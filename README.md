@@ -1,3 +1,5 @@
-![alt tag](https://github.com/StackIQ/stacki/blob/master/logo.png)
+![alt tag](master/logo.png)
 
-[wiki](wiki)
+* [main page](http://www.stacki.com)
+* [documentation](https://github.com/StackIQ/stacki/wiki)
+* [mailing list](https://groups.google.com/forum/#!forum/stacki)
