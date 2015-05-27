@@ -1,4 +1,4 @@
-![alt tag](master/logo.png)
+![alt tag](logo.png)
 
 * [main page](http://www.stacki.com)
 * [documentation](https://github.com/StackIQ/stacki/wiki)
