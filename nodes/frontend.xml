@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+
+<description>
+Frontend Appliance Node.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<package>stack-command</package>
+
+
+</kickstart> 
+

@@ -1,0 +1,57 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Secure Sockets Layer for non-frontend nodes.
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post>
+
+<!-- Make a Certificate for Mod_SSL -->
+<eval shell="bash" mode="xml">
+
+cert=`mktemp -dq /etc/security/ca/new-certs/cert.XXXXXX`
+
+(
+cd /etc/security/ca; \
+/usr/bin/openssl req -new -nodes -config ca.cfg \
+	-keyout $cert/key \
+	-subj "\
+/C=&Info_CertificateCountry;/\
+ST=&Info_CertificateState;/\
+L=&Info_CertificateLocality;/\
+O=&Info_CertificateOrganization;/\
+OU=&Info_ClusterName;/\
+CN=&hostname;.&Kickstart_PrivateDNSDomain;" \
+	&gt; $cert/csr 2&gt;/dev/null
+)
+
+echo "&lt;file name='/etc/pki/tls/private/localhost.key' perms='0400'&gt;"
+cat $cert/key
+echo "&lt;/file&gt;"
+
+<!-- Sign the Request with our CA-->
+(
+cd /etc/security/ca; \
+/usr/bin/openssl x509 -req -days 1000 \
+	-CA ca.crt -CAkey ca.key -CAserial ca.serial \
+	&lt; $cert/csr \
+	&gt; $cert/crt 2&gt;/dev/null
+)
+
+echo "&lt;file name='/etc/pki/tls/certs/localhost.crt' perms='0444'&gt;"
+cat $cert/crt
+echo "&lt;/file&gt;"
+rm -rf $cert
+</eval>
+</post>
+
+
+</kickstart> 

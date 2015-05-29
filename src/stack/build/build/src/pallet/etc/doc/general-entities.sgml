@@ -1,0 +1,21 @@
+<!-- Put Common Entities Here
+-->
+
+<!-- Line Break Element. Allow line break in
+	<PARA> and <ENTRY> tags-->
+<!ELEMENT BR - O EMPTY>
+<!ENTITY % local.para.char.mix "|br">
+<!ENTITY % local.entry.char.mix "|br">
+
+<!ENTITY rockscopyright SYSTEM "rocks-copyright.txt">
+
+<!ENTITY rocks		  	"<trademark class=registered>Rocks</trademark>">
+<!ENTITY rocks-clusters	"<trademark class=trade>Rocks Clusters</trademark>">
+<!ENTITY rocks-avalanche	"<trademark class=trade>Avalanche Installer</trademark>">
+
+<!ENTITY roll "roll">
+
+<!ENTITY true "<constant>TRUE</constant>">
+<!ENTITY false "<constant>FALSE</constant>">
+
+

@@ -1,0 +1,36 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Take a root partition, and make it ours!
+
+This is the key to determining, on reinstalls, if we should save partitions
+(because the stamp is there) or blow away all the paritions on the
+disk (because the stamp isn't there).
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post>
+<file name="/etc/stack-release">
+stacki release &version; (&release;)
+</file>
+</post>
+
+<post>
+sed "s/redhat-release/stack-release/" /etc/rc.sysinit &gt; /tmp/rc.sysinit
+cp /tmp/rc.sysinit /etc/rc.sysinit
+rm /tmp/rc.sysinit
+</post>
+
+</kickstart> 

@@ -1,0 +1,48 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+<description>
+The 'client node' in the graph.
+
+This file is used as a connection point for other XML configuration nodes.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+<pre>
+
+<!--
+	this is used to skip by the browser popup during a client install.
+	we only want the browser (firefox) to popup on server installs
+	because the browser prompts the user for configuration info
+-->
+touch /tmp/stack-skip-welcome
+
+<!--
+	Disable this repo. If it is enabled, it can cause a 10 minute delay
+	during an installation
+-->
+<file name="/tmp/anaconda-yum.conf" mode="append">
+enabled=0
+gpgcheck=0
+</file>
+</pre>
+
+
+<post>
+<!-- get the name of the database host into the rocks command line -->
+<report name="dbhost"></report>
+
+</post>
+
+
+</kickstart> 

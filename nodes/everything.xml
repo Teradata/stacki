@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+	<description>
+	Dummy empty node for building the OS Roll, this is the
+	root of everything in the graph
+	</description>
+
+	<package>kernel</package>
+	<package>kernel-devel</package>
+
+	<package>gtkhtml2</package>
+	<package>gnome-python2-gtkhtml2</package>
+
+	<package>rrdtool</package>
+	<package>ruby</package>
+	<package>lzo-devel</package>
+	<package>perl-Time-HiRes</package>
+
+	<package>postgresql</package>
+	<package>postgresql-libs</package>
+	<package>postgresql-server</package>
+	<package>snappy-devel</package>
+
+	<package>perl-Digest-HMAC</package>
+	<package>perl-Digest-SHA1</package>
+
+	<package>grub</package>
+	<package>grub2</package>
+
+</kickstart> 
+

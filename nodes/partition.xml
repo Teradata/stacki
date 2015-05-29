@@ -1,0 +1,87 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<!-- default partitioning scheme -->
+
+<pre interpreter="/opt/stack/bin/python">
+import sys
+sys.path.append('/opt/stack/lib')
+
+import stack_partition
+import os
+
+nukedisks = '&nukedisks;'
+
+def initDiskLabel(disk):
+	# break down software disk arrays
+	cmd = '/sbin/mdadm --stop --scan > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	cmd = '/sbin/mdadm --zero-superblock /dev/%s' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	# Clear out the master boot record of the drive
+	cmd = '/bin/dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	cmd = '/usr/sbin/parted -s /dev/%s mklabel gpt' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+
+def doBootDisk(file, disk):
+	file.write('part / --size=16000 --fstype=ext4 --ondisk=%s\n' % disk)
+	file.write('part swap --size=1000 --ondisk=%s\n' % disk)
+	file.write('part /var --size=16000 --fstype=xfs --ondisk=%s\n' % disk)
+	file.write('part /state/partition1 --size=1 --grow --fstype=xfs ' +
+		'--ondisk=%s\n' % disk)
+	
+def loadSpreadsheetPartitions(disk_info):
+	file = open("/tmp/user_partition_info", "w")
+	for o in disk_info:
+		size = str(o['size'])
+		if size == '0':
+			size = "1 --grow"
+		st = "part %s --size=%s --fstype=%s --ondisk=%s" % \
+			(o['mountpoint'], size, o['fstype'], o['device'])
+		file.write(st + "\n")
+	file.close()
+
+
+def str2bool(s):
+	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
+		return 1
+	else:
+		return 0
+
+
+#
+# now go do the partitioning
+#
+p = stack_partition.StackPartition()
+disks = p.getDisks()
+
+file = open('/tmp/system_partition_info', 'w')
+
+if str2bool(nukedisks):
+	for disk in disks:
+		initDiskLabel(disk)
+
+output = <eval>/opt/stack/bin/stack report host storage partition &hostname;</eval>
+
+if output:
+	loadSpreadsheetPartitions(output)
+else:
+	doBootDisk(file, disks[0])
+file.close()
+
+</pre>
+</kickstart>

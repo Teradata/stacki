@@ -1,0 +1,201 @@
+/*
+ * StackIQ Theme
+ * ~~~~~~~~~~~~~
+ *
+ * Sphinx stylesheet -- stackiq theme.
+ *
+ * :copyright: Copyright 2007-2014 by the Sphinx team, see AUTHORS.
+ * :license: BSD, see LICENSE for details.
+ *
+ */
+
+@import 'agogo.css';
+
+body {
+  font-family: helvetica,arial,sans-serif;
+  line-height: 1.4em;
+  color: black;
+  background-color: #fff;
+}
+
+div.header-wrapper {
+  background-image:url('ribbon.png');
+  background-repeat: repeat-x;
+  background-position: top left;
+  background-color:#fff;
+  height:100px;
+  border-bottom: 1px solid #ccc;
+}
+
+
+/* Default body styles */
+a {
+  color: #06c;
+}
+
+
+div.bodywrapper a:hover, div.footer a:hover {
+  color:#f05a28;
+}
+
+div.toctree-wrapper a {
+	text-decoration: none;
+}
+
+div.toctree-wrapper a:hover {
+	text-decoration: underline;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, td, th {
+    border: 1px solid  #ccc;
+    padding: 10px;
+}
+
+table.footnote, table.footnote td {
+    border: 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: helvetica,arial,sans-serif;
+  font-weight: normal;
+  margin-bottom: .8em;
+  text-align: left;
+}
+
+h1 {
+  color: #000;
+}
+
+h2 {
+  padding-bottom: .5em;
+  border-bottom: 1px solid #ccc;
+}
+
+
+img {
+  border: 6px solid #ff4700;
+  width: 47em;
+}
+
+div.document .docutils.literal {
+  font-family: monospace;
+  text-color: black;
+  font-weight: bold;
+  font-style: normal;
+  text-align: left;
+}
+
+/* Header */
+
+div.header {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height:30px;
+}
+
+div.header .headertitle {
+  font-family: helvetica,arial,sans-serif;
+  font-weight: normal;
+  font-size: 130%;
+  letter-spacing: .08em;
+  margin-top: 50px;
+  margin-left: 350px;
+}
+
+div.header .headertitle a {
+  color: #06c;
+}
+
+div.header div.rel {
+  margin-top: 1em;
+  position: absolute;
+  top: 45px;
+}
+
+div.header div.rel a {
+  color: #06c;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+div.header div.rel a:hover {
+  color: #f05a28;
+}
+
+p.logo {
+    float: right;
+    margin-right: 140px;
+    margin-top: 40px;
+}
+
+img.logo {
+    width: 150px;
+    top:20px;
+    border: 0;
+}
+
+
+div.document ul {
+  margin: 1.2em;
+  list-style-type: none;
+}
+
+div.document ul.simple {
+  list-style-type: disc;
+}
+
+p.caption {
+  text-align: center;
+  font-size: 75%;
+  font-weight: bold;
+  font-style: normal;
+}
+
+div.sidebar a:hover, div.header a:hover {
+  color:#f05a28;
+  text-decoration: underline;
+}
+
+div.sidebar li.toctree-l1.current a {
+  border-right: 5px solid #ff4700;
+}
+
+/* Footer */
+
+div.footer-wrapper {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  min-height: 80px;
+  background: #fff;
+}
+
+div.footer, div.footer a {
+  color: #06c;
+}
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+}
+
+span.red {
+	color: red;
+	font-weight: bold;
+}
+
+span.green {
+	color: green;
+	font-weight: bold;
+}
+
+span.gray {
+	color: gray;
+	font-weight: bold;
+}

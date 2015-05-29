@@ -1,0 +1,116 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+<description>
+Server node firewall rules
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+
+<post>
+
+<!-- define the global firewall rules -->
+
+/opt/stack/bin/stack add firewall network=all service=all \
+	protocol=all action=ACCEPT chain=INPUT rulename="LOOPBACK-NET" \
+	flags="-i lo" comment="Accept all traffic over loopback interface"
+
+/opt/stack/bin/stack add firewall network=private service="all" \
+	protocol="all" action="ACCEPT" chain="INPUT" rulename="PRIVATE-NET" \
+	comment="Accept all traffic on private network"
+
+/opt/stack/bin/stack add firewall network=public service="ssh" \
+	protocol="tcp" action="ACCEPT" chain="INPUT" \
+	flags="-m state --state NEW" rulename="SSH" \
+	comment="Accept SSH traffic"
+
+/opt/stack/bin/stack add firewall network=public service="all" \
+	protocol="all" action="ACCEPT" chain="INPUT" \
+	flags="-m state --state RELATED,ESTABLISHED" rulename="PRIVATE-RELATED"
+
+<!-- define the frontend-specific firewall rules -->
+
+<![CDATA[
+
+/opt/stack/bin/stack add host firewall localhost \
+	rulename="PUBLIC-HTTPS" chain=INPUT flags="-m state --state NEW \
+	--source &Kickstart_PublicNetwork;/&Kickstart_PublicNetmask;" \
+	protocol=tcp service=https action=ACCEPT network=public \
+	comment="Allow HTTPS traffic"
+
+/opt/stack/bin/stack add host firewall localhost \
+	rulename="PUBLIC-WWW" chain=INPUT flags="-m state --state NEW \
+	--source &Kickstart_PublicNetwork;/&Kickstart_PublicNetmask;" \
+	protocol=tcp service=http action=ACCEPT network=public \
+	comment="Allow Web service traffic"
+
+]]>
+
+/opt/stack/bin/stack add host firewall localhost \
+	rulename="PUBLIC-FORWARD" network=public \
+	output-network=private service="all" 	 \
+	protocol="all" action="ACCEPT" chain="FORWARD" \
+	flags="-m state --state RELATED,ESTABLISHED" \
+	comment="Allow traffic forwarding from public to private"
+
+/opt/stack/bin/stack add host firewall localhost	\
+	rulename="PRIVATE-FORWARD" network=private	\
+	service="all" protocol="all" action="ACCEPT" chain="FORWARD" \
+	comment="Allow private traffic forwarding"
+
+/opt/stack/bin/stack add host firewall localhost \
+	rulename="NAT-MASQUERADE-PUBLIC" table=nat \
+	output-network=public service=all protocol=all \
+	action="MASQUERADE" chain="POSTROUTING" \
+	comment="Masquerade outgoing public traffic"
+
+/opt/stack/bin/stack add host firewall localhost network=all \
+	rulename=NON-PRIVATE-GANGLIA service="8649" \
+	protocol="udp" action="REJECT" chain="INPUT" \
+	comment="block ganglia traffic from non-private interfaces"
+
+/opt/stack/bin/stack add host firewall localhost network=all \
+	rulename=NON-PRIVATE-MYSQL service="3306" \
+	protocol="tcp" action="REJECT" chain="INPUT" \
+	comment="block mysql traffic from non-private interfaces"
+
+/opt/stack/bin/stack add host firewall localhost network=all \
+	rulename=NON-PRIVATE-FOUNDATION-MYSQL service="40000" \
+	protocol="tcp" action="REJECT" chain="INPUT" \
+	comment="block foundation mysql traffic from non-private interfaces"
+
+/opt/stack/bin/stack add host firewall localhost network=all \
+	rulename=SUB-1024-TCP service="0:1023" protocol=tcp \
+	action="REJECT" chain=INPUT \
+	comment="Block all TCP traffic below port 1024"
+
+/opt/stack/bin/stack add host firewall localhost network=all \
+	rulename=SUB-1024-UDP service="0:1023" protocol=udp \
+	action="REJECT" chain=INPUT \
+	comment="Block all UDP traffic below port 1024"
+</post>
+
+
+<!-- create the firewall rules for the frontend -->
+
+<post>
+
+/opt/stack/bin/stack report host firewall localhost | \
+	/opt/stack/bin/stack report script \
+	attrs="{'Kickstart_PublicNetwork':'&Kickstart_PublicNetwork;', \
+	'Kickstart_PublicNetmask':'&Kickstart_PublicNetmask;'}" \
+	> /tmp/do-firewall.sh
+
+chmod a+x /tmp/do-firewall.sh
+/tmp/do-firewall.sh
+
+</post>
+
+
+</kickstart>

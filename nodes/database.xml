@@ -1,0 +1,171 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+  <description>
+
+  NPACI Rocks Cluster Database. Includes client programs,
+  python libraries, and Apache configuration.
+
+  </description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v1.0 www.stacki.com
+	</si_copyright>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+  <package>stack-sql</package>
+  <package>foundation-mysql</package>
+  <package>foundation-py-MySQL-python</package>
+
+<post>
+
+<!--
+	set the hostname to the private name. this helps the rocks command
+	line find the host 'localhost' correctly
+-->
+/bin/hostname &hostname;
+
+<!--
+	Add the stackdb user and group to the system.
+	This is the user that will run the Rocks database.
+	Also setup the correct directories and their
+	permissions for running the database
+-->
+groupadd -g 403 stackdb
+useradd -u 403 -g stackdb -d /var/opt/stack/mysql -m -s /bin/false stackdb
+
+/opt/stack/sbin/mysql-install-db
+
+chgrp -R stackdb /var/opt/stack/mysql
+chmod -R g+rwx   /var/opt/stack/mysql
+chmod a+rx /var/opt/stack/mysql
+</post>
+
+<!--
+	Setup foundation-mysql to startup at boot
+	and start foundation-mysql database
+-->
+<post>
+<file name="/etc/ld.so.conf.d/foundation-mysql.conf">
+/opt/stack/lib/mysql
+</file>
+
+/sbin/ldconfig
+
+/sbin/chkconfig foundation-mysql on
+/etc/rc.d/init.d/foundation-mysql start
+
+</post>
+
+<!--
+	Make sure that the mysql database is
+	up and running
+-->
+<post>
+/opt/stack/bin/mysqladmin -s ping > /dev/null
+while [ $? -eq 1 ]; do
+        sleep 1
+        /opt/stack/bin/mysqladmin -s ping > /dev/null
+done
+</post>
+
+<post>
+<!-- Generate random password for root access to the database -->
+root_pw=`/opt/stack/sbin/gen_random_pw`
+<file name="/opt/stack/etc/root.my.cnf" perms="0400"
+	owner="root:root" vars="expanded">
+[client]
+user		= root
+socket		= /var/opt/stack/mysql/mysql.sock
+password	= $root_pw
+</file>
+
+
+# give MySQL 1/16 of main memory for caching
+MEMSIZE=`gawk '/MemTotal:/ { print int($2/16) }' /proc/meminfo`000
+
+sed "/datadir/a query_cache_size = $MEMSIZE\nquery_cache_type = 1\nquery_cache_limit = $MEMSIZE" /opt/stack/etc/my.cnf &lt; /tmp/my.cnf
+
+cp /tmp/my.cnf /opt/stack/etc/my.cnf
+rm -f /tmp/my.cnf
+
+
+<!-- Generate random password for apache access to database -->
+apache_pw=`/opt/stack/sbin/gen_random_pw`
+<file name="/opt/stack/etc/my.cnf"
+	owner="root:apache" perms="0640">
+[mysqld]
+user		= stackdb
+port		= 40000
+socket		= /var/opt/stack/mysql/mysql.sock
+datadir		= /var/opt/stack/mysql
+
+[client]
+user		= apache
+port		= 40000
+socket		= /var/opt/stack/mysql/mysql.sock
+password	= $apache_pw
+</file>
+
+</post>
+
+<!-- Access control on the database -->
+<post interpreter='/opt/stack/bin/python'>
+import os
+import sys
+import re
+import string
+import base64
+
+import MySQLdb
+
+# Connect to the database
+d = MySQLdb.connect(user='root', db='mysql', passwd='',
+	unix_socket='/var/opt/stack/mysql/mysql.sock')
+
+try:
+	db = d.cursor()
+except:
+	sys.exit(-1)
+
+# Read the root database password from root.my.cnf
+conf_file = open('/opt/stack/etc/root.my.cnf')
+for line in conf_file.readlines():
+	if line.startswith('password'):
+		root_pass = line.split('=')[1].strip()
+		break
+conf_file.close()
+cmd_set = []
+
+# Password Access for root
+cmd_set.append('set password for "root"@"localhost"=PASSWORD("%s")' % root_pass)
+cmd_set.append('set password for "root"@"127.0.0.1"=PASSWORD("%s")' % root_pass)
+cmd_set.append('set password for "root"@"&hostname;"=PASSWORD("%s")' % root_pass)
+
+# Read the apache db password from my.cnf
+apache_conf_file = open('/opt/stack/etc/my.cnf')
+for line in apache_conf_file.readlines():
+	if line.startswith('password'):
+		apache_pass = line.split('=')[1].strip()
+		break
+
+apache_conf_file.close()
+
+# Password access for apache
+cmd_set.append('create user "apache"@"localhost" identified by "%s"' % apache_pass)
+cmd_set.append('create user "apache"@"127.0.0.1" identified by "%s"' % apache_pass)
+cmd_set.append('create user "apache"@"&hostname;" identified by "%s"' % apache_pass)
+
+for cmd in cmd_set:
+	try:
+		db.execute(cmd)
+	except:
+		sys.stderr.write("Could not execute %s\n" % cmd)
+</post>
+</kickstart>

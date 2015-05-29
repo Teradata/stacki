@@ -1,0 +1,7 @@
+<warning>
+<para>
+This &roll; has been released independent of the corresponding &rocks; release.
+It therefore requires the complete &roll-os; &roll; and will not function
+correctly if using only the &roll-jumbo; or incomplete set of &roll-os; CDROMs.
+</para>
+</warning>

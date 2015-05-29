@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE kickstart SYSTEM "/usr/lib/rocks/xml/nodes.dtd">
+
+
+<nodes>
+
+	<description>
+
+	List of remote nodes and their kickstart masters
+
+	</description>
+
+  
+	<changelog>
+	$Log$
+	Revision 1.1  2005/03/01 02:02:48  mjk
+	moved from core to base
+	
+	Revision 1.2  2003/05/29 20:55:19  mjk
+	gateway added to kickstart.cgi
+	
+	Revision 1.1  2003/05/22 16:36:35  mjk
+	copyright
+	
+	</changelog>
+
+
+	<proxy server="localhost">
+		<client spoof="10.255.255.254">10.0.0.1</client>
+	</proxy>
+
+
+<!-- examples
+
+	<proxy server="geon.rocksclusters.org">
+		<client>192.168.1.1</client>
+	</proxy>
+
+	<proxy client="192.168.1.2" server="birn.rocksclusters.org"/>
+
+-->
+
+</nodes> 

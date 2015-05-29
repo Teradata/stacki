@@ -1,0 +1,227 @@
+<section id="graphs" xreflabel="Graphs Directory">
+<title> Graphs Directory </title>
+
+<para>
+Inside the <computeroutput>graphs</computeroutput> directory, you should
+create another directory named <computeroutput>default</computeroutput>.
+</para>
+
+<para>
+Looking back at the Intel Roll, there is one file in its
+<computeroutput>graphs/default</computeroutput> directory called:
+<computeroutput>roll/intel/graphs/default/intel.xml</computeroutput>.
+</para>
+
+<para>
+This file describes how all the files in the
+<computeroutput>nodes</computeroutput> directory are linked together
+in the kickstart graph.
+For example, in 
+<computeroutput>roll/intel/graphs/default/intel.xml</computeroutput>
+we see that the XML configuration node file
+<computeroutput>roll/intel/nodes/intel.xml</computeroutput>
+is linked into the <computeroutput>frontend</computeroutput> node.
+</para>
+
+<para>
+To see how this works, below is an excerpt from the kickstart graph 
+when the Intel Roll is installed:
+</para>
+
+<para>
+<mediaobject>
+	<imageobject>
+	<imagedata fileref="images/graph.png" scale="75">
+	</imageobject>
+</mediaobject>
+</para>
+
+<para>
+The edge which travels from the node labeled
+<emphasis>frontend</emphasis> to the node labeled
+<emphasis>intel</emphasis> is result of the specification found in
+<computeroutput>roll/intel/graphs/default/intel.xml</computeroutput>
+which looks like:
+</para>
+
+<screen>
+&lt;edge from="frontend"&gt;
+        &lt;to&gt;intel&lt;/to&gt;
+&lt;/edge&gt;
+</screen>
+
+<section id="graphs-adding"
+	xreflabel="Using a Graph File to Add Packages">
+
+<title> Using a Graph File to Add Packages </title>
+
+<para>
+This section describes how to use the nodes and graphs files to direct
+the installer to add packages to the frontend or the compute nodes.
+</para>
+
+<para>
+Say you have 4 packages and they're named:
+package-one, package-two, package-three and package-four.
+You want to add package-one and package-two to the frontend and you want to
+add package-three and package-four to the compute nodes.
+Also, say the name of your roll is <emphasis>diamond</emphasis>.
+</para>
+
+<para>
+First, in your development source tree, you'll create the file
+<computeroutput>roll/diamond/nodes/diamond-frontend.xml</computeroutput>
+which looks like:
+</para>
+
+<screen>
+&lt;?xml version="1.0" standalone="no"?&gt;
+&lt;!DOCTYPE kickstart SYSTEM "@KICKSTART_DTD@"&gt;
+
+&lt;kickstart&gt;
+
+&lt;description&gt;
+The Diamond Roll.
+&lt;/description&gt;
+
+&lt;changelog&gt;
+$Log$
+Revision 1.1  2010/06/22 21:07:44  mjk
+build env moving into base roll
+
+Revision 1.2  2004/01/12 22:55:56  bruno
+more info on how to add nodes files into the graph
+
+&lt;/changelog&gt;
+
+&lt;package roll="diamond"&gt;package-one&lt;/package&gt;
+&lt;package roll="diamond"&gt;package-two&lt;/package&gt;
+
+&lt;post&gt;
+&lt;!-- post configuration scripts go here --&gt;
+&lt;/post&gt;
+
+&lt;/kickstart&gt; 
+</screen>
+
+<para>
+Then you'll create the file
+<computeroutput>roll/diamond/nodes/diamond-compute.xml</computeroutput>
+which looks like:
+</para>
+
+<screen>
+&lt;?xml version="1.0" standalone="no"?&gt;
+&lt;!DOCTYPE kickstart SYSTEM "@KICKSTART_DTD@"&gt;
+
+&lt;kickstart&gt;
+
+&lt;description&gt;
+The Diamond Roll.
+&lt;/description&gt;
+
+&lt;changelog&gt;
+$Log$
+Revision 1.1  2010/06/22 21:07:44  mjk
+build env moving into base roll
+
+Revision 1.2  2004/01/12 22:55:56  bruno
+more info on how to add nodes files into the graph
+
+&lt;/changelog&gt;
+
+&lt;package roll="diamond"&gt;package-three&lt;/package&gt;
+&lt;package roll="diamond"&gt;package-four&lt;/package&gt;
+
+&lt;post&gt;
+&lt;!-- post configuration scripts go here --&gt;
+&lt;/post&gt;
+
+&lt;/kickstart&gt; 
+</screen>
+
+<para>
+Now you'll create the graph file 
+<computeroutput>roll/diamond/graphs/default/diamond.xml</computeroutput>.
+This file is what links the nodes files
+<computeroutput>diamond-frontend.xml</computeroutput>
+and
+<computeroutput>diamond-compute.xml</computeroutput>
+into the full kickstart graph that is created on the frontend during
+the frontend's installation.
+</para>
+
+<para>
+The graph file for the diamond roll:
+</para>
+
+<screen>
+&lt;?xml version="1.0" standalone="no"?&gt;
+&lt;!DOCTYPE kickstart SYSTEM "@GRAPH_DTD@"&gt;
+
+&lt;graph&gt;
+
+&lt;description&gt;
+The Diamond Roll.
+&lt;/description&gt;
+
+&lt;changelog&gt;
+$Log$
+Revision 1.1  2010/06/22 21:07:44  mjk
+build env moving into base roll
+
+Revision 1.2  2004/01/12 22:55:56  bruno
+more info on how to add nodes files into the graph
+
+&lt;/changelog&gt;
+
+&lt;edge from="frontend"&gt;
+	&lt;to&gt;diamond-frontend&lt;/to&gt;
+&lt;/edge&gt;
+
+&lt;edge from="compute"&gt;
+	&lt;to&gt;diamond-compute&lt;/to&gt;
+&lt;/edge&gt;
+
+&lt;/graph&gt;
+</screen>
+
+</section>
+
+
+<section id="graphs-works"
+	xreflabel="How it Works">
+
+<title> How it Works</title>
+
+<para>
+During the installation of the frontend, the frontend's kickstart graph
+will be generated after all the rolls have been inserted by the user.
+That is, when the user answers 'No' to the the install screen that
+asks 'Do you have a Roll CD/DVD?', the installer will traverse the graph files
+and node files from all the rolls that were added to the frontend and
+build a RedHat-compliant kickstart file based on which nodes it traverses.
+The installation of the frontend is dictated by this generated kickstart
+file.
+</para>
+
+<para>
+In the above example, 
+for a frontend installation, the node file
+<emphasis>diamond-frontend</emphasis> will be traversed (and therefore
+included in the frontend's kickstart file), but the node file
+<emphasis>diamond-compute</emphasis> will not.
+</para>
+
+<para>
+But, after the frontend is installed and when compute nodes are being
+installed, the node file
+<emphasis>diamond-compute</emphasis> will be traversed (and therefore
+included in the computes' kickstart file), but the node file
+<emphasis>diamond-frontend</emphasis> will not.
+</para>
+
+</section>
+
+</section>
+

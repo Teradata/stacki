@@ -1,0 +1,190 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2006-01-24 06:01+KST\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: insert-ethers.py:491
+msgid "insert-ethers loading plugins: "
+msgstr ""
+
+#: insert-ethers.py:514
+msgid "(invalid, skipping) "
+msgstr ""
+
+#: insert-ethers.py:576
+msgid "Quit"
+msgstr ""
+
+#: insert-ethers.py:577
+msgid "Error"
+msgstr ""
+
+#: insert-ethers.py:579 insert-ethers.py:582 insert-ethers.py:765
+#: insert-ethers.py:1020
+msgid "OK"
+msgstr ""
+
+#: insert-ethers.py:580
+msgid "Warning"
+msgstr ""
+
+#: insert-ethers.py:583
+msgid "Information"
+msgstr ""
+
+#: insert-ethers.py:713
+msgid "Inserted Appliances"
+msgstr ""
+
+#: insert-ethers.py:717
+msgid "%s -- version %s"
+msgstr ""
+
+#: insert-ethers.py:721
+msgid "Opened kickstart access to %s network"
+msgstr ""
+
+#: insert-ethers.py:730
+msgid "Invalid Appliance \"%s\""
+msgstr ""
+
+#: insert-ethers.py:753
+msgid "No appliance names in database"
+msgstr ""
+
+#: insert-ethers.py:763
+msgid "Choose Appliance Type"
+msgstr ""
+
+#: insert-ethers.py:764
+msgid "Select An Appliance Type:"
+msgstr ""
+
+#: insert-ethers.py:778 insert-ethers.py:926
+msgid "Could not find appliance (%s) in database"
+msgstr ""
+
+#: insert-ethers.py:851
+msgid "Could not find any nodes in database (site %d)"
+msgstr ""
+
+#: insert-ethers.py:903
+msgid "Not kickstarted, please wait..."
+msgstr ""
+
+#: insert-ethers.py:1005
+msgid "IP Address Selection"
+msgstr ""
+
+#: insert-ethers.py:1006
+msgid "Enter the IP address for host %s"
+msgstr ""
+
+#: insert-ethers.py:1007
+msgid "IP Address"
+msgstr ""
+
+#: insert-ethers.py:1017
+msgid "Duplicate IP"
+msgstr ""
+
+#: insert-ethers.py:1018
+msgid ""
+"The IP address (%s) already exists.\n"
+"\n"
+msgstr ""
+
+#: insert-ethers.py:1019
+msgid "Please select another."
+msgstr ""
+
+#: insert-ethers.py:1120
+msgid "Discovered New Appliance"
+msgstr ""
+
+#: insert-ethers.py:1122
+msgid "Discovered a new appliance with MAC (%s)"
+msgstr ""
+
+#: insert-ethers.py:1214
+msgid "Apache log file not well formed!"
+msgstr ""
+
+#: insert-ethers.py:1223
+msgid "Unknown node %s got a kickstart file!"
+msgstr ""
+
+#: insert-ethers.py:1262
+msgid "Waiting for %s to kickstart..."
+msgstr ""
+
+#: insert-ethers.py:1266 insert-ethers.py:1271
+msgid "Suggest Done"
+msgstr ""
+
+#: insert-ethers.py:1277
+msgid ""
+"Rocks distribution is not ready\n"
+"\n"
+msgstr ""
+
+#: insert-ethers.py:1278
+msgid ""
+"Please wait for rocks-dist to complete\n"
+msgstr ""
+
+#: insert-ethers.py:1333 insert-ethers.py:1409
+msgid ""
+"%s\n"
+msgstr ""
+
+#: insert-ethers.py:1346
+msgid " Press <F10> to quit, press <F11> to force quit"
+msgstr ""
+
+#: insert-ethers.py:1390
+msgid "Restarting Services"
+msgstr ""
+
+#: insert-ethers.py:1392
+msgid "Restarting Services..."
+msgstr ""
+
+#: insert-ethers.py:1417
+msgid " Press <F10> to quit "
+msgstr ""
+
+#: insert-ethers.py:1420
+msgid ""
+"Kickstart access opened to %s,\n"
+msgstr ""
+
+#: insert-ethers.py:1421
+msgid "not listening..."
+msgstr ""
+
+#: insert-ethers.py:1443
+msgid "Rocks distribution is not ready"
+msgstr ""
+
+#: insert-ethers.py:1596
+msgid "error - lock file %s exists"
+msgstr ""
+
+#: insert-ethers.py:1614
+msgid ""
+"Note: %s\n"
+msgstr ""
+

@@ -1,0 +1,411 @@
+# @SI_Copyright@
+#                             www.stacki.com
+#                                  v1.0
+# 
+#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#  
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#  
+# 2. Redistributions in binary form must reproduce the above copyright
+# notice unmodified and in its entirety, this list of conditions and the
+# following disclaimer in the documentation and/or other materials provided 
+# with the distribution.
+#  
+# 3. All advertising and press materials, printed or electronic, mentioning
+# features or use of this software must display the following acknowledgement: 
+# 
+# 	 "This product includes software developed by StackIQ" 
+#  
+# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
+# neither the name or logo of this software nor the names of its
+# authors may be used to endorse or promote products derived from this
+# software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# @SI_Copyright@
+#
+# @Copyright@
+#  				Rocks(r)
+#  		         www.rocksclusters.org
+#  		         version 5.4 (Maverick)
+#  
+# Copyright (c) 2000 - 2010 The Regents of the University of California.
+# All rights reserved.	
+#  
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#  
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#  
+# 2. Redistributions in binary form must reproduce the above copyright
+# notice unmodified and in its entirety, this list of conditions and the
+# following disclaimer in the documentation and/or other materials provided 
+# with the distribution.
+#  
+# 3. All advertising and press materials, printed or electronic, mentioning
+# features or use of this software must display the following acknowledgement: 
+#  
+# 	"This product includes software developed by the Rocks(r)
+# 	Cluster Group at the San Diego Supercomputer Center at the
+# 	University of California, San Diego and its contributors."
+# 
+# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
+# neither the name or logo of this software nor the names of its
+# authors may be used to endorse or promote products derived from this
+# software without specific prior written permission.  The name of the
+# software includes the following terms, and any derivatives thereof:
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# the associated name, interested parties should contact Technology 
+# Transfer & Intellectual Property Services, University of California, 
+# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
+# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
+#  
+# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# @Copyright@
+
+
+import csv
+import re
+import sys
+import stack.commands
+
+class Implementation(stack.commands.ApplianceArgumentProcessor,
+	stack.commands.HostArgumentProcessor,
+	stack.commands.NetworkArgumentProcessor,
+	stack.commands.Implementation):	
+
+	"""
+	Load attributes into the database based on comma-separated formatted
+	file.
+	"""
+
+	def checkAppliance(self, appliance):
+		if appliance not in self.appliances:
+			msg = 'appliance "%s" does not exist in the database' \
+				% appliance
+			sys.exit((-1, msg, ''))
+
+	def checkIP(self, ip):
+		for o in self.list_host_interface:
+			if o['ip'] == ip:
+				msg = 'IP "%s" is already in the database' % ip
+				sys.exit((-1, msg, ''))
+
+	def checkMAC(self, mac):
+		for o in self.list_host_interface:
+			if o['mac'].lower() == mac:
+				msg = 'MAC "%s" is already in the database' \
+					% mac
+				sys.exit((-1, msg, ''))
+
+	def checkSubnet(self, subnet):
+		if subnet not in self.subnets:
+			msg = 'subnet "%s" does not exist in the database' \
+				% subnet
+			sys.exit((-1, msg, ''))
+
+
+	def run(self, args):
+		filename, = args
+
+		self.list_host_interface = \
+			self.owner.call('list.host.interface')
+		self.appliances = self.getApplianceNames()
+		self.subnets = self.getNetworkNames()
+		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+
+		reader = csv.reader(open(filename, 'rU'))
+
+		header = None
+		for row in reader:
+
+                        # Ignore empty rows in the csv which happens
+                        # frequently with excel
+                        
+                        empty = True
+                        for cell in row:
+                                if cell.strip():
+                                        empty = False
+                        if empty:
+                                continue
+
+			if not header:
+				header = row
+
+				#
+				# make checking the header easier
+				#
+				required = [ 'name', 'appliance', 'ip', 'mac',
+					'interface', 'rack', 'rank', 'subnet' ]
+
+				for i in range(0, len(row)):
+					header[i] = header[i].strip().lower()
+
+					if header[i] in required:
+						required.remove(header[i])
+
+				if len(required) > 0:
+					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
+					sys.exit((-1, msg, ''))
+
+				continue
+
+			name = None
+			appliance = None
+			rack = None
+			rank = None
+			ip = None
+			mac = None
+			interface = None
+			subnet = None
+			ifhostname = None
+			channel = None
+			options = None
+			vlan = None
+			boss = None
+			notes = None
+
+			for i in range(0, len(row)):
+				field = row[i].strip()
+				if not field:
+					continue
+
+				if header[i] == 'name':
+					name = field.lower()
+				if header[i] == 'appliance':
+					appliance = field
+				elif header[i] == 'rack':
+					rack = field
+				elif header[i] == 'rank':
+					rank = field
+				elif header[i] == 'ip':
+					ip = field
+					if not ipRegex.match(ip):
+						msg = 'invalid IP %s in the input file' % ip
+						sys.exit((-1, msg, ''))
+				elif header[i] == 'mac':
+					#
+					# make sure the MAC has lowercase
+					# letters
+					#
+					mac = field.lower()
+				elif header[i] == 'interface':
+					interface = field.lower()
+				elif header[i] == 'subnet':
+					subnet = field
+				elif header[i] == 'interface hostname':
+					ifhostname = field
+				elif header[i] == 'channel':
+					channel = field
+				elif header[i] == 'options':
+					options = field
+				elif header[i] == 'vlan':
+					try:
+						vlan = int(field)
+					except:
+						msg = 'VLAN "%s" must be an integer' % field
+						sys.exit((-1, msg, ''))
+
+					if vlan < 1:
+						msg = 'VLAN "%s" must be greater than 0' % vlan
+						sys.exit((-1, msg, ''))
+				elif header[i] == 'boss':
+					boss = field
+				elif header[i] == 'notes':
+					notes = field
+						
+			if not name:
+				msg = 'empty host name found in "name" column'
+				sys.exit((-1, msg, ''))
+
+			if name not in self.owner.hosts.keys():
+				self.owner.hosts[name] = {}
+
+			if appliance:
+				if 'appliance' in self.owner.hosts[name].keys() and \
+						self.owner.hosts[name]['appliance'] != appliance:
+					msg = 'two different appliance types specified for host "%s"' % name
+					sys.exit((-1, msg, ''))
+
+				self.owner.hosts[name]['appliance'] = appliance
+
+			if rack:
+				if 'rack' in self.owner.hosts[name].keys() and \
+						self.owner.hosts[name]['rack'] != rack:
+					msg = 'two different rack numbers specified for host "%s"' % name
+					sys.exit((-1, msg, ''))
+
+				self.owner.hosts[name]['rack'] = rack
+
+			if rank:
+				if 'rank' in self.owner.hosts[name].keys() and \
+						self.owner.hosts[name]['rank'] != rank:
+					msg = 'two different rank numbers specified for host "%s"' % name
+					sys.exit((-1, msg, ''))
+
+				self.owner.hosts[name]['rank'] = rank
+
+			if not interface:
+				continue
+
+			if name not in self.owner.interfaces.keys():
+				self.owner.interfaces[name] = {}
+
+			if interface in self.owner.interfaces[name].keys():
+				msg = 'interface "%s" already specified for host "%s"' % (interface, name)
+				sys.exit((-1, msg, ''))
+
+			self.owner.interfaces[name][interface] = {}
+
+			if ip:
+				self.owner.interfaces[name][interface]['ip'] = ip
+			if mac:
+				self.owner.interfaces[name][interface]['mac'] = mac
+			if subnet:
+				self.owner.interfaces[name][interface]['subnet'] = subnet
+			if ifhostname:
+				self.owner.interfaces[name][interface]['ifhostname'] = ifhostname
+			if channel:
+				self.owner.interfaces[name][interface]['channel'] = channel
+			if options:
+				if re.match('bond[0-9]+$', interface):
+					options = 'bonding-opts="%s"' % options
+
+				self.owner.interfaces[name][interface]['options'] = options
+			if vlan:
+				self.owner.interfaces[name][interface]['vlan'] = vlan
+			if boss:
+				self.owner.hosts[name]['boss'] = boss
+
+			if notes:
+				if 'notes' not in self.owner.hosts[name].keys():
+					self.owner.hosts[name]['notes'] = notes
+				else:
+					self.owner.hosts[name]['notes'] += \
+						', %s' % notes
+
+		#
+		# check if the 'Boss' column was set
+		#
+		thisboss = self.db.getHostname('localhost')
+		hasboss = 0
+		for name in self.owner.hosts.keys():
+			if 'boss' in self.owner.hosts[name]:
+				if self.owner.hosts[name]['boss'] == thisboss:
+					hasboss = 1
+					break
+
+		if hasboss:
+			#
+			# now remove all hosts not associated with this Boss
+			#
+			for name in self.owner.hosts.keys():
+				if self.owner.hosts[name]['boss'] != thisboss:
+					del self.owner.hosts[name]
+
+					for o in self.list_host_interface:
+						if o['name'] == name:
+							self.owner.call(
+								'remove.host',
+								[ name ])
+
+		#
+		# sanity checks
+		#
+		macs = []
+		ips = []
+		for name in self.owner.hosts.keys():
+			#
+			# ensure at least one of the host entries has an
+			# appliance associated with it
+			#
+			if 'appliance' not in self.owner.hosts[name].keys():
+				msg = 'must supply an appliance type for host "%s"' % (name)
+				sys.exit((-1, msg, ''))
+			else:
+				self.checkAppliance(
+					self.owner.hosts[name]['appliance'])
+
+			#
+			# interface specific checks
+			#
+			for interface in self.owner.interfaces[name].keys():
+				try:
+					ip = self.owner.interfaces[name][interface]['ip']
+				except:
+					ip = None
+				if ip:
+#					self.checkIP(ip)
+					if ip in ips:
+						msg = 'duplicate IP "%s" in the input file' % ip
+						sys.exit((-1, msg, ''))
+
+					ips.append(ip)
+
+				try:
+					mac = self.owner.interfaces[name][interface]['mac']
+				except:
+					mac = None
+				if mac:
+#					self.checkMAC(mac)
+					if mac in macs:
+						msg = 'duplicate MAC "%s" in the input file' % mac
+						sys.exit((-1, msg, ''))
+
+					macs.append(mac)
+
+				try:
+					subnet = self.owner.interfaces[name][interface]['subnet']
+				except:
+					subnet = None
+				if subnet:
+					self.checkSubnet(subnet)
+
+
+				#
+				# if 'channel' is specified and if it starts
+				# with 'bond', make sure there is an interface
+				# for this host that matches the the bond value
+				#
+				if re.match('bond[0-9]+$', interface):
+					found = 0
+					for iface in self.owner.interfaces[name].keys():
+						if 'channel' not in self.owner.interfaces[name][iface].keys():
+							continue
+
+						if interface == self.owner.interfaces[name][iface]['channel']:
+							found = 1
+							break
+
+					if not found:
+						msg = 'bonded interface "%s" is specified for host "%s", ' % (interface, name)
+						msg += 'but there is no channel "%s" specified for any interface associated with this host' % (interface)
+						sys.exit((-1, msg, ''))
+

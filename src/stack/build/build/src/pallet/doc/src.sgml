@@ -1,0 +1,63 @@
+<section id="src" xreflabel="src Directory">
+<title> src Directory </title>
+
+<para>
+If your roll requires RPMs to be built from source, you'll place the
+tarballs under the
+<computeroutput>src</computeroutput> directory.
+If your roll doesn't need to build any source code, that is, it only
+includes downloaded pre-built RPMS, then the 
+<computeroutput>src</computeroutput> directory is not needed and you
+should skip this step.
+</para>
+
+<para>
+Looking at the Intel Roll, you'll see the file:
+<computeroutput>roll/intel/src/Makefile</computeroutput>.
+Copy this file into your 
+<computeroutput>src</computeroutput> directory.
+You will not need to modify this file -- it simply drives the source code
+building process.
+</para>
+
+<para>
+Now, in the Intel Roll, you'll see the directory:
+<computeroutput>roll/intel/src/mpich-eth</computeroutput>.
+Inside that directory, you'll see:
+<computeroutput>Makefile, mpich-1.2.5.2.tar.gz, mpich.spec.in
+and patch-files</computeroutput>.
+</para>
+
+<para>
+The file <computeroutput>mpich-1.2.5.2.tar.gz</computeroutput> is
+the tarball as downloaded from the MPICH web site.
+</para>
+
+<para>
+The directory <computeroutput>patch-files</computeroutput> is used to
+patch some of the files inside the mpich tarball.
+If you don't need to patch any files, ignore this directory.
+</para>
+
+<para>
+The file <computeroutput>mpich.spec.in</computeroutput> is a RedHat
+spec file that directs <computeroutput>rpmbuild</computeroutput>
+on how to assemble the RPM.
+For an in-depth description of spec files, see
+<ulink url="http://www.rpm.org/max-rpm/">Maximum RPM</ulink>.
+</para>
+
+<para>
+The file <computeroutput>Makefile</computeroutput> drives the building
+of the RPM.
+</para>
+
+<para>
+Copy the files 
+<computeroutput>Makefile and mpich.spec.in</computeroutput> to your
+<computeroutput>src</computeroutput> directory and experiment with them
+in order to build an RPM for your source code.
+</para>
+
+</section>
+

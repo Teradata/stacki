@@ -1,0 +1,126 @@
+<section id="roll-devel" xreflabel="Roll Development">
+<title> Roll Development </title>
+
+<para>
+This section guides developers on how to build a Roll.
+</para>
+
+<para>
+To get started, login to a Rocks frontend and mirror the
+<ulink url="http://www.rocksclusters.org/rocks-documentation/3.1.0/customization-mirroring.html">
+Rocks distribution</ulink>
+and perform a
+<ulink
+url="http://www.rocksclusters.org/rocks-documentation/3.1.0/anonymous-cvs.html">
+CVS checkout of the Rocks code</ulink>.
+</para>
+
+<para>
+After the CVS checkout is completed, go to the top-level roll directory:
+</para>
+
+<screen>
+# cd rocks/src/roll
+</screen>
+
+<para>
+You should see something similar to:
+</para>
+
+<screen>
+bin           cacl    etc            hpc       metaroll.mk  patch
+birn          condor  gfarm          intel     nbcr         pbs
+birn-oracle1  CVS     grid           java      ninf         sge
+birn-oracle2  demo    grid-rocks-ca  Makefile  optiputer    top500
+</screen>
+
+<para>
+Now create a new directory for your roll -- the direcory name will be the
+name of your roll.
+For example, let's say you want your roll to be called
+<emphasis>skel</emphasis>:
+</para>
+
+<screen>
+# mkdir skel
+</screen>
+
+<para>
+To describe what directories and files you need to build your roll, we'll
+use the <computeroutput>intel</computeroutput> roll as a guide.
+In the directory 
+<computeroutput>intel</computeroutput>, you'll see:
+</para>
+
+<screen>
+CVS  graphs  Makefile  nodes  RPMS  src  SRPMS  version.mk
+</screen>
+
+<para>
+Copy the files <computeroutput>Makefile</computeroutput> and
+<computeroutput>version.mk</computeroutput> into your roll:
+</para>
+
+<screen>
+# cp Makefile version.mk ../skel/
+</screen>
+
+<para>
+The first file, <computeroutput>Makefile</computeroutput>, should remain
+unchanged.
+It includes other files in order to drive the roll building process.
+</para>
+
+<para>
+The second file, <computeroutput>version.mk</computeroutput>, should only
+be modified if you wish to change the version number or release number of
+your roll.
+</para>
+
+<para>
+Now make the directories:
+<computeroutput>graphs, nodes, RPMS, SRPMS and src</computeroutput>.
+Your roll should look like:
+</para>
+
+<screen>
+&lt; roll name &gt; ----+
+	          |
+	          +- graphs -+
+	          |
+	          +- nodes -+
+	          |
+	          +- RPMS -+
+	          |
+	          +- SRPMS -+
+	          |
+	          +- src -+
+	          |
+	          +- version.mk
+	          |
+	          +- Makefile
+</screen>
+
+<para>
+Inside the <computeroutput>nodes</computeroutput> directory, you will put your
+Rocks-based XML configuration files.
+These files are used to install packages and to configure their respective
+services.
+</para>
+
+<para>
+In the Intel Roll, the file
+<computeroutput>roll/intel/nodes/intel.xml</computeroutput>
+has the package names for the compilers to be installed on specific hardware
+architectures.
+For example, the <computeroutput>intel-icc8</computeroutput> is installed
+with the line:
+</para>
+
+<screen>
+&lt;package roll="intel"&gt;intel-icc8&lt;/package&gt;
+</screen>
+
+
+</section>
+

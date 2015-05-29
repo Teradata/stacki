@@ -1,0 +1,91 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+	<description>
+	The 'server node' in the graph.
+
+	This file is used as a connection point for other XML
+	configuration nodes.
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v1.0 www.stacki.com
+	</si_copyright>
+
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+<package>stack-admin</package>
+
+<package>foundation-gd</package>
+
+<!-- to build anaconda -->
+<package>device-mapper-devel</package>
+<package>isomd5sum-devel</package>
+<package>libarchive-devel</package>
+<package>libblkid-devel</package>
+<package>newt-devel</package>
+<package>slang-devel</package>
+<package>xmlto</package>
+<package>NetworkManager-devel</package>
+<package>NetworkManager-glib-devel</package>
+<package>dbus-devel</package>
+<package>iscsi-initiator-utils-devel</package>
+<package>libcurl-devel</package>
+<package>stack-config-server</package>
+<package>git</package>
+
+<!-- needed to build distributions -->
+<package>createrepo</package>
+<package>squashfs-tools</package>
+
+
+<post>
+<!-- optionally set the airboss attribute -->
+
+AIRBOSS=`/bin/cat /proc/cmdline | /bin/awk \
+	'BEGIN {RS="[[:space:]]"; FS="="} /airboss/{print $2}'`
+
+if [ "$AIRBOSS" != "" ]
+then
+	/opt/stack/bin/stack add host attr localhost airboss $AIRBOSS
+fi
+
+</post>
+
+<post>
+<!--
+        all rolls added to a running frontend will be added 'on the fly', so
+        set the roll_install_on_the_fly ottribute to true.
+
+        'shadow=yes' means that root and apache can access this attribute,
+        but it will not show up in 'rocks dump' so it won't pollute the
+        restore roll.
+-->
+
+/opt/stack/bin/stack set host attr localhost roll_install_on_the_fly true \
+        shadow=yes
+
+<!--
+	 Default to system (passwd/shadow) authentication.
+-->
+/opt/stack/bin/stack set attr user.auth unix
+
+</post>
+
+<!--
+	The restore roll needs a default (empty) git repository in order to
+	build
+-->
+
+<boot order="post">
+git init /export/site-roll/stack/src/roll/restore
+</boot>
+
+</kickstart> 
+

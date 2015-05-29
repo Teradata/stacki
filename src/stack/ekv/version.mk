@@ -1,0 +1,2 @@
+RPM.EXTRAS	= "AutoReqProv: no"
+

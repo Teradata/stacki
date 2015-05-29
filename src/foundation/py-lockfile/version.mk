@@ -1,0 +1,2 @@
+VERSION = 0.8
+ARCHIVENAME=lockfile

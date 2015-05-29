@@ -1,0 +1,3 @@
+VERSION = 0.6c11
+ARCHIVENAME=setuptools
+ORDER = 3

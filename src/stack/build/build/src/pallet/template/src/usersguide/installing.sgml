@@ -1,0 +1,5 @@
+<chapter id="installing">
+<title>Installing &rollname-l;</title>
+&source-roll-installing-standard;
+&source-roll-installing-onthefly;
+</chapter>

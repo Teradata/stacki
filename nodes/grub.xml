@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Boot loader support (GRand Unified Bootloader)
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<package>grub</package>
+
+
+<post>
+
+<!-- take out the splashscreen -->
+<file name="/tmp/grub.conf" expr="grep -v splashimage /boot/grub/grub.conf"/>
+mv /tmp/grub.conf /boot/grub/grub.conf
+
+<!-- Preserve the original grub.conf -->
+cp /boot/grub/grub.conf /boot/grub/grub-orig.conf
+
+</post>
+
+
+</kickstart> 

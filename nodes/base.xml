@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+<description>
+Base class for all nodes.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<main>
+<unsupported_hardware/>
+
+<install>
+%include /tmp/partition-info
+</install>
+
+<lang>&Kickstart_Lang;</lang>
+<keyboard>&Kickstart_Keyboard;</keyboard>
+
+<timezone>--utc &Kickstart_Timezone;</timezone>
+<bootloader>--location=mbr</bootloader>
+
+<url> --url http://127.0.0.1/install/distributions/&distribution;/&arch; </url>
+</main>
+
+
+<post>
+/sbin/chkconfig stack-pre on
+/sbin/chkconfig stack-post on
+</post>
+
+
+<post>
+<file name="/tmp/mdmonitor"
+	expr="sed -e 's/--user=root//' /etc/rc.d/init.d/mdmonitor"/>
+
+<file name="/etc/rc.d/init.d/mdmonitor" perms="755"
+	expr="cat /tmp/mdmonitor"/>
+
+rm /tmp/mdmonitor
+</post>
+
+
+<post>
+/sbin/chkconfig NetworkManager off
+</post>
+
+
+<boot order="post">
+rm -f /tmp/ks-script*
+</boot>
+
+</kickstart> 

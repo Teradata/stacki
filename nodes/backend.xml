@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+
+<description>
+Backend Appliance Node. You should create your own extend-backend.xml
+file to add functionality to this appliance type.
+</description>
+
+
+</kickstart> 
+

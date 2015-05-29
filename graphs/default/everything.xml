@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+
+<graph>
+
+	<description>
+	Create a single "everything" node that includes every
+	Appliance type the database knows about.
+	</description>
+
+	<edge from="everything">
+		<to>frontend</to>
+		<to>backend</to>
+	</edge>
+
+</graph>

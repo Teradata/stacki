@@ -1,0 +1,92 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<pre>
+
+<file name="/tmp/db_partition_info.py">
+StackVersion = '&version;'
+StackRelease = '&release;'
+KickstartHost = '&Kickstart_PrivateKickstartHost;'
+
+<eval shell="python" mode="xml">
+import os
+import string
+import re
+import sys
+import syslog
+import stack.sql
+
+class App(stack.sql.Application):
+
+	def __init__(self):
+		stack.sql.Application.__init__(self)
+		self.hostname = None
+
+	def setHostname(self, hostname):
+		self.hostname = hostname
+
+	def getPartitionInfo(self):
+		partinfo = {}
+
+		self.execute('select partitions.device, partitions.mountpoint, '
+			'partitions.sectorstart, partitions.partitionsize, '
+			'partitions.partitionid, partitions.fstype, '
+			'partitions.partitionflags, partitions.formatflags '
+			'from partitions,nodes '
+			'where partitions.node = nodes.id and '
+			'nodes.name = "%s" ' % self.hostname +
+			'order by partitions.device')
+
+		for dev,mnt,sect,size,id,fstype,pflags,fflags in \
+								self.fetchall():
+
+			s = (dev,sect,size,id,fstype,pflags,fflags,mnt)
+
+			if dev[0:2] == 'md':
+				devbasename = dev
+			else:
+				a = re.split('[0-9]+$', dev)
+				devbasename = a[0]
+
+			if not partinfo.has_key(devbasename):
+				partinfo[devbasename] = [ s ]
+			else:
+				partinfo[devbasename].append(s)
+
+		return partinfo
+
+
+        def run(self):
+		#
+		# if we are installing a standalone node (e.g., a frontend
+		# or a web server) the database will not be accessible, so
+		# don't do anything and just return
+		#
+		if self.connect():
+			partinfo = self.getPartitionInfo()
+			print 'dbpartinfo = ', repr(partinfo)
+			self.close()
+		else:
+			print 'dbpartinfo = {}'
+
+		return
+
+
+app = App()
+app.setHostname('&hostname;')
+app.run()
+</eval>
+
+</file>
+
+</pre>
+
+
+</kickstart> 
+

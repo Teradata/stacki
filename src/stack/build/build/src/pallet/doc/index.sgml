@@ -1,0 +1,74 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+	<!ENTITY intro		SYSTEM "intro.sgml">
+	<!ENTITY nodes		SYSTEM "nodes.sgml">
+	<!ENTITY graphs		SYSTEM "graphs.sgml">
+	<!ENTITY RPMS		SYSTEM "RPMS.sgml">
+	<!ENTITY SRPMS		SYSTEM "SRPMS.sgml">
+	<!ENTITY src		SYSTEM "src.sgml">
+	<!ENTITY build		SYSTEM "build.sgml">
+	<!ENTITY testing	SYSTEM "testing.sgml">
+]>
+
+<book>
+<bookinfo>
+
+	<title> Roll Developers Guide </title>
+
+<!--
+	<subtitle>
+		<inlinemediaobject>
+			<imageobject>
+				<imagedata fileref="images/intel-c.png">
+			</imageobject>
+		</inlinemediaobject>
+		<inlinemediaobject>
+			<imageobject>
+				<imagedata fileref="images/intel-f.png">
+			</imageobject>
+		</inlinemediaobject>
+	</subtitle>
+-->
+
+	<edition>Version 3.1.0</edition>
+
+	<pubdate>January 2004</pubdate>
+
+	<copyright id="copyright" xreflabel="copyright">
+		<year>2004</year>
+		<holder>UC Regents</holder>
+	</copyright>
+
+	<releaseinfo>
+		<ulink url="roll-develguide.pdf">(PDF version)</ulink>
+	</releaseinfo>
+
+</bookinfo>
+
+<chapter id="roll-file" xreflabel="Roll Files ">
+<title> Roll Files </title>
+
+&intro;
+&nodes;
+&graphs;
+&RPMS;
+&SRPMS;
+&src;
+
+</chapter>
+
+
+<chapter id="roll-building" xreflabel="Roll Building ">
+<title> Building Your Roll </title>
+
+&build;
+
+</chapter>
+
+
+<chapter id="roll-testing" xreflabel="Roll Testing ">
+<title> Testing Your Roll </title>
+
+&testing;
+
+</chapter>
+</book>

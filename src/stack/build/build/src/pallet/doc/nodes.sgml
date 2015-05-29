@@ -1,0 +1,46 @@
+<section id="nodes" xreflabel="Nodes Directory">
+<title> Nodes Directory </title>
+
+<para>
+Inside the <computeroutput>nodes</computeroutput> directory, you will put your
+Rocks-based XML configuration files.
+These files are used to install packages and to configure their respective
+services.
+</para>
+
+<para>
+In the Intel Roll, the file
+<computeroutput>roll/intel/nodes/intel.xml</computeroutput>
+has the package names for the compilers to be installed on specific hardware
+architectures.
+For example, the <computeroutput>intel-icc8</computeroutput> is installed
+with the line:
+</para>
+
+<screen>
+&lt;package roll="intel"&gt;intel-icc8&lt;/package&gt;
+</screen>
+
+<warning>
+<para>
+Make note of the attribute <computeroutput>roll="intel"</computeroutput>, this
+is important.
+Every package that is to be installed by your roll must have this attribute
+set to the name of your roll.
+This is because the extensions that Rocks adds to RedHat's installer keys off
+this value in order to install the packages from your roll CD during the
+final stages of a frontend installation.
+Without the <emphasis>roll</emphasis> attribute, the RedHat installer will
+think the package is on the Rocks Base CD, which it won't be, and the
+installation will fail.
+</para>
+</warning>
+
+<para>
+The <computeroutput>&lt;post&gt;</computeroutput> section of the node
+<computeroutput>roll/intel/nodes/intel.xml</computeroutput>
+shows how the packages are configured after they are installed.
+</para>
+
+</section>
+

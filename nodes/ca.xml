@@ -1,0 +1,99 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+  <description>
+
+Sets up keys for the frontend Certificate Authority
+
+  </description>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+
+<post>
+
+mkdir -p /etc/security/ca
+mkdir -p /etc/security/ca/new-certs
+
+<file name="/etc/security/ca/ca.cfg" perms="0640" owner="root.apache">
+[ req ]
+default_bits		= 1024
+default_md		= md5
+string_mask		= nombstr	# permitted characters
+distinguished_name	= req_distinguished_name
+
+[ v3_ca ]
+basicConstraints	= CA:TRUE
+subjectKeyIdentifier	= hash
+authorityKeyIdentifier	= keyid:always,issuer:always
+
+[ req_distinguished_name ]
+0.organizationName	= Organization Name (company)
+organizationalUnitName	= Organizational Unit Name (department, division)
+emailAddress		= Email Address
+emailAddress_max	= 64
+localityName		= Locality Name (city, district)
+stateOrProvinceName	= State or Province Name (full name)
+countryName		= Country Name (2 letter code)
+countryName_min		= 2
+countryName_max		= 2
+commonName		= Common Name (hostname, IP, or your name)
+
+commonName_default = &Kickstart_PublicHostname;
+organizationalUnitName_default	= &Info_ClusterName;-CA
+emailAddress_default		= &Info_ClusterContact;
+0.organizationName_default	= &Info_CertificateOrganization;
+localityName_default		= &Info_CertificateLocality;
+stateOrProvinceName_default	= &Info_CertificateState;
+countryName_default		= &Info_CertificateCountry;
+</file>
+
+</post>
+
+<post arg="--nochroot">
+
+<!-- Place certificates and keys. -->
+
+<!-- CA -->
+if [ -f /tmp/security/ca.key ]
+then
+	mv /tmp/security/ca.key /mnt/sysimage/etc/security/ca/
+	mv /tmp/security/ca.crt /mnt/sysimage/etc/security/ca/
+	mv /tmp/security/ca.serial /mnt/sysimage/etc/security/ca/
+fi
+
+</post>
+
+<post>
+
+<!-- Our Certificate Authority -->
+if [ ! -f /etc/security/ca/ca.key ]
+then
+(
+cd /etc/security/ca; \
+/usr/bin/openssl req -new -x509 -extensions v3_ca -nodes \
+	-keyout ca.key -days 5000 -batch -config ca.cfg > ca.crt; \
+chmod 0400 ca.key; \
+chmod 0444 ca.crt; \
+echo "01" > ca.serial 
+)
+fi
+
+
+<!-- Set perms so Apache can issue certs -->
+chmod 0750 /etc/security/ca
+chmod 0770 /etc/security/ca/new-certs
+chmod 0664 /etc/security/ca/ca.serial
+chmod 0440 /etc/security/ca/ca.key
+chmod 0640 /etc/security/ca/ca.cfg
+
+chgrp -R apache /etc/security/ca
+
+</post>
+
+</kickstart>

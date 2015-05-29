@@ -1,0 +1,35 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Place the root ssh public key from the installation machine on to
+the installed machine
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<post>
+
+<!-- make sure the appropriate directories exist -->
+
+for i in "/root/.ssh" ; do
+	if [ ! -d $i ]; then
+		/bin/mkdir -p $i
+	fi
+done
+
+<!-- propagate root's public ssh key -->
+
+<file name="/root/.ssh/authorized_keys">
+<eval shell="sh">
+cat /root/.ssh/id_rsa.pub
+</eval>
+</file>
+
+</post>
+
+</kickstart> 

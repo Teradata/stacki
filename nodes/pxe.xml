@@ -1,0 +1,114 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Provides pre-execution environment (PXE) support for frontend machines.
+</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v1.0 www.stacki.com
+	</si_copyright>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+<package>tftp-server</package>
+<package>syslinux</package>
+<package>xinetd</package>
+<package>memtest86+</package>
+<package>stack-images</package>
+<package>stack-pxeboot</package>
+
+<post>
+
+<!-- pxe needs a tftp server -->
+<file name="/etc/xinetd.d/tftp">
+service tftp
+{
+        socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = -s /tftpboot/pxelinux
+        instances               = 1
+	per_source		= 11
+	cps			= 1000 2
+	flags			= IPv4
+        disable                 = no
+}
+</file>
+
+
+<!--	
+	copy vmlinuz and initrd.img that pxelinux will grab from
+	this server
+-->
+mkdir -p /tftpboot/pxelinux
+
+cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux
+cp /opt/stack/images/initrd.img* /tftpboot/pxelinux/
+
+cp /boot/memtest86* /tftpboot/pxelinux/memtest
+
+</post>
+
+<post>
+
+mkdir -p /tftpboot/pxelinux/pxelinux.cfg
+chown root.apache /tftpboot/pxelinux/pxelinux.cfg
+chmod 775 /tftpboot/pxelinux/pxelinux.cfg
+
+<!-- copy all the syslinux programs to the pxelinux directory -->
+cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
+
+</post>
+
+
+<post>
+
+<!-- now setup the global PXE boot default actions -->
+/opt/stack/bin/stack add bootaction action="install" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
+
+/opt/stack/bin/stack add bootaction action="install no-parallel-format" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
+
+/opt/stack/bin/stack add bootaction action="os" \
+	kernel="com32 chain.c32" args="hd0"
+
+/opt/stack/bin/stack add bootaction action="os.localboot" \
+	kernel="localboot 0"
+
+/opt/stack/bin/stack add bootaction action="os.hplocalboot" \
+	kernel="localboot -1"
+
+/opt/stack/bin/stack add bootaction action="memtest" \
+	kernel="kernel memtest"
+
+/opt/stack/bin/stack add bootaction action="install headless" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
+
+/opt/stack/bin/stack add bootaction action="rescue" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
+
+/opt/stack/bin/stack add bootaction action="pxeflash" \
+	kernel="kernel memdisk bigraw" \
+	ramdisk="pxeflash.img" \
+	args="keeppxe"
+
+</post>
+
+</kickstart> 

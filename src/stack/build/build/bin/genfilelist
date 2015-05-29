@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+import os, sys
+
+pkg = sys.argv[1]
+buildroot = sys.argv[2]
+for r, d, f in os.walk(buildroot,topdown=True):
+	for n in d:
+		dn = os.path.join(r,n)
+		if os.listdir(dn) == []:
+			fname = dn.replace(buildroot,'', 1)
+			print "\"%s\"" % fname
+	for n in f:
+		fn = os.path.join(r, n)
+		fname = fn.replace(buildroot,'',1)
+		print "\"%s\"" % fname

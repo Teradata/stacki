@@ -1,0 +1,307 @@
+<!--
+@SI_Copyright@
+                            www.stacki.com
+                                 v1.0
+
+     Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+ 
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+ 
+2. Redistributions in binary form must reproduce the above copyright
+notice unmodified and in its entirety, this list of conditions and the
+following disclaimer in the documentation and/or other materials provided 
+with the distribution.
+ 
+3. All advertising and press materials, printed or electronic, mentioning
+features or use of this software must display the following acknowledgement: 
+
+	 "This product includes software developed by StackIQ" 
+ 
+4. Except as permitted for the purposes of acknowledgment in paragraph 3,
+neither the name or logo of this software nor the names of its
+authors may be used to endorse or promote products derived from this
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@SI_Copyright@
+-->
+
+<!ENTITY platform-hardware "<entry>no</entry>">
+<!ENTITY platform-private "<entry>no</entry>">
+<!ENTITY platform-ec2 "<entry>no</entry>">
+
+<!-- Rocks+ Rolls
+
+All Rolls from the Rocks+ source tree should have two entries in this
+file:
+
+- roll-rocksplus-NAME-l
+	Human readable name of the Roll.
+
+- roll-rocksplus-NAME-s
+- roll-rocksplus-NAME
+	Computer readable name of the Roll.
+
+- roll-NAME-d
+	Short decription of the Roll.
+
+- overview-rocksplus-NAME-depend
+	Must be the empty string "".  Adding the name of the Roll to
+	a usersguide version.mk will create the corresponding entry
+	in the dependcies table (overview section of manual).
+
+-->
+
+<!ENTITY roll-cluster-core-l	"<command>Cluster Core</command>">
+<!ENTITY roll-cluster-core-s	"<constant>cluster-core</constant>">
+<!ENTITY roll-cluster-core	"cluster-core">
+<!ENTITY roll-cluster-core-d	"StackIQ Cluster Core">
+<!ENTITY overview-cluster-core-depend "">
+
+<!ENTITY roll-cuda-l	"<command>CUDA</command>">
+<!ENTITY roll-cuda-s	"<constant>cuda</constant>">
+<!ENTITY roll-cuda	"cuda">
+<!ENTITY roll-cuda-d	"CUDA SDK and Drivers">
+<!ENTITY overview-rocksplus-cuda-depend "">
+
+<!ENTITY roll-dell-l	"<command>Dell</command>">
+<!ENTITY roll-dell-s	"<constant>dell</constant>">
+<!ENTITY roll-dell	"dell">
+<!ENTITY roll-dell-d	"Dell Hardware Support">
+<!ENTITY overview-dell-depend "">
+
+<!ENTITY roll-rocksplus-aws-l  "<command>AWS</command>">
+<!ENTITY roll-rocksplus-aws-s  "<constant>aws</constant>">
+<!ENTITY roll-rocksplus-aws    "aws">
+<!ENTITY roll-rocksplus-aws-d  "Amazon Web Services (EC2)">
+<!ENTITY overview-rocksplus-aws-depend "">
+
+<!ENTITY roll-rocksplus-hp-l	"<command>HP</command>">
+<!ENTITY roll-rocksplus-hp-s	"<constant>hp</constant>">
+<!ENTITY roll-rocksplus-hp	"hp">
+<!ENTITY roll-rocksplus-hp-d	"HP Hardware Support">
+<!ENTITY overview-rocksplus-hp-depend "">
+
+<!ENTITY roll-rocksplus-intel-icr-l	"<command>Intel Cluster Ready</command>">
+<!ENTITY roll-rocksplus-intel-icr-s	"<constant>intel-icr</constant>">
+<!ENTITY roll-rocksplus-intel-icr	"intel-icr">
+<!ENTITY roll-rocksplus-intel-icr-d	"Intel Cluster Ready Support">
+<!ENTITY overview-rocksplus-intel-icr-depend "">
+
+<!ENTITY roll-intel-developer-l	"<command>Intel Developer</command>">
+<!ENTITY roll-intel-developer-s	"<constant>intel-developer</constant>">
+<!ENTITY roll-intel-developer		"intel-developer">
+<!ENTITY roll-intel-developer-d	"Intel Compilers and Libraries">
+<!ENTITY overview-intel-developer-depend "">
+
+<!ENTITY roll-rocksplus-kernel-l	"<command>Kernel</command>">
+<!ENTITY roll-rocksplus-kernel-s	"<constant>kernel</constant>">
+<!ENTITY roll-rocksplus-kernel		"kernel">
+<!ENTITY roll-rocksplus-kernel-d	"StackIQ Installation and Runtime Kernel">
+<!ENTITY overview-rocksplus-kernel-depend "">
+
+<!ENTITY roll-rocksplus-moab-l	"<command>Moab</command>">
+<!ENTITY roll-rocksplus-moab-s	"<constant>moab</constant>">
+<!ENTITY roll-rocksplus-moab	"moab">
+<!ENTITY roll-rocksplus-moab-d	"Adaptive Computing's Moab Scheduler">
+<!ENTITY overview-rocksplus-moab-depend "">
+
+<!ENTITY roll-mlnx-ofed-l	"<command>Mellanox OFED</command>">
+<!ENTITY roll-mlnx-ofed-s	"<constant>mlnx-ofed</constant>">
+<!ENTITY roll-mlnx-ofed	"mlnx-ofed">
+<!ENTITY roll-mlnx-ofed-d	"Mellanox Infiniband Support">
+<!ENTITY overview-mlnx-ofed-depend "">
+
+<!ENTITY roll-rocksplus-mongo-l	"<command>MongoDB</command>">
+<!ENTITY roll-rocksplus-mongo-s	"<constant>mongo</constant>">
+<!ENTITY roll-rocksplus-mongo	"mongo">
+<!ENTITY roll-rocksplus-mongo-d	"MongoDB Support">
+<!ENTITY overview-rocksplus-mongo-depend "">
+
+<!ENTITY roll-rocksplus-cassandra-l	"<command>Cassandra</command>">
+<!ENTITY roll-rocksplus-cassandra-s	"<constant>cassandra</constant>">
+<!ENTITY roll-rocksplus-cassandra	"cassandra">
+<!ENTITY roll-rocksplus-cassandra-d	"Cassandra Support">
+<!ENTITY overview-rocksplus-cassandra-depend "">
+
+<!ENTITY roll-hortonworks-l		"<command>Hortonworks</command>">
+<!ENTITY roll-hortonworks-s		"<constant>hortonworks</constant>">
+<!ENTITY roll-hortonworks		"hortonworks">
+<!ENTITY roll-hortonworks-d		"Hortonworks Data Platform Support">
+<!ENTITY overview-hortonworks-depend "">
+
+<!ENTITY roll-cloudera-l	"<command>Cloudera</command>">
+<!ENTITY roll-cloudera-s	"<constant>cloudera</constant>">
+<!ENTITY roll-cloudera		"cloudera">
+<!ENTITY roll-cloudera-d	"CDH Support">
+<!ENTITY overview-cloudera-depend "">
+
+<!ENTITY roll-mapr-l		"<command>MapR</command>">
+<!ENTITY roll-mapr-s		"<constant>mapr</constant>">
+<!ENTITY roll-mapr		"mapr">
+<!ENTITY roll-mapr-d		"MapR Support">
+<!ENTITY overview-mapr-depend "">
+
+<!ENTITY roll-pbspro-l	"<command>PBS Pro</command>">
+<!ENTITY roll-pbspro-s	"<constant>pbspro</constant>">
+<!ENTITY roll-pbspro	"pbspro">
+<!ENTITY roll-pbspro-d	"Altair's PBS Pro Scheduler">
+<!ENTITY overview-pbspro-depend "">
+
+<!ENTITY roll-talend-l		"<command>Talend</command>">
+<!ENTITY roll-talend-s		"<constant>Talend</constant>">
+<!ENTITY roll-talend            "Talend">
+<!ENTITY roll-talend-d		"Talend Support">
+<!ENTITY overview-talend-depend "">
+
+<!-- Core Rocks Rolls
+
+All Rolls from the Rocks source tree should have two entries in this
+file:
+
+- roll-NAME-l
+	Human readable name of the Roll.
+
+- roll-NAME-s
+- roll-NAME
+	Computer  readable name of the Roll.
+
+- roll-NAME-d
+	Short decription of the Roll.
+
+- overview-NAME-depend
+	Must be the empty string "".  Adding the name of the Roll to
+	a usersguide version.mk will create the corresponding entry
+	in the dependcies table (overview section of manual).
+
+-->
+
+<!ENTITY roll-alpha-l	"<command>Alpha</command>">
+<!ENTITY roll-alpha-s	"<constant>alpha</constant>">
+<!ENTITY roll-alpha	"alpha">
+<!ENTITY roll-alpha-d	"Experimental Features">
+<!ENTITY overview-alpha-depend "">
+
+<!ENTITY roll-area51-l	"<command>Area51</command>">
+<!ENTITY roll-area51-s	"<constant>area51</constant>">
+<!ENTITY roll-area51	"area51">
+<!ENTITY roll-area51-d	"Security Tools (tripwire, chkrootkit)">
+<!ENTITY overview-area51-depend "">
+
+<!ENTITY roll-base-l	"<command>Base</command>">
+<!ENTITY roll-base-s	"<constant>base</constant>">
+<!ENTITY roll-base	"base">
+<!ENTITY roll-base-d	"Core of &rocks;">
+<!ENTITY overview-base-depend "">
+
+<!ENTITY roll-bio-l	"<command>Bio</command>">
+<!ENTITY roll-bio-s	"<constant>bio</constant>">
+<!ENTITY roll-bio		"bio">
+<!ENTITY roll-bio-d	"Bio Informatic Tools">
+<!ENTITY overview-bio-depend "">
+
+<!ENTITY roll-condor-l	"<command>Condor</command>">
+<!ENTITY roll-condor-s	"<constant>condor</constant>">
+<!ENTITY roll-condor	"condor">
+<!ENTITY roll-condor-d	"Condor Scheduler">
+<!ENTITY overview-condor-depend "">
+
+<!ENTITY roll-ganglia-l		"<command>Ganglia</command>">
+<!ENTITY roll-ganglia-s	"<constant>ganglia</constant>">
+<!ENTITY roll-ganglia		"ganglia">
+<!ENTITY roll-ganglia-d	"System Monitoring">
+<!ENTITY overview-ganglia-depend "">
+
+<!ENTITY roll-grid-l	"<command>Grid</command>">
+<!ENTITY roll-grid-s	"<constant>grid</constant>">
+<!ENTITY roll-grid		"grid">
+<!ENTITY roll-grid-d	"Globus Toolkit">
+<!ENTITY overview-grid-depend "">
+
+<!ENTITY roll-hpc-l	"<command>HPC</command>">
+<!ENTITY roll-hpc-s	"<constant>hpc</constant>">
+<!ENTITY roll-hpc		"hpc">
+<!ENTITY roll-hpc-d	"MPI (GNU/Ethernet)">
+<!ENTITY overview-hpc-depend "">
+
+<!ENTITY roll-java-l	"<command>Java</command>">
+<!ENTITY roll-java-s	"<constant>java</constant>">
+<!ENTITY roll-java		"java">
+<!ENTITY roll-java-d	"Java Runtime">
+<!ENTITY overview-java-depend "">
+
+<!ENTITY roll-os-l		"<command>OS or RHEL or CentOS</command>">
+<!ENTITY roll-os-s	"<constant>os or RHEL or CentOS</constant>">
+<!ENTITY roll-os		"os or RHEL or CentOS">
+<!ENTITY roll-os-d	"os or RHEL or CentOS">
+<!ENTITY overview-os-depend "">
+
+<!ENTITY roll-pbs-l	"<command>PBS</command>">
+<!ENTITY roll-pbs-s	"<constant>pbs</constant>">
+<!ENTITY roll-pbs		"pbs">
+<!ENTITY roll-pbs-d	"Portable Batch System Scheduler">
+<!ENTITY overview-pbs-depend "">
+
+<!ENTITY roll-service-pack-l	"<command>Service Pack</command>">
+<!ENTITY roll-service-pack-s	"<constant>service-pack</constant>">
+<!ENTITY roll-service-pack		"service-pack">
+<!ENTITY roll-service-pack-d	"Inter-Release Fixes">
+<!ENTITY overview-service-pack-depend "">
+
+<!ENTITY roll-ogs-l	"<command>Open Grid Scheduler</command>">
+<!ENTITY roll-ogs-s	"<constant>ogs</constant>">
+<!ENTITY roll-ogs	"ogs">
+<!ENTITY roll-ogs-d	"Open Grid Engine Scheduler">
+<!ENTITY overview-ogs-depend "">
+
+<!ENTITY roll-ge-l	"<command>Open Grid Scheduler</command>">
+<!ENTITY roll-ge-s	"<constant>ogs</constant>">
+<!ENTITY roll-ge	"ogs">
+<!ENTITY roll-ge-d	"Open Grid Engine Scheduler">
+<!ENTITY overview-ge-depend "">
+
+<!ENTITY roll-uge-l	"<command>Univa Grid Engine</command>">
+<!ENTITY roll-uge-s	"<constant>uge</constant>">
+<!ENTITY roll-uge	"uge">
+<!ENTITY roll-uge-d	"Univa Grid Engine Scheduler">
+<!ENTITY overview-uge-depend "">
+
+<!ENTITY roll-torque-l	"<command>Torque</command>">
+<!ENTITY roll-torque-s	"<constant>torque</constant>">
+<!ENTITY roll-torque	"torque">
+<!ENTITY roll-torque-d	"Torque Scheduler">
+<!ENTITY overview-torque-depend "">
+
+<!ENTITY roll-viz-l	"<command>Viz</command>">
+<!ENTITY roll-viz-s	"<constant>viz</constant>">
+<!ENTITY roll-viz		"viz">
+<!ENTITY roll-viz-d	"Visualization for Tile Display Walls">
+<!ENTITY overview-viz-depend "">
+
+<!ENTITY roll-web-server-l	"<command>Web Server</command>">
+<!ENTITY roll-web-server-s	"<constant>web-server</constant>">
+<!ENTITY roll-web-server	"web-server">
+<!ENTITY roll-web-server-d	"Wordpress, and Apache">
+<!ENTITY overview-web-server-depend "">
+
+<!ENTITY roll-xen-l	"<command>Xen</command>">
+<!ENTITY roll-xen-s	"<constant>xen</constant>">
+<!ENTITY roll-xen		"xen">
+<!ENTITY roll-xen-d	"Xen Hypervisor and Cloud Support">
+<!ENTITY overview-xen-depend "">
+

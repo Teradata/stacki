@@ -1,0 +1,56 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<description>
+	Core graph for Stacki.
+	</description>
+
+
+	<!-- Graph Ordering for Kickstart Generation -->
+
+	<order tail="HEAD">
+		<head>pre-ssh-key</head>
+	</order>
+
+	<order head="storage-controller-client">
+		<tail>partition</tail>
+	</order>
+
+	<order head="ca">
+		<tail>ssl-client</tail>
+	</order>
+
+	<order head="TAIL">
+		<tail>postshell</tail>
+		<tail>do-partition</tail>
+	</order>
+
+
+	<!-- Graph OO Framework -->
+
+	<edge from="base">
+		<to>pre-ssh-key</to>
+		<to>disk-stamp</to>
+		<to>logrotate</to>
+		<to>rpc</to>
+		<to>node</to>
+		<to>ntp</to>
+		<to>firewall</to>
+		<to>selinux</to>
+		<to>postshell</to>
+		<to>partition</to>
+		<to>yum</to>
+		<to>ssl</to>
+		<to>ssh</to>
+		<to>ssh-client</to>
+	</edge>
+	<edge from="client">
+		<to>ssl-client</to>
+	</edge>
+
+	<edge from="partition">
+		<to>do-partition</to>
+	</edge>
+
+</graph>
+

@@ -1,0 +1,59 @@
+<!--
+$Log$
+Revision 1.2  2011/01/28 02:17:28  mjk
+Docbook cleanup (using Viz Roll as proto-type)
+- consistent entity naming (no more mixing of '-' and '_')
+- roll compat page only lists specified rolls (version.mk)
+- added note about using all OS cds with non-core rolls (e.g. viz)
+- added entities for roll names, and bools
+- logical styles used instead of direct formatting
+  e.g. constant vs. emphasis
+Works for Viz (needs new devel env installed)
+TODO: Update Base Roll to further standardize (slow)
+TODO: Cleanup all other Rolls (fast)
+
+Revision 1.1  2010/06/22 21:07:44  mjk
+build env moving into base roll
+
+Revision 1.2  2008/11/03 18:30:14  mjk
+- fix userguide copyright building
+- area51 uses rocks command line
+
+Revision 1.1  2007/06/16 01:38:58  mjk
+*** empty log message ***
+
+-->
+
+<appendix id="rocks-copyright" xreflabel="Rocks Copyright">
+<title>&rocks; Copyright and Trademark</title>
+
+<section><title>Copyright Statement</title>
+<para><screen>
+&rockscopyright;
+</screen></para>
+</section>
+
+<section><title>Trademark Licensing</title>
+<para>
+The &rocks; logo (<xref linkend="rocks-logo">) and the names 
+&rocks;,
+&rocks-clusters;, and
+&rocks-avalanche;
+have been submitted to the United States Patent and 
+Trademark Office to become registered trademarks.
+</para>
+<para>
+Commercial entities that wish to use any of the above names or logo in a 
+product name or marketing material, are required to get written permission from
+the Technology Transfer and Intellectual Property Services Office at UCSD 
+<email>invent@ucsd.edu</email>.
+</para>
+
+<figure id="rocks-logo">
+<title>&rocks; logo</title>
+<graphic fileref="images/roll-rocks.png"></graphic>
+</figure>
+
+</section>
+
+</appendix>

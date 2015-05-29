@@ -1,0 +1,18 @@
+<section id="RPMS" xreflabel="RPMS Directory">
+<title> RPMS Directory </title>
+
+<para>
+If you have any pre-built RPMS (for example, an RPM that you downloaded),
+you should place them in the <computeroutput>RPMS</computeroutput>
+directory.
+</para>
+
+<para>
+All RPMS that you build from scratch (which will be built out of the
+files found under the 
+<computeroutput>src</computeroutput>
+directory) will be automatically put in this directory.
+</para>
+
+</section>
+

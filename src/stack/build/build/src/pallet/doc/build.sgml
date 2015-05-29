@@ -1,0 +1,58 @@
+<section id="build" xreflabel="Making a Roll ISO">
+<title> Making a Roll ISO </title>
+
+<para>
+To build an ISO image of your roll, go the the directory:
+<computeroutput>roll/&lt;roll name&gt;</computeroutput> and
+execute:
+</para>
+
+<screen>
+# make roll
+</screen>
+
+<para>
+This will start a process that goes into the 
+<computeroutput>src</computeroutput> directory
+and creates RPMS for each software package (as specified by their
+respective spec files), copies the newly built RPMs into the directory
+<computeroutput>RPMS</computeroutput>.
+</para>
+
+<para>
+Then a directory named 
+<computeroutput>iso</computeroutput> is created.
+It will be the structure of the ISO, that is, 
+<computeroutput>mkisofs</computeroutput> looks into this directory and
+makes an ISO image based on it.
+</para>
+
+<para>
+When you look at your ISO image, you'll see a file of the form:
+<computeroutput>
+roll-&lt;roll name&gt;-kickstart-3.1.0-0.noarch.rpm</computeroutput>.
+This RPM was automatically built for you and it contains the files found
+in the 
+<computeroutput>nodes</computeroutput> directory
+and the 
+<computeroutput>graphs</computeroutput> directory.
+This file is what the installer looks at in order to recognize your roll
+and properly install it.
+</para>
+
+<para>
+After you successfully build your roll, you should see a file of the 
+form:
+<computeroutput>
+roll-&lt;roll name&gt;-3.1.0-0.&lt;arch&gt;.iso</computeroutput>.
+This is the ISO image for your roll.
+</para>
+
+<para>
+For example, the Intel Roll's ISO image for the i386 architecture is
+named:
+<computeroutput>roll-intel-3.1.0-0.i386.iso</computeroutput>.
+</para>
+
+</section>
+

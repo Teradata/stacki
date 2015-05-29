@@ -1,0 +1,54 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+<description>
+Enable SSH
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<package>openssh</package>
+<package>openssh-clients</package>
+<package>openssh-server</package>
+<package>openssh-askpass</package>
+<package>xorg-x11-xauth</package>
+
+
+<post>
+<file name="/etc/ssh/ssh_config">
+Host *
+	CheckHostIP             no
+	ForwardX11              yes
+	ForwardAgent		yes
+	StrictHostKeyChecking   no
+	UsePrivilegedPort       no
+	Protocol		2,1
+</file>
+</post>
+
+<post>
+<!--
+change permissions on /root/ and /root/.ssh/ directories so
+cluster-dist can read root's 'id_rsa.pub' when it's run by a
+non-root user
+-->
+
+chmod a+rx /root
+mkdir /root/.ssh
+chmod a+rx /root/.ssh
+
+<!-- Turn off challenge-response so we get normal passwd auth. -->
+sed -e 's/#ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' \
+	/etc/ssh/sshd_config > /tmp/sshd_config
+sed -e 's/#PermitUserEnvironment no/PermitUserEnvironment yes/' \
+	/tmp/sshd_config > /etc/ssh/sshd_config
+
+</post>
+
+</kickstart> 

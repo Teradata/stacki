@@ -1,0 +1,216 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart interface="public">
+
+	<description>
+	Populate cluster database with initial data
+	</description>
+
+        <si_copyright>
+        (c) 2006 - 2015 StackIQ Inc.
+        All rights reserved. stacki(r) v1.0 www.stacki.com
+        </si_copyright>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+
+<post arg="--nochroot">
+
+cp /tmp/site.attrs /mnt/sysimage/tmp
+chmod 400 /mnt/sysimage/tmp/site.attrs
+cp /tmp/rolls.xml /mnt/sysimage/tmp
+
+</post>
+
+<post interpreter="/opt/stack/bin/python">
+
+import os.path
+
+if os.path.exists('/tmp/site.attrs'):
+	file = open('/tmp/site.attrs', 'r')
+	for line in file.readlines():
+		l = line.split(':', 1)
+		if len(l) == 2:
+			#
+			# key/value pairs
+			#
+
+			#
+			# there are some attributes that don't belong in the
+			# database
+			#
+			key = l[0].strip()
+
+			if key in [ 'hostname', 'rack', 'rank', 'os' ]:
+				continue
+
+			v = l[1].strip()
+			value = ''
+			for i in v:
+				if i == "'":
+					value += "'"
+					value += '"'
+					value += "\\'"
+					value += '"'
+					value += "'"
+				else:
+					value += i
+			
+			if key in [ 'Kickstart_PrivatePortableRootPassword', \
+					'Kickstart_PrivateRootPassword', \
+					'Kickstart_PrivateSHARootPassword', \
+					'Kickstart_PrivateMD5RootPassword', \
+					'Kickstart_PrivateDjangoRootPassword' ]:
+				extra = 'shadow=y'
+			else:
+				extra = ''
+
+			os.system("/opt/stack/bin/stack set attr %s '%s' '%s'"
+				% (extra, key, value))
+
+	file.close()
+
+</post>
+
+<post>
+
+<!-- access control -->
+/opt/stack/bin/stack set access command='*'     group='apache'
+/opt/stack/bin/stack set access command='list*' group='wheel'
+
+<!-- insert the base distributions into the database -->
+/opt/stack/bin/stack add distribution default 
+
+<!-- insert the base appliances into the database -->
+
+/opt/stack/bin/stack add appliance frontend membership=Frontend node=server \
+	public=no
+/opt/stack/bin/stack add appliance backend  membership=Backend node=backend
+
+<!-- manage firewall rules by default -->
+/opt/stack/bin/stack set attr firewall true
+
+<!--	Set managed attribute for appliances.
+	This determines whether the appliances
+	can be ssh'ed into for running management
+	commands
+-->
+
+/opt/stack/bin/stack set attr managed false
+
+/opt/stack/bin/stack set appliance attr frontend managed false
+/opt/stack/bin/stack set appliance attr backend	 managed true
+
+<!-- networks -->
+
+/opt/stack/bin/stack add network private	\
+	subnet=&Kickstart_PrivateNetwork;	\
+	netmask=&Kickstart_PrivateNetmask;	\
+	dnszone=&Kickstart_PrivateDNSDomain;	\
+	servedns=true
+
+/opt/stack/bin/stack add network public		\
+	subnet=&Kickstart_PublicNetwork;	\
+	netmask=&Kickstart_PublicNetmask;	\
+	dnszone=&Kickstart_PublicDNSDomain;	\
+	servedns=false
+
+<!--
+	set the frontend's primary network to be the public network. this
+	network will be used to generate the hostname for the frontend.
+-->
+/opt/stack/bin/stack set appliance attr frontend primary_net public
+
+<!-- set default os to whatever the frontend is -->
+
+/opt/stack/bin/stack set attr attr=os value=&os;
+
+</post>
+
+<post>	
+<!-- frontend host -->
+
+/opt/stack/bin/stack "add host" &Kickstart_PrivateHostname; \
+	membership=Frontend rack=0 rank=0
+
+<!-- routes
+	multicast (bottom 255 addresses only)
+	broadcast
+	default gateway (frontend)
+	default gateway (backend nodes)
+	frontend public interface over private network
+-->
+/opt/stack/bin/stack add route 224.0.0.0 private netmask=255.255.255.0
+
+/opt/stack/bin/stack add route 255.255.255.255 private netmask=255.255.255.255
+
+/opt/stack/bin/stack add host route &Kickstart_PrivateHostname; 0.0.0.0 \
+	&Kickstart_PublicGateway; netmask=0.0.0.0
+
+/opt/stack/bin/stack add route 0.0.0.0 \
+	&Kickstart_PrivateGateway; netmask=0.0.0.0
+
+/opt/stack/bin/stack add route &Kickstart_PublicAddress; \
+	&Kickstart_PrivateAddress; netmask=255.255.255.255
+	
+<!-- frontend private network -->
+
+/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname; \
+	&Kickstart_PrivateInterface;
+
+/opt/stack/bin/stack set host interface subnet &Kickstart_PrivateHostname; \
+	&Kickstart_PrivateInterface; private
+
+/opt/stack/bin/stack set host interface ip &Kickstart_PrivateHostname; \
+	&Kickstart_PrivateInterface; &Kickstart_PrivateAddress;
+
+/opt/stack/bin/stack set host interface name &Kickstart_PrivateHostname; \
+	&Kickstart_PrivateInterface; &Kickstart_PrivateHostname;
+
+/opt/stack/bin/stack set host interface mac &Kickstart_PrivateHostname; \
+	&Kickstart_PrivateInterface; &Kickstart_PrivateEthernet;
+
+<!-- boss public network -->
+
+/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname; \
+	&Kickstart_PublicInterface;
+
+/opt/stack/bin/stack set host interface subnet &Kickstart_PrivateHostname; \
+	&Kickstart_PublicInterface; public
+
+/opt/stack/bin/stack set host interface ip &Kickstart_PrivateHostname; \
+	&Kickstart_PublicInterface; &Kickstart_PublicAddress;
+
+/opt/stack/bin/stack set host interface name &Kickstart_PrivateHostname; \
+	&Kickstart_PublicInterface; &Kickstart_PrivateHostname;
+
+/opt/stack/bin/stack set host interface mac &Kickstart_PrivateHostname; \
+	&Kickstart_PublicInterface; &Kickstart_PublicEthernet;
+
+
+<!-- SSH settings -->
+
+/opt/stack/bin/stack set attr ssh.use_dns true
+
+<!-- insert-ethers base numbers -->
+
+/opt/stack/bin/stack set attr discovery/base.rank 0
+/opt/stack/bin/stack set attr discovery/base.rack 0
+
+</post>
+
+<post>
+<!-- use long passwords in the database -->
+<file name="/tmp/my.cnf" expr="grep -v '^old_passwords' /etc/my.cnf"/>
+<file name="/etc/my.cnf" perms="644" expr="cat /tmp/my.cnf"/>
+rm /tmp/my.cnf
+
+</post>
+
+<post>
+/opt/stack/bin/stack set attr mcli.flags "WB,NORA,Direct,NoCachedBadBBU"
+</post>
+
+</kickstart>

@@ -1,0 +1,31 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Generates the resolv.conf file for slave nodes.
+We point to all nameservers listed in the PrivateDNSServers
+entry in the app_globals table in the database.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+
+<post>
+<file name="/etc/resolv.conf">
+<report name="resolv.private"></report>
+</file>
+
+<!-- Give each host knowledge of itself. -->
+<file name="/etc/hosts">
+127.0.0.1	localhost.localdomain localhost
+&Kickstart_PublicAddress;	&Kickstart_PublicHostname;
+&hostaddr;	&hostname;.&Kickstart_PrivateDNSDomain; &hostname;
+</file>
+</post>
+
+
+</kickstart> 

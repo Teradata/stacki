@@ -1,0 +1,79 @@
+<?xml version="1.0" standalone="yes"?>
+
+<kcgi parent="@PROJECT_NAME@">
+
+	<id>$RCSfile$</id>
+
+	<copyright>
+	Copyright (c) 2000 - 2010 The Regents of the University of California.
+	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+ 	</copyright>
+ 
+  	<changelog>
+	$Log$
+	Revision 1.12  2010/09/07 23:53:07  bruno
+	star power for gb
+	
+	Revision 1.11  2009/05/01 19:07:07  mjk
+	chimi con queso
+	
+	Revision 1.10  2008/10/18 00:56:01  mjk
+	copyright 5.1
+	
+	Revision 1.9  2008/03/06 23:41:43  mjk
+	copyright storm on
+	
+	Revision 1.8  2007/06/23 04:03:23  mjk
+	mars hill copyright
+	
+	Revision 1.7  2006/09/11 22:47:16  mjk
+	monkey face copyright
+	
+	Revision 1.6  2006/08/10 00:09:37  mjk
+	4.2 copyright
+	
+	Revision 1.5  2005/10/12 18:08:39  mjk
+	final copyright for 4.1
+	
+	Revision 1.4  2005/09/29 03:35:05  phil
+	Fixes runaway python on the server when running kickstart.cgi
+	a) tracking the number of generating kickstarting instances using a lockfile as a monitor (does not fail if lockfile is missing or unreadable)
+	b) properly generate headers for 503 errors and add Retry-Time: directive to the header
+	
+	This allows even slow frontends to install complete racks without
+	being brought to its knees.
+	
+	Still need to experiment with the number of concurrent generators on older
+	boxen.
+	
+	Revision 1.3  2005/09/16 01:02:19  mjk
+	updated copyright
+	
+	Revision 1.2  2005/05/24 21:21:54  mjk
+	update copyright, release is not any closer
+	
+	Revision 1.1  2005/03/01 02:02:48  mjk
+	moved from core to base
+	
+	Revision 1.3  2004/11/02 00:41:27  fds
+	Support for wan-all-access. Used for centrals, public frontends.
+	
+	Revision 1.2  2004/10/16 04:32:26  fds
+	5 is a more realistic threshold to try to keep the pxe server fed.
+	
+	Revision 1.1  2004/09/07 23:25:13  fds
+	Kickstart gets its load threshold from config file.
+	
+	</changelog>
+
+	<!-- Load threshold: if more than N kickstart.cgi processes exist,
+	the frontend kickstart server is busy.
+	-->
+	<option name="loadthresh" value="4"/>
+
+	<!-- If not given, wan access is per-client. If present, all clients
+	may read distro packages. 
+	<option name="wan-all-access"/>
+	-->
+
+</kcgi>

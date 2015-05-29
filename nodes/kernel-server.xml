@@ -1,0 +1,100 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Packages and configuration that should only be installed on servers
+(e.g., frontend machines)
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<!-- packages that are needed to correctly rebuild the kernel roll -->
+<package>pcre</package>
+<package>pcre-devel</package>
+<package>keyutils</package>
+<package>keyutils-libs-devel</package>
+<package>iscsi-initiator-utils</package>
+<package>iscsi-initiator-utils-devel</package>
+<package>fcgi</package>
+<package>stack-tracker</package>
+<package>libblkid-devel</package>
+<package>isomd5sum-devel</package>
+<package>slang-devel</package>
+<package>newt-devel</package>
+<package>NetworkManager-devel</package>
+<package>NetworkManager-glib-devel</package>
+<package>yum-utils</package>
+
+
+<post>
+
+<file name="/etc/rc.d/init.d/stack-tracker" perms="755"><![CDATA[#!/bin/sh
+#
+# chkconfig: 35 99 01
+#
+# description: Start the service that tracks downloaded packages
+#
+. /etc/rc.d/init.d/functions
+
+start() {
+	echo -n "Starting stacki Tracker: "
+	daemon '/opt/stack/bin/tracker-server' > /var/log/tracker-server.log \
+		2>&1 &
+	RETVAL=$?
+
+	touch /var/lock/subsys/tracker-server
+	return $RETVAL
+}
+
+stop() {
+	action "Stopping stacki Tracker: " killall tracker-server
+	RETVAL=$?
+
+	rm -f /var/lock/subsys/tracker-server
+	return $RETVAL
+}
+
+#
+# main
+#
+case "$1" in
+start)
+	start
+	;;
+
+stop)
+	stop
+	;;
+
+restart)
+	stop
+	start
+	;;
+
+*)
+	echo "Usage: $0 {start|stop|restart}"
+	RETVAL=1	
+esac
+
+exit $RETVAL
+]]>
+</file>
+
+
+/sbin/chkconfig stack-tracker on
+
+</post>
+
+
+</kickstart>
+

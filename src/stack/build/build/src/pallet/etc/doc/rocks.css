@@ -1,0 +1,255 @@
+/***************************/
+span.footnote {
+	color: #12129C;
+    font-family: helvetica, arial, sans-serif;
+	font-size: 10pt;
+	}
+.footnotes	{
+	width: 80%;
+	margin : 10px 20px 10px 0px;
+    font-family: helvetica, arial, sans-serif;
+	font-size: 10pt;
+	color: #12129C;
+}
+
+body.book,body.article, body.chapter, body.part,
+body.preface, body.sect1, body.index, body.colophon, body.glossary {
+    background-color: #FFFFFF;
+    color: #12129C;
+    font-family: helvetica, Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+}
+
+p, td, th, .variablelist {
+    font-family: helvetica, arial, sans-serif;
+    font-size: 12pt;
+    /* left must be 0 so it lines up */
+    margin : 10px 0px 10px 0px;
+}
+
+li {
+    font-family: helvetica, arial, sans-serif;
+    font-size: 12pt;
+}
+
+.computeroutput, .command {
+        font-family: courier, courier new, monospace;
+        font-size: 12pt;
+    }
+
+.userinput {
+        font-family: courier, courier new, monospace;
+        font-size: 12pt;
+        font-weight: bold;
+        }
+
+table.calstable th {
+    border: 2px solid #A9A9A9;
+    background-color: #A9A9A9;
+    color: #000000;
+    }
+table.note, table.tip, table.important, table.caution, table.warning {
+    width: 90%;
+    font-family: helvetica, arial, sans-serif;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    }
+
+/***************************/
+/* table for inline images */
+div.informaltable table.calstable {
+    border: 0px solid #12129C; 
+    background-color:white;
+}
+
+/* centering images */
+div.mediaobject {
+    text-align: center;
+}
+
+/* table params */
+div.section table { 
+    color: black;
+    font-size: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    background-color:#FFFFDA;
+    border: 1px solid #E9B249; 
+	width:90%;
+}
+
+/* for regular tables */
+div.table table.calstable {
+    background-color:#F0F0F0;
+    margin-left: auto;
+    margin-right: auto;
+    border: 0px solid grey;
+	width:auto;
+}
+div.table table.calstable td {
+    font-size: 90%;
+    padding: 0.3em;
+}
+
+/* single-line table borders for rows/columns */
+div.preface div.table table.calstable ,
+div.section div.table table.calstable {
+	border-spacing: 0px;
+/*	border-collapse: collapse; */
+	border: 1px solid grey;
+}
+
+div.section table table {
+    border: 0px solid grey;
+}
+
+/* put beige background */
+div.section table pre.programlisting,
+div.section table pre.screen { 
+    background-color:#FFFFDA;
+	font-size: 75%;
+}
+
+/* caution table */
+div.section div.caution p, 
+div.section div.section div.caution p {
+    color: #A41C02; 
+    font-size: 90%;
+	text-align: left; 
+}
+div.caution table.caution {
+    border: 1px solid #A41C02;
+    background-color:#FFFFFF;
+}
+div.caution table.caution table, 
+div.caution table.caution table pre.screen {
+    background-color:#FFFFFF;
+    color: #A41C02; 
+}
+
+/* warning table */
+div.warning table.warning {
+    border: 1px solid red;
+    background-color:#FFFFFF;
+}
+div.warning table.warning table, 
+div.warning table.warning table pre.screen {
+    background-color:#FFFFFF;
+    color: #F70000; 
+}
+div.section div.warning p, 
+div.section div.section div.warning p {
+    color: #F70000; 
+    font-size: 90%;
+	text-align: left; 
+}
+
+/* tip and note tables */
+div.tip table.tip ,
+div.note table.note {
+    border: 0px solid grey;
+    background-color: #EAEAFF;
+}
+div.tip table.tip table, 
+div.tip table.tip table pre.screen,
+div.note table.note table, 
+div.note table.note table pre.screen {
+    background-color:#EAEAFF;
+}
+
+/* font for screens inside special tablees */
+div.caution table.caution table pre.screen,
+div.warning table.warning table pre.screen ,
+div.tip table.tip table pre.screen ,
+div.note table.note table pre.screen {
+    font-size:80%;
+}
+
+/* table row header */
+th { text-align: center; }
+
+/* put tables in the center of page */
+div.table { text-align: center;}
+
+/* for variables */
+div.section div.variablelist dt, 
+div.section div.variablelist a {
+    font-size:90%;
+}
+
+.contacts {
+    font-size: 90%;
+    line-height: 115%;
+}
+
+/* main title */
+.title {
+    font-family: helvetica, Verdana, Arial, Helvetica, sans-serif;
+    font-size: 130%;
+    line-height: 105%;
+    color: #12129C; 
+}
+/* link visited */
+a:visited {
+    color: #1E447C; /*#449A8B;  */
+    text-decoration: none;
+}
+
+/* link */
+a:link, .links {
+    color: blue   ;
+    text-decoration: none;
+}
+
+/* text, and what's in copyright */
+p, .ptext {
+    font-family: Palatino, Arial, Helvetica, sans-serif;
+    font-size: 90%;
+    line-height: 120%;
+    color: black; 
+}
+
+/* bulelts in pages */
+ul {
+    font-size: 90%;
+    font-family: helvetica, Verdana, Arial, Helvetica, sans-serif;
+    line-height: 115%;
+    color: #12129C;
+}
+
+/* font/color chapter and section titles */
+body {
+    background-color: #FFFFFF;
+    color: #12129C;
+    font-family: helvetica, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	line-height: 1.3;
+}
+
+/* font/size for chapter/section title */
+h1 { font-size: 120%; }
+h2 { font-size: 110%; }
+h3 { font-size: 90%; }
+div.section h1 { font-size: 120%; } 
+div.section div.section h2 { font-size: 100%; } 
+
+/* nav header */
+div.navheader table a { 
+    color: #E9B249;
+    font-weight: bold;
+}
+
+/* nav footer words */
+div.navfooter table td { 
+    font-size: 80%;
+    font-weight: bold;
+}
+
+/* nav footer links */
+div.navfooter table td a { 
+    font-size: 125%;  
+    color: #E9B249;
+    font-weight: bold;
+}
+

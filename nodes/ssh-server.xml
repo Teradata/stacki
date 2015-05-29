@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+<description>
+SSH config for frontend nodes.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+  
+<post>
+<!-- clean up ssh_host* files. They will be recreated on first boot -->
+rm -f /etc/ssh/ssh_host_dsa_key*
+rm -f /etc/ssh/ssh_host_rsa_key*
+rm -f /etc/ssh/ssh_host_key*
+</post>
+
+
+</kickstart>
+

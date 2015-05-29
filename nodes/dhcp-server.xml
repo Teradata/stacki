@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+  <description>
+
+  Setup the DHCP server for the cluster
+
+  </description>
+
+  <package>dhcp</package>
+
+<post>
+
+<!-- turn on dhcpd service -->
+/sbin/chkconfig dhcpd on
+
+/opt/stack/bin/stack report host dhcpd &Kickstart_PrivateHostname; | \
+	/opt/stack/bin/stack report script > /tmp/do-dhcpd.sh
+
+chmod a+x /tmp/do-dhcpd.sh
+/tmp/do-dhcpd.sh
+
+
+<!-- disable dnsmasq -->
+/sbin/chkconfig --del dnsmasq
+
+</post>
+
+</kickstart> 
+

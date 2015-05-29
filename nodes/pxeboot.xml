@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+<description>
+PXE first configuration for client nodes
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post>
+
+<!-- set the node to boot from local disk on the next reboot -->
+/usr/bin/wget --no-check-certificate -O /dev/null \
+	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi
+
+</post>
+
+</kickstart> 
+

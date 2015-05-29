@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v1.0 www.stacki.com
+	</si_copyright>
+
+	<copyright>
+	Copyright (c) 2000 - 2010 The Regents of the University of California.
+	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+	</copyright>
+
+<post>
+
+<!-- add a global default that configures all backend nodes as JBODs -->
+
+/opt/stack/bin/stack add storage controller slot=* raidlevel=0 arrayid=*
+
+</post>
+
+</kickstart> 
+

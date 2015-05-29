@@ -1,0 +1,10 @@
+/build-*-*/
+/src/order-*.mk
+.buildenv
+.buildenv-stacki
+.rpmmacros
+*.pyc
+*~
+*#*#
+.DS_Store
+roll-*.xml

@@ -1,0 +1,2 @@
+NAME	= MegaCLI
+VERSION = 8.07.07

@@ -1,0 +1,52 @@
+# $Id$
+
+Summary: i386 Library Compatibility for @ROLLNAME@
+Name: @NAME@-compat-libs
+Version: @VERSION@
+Release: @RELEASE@
+Copyright: BSD
+Group: Applications
+Source: %{name}-%{version}.tar.gz
+Buildroot: @VAR@/tmp/%{name}-buildroot
+BuildArch: i386
+
+%description  
+This package contains the x86 libraries from a Rocks 3.1.0 x86
+frontend for the @ROLLNAME@ roll. It is used primarily to provide an x86
+environment on x86_64 machines.
+
+##
+## PREP
+##
+%prep
+
+##
+## SETUP and PATCH
+##
+%setup
+
+
+##
+## BUILD
+##
+%build
+
+##
+## INSTALL
+##
+%install
+
+make ROOT=$RPM_BUILD_ROOT compat-install
+
+##
+## FILES
+##
+
+%files 
+/
+
+##
+## CLEAN
+##
+%clean
+rm -rf $RPM_BUILD_ROOT

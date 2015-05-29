@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Save the partition info from this node by sending a message back to the
+frontend. The frontend will store the partition info in the database
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post arg="--nochroot">
+/opt/stack/lib/record_partitions.py
+</post>
+
+</kickstart> 

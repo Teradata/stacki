@@ -1,0 +1,95 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+<description>
+SSH Config for backend nodes and other non-frontend appliances.
+
+We are using one key pair among all SSH servers in the
+cluster. This implies we do not care about Man-in-the-Middle
+attacks. We have subverted the protection for these attacks for
+several releases (broadcastSSH).
+
+This logic should not be in the ssh.xml node so the frontend will
+generate its own keypair.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+  
+<post>
+
+<!-- The way to pass binary files through Kickstart. Should we
+make this part of the file tag? 
+-->
+
+key="
+<eval>
+/opt/stack/sbin/read-ssh-private-key RSA1 | python -c '
+import base64 
+import sys 
+base64.encode(sys.stdin, sys.stdout)'
+</eval>"
+
+echo $key | python -c '
+import base64
+import sys
+base64.decode(sys.stdin, sys.stdout)' > /etc/ssh/ssh_host_key
+
+chmod 0400 /etc/ssh/ssh_host_key
+
+
+<file name="/etc/ssh/ssh_host_key.pub" perms="0444">
+<eval>
+cat /etc/ssh/ssh_host_key.pub
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_rsa_key" perms="0400">
+<eval>
+/opt/stack/sbin/read-ssh-private-key RSA
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_rsa_key.pub" perms="0444">
+<eval>
+cat /etc/ssh/ssh_host_rsa_key.pub
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_dsa_key" perms="0400">
+<eval>
+/opt/stack/sbin/read-ssh-private-key DSA
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_dsa_key.pub" perms="0444">
+<eval>
+cat /etc/ssh/ssh_host_dsa_key.pub
+</eval>
+</file>
+
+</post>
+
+<!-- ssh_use_dns is used to disable DNS lookups on ssh connections. -->
+<!-- This is useful for clusters not on the Internet. -->
+
+
+<post cond="not ssh.use_dns">
+<file name="/etc/ssh/sshd_config" mode="append">
+UseDNS no
+</file>
+</post>
+
+
+</kickstart>
+

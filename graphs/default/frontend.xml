@@ -1,0 +1,98 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<description>
+	Frontend appliance graph for Stacki.
+	</description>
+
+
+	<!-- Graph Ordering for Kickstart Generation -->
+
+	<order head="ca">
+		<tail>ssl-server</tail>
+	</order>
+
+	<edge from="security-server">
+		<to>ssl-server</to>
+		<to>ca</to>
+	</edge>
+
+	<order head="apache">
+		<tail>database</tail>
+	</order>
+
+	<order head="grub">
+		<tail>grub-server</tail>
+	</order>
+
+	<order head="database">
+		<tail>database-schema</tail>
+	</order>
+
+	<order head="database-schema">
+		<tail>database-data</tail>
+	</order>
+
+	<order head="database-data">
+		<tail>install</tail>
+		<tail>routes-server</tail>
+		<tail>insert-rolls</tail>
+		<tail>server</tail>
+		<tail>pxe</tail>
+		<tail>networking-server</tail>
+		<tail>dhcp-server</tail>
+		<tail>dns-server</tail>
+	</order>
+
+	<order head="node">
+		<tail>database-data</tail>
+	</order>
+
+	<order head="firewall">
+		<tail>server-firewall</tail>
+	</order>
+
+	<order tail="server-firewall">
+		<head>networking-server</head>
+		<head>database-data</head>
+	</order>
+
+	<order head="TAIL">
+		<tail>install</tail>
+		<tail>partitions-save-server</tail>
+	</order>
+
+
+	<!-- Graph OO Framework -->
+
+	<edge from="frontend">
+		<to>server</to>
+	</edge>
+
+	<edge from="server">
+		<to>base</to>
+		<to>apache</to>
+		<to>security-server</to>
+		<to>ntp-server</to>
+		<to>grub-server</to>
+		<to>install</to>
+		<to>pxe</to>
+		<to>insert-rolls</to>
+		<to>networking-server</to>
+		<to>dhcp-server</to>
+		<to>dns-server</to>
+		<to>server-firewall</to>
+		<to>partitions-save-server</to>
+		<to>routes-server</to>
+		<to>kernel-server</to>
+		<to>ca</to>
+		<to>database</to>
+		<to>database-data</to>
+		<to>database-schema</to>
+		<to>foundation-base</to>
+		<to>ssh-server</to>
+		<to>storage-controller-server</to>
+		<to>dist</to>
+	</edge>
+
+</graph>

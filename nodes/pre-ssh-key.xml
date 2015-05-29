@@ -1,0 +1,70 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart interface="public">
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+<pre>
+
+<!-- propagate root's public ssh key for ekv -->
+
+<!-- if the authorized_keys file already exists, then don't recreate it -->
+if [ -f /tmp/authorized_keys ]
+then
+	exit
+fi
+
+<!--
+	not using 'file' tags as file tags are expanded by kgen to include
+	extra wrapper code and this wrapper code is not present in the 'pre'
+	environment.
+-->
+
+cat &gt; /tmp/authorized_keys &lt;&lt; 'EOF'
+<eval shell="python">
+
+import os
+
+def readkeys(filename):
+	try:
+		file = open(filename, 'r')
+		for key in file.readlines():
+			if len(key) > 0:
+				print '%s' % (key[:-1])
+		file.close()
+	except:
+		pass
+
+	return
+
+#
+# first put in root's public key
+#
+readkeys('/root/.ssh/id_rsa.pub')
+
+#
+# now get all the public keys for the trusted users
+#
+keydir = '/etc/ssh/authorized_keys'
+
+if os.path.isdir(keydir):
+	for keyfile in os.listdir(keydir):
+		filename = os.path.join(keydir, keyfile)
+		readkeys(filename)
+
+</eval>
+EOF
+
+chmod 600 /tmp/authorized_keys
+
+</pre>
+
+</kickstart>

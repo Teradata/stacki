@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+<description>
+Client node firewall rules
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<post>
+<report name="host.firewall">&hostname;</report>
+</post>
+
+
+</kickstart> 
+

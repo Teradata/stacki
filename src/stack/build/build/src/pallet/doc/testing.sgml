@@ -1,0 +1,163 @@
+<section id="testing" xreflabel="Testing Your Roll">
+<title> Testing Your Roll </title>
+
+<para>
+After you build the ISO image, burn the image to a CD.
+</para>
+
+<para>
+Then, find a test machine and, at a minimum, get the Rocks Base CD
+and the HPC Roll CD.
+Then follow the frontend installation instructions from the Rocks
+web site.
+When the installer asks if you have a roll CD, answer 'yes' and put in the
+HPC Roll.
+When it asks if you have another roll, put in yours.
+</para>
+
+<para>
+Early in roll development, there is good chance your roll will trigger
+an exception in the installer.
+Many times, this is due to a syntax error in one of your XML files found
+in the
+<computeroutput>nodes</computeroutput> or 
+<computeroutput>graphs</computeroutput> directories.
+</para>
+
+<para>
+To perform a quick syntax check on your XML files, execute:
+</para>
+
+<screen>
+# cd roll/&lt;roll name&gt;
+# kpp &lt;file in nodes directory&gt;
+</screen>
+
+<para>
+For example, in the Intel Roll, to perform a syntax check on the
+file 
+<computeroutput>roll/intel/nodes/intel.xml</computeroutput>, we execute:
+</para>
+
+<screen>
+# cd roll/intel
+# kpp intel
+</screen>
+
+<para>
+If there is a syntax error, you'll receive a python exception error
+message from 
+<computeroutput>kpp</computeroutput>.
+</para>
+
+<para>
+You may see an error that looks like:
+</para>
+
+<screen>
+kpp error - cannot find node "&lt;filename&gt;"
+</screen>
+
+<para>
+This means that your graph file has made a reference to a node that is
+not in your roll, 
+where <emphasis>&lt;filename&gt;</emphasis> is reference to a node in
+another roll.
+To work around this, create a symbolic link in the nodes directory
+to the missing node file.
+This file is most likely in
+<computeroutput>/home/install/profiles/current/nodes</computeroutput>.
+</para>
+
+<para>
+For example, if kpp's error is:
+</para>
+
+<screen>
+kpp error - cannot find node "client"
+</screen>
+
+<para>
+Then the work around is:
+</para>
+
+<screen>
+# cd roll/&lt;roll name&gt;/nodes
+# ln -s /home/install/profiles/current/nodes/client.xml client.xml
+</screen>
+
+<para>
+Then try to execute kpp again.
+</para>
+
+<warning>
+<para>
+If you add a symbolic link to your nodes directory, make sure to remove it
+before you build your roll.
+If you don't, the link will be included in your roll and cause the
+installation to fail.
+</para>
+</warning>
+
+<para>
+If your XML files are syntactically clean, but the installer still throws
+an exception, you'll have to closely examine your XML code.
+</para>
+
+<para>
+Also, you can click the 'Debug' button from the installer and start to
+look at the installer's python code.
+The Rocks team has implemented extensions to RedHat's installer and 
+this code can be found under
+<computeroutput>/home/install/profiles/current/include/</computeroutput>.
+Also, the source code for RedHat's installer can be found by expanding
+a tarball in the Rocks source tree:
+</para>
+
+<screen>
+# cd src/rocks/boot/enterprise/3/loader
+# make anaconda-9.1
+</screen>
+
+<para>
+This will deposit the code for RedHat's installer in the directory
+<computeroutput>anaconda-9.1</computeroutput>.
+</para>
+
+
+<section id="testing-kgen"
+	xreflabel="Using kgen">
+
+<title> Using kgen to the Kickstart File </title>
+
+<para>
+Once your XML is syntatically clean, you can use
+<computeroutput>kgen</computeroutput> to see what the resulting
+RedHat-compliant kickstart file will look like for your nodes files.
+</para>
+
+<para>
+Using the Intel Roll as a guide, execute the following:
+</para>
+
+<screen>
+# cd roll/intel
+# kpp intel | kgen
+</screen>
+
+<para>
+You'll see a RedHat-compliant kickstart file -- but it only has kickstart
+commands relevant to the Intel Roll.
+</para>
+
+<para>
+Often, you can cut portions from the <emphasis>%post</emphasis> section and
+run the shell commands to test specific post installation procedures, but
+do this with caution as the commands will alter the configuration on the
+host in which you run it.
+</para>
+
+</section>
+
+</section>
+

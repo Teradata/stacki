@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="no"?>
+
+
+<kickstart>
+
+<description>
+A node is a machine in the cluster.  Node's are on a private network
+and get DHCP/NIS state from the frontend.
+</description>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v1.0 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<main>
+<rootpw>--iscrypted &Kickstart_PrivateRootPassword;</rootpw>
+</main>
+
+
+<package>stack-config</package>
+
+
+<post>
+<!-- configure IP forwarding -->
+gawk '/net\.ipv4\.ip_forward/ { \
+	printf("net.ipv4.ip_forward = 1\n"); \
+	next; \
+} \
+{ print $0 }' /etc/sysctl.conf &gt; /tmp/sysctl.conf
+mv /tmp/sysctl.conf /etc/sysctl.conf
+
+<file name="/etc/man.config" mode="append">
+MANPATH /opt/stack/man
+MANPATH /opt/stack/share/man
+</file>
+</post>
+
+
+</kickstart> 
+

@@ -1,0 +1,18 @@
+<section id="SRPMS" xreflabel="SRPMS Directory">
+<title> SRPMS Directory </title>
+
+<para>
+If you have any pre-built SRPMS (for example, an SRPM that you downloaded),
+you should place them in the <computeroutput>SRPMS</computeroutput>
+directory.
+</para>
+
+<para>
+All SRPMS that you build from scratch (which will be built out of the
+files found under the 
+<computeroutput>src</computeroutput>
+directory) will be automatically put in this directory.
+</para>
+
+</section>
+

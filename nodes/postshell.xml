@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+<description>
+Allow interaction after all post sections have run
+If postshell is on the command line, wait until /mnt/sysimage/tmp/postshell
+is removed interactively.
+</description>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post>
+
+grep -q "postshell" /proc/cmdline
+if [ $? -eq 0 ]; then
+	touch /tmp/postshell
+	while [ -e /tmp/postshell ]; do /bin/sleep 5; done
+fi
+
+</post>
+
+</kickstart> 

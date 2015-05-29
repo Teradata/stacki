@@ -1,0 +1,193 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: insert-ethers VERSION\n"
+"POT-Creation-Date: 2006-01-24 06:01+KST\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Yuchan Park <yuchan@kisti.re.kr>\n"
+"Language-Team: Korean<LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: insert-ethers.py:491
+msgid "insert-ethers loading plugins: "
+msgstr "insert-ethers가 플러그인을 읽는 중: "
+
+#: insert-ethers.py:514
+msgid "(invalid, skipping) "
+msgstr "(유효하지 않음, 무시함) "
+
+#: insert-ethers.py:576
+msgid "Quit"
+msgstr "종료"
+
+#: insert-ethers.py:577
+msgid "Error"
+msgstr "오류"
+
+#: insert-ethers.py:579 insert-ethers.py:582 insert-ethers.py:765
+#: insert-ethers.py:1020
+msgid "OK"
+msgstr "확인"
+
+#: insert-ethers.py:580
+msgid "Warning"
+msgstr "경고"
+
+#: insert-ethers.py:583
+msgid "Information"
+msgstr "정보"
+
+#: insert-ethers.py:713
+msgid "Inserted Appliances"
+msgstr "장비 추가"
+
+#: insert-ethers.py:717
+msgid "%s -- version %s"
+msgstr "%s -- 버전 %s"
+
+#: insert-ethers.py:721
+msgid "Opened kickstart access to %s network"
+msgstr "%s 네트워크에 접근하기 위해 kickstart가 열림"
+
+#: insert-ethers.py:730
+msgid "Invalid Appliance \"%s\""
+msgstr "유효하지 않는 장비 \"%s\""
+
+#: insert-ethers.py:753
+msgid "No appliance names in database"
+msgstr "DB에서 장비 이름을 찾을 수 없습니다"
+
+#: insert-ethers.py:763
+msgid "Choose Appliance Type"
+msgstr "장비 타입을 선택하십시오"
+
+#: insert-ethers.py:764
+msgid "Select An Appliance Type:"
+msgstr "장비 타입을 선택하십시오:"
+
+#: insert-ethers.py:778 insert-ethers.py:926
+msgid "Could not find appliance (%s) in database"
+msgstr "DB에서 장비 %s 를 찾을 수 없습니다"
+
+#: insert-ethers.py:851
+msgid "Could not find any nodes in database (site %d)"
+msgstr "DB에서 사이트 %d 에 대한 노드를 찾을 수 없습니다"
+
+#: insert-ethers.py:903
+msgid "Not kickstarted, please wait..."
+msgstr "kickstart가 시작되지 않았습니다, 잠시 기다리십시오.."
+
+#: insert-ethers.py:1005
+msgid "IP Address Selection"
+msgstr "IP 주소 선택"
+
+#: insert-ethers.py:1006
+msgid "Enter the IP address for host %s"
+msgstr "host %s에 대한 IP를 입력하십시오"
+
+#: insert-ethers.py:1007
+msgid "IP Address"
+msgstr "IP 주소"
+
+#: insert-ethers.py:1017
+msgid "Duplicate IP"
+msgstr "중복된 IP"
+
+#: insert-ethers.py:1018
+msgid ""
+"The IP address (%s) already exists.\n"
+"\n"
+msgstr "IP (%s ) 는 이미 존재합니다\n\n"
+
+#: insert-ethers.py:1019
+msgid "Please select another."
+msgstr "다른것을 선택하십시오."
+
+#: insert-ethers.py:1120
+msgid "Discovered New Appliance"
+msgstr "새로운 장비 발견함"
+
+#: insert-ethers.py:1122
+msgid "Discovered a new appliance with MAC (%s)"
+msgstr "MAC (%s)의 새로운 장비를 발견함 "
+
+#: insert-ethers.py:1214
+msgid "Apache log file not well formed!"
+msgstr "apache 로그 파일이 올바르지 못합니다!"
+
+#: insert-ethers.py:1223
+msgid "Unknown node %s got a kickstart file!"
+msgstr "알수 없는 노드 %s 가 kickstart 파일을 받지 못했습니다!"
+
+#: insert-ethers.py:1262
+msgid "Waiting for %s to kickstart..."
+msgstr "kickstart에 대해 %s를 대기하고 있습니다..."
+
+#: insert-ethers.py:1266 insert-ethers.py:1271
+msgid "Suggest Done"
+msgstr "완료중"
+
+#: insert-ethers.py:1277
+msgid ""
+"Rocks distribution is not ready\n"
+"\n"
+msgstr ""
+"Rocks  배포판이 준비되지 않았습니다\n"
+"\n"
+
+#: insert-ethers.py:1278
+msgid ""
+"Please wait for rocks-dist to complete\n"
+msgstr "rocks-dist를 완료할때까지 기다리십시오\n"
+
+#: insert-ethers.py:1333 insert-ethers.py:1409
+msgid ""
+"%s\n"
+msgstr "%s\n"
+
+#: insert-ethers.py:1346
+msgid " Press <F10> to quit, press <F11> to force quit"
+msgstr " 종료: <F10>, 강제 종료: <F11>"
+
+#: insert-ethers.py:1390
+msgid "Restarting Services"
+msgstr "서비스를 재시작합니다"
+
+#: insert-ethers.py:1392
+msgid "Restarting Services..."
+msgstr "서비스를 재시작하고 있습니다..."
+
+#: insert-ethers.py:1417
+msgid " Press <F10> to quit "
+msgstr " 종료: <F10> "
+
+#: insert-ethers.py:1420
+msgid ""
+"Kickstart access opened to %s,\n"
+msgstr ""
+"Kickstart가 %s 로 접근합니다\n"
+
+#: insert-ethers.py:1421
+msgid "not listening..."
+msgstr "확인할 수 없습니다...."
+
+#: insert-ethers.py:1443
+msgid "Rocks distribution is not ready"
+msgstr "Rocks 배포판이 준비되어있지 않습니다"
+
+#: insert-ethers.py:1596
+msgid "error - lock file %s exists"
+msgstr "오류 - %s lock 파일이 존재합니다"
+
+#: insert-ethers.py:1614
+msgid ""
+"Note: %s\n"
+msgstr ""
+"주의: %s\n"

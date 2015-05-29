@@ -1,0 +1,65 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+	<description>
+
+	  Populates the frontend database with initially selected rolls.
+
+	</description>
+
+        <si_copyright>
+        (c) 2006 - 2015 StackIQ Inc.
+        All rights reserved. stacki(r) v1.0 www.stacki.com
+        </si_copyright>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+        </copyright>
+
+<post>
+
+<file name="/tmp/insert-rolls.sql">
+<eval shell="/opt/stack/bin/python">
+import os
+import os.path
+import sys
+import stack.roll
+
+if '&hostname;' == 'None':
+	#
+	# this case can happen when building a cdrom that builds a
+	# kickstart file for 'Server' and 'Client'
+	#
+	sys.exit()
+
+if not os.path.exists('/tmp/rolls.xml'):
+	sys.exit()
+
+generator = stack.roll.Generator()
+generator.parse('/tmp/rolls.xml')
+
+# 
+# Generate insert statements
+#
+found = []
+for name, version, arch, url, diskid in generator.rolls:
+	key = '%s-%s-%s' % (name, version, arch)
+
+	if key not in found:
+		print ('insert into rolls (name, version, arch, os) '
+			'values ("%s","%s","%s","redhat" );'
+			% (name, version, arch))
+
+		found.append(key)
+</eval>
+</file>
+
+/opt/stack/bin/mysql -u apache cluster &lt; /tmp/insert-rolls.sql
+
+/opt/stack/bin/stack enable pallet %
+
+</post>
+
+</kickstart> 

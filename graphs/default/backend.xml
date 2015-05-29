@@ -1,0 +1,53 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<description>
+	Backend appliance graph for Stacki.
+	</description>
+
+
+	<!-- Graph Ordering for Kickstart Generation -->
+
+	<order tail="HEAD">
+		<head>partitions-save</head>
+	</order>
+
+	<order head="backend">
+		<tail>base</tail>
+	</order>
+
+	<order head="firewall">
+		<tail>client-firewall</tail>
+	</order>
+
+	<order tail="client-firewall">
+		<head>networking-client</head>
+	</order>
+
+	<order head="TAIL">
+		<tail>backend</tail>
+	</order>
+
+
+	<!-- Graph OO Framework -->
+
+	<edge from="backend">
+		<to>client</to>
+	</edge>
+
+	<edge from="client">
+		<to>base</to>
+		<to>ntp-client</to>
+		<to>networking-client</to>
+		<to>node-certs</to>
+		<to>resolv</to>
+		<to>partitions-save</to>
+		<to>routes-client</to>
+		<to>pxeboot</to>
+		<to>storage-controller-client</to>
+	</edge>
+
+	<edge from="client" to="client-firewall" cond="firewall"/>
+
+</graph>
+

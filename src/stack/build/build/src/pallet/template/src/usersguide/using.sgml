@@ -1,0 +1,16 @@
+<chapter id="using" xreflabel="Using the @template@ Roll">
+<title>Using the &roll-@template@-l; Roll</title>
+
+<section id="using-@template@" xreflabel="Using the @template@ roll">
+<title>Using the &roll-@template@-l; Roll</title>
+
+<para>
+Tutorials for using @template@ and its components are available
+from the <ulink url="http://link-here.html">
+@template@ web site</ulink>
+</para>
+
+</section>
+
+
+</chapter>
