@@ -122,7 +122,7 @@ class App(stack.app.Application):
 	def __init__(self, argv):
 		stack.app.Application.__init__(self, argv)	
 
-		self.usage_name = 'Rocks Console'
+		self.usage_name = 'Stacki Console'
 		self.usage_version = '@VERSION@'
 
 		self.nodename = ''
@@ -157,7 +157,7 @@ class App(stack.app.Application):
 
 
 	def usageTail(self):
-		return ' <nodename (e.g., compute-0-0)>\n'
+		return ' <nodename (e.g., backend-0-0)>\n'
 
 
 	def ekvviewer(self):
@@ -173,7 +173,7 @@ class App(stack.app.Application):
 
 		return
 
-	def createSecureTunnel_redhat(self):
+	def createSecureTunnel(self):
 		#
 		# use a temporary file to store the host key. we do this
 		# because a new temporary host key is created in the
@@ -192,47 +192,6 @@ class App(stack.app.Application):
 		cmd += '\'/bin/bash -c "sleep 20"\' '
 		self.s.close()
 		os.system(cmd)
-
-
-	def createSecureTunnel_sunos(self):
-		#
-		# use a temporary file to store the host key. we do this
-		# because a new temporary host key is created in the
-		# installer and if we add this temporary host key to
-		# /root/.ssh/known_hosts, then the next time the node is
-		# installed, the ssh tunnel will get a 'man-in-middle' error
-		# and not allow port forwarding.
-		#
-		self.known_hosts = "%s_%s" % (self.known_hosts,self.nodename)
-		if os.path.exists(self.known_hosts):
-			os.unlink(self.known_hosts)
-
-		cmd = 'ssh -q -f -o UserKnownHostsFile=%s ' % (self.known_hosts)
-		cmd +='-o XAuthLocation=/tmp/root/.TTauthority '
-		cmd += '-L %d:localhost:%d ' % (self.localport, self.remoteport)
-		cmd += '%s -p 2200 ' % (self.nodename)
-		cmd +="\'/tmp/root/usr/bin/x11vnc -display :0 "	\
-			"-quiet -once -nopw -rfbport %d -auth "	\
-			"/tmp/root/.TTauthority -localhost -noshm\'" % self.remoteport
-		self.s.close()
-		print cmd
-		os.system(cmd)
-		time.sleep(5)
-		return
-
-
-
-	def createSecureTunnel(self):
-		r,w = popen2.popen2('rocks list host attr %s ' % self.nodename +
-				" | awk '{if ($2==\"os\") print $3;}'")
-		w.close()
-		osname = r.readline().strip()
-		if osname == '':
-			osname = 'redhat'
-		f = getattr(self, "createSecureTunnel_%s" % osname)
-		f()
-		return
-
 
 	def run(self):
 		if len(self.args) > 0:
