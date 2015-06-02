@@ -1,0 +1,8 @@
+www.stacki.com -O "./stacki" -%v
+File generated automatically on Tue, 02 Jun 2015 13:48:30, do NOT edit
+
+To update a mirror, just launch httrack without any parameters
+The existing cache will be used (and modified)
+To have other options, retype all parameters and launch HTTrack
+To continue an interrupted mirror, just launch httrack without any parameters
+

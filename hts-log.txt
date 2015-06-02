@@ -1,0 +1,25 @@
+HTTrack3.48-3 launched on Tue, 02 Jun 2015 13:48:30 at www.stacki.com
+(winhttrack www.stacki.com -O "./stacki" -%v )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+13:48:49	Error: 	"Method Not Allowed" (405) at link www.stacki.com/xmlrpc.php (from www.stacki.com/)
+13:50:15	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/plugins/ds-live-composer/css/front/grabbing.png (from www.stacki.com/wp-content/plugins/ds-live-composer/css/front/plugins.css?ver=4.2.2)
+13:50:15	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/plugins/ds-live-composer/css/front/AjaxLoader.gif (from www.stacki.com/wp-content/plugins/ds-live-composer/css/front/plugins.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/fonts/glyphicons-halflings-regular.eot (from www.stacki.com/wp-content/themes/slowave/style/css/bootstrap.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/fonts/glyphicons-halflings-regular.eot? (from www.stacki.com/wp-content/themes/slowave/style/css/bootstrap.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/fonts/glyphicons-halflings-regular.woff (from www.stacki.com/wp-content/themes/slowave/style/css/bootstrap.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/fonts/glyphicons-halflings-regular.ttf (from www.stacki.com/wp-content/themes/slowave/style/css/bootstrap.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/fonts/glyphicons-halflings-regular.svg (from www.stacki.com/wp-content/themes/slowave/style/css/bootstrap.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/js/fancybox/fancybox_sprite.png (from www.stacki.com/wp-content/themes/slowave/style/js/fancybox/jquery.fancybox.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/js/fancybox/fancybox_loading.gif (from www.stacki.com/wp-content/themes/slowave/style/js/fancybox/jquery.fancybox.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/js/fancybox/fancybox_sprite@2x.png (from www.stacki.com/wp-content/themes/slowave/style/js/fancybox/jquery.fancybox.css?ver=4.2.2)
+13:50:16	Error: 	"Not Found" (404) at link www.stacki.com/wp-content/themes/slowave/style/js/fancybox/fancybox_loading@2x.gif (from www.stacki.com/wp-content/themes/slowave/style/js/fancybox/jquery.fancybox.css?ver=4.2.2)
+13:50:18	Warning: 	Moved Permanently for www.stacki.com/?p=110
+13:50:18	Warning: 	File has moved from www.stacki.com/?p=110 to http://www.stacki.com/intro/
+
+HTTrack Website Copier/3.48-3 mirror complete in 1 minutes 48 seconds : 192 links scanned, 178 files written (3727678 bytes overall) [2718953 bytes received at 25175 bytes/sec], 1815328 bytes transferred using HTTP compression in 74 files, ratio 25%, 7.6 requests per connection
+(12 errors, 2 warnings, 0 messages)

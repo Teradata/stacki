@@ -1,0 +1,23 @@
+/* Enter Custom CSS Below Here */
+
+a.downloadStacki { background:#EF5E28; border:1px solid #fff; margin:40px auto 0; padding:16px 24px; font-size:1.6em; color:#fff; display:block; width:300px; text-align:center; }
+
+#ebor_contact-widget-2 p { color:#fff;}
+
+.light-wrapper .page-title  { background:#BEE7FD !important; }
+
+footer .inner { padding:10px 0 30px; }
+.sub-footer { padding:15px 0!important; }
+
+#menu-footer-navigation { padding:0; }
+.menu-footer-navigation-container ul.menu li { list-style-type:none; }
+
+.menu-footer-navigation-stacki-container ul.menu { padding:0; }
+.menu-footer-navigation-stacki-container ul.menu li { list-style-type:none; }
+
+.h2id { color:#111; }
+
+a.anchorspacer { line-height:1px !important; display:block; position:relative; top:-100px; }
+.anchorspacer img { width:1px; height:1px; }
+
+ul.inputs-list li.hs-form-booleancheckbox { list-style-type:none; }

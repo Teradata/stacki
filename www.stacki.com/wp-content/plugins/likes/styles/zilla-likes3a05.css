@@ -1,0 +1,23 @@
+.zilla-likes {
+	background: url(../images/heart.png) no-repeat 0 49%;
+	border: 0 !important;
+	display: inline-block;
+	margin-bottom: 10px;
+	min-height: 14px;
+	padding-left: 18px;
+	text-decoration: none;
+}
+.zilla-likes:hover,
+.zilla-likes.active {
+	background: url(../images/heart_active.png) no-repeat 0 49%;
+	border: 0 !important;
+	margin: 0 0 10px 0 !important;
+	padding-left: 18px !important;
+	text-decoration: none;
+}
+
+.zilla-blog-widget .zilla-likes,
+.tz_recentwork_widget .zilla-likes,
+.tz_blog_widget .zilla-likes,
+.home div#the_body #slider .excerpt .zilla-likes,
+.archive div#the_body #slider .excerpt .zilla-likes { display: none; } /* Hide Zilla Share in custom post widget and sliders in themes */
