@@ -1,4 +1,0 @@
-# HTTrack Website Copier Cookie File
-# This file format is compatible with Netscape cookies
-www.stacki.com	TRUE	/	FALSE	1999999999	wfvt_1732272387	556e17079dadb
-
