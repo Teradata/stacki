@@ -50,7 +50,7 @@ bootstrap:
 	yum install gcc-c++
 	yum install gettext
 	yum install eject
-	yum install bin-utils-devel
+	yum install binutils-devel
 	yum install openssl-devel
 	yum install bzip2-devel
 	yum install ncurses-devel
