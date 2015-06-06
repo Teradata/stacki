@@ -80,20 +80,12 @@ class Command(stack.commands.add.host.command):
 	Host name of machine
 	</arg>
 	
-	<arg type='string' name='name'>
-	The alias name for the host.
-	</arg>
-	
 	<param type='string' name='name'>
 	Can be used in place of the name argument.
 	</param>
 
-	<example cmd='add host alias compute-0-0 c-0-0'>
-	Adds the alias 'c-0-0' to the host 'compute-0-0'.
-	</example>
-	
-	<example cmd='add host alias compute-0-0 name=c-0-0'>
-	Same as above.
+	<example cmd='add host alias backend-0-0 name=b00'>
+	Add a host alias "b00" to host "backend-0-0".
 	</example>
 	"""
 

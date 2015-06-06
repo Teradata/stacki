@@ -100,7 +100,7 @@ class Command(stack.commands.add.host.command):
 	<param type='string' name='name' optional='1'>
 	The host name associated with the bonded interface. If name is not
 	specified, then the interface get the internal host name
-	(e.g., compute-0-0).
+	(e.g., backend-0-0).
 	</param>
 
 	<param type='string' name='options' optional='1'>
@@ -108,9 +108,9 @@ class Command(stack.commands.add.host.command):
 	as BONDING_OPTS in the ifcfg-bond* files.
 	</param>
 
-	<example cmd='add host bonded compute-0-0 channel=bond0
+	<example cmd='add host bonded backend-0-0 channel=bond0
 		interfaces=eth0,eth1 ip=10.1.255.254 network=private'>
-	Adds a bonded interface named "bond0" to compute-0-0 by bonding
+	Adds a bonded interface named "bond0" to backend-0-0 by bonding
 	the physical interfaces eth0 and eth1, it assigns the IP address
 	10.1.255.254 to bond0 and it associates this interface to the private
 	network.

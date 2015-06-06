@@ -130,26 +130,18 @@ import stack.commands
 class Command(stack.commands.add.command):
 	"""
 	Add a network to the database. By default both the "public" and
-	"private" networks are already defined by Rocks.
+	"private" networks are already defined by StackI.
 		
 	<arg type='string' name='name'>
 	Name of the new network.
 	</arg>
-	
-	<arg type='string' name='subnet'>
-	The IP network address for the new network.
-	</arg>
-
-	<arg type='string' name='netmask'>
-	The IP network mask for the new network.
-	</arg>
 
 	<param type='string' name='subnet'>
-	Can be used in place of the subnet argument.
+	The IP network address for the new network.
 	</param>
 	
 	<param type='string' name='netmask'>
-	Can be used in place of the netmask argument.
+	The IP network mask for the new network.
 	</param>
 	
 	<param type='string' name='mtu'>
@@ -167,12 +159,12 @@ class Command(stack.commands.add.command):
 	served by the nameserver on the frontend.
 	</param>
 
-	<example cmd='add network optiputer 192.168.1.0 255.255.255.0'>
-	Adds the optiputer network address of 192.168.1.0/255.255.255.0.
+	<example cmd='add network fast 192.168.1.0 255.255.255.0'>
+	Adds the fast network address of 192.168.1.0/255.255.255.0.
 	</example>
 
-	<example cmd='add network optiputer subnet=192.168.1.0 netmask=255.255.255.0 mtu=9000
-		dnszone="optiputer.net" servedns=true'>
+	<example cmd='add network hadoop subnet=192.168.1.0 netmask=255.255.255.0 mtu=9000
+		dnszone="hadoop.net" servedns=true'>
 	Same as above, but set the MTU to 9000.
 	</example>
 	"""

@@ -103,10 +103,11 @@ class Command(stack.commands.DistributionArgumentProcessor,
 	</arg>
 	
 	<param type='string' name='graph'>
-	Graph associated with the distribution
+	Graph associated with the distribution. Default
+	graph is 'default'
 	</param>
 	<param type='string' name='os'>
-	OS associated with the distribution
+	OS associated with the distribution. Default is 'redhat'
 	</param>
 	<example cmd='add distribution develop'>
 	Adds the distribution named "develop" into the database.

@@ -101,28 +101,17 @@ class Command(stack.commands.add.host.command):
 	Host name of machine
 	</arg>
 	
-	<arg type='string' name='attr'>
-	Name of the attribute
-	</arg>
-
-	<arg type='string' name='value'>
-	Value of the attribute
-	</arg>
-	
 	<param type='string' name='attr'>
-	same as attr argument
+	Name of the attribute
 	</param>
 
 	<param type='string' name='value'>
-	same as value argument
+	Value of the attribute
 	</param>
 
-	<example cmd='add host attr compute-0-0 cpus 2'>
-	Sets the number of cpus of compute-0-0 to 2
-	</example>
-
-	<example cmd='add host attr compute-0-0 attr=cpus value=2'>
-	same as above
+	<example cmd='add host attr backend-0-0 attr=nukedisks value=True'>
+	Add the nukedisks host attribute to backend-0-0, and set its value
+	to True
 	</example>
 	
 	<related>list host attr</related>

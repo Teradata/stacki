@@ -83,7 +83,7 @@ class Command(stack.commands.add.appliance.command):
 	Add a route for an appliance type in the cluster
 
 	<arg type='string' name='appliance'>
-	The appliance type (e.g., 'compute'). This argument is required.
+	The appliance type (e.g., 'backend'). This argument is required.
 	</arg>
 	
 	<arg type='string' name='address'>

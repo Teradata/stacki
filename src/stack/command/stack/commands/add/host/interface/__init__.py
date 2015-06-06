@@ -165,18 +165,14 @@ import stack.commands
 
 class Command(stack.commands.add.host.command):
 	"""
-	Adds an interface to a host and sets the associated values 
+	Adds an interface to a host and sets the associated values.
 
 	<arg type='string' name='host'>
 	Host name of machine
 	</arg>
 	
-	<arg type='string' name='iface'>
-	The interface name on the host (e.g., 'eth0', 'eth1')
-	</arg>
-	
 	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	The interface name on the host (e.g., 'eth0', 'eth1')
 	</param>
 
 	<param type='string' name='ip'>
@@ -203,11 +199,9 @@ class Command(stack.commands.add.host.command):
 	The VLAN ID to assign the interface
 	</param>
 
-	<example cmd='add host interface compute-0-0 eth1 ip=192.168.1.2 subnet=private name=fast-0-0'>
-	</example>
-	
-	<example cmd='add host interface compute-0-0 iface=eth1 ip=192.168.1.2 subnet=private name=fast-0-0'>
-	same as above
+	<example cmd='add host interface backend-0-0 iface=eth1 ip=192.168.1.2 subnet=private name=fast-0-0'>
+	Add interface "eth1" to host "backend-0-0" with the given
+	IP address, network assignment, and name.
 	</example>
 
 	<related>set host interface iface</related>

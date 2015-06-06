@@ -78,7 +78,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.add.command):
 	
 	<param type='string' name='action'>
 	Label name for the bootaction. You can see the bootaction label names by
-	executing: 'rocks list bootaction [host(s)]'.
+	executing: 'stack list bootaction [host(s)]'.
 	</param>
 	
 	<param type='string' name='kernel'>

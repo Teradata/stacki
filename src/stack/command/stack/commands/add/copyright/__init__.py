@@ -103,7 +103,7 @@ class Command(stack.commands.add.command):
 	"""
 	Insert a copyright for each file under a directory.
 
-	This a used exclusively by stacki developers to insure all files
+	This a used exclusively by stacki developers to ensure all files
 	have current copyright statements.
 	"""
 
