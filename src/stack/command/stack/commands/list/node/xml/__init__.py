@@ -114,9 +114,9 @@ class Command(stack.commands.list.command):
 	e.g., attrs="{ 'os': 'redhat', 'arch' : 'x86_64' }"
 	</param>
 
-	<param type='string' name='roll'>
-	If set, only expand nodes from the named roll. If not
-	supplied, then the all rolls are used.
+	<param type='string' name='pallet'>
+	If set, only expand nodes from the named pallet. If not
+	supplied, then the all pallets are used.
 	</param>
 
 	<param type='bool' name='eval'>
@@ -145,18 +145,18 @@ class Command(stack.commands.list.command):
 
 	def run(self, params, args):
 
-		(attributes, rolls, evalp, missing, 
+		(attributes, pallets, evalp, missing, 
 			generator, basedir) = self.fillParams(
 			[('attrs', ),
-			('roll', ),
+			('pallet', ),
 			('eval', 'yes'),
 			('missing-check', 'no'),
 			('gen', 'kgen'),
 			('basedir', )
 			])
 			
-		if rolls:
-			rolls = rolls.split(',')
+		if pallets:
+			pallets = pallets.split(',')
 
 		if attributes:
 			try:
@@ -331,7 +331,7 @@ class Command(stack.commands.list.command):
 			if not node:
 				continue
 
-			# When building rolls allowMissing=1 and
+			# When building pallets allowMissing=1 and
 			# doEval=0.  This is setup by rollRPMS.py
 
 			if allowMissing:
@@ -367,10 +367,10 @@ class Command(stack.commands.list.command):
 
 		for node in parsed:
 
-			# If we are only expanding a roll subgraph
+			# If we are only expanding a pallet subgraph
 			# then do not ouput the XML for other nodes
 				
-			if rolls and node.getRoll() not in rolls:
+			if pallets and node.getRoll() not in pallets:
 				continue
 				
 			try:
