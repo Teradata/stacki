@@ -44,7 +44,15 @@
 <package>createrepo</package>
 <package>squashfs-tools</package>
 
+<!-- genisoimages to create pallets -->
+<package>genisofs</package>
 
+<!-- /mnt/cdrom needed to create pallets -->
+<post>
+    if [ ! -d /mnt/cdrom ]; then
+        mkdir -p /mnt/cdrom
+    fi
+</post>
 <post>
 <!-- optionally set the airboss attribute -->
 
