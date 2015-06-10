@@ -45,7 +45,7 @@
 <package>squashfs-tools</package>
 
 <!-- genisoimages to create pallets -->
-<package>genisofs</package>
+<package>genisoimage</package>
 
 <!-- /mnt/cdrom needed to create pallets -->
 <post>
