@@ -28,6 +28,7 @@
 
 	<package>grub</package>
 	<package>grub2</package>
+	<package>genisoimage</package>
 
 </kickstart> 
 

@@ -112,7 +112,7 @@ class Command(command):
 
 	<param type='string' name='membership'>
 	The full membership name of the appliance. This name will be displayed
-	in the appliances menu by insert-ethers (e.g., 'NAS Appliance'). If
+	in the appliances menu by insert-ethers (e.g., 'backend'). If
 	not supplied, the membership name is set to the appliance name.
 	</param>
 
