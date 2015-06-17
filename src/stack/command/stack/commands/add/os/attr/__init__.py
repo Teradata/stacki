@@ -101,26 +101,17 @@ class Command(stack.commands.add.os.command):
 	Name of os
 	</arg>
 	
-	<arg type='string' name='attr'>
-	Name of the attribute
-	</arg>
-
-	<arg type='string' name='value'>
-	Value of the attribute
-	</arg>
-	
 	<param type='string' name='attr'>
-	same as attr argument
+	Name of the attribute
 	</param>
 
 	<param type='string' name='value'>
-	same as value argument
+	Value of the attribute
 	</param>
 
-	<example cmd='add os attr redhat sge False'>
-	Sets the sge attribution to False for redhat nodes
+	<example cmd='add os attr redhat attr=nukedisks value=False'>
+	Sets the nukedisks attribute to False for redhat nodes
 	</example>
-
 	"""
 
 	def run(self, params, args):

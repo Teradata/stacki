@@ -99,27 +99,28 @@ class Textsub(UserDict.UserDict):
 
 class Command(stack.commands.create.new.command):
 	"""	
-	Create a new pallet from a template.
+	Create a skeleton directory structure for a pallet
+	source.
 
-	<arg type='string' name='version'>	
-	</arg>
+	This command is to be used mainly by pallet developers.
+
+	This command creates a directory structure from
+	templates that can be then be populated with required
+	software and configuration.
+
+	Refer to Pallet Developer Guide for more information.
 
 	<arg type='string' name='name'>	
+	Name of the new pallet to be created.
 	</arg>
-
-	<arg type='string' name='color'>	
-	</arg>
-	
-	<param type='string' name='name'>
-	</param>
 	
 	<param type='string' name='version'>
+	Version of the pallet. Typically the version of the
+	application to be palletized.
 	</param>
 
-	<param type='string' name='color'>
-	</param>
-
-	<example cmd='create new pallet'>
+	<example cmd='create new pallet valgrind version=3.10.1'>
+	Creates a new pallet for Valgrind version 3.10.1.
 	</example>
 	"""
 

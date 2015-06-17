@@ -101,24 +101,16 @@ class Command(stack.commands.add.environment.command):
 	Name of environment
 	</arg>
 	
-	<arg type='string' name='attr'>
-	Name of the attribute
-	</arg>
-
-	<arg type='string' name='value'>
-	Value of the attribute
-	</arg>
-	
 	<param type='string' name='attr'>
-	same as attr argument
+	Name of the attribute
 	</param>
 
 	<param type='string' name='value'>
-	same as value argument
+	Value of the attribute
 	</param>
 
-	<example cmd='add environment attr test sge False'>
-	Sets the sge attribution to False for test nodes
+	<example cmd='add environment attr test attr=nukedisks value=False'>
+	Sets the nukedisks attribute to false for environment "test"
 	</example>
 
 	"""

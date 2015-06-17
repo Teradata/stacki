@@ -112,8 +112,8 @@ class Command(stack.commands.add.command):
 	same as value argument
 	</param>
 
-	<example cmd='add attr sge False'>
-	Adds the sge attribution and sets it to False.
+	<example cmd='add attr nukedisks False'>
+	Adds the nukedisks attribute and sets it to False.
 	</example>
 
 	<related>list attr</related>

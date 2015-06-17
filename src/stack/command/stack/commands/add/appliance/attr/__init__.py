@@ -100,30 +100,18 @@ class Command(stack.commands.add.appliance.command):
 	Name of appliance
 	</arg>
 	
-	<arg type='string' name='attr'>
-	Name of the attribute
-	</arg>
-
-	<arg type='string' name='value'>
-	Value of the attribute
-	</arg>
-	
 	<param type='string' name='attr'>
-	same as attr argument
+	Name of the attribute
 	</param>
 
 	<param type='string' name='value'>
-	same as value argument
+	Value of the attribute
 	</param>
 
-	<example cmd='add appliance attr compute sge False'>
-	Sets the sge attribution to False for compute appliances
+	<example cmd='add appliance attr backend attr=nukedisks value=False'>
+	Sets the "nukedisks" attribute to False for nukedisks appliances
 	</example>
 
-	<example cmd='add appliance attr compute sge attr=cpus value=2'>
-	same as above
-	</example>
-	
 	<related>list appliance attr</related>
 	<related>remove appliance attr</related>
 	<related>set host attr</related>

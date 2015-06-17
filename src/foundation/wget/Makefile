@@ -98,6 +98,12 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 
 build:
+	gunzip -c wget-$(VERSION).tar.gz | $(TAR) -xf -
+	( 					\
+		cd wget-$(VERSION);		\
+		PATH=/opt/stack/bin:$$PATH ./configure --prefix=$(PKGROOT);\
+		$(MAKE);			\
+	)
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)

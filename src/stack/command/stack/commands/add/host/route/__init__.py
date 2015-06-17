@@ -92,11 +92,11 @@ class Command(stack.commands.add.host.command):
 	Host name of machine
 	</arg>
 	
-	<arg type='string' name='address'>
+	<param type='string' name='address'>
 	Host or network address
 	</arg>
 	
-	<arg type='string' name='gateway'>
+	<param type='string' name='gateway'>
 	Network or device gateway
 	</arg>
 

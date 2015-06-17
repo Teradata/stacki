@@ -78,8 +78,9 @@ import stack.commands
 
 class Command(stack.commands.config.host.command):
 	"""
-	Adds host interfaces to the database.
+	!!! STACKIQ INTERNAL COMMAND ONLY !!!
 
+	Configures host interfaces in the database.
 	This command should only be called from a post section in a kickstart
 	file.
 

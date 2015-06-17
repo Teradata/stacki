@@ -96,6 +96,8 @@ DEPENDS.FILES	= pygobject-$(VERSION).tar.xz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap: install-rpm
+
 build:
 	xzcat pygobject-$(VERSION).tar.xz | $(TAR) -xf - 
 	(								\

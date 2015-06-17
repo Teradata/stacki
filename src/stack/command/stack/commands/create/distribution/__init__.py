@@ -140,13 +140,15 @@ class Command(stack.commands.create.command,
 	A space separated list of pallets to use when building a distribution.
 	"name,version" is required when delimiting pallets.
 	
-	For example: pallets="base,6.0 kernel,6.0 os,6.2".	
-	Default is "None".
+	For example: pallets="stacki,1.0 os,6.6". Default is "None".
 	</param>
 
 	<example cmd='create distribution'>
 	Create a RedHat distribution in /export/stack/distributions/default.
 	</example>
+
+	<related>list distribution</related>
+	<related>remove distribution</related>
 	"""
 
 	def getRolls(self, dist):

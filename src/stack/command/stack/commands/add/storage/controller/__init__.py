@@ -51,8 +51,8 @@ class Command(stack.commands.HostArgumentProcessor,
 
         <arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'compute') or a valid host
-	(e.g., 'compute-0-0). No argument means the scope is 'global'.
+	'redhat'), a valid appliance (e.g., 'backend') or a valid host
+	(e.g., 'backend-0-0). No argument means the scope is 'global'.
         </arg>
 
 	<param type='int' name='adapter' optional='1'>
@@ -90,12 +90,12 @@ class Command(stack.commands.HostArgumentProcessor,
 	equal to 2 will be created second, etc.
         </param>
 
-	<example cmd='add storage controller compute-0-0 slot=1 raidlevel=0 arrayid=1'>
-	The disk in slot 1 on compute-0-0 should be a RAID 0 disk.
+	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1'>
+	The disk in slot 1 on backend-0-0 should be a RAID 0 disk.
 	</example>
 
-	<example cmd='add storage controller compute-0-0 slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2'>
-	The disks in slots 2-6 on compute-0-0 should be a RAID 6 with two
+	<example cmd='add storage controller backend-0-0 slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2'>
+	The disks in slots 2-6 on backend-0-0 should be a RAID 6 with two
 	hotspares associated with the array in slots 7 and 8.
 	</example>
 	"""

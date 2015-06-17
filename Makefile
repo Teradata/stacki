@@ -44,6 +44,21 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 bootstrap:
+	yum install rpm-build 
+	yum install redhat-rpm-config
+	yum install gcc
+	yum install gcc-c++
+	yum install gettext
+	yum install eject
+	yum install binutils-devel
+	yum install openssl-devel
+	yum install bzip2-devel
+	yum install ncurses-devel
+	yum install swig
+	yum install gtk2-devel
+	yum install mesa-libGLU-devel
+	yum install pygobject2-devel
+	yum install pycairo-devel
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 

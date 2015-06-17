@@ -107,17 +107,17 @@ class Command(command):
 	Add an appliance specification to the database.
 	
 	<arg type='string' name='appliance'>
-	The appliance name (e.g., 'compute', 'frontend', 'nas').
+	The appliance name (e.g., 'backend', 'frontend', 'nas').
 	</arg>
 
 	<param type='string' name='membership'>
 	The full membership name of the appliance. This name will be displayed
-	in the appliances menu by insert-ethers (e.g., 'NAS Appliance'). If
+	in the appliances menu by insert-ethers (e.g., 'backend'). If
 	not supplied, the membership name is set to the appliance name.
 	</param>
 
 	<param type='string' name='node'>
-	The name of the root XML node (e.g., 'compute', 'nas', 'viz-tile'). If
+	The name of the root XML node (e.g., 'backend', 'nas'). If
 	not supplied, the node name is set to the appliance name.
 	</param>
 	
@@ -127,9 +127,6 @@ class Command(command):
 	</param>
 
 	<example cmd='add appliance nas membership="NAS Appliance" node=nas public=yes'>
-	</example>
-	
-	<example cmd='add appliance tile membership=Tile node=viz-tile public=yes'>
 	</example>
 	"""
 

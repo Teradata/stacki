@@ -3,7 +3,7 @@ import stack.commands
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
 	"""
-	Add a bridge interface to a given host
+	Add a bridge interface to a given host.
 	<arg name="host">
 	Hostname
 	</arg>
@@ -17,7 +17,7 @@ class Command(stack.commands.Command,
 	Name of the network on which the physical
 	device to be bridged exists.
 	</param>
-	<example cmd="add host bridge compute-0-0 name=cloudbr0
+	<example cmd="add host bridge backend-0-0 name=cloudbr0
 	network=private iface=eth0">
 	This command will create a bridge called "cloudbr0", and
 	attach it to physical interface eth0 and place it on the

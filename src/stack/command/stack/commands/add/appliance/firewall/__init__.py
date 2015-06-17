@@ -81,7 +81,7 @@ class Command(stack.commands.add.firewall.command,
 	Add a firewall rule for an appliance type.
 
 	<arg type='string' name='appliance'>
-	Appliance type (e.g., "compute").
+	Appliance type (e.g., "backend").
 	</arg>
 
 	<param type='string' name='service'>
@@ -100,7 +100,7 @@ class Command(stack.commands.add.firewall.command,
         <param type='string' name='network'>
         The network for this rule. This is a named network
         (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+        'stack list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
@@ -108,7 +108,7 @@ class Command(stack.commands.add.firewall.command,
         <param type='string' name='output-network' optional='1'>
         The output network for this rule. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+        'stack list network'.
 	</param>
 
         <param type='string' name='chain'>

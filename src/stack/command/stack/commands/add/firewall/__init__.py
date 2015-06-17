@@ -150,7 +150,7 @@ class command(stack.commands.HostArgumentProcessor,
 				name = '%s'""" % (network))
 
 			if rows == 0:
-				self.abort('network "%s" not in the database. Run "rocks list network" to get a list of valid networks.' % network)
+				self.abort('network "%s" not in the database. Run "stack list network" to get a list of valid networks.' % network)
 
 			network, = self.db.fetchone()
 		else:
@@ -163,7 +163,7 @@ class command(stack.commands.HostArgumentProcessor,
 				name = '%s'""" % (outnetwork))
 
 			if rows == 0:
-				self.abort('output-network "%s" not in the database. Run "rocks list network" to get a list of valid networks.')
+				self.abort('output-network "%s" not in the database. Run "stack list network" to get a list of valid networks.')
 
 			outnetwork, = self.db.fetchone()
 		else:
@@ -257,7 +257,7 @@ class Command(command):
         <param type='string' name='network'>
         The network this rule should be applied to. This is a named network
         (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+        'stack list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
@@ -265,7 +265,7 @@ class Command(command):
         <param type='string' name='output-network' optional='1'>
         The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+        'stack list network'.
 	</param>
 
         <param type='string' name='chain'>
