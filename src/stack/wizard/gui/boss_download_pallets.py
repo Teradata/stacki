@@ -50,3 +50,18 @@ os.chdir(cwd)
 cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
 os.system(cmd)
 
+#
+# added the code below for 7.x
+#
+cmd = '/bin/yum -c /tmp/anaconda-yum.conf clean all'
+os.system(cmd)
+
+#
+# write a new repo file for our distro
+#
+os.system('mkdir -p /tmp/yum.repos.d')
+file = open('/tmp/yum.repos.d/stacki.repo', 'w')
+file.write('[stacki]\n')
+file.write('name=stacki\n')
+file.write('baseurl=file:///install/distributions/default/x86_64\n')
+file.close()

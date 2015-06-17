@@ -42,10 +42,11 @@
 		<to>yum</to>
 		<to>ssl</to>
 		<to>ssh</to>
-		<to>ssh-client</to>
 	</edge>
+
 	<edge from="client">
 		<to>ssl-client</to>
+		<to>ssh-client</to>
 	</edge>
 
 	<edge from="partition">

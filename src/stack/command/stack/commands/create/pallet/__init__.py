@@ -446,6 +446,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 	def makeBootable(self, name):
 		import stack.roll
+		import stack
 
 		print 'Configuring pallet to be bootable ... ', name
 		os.environ['RPMHOME'] = os.getcwd()
@@ -463,11 +464,19 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			self.config.getRollArch())
 
 		fout = open(os.path.join('disk1', 'ks.cfg'), 'w')
-		fout.write('url --url http://localhost/%s\n' % distdir)
-		fout.write('lang en_US\n')
-		fout.write('keyboard us\n')
-		fout.write('interactive\n')
-		fout.write('install\n')
+
+		if stack.release == '7.x':
+			fout.write('install\n')
+			fout.write('url --url file:///mnt/cdrom\n')
+			fout.write('lang en_US\n')
+			fout.write('keyboard us\n')
+		else:
+			fout.write('install\n')
+			fout.write('url --url http://localhost/%s\n' % distdir)
+			fout.write('lang en_US\n')
+			fout.write('keyboard us\n')
+			fout.write('interactive\n')
+
 		fout.close()
 
 		import stack.bootable
@@ -752,3 +761,5 @@ class Command(stack.commands.create.command):
 			
 		builder.run()
 
+
+RollName = "stacki"

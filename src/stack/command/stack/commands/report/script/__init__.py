@@ -146,6 +146,9 @@ class Command(stack.commands.report.command):
 			if line[0:5] == '%post':
 				continue
 
+			if line == '%end':
+				continue
+
 			self.addOutput('', line.rstrip())
 
 

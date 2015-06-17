@@ -102,6 +102,7 @@ class Implementation(stack.commands.Implementation):
 	"""
 
 	def run(self, args):
+		import stack
 
 		(clean, prefix, treeinfo) = args
 
@@ -141,6 +142,10 @@ class Implementation(stack.commands.Implementation):
 		roll_dir = os.path.join(prefix, name, vers, OS, arch)
 		destdir = os.path.join(roll_dir, 'RPMS')
 
+		print 'stack.release (%s)' % stack.release
+		if stack.release == '7.x':
+			liveosdir = os.path.join(roll_dir, 'LiveOS')
+
 		if clean and os.path.exists(roll_dir):
 			print 'Cleaning %s version %s ' % (name, vers),
 			print 'for %s from pallets directory' % arch
@@ -151,19 +156,29 @@ class Implementation(stack.commands.Implementation):
 		if not os.path.exists(destdir):
 			os.makedirs(destdir)
 
+		if stack.release == '7.x' and not os.path.exists(liveosdir):
+			os.makedirs(liveosdir)
+
 		cdtree = stack.file.Tree(self.owner.mountPoint)
 		for dir in cdtree.getDirs():
 			for file in cdtree.getFiles(dir):
-				if not file.getName().endswith('.rpm'):
-					continue
-				if file.getPackageArch() != 'src' and \
-					file.getBaseName() != 'comps' and \
-					file.getName() != 'comps.rpm' \
-					and not (arch == 'i386' and \
-					re.match('^kudzu.*', file.getBaseName())):
-						os.system('cp -p %s %s' % (
-							file.getFullName(), 
-							destdir))
+				if stack.release == '7.x' and dir == 'LiveOS' \
+					and file.getName().endswith('.img'):
+
+					os.system('cp -p %s %s' % (
+						file.getFullName(), 
+						liveosdir))
+				else:
+					if not file.getName().endswith('.rpm'):
+						continue
+					if file.getPackageArch() != 'src' and \
+						file.getBaseName() != 'comps' and \
+						file.getName() != 'comps.rpm' \
+						and not (arch == 'i386' and \
+						re.match('^kudzu.*', file.getBaseName())):
+							os.system('cp -p %s %s' % (
+								file.getFullName(), 
+								destdir))
 		#
 		# lay down a minimal roll XML config file
 		#
@@ -178,3 +193,5 @@ class Implementation(stack.commands.Implementation):
 		return (name, vers, arch)
 
 
+
+RollName = "stacki"

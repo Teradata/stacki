@@ -17,6 +17,7 @@ import stack_partition
 import os
 
 nukedisks = '&nukedisks;'
+release = '&release;'
 
 def initDiskLabel(disk):
 	# break down software disk arrays
@@ -38,6 +39,9 @@ def initDiskLabel(disk):
 
 
 def doBootDisk(file, disk):
+	if release == '7.x':
+		file.write('part biosboot --fstype=biosboot --size=1 ' +
+			'--ondisk=%s\n' % disk)
 	file.write('part / --size=16000 --fstype=ext4 --ondisk=%s\n' % disk)
 	file.write('part swap --size=1000 --ondisk=%s\n' % disk)
 	file.write('part /var --size=16000 --fstype=xfs --ondisk=%s\n' % disk)

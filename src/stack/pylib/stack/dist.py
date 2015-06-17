@@ -248,6 +248,9 @@ class Base(Arch):
 
 	def setRPMS(self, list):
 		self.setFiles('release', os.path.join('RedHat', 'RPMS'), list)
+
+	def setLiveOS(self, list):
+		self.setFiles('release', os.path.join('LiveOS'), list)
         
 	def getPackage(self, name, list):
 
@@ -394,6 +397,19 @@ class Mirror(Base):
 			path  = os.path.join(roll, version, arch, 'RedHat', 'base')
 			files = self.getFiles('pallets', path)
 		return files
+		
+
+	def getRollLiveOSFiles(self, roll, version, arch):
+		"""
+		Used to get all files in 'LiveOS' directory
+		"""
+
+		#
+		# only support the new roll layout -- since this was added
+		# for RHEL 7
+		#
+		path = os.path.join(roll, version, 'redhat', arch, 'LiveOS')
+		return self.getFiles('pallets', path)
 		
 
 	def getRolls(self):

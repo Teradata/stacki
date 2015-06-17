@@ -248,6 +248,7 @@ class Bootable:
 
 	def installBootfiles(self, destination):
 		import stat
+		import stack
 
 		print 'Applying boot files'
 
@@ -274,17 +275,59 @@ class Bootable:
 				shutil.move(os.path.join(images, file),
 					os.path.join(isolinux, 'initrd.img'))
 
-		#
-		# install.img
-		#
-		imagesdir = os.path.join(self.rolldir, 'images')
+		if stack.release == '7.x':
+			imagesdir = os.path.join(destination, 'images')
+		else:
+			imagesdir = os.path.join(self.rolldir, 'images')
+
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
 
-		install = os.path.join(os.path.join(images, 'install.img'))
-		image = os.path.join(imagesdir, 'install.img')
-		os.rename(install, image)
-		os.chmod(image, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+		if stack.release == '7.x':
+			#
+			# upgrade.img
+			#
+			fileold = os.path.join(os.path.join(images,
+				'upgrade.img'))
+			filenew = os.path.join(imagesdir, 'upgrade.img')
+		else:
+			#
+			# install.img
+			#
+			fileold = os.path.join(os.path.join(images,
+				'install.img'))
+			filenew = os.path.join(imagesdir, 'install.img')
+
+		os.rename(fileold, filenew)
+		os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
+		if stack.release == '7.x':
+			#
+			# updates.img
+			#
+			fileold = os.path.join(os.path.join(images,
+				'updates.img'))
+			filenew = os.path.join(imagesdir, 'updates.img')
+
+			os.rename(fileold, filenew)
+			os.chmod(filenew,
+				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
+			#
+			# squashfs.img from LiveOS
+			#
+			liveolddir = 'default/x86_64/LiveOS'
+			livenewdir = os.path.join(destination, 'LiveOS')
+			if not os.path.exists(livenewdir):
+				os.makedirs(livenewdir)
+
+			fileold = os.path.join(os.path.join(liveolddir,
+				'squashfs.img'))
+			filenew = os.path.join(livenewdir, 'squashfs.img')
+
+			os.rename(fileold, filenew)
+			os.chmod(filenew,
+				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		#
 		# put the 'barnacle' executable in the ISO

@@ -85,6 +85,9 @@ app.run()
 
 </file>
 
+chmod a+x /opt/stack/lib/do_partition.py
+/opt/stack/lib/do_partition.py > /tmp/partition-info
+
 </pre>
 
 

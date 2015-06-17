@@ -92,6 +92,7 @@
 
 import os
 import sys
+import stack
 import stack.commands
 
 class Implementation(stack.commands.Implementation):
@@ -144,7 +145,22 @@ class Implementation(stack.commands.Implementation):
 			os.system('find . ! -name TRANS.TBL -print | cpio -mpud %s' %
 				  roll_dir)
 
+			#
+			# check for LiveOS
+			#
+			if stack.release == '7.x':
+				liveosdir = os.path.join(self.owner.mountPoint,
+					'LiveOS')
+
+				if os.path.exists(liveosdir):
+					os.chdir(self.owner.mountPoint)
+					os.system('find LiveOS ! -name TRANS.TBL ' +
+						' -print | cpio -mpud ' +
+						'%s' % specific_roll_dir)
+
 		# after copying the roll, make sure everyone (apache included)
 		# can traverse the directories
 		os.system('find %s -type d -exec chmod a+rx {} \;' % roll_dir)
 		os.chdir(cwd)
+
+RollName = "stacki"

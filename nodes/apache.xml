@@ -29,7 +29,7 @@
 
 <file name="/etc/httpd/conf.d/stack.conf"><![CDATA[
 #
-# Rocks Specific Apache configuration. 
+# Stacki Specific Apache configuration. 
 # Generated automatically by the apache.xml node.
 #
 <IfModule mod_mime.c>

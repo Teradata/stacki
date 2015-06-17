@@ -113,7 +113,7 @@ install:: build
 	)
 	@echo "version = \"$(STACK_VERSION)\"" >> \
 		$(ROOT)/$(PY.STACK)/stack/__init__.py
-	@echo "release = \"$(VERSION_NAME)\"" >> \
+	@echo "release = \"$(STACK_RELEASE)\"" >> \
 		$(ROOT)/$(PY.STACK)/stack/__init__.py
 
 clean::

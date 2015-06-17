@@ -13,7 +13,7 @@
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
         </copyright>
 
-<post>
+<post cond="'&release;' == '6.x'">
 
 <!-- Make a Certificate for Mod_SSL -->
 (
@@ -42,6 +42,21 @@ chmod 0444 /etc/pki/tls/certs/localhost.crt
 )
 
 </post>
+
+<post cond="'&release;' == '7.x'">
+<!-- Make localhost.key -->
+/usr/bin/openssl genpkey -algorithm RSA \
+	-out /etc/pki/tls/private/localhost.key \
+	-pkeyopt rsa_keygen_bits:2048
+
+<!-- Make Certificate -->
+/usr/bin/openssl req -utf8 -new \
+	-key /etc/pki/tls/private/localhost.key \
+	-x509 -days 2000 -set_serial 0 \
+	-out /etc/pki/tls/certs/localhost.crt \
+	-config /etc/security/ca/ca.cfg -batch
+</post>
+
 
 <!--
 	SSL configuration.

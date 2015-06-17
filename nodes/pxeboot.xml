@@ -16,7 +16,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <post>
 
 <!-- set the node to boot from local disk on the next reboot -->
-/usr/bin/wget --no-check-certificate -O /dev/null \
+/bin/curl --insecure -o /dev/null \
 	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi
 
 </post>

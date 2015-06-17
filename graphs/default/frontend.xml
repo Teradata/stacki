@@ -21,10 +21,6 @@
 		<tail>database</tail>
 	</order>
 
-	<order head="grub">
-		<tail>grub-server</tail>
-	</order>
-
 	<order head="database">
 		<tail>database-schema</tail>
 	</order>
@@ -74,7 +70,6 @@
 		<to>apache</to>
 		<to>security-server</to>
 		<to>ntp-server</to>
-		<to>grub-server</to>
 		<to>install</to>
 		<to>pxe</to>
 		<to>insert-rolls</to>
@@ -93,6 +88,7 @@
 		<to>ssh-server</to>
 		<to>storage-controller-server</to>
 		<to>dist</to>
+		<to>grub-server</to>
 	</edge>
 
 </graph>

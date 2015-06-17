@@ -149,7 +149,7 @@ class Command(stack.commands.run.command):
 			
 		rpms = []
 		for line in gen.generate('packages'):
-			if line.find('%package') == -1:
+			if line.find('%package') == -1 and line.find('%end') == -1:
 				rpms.append(line)
 		for rpm in rpms:
 			if rpm in rpm_list.keys():
@@ -161,7 +161,7 @@ class Command(stack.commands.run.command):
 
 		cur_proc = False
 		for line in gen.generate('post'):
-			if not line.startswith('%post'):
+			if not line.startswith('%post') and not line.startswith('%end'):
 				script.append(line)
 			else:
 				if cur_proc == True:
@@ -182,9 +182,9 @@ class Command(stack.commands.run.command):
 		script.append('\n# Boot scripts\n')
 		for line in gen.generate('boot'):
 			#
-			# skip lines that start with '%post'
+			# skip lines that start with '%post' or '%end'
 			#
-			if line[0:5] == '%post':
+			if line[0:5] == '%post' or line[0:4] == '%end':
 				continue
 
 			script.append(line)

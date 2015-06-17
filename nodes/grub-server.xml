@@ -21,7 +21,7 @@
 
 
 <!-- Setup /boot/grub/stack.conf file -->
-<post interpreter="/opt/stack/bin/python">
+<post interpreter="/opt/stack/bin/python" cond="release == '6.x'">
 import stack.grub
 
 makegrub = stack.grub.App()

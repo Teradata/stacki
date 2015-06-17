@@ -92,12 +92,12 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-DEPENDS.FILES	= pygobject-$(VERSION).tar.gz
+DEPENDS.FILES	= pygobject-$(VERSION).tar.xz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 build:
-	gunzip -c pygobject-$(VERSION).tar.gz | $(TAR) -xf -
+	xzcat pygobject-$(VERSION).tar.xz | $(TAR) -xf - 
 	(								\
 		cd pygobject-$(VERSION);			\
 		PATH=/opt/stack/bin:$$PATH				\

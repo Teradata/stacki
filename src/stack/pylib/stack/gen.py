@@ -493,7 +493,7 @@ class Generator_redhat(Generator):
 		self.ks['boot-post']	= []
 
 		self.rpm_context	= {}
-		self.log = '/var/log/stack-install.log'
+		self.log = '/mnt/sysimage/var/log/stack-install.log'
 
 	
 	##
@@ -772,6 +772,7 @@ class Generator_redhat(Generator):
 			else:
 				(roll, nodefile, color) = (none, none, none)
 			list.append(('-'+ e, roll, nodefile, color))
+		list.append('%end')
 		return list
 
 	def generate_pre(self):
@@ -786,6 +787,7 @@ class Generator_redhat(Generator):
 			pre_list.append(('%%pre --log=/tmp/ks-pre.log %s' %
 				args, roll, nodefile, color))
 			pre_list.append((text + '\n',roll, nodefile, color))
+			pre_list.append(('%end'))
 			
 		return pre_list
 
@@ -798,15 +800,10 @@ class Generator_redhat(Generator):
 			roll = list[1]
 			nodefile = list[2]
 			color = list[3]
-			arglist = args.split()
-			try:
-				i = arglist.index("--nochroot")
-				log = '/mnt/sysimage/%s' % self.log
-			except:
-				log = self.log
 			post_list.append(('%%post --log=%s %s' %
-				(log, args), roll, nodefile, color))
+				(self.log, args), roll, nodefile, color))
 			post_list.append((text + '\n',roll, nodefile, color))
+			post_list.append(('%end'))
 			
 		return post_list
 
@@ -843,6 +840,8 @@ class Generator_redhat(Generator):
 
 		list.append('__EOF__')
 		list.append('')
+
+		list.append('%end')
 		
 		return list
 

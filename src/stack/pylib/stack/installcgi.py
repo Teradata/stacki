@@ -271,7 +271,10 @@ class InstallCGI:
 		#
 		# build the distro
 		#
-		pythonpath = os.environ['PYTHONPATH']
+		pythonpath = None
+		if os.environ.has_key('PYTHONPATH'):
+			pythonpath = os.environ['PYTHONPATH']
+
 		os.environ['PYTHONPATH'] = '/tmp/updates'
 
 		cmd = 'HOME=%s ' % self.rootdir
@@ -282,7 +285,8 @@ class InstallCGI:
 		os.system('echo %s > /tmp/stack-create-distro.debug' % cmd)
 		os.system(cmd + ' >> /tmp/stack-create-distro.debug 2>&1')
 
-		os.environ['PYTHONPATH'] = pythonpath
+		if pythonpath:
+			os.environ['PYTHONPATH'] = pythonpath
 
 		os.chdir(cwd)
 

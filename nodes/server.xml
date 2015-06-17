@@ -20,8 +20,12 @@
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
         </copyright>
 
-<package>stack-admin</package>
+<main>
+<reboot> --eject </reboot>
+</main>
 
+
+<package>stack-admin</package>
 <package>foundation-gd</package>
 
 <!-- to build anaconda -->

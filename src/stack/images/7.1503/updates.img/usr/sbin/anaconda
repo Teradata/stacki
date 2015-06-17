@@ -1,0 +1,62 @@
+#!/usr/bin/python
+
+import subprocess
+import shutil
+import os
+import time
+
+#
+# call the real anaconda
+#
+s = subprocess.Popen('/usr/sbin/anaconda.real')
+s.wait()
+
+file = open('/proc/cmdline', 'r')
+args = file.readline().split()
+file.close()
+
+if 'boss' in args:
+	#
+	# we are a boss
+	#
+	if 'stackiq-debug' in args:
+		#
+		# debug development code
+		#
+		file = open('/tmp/wait', 'w')
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)
+
+	#
+	#
+	# kill all instances of 'anaconda.real' and 'Xorg'
+	#
+	os.system('killall -9 anaconda.real')
+	os.system('killall -9 Xorg')
+
+	#
+	# restart lighttpd 
+	#
+	if os.path.exists('/run/install/tmp/stack.conf'):
+		shutil.copyfile('/run/install/tmp/stack.conf',
+			'/tmp/stack.conf')
+	else:
+		#
+		# create a dummy stack.conf
+		#
+		file = open('/tmp/stack.conf', 'w')
+		file.write('var.trackers = ""\n')
+		file.write('var.pkgservers = ""\n')
+		file.close()
+
+	subprocess.call([ '/opt/lighttpd/sbin/lighttpd', '-f', 
+		'/opt/lighttpd/conf/lighttpd.conf', '-m',
+		'/opt/lighttpd/lib/' ])
+
+	#
+	# if we are a boss, then restart anaconda
+	#
+	s = subprocess.Popen('/usr/sbin/anaconda.real')
+	s.wait()
+

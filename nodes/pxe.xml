@@ -69,9 +69,10 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 </post>
 
 
-<post>
-
 <!-- now setup the global PXE boot default actions -->
+
+<post cond="'&release;' == '6.x'">
+
 /opt/stack/bin/stack add bootaction action="install" \
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
@@ -81,18 +82,6 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
-
-/opt/stack/bin/stack add bootaction action="os" \
-	kernel="com32 chain.c32" args="hd0"
-
-/opt/stack/bin/stack add bootaction action="os.localboot" \
-	kernel="localboot 0"
-
-/opt/stack/bin/stack add bootaction action="os.hplocalboot" \
-	kernel="localboot -1"
-
-/opt/stack/bin/stack add bootaction action="memtest" \
-	kernel="kernel memtest"
 
 /opt/stack/bin/stack add bootaction action="install headless" \
 	kernel="vmlinuz-&version;-&arch;" \
@@ -104,10 +93,51 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 	ramdisk="initrd.img-&version;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
 
+</post>
+
+
+<post cond="'&release;' == '7.x'">
+
+/opt/stack/bin/stack add bootaction action="install" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac"
+
+/opt/stack/bin/stack add bootaction action="install no-parallel-format" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format"
+
+/opt/stack/bin/stack add bootaction action="install headless" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac headless"
+
+/opt/stack/bin/stack add bootaction action="rescue" \
+	kernel="vmlinuz-&version;-&arch;" \
+	ramdisk="initrd.img-&version;-&arch;" \
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue"
+
+</post>
+
+
+<post>
+
 /opt/stack/bin/stack add bootaction action="pxeflash" \
 	kernel="kernel memdisk bigraw" \
 	ramdisk="pxeflash.img" \
 	args="keeppxe"
+/opt/stack/bin/stack add bootaction action="os" \
+	kernel="com32 chain.c32" args="hd0"
+
+/opt/stack/bin/stack add bootaction action="os.localboot" \
+	kernel="localboot 0"
+
+/opt/stack/bin/stack add bootaction action="os.hplocalboot" \
+	kernel="localboot -1"
+
+/opt/stack/bin/stack add bootaction action="memtest" \
+	kernel="kernel memtest"
 
 </post>
 

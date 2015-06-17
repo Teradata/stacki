@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-PKGROOT		= /lighttpd
+PKGROOT		= /opt/lighttpd
 ROLLROOT	= ../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION).tar.gz
 DEPENDS.DIRS	= cgi conf

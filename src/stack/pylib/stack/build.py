@@ -200,6 +200,21 @@ class DistributionBuilder(Builder):
 	return 0
 
 
+    def getRollLiveOSFiles(self):
+	    files = []
+	    for m in self.dist.getMirrors():
+		    for key, value in m.getRolls().items():
+			    for v, a in value:
+				    if self.useRoll(key, v, a):
+					    f = m.getRollLiveOSFiles(key, v, a)
+					    if f:
+						    files.extend(f)
+						    print '\tusing files from %s' % (key)
+						    for name in f:
+							    print '\t\t%s' % name.getBaseName()
+	    return files
+
+
     def getRollBaseFiles(self):
 	    files = []
 	    for m in self.dist.getMirrors():
@@ -256,8 +271,13 @@ class DistributionBuilder(Builder):
         self.dist.setRPMS(self.resolveVersions(self.buildRPMSList()))
 
 
-    def insertNetstage(self):
-	print 'Applying install.img'
+    def buildLiveOS(self):
+        print 'Resolving versions (LiveOS)'
+        self.dist.setLiveOS(self.resolveVersions(self.getRollLiveOSFiles()))
+
+
+    def insertImage(self, image):
+	print 'Applying %s' % image
 	import stat
 	
 	try:
@@ -271,11 +291,11 @@ class DistributionBuilder(Builder):
 	if not os.path.exists(imagesdir):
 		os.makedirs(imagesdir)
 
-	install = os.path.join(self.dist.getReleasePath(),
-		'opt', 'stack', 'images', 'install.img')
-	image = os.path.join(imagesdir, 'install.img')
-	os.rename(install, image)
-	os.chmod(image, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+	imageold = os.path.join(self.dist.getReleasePath(),
+		'opt', 'stack', 'images', image)
+	imagenew = os.path.join(imagesdir, image)
+	os.rename(imageold, imagenew)
+	os.chmod(imagenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 	#
 	# clean up other image files from the stack-image RPM
@@ -287,9 +307,15 @@ class DistributionBuilder(Builder):
 
 
     def build(self):
+		import stack
+
 		self.clean()
 		self.dist.syncMirror()
 		self.buildBase()
+
+		if stack.release == '7.x':
+			self.buildLiveOS()
+
 		self.buildRPMS()
 
 		print 'Creating files',
@@ -303,7 +329,12 @@ class DistributionBuilder(Builder):
 		print 'Applying comps.xml'
 		self.applyRPM('foundation-comps', self.dist.getReleasePath())
 
-		self.insertNetstage()
+		if stack.release == '7.x':
+			self.insertImage('upgrade.img')
+			self.insertImage('updates.img')
+		else:
+			self.insertImage('install.img')
+		
 		self.buildKickstart()
 		if self.doMD5:
 			self.createrepo()

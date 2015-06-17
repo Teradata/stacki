@@ -122,7 +122,6 @@ install::
 	#
 	mkdir -p $(ROOT)/usr/sbin
 	$(INSTALL) -m755 pty-wrapper.py $(ROOT)/usr/sbin/
-	$(INSTALL) -m755 /usr/sbin/eject $(ROOT)/usr/sbin/
 
 	#
 	# executable that makes sure all disks are 'bootable'

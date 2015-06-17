@@ -34,6 +34,9 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 </main>
 
 
+<package cond="'&release;' == '7.x'">net-tools</package>
+
+
 <post>
 /sbin/chkconfig stack-pre on
 /sbin/chkconfig stack-post on

@@ -137,6 +137,7 @@ static char rcsid[] = "$Id$";
 #define RSA1 1
 #define RSA 2
 #define DSA 3
+#define ECDSA 4
 
 int
 main(int argc, char *argv[])
@@ -167,6 +168,8 @@ main(int argc, char *argv[])
 		mode = RSA;
 	  else if (!strncmp("DSA", argv[1], 3))
 		mode = DSA;
+	  else if (!strncmp("ECDSA", argv[1], 5))
+		mode = ECDSA;
 	}
 	
 	switch (mode)
@@ -180,8 +183,12 @@ main(int argc, char *argv[])
 	  case DSA:
 		keyfile = FILENAME "/ssh_host_dsa_key";
 		break;
+	  case ECDSA:
+		keyfile = FILENAME "/ssh_host_ecdsa_key";
+		break;
 	  default:
-		fprintf(stderr, "Please specify a key: RSA1 | RSA | DSA\n");
+		fprintf(stderr,
+			"Please specify a key: RSA1 | RSA | DSA | ECDSA\n");
 		return 1;
 	}
 
