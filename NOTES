@@ -1,0 +1,26 @@
+To change the version/release info:
+
+	edit version.mk
+		change RELEASE
+		change ROLLVERSION
+
+	edit src/stack/build/build/etc/stack-version.mk
+		change RELEASE_NAME
+
+	cd src/stack/build
+	make install-rpm
+
+logout, log back in
+
+	cd src/stack/pylib
+	edit version.mk
+		change STACK_VERSION
+		change STACK_RELEASE
+	make install-rpm
+
+	cd src/stack/command
+	make install-rpm
+
+	cd .
+	make roll
+
