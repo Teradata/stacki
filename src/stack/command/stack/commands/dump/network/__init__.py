@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,24 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:53  bruno
-# star power for gb
-#
-# Revision 1.4  2009/06/03 21:28:52  bruno
-# add MTU to the subnets table
-#
-# Revision 1.3  2009/05/01 19:06:57  mjk
-# chimi con queso
-#
-# Revision 1.2  2008/10/18 00:55:49  mjk
-# copyright 5.1
-#
-# Revision 1.1  2008/04/29 21:28:38  bruno
-# dump the network info
-#
-#
 
 import os
 import sys
@@ -97,12 +80,14 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		for net in self.getNetworkNames(args):
-			self.db.execute("""select subnet, netmask, mtu from
-				subnets where name='%s'""" % net)
 
-			for (subnet, netmask, mtu) in self.db.fetchall():
-				self.dump('add network %s ' % (net) +
-					'subnet=%s netmask=%s mtu=%s' % \
-					(subnet,netmask,mtu))
+		for dict in self.call('list.network'):
+                        self.dump('"add network" %s' % dict['network'])
+                         
+                        for option in dict.keys():
+                                if option == 'network':
+                                        continue
+                                if dict[option]:
+                                        self.dump('"set network %s" %s %s=%s' %
+                                                (option, dict['network'], option, dict[option]))
 

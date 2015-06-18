@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,115 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.22  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.21  2010/08/30 20:22:22  bruno
-# don't print the netmask if there is no IP
-#
-# Revision 1.20  2010/04/20 17:22:36  bruno
-# initial support for channel bonding
-#
-# Revision 1.19  2010/04/19 21:22:15  bruno
-# can now set and report 'options' for network interface modules.
-#
-# this will be handy for setting interrupt coalescing and for setting up
-# channel bonding.
-#
-# Revision 1.18  2009/07/28 17:52:19  bruno
-# be consistent -- all references to 'vlanid' should be 'vlan'
-#
-# Revision 1.17  2009/05/01 19:06:58  mjk
-# chimi con queso
-#
-# Revision 1.16  2009/03/17 18:50:24  bruno
-# adjust for no gateway
-#
-# Revision 1.15  2009/03/13 00:02:59  mjk
-# - checkpoint for route commands
-# - gateway is dead (now a default route)
-# - removed comment rows from schema (let's see what breaks)
-# - removed short-name from appliance (let's see what breaks)
-# - dbreport static-routes is dead
-#
-# Revision 1.14  2008/10/18 00:55:50  mjk
-# copyright 5.1
-#
-# Revision 1.13  2008/09/25 17:39:55  bruno
-# phil's command tweaks
-#
-# Revision 1.12  2008/07/22 00:34:40  bruno
-# first whack at vlan support
-#
-# Revision 1.11  2008/03/06 23:41:37  mjk
-# copyright storm on
-#
-# Revision 1.10  2007/07/04 01:47:38  mjk
-# embrace the anger
-#
-# Revision 1.9  2007/06/28 19:45:44  bruno
-# all the 'rocks list host' commands now have help
-#
-# Revision 1.8  2007/06/19 16:42:41  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.7  2007/06/18 20:57:07  phil
-# Add module to the list output
-# Change heading on interface column from if to iface.
-#
-# Revision 1.6  2007/06/15 16:18:22  phil
-# Phil needs help with his editor
-#
-# Revision 1.5  2007/06/15 06:19:43  phil
-# SQL skulduggery to get list all the interfaces with the subnets table
-#
-# Revision 1.4  2007/06/12 01:10:42  mjk
-# - 'rocks add subnet' is now 'rocks add network'
-# - added set network subnet|netmask
-# - added list network
-# - other cleanup
-#
-# Revision 1.3  2007/05/31 19:35:42  bruno
-# first pass at getting all the 'help' consistent on all the rocks commands
-#
-# Revision 1.2  2007/05/10 20:37:01  mjk
-# - massive rocks-command changes
-# -- list host is standardized
-# -- usage simpler
-# -- help is the docstring
-# -- host groups and select statements
-# - added viz commands
-#
-# Revision 1.1  2007/04/30 22:11:11  bruno
-# first pass at pxeboot (pxe first) rocks command line
-#
-# Revision 1.4  2007/04/24 17:58:09  bruno
-# consist look and feel for all 'list' commands
-#
-# put partition commands under 'host'
-#
-# Revision 1.3  2007/04/13 17:59:05  bruno
-# little bug fix
-#
-# Revision 1.2  2007/02/27 01:53:58  mjk
-# - run(self, args) => run(self, flags, args)
-# - replaced rocks list host xml with more complete code
-# - replaced rocks lust node xml with kpp shell (not a command now)
-#
-# Revision 1.1  2007/01/12 20:18:04  anoop
-# Shuffling things around a little bit
-#
-# From now on "node" always refers to xml files in the nodes/ directory
-# Any host information that needs to be obtained should be put into
-# host/ directory
-#
-# Revision 1.1  2007/01/10 17:32:05  mjk
-# added list node interfaces|memberships
-# minor tweaks
-#
 
 import stack.commands
 import re
@@ -184,14 +76,23 @@ class Command(stack.commands.list.host.command):
 	"""
 
 	def run(self, params, args):
+
+		expanded, = self.fillParams([ ('expanded', 'false') ])
+                expanded = self.str2bool(expanded)
+
+                networks = {}
+                if expanded:
+                        for row in self.call('list.network'):
+                                networks[row['network']] = row
+                        
                 reg = re.compile('vlan.*')
-		self.beginOutput()
+
+                self.beginOutput()
 
                 for host in self.getHostnames(args):
                         self.db.execute("""select distinctrow
 				IF(net.subnet, sub.name, NULL),
-				net.device, net.mac, net.ip,
-				IF(net.subnet and net.ip,sub.netmask,NULL),
+				net.device, net.mac, net.main, net.ip,
 				net.module, net.name, net.vlanid, net.options,
 				net.channel
 				from nodes n, networks net, subnets sub
@@ -199,19 +100,90 @@ class Command(stack.commands.list.host.command):
 				and (net.subnet=sub.id or net.subnet is NULL)
 				order by net.device""" % host )
 
-			for row in self.db.fetchall():
-				#
-				# if device name matches vlan* then clear
-				# fields for printing
-				#
-                		if row[1] and reg.match(row[1]):  
-					self.addOutput(host, (row[0], row[1],
-						None, None, None, None,
-						None, row[7], row[8], row[9]) )
-				else:
-					self.addOutput(host, row)
+			for (network,
+                             interface,
+                             mac,
+                             default,
+                             ip,
+                             module,
+                             name,
+                             vlan,
+                             options,
+                             channel) in self.db.fetchall():
 
-		self.endOutput(header=['host', 'subnet', 'iface', 'mac', 
-			'ip', 'netmask', 'module', 'name', 'vlan',
-			'options', 'channel'])
+                		if interface and reg.match(interface):
+                                        # If device name matches vlan*
+                                        # Then clear fields for printing
+                                        mac = ip = module = name = None
+
+                                if not default:
+                                        # Change False to None for easier
+                                        # to read output.
+                                        default = None
+                                else:
+                                        default = True
+
+                                if not expanded:
+                                        self.addOutput(host, (
+                                                interface,
+                                                default,
+                                                network,
+                                                mac,
+                                                ip,
+                                                name,
+                                                module,
+                                                vlan,
+                                                options,
+                                                channel
+                                                ))
+                                else:
+                                        self.addOutput(host, (
+                                                interface,
+                                                default,
+                                                network,
+                                                mac,
+                                                ip,
+                                                networks[network]['mask'],
+                                                networks[network]['gateway'],
+                                                name,
+                                                networks[network]['zone'],
+                                                networks[network]['dns'],
+                                                networks[network]['pxe'],
+                                                module,
+                                                vlan,
+                                                options,
+                                                channel
+                                                ))
+
+                if not expanded:
+                        self.endOutput(header=[ 'host',
+                                'interface',
+                                'default',
+                                'network',
+                                'mac',
+                                'ip',
+                                'name',
+                                'module',
+                                'vlan',
+                                'options',
+                                'channel'
+                                ])
+                else:
+                        self.endOutput(header=[ 'host',
+                                'interface',
+                                'default',
+                                'network',
+                                'mac',
+                                'ip',
+                                'mask',
+                                'gateway',
+                                'name',
+                                'zone',
+                                'dns',
+                                'pxe',
+                                'module',
+                                'vlan',
+                                'options',
+                                'channel'
+                                ])
 

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,20 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.1  2008/12/15 22:27:21  bruno
-# convert pxeboot and pxeaction tables to boot and bootaction tables.
-#
-# this enables merging the pxeaction and vm_profiles tables
-#
-#
 
 import os
 import os.path
@@ -104,7 +91,6 @@ class Command(stack.commands.remove.host.command):
 			rows = self.db.execute("""select networks.ip from
 				networks, nodes, subnets where
 				networks.node = nodes.id and
-				subnets.name = 'private' and
 				networks.subnet = subnets.id and
 				nodes.name = '%s' """ % host)
 

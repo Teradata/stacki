@@ -152,10 +152,10 @@ class Command(command):
 			# now set the runaction and installaction for each host
 			#
 			if runaction:
-				self.dump('set host runaction %s action=%s'
+				self.dump('"set host runaction" %s action=%s'
 					% (host, self.quote(runaction)))
 			if installaction:
-				self.dump('set host installaction %s action=%s'
+				self.dump('"set host installaction" %s action=%s'
 					% (host, self.quote(installaction)))
 
 

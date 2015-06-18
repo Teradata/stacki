@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,36 +51,65 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:53:00  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:07:02  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/04 20:15:31  bruno
-# moved 'dbreport hosts' and 'dbreport resolv' into the command line
-#
-#
 
 import stack.commands
 
-class Command(stack.commands.report.resolv.command):
+class Command(stack.commands.set.host.command):
 	"""
-	Report for /etc/resolv.conf for private side nodes.
+	Sets the logical interface of a mac address for particular hosts.
 
-	<example cmd='report resolv private'>
-	Outputs data for /etc/resolv.conf for compute nodes.
+	<arg type='string' name='host' repeat='1'>
+	One or more named hosts.
+	</arg>
+	
+	<arg type='string' name='mac'>
+	MAC address of the interface  whose logical interface will be reassigned
+ 	</arg>
+ 	
+ 	<arg type='string' name='interface'>
+	Logical interface.
+	</arg>
+
+	<param type='string' name='mac'>
+	Can be used in place of the mac argument.
+	</param>
+
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
+	</param>
+	
+
+	<example cmd='set host interface interface backend-0-0 00:0e:0c:a7:5d:ff eth1'>
+	Sets the logical interface of MAC address 00:0e:0c:a7:5d:ff to be eth1 
 	</example>
+
+	<example cmd='set host interface interface backend-0-0 interface=eth1 mac=00:0e:0c:a7:5d:ff'>
+	Same as above.
+	</example>
+	
+	<!-- cross refs do not exist yet
+	<related>set host interface interface</related>
+	<related>set host interface ip</related>
+	<related>set host interface module</related>
+	-->
+	<related>add host</related>
 	"""
+	
+	def run(self, params, args):
 
-	def run(self, param, args):
-		"""Defines the resolv.conf for private side nodes."""
+		(args, mac, interface) = self.fillPositionalArgs(('mac', 'interface'))
 
-		self.beginOutput()
-		self.addOutput('', self.searchdomain())
-		self.addOutput('', self.nameservers(self.db.getHostAttr('localhost',
-									'Kickstart_PrivateDNSServers')))
-		self.endOutput(padChar='')
+		if not len(args):
+			self.abort('must supply host')
+		if not mac:
+			self.abort('must supply mac')
+		if not interface:
+			self.abort('must supply interface')
+
+		for host in self.getHostnames(args):
+			self.db.execute("""update networks,nodes set 
+				networks.device='%s' where
+				nodes.name='%s' and networks.node=nodes.id and
+				networks.mac='%s'""" %
+				(interface, host, mac))
 

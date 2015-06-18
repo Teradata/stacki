@@ -90,57 +90,138 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+import os
+import os.path
+import sys
+import stack
+import string
 import stack.commands
+import stack.ip
+import stack.text
 
-class command(stack.commands.HostArgumentProcessor,
-	      stack.commands.report.command):
-
-	def searchdomain(self):
-		"""Prints the domain and search entries."""
-
-		s = 'search '
-		# First add the private network entry.
-		self.db.execute('select dnszone from ' +\
-			'subnets where name="private"')
-		private_domain, = self.db.fetchone()
-		s += private_domain
-
-		# Add the remaining network searches after
-		self.db.execute('select dnszone from ' +\
-			'subnets where name!="private"')
-		for (zone, ) in self.db.fetchall():
-			s += ' %s' % zone
-
-		return s
-
-	def nameservers(self, servers):
-		"""Prints a comma-separated list of name servers
-		in the resolv.conf style."""
-
-		s = ''
-		if servers:
-			for server in servers.split(','):
-				s += 'nameserver %s\n' % server
-		return s
-
-
-class Command(command):
+class Command(stack.commands.HostArgumentProcessor,
+	stack.commands.report.command):
 	"""
-	Report for /etc/resolv.conf for public side nodes.
-
-	<example cmd='report resolv'>
-	Outputs data for /etc/resolv.conf for the frontend.
-	</example>
+	Output the DHCP server configuration file.
 	"""
 
-	def run(self, param, args):
-		"""Defines the resolv.conf for public side nodes."""
+
+	def writeDhcpDotConf(self):
+		self.addOutput('', '<file name="/etc/dhcp/dhcpd.conf">')
+
+                self.addOutput('', stack.text.DoNotEdit())
+		self.addOutput('', 'ddns-update-style none;')
+
+                # Build a dictionary of DHCPD server addresses
+                # for each subnet that serves PXE (DHCP).
+
+                servers = {}
+                for row in self.db.select("""
+                       	s.name, n.ip from
+                	nodes nd, subnets s, networks n where 
+			s.id       = n.subnet and 
+			s.pxe      = TRUE     and 
+			n.node     = nd.id    and 
+        		nd.name    = '%s'
+			""" % self.db.getHostname()):
+                        servers[row[0]]    = row[1]
+                        servers['default'] = row[1]
+                if len(servers) > 2:
+                	del servers['default']
+
+                for (netname, network, netmask, gateway, zone) in self.db.select("""
+        		name, address, mask, gateway, zone from 
+			subnets where
+        		pxe = TRUE
+		        """):
+
+			self.addOutput('', '\nsubnet %s netmask %s {'
+				% (network, netmask))
+
+			self.addOutput('', '\tdefault-lease-time\t\t1200;')
+			self.addOutput('', '\tmax-lease-time\t\t\t1200;')
+
+			ipg  = stack.ip.IPGenerator(network, netmask)
+                        self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
+			self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
+			self.addOutput('', '\toption broadcast-address\t%s;' %
+                        	ipg.broadcast())
+			self.addOutput('', '}\n')
+
+		for name, in self.db.select("name from nodes order by rack, rank"):
+                        
+                        kickstartable = self.str2bool(
+                                self.db.getHostAttr(name, 'kickstartable'))
+                        
+                       	mac = None
+                       	ip  = None
+                       	dev = None
+                        
+			#
+			# look for a physical private interface that has an
+			# IP address assigned to it.
+			#
+			for (mac, ip, dev, netname) in self.db.select("""
+                       		n.mac, n.ip, n.device, s.name
+                               	from networks n, subnets s, nodes where
+                               	n.node     = nodes.id and 
+				nodes.name = '%s'     and
+				n.subnet   = s.id     and
+				(n.vlanid is NULL or n.vlanid = 0)
+                               	""" % name):
+                                if ip and mac and dev and netname:
+                                        self.addOutput('', '\nhost %s.%s.%s {' %
+                                        	(name, netname, dev))
+                                        self.addOutput('', '\toption host-name\t"%s";' % name)
+
+                                        self.addOutput('', '\thardware ethernet\t%s;' % mac)
+                                        self.addOutput('', '\tfixed-address\t\t%s;' % ip)
+
+                                        if kickstartable:
+                                        	self.addOutput('', '\tfilename\t\t"pxelinux.0";')
+
+                                                server = servers.get(netname)
+                                                if not server:
+                                                        server = servers.get('default')
+
+                                                self.addOutput('','\tserver-name\t\t"%s";'
+                                                	% server)
+                                        	self.addOutput('','\tnext-server\t\t%s;'
+							% server)
+                                
+                                        self.addOutput('', '}')
+
+
+		self.addOutput('', '</file>')
+
+
+
+	def writeDhcpSysconfig(self):
+		self.addOutput('', '<file name="/etc/sysconfig/dhcpd">')
+                self.addOutput('', stack.text.DoNotEdit())
+
+                devices = ''
+		for device, in self.db.select("""
+			device from
+                        networks n, subnets s
+			where n.node = (select id from nodes where name = '%s') and
+			s.pxe = TRUE and
+			n.subnet = s.id and
+			n.ip is not NULL and
+			(n.vlanid is NULL or n.vlanid = 0)
+        		""" % self.db.getHostname()):
+                        devices += '%s ' % device
+
+		self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())
+		self.addOutput('', '</file>')
+		
+
+
+
+	def run(self, params, args):
 
 		self.beginOutput()
-		self.addOutput('', self.searchdomain())
-		self.addOutput('', 'nameserver 127.0.0.1')
-		self.addOutput('', self.nameservers(self.db.getHostAttr('localhost',
-									'Kickstart_PublicDNSServers')))
+		self.writeDhcpDotConf()
+		self.writeDhcpSysconfig()
 		self.endOutput(padChar='')
 

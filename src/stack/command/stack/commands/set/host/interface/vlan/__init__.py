@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -83,7 +84,7 @@ class Command(stack.commands.set.host.command):
 	One or more named hosts.
 	</arg>
 	
-	<arg type='string' name='iface'>
+	<arg type='string' name='interface'>
  	Interface that should be updated. This may be a logical interface or 
  	the mac address of the interface.
  	</arg>
@@ -93,8 +94,8 @@ class Command(stack.commands.set.host.command):
 	pair 'subnet/vlan' must be defined in the VLANs table.
  	</arg>
  	
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
 	</param>
 
 	<param type='string' name='vlan'>
@@ -115,14 +116,14 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, iface, vid) = self.fillPositionalArgs(
-			('iface', 'vlan'))
+		(args, interface, vid) = self.fillPositionalArgs(
+			('interface', 'vlan'))
 
 		if not len(args):
 			self.abort('must supply host')
 
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
 
 		if not vid:
 			self.abort('must supply vlan')
@@ -138,5 +139,5 @@ class Command(stack.commands.set.host.command):
 				set net.vlanid = IF(%d = 0, NULL, %d)
 				where net.device = '%s' and
 				n.name = '%s' and net.node = n.id""" %
-				(vlanid, vlanid, iface, host))
+				(vlanid, vlanid, interface, host))
 

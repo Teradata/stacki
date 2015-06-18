@@ -1,3 +1,6 @@
+# @SI_Copyright@
+# @SI_Copyright@
+
 import stack.commands
 
 class Command(stack.commands.Command,
@@ -10,7 +13,7 @@ class Command(stack.commands.Command,
 	<param name="name" type="string">
 	Name for the bridge interface.
 	</param>
-	<param name="iface" type="string">
+	<param name="interface" type="string">
 	Physical interface to be bridged
 	</param>
 	<param name="network" type="string">
@@ -18,16 +21,16 @@ class Command(stack.commands.Command,
 	device to be bridged exists.
 	</param>
 	<example cmd="add host bridge backend-0-0 name=cloudbr0
-	network=private iface=eth0">
+	network=private interface=eth0">
 	This command will create a bridge called "cloudbr0", and
 	attach it to physical interface eth0 and place it on the
 	private network.
 	</example>
 	"""
 	def run(self, params, args):
-		(bridge, iface, network) = self.fillParams([
+		(bridge, interface, network) = self.fillParams([
 			('name', ''),
-			('iface',''),
+			('interface',''),
 			('network',''),
 			])
 
@@ -36,7 +39,7 @@ class Command(stack.commands.Command,
 		if not bridge:
 			self.abort('Please specify name of bridge')
 
-		if not iface and not network:
+		if not interface and not network:
 			self.abort('Please specify either name of interface\n'+\
 				'or name of network')
 
@@ -48,13 +51,13 @@ class Command(stack.commands.Command,
 			
 			if network:
 				sql = sql + ' and s.name="%s"' % network
-			if iface:
-				sql = sql + ' and nt.device="%s"' % iface
+			if interface:
+				sql = sql + ' and nt.device="%s"' % interface
 
 			r = self.db.execute(sql)
 			if r == 0:
 				self.abort('Could not find ' +\
-				("interface %s configured on " % iface if iface else '')+\
+				("interface %s configured on " % interface if interface else '')+\
 				("network %s on " % network if network else '')+\
 				"host %s" % host)
 			else:
@@ -67,18 +70,19 @@ class Command(stack.commands.Command,
 
 			# Set ip and subnet to NULL for original device
 			self.command('set.host.interface.ip',
-				[host, 'iface=%s' % dev,'ip=NULL'])
+				[host, 'interface=%s' % dev,'ip=NULL'])
 			self.command('set.host.interface.subnet',
-				[host, 'iface=%s' % dev, 'subnet=NULL'])
+				[host, 'interface=%s' % dev, 'subnet=NULL'])
+                        
 			# Create new bridge interface
-			a_h_i_args = [host, "iface=%s" % bridge, 'subnet=%s' % net,
+			a_h_i_args = [host, "interface=%s" % bridge, 'network=%s' % net,
 				'name=%s' % netname]
 			if ip:
 				a_h_i_args.append('ip=%s' % ip)
 			self.command('add.host.interface',
 				a_h_i_args)
 			self.command('set.host.interface.options',
-				[host, bridge, 'options=bridge'])
+				[host, 'interface=%s' % bridge, 'options=bridge'])
 			# Set the original device to point to the bridge
 			self.command('set.host.interface.options',
-				[host, dev, 'options=%s' % opts])
+				[host, 'interface=%s' % dev, 'options=%s' % opts])

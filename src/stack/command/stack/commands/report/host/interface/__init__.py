@@ -103,14 +103,14 @@ class Command(stack.commands.HostArgumentProcessor,
 	One host name.
 	</arg>
 
-	<param type='string' name='iface'>
+	<param type='string' name='interface'>
 	Output a configuration file for this host's interface (e.g. 'eth0').
-	If no 'iface' parameter is supplied, then configuration files
+	If no 'interface' parameter is supplied, then configuration files
 	for every interface defined for the host will be output (and each
 	file will be delineated by &lt;file&gt; and &lt;/file&gt; tags).
 	</param>
 
-	<example cmd='report host interface compute-0-0 iface=eth0'>
+	<example cmd='report host interface compute-0-0 interface=eth0'>
 	Output a network configuration file for compute-0-0's eth0 interface.
 	</example>
 	"""
@@ -308,7 +308,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 	def run(self, params, args):
 
-		self.iface, = self.fillParams([('iface', ), ])
+		self.interface, = self.fillParams([('interface', ), ])
 		self.beginOutput()
 
                 for host in self.getHostnames(args):
@@ -318,55 +318,9 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.endOutput(padChar = '')
 
-	def run_sunos(self, host):
-		# Ignore IPMI devices and get all the other configured
-		# interfaces
-		self.db.execute("select networks.ip, networks.device, "	+\
-				"subnets.netmask from networks, nodes, " +\
-				"subnets where nodes.name='%s' " % (host)+\
-				"and networks.subnet=subnets.id " +\
-				"and networks.device!='ipmi' "	+\
-				"and networks.node=nodes.id")
-
-		for row in self.db.fetchall():
-			(ip, device, netmask) = row
-			if ip is not None:
-				self.write_host_file_sunos(ip, netmask, device)
-		
-		# Get all the IPMI interfaces
-		self.db.execute("select networks.ip, networks.module, " +\
-				"subnets.netmask from networks, nodes, "+\
-				"subnets where nodes.name='%s' " %(host)+\
-				"and networks.device='ipmi' "		+\
-				"and networks.subnet=subnets.id "		+\
-				"and networks.node=nodes.id")
-
-		for row in self.db.fetchall():
-			(ip, channel, netmask) = row
-			self.addOutput(host, 'ipmitool lan set %s ipsrc static'
-				% (channel))
-			self.addOutput(host, 'ipmitool lan set %s ipaddr %s'
-				% (channel, ip))
-			self.addOutput(host, 'ipmitool lan set %s netmask %s'
-				% (channel, netmask))
-			self.addOutput(host, 'ipmitool lan set %s arp respond on'
-				% (channel))
-			self.addOutput(host, 'ipmitool user set password 1 admin')
-			self.addOutput(host, 'ipmitool lan set %s access on'
-				% (channel))
-			self.addOutput(host, 'ipmitool lan set %s user'
-				% (channel))
-			self.addOutput(host, 'ipmitool lan set %s auth ADMIN PASSWORD'
-				% (channel))
-	
-	def write_host_file_sunos(self, ip, netmask, device):
-		s = '<file name="/etc/hostname.%s">\n' % device
-		s += "%s netmask %s\n" % (ip, netmask)
-		s += '</file>\n'
-		self.addText(s)
-		
+                
 	def run_redhat(self, host):
-		self.db.execute("""select id, name, netmask, mtu
+		self.db.execute("""select id, name, mask, mtu
 			from subnets""")
 
 		#
@@ -467,8 +421,8 @@ class Command(stack.commands.HostArgumentProcessor,
 					if rows:
 						mtu, = self.db.fetchone()
 
-			if self.iface:
-				if self.iface == device:
+			if self.interface:
+				if self.interface == device:
 					self.writeConfig(host, mac, ip, device,
 						netmask, vlanid, mtu, optionlist,
 						channel)

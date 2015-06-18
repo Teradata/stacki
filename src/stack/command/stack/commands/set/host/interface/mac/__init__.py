@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,54 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.13  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.12  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.11  2009/04/14 16:12:17  bruno
-# push towards chimmy beta
-#
-# Revision 1.10  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.9  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.8  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.7  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.6  2007/06/18 20:18:52  phil
-# Updates to allow NULL setting
-# Rationalize command naming conventions
-#
-# Revision 1.5  2007/06/18 15:40:09  phil
-# set mac=NULL to clear the mac address
-#
-# Revision 1.4  2007/06/16 23:49:20  phil
-# Add some helper functions for parameter,argument processing when wanting to
-# support named arguments.   Cleaned up set host interface mac
-#
-# Revision 1.3  2007/06/16 02:39:51  mjk
-# - added list roll commands (used for docbook)
-# - docstrings should now be XML
-# - added parser for docstring to ASCII or DocBook
-# - ditched Phil's Network regex stuff (will come back later)
-# - updated several docstrings
-#
-# Revision 1.2  2007/06/16 00:15:46  phil
-# a fill positional parameters. Phil needs python help from katz
-#
-# Revision 1.1  2007/06/15 20:52:02  phil
-# Set the mac address of a particular interface
-#
 
 import stack.commands
 
@@ -109,7 +62,7 @@ class Command(stack.commands.set.host.command):
 	Host name.
 	</arg>
 	
-	<arg type='string' name='iface'>
+	<arg type='string' name='interface'>
  	Interface that should be updated. This may be a logical interface or 
  	the mac address of the interface.
  	</arg>
@@ -120,8 +73,8 @@ class Command(stack.commands.set.host.command):
 	clear the mac address.
 	</arg>
 
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
 	</param>
 
 	<param type='string' name='mac'>
@@ -133,16 +86,16 @@ class Command(stack.commands.set.host.command):
 	Sets the MAC Address for the eth1 device on host compute-0-0.
 	</example>
 
-	<example cmd='set host interface mac compute-0-0 iface=eth1 mac=00:0e:0c:a7:5d:ff'>
+	<example cmd='set host interface mac compute-0-0 interface=eth1 mac=00:0e:0c:a7:5d:ff'>
 	Same as above.
 	</example>
 	
-	<example cmd='set host interface mac compute-0-0 iface=eth1 mac=NULL'>
+	<example cmd='set host interface mac compute-0-0 interface=eth1 mac=NULL'>
 	clears the mac address from the database
 	</example>
 	
 	<!-- cross refs do not exist yet
-	<related>set host interface iface</related>
+	<related>set host interface interface</related>
 	<related>set host interface ip</related>
 	<related>set host interface module</related>
 	-->
@@ -151,14 +104,14 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, iface, mac) = self.fillPositionalArgs(('iface', 'mac'))
+		(args, interface, mac) = self.fillPositionalArgs(('interface', 'mac'))
 
 		hosts = self.getHostnames(args)	
 			
 		if len(hosts) != 1:
 			self.abort('must supply one host')
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
 		if not mac:
 			self.abort('must supply mac')
 
@@ -167,5 +120,5 @@ class Command(stack.commands.set.host.command):
 				networks.mac=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
 				(networks.device='%s' or networks.mac='%s')""" %
-				(mac, host, iface, iface))
+				(mac, host, interface, interface))
 

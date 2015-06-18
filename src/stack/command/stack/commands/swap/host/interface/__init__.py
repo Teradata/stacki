@@ -101,8 +101,8 @@ class Command(stack.commands.swap.host.command):
 	Host name of machine
 	</arg>
 
-	<param type='string' name='ifaces'>
-	Two comma-separated interface names (e.g., ifaces="eth0,eth1").
+	<param type='string' name='interfaces'>
+	Two comma-separated interface names (e.g., interfaces="eth0,eth1").
 	</param>
 
 	<param type='boolean' name='sync-config'>
@@ -111,7 +111,7 @@ class Command(stack.commands.swap.host.command):
 	</param>
 	"""
 
-	def swap(self, host, old_mac, old_iface, new_mac, new_iface):
+	def swap(self, host, old_mac, old_interface, new_mac, new_interface):
 		#
 		# swap two interfaces
 		#
@@ -132,11 +132,11 @@ class Command(stack.commands.swap.host.command):
 		(new_id, new_module, new_options) = self.db.fetchone()
 
 		self.db.execute("""update networks set mac = '%s',
-			device = '%s' where id = %s""" % (old_mac, old_iface,
+			device = '%s' where id = %s""" % (old_mac, old_interface,
 			new_id))
 
 		self.db.execute("""update networks set mac = '%s',
-			device = '%s' where id = %s""" % (new_mac, new_iface,
+			device = '%s' where id = %s""" % (new_mac, new_interface,
 			old_id))
 
 		if old_module:
@@ -154,18 +154,18 @@ class Command(stack.commands.swap.host.command):
 
 
 	def run(self, params, args):
-		ifaces, sync_config = self.fillParams([
-			('ifaces', None),
+		interfaces, sync_config = self.fillParams([
+			('interfaces', None),
 			('sync-config', 'yes')
 			])
 
 		syncit = self.str2bool(sync_config)
 
-		if not ifaces:
+		if not interfaces:
 			self.abort('must supply two interfaces')
 
-		iface = ifaces.split(',')
-		if len(iface) != 2:
+		interface = interfaces.split(',')
+		if len(interface) != 2:
 			self.abort('must supply two interfaces')
 
 		hosts = self.getHostnames(args)
@@ -175,19 +175,19 @@ class Command(stack.commands.swap.host.command):
 			self.db.execute("""
 				select mac from networks where node =
 				(select id from nodes where name = '%s') and
-				device = '%s' """ % (host, iface[0]))
+				device = '%s' """ % (host, interface[0]))
 
 			m, = self.db.fetchone()
 			mac.append(m)
 
 			self.db.execute("""select mac from networks where node =
 				(select id from nodes where name = '%s') and
-				device = '%s' """ % (host, iface[1]))
+				device = '%s' """ % (host, interface[1]))
 
 			m, = self.db.fetchone()
 			mac.append(m)
 
-			self.swap(host, mac[0], iface[0], mac[1], iface[1])
+			self.swap(host, mac[0], interface[0], mac[1], interface[1])
 
 		if syncit:
 			self.command('sync.host.config', hosts)	

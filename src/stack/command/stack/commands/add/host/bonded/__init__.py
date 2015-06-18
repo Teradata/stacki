@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -161,24 +162,24 @@ class Command(stack.commands.add.host.command):
 				'Run "rocks list network" to get a list\n' +\
 				'of valid networks.')
 
-		ifaces = []
+		interfaces = []
 		if ',' in interfaces:
 			#
 			# comma-separated list
 			#
 			for i in interfaces.split(','):
-				ifaces.append(i.strip())
+				interfaces.append(i.strip())
 		else:
 			#
 			# assume it is a space-separated list
 			#
 			for i in interfaces.split():
-				ifaces.append(i.strip())
+				interfaces.append(i.strip())
 			
 		#
 		# check if the physical interfaces exist
 		#
-		for i in ifaces:
+		for i in interfaces:
 			rows = self.db.execute("""select net.device from
 				networks net, nodes n where
 				net.device = '%s' and n.name = '%s' and
@@ -192,27 +193,34 @@ class Command(stack.commands.add.host.command):
 		#
 		# add the bonded interface
 		#
-		self.command('add.host.interface',
-			[host, channel, 'ip=%s' % ip, 'module=bonding',
-			'name=%s' % name, 'subnet=%s' % network])
+		self.command('add.host.interface', [
+                        host,
+                        'interface=%s' % channel,
+                        'ip=%s' % ip,
+                        'module=bonding',
+                        'name=%s' % name,
+                        'network=%s' % network
+                        ])
 
 		# Set the options for the interface
 		if opts:
-			self.command('set.host.interface.options',
-				[host, 'iface=%s' % channel,
-				'options=bonding-opts="%s"' % opts])
+			self.command('set.host.interface.options', [
+                                host,
+                                'interface=%s' % channel,
+				'options=bonding-opts="%s"' % opts
+                                ])
 		#
 		# clear out all networking info from the physical interfaces and
 		# then associate the interfaces with the bonded channel
 		#
-		for i in ifaces:
-			self.command('set.host.interface.subnet',
-				(host, i, 'subnet=NULL'))
+		for i in interfaces:
+			self.command('set.host.interface.network',
+				(host, 'interface=%s' % i, 'network=NULL'))
 			self.command('set.host.interface.ip',
-				(host, i, 'ip=NULL'))
+				(host, 'interface=%s' % i, 'ip=NULL'))
 			self.command('set.host.interface.name',
-				(host, i, 'name=NULL'))
+				(host, 'interface=%s' % i, 'name=NULL'))
 
 			self.command('set.host.interface.channel',
-				(host, i, 'channel=%s' % channel))
+				(host, 'interface=%s' % i, 'channel=%s' % channel))
 

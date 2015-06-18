@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,27 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.12  2010/09/07 23:52:51  bruno
-# star power for gb
-#
-# Revision 1.11  2010/06/14 17:45:27  bruno
-# tweak
-#
-# Revision 1.10  2010/06/07 23:50:55  bruno
-# 'rocks config host interface' now uses the 'rocks swap host interface'
-# command when needed.
-#
-# Revision 1.9  2010/05/20 20:59:10  bruno
-# pulled my head of out of my keister and figured out how to pass parameters
-# to 'rocks config host interface'
-#
-# Revision 1.8  2010/05/20 00:16:12  bruno
-# new code to add MAC addresses to the database and to track which interface
-# is the private one
-#
-#
 
 import os
 import re
@@ -88,7 +68,7 @@ class Command(stack.commands.config.host.command):
 	Host name of machine
 	</arg>
 
-	<param type='string' name='iface'>
+	<param type='string' name='interface'>
 	Interface names (e.g., "eth0"). If multiple interfaces are supplied,
 	then they must be comma-separated.
 	</param>
@@ -110,8 +90,8 @@ class Command(stack.commands.config.host.command):
 	"""
 
 	def run(self, params, args):
-		(iface, mac, module, flag) = self.fillParams([
-			('iface', None),
+		(interface, mac, module, flag) = self.fillParams([
+			('interface', None),
 			('mac', None),
 			('module', None),
 			('flag', None) ])
@@ -127,16 +107,30 @@ class Command(stack.commands.config.host.command):
 
 		discovered_macs = []
 
-		macs = mac.split(',')
-		ifaces = iface.split(',')
-		modules = module.split(',')
-		flags = flag.split(',')
+		if mac:
+			macs = mac.split(',')
+		else:
+			macs = []
+
+		if interface:
+			interfaces = interface.split(',')
+		else:
+			interfaces = []
+
+		if module:
+			modules = module.split(',')
+		else:
+			modules = []
+		if flag:
+			flags = flag.split(',')
+		else:
+			flags = []
 
 		for i in range(0, len(macs)):
 			a = (macs[i], )
 
-			if len(ifaces) > i:
-				a += (ifaces[i], )
+			if len(interfaces) > i:
+				a += (interfaces[i], )
 			else:
 				a += ('', )
 
@@ -155,7 +149,7 @@ class Command(stack.commands.config.host.command):
 		#
 		# make sure all the MACs are in the database
 		#
-		for (mac, iface, module, ks) in discovered_macs:
+		for (mac, interface, module, ks) in discovered_macs:
 			rows = self.db.execute("""select mac from networks
 				where mac = '%s' """ % (mac))
 			if rows == 0:
@@ -168,11 +162,11 @@ class Command(stack.commands.config.host.command):
 				rows = self.db.execute("""select * from
 					networks where device = '%s' and
 					node = (select id from nodes where
-					name = '%s')""" % (iface, host))
+					name = '%s')""" % (interface, host))
 
 				if rows == 1:
 					self.command('set.host.interface.mac',
-						(host, 'iface=%s' % iface,
+						(host, 'interface=%s' % interface,
 						'mac=%s' % mac))
 					#
 					# since the MAC changed, we are not
@@ -182,27 +176,27 @@ class Command(stack.commands.config.host.command):
 					#
 					self.command(
 						'set.host.interface.module',
-						(host, 'iface=%s' % iface,
+						(host, 'interface=%s' % interface,
 						'module=NULL'))
 				else:
 					self.command('add.host.interface', 
-						(host, 'iface=%s' % iface,
+						(host, 'interface=%s' % interface,
 						'mac=%s' % mac))
 
 				sync_config = 1
 
 		#
-		# update the iface-to-mac mapping
+		# update the interface-to-mac mapping
 		#
-		for (mac, iface, module, ks) in discovered_macs:
-			self.command('set.host.interface.iface', 
-				(host, 'iface=%s' % iface,
+		for (mac, interface, module, ks) in discovered_macs:
+			self.command('set.host.interface.interface', 
+				(host, 'interface=%s' % interface,
 					'mac=%s' % mac))
 
 		#
 		# let's see if the private interface moved
 		#
-		for (mac, iface, module, ks) in discovered_macs:
+		for (mac, interface, module, ks) in discovered_macs:
 			if ks != 'ks':
 				continue
 
@@ -213,7 +207,7 @@ class Command(stack.commands.config.host.command):
 				% (host))
 				
 			if rows == 1:
-				(old_mac, old_iface) = self.db.fetchone()
+				(old_mac, old_interface) = self.db.fetchone()
 
 				if old_mac != mac:
 					#
@@ -223,8 +217,8 @@ class Command(stack.commands.config.host.command):
 					#
 					self.command('swap.host.interface',
 						(host, 'sync-config=no',
-						'ifaces=%s,%s' %
-						(old_iface, iface)))
+						'interfaces=%s,%s' %
+						(old_interface, interface)))
 
 					sync_config = 1
 

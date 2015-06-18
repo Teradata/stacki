@@ -173,25 +173,3 @@ class Command(command):
 		self.command('add.appliance.attr', [ app_name, 'kickstartable',
 			self.bool2str(kickstartable) ])
 		
-		if kickstartable:
-			next_server = None
-
-			try:
-				next_server = self.db.getHostAttr('localhost',
-					'Kickstart_PrivateKickstartHost')
-			except:
-				rows = self.db.execute("""select value from
-					global_attributes where
-					attr='Kickstart_PrivateKickstartHost'
-					""")
-
-				if rows == 1:
-					next_server, = self.db.fetchone()
-
-			if next_server:
-				self.command('add.appliance.attr', [app_name,
-					'dhcp_nextserver', next_server])
-
-				self.command('add.appliance.attr', [app_name,
-					'dhcp_filename', 'pxelinux.0' ])
-

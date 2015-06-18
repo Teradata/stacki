@@ -98,8 +98,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Outputs the network configuration file for a host (on RHEL-based
 	machines, this is the contents of the file /etc/sysconfig/network).
 
-	<arg type='string' name='host'>
-	One host name.
+	<arg type='string' name='host' repeat='1'>
+        Hostname.
 	</arg>
 
 	<example cmd='report host network compute-0-0'>
@@ -112,8 +112,35 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 		
 		for host in self.getHostnames(args):
-			osname = self.db.getHostOS(host)
-			self.runImplementation(osname, host)
-			
-		self.endOutput(padChar='')
+                        self.addOutput(host, '<file name="/etc/sysconfig/network">')
+                        self.addOutput(host, 'NETWORKING=yes')
 
+                        network = None
+                        zone    = None
+                        name    = None
+                        gateway = None
+                        for row in self.call('list.host.interface', [ host ]):
+                                if row['default']:
+                                        network = row['network']
+                                        name    = row['name']
+                                        if not name:
+                                                name = host
+
+                        if network:
+                                for row in self.call('list.network', [ network ]):
+                                        gateway = row['gateway']
+                                        zone    = row['zone']
+
+                        if zone:
+                                hostname = '%s.%s' % (name, zone)
+                        else:
+                                hostname = name
+                        self.addOutput(host, 'HOSTNAME=%s' % hostname)
+
+                        if gateway:
+                                self.addOutput(host, 'GATEWAY=%s' % gateway)
+
+                        self.addOutput(host, '</file>')
+                
+
+            	self.endOutput(padChar='')

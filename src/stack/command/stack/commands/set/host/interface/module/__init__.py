@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,39 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.9  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.8  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.7  2009/04/14 16:12:17  bruno
-# push towards chimmy beta
-#
-# Revision 1.6  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.4  2007/07/05 17:46:45  bruno
-# fixes
-#
-# Revision 1.3  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.2  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/18 20:58:02  phil
-# Fix doc in gateway. Added set module command
-#
-# Revision 1.1  2007/06/18 20:44:58  phil
-# Allow setting of gateway
-#
+
 
 import string
 import stack.commands
@@ -96,7 +65,7 @@ class Command(stack.commands.set.host.command):
 	One or more hosts.
 	</arg>
 	
-	<arg type='string' name='iface'>
+	<arg type='string' name='interface'>
  	Interface that should be updated. This may be a logical interface or 
  	the MAC address of the interface.
  	</arg>
@@ -105,8 +74,8 @@ class Command(stack.commands.set.host.command):
 	The software device module of interface. Use module=NULL to clear.
 	</arg>
 
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
 	</param>
 
 	<param type='string' name='module'>
@@ -118,16 +87,16 @@ class Command(stack.commands.set.host.command):
 	Sets the device module for eth1 to be e1000 on host compute-0-0.
 	</example>
 
-	<example cmd='set host interface module compute-0-0 iface=eth1 module=e1000'>
+	<example cmd='set host interface module compute-0-0 interface=eth1 module=e1000'>
 	Same as above.
 	</example>
 	
-	<example cmd='set host interface module compute-0-0 iface=eth1 module=NULL'>
+	<example cmd='set host interface module compute-0-0 interface=eth1 module=NULL'>
 	Clear the module entry.
 	</example>
 	
 	<!-- cross refs do not exist yet
-	<related>set host interface iface</related>
+	<related>set host interface interface</related>
 	<related>set host interface ip</related>
 	<related>set host interface module</related>
 	-->
@@ -136,13 +105,13 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, iface, module) = self.fillPositionalArgs(
-			('iface', 'module'))
+		(args, interface, module) = self.fillPositionalArgs(
+			('interface', 'module'))
 			
 		if not len(args):
 			self.abort('must supply host')
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
 		if not module:
 			self.abort('must supply module')
 
@@ -154,5 +123,5 @@ class Command(stack.commands.set.host.command):
 				networks.module=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
 				(networks.device='%s' or networks.mac='%s')""" %
-				(module, host, iface, iface))
+				(module, host, interface, interface))
 

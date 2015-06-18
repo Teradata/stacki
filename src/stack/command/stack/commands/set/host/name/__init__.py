@@ -109,11 +109,11 @@ class Command(stack.commands.set.host.command):
 	Can be used in place of the 'name' argument.
 	</param>
 
-	<example cmd='set host name compute-0-0 new-compute-0-0'>
-	Changes the name of compute-0-0 to new-compute-0-0.
+	<example cmd='set host name backend-0-0 new-backend-0-0'>
+	Changes the name of backend-0-0 to new-backend-0-0.
 	</example>
 
-	<example cmd='set host cpus compute-0-0 name=new-compute-0-1'>
+	<example cmd='set host cpus backend-0-0 name=new-backend-0-1'>
 	Same as above.
 	</example>
 	"""
@@ -140,7 +140,7 @@ class Command(stack.commands.set.host.command):
 		
 
                 for dict in self.call('list.host.interface',
-                                      [ host, 'iface=private' ]):
+                                      [ host, 'interface=private' ]):
                         addr = dict['ip']
                         
                 self.command('sync.config')

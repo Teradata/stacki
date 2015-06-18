@@ -38,57 +38,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-#
-# @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
-#  
-# Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
-# 
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.  The name of the
-# software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
-# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
-# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# @Copyright@
 
 
 import csv
@@ -125,10 +74,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					% mac
 				sys.exit((-1, msg, ''))
 
-	def checkSubnet(self, subnet):
-		if subnet not in self.subnets:
-			msg = 'subnet "%s" does not exist in the database' \
-				% subnet
+	def checkNetwork(self, network):
+		if network not in self.networks:
+			msg = 'network "%s" does not exist in the database' \
+				% network
 			sys.exit((-1, msg, ''))
 
 
@@ -138,7 +87,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.list_host_interface = \
 			self.owner.call('list.host.interface')
 		self.appliances = self.getApplianceNames()
-		self.subnets = self.getNetworkNames()
+		self.networks = self.getNetworkNames()
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
 		reader = csv.reader(open(filename, 'rU'))
@@ -163,7 +112,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				# make checking the header easier
 				#
 				required = [ 'name', 'appliance', 'ip', 'mac',
-					'interface', 'rack', 'rank', 'subnet' ]
+					'interface', 'rack', 'rank', 'network' ]
 
 				for i in range(0, len(row)):
 					header[i] = header[i].strip().lower()
@@ -184,7 +133,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			ip = None
 			mac = None
 			interface = None
-			subnet = None
+			network = None
 			ifhostname = None
 			channel = None
 			options = None
@@ -218,8 +167,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					mac = field.lower()
 				elif header[i] == 'interface':
 					interface = field.lower()
-				elif header[i] == 'subnet':
-					subnet = field
+				elif header[i] == 'network':
+					network = field
 				elif header[i] == 'interface hostname':
 					ifhostname = field
 				elif header[i] == 'channel':
@@ -288,8 +237,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				self.owner.interfaces[name][interface]['ip'] = ip
 			if mac:
 				self.owner.interfaces[name][interface]['mac'] = mac
-			if subnet:
-				self.owner.interfaces[name][interface]['subnet'] = subnet
+			if network:
+				self.owner.interfaces[name][interface]['network'] = network
 			if ifhostname:
 				self.owner.interfaces[name][interface]['ifhostname'] = ifhostname
 			if channel:
@@ -382,11 +331,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					macs.append(mac)
 
 				try:
-					subnet = self.owner.interfaces[name][interface]['subnet']
+					network = self.owner.interfaces[name][interface]['network']
 				except:
-					subnet = None
-				if subnet:
-					self.checkSubnet(subnet)
+					network = None
+				if network:
+					self.checkNetwork(network)
 
 
 				#
@@ -396,11 +345,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				#
 				if re.match('bond[0-9]+$', interface):
 					found = 0
-					for iface in self.owner.interfaces[name].keys():
-						if 'channel' not in self.owner.interfaces[name][iface].keys():
+					for interface in self.owner.interfaces[name].keys():
+						if 'channel' not in self.owner.interfaces[name][interface].keys():
 							continue
 
-						if interface == self.owner.interfaces[name][iface]['channel']:
+						if interface == self.owner.interfaces[name][interface]['channel']:
 							found = 1
 							break
 

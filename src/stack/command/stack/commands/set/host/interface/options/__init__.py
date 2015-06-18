@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,19 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/10/06 19:41:10  phil
-# Document and interpret linux-only options: dhcp, noreport.
-# Needed by EC2.
-#
-# Revision 1.2  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.1  2010/04/19 22:56:58  bruno
-# new
-#
-#
 
 import string
 import stack.commands
@@ -76,13 +64,13 @@ class Command(stack.commands.set.host.command):
 	One or more hosts.
 	</arg>
 	
-	<arg type='string' name='iface'>
+	<arg type='string' name='interface'>
  	Interface that should be updated. This may be a logical interface or 
  	the MAC address of the interface.
  	</arg>
  	
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
 	</param>
 
 	<param type='string' name='options'>
@@ -92,19 +80,19 @@ class Command(stack.commands.set.host.command):
 	options for bonded interfaces
 	</param>
 	
-	<example cmd='set host interface options compute-0-0 iface=eth1 options="Speed=10"'>
+	<example cmd='set host interface options compute-0-0 interface=eth1 options="Speed=10"'>
 	Sets the option "Speed=10" for eth1 on e1000 on host compute-0-0.
 	</example>
 	
-	<example cmd='set host interface options compute-0-0 iface=eth1 options=NULL'>
+	<example cmd='set host interface options compute-0-0 interface=eth1 options=NULL'>
 	Clear the options entry.
 	</example>
 
-	<example cmd='set host interface options compute-0-0 iface=eth0 options="dhcp"'>
+	<example cmd='set host interface options compute-0-0 interface=eth0 options="dhcp"'>
 	Linux only: Configure eth0 interface for DHCP instead of static.
 	</example>
 
-	<example cmd='set host interface options compute-0-0 iface=eth0 options="noreport"'>
+	<example cmd='set host interface options compute-0-0 interface=eth0 options="noreport"'>
 	Linux only:  Tell rocks report host interface to ignore this interface
 	when writing configuration files
 	</example>
@@ -113,13 +101,13 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, iface, options) = self.fillPositionalArgs(
-			('iface', 'options'))
+		(args, interface, options) = self.fillPositionalArgs(
+			('interface', 'options'))
 			
 		if not len(args):
 			self.abort('must supply host')
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
 		if not options:
 			self.abort('must supply options')
 
@@ -131,5 +119,5 @@ class Command(stack.commands.set.host.command):
 				networks.options=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
 				(networks.device='%s' or networks.mac='%s')""" %
-				(options, host, iface, iface))
+				(options, host, interface, interface))
 

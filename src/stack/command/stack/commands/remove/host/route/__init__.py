@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,21 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.3  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.2  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 22:19:56  mjk
-# - route commands done
-# - cleanup of stack.host plugins
-#
 
 import stack.commands
 
@@ -72,8 +58,8 @@ class Command(stack.commands.remove.host.command):
 	"""
 	Remove a static route for a host.
 
-	<arg type='string' name='host'>
-	Name of a host machine. This argument is required.
+	<arg type='string' name='host' repeat='1'>
+	Name of a host machine.
 	</arg>
 
 	<arg type='string' name='address'>

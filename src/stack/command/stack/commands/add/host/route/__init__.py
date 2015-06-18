@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,37 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.9  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.8  2010/07/09 22:30:56  bruno
-# gateway can't be NULL
-#
-# Revision 1.7  2010/05/20 00:31:44  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.6  2010/01/14 23:42:30  bruno
-# added 'host' argument to help section
-#
-# Revision 1.5  2009/07/21 21:50:51  bruno
-# fix help
-#
-# Revision 1.4  2009/05/01 19:06:55  mjk
-# chimi con queso
-#
-# Revision 1.3  2009/03/13 19:44:09  mjk
-# - added add.appliance.route
-# - added add.os.route
-#
-# Revision 1.1  2009/03/13 17:58:15  mjk
-# *** empty log message ***
-#
-
 
 import stack.commands
 
@@ -88,17 +58,17 @@ class Command(stack.commands.add.host.command):
 	"""
 	Add a route for a host
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' repeat='1'>
 	Host name of machine
 	</arg>
 	
 	<param type='string' name='address'>
 	Host or network address
-	</arg>
+	</param>
 	
 	<param type='string' name='gateway'>
 	Network or device gateway
-	</arg>
+	</param>
 
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route
@@ -108,12 +78,12 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 
-		(args, address, gateway) = self.fillPositionalArgs(
-			('address','gateway'))
-
-		(netmask,) = self.fillParams([('netmask', '255.255.255.255')])
-		
-		hosts = self.getHostnames(args)
+                hosts = self.getHostnames(args)
+                
+		(address, gateway, netmask) = self.fillParams([
+                        ('address', None),
+                        ('gateway', None),
+                        ('netmask', '255.255.255.255')])
 		
 		if not address:
 			self.abort('address required')

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,55 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.11  2010/09/07 23:52:56  bruno
-# star power for gb
-#
-# Revision 1.10  2010/06/30 17:37:33  anoop
-# Overhaul of the naming system. We now support
-# 1. Multiple zone/domains
-# 2. Serving DNS for multiple domains
-# 3. No FQDN support for network names
-#    - FQDN must be split into name & domain.
-#    - Each piece information will go to a
-#      different table
-# Hopefully, I've covered the basics, and not broken
-# anything major
-#
-# Revision 1.9  2009/06/03 21:28:52  bruno
-# add MTU to the subnets table
-#
-# Revision 1.8  2009/05/01 19:06:59  mjk
-# chimi con queso
-#
-# Revision 1.7  2008/10/18 00:55:54  mjk
-# copyright 5.1
-#
-# Revision 1.6  2008/03/06 23:41:38  mjk
-# copyright storm on
-#
-# Revision 1.5  2007/07/04 01:47:38  mjk
-# embrace the anger
-#
-# Revision 1.4  2007/06/28 19:51:42  bruno
-# help for 'rocks list network'
-#
-# Revision 1.3  2007/06/19 16:42:42  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.2  2007/06/12 01:33:40  mjk
-# - added NetworkArgumentProcessor
-# - updated rocks list network
-#
-# Revision 1.1  2007/06/12 01:10:42  mjk
-# - 'rocks add subnet' is now 'rocks add network'
-# - added set network subnet|netmask
-# - added list network
-# - other cleanup
-#
-
 
 import os
 import stat
@@ -128,14 +80,49 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	"""
 
 	def run(self, params, args):
-		
+
+                (dns, pxe) = self.fillParams([('dns', None),
+                                              ('pxe', None)])
+
+                if dns:
+                        dns = self.str2bool(dns)
+                if pxe:
+                        pxe = self.str2bool(pxe)
+                        
 		self.beginOutput()
-		
-		for net in self.getNetworkNames(args):
-			self.db.execute("""select subnet, netmask, mtu, 
-				dnszone, if(servedns,'True','False')
-				from subnets where name='%s'""" % net)
-			for row in self.db.fetchall():
-				self.addOutput(net, row)
+
+                networks = []
+                for row in self.db.select("""
+                	name, address, mask, gateway, mtu, zone,
+                        if(dns, 'True', 'False'),
+                        if(pxe, 'True', 'False')
+                        from subnets
+                        """):
+                        network = {}
+                        network['name']    = row[0]
+                        network['address'] = row[1]
+                        network['mask']    = row[2]
+                        network['gateway'] = row[3]
+                        network['mtu']     = row[4]
+                        network['zone']    = row[5]
+                        network['dns']     = self.str2bool(row[6])
+                        network['pxe']     = self.str2bool(row[7])
+                        networks.append(network)
+
+                for network in networks:
+
+                	if not (dns == None or network['dns'] == dns):
+                                continue
+                	if not (pxe == None or network['pxe'] == pxe):
+                                continue
+                        
+			self.addOutput(network['name'], [ network['address'],
+                                                        network['mask'],
+                                                        network['gateway'],
+                                                        network['mtu'],
+                                                        network['zone'],
+                                                        network['dns'],
+                                                        network['pxe'] ])     
 			
-		self.endOutput(header=['network', 'subnet', 'netmask', 'mtu', 'dnszone', 'servedns'])
+		self.endOutput(header=['network', 'address', 'mask', 'gateway',
+                                               'mtu', 'zone', 'dns', 'pxe'])

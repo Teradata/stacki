@@ -464,13 +464,11 @@ class HostArgumentProcessor:
 				memberships.append(membership)
 
 			racks = []
-			for (rack,rank) in self.db.select("""
-				rack,rank from nodes	
+			for (rack,) in self.db.select("""
+                                distinct(rack) from nodes
 				"""):
 				racks.append(rack)
-			# You know, just get the racks we have
-			racks = set(racks)
-                        
+
 			list = []
 			for host in names:
                                 if host in environments:
@@ -739,8 +737,10 @@ class DocStringHandler(handler.ContentHandler,
 		self.users			= users
 		self.section			= {}
 		self.section['description']	= ''
-		self.section['arg']		= []
-		self.section['param']		= []
+                self.section['optarg']		= []
+                self.section['reqarg']		= []
+		self.section['optparam']	= []
+		self.section['reqparam']	= []
 		self.section['example']		= []
 		self.section['related']		= []
 		self.parser = make_parser()
@@ -855,63 +855,96 @@ class DocStringHandler(handler.ContentHandler,
 		return s
 
 	
-	def getUsageText(self):
+	def getUsageText(self, colors):
+                if colors:
+                        bold   = colors['bold']['code']
+                        unbold = colors['reset']['code']
+                else:
+                	bold   = ''
+                        unbold = ''
+                
 		s = ''
-		for ((name, type, opt, rep), txt) in self.section['arg']:
-			if opt:
-				s += '[%s]' % name
-			else:
-				s += '{%s}' % name
-			if rep:
-				s += '...'
-			s += ' '
-		for ((name, type, opt, rep), txt) in self.section['param']:
-			if opt:
-				s += '[%s=%s]' % (name, type)
-			else:
-				s += '{%s=%s}' % (name, type)
-			if rep:
-				s += '...'
-			s += ' '
+		for (name, type, rep, txt) in self.section['reqarg']:
+                        if rep:
+                                dots = ' ...'
+                        else:
+                                dots = ''
+			s += '{%s%s%s%s} ' % (bold, name, unbold, dots)
+		for (name, type, rep, txt) in self.section['optarg']:
+                        if rep:
+                                dots = ' ...'
+                        else:
+                                dots = ''
+			s += '[%s%s%s%s] ' % (bold, name, unbold, dots)
+		for (name, type, rep, txt) in self.section['reqparam']:
+                        if rep:
+                                dots = ' ...'
+                        else:
+                                dots = ''
+			s += '{%s%s%s=%s%s} ' % (bold, name, unbold, type, dots)
+		for (name, type, rep, txt) in self.section['optparam']:
+                        if rep:
+                                dots = ' ...'
+                        else:
+                                dots = ''
+			s += '[%s%s%s=%s%s] ' % (bold, name, unbold, type, dots)
 		if s and s[-1] == ' ':
 			return s[:-1]
 		else:
 			return s
 	
-	def getPlainText(self):
+	def getPlainText(self, colors=None):
 		if 'root' in self.users:
 			prompt = '#'
 		else:
 			prompt = '$'
+
+                if colors:
+                        bold   = colors['bold']['code']
+                        unbold = colors['reset']['code']
+                else:
+                	bold   = ''
+                        unbold = ''
+                
 		s  = ''
-		s += 'stack %s %s' % (self.name, self.getUsageText())
-		s += '\n\nDescription:\n'
+		s += 'stack %s %s' % (self.name, self.getUsageText(colors))
+		s += '\n\n%sDescription%s\n' % (bold, unbold)
 		s += self.section['description']
-		if self.section['arg']:
-			s += '\nArguments:\n\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['arg']:
-				if opt:
-					s += '\t[%s]' % name
-				else:
-					s += '\t{%s}' % name
-				s += '\n%s\n' % txt
-		if self.section['param']:
-			s += '\nParameters:\n\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['param']:
-				if opt:
-					s += '\t[%s=%s]' % (name, type)
-				else:
-					s += '\t{%s=%s}' % (name, type)
-				s += '\n%s\n' % txt
+		if self.section['reqarg'] or self.section['optarg']:
+			s += '\n%sArguments%s\n\n' % (bold, unbold)
+			for (name, type, rep, txt) in self.section['reqarg']:
+                                if rep:
+                                        dots = ' ...'
+                                else:
+                                        dots = ''
+                                s += '\t{%s%s%s%s}\n%s\n' % (bold, name, unbold, dots, txt)
+			for (name, type, rep, txt) in self.section['optarg']:
+                                if rep:
+                                        dots = ' ...'
+                                else:
+                                        dots = ''
+				s += '\t[%s%s%s%s]\n%s\n' % (bold, name, unbold, dots, txt)
+		if self.section['reqparam'] or self.section['optparam']:
+			s += '\n%sParameters%s\n\n' % (bold, unbold)
+			for (name, type, rep, txt) in self.section['reqparam']:
+                                if rep:
+                                        dots = ' ...'
+                                else:
+                                        dots = ''
+				s += '\t{%s%s%s=%s%s}\n%s\n' % (bold, name, unbold, type, dots, txt)
+			for (name, type, rep, txt) in self.section['optparam']:
+                                if rep:
+                                        dots = ' ...'
+                                else:
+                                        dots = ''
+				s += '\t[%s%s%s=%s%s]\n%s\n' % (bold, name, unbold, type, dots, txt)
 		if self.section['example']:
-			s += '\nExamples:\n\n'
+			s += '\n%sExamples%s\n\n' % (bold, unbold)
 			for (cmd, txt) in self.section['example']:
 				s += '\t%s stack %s\n' % (prompt, cmd)
 				s += '%s\n' % txt
 		if self.section['related']:
-			s += '\nRelated Commands:\n\n'
+			s += '\n%sRelated Commands%s\n\n' % (bold, unbold)
 			for related in self.section['related']:
 				s += '\tstack %s\n' % related
 		return s
@@ -1033,9 +1066,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.key  = None
 		self.text = ''
 		if name in [ 'arg', 'param' ]:
-			try:
-				type = attrs.get('type')
-			except:
+                        type = attrs.get('type')
+			if not type:
 				type = 'string'
 			try:
 				optional = int(attrs.get('optional'))
@@ -1053,16 +1085,29 @@ class DocStringHandler(handler.ContentHandler,
 		elif name == 'example':
 			self.key = attrs.get('cmd')
 		
-	def endElement(self, name):
-		if name == 'docstring':
+	def endElement(self, tag):
+		if tag == 'docstring':
 			# we are done so sort the param and related lists
-			self.section['param'].sort()
+			self.section['reqparam'].sort()
+			self.section['optparam'].sort()
 			self.section['related'].sort()
-		elif name in [ 'arg', 'param', 'example' ]:
-			self.section[name].append((self.key, self.text))
+                elif tag == 'arg':
+                        name, type, optional, repeat = self.key
+                        if optional:
+                                self.section['optarg'].append((name, type, repeat, self.text))
+                        else:
+                                self.section['reqarg'].append((name, type, repeat, self.text))
+                elif tag == 'param':
+                        name, type, optional, repeat = self.key
+                        if optional:
+                                self.section['optparam'].append((name, type, repeat, self.text))
+                        else:
+                                self.section['reqparam'].append((name, type, repeat, self.text))
+                elif tag == 'example':
+			self.section['example'].append((self.key, self.text))
 		else:
-			if self.section.has_key(name):
-				self.section[name].append(self.text)
+			if self.section.has_key(tag):
+				self.section[tag].append(self.text)
 		
 	def characters(self, s):
 		self.text += s
@@ -1332,7 +1377,7 @@ class DatabaseConnection:
                         list = []
 			for (ip, host, subnet, netmask) in self.select("""
 				n.ip, if(n.name, n.name, nd.name), 
-                                s.subnet, s.netmask from 
+                                s.address, s.mask from 
                                 networks n, appliances a, subnets s, nodes nd 
                                 where 
                                 n.node=nd.id and nd.appliance=a.id and 
@@ -1351,7 +1396,7 @@ class DatabaseConnection:
 
 			for (ip, host, zone, subnet, netmask) in self.select("""
 				n.ip, if(n.name, n.name, nd.name), 
-                                s.dnszone, s.subnet, s.netmask from 
+                                s.zone, s.address, s.mask from 
                                 networks n, appliances a, subnets s, nodes nd 
                                 where 
                                 n.node=nd.id and nd.appliance=a.id and
@@ -1366,8 +1411,8 @@ class DatabaseConnection:
 				list.append((None, 'Kickstart_PublicBroadcast',
                                              '%s' % ipg.broadcast()))
 
-			for (name, subnet, netmask, dnszone) in self.select("""
-				name, subnet, netmask, dnszone from 
+			for (name, subnet, netmask, zone) in self.select("""
+				name, address, mask, zone from 
                                 subnets
 				"""):
 				if name == 'private':
@@ -1375,7 +1420,7 @@ class DatabaseConnection:
                                                                    netmask)
 					list.append((None,
                                                      'Kickstart_PrivateDNSDomain', 
-                                                     dnszone))
+                                                     zone))
 					list.append((None, 
                                                      'Kickstart_PrivateNetwork',
                                                      subnet))
@@ -1390,7 +1435,7 @@ class DatabaseConnection:
                                                                    netmask)
                                         list.append((None,
                                                      'Kickstart_PublicDNSDomain', 
-                                                     dnszone))
+                                                     zone))
 					list.append((None, 
                                                      'Kickstart_PublicNetwork',
                                                      subnet))
@@ -1437,13 +1482,14 @@ class DatabaseConnection:
                                           (None, 'membership', membership)
                                         ])
                                 
-                        for (name, address) in self.select("""
-				n.name, nt.ip from
+                        for (name, zone, address) in self.select("""
+				n.name, s.zone, nt.ip from
 				networks nt, nodes n, subnets s where
-				s.name="private" and nt.node=n.id and
+				nt.main=true and nt.node=n.id and
 				nt.subnet=s.id
                                 """):
                                 dict[name].append((None, 'hostaddr', address))
+                                dict[name].append((None, 'domainname', zone))
 
                         if self.caching:
                                 self.cache['host-intrinsic-attrs-dict'] = dict
@@ -1705,8 +1751,8 @@ class DatabaseConnection:
 
                 result = None
                 
-		for (netname, dnszone) in self.select("""
-                        net.name, s.dnszone from
+		for (netname, zone) in self.select("""
+                        net.name, s.zone from
 			nodes n, networks net, subnets s where n.name = '%s'
 			and net.node = n.id and net.subnet = s.id and
 			s.name = '%s'
@@ -1717,7 +1763,7 @@ class DatabaseConnection:
 			# dns zone
 			if not netname:
 				netname = hostname
-			result = '%s.%s' % (netname, dnszone)
+			result = '%s.%s' % (netname, zone)
                 
 		return result
 
@@ -1813,7 +1859,7 @@ class DatabaseConnection:
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\
 						'nt.node=n.id and '		+\
-						's.dnszone="%s" and ' % (domain)+\
+						's.zone="%s" and ' % (domain)+   \
 						'(nt.name="%s" or n.name="%s")'  \
 						% (name, name)
 
@@ -1939,12 +1985,38 @@ class Command:
 
 		self.rc = None # return code
 		self.level = 0
-		
+
+                # Look up terminal colors safely using tput, uncolored if
+                # this fails.
+                
+                self.colors = {
+                        'bold': { 'tput': 'bold', 'code': '' },
+                        'reset': { 'tput': 'sgr0', 'code': '' },
+                        'beginline': { 'tput': 'smul', 'code': ''},
+                        'endline': { 'tput': 'rmul', 'code': ''}
+                        }
+                if sys.stdout.isatty():
+			for key in self.colors.keys():
+				c = 'tput %s' % self.colors[key]['tput']
+                	        try:
+	                        	p = subprocess.Popen(c.split(),
+        	                                             stdout=subprocess.PIPE)
+                	        except:
+                        	        continue
+	                       	(o, e) = p.communicate()
+        	               	if p.returncode == 0:
+                	       		self.colors[key]['code'] = o
+
+
+
+                		
 	def abort(self, msg):
 		# msg  : error string (stderr, and syslog)
 		# usage: command users (stderr)
 		raise UsageException(msg, self)
 
+        # TODO - Kill this evil function
+        
 	def fillPositionalArgs(self, names, params=None, args=None):
 		# The helper function will allow named parameters
 		# to be used in lieu of positional arguments
@@ -2342,28 +2414,6 @@ class Command:
 			return
 
 
-                # Look up terminal colors safely using tput, uncolored if
-                # this fails.
-                
-                colors = {
-                        'bold': { 'tput': 'bold', 'code': '' },
-                        'reset': { 'tput': 'sgr0', 'code': '' },
-                        'beginline': { 'tput': 'smul', 'code': ''},
-                        'endline': { 'tput': 'rmul', 'code': ''}
-                        }
-                if sys.stdout.isatty():
-			for key in colors.keys():
-				c = 'tput %s' % colors[key]['tput']
-                	        try:
-	                        	p = subprocess.Popen(c.split(),
-        	                                             stdout=subprocess.PIPE)
-                	        except:
-                        	        continue
-	                       	(o, e) = p.communicate()
-        	               	if p.returncode == 0:
-                	       		colors[key]['code'] = o
-
-                		
 		# Loop over the output and check if there is more than
 		# one owner (usually a hostname).  We have only one owner
 		# there is no reason to display it.  The caller can use
@@ -2468,9 +2518,9 @@ class Command:
 				else:
 					o = s
                                 if isHeader:
-                                        o = '%s%s%s' % (colors['bold']['code'],
+                                        o = '%s%s%s' % (self.colors['bold']['code'],
                                                         o,
-                                                        colors['reset']['code'])
+                                                        self.colors['reset']['code'])
 				list.append(o)
 			self.addText('%s\n' % self.outputRow(list, outputCols))
                         isHeader = False
@@ -2496,7 +2546,7 @@ class Command:
 					self.__doc__)
 			except:
 				return '-- invalid doc string --'
-			return handler.getUsageText()
+			return handler.getUsageText(self.colors)
 		else:
 			return '-- missing doc string --'
 
@@ -2535,7 +2585,7 @@ class Command:
 			elif format == 'md':
 				self.addText(handler.getMarkDown())
 			else:
-				self.addText(handler.getPlainText())
+				self.addText(handler.getPlainText(self.colors))
 
 
         def hasAccess(self, name):

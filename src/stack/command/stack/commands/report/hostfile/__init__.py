@@ -27,7 +27,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 		ip = None
 		mac = None
 		interface = None
-		subnet = None
+		network = None
 		channel = None
 		options = None
 		vlan = None
@@ -50,8 +50,8 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 			ip = o['ip']
 			mac = o['mac']
-			interface = o['iface']
-			subnet = o['subnet']
+			interface = o['interface']
+			network = o['network']
 			channel = o['channel']
 			options = o['options']
 			vlan = o['vlan']
@@ -59,7 +59,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			i += 1
 
 			row = [ name, interface_hostname, appliance, rack,
-				rank, ip, mac, interface, subnet, channel,
+				rank, ip, mac, interface, network, channel,
 				options, vlan ]
 
 			csv_w.writerow(row)
@@ -67,7 +67,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	def run(self, params, args):
 
 		header = ['NAME', 'INTERFACE HOSTNAME', 'APPLIANCE', 'RACK',
-			'RANK', 'IP', 'MAC', 'INTERFACE', 'SUBNET',
+			'RANK', 'IP', 'MAC', 'INTERFACE', 'NETWORK',
 			'CHANNEL', 'OPTIONS', 'VLAN']
 
 		# CSV writer requires fileIO.

@@ -1,28 +1,30 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
-#  
+# 
+# 				Rocks(r)
+# 		         www.rocksclusters.org
+# 		         version 5.4 (Maverick)
+# 
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
-#  
+# 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+# 
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+# 
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
 # following disclaimer in the documentation and/or other materials provided 
 # with the distribution.
-#  
+# 
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
-#  
+# 
 # 	"This product includes software developed by the Rocks(r)
 # 	Cluster Group at the San Diego Supercomputer Center at the
 # 	University of California, San Diego and its contributors."
@@ -37,7 +39,7 @@
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
 # Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
+# 
 # THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -49,114 +51,58 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.7  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.6  2009/04/14 16:12:16  bruno
-# push towards chimmy beta
-#
-# Revision 1.5  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.4  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.3  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.2  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/18 20:18:52  phil
-# Updates to allow NULL setting
-# Rationalize command naming conventions
-#
-# Revision 1.5  2007/06/18 15:40:09  phil
-# set mac=NULL to clear the mac address
-#
-# Revision 1.4  2007/06/16 23:49:20  phil
-# Add some helper functions for parameter,argument processing when wanting to
-# support named arguments.   Cleaned up set host interface mac
-#
-# Revision 1.3  2007/06/16 02:39:51  mjk
-# - added list roll commands (used for docbook)
-# - docstrings should now be XML
-# - added parser for docstring to ASCII or DocBook
-# - ditched Phil's Network regex stuff (will come back later)
-# - updated several docstrings
-#
-# Revision 1.2  2007/06/16 00:15:46  phil
-# a fill positional parameters. Phil needs python help from katz
-#
-# Revision 1.1  2007/06/15 20:52:02  phil
-# Set the mac address of a particular interface
-#
 
+import string
 import stack.commands
 
 class Command(stack.commands.set.host.command):
 	"""
-	Sets the logical interface of a mac address for particular hosts.
+	Sets the channel for a named interface.
 
 	<arg type='string' name='host' repeat='1'>
-	One or more named hosts.
+	One or more hosts.
 	</arg>
 	
-	<arg type='string' name='mac'>
-	MAC address of the interface  whose logical interface will be reassigned
- 	</arg>
+	<param optional='0' type='string' name='interface'>
+ 	Interface that should be updated. This may be a logical interface or 
+ 	the MAC address of the interface.
+ 	</param>
+
+ 	<param optional='0' type='string' name='channel'>
+	The channel for an interface. Use channel=NULL to clear.
+	</param>
  	
- 	<arg type='string' name='iface'>
-	Logical interface.
-	</arg>
-
-	<param type='string' name='mac'>
-	Can be used in place of the mac argument.
-	</param>
-
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
-	</param>
-	
-
-	<example cmd='set host interface iface compute-0-0 00:0e:0c:a7:5d:ff eth1'>
-	Sets the logical interface of MAC address 00:0e:0c:a7:5d:ff to be eth1 
-	</example>
-
-	<example cmd='set host interface iface compute-0-0 iface=eth1 mac=00:0e:0c:a7:5d:ff'>
-	Same as above.
+	<example cmd='set host interface channel backend-0-0 interface=eth1 channel="bond0"'>
+	Sets the channel for eth1 to be "bond0" (i.e., it associates eth1 with
+	the bonded interface named "bond0").
 	</example>
 	
-	<!-- cross refs do not exist yet
-	<related>set host interface iface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
+	<example cmd='set host interface channel backend-0-0 interface=eth1 channel=NULL'>
+	Clear the channel entry.
+	</example>
 	"""
 	
 	def run(self, params, args):
 
-		(args, mac, iface) = self.fillPositionalArgs(('mac', 'iface'))
-
+		(args, interface, channel) = self.fillPositionalArgs(
+			('interface', 'channel'))
+			
 		if not len(args):
 			self.abort('must supply host')
-		if not mac:
-			self.abort('must supply mac')
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
+		if not channel:
+			self.abort('must supply channel')
+
+		if string.upper(channel) == 'NULL':
+			channel = 'NULL'
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update networks,nodes set 
-				networks.device='%s' where
+			self.db.execute("""update networks, nodes set 
+				networks.channel=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
-				networks.mac='%s'""" %
-				(iface, host, mac))
+				(networks.device='%s' or networks.mac='%s')""" %
+				(channel, host, interface, interface))
 

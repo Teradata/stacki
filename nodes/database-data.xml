@@ -6,8 +6,8 @@
 	</description>
 
         <si_copyright>
-        (c) 2006 - 2015 StackIQ Inc.
-        All rights reserved. stacki(r) v1.0 www.stacki.com
+        (c) 2006 - 2014 StackIQ Inc. All rights reserved.
+        Redistribution is prohibited.
         </si_copyright>
 
         <copyright>
@@ -106,16 +106,18 @@ if os.path.exists('/tmp/site.attrs'):
 <!-- networks -->
 
 /opt/stack/bin/stack add network private	\
-	subnet=&Kickstart_PrivateNetwork;	\
-	netmask=&Kickstart_PrivateNetmask;	\
-	dnszone=&Kickstart_PrivateDNSDomain;	\
-	servedns=true
+	address=&Kickstart_PrivateNetwork;	\
+	mask=&Kickstart_PrivateNetmask;	        \
+	zone=&Kickstart_PrivateDNSDomain;	\
+	gateway=&Kickstart_PrivateGateway;	\
+	dns=true pxe=true
 
 /opt/stack/bin/stack add network public		\
-	subnet=&Kickstart_PublicNetwork;	\
-	netmask=&Kickstart_PublicNetmask;	\
-	dnszone=&Kickstart_PublicDNSDomain;	\
-	servedns=false
+	address=&Kickstart_PublicNetwork;	\
+	mask=&Kickstart_PublicNetmask;		\
+	zone=&Kickstart_PublicDNSDomain;	\
+	gateway=&Kickstart_PublicGateway;
+
 
 <!--
 	set the frontend's primary network to be the public network. this
@@ -127,9 +129,6 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack set attr attr=os value=&os;
 
-</post>
-
-<post>	
 <!-- frontend host -->
 
 /opt/stack/bin/stack "add host" &Kickstart_PrivateHostname; \
@@ -146,48 +145,27 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack add route 255.255.255.255 private netmask=255.255.255.255
 
-/opt/stack/bin/stack add host route &Kickstart_PrivateHostname; 0.0.0.0 \
-	&Kickstart_PublicGateway; netmask=0.0.0.0
-
-/opt/stack/bin/stack add route 0.0.0.0 \
-	&Kickstart_PrivateGateway; netmask=0.0.0.0
-
 /opt/stack/bin/stack add route &Kickstart_PublicAddress; \
 	&Kickstart_PrivateAddress; netmask=255.255.255.255
 	
 <!-- frontend private network -->
 
-/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname; \
-	&Kickstart_PrivateInterface;
+/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
+	network=private 						\
+	interface=&Kickstart_PrivateInterface;				\
+	mac=&Kickstart_PrivateEthernet;					\
+	ip=&Kickstart_PrivateAddress;					\
+	name=&Kickstart_PrivateHostname;
 
-/opt/stack/bin/stack set host interface subnet &Kickstart_PrivateHostname; \
-	&Kickstart_PrivateInterface; private
+<!-- frontend public network -->
 
-/opt/stack/bin/stack set host interface ip &Kickstart_PrivateHostname; \
-	&Kickstart_PrivateInterface; &Kickstart_PrivateAddress;
-
-/opt/stack/bin/stack set host interface name &Kickstart_PrivateHostname; \
-	&Kickstart_PrivateInterface; &Kickstart_PrivateHostname;
-
-/opt/stack/bin/stack set host interface mac &Kickstart_PrivateHostname; \
-	&Kickstart_PrivateInterface; &Kickstart_PrivateEthernet;
-
-<!-- boss public network -->
-
-/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname; \
-	&Kickstart_PublicInterface;
-
-/opt/stack/bin/stack set host interface subnet &Kickstart_PrivateHostname; \
-	&Kickstart_PublicInterface; public
-
-/opt/stack/bin/stack set host interface ip &Kickstart_PrivateHostname; \
-	&Kickstart_PublicInterface; &Kickstart_PublicAddress;
-
-/opt/stack/bin/stack set host interface name &Kickstart_PrivateHostname; \
-	&Kickstart_PublicInterface; &Kickstart_PrivateHostname;
-
-/opt/stack/bin/stack set host interface mac &Kickstart_PrivateHostname; \
-	&Kickstart_PublicInterface; &Kickstart_PublicEthernet;
+/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
+	network=public;							\
+	default=true;							\
+	interface=&Kickstart_PublicInterface;				\
+	mac=&Kickstart_PublicEthernet;					\
+	ip=&Kickstart_PublicAddress;					\
+	name=&Kickstart_PrivateHostname;
 
 
 <!-- SSH settings -->
@@ -199,17 +177,12 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack set attr discovery/base.rank 0
 /opt/stack/bin/stack set attr discovery/base.rack 0
 
-</post>
-
-<post>
 <!-- use long passwords in the database -->
 <file name="/tmp/my.cnf" expr="grep -v '^old_passwords' /etc/my.cnf"/>
 <file name="/etc/my.cnf" perms="644" expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-</post>
 
-<post>
 /opt/stack/bin/stack set attr mcli.flags "WB,NORA,Direct,NoCachedBadBBU"
 </post>
 

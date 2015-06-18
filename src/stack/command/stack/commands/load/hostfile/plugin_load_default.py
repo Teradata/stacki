@@ -52,9 +52,9 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 	def removeInterfaces(self, host):
 		output = self.owner.call('list.host.interface', [ host ])
 		for v in output:
-			if v['iface']:
+			if v['interface']:
 				self.owner.call('remove.host.interface',
-					[ host, 'iface=%s' % v['iface'] ])
+					[ host, 'interface=%s' % v['interface'] ])
 
 
 	def run(self, args):
@@ -108,7 +108,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			#	
 			self.removeInterfaces(host)
 
-			for iface in interfaces[host].keys():
+			for interface in interfaces[host].keys():
 				ip = None
 				mac = None
 				subnet = None
@@ -117,25 +117,25 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				options = None
 				vlan = None
 
-				if 'ip' in interfaces[host][iface].keys():
-					ip = interfaces[host][iface]['ip']
-				if 'mac' in interfaces[host][iface].keys():
-					mac = interfaces[host][iface]['mac']
-				if 'subnet' in interfaces[host][iface].keys():
-					subnet = interfaces[host][iface]['subnet']
-				if 'ifhostname' in interfaces[host][iface].keys():
-					ifhostname = interfaces[host][iface]['ifhostname']
-				if 'channel' in interfaces[host][iface].keys():
-					channel = interfaces[host][iface]['channel']
-				if 'options' in interfaces[host][iface].keys():
-					options = interfaces[host][iface]['options']
-				if 'vlan' in interfaces[host][iface].keys():
-					vlan = interfaces[host][iface]['vlan']
+				if 'ip' in interfaces[host][interface].keys():
+					ip = interfaces[host][interface]['ip']
+				if 'mac' in interfaces[host][interface].keys():
+					mac = interfaces[host][interface]['mac']
+				if 'subnet' in interfaces[host][interface].keys():
+					subnet = interfaces[host][interface]['subnet']
+				if 'ifhostname' in interfaces[host][interface].keys():
+					ifhostname = interfaces[host][interface]['ifhostname']
+				if 'channel' in interfaces[host][interface].keys():
+					channel = interfaces[host][interface]['channel']
+				if 'options' in interfaces[host][interface].keys():
+					options = interfaces[host][interface]['options']
+				if 'vlan' in interfaces[host][interface].keys():
+					vlan = interfaces[host][interface]['vlan']
 
 				#
 				# now add the interface
 				#
-				cmdparams = [ host, 'iface=%s' % iface ]
+				cmdparams = [ host, 'interface=%s' % interface ]
 				if mac:
 					cmdparams.append('mac=%s' % mac)
 				if ip:
@@ -148,14 +148,14 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					cmdparams.append('vlan=%d' % vlan)
 				if subnet == 'private':
 					cmdparams.append('name=%s' % host)
-				if 'bond' == iface[:4]:
+				if 'bond' == interface[:4]:
 					cmdparams.append('module=bonding')
 
 				self.owner.call('add.host.interface', cmdparams)
 
 				if channel:
 					cmdparams = [ host,
-						'iface=%s' % iface,
+						'interface=%s' % interface,
 						'channel=%s' % channel ]
 					self.owner.call(
 						'set.host.interface.channel',
@@ -163,7 +163,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 				if options:
 					cmdparams = [ host,
-						'iface=%s' % iface,
+						'interface=%s' % interface,
 						'options=%s' % options ]
 					self.owner.call(
 						'set.host.interface.options',

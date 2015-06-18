@@ -22,8 +22,7 @@
 
 <post>
 <!-- resolv.conf -->
-<file name="/etc/resolv.conf"
-      expr="/opt/stack/bin/stack report resolv"/>
+<report name="host.resolv">localhost</report>
 
 <!-- write the DNS files -->
 /opt/stack/bin/stack sync dns

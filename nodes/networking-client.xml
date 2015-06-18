@@ -46,7 +46,7 @@ for i in os.environ:
 
 params = None
 if len(ifaces) > 0 and len(macs) > 0:
-	params = 'iface="%s" mac="%s"' % (','.join(ifaces), ','.join(macs))
+	params = 'interface="%s" mac="%s"' % (','.join(ifaces), ','.join(macs))
 
 	if len(modules) > 0:
 		params += ' module="%s"' % (','.join(modules))

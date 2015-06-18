@@ -127,16 +127,13 @@ zone "0.0.127.in-addr.arpa" IN {
 };
 """
 # zone mapping
-fw_zone_template = """
+zone_template = """
 zone "%s" {
 	type master;
 	notify no;
 	file "%s.domain";
 };
-"""
 
-# Reverse zone mapping
-rev_zone_template = """
 zone "%s.in-addr.arpa" {
 	type master;
 	notify no;
@@ -144,7 +141,6 @@ zone "%s.in-addr.arpa" {
 };
 """
 
-zone_template = "%s\n%s" % (fw_zone_template, rev_zone_template)
 
 class Command(stack.commands.report.command):
 	"""
@@ -157,66 +153,50 @@ class Command(stack.commands.report.command):
 	"""
 
 	def run(self, params, args):
-		
-		# Start writing the named.conf file
-		s = '<file name="/etc/named.conf" perms="0644">\n'
-
-		s += stack.text.DoNotEdit()
-                s += '# Site additions go in /etc/named.conf.local\n'
                 
-		# Get a list of all the Public DNS servers
-		fwds = self.db.getHostAttr('localhost',
-			'Kickstart_PublicDNSServers')
-		forwarders = string.join(fwds.split(','), ';')
+                networks = []
+                for row in self.call('list.network', [ 'dns=true' ]):
+                        networks.append(row)
+                        		
+		s = '<file name="/etc/named.conf" perms="0644">\n'
+		s += stack.text.DoNotEdit()
+                s += '# Site additions go in /etc/named.conf.local\n\n'
+                
 
-                network = None
-                netmask = None
-                for row in self.call('list.network', [ 'private' ]):
-                        network = row['subnet']
-                        ip = stack.ip.IPGenerator(network,
-                                                  row['netmask'])
-                        netmask = ip.cidr()
-                if network and netmask:
-                        s += 'acl private {\n\t%s/%s;\n};\n\n' % (network,
-                                                                  netmask)
+                acl = [ ]
+                for network in networks:
+                        ip = stack.ip.IPGenerator(network['address'],
+                                                  network['mask'])
+                        cidr = ip.cidr()
+                        acl.append('\t%s/%s;' % (network['address'], ip.cidr()))
+                if len(acl):
+                        s += 'acl private {\n%s\n};\n\n' % string.join(acl, '\n')
                 else:
-                        s += 'acl private {};\n'
-                        
+                        # Not sure if this could happen so do the logical
+                        # thing just in case.  This would mean no
+                        # networks have dns=true.
+                        s += 'acl private {\n\t127.0.0.0/24;\n};\n'
+                                           
 		
-		# Create the preamble from the template
+		fwds = self.db.getHostAttr('localhost',
+                	'Kickstart_PublicDNSServers')
+		forwarders = string.join(fwds.split(','), ';')
 		s += config_preamble % (forwarders)
-
-		subnet_list = {}
-		# Get a list of all networks that we should serve
-		# domain names for
-		for n in self.getNetworks():
-			# For every network, get the base subnet,
-			# and reverse it. This is basically the
-			# format that named understands
-			sn	= self.getSubnet(n.subnet, n.netmask)
-			sn.reverse()
-			r_sn	= string.join(sn, '.')
-			if not subnet_list.has_key(r_sn):
-				subnet_list[r_sn] = []
-			subnet_list[r_sn].append(n)
-
-		overlapping_subnets = {}
-		for sn in subnet_list:
-			if len(subnet_list[sn]) == 1:
-				n = subnet_list[sn][0]
-				s += zone_template % (n.dnszone, n.name, \
-				sn, n.name, sn)
-			else:
-				overlapping_subnets[sn] = subnet_list[sn]
-
-		for sn in overlapping_subnets:
-			name = ''
-			for n in overlapping_subnets[sn]:
-				s += fw_zone_template % (n.dnszone, n.name)
-				name += n.name + '-'
-			name = name.rstrip('-')
-			s += rev_zone_template % (sn, name, sn)
-			
+                
+                # For every network, get the base subnet,
+                # and reverse it. This is basically the
+                # format that named understands
+                
+                for network in networks:
+                        sn = self.getSubnet(network['address'], network['mask'])
+                        sn.reverse()
+			r_sn = string.join(sn, '.')
+                        s += zone_template % (network['zone'],
+                                              network['network'],
+                                              r_sn,
+                                              network['network'],
+                                              r_sn)
+                        
 		# Check if there are local modifications to named.conf
 		if os.path.exists('/etc/named.conf.local'):
 			f = open('/etc/named.conf.local', 'r')
@@ -229,5 +209,5 @@ class Command(stack.commands.report.command):
 		s += '</file>\n'
 
 		self.beginOutput()
-		self.addOutput('localhost',s)
+		self.addOutput('', s)
 		self.endOutput(padChar = '')

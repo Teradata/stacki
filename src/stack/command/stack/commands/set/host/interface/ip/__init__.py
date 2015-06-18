@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,53 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.12  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.11  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.10  2009/04/14 16:12:16  bruno
-# push towards chimmy beta
-#
-# Revision 1.9  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.8  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.7  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.6  2007/06/23 03:54:52  mjk
-# - first pass at consistency
-# - still needs some docstrings
-# - argument processors take SQL wildcards
-# - add cannot run twice (must use set)
-# - dump does sets not just adds
-#
-# Revision 1.5  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.4  2007/06/18 22:34:41  phil
-# Rewrote add host interface to use set commands
-# Fixed error in subnet
-# Xrefs in ip
-#
-# Revision 1.3  2007/06/18 20:45:13  phil
-# Fix documentation
-#
-# Revision 1.2  2007/06/18 20:18:52  phil
-# Updates to allow NULL setting
-# Rationalize command naming conventions
-#
-# Revision 1.1  2007/06/18 15:37:31  phil
-# Allow handling of special string NULL to clear IP address
-#
-#
 
 import stack.commands
 
@@ -108,7 +62,7 @@ class Command(stack.commands.set.host.command):
 	Host name.
 	</arg>
 	
-	<arg type='string' name='iface'>
+	<arg type='string' name='interface'>
  	Interface that should be updated. This may be a logical interface or 
  	the mac address of the interface.
  	</arg>
@@ -119,8 +73,8 @@ class Command(stack.commands.set.host.command):
 	to clear.
 	</arg>
 
-	<param type='string' name='iface'>
-	Can be used in place of the iface argument.
+	<param type='string' name='interface'>
+	Can be used in place of the interface argument.
 	</param>
 
 	<param type='string' name='ip'>
@@ -128,15 +82,15 @@ class Command(stack.commands.set.host.command):
 	</param>
 	
 
-	<example cmd='set host interface ip compute-0-0 eth1 192.168.0.10'>
-	Sets the IP Address for the eth1 device on host compute-0-0.
+	<example cmd='set host interface ip backend-0-0 eth1 192.168.0.10'>
+	Sets the IP Address for the eth1 device on host backend-0-0.
 	</example>
 
-	<example cmd='set host interface ip compute-0-0 iface=eth1 ip=192.168.0.10'>
+	<example cmd='set host interface ip backend-0-0 interface=eth1 ip=192.168.0.10'>
 	Same as above.
 	</example>
 	
-	<related>set host interface iface</related>
+	<related>set host interface interface</related>
 	<related>set host interface ip</related>
 	<related>set host interface module</related>
 	<related>add host</related>
@@ -144,14 +98,14 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, iface, ip) = self.fillPositionalArgs(('iface', 'ip'))
+		(args, interface, ip) = self.fillPositionalArgs(('interface', 'ip'))
 
 		hosts = self.getHostnames(args)
 		
 		if len(hosts) != 1:
 			self.abort('must supply one host')
-		if not iface:
-			self.abort('must supply iface')
+		if not interface:
+			self.abort('must supply interface')
 		if not ip:
 			self.abort('must supply ip')
 
@@ -162,5 +116,5 @@ class Command(stack.commands.set.host.command):
 				networks.ip=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
 				(networks.device='%s' or networks.mac='%s')""" %
-				(ip, host, iface, iface))
+				(ip, host, interface, interface))
 

@@ -131,8 +131,8 @@ class Command(stack.commands.HostArgumentProcessor,
 					"nt.node=n.id and nt.subnet=s.id"
 				rows = self.db.execute(query)
 				if rows:
-					iface = self.db.fetchone()[0]
-					s += ' -i %s' % iface
+					interface = self.db.fetchone()[0]
+					s += ' -i %s' % interface
 			if rule['output-network'] != 'all' and \
 				rule['output-network'] != None:
 				query = "select nt.device from networks nt," +\
@@ -142,8 +142,8 @@ class Command(stack.commands.HostArgumentProcessor,
 					"nt.node=n.id and nt.subnet=s.id"
 				rows = self.db.execute(query)
 				if rows:
-					iface = self.db.fetchone()[0]
-					s += ' -o %s' % iface
+					interface = self.db.fetchone()[0]
+					s += ' -o %s' % interface
 			if rule['protocol'] != 'all' and \
 				rule['protocol'] != None:
 				s += ' -p %s' % rule['protocol']

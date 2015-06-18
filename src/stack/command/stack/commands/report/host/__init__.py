@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+import string
 import stack.commands
 import stack.ip
 import stack.text
@@ -109,152 +110,43 @@ class Command(command):
 	</example>
 	"""
 
-	def hostlocal(self, hostsFile):
-
-		# Allow easy addition of extra hosts from a local
-		# file.  This change was submitted as a patch from
-		# Gouichi Iisaka (HP Japan).
-
-		if os.path.isfile(hostsFile):
-			print '# import from %s' % hostsFile
-			file = open(hostsFile, 'r')
-			for line in file.readlines():
-				print line[:-1]
-			file.close()
-
-
-	def extranics(self):
-		self.db.execute("""select networks.IP, networks.Name from
-			networks,subnets where subnets.name != "private" and
-			networks.subnet = subnets.id and
-			networks.ip is not NULL order by networks.IP""")
-
-		nodes=[]
-		for row in self.db.fetchall():
-			node = stack.util.Struct()
-			node.address	= row[0]
-			node.name	= [row[1],]
-			nodes.append(node)
-
-		for node in nodes:
-			if node.name[0] is not None:
-				print '%s\t%s' % (node.address,
-					' '.join(node.name))
-
-
-	def hostlines(self, subnet, netmask):
-
-		ip  = stack.ip.IPGenerator(subnet, netmask)
-
-		domain = self.db.getHostAttr('localhost',
-			'Kickstart_PrivateDNSDomain')
-
-		nodes=[]
-		for row in self.db.fetchall():
-			node = stack.util.Struct()
-			node.id		= row[0]
-			node.rack	= row[1]
-			node.rank	= row[2]
-			node.appname	= row[3]
-			node.warning    = None
-
-			self.db.execute("""select networks.name, networks.ip
-				from networks, subnets where
-				networks.node = %d and
-				subnets.name = "private" and
-				networks.subnet = subnets.id and
-				(networks.device not like 'vlan%%' or
-				networks.device is NULL)""" %
-				(node.id))
-
-			row = self.db.fetchone()
-			if row == None:
-				continue
-
-			nodes.append(node)
-			node.name = [row[0],]
-			node.address = row[1]
-
-			if not node.address:
-				node.address = ip.dec()
-
-			name  = '%s-%d-%d' % (node.appname, node.rack,
-				node.rank)
-
-			# If there is no name in the database, use the
-			# generated one.
-
-			if not node.name[0]:
-				node.name = [name,]
-			
-			if node.name[0] != name:
-				node.warning = 'originally %s' % name
-
-		# Append names from the Aliases table.
-		
-		for node in nodes:
-			self.db.execute('select name from aliases '
-				     'where node = %d' % (node.id))
-			for alias, in self.db.fetchall():
-				node.name.append(alias)
-
-		# Format the data
-		
-		for node in nodes:
-			fqdn = "%s.%s" % (node.name[0], domain)
-			entry = '%s\t%s %s' % (node.address, fqdn,
-				' '.join(node.name))
-			if node.warning:
-				entry = entry + ' # ' + node.warning
-			print entry
-
-      
 	def run(self, param, args):
 		self.beginOutput()
                 self.addOutput('localhost', stack.text.DoNotEdit())
 		self.addOutput('localhost', '#  Site additions go in /etc/hosts.local\n')
 		self.addOutput('localhost','127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 
-		# First get the zonename for the private Rocks network
-		self.db.execute('select dnszone from subnets '	+\
-				'where name="private"')
-		localzone, = self.db.fetchone()
+                aliases = {}
+                for row in self.call('list.host.alias'):
+                        host  = row['host']
+                        alias = row['alias']
 
-		# Get a list of all hostnames that are part of the
-		# private network. Use the MySQL coalesce function
-		# to use name from nodes table if name from networks
-		# table is not set/set to NULL
-		cmd = 'select nt.ip, a.name, s.dnszone, '	+\
-			'coalesce(nt.name,n.name) '		+\
-			'from networks nt, subnets s, nodes n '	+\
-			'left join aliases a on (a.node=n.id) '	+\
-			'where nt.subnet=s.id and nt.ip!="NULL" '	+\
-			'and nt.node=n.id order by nt.subnet, nt.name'
+                        if not row.has_key(host):
+                                aliases[host] = []
+                        aliases[host].append(alias)
+                        
+                zones = {}
+                for row in self.call('list.network'):
+                	zones[row['network']] = row['zone']
+        
+                for row in self.call('list.host.interface'):
+                        host    = row['host']
+                        ip      = row['ip']
+                        zone    = zones[row['network']]
+                        default = row['default']
 
-		self.db.execute(cmd)
+                        names = []
+                        if zone:
+                                names.append('%s.%s' % (host, zone))
+                        if default:
+                                names.append(host)
+                        if aliases.has_key(host):
+                                for alias in aliases.get(host):
+                                        names.append(alias)
 
-		# The policy we will maintain for every entry in
-		# the private zone is the following.
-		# <ip> <name>.<private_zone> <name> <alias> <alias>.<private_zone>
-		# For all other networks, host entry will be of the format
-		# <ip> <name>.<zonename> <alias>.<zonename>
-		for (ip, alias, zone, record) in self.db.fetchall():
-			# Construct the hosts entry
-			# Add <ip> <name>.<zonename>
-			h = '%s\t%s.%s' % (ip, record, zone)
+                        self.addOutput('localhost', '%s\t%s' %
+                                               (ip, string.join(names)))
 
-			# If it's the private zone
-			if zone == localzone:
-				# Add the <name> entry
-				h = h + '\t' + record
-				# and the <alias> entry
-				if alias is not None:
-					h = h + '\t' + alias
-			# Finally add the <alias>.<zonename> entry
-			if alias is not None:
-				h = h + '\t' + '%s.%s' % (alias, zone)
-
-			self.addOutput('localhost', h)
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'

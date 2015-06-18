@@ -15,17 +15,16 @@ All rights reserved. stacki(r) v1.0 www.stacki.com
 
 
 <post>
-<file name="/etc/resolv.conf">
-<report name="resolv.private"></report>
-</file>
+
+<report name="host.resolv">&hostname;</report>
 
 <!-- Give each host knowledge of itself. -->
 <file name="/etc/hosts">
 127.0.0.1	localhost.localdomain localhost
 &Kickstart_PublicAddress;	&Kickstart_PublicHostname;
-&hostaddr;	&hostname;.&Kickstart_PrivateDNSDomain; &hostname;
+&hostaddr;	&hostname;.&domainname; &hostname;
 </file>
-</post>
 
+</post>
 
 </kickstart> 

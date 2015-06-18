@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,28 +51,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.7  2010/05/24 17:41:55  bruno
-# fix help doc.
-#
-# Revision 1.6  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.5  2009/02/13 20:21:12  bruno
-# make sure physical hosts look at the 'runaction' or 'installaction'
-# columns in the nodes table in order to reference the correct bootaction.
-#
-# Revision 1.4  2009/01/16 23:58:15  bruno
-# configuring the boot action and writing the boot files (e.g., PXE host config
-# files and Xen config files) are now done in exactly the same way.
-#
-#
 
+import sys
+import string
 import stack.commands
+import os
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -97,6 +81,151 @@ class Command(stack.commands.set.host.command):
 	"RUNACTION" column.
 	</example>
 	"""
+
+	def writeDefaultPxebootCfg(self):
+		nrows = self.db.execute("""
+                	select kernel, ramdisk, args from
+			bootaction where action='install'
+                        """)
+
+		if nrows == 1:
+			kernel, ramdisk, args = self.db.fetchone()
+
+			filename = '/tftpboot/pxelinux/pxelinux.cfg/default'
+			file = open(filename, 'w')
+			file.write('default stack\n')
+			file.write('prompt 0\n')
+			file.write('label stack\n')
+
+			if len(kernel) > 6 and kernel[0:7] == 'vmlinuz':
+				file.write('\tkernel %s\n' % (kernel))
+			if len(ramdisk) > 0:
+				if len(args) > 0:
+					args += ' initrd=%s' % ramdisk
+				else:
+					args = 'initrd=%s' % ramdisk
+			if len(args) > 0:
+				file.write('\tappend %s\n' % (args))
+
+			# If using ksdevice=bootif we need to
+			# pass the PXE information to loader.
+			
+			if args and args.find('bootif') != -1:
+				file.write('\tipappend 2\n')
+
+			file.close()
+
+			#
+			# make sure apache can update the file
+			#
+			os.system('chown root.apache %s' % (filename))
+			os.system('chmod 664 %s' % (filename))
+
+
+	def writePxebootCfg(self, host):
+
+		# Get the IP and NETMASK of the host
+
+		for row in self.owner.call('list.host.interface', [ host, 'expanded=true' ]):
+			if row['dns'] == 'True':
+				ip = row['ip']
+                                netmask = row['mask']
+                                gateway = row['gateway']
+
+
+		# Compute the HEX IP filename for the host
+		filename = '/tftpboot/pxelinux/pxelinux.cfg/'
+		for i in string.split(ip, '.'):
+			hexstr = '%02x' % (int(i))
+			filename += '%s' % hexstr.upper()
+
+
+		#
+		# there is a case where the host name may be in the nodes table
+		# but not in the boot table. in this case, remove the current
+		# configuration file (if it exists) and return
+		#
+
+		action = None
+		for row in self.owner.call('list.host.boot', [ host ]):
+			action = row['action']
+		if not action:
+			try:
+				os.unlink(filename)
+			except:
+				pass
+			return
+
+		# Get the bootaction for the host (install or os) and
+		# lookup the actual kernel, ramdisk, and args for the
+		# specific action.
+
+		for row in self.owner.call('list.host', [ host ]):
+			if action == 'install':
+				bootaction = row['installaction']
+			else:
+				bootaction = row['runaction']
+
+		kernel = ramdisk = args = None
+		for row in self.owner.call('list.bootaction'):
+			if row['action'] == bootaction:
+				kernel  = row['kernel']
+				ramdisk = row['ramdisk']
+				args    = row['args']
+
+		if not kernel:
+			print 'bootaction "%s" for host "%s" is invalid' % \
+				(action, host)
+			sys.exit(-1)
+
+
+		# If the ksdevice= is set fill in the network
+		# information as well.  This will avoid the DHCP
+		# request inside anaconda.
+
+		if args and args.find('ksdevice=') != -1:
+
+			dnsserver  = self.db.getHostAttr(host, 'Kickstart_PrivateDNSServers')
+			nextserver = self.db.getHostAttr(host, 'Kickstart_PrivateKickstartHost')
+			
+			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
+				(ip, gateway, netmask, dnsserver, nextserver)
+
+		if filename != None:
+			file = open(filename, 'w')	
+			file.write('default stack\n')
+			file.write('prompt 0\n')
+			file.write('label stack\n')
+
+			if kernel:
+				if kernel[0:7] == 'vmlinuz':
+					file.write('\tkernel %s\n' % (kernel))
+				else:
+					file.write('\t%s\n' % (kernel))
+
+			if ramdisk and len(ramdisk) > 0:
+				if len(args) > 0:
+					args += ' initrd=%s' % ramdisk
+				else:
+					args = 'initrd=%s' % ramdisk
+
+			if args and len(args) > 0:
+				file.write('\tappend %s\n' % (args))
+
+			# If using ksdevice=bootif we need to
+			# pass the PXE information to loader.
+			
+			if args and args.find('bootif') != -1:
+				file.write('\tipappend 2\n')
+
+			file.close()
+
+			#
+			# make sure apache can update the file
+			#
+			os.system('chown root.apache %s' % (filename))
+			os.system('chmod 664 %s' % (filename))
+
 
 	def updateBoot(self, host, action):
 		#
@@ -129,15 +258,20 @@ class Command(stack.commands.set.host.command):
 			self.abort('must supply host')
 
 		if action not in [ 'os', 'run', 'install', None ]:
-			self.abort('invalid action. action must be ' +
-				'"os", "run" or "install"')
+			self.abort('invalid action. action must be "os", "run" or "install"')
 
 		for host in self.getHostnames(args):
 			if action:
 				self.updateBoot(host, action)
 
-			#
-			# run the plugins
-			# 
-			self.runPlugins(host)
+                        #
+                        # if this host is the frontend, then generate the
+                        # default configuration file
+                        #
+                        frontend_host = self.db.getHostAttr('localhost', 'Kickstart_PrivateHostname')
+                        if host == frontend_host:
+                                self.writeDefaultPxebootCfg()
+                        else:
+                        	self.writePxebootCfg(host)
+
 
