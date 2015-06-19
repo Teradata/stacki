@@ -705,10 +705,13 @@ def setupDisplay(anaconda, opts, addon_paths=None):
                     '/opt/stack/lib:/tmp/updates/lib64'
 
             log.debug('STACKIQ: Building Boss Kickstart File.')
+            file = open('boss_ks_file.debug', 'w')
             s = subprocess.Popen('/opt/stack/bin/boss_ks_file.py',
-                env = bossenv)
+                env = bossenv,
+                stdout = file, stderr = subprocess.STDOUT)
             s.wait()	
-
+            file.close()
+   
             # 
             # RHEL 7.x wants the kickstart file in /run/install
             # 

@@ -30,5 +30,7 @@
 	<package>grub2</package>
 	<package>genisoimage</package>
 
+	<package>libtirpc</package>
+
 </kickstart> 
 

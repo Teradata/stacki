@@ -368,10 +368,16 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		#
 		# use yum to resolve dependencies
 		#
-		sys.path.append('/usr/lib/python2.6/site-packages')
-		sys.path.append('/usr/lib64/python2.6/site-packages')
-		sys.path.append('/usr/lib/python2.6/lib-dynload')
-		sys.path.append('/usr/lib64/python2.6/lib-dynload')
+		if stack.release == '7.x':
+			pythonver = '2.7'
+		else:
+			pythonver = '2.6'
+
+		sys.path.append('/usr/lib/python%s/site-packages' % pythonver)
+		sys.path.append('/usr/lib64/python%s/site-packages' % pythonver)
+		sys.path.append('/usr/lib/python%s/lib-dynload' % pythonver)
+		sys.path.append('/usr/lib64/python%s/lib-dynload' % pythonver)
+
 		import yum
 
 		#
