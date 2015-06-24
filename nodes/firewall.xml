@@ -12,11 +12,18 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 </copyright>
 
 
-<post>
-<!-- configure and turn on iptables -->
-/sbin/chkconfig iptables on
+<package cond="'&release;' == '7.x'">iptables-services</package>
 
-<!-- turn off ip6tables -->
+
+<post cond="'&release;' == '7.x'">
+/usr/bin/systemctl disable firewalld
+/usr/bin/systemctl enable iptables
+/usr/bin/systemctl disable ip6tables
+</post>
+
+
+<post cond="'&release;' == '6.x'">
+/sbin/chkconfig iptables on
 /sbin/chkconfig ip6tables off
 </post>
 

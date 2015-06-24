@@ -50,6 +50,7 @@ def setHostname(hostname):
 	f.write('NETWORKING=yes\n')
 	f.write('HOSTNAME=%s\n' % hostname)
 	f.close()
+	os.system('/bin/hostname %s' % hostname)
 
 def setResolv(domain, servers):
 	resolv = '/etc/resolv.conf'
