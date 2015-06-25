@@ -134,10 +134,11 @@ static char rcsid[] = "$Id$";
 #define MYUSER "apache"
 
 /* The different kinds of keys. */
-#define RSA1 1
-#define RSA 2
-#define DSA 3
-#define ECDSA 4
+#define RSA1	1
+#define RSA	2
+#define DSA	3
+#define ECDSA	4
+#define ED25519	5
 
 int
 main(int argc, char *argv[])
@@ -170,6 +171,8 @@ main(int argc, char *argv[])
 		mode = DSA;
 	  else if (!strncmp("ECDSA", argv[1], 5))
 		mode = ECDSA;
+	  else if (!strncmp("ED25519", argv[1], 5))
+		mode = ED25519;
 	}
 	
 	switch (mode)
@@ -186,9 +189,11 @@ main(int argc, char *argv[])
 	  case ECDSA:
 		keyfile = FILENAME "/ssh_host_ecdsa_key";
 		break;
+	  case ED25519:
+		keyfile = FILENAME "/ssh_host_ed25519_key";
+		break;
 	  default:
-		fprintf(stderr,
-			"Please specify a key: RSA1 | RSA | DSA | ECDSA\n");
+		fprintf(stderr, "Please specify a key: RSA1 | RSA | DSA | ECDSA | ED25519\n");
 		return 1;
 	}
 

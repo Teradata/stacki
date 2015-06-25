@@ -15,9 +15,7 @@ All rights reserved. stacki(r) v1.0 www.stacki.com
   
 <post>
 <!-- clean up ssh_host* files. They will be recreated on first boot -->
-rm -f /etc/ssh/ssh_host_dsa_key*
-rm -f /etc/ssh/ssh_host_rsa_key*
-rm -f /etc/ssh/ssh_host_key*
+rm -f /etc/ssh/ssh_host_*
 </post>
 
 

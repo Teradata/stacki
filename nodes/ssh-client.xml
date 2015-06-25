@@ -67,7 +67,7 @@ UseDNS no
 <post cond="'&release;' == '6.x'">
 
 key="
-<eval cond="'&release;' == '6.x'">
+<eval>
 /opt/stack/sbin/read-ssh-private-key RSA1 | python -c '
 import base64 
 import sys 
@@ -82,19 +82,19 @@ base64.decode(sys.stdin, sys.stdout)' > /etc/ssh/ssh_host_key
 chmod 0400 /etc/ssh/ssh_host_key
 
 <file name="/etc/ssh/ssh_host_key.pub" perms="0444">
-<eval cond="'&release;' == '6.x'">
+<eval>
 cat /etc/ssh/ssh_host_key.pub
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_dsa_key" perms="0400">
-<eval cond="'&release;' == '6.x'">
+<eval>
 /opt/stack/sbin/read-ssh-private-key DSA
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_dsa_key.pub" perms="0444">
-<eval cond="'&release;' == '6.x'">
+<eval>
 cat /etc/ssh/ssh_host_dsa_key.pub
 </eval>
 </file>
@@ -105,14 +105,26 @@ cat /etc/ssh/ssh_host_dsa_key.pub
 <post cond="'&release;' == '7.x'">
 
 <file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400">
-<eval cond="'&release;' == '7.x'">
+<eval>
 /opt/stack/sbin/read-ssh-private-key ECDSA
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_ecdsa_key.pub" perms="0444">
-<eval cond="'&release;' == '7.x'">
+<eval>
 cat /etc/ssh/ssh_host_ecdsa_key.pub
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_ed25519_key" perms="0400">
+<eval>
+/opt/stack/sbin/read-ssh-private-key ED25519
+</eval>
+</file>
+
+<file name="/etc/ssh/ssh_host_ed25519_key.pub" perms="0444">
+<eval>
+cat /etc/ssh/ssh_host_ed25519_key.pub
 </eval>
 </file>
 
