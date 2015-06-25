@@ -40,6 +40,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command,
               stack.commands.DistributionArgumentProcessor):
@@ -50,26 +51,23 @@ class Command(stack.commands.set.host.command,
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='distribution'>
+	<param type='string' name='distribution' optional='0'>
 	The name of the distribution (e.g. default)
-	</arg>
-
-	<param type='string' name='distribution'>
-	Can be used in place of the distribution argument.
 	</param>
 
-	<example cmd='set host distribution compute default'>
+	<example cmd='set host distribution compute distribution=default'>
 	Set the distribution for all current compute nodes to default.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, dist) = self.fillPositionalArgs(('distribution', ))
+                
+		(distribution, ) = self.fillParams([
+                        ('distribution', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not dist:
-			self.abort('must supply distribution')
+                        raise ArgRequired(self, 'host')
 
 		# Check to make sure this is a valid distribution name
 

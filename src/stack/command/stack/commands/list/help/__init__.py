@@ -150,9 +150,11 @@ class Command(stack.commands.list.command):
 		# code we need to provide the params argument.  This is the
 		# only command where we need to include this argument.
 		
-		(subdir, cols) = self.fillParams([('subdir', ),
-						  ('cols', 80) ],
-						 params)
+		(subdir, cols) = self.fillParams([
+                        ('subdir', ),
+                        ('cols', 80)
+                        ],
+			params)
 		
 		if subdir:
 			filepath = os.path.join(stack.commands.__path__[0],
@@ -174,9 +176,8 @@ class Command(stack.commands.list.command):
 			if not dir:
 				continue
 				
-			module = '%s.%s' % \
-				(modpath, string.join(dir.split(os.sep),'.'))
-			__import__(module)
+			module = '%s.%s' % (modpath, string.join(dir.split(os.sep),'.'))
+                        __import__(module)
 			module = eval(module)
 			
 			try:

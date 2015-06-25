@@ -42,6 +42,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
@@ -87,7 +88,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	hotspare).
 	In addition, the arrays will be created in arrayid order, that is,
 	the array with arrayid equal to 1 will be created first, arrayid
-	equal to 2 will be created second, etc.
+        equal to 2 will be created second, etc.
         </param>
 
 	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1'>
@@ -123,7 +124,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			label.append('slot')
 			value.append('%s' % slot)
 
-			self.abort('disk specification %s %s already exists in the database' % ('/'.join(label), '/'.join(value)))
+			raise CommandError(self, 'disk specification %s %s already exists in the database' % ('/'.join(label), '/'.join(value)))
 
 
 	def run(self, params, args):
@@ -150,7 +151,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			except:
 				hosts = []
 		else:
-			self.abort('must supply zero or one argument')
+			raise CommandError(self, 'must supply zero or one argument')
 
 		if not scope:
 			if args[0] in oses:
@@ -161,35 +162,34 @@ class Command(stack.commands.HostArgumentProcessor,
 				scope = 'host'
 
 		if not scope:
-			self.abort('argument "%s" must be a ' % args[0] + \
-				'valid os, appliance name or host name')
+			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % arg[0])
 
 		if scope == 'global':
 			name = 'global'
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot, hotspare, raidlevel, arrayid = \
-			self.fillParams([ ('adapter', None), 
-				('enclosure', None), ('slot', None),
-				('hotspare', None), ('raidlevel', None),
-				('arrayid', None) ])
+                adapter, enclosure, slot, hotspare, raidlevel, arrayid = self.fillParams([
+                        ('adapter', None),
+                        ('enclosure', None),
+                        ('slot', None),
+                        ('hotspare', None),
+                        ('raidlevel', None),
+			('arrayid', None, True)
+                        ])
 
 		if not hotspare and not slot:
-			self.abort('slot or hotspare not specified')
-		if not arrayid:
-			self.abort('arrayid not specified')
+                        raise ParamRequired(self, [ 'slot', 'hotspare' ])
 		if arrayid != 'global' and not raidlevel:
-			self.abort('raidlevel not specified')
+                        raise ParamRequired(self, 'raidlevel')
 
 		if adapter:
 			try:
 				adapter = int(adapter)
 			except:
-				self.abort('adapter is not an integer')
-
+                                raise ParamType(self, 'adapter', 'integer')
 			if adapter < 0:
-				self.abort('adapter "%s" is not zero or a positive integer' % adapter)
+                                raise ParamValue(self, 'adapter', '>= 0')
 		else:
 			adapter = -1
 
@@ -197,10 +197,9 @@ class Command(stack.commands.HostArgumentProcessor,
 			try:
 				enclosure = int(enclosure)
 			except:
-				self.abort('enclosure is not an integer')
-
+                                raise ParamType(self, 'enclosure', 'integer')
 			if adapter < 0:
-				self.abort('enclosure "%s" is not zero or a positive integer' % enclosure)
+                                raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
 
@@ -215,23 +214,22 @@ class Command(stack.commands.HostArgumentProcessor,
 				else:
 					try:
 						s = int(s)
-					except:	
-						self.abort('slot "%s" is not an integer' % s)
+					except:
+                                                raise ParamType(self, 'slot', 'integer')
 					if s < 0:
-						self.abort('slot "%s" is not zero or a positive integer' % s)
+                                                raise ParamValue(self, 'slot', '>= 0')
 					if s in slots:
-						self.abort('slot "%s" is listed twice' % s)
-
+                                                raise ParamError(self, 'slot', ' "%s" is listed twice' % s)
 				slots.append(s)
 
 		if raidlevel:
 			try:
 				raidlevel = int(raidlevel)
 			except:
-				self.abort('raidlevel is not an integer')
+                                raise ParamType(self, 'raidlevel', 'integer')
 
 			if raidlevel not in [ 0, 1, 5, 6, 10 ]:
-				self.abort('raidlevel "%s" is not supported.\nSupported raidlevels are 0, 1, 5, 6, 10.' % raidlevel)
+                                raise ParamValue(self, 'raidlevel', 'one of {0, 1, 5, 6, 10}')
 
 		hotspares = []
 		if hotspare:
@@ -239,12 +237,11 @@ class Command(stack.commands.HostArgumentProcessor,
 				try:
 					h = int(h)
 				except:	
-					self.abort('hotspare "%s" is not an integer' % h)
+                                        raise ParamType(self, 'hotspare', 'integer')
 				if h < 0:
-					self.abort('hotspare "%s" is not a zero or positive integer' % h)
+                                        raise ParamValue(self, 'hostspare', '>= 0')
 				if h in hotspares:
-					self.abort('hotspare "%s" is listed twice' % h)
-
+                                        raise ParamError(self, 'hostspare', ' "%s" is listed twice' % h)
 				hotspares.append(h)
 
 		if arrayid in [ 'global', '*' ]:
@@ -252,13 +249,13 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			try:
 				arrayid = int(arrayid)
-			except:	
-				self.abort('arrayid "%s" is not an integer' % arrayid)
+			except:
+                                raise ParamType(self, 'arrayid', 'integer')
 			if arrayid < 1:
-				self.abort('arrayid "%s" is not a positive integer' % h)
+                                raise ParamValue(self, 'arrayid', '>= 0')
 
 		if arrayid == 'global' and len(hotspares) == 0:
-			self.abort('arrayid is "global" with no hotspares. Please supply at least one hotspare')
+                        raise ParamError(self, 'arrayid', 'is "global" with no hotspares. Please supply at least one hotspare')
 
 		#
 		# look up the id in the appropriate 'scope' table

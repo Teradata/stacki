@@ -98,31 +98,24 @@ import sys
 import string
 import stack.attr
 import stack.commands
+from stack.exception import *
 
-class Command(stack.commands.set.environment.command):
+class Command(stack.commands.set.attr.command, stack.commands.set.environment.command):
 	"""
 	Sets an attribute to an environment and sets the associated values 
 
-	<arg type='string' name='environment'>
+	<arg type='string' name='environment' repeat='1'>
 	Name of environment
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
-	</arg>
+	</param>
 
-	<arg type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
-	</arg>
+	</param>
 	
-	<param type='string' name='attr'>
-	same as attr argument
-	</param>
-
-	<param type='string' name='value'>
-	same as value argument
-	</param>
-
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
@@ -136,30 +129,12 @@ class Command(stack.commands.set.environment.command):
 
 	def run(self, params, args):
 
-		(args, key, value) = self.fillPositionalArgs(('attr', 'value'))
+		(key, value, shadow, force) = self.doParams()
 
-		if not args:
-			self.abort('missing environment name')
-		if not key:
-			self.abort('missing attribute name')
-		if not value:
-			self.about('missing value of attribute')
-
-		(shadow, force) = self.fillParams([
-			('shadow', 'n'),
-			('force', 'y')
-			])
-
-		if self.str2bool(shadow):
-			s = "'%s'" % value
-			v = 'NULL'
-		else:
-			s = 'NULL'
-			v = "'%s'" % value
+                if not args:
+                        raise ArgRequired(self, 'environment')
 
 		(scope, attr) = stack.attr.SplitAttr(key)
-
-		force = self.str2bool(force)
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
 
 
@@ -170,8 +145,8 @@ class Command(stack.commands.set.environment.command):
 						[env, aflag]):
 					list.append(env)
 			if list:
-				self.abort('attribute exists for %s' %
-					   string.join(list))
+                                raise CommandError(self, 'attr "%s" exists for %s' %
+                                                           (aflag, string.join(list)))
 
 
 		for env in args:

@@ -97,21 +97,22 @@ class Command(stack.commands.add.os.command):
 	"""
 	Adds an attribute to an os and sets the associated values 
 
-	<arg type='string' name='os'>
+	<arg type='string' name='os' optional='1' repeat='1'>
 	Name of os
 	</arg>
 	
-	<param type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
 
-	<param type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-
-	<example cmd='add os attr redhat attr=nukedisks value=False'>
-	Sets the nukedisks attribute to False for redhat nodes
-	</example>
+	
+	<param type='boolean' name='shadow'>
+	If set to true, then set the 'shadow' value (only readable by root
+	and apache).
+	</param>
 	"""
 
 	def run(self, params, args):

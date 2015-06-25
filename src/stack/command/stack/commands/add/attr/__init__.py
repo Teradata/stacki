@@ -96,24 +96,21 @@ class Command(stack.commands.add.command):
 	"""
 	Adds a global attribute for all nodes
 
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
-	</arg>
+	</param>
 
-	<arg type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
-	</arg>
+	</param>
 	
-	<param type='string' name='attr'>
-	same as attr argument
+	<param type='boolean' name='shadow'>
+	If set to true, then set the 'shadow' value (only readable by root
+	and apache).
 	</param>
 
-	<param type='string' name='value'>
-	same as value argument
-	</param>
-
-	<example cmd='add attr nukedisks False'>
-	Adds the nukedisks attribute and sets it to False.
+	<example cmd='add attr attr=sge value=False'>
+	Sets the sge attribute to False
 	</example>
 
 	<related>list attr</related>

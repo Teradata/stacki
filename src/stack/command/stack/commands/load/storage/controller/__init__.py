@@ -48,6 +48,7 @@ import os.path
 import sys
 import shutil
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.load.command,
                stack.commands.HostArgumentProcessor):
@@ -71,13 +72,12 @@ class Command(stack.commands.load.command,
 	"""		
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([ ('file', None),
+                filename, processor = self.fillParams([
+                        ('file', None, True),
 			('processor', 'default') ])
 
-		if not filename:
-                        self.abort('must supply a "file" parameter')
 		if not os.path.exists(filename):
-			self.abort('file "%s" does not exist' % filename)
+                        raise CommandError('file "%s" does not exist' % filename)
 
 		#
 		# implementations can't return values

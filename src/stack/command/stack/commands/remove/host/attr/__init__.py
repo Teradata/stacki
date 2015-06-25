@@ -97,33 +97,22 @@ class Command(stack.commands.remove.host.command):
 	"""
 	Remove an attribute for a host.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1' repeat='1'>
 	One or more hosts
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</arg>
+ 	</param>
  	
-	<param type='string' name='attr'>
-	Can be used in place of the attr argument.
-	</param>
-
-	<example cmd='remove host attr compute-0-0 cpus'>
-	Removes the attribute cpus for host compute-0-0.
-	</example>
-
-	<example cmd='remove host attr compute-0-0 attr=cpus'>
-	Same as above.
+	<example cmd='remove host attr backend-0-0 attr=cpus'>
+	Removes the attribute cpus for host backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, key) = self.fillPositionalArgs(('attr', ))
-
-		if not key:
-			self.abort('missing attribute name')
-
+		(key, ) = self.fillParams([ ('attr', None, True) ])
+                 
 		for host in self.getHostnames(args):
 			attr = stack.attr.NormalizeAttr(key)
 			for row in self.call('list.host.attr', [ host ]):

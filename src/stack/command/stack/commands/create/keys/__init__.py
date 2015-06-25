@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,21 +51,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:51  bruno
-# star power for gb
-#
-# Revision 1.2  2010/08/27 17:16:27  bruno
-# change the parameter name from 'p' to 'passphrase'
-#
-# Revision 1.1  2010/06/29 21:46:59  bruno
-# add a command to generate a RSA private/public key pair
-#
-#
 
-import stack.commands
 import os
+import stack.commands
+from stack.exception import *
 
 class command(stack.commands.create.command):
 	MustBeRoot = 0
@@ -89,16 +79,14 @@ class Command(command):
 
 	def run(self, params, args):
 		(key, p) = self.fillParams([
-			('key', ),
+			('key', None, True),
 			('passphrase', 'yes')
 			])
 
 		passphrase = self.str2bool(p)
 		
-		if not key:
-			self.abort('must supply a filename for the private key')
 		if os.path.exists(key):
-			self.abort("the key file '%s' already exists" % key)
+                        raise CommandError(self, "key file '%s' already exists" % key)
 
 		#
 		# generate the private key

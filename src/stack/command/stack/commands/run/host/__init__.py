@@ -99,6 +99,8 @@ import socket
 import subprocess
 import shlex
 import stack.commands
+from stack.exception import *
+
 
 class Parallel(threading.Thread):
 	def __init__(self, cmdclass, cmd, host, collate):
@@ -144,9 +146,9 @@ class Command(command):
 	'compute-0-0: managed true', then the host is managed.
 	</arg>
 
-	<arg type='string' name='command'>
+	<param type='string' name='command' optional='0'>
 	The command to run on the list of hosts.
-	</arg>
+	</param>
 
 	<param type='boolean' name='managed'>
 	Run the command only on 'managed' hosts, that is, hosts that generally
@@ -182,16 +184,12 @@ class Command(command):
 	try to run the command in parallel on all hosts. Default is '128'.
 	</param>
 
-	<param type='string' name='command'>
-	Can be used in place of the 'command' argument.
-	</param>
-
-	<example cmd='run host compute-0-0 command="hostname"'>
-	Run the command 'hostname' on compute-0-0.
+	<example cmd='run host backend-0-0 command="hostname"'>
+	Run the command 'hostname' on backend-0-0.
 	</example>
 
-	<example cmd='run host compute "ls /tmp"'>
-	Run the command 'ls /tmp/' on all compute nodes.
+	<example cmd='run host backend command="ls /tmp"'>
+	Run the command 'ls /tmp/' on all backend nodes.
 	</example>
 	"""
 
@@ -239,38 +237,35 @@ class Command(command):
 
 
 	def run(self, params, args):
-		(args, command) = self.fillPositionalArgs(('command', ))
 
-		if not command:
-			self.abort('must supply a command')
 
-		(managed, x11, t, d, c, n) = \
-			self.fillParams([
-				('managed', 'y'),
-				('x11', 'n'),
-				('timeout', '30'),
-				('delay', '0'),
-				('collate', 'y'),
-				('num-threads', '128')
+		(command, managed, x11, t, d, c, n) = self.fillParams([
+                        ('command', None, True),
+                        ('managed', 'y'),
+                        ('x11', 'n'),
+                        ('timeout', '30'),
+			('delay', '0'),
+			('collate', 'y'),
+			('num-threads', '128')
 			])
 
 		try:
 			timeout = int(t)
 		except:
-			self.abort('"timeout" must be an integer')
+                        raise ParamType(self, 'timeout', 'integer')
 
 		if timeout < 0:
-			self.abort('"timeout" must be a postive integer')
+                        raise ParamValue(self, 'timeout', '> 0')
 
 		try:
 			numthreads = int(n)
 		except:
-			self.abort('"num-threads" must be an integer')
+                        raise ParamType(self, 'num-threads', 'integer')
 
 		try:
 			delay = float(d)
-		except:
-			self.abort('"delay" must be a floating point number')
+		except:	
+                        raise ParamType(self, 'delay', 'float')
 
 		hosts = self.getHostnames(args, self.str2bool(managed))
 		

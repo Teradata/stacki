@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,20 +51,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.2  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.1  2010/06/15 19:35:43  bruno
-# commands to:
-#  - manage public keys
-#  - start/stop a service
-#
-#
 
 import os
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -81,18 +72,13 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		key, = self.fillParams([ ('key', ) ])
-
-		if not key:
-			self.abort('must supply a public key')
+		key, = self.fillParams([ ('key', None, True) ])
 
 		if len(args) == 0:
-			self.abort('must supply a host')
-
+                        raise ArgRequired(self, 'host')
 		hosts = self.getHostnames(args)
-
 		if len(hosts) > 1:
-			self.abort('must supply only one host')
+                        raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 
@@ -114,7 +100,7 @@ class Command(stack.commands.add.host.command):
 			public_key = '%s' """ % (host, public_key))
 
 		if rows == 1:
-			self.abort('the public key already exists for host %s'
+			raise CommandError(self, 'the public key already exists for host %s'
 				% host)
 
 		#

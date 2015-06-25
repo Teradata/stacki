@@ -1,8 +1,8 @@
 # @SI_Copyright@
 # @SI_Copyright@
-# @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
@@ -51,7 +51,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		row = self.db.fetchone()
 
 		if row:
-			self.abort("""partition specification for device %s, 
+			raise CommandError(self, """partition specification for device %s, 
 				mount point %s already exists in the 
 				database""" % (device, mountpt))
 
@@ -79,7 +79,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			except:
 				hosts = []
 		else:
-			self.abort('must supply zero or one argument')
+                        raise ArgRequired(self, 'scope')
 
 		if not scope:
 			if args[0] in oses:
@@ -90,21 +90,19 @@ class Command(stack.commands.HostArgumentProcessor,
 				scope = 'host'
 
 		if not scope:
-			self.abort('argument "%s" must be a ' % args[0] + \
-				'valid os, appliance name or host name')
+                        raise ArgValue(self, 'scope', 'valid os, appliance name or host name')
 
 		if scope == 'global':
 			name = 'global'
 		else:
 			name = args[0]
 
-		device, size, type, mountpt = self.fillParams([('device', None),
-			('size', None), ('type', None), ('mountpoint', None)])
-
-		if not device:
-			self.abort('device not specified')
-		if not mountpt:
-			self.abort('mount point not specified')
+		(device, size, type, mountpt) = self.fillParams([
+                        ('device', None, True),
+			('size', None),
+                        ('type', None),
+                        ('mountpoint', None, True)
+                        ])
 
 		sizes = []
 		# Validate sizes
@@ -112,18 +110,17 @@ class Command(stack.commands.HostArgumentProcessor,
 			for s in size.split(','):
 				try:
 					s = int(s)
-				except:	
-					self.abort('size "%s" is not an integer' % s)
+				except:
+                                        raise ParamType(self, 'size', 'integer')
 				if s < 0:
-					self.abort('size "%s" is not zero or a positive integer' % s)
-
+                                        raise ParamValue(self, 'size', '>= 0')
 				sizes.append(s)
 
 		mountpts = mountpt.split(',')
 		types = type.split(',')
 
 		if not (len(sizes) == len(mountpts) == len(types)):
-			self.abort('enter size, mountpoint, type for each partition on a device')
+			raise CommandError(self, 'enter size, mountpoint, type for each partition on a device')
 	
 		#
 		# look up the id in the appropriate 'scope' table

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,64 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.10  2010/09/07 23:52:56  bruno
-# star power for gb
-#
-# Revision 1.9  2009/05/01 19:06:59  mjk
-# chimi con queso
-#
-# Revision 1.8  2008/10/18 00:55:55  mjk
-# copyright 5.1
-#
-# Revision 1.7  2008/10/16 20:35:20  bruno
-# when printing a roll's commands, only process one version of the roll,
-# otherwise, every command will be listed multiple times.
-#
-# Revision 1.6  2008/03/06 23:41:38  mjk
-# copyright storm on
-#
-# Revision 1.5  2007/07/04 01:47:38  mjk
-# embrace the anger
-#
-# Revision 1.4  2007/06/28 20:26:25  bruno
-# done with 'rocks list'
-#
-# Revision 1.3  2007/06/26 05:19:39  phil
-# properly use getRollNames
-#
-# Revision 1.2  2007/06/19 16:42:42  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/16 02:39:51  mjk
-# - added list roll commands (used for docbook)
-# - docstrings should now be XML
-# - added parser for docstring to ASCII or DocBook
-# - ditched Phil's Network regex stuff (will come back later)
-# - updated several docstrings
-#
-# Revision 1.4  2007/06/07 21:23:05  mjk
-# - command derive from verb.command class
-# - default is MustBeRoot
-# - list.command / dump.command set MustBeRoot = 0
-# - removed plugin non-bugfix
-#
-# Revision 1.3  2007/06/07 17:21:51  mjk
-# - added RollArgumentProcessor
-# - added trimOwner option to the endOutput method
-# - roll based commands are uniform
-#
-# Revision 1.2  2007/06/01 17:44:10  bruno
-# more than one version of a roll in the rolls database caused redundant
-# info to be listed -- the 'distinct' keyword only prints unique values
-#
-# Revision 1.1  2007/05/31 21:25:55  bruno
-# rocks enable/disable/list roll
-#
-#
-
 
 import os
 import stat
@@ -116,6 +59,7 @@ import sys
 import string
 import stack.file
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.RollArgumentProcessor,

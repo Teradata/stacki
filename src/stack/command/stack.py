@@ -101,6 +101,7 @@ import sys
 import string
 import syslog
 import stack	# need this so we can load the stack.commands.* modules
+import stack.exception
 from stack.bool import str2bool
 import types
 import time
@@ -385,30 +386,34 @@ def run_command(args):
 		print help.getText()
 		return -1
 
+        import stack.exception
+        
 	# Check to see if STACKDEBUG variable is set.
 	# This determines if the stack trace should be
 	# dumped when an exception occurs.
+        
 	STACKDEBUG = None
 	if os.environ.has_key('STACKDEBUG'):
 		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
 
 	try:
-		command   = getattr(module, 'Command')(Database)
+		command = getattr(module, 'Command')(Database)
 		t0 = time.time()
 		rc = command.runWrapper(name, args[i:])
-		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
+#		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
+	except stack.exception.CommandError as e:
+		sys.stderr.write('%s\n' % e)
+		syslog.syslog(syslog.LOG_ERR, '%s' % e)
+                return -1
 	except:
 		# Sanitize Exceptions, and log them.
 		exc, msg, tb = sys.exc_info()
 		for line in traceback.format_tb(tb):
-			syslog.syslog(syslog.LOG_ERR, '%s' % line)
-			# If STACKDEBUG is set, the dump the
-			# traceback to the output
-			if STACKDEBUG:
-				sys.stderr.write(line)
-		error_line = '%s: %s\n%s\n' % (module.__name__, exc.__name__, msg)
-		sys.stderr.write(error_line)
-		syslog.syslog(syslog.LOG_ERR, error_line)
+			syslog.syslog(syslog.LOG_DEBUG, '%s' % line)
+			sys.stderr.write(line)
+		error = '%s: %s -- %s' % (module.__name__, exc.__name__, msg)
+		sys.stderr.write('%s\n' % error)
+		syslog.syslog(syslog.LOG_ERR, error)
 		return -1
 
 	text = command.getText()

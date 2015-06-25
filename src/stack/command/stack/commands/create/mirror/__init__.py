@@ -101,6 +101,7 @@ import subprocess
 import shlex
 import stack
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.create.command):
@@ -116,9 +117,9 @@ class Command(stack.commands.create.command):
 	If using a url, "newest" and "urlonly" have no effect. The entire
 	distribution will be downloaded.
 
-	<arg type='string' name='path'>	
+	<param type='string' name='url'>	
 	The network location of the repository of packages.
-	</arg>
+	</param>
 	
 	<param type='string' name='name'>
 	The base name for the created pallet. If "repoid" is specified, then
@@ -136,27 +137,27 @@ class Command(stack.commands.create.command):
 	of the OS running on this machine).
 	</param>
 
-	<param type='string' name='repoid' optional='1'>
+	<param type='string' name='repoid'>
 	The repoid to mirror. Repoid's are found by executing: "yum repolist".
 	Default: None.
 	</param>
 
-	<param type='string' name='repoconfig' optional='1'>
+	<param type='string' name='repoconfig'>
 	The path to a repo configuration file. Default: None.
 	</param>
 
-	<param type='boolean' name='newest' optional='1'>
+	<param type='boolean' name='newest'>
 	Get only the latest RPMS from the repo. Default is "no"
 	and downloads the entire set of RPMS from the distribution.
 	</param>
 
-	<param type='boolean' name='urlonly' optional='1'>	
+	<param type='boolean' name='urlonly'>	
 	Print only the list of RPMS in the repo to be downloaded. 
 	Useful for checking what will be downloaded.
 	Default is "no."
 	</param>
 
-	<example cmd='create mirror http://mirrors.kernel.org/centos/6.5/updates/x86_64/Packages name=updates version=6.5'>
+	<example cmd='create mirror url=http://mirrors.kernel.org/centos/6.5/updates/x86_64/Packages name=updates version=6.5'>
 	Creates a mirror for CentOS 6.5 based on the packages from mirrors.kernel.org.
 	The pallet ISO will be named 'updates-6.5-0.x86_64.disk1.iso'.
 	</example>
@@ -256,15 +257,16 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			version = 'X'
 			
-		(name, version, arch, repoid, repoconfig, 
-			newest, urlonly) = self.fillParams(
-			[('name', None),
+		(name, version, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
+                        ('url', None)
+			('name', None),
 			('version', version),
 			('arch', self.arch), 
 			('repoid', None),
 			('repoconfig', None),
 			('newest', 'no'),
-			('urlonly', 'no')])
+			('urlonly', 'no')
+                        ])
 
 		# Any call to reposync creates a directory
 		# We don't want that if urlstatus is True.
@@ -273,28 +275,24 @@ class Command(stack.commands.create.command):
 		# following code.
 		urlstatus = self.str2bool(urlonly)
 
-		mirror_path = None
-		if len(args) == 1:
-			mirror_path = args[0]
-
 		if name == None:
 			if repoid:
 				name = repoid
 			else:
 				name = 'updates'
 
-		if not repoid and not mirror_path:
-			self.abort('must supply a URL argument or a "repoid"')
+		if not repoid and not url:
+                        raise ParamRequred(self, ('url', 'repoid'))
 
 		# Query the repo to see if it exists and we can get to it.
 		rpms,repoerr = self.repoquery(repoid, repoconfig)
-		if repoerr and rpms == 'None' and not mirror_path:
+		if repoerr and rpms == 'None' and not url:
 			msg =  "I do not think this repoid "
 			msg += "means what you think "
 			msg += "it means. "
 			msg += "\n\nrepoid '%s' doesn't " % repoid
 			msg += "appear to be a valid repo.\n"
-			self.abort(msg)
+			raise CommandError(self, msg)
 
 		# If urlonly, just print what will be downloaded.
 		if urlstatus  == True:
@@ -313,8 +311,8 @@ class Command(stack.commands.create.command):
 		else:
 			self.clean()
 		
-		if mirror_path:
-			self.mirror(mirror_path)
+		if url:
+			self.mirror(url)
 		elif repoid and urlstatus == False:
 			self.reposync(repoid, repoconfig, newest, urlonly)
 

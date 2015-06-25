@@ -109,6 +109,7 @@ from stack.cond import EvalCondExpr
 from stack.attr import *
 import stack.graph
 import stack.ip
+from stack.exception import *
 from stack.bool import *
 import xml
 from xml.sax import saxutils
@@ -144,20 +145,6 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		sys.__stderr__.write('%s\n' % m)
 		
 
-class CommandException(Exception):
-	def __init__(self, msg):
-		self.msg = msg
-
-	def __str__(self):
-		return self.msg
-
-class UsageException(Exception):
-	def __init__(self, msg, cmdObj):
-		self.msg = msg
-		self.usage = cmdObj.usage()
-
-	def __str__(self):
-		return "%s\n%s" % (self.msg, self.usage)
 
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
@@ -183,7 +170,7 @@ class OSArgumentProcessor:
 			elif s in [ 'xenserver' ]:
 				list.append('xenserver')
 			else:
-				raise CommandException('unknown os "%s"' % arg)
+				raise CommandError('unknown os "%s"' % arg)
 		if not list:
 			list.append('redhat')
 			list.append('sunos')
@@ -215,7 +202,7 @@ class MembershipArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandException('unknown membership "%s"' % arg)
+				raise CommandError('unknown membership "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -242,7 +229,7 @@ class ApplianceArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandException('unknown appliance "%s"' % arg)
+				raise CommandError('unknown appliance "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -274,7 +261,7 @@ class DistributionArgumentProcessor:
 					# is empty
 					continue
 				else:
-					raise CommandException('unknown distribution "%s"' % arg)
+					raise CommandError('unknown distribution "%s"' % arg)
 
 			for name, in self.db.fetchall():
 				list.append(name)
@@ -302,7 +289,7 @@ class NetworkArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandException('unknown network "%s"' % arg)
+				raise CommandError('unknown network "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -329,7 +316,7 @@ class RollArgumentProcessor:
 	"""An Interface class to add the ability to process pallet arguments."""
 	
 	def getRollNames(self, args, params):
-		"""Returns a list of (name, version) tuples from the pallet
+		"""Returns a list of (name, version, release) tuples from the pallet
 		table in the database.  If the PARAMS['version'] is provided
 		only pallets of that version are included otherwise no filtering
 		on version number is performed.  If the ARGS list is empty then
@@ -347,15 +334,15 @@ class RollArgumentProcessor:
 		if not args:
 			args = [ '%' ] # find all pallet names
 		for arg in args:
-			rows = self.db.execute("""select distinct name,version
+			rows = self.db.execute("""select distinct name,version,release
 				from rolls where name like binary '%s' and 
 				version like binary '%s'""" % (arg, version))
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandException('unknown pallet name "%s"' % arg)
-			for (name, ver) in self.db.fetchall():
-				list.append((name, ver))
+				raise CommandError('unknown pallet name "%s"' % arg)
+			for (name, ver, rel) in self.db.fetchall():
+				list.append((name, ver, rel))
 				
 		return list
 
@@ -522,7 +509,7 @@ class HostArgumentProcessor:
 						res = EvalCondExpr(exp,
 								   hostAttrs[host])
 					except SyntaxError:
-						raise CommandException('group syntax "%s"' % exp)
+						raise CommandError('group syntax "%s"' % exp)
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
@@ -1910,7 +1897,7 @@ class DatabaseConnection:
 
 					fin.close()
 				
-				raise CommandException('cannot resolve host "%s"' % hostname)
+				raise CommandError('cannot resolve host "%s"' % hostname)
 					
 		
 		if addr == '127.0.0.1': # allow localhost to be valid
@@ -1936,7 +1923,7 @@ class DatabaseConnection:
 					'nodes.id=networks.node and '
 					'networks.name="%s"' % (hostname))
 				if not rows:
-					raise CommandException('host "%s" is not in cluster'
+					raise CommandError('host "%s" is not in cluster'
 						% hostname)
 			hostname, = self.link.fetchone()
 
@@ -2008,84 +1995,7 @@ class Command:
                 	       		self.colors[key]['code'] = o
 
 
-
-                		
-	def abort(self, msg):
-		# msg  : error string (stderr, and syslog)
-		# usage: command users (stderr)
-		raise UsageException(msg, self)
-
-        # TODO - Kill this evil function
-        
-	def fillPositionalArgs(self, names, params=None, args=None):
-		# The helper function will allow named parameters
-		# to be used in lieu of positional arguments
-		# Example:  
-		#   Suppose command is of the form: 
-                #            command <arg1> <arg2> <arg3>
-		#   Usually called as:
-		#            command foo bar baz
-                #   However if you name the arguments as parameters, say
-		#           arg1, arg2, arg3
-		#   Then, equivalent calls of the command are
-		#	    command arg1=foo arg2=bar arg3=baz 
-		#           command foo arg2=bar arg3=baz
-                #           command foo bar arg3=baz
-		#           command foo bar baz
-		#           command foo arg2=bar baz
-		#
-		#   Arguments:
-		#           paramlist = list of parameter names in the order
-		#                       that their unnamed argument counterparts
-		#  		 	appear eg. paramlist=('iface','mac')
-		#	    params    = list of parameters (e.g param=value) 
-		#           args      = args
-		#
-		#  Returns:
-		#           remaining args, Filled parameters
-		#  Example:
-		#           hostlist,iface,mac=self.fillPositionalArgs( \
-	        #			('iface','mac'),params,args)
-	
-		if not type(names) in [ types.ListType, types.TupleType ]:
-			names = [ names ]
-			 
-		if not params:
-			params = self._params
-		if not args:
-			args = self._args
-			
-		list = []
-		for name in names:
-			if params.has_key(name):
-				list.append(params[name])
-			else:
-				list.append(None)
-
-		# now walk backwards through the args and pull off
-		# positional arguments that have not already been set
-		# as a param=<parameter>
-
-		trimmedArgs = args
-		vars = []
-		list.reverse()
-		for e in list:
-			if not e and len(trimmedArgs):
-				vars.append(trimmedArgs[-1])
-				trimmedArgs = trimmedArgs[:-1]
-			else:
-				vars.append(e)
-		
-		# need to reverse the 'vars' to get them in the correct order
-		# since we processed them above in reverse order
-		vars.reverse()
-
-		rlist=[]
-		rlist.append(trimmedArgs)
-		rlist.extend(vars)
-		return rlist 
-
-	def fillParams(self, names, params=None):
+        def fillParams(self, names, params=None):
 		"""Returns a list of variables with either default
 		values of the values in the PARAMS dictionary.
 		
@@ -2093,6 +2003,7 @@ class Command:
 			KEY - key name of PARAMS dictionary
 			DEFAULT - default value if key in not in dict
 		PARAMS - optional dictionary
+                REQUIRED - optional boolean (True means param is required)
 		
 		For example:
 		
@@ -2112,27 +2023,36 @@ class Command:
 
 		# for each element in the names list make sure it is also
 		# a tuple.  If the second element (default value) is missing
-		# use None.  The resulting PDLIST is a list of (key, default) 
-		# tuples.
-		
+		# use None.  If the third element is missing assume the
+                # parameter is not required.
+                		
 		pdlist = []
 		for e in names:
-			if type(e) in [ types.ListType, types.TupleType] \
-				and len(e) == 2:
-				tuple = ( e[0], e[1] )
+			if type(e) in [ types.ListType, types.TupleType]:
+                                if len(e) == 3:
+                                        tuple = ( e[0], e[1], e[2] )
+                                elif len(e) == 2:
+                                        tuple = ( e[0], e[1], False )
+                                elif len(e) == 1:
+                                        tuple = ( e[0], None, False )
+                                else:
+                                        assert len(e) in [ 1, 2, 3 ]
 			else:
-				tuple = ( e[0], None )
+				tuple = ( e[0], None, False )
 			pdlist.append(tuple)
 				
 		if not params:
 			params = self._params
 
 		list = []
-		for (key, default) in pdlist:
+		for (key, default, required) in pdlist:
 			if params.has_key(key):
 				list.append(params[key])
 			else:
+                                if required:
+                                        raise ParamRequired(self, key)
 				list.append(default)
+
 		return list
 
 
@@ -2708,7 +2628,7 @@ class Command:
 			self.help(name, dict)
 		else:
                         if not self.hasAccess(name):
-				raise CommandException('user "%s" does not have access "%s"' %
+				raise CommandError('user "%s" does not have access "%s"' %
                                       (username, name))
 			else:
 				self._argv   = argv # raw arg list

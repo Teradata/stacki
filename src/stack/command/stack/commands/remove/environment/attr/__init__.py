@@ -92,40 +92,31 @@
 
 import stack.attr
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.environment.command):
 	"""
 	Remove an attribute for an Environment.
 
-	<arg type='string' name='environment'>
+	<arg type='string' name='environment' repeat='1' optional='0'>
 	One or more Environment specifications (e.g., 'test').
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</arg>
+ 	</param>
  	
-	<param type='string' name='attr'>
-	Can be used in place of the attr argument.
-	</param>
-
-	<example cmd='remove environment attr test sge'>
-	Removes the attribute sge for text environment machines.
-	</example>
-
 	<example cmd='remove environment attr test attr=sge'>
-	Same as above.
+	Removes the attribute sge for text environment machines.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, key) = self.fillPositionalArgs(('attr', ))
-
+		(key, ) = self.fillParams([ ('attr', None, True) ])
+                 
 		if not args:
-			self.abort('missing environment name')
-		if not key:
-			self.abort('missing attribute name')
-
+                        raise ArgRequired(self, 'environment')
+                
 		for env in args:
 			attr = stack.attr.NormalizeAttr(key)
 			for row in self.call('list.environment.attr', [ env ]):

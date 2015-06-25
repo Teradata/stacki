@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,45 +51,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:56  bruno
-# star power for gb
-#
-# Revision 1.5  2010/08/05 22:21:18  bruno
-# optionally get the status of the VMs
-#
-# Revision 1.4  2010/08/05 19:56:06  bruno
-# more airboss updates
-#
-# Revision 1.3  2010/07/12 17:43:41  bruno
-# moved the private key reading into the commands. this makes it possible to
-# enter the passphrase on the key once and have the command apply to several
-# nodes.
-#
-# Revision 1.2  2010/07/09 23:50:14  bruno
-# check if the key exists
-#
-# Revision 1.1  2010/07/09 23:18:06  bruno
-# moved 'rocks list host macs' to the base roll.
-#
-# Revision 1.3  2010/07/07 23:18:39  bruno
-# added 'power on + install' command
-#
-# Revision 1.2  2010/06/30 17:59:58  bruno
-# can now route error messages back to the terminal that issued the command.
-#
-# can optionally set the VNC viewer flags.
-#
-# Revision 1.1  2010/06/28 17:22:56  bruno
-# added 'list host macs' command
-#
-#
 
 import os
 import M2Crypto
 import stack.commands
 import stack.vm
+from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
@@ -119,24 +87,23 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		(key, s) = self.fillParams([ ('key', ), ('status', 'n') ])
+		(key, s) = self.fillParams([
+                        ('key', None, True),
+                        ('status', 'n')
+                        ])
 
-		if not key:
-			self.abort('must supply a path name to a private key')
 		if not os.path.exists(key):
-			self.abort('private key "%s" does not exist' % key)
+			raise CommandError(self, 'private key "%s" does not exist' % key)
 
 		state = self.str2bool(s)
 
 		vm_controller = self.db.getHostAttr('localhost', 'airboss')
 
 		if not vm_controller:
-			self.abort('the "airboss" attribute is not set')
+			raise CommandError(self, 'the "airboss" attribute is not set')
 
-		if len(args) == 0:
-			self.abort('must supply one host name')
-		if len(args) > 1:
-			self.abort('must supply only one host name')
+		if not len(args) == 1:
+                        raise ArgUnique(self, 'host')
 
 		hosts = self.getHostnames(args)
 		host = hosts[0]
@@ -149,7 +116,7 @@ class Command(command):
 		else:
 			(status, macs) = vm.cmd('list macs', host)
 		if status != 0:
-			self.abort('command failed: %s' % macs)
+                        raise CommandError(self, 'command failed: %s' % macs)
 
 		self.beginOutput()
 		for mac in macs.split('\n'):

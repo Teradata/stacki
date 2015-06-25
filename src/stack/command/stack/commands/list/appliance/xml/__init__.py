@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,81 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.15  2010/09/07 23:52:54  bruno
-# star power for gb
-#
-# Revision 1.14  2009/05/01 19:06:57  mjk
-# chimi con queso
-#
-# Revision 1.13  2008/12/20 01:06:15  mjk
-# - added appliance_attributes
-# - attributes => node_attributes
-# - rocks set,list,remove appliance attr
-# - eval shell for conds has a special local dictionary that allows
-#   unresolved variables (attributes) to evaluate to None
-# - need to add this to solaris
-# - need to move UserDict stuff into pylib and remove cut/paste code
-# - need a drink
-#
-# Revision 1.12  2008/10/18 00:55:49  mjk
-# copyright 5.1
-#
-# Revision 1.11  2008/03/06 23:41:37  mjk
-# copyright storm on
-#
-# Revision 1.10  2007/07/04 01:47:38  mjk
-# embrace the anger
-#
-# Revision 1.9  2007/06/27 23:59:23  bruno
-# more cleanup.
-#
-# phil, commence head shaking.
-#
-# Revision 1.8  2007/06/19 16:42:41  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.7  2007/06/16 02:39:51  mjk
-# - added list roll commands (used for docbook)
-# - docstrings should now be XML
-# - added parser for docstring to ASCII or DocBook
-# - ditched Phil's Network regex stuff (will come back later)
-# - updated several docstrings
-#
-# Revision 1.6  2007/06/07 21:23:04  mjk
-# - command derive from verb.command class
-# - default is MustBeRoot
-# - list.command / dump.command set MustBeRoot = 0
-# - removed plugin non-bugfix
-#
-# Revision 1.5  2007/05/31 19:35:42  bruno
-# first pass at getting all the 'help' consistent on all the rocks commands
-#
-# Revision 1.4  2007/05/11 18:33:15  mjk
-# - fix list host profiles
-# - [hosts] -> [host(s)]
-#
-# Revision 1.3  2007/05/10 20:37:01  mjk
-# - massive rocks-command changes
-# -- list host is standardized
-# -- usage simpler
-# -- help is the docstring
-# -- host groups and select statements
-# - added viz commands
-#
-# Revision 1.2  2007/02/27 01:53:58  mjk
-# - run(self, args) => run(self, flags, args)
-# - replaced rocks list host xml with more complete code
-# - replaced rocks lust node xml with kpp shell (not a command now)
-#
-# Revision 1.1  2007/01/17 19:31:19  anoop
-# new command line function
-# rocks list appliance xml <membership>
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.list.appliance.command):
 
@@ -156,8 +85,7 @@ class Command(stack.commands.list.appliance.command):
 			try:
 				(name, ) = self.db.fetchone()
 			except TypeError:
-				self.abort('no such appliance "%s"' %
-					app)
+                                raise CommandError(self, 'no such appliance "%s"' % app)
 			if name:
 				xml = self.command('list.node.xml', [name])
 				for line in xml.split('\n'):

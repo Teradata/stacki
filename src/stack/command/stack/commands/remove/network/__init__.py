@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,57 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.10  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.9  2009/05/01 19:07:01  mjk
-# chimi con queso
-#
-# Revision 1.8  2008/10/18 00:55:56  mjk
-# copyright 5.1
-#
-# Revision 1.7  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.6  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.5  2007/06/28 21:48:38  bruno
-# made a sweep over all the remove commands
-#
-# Revision 1.4  2007/06/25 21:26:03  bruno
-# correct row count processing
-#
-# Revision 1.3  2007/06/19 16:42:42  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.2  2007/06/12 19:22:57  mjk
-# better protection
-#
-# Revision 1.4  2007/06/05 22:28:11  mjk
-# require root for all remove commands
-#
-# Revision 1.3  2007/05/31 19:35:43  bruno
-# first pass at getting all the 'help' consistent on all the rocks commands
-#
-# Revision 1.2  2007/05/10 20:37:02  mjk
-# - massive rocks-command changes
-# -- list host is standardized
-# -- usage simpler
-# -- help is the docstring
-# -- host groups and select statements
-# - added viz commands
-#
-# Revision 1.1  2007/04/12 19:48:05  bruno
-# added command line: 'rocks add/list/remove appliance'
-#
-# updated base, hpc, pvfs2 and viz rolls to use new command line.
-#
-#
-
 
 import os
 import stat
@@ -108,7 +58,7 @@ import time
 import sys
 import string
 import stack.commands
-
+from stack.exception import *
 
 class Command(stack.commands.NetworkArgumentProcessor,
 	stack.commands.remove.command):
@@ -129,7 +79,7 @@ class Command(stack.commands.NetworkArgumentProcessor,
 
 	def run(self, params, args):
 		if not len(args):
-			self.abort('must supply network')
+                        raise ArgRequired(self, 'network')
 			
 		# use the default argument handling but protect the user
 		# from ever deleting networks (subnets table) that are
@@ -145,7 +95,7 @@ class Command(stack.commands.NetworkArgumentProcessor,
 				sub.name='%s'""" % network)
 
 			if rows > 0:
-				self.abort('cannot remove ' +
+				raise CommandError(self, 'cannot remove ' +
 					'"%s" ' % (network) +
 					'network. There are nodes still ' +
 					'associated with it.')

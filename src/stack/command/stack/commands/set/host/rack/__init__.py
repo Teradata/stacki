@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,40 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:02  bruno
-# star power for gb
-#
-# Revision 1.7  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.6  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.4  2007/07/04 01:47:40  mjk
-# embrace the anger
-#
-# Revision 1.3  2007/07/02 19:57:59  bruno
-# more cleanup
-#
-# Revision 1.2  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/08 03:26:24  mjk
-# - plugins call self.owner.addText()
-# - non-existant bug was real, fix plugin graph stuff
-# - add set host cpus|membership|rack|rank
-# - add list host (not /etc/hosts, rather the nodes table)
-# - fix --- padding for only None fields not 0 fields
-# - list host interfaces is cool works for incomplete hosts
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -93,36 +63,27 @@ class Command(stack.commands.set.host.command):
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='rack'>
-	The rack number to assign to each host.
-	</arg>
-
-	<param type='string' name='rack'>
-	Can be used in place of rack argument.
+	<param type='string' name='rack' optional='0'>
+	The rack name (usually a number) to assign to each host.
 	</param>
 
-	<example cmd='set host rack compute-2-0 2'>
+	<example cmd='set host rack compute-2-0 rack=2'>
 	Set the rack number to 2 for compute-2-0.
-	</example>
-
-	<example cmd='set host rack compute-0-0 compute-0-1 0'>
-	Set the rack number to 0 for compute-0-0 and compute-0-1.
-	</example>
-
-	<example cmd='set host rack compute-0-0 compute-0-1 rack=0'>
-	Same as above.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, rack) = self.fillPositionalArgs(('rack', ))
+
+		(rack, ) = self.fillParams([
+                        ('rack', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not rack:
-			self.abort('must supply rack')
+                        raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set rack=%d where
-				name='%s'""" % (int(rack), host))
+			self.db.execute("""
+                        	update nodes set rack='%s' where
+				name='%s'
+                                """ % (rack, host))
 

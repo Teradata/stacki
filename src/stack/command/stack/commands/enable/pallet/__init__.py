@@ -97,6 +97,7 @@ import time
 import sys
 import string
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.RollArgumentProcessor,
@@ -143,21 +144,22 @@ class Command(stack.commands.RollArgumentProcessor,
 
 	def run(self, params, args):
 
-                (arch, distribution) = self.fillParams(
-			[('arch', self.arch),
-			 ('distribution', 'default')])
+                (arch, distribution) = self.fillParams([
+                        ('arch', self.arch),
+                        ('distribution', 'default')
+                        ])
 
                 if len(args) < 1:
-                        self.abort('must supply one or more pallets')
+                        raise ArgRequired(self, 'pallet')
 
 		rows = self.db.execute("""
 			select * from distributions where name='%s'
 			""" % distribution)
 		if not rows:
-			self.abort('unknown distribution "%s"' % distribution)
+                        raise CommandError(self, 'unknown distribution "%s"' % distribution)
 		
 			
-		for (roll, version) in self.getRollNames(args, params):
+		for (roll, version, release) in self.getRollNames(args, params):
 			rows = self.db.execute("""
 				select d.name from
 				stacks s, rolls r, distributions d where

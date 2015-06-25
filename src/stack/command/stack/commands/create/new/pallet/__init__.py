@@ -1,4 +1,5 @@
-# $Id: __init__.py,v 1.3 2011/02/03 23:01:22 bruno Exp $
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,18 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2011/02/03 23:01:22  bruno
-# fix help for command
-#
-# Revision 1.2  2010/09/07 23:52:51  bruno
-# star power for gb
-#
-# Revision 1.1  2009/06/08 22:24:51  bruno
-# create the directory structure in order to build a new roll from scratch
-#
-#
 
 import re
 import os
@@ -71,6 +60,7 @@ import UserDict
 from random import randrange
 import stack
 import stack.commands
+from stack.exception import *
 
 class Textsub(UserDict.UserDict):
 	"""Substitutes variables in the text with their values
@@ -110,16 +100,16 @@ class Command(stack.commands.create.new.command):
 
 	Refer to Pallet Developer Guide for more information.
 
-	<arg type='string' name='name'>	
+	<param type='string' name='name' optional='0'>	
 	Name of the new pallet to be created.
-	</arg>
+	</param>
 	
 	<param type='string' name='version'>
 	Version of the pallet. Typically the version of the
 	application to be palletized.
 	</param>
 
-	<example cmd='create new pallet valgrind version=3.10.1'>
+	<example cmd='create new pallet name=valgrind version=3.10.1'>
 	Creates a new pallet for Valgrind version 3.10.1.
 	</example>
 	"""
@@ -259,13 +249,12 @@ class Command(stack.commands.create.new.command):
 
 
 	def run(self, params, args):
-		(args, self.name) = self.fillPositionalArgs(('name', ))
 
-		if not self.name:
-			self.abort('must supply a name for the new pallet')
-
-		(self.version, self.color) = self.fillParams([
-			('version', '1.0'), ('color', self.colorNode()) ])
+                (self.name, self.version, self.color) = self.fillParams([
+                        ('name', None, True),
+			('version', '1.0'),
+                        ('color', self.colorNode())
+                        ])
 
 		self.setDict()
 		self.createDirsFiles()

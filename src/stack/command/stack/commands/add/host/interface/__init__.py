@@ -59,7 +59,7 @@ import time
 import sys
 import string
 import stack.commands
-
+from stack.exception import *
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -105,44 +105,38 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 
-		(args, interface) = self.fillPositionalArgs(('interface',))
 		hosts = self.getHostnames(args)
-		
-		if not interface:
-			self.abort('missing interface')
+                (interface, mac) = self.fillParams([
+                        (interface, None),
+                        (mac,       None)
+                        ])
 
-		if len(hosts) != 1:	
-			self.abort('must supply one host')
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
+		if len(hosts) != 1:
+                        raise ArgUnique(self, 'host')
+
 		host = hosts[0]
 
-		#
-		# determine if this is an interface name or a MAC address
-		#
-		isMac = 0
-		m = interface.split(':')
-		if len(m) >= 6:
-			isMac = 1
+                for dict in self.call('list.host.interface', [ 'host=%s' % host ]):
+                        if interface == dict['interface']:
+                                raise CommandError(self, 'interface exists')
+                        if mac == dict['mac']:
+                                raise CommandError(self, 'mac exists')
 
-		rows = self.db.execute("""select * from networks,nodes where 
-			nodes.name='%s' and
-			(networks.device='%s' or networks.mac='%s') and
-			networks.node=nodes.id""" % (host, interface, interface))
-		if rows:
-			self.abort('interface "%s" exists' % interface)
 
-		# Add the interface and then call the set commands for
-		# all the provided parameters
-		
-		if isMac:
-			self.db.execute("""insert into networks(node,mac)
-				values ((select id from nodes where name='%s'),
-				'%s')""" % (host, interface)) 
+                if mac:
+			self.db.execute("""
+                        	insert into networks(node, mac)
+				values ((select id from nodes where name='%s'), '%s')
+                                """ % (host, mac)) 
 		else:
-			self.db.execute("""insert into networks(node,device)
-				values ((select id from nodes where name='%s'),
-				'%s')""" % (host, interface)) 
+			self.db.execute("""
+                        	insert into networks(node, device)
+				values ((select id from nodes where name='%s'), '%s')
+                                """ % (host, interface)) 
 
-		for key in ['ip', 'mac', 'module', 'name', 'subnet', 'vlan', 'default']:
+		for key in ['interface', 'ip', 'mac', 'module', 'name', 'subnet', 'vlan', 'default']:
 			if params.has_key(key):
 				self.command('set.host.interface.%s' % key,
 					(host, "interface=%s" % interface,

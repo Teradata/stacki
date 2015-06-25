@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,43 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.9  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.8  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.7  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.6  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.5  2007/07/04 01:47:40  mjk
-# embrace the anger
-#
-# Revision 1.4  2007/06/29 21:22:05  bruno
-# more cleanup
-#
-# Revision 1.3  2007/06/25 21:26:03  bruno
-# correct row count processing
-#
-# Revision 1.2  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/08 03:26:24  mjk
-# - plugins call self.owner.addText()
-# - non-existant bug was real, fix plugin graph stuff
-# - add set host cpus|membership|rack|rank
-# - add list host (not /etc/hosts, rather the nodes table)
-# - fix --- padding for only None fields not 0 fields
-# - list host interfaces is cool works for incomplete hosts
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.MembershipArgumentProcessor,
 	stack.commands.set.host.command):
@@ -97,39 +64,31 @@ class Command(stack.commands.MembershipArgumentProcessor,
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='membership'>
+	<param type='string' name='membership' optional='0'>
 	The membership to assign to each host.
-	</arg>
-
-	<param type='string' name='membership'>
-	Can be used in place of the membership argument.
 	</param>
 
-	<example cmd='set host membership "NAS Appliance" nas-0-0'>
+	<example cmd='set host membership nas-0-0 membership="NAS Appliance"'>
 	Sets the membership to 'NAS Appliance' for nas-0-0.
-	</example>
-
-	<example cmd='set host membership "NAS Appliance" membership=nas-0-0'>
-	Same as above.
-	</example>
-
-	<example cmd='set host membership Compute'>
-	Sets the membership to 'Compute' for all known hosts.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, membership) = self.fillPositionalArgs(('membership', ))
+
+		(membership, ) = self.fillParams([
+                        ('membership', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not membership:
-			self.abort('must supply membership')
+                        raise ArgRequired(self, 'host')
+
 		if membership not in self.getMembershipNames():
-			self.abort('invalid membership "%s"' % membership)		
+                        raise CommandError('membership parameter not valid', self)
+
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set 
+			self.db.execute("""
+                        	update nodes set 
 				membership=(select id from memberships where
-				name='%s') where name='%s'""" % 
-				(membership, host))
+				name='%s') where name='%s'
+                                """ % (membership, host))
 

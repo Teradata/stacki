@@ -98,18 +98,19 @@ import os.path
 import sys
 import shutil
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.load.command,
                stack.commands.HostArgumentProcessor):
 	"""
 	Load attributes into the database
 	
-	<param type='string' name='file'>
+	<param type='string' name='file' optional='1'>
 	The file that contains the attribute data to be loaded into the
 	database.
 	</param>
 
-	<param type='string' name='processor' optional='1'>
+	<param type='string' name='processor'>
 	The processor used to parse the file and to load the data into the
 	database. Default: default.
 	</param>
@@ -166,13 +167,13 @@ class Command(stack.commands.load.command,
 			
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([ ('file', None),
-			('processor', 'default') ])
+                filename, processor = self.fillParams([
+                        ('file', None, True),
+			('processor', 'default')
+                        ])
 
-		if not filename:
-                        self.abort('must supply a "file" parameter')
 		if not os.path.exists(filename):
-			self.abort('file "%s" does not exist' % filename)
+                        raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		#
 		# implementations can't return values

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,29 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/20 00:31:45  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.3  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.2  2009/05/01 19:06:59  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 22:19:55  mjk
-# - route commands done
-# - cleanup of stack.host plugins
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.appliance.command):
 	"""
@@ -82,27 +63,22 @@ class Command(stack.commands.remove.appliance.command):
 	Appliance name. This argument is required.
 	</arg>
 
-	<arg type='string' name='address'>
-	The address of the static route to remove. This argument is required.
-	</arg>
-
-	<param type='string' name='address'>
-	Can be used in place of the 'address' argument.
+	<param type='string' name='address' optional='0'>
+	The address of the static route to remove.
 	</param>
 
-	<example cmd='remove appliance route compute 1.2.3.4'>
+	<example cmd='remove appliance route compute address=1.2.3.4'>
 	Remove the static route for the 'compute' appliance that has the
 	network address '1.2.3.4'.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, address) = self.fillPositionalArgs(('address', ))
+                
+		(address, ) = self.fillParams([ ('address', None, True) ])
 
-		if not address:
-			self.abort('requires address')
 		if len(args) == 0:
-			self.abort('must supply at least one appliance type')
+                        raise ArgRequired(self, 'appliance')
 
 		for appliance in self.getApplianceNames(args):
 			self.db.execute("""

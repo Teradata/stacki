@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,33 +51,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.5  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.4  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.3  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.2  2008/02/21 20:24:38  bruno
-# fix help
-#
-# Revision 1.1  2008/01/23 19:05:35  bruno
-# can now add kernel boot parameters to the running configuration with the rocks
-# command line
-#
-#
 
 import sys
 import string
 import stack.commands
 import os
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -105,11 +85,8 @@ class Command(stack.commands.set.host.command):
 		else:
 			hosts = self.getHostnames(args)
 
-		(flags, ) = self.fillParams( [('flags', )] )
+		(flags, ) = self.fillParams( [('flags', None, True)] )
 			
-		if not flags:
-			self.abort('must supply the flags')
-
 		if not hosts:
 			#
 			# set the global configuration

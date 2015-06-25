@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,22 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.4  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.3  2009/05/01 19:07:01  mjk
-# chimi con queso
-#
-# Revision 1.2  2009/03/13 22:19:56  mjk
-# - route commands done
-# - cleanup of stack.host plugins
-#
-
 
 
 import stack.commands
@@ -74,25 +59,19 @@ class Command(stack.commands.remove.command):
 	"""
 	Remove a global static route.
 
-	<arg type='string' name='address'>
-	The address of the static route to remove. This argument is required.
-	</arg>
-
-	<param type='string' name='address'>
-	Can be used in place of the 'address' argument.
+	<param type='string' name='address' optional='0'>
+	The address of the static route to remove.
 	</param>
 
-	<example cmd='remove route 1.2.3.4'>
+	<example cmd='remove route address=1.2.3.4'>
 	Remove the global static route that has the network address '1.2.3.4'.
 	</example>
 	"""
 
 
 	def run(self, params, args):
-		(args, address) = self.fillPositionalArgs(('address', ))
 
-		if not address:
-			self.abort('address required')
+                (address, ) = self.fillParams([ ('address', None, True) ])
 
 		self.db.execute("""delete from global_routes where 
 			network = '%s'""" % address)

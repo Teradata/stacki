@@ -2,6 +2,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.interface.command):
 	"""
@@ -30,25 +31,26 @@ class Command(stack.commands.set.host.interface.command):
 	def run(self, params, args):
 
                 (interface, network, default) = self.fillParams([
+                        ('default', 'true'),
                         ('interface', None),
                         ('network', None),
-                        ('default', 'True')])
+                        ])
 
                 default = self.str2bool(default)
 
 		if not interface and not network:
-                        self.abort('must specify a network or interface name')
+                        raise ParamRequired(self, ('interface', 'network'))
 
                 for host in self.getHostnames(args):
                         if network:
                                 interface = self.getInterface(host, network)
                         if not interface:
-                                self.abort('no interface for "%s" on "%s"' %
-                                	(network, host))
+                                raise CommandError(self, 'no interface for "%s" on "%s"' %
+                                                (network, host))
 
                         if not self.verifyInterface(host, interface):
-                                self.abort('no interface "%s" on "%s"' %
-                                        (interface, host))
+                                raise CommandError(self, 'no interface "%s" on "%s"' %
+                                                (interface, host))
 
                         # Exclusively set the default interface by resetting
                         # all other interfaces after enabling the specified one.

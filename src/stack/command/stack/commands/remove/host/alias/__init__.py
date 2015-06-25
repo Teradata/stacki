@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,60 +51,46 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.1  2008/10/21 19:34:04  bruno
-# added 'alias' commands
-#
-#
+
 
 import stack.commands
 
 class Command(stack.commands.remove.host.command):
 	"""
-	Remove an alias for a host.
+	Remove an alias from a host(s).
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1' repeat='1'>
 	One hosts.
 	</arg>
 	
-	<arg type='string' name='name'>
+	<param type='string' name='alias'>
 	The alias name that should be removed.
- 	</arg>
- 	
-	<param type='string' name='name'>
-	Can be used in place of the name argument.
 	</param>
 
-	<example cmd='remove host alias compute-0-0 c-0-0'>
-	Removes the alias c-0-0 for host compute-0-0.
+	<example cmd='remove host alias backend-0-0 alias=c-0-0'>
+	Removes the alias c-0-0 for host backend-0-0.
 	</example>
 
-	<example cmd='remove host alias compute-0-0 name=c-0-0'>
-	Same as above.
+	<example cmd='remove host alias backend-0-0'>
+	Removes all aliases for backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, name) = self.fillPositionalArgs(('name', ))
+                
+		(alias, ) = self.fillParams([
+                        ('alias', None)
+                        ])
 
-		if not name:
-			self.abort('missing alias name')
-
-		hosts = self.getHostnames(args)
-		if len(hosts) != 1:	
-			self.abort('must supply one host')
-		host = hosts[0]
-			
-		self.db.execute("""delete from aliases where 
-			node = (select id from nodes where name='%s')
-			and name = '%s'""" % (host, name))
-
-		self.command('sync.config')
-
+		for host in self.getHostnames(args):
+                	if not alias: 
+                        	self.db.execute("""
+                                	delete from aliases where 
+                                        node = (select id from nodes where name='%s')
+                                        """ % host)
+                        else:
+                                self.db.execute("""
+                                	delete from aliases where 
+                                        node = (select id from nodes where name='%s')
+                                        and name = '%s'
+                                        """ % (host, alias))

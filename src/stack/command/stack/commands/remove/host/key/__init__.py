@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,19 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.2  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.1  2010/06/15 19:35:43  bruno
-# commands to:
-#  - manage public keys
-#  - start/stop a service
-#
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
@@ -79,18 +70,13 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		id, = self.fillParams([ ('id', ) ])
-
-		if not id:
-			self.abort('must supply an ID for the key')
+		id, = self.fillParams([ ('id', None, True) ])
 
 		if len(args) == 0:
-			self.abort('must supply a host')
-
+                        raise ArgRequired(self, 'host')
 		hosts = self.getHostnames(args)
-
 		if len(hosts) > 1:
-			self.abort('must supply only one host')
+                        raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 
@@ -101,7 +87,7 @@ class Command(stack.commands.remove.host.command):
 		if rows == 0:
 			msg = "public key with id %s " % id
 			msg += "doesn't exist for host %s" % host
-			self.abort(msg)
+			raise CommandError(self, msg)
 		
 		self.db.execute("""delete from public_keys where
 			id = %s and node = (select id from

@@ -1,5 +1,5 @@
-#
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -51,30 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.5  2009/05/01 19:06:58  mjk
-# chimi con queso
-#
-# Revision 1.4  2009/01/05 23:46:59  bruno
-# can now build a compute node
-#
-# Revision 1.3  2008/10/18 00:55:50  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:37  mjk
-# copyright storm on
-#
-# Revision 1.1  2007/12/10 21:28:34  bruno
-# the base roll now contains several elements from the HPC roll, thus
-# making the HPC roll optional.
-#
-# this also includes changes to help build and configure VMs for V.
-#
-#
 
 import os
 import sys
@@ -84,7 +60,7 @@ import stack.gen
 import stack.commands
 import xml.dom.ext
 import xml.dom.ext.reader.Sax2
-from stack.commands import UsageException, CommandException
+from stack.exception import *
 
 class ProfileNodeFilter(stack.gen.NodeFilter):
 	def acceptNode(self, node):
@@ -122,10 +98,7 @@ class Command(stack.commands.Command):
 
 
 	def run(self, params, args):
-		section, = self.fillParams( [('section', None)] )
-
-		if not section:
-			raise UsageException("Must supply section",self)
+		section, = self.fillParams([ ('section', None, True) ])
 
 		self.xml_doc = xml.dom.ext.reader.Sax2.FromXmlStream(sys.stdin)
 		self.xml_filter = ProfileNodeFilter({})

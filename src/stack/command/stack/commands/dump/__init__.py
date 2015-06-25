@@ -55,6 +55,7 @@
 
 import string
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.Command):
 	MustBeRoot = 0
@@ -94,7 +95,7 @@ class Command(command):
 	
 	def run(self, params, args):
 		if len(args):
-			self.abort('command does not take arguments')
+                        raise CommandError(self, 'command does not take arguments')
 		self.addText("#!/bin/bash\n\n")
 		self.runPlugins()
 		self.dump("sync config")

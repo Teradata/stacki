@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,56 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.12  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.11  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.10  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.9  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.8  2007/07/05 17:46:45  bruno
-# fixes
-#
-# Revision 1.7  2007/07/04 02:14:35  mjk
-# fix docstring
-#
-# Revision 1.6  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.5  2007/06/29 21:22:05  bruno
-# more cleanup
-#
-# Revision 1.4  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.3  2007/06/12 19:15:11  mjk
-# - simpler set network commands
-# - added remove network
-#
-# Revision 1.2  2007/06/12 01:10:42  mjk
-# - 'rocks add subnet' is now 'rocks add network'
-# - added set network subnet|netmask
-# - added list network
-# - other cleanup
-#
-# Revision 1.1  2007/06/08 03:26:24  mjk
-# - plugins call self.owner.addText()
-# - non-existant bug was real, fix plugin graph stuff
-# - add set host cpus|membership|rack|rank
-# - add list host (not /etc/hosts, rather the nodes table)
-# - fix --- padding for only None fields not 0 fields
-# - list host interfaces is cool works for incomplete hosts
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -109,36 +63,31 @@ class Command(stack.commands.set.host.command):
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='cpus'>
+	<param type='string' name='cpus' optional='0'>
 	The number of CPUs to assign to each host.
-	</arg>
-
-	<param optional='1' type='string' name='cpus'>
-	Can be used in place of the cpus argument.
 	</param>
 
-	<example cmd='set host cpus compute-0-0 2'>
-	Sets the CPU value to 2 for compute-0-0.
-	</example>
-
-	<example cmd='set host cpus compute-0-0 compute-0-1 4'>
-	Sets the CPU value to 4 for compute-0-0 and compute-0-1.
-	</example>
-
-	<example cmd='set host cpus compute-0-0 compute-0-1 cpus=4'>
-	Same as above.
+	<example cmd='set host cpus backend-0-0 cpus=2'>
+	Sets the CPU value to 2 for backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, cpus) = self.fillPositionalArgs(('cpus',))
+                
+		(cpus, ) = self.fillParams([
+                        ('cpus', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not cpus:
-			self.abort('must supply cpus')
-			
+                        raise ArgRequired(self, 'host')
+                try:
+                        cpus = int(cpus)
+                except:
+                        raise ParamType(self, 'cpu', 'integer')
+
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set cpus=%d where
-				name='%s'""" % (int(cpus), host))
+			self.db.execute("""
+                        	update nodes set cpus=%d where
+				name='%s'
+                                """ % (cpus, host))
 		

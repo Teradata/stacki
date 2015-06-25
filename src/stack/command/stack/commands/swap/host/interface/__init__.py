@@ -92,16 +92,17 @@
 
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.swap.host.command):
 	"""
 	Swaps two host interfaces in the database.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1'>
 	Host name of machine
 	</arg>
 
-	<param type='string' name='interfaces'>
+	<param type='string' name='interfaces' optional='0'>
 	Two comma-separated interface names (e.g., interfaces="eth0,eth1").
 	</param>
 
@@ -155,18 +156,15 @@ class Command(stack.commands.swap.host.command):
 
 	def run(self, params, args):
 		interfaces, sync_config = self.fillParams([
-			('interfaces', None),
+			('interfaces', None, True),
 			('sync-config', 'yes')
 			])
 
 		syncit = self.str2bool(sync_config)
 
-		if not interfaces:
-			self.abort('must supply two interfaces')
-
 		interface = interfaces.split(',')
 		if len(interface) != 2:
-			self.abort('must supply two interfaces')
+                        raise CommandError(self, 'must supply two interfaces')
 
 		hosts = self.getHostnames(args)
 		for host in hosts:

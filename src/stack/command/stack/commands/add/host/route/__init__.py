@@ -53,6 +53,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -81,15 +82,10 @@ class Command(stack.commands.add.host.command):
                 hosts = self.getHostnames(args)
                 
 		(address, gateway, netmask) = self.fillParams([
-                        ('address', None),
-                        ('gateway', None),
+                        ('address', None, True),
+                        ('gateway', None, True),
                         ('netmask', '255.255.255.255')])
 		
-		if not address:
-			self.abort('address required')
-		if not gateway:
-			self.abort('gateway required')
-
 		#
 		# determine if this is a subnet identifier
 		#
@@ -105,7 +101,7 @@ class Command(stack.commands.add.host.command):
 			gateway = "'%s'" % gateway
 		
 		# Verify the route doesn't already exist.  If it does
-		# for any of the hosts abort.
+		# for any of the hosts raise a CommandError.
 		
 		for host in hosts:
 			rows = self.db.execute("""select * from 
@@ -114,7 +110,7 @@ class Command(stack.commands.add.host.command):
 				and n.name='%s'""" %	
 				(address, host)) 
 			if rows:
-				self.abort('route exists')
+                                raise CommandError(self, 'route exists')
 		
 		# Now that we know things will work insert the route for
 		# all the hosts

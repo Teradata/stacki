@@ -55,73 +55,61 @@
 
 import string
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
 	Sets the device module for a named interface. On Linux this will get
 	translated to an entry in /etc/modprobe.conf.
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='1'>
 	One or more hosts.
 	</arg>
 	
-	<arg type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the MAC address of the interface.
- 	</arg>
- 	
- 	<arg type='string' name='module'>
-	The software device module of interface. Use module=NULL to clear.
-	</arg>
-
 	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
+ 	Name of the interface.
+ 	</param>
+
+	<param type='string' name='mac'>
+ 	MAC address of the interface.
+ 	</param>
+
+	<param type='string' name='module' optional='0'>
+	Module name.
 	</param>
-
-	<param type='string' name='module'>
-	Can be used in place of the module argument.
-	</param>
 	
-
-	<example cmd='set host interface module compute-0-0 eth1 e1000'>
-	Sets the device module for eth1 to be e1000 on host compute-0-0.
+	<example cmd='set host interface module backend-0-0 interface=eth1 module=e1000'>
+	Sets the device module for eth1 to be e1000 on host backend-0-0.
 	</example>
-
-	<example cmd='set host interface module compute-0-0 interface=eth1 module=e1000'>
-	Same as above.
-	</example>
-	
-	<example cmd='set host interface module compute-0-0 interface=eth1 module=NULL'>
-	Clear the module entry.
-	</example>
-	
-	<!-- cross refs do not exist yet
-	<related>set host interface interface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
 	"""
 	
 	def run(self, params, args):
 
-		(args, interface, module) = self.fillPositionalArgs(
-			('interface', 'module'))
-			
-		if not len(args):
-			self.abort('must supply host')
-		if not interface:
-			self.abort('must supply interface')
-		if not module:
-			self.abort('must supply module')
+                (module, interface, mac) = self.fillParams([
+                        ('module',    None, True),
+                        ('interface', None),
+                        ('mac',       None)
+                        ])
 
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
+                
 		if string.upper(module) == 'NULL':
 			module = 'NULL'
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update networks, nodes set 
-				networks.module=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
-				(networks.device='%s' or networks.mac='%s')""" %
-				(module, host, interface, interface))
+                        if interface:
+				self.db.execute("""
+                                	update networks, nodes set 
+					networks.module=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.device like '%s'
+                                        """ % (module, host, interface))
+                        else:
+				self.db.execute("""
+                                	update networks, nodes set 
+					networks.module=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.mac like '%s'
+                                        """ % (module, host, mac))
 

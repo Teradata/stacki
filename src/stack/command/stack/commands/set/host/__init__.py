@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,34 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.7  2009/05/01 19:07:02  mjk
-# chimi con queso
-#
-# Revision 1.6  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.4  2007/06/19 16:42:42  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.3  2007/06/07 21:23:05  mjk
-# - command derive from verb.command class
-# - default is MustBeRoot
-# - list.command / dump.command set MustBeRoot = 0
-# - removed plugin non-bugfix
-#
-# Revision 1.2  2007/06/07 16:43:02  mjk
-# - moved host(s) argument processing into a top level class
-# - list/dump/set host commands now use this
-#
 
 import stack.commands
 

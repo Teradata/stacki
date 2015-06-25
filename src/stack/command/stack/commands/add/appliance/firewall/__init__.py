@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,29 +51,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2011/02/24 20:10:27  bruno
-# Added documentation and examples to the add/close/open firewall commands.
-# Thanks to Larry Baker for the suggestion.
-#
-# Revision 1.4  2010/09/07 23:52:49  bruno
-# star power for gb
-#
-# Revision 1.3  2010/05/25 21:23:46  bruno
-# more firewall fixes
-#
-# Revision 1.2  2010/05/07 23:13:32  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.1  2010/05/04 22:04:14  bruno
-# more firewall commands
-#
-#
 
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
+from stack.exception import *
 
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.appliance.command):
@@ -80,18 +63,18 @@ class Command(stack.commands.add.firewall.command,
 	"""
 	Add a firewall rule for an appliance type.
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' repeat='1'>
 	Appliance type (e.g., "backend").
 	</arg>
 
-	<param type='string' name='service'>
+	<param type='string' name='service' require='1'>
 	The service identifier, port number or port range. For example
 	"www", 8080 or 0:1024.
 	To have this firewall rule apply to all services, specify the
 	keyword 'all'.
 	</param>
 
-	<param type='string' name='protocol'>
+	<param type='string' name='protocol' require='1'>
 	The protocol associated with the service. For example, "tcp" or "udp".
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
@@ -105,17 +88,17 @@ class Command(stack.commands.add.firewall.command,
 	keyword 'all'.
 	</param>
 
-        <param type='string' name='output-network' optional='1'>
+        <param type='string' name='output-network'>
         The output network for this rule. This is a named
 	network (e.g., 'private') and must be one listed by the command
         'stack list network'.
 	</param>
 
-        <param type='string' name='chain'>
+        <param type='string' name='chain' require='1'>
 	The iptables 'chain' for this this rule (e.g., INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action'>
+        <param type='string' name='action' require='1'>
 	The iptables 'action' this rule (e.g., ACCEPT, REJECT, DROP).
 	</param>
 
@@ -129,7 +112,6 @@ class Command(stack.commands.add.firewall.command,
 	The rule name for the rule to add. This is the handle by
 	which the admin can remove or override the rule.
 	</param>
-
 
 	<example cmd='add appliance firewall login network=private service="all" protocol="all" action="ACCEPT" chain="FORWARD"'>
 	Accept all services and all protocols on the private network for the
@@ -149,28 +131,12 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
+                
 		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.fillParams([
-				('service', ),
-				('network', ),
-				('output-network', ),
-				('chain', ),
-				('action', ),
-				('protocol', ),
-				('flags', ),
-				('comment', ),
-				('table','filter'),
-				('rulename',),
-			])
+                         comment, table, rulename) = self.doParams()
 
 		if len(args) == 0:
-			self.abort('must supply at least one appliance type')
-
-		(service, network, outnetwork,
-		chain, action, protocol, flags,
-		comment, table, rulename) = self.checkArgs(service, network,
-					outnetwork, chain, action, protocol,
-					flags, comment, table, rulename)
+                        raise ArgRequired(self, 'appliance')
 
 		apps = self.getApplianceNames(args)
 

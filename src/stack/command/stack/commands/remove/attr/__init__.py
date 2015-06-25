@@ -98,35 +98,25 @@ class Command(stack.commands.remove.command):
 	"""
 	Remove a global attribute.
 
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</arg>
+ 	</param>
  	
-	<param type='string' name='attr'>
-	Can be used in place of the attr argument.
-	</param>
-
-	<example cmd='remove attr cpus'>
-	Removes the global attribute named 'cpus'.
-	</example>
-
 	<example cmd='remove attr attr=cpus'>
-	Same as above.
+	Removes the global attribute named 'cpus'.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, key) = self.fillPositionalArgs(('attr', ))
-
-		if not key:
-			self.abort('missing attribute name')
-
+		(key, ) = self.fillParams([ ('attr', None, True) ])
+                 
 		attr = stack.attr.NormalizeAttr(key)
 		for row in self.call('list.attr'):
 			s = row['scope']
 			a = row['attr']
 			if attr == stack.attr.ConcatAttr(s, a):
-				self.db.execute("""delete from
+				self.db.execute("""
+                                	delete from
 					global_attributes where
 					scope = binary '%s' and
 					attr  = binary '%s'

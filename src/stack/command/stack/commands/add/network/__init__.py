@@ -58,6 +58,7 @@ import sys
 import types
 import string
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.command):
 	"""
@@ -106,24 +107,19 @@ class Command(stack.commands.add.command):
         def run(self, params, args):
 
         	if len(args) != 1:
-        		self.abort('must supply one network')
+                        raise ArgUnique(self, 'network')
         	name = args[0]
         	
 		(address, mask, gateway,
                          mtu, zone, dns, pxe) = self.fillParams([
-                                 ('address',	None),
-                                 ('mask',	None),
+                                 ('address',	None, True),
+                                 ('mask',	None, True),
                                  ('gateway',	None),
                                  ('mtu',       '1500'),
                                  ('zone',	name),
                                  ('dns',	'n'),
                                  ('pxe',	'n')
                                  ])
-
-		if not address:
-                        self.abort('address not specified')
-		if not mask:
-                        self.abort('mask not specified')
 
 		dns = self.str2bool(dns)
                 pxe = self.str2bool(pxe)
@@ -135,7 +131,7 @@ class Command(stack.commands.add.command):
         		* from subnets where name='%s'
         		""" % name)
 		if len(rows):
-			self.abort('network "%s" exists' % name)
+			raise CommandError(self, 'network "%s" exists' % name)
 		
 		self.db.execute("""
 			insert into subnets 

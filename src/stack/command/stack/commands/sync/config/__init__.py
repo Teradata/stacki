@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,35 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/11/19 23:56:00  bruno
-# convert dhcp configuration to output XML
-#
-# lookup the private interface name and write it to /etc/sysconfig/dhcpd
-#
-# Revision 1.7  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.6  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.5  2008/11/03 23:02:52  bruno
-# bug fix where insert-ethers --replace causes an exception to be printed.
-#
-# Revision 1.4  2008/10/31 23:00:44  mjk
-# fix addText call
-#
-# Revision 1.3  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.1  2007/07/02 18:41:01  bruno
-# added 'rocks sync config' (insert-ethers --update) and more sync cleanup
-#
-#
 
 import os
 import sys
@@ -89,7 +61,7 @@ import stack.commands
 
 class Command(stack.commands.sync.command):
 	"""
-	For each system configuration file controlled by Rocks, first
+	For each system configuration file controlled by Stack, first
 	rebuild the configuration file by extracting data from the
 	database, then restart the relevant services.
 

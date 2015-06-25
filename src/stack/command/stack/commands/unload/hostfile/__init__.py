@@ -92,16 +92,17 @@
 
 import os.path
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.unload.command):
 	"""
 	Unload (remove) hosts from the database
 	
-	<param type='string' name='file'>
+	<param type='string' name='file' optional='0'>
 	The file that contains the host data to be removed from the database.
 	</param>
 
-	<param type='string' name='processor' optional='1'>
+	<param type='string' name='processor'>
 	The processor used to parse the file and to remove the data into the
 	database. Default: default.
 	</param>
@@ -115,13 +116,13 @@ class Command(stack.commands.unload.command):
 	"""		
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([ ('file', None),
-			('processor', 'default') ])
+                filename, processor = self.fillParams([
+                        ('file', None, True),
+			('processor', 'default')
+                        ])
 
-		if not filename:
-                        self.abort('must supply a "file" parameter')
 		if not os.path.exists(filename):
-			self.abort('file "%s" does not exist' % filename)
+                        raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.runImplementation('unload_%s' % processor, (filename, ))
 

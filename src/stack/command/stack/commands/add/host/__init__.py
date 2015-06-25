@@ -98,6 +98,7 @@ import sys
 import string
 import socket
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
@@ -159,9 +160,9 @@ class Command(command):
 	"""
 
 	def addHost(self, host):
+                
 		if host in self.getHostnames():
-			self.abort('host "%s" already exists in the database'
-				% host)
+			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank
 		# then do the right thing and figure out the default
@@ -198,30 +199,23 @@ class Command(command):
 				('distribution', 'default') ])
 
 		if not membership and not appliance:
-			if not appliance:
-				self.abort('appliance not specified')
-			else:
-				self.abort('membership not specified')
+                        raise ParamRequired(self, ('membership', 'appliance'))
 
 		if rack == None:
-			self.abort('rack not specified')
+                        raise ParamRequired(self, 'rack')
 		if rank == None:
-			self.abort('rank not specified')
+                        raise ParamRequired(self, 'rank')
 
 		try:
-			rack = int(rack)
-		except:	
-			self.abort('rack is not an integer')
-		try:
 			rank = int(rank)
-		except:	
-			self.abort('rank is not an integer')
+		except:
+                        raise ParamType(self, 'rank', 'integer')
 		try:
 			numCPUs = int(numCPUs)
-			if numCPUs < 0:
-				self.abort('cpus is not a positive integer')
-		except:	
-			self.abort('cpus is not an integer')
+                except:
+                        raise ParamType(self, 'cpus', 'integer')
+                if numCPUs < 0:
+                        raise ParamValue(self, 'cpus', '> 0')
 
 		if membership and not appliance:
 			#
@@ -233,15 +227,13 @@ class Command(command):
 					break
 
 			if not appliance:
-				self.abort('membership "%s" is not in the database' % membership)
+                        	raise CommandError(self, 'membership "%s" is not in the database' % membership)
 
 		if appliance not in appliances:
-			self.abort('appliance "%s" is not in the database'
-				% appliance)
+			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)
 
 		if dist not in self.getDistributionNames():
-			self.abort('distribution "%s" is not in the database'
-				% dist)
+			raise CommandError(self, 'distribution "%s" is not in the database' % dist)
 	
 		self.db.execute("""insert into nodes
 				(name, appliance, distribution, cpus, rack, 
@@ -253,8 +245,9 @@ class Command(command):
 
 
 	def run(self, params, args):
+                
 		if len(args) != 1:
-			self.abort('must supply one host')
+                        raise ArgUnique(self, 'host')
 
 		host = args[0]
 		self.addHost(host)

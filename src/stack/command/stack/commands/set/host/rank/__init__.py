@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,40 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:02  bruno
-# star power for gb
-#
-# Revision 1.7  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.6  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.4  2007/07/04 01:47:40  mjk
-# embrace the anger
-#
-# Revision 1.3  2007/07/02 19:57:59  bruno
-# more cleanup
-#
-# Revision 1.2  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.1  2007/06/08 03:26:25  mjk
-# - plugins call self.owner.addText()
-# - non-existant bug was real, fix plugin graph stuff
-# - add set host cpus|membership|rank|rank
-# - add list host (not /etc/hosts, rather the nodes table)
-# - fix --- padding for only None fields not 0 fields
-# - list host interfaces is cool works for incomplete hosts
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -93,36 +63,31 @@ class Command(stack.commands.set.host.command):
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='rank'>
+	<param type='integer' name='rank' optional='0'>
 	The rank number to assign to each host.
-	</arg>
-
-	<param type='string' name='rank'>
-	Can be used in place of rank argument.
 	</param>
 
-	<example cmd='set host rank compute-0-2 2'>
+	<example cmd='set host rank compute-0-2 rank=2'>
 	Set the rank number to 2 for compute-0-2.
-	</example>
-
-	<example cmd='set host rank compute-0-0 compute-1-0 0'>
-	Set the rank number to 0 for compute-0-0 and compute-1-0.
-	</example>
-
-	<example cmd='set host rank compute-0-0 compute-1-0 rank=0'>
-	Same as above.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, rank) = self.fillPositionalArgs(('rank', ))
+
+		(rank, ) = self.fillParams([
+                        ('rank', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not rank:
-			self.abort('must supply rank')
+                	raise ArgRequired(self, 'host')
+                try:
+                        rank = int(rank)
+                except:
+                	raise ParamType(self, 'rank', 'integer')
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set rank=%d where
-				name='%s'""" % (int(rank), host))
+			self.db.execute("""
+                        	update nodes set rank=%d where
+				name='%s'
+                                """ % (rank, host))
 				

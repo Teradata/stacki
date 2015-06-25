@@ -55,6 +55,7 @@
 import os
 import re
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.config.host.command):
 	"""
@@ -98,8 +99,8 @@ class Command(stack.commands.config.host.command):
 
 		hosts = self.getHostnames(args)
 
-		if len(hosts) != 1:	
-			self.abort('must supply only one host')
+		if len(hosts) != 1:
+                	raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 

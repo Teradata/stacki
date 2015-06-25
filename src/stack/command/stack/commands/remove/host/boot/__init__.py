@@ -56,6 +56,7 @@ import os
 import os.path
 import string
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
@@ -77,7 +78,7 @@ class Command(stack.commands.remove.host.command):
 	
 	def run(self, params, args):
 		if not len(args):
-			self.abort("must supply host")
+                        raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 

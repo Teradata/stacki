@@ -94,6 +94,7 @@
 import shutil
 import os.path
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.load.command):
 	"""
@@ -104,7 +105,7 @@ class Command(stack.commands.load.command):
 	database.
 	</param>
 
-	<param type='string' name='processor' optional='1'>
+	<param type='string' name='processor'>
 	The processor used to parse the file and to load the data into the
 	database. Default: default.
 	</param>
@@ -144,29 +145,26 @@ class Command(stack.commands.load.command):
 
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([ ('file', None),
-			('processor', 'default') ])
+                filename, processor = self.fillParams([
+                        ('file', None),
+			('processor', 'default')
+                        ])
 
-		if not filename:
-			self.abort('must supply a "file" parameter')
+                googleacct = self.str2bool(self.db.getHostAttr('localhost', 'google.credential'))
+                if googleacct:
+			#
+			# this may be a Google spreadsheet
+			#
+			googlefile = self.doGoogle(filename)
+			if not googlefile:
+                                raise CommandError(self, 'file "%s" does not exist' % filename)
+			filename = googlefile
+                else:
+                	if not file:
+                        	raise ParamRequired(self, 'file')
 
-		if not os.path.exists(filename):
-			googleacct = self.str2bool(self.db.getHostAttr(
-				'localhost', 'google.credential'))
-
-			if googleacct:
-				#
-				# this may be a Google spreadsheet
-				#
-				googlefile = self.doGoogle(filename)
-				if not googlefile:
-					self.abort('file "%s" does not exist'
-						% filename)
-
-				filename = googlefile
-			else:
-				self.abort('file "%s" does not exist'
-					% filename)
+                        if not os.path.exists(filename):
+                                raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.hosts = {}
 		self.interfaces = {}

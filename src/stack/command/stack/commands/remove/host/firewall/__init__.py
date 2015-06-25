@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,26 +51,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.3  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.2  2010/05/07 23:13:33  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.1  2010/04/30 22:07:17  bruno
-# first pass at the firewall commands. we can do global and host level
-# rules, that is, we can add, remove, open (calls add), close (also calls add),
-# list and dump the global rules and the host-specific rules.
-#
-#
+
 
 import stack.commands
 import stack.commands.remove.firewall
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command,
 	stack.commands.remove.firewall.command):
@@ -79,23 +65,21 @@ class Command(stack.commands.remove.host.command,
 	you must supply the name of the rule. The Rule names may
 	be obtained by running "rocks list host firewall"
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' repeat='1'>
 	Name of a host machine.
 	</arg>
 
-	<param type='string' name='rulename'>
+	<param type='string' name='rulename' optional='0'>
 	Name of host-specific rule
 	</param>
 
 	"""
 
 	def run(self, params, args):
-		rulename, = self.fillParams([
-			('rulename',)
-			])
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
-			self.abort('must supply at least one host')
+                        raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			sql = """node = (select id from nodes where

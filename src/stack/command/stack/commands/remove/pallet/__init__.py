@@ -101,6 +101,7 @@ import time
 import sys
 import string
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.RollArgumentProcessor,
@@ -141,12 +142,15 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                (arch, OS ) = self.fillParams([('arch', '%'),('os','%')])
+                (arch, OS ) = self.fillParams([
+                        ('arch', '%'),
+                        ('os','%')
+                        ])
 
                 if len(args) < 1:
-                        self.abort('must supply one or more pallets')
+                        raise ArgRequired(self, 'pallet')
 
-		for (roll, version) in self.getRollNames(args, params):
+		for (roll, version, release) in self.getRollNames(args, params):
 			rows = self.db.execute("""
 				select os, arch from rolls where
 				name = '%s' and version = '%s' and

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,36 +51,14 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2011/02/24 20:10:28  bruno
-# Added documentation and examples to the add/close/open firewall commands.
-# Thanks to Larry Baker for the suggestion.
-#
-# Revision 1.5  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/11 22:28:15  bruno
-# more tweaks
-#
-# Revision 1.3  2010/05/07 23:13:32  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.2  2010/05/04 22:04:14  bruno
-# more firewall commands
-#
-# Revision 1.1  2010/04/30 22:07:16  bruno
-# first pass at the firewall commands. we can do global and host level
-# rules, that is, we can add, remove, open (calls add), close (also calls add),
-# list and dump the global rules and the host-specific rules.
-#
-#
 
 import string
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.add.command):
+        
 	def serviceCheck(self, service):
 		#
 		# a service can look like:
@@ -104,7 +83,7 @@ class command(stack.commands.HostArgumentProcessor,
 			if len(ports) > 2:
 				msg = 'port range "%s" is invalid. ' % service
 				msg += 'it must be "integer:integer"'
-				self.abort(msg)
+				raise CommandError(self, msg)
 
 			for a in ports:
 				try:
@@ -115,7 +94,7 @@ class command(stack.commands.HostArgumentProcessor,
 					msg += 'is invalid. '
 					msg += 'it must be "integer" or '
 					msg += '"integer:integer"'
-					self.abort(msg)
+                                        raise CommandError(self, msg)
 				
 		#
 		# if we made it here, then the service definition looks good
@@ -123,23 +102,28 @@ class command(stack.commands.HostArgumentProcessor,
 		return
 
 
-	def checkArgs(self, service, network, outnetwork, chain, action,
-		protocol, flags, comment, table, rulename):
+	def doParams(self):
 
-		if not service:
-			self.abort('service required')
+		(service, network, outnetwork, chain, action, protocol, flags,
+			comment, table, rulename) = self.fillParams([
+				('service',		None,	True),
+				('network',		None),
+				('output-network',	None),
+				('chain',		None,	True),
+				('action',		None,	True),
+				('protocol',		None,	True),
+				('flags',		None),
+				('comment',		None),
+				('table',		'filter'),
+				('rulename',		None),
+			])
+		
 		if not network and not outnetwork:
-			self.abort('network or output-network required')
-		if not chain:
-			self.abort('chain required')
-		if not action:
-			self.abort('action required')
-		if not protocol:
-			self.abort('protocol required')
+                        raise ParamRequired(self, ('network', 'output-network'))
 
-		if table not in [ 'filter', 'raw',
-				'mangle','nat']:
-			self.abort('table %s is invalid' % table)
+		if table not in [ 'filter', 'raw', 'mangle','nat']:
+                        raise ParamError(self, 'table', 'is not valid')
+
 		#
 		# check if the network exists
 		#
@@ -150,7 +134,7 @@ class command(stack.commands.HostArgumentProcessor,
 				name = '%s'""" % (network))
 
 			if rows == 0:
-				self.abort('network "%s" not in the database. Run "stack list network" to get a list of valid networks.' % network)
+                                raise CommandError(self, 'network "%s" not in the database. Run "stack list network" to get a list of valid networks.' % network)
 
 			network, = self.db.fetchone()
 		else:
@@ -163,7 +147,7 @@ class command(stack.commands.HostArgumentProcessor,
 				name = '%s'""" % (outnetwork))
 
 			if rows == 0:
-				self.abort('output-network "%s" not in the database. Run "stack list network" to get a list of valid networks.')
+				raise CommandError(self, 'output-network "%s" not in the database. Run "stack list network" to get a list of valid networks.')
 
 			outnetwork, = self.db.fetchone()
 		else:
@@ -203,8 +187,8 @@ class command(stack.commands.HostArgumentProcessor,
 		query = 'select * from %s where name="%s"' % (hierarchy, rulename)
 		rows  = self.db.execute(query)
 		if rows:
-			self.abort('Rule with rulename %s already exists' %\
-				 rulename)
+			raise CommandError(self, 'Rule with rulename %s already exists' %
+                                                   rulename)
 
 		query = """select * from %s where %s
 			service = '%s' and action = '%s' and chain = '%s' and
@@ -220,7 +204,7 @@ class command(stack.commands.HostArgumentProcessor,
 			outnetwork, protocol, protocol, flags, flags)
 		rows  = self.db.execute(query)
 		if rows:
-			self.abort('firewall rule already exists')
+			raise CommandError(self, 'firewall rule already exists')
 
 
 	def insertRule(self, hierarchy, extracol, extraval, service, network,
@@ -241,14 +225,14 @@ class Command(command):
 	"""
 	Add a global firewall rule for the all hosts in the cluster.
 
-	<param type='string' name='service'>
+	<param type='string' name='service' require='1'>
 	The service identifier, port number or port range. For example
 	"www", 8080 or 0:1024.
 	To have this firewall rule apply to all services, specify the
 	keyword 'all'.
 	</param>
 
-	<param type='string' name='protocol'>
+	<param type='string' name='protocol' require='1'>
 	The protocol associated with the rule. For example, "tcp" or "udp".
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
@@ -268,12 +252,12 @@ class Command(command):
         'stack list network'.
 	</param>
 
-        <param type='string' name='chain'>
+        <param type='string' name='chain' require='1'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action'>
+        <param type='string' name='action' require='1'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>
@@ -309,25 +293,9 @@ table="filter" rulename="accept_public_ssh"'>
 	</example>
 	"""
 	def run(self, params, args):
+                
 		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.fillParams([
-				('service', ),
-				('network', ),
-				('output-network', ),
-				('chain', ),
-				('action', ),
-				('protocol', ),
-				('flags', ),
-				('comment', ),
-				('table','filter'),
-				('rulename',),
-			])
-		
-		(service, network, outnetwork,
-		chain, action, protocol, flags,
-		comment, table, rulename) = self.checkArgs(service, network,
-					outnetwork, chain, action, protocol,
-					flags, comment, table, rulename)
+                         comment, table, rulename) = self.doParams()
 
 		self.checkRule('global_firewall', '', service, network,
 			outnetwork, chain, action, protocol, flags, comment, table, rulename)

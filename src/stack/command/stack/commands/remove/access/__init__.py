@@ -43,33 +43,36 @@ import os
 import grp
 import sys
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.Command):
 	"""
         Remove Access control pattern.
-	<param name="command">
+        
+	<param name="command" optional='0'>
 	Command Pattern.
 	</param>
-	<param name="group">
+        
+	<param name="group" optional='0'>
 	Group name / ID for access.
 	</param>
-	<example cmd="remove access '*' apache">
+        
+	<example cmd='remove access command="*" group=apache'>
 	Remove "apache" group access to all "rocks" commands
 	</example>
-	<example cmd='remove access command="list*" group="wheel"'>
+        
+	<example cmd='remove access command="list*" group=wheel'>
 	Remove "wheel" group access to all "rocks list" commands
 	</example>
 	"""
 
 	def run(self, params, args):
 
-		(args, cmd, group) = self.fillPositionalArgs(('command',
-                                                              'group'))
-		if not cmd:
-			self.abort('missing command pattern')
-		if not group:
-			self.abort('missing group membership')
-
+		(cmd, group) = self.fillParams([
+                        ('command', None, True),
+                        ('group',   None, True)
+                        ])
+                 
 		groupid = None
 		try:
 			groupid = int(group)
@@ -80,10 +83,10 @@ class Command(stack.commands.Command):
 			try:
 				groupid = grp.getgrnam(group).gr_gid
 			except KeyError:
-				self.abort('Cannot find group %s' % group)
+                                raise CommandError(self, 'cannot find group %s' % group)
 
 		if groupid == None:
-			self.abort('Cannot find group %s' % group)
+                        raise CommandError(self, 'cannot find group %s' % group)
 
                 self.db.execute("""delete from access where
 			command="%s" and groupid=%d""" \

@@ -97,33 +97,22 @@ class Command(stack.commands.remove.os.command):
 	"""
 	Remove an attribute for an OS.
 
-	<arg type='string' name='os'>
+	<arg type='string' name='os' optional='1' repeat='1'>
 	One or more OS specifications (e.g., 'linux').
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</arg>
+ 	</param>
  	
-	<param type='string' name='attr'>
-	Can be used in place of the attr argument.
-	</param>
-
-	<example cmd='remove os attr linux sge'>
-	Removes the attribute sge for linux OS machines.
-	</example>
-
 	<example cmd='remove os attr linux attr=sge'>
-	Same as above.
+	Removes the attribute sge for linux OS machines.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, key) = self.fillPositionalArgs(('attr', ))
-
-		if not key:
-			self.abort('missing attribute name')
-
+		(key, ) = self.fillParams([ ('attr', None, True) ])
+                 
 		for os in self.getOSNames(args):
 			attr = stack.attr.NormalizeAttr(key)
 			for row in self.call('list.os.attr', [ os ]):

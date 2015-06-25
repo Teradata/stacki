@@ -97,77 +97,41 @@ import time
 import sys
 import string
 import stack.attr
-import stack.commands
+import stack.commands.set.attr
+from stack.exception import *
 
-class Command(stack.commands.set.appliance.command):
+class Command(stack.commands.set.attr.command, stack.commands.set.appliance.command):
 	"""
 	Sets an attribute to an appliance and sets the associated values 
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' optional='1' repeat='1'>
 	Name of appliance
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
-	</arg>
+	</param>
 
-	<arg type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
-	</arg>
+	</param>
 	
-	<param type='string' name='attr'>
-	same as attr argument
-	</param>
-
-	<param type='string' name='value'>
-	same as value argument
-	</param>
-
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
 	</param>
 
-	<example cmd='set appliance attr compute sge False'>
-	Sets the sge attribution to False for compute appliances
+	<example cmd='set appliance attr backend attr=sge value=False'>
+	Sets the sge attribution to False for backend appliances
 	</example>
-
-	<example cmd='set appliance attr compute sge attr=cpus value=2'>
-	same as above
-	</example>
-	
-	<related>list appliance attr</related>
-	<related>remove appliance attr</related>
-	<related>set host attr</related>
-	<related>list host attr</related>
-	<related>remove host attr</related>
 	"""
 
 	def run(self, params, args):
 
-		(args, key, value) = self.fillPositionalArgs(('attr', 'value'))
 		appliances = self.getApplianceNames(args)
-		
-		if not key:
-			self.abort('missing attribute name')
-		if not value:
-			self.about('missing value of attribute')
-
-		(shadow, force) = self.fillParams([
-			('shadow', 'n'),
-			('force', 'y')
-			])
-
-		if self.str2bool(shadow):
-			s = "'%s'" % value
-			v = 'NULL'
-		else:
-			s = 'NULL'
-			v = "'%s'" % value
+		(key, value, shadow, force) = self.doParams()
 
 		(scope, attr) = stack.attr.SplitAttr(key)
-
-		force = self.str2bool(force)
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
 
 		if not force:		# test if attr exists
@@ -177,8 +141,8 @@ class Command(stack.commands.set.appliance.command):
 						[appliance, aflag]):
 					list.append(appliance)
 			if list:
-				self.abort('attribute exists for %s' %
-					   string.join(list))
+                                raise CommandError(self, 'attr "%s" exists for %s' %
+                                                           (aflag, string.join(list)))
 
 
 		for appliance in appliances:

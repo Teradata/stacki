@@ -108,6 +108,7 @@ import stack.dist
 import stack.file
 import stack.roll
 import stack.util
+from stack.exception import *
 
 
 class Builder:
@@ -742,10 +743,14 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			version = 'X'
 
-		(name, version) = self.fillParams(
-			[('name', None),
-			('version', version) ])
-		
+		(name, version) = self.fillParams([
+                        ('name', None),
+			('version', version)
+                        ])
+
+                if len(arg) == 0:
+                        raise ArgRequired(self, 'pallet')
+                
 		# Set pallet Builder to correct OS
 		roller = getattr(stack.commands.create.pallet,
 			'RollBuilder_%s' % (self.os))
@@ -754,16 +759,14 @@ class Command(stack.commands.create.command):
 			if ext == '.xml':
 				builder = roller(args[0], self.command)
 			else:
-				self.abort('missing xml file')
+                                raise CommandError(self, 'missing xml file')
 		elif len(args) > 1:
 			for arg in args:
 				base, ext = os.path.splitext(arg)
 				if not ext == '.iso':
-					self.abort('bad iso file')
+                                        raise CommandError(self, 'bad iso file')
 			builder = MetaRollBuilder(args, name, version,
 				self.command)
-		else:
-			self.abort('no arguments')
 			
 		builder.run()
 

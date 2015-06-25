@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,61 +51,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.12  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.11  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.10  2008/10/18 00:55:56  mjk
-# copyright 5.1
-#
-# Revision 1.9  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.8  2007/07/04 01:47:39  mjk
-# embrace the anger
-#
-# Revision 1.7  2007/06/28 21:48:38  bruno
-# made a sweep over all the remove commands
-#
-# Revision 1.6  2007/06/25 23:45:06  bruno
-# associate with base roll
-#
-# Revision 1.5  2007/06/19 16:42:42  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.4  2007/06/05 22:28:11  mjk
-# require root for all remove commands
-#
-# Revision 1.3  2007/05/31 19:35:43  bruno
-# first pass at getting all the 'help' consistent on all the rocks commands
-#
-# Revision 1.2  2007/05/10 20:37:02  mjk
-# - massive rocks-command changes
-# -- list host is standardized
-# -- usage simpler
-# -- help is the docstring
-# -- host groups and select statements
-# - added viz commands
-#
-# Revision 1.1  2007/04/24 17:58:09  bruno
-# consist look and feel for all 'list' commands
-#
-# put partition commands under 'host'
-#
-# Revision 1.1  2007/04/05 20:51:55  bruno
-# rocks-partition is now in the command line
-#
-#
 
 import sys
 import socket
 import stack.commands
 import string
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
@@ -141,8 +93,9 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
+                
 		if not len(args):
-			self.abort('must supply host')
+                        raise ArgRequired(self, 'host')
 			
 		(partition, device, uuid) = self.fillParams([
 			('partition', None),

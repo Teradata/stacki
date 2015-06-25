@@ -1,3 +1,6 @@
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -48,36 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.9  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.8  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.7  2009/02/12 05:17:01  bruno
-# typo
-#
-# Revision 1.6  2008/10/18 00:55:55  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/07/08 21:45:40  bruno
-# sync the config after hosts are removed
-#
-# Revision 1.4  2008/03/06 23:41:38  mjk
-# copyright storm on
-#
-# Revision 1.3  2008/02/01 20:52:27  bruno
-# use plugins to support removing all database entries for a host.
-#
-# Revision 1.2  2007/06/25 23:24:36  bruno
-# added a command to remove the PXE boot configuration for a node that
-# is removed with insert-ethers
-#
-#
 
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 		stack.commands.remove.command):
@@ -99,7 +75,7 @@ class Command(command):
 
 	def run(self, params, args):
 		if len(args) < 1:
-			self.abort('must supply at least one host')
+                        raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			self.runPlugins(host)

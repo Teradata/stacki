@@ -59,52 +59,53 @@ import time
 import sys
 import string
 import stack.commands
-import threading
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
 	Remove a network interface definition for a host.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1' repeat='1'>
 	One or more named hosts.
 	</arg>
 	
-	<arg type='string' name='interface'>
- 	Interface that should be removed. This may be a logical interface or 
- 	the mac address of the interface.
- 	</arg>
- 	
 	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
-	</param>
+ 	Name of the interface that should be removed.
+ 	</param>
 
-	<example cmd='remove host interface compute-0-0 eth1'>
-	Removes the interface eth1 on host compute-0-0.
+	<param type='string' name='mac'>
+ 	MAC address of the interface that should be removed.
+ 	</param>
+ 	
+	<example cmd='remove host interface backend-0-0 interface=eth1'>
+	Removes the interface eth1 on host backend-0-0.
 	</example>
 
-	<example cmd='remove host interface compute-0-0 compute-0-1 interface=eth1'>
-	Removes the interface eth1 on hosts compute-0-0 and compute-0-1.
+	<example cmd='remove host interface backend-0-0 backend-0-1 interface=eth1'>
+	Removes the interface eth1 on hosts backend-0-0 and backend-0-1.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, interface) = self.fillPositionalArgs(('interface', ))
-	
-		if not len(args):
-			self.abort('must supply host')
-		if not interface:
-			self.abort('must supply interface')
-			
-		hosts = self.getHostnames(args)
 
-		for host in hosts:
-			self.db.execute("""delete from networks where 
-				node=(select id from nodes where name='%s')
-				and (device like '%s' or mac like '%s')""" % 
-				(host, interface, interface))
+                (interface, mac) = self.fillParams([
+                        (interface, None),
+                        (mac,       None)
+                        ])
 
-#		I was shocked to see this here, also caused issues if the
-#		host doesn't exist. -mjk
-#			
-#		cmd = 'rm -f /etc/sysconfig/network-scripts/ifcfg-%s' % interface
-#		self.command('run.host', hosts + [ cmd ] )
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
+
+		for host in self.getHostnames(args):
+                        if interface:
+                                self.db.execute("""
+                        		delete from networks where 
+                                        node=(select id from nodes where name='%s')
+                                        and device like '%s'
+                                        """ %  (host, interface))
+                        else:
+                                self.db.execute("""
+                        		delete from networks where 
+                                        node=(select id from nodes where name='%s')
+                                        and mac like '%s'
+                                        """ %  (host, mac))

@@ -95,22 +95,27 @@ import stack.commands
 
 class Command(stack.commands.add.environment.command):
 	"""
-	Adds an attribute to an environment and sets the associated values 
+	Sets an attribute to an environment and sets the associated values 
 
-	<arg type='string' name='environment'>
+	<arg type='string' name='environment' repeat='1'>
 	Name of environment
 	</arg>
 	
-	<param type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
 
-	<param type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
+	
+	<param type='boolean' name='shadow'>
+	If set to true, then set the 'shadow' value (only readable by root
+	and apache).
+	</param>
 
-	<example cmd='add environment attr test attr=nukedisks value=False'>
-	Sets the nukedisks attribute to false for environment "test"
+	<example cmd='set environment attr test sge False'>
+	Sets the sge attribution to False for test nodes
 	</example>
 
 	"""

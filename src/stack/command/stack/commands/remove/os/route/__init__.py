@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,59 +51,34 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/20 00:31:45  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.3  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.2  2009/05/01 19:07:01  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 22:19:56  mjk
-# - route commands done
-# - cleanup of stack.host plugins
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.os.command):
 	"""
 	Remove a static route for an OS type.
 
-	<arg type='string' name='os'>
-	The OS type (e.g., 'linux', 'sunos', etc.). This argument is required.
+	<arg type='string' name='os' repeat='1'>
+	The OS type (e.g., 'linux', 'sunos', etc.).
 	</arg>
 
-	<param type='string' name='address'>
-	The address of the static route to remove. This argument is required.
+	<param type='string' name='address' optional='0'>
+	The address of the static route to remove.
 	</param>
 
-	<param type='string' name='address'>
-	Can be used in place of the 'address' argument.
-	</param>
-
-	<example cmd='remove os route linux 1.2.3.4'>
+	<example cmd='remove os route linux address=1.2.3.4'>
 	Remove the static route for the OS 'linux' that has the
 	network address '1.2.3.4'.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, address) = self.fillPositionalArgs(('address', ))
 
-		if not address:
-			self.abort('address required')
+		(address, ) = self.fillParams([ ('address', None, True) ])
+
 		if len(args) == 0:
-			self.abort('must supply at least one OS type')
+                	raise ArgRequired(self, 'os')
 
 		for os in self.getOSNames(args):
 			self.db.execute("""delete from os_routes where 

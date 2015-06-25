@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,18 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:06:58  mjk
-# chimi con queso
-#
-# Revision 1.1  2008/10/21 19:34:03  bruno
-# added 'alias' commands
-#
-#
 
 import stack.commands
 
@@ -74,12 +63,8 @@ class Command(stack.commands.list.host.command):
 	for all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host alias compute-0-0'>
-	List the aliases for compute-0-0.
-	</example>
-
-	<example cmd='list host membership'>
-	List the aliases for all known hosts.
+	<example cmd='list host alias backend-0-0'>
+	List the aliases for backend-0-0.
 	</example>
 	"""
 
@@ -88,7 +73,8 @@ class Command(stack.commands.list.host.command):
 		self.beginOutput()
 
 		for host in self.getHostnames(args):
-			self.db.execute("""select name from aliases where
+			self.db.execute("""
+                        	select name from aliases where
 				node = (select id from nodes where name='%s')
 				""" % host)
 			for alias, in self.db.fetchall():

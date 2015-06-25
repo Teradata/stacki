@@ -53,6 +53,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -62,74 +63,62 @@ class Command(stack.commands.set.host.command):
 	Host name.
 	</arg>
 	
-	<arg type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the MAC address of the interface.
- 	</arg>
+	<param type='string' name='interface'>
+ 	Name of the interface.
+ 	</param>
+
+	<param type='string' name='mac'>
+ 	MAC address of the interface.
+ 	</param>
  	
- 	<arg type='string' name='name'>
+ 	<param type='string' name='name' optional='0'>
 	Name of this interface (e.g. newname). This is only the
 	name associated with a certain interface. FQDNs are disallowed.
 	To set the domain or zone for an interface, use the
-	"rocks add network" command, and then associate the interface
+	"stack add network" command, and then associate the interface
 	with the network
-	</arg>
-
-	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
 	</param>
 
-	<param type='string' name='name'>
-	Can be used in place of the name argument. 
-	</param>
-	
-
-	<example cmd='set host interface name backend-0-0 eth1 cluster-0-0'>
+	<example cmd='set host interface name backend-0-0 interface=eth1 name=cluster-0-0'>
 	Sets the name for the eth1 device on host backend-0-0 to
 	cluster-0-0.zonename. The zone is decided by the subnet that the
 	interface is attached to.
 	</example>
-
-	<example cmd='set host interface name backend-0-0 interface=eth1 name=c0-0'>
-	Same as above.
-	</example>
-	
-	<!-- cross refs do not exist yet
-	<related>set host interface interface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
-	<related>add network</related>
 	"""
 	
 	def run(self, params, args):
 
-		(args, interface, name) = self.fillPositionalArgs(('interface','name'))
-
-		hosts = self.getHostnames(args)	
-			
-		if len(hosts) != 1:
-			self.abort('must supply one host')
-
-		# One host only
-		host = hosts[0]
-
-		if not interface:
-			self.abort('must supply interface')
-		if not name:
-			self.abort('must supply name')
+		hosts = self.getHostnames(args)
+                (name, interface, mac) = self.fillParams([
+                        ('name',      None, True),
+                        ('interface', None),
+                        ('mac',       None)
+                        ])
 
 		if len(name.split('.')) > 1:
-			self.abort('cannot be fqdn\n' +\
-			'Please use subnets table to set domain name')
+                        raise ParamType(self, 'name', 'FQDN')
+                if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
+		if len(hosts) != 1:
+                        raise ArgUnique(self, 'host')
+
+                host = hosts[0]		
 
 		if name.upper() == "NULL":
 			name = host
 
-		self.db.execute("""update networks, nodes set 
-			networks.name='%s' where nodes.name='%s'
-			and networks.node=nodes.id and
-			(networks.device='%s' or networks.mac='%s')""" %
-			(name, host, interface, interface))
+                if interface:
+                        self.db.execute("""
+                        	update networks, nodes set 
+                                networks.name='%s' where nodes.name='%s'
+                                and networks.node=nodes.id and
+                                networks.device like '%s'
+                                """ % (name, host, interface))
+                else:
+                        self.db.execute("""
+                        	update networks, nodes set 
+                                networks.name='%s' where nodes.name='%s'
+                                and networks.node=nodes.id and
+                                networks.mac like '%s'
+                                """ % (name, host, mac))
 

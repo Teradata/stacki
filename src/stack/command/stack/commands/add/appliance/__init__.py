@@ -97,6 +97,7 @@ import time
 import sys
 import string
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.add.command):
@@ -133,28 +134,28 @@ class Command(command):
 	def run(self, params, args):
 
 		if len(args) != 1:
-			self.abort('must supply one appliance')
-		app_name = args[0]
+                        raise ArgUnique(self, 'appliance')
+		appliance = args[0]
 					
-		(mem_name, node, public) = \
-			self.fillParams(
-				[('membership', ), 
-				('node', ''),
-				('public', 'y')])
+		(membership, node, public) = self.fillParams([
+                        ('membership', None),
+                        ('node', ''),
+                        ('public', 'y')
+                        ])
 
 		public  = self.bool2str(self.str2bool(public))
 		
-		if not mem_name:
-			mem_name = string.capitalize(app_name)
+		if not membership:
+			membership = string.capitalize(appliance)
 
 		#
 		# check for duplicates
 		#
 		rows = self.db.execute("""
 			select * from appliances where name='%s'
-			""" % app_name)
+			""" % appliance)
 		if rows > 0:
-			self.abort('appliance "%s" already exists' % app_name)
+			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
 		#
 		# ok, we're good to go
@@ -162,14 +163,17 @@ class Command(command):
 		self.db.execute("""
 			insert into appliances (name, membership, public) values
 			('%s', '%s', '%s')
-			""" %  (app_name, mem_name, public))
+			""" %  (appliance, membership, public))
 
 		if not node:
 			kickstartable = False
 		else:
 			kickstartable = True
-			self.command('add.appliance.attr', [ app_name, 'node', node ])
+			self.command('add.appliance.attr', [ appliance, 'node', node ])
 
-		self.command('add.appliance.attr', [ app_name, 'kickstartable',
-			self.bool2str(kickstartable) ])
+		self.command('add.appliance.attr', [
+                        appliance,
+                        'attr=kickstartable',
+			'value=%s' % self.bool2str(kickstartable)
+                        ])
 		

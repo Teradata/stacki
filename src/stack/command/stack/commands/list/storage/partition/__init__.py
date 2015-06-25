@@ -1,8 +1,8 @@
 # @SI_Copyright@
 # @SI_Copyright@
-# @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.list.command,
 		stack.commands.OSArgumentProcessor,
@@ -72,7 +72,7 @@ class Command(stack.commands.list.command,
 				hosts = []
 
 		else:
-			self.abort('must supply zero or one argument')
+                        raise ArgError(self, 'scope', 'must be unique or missing')
 
 		if not scope:
 			if args[0] in oses:
@@ -83,8 +83,7 @@ class Command(stack.commands.list.command,
 				scope = 'host'
 
 		if not scope:
-			self.abort('argument "%s" must be a ' % args[0] + \
-				'valid os, appliance name or host name')
+			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
 
 		query = None
 		if scope == 'global':

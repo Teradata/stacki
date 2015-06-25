@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,33 +51,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.5  2010/07/09 22:30:56  bruno
-# gateway can't be NULL
-#
-# Revision 1.4  2010/05/20 00:31:44  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.3  2009/07/21 21:50:51  bruno
-# fix help
-#
-# Revision 1.2  2009/05/01 19:06:55  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 19:44:09  mjk
-# - added add.appliance.route
-# - added add.os.route
-#
 
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.os.command):
 	"""
@@ -102,17 +80,14 @@ class Command(stack.commands.add.os.command):
 
 	def run(self, params, args):
 
-		(args, address, gateway) = self.fillPositionalArgs(
-			('address','gateway'))
-
-		(netmask,) = self.fillParams([('netmask', '255.255.255.255')])
+		(address, gateway, netmask) = self.fillParams([
+                        ('address', None, True),
+                        ('gateway', None, True),
+                        ('netmask', '255.255.255.255')
+                        ])
 		
-		if not address:
-			self.abort('address required')
-		if not gateway:
-			self.abort('gateway required')
 		if len(args) == 0:
-			self.abort('must supply at least one OS type')
+                        raise ArgRequired(self, 'os')
 
 		oses = self.getOSNames(args)
 
@@ -131,7 +106,7 @@ class Command(stack.commands.add.os.command):
 			gateway = "'%s'" % gateway
 		
 		# Verify the route doesn't already exist.  If it does
-		# for any of the OSes abort.
+		# for any of the OSes raise a CommandError.
 		
 		for os in oses:
 			rows = self.db.execute("""select * from 
@@ -139,7 +114,7 @@ class Command(stack.commands.add.os.command):
 				network='%s' and os='%s'""" % 
 				(address, os))
 			if rows:
-				self.abort('route exists')
+                                raise CommandError(self, 'route exists')
 		
 		# Now that we know things will work insert the route for
 		# all the OSes

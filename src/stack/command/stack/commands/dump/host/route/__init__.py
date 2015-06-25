@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,34 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:53  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/20 00:31:44  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.3  2009/06/19 21:07:34  mjk
-# - added dumpHostname to dump commands (use localhost for frontend)
-# - added add commands for attrs
-# - dump uses add for attr (does not overwrite installer set attrs)A
-# - do not dump public or private interfaces for the frontend
-# - do not dump os/arch host attributes
-# - fix various self.about() -> self.abort()
-#
-# Revision 1.2  2009/05/01 19:06:57  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 21:10:49  mjk
-# - added dump route commands
-#
-
 
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.dump.host.command):

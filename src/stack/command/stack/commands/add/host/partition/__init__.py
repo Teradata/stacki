@@ -44,6 +44,7 @@
 import os
 import sys
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -84,10 +85,11 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 		hosts = self.getHostnames(args)
+                
 		(device, mountpoint, uuid,
 		sectorstart, size, partitionid,
 		fs, partitionflags, formatflags) = self.fillParams([
-				("device", None),
+				("device", None, True),
 				("mountpoint",""),
 				("uuid",""),
 				("sectorstart", 0),
@@ -97,9 +99,6 @@ class Command(stack.commands.Command,
 				("partitionflags",""),
 				("formatflags", ""),
 			])
-
-		if device == None:
-			self.abort("Please specify device name")
 
 		for host in hosts:
 			sql_cmd = """select p.id from partitions p, nodes n

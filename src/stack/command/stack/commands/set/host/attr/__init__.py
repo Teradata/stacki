@@ -97,74 +97,40 @@ import sys
 import string
 import stack.attr
 import stack.commands
+from stack.exception import *
 
-
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.attr.command, stack.commands.set.host.command):
 	"""
 	Sets an attribute to a host and sets the associated values 
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1' repeat='1'>
 	Host name of machine
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
-	</arg>
+	</param>
 
-	<arg type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
-	</arg>
+	</param>
 	
-	<param type='string' name='attr'>
-	same as attr argument
-	</param>
-
-	<param type='string' name='value'>
-	same as value argument
-	</param>
-
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
 	</param>
 
-	<example cmd='set host attr compute-0-0 cpus 2'>
-	Sets the number of cpus of compute-0-0 to 2
+	<example cmd='set host attr backend-0-0 attr=cpus value=2'>
+	Sets the number of cpus of backend-0-0 to 2
 	</example>
-
-	<example cmd='set host attr compute-0-0 attr=cpus value=2'>
-	same as above
-	</example>
-	
-	<related>list host attr</related>
-	<related>remove host attr</related>
 	"""
 
 	def run(self, params, args):
 
-		(args, key, value) = self.fillPositionalArgs(('attr', 'value'))
 		hosts = self.getHostnames(args)
-		
-		if not key:
-			self.abort('missing attribute name')
-		if not value:
-			self.about('missing value of attribute')
-
-		(shadow, force) = self.fillParams([
-			('shadow', 'n'),
-			('force', 'y')
-			])
-
-		if self.str2bool(shadow):
-			s = "'%s'" % value
-			v = 'NULL'
-		else:
-			s = 'NULL'
-			v = "'%s'" % value
+		(key, value, shadow, force) = self.doParams()
 
 		(scope, attr) = stack.attr.SplitAttr(key)
-
-		force = self.str2bool(force)
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
 
 
@@ -178,8 +144,9 @@ class Command(stack.commands.set.host.command):
 					if row['source'] == 'H':
 						list.append(host)
 			if list:
-				self.abort('attribute exists for %s' %
-					   string.join(list))
+                                raise CommandError(self, 'attr "%s" exists for %s' %
+                                                           (aflag, string.join(list)))
+
 
 		for host in hosts:
 			self.command('remove.host.attr',

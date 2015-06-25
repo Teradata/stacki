@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,37 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2011/08/09 01:03:16  anoop
-# If yum install fails due to dependency error,
-# force install using rpm --nodeps
-#
-# Revision 1.6  2011/07/15 23:48:00  anoop
-# Rocks run roll needs to honour the "--interpreter" flag
-# to the post sections
-#
-# Revision 1.5  2011/07/13 18:36:29  anoop
-# Honour .<arch> directive to yum install.
-# When installing packages use,
-# "yum install <package>" instead of "yum install <packagefile>.rpm"
-#
-# Revision 1.4  2011/01/24 22:47:34  mjk
-# Use YUM instead of RPM for rocks run roll
-# This fixes two issues
-# 1) On 64bit we were not installing the 32bit RPMs
-# 2) name.arch packages were not being installed
-#
-# Revision 1.3  2010/09/07 23:53:00  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:07:02  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/06 22:34:16  mjk
-# - added roll argument to list.host.xml and list.node.xml
-# - kroll is dead, added run.roll
-#
 
 import os
 import string
@@ -91,6 +61,7 @@ import stack.commands
 import tempfile
 import sys
 from xml.dom.ext.reader import Sax2
+from stack.exception import *
 
 rpm_force_template = """[ $? -ne 0 ] && \\
 echo "# YUM failed - trying with RPM" && \\
@@ -112,13 +83,10 @@ class Command(stack.commands.run.command):
 
 	def run(self, params, args):
 
-		(dryrun, ) = self.fillParams([('dryrun', )])
+		(dryrun, ) = self.fillParams([ ('dryrun', 'true')])
 		
-		if dryrun:
-			dryrun = self.str2bool(dryrun)
-		else:
-			dryrun = True
-		
+                dryrun = self.str2bool(dryrun)
+                
 		script = []
 		script.append('#!/bin/sh')
 

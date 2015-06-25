@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,26 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.4  2009/05/01 19:07:03  mjk
-# chimi con queso
-#
-# Revision 1.3  2008/10/18 00:55:57  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.1  2007/08/14 18:50:09  bruno
-# set and list comment field for hosts
-#
-#
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -79,35 +63,24 @@ class Command(stack.commands.set.host.command):
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='comment'>
+	<param type='string' name='comment' optional='0'>
 	The string to assign to the comment field for each host.
-	</arg>
-
-	<param optional='1' type='string' name='comment'>
-	Can be used in place of the comment argument.
 	</param>
 
-	<example cmd='set host comment compute-0-0 "Fast Node"'>
-	Sets the comment field to "Fast Node" for compute-0-0.
-	</example>
-
-	<example cmd='set host comment compute-0-0 compute-0-1 "Slow Node"'>
-	Sets the comment field to "Slow Node" for compute-0-0 and compute-0-1.
-	</example>
-
-	<example cmd='set host comment compute-0-0 compute-0-1 comment="Slow Node"'>
-	Same as above.
+	<example cmd='set host comment backend-0-0 comment="Fast Node"'>
+	Sets the comment field to "Fast Node" for backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, comment) = self.fillPositionalArgs(('comment',))
+                
+		(comment, ) = self.fillParams([
+                        ('comment', None, True)
+                        ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not comment:
-			self.abort('must supply comment')
-			
+                        raise ArgRequired(self, 'host')
+
 		for host in self.getHostnames(args):
 			self.db.execute("""update nodes set comment="%s" where
 				name='%s'""" % (comment, host))

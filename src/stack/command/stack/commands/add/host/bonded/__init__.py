@@ -51,24 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.3  2010/04/30 22:02:13  bruno
-# changed 'subnet' parameter to 'network'
-#
-# Revision 1.2  2010/04/20 19:33:04  bruno
-# more bonding tweaks
-#
-# Revision 1.1  2010/04/20 17:22:35  bruno
-# initial support for channel bonding
-#
-#
-
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -120,19 +105,19 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 		(channel, interfaces, ip, network, name, opts) = self.fillParams([
-			('channel', ),
-			('interfaces', ),
-			('ip', ),
-			('network', ),
+			('channel', None, True),
+			('interfaces', None, True),
+			('ip', None, True),
+			('network', None, True),
 			('name', ),
 			('options',) ])
 		
 		hosts = self.getHostnames(args)
 
 		if len(hosts) == 0:
-			self.abort('host required')
+                        raise ArgRequired(self, 'host')
 		if len(hosts) > 1:
-			self.abort('only one host required')
+                        raise ArgUnique(self, 'host')
 	
 		host = hosts[0]
 
@@ -142,15 +127,6 @@ class Command(stack.commands.add.host.command):
 			#
 			name = host
 		
-		if not channel:
-			self.abort('channel required')
-		if not interfaces:
-			self.abort('interfaces required')
-		if not ip:
-			self.abort('ip required')
-		if not network:
-			self.abort('network required')
-		
 		#
 		# check if the network exists
 		#
@@ -158,7 +134,7 @@ class Command(stack.commands.add.host.command):
 			name = '%s'""" % (network))
 
 		if rows == 0:
-			self.abort('network "%s" not in the database.\n' +\
+			raise CommandError(self, 'network "%s" not in the database.\n' +\
 				'Run "rocks list network" to get a list\n' +\
 				'of valid networks.')
 
@@ -186,7 +162,7 @@ class Command(stack.commands.add.host.command):
 				net.node = n.id""" % (i, host))
 
 			if rows == 0:
-				self.abort('interface "%s" does not exist for host "%s"' % (i, host))
+				raise CommandError(self, 'interface "%s" does not exist for host "%s"' % (i, host))
 
 		#
 		# ok, we're good to go

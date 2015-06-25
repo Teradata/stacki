@@ -40,6 +40,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -63,7 +64,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			print output
 			return
 		elif len(hosts) > 1:
-			self.abort('must supply only one host')
+                        raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 

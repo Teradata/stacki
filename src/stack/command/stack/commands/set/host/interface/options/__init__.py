@@ -54,24 +54,24 @@
 
 import string
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
 	Sets the options for a device module for a named interface. On Linux,
 	this will get translated to an entry in /etc/modprobe.conf.
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='1'>
 	One or more hosts.
 	</arg>
 	
-	<arg type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the MAC address of the interface.
- 	</arg>
- 	
 	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
-	</param>
+ 	Name of the interface.
+ 	</param>
+
+	<param type='string' name='mac'>
+ 	MAC address of the interface.
+ 	</param>
 
 	<param type='string' name='options'>
 	The options for an interface. Use options=NULL to clear.
@@ -80,20 +80,20 @@ class Command(stack.commands.set.host.command):
 	options for bonded interfaces
 	</param>
 	
-	<example cmd='set host interface options compute-0-0 interface=eth1 options="Speed=10"'>
-	Sets the option "Speed=10" for eth1 on e1000 on host compute-0-0.
+	<example cmd='set host interface options backend-0-0 interface=eth1 options="Speed=10"'>
+	Sets the option "Speed=10" for eth1 on e1000 on host backend-0-0.
 	</example>
 	
-	<example cmd='set host interface options compute-0-0 interface=eth1 options=NULL'>
+	<example cmd='set host interface options backend-0-0 interface=eth1 options=NULL'>
 	Clear the options entry.
 	</example>
 
-	<example cmd='set host interface options compute-0-0 interface=eth0 options="dhcp"'>
+	<example cmd='set host interface options backend-0-0 interface=eth0 options="dhcp"'>
 	Linux only: Configure eth0 interface for DHCP instead of static.
 	</example>
 
-	<example cmd='set host interface options compute-0-0 interface=eth0 options="noreport"'>
-	Linux only:  Tell rocks report host interface to ignore this interface
+	<example cmd='set host interface options backend-0-0 interface=eth0 options="noreport"'>
+	Linux only:  Tell stack report host interface to ignore this interface
 	when writing configuration files
 	</example>
 	
@@ -101,23 +101,32 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, interface, options) = self.fillPositionalArgs(
-			('interface', 'options'))
-			
-		if not len(args):
-			self.abort('must supply host')
-		if not interface:
-			self.abort('must supply interface')
-		if not options:
-			self.abort('must supply options')
+                (option, interface, mac) = self.fillParams([
+                        ('option',    None, True),
+                        ('interface', None),
+                        ('mac',       None)
+                        ])
 
-		if string.upper(options) == 'NULL':
-			options = 'NULL'
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
+                
+		if string.upper(option) == 'NULL':
+			option = 'NULL'
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update networks, nodes set 
-				networks.options=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
-				(networks.device='%s' or networks.mac='%s')""" %
-				(options, host, interface, interface))
+                        if interface:
+				self.db.execute("""
+                                	update networks, nodes set 
+					networks.option=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.device like '%s'
+                                        """ % (option, host, interface))
+                        else:
+				self.db.execute("""
+                                	update networks, nodes set 
+					networks.option=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.mac like '%s'
+                                        """ % (option, host, mac))
+                
 

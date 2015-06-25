@@ -2,6 +2,7 @@
 # @SI_Copyright@
 
 import stack.commands.set.network
+from stack.exception import *
 
 class Command(stack.commands.set.network.command):
 	"""
@@ -24,7 +25,7 @@ class Command(stack.commands.set.network.command):
 
                 (networks, zone) = self.fillSetNetworkParams(args, 'zone')
                 if len(networks) > 1:
-                        self.abort('must specify a single network')
+                        raise ArgUnique(self, 'network')
 			        	
         	for network in networks:
 			self.db.execute("""

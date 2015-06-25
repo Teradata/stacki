@@ -211,7 +211,7 @@ class Command(stack.commands.list.command):
 			attrs['membership'] = 'Frontend'
 	
 		if len(args) != 1:
-			self.abort('must supply an XML node name')
+                        raise ArgRequired(self, 'node')
 		root = args[0]
 
 		doEval = self.str2bool(evalp)

@@ -42,6 +42,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.command,
 		stack.commands.OSArgumentProcessor,
@@ -105,7 +106,7 @@ class Command(stack.commands.remove.command,
 			except:
 				hosts = []
 		else:
-			self.abort('must supply zero or one argument')
+			raise ArgRequired(self, 'scope')
 
 		if not scope:
 			if args[0] in oses:
@@ -116,28 +117,26 @@ class Command(stack.commands.remove.command,
 				scope = 'host'
 
 		if not scope:
-			self.abort('argument "%s" must be a ' % args[0] + \
-				'valid os, appliance name or host name')
+                        raise ArgValue(self, 'scope', 'a valid os, appliance name or host name')
 
 		if scope == 'global':
 			name = None
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot = self.fillParams([ ('adapter', None), 
-				('enclosure', None), ('slot', None) ])
-
-		if not slot:
-			self.abort('slot not specified')
+                adapter, enclosure, slot = self.fillParams([
+                        ('adapter', None), 
+                        ('enclosure', None),
+                        ('slot', None, True)
+                        ])
 
 		if adapter and adapter != '*':
 			try:
 				adapter = int(adapter)
 			except:
-				self.abort('adapter is not an integer')
-
+                                raise ParamType(self, 'adapter', 'integer')
 			if adapter < 0:
-				self.abort('adapter "%s" is not zero or a positive integer' % adapter)
+                                raise ParamValue(self, 'adapter', '>= 0')
 		else:
 			adapter = -1
 
@@ -145,10 +144,9 @@ class Command(stack.commands.remove.command,
 			try:
 				enclosure = int(enclosure)
 			except:
-				self.abort('enclosure is not an integer')
-
+                                raise ParamType(self, 'enclosure', 'integer')
 			if adapter < 0:
-				self.abort('enclosure "%s" is not zero or a positive integer' % enclosure)
+                                raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
 
@@ -157,13 +155,12 @@ class Command(stack.commands.remove.command,
 			for s in slot.split(','):
 				try:
 					s = int(s)
-				except:	
-					self.abort('slot "%s" is not an integer' % s)
+				except:
+                                        raise ParamType(self, 'slot', 'integer')
 				if s < 1:
-					self.abort('slot "%s" is not a positive integer' % s)
+                                        raise ParamValue(self, 'slot', '> 0')
 				if s in slots:
-					self.abort('slot "%s" is listed twice' % s)
-
+                                        raise ParamError(self, 'slot', '"%s" is listed twice' % s)
 				slots.append(s)
 
 		#

@@ -40,6 +40,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command,
 	      stack.commands.ApplianceArgumentProcessor):
@@ -50,25 +51,20 @@ class Command(stack.commands.set.host.command,
 	One or more host names.
 	</arg>
 
-	<arg type='string' name='appliance'>
-	Appliance name (e.g. "compute").
-	</arg>
-
-	<param type='string' name='appliance'>
-	Can be used in place of appliance argument.
+	<param type='string' name='appliance' optional='0'>
+	Appliance name (e.g. "backend").
 	</param>
 	"""
 
 	def run(self, params, args):
-		(args, appliance) = self.fillPositionalArgs(('appliance', ))
+                
+		(appliance, ) = self.fillParams([ ('appliance', None, True) ])
 		
 		if not len(args):
-			self.abort('must supply host')
-		if not appliance:
-			self.abort('must supply appliance')
+                        raise ArgRequired(self, 'host')
 
 		if appliance not in self.getApplianceNames():
-			self.abort('invalid appliance name')
+                        raise CommandError(self, 'appliance parameter not valid')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""

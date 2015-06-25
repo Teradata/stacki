@@ -2,6 +2,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.set.command,
               stack.commands.NetworkArgumentProcessor):
@@ -10,11 +11,9 @@ class command(stack.commands.set.command,
 
                 networks = self.getNetworkNames(args)
                 if not networks:
-                        self.abort('network "%s" not defined' % args)
+                        raise CommandError(self, 'network "%s" is not defined' % args)
 
-                (param, ) = self.fillParams([(paramName, None)])
-                if not param:
-                        self.abort('%s not specified' % paramName)
+                (param, ) = self.fillParams([ (paramName, None, True) ])
 
                 return (networks, param)
 

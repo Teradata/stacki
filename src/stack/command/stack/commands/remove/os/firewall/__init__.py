@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,24 +51,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.3  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.2  2010/05/07 23:13:33  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.1  2010/05/07 18:27:44  bruno
-# closer
-#
-#
 
 import stack.commands
 import stack.commands.remove.firewall
+from stack.exception import *
 
 class Command(stack.commands.remove.os.command,
 	stack.commands.remove.firewall.command):
@@ -76,22 +63,20 @@ class Command(stack.commands.remove.os.command,
 	Remove a firewall rule for an OS type. To remove
 	a rule, one must supply the name of the rule.
 
-	<arg type='string' name='os'>
+	<arg type='string' name='os' repeat='1'>
 	Name of an OS type (e.g., "linux", "sunos").
 	</arg>
 
-	<param name="rulename" type="string">
+	<param name="rulename" type="string" optional='0'>
 	Name of the OS-specific rule
 	</param>
 	"""
 
 	def run(self, params, args):
-		rulename, = self.fillParams([
-				('rulename',)
-				])
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
-			self.abort('must supply at least one OS type')
+                        raise ArgRequired(self, 'os')
 		
 		for os in self.getOSNames(args):
 			sql = """os='%s'""" % (os)

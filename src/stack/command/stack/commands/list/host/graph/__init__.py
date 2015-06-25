@@ -100,6 +100,7 @@ import stack.profile
 import stack.graph
 import stack.file
 import stack.commands
+from stack.exception import *
 
 from xml.sax import make_parser
 
@@ -163,14 +164,12 @@ class Command(stack.commands.list.host.command):
 				arch, 'build')
 			if basedir:
 				if not os.path.exists(basedir):
-					self.abort('cannot read directory "%s"'
-						% basedir)
+                                        raise CommandError(self, 'cannot read directory "%s"' % basedir)
 				self.basedir = basedir
 
 			graphdir = os.path.join(self.basedir, 'graphs', graph)
 			if not os.path.exists(graphdir):
-				self.abort('cannot read directory "%s"' %
-					graphdir)
+                                raise CommandError('cannot read directory "%s"' % graphdir)
 
 			parser  = make_parser()
 			attrs = self.db.getHostAttrs(host)

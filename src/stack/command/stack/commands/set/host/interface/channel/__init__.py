@@ -56,21 +56,25 @@
 
 import string
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
 	Sets the channel for a named interface.
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='1'>
 	One or more hosts.
 	</arg>
 	
-	<param optional='0' type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the MAC address of the interface.
+	<param type='string' name='interface'>
+ 	Name of the interface.
  	</param>
 
- 	<param optional='0' type='string' name='channel'>
+	<param type='string' name='mac'>
+ 	MAC address of the interface.
+ 	</param>
+
+ 	<param type='string' name='channel' optional='0'>
 	The channel for an interface. Use channel=NULL to clear.
 	</param>
  	
@@ -86,23 +90,31 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-		(args, interface, channel) = self.fillPositionalArgs(
-			('interface', 'channel'))
-			
-		if not len(args):
-			self.abort('must supply host')
-		if not interface:
-			self.abort('must supply interface')
-		if not channel:
-			self.abort('must supply channel')
+                (channel, interface, mac) = self.fillParams([
+                        ('channel',   None, True),
+                        ('interface', None),
+                        ('mac',       None)
+                        ])
+
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
 
 		if string.upper(channel) == 'NULL':
 			channel = 'NULL'
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update networks, nodes set 
-				networks.channel=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
-				(networks.device='%s' or networks.mac='%s')""" %
-				(channel, host, interface, interface))
+                        if interface:
+                                self.db.execute("""
+                                	update networks, nodes set 
+                                        networks.channel=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.device like '%s'
+                                        """ % (channel, host, interface))
+                        else:
+                                self.db.execute("""
+                                	update networks, nodes set 
+                                        networks.channel=NULLIF('%s','NULL') where
+                                        nodes.name='%s' and networks.node=nodes.id and
+                                        networks.mac like '%s'
+                                        """ % (channel, host, mac))
 

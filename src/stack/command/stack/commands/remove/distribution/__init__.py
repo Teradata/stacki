@@ -91,6 +91,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.DistributionArgumentProcessor,
 	stack.commands.remove.command):
@@ -108,13 +109,13 @@ class Command(stack.commands.DistributionArgumentProcessor,
 
 	def run(self, params, args):
 		if len(args) != 1:
-			self.abort('must supply one or more distributions')
+                        raise ArgRequired(self, 'distribution')
 
 		dists = self.getDistributionNames(args)
 
 		# Prevent user from removing the default distribution.
 		if 'default' in dists:
-			self.abort('cannot remove default distribution')
+			raise CommandError(self, 'cannot remove default distribution')
 
 		# first check if the distribution is associated with any
 		# hosts
@@ -122,7 +123,7 @@ class Command(stack.commands.DistributionArgumentProcessor,
 		for dist in dists:
 			for row in self.call('list.host'):
 				if row['distribution'] == dist:
-					self.abort('cannot remove distribution "%s"\nbecause host "%s" is assigned to this distribution' % (dist, row['host']))
+					raise CommandError(self, 'cannot remove distribution "%s"\nbecause host "%s" is assigned to this distribution' % (dist, row['host']))
 
 		for dist in dists:
 			self.db.execute("""

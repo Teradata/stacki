@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,36 +51,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:53  bruno
-# star power for gb
-#
-# Revision 1.5  2010/05/24 17:21:47  bruno
-# the right fix for the last checkin
-#
-# Revision 1.4  2010/05/24 17:18:14  bruno
-# exclude the frontend.
-#
-# Revision 1.3  2010/02/22 23:11:03  mjk
-# - rocks iterface host using os.system not popen
-#   - can now be used like cluster-fork
-#   - rocks host iterate compute | ssh -f % cmd
-# - getHostname() now handles another f'd up case where DNS is correct (fw/bw)
-#   but the IP address is completely different.  This happens when the public
-#   name maps to a private address behind some insane firewall.
-#
-# Revision 1.2  2009/08/20 17:16:17  bruno
-# fix help
-#
-# Revision 1.1  2009/06/10 17:40:26  mjk
-# - new verb interate
-# - every object should have an iterate (right now just host)
-# - '%' wildcard stuff should go into pylib
-#
 
 import os
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.iterate.command):
@@ -97,32 +72,22 @@ class Command(command):
 	all hosts except the frontend.
         </arg>
 
-        <arg optional='1' type='string' name='command'>
+        <param optional='0' type='string' name='command'>
 	The shell command to be run for each host.  The '%' character is used as
 	a wildcard to indicate the hostname.  Quoting of the '%' to expand to a 
 	literal is accomplished with '%%'.
-        </arg>
-	
-        <param type='string' name='command'>
-        Can be used in place of the command argument.
         </param>
-
-	<example cmd='iterate host compute "scp file %:/tmp/"'>
-	Copies file to the /tmp directory of every compute node
-	</example>
-
-	<example cmd='iterate host compute command="scp file %:/tmp/"'>
-	Same as above
+	
+	<example cmd='iterate host backend command="scp file %:/tmp/"'>
+	Copies file to the /tmp directory of every backend node
 	</example>
 	"""
 
 	def run(self, params, args):
 
-		self.beginOutput()
+                (cmd, ) = self.fillParams([ ('command', None, True) ])
 
-		(args, cmd) = self.fillPositionalArgs(('command',))
-		if not cmd:
-			self.abort('requires a command')
+		self.beginOutput()
 
 		hosts = []
 		if len(args) == 0:

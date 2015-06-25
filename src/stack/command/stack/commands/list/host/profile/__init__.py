@@ -93,6 +93,7 @@
 import sys
 import stack.commands
 import stack.gen
+from stack.exception import *
 
 
 class Command(stack.commands.list.host.command):

@@ -53,6 +53,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -62,23 +63,14 @@ class Command(stack.commands.set.host.command):
 	One or more named hosts.
 	</arg>
 	
-	<arg type='string' name='mac'>
-	MAC address of the interface  whose logical interface will be reassigned
- 	</arg>
+	<param type='string' name='interface' optional='0'>
+ 	Name of the interface.
+ 	</param>
+
+	<param type='string' name='mac' optional='0'>
+	MAC address of the interface.
+ 	</param>
  	
- 	<arg type='string' name='interface'>
-	Logical interface.
-	</arg>
-
-	<param type='string' name='mac'>
-	Can be used in place of the mac argument.
-	</param>
-
-	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
-	</param>
-	
-
 	<example cmd='set host interface interface backend-0-0 00:0e:0c:a7:5d:ff eth1'>
 	Sets the logical interface of MAC address 00:0e:0c:a7:5d:ff to be eth1 
 	</example>
@@ -86,30 +78,23 @@ class Command(stack.commands.set.host.command):
 	<example cmd='set host interface interface backend-0-0 interface=eth1 mac=00:0e:0c:a7:5d:ff'>
 	Same as above.
 	</example>
-	
-	<!-- cross refs do not exist yet
-	<related>set host interface interface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
 	"""
 	
 	def run(self, params, args):
 
-		(args, mac, interface) = self.fillPositionalArgs(('mac', 'interface'))
+                (interface, mac) = self.fillParams([
+                        ('interface', None, True),
+                        ('mac',       None, True)
+                        ])
 
 		if not len(args):
-			self.abort('must supply host')
-		if not mac:
-			self.abort('must supply mac')
-		if not interface:
-			self.abort('must supply interface')
+                        raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
-			self.db.execute("""update networks,nodes set 
+                for host in self.getHostnames(args):
+			self.db.execute("""
+                        	update networks,nodes set 
 				networks.device='%s' where
 				nodes.name='%s' and networks.node=nodes.id and
-				networks.mac='%s'""" %
-				(interface, host, mac))
+				networks.mac like '%s'
+                                """ % (interface, host, mac))
 

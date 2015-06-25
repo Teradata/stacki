@@ -53,70 +53,61 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
 	Sets the network for named interface on one of more hosts. 
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='0'>
 	One or more named hosts.
 	</arg>
 	
-	<arg type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the MAC address of the interface.
- 	</arg>
- 	
- 	<arg type='string' name='network'>
+	<param type='string' name='interface'>
+ 	Name of the interface.
+ 	</param>
+
+	<param type='string' name='mac'>
+ 	MAC address of the interface.
+ 	</param>
+
+ 	<param type='string' name='network' optional='1'>
 	The network address of the interface. This is a named network and must be
 	listable by the command 'rocks list network'.
-	</arg>
-
-	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
 	</param>
-
-	<param type='string' name='network'>
-	Can be used in place of the network argument.
-	</param>
-	
-
-	<example cmd='set host interface network backend-0-0 eth1 public'>
-	Sets eth1 to be on the public network.
-	</example>
 
 	<example cmd='set host interface mac backend-0-0 interface=eth1 network=public'>
-	Same as above.
+	Sets eth1 to be on the public network.
 	</example>
-	
-	<!-- cross refs do not exist yet
-	<related>set host interface interface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
 	"""
 	
 	def run(self, params, args):
 
-		(args, interface, network) = self.fillPositionalArgs(
-			('interface', 'network'))
+                (network, interface, mac) = self.fillParams([
+                        ('network',   None, True),
+                        ('interface', None),
+                        ('mac',       None)
+                        ])
 
-		if not len(args):
-			self.abort('must supply host')
-		if not interface:
-			self.abort('must supply interface')
-		if not network:
-			self.abort('must supply network')
+		if not interface and not mac:
+                        raise ParamRequired(self, ('interface', 'mac'))
 
 		for host in self.getHostnames(args):
-			
-			# Updates the network id.
-
-			self.db.execute("""update networks net, nodes n 
-				set net.network=
-				(select id from subnets s where s.name='%s')
-				where
-				n.name='%s' and net.node=n.id and
-			 	(net.device='%s' or net.mac='%s')""" %
-				(network, host, interface, interface))
+			if interface:
+				self.db.execute("""
+                                	update networks net, nodes n 
+					set net.network=
+                                        (select id from subnets s where s.name='%s')
+                                        where
+                                        n.name='%s' and net.node=n.id and
+                                        net.device like '%s'
+                                        """ % (network, host, interface))
+                        else:
+				self.db.execute("""
+                                	update networks net, nodes n 
+					set net.network=
+                                        (select id from subnets s where s.name='%s')
+                                        where
+                                        n.name='%s' and net.node=n.id and
+                                        net.mac like '%s'
+                                        """ % (network, host, mac))

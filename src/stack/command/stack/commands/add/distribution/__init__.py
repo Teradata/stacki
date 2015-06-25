@@ -93,6 +93,7 @@
 import os
 import stack
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.DistributionArgumentProcessor,
 	stack.commands.add.command):
@@ -118,15 +119,16 @@ class Command(stack.commands.DistributionArgumentProcessor,
 	def run(self, params, args):
 	
 		if len(args) != 1:
-			self.abort('must supply one distribution')
+                        raise ArgUnique(self, 'distribution')
 		dist = args[0]
 		
 		(graph, OS) = self.fillParams([
 				('graph','default'),
 				('os','redhat')
 				])
+                 
 		if dist in self.getDistributionNames():
-			self.abort('distribution "%s" exists' % dist)
+                        raise CommandError(self, 'distribution "%s" exists' % dist)
 
 		self.db.execute("""insert into distributions (name, os, graph) values
 			('%s', '%s', '%s')""" % (dist, OS, graph))

@@ -99,6 +99,7 @@ import stack
 import stack.commands
 import stack.dist
 import stack.build
+from stack.exception import *
 
 class Command(stack.commands.create.command,
 	      stack.commands.DistributionArgumentProcessor):
@@ -192,13 +193,12 @@ class Command(stack.commands.create.command,
 				rolls.append(i.split(',') + [ True ] )
 
 		if rolls and len(args) != 1:
-			self.abort('pallets option requires exactly one distribution')
+			raise CommandError(self, 'pallets option requires exactly one distribution')
 
 		if not self.db or rolls:
 			if len(args) != 1:
 				# No DB -- FE Kickstart Env
-				self.abort(
-					'must supply exactly one distribution')
+                                raise CommandError(self, 'must supply exactly one distribution')
 			distributions = args
 		else:
 			distributions = self.getDistributionNames(args)
@@ -216,7 +216,7 @@ class Command(stack.commands.create.command,
 
 			lockfile = '/var/lock/%s' % distName
 			if os.path.exists(lockfile):
-				self.abort(
+                                raise CommandError(self,
 					"Lockfile %s exists.\n" % lockfile +
 					"Another instance of stack create " +
 					"distribution is running")

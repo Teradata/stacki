@@ -97,25 +97,26 @@ class Command(stack.commands.add.host.command):
 	"""
 	Adds an attribute to a host and sets the associated values 
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='1' repeat='1'>
 	Host name of machine
 	</arg>
 	
-	<param type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
 
-	<param type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-
-	<example cmd='add host attr backend-0-0 attr=nukedisks value=True'>
-	Add the nukedisks host attribute to backend-0-0, and set its value
-	to True
-	</example>
 	
-	<related>list host attr</related>
-	<related>remove host attr</related>
+	<param type='boolean' name='shadow'>
+	If set to true, then set the 'shadow' value (only readable by root
+	and apache).
+	</param>
+
+	<example cmd='set host attr backend-0-0 attr=cpus value=2'>
+	Sets the number of cpus of backend-0-0 to 2
+	</example>
 	"""
 
 	def run(self, params, args):

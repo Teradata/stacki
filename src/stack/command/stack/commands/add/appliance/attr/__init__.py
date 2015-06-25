@@ -96,27 +96,26 @@ class Command(stack.commands.add.appliance.command):
 	"""
 	Adds an attribute to an appliance and sets the associated values 
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' optional='1' repeat='1'>
 	Name of appliance
 	</arg>
 	
-	<param type='string' name='attr'>
+	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
 
-	<param type='string' name='value'>
+	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
+	
+	<param type='boolean' name='shadow'>
+	If set to true, then set the 'shadow' value (only readable by root
+	and apache).
+	</param>
 
-	<example cmd='add appliance attr backend attr=nukedisks value=False'>
-	Sets the "nukedisks" attribute to False for nukedisks appliances
+	<example cmd='set appliance attr backend attr=sge value=False'>
+	Sets the sge attribution to False for backend appliances
 	</example>
-
-	<related>list appliance attr</related>
-	<related>remove appliance attr</related>
-	<related>set host attr</related>
-	<related>list host attr</related>
-	<related>remove host attr</related>
 	"""
 
 	def run(self, params, args):

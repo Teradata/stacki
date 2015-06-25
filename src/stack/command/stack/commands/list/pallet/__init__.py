@@ -127,9 +127,9 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 
 		self.beginOutput()
-		for (roll, version) in self.getRollNames(args, params):
+		for (roll, version, release) in self.getRollNames(args, params):
 			self.db.execute("""
-				select r.arch,r.os from rolls r where
+				select r.arch, r.os from rolls r where
 				r.name='%s' and r.version='%s'
 				""" % (roll, version))
 			

@@ -97,6 +97,7 @@ import string
 import popen2
 import stack.file
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.add.command):
@@ -182,15 +183,10 @@ class Command(stack.commands.add.command):
 						       (clean, prefix,
 							treeinfo))
 				if res and updatedb:
-					self.insert(res[0], res[1], res[2],
+					self.insert(res[0], res[1], '', res[2],
 						    'redhat')
-			elif os.path.exists(cdtoc):
-				res = self.runImplementation('foreign_sunos',
-						       (clean, prefix,
-							cdtoc))
-				if res and updatedb:
-					self.insert(res[0], res[1], res[2],
-						    'sunos')
+			else:
+                                raise CommandError(self, 'unknown os on media')
 
 		#
 		# Keep going even if a foreign pallet.  Safe to loop over an
@@ -204,31 +200,36 @@ class Command(stack.commands.add.command):
 			if updatedb:
 				self.insert(info.getRollName(),
 					info.getRollVersion(),
+                                        info.getRollRelease(),
 					info.getRollArch(),
 					info.getRollOS())
 
 
-	def insert(self, name, version, arch, OS):
+	def insert(self, name, version, release, arch, OS):
 		"""
 		Insert the pallet information into the database if
 		not already present.
 		"""
-		rows = self.db.execute("""select * from rolls where
-			name='%s' and version='%s' and arch='%s' and os='%s'
-			""" % (name, version, arch, OS))
+
+                rows = self.db.execute("""
+                       	select * from rolls where
+                        name='%s' and version='%s' and release='%s' and arch='%s' and os='%s'
+                        """ % (name, version, release, arch, OS))
 		if not rows:
 			self.db.execute("""insert into rolls
-				(name, version, arch, os) values
-				('%s', '%s', '%s', '%s')
-				""" % (name, version, arch, OS))
+				(name, version, release, arch, os) values
+				('%s', '%s', '%s', '%s', '%s')
+				""" % (name, version, release, arch, OS))
 			
 
 		
 
 	def run(self, params, args):
-		(clean, dir, updatedb) = self.fillParams([ ('clean', 'n'),
+		(clean, dir, updatedb) = self.fillParams([
+                        ('clean', 'n'),
 			('dir', '/export/stack/pallets'),
-			('updatedb', 'y') ])
+			('updatedb', 'y')
+                        ])
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
@@ -261,5 +262,5 @@ class Command(stack.commands.add.command):
 			if self.runImplementation('mounted_%s' % self.os):
 				self.copy(clean, dir, updatedb)
 			else:
-				self.abort('CDROM not mounted')
+                                raise CommandError(self, 'CDROM not mounted')
 

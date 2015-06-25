@@ -97,33 +97,22 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 	Remove an attribute for an appliance.
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' optional='1' repeat='1'>
 	One or more appliances
 	</arg>
 	
-	<arg type='string' name='attr'>
+	<arg type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
  	</arg>
  	
-	<param type='string' name='attr'>
-	Can be used in place of the attr argument.
-	</param>
-
-	<example cmd='remove appliance attr compute sge'>
-	Removes the attribute sge for compute appliances
-	</example>
-
-	<example cmd='remove appliance attr compute attr=sge'>
-	Same as above.
+	<example cmd='remove appliance attr backend attr=sge'>
+	Removes the attribute sge for backend appliances
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, key) = self.fillPositionalArgs(('attr', ))
-
-		if not key:
-			self.abort('missing attribute name')
-
+		(key, ) = self.fillParams([ ('attr', None, True) ])
+                 
 		for appliance in self.getApplianceNames(args):
 			attr = stack.attr.NormalizeAttr(key)
 			for row in self.call('list.appliance.attr', [ appliance ]):

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,22 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.3  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.2  2009/05/01 19:07:01  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/02/10 20:11:20  mjk
-# os attr stuff for anoop
-#
 
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.OSArgumentProcessor,
 		stack.commands.remove.command):
@@ -86,7 +74,7 @@ class Command(command):
 
 	def run(self, params, args):
 		if len(args) < 1:
-			self.abort('must supply at least one OS')
+                        raise ArgRequired(self, 'os')
 			
 		for os in self.getOSNames(args):
 			self.runPlugins(os)

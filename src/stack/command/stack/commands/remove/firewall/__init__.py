@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,35 +51,15 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/11/19 16:15:17  bruno
-# fix to remove a firewall rule with 'all' as its 'network' or 'output-network'
-#
-# Revision 1.4  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.3  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.2  2010/05/07 23:13:33  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.1  2010/04/30 22:07:16  bruno
-# first pass at the firewall commands. we can do global and host level
-# rules, that is, we can add, remove, open (calls add), close (also calls add),
-# list and dump the global rules and the host-specific rules.
-#
-#
 
 import stack.commands
+from stack.exception import *
 
 class command(stack.commands.remove.command):
 	def deleteRule(self, table, rulename, extrasql=None):
 
-		if not rulename:
-			self.abort('Rulename required')
-	
+                assert table
+                assert rulename
 
 		query = 'select * from %s where name="%s"' % (table, rulename)
 		if extrasql:
@@ -86,7 +67,7 @@ class command(stack.commands.remove.command):
 		rows = self.db.execute(query)
 
 		if rows == 0:
-			self.abort('Could not find rule %s in %s' % (rulename, table))
+			raise CommandError(self, 'Could not find rule %s in %s' % (rulename, table))
 
 		query = 'delete from %s where name="%s"' % (table, rulename)
 		if extrasql:
@@ -97,15 +78,15 @@ class Command(command):
 	"""
 	Remove a global firewall rule. To remove a rule, you must supply
 	the name of the rule.
-	<arg name="rulename">
-	Name of the global rule
-	</arg>
+        
+	<param type='string' name='rulename' optional='0'>
+	Name of the rule
+	</param>
 	"""
 
 	def run(self, params, args):
-		if len(args) == 0:
-			self.abort('Specify rulename')
-		rulename = args[0]
-
-		self.deleteRule('global_firewall',rulename)
+                
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
+                
+		self.deleteRule('global_firewall', rulename)
 

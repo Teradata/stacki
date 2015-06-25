@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,27 +51,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.3  2010/04/14 14:40:26  bruno
-# changed 'host bootaction' to 'bootaction' in the documentation portion of
-# the commands
-#
-# Revision 1.2  2009/05/01 19:06:54  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/02/12 21:40:05  bruno
-# make the bootaction global
-#
-#
 
 import sys
 import string
 import stack.commands
 import os
+from stack.exception import *
 
 class Command(stack.commands.HostArgumentProcessor, stack.commands.add.command):
 	"""
@@ -151,15 +137,13 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.add.command):
 
 
 	def run(self, params, args):
-		(action, kernel, ramdisk, bootargs) = self.fillParams(
-			[('action', ), 
+		(action, kernel, ramdisk, bootargs) = self.fillParams([
+			('action', None, True), 
 			('kernel', ),
 			('ramdisk', ),
-			('args', )])
+			('args', )
+                        ])
 			
-		if not action:
-			self.abort('must supply an action')
-
 		self.addBootAction(action, kernel, ramdisk, bootargs)
 
 		#	

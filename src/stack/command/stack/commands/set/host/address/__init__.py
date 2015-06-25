@@ -97,6 +97,7 @@ import os.path
 import getpass
 import crypt
 import stack.commands
+from stack.exception import *
 
 
 class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
@@ -171,14 +172,17 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 
 
 	def run(self, params, args):
-		(ip, netmask, shortname, domainname, gateway, dns) = \
-			self.fillParams([ ('ip', None),
-				('netmask', None), ('shortname', None),
-				('domain', None), ('gateway', None),
-				('dns', None) ])
+		(ip, netmask, shortname, domainname, gateway, dns) = self.fillParams([
+                        ('ip', None),
+			('netmask', None),
+                        ('shortname', None),
+			('domain', None),
+                        ('gateway', None),
+			('dns', None)
+                        ])
 
 		if len(params) == 0:
-			self.abort('You did not supply any values to update')
+                        raise CommandError(self, 'no parameters specified')
 
 		if not ip:
 			ip = self.db.getHostAttr('localhost',
@@ -209,13 +213,12 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		hosts = self.getHostnames(args)
 
 		if len(hosts) != 1:
-			self.abort('must supply only one host')
+                        raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 
 		if host != self.db.getHostname('localhost'):
-			self.abort('must supply the current name of this ' +
-				'frontend')
+                        raise CommandError(self, 'must supply the current name of this frontend')
 
 		oldhost = self.db.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
@@ -300,49 +303,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		password = self.readpassword()
 
 		if crypt.crypt(clear_password, password) != password:
-			self.abort('The current password you entered ' +
-				'does not match the stored password')
-
-		#
-		# if we are about to change the hostname, then check if there
-		# is a valid license for the new hostname
-		#
-		olddomain = self.db.getHostAttr('localhost',
-			'Kickstart_PublicDNSDomain').strip()
-		
-		valid = 0
-		licdir = '/opt/stack/license'
-		if os.path.exists(licdir) and (shortname != oldhost or
-				domainname != olddomain):
-
-			for l in os.listdir(licdir):
-				lic = '%s/%s' % (licdir, l)
-
-				(nodes, expires, updates, hostname, rolls, valid) = self.readl(lic)
-
-				#
-				# a license can be valid when the hostname is
-				# set to None. this means that this is a
-				# 'freemium' cluster (the number of
-				# nodes currently in the system are less than
-				# or equal to MaxFreeiumNodes).
-				#
-				if valid and (hostname == '%s.%s' % \
-						(shortname, domainname) or \
-						not hostname):
-					break
-
-		if not valid:
-			#
-			# call the preWrapper. it may be the case that there
-			# isn't a valid license for the new host name, but 
-			# there are not enough nodes for it to matter, that is,
-			# the node count is less than MaxFreemiumNodes.
-			#
-			if self.preWrapper('set host address') == 0:
-				self.abort('You do not have a valid license ' +
-					'for hostname "%s.%s"' %
-					(shortname, domainname))
+                        raise CommandError(self, 'The current password you entered does not match the stored password')
 
 		#
 		# update the name in the nodes and networks tables first

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,43 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.5  2010/09/01 18:00:27  bruno
-# open multiple consoles simultaneously
-#
-# Revision 1.4  2010/08/05 19:56:06  bruno
-# more airboss updates
-#
-# Revision 1.3  2010/07/12 17:43:41  bruno
-# moved the private key reading into the commands. this makes it possible to
-# enter the passphrase on the key once and have the command apply to several
-# nodes.
-#
-# Revision 1.2  2010/07/09 23:50:15  bruno
-# check if the key exists
-#
-# Revision 1.1  2010/07/09 21:00:53  bruno
-# moved the VM power and console commands to the base roll
-#
-# Revision 1.4  2010/06/30 19:51:22  bruno
-# fixes
-#
-# Revision 1.3  2010/06/30 17:59:58  bruno
-# can now route error messages back to the terminal that issued the command.
-#
-# can optionally set the VNC viewer flags.
-#
-# Revision 1.2  2010/06/23 22:23:37  bruno
-# fixes
-#
-# Revision 1.1  2010/06/22 21:41:14  bruno
-# basic control of VMs from within a VM
-#
-#
 
 import os
 import sys
@@ -94,6 +58,7 @@ import M2Crypto
 import stack.commands
 import stack.vm
 import threading
+from stack.exception import *
 
 
 class Parallel(threading.Thread):
@@ -141,21 +106,19 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 		(key, vncflags) = self.fillParams([
-			('key', ),
+			('key', None, True),
 			('vncflags', '-log *:stderr:0 -FullColor -PreferredEncoding hextile')
 			])
 
-		if not key:
-			self.abort('must supply a path name to a private key')
 		if not os.path.exists(key):
-			self.abort('private key "%s" does not exist' % key)
+                        raise CommandError(self, 'private key "%s" does not exist' % key)
 
 		rsakey = M2Crypto.RSA.load_key(key)
 
 		vm_controller = self.db.getHostAttr('localhost', 'airboss')
 
 		if not vm_controller:
-			self.abort('the "airboss" attribute is not set')
+                        raise CommandError(self, 'the "airboss" attribute is not set')
 
 		threads = []
 		for host in self.getHostnames(args):

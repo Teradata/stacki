@@ -92,6 +92,7 @@
 
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -101,47 +102,33 @@ class Command(stack.commands.set.host.command):
 	The current name of the host.
 	</arg>
 
-	<arg type='string' name='name'>
+	<param type='string' name='name' optional='0'>
 	The new name for the host.
-	</arg>
-
-	<param optional='1' type='string' name='name'>
-	Can be used in place of the 'name' argument.
 	</param>
 
-	<example cmd='set host name backend-0-0 new-backend-0-0'>
+	<example cmd='set host name backend-0-0 name=new-backend-0-0'>
 	Changes the name of backend-0-0 to new-backend-0-0.
-	</example>
-
-	<example cmd='set host cpus backend-0-0 name=new-backend-0-1'>
-	Same as above.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(args, name) = self.fillPositionalArgs(('name',))
-		
-		if not len(args):
-			self.abort('must supply a host')
-		if not name:
-			self.abort('must supply new name')
-
-		if name in self.getHostnames():
-			self.abort('new name "%s" already exists' % name)
-			
-		hosts = self.getHostnames(args)
-		if len(hosts) > 1:
-			self.abort('must supply only one host')
-		host = hosts[0]
-
                 
-		self.db.execute("""update nodes set name='%s' where
-			name='%s'""" % (name, host))
+		hosts = self.getHostnames(args)
+                (name, ) = self.fillParams([
+                        ('name', None, True)
+                        ])
 		
-
-                for dict in self.call('list.host.interface',
-                                      [ host, 'interface=private' ]):
-                        addr = dict['ip']
+		if not len(hosts) == 1:
+                        raise ArgUnique(self, 'host')
+		if name in self.getHostnames():
+                        raise CommandError(self, 'name already exists')
+			
+		host = hosts[0]
+                
+		self.db.execute("""
+                	update nodes set name='%s' where
+			name='%s'
+                        """ % (name, host))
+		
                         
-                self.command('sync.config')
 

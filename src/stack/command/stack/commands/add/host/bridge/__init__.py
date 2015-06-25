@@ -2,6 +2,7 @@
 # @SI_Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -29,19 +30,15 @@ class Command(stack.commands.Command,
 	"""
 	def run(self, params, args):
 		(bridge, interface, network) = self.fillParams([
-			('name', ''),
+			('name', None, True),
 			('interface',''),
 			('network',''),
 			])
 
 		hosts = self.getHostnames(args)
 
-		if not bridge:
-			self.abort('Please specify name of bridge')
-
 		if not interface and not network:
-			self.abort('Please specify either name of interface\n'+\
-				'or name of network')
+                        raise ParamRequired(self, ('interface', 'network'))
 
 		for host in hosts:
 			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.options ' +\
@@ -56,7 +53,7 @@ class Command(stack.commands.Command,
 
 			r = self.db.execute(sql)
 			if r == 0:
-				self.abort('Could not find ' +\
+				raise CommandError(self, 'Could not find ' +\
 				("interface %s configured on " % interface if interface else '')+\
 				("network %s on " % network if network else '')+\
 				"host %s" % host)

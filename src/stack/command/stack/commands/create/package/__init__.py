@@ -1,4 +1,5 @@
-# $Id: __init__.py,v 1.6 2011/01/24 17:54:44 mjk Exp $
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,26 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2011/01/24 17:54:44  mjk
-# Disable RPM computing the provides list
-#
-# Revision 1.5  2010/09/07 23:52:52  bruno
-# star power for gb
-#
-# Revision 1.4  2009/05/01 19:06:56  mjk
-# chimi con queso
-#
-# Revision 1.3  2008/10/18 00:55:48  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/08/20 23:22:46  mjk
-# docstring
-#
-# Revision 1.1  2008/08/20 22:15:16  mjk
-# works / needs docstring
-#
+
 
 import os
 import tempfile
@@ -135,18 +117,13 @@ class Command(stack.commands.create.command):
 
 		(name, dir, prefix, version,
 			release, rpmextra) = self.fillParams([
-				('name',),
-				('dir',),
+				('name', None, True),
+				('dir', None, True),
 				('prefix',),
 				('version', stack.version),
 				('release', '1'),
 				('rpmextra','AutoReqProv: no'),
 			])
-
-		if not name:
-			self.abort('must supply package name')
-		if not dir:
-			self.abort('must supply directory name')
 
 		rocksRoot = os.environ['ROCKSBUILD']
 

@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,49 +51,26 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:49  bruno
-# star power for gb
-#
-# Revision 1.5  2010/07/09 22:30:56  bruno
-# gateway can't be NULL
-#
-# Revision 1.4  2010/05/20 00:31:44  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.3  2009/07/21 21:50:51  bruno
-# fix help
-#
-# Revision 1.2  2009/05/01 19:06:54  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 19:44:09  mjk
-# - added add.appliance.route
-# - added add.os.route
-#
 
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.appliance.command):
 	"""
 	Add a route for an appliance type in the cluster
 
 	<arg type='string' name='appliance'>
-	The appliance type (e.g., 'backend'). This argument is required.
+	The appliance type (e.g., 'backend').
 	</arg>
 	
-	<arg type='string' name='address'>
+	<param type='string' name='address' optional='0'>
 	Host or network address
-	</arg>
+	</param>
 	
-	<arg type='string' name='gateway'>
+	<param type='string' name='gateway' optional='0'>
 	Network or device gateway
-	</arg>
+	</param>
 
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route
@@ -102,25 +80,24 @@ class Command(stack.commands.add.appliance.command):
 
 	def run(self, params, args):
 
-		(args, address, gateway) = self.fillPositionalArgs(
-			('address','gateway'))
+                apps = self.getApplianceNames(args)
 
-		(netmask,) = self.fillParams([('netmask', '255.255.255.255')])
+		(address, gateway, netmask,) = self.fillParams([
+                        ('address', None, True),
+                        ('gateway', None, True),
+                        ('netmask', '255.255.255.255')
+                        ])
 		
-		if not address:
-			self.abort('address required')
-		if not gateway:
-			self.abort('gateway required')
 		if len(args) == 0:
-			self.abort('must supply at least one appliance type')
+                        raise ParamRequired(self, 'appliance')
 
-		apps = self.getApplianceNames(args)
 
 		#
 		# determine if this is a subnet identifier
 		#
 		subnet = 0
-		rows = self.db.execute("""select id from subnets where
+		rows = self.db.execute("""
+                	select id from subnets where
 			name = '%s' """ % gateway)
 
 		if rows == 1:
@@ -131,7 +108,7 @@ class Command(stack.commands.add.appliance.command):
 			gateway = "'%s'" % gateway
 		
 		# Verify the route doesn't already exist.  If it does
-		# for any of the appliances abort.
+		# for any of the appliances raise a CommandError.
 		
 		for app in apps:
 			rows = self.db.execute("""select * from 
@@ -140,7 +117,7 @@ class Command(stack.commands.add.appliance.command):
 				and a.name='%s'""" %	
 				(address, app)) 
 			if rows:
-				self.abort('route exists')
+				raise CommandError(self, 'route exists')
 		
 		# Now that we know things will work insert the route for
 		# all the appliances

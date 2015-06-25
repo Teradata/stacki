@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,40 +51,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/10/06 22:45:46  bruno
-# don't do the hostname check for 'set host power'. this because in a newly
-# installed VM frontend, the database is not populated with the MAC address of
-# its compute nodes, so this command will fail when trying to power up the
-# compute nodes for the first time.
-#
-# Revision 1.7  2010/09/23 20:24:07  bruno
-# use the host argument processor
-#
-# Revision 1.6  2010/09/07 23:53:01  bruno
-# star power for gb
-#
-# Revision 1.5  2010/07/14 19:39:39  bruno
-# better
-#
-# Revision 1.4  2010/07/09 21:00:54  bruno
-# moved the VM power and console commands to the base roll
-#
-# Revision 1.3  2010/06/25 19:10:07  bruno
-# let non-root users control the power to nodes
-#
-# Revision 1.2  2010/06/23 22:51:11  bruno
-# fix
-#
-# Revision 1.1  2010/06/22 21:42:36  bruno
-# power control and console access for VMs
-#
-#
 
 import stack.commands
 import os
 import M2Crypto
+from stack.exception import *
 
 class command(stack.commands.set.host.command):
 	MustBeRoot = 0
@@ -120,18 +92,16 @@ class Command(command):
 			])
 		
 		if not len(args):
-			self.abort('must supply at least one host')
+                        raise ArgRequired(self, 'host')
 
 		if action not in [ 'on', 'off', 'install' ]:
-			self.abort('invalid action. ' +
-				'action must be "on", "off" or "install"')
+                        raise ParamValue(self, '"on", "off" or "install"')
 
 		rsakey = None
 
 		if key:
 			if not os.path.exists(key):
-				self.abort("can't access the private key '%s'"
-					% key)
+                                raise CommandError(self, "can't access the private key '%s'" % key)
 			rsakey = M2Crypto.RSA.load_key(key)
 
 		for host in args:

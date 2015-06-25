@@ -56,6 +56,7 @@ import sys
 import string
 import stack.commands
 import os
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
@@ -255,10 +256,10 @@ class Command(stack.commands.set.host.command):
 		(action,) = self.fillParams([('action', )])
 		
 		if not len(args):
-			self.abort('must supply host')
+                	raise ArgRequired(self, 'host')
 
 		if action not in [ 'os', 'run', 'install', None ]:
-			self.abort('invalid action. action must be "os", "run" or "install"')
+                	raise ParamValue(self, 'action', '"os", "run" or "install"')
 
 		for host in self.getHostnames(args):
 			if action:

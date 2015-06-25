@@ -43,33 +43,37 @@ import os
 import grp
 import sys
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.command):
 	"""
         Sets an Access control pattern.
-	<param name="command">
+        
+	<param name="command" optional='0'>
 	Command Pattern.
 	</param>
-	<param name="group">
+        
+	<param name="group" optional='0'>
 	Group name / ID for access.
 	</param>
-	<example cmd='set access "*" apache'>
-	Give "apache" group access to all "rocks" commands
+        
+	<example cmd='set access command="*" group=apache'>
+	Give "apache" group access to all "stack" commands
 	</example>
-	<example cmd='set access command="list*" group="wheel"'>
-	Give "wheel" group access to all "rocks list" commands
+        
+	<example cmd='set access command="list*" group=wheel'>
+	Give "wheel" group access to all "stack list" commands
 	</example>
 	"""
 
 	def run(self, params, args):
 
-		(args, cmd, group) = self.fillPositionalArgs(('command',
-                                                              'group'))
-		if not cmd:
-			self.abort('missing command pattern')
-		if not group:
-			self.abort('missing group membership')
-
+                
+		(cmd, group) = self.fillParams([
+                        ('command', None, True),
+                        ('group',   None, True)
+                        ])
+                 
 		groupid = None
 		try:
 			groupid = int(group)
@@ -80,10 +84,10 @@ class Command(stack.commands.set.command):
 			try:
 				groupid = grp.getgrnam(group).gr_gid
 			except KeyError:
-				self.abort('Cannot find group %s' % group)
+				raise CommandError(self, 'cannot find group %s' % group)
 
 		if groupid == None:
-			self.abort('Cannot find group %s' % group)
+			raise CommandError(self, 'cannot find group %s' % group)
 
                 self.db.execute("""
                 	insert into access (command, groupid)

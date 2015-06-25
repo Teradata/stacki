@@ -276,6 +276,7 @@ CREATE TABLE rolls (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
   Version	varchar(32) NOT NULL default '',
+  Release	varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default 'redhat',
   PRIMARY KEY (ID)

@@ -53,72 +53,46 @@
 # @Copyright@
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.set.host.command):
 	"""
 	Sets the mac address for named interface on host.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' repeat='1'>
 	Host name.
 	</arg>
-	
-	<arg type='string' name='interface'>
- 	Interface that should be updated. This may be a logical interface or 
- 	the mac address of the interface.
- 	</arg>
- 	
- 	<arg type='string' name='mac'>
+
+	<param type='string' name='interface' optional='0'>
+ 	Name of the interface.
+ 	</param>
+
+ 	<param type='string' name='mac' optional='0'>
 	The mac address of the interface. Usually of the form dd:dd:dd:dd:dd:dd
 	where d is a hex digit. This format is not enforced. Use mac=NULL to
 	clear the mac address.
-	</arg>
-
-	<param type='string' name='interface'>
-	Can be used in place of the interface argument.
 	</param>
 
-	<param type='string' name='mac'>
-	Can be used in place of the mac argument.
-	</param>
-	
-
-	<example cmd='set host interface mac compute-0-0 eth1 00:0e:0c:a7:5d:ff'>
-	Sets the MAC Address for the eth1 device on host compute-0-0.
+	<example cmd='set host interface mac backend-0-0 interface=eth1 mac=00:0e:0c:a7:5d:ff'>
+	Sets the MAC Address for the eth1 device on host backend-0-0.
 	</example>
-
-	<example cmd='set host interface mac compute-0-0 interface=eth1 mac=00:0e:0c:a7:5d:ff'>
-	Same as above.
-	</example>
-	
-	<example cmd='set host interface mac compute-0-0 interface=eth1 mac=NULL'>
-	clears the mac address from the database
-	</example>
-	
-	<!-- cross refs do not exist yet
-	<related>set host interface interface</related>
-	<related>set host interface ip</related>
-	<related>set host interface module</related>
-	-->
-	<related>add host</related>
 	"""
 	
 	def run(self, params, args):
 
-		(args, interface, mac) = self.fillPositionalArgs(('interface', 'mac'))
+                (interface, mac) = self.fillParams([
+                        ('interface', None, True),
+                        ('mac',       None, True)
+                        ])
 
-		hosts = self.getHostnames(args)	
-			
-		if len(hosts) != 1:
-			self.abort('must supply one host')
-		if not interface:
-			self.abort('must supply interface')
-		if not mac:
-			self.abort('must supply mac')
+		if not len(args):
+                        raise ArgRequired(self, 'host')
 
-		for host in hosts:
-			self.db.execute("""update networks, nodes set 
+                for host in self.getHostnames(args):
+			self.db.execute("""
+        	        	update networks, nodes set 
 				networks.mac=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
-				(networks.device='%s' or networks.mac='%s')""" %
-				(mac, host, interface, interface))
+				networks.device like '%s'
+        	                """ % (mac, host, interface))
 

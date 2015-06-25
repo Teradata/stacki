@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,27 +51,9 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:50  bruno
-# star power for gb
-#
-# Revision 1.3  2009/05/01 19:06:55  mjk
-# chimi con queso
-#
-# Revision 1.2  2009/03/13 18:45:58  mjk
-# - rocks add host route works
-# - added stack.add.host.command class
-# - getHostAttrs|Routes uses getHostname to normalize the host arg
-# - fixed getHostRoutes
-#
-# Revision 1.1  2008/10/21 19:34:03  bruno
-# added 'alias' commands
-#
-#
-
 
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -80,49 +63,38 @@ class Command(stack.commands.add.host.command):
 	Host name of machine
 	</arg>
 	
-	<param type='string' name='name'>
-	Can be used in place of the name argument.
+	<param type='string' name='alias' optional='0'>
+        Alias for the host.
 	</param>
 
-	<example cmd='add host alias backend-0-0 name=b00'>
+	<example cmd='add host alias backend-0-0 alias=b00'>
 	Add a host alias "b00" to host "backend-0-0".
 	</example>
 	"""
 
 	def run(self, params, args):
 
-		(args, name) = self.fillPositionalArgs(('name',))
-		hosts = self.getHostnames(args)
+                hosts = self.getHostnames(args)
+                
+		(alias, ) = self.fillParams([
+                        ('alias', None, True)
+                        ])
 		
-		if not name:
-			self.abort('missing alias name')
+                if not host:
+                        raise ArgRequired(self, 'host')
+		if not len(hosts) == 1:
+                        raise ArgUnique(self, 'host')
 
-		if len(hosts) != 1:	
-			self.abort('must supply one host')
-		host = hosts[0]
-		
-		rows = self.db.execute("""select id from nodes where 
-			name = '%s'""" % (host))
+                host = hosts[0]
+                for dict in self.call('list.host.alias', [ 'host=%s' % host ]):
+                        if alias == dict['alias']:
+                                raise CommandError(self, 'alias "%s" exists' % alias)
 
-		if rows == 0:
-			self.abort('host "%s" does exist in the database' %
-				host)
+		self.db.execute("""
+                	insert into aliases (node, name)
+			values (
+                        (select id from nodes where name='%s'),
+                        '%s'
+                        )
+                        """ % (host, alias))
 
-		node, = self.db.fetchone()
-
-		#
-		# check if the alias already exists
-		#
-		rows = self.db.execute("""select name from aliases where 
-			name = '%s'""" % (name))
-
-		if rows > 0:
-			self.abort('alias "%s" already exists' % name)
-
-		self.db.execute("""insert into aliases (node, name)
-			values (%s, '%s')""" % (node, name))
-
-		#
-		# update the host file and name service
-		#
-		self.command('sync.config')
