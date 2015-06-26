@@ -13,3 +13,11 @@ path = os.path.join('/opt', 'stack', 'redhat', 'usr', libdir,
 	'python%s' % sys.version[:3], 'site-packages')
 
 site.addsitedir(path)
+
+#
+# for stacki 7.x
+#
+path = os.path.join('/opt', 'stack', 'redhat', 'usr', libdir, 
+	'python2.7', 'site-packages')
+
+site.addsitedir(path)
