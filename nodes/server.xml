@@ -65,7 +65,7 @@ AIRBOSS=`/bin/cat /proc/cmdline | /bin/awk \
 
 if [ "$AIRBOSS" != "" ]
 then
-	/opt/stack/bin/stack add host attr localhost airboss $AIRBOSS
+	/opt/stack/bin/stack add host attr localhost attr=airboss value=$AIRBOSS
 fi
 
 </post>
@@ -80,13 +80,13 @@ fi
         restore roll.
 -->
 
-/opt/stack/bin/stack set host attr localhost roll_install_on_the_fly true \
+/opt/stack/bin/stack set host attr localhost attr=roll_install_on_the_fly value=true \
         shadow=yes
 
 <!--
 	 Default to system (passwd/shadow) authentication.
 -->
-/opt/stack/bin/stack set attr user.auth unix
+/opt/stack/bin/stack set attr attr=user.auth value=unix
 
 </post>
 

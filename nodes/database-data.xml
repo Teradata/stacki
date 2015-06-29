@@ -67,7 +67,7 @@ if os.path.exists('/tmp/site.attrs'):
 			else:
 				extra = ''
 
-			os.system("/opt/stack/bin/stack set attr %s '%s' '%s'"
+			os.system("/opt/stack/bin/stack set attr %s attr='%s' value='%s'"
 				% (extra, key, value))
 
 	file.close()
@@ -85,8 +85,7 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert the base appliances into the database -->
 
-/opt/stack/bin/stack add appliance frontend membership=Frontend node=server \
-	public=no
+/opt/stack/bin/stack add appliance frontend membership=Frontend node=server public=no
 /opt/stack/bin/stack add appliance backend  membership=Backend node=backend
 
 <!-- manage firewall rules by default -->
@@ -98,10 +97,10 @@ if os.path.exists('/tmp/site.attrs'):
 	commands
 -->
 
-/opt/stack/bin/stack set attr managed false
+/opt/stack/bin/stack set attr attr=managed value=false
 
-/opt/stack/bin/stack set appliance attr frontend managed false
-/opt/stack/bin/stack set appliance attr backend	 managed true
+/opt/stack/bin/stack set appliance attr frontend attr=managed value=false
+/opt/stack/bin/stack set appliance attr backend	 attr=managed value=true
 
 <!-- networks -->
 
@@ -123,7 +122,7 @@ if os.path.exists('/tmp/site.attrs'):
 	set the frontend's primary network to be the public network. this
 	network will be used to generate the hostname for the frontend.
 -->
-/opt/stack/bin/stack set appliance attr frontend primary_net public
+/opt/stack/bin/stack set host interface default localhost network=public
 
 <!-- set default os to whatever the frontend is -->
 
@@ -141,9 +140,9 @@ if os.path.exists('/tmp/site.attrs'):
 	default gateway (backend nodes)
 	frontend public interface over private network
 -->
-/opt/stack/bin/stack add route 224.0.0.0 private netmask=255.255.255.0
+/opt/stack/bin/stack add route address=224.0.0.0 gateway=private netmask=255.255.255.0
 
-/opt/stack/bin/stack add route 255.255.255.255 private netmask=255.255.255.255
+/opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
 
 /opt/stack/bin/stack add route &Kickstart_PublicAddress; \
 	&Kickstart_PrivateAddress; netmask=255.255.255.255
@@ -170,12 +169,12 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- SSH settings -->
 
-/opt/stack/bin/stack set attr ssh.use_dns true
+/opt/stack/bin/stack set attr attr=ssh.use_dns value=true
 
 <!-- insert-ethers base numbers -->
 
-/opt/stack/bin/stack set attr discovery/base.rank 0
-/opt/stack/bin/stack set attr discovery/base.rack 0
+/opt/stack/bin/stack set attr attr=discovery/base.rank value=0
+/opt/stack/bin/stack set attr attr=discovery/base.rack value=0
 
 <!-- use long passwords in the database -->
 <file name="/tmp/my.cnf" expr="grep -v '^old_passwords' /etc/my.cnf"/>
@@ -183,7 +182,7 @@ if os.path.exists('/tmp/site.attrs'):
 rm /tmp/my.cnf
 
 
-/opt/stack/bin/stack set attr mcli.flags "WB,NORA,Direct,NoCachedBadBBU"
+/opt/stack/bin/stack set attr attr=mcli.flags value="WB,NORA,Direct,NoCachedBadBBU"
 </post>
 
 </kickstart>

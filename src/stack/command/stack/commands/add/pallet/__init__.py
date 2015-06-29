@@ -213,11 +213,11 @@ class Command(stack.commands.add.command):
 
                 rows = self.db.execute("""
                        	select * from rolls where
-                        name='%s' and version='%s' and release='%s' and arch='%s' and os='%s'
+                        name='%s' and version='%s' and rel='%s' and arch='%s' and os='%s'
                         """ % (name, version, release, arch, OS))
 		if not rows:
 			self.db.execute("""insert into rolls
-				(name, version, release, arch, os) values
+				(name, version, rel, arch, os) values
 				('%s', '%s', '%s', '%s', '%s')
 				""" % (name, version, release, arch, OS))
 			

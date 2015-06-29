@@ -638,7 +638,7 @@ class InsertEthers(GUI):
 				"Could not insert %s into database" % nodename
 
 		cmd = '/opt/stack/bin/stack add host interface %s interface=NULL ' % nodename +\
-			'mac=%s name=%s ip=%s network=%s' % \
+			'default=true mac=%s name=%s ip=%s network=%s' % \
 			(mac, nodename, ip, self.subnet)
 		s = os.system(cmd)
 		if s != 0:

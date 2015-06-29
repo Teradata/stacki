@@ -74,7 +74,7 @@ def test_distribution():
 
         # set dist for this host
 
-        result = Call('set host distribution', [ 'localhost', dist ])
+        result = Call('set host distribution', [ 'localhost', 'distribution=%s' % dist ])
         assert ReturnCode() == 0 and result == []
 
 	# verify dist was set
@@ -83,29 +83,20 @@ def test_distribution():
 	assert ReturnCode() == 0 and len(result) == 1
 	assert result[0]['distribution'] == dist
 
+	# restore prev setting
+
+	result = Call('set host distribution', [ 'localhost', 'distribution=%s' % prevDist ])
+	assert ReturnCode() == 0 and result == []
+
         # remove dist
 
         result = Call('remove distribution', [ dist ])
         assert ReturnCode() == 0 and result == []
 
-	# verify dist reverted back to default
-	#	remove distribution will reset all hosts to
-	#	default when their distro is removed to
-	#	prevent them from being orphaned.
-
-	result = Call('list host', [ 'localhost' ])
-	assert ReturnCode() == 0 and len(result) == 1
-	assert result[0]['distribution'] == 'default'
-
-	# restore prev setting
-
-	result = Call('set host distribution', [ 'localhost', prevDist ])
-	assert ReturnCode() == 0 and result == []
-
 	# try to remove default
 	#	remove distribution protects against this
 
-	result = Call('remove distribution', [ 'default' ])
+       	result = Call('remove distribution', [ 'default' ])
 	assert ReturnCode() == 255 and result == []
 
 		

@@ -59,6 +59,7 @@ bootstrap:
 	yum install mesa-libGLU-devel
 	yum install pygobject2-devel
 	yum install pycairo-devel
+	yum install mkisofs
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 

@@ -71,12 +71,12 @@ class Command(stack.commands.set.host.command,
 
 		# Check to make sure this is a valid distribution name
 
-		self.getDistributionNames([dist])
+		self.getDistributionNames([distribution])
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
 				update nodes set distribution=
 				(select id from distributions where name='%s')
 				where name="%s"
-				""" % (dist, host))
+				""" % (distribution, host))
 

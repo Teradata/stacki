@@ -159,6 +159,10 @@ class Command(stack.commands.RollArgumentProcessor,
                         raise CommandError(self, 'unknown distribution "%s"' % distribution)
 		
 		for (roll, version, release) in self.getRollNames(args, params):
+                        if release:
+                                rel = "rel='%s'" % release
+                        else:
+                                rel = 'rel is NULL'
 			self.db.execute("""
 				delete from stacks where
 				distribution =
@@ -166,7 +170,7 @@ class Command(stack.commands.RollArgumentProcessor,
 				and
 				roll =
 				(select id from rolls where
-				name='%s' and version='%s' and release='%s' and arch='%s')
-				""" % (distribution, roll, version, release, arch))
+				name='%s' and version='%s' and %s and arch='%s')
+				""" % (distribution, roll, version, rel, arch))
 
 		

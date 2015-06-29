@@ -107,8 +107,8 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
                 (interface, mac) = self.fillParams([
-                        (interface, None),
-                        (mac,       None)
+                        ('interface', None),
+                        ('mac',       None)
                         ])
 
 		if not interface and not mac:

@@ -110,16 +110,10 @@ class command(stack.commands.set.command):
 			('shadow', 'n'),
 			('force',  'y')
                         ])
-                 
-		if self.str2bool(shadow):
-			s = "'%s'" % value
-			v = 'NULL'
-		else:
-			s = 'NULL'
-			v = "'%s'" % value
 
-		force = self.str2bool(force)
-
+                shadow = self.str2bool(shadow)  
+		force  = self.str2bool(force)
+                
                 return (attr, value, shadow, force)
                 
         
@@ -160,6 +154,13 @@ class Command(command):
                                 raise CommandError(self, 'attr "%s" exists' % aflag)
 
 		self.command('remove.attr', [ aflag ] )
+
+		if shadow:
+			s = "'%s'" % value
+			v = 'NULL'
+		else:
+			s = 'NULL'
+			v = "'%s'" % value
 
 		self.db.execute("""
 			insert into global_attributes

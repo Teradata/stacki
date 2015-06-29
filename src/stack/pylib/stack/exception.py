@@ -6,7 +6,8 @@ import string
 
 class CommandError(Exception):
 
-        def __init__(self, msg):
+        def __init__(self, cmd, msg):
+                self.cmd = cmd
                 self.msg = msg
 
         def __str__(self):
@@ -19,8 +20,7 @@ class CommandError(Exception):
 class UsageError(CommandError):
         
         def __init__(self, cmd, msg):
-                self.cmd = cmd
-                super(UsageError, self).__init__(msg)
+                super(UsageError, self).__init__(cmd, msg)
 
         def message(self):
                 return '%s\n%s' % (self.msg, self.usage())

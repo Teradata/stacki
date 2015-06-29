@@ -96,7 +96,7 @@ class Command(stack.commands.set.host.command):
                         ])
 
 		if len(name.split('.')) > 1:
-                        raise ParamType(self, 'name', 'FQDN')
+                        raise ParamType(self, 'name', 'non-FQDN (base hostname)')
                 if not interface and not mac:
                         raise ParamRequired(self, ('interface', 'mac'))
 		if len(hosts) != 1:

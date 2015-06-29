@@ -160,23 +160,31 @@ class Command(stack.commands.RollArgumentProcessor,
 		
 			
 		for (roll, version, release) in self.getRollNames(args, params):
+                        if release:
+                                rel = "rel='%s' and" % release
+                        else:
+                                rel = ''
 			rows = self.db.execute("""
 				select d.name from
 				stacks s, rolls r, distributions d where
 				r.name='%s' and
-				r.version='%s' and
+				r.version='%s' and %s
 				r.arch='%s' and
 				d.name='%s' and
 				s.distribution=d.id and s.roll=r.id
-				""" % (roll, version, arch, distribution))
+				""" % (roll, version, rel, arch, distribution))
 			if not rows:
+	                        if release:
+                                        rel = "rel='%s'" % release
+	                        else:
+                                        rel = 'rel is NULL'
 				self.db.execute("""
-				insert into stacks(distribution, roll)
-				values (
-				(select id from distributions where name='%s'),
-				(select id from rolls where
-				name='%s' and version='%s' and arch='%s')
-				)""" % (distribution, roll, version, arch))
+					insert into stacks(distribution, roll)
+                                        values (
+                                        (select id from distributions where name='%s'),
+                                        (select id from rolls where
+                                        name='%s' and version='%s' and %s and arch='%s')
+                                        )""" % (distribution, roll, version, rel, arch))
 
 
 

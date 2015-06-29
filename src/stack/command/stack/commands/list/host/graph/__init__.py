@@ -169,7 +169,7 @@ class Command(stack.commands.list.host.command):
 
 			graphdir = os.path.join(self.basedir, 'graphs', graph)
 			if not os.path.exists(graphdir):
-                                raise CommandError('cannot read directory "%s"' % graphdir)
+                                raise CommandError(self, 'cannot read directory "%s"' % graphdir)
 
 			parser  = make_parser()
 			attrs = self.db.getHostAttrs(host)

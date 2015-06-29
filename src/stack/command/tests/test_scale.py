@@ -51,11 +51,11 @@ ENVIRONMENT = 'pytest'
 def setup_module(module):
         for rack in range(1000, 1000 + NUMRACKS):
                 for rank in range(0, RACKSIZE):
-                        host = 'compute-%d-%d' % (rack, rank)
+                        host = 'backend-%d-%d' % (rack, rank)
                         Call('add host %s' % host)
-                        Call('set host attr %s environment %s' %
+                        Call('set host attr %s attr=environment value=%s' %
                              (host, ENVIRONMENT))
-        Call('set environment attr %s key value' % ENVIRONMENT)
+        Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
 
         result = Call('list host %s' % ENVIRONMENT)
         assert ReturnCode() == 0 and len(result) == (NUMRACKS * RACKSIZE)
@@ -72,7 +72,7 @@ def test_scale():
         t1 = time.time()
         print 'list host (%.3fs)' % (t1-t0)
         t0 = time.time()
-        Call('list host profile', [ 'compute-1000-0' ])
+        Call('list host profile', [ 'backend-1000-0' ])
         t1 = time.time()
         print 'list host profile (%.3fs)' % (t1-t0)
         

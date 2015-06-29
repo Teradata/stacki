@@ -170,7 +170,7 @@ class OSArgumentProcessor:
 			elif s in [ 'xenserver' ]:
 				list.append('xenserver')
 			else:
-				raise CommandError('unknown os "%s"' % arg)
+				raise CommandError(self, 'unknown os "%s"' % arg)
 		if not list:
 			list.append('redhat')
 			list.append('sunos')
@@ -202,7 +202,7 @@ class MembershipArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandError('unknown membership "%s"' % arg)
+				raise CommandError(self, 'unknown membership "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -229,7 +229,7 @@ class ApplianceArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandError('unknown appliance "%s"' % arg)
+				raise CommandError(self, 'unknown appliance "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -261,7 +261,7 @@ class DistributionArgumentProcessor:
 					# is empty
 					continue
 				else:
-					raise CommandError('unknown distribution "%s"' % arg)
+					raise CommandError(self, 'unknown distribution "%s"' % arg)
 
 			for name, in self.db.fetchall():
 				list.append(name)
@@ -289,7 +289,7 @@ class NetworkArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandError('unknown network "%s"' % arg)
+				raise CommandError(self, 'unknown network "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -334,13 +334,13 @@ class RollArgumentProcessor:
 		if not args:
 			args = [ '%' ] # find all pallet names
 		for arg in args:
-			rows = self.db.execute("""select distinct name,version,release
+			rows = self.db.execute("""select distinct name,version,rel
 				from rolls where name like binary '%s' and 
 				version like binary '%s'""" % (arg, version))
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandError('unknown pallet name "%s"' % arg)
+				raise CommandError(self, 'unknown pallet name "%s"' % arg)
 			for (name, ver, rel) in self.db.fetchall():
 				list.append((name, ver, rel))
 				
@@ -509,7 +509,7 @@ class HostArgumentProcessor:
 						res = EvalCondExpr(exp,
 								   hostAttrs[host])
 					except SyntaxError:
-						raise CommandError('group syntax "%s"' % exp)
+						raise CommandError(self, 'group syntax "%s"' % exp)
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
@@ -1897,7 +1897,7 @@ class DatabaseConnection:
 
 					fin.close()
 				
-				raise CommandError('cannot resolve host "%s"' % hostname)
+				raise CommandError(self, 'cannot resolve host "%s"' % hostname)
 					
 		
 		if addr == '127.0.0.1': # allow localhost to be valid
@@ -1923,7 +1923,7 @@ class DatabaseConnection:
 					'nodes.id=networks.node and '
 					'networks.name="%s"' % (hostname))
 				if not rows:
-					raise CommandError('host "%s" is not in cluster'
+					raise CommandError(self, 'host "%s" is not in cluster'
 						% hostname)
 			hostname, = self.link.fetchone()
 
@@ -2628,7 +2628,7 @@ class Command:
 			self.help(name, dict)
 		else:
                         if not self.hasAccess(name):
-				raise CommandError('user "%s" does not have access "%s"' %
+				raise CommandError(self, 'user "%s" does not have access "%s"' %
                                       (username, name))
 			else:
 				self._argv   = argv # raw arg list

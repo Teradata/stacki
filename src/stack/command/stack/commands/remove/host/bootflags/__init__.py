@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,25 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:58  bruno
-# star power for gb
-#
-# Revision 1.4  2009/05/01 19:07:00  mjk
-# chimi con queso
-#
-# Revision 1.3  2008/10/18 00:55:56  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:38  mjk
-# copyright storm on
-#
-# Revision 1.1  2008/01/23 19:05:34  bruno
-# can now add kernel boot parameters to the running configuration with the rocks
-# command line
-#
-#
 
 import sys
 import string
@@ -84,8 +66,8 @@ class Command(stack.commands.remove.host.command):
 	listed, then the global definition is removed.
 	</arg>
 
-	<example cmd='remove host bootflags compute-0-0'>
-	Remove the kernel boot flags definition for compute-0-0.
+	<example cmd='remove host bootflags backend-0-0'>
+	Remove the kernel boot flags definition for backend-0-0.
 	</example>
 	"""
 
@@ -94,9 +76,9 @@ class Command(stack.commands.remove.host.command):
 		# flags. Otherwise remove the flags for each supplied host.
 		
 		if len(args) == 0:
-			self.command('remove.attr', [ 'bootflags' ])
+			self.command('remove.attr', [ 'attr=bootflags' ])
 		else:
 			for host in self.getHostnames(args):
 				self.command('remove.host.attr', [ host,
-					'bootflags' ])
+					'attr=bootflags' ])
 

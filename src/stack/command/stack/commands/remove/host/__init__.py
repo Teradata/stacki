@@ -68,8 +68,8 @@ class Command(command):
 	List of hosts to remove from the database.
 	</arg>
 
-	<example cmd='remove host compute-0-0'>
-	Remove the compute-0-0 from the database.
+	<example cmd='remove host backend-0-0'>
+	Remove the backend-0-0 from the database.
 	</example>
 	"""
 

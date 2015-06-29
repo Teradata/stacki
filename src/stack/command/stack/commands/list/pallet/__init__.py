@@ -148,9 +148,9 @@ class Command(stack.commands.RollArgumentProcessor,
 				for dist, in self.db.fetchall():
 					distributions.append(dist)
 
-				self.addOutput(roll, (version, arch, OS,
+				self.addOutput(roll, (version, release, arch, OS,
 					string.join(distributions,' ')))
 
-		self.endOutput(header=['name', 'version', 'arch', 'os',
+		self.endOutput(header=['name', 'version', 'release', 'arch', 'os',
 				       'distributions'], trimOwner=False)
 		

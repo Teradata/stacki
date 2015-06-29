@@ -45,14 +45,14 @@ import stack
 from stack.bool import *
 from stack.api import *
 
-HOST	    = 'compute-1000-0'
+HOST	    = 'backend-1000-0'
 ENVIRONMENT = 'pytest'
 
 
 def setup_module(module):
         Call('add host %s' % HOST)
-        Call('set host attr %s environment %s' % (HOST, ENVIRONMENT))
-        Call('set environment attr %s key value' % ENVIRONMENT)
+        Call('set host attr %s attr=environment value=%s' % (HOST, ENVIRONMENT))
+        Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
 
 def teardown_module(module):
         Call('remove host %s' % ENVIRONMENT)
@@ -72,7 +72,7 @@ def test_attr(table=None, owner=None):
 	if not owner:
 		owner = ''
 
-	result = Call('remove %s attr' % table, ('%s a.b.c.d' % owner).split())
+	result = Call('remove %s attr' % table, ('%s attr=a.b.c.d' % owner).split())
 	assert ReturnCode() == 0 and result == [ ]
 
 	for (key, (scope, attr)) in [ ('a.b.c.d', ('a.b.c', 'd')),
@@ -83,7 +83,7 @@ def test_attr(table=None, owner=None):
 		value = str(random.randint(0, 100))
 
 		result = Call('set %s attr' % table,
-			      ('%s %s %s' % (owner, key, value)).split())
+			      ('%s attr=%s value=%s' % (owner, key, value)).split())
 		assert ReturnCode() == 0 and result == [ ]
 
 		if key != 'a.b.c.d':
@@ -105,7 +105,7 @@ def test_attr(table=None, owner=None):
 
 
 		result = Call('remove %s attr' % table,
-		      ('%s a.b.c.d' % owner).split())
+		      ('%s attr=a.b.c.d' % owner).split())
 	assert ReturnCode() == 0 and result == [ ]
 
 	
@@ -116,7 +116,7 @@ def test_environment_attr():
         test_attr('environment', ENVIRONMENT)
         
 def test_appliance_attr():
-	test_attr('appliance', 'compute')
+	test_attr('appliance', 'backend')
 	test_attr('appliance', 'frontend')
 
 def test_host_attr():

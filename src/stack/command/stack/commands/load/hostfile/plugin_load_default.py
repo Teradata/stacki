@@ -42,6 +42,7 @@
 # @Copyright@
 
 import stack.commands
+from stack.bool import *
 
 class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
@@ -116,6 +117,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				channel = None
 				options = None
 				vlan = None
+                                default = None
 
 				if 'ip' in interfaces[host][interface].keys():
 					ip = interfaces[host][interface]['ip']
@@ -131,11 +133,15 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					options = interfaces[host][interface]['options']
 				if 'vlan' in interfaces[host][interface].keys():
 					vlan = interfaces[host][interface]['vlan']
+				if 'default' in interfaces[host][interface].keys():
+					default = str2bool(interfaces[host][interface]['default'])
+                                else:
+                                        default = False
 
 				#
 				# now add the interface
 				#
-				cmdparams = [ host, 'interface=%s' % interface ]
+				cmdparams = [ host, 'interface=%s default=%s' % (interface, default) ]
 				if mac:
 					cmdparams.append('mac=%s' % mac)
 				if ip:
@@ -146,7 +152,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					cmdparams.append('name=%s' % ifhostname)
 				if vlan:
 					cmdparams.append('vlan=%d' % vlan)
-				if subnet == 'private':
+                                if default:
 					cmdparams.append('name=%s' % host)
 				if 'bond' == interface[:4]:
 					cmdparams.append('module=bonding')

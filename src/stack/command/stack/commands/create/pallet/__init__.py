@@ -748,7 +748,7 @@ class Command(stack.commands.create.command):
 			('version', version)
                         ])
 
-                if len(arg) == 0:
+                if len(args) == 0:
                         raise ArgRequired(self, 'pallet')
                 
 		# Set pallet Builder to correct OS
@@ -770,5 +770,3 @@ class Command(stack.commands.create.command):
 			
 		builder.run()
 
-
-RollName = "stacki"

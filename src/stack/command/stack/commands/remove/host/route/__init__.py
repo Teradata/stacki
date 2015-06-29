@@ -66,8 +66,8 @@ class Command(stack.commands.remove.host.command):
 	The address of the static route to remove. This argument is required.
 	</param>
 
-	<example cmd='remove host route compute-0-0 address=1.2.3.4'>
-	Remove the static route for the host 'compute-0-0' that has the
+	<example cmd='remove host route backend-0-0 address=1.2.3.4'>
+	Remove the static route for the host 'backend-0-0' that has the
 	network address '1.2.3.4'.
 	</example>
 	"""

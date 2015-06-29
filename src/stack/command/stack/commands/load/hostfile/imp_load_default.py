@@ -139,6 +139,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			options = None
 			vlan = None
 			boss = None
+                        default = None
 			notes = None
 
 			for i in range(0, len(row)):
@@ -187,6 +188,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						sys.exit((-1, msg, ''))
 				elif header[i] == 'boss':
 					boss = field
+                                elif header[i] == 'default':
+                                        boss = field
 				elif header[i] == 'notes':
 					notes = field
 						
@@ -233,6 +236,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 			self.owner.interfaces[name][interface] = {}
 
+                        if default:
+				self.owner.interfaces[name][interface]['default'] = default
 			if ip:
 				self.owner.interfaces[name][interface]['ip'] = ip
 			if mac:

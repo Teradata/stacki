@@ -145,6 +145,13 @@ class Command(stack.commands.set.attr.command, stack.commands.set.appliance.comm
                                                            (aflag, string.join(list)))
 
 
+		if shadow:
+			s = "'%s'" % value
+			v = 'NULL'
+		else:
+			s = 'NULL'
+			v = "'%s'" % value
+
 		for appliance in appliances:
 			self.command('remove.appliance.attr',
 				     [appliance, aflag])

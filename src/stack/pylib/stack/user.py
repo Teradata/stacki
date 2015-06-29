@@ -39,8 +39,8 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-from stack.commands import Abort
 from stack.api import Call
+from stack.exception import *
 
 import pwd
 import spwd
@@ -61,7 +61,7 @@ class UserArgumentProcessor():
 		if authType == 'unix':
 			return self.getUsers_unix(args)
 		else:
-			Abort('authentication attr unset')
+			CommandError(self, 'authentication attr unset')
 
 
 	def getUsers_unix(self, args):
@@ -96,13 +96,13 @@ class UserArgumentProcessor():
 					try:
 						user = pwd.getpwuid(uid)
 					except KeyError:
-						Abort('cannot find user %d'
+						CommnandError(self, 'cannot find user %d'
 						      % uid)
 				else:
 					try:
 						user = pwd.getpwnam(arg)
 					except KeyError:
-						Abort('cannot find user "%s"'
+						CommandErrror(self, 'cannot find user "%s"'
 						      % arg)
 				users[user.pw_name] = user
 

@@ -60,7 +60,7 @@ def test_call():
 
 	found = False
 	for dict in Call('list appliance'):
-		if dict['appliance'] == 'compute':
+		if dict['appliance'] == 'backend':
 			found = True
 			assert str2bool(dict['public'])
 	assert found

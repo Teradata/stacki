@@ -96,7 +96,7 @@ import time
 import sys
 import string
 import stack.attr
-import stack.commands
+import stack.commands.set.attr
 from stack.exception import *
 
 class Command(stack.commands.set.attr.command, stack.commands.set.host.command):
@@ -146,6 +146,13 @@ class Command(stack.commands.set.attr.command, stack.commands.set.host.command):
 			if list:
                                 raise CommandError(self, 'attr "%s" exists for %s' %
                                                            (aflag, string.join(list)))
+
+		if shadow:
+			s = "'%s'" % value
+			v = 'NULL'
+		else:
+			s = 'NULL'
+			v = "'%s'" % value
 
 
 		for host in hosts:

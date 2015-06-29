@@ -16,12 +16,7 @@
 <!-- turn on dhcpd service -->
 /sbin/chkconfig dhcpd on
 
-/opt/stack/bin/stack report host dhcpd &Kickstart_PrivateHostname; | \
-	/opt/stack/bin/stack report script > /tmp/do-dhcpd.sh
-
-chmod a+x /tmp/do-dhcpd.sh
-/tmp/do-dhcpd.sh
-
+/opt/stack/bin/stack report dhcpd | /opt/stack/bin/stack report script | sh
 
 <!-- disable dnsmasq -->
 /sbin/chkconfig --del dnsmasq
