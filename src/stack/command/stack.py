@@ -372,6 +372,7 @@ def run_command(args):
 
 	name = string.join(string.split(s, '.')[2:], ' ')
 
+        import stack.exception
 
 	# If we can load the command object then fall through and invoke the run()
 	# method.  Otherwise the user did not give a complete command line and
@@ -382,11 +383,14 @@ def run_command(args):
 		help = stack.commands.list.help.Command(Database)
 		fullmodpath = s.split('.')
 		submodpath  = string.join(fullmodpath[2:], '/')
-		help.run({'subdir': submodpath}, [])
+                try:
+                        help.run({'subdir': submodpath}, [])
+                except stack.exception.CommandError, e:
+                        sys.stderr.write('%s\n' % e)
+                        return -1
 		print help.getText()
 		return -1
 
-        import stack.exception
         
 	# Check to see if STACKDEBUG variable is set.
 	# This determines if the stack trace should be
@@ -466,7 +470,7 @@ if len(sys.argv) == 1:
 	# opening the stack shell is a bad idea. Instead
 	# just run help, and quit
 	if not sys.stdout.isatty():
-		rc = run_command(['help'])
+                rc = run_command(['help'])
 		sys.exit(rc)
 	else:
 		os.environ['TERM'] = 'vt100'
