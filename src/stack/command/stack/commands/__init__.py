@@ -365,7 +365,7 @@ class HostArgumentProcessor:
 		rackN - All non-frontend host in rack N
 		appliancename - All appliances of a given type (e.g. compute)
 		[ cond ] - Ad-Hoc attribute/cond groups
-			(e.g. [ appliance="compute" ])
+			(e.g. [ appliance=="compute" ])
 
 		The 'managed_only' flag means that the list of hosts will
 		*not* contain hosts that traditionally don't have ssh login
