@@ -84,6 +84,7 @@ import stack.gen
 import stack.commands
 import xml.dom.ext
 import xml.dom.ext.reader.Sax2
+from stack.commands import UsageException, CommandException
 
 class ProfileNodeFilter(stack.gen.NodeFilter):
 	def acceptNode(self, node):
@@ -124,7 +125,7 @@ class Command(stack.commands.Command):
 		section, = self.fillParams( [('section', None)] )
 
 		if not section:
-			stack.commands.Abort("Must supply section")
+			raise UsageException("Must supply section",self)
 
 		self.xml_doc = xml.dom.ext.reader.Sax2.FromXmlStream(sys.stdin)
 		self.xml_filter = ProfileNodeFilter({})
@@ -149,4 +150,3 @@ class Command(stack.commands.Command):
 		self.beginOutput()
 		self.addOutput(None, text)
 		self.endOutput(padChar='')
-

@@ -125,9 +125,10 @@ def Log(message, level=syslog.LOG_INFO):
 	syslog.syslog(level, '%s%s' % (_logPrefix, message))
 
 def Debug(message, level=syslog.LOG_DEBUG):
-	"""If the environment variable STACKDEBUG is set, send a message to
-	syslog and stderr."""
-	if os.environ.has_key('STACKDEBUG'):
+	"""If the environment variable STACKDEBUG is set,
+	send a message to syslog and stderr."""
+	if os.environ.has_key('STACKDEBUG') and \
+		str2bool(os.environ['STACKDEBUG']):
 		m = ''
 		p = ''
 		for c in message.strip():
@@ -142,11 +143,21 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		Log(message, level)
 		sys.__stderr__.write('%s\n' % m)
 		
-		
-def Abort(message):
-	"""Print a standard error message and abort the program"""
-	sys.exit((-1, message, None))
 
+class CommandException(Exception):
+	def __init__(self, msg):
+		self.msg = msg
+
+	def __str__(self):
+		return self.msg
+
+class UsageException(Exception):
+	def __init__(self, msg, cmdObj):
+		self.msg = msg
+		self.usage = cmdObj.usage()
+
+	def __str__(self):
+		return "%s\n%s" % (self.msg, self.usage)
 
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
@@ -172,7 +183,7 @@ class OSArgumentProcessor:
 			elif s in [ 'xenserver' ]:
 				list.append('xenserver')
 			else:
-				Abort('unknown os "%s"' % arg)
+				raise CommandException('unknown os "%s"' % arg)
 		if not list:
 			list.append('redhat')
 			list.append('sunos')
@@ -191,8 +202,8 @@ class MembershipArgumentProcessor:
 		"""Returns a list of membership names from the database.
 		For each arg in the ARGS list find all the membership
 		names that match the arg (assume SQL regexp).  If an
-		arg does not match anything in the database we Abort.  If the
-		ARGS list is empty return all membership names.
+		arg does not match anything in the database we raise an
+		exception.If the ARGS list is empty return all membership names.
 		"""
 		list = []
 		if not args:
@@ -204,7 +215,7 @@ class MembershipArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				Abort('unknown membership "%s"' % arg)
+				raise CommandException('unknown membership "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -219,8 +230,8 @@ class ApplianceArgumentProcessor:
 		"""Returns a list of appliance names from the database.
 		For each arg in the ARGS list find all the appliance
 		names that match the arg (assume SQL regexp).  If an
-		arg does not match anything in the database we Abort.  If the
-		ARGS list is empty return all appliance names.
+		arg does not match anything in the database we raise
+		an exception. If the ARGS list is empty return all appliance names.
 		"""	
 		list = []
 		if not args:
@@ -231,7 +242,7 @@ class ApplianceArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				Abort('unknown appliance "%s"' % arg)
+				raise CommandException('unknown appliance "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -245,9 +256,9 @@ class DistributionArgumentProcessor:
 		"""Returns a list of distribution names from the database.
 		For each arg in the ARGS list find all the distribution
 		names that match the arg (assume SQL regexp).  If an
-		arg does not match anything in the database we Abort.  If the
-		ARGS list is empty return all distribution names.
-		"""	
+		arg does not match anything in the database we raise an
+		exception.  If the ARGS list is empty return all distribution names.
+		"""
 		list = []
 		if not args:
 			args = [ '%' ] # find all distributions
@@ -263,7 +274,7 @@ class DistributionArgumentProcessor:
 					# is empty
 					continue
 				else:
-					Abort('unknown distribution "%s"' % arg)
+					raise CommandException('unknown distribution "%s"' % arg)
 
 			for name, in self.db.fetchall():
 				list.append(name)
@@ -279,8 +290,8 @@ class NetworkArgumentProcessor:
 		"""Returns a list of network (subnet) names from the database.
 		For each arg in the ARGS list find all the network
 		names that match the arg (assume SQL regexp).  If an
-		arg does not match anything in the database we Abort.  If the
-		ARGS list is empty return all network names.
+		arg does not match anything in the database we raise
+		an exception.  If the ARGS list is empty return all network names.
 		"""
 		list = []
 		if not args:
@@ -291,7 +302,7 @@ class NetworkArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				Abort('unknown network "%s"' % arg)
+				raise CommandException('unknown network "%s"' % arg)
 			for name, in self.db.fetchall():
 				list.append(name)
 		return list
@@ -342,7 +353,7 @@ class RollArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				Abort('unknown pallet name "%s"' % arg)
+				raise CommandException('unknown pallet name "%s"' % arg)
 			for (name, ver) in self.db.fetchall():
 				list.append((name, ver))
 				
@@ -510,7 +521,7 @@ class HostArgumentProcessor:
 						res = EvalCondExpr(exp,
 								   hostAttrs[host])
 					except SyntaxError:
-						Abort('group syntax "%s"' % exp)
+						raise CommandException('group syntax "%s"' % exp)
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
@@ -1850,7 +1861,7 @@ class DatabaseConnection:
 
 					fin.close()
 				
-				Abort('cannot resolve host "%s"' % hostname)
+				raise CommandException('cannot resolve host "%s"' % hostname)
 					
 		
 		if addr == '127.0.0.1': # allow localhost to be valid
@@ -1876,7 +1887,7 @@ class DatabaseConnection:
 					'nodes.id=networks.node and '
 					'networks.name="%s"' % (hostname))
 				if not rows:
-					Abort('host "%s" is not in cluster'
+					raise CommandException('host "%s" is not in cluster'
 						% hostname)
 			hostname, = self.link.fetchone()
 
@@ -1927,11 +1938,10 @@ class Command:
 		self.level = 0
 		
 	def abort(self, msg):
-		# -1   : exit code (exit to os)
 		# msg  : error string (stderr, and syslog)
 		# usage: command users (stderr)
-		sys.exit((-1, msg, self.usage()))
-	
+		raise UsageException(msg, self)
+
 	def fillPositionalArgs(self, names, params=None, args=None):
 		# The helper function will allow named parameters
 		# to be used in lieu of positional arguments
@@ -2645,7 +2655,7 @@ class Command:
 			self.help(name, dict)
 		else:
                         if not self.hasAccess(name):
-				Abort('user "%s" does not have access "%s"' %
+				raise CommandException('user "%s" does not have access "%s"' %
                                       (username, name))
 			else:
 				self._argv   = argv # raw arg list
