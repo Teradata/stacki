@@ -101,15 +101,16 @@ import sys
 import string
 import syslog
 import stack	# need this so we can load the stack.commands.* modules
+from stack.bool import str2bool
 import types
 import time
 import shlex
 from distutils.sysconfig import get_python_lib
+import traceback
 
 # Open syslog
     
-syslog.openlog('RCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
-
+syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
 # Several Commands are run in the installation environment before the
@@ -164,8 +165,10 @@ try:
 
 except ImportError:
 	Database = None
+	syslog.syslog(syslog.LOG_WARN,"ImportError - Python Database Error")
 except OperationalError:
 	Database = None
+	syslog.syslog(syslog.LOG_WARN,"OperationalError - Python Database Error")
 
 
 class command_struct:
@@ -359,7 +362,7 @@ def run_command(args):
 				continue
 
 	if not module:
-		print 'error - invalid stack command "%s"' % args[0]
+		sys.stderr.write('Error - Invalid stack command "%s"\n' % args[0])
 		return -1
 
 	name = string.join(string.split(s, '.')[2:], ' ')
@@ -369,9 +372,7 @@ def run_command(args):
 	# method.  Otherwise the user did not give a complete command line and
 	# we call the help command based on the partial command given.
 
-	try:
-		command   = getattr(module, 'Command')(Database)
-	except AttributeError:
+	if not hasattr(module,'Command'):
 		import stack.commands.list.help
 		help = stack.commands.list.help.Command(Database)
 		fullmodpath = s.split('.')
@@ -380,25 +381,31 @@ def run_command(args):
 		print help.getText()
 		return -1
 
-	# Try to use SUDO
-
-#	if command.MustBeRoot and not (command.isRootUser() or command.isApacheUser()):
-#		rc = os.system('sudo %s' % string.join(sys.argv,' '))
-#		syslog.closelog()
-#		return rc
-
-	# Run as current user
+	# Check to see if STACKDEBUG variable is set.
+	# This determines if the stack trace should be
+	# dumped when an exception occurs.
+	STACKDEBUG = None
+	if os.environ.has_key('STACKDEBUG'):
+		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
 
 	try:
+		command   = getattr(module, 'Command')(Database)
 		t0 = time.time()
 		rc = command.runWrapper(name, args[i:])
 		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
-	except SystemExit, (rc, msg, usage):
-		print 'error - %s' % msg
-		syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)
-		if usage:
-			print usage
-		return rc
+	except:
+		# Sanitize Exceptions, and log them.
+		exc, msg, tb = sys.exc_info()
+		for line in traceback.format_tb(tb):
+			syslog.syslog(syslog.LOG_ERR, '%s' % line)
+			# If STACKDEBUG is set, the dump the
+			# traceback to the output
+			if STACKDEBUG:
+				sys.stderr.write(line)
+		error_line = '%s : %s\n' % (exc.__name__, msg)
+		sys.stderr.write(error_line)
+		syslog.syslog(syslog.LOG_ERR, error_line)
+		return -1
 
 	text = command.getText()
 	if len(text) > 0:
