@@ -165,10 +165,14 @@ try:
 
 except ImportError:
 	Database = None
-	syslog.syslog(syslog.LOG_WARN,"ImportError - Python Database Error")
+	s = "ImportError: Python Database Error\n"
+	sys.stderr.write(s)
+	syslog.syslog(syslog.LOG_WARNING,s)
 except OperationalError:
 	Database = None
-	syslog.syslog(syslog.LOG_WARN,"OperationalError - Python Database Error")
+	s = "OperationalError: Could not connect to database\n"
+	sys.stderr.write(s)
+	syslog.syslog(syslog.LOG_WARNING,s)
 
 
 class command_struct:
@@ -402,7 +406,7 @@ def run_command(args):
 			# traceback to the output
 			if STACKDEBUG:
 				sys.stderr.write(line)
-		error_line = '%s : %s\n' % (exc.__name__, msg)
+		error_line = '%s: %s\n%s\n' % (module.__name__, exc.__name__, msg)
 		sys.stderr.write(error_line)
 		syslog.syslog(syslog.LOG_ERR, error_line)
 		return -1
