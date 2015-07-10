@@ -58,6 +58,25 @@ rm /tmp/mdmonitor
 /sbin/chkconfig NetworkManager off
 </post>
 
+<!-- Rsyslog Configuration file -->
+<post>
+<file name="/etc/rsyslog.d/stacki.conf">
+/*
+	Turn off escape character parsing.
+	This keeps tabs and newlines intact.
+ */
+$EscapeControlCharactersOnReceive off
+
+# Send local0 facility to /var/log/local0
+local0.*    /var/log/local0
+
+/*
+   If we're calling this from StackI
+   command line, stop processing now
+*/
+if $programname == 'SCL' then ~
+</file>
+</post>
 
 <boot order="post">
 rm -f /tmp/ks-script*
