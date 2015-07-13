@@ -151,15 +151,15 @@ class Command(stack.commands.list.appliance.command):
 
 		self.beginOutput()
 		for app in self.getApplianceNames(args):
-			self.db.execute("""select node from appliances
+			self.db.execute("""select name from appliances
 				where name='%s'""" % app)
 			try:
-				(node, ) = self.db.fetchone()
+				(name, ) = self.db.fetchone()
 			except TypeError:
 				self.abort('no such appliance "%s"' %
 					app)
-			if node:
-				xml = self.command('list.node.xml', [node])
+			if name:
+				xml = self.command('list.node.xml', [name])
 				for line in xml.split('\n'):
 					self.addOutput(app, line)
 		self.endOutput(padChar='')
