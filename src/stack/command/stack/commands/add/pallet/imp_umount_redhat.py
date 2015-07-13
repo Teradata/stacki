@@ -98,4 +98,4 @@ class Implementation(stack.commands.Implementation):
 	"""Unmount the ISO image on linux"""
 	
 	def run(self, args):
-		os.system('umount %s' % self.owner.mountPoint)
+		os.system('umount %s > /dev/null' % self.owner.mountPoint)

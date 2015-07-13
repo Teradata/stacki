@@ -122,19 +122,13 @@ class Command(command):
 			#
 			# get the rolls associated with this distribution
 			#
-			self.db.execute("""select r.name from
+			self.db.execute("""select r.name,r.version from
 				rolls r, stacks s where
 				s.distribution = %s and s.roll = r.id""" % id)
-
-			rolls = []
-			for roll, in self.db.fetchall():
-				rolls.append(roll)
-
-			if rolls:
-				rolls.sort()
-
-			self.addOutput(dist, (os, graph, ' '.join(rolls)))
 			
-		self.endOutput(header=['name', 'os', 'graph', 'pallets'],
+			for roll,version in self.db.fetchall():
+				self.addOutput(dist, (os, graph, roll, version ))
+
+		self.endOutput(header=['name', 'os', 'graph', 'pallets', 'version'],
 			trimOwner=False)
 
