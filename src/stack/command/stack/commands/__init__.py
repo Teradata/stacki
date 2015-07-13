@@ -463,11 +463,13 @@ class HostArgumentProcessor:
 				appliances.append(name)
 				memberships.append(membership)
 
-                        for (minRack, maxRack) in self.db.select("""
-				min(rack), max(rack) from nodes
+			racks = []
+			for (rack,rank) in self.db.select("""
+				rack,rank from nodes	
 				"""):
-                                
-                                pass
+				racks.append(rack)
+			# You know, just get the racks we have
+			racks = set(racks)
                         
 			list = []
 			for host in names:
@@ -481,12 +483,13 @@ class HostArgumentProcessor:
 					host = '[membership=="%s"]' % host
 					adhoc = True
 				elif host.find('rack') == 0:
-					for i in range(minRack, maxRack+1):
+					for i in racks:
 						if host.find('rack%d' % i) == 0:
 							host = '[rack==%d]' % i
 							adhoc = True
 				elif host[0] == '[':
 					adhoc = True
+
 				list.append(host)
 				
 			names = list	# names is now the new ad-hoc syntax
