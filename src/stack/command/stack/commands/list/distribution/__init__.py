@@ -135,6 +135,6 @@ class Command(command):
 
 			self.addOutput(dist, (os, graph, ' '.join(rolls)))
 			
-		self.endOutput(header=['name', 'os', 'graph', 'rolls'],
+		self.endOutput(header=['name', 'os', 'graph', 'pallets'],
 			trimOwner=False)
 
