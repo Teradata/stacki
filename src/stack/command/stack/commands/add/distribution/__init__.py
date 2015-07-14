@@ -91,6 +91,7 @@
 # @Copyright@
 
 import os
+import stack
 import stack.commands
 
 class Command(stack.commands.DistributionArgumentProcessor,
@@ -131,7 +132,7 @@ class Command(stack.commands.DistributionArgumentProcessor,
 			('%s', '%s', '%s')""" % (dist, OS, graph))
 
 		# Create site-profile and contrib directory
-		v = self.db.getHostAttr('localhost', 'distribution.default.version')
+		v = stack.version
 		contrib_dir = os.path.join(os.sep, 'export', 'stack', 'contrib', dist, v, 'x86_64', 'RPMS')
 		site_nodes_dir  = os.path.join(os.sep, 'export', 'stack', 'site-profiles', dist, v, 'nodes')
 		site_graphs_dir = os.path.join(os.sep, 'export', 'stack', 'site-profiles', dist, v, 'graphs', 'default')
