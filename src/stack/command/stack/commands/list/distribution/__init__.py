@@ -125,9 +125,10 @@ class Command(command):
 			self.db.execute("""select r.name,r.version from
 				rolls r, stacks s where
 				s.distribution = %s and s.roll = r.id""" % id)
-			
+			rolls = {}
 			for roll,version in self.db.fetchall():
-				self.addOutput(dist, (os, graph, roll, version ))
+				rolls[roll] = version
+			self.addOutput(dist, (os, graph, ' '.join(rolls.keys()), ' '.join(rolls.values())))
 
 		self.endOutput(header=['name', 'os', 'graph', 'pallets', 'version'],
 			trimOwner=False)
