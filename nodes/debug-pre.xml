@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+  <description>
+
+  Stupid debugging tricks.  To use you need to add an edge in your XML
+  graph file to this node.  By setting the weight of the edge you can
+  control where it the final output this code gets placed.
+
+  This trick is specific to the kickstart pre section
+
+  </description>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+        
+        </copyright>
+
+
+<pre>
+echo "yo" &gt; /tmp/yo
+while [ -f /tmp/yo ]; do
+	sleep 5
+done
+</pre>
+
+</kickstart> 
+
+
+
+
+
+
+
+
