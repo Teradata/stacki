@@ -1,0 +1,113 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+	<description>
+	 Stacki Frontend can serve Pallets to other Frontends
+	</description>
+
+        </si_copyright>
+        <si_copyright>
+
+        <copyright>
+        Copyright (c) 2000 - 2010 The Regents of the University of California.
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+        </copyright>
+
+
+<post>
+
+<file name="/etc/httpd/conf.d/central.conf">
+<![CDATA[
+<Directory /var/www/html/install>
+	Options FollowSymLinks Indexes ExecCGI
+	AllowOverride None
+	Allow from all
+</Directory>
+
+# HTTPS access for serving kickstart files
+
+<Directory /var/www/html/install/sbin>
+	AllowOverride None
+	SSLRequireSSL
+	SSLVerifyClient None
+	Allow from all
+</Directory>
+
+# allow all access to the pallets RPMS
+<Directory /var/www/html/install/pallets>
+	DirectoryIndex /install/pallets/index.cgi
+	Allow from all
+</Directory>
+
+SSLCACertificateFile /etc/httpd/conf/ssl.ca/ca-bundle
+]]>
+</file>
+
+mkdir -p /export/stack/pallets
+
+<file name="/export/stack/pallets/index.cgi" perms="755"><![CDATA[#!/opt/stack/bin/python
+
+import os
+
+try:
+	dir = os.environ['DOCUMENT_ROOT'] + os.environ['REQUEST_URI']
+except:
+	dir = '.'
+	pass
+
+out = ''
+
+out += '<html>'
+out += '<body>'
+out += '<table>'
+
+listing = os.listdir(dir)
+listing.sort(key=str.lower)
+for file in listing:
+	if file not in [ 'index.cgi' ]:
+		out += '<tr><td>\n'
+
+		if os.path.isdir(os.path.join(dir, file)):
+			out += '<a href="%s/">%s/</a>\n' % (file, file)
+		else:
+			out += '<a href="%s">%s</a>\n' % (file, file)
+
+		out += '</td></tr>'
+		out += '\n'
+
+out += '</table>'
+out += '</body>'
+out += '</html>'
+
+print 'Content-type: text/html'
+print 'Content-length: %d' % (len(out))
+print ''
+print out
+]]>
+</file>
+
+mkdir -p /etc/httpd/conf/ssl.ca
+
+cp /etc/security/ca/ca.crt /etc/httpd/conf/ssl.ca/
+
+<file name="/etc/httpd/conf/ssl.ca/Makefile">
+# Makefile to build the ca-bundle for HTTPS authentication.
+
+CERTS = $(wildcard *.crt)
+
+ca-bundle: $(CERTS)
+	cat $(CERTS) &gt; $@
+
+clean:
+	rm ca-bundle
+</file>
+
+make -C /etc/httpd/conf/ssl.ca
+
+touch /var/www/html/robots.txt
+
+</post>
+
+</kickstart> 
+
