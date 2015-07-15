@@ -1,3 +1,3 @@
-VERSION = 3.10.2
-TARBALL	= pygobject-$(VERSION).tar.xz
-UNPACK	= xzcat
+SRCVERSION	= 3.10.2
+SRCFILE		= pygobject-$(SRCVERSION).tar.xz
+UNPACK		= xzcat

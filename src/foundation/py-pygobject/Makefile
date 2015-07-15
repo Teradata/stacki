@@ -91,20 +91,21 @@
 # @Copyright@
 
 
+-include $(RELEASE).mk
+
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-DEPENDS.FILES	= $(TARBALL)
+DEPENDS.FILES	= $(SRCFILE)
 
 include $(STACKBUILD)/etc/CCRules.mk
--include $(RELEASE).mk
 
 
 bootstrap: install-rpm
 
 build:
-	$(UNPACK) $(TARBALL) | $(TAR) -xf -
+	$(UNPACK) $(SRCFILE) | $(TAR) -xf -
 	(								\
-		cd pygobject-$(VERSION);				\
+		cd pygobject-$(SRCVERSION);				\
 		PATH=/opt/stack/bin:$$PATH				\
 			./configure --prefix=$(PKGROOT);		\
 		$(MAKE);						\
@@ -112,10 +113,10 @@ build:
 
 install::
 	(								\
-		cd pygobject-$(VERSION);				\
+		cd pygobject-$(SRCVERSION);				\
 		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
 	)
 
 
 clean::
-	rm -rf pygobject-$(VERSION)
+	rm -rf pygobject-$(SRCVERSION)
