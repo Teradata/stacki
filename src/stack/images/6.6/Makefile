@@ -40,7 +40,7 @@
 # @SI_Copyright@
 
 dump-info bootstrap rpm pkg clean nuke build install:
-	for x in anaconda initrd.img install.img vmlinuz isolinux; do	\
+	for x in anaconda initrd.img install.img vmlinuz ../isolinux; do	\
 		if [ -d $$x ]; then				\
 			(cd $$x; $(MAKE) $@);	 		\
 		fi;				 		\

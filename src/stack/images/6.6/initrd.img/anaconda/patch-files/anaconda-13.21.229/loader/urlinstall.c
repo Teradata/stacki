@@ -319,8 +319,8 @@ start_httpd()
 	/*
 	 * the first two NULLs are place holders for the 'nextServer' info
 	 */
-	char	*args[] = { "/lighttpd/sbin/lighttpd", 
-				"-f", "/lighttpd/conf/lighttpd.conf",
+	char	*args[] = { "/opt/lighttpd/sbin/lighttpd", 
+				"-f", "/opt/lighttpd/conf/lighttpd.conf",
 				"-D", NULL };
 	int	pid;
 	int	i;
