@@ -16,7 +16,14 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <post>
 
 <!-- set the node to boot from local disk on the next reboot -->
-/bin/curl --insecure -o /dev/null \
+
+CURL=/usr/bin/curl
+if [ -f /bin/curl ]
+then
+	CURL=/bin/curl
+fi
+
+$CURL --insecure -o /dev/null \
 	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi
 
 </post>

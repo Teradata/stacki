@@ -1,4 +1,3 @@
-ANACONDA_VERSION	= 7.1503
 MAKE.rpmflag		= -bb --define "__spec_install_post :"
 OS.DEPENDENCIES	= NetworkManager-devel	\
 		NetworkManager-glib-devel \

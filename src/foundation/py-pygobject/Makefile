@@ -90,18 +90,21 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-DEPENDS.FILES	= pygobject-$(VERSION).tar.xz
+DEPENDS.FILES	= $(TARBALL)
 
 include $(STACKBUILD)/etc/CCRules.mk
+-include $(RELEASE).mk
+
 
 bootstrap: install-rpm
 
 build:
-	xzcat pygobject-$(VERSION).tar.xz | $(TAR) -xf - 
+	$(UNPACK) $(TARBALL) | $(TAR) -xf -
 	(								\
-		cd pygobject-$(VERSION);			\
+		cd pygobject-$(VERSION);				\
 		PATH=/opt/stack/bin:$$PATH				\
 			./configure --prefix=$(PKGROOT);		\
 		$(MAKE);						\
@@ -109,7 +112,7 @@ build:
 
 install::
 	(								\
-		cd pygobject-$(VERSION);			\
+		cd pygobject-$(VERSION);				\
 		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
 	)
 

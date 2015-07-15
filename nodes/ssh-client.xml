@@ -29,7 +29,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400">
 <eval>
-/opt/stack/sbin/read-ssh-private-key ECDSA
+/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
 </eval>
 </file>
 
@@ -42,13 +42,13 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <file name="/etc/ssh/ssh_host_rsa_key" perms="0400">
 <eval>
-/opt/stack/sbin/read-ssh-private-key RSA
+/opt/stack/sbin/read-ssh-private-key RSA 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_rsa_key.pub" perms="0444">
 <eval>
-cat /etc/ssh/ssh_host_rsa_key.pub
+cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null
 </eval>
 </file>
 
@@ -68,7 +68,7 @@ UseDNS no
 
 key="
 <eval>
-/opt/stack/sbin/read-ssh-private-key RSA1 | python -c '
+/opt/stack/sbin/read-ssh-private-key RSA1 2> /dev/null | python -c '
 import base64 
 import sys 
 base64.encode(sys.stdin, sys.stdout)'
@@ -83,19 +83,19 @@ chmod 0400 /etc/ssh/ssh_host_key
 
 <file name="/etc/ssh/ssh_host_key.pub" perms="0444">
 <eval>
-cat /etc/ssh/ssh_host_key.pub
+cat /etc/ssh/ssh_host_key.pub 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_dsa_key" perms="0400">
 <eval>
-/opt/stack/sbin/read-ssh-private-key DSA
+/opt/stack/sbin/read-ssh-private-key DSA 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_dsa_key.pub" perms="0444">
 <eval>
-cat /etc/ssh/ssh_host_dsa_key.pub
+cat /etc/ssh/ssh_host_dsa_key.pub 2> /dev/null
 </eval>
 </file>
 
@@ -106,25 +106,25 @@ cat /etc/ssh/ssh_host_dsa_key.pub
 
 <file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400">
 <eval>
-/opt/stack/sbin/read-ssh-private-key ECDSA
+/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_ecdsa_key.pub" perms="0444">
 <eval>
-cat /etc/ssh/ssh_host_ecdsa_key.pub
+cat /etc/ssh/ssh_host_ecdsa_key.pub 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_ed25519_key" perms="0400">
 <eval>
-/opt/stack/sbin/read-ssh-private-key ED25519
+/opt/stack/sbin/read-ssh-private-key ED25519 2> /dev/null
 </eval>
 </file>
 
 <file name="/etc/ssh/ssh_host_ed25519_key.pub" perms="0444">
 <eval>
-cat /etc/ssh/ssh_host_ed25519_key.pub
+cat /etc/ssh/ssh_host_ed25519_key.pub 2> /dev/null
 </eval>
 </file>
 
