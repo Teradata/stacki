@@ -48,6 +48,9 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	echo "Building isolinux"
+	cat menu-header > menu.cfg
+	echo "menu title stacki $(VERSION) ($(RELEASE))" >> menu.cfg
+	cat menu-footer >> menu.cfg
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)

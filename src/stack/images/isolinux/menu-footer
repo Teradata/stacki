@@ -1,8 +1,4 @@
-timeout 100
 
-menu resolution 640 480
-menu background splash.png
-menu title stacki 1.0 (I)
 menu autoboot Autoboot in # seconds
 menu clear
 

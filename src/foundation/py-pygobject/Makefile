@@ -90,17 +90,18 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
--include $(RELEASE).mk
-
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
 DEPENDS.FILES	= $(SRCFILE)
 
 include $(STACKBUILD)/etc/CCRules.mk
+-include $(RELEASE).mk
 
 
-bootstrap: install-rpm
+bootstrap: prep install-rpm
+
+prep:
+	$(PREP)
 
 build:
 	$(UNPACK) $(SRCFILE) | $(TAR) -xf -
