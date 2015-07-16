@@ -115,7 +115,7 @@ repoconfig(ccmnt, osmnt)
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'foundation-python-xml', 'foundation-redhat', 'deltarpm', 
 	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
-	'stack-wizard', 'net-tools' ]
+	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
 installrpms(pkgs)
 
 umount(ccmnt)
