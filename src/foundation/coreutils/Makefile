@@ -59,11 +59,11 @@
 # 
 # @Copyright@
 
-PKGROOT		= /opt/rocks
+PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
 DEPENDS.FILES	= coreutils-$(VERSION).tar.xz
 
-include $(ROCKSBUILD)/etc/CCRules.mk
+include $(STACKBUILD)/etc/CCRules.mk
 
 
 build:
