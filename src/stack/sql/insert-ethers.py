@@ -107,6 +107,7 @@ from stack.api.get import *
 import stack.kickstart
 import syslog
 from gettext import gettext as _
+from stack.exception import *
 
 
 class InsertError(Exception):
@@ -566,7 +567,7 @@ class InsertEthers(GUI):
 
 	def getnetwork(self,subnet):
 		
-		self.sql.execute("select subnet,netmask from subnets where name='%s'" % (subnet))
+		self.sql.execute("select address,mask from subnets where name='%s'" % (subnet))
 		network,netmask = self.sql.fetchone()
 		return network,netmask
 			
@@ -1076,4 +1077,5 @@ try:
 except Exception, msg:
 	app.cleanup()
 	sys.stderr.write('error - ' + str(msg) + '\n')
+        syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)
 	sys.exit(1)

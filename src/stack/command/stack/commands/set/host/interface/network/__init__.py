@@ -134,7 +134,7 @@ class Command(stack.commands.set.host.command):
 			if interface:
 				self.db.execute("""
                                 	update networks net, nodes n 
-					set net.network=
+					set net.subnet=
                                         (select id from subnets s where s.name='%s')
                                         where
                                         n.name='%s' and net.node=n.id and
@@ -143,7 +143,7 @@ class Command(stack.commands.set.host.command):
                         else:
 				self.db.execute("""
                                 	update networks net, nodes n 
-					set net.network=
+					set net.subnet=
                                         (select id from subnets s where s.name='%s')
                                         where
                                         n.name='%s' and net.node=n.id and

@@ -240,7 +240,7 @@ class Command(command):
 				rank) values ( '%s',
 				(select id from appliances where name='%s'),
 				(select id from distributions where name='%s'),
-				'%d', '%d', '%d')""" % (host, appliance, dist,
+				'%d', '%s', '%d')""" % (host, appliance, dist,
 				numCPUs, rack, rank))
 
 

@@ -184,8 +184,8 @@ if empty:
 
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
 
-stack.api.Call('set host attr', [ caddr, 'arch', arch ])
-stack.api.Call('set host cpus', [ caddr, np ])
+stack.api.Call('set host attr', [ caddr, 'attr=arch', 'value=%s' % arch ])
+stack.api.Call('set host cpus', [ caddr, 'cpus=%s' % np ])
 
 cmd = '/opt/stack/bin/stack list host xml arch=%s os=redhat %s' % \
     (arch, caddr)

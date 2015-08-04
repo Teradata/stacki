@@ -59,6 +59,10 @@ class Command(stack.commands.set.host.interface.command):
  	Network name of the default interface.
  	</param>
 
+        <param optional='0' type='string' name='mac'>
+ 	MAC address name of the default interface.
+ 	</param>
+
         <param optional='0' type='bool' name='default'>
         Can be used to set the value of default to False.
         This is used to remove all default networks.
@@ -68,28 +72,38 @@ class Command(stack.commands.set.host.interface.command):
 
 	def run(self, params, args):
 
-                (interface, network, default) = self.fillParams([
+                (default, interface, network, mac) = self.fillParams([
                         ('default', 'true'),
                         ('interface', None),
                         ('network', None),
+                        ('mac', None),
                         ])
 
                 default = self.str2bool(default)
 
-		if not interface and not network:
-                        raise ParamRequired(self, ('interface', 'network'))
+		if not interface and not network and not mac:
+                        raise ParamRequired(self, ('interface', 'network', 'mac'))
 
                 for host in self.getHostnames(args):
-                        if network:
-                                interface = self.getInterface(host, network)
-                        if not interface:
-                                raise CommandError(self, 'no interface for "%s" on "%s"' %
-                                                (network, host))
+                        # find the MAC address for the specified interface and
+                        # use this as the handle.
+                        
+                        if not mac and network:
+                                for dict in self.command('list.host.interface', 'host'):
+                                        if network == dict['network']:
+                                                mac = dict['mac']
+                                if not mac:
+                                        raise CommandError(self, 'network "%s" for "%s" not found' %
+                                                        (network, host))
 
-                        if not self.verifyInterface(host, interface):
-                                raise CommandError(self, 'no interface "%s" on "%s"' %
-                                                (interface, host))
-
+                        if not mac and interface:
+                                for dict in self.command('list.host.interface', 'host'):
+                                        if interface == dict['interface']:
+                                                mac = dict['mac']
+                                if not mac:
+                                        raise CommandError(self, 'interface "%s" for "%s" not found' %
+                                                        (interface, host))
+                                                
                         # Exclusively set the default interface by resetting
                         # all other interfaces after enabling the specified one.
                         
@@ -98,15 +112,15 @@ class Command(stack.commands.set.host.interface.command):
                                 set net.main = %s
                                 where
                                 n.name = '%s' and net.node = n.id and
-                                net.device = '%s'
-                                """ % (default, host, interface))
+                                net.mac = '%s'
+                                """ % (default, host, mac))
                         if default:
                                 self.db.execute("""
                         		update networks net, nodes n
                                 	set net.main='False'
                                 	where
                                 	n.name='%s' and net.node=n.id and
-                                	net.device != '%s'
-                                	""" % (host, interface))
+                                	net.mac != '%s'
+                                	""" % (host, mac))
                         
 

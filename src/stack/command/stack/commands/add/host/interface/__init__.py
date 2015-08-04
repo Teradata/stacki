@@ -163,20 +163,30 @@ class Command(stack.commands.add.host.command):
                                 raise CommandError(self, 'mac exists')
 
 
+		fields = [ 'network', 'ip', 'module', 'name', 'subnet', 'vlan', 'default']
+
+                # Insert the mac or interface into the database and then use
+                # that to key off of for all the subsequent fields.
+                # Give the MAC preferrence (need to pick one) but still do the
+                # right thing when MAC and Interface are both specified.
+                
                 if mac:
 			self.db.execute("""
                         	insert into networks(node, mac)
 				values ((select id from nodes where name='%s'), '%s')
                                 """ % (host, mac)) 
+                        handle = 'mac=%s' % mac
+                        fields.append('interface')
 		else:
 			self.db.execute("""
                         	insert into networks(node, device)
 				values ((select id from nodes where name='%s'), '%s')
                                 """ % (host, interface)) 
+                        handle = 'interface=%s' % interface
+                        fields.append('mac')
 
-		for key in ['interface', 'ip', 'mac', 'module', 'name', 'subnet', 'vlan', 'default']:
+		for key in fields:
 			if params.has_key(key):
 				self.command('set.host.interface.%s' % key,
-					(host, "interface=%s" % interface,
-					"%s=%s" % (key, params[key])))
+					(host, handle, "%s=%s" % (key, params[key])))
 
