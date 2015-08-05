@@ -136,7 +136,7 @@ class Command(command):
 		if len(args) != 1:
                         raise ArgUnique(self, 'appliance')
 		appliance = args[0]
-					
+
 		(membership, node, public) = self.fillParams([
                         ('membership', None),
                         ('node', ''),
@@ -169,7 +169,8 @@ class Command(command):
 			kickstartable = False
 		else:
 			kickstartable = True
-			self.command('add.appliance.attr', [ appliance, 'node', node ])
+			self.command('add.appliance.attr', [ appliance,
+				'attr=node', 'value=%s' % node ])
 
 		self.command('add.appliance.attr', [
                         appliance,
