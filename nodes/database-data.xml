@@ -159,8 +159,8 @@ if os.path.exists('/tmp/site.attrs'):
 <!-- frontend public network -->
 
 /opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
-	network=public;							\
-	default=true;							\
+	network=public							\
+	default=true							\
 	interface=&Kickstart_PublicInterface;				\
 	mac=&Kickstart_PublicEthernet;					\
 	ip=&Kickstart_PublicAddress;					\
