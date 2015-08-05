@@ -111,8 +111,8 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None, True) ])
-                 
+		(key, ) = self.fillParams([ ('attr', None, False) ])
+
 		for appliance in self.getApplianceNames(args):
 			attr = stack.attr.NormalizeAttr(key)
 			for row in self.call('list.appliance.attr', [ appliance ]):
