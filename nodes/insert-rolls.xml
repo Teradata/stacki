@@ -18,13 +18,12 @@
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
         </copyright>
 
-<post>
-
-<file name="/tmp/insert-rolls.sql">
-<eval shell="/opt/stack/bin/python">
+<post interpreter='/opt/stack/bin/python'>
 import os
 import os.path
 import sys
+import subprocess
+import stack
 import stack.roll
 
 if '&hostname;' == 'None':
@@ -40,25 +39,26 @@ if not os.path.exists('/tmp/rolls.xml'):
 generator = stack.roll.Generator()
 generator.parse('/tmp/rolls.xml')
 
-# 
-# Generate insert statements
-#
 found = []
-for name, version, arch, url, diskid in generator.rolls:
-	key = '%s-%s-%s' % (name, version, arch)
+for name, version, release, arch, url, diskid in generator.rolls:
+	key = '%s-%s-%s-%s' % (name, version, release, arch)
 
 	if key not in found:
-		print ('insert into rolls (name, version, arch, os) '
-			'values ("%s","%s","%s","redhat" );'
-			% (name, version, arch))
+		if not release:
+			release = stack.release
+
+		mysqlcmd = 'insert into rolls (name, version, rel, arch, os) '
+		mysqlcmd += 'values ("%s","%s","%s","%s","redhat" );' \
+			% (name, version, release, arch)
+
+		cmd = "/opt/stack/bin/mysql -u apache --execute '%s' cluster" \
+			% mysqlcmd
+		subprocess.call(cmd, shell = True)
+
+		cmd = '/opt/stack/bin/stack enable pallet %s' % name
+		subprocess.call(cmd, shell = True)
 
 		found.append(key)
-</eval>
-</file>
-
-/opt/stack/bin/mysql -u apache cluster &lt; /tmp/insert-rolls.sql
-
-/opt/stack/bin/stack enable pallet %
 
 </post>
 

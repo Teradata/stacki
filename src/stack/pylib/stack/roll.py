@@ -285,7 +285,12 @@ class Generator(osGenerator):
 		else:
 			diskid = ''
 
-		self.rolls.append((name, version, arch, url, diskid))
+		if attr.getNamedItem((None, 'release')):
+			release = attr.getNamedItem((None, 'release')).value
+		else:
+			release = ''
+
+		self.rolls.append((name, version, release, arch, url, diskid))
 
 		return
 

@@ -212,7 +212,7 @@ class InstallCGI:
 		else:
 			wget = '/usr/bin/wget'
 
-		(rollname, rollver, rollarch, rollurl, diskid) = roll
+		(rollname, rollver, rollrel, rollarch, rollurl, diskid) = roll
 
 		url = rollurl + '%s/%s/redhat/%s/RPMS/' % (rollname, rollver,
 			rollarch)
@@ -265,7 +265,8 @@ class InstallCGI:
 		#
 		rolls = []
 		for r in rollslist:
-			(rollname, rollversion, rollarch, rollurl, diskid) = r
+			(rollname, rollversion, rollrel, rollarch, rollurl,
+				diskid) = r
 			rolls.append('%s,%s' % (rollname, rollversion))
 
 		#

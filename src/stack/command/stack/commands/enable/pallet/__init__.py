@@ -108,12 +108,17 @@ class Command(stack.commands.RollArgumentProcessor,
 
 	<arg type='string' name='pallet' repeat='1'>
 	List of pallets to enable. This should be the pallet base name (e.g.,
-	base, hpc, kernel).
+	stacki, boss, os).
 	</arg>
 	
 	<param type='string' name='version'>
 	The version number of the pallet to be enabled. If no version number is
 	supplied, then all versions of a pallet will be enabled.
+	</param>
+
+	<param type='string' name='release'>
+	The release number of the pallet to be enabled. If no release number is
+	supplied, then all releases of a pallet will be enabled.
 	</param>
 
 	<param type='string' name='arch'>

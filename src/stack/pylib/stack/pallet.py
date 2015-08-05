@@ -136,7 +136,7 @@ class GetPallet:
 	def downloadDVDPallets(self, pallets):
 		diskids = []
 		for pallet in pallets:
-			(name, version, arch, url, diskid) = pallet
+			(name, version, release, arch, url, diskid) = pallet
 
 			if diskid != '' and diskid not in diskids:
 				diskids.append(diskid)
@@ -163,7 +163,7 @@ class GetPallet:
 
 	def downloadNetworkPallets(self, pallets):
 		for pallet in pallets:
-			(name, version, arch, url, diskid) = pallet
+			(name, version, release, arch, url, diskid) = pallet
 
 			if diskid != '':
 				continue

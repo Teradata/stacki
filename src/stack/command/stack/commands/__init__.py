@@ -329,6 +329,11 @@ class RollArgumentProcessor:
 			version = params['version']
 		else:
 			version = '%' # SQL wildcard
+
+		if params.has_key('release'):
+			rel = params['release']
+		else:
+			rel = '%' # SQL wildcard
 	
 		list = []
 		if not args:
@@ -336,7 +341,8 @@ class RollArgumentProcessor:
 		for arg in args:
 			rows = self.db.execute("""select distinct name,version,rel
 				from rolls where name like binary '%s' and 
-				version like binary '%s'""" % (arg, version))
+				version like binary '%s' and 
+				rel like binary '%s' """ % (arg, version, rel))
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
