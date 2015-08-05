@@ -144,8 +144,8 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
 
-/opt/stack/bin/stack add route &Kickstart_PublicAddress; \
-	&Kickstart_PrivateAddress; netmask=255.255.255.255
+/opt/stack/bin/stack add route address=&Kickstart_PublicAddress; \
+	gateway=&Kickstart_PrivateAddress; netmask=255.255.255.255
 	
 <!-- frontend private network -->
 
