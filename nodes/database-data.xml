@@ -89,7 +89,7 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack add appliance backend  membership=Backend node=backend
 
 <!-- manage firewall rules by default -->
-/opt/stack/bin/stack set attr firewall true
+/opt/stack/bin/stack set attr attr=firewall value=true
 
 <!--	Set managed attribute for appliances.
 	This determines whether the appliances
