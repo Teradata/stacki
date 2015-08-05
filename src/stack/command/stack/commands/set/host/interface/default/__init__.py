@@ -67,7 +67,6 @@ class Command(stack.commands.set.host.interface.command):
         Can be used to set the value of default to False.
         This is used to remove all default networks.
         </param>
-
 	"""
 
 	def run(self, params, args):
@@ -89,7 +88,7 @@ class Command(stack.commands.set.host.interface.command):
                         # use this as the handle.
                         
                         if not mac and network:
-                                for dict in self.command('list.host.interface', 'host'):
+                                for dict in self.call('list.host.interface', [host]):
                                         if network == dict['network']:
                                                 mac = dict['mac']
                                 if not mac:
@@ -97,7 +96,7 @@ class Command(stack.commands.set.host.interface.command):
                                                         (network, host))
 
                         if not mac and interface:
-                                for dict in self.command('list.host.interface', 'host'):
+                                for dict in self.call('list.host.interface', [host]):
                                         if interface == dict['interface']:
                                                 mac = dict['mac']
                                 if not mac:
@@ -122,5 +121,3 @@ class Command(stack.commands.set.host.interface.command):
                                 	n.name='%s' and net.node=n.id and
                                 	net.mac != '%s'
                                 	""" % (host, mac))
-                        
-
