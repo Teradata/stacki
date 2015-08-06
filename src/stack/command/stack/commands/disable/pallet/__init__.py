@@ -162,7 +162,7 @@ class Command(stack.commands.RollArgumentProcessor,
                         if release:
                                 rel = "rel='%s'" % release
                         else:
-                                rel = 'rel is NULL'
+                                rel = 'rel=""'
 			self.db.execute("""
 				delete from stacks where
 				distribution =
