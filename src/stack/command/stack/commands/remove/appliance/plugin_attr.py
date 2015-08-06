@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,27 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:57  bruno
-# star power for gb
-#
-# Revision 1.3  2009/07/27 21:42:07  bruno
-# fix for 'rocks remove appliance'
-#
-# Revision 1.2  2009/05/01 19:06:59  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 22:19:55  mjk
-# - route commands done
-# - cleanup of stack.host plugins
-#
-# Revision 1.2  2009/03/06 21:28:12  bruno
-# need to look at node_attributes table.
-#
-# Revision 1.1  2008/12/18 20:01:33  mjk
-# attribute commands
-#
 
 import stack.commands
 
@@ -80,5 +60,7 @@ class Plugin(stack.commands.Plugin):
 		return 'attr'
 
 	def run(self, appliance):
-		self.owner.command('remove.appliance.attr', [ appliance ])
+		self.owner.db.execute("""delete from appliance_attributes where 
+			appliance = (select id from appliances where name = '%s')""" %
+			appliance)
 
