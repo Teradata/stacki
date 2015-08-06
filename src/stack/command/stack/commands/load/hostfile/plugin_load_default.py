@@ -147,7 +147,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				if ip:
 					cmdparams.append('ip=%s' % ip)
 				if subnet:
-					cmdparams.append('subnet=%s' % subnet)
+    					cmdparams.append('subnet=%s' % subnet)
 				if ifhostname:
 					cmdparams.append('name=%s' % ifhostname)
 				if vlan:

@@ -115,8 +115,8 @@ class Command(stack.commands.add.host.command):
 	The IP address to assign to the interface (e.g., '192.168.1.254')
 	</param>
 
-	<param type='string' name='subnet'>
-	The name of the subnet to assign to the interface (e.g., 'private')
+	<param type='string' name='network'>
+	The name of the network to assign to the interface (e.g., 'private')
 	</param>
 	
 	<param type='string' name='name'>
@@ -135,7 +135,7 @@ class Command(stack.commands.add.host.command):
 	The VLAN ID to assign the interface
 	</param>
 
-	<example cmd='add host interface backend-0-0 interface=eth1 ip=192.168.1.2 subnet=private name=fast-0-0'>
+	<example cmd='add host interface backend-0-0 interface=eth1 ip=192.168.1.2 network=private name=fast-0-0'>
 	Add interface "eth1" to host "backend-0-0" with the given
 	IP address, network assignment, and name.
 	</example>
@@ -163,7 +163,7 @@ class Command(stack.commands.add.host.command):
                                 raise CommandError(self, 'mac exists')
 
 
-		fields = [ 'network', 'ip', 'module', 'name', 'subnet', 'vlan', 'default']
+		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default']
 
                 # Insert the mac or interface into the database and then use
                 # that to key off of for all the subsequent fields.

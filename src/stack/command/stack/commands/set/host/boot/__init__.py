@@ -165,8 +165,8 @@ class Command(stack.commands.set.host.command):
 
 		# Get the IP and NETMASK of the host
 
-		for row in self.owner.call('list.host.interface', [ host, 'expanded=true' ]):
-			if row['dns'] == 'True':
+		for row in self.call('list.host.interface', [ host, 'expanded=true' ]):
+			if row['pxe'] == True:
 				ip = row['ip']
                                 netmask = row['mask']
                                 gateway = row['gateway']
@@ -186,7 +186,7 @@ class Command(stack.commands.set.host.command):
 		#
 
 		action = None
-		for row in self.owner.call('list.host.boot', [ host ]):
+		for row in self.call('list.host.boot', [ host ]):
 			action = row['action']
 		if not action:
 			try:
@@ -199,14 +199,14 @@ class Command(stack.commands.set.host.command):
 		# lookup the actual kernel, ramdisk, and args for the
 		# specific action.
 
-		for row in self.owner.call('list.host', [ host ]):
+		for row in self.call('list.host', [ host ]):
 			if action == 'install':
 				bootaction = row['installaction']
 			else:
 				bootaction = row['runaction']
 
 		kernel = ramdisk = args = None
-		for row in self.owner.call('list.bootaction'):
+		for row in self.call('list.bootaction'):
 			if row['action'] == bootaction:
 				kernel  = row['kernel']
 				ramdisk = row['ramdisk']
