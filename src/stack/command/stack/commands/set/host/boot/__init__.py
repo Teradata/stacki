@@ -161,52 +161,19 @@ class Command(stack.commands.set.host.command):
 			os.system('chmod 664 %s' % (filename))
 
 
-	def writePxebootCfg(self, host):
-
-		# Get the IP and NETMASK of the host
-
-		for row in self.owner.call('list.host.interface', [ host, 'expanded=true' ]):
-			if row['dns'] == 'True':
-				ip = row['ip']
-                                netmask = row['mask']
-                                gateway = row['gateway']
-
-
-		# Compute the HEX IP filename for the host
-		filename = '/tftpboot/pxelinux/pxelinux.cfg/'
-		for i in string.split(ip, '.'):
-			hexstr = '%02x' % (int(i))
-			filename += '%s' % hexstr.upper()
-
-
-		#
-		# there is a case where the host name may be in the nodes table
-		# but not in the boot table. in this case, remove the current
-		# configuration file (if it exists) and return
-		#
-
-		action = None
-		for row in self.owner.call('list.host.boot', [ host ]):
-			action = row['action']
-		if not action:
-			try:
-				os.unlink(filename)
-			except:
-				pass
-			return
-
+	def writeFile(self, host, action, filename, ip, netmask, gateway):
 		# Get the bootaction for the host (install or os) and
 		# lookup the actual kernel, ramdisk, and args for the
 		# specific action.
 
-		for row in self.owner.call('list.host', [ host ]):
+		for row in self.call('list.host', [ host ]):
 			if action == 'install':
 				bootaction = row['installaction']
 			else:
 				bootaction = row['runaction']
 
 		kernel = ramdisk = args = None
-		for row in self.owner.call('list.bootaction'):
+		for row in self.call('list.bootaction'):
 			if row['action'] == bootaction:
 				kernel  = row['kernel']
 				ramdisk = row['ramdisk']
@@ -217,15 +184,15 @@ class Command(stack.commands.set.host.command):
 				(action, host)
 			sys.exit(-1)
 
-
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.
 
 		if args and args.find('ksdevice=') != -1:
-
-			dnsserver  = self.db.getHostAttr(host, 'Kickstart_PrivateDNSServers')
-			nextserver = self.db.getHostAttr(host, 'Kickstart_PrivateKickstartHost')
+			dnsserver = self.db.getHostAttr(host,
+				'Kickstart_PrivateDNSServers')
+			nextserver = self.db.getHostAttr(host,
+				'Kickstart_PrivateKickstartHost')
 			
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
 				(ip, gateway, netmask, dnsserver, nextserver)
@@ -241,7 +208,6 @@ class Command(stack.commands.set.host.command):
 					file.write('\tkernel %s\n' % (kernel))
 				else:
 					file.write('\t%s\n' % (kernel))
-
 			if ramdisk and len(ramdisk) > 0:
 				if len(args) > 0:
 					args += ' initrd=%s' % ramdisk
@@ -262,9 +228,42 @@ class Command(stack.commands.set.host.command):
 			#
 			# make sure apache can update the file
 			#
-			os.system('chown root.apache %s' % (filename))
-			os.system('chmod 664 %s' % (filename))
+			import pwd
+			import grp
+			
+			os.chown(filename, pwd.getpwnam('root').pw_uid,
+				grp.getgrnam('apache').gr_gid)
+			os.chmod(filename, 0664)
 
+
+	def writePxebootCfg(self, host, action):
+		#
+		# Get the IP and NETMASK of the host
+		#
+		for row in self.call('list.host.interface',
+				[ host, 'expanded=true' ]):
+
+			ip = row['ip']
+			if ip:
+				#
+				# Compute the HEX IP filename for the host
+				#
+				filename = '/tftpboot/pxelinux/pxelinux.cfg/'
+				hexstr = ''
+				for i in string.split(ip, '.'):
+					hexstr += '%02x' % (int(i))
+				filename += '%s' % hexstr.upper()
+
+				if row['pxe']:
+					self.writeFile(host, action, filename,
+						ip, row['mask'], row['gateway'])
+				else:
+					#
+					# if present, remove the old PXE
+					# config file
+					#
+					if os.path.exists(filename):
+						os.unlink(filename)
 
 	def updateBoot(self, host, action):
 		#
@@ -311,6 +310,6 @@ class Command(stack.commands.set.host.command):
                         if host == frontend_host:
                                 self.writeDefaultPxebootCfg()
                         else:
-                        	self.writePxebootCfg(host)
+				self.writePxebootCfg(host, action)
 
 

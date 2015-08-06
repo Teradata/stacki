@@ -94,7 +94,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						% hosts[host][key] ])
 				else:
 					self.owner.call('set.host.%s' % key,
-						[ host, hosts[host][key] ])
+						[ host, '%s=%s' % (key, hosts[host][key]) ])
 
 			if host not in interfaces.keys():
 				continue
@@ -112,7 +112,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			for interface in interfaces[host].keys():
 				ip = None
 				mac = None
-				subnet = None
+				network = None
 				ifhostname = None
 				channel = None
 				options = None
@@ -123,8 +123,8 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					ip = interfaces[host][interface]['ip']
 				if 'mac' in interfaces[host][interface].keys():
 					mac = interfaces[host][interface]['mac']
-				if 'subnet' in interfaces[host][interface].keys():
-					subnet = interfaces[host][interface]['subnet']
+				if 'network' in interfaces[host][interface].keys():
+					network = interfaces[host][interface]['network']
 				if 'ifhostname' in interfaces[host][interface].keys():
 					ifhostname = interfaces[host][interface]['ifhostname']
 				if 'channel' in interfaces[host][interface].keys():
@@ -141,13 +141,15 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				#
 				# now add the interface
 				#
-				cmdparams = [ host, 'interface=%s default=%s' % (interface, default) ]
+				cmdparams = [ host,
+					'interface=%s' % interface,
+					'default=%s' % default ]
 				if mac:
 					cmdparams.append('mac=%s' % mac)
 				if ip:
 					cmdparams.append('ip=%s' % ip)
-				if subnet:
-					cmdparams.append('subnet=%s' % subnet)
+				if network:
+					cmdparams.append('network=%s' % network)
 				if ifhostname:
 					cmdparams.append('name=%s' % ifhostname)
 				if vlan:
