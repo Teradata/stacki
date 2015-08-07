@@ -44,6 +44,7 @@ import csv
 import re
 import sys
 import stack.commands
+from stack.bool import *
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -189,7 +190,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				elif header[i] == 'boss':
 					boss = field
                                 elif header[i] == 'default':
-                                        boss = field
+                                        default = field
 				elif header[i] == 'notes':
 					notes = field
 						
@@ -307,6 +308,38 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				self.checkAppliance(
 					self.owner.hosts[name]['appliance'])
 
+			#
+			# 'default' checking
+			#
+			ifaces = self.owner.interfaces[name].keys()
+			
+			#
+			# if there is only one interface, make it the default
+			#
+			if len(ifaces) == 1:
+				self.owner.interfaces[name][ifaces[0]]['default'] = 'True'
+			else:
+				#
+				# if there is more than one interface for this
+				# host, make sure that one of the interfaces
+				# is specified as the 'default' interface
+				#
+				default = False
+				multiple_defaults = False
+				for interface in ifaces:
+					if self.owner.interfaces[name][interface].has_key('default') and str2bool(self.owner.interfaces[name][interface]['default']) == True:
+						if not default:
+							default = True
+						else:
+							multiple_defaults = True
+				if not default:
+					msg = 'host "%s" has multiple interfaces but none of the interfaces are designated as\na "default" interface. add a "default" column to your spreadsheet and\nmark one of the interfaces as "True" in the default column' % name
+					sys.exit((-1, msg, ''))
+
+				if multiple_defaults:
+					msg = 'host "%s" has more than one interface designated as the "default" interface.\nedit your spreadsheet so that only one interface is the "default".' % name
+					sys.exit((-1, msg, ''))
+					
 			#
 			# interface specific checks
 			#
