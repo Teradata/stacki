@@ -1,31 +1,31 @@
 # @SI_Copyright@
 #                             www.stacki.com
 #                                  v1.0
-# 
+#
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-# 	 "This product includes software developed by StackIQ" 
-#  
+# features or use of this software must display the following acknowledgement:
+#
+# 	 "This product includes software developed by StackIQ"
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -110,7 +110,7 @@ class Command(stack.commands.list.command,
 				hosts = []
 
 		else:
-                        raise ArgError(self, 'scope', 'must be unique or missing')
+			raise ArgError(self, 'scope', 'must be unique or missing')
 
 		if not scope:
 			if args[0] in oses:
@@ -122,42 +122,41 @@ class Command(stack.commands.list.command,
 
 		if not scope:
 			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
-
 		query = None
 		if scope == 'global':
 			if globalOnlyFlag:
-				query = """select scope, device, mountpoint, size, fstype
+				query = """select scope, device, mountpoint, size, fstype, options 
 					from storage_partition
 					where scope = 'global'
-					order by device, mountpoint"""
+					order by fstype, size"""
 			else:
-				query = """(select scope, device, mountpoint, size, fstype
+				query = """(select scope, device, mountpoint, size, fstype, options 
 					from storage_partition 
 					where scope = 'global'
-					order by device, mountpoint) UNION ALL
+					order by fstype, size) UNION ALL
 					(select a.name, p.device, p.mountpoint, p.size, 
-					p.fstype from storage_partition as p inner join nodes 
-					as a on p.tableid=a.id where p.scope='host' 
-					order by p.size, p.fstype) UNION ALL 
+					p.fstype, p.options from storage_partition as p inner join 
+					nodes as a on p.tableid=a.id where p.scope='host' 
+					order by p.fstype, p.size) UNION ALL 
 					(select a.name, p.device, p.mountpoint, p.size,
-					p.fstype from storage_partition as p inner join 
+					p.fstype, p.options from storage_partition as p inner join 
 					appliances as a on p.tableid=a.id where 
-					p.scope='appliance' order by p.size, p.fstype)"""
+					p.scope='appliance' order by p.fstype, p.size)"""
 		elif scope == 'os':
 			#
 			# not currently supported
 			#
 			return
 		elif scope == 'appliance':
-			query = """select scope, device, mountpoint, size, fstype
-				from storage_partition where scope = "appliance"
+			query = """select scope, device, mountpoint, size, fstype,
+				options from storage_partition where scope = "appliance"
 				and tableid = (select id from appliances
-                                where name = '%s')""" % args[0]
+                                where name = '%s') order by fstype, size""" % args[0]
 		elif scope == 'host':
-			query = """select scope, device, mountpoint, size, fstype
-				from storage_partition where scope="host" and 
+			query = """select scope, device, mountpoint, size, fstype,
+				options from storage_partition where scope="host" and 
 				tableid = (select id from nodes 
-				where name = '%s')""" % args[0]
+				where name = '%s') order by fstype, size""" % args[0]
 
 		if not query:
 			return
@@ -168,13 +167,16 @@ class Command(stack.commands.list.command,
 
 		i = 0
 		for row in self.db.fetchall():
-			name, device, mountpoint, size, fstype = row
-		
+			name, device, mountpoint, size, fstype, options = row
+			if size == -1:
+				size = "recommended"
+			elif size == -2:
+				size = "hibernation"	
 			if name == "host" or name == "appliance":
 				name = args[0]	
 			self.addOutput(name, [ device, mountpoint, 
-				size, fstype])
+				size, fstype, options])
 
 			i += 1
 		self.endOutput(header=['scope', 'device', 'mountpoint', 'size', 
-			'fstype' ], trimOwner = 0)
+			'fstype', 'options'], trimOwner = 0)

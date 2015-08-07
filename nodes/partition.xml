@@ -50,15 +50,77 @@ def doBootDisk(file, disk):
 	
 def loadSpreadsheetPartitions(disk_info):
 	file = open("/tmp/user_partition_info", "w")
+
+	type_dict = {}
+	val_arr = []
 	for o in disk_info:
+		type = o['fstype']
+		if type not in type_dict:
+			val_arr = []
+		else:
+			val_arr = type_dict[type]
+		val_arr.append(o)
+		type_dict[type] = val_arr
+
+	# Write all definitions of type lvm i.e. pv's
+	if 'lvm' in type_dict:
+		lvm_info = type_dict['lvm']
+		for o in lvm_info:
+			size = "--size=" + str(o['size'])
+			if o['size'] in ['recommended', 'hibernation']:
+				size = '--' + o['size']
+				
+			st = "part %s %s --ondisk=%s %s" % \
+				(o['mountpoint'], size, o['device'], \
+				o['options'].replace("'","").replace('"', ''))
+			file.write(st + "\n")
+
+	lvm_mountpts = []
+	# Write all volgroups - Make a note of these.
+	if 'volgroup' in type_dict:
+		volgroup_info = type_dict['volgroup']
+		for v in volgroup_info:
+			#
+			# v['device'] can be 'pv.01 pv.02 pv.03'
+			# Put each of them in a separate volgroup
+			# definition.
+			#
+			dev_arr = v['device'].split()
+			
+			for d in dev_arr:
+				# Ignore size options
+				st = "volgroup %s %s %s" % \
+					(v['mountpoint'], d, \
+					v['options'].replace("'","").replace('"', ''))
+				file.write(st + "\n")
+			lvm_mountpts.append(v['mountpoint'])
+	
+	# Write remaining - check if its a logvol definition
+	for o in disk_info:
+		# Skip lvm, volgroup since they are already written.
+		if o['fstype'] in ['lvm', 'volgroup']:
+			continue
 		size = str(o['size'])
 		if size == '0':
-			size = "1 --grow"
-		st = "part %s --size=%s --fstype=%s --ondisk=%s" % \
-			(o['mountpoint'], size, o['fstype'], o['device'])
+			size = "--size=1 --grow"
+		elif size in ['recommended', 'hibernation']:
+			size = "--" + size
+		else:
+			size = "--size=" + size
+	
+		# Check if device is an lvm mountpoint
+		if o['device'] in lvm_mountpts:
+			st = "logvol %s --fstype %s %s --vgname=%s %s" % \
+				(o['mountpoint'], o['fstype'], \
+				o['options'].replace("'","").replace('"', ''), \
+				o['device'], size)
+		else:
+			st = "part %s %s --fstype=%s --ondisk=%s %s" % \
+				(o['mountpoint'], size, o['fstype'], \
+				o['device'], \
+				o['options'].replace("'","").replace('"', ''))
 		file.write(st + "\n")
 	file.close()
-
 
 def str2bool(s):
 	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:

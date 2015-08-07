@@ -1,31 +1,31 @@
 # @SI_Copyright@
 #                             www.stacki.com
 #                                  v1.0
-# 
+#
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-# 	 "This product includes software developed by StackIQ" 
-#  
+# features or use of this software must display the following acknowledgement:
+#
+# 	 "This product includes software developed by StackIQ"
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -62,17 +62,38 @@ class Command(stack.commands.HostArgumentProcessor,
 	Comma separated list of mountpoints
 	</param>
 
-        <param type='int' name='size'>
-	Size of the partition	
+        <param type='int' name='size' optional='1'>
+	Size of the partition.
         </param>
 
-	<param type='string' name='type'>
+	<param type='string' name='type' optional='1'>
 	Type of partition E.g: ext4, ext3 etc.
 	</param>
+
+	<param type='string' name='options' optional='0'>
+	Options that need to be supplied while adding partitions.
+	</param>
 	
-	<example cmd='add storage partition compute-0-0 device=sda mountpoint=/,/var
-		size=50,80 type=ext4,nfs'>
-	Creates 2 partitions on device sda with mountpoints /, /var.
+	<example cmd='add storage partition compute-0-0 device=sda mountpoint=/var
+		size=50 type=ext4'>
+	Creates a ext4 partition on device sda with mountpoints /var.
+	</example>
+
+	<example cmd='add storage partition compute-0-2 device=sdc mountpoint=pv.01
+		 size=0 type=lvm'>
+	Creates a physical volume named pv.01 for lvm.
+	</example>
+
+	<example cmd='add storage partition compute-0-2 mountpoint=volgrp01 device=pv.01 pv.02 pv.03
+		size=32768 type=volgroup'>
+	Creates a volume group from 3 physical volumes i.e. pv.01, pv.02, pv.03. All these 3
+	physical volumes need to be created with the previous example. PV's need to be space
+	separated.
+	</example>
+	<example cmd='add storage partition compute-0-2 device=volgrp01 mountpoint=/banktools
+		size=8192 type=xfs options=--name=banktools'>
+	Created an xfs lvm partition of size 8192 on volgrp01. volgrp01 needs to be created
+	with the previous example.
 	</example>
 	"""
 
@@ -89,7 +110,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		row = self.db.fetchone()
 
 		if row:
-			raise CommandError(self, """partition specification for device %s, 
+			raise CommandError(self, """partition specification for device %s,
 				mount point %s already exists in the 
 				database""" % (device, mountpt))
 
@@ -117,7 +138,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			except:
 				hosts = []
 		else:
-                        raise ArgRequired(self, 'scope')
+			raise ArgRequired(self, 'scope')
 
 		if not scope:
 			if args[0] in oses:
@@ -128,19 +149,25 @@ class Command(stack.commands.HostArgumentProcessor,
 				scope = 'host'
 
 		if not scope:
-                        raise ArgValue(self, 'scope', 'valid os, appliance name or host name')
+			raise ArgValue(self, 'scope', 'valid os, appliance name or host name')
 
 		if scope == 'global':
 			name = 'global'
 		else:
 			name = args[0]
 
-		(device, size, type, mountpt) = self.fillParams([
-                        ('device', None, True),
-			('size', None),
-                        ('type', None),
-                        ('mountpoint', None, True)
-                        ])
+		device, size, type, mountpt, options = self.fillParams([
+			('device', None, True),
+			('size', None), 
+			('type', None), 
+			('mountpoint', None, True),
+			('options', None)
+			])
+
+		if not device:
+			raise ArgRequired(self, 'device')
+		if not mountpt:
+			raise ArgRequired(self, 'mountpoint')
 
 		sizes = []
 		# Validate sizes
@@ -149,13 +176,28 @@ class Command(stack.commands.HostArgumentProcessor,
 				try:
 					s = int(s)
 				except:
-                                        raise ParamType(self, 'size', 'integer')
-				if s < 0:
-                                        raise ParamValue(self, 'size', '>= 0')
+					#
+					# If mountpoint is 'swap' then allow
+					# 'hibernate', 'recommended' as sizes.
+					#
+					if (device == 'swap' or mountpoint == 'swap') and \
+						size == 'recommended':
+						size = -1
+					elif (device == 'swap' or mountpoint == 'swap') and \
+						size == 'hibernation':
+						size = -2
+					else:
+						raise ParamType(self, 'size', 'integer')
+						if s < 0:
+							raise ParamValue(self, 'size', '>= 0')
 				sizes.append(s)
 
 		mountpts = mountpt.split(',')
 		types = type.split(',')
+		options_arr = []
+
+		if options:
+			options_arr = options.split(',')
 
 		if not (len(sizes) == len(mountpts) == len(types)):
 			raise CommandError(self, 'enter size, mountpoint, type for each partition on a device')
@@ -185,8 +227,12 @@ class Command(stack.commands.HostArgumentProcessor,
 		# now add the specifications to the database
 		#
 		for i in range(len(mountpts)):
+			if i >= len(options_arr):
+				option_val = ""
+			else:
+				option_val = options_arr[i]
 			self.db.execute("""insert into storage_partition
 				(Scope, TableID, device, Mountpoint,
-				Size, FsType) values ('%s', %s, '%s', '%s',
-				%s, '%s') """ % (scope, tableid, device,
-				mountpts[i], sizes[i], types[i]))
+				Size, FsType, Options) values ('%s', %s, '%s', '%s',
+				%s, '%s', '%s') """ % (scope, tableid, device,
+				mountpts[i], sizes[i], types[i], option_val))

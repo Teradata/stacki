@@ -440,7 +440,8 @@ CREATE TABLE storage_partition (
  Device		varchar(128) NOT NULL default '',
  Mountpoint	varchar(128) NOT NULL default '',
  Size		int(11) NOT NULL,
- FsType		varchar(128) NOT NULL default ''
+ FsType		varchar(128) NOT NULL default '',
+ Options        varchar(512) NOT NULL default ''
 ) TYPE=MyISAM;
 
 grant select on cluster.storage_partition to ''@'localhost';

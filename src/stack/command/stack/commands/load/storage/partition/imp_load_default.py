@@ -1,31 +1,31 @@
 # @SI_Copyright@
 #                             www.stacki.com
 #                                  v1.0
-# 
+#
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-# 	 "This product includes software developed by StackIQ" 
-#  
+# features or use of this software must display the following acknowledgement:
+#
+# 	 "This product includes software developed by StackIQ"
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -41,8 +41,9 @@
 
 import csv
 import re
-import sys
+from sets import Set
 import stack.commands
+import sys
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -54,7 +55,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, device, mountpoint, size, type):
+	def doit(self, host, device, mountpoint, size, fstype, options, line):
 		#
 		# error checking
 		#
@@ -67,9 +68,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		if size == None:
 			msg = 'empty value found for "size" column at line %d' % line
 			sys.exit((-1, msg, ''))
-
-		if type == None:
+		if fstype == None or fstype == 'None':
 			msg = 'empty value found for "type" column at line %d' % line
+			sys.exit((-1, msg, ''))
 		if host not in self.owner.hosts.keys():
 			self.owner.hosts[host] = {}
 		
@@ -81,7 +82,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		partition_detail_map = {}
 		partition_detail_map['mountpoint'] = mountpoint
 		partition_detail_map['size'] = size
-		partition_detail_map['type'] = type
+		partition_detail_map['type'] = fstype
+		partition_detail_map['options'] = options
+
 		# Append partition info to the map
 		partitions_list.append(partition_detail_map)
 		self.owner.hosts[host][device] = partitions_list
@@ -96,6 +99,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		line = 0
 
 		name = None
+		type_dict = {}
+		lvm_host_set = Set([])
 
 		for row in reader:
 			line += 1
@@ -135,6 +140,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			mountpoint = None
 			size = None
 			type = None
+			options = None
 
 			for i in range(0, len(row)):
 				field = row[i].strip()
@@ -153,16 +159,21 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				elif header[i] == 'size':
 					try:
 						size = int(field)
+						if size < 0:
+							msg = 'size "%d" must be 0 or greater' % size
+							sys.exit((-1, msg, ''))
 					except:
-						msg = 'size "%s" must be an integer' % field
-						sys.exit((-1, msg, ''))
-
-					if size < 0:
-						msg = 'size "%d" must be 0 or greater' % size
-						sys.exit((-1, msg, ''))
-
+						if field.lower() == 'recommended':
+							size = -1
+						elif field.lower() == 'hibernation':
+							size =  -2
+						else:
+							msg = 'size "%s" must be an integer' % field
+							sys.exit((-1, msg, ''))
 				elif header[i] == 'type':
 					type = field.lower()
+				elif header[i] == 'options':
+					options = field
 	
 			#
 			# the first non-header line must have a host name
@@ -181,4 +192,53 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				sys.exit((-1, msg, ''))
 
 			for host in hosts:
-				self.doit(host, device, mountpoint, size, type)
+				self.doit(host, device, mountpoint, 
+					size, type, options, line)
+				#
+				# Create type_dict with the {fstype : mountpoints}
+				#  to validate lvm definitions.
+				# E.g. {'node204-volgroup': ['volgrp01'], 
+				#       'node204-lvm': ['pv.01', 'pv.02', 'pv.03']} 
+				#
+				device_arr = []
+				type_key = host + '-' + type
+				if type_key not in type_dict:
+					device_arr = []
+				else:
+					device_arr = type_dict[type_key]
+				device_arr.append(mountpoint)
+				type_dict[type_key] = device_arr
+
+				if type == 'lvm':
+					lvm_host_set.add(host)
+
+		# Regexp to match Hard disk labels
+		hd_label_regexp = '[s|h]d[a-z]'
+		hd_regexp = re.compile(hd_label_regexp)
+
+		# Revalidate the spreadsheet to check if pv's, volgroups have been defined
+		for host in hosts:
+			# Set install action to parallel format if there is lvm.
+			if host in lvm_host_set:
+				self.owner.call('set.host.installaction', 
+					[ host, 'action=install no-parallel-format'])
+
+			# Get device map for a host
+			device_map = self.owner.hosts[host]
+			for d in device_map.keys():
+				d_map = device_map[d][0]
+				# Check if volgroups have an already defined physical volume	
+				if d_map['type'] == 'volgroup':
+					device_arr = d.split(' ')
+					for da in device_arr:
+						#
+						# If pv's have not been defined before 
+						# then throw an error
+						#
+						if da not in type_dict[host + '-lvm']: 
+							msg = 'pv "%s" not defined' % da
+							sys.exit((-1, msg, ''))
+				elif not hd_regexp.match(d):
+					if d not in type_dict[host + '-volgroup']:
+						msg = 'volgroup "%s" not defined' % d
+						sys.exit((-1, msg, ''))
