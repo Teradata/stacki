@@ -156,7 +156,7 @@ class Command(stack.commands.add.host.command):
 
 		host = hosts[0]
 
-                for dict in self.call('list.host.interface', [ 'host=%s' % host ]):
+                for dict in self.call('list.host.interface', [ host ]):
                         if interface == dict['interface']:
                                 raise CommandError(self, 'interface exists')
                         if mac == dict['mac']:
