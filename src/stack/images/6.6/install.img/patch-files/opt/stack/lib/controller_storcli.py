@@ -1,9 +1,9 @@
-#!/opt/rocks/bin/python
+#!/opt/stack/bin/python
 
 from subprocess import *
 import json
 
-class StorCLI:
+class CLI:
 
 	def run(self, args, json_out = False):
 		cmd = [ '/opt/stack/sbin/storcli' ]
