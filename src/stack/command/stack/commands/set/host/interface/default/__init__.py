@@ -65,7 +65,6 @@ class Command(stack.commands.set.host.interface.command):
 
         <param optional='0' type='bool' name='default'>
         Can be used to set the value of default to False.
-        This is used to remove all default networks.
         </param>
 	"""
 
@@ -84,40 +83,49 @@ class Command(stack.commands.set.host.interface.command):
                         raise ParamRequired(self, ('interface', 'network', 'mac'))
 
                 for host in self.getHostnames(args):
-                        # find the MAC address for the specified interface and
-                        # use this as the handle.
-                        
-                        if not mac and network:
-                                for dict in self.call('list.host.interface', [host]):
-                                        if network == dict['network']:
-                                                mac = dict['mac']
-                                if not mac:
-                                        raise CommandError(self, 'network "%s" for "%s" not found' %
-                                                        (network, host))
-
-                        if not mac and interface:
-                                for dict in self.call('list.host.interface', [host]):
-                                        if interface == dict['interface']:
-                                                mac = dict['mac']
-                                if not mac:
-                                        raise CommandError(self, 'interface "%s" for "%s" not found' %
-                                                        (interface, host))
-                                                
-                        # Exclusively set the default interface by resetting
-                        # all other interfaces after enabling the specified one.
-                        
-                        self.db.execute("""
-                        	update networks net, nodes n
-                                set net.main = %s
-                                where
-                                n.name = '%s' and net.node = n.id and
-                                net.mac = '%s'
-                                """ % (default, host, mac))
-                        if default:
-                                self.db.execute("""
-                        		update networks net, nodes n
-                                	set net.main='False'
-                                	where
-                                	n.name='%s' and net.node=n.id and
-                                	net.mac != '%s'
-                                	""" % (host, mac))
+			valid = False
+			# Check validity of params. Match them against the
+			# values in the database to check params.
+			for dict in self.call('list.host.interface', [host]):
+				if network and network == dict['network']:
+					valid = True
+					sql_set_cmd = """update networks net,
+					nodes n, subnets s set net.main = %d
+					where n.name = '%s' and s.name='%s'
+					and net.node = n.id and net.subnet=s.id""" % \
+					(default, host, network)
+					break
+				if interface and interface == dict['interface']:
+					valid = True
+					sql_set_cmd = """update networks net,
+					nodes n set net.main = %d where
+					n.name = '%s' and net.node = n.id
+					and net.device ='%s'""" % \
+					(default, host, interface)
+					break
+				if mac and mac == dict['mac']:
+					valid = True
+					sql_set_cmd = """update networks net,
+					nodes n set net.main = %d where
+					n.name = '%s' and net.node = n.id
+					and net.mac ='%s'""" % \
+					(default, host, mac)
+					break
+			if valid:
+				if default:
+                       			sql_clear_cmd = """update networks net,
+						nodes n set net.main = 0
+						where n.name = '%s' and
+						net.node = n.id """ % (host)
+					self.db.execute(sql_clear_cmd)
+				self.db.execute(sql_set_cmd)
+			else:
+				if network:
+					raise CommandError(self, "Network '%s' for '%s' not found" % \
+						(network, host))
+				elif interface:
+					raise CommandError(self, "Interface '%s' for '%s' not found" % \
+						(interface, host))
+				elif mac:
+					raise CommandError(self, "MAC Address '%s' for '%s' not found" % \
+						(mac, host))
