@@ -1,416 +1,416 @@
-America/Los_Angeles
-America/Denver
-America/Phoenix
-America/Chicago
-America/New_York
-America/Adak
-America/Anchorage
-America/Boise
-America/Detroit
-America/Indiana/Indianapolis
-America/Indiana/Knox
-America/Indiana/Marengo
-America/Indiana/Petersburg
-America/Indiana/Tell_City
-America/Indiana/Vevay
-America/Indiana/Vincennes
-America/Indiana/Winamac
-America/Juneau
-America/Kentucky/Louisville
-America/Kentucky/Monticello
-America/Menominee
-America/Metlakatla
-America/Nome
-America/North_Dakota/Beulah
-America/North_Dakota/Center
-America/North_Dakota/New_Salem
-America/Sitka
-America/Yakutat
-Pacific/Honolulu
-Africa/Abidjan
-Africa/Accra
-Africa/Addis_Ababa
-Africa/Algiers
-Africa/Asmara
-Africa/Bamako
-Africa/Bangui
-Africa/Banjul
-Africa/Bissau
-Africa/Blantyre
-Africa/Brazzaville
-Africa/Bujumbura
-Africa/Cairo
-Africa/Casablanca
-Africa/Ceuta
-Africa/Conakry
-Africa/Dakar
-Africa/Dar_es_Salaam
-Africa/Djibouti
-Africa/Douala
-Africa/El_Aaiun
-Africa/Freetown
-Africa/Gaborone
-Africa/Harare
-Africa/Johannesburg
-Africa/Juba
-Africa/Kampala
-Africa/Khartoum
-Africa/Kigali
-Africa/Kinshasa
-Africa/Lagos
-Africa/Libreville
-Africa/Lome
-Africa/Luanda
-Africa/Lubumbashi
-Africa/Lusaka
-Africa/Malabo
-Africa/Maputo
-Africa/Maseru
-Africa/Mbabane
-Africa/Mogadishu
-Africa/Monrovia
-Africa/Nairobi
-Africa/Ndjamena
-Africa/Niamey
-Africa/Nouakchott
-Africa/Ouagadougou
-Africa/Porto-Novo
-Africa/Sao_Tome
-Africa/Tripoli
-Africa/Tunis
-Africa/Windhoek
-America/Anguilla
-America/Antigua
-America/Araguaina
-America/Argentina/Buenos_Aires
-America/Argentina/Catamarca
-America/Argentina/Cordoba
-America/Argentina/Jujuy
-America/Argentina/La_Rioja
-America/Argentina/Mendoza
-America/Argentina/Rio_Gallegos
-America/Argentina/Salta
-America/Argentina/San_Juan
-America/Argentina/San_Luis
-America/Argentina/Tucuman
-America/Argentina/Ushuaia
-America/Aruba
-America/Asuncion
-America/Atikokan
-America/Bahia
-America/Bahia_Banderas
-America/Barbados
-America/Belem
-America/Belize
-America/Blanc-Sablon
-America/Boa_Vista
-America/Bogota
-America/Cambridge_Bay
-America/Campo_Grande
-America/Cancun
-America/Caracas
-America/Cayenne
-America/Cayman
-America/Chihuahua
-America/Costa_Rica
-America/Creston
-America/Cuiaba
-America/Curacao
-America/Danmarkshavn
-America/Dawson
-America/Dawson_Creek
-America/Dominica
-America/Edmonton
-America/Eirunepe
-America/El_Salvador
-America/Fortaleza
-America/Glace_Bay
-America/Godthab
-America/Goose_Bay
-America/Grand_Turk
-America/Grenada
-America/Guadeloupe
-America/Guatemala
-America/Guayaquil
-America/Guyana
-America/Halifax
-America/Havana
-America/Hermosillo
-America/Inuvik
-America/Iqaluit
-America/Jamaica
-America/Kralendijk
-America/La_Paz
-America/Lima
-America/Lower_Princes
-America/Maceio
-America/Managua
-America/Manaus
-America/Marigot
-America/Martinique
-America/Matamoros
-America/Mazatlan
-America/Merida
-America/Mexico_City
-America/Miquelon
-America/Moncton
-America/Monterrey
-America/Montevideo
-America/Montserrat
-America/Nassau
-America/Nipigon
-America/Noronha
-America/Ojinaga
-America/Panama
-America/Pangnirtung
-America/Paramaribo
-America/Port-au-Prince
-America/Port_of_Spain
-America/Porto_Velho
-America/Puerto_Rico
-America/Rainy_River
-America/Rankin_Inlet
-America/Recife
-America/Regina
-America/Resolute
-America/Rio_Branco
-America/Santa_Isabel
-America/Santarem
-America/Santiago
-America/Santo_Domingo
-America/Sao_Paulo
-America/Scoresbysund
-America/St_Barthelemy
-America/St_Johns
-America/St_Kitts
-America/St_Lucia
-America/St_Thomas
-America/St_Vincent
-America/Swift_Current
-America/Tegucigalpa
-America/Thule
-America/Thunder_Bay
-America/Tijuana
-America/Toronto
-America/Tortola
-America/Vancouver
-America/Whitehorse
-America/Winnipeg
-America/Yellowknife
-Antarctica/Casey
-Antarctica/Davis
-Antarctica/DumontDUrville
-Antarctica/Macquarie
-Antarctica/Mawson
-Antarctica/McMurdo
-Antarctica/Palmer
-Antarctica/Rothera
-Antarctica/Syowa
-Antarctica/Troll
-Antarctica/Vostok
-Arctic/Longyearbyen
-Asia/Aden
-Asia/Almaty
-Asia/Amman
-Asia/Anadyr
-Asia/Aqtau
-Asia/Aqtobe
-Asia/Ashgabat
-Asia/Baghdad
-Asia/Bahrain
-Asia/Baku
-Asia/Bangkok
-Asia/Beirut
-Asia/Bishkek
-Asia/Brunei
-Asia/Choibalsan
-Asia/Chongqing
-Asia/Colombo
-Asia/Damascus
-Asia/Dhaka
-Asia/Dili
-Asia/Dubai
-Asia/Dushanbe
-Asia/Gaza
-Asia/Harbin
-Asia/Hebron
-Asia/Ho_Chi_Minh
-Asia/Hong_Kong
-Asia/Hovd
-Asia/Irkutsk
-Asia/Jakarta
-Asia/Jayapura
-Asia/Jerusalem
-Asia/Kabul
-Asia/Kamchatka
-Asia/Karachi
-Asia/Kashgar
-Asia/Kathmandu
-Asia/Khandyga
-Asia/Kolkata
-Asia/Krasnoyarsk
-Asia/Kuala_Lumpur
-Asia/Kuching
-Asia/Kuwait
-Asia/Macau
-Asia/Magadan
-Asia/Makassar
-Asia/Manila
-Asia/Muscat
-Asia/Nicosia
-Asia/Novokuznetsk
-Asia/Novosibirsk
-Asia/Omsk
-Asia/Oral
-Asia/Phnom_Penh
-Asia/Pontianak
-Asia/Pyongyang
-Asia/Qatar
-Asia/Qyzylorda
-Asia/Rangoon
-Asia/Riyadh
-Asia/Sakhalin
-Asia/Samarkand
-Asia/Seoul
-Asia/Shanghai
-Asia/Singapore
-Asia/Taipei
-Asia/Tashkent
-Asia/Tbilisi
-Asia/Tehran
-Asia/Thimphu
-Asia/Tokyo
-Asia/Ulaanbaatar
-Asia/Urumqi
-Asia/Ust-Nera
-Asia/Vientiane
-Asia/Vladivostok
-Asia/Yakutsk
-Asia/Yekaterinburg
-Asia/Yerevan
-Atlantic/Azores
-Atlantic/Bermuda
-Atlantic/Canary
-Atlantic/Cape_Verde
-Atlantic/Faroe
-Atlantic/Madeira
-Atlantic/Reykjavik
-Atlantic/South_Georgia
-Atlantic/St_Helena
-Atlantic/Stanley
-Australia/Adelaide
-Australia/Brisbane
-Australia/Broken_Hill
-Australia/Currie
-Australia/Darwin
-Australia/Eucla
-Australia/Hobart
-Australia/Lindeman
-Australia/Lord_Howe
-Australia/Melbourne
-Australia/Perth
-Australia/Sydney
-Europe/Amsterdam
-Europe/Andorra
-Europe/Athens
-Europe/Belgrade
-Europe/Berlin
-Europe/Bratislava
-Europe/Brussels
-Europe/Bucharest
-Europe/Budapest
-Europe/Busingen
-Europe/Chisinau
-Europe/Copenhagen
-Europe/Dublin
-Europe/Gibraltar
-Europe/Guernsey
-Europe/Helsinki
-Europe/Isle_of_Man
-Europe/Istanbul
-Europe/Jersey
-Europe/Kaliningrad
-Europe/Kiev
-Europe/Lisbon
-Europe/Ljubljana
-Europe/London
-Europe/Luxembourg
-Europe/Madrid
-Europe/Malta
-Europe/Mariehamn
-Europe/Minsk
-Europe/Monaco
-Europe/Moscow
-Europe/Oslo
-Europe/Paris
-Europe/Podgorica
-Europe/Prague
-Europe/Riga
-Europe/Rome
-Europe/Samara
-Europe/San_Marino
-Europe/Sarajevo
-Europe/Simferopol
-Europe/Skopje
-Europe/Sofia
-Europe/Stockholm
-Europe/Tallinn
-Europe/Tirane
-Europe/Uzhgorod
-Europe/Vaduz
-Europe/Vatican
-Europe/Vienna
-Europe/Vilnius
-Europe/Volgograd
-Europe/Warsaw
-Europe/Zagreb
-Europe/Zaporozhye
-Europe/Zurich
-Indian/Antananarivo
-Indian/Chagos
-Indian/Christmas
-Indian/Cocos
-Indian/Comoro
-Indian/Kerguelen
-Indian/Mahe
-Indian/Maldives
-Indian/Mauritius
-Indian/Mayotte
-Indian/Reunion
-Pacific/Apia
-Pacific/Auckland
-Pacific/Chatham
-Pacific/Chuuk
-Pacific/Easter
-Pacific/Efate
-Pacific/Enderbury
-Pacific/Fakaofo
-Pacific/Fiji
-Pacific/Funafuti
-Pacific/Galapagos
-Pacific/Gambier
-Pacific/Guadalcanal
-Pacific/Guam
-Pacific/Johnston
-Pacific/Kiritimati
-Pacific/Kosrae
-Pacific/Kwajalein
-Pacific/Majuro
-Pacific/Marquesas
-Pacific/Midway
-Pacific/Nauru
-Pacific/Niue
-Pacific/Norfolk
-Pacific/Noumea
-Pacific/Pago_Pago
-Pacific/Palau
-Pacific/Pitcairn
-Pacific/Pohnpei
-Pacific/Port_Moresby
-Pacific/Rarotonga
-Pacific/Saipan
-Pacific/Tahiti
-Pacific/Tarawa
-Pacific/Tongatapu
-Pacific/Wake
-Pacific/Wallis
+America/Los_Angeles		34.0500 N, 118.2500 W
+America/Denver			39.7392 N, 104.9903 W
+America/Phoenix			33.4500 N, 112.0667 W
+America/Chicago			41.8369 N, 87.6847 W
+America/New_York		40.7127 N, 74.0059 W
+America/Adak			51.8720 N, 176.6360 W
+America/Anchorage		61.2167 N, 149.9000 W
+America/Boise			43.6167 N, 116.2000 W
+America/Detroit			42.3314 N, 83.0458 W
+America/Indiana/Indianapolis	39.7910 N, 86.1480 W
+America/Indiana/Knox		41.2942 N, 86.6225 W
+America/Indiana/Marengo		38.3706 N, 86.3433 W
+America/Indiana/Petersburg	38.4917 N, 87.2803 W
+America/Indiana/Tell_City	37.9531 N, 86.7614 W
+America/Indiana/Vevay		38.7458 N, 85.0711 W
+America/Indiana/Vincennes	38.6783 N, 87.5161 W
+America/Indiana/Winamac		41.0500 N, 86.6000 W
+America/Juneau			58.3000 N, 134.4167 W
+America/Kentucky/Louisville	38.2500 N, 85.7667 W
+America/Kentucky/Monticello	36.8381 N, 84.8500 W
+America/Menominee		45.1078 N, 87.6142 W
+America/Metlakatla		55.1269 N, 131.5764 W
+America/Nome			64.5039 N, 165.3994 W
+America/North_Dakota/Beulah	47.2681 N, 101.7772 W
+America/North_Dakota/Center	47.1150 N, 101.3003 W
+America/North_Dakota/New_Salem	46.8431 N, 101.4119 W
+America/Sitka			57.0516 N, 135.3386 W
+America/Yakutat			59.5469 N, 139.7272 W
+Pacific/Honolulu		21.3000 N, 157.8167 W
+Africa/Abidjan			5.3167 N, 4.0333 W
+Africa/Accra			5.5500 N, 0.2000 W
+Africa/Addis_Ababa		9.0300 N, 38.7400 E
+Africa/Algiers			36.7667 N, 3.2167 E
+Africa/Asmara			15.3333 N, 38.9333 E
+Africa/Bamako			12.6500 N, 8.0000 W
+Africa/Bangui			4.3667 N, 18.5833 E
+Africa/Banjul			13.4531 N, 16.5775 W
+Africa/Bissau			11.8500 N, 15.5667 W
+Africa/Blantyre			15.7861 S, 35.0058 E
+Africa/Brazzaville		4.2678 S, 15.2919 E
+Africa/Bujumbura		3.3833 S, 29.3667 E
+Africa/Cairo			30.0500 N, 31.2333 E
+Africa/Casablanca		33.5333 N, 7.5833 W
+Africa/Ceuta			35.8883 N, 5.3156 W
+Africa/Conakry			9.5092 N, 13.7122 W
+Africa/Dakar			14.6928 N, 17.4467 W
+Africa/Dar_es_Salaam		6.8000 S, 39.2833 E
+Africa/Djibouti			11.6000 N, 43.1667 E
+Africa/Douala			4.0500 N, 9.7000 E
+Africa/El_Aaiun			27.1536 N, 13.2033 W
+Africa/Freetown			8.4844 N, 13.2344 W
+Africa/Gaborone			24.6581 S, 25.9122 E
+Africa/Harare			17.8639 S, 31.0297 E
+Africa/Johannesburg		26.2044 S, 28.0456 E
+Africa/Juba			4.8500 N, 31.6000 E
+Africa/Kampala			0.3136 N, 32.5811 E
+Africa/Khartoum			15.6333 N, 32.5333 E
+Africa/Kigali			1.9439 S, 30.0594 E
+Africa/Kinshasa			4.3250 S, 15.3222 E
+Africa/Lagos			6.4531 N, 3.3958 E
+Africa/Libreville		0.3901 N, 9.4544 E
+Africa/Lome			6.1319 N, 1.2228 E
+Africa/Luanda			8.8383 S, 13.2344 E
+Africa/Lubumbashi		11.6667 S, 27.4667 E
+Africa/Lusaka			15.4167 S, 28.2833 E
+Africa/Malabo			3.7500 N, 8.7833 E
+Africa/Maputo			25.9667 S, 32.5833 E
+Africa/Maseru			29.3100 S, 27.4800 E
+Africa/Mbabane			26.3167 S, 31.1333 E
+Africa/Mogadishu		2.0333 N, 45.3500 E
+Africa/Monrovia			6.3133 N, 10.8014 W
+Africa/Nairobi			1.2833 S, 36.8167 E
+Africa/Ndjamena			12.1131 N, 15.0492 E
+Africa/Niamey			13.5214 N, 2.1053 E
+Africa/Nouakchott		18.1000 N, 15.9500 W
+Africa/Ouagadougou		12.3572 N, 1.5353 W
+Africa/Porto-Novo		6.4972 N, 2.6050 E
+Africa/Sao_Tome			0.3361 N, 6.6814 E
+Africa/Tripoli			32.9022 N, 13.1858 E
+Africa/Tunis			36.8000 N, 10.1833 E
+Africa/Windhoek			22.5700 S, 17.0836 E
+America/Anguilla		18.2272 N, 63.0490 W
+America/Antigua			17.1167 N, 61.8500 W
+America/Araguaina		7.1908 S, 48.2069 W
+America/Argentina/Buenos_Aires	34.6033 S, 58.3817 W
+America/Argentina/Catamarca	28.4667 S, 65.7833 W
+America/Argentina/Cordoba	31.4167 S, 64.1833 W
+America/Argentina/Jujuy		24.1833 S, 65.3000 W
+America/Argentina/La_Rioja	29.4125 S, 66.8542 W
+America/Argentina/Mendoza	32.8833 S, 68.8167 W
+America/Argentina/Rio_Gallegos	51.6333 S, 69.2167 W
+America/Argentina/Salta		24.7833 S, 65.4167 W
+America/Argentina/San_Juan	31.5342 S, 68.5261 W
+America/Argentina/San_Luis	33.3000 S, 66.3333 W
+America/Argentina/Tucuman	26.9400 S, 65.3400 W
+America/Argentina/Ushuaia	54.8000 S, 68.3000 W
+America/Aruba			12.5000 N, 69.9667 W
+America/Asuncion		25.2667 S, 57.6333 W
+America/Atikokan		48.7500 N, 91.6167 W
+America/Bahia			12.5200 S, 41.6900 W
+America/Bahia_Banderas		20.6495 N, 105.3822 W
+America/Barbados		13.1667 N, 59.5500 W
+America/Belem			1.4558 S, 48.5039 W
+America/Belize			17.2500 N, 88.7667 W
+America/Blanc-Sablon		51.4167 N, 57.1333 W
+America/Boa_Vista		16.1033 N, 22.8035 W
+America/Bogota			4.5981 N, 74.0758 W
+America/Cambridge_Bay		69.1172 N, 105.0531 W
+America/Campo_Grande		20.4622 S, 54.6111 W
+America/Cancun			21.1606 N, 86.8475 W
+America/Caracas			10.5000 N, 66.9167 W
+America/Cayenne			4.9372 N, 52.3260 W
+America/Cayman			19.3333 N, 81.4000 W
+America/Chihuahua		28.8167 N, 106.4333 W
+America/Costa_Rica		9.9333 N, 84.0833 W
+America/Creston			49.0600 N, 116.3100 W
+America/Cuiaba			15.5958 S, 56.0969 W
+America/Curacao			12.1833 N, 69.0000 W
+America/Danmarkshavn		76.7667 N, 18.6667 W
+America/Dawson			64.0600 N, 139.4108 W
+America/Dawson_Creek		55.7606 N, 120.2356 W
+America/Dominica		15.3000 N, 61.3833 W
+America/Edmonton		53.5333 N, 113.5000 W
+America/Eirunepe		6.6600 S, 69.8739 W
+America/El_Salvador		13.6667 N, 89.1667 W
+America/Fortaleza		3.7183 S, 38.5428 W
+America/Glace_Bay		46.2000 N, 59.9667 W
+America/Godthab			64.1750 N, 51.7389 W
+America/Goose_Bay		53.3019 N, 60.4167 W
+America/Grand_Turk		21.4722 N, 71.1389 W
+America/Grenada			12.0500 N, 61.7500 W
+America/Guadeloupe		16.2500 N, 61.5833 W
+America/Guatemala		14.6133 N, 90.5353 W
+America/Guayaquil		2.1833 S, 79.8833 W
+America/Guyana			5.0000 N, 58.7500 W
+America/Halifax			44.6478 N, 63.5714 W
+America/Havana			23.1333 N, 82.3833 W
+America/Hermosillo		29.0989 N, 110.9542 W
+America/Inuvik			68.3617 N, 133.7306 W
+America/Iqaluit			63.7486 N, 68.5197 W
+America/Jamaica			18.1824 N, 77.3218 W
+America/Kralendijk		12.1507 N, 68.2767 W
+America/La_Paz			16.5000 S, 68.1500 W
+America/Lima			12.0433 S, 77.0283 W
+America/Lower_Princes		18.0528 N, 63.0425 W
+America/Maceio			9.6658 S, 35.7350 W
+America/Managua			12.1364 N, 86.2514 W
+America/Manaus			3.1000 S, 60.0167 W
+America/Marigot			18.0731 N, 63.0822 W
+America/Martinique		14.6667 N, 61.0000 W
+America/Matamoros		25.8797 N, 97.5042 W
+America/Mazatlan		23.2200 N, 106.4200 W
+America/Merida			20.9700 N, 89.6200 W
+America/Mexico_City		19.4333 N, 99.1333 W
+America/Miquelon		46.7833 N, 56.2000 W
+America/Moncton			46.1328 N, 64.7714 W
+America/Monterrey		25.6667 N, 100.3000 W
+America/Montevideo		34.8836 S, 56.1819 W
+America/Montserrat		16.7500 N, 62.2000 W
+America/Nassau			25.0600 N, 77.3450 W
+America/Nipigon			49.0000 N, 88.4167 W
+America/Noronha			3.8538 S, 32.4238 W
+America/Ojinaga			29.5644 N, 104.4164 W
+America/Panama			8.9833 N, 79.5167 W
+America/Pangnirtung		66.1478 N, 65.6994 W
+America/Paramaribo		5.8667 N, 55.1667 W
+America/Port-au-Prince		18.5333 N, 72.3333 W
+America/Port_of_Spain		10.6667 N, 61.5167 W
+America/Porto_Velho		8.7619 S, 63.9039 W
+America/Puerto_Rico		18.4500 N, 66.1000 W
+America/Rainy_River		48.7167 N, 94.5667 W
+America/Rankin_Inlet		62.8097 N, 92.0994 W
+America/Recife			8.0500 S, 34.9000 W
+America/Regina			50.4547 N, 104.6067 W
+America/Resolute		74.6975 N, 94.8322 W
+America/Rio_Branco		9.9747 S, 67.8100 W
+America/Santa_Isabel		17.9661 N, 66.4050 W
+America/Santarem		2.4300 S, 54.7200 W
+America/Santiago		33.4500 S, 70.6667 W
+America/Santo_Domingo		18.4667 N, 69.9500 W
+America/Sao_Paulo		23.5500 S, 46.6333 W
+America/Scoresbysund		70.4853 N, 21.9667 W
+America/St_Barthelemy		17.9000 N, 62.8333 W
+America/St_Johns		47.5675 N, 52.7072 W
+America/St_Kitts		17.2500 N, 62.6667 W
+America/St_Lucia		14.0167 N, 60.9833 W
+America/St_Thomas		18.3333 N, 64.9167 W
+America/St_Vincent		13.2500 N, 61.2000 W
+America/Swift_Current		50.2881 N, 107.7939 W
+America/Tegucigalpa		14.1000 N, 87.2167 W
+America/Thule			76.5311 N, 68.7031 W
+America/Thunder_Bay		48.3822 N, 89.2461 W
+America/Tijuana			32.5250 N, 117.0333 W
+America/Toronto			43.7000 N, 79.4000 W
+America/Tortola			18.4233 N, 64.6181 W
+America/Vancouver		49.2827 N, 123.1207 W
+America/Whitehorse		60.7167 N, 135.0500 W
+America/Winnipeg		49.8994 N, 97.1392 W
+America/Yellowknife		62.4422 N, 114.3975 W
+Antarctica/Casey		66.2817 S, 110.5244 E
+Antarctica/Davis		68.5764 S, 77.9689 E
+Antarctica/DumontDUrville	66.6628 S, 140.0019 E
+Antarctica/Macquarie		54.5000 S, 158.9500 E
+Antarctica/Mawson		67.6000 S, 62.8667 E
+Antarctica/McMurdo		77.8500 S, 166.6667 E
+Antarctica/Palmer		64.7742 S, 64.0531 W
+Antarctica/Rothera		67.5667 S, 68.1333 W
+Antarctica/Syowa		69.0000 S, 39.5833 E
+Antarctica/Troll		72.0114 S, 2.5350 E
+Antarctica/Vostok		78.4639 S, 106.8375 E
+Arctic/Longyearbyen		78.2200 N, 15.6500 E
+Asia/Aden			15.0000 N, 48.0000 E
+Asia/Almaty			43.2775 N, 76.8958 E
+Asia/Amman			31.9497 N, 35.9328 E
+Asia/Anadyr			64.7333 N, 177.5167 E
+Asia/Aqtau			43.6500 N, 51.1500 E
+Asia/Aqtobe			50.2833 N, 57.1667 E
+Asia/Ashgabat			37.9333 N, 58.3667 E
+Asia/Baghdad			33.3333 N, 44.4333 E
+Asia/Bahrain			26.0275 N, 50.5500 E
+Asia/Baku			40.3953 N, 49.8822 E
+Asia/Bangkok			13.7563 N, 100.5018 E
+Asia/Beirut			33.8869 N, 35.5131 E
+Asia/Bishkek			42.8747 N, 74.6122 E
+Asia/Brunei			4.8903 N, 114.9422 E
+Asia/Choibalsan			48.0783 N, 114.5350 E
+Asia/Chongqing			29.5583 N, 106.5667 E
+Asia/Colombo			6.9344 N, 79.8428 E
+Asia/Damascus			33.5131 N, 36.2919 E
+Asia/Dhaka			23.7000 N, 90.3667 E
+Asia/Dili			8.5500 S, 125.5667 E
+Asia/Dubai			25.2048 N, 55.2708 E
+Asia/Dushanbe			38.5367 N, 68.7800 E
+Asia/Gaza			31.4167 N, 34.3333 E
+Asia/Harbin			45.7500 N, 126.6333 E
+Asia/Hebron			31.5333 N, 35.0950 E
+Asia/Ho_Chi_Minh		10.7500 N, 106.6667 E
+Asia/Hong_Kong			22.2783 N, 114.1747 E
+Asia/Hovd			47.0000 N, 92.7500 E
+Asia/Irkutsk			52.3122 N, 104.2958 E
+Asia/Jakarta			6.1745 S, 106.8227 E
+Asia/Jayapura			2.5330 S, 140.7170 E
+Asia/Jerusalem			31.7833 N, 35.2167 E
+Asia/Kabul			34.5333 N, 69.1667 E
+Asia/Kamchatka			57.0000 N, 160.0000 E
+Asia/Karachi			24.8600 N, 67.0100 E
+Asia/Kashgar			39.4667 N, 75.9833 E
+Asia/Kathmandu			27.7000 N, 85.3333 E
+Asia/Khandyga			62.6667 N, 135.6000 E
+Asia/Kolkata			22.5667 N, 88.3667 E
+Asia/Krasnoyarsk		56.0167 N, 93.0667 E
+Asia/Kuala_Lumpur		3.1333 N, 101.6833 E
+Asia/Kuching			1.5600 N, 110.3450 E
+Asia/Kuwait			29.3697 N, 47.9783 E
+Asia/Macau			22.1667 N, 113.5500 E
+Asia/Magadan			59.5667 N, 150.8000 E
+Asia/Makassar			5.1333 S, 119.4167 E
+Asia/Manila			14.5800 N, 121.0000 E
+Asia/Muscat			23.6100 N, 58.5400 E
+Asia/Nicosia			35.1667 N, 33.3667 E
+Asia/Novokuznetsk		53.7500 N, 87.1167 E
+Asia/Novosibirsk		55.0167 N, 82.9333 E
+Asia/Omsk			54.9833 N, 73.3667 E
+Asia/Oral			51.2333 N, 51.3667 E
+Asia/Phnom_Penh			11.5500 N, 104.9167 E
+Asia/Pontianak			0.0000 S, 109.3333 E
+Asia/Pyongyang			39.0194 N, 125.7381 E
+Asia/Qatar			25.3000 N, 51.5167 E
+Asia/Qyzylorda			44.8500 N, 65.5167 E
+Asia/Rangoon			16.8000 N, 96.1500 E
+Asia/Riyadh			24.6333 N, 46.7167 E
+Asia/Sakhalin			51.0000 N, 143.0000 E
+Asia/Samarkand			39.7000 N, 66.9833 E
+Asia/Seoul			37.5667 N, 126.9667 E
+Asia/Shanghai			31.2000 N, 121.5000 E
+Asia/Singapore			1.3000 N, 103.8000 E
+Asia/Taipei			25.0333 N, 121.6333 E
+Asia/Tashkent			41.2667 N, 69.2167 E
+Asia/Tbilisi			41.7167 N, 44.7833 E
+Asia/Tehran			35.6961 N, 51.4231 E
+Asia/Thimphu			27.4667 N, 89.6417 E
+Asia/Tokyo			35.6833 N, 139.6833 E
+Asia/Ulaanbaatar		47.9200 N, 106.9200 E
+Asia/Urumqi			43.8250 N, 87.6000 E
+Asia/Ust-Nera			64.5681 N, 143.2361 E
+Asia/Vientiane			17.9667 N, 102.6000 E
+Asia/Vladivostok		43.1333 N, 131.9000 E
+Asia/Yakutsk			62.0333 N, 129.7333 E
+Asia/Yekaterinburg		56.8333 N, 60.5833 E
+Asia/Yerevan			40.1833 N, 44.5167 E
+Atlantic/Azores			37.7411 N, 25.6756 W
+Atlantic/Bermuda		32.3000 N, 64.7833 W
+Atlantic/Canary			28.1000 N, 15.400 W
+Atlantic/Cape_Verde		15.1111 N, 23.6167 W
+Atlantic/Faroe			62.0000 N, 6.7833 W
+Atlantic/Madeira		32.6511 N, 16.9097 W
+Atlantic/Reykjavik		64.1333 N, 21.9333 W
+Atlantic/South_Georgia		54.2500 S, 36.7500 W
+Atlantic/St_Helena		15.9500 S, 5.7167 W
+Atlantic/Stanley		51.6921 S, 57.8589 W
+Australia/Adelaide		34.9290 S, 138.6010 E
+Australia/Brisbane		27.4667 S, 153.0333 E
+Australia/Broken_Hill		31.9567 S, 141.4678 E
+Australia/Currie		39.9311 S, 143.8506 E
+Australia/Darwin		12.4500 S, 130.8333 E
+Australia/Eucla			31.6750 S, 128.8831 E
+Australia/Hobart		42.8806 S, 147.3250 E
+Australia/Lindeman		20.4500 S, 149.0333 E
+Australia/Lord_Howe		31.5500 S, 159.0833 E
+Australia/Melbourne		37.8136 S, 144.9631 E
+Australia/Perth			31.9522 S, 115.8589 E
+Australia/Sydney		33.8650 S, 151.2094 E
+Europe/Amsterdam		52.3667 N, 4.9000 E
+Europe/Andorra			42.5000 N, 1.5167 E
+Europe/Athens			37.9667 N, 23.7167 E
+Europe/Belgrade			44.8167 N, 20.4667 E
+Europe/Berlin			52.5167 N, 13.3833 E
+Europe/Bratislava		48.1439 N, 17.1097 E
+Europe/Brussels			50.8500 N, 4.3500 E
+Europe/Bucharest		44.4268 N, 26.1025 E
+Europe/Budapest			47.4925 N, 19.0514 E
+Europe/Busingen			47.6969 N, 8.6903 E
+Europe/Chisinau			47.0000 N, 28.9167 E
+Europe/Copenhagen		55.6761 N, 12.5683 E
+Europe/Dublin			53.3478 N, 6.2597 W
+Europe/Gibraltar		36.1430 N, 5.3530 W
+Europe/Guernsey			49.4500 N, 2.5500 W
+Europe/Helsinki			60.1708 N, 24.9375 E
+Europe/Isle_of_Man		54.2500 N, 4.5000 W
+Europe/Istanbul			41.0136 N, 28.9550 E
+Europe/Jersey			49.1900 N, 2.1100 W
+Europe/Kaliningrad		54.7167 N, 20.5167 E
+Europe/Kiev			50.4500 N, 30.5233 E
+Europe/Lisbon			38.7139 N, 9.1394 W
+Europe/Ljubljana		46.0556 N, 14.5083 E
+Europe/London			51.5072 N, 0.1275 W
+Europe/Luxembourg		49.6117 N, 6.1300 E
+Europe/Madrid			40.4000 N, 3.7167 W
+Europe/Malta			35.8833 N, 14.5000 E
+Europe/Mariehamn		60.1000 N, 19.9333 E
+Europe/Minsk			53.9000 N, 27.5667 E
+Europe/Monaco			43.7328 N, 7.4197 E
+Europe/Moscow			55.7500 N, 37.6167 E
+Europe/Oslo			59.9500 N, 10.7500 E
+Europe/Paris			48.8567 N, 2.3508 E
+Europe/Podgorica		42.4413 N, 19.2629 E
+Europe/Prague			50.0833 N, 14.4167 E
+Europe/Riga			56.9489 N, 24.1064 E
+Europe/Rome			41.9000 N, 12.5000 E
+Europe/Samara			53.2028 N, 50.1408 E
+Europe/San_Marino		43.9333 N, 12.4667 E
+Europe/Sarajevo			43.8667 N, 18.4167 E
+Europe/Simferopol		44.9519 N, 34.1022 E
+Europe/Skopje			42.0000 N, 21.4333 E
+Europe/Sofia			42.7000 N, 23.3333 E
+Europe/Stockholm		59.3294 N, 18.0686 E
+Europe/Tallinn			59.4372 N, 24.7453 E
+Europe/Tirane			41.3260 N, 19.8160 E
+Europe/Uzhgorod			48.6239 N, 22.3000 E
+Europe/Vaduz			47.1410 N, 9.5210 E
+Europe/Vatican			41.9033 N, 12.4533 E
+Europe/Vienna			48.2000 N, 16.3667 E
+Europe/Vilnius			54.6833 N, 25.2833 E
+Europe/Volgograd		48.7000 N, 44.5167 E
+Europe/Warsaw			52.2333 N, 21.0167 E
+Europe/Zagreb			45.8167 N, 15.9833 E
+Europe/Zaporozhye		47.8333 N, 35.1667 E
+Europe/Zurich			47.3667 N, 8.5500 E
+Indian/Antananarivo		18.9333 S, 47.5167 E
+Indian/Chagos			6.0000 S, 71.5000 E
+Indian/Christmas		10.4833 S, 105.6333 E
+Indian/Cocos			5.5189 N, 87.0717 W
+Indian/Comoro			12.1400 S, 44.2500 E
+Indian/Kerguelen		49.2500 S, 69.1667 E
+Indian/Mahe			4.6667 S, 55.4667 E
+Indian/Maldives			3.2000 N, 73.2200 E
+Indian/Mauritius		20.2000 S, 57.5000 E
+Indian/Mayotte			12.8431 S, 45.1383 E
+Indian/Reunion			21.1144 S, 55.5325 E
+Pacific/Apia			13.8333 S, 171.7500 W
+Pacific/Auckland		36.8406 S, 174.7400 E
+Pacific/Chatham			44.0333 S, 176.4333 W
+Pacific/Chuuk			7.4167 N, 151.7833 E
+Pacific/Easter			27.1167 S, 109.3667 W
+Pacific/Efate			17.6667 S, 168.4167 E
+Pacific/Enderbury		3.1333 S, 171.0833 W
+Pacific/Fakaofo			9.3653 S, 171.2150 W
+Pacific/Fiji			18.0000 S, 179.0000 E
+Pacific/Funafuti		8.5167 S, 179.2000 E
+Pacific/Galapagos		0.6667 S, 90.5500 W
+Pacific/Gambier			23.1400 S, 134.9400 W
+Pacific/Guadalcanal		9.6167 S, 160.1833 E
+Pacific/Guam			13.5000 N, 144.8000 E
+Pacific/Johnston		41.6714 N, 93.7058 W
+Pacific/Kiritimati		1.8667 N, 157.4000 W
+Pacific/Kosrae			5.3167 N, 162.9833 E
+Pacific/Kwajalein		8.7167 N, 167.7333 E
+Pacific/Majuro			7.0667 N, 171.2667 E
+Pacific/Marquesas		9.4544 S, 139.3889 W
+Pacific/Midway			28.2000 N, 177.3500 W
+Pacific/Nauru			0.5333 S, 166.9333 E
+Pacific/Niue			19.0500 S, 169.9167 W
+Pacific/Norfolk			29.0333 S, 167.9500 E
+Pacific/Noumea			22.2758 S, 166.4580 E
+Pacific/Pago_Pago		14.2794 S, 170.7006 W
+Pacific/Palau			7.5000 N, 134.6167 E
+Pacific/Pitcairn		25.0667 S, 130.1000 W
+Pacific/Pohnpei			6.8500 N, 158.2333 E
+Pacific/Port_Moresby		9.5136 S, 147.2188 E
+Pacific/Rarotonga		21.2333 S, 159.7833 W
+Pacific/Saipan			15.1833 N, 145.7500 E
+Pacific/Tahiti			17.6667 S, 149.4167 W
+Pacific/Tarawa			1.4167 N, 173.0333 E
+Pacific/Tongatapu		21.2114 S, 175.1531 W
+Pacific/Wake			19.3000 N, 166.6333 E
+Pacific/Wallis			13.2667 S, 176.2000 W
