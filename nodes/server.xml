@@ -51,6 +51,11 @@
 <!-- genisoimages to create pallets -->
 <package>genisoimage</package>
 
+<!-- packages required for stack create package -->
+<package>rpm-build</package>
+<package>stack-build</package>
+<package>redhat-rpm-config</package>
+
 <!-- /mnt/cdrom needed to create pallets -->
 <post>
     if [ ! -d /mnt/cdrom ]; then
