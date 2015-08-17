@@ -113,7 +113,7 @@ class Page1(wx.Panel):
 		sizer = createSizer(4, 1, self, "Begin Installation")
 
 		#map image
-		bitmap = wx.Bitmap('./earthmap.bmp')
+		bitmap = wx.Bitmap('/opt/stack/bin/earthmap.bmp')
 		img_w = bitmap.GetWidth()
 		img_h = bitmap.GetHeight()
 		self.control = wx.StaticBitmap(self, -1, bitmap, (10, 5),
@@ -206,7 +206,7 @@ class Page1(wx.Panel):
 				x = img_w + offset
 
 			#draw new bitmap
-			bitmap = wx.Bitmap('./earthmap.bmp')
+			bitmap = wx.Bitmap('/opt/stack/bin/earthmap.bmp')
 			self.dc = wx.MemoryDC(bitmap)
 			self.dc.SetPen(wx.Pen(wx.RED, 1))
 			self.dc.CrossHair(x, y)
