@@ -107,7 +107,7 @@ class Data:
 			self.data.Kickstart_Timezone = zone
 			return (True, "", "")
 
-	def setNetwork(interface, mac, addr, netmask):
+	def setNetwork(self, interface, mac, addr, netmask):
 		# Write ifconfig file
 		lines = [
 			'DEVICE=%s' % interface,
@@ -134,7 +134,7 @@ class Data:
 		cmd = ['/sbin/ifconfig', interface, 'up']
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
-	def setHostname(hostname):
+	def setHostname(self, hostname):
 		hostfile = '/etc/sysconfig/network'
 		f = open(hostfile, 'w')
 		f.write('NETWORKING=yes\n')
@@ -142,7 +142,7 @@ class Data:
 		f.close()
 		os.system('/bin/hostname %s' % hostname)
 
-	def setResolv(domain, servers):
+	def setResolv(self, domain, servers):
 		resolv = '/etc/resolv.conf'
 		f = open(resolv, 'w')
 		f.write('search %s\n' % domain)
@@ -153,7 +153,7 @@ class Data:
 
 	def configNetwork(self):
 		#configure network immediately
-		setNetwork(self.data.Kickstart_PrivateInterface,
+		self.setNetwork(self.data.Kickstart_PrivateInterface,
 			self.data.Kickstart_PrivateEthernet,
 			self.data.Kickstart_PrivateAddress,
 			self.data.Kickstart_PrivateNetmask)
@@ -164,10 +164,10 @@ class Data:
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 		# Set hostname of host to Private Hostname
-		setHostname(self.data.Kickstart_PrivateHostname)
+		self.setHostname(self.data.Kickstart_PrivateHostname)
 
 		# Set resolv.conf
-		setResolv(self.data.Kickstart_PrivateDNSDomain,
+		self.setResolv(self.data.Kickstart_PrivateDNSDomain,
 			self.data.Kickstart_PrivateDNSServers)
 
 	def getDevices(self):
@@ -242,11 +242,11 @@ class Data:
 				self.data.devices.pop(self.data.Kickstart_PrivateInterface)
 
 				if config_net:
-					configNetwork()
+					self.configNetwork()
 
 				return (True, "", "")
 			except:
-				#print traceback.format_exc()
+				print traceback.format_exc()
 				return (False, "Incorrect input", "Input Error")
 
 	def validatePassword(self, pw1, pw2):
