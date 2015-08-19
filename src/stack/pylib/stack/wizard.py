@@ -21,6 +21,7 @@ class Attr:
 	Info_ClusterContact = ""
 	Info_ClusterLatlong = "N32.87 W117.22"
 	Info_ClusterName = ""
+	Info_FQDN = ""
 	Info_ClusterURL = ""
 	Kickstart_DistroDir = "/export/stack"
 	Kickstart_Keyboard = "us"
@@ -72,7 +73,6 @@ class Attr:
 	partition = "Automated"
 	dvdrolls = None
 	netrolls = None
-	network = None
 
 class Data:
 
@@ -164,7 +164,7 @@ class Data:
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 		# Set hostname of host to Private Hostname
-		self.setHostname(self.data.Kickstart_PrivateHostname)
+		self.setHostname(self.data.Info_FQDN)
 
 		# Set resolv.conf
 		self.setResolv(self.data.Kickstart_PrivateDNSDomain,
@@ -194,7 +194,7 @@ class Data:
 
 		fqhn, eth, ip, subnet, gateway, dns = tup
 
-		self.data.Kickstart_PrivateHostname = str(fqhn)
+		self.data.Info_FQDN = str(fqhn)
 		self.data.Kickstart_PrivateInterface = str(eth)
 		self.data.Kickstart_PrivateAddress = str(ip)
 		self.data.Kickstart_PrivateNetmask = str(subnet)
@@ -207,20 +207,20 @@ class Data:
 			self.data.Kickstart_PrivateNetmask or not \
 			self.data.Kickstart_PrivateGateway or not \
 			self.data.Kickstart_PrivateDNSServers or not \
-			self.data.Kickstart_PrivateHostname:
+			self.data.Info_FQDN:
 			return (False, "Please fill out all entries", "Incomplete")
 		else:
 			self.data.Kickstart_PrivateKickstartHost = \
 				self.data.Kickstart_PrivateAddress
 			self.data.Info_ClusterURL = \
-				"http://" + self.data.Kickstart_PrivateHostname + "/"
+				"http://" + self.data.Info_FQDN + "/"
 			#self.data.Kickstart_PrivateHostname =
 			#	self.data.Kickstart_PrivateHostname.split(".")[0]
 
 			#calculate public dns domain
-			n = self.data.Kickstart_PrivateHostname
+			n = self.data.Info_FQDN
 			n = n.split(".")
-			n.pop(0)
+			self.data.Kickstart_PrivateHostname = n.pop(0)
 			dns = ""
 			for i in range(len(n)):
 				dns += n[i]
@@ -314,7 +314,7 @@ class Data:
 			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['id']
 
 		#display summary data
-		summaryStr = 'Hostname: ' + self.data.Kickstart_PrivateHostname + '\n' + \
+		summaryStr = 'Hostname: ' + self.data.Info_FQDN + '\n' + \
 			'Timezone: ' + self.data.Kickstart_Timezone + '\n' + \
 			'Private Device: ' + \
 				self.data.Kickstart_PrivateInterface + '\n' + \
