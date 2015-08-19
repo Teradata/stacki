@@ -3,7 +3,15 @@ import os
 import subprocess
 import stack.media
 import stack.wizard
-import wx
+
+#try to get wxpython
+try:
+	import wx
+except ImportError:
+	HAS_WX = False
+else:
+	HAS_WX = True
+
 import sys
 import traceback
 import urllib2
@@ -725,8 +733,8 @@ for s in sys.argv:
 	elif s == '--noX':
 		noX = True
 
-print str(config_net) + ': set network during boss_config'
-print str(noX) + ': use snack installation instead of wx'
+print 'Set network during boss_config: ' + str(config_net)
+print 'Use snack installation instead of wx: ' + str(noX)
 
 #
 # make sure the DVD is mounted
@@ -734,7 +742,7 @@ print str(noX) + ': use snack installation instead of wx'
 cmd = 'mkdir -p /mnt/cdrom ; mount /dev/cdrom /mnt/cdrom'
 os.system(cmd)
 
-if noX:
+if noX or not HAS_WX:
 	execfile("boss_config_snack.py")
 else:
 	app = wx.App()
