@@ -10,6 +10,7 @@ All rights reserved. stacki(r) v1.0 www.stacki.com
 
 <pre interpreter="/opt/stack/bin/python">
 import sys
+import importlib
 sys.path.append('/opt/stack/lib')
 
 def str2bool(s):
@@ -20,28 +21,49 @@ def str2bool(s):
 
 def getController():
 
-	import controller_storcli
-	ctrl = controller_storcli.StorCLI()
-	adapter = ctrl.getAdapter()
-	if adapter != None:
-		flags = '&storcli.flags;'.split(',')
+	# Check if a controller is listed explicitly
+	controller_type = '&storage.adapter.type;'
+
+	# If controller type is specified, make that
+	# the only possible choice. Otherwise, list
+	# all controllers supported by StackI.
+	if controller_type:
+		ctrl_list = [ controller_type ]
+	else:
+		ctrl_list = ['storcli', 'megacli', 'hpssacli']
+
+	# For all the controllers in the list, cycle
+	# through them to see which adapter is connected.
+	for c in ctrl_list:
+		# We will always correctly import one of the default
+		# controllers. If we fail to import one, then it's
+		# an invalid controller that isn't supported, and
+		# we bail out.
+		try:
+			modulename = 'controller_%s' % c
+			controller = importlib.import_module(modulename)
+		except ImportError:
+			return (None, None, None)
+
+
+		# Once we import, get the CLI, adapter, and flags.
+		ctrl = controller.CLI()
+		adapter = ctrl.getAdapter()
+
+		if not adapter:
+			continue
+		else:
+
+		if c == 'storcli':
+			flags = '&storcli.flags;'
+		if c == 'megacli':
+			flags = '&megacli.flags;'
+		if c == 'hpssacli':
+			flags = '&hpssacli.flags;'
+
 		return (ctrl, adapter, flags)
 
-	import controller_megacli
-	ctrl = controller_megacli.Megacli()
-	adapter = ctrl.getAdapter()
-	if adapter != None:
-		flags = "&mcli.flags;".split(',')
-		return (ctrl, adapter, flags)
-
-	import controller_hpssacli
-	ctrl = controller_hpssacli.Hpssacli()
-	adapter = ctrl.getAdapter()
-	if adapter != None:
-		flags = "&hpcli.flags;".split(',')
-		return (ctrl, adapter, flags)
-
-	return (None, None, None)
+	return(None, None, None)
 
 #
 # only run this code if 'nukecontroller' is true
@@ -198,6 +220,4 @@ for arrayid in arrayids:
 
 </pre>
 
-
 </kickstart> 
-

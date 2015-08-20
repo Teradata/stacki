@@ -2,9 +2,9 @@
 
 from subprocess import *
 
-class Megacli:
+class CLI:
 
-	def megacli(self, args):
+	def run(self, args):
 		cmd = [ '/opt/stack/sbin/MegaCli' ]
 		cmd.extend(args)
 		cmd.extend(['-AppLogFile','/tmp/MegaCli.log'])
@@ -24,13 +24,13 @@ class Megacli:
 		return result
 
 	def doNuke(self, adapter):
-		self.megacli(['-CfgClr', '-a%d' % adapter])
-		self.megacli(['-CfgForeign', '-Clear', '-a%d' % adapter])
-		self.megacli(['-AdpSetProp', 'BootWithPinnedCache', '1',
+		self.run(['-CfgClr', '-a%d' % adapter])
+		self.run(['-CfgForeign', '-Clear', '-a%d' % adapter])
+		self.run(['-AdpSetProp', 'BootWithPinnedCache', '1',
 			'-a%d' % adapter])
 
 	def getAdapter(self):
-		for (k, v) in self.megacli(['-adpCount']):
+		for (k, v) in self.run(['-adpCount']):
 			if k == 'Controller Count':
 				try:
 					controllers = int(v)
@@ -45,7 +45,7 @@ class Megacli:
 		return None
 
 	def getEnclosure(self, adapter):
-		for (k, v) in self.megacli(['-EncInfo', '-a%d' % adapter]):
+		for (k, v) in self.run(['-EncInfo', '-a%d' % adapter]):
 			if k == 'Device ID':
 				return v
 
@@ -53,7 +53,7 @@ class Megacli:
 
 	def getSlots(self, adapter):
 		slots = []
-		for (k, v) in self.megacli(['-PDList', '-a%d' % adapter]):
+		for (k, v) in self.run(['-PDList', '-a%d' % adapter]):
 			if k == 'Slot Number':
 				slots.append(int(v))
 
@@ -80,7 +80,7 @@ class Megacli:
 			cmd.append('-Hsp[%s]' % ','.join(hs))
 
 		cmd.append('-a%d' % adapter)
-		self.megacli(cmd)
+		self.run(cmd)
 
 	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
 		for hotspare in hotspares:
@@ -88,5 +88,5 @@ class Megacli:
 				'[%s:%d]' % (enclosure, hotspare),
 				'-a%d' % adapter ]
 
-			self.megacli(cmd)
+			self.run(cmd)
 

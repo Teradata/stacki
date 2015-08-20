@@ -2,10 +2,10 @@
 
 from subprocess import *
 
-class Hpssacli:
+class CLI:
 	debug = 0
 
-	def hpssacli(self, args):
+	def run(self, args):
 		cmd = [ '/opt/stack/sbin/hpssacli', 'ctrl' ]
 		cmd.extend(args)
 
@@ -24,7 +24,7 @@ class Hpssacli:
 		return result
 
 	def getAdapter(self):
-		result = self.hpssacli([ 'all', 'show' ])
+		result = self.run([ 'all', 'show' ])
 		for line in result:
 			tokens = line[:-1].split()
 			if len(tokens) < 1:
@@ -64,7 +64,7 @@ class Hpssacli:
 		#
 		# the enclosure id is a combination of the 'port' and 'box'
 		#
-		result = self.hpssacli([ 'slot=%d' % adapter, 'physicaldrive',
+		result = self.run([ 'slot=%d' % adapter, 'physicaldrive',
 			'all', 'show' ])
 		for line in result:
 			tokens = line[:-1].split()
@@ -100,7 +100,7 @@ class Hpssacli:
 		#
 		# the slots are the 'bay' value
 		#
-		result = self.hpssacli([ 'slot=%d' % adapter, 'physicaldrive',
+		result = self.run([ 'slot=%d' % adapter, 'physicaldrive',
 			'all', 'show' ])
 		for line in result:
 			tokens = line[:-1].split()
@@ -133,7 +133,7 @@ class Hpssacli:
 		#
 		arrays = []
 
-		result = self.hpssacli([ 'slot=%d' % adapter, 'show',
+		result = self.run([ 'slot=%d' % adapter, 'show',
 			'config' ])
 		for line in result:
 			tokens = line[:-1].split()
@@ -149,7 +149,7 @@ class Hpssacli:
 		return arrays
 
 	def doNuke(self, adapter):
-		result = self.hpssacli([ 'slot=%d' % adapter, 'delete',
+		result = self.run([ 'slot=%d' % adapter, 'delete',
 			'forced', 'override' ])
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
@@ -182,7 +182,7 @@ class Hpssacli:
 		if flags:
 			cmd.extend(flags)
 
-		result = self.hpssacli(cmd)
+		result = self.run(cmd)
 
 		if hotspares:
 			#
@@ -208,7 +208,7 @@ class Hpssacli:
 
 				cmd = [ 'slot=%d' % adapter, 'array', arrayid,
 					'add', 'spares=%s' % ','.join(spares) ]
-				result = self.hpssacli(cmd)
+				result = self.run(cmd)
 
 	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
 		spares = []
@@ -218,5 +218,5 @@ class Hpssacli:
 
 		cmd = [ 'slot=%d' % adapter, 'array', 'all', 'add',
 			'spares=%s' % ','.join(spares) ]
-		result = self.hpssacli(cmd)
+		result = self.run(cmd)
 

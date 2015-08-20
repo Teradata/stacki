@@ -1,9 +1,9 @@
-#!/opt/rocks/bin/python
+#!/opt/stack/bin/python
 
 from subprocess import *
 import json
 
-class StorCLI:
+class CLI:
 
 	def run(self, args, json_out = False):
 		cmd = [ '/opt/stack/sbin/storcli' ]
@@ -40,6 +40,7 @@ class StorCLI:
 	def doNuke(self, adapter):
 		self.run(['/c%d/vall' % adapter,'delete', 'force'])
 		self.run(['/c%d/fall' % adapter,'delete'])
+		self.run(['/c%d' % adapter, 'set', 'jbod=off'])
 		self.run(['/c%d' % adapter, 'set', 'bootwithpinnedcache=on'])
 
 	def getAdapter(self):

@@ -3,7 +3,7 @@
 from subprocess import *
 import json
 
-class StorCLI:
+class CLI:
 
 	def run(self, args, json_out = False):
 		cmd = [ '/opt/stack/sbin/storcli' ]

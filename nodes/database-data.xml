@@ -168,8 +168,8 @@ if os.path.exists('/tmp/site.attrs'):
 <file name="/etc/my.cnf" perms="644" expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-
-/opt/stack/bin/stack set attr attr=mcli.flags value="WB,NORA,Direct,NoCachedBadBBU"
+<!-- Set MegaCLI Flags -->
+/opt/stack/bin/stack set attr attr=megacli.flags value="WB,NORA,Direct,NoCachedBadBBU"
 </post>
 
 </kickstart>
