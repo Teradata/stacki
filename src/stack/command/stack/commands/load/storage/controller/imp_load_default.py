@@ -45,6 +45,7 @@ import csv
 import re
 import sys
 import stack.commands
+from stack.exception import *
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -62,32 +63,23 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		#
 		if slot == None:
 			msg = 'empty value found for "slot" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			CommandError(self, msg)
 		if raid == None:
 			msg = 'empty value found for "raid level" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			CommandError(self, msg)
 		if array == None:
 			msg = 'empty value found for "array id" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			CommandError(self, msg)
 
 		if host not in self.owner.hosts.keys():
 			self.owner.hosts[host] = {}
 
 		if array not in self.owner.hosts[host].keys():
 			self.owner.hosts[host][array] = {}
-		elif raid == 0:
-			#
-			# special case for RAID0 -- each RAID0 must have its
-			# own array id, so if the array id already exists, then
-			# that means there is another array that already has
-			# its array id
-			#
-			msg = 'array id "%s" already exists for RAID0 at line %d' % (array, line)
-			sys.exit((-1, msg, ''))
 
 		if slot == '*' and raid != 0:
 			msg = 'raid level must be "0" when slot is "*". See line %d' % (line)
-			sys.exit((-1, msg, ''))
+			CommandError(self, msg)
 
 		if 'slot' not in self.owner.hosts[host][array].keys():
 			self.owner.hosts[host][array]['slot'] = []
@@ -104,7 +96,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		else:
 			if slot in self.owner.hosts[host][array]['slot']:
 				msg = 'duplicate slot "%s" found in the spreadsheet at line %d' % (slot, line)
-				sys.exit((-1, msg, ''))
+				CommandError(self, msg)
 
 			if raid == 'hotspare':
 				if 'hotspare' not in self.owner.hosts[host][array].keys():
@@ -118,7 +110,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				if raid != self.owner.hosts[host][array]['raid']:
 					msg = 'RAID level mismatch "%s" found in the spreadsheet at line %d' % (raid, line)
-					sys.exit((-1, msg, ''))
+					CommandError(self, msg)
 
 
 	def run(self, args):
@@ -162,7 +154,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				if len(required) > 0:
 					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					sys.exit((-1, msg, ''))
+					CommandError(self, msg)
 
 				continue
 
@@ -186,11 +178,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							slot = int(field)
 						except:
 							msg = 'slot "%s" must be an integer' % field
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 
 						if slot < 0:
 							msg = 'slot "%d" must be 0 or greater' % slot
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 
 				elif header[i] == 'raid level':
 					if field.lower() == 'hotspare':
@@ -200,11 +192,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							raid = int(field)
 						except:
 							msg = 'raid "%s" must be an integer' % field
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 
 						if raid < 0:
 							msg = 'raid "%d" must be 0 or greater' % raid
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 
 				elif header[i] == 'array id':
 					if field.lower() == 'global':
@@ -216,18 +208,18 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							array = int(field)
 						except:
 							msg = 'array "%s" must be an integer' % field
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 
 						if array < 0:
 							msg = 'array "%d" must be 0 or greater' % array
-							sys.exit((-1, msg, ''))
+							CommandError(self, msg)
 						
 			#
 			# the first non-header line must have a host name
 			#
 			if line == 1 and not name:
 				msg = 'empty host name found in "name" column'
-				sys.exit((-1, msg, ''))
+				CommandError(self, msg)
 
 			if name in self.appliances or name == 'global':
 				hosts = [ name ]
@@ -235,8 +227,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				hosts = self.getHostnames([ name ])
 
 			if not hosts:
-				msg = '"%s" is not host nor is it an appliance in the database' % name
-				sys.exit((-1, msg, ''))
+				msg = 'Cannot find "%s"' % name
+				CommandError(self, msg)
 
 			for host in hosts:
 				self.doit(host, slot, raid, array, line)
@@ -249,5 +241,5 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if array != 'global' and len(self.owner.hosts[host][array]['slot']) == 0:
 
 					msg = 'hotspare for "%s" for array "%s" is not associated with a disk array' % (host, array)
-					sys.exit((-1, msg, ''))
+					CommandError(self, msg)
 
