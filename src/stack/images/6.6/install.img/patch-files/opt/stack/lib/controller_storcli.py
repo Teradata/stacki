@@ -40,6 +40,7 @@ class CLI:
 	def doNuke(self, adapter):
 		self.run(['/c%d/vall' % adapter,'delete', 'force'])
 		self.run(['/c%d/fall' % adapter,'delete'])
+		self.run(['/c%d' % adapter, 'set', 'jbod=off'])
 		self.run(['/c%d' % adapter, 'set', 'bootwithpinnedcache=on'])
 
 	def getAdapter(self):
