@@ -10,7 +10,7 @@ def render_timezone(screen):
 	for line in open('/opt/stack/bin/timezones.txt'):
 		line = line.replace('\n', '')
 		line = filter(None, line.split('\t'))
-		cities.append((line[0], line[0]))
+		cities.append(line[0])
 
 	#render window to choose a timezone
 	result = ListboxChoiceWindow(screen, "Stacki Installation", \
