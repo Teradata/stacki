@@ -17,6 +17,13 @@ def banner(string):
 	print string
 	print '#######################################'	
 
+def copy(source, dest):
+	banner("Copying %s to local disk" % source)
+	subprocess.call(['mkdir', '-p', dest])
+	subprocess.call(['mount', '-o', 'loop', source, '/media'])
+	subprocess.call(['cp', '-r', '/media/.', dest])
+	subprocess.call(['umount', '/media'])
+
 def mount(source, dest):
 	subprocess.call(['mkdir', '-p', dest])
 	subprocess.call(['mount', '-o', 'loop', source, dest])
@@ -54,6 +61,8 @@ def repoconfig(ccmnt, osmnt):
 	file.write('gpgcheck=no\n')
 	file.close()
 
+	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
+	
 	file = open('/etc/yum.repos.d/stack.repo' ,'w')
 	file.write('[Stack]\n')
 	file.write('name=Stack\n')
@@ -72,29 +81,51 @@ def ldconf():
 ##
 ## MAIN
 ##
+
+#
+# log all output to a file too
+#
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+tee = subprocess.Popen(["tee", "/tmp/frontend-install.log"],
+	stdin=subprocess.PIPE)
+os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
+os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+
+#
+# process the command line arguments
+#
 print sys.argv[1:]
-if len(sys.argv[1:]) != 6:
-	print "Requires exactly 6 arguments, in order:"
-	print "\tpath to stacki ISO"
+if len(sys.argv[1:]) != 6 and len(sys.argv[1:]) != 7:
+	print "Requires 6 arguments and 1 optional argument, in order:"
 	print "\tstacki short name (usually 'stacki')"
 	print "\tstacki version"
-	print "\tpath to OS ISO"
+	print "\tpath to stacki ISO"
 	print "\tOS short name (eg 'CentOS')"
 	print "\tOS version"
+	print "\tpath to OS ISO DVD1"
+	print "\t(optional path to OS ISO DVD2)"
 	exit()
 
-cciso = sys.argv[1]
-ccname = sys.argv[2]
-ccver = sys.argv[3]
-osiso = sys.argv[4]
-osname = sys.argv[5]
-osver = sys.argv[6]
+ccname = sys.argv[1]
+ccver = sys.argv[2]
+cciso = sys.argv[3]
+osname = sys.argv[4]
+osver = sys.argv[5]
+osiso1 = sys.argv[6]
+if len(sys.argv[1:]) == 7:
+	osiso2 = sys.argv[7]
+else:
+	osiso2 = None
 
 if not os.path.exists(cciso):
 	print "Error: File '{0}' does not exist.".format(cciso)
 	exit()
-if not os.path.exists(osiso):
-	print "Error: File '{0}' does not exist.".format(osiso)
+if not os.path.exists(osiso1):
+	print "Error: File '{0}' does not exist.".format(osiso1)
+	exit()
+if osiso2 and not os.path.exists(osiso2):
+	print "Error: File '{0}' does not exist.".format(osiso2)
 	exit()
 
 banner("Boostrap Stack Command Line")
@@ -102,14 +133,16 @@ banner("Boostrap Stack Command Line")
 # turn off NetworkManager so it doesn't overwrite our networking info
 subprocess.call(['service', 'NetworkManager', 'stop'])
 
-# mount the isos
-ccmnt = '/mnt/cdrom'
-mount(cciso, ccmnt)
-osmnt = '/mnt/disk2'
-mount(osiso, osmnt)
+# copy the isos
+ccdest = '/export/%s' % ccname
+copy(cciso, ccdest)
+osdest = '/export/%s' % osname
+copy(osiso1, osdest)
+if osiso2:
+	copy(osiso2, osdest)
 
 # create repo config file
-repoconfig(ccmnt, osmnt)
+repoconfig(ccdest, osdest)
 
 # install rpms
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
@@ -118,14 +151,16 @@ pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
 installrpms(pkgs)
 
-umount(ccmnt)
-umount(osmnt)
+# cleanup ISO copies
+subprocess.call(['rm', '-rf', ccdest, osdest])
 
 # run stack add pallet on stacki and os iso
 banner("Add pallets")
 stackpath = '/opt/stack/bin/stack'
 subprocess.call([stackpath,'add','pallet',cciso])
-subprocess.call([stackpath,'add','pallet',osiso])
+subprocess.call([stackpath,'add','pallet',osiso1])
+if osiso2:
+	subprocess.call([stackpath,'add','pallet',osiso2])
 
 banner("Create Stack Distro")	
 subprocess.call(['mkdir','-p','/export/stack/distributions/'])
@@ -139,23 +174,29 @@ subprocess.call([a], shell=True, cwd='/export/stack/distributions/')
 banner("Configuring dynamic linker for stacki")
 ldconf()
 
-# execute boss_config.py.  completing this wizard drops /tmp/site.attrs
-banner("Launch Boss-Config")
-mount(cciso, ccmnt)
-subprocess.call(['/opt/stack/bin/python','/opt/stack/bin/boss_config.py'])
-umount(ccmnt)
+if not os.path.exists('/tmp/site.attrs') and not \
+		os.path.exists('/tmp/rolls.xml'):
+	#
+	# execute boss_config.py. completing this wizard creates
+	# /tmp/site.attrs and /tmp/rolls.xml
+	#
+	banner("Launch Boss-Config")
+	mount(cciso, '/mnt/cdrom')
+	subprocess.call(['/opt/stack/bin/python',
+		'/opt/stack/bin/boss_config.py'])
+	umount('/mnt/cdrom')
 	
-# add missing attrs to site.attrs
-f = open("/tmp/site.attrs", "a")
-string= "Kickstart_PrivateKickstartBasedir:distributions\n"
-string+= "Kickstart_Multicast:"+generate_multicast()+"\n"
-string+= "Private_PureRootPassword:a\n"
-string+= "Confirm_Private_PureRootPassword:a\n"
-string+= "Server_Partitioning:force-default-root-disk-only\n"
-string+= "disableServices:\n"
-string+= "serviceList:\n"
-f.write(string)
-f.close()
+	# add missing attrs to site.attrs
+	f = open("/tmp/site.attrs", "a")
+	string= "Kickstart_PrivateKickstartBasedir:distributions\n"
+	string+= "Kickstart_Multicast:"+generate_multicast()+"\n"
+	string+= "Private_PureRootPassword:a\n"
+	string+= "Confirm_Private_PureRootPassword:a\n"
+	string+= "Server_Partitioning:force-default-root-disk-only\n"
+	string+= "disableServices:\n"
+	string+= "serviceList:\n"
+	f.write(string)
+	f.close()
 
 # convert site.attrs to python dict
 f = [line.strip() for line in open("/tmp/site.attrs","r")]
@@ -191,7 +232,9 @@ subprocess.call(['sh','/tmp/run.sh'])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])
-subprocess.call([stackpath, 'add', 'pallet', osiso])
+subprocess.call([stackpath, 'add', 'pallet', osiso1])
+if osiso2:
+	subprocess.call([stackpath, 'add', 'pallet', osiso2])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
 	
 # all done

@@ -45,10 +45,10 @@
 	</order>
 
 	<order head="firewall">
-		<tail>server-firewall</tail>
+		<tail>firewall-server</tail>
 	</order>
 
-	<order tail="server-firewall">
+	<order tail="firewall-server">
 		<head>networking-server</head>
 		<head>database-data</head>
 	</order>
@@ -76,7 +76,7 @@
 		<to>networking-server</to>
 		<to>dhcp-server</to>
 		<to>dns-server</to>
-		<to>server-firewall</to>
+		<to>firewall-server</to>
 		<to>partitions-save-server</to>
 		<to>routes-server</to>
 		<to>kernel-server</to>
@@ -88,7 +88,6 @@
 		<to>ssh-server</to>
 		<to>storage-controller-server</to>
 		<to>dist</to>
-		<to>grub-server</to>
 	</edge>
 
 </graph>

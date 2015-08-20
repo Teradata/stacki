@@ -85,7 +85,8 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert the base appliances into the database -->
 
-/opt/stack/bin/stack add appliance frontend membership=Frontend node=server public=no
+/opt/stack/bin/stack add appliance frontend membership=Frontend node=server \
+	public=no
 /opt/stack/bin/stack add appliance backend  membership=Backend node=backend
 
 <!-- manage firewall rules by default -->
@@ -111,18 +112,11 @@ if os.path.exists('/tmp/site.attrs'):
 	gateway=&Kickstart_PrivateGateway;	\
 	dns=true pxe=true
 
-/opt/stack/bin/stack add network public		\
-	address=&Kickstart_PublicNetwork;	\
-	mask=&Kickstart_PublicNetmask;		\
-	zone=&Kickstart_PublicDNSDomain;	\
-	gateway=&Kickstart_PublicGateway;
-
-
 <!--
 	set the frontend's primary network to be the public network. this
 	network will be used to generate the hostname for the frontend.
 -->
-/opt/stack/bin/stack set host interface default localhost network=public
+# /opt/stack/bin/stack set host interface default localhost network=public
 
 <!-- set default os to whatever the frontend is -->
 
@@ -156,16 +150,9 @@ if os.path.exists('/tmp/site.attrs'):
 	ip=&Kickstart_PrivateAddress;					\
 	name=&Kickstart_PrivateHostname;
 
-<!-- frontend public network -->
-
-/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
-	network=public							\
-	default=true							\
-	interface=&Kickstart_PublicInterface;				\
-	mac=&Kickstart_PublicEthernet;					\
-	ip=&Kickstart_PublicAddress;					\
-	name=&Kickstart_PrivateHostname;
-
+/opt/stack/bin/stack set host interface default &Kickstart_PrivateHostname; \
+	interface=&Kickstart_PrivateInterface;				\
+	default=true
 
 <!-- SSH settings -->
 
