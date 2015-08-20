@@ -51,23 +51,16 @@
 <!-- genisoimages to create pallets -->
 <package>genisoimage</package>
 
+<!-- packages required for stack create package -->
+<package>rpm-build</package>
+<package>stack-build</package>
+<package>redhat-rpm-config</package>
+
 <!-- /mnt/cdrom needed to create pallets -->
 <post>
     if [ ! -d /mnt/cdrom ]; then
         mkdir -p /mnt/cdrom
     fi
-</post>
-<post>
-<!-- optionally set the airboss attribute -->
-
-AIRBOSS=`/bin/cat /proc/cmdline | /bin/awk \
-	'BEGIN {RS="[[:space:]]"; FS="="} /airboss/{print $2}'`
-
-if [ "$AIRBOSS" != "" ]
-then
-	/opt/stack/bin/stack add host attr localhost attr=airboss value=$AIRBOSS
-fi
-
 </post>
 
 <post>

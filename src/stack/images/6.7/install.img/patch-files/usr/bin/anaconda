@@ -1,0 +1,578 @@
+#!/bin/sh
+#
+# $Id$
+#
+# @Copyright@
+#  				Rocks(r)
+#  		         www.rocksclusters.org
+#  		         version 5.4 (Maverick)
+#  
+# Copyright (c) 2000 - 2010 The Regents of the University of California.
+# All rights reserved.	
+#  
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#  
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#  
+# 2. Redistributions in binary form must reproduce the above copyright
+# notice unmodified and in its entirety, this list of conditions and the
+# following disclaimer in the documentation and/or other materials provided 
+# with the distribution.
+#  
+# 3. All advertising and press materials, printed or electronic, mentioning
+# features or use of this software must display the following acknowledgement: 
+#  
+# 	"This product includes software developed by the Rocks(r)
+# 	Cluster Group at the San Diego Supercomputer Center at the
+# 	University of California, San Diego and its contributors."
+# 
+# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
+# neither the name or logo of this software nor the names of its
+# authors may be used to endorse or promote products derived from this
+# software without specific prior written permission.  The name of the
+# software includes the following terms, and any derivatives thereof:
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# the associated name, interested parties should contact Technology 
+# Transfer & Intellectual Property Services, University of California, 
+# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
+# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
+#  
+# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# @Copyright@
+#
+# $Log$
+# Revision 1.35  2011/01/05 19:00:53  bruno
+# Properly report disk partitions into the database for software RAID file
+# systems.
+#
+# Increase installation speeds for clients with software RAID file systems.
+#
+# Revision 1.34  2010/09/16 19:54:00  bruno
+# mount /export on /tmp/ram2 instead of /dev/ram2. this avoids a benign error
+# message from mknod.
+#
+# Revision 1.33  2010/09/07 23:53:05  bruno
+# star power for gb
+#
+# Revision 1.32  2010/03/03 22:00:34  bruno
+# call 'peer-done' to tell the avalanche tracker that this node is no longer
+# available to serve files
+#
+# Revision 1.31  2009/05/01 19:07:05  mjk
+# chimi con queso
+#
+# Revision 1.30  2008/10/18 00:55:59  mjk
+# copyright 5.1
+#
+# Revision 1.29  2008/07/18 20:49:07  bruno
+# now have ability to build any appliance from rocks 'boot:' prompt. just
+# type 'bulid appliance=xml-node-name', for example:
+# 'build appliance=vm-container-sever'
+#
+# change 'boot:' directive of 'frontend' to 'build'
+#
+# Revision 1.28  2008/03/06 23:41:41  mjk
+# copyright storm on
+#
+# Revision 1.27  2008/01/18 19:31:28  bruno
+# sshd is now started during an install on V
+#
+# Revision 1.26  2007/12/20 21:58:59  bruno
+# fixes for RHEL 5 update 1
+#
+# Revision 1.25  2007/12/13 02:53:40  bruno
+# can now build a bootable kernel CD and build a physical frontend with V
+# on RHEL 5 update 1
+#
+# Revision 1.24  2007/12/10 21:28:34  bruno
+# the base roll now contains several elements from the HPC roll, thus
+# making the HPC roll optional.
+#
+# this also includes changes to help build and configure VMs for V.
+#
+# Revision 1.23  2007/06/23 04:03:22  mjk
+# mars hill copyright
+#
+# Revision 1.22  2006/09/11 22:47:09  mjk
+# monkey face copyright
+#
+# Revision 1.21  2006/08/10 00:09:31  mjk
+# 4.2 copyright
+#
+# Revision 1.20  2006/06/21 02:23:27  bruno
+# remove debug code
+#
+# Revision 1.19  2006/06/15 21:25:54  bruno
+# tweaks for vnc-based installation console
+#
+# Revision 1.18  2006/06/05 17:57:36  bruno
+# first steps towards 4.2 beta
+#
+# Revision 1.17  2006/01/27 22:29:43  bruno
+# stable (mostly) after integration of new foundation and localization code
+#
+# Revision 1.16  2006/01/25 22:22:55  bruno
+# compute nodes build again
+#
+# Revision 1.15  2005/10/12 18:08:38  mjk
+# final copyright for 4.1
+#
+# Revision 1.14  2005/10/04 21:20:47  bruno
+# use kgen to determine if /tmp/ks.cfg is 'raw' (XML) or 'cooked' (valid redhat
+# kickstart file)
+#
+# Revision 1.13  2005/10/04 16:45:54  bruno
+# compute nodes now run kgen to produce the final kickstart file.
+#
+# Revision 1.12  2005/09/16 01:02:18  mjk
+# updated copyright
+#
+# Revision 1.11  2005/08/25 16:43:12  bruno
+# after the installation is complete, send the 'done' message to the tracker
+#
+# Revision 1.10  2005/08/19 05:44:21  bruno
+# final touches on bittorrent code
+#
+# Revision 1.9  2005/08/18 01:52:58  bruno
+# no longer need to start the bittorrent seeder
+#
+# Revision 1.8  2005/07/27 01:54:38  bruno
+# checkpoint
+#
+# Revision 1.7  2005/05/24 21:21:53  mjk
+# update copyright, release is not any closer
+#
+# Revision 1.6  2005/04/06 22:29:40  bruno
+# take out the sun v60x installation optimization code
+#
+# Revision 1.5  2005/03/31 04:39:48  bruno
+# backout cleanliness
+#
+# Revision 1.4  2005/03/31 01:20:39  bruno
+# mask all ugly output
+#
+# Revision 1.3  2005/03/29 02:43:10  bruno
+# make sure path to lib64 is set for all python paths
+#
+# Revision 1.2  2005/03/12 00:01:51  bruno
+# minor checkin
+#
+# Revision 1.62  2005/02/14 21:58:42  bruno
+# make sure all the disks are 'bootable' (that is, visible to the kernel)
+# before calling the real anaconda.
+#
+# also, removed an 'echo' statement
+#
+# Revision 1.61  2004/08/25 05:25:40  bruno
+# move from ssh v1 to ssh v2
+#
+# (bug 17)
+#
+# Revision 1.60  2004/06/18 21:46:18  bruno
+# move ekv from port 22 to port 2200
+#
+# Revision 1.59  2004/05/06 21:58:36  fds
+# Rescue mode works.
+#
+# Revision 1.58  2004/04/22 17:08:54  bruno
+# reconfigure sshd in anaconda in order to support secure ekv
+#
+# Revision 1.57  2004/04/21 06:21:03  bruno
+# needed to nuke /etc/rpm/platform in the installation environment in order
+# for athlons to be properly detected
+#
+# Revision 1.56  2004/04/16 05:38:44  bruno
+# fixes for secure wan ekv
+#
+# Revision 1.55  2004/04/14 02:50:33  bruno
+# cleanup on loader.c regarding central installs
+#
+# can now do secure ekv for frontends
+#
+# initial cluster database needs 'module' initialized in networks table
+#
+# Revision 1.54  2004/03/25 03:15:39  bruno
+# touch 'em all!
+#
+# update version numbers to 3.2.0 and update copyrights
+#
+# Revision 1.53  2004/03/02 23:48:17  bruno
+# eject the CD at the appropriate time
+#
+# Revision 1.52  2004/02/25 18:40:54  bruno
+# ekv once again looks beautiful
+#
+# Revision 1.51  2004/02/11 22:08:01  bruno
+# old commits that should have been done when 3.1.0 came out
+#
+# Revision 1.50  2004/02/06 02:33:59  fds
+# For WAN ks.
+#
+# Revision 1.49  2003/11/16 17:03:54  bruno
+# make re-inserting adaptec driver quiet
+#
+# Revision 1.48  2003/11/07 20:27:54  bruno
+# fix to speed up installation on v60x
+#
+# Revision 1.47  2003/10/15 22:19:47  bruno
+# fixes for taroon
+#
+# Revision 1.46  2003/10/01 02:11:15  bruno
+# fixes for anaconda 9
+#
+# Revision 1.45  2003/09/24 17:08:45  fds
+# Bruno's changes for RH 9
+#
+# Revision 1.44  2003/08/15 22:34:46  mjk
+# 3.0.0 copyright
+#
+# Revision 1.43  2003/07/17 23:08:03  bruno
+# pushing towards 2.3.3
+#
+# Revision 1.42  2003/07/12 00:50:25  bruno
+# tweaks
+#
+# Revision 1.41  2003/07/07 20:28:52  bruno
+# roll enablers
+#
+# Revision 1.40  2003/05/22 16:39:27  mjk
+# copyright
+#
+# Revision 1.39  2003/02/17 18:43:04  bruno
+# updated copyright to 2003
+#
+# Revision 1.38  2002/10/18 21:33:26  mjk
+# Rocks 2.3 Copyright
+#
+# Revision 1.37  2002/10/09 23:45:12  bruno
+# had to add to PYTHONPATH in order to pick up the rocks python modules
+#
+# Revision 1.36  2002/10/03 14:08:18  bruno
+# send draino's stderr to /dev/null -- this cleans up some error messages
+# that could be seen with telnet sessions that don't negotiate options quite
+# like we'd expect
+#
+# Revision 1.35  2002/07/03 23:27:30  bruno
+# updates for 7.3
+#
+# Revision 1.34  2002/07/02 00:36:26  bruno
+# latest changes -- still working towards the right script
+#
+# Revision 1.33  2002/06/25 23:38:26  bruno
+# latest for 7.3
+#
+# Revision 1.32  2002/06/17 19:50:02  bruno
+# 7.3-isms
+#
+# Revision 1.31  2002/02/21 21:33:27  bruno
+# added new copyright
+#
+# Revision 1.30  2002/02/21 21:11:44  bruno
+# fixes for partitioning
+#
+# Revision 1.29  2002/01/23 21:33:48  bruno
+# oops -- forgot to nuke the '/bin/sh' debug at the end
+#
+# Revision 1.28  2002/01/23 21:33:24  bruno
+# need full pathname for anaconda.real
+#
+# Revision 1.27  2002/01/18 23:32:57  bruno
+# fixes for 7.2
+#
+# Revision 1.26  2001/10/01 20:55:15  bruno
+# pxe changes
+#
+# Revision 1.25  2001/07/28 23:29:07  bruno
+# changes for new patched loader that natively get the ks.cfg with http
+#
+# Revision 1.24  2001/06/30 00:56:29  bruno
+# get kickstart server by gawkin' through skeleton kickstart file that is
+# in initrd.img
+#
+# Revision 1.23  2001/06/28 22:25:25  bruno
+# changed ekv to deal with new watchdog mechanism from 'cluster-config'
+#
+# Revision 1.22  2001/06/14 22:29:40  bruno
+# removed debug
+#
+# Revision 1.21  2001/06/14 22:27:36  bruno
+# anaconda now gets ks.cfg with wget calling kickstart.cgi.
+#
+# Revision 1.20  2001/06/14 20:56:14  mjk
+# More IA64 changes
+#
+#
+
+ROCKPATH=/tmp/updates/stack
+export PATH=$PATH:$ROCKPATH/bin:/tmp/updates/usr/sbin:/tmp/updates/sbin:/tmp/updates/usr/bin
+
+echo "PATH=$PATH:$ROCKPATH/bin" >> /.profile
+echo "export PATH" >> /.profile
+
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/updates/lib:/tmp/updates/usr/lib64:/tmp/updates/usr/lib" >> /.profile
+echo "export LD_LIBRARY_PATH" >> /.profile
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/updates/lib:/tmp/updates/usr/lib64:/tmp/updates/usr/lib:/lib64_old:/lib_old
+export LD_LIBRARY_PATH
+
+FOUNDATION=`/opt/stack/bin/python -c "
+import sys
+import string
+print string.join(sys.path, ':')
+"`
+
+INSTALLEDPYTHON=`python -c "
+import sys
+import string
+print string.join(sys.path, ':')
+"`
+
+#
+# before calling the real anaconda, blow away the 'platform' file.
+# this causes anaconda to correctly detect the processor
+# (e.g., i686 vs. athlon)
+#
+rm -f /etc/rpm/platform
+
+#
+# make sure there is a home directory for root
+#
+mkdir -p /root
+
+#
+# make sure anaconda can see the disks
+#
+/opt/stack/bin/make-bootable-disks > /dev/null 2>&1
+
+#
+# configure up sshd for the install environment
+#
+echo "Port 2200
+ListenAddress 0.0.0.0
+HostDSAKey /tmp/ssh_host_dsa_key
+HostKey /tmp/ssh_install_host_key
+AuthorizedKeysFile /tmp/authorized_keys
+ServerKeyBits 768
+LoginGraceTime 600
+KeyRegenerationInterval 3600
+IgnoreRhosts yes
+StrictModes no
+X11Forwarding no
+X11DisplayOffset 10
+PrintMotd no
+KeepAlive yes
+SyslogFacility DAEMON
+RhostsRSAAuthentication no
+RSAAuthentication yes
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin yes
+UseLogin no
+UsePrivilegeSeparation no" > /tmp/sshd_install_config
+
+echo "sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin" \
+	>> /etc/passwd
+
+#
+# if one of the partitions is a software raid and if the raid is in a
+# "dirty" state, mdadm will try to 'resync' the disks to ensure all the
+# data is protected.
+#
+# on a running system, this is a great thing to do. 
+#
+# on an installing system, it slows the install down considerably.
+#
+# i haven't found a way to disable the 'resync' action for mdadm, but we can
+# extremely throttle back the top rebuild speed.
+#
+echo 1 > /proc/sys/dev/raid/speed_limit_min
+echo 2 > /proc/sys/dev/raid/speed_limit_max
+
+#
+# translate an XML-based kickstart file into a redhat compliant one
+#
+if [ -f /tmp/ks.cfg ]
+then
+	#
+	# save off the kickstart file as 'ks.xml'. on client nodes, we'll
+	# modify this ks.xml with the appropriate partitioning info
+	#
+	if [ ! -f /tmp/ks.xml ]
+	then
+		cp /tmp/ks.cfg /tmp/ks.xml
+	fi
+
+	cat /tmp/ks.xml | \
+		/opt/stack/bin/stack list host profile 2> /tmp/kgen.debug | \
+		/opt/stack/bin/stack list host installfile section=kickstart \
+		> /tmp/k 2>> /tmp/kgen.debug
+
+	if [ $? = 0 ]
+	then 
+		mv /tmp/k /tmp/ks.cfg
+	fi
+fi
+
+#
+# make sure a dummy /tmp/partition-info file exists, otherwise the
+# installer will throw an exception
+#
+touch /tmp/partition-info
+
+
+rescue()
+{
+	#
+	# start the shell so the user can issue rescue commands
+	#
+	echo "Rescue Mode: Starting shell..."
+	echo
+	# Dont ask. RedHat's rescue mode is brain-damaged.
+	rm -f /etc/group
+	rm -f /etc/services
+	rm -f /etc/nsswitch.conf
+	rm -f /etc/protocols
+
+	/opt/stack/lib/anaconda_stack.py $* --rescue \
+		--method=http://localhost/mnt/cdrom
+}
+
+start_sshd()
+{
+	#
+	# startup an ssh server
+	#
+	/sbin/ssh-keygen -t rsa1 -b 1024 -f /tmp/ssh_install_host_key -N "" > \
+		/dev/null 2>&1
+	/sbin/ssh-keygen -d -f /tmp/ssh_host_dsa_key -N "" > /dev/null 2>&1
+
+	case "`/usr/bin/uname -m`" in
+	x86_64)
+		lib="/lib64/security"
+		;;
+	*)
+		lib="/lib/security"
+		;;
+	esac
+
+	echo "sshd auth       required     $lib/pam_permit.so" > /etc/pam.conf
+	echo "sshd account    required     $lib/pam_permit.so" >> /etc/pam.conf
+	echo "sshd password   required     $lib/pam_permit.so" >> /etc/pam.conf
+	echo "sshd session    required     $lib/pam_permit.so" >> /etc/pam.conf
+
+	/sbin/sshd -f /tmp/sshd_install_config >> /tmp/ssh.debug 2>&1
+}
+
+ekv()
+{
+	#
+	# startup anaconda in the pty wrapper
+	#
+	unset LD_PRELOAD
+	unset LANG
+	unset LANGUAS
+	export TERM=vt100
+
+	csp "pty-wrapper.py $* | /usr/bin/tee /dev/console | \
+		detach \"draino | detour -p 8000\" 2> /dev/null "
+}
+
+server()
+{
+	#
+	# this function is called when setting up a server, like a frontend
+	#
+	mkdir /export
+	mount -t ramfs -o size=256m ext4 /export
+	
+	grep -q "ekv" /proc/cmdline
+	if [ $? -eq 0 ]; then
+		start_sshd
+		EKV="ekv"
+	else
+		EKV=""
+	fi
+
+	echo "#!/sbin/bash
+/opt/stack/lib/anaconda_stack.py $*
+if [ -f /tmp/rolls.xml ] ; then
+	# Change the method as well. Needed for WAN kickstart.
+	rm -f /sbin/mpath_prio_*
+	/opt/stack/lib/anaconda_stack.py \
+		--stage2 http://localhost/install/distributions/default/x86_64/images/install.img \
+		--kickstart /tmp/ks.cfg \
+		--graphical \
+		--noselinux \
+		--lang en_US \
+		--keymap us \
+		--repo http://localhost/install/distributions/default/x86_64
+fi
+/usr/bin/killall --quiet pty-wrapper.py" > /tmp/stack-install.sh
+
+	chmod a+x /tmp/stack-install.sh
+	$EKV /tmp/stack-install.sh
+}
+
+client()
+{
+	#
+	# this function is called when setting up a client, like a
+	# compute node
+	#
+	start_sshd
+
+	PARAMS=`echo $* | sed 's/http:\/\/[^/]*\//http:\/\/127.0.0.1\//g'`
+
+	echo "ekv /opt/stack/lib/anaconda_stack.py $PARAMS" >> /tmp/ekv.debug
+
+	ekv /opt/stack/lib/anaconda_stack.py $PARAMS
+
+	#
+	# before exiting, tell the Avalanche tracker that this node is no
+	# longer serving files 
+	#
+	/opt/stack/bin/peer-done
+}
+
+
+MODE=""
+
+grep -q "build" /proc/cmdline
+if [ $? -eq 0 ]; then
+	MODE="server"
+fi
+
+grep -q "rescue" /proc/cmdline
+if [ $? -eq 0 ]; then
+	MODE="rescue"
+fi
+
+case "$MODE" in
+server)
+	server $*
+	;;
+rescue)
+	rescue
+	;;
+*)
+	client $* 
+	;;
+esac
+
+
+/usr/bin/killall --quiet lighttpd
+

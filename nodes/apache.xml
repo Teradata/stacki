@@ -52,7 +52,7 @@ KeepAlive On
 KeepAliveTimeout 5
 
 UseCanonicalName Off
-ServerName ]]>&Kickstart_PublicHostname;<![CDATA[
+ServerName ]]>&Info_FQDN;<![CDATA[
 
 DirectoryIndex index.cgi
 
@@ -63,23 +63,6 @@ DirectoryIndex index.cgi
 	Allow from all
 </Directory>
 
-<Directory "/var/www/html/proc">
-	Options FollowSymLinks Indexes ExecCGI
-	AllowOverride None
-	Order deny,allow
-	Allow from ]]>&Kickstart_PrivateNetwork;/&Kickstart_PrivateNetmask;<![CDATA[
-	Allow from 127.0.0.1
-	Deny from all
-</Directory>
-
-<Directory "/var/www/html/pxelinux">
-	Options FollowSymLinks Indexes ExecCGI
-	AllowOverride None
-	Order deny,allow
-	Allow from ]]>&Kickstart_PrivateNetwork;/&Kickstart_PrivateNetmask;<![CDATA[
-	Allow from 127.0.0.1
-	Deny from all
-</Directory>
 ]]>
 </file>
 
