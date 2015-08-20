@@ -10,7 +10,6 @@ All rights reserved. stacki(r) v1.0 www.stacki.com
 
 <pre interpreter="/opt/stack/bin/python">
 import sys
-import importlib
 sys.path.append('/opt/stack/lib')
 
 def str2bool(s):
@@ -41,7 +40,7 @@ def getController():
 		# we bail out.
 		try:
 			modulename = 'controller_%s' % c
-			controller = importlib.import_module(modulename)
+			controller = __import__(modulename)
 		except ImportError:
 			return (None, None, None)
 
@@ -50,18 +49,18 @@ def getController():
 		ctrl = controller.CLI()
 		adapter = ctrl.getAdapter()
 
-		if not adapter:
+		if adapter == None:
 			continue
+
 		else:
+			if c == 'storcli':
+				flags = '&storcli.flags;'
+			if c ==	'megacli':
+				flags = '&megacli.flags;'
+			if c == 'hpssacli':
+				flags = '&hpssacli.flags;'
 
-		if c == 'storcli':
-			flags = '&storcli.flags;'
-		if c == 'megacli':
-			flags = '&megacli.flags;'
-		if c == 'hpssacli':
-			flags = '&hpssacli.flags;'
-
-		return (ctrl, adapter, flags)
+			return (ctrl, adapter, flags)
 
 	return(None, None, None)
 
