@@ -26,7 +26,7 @@ ST=&Info_CertificateState;/\
 L=&Info_CertificateLocality;/\
 O=&Info_CertificateOrganization;/\
 OU=&Info_ClusterName;/\
-CN=&Kickstart_PublicHostname;" \
+CN=&Info_FQDN;" \
 	&gt; certs/localhost.csr ; \
 chmod 0400 private/localhost.key
 )

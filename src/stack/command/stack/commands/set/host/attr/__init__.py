@@ -168,7 +168,7 @@ class Command(stack.commands.set.attr.command, stack.commands.set.host.command):
 
 		for host in hosts:
 			s = None
-			if self.str2bool(shadow):
+			if shadow:
 				s = value
 			args = (host, scope, attr, value, s)
 			self.runPlugins(args)

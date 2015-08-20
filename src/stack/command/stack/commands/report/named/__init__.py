@@ -180,6 +180,19 @@ class Command(stack.commands.report.command):
 		
 		fwds = self.db.getHostAttr('localhost',
                 	'Kickstart_PublicDNSServers')
+		if not fwds:
+			#
+			# in the case of only one interface on the frontend,
+			# then Kickstart_PublicDNSServers will not be
+			# defined and Kickstart_PrivateDNSServers will have
+			# the correct DNS servers
+			#
+			fwds = self.db.getHostAttr('localhost',
+				'Kickstart_PrivateDNSServers')
+
+			if not fwds:
+				return
+
 		forwarders = string.join(fwds.split(','), ';')
 		s += config_preamble % (forwarders)
                 
