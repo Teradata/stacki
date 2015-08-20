@@ -121,7 +121,7 @@ def render_pallets(screen, data):
 		result = ButtonChoiceWindow(screen, "Error", \
 			"Please insert or mount a pallets DVD",
 			buttons=['Ok', 'Cancel'])
-		res = (result, "none")
+		result = (result, "none")
 	else:
 		#create form
 		g = GridForm(screen, "Stacki Installation", 1, 3)
