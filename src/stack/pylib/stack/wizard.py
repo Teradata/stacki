@@ -299,9 +299,9 @@ class Data:
 		if count == 0:
 			return (False, "Please select a pallet", "Error")
 		else:
-			if dvdlist > 0:
+			if len(dvdlist) > 0:
 				self.data.dvdrolls = dvdlist
-			if netlist > 0:
+			if len(netlist) > 0:
 				self.data.netrolls = netlist
 			return (True, "", "")
 
@@ -309,7 +309,13 @@ class Data:
 
 		#string of pallets
 		text = ""
-		pallets = self.data.dvdrolls
+		pallets = []
+
+		if self.data.dvdrolls:
+			pallets.extend(self.data.dvdrolls)
+		if self.data.netrolls:
+			pallets.extend(self.data.netrolls)
+
 		for p in pallets:
 			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['id']
 
@@ -347,13 +353,14 @@ class Data:
 		#create xml elements and write rolls.xml
 		#write rolls from dvd
 		rolls = Element('rolls')
-		for w in self.data.dvdrolls:
-			roll = SubElement(rolls, 'roll', \
-				name=w['name'], \
-				version=w['version'], \
-				arch='x86_64', \
-				url='http://127.0.0.1/mnt/cdrom/', \
-				diskid=w['id'])
+		if self.data.dvdrolls:
+			for w in self.data.dvdrolls:
+				roll = SubElement(rolls, 'roll', \
+					name=w['name'], \
+					version=w['version'], \
+					arch='x86_64', \
+					url='http://127.0.0.1/mnt/cdrom/', \
+					diskid=w['id'])
 
 		#write rolls from network
 		if self.data.netrolls:
