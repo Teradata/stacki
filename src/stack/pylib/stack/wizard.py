@@ -299,6 +299,9 @@ class Data:
 		if count == 0:
 			return (False, "Please select a pallet", "Error")
 		else:
+			self.data.dvdrolls = []
+			self.data.netrolls = []
+
 			if len(dvdlist) > 0:
 				self.data.dvdrolls = dvdlist
 			if len(netlist) > 0:
