@@ -430,6 +430,9 @@ class Page6(wx.Panel):
 		self.list1.InsertColumn(2, 'Id', width = 100)
 		self.list1.InsertColumn(3, 'Network', width = 170)
 
+		#keep track of loading pallets
+		self.pallets = []
+
 		#get pallets from pallets
 		packages = data.getDVDPallets()
 
@@ -581,8 +584,8 @@ class AddPalletsDialog(wx.Dialog):
 	def OnUrlLoad(self, event):
 		try:
 			if not self.urlText.Value:
-				wx.MessageBox('Please enter a URL to the location " + \
-					"of pallets', 'Incomplete',
+				wx.MessageBox('Please enter a URL to the location ' + \
+					'of pallets', 'Incomplete',
 					wx.OK | wx.ICON_ERROR)
 				return
 			else:
