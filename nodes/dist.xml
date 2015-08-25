@@ -24,9 +24,12 @@ mkdir -p /export/stack/contrib/default/$VERSION/$ARCH/RPMS
 chmod 775 /export/stack/contrib/default/$VERSION/$ARCH/RPMS
 chown root:apache /export/stack/contrib/default/$VERSION/$ARCH/RPMS
 
-mkdir -p /export/stack/site-profiles/default/$VERSION/graphs/default
-chmod 775 /export/stack/site-profiles/default/$VERSION/graphs/default
-chown root:apache /export/stack/site-profiles/default/$VERSION/graphs/default
+mkdir -p /export/stack/site-profiles/default/$VERSION/graphs/default  
+chmod 775 /export/stack/site-profiles/default/$VERSION/graphs/default 
+chown root:apache /export/stack/site-profiles/default/$VERSION/graphs/default 
+
+mkdir -p /export/stack/carts
+chown root:apache /export/stack/carts
 </post>
 
 <boot order="post">

@@ -159,6 +159,10 @@ class DistributionBuilder(Builder):
     def setResolveVersions(self, resolve):
 	    self.doResolve = resolve
 
+    def setCarts(self, list):
+            if list:
+                    self.carts = list
+                    
     def setRolls(self, list, only=0):
 	    if list:
 		    for e in list:
@@ -252,8 +256,9 @@ class DistributionBuilder(Builder):
 	    for mirror in self.dist.getMirrors():
 		    rpms.extend(mirror.getRPMS())
 	    if not self.onlyRolls:
-	    	rpms.extend(self.dist.getContribRPMS())
-	    	rpms.extend(self.dist.getLocalRPMS())
+		    rpms.extend(self.dist.getCartRPMS())
+	    	    rpms.extend(self.dist.getContribRPMS())
+	    	    rpms.extend(self.dist.getLocalRPMS())
 	    if not os.path.isdir(self.dist.getForceRPMSPath()):
 		    os.makedirs(self.dist.getForceRPMSPath())
 	    else:

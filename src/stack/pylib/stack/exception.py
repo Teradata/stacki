@@ -42,10 +42,9 @@
 import types
 import string
 
-class CommandError(Exception):
+class StackError(Exception):
 
-        def __init__(self, cmd, msg):
-                self.cmd = cmd
+	def __init__(self, msg):
                 self.msg = msg
 
         def __str__(self):
@@ -53,7 +52,13 @@ class CommandError(Exception):
 
         def message(self):
                 return self.msg
+        
 
+class CommandError(StackError):
+
+        def __init__(self, cmd, msg):
+                self.cmd = cmd
+                super(CommandError, self).__init__(msg)
 
 class UsageError(CommandError):
         
@@ -137,6 +142,6 @@ class ParamType(ParamError):
 class ParamValue(ParamError):
 
         def __init__(self, cmd, param, value):
-                super(ParamInteger, self).__init__(cmd, param, 'must be %s' % value)
+                super(ParamValue, self).__init__(cmd, param, 'must be %s' % value)
 
         

@@ -102,7 +102,7 @@ import stack.build
 class Implementation(stack.commands.Implementation):
 
 	def run(self, args):
-		(dist, inplace, resolve, md5, root, rolls) = args
+		(dist, inplace, resolve, md5, root, rolls, carts) = args
 
 		if not inplace:
 			path = os.path.join(root, 'distributions')
@@ -144,6 +144,7 @@ class Implementation(stack.commands.Implementation):
 
 		builder.setResolveVersions(resolve)
 		builder.setRolls(rolls)
+		builder.setCarts(carts)
 		builder.setSiteProfiles(True)
 		builder.setMD5(md5)
 		builder.build()

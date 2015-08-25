@@ -107,8 +107,8 @@ class Command(command):
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host compute-0-0'>
-	List info for compute-0-0.
+	<example cmd='list host backend-0-0'>
+	List info for backend-0-0.
 	</example>
 
 	<example cmd='list host'>
@@ -116,71 +116,23 @@ class Command(command):
 	</example>
 	"""
 	def run(self, params, args):
-
-		order,  = self.fillParams([ ('order', 'asc') ])
-
-		self.beginOutput()
-
-		# Get the hostname of the frontend
-
-#		frontend_list = self.getHostnames(['frontend'])
-		frontend_list = []
-		frontend_list.append('localhost')
-
-		# If we have the redis module try to find the frontend
-		# on which the Redis server is running.
-
-		validRedisConnection = False
-		try:
-			import redis
-			for frontend in frontend_list:
-				try:
-					r = redis.StrictRedis(host=frontend)
-					temp = r.info()
-					validRedisConnection = True
-					break
-				except:
-					pass
-		except:
-			pass
-
-                dict = {}
-                self.db.execute("""
-	                select n.name, n.rack, n.rank, n.cpus, a.name, d.name,
-			n.runaction, n.installaction from
-			nodes n, appliances a, distributions d where 
-			n.appliance=a.id and n.distribution=d.id
-			""")
-                for row in self.db.fetchall():
-                        dict[row[0]] = row[1:]
-                        
+            
+		(order, ) = self.fillParams([ ('order', 'asc') ])
+                
                 hosts = self.getHostnames(args, order=order)
+            
+		header = [ 'host' ]
+                values = { }
                 for host in hosts:
-			(rack, rank, 
-			 cpus, 
-			 appliance, distribution,
-			 runaction, installaction) = dict[host]
+                        values[host] = [ ]
+                        
+                for (provides, result) in self.runPlugins(hosts):
+                        header.extend(result['keys'])
+                        for h,v in result['values'].items():
+                                values[h].extend(v)
 
-			if validRedisConnection:
-				status = r.get('host:%s:status' % host)
-				self.addOutput(host, [ rack, rank,
-					cpus, appliance, distribution,
-					runaction, installaction, status])
-			else:
-				self.addOutput(host, [ rack, rank,
-					cpus, appliance, distribution,
-					runaction, installaction] )
+                self.beginOutput()
+                for host in hosts:
+			self.addOutput(host, values[host])
+                self.endOutput(header = header, trimOwner=False)
 
-		if validRedisConnection:
-			self.endOutput(header = ['host', 
-					 'rack', 'rank', 
-					 'cpus',
-					 'appliance', 'distribution',
-					 'runaction', 'installaction',
-					 'status'])
-		else:
-			self.endOutput(header = ['host',
-					'rack', 'rank',
-					'cpus',
-					'appliance', 'distribution',
-					'runaction', 'installaction'])

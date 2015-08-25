@@ -93,50 +93,58 @@
 # @Copyright@
 
 import os
-import re
-import socket
-import string
 import cgi
+import syslog
+import json
 import stack.api
+
+syslog.openlog('setPxeBoot.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 #
 # get the name of the node that is issuing the request
 #
-ipaddr = ''
+ipaddr = None
 if os.environ.has_key('REMOTE_ADDR'):
 	ipaddr = os.environ['REMOTE_ADDR']
+if not ipaddr:
+        sys.exit(-1)
+        
+syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
 
+# 'params' field should be a python dictionary of the form:
 #
-# Check for the requested action (if any) and sanitize.
-# Defaults to 'os'.
+# { 'action': value }
 #
+# It is json encoded for transport to keep things simple, and
+# help us only treat the values as data.
 
 form = cgi.FieldStorage()
+params = None
+action = None
 try:
-	action = form['action'].value
+	params = form['params'].value
+        try:
+                params = json.loads(params)
+        	try:
+	        	action = params['action']
+        	except:
+		        syslog.syslog(syslog.LOG_ERR, 'no action speficied')
+        except:
+                syslog.syslog(syslog.LOG_ERR, 'invalid params %s' % params)
 except:
-	action = None
-if not action or re.search('[^a-zA-Z0-9 _-.]+', action):
-	action = 'os'
+        syslog.syslog(syslog.LOG_ERR, 'missing params')
 
-#
-# convert the requesting IP address into a simple hostname (only the hostname
-# and not a FQDN)
-#
-(name, aliaslist, ipaddrlist) = socket.gethostbyaddr(ipaddr)
-host = string.split(name, '.')[0]
+        
+# The above let's us set the boot action to anything (e.g. 'install') but
+# here we lock thing down to only allow a reset to 'os'.
 
-#
-# set the host boot off its local disk
-#
+if action == 'os':
+	stack.api.Call('set host boot', [ ipaddr, 'action=%s' % action ])
 
-stack.api.Call('set host boot', [ host, 'action=%s' % action ])
-
-#
-# send a web response back to the node
-#
+        
 print 'Content-type: application/octet-stream'
 print 'Content-length: %d' % (len(''))
 print ''
 print ''
 
+syslog.closelog()

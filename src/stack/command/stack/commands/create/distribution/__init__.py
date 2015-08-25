@@ -152,6 +152,23 @@ class Command(stack.commands.create.command,
 	<related>remove distribution</related>
 	"""
 
+	def getCarts(self, dist):
+		"""
+		Get a list of carts used to build this distribution
+		"""
+
+		carts = []
+		self.db.execute("""
+			select c.name from
+			cart_stacks s, distributions d, carts c where
+			s.distribution = d.id and s.cart = c.id and
+			d.name='%s'
+			""" % dist)
+		for name,  in self.db.fetchall():
+			carts.append(name)
+
+		return carts
+        
 	def getRolls(self, dist):
 		"""
 		Get a list of pallets used to build this distribution
@@ -230,7 +247,8 @@ class Command(stack.commands.create.command,
 						 resolve,
 						 md5,
 						 root,
-						 rolls])
+						 rolls,
+                                                 carts ])
 
 			if not inplace:
 				#

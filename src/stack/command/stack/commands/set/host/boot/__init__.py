@@ -230,10 +230,17 @@ class Command(stack.commands.set.host.command):
 			#
 			import pwd
 			import grp
-			
-			os.chown(filename, pwd.getpwnam('root').pw_uid,
-				grp.getgrnam('apache').gr_gid)
-			os.chmod(filename, 0664)
+
+                        uid = pwd.getpwnam('root').pw_uid
+			gid = grp.getgrnam('apache').gr_gid
+                        try:
+                                os.chown(filename, uid, gid)
+                        except OSError:
+                                pass
+                        try:
+				os.chmod(filename, 0664)
+                        except OSError:
+                                pass
 
 
 	def writePxebootCfg(self, host, action):

@@ -24,7 +24,7 @@ then
 fi
 
 $CURL --insecure -o /dev/null \
-	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi
+	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
 
 </post>
 

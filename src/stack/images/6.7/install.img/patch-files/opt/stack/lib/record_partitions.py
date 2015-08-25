@@ -5,6 +5,7 @@ import stack_partition
 import httplib
 import random
 import time
+import json
 import string
 
 
@@ -17,7 +18,7 @@ def sendit(server, req, nodepartinfo):
 	h = httplib.HTTPSConnection(server, key_file = None, cert_file = None)
 	h.putrequest('GET', '/install/sbin/public/setDbPartitions.cgi')
 
-	h.putheader('X-Stack-PartitionInfo', repr(nodepartinfo))
+	h.putheader('X-Stack-PartitionInfo', json.dumps(nodepartinfo))
 
 	try:
 		h.endheaders()

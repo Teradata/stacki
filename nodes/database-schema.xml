@@ -263,11 +263,32 @@ grant select on cluster.node_routes to ''@'%.local';
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
   Distribution	int(11) NOT NULL default '1',
-  Roll		int(11) NOT NULL
+  Roll		int(11) NOT NULL 
 ) TYPE=MyISAM;
 
 grant select on cluster.stacks to ''@'localhost';
 grant select on cluster.stacks to ''@'%.local';
+
+DROP TABLE IF EXISTS cart_stacks;
+CREATE TABLE cart_stacks (
+  Distribution	int(11) NOT NULL default '1',
+  Cart		int(11) NOT NULL 
+) TYPE=MyISAM;
+
+grant select on cluster.cart_stacks to ''@'localhost';
+grant select on cluster.cart_stacks to ''@'%.local';
+
+<!-- Carts -->
+
+DROP TABLE IF EXISTS carts;
+CREATE TABLE carts (
+  ID 		int(11) NOT NULL auto_increment,
+  Name		varchar(128) NOT NULL default '',
+  PRIMARY KEY (ID) 
+) TYPE=MyISAM;
+
+grant select on cluster.carts to ''@'localhost';
+grant select on cluster.carts to ''@'%.local';
 
 <!-- Roll.  What Rolls are installed and used by default. -->
 
@@ -279,7 +300,7 @@ CREATE TABLE rolls (
   Rel		varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default 'redhat',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID) 
 ) TYPE=MyISAM;
 
 grant select on cluster.rolls to ''@'localhost';

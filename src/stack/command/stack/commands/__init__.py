@@ -311,7 +311,28 @@ class NetworkArgumentProcessor:
 
 		return netname
 	
+class CartArgumentProcessor:
+        """An Interface class to add the ability to process cart arguments."""
+
+        def getCartNames(self, args, params):
 	
+		list = []
+		if not args:
+			args = [ '%' ] # find all cart names
+		for arg in args:
+			rows = self.db.execute("""
+                        	select name from carts
+                                where name like binary '%s'
+				""" % arg)
+			if rows == 0 and arg == '%': # empty table is OK
+				continue
+			if rows < 1:
+				raise CommandError(self, 'unknown cart "%s"' % arg)
+			for (name, ) in self.db.fetchall():
+				list.append(name)
+		return list
+
+        
 class RollArgumentProcessor:
 	"""An Interface class to add the ability to process pallet arguments."""
 	
@@ -346,7 +367,7 @@ class RollArgumentProcessor:
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
-				raise CommandError(self, 'unknown pallet name "%s"' % arg)
+				raise CommandError(self, 'unknown pallet "%s"' % arg)
 			for (name, ver, rel) in self.db.fetchall():
 				list.append((name, ver, rel))
 				
@@ -2170,9 +2191,13 @@ class Command:
 	def runPlugins(self, args='', plugins=None):
 		if not plugins:
 			plugins = self.loadPlugins()
+                results = [ ]
 		for plugin in plugins:
                         Log('run %s' % plugin)
-			plugin.run(args)
+                        retval = plugin.run(args)
+                        if not retval == None:
+                                results.append((plugin.provides(), retval))
+                return results
 
 
 

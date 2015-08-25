@@ -152,7 +152,7 @@ class Command(stack.commands.list.command):
                         try:
                         	__import__(module)
                         except ImportError:
-                                raise CommandError(self, '%s missing __init__.py' % module)
+                                raise CommandError(self, '%s import failed (missing or bad file)' % module)
 			module = eval(module)
 			
 			try:

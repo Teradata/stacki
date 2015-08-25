@@ -1,6 +1,7 @@
 #!/opt/stack/bin/python
 #
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -52,73 +53,15 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.16  2010/09/07 23:53:07  bruno
-# star power for gb
-#
-# Revision 1.15  2009/05/01 19:07:07  mjk
-# chimi con queso
-#
-# Revision 1.14  2008/10/18 00:56:01  mjk
-# copyright 5.1
-#
-# Revision 1.13  2008/03/06 23:41:44  mjk
-# copyright storm on
-#
-# Revision 1.12  2007/12/10 21:28:35  bruno
-# the base roll now contains several elements from the HPC roll, thus
-# making the HPC roll optional.
-#
-# this also includes changes to help build and configure VMs for V.
-#
-# Revision 1.11  2007/06/23 04:03:23  mjk
-# mars hill copyright
-#
-# Revision 1.10  2006/09/11 22:47:17  mjk
-# monkey face copyright
-#
-# Revision 1.9  2006/08/10 00:09:38  mjk
-# 4.2 copyright
-#
-# Revision 1.8  2006/01/16 06:48:59  mjk
-# fix python path for source built foundation python
-#
-# Revision 1.7  2005/10/12 18:08:40  mjk
-# final copyright for 4.1
-#
-# Revision 1.6  2005/09/16 01:02:19  mjk
-# updated copyright
-#
-# Revision 1.5  2005/09/13 19:26:21  bruno
-# move to foundation
-#
-# Revision 1.4  2005/05/24 21:21:55  mjk
-# update copyright, release is not any closer
-#
-# Revision 1.3  2005/05/23 23:59:24  fds
-# Frontend Restore
-#
-# Revision 1.2  2005/04/28 21:47:24  bruno
-# partitioning function updates in order to support itanium.
-#
-# itanics need 'parted' as 'sfdisk' only looks at block 0 on a disk and
-# itanics put their real partition info in block 1 (this is the GPT partitioning
-# scheme)
-#
-# Revision 1.1  2005/03/01 02:02:49  mjk
-# moved from core to base
-#
-# Revision 1.1  2005/02/14 21:53:04  bruno
-# added setDbPartitions.cgi for phil's phartitioning phun
-#
-#
-#
+
 
 import os
 import shlex
 import subprocess
+import json
+import syslog
 import stack.sql
+
 
 class App(stack.sql.Application):
 
@@ -172,36 +115,51 @@ class App(stack.sql.Application):
 
         def run(self):
 
-		host = ''
+		ipaddr = None
 		if os.environ.has_key('REMOTE_ADDR'):
-                	host = os.environ['REMOTE_ADDR']
+                	ipaddr = os.environ['REMOTE_ADDR']
+                if not ipaddr:
+                        return
 
+        	syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
+                
 		if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
-			partinfo = \
-				eval(os.environ['HTTP_X_STACK_PARTITIONINFO'])
 
-			cmd = """/opt/stack/bin/stack remove host partition
-				%s""" % host
-			c = shlex.split(cmd)
-			p = subprocess.Popen(c, stdout=None, stderr=None)
-			rc = p.wait()
+			partinfo = os.environ['HTTP_X_STACK_PARTITIONINFO']
+                        try:
+				partinfo = json.loads(partinfo)
+                        except:
+                                syslog.syslog(syslog.LOG_ERR, 'invalid partinfo %s' % partinfo)
+                                partinfo = None
 
-			self.connect()
+                        if partinfo:
+#                                syslog.syslog(syslog.LOG_INFO, 'partinfo %s' % partinfo)
+                                
+                                p = subprocess.Popen( [ '/opt/stack/bin/stack',
+                                                        'remove',
+                                                        'host',
+                                                        'partition',
+                                                        ipaddr ], stdout=None, stderr=None)
+                                rc = p.wait()
 
-			inserts = []
-			for disk in partinfo.keys():
-				for part in partinfo[disk]:
-					inserts.append(self.setPartitionInfo(host, part))
+                                self.connect()
 
-			for insert in inserts:
-				self.execute(insert)
+                                inserts = []
+                                for disk in partinfo.keys():
+                                        for part in partinfo[disk]:
+                                                inserts.append(self.setPartitionInfo(ipaddr, part))
 
-			self.close()
+                                for insert in inserts:
+                                        self.execute(insert)
 
-		os.system('/opt/stack/bin/stack set host attr ' +\
-			'%s attr=nukedisks value=false' % host)
-		os.system('/opt/stack/bin/stack set host attr ' +\
-			'%s attr=nukecontroller value=false' % host)
+                                self.close()
+
+                # The following attributes are one shot booleans and
+                # should always be reset even if the partinfo was corrupt.
+                
+		os.system('/opt/stack/bin/stack set host attr %s attr=nukedisks value=false' % ipaddr)
+		os.system('/opt/stack/bin/stack set host attr %s attr=nukecontroller value=false' % ipaddr)
+                
 		print 'Content-type: application/octet-stream'
 		print 'Content-length: %d' % (len(''))
 		print ''
@@ -209,6 +167,7 @@ class App(stack.sql.Application):
 
 		return
 
+syslog.openlog('setDbPartitions.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
 app = App()
 app.run()
-
+syslog.close()
