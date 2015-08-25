@@ -13,9 +13,6 @@ To change the version/release info:
 logout, log back in
 
 	cd src/stack/pylib
-	edit version.mk
-		change STACK_VERSION
-		change STACK_RELEASE
 	make install-rpm
 
 	cd src/stack/command
