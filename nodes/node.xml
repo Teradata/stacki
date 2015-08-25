@@ -35,13 +35,22 @@ gawk '/net\.ipv4\.ip_forward/ { \
 } \
 { print $0 }' /etc/sysctl.conf &gt; /tmp/sysctl.conf
 mv /tmp/sysctl.conf /etc/sysctl.conf
+</post>
 
+<post cond="'&release;' == '6.x'">
 <file name="/etc/man.config" mode="append">
 MANPATH /opt/stack/man
 MANPATH /opt/stack/share/man
 </file>
 </post>
 
+<post cond="'&release;' == '7.x'">
+<file name="/etc/man_db.conf" mode="append">
+MANDATORY_MANPATH /opt/stack/man
+MANDATORY_MANPATH /opt/stack/share/man
+</file>
+
+</post>
 
 </kickstart> 
 
