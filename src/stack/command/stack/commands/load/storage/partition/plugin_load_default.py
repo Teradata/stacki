@@ -55,6 +55,11 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 	def run(self, args):
 		hosts = args
 		for host in hosts.keys():
+			#
+			# first remove the entries for this host
+			#
+			self.owner.call('remove.storage.partition', [ host ])
+
 			# Get list of devices for this host
 			devices = hosts[host].keys()
 			devices.sort()
