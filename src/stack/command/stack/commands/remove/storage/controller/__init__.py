@@ -145,7 +145,7 @@ class Command(stack.commands.remove.command,
 				enclosure = int(enclosure)
 			except:
                                 raise ParamType(self, 'enclosure', 'integer')
-			if adapter < 0:
+			if enclosure < 0:
                                 raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
@@ -157,8 +157,8 @@ class Command(stack.commands.remove.command,
 					s = int(s)
 				except:
                                         raise ParamType(self, 'slot', 'integer')
-				if s < 1:
-                                        raise ParamValue(self, 'slot', '> 0')
+				if s < 0:
+                                        raise ParamValue(self, 'slot', '>= 0')
 				if s in slots:
                                         raise ParamError(self, 'slot', '"%s" is listed twice' % s)
 				slots.append(s)

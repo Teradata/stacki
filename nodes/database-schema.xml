@@ -448,7 +448,8 @@ CREATE TABLE storage_controller (
  Enclosure	int(11) NOT NULL,
  Slot		int(11) NOT NULL,
  RaidLevel	int(11) NOT NULL,
- ArrayID	int(11) NOT NULL
+ ArrayID	int(11) NOT NULL,
+ Options	varchar(512) NOT NULL default ''
 ) TYPE=MyISAM;
 
 grant select on cluster.storage_controller to ''@'localhost';

@@ -91,6 +91,14 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 					cmdargs.append('slot=%s'
 						% ','.join(slots))
 
+				if 'enclosure' in hosts[host][array].keys():
+					enclosure = hosts[host][array]['enclosure'].strip()
+					cmdargs.append('enclosure=%s' % enclosure)
+
+				if 'options' in hosts[host][array].keys():
+					options = hosts[host][array]['options']
+					cmdargs.append('options="%s"' % options)
+
 				if 'hotspare' in hosts[host][array].keys():
 					hotspares = []
 					for hotspare in hosts[host][array]['hotspare']:
