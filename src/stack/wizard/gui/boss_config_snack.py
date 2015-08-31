@@ -139,7 +139,7 @@ def render_pallets(screen, data):
 			ct.addItem(line, (0, snackArgs['append']))
 
 		#create buttons
-		bb = ButtonBar(screen, (("Conitnue", "continue"), ("Back", "back")))
+		bb = ButtonBar(screen, (("Continue", "continue"), ("Back", "back")))
 
 		#add elements to form
 		g.add(tb, 0, 0)
@@ -185,7 +185,10 @@ def process_data(page, btn_value, result):
 
 	#check button pressed and process accordingly
 	if btn_value == 'back':
-		page = page - 1
+		if page == 5 and no_partition:
+			page = page - 2
+		else:
+			page = page - 1
 	elif btn_value == 'cancel':
 		page = 10
 	elif btn_value == 'ok':
@@ -229,7 +232,10 @@ def process_data(page, btn_value, result):
 			ButtonChoiceWindow(screen, title, message,
 				buttons=['Ok'])
 		else:
-			page += 1
+			if page == 3 and no_partition:
+				page += 2
+			else:
+				page += 1
 	return page
 
 def render(screen, page, data):
@@ -254,6 +260,7 @@ def render(screen, page, data):
 
 #begin
 config_net = True
+no_partition = False
 screen = SnackScreen()
 page = 1
 data = stack.wizard.Data()
@@ -262,6 +269,8 @@ data = stack.wizard.Data()
 for s in sys.argv:
 	if s == '--no-net-reconfig':
 		config_net = False
+	if s == '--no-partition':
+		no_partition = True
 
 #loop until the last page
 while page < 7:

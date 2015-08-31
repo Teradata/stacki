@@ -352,7 +352,10 @@ class Page4(wx.Panel):
 		if not validated:
 			wx.MessageBox(message, title, wx.OK | wx.ICON_ERROR)	
 		else:
-			wx.PostEvent(self.parent, PageChangeEvent(page=Page5))
+			if not no_partition:
+				wx.PostEvent(self.parent, PageChangeEvent(page=Page5))
+			else:
+				wx.PostEvent(self.parent, PageChangeEvent(page=Page6))
 
 	def OnPage2(self, event):
 		wx.PostEvent(self.parent, PageChangeEvent(page=Page2))
@@ -525,7 +528,10 @@ class Page6(wx.Panel):
 			wx.PostEvent(self.parent, PageChangeEvent(page=Page7))
 
 	def OnPage5(self, event):
-		wx.PostEvent(self.parent, PageChangeEvent(page=Page5))
+		if not no_partition:
+			wx.PostEvent(self.parent, PageChangeEvent(page=Page5))
+		else:
+			wx.PostEvent(self.parent, PageChangeEvent(page=Page4))
 
 class AddPalletsDialog(wx.Dialog):
 	def __init__(self, *args, **kw):
@@ -729,15 +735,19 @@ class Boss(wx.Frame):
 #
 config_net = True
 noX = False
+no_partition = False
 
 for s in sys.argv:
 	if s == '--no-net-reconfig':
 		config_net = False
 	elif s == '--noX':
 		noX = True
+	elif s == '--no-partition':
+		no_partition = True
 
 print 'Set network during boss_config: ' + str(config_net)
 print 'Use snack installation instead of wx: ' + str(noX)
+print 'Disable partitioning: ' + str(no_partition)
 
 #
 # make sure the DVD is mounted
@@ -746,7 +756,7 @@ cmd = 'mkdir -p /mnt/cdrom ; mount /dev/cdrom /mnt/cdrom'
 os.system(cmd)
 
 if noX or not HAS_WX:
-	execfile("boss_config_snack.py")
+	execfile("/opt/stack/bin/boss_config_snack.py")
 else:
 	app = wx.App()
 	app.TopWindow = Boss(None, title='Stacki Installation')
