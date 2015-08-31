@@ -57,7 +57,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, slot, raid, array, line):
+	def doit(self, host, slot, enclosure, raid, array, options, line):
 		#
 		# error checking
 		#
@@ -76,6 +76,13 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		if array not in self.owner.hosts[host].keys():
 			self.owner.hosts[host][array] = {}
+
+		if options:
+			self.owner.hosts[host][array]['options'] = options
+
+		if enclosure:
+			self.owner.hosts[host][array]['enclosure'] = enclosure
+
 
 		if slot == '*' and raid != 0:
 			msg = 'raid level must be "0" when slot is "*". See line %d' % (line)
@@ -161,6 +168,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			slot = None
 			raid = None
 			array = None
+			options = None
+			enclosure = None
 
 			for i in range(0, len(row)):
 				field = row[i].strip()
@@ -213,7 +222,15 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						if array < 0:
 							msg = 'array "%d" must be 0 or greater' % array
 							CommandError(self, msg)
-						
+
+				elif header[i] == 'options':
+					if field:
+						options = field
+
+				elif header[i] == 'enclosure':
+					if field:
+						enclosure = field
+
 			#
 			# the first non-header line must have a host name
 			#
@@ -231,7 +248,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				CommandError(self, msg)
 
 			for host in hosts:
-				self.doit(host, slot, raid, array, line)
+				self.doit(host, slot, enclosure, raid, array, options, line)
 
 		#
 		# do final validation

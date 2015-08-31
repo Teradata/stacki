@@ -42,27 +42,16 @@ def getController():
 			modulename = 'controller_%s' % c
 			controller = __import__(modulename)
 		except ImportError:
-			return (None, None, None)
+			return (None, None)
 
 
-		# Once we import, get the CLI, adapter, and flags.
+		# Once we import, get the CLI, adapter
 		ctrl = controller.CLI()
 		adapter = ctrl.getAdapter()
 
-		if adapter == None:
-			continue
+		return (ctrl, adapter)
 
-		else:
-			if c == 'storcli':
-				flags = '&storcli.flags;'
-			if c ==	'megacli':
-				flags = '&megacli.flags;'
-			if c == 'hpssacli':
-				flags = '&hpssacli.flags;'
-
-			return (ctrl, adapter, flags)
-
-	return(None, None, None)
+	return(None, None)
 
 #
 # only run this code if 'nukecontroller' is true
@@ -71,9 +60,8 @@ if not str2bool('&nukecontroller;'):
 	sys.exit(0)
 
 # Get the Controller Object, the adapter info,
-# and CLI flags
 
-(ctrl, adapter, flags) = getController()
+(ctrl, adapter) = getController()
 
 
 if ctrl == None:
@@ -114,6 +102,7 @@ for arrayid in arrayids:
 	raidlevel = None
 	enclosure = None
 	adapter = None
+	options = ''
 		
 	for o in output:
 		if o['arrayid'] != arrayid:
@@ -141,6 +130,8 @@ for arrayid in arrayids:
 
 			if raidlevel != 'hotspare':
 				raidlevel = int(o['raidlevel'])
+		if 'options' in o.keys():
+			options  = o['options']
 
 	if not adapter:
 		adapter = ctrl.getAdapter()
@@ -157,7 +148,7 @@ for arrayid in arrayids:
 	if len(slots) == 1 and slots[0] == '*':
 		for slot in freeslots:
 			ctrl.doRaid(raidlevel, adapter, enclosure, [ slot ],
-				hotspares, flags)
+				hotspares, options)
 		freeslots = []
 	else:
 		for slot in slots:
@@ -172,7 +163,7 @@ for arrayid in arrayids:
 		#
 		if raidlevel != 'hotspare' and arrayid != 'global':
 			ctrl.doRaid(raidlevel, adapter, enclosure, slots,
-				hotspares, flags)
+				hotspares, options)
 
 #
 # do the global hot spares last

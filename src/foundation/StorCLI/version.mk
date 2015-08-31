@@ -1,2 +1,2 @@
 NAME	= storcli
-VERSION = 1.07.07
+VERSION = 1.16.06
