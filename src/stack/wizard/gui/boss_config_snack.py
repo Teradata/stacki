@@ -139,7 +139,7 @@ def render_pallets(screen, data):
 			ct.addItem(line, (0, snackArgs['append']))
 
 		#create buttons
-		bb = ButtonBar(screen, (("Conitnue", "continue"), ("Back", "back")))
+		bb = ButtonBar(screen, (("Continue", "continue"), ("Back", "back")))
 
 		#add elements to form
 		g.add(tb, 0, 0)

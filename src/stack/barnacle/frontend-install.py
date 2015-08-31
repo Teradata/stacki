@@ -11,6 +11,7 @@ import sys
 import string
 import subprocess
 import random
+import getopt
 
 def banner(string):
 	print '#######################################'
@@ -78,6 +79,21 @@ def ldconf():
 
 	subprocess.call(['ldconfig'])
 
+def usage():
+	print "Requried arguments:"
+	print "\t--stacki-iso=ISO : path to stacki ISO"
+	print "\t--stacki-version=version : stacki version"
+	print "\t--stacki-name=name : stacki name (usually 'stacki')"
+	print "\t--os-iso=ISO1,ISO2 : path(s) to OS ISO(s)"
+	print "\t--os-version=version : OS version"
+	print "\t--os-name=name : OS name (e.g., 'CentOS')"
+
+	print
+	print "Optional arguments:"
+	print "\t--noX : Don't require X11 for frontend wizard. Use text mode"
+	print "\t--no-net-reconfig : Don't reconfigure the network on the frontend"
+	sys.exit(-1)
+
 ##
 ## MAIN
 ##
@@ -95,26 +111,52 @@ os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 #
 # process the command line arguments
 #
-print sys.argv[1:]
-if len(sys.argv[1:]) != 6 and len(sys.argv[1:]) != 7:
-	print "Requires 6 arguments and 1 optional argument, in order:"
-	print "\tstacki short name (usually 'stacki')"
-	print "\tstacki version"
-	print "\tpath to stacki ISO"
-	print "\tOS short name (eg 'CentOS')"
-	print "\tOS version"
-	print "\tpath to OS ISO DVD1"
-	print "\t(optional path to OS ISO DVD2)"
-	exit()
+opts, args = getopt.getopt(sys.argv[1:], '', [
+	'stacki-iso=', 'stacki-version=', 'stacki-name=',
+	'os-iso=', 'os-version=', 'os-name=',
+	'noX', 'no-net-reconfig' ]) 
 
-ccname = sys.argv[1]
-ccver = sys.argv[2]
-cciso = sys.argv[3]
-osname = sys.argv[4]
-osver = sys.argv[5]
-osiso1 = sys.argv[6]
-if len(sys.argv[1:]) == 7:
-	osiso2 = sys.argv[7]
+stacki_iso = None
+stacki_version = None
+stacki_name = None
+os_iso = None
+os_version = None
+os_name = None
+noX = 0
+no_net_reconfig = 0
+
+for opt, arg in opts:
+	if opt == '--stacki-iso':
+		stacki_iso = arg.split(',')
+	elif opt == '--stacki-version':
+		stacki_version = arg
+	elif opt == '--stacki-name':
+		stacki_name = arg
+	elif opt == '--os-iso':
+		os_iso = arg.split(',')
+	elif opt == '--os-version':
+		os_version = arg
+	elif opt == '--os-name':
+		os_name = arg
+	elif opt == '--noX':
+		noX = 1
+	elif opt == '--no-net-reconfig':
+		no_net_reconfig = 1
+
+if not stacki_iso or not stacki_version or not stacki_name \
+		or not os_iso or not os_version or not os_name:
+	usage()
+	print 'usage'
+	sys.exit(-1)
+
+ccname = stacki_name
+ccver = stacki_version
+cciso = stacki_iso[0]
+osname = os_name
+osver = os_version
+osiso1 = os_iso[0]
+if len(os_iso) > 1:
+	osiso2 = os_iso[1]
 else:
 	osiso2 = None
 
@@ -182,8 +224,12 @@ if not os.path.exists('/tmp/site.attrs') and not \
 	#
 	banner("Launch Boss-Config")
 	mount(cciso, '/mnt/cdrom')
-	subprocess.call(['/opt/stack/bin/python',
-		'/opt/stack/bin/boss_config.py'])
+	cmd = ['/opt/stack/bin/python', '/opt/stack/bin/boss_config.py']
+	if noX:
+		cmd.append('--noX')
+	if no_net_reconfig:
+		cmd.append('--no-net-reconfig')
+	subprocess.call(cmd)
 	umount('/mnt/cdrom')
 	
 	# add missing attrs to site.attrs

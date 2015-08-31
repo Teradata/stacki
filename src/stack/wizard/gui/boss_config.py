@@ -746,7 +746,7 @@ cmd = 'mkdir -p /mnt/cdrom ; mount /dev/cdrom /mnt/cdrom'
 os.system(cmd)
 
 if noX or not HAS_WX:
-	execfile("boss_config_snack.py")
+	execfile("/opt/stack/bin/boss_config_snack.py")
 else:
 	app = wx.App()
 	app.TopWindow = Boss(None, title='Stacki Installation')
