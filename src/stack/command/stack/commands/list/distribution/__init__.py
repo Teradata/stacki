@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+import string
 import stack.commands
 
 class command(stack.commands.list.command,
@@ -111,25 +112,40 @@ class Command(command):
 
 	def run(self, params, args):
 
+                pallets = {}
+                carts   = {}
+                for row in self.call('list.pallet'):
+                        if row['distributions']:
+                                for dist in row['distributions'].split():
+                                        if not pallets.has_key(dist):
+                                                pallets[dist] = []
+                                        name = row['name']
+                                        ver  = row['version']
+                                        rel  = row['release']
+                                        fullname = '%s-%s' % (name, ver)
+                                        if rel:
+                                        	fullname += '-%s' % rel
+                                        pallets[dist].append(fullname)
+
+                        
+                for row in self.call('list.cart'):
+                        if row['distributions']:
+                                for dist in row['distributions'].split():
+                                        if not carts.has_key(dist):
+                                                carts[dist] = []
+                                        carts[dist].append(row['name'])
+
 		self.beginOutput()
 
 		for dist in self.getDistributionNames(args):
 			self.db.execute("""select id, os, graph from
 				distributions where name='%s'""" % dist)
-
 			id, os, graph = self.db.fetchone()
 
-			#
-			# get the rolls associated with this distribution
-			#
-			self.db.execute("""select r.name,r.version from
-				rolls r, stacks s where
-				s.distribution = %s and s.roll = r.id""" % id)
-			rolls = {}
-			for roll,version in self.db.fetchall():
-				rolls[roll] = version
-			self.addOutput(dist, (os, graph, ' '.join(rolls.keys()), ' '.join(rolls.values())))
-
-		self.endOutput(header=['name', 'os', 'graph', 'pallets', 'version'],
+			self.addOutput(dist, (os, graph,
+                                              string.join(pallets[dist]),
+                                              string.join(carts[dist])))
+                        
+		self.endOutput(header=['name', 'os', 'graph', 'pallets', 'carts'],
 			trimOwner=False)
 
