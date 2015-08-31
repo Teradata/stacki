@@ -499,7 +499,7 @@ class Distribution(Base):
 		for f in self.trees['force'].getFiles(''):
 			f.setImortal()
 
-    
+
 	def setContrib(self, s):
 		self.contrib = s
 

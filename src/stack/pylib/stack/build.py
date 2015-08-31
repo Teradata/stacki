@@ -134,6 +134,7 @@ class DistributionBuilder(Builder):
         Builder.__init__(self)
         self.dist		= dist
         self.useLinks		= links
+        self.carts		= []
         self.compsPath		= None
 	self.useRolls		= {}
 	self.allRolls		= 1
@@ -242,11 +243,22 @@ class DistributionBuilder(Builder):
 				    if self.useRoll(key, v, a):
 					    r = m.getRollRPMS(key, v, a)
 					    if r:
-						    print '\tfound %4d packages on %s %s %s' % (len(r), key, v, a)
+						    print '\tfound %4d packages on pallet %s %s' % (len(r), key, v)
 						    rpms.extend(r)
 	    return rpms
 
 
+    def getCartRPMS(self):
+            rpms = []
+            for cart in self.carts:
+                    tree = stack.file.Tree(os.path.join('/export/stack/carts',
+                                                                cart))
+                    r = tree.getFiles('RPMS')
+                    print '\tfound %4d packages on cart   %s' % (len(r), cart)
+                    rpms.extend(r)
+                    
+            return rpms
+    
     def buildRPMSList(self):
 
 	    # Build and resolve the list of RPMS.  Then drop in all
@@ -256,7 +268,7 @@ class DistributionBuilder(Builder):
 	    for mirror in self.dist.getMirrors():
 		    rpms.extend(mirror.getRPMS())
 	    if not self.onlyRolls:
-		    rpms.extend(self.dist.getCartRPMS())
+		    rpms.extend(self.getCartRPMS())
 	    	    rpms.extend(self.dist.getContribRPMS())
 	    	    rpms.extend(self.dist.getLocalRPMS())
 	    if not os.path.isdir(self.dist.getForceRPMSPath()):
@@ -272,7 +284,7 @@ class DistributionBuilder(Builder):
 
 
     def buildRPMS(self):
-        print 'Resolving versions (RPMs)'
+        print 'Gathering RPMs'
         self.dist.setRPMS(self.resolveVersions(self.buildRPMSList()))
 
 
@@ -363,12 +375,12 @@ class DistributionBuilder(Builder):
 		except ValueError:
 			continue
 			
-		print '\tusing %s' % rpm.getBaseName()
+		print '\tinstalling %s' % rpm.getBaseName()
 		self.applyRPM(rpm.getBaseName(), build)
 
 	# Copy local profiles into the distribution.
 	if self.withSiteProfiles:
-		print '    installing "site" profiles...'
+		print '\tinstalling site-profiles'
 		tree = self.dist.getSiteProfilesTree()
 		for dir in tree.getDirs():
 			for file in tree.getFiles(dir):
@@ -379,7 +391,20 @@ class DistributionBuilder(Builder):
 					os.path.join(path, file.getName()))
 				# make sure apache can read site XML
 				file.chmod(0664)
-
+                                
+	# Copy cart profiles into the distribution.
+        for cart in self.carts:
+		print '\tinstalling %s cart' % cart
+                tree = stack.file.Tree(os.path.join('/export/stack/carts',
+                                                            cart))
+                for file in tree.getFiles('graph'):
+                        shutil.copy(file.getFullName(),
+                        	os.path.join(build, 'graphs', 'default', file.getName()))
+                        
+                for file in tree.getFiles('nodes'):
+                        shutil.copy(file.getFullName(),
+                        	os.path.join(build, 'nodes', file.getName()))
+                
 
     def applyRPM(self, name, root, flags=''):
         """Used to 'patch' the new distribution with RPMs from the

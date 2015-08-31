@@ -239,7 +239,9 @@ class Command(stack.commands.create.command,
 					"distribution is running")
 			os.system('touch %s' % lockfile)
 
-			print "\nBuilding %s distribution\n" % distName
+                        carts = self.getCarts(distName)
+                        
+			print 'Building %s distribution' % distName
 
 			self.runImplementation(distOS,
 					       [ distName,
