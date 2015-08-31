@@ -758,7 +758,11 @@ os.system(cmd)
 if noX or not HAS_WX:
 	execfile("/opt/stack/bin/boss_config_snack.py")
 else:
-	app = wx.App()
-	app.TopWindow = Boss(None, title='Stacki Installation')
-	app.TopWindow.Show()
-	app.MainLoop()
+	try:
+		app = wx.App()
+		app.TopWindow = Boss(None, title='Stacki Installation')
+		app.TopWindow.Show()
+		app.MainLoop()
+	except:
+		print "Falling back to snack installation..."
+		execfile("/opt/stack/bin/boss_config_snack.py")
