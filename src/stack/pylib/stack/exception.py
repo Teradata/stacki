@@ -137,7 +137,7 @@ class ParamType(ParamError):
                         article = 'an'
                 else:
                         article = 'a'
-                super(ParamInteger, self).__init__(cmd, param, 'must be %s %s' % (article, type))
+                super(ParamType, self).__init__(cmd, param, 'must be %s %s' % (article, type))
 
 class ParamValue(ParamError):
 

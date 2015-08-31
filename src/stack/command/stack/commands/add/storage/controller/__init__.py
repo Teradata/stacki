@@ -169,13 +169,14 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot, hotspare, raidlevel, arrayid = self.fillParams([
+                adapter, enclosure, slot, hotspare, raidlevel, arrayid, options = self.fillParams([
                         ('adapter', None),
                         ('enclosure', None),
                         ('slot', None),
                         ('hotspare', None),
                         ('raidlevel', None),
-			('arrayid', None, True)
+			('arrayid', None, True),
+			('options','')
                         ])
 
 		if not hotspare and not slot:
@@ -198,7 +199,7 @@ class Command(stack.commands.HostArgumentProcessor,
 				enclosure = int(enclosure)
 			except:
                                 raise ParamType(self, 'enclosure', 'integer')
-			if adapter < 0:
+			if enclosure < 0:
                                 raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
@@ -228,8 +229,8 @@ class Command(stack.commands.HostArgumentProcessor,
 			except:
                                 raise ParamType(self, 'raidlevel', 'integer')
 
-			if raidlevel not in [ 0, 1, 5, 6, 10 ]:
-                                raise ParamValue(self, 'raidlevel', 'one of {0, 1, 5, 6, 10}')
+			if raidlevel not in [ 0, 1, 5, 6, 10, 50, 60 ]:
+                                raise ParamValue(self, 'raidlevel', 'one of {0, 1, 5, 6, 10, 50, 60}')
 
 		hotspares = []
 		if hotspare:
@@ -293,9 +294,9 @@ class Command(stack.commands.HostArgumentProcessor,
 		for slot in slots:
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid) values ('%s', %s, %s, %s,
-				%s, %s, %s) """ % (scope, tableid, adapter,
-				enclosure, slot, raidlevel, arrayid))
+				raidlevel, arrayid, options) values ('%s', %s, %s, %s,
+				%s, %s, %s, '%s') """ % (scope, tableid, adapter,
+				enclosure, slot, raidlevel, arrayid, options))
 
 		for hotspare in hotspares:
 			raidlevel = -1
@@ -304,7 +305,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid) values ('%s', %s, %s, %s,
-				%s, %s, %s) """ % (scope, tableid, adapter,
-				enclosure, hotspare, raidlevel, arrayid))
+				raidlevel, arrayid, options) values ('%s', %s, %s, %s,
+				%s, %s, %s, '%s') """ % (scope, tableid, adapter,
+				enclosure, hotspare, raidlevel, arrayid, options))
 

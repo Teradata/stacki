@@ -116,7 +116,7 @@ class Command(stack.commands.list.command,
 		query = None
 		if scope == 'global':
 			query = """select adapter, enclosure, slot, raidlevel,
-				arrayid from storage_controller 
+				arrayid, options from storage_controller 
 				where scope = 'global'
 				order by enclosure, adapter, slot"""
 		elif scope == 'os':
@@ -126,7 +126,7 @@ class Command(stack.commands.list.command,
 			return
 		elif scope == 'appliance':
 			query = """select adapter, enclosure, slot,
-				raidlevel, arrayid
+				raidlevel, arrayid, options
 				from storage_controller where
 				scope = "appliance" and tableid = (select
 				id from appliances
@@ -134,7 +134,7 @@ class Command(stack.commands.list.command,
 				order by enclosure, adapter, slot""" % args[0]
 		elif scope == 'host':
 			query = """select adapter, enclosure, slot,
-				raidlevel, arrayid
+				raidlevel, arrayid, options
 				from storage_controller where
 				scope = "host" and tableid = (select
 				id from nodes where name = '%s')
@@ -155,7 +155,7 @@ class Command(stack.commands.list.command,
 
 		i = 0
 		for row in self.db.fetchall():
-			adapter, enclosure, slot, raidlevel, arrayid = row
+			adapter, enclosure, slot, raidlevel, arrayid, options = row
 
 			if i > 0:
 				name = None
@@ -171,12 +171,14 @@ class Command(stack.commands.list.command,
 				arrayid = 'global'
 			elif arrayid == -2:
 				arrayid = '*'
+			# Remove leading and trailing double quotes
+			options = options.strip("\"")
 
 			self.addOutput(name, [ enclosure, adapter, slot,
-				raidlevel, arrayid ])
+				raidlevel, arrayid, options ])
 
 			i += 1
 
 		self.endOutput(header=['scope', 'enclosure', 'adapter', 'slot', 
-			'raidlevel', 'arrayid' ], trimOwner = 0)
+			'raidlevel', 'arrayid', 'options' ], trimOwner = 0)
 

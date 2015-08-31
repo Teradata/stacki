@@ -93,7 +93,7 @@ class CLI:
 		args.append('drives=%s' % ','.join(disks))
 
 		if flags:
-			args.extend(flags)
+			args.append(flags)
 
 		if hotspares:
 			hs = []
