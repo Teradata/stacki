@@ -96,7 +96,7 @@ class Command(stack.commands.CartArgumentProcessor,
                         
                         node = open(os.path.join(tree.getRoot(), cart, 'nodes', 'cart-%s-backend.xml' % cart), 'w')
                         node.write("""<?xml version="1.0" standalone="no"?>
-<node>
+<kickstart>
 
 	<description>
         %s cart backend appliance extensions
@@ -108,7 +108,7 @@ class Command(stack.commands.CartArgumentProcessor,
 <post>
 
 </post>
-</node>
+</kickstart>
 """ % cart)
                         node.close()
                         

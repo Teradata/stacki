@@ -158,14 +158,15 @@ class Command(stack.commands.create.command,
 		"""
 
 		carts = []
-		self.db.execute("""
+		rows = self.db.execute("""
 			select c.name from
 			cart_stacks s, distributions d, carts c where
 			s.distribution = d.id and s.cart = c.id and
 			d.name='%s'
 			""" % dist)
-		for name,  in self.db.fetchall():
-			carts.append(name)
+		if rows:
+			for name, in self.db.fetchall():
+				carts.append(name)
 
 		return carts
         
