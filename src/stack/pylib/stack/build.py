@@ -256,6 +256,11 @@ class DistributionBuilder(Builder):
                     r = tree.getFiles('RPMS')
                     print '\tfound %4d packages on cart   %s' % (len(r), cart)
                     rpms.extend(r)
+
+            # fix rpm permissions in the cart dirs (files get symlinked)
+            
+            for rpm in rpms:
+                    rpm.chmod(0644)
                     
             return rpms
     
