@@ -94,10 +94,41 @@ def render_network(screen, data):
 
 def render_password(screen):
 
-	#render window to input password
-	result = EntryWindow(screen, 'Stacki Installation', 'Setup Password',
-		['Password:', 'Confirm Password:'], buttons=('Continue', 'Back'), \
-		width=51, entryWidth=20)
+	g = GridForm(screen, "Stacki Installation", 2, 4)
+
+	#create labels
+	pass1 = Textbox(18, 1, "Password:", scroll=0, wrap=0)
+	pass2 = Textbox(18, 1, "Confirm Password:", scroll=0, wrap=0)
+	space = Textbox(18, 1, "", scroll=0, wrap=0)
+
+	#create input fields
+	e1 = Entry(21, text="", password=1, scroll=0, returnExit=0)
+	e2 = Entry(21, text="", password=1, scroll=0, returnExit=0)
+
+	#add elements to form
+	g.add(pass1, 0, 0)
+	g.add(pass2, 0, 1)
+	g.add(e1, 1, 0)
+	g.add(e2, 1, 1)
+	g.add(space, 0, 2)
+
+	#create buttons
+	back_button = Button("Back")
+	continue_button = Button("Continue")
+
+	#add buttons to form
+	g.add(continue_button, 0, 3)
+	g.add(back_button, 1, 3)
+
+	#get the pressed button value
+	form_result = g.runOnce()
+	if form_result == back_button:
+		btn_value = "back"
+	else:
+		btn_value = "continue"
+
+	#return pressed button value and input values
+	result = (btn_value, (e1.value(), e2.value()))
 	return result
 
 def render_partition(screen):
