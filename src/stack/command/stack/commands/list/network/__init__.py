@@ -129,7 +129,7 @@ class Command(stack.commands.NetworkArgumentProcessor,
                         
 		self.beginOutput()
 
-                networks = []
+                networks = {}
                 for row in self.db.select("""
                 	name, address, mask, gateway, mtu, zone,
                         if(dns, 'True', 'False'),
@@ -145,9 +145,11 @@ class Command(stack.commands.NetworkArgumentProcessor,
                         network['zone']    = row[5]
                         network['dns']     = self.str2bool(row[6])
                         network['pxe']     = self.str2bool(row[7])
-                        networks.append(network)
+                        if row[0]:
+                                networks[row[0]] = network
 
-                for network in networks:
+                for net in self.getNetworkNames(args):
+                        network = networks[net]
 
                 	if not (dns == None or network['dns'] == dns):
                                 continue
