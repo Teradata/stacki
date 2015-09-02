@@ -130,10 +130,18 @@ class Command(command):
                 	zones[row['network']] = row['zone']
         
                 for row in self.call('list.host.interface'):
+                        ip = row['ip']
+			if not ip:
+				continue
+
                         host    = row['host']
-                        ip      = row['ip']
-                        zone    = zones[row['network']]
+			network = row['network']
                         default = row['default']
+
+			if network:
+                        	zone = zones[network]
+			else:
+				zone = None
 
                         names = []
                         if zone:
