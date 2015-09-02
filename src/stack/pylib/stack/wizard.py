@@ -61,6 +61,7 @@ class Attr:
 	Kickstart_PrivateNetwork = ""
 	Kickstart_PrivateSyslogHost = ""
 	Kickstart_PrivateKickstartBasedir = "distributions"
+	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
 	Kickstart_PrivateDjangoRootPassword = ""
@@ -214,6 +215,8 @@ class Data:
 				self.data.Kickstart_PrivateAddress
 			self.data.Info_ClusterURL = \
 				"http://" + self.data.Info_FQDN + "/"
+			self.data.Kickstart_PrivateNTPHost = \
+				self.data.Kickstart_PrivateAddress
 			#self.data.Kickstart_PrivateHostname =
 			#	self.data.Kickstart_PrivateHostname.split(".")[0]
 
