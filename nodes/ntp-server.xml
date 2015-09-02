@@ -25,7 +25,7 @@
 <!-- Configure NTP to use an external server -->
 
 <file name="/etc/ntp.conf">
-server &Kickstart_PublicNTPHost; iburst
+server &Kickstart_PrivateNTPHost; iburst
 server	127.127.1.1 iburst
 fudge	127.127.1.1 stratum 10
 driftfile /var/lib/ntp/drift
@@ -36,12 +36,12 @@ driftfile /var/lib/ntp/drift
 /bin/mkdir -p /etc/ntp
 
 <file name="/etc/ntp/step-tickers">
-&Kickstart_PublicNTPHost;
+&Kickstart_PrivateNTPHost;
 </file>
 
 <!-- Force the clock to be set to the server right now -->
 
-/usr/sbin/ntpdate &Kickstart_PublicNTPHost;
+/usr/sbin/ntpdate &Kickstart_PrivateNTPHost;
 /sbin/hwclock --systohc --utc
 
 </post>

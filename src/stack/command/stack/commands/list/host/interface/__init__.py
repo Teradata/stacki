@@ -175,18 +175,31 @@ class Command(stack.commands.list.host.command):
                                                 channel
                                                 ))
                                 else:
+					if network:
+                                                mask = networks[network]['mask']
+                                                gateway = networks[network]['gateway']
+                                                zone = networks[network]['zone']
+                                                dns = networks[network]['dns']
+                                                pxe = networks[network]['pxe']
+					else:
+						mask = None
+						gateway = None
+						zone = None
+						dns = None
+						pxe = None
+				
                                         self.addOutput(host, (
                                                 interface,
                                                 default,
                                                 network,
                                                 mac,
                                                 ip,
-                                                networks[network]['mask'],
-                                                networks[network]['gateway'],
+                                                mask,
+                                                gateway,
                                                 name,
-                                                networks[network]['zone'],
-                                                networks[network]['dns'],
-                                                networks[network]['pxe'],
+                                                zone,
+                                                dns,
+                                                pxe,
                                                 module,
                                                 vlan,
                                                 options,

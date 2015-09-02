@@ -55,11 +55,4 @@ gpgcheck=0
 </pre>
 
 
-<post>
-<!-- get the name of the database host into the stack command line -->
-<report name="dbhost"></report>
-
-</post>
-
-
 </kickstart> 

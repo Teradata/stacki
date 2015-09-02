@@ -24,7 +24,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <post cond="'&release;' == '6.x'">
 /sbin/chkconfig iptables on
-/sbin/chkconfig ip6tables off
 </post>
 
 

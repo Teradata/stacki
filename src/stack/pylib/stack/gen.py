@@ -197,9 +197,9 @@ class Generator:
 			l.append('\t\tmkdir -m 700 %s' % rcsdir)
 			l.append('\t\tchown 0:0 %s' % rcsdir)
 		 	l.append('\tfi;')
-			l.append('\techo "original" | /opt/stack/bin/ci %s;' %
+			l.append('\techo "original" | /opt/stack/bin/ci -q %s;' %
 			 	file)
-			l.append('\t/opt/stack/bin/co -f -l %s;' % file)
+			l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
 			l.append('fi')
 
 		# If this is a subsequent file tag and the optional PERMS
@@ -241,8 +241,8 @@ class Generator:
 
 		l.append('')
 		l.append('if [ -f %s ]; then' % file)
-		l.append('\techo "stack" | /opt/stack/bin/ci %s;' % file)
-		l.append('\t/opt/stack/bin/co -f -l %s;' % file)
+		l.append('\techo "stack" | /opt/stack/bin/ci -q %s;' % file)
+		l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
 		l.append('fi')		
 
 		if owner:

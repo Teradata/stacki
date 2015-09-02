@@ -391,6 +391,7 @@ class Command(stack.commands.list.command):
 			attrs['appliance'] == 'frontend':
 
                         self.addText('<post>\n')
+                        self.addText('mkdir -p /opt/stack/etc\n')
                         self.addText('<file name="/opt/stack/etc/profile.cfg" perms="0640">\n')
                         self.addText('[attr]\n')
                         for k in keys:
