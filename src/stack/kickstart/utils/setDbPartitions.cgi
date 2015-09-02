@@ -170,4 +170,4 @@ class App(stack.sql.Application):
 syslog.openlog('setDbPartitions.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
 app = App()
 app.run()
-syslog.close()
+syslog.closelog()
