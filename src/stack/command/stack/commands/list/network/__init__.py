@@ -162,5 +162,5 @@ class Command(stack.commands.NetworkArgumentProcessor,
                                                         network['dns'],
                                                         network['pxe'] ])     
 			
-		self.endOutput(header=['network', 'address', 'mask', 'gateway',
+		self.endOutput(trimOwner=False, header=['network', 'address', 'mask', 'gateway',
                                                'mtu', 'zone', 'dns', 'pxe'])
