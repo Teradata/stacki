@@ -102,39 +102,8 @@ import stack.commands
 from stack.exception import *
 
 
-class Parallel(threading.Thread):
-	def __init__(self, cmdclass, cmd, host, collate):
-		threading.Thread.__init__(self)
-		self.cmd = cmd
-		self.host = host
-		self.collate = collate
-		self.cmdclass = cmdclass
-		self.rc = False
-
-	def run(self):
-		(self.rc, out, err) = self.cmdclass.runHostCommand(self.host, self.cmd)
-
-		for line in out:
-			if self.collate:
-				self.cmdclass.addOutput(self.host, line.strip())
-			else:
-				sys.stdout.write("%s\n" % line.strip())
-
-		for line in err:
-			if self.collate:
-				self.cmdclass.addOutput(self.host, line.strip())
-			else:
-				sys.stderr.write("%s\n" % line.strip())
-
-
-	
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.run.command):
-
-	MustBeRoot = 0
-
-	
-class Command(command):
+class Command(stack.commands.Command,
+	stack.commands.HostArgumentProcessor):
 	"""
 	Run a command for each specified host.
 
@@ -179,9 +148,9 @@ class Command(command):
 	'yes'. Default is 'yes'.
 	</param>
 
-	<param type='string' name='num-threads'>
-	The number of threads to start in parallel. If num-threads is 0, then
-	try to run the command in parallel on all hosts. Default is '128'.
+	<param type='string' name='threads'>
+	The number of threads to start in parallel. Default is 0.
+	Set "run.host.threads" to set the default
 	</param>
 
 	<example cmd='run host backend-0-0 command="hostname"'>
@@ -193,153 +162,69 @@ class Command(command):
 	</example>
 	"""
 
-
-	def runHostCommand(self, host, command):
-		"""
-		Runs the COMMAND on the remote HOST.  If the HOST is the
-		current machine just run the COMMAND in a subprocess.
-		"""
-		
-		online = True
-
-		if host != socket.gethostname().split('.')[0]:
-			# First check to make the machine is up and SSH is responding.
-			#
-			# This catches the case when the node is up, sshd is sitting 
-			# on port 22, but it is not responding (e.g., the node is 
-			# overloaded, sshd is hung, etc.)
-			#
-			# sock.recv() should return something like:
-			#
-			#	SSH-2.0-OpenSSH_4.3
-
-			sock   = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			sock.settimeout(2.0)
-			try:
-				sock.connect((host, 22))
-				buf = sock.recv(64)
-			except:
-				online = False
-
-		if online:
-			proc = subprocess.Popen([ 'ssh', host, command ],
-						stdin = None,
-						stdout = subprocess.PIPE,
-						stderr = subprocess.PIPE)
-
-			retval = proc.wait()
-			o, e   = proc.communicate()
-			return (retval, o.split('\n')[:-1], e.split('\n')[:-1])
-
-		return (None, [ 'down' ], [])
-
-
-
-
 	def run(self, params, args):
 
-
-		(command, managed, x11, t, d, c, n) = self.fillParams([
-                        ('command', None, True),
-                        ('managed', 'y'),
-                        ('x11', 'n'),
-                        ('timeout', '30'),
-			('delay', '0'),
-			('collate', 'y'),
-			('num-threads', '128')
+		# Parse Params
+		(cmd, managed, x11, t, d, collate, n, method) = self.fillParams([
+                        ('command', None, True),	# Command
+                        ('managed', 'y'),		# Run on Managed Hosts only
+                        ('x11', 'n'),			# Run without X11
+                        ('timeout', '0'),		# Set timeout for commands
+			('delay', '0'),			# Set delay between each thread
+			('collate', 'y'),		# Collate output
+			('threads',self.db.getHostAttr('localhost','run.host.threads')),
+			('method',self.db.getHostAttr('localhost','run.host.impl'))
 			])
 
+		# Get list of hosts to run the command on
+		self.hosts = self.getHostnames(args, self.str2bool(managed))
+
+		# Get timeout for commands
 		try:
-			timeout = int(t)
+			self.timeout = int(t)
 		except:
                         raise ParamType(self, 'timeout', 'integer')
-
-		if timeout < 0:
+		if self.timeout < 0:
                         raise ParamValue(self, 'timeout', '> 0')
 
-		try:
-			numthreads = int(n)
-		except:
-                        raise ParamType(self, 'num-threads', 'integer')
+		# Get Number of threads to run concurrently
+		if n == None:
+			self.numthreads = 0
+		else:
+			try:
+				self.numthreads = int(n)
+			except:
+				raise ParamType(self, 'threads', 'integer')
+			if self.numthreads < 0:
+				raise ParamValue(self, 'threads','> 0')
 
+		# Get time to pause between subsequent threads
 		try:
-			delay = float(d)
+			self.delay = float(d)
 		except:	
                         raise ParamType(self, 'delay', 'float')
 
-		hosts = self.getHostnames(args, self.str2bool(managed))
-		
-		# This is the same as doing -x using ssh.  Might be useful
-		# for the common case, but required for the Viz Roll.
-
+		# Check if we want to unset the Display
 		if not self.str2bool(x11):
 			try:
 				del os.environ['DISPLAY']
 			except KeyError:
 				pass
 
-		# By default collate is true, unless otherwise specified
-		collate = self.str2bool(c)
-			
-		if collate:
+		# Get the command
+		self.cmd = cmd
+
+		# Get the implementation to run. By default, run SSH
+		if method == None:
+			method = 'ssh'
+
+		# Check if we should collate the output
+		self.collate = self.str2bool(collate)
+
+		if self.collate:
 			self.beginOutput()
 
-		if numthreads <= 0:
-			numthreads = len(hosts)
+		self.runImplementation(method, [self.hosts, cmd])
 
-		threads = []
-
-		i = 0
-		rc = True
-		work = len(hosts)
-		while work:
-			
-			# Run the first batch of threads
-
-			while i < numthreads and i < len(hosts):
-				host = hosts[i]
-				i += 1	
-
-				p = Parallel(self, command, host, collate)
-				p.setDaemon(True)
-				p.start()
-				threads.append(p)
-
-				if delay > 0:
-					time.sleep(delay)
-
-			# Collect completed threads
-
-			try:
-				totaltime = time.time()
-				while timeout == 0 or (time.time() - totaltime) < timeout:
-
-					active = threading.enumerate()
-
-					t = threads
-					for thread in t:
-						if thread not in active:
-							thread.join(0.1)
-							threads.remove(thread)
-							numthreads += 1
-							work -= 1
-
-					if len(active) == 1:
-						break
-				
-					# don't burn a CPU while waiting for the
-					# threads to complete
-
-					time.sleep(0.5)
-
-			except KeyboardInterrupt:
-				work = 0
-
-		if collate:
-			self.endOutput(padChar='', trimOwner=False)
-
-		for thread in threads:
-			if not thread.rc:
-				rc = False
-				break
-		return rc
+		if self.collate:
+			self.endOutput(trimOwner = False)
