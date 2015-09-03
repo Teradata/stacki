@@ -24,8 +24,37 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <post cond="'&release;' == '6.x'">
 /sbin/chkconfig iptables on
-/sbin/chkconfig ip6tables off
+</post>
+
+
+<post>
+
+<!-- define the global firewall rules -->
+
+/opt/stack/bin/stack add firewall network=all service=all \
+	protocol=all action=ACCEPT chain=INPUT rulename=LOOPBACK-NET \
+	flags="-i lo" comment="Accept all traffic over loopback interface"
+
+/opt/stack/bin/stack add firewall network=all service=ssh \
+	protocol=tcp action=ACCEPT chain=INPUT rulename=SSH \
+	flags="-m state --state NEW" \
+	comment="Accept all ssh traffic on all networks"
+
+/opt/stack/bin/stack add firewall network=all service=all \
+	protocol=all action=ACCEPT chain=INPUT rulename=PRIVATE-RELATED \
+	flags="-m state --state RELATED,ESTABLISHED" \
+	comment="Accept related and established connections"
+
+/opt/stack/bin/stack add firewall network=private service=all \
+	protocol=all action=ACCEPT chain=INPUT rulename=PRIVATE-NET \
+	comment="Accept all traffic on private network"
+
+/opt/stack/bin/stack add firewall network=all service=all \
+	protocol=all action=REJECT chain=INPUT rulename=REJECT-ALL \
+	comment="Block all traffic"
+
 </post>
 
 
 </kickstart> 
+

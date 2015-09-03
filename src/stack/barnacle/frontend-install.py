@@ -91,7 +91,6 @@ def usage():
 	print
 	print "Optional arguments:"
 	print "\t--noX : Don't require X11 for frontend wizard. Use text mode"
-	print "\t--no-net-reconfig : Don't reconfigure the network on the frontend"
 	sys.exit(-1)
 
 ##
@@ -113,8 +112,7 @@ os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 #
 opts, args = getopt.getopt(sys.argv[1:], '', [
 	'stacki-iso=', 'stacki-version=', 'stacki-name=',
-	'os-iso=', 'os-version=', 'os-name=',
-	'noX', 'no-net-reconfig' ]) 
+	'os-iso=', 'os-version=', 'os-name=', 'noX' ]) 
 
 stacki_iso = None
 stacki_version = None
@@ -140,13 +138,35 @@ for opt, arg in opts:
 		os_name = arg
 	elif opt == '--noX':
 		noX = 1
-	elif opt == '--no-net-reconfig':
-		no_net_reconfig = 1
 
-if not stacki_iso or not stacki_version or not stacki_name \
-		or not os_iso or not os_version or not os_name:
+if not stacki_iso:
+	print '--stacki-iso is not specified\n'
 	usage()
-	print 'usage'
+	sys.exit(-1)
+
+if not stacki_version:
+	print '--stacki-version is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not stacki_name:
+	print '--stacki-name is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_iso:
+	print '--os-iso is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_version:
+	print '--os-version is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_name:
+	print '--os-name is not specified\n'
+	usage()
 	sys.exit(-1)
 
 ccname = stacki_name
@@ -224,11 +244,10 @@ if not os.path.exists('/tmp/site.attrs') and not \
 	#
 	banner("Launch Boss-Config")
 	mount(cciso, '/mnt/cdrom')
-	cmd = ['/opt/stack/bin/python', '/opt/stack/bin/boss_config.py']
+	cmd = [ '/opt/stack/bin/python', '/opt/stack/bin/boss_config.py',
+		'--no-partition', '--no-net-reconfig' ]
 	if noX:
 		cmd.append('--noX')
-	if no_net_reconfig:
-		cmd.append('--no-net-reconfig')
 	subprocess.call(cmd)
 	umount('/mnt/cdrom')
 	

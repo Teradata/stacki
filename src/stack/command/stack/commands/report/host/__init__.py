@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v1.0
+#                                  v2.0
 # 
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
 # 
@@ -29,7 +29,7 @@
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
@@ -130,10 +130,18 @@ class Command(command):
                 	zones[row['network']] = row['zone']
         
                 for row in self.call('list.host.interface'):
+                        ip = row['ip']
+			if not ip:
+				continue
+
                         host    = row['host']
-                        ip      = row['ip']
-                        zone    = zones[row['network']]
+			network = row['network']
                         default = row['default']
+
+			if network:
+                        	zone = zones[network]
+			else:
+				zone = None
 
                         names = []
                         if zone:

@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v1.0
+#                                  v2.0
 # 
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
 # 
@@ -29,7 +29,7 @@
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
@@ -129,7 +129,7 @@ class Command(stack.commands.NetworkArgumentProcessor,
                         
 		self.beginOutput()
 
-                networks = []
+                networks = {}
                 for row in self.db.select("""
                 	name, address, mask, gateway, mtu, zone,
                         if(dns, 'True', 'False'),
@@ -145,9 +145,11 @@ class Command(stack.commands.NetworkArgumentProcessor,
                         network['zone']    = row[5]
                         network['dns']     = self.str2bool(row[6])
                         network['pxe']     = self.str2bool(row[7])
-                        networks.append(network)
+                        if row[0]:
+                                networks[row[0]] = network
 
-                for network in networks:
+                for net in self.getNetworkNames(args):
+                        network = networks[net]
 
                 	if not (dns == None or network['dns'] == dns):
                                 continue
@@ -162,5 +164,5 @@ class Command(stack.commands.NetworkArgumentProcessor,
                                                         network['dns'],
                                                         network['pxe'] ])     
 			
-		self.endOutput(header=['network', 'address', 'mask', 'gateway',
+		self.endOutput(trimOwner=False, header=['network', 'address', 'mask', 'gateway',
                                                'mtu', 'zone', 'dns', 'pxe'])

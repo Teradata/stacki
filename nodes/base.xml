@@ -8,7 +8,7 @@ Base class for all nodes.
 
 <si_copyright>
 (c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v1.0 www.stacki.com
+All rights reserved. stacki(r) v2.0 www.stacki.com
 </si_copyright>
 
 <copyright>
@@ -35,6 +35,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 
 <package cond="'&release;' == '7.x'">net-tools</package>
+<package>foundation-rcs</package>
 
 
 <post>
@@ -79,7 +80,8 @@ if $programname == 'SCL' then ~
 </post>
 
 <boot order="post">
-rm -f /tmp/ks-script*
+mkdir -p /var/log/stacki/ks
+mv /tmp/ks-script* /var/log/stacki/ks
 </boot>
 
 </kickstart> 

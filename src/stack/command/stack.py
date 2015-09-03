@@ -2,7 +2,7 @@
 #
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v1.0
+#                                  v2.0
 # 
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
 # 
@@ -31,7 +31,7 @@
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
@@ -166,15 +166,8 @@ try:
 
 except ImportError:
 	Database = None
-	s = "ImportError: Python Database Error\n"
-	sys.stderr.write(s)
-	syslog.syslog(syslog.LOG_WARNING,s)
 except OperationalError:
 	Database = None
-	s = "OperationalError: Could not connect to database\n"
-	sys.stderr.write(s)
-	syslog.syslog(syslog.LOG_WARNING,s)
-
 
 class command_struct:
 	def __init__(self):
