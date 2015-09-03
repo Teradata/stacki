@@ -139,10 +139,34 @@ for opt, arg in opts:
 	elif opt == '--noX':
 		noX = 1
 
-if not stacki_iso or not stacki_version or not stacki_name \
-		or not os_iso or not os_version or not os_name:
+if not stacki_iso:
+	print '--stacki-iso is not specified\n'
 	usage()
-	print 'usage'
+	sys.exit(-1)
+
+if not stacki_version:
+	print '--stacki-version is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not stacki_name:
+	print '--stacki-name is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_iso:
+	print '--os-iso is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_version:
+	print '--os-version is not specified\n'
+	usage()
+	sys.exit(-1)
+
+if not os_name:
+	print '--os-name is not specified\n'
+	usage()
 	sys.exit(-1)
 
 ccname = stacki_name

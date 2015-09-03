@@ -15,59 +15,10 @@ All rights reserved. stacki(r) v2.0 www.stacki.com
 
 <post>
 
-<!-- define the global firewall rules -->
-
-/opt/stack/bin/stack add firewall network=all service=all \
-	protocol=all action=ACCEPT chain=INPUT rulename="LOOPBACK-NET" \
-	flags="-i lo" comment="Accept all traffic over loopback interface"
-
-/opt/stack/bin/stack add firewall network=private service="all" \
-	protocol="all" action="ACCEPT" chain="INPUT" rulename="PRIVATE-NET" \
-	comment="Accept all traffic on private network"
-
-<!-- define the frontend-specific firewall rules -->
-
-/opt/stack/bin/stack add host firewall localhost	\
-	rulename="PRIVATE-FORWARD" network=private	\
-	service="all" protocol="all" action="ACCEPT" chain="FORWARD" \
-	comment="Allow private traffic forwarding"
-
-/opt/stack/bin/stack add host firewall localhost network=all \
-	rulename=NON-PRIVATE-GANGLIA service="8649" \
-	protocol="udp" action="REJECT" chain="INPUT" \
-	comment="block ganglia traffic from non-private interfaces"
-
-/opt/stack/bin/stack add host firewall localhost network=all \
-	rulename=NON-PRIVATE-MYSQL service="3306" \
-	protocol="tcp" action="REJECT" chain="INPUT" \
-	comment="block mysql traffic from non-private interfaces"
-
-/opt/stack/bin/stack add host firewall localhost network=all \
-	rulename=NON-PRIVATE-FOUNDATION-MYSQL service="40000" \
-	protocol="tcp" action="REJECT" chain="INPUT" \
-	comment="block foundation mysql traffic from non-private interfaces"
-
-/opt/stack/bin/stack add host firewall localhost network=all \
-	rulename=SUB-1024-TCP service="0:1023" protocol=tcp \
-	action="REJECT" chain=INPUT \
-	comment="Block all TCP traffic below port 1024"
-
-/opt/stack/bin/stack add host firewall localhost network=all \
-	rulename=SUB-1024-UDP service="0:1023" protocol=udp \
-	action="REJECT" chain=INPUT \
-	comment="Block all UDP traffic below port 1024"
-</post>
-
-
-<!-- create the firewall rules for the frontend -->
-
-<post>
+<!-- apply the firewall rules to the frontend -->
 
 /opt/stack/bin/stack report host firewall localhost | \
-	/opt/stack/bin/stack report script \
-	attrs="{'Kickstart_PublicNetwork':'&Kickstart_PublicNetwork;', \
-	'Kickstart_PublicNetmask':'&Kickstart_PublicNetmask;'}" \
-	> /tmp/do-firewall.sh
+	/opt/stack/bin/stack report script > /tmp/do-firewall.sh
 
 chmod a+x /tmp/do-firewall.sh
 /tmp/do-firewall.sh

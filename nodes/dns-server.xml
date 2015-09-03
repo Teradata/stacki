@@ -22,7 +22,12 @@
 
 <post>
 <!-- resolv.conf -->
-<report name="host.resolv">localhost</report>
+
+/opt/stack/bin/stack report host resolv &Kickstart_PrivateHostname; | \
+        /opt/stack/bin/stack report script > /tmp/do-resolv.sh
+
+chmod a+x /tmp/do-resolv.sh
+/tmp/do-resolv.sh
 
 <!-- write the DNS files -->
 /opt/stack/bin/stack sync dns
