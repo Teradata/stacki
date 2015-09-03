@@ -166,15 +166,8 @@ try:
 
 except ImportError:
 	Database = None
-	s = "ImportError: Python Database Error\n"
-	sys.stderr.write(s)
-	syslog.syslog(syslog.LOG_WARNING,s)
 except OperationalError:
 	Database = None
-	s = "OperationalError: Could not connect to database\n"
-	sys.stderr.write(s)
-	syslog.syslog(syslog.LOG_WARNING,s)
-
 
 class command_struct:
 	def __init__(self):
