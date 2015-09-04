@@ -91,6 +91,7 @@
 # @Copyright@
 
 import os
+import subprocess
 import stack.media
 
 class GetPallet:
@@ -161,12 +162,16 @@ class GetPallet:
 		if self.media.mounted():
 			self.media.ejectCD()
 
-	def downloadNetworkPallets(self, pallets):
+	def downloadNetworkPallets(self, pallets, dialog=None):
 		for pallet in pallets:
 			(name, version, release, arch, url, diskid) = pallet
 
 			if diskid != '':
 				continue
+
+			#if wx dialog is available, init the pallet
+                        if dialog:
+                                dialog.initPallet(name, version)
 
 			path = os.path.join(name, version, 'redhat', arch)
 			url = os.path.join(url, path)
@@ -180,10 +185,12 @@ class GetPallet:
 			flags = '-m -np -nH --dns-timeout=3 '
 			flags += '--connect-timeout=3 '
 			flags += '--read-timeout=10 --tries=3'
+
 			cmd = '/usr/bin/wget %s --cut-dirs=%d %s' % (flags,
 				cutdirs, url)
 			os.system(cmd)
 
-			if 0:
-				w.pop()
+			#if wx dialog is available, update complete message
+			if dialog:
+				dialog.completePallet()
 
