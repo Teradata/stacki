@@ -49,7 +49,7 @@ def getController():
 		ctrl = controller.CLI()
 		adapter = ctrl.getAdapter()
 
-		if ctrl:
+		if adapter != None:
 			return (ctrl, adapter)
 
 	return(None, None)
