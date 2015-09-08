@@ -156,8 +156,8 @@ class GetPallet:
 			basePalletDir = '/mnt/sysimage/export/stack/pallets'
 
 			#if wx dialog is available, init the pallet
-                        if dialog:
-                                dialog.initPallet("pallets from DVD", d)
+			if dialog:
+				dialog.initPallet("Pallets from DVD", d)
 
 			cmd = '/opt/stack/bin/stack add pallet '
 			cmd += 'updatedb=n dir=%s' % basePalletDir
