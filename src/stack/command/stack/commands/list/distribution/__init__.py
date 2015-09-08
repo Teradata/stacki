@@ -145,6 +145,9 @@ class Command(command):
 			if not carts.has_key(dist):
 				carts[dist] = []
 
+			if not pallets.has_key(dist):
+				pallets[dist] = []
+
 			self.addOutput(dist, (os, graph,
                                               string.join(pallets[dist]),
                                               string.join(carts[dist])))
