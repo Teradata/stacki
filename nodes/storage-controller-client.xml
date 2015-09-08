@@ -49,7 +49,8 @@ def getController():
 		ctrl = controller.CLI()
 		adapter = ctrl.getAdapter()
 
-		return (ctrl, adapter)
+		if ctrl:
+			return (ctrl, adapter)
 
 	return(None, None)
 
@@ -128,8 +129,6 @@ for arrayid in arrayids:
 		if 'raidlevel' in o.keys() and not raidlevel:
 			raidlevel = o['raidlevel']
 
-			if raidlevel != 'hotspare':
-				raidlevel = int(o['raidlevel'])
 		if 'options' in o.keys():
 			options  = o['options']
 
