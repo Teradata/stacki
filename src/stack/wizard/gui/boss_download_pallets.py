@@ -135,11 +135,7 @@ def do_download(dialog=None):
 	pallets = g.rolls
 
 	if dialog:
-		#
-		# DVD pallets get read immediately so download dialog is not
-		# need for DVD pallet
-		#
-		getpallet.downloadDVDPallets(pallets)
+		getpallet.downloadDVDPallets(pallets, dialog)
 		getpallet.downloadNetworkPallets(pallets, dialog)
 	else:
 		getpallet.downloadDVDPallets(pallets)

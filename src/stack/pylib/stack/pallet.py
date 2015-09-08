@@ -134,7 +134,7 @@ class GetPallet:
 					print 'Put Pallet disk %s in drive' \
 						% diskname
 
-	def downloadDVDPallets(self, pallets):
+	def downloadDVDPallets(self, pallets, dialog=None):
 		diskids = []
 		for pallet in pallets:
 			(name, version, release, arch, url, diskid) = pallet
@@ -155,9 +155,17 @@ class GetPallet:
 			#
 			basePalletDir = '/mnt/sysimage/export/stack/pallets'
 
+			#if wx dialog is available, init the pallet
+                        if dialog:
+                                dialog.initPallet("pallets from DVD", d)
+
 			cmd = '/opt/stack/bin/stack add pallet '
 			cmd += 'updatedb=n dir=%s' % basePalletDir
 			os.system(cmd)
+
+			#if wx dialog is available, update complete message
+			if dialog:
+				dialog.completePallet()
 
 		if self.media.mounted():
 			self.media.ejectCD()
