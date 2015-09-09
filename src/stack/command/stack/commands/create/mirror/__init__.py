@@ -257,8 +257,8 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			version = 'X'
 			
-		(name, version, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
-                        ('url', None)
+		(url, name, version, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
+                        ('url', None),
 			('name', None),
 			('version', version),
 			('arch', self.arch), 
