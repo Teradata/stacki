@@ -282,7 +282,7 @@ class Command(stack.commands.create.command):
 				name = 'updates'
 
 		if not repoid and not url:
-                        raise ParamRequred(self, ('url', 'repoid'))
+                        raise ParamRequired(self, ('url', 'repoid'))
 
 		# Query the repo to see if it exists and we can get to it.
 		rpms,repoerr = self.repoquery(repoid, repoconfig)
