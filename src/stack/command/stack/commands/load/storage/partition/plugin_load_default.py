@@ -58,7 +58,11 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 			#
 			# first remove the entries for this host
 			#
-			self.owner.call('remove.storage.partition', [ host ])
+			if host == 'global':
+				target = []
+			else:
+				target = [ host ]
+			self.owner.call('remove.storage.partition', target)
 
 			# Get list of devices for this host
 			devices = hosts[host].keys()
