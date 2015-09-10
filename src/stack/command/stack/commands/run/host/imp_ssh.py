@@ -8,8 +8,6 @@ import time
 import subprocess
 import sys
 
-from profilehooks import profile
-
 class Implementation(stack.commands.Implementation):
 
 	#@warningLicenseCheck
