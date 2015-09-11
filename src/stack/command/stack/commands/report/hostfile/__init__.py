@@ -26,6 +26,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 		ip = None
 		mac = None
+		default = None
 		interface = None
 		network = None
 		channel = None
@@ -50,6 +51,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 			ip = o['ip']
 			mac = o['mac']
+			default = o['default']
 			interface = o['interface']
 			network = o['network']
 			channel = o['channel']
@@ -58,7 +60,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 			i += 1
 
-			row = [ name, interface_hostname, appliance, rack,
+			row = [ name, interface_hostname, default, appliance, rack,
 				rank, ip, mac, interface, network, channel,
 				options, vlan ]
 
@@ -66,7 +68,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 	def run(self, params, args):
 
-		header = ['NAME', 'INTERFACE HOSTNAME', 'APPLIANCE', 'RACK',
+		header = ['NAME', 'INTERFACE HOSTNAME', 'DEFAULT', 'APPLIANCE', 'RACK',
 			'RANK', 'IP', 'MAC', 'INTERFACE', 'NETWORK',
 			'CHANNEL', 'OPTIONS', 'VLAN']
 
