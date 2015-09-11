@@ -116,7 +116,7 @@ class Command(command):
 	and rank parameters are taken from the hostname.
         </arg>
 
-        <param type='int' name='cpus'>
+        <param type='' name='cpus'>
         Number of CPUs (cores) in the given host.  If not provided the
 	default of 1 CPU is inserted into the database.
         </param>
@@ -127,14 +127,14 @@ class Command(command):
 	the host.
 	</param>
 
-        <param type='int' name='rack'>
+        <param type='string' name='rack'>
         The number of the rack where the machine is located. The convention
 	in Stacki is to start numbering at 0. If not provided and the host
 	name is of the standard form the rack number is taken from the host
 	name.
         </param>
 
-	<param type='int' name='rank'>
+	<param type='string' name='rank'>
 	The position of the machine in the rack. The convention in Stacki
 	is to number from the bottom of the rack to the top starting at 0.
 	If not provided and the host name is of the standard form the rank
@@ -181,8 +181,8 @@ class Command(command):
 			basename, rack, rank = host.split('-')
 			if basename in appliances:
 				appliance = basename
-				rack = int(rack)
-				rank = int(rank)
+				rack = (rack)
+				rank = (rank)
 		except:
 			appliance = None
 			rack = None
@@ -206,10 +206,10 @@ class Command(command):
 		if rank == None:
                         raise ParamRequired(self, 'rank')
 
-		try:
-			rank = int(rank)
-		except:
-                        raise ParamType(self, 'rank', 'integer')
+#		try:
+#			rank = int(rank)
+#		except:
+#                        raise ParamType(self, 'rank', 'integer')
 		try:
 			numCPUs = int(numCPUs)
                 except:
@@ -240,7 +240,7 @@ class Command(command):
 				rank) values ( '%s',
 				(select id from appliances where name='%s'),
 				(select id from distributions where name='%s'),
-				'%d', '%s', '%d')""" % (host, appliance, dist,
+				'%d', '%s', '%s')""" % (host, appliance, dist,
 				numCPUs, rack, rank))
 
 
