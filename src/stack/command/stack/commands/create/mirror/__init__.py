@@ -147,8 +147,12 @@ class Command(stack.commands.create.command):
 	</param>
 
 	<param type='boolean' name='newest'>
-	Get only the latest RPMS from the repo. Default is "no"
-	and downloads the entire set of RPMS from the distribution.
+	Get only the latest RPMS from the repo. Default is "True"
+	and downloads only the most recent versions of the RPMs
+	in the repo.
+	
+	Set to "false" or "no" to get all versions of the RPMs
+	in a repository.
 	</param>
 
 	<param type='boolean' name='urlonly'>	
@@ -264,7 +268,7 @@ class Command(stack.commands.create.command):
 			('arch', self.arch), 
 			('repoid', None),
 			('repoconfig', None),
-			('newest', 'no'),
+			('newest', 'yes'),
 			('urlonly', 'no')
                         ])
 
@@ -324,7 +328,7 @@ class Command(stack.commands.create.command):
 		else:
 			xmlfilename = 'roll-%s.xml' % name
 			self.makeRollXML(name, version, arch, xmlfilename)
-			self.command('create.pallet', [ '%s' % (xmlfilename) ] )
+			self.command('create.pallet', [ '%s' % (xmlfilename), 'newest=%s' % newest] )
 		
 		self.clean()
 
