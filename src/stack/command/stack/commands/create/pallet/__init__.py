@@ -258,7 +258,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 					continue
 					
 				# Resolve package versions
-				if stack.commands.str2bool(newest) == True:		
+				if newest == True:		
 					name = file.getUniqueName()
 				else:
 					name = file.getFullName()
@@ -730,7 +730,7 @@ class Command(stack.commands.create.command):
 	stacki running on this machine).
 	</param>
 
-	<param type='string' name='newest'>
+	<param type='boolean' name='newest'>
 	</param>
 
 	<example cmd='create pallet pallet-base.xml'>

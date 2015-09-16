@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v2.0
+#                                  v1.0
 # 
 #      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
 # 
@@ -29,7 +29,7 @@
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
@@ -104,7 +104,7 @@ STACK_VERSION = $(VERSION)
 # A name, not a RPM release id. Added for flair. First releases named
 # after well-known mountains.
 
-RELEASE_NAME = 6.x
+RELEASE_NAME = 7.x
 VERSION_NAME = "$(RELEASE_NAME)"
 
 # The project name is used to identify to distribution.  The base 
