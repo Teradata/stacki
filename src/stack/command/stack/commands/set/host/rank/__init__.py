@@ -101,7 +101,7 @@ class Command(stack.commands.set.host.command):
 	One or more host names.
 	</arg>
 
-	<param type='integer' name='rank' optional='0'>
+	<param type='string' name='rank' optional='0'>
 	The rank number to assign to each host.
 	</param>
 
@@ -118,14 +118,10 @@ class Command(stack.commands.set.host.command):
 		
 		if not len(args):
                 	raise ArgRequired(self, 'host')
-                try:
-                        rank = int(rank)
-                except:
-                	raise ParamType(self, 'rank', 'integer')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set rank=%d where
+                        	update nodes set rank='%s' where
 				name='%s'
                                 """ % (rank, host))
 				

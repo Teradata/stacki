@@ -156,8 +156,8 @@ CREATE TABLE nodes (
   Appliance	int(11) default '2',
   Distribution	int(11) default '1',
   CPUs		int(11) NOT NULL default '1',
-  Rack		int(11) default NULL,
-  Rank		int(11) default NULL,
+  Rack		varchar(64) default NULL,
+  Rank		varchar(64) default NULL,
   RunAction	varchar(64) default 'os',
   InstallAction	varchar(64) default 'install',
   PRIMARY KEY  (ID)

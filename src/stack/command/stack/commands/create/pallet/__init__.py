@@ -258,8 +258,11 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 					continue
 					
 				# Resolve package versions
-				
-				name = file.getUniqueName()
+				if stack.commands.str2bool(newest) == True:		
+					name = file.getUniqueName()
+				else:
+					name = file.getFullName()
+
 				if not dict.has_key(name) or file >= dict[name]:
 					dict[name] = file
 					
@@ -727,6 +730,9 @@ class Command(stack.commands.create.command):
 	stacki running on this machine).
 	</param>
 
+	<param type='string' name='newest'>
+	</param>
+
 	<example cmd='create pallet pallet-base.xml'>
 	Creates the Rocks Base pallet from the pallet-base.xml description file.
 	</example>
@@ -749,10 +755,16 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			version = 'X'
 
-		(name, version) = self.fillParams([
+		(name, version, newest) = self.fillParams([
                         ('name', None),
-			('version', version)
+			('version', version),
+			('newest', True) 
                         ])
+		# Yes, globals are probably bad. But this is the fastest
+		# to getting what we want. Otherise have to pass all this
+		# in various arg lines to the defined classes and defs 
+		# in this file. Blame Greg, he said it was okay.
+		global newest
 
                 if len(args) == 0:
                         raise ArgRequired(self, 'pallet')

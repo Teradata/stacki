@@ -482,7 +482,6 @@ class HostArgumentProcessor:
                                 distinct(rack) from nodes
 				"""):
 				racks.append(rack)
-
 			list = []
 			for host in names:
                                 if host in environments:
@@ -496,9 +495,14 @@ class HostArgumentProcessor:
 					adhoc = True
 				elif host.find('rack') == 0:
 					for i in racks:
-						if host.find('rack%d' % i) == 0:
-							host = '[rack==%d]' % i
-							adhoc = True
+						if host.find('rack%s' % i) == 0:
+							try:
+								isinstance(int(i),int)
+								host = '[rack==%s]' % int(i)
+								adhoc = True
+							except ValueError:
+								host = '[rack=="%s"]' % i
+								adhoc = True
 				elif host[0] == '[':
 					adhoc = True
 
