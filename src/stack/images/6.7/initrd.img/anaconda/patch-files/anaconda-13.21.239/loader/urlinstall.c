@@ -323,74 +323,20 @@ start_httpd()
 				"-f", "/opt/lighttpd/conf/lighttpd.conf",
 				"-D", NULL };
 	int	pid;
-	int	i;
-	struct device	**devices;
-
-	/*
-	 * try to mount the CD
-	 */
-	devices = getDevices(DEVICE_CDROM);
-	if (devices) {
-		for (i = 0; devices[i]; i++) {
-			char	*tmp = NULL;
-
-			if (!devices[i]->device) {
-				continue;
-			}
-
-			if (strncmp("/dev/", devices[i]->device, 5) != 0) {
-				checked_asprintf(&tmp, "/dev/%s",
-					devices[i]->device);
-
-				free(devices[i]->device);
-				devices[i]->device = tmp;
-			}
-
-#ifdef	LATER
-			devMakeInode(devices[i]->device, "/tmp/stack-cdrom");
-#endif
-
-			logMessage(INFO,
-				"start_httpd:trying to mount device %s",
-				devices[i]->device);
-			if (doPwMount(devices[i]->device, "/mnt/cdrom",
-				"iso9660", "ro", NULL)) {
-
-				logMessage(ERROR,
-					"start_httpd:doPwMount failed\n");
-			} else {
-				/*
-				 * if there are multiple CD drives, exit this
-				 * loop after the first successful mount
-				 */ 
-				if (symlink(devices[i]->device,
-						"/tmp/stack-cdrom") != 0) {
-					logMessage(ERROR,
-						"start_httpd:symlink failed\n");
-				}
-				break;
-			}
-		}
-	}
 
 	/*
 	 * start the service
 	 */
+	logMessage(INFO, "STACKI:start_httpd:starting lighttpd");
+
 	pid = fork();
 	if (pid != 0) {
-#ifdef	LATER
-		/*
-		 * don't close stdin or stdout. this causes problems
-		 * with mini_httpd as it uses these file descriptors for
-		 * it's CGI processing
-		 */
-		close(2);
-#endif
 		execv(args[0], args);
-		logMessage(ERROR, "start_httpd:lighttpd failed\n");
+		logMessage(ERROR, "STACKI:start_httpd:lighttpd failed\n");
 	}
 }
 #endif
+
 
 char *mountUrlImage(struct installMethod *method, char *location,
                     struct loaderData_s *loaderData) {

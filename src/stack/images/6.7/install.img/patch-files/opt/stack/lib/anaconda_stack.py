@@ -1135,7 +1135,8 @@ if __name__ == "__main__":
         if os.path.exists('/tmp/stack-skip-welcome'):
             discovered_disks = []
             for d in anaconda.id.storage.disks:
-                discovered_disks.append(d.name)
+                if not d.removable:
+                    discovered_disks.append(d.name)
     
             swraid = []
             for d in anaconda.id.storage.devices:
