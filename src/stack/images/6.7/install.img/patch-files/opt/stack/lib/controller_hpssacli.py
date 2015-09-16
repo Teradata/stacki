@@ -175,9 +175,14 @@ class CLI:
 			#
 			prearrayids = self.getArrays(adapter)
 
+
+		# HPSSACLI prefers to call it RAID 1+0, instead of RAID 10.
+		if raidlevel == '10':
+			raidlevel = '1+0'
+
 		cmd = [ 'slot=%d' % adapter, 'create',
 			'type=logicaldrive', 'drives=%s' % ','.join(drives),
-			'raid=%d' % raidlevel ]
+			'raid=%s' % raidlevel ]
 
 		if flags:
 			cmd.extend(flags)
@@ -210,7 +215,7 @@ class CLI:
 					'add', 'spares=%s' % ','.join(spares) ]
 				result = self.run(cmd)
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, options):
 		spares = []
 		for slot in hotspares:
 			enclosure = self.getEnclosure(adapter, slot)
@@ -218,5 +223,8 @@ class CLI:
 
 		cmd = [ 'slot=%d' % adapter, 'array', 'all', 'add',
 			'spares=%s' % ','.join(spares) ]
+
+		if options:
+			cmd.append(options)
 		result = self.run(cmd)
 

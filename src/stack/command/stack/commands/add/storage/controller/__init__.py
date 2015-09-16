@@ -223,15 +223,6 @@ class Command(stack.commands.HostArgumentProcessor,
                                                 raise ParamError(self, 'slot', ' "%s" is listed twice' % s)
 				slots.append(s)
 
-		if raidlevel:
-			try:
-				raidlevel = int(raidlevel)
-			except:
-                                raise ParamType(self, 'raidlevel', 'integer')
-
-			if raidlevel not in [ 0, 1, 5, 6, 10, 50, 60 ]:
-                                raise ParamValue(self, 'raidlevel', 'one of {0, 1, 5, 6, 10, 50, 60}')
-
 		hotspares = []
 		if hotspare:
 			for h in hotspare.split(','):

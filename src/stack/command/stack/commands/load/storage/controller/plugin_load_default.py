@@ -76,7 +76,7 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 
 				if 'raid' in hosts[host][array].keys():
 					raidlevel = hosts[host][array]['raid']
-					cmdargs.append('raidlevel=%d'
+					cmdargs.append('raidlevel=%s'
 						% raidlevel)
 
 				if 'slot' in hosts[host][array].keys():

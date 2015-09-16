@@ -447,7 +447,7 @@ CREATE TABLE storage_controller (
  Adapter	int(11) NOT NULL,
  Enclosure	int(11) NOT NULL,
  Slot		int(11) NOT NULL,
- RaidLevel	int(11) NOT NULL,
+ RaidLevel	varchar(16) NOT NULL,
  ArrayID	int(11) NOT NULL,
  Options	varchar(512) NOT NULL default ''
 ) TYPE=MyISAM;

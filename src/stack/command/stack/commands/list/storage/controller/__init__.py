@@ -165,7 +165,7 @@ class Command(stack.commands.list.command,
 				enclosure = None
 			if slot == -1:
 				slot = '*'
-			if raidlevel == -1:
+			if raidlevel == '-1':
 				raidlevel = 'hotspare'
 			if arrayid == -1:
 				arrayid = 'global'
