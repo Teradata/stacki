@@ -102,6 +102,7 @@ import popen2
 import pexpect
 import socket
 import subprocess
+import shlex
 import stack
 import stack.commands
 import stack.dist
@@ -140,7 +141,12 @@ class Builder:
 			(volname, extraflags, os.path.join(cwd, isoName))
 
 		os.chdir(rollDir)
-		os.system(cmd + ' 2> /dev/null')
+		subprocess.call(shlex.split(cmd), stdin = None, stdout = None,
+			stderr = None)
+
+		if self.config.isBootable():
+			subprocess.call([ 'isohybrid',
+				os.path.join(cwd, isoName) ])
 		os.chdir(cwd)
 
 		
@@ -252,7 +258,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 					continue
 					
 				# Resolve package versions
-				if stack.commands.str2bool(newest) == True:		
+				if newest == True:		
 					name = file.getUniqueName()
 				else:
 					name = file.getFullName()
@@ -482,7 +488,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			fout.write('keyboard us\n')
 		else:
 			fout.write('install\n')
-			fout.write('url --url http://localhost/%s\n' % distdir)
+			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
 			fout.write('lang en_US\n')
 			fout.write('keyboard us\n')
 			fout.write('interactive\n')
@@ -724,7 +730,7 @@ class Command(stack.commands.create.command):
 	stacki running on this machine).
 	</param>
 
-	<param type='string' name='newest'>
+	<param type='boolean' name='newest'>
 	</param>
 
 	<example cmd='create pallet pallet-base.xml'>

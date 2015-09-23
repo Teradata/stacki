@@ -329,7 +329,28 @@ int kickstartFromRemovable(char *kssrc) {
       3 - kickstart file named path not there
 */
 int getKickstartFromBlockDevice(char *device, char *path) {
+#ifdef	STACKI
+	int	rc;
+
+	rc = getFileFromBlockDevice(device, path, "/tmp/ks.cfg");
+
+	/*
+	 * make sure /mnt/cdrom is the mount point for the Stacki bits
+	 */
+	if (!rc) {
+		logMessage(INFO,
+			"STACKI:getKickstartFromBlockDevice:trying to mount device %s", device);
+
+		if (doPwMount(device, "/mnt/cdrom", "iso9660", "ro", NULL)) {
+			logMessage(ERROR,
+				"STACKI:start_httpd:doPwMount failed\n");
+		}
+	}
+
+	return(rc);
+#else
     return getFileFromBlockDevice(device, path, "/tmp/ks.cfg");
+#endif
 }
 
 static char *newKickstartLocation(const char *origLocation) {

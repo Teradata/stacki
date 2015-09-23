@@ -169,10 +169,11 @@ for arrayid in arrayids:
 #
 for arrayid in arrayids:
 	slots = []
-	hotspares = []
+	hotspare = None
 	raidlevel = None
 	enclosure = None
 	adapter = None
+	options = None
 		
 	#
 	# a global hotspare has an array id of 'global' and a
@@ -185,27 +186,27 @@ for arrayid in arrayids:
 		if 'slot' in o.keys():
 			if 'raidlevel' in o.keys() and \
 					o['raidlevel'] == 'hotspare':
-				hotspares.append(o['slot'])
+				hotspare = o['slot']
 
 		if 'adapter' in o.keys() and not adapter:
 			try:
 				adapter = int(o['adapter'])
 			except:
 				adapter = None
+		if not adapter:
+			adapter = ctrl.getAdapter()
 		if 'enclosure' in o.keys() and not enclosure:
 			try:
 				enclosure = o['enclosure']
 			except:
 				enclosure = None
+		if not enclosure:
+			enclosure = ctrl.getEnclosure(adapter)
 
-	if not adapter:
-		adapter = ctrl.getAdapter()
-	if not enclosure:
-		enclosure = ctrl.getEnclosure(adapter)
+		if 'options' in o.keys():
+			options = o['options']
 
-	if hotspares:
-		hotspares.sort()
-		ctrl.doGlobalHotSpare(adapter, enclosure, hotspares)
+		ctrl.doGlobalHotSpare(adapter, enclosure, [hotspare], options)
 
 </pre>
 

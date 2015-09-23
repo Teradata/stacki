@@ -194,18 +194,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							CommandError(self, msg)
 
 				elif header[i] == 'raid level':
-					if field.lower() == 'hotspare':
-						raid = field.lower()
-					else:
-						try:
-							raid = int(field)
-						except:
-							msg = 'raid "%s" must be an integer' % field
-							CommandError(self, msg)
-
-						if raid < 0:
-							msg = 'raid "%d" must be 0 or greater' % raid
-							CommandError(self, msg)
+					raid = field.lower()
 
 				elif header[i] == 'array id':
 					if field.lower() == 'global':
