@@ -91,23 +91,23 @@
 # @Copyright@
 
 ROLLROOT	= ../../..
-DEPENDS.FILES	= netaddr-$(VERSION).tar.gz
+DEPENDS.FILES	= ipaddress-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 build:
-	gunzip -c netaddr-$(VERSION).tar.gz | $(TAR) -xf -
+	gunzip -c ipaddress-$(VERSION).tar.gz | $(TAR) -xf -
 	(								\
-		cd netaddr-$(VERSION);					\
+		cd ipaddress-$(VERSION);					\
 		$(PY.PATH) setup.py build;				\
 	)
 
 install::
 	(								\
-		cd netaddr-$(VERSION);					\
+		cd ipaddress-$(VERSION);					\
 		$(PY.PATH) setup.py install --root=$(ROOT);		\
 	)
 
 
 clean::
-	rm -rf netaddr-$(VERSION)
+	rm -rf ipaddress-$(VERSION)
