@@ -683,6 +683,20 @@ def setupDisplay(anaconda, opts, addon_paths=None):
         #
         if not os.path.exists('/tmp/rolls.xml') or \
                 not os.path.exists('/tmp/site.attrs'):
+
+            #
+            # before starting boss_config.py, let's put down a yum repo
+            # configuration file that will help anaconda find our newly
+            # built repo
+            #
+
+            file = open('/etc/anaconda.repos.d/stacki.repo', 'w')
+            file.write('[stacki]\n')
+            file.write('name=stacki\n')
+            file.write('baseurl=file:///install/distributions/default/x86_64\n')
+            file.write('assumeyes=1\n')
+            file.close()
+
             log.debug('STACKIQ: Starting Boss Configuration.')
             bossenv = os.environ.copy()
             bossenv['LD_LIBRARY_PATH'] = '/opt/stack/lib'
