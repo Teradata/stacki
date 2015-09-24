@@ -205,6 +205,8 @@ def turnOnFilesystems(anaconda):
         else:
             bossenv['LD_LIBRARY_PATH'] = '/opt/stack/lib'
 
+        bossenv['DISPLAY'] = ':1'
+
         s = subprocess.Popen('/opt/stack/bin/boss_download_pallets.py',
 		env = bossenv)
         s.wait()

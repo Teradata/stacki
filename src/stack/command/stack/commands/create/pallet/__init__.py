@@ -483,7 +483,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 		if stack.release == '7.x':
 			fout.write('install\n')
-			fout.write('url --url file:///mnt/cdrom\n')
+			fout.write('url --url http://127.0.0.1/mnt/cdrom\n')
 			fout.write('lang en_US\n')
 			fout.write('keyboard us\n')
 		else:

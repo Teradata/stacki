@@ -750,9 +750,33 @@ print 'Use snack installation instead of wx: ' + str(noX)
 print 'Disable partitioning: ' + str(no_partition)
 
 #
-# make sure the DVD is mounted
+# make sure the installation ISO is mounted on /mnt/cdrom. it could be a
+# USB stick or DVD
 #
-cmd = 'mkdir -p /mnt/cdrom ; mount /dev/cdrom /mnt/cdrom'
+cmdline = open('/proc/cmdline', 'r')
+cmdargs = cmdline.readline()
+cmdline.close()
+
+#
+# if this is a USB install, then we'll see a kernel command line parameter
+# that looks like:
+#
+#	inst.stage2=hd:sda1:/
+#
+# and we want to parse out the disk device (e.g., 'sda1')
+#
+device = None
+for cmdarg in cmdargs.split():
+	if cmdarg.startswith('inst.stage2='):
+		b = cmdarg.split('=')
+		c = b[1].split(':')
+		if len(c) > 1 and c[0] == 'hd':
+			device = c[1]
+			break
+if not device:
+	device = 'cdrom'
+
+cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
 os.system(cmd)
 
 if noX or not HAS_WX:

@@ -39,9 +39,20 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-dump-info bootstrap rpm pkg clean nuke build install:
-	for x in initrd.img updates.img upgrade.img vmlinuz isolinux; do \
-		if [ -d $$x ]; then				\
-			(cd $$x; $(MAKE) $@);	 		\
-		fi;				 		\
-	done
+ROLLROOT	= ../../../../..
+FILES		= isolinux.bin isolinux.cfg menu.cfg splash.png \
+			vesamenu.c32 chain.c32
+
+include $(STACKBUILD)/etc/CCRules.mk
+
+
+build:
+	echo "Building isolinux"
+	cat menu-header > menu.cfg
+	echo "menu title stacki $(VERSION) ($(RELEASE))" >> menu.cfg
+	cat menu-footer >> menu.cfg
+
+install::
+	mkdir -p $(ROOT)/$(PKGROOT)
+	cp $(FILES) $(ROOT)/$(PKGROOT)
+
