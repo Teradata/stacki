@@ -93,6 +93,7 @@
 import os
 import subprocess
 import stack.media
+import time
 
 class GetPallet:
 	def __init__(self):
@@ -135,6 +136,71 @@ class GetPallet:
 						% diskname
 
 	def downloadDVDPallets(self, pallets, dialog=None):
+		#
+		# function is used when progress dialog is available
+		# poll the destination directory and get the latest created pallet info
+		# update the progress bar with current block to total block ratio
+		#
+		def updateProgress():
+			T = []
+			P = {}
+			basePalletDir = '/mnt/sysimage/export/stack/pallets'
+			if os.path.exists(basePalletDir):
+
+				folders = os.listdir(basePalletDir)
+				if len(folders) > 0:
+					# get last modified time of all folders in pallets directory
+					for name in folders:
+						palletDir = basePalletDir + "/" + name
+						if os.path.isdir(palletDir):
+
+							# get the disk size
+							proc = subprocess.Popen( ['du', '-b', palletDir, '--summarize' ], \
+								stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+							(out, err) = proc.communicate()
+							size = int(filter(None, out.split('\n'))[0].split('\t')[0])
+
+							version = os.listdir(palletDir)[0]
+							mtime = os.stat(palletDir)[8]
+							T.append(mtime)
+							P[mtime] = (name, version, size)
+
+					if len(T) > 0:
+
+						# take the latest created and write the filename
+						# with current size as content
+						T.sort()
+						latest_time = T[-1]
+						tup = P[latest_time]
+
+						#
+						# write filename and byte size
+						#
+						name = str(tup[0])
+						version = str(tup[1])
+						pallet = name + '---' + version
+
+						# normalize the size
+						size = tup[2]
+						value = int((float(size) / self.totalsizes[pallet]) * 100)
+
+						# if name and version is different
+						if name != self.name or version != self.version:
+							if self.name != '' and self.version != '':
+								# update to a new pallet
+								dialog.completePallet()
+								dialog.initPallet(name, version, self.totalsizes[pallet])
+								dialog.updateProgress(value)
+							else:
+								# start a new pallet
+								dialog.initPallet(name, version, self.totalsizes[pallet])
+								dialog.updateProgress(value)
+						else:
+							dialog.updateProgress(value)
+
+						self.name = name
+						self.version = version
+
 		diskids = []
 		for pallet in pallets:
 			(name, version, release, arch, url, diskid) = pallet
@@ -144,31 +210,82 @@ class GetPallet:
 
 		diskids.sort()
 		for d in diskids:
-			#
-			# ask the user to put the right media in the bay
-			#
-			self.checkDVD(d)
+			if not dialog:
+				#
+				# ask the user to put the right media in the bay
+				#
+				self.checkDVD(d)
 
-			#
-			# for DVDs, we can't download individual pallets --
-			# we get all of them off the DVD
-			#
-			basePalletDir = '/mnt/sysimage/export/stack/pallets'
+				#
+				# for DVDs, we can't download individual pallets --
+				# we get all of them off the DVD
+				#
+				basePalletDir = '/mnt/sysimage/export/stack/pallets'
 
-			#if wx dialog is available, init the pallet
+				cmd = '/opt/stack/bin/stack add pallet '
+				cmd += 'updatedb=n dir=%s' % basePalletDir
+				os.system(cmd)
+
 			if dialog:
-				dialog.initPallet("Pallets from DVD", d)
+				#
+				# ask the user to put the right media in the bay
+				#
+				self.checkDVD(d)
 
-			cmd = '/opt/stack/bin/stack add pallet '
-			cmd += 'updatedb=n dir=%s' % basePalletDir
-			os.system(cmd)
+				# dict total sizes of DVD pallets
+				self.totalsizes = {}
 
-			#if wx dialog is available, update complete message
-			if dialog:
+				# on the DVD look for roll-*.xml and put path into a list
+				proc = subprocess.Popen( ['find', '/mnt/cdrom/', '-type', 'f',
+					'-name', 'roll-*.xml'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				(out, err) = proc.communicate()
+				P = filter(None, out.split('\n'))
+
+				# get name and version of each pallet from list and store the sizes for each
+				for path in P:
+					info = path.strip('/mnt/cdrom/').split('/')
+					name = info[0]
+					version = info[1]
+					pallet = name + '---' + version
+					palletPath = '/mnt/cdrom/' + name + '/' + version + '/'
+
+					# get the size of pallet
+					proc = subprocess.Popen( ['du', '-b', palletPath, '--summarize'], \
+						stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+					(out, err) = proc.communicate()
+
+					size = int(filter(None, out.split('\n'))[0].split('\t')[0])
+					self.totalsizes[pallet] = size
+
+				#
+				# for DVDs, we can't download individual pallets --
+				# we get all of them off the DVD
+				#
+				basePalletDir = '/mnt/sysimage/export/stack/pallets'
+
+				# init the name and version tracking variables for updateProgress()
+				self.name = ''
+				self.version = ''
+
+				# totalsize is only used as a flag now
+				dialog.initPallet(self.name, self.version, 100)
+
+				# start download DVD pallets
+				arg = 'dir=' + basePalletDir
+				proc = subprocess.Popen( [ '/opt/stack/bin/stack', 'add', 'pallet',
+					'updatedb=n', arg ], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+
+				# while DVD pallets download, update progress bar
+				while proc.poll() is None:
+					time.sleep(0.2)
+					updateProgress()
+
+				# when done, force a complete
+				dialog.updateProgress(100)
 				dialog.completePallet()
 
-		if self.media.mounted():
-			self.media.ejectCD()
+			if self.media.mounted():
+				self.media.ejectCD()
 
 	def downloadNetworkPallets(self, pallets, dialog=None):
 		for pallet in pallets:
@@ -176,10 +293,6 @@ class GetPallet:
 
 			if diskid != '':
 				continue
-
-			#if wx dialog is available, init the pallet
-                        if dialog:
-                                dialog.initPallet(name, version)
 
 			path = os.path.join(name, version, 'redhat', arch)
 			url = os.path.join(url, path)
@@ -196,9 +309,44 @@ class GetPallet:
 
 			cmd = '/usr/bin/wget %s --cut-dirs=%d %s' % (flags,
 				cutdirs, url)
-			os.system(cmd)
 
-			#if wx dialog is available, update complete message
+			if not dialog:
+				os.system(cmd)
+
 			if dialog:
-				dialog.completePallet()
+				# spider mode command
+				spi = cmd.split()
+				spi.append('--spider')
 
+				proc = subprocess.Popen( spi, \
+                                stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				(out, err) = proc.communicate()
+
+				totalsize = 0
+				err = err.replace('\n', ' ')
+
+				# get total size in KB
+				A = filter(None, err.split("Length:"))
+				for i in A:
+					if '[application' in i:
+						totalsize += int(round(int(i.split('(')[0].strip()) * 0.001))
+
+				# totalsize is only used as a flag now
+				dialog.initPallet(name, version, totalsize)
+
+				cmd = cmd.split()
+				proc = subprocess.Popen( cmd, \
+					stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+
+				# update the progress bar
+				size = 0
+				while proc.poll() is None:
+					l = proc.stderr.readline()
+					if len(l.split()) == 9:
+						size += 50
+						value = int((float(size) / totalsize) * 100)
+						if value <= 100:
+							dialog.updateProgress(value)
+
+				dialog.updateProgress(100)
+				dialog.completePallet()
