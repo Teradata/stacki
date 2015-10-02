@@ -4,11 +4,11 @@ import sys
 
 #try to get wxpython
 try:
-        import wx
+	import wx
 except ImportError:
-        HAS_WX = False
+	HAS_WX = False
 else:
-        HAS_WX = True
+	HAS_WX = True
 
 import threading
 import time
@@ -25,13 +25,10 @@ class DownloadFrame(wx.Frame):
 		sizer = wx.GridBagSizer(5, 3)
 
 		#logo
-		png = wx.Image('/opt/stack/bin/logo.png', \
-			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+		png = wx.Image('/opt/stack/bin/logo.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
 		imageBitmap = \
-			wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), \
-				png.GetHeight()))
-		sizer.Add(imageBitmap, pos=(0, 0), flag=wx.TOP|wx.LEFT|wx.BOTTOM, \
-			border=20)
+			wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), png.GetHeight()))
+		sizer.Add(imageBitmap, pos=(0, 0), flag=wx.TOP|wx.LEFT|wx.BOTTOM, border=20)
 
 		#text message
 		self.lb = wx.StaticText(self, label='No downloads as of now...')
@@ -44,13 +41,12 @@ class DownloadFrame(wx.Frame):
 		self.list1.InsertColumn(2, 'Version', width = 150)
 
 		#init progress bar
-		self.progress = wx.Gauge(self, size=(500,-1))
-		self.gspeed = 100
+		self.progress = wx.Gauge(self, range=100, size=(500,-1))
 		self.timer = wx.Timer(self)
-		self.timer.Start(self.gspeed)
 		self.Bind(wx.EVT_TIMER, self.updatePulse)
-		self.name = 'none'
-		self.version = 'none'
+		self.name = 'No pallet'
+		self.version = ''
+		self.count = 0
 
 		#add elements to form
 		sizer.Add(self.lb, pos=(1, 0), span=(1, 5), \
@@ -64,8 +60,12 @@ class DownloadFrame(wx.Frame):
 		self.SetSizerAndFit(sizer)
 		self.Show(True)
 
-	def downloadNewPallet(self, name, ver):
-		self.timer.Start(self.gspeed)
+	def downloadNewPallet(self, name, ver, size=None):
+		if size:
+			self.size = size
+		else:
+			self.timer.Start(100) #milliseconds
+
 		self.name = name
 		self.version = ver
 		self.lb.SetLabel("Downloading: " + self.name + " " + self.version);
@@ -74,29 +74,44 @@ class DownloadFrame(wx.Frame):
 		self.list1.InsertStringItem(0, 'Downloaded')
 		self.list1.SetStringItem(0, 1, self.name)
 		self.list1.SetStringItem(0, 2, self.version)
-		self.lb.SetLabel("Completed Downloading: " + self.name + " " + \
-			self.version);
+		self.lb.SetLabel("Completed Downloading: " + self.name + " " + self.version);
 		self.timer.Stop()
 
 	def errorNewPallet(self, rc):
 		self.list1.InsertStringItem(0, 'Error ' + str(rc))
 		self.list1.SetStringItem(0, 1, self.name)
 		self.list1.SetStringItem(0, 2, self.version)
-		self.lb.SetLabel("Error in Downloading: " + self.name + " " + \
-			self.version);
+		self.lb.SetLabel("Error in Downloading: " + self.name + " " + self.version);
 		self.timer.Stop()
+
+	def rebuildDistribution(self):
+		self.lb.SetLabel("Now building distribution (this can take a while)...");
+
+	def updatePallet(self, count):
+		self.progress.SetValue(count)
+
+	def pollDownload(self, name, ver):
+		if name != self.name or ver != self.version:
+			wx.CallAfter(self.downloadNewPallet, name, ver)
 
 	def updatePulse(self, timer):
 		self.progress.Pulse()
 
-	def initPallet(self, name, ver):
-		wx.CallAfter(self.downloadNewPallet, name, ver)
+	def updateProgress(self, count):
+		wx.CallAfter(self.updatePallet, count)
+
+	def initPallet(self, name, ver, size=None):
+		wx.CallAfter(self.downloadNewPallet, name, ver, size)
 
 	def completePallet(self):
 		wx.CallAfter(self.completeNewPallet)
 
 	def errorPallet(self, rc):
 		wx.CallAfter(self.errorNewPallet, rc)
+
+	def doneMessage(self):
+		time.sleep(2)
+		wx.CallAfter(self.rebuildDistribution)
 
 def do_download(dialog=None):
 
@@ -140,6 +155,9 @@ def do_download(dialog=None):
 	else:
 		getpallet.downloadDVDPallets(pallets)
 		getpallet.downloadNetworkPallets(pallets)
+
+	# display rebuild distribution message
+	dialog.doneMessage()
 
 	cwd = os.getcwd()
 	os.chdir('/mnt/sysimage/export/stack')
