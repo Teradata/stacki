@@ -61,7 +61,7 @@ class CLI:
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
-		cmd = [ '-CfgLdAdd', '-r%d' % raidlevel ]
+		cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
 
 		disks = []
 		for slot in slots:

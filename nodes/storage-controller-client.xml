@@ -7,6 +7,11 @@
 All rights reserved. stacki(r) v2.0 www.stacki.com
 </si_copyright>
 
+<pre cond="'&release;' == '7.x'">
+<!-- Load SCSI Generic Module. Required for HPSSACLI,
+     and StorCLI, on RHEL/CentOS 7.x -->
+modprobe sg
+</pre>
 
 <pre interpreter="/opt/stack/bin/python">
 import sys
@@ -210,4 +215,11 @@ for arrayid in arrayids:
 
 </pre>
 
+<post cond="'&release;' == '7.x'">
+<file name="/etc/modules-load.d/sg.conf">
+# Bug in CentOS / RHEL 7.0. SCSI Generic Module
+# is not loaded by default
+sg
+</file>
+</post>
 </kickstart> 

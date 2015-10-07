@@ -17,8 +17,12 @@ class CLI:
 		if json_out:
 			cmd.append('J')
 
+		f = open('/tmp/MegaSAS.log','a')
+		f.write('cmd: %s\n\n'  % ' '.join(cmd))
 		p = Popen(cmd, stdout=PIPE)
 		o, e = p.communicate()
+		f.write('%s\n\n' % o)
+		f.close()
 		if json_out:
 			j = json.loads(o)
 			result = j['Controllers'][0]
@@ -40,6 +44,7 @@ class CLI:
 	def doNuke(self, adapter):
 		self.run(['/c%d/vall' % adapter,'delete', 'force'])
 		self.run(['/c%d/fall' % adapter,'delete'])
+		self.run(['/c%d' % adapter, 'set', 'jbod=off'])
 		self.run(['/c%d' % adapter, 'set', 'bootwithpinnedcache=on'])
 
 	def getAdapter(self):
@@ -80,7 +85,7 @@ class CLI:
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
 		args = ['/c%d' % adapter, 'add','vd',
-			'type=r%d' % raidlevel]
+			'type=r%s' % raidlevel]
 
 		disks = []
 		for slot in slots:
@@ -92,7 +97,7 @@ class CLI:
 		args.append('drives=%s' % ','.join(disks))
 
 		if flags:
-			args.extend(flags)
+			args.append(flags)
 
 		if hotspares:
 			hs = []
@@ -100,14 +105,14 @@ class CLI:
 				if enclosure:
 					hs.append('%s:%d' % (enclosure, hotspare))
 				else:
-					hs.append(hotspare)
+					hs.append('%d' % hotspare)
 	
 
 			args.append('spares=%s' % ','.join(hs))
 
 		self.run(args)
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, options):
 		if enclosure:
 			loc = '/c%d/e%d' % (adapter, enclosure)
 		else:
@@ -115,6 +120,8 @@ class CLI:
 
 		for hotspare in hotspares:
 			args = ['%s/s%d' % (loc, hotspare), 'add','hotsparedrive']
+			if options:
+				args.append(options)
 			self.run(args)
 
 
