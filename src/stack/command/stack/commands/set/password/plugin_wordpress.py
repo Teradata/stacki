@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,24 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:53:02  bruno
-# star power for gb
-#
-# Revision 1.4  2010/07/08 23:45:18  bruno
-# password setting fixes
-#
-# Revision 1.3  2009/09/30 19:44:05  bruno
-# make sure password changing code accesses the rocks foundation database
-#
-# Revision 1.2  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/02/10 20:41:46  bruno
-# change the root password for various cluster services
-#
-#
 
 import MySQLdb
 import stack.password
@@ -127,5 +110,6 @@ class Plugin(stack.commands.Plugin):
 		# store it in the rocks database
 		# 
 		self.owner.command('set.attr',
-			[ 'Kickstart_PrivatePortableRootPassword', newpw ] )
+			[ 'attr=Kickstart_PrivatePortableRootPassword', 
+			  'value=%s' % newpw ] )
 

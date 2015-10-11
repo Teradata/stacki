@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,18 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:53:02  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/02/10 20:41:46  bruno
-# change the root password for various cluster services
-#
-#
 
 import spwd
 import subprocess
@@ -101,7 +90,8 @@ class Plugin(stack.commands.Plugin):
 			# store it in the database
 			# 
 			self.owner.command('set.attr',
-				[ 'Kickstart_PrivateRootPassword', newpw ] )
+				[ 'attr=Kickstart_PrivateRootPassword', 
+				  'value=%s' % newpw ] )
 		else:
 			print 'Could not read the new password for root'
 
