@@ -169,14 +169,15 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot, hotspare, raidlevel, arrayid, options = self.fillParams([
+                adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
                         ('adapter', None),
                         ('enclosure', None),
                         ('slot', None),
                         ('hotspare', None),
                         ('raidlevel', None),
 			('arrayid', None, True),
-			('options','')
+			('options',''),
+			('force','n')
                         ])
 
 		if not hotspare and not slot:
@@ -267,12 +268,15 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# make sure the specification doesn't already exist
 		#
+		force = self.str2bool(force)
 		for slot in slots:
-			self.checkIt(name, scope, tableid, adapter, enclosure,
-				slot)
+			if not force:
+				self.checkIt(name, scope, tableid, adapter, enclosure,
+					slot)
 		for hotspare in hotspares:
-			self.checkIt(name, scope, tableid, adapter, enclosure,
-				hotspare)
+			if not force:
+				self.checkIt(name, scope, tableid, adapter, enclosure,
+					hotspare)
 
 		if arrayid == 'global':
 			arrayid = -1

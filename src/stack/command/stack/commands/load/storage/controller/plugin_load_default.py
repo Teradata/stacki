@@ -107,6 +107,9 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 
 					cmdargs.append('hotspare=%s'
 						% ','.join(hotspares))
+
+				if self.owner.force:
+					cmdargs.append('force=y')
 			
 				self.owner.call('add.storage.controller',
 					cmdargs)
