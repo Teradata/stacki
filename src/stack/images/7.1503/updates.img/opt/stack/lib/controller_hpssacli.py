@@ -185,7 +185,8 @@ class CLI:
 			'raid=%s' % raidlevel ]
 
 		if flags:
-			cmd.extend(flags)
+			f = flags.split()
+			cmd.extend(f)
 
 		result = self.run(cmd)
 
@@ -225,6 +226,7 @@ class CLI:
 			'spares=%s' % ','.join(spares) ]
 
 		if options:
-			cmd.append(options)
+			f = options.split()
+			cmd.extend(f)
 		result = self.run(cmd)
 

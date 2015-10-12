@@ -97,7 +97,8 @@ class CLI:
 		args.append('drives=%s' % ','.join(disks))
 
 		if flags:
-			args.append(flags)
+			f = flags.split()
+			args.extend(f)
 
 		if hotspares:
 			hs = []
@@ -121,7 +122,8 @@ class CLI:
 		for hotspare in hotspares:
 			args = ['%s/s%d' % (loc, hotspare), 'add','hotsparedrive']
 			if options:
-				args.append(options)
+				f = options.split()
+				args.extend(f)
 			self.run(args)
 
 
