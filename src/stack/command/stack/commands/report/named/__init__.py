@@ -163,19 +163,13 @@ class Command(stack.commands.report.command):
                 s += '# Site additions go in /etc/named.conf.local\n\n'
                 
 
-                acl = [ ]
+                acl = [ '127.0.0.0/24']
                 for network in networks:
                         ip = stack.ip.IPGenerator(network['address'],
                                                   network['mask'])
                         cidr = ip.cidr()
-                        acl.append('\t%s/%s;' % (network['address'], ip.cidr()))
-                if len(acl):
-                        s += 'acl private {\n%s\n};\n\n' % string.join(acl, '\n')
-                else:
-                        # Not sure if this could happen so do the logical
-                        # thing just in case.  This would mean no
-                        # networks have dns=true.
-                        s += 'acl private {\n\t127.0.0.0/24;\n};\n'
+                        acl.append('%s/%s' % (network['address'], cidr))
+                s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
                                            
 		
 		fwds = self.db.getHostAttr('localhost',
