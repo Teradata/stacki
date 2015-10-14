@@ -157,6 +157,7 @@ if os.path.exists('/tmp/site.attrs'):
 <!-- SSH settings -->
 
 /opt/stack/bin/stack set attr attr=ssh.use_dns value=true
+/opt/stack/bin/stack set attr attr=sync.ssh.authkey value=true
 
 <!-- insert-ethers base numbers -->
 

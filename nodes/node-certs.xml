@@ -21,9 +21,10 @@ for i in "/root/.ssh" ; do
 		/bin/mkdir -p $i
 	fi
 done
+</post>
 
 <!-- propagate root's public ssh key -->
-
+<post cond="sync.ssh.authkey">
 <file name="/root/.ssh/authorized_keys">
 <eval shell="sh">
 cat /root/.ssh/id_rsa.pub
