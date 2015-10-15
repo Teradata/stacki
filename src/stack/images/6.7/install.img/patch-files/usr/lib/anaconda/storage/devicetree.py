@@ -548,6 +548,27 @@ class DeviceTree(object):
 
     def processActions(self, dryRun=None):
         """ Execute all registered actions. """
+
+	# Execute an action
+        def executeAction(action):
+            try:
+                # STACKI
+                log.info("STACKI:standard action: %s" % action)
+                # STACKI
+                action.execute(intf=self.intf)
+            except DiskLabelCommitError:
+                # it's likely that a previous format destroy action
+                # triggered setup of an lvm or md device.
+                self.teardownAll()
+                action.execute(intf=self.intf)
+
+            udev_settle()
+            for device in self._devices:
+                #make sure we catch any renumbering parted does
+                if device.exists and isinstance(device, PartitionDevice):
+                    device.updateName()
+                    device.format.device = device.path
+
         # in most cases the actions will already be sorted because of the
         # rules for registration, but let's not rely on that
         def cmpActions(a1, a2):
@@ -766,8 +787,47 @@ class DeviceTree(object):
 
         file.close()
         # STACKI
+	partition_actions=[]
+	vg_actions=[]
+	lv_actions=[]
+	pv_actions=[]
+	other_actions=[]
 
-        for action in self._actions:
+	#
+	# Separate actions based on their type.
+	# We are doing this to facilitate parallel
+	# format later.
+	#
+        for a in self._actions:
+            if a.isCreate() and a.isDevice():
+                if a.device.type == 'partition':
+                    partition_actions.append(a)
+                elif a.device.type == 'lvmvg':
+                    vg_actions.append(a)
+                elif a.device.type == 'lvmlv':
+                    lv_actions.append(a)
+                else:
+                    other_actions.append(a)
+	    elif a.isCreate() and a.isFormat() and a.device.format.type == 'lvmpv': 
+                pv_actions.append(a)
+            else:
+		other_actions.append(a)		
+
+        # Create partitions first (Eg: sda1, sda2 etc)
+        for a in partition_actions:
+            executeAction(a)
+        # Create Physical Volumes next
+        for a in pv_actions:
+            executeAction(a)
+        # Create Volume groups next
+        for a in vg_actions:
+            executeAction(a)
+        # Create logical volumes next
+        for a in lv_actions:
+            executeAction(a)
+
+	# Execute disk format in parallel
+        for action in other_actions:
             log.info("executing action: %s" % action)
             if not dryRun:
                 # STACKI
@@ -786,24 +846,8 @@ class DeviceTree(object):
                     continue
                 # STACKI
 
-                try:
-                    # STACKI
-                    log.info("STACKI:standard action: %s" % action)
-                    # STACKI
-                    action.execute(intf=self.intf)
-                except DiskLabelCommitError:
-                    # it's likely that a previous format destroy action
-                    # triggered setup of an lvm or md device.
-                    self.teardownAll()
-                    action.execute(intf=self.intf)
-
-                udev_settle()
-                for device in self._devices:
-                    # make sure we catch any renumbering parted does
-                    if device.exists and isinstance(device, PartitionDevice):
-                        device.updateName()
-                        device.format.device = device.path
-
+		executeAction(action)
+        
         # STACKI
         if parallel_format and len(threads) > 0:
             log.info("STACKI: starting parallel format")

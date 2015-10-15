@@ -41,7 +41,6 @@
 
 import csv
 import re
-from sets import Set
 import stack.commands
 import sys
 
@@ -100,7 +99,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		name = None
 		type_dict = {}
-		lvm_host_set = Set([])
 
 		for row in reader:
 			line += 1
@@ -209,20 +207,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				device_arr.append(mountpoint)
 				type_dict[type_key] = device_arr
 
-				if type == 'lvm':
-					lvm_host_set.add(host)
-
 		# Regexp to match Hard disk labels
 		hd_label_regexp = '[s|h]d[a-z]'
 		hd_regexp = re.compile(hd_label_regexp)
 
 		# Revalidate the spreadsheet to check if pv's, volgroups have been defined
 		for host in hosts:
-			# Set install action to parallel format if there is lvm.
-			if host in lvm_host_set:
-				self.owner.call('set.host.installaction', 
-					[ host, 'action=install no-parallel-format'])
-
 			# Get device map for a host
 			device_map = self.owner.hosts[host]
 			for d in device_map.keys():
