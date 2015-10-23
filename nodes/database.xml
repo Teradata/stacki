@@ -20,7 +20,7 @@
         </copyright>
 
   <package>stack-sql</package>
-  <package>foundation-mysql</package>
+  <package>foundation-mariadb</package>
   <package>foundation-py-MySQL-python</package>
 
 <post>
@@ -37,42 +37,21 @@
 	Also setup the correct directories and their
 	permissions for running the database
 -->
+mkdir -p /var/opt/stack
+
 groupadd -g 403 stackdb
 useradd -u 403 -g stackdb -d /var/opt/stack/mysql -m -s /bin/false stackdb
-
-/opt/stack/sbin/mysql-install-db
 
 chgrp -R stackdb /var/opt/stack/mysql
 chmod -R g+rwx   /var/opt/stack/mysql
 chmod a+rx /var/opt/stack/mysql
-</post>
 
-<!--
-	Setup foundation-mysql to startup at boot
-	and start foundation-mysql database
--->
-<post>
-<file name="/etc/ld.so.conf.d/foundation-mysql.conf">
-/opt/stack/lib/mysql
+<file name="/etc/ld.so.conf.d/foundation-mariadb.conf"
+	perms="0640">
+/opt/stack/lib64
 </file>
+/usr/sbin/ldconfig
 
-/sbin/ldconfig
-
-/sbin/chkconfig foundation-mysql on
-/etc/rc.d/init.d/foundation-mysql start
-
-</post>
-
-<!--
-	Make sure that the mysql database is
-	up and running
--->
-<post>
-/opt/stack/bin/mysqladmin -s ping > /dev/null
-while [ $? -eq 1 ]; do
-        sleep 1
-        /opt/stack/bin/mysqladmin -s ping > /dev/null
-done
 </post>
 
 <post>
@@ -85,21 +64,10 @@ user		= root
 socket		= /var/opt/stack/mysql/mysql.sock
 password	= $root_pw
 </file>
-
-
-# give MySQL 1/16 of main memory for caching
-MEMSIZE=`gawk '/MemTotal:/ { print int($2/16) }' /proc/meminfo`000
-
-sed "/datadir/a query_cache_size = $MEMSIZE\nquery_cache_type = 1\nquery_cache_limit = $MEMSIZE" /opt/stack/etc/my.cnf &lt; /tmp/my.cnf
-
-cp /tmp/my.cnf /opt/stack/etc/my.cnf
-rm -f /tmp/my.cnf
-
-
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
 <file name="/opt/stack/etc/my.cnf"
-	owner="root:apache" perms="0640">
+	owner="root:apache" perms="0640" vars="expanded">
 [mysqld]
 user		= stackdb
 port		= 40000
@@ -115,6 +83,30 @@ password	= $apache_pw
 
 </post>
 
+<!--
+	Setup MariaDB to startup at boot
+	and start database
+-->
+<post>
+/opt/stack/sbin/mysql-install-db
+
+/sbin/chkconfig foundation-mariadb on
+/etc/rc.d/init.d/foundation-mariadb start
+
+</post>
+<!--
+	Make sure that the database is
+	up and running
+-->
+<post>
+/opt/stack/bin/mysqladmin -s ping > /dev/null
+while [ $? -eq 1 ]; do
+        sleep 1
+        /opt/stack/bin/mysqladmin -s ping > /dev/null
+done
+
+</post>
+
 <!-- Access control on the database -->
 <post interpreter='/opt/stack/bin/python'>
 import os
@@ -127,7 +119,8 @@ import MySQLdb
 
 # Connect to the database
 d = MySQLdb.connect(user='root', db='mysql', passwd='',
-	unix_socket='/var/opt/stack/mysql/mysql.sock')
+	unix_socket='/var/opt/stack/mysql/mysql.sock',
+	autocommit=True)
 
 try:
 	db = d.cursor()

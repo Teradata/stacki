@@ -156,13 +156,15 @@ try:
 			host='localhost',
 			user=username,
 			passwd='%s' % passwd,
-			unix_socket='/var/opt/stack/mysql/mysql.sock')
+			unix_socket='/var/opt/stack/mysql/mysql.sock',
+			autocommit=True)
 	else:
 		Database = connect(db='cluster',
 			host='%s' % host,
 			user=username,
 			passwd='%s' % passwd,
-			port=40000)
+			port=40000,
+			autocommit=True)
 
 except ImportError:
 	Database = None

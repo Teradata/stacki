@@ -30,7 +30,7 @@ DROP TABLE IF EXISTS access;
 CREATE TABLE access (
   Command       varchar(128) NOT NULL,
   GroupID       int(11) NOT NULL
-) TYPE=MyISAM;
+);
 
 <!-- enable root to run all commands -->
 
@@ -47,7 +47,7 @@ CREATE TABLE aliases (
   Node		int(11) NOT NULL default '0',
   Name		varchar(32) default NULL,
   PRIMARY KEY (ID) 
-) TYPE=MyISAM;
+);
 
 grant select on cluster.aliases to ''@'localhost';
 grant select on cluster.aliases to ''@'%.local';
@@ -60,7 +60,7 @@ CREATE TABLE global_attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL
-) TYPE=MyISAM;
+);
 
 grant select (scope, attr, value) on cluster.global_attributes to ''@'localhost';
 grant select (scope, attr, value) on cluster.global_attributes to ''@'%.local';
@@ -72,7 +72,7 @@ CREATE TABLE os_attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL
-) TYPE=MyISAM;
+);
 
 grant select (os, scope, attr, value) on cluster.os_attributes to ''@'localhost';
 grant select (os, scope, attr, value) on cluster.os_attributes to ''@'%.local';
@@ -84,7 +84,7 @@ CREATE TABLE environment_attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL
-) TYPE=MyISAM;
+);
 
 grant select (environment, scope, attr, value) on cluster.environment_attributes to ''@'localhost';
 grant select (environment, scope, attr, value) on cluster.environment_attributes to ''@'%.local';
@@ -97,7 +97,7 @@ CREATE TABLE appliance_attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL
-) TYPE=MyISAM;
+);
 
 grant select (appliance, scope, attr, value) on cluster.appliance_attributes
 	to ''@'localhost';
@@ -111,7 +111,7 @@ CREATE TABLE node_attributes (
   Attr		varchar(128) NOT NULL,
   Value		text,
   Shadow        text default NULL
-) TYPE=MyISAM;
+);
 
 grant select (node, scope, attr, value) on cluster.node_attributes to ''@'localhost';
 grant select (node, scope, attr, value) on cluster.node_attributes to ''@'%.local';
@@ -125,7 +125,7 @@ CREATE TABLE appliances (
   Membership	varchar(64) NOT NULL default '',
   Public	enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.appliances to ''@'localhost';
 grant select on cluster.appliances to ''@'%.local';
@@ -139,7 +139,7 @@ CREATE TABLE distributions (
   OS		varchar(32) NOT NULL default 'redhat',
   Graph		varchar(32) NOT NULL default 'default',
   PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.distributions to ''@'localhost';
 grant select on cluster.distributions to ''@'%.local';
@@ -161,7 +161,7 @@ CREATE TABLE nodes (
   RunAction	varchar(64) default 'os',
   InstallAction	varchar(64) default 'install',
   PRIMARY KEY  (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.nodes to ''@'localhost';
 grant select on cluster.nodes to ''@'%.local';
@@ -185,7 +185,7 @@ CREATE TABLE networks (
   Channel	varchar(128) default NULL,
   Main		boolean	default false,
   PRIMARY KEY(ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.networks to ''@'localhost';
 grant select on cluster.networks to ''@'%.local';
@@ -204,7 +204,7 @@ CREATE TABLE subnets (
 	dns		boolean		default false,
 	pxe		boolean		default false,
 	PRIMARY KEY(ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.subnets to ''@'localhost';
 grant select on cluster.subnets to ''@'%.local';
@@ -217,7 +217,7 @@ CREATE TABLE global_routes (
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
   Subnet	int(11)	default NULL references subnets
-) TYPE=MyISAM;
+);
 
 grant select on cluster.global_routes to ''@'localhost';
 grant select on cluster.global_routes to ''@'%.local';
@@ -229,7 +229,7 @@ CREATE TABLE os_routes (
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
   Subnet	int(11)	default NULL references subnets
-) TYPE=MyISAM;
+);
 
 grant select on cluster.os_routes to ''@'localhost';
 grant select on cluster.os_routes to ''@'%.local';
@@ -241,7 +241,7 @@ CREATE TABLE appliance_routes (
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
   Subnet	int(11)	default NULL references subnets
-) TYPE=MyISAM;
+);
 
 grant select on cluster.appliance_routes to ''@'localhost';
 grant select on cluster.appliance_routes to ''@'%.local';
@@ -253,7 +253,7 @@ CREATE TABLE node_routes (
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
   Subnet	int(11)	default NULL references subnets
-) TYPE=MyISAM;
+);
 
 grant select on cluster.node_routes to ''@'localhost';
 grant select on cluster.node_routes to ''@'%.local';
@@ -264,7 +264,7 @@ DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
   Distribution	int(11) NOT NULL default '1',
   Roll		int(11) NOT NULL 
-) TYPE=MyISAM;
+);
 
 grant select on cluster.stacks to ''@'localhost';
 grant select on cluster.stacks to ''@'%.local';
@@ -273,7 +273,7 @@ DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
   Distribution	int(11) NOT NULL default '1',
   Cart		int(11) NOT NULL 
-) TYPE=MyISAM;
+);
 
 grant select on cluster.cart_stacks to ''@'localhost';
 grant select on cluster.cart_stacks to ''@'%.local';
@@ -285,7 +285,7 @@ CREATE TABLE carts (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
   PRIMARY KEY (ID) 
-) TYPE=MyISAM;
+);
 
 grant select on cluster.carts to ''@'localhost';
 grant select on cluster.carts to ''@'%.local';
@@ -301,7 +301,7 @@ CREATE TABLE rolls (
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default 'redhat',
   PRIMARY KEY (ID) 
-) TYPE=MyISAM;
+);
 
 grant select on cluster.rolls to ''@'localhost';
 grant select on cluster.rolls to ''@'%.local';
@@ -322,7 +322,7 @@ CREATE TABLE partitions (
 	PartitionFlags	varchar(128) NOT NULL default '',
 	FormatFlags	varchar(128) NOT NULL default '',
 	PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.partitions to ''@'localhost';
 grant select on cluster.partitions to ''@'%.local';
@@ -334,7 +334,7 @@ CREATE TABLE boot (
   Node          int(11) NOT NULL default '0',
   Action        enum ('install', 'os', 'run'),
   PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.boot to ''@'localhost';
 grant select on cluster.boot to ''@'%.local';
@@ -347,7 +347,7 @@ CREATE TABLE bootaction (
   Ramdisk       varchar(256) default NULL,
   Args          varchar(1024) default NULL,
   PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.bootaction to ''@'localhost';
 grant select on cluster.bootaction to ''@'%.local';
@@ -367,7 +367,7 @@ CREATE TABLE global_firewall (
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
-) TYPE=MyISAM;
+);
 
 grant select on cluster.global_firewall to ''@'localhost';
 grant select on cluster.global_firewall to ''@'%.local';
@@ -386,7 +386,7 @@ CREATE TABLE os_firewall (
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
-) TYPE=MyISAM;
+);
 
 grant select on cluster.os_firewall to ''@'localhost';
 grant select on cluster.os_firewall to ''@'%.local';
@@ -405,7 +405,7 @@ CREATE TABLE appliance_firewall (
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
-) TYPE=MyISAM;
+);
 
 grant select on cluster.appliance_firewall to ''@'localhost';
 grant select on cluster.appliance_firewall to ''@'%.local';
@@ -424,7 +424,7 @@ CREATE TABLE node_firewall (
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
-) TYPE=MyISAM;
+);
 
 grant select on cluster.node_firewall to ''@'localhost';
 grant select on cluster.node_firewall to ''@'%.local';
@@ -435,7 +435,7 @@ CREATE TABLE public_keys (
  Node		int(11) NOT NULL default '0',
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
-) TYPE=MyISAM;
+);
 
 grant select on cluster.public_keys to ''@'localhost';
 grant select on cluster.public_keys to ''@'%.local';
@@ -450,7 +450,7 @@ CREATE TABLE storage_controller (
  RaidLevel	varchar(16) NOT NULL,
  ArrayID	int(11) NOT NULL,
  Options	varchar(512) NOT NULL default ''
-) TYPE=MyISAM;
+);
 
 grant select on cluster.storage_controller to ''@'localhost';
 grant select on cluster.storage_controller to ''@'%.local';
@@ -464,7 +464,7 @@ CREATE TABLE storage_partition (
  Size		int(11) NOT NULL,
  FsType		varchar(128) NOT NULL default '',
  Options        varchar(512) NOT NULL default ''
-) TYPE=MyISAM;
+);
 
 grant select on cluster.storage_partition to ''@'localhost';
 grant select on cluster.storage_partition to ''@'%.local';
