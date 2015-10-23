@@ -493,7 +493,7 @@ class Generator_redhat(Generator):
 		self.ks['boot-post']	= []
 
 		self.rpm_context	= {}
-		self.log = '/mnt/sysimage/var/log/stack-install.log'
+		self.log = '/var/log/stack-install.log'
 
 	
 	##
@@ -800,8 +800,15 @@ class Generator_redhat(Generator):
 			roll = list[1]
 			nodefile = list[2]
 			color = list[3]
+			log = self.log
+			try:
+				i = args.index('--nochroot')
+				if i >= 0:
+					log = '/mnt/sysimage/%s' % self.log
+			except:
+				pass
 			post_list.append(('%%post --log=%s %s' %
-				(self.log, args), roll, nodefile, color))
+				(log, args), roll, nodefile, color))
 			post_list.append((text + '\n',roll, nodefile, color))
 			post_list.append(('%end'))
 			
