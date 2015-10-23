@@ -92,12 +92,12 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-DEPENDS.FILES	= MySQL-python-$(VERSION).tar.gz
+DEPENDS.FILES	= MySQL-python-$(VERSION).zip
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 build:
-	gunzip -c MySQL-python-$(VERSION).tar.gz | $(TAR) -xf -
+	unzip MySQL-python-$(VERSION).zip
 	( 								\
 		cd MySQL-python-$(VERSION);				\
 		PATH=$(PKGROOT)/bin:$$PATH 				\
