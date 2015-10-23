@@ -1,0 +1,2237 @@
+*********************************************
+
+LSI Corp. MegaRAID StorCLI Release 
+
+*********************************************
+
+Release Date: 10/05/15
+========================
+
+Supported Controllers
+==================
+
+Syncro 9361-8i
+Syncro 9380-8e
+MegaRAID SAS 9361-8i
+MegaRAID SAS 9361-4i
+MegaRAID SAS 9341-8i
+MegaRAID SAS 9341-4i
+MegaRAID SAS 9380-8e
+MegaRAID SAS 9380-4i4e
+MegaRAID SAS 9270-8i 
+MegaRAID SAS 9271-4i 
+MegaRAID SAS 9271-8i 
+MegaRAID SAS 9271-8iCC 
+Syncro CS 9271-8i
+MegaRAID SAS 9286-8e 
+MegaRAID SAS 9286CV-8e 
+MegaRAID SAS 9286CV-8eCC
+Syncro CS 9286-8e
+MegaRAID SAS 9265-8i
+MegaRAID SAS 9285-8e
+MegaRAID SAS 9240-4i
+MegaRAID SAS 9240-8i
+MegaRAID SAS 9260-4i
+MegaRAID SAS 9260CV-4i
+MegaRAID SAS 9260-8i
+MegaRAID SAS 9260CV-8i
+MegaRAID SAS 9260DE-8i
+MegaRAID SAS 9261-8i
+MegaRAID SAS 9280-4i4e
+MegaRAID SAS 9280-8e
+MegaRAID SAS 9280DE-8e
+MegaRAID SAS 9280-24i4e
+MegaRAID SAS 9280-16i4e
+MegaRAID SAS 9260-16i
+MegaRAID SAS 9266-4i
+MegaRAID SAS 9266-8i
+MegaRAID SAS 9285CV-8e
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 10/05/15
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.17.08
+Previous Versoin	1.16.06
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+Linux-ppc
+VMware
+VMware MN
+VMware MN-NDS
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00845688 - (Closed) - MR_6.8_storcli: Fails to get phyerrorcounters of the expander phys for the enclosures which are in daisy chain
+SCGCQ00853174 - (Closed) - Storcli writes "no CC errors were logged " instead of "no pd events" in a file, when fire a command pdfailevents.
+SCGCQ00857748 - (Closed) - On executing storcli cmd to dump alilog, it posts an error message and also doesnt list all the information
+SCGCQ00857760 - (Closed) - Alignment of logs in the log file for the controller info is not proper
+SCGCQ00863767 - (Closed) - Fixed all the resource leaks, Null pointer deferences and error handling issues.
+SCGCQ00865020 - (Closed) - The Design Info field is partially populated for CV in StorCLI Ver 1.17.01 as compared to the previous releases.
+SCGCQ00874043 - (Closed) - StorCLI returns confusing message when flashing incompatible FW image(16MB)
+SCGCQ00880288 - (Closed) - storcli command "/c0 show alilog" takes more than 2 mins.
+SCGCQ00880959 - (Closed) - Coverity defect fixes in Storcli 6.9
+SCGCQ00884900 - (Closed) - Coverity defects in 6.9 Storlci
+SCGCQ00894452 - (Closed) - Storcli displays wrong message while deleting a CCVD
+SCGCQ00894601 - (Closed) - StorCLI : output string needs to be change for largeIO support command
+SCGCQ00845602 - (Closed) - Alpha 6.8: Storcli command ./storcli /cx/fall show not displaying proper error message for non importable VD.
+SCGCQ00859728 - (Closed) - Need to change the message if identified an OS or file system on VD
+SCGCQ00867587 - (Closed) - Check for OS on any Jbod while disabling JBOD on the controller
+SCGCQ00914834 - (Closed) - Updating storcli as per the API changes for LargeIOSupport
+SCGCQ00860801 - (Closed) - Coverity defects for 6.9
+SCGCQ00863669 - (Closed) - Coverity fixes in MR6.9
+SCGCQ00865464 - (Closed) - Incorrect error message displays BBU instead of CV
+SCGCQ00874608 - (Resolved) - misspelled word in storcli message
+SCGCQ00893958 - (Resolved) - MR_Intruder: Incomplete help file provided for the command storcli /cx set autopdcache=<off|[on|sscr0]|r0|wbr0> [immediate]
+SCGCQ00865804 - (Closed) - PERCCLI shows storccli during help command
+SCGCQ00865971 - (Closed) - StorCLI saves a degraded config but does not restore it.
+SCGCQ00873650 - (Closed) - Dereferencing the null pointer
+SCGCQ00855390 - (Closed) - Adding NULL Check to avoid referencing a NULL
+SCGCQ00860822 - (Closed) - If connector index is 0xFF display connector name as "Internal"
+SCGCQ00864791 - (Closed) - Coverity defects(Adding NULL Checks and Error messages in failure cases)
+SCGCQ00853185 - (Closed) - Storcli fails to dump lastoneday pdfailevents in a file.
+SCGCQ00855389 - (Closed) - Remove unused variables in flash Cp.
+SCGCQ00877894 - (Closed) - Disable SSD caching fails from Storcli in OEL 7.
+SCGCQ00873620 - (Closed) - StorCLI does not find enclosures in multipath environme
+SCGCQ00851795 - (Implemented) - Implemented commands to save/restore the configuration on the controller.
+SCGCQ00867424 - (Implemented) - Incorrect message displayed when performing Auto configuration raid 0 with SSD drives.
+SCGCQ00828030 - (Implemented) - Add support to detect that an OS is installed on a JBOD and to block it from being changed to Unconfigured Good
+SCGCQ00894103 - (Closed) - StorCLI : Add support to enable/Disable of Large IO Support - 1 MB IO
+SCGCQ00854620 - (Implemented) - Provide a more descriptive port enumeration
+SCGCQ00833594 - (Closed) - added new command /c0 show swalilog equivalent to adpalilog
+SCGCQ00850619 - (Closed) - Added support for flashing the FW on intruder and new Dev-ID's of Invader are added f
+SCGCQ00853554 - (Port_Complete) - OEM requesting to do a WRITE VERIFY prior to flushing cache.
+SCGCQ00864789 - (Port_Complete) - Spelling mistake in storcli output command pdfaileventoption
+
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+=======================
+Previous Releases
+=======================
+
+SAS MegaRAID StorCLI
+Release Date: 07/13/15
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.16.06
+Previous Versoin	1.15.05
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+Linux-ppc
+VMware
+VMware MN
+VMware MN-NDS
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00355536 - (Closed) - MegaCli and StorCli can not manage both Liberator (and prior) and TB controllers in the same system under FreeBSD with the mf
+SCGCQ00357948 - (Closed) - StorCLI does not display drive information behind the Blackjack (Alta) interposer correctly
+SCGCQ00359629 - (Closed) - In paged view the text " Press Enter to continue" should be changed to " Press any key to Continue"
+SCGCQ00359998 - (Closed) - Code clean up in libmods and sysefi files are added
+SCGCQ00360814 - (Closed) - StorCLI: Not able to set pr property includessds as onlymixed on Liberator cacheoffload controller
+SCGCQ00362216 - (Closed) - iMr_Fury_StorCli:4K Drive size shown wrong in Esxi4.1U3
+SCGCQ00362717 - (Closed) - storcli /c0/d0 show " in that legend missing for "Dgrd/pdgd/Onln/ofLn/Rbld"
+SCGCQ00363455 - (Closed) - The legend for the PD List table exceeds 80 char limit.
+SCGCQ00363522 - (Closed) - storcli query for displaying controller properties is showing status , as failure.
+SCGCQ00364248 - (Closed) - StorCLI failed to delete a VD that is just created under Windows 2008
+SCGCQ00364622 - (Closed) - Reports wrong diskgroup size while querying controller level properties
+SCGCQ00364735 - (Closed) - UEFI, the O/P of <storcli /c0 show all>"Current Controller Date/Time" & "Current System Date/time" are not in proper format
+SCGCQ00371445 - (Closed) - Vmware CLI fails to set the phy linkspeed
+SCGCQ00378828 - (Closed) - StorCLI-Legacy:'adpbootdrive get' fails to get bootdrive information.
+SCGCQ00381100 - (Closed) - MR: not able to create PRL11 using 96 drives.
+SCGCQ00408070 - (Closed) - StorCLI does not show both "Current Write Policy" and "Default Write Policy" for VD
+SCGCQ00413789 - (Closed) - storcli crashes on having a non PI drive and trying to create pi vd on all the drive
+SCGCQ00438350 - (Closed) - Megacli crashes after invoking any command in SGI system with one 9280-8e and 2 quad port qlogic FC cards.
+SCGCQ00475583 - (Closed) - Raptor_Galaxy_Tencent:Tencent Storcli detecting the card.
+SCGCQ00479843 - (Closed) - Storcli internal errors should return with 1001, but its coming as -1
+SCGCQ00481474 - (Closed) - Some Numeric values in CLI o/p comes in Hex format
+SCGCQ00484560 - (Closed) - Try to create a Exclusive VD, but after creation it still shows as Shared VD.
+SCGCQ00505771 - (Closed) - Wrong size of CacheCade VD is getting displayed after making one PD offline
+SCGCQ00518543 - (Closed) - PCLI Sparc(1.07.02):" Cli show all" command fails with error msg "Error! App exec failed in FW PCLIError! Internal".
+SCGCQ00568073 - (Closed) - Storclio_1.09.00:Fails to set SubOEMID on Solaris OS .
+SCGCQ00574835 - (Closed) - MR_Inv_6.3_PPC:Storcli- Retreiving LDBBM info through storcli is failing on SLES11 SP2 PPC64
+SCGCQ00579658 - (Closed) - PPC64 :: MR Liberator :: All commands of StorCli is failing with segmentation fault after creating a GlobalHotSpare
+SCGCQ00644123 - (Closed) - "/cx/ex show phyerrorcounters" gives core dump on freeBSD 32 and 64 bit.
+SCGCQ00653742 - (Closed) - Storlib header file checkin and make compatible changes in CLI code.
+SCGCQ00690355 - (Closed) - Storcli shows two controllers in the system though you have only one cotntroller in the system.
+SCGCQ00712982 - (Closed) - Verify StorCLI warns on destructive operations - R0 with 2 x SED drives Deleted with no warning.
+SCGCQ00716584 - (Closed) - /c0 show all page are having some incorrectness in controller information
+SCGCQ00725192 - (Closed) - H330: Firmware Crash is hit while creating the Raid1 vd without drives selected
+SCGCQ00730505 - (Closed) - After Rebuilding, DHS and Expand VD operations failed to update as per VD properties
+SCGCQ00756647 - (Closed) - 6.6_StorCli: StorCli lists all cascaded enclosures at position 0.
+SCGCQ00758770 - (Closed) - FW breaks in iMR when excluding VD's from CC
+SCGCQ00759183 - (Closed) - SED adapterOperation detailed is not shown in detailed show controller properties
+SCGCQ00759187 - (Closed) - Boot Volume details is shown in Megacli but not with storcli.
+SCGCQ00759969 - (Closed) - Adapters are not listed in sorted order.
+SCGCQ00760752 - (Closed) - /c0 show all does not list hwCfg information as compared to MegaCLI.
+SCGCQ00762663 - (Closed) - Storclio : Different error code is coming for 'set pcilinkspeed' in VMware 4.1U3
+SCGCQ00765712 - (Closed) - StorCLI is not updated with the error Message for all new MFI_STAT added in mfistat.h
+SCGCQ00765759 - (Closed) - StorCLI shows wrong "Number of blocks" for a 65.5TB VD size
+SCGCQ00765762 - (Closed) - StorCLI VMware Binary not displaying detailed description for phyerrorcounters of enclosures
+SCGCQ00772243 - (Closed) - StorCLI shows CacheBypass Size and CacheBypass Mode feature enabled against a VD which is associated with a CacheCade VD
+SCGCQ00779789 - (Closed) - Active operation(s) is coming as none when virtual drive erase is in progress.
+SCGCQ00779806 - (Closed) - ASO count mismatch in show ASO w.r.t ASO in storcli show all cmd
+SCGCQ00782882 - (Closed) - MR6.6:StorCLI shows incorrect information about "Cache Vault Flash Size"
+SCGCQ00784808 - (Closed) - "cpybck" help is not coming in Legends
+SCGCQ00792202 - (Closed) - Readability : Output string need to be updated for supportForceTo512e in show all command
+SCGCQ00792232 - (Closed) - MFCdefaults : DisableHII option needs to be include in getShowDefaults()
+SCGCQ00793374 - (Closed) - Comparing an array to null is not useful: "rawSmartData != NULL"
+SCGCQ00794394 - (Closed) - MR_6.7_STROCLI: Command "./storcli64 /c0/ex/sx reset phyerrorcounters" fails in RHEL6.6 PPC64
+SCGCQ00802031 - (Closed) - Deallocation of the same memory more than 
+SCGCQ00804554 - (Closed) - emory not freed which can cause leak
+SCGCQ00804588 - (Closed) - Memory leak happening in failure case since not freeing before returning error code.
+SCGCQ00818653 - (Closed) - Copyright value still shows 2014
+SCGCQ00827049 - (Closed) - Storcli cannot create R10 in iMR with 6 or 8 drives per span.
+SCGCQ00827299 - (Closed) - Storcli crashes instead of showing error message on enabling caching on Source VDs and C
+SCGCQ00833223 - (Closed) - Not displaying the timePeriod for event MR_EVT_PD_DEGRADED_MEDIA_POOR_PERFORMANCE
+SCGCQ00833224 - (Closed) - setting vfmap with PF/wrong VF is throwing error
+SCGCQ00839797 - (Closed) - Segmentation Fault observed, when trying to create R1 CCVD using 3/5 drives
+SCGCQ00840948 - (Closed) - Storcli throws syntax error,when setting errorThreshold.
+SCGCQ00853174 - (Closed) - Storcli writes "no CC errors were logged " instead of "no pd events" in a file, when fire a command pdfailevents.
+SCGCQ00360040 - (Closed) - Storcli is returning error with show
+SCGCQ00362070 - (Closed) - iMr_Fury_StorCLi:SectorSize show as "512KB" for 512Bytes drives
+SCGCQ00362421 - (Closed) - StorCLI: Not able to detect Liberator Controller on FreeBSD 9.0(64-bit)
+SCGCQ00364097 - (Closed) - iMR_Inv_6.1:StoreCLI- StoreCLI reports wrong Emulation type for VDs
+SCGCQ00365632 - (Closed) - PCI Info for FreeBSD needs to be indicated as "N/A"
+SCGCQ00372155 - (Closed) - Certain controller features displayed under "show all" exceeds 80-char limit.
+SCGCQ00374735 - (Closed) - StorCLI crashed when run on a Windows 2008 64-bit with 24GB of RAM and 66 drives attached
+SCGCQ00374979 - (Closed) - Storcli ld info command displays R10 vd Span Depth to 1.
+SCGCQ00378135 - (Closed) - portings of AdpRestart command
+SCGCQ00379104 - (Closed) - Not able to get paged view of StorCLI output on VM-Ware Platform
+SCGCQ00396665 - (Closed) - StorcLi_5.7: Remove the description for "Ra=Read Ahead Adaptive" in VD show info.
+SCGCQ00424978 - (Closed) - MR6.1: Hamlin: Is VD Emulated=Yes when emulationType=1
+SCGCQ00442610 - (Closed) - Onfi_patch_6.0:Firmware crashed @Line 244 in ../../raid/1078int.c for entering into CTRL-R with Pinned cache in R60 and R6.
+SCGCQ00442652 - (Closed) - SWR_1.34 - Serial number field is blank in controller information and the same could be updated with N/A in StorCli
+SCGCQ00490620 - (Closed) - Unable to insert a drive after setting a drive as 'Missing' .
+SCGCQ00503981 - (Closed) - Command "./Storcli /call/eall/sx set offline" fails with ERRcode1001 and ERRmsg drive not found.
+SCGCQ00504585 - (Closed) - Some sparc structures missing for storcli.
+SCGCQ00567761 - (Closed) - MR Liberator : PPC SERVERGY Server : MonTask: line 541 in file ../../raid/raidpci.c
+SCGCQ00644545 - (Closed) - storecli reports wrong size on 3000MB VD
+SCGCQ00649324 - (Closed) - MR6.4_StorCLI_240VD: StorCLI crashes on issuing /c1 set cc=conc delay=10 starttime=2014/12/12 12 excludevd=0
+SCGCQ00649962 - (Closed) - Cannot create a VD smaller than 800MB with 4K drives
+SCGCQ00653672 - (Closed) - MR6.4: Storcli show command does not display all the controllers plugged into the server
+SCGCQ00757358 - (Closed) - Add adapterOperation support details in /c0 show all for cachebypassMode.
+SCGCQ00758101 - (Closed) - MR_6.6_Storcli: Storcli reports supercap state 'unknown' while learn is happening on the controller.
+SCGCQ00758924 - (Closed) - Exception with command /co show badblocks or "storcli /cx flasherase"
+SCGCQ00759178 - (Closed) - SupportMaxRate SATA is not listed in PD allowed operations.
+SCGCQ00759181 - (Closed) - Add adapterOperation support details in /c0 show all for Emulationtype.
+SCGCQ00759862 - (Closed) - OEMID is coming as "Unknown" for /c0 show all
+SCGCQ00759959 - (Closed) - Support details are not shown in /c0 show all for discard cache (stalling LD deletion)
+SCGCQ00760385 - (Closed) - MR_6.6: StorCLI showing incorrect value for next Schedule time for consistency check after disabling the CC
+SCGCQ00760398 - (Closed) - MR6.6: Segmentation fault (Core Dumped) in CLI when setting any invalid value for PR start time
+SCGCQ00761937 - (Closed) - MR 6.6 Prealpha2 Storcli:Similar PCI address(BDF number) is displayed for multiple controllers connected to FreeBSD 9.3.
+SCGCQ00764658 - (Closed) - StorCLI /c0 show all command does not reflect the discard vd delete filed
+SCGCQ00765714 - (Closed) - StorCLI shows CacheBypass Size and CacheBypass Mode feature enabled against a CacheCade VD
+SCGCQ00767363 - (Closed) - Showing wrong creation date for Autoconfigured virtual drives
+SCGCQ00771626 - (Closed) - Storcli errors are printing in a different line.
+SCGCQ00772302 - (Closed) - Storcli has option to set PR maxconcurrentpd but show is not present
+SCGCQ00772332 - (Closed) - vpdpage should be read from 4 bytes to get serial number of drive
+SCGCQ00778577 - (Closed) - GB scale to be added while showing CacheCade size in CLI
+SCGCQ00779800 - (Closed) - MR6.6_CLI_FreeBSD: Displaying incorrect Driver name
+SCGCQ00783357 - (Closed) - CTRL-R:2 iMR Card in same System hitting Montask
+SCGCQ00785918 - (Closed) - Reviewing the Code AdataMfi, RmDataMf and VdDataMf files.
+SCGCQ00792200 - (Closed) - supportCPLDUpdate support bit needs to be updated in contoller detailed information
+SCGCQ00793761 - (Closed) - The HDD firmware revision is shown blank for few drives connected.
+SCGCQ00794393 - (Closed) - MR_6.7_STROCLI: "./storcli64 /c0/ex show phyerrorcounters" gives segmentation fault in RHEL6.6 PPC64
+SCGCQ00795335 - (Closed) - Explicit null dereferenced in rmdatamf.cpp causing wrong result
+SCGCQ00796206 - (Closed) - fisResBuffer memory allocation is not considering the failure case
+SCGCQ00803420 - (Closed) - Storcli displays wrong native driver version on ESXi5.5 when quered .
+SCGCQ00804745 - (Closed) - Resource leak - Leak of memory or pointers to system resources
+SCGCQ00805547 - (Closed) - MR_6.7_ Storcli: "Storcli /cx/eall/sall show " gives no enclosure found if two enclosures are connected in multipath scenario
+SCGCQ00806966 - (Resolved) - IDA show incorrect RAID controller type information
+SCGCQ00814939 - (Closed) - MR_6.7: Storcli Command "./storcli /c0/v2 set accesspolicy=RmvBlkd " fails for a blocked source VD.
+SCGCQ00819880 - (Closed) - Gas Gauge Update + StorCLI ResetNow Op
+SCGCQ00837197 - (Closed) - MR_6.8_Storcli: Cachevault flash size shows differently for different commands in storcli under RHEL6.6 PPC64
+SCGCQ00837339 - (Closed) - "/c0/cv show all" shows "CacheVault Flash Size" as 0KB for TB.
+SCGCQ00837342 - (Closed) - New PD_Degraded media events are not logging correctly in PPC
+SCGCQ00840408 - (Closed) - Storcli gives wrong message for '/c1 /eall show phyerrorcounters' on IMR controller with no enclosures
+SCGCQ00357263 - (Closed) - MegaCLI adpgetpciinfo returns a static Bus Number value "17d0"
+SCGCQ00366000 - (Closed) - Storcli displays incomplete serial number for some SSDs
+SCGCQ00377364 - (Closed) - StorCli shows Power Saving Option as enabled, despite IBM Flatwood controller having power saving option completely disabled.
+SCGCQ00383043 - (Closed) - StorCLI-Invader : The "coercion" mode is not in sync with the legacy values.
+SCGCQ00454971 - (Closed) - storcli /c0 show is not listinf SWR controller
+SCGCQ00475562 - (Resolved) Storcli - DFF firmware download fails with config ID mismatch on ESXi5.1
+SCGCQ00475815 - (Closed) - debug prints are present when issuing /co/eall show
+SCGCQ00499067 - (Closed) - Storcli reports VD Type as "Rec1" during reconstruction on SPARC.
+SCGCQ00518579 - (Closed) - Unable to make R10 through Ctrl R using 4k drives
+SCGCQ00529763 - (Closed) - Some characters missing while querying for VD properties with having 64 VD's on a controller.
+SCGCQ00572800 - (Closed) - MR_Inv_6.3_PPC:Storcli-WWN is showing blank for SAS PDs on SLES11 SP2 PPC64
+SCGCQ00581416 - (Closed) - PPC64 :: MR Liberator :: ./storcli64 /c0 show dequeuelog file command failing with segmentation fault
+SCGCQ00601775 - (Closed) - MR : on querying PR status, storcli hits segmentation fault.
+SCGCQ00609942 - (Closed) - storelib header file changes porting
+SCGCQ00645195 - (Closed) - Storcli : unable to set patrol read delay
+SCGCQ00674023 - (Closed) - MR_6.4_StorCli_EFI: Storcli.efi crashes for iMR card.
+SCGCQ00674969 - (Closed) - Storcli doesn't show SN of Samsung SSD 200/400/800 in SWRAID version 1.32
+SCGCQ00695070 - (Closed) - storcli /c0 show all is not displaying "support vd hide" and "support HOQrebuild" feilds and legends are not displayed for HD
+SCGCQ00729691 - (Closed) - MR6.5alpha:Segmentation fault(coredump) observed on executing ./storcli /c1/v63 show all for 64th cachecade VD in ubuntu14.04
+SCGCQ00752000 - (Closed) - In Windows and Linux only controller grouping is working but not sorting
+SCGCQ00755063 - (Closed) - Add support bits for uneven-span and SSHA support
+SCGCQ00759290 - (Closed) - SSM-FLASh drives property is displayed for regular drives.
+SCGCQ00767347 - (Closed) - Patrol read delay is showing wrong value when set to continuous
+SCGCQ00785400 - (Closed) - VD level hide/unhide is not possible through storcli in PPC
+SCGCQ00792264 - (Closed) - Missing the Display of the property temperatureCtrl.
+SCGCQ00794760 - (Closed) - When Supercap SOH is reported bad, CLI still see the Supercap status as "Optimal"
+SCGCQ00799426 - (Closed) - Command /cx/ex show phyerrorcounters gives bus error in Orcale Enterprise Linux
+SCGCQ00804650 - (Closed) - Varailble need to be freed before returning in all failure case
+SCGCQ00809736 - (Closed) - FW hangs during SVD and CCVD migration based on DDR Size
+SCGCQ00830544 - (Closed) - Adpalilog is failing with storcli
+SCGCQ00838307 - (Closed) - Maintainer name being populated while querying for storcli version from OS
+SCGCQ00840372 - (Closed) - Read policy should be 'NORA' for IMR controller instead of 'none'
+SCGCQ00842237 - (Closed) - storcli exits with legacy syntax for pdfwdownload
+SCGCQ00357913 - (Closed) - Update VD emulation feature in StorCLI Libmods module to sync with latest APIs.
+SCGCQ00360745 - (Closed) - StorCLI does not provide command to set HSM or HCOE SCGCQ00358662
+SCGCQ00364332 - (Closed) - iMR_Inv_6.1:StoreCLI-StoreCLI does not give proper message while trying to create 33rd VD on iMR FURY controller
+SCGCQ00365950 - (Closed) - StorCLI cannot displays information for controller in Safe mode
+SCGCQ00374336 - (Closed) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00384644 - (Closed) - iMR_Inv_6.1:StorCLI- StorCLI does not show 'Unsupported/Blocked' state for 4K drives even though FW is not supporting 4K
+SCGCQ00396303 - (Resolved) - Cfgclr command fails without force option in Sparc OS
+SCGCQ00397663 - (Closed) - StorCli_MR: While creating VD using default values FW allows read policy as"Ra=Read Ahead Adaptive" as against PR-317400
+SCGCQ00465956 - (Closed) - No of blocks displayed for a VD remains same for all VD sizes.
+SCGCQ00467502 - (Closed) - State of the Shielded Drive is not displayed using storcli command
+SCGCQ00569935 - (Closed) - PPC64 :: MR Liberator :: Storcli Version 1.09.01 is showing wrong Creation Date and Time in VD properties
+SCGCQ00574287 - (Closed) - MR_Inv_6.3_PPC:Storcli- Storcli gives 'Segmentation fault' while retriving 'advanced software options' on SLES11 SP2 PPC64
+SCGCQ00627672 - (Closed) - MR6.4_StorCLI: c0 show controller health is failing
+SCGCQ00674131 - (Closed) - StorCLIO_1.09.09 : Not able to set subOEMid in Rhel 5.10 x64 bit.
+SCGCQ00712171 - (Closed) - While creating cachecade vd with one SAS-SSD;Raid 1 option is also enabled
+SCGCQ00787705 - (Closed) - CPLD - userCodeDefinition should be shown as part of /c0 show all command
+SCGCQ00792233 - (Closed) - CPLD UPDATE : cpld upgradableCPLD support bit need to add under hardware configuration
+SCGCQ00796227 - (Closed) - rlListPtr is not handled properly in failure case
+SCGCQ00804680 - (Closed) - Out-of-bounds access and array delete misuse
+SCGCQ00819603 - (Closed) - With command "/c0 start diag" duration should be an optional param.
+SCGCQ00820392 - (Closed) - Segmentation fault while querying for GHSP/DHSP while drive is going in shield-HSP state.
+SCGCQ00827192 - (Closed) - PD fail events are not logging into the file properly in EFI environment
+SCGCQ00830435 - (Closed) - LDViewMirror is giving segmentation fault
+SCGCQ00839321 - (Closed) - Storcli gives wrong error code with respect to FW state while converting JBOD to UG
+SCGCQ00423832 - (Closed) - EFI_ Storcli: Cannot set vpd file on controller, EFI hangs and cannot proceed for further operations until reboot
+SCGCQ00448094 - (Closed) - core dump while issuing storcli command ./storcli /c0/fall show 
+SCGCQ00471116 - (Closed) - Pcli: Pcli crashes while try to set securitykey for controller.
+SCGCQ00493491 - (Closed) - Storcli /c0 show ASO fails and delay in displaying
+SCGCQ00521999 - (Closed) - CSET: storelib header file checkin for the latest changes done by storelib - (SCGCQ00521999)
+SCGCQ00523370 - (Closed) - StorCLI reports controller status as 'OK' when Arctrus controller(9361-8i) booted in safe mode
+SCGCQ00792211 - (Closed) - supportDrvActivityLEDSetting supported bit need to be update in Supported adapater Operations
+SCGCQ00793354 - (Closed) - Incorrect sizeof expression in dcmdprm
+SCGCQ00804663 - (Closed) - Variable going out of scope without freeing which causes memory leak
+SCGCQ00813314 - (Closed) - Not able add new VD in Drive Group
+SCGCQ00830269 - (Closed) - storcli /call show all fails with "command invalid"
+SCGCQ00835758 - (Closed) - Storcli shows caching is enabled on Source VD when CCVD is in offline state
+SCGCQ00348911 - (Closed) - Adapter 0: Failed to start SecureErase on Virtual Drive 0 in VMware_ESXi_5.1
+SCGCQ00394883 - (Closed) - StorCli_MR: While Creating RAID1 with four drives command facing the "C0:BAIL_OUT at line 1354" on Flatwood Board
+SCGCQ00436107 - (Closed) - The bootwithpinnedcache logic is backwards, both storcli and the FW are affected
+SCGCQ00518201 - (Closed) - MR6.2 : Storcli shows incorrect "Bus" information when "/c0 show all" is run
+SCGCQ00564008 - (Closed) - StorCli: Segmantation fault appearing in storcli when issuing /c0/fall show
+SCGCQ00622605 - (Closed) - CS2.0: Ctrl-R Domain Id is not showing in controller properties
+SCGCQ00789402 - (Closed) - Remove the code related to enableVCor feild this was used for ASD and now it is not used any more.
+SCGCQ00792205 - (Closed) - supportForceFlash needs to add under suported adapter operations
+SCGCQ00795334 - (Closed) - Operands don't affect result in pddatamf.cpp causing wrong result
+SCGCQ00811117 - (Closed) - LibMod changes for CTLR+R to read Disk Write Cache settings of PD.
+SCGCQ00477037 - (Closed) - CLI reporting Large VD (56TB) size slightly smaller than other apps (by .001)
+SCGCQ00603174 - (Closed) - /c0 set cc=conc command fails with iMR card.
+SCGCQ00795342 - (Closed) - Unchecked return value in rmdatamf.cpp (getControllerStatus)
+SCGCQ00801311 - (Closed) - MR_6.7_Storcli: Storcli reports wrong tmm and scap date of manufacture under scap properties in RHEL6.6 PPC64
+SCGCQ00853185 - (Closed) - Storcli fails to dump lastoneday pdfailevents in a file.
+SCGCQ00792085 - (Closed) - StorCLI :supportDisableImmediateIO adapter properties need to be added under show all command
+SCGCQ00792234 - (Closed) - Firmware error code status MFI_STAT_SECURE_SYSTEM_PD_EXISTS needs to be update in code
+SCGCQ00793361 - (Closed) - Non-array delete for objects in rmdatamf
+SCGCQ00793363 - (Closed) - Resource leak in VdDataMf scanPartitions
+SCGCQ00795336 - (Closed) - Explicit null dereferenced in vddatamf.cpp (getVdDetldInfo)
+SCGCQ00804672 - (Resolved) - Non-array delete for objects: destructors will not be called for objects in the array leading to unexpected beh
+SCGCQ00351234 - (Implemented) - Provide a way to enable or disable 512E using Applicaions
+SCGCQ00632240 - (Implemented) - SED/FDE changes for storcli Synchro
+SCGCQ00685007 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00685010 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00696872 - (Closed) - Consistent Sorting of Controllers for End Users in Customer Facing Tools
+SCGCQ00735171 - (Closed) - Implemented the storcli command to print SATA drive's phy error counters and reset them.
+SCGCQ00818101 - (Implemented) - Add set "Fail PD on SMARTer" property feature to StorCLI
+SCGCQ00829204 - (Implemented) - LibMods: Increase maximum cache size for Cachecade to 2048GB. This will be named CC 2.5
+SCGCQ00525321 - (Closed) - Implemented the diag results to print on console
+SCGCQ00564477 - (Implemented) - Display the NCQ enabled/disabled status of every SATA disk drive in the output of StorCLI and MegaCLI
+SCGCQ00642230 - (Closed) - Allow VMWARE version of STORCLI cannot be run from any directory
+SCGCQ00726019 - (Implemented) - Add set "Fail PD on SMARTer" property feature to StorCLI
+SCGCQ00755527 - (Closed) - Enable SED on JBOD
+SCGCQ00350668 - (Implemented) - Create Spanned R0 array (00) in StorCLI
+SCGCQ00369742 - (Implemented) - MWCLI. R10, R50, R60, R00 VD creation
+SCGCQ00558815 - (Closed) - MR 4.12: Big endian architecture support for MR Linux driver and StorCli
+SCGCQ00787923 - (Implemented) - OEL Support for SPARC
+SCGCQ00352120 - (Implemented) - MWCLI. Add HA support into storcli
+SCGCQ00564474 - (Implemented) - Request RAID CLI to display the Patrol Read Start Time
+SCGCQ00621287 - (Closed) - STORCLI will support MR controller management without UEFI BootServiceDriver Driver and also has retain functionality of existing see- adapter-through-driver functionality.
+SCGCQ00750164 - (Closed) - RRB 71 - enable SED support for iMR JBOB
+SCGCQ00757473 - (Closed) - LD Deletion stalling all IOs on 12.12.0-0178
+SCGCQ00818987 - (Closed) - LimMod changes related to CtrlH & MSM Mismatch on write-back options - UI Inconsistancy issue
+SCGCQ00828476 - (Closed) - Storcli Should display SAS Address N/A if its invalid and change Host interface type names from PCIX, PCIE to PCI-X, PCI-E
+SCGCQ00333209 - (Closed) - Implemented 128 drive support by using the new ENCL_INFO structures
+SCGCQ00349548 - (Closed) - Uneven span support is added in StorCLI.
+SCGCQ00349599 - (Implemented) - Refer attached design doc
+SCGCQ00433703 - (Implemented) - Megacli/storcli support for lmrc driver
+SCGCQ00467863 - (Implemented) - ASD- StorCLI - Libmod changes to support PD caching.
+SCGCQ00632051 - (Closed) - Added the OEM-NEC check for getting default disk-cache policy in Libmods as Disable.
+SCGCQ00827663 - (Closed) - Implemented the VD-VF mapping related commands in factory tool
+SCGCQ00827665 - (Closed) - Implemented the VD-VF mapping related commands in factory tool
+SCGCQ00381093 - (Implemented) - PR SCGCQ00319011: Rebuild time res
+SCGCQ00665081 - (Closed) - If any error that is returned as negative we return it s 0xFF from CLI to shell else FW returned error status will be returned to shell.
+SCGCQ00693042 - (Implemented) - Complete 240VD support for utilities
+SCGCQ00794841 - (Closed) - Functionality to extract field value from new API changes
+SCGCQ00795150 - (Opened) - UDK Support for EFI
+SCGCQ00816344 - (Implemented) - Utilities/Applications should not assume that expanders are enclosures as this is not always the case.
+SCGCQ00817977 - (Closed) - Monitoring Drive performance and predictive failure
+SCGCQ00817980 - (Closed) - Storcli: Monitoring Drive performance and predictive failure
+SCGCQ00342399 - (Implemented) - CSET: (Tbolt PR 211180) Punctured Block Logging Improvements
+SCGCQ00381311 - (Implemented) - dcmd path chagnes for supporting the new cachevault a
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+
+
+SAS MegaRAID StorCLI
+Release Date: 04/16/15
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.15.05
+Previous Versoin	1.14.12
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+Linux-ppc
+VMware
+VMware MN
+VMware MN-NDS
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00808112 - (Closed) - PDFwDownload with legacy syntax fails
+SCGCQ00806973 - (Closed) - Not able to create VD using cfgcachecade add legacy syntax
+SCGCQ00806493 - (Closed) - MR6.7:StorCLI throws error message as "Older Ver Image", when trying to Flash 4MB file from MR 6.7 Pack6 to Pack7
+SCGCQ00804568 - (Closed) - Resource Leak : The system resource will not be reclaimed and reused, reducing the future availability of the resource
+SCGCQ00804302 - (Closed) - Resource leak: Variable going out of scope leaks the storage it points to.
+SCGCQ00803053 - (Closed) - storcli crashes on trying to flash the CPLD
+SCGCQ00799098 - (Closed) - Smartpollinterval range to be changed from '1 to 65535' to '0 to 65535'
+SCGCQ00797172 - (Closed) - Logically dead code in SwEvt.cpp
+SCGCQ00797168 - (Closed) - Non-array delete for scalars SnpShtCp.cpp
+SCGCQ00797143 - (Closed) - Resource Leak in LdRecn.cpp
+SCGCQ00797088 - (Closed) - Structurally dead code in foreigncp.cpp (process_show)
+SCGCQ00797085 - (Closed) - Explicit null dereferenced in ctcfpgcp.cpp (write_config_page)
+SCGCQ00796128 - (Closed) - Memory leak due to Pdlist pointer
+SCGCQ00795465 - (Closed) - Resource leak in cfgssccp.cpp(associateVDsToCachePool)
+SCGCQ00795437 - (Closed) - Dereference before null check pdremfp.cpp
+SCGCQ00795144 - (Closed) - Memory leak as UnCfgdVdOnFreeSpOnPd Class object is not freed
+SCGCQ00795130 - (Closed) - storcli /c0 set cc doesnot have option to include all VD's.
+SCGCQ00793707 - (Closed) - Set Supercap VPD information fails on PPC
+SCGCQ00793396 - (Closed) - Comparing an array to null is not useful: "NULL != fspHdrList"
+SCGCQ00793393 - (Closed) - Non-array delete for objects in trmlgcp.cpp
+SCGCQ00793378 - (Closed) - Non-array delete for objects cfgechcp.cpp in associateVDsToCachePool
+SCGCQ00793375 - (Closed) - Resource leak adpvpdcp.cpp in AdpSetVPD
+SCGCQ00793372 - (Closed) - Non-array delete for objects adhwrcp.cpp handleReadSuboption
+SCGCQ00790062 - (Closed) - "./storcli64 /c0 show cc" fails in RHEL 6.6 PPC64 with more than 64 VDs present
+SCGCQ00790032 - (Closed) - "./storcli64 /c0 show eghs" fails on RHEL 6.6 PPC64
+SCGCQ00789389 - (Closed) - autopdcache detailed help dose not have immediate option
+SCGCQ00782882 - (Closed) - MR6.6:StorCLI shows incorrect information about "Cache Vault Flash Size"
+SCGCQ00779806 - (Closed) - ASO count mismatch in show ASO w.r.t ASO in storcli show all cmd
+SCGCQ00779789 - (Closed) - Active operation(s) is coming as none when virtual drive erase is in progress.
+SCGCQ00772243 - (Closed) - StorCLI shows CacheBypass Size and CacheBypass Mode feature enabled against a VD which is associated with a CacheCade VD
+SCGCQ00765762 - (Closed) - StorCLI VMware Binary not displaying detailed description for phyerrorcounters of enclosures
+SCGCQ00765759 - (Closed) - StorCLI shows wrong "Number of blocks" for a 65.5TB VD size
+SCGCQ00765712 - (Closed) - StorCLI is not updated with the error Message for all new MFI_STAT added in mfistat.h
+SCGCQ00762663 - (Closed) - Storclio : Different error code is coming for 'set pcilinkspeed' in VMware 4.1U3
+SCGCQ00760752 - (Closed) - /c0 show all does not list hwCfg information as compared to MegaCLI.
+SCGCQ00759969 - (Closed) - Adapters are not listed in sorted order.
+SCGCQ00759187 - (Closed) - Boot Volume details is shown in Megacli but not with storcli.
+SCGCQ00759183 - (Closed) - SED adapterOperation detailed is not shown in detailed show controller properties
+SCGCQ00758770 - (Closed) - FW breaks in iMR when excluding VD's from CC
+SCGCQ00756647 - (Closed) - 6.6_StorCli: StorCli lists all cascaded enclosures at position 0.
+SCGCQ00730505 - (Closed) - After Rebuilding, DHS and Expand VD operations failed to update as per VD properties
+SCGCQ00725192 - (Closed) - Firmware Crash is hit while creating the Raid1 vd without drives selected
+SCGCQ00716584 - (Closed) - /c0 show all page are having some incorrectness in controller information
+SCGCQ00712982 - (Closed) - Verify StorCLI warns on destructive operations - R0 with 2 x SED drives Deleted with no warning.
+SCGCQ00690355 - (Closed) - Storcli shows two controllers in the system though you have only one cotntroller in the system.
+SCGCQ00653742 - (Closed) - Storlib header file checkin and make compatible changes in CLI code.
+SCGCQ00644123 - (Closed) - "/cx/ex show phyerrorcounters" gives core dump on freeBSD 32 and 64 bit.
+SCGCQ00579658 - (Closed) - PPC64 :: MR Liberator :: All commands of StorCli is failing with segmentation fault after creating a GlobalHotSpare
+SCGCQ00574835 - (Closed) - MR_Inv_6.3_PPC:Storcli- Retreiving LDBBM info through storcli is failing on SLES11 SP2 PPC64
+SCGCQ00568073 - (Closed) - Storclio_1.09.00:Fails to set SubOEMID on Solaris OS .
+SCGCQ00518543 - (Closed) - PCLI Sparc(1.07.02):" Cli show all" command fails with error msg "Error! App exec failed in FW PCLIError! Internal".
+SCGCQ00505771 - (Closed) - Wrong size of CacheCade VD is getting displayed after making one PD offline
+SCGCQ00484560 - (Closed) - Try to create a Exclusive VD, but after creation it still shows as Shared VD.
+SCGCQ00481474 - (Closed) - Some Numeric values in CLI o/p comes in Hex format
+SCGCQ00479843 - (Closed) - Storcli internal errors should return with 1001, but its coming as -1
+SCGCQ00355536 - (Closed) - MegaCli and StorCli can not manage both Liberato(and prior) and TB controllers in the same system under FreeBSD with the mf
+SCGCQ00357948 - (Closed) - StorCLI does not display drive information behind the Blackjack (Alta) interposer correctly
+SCGCQ00359629 - (Closed) - In paged view the text " Press Enter to continue" should be changed to " Press any key to Continue"
+SCGCQ00359998 - (Closed) - Code clean up in libmods and sysefi files are added
+SCGCQ00360814 - (Closed) - StorCLI: Not able to set pr property includessds as onlymixed on Liberator cacheoffload controller
+SCGCQ00362216 - (Closed) - iMr_Fury_StorCli:4K Drive size shown wrong in Esxi4.1U3
+SCGCQ00362717 - (Closed) - storcli /c0/d0 show " in that legend missing for "Dgrd/pdgd/Onln/ofLn/Rbld"
+SCGCQ00363455 - (Closed) - The legend for the PD List table exceeds 80 char limit.
+SCGCQ00363522 - (Closed) - storcli query for displaying controller properties is showing status , as failure.
+SCGCQ00364248 - (Closed) - StorCLI failed to delete a VD that is just created under Windows 2008
+SCGCQ00364622 - (Closed) - Reports wrong diskgroup size while querying controller level properties
+SCGCQ00364735 - (Closed) - UEFI, the O/P of <storcli /c0 show all>"Current Controller Date/Time" & "Current System Date/time" are not in proper format
+SCGCQ00371445 - (Closed) - Vmware CLI fails to set the phy linkspeed
+SCGCQ00378828 - (Closed) - StorCLI-Legacy:'adpbootdrive get' fails to get bootdrive information.
+SCGCQ00381100 - (Closed) - MR: not able to create PRL11 using 96 drives.
+SCGCQ00408070 - (Closed) - StorCLI does not show both "Current Write Policy" and "Default Write Policy" for VD
+SCGCQ00413789 - (Closed) - storcli crashes on having a non PI drive and trying to create pi vd on all the drive
+SCGCQ00438350 - (Closed) - Megacli crashes after invoking any command in SGI system with one 9280-8e and 2 quad port qlogic FC cards.
+SCGCQ00475583 - (Closed) - Storcli detecting the controller
+SCGCQ00810266 - (Closed) - MR6.7-Misspellingof Minutes with storcli
+SCGCQ00808109 - (Closed) - storcli -DpmStat -dsply hist physdrv[252:2] a0 fails
+SCGCQ00804748 - (Closed) - Referring a pointer which was already freed.
+SCGCQ00804578 - (Closed) - Variable not freed after allocating memory
+SCGCQ00803754 - (Closed) - CCVD is creating with max array size where it has to be limited to 1TB
+SCGCQ00803404 - (Closed) - After flashing expander firmware storcli is not displaying expected message .
+SCGCQ00797137 - (Closed) - Dereference before null check in pdremfcp.cpp(validateExtractMaxLBAFromDriveCfgFile)
+SCGCQ00797136 - (Closed) - Logically dead code in pddffprovcp.cpp(SendSTPCmd)
+SCGCQ00797091 - (Closed) - Resource leak in ldaddcp.cpp(cfgOnNewArray)
+SCGCQ00797087 - (Closed) - Use after free in expandvdcp.cpp (process_show)
+SCGCQ00795892 - (Closed) - Memory leak as the pointer is not getting deleted when we return a failure.
+SCGCQ00795434 - (Closed) - Dereference before null check in pddffdiagp.cpp
+SCGCQ00795410 - (Closed) - No help provided for the command to uninstall storcli in ubuntu
+SCGCQ00795147 - (Closed) - pdlist pointer is not getting deleted in failure case
+SCGCQ00793729 - (Closed) - Some of the Design info parameters are missing for supercap
+SCGCQ00793385 - (Closed) - Resource leak in encinfcp.cpp (process)
+SCGCQ00793381 - (Closed) - Non-array delete for objects in deqlgcp.cpp (process)
+SCGCQ00793379 - (Closed) - Resource leak in cfgssccp.cpp
+SCGCQ00793373 - (Closed) - Array delete misuse - pdrmps.cpp
+SCGCQ00790043 - (Closed) - "./storcli64 /c0 flasherase " fails in RHEL 6.6 PPC64
+SCGCQ00789416 - (Closed) - StorCLI Code removal for removed ASD feilds in mr.h
+SCGCQ00783357 - (Closed) - CTRL-R:2 iMR Card in same System hitting Montask
+SCGCQ00779800 - (Closed) - MR6.6_CLI_FreeBSD: Displaying incorrect Driver name
+SCGCQ00778577 - (Closed) - GB scale to be added while showing CacheCade size in CLI
+SCGCQ00772332 - (Closed) - vpdpage should be read from 4 bytes to get serial number of drive
+SCGCQ00772302 - (Closed) - Storcli has option to set PR maxconcurrentpd but show is not present
+SCGCQ00771626 - (Closed) - Storcli errors are printing in a different line.
+SCGCQ00767363 - (Closed) - Showing wrong creation date for Autoconfigured virtual drives
+SCGCQ00765714 - (Closed) - StorCLI shows CacheBypass Size and CacheBypass Mode feature enabled against a CacheCade VD
+SCGCQ00764658 - (Closed) - StorCLI /c0 show all command does not reflect the discard vd delete filed
+SCGCQ00761937 - (Closed) - MR 6.6 Prealpha2 Storcli:Similar PCI address(BDF number) is displayed for multiple controllers connected to FreeBSD 9.3.
+SCGCQ00760398 - (Closed) - MR6.6: Segmentation fault (Core Dumped) in CLI when setting any invalid value for PR start time
+SCGCQ00760385 - (Closed) - MR_6.6: StorCLI showing incorrect value for next Schedule time for consistency check after disabling the CC
+SCGCQ00759959 - (Closed) - Support details are not shown in /c0 show all for discard cache (stalling LD deletion)
+SCGCQ00759862 - (Closed) - OEMID is coming as "Unknown" for /c0 show all
+SCGCQ00759181 - (Closed) - Add adapterOperation support details in /c0 show all for Emulationtype.
+SCGCQ00759178 - (Closed) - SupportMaxRate SATA is not listed in PD allowed operations.
+SCGCQ00758924 - (Closed) - Exception with command /co show badblocks or "storcli /cx flasherase"
+SCGCQ00758101 - (Closed) - MR_6.6_Storcli: Storcli reports supercap state 'unknown' while learn is happening on the controller.
+SCGCQ00757358 - (Closed) - Add adapterOperation support details in /c0 show all for cachebypassMode.
+SCGCQ00649962 - (Closed) - Cannot create a VD smaller than 800MB with 4K drives
+SCGCQ00649324 - (Closed) - MR6.4_StorCLI_240VD: StorCLI crashes on issuing /c1 set cc=conc delay=10 starttime=2014/12/12 12 excludevd=0
+SCGCQ00644545 - (Closed) - storecli reports wrong size on 3000MB VD
+SCGCQ00567761 - (Closed) - MR Liberator : PPC SERVERGY Server : MonTask: line 541 in file ../../raid/raidpci.c
+SCGCQ00504585 - (Closed) - Some sparc structures missing for storcli.
+SCGCQ00503981 - (Closed) - Command "./Storcli /call/eall/sx set offline" fails with ERRcode1001 and ERRmsg drive not found.
+SCGCQ00490620 - (Closed) - Unable to insert a drive after setting a drive as 'Missing' .
+SCGCQ00360040 - (Closed) - Storcli is returning error with show
+SCGCQ00362070 - (Closed) - iMr_Fury_StorCLi:SectorSize show as "512KB" for 512Bytes drives
+SCGCQ00362421 - (Closed) - StorCLI: Not able to detect Liberator Controller on FreeBSD 9.0(64-bit
+SCGCQ00364097 - (Closed) - iMR_Inv_6.1:StoreCLI- StoreCLI reports wrong Emulation type for VDs
+SCGCQ00365632 - (Closed) - PCI Info for FreeBSD needs to be indicated as "N/A"
+SCGCQ00372155 - (Closed) - Certain controller features displayed under "show all" exceeds 80-char limit.
+SCGCQ00374735 - (Closed) - StorCLI crashed when run on a Windows 2008 64-bit with 24GB of RAM and 66 drives attached
+SCGCQ00374979 - (Closed) - Storcli ld info command displays R10 vd Span Depth to 1.
+SCGCQ00378135 - (Closed) - portings of AdpRestart command
+SCGCQ00379104 - (Closed) - Not able to get paged view of StorCLI output on VM-Ware Platform
+SCGCQ00396665 - (Closed) - StorcLi_5.7: Remove the description for "Ra=Read Ahead Adaptive" in VD show info.
+SCGCQ00424978 - (Closed) - MR6.1 Is VD Emulated=Yes when emulationType=1
+SCGCQ00442610 - (Closed) - Onfi_patch_6.0:Firmware crashed @Line 244 in ../../raid/1078int.c for entering into CTRL-R with Pinned cache in R60 and R6.
+SCGCQ00442652 - (Closed) - SWR_1.34 - Serial number field is blank in controller information and the same could be updated with N/A in StorCli
+SCGCQ00653672 - (Closed) - MR6.4: Storcli show command does not display all the controllers plugged into the server
+SCGCQ00804712 - (Closed) - Resource leak - The system resource will not be reclaimed and reused.
+SCGCQ00804666 - (Closed) - Variable not freed after allocating memory
+SCGCQ00804583 - (Closed) - Resource leak in objects in Storcli: Constructor allocates memory but destructor does not free it.
+SCGCQ00800414 - (Closed) - Coverity 13595 Unchecked return value
+SCGCQ00800403 - (Closed) - Removing logically dead code performing actions that cannot occur
+SCGCQ00795463 - (Closed) - Operands don't affect result in addevscp.cpp (setHSP)
+SCGCQ00795439 - (Closed) - Dereference before null check in cfgsscdp.cpp
+SCGCQ00794039 - (Closed) - Explicit null dereferenced (FORWARD_NULL) assign_zero: Assigning: "drvListPtr" = 0.
+SCGCQ00793371 - (Closed) - Non-array delete for objects in adalogcp.cpp
+SCGCQ00790050 - (Closed) - "./storcli64 /c0 show all page" shows "cachevault flash size = 8.0 ZB
+SCGCQ00785400 - (Closed) - VD level hide/unhide is not possible through storcli in PPC
+SCGCQ00767347 - (Closed) - Patrol read delay is showing wrong value when set to continuous
+SCGCQ00759290 - (Closed) - SSM-FLASh drives property is displayed for regular drives.
+SCGCQ00755063 - (Closed) - Add support bits for uneven-span and SSHA support
+SCGCQ00752000 - (Closed) - In Windows and Linux only controller grouping is working but not sorting
+SCGCQ00729691 - (Closed) - MR6.5alpha:Segmentation fault(coredump) observed on executing ./storcli /c1/v63 show all for 64th cachecade VD in ubuntu14.04
+SCGCQ00695070 - (Closed) - storcli /c0 show all is not displaying "support vd hide" and "support HOQrebuild" feilds and legends are not displayed for HD
+SCGCQ00674969 - (Closed) - Storcli doesn't show SN of Samsung SSD 200/400/800 in SWRAID version 1.32
+SCGCQ00674023 - (Closed) - MR_6.4_StorCli_EFI: Storcli.efi crashes for iMR card.
+SCGCQ00645195 - (Closed) - Storcli : unable to set patrol read delay
+SCGCQ00609942 - (Closed) - storelib header file changes porting
+SCGCQ00601775 - (Closed) - MR : on querying PR status, storcli hits segmentation fault
+SCGCQ00581416 - (Closed) - PPC64 :: MR Liberator :: ./storcli64 /c0 show dequeuelog file command failing with segmentation fault
+SCGCQ00572800 - (Closed) - MR_Inv_6.3_PPC:Storcli-WWN is showing blank for SAS PDs on SLES11 SP2 PPC64
+SCGCQ00529763 - (Closed) - Some characters missing while querying for VD properties with having 64 VD's on a controller.
+SCGCQ00518579 - (Closed) - Unable to make R10 through Ctrl R using 4k drives
+SCGCQ00499067 - (Closed) - Storcli reports VD Type as "Rec1" during reconstruction on SPARC.
+SCGCQ00475815 - (Closed) - debug prints are present when issuing /co/eall show
+SCGCQ00357263 - (Closed) - MegaCLI adpgetpciinfo returns a static Bus Number value "17d0"
+SCGCQ00366000 - (Closed) - Storcli displays incomplete serial number for some SSDs
+SCGCQ00377364 - (Closed) - StorCli shows Power Saving Option as enabled, despite IBM Flatwood controller having power saving option completely disabled.
+SCGCQ00383043 - (Closed) - StorCLI-Invader : The "coercion" mode is not in sync with the legacy values.
+SCGCQ00454971 - (Closed) - storcli /c0 show is not listinf SWR controller
+SCGCQ00475562 - (Resolved) - Storcli - DFF firmware download fails with config ID mismatch on ESXi5.1
+SCGCQ00807557 - (Closed) - Segmentation fault observed while trying to set JBOD as boot drive through legacy command in UBUNTU 14.10.
+SCGCQ00804768 - (Closed) - Mesgptr is not getting deleted.
+SCGCQ00804713 - (Closed) - LdTargetIdList is not getting freed in failure case
+SCGCQ00796126 - (Closed) - fixing memory leak in bbu class
+SCGCQ00793627 - (Closed) - Set autopdcache fails in PPC
+SCGCQ00793394 - (Closed) - Non-array delete for objects in ttylogcp.cpp
+SCGCQ00793386 - (Closed) - Non-array delete for objects in pdonlncp.cpp - (pdGetNissing)
+SCGCQ00787431 - (Closed) - Dimmerswitch settings different in ctrl+r and storcli
+SCGCQ00712171 - (Closed) - While creating cachecade vd with one SAS-SSD;Raid 1 option is also enabled
+SCGCQ00674131 - (Closed) - StorCLIO_1.09.09 : Not able to set subOEMid in Rhel 5.10 x64 bit.
+SCGCQ00627672 - (Closed) - MR6.4_StorCLI: c0 show controller health is failing
+SCGCQ00574287 - (Closed) - MR_Inv_6.3_PPC:Storcli- Storcli gives 'Segmentation fault' while retriving 'advanced software options' on SLES11 SP2 PPC64
+SCGCQ00569935 - (Closed) - PPC64 :: MR Liberator :: Storcli Version 1.09.01 is showing wrong Creation Date and Time in VD properties
+SCGCQ00357913 - (Closed) - Update VD emulation feature in StorCLI Libmods module to sync with latest APIs.
+SCGCQ00360745 - (Closed) - StorCLI does not provide command to set HSM or HCOE SCGCQ0035866
+SCGCQ00364332 - (Closed) - iMR_Inv_6.1:StoreCLI-StoreCLI does not give proper message while trying to create 33rd VD on iMR FURY controller
+SCGCQ00365950 - (Closed) - StorCLI cannot displays information for controller in Safe mode
+SCGCQ00374336 - (Closed) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00384644 - (Closed) - iMR_Inv_6.1:StorCLI- StorCLI does not show 'Unsupported/Blocked' state for 4K drives even though FW is not supporting 4K
+SCGCQ00396303 - (Resolved) - Cfgclr command fails without force option in Sparc OS
+SCGCQ00397663 - (Closed) - StorCli_MR: While creating VD using default values FW allows read policy as"Ra=Read Ahead Adaptive" as against PR-317400
+SCGCQ00465956 - (Closed) - No of blocks displayed for a VD remains same for all VD sizes.
+SCGCQ00467502 - (Closed) - State of the Shielded Drive is not displayed using storcli command
+SCGCQ00810638 - (Closed) - Added the condition to check the raid level and fail it if the drives given are lesser than the needed drives
+SCGCQ00797139 - (Closed) - Structurally dead code in prfmoncp.cpp(process)
+SCGCQ00797090 - (Closed) - Resource leak in ldaddcp.cpp(associateVDsToCachePool)
+SCGCQ00793360 - (Closed) - Unchecked return value in appverp.cpp
+SCGCQ00790022 - (Closed) - ./storcli64 /c0 show pr gives segmentation fault on PPC with more than 64 VDs
+SCGCQ00523370 - (Closed) - StorCLI reports controller status as 'OK' when Arctrus controller(9361-8i) booted in safe mode
+SCGCQ00521999 - (Closed) - CSET: storelib header file checkin for the latest changes done by storelib - (SCGCQ00521999)
+SCGCQ00493491 - (Closed) - Storcli /c0 show ASO fails and delay in displaying .
+SCGCQ00471116 - (Closed) - Pcli: Pcli crashes while try to set securitykey for controller.
+SCGCQ00423832 - (Closed) - EFI_ Storcli: Cannot set vpd file on controller, EFI hangs and cannot proceed for further operations until reboot
+SCGCQ00448094 - (Closed) - core dump while issuing storcli command ./storcli /c0/fall show all.
+SCGCQ00348911 - (Closed) - Adapter 0: Failed to start SecureErase on Virtual Drive 0 in VMware_ESXi_5.1
+SCGCQ00804725 - (Closed) - userPdListPtr is not handled properly in failure case
+SCGCQ00804682 - (Closed) - Resource Leak : This could cause an immediate crash or incorrect values might be read subsequently resulting in incorrect com
+SCGCQ00800228 - (Closed) - Out of bounds access which can cause memory corruptions
+SCGCQ00797165 - (Closed) - Non-array delete for scalars ShwSumCp.cpp
+SCGCQ00622605 - (Closed) - CS2.0: Ctrl-R Domain Id is not showing in controller properties
+SCGCQ00564008 - (Closed) - StorCli: Segmantation fault appearing in storcli when issuing /c0/fall show
+SCGCQ00518201 - (Closed) - MR6.2 : Storcli shows incorrect "Bus" information when "/c0 show all" is run
+SCGCQ00394883 - (Closed) - StorCli_MR: While Creating RAID1 with four drives command facing the "C0:BAIL_OUT at line 1354" on Flatwood Board
+SCGCQ00436107 - (Closed) - The bootwithpinnedcache logic is backwards, both storcli and the FW are affected
+SCGCQ00793689 - (Closed) - Reading Supercap VPD information fails on RHEL 6.6 PPC64
+SCGCQ00603174 - (Closed) - /c0 set cc=conc command fails with iMR card.
+SCGCQ00477037 - (Closed) - CLI reporting Large VD (56TB) size slightly smaller than other apps 
+SCGCQ00796453 - (Implemented) - MR 6.7 - If execute delete CCVD force, StorCLI throws error code 0x3 MFI_STAT message but FW throws a proper message
+SCGCQ00781004 - (Implemented) - Write-back caching support for non-RAID disks
+SCGCQ00780967 - (Implemented) - Mechanism to set disk write cache on non-RAID disks - to enable / disable
+SCGCQ00735171 - (Closed) - Implemented the storcli command to print SATA drive's phy error counters and reset them.
+SCGCQ00696872 - (Closed) - Consistent Sorting of Controllers for End Users in Customer Facing Tools
+SCGCQ00685010 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00685007 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00632240 - (Implemented) - SED/FDE changes for storcli Synchro
+SCGCQ00351234 - (Implemented) - Provide a way to enable or disable 512E using Applications
+SCGCQ00790434 - (Closed) - Added a message to wait for some time after expander FW flash is success.
+SCGCQ00787963 - (Implemented) - Address BBU/Supercap inconsistent Behavior across HSW apps.
+SCGCQ00755527 - (Closed) - Enable SED on JBOD
+SCGCQ00642230 - (Closed) - Allow VMWARE version of STORCLI cannot be run from any directory
+SCGCQ00564477 - (Implemented) - Display the NCQ enabled/disabled status of every SATA disk drive in the output of StorCLI and MegaCLI
+SCGCQ00525321 - (Closed) - Implemented the diag results to print on console
+SCGCQ00787940 - (Implemented) - Update Attribution Language - Copyright, Trademark, Confidentiality to Avago
+SCGCQ00558815 - (Closed) - MR 4.12: Big endian architecture support for MR Linux driver and StorCli
+SCGCQ00350668 - (Implemented) - Create Spanned R0 array (00) in StorCLI
+SCGCQ00369742 - (Implemented) - MWCLI. R10, R50, R60, R00 VD creation
+SCGCQ00762265 - (Implemented) - Online Capacity Expansion by adding spans to RAID 10.
+SCGCQ00757473 - (Closed) - LD Deletion stalling all IOs on 12.12.0-0178
+SCGCQ00750164 - (Closed) - RRB 71 - enable SED support for iMR JBOD
+SCGCQ00621287 - (Closed) - STORCLI will support MR controller management without UEFI BootServiceDriver Driver and also has retain functionality of existing see- adapter-through-driver functionality.
+SCGCQ00564474 - (Implemented) - Request RAID CLI to display the Patrol Read Start Time
+SCGCQ00352120 - (Implemented) - MWCLI. Add HA support into storcli
+SCGCQ00333209 - (Closed) - Implemented 128 drive support by using the new ENCL_INFO structures
+SCGCQ00632051 - (Closed) - Added the OEM-NEC check for getting default disk-cache policy in Libmods as Disable.
+SCGCQ00349548 - (Closed) - Uneven span support is added in StorCLI.
+SCGCQ00349599 - (Implemented) - Refer attached design doc
+SCGCQ00433703 - (Implemented) - Megacli/storcli support for lmrc driver
+SCGCQ00467863 - (Implemented) - ASD- StorCLI - Libmod changes to support PD caching.
+SCGCQ00693042 - (Implemented) - Complete 240VD support for utilities
+SCGCQ00796453 - (Implemented) - MR 6.7 - If execute delete CCVD force, StorCLI throws error code 0x3 MFI_STAT message but FW throws a proper message
+SCGCQ00781004 - (Implemented) - Write-back caching support for non-RAID disks
+SCGCQ00780967 - (Implemented) - Mechanism to set disk write cache on non-RAID disks - to enable / disable
+SCGCQ00735171 - (Closed) - Implemented the storcli command to print SATA drive's phy error counters and reset them.
+SCGCQ00696872 - (Closed) - Consistent Sorting of Controllers for End Users in Customer Facing Tools
+SCGCQ00685010 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00685007 - (Closed) - Added the library functions for the new MR API bits and LD operations.
+SCGCQ00632240 - (Implemented) - SED/FDE changes for storcli Synchro
+SCGCQ00351234 - (Implemented) - Provide a way to enable or disable 512E using Applications
+SCGCQ00790434 - (Closed) - Added a message to wait for some time after expander FW flash is success.
+SCGCQ00787963 - (Implemented) - Address BBU/Supercap inconsistent Behavior across HSW apps.
+SCGCQ00755527 - (Closed) - Enable SED on JBOD
+SCGCQ00642230 - (Closed) - Allow VMWARE version of STORCLI cannot be run from any directory
+SCGCQ00564477 - (Implemented) - Display the NCQ enabled/disabled status of every SATA disk drive in the output of StorCLI and MegaCLI
+SCGCQ00525321 - (Closed) - Implemented the diag results to print on console
+SCGCQ00787940 - (Implemented) - Update Attribution Language - Copyright, Trademark, Confidentiality to Avago
+SCGCQ00558815 - (Closed) - MR 4.12: Big endian architecture support for MR Linux driver and StorCli
+SCGCQ00350668 - (Implemented) - Create Spanned R0 array (00) in StorCLI
+SCGCQ00369742 - (Implemented) - MWCLI. R10, R50, R60, R00 VD creation
+SCGCQ00762265 - (Implemented) - Online Capacity Expansion by adding spans to RAID 10.
+SCGCQ00757473 - (Closed) - LD Deletion stalling all IOs on 12.12.0-0178
+SCGCQ00750164 - (Closed) - RRB 71 - enable SED support for iMR JBOD
+SCGCQ00621287 - (Closed) - STORCLI will support MR controller management without UEFI BootServiceDriver Driver and also has retain functionality of existing see- adapter-through-driver functionality.
+SCGCQ00564474 - (Implemented) - Request RAID CLI to display the Patrol Read Start Time
+SCGCQ00352120 - (Implemented) - MWCLI. Add HA support into storcli
+SCGCQ00333209 - (Closed) - Implemented 128 drive support by using the new ENCL_INFO structures
+SCGCQ00632051 - (Closed) - Added the OEM-NEC check for getting default disk-cache policy in Libmods as Disable.
+SCGCQ00349548 - (Closed) - Uneven span support is added in StorCLI.
+SCGCQ00349599 - (Implemented) - Refer attached design doc
+SCGCQ00433703 - (Implemented) - Megacli/storcli support for lmrc driver
+SCGCQ00467863 - (Implemented) - ASD- StorCLI - Libmod changes to support PD caching.
+SCGCQ00693042 - (Implemented) - Complete 240VD support for utilities
+SCGCQ00665081 - (Closed) - If any error that is returned as negative we return it s 0xFF from CLI to shell else FW returned error status will be returned to shell.
+SCGCQ00381093 - (Implemented) - PR SCGCQ00319011: Rebuild time reset
+SCGCQ00436228 - (Opened) -
+SCGCQ00342399 - (Implemented) - CSET: (Tbolt PR 211180) Punctured Block Logging Improvements
+SCGCQ00381311 - (Implemented) - dcmd path chagnes for supporting the new cachevault api
+SCGCQ00518387 - (Port_Complete) - Storcli(1.07.01): Serial number is not displayed for Seagnus(9361-8i) card in RHEL 6.4 32 bit operating system.
+SCGCQ00579103 - (Port_Complete) - Added the code to add the VD when there are missing drives on the array.
+SCGCQ00602371 - (Active) - Need to display controller memory in Control-R
+SCGCQ00758707 - (Port_Complete) - MR6.5_storCLI: VD property" Exposure to OS" equals to yes even after hidding the Virtual Drive.
+SCGCQ00758750 - (Active) - Libmods changes for defect SCGCQ00726485: Commands for unintended controller during OCR.
+SCGCQ00778747 - (Port_Complete) - Storcli get adpbootdrive legacy syntax fails
+SCGCQ00614802 - (Port_Complete) - ASD- StorCLI- Libmod related changes for porting Virtual cache feature
+SCGCQ00660804 - (Port_Complete) - Libmod changes for ER:SCGCQ00658772
+SCGCQ00732058 - (Port_Complete) - CLI command to access/modify Drive Activity LED
+SCGCQ00758689 - (Active) - Libmods: SES Management Suspend Mode for Expanders
+SCGCQ00766164 - (Port_Complete) - Displaying entire 8-byte HDD drive firmware version.
+SCGCQ00413856 - (Port_Complete) - remove the "Drive write cache" policy from Pd information.
+SCGCQ00468257 - (Port_Complete) - SWR_SLES_11_SP3_GM Release validation : In storCli " serial number and FW package Build " fields are showing blank
+SCGCQ00558869 - (Port_Complete) - Implemented the deviceExposure as a BIOS option to set /c0 set BIOS deviceExposure=<value>
+SCGCQ00578945 - (Port_Complete) - Driver version is displayed as blank for Vmware split driver in CLI 1.08.01.
+SCGCQ00653736 - (Port_Complete) - EnhancementRequest SCGCQ00650090: Add disable/enable BGI option in create VD dialog to CTRL-R
+SCGCQ00688356 - (Port_Complete) - CTRL-R- Max config- Unable to create Raid10 VD using 192 Physical drives.
+SCGCQ00732019 - (Active) - CLI command to access/modify Immediate IO
+SCGCQ00738979 - (Port_Complete) - Implemented the storcli command to print the smart data of SATA drives.
+SCGCQ00469194 - (Port_Complete) - Aligning with FW for strip calculation for 4K drives(LIBMOD)
+SCGCQ00498804 - (Port_Complete) - Unable to set PI to on/off .
+SCGCQ00616621 - (Port_Complete) - Libmods changes for OP and Remanufacture NMR1.8
+SCGCQ00678664 - (Port_Complete) - Libmod changes for defect SCGCQ00666029
+SCGCQ00687252 - (Port_Complete) - Set MFC data using ini file fails for controller
+SCGCQ00736025 - (Active) - MR6.5_RHEL5.10 : StorCLI crashing in *** glibc detected *** on trying to clear configuration on RHEL 5.10
+SCGCQ00758122 - (Port_Complete) - Libmods: Display of CacheVault Flash Memory size
+SCGCQ00793742 - (Port_Complete) - Reading Supercap VPD information fails on RHEL 6.6 PPC64
+SCGCQ00412593 - (Port_Complete) - Resolving compiler errors for Ctrl-R
+SCGCQ00469169 - (Port_Complete) - In virtual drives information the Cac filed values are incorrect with regular VD's
+SCGCQ00477845 - (Port_Complete) - Checking in tab changes
+SCGCQ00498784 - (Port_Complete) - RAID type is displayed as RAID0 for R5 VD on executing command "cli /fall show all" and "cli /fall import preview"
+SCGCQ00643707 - (Port_Complete) - Perccli crashes on displaying controller information when there is a foreign config.
+SCGCQ00694663 - (Port_Complete) - Simulator files check-in with changes in new API.
+SCGCQ00699269 - (Port_Complete) - storcli is displaying only information of one enclosure when all option is given for phyerrorcounters, on multiple enclosures
+SCGCQ00788882 - (Port_Complete) - MegaRAID CPLD update improvements
+SCGCQ00790078 - (Port_Complete) - "./storcli64 /c0 show eghs" fails on RHEL 6.6 PPC64
+SCGCQ00413017 - (Port_Complete) - Storcli reports "segmentation fault" when running command to downgrade controller to iMR
+SCGCQ00437065 - (Port_Complete) - Driver Version is not shown in PercCli
+SCGCQ00595789 - (Port_Complete) - StorcliF Application Error when running AdpDiags in WinPE
+SCGCQ00610099 - (Port_Complete) - implemented the below commands for supporting limitsatato3G.
+SCGCQ00631408 - (Port_Complete) - Added the library calls for supporting the personality mgmt.
+SCGCQ00719102 - (Port_Complete) - Date Created field in storCLI display is incorrect after creating a VD in MSM using SWR versio 1.34 on ALM2-16
+SCGCQ00756644 - (Active) - StorCLI : BBB Phase 1 - 128k threshold plus CLI enable/disable
+SCGCQ00797738 - (Port_Complete) - SuperCap Capacitance from same system is showed inconsistent in -adpbbucmd and /cv show
+SCGCQ00376240 - (Port_Complete) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00414383 - (Port_Complete) - When a command fails, subsequent commands/actions are aborted in storcli (MegaCli)
+SCGCQ00468241 - (Port_Complete) - Slow to create VD in HA Linux
+SCGCQ00498801 - (Port_Complete) - Unable to create cachecade VD with WT property .
+SCGCQ00578944 - (Port_Complete) - Wrong driver name is displayed for Vmware split driver in CLI 1.08.01.
+SCGCQ00692501 - (Port_Complete) - Firmware crash (TLB) seen during removal of SAS cable form enclosure connected in multipath.
+SCGCQ00789404 - (Port_Complete) - Remove the code related to enableVCor feild this was used for ASD and now it is not used any more.
+SCGCQ00794454 - (Port_Complete) - Dimmerswitch settings different in ctrl+r and storcli
+SCGCQ00576457 - (Port_Complete) - Multi CC cannot running concurrent even the setting is Concurrent
+SCGCQ00589544 - (Port_Complete) - storcli incorrectly handle set SOE/stoponerror and set with opposite value
+SCGCQ00518387 - (Port_Complete) - Storcli(1.07.01): Serial number is not displayed for Seagnus(9361-8i) card in RHEL 6.4 32 bit operating system.
+SCGCQ00579103 - (Port_Complete) - Added the code to add the VD when there are missing drives on the array.
+SCGCQ00602371 - (Active) - Need to display controller memory in Control-R
+SCGCQ00758707 - (Port_Complete) - MR6.5_storCLI: VD property" Exposure to OS" equals to yes even after hidding the Virtual Drive.
+SCGCQ00758750 - (Active) - Libmods changes for defect SCGCQ00726485: Commands for unintended controller during OCR.
+SCGCQ00778747 - (Port_Complete) - Storcli get adpbootdrive legacy syntax fails
+SCGCQ00614802 - (Port_Complete) - ASD- StorCLI- Libmod related changes for porting Virtual cache feature
+SCGCQ00660804 - (Port_Complete) - Libmod changes for ER:SCGCQ00658772
+SCGCQ00732058 - (Port_Complete) - CLI command to access/modify Drive Activity LED
+SCGCQ00758689 - (Active) - Libmods: SES Management Suspend Mode for Expanders
+SCGCQ00766164 - (Port_Complete) - Displaying entire 8-byte HDD drive firmware version.
+SCGCQ00413856 - (Port_Complete) - remove the "Drive write cache" policy from Pd information.
+SCGCQ00468257 - (Port_Complete) - SWR_SLES_11_SP3_GM Release validation : In storCli " serial number and FW package Build " fields are showing blank
+SCGCQ00558869 - (Port_Complete) - Implemented the deviceExposure as a BIOS option to set /c0 set BIOS deviceExposure=<value>
+SCGCQ00578945 - (Port_Complete) - Driver version is displayed as blank for Vmware split driver in PercCLI 1.08.01.
+SCGCQ00653736 - (Port_Complete) - EnhancementRequest SCGCQ00650090: Add disable/enable BGI option in create VD dialog to CTRL-R
+SCGCQ00688356 - (Port_Complete) - CTRL-R- Max config- Unable to create Raid10 VD using 192 Physical drives.
+SCGCQ00732019 - (Active) - CLI command to access/modify Immediate IO
+SCGCQ00738979 - (Port_Complete) - Implemented the storcli command to print the smart data of SATA drives.
+SCGCQ00469194 - (Port_Complete) - Aligning with FW for strip calculation for 4K drives(LIBMOD)
+SCGCQ00498804 - (Port_Complete) - Unable to set PI to on/off .
+SCGCQ00616621 - (Port_Complete) - Libmods changes for OP and Remanufacture NMR1.8
+SCGCQ00678664 - (Port_Complete) - Libmod changes for defect SCGCQ00666029
+SCGCQ00687252 - (Port_Complete) - Set MFC data using ini file fails for Softlayer controller
+SCGCQ00736025 - (Active) - MR6.5_RHEL5.10 : StorCLI crashing in *** glibc detected *** on trying to clear configuration on RHEL 5.10
+SCGCQ00758122 - (Port_Complete) - Libmods: Display of CacheVault Flash Memory size
+SCGCQ00793742 - (Port_Complete) - Reading Supercap VPD information fails on RHEL 6.6 PPC64
+SCGCQ00412593 - (Port_Complete) - Resolving compiler errors for Ctrl-R
+SCGCQ00469169 - (Port_Complete) - In virtual drives information the Cac filed values are incorrect with regular VD's
+SCGCQ00477845 - (Port_Complete) - Checking in tab changes
+SCGCQ00498784 - (Port_Complete) - RAID type is displayed as RAID0 for R5 VD on executing command "cli /fall show all" and "cli /fall import preview"
+SCGCQ00643707 - (Port_Complete) - Perccli crashes on displaying controller information when there is a foreign config.
+SCGCQ00694663 - (Port_Complete) - Simulator files check-in with changes in new API.
+SCGCQ00699269 - (Port_Complete) - storcli is displaying only information of one enclosure when all option is given for phyerrorcounters, on multiple enclosures
+SCGCQ00788882 - (Port_Complete) - MegaRAID CPLD update improvements
+SCGCQ00790078 - (Port_Complete) - "./storcli64 /c0 show eghs" fails on RHEL 6.6 PPC64
+SCGCQ00413017 - (Port_Complete) - Storcli reports "segmentation fault" when running command to downgrade controller to iMR
+SCGCQ00437065 - (Port_Complete) - Driver Version is not shown in PercCli
+SCGCQ00595789 - (Port_Complete) - StorcliF Application Error when running AdpDiags in WinPE
+SCGCQ00610099 - (Port_Complete) - implemented the below commands for supporting limitsatato3G.
+SCGCQ00631408 - (Port_Complete) - Added the library calls for supporting the personality mgmt.
+SCGCQ00719102 - (Port_Complete) - Date Created field in storCLI display is incorrect after creating a VD in MSM using SWR versio 1.34 on ALM2-16
+SCGCQ00756644 - (Active) - StorCLI : BBB Phase 1 - 128k threshold plus CLI enable/disable
+SCGCQ00797738 - (Port_Complete) - SuperCap Capacitance from same system is showed inconsistent in -adpbbucmd and /cv show
+SCGCQ00376240 - (Port_Complete) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00414383 - (Port_Complete) - When a command fails, subsequent commands/actions are aborted in storcli (MegaCli)
+SCGCQ00468241 - (Port_Complete) - Slow to create VD in HA Linux
+SCGCQ00498801 - (Port_Complete) - Unable to create cachecade VD with WT property .
+SCGCQ00578944 - (Port_Complete) - Wrong driver name is displayed for Vmware split driver in PercCLI 1.08.01.
+SCGCQ00692501 - (Port_Complete) - Firmware crash (TLB) seen during removal of SAS cable form enclosure connected in multipath.
+SCGCQ00789404 - (Port_Complete) - Remove the code related to enableVCor feild this was used for ASD and now it is not used any more.
+SCGCQ00794454 - (Port_Complete) - Dimmerswitch settings different in ctrl+r and storcli
+SCGCQ00576457 - (Port_Complete) - Multi CC cannot running concurrent even the setting is Concurrent
+SCGCQ00589544 - (Port_Complete) - storcli incorrectly handle set SOE/stoponerror and set with opposite value
+SCGCQ00593831 - (Port_Not_Required) - Inconsistency LDBBM status shown in storcli.
+SCGCQ00611867 - (Port_Complete) - Implemented the commands for ThermalPoll interval for SSD and HDD
+SCGCQ00647256 - (Port_Complete) - ASD- MR 6.4 - NytroXD compilation related fix
+SCGCQ00789418 - (Port_Complete) - StorCLI Code removal for removed ASD feilds in mr.h
+SCGCQ00790077 - (Port_Complete) - "./storcli64 /c0 flasherase " fails in RHEL 6.6 PPC64
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+SAS MegaRAID StorCLI
+Release Date: 01/14/15
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.14.12
+Previous Versoin	1.13.06
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+Linux-ppc
+VMware
+VMware MN
+VMware MN-NDS
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00696870 (ENHREQ) - Implemented the storcli command to print SATA drive's phy error counters and reset them.
+SCGCQ00755055 (DFCT) - Not able to flash Firware
+SCGCQ00757356 (DFCT) - Show cc (ExcludeVD property) results in memory overwrite with 240VD support.
+SCGCQ00757358 (DFCT) - Add adapterOperation support details in /c0 show all for cachebypassMode.
+SCGCQ00758079 (DFCT) - MR 6.6 Prealpha:Incorrect Storcli version is displayed for MR 6.6 FreeBSD binary.
+SCGCQ00758739 (DFCT) - StorCLI while executing SED command the syntax fails with unsupported token
+SCGCQ00758756 (DFCT) - Imporper detailed help command discription for set security JBOD command
+SCGCQ00757497 (ENHREQ) - LD Deletion stalling all IOs on 12.12.0-0178
+SCGCQ00725192 (DFCT) - H330: Firmware Crash is hit while creating the Raid1 vd without drives selected
+SCGCQ00730505 (DFCT) - After Rebuilding, DHS and Expand VD operations failed to update as per VD properties
+SCGCQ00752000 (DFCT) - In Windows and Linux only controller grouping is working but not sorting
+SCGCQ00755063 (DFCT) - Add support bits for uneven-span and SSHA support
+SCGCQ00756647 (DFCT) - 6.6_StorCli: StorCli lists all cascaded enclosures at position 0.
+SCGCQ00757755 (DFCT) - MR6.6_StorCLI: Displaying"BBU Not Present" for Cache vault in iMR Fury Controller
+SCGCQ00758920 (DFCT) - "Storcli.exe has stopped working" when issuing command to see controller badblocks.
+SCGCQ00758924 (DFCT) - Exception with command /co show badblocks or "storcli /cx flasherase"
+SCGCQ00759178 (DFCT) - SupportMaxRate SATA is not listed in PD allowed operations.
+SCGCQ00759181 (DFCT) - Add adapterOperation support details in /c0 show all for Emulationtype.
+SCGCQ00759183 (DFCT) - SED adapterOperation detailed is not shown in detailed show controller properties
+SCGCQ00759187 (DFCT) - Boot Volume details is shown in Megacli but not with storcli.
+SCGCQ00759213 (DFCT) - Unused errors present in foreign command processor
+SCGCQ00759218 (DFCT) - Memset is used only for 4 bytes where it has to be reset for the size of buffer we create.
+SCGCQ00759290 (DFCT) - SSM-FLASh drives property is displayed for regular drives.
+SCGCQ00759862 (DFCT) - OEMID is coming as "Unknown" for /c0 show all
+SCGCQ00759959 (DFCT) - Support details are not shown in /c0 show all for discard cache (stalling LD deletion)
+SCGCQ00759969 (DFCT) - Adapters are not listed in sorted order.
+SCGCQ00760214 (DFCT) - /c0 show health all command does not show health for all drives
+SCGCQ00760215 (DFCT) - show health command for drives is failing with error code 61
+SCGCQ00760255 (DFCT) - Storcli_Patch_6.4 : Detailed help file is not generating for MFG
+SCGCQ00760385 (DFCT) - MR_6.6: StorCLI showing incorrect value for next Schedule time for consistency check after disabling the CC
+SCGCQ00760398 (DFCT) - MR6.6: Segmentation fault (Core Dumped) in CLI when setting any invalid value for PR start time
+SCGCQ00760752 (DFCT) - /c0 show all does not list hwCfg information as compared to MegaCLI.
+SCGCQ00760757 (DFCT) - add vd help is exceeding 80 character per line limit.
+SCGCQ00761937 (DFCT) - MR 6.6 Prealpha2 Storcli:Similar PCI address(BDF number) is displayed for multiple controllers connected to FreeBSD 9.3.
+SCGCQ00762663 (DFCT) - Storclio : Different error code is coming for 'set pcilinkspeed' in VMware 4.1U3
+SCGCQ00763998 (DFCT) - Help missing for set sesmonitoring command
+SCGCQ00764636 (DFCT) - StorCLI:Vd delete discardcache option for delete virtual drive should not support for Liberator & TB
+SCGCQ00764658 (DFCT) - StorCLI /c0 show all command does not reflect the discard vd delete filed
+SCGCQ00764794 (DFCT) - storcli crash when trying to import 240+64 vd at once
+SCGCQ00765712 (DFCT) - StorCLI is not updated with the error Message for all new MFI_STAT added in mfistat.h
+SCGCQ00765714 (DFCT) - StorCLI shows CacheBypass Size and CacheBypass Mode feature enabled against a CacheCade VD
+SCGCQ00765759 (DFCT) - StorCLI shows wrong "Number of blocks" for a 65.5TB VD size
+SCGCQ00766153 (DFCT) - BBMT entries corrected and uncorrected error counters are rounding off after max is reached.
+SCGCQ00766154 (DFCT) - BadBlock count displayed with below commands are rounding off after max is reached.
+SCGCQ00767040 (DFCT) - help content is wrong for command /c0 set pcilinspeed
+SCGCQ00767061 (DFCT) - MBOX values for set pcilinkspeed are not aligned with MR API.
+SCGCQ00767128 (DFCT) -
+SCGCQ00767868 (DFCT) - StorCLI: Detailed Help for coercion command should have the description for thier Value as [ 0, 1 , 2]
+SCGCQ00758101 (DFCT) - MR_6.6_Storcli: Storcli reports supercap state 'unknown' while learn is happening on the controller.
+SCGCQ00758770 (DFCT) - FW breaks in iMR when excluding VD's from CC
+SCGCQ00723935 (DFCT) - Enclosure connector name not displaying properly
+SCGCQ00749743 (DFCT) - Syncro SSHA : StorCLI /c0 show loadbalancemode show Load Balance OFF eventhought the fearure is ON
+SCGCQ00770875 (DFCT) - MR 6.6 : Storcli for FreeBSD gives wrong version
+SCGCQ00775217 (DFCT) - MR6.6_StorCLI: Showing BBU_Prop for cache vault instead of CacheVault_Prop for MR Controller card
+SCGCQ00776897 (DFCT) - MR_6.6_StorCLI: Incorrectness in the Error message while deactivating the trial Key.
+SCGCQ00777800 (DFCT) - storcli reports CCVD deleted even though its still under deletion process by FW
+SCGCQ00779800 (DFCT) - MR6.6_CLI_FreeBSD: Displaying incorrect Driver name
+SCGCQ00780082 (DFCT) - Segmentation fault while trying to flash GasGauge file with "noverchk" switch.
+SCGCQ00780773 (DFCT) - MR6.6:StorCLI shows incorrect information about "Cache Vault Flash Size"
+SCGCQ00782882 (DFCT) - MR6.6:StorCLI shows incorrect information about "Cache Vault Flash Size"
+SCGCQ00783289 (DFCT) - Firmware returns an error for DCMD MR_DCMD_SCAN_FOR_FOREIGN_CONFIGS, but storcli still goes ahead and fires import.
+SCGCQ00783693 (DFCT) - Storcli running legacy Cli command for encinfo does not display the reults in the correct format
+SCGCQ00787431 (DFCT) - Dimmerswitch settings different in ctrl+r and storcli
+SCGCQ00794013 (DFCT) - too many bytes for ioctl, given [ffff], max [ff44]
+SCGCQ00795836 (DFCT) - storcli /c0/eall show is giving segmentation on TB FW
+SCGCQ00413396 (DFCT) - MR_Inv_6.1:StoreCLI- Reports CTRL+R is disabled (controller boot properties) but actually it is enabled
+SCGCQ00797068 (DFCT) - SATA SSD Model string is truncated to 8 bytes in StorCLI /cx/sx/ex show all Device Attributes section
+SCGCQ00797277 (DFCT) - SuperCap Capacitance from same system is showed inconsistent in -adpbbucmd and /cv show
+SCGCQ00797726 (DFCT) - EFI Storcli is not show the PD information on Grantley server
+ 
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 10/07/14
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.13.06
+Previous Versoin	1.12.13
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+Linux-ppc
+VMware
+VMware MN
+VMware MN-NDS
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+** Change list updated 10/07/14 -- no change to binaries **
+SCGCQ00637551 - (Closed) - storcli.efi /c0 set migraterate is setting values even if the value is out of range
+SCGCQ00698962 - (Closed) - Storcli /c0 show configautobalance display as OFF eventhought the feature is ON
+SCGCQ00704313 - (Closed) - Legacy command for displaying LD information not working
+SCGCQ00712596 - (Closed) - Storcli not able to show the pinned cache for 240 VDs
+SCGCQ00713774 - (Closed) - STORCLI fail to execute Reconstruction with Degraded r6 VD
+SCGCQ00717299 - (Closed) - Storecli expand array OCE Not possible, insufficient space, expand array to get the additional space
+SCGCQ00725544 - (Closed) - Supercap properties reports wrong in storcli
+SCGCQ00726485 - (Closed) - Commands for unintended controller during OCR, controller availability non transparent during OCR.
+SCGCQ00735055 - (Closed) - Mismatch in the no of fields showing in /c0 show eventloginfo command according to the help file
+SCGCQ00738817 - (Closed) - Incorrectness in auto patrol read starttime schedule, after changing the date.
+SCGCQ00739945 - (Closed) - need to remove AWB option with creation of Cachecade vd from Helpfile
+SCGCQ00740053 - (Closed) - storlci becomes unresponsive on trying to create multiple VD at a time.
+SCGCQ00688530 - (Closed) - Not able to unhide individual VD's and DG hide/unhide does not work when one vd is hidden or unhidden in DG
+SCGCQ00693466 - (Closed) - "Segmentation fault" Error message after executing Diagnostic cmd in storCLI and further execution resulting into PSOD
+SCGCQ00705623 - (Closed) - Unsupported-command error on executing the command to set MFG data on controller in EFI shell .
+SCGCQ00710783 - (Closed) - Detail-status is not required to be displayed for any command which is success
+SCGCQ00720007 - (Closed) - Caching is not getting enabled on all SVD's at a time using StorCLI command
+SCGCQ00735327 - (Closed) - using option 2 for join mirror performs the same operation as option 0
+SCGCQ00686189 - (Closed) - Advance Software options is not displaying any value for MegaRAID CacheCade Pro2.0
+SCGCQ00705593 - (Closed) - Command "show autopdcache " is not working correctly
+SCGCQ00720446 - (Closed) - Show learn is not coming in Help File
+SCGCQ00740182 - (Closed) - Showing incorrect VDs number after excluding the VDs from cc
+SCGCQ00635336 - (Closed) - storcli /c0 set backplane mode=val if we give value 256 its taking as 0 and giving command as success.
+SCGCQ00684010 - (Closed) - For iBBU battery typeiBBU09 the Next Learn time value is not correct in the output of storCLI command storcli64 /c0/bbu show
+SCGCQ00687566 - (Closed) - Storcli error message is confusing
+SCGCQ00691917 - (Closed) - on querying for backplane/controller PHY, errors get reported
+SCGCQ00723767 - (Closed) - Incorrectness in Ctrl_Prop While getting output for /c0 show prcorrectunconfiguredareas
+SCGCQ00693177 - (Closed) - Try to split mirror with /c0/dall split mirror, But split mirror is not happening on all vds.
+SCGCQ00693187 - (Closed) - not giving detail status table for split mirror command.
+SCGCQ00695247 - (Closed) - on querying the PHY info for the drive,storcli gives the junk data
+SCGCQ00723938 - (Closed) - storcli is giving improper error message when i missed pdperarray while creating raid00
+SCGCQ00731998 - (Closed) - StorCLI displaying unwanted fields for Non-Controller flash image.
+SCGCQ00694027 - (Closed) - on querying the phy error counter for controller, storcli dosent fail the cmd
+SCGCQ00709767 - (Closed) - 'disableCacheBypass' being treated inversely as 'cacheBypass'
+SCGCQ00668543 - (Closed) - Not able to enable security on DG which are eligible for secured Drive Group
+SCGCQ00705597 - (Closed) - Help is not present for "set autopdcache".
+SCGCQ00711678 - (Closed) - Help of set consistency check showing special character
+SCGCQ00716639 - (Closed) - Storcli TMM and SCAP info shows wrong numbers
+SCGCQ00606760 - (Closed) - "set perfmode" accepting wrong inputs
+SCGCQ00642227 - (Closed) - Implement Head of Queue drive rebuild for MegaRAID controllers
+SCGCQ00656613 - (Closed) - Add ability to take a VD offline, bring back VD online 
+SCGCQ00684957 - (Closed) - Need StorCLI-O for EFI
+SCGCQ00707449 - (Implemented) - SSHA Licensing (PFK)
+SCGCQ00709946 - (Active) - For iBBU battery typeiBBU09 the Next Learn time value is not correct in the output of storCLI command storcli64 /c0/bbu show
+SCGCQ00719104 - (Port_Complete) - Missing learn cycle progress information in show learn command for cachevault.
+SCGCQ00699266 - (Port_Complete) - storcli is displaying only information of one enclosure when all option is given for phyerrorcounters, on multiple enclosures
+SCGCQ00722165 - (Active) - Liberator (SAS9260-8i) controllers indicate that the do not support JBOD mode
+SCGCQ00690644 - (Port_Complete) - storcli.efi /c0 set migraterate is setting values even if the value is out of range
+SCGCQ00732184 - (Active) - CLI command to access/modify Drive Activity LED
+SCGCQ00731753 - (Active) - CLI command to access/modify Immediate IO
+SCGCQ00690877 - (Port_Complete) - Advance Software options is not displaying any value for MegaRAID CacheCade Pro2.0
+SCGCQ00691901 - (Port_Complete) - Not able to enable security on DG which are eligible for secured Drive Group
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 08/08/14
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.12.13
+Previous Versoin	1.09.13
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00617622 - (Closed) - Storcli- Gives Seg fault for './storcli /c0 show all' if a foreign Secured VD is present on the controller
+SCGCQ00637551 - (Closed) - storcli.efi /c0 set migrate rate is setting values even if the value is out of range
+SCGCQ00648409 - (Closed) - Value not popped up for successful completion of autopdcache=r0 command.
+SCGCQ00649340 - (Closed) - Store add VD help should display R1 EC as supported raid level
+SCGCQ00657399 - (Closed) - query for multiple enclosure properties is failing in storcli version-1.12.05
+SCGCQ00659228 - (Closed) - storcli show file=***.rom displaying only firmware version
+SCGCQ00668210 - (Closed) - Inconsistent scheduled learn time.
+SCGCQ00672888 - (Closed) - Junk Characters observed in EFI storcli version : 1.12.07
+SCGCQ00678562 - (Closed) - the phy number dosent come properly on querying the phy error counter
+SCGCQ00606774 - (Closed) - command "set patrolread delay" showing negative time delay
+SCGCQ00622402 - (Closed) - Changing the MR_MFC_DEFAULTS->biosContinueOnError behavior for StorCLI as per PDMs
+SCGCQ00624834 - (Closed) - fw is not able create vd on all drive as r0 using storcli command without an option immediate
+SCGCQ00624991 - (Closed) - there is no syntax for storcli64.exe /cx/ex show
+SCGCQ00629272 - (Closed) - storcli /c0/v2-256 show results in segmentation fault
+SCGCQ00644238 - (Closed) - improper statment for emulationType 0 in help & detailed help
+SCGCQ00647260 - (Closed) - Storcli-1.12.03-a failure message is displayed for a successful operation
+SCGCQ00653749 - (Closed) - "cfgcachecadedsply" command is not showing any CC VD details [when creating using EVS + CCVD]
+SCGCQ00611955 - (Closed) - Update the storcli help file for this command ./stocli /c0 set eccbucketleakrate
+SCGCQ00616901 - (Closed) - seeing junk characters for command "show termlog"
+SCGCQ00626582 - (Resolved) - not able to create WB cachecade-VD
+SCGCQ00627824 - (Closed) - -High Availability Properties alignment properly in adpallinfo detail.
+SCGCQ00627826 - (Closed) - not able set emergency hotspare field in storcli
+SCGCQ00646216 - (Closed) - Help not displayed for diag when tagged with paniclog,smartlog and errorlog.
+SCGCQ00647107 - (Closed) - LD emulation type set to 512e even though there only 512n drives are used during creation
+SCGCQ00682484 - (Closed) - help file needs to be updated  for /cx/dx add mirror src=2
+SCGCQ00684010 - (Closed) - For iBBU battery typeiBBU09 the Next Learn time value is not correct in the output of storCLI command storcli64 /c0/bbu show
+SCGCQ00691917 - (Closed) - on querying for backplane/controller PHY, errors get reported
+SCGCQ00645141 - (Closed) - Storcli reports VD state as offline if pinned cache is generated through CC VD removal
+SCGCQ00646223 - (Closed) - adding mirror by setting src value to 0 will start rebuild on online drive
+SCGCQ00649337 - (Closed) - Junk characters seen in storcli.efi –adpallinfo –a0 and storcli.efi /c0 show all
+SCGCQ00695247 - (Closed) - on querying the PHY info for the drive,storcli gives the junk data
+SCGCQ00666644 - (Closed) - using option 2 i.e ./storcli /c0/d0 add mirror src=2 give success but no operation is performed
+SCGCQ00694027 - (Closed) - on querying the phy error counter for controller, storcli dosent fail the cmd
+SCGCQ00615654 - (Closed) - Battery serial number is not coming properly as per termlogs
+SCGCQ00627716 - (Closed) - unable to create VD using Storcli
+SCGCQ00646344 - (Closed) - Overall Health of a controller is displayed as ERROR if there is no VD present.
+SCGCQ00658427 - (Closed) - Need to handle the failed cases and junk/invalid image file scenario for storcli show file=<filename> command
+SCGCQ00675388 - (Closed) - Storcli won't set cacheflushinterval to a value greater >= 10 using old megacli syntax
+SCGCQ00670246 - (Closed) - add vd each type=r0 creation leads to Segmentation Fault
+SCGCQ00678558 - (Closed) - the out put for phyerror counter goes beyound the limit of wordcount.
+SCGCQ00678616 - (Closed) - Status of storcli controller show health command on card Failed
+SCGCQ00621291 - (Closed) - Add storCLI command to read phy error counters (target, expander, controller)
+SCGCQ00625566 - (Closed) - Add a feature to read and display the FW version from the .rom file for MegaRAID FW package
+SCGCQ00634751 - (Closed) - Requirement for 512e implementation changes
+SCGCQ00673086 - (Closed) - OAdd SSHA support to StorCLI
+SCGCQ00610100 - (Port_Complete) - implemented the below commands for supporting limitsatato3G
+SCGCQ00615523 - (Port_Complete) - doesn't have proper keyword to set the Dimmer switch property for DisableLDPS.
+SCGCQ00631409 - (Port_Complete) - Add support bit check for flash-erase.
+SCGCQ00654713 - (Port_Complete) - Help not displayed for diag when tagged with paniclog,smartlog and errorlog. - (SCGCQ00646216) --Updating review comments
+SCGCQ00615522 - (Port_Complete) - displays 'Model' information incorrectly using PercCLI show
+SCGCQ00626649 - (Port_Complete) - storcli /253-255 show gives segmentation fault.
+SCGCQ00660446 - (Port_Complete) - WB CCVD is created eventhough WT is specified in Slice nytro Cache create option
+SCGCQ00629199 - (Port_Complete) -  unable to create VD using Storcli
+SCGCQ00615442 - (Port_Complete) - Porting OverProvisioning and Remanufacture to StorCli5.9 for NMR 1.8
+SCGCQ00631330 - (Port_Complete) - set batterywarning command sets inproperly.
+SCGCQ00631410 - (Port_Complete) - SSDThermalPollInterval value range starts from 1 not from 0
+SCGCQ00614724 - (Port_Complete) - add VD nytrocache command displays a wrong error message if the CCVD is already present
+SCGCQ00614177 - (Port_Complete) - StorCli Displays Incorrect Information for BatteryWarning versus MagaCli
+SCGCQ00631411 - (Port_Complete) - Implemented the personality mgmt to set either HBA/RAID mode.
+SCGCQ00670865 - (Port_Complete) - NMR1.8-Storcli shows success message on creating EC CCVD in WT mode
+SCGCQ00691901 - (Port_Complete) - Not able to enable security on DG which are eligible for secured Drive Group
+SCGCQ00690877 - (Port_Complete) - Advance Software options is not displaying any value for MegaRAID CacheCade Pro2.0
+SCGCQ00611864 - (Port_Complete) - Porting megaSCu syntax to perccli for limitMaxRateSATAto3G
+SCGCQ00611866 - (Port_Complete) - Implemented the commands for ThermalPoll interval for SSD and HDD
+SCGCQ00615271 - (Port_Complete) - StorCLIF and StorCLIO - Porting VC features
+SCGCQ00670863 - (Port_Complete) - Source VD association failed and Storcli application crashed while associating sourceVD to CCVD
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 06/18/14
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.09.13
+Previous Versoin	1.09.08
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00681802 - (Completed) - GG firmware update patch (GG firmware update support for following OSes: Windows, Linux, EFI, Ubuntu)
+SCGCQ00681722 - (Closed) - storcli (megacli style) output difference in pdlist command
+SCGCQ00682462 - (Closed) - Help file should be updated
+SCGCQ00655156 - (Closed) - "storcli -AdpBIOS -BE -a0" no longer works
+SCGCQ00682485 - (Closed) - status of the command id getting success with invalid GG file.
+SCGCQ00682477 - (Closed) - option "Resetnow" should be blocked when flashing Gasguage
+SCGCQ00698740 - (Closed) - Card with Empty module version doesn't update firmware if option "noverchk" is provided.
+SCGCQ00683236 - (Closed) - In Rhel OS seeing wrong error code.
+SCGCQ00658495 - (Port_Complete) - set batterywarning command sets inproperly.
+SCGCQ00659836 - (Port_Complete) - StorCli Displays Incorrect Information for BatteryWarning versus MagaCli
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 05/09/14
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.09.08
+Previous Versoin	1.07.07
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00567786 - (Closed) - not able get enclosure status
+SCGCQ00571823 - (Resolved) - Added a condition to check for no VDs in StrtDrCp
+SCGCQ00573703 - (Closed) - Storcli shows wrong VD size for 4K VDs during foreign config import
+SCGCQ00574165 - (Closed) - compare factorysettings is a factory command but works in storcli
+SCGCQ00579423 - (Closed) - storcli - issung "storcli /c0/v256" command generating coredump segmentation fault
+SCGCQ00600059 - (Closed) - Storcli creates configuration not using the OEM default value for Disk Cache Policy
+SCGCQ00471826 - (Closed) - StorCli mbox value needs to be changed for the command "storcli /c0/bbu show gasgauge offset=1 numbytes=1"
+SCGCQ00571832 - (Resolved) - Added a condition to check for no VDs
+SCGCQ00574325 - (Closed) - Storcli 'show ds' command fails with message "LD Power saving is unsupported"
+SCGCQ00598687 - (Closed) - for bbu command In properties schedule time is showing twice
+SCGCQ00599761 - (Closed) - storcli /c0/e1,2,3 show is showing enclouser properties multiple times.
+SCGCQ00622402 - (Closed) - Changing the MR_MFC_DEFAULTS->biosContinueOnError behavior for StorCLI as per PDMs
+SCGCQ00484361 - (Closed) - Removed the option all from tokenizer as it is not supported for enclosure firmware download.
+SCGCQ00563031 - (Closed) - Even though there are no drive groups, the command storcli /c0/dxxx set security=on is getting success
+SCGCQ00565409 - (Closed) - while Rebuild was going on Storcli was allows to create a partial VD on the same drive group
+SCGCQ00576233 - (Closed) -  ./storcli64 /c0/bbu set learnstarttime command is failing with segmentation fault
+SCGCQ00595061 - (Closed) - Storcli shows wrong estimated time for a rebuilding drive.
+SCGCQ00602401 - (Closed) - ./storcli64 /c0/e252 show status displays success message
+SCGCQ00581367 - (Closed) - MOn issuing command Adpalilog -a0 the Storcli throws an error 0x0c on PPC server
+SCGCQ00601834 - (Closed) - The SCAPVPD commands are described as BBU instead of CV.
+SCGCQ00559492 - (Closed) - Storcli displays the cc estimated time left out for the vd's where the operation is not in progress
+SCGCQ00573720 - (Closed) - Need to display skipped images by storcil package flashing
+SCGCQ00574205 - (Closed) - ./storcli64 /c252 show is displaying controller information of 1st controller
+SCGCQ00601212 - (Closed) - Detailed help for storcli /c0/v0 set hostaccess is not showing
+SCGCQ00581982 - (Closed) - Difference in behaviour across windows and linux platform after flashing FW from storclif
+SCGCQ00598488 - (Closed) - storcli /c256 show is showing O/P as wrong synatx.
+SCGCQ00600176 - (Closed) - command "/c0/p8 show" causing cli crash in windows OS
+SCGCQ00602926 - (Closed) - when we query help for set perfmode the range is not mentioned for maxflush lines & numiostoorder.
+SCGCQ00606117 - (Closed) - storlib library depended Make file flags check in
+SCGCQ00577682 - (Closed) - MR Liberator :: ./storcli64 /c0 show dequeuelog file command failing with segmentation fault
+SCGCQ00588916 - (Resolved) - ./storcli64 /c0/sall show rebuild command shows success status
+SCGCQ00598788 - (Closed) - "show termlog" command description is coming after displaying the logs.
+SCGCQ00627716 - (Closed) - unable to create VD using Storcli
+SCGCQ00553006 - (Closed) - Updated Help syntax for add vd w.r.t AWB
+SCGCQ00572149 - (Closed) - Added the help changes for break and join mirror.
+SCGCQ00601568 - (Closed) - nolog option is not working in MegaCLI
+SCGCQ00526855 - (Implemented) - Link libstdc++ statically to Linux versiosn of Strcli, storclio and storclif
+SCGCQ00602432 - (Closed) - Linux-ppc 32-bit minimum driver version supported by storcli 06.603.04.00.
+SCGCQ00554055 - (Closed) - Big endian architecture support for MR Linux driver and StorCli
+SCGCQ00555468 - (Closed) - Added OEM based help and displaying it.
+SCGCQ00568855 - (Implemented) - Added new commands for join mirror
+SCGCQ00550374 - (Implemented) - Added new commands for break mirror
+SCGCQ00569363 - (Closed) - Implemented the below CS syncro commands
+SCGCQ00564470 - (Implemented) - Request RAID CLI to display the Patrol Read Start Time
+SCGCQ00523846 - (Implemented) - Storcli to flash 16 and 32 MB images
+SCGCQ00593583 - (Port_Complete) - In Storcli, appropriate error description to be logged when FW flash is failed
+SCGCQ00601765 - (Port_Complete) - Storcli shows wrong estimated time for a rebuilding drive.
+SCGCQ00576453 - (Port_Complete) - Found storli will show incorrect Next starttime after changing CC from Automatic to OFF.
+SCGCQ00592293 - (Port_Complete) - Unable to replace failed drive
+SCGCQ00598800 - (Port_Not_Required) - StorCLI adpalilog command crashes in Windows 2012 R2 Build 9600 - version 1.06.03 and version 1.03.46
+SCGCQ00558870 - (Port_Complete) - Implemented the deviceExposure as a BIOS option to set /c0 set BIOS deviceExposure=n
+SCGCQ00564130 - (Port_Complete) - Added a condition to check for number of drives.
+SCGCQ00604174 - (Active) - BiosContinueOnError IssueWebBIOS for SAS9265-8i controller incorrectly reports "Pause on errors" instead of "Bypass Error"
+SCGCQ00593384 - (Port_Complete) - SCSI bus reset while collecting TFF smart logs
+SCGCQ00593417 - (Port_Complete) - 1.05.56 rpm installation failed saying "scriptlet failed, exit status 1"
+SCGCQ00593572 - (Port_Complete) - TFF firmware upgrade succeeded with mode 7 on Eagle board
+SCGCQ00567735 - (Port_Complete) - not showing DS3 enable properties.
+SCGCQ00578982 - (Port_Complete) - and storclif mention "nytrocache" in help message not an OEM feature
+SCGCQ00593226 - (Port_Complete) - When attempting to update DFF firmware, update fails with error "Failure 1001 failed to get ssd Controller type.
+SCGCQ00593386 - (Port_Complete) - 'start format' command form stocli on unconfigured drive deletes all the vds configured
+SCGCQ00598815 - (Port_Complete) - StorCLI adpalilog command crashes in Windows 2012 R2 Build 9600 - version 1.06.03 and version 1.03.46
+SCGCQ00563046 - (Port_Complete) - storcli64.exe /c0/cv start learn option is not present
+SCGCQ00575400 - (Port_Complete) - Getting segmentation fault when executed the command /c0 compare factorysettings file= file name
+SCGCQ00555931 - (Port_Complete) - storclif 1.07.06 does not have memory scrub test available
+SCGCQ00567476 - (Port_Complete) - getting segmentation fault when executed the command /c0 set factory file=filename
+SCGCQ00578979 - (Port_Complete) - space present in command compare factorysettings between words factorysettings
+SCGCQ00593402 - (Active) - Successful command execution depicted as a "failure" for the command: "add each vd type=r0"
+SCGCQ00593571 - (Port_Complete) - Storcli doesn't provide "Description" in output when extract paniclog is issued on all the TFFs.
+SCGCQ00593568 - (Active) - Storcli doesnot prompt the user to reboot the host after changing the link speed of a TFF.
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 01/20/14
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.07.07
+Previous Versoin	1.05.07
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00493418 - (Closed) - FW breaks to MegaMon on executing "Cli /eall/sall show all" command.
+SCGCQ00501866 - (Closed) - Time Left is not show correctly by sparc storcli
+SCGCQ00521869 - (Closed) - /call/eall show not providing details of enclosure connected to the second controller
+SCGCQ00526799 - (Closed) - Not able to flash PD firmware of 4TB Drive using storcli
+SCGCQ00485777 - (Closed) - FW breaks to Megamon, after creating 16 R0 VD's and on executing command "cli /vall show all" from PCLI.
+SCGCQ00501376 - (Closed) - "/c0 show dequeuelog file=_____" command is not working in OS OEL_5.9
+SCGCQ00503993 - (Closed) - Command "./storcli /call/eall/sall show" fails for second controller with description drive not found.
+SCGCQ00505348 - (Closed) - The help file for "/c0 start Diag duration=___" is missing
+SCGCQ00503359 - (Closed) - Wrong PCLI version with junk charcters are displayed under GetControllerInfo.
+SCGCQ00498965 - (Closed) - "/c0/bbu start learn" command starts battery learn cycle on supercap battery.
+SCGCQ00518133 - (Closed) - LSI_MR Controllers fails to set "FACTORY SETTINGS"
+SCGCQ00526503 - (Closed) - Flashing of FW in UEFI mode using storcli.efi is issuing File read error.
+SCGCQ00501383 - (Closed) - "/c0 show dequeuelog file=_____" command is missing in main help file
+SCGCQ00501414 - (Closed) - Online firmware update is not triggered on flashing FW
+SCGCQ00524047 - (Closed) - Segmentation fault occures while converting binary to text file of DQlogs
+SCGCQ00526385 - (Closed) - Unable to create cachecade VD with WT property .
+SCGCQ00522666 - (Closed) - Command "cli /sall show all" 
+SCGCQ00524755 - (Closed) - Storcli- Gives incomplete message while clearing config when CC VD is present on the controller
+SCGCQ00493544 - (Closed) - "Error! App exec failed in FW PCLIError! Internal" is displayed on executing "Cli /eall/sall spindown" command with 25 drives.
+SCGCQ00501437 - (Closed) - StorCLI - MR 6.2 StorCLI help syntax is wrong
+SCGCQ00518372 - (Closed) - Displaying the Adapter health status in storcli show.
+SCGCQ00501561 - (Closed) - Implemented the diag results to print on console
+SCGCQ00484168 - (Closed) - Implemented the AWB for VD creations
+SCGCQ00526393 - (Active) - Implementation of "MegaCli adpbbucmd schedulelearn [options.....] an" equivalent command in storcli
+SCGCQ00304999 - (Closed) - SWR- Retrieval of controller information fails .
+SCGCQ00305001 - (Closed) - storcli command- show DS displays wrong information for type4 and DS off
+SCGCQ00307493 - (Closed) - (RW LSIP200233165) Storcli: Reocurance should be spelled as reoccurrence in controller show all properties for PR and CC
+SCGCQ00307495 - (Closed) - Displaying the correct operating system for Windows 2012 Server
+SCGCQ00308671 - (Closed) - StorCLI is not showing correct driver version in Solaris 11
+SCGCQ00309347 - (Closed) - StorCli-SATA Drives "PRODUCT ID" its not showing properly.
+SCGCQ00312089 - (Closed) - Storcli- Not able to perform erase operation on a PD on VMWare 4.1 update 2
+SCGCQ00312319 - (Closed) - Storcli- Status of /pall set linkspeed is showing success eventhough the operation is failure on ESX 4.1 update 2
+SCGCQ00314106 - (Closed) - Remove all negative error codes
+SCGCQ00314585 - (Closed) - StorCli - Cache cade VD information page doesn't have any details for associated VDs.
+SCGCQ00322316 - (Closed) - Defect: Storcli-Controller show/set help page in that last line execute with Storcli Directory.
+SCGCQ00328184 - (Closed) - StorCLI2.0: "endCtlrPropUpdate failed 4" when changing the properties of patrolread
+SCGCQ00335239 - (Closed) - Virtual Drive properties(stripe size and size) got changed when VD is degraded
+SCGCQ00338301 - (Closed) - StorCLI : Not able to set BBU modes using legacy syntax in EFI Environment
+SCGCQ00341488 - (Closed) - stocli_EFI- In paged view the next line after "press enter to continue " should be displayed in next line
+SCGCQ00342056 - (Closed) - StorCLI - in command "./storcli show " 2 fields are not getting displayed ( 1. Host Name , 2. Operating System )
+SCGCQ00342074 - (Closed) - storcli should not depend on MFC_FEATURES instead check the other bits which indicates whether a particular feature is supported
+SCGCQ00342549 - (Closed) - spelling mistake of initialization in (background initialization)
+SCGCQ00343721 - (Cloned_EnhReq) - Drive /c0/ex/sx Hot Spare Information, displays array info under Dedicated Drive Group(s) = 0, 1
+SCGCQ00343907 - (Closed) - StorCLI_EFI: System halts while performing import preview with securitykey in EFI Environment
+SCGCQ00345525 - (Closed) - On performing an "add vd" with size provided in TB a decimal value is truncated to whole number as input.
+SCGCQ00349419 - (Closed) - storcli /c0 show all -----> driver version and driver name field is missing
+SCGCQ00350744 - (Closed) - ./storcli /c0/dall show -----> In the drive group info the alignment for global hot spare drive is improper.
+SCGCQ00352569 - (Closed) - Buffer overflow
+SCGCQ00360745 - (Closed) - StorCLI does not provide command to set HSM or HCOE SCGCQ00358662
+SCGCQ00362717 - (Closed) - storcli /c0/d0 show " in that legend missing for "Dgrd/pdgd/Onln/ofLn/Rbld"
+SCGCQ00363522 - (Closed) - storcli query for displaying controller properties is showing status , as failure.
+SCGCQ00364248 - (Closed) - StorCLI failed to delete a VD that is just created under Windows 2008
+SCGCQ00364622 - (Closed) - Reports wrong diskgroup size while querying controller level properties
+SCGCQ00381100 - (Closed) - MR: not able to create PRL11 using 96 drives.
+SCGCQ00462959 - (Closed) - Slow to create VD in HA Linux
+SCGCQ00464708 - (Closed) - Storcli display total number of VDs in a individual drive group properties.
+SCGCQ00466519 - (Closed) - StorCLI_6.1:The help file for "/c0 compare securitykey h" is missing
+SCGCQ00467119 - (Closed) - SWR_SLES_11_SP3_GM Release validation : In storCli " serial number and FW package Build " fields are showing blank
+SCGCQ00481532 - (Closed) - Msg comes for all /c0 show commands.
+SCGCQ00305002 - (Closed) - Storcli:Unable to update PD Firmware using Storcli in Vmware 5.0
+SCGCQ00310308 - (Closed) - Storcli -Format for Date/Time varies in show|show all controller properties .
+SCGCQ00313759 - (Closed) - Storcli:Unable to create Cachecade VD in Windows 8
+SCGCQ00314602 - (Closed) - StorCli - Cachecade VD information page should not display stripe size.
+SCGCQ00316677 - (Closed) - Logical and Physical sector size must be hidden when 512E feature is not supported
+SCGCQ00322262 - (Closed) - iMR_Inv:37 drives shown as unconfigured good in MegaCLI when "enable JBOD=0" in Ubuntu 12.04 32 bit OS
+SCGCQ00324797 - (Closed) - Serial Number of controller is not displayed for some controllers.
+SCGCQ00332212 - (Closed) - libsysfs custom implementation issue.
+SCGCQ00341418 - (Closed) - In the command O/P of <./storcli /c0 show all>"Driver Name" and "Driver Version"are NOT matching with actual name and version
+SCGCQ00342723 - (Closed) - It is displaying the driver version as driver name
+SCGCQ00344992 - (Closed) - In the command O/P of <./storcli /c0 show all>, ErrMsg 255 Failed to get Bus Info is displayed
+SCGCQ00348911 - (Closed) - Adapter 0: Failed to start SecureErase on Virtual Drive 0 in VMware_ESXi_5.1
+SCGCQ00353679 - (Closed) - StorCli-"/c0/eall/sall show"in that need to be describe the GHS/Onln/Offln/F
+SCGCQ00355536 - (Closed) - MegaCli and StorCli can not manage both Liberator (and prior) and TB controllers in the same system under FreeBSD with the mfi adn mrsas driver.
+SCGCQ00357653 - (Closed) - Removing static memory allocation and allocating memory dynamically in function stricmp in file Cutils.cpp
+SCGCQ00357913 - (Closed) - Update VD emulation feature in StorCLI Libmods module to sync with latest APIs.
+SCGCQ00359998 - (Closed) - Code clean up in libmods and sysefi files are added
+SCGCQ00360814 - (Closed) - StorCLI: Not able to set pr property includessds as onlymixed on Liberator cacheoffload controller
+SCGCQ00362421 - (Closed) - StorCLI: Not able to detect Liberator Controller on FreeBSD 9.0(64-bit)
+SCGCQ00364097 - (Closed) - iMR_Inv_6.1:StoreCLI- StoreCLI reports wrong Emulation type for VDs
+SCGCQ00366000 - (Closed) - Storcli displays incomplete serial number for some SSDs
+SCGCQ00374979 - (Closed) - Storcli ld info command displays R10 vd Span Depth to 1.
+SCGCQ00469162 - (Closed) - In virtual drives information the Cac filed values are incorrect with regular VD's
+SCGCQ00476030 - (Closed) - while running I/O ,It's taking time to load the controller information.
+SCGCQ00312928 - (Closed) - Storcli- Abbreviation of UID should be mentioned in the output for /cx/fall show all
+SCGCQ00314122 - (Closed) - Missing characters in PD model display
+SCGCQ00317649 - (Closed) - Defect: StorCli-VD state "Dgrd'' is changed in the description-''dgrd''
+SCGCQ00326862 - (Closed) - FreeBSD support for MegaWare Cli
+SCGCQ00338688 - (Closed) - Storcli spelling mistakes and typos
+SCGCQ00343593 - (Closed) - Description for different Drive "State" like DHS, Ugood, Online need to be provided under Show Drive Information
+SCGCQ00363455 - (Closed) - The legend for the PD List table exceeds 80 char limit.
+SCGCQ00364735 - (Closed) - UEFI, the O/P of <storcli /c0 show all>"Current Controller Date/Time" & "Current System Date/time" are not in proper format
+SCGCQ00371445 - (Closed) - Vmware CLI fails to set the phy linkspeed
+SCGCQ00377364 - (Closed) - StorCli shows Power Saving Option as enabled, despite controller having power saving option completely disabled.
+SCGCQ00383043 - (Closed) - StorCLI-Invader : The "coercion" mode is not in sync with the legacy values.
+SCGCQ00394883 - (Closed) - StorCli_MR: While Creating RAID1 with four drives command facing the "C0:BAIL_OUT at line 1354"
+SCGCQ00396303 - (Resolved) - Cfgclr command fails without force option in Sparc OS
+SCGCQ00460861 - (Closed) - MR_Inv_6.1:StorCLI- Gives wrong message after battery retention test command is issued for Supercap FBU03
+SCGCQ00462885 - (Closed) - Need to remove storcli /cx show clusterenable and storcli /cx set clusterenable=<value> since FW did not support this in HA
+SCGCQ00466038 - (Closed) - MR_Inv_6.1:StoreCLI- StorCLI reports retention time as 0 for supercap FBU02 and FBU03
+SCGCQ00466251 - (Closed) - HA : StorCLI crash when update drive firmware
+SCGCQ00471042 - (Closed) - PCLI:Cant able to set securitykey for Controller and also VD name for VD(Takes as uppercharacter even if name given in lower)
+SCGCQ00485270 - (Closed) - StorCLI- unsupported CV operations for SuperCap 'set' needs to be removed
+SCGCQ00311990 - (Closed) - Removed unsupported property "Ra=Read Ahead Adaptive" from VD information.
+SCGCQ00314114 - (Closed) - sector size of PDs are shown as 512 KB which is wrong.
+SCGCQ00314128 - (Closed) - Add abbreviation description to all the PD states
+SCGCQ00318435 - (Cloned_EnhReq) - Porting of 1.0 PRs to storcli phase 2.5 (Libmods)
+SCGCQ00345372 - (Closed) - Storcli command "/cx show all" must display ROC temperature.
+SCGCQ00359629 - (Closed) - In paged view the text " Press Enter to continue" should be changed to " Press any key to Continue"
+SCGCQ00365950 - (Closed) - StorCLI cannot displays information for controller in Safe mode
+SCGCQ00442610 - (Closed) - Onfi_patch_6.0:Firmware crashed @Line 244 in ../../raid/1078int.c for entering into CTRL-R with Pinned cache in R60 and R6.
+SCGCQ00469179 - (Closed) - Aligning with FW for strip calculation for 4K drives
+SCGCQ00337962 - (Closed) - StorCLI: not able to save events in txt file in EFI environment
+SCGCQ00362216 - (Closed) - iMr_Fury_StorCli:4K Drive size shown wrong in Esxi4.1U3
+SCGCQ00365632 - (Closed) - PCI Info for FreeBSD needs to be indicated as "N/A"
+SCGCQ00379104 - (Closed) - Not able to get paged view of StorCLI output on VM-Ware Platform
+SCGCQ00438350 - (Closed) - Megacli crashes after invoking any command in SGI system with one 9280-8e and 2 quad port qlogic FC cards.
+SCGCQ00485561 - (Closed) - storclio set and get vpd gives a wrong output in failure case.
+SCGCQ00493690 - (Closed) - /var/tmp//installobaWVe/checkinstallrbaWVe: line 11: syntax error at line 22
+SCGCQ00481039 - (Closed) - option -v doesn't work with preboot storcli
+SCGCQ00311436 - (Closed) - Storcli-SWR- Controller serial number display is different in show/showall controller properties .
+SCGCQ00360040 - (Closed) - Storcli is returning error with show
+SCGCQ00408070 - (Closed) - StorCLI does not show both "Current Write Policy" and "Default Write Policy" for VD
+SCGCQ00423832 - (Closed) - EFI_ Storcli: Cannot set vpd file on controller, EFI hangs and cannot proceed for further operations until reboot
+SCGCQ00470976 - (Closed) - Storcli shows irrelevant information about Nytro cache VD when user types "CfgCacheCadeDsply"
+SCGCQ00484372 - (Closed) - Storcli:Help file modification required for command ''/cx set eghs''
+SCGCQ00357263 - (Closed) - MegaCLI adpgetpciinfo returns a static Bus Number value "17d0"
+SCGCQ00362070 - (Closed) - iMr_Fury_StorCLi:SectorSize show as "512KB" for 512Bytes drives
+SCGCQ00396665 - (Closed) - StorcLi_5.7: Remove the description for "Ra=Read Ahead Adaptive" in VD show info.
+SCGCQ00397663 - (Closed) - StorCli_MR: While creating VD using default values FW allows read policy as"Ra=Read Ahead Adaptive" as against PR-317400
+SCGCQ00424978 - (Closed) - Is VD Emulated=Yes when emulationType=1
+SCGCQ00436107 - (Closed) - The bootwithpinnedcache logic is backwards, both storcli and the FW are affected
+SCGCQ00448094 - (Closed) - core dump while issuing storcli command ./storcli /c0/fall show all.
+SCGCQ00454971 - (Closed) - storcli /c0 show is not listinf SWR controller
+SCGCQ00471978 - (Closed) - Storcli does not show firmware version using Megacli syntax
+SCGCQ00472000 - (Closed) - Storcli:"storcli /c0/v0 del help" does not show information on normal vd delete
+SCGCQ00314119 - (Closed) - "Drive NCQ setting" field Removed
+SCGCQ00357948 - (Closed) - StorCLI does not display drive information behind the Blackjack (Alta) interposer correctly
+SCGCQ00384644 - (Closed) - iMR_Inv_6.1:StorCLI- StorCLI does not show 'Unsupported/Blocked' state for 4K drives even though FW is not supporting 4K
+SCGCQ00413789 - (Closed) - storcli crashes on having a non PI drive and trying to create pi vd on all the drive
+SCGCQ00442652 - (Closed) - SWR_1.34 - Serial number field is blank in controller information and the same could be updated with N/A in StorCli
+SCGCQ00484230 - (Closed) - "Cli /ex/sx set offline" fails with errcd -1 and message enclosure ID not found.
+SCGCQ00495121 - (Closed) - Unable to set pnpid using the ini file with captal letters mixed in the string
+SCGCQ00330250 - (Closed) - StorCLI compliance with OSSRB recommendation
+SCGCQ00342399 - (Implemented) - CSET: (Tbolt PR 211180) Punctured Block Logging Improvements
+SCGCQ00329470 - (Closed) - Implemented the StorCLI commands to erase contents from NVCache
+SCGCQ00488282 - (Implemented) - Add ability to change/program PCIDATA in StorClio (CLI for OEMs)
+SCGCQ00501189 - (Implemented) - MWCLI. Add command /cX/vX locate
+SCGCQ00323426 - (Implemented) - Porting of Vogel 1.0 PRs to storcli phase 2.5 [Libmods]
+SCGCQ00349599 - (Implemented) - Refer attached design doc
+SCGCQ00352120 - (Implemented) - MWCLI. Add HA support into storcli
+SCGCQ00329469 - (Closed) - Implemented the StorCLI commands to scrub memory on controllers
+SCGCQ00332606 - (Implemented) - Display Drive Model number, Serial Number and Firmware Revision as in MSM
+SCGCQ00349548 - (Closed) - Uneven span support is added in StorCLI.
+SCGCQ00351234 - (Implemented) - Provide a way to enable or disable 512E using Applications
+SCGCQ00479543 - (Implemented) - MWCLI: Need MegaOEM for Solaris x86 and Solaris SPARC
+SCGCQ00333213 - (Closed) - Implemented 128 drive support by using the new ENCL_INFO structures
+SCGCQ00322837 - (Closed) - Printing multiple json objects from different controllers as a single Array
+SCGCQ00332600 - (Implemented) - StorCLI compliance with OSSRB recommendation
+SCGCQ00350668 - (Implemented) - Create Spanned R0 array (00) in StorCLI
+SCGCQ00381311 - (Implemented) - dcmd path chagnes for supporting the new cachevault api
+SCGCQ00369742 - (Implemented) - MWCLI. R10, R50, R60, R00 VD creation
+SCGCQ00381093 - (Implemented) - PR SCGCQ00319011: Rebuild time reset
+SCGCQ00433703 - (Implemented) - Megacli/storcli support for lmrc driver
+SCGCQ00413856 - (Port_Complete) - remove the "Drive write cache" policy from Pd information.
+SCGCQ00469192 - (Port_Complete) - Aligning with FW for strip calculation for 4K drives
+SCGCQ00471590 - (Port_Complete) - Need to remove storcli /cx show clusterenable and storcli /cx set clusterenable=<value> since FW did not support this in HA
+SCGCQ00504584 - (Port_Complete) - Command "./storcli /call/eall/sall show" fails for second controller with description drive not found.
+SCGCQ00413017 - (Port_Complete) - Storcli reports "segmentation fault" when running command to downgrade controller to iMR
+SCGCQ00376240 - (Port_Complete) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00437065 - (Port_Complete) - Driver Version is not shown
+SCGCQ00473065 - (Port_Complete) - StorCli_6.1: The SATA drive is dropped while creating a R1 vd using mix of SAS and SATA drives
+SCGCQ00478786 - (Port_Complete) - (v 1.04.11) get a good return code (0) even when it failed
+SCGCQ00471582 - (Port_Complete) - Storclio:Spelling mistake during execution of command 'compare factorysettings'
+SCGCQ00475598 - (Port_Complete) - Storcli:4K -Wrong size updated after performing OCE on 4K Drives .
+SCGCQ00475601 - (Port_Complete) - storcli crash while using the command /cx/vx expand size=xx expandarray
+SCGCQ00414383 - (Port_Complete) - When a command fails, subsequent commands/actions are aborted in storcli (MegaCli)
+SCGCQ00481849 - (Port_Complete) - StorCLI- StorCLI reports wrong capacitance value for supercap FBU03
+SCGCQ00412593 - (Port_Complete) - Resolving compiler errors for Ctrl-R
+SCGCQ00471048 - (Active) - HA : StorCLI crash when update drive firmware
+SCGCQ00469390 - (Port_Complete) - MR_Inv_6.1:StoreCLI- StorCLI reports retention time as 0 for supercap FBU02 and FBU03
+
+
+Installation Commands: 
+=======================
+Any OS specific instructions are noted in a readme file included in a folder in the zip file.
+Refer to the MegaRAID SAS Software User's Guide for any additional StorCLI information.  The User Guide can be found in the MegaRAID Documentation section of www.lsi.com.
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 09/23/13
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.05.07
+Previous Versoin	1.04.07
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris x86
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00009501 - (Closed) - MPI2_FW_IMAGE_HEADER is 16 bits too long
+SCGCQ00183867 - (Closed) - MPI2: IO Unit Page 10 structure incorrect
+SCGCQ00364332 - (Closed) - iMR_Inv_6.1:StoreCLI-StoreCLI does not give proper message while trying to create 33rd VD on iMR FURY controller
+SCGCQ00374336 - (Closed) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00374732 - (Closed) - StorCLI cannot set "bypasserror" or "be"
+SCGCQ00374733 - (Closed) - Storcli does not show 512 strip size in the online help
+SCGCQ00378124 - (Closed) - Porting of AdpRestart Command
+SCGCQ00379046 - (Closed) - MegaCLI help shows Storcli in generic help command
+SCGCQ00379112 - (Closed) - storcli-legacy: The helpfile for "adpfwflash" needs to be updated for "NoVerChk"
+SCGCQ00381383 - (Closed) - Storcli_Invader: "/c0 pause pr" Description message should be sync with command
+SCGCQ00394588 - (Closed) - storcli only displays 1 vd when 7 present on DG view
+SCGCQ00397280 - (Closed) - StorCli_MR:Need to modify the "DIMMER SWITCH" Help Description
+SCGCQ00397877 - (Closed) - SWR: EFI:"Press any key to continue" displays twice.
+SCGCQ00397893 - (Resolved) - SWR: EFI: Operating system details shows nothing.
+SCGCQ00399897 - (Closed) - BBU GasGauge Status information should not get printed for TMMC
+SCGCQ00400429 - (Closed) - Storcli help lists unsupported /Fx option for foreign commands
+SCGCQ00406358 - (Closed) - CLI does not provide appropriate error message and error code when secure erase is not supported
+SCGCQ00414300 - (Closed) - StorCli_6.0-The help file for "storcli /cx/fx " is missing.
+SCGCQ00415814 - (Closed) - storcli only associates 38 out of 48 VDs
+SCGCQ00418295 - (Closed) - size=0 VD is getting created with remaining free space, when a VD is present in Drive Group.
+SCGCQ00421114 - (Closed) - Storcli/Storclif/storclio:Help file for Legacy commands displays mrcli instead storcli.
+SCGCQ00421282 - (Closed) - StorCLIO : not able to get or set hwdevice information with storCLIO
+SCGCQ00423757 - (Closed) - EFI: Storcli : Not able to get and set vpd information on TMM module or Supercap
+SCGCQ00435852 - (Closed) - misspelled word in storcli.efi message
+SCGCQ00437754 - (Closed) - Help syntax is not aligned with 80 char per line limits.
+SCGCQ00449926 - (Closed) - Power Shell support for megacli syntax for windows _ Porting
+SCGCQ00450496 - (Closed) - StorcliF : output for the command /c0 compare factorysettings is not in sync with the legacy output.
+SCGCQ00456135 - (Closed) - Unable to create Cachecade VD by referring the syntax in Help file for ''add vd'' .
+SCGCQ00462959 - (Closed) - Slow to create VD in HA Linux
+SCGCQ00466519 - (Closed) - StorCLI_6.1:The help file for "/c0 compare securitykey h" is missing
+SCGCQ00372155 - (Closed) - Certain controller features displayed under "show all" exceeds 80-char limit.
+SCGCQ00374118 - (Closed) - StorCli-"/c0/dall show all "in FreeSpaceDetails legend missing for "ID/VD/AfterVD"
+SCGCQ00374979 - (Closed) - Storcli ld info command displays R10 vd Span Depth to 1.
+SCGCQ00376643 - (Closed) - Fail to set/disable the Disk Cache Policy along with the vd creation.
+SCGCQ00378135 - (Closed) - portings of AdpRestart command
+SCGCQ00378828 - (Closed) - StorCLI-Legacy:'adpbootdrive get' fails to get bootdrive information.
+SCGCQ00385101 - (Closed) - StorCli implementation of AdpRestart Command
+SCGCQ00386429 - (Closed) - StorCLI help file shows /cx/dx show cachecade instead of /cx/dall show cachecade
+SCGCQ00391731 - (Closed) - storcli displays message as firmware flash successfully completed even the flashing is failed.
+SCGCQ00397014 - (Closed) - With one VD as foreign, StorCLI shows all VDs as foreign.
+SCGCQ00397269 - (Closed) - StorCli_5.7: On SuperCap battery ''strat learn" operation is not allowed
+SCGCQ00399002 - (Closed) - handleTokens(tokenListPtr);
+SCGCQ00399387 - (Closed) - Not able to find range for Perf Mode value
+SCGCQ00401663 - (Closed) - help text not working for the command set securitykey
+SCGCQ00412827 - (Closed) - CV (CacheVault) does not support changing bbu mode but StorCLI show option to change bbu mode
+SCGCQ00417435 - (Closed) - StorCLIF : the command /cx get hwdevice fails to get VPD information.
+SCGCQ00417973 - (Closed) - Storclio/Storclif-Detailed help for the command start diag required .
+SCGCQ00423781 - (Closed) - StorCLIF : getting wrong values for get gas gauge information.
+SCGCQ00441696 - (Closed) - StoreCLI- Inconsistent behavior across different application when creating cachecade VD
+SCGCQ00466251 - (Closed) - HA : StorCLI crash when update drive firmware
+SCGCQ00467119 - (Resolved) - SWR_SLES_11_SP3_GM Release validation : In storCli " serial number and FW package Build " fields are showing blank
+SCGCQ00469179 - (Closed) - Aligning with FW for strip calculation for 4K drives
+SCGCQ00372264 - (Closed) - StorCLI: The legend for "phy Error Counters" exceeds the 80-char limit.
+SCGCQ00374377 - (Closed) - GetGGEEPData equivalent syntax is not present in storcli
+SCGCQ00374418 - (Closed) - Storcli : controller information query is displaying the status as failure.
+SCGCQ00375757 - (Closed) - "StorCLI /cx/bbu show modes" show the bbu modes description without the actual bbu mode number
+SCGCQ00377364 - (Closed) - StorCli shows Power Saving Option as enabled, despite controller having power saving option completely disabled.
+SCGCQ00380889 - (Closed) - Not able to set securitykey on controller
+SCGCQ00381100 - (Resolved) - MR: not able to create PRL11 using 96 drives.
+SCGCQ00383043 - (Closed) - StorCLI-Invader : The "coercion" mode is not in sync with the legacy values.
+SCGCQ00384644 - (Resolved) - iMR_Inv_6.1:StorCLI- StorCLI does not show 'Unsupported/Blocked' state for 4K drives even though FW is not supporting 4K
+SCGCQ00386586 - (Closed) - include support for SWR controllers in non LSI verison of storcli.
+SCGCQ00394127 - (Closed) - Added the command to DOS SCU
+SCGCQ00394883 - (Closed) - StorCli_MR: While Creating RAID1 with four drives command facing the "C0:BAIL_OUT at line 1354"
+SCGCQ00396303 - (Resolved) - Cfgclr command fails without force option in Sparc OS
+SCGCQ00400019 - (Closed) - "storcli /c0/dall show" command not working
+SCGCQ00411501 - (Closed) - StorCli_MR: Cache vault Strart learn command displaying twice in the hep file "/c0/cv h"
+SCGCQ00414328 - (Closed) - Perf mode value not getting set when executed along with the other parameters
+SCGCQ00414731 - (Closed) - Checking in StorcliF & storcli0 changes
+SCGCQ00415454 - (Closed) - StorCLI help file does not display "add vd spanned array"
+SCGCQ00420040 - (Closed) - StorCLIF : Not able to read or write factory settings with adpsettings command (legacy command )
+SCGCQ00436928 - (Closed) - Illusive/Bad Data Extracted
+SCGCQ00437762 - (Closed) - Exit code coming as 1 for adpbios (Megacli Syntax)
+SCGCQ00443072 - (Closed) - SWR: In Store Cli if we start any background operation Estimated time left field showing Blank
+SCGCQ00447686 - (Closed) - Storecli does not display complete information for the command ./storecli /c0/p0-x show.
+SCGCQ00456501 - (Closed) - StorcliF: StorcliF and StorcliO crashes when given invalid file for the command /c0 set factorysettings file=filename
+SCGCQ00460861 - (Closed) - MR_Inv_6.1:StorCLI- Gives wrong message after battery retention test command is issued for Supercap FBU03
+SCGCQ00466038 - (Closed) - MR_Inv_6.1:StoreCLI- StorCLI reports retention time as 0 for supercap FBU02 and FBU03
+SCGCQ00469162 - (Closed) - In virtual drives information the Cac filed values are incorrect with regular VD's
+SCGCQ00379157 - (Closed) - StorCLI: the help file for "storcli /cx transform iMR" is missing
+SCGCQ00380143 - (Closed) - The set phy linkspeed operation needs to have the unit(GB/s) mentioned and the Description" column is blank for set and Show.
+SCGCQ00394952 - (Closed) - Segmentation fault hitting while executing the command "/c0 set bgi h "
+SCGCQ00398246 - (Closed) - VD create syntax display improper output.
+SCGCQ00398992 - (Closed) - Command displayed in the same line after "Press any key to continue".
+SCGCQ00402499 - (Closed) - Storecli /c0 show eventloginfo 
+SCGCQ00403335 - (Closed) - Mismatch of "Start Copyback " command in global help file and particular help file of copyback .
+SCGCQ00436538 - (Closed) - pd version is not listing all if PDs are missing
+SCGCQ00442610 - (Closed) - Onfi_patch_6.0:Firmware crashed @Line 244 in ../../raid/1078int.c for entering into CTRL-R with Pinned cache in R60 and R6.
+SCGCQ00447972 - (Closed) - Storcli : adpgetprop command for enableeug/enableeghsp showing success and not getting reflected when we give wrong flag
+SCGCQ00451393 - (Closed) - Megascu adpm0flash command hangs
+SCGCQ00462885 - (Closed) - Need to remove storcli /cx show clusterenable and storcli /cx set clusterenable=<value> since FW did not support this in HA
+SCGCQ00364097 - (Resolved) - iMR_Inv_6.1:StoreCLI- StoreCLI reports wrong Emulation type for VDs
+SCGCQ00375625 - (Closed) - StorCLI : Displaying failure in the output for querying Dimmer switch information
+SCGCQ00379104 - (Closed) - Not able to get paged view of StorCLI output on VM-Ware Platform
+SCGCQ00390777 - (Closed) - iMR_Inv_6.1:StorCLI- VD creation command does not give any message if we tried to create a PI VD using normal PDs
+SCGCQ00392598 - (Closed) - Pause operation should be sync with in show status of the PR.
+SCGCQ00392686 - (Closed) - For the perfmode command in the help file we are displaying the storcli.exe /cx set perfmode = <value> syntax
+SCGCQ00393442 - (Closed) - Spelling mistake in keyword headlessSafeMode
+SCGCQ00406580 - (Closed) - Adprestart command fails
+SCGCQ00413803 - (Closed) - Factory Command /c0/bbu start retentiontest should not be supported in storcli
+SCGCQ00438350 - (Closed) - Megacli crashes after invoking any command in system with one 9280-8e and 2 quad port qlogic FC cards.
+SCGCQ00457906 - (Closed) - storcli_6.1:The help file for"./storcli /cx/mx set h " is missing
+SCGCQ00374735 - (Closed) - StorCLI crashed when run on a Windows 2008 64-bit with 24GB of RAM and 66 drives attached
+SCGCQ00380746 - (Closed) - Error handling for Drive FW download when the hardware is not supported.
+SCGCQ00384729 - (Closed) - Storcli-Inv-multiple VD's in same DG, setting security using /cx/vall set security=on is Failing for every VD except 1st VD
+SCGCQ00392501 - (Closed) - StorCli_5.7 : "/c0/bbu start learn h " is not showing.
+SCGCQ00394005 - (Closed) - Enabling OCR from StorCLI actually disables the controller property.
+SCGCQ00394375 - (Closed) - Adprestart command fails
+SCGCQ00397920 - (Closed) - StorCli_MR: BBU Strart learn command displaying twice in the "/c0/bbu h"
+SCGCQ00400025 - (Closed) - Storcli shows inaccurate Elapsed Time as recon progresses
+SCGCQ00400640 - (Closed) - Copyright information is showing wrongly
+SCGCQ00408070 - (Closed) - StorCLI does not show both "Current Write Policy" and "Default Write Policy" for VD
+SCGCQ00423347 - (Closed) - Storclif :Segmentation Fault with execution of legacy command BBUMFGSET .
+SCGCQ00423832 - (Closed) - EFI_ Storcli: Cannot set vpd file on controller, EFI hangs and cannot proceed for further operations until reboot
+SCGCQ00433513 - (Closed) - StorcliF : Not able to get or set connector mode on cassiopeia controller
+SCGCQ00436931 - (Closed) - CLI displays VPD data for TMM and Battery/Supercap = ONLY TMM Data Extracted but NOT Supercap Data
+SCGCQ00449134 - (Closed) - Battery Over-temp is not showing correctly.
+SCGCQ00454427 - (Closed) - Storcli_6.1:"press any key to continue" showing twice in the lagacy command
+SCGCQ00464708 - (Closed) - Storcli display total number of VDs in a individual drive group properties.
+SCGCQ00369258 - (Closed) - Description is shown as "None" when using verchk option while flashing fw.
+SCGCQ00392053 - (Closed) - MegaCLI and StorCLI should display "Estimated Time Left" in hours, days and minutes format.
+SCGCQ00396665 - (Closed) - StorcLi_5.7: Remove the description for "Ra=Read Ahead Adaptive" in VD show info.
+SCGCQ00397663 - (Closed) - StorCli_MR: While creating VD using default values FW allows read policy as"Ra=Read Ahead Adaptive" as against PR-317400
+SCGCQ00399443 - (Closed) - StorCLI App Crash while execution of event info for vd ccincon
+SCGCQ00402910 - (Closed) - StorCli_6.0:Raid level can be created even wthout delimiter(i.e size=1gb1gb1gb1gb)
+SCGCQ00424978 - (Closed) - Is VD Emulated=Yes when emulationType=1
+SCGCQ00436107 - (Closed) - The bootwithpinnedcache logic is backwards, both storcli and the FW are affected
+SCGCQ00448094 - (Closed) - core dump while issuing storcli command ./storcli /c0/fall show all.
+SCGCQ00454971 - (Closed) - storcli /c0 show is not listinf SWR controller
+SCGCQ00378448 - (Closed) - StorCLI reports incorrect message when download a firmware image to the controller with pinned cache
+SCGCQ00395178 - (Closed) - storcli doesnt support legacy MegaCli elf commands
+SCGCQ00400139 - (Closed) - StorCLI shows date of manufacture in non-convention format
+SCGCQ00413789 - (Closed) - storcli crashes on having a non PI drive and trying to create pi vd on all the drive
+SCGCQ00422006 - (Closed) - Storcli crashes when given wrong in put file to set VPD on controller
+SCGCQ00442444 - (Closed) - MR_Inv_6.1:StoreCLI- StorCLI gives wrong info when preserved cache is generated on 4K VD (./storcli /c0 show preservedcache).
+SCGCQ00442652 - (Closed) - SWR_1.34 - Serial number field is blank in controller information and the same could be updated with N/A in StorCli
+SCGCQ00066241 - (Closed) - MPI 2.5: Power Management
+SCGCQ00308453 - (Closed) - MPI2: IR reporting Elapsed Seconds
+SCGCQ00299943 - (Closed) - MPI2: add IOCExceptions bit for Partial Memory Failure
+SCGCQ00250721 - (Closed) - MPI2: Update Hard Reset Algorithm with new timings
+SCGCQ00209048 - (Closed) - MPI2: Return Port info in the SAS Device Status Change Event
+SCGCQ00201727 - (Closed) - MPI2: Add spin-up disable bit to SAS IO Unit Page 4
+SCGCQ00201203 - (Closed) - MPI2: Remove/Obsolete MPI Power Management Control Feature PCIE_LINK
+SCGCQ00194293 - (Closed) - MPI2: product specific range for extended image type
+SCGCQ00116336 - (Closed) - Gen 3: method to enable/disable FastPath capability on a per-device basis
+SCGCQ00125672 - (Closed) - Gen 3: add 12Gb/s option for link rate
+SCGCQ00125683 - (Closed) - MPI2: add Link Rate of UNSUPPORTED_PHY_ATTACHED
+SCGCQ00136677 - (Closed) - Gen3: add optional vendor-unique region to MPI25_SCSI_IO_REQUEST structure
+SCGCQ00137514 - (Closed) - MPI2: add PCI Device ID for Warhawk
+SCGCQ00138259 - (Closed) - MPI2: add alternative defines for SGE Direction bit
+SCGCQ00140397 - (Closed) - MPI2: modify Host Based Discovery Action Request
+SCGCQ00141834 - (Closed) - MPI2: ability to disable SATA NCQ on a per-device basis
+SCGCQ00155192 - (Closed) - MPI 2.5: update PCI Device Ids for Invader / Fury
+SCGCQ00157968 - (Closed) - MPI2: Add new Config Page Type - Extended Manufacturing
+SCGCQ00159010 - (Closed) - MPI2: MFG 7 update: method to link ISTWI devices, GPIO, PHYs of a SAS connector
+SCGCQ00160485 - (Closed) - MPI2: Change MPI Simple SGE Local bit description and IEEE Chain Flags to match HW
+SCGCQ00161661 - (Closed) - MPI2: Add IOC Temperature Monitoring Capability
+SCGCQ00162562 - (Closed) - MPI2: rework Pinout field of ConnectorInfo for MFG Page 7
+SCGCQ00162597 - (Closed) - MPI2: reserve some FWDownload ImageType values for product-specific use
+SCGCQ00163413 - (Closed) - MPI2: IOUnit page 7: Add new fields for Board temperature
+SCGCQ00163641 - (Closed) - MPI 2.5: SCSI Initiator I/O path counters (SAS IO Unit Page 16)
+SCGCQ00164407 - (Closed) - MPI 2.5: review SGE Flags for Local bit and Data Location Address Space changes
+SCGCQ00166171 - (Closed) - MPI2: new event for NOTIFY(Enable Spinup)
+SCGCQ00176893 - (Closed) - MPI 2.5: new Power Performance Change Event to report changes to global power management mode
+SCGCQ00177635 - (Closed) - MPI 2.5: report offset of first EEDP error in SCSI IO Reply
+SCGCQ00268818 - (Closed) - Allow for MPI 2.5 IEEE Chain Element in SATA Passthrough Request
+SCGCQ00283196 - (Closed) - Toolbox Diagnostic CLI Request now uses IEEE SGL, including chain elements
+SCGCQ00378774 - (Implemented) - new storcli object is added to storcli to represent cachevault
+SCGCQ00413314 - (Implemented) - Implement storclif commands - get/set hwdevice and configpage
+SCGCQ00413317 - (Implemented) - Implementation of StorCLIF command for AdpSetSubOEMId XX -aN and AdpGetSubOEMId -aN
+SCGCQ00421090 - (Closed) - Added the HA code to MR5.8 stream
+SCGCQ00425077 - (Implemented) - Set factory default command in StorCLI
+SCGCQ00283198 - (Closed) - MPI2: Toolbox Diagnostic CLI Tool Request may now use chain elements in the SGL
+SCGCQ00258327 - (Closed) - MPI2: Reserve Product Specific range for Event codes
+SCGCQ00229719 - (Closed) - MPI2: BIOS Page 1 additions for UEFI HII
+SCGCQ00228572 - (Closed) - MPI2: add 4K sectors supported bit to IOC Page 6 CapabilitiesFlags field
+SCGCQ00203886 - (Closed) - MPI2: New RAID Action (COMPATIBILITY_CHECK)
+SCGCQ00194461 - (Closed) - MPI2: Add auto reserve and 8-kbit seeprom support to ISTWII
+SCGCQ00128142 - (Closed) - Gen 3: update MPI v2.5 header files
+SCGCQ00132183 - (Closed) - MPI2: add optional vendor-unique region to MPI2_SCSI_IO_REQUEST structure
+SCGCQ00136201 - (Closed) - MPI2 - additional IR status information
+SCGCQ00142578 - (Closed) - MPI2: obsolete MPI2_IOUNITPAGE1_MULTI_PATHING
+SCGCQ00169936 - (Closed) - MPI 2.5: remove Command Determines Data Direction bit from SCSI IO
+SCGCQ00172984 - (Closed) - MPI2: for SRIOV, allow PF to access config pages for other VFs
+SCGCQ00175997 - (Closed) - MPI2: Add IO Unit Page 10 - Host Credit Balancing
+SCGCQ00218764 - (Closed) - MPI2: new name for SCSI IO Request Control bits
+SCGCQ00227491 - (Closed) - MPI 2.5: IR - new Raid Action to enable the Fast Path
+SCGCQ00209055 - (Closed) - MPI2: create product-specific range for RAID Action Request
+SCGCQ00125496 - (Closed) - Gen 3: remove Release On Full option for diag trace buffer
+SCGCQ00159395 - (Closed) - MPI 2.5: Obsolete MPI2_RAID_VOL_CREATION_BACKGROUND_INIT
+SCGCQ00175743 - (Closed) - MPI2: method to communicate between hosts on virtual functions
+SCGCQ00433477 - (Implemented) - Mapping of MegaCLI(DPMenable(set/get) & ForceSGPIO(get/set) command to StorCLI( (show/set -> DPM) & (show/set SGPIOforce))
+SCGCQ00438735 - (Closed) - Changed the storcli syntaxes as Suggested by PDM's and FAE's.
+SCGCQ00157982 - (Closed) - MPI 2.5: Chain SGL Segment sizes
+SCGCQ00399602 - (Implemented) - storcli support for LSI and OEM, factory
+SCGCQ00412981 - (Implemented) - implementation of StorcliF commands for adpsetsasa,adpdiag,adpshutdown
+SCGCQ00435665 - (Implemented) - storcli mapping for the missing legacy commands
+SCGCQ00125662 - (Closed) - MPI2: review Task Set Full handling
+SCGCQ00353002 - (Implemented) - Signed FW Update
+SCGCQ00375811 - (Closed) - Need MegaSCU for changes in MFC
+SCGCQ00380155 - (Implemented) - Undo - blocking firmware update for drives behind ALTA
+SCGCQ00413337 - (Implemented) - MWCLI. storcli builds for LSI and OEM factory, please check description.
+SCGCQ00137489 - (Closed) - MPI2: bring Diagnostic Data Upload Tool forward from MPI v1.5
+SCGCQ00379169 - (Implemented) - Remove support for flashing firmware on PDs behind ALTA
+SCGCQ00413064 - (Implemented) - Implementation of MegaSCU commands in storcli syntax
+SCGCQ00413432 - (Closed) - Implementation of commands mentioned in the desc below
+SCGCQ00441143 - (Implemented) - Implementing Bad block management related comands in storcli.
+SCGCQ00369601 - (Implemented) - MWCLI. Add -adpbattest capability to EFI CLI
+SCGCQ00369604 - (Implemented) - Rebuild time reset
+SCGCQ00381311 - (Implemented) - dcmd path chagnes for supporting the new cachevault api
+SCGCQ00419161 - (Implemented) - Implementation of StorCLIO command for ADPMFGSET -f file a0 in storcli
+SCGCQ00419336 - (Implemented) - Implementation of setPcilinkspeed command in storCLIF
+SCGCQ00423256 - (Closed) - RRB 45 - CLI Reporting of TMM VPD
+SCGCQ00369742 - (Implemented) - MWCLI. R10, R50, R60, R00 VD creation
+SCGCQ00381093 - (Implemented) - PR SCGCQ00319011: Rebuild time reset
+SCGCQ00433703 - (Implemented) - Megacli/storcli support for lmrc driver
+SCGCQ00434744 - (Implemented) - Equivalent storcli command implementation of MegaCLI -AdpGetPciInfo -aN|-a0,1,2|-aALL
+SCGCQ00447069 - (Implemented) - Implementation of StorCLIO command for Adpnvram clear a0 in storclio as well as support legacy command
+SCGCQ00413330 - (Port_Complete) - Storcli reports "segmentation fault" when running command to downgrade controller to iMR
+SCGCQ00413856 - (Port_Complete) - remove the "Drive write cache" policy from Pd information.
+SCGCQ00417917 - (Port_Complete) - UEFI StorCli doesn't show the correct UEFI Driver Version
+SCGCQ00413017 - (Port_Complete) - Storcli reports "segmentation fault" when running command to downgrade controller to iMR
+SCGCQ00413888 - (Port_Complete) - StorCli_6.0-The help file for "storcli /cx/dx set security " is missing
+SCGCQ00376240 - (Port_Complete) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00411384 - (Port_Complete) - Unable to start migration from R0 to R5
+SCGCQ00411614 - (Port_Complete) - hits segmentation fault while creating multiple Vd's on Raid 10.
+SCGCQ00413311 - (Port_Complete) - Cannot change or update controller date and time in MegaSCU
+SCGCQ00437065 - (Port_Complete) - Driver Version is not shown
+SCGCQ00375839 - (Active) - StorCLI: The legend for "phy Error Counters" exceeds the 80-char limit.
+SCGCQ00411449 - (Port_Complete) - Improper output when configure R10 VD.
+SCGCQ00414863 - (Port_Complete) - When a command fails, subsequent commands/actions are aborted in storcli (MegaCli)
+SCGCQ00413041 - (Port_Complete) - Getting error message while installing or upgrading on Linux platform
+SCGCQ00458499 - (Port_Complete) - Block configuration with unsupported strip element sizes
+SCGCQ00414383 - (Port_Complete) - When a command fails, subsequent commands/actions are aborted in storcli (MegaCli)
+SCGCQ00391744 - (Active) - StorCli-"show ctrlcount" help is not displaying.
+SCGCQ00412593 - (Port_Complete) - Resolving compiler errors for Ctrl-R
+SCGCQ00425263 - (Active) - storcli /c0 show all : did not have HA information+request to add additional info
+
+
+Installation Commands: 
+=======================
+Refer to the User's Guide included in the package.
+
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 05/30/13
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.04.07
+Previous Versoin	1.03.11
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris
+FreeBSD
+EFI 
+Ubuntu
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00364332 - (Closed) - StoreCLI does not give proper message while trying to create 33rd VD on iMR FURY controller
+SCGCQ00374336 - (Closed) - System halts on issuing storcli commands in EFI Environment.
+SCGCQ00374732 - (Closed) - StorCLI cannot set "bypasserror" or "be"
+SCGCQ00374733 - (Closed) - Storcli does not show 512 strip size in the online help
+SCGCQ00378124 - (Closed) - Porting of AdpRestart Command
+SCGCQ00372155 - (Closed) - Certain controller features displayed under "show all" exceeds 80-char limit.
+SCGCQ00374118 - (Closed) - StorCli-"/c0/dall show all "in FreeSpaceDetails legend missing for "ID/VD/AfterVD"
+SCGCQ00378135 - (Closed) - portings of AdpRestart command
+SCGCQ00378828 - (Closed) - StorCLI-Legacy:'adpbootdrive get' fails to get bootdrive information.
+SCGCQ00372264 - (Closed) - StorCLI: The legend for "phy Error Counters" exceeds the 80-char limit.
+SCGCQ00374418 - (Closed) - Storcli : controller information query for OEM controller is displaying the status as failure.
+SCGCQ00375757 - (Closed) - "StorCLI /cx/bbu show modes" show the bbu modes description without the actual bbu mode number
+SCGCQ00374735 - (Closed) - StorCLI crashed when run on a Windows 2008 64-bit with 24GB of RAM and 66 drives attached
+SCGCQ00380746 - (Closed) - Error handling for Drive FW download when the hardware is not supported.
+SCGCQ00369258 - (Closed) - Description is shown as "None" when using verchk option while flashing fw.
+SCGCQ00378448 - (Closed) - StorCLI reports incorrect message when download a firmware image to the controller with pinned cache
+SCGCQ00375811 - (Implemented) - Need MegaSCU for changes in MFC
+SCGCQ00380155 - (Implemented) - Undo - blocking firmware update for drives behind interposer
+SCGCQ00379169 - (Implemented) - Remove support for flashing firmware on PDs behind interposer
+SCGCQ00375839 - (Active) - StorCLI: The legend for "phy Error Counters" exceeds the 80-char limit.
+
+Installation Commands: 
+=======================
+Refer to the User's Guide included in the package.
+
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 03/02/13
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.03.11
+Previous Versoin	1.02.08
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris
+FreeBSD
+EFI 
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+SCGCQ00339670 - (Completed) - Fixing Linux Release 1.02-00
+SCGCQ00359141 - (Completed) - Fixing Linux Release 1.03.01
+
+
+Installation Commands: 
+=======================
+Refer to the User's Guide included in the package.
+
+
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 01/16/13
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.02.08 (Phase 3)
+Previous Version	1.01.10 (Phase 2)
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+Solaris
+FreeBSD
+EFI (EFI StorCLI version 2.5.1.02.05)
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+There were few updates in command syntaxes. 
+-	See revision history in Rev E : available in Page 2 of user guide(StorCLI_Phase3_RefMan_.pdf)
+-	See revision history in appendix D: available in Page 76 of user guide(StorCLI_Phase3_RefMan_.pdf)
+SCGCQ00295690	MWCLI. Solaris x86 support
+SCGCQ00295810	MWCLI for uEFI
+SCGCQ00314895	MWCLI. FreeBSD 7.x & 8.x support
+Fixes since Phase 2 Release...
+SCGCQ00374892	XD1.5-StorCLI attempts to Add/remove configure/unconfigured VDs when add/removal of ALL vds is issued.
+SCGCQ00355952	StorCLI : Not able to set CC scheduling beyond some limit.
+SCGCQ00356883	Storcli - legacy commands related to bbu failing in multicontroller environment
+SCGCQ00345353	storcli /c0/ex show status---> It is not displaying all the information of the enclosure.
+SCGCQ00356970	StorCLI: The time remaining column is not populated on executing "storcli /c0 show aso" and no description for "Mode" column.
+SCGCQ00358752	StorCLI: "/c0 show" command displays PD LIST table information occupying more than 80 coloumns
+SCGCQ00360027	StorCli-Incorrect VD size displayed after expansion of VD size.
+SCGCQ00335385	Storcli command won't display any controllers
+SCGCQ00339764	StorCLI_EFI : Getting syntax error for add hotsparedrive command.
+SCGCQ00343802	StorCLI_EFI : System halts on performing  RLM (Raid level Migration)  without adding/removing drives, in EFI Environment
+SCGCQ00352972	StorCli- system halted on executing command " storcli /c0/f show"  in UEFI
+SCGCQ00354167	StorCli- "System hang" while creating the VD using legacy command in UEFI
+SCGCQ00354581	Storcli_EFI : System halts while executing lengthy commands
+SCGCQ00315799	4k_DIF: Not able to Replace the missing Drive for 4K VDusing the MegaCLI -Vogel_1.0_sprint_4k Apr 11, 2012
+SCGCQ00315801	Creating the 4K VD fails with firmware error description using MegaCLI -Vogel_1.0_sprint_4k
+SCGCQ00316591	Storcli: Importing Foreign Configuration while Rebuild is in progress Show fall shown multiple R60 VDs
+SCGCQ00316673	Storcli: Query for Phyinfo using storecli twice, will results in non-functional controller/system hang
+SCGCQ00316674	Unable to set abortCConerror property on controller card using StoreCli.
+SCGCQ00316675	Storcli displaying Emergency spare is No for all unconfigured drives while "enableeug" property is ON
+SCGCQ00337971	StorCLI : Not able to schedule PR in EFI environment
+SCGCQ00338386	StorCLI : Not able to upgrade controller firmware  without using nosigchk and noverchk in EFI Environment.
+SCGCQ00338398	StorCLI: getting syntax error for pd insert command in EFI Environment
+SCGCQ00341481	StorCLI - after migration the last pd is getting displayed twice( when migrating from 4pd raid 5 to 6 pd r0 )
+SCGCQ00341581	Set path to new library as "export LD_LIBRARY_PATH=/usr/local/lib" after installing libgcc-3.4.6-sol10-x86-local.pkg
+SCGCQ00341585	fails to log the latest set of events to the file.
+SCGCQ00341991	StorCLI_EFI: Displaying "" symbol under progress bar when PD Initialization is in progress
+SCGCQ00342017	StorCLI: After a controller FW flash from StorCLI, No pending Images are seen before a reboot as seen in the legacy builds.
+SCGCQ00342072	FreeBSD - Adapter cache Flush is not working .
+SCGCQ00342077	storecli_EFI.storecli.efi /c0/pall set linkspeed=val   It is not displaying PHY info field .
+SCGCQ00342117	StorCli does not display a help message for  "/cx/ex show status h" and storCLI  storcli /cx/ex show all h
+SCGCQ00342241	StorCLI_EFI:Storcli is showing that VD expansion is possible but not allowing to expand if space is before start LBA of VD
+SCGCQ00342272	StorCLI_EFI : Not able to save the configuration with Megacli syntax
+SCGCQ00342670	StorCli-"enblPI/PreventPIImport" equivalent command is not their in StorCLi
+SCGCQ00342693	StorCLI: A Drive spinup/spindown not successful on drives marked as hotspare as against MSM.
+SCGCQ00342730	Storcli_EFI : Not getting valid JSON output for any of the commands in EFI Environment
+SCGCQ00342732	StorCLI: the "set bootdrive = on" command sets the requested vd2 as bootable without user intervention.
+SCGCQ00343591	StorCLI: A dedicated hot spare cannot be assigned to any one of the particular spans for a spanned DG as against MSM.
+SCGCQ00343636	StorCLI allows a single Unconfigured Drive to be assigned as a dedicated hotspare to two different VD's.
+SCGCQ00343799	StorCLI: Cannot explicitly assign the configured cachecade VDs to the Disk Groups for the existing CC-VD.
+SCGCQ00345525	StorCLI: On performing an "add vd" with size provided in TB a decimal value is truncated to whole number as input.
+SCGCQ00345557	StorCLI:  A vd can be assigned to a cachecade VD multiple times also a cachecade VD allows to be assigned to itself.
+SCGCQ00345791	Storcli: not able to flash PD firmware on FreeBSD
+SCGCQ00346878	Storcli: Not getting proper import preview for secured foreign VD on EFI and Solaris Environment.
+SCGCQ00346917	Storcli_EFI : Not able to set securitykey on controller in EFI environment
+SCGCQ00348494	StorCli-" /c0 show stoponerror" is not working
+SCGCQ00350582	StorCli- "Disk Group" column is missing.
+SCGCQ00353580	Storcli- "/c0/fall show" is displaying wrong.
+SCGCQ00353641	StorCLI - spinup/spindown is not supported for tape drive , but executing spindown operation shows success message
+SCGCQ00356700	StorCLI - legacy command adpshutdown not working properly
+SCGCQ00356986	StorCLI - when " stop initialization " command is executed on a pd even when it is not in progress it is showing success
+SCGCQ00357024	StorCLI - flush|flushcache showing command not supported whereas subsequent legacy command working successfully
+SCGCQ00360565	In '/cx/vx show all' Active Operations = None during a Rebuild
+SCGCQ00289586	Emulated Block size should be displayed as part of PD information for 512E drives
+SCGCQ00316676	StorCLI help does not have the information to show the boot drive
+SCGCQ00316680	FreeBSD support for MegaWare Cli
+SCGCQ00318116	StorCLI2.5: "delay" & properties of "Consistency Check" does not function properly
+SCGCQ00320538	iMR_Inv_MegaCli:Deb package fir MegaCli not available for Ubuntu 12.04 OS
+SCGCQ00324813	MegaCLI: MFI_STAT_NOT_FOUND returns when retrieving the FW event log.
+SCGCQ00326760	StorCli adpbbucmd shows next learn cycle would happen 1 day earlier for SuperCaP
+SCGCQ00327419	StorCli-IN help file-"BBU show status" command is not their.
+SCGCQ00327557	Storcli-"BBU show help" is not working.
+SCGCQ00328182	StorCLI2.0: patrolread help description for delay is mentioned in terms of "minutes" instead of "hours"
+SCGCQ00328204	StorCLI- Individual help for VD expansion does not give the completion description .
+SCGCQ00328568	StorCli-"PHY Linkspeed show help/" is not working
+SCGCQ00329941	StorCli-"DRIVER VERSION" is not displaying for SWR controller  on LINUX Platform.
+SCGCQ00330263	StorCli-" show  ds | safeid | rehostinfo help" is not displaying.
+SCGCQ00330447	StorCli-" On VD show cc help " is not displaying
+SCGCQ00335327	storcli 1.01.10 doesn't display all required enclosure info for /cx/ex show all, i.e. voltage/ps/temp/etc status/values
+SCGCQ00337951	Storcli : Exit code is displayed  unnecessarily at the end of output on efi environment .
+SCGCQ00337956	StorCLI: -h is not working for help display in  efi environment
+SCGCQ00337967	StorCLI : getting invalid error code (out of range) while querying for invalid drive number in EFI Environment
+SCGCQ00338155	StorCLI : VD's exluded from CC Scheduling is not reflected properly with /c0 show cc command in EFI Environment
+SCGCQ00338194	StorCli-IN help file-"BBU show properties" command is not their.
+SCGCQ00338206	StorCli- "legacy help file is not displaying"
+SCGCQ00338265	StorCLI: paged view of any output should support " Press any key to continue" to proceed to next page
+SCGCQ00338393	StorCLI : Date and Time of controller is not displayed in proper format in EFI Environment
+SCGCQ00338576	StorCli-"Help page" last line execuite with storcli directory.
+SCGCQ00339730	StorCLI_EFI : In paged output the lines following the message "Press any key to continue" should be displayed in next line.
+SCGCQ00340208	code changes for some StorcliEFI-DEFECT
+SCGCQ00341443	StorCLI - partial help for patrolread delay is not working
+SCGCQ00341451	StorCLI - show patrolread is not showing the progress of the current patrol read in percentage
+SCGCQ00341472	StorCLI - show migrate is not displaying the time since the virtual drive migration started
+SCGCQ00341679	StorCLI : partial help for cc is not working ("/cx show cc h" ) . Giving syntax error
+SCGCQ00342053	storecli_EFI>storecli h  It is displaying description of some commands(use only for partial help).
+SCGCQ00342122	help file is not available for  "storcli dx show all h"
+SCGCQ00342129	storecli_EFI> storecli.efi /c0/ex show status not displaying ALARM info field
+SCGCQ00342144	StorCLI - the command "./storcli /c0 show reconrate " is displaying the migrate rate under controller prop
+SCGCQ00342229	storecli_EFI> After stopping init in multiple vds ,VD status in not updating properly.
+SCGCQ00342461	StorCLI doesn't show NCQ support of a SATA drive
+SCGCQ00342597	StorCli-"Perfmode" value is not mentioned in the description
+SCGCQ00342605	StorCLI does not prompt user intervention while deleting VD which has Boot Partition.
+SCGCQ00342727	Help description for Controller Properties abbrevations like ABS, SOE is missing in cmd O/P
+SCGCQ00342737	Not displaying the correct version of driver in megacli command.
+SCGCQ00342997	StorCLI - not getting partial help for /cx/px set linkspeed h
+SCGCQ00343108	StorCLI_EFI : Not able to disable/enable  Dimmer switch 1 with command /c2 set ds=off/on  type=4
+SCGCQ00343191	StorCLI - cannot get a helpfile for "./storcli /cx set cc h "
+SCGCQ00343199	StorCli-In Help File" show/set OCR" command is not their.
+SCGCQ00343222	FREE BSD- Modifiaction of syntax required in help file for setting consistency check .
+SCGCQ00343682	StorCLI - Syntax of set cc is given wrong in global help file
+SCGCQ00343749	StorCLI: mismatch with help file for setting linkspeed with the that of the error message on setting unsupported linkspeed.
+SCGCQ00343786	StorCLI -  "storcli /cx delete securitykey"when executed twice in a row shows a success status in controller properties
+SCGCQ00344142	The size is in KB for "WithArrExp" instead of GB under EXPANSION INFORMATION
+SCGCQ00344188	Help file not working for 'storcli /cx/vx expand '
+SCGCQ00344707	StorCLI: 512KB Stripe size is not mentioned in CLI  help page of "storcli /cx add vd h"
+SCGCQ00345311	StorCLI - "storcli /cx/pall set linkspeed = 1.5/3 ... " showing success but setting it individual is showing a comand invalid
+SCGCQ00345706	./storcli /c0 set perfmode=val  ----->It is setting perfmode value other than 0 and 1
+SCGCQ00345907	StorCli-" show aso " command is missing in help file.
+SCGCQ00346025	./Storcli -AdpGetPciInfo -a0 ---->This command is not displaying information like bus,device,functional no. of the adapter.
+SCGCQ00346919	Storcli_EFI : partial query for commands is not working with numbers like /c0 set h (works only with /cx )
+SCGCQ00348538	StorCli-"Firmware Package Build" version is not showing in controller Info (UEFI)
+SCGCQ00348706	StorCli-"/c0 set ds h" in help description need to some changes.
+SCGCQ00349475	StorCLI: The "gas gauge" needs to be addressed under "show BBU status h"
+SCGCQ00349498	StorCLI: A help file to be added for "storcli /c0/bbu start learn"
+SCGCQ00351169	./storcli /c0 set securitykey=xxx passphrase=xxx ---->Description of securitykey should be display in description field.
+SCGCQ00351987	Storcli : Unexpected line at output when legacy command ''Adpallinfo'' executed with page=x
+SCGCQ00352560	The help file for "set backplane" needs to be revised.
+SCGCQ00352571	StorCLI: "The set backplane = 0"  the command value description exceeds 80 charecters.
+SCGCQ00352630	STORCLI: Command to set SOE(stop on Error) is missing in global help file
+SCGCQ00352637	StorCLI: Global/Individual help missing for command to set ABS(Auto Boot Select) .
+SCGCQ00352779	User guide PDF file for Technical and Documentation are required to be updated.
+SCGCQ00352887	None of the build is having readme file except solaris in the storcli build ---->ver 1.02-02 Oct 23,2012
+SCGCQ00353682	Storcli- Displaying incomplete foreign config even if all the drives are in Ugood state for /c0/fall show command
+SCGCQ00353683	after controller firmware download completes Description is showing the firmware package version instead of firmware version
+SCGCQ00354235	Storcli: StorCLI  should throw syntax error for the command /c0/dall show all all all
+SCGCQ00354543	StorCLI: help legend missing for "show freespace"
+SCGCQ00355107	StorCLI-Require Update of the URL mentioned in Readme File of SOLARIS11 .
+SCGCQ00355116	Storcli_EFI : Showing success for  non-supported operations,  related with  association of VD to cachepool.
+SCGCQ00355137	Storcli - when setting smartpollinterval to -1 , it is throwing syntax error instead of failure .
+SCGCQ00355367	StorCLI- Description for what kind & range of value will be accepted by memscrubpatterns is not provided in help file
+SCGCQ00355432	StorCLI : Not able to set CC execution delay if used with complete  CC scheduling command
+SCGCQ00356657	Special Charecters are printed or the state info is missing under the state column of the drive.
+SCGCQ00356695	StorCLI - when stop command for PD reated operations  is executed . The command description shows wrong slot id's for PD's
+SCGCQ00356998	Storcli-display command when used with "page" is not showing the output correctly...
+SCGCQ00357319	The "EID:Slot" is not populated on fetching information on the existing foreign configuration.
+SCGCQ00357371	StorCLI: The PD list table is not sorted acoording to enclosureid:slotid.
+SCGCQ00357647	storcli: cliefimain.cpp file changes for lengthy commands.
+SCGCQ00357648	Storcli reports baterry is charging and discharging at the same time.
+SCGCQ00359371	Storcli-"show" info need to add  abbreviation for "PDs/DGs/VDs/BBU/Y"
+SCGCQ00361544	StorCli-"/c0 start pr " in failure state displaying worng 'error message'.
+SCGCQ00364859	Correcting the formats of below commands (exit code ,show event log and time, date format )
+SCGCQ00328185	StorCli-In legacy help file command line execute  along with" press any key to continue"-only Windows OS
+SCGCQ00328531	StorCLI2.0: phy linkspeed help description is mentioned in terms of "GB" instead of "Gb/s"
+SCGCQ00333006	LSI MegaCLI EncInfo (Enclosure Info) duplicates the first power supply status data to both power supplies
+SCGCQ00338675	'VD ADD' should use 'strip' instead of 'stripe'.
+SCGCQ00341595	StorCLI - Spelling mismatch "Alta" specified which should either be "SATA" or "ATA"
+SCGCQ00342071	storcli help command with "Legacy" and "page" option doesnt display the paged help.
+SCGCQ00342978	StorCli-"Phy linkspeed show all help" in description spelling mistake is their.
+SCGCQ00343142	StorCli-"eccbucketleakrate" , the value should be greater than ‘0’ and less than ‘65535’. Help is misleading.
+SCGCQ00344136	Description for option [expandarray] in command storcli /cx/v(x|all) expand Size=<xx> is not clear
+SCGCQ00344150	StorCLI - partial help ( Descripton ) for command "storcli /cx /bbu show properties h " is not there
+SCGCQ00344171	StorCli-"Smartpollinterval"value need to be mention in the Description.
+SCGCQ00344800	Help legend is missing for properties of enclosure in O/P of ./storcli /c0/e59 show all and show cmds
+SCGCQ00344994	StorCLI - "storcli /cx/vx show preservedcache " command is not present in the help file
+SCGCQ00352071	Storcli_EFI : "storcli -h legacy" cmd is not working
+SCGCQ00352881	Alignment text issue in the O/P of command "storcli.efi /c0 show eventlogInfo"
+SCGCQ00359980	Code cleanup in Univ_viva_cli
+SCGCQ00340241	StorCLI - " insert " command is not working
+SCGCQ00338560	StorCLI : Driver version is not displayed correctly
+SCGCQ00339757	StorCLI_EFI : Progress field for drive erase operation is displaying "' symbol if drive erase is in progress.
+SCGCQ00342762	StorCli-"Driver Version" field is missing (Free BSD 7.3)
+SCGCQ00343005	StorCLI: Stripe Size of the VD is shown incorrect after a PD missing operation is performed on the disk group.
+SCGCQ00346251	storcli does not report ROC temperature in '/cX show all' in HW section
+SCGCQ00354427	StorCli-"System halts" on performing operation "/c0 set aso key=    " in UEFI
+SCGCQ00342052	StorCLI - command "./storcli show " is throwing a description message that command is not supported
+SCGCQ00343169	StorCli-"Show/set OCR help" is not Displaying
+SCGCQ00344861	storecli_EFI > storecli.efi /c0 set perfmode h---> In  perfmode help file it is not giving what values we can set.
+SCGCQ00346944	Storcli: Inquiry data of the drives is missing from output of  /cx/ex/sx show all command on FreeBSD with TB controller
+SCGCQ00354191	Storcli - giving syntax error when trying to get help using numbers , e.g "storcli_efi /c0 h "
+SCGCQ00355847	StorCli- "Serial Number" of physical Drives is not getting displayed in FreeBSD
+SCGCQ00341986	StorCLI: Does not prompt the user to restart/reboot the controller after a FW flash for it to take effect as seen in MSM.
+SCGCQ00348048	StorCLI: StorCLI does not provide single command to perform a locate drive configured as part of a VD as against MSM.
+SCGCQ00348474	.\storCLI64.exe /c1 add vd type=r1 drives=47:1,2 ----> command is giving syntax error if using "comma" for vd creation.
+SCGCQ00350579	StorCLI: The VD name cannot contain spaces as allowed in MSM.
+SCGCQ00358917	EFI Shell StorCLI: Rebuild starts and does not make any progress in EFI env
+SCGCQ00375019	“StorCli64.exe /xd/wdall show” command reports that NytroXD license is absent even when the license is available
+SCGCQ00318433	Porting of Vogel 1.0 PRs to storcli phase 2.5
+SCGCQ00341607	Failing to display Driver Version  in FreeBSd
+SCGCQ00343664	Storcli-"Enclosure Slot No is mis matching "(DE1600-SAS )
+
+
+
+
+
+
+Important Notes:
+==================
+STORCLI PHASE 2.0 Specific Limitations:
+1.	User can use both 'raid0' and 'r0' for mentioning the raid level. And user can find both the forms in the help command.
+2.	When passing parameter,'set' for CC mode is mandatory. 
+3.	The use of comma in between array no and row parameter in the syntax for making ‘pdreplacemissing’ should not be used.
+4.	User would not be able to specify ROWs while creating ‘Dedicated Hot Spare’. Instead user needs to use ‘Drive Group ID’ as dgs=N
+5.	In ‘Foreign Configuration show’, utility will display VD as ‘Foreign’ instead of showing the VD state.
+6.	The success code and description is printed only after complete processing of the command. Success will not be printed unless the entire log is displayed to the output. Hence the success code and description is printed at the end of the log for this particular command.
+7.	Any command syntax is still valid, if user uses “-” instead of “/”  for e.g. storcli.exe /c0-vall show.
+8.	Show ‘Bus and PCI Slot type’ are not shown as part of the controller information.
+9.	While creating a VD using non-Enc-ID Devices, user needs to provide inputs in the format ‘D:SlotID’ as syntax (for eg: Drives=D:1,2,3 where 1,2,3 are the slot ids of the non encID devices)
+10.	Tape Drives will be listed only with /c0/sall show all command, /c0/sall show doesn’t list Tape drive but only display the direct attached drives if present or a blank table if none are connected.
+11.	Importing Foreign Configuration while Rebuild is in progress then query for Show fall the output would display multiple R60 VDs.
+12.	Date and Time of controller is not displayed in proper format in EFI Environment 
+13.	JSON is not required in EFI
+14.	The sector size of the drives are displayed in “KB” instead of bytes under the PD List table. This is just display error in tabular format but it is displayed correctly in drive details.
+15.	The “Eid:slot” column while importing a foreign config is not populated. StorCLI: The VD name cannot contain spaces as allowed in MSM.
+16.	Consistency Check cannot be scheduled beyond year-2037AD.
+17.	Flashing 9260CV low-level controller firmware is supported only through DOS version of CLI (MegaCLI) and not through EFI version of StorCLI.  Flashing MegaRAID firmware does not have this issue.
+
+Known Behavior:
+1.	‘All VD initialization’ command when run through StorCLI utility, shows the error message as failed for cachecaded VD. This is a generic limitation.
+2.	While reconstruction is in progress, start of CC/Init/BGI operations on same VD throws an inappropriate error message. This is a generic limitation.
+3.	In controller show cc the field CC current state will change only when it meets the schedule CC parameters.
+4.	All the unsupported commands for SWR controller if tried to execute may result in unknown behavior for example – system hang-up. For the list of unsupported commands refer to user guide Appendix C: Unsupported Commands in Embedded RAID.
+5.	Output for controller information contains junk characters in VMware ESXi 4.1 update2.  
+6.	FDE drives are displayed as secured drives on SWR- SCU controller.
+7.	There is no check to see whether user has entered different properties or the same property multiple times in StorCLI command. Hence StorCLI  does not throw syntax error for the command “/c0/dall show all all all”. This issue is because of the implementation of accepting multiple properties in a single command line in some cases.
+
+
+Installation Commands: 
+=======================
+Refer to the User's Guide included in the package.
+
+
+
+
+Component:
+=========
+SAS MegaRAID StorCLI
+Release Date: 11/06/12
+
+
+Version Numbers:	StorCLI
+===============		===========			
+Current Version		1.01.10
+
+
+Contents:
+=========
+This package contains StorCLI for the following OSes:
+Windows
+Linux
+VMware
+VMware MN
+
+Use the StorCLI components from the folder that matches your OS.
+
+
+Enhancements and Bug Fixes
+==========================
+Initial Release
+
+
+Important Notes:
+==================
+1.  User can use both ‘raid0’ and ‘r0’ for mentioning the raid level. And user can find both the forms in the help command.
+2.  When passing parameter ‘set' for CC mode is mandatory. 
+3.  The use of comma in between array no and row parameter in the syntax for making ‘pdreplacemissing’ should not be used.
+4.  User would not be able to specify ROWs while creating ‘Dedicated Hot Spare’. Instead user needs to use ‘Drive Group ID’ as dgs=N
+5.  In ‘Foreign Configuration show’, utility will display VD as ‘Foreign’ instead of showing the VD state.
+6.  The success code and description is printed only after complete processing of the command. Success will not be printed unless the entire log is displayed to the output. The success code and description is printed at the end of the log for this particular command.
+7.  Any command syntax is still valid, if user uses “-” instead of “/”  (e.g. storcli.exe /c0-vall show.)
+8.  Show ‘Bus and PCI Slot type’ are not shown as part of the controller information.
+9.  While creating a VD using non-Enc-ID Devices, user needs to provide inputs in the format ‘D:SlotID’ as syntax (e.g. Drives=D:1,2,3 where 1,2,3 are the slot ids of the non encID devices.)
+10. Tape Drives will be listed only with /c0/sall show all command. /c0/sall show doesn’t list Tape drive but only displays the direct attached drives if present or a blank table if none are connected.
+11. Importing Foreign Configuration while Rebuild is in progress then query for Show fall the output would display multiple R60 VDs.
+12. For any operation (Migrate/Init/BGI/CC) percentile completed in minutes is not displayed in StorCLI output. 
+13. ‘All VD initialization’ command when run through StorCLI utility, shows the error message as failed for cachecaded VD.
+14. While reconstruction is in progress, start of CC/Init/BGI operations on same VD throws an inappropriate error message.
+15. In controller show cc the field CC current state will change only when it meets the schedule CC parameters.
+16. All the unsupported commands for SWR controller if tried to execute may result in unknown behavior for example – system hang-up. For the list of unsupported commands refer to user guide Appendix C: Unsupported Commands in Embedded RAID.
+17. Output for controller information contains junk characters in VMware ESXi 4.1 update2.  
+18. FDE drives are displayed as secured drives on SWR- SCU controller.
+
+
+
+Installation Commands: 
+=======================
+Refer to the User's Guide included in the package.
+
+
+

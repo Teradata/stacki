@@ -53,13 +53,9 @@ build:
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin
-	mkdir -p $(ROOT)/$(PKGROOT)/lib
 	$(INSTALL) -m755 \
 		$(CURDIR)/tmp/opt/MegaRAID/storcli/storcli64 \
 		$(ROOT)/$(PKGROOT)/sbin/storcli
-	$(INSTALL) -m0444 \
-		$(CURDIR)/tmp/opt/MegaRAID/storcli/libstorelibir-2.so.14.07-0 \
-		$(ROOT)/$(PKGROOT)/lib/
 
 clean::
 	rm -rf tmp
