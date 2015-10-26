@@ -54,6 +54,8 @@ bootstrap:
 	yum install -y openssl-devel
 	yum install -y bzip2-devel
 	yum install -y ncurses-devel
+	yum install -y readline-devel
+	yum install -y sqlite-devel
 	yum install -y swig
 	yum install -y gtk2-devel
 	yum install -y mesa-libGLU-devel
@@ -63,6 +65,7 @@ bootstrap:
 	yum install -y intltool
 	yum install -y audit-libs-devel
 	yum install -y system-config-keyboard
+	yum install -y cmake
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
