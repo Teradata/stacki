@@ -107,7 +107,9 @@ class Command(stack.commands.report.host.command):
 				remotedns = self.db.getHostAttr(host,
 					'Kickstart_PrivateDNSServers')
 			if remotedns:
-				self.addOutput(host, 'nameserver %s' % remotedns)
+				servers = remotedns.split(',')
+				for server in servers:
+					self.addOutput(host, 'nameserver %s' % server.strip())
 
 			self.addOutput(host,'</file>')
 
