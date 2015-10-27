@@ -249,7 +249,7 @@ class Page2(wx.Panel):
 			"Fully Qualified Host Name", \
 			"This must be the fully-qualified domain name\n" + \
 			"(e.g., dev.stacki.com)", \
-			data.get('Kickstart_PrivateHostname'), None)
+			data.get('Info_FQDN'), None)
 		d, helpBitmap1, self.cb = createCb(self, \
 			"Devices", "This is the interface that connects the " + \
 			"frontend to the outside network", list,
@@ -558,6 +558,8 @@ class AddPalletsDialog(wx.Dialog):
 		#create label and text input
 		lb = wx.StaticText(self, label='Add pallets from a network')
 		self.urlText = wx.TextCtrl(self, size=(410, -1))
+		self.urlText.SetForegroundColour(wx.BLACK)
+		self.urlText.SetBackgroundColour(wx.WHITE)
 
 		#create buttons
 		urlButton = createButton(self, self.OnUrlLoad, "Load")

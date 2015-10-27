@@ -20,7 +20,7 @@ import stack.installcgi
 class DownloadFrame(wx.Frame):
 	"""This is a test frame for displaying progress of downloading pallets"""
 	def __init__(self, parent, title):
-		wx.Frame.__init__(self, parent, title=title, size=(600, 600))
+		wx.Frame.__init__(self, parent, title=title, size=(600, 600), style=wx.STAY_ON_TOP)
 
 		sizer = wx.GridBagSizer(5, 3)
 
