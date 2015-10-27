@@ -15,28 +15,9 @@ sys.path.append('/opt/stack/lib')
 
 import stack_partition
 import os
+from stack.bool import str2bool
 
-nukedisks = '&nukedisks;'
 release = '&release;'
-
-def initDiskLabel(disk):
-	# break down software disk arrays
-	cmd = '/sbin/mdadm --stop --scan > /dev/null 2>&amp;1'
-	os.system(cmd)
-
-	cmd = '/sbin/mdadm --zero-superblock /dev/%s' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
-
-	# Clear out the master boot record of the drive
-	cmd = '/bin/dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
-
-	cmd = '/usr/sbin/parted -s /dev/%s mklabel gpt' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
-
 
 def doBootDisk(file, disk):
 	if release == '7.x':
@@ -136,10 +117,6 @@ p = stack_partition.StackPartition()
 disks = p.getDisks()
 
 file = open('/tmp/system_partition_info', 'w')
-
-if str2bool(nukedisks):
-	for disk in disks:
-		initDiskLabel(disk)
 
 output = <eval>/opt/stack/bin/stack report host storage partition &hostname;</eval>
 

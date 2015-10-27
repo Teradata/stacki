@@ -38,7 +38,7 @@
 		<to>firewall</to>
 		<to>selinux</to>
 		<to>postshell</to>
-		<to>partition</to>
+		<to>nukedisks</to>
 		<to>yum</to>
 		<to>ssl</to>
 		<to>ssh</to>
@@ -48,6 +48,9 @@
 		<to>ssl-client</to>
 		<to>ssh-client</to>
 	</edge>
+
+	<edge from="nukedisks" to="partition"/>
+	<order head="nukedisks" tail="partition"/>
 
 	<edge from="partition">
 		<to>do-partition</to>

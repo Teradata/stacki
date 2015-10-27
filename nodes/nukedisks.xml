@@ -1,0 +1,50 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<si_copyright>
+(c) 2006 - 2015 StackIQ Inc.
+All rights reserved. stacki(r) v2.0 www.stacki.com
+</si_copyright>
+
+<!-- Nukedisks Functionality -->
+
+<pre interpreter="/opt/stack/bin/python">
+import sys
+sys.path.append('/opt/stack/lib')
+
+import stack_partition
+import os
+from stack.bool import str2bool
+
+nukedisks = '&nukedisks;'
+
+def initDiskLabel(disk):
+	# break down software disk arrays
+	cmd = '/sbin/mdadm --stop --scan > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	cmd = '/sbin/mdadm --zero-superblock /dev/%s' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	# Clear out the master boot record of the drive
+	cmd = '/bin/dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+	cmd = '/usr/sbin/parted -s /dev/%s mklabel gpt' % disk
+	cmd += ' > /dev/null 2>&amp;1'
+	os.system(cmd)
+
+p = stack_partition.StackPartition()
+disks = p.getDisks()
+
+if str2bool(nukedisks):
+	for disk in disks:
+		initDiskLabel(disk)
+
+</pre>
+
+</kickstart>
+
