@@ -269,7 +269,6 @@ class InsertEthers(GUI):
 		self.restart_services	= 0
 		self.inserted		= []
 		self.kickstarted	= {}
-		self.staticip		= 'false'
 		self.lastmsg		= ''
 		self.client		= ''
 		self.setDistribution('default')
@@ -279,7 +278,7 @@ class InsertEthers(GUI):
 		self.mac		= None
 		self.ipaddr		= None
 		self.netmask		= None
-		self.subnet		= 'private' # Internal Network
+		self.subnet		= 'private'
 		self.broadcast		= None
 		self.appliance_name	= None
 		self.device		= None
@@ -314,9 +313,6 @@ class InsertEthers(GUI):
 	def setRank(self, n):
 		self.rank = n
 
-	def setStatic(self):
-		self.staticip = 'true'
-
 	def setMax(self, max):
 		self.maxNew = max
 
@@ -324,10 +320,10 @@ class InsertEthers(GUI):
 		self.distribution = distribution
 		self.dist_lockfile = '/var/lock/%s' % self.distribution
 
-	def startGUI(self):
+	def setSubnet(self, subnet):
+		self.subnet = subnet
 
-		net  = GetAttr('Kickstart_PrivateNetwork')
-		mask = GetAttr('Kickstart_PrivateNetmask')
+	def startGUI(self):
 
 		GUI.startGUI(self)
 
@@ -339,9 +335,7 @@ class InsertEthers(GUI):
 		self.screen.drawRootText(0, 0, _("%s -- version %s") % 
 					 (self.sql.usage_name,
 					  self.sql.usage_version))
-		self.screen.drawRootText(0, 1, 
-				_("Opened kickstart access to %s/%s network") % 
-				(net, mask))
+
 		self.screen.pushHelpLine(' ')
 
 
@@ -489,44 +483,6 @@ class InsertEthers(GUI):
 			self.rank = int(GetAttr('discovery.base.rack'))
 
 
-
-
-	def askuserIP(self, nodename):
-		#
-		# ask the user for an IP address
-		#
-		done = 0
-
-		while not done:
-			entry = snack.Entry(15)
-
-			rc, values = snack.EntryWindow(self.screen,
-				_("IP Address Selection"),
-				_("Enter the IP address for host %s") % (nodename),
-				[ (_("IP Address"), entry) ],
-				buttons = [ 'Ok' ])
-
-			ipaddr = entry.value()
-			try:
-				query = 'select id from networks where ' +\
-					'ip="%s"' % ipaddr
-				rows = self.sql.execute(query)
-				if rows:
-					raise ValueError, "Duplicate IP"
-
-				self.setIPaddr(ipaddr)
-				done = 1
-			except ValueError:
-				msg = _("The IP address (%s) " % ipaddr +\
-					"already exists.\n" ) +\
-					_("Please select another.")
-				snack.ButtonChoiceWindow(
-					self.screen,
-					_("Duplicate IP"),
-					msg,
-					buttons = [ _("OK") ])
-
-		return ipaddr
 
 
 	def getnetmask(self, dev):
@@ -703,19 +659,9 @@ class InsertEthers(GUI):
 			nodename = self.getNodename()
 
 			(bcast, netmask) = self.getnetmask(dev)
-			if self.staticip == 'true':
-				#
-				# if the user requested to enter static
-				# IP addresses, open the form
-				#
-				self.printDiscovered(mac)
-
-				ipaddr = self.askuserIP(nodename)
-				self.addit(mac, nodename, ipaddr, netmask)
-			else:
-				ipaddr = self.getnextIP(self.subnet)
-				self.addit(mac, nodename, ipaddr, netmask)
-				self.printDiscovered(mac)
+			ipaddr = self.getnextIP(self.subnet)
+			self.addit(mac, nodename, ipaddr, netmask)
+			self.printDiscovered(mac)
 				
 			retval = 'true'
 
@@ -801,22 +747,6 @@ class InsertEthers(GUI):
 
 			interface = tokens[9].replace(':','').strip()
 			
-			# Next get the interface for the specified subnet.
-			# This is done using a database lookup
-
-			self.sql.execute("""
-				select networks.device from
-				networks, subnets, nodes where
-				subnets.name='%s' and nodes.name='%s' 
-				and networks.subnet=subnets.id and
-				networks.node=nodes.id
-				""" % (self.subnet,
-				       GetAttr('Kickstart_PrivateHostname')))
-			
-			subnet_dev = self.sql.fetchone()[0]
-			if interface != subnet_dev:
-				return
-
 			if self.discover(tokens[7], interface) == 'false':
 				return
 
@@ -1003,7 +933,7 @@ class App(stack.sql.Application):
 			('rank=', 'number'),
 			('distribution=', 'distribution'),
 			('update'),
-			('staticip')
+			('network=', 'network name')
 		])
 
 
@@ -1028,11 +958,10 @@ class App(stack.sql.Application):
 			self.insertor.setRank(int(c[1]))
 		elif c[0] == '--update':
 			self.doUpdate = 1
-		elif c[0] == '--staticip':
-			self.insertor.setStatic()
-			self.batch = 1
 		elif c[0] == '--distribution':
 			self.insertor.setDistribution(c[1])
+		elif c[0] == '--network':
+			self.insertor.setSubnet(c[1])
 		return 0
 
 
