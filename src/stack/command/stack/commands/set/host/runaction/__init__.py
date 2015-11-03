@@ -134,7 +134,7 @@ class Command(stack.commands.set.host.command):
                                 raise CommandError(self, 'invalid action parameter')
 			runaction = "'%s'" % action
 			
-                for hosts in self.getHostnames(args):
+                for host in self.getHostnames(args):
 			self.db.execute("""
                         	update nodes set runaction=%s
 				where name='%s'
