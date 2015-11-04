@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import stack.file
@@ -142,17 +143,17 @@ class Implementation(stack.commands.Implementation):
 		roll_dir = os.path.join(prefix, name, vers, OS, arch)
 		destdir = os.path.join(roll_dir, 'RPMS')
 
-		print 'stack.release (%s)' % stack.release
+		print('stack.release (%s)' % stack.release)
 		if stack.release == '7.x':
 			liveosdir = os.path.join(roll_dir, 'LiveOS')
 
 		if clean and os.path.exists(roll_dir):
-			print 'Cleaning %s version %s ' % (name, vers),
-			print 'for %s from pallets directory' % arch
+			print('Cleaning %s version %s ' % (name, vers), end=' ')
+			print('for %s from pallets directory' % arch)
 			os.system('/bin/rm -rf %s' % roll_dir)
 			os.makedirs(roll_dir)
 
-		print 'Copying "%s" (%s,%s) pallet ...' % (name, vers, arch)
+		print('Copying "%s" (%s,%s) pallet ...' % (name, vers, arch))
 		if not os.path.exists(destdir):
 			os.makedirs(destdir)
 

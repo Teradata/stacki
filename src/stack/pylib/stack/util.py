@@ -171,6 +171,7 @@
 # - Seriously needs a design document.
 #
 
+from __future__ import print_function
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -295,7 +296,7 @@ class ParseXML(handler.ContentHandler,
 
 
 def system(cmd, type='standard'):
-	print cmd
+	print(cmd)
 
 	if type == 'spinner':
 		return startSpinner(cmd)
@@ -331,7 +332,7 @@ def startSpinner(cmd):
 			pad = pad + ' '
 		spin  = spinChars[spinIndex % len(spinChars)]
 		spinIndex = spinIndex + 1
-		print spin + data + pad + '\r',
+		print(spin + data + pad + '\r', end=' ')
 		prevLength = currLength
 		sys.stdout.flush()
 	r.close()
@@ -343,7 +344,7 @@ def startSpinner(cmd):
 	pad = ''
 	for i in range(0,78):
 		pad = pad + ' '
-	print '\r%s\r' % pad,
+	print('\r%s\r' % pad, end=' ')
 	
 
 def prettyNumber(x):

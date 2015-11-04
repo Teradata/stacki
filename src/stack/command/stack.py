@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -291,16 +292,16 @@ class RCL_Completer:
 		if len(tokens) > 0:
 			t = tokens.pop(0)
 			if d.children.has_key(t):
-				print '  '*level, t
+				print('  '*level, t)
 				self.print_mod_cmd(d.children[t], tokens, level+1)
 			else:
 				for i in d.children:
 					if i.startswith(t):
-						print '  '*level, i
+						print('  '*level, i)
 						self.print_mod_cmd(d.children[i], [], level+1)
 		else:
 			for i in d.children:
-				print '  '*level, i
+				print('  '*level, i)
 				self.print_mod_cmd(d.children[i], [], level+1)
 
 	# Completer function. This function takes in a list of tokens, and
@@ -383,7 +384,7 @@ def run_command(args):
                 except stack.exception.CommandError, e:
                         sys.stderr.write('%s\n' % e)
                         return -1
-		print help.getText()
+		print(help.getText())
 		return -1
 
         
@@ -417,9 +418,9 @@ def run_command(args):
 
 	text = command.getText()
 	if len(text) > 0:
-		print text,
+		print(text, end=' ')
 		if text[len(text)-1] != '\n':
-			print
+			print()
 	syslog.closelog()
 	if rc is True:
 		return 0
@@ -453,10 +454,10 @@ def run_cli(prompt):
 			else:
 				rc = run_command(shlex.split(cmd))
 		except EOFError:
-			print
+			print()
 			done = 1
 		except KeyboardInterrupt:
-			print
+			print()
 			done = 1
 
 # If the command line is empty, open the stack shell

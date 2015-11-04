@@ -39,6 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+from __future__ import print_function
 import stack.commands
 from stack.exception import *
 
@@ -61,7 +62,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		if len(hosts) == 0:
 			output = []
-			print output
+			print(output)
 			return
 		elif len(hosts) > 1:
                         raise ArgUnique(self, 'host')
@@ -74,7 +75,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.partition', [ host ])
 		if output:
-			print output
+			print(output)
 			return
 
 		# 
@@ -84,7 +85,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		output = self.call('list.storage.partition', [ appliance ])
 		if output:
-			print output
+			print(output)
 			return
 
 		#
@@ -92,7 +93,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.partition', ['globalOnly=y'])
 		if output:
-			print output
+			print(output)
 			return
 
 		#
@@ -100,4 +101,4 @@ class Command(stack.commands.HostArgumentProcessor,
 		# configuration for this host
 		#
 		output = []
-		print output
+		print(output)

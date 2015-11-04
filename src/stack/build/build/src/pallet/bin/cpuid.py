@@ -14,6 +14,8 @@
 #	9. EM64T
 #
 
+from __future__ import print_function
+
 AMD_Athlon = 2
 AMD_Hammer_32 = 3
 AMD_Hammer_64 = 4
@@ -82,11 +84,11 @@ for line in file.readlines():
 				if fam == family and mod == model \
 						and ven == vendor:
 
-					print id
+					print(id)
 					sys.exit(0)
 
 #
 # if we made it this far, we don't know what the processor is. output
 # the unknown id
 #
-print '1'
+print('1')

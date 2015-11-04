@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import os.path
 import sys
@@ -179,7 +180,7 @@ class App(stack.app.Application):
 	def thinkLocally(self, name):
 		assert self.rpmsPath
 
-		print 'thinkLocally: rpmsPath (%s)' % self.rpmsPath
+		print('thinkLocally: rpmsPath (%s)' % self.rpmsPath)
 		localtree = stack.file.Tree(self.rpmsPath)
 
 		locallist = {}
@@ -188,7 +189,7 @@ class App(stack.app.Application):
 				for arch in self.dist.cpus:
 					s = '%s-%s' % (name, arch)
 					if s == rpm.getUniqueName():
-						print "thinkLocally: found", rpm.getName()
+						print("thinkLocally: found", rpm.getName())
 						return rpm
 
 		return None
@@ -203,7 +204,7 @@ class App(stack.app.Application):
 			if not RPM:
 				raise DistError, "Could not find %s rpm" % (pkg)
 
-			print "Applying package %s" % (pkg)
+			print("Applying package %s" % (pkg))
 
 			self.boot.applyRPM(RPM, 
 				os.path.join(os.getcwd(), pkg),
@@ -222,16 +223,16 @@ class App(stack.app.Application):
 
 	def run(self):
 
-		print "build-initrd starting..."
-		print "arch:", self.getArch()
+		print("build-initrd starting...")
+		print("arch:", self.getArch())
 
 		self.dist = Distribution(self.getArch())
 		self.dist.generate()
 
 		self.boot = stack.bootable.Bootable(self.dist, 'none')
 
-		print 'updatepkgs: ' , self.updatepkgs
-		print 'pkgs: ' , self.pkgs
+		print('updatepkgs: ' , self.updatepkgs)
+		print('pkgs: ' , self.pkgs)
 
 		#
 		# overlay packages onto the initrd.img
@@ -242,7 +243,7 @@ class App(stack.app.Application):
 		update = 0
 		self.overlaypkgs(self.pkgs, update)
 
-		print "build-initrd complete."
+		print("build-initrd complete.")
 
 # Main
 app = App(sys.argv)

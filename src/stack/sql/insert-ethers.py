@@ -93,6 +93,7 @@
 # @Copyright@
 
 
+from __future__ import print_function
 import sys
 import os
 import string
@@ -568,8 +569,8 @@ class InsertEthers(GUI):
 		#
 		# if we make it to here, an error occurred
 		#
-		print 'error: getnextIP: could not get IP address ',
-		print 'for device (%s)' % (dev)
+		print('error: getnextIP: could not get IP address ', end=' ')
+		print('for device (%s)' % (dev))
 		return '0.0.0.0'
 
 

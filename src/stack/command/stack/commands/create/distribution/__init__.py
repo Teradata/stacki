@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import os
 import os.path
 import tempfile
@@ -242,7 +242,7 @@ class Command(stack.commands.create.command,
 
                         carts = self.getCarts(distName)
                         
-			print 'Building %s distribution' % distName
+			print('Building %s distribution' % distName)
 
 			self.runImplementation(distOS,
 					       [ distName,
@@ -274,7 +274,7 @@ class Command(stack.commands.create.command,
 				self.command('set.attr', [ 'attr=%s' % attr,
 					'value=%s' % dist_version ])
 
-				print 'Distribution version: ', dist_version
+				print('Distribution version: ', dist_version)
 					
 			os.unlink(lockfile)
 

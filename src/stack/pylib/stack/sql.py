@@ -199,6 +199,7 @@
 # - Added ip.py, sql.py for SQL oriented scripts
 #
 
+from __future__ import print_function
 import os
 import pwd
 import sys
@@ -376,7 +377,7 @@ class Application(stack.app.Application):
             # Get a database cursor which is used to manage the context of
             # a fetch operation
 	    if self.flags['verbose'][0]:
-	    	print "connect:connected",self.link
+	    	print("connect:connected",self.link)
             self.cursor = self.link.cursor()
             return 1
         return 0

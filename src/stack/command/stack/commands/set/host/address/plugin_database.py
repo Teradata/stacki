@@ -93,6 +93,7 @@
 # $Log:$
 #
 
+from __future__ import print_function 
 import stack.commands
 from MySQLdb import *
 
@@ -108,7 +109,7 @@ class Plugin(stack.commands.Plugin):
 		shortname = self.owner.db.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
 
-		print 'Updating database permissions'
+		print('Updating database permissions')
 
 		#
 		# get the password for the database

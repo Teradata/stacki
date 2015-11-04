@@ -1,5 +1,6 @@
 #!/opt/stack/bin/python
 
+from __future__ import print_function
 import sys
 import urllib2
 import pickle
@@ -63,4 +64,4 @@ if __name__ == '__main__':
 	html = response.read()
 	parser = BossHTMLParser(url)
 	parser.feed(html)
-	print pickle.dumps(parser.pallets)
+	print(pickle.dumps(parser.pallets))

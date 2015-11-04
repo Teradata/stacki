@@ -1,4 +1,5 @@
 #! /opt/stack/bin/python
+from __future__ import print_function
 import os
 import subprocess
 import traceback
@@ -249,7 +250,7 @@ class Data:
 
 				return (True, "", "")
 			except:
-				print traceback.format_exc()
+				print(traceback.format_exc())
 				return (False, "Incorrect input", "Input Error")
 
 	def validatePassword(self, pw1, pw2):

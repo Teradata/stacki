@@ -1,5 +1,6 @@
 #!@PYTHON@
 
+from __future__ import print_function
 import os,sys
 import socket
 import stack.app
@@ -37,10 +38,10 @@ class App(stack.app.Application):
 		try:
 			s.connect((self.node_name,self.port_num))
 		except:
-			print 'closed'
+			print('closed')
 			sys.exit(1)
 		
-		print 'open'
+		print('open')
 		s.close()
 		sys.exit(0)
 	

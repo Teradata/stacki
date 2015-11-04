@@ -93,6 +93,7 @@
 # $Log:$
 #
 
+from __future__ import print_function
 import stack.commands
 
 class Plugin(stack.commands.Plugin):
@@ -113,7 +114,7 @@ class Plugin(stack.commands.Plugin):
 		ip = self.owner.db.getHostAttr('localhost',
 			'Kickstart_PublicAddress')
 
-		print 'Updating routes'
+		print('Updating routes')
 
 		self.owner.command('remove.host.route',
 			[ 'localhost', '0.0.0.0' ])

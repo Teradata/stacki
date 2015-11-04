@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import csv
 import re
 import sys
@@ -166,7 +166,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if target not in reserved:
 				host = self.db.getHostname(target)
 				if not host:
-					print 'target "%s" is not an known appliance or host name' % host
+					print('target "%s" is not an known appliance or host name' % host)
 					sys.exit(-1)
 
 			if target not in self.owner.attrs.keys():

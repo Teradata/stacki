@@ -39,6 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+from __future__ import print_function
 import os
 import time
 import pytest
@@ -66,15 +67,15 @@ def teardown_module(module):
 
 
 def test_scale():
-        print '...'
+        print('...')
         t0 = time.time()
         Call('list host')
         t1 = time.time()
-        print 'list host (%.3fs)' % (t1-t0)
+        print('list host (%.3fs)' % (t1-t0))
         t0 = time.time()
         Call('list host profile', [ 'backend-1000-0' ])
         t1 = time.time()
-        print 'list host profile (%.3fs)' % (t1-t0)
+        print('list host profile (%.3fs)' % (t1-t0))
         
 
 

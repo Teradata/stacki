@@ -85,6 +85,7 @@
 #
 #
 
+from __future__ import print_function
 import stack.commands
 import stack.vm
 import sys
@@ -100,7 +101,7 @@ class Plugin(stack.commands.Plugin):
 		rsakey = args[2]
 
 		if not rsakey:
-			print 'need to supply a private key'
+			print('need to supply a private key')
 			sys.exit(-1)
 
 		#
@@ -122,6 +123,6 @@ class Plugin(stack.commands.Plugin):
 			(status, reason) = vm.cmd(op, host)
 
 			if status != 0:
-				print 'command failed\n%s' % reason
+				print('command failed\n%s' % reason)
 				sys.exit(-1)
 

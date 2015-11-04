@@ -147,6 +147,7 @@
 # understand this and run around with bogus ip addresses.
 
 
+from __future__ import print_function
 import string
 import types
 import sys
@@ -234,7 +235,7 @@ class IPGenerator:
             elif self.network() & 0xe0 == 0xc0:
                 self.netmask = IPAddr('255.255.255.0')
             else:
-                print 'not a unicast address', self.network
+                print('not a unicast address', self.network)
                 sys.exit(-1)
         else:
             self.netmask = IPAddr(netmask)
@@ -292,6 +293,6 @@ class IPGenerator:
 
 if __name__ == '__main__':
     a = IPGenerator('10.1.1.0', '255.255.255.128')
-    print a.curr()
+    print(a.curr())
     a.next(-126)
-    print a.curr()
+    print(a.curr())

@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import stack
@@ -118,8 +119,8 @@ class Implementation(stack.commands.Implementation):
 		# Clean out the existing roll directory if asked
 		
 		if clean and os.path.exists(specific_roll_dir):
-			print 'Cleaning %s version %s ' % (name, vers),
-			print 'for %s from the pallets directory' % arch
+			print('Cleaning %s version %s ' % (name, vers), end=' ')
+			print('for %s from the pallets directory' % arch)
 			os.system('/bin/rm -rf %s' % specific_roll_dir)
 			os.makedirs(specific_roll_dir)
 

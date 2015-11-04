@@ -150,6 +150,7 @@
 #
 #
 
+from __future__ import print_function
 import os
 import sys
 import stack.sql
@@ -247,7 +248,7 @@ class Application(stack.sql.Application):
 		if not os.path.exists(self.rpmdb):
 			os.makedirs(self.rpmdb)			
 
-		print "Applying:", rpm.getFullName()
+		print("Applying:", rpm.getFullName())
 
 		cmd = 'rpm -i --force --nodeps --badreloc --noscripts ' + \
 			'--relocate /=%s/%s' % (os.getcwd(), rpm.getBaseName())

@@ -93,6 +93,7 @@
 # $Log:$
 #
 
+from __future__ import print_function
 import os
 import stack.commands
 
@@ -110,7 +111,7 @@ class Plugin(stack.commands.Plugin):
 		domainname = self.owner.db.getHostAttr('localhost',
 			'Kickstart_PublicDNSDomain')
 
-		print 'Updating postfix'
+		print('Updating postfix')
 
 		file = open('/etc/postfix/sender-canonical', 'w+')
 		file.write('@local @%s.%s\n' % (shortname, domainname))

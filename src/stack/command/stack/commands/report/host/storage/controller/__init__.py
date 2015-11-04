@@ -40,6 +40,7 @@
 # @SI_Copyright@
 # 
 
+from __future__ import print_function
 import stack.commands
 from stack.exception import *
 
@@ -71,7 +72,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.controller', [ host ])
 		if output:
-			print output
+			print(output)
 			return
 
 		# 
@@ -81,7 +82,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		output = self.call('list.storage.controller', [ appliance ])
 		if output:
-			print output
+			print(output)
 			return
 
 		#
@@ -89,7 +90,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.controller')
 		if output:
-			print output
+			print(output)
 			return
 
 		#
@@ -97,5 +98,5 @@ class Command(stack.commands.HostArgumentProcessor,
 		# configuration for this host
 		#
 		output = []
-		print output
+		print(output)
 

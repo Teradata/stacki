@@ -129,6 +129,7 @@
 # KRoll
 #
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -289,30 +290,30 @@ class Generator(stack.gen.Generator):
 			pass
 		
 	def generate_order(self):
-		print '#'
-		print '# Node Traversal Order'
-		print '#'
+		print('#')
+		print('# Node Traversal Order')
+		print('#')
 		for line in self.ks['order']:
-			print '#', line
-		print '#'
-		print
+			print('#', line)
+		print('#')
+		print()
 
 	def generate_packages(self):
-		print '#'
-		print '# Kickstart Packages Section'
-		print '#'
+		print('#')
+		print('# Kickstart Packages Section')
+		print('#')
 		for rpm in self.ks['rpms']:
-			print 'rpm -Uvh --force --nodeps ', rpm
-		print
+			print('rpm -Uvh --force --nodeps ', rpm)
+		print()
 
 	def generate_post(self):
-		print '#'
-		print '# Kickstart Post Section'
-		print '#'
+		print('#')
+		print('# Kickstart Post Section')
+		print('#')
 		for list in self.ks['post']:
-			print '#', list[0]
-			print string.join(list[1:], '\n')
-		print
+			print('#', list[0])
+			print(string.join(list[1:], '\n'))
+		print()
 			
 
 
@@ -336,7 +337,7 @@ class App(stack.kickstart.Application):
 			hostname = string.split(socket.gethostname(), '.')[0]
 			hostaddr = socket.gethostbyname(hostname)
 		except:
-			print 'error - cannot determine hostname'
+			print('error - cannot determine hostname')
 			sys.exit(-1)
 
 		try:
@@ -352,7 +353,7 @@ class App(stack.kickstart.Application):
 				% hostname)
 			graph, node, dist = self.fetchone()
 		except:
-			print 'error = cannot find host in database'
+			print('error = cannot find host in database')
 			sys.exit(-1)
 		
 		self.dist.setDist(os.path.join(dist))
@@ -369,8 +370,8 @@ class App(stack.kickstart.Application):
 		try:
 			os.chdir(buildroot)
 		except:
-			print 'error - cannot find distribution (%s)' % \
-				buildroot
+			print('error - cannot find distribution (%s)' % \
+				buildroot)
 			sys.exit(-1)
 
 		text = []
@@ -384,10 +385,10 @@ class App(stack.kickstart.Application):
 		self.generator.setRPMS(self.dist.getRPMS())
 		self.generator.parse(doc)
 
-		print '#!/bin/sh'		
-		print '#'
-		print '# %s version %s' % (self.usage_name, self.usage_version)
-		print '#'
+		print('#!/bin/sh')		
+		print('#')
+		print('# %s version %s' % (self.usage_name, self.usage_version))
+		print('#')
 
 		for s in [ 'order', 'packages', 'post' ]:
 			self.generator.generate(s)

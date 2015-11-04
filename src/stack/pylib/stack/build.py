@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import sys
 import os
 import shutil
@@ -188,7 +189,7 @@ class DistributionBuilder(Builder):
     def clean(self):
         # Nuke the previous distribution.  The cleaner() method will
         # preserve any build/ directory.
-        print 'Cleaning distribution'
+        print('Cleaning distribution')
         self.dist.getTree('release').apply(self.cleaner)
 
 
@@ -214,9 +215,9 @@ class DistributionBuilder(Builder):
 					    f = m.getRollLiveOSFiles(key, v, a)
 					    if f:
 						    files.extend(f)
-						    print '\tusing files from %s' % (key)
+						    print('\tusing files from %s' % (key))
 						    for name in f:
-							    print '\t\t%s' % name.getBaseName()
+							    print('\t\t%s' % name.getBaseName())
 	    return files
 
 
@@ -229,9 +230,9 @@ class DistributionBuilder(Builder):
 					    f = m.getRollBaseFiles(key, v, a)
 					    if f:
 						    files.extend(f)
-						    print '\tusing files from %s' % (key)
+						    print('\tusing files from %s' % (key))
 						    for name in f:
-							    print '\t\t%s' % name.getBaseName()
+							    print('\t\t%s' % name.getBaseName())
 	    return files
 
 
@@ -243,7 +244,7 @@ class DistributionBuilder(Builder):
 				    if self.useRoll(key, v, a):
 					    r = m.getRollRPMS(key, v, a)
 					    if r:
-						    print '\tfound %4d packages on pallet %s %s' % (len(r), key, v)
+						    print('\tfound %4d packages on pallet %s %s' % (len(r), key, v))
 						    rpms.extend(r)
 	    return rpms
 
@@ -254,7 +255,7 @@ class DistributionBuilder(Builder):
                     tree = stack.file.Tree(os.path.join('/export/stack/carts',
                                                                 cart))
                     r = tree.getFiles('RPMS')
-                    print '\tfound %4d packages on cart   %s' % (len(r), cart)
+                    print('\tfound %4d packages on cart   %s' % (len(r), cart))
                     rpms.extend(r)
 
             # fix rpm permissions in the cart dirs (files get symlinked)
@@ -284,29 +285,29 @@ class DistributionBuilder(Builder):
 
     
     def buildBase(self):
-        print 'Resolving versions (base files)'
+        print('Resolving versions (base files)')
         self.dist.setBaseFiles(self.resolveVersions(self.getRollBaseFiles()))
 
 
     def buildRPMS(self):
-        print 'Gathering RPMs'
+        print('Gathering RPMs')
         self.dist.setRPMS(self.resolveVersions(self.buildRPMSList()))
 
 
     def buildLiveOS(self):
-        print 'Resolving versions (LiveOS)'
+        print('Resolving versions (LiveOS)')
         self.dist.setLiveOS(self.resolveVersions(self.getRollLiveOSFiles()))
 
 
     def insertImage(self, image):
-	print 'Applying %s' % image
+	print('Applying %s' % image)
 	import stat
 	
 	try:
 		self.applyRPM('stack-images', self.dist.getReleasePath())
 	except:
-		print "Couldn't find the package stack-images"
-		print "\tIf you are building the OS roll, this is not a problem"
+		print("Couldn't find the package stack-images")
+		print("\tIf you are building the OS roll, this is not a problem")
 		return
 
 	imagesdir = os.path.join(self.dist.getReleasePath(), 'images')
@@ -340,15 +341,15 @@ class DistributionBuilder(Builder):
 
 		self.buildRPMS()
 
-		print 'Creating files',
+		print('Creating files', end=' ')
 		if self.useLinks:
-			print '(symbolic links - fast)'
+			print('(symbolic links - fast)')
 		else:
-			print '(deep copy - slow)'
+			print('(deep copy - slow)')
 		self.dist.getReleaseTree().apply(self.builder)
 		self.dist.getReleaseTree().apply(self.normalizer)
 
-		print 'Applying comps.xml'
+		print('Applying comps.xml')
 		self.applyRPM('foundation-comps', self.dist.getReleasePath())
 
 		if stack.release == '7.x':
@@ -366,7 +367,7 @@ class DistributionBuilder(Builder):
 
 
     def buildKickstart(self):
-	print 'Installing XML Kickstart profiles'
+	print('Installing XML Kickstart profiles')
 
 	build   = self.dist.getBuildPath()
 
@@ -380,12 +381,12 @@ class DistributionBuilder(Builder):
 		except ValueError:
 			continue
 			
-		print '\tinstalling %s' % rpm.getBaseName()
+		print('\tinstalling %s' % rpm.getBaseName())
 		self.applyRPM(rpm.getBaseName(), build)
 
 	# Copy local profiles into the distribution.
 	if self.withSiteProfiles:
-		print '\tinstalling site-profiles'
+		print('\tinstalling site-profiles')
 		tree = self.dist.getSiteProfilesTree()
 		for dir in tree.getDirs():
 			for file in tree.getFiles(dir):
@@ -399,7 +400,7 @@ class DistributionBuilder(Builder):
                                 
 	# Copy cart profiles into the distribution.
         for cart in self.carts:
-		print '\tinstalling %s cart' % cart
+		print('\tinstalling %s cart' % cart)
                 tree = stack.file.Tree(os.path.join('/export/stack/carts',
                                                             cart))
                 for file in tree.getFiles('graph'):
@@ -463,7 +464,7 @@ class DistributionBuilder(Builder):
 
 
     def buildProductImg(self):
-	print 'Building product.img'
+	print('Building product.img')
 	#
 	# the directory where the python files exist that are used to
 	# extend anaconda
@@ -529,7 +530,7 @@ class DistributionBuilder(Builder):
         if not n:
             n = 1
 
-	print 'Creating repository ...'
+	print('Creating repository ...')
 
 	cwd = os.getcwd()
 	releasedir = self.dist.getReleasePath()
@@ -628,7 +629,7 @@ class DistributionBuilder(Builder):
             list.append(dict[e])
 
         if self.doResolve:
-            print '\tremoving %d older packages' % (len(files) - len(list))
+            print('\tremoving %d older packages' % (len(files) - len(list)))
         return list
 
     def setComps(self, path):

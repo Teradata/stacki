@@ -117,7 +117,7 @@
 # Add cfengine support (don't ask why).
 #
 
-
+from __future__ import print_function 
 import os
 import sys
 import string
@@ -169,11 +169,11 @@ class App(stack.app.Application):
 		self.report.append(self.getChildText(node))
 
 	def createReport(self):
-		print '#'
-		print '# %s version %s' % (self.usage_name, self.usage_version)
-		print '#'
-		print
-		print string.join(self.report, '\n')
+		print('#')
+		print('# %s version %s' % (self.usage_name, self.usage_version))
+		print('#')
+		print()
+		print(string.join(self.report, '\n'))
 
 
 	def run(self):

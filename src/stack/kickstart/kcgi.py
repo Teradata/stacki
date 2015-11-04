@@ -92,7 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import os
 import re
 import fcntl
@@ -117,10 +117,10 @@ syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (caddr, cport))
 # This means only a root user can request a kickstart file
 		
 if cport > 1023:
-	print "Content-type: text/html"
-	print "Status: 401 Unauthorized"
-	print
-	print "<h1>Unauthorized</h1>"
+	print("Content-type: text/html")
+	print("Status: 401 Unauthorized")
+	print()
+	print("<h1>Unauthorized</h1>")
 	sys.exit(1)
 
 
@@ -133,10 +133,10 @@ try:
 except:
 	arch = None
 if not arch or re.search('[^a-zA-Z0-9_]+', arch):
-	print "Content-type: text/html"
-	print "Status: 500 Internal Error"
-	print
-	print "<h1>Invalid arch field</h1>"
+	print("Content-type: text/html")
+	print("Status: 500 Internal Error")
+	print()
+	print("<h1>Invalid arch field</h1>")
 	sys.exit(1)
 
 try:
@@ -144,10 +144,10 @@ try:
 except:
 	np = None
 if not np or re.search('[^0-9]+', np):
-	print "Content-type: text/html"
-	print "Status: 500 Internal Error"
-	print
-	print "<h1>Invalid np field</h1>"
+	print("Content-type: text/html")
+	print("Status: 500 Internal Error")
+	print()
+	print("<h1>Invalid np field</h1>")
 	sys.exit(1)
 
         
@@ -168,11 +168,11 @@ if count == None:
 if count == 0:
 	# Out of resources force the client to retry,
 	# and exit the cgi after we release the mutex.
-	print "Content-type: text/html"
-	print "Status: 503 Service Busy"
-	print "Retry-After: 15"
-	print
-	print "<h1>Service is Busy</h1>"
+	print("Content-type: text/html")
+	print( "Status: 503 Service Busy")
+	print("Retry-After: 15")
+	print()
+	print("<h1>Service is Busy</h1>")
 	empty = True
 else:
 	count -= 1
@@ -215,12 +215,12 @@ if not attrs.has_key('pkgservers'):
 #
 if report:
 	out = string.join(report, '\n')
-	print 'Content-type: application/octet-stream'
-	print 'Content-length: %d' % (len(out))
-	print 'X-Avalanche-Trackers: %s' % (attrs['trackers'])
-	print 'X-Avalanche-Pkg-Servers: %s' % (attrs['pkgservers'])
-	print ''
-	print out
+	print('Content-type: application/octet-stream')
+	print('Content-length: %d' % (len(out)))
+	print('X-Avalanche-Trackers: %s' % (attrs['trackers']))
+	print('X-Avalanche-Pkg-Servers: %s' % (attrs['pkgservers']))
+	print('')
+	print(out)
 		
 #
 # Release resource semaphore.

@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import os
 import sys
 import re
@@ -125,7 +125,7 @@ class Builder:
 		pass
 				
 	def mkisofs(self, isoName, rollName, diskName, rollDir):
-		print 'Building ISO image for %s ...' % diskName
+		print('Building ISO image for %s ...' % diskName)
 
 		if self.config.isBootable():
 			extraflags = self.config.getISOFlags()
@@ -151,7 +151,7 @@ class Builder:
 
 		
 	def writerepo(self):
-		print 'Writing repo data'
+		print('Writing repo data')
 		cwd = os.getcwd()
 		rolldir = os.path.join(os.getcwd(), 'disk1')
 		os.chdir(rolldir)
@@ -323,7 +323,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 		cwd = os.getcwd()
 
-		print 'making default-all'
+		print('making default-all')
 
 		self.command('create.distribution', [ 'default-all',
 			'inplace=true', 'resolve=true', 'md5=false' ])
@@ -360,7 +360,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		# code.  We need this since anaconda and comps are missing
 		# from the foreign pallets (os/update CDs).
 
-		print 'making default-os'
+		print('making default-os')
 
 		self.command('create.distribution', [ 'default-os',
 			'inplace=true', 'resolve=true', 'md5=false' ])
@@ -371,8 +371,8 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		comps = os.path.join('default-os', self.arch, 'RedHat',
 			'base', 'comps.xml')
 		if not os.path.exists(comps):
-			print '\n\tCould not find a comps.xml file.'
-			print '\tCopy a comps.xml file into the CentOS pallet\n'
+			print('\n\tCould not find a comps.xml file.')
+			print('\tCopy a comps.xml file into the CentOS pallet\n')
 			sys.exit(-1)
 
 		#
@@ -464,7 +464,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		import stack.roll
 		import stack
 
-		print 'Configuring pallet to be bootable ... ', name
+		print('Configuring pallet to be bootable ... ', name)
 		os.environ['RPMHOME'] = os.getcwd()
 		dist = stack.roll.Distribution(self.getArch())
 		dist.name = 'default'
@@ -535,8 +535,8 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			(required, optional) = self.getExternalRPMS()
 			for file in list:
 				required.append(file)
-			print 'Required Packages', len(required)
-			print 'Optional Packages', len(optional)
+			print('Required Packages', len(required))
+			print('Optional Packages', len(optional))
 			for file in required: # make a copy of the list
 				list.append(file)
 			list.extend(optional)
@@ -544,11 +544,11 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 		optional = 0
 		for (name, id, size, files) in self.spanDisks(list):
-			print 'Creating %s (%.2fMB)...' % (name, size),
+			print('Creating %s (%.2fMB)...' % (name, size), end=' ')
 			if optional:
-				print ' This disk is optional (extra rpms)'
+				print(' This disk is optional (extra rpms)')
 			else:
-				print 
+				print() 
 				
 			if self.config.getRollInterface() == '4.0':
 				# old style
@@ -635,7 +635,7 @@ class MetaRollBuilder(Builder):
 			try:
 				self.rolls.append(stack.file.RollFile(file))
 			except OSError:
-				print 'error - %s, no such pallet' % file
+				print('error - %s, no such pallet' % file)
 				sys.exit(-1)
 
 	def run(self):
@@ -662,11 +662,11 @@ class MetaRollBuilder(Builder):
 
     		# Create the meta pallet
 					
-		print 'Building %s ...' % name
+		print('Building %s ...' % name)
 		tmp = self.mktemp()
 		os.makedirs(tmp)
 		for roll in self.rolls:
-			print '\tcopying %s' % roll.getRollName()
+			print('\tcopying %s' % roll.getRollName())
 			self.copyRoll(roll, tmp)
 		isoname = '%s.disk1.iso' % (name)
 
@@ -700,7 +700,7 @@ class MetaRollBuilder(Builder):
 		
 		tree = stack.file.Tree(tmp)
 		size = tree.getSize()
-		print 'Pallet is %.1fMB' % size
+		print('Pallet is %.1fMB' % size)
 
 		self.stampDisk(tmp, rollName, arch)
 		self.mkisofs(isoname, rollName, 'disk1', tmp)

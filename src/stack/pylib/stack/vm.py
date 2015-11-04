@@ -108,6 +108,7 @@
 #
 #
 
+from __future__ import print_function
 import os
 
 class VM:
@@ -524,10 +525,10 @@ class VMControl:
 			while msg == 'retry':
 				(status, msg) = self.console(op, dst_mac)
 				if msg == 'retry':
-					print ''
-					print 'Attempting to reestablish ' + \
+					print('')
+					print('Attempting to reestablish ' + \
 						'the console connection. ' + \
-						'Standby...'
+						'Standby...')
 
 		return (status, msg)
 

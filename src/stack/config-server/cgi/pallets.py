@@ -1,5 +1,6 @@
 #!/opt/stack/bin/python
 
+from __future__ import print_function
 import os
 
 try:
@@ -32,7 +33,7 @@ out += '</table>'
 out += '</body>'
 out += '</html>'
 
-print 'Content-type: text/html'
-print 'Content-length: %d' % (len(out))
-print ''
-print out
+print('Content-type: text/html')
+print('Content-length: %d' % (len(out)))
+print('')
+print(out)

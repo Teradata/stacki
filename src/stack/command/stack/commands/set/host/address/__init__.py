@@ -93,6 +93,7 @@
 # $Log:$
 #
 
+from __future__ import print_function
 import os.path
 import getpass
 import crypt
@@ -245,52 +246,52 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		#
 		# inform the user what they are about to do
 		#
-		print ''
-		print 'You are about to apply new networking values' + \
-			' to your frontend:'
+		print('')
+		print('You are about to apply new networking values' + \
+			' to your frontend:')
 
 		if oldip != ip:
-			print ''
-			print '\tnew IP: %s' % (ip)
-			print '\told IP: %s' % (oldip)
+			print('')
+			print('\tnew IP: %s' % (ip))
+			print('\told IP: %s' % (oldip))
 
 		if netmask != self.db.getHostAttr('localhost',
 				'Kickstart_PublicNetmask'):
-			print ''
-			print '\tnew netmask: %s' % (netmask)
-			print '\told netmask: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicNetmask'))
+			print('')
+			print('\tnew netmask: %s' % (netmask))
+			print('\told netmask: %s' % (self.db.getHostAttr(
+				'localhost', 'Kickstart_PublicNetmask')))
 
 		if gateway != self.db.getHostAttr('localhost',
 				'Kickstart_PublicGateway'):
-			print ''
-			print '\tnew gateway: %s' % (gateway)
-			print '\told gateway: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicGateway'))
+			print('')
+			print('\tnew gateway: %s' % (gateway))
+			print('\told gateway: %s' % (self.db.getHostAttr(
+				'localhost', 'Kickstart_PublicGateway')))
 
 		if dns != self.db.getHostAttr('localhost',
 				'Kickstart_PublicDNSServers'):
-			print ''
-			print '\tnew dns: %s' % (dns)
-			print '\told dns: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicDNSServers'))
+			print('')
+			print('\tnew dns: %s' % (dns))
+			print('\told dns: %s' % (self.db.getHostAttr(
+				'localhost', 'Kickstart_PublicDNSServers')))
 
 		if shortname != self.db.getHostAttr('localhost',
 				'Kickstart_PrivateHostname'):
-			print ''
-			print '\tnew shortname: %s' % (shortname)
-			print '\told shortname: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PrivateHostname'))
+			print('')
+			print('\tnew shortname: %s' % (shortname))
+			print('\told shortname: %s' % (self.db.getHostAttr(
+				'localhost', 'Kickstart_PrivateHostname')))
 
 		if domainname != self.db.getHostAttr('localhost',
 				'Kickstart_PublicDNSDomain'):
-			print ''
-			print '\tnew domain: %s' % (domainname)
-			print '\told domain: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicDNSDomain'))
+			print('')
+			print('\tnew domain: %s' % (domainname))
+			print('\told domain: %s' % (self.db.getHostAttr(
+				'localhost', 'Kickstart_PublicDNSDomain')))
 
-		print ''
-		print 'If this looks correct, then enter the current UNIX root'
+		print('')
+		print('If this looks correct, then enter the current UNIX root')
 
 		#
 		# get the root password in order to access the database
@@ -308,8 +309,8 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		#
 		# update the name in the nodes and networks tables first
 		#
-		print 'Updating host name and network interface values ' + \
-			'in the database'
+		print('Updating host name and network interface values ' + \
+			'in the database')
 
 		self.command('set.host.name', [ oldhost, shortname ])
 
@@ -365,7 +366,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		# set all the attributes to the new values. then the plugins
 		# can simply access the attributes to get the updated values
 		#
-		print 'Updating global attributes'
+		print('Updating global attributes')
 
 		self.command('set.attr', [ 'Kickstart_PublicHostname',
 			'%s.%s' % (shortname, domainname) ])
@@ -424,10 +425,10 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		#
 		self.command('sync.host.network', [ 'localhost', 'restart=no' ])
 
-		print ''
-		print 'Update complete'
-		print ''
-		print 'You must reboot your frontend now. When ' + \
-			'the frontend reboots, '
-		print 'remember to reinstall the compute nodes.'
-		print ''
+		print('')
+		print('Update complete')
+		print('')
+		print('You must reboot your frontend now. When ' + \
+			'the frontend reboots, ')
+		print('remember to reinstall the compute nodes.')
+		print('')

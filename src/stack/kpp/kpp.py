@@ -520,6 +520,7 @@
 # - added <tree><node> tags
 #
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -772,24 +773,24 @@ class App(stack.sql.Application):
 
 	def createDotGraph(self, handler, styleMap):
 		graph = handler.getMainGraph()
-		print 'digraph %s {' % self.graph
-		print '\tsize="%s";' % self.drawSize
+		print('digraph %s {' % self.graph)
+		print('\tsize="%s";' % self.drawSize)
 		if self.drawLandscape:
-			print '\trankdir=TB;'
+			print('\trankdir=TB;')
 		else:
-			print '\trankdir=LR;'
+			print('\trankdir=LR;')
 
 		if self.drawKey:
-			print '\tsubgraph clusterkey {'
-			print '\t\tlabel="Rolls";'
-			print '\t\tcolor=black;'
+			print('\tsubgraph clusterkey {')
+			print('\t\tlabel="Rolls";')
+			print('\t\tcolor=black;')
 			for key in styleMap:
 				a = 'style=filled '
 				a = a + 'shape=%s '    % styleMap[key].nodeShape
 				a = a + 'label="%s " ' % key
 				a = a + 'fillcolor=%s' % styleMap[key].nodeColor
-				print '\t\t"roll-%s" [%s];' % (key, a)
-			print '\t}'
+				print('\t\t"roll-%s" [%s];' % (key, a))
+			print('\t}')
 
 		for node in graph.getNodes():
 			try:
@@ -839,7 +840,7 @@ class App(stack.sql.Application):
 				e.drawDot('\t')
 
 
-		print '}'
+		print('}')
 
 
 	def run(self):
@@ -976,12 +977,12 @@ class App(stack.sql.Application):
 			# Now print everyone out with the header kstext from
 			# the previously parsed nodes
 
-			print '<?xml version="1.0" standalone="no"?>'
-			print '<kickstart>'
-			print '<loader>'
-			print saxutils.escape(kstext)
-			print '%kgen'
-			print '</loader>'
+			print('<?xml version="1.0" standalone="no"?>')
+			print('<kickstart>')
+			print('<loader>')
+			print(saxutils.escape(kstext))
+			print('%kgen')
+			print('</loader>')
 
 			for node in parsed:
 
@@ -992,12 +993,12 @@ class App(stack.sql.Application):
 					continue
 				
 				try:
-					print node.getXML()
+					print(node.getXML())
 				except Exception, msg:
 					raise stack.util.KickstartNodeError, \
 					      "in %s node: %s" \
 					      % (node, msg)
-			print '</kickstart>'
+			print('</kickstart>')
 
 
 			
@@ -1782,7 +1783,7 @@ class Node(stack.graph.Node):
 		attrs = attrs + 'label="%s" '   % self.name
 		attrs = attrs + 'fillcolor=%s ' % self.fillColor
 		attrs = attrs + 'color=%s'      % self.color
-		print '%s"%s" [%s];' % (prefix, self.name, attrs)
+		print('%s"%s" [%s];' % (prefix, self.name, attrs))
 		
 
 class Edge(stack.graph.Edge):
@@ -1842,9 +1843,9 @@ class FrameworkEdge(Edge):
 			arch = string.join(self.arch, '\\n')
 			attrs = attrs + 'label="%s"' % arch
 
-		print '%s"%s" -> "%s" [%s];' % (prefix, self.parent.name,
+		print('%s"%s" -> "%s" [%s];' % (prefix, self.parent.name,
 						self.child.name,
-						attrs)
+						attrs))
 
 
 class OrderEdge(Edge):
@@ -1860,9 +1861,9 @@ class OrderEdge(Edge):
 		attrs = attrs + 'style=%s ' % self.style
 		attrs = attrs + 'color=%s ' % self.color
 		attrs = attrs + 'arrowhead=dot arrowsize=1.5'
-		print '%s"%s" -> "%s" [%s];' % (prefix, self.parent.name,
+		print('%s"%s" -> "%s" [%s];' % (prefix, self.parent.name,
 						self.child.name,
-						attrs)
+						attrs))
 
 
 

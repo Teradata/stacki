@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import shutil
 import tempfile
@@ -136,7 +137,7 @@ class Bootable:
 		if len(r) == 1:
 			rpm = r[0]
 		elif len(r) > 1:
-			print 'found more than one RPM for %s' % (name)
+			print('found more than one RPM for %s' % (name))
 
 			for c in self.cpus:
 				for i in r:
@@ -145,8 +146,8 @@ class Bootable:
 						break
 
 				if rpm:
-					print '\tusing %s' % \
-							rpm.getUniqueName()
+					print('\tusing %s' % \
+							rpm.getUniqueName())
 					break
 			
 		return rpm
@@ -237,7 +238,7 @@ class Bootable:
 		# - umount the file
 		# - compress, and copy, the image back into the distribution
 
-		print '    building CRAM filesystem ...'
+		print('    building CRAM filesystem ...')
 		os.system('mkcramfs %s %s > /dev/null' % \
 			(stagesrc, image_name))
 
@@ -250,7 +251,7 @@ class Bootable:
 		import stat
 		import stack
 
-		print 'Applying boot files'
+		print('Applying boot files')
 
 		name = 'stack-images'
 		RPM = self.getBestRPM(name)

@@ -51,6 +51,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -182,7 +183,7 @@ class Application:
             try:
                 parser.parse(file)
             except SAXParseException, msg:
-                print filename, "XML parse exception: ", msg
+                print(filename, "XML parse exception: ", msg)
             file.close()
             
 
@@ -224,10 +225,10 @@ class Application:
             self.help()
             sys.exit(0)
         elif c[0] == '--list-rcfiles':
-            print self.rcfileList
+            print(self.rcfileList)
             sys.exit(0)
         elif c[0] == '--list-project-info':
-            print self.projectInfo()
+            print(self.projectInfo())
             sys.exit(0)
 	elif c[0] == '--rcfile':
 		self.rcForce.append(c[1])
@@ -288,7 +289,7 @@ class Application:
         list.append(self.usageTail())
 
         # Print the usage, word wrapped to the correct screen size.
-        print self.usage_name, '- version', self.usage_version
+        print(self.usage_name, '- version', self.usage_version)
         l = 0
         s = ''
         for e in list:
@@ -296,11 +297,11 @@ class Application:
                 s = s + e
                 l = l + len(e)
             else:
-                print s
+                print(s)
                 l = len(e)
                 s = e
         if s:
-            print s
+            print(s)
 
 
     def help(self):

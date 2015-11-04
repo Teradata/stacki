@@ -1,5 +1,6 @@
 #!/opt/stack/bin/python
 
+from __future__ import print_function
 from subprocess import *
 import json
 
@@ -131,5 +132,5 @@ if __name__ == '__main__':
 	s = StorCLI()
 	a = s.getAdapter()
 	if a is not None:
-		print s.getEnclosure(a)
-		print s.getSlots(a)
+		print(s.getEnclosure(a))
+		print(s.getSlots(a))

@@ -30,6 +30,7 @@
 
 # This toplevel file is a little messy at the moment...
 
+from __future__ import print_function
 import sys, os, re, time, subprocess, atexit
 from optparse import OptionParser
 from tempfile import mkstemp
@@ -363,7 +364,7 @@ def runVNC():
             if iutil.isConsoleOnVirtualTerminal() or iutil.isS390():
                     time.sleep(10000)
             else:
-                    print _("Press <enter> for a shell")
+                    print(_("Press <enter> for a shell"))
                     sys.stdin.readline()
                     iutil.execConsole()
 

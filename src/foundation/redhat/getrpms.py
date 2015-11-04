@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_funtion
 import sys
 import os
 import stack.app
@@ -108,9 +109,9 @@ class App(stack.app.Application):
 		dist = stack.roll.Distribution(self.getArch())
 		dist.generate(md5=False)
 
-		print rpms
+		print(rpms)
 		for name in rpms:
-			print name
+			print(name)
 			for rpm in dist.getRPM(name):
 				rpm.installPackage(root, '--excludedocs')
 			

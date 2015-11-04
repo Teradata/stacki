@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -153,7 +154,7 @@ class Command(stack.commands.add.command):
 		# tag in a file does not cause all the code to be lost.
 		
 		if blocks:
-			print file.getFullName()
+			print(file.getFullName())
 			shutil.copymode(file.getFullName(), tmp)
 			try:
 				shutil.copyfile(tmp, file.getFullName())
@@ -182,22 +183,22 @@ class Command(stack.commands.add.command):
 		# could not run on ourselves.
 		self.tree = stack.file.Tree('../../..')
 		
-		print 'Inserting stacki copyright into source code files...'
+		print('Inserting stacki copyright into source code files...')
 		self.pattern   = [ '@' + 'SI_Copyright@', '@' + 'SI_Copyright@' ]
 		self.copyright = copyright['stacki-long']
 		self.tree.apply(self.iter)
 
-		print 'Inserting stacki copyright into XML files...'
+		print('Inserting stacki copyright into XML files...')
 		self.pattern = [ '<' + 'si_copyright>', '<' + '/si_copyright>' ]
 		self.copyright = copyright['stacki-short']
 		self.tree.apply(self.iter)
 
-		print 'Inserting rocks copyright into source code files...'
+		print('Inserting rocks copyright into source code files...')
 		self.pattern   = [ '@' + 'Copyright@', '@' + 'Copyright@' ]
 		self.copyright = copyright['rocks-long']
 		self.tree.apply(self.iter)
 
-		print 'Inserting rocks copyright into XML files...'
+		print('Inserting rocks copyright into XML files...')
 		self.pattern = [ '<' + 'copyright>', '<' + '/copyright>' ]
 		self.copyright = copyright['rocks-short']
 		self.tree.apply(self.iter)

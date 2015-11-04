@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import subprocess
 import stack.media
@@ -132,8 +133,8 @@ class GetPallet:
 						+ " '%s' " % (diskname)
 						+ _("in the drive\n"))
 				else:
-					print 'Put Pallet disk %s in drive' \
-						% diskname
+					print('Put Pallet disk %s in drive' \
+						% diskname)
 
 	def downloadDVDPallets(self, pallets, dialog=None):
 		#

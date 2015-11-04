@@ -177,6 +177,7 @@
 # - Application now work when the HOME env var is not set
 #
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -279,7 +280,7 @@ class ClusterFork(stack.sql.Application):
 
 			if os.system('ping -c1 -w1 %s > /dev/null 2>&1' % \
 					(hostname)) == 0:
-				print ""
+				print("")
 					
 				if self.bg:
 					sshflags = "-f"
@@ -287,7 +288,7 @@ class ClusterFork(stack.sql.Application):
 				os.system("ssh %s %s \"%s\"" % \
 					(sshflags, hostname, command))
 			else:
-				print "down"
+				print("down")
 
-		print ""
+		print("")
 

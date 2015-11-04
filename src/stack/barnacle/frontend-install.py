@@ -6,6 +6,7 @@
 # has to be changed to accomodate lack of database
 # Copy wxpython RPM somewhere (it isnt included in 6.6)
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -14,9 +15,9 @@ import random
 import getopt
 
 def banner(string):
-	print '#######################################'
-	print string
-	print '#######################################'	
+	print('#######################################')
+	print(string)
+	print('#######################################')	
 
 def copy(source, dest):
 	banner("Copying %s to local disk" % source)
@@ -80,17 +81,17 @@ def ldconf():
 	subprocess.call(['ldconfig'])
 
 def usage():
-	print "Requried arguments:"
-	print "\t--stacki-iso=ISO : path to stacki ISO"
-	print "\t--stacki-version=version : stacki version"
-	print "\t--stacki-name=name : stacki name (usually 'stacki')"
-	print "\t--os-iso=ISO1,ISO2 : path(s) to OS ISO(s)"
-	print "\t--os-version=version : OS version"
-	print "\t--os-name=name : OS name (e.g., 'CentOS')"
+	print("Requried arguments:")
+	print("\t--stacki-iso=ISO : path to stacki ISO")
+	print("\t--stacki-version=version : stacki version")
+	print("\t--stacki-name=name : stacki name (usually 'stacki')")
+	print("\t--os-iso=ISO1,ISO2 : path(s) to OS ISO(s)")
+	print("\t--os-version=version : OS version")
+	print("\t--os-name=name : OS name (e.g., 'CentOS')")
 
-	print
-	print "Optional arguments:"
-	print "\t--noX : Don't require X11 for frontend wizard. Use text mode"
+	print()
+	print("Optional arguments:")
+	print("\t--noX : Don't require X11 for frontend wizard. Use text mode")
 	sys.exit(-1)
 
 ##
@@ -140,32 +141,32 @@ for opt, arg in opts:
 		noX = 1
 
 if not stacki_iso:
-	print '--stacki-iso is not specified\n'
+	print('--stacki-iso is not specified\n')
 	usage()
 	sys.exit(-1)
 
 if not stacki_version:
-	print '--stacki-version is not specified\n'
+	print('--stacki-version is not specified\n')
 	usage()
 	sys.exit(-1)
 
 if not stacki_name:
-	print '--stacki-name is not specified\n'
+	print('--stacki-name is not specified\n')
 	usage()
 	sys.exit(-1)
 
 if not os_iso:
-	print '--os-iso is not specified\n'
+	print('--os-iso is not specified\n')
 	usage()
 	sys.exit(-1)
 
 if not os_version:
-	print '--os-version is not specified\n'
+	print('--os-version is not specified\n')
 	usage()
 	sys.exit(-1)
 
 if not os_name:
-	print '--os-name is not specified\n'
+	print('--os-name is not specified\n')
 	usage()
 	sys.exit(-1)
 
@@ -181,13 +182,13 @@ else:
 	osiso2 = None
 
 if not os.path.exists(cciso):
-	print "Error: File '{0}' does not exist.".format(cciso)
+	print("Error: File '{0}' does not exist.".format(cciso))
 	exit()
 if not os.path.exists(osiso1):
-	print "Error: File '{0}' does not exist.".format(osiso1)
+	print("Error: File '{0}' does not exist.".format(osiso1))
 	exit()
 if osiso2 and not os.path.exists(osiso2):
-	print "Error: File '{0}' does not exist.".format(osiso2)
+	print("Error: File '{0}' does not exist.".format(osiso2))
 	exit()
 
 banner("Boostrap Stack Command Line")
@@ -230,7 +231,7 @@ subprocess.call(['mkdir','-p','/export/stack/distributions/'])
 pallets = 'pallets="{0},{1} {2},{3}"'.format(ccname, ccver, osname, osver)
 palletssplit=pallets.split(" ")
 a = "/opt/stack/bin/stack create distribution inplace=true {0}".format(pallets)
-print a
+print(a)
 subprocess.call([a], shell=True, cwd='/export/stack/distributions/')
 
 banner("Configuring dynamic linker for stacki")
@@ -304,4 +305,4 @@ subprocess.call([stackpath, 'enable', 'pallet', '%'])
 	
 # all done
 banner("Done")
-print "Reboot to complete process."
+print("Reboot to complete process.")

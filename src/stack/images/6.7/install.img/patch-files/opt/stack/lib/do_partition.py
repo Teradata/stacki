@@ -1,5 +1,6 @@
 #!/opt/stack/bin/python
 
+from __future__ import print_function
 import sys
 import string
 import stack_partition
@@ -256,5 +257,5 @@ else:
 			parts += lvms
 
 	for line in parts:
-		print line
+		print(line)
 

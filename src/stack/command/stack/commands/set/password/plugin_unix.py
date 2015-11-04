@@ -52,6 +52,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import spwd
 import subprocess
 import stack.commands
@@ -93,5 +94,5 @@ class Plugin(stack.commands.Plugin):
 				[ 'attr=Kickstart_PrivateRootPassword', 
 				  'value=%s' % newpw ] )
 		else:
-			print 'Could not read the new password for root'
+			print('Could not read the new password for root')
 

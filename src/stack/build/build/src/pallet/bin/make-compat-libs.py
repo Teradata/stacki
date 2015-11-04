@@ -21,6 +21,7 @@
 #
 #
 
+from __future__ import print_function
 import sys
 import os
 import commands
@@ -57,7 +58,7 @@ class App(stack.app.Application):
 					break
 
 		for lib in libs.keys():
-			print lib
+			print(lib)
 	
 
 	def analyze(self, files):
