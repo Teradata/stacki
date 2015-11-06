@@ -119,11 +119,11 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 				self.owner.call(cmd, args)
 
 			# If the environment is set move all the hosts
-			# to an environment specific distribuion.
+			# to an environment specific box.
 
-			dist = attrs[target].get('environment')
-			if dist:
+			box = attrs[target].get('environment')
+			if box:
 				if target in hosts:
-					self.owner.call('set.host.distribution',
-                                                        [ target, 
-                                                          'distribution=%s' % dist ])
+					self.owner.call('set.host.box',
+						[ target, 'box=%s' % box ])
+

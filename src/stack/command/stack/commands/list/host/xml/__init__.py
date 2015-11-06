@@ -124,7 +124,7 @@ class Command(stack.commands.list.host.command):
 
 		for host in self.getHostnames(args):
 
-			# Call "rocks list node xml" with attrs{} dictionary
+			# Call "stack list node xml" with attrs{} dictionary
 			# set from the database.
 
 			attrs = self.db.getHostAttrs(host)

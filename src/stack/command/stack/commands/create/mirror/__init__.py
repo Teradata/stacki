@@ -115,7 +115,7 @@ class Command(stack.commands.create.command):
 	All other public repositories can use a repoid or url.
 
 	If using a url, "newest" and "urlonly" have no effect. The entire
-	distribution will be downloaded.
+	repo will be downloaded.
 
 	<param type='string' name='url'>	
 	The network location of the repository of packages.

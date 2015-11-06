@@ -69,13 +69,13 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			if host not in existinghosts:
 				args         = [ host ]
 				appliance    = hosts[host].get('appliance')
-				distribution = hosts[host].get('distribution')
+				box          = hosts[host].get('box')
 				rack         = hosts[host].get('rack')
 				rank         = hosts[host].get('rank')
 				if appliance:
 					args.append('appliance=%s' % appliance)
-				if distribution:
-					args.append('distribution=%s' % distribution)
+				if box:
+					args.append('box=%s' % box)
 				if rack:
 					args.append('rack=%s' % rack)
 				if rank:

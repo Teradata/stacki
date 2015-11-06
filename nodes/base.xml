@@ -30,7 +30,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <timezone>--utc &Kickstart_Timezone;</timezone>
 <bootloader>--location=mbr</bootloader>
 
-<url> --url http://127.0.0.1/install/distributions/&distribution;/&arch; </url>
 </main>
 
 

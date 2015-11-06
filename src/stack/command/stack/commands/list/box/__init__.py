@@ -94,64 +94,59 @@ import string
 import stack.commands
 
 class command(stack.commands.list.command,
-	      stack.commands.DistributionArgumentProcessor):
+	      stack.commands.BoxArgumentProcessor):
 	pass
 
 class Command(command):
 	"""
-	Lists the distributions defined in the cluster database.
+	Lists the pallets and carts that are associated with boxes.
 	
-	<arg optional='1' type='string' name='distribution' repeat='1'>
-	Optional list of distribution names.
+	<arg optional='1' type='string' name='box' repeat='1'>
+	Optional list of box names.
 	</arg>
 		
-	<example cmd='list distribution'>
-	List all known distribution definitions.
+	<example cmd='list box'>
+	List all known box definitions.
 	</example>
 	"""
 
 	def run(self, params, args):
-
                 pallets = {}
                 carts   = {}
-                for row in self.call('list.pallet'):
-                        if row['distributions']:
-                                for dist in row['distributions'].split():
-                                        if not pallets.has_key(dist):
-                                                pallets[dist] = []
-                                        name = row['name']
-                                        ver  = row['version']
-                                        rel  = row['release']
-                                        fullname = '%s-%s' % (name, ver)
-                                        if rel:
-                                        	fullname += '-%s' % rel
-                                        pallets[dist].append(fullname)
 
-                        
+		for box in self.getBoxNames(args):
+			for name, version, rel, arch in self.getBoxPallets(box):
+				fullname = '%s-%s' % (name, version)
+				if rel:
+					fullname += '-%s' % rel
+
+				if not pallets.has_key(box):
+					pallets[box] = []
+				pallets[box].append(fullname)
+			
                 for row in self.call('list.cart'):
-                        if row['distributions']:
-                                for dist in row['distributions'].split():
-                                        if not carts.has_key(dist):
-                                                carts[dist] = []
-                                        carts[dist].append(row['name'])
+                        if row['boxes']:
+                                for box in row['boxes'].split():
+                                        if not carts.has_key(box):
+                                                carts[box] = []
+                                        carts[box].append(row['name'])
 
 		self.beginOutput()
 
-		for dist in self.getDistributionNames(args):
-			self.db.execute("""select id, os, graph from
-				distributions where name='%s'""" % dist)
-			id, os, graph = self.db.fetchone()
+		for box in self.getBoxNames(args):
+			self.db.execute("""select id, os from
+				boxes where name='%s'""" % box)
+			id, os = self.db.fetchone()
 
-			if not carts.has_key(dist):
-				carts[dist] = []
+			if not carts.has_key(box):
+				carts[box] = []
 
-			if not pallets.has_key(dist):
-				pallets[dist] = []
+			if not pallets.has_key(box):
+				pallets[box] = []
 
-			self.addOutput(dist, (os, graph,
-                                              string.join(pallets[dist]),
-                                              string.join(carts[dist])))
+			self.addOutput(box, (os, string.join(pallets[box]),
+				string.join(carts[box])))
                         
-		self.endOutput(header=['name', 'os', 'graph', 'pallets', 'carts'],
+		self.endOutput(header=['name', 'os', 'pallets', 'carts'],
 			trimOwner=False)
 

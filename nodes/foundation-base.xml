@@ -60,7 +60,13 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 /opt/stack/lib
 </file>
 
-/sbin/ldconfig
+if [ -f /usr/sbin/ldconfig ]
+then
+	/usr/sbin/ldconfig
+elif [ -f /sbin/ldconfig ]
+then
+	/sbin/ldconfig
+fi
 
 </post>
 

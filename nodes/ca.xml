@@ -43,7 +43,7 @@ countryName_max		= 2
 commonName		= Common Name (hostname, IP, or your name)
 
 commonName_default = &Kickstart_PublicHostname;
-organizationalUnitName_default	= &Info_ClusterName;-CA
+organizationalUnitName_default	= &Kickstart_PrivateHostname;-CA
 0.organizationName_default	= &Info_CertificateOrganization;
 localityName_default		= &Info_CertificateLocality;
 stateOrProvinceName_default	= &Info_CertificateState;

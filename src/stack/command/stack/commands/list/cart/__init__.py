@@ -53,8 +53,8 @@ class Command(stack.commands.CartArgumentProcessor,
 	List the status of available carts.
 	
 	<arg optional='1' type='string' name='cart' repeat='1'>
-	List of carts. This should be the cart base name (e.g., base, hpc,
-	kernel). If no carts are listed, then status for all the carts are
+	List of carts. This should be the cart base name (e.g., stacki, os,
+	etc.). If no carts are listed, then status for all the carts are
 	listed.
 	</arg>
 
@@ -68,24 +68,24 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-
 		self.beginOutput()
+
 		for cart in self.getCartNames(args, params):
                     
-			# For each cart determine it is enabled
-			# in and distributions.
+			# For each cart determine if it is enabled
+			# in any box.
                         
-                        distributions = [ ]
-                        for row in self.db.select("""
-                                d.name from
-                                cart_stacks s, carts c, distributions d where
-                                c.name='%s' and
-                                s.cart=c.id and s.distribution=d.id
-                                """ % cart):
-                        	distributions.append(row[0])
-			
-			self.addOutput(cart, string.join(distributions,' '))
+                        boxes = []
 
-		self.endOutput(header=['name', 'distributions'],
-                                   trimOwner=False)
-		
+                        for row in self.db.select("""b.name from
+                                cart_stacks s, carts c, boxes b where
+                                c.name='%s' and
+                                s.cart=c.id and s.box=b.id """
+				% cart):
+
+                        	boxes.append(row[0])
+			
+			self.addOutput(cart, string.join(boxes,' '))
+
+		self.endOutput(header=['name', 'boxes'], trimOwner=False)
+

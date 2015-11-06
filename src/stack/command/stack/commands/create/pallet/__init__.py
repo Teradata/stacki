@@ -95,6 +95,7 @@ import os
 import sys
 import re
 import string
+import stat
 import time
 import tempfile
 import shutil
@@ -150,12 +151,29 @@ class Builder:
 		os.chdir(cwd)
 
 		
-	def writerepo(self):
+	def writerepo(self, name, version, arch):
 		print 'Writing repo data'
 		cwd = os.getcwd()
-		rolldir = os.path.join(os.getcwd(), 'disk1')
-		os.chdir(rolldir)
+		palletdir = os.path.join(os.getcwd(), 'disk1', name, version,
+			'redhat', arch)
+		os.chdir(palletdir)
 		subprocess.call([ 'createrepo', '.' ])
+		os.chdir(cwd)
+
+
+	def copyXMLs(self, name, version, arch):
+		print 'Copying graph and node XML files'
+
+		cwd = os.getcwd()
+		srcdir = os.path.join(cwd, '..')
+		destdir = os.path.join(cwd, 'disk1', name, version,
+			'redhat', arch)
+
+		os.chdir(destdir)
+		shutil.copytree(os.path.join(srcdir, 'graph'),
+			os.path.join(destdir, 'graph'))
+		shutil.copytree(os.path.join(srcdir, 'nodes'),
+			os.path.join(destdir, 'nodes'))
 		os.chdir(cwd)
 
 		
@@ -202,12 +220,13 @@ class Builder:
 
 class RollBuilder_redhat(Builder, stack.dist.Arch):
 
-	def __init__(self, file, command):
+	def __init__(self, file, command, call):
 		Builder.__init__(self)
 		stack.dist.Arch.__init__(self)
 		self.config = stack.file.RollInfoFile(file)
 		self.setArch(self.config.getRollArch())
 		self.command = command
+		self.call = call
 
 	def mkisofs(self, isoName, rollName, diskName):
 		Builder.mkisofs(self, isoName, rollName, diskName, diskName)
@@ -462,23 +481,27 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 	def makeBootable(self, name):
 		import stack.roll
+		import stack.bootable
 		import stack
 
 		print 'Configuring pallet to be bootable ... ', name
-		os.environ['RPMHOME'] = os.getcwd()
-		dist = stack.roll.Distribution(self.getArch())
-		dist.name = 'default'
-		dist.generate(md5=False)
-		
+
+		#
+		# get 'stacki' pallet info
+		#
+		stacki_name = 'stacki'
+		stacki_version = None
+		stacki_arch = None
+		for o in self.call('list.pallet', [ 'stacki' ]):
+			if stack.release == o['release']:
+				stacki_version = o['version']
+				stacki_arch = o['arch']
+				break
+
 		# 
 		# create a minimal kickstart file. this will get us to the
-		# rocks screens.
+		# stacki wizard
 		# 
-		distdir = os.path.join('mnt/cdrom', self.config.getRollName(),
-			self.config.getRollVersion(),
-			'redhat',
-			self.config.getRollArch())
-
 		fout = open(os.path.join('disk1', 'ks.cfg'), 'w')
 
 		if stack.release == '7.x':
@@ -487,6 +510,9 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			fout.write('lang en_US\n')
 			fout.write('keyboard us\n')
 		else:
+			distdir = os.path.join('mnt', 'cdrom', stacki_name,
+				stacki_version, 'redhat', stacki_arch)
+
 			fout.write('install\n')
 			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
 			fout.write('lang en_US\n')
@@ -495,20 +521,19 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 		fout.close()
 
-		import stack.bootable
-
+		#
+		# add isolinux files
+		# 
 		localrolldir = os.path.join(self.config.getRollName(), 
 			self.config.getRollVersion(), 'redhat', 
 			self.config.getRollArch())
 
-		rolldir = os.path.join(os.getcwd(), 'disk1', localrolldir)
+		destination = os.path.join(os.getcwd(), 'disk1')
+		rolldir = os.path.join(destination, localrolldir)
+		self.boot = stack.bootable.Bootable(os.getcwd(), rolldir)
 
-		self.boot = stack.bootable.Bootable(dist, rolldir)
-
-		#
-		# add isolinux files
-		# 
-		self.boot.installBootfiles(os.path.join(os.getcwd(), 'disk1'))
+		self.boot.installBootfiles(destination)
+		
 		return
 
 
@@ -563,6 +588,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 						    self.config.getRollVersion(),
 						    'redhat',
 						    self.config.getRollArch())
+
 				rpmsdir = 'RPMS'
 
 			os.makedirs(root)
@@ -598,8 +624,15 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			self.stampDisk(name, self.config.getRollName(), 
 				self.config.getRollArch(), id)
 				
-			# write repo data 
-			self.writerepo()
+			# write repodata 
+			self.writerepo(self.config.getRollName(),
+				self.config.getRollVersion(),
+				self.config.getRollArch())
+
+			# copy the graph and node XMLs files into the pallet
+			self.copyXMLs(self.config.getRollName(),
+				self.config.getRollVersion(),
+				self.config.getRollArch())
 			
 			# make the ISO.  This code will change and move into
 			# the base class, and supported bootable pallets.  Get
@@ -708,7 +741,9 @@ class MetaRollBuilder(Builder):
 		shutil.rmtree(tmp)
 
 
-class Command(stack.commands.create.command):
+class Command(stack.commands.create.command,
+		stack.commands.HostArgumentProcessor):
+
 	"""
 	Create a pallet.  You may specify either a single XML file to build
 	one pallet or a list of ISO files to build a Meta pallet.
@@ -775,7 +810,8 @@ class Command(stack.commands.create.command):
 		if len(args) == 1:
 			base, ext = os.path.splitext(args[0])
 			if ext == '.xml':
-				builder = roller(args[0], self.command)
+				builder = roller(args[0], self.command,
+					self.call)
 			else:
                                 raise CommandError(self, 'missing xml file')
 		elif len(args) > 1:

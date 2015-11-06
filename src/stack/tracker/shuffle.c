@@ -112,8 +112,8 @@ gethostattr(char *ip, char *attr)
 	 * OS attribute
 	 */
 	sprintf(query, "select a.value from os_attributes a, nodes n, \
-		networks net, distributions d where net.ip = '%s' and \
-		net.node = n.id and n.distribution = d.id and d.os = a.os \
+		networks net, boxes b where net.ip = '%s' and \
+		net.node = n.id and n.box = b.id and b.os = a.os \
 		and a.attr = '%s'", ip, attr);
 
 	if (mysql_real_query(&mysql, query, strlen(query)) != 0) {

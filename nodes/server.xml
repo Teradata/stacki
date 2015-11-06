@@ -44,10 +44,6 @@
 <package>stack-config-server</package>
 <package>git</package>
 
-<!-- needed to build distributions -->
-<package>createrepo</package>
-<package>squashfs-tools</package>
-
 <!-- genisoimages to create pallets -->
 <package>genisoimage</package>
 
@@ -81,6 +77,11 @@
 -->
 /opt/stack/bin/stack set attr attr=user.auth value=unix
 
+</post>
+
+<post>
+mkdir -p /export/stack/carts
+chown root:apache /export/stack/carts
 </post>
 
 <!--

@@ -92,6 +92,8 @@
 
 import os
 import sys
+import shlex
+import subprocess
 import stack.file
 import stack.commands
 
@@ -140,9 +142,9 @@ class Implementation(stack.commands.Implementation):
 			
 		OS = 'redhat'
 		roll_dir = os.path.join(prefix, name, vers, OS, arch)
-		destdir = os.path.join(roll_dir, 'RPMS')
+		# destdir = os.path.join(roll_dir, 'RPMS')
+		destdir = roll_dir
 
-		print 'stack.release (%s)' % stack.release
 		if stack.release == '7.x':
 			liveosdir = os.path.join(roll_dir, 'LiveOS')
 
@@ -153,8 +155,25 @@ class Implementation(stack.commands.Implementation):
 			os.makedirs(roll_dir)
 
 		print 'Copying "%s" (%s,%s) pallet ...' % (name, vers, arch)
+
 		if not os.path.exists(destdir):
 			os.makedirs(destdir)
+
+		cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
+			% (self.owner.mountPoint, destdir)
+		print 'cmd: %s' % cmd
+		subprocess.call(shlex.split(cmd))
+		# subprocess.call(shlex.split(cmd), 
+		# 	stdout = open('/dev/null'), stderr = open('/dev/null'))
+
+		return (name, vers, arch)
+
+
+		#
+		# DEAD CODE?
+		# DEAD CODE?
+		# DEAD CODE?
+		#
 
 		if stack.release == '7.x' and not os.path.exists(liveosdir):
 			os.makedirs(liveosdir)
@@ -179,19 +198,5 @@ class Implementation(stack.commands.Implementation):
 							os.system('cp -p %s %s' % (
 								file.getFullName(), 
 								destdir))
-		#
-		# lay down a minimal roll XML config file
-		#
-		f = open('%s' % os.path.join(roll_dir, 'roll-%s.xml' % name),
-			'w')
-		f.write('<roll name="%s" interface="6.0.2">\n' % name)
-		f.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, stack.release, arch, OS))
-		f.write('<iso maxsize="0" bootable="0"/>\n')
-		f.write('</roll>\n')
-		f.close()
 
 		return (name, vers, arch)
-
-
-
-RollName = "stacki"

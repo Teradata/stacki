@@ -121,7 +121,7 @@ class Command(stack.commands.report.command):
 		file.close()
 
 		scrubed = ''
-		cmd = 'xmllint --nocdata %s' % (filename)
+		cmd = '/opt/stack/bin/xmllint --nocdata %s' % (filename)
 		for line in os.popen(cmd).readlines():
 			scrubed += line
 		

@@ -50,7 +50,14 @@ chmod a+rx /var/opt/stack/mysql
 	perms="0640">
 /opt/stack/lib64
 </file>
-/usr/sbin/ldconfig
+
+if [ -f /usr/sbin/ldconfig ]
+then
+	/usr/sbin/ldconfig
+elif [ -f /sbin/ldconfig ]
+then
+	/sbin/ldconfig
+fi
 
 </post>
 

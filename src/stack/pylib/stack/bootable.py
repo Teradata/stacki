@@ -94,73 +94,46 @@
 
 import os
 import shutil
-import tempfile
-import stack.dist
 import stack.file
-import stack.util
-
+import stack.api
 
 class Bootable:
 
-	def __init__(self, dist, rolldir):
-		self.dist = dist
-		self.rolldir = rolldir
+	def __init__(self, localdir, palletdir):
+		self.palletdir = palletdir
+		self.filetree = {}
 
 		#
-		# build a list of CPUs, from 'best' to 'worst' match
+		# find all the pallets and carts associated with this host
+		# (the host that is building the pallet), and build file trees
+		# for each pallet/cart.
 		#
+		box = None
+		for o in stack.api.Call('list host', [ 'host=localhost']):
+			box = o['box']
 
-		#
-		# the 'native' cpu is always first
-		#
-		self.cpus = []
-		i86cpus = [ 'i686', 'i586', 'i486', 'i386' ]
+		if not box:
+			raise ValueError, 'could not find box for "localhost"'
+			return
 
-		native = os.uname()[4]
-		self.cpus.append(native)
+		self.filetree['local'] = stack.file.Tree(localdir)
 
-		if native in i86cpus:
-			self.cpus += i86cpus
+		pallets = []
+		for o in stack.api.Call('list pallet'):
+			boxes  = o['boxes'].split()
+			if box in boxes:
+				pallets.append((o['name'], o['version'],
+					o['arch']))
 
-		self.cpus.append('noarch')
-		return
+		for name, ver, arch in pallets:
+			palletpath = os.path.join('/export', 'stack', 'pallets',
+				name, ver, 'redhat', arch)
 
+			self.filetree[name] = stack.file.Tree(palletpath)
 
-	def getBestRPM(self, name):
-		r = self.dist.getRPM(name)
-		if r == None:
-			return None
-			
-		rpm = None
-
-		if len(r) == 1:
-			rpm = r[0]
-		elif len(r) > 1:
-			print 'found more than one RPM for %s' % (name)
-
-			for c in self.cpus:
-				for i in r:
-					if i.getPackageArch() == c:
-						rpm = i
-						break
-
-				if rpm:
-					print '\tusing %s' % \
-							rpm.getUniqueName()
-					break
-			
-		return rpm
-
-
+		
 	def applyRPM(self, rpm, root, flags=''):
-		"""Used to 'patch' the new distribution with RPMs from the
-		distribution.  We use this to always get the correct
-		genhdlist, and to apply eKV to Stack distributions.
-        
-		Throws a ValueError if it cannot find the specified RPM, and
-		BuildError if the RPM was found but could not be installed."""
-
-#		print 'applyRPM', rpm.getBaseName(), root
+		print 'applyRPM', rpm.getBaseName(), root
 
 		dbdir = os.path.join(root, 'var', 'lib', 'rpm')
 
@@ -187,63 +160,35 @@ class Bootable:
 		return retval
 
 
-	def patchImage(self, image_name):
+	def findFile(self, name):
+		trees = self.filetree.keys()
+
 		#
-		# image_name = full pathname to stage2.img file
+		# look in the local tree first
 		#
-		cwd = os.getcwd()
+		if 'local' in trees:
+			tree = self.filetree['local']
+			for d in tree.getDirs():
+				for file in tree.getFiles(d):
+					try:
+						if file.getPackageName() == name:
+							return file
+					except:
+						pass
+		for key in trees:
+			if key == 'local':
+				continue
 
-		# Create a scratch area on the local disk of the machine, we
-		# don't want to do this in the distribution since it might be
-		# over NFS (not a problem, just slow).
-        
-		tmp = tempfile.mktemp()
-		os.makedirs(tmp)
+			tree = self.filetree[key]
+			for d in tree.getDirs():
+				for file in tree.getFiles(d):
+					try:
+						if file.getPackageName() == name:
+							return file
+					except:
+						pass
 
-		stageimg = os.path.join(tmp, 'img')	# uncompress img
-		stagemnt = os.path.join(tmp, 'mnt')	# mounted image
-		stagesrc = os.path.join(tmp, 'src')	# working image
-		os.makedirs(stagemnt)
-
-		# - uncompress the the 2nd stage image from the distribution
-		# - mount the file on the loopback device
-		#	(requires SUID 'C' code)
-		# - copy all file into the working images
-		# - umount the loopback device
-
-		shutil.copy(image_name, stageimg)
-
-		os.system('mount -oloop -t squashfs %s %s' %
-			(stageimg, stagemnt))
-
-		os.chdir(stagemnt)
-		os.system('find . | cpio -pdu %s 2> /dev/null' % stagesrc)
-		os.chdir(cwd)
-
-		os.system('umount %s' % stagemnt)
-
-		# Stamp the new image with our likeness so the new loader
-		# will "verify" its authenticity. This stamp must be repeated
-		# in an identical file in the initrd.
-
-		stamp = open(os.path.join(stagesrc, ".buildstamp"), "w")
-		stamp.write("Stack-RedHat\n")
-		stamp.close()
-
-		# - create a new image file based on the size of the
-		#	working image
-		# - mount the file on loopback
-		# - copy the working image into the mounted images
-		# - umount the file
-		# - compress, and copy, the image back into the distribution
-
-		print '    building CRAM filesystem ...'
-		os.system('mkcramfs %s %s > /dev/null' % \
-			(stagesrc, image_name))
-
-		# Erase the evidence.
-		shutil.rmtree(tmp)
-		return
+		return None
 
 
 	def installBootfiles(self, destination):
@@ -253,7 +198,7 @@ class Bootable:
 		print 'Applying boot files'
 
 		name = 'stack-images'
-		RPM = self.getBestRPM(name)
+		RPM = self.findFile(name)
 		if not RPM:
 			raise ValueError, "could not find %s" % name
 
@@ -278,7 +223,7 @@ class Bootable:
 		if stack.release == '7.x':
 			imagesdir = os.path.join(destination, 'images')
 		else:
-			imagesdir = os.path.join(self.rolldir, 'images')
+			imagesdir = os.path.join(self.palletdir, 'images')
 
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
@@ -333,7 +278,7 @@ class Bootable:
 		# put the 'barnacle' executable in the ISO
 		#
 		name = 'stack-barnacle'
-		RPM = self.getBestRPM(name)
+		RPM = self.findFile(name)
 		if RPM:
 			self.applyRPM(RPM, destination)
 			src = os.path.join(destination, 'opt', 'stack',
@@ -349,15 +294,5 @@ class Bootable:
 		shutil.rmtree(os.path.join(destination, 'var'),
 			ignore_errors = 1)
 
-		return
-
-
-	def copyBasefiles(self, destination):
-		if not os.path.exists(destination):
-			os.makedirs(destination)
-		basepath = os.path.join(self.dist.getPath(), 'RedHat', 'base')
-		cmd = 'cp %s/* %s' % (basepath, destination)
-		os.system(cmd)
-		os.system('touch %s/comps.rpm' % destination)
 		return
 

@@ -59,14 +59,13 @@ class Command(stack.commands.CartArgumentProcessor,
 	base, hpc, kernel).
 	</arg>
 	
-	<param type='string' name='distribution'>
-	The name of the distribution on which to enable the cart. If no
-	distribution is specified the cart is disabled for the default
-	distribution.
+	<param type='string' name='box'>
+	The name of the box in which to disable the cart. If no box is
+	specified the cart is disabled for the default box.
 	</param>
 
 	<example cmd='disable cart local'>
-	Disable the local cart.
+	Disable the cart named "local".
 	</example>
 	
 	<related>add cart</related>
@@ -75,28 +74,22 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-
-                (distribution, ) = self.fillParams([
-                        ('distribution', 'default')
-                        ])
-
                 if len(args) < 1:
                         raise ArgRequired(self, 'cart')
 
+                box, = self.fillParams([ ('box', 'default') ])
+
 		rows = self.db.execute("""
-			select * from distributions where name='%s'
-			""" % distribution)
+			select * from boxes where name='%s' """ % box)
+
 		if not rows:
-                        raise CommandError(self, 'unknown distribution "%s"' % distribution)
+                        raise CommandError(self, 'unknown box "%s"' % box)
 		
 		for cart in self.getCartNames(args, params):
 			self.db.execute("""
 				delete from cart_stacks where
-				distribution =
-				(select id from distributions where name='%s')
+				box = (select id from boxes where name='%s')
 				and
-				cart =
-				(select id from carts where name='%s')
-				""" % (distribution, cart))
+				cart = (select id from carts where name='%s')
+				""" % (box, cart))
 
-		

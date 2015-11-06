@@ -140,30 +140,11 @@ class Command(stack.commands.run.command):
 		gen = getattr(stack.gen,'Generator_%s' % self.os)()
 		gen.parse(xml)
 
-		distPath = os.path.join(self.command('report.distribution')[:-1],
-			'default')
-                tree = stack.file.Tree(distPath)
-		rpm_list = {}
-		for file in tree.getFiles(os.path.join(self.arch, 
-			'RedHat', 'RPMS')):
-			if isinstance(file, stack.file.RPMFile):
-				rpm_list[file.getBaseName()] = \
-					file.getFullName()
-				rpm_list["%s.%s" % (file.getBaseName(), \
-					file.getPackageArch())] = \
-						file.getFullName()
-			
 		rpms = []
 		for line in gen.generate('packages'):
-			if line.find('%package') == -1 and line.find('%end') == -1:
+			if line.find('%package') == -1 and line.find('%end') == -1 and line not in rpms:
+				script.append('yum install -y %s' % line)
 				rpms.append(line)
-		for rpm in rpms:
-			if rpm in rpm_list.keys():
-				script.append('yum install -y %s' %
-					rpm)
-				script.append(rpm_force_template %
-					rpm_list[rpm])
-
 
 		cur_proc = False
 		for line in gen.generate('post'):

@@ -96,7 +96,7 @@ import os
 import stack.commands
 
 class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+	stack.commands.BoxArgumentProcessor, stack.commands.report.command):
 	"""
 	Create a report that describes the yum.conf repo file that should be
 	put on hosts.
@@ -109,39 +109,27 @@ class Command(stack.commands.HostArgumentProcessor,
 	Create a report of the yum.conf repo for compute-0-0.
 	</example>
 	"""
-	
-	def run(self, params, args):
 
+	def run(self, params, args):
 		self.beginOutput()
 
 		for host in self.getHostnames(args):
-			self.addOutput(host,
-				'<file name="/etc/yum.repos.d/stacki.repo">')
-			version = self.db.getHostAttr(host, 'version')
-			if not version:
-				version = stack.version
+			box = self.db.getHostAttr(host, 'box')
 
-			frontend_private_ip = self.db.getHostAttr(host,
-				'Kickstart_PrivateAddress')
+			for pallet in self.getBoxPallets(box):
+				pname, pversion, prel, parch = pallet
 
-			basedir = os.path.join('install',
-					self.db.getHostAttr(host, 
-					'Kickstart_PrivateKickstartBasedir'))
+				self.addOutput(host, '<file name="/etc/yum.repos.d/%s.repo">'% pname)
+				frontend_private_ip = self.db.getHostAttr(host,
+					'Kickstart_PrivateAddress')
 
-			distro = self.db.getHostAttr(host, 'distribution')
-			if not distro:
-				distro = 'default'
+				self.addOutput(host, '[%s-%s]' %
+					(pname, pversion))
+				self.addOutput(host, 'name=%s %s' %
+					(pname, pversion))
+				self.addOutput(host, 'baseurl=http://%s/install/pallets/%s/%s/redhat/%s' % (frontend_private_ip, pname, pversion, parch))
+				self.addOutput(host, 'assumeyes=1')
 
-			arch = self.db.getHostAttr(host, 'arch')
-			if not arch:
-				arch = 'x86_64'
-
-			self.addOutput(host, '[stacki-%s]' % version)
-			self.addOutput(host, 'name=stacki %s' % version)
-			self.addOutput(host, 'baseurl=http://%s/%s/%s/%s' %
-				(frontend_private_ip, basedir, distro, arch))
-			self.addOutput(host, 'assumeyes=1')
-
-			self.addOutput(host,'</file>')
+				self.addOutput(host,'</file>')
 
 		self.endOutput(padChar='')

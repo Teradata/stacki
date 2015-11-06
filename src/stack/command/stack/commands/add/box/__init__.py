@@ -90,191 +90,40 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
 import os
-import os.path
-import tempfile
-import shutil
 import stack
 import stack.commands
-import stack.dist
-import stack.build
 from stack.exception import *
 
-class Command(stack.commands.create.command,
-	      stack.commands.DistributionArgumentProcessor):
+class Command(stack.commands.BoxArgumentProcessor,
+	stack.commands.add.command):
 	"""
-	Create a Stack distribution. This distribution is used to install
-	Stack nodes.
+	Add a box specification to the database.
 
-	<arg type='string' name='distribution'>
-	The name of the distribution to build. Use "stack list distribution"
-	to get the list of all valid distributions.
-	Default is "default".
+	<arg type='string' name='box'>
+	Name of the new box.
 	</arg>
-
-	<param type='bool' name='inplace'>
-	If true, then build the distribution in the current directory.
-	Default is false.
-	</param>
-
-        <param type='bool' name='resolve'>
-        If true, then resolve RPM versions during the build so only the
-        most recent is included in the distribution. Normally this is
-        not required since yum and anaconda expect all versions to be
-        present. Currently, this option exists for internal use only.
-	Default is false.
-	</param>
-
-	<param type='bool' name='md5'>
-	If true, then calculate the MD5 checksums for all files in the
-	distribution.
-	Default is true.
-	</param>
-
-	<param type='string' name='root'>
-	The root directory where the pallets are located.
-	Default is "/export/stack".
-	</param>
-
-	<param type='string' name='pallets'>
-	A space separated list of pallets to use when building a distribution.
-	"name,version" is required when delimiting pallets.
 	
-	For example: pallets="stacki,1.0 os,6.6". Default is "None".
+	<param type='string' name='os'>
+	OS associated with the box. Default is 'redhat'
 	</param>
 
-	<example cmd='create distribution'>
-	Create a RedHat distribution in /export/stack/distributions/default.
+	<example cmd='add box develop'>
+	Adds the box named "develop" into the database.
 	</example>
-
-	<related>list distribution</related>
-	<related>remove distribution</related>
 	"""
-
-	def getCarts(self, dist):
-		"""
-		Get a list of carts used to build this distribution
-		"""
-
-		carts = []
-		rows = self.db.execute("""
-			select c.name from
-			cart_stacks s, distributions d, carts c where
-			s.distribution = d.id and s.cart = c.id and
-			d.name='%s'
-			""" % dist)
-		if rows:
-			for name, in self.db.fetchall():
-				carts.append(name)
-
-		return carts
-        
-	def getRolls(self, dist):
-		"""
-		Get a list of pallets used to build this distribution
-		"""
-
-		rolls = []
-		self.db.execute("""
-			select r.name, r.version from
-			stacks s, distributions d, rolls r where
-			s.distribution = d.id and s.roll = r.id and
-			d.name='%s'
-			""" % dist)
-		for name, version in self.db.fetchall():
-			rolls.append([name, version, True])
-
-		return rolls
-
 
 	def run(self, params, args):
+		if len(args) != 1:
+                        raise ArgUnique(self, 'box')
 
-		if not args:		# default is just build default
-			args = [ 'default' ]
+		box = args[0]
+		
+		if box in self.getBoxNames():
+                        raise CommandError(self, 'box "%s" exists' % box)
 
-		(inplace, resolve, md5, root, withrolls)  = self.fillParams([
-			('inplace', 'n'),
-			('resolve', 'n'),
-			('md5', 'y'),
-			('root', '/export/stack'),
-			('pallets', None),
-			])
+		OS, = self.fillParams([ ('os', 'redhat') ])
 
-
-		inplace = self.str2bool(inplace)
-		resolve = self.str2bool(resolve)
-		md5     = self.str2bool(md5)
-		rolls   = []
-		if withrolls:
-			for i in withrolls.split(' '):
-				rolls.append(i.split(',') + [ True ] )
-
-		if rolls and len(args) != 1:
-			raise CommandError(self, 'pallets option requires exactly one distribution')
-
-		if not self.db or rolls:
-			if len(args) != 1:
-				# No DB -- FE Kickstart Env
-                                raise CommandError(self, 'must supply exactly one distribution')
-			distributions = args
-		else:
-			distributions = self.getDistributionNames(args)
-
-		for distName in distributions:
-			if self.db and not withrolls:
-				rolls = self.getRolls(distName)
-				self.db.execute("""
-					select os from distributions d where
-					d.name='%s'
-					""" % distName)
-				distOS, = self.db.fetchone()
-			else:
-				distOS = 'redhat'
-
-			lockfile = '/var/lock/%s' % distName
-			if os.path.exists(lockfile):
-                                raise CommandError(self,
-					"Lockfile %s exists.\n" % lockfile +
-					"Another instance of stack create " +
-					"distribution is running")
-			os.system('touch %s' % lockfile)
-
-                        carts = self.getCarts(distName)
-                        
-			print 'Building %s distribution' % distName
-
-			self.runImplementation(distOS,
-					       [ distName,
-						 inplace,
-						 resolve,
-						 md5,
-						 root,
-						 rolls,
-                                                 carts ])
-
-			if not inplace:
-				#
-				# after the distribution building completes,
-				# increment its version number
-				#
-				attr = 'distribution.%s/version' % distName
-				dist_version = self.db.getHostAttr('localhost',
-					attr)
-
-				if dist_version:
-					try:
-						dist_version = \
-							int(dist_version) + 1
-					except:
-						dist_version = 1
-				else:
-					dist_version = 1
-
-				self.command('set.attr', [ 'attr=%s' % attr,
-					'value=%s' % dist_version ])
-
-				print 'Distribution version: ', dist_version
-					
-			os.unlink(lockfile)
+		self.db.execute("""insert into boxes (name, os) values
+			('%s', '%s')""" % (box, OS))
 

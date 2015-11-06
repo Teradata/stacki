@@ -38,7 +38,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-# 
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -91,121 +91,41 @@
 # @Copyright@
 
 import os
-import os.path
-import tempfile
-import shutil
-import stack
+import stat
+import time
+import sys
+import string
 import stack.commands
-import stack.dist
-import stack.build
-
-class Implementation(stack.commands.Implementation):
-
-	def run(self, args):
-		(dist, inplace, resolve, md5, root, rolls, carts) = args
-
-		if not inplace:
-			path = os.path.join(root, 'distributions')
-			if not os.path.exists(path):
-				os.makedirs(path)
-				os.system('chmod 755 %s' % path)
-			os.chdir(path)
-
-		mirror = stack.dist.Mirror()
-		mirror.setHost('rolls')
-		mirror.setPath(root)
-		mirror.setRoot(root)
-		mirror.setArch(self.owner.arch)
-
-		mirrors = []
-		mirrors.append(mirror)
-
-		distro = stack.dist.Distribution(mirrors, stack.version)
-		distro.setRoot(os.getcwd())
 
 
-		#
-		# build the new distro in a temporary directory
-		#
-		tempdist = tempfile.mkdtemp(dir='')
-		distro.setDist(tempdist)
+class Command(stack.commands.list.box.command,
+	      stack.commands.RollArgumentProcessor):
+	"""
+	List the pallets enabled in each box.
+	
+	<arg optional='1' type='string' name='box' repeat='1'>
+	List of boxes.
+	</arg>
 
-		distro.setLocal('/usr/src/redhat')
-		distro.setContrib(os.path.join(mirror.getRootPath(),
-			'contrib', dist, stack.version))
-		distro.setSiteProfiles(os.path.join(mirror.getRootPath(),
-			'site-profiles', dist, stack.version))
+	<example cmd='list box pallet default'>
+	List the pallets used in the "default" box.
+	</example>
+	"""		
 
+	def run(self, params, args):
+		self.beginOutput()
 
-		#
-		# build it
-		# 
-		builder = stack.build.DistributionBuilder(distro)
+		boxes = self.getBoxNames(args)
 
-		builder.setResolveVersions(resolve)
-		builder.setRolls(rolls)
-		builder.setCarts(carts)
-		builder.setSiteProfiles(True)
-		builder.setMD5(md5)
-		builder.build()
+		for box in boxes:
+			self.db.execute("""select r.name, r.arch, r.version from
+				stacks s, rolls r, boxes b where
+				s.roll = r.id and s.box = b.id and
+				b.name = '%s' """ % box)
+			
+			for (roll, arch, version) in self.db.fetchall():
+				self.addOutput(box, (roll, arch, version))
 
-		#
-		# make sure everyone can traverse the the rolls directories
-		#
-		mirrors = distro.getMirrors()
-		fullmirror = mirrors[0].getRollsPath()
-		os.system('find %s -type d ' % (fullmirror) + \
-			  '-exec chmod -R 0755 {} \;')
+		self.endOutput(header=['box', 'pallet', 'arch', 'version'],
+			trimOwner=False)
 
-
-		#
-		# now move the previous distro into a temporary
-		# directory
-		#
-		prevdist = tempfile.mkdtemp(dir='')
-		try:
-			shutil.move(dist, prevdist)
-		except:
-			pass
-
-
-		#
-		# rename the temporary distro (the one we just built)
-		# to the 'official' name and make sure the permissions
-		# are correct
-		#
-		shutil.move(tempdist, dist)
-		os.system('chmod 755 %s' % dist)
-
-		if not inplace:
-			#
-			# if this is the repo that is associated with the
-			# frontend, then recreate the yum package metadata
-			# and cache
-			#
-			fedist = None
-			output = self.owner.call('list.host', [ 'localhost' ])
-			for o in output:
-				fedist = o['distribution']
-
-			if dist == fedist:
-				os.system('yum clean --disablerepo=* ' +
-					'--enablerepo=stacki-%s ' % stack.version +
-					'all')
-				os.system('yum makecache --disablerepo=* ' +
-					'--enablerepo=stacki-%s ' % stack.version +
-					'all')
-			#
-			# restart the tracker because we don't want packages
-			# from the previous distro to be tracked
-			#
-			os.system('/sbin/service stack-tracker restart')
-
-		#
-		# nuke the previous distro
-		#
-		try:
-			shutil.rmtree(prevdist)
-		except:
-			pass
-		

@@ -130,19 +130,18 @@ CREATE TABLE appliances (
 grant select on cluster.appliances to ''@'localhost';
 grant select on cluster.appliances to ''@'%.local';
 
-<!-- Distributions -->
+<!-- Boxes -->
 
-DROP TABLE IF EXISTS distributions;
-CREATE TABLE distributions (
+DROP TABLE IF EXISTS boxes;
+CREATE TABLE boxes (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default 'default',
   OS		varchar(32) NOT NULL default 'redhat',
-  Graph		varchar(32) NOT NULL default 'default',
   PRIMARY KEY (ID)
 );
 
-grant select on cluster.distributions to ''@'localhost';
-grant select on cluster.distributions to ''@'%.local';
+grant select on cluster.boxes to ''@'localhost';
+grant select on cluster.boxes to ''@'%.local';
 
 <!-- Nodes
  NOT NORMALIZED: Name is a repeat from the networks table. Nodes.name should be
@@ -154,7 +153,7 @@ CREATE TABLE nodes (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(128) default NULL,
   Appliance	int(11) default '2',
-  Distribution	int(11) default '1',
+  Box		int(11) default '1',
   CPUs		int(11) NOT NULL default '1',
   Rack		varchar(64) default NULL,
   Rank		varchar(64) default NULL,
@@ -262,7 +261,7 @@ grant select on cluster.node_routes to ''@'%.local';
 
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
-  Distribution	int(11) NOT NULL default '1',
+  Box		int(11) NOT NULL default '1',
   Roll		int(11) NOT NULL 
 );
 
@@ -271,7 +270,7 @@ grant select on cluster.stacks to ''@'%.local';
 
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
-  Distribution	int(11) NOT NULL default '1',
+  Box		int(11) NOT NULL default '1',
   Cart		int(11) NOT NULL 
 );
 

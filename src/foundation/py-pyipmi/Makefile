@@ -100,17 +100,17 @@ include $(STACKBUILD)/etc/CCRules.mk
 build:
 	gunzip -c pyipmi-$(VERSION).tar.gz | $(TAR) -xf -
 	(								\
-		cd pyipmi-$(VERSION);				\
-		PATH=/opt/stack/bin:$$PATH				\
-			./configure --prefix=$(PKGROOT);		\
-		$(MAKE);						\
+		cd pyipmi-$(VERSION);					\
+		$(PY.PATH) setup.py build;				\
 	)
 
 install::
+	mkdir -p $(ROOT)
 	(								\
-		cd pyipmi-$(VERSION);				\
-		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
+		cd pyipmi-$(VERSION);					\
+		$(PY.PATH) setup.py install				\
+			--root=$(ROOT);					\
 	)
 
 clean::
-	rm -rf pycairo-$(VERSION)
+	rm -rf pyipmi-$(VERSION)

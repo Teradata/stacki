@@ -39,66 +39,40 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-import pytest
-import random
-import stack
-from stack.bool import *
-from stack.api import *
+import stack.commands
+from stack.exception import *
 
-def test_distribution():
+class Command(stack.commands.set.host.command,
+              stack.commands.BoxArgumentProcessor):
 	"""
-	Test list/add/remove/set distibution.
-	"""
-
-	# Search for a unused distribution name and use it for
-	# the following tests.
-
-	done = False
-	while not done:
-		dist = 'default-%s' % str(random.randint(0, 100))
-		result = Call('list distribution', [ dist ])
-		if ReturnCode() and not result:
-			done = True
-	assert dist
-
-	# add dist
-
-	result = Call('add distribution', [ dist ])
-	assert ReturnCode() == 0 and result == []
-
-	# lookup current dist for host
-
-	result = Call('list host', [ 'localhost' ])
-	assert ReturnCode() == 0 and len(result) == 1
-	prevDist = result[0]['distribution']
-
-        # set dist for this host
-
-        result = Call('set host distribution', [ 'localhost', 'distribution=%s' % dist ])
-        assert ReturnCode() == 0 and result == []
-
-	# verify dist was set
-
-	result = Call('list host', [ 'localhost' ])
-	assert ReturnCode() == 0 and len(result) == 1
-	assert result[0]['distribution'] == dist
-
-	# restore prev setting
-
-	result = Call('set host distribution', [ 'localhost', 'distribution=%s' % prevDist ])
-	assert ReturnCode() == 0 and result == []
-
-        # remove dist
-
-        result = Call('remove distribution', [ dist ])
-        assert ReturnCode() == 0 and result == []
-
-	# try to remove default
-	#	remove distribution protects against this
-
-       	result = Call('remove distribution', [ 'default' ])
-	assert ReturnCode() == 255 and result == []
-
-		
-
+	Sets the box for a list of hosts.
 	
+	<arg type='string' name='host' repeat='1'>
+	One or more host names.
+	</arg>
+
+	<param type='string' name='box' optional='0'>
+	The name of the box (e.g. default)
+	</param>
+
+	<example cmd='set host box backend box=default'>
+	Set the box for all backend nodes to default.
+	</example>
+	"""
+
+	def run(self, params, args):
+		if not len(args):
+                        raise ArgRequired(self, 'host')
+
+		box, = self.fillParams([ ('box', None, True) ])
+		
+		# Check to make sure this is a valid box name
+
+		self.getBoxNames([ box ])
+
+		for host in self.getHostnames(args):
+			self.db.execute("""update nodes set box=
+				(select id from boxes where name='%s')
+				where name='%s' """
+				% (box, host))
+

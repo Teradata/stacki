@@ -90,55 +90,42 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-import os
-import stack
 import stack.commands
 from stack.exception import *
 
-class Command(stack.commands.DistributionArgumentProcessor,
-	stack.commands.add.command):
+class Command(stack.commands.BoxArgumentProcessor,
+	stack.commands.remove.command):
 	"""
-	Add a distribution specification to the database.
+	Remove a box specification from the database.
 
-	<arg type='string' name='distribution'>
-	Name of the new distribution.
+	<arg type='string' name='box'>
+	Box name.
 	</arg>
 	
-	<param type='string' name='graph'>
-	Graph associated with the distribution. Default
-	graph is 'default'
-	</param>
-	<param type='string' name='os'>
-	OS associated with the distribution. Default is 'redhat'
-	</param>
-	<example cmd='add distribution develop'>
-	Adds the distribution named "develop" into the database.
+	<example cmd='remove box test'>
+	Removes the box named "test" from the database.
 	</example>
 	"""
 
 	def run(self, params, args):
-	
 		if len(args) != 1:
-                        raise ArgUnique(self, 'distribution')
-		dist = args[0]
+                        raise ArgRequired(self, 'box')
+
+		boxes = self.getBoxNames(args)
+
+		# Prevent user from removing the default box.
 		
-		(graph, OS) = self.fillParams([
-				('graph','default'),
-				('os','redhat')
-				])
-                 
-		if dist in self.getDistributionNames():
-                        raise CommandError(self, 'distribution "%s" exists' % dist)
+		if 'default' in boxes:
+			raise CommandError(self, 'cannot remove default box')
 
-		self.db.execute("""insert into distributions (name, os, graph) values
-			('%s', '%s', '%s')""" % (dist, OS, graph))
+		# first check if the box is associated with any hosts
 
-		# Create site-profile and contrib directory
-		v = stack.version
-		contrib_dir = os.path.join(os.sep, 'export', 'stack', 'contrib', dist, v, 'x86_64', 'RPMS')
-		site_nodes_dir  = os.path.join(os.sep, 'export', 'stack', 'site-profiles', dist, v, 'nodes')
-		site_graphs_dir = os.path.join(os.sep, 'export', 'stack', 'site-profiles', dist, v, 'graphs', 'default')
+		for box in boxes:
+			for row in self.call('list.host'):
+				if row['box'] == box:
+					raise CommandError(self, 'cannot remove box "%s"\nbecause host "%s" is assigned to this box' % (box, row['host']))
 
-		for dir in [contrib_dir, site_nodes_dir, site_graphs_dir]:
-			if not os.path.exists(dir):
-				os.makedirs(dir)
+		for box in boxes:
+			self.db.execute("""delete from boxes
+				where name = '%s' """ % box)
+

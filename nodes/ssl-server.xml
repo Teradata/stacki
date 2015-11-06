@@ -25,7 +25,7 @@ cd /etc/pki/tls ; \
 ST=&Info_CertificateState;/\
 L=&Info_CertificateLocality;/\
 O=&Info_CertificateOrganization;/\
-OU=&Info_ClusterName;/\
+OU=&Kickstart_PrivateHostname;/\
 CN=&Info_FQDN;" \
 	&gt; certs/localhost.csr ; \
 chmod 0400 private/localhost.key

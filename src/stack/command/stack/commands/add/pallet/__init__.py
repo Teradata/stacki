@@ -161,7 +161,6 @@ class Command(stack.commands.add.command):
 			roll = stack.file.RollInfoFile(filename.strip())
 			dict[roll.getRollName()] = roll
 			
-			
 		if len(dict) == 0:
 			
 			# If the roll_info hash is empty, that means there are
@@ -220,9 +219,7 @@ class Command(stack.commands.add.command):
 				(name, version, rel, arch, os) values
 				('%s', '%s', '%s', '%s', '%s')
 				""" % (name, version, release, arch, OS))
-			
 
-		
 
 	def run(self, params, args):
 		(clean, dir, updatedb) = self.fillParams([

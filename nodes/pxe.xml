@@ -127,6 +127,7 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 	kernel="kernel memdisk bigraw" \
 	ramdisk="pxeflash.img" \
 	args="keeppxe"
+
 /opt/stack/bin/stack add bootaction action="os" \
 	kernel="com32 chain.c32" args="hd0"
 

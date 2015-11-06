@@ -4,7 +4,6 @@ foundation-cython
 foundation-gawk
 foundation-gd
 foundation-libxml2
-foundation-mysql
 foundation-pycrypto
 foundation-py-dateutil
 foundation-py-docutils
@@ -57,7 +56,6 @@ stack-piece-pipe
 stack-pylib
 stack-sql
 stack-tracker
-roll-stacki-kickstart
 storcli
 stack-wizard
 stack-admin
@@ -66,3 +64,7 @@ stack-config-server
 stack-images
 stack-pxeboot
 fcgi
+foundation-mariadb
+foundation-py-ipaddress
+netaddr
+foundation-py-pyipmi

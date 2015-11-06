@@ -98,53 +98,7 @@ import sys
 import stack.app
 import stack.bootable
 import stack.file
-from stack.dist import DistError
 
-
-class Distribution:
-
-	def __init__(self, arch, name='default'):
-		self.arch = arch
-		self.tree = None
-		self.name = name
-
-		#
-		# the 'native' cpu is always first
-		#
-		native = os.uname()[4]
-		self.cpus = [ native, 'noarch' ]
-
-	def getPath(self):
-		return os.path.join(self.name, self.arch)
-		
-	def generate(self, flags=""):
-		if not os.path.exists('default'):
-			stack.util.system('/opt/stack/bin/stack ' +
-				'create distribution resolve=true inplace=true ' +
-				'md5=false')
-
-		self.tree = stack.file.Tree(os.path.join(os.getcwd(), 
-			self.getPath()))
-		
-	def getRPMS(self):
-		return self.tree.getFiles(os.path.join('RedHat', 'RPMS'))
-
-	def getSRPMS(self):
-		return self.tree.getFiles('SRPMS')
-		
-	def getRPM(self, name):
-		l = []
-		for rpm in self.getRPMS():
-			try:
-				if rpm.getPackageName() == name:
-					l.append(rpm)
-			except:
-				pass
-		if len(l) > 0:
-			return l
-		return None
-
-	
 
 class App(stack.app.Application):
 	def __init__(self, argv):
@@ -176,30 +130,9 @@ class App(stack.app.Application):
 		return 0
 
 
-	def thinkLocally(self, name):
-		assert self.rpmsPath
-
-		print 'thinkLocally: rpmsPath (%s)' % self.rpmsPath
-		localtree = stack.file.Tree(self.rpmsPath)
-
-		locallist = {}
-		for dir in localtree.getDirs():
-			for rpm in localtree.getFiles(dir):
-				for arch in self.dist.cpus:
-					s = '%s-%s' % (name, arch)
-					if s == rpm.getUniqueName():
-						print "thinkLocally: found", rpm.getName()
-						return rpm
-
-		return None
-
-
 	def overlaypkgs(self, pkgs, update):
 		for pkg in pkgs:
-			RPM = self.thinkLocally(pkg)
-			if not RPM:
-				RPM = self.boot.getBestRPM(pkg)
-
+			RPM = self.boot.findFile(pkg)
 			if not RPM:
 				raise DistError, "Could not find %s rpm" % (pkg)
 
@@ -221,14 +154,9 @@ class App(stack.app.Application):
 
 
 	def run(self):
-
 		print "build-initrd starting..."
-		print "arch:", self.getArch()
 
-		self.dist = Distribution(self.getArch())
-		self.dist.generate()
-
-		self.boot = stack.bootable.Bootable(self.dist, 'none')
+		self.boot = stack.bootable.Bootable(self.rpmsPath, self.builddir)
 
 		print 'updatepkgs: ' , self.updatepkgs
 		print 'pkgs: ' , self.pkgs

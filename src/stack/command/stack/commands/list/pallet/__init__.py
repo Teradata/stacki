@@ -125,32 +125,31 @@ class Command(stack.commands.RollArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-
 		self.beginOutput()
+
 		for (roll, version, release) in self.getRollNames(args, params):
-			self.db.execute("""
-				select r.arch, r.os from rolls r where
-				r.name='%s' and r.version='%s'
-				""" % (roll, version))
+			self.db.execute("""select r.arch, r.os from rolls r
+				where r.name='%s' and r.version='%s' """
+				% (roll, version))
 			
 			# For each pallet determine it is enabled
-			# in and distributions.
+			# in any boxes.
 			
 			for arch,OS in self.db.fetchall():
-				self.db.execute("""
-					select d.name from
-					stacks s, rolls r, distributions d where
+				self.db.execute("""select b.name from
+					stacks s, rolls r, boxes b where
 					r.name='%s' and r.arch='%s' and
 					r.version='%s' and
-					s.roll=r.id and s.distribution=d.id
-					""" % (roll, arch, version))
-				distributions = []
-				for dist, in self.db.fetchall():
-					distributions.append(dist)
+					s.roll=r.id and s.box=b.id """
+					% (roll, arch, version))
 
-				self.addOutput(roll, (version, release, arch, OS,
-					string.join(distributions,' ')))
+				boxes = []
+				for box, in self.db.fetchall():
+					boxes.append(box)
 
-		self.endOutput(header=['name', 'version', 'release', 'arch', 'os',
-				       'distributions'], trimOwner=False)
+				self.addOutput(roll, (version, release, arch,
+					OS, string.join(boxes,' ')))
+
+		self.endOutput(header=['name', 'version', 'release', 'arch',
+			'os', 'boxes'], trimOwner=False)
 		

@@ -102,7 +102,7 @@ from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.DistributionArgumentProcessor,
+		stack.commands.BoxArgumentProcessor,
 		stack.commands.add.command):
 	pass
 	
@@ -141,8 +141,8 @@ class Command(command):
 	number is taken from the host name.
 	</param>
 
-	<param type='string' name='distribution'>
-	The distribution name for the host. The default is: "default".
+	<param type='string' name='box'>
+	The box name for the host. The default is: "default".
 	</param>
 
 	<example cmd='add host backend-0-1'>
@@ -189,14 +189,14 @@ class Command(command):
 			rank = None
 				
 		# fillParams with the above default values
-		(appliance, membership, numCPUs, rack, rank, dist) = \
+		(appliance, membership, numCPUs, rack, rank, box) = \
 			self.fillParams( [
 				('appliance', appliance),
 				('membership', None),
 				('cpus', 1),
 				('rack', rack),
 				('rank', rank),
-				('distribution', 'default') ])
+				('box', 'default') ])
 
 		if not membership and not appliance:
                         raise ParamRequired(self, ('membership', 'appliance'))
@@ -232,20 +232,19 @@ class Command(command):
 		if appliance not in appliances:
 			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)
 
-		if dist not in self.getDistributionNames():
-			raise CommandError(self, 'distribution "%s" is not in the database' % dist)
+		if box not in self.getBoxNames():
+			raise CommandError(self, 'box "%s" is not in the database' % box)
 	
 		self.db.execute("""insert into nodes
-				(name, appliance, distribution, cpus, rack, 
+				(name, appliance, box, cpus, rack, 
 				rank) values ( '%s',
 				(select id from appliances where name='%s'),
-				(select id from distributions where name='%s'),
-				'%d', '%s', '%s')""" % (host, appliance, dist,
+				(select id from boxes where name='%s'),
+				'%d', '%s', '%s')""" % (host, appliance, box,
 				numCPUs, rack, rank))
 
 
 	def run(self, params, args):
-                
 		if len(args) != 1:
                         raise ArgUnique(self, 'host')
 

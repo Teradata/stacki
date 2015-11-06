@@ -165,7 +165,7 @@ class Plugin(stack.commands.Plugin):
 		cmd += 'O=%s/ ' % self.owner.db.getHostAttr('localhost',
 			'Info_CertificateOrganization')
 		cmd += 'OU=%s/ ' % self.owner.db.getHostAttr('localhost',
-			'Info_ClusterName')
+			'Kickstart_PrivateHostname')
 		cmd += 'CN=%s.%s" ' % (shortname, domainname)
 		cmd += '> certs/localhost.csr 2> /dev/null ; '
 		cmd += 'chmod 0400 private/localhost.key'

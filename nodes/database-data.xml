@@ -80,8 +80,8 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack set access command='*'     group='apache'
 /opt/stack/bin/stack set access command='list*' group='wheel'
 
-<!-- insert the base distributions into the database -->
-/opt/stack/bin/stack add distribution default 
+<!-- insert the base box into the database -->
+/opt/stack/bin/stack add box default
 
 <!-- insert the base appliances into the database -->
 

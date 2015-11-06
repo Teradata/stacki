@@ -24,6 +24,7 @@ class Attr:
 	Info_FQDN = ""
 	Info_ClusterURL = ""
 	Kickstart_DistroDir = "/export/stack"
+	Kickstart_BoxDir = "/export/stack"
 	Kickstart_Keyboard = "us"
 	Kickstart_Lang = "en_US"
 	Kickstart_Langsupport = "en_US"

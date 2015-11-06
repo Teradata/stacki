@@ -101,7 +101,7 @@ from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
 
-class Command(stack.commands.list.command):
+class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 	"""
 	Lists the XML configuration information for a host. The graph
 	traversal for the XML output is rooted at the XML node file
@@ -134,26 +134,20 @@ class Command(stack.commands.list.command):
 	2nd pass generator. If not supplied, then use 'kgen'.
 	</param>
 
-	<param type='string' name='basedir'>
-	If specified, the location of the XML node files.
-	</param>
-	
 	<example cmd='list node xml compute'>
 	Generate the XML graph starting at the XML node named 'compute.xml'.
 	</example>
 	"""
 
 	def run(self, params, args):
-
-		(attributes, pallets, evalp, missing, 
-			generator, basedir) = self.fillParams(
-			[('attrs', ),
-			('pallet', ),
-			('eval', 'yes'),
-			('missing-check', 'no'),
-			('gen', 'kgen'),
-			('basedir', )
-			])
+		(attributes, pallets, evalp, missing, generator) = \
+			self.fillParams([
+				('attrs', ),
+				('pallet', ),
+				('eval', 'yes'),
+				('missing-check', 'no'),
+				('gen', 'kgen')
+				])
 			
 		if pallets:
 			pallets = pallets.split(',')
@@ -204,8 +198,8 @@ class Command(stack.commands.list.command):
 		if 'graph' not in attrs:
 			attrs['graph'] = 'default'
 			
-		if 'distribution' not in attrs:
-			attrs['distribution'] = 'default'
+		if 'box' not in attrs:
+			attrs['box'] = 'default'
 			
 		if 'membership' not in attrs:
 			attrs['membership'] = 'Frontend'
@@ -222,46 +216,70 @@ class Command(stack.commands.list.command):
 		else:
 			starter_tag = "kickstart"
 
+		import stack
 
 		# Add more values to the attributes
 		attrs['version'] = stack.version
 		attrs['release'] = stack.release
 		attrs['root']	 = root
 		
-		kickstart_dir = self.command('report.distribution').strip()
-
-		if not basedir:
-			if attrs['os'] == 'sunos':
-				basedir = os.path.join(os.sep, kickstart_dir,
-					attrs['distribution'], attrs['os'],
-					'build')
-			else:
-				basedir = os.path.join(os.sep, kickstart_dir,
-					attrs['distribution'], attrs['arch'],
-					'build')
-
-		os.chdir(basedir)
-
 		entities = {}
 
 		# Parse the XML graph files in the chosen directory
 
+		#	
+		# get the pallets and carts that are in the box associated
+		# with the host
+		#	
+		items = []
+		try:
+			for name, version, arch in self.getBoxPallets(
+					attrs['box']):
+				items.append(os.path.join('/export', 'stack',
+					'pallets', name, version, 'redhat', arch))
+		except:
+			#
+			# there is no output from 'getBoxPallets()'.
+			# let's assume that the database is down
+			# (e.g., we are installing and configuring
+			# the frontend's database) and we'll get
+			# pallet info from '/tmp/rolls.xml' or
+			# '/tmp/pallets.xml'
+			#
+
+			import stack.roll
+
+			g = stack.roll.Generator()
+
+			if os.path.exists('/tmp/rolls.xml'):
+				g.parse('/tmp/rolls.xml')
+			elif os.path.exists('/tmp/pallets.xml'):
+				g.parse('/tmp/pallets.xml')
+
+			for pallet in g.rolls:
+				(pname, pver, prel, parch, purl, pdiskid) \
+					= pallet
+				items.append(os.path.join('/export',
+					'stack', 'pallets', pname, pver,
+					'redhat', parch))
+
 		parser  = make_parser()
-		handler = stack.profile.GraphHandler(attrs, entities)
+		handler = stack.profile.GraphHandler(attrs, entities,
+			directories = items)
 
-		graphDir = os.path.join('graphs', attrs['graph'])
-		if not os.path.exists(graphDir):
-			print 'error - no such graph', graphDir
-			sys.exit(-1)
+		for item in items:
+			graph = os.path.join(item, 'graph')
+			if not os.path.exists(graph):
+				continue
 
-		for file in os.listdir(graphDir):
-			base, ext = os.path.splitext(file)
-			if ext == '.xml':
-				path = os.path.join(graphDir, file)
-				fin = open(path, 'r')
-				parser.setContentHandler(handler)
-				parser.parse(fin)
-				fin.close()
+			for file in os.listdir(graph):
+				base, ext = os.path.splitext(file)
+				if ext == '.xml':
+					path = os.path.join(graph, file)
+					fin = open(path, 'r')
+					parser.setContentHandler(handler)
+					parser.parse(fin)
+					fin.close()
 
 		graph = handler.getMainGraph()
 		if graph.hasNode(root):
@@ -287,7 +305,6 @@ class Command(stack.commands.list.command):
 			if not stack.cond.EvalCondExpr(cond, attrs):
 				nodesHash[node.name] = None
 			
-
 		# Initialize the hash table for the dependency
 		# nodes, and filter out everyone not for our
 		# generator type (e.g. 'kgen').
@@ -324,7 +341,7 @@ class Command(stack.commands.list.command):
 
 		# Iterate over the nodes and parse everyone we need
 		# to parse.
-		
+
 		parsed = []
 		kstext = ''
 		for node in list:
@@ -333,6 +350,13 @@ class Command(stack.commands.list.command):
 
 			# When building pallets allowMissing=1 and
 			# doEval=0.  This is setup by rollRPMS.py
+
+			# for item in items:
+			if 0:
+				nodefile = os.path.join(item, 'nodes', node)
+				if os.path.exists(nodefile):
+					node = nodefile
+					break
 
 			if allowMissing:
 				try:

@@ -235,24 +235,23 @@ class ApplianceArgumentProcessor:
 		return list
 
 
-class DistributionArgumentProcessor:
-	"""An Interface class to add the ability to process distribution
-	arguments."""
+class BoxArgumentProcessor:
+	"""An Interface class to add the ability to process box arguments."""
 		
-	def getDistributionNames(self, args=None):
-		"""Returns a list of distribution names from the database.
-		For each arg in the ARGS list find all the distribution
+	def getBoxNames(self, args=None):
+		"""Returns a list of box names from the database.
+		For each arg in the ARGS list find all the box
 		names that match the arg (assume SQL regexp).  If an
 		arg does not match anything in the database we raise an
-		exception.  If the ARGS list is empty return all distribution names.
+		exception.  If the ARGS list is empty return all box names.
 		"""
 		list = []
 		if not args:
-			args = [ '%' ] # find all distributions
+			args = [ '%' ] # find all boxes
 
 		for arg in args:
 			rows = self.db.execute("""select name from
-				distributions where name like '%s'""" % arg)
+				boxes where name like '%s'""" % arg)
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
@@ -261,12 +260,34 @@ class DistributionArgumentProcessor:
 					# is empty
 					continue
 				else:
-					raise CommandError(self, 'unknown distribution "%s"' % arg)
+					raise CommandError(self,
+						'unknown box "%s"' % arg)
 
 			for name, in self.db.fetchall():
 				list.append(name)
 
 		return list
+
+
+	def getBoxPallets(self, box = 'default'):
+		"""Returns a list of pallets for a box"""
+
+		#
+		# make sure 'box' exists
+		#
+		self.getBoxNames([ box ])	
+
+		pallets = []
+
+		rows = self.db.execute("""select r.name, r.version, r.rel,
+			r.arch from
+			rolls r, boxes b, stacks s where b.name = '%s' and
+			b.id = s.box and s.roll = r.id""" % box)
+
+		for name, version, rel, arch in self.db.fetchall():
+			pallets.append((name, version, rel, arch))
+
+		return pallets
 		
 
 class NetworkArgumentProcessor:
@@ -341,7 +362,7 @@ class RollArgumentProcessor:
 		table in the database.  If the PARAMS['version'] is provided
 		only pallets of that version are included otherwise no filtering
 		on version number is performed.  If the ARGS list is empty then
-		all pallet names are returned.  SQL regexps acan be used in 
+		all pallet names are returned.  SQL regexp can be used in 
 		both the version parameter and arg list, but must expand to 
 		something.
 		"""
@@ -1256,9 +1277,9 @@ class DatabaseConnection:
                 if not dict:
                         dict = {}
                 	for (name, os) in self.select("""
-				n.name, d.os from
-				distributions d, nodes n where
-				n.distribution=d.id
+				n.name, b.os from
+				boxes b, nodes n where
+				n.box=b.id
                         	"""):
                         	dict[name] = os
                 if self.caching:
@@ -1486,16 +1507,14 @@ class DatabaseConnection:
                                                (None, 'rank', rank),
                                                (None, 'cpus', cpus) ]
 
-                        for (name, dist, graph,
-                             appliance, membership) in self.select("""
-				n.name, d.name, d.graph, 
+                        for (name, box, appliance, membership) in \
+				self.select(""" n.name, b.name,
                                 a.name, a.membership from
-				nodes n, distributions d, appliances a where
-				n.appliance=a.id and n.distribution=d.id
-				"""):
+				nodes n, boxes b, appliances a where
+				n.appliance=a.id and n.box=b.id """):
+
                                 dict[name].extend(
-                                        [ (None, 'distribution', dist),
-                                          (None, 'graph', graph),
+                                        [ (None, 'box', box),
                                           (None, 'appliance', appliance),
                                           (None, 'membership', membership)
                                         ])

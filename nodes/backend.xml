@@ -9,5 +9,34 @@ file to add functionality to this appliance type.
 </description>
 
 
+<main>
+
+<eval shell="/opt/stack/bin/python" mode="xml">
+
+import stack.api
+
+#
+# output "url" line first -- the url line will be a path to 'stacki'
+#
+listpallet = stack.api.Call('list pallet')
+
+for o in listpallet:
+	boxes = o['boxes'].split()
+	if '&box;' in boxes and o['name'] == 'stacki':
+		print '&lt;url&gt; --url http://127.0.0.1/install/pallets/%s/%s/redhat/%s&lt;/url&gt;' % (o['name'], o['version'], o['arch'])
+
+#
+# now output the repos
+#
+for o in listpallet:
+	boxes = o['boxes'].split()
+	if '&box;' in boxes:
+		print '&lt;repo&gt; --name="%s" --baseurl=http://127.0.0.1/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (o['name'], o['name'], o['version'], o['arch'])
+
+</eval>
+
+</main>
+
+
 </kickstart> 
 

@@ -47,17 +47,16 @@ class Plugin(stack.commands.Plugin):
                 return 'basic'
 
         def run(self, hosts):
-
-                dict = { }
+                dict = {}
                 for host in hosts:
                         dict[host] = True
                         
                 for row in self.db.select("""
-	                n.name, n.rack, n.rank, n.cpus, a.name, d.name,
+	                n.name, n.rack, n.rank, n.cpus, a.name, b.name,
 			n.runaction, n.installaction from
-			nodes n, appliances a, distributions d where 
-			n.appliance=a.id and n.distribution=d.id
-			"""):
+			nodes n, appliances a, boxes b where 
+			n.appliance = a.id and n.box = b.id """):
+
                         if dict.has_key(row[0]):
                                 dict[row[0]] = row[1:]
         
@@ -65,9 +64,8 @@ class Plugin(stack.commands.Plugin):
                                     'rank',
                                     'cpus',
                                     'appliance',
-                                    'distribution',
+                                    'box',
                                     'runaction',
                                     'installaction' ],
                         'values': dict }
 
-                

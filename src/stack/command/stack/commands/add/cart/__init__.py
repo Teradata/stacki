@@ -115,11 +115,9 @@ class Command(stack.commands.CartArgumentProcessor,
 
                 # Files were already on disk either manually created or by the
                 # simple template above.
-                # Add the cart to the database so we can enable it on a
-                # distribution.
+                # Add the cart to the database so we can enable it for a box
 
                 self.db.execute("""
                 	insert into carts(name) values ('%s')
                         """ % cart)
-                
-		
+

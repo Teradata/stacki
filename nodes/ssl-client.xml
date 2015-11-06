@@ -28,7 +28,7 @@ cd /etc/security/ca; \
 ST=&Info_CertificateState;/\
 L=&Info_CertificateLocality;/\
 O=&Info_CertificateOrganization;/\
-OU=&Info_ClusterName;/\
+OU=&Kickstart_PrivateHostname;/\
 CN=&hostname;.&Kickstart_PrivateDNSDomain;" \
 	&gt; $cert/csr 2&gt;/dev/null
 )

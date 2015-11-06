@@ -49,7 +49,7 @@ from stack.bool import *
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
 	stack.commands.NetworkArgumentProcessor,
-	stack.commands.DistributionArgumentProcessor,
+	stack.commands.BoxArgumentProcessor,
 	stack.commands.Implementation):	
 
 	"""
@@ -82,10 +82,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				% network
 			sys.exit((-1, msg, ''))
 
-	def checkDistribution(self, distribution):
-		if distribution not in self.distributions:
-			msg = 'distribution "%s" does not exist in the database' \
-				% distribution
+	def checkBox(self, box):
+		if box not in self.boxes:
+			msg = 'box "%s" does not exist in the database' % box
 			sys.exit((-1, msg, ''))
 
 	def run(self, args):
@@ -95,7 +94,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			self.owner.call('list.host.interface')
 		self.appliances = self.getApplianceNames()
 		self.networks = self.getNetworkNames()
-		self.distributions = self.getDistributionNames()
+		self.boxes = self.getBoxNames()
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
 		reader = csv.reader(open(filename, 'rU'))
@@ -135,7 +134,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				continue
 
 			name = None
-			distribution = None
+			box = None
 			appliance = None
 			rack = None
 			rank = None
@@ -158,8 +157,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				if header[i] == 'name':
 					name = field.lower()
-				if header[i] == 'distribution':
-					distribution = field
+				if header[i] == 'box':
+					box = field
 				if header[i] == 'appliance':
 					appliance = field
 				elif header[i] == 'rack':
@@ -211,9 +210,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if name not in self.owner.hosts.keys():
 				self.owner.hosts[name] = {}
 
-			if distribution:
-				self.checkDistribution(distribution)
-				self.owner.hosts[name]['distribution'] = distribution
+			if box:
+				self.checkBox(box)
+				self.owner.hosts[name]['box'] = box
 
 			if appliance:
 				if 'appliance' in self.owner.hosts[name].keys() and \

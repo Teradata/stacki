@@ -59,14 +59,13 @@ class Command(stack.commands.CartArgumentProcessor,
 	stacki, boss, os).
 	</arg>
 	
-	<param type='string' name='distribution'>
-	The name of the distribution on which to enable the cart. If no
-	distribution is specified the cart is enabled for the default
-	distribution.
+	<param type='string' name='box'>
+	The name of the box in which to enable the cart. If no box is
+	specified the cart is enabled for the default box.
 	</param>
 
 	<example cmd='enable cart local'>
-	Enable the local cart.
+	Enable the cart named "local".
 	</example>
 
 	<related>add cart</related>
@@ -75,39 +74,32 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-
-                (distribution, ) = self.fillParams([
-                        ('distribution', 'default')
-                        ])
-
                 if len(args) < 1:
                         raise ArgRequired(self, 'cart')
 
+                (box, ) = self.fillParams([ ('box', 'default') ])
+
 		rows = self.db.execute("""
-			select * from distributions where name='%s'
-			""" % distribution)
+			select * from boxes where name='%s' """ % box)
 		if not rows:
-                        raise CommandError(self, 'unknown distribution "%s"' % distribution)
-		
+                        raise CommandError(self, 'unknown box "%s"' % box)
 			
 		for cart in self.getCartNames(args, params):
-                        
                         enabled = False
 			for row in self.db.select("""
-				d.name from
-				cart_stacks s, carts c, distributions d where
-				c.name='%s' and d.name='%s' and
-				s.distribution=d.id and s.cart=c.id
-				""" % (cart, distribution)):
+				b.name from
+				cart_stacks s, carts c, boxes b where
+				c.name = '%s' and b.name = '%s' and
+				s.box = b.id and s.cart = c.id
+				""" % (cart, box)):
+
                                 enabled = True
                                 
 			if not enabled:
                                 self.db.execute("""
-					insert into cart_stacks(distribution, cart)
+					insert into cart_stacks(box, cart)
                                         values (
-                                        (select id from distributions where name='%s'),
+                                        (select id from boxes where name='%s'),
                                         (select id from carts where name='%s')
-                                        )""" % (distribution, cart))
-
-
+                                        )""" % (box, cart))
 

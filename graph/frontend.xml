@@ -87,7 +87,6 @@
 		<to>foundation-base</to>
 		<to>ssh-server</to>
 		<to>storage-controller-server</to>
-		<to>dist</to>
 	</edge>
 
 </graph>

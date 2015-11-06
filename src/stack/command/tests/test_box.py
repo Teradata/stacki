@@ -39,44 +39,63 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-import stack.commands
-from stack.exception import *
+import pytest
+import random
+import stack
+from stack.bool import *
+from stack.api import *
 
-class Command(stack.commands.set.host.command,
-              stack.commands.DistributionArgumentProcessor):
+def test_box():
 	"""
-	Sets the distribution for a list of hosts.
-	
-	<arg type='string' name='host' repeat='1'>
-	One or more host names.
-	</arg>
-
-	<param type='string' name='distribution' optional='0'>
-	The name of the distribution (e.g. default)
-	</param>
-
-	<example cmd='set host distribution compute distribution=default'>
-	Set the distribution for all current compute nodes to default.
-	</example>
+	Test list/add/remove/set box.
 	"""
 
-	def run(self, params, args):
-                
-		(distribution, ) = self.fillParams([
-                        ('distribution', None, True)
-                        ])
-		
-		if not len(args):
-                        raise ArgRequired(self, 'host')
+	# Search for a unused box name and use it for
+	# the following tests.
 
-		# Check to make sure this is a valid distribution name
+	done = False
+	while not done:
+		box = 'default-%s' % str(random.randint(0, 100))
+		result = Call('list box', [ box ])
+		if ReturnCode() and not result:
+			done = True
+	assert box
 
-		self.getDistributionNames([distribution])
+	# add box
 
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update nodes set distribution=
-				(select id from distributions where name='%s')
-				where name="%s"
-				""" % (distribution, host))
+	result = Call('add box', [ box ])
+	assert ReturnCode() == 0 and result == []
+
+	# lookup current box for host
+
+	result = Call('list host', [ 'localhost' ])
+	assert ReturnCode() == 0 and len(result) == 1
+	prevBox = result[0]['box']
+
+        # set box for this host
+
+        result = Call('set host box', [ 'localhost', 'box=%s' % box ])
+        assert ReturnCode() == 0 and result == []
+
+	# verify box was set
+
+	result = Call('list host', [ 'localhost' ])
+	assert ReturnCode() == 0 and len(result) == 1
+	assert result[0]['box'] == box
+
+	# restore prev setting
+
+	result = Call('set host box', [ 'localhost', 'box=%s' % prevBox ])
+	assert ReturnCode() == 0 and result == []
+
+        # remove box
+
+        result = Call('remove box', [ box ])
+        assert ReturnCode() == 0 and result == []
+
+	# try to remove default
+	#	"remove box" should protect against this
+
+       	result = Call('remove box', [ 'default' ])
+	assert ReturnCode() == 255 and result == []
 

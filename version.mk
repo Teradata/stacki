@@ -1,5 +1,5 @@
 export ROLL		= stacki
-export ROLLVERSION	= 2.0
+export ROLLVERSION	= 3.0
 
 COLOR			= lightsteelblue
 BOOTABLE		= 1
@@ -9,4 +9,4 @@ KICKSTART_LANG		= "en_US"
 KICKSTART_LANGSUPPORT	= "en_US"
 
 CODENAME		= Hyper
-export RELEASE		= 7.x
+export RELEASE		= 6.x

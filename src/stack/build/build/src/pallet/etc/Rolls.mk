@@ -145,7 +145,7 @@ endif
 # --------------------------------------------------------------------- #
 
 .PHONY: roll
-roll: $(TARGET_PKG) $(TARGET_PKG)s roll-$(ROLL).xml 
+roll: $(TARGET_PKG)s roll-$(ROLL).xml 
 	(								\
 		cd build-$(ROLL)-$(STACK);				\
 		rm -rf disk*;						\

@@ -184,7 +184,7 @@ class GraphHandler(handler.ContentHandler,
 		   handler.ErrorHandler,
 		   AttributeHandler):
 
-	def __init__(self, attrs, entities={}, prune=True):
+	def __init__(self, attrs, entities={}, prune=True, directories=[ '.' ]):
 		handler.ContentHandler.__init__(self)
 		self.setAttributes(attrs)
 		self.graph			= stack.util.Struct()
@@ -200,6 +200,7 @@ class GraphHandler(handler.ContentHandler,
 		self.roll			= ''
 		self.text			= ''
 		self.os				= attrs['os']
+		self.directories		= directories
 
 		# Should we prune the graph while adding edges or not.
 		# Prune is the answer for most cases while traversing
@@ -217,22 +218,15 @@ class GraphHandler(handler.ContentHandler,
 		if node.name in [ 'HEAD', 'TAIL' ]:
 			return
 		
-		nodesPath = [ os.path.join('.',  'nodes'),
-			      os.path.join('..', 'nodes'),
-			      os.path.join('.',  'site-nodes'),
-			      os.path.join('..', 'site-nodes')
-			      ]
+		nodesPath = []
+		for dir in self.directories:
+			nodesPath.append(os.path.join(dir, 'nodes'))
 
 		# Find the xml file for each node in the graph.  If we
 		# can't find one just complain and abort.
 
-		xml = [ None, None, None ] # rocks, extend, replace
+		xml = [ None, None, None ] # default, extend, replace
 		for dir in nodesPath:
-			if self.os == 'sunos':
-				file = os.path.join(dir, 'sol_%s.xml'\
-						% node.name)
-				if os.path.isfile(file):
-					node.name = 'sol_%s' % node.name
 			if not xml[0]:
 				file = os.path.join(dir, '%s.xml' % node.name)
 				if os.path.isfile(file):
@@ -269,6 +263,7 @@ class GraphHandler(handler.ContentHandler,
 
 			fin = open(xmlFile, 'r')
 			parser = make_parser()
+
 			handler = Pass1NodeHandler(node, xmlFile, 
 				self.entities, self.attributes, eval, rcl)
 			parser.setContentHandler(handler)
@@ -625,12 +620,21 @@ class Pass1NodeHandler(handler.ContentHandler,
 		# Setup the Node object to know what roll and what filename 
 		# this XML came from.  We use this on the second pass to
 		# annotated every XML tag with this information
+		palletname = attrs.get('roll')
 		
-		if attrs.get('roll'):
-			self.node.setRoll(attrs.get('roll'))
-		else:
-			self.node.setRoll('unknown')
-			
+		if not palletname:
+			#
+			# let's see if the roll (pallet) name is inside the
+			# filename
+			#
+			if self.filename.startswith('/export/stack/pallets'):
+				p = self.filename.split('/')
+				palletname = p[4]
+
+		if not palletname:
+			palletname = 'unknown'
+
+		self.node.setRoll(palletname)
 
 		# Rolls can define individual nodes to be "interface=public".
 		# All this does is change the shape of the node on the
@@ -979,7 +983,10 @@ class Pass2NodeHandler(handler.ContentHandler,
 			return
 
 		if self.kskey:
-			self.kstags[self.kskey] = string.join(self.kstext, '')
+			if not self.kstags.has_key(self.kskey):
+				self.kstags[self.kskey] = []
+			self.kstags[self.kskey].append(
+				string.join(self.kstext, ''))
 			
 		self.xml.append('</%s>' % name)
 
@@ -990,7 +997,8 @@ class Pass2NodeHandler(handler.ContentHandler,
 	def getKSText(self):
 		text = ''
 		for key, val in self.kstags.items():
-			text += '%s %s\n' % (key, val)
+			for v in val:
+				text += '%s %s\n' % (key, v)
 		return text
 		
 	def getXML(self):

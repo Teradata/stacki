@@ -95,7 +95,7 @@
 import sys
 import os
 import stack.app
-import stack.roll
+import stack.bootable
 
 class App(stack.app.Application):
 
@@ -105,15 +105,19 @@ class App(stack.app.Application):
 	def run(self):
 		root = self.args[0]
 		rpms = self.args[1:]
-		dist = stack.roll.Distribution(self.getArch())
-		dist.generate(md5=False)
 
-		print rpms
+		#
+		# localdir and palletdir are just a placeholders
+		#
+		localdir = '.'
+		palletdir = None
+		boot = stack.bootable.Bootable(localdir, palletdir)
+
 		for name in rpms:
 			print name
-			for rpm in dist.getRPM(name):
-				rpm.installPackage(root, '--excludedocs')
-			
+			rpm = boot.findFile(name)
+			if rpm:
+				boot.applyRPM(rpm, root, flags = '--excludedocs')
 
 app = App(sys.argv)
 app.parseArgs()

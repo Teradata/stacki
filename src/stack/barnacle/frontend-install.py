@@ -33,8 +33,7 @@ def umount(dest):
 	subprocess.call(['umount', dest])
 
 def installrpms(pkgs):
-	cmd = [ 'yum', '-y', '-c', '/tmp/barnacle.repo', '--disablerepo=*' ]
-	cmd += [ '--enablerepo=stacki,OS', 'install' ]
+	cmd = [ 'yum', '-y', 'install' ]
 	cmd += pkgs
 	subprocess.call(cmd)
 
@@ -48,11 +47,14 @@ def generate_multicast():
 	d = random.randrange(1,255)
 	return str(a)+'.'+str(b)+'.'+str(c)+'.'+str(d)
 
-def repoconfig(ccmnt, osmnt):
-	file = open('/tmp/barnacle.repo', 'w')
+def repoconfig(ccmnt, ccname, ccver, osmnt):
+	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
+
+	file = open('/etc/yum.repos.d/stack.repo', 'w')
 	file.write('[stacki]\n')
 	file.write('name=stacki\n')
-	file.write('baseurl=file://%s\n' % ccmnt)
+	file.write('baseurl=file://%s/%s/%s/redhat/x86_64\n'
+		% (ccmnt, ccname, ccver))
 	file.write('assumeyes=1\n')
 	file.write('gpgcheck=no\n')
 	file.write('[OS]\n')
@@ -62,16 +64,7 @@ def repoconfig(ccmnt, osmnt):
 	file.write('gpgcheck=no\n')
 	file.close()
 
-	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
 	
-	file = open('/etc/yum.repos.d/stack.repo' ,'w')
-	file.write('[Stack]\n')
-	file.write('name=Stack\n')
-	file.write('baseurl=file:///export/stack/distributions/default/x86_64\n')
-	file.write('assumeyes=1\n')
-	file.write('gpgcheck=no\n')
-	file.close()
-
 def ldconf():
 	file = open('/etc/ld.so.conf.d/foundation.conf', 'w')
 	file.write('/opt/stack/lib\n')
@@ -196,15 +189,16 @@ banner("Boostrap Stack Command Line")
 subprocess.call(['service', 'NetworkManager', 'stop'])
 
 # copy the isos
-ccdest = '/export/%s' % ccname
+ccdest = '/export/stack/pallets'
 copy(cciso, ccdest)
-osdest = '/export/%s' % osname
+
+osdest = '/export/stack/pallets'
 copy(osiso1, osdest)
 if osiso2:
 	copy(osiso2, osdest)
 
 # create repo config file
-repoconfig(ccdest, osdest)
+repoconfig(ccdest, ccname, ccver, osdest)
 
 # install rpms
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
@@ -212,26 +206,6 @@ pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
 	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
 installrpms(pkgs)
-
-# cleanup ISO copies
-subprocess.call(['rm', '-rf', ccdest, osdest])
-
-# run stack add pallet on stacki and os iso
-banner("Add pallets")
-stackpath = '/opt/stack/bin/stack'
-subprocess.call([stackpath,'add','pallet',cciso])
-subprocess.call([stackpath,'add','pallet',osiso1])
-if osiso2:
-	subprocess.call([stackpath,'add','pallet',osiso2])
-
-banner("Create Stack Distro")	
-subprocess.call(['mkdir','-p','/export/stack/distributions/'])
-
-pallets = 'pallets="{0},{1} {2},{3}"'.format(ccname, ccver, osname, osver)
-palletssplit=pallets.split(" ")
-a = "/opt/stack/bin/stack create distribution inplace=true {0}".format(pallets)
-print a
-subprocess.call([a], shell=True, cwd='/export/stack/distributions/')
 
 banner("Configuring dynamic linker for stacki")
 ldconf()
@@ -271,29 +245,33 @@ for line in f:
         attributes[split[0]]=split[1]
 	
 # fix hostfile
-f = open("/etc/hosts","a")
-string= attributes['Kickstart_PublicAddress']+"\t"+attributes['Kickstart_PrivateHostname']+"\n"
-f.write(string)
+f = open("/etc/hosts", "a")
+line = '%s\t%s %s\n' % (attributes['Kickstart_PrivateAddress'],
+	attributes['Kickstart_PrivateHostname'], attributes['Info_FQDN'])
+f.write(line)
 f.close()
 	
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
+stackpath = '/opt/stack/bin/stack'
 f = open("/tmp/stack.xml", "w")
-subprocess.call([stackpath,'list','node','xml','server',
-		'attrs={0}'.format(repr(attributes))], stdout=f)
+cmd = [ stackpath, 'list', 'node', 'xml', 'server',
+	'attrs={0}'.format(repr(attributes))]
+print 'cmd: %s' % ' '.join(cmd)
+subprocess.call(cmd, stdout=f, stderr=None)
 f.close()
-	
+
 banner("Process XML")
 # pipe that output to stack run pallet and output run.sh
 infile = open("/tmp/stack.xml", "r")
 outfile = open("/tmp/run.sh", "w")
-subprocess.call([stackpath,'run','pallet'], stdin=infile, stdout=outfile)
+subprocess.call([stackpath, 'run', 'pallet'], stdin=infile, stdout=outfile)
 infile.close()
 outfile.close()
 
 banner("Run Setup Script")
 # run run.sh
-subprocess.call(['sh','/tmp/run.sh'])
+subprocess.call(['sh', '/tmp/run.sh'])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])
@@ -301,7 +279,8 @@ subprocess.call([stackpath, 'add', 'pallet', osiso1])
 if osiso2:
 	subprocess.call([stackpath, 'add', 'pallet', osiso2])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
-	
+
 # all done
 banner("Done")
 print "Reboot to complete process."
+
