@@ -51,7 +51,6 @@ stack-command
 stack-config
 stack-ekv
 stack-kickstart
-stack-kpp
 stack-piece-pipe
 stack-pylib
 stack-sql
