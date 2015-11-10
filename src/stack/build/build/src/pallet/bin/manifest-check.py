@@ -95,13 +95,14 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import stack.file
 import stack.util
 
 if len(sys.argv) != 3:
-	print 'error - use make manifest-check'
+	print('error - use make manifest-check')
 	sys.exit(-1)
 
 rollname  = sys.argv[1]
@@ -129,7 +130,7 @@ for filename in [ 'manifest', 'manifest.%s' % rollname ]:
 	file.close()
 
 if not found:
-	print 'error - cannot manifest'
+	print('error - cannot manifest')
 	sys.exit(0)
 
 built = []
@@ -154,13 +155,13 @@ for rpm in builtfiles:
 
 
 if len(manifest) != len(built):
-	print '\nERROR - the following packages were not built:'
+	print('\nERROR - the following packages were not built:')
 	for pkg in manifest:
 		if pkg not in built:
-			print '\t%s' % pkg
+			print('\t%s' % pkg)
 
 if len(notmanifest) > 0:
-	print '\nERROR - the following packages were built but not in manifest:'
+	print('\nERROR - the following packages were built but not in manifest:')
 	for pkg in notmanifest:
-		print '\t%s' % pkg
+		print('\t%s' % pkg)
 

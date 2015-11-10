@@ -75,6 +75,7 @@
 # Initial revision. Screens debugging.
 #
 
+from __future__ import print_function
 import sys
 import os
 import stack.app
@@ -137,12 +138,12 @@ class App(stack.app.Application):
 
 		self.roll = base + self.args[0]
 		if not os.path.isdir(self.roll):
-			print "Error: roll directory %s does not exist" % (self.roll)
+			print("Error: roll directory %s does not exist" % (self.roll))
 			sys.exit(-1)
 
 		self.baseRollDir = base + "base/src/screens/"
 		if not os.path.isdir(self.baseRollDir):
-			print "Error: roll directory %s does not exist" % (self.baseRollDir)
+			print("Error: roll directory %s does not exist" % (self.baseRollDir))
 			sys.exit(-1)
 		return
 
@@ -172,8 +173,8 @@ class App(stack.app.Application):
 	def help(self):
 		"""Print usage and exit"""
 		self.usage()
-		print "\tscreen - XML screen file"
-		print  "\troll - roll name"
+		print("\tscreen - XML screen file")
+		print("\troll - roll name")
 		sys.exit(0)
 
 
@@ -194,7 +195,7 @@ class App(stack.app.Application):
 	def setScreenXmlFile(self):
 		self.screen = os.path.join(self.roll, "nodes", self.xmlname)
 		if not os.path.isfile(self.screen):
-			print "Error: File %s does not exist" % self.screen
+			print("Error: File %s does not exist" % self.screen)
 			sys.exit(-1)
 		return
 
@@ -226,7 +227,7 @@ class App(stack.app.Application):
 			f.write (text)
 			f.close()
 		except IOError:
-			print "Error writing file %s" % name
+			print("Error writing file %s" % name)
 
 
 	def createValDir(self):

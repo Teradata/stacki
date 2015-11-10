@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_funtion
 import sys
 import os
 import stack.app
@@ -114,7 +115,7 @@ class App(stack.app.Application):
 		boot = stack.bootable.Bootable(localdir, palletdir)
 
 		for name in rpms:
-			print name
+			print(name)
 			rpm = boot.findFile(name)
 			if rpm:
 				boot.applyRPM(rpm, root, flags = '--excludedocs')

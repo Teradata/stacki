@@ -93,6 +93,7 @@
 # @Copyright@
 
 
+from __future__ import print_function
 import sys
 import os
 import string
@@ -218,7 +219,7 @@ class File:
 			os.chmod(self.getFullName(), mode)
 
 	def dump(self):
-		print '%s(%s)' % (self.filename, self.pathname)
+		print('%s(%s)' % (self.filename, self.pathname))
 
 
 
@@ -660,7 +661,7 @@ class Tree:
 
 	def dumpDirNames(self):
 		for key in self.tree.keys():
-		    print key
+		    print(key)
 	    
 	def dump(self):
 		self.apply(self.__dumpIter__)
@@ -681,7 +682,7 @@ class Tree:
     
 
 	def __dumpIter__(self, path, file, root):
-		print path,
+		print(path, end=' ')
 		file.dump()
 	
 	

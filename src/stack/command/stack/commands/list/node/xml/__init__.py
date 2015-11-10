@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function 
 import os
 import sys
 import string
@@ -285,7 +286,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		if graph.hasNode(root):
 			root = graph.getNode(root)
 		else:
-			print 'error - node %s in not in graph' % root
+			print('error - node %s in not in graph' % root)
 			sys.exit(-1)
 				
 		nodes = stack.profile.FrameworkIterator(graph).run(root)

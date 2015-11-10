@@ -39,6 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+from __future__ import print_function
 import shlex
 import subprocess
 import stack.commands
@@ -90,7 +91,7 @@ class Command(stack.commands.set.host.command):
 				megacmd += '%s ' % (flags)
 			megacmd += '-a%s > /dev/null 2>&1' % (adapter)
 
-			print 'megacmd: ', megacmd
+			print('megacmd: ', megacmd)
 
 		elif action == 'offline':
 			megacmd = '/opt/stack/sbin/MegaCli -pdoffline '
@@ -160,21 +161,21 @@ class Command(stack.commands.set.host.command):
 						msg = 'storage device at '
 						msg += '%d:%d ' % (encid, slot)
 						msg += 'is already online'
-						print msg
+						print(msg)
 					elif action == 'offline' and \
 						row['status'] == 'offline':
 
 						msg = 'storage device at '
 						msg += '%d:%d ' % (encid, slot)
 						msg += 'is already offline'
-						print msg
+						print(msg)
 					elif action == 'configure' and \
 						row['status'] != 'unconfigured':
 
 						msg = 'storage device at '
 						msg += '%d:%d ' % (encid, slot)
 						msg += 'must be "unconfigured"'
-						print msg
+						print(msg)
 					else:
 						self.setState(host, adapter,
 							encid, slot, action)
@@ -184,5 +185,5 @@ class Command(stack.commands.set.host.command):
 			if not found:
 				msg = 'storage device %d:%d ' % (encid, slot)
 				msg += 'was not found on host %s' % host
-				print msg
+				print(msg)
 

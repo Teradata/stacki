@@ -85,6 +85,7 @@
 # methds in the class
 #
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -159,7 +160,7 @@ class Application(stack.sql.Application):
 			id = row[0]
 			return id
 		else:
-			print "Node  %s does not exist!" % host 
+			print("Node  %s does not exist!" % host) 
 			sys.exit(-1)
 
 	#
@@ -186,7 +187,7 @@ class Application(stack.sql.Application):
 			self.nodelist = ['']
 	
 		if self.flags['verbose'][0]:
-			print "node list is: ", self.nodelist
+			print("node list is: ", self.nodelist)
 	#
 	# selectString -- if table is empty, then match all 
 	#    Formats a string suitable for: 
@@ -268,14 +269,14 @@ class Application(stack.sql.Application):
 	def runQuery(self,vmsg,query):
 		
 		if self.flags['verbose'][0] or self.flags['dryrun'][0]:
-			print vmsg + " query: ", query
+			print(vmsg + " query: ", query)
 
 		if self.flags['dryrun'][0] == 0:
 			try:
 				qval = self.execute(query)
 				return qval
 			except:
-				print "Error in query (%d) [%s]\n" % (qval,vmsg)
+				print("Error in query (%d) [%s]\n" % (qval,vmsg))
 				raise SQLerror, query 
 
 	def mergeDBandParameters(self):
@@ -288,9 +289,9 @@ class Application(stack.sql.Application):
 					self.dbvalues[self.paramMap[fname]]
 
 		if self.flags['verbose'][0]:
-			print "After Merge of DB-read Values, Parameters are:"
+			print("After Merge of DB-read Values, Parameters are:")
 			for p in self.params.keys():
-				print "%s = %s" % (p,self.params[p][0])
+				print("%s = %s" % (p,self.params[p][0]))
 		return 0
 
 	# ------------------   END GENERIC Helper Functions ---------------------

@@ -39,6 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+from __future__ import print_function
 import os
 import ConfigParser
 import stack.api
@@ -95,5 +96,5 @@ def GetHostAttr(host, attribute):
 
 
 if __name__ == "__main__":
-	print 'GetHostname() ->', GetHostname()
-	print 'GetHostAttr("localhost", "os") ->', GetHostAttr('localhost', 'os')
+	print('GetHostname() ->', GetHostname())
+	print('GetHostAttr("localhost", "os") ->', GetHostAttr('localhost', 'os'))

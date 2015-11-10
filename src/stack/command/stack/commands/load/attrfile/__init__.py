@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import csv
 import re
 import os
@@ -130,7 +130,7 @@ class Command(stack.commands.load.command,
 		#	0) is on a single line
 		for c in value:
 			if c in [ '\n' ]:
-				print 'value "%s" cannot be multi-line' % value
+				print('value "%s" cannot be multi-line' % value)
 				sys.exit(-1)
 
 	def checkAttr(self, attr):
@@ -145,21 +145,21 @@ class Command(stack.commands.load.command,
 			return
 
 		if ' ' in attr:
-                        print 'attribute "%s" cannot have a space character' \
-				% attr
+                        print('attribute "%s" cannot have a space character' \
+				% attr)
 			sys.exit(-1)
 
 		a = attr.split('/')
 		if len(a) > 2:
-                        print 'attribute "%s" cannot have more than one "/"' \
-				% attr
+                        print('attribute "%s" cannot have more than one "/"' \
+				% attr)
 			sys.exit(-1)
 
 		ctoken = '[A-Za-z_][A-Za-z0-9_]*$'
 		for t in a:
 			for token in t.split('.'):
 				if not re.match(ctoken, token):
-					print 'attribute "%s" contains an invalid character.\n"%s" must be a valid ctoken' % (attr, token)
+					print('attribute "%s" contains an invalid character.\n"%s" must be a valid ctoken' % (attr, token))
 					sys.exit(-1)
 
 

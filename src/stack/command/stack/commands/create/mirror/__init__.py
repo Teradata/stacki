@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import os
 import os.path
 import stat
@@ -301,7 +301,7 @@ class Command(stack.commands.create.command):
 		# If urlonly, just print what will be downloaded.
 		if urlstatus  == True:
 			rpms, err = self.reposync(repoid,repoconfig,newest,urlonly)
-			print rpms
+			print(rpms)
 			os.system('rm -fr %s' % repoid)
 
 		cwd = os.getcwd()

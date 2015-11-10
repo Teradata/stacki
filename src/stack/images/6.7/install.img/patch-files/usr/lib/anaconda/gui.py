@@ -21,6 +21,7 @@
 #            Michael Fulbright <msf@redhat.com>
 #
 
+from __future__ import print_function
 import os
 from flags import flags
 os.environ["GNOME_DISABLE_CRASH_DIALOG"] = "1"

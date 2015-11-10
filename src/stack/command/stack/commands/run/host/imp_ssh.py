@@ -1,6 +1,7 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
+from __future__ import print_function
 import stack.commands
 import threading
 import socket
@@ -96,7 +97,7 @@ class Implementation(stack.commands.Implementation):
 		for host in host_output:
 			if not collate:
 				if host_output[host]['output']:
-					print str(host_output[host]['output'])
+					print(str(host_output[host]['output']))
 			else:
 				out = host_output[host]['output'].split('\n')
 				for line in out:

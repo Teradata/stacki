@@ -50,6 +50,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
+from __future__ import print_function
 import os
 import os.path
 import rpm
@@ -129,16 +130,16 @@ class Rebuild:
 				pad = pad + ' '
 			prevLength = currLength
 
-			print data + pad + '\r',
+			print(data + pad + '\r', end=' ')
 			sys.stdout.flush()
 
 		log.close()
 
 		retval = r.close()
 		if retval == None:
-			print '          Success' + '\r'
+			print('          Success' + '\r')
 		else:
-			print
+			print()
 
 		return retval
 
@@ -188,7 +189,7 @@ class Rebuild:
 			rpminfo = self.ts.hdrFromFdno(fdno)
 			os.close(fdno)
 			requires = rpminfo[rpm.RPMTAG_REQUIRES]
-			print 'requires: ', requires
+			print('requires: ', requires)
 		except:
 			requires = None
 			pass
@@ -200,7 +201,7 @@ class Rebuild:
 	# the commands
 	#
 	def buildYumRepository(self):
-		print 'Building Yum Repository'
+		print('Building Yum Repository')
 		cmd = 'yum-arch -l %s' % (self.dist.getReleasePath())
 		os.system(cmd)
 		
@@ -255,7 +256,7 @@ class Rebuild:
 
 		for req in reqlist:
 			cmd = 'yum install %s' % (req)
-			print 'installRequiredPackages:cmd:',cmd
+			print('installRequiredPackages:cmd:',cmd)
 			os.system(cmd)
 
 		return
@@ -277,10 +278,10 @@ class Rebuild:
 					continue
 
 				if packager != 'Stack' and distro != 'Stack':
-					print '%s' % (rname.getName())
-					print '\tbuilt by: %s' % (packager)
-					print '\t\tfrom distribution: %s\n' \
-						% (distro)
+					print('%s' % (rname.getName()))
+					print('\tbuilt by: %s' % (packager))
+					print('\t\tfrom distribution: %s\n' \
+						% (distro))
 			except:
 				pass
 
@@ -324,7 +325,7 @@ class Rebuild:
 		logfile = os.path.join(self.donedir, pkg.getName() + '.log')
 		donefile = os.path.join(self.donedir, pkg.getName() + '.done')
 
-		print 'Building: %s' % (pkg.getName())
+		print('Building: %s' % (pkg.getName()))
 		cmd += ' 2>&1 '
 
 		if self.displayStatusLine(cmd, logfile) == None:

@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+from __future__ import print_function
 import os
 import sys
 import string
@@ -247,8 +247,8 @@ class Command(stack.commands.add.command):
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				list.append(arg)
 			else:
-				print "Cannot find %s or %s "\
-					"is not and ISO image" % (arg, arg)
+				print("Cannot find %s or %s "\
+					"is not and ISO image" % (arg, arg))
 		
 		for iso in list:	# have a set of iso files
 			self.runImplementation('mount_%s' % self.os, iso)

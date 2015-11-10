@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import M2Crypto
@@ -116,7 +117,7 @@ class Parallel(threading.Thread):
 		(status, reason) = vm.cmd('console', self.host)
 
 		if status != 0:
-			print 'command failed\n%s' % reason
+			print('command failed\n%s' % reason)
 
 
 class Command(stack.commands.Command,

@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -290,9 +291,9 @@ class GraphHandler(handler.ContentHandler,
 				try:
 					parser.feed(line)
 				except:
-					print 'XML parse error in ' + \
+					print('XML parse error in ' + \
 						'file %s ' % xmlFile + \
-						'on line %d\n' % linenumber
+						'on line %d\n' % linenumber)
 					raise
 				
 			fin.close()
@@ -1068,7 +1069,7 @@ class Node(stack.graph.Node):
 		return '%s"%s" [%s];' % (prefix, name, attrs)
 		
 	def drawDot(self, prefix=''):
-		print self.getDot(prefix)
+		print(self.getDot(prefix))
 		
 
 class Edge(stack.graph.Edge):
@@ -1131,7 +1132,7 @@ class FrameworkEdge(Edge):
 					
 	
 	def drawDot(self, prefix=''):
-		print self.getDot(prefix)
+		print(self.getDot(prefix))
 		
 
 
@@ -1157,7 +1158,7 @@ class OrderEdge(Edge):
 		return '%s"%s" -> "%s" [%s];' % (prefix, parent, child, attrs)
 
 	def drawDot(self, prefix=''):
-		print self.getDot(prefix)
+		print(self.getDot(prefix))
 		
 
 

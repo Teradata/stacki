@@ -110,6 +110,7 @@
 #
 #
 
+from __future__ import print_function
 import os
 import sys
 import stack.app
@@ -197,7 +198,7 @@ class App(stack.app.Application):
 		if len(self.args) > 0:
 			self.nodename = self.args[0]
 		else:
-			print '\n\t"nodename" was not specified\n'
+			print('\n\t"nodename" was not specified\n')
 			self.usage()
 			sys.exit(-1)
 

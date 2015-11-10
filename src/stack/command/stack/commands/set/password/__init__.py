@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import pwd
 import getpass
@@ -122,7 +123,7 @@ class Command(stack.commands.Command):
 			if new_password == confirm_new_password:
 				break
 			else:
-				print 'Sorry, the passwords do not match'
+				print('Sorry, the passwords do not match')
 		
 		self.runPlugins( [ old_password, new_password ] )
 

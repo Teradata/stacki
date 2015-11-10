@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import shutil
 import stack.file
@@ -195,7 +196,7 @@ class Bootable:
 		import stat
 		import stack
 
-		print 'Applying boot files'
+		print('Applying boot files')
 
 		name = 'stack-images'
 		RPM = self.findFile(name)

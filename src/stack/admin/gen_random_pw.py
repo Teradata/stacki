@@ -1,5 +1,6 @@
 #!@PYTHON@
 
+from __future__ import print_function
 import os
 import sys
 import base64
@@ -41,6 +42,6 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		type = sys.argv[1].strip()
 	if type == 'crypt':
-		print p.get_crypt_pw()
+		print(p.get_crypt_pw())
 	else:
-		print p.get_cleartext_pw()
+		print(p.get_cleartext_pw())

@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import sys
 import string
 import stack.commands
@@ -180,8 +181,8 @@ class Command(stack.commands.set.host.command):
 				args    = row['args']
 
 		if not kernel:
-			print 'bootaction "%s" for host "%s" is invalid' % \
-				(action, host)
+			print('bootaction "%s" for host "%s" is invalid' % \
+				(action, host))
 			sys.exit(-1)
 
 		# If the ksdevice= is set fill in the network

@@ -1,4 +1,5 @@
 #!/opt/stack/bin/python
+from __future__ import print_function
 import os
 import subprocess
 import stack.media
@@ -630,7 +631,7 @@ class AddPalletsDialog(wx.Dialog):
 							3, p['url'])
 						self.page.pallets.append(p)
 				else:
-					print e
+					print(e)
 					wx.MessageBox('Sorry, cannot recognize ' + \
 						'the URL', 'Invalid URL',
 						wx.OK | wx.ICON_ERROR)
@@ -747,9 +748,9 @@ for s in sys.argv:
 	elif s == '--no-partition':
 		no_partition = True
 
-print 'Set network during boss_config: ' + str(config_net)
-print 'Use snack installation instead of wx: ' + str(noX)
-print 'Disable partitioning: ' + str(no_partition)
+print('Set network during boss_config: ' + str(config_net))
+print('Use snack installation instead of wx: ' + str(noX))
+print('Disable partitioning: ' + str(no_partition))
 
 #
 # make sure the installation ISO is mounted on /mnt/cdrom. it could be a
@@ -790,5 +791,5 @@ else:
 		app.TopWindow.Show()
 		app.MainLoop()
 	except:
-		print "Falling back to snack installation..."
+		print("Falling back to snack installation...")
 		execfile("/opt/stack/bin/boss_config_snack.py")

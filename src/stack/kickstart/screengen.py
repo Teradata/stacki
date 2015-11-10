@@ -92,6 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -313,38 +314,38 @@ class Generator(osGenerator):
 	##
 	def generateScreen(self, screen, i):
 		if self.screens[i].has_key('code'):
-			print self.screens[i]['code']
-			print ""
+			print(self.screens[i]['code'])
+			print("")
 
-		print "function screen%d()" % (i)
-		print "{"
+		print("function screen%d()" % (i))
+		print("{")
 
-		print "\tvar\td_title = " + \
-			"top.workarea.document.createElement('div');"
-		print "\tvar\td_vars = " + \
-			"top.workarea.document.createElement('div');"
-		print "\tvar\td_help = " + \
-			"top.help.document.createElement('div');"
-		print "\tvar\td_buttons = " + \
-			"top.workarea.document.createElement('div');"
-		print "\tvar\thelptext;"
+		print("\tvar\td_title = " + \
+			"top.workarea.document.createElement('div');")
+		print("\tvar\td_vars = " + \
+			"top.workarea.document.createElement('div');")
+		print("\tvar\td_help = " + \
+			"top.help.document.createElement('div');")
+		print("\tvar\td_buttons = " + \
+			"top.workarea.document.createElement('div');")
+		print("\tvar\thelptext;")
 
-		print ""
+		print("")
 
 		#
 		# output the screen title
 		#
-		print "\td_title.id = 'screen-title';"
-		print "\td_title.appendChild(top.addTitleText" + \
-			"('%s'));" % (self.screens[i]['title'])
-		print "\ttop.screen_title[%d] = d_title;" % (i)
+		print("\td_title.id = 'screen-title';")
+		print("\td_title.appendChild(top.addTitleText" + \
+			"('%s'));" % (self.screens[i]['title']))
+		print("\ttop.screen_title[%d] = d_title;" % (i))
 
-		print ""
+		print("")
 
 		#
 		# output the screen variables
 		#
-		print "\td_vars.id = 'screen-variables';"
+		print("\td_vars.id = 'screen-variables';")
 		for variable in self.screens[i]['variables']:
 			if not variable.has_key('type'):
 				inputtype = 'text'
@@ -380,65 +381,65 @@ class Generator(osGenerator):
 					(variable['validate'])
 
 			if inputtype == 'menu':
-				print "\tvar options = new Array();"
+				print("\tvar options = new Array();")
 				if variable.has_key('option'):
 					j = 0
 					for option in variable['option']:
 						o = "\toptions[%d] = " % (j)
 						o += "'%s';" % (option)
-						print o
+						print(o)
 						j = j +1
 
-				print "\td_vars.appendChild(top.addToMenu(" + \
+				print("\td_vars.appendChild(top.addToMenu(" + \
 					"'%s'" % (variable['label']) + \
 					", '%s'" % (variable['name']) + \
 					", '%s'" % (size) + \
 					", %s" % (validate) + \
 					", options" + \
-					", '%s'));" % (value)
+					", '%s'));" % (value))
 			else:
-				print "\td_vars.appendChild(top.addToForm(" + \
+				print("\td_vars.appendChild(top.addToForm(" + \
 					"'%s'" % (inputtype) + \
 					", '%s'" % (variable['label']) + \
 					", '%s'" % (variable['name']) + \
 					", '%s'" % (size) + \
 					", '%s'" % (value) + \
-					", %s));" % (validate)
-		print "\ttop.screen_variables[%d] = d_vars;" % (i)
+					", %s));" % (validate))
+		print("\ttop.screen_variables[%d] = d_vars;" % (i))
 
-		print ""
+		print("")
 
 		#
 		# output the screen help
 		#
-		print "\td_help.id = 'screen-help';"
+		print("\td_help.id = 'screen-help';")
 		for variable in self.screens[i]['variables']:
 			if not variable.has_key('help'):
 				continue
 			else:
 				help = variable['help']
 
-			print "\td_help.appendChild(top.addToHelp(" + \
+			print("\td_help.appendChild(top.addToHelp(" + \
 				"'%s:'" % (variable['label']) + \
-				", '%s'));" % (help)
-		print "\ttop.screen_help[%s] = d_help;" % (i)
+				", '%s'));" % (help))
+		print("\ttop.screen_help[%s] = d_help;" % (i))
 
 		#
 		# output the screen buttons
 		#
-		print ""
-		print "\td_buttons.id = 'screen-buttons';"
-		print "\td_buttons.appendChild(" + \
-			"top.addButton('Back', top.prevScreen));"
-		print "\td_buttons.appendChild(" + \
+		print("")
+		print("\td_buttons.id = 'screen-buttons';")
+		print("\td_buttons.appendChild(" + \
+			"top.addButton('Back', top.prevScreen));")
+		print("\td_buttons.appendChild(" + \
 			"top.addButton('Next', " + \
-				"validate_screen%d));" % (i)
-		print "\ttop.screen_buttons[%s] = d_buttons;" % (i)
+				"validate_screen%d));" % (i))
+		print("\ttop.screen_buttons[%s] = d_buttons;" % (i))
 
 		#
 		# end the 'function screen[0-9]*' function
 		#
-		print "}"
+		print("}")
 
 		#
 		# now output the form validation code. this is just a
@@ -460,53 +461,53 @@ class Generator(osGenerator):
 		#
 		# now print out the screen validation code
 		#
-		print ""
-		print "function validate_screen%d(e)" % (i)
-		print "{"
-		print "\tvar retval = true;"
-		print ""
-		print "\tif ((" + \
-			string.join(validatefunctions, ' && ') + ")) {"
-		print "\t\ttop.savevalues();"
-		print "\t\ttop.nextScreen();"
-		print "\t} else {"
-		print "\t\tretval = false;"
-		print "\t}"
-		print ""
-		print "\treturn(retval);"
-		print "}"
-		print ""
+		print("")
+		print("function validate_screen%d(e)" % (i))
+		print("{")
+		print("\tvar retval = true;")
+		print("")
+		print("\tif ((" + \
+			string.join(validatefunctions, ' && ') + ")) {")
+		print("\t\ttop.savevalues();")
+		print("\t\ttop.nextScreen();")
+		print("\t} else {")
+		print("\t\tretval = false;")
+		print("\t}")
+		print("")
+		print("\treturn(retval);")
+		print("}")
+		print("")
 
 		return
 
 
 	def generate(self):
-		print '<html>'
-		print '<head>'
+		print('<html>')
+		print('<head>')
 
-		print '<script language="JavaScript">'
+		print('<script language="JavaScript">')
 
 		i = 0;
 		for screen in self.screens:
 			self.generateScreen(screen, i)
 			i = i + 1
 
-		print ''
+		print('')
 
-		print 'function initScreens()'
-		print '{'
+		print('function initScreens()')
+		print('{')
 		i = 0;
 		for screen in self.screens:
 			#
 			# call the screen functions to initialize them
 			#
-			print '\tself.screen%d();' % (i)
+			print('\tself.screen%d();' % (i))
 			i = i + 1
-		print '}'
+		print('}')
 
-		print '</script>'
-		print '</head>'
-		print '</html>'
+		print('</script>')
+		print('</head>')
+		print('</html>')
 
 		return
 

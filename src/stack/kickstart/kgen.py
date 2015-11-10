@@ -400,6 +400,7 @@
 # - added <tree><node> tags
 #
 
+from __future__ import print_function
 import os
 import sys
 import string
@@ -459,9 +460,9 @@ class App(stack.app.Application):
 		
 		self.generator.parse(file.read())
 
-		print '#'
-		print '# %s version %s' % (self.usage_name, self.usage_version)
-		print '#'
+		print('#')
+		print('# %s version %s' % (self.usage_name, self.usage_version))
+		print('#')
 
 		sections = self.sections
 		if not sections:
@@ -478,7 +479,7 @@ class App(stack.app.Application):
 			list += self.generator.generate(s)
 
 		for line in list:
-			print line.rstrip()
+			print(line.rstrip())
 
 
 app = App(sys.argv)

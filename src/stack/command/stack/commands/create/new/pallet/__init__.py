@@ -90,6 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
+from __future__ import print_function
 import re
 import os
 import shutil
@@ -246,7 +247,7 @@ class Command(stack.commands.create.new.command):
 			f.write (text)
 			f.close()
 		except IOError:
-			print "Error writing file %s" % name
+			print("Error writing file %s" % name)
 
 
 	def update(self, namein, nameout):
