@@ -216,7 +216,7 @@ class WelcomeWindow(InstallWindow):
 
 	def regenerateKickstartFile(self):
 		bossenv = os.environ.copy()
-		if bossenv.has_key('LD_LIBRARY_PATH'):
+		if 'LD_LIBRARY_PATH' in bossenv:
 			bossenv['LD_LIBRARY_PATH'] = \
 				'%s:/opt/stack/lib:/tmp/updates/lib64' \
 				% bossenv['LD_LIBRARY_PATH']

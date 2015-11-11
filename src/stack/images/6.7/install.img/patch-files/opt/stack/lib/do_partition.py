@@ -120,7 +120,7 @@ def backend(nodestorage, disks, raids):
 		dbpartinfo = db_partition_info.dbpartinfo
 
 	for disk in nodedisks.keys():
-		if dbpartinfo.has_key(disk) and \
+		if disk in dbpartinfo and \
 			nodestorage.compareDiskInfo(dbpartinfo[disk],
 				nodedisks[disk]):
 

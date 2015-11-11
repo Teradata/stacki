@@ -291,7 +291,7 @@ def setupPythonPath():
 
 def setupEnvironment():
     # Silly GNOME stuff
-    if os.environ.has_key('HOME') and not os.environ.has_key("XAUTHORITY"):
+    if 'HOME' in os.environ and "XAUTHORITY" not in os.environ:
         os.environ['XAUTHORITY'] = os.environ['HOME'] + '/.Xauthority'
     os.environ['HOME'] = '/tmp'
     os.environ['LC_NUMERIC'] = 'C'
@@ -305,14 +305,14 @@ def setupEnvironment():
 
     # we can't let the LD_PRELOAD hang around because it will leak into
     # rpm %post and the like.  ick :/
-    if os.environ.has_key("LD_PRELOAD"):
+    if "LD_PRELOAD" in os.environ:
         del os.environ["LD_PRELOAD"]
 
     os.environ["GLADEPATH"] = "/tmp/updates/:/tmp/updates/ui/:ui/:/usr/share/anaconda/ui/:/usr/share/python-meh/"
     os.environ["PIXMAPPATH"] = "/tmp/updates/pixmaps/:/tmp/updates/:/tmp/product/pixmaps/:/tmp/product/:pixmaps/:/usr/share/anaconda/pixmaps/:/usr/share/pixmaps/:/usr/share/anaconda/:/usr/share/python-meh/"
 
 def setupLoggingFromOpts(opts):
-    if opts.loglevel and anaconda_log.logLevelMap.has_key(opts.loglevel):
+    if opts.loglevel and opts.loglevel in anaconda_log.logLevelMap:
         level = anaconda_log.logLevelMap[opts.loglevel]
         anaconda_log.logger.loglevel = level
         anaconda_log.setHandlersLevel(log, level)
@@ -551,7 +551,7 @@ class Anaconda(object):
 
         if display_mode == 't':
             from text import InstallInterface
-            if not os.environ.has_key("LANG"):
+            if "LANG" not in os.environ:
                 os.environ["LANG"] = "en_US.UTF-8"
 
         if display_mode == 'c':
@@ -905,7 +905,7 @@ if __name__ == "__main__":
     if iutil.memInstalled() < isys.MIN_GUI_RAM:
         flags.vncquestion = False
 
-    if os.environ.has_key('DISPLAY'):
+    if 'DISPLAY' in os.environ:
         flags.preexisting_x11 = True
 
     if opts.display_mode == 't' and flags.vncquestion: #we prefer vnc over text mode, so ask about that
@@ -947,7 +947,7 @@ if __name__ == "__main__":
 
     # XXX kind of hacky - need to remember if we're running on an existing
     #                     X display later to avoid some initilization steps
-    if os.environ.has_key('DISPLAY') and opts.display_mode == 'g':
+    if 'DISPLAY' in os.environ and opts.display_mode == 'g':
         x_already_set = 1
     else:
         x_already_set = 0

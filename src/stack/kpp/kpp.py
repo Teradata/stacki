@@ -926,11 +926,11 @@ class App(stack.sql.Application):
 					depsHash[node.name] = None
 
 			for dep,gen in deps:
-				if not nodesHash.has_key(dep.name):
+				if dep.name not in nodesHash:
 					depsHash[dep.name] = None
 
 			for node,arch,release in nodes:
-				if depsHash.has_key(node.name):
+				if node.name in depsHash:
 					nodesHash[node.name] = None
 
 			list = []
@@ -1208,7 +1208,7 @@ class GraphHandler(handler.ContentHandler,
 		self.text		= ''
 		self.attrs.order.gen	= self.attrs.order.default.gen
 		
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.gen = attrs['gen']
 
 
@@ -1224,7 +1224,7 @@ class GraphHandler(handler.ContentHandler,
 		self.text		= ''
 		self.attrs.order.gen	= self.attrs.order.default.gen
 
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.gen = attrs['gen']
 
 	def endElement_tail(self, name):
@@ -1240,9 +1240,9 @@ class GraphHandler(handler.ContentHandler,
 		self.attrs.main.arch	= self.attrs.main.default.arch
 		self.attrs.main.release	= self.attrs.main.default.release
 
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			self.attrs.main.arch = attrs['arch']
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			self.attrs.main.release = attrs['release']
 
 	def endElement_to(self, name):
@@ -1258,9 +1258,9 @@ class GraphHandler(handler.ContentHandler,
 		self.attrs.main.arch	= self.attrs.main.default.arch
 		self.attrs.main.release	= self.attrs.main.default.release
 		
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			self.attrs.main.arch = attrs['arch']
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			self.attrs.main.release = attrs['release']
 
 
@@ -1272,15 +1272,15 @@ class GraphHandler(handler.ContentHandler,
 	# <order>
 
 	def startElement_order(self, name, attrs):
-		if attrs.has_key('head'):
+		if 'head' in attrs:
 			self.attrs.order.head = attrs['head']
 		else:
 			self.attrs.order.head = None
-		if attrs.has_key('tail'):
+		if 'tail' in attrs:
 			self.attrs.order.tail = attrs['tail']
 		else:
 			self.attrs.order.tail = None
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.default.gen = attrs['gen']
 		else:
 			self.attrs.order.default.gen = None
@@ -1295,19 +1295,19 @@ class GraphHandler(handler.ContentHandler,
 	# <edge>
 	
 	def startElement_edge(self, name, attrs):
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			self.attrs.main.default.arch = attrs['arch']
 		else:
 			self.attrs.main.default.arch = None
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			self.attrs.main.default.release = attrs['release']
 		else:
 			self.attrs.main.default.release	= None
-		if attrs.has_key('to'):
+		if 'to' in attrs:
 			self.attrs.main.parent = attrs['to']
 		else:
 			self.attrs.main.parent = None
-		if attrs.has_key('from'):
+		if 'from' in attrs:
 			self.attrs.main.child = attrs['from']
 		else:
 			self.attrs.main.child = None
@@ -1373,7 +1373,7 @@ class SiteNodeHandler(handler.ContentHandler,
 			varVal = varVal.replace("\\'","'")
 			self.entities[varName] = varVal
 		elif varRef:
-			if self.entities.has_key(varRef):
+			if varRef in self.entities:
 				self.entities[varName] = self.entities[varRef]
 			else:
 				self.entities[varName] = ''
@@ -1500,7 +1500,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 		if varVal:
 			self.entities[varName] = varVal
 		elif varRef:
-			if self.entities.has_key(varRef):
+			if varRef in self.entities:
 				self.entities[varName] = self.entities[varRef]
 			else:
 				self.entities[varName] = ''

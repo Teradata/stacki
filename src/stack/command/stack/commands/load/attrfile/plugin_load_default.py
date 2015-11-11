@@ -62,7 +62,7 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 			if target == 'default':
 				continue
 			elif target == 'global':
-				if not attrs[target].has_key('environment'):
+				if 'environment' not in attrs[target]:
 					cmd = 'remove.attr'
 					arg = None
 				else:
@@ -90,7 +90,7 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 			if target == 'default':
 				continue
 			elif target == 'global':
-				if not attrs[target].has_key('environment'):
+				if 'environment' not in attrs[target]:
 					cmd = 'set.attr'
 					arg = None
 				else:

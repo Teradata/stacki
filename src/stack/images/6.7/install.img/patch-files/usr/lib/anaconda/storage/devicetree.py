@@ -1967,7 +1967,7 @@ class DeviceTree(object):
         log_method_call(self, name=device.name, type=device.format.type)
 
         name = udev_device_get_multipath_name(info)
-        if self.__multipaths.has_key(name):
+        if name in self.__multipaths:
             mp = self.__multipaths[name]
             mp.addParent(device)
         else:
@@ -2365,7 +2365,7 @@ class DeviceTree(object):
             new_devices = udev_get_block_devices()
 
             for new_device in new_devices:
-                if not old_devices.has_key(new_device['name']):
+                if new_device['name'] not in old_devices:
                     old_devices[new_device['name']] = new_device
                     devices.append(new_device)
 

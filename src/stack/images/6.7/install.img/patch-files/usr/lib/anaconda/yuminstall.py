@@ -496,7 +496,7 @@ class AnacondaYum(YumSorter):
         # whatever) is mounted yet since loader only mounts the source
         # for the stage2 image.  We need to set up the source mount
         # now.
-        if flags.cmdline.has_key("preupgrade"):
+        if "preupgrade" in flags.cmdline:
             path = "/var/cache/yum/preupgrade"
             self.anaconda.methodstr = "hd::%s" % path 
             self._baseRepoURL = "file:///mnt/sysimage/%s" % path
@@ -1216,7 +1216,7 @@ class AnacondaYum(YumSorter):
 
             for (descr, (ty, mount, need)) in probs.value: # FIXME: probs.value???
                 log.error("%s: %s" %(probTypes[ty], descr))
-                if not uniqueProbs.has_key(ty) and probTypes.has_key(ty):
+                if ty not in uniqueProbs and ty in probTypes:
                     uniqueProbs[ty] = probTypes[ty]
 
                 if ty == rpm.RPMPROB_DISKSPACE:
@@ -2005,7 +2005,7 @@ debuglevel=6
             repo.dirCleanup()
 
         # expire yum caches on upgrade
-        if (flags.cmdline.has_key("preupgrade") or anaconda.id.getUpgrade()) and os.path.exists("%s/var/cache/yum" %(anaconda.rootPath,)):
+        if ("preupgrade" in flags.cmdline or anaconda.id.getUpgrade()) and os.path.exists("%s/var/cache/yum" %(anaconda.rootPath,)):
             log.info("Expiring yum caches")
             try:
                 iutil.execWithRedirect("yum", ["clean", "all"],
@@ -2015,7 +2015,7 @@ debuglevel=6
                 pass
 
         # nuke preupgrade
-        if flags.cmdline.has_key("preupgrade") and os.path.exists("%s/var/cache/yum/anaconda-upgrade" %(anaconda.rootPath,)):
+        if "preupgrade" in flags.cmdline and os.path.exists("%s/var/cache/yum/anaconda-upgrade" %(anaconda.rootPath,)):
             try:
                 shutil.rmtree("%s/var/cache/yum/anaconda-upgrade" %(anaconda.rootPath,))
             except:

@@ -54,7 +54,7 @@ class App(stack.sql.Application):
 				a = re.split('[0-9]+$', dev)
 				devbasename = a[0]
 
-			if not partinfo.has_key(devbasename):
+			if devbasename not in partinfo:
 				partinfo[devbasename] = [ s ]
 			else:
 				partinfo[devbasename].append(s)

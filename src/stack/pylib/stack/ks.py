@@ -194,13 +194,13 @@ class KickstartFile:
                     key = string.split(s[1:])[0]
                     val = []
                 else:
-                    if not self.dict.has_key(key):
+                    if key not in self.dict:
                         self.dict[key] = [s]
                     else:
                         self.dict[key].append(s)
         
     def getSection(self, name):
-        if self.dict.has_key(name):
+        if name in self.dict:
             return self.dict[name]
         else:
             return None

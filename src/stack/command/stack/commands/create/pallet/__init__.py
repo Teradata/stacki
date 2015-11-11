@@ -282,7 +282,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 				else:
 					name = file.getFullName()
 
-				if not dict.has_key(name) or file >= dict[name]:
+				if name not in dict or file >= dict[name]:
 					dict[name] = file
 					
 		# convert the dictionary to a list and return all the RPMFiles

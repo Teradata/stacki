@@ -27,7 +27,7 @@ from flags import flags
 os.environ["GNOME_DISABLE_CRASH_DIALOG"] = "1"
 
 # we only want to enable the accessibility stuff if requested for now...
-if flags.cmdline.has_key("dogtail"):
+if "dogtail" in flags.cmdline:
     os.environ["GTK_MODULES"] = "gail:atk-bridge"
 
 import string
@@ -1338,7 +1338,7 @@ class InstallInterface(InstallInterfaceBase):
 
 class InstallControlWindow:
     def setLanguage (self):
-        if not self.__dict__.has_key('window'): return
+        if 'window' not in self.__dict__: return
 
         self.reloadRcQueued = 1
 

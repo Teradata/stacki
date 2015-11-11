@@ -273,7 +273,7 @@ class InstallCGI:
 		# build the distro
 		#
 		pythonpath = None
-		if os.environ.has_key('PYTHONPATH'):
+		if 'PYTHONPATH' in os.environ:
 			pythonpath = os.environ['PYTHONPATH']
 
 		os.environ['PYTHONPATH'] = '/tmp/updates'

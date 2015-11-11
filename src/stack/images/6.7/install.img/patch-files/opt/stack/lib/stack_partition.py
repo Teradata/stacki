@@ -392,7 +392,7 @@ class StackPartition:
 				partinfo.append("%s,,%s,,,,,," % (devname,
 					diskinfo[devname]['size']))
 
-			if diskinfo[devname].has_key('parts'):
+			if 'parts' in diskinfo[devname]:
 				partinfo += self.formatPartedNodePartInfo(
 					devname, diskinfo[devname]['parts'])
 
@@ -437,7 +437,7 @@ class StackPartition:
 						break
 
 				if key != '':
-					if not nodedisks.has_key(key):
+					if key not in nodedisks:
 						nodedisks[key] = [n]
 					else:
 						nodedisks[key].append(n)
@@ -452,7 +452,7 @@ class StackPartition:
 			return [ (disk, 'dummy') ]
 
 		diskinfo = self.getDiskInfo(disk)
-		if not diskinfo[disk].has_key('parts'):
+		if 'parts' not in diskinfo[disk]:
 			return []
 
 		if len(disk) > 4 and disk[0:5] == 'cciss':
