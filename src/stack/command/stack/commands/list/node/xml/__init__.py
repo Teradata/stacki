@@ -400,7 +400,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 				
 			try:
 				self.addText('%s\n' % node.getXML())
-			except Exception, msg:
+			except Exception as msg:
 				raise stack.util.KickstartNodeError, \
 				      "in %s node: %s" \
 				      % (node, msg)

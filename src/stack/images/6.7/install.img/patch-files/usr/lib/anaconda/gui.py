@@ -346,7 +346,7 @@ def getPixbuf(file):
 
     try:
         pixbuf = gtk.gdk.pixbuf_new_from_file(fn)
-    except RuntimeError, msg:
+    except RuntimeError as msg:
         log.error("unable to read %s: %s" %(file, msg))
         pixbuf = None
     
@@ -927,7 +927,7 @@ class DetailedMessageWindow(MessageWindow):
                 if __builtins__.get("type")(line) != unicode:
                     try:
                         line = unicode(line, encoding='utf-8')
-                    except UnicodeDecodeError, e:
+                    except UnicodeDecodeError as e:
                         log.error("UnicodeDecodeException: line = %s" % (line,))
                         log.error("UnicodeDecodeException: %s" % (str(e),))
 
@@ -1439,7 +1439,7 @@ class InstallControlWindow:
                                                  found[2])
                 newScreenClass = loaded.__dict__[className]
                 break
-            except ImportError, e:
+            except ImportError as e:
                 print(e)
                 win = MessageWindow(_("Error!"),
                                     _("An error occurred when attempting "

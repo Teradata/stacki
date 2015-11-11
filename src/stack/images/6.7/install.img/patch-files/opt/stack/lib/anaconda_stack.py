@@ -537,7 +537,7 @@ class Anaconda(object):
 
             try:
                 from gui import InstallInterface
-            except Exception, e:
+            except Exception as e:
                 stdoutLog.error("Exception starting GUI installer: %s" %(e,))
                 # if we're not going to really go into GUI mode, we need to get
                 # back to vc1 where the text install is going to pop up.
@@ -1076,7 +1076,7 @@ if __name__ == "__main__":
 
            try:
                fr = urlgrabber.urlopen(opts.dogtail)
-           except urlgrabber.grabber.URLGrabError, e:
+           except urlgrabber.grabber.URLGrabError as e:
                log.error("Could not retrieve Dogtail script from %s.\nError was\n%s" % (opts.dogtail, e))
                fr = None
                            
@@ -1096,7 +1096,7 @@ if __name__ == "__main__":
                    # we are in the parent, sleep to give time for the testcase to initialize
                    # todo: is this needed, how to avoid possible race conditions
                    time.sleep(1)
-       except Exception, e:
+       except Exception as e:
            log.error("Exception %s while running Dogtail testcase" % e)
 
     if opts.lang:
@@ -1191,7 +1191,7 @@ if __name__ == "__main__":
 
     try:
         anaconda.intf.run(anaconda)
-    except SystemExit, code:
+    except SystemExit as code:
         anaconda.intf.shutdown()
 
     if anaconda.isKickstart and anaconda.id.ksdata.reboot.eject:

@@ -283,7 +283,7 @@ class PyBuildExt(build_ext):
 
         try:
             build_ext.build_extension(self, ext)
-        except (CCompilerError, DistutilsError), why:
+        except (CCompilerError, DistutilsError) as why:
             self.announce('WARNING: building of extension "%s" failed: %s' %
                           (ext.name, sys.exc_info()[1]))
             self.failed.append(ext.name)
@@ -319,7 +319,7 @@ class PyBuildExt(build_ext):
             self.get_ext_filename(self.get_ext_fullname(ext.name)))
         try:
             imp.load_dynamic(ext.name, ext_filename)
-        except ImportError, why:
+        except ImportError as why:
             self.failed.append(ext.name)
             self.announce('*** WARNING: renaming "%s" since importing it'
                           ' failed: %s' % (ext.name, why), level=3)
@@ -737,7 +737,7 @@ class PyBuildExt(build_ext):
                     m = openssl_ver_re.match(line)
                     if m:
                         openssl_ver = eval(m.group(1))
-            except IOError, msg:
+            except IOError as msg:
                 print("IOError while reading opensshv.h:", msg)
                 pass
 

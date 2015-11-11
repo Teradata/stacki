@@ -486,11 +486,11 @@ app = App(sys.argv)
 app.parseArgs()
 try:
 	app.run()
-except KickstartError, msg:
+except KickstartError as msg:
 	sys.stderr.write("kgen error - %s\n" % msg)
 	sys.exit(-1)
 
-except SAXParseException, msg:
+except SAXParseException as msg:
 	sys.stderr.write("kgen XML parse exception: %s\n" % msg)
 	sys.exit(-1)
 

@@ -829,7 +829,7 @@ class InsertEthers(GUI):
 					raise InsertError,\
 					 "Node %s already exists" % self.hostname
 
-		except (ValueError, InsertError), msg:
+		except (ValueError, InsertError) as msg:
 			self.errorGUI(msg)
 			self.endGUI()
 			sys.stderr.write(_("%s\n") % str(msg))
@@ -866,7 +866,7 @@ class InsertEthers(GUI):
 				except InsertDone:
 					suggest_done = 1
 
-				except (ValueError, InsertError), msg:
+				except (ValueError, InsertError) as msg:
 					self.warningGUI(msg)
 				continue
 
@@ -876,7 +876,7 @@ class InsertEthers(GUI):
 			if access_line:
 				try:
 					self.listenKs(access_line)
-				except InsertError, msg:
+				except InsertError as msg:
 					self.warningGUI(msg)
 				continue
 
@@ -1004,7 +1004,7 @@ app = App(sys.argv)
 app.parseArgs()
 try:
 	app.run()
-except Exception, msg:
+except Exception as msg:
 	app.cleanup()
 	sys.stderr.write('error - ' + str(msg) + '\n')
         syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)

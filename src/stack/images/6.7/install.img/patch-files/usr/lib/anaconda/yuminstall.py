@@ -189,7 +189,7 @@ class AnacondaCallback:
                     else:
                         retries += 1
                         continue
-                except yum.Errors.RepoError, e:
+                except yum.Errors.RepoError as e:
                     continue
             # STACKI
 
@@ -219,7 +219,7 @@ class AnacondaCallback:
                 except URLGrabError as e:
                     log.error("URLGrabError: %s" % (e,))
                     self.ayum._handleFailure(po, trynumber)
-                except yum.Errors.RepoError, e:
+                except yum.Errors.RepoError as e:
                     continue
             self.inProgressPo = po
 
@@ -332,7 +332,7 @@ class AnacondaYumRepo(YumRepository):
                 for f in filter(os.path.isfile, glob.glob("%s/*" % (cachedir))):
                     try:
                         os.unlink(f)
-                    except Exception, e:
+                    except Exception as e:
                         log.debug("error %s removing: %s" %(e,f))
             elif not self.needsNetwork() or self.name == "Installation Repo" or self.id.startswith("anaconda-"):
                 log.debug("Removing cachedir: %s" % (cachedir))
@@ -995,7 +995,7 @@ class AnacondaYum(YumSorter):
                 self._handleFailure(po, trynumber)
             except IOError:
                 self._handleFailure(po, trynumber)
-            except yum.Errors.RepoError, e:
+            except yum.Errors.RepoError as e:
                 continue
 
     def _handleFailure(self, package, trynumber=YUM_DOWNLOAD_RETRIES):
@@ -1156,7 +1156,7 @@ class AnacondaYum(YumSorter):
                 self.populateTs(keepold=0)
                 self.dsCallback.pop()
                 self.dsCallback = None
-            except RepoError, e:
+            except RepoError as e:
                 msg = _("There was an error running your transaction for "
                         "the following reason: %s\n") % str(e)
 
@@ -1200,7 +1200,7 @@ class AnacondaYum(YumSorter):
 
         try:
             self.runTransaction(cb=cb)
-        except YumBaseError, probs:
+        except YumBaseError as probs:
             # FIXME: we need to actually look at these problems...
             probTypes = { rpm.RPMPROB_NEW_FILE_CONFLICT : _('file conflicts'),
                           rpm.RPMPROB_FILE_CONFLICT : _('file conflicts'),
@@ -1441,7 +1441,7 @@ debuglevel=6
                 # groups later
                 for txmbr in self.ayum.tsInfo.getMembers():
                     txmbr.groups = yum.misc.unique(txmbr.groups)
-            except (GroupsError, NoSuchGroup, RepoError), e:
+            except (GroupsError, NoSuchGroup, RepoError) as e:
                 buttons = [_("_Exit installer"), _("_Retry")]
             else:
                 break # success
@@ -1493,7 +1493,7 @@ debuglevel=6
                     fn(repo)
                     if callback:
                         callback.disconnect()
-                except RepoError, e:
+                except RepoError as e:
                     if callback:
                         callback.disconnect()
                     if repo.needsNetwork() and not network.hasActiveNetDev():
@@ -1715,7 +1715,7 @@ debuglevel=6
                         return DISPATCH_BACK
 
                 break
-            except RepoError, e:
+            except RepoError as e:
                 # FIXME: would be nice to be able to recover here
                 rc = anaconda.intf.messageWindow(_("Error"),
                                _("Unable to read package metadata. This may be "
@@ -1779,7 +1779,7 @@ debuglevel=6
             for d in ("/selinux", "/dev", "/proc/bus/usb"):
                 try:
                     isys.umount(anaconda.rootPath + d, removeDir = False)
-                except Exception, e:
+                except Exception as e:
                     log.error("unable to unmount %s: %s" %(d, e))
             return
 
@@ -1842,7 +1842,7 @@ debuglevel=6
                     os.symlink("%s/%s" %(anaconda.rootPath, path), "%s" %(path,))
                 else:
                     log.warning("%s already exists as a symlink to %s" %(path, os.readlink(path),))
-        except Exception, e:
+        except Exception as e:
             # how this could happen isn't entirely clear; log it in case
             # it does and causes problems later
             log.error("error creating symlink, continuing anyway: %s" %(e,))
@@ -1851,17 +1851,17 @@ debuglevel=6
         if flags.selinux:
             try:
                 os.mkdir(anaconda.rootPath + "/selinux")
-            except Exception, e:
+            except Exception as e:
                 pass
             try:
                 isys.mount("/selinux", anaconda.rootPath + "/selinux", "selinuxfs")
-            except Exception, e:
+            except Exception as e:
                 log.error("error mounting selinuxfs: %s" %(e,))
 
         # For usbfs
         try:
             isys.mount("/proc/bus/usb", anaconda.rootPath + "/proc/bus/usb", "usbfs")
-        except Exception, e:
+        except Exception as e:
             log.error("error mounting usbfs: %s" %(e,))
 
         # write out the fstab
@@ -2044,7 +2044,7 @@ debuglevel=6
         try:
             grp = self.ayum.comps.return_group(group)
             if grp.selected: return True
-        except yum.Errors.GroupsError, e:
+        except yum.Errors.GroupsError as e:
             pass
         return False
 
@@ -2067,7 +2067,7 @@ debuglevel=6
             mbrs = self.ayum.selectGroup(group, group_package_types=types)
             if len(mbrs) == 0 and self.isGroupSelected(group):
                 return
-        except yum.Errors.GroupsError, e:
+        except yum.Errors.GroupsError as e:
             # try to find out if it's the name or translated name
             gid = self.__getGroupId(group)
             if gid is not None:
@@ -2081,7 +2081,7 @@ debuglevel=6
     def deselectGroup(self, group, *args):
         try:
             self.ayum.deselectGroup(group, force=True)
-        except yum.Errors.GroupsError, e:
+        except yum.Errors.GroupsError as e:
             # try to find out if it's the name or translated name
             gid = self.__getGroupId(group)
             if gid is not None:

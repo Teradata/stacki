@@ -994,7 +994,7 @@ class App(stack.sql.Application):
 				
 				try:
 					print(node.getXML())
-				except Exception, msg:
+				except Exception as msg:
 					raise stack.util.KickstartNodeError, \
 					      "in %s node: %s" \
 					      % (node, msg)
@@ -1972,7 +1972,7 @@ app = App(sys.argv)
 app.parseArgs()
 try:
 	app.run()
-except stack.util.KickstartError, msg:
+except stack.util.KickstartError as msg:
 	sys.stderr.write("kpp error - %s\n" % msg)
 	sys.exit(-1)
 
