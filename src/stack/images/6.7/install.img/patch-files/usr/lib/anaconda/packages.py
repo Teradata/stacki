@@ -77,7 +77,7 @@ def copyAnacondaLogs(anaconda):
         if os.access(fn, os.R_OK):
             try:
                 shutil.copyfile(fn, "%s/var/log/%s" %(anaconda.rootPath, dest))
-                os.chmod("%s/var/log/%s" %(anaconda.rootPath, dest), 0600)
+                os.chmod("%s/var/log/%s" %(anaconda.rootPath, dest), 0o600)
             except:
                 pass
 
