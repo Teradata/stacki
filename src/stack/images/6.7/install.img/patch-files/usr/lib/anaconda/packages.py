@@ -108,29 +108,34 @@ def turnOnFilesystems(anaconda):
 
     try:
         anaconda.id.storage.doIt()
-    except DeviceResizeError as (msg, device):
+    except DeviceResizeError as e:
+        (msg, device) = e.args
         # XXX does this make any sense? do we support resize of
         #     devices other than partitions?
         title = _("Device Resize Failed")
         message = _("An error was encountered while "
                     "resizing device %s.") % (device,)
         details = msg
-    except DeviceCreateError as (msg, device):
+    except DeviceCreateError as e:
+        (msg, device) = e.args
         title = _("Device Creation Failed")
         message = _("An error was encountered while "
                     "creating device %s.") % (device,)
         details = msg
-    except DeviceDestroyError as (msg, device):
+    except DeviceDestroyError as e:
+        (msg, device) = e.args
         title = _("Device Removal Failed")
         message = _("An error was encountered while "
                     "removing device %s.") % (device,)
         details = msg
-    except DeviceError as (msg, device):
+    except DeviceError as e:
+        (msg, device) = e.args
         title = _("Device Setup Failed")
         message = _("An error was encountered while "
                     "setting up device %s.") % (device,)
         details = msg
-    except FSResizeError as (msg, device):
+    except FSResizeError as e:
+        (msg, device) = e.args
         title = _("Resizing Failed")
         message = _("There was an error encountered while "
                     "resizing the device %s.") % (device,)
@@ -139,12 +144,14 @@ def turnOnFilesystems(anaconda):
             details = open("/tmp/resize.out", "r").read()
         else:
             details = "%s" %(msg,)
-    except FSMigrateError as (msg, device):
+    except FSMigrateError as e:
+        (msg, device) = e.args
         title = _("Migration Failed")
         message = _("An error was encountered while "
                     "migrating filesystem on device %s.") % (device,)
         details = msg
-    except FormatCreateError as (msg, device):
+    except FormatCreateError as e:
+        (msg, device) = e.args
         title = _("Formatting Failed")
         message = _("An error was encountered while "
                     "formatting device %s.") % (device,)

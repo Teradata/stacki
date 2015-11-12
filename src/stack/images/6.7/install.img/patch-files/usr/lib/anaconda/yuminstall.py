@@ -1822,7 +1822,8 @@ debuglevel=6
         for i in dirList:
             try:
                 os.mkdir(anaconda.rootPath + i)
-            except os.error, (errno, msg):
+            except os.error as e:
+                (errno, msg) = e.args
                 pass
 #            log.error("Error making directory %s: %s" % (i, msg))
 

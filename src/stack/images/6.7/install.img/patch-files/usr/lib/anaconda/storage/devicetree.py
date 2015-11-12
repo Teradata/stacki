@@ -1823,7 +1823,8 @@ class DeviceTree(object):
                 try:
                     lv_device.setup()
                     added = True
-                except DeviceError as (msg, name):
+                except DeviceError as e:
+                    (msg, errno) = e.args
                     log.info("setup of %s failed: %s"
                                         % (lv_device.name, msg))
 
@@ -2410,7 +2411,8 @@ class DeviceTree(object):
         for device in self.leaves:
             try:
                 device.setup()
-            except DeviceError as (msg, name):
+            except DeviceError as e:
+                (msg, name) = e.args
                 log.debug("setup of %s failed: %s" % (device.name, msg))
 
     def getDeviceBySysfsPath(self, path):
