@@ -29,6 +29,7 @@
 #
 
 # This toplevel file is a little messy at the moment...
+from __future__ import print_function
 
 coverage = None
 
@@ -59,8 +60,8 @@ def exitHandler(rebootData, storage, exitCode=None):
 
     if "nokill" in flags.cmdline:
         iutil.vtActivate(1)
-        print "anaconda halting due to nokill flag."
-        print "The system will be rebooted when you press Ctrl-Alt-Delete."
+        print("anaconda halting due to nokill flag.")
+        print("The system will be rebooted when you press Ctrl-Alt-Delete.")
         while True:
             time.sleep(10000)
 
@@ -809,7 +810,7 @@ if __name__ == "__main__":
         log.addHandler(logging.StreamHandler(stream=sys.stdout))
         parseArguments()
 
-    print "Starting installer, one moment..."
+    print("Starting installer, one moment...")
 
     # Allow a file to be loaded as early as possible
     try:
@@ -908,9 +909,9 @@ if __name__ == "__main__":
     separate_attachements_note = " * when reporting a bug add logs from /tmp as separate text/plain attachments"
 
     if product.isFinal:
-        print "anaconda %s started." % verdesc
+        print("anaconda %s started." % verdesc)
     else:
-        print "anaconda %s (pre-release) started." % verdesc
+        print("anaconda %s (pre-release) started." % verdesc)
 
     # we are past the --version and --help shortcut so we can import Blivet
     # now without slowing down anything critical
