@@ -105,7 +105,7 @@ def doStartupX11Actions():
             xutils.setRootResource('Xft.rgba', 'none')
         except:
             sys.stderr.write("X SERVER STARTED, THEN FAILED");
-            raise RuntimeError, "X server failed to start"
+            raise RuntimeError("X server failed to start")
 
 def set_x_resolution(runres):
     # cant do this if no window manager is running because otherwise when we

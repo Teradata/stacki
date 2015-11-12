@@ -244,8 +244,7 @@ class GraphHandler(handler.ContentHandler,
 					xml[2] = file
 
 		if not (xml[0] or xml[2]):
-			raise stack.util.KickstartNodeError, \
-			      'cannot find node "%s"' % node.name
+			raise stack.util.KickstartNodeError('cannot find node "%s"' % node.name)
 
 		xmlFiles = [ xml[0] ]
 		if xml[1]:

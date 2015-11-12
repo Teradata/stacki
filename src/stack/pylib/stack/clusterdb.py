@@ -168,7 +168,7 @@ class Nodes:
 			msg = 'Node %s already exists.\n' % checkname 
 			msg += 'Select a different hostname, cabinet '
 			msg += 'and/or rank value.'
-			raise ValueError, msg
+			raise ValueError(msg)
 
 	def checkSubnet(self,subnet):
 		"Check to see if the subnet exists"
@@ -176,7 +176,7 @@ class Nodes:
 		rows = self.sql.execute("select id from subnets where name='%s'" % subnet);
 		if (rows == 0):
 			msg = "subnet %s does not exist. Bailing out" % (subnet)
-			raise KeyError, msg
+			raise KeyError(msg)
 			return
 
 	def checkIP(self, ipaddr):
@@ -189,7 +189,7 @@ class Nodes:
 
 		if nodeid:
 			msg = "Duplicate IP '%s' Specified" % ipaddr
-			raise ValueError, msg
+			raise ValueError(msg)
 
 
 	def checkMAC(self, mac):
@@ -206,7 +206,7 @@ class Nodes:
 
 		if self.sql.execute(query) == 1:
 			msg = "Duplicate MAC '%s' Specified" % mac
-			raise ValueError, msg
+			raise ValueError(msg)
 
 
 	def checkMembershipName(self, name):
@@ -215,11 +215,11 @@ class Nodes:
 		
 		if self.sql.execute(query) == 0:
 			msg = 'Could not find Membership "%s"' % name
-			raise ValueError, msg
+			raise ValueError(msg)
 
 
 	def checkMembership(self, mid):
 		query='select id from appliances where id="%s"' % mid
 		if self.sql.execute(query) == 0:
 			msg = 'Invalid Membership ID "%s"' % mid
-			raise ValueError, msg
+			raise ValueError(msg)

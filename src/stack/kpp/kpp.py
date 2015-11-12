@@ -862,8 +862,7 @@ class App(stack.sql.Application):
 		graph_dir = os.path.join('graphs', self.graph)
 
 		if not os.path.exists(graph_dir):
-			raise stack.util.KickstartGraphError, \
-				"cannot find graph dir '%s'" % graph_dir
+			raise stack.util.KickstartGraphError("cannot find graph dir '%s'" % graph_dir)
 
 		for file in os.listdir(graph_dir):
 			root, ext = os.path.splitext(file)
@@ -895,8 +894,7 @@ class App(stack.sql.Application):
 			if graph.hasNode(rootName):
 				root = graph.getNode(rootName)
 			else:
-				raise stack.util.KickstartNodeError, \
-					'node %s not in graph' % rootName
+				raise stack.util.KickstartNodeError('node %s not in graph' % rootName)
 				
 			nodes = FrameworkIterator(graph).run(root)
 			deps  = OrderIterator(handler.getOrderGraph()).run()
@@ -995,9 +993,8 @@ class App(stack.sql.Application):
 				try:
 					print(node.getXML())
 				except Exception, msg:
-					raise stack.util.KickstartNodeError, \
-					      "in %s node: %s" \
-					      % (node, msg)
+					raise stack.util.KickstartNodeError("in %s node: %s" \
+					      % (node, msg))
 			print('</kickstart>')
 
 
@@ -1113,8 +1110,7 @@ class GraphHandler(handler.ContentHandler,
 					xml[2] = file
 
 		if not (xml[0] or xml[2]):
-			raise stack.util.KickstartNodeError, \
-			      'cannot find node "%s"' % node.name
+			raise stack.util.KickstartNodeError('cannot find node "%s"' % node.name)
 
 		xmlFiles = [ xml[0] ]
 		if xml[1]:

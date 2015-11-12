@@ -156,7 +156,7 @@ class AnacondaCallback:
                                                  epoch, hdr['version'],
                                                  hdr['release'])
             if len(txmbrs) == 0:
-                raise RuntimeError, "Unable to find package %s-%s-%s.%s" %(hdr['name'], hdr['version'], hdr['release'], hdr['arch'])
+                raise RuntimeError("Unable to find package %s-%s-%s.%s" %(hdr['name'], hdr['version'], hdr['release'], hdr['arch']))
             po = txmbrs[0].po
 
             repo = self.repos.getRepo(po.repoid)
@@ -657,18 +657,18 @@ class AnacondaYum(YumSorter):
         if "-source" in repo.id or "-debuginfo" in repo.id:
             name = repo.name
             del(repo)
-            raise RepoError, "Repo %s contains -source or -debuginfo, excluding" % name
+            raise RepoError("Repo %s contains -source or -debuginfo, excluding" % name)
 
         # this is a little hard-coded, but it's effective
         if productIsFinal and ("rawhide" in repo.id or "development" in repo.id):
             name = repo.name
             del(repo)
-            raise RepoError, "Excluding devel repo %s for non-devel anaconda" % name
+            raise RepoError("Excluding devel repo %s for non-devel anaconda" % name)
 
         if not productIsFinal and not repo.enabled:
             name = repo.name
             del(repo)
-            raise RepoError, "Excluding disabled repo %s for prerelease" % name
+            raise RepoError("Excluding disabled repo %s for prerelease" % name)
 
         # If repo=/method= was passed in, we want to default these extra
         # repos to off.
@@ -1511,7 +1511,7 @@ debuglevel=6
                     buttons.append(_("_Continue"))
 
                 if not fatalerrors:
-                    raise RepoError, e
+                    raise RepoError(e)
 
                 rc = anaconda.intf.messageWindow(_("Error"),
                                    _("Unable to read package metadata. This may be "
@@ -2051,7 +2051,7 @@ debuglevel=6
     def selectGroup(self, group, *args):
         if not self.ayum.comps.has_group(group):
             log.debug("no such group %s" % group)
-            raise NoSuchGroup, group
+            raise NoSuchGroup(group)
 
         types = ["mandatory"]
 
@@ -2076,7 +2076,7 @@ debuglevel=6
                     return
             else:
                 log.debug("no such group %s" %(group,))
-                raise NoSuchGroup, group
+                raise NoSuchGroup(group)
 
     def deselectGroup(self, group, *args):
         try:

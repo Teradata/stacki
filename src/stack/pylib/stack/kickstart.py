@@ -229,8 +229,8 @@ class Application(stack.sql.Application):
 		self.dist.setDist(dist)
 		
 		if not os.path.isdir(self.dist.getHomePath()):
-			raise DistError, "Cannot find distribution %s" \
-				% self.dist.getHomePath()
+			raise DistError("Cannot find distribution %s" \
+				% self.dist.getHomePath())
 			
 		if not self.dist.isBuilt():
 			self.dist.build()
@@ -243,7 +243,7 @@ class Application(stack.sql.Application):
 		DEPRICATED: use rpm.apply() method instead."""
 			
 		if not rpm:
-			raise DistError, "Couldn't find one of your rpms"
+			raise DistError("Couldn't find one of your rpms")
 
 		if not os.path.exists(self.rpmdb):
 			os.makedirs(self.rpmdb)			
@@ -257,7 +257,7 @@ class Application(stack.sql.Application):
 
 		rv = os.system(cmd)
 		if rv == 256:
-			raise DistError, "Could not apply one of your rpms"
+			raise DistError("Could not apply one of your rpms")
 		
 
 

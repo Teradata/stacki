@@ -319,14 +319,14 @@ def findGladeFile(file):
         fn = dir + file
         if os.access(fn, os.R_OK):
             return fn
-    raise RuntimeError, "Unable to find glade file %s" % file
+    raise RuntimeError("Unable to find glade file %s" % file)
 
 def getGladeWidget(file, rootwidget, i18ndomain="anaconda"):
     f = findGladeFile(file)
     xml = gtk.glade.XML(f, root = rootwidget, domain = i18ndomain)
     w = xml.get_widget(rootwidget)
     if w is None:
-        raise RuntimeError, "Unable to find root widget %s in %s" %(rootwidget, file)
+        raise RuntimeError("Unable to find root widget %s in %s" %(rootwidget, file))
 
     return (xml, w)
 

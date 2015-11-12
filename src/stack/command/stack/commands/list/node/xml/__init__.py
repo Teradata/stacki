@@ -401,9 +401,8 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			try:
 				self.addText('%s\n' % node.getXML())
 			except Exception, msg:
-				raise stack.util.KickstartNodeError, \
-				      "in %s node: %s" \
-				      % (node, msg)
+				raise stack.util.KickstartNodeError("in %s node: %s" \
+				      % (node, msg))
 
                 # Create profile.cfg file of all the attributes used
                 # To create the XML Profile.  Since the DB is on the
