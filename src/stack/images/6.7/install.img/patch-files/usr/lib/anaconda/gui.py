@@ -102,7 +102,7 @@ def copyScreenshots():
     destDir = "/mnt/sysimage/root/anaconda-screenshots"
     if not os.access(destDir, os.R_OK):
         try:
-            os.mkdir(destDir, 0750)
+            os.mkdir(destDir, 0o750)
         except:
             window = MessageWindow("Error Saving Screenshot", 
                                    _("An error occurred saving screenshots "

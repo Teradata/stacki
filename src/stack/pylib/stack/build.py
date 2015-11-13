@@ -261,7 +261,7 @@ class DistributionBuilder(Builder):
             # fix rpm permissions in the cart dirs (files get symlinked)
             
             for rpm in rpms:
-                    rpm.chmod(0644)
+                    rpm.chmod(0o644)
                     
             return rpms
     
@@ -396,7 +396,7 @@ class DistributionBuilder(Builder):
 				shutil.copy(file.getFullName(),
 					os.path.join(path, file.getName()))
 				# make sure apache can read site XML
-				file.chmod(0664)
+				file.chmod(0o664)
                                 
 	# Copy cart profiles into the distribution.
         for cart in self.carts:
@@ -511,7 +511,7 @@ class DistributionBuilder(Builder):
 		# off the CD, so it will not be needed for the remainder of
 		# the server installation.
 		#
-		os.chmod(product, 0666)
+		os.chmod(product, 0o666)
 
 	os.chdir(cwd)
 	return
