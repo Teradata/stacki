@@ -1,6 +1,6 @@
 # @SI_Copyright@
 # @SI_Copyright@
-# @SI_Copyright@
+import os
 from pyipmi.bmc import LanBMC
 from pyipmi import make_bmc
 import stack.api
@@ -9,14 +9,17 @@ from stack.exception import *
 
 class Command(stack.commands.Command):
 	"""
-	Open virtual console on the remote machine.
+	Update firmware on machine remotely.
 	Currently works only for Dell Servers.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
-	<example cmd='open host console compute-0-0'>
-	Open console on compute-0-0.
+	<param type='string' name='name' optional='0'>
+	Name of the update file.
+	</param>
+	<example cmd='update host firmware compute-0-0 name=ESM.bin'>
+	Update iDRAC firmware on compute-0-0 to ESM.bin.
 	</example>
 	"""
 	MustBeRoot = 0
@@ -26,6 +29,9 @@ class Command(stack.commands.Command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 		host = args[0]
+		(name,) = self.fillParams([('name', None)])
+		if not name:
+			raise ParamRequired(self, 'name')
 
 		# Get ipmi interface from db for this host
 		output = self.call('list.host.interface', [ host ])
@@ -50,7 +56,16 @@ class Command(stack.commands.Command):
 		if not r:
 			raise CommandError(self, 'ipmi password not found ' \
 				'in the database')
+			self.abort('ipmi password not found in the database')
 		pwd = r[0]['value']
+
+		# Get IP addr of tftp server
+		r = stack.api.Call("list.attr", 
+			["attr=Kickstart_PrivateNetwork"])
+		if not r:
+			raise CommandError(self, 'Kickstart_PrivateNetwork ' \
+				'not found in database')
+		tftp_ip = r[0]['value']
 
 		# Get Manufacturer information
 		bmc = make_bmc(LanBMC, 
@@ -61,6 +76,9 @@ class Command(stack.commands.Command):
 		
 		# Run implementation specific code
 		if Command.DELL in bmc_info.manufacturer_name.lower():
-			print 'Getting configuration information from Dell iDRAC...'
+			path = '/tftpboot/' + name
+			if not os.path.isfile(path):
+				raise CommandError(self, 'Update file %s should '
+					'be present in /tftpboot/' % path)
 			self.runImplementation('%s' % Command.DELL,
-				(host, ipmi_ip, uname, pwd))
+				(host, ipmi_ip, uname, pwd, path, tftp_ip))

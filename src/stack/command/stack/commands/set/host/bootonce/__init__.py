@@ -9,14 +9,24 @@ from stack.exception import *
 
 class Command(stack.commands.Command):
 	"""
-	Open virtual console on the remote machine.
+	Boot Once from virtual media or any other device.
 	Currently works only for Dell Servers.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
-	<example cmd='open host console compute-0-0'>
-	Open console on compute-0-0.
+	<param type='string' name='action' optional='0'>
+	disk  : Force boot from default Hard-drive
+	safe  : Force boot from default Hard-drive, request Safe Mode
+	diag  : Force boot from Diagnostic Partition
+	cdrom : Force boot from CD/DVD
+	pxe   : Force pxe boot
+	bios  : Force boot into BIOS Setup
+	floppy: Force boot from Floppy/primary removable media	
+	vmedia: Force boot from virtual media image
+	</param>
+	<example cmd='set host bootonce compute-0-0 action=vmedia'>
+	Boot once from selected device compute-0-0 remotely.
 	</example>
 	"""
 	MustBeRoot = 0
@@ -26,7 +36,14 @@ class Command(stack.commands.Command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 		host = args[0]
-
+		
+		(action,) = self.fillParams([('action', None)])
+		action_arr = ['pxe', 'disk', 'safe', 'diag', 'cdrom', 
+			'bios', 'floppy', 'vmedia']
+		if action not in action_arr:
+			raise ParamError(self, 'action', 'needs to be one of ' \
+				'pxe, disk, safe, diag, cdrom, bios, floppy, ' \
+				' vmedia')
 		# Get ipmi interface from db for this host
 		output = self.call('list.host.interface', [ host ])
 		ipmi_ip = None
@@ -61,6 +78,5 @@ class Command(stack.commands.Command):
 		
 		# Run implementation specific code
 		if Command.DELL in bmc_info.manufacturer_name.lower():
-			print 'Getting configuration information from Dell iDRAC...'
 			self.runImplementation('%s' % Command.DELL,
-				(host, ipmi_ip, uname, pwd))
+				(host, ipmi_ip, uname, pwd, action))

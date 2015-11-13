@@ -44,6 +44,9 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 bootstrap:
+	yum groupinstall -y Gnome
+	yum groupinstall -y "Compatibility Libraries"
+	yum groupinstall -y "Development Tools"
 	yum install -y rpm-build
 	yum install -y redhat-rpm-config
 	yum install -y gcc
