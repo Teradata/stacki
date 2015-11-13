@@ -1,6 +1,7 @@
 # @SI_Copyright@
 # @SI_Copyright@
 # @SI_Copyright@
+import os
 from pyipmi.bmc import LanBMC
 from pyipmi import make_bmc
 import stack.api
@@ -9,14 +10,17 @@ from stack.exception import *
 
 class Command(stack.commands.Command):
 	"""
-	Open virtual console on the remote machine.
+	Mount a bootable ISO on a remote machine.
 	Currently works only for Dell Servers.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
-	<example cmd='open host console compute-0-0'>
-	Open console on compute-0-0.
+	<param type='string' name='path' optional='0'>
+	Path to the ISO.
+	</param>
+	<example cmd='set host vmedia compute-0-0 path=redhat.iso'>
+	Mount redhat.iso on compute-0-0 remotely.
 	</example>
 	"""
 	MustBeRoot = 0
@@ -26,7 +30,11 @@ class Command(stack.commands.Command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 		host = args[0]
+		(path,) = self.fillParams([('path', None)])
 
+		if not path or not os.path.isfile(path):
+			raise ParamRequired(self, 'path')
+		
 		# Get ipmi interface from db for this host
 		output = self.call('list.host.interface', [ host ])
 		ipmi_ip = None
@@ -34,8 +42,8 @@ class Command(stack.commands.Command):
 			if o['interface'] == 'ipmi':
 				ipmi_ip = o['ip']
 		if not ipmi_ip:
-			raise CommandError(self, 'No ipmi interface found for ' \
-				'host ' + host)
+			raise CommandError(self, 'No ipmi interface found ' \
+				'for host ' + host)
 
 		# Get the ipmi uname, pwd
 		r = stack.api.Call("list.host.attr", 
@@ -61,6 +69,5 @@ class Command(stack.commands.Command):
 		
 		# Run implementation specific code
 		if Command.DELL in bmc_info.manufacturer_name.lower():
-			print 'Getting configuration information from Dell iDRAC...'
 			self.runImplementation('%s' % Command.DELL,
-				(host, ipmi_ip, uname, pwd))
+				(host, ipmi_ip, uname, pwd, path))
