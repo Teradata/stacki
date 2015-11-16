@@ -4,8 +4,6 @@
 import pyipmi
 from pyipmi.bmc import LanBMC
 from pyipmi import make_bmc
-import pyipmi.server
-from pyipmi.server import Server
 import stack.api
 import stack.commands
 from stack.exception import *
@@ -16,21 +14,26 @@ class command(stack.commands.set.host.command):
 
 class Command(command):
 	"""
-	Turn the power for a host on or off.
-
+	Set boot order for a host without having to go through the BIOS
+	settings manually.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
 	<param type='string' name='action'>
-	The power setting. This must be one of 'on', 'off', 'hard_reset'
-	or 'power_cycle'. Reset does a warm boot. Cycle completely powers 
-	off the machine then powers it back on, which has the server 
-	go through a cold boot.
+	Should be one of the below:
+	none : Do not change boot device order
+	pxe   : Force PXE boot
+	disk  : Force boot from default Hard-drive
+	safe  : Force boot from default Hard-drive, request Safe Mode
+	diag  : Force boot from Diagnostic Partition
+	cdrom : Force boot from CD/DVD
+	bios  : Force boot into BIOS Setup
+	floppy: Force boot from Floppy/primary removable media
 	</param>
 		
-	<example cmd='set host power compute-0-0 action=on'>
-	Turn on the power for compute-0-0.
+	<example cmd='set host boot order compute-0-0 action=pxe'>
+	Set compute-0-0 to pxe boot first.
 	</example>
 	"""
 	def run(self, params, args):
@@ -42,9 +45,11 @@ class Command(command):
 			raise ArgRequired(self, 'host')
 		host = args[0]
 
-		if action not in [ 'on', 'off', 'hard_reset', 'power_cycle' ]:
-			raise ParamError(self, 'action', 'must be one of "on"' \
-				'"off", "power_cycle", or "hard_reset"')
+		if action not in [ 'none', 'pxe', 'disk', 'safe', 
+			'diag', 'cdrom', 'bios', 'floppy' ]:
+			raise ParamError(self, 'action', 'must be one of' \
+				'"none", "pxe", "safe", "disk","diag", '  \
+				'"cdrom", "bios" or "floppy"')
 		# Get ipmi interface from db for this host
 		output = self.call('list.host.interface', [ host ])
 		ipmi_ip = None
@@ -67,20 +72,13 @@ class Command(command):
 			[host,"attr=ipmi_pwd"])
 		if not r:
 			raise CommandError(self, 'ipmi password not found ' \
-				'in the database')
+				'in the database')	
 		pwd = r[0]['value']
 
 		bmc = make_bmc(LanBMC,
 			hostname=ipmi_ip,
 			username=uname,
 			password=pwd)
-		server = Server(bmc)
 
-		if action == 'on':
-			server.power_on()
-		elif action == 'off':
-			server.power_off()
-		elif action == 'hard_reset':
-			server.hard_reset()
-		else:
-			server.power_cycle()
+		# Set bootdev via IPMI interface
+		bmc.set_bootdev(action)

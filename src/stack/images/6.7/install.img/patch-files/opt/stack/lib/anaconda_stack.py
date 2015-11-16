@@ -458,7 +458,7 @@ def startSsh():
         return
 
     if not fork_orphan():
-        os.open("/var/log/lastlog", os.O_RDWR | os.O_CREAT, 0644)
+        os.open("/var/log/lastlog", os.O_RDWR | os.O_CREAT, 0o644)
         ssh_keys = {
             'rsa1':'ssh_host_key',
             'rsa':'ssh_host_rsa_key',
@@ -522,7 +522,7 @@ class Anaconda(object):
         if self.xdriver is None:
             return
         if not os.path.isdir("%s/etc/X11" %(instPath,)):
-            os.makedirs("%s/etc/X11" %(instPath,), mode=0755)
+            os.makedirs("%s/etc/X11" %(instPath,), mode=0o755)
         f = open("%s/etc/X11/xorg.conf" %(instPath,), 'w')
         f.write('Section "Device"\n\tIdentifier "Videocard0"\n\tDriver "%s"\nEndSection\n' % self.xdriver)
         f.close()
@@ -1089,7 +1089,7 @@ if __name__ == "__main__":
                # download completed, run the test
                if not os.fork():
                    # we are in the child
-                   os.chmod(testcase, 0755)
+                   os.chmod(testcase, 0o755)
                    os.execv(testcase, [testcase])
                    sys.exit(0)
                else:

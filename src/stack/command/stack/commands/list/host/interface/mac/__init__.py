@@ -1,50 +1,32 @@
 # @SI_Copyright@
 # @SI_Copyright@
 # @SI_Copyright@
-import pyipmi
 from pyipmi.bmc import LanBMC
 from pyipmi import make_bmc
-import pyipmi.server
-from pyipmi.server import Server
 import stack.api
 import stack.commands
 from stack.exception import *
 
-class command(stack.commands.set.host.command):
-	MustBeRoot = 0
-
-
-class Command(command):
+class Command(stack.commands.Command):
 	"""
-	Turn the power for a host on or off.
-
+	List all NIC's on a machine. Currently works
+	for Dell.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
-	<param type='string' name='action'>
-	The power setting. This must be one of 'on', 'off', 'hard_reset'
-	or 'power_cycle'. Reset does a warm boot. Cycle completely powers 
-	off the machine then powers it back on, which has the server 
-	go through a cold boot.
-	</param>
-		
-	<example cmd='set host power compute-0-0 action=on'>
-	Turn on the power for compute-0-0.
+	<example cmd='list host interface mac compute-0-0'>
+	List information about all NIC's on compute-0-0.
 	</example>
 	"""
+	MustBeRoot = 0
+	DELL = "dell"
+
 	def run(self, params, args):
-		(action, ) = self.fillParams([
-			('action', ),
-			])
-		
 		if not len(args):
 			raise ArgRequired(self, 'host')
 		host = args[0]
-
-		if action not in [ 'on', 'off', 'hard_reset', 'power_cycle' ]:
-			raise ParamError(self, 'action', 'must be one of "on"' \
-				'"off", "power_cycle", or "hard_reset"')
+		
 		# Get ipmi interface from db for this host
 		output = self.call('list.host.interface', [ host ])
 		ipmi_ip = None
@@ -70,17 +52,14 @@ class Command(command):
 				'in the database')
 		pwd = r[0]['value']
 
-		bmc = make_bmc(LanBMC,
-			hostname=ipmi_ip,
-			username=uname,
+		# Get Manufacturer information
+		bmc = make_bmc(LanBMC, 
+			hostname=ipmi_ip, 
+			username=uname, 
 			password=pwd)
-		server = Server(bmc)
-
-		if action == 'on':
-			server.power_on()
-		elif action == 'off':
-			server.power_off()
-		elif action == 'hard_reset':
-			server.hard_reset()
-		else:
-			server.power_cycle()
+		bmc_info = bmc.info()
+		
+		# Run implementation specific code
+		if Command.DELL in bmc_info.manufacturer_name.lower():
+			self.runImplementation('%s' % Command.DELL,
+				(host, ipmi_ip, uname, pwd))

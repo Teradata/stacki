@@ -135,7 +135,7 @@ class Command(command):
 		cmd += '-out %s 1024' % key
 		status = os.system(cmd)
 		if status == 0:
-			os.chmod(key, 0400)
+			os.chmod(key, 0o400)
 
 			#
 			# output the public key

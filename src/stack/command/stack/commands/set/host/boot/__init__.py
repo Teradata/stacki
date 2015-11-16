@@ -239,7 +239,7 @@ class Command(stack.commands.set.host.command):
                         except OSError:
                                 pass
                         try:
-				os.chmod(filename, 0664)
+				os.chmod(filename, 0o664)
                         except OSError:
                                 pass
 

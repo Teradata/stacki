@@ -23,7 +23,6 @@
   <package>python-pyblock</package>
   <package>pykickstart</package>
   <package>stack-kickstart</package>
-  <package>stack-kpp</package>
   <package>telnet</package>
   <package>tigervnc</package>
 
