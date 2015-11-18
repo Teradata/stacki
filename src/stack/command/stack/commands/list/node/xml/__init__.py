@@ -224,8 +224,6 @@ class Command(stack.commands.list.command):
 
 
 		# Add more values to the attributes
-		attrs['version'] = stack.version
-		attrs['release'] = stack.release
 		attrs['root']	 = root
 		
 		kickstart_dir = self.command('report.distribution').strip()

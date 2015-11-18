@@ -1460,6 +1460,9 @@ class DatabaseConnection:
                                                      'Kickstart_PublicNetmaskCIDR', 
 						     '%s' % ipg.cidr()))
 
+			list.append((None, 'release', stack.release))
+			list.append((None, 'version', stack.version))
+
                         if self.caching:
                         	self.cache['intrinsic-attrs-list'] = list
         
