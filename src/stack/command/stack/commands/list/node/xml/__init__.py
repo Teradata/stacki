@@ -220,8 +220,6 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		import stack
 
 		# Add more values to the attributes
-		attrs['version'] = stack.version
-		attrs['release'] = stack.release
 		attrs['root']	 = root
 		
 		entities = {}
