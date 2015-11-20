@@ -25,6 +25,8 @@ class Command(stack.commands.Command,
 			if prev_host != None and prev_host != cur_host:
 					host_out[prev_host] = '\n'.join(cur_out)
 					cur_out = []
+			if i['col-1'].startswith('Warning: '):
+				continue
 			cur_out.append(i['col-1'])
 
 		host_out[cur_host] = '\n'.join(cur_out)
