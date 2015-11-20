@@ -95,6 +95,7 @@ import os
 import sys
 import string
 import socket
+import subprocess
 import stack
 import stack.profile
 import stack.commands
@@ -220,6 +221,8 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		import stack
 
 		# Add more values to the attributes
+		attrs['version'] = stack.version
+		attrs['release'] = stack.release
 		attrs['root']	 = root
 		
 		entities = {}
@@ -227,12 +230,11 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		# Parse the XML graph files in the chosen directory
 
 		#	
-		# get the pallets and carts that are in the box associated
-		# with the host
+		# get the pallets that are in the box associated with the host
 		#	
 		items = []
 		try:
-			for name, version, arch in self.getBoxPallets(
+			for name, version, rel, arch in self.getBoxPallets(
 					attrs['box']):
 				items.append(os.path.join('/export', 'stack',
 					'pallets', name, version, 'redhat', arch))
@@ -261,6 +263,29 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 				items.append(os.path.join('/export',
 					'stack', 'pallets', pname, pver,
 					'redhat', parch))
+
+		#
+		# get the carts associated with the box
+		#
+		output = self.call('list.cart')
+		devnull = open('/dev/null', 'w')
+		for o in output:
+			if attrs['box'] in o['boxes'].split():
+				items.append(os.path.join('/export', 'stack',
+					'carts', o['name']))
+	
+				#
+				# if a cart has changed since the last time we
+				# built a kickstart file, we will need to
+				# 'compile' it which may take a long time
+				# (because we create a repo in the cart and
+				# if there are a lot of RPMS the checksum will
+				# take a long time) -- so, let's fork off the
+				# cart compilation.
+				#
+				subprocess.Popen([ '/opt/stack/bin/stack',
+					'compile', 'cart', o['name'] ],
+					stdout = devnull, stderr = devnull)
 
 		parser  = make_parser()
 		handler = stack.profile.GraphHandler(attrs, entities,
@@ -349,13 +374,6 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 
 			# When building pallets allowMissing=1 and
 			# doEval=0.  This is setup by rollRPMS.py
-
-			# for item in items:
-			if 0:
-				nodefile = os.path.join(item, 'nodes', node)
-				if os.path.exists(nodefile):
-					node = nodefile
-					break
 
 			if allowMissing:
 				try:

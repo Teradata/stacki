@@ -962,7 +962,8 @@ class Pass2NodeHandler(handler.ContentHandler,
 		if name == 'kickstart' or name == 'jumpstart':
 			return
 		
-		if name in [ 'url', 'lang', 'keyboard', 'text', 'reboot' ]:
+		if name in [ 'url', 'lang', 'keyboard', 'text', 'reboot',
+				'unsupported_hardware' ]:
 			self.kskey = name
 		else:
 			self.kskey = None

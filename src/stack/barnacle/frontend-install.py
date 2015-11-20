@@ -193,7 +193,7 @@ subprocess.call(['service', 'NetworkManager', 'stop'])
 ccdest = '/export/stack/pallets'
 copy(cciso, ccdest)
 
-osdest = '/export/stack/pallets'
+osdest = '/export/stack/pallets/%s' % osname
 copy(osiso1, osdest)
 if osiso2:
 	copy(osiso2, osdest)
@@ -258,7 +258,7 @@ stackpath = '/opt/stack/bin/stack'
 f = open("/tmp/stack.xml", "w")
 cmd = [ stackpath, 'list', 'node', 'xml', 'server',
 	'attrs={0}'.format(repr(attributes))]
-print 'cmd: %s' % ' '.join(cmd)
+print('cmd: %s' % ' '.join(cmd))
 subprocess.call(cmd, stdout=f, stderr=None)
 f.close()
 
@@ -273,6 +273,9 @@ outfile.close()
 banner("Run Setup Script")
 # run run.sh
 subprocess.call(['sh', '/tmp/run.sh'])
+
+# before we add the pallets, clean up the old OS that we copied to the disk
+subprocess.call(['/bin/rm', '-rf', osdest])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])

@@ -418,7 +418,7 @@ def run_command(args):
 
 	text = command.getText()
 	if len(text) > 0:
-		print(text, end=' ')
+		print(text, end='')
 		if text[len(text)-1] != '\n':
 			print()
 	syslog.closelog()

@@ -1046,12 +1046,10 @@ class AnacondaYum(YumSorter):
         #
         repo = self.repos.getRepo(kwargs["repo"])
 
-	if repo.timeout < 120.0:
-            repo.timeout = 120.0
-        else:
-            repo.timeout += 30.0
-
-        log.info("STACKI:timeout: %s" % repo.timeout)
+        log.info("STACKI:mirrorFailureCB: sleeping for %s seconds"
+            % repo.timeout)
+        time.sleep(repo.timeout)
+        repo.timeout += 10.0
 
         #
         # the call to _setupGrab() makes yum reread its options, thus, it will

@@ -92,7 +92,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_funtion
+from __future__ import print_function
 import sys
 import os
 import stack.app

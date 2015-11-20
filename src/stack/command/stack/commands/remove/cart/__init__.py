@@ -1,3 +1,4 @@
+#
 # @SI_Copyright@
 #                             www.stacki.com
 #                                  v2.0
@@ -38,59 +39,42 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
+#
 
 import os
-import stat
-import time
-import sys
-import string
 import stack.commands
-
+from stack.exception import *
 
 class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.list.command):
+	stack.commands.remove.command):
 	"""
-	List the status of available carts.
-	
-	<arg optional='1' type='string' name='cart' repeat='1'>
-	List of carts. This should be the cart base name (e.g., stacki, os,
-	etc.). If no carts are listed, then status for all the carts are
-	listed.
-	</arg>
+	Remove a cart from both the database and filesystem.	
 
-	<example cmd='list cart kernel'>		
-	List the status of the kernel cart.
+	<arg type='string' name='cart' repeat='1'>
+	List of carts. 
+	</arg>
+	
+	<example cmd='remove cart devel'>
+	Remove the cart named 'devel'.
 	</example>
 	
-	<example cmd='list cart'>
-	List the status of all the available carts.
-	</example>
+	<related>add cart</related>
+	<related>enable cart</related>
+	<related>disable cart</related>
+	<related>list cart</related>
 	"""		
 
 	def run(self, params, args):
-		self.beginOutput()
+                if not len(args):
+                        raise ArgRequired(self, 'cart')
 
-		try:
-			carts = self.getCartNames(args, params)
-		except:
-			carts = []
+		cartpath = '/export/stack/carts'
+		for cart in self.getCartNames(args, params):
+			os.system('/bin/rm -rf %s' % os.path.join(cartpath, cart))
 
-		for cart in carts:
-                    
-			# For each cart determine if it is enabled
-			# in any box.
-                        
-                        boxes = []
-
-                        for row in self.db.select("""b.name from
-                                cart_stacks s, carts c, boxes b where
-                                c.name='%s' and
-                                s.cart=c.id and s.box=b.id """
-				% cart):
-
-                        	boxes.append(row[0])
-			
-			self.addOutput(cart, string.join(boxes,' '))
-
-		self.endOutput(header=['name', 'boxes'], trimOwner=False)
+			#
+			# Remove cart from database
+			#
+			self.db.execute("delete from carts where name = '%s'"
+				% cart)
 
