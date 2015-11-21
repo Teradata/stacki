@@ -42,7 +42,7 @@ class App(stack.app.Application):
 	def run(self):
 		files = self.getArgs()
 		if not files:
-			raise ValueError, "I need some input files"
+			raise ValueError("I need some input files")
 
 		libs = self.analyze(files)
 		while 1:
