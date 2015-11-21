@@ -41,6 +41,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+from __future__ import print_function
 import os
 import string
 from subprocess import *
@@ -93,6 +94,6 @@ for src in dirs.keys():
 
 list.sort()
 
-print 'SRCDIRS = ',
+print('SRCDIRS = ', end=' ')
 for order, src in list:
-        print '\\\n\t%s ' % src,
+        print('\\\n\t%s ' % src, end=' ')
