@@ -94,7 +94,7 @@ class Command(stack.commands.report.host.command):
 			#
                 	for row in self.call('list.host.interface', [ host ]):
 				network = row['network']
-				if dns.has_key(network) and dns[network]:
+				if network in dns and dns[network]:
 					frontend = self.db.getHostAttr(host,
 						'Kickstart_PrivateAddress')
 					self.addOutput(host, 'nameserver %s' %

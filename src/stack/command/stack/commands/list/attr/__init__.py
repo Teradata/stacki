@@ -126,7 +126,7 @@ class Command(stack.commands.list.command):
 		if rows:
 			for s, a, v in self.db.fetchall():
 				k = stack.attr.ConcatAttr(s, a)
-				if intrinsics.has_key(k):
+				if k in intrinsics:
 					continue
 				attrs[k] = (s, a, v)
 
@@ -146,7 +146,7 @@ class Command(stack.commands.list.command):
 			for k in keys:
 				(s, a, v) = attrs[k]
 				if key == k:
-					if intrinsics.has_key(k):
+					if k in intrinsics:
 						source = 'I'
 					else:
 						source = 'G'
@@ -155,7 +155,7 @@ class Command(stack.commands.list.command):
 			for k in keys:
 				(s, a, v) = attrs[k]
 				if not scope or (s and s.find(scope) == 0):
-					if intrinsics.has_key(k):
+					if k in intrinsics:
 						source = 'I'
 					else:
 						source = 'G'

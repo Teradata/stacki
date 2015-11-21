@@ -57,7 +57,7 @@ class Plugin(stack.commands.Plugin):
 			nodes n, appliances a, boxes b where 
 			n.appliance = a.id and n.box = b.id """):
 
-                        if dict.has_key(row[0]):
+                        if row[0] in dict:
                                 dict[row[0]] = row[1:]
         
                 return { 'keys' : [ 'rack',

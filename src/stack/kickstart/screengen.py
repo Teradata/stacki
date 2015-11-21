@@ -182,7 +182,7 @@ class Generator(osGenerator):
 
 
 	def handle_screen_variable(self, node):
-		if not self.screens[-1].has_key('variables'):
+		if 'variables' not in self.screens[-1]:
 			self.screens[-1]['variables'] = [{}]
 		else:
 			self.screens[-1]['variables'].append({})
@@ -270,7 +270,7 @@ class Generator(osGenerator):
 	#		<option>
 	# </screen>
 	def handle_variable_option(self, node):
-		if not self.screens[-1]['variables'][-1].has_key('option'):
+		if 'option' not in self.screens[-1]['variables'][-1]:
 			self.screens[-1]['variables'][-1]['option'] = []
 
 		self.screens[-1]['variables'][-1]['option'].append(
@@ -281,7 +281,7 @@ class Generator(osGenerator):
 	#	<code>
 	# </screen>
 	def handle_screen_code(self, node):
-		if not self.screens[-1].has_key('code'):
+		if 'code' not in self.screens[-1]:
 			self.screens[-1]['code'] = ''
 
 		self.screens[-1]['code'] += '%s' % (self.getChildText(node))
@@ -313,7 +313,7 @@ class Generator(osGenerator):
 	## Generator Section
 	##
 	def generateScreen(self, screen, i):
-		if self.screens[i].has_key('code'):
+		if 'code' in self.screens[i]:
 			print(self.screens[i]['code'])
 			print("")
 
@@ -347,7 +347,7 @@ class Generator(osGenerator):
 		#
 		print("\td_vars.id = 'screen-variables';")
 		for variable in self.screens[i]['variables']:
-			if not variable.has_key('type'):
+			if 'type' not in variable:
 				inputtype = 'text'
 			else:
 				if variable['type'] == 'password':
@@ -361,20 +361,20 @@ class Generator(osGenerator):
 				else:
 					inputtype = 'text'
 
-			if not variable.has_key('size'):
+			if 'size' not in variable:
 				size = 20
 			else:
 				size = variable['size']
 
-			if variable.has_key('value') \
+			if 'value' in variable \
 						and variable['value'] != '':
 				value = variable['value']
-			elif variable.has_key('default'):
+			elif 'default' in variable:
 				value = variable['default']
 			else:
 				value = ''
 
-			if not variable.has_key('validate'):
+			if 'validate' not in variable:
 				validate = 'null'
 			else:
 				validate = 'top.screens.%s' % \
@@ -382,7 +382,7 @@ class Generator(osGenerator):
 
 			if inputtype == 'menu':
 				print("\tvar options = new Array();")
-				if variable.has_key('option'):
+				if 'option' in variable:
 					j = 0
 					for option in variable['option']:
 						o = "\toptions[%d] = " % (j)
@@ -414,7 +414,7 @@ class Generator(osGenerator):
 		#
 		print("\td_help.id = 'screen-help';")
 		for variable in self.screens[i]['variables']:
-			if not variable.has_key('help'):
+			if 'help' not in variable:
 				continue
 			else:
 				help = variable['help']
@@ -447,7 +447,7 @@ class Generator(osGenerator):
 		#
 		validatefunctions = []
 		for variable in self.screens[i]['variables']:
-			if variable.has_key('validate'):
+			if 'validate' in variable:
 				functioncall = variable['validate'] + '(e)'
 				validatefunctions.append(functioncall)
 

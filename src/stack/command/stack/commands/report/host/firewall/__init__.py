@@ -197,7 +197,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			while rules:
 				rule = rules.pop(0)
 				table = rule['table']
-				if not tables.has_key(table):
+				if table not in tables:
 					tables[table] = []
 				tables[table].append(rule)
 
@@ -206,7 +206,7 @@ class Command(stack.commands.HostArgumentProcessor,
 				# Finally print all the rules that are present
 				# in each table. These rules are already sorted
 				# so no further sorting is necessary
-				if tables.has_key(tt):
+				if tt in tables:
 					self.printRules(host, tt, tables[tt])
 
 			#
