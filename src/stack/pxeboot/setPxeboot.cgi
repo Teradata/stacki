@@ -104,7 +104,7 @@ syslog.openlog('setPxeBoot.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
 # get the name of the node that is issuing the request
 #
 ipaddr = None
-if os.environ.has_key('REMOTE_ADDR'):
+if 'REMOTE_ADDR' in os.environ:
 	ipaddr = os.environ['REMOTE_ADDR']
 if not ipaddr:
         sys.exit(-1)

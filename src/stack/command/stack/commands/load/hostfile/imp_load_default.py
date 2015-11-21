@@ -340,7 +340,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				default = False
 				multiple_defaults = False
 				for interface in ifaces:
-					if self.owner.interfaces[name][interface].has_key('default') and str2bool(self.owner.interfaces[name][interface]['default']) == True:
+					if 'default' in self.owner.interfaces[name][interface] and str2bool(self.owner.interfaces[name][interface]['default']) == True:
 						if not default:
 							default = True
 						else:

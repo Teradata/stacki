@@ -284,7 +284,7 @@ class GraphHandler(handler.ContentHandler,
 				# Send the XML to stderr for debugging before
 				# we parse it.
 				
-				if os.environ.has_key('STACKDEBUG'):
+				if 'STACKDEBUG' in os.environ:
 					sys.stderr.write('[parse1]%s' % line)
 
 				try:
@@ -310,7 +310,7 @@ class GraphHandler(handler.ContentHandler,
 			xml = handler.getXML()
 			handler = Pass2NodeHandler(node, self.attributes)
 			parser.setContentHandler(handler)
-			if os.environ.has_key('STACKDEBUG'):
+			if 'STACKDEBUG' in os.environ:
 				sys.stderr.write('[parse2]%s' % xml)
 			parser.feed(xml)
 
@@ -370,7 +370,7 @@ class GraphHandler(handler.ContentHandler,
 		self.text		= ''
 		self.attrs.order.gen	= self.attrs.order.default.gen
 		
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.gen = attrs['gen']
 
 
@@ -386,7 +386,7 @@ class GraphHandler(handler.ContentHandler,
 		self.text		= ''
 		self.attrs.order.gen	= self.attrs.order.default.gen
 
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.gen = attrs['gen']
 
 	def endElement_tail(self, name):
@@ -405,15 +405,15 @@ class GraphHandler(handler.ContentHandler,
 		release	= None
 		cond = self.attrs.main.default.cond
 
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			arch = attrs['arch']
-		if attrs.has_key('os'):
+		if 'os' in attrs:
 			osname = attrs['os']
 			if osname == 'linux':
 				osname = 'redhat'
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			release = attrs['release']
-		if attrs.has_key('cond'):
+		if 'cond' in attrs:
 			cond = "( %s and %s )" % (cond, attrs['cond'])
 			
 		self.attrs.main.cond = \
@@ -436,15 +436,15 @@ class GraphHandler(handler.ContentHandler,
 		release	= None
 		cond = self.attrs.main.default.cond
 
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			arch = attrs['arch']
-		if attrs.has_key('os'):
+		if 'os' in attrs:
 			osname = attrs['os']
 			if osname == 'linux':
 				osname = 'redhat'
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			release = attrs['release']
-		if attrs.has_key('cond'):
+		if 'cond' in attrs:
 			cond = "( %s and %s )" % (cond, attrs['cond'])
 			
 		self.attrs.main.cond = \
@@ -461,15 +461,15 @@ class GraphHandler(handler.ContentHandler,
 	# <order>
 
 	def startElement_order(self, name, attrs):
-		if attrs.has_key('head'):
+		if 'head' in attrs:
 			self.attrs.order.head = attrs['head']
 		else:
 			self.attrs.order.head = None
-		if attrs.has_key('tail'):
+		if 'tail' in attrs:
 			self.attrs.order.tail = attrs['tail']
 		else:
 			self.attrs.order.tail = None
-		if attrs.has_key('gen'):
+		if 'gen' in attrs:
 			self.attrs.order.default.gen = attrs['gen']
 		else:
 			self.attrs.order.default.gen = None
@@ -484,21 +484,21 @@ class GraphHandler(handler.ContentHandler,
 	# <edge>
 	
 	def startElement_edge(self, name, attrs):
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			arch = attrs['arch']
 		else:
 			arch = None
-		if attrs.has_key('os'):
+		if 'os' in attrs:
 			osname = attrs['os']
 			if osname == 'linux':
 				osname = 'redhat'
 		else:
 			osname = None
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			release = attrs['release']
 		else:
 			release	= None
-		if attrs.has_key('cond'):
+		if 'cond' in attrs:
 			cond = attrs['cond']
 		else:
 			cond = None
@@ -506,11 +506,11 @@ class GraphHandler(handler.ContentHandler,
 		self.attrs.main.default.cond = \
 			stack.cond.CreateCondExpr(arch, osname, release, cond)
 		
-		if attrs.has_key('to'):
+		if 'to' in attrs:
 			self.attrs.main.parent = attrs['to']
 		else:
 			self.attrs.main.parent = None
-		if attrs.has_key('from'):
+		if 'from' in attrs:
 			self.attrs.main.child = attrs['from']
 		else:
 			self.attrs.main.child = None
@@ -581,15 +581,15 @@ class Pass1NodeHandler(handler.ContentHandler,
 		release	= None
 		cond = None
 
-		if attrs.has_key('arch'):
+		if 'arch' in attrs:
 			arch = attrs['arch']
-		if attrs.has_key('os'):
+		if 'os' in attrs:
 			osname = attrs['os']
 			if osname == 'linux':
 				osname = 'redhat'
-		if attrs.has_key('release'):
+		if 'release' in attrs:
 			release = attrs['release']
-		if attrs.has_key('cond'):
+		if 'cond' in attrs:
 			cond = "( %s and %s )" % (cond, attrs['cond'])
 
 		self.cond = stack.cond.CreateCondExpr(arch, osname, release, cond)
@@ -680,12 +680,12 @@ class Pass1NodeHandler(handler.ContentHandler,
 		file = open(os.path.join('include', filename), 'r')
 		for line in file.readlines():
 			if mode == 'quote':
-				if os.environ.has_key('STACKDEBUG'):
+				if 'STACKDEBUG' in os.environ:
 					sys.stderr.write('[include]%s' %
 						saxutils.escape(line))
 				self.xml.append(saxutils.escape(line))
 			else:
-				if os.environ.has_key('STACKDEBUG'):
+				if 'STACKDEBUG' in os.environ:
 					sys.stderr.write('[include]%s' % line)
 				self.xml.append(line)
 		file.close()
@@ -714,7 +714,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 		if varVal:
 			self.entities[varName] = varVal
 		elif varRef:
-			if self.entities.has_key(varRef):
+			if varRef in self.entities:
 				self.entities[varName] = self.entities[varRef]
 			else:
 				self.entities[varName] = ''
@@ -842,7 +842,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 			
 		r, w = popen2.popen2(self.evalShell)
 
-		if os.environ.has_key('STACKDEBUG'):
+		if 'STACKDEBUG' in os.environ:
 			for line in string.join(self.evalText, '').split('\n'):
 				sys.stderr.write('[eval]%s\n' % line)
 		
@@ -984,7 +984,7 @@ class Pass2NodeHandler(handler.ContentHandler,
 			return
 
 		if self.kskey:
-			if not self.kstags.has_key(self.kskey):
+			if self.kskey not in self.kstags:
 				self.kstags[self.kskey] = []
 			self.kstags[self.kskey].append(
 				string.join(self.kstext, ''))

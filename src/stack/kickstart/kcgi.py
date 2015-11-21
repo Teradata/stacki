@@ -205,9 +205,9 @@ for dict in result:
 			'pkgservers' ]:
 		attrs[dict['attr']] = dict['value'] 
 
-if not attrs.has_key('trackers'):
+if 'trackers' not in attrs:
 	attrs['trackers'] = attrs['Kickstart_PrivateKickstartHost']
-if not attrs.has_key('pkgservers'):
+if 'pkgservers' not in attrs:
 	attrs['pkgservers'] = attrs['Kickstart_PrivateKickstartHost']
 
 #

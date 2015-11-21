@@ -128,7 +128,7 @@ def Log(message, level=syslog.LOG_INFO):
 def Debug(message, level=syslog.LOG_DEBUG):
 	"""If the environment variable STACKDEBUG is set,
 	send a message to syslog and stderr."""
-	if os.environ.has_key('STACKDEBUG') and \
+	if 'STACKDEBUG' in os.environ and \
 		str2bool(os.environ['STACKDEBUG']):
 		m = ''
 		p = ''
@@ -367,12 +367,12 @@ class RollArgumentProcessor:
 		something.
 		"""
 
-		if params.has_key('version'):
+		if 'version' in params:
 			version = params['version']
 		else:
 			version = '%' # SQL wildcard
 
-		if params.has_key('release'):
+		if 'release' in params:
 			rel = params['release']
 		else:
 			rel = '%' # SQL wildcard
@@ -565,7 +565,7 @@ class HostArgumentProcessor:
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
-						if not explicit.has_key(host):
+						if host not in explicit:
 							explicit[host] = False
 #					Debug('group %s is %s for %s' %
 #				      (exp, res, host))
@@ -576,7 +576,7 @@ class HostArgumentProcessor:
 				for host in fnmatch.filter(hostList, name):
 					s = self.db.getHostname(host, subnet)
 					hostDict[host] = s
-					if not explicit.has_key(host):
+					if host not in explicit:
 						explicit[host] = False
 					
 
@@ -1145,7 +1145,7 @@ class DocStringHandler(handler.ContentHandler,
                 elif tag == 'example':
 			self.section['example'].append((self.key, self.text))
 		else:
-			if self.section.has_key(tag):
+			if tag in self.section:
 				self.section[tag].append(self.text)
 		
 	def characters(self, s):
@@ -1207,7 +1207,7 @@ class DatabaseConnection:
                 k = m.hexdigest()
 
 #                print 'select', k
-                if self.cache.has_key(k):
+                if k in self.cache:
                 	rows = self.cache[k]
 #                        print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
                 else:
@@ -1592,7 +1592,7 @@ class DatabaseConnection:
 						v = x
 				else:
 					(o, s, a, v) = row
-                                if not O.has_key(o):
+                                if o not in O:
                                         O[o] = {}
                                 O[o][ConcatAttr(s, a, slash=True)] = v
 
@@ -1615,7 +1615,7 @@ class DatabaseConnection:
         	                                v = x
                                 else:
                                         (e, s, a, v) = row
-                                if not E.has_key(e):
+                                if e not in E:
                                         E[e] = {}
                                 E[e][ConcatAttr(s, a, slash=True)] = v
 			
@@ -1644,7 +1644,7 @@ class DatabaseConnection:
                                         	v = x
                                 else:
                                         (app, s, a, v) = row
-                                if not A.has_key(app):
+                                if app not in A:
                                         A[app] = {}
                                 A[app][ConcatAttr(s, a, slash=True)] = v
 
@@ -1670,13 +1670,13 @@ class DatabaseConnection:
 						v = x
 				else:
 					(h, s, a, v) = row
-                                if not H.has_key(h):
+                                if h not in H:
                                         H[h] = {}
                                 H[h][ConcatAttr(s, a, slash=True)] = v
 
                         for h, in self.select('name from nodes'):
 
-				if not H.has_key(h):
+				if h not in H:
 					H[h] = {}
 
                                 app  = self.getHostAppliance(h)
@@ -1701,19 +1701,19 @@ class DatabaseConnection:
         		        for (key, value) in G.items():
 	                	        (s, a) = SplitAttr(key)
         	                	d[key] = (s, a, value, 'G')
-	          	      	if O.has_key(os):
+	          	      	if os in O:
         	        	        for (key, value) in O[os].items():
                 	        	        (s, a) = SplitAttr(key)
                         	        	d[key] = (s, a, value, 'O')
-		                if A.has_key(app):
+		                if app in A:
         		                for (key, value) in A[app].items():
                 		                (s, a) = SplitAttr(key)
                         		        d[key] = (s, a, value, 'A')
-		                if env and E.has_key(env):
+		                if env and env in E:
         		                for (key, value) in E[env].items():
                 		                (s, a) = SplitAttr(key)
                         		        d[key] = (s, a, value, 'E')
-		                if H.has_key(h):
+		                if h in H:
         		                for (key, value) in H[h].items():
                 		                (s, a) = SplitAttr(key)
                         		        d[key] = (s, a, value, 'H')
@@ -1773,7 +1773,7 @@ class DatabaseConnection:
                 (s, a) = SplitAttr(key)
                 attr   = ConcatAttr(s, a, slash=True)
 
-                if attrs.has_key(attr):
+                if attr in attrs:
                         (value, source) = attrs[attr]
                 else:
                         value = source = None
@@ -2099,7 +2099,7 @@ class Command:
 
 		list = []
 		for (key, default, required) in pdlist:
-			if params.has_key(key):
+			if key in params:
 				list.append(params[key])
 			else:
                                 if required:
@@ -2208,7 +2208,7 @@ class Command:
 			
 		list = []
 		for node in PluginOrderIterator(graph).run():
-			if dict.has_key(node):
+			if node in dict:
 				list.append(dict[node])
 
 		return list
@@ -2282,7 +2282,7 @@ class Command:
 
 	
 	def strWordWrap(self, line, indent=''):
-		if os.environ.has_key('COLUMNS'):
+		if 'COLUMNS' in os.environ:
 			cols = os.environ['COLUMNS']
 		else:
 			cols = 80
@@ -2372,7 +2372,7 @@ class Command:
 					if header[i]:
 						key = header[i]
 						val = line[i]
-                                                if dict.has_key(key):
+                                                if key in dict:
                                                         if not type(dict[key]) ==types.ListType:
                                                                 dict[key] = [ dict[key] ]
                                                         dict[key].append(val)
@@ -2449,7 +2449,7 @@ class Command:
                 isHeader = False
 		if header:
                         isHeader = True
-			if self._params.has_key('output-header'):
+			if 'output-header' in self._params:
 				if not str2bool(self._params['output-header']):
 					output = output[1:]
                                         isHeader = False
@@ -2467,7 +2467,7 @@ class Command:
 		# $ stack list pallet output-col=name,version
 
 		if header:
-			if self._params.has_key('output-col'):
+			if 'output-col' in self._params:
 				cols = self._params['output-col'].split(',')
 			else:
 				cols = header
@@ -2537,7 +2537,7 @@ class Command:
 		else:
 			users = []
 			
-		if flags.has_key('format'):
+		if 'format' in flags:
 			format = flags['format'].lower()
 		else:
 			format = 'plain'

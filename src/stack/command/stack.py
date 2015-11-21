@@ -224,7 +224,7 @@ class RCL_Completer:
 			for i in mod_split:
 				# Create and navigate to the end of
 				# the current module tree
-				if not cur.children.has_key(i):
+				if i not in cur.children:
 					cur.children[i] = command_struct()
 				cur = cur.children[i]
 				#cur.name=i
@@ -242,13 +242,13 @@ class RCL_Completer:
 		# the traversal going
 		if len(tokens) > 1:
 			t = tokens.pop(0)
-			if d.children.has_key(t):
+			if t in d.children:
 				self.traverse(d.children[t], tokens, incomplete, result)
 		# If we're at the last token in the list of tokens.
 		elif len(tokens) == 1:
 			t = tokens.pop(0)
 			# First check if the last token is a valid token
-			if d.children.has_key(t):
+			if t in d.children:
 				cur = d.children[t]
 				# If the token is valid, but is incomplete -
 				# this means that the token was entered fully
@@ -291,7 +291,7 @@ class RCL_Completer:
 			return
 		if len(tokens) > 0:
 			t = tokens.pop(0)
-			if d.children.has_key(t):
+			if t in d.children:
 				print('  '*level, t)
 				self.print_mod_cmd(d.children[t], tokens, level+1)
 			else:
@@ -393,7 +393,7 @@ def run_command(args):
 	# dumped when an exception occurs.
         
 	STACKDEBUG = None
-	if os.environ.has_key('STACKDEBUG'):
+	if 'STACKDEBUG' in os.environ:
 		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
 
 	try:
