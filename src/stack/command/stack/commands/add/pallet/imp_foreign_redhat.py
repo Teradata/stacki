@@ -162,7 +162,7 @@ class Implementation(stack.commands.Implementation):
 
 		cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
 			% (self.owner.mountPoint, destdir)
-		print 'cmd: %s' % cmd
+		print('cmd: %s' % cmd)
 		subprocess.call(shlex.split(cmd))
 		# subprocess.call(shlex.split(cmd), 
 		# 	stdout = open('/dev/null'), stderr = open('/dev/null'))

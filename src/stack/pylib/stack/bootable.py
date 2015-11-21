@@ -134,7 +134,7 @@ class Bootable:
 
 		
 	def applyRPM(self, rpm, root, flags=''):
-		print 'applyRPM', rpm.getBaseName(), root
+		print('applyRPM', rpm.getBaseName(), root)
 
 		dbdir = os.path.join(root, 'var', 'lib', 'rpm')
 
