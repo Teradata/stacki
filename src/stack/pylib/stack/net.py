@@ -154,7 +154,7 @@ class Application(stack.app.Application):
 		if 'eth0' in intfs:
 			return 'eth0'
 			
-		raise Exception, "Your private interface (eth0) is down"
+		raise Exception("Your private interface (eth0) is down")
 						
 
 	def privateIP(self):
