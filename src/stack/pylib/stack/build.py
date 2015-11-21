@@ -423,7 +423,7 @@ class DistributionBuilder(Builder):
 	rpm = None
 	try:
         	rpm = self.dist.getRPM(name)
-	except stack.dist.DistRPMList, e:
+	except stack.dist.DistRPMList as e:
 		for r in e.list:
 			if r.getPackageArch() == self.dist.getArch():
 				rpm = r

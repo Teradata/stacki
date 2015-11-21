@@ -221,7 +221,8 @@ class App(stack.app.Application):
 		 	try:
 				self.s.bind(("localhost",self.localport))
 				done = 1
-			except socket.error,(errno,string):
+			except socket.error as e:
+                           (errno, string) = e.args
 			   if(errno == 98):
 				done = 0
 				self.localport = self.localport + 1
