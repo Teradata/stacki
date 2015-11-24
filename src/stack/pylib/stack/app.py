@@ -182,7 +182,7 @@ class Application:
             parser.setContentHandler(handler)
             try:
                 parser.parse(file)
-            except SAXParseException as msg:
+            except SAXParseException, msg:
                 print(filename, "XML parse exception: ", msg)
             file.close()
             
@@ -205,7 +205,7 @@ class Application:
                 long.append(e)
         try:
             opts, args = getopt.getopt(self.args, short, long)
-        except getopt.GetoptError as msg:
+        except getopt.GetoptError, msg:
 	    sys.stderr.write("error - %s\n" % msg)
             self.usage()
             sys.exit(1)

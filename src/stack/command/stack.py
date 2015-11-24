@@ -381,7 +381,7 @@ def run_command(args):
 		submodpath  = string.join(fullmodpath[2:], '/')
                 try:
                         help.run({'subdir': submodpath}, [])
-                except stack.exception.CommandError as e:
+                except stack.exception.CommandError, e:
                         sys.stderr.write('%s\n' % e)
                         return -1
 		print(help.getText())
