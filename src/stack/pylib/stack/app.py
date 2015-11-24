@@ -160,7 +160,7 @@ class Application:
         # precedence.
 
         dirList = [ os.path.join(os.sep,'opt', self.projectName, 'etc') ]
-        if 'HOME' in os.environ:
+        if os.environ.has_key('HOME'):
             dirList.append(os.environ['HOME'])
         dirList.append('.')
 
@@ -182,7 +182,7 @@ class Application:
             parser.setContentHandler(handler)
             try:
                 parser.parse(file)
-            except SAXParseException as msg:
+            except SAXParseException, msg:
                 print(filename, "XML parse exception: ", msg)
             file.close()
             
@@ -205,7 +205,7 @@ class Application:
                 long.append(e)
         try:
             opts, args = getopt.getopt(self.args, short, long)
-        except getopt.GetoptError as msg:
+        except getopt.GetoptError, msg:
 	    sys.stderr.write("error - %s\n" % msg)
             self.usage()
             sys.exit(1)
@@ -238,7 +238,7 @@ class Application:
     
     def usage(self):
 
-        if 'COLUMNS' in os.environ:
+        if os.environ.has_key('COLUMNS'):
             cols = os.environ['COLUMNS']
         else:
             cols = 80

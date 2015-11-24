@@ -120,14 +120,14 @@ class Command(command):
 				if rel:
 					fullname += '-%s' % rel
 
-				if box not in pallets:
+				if not pallets.has_key(box):
 					pallets[box] = []
 				pallets[box].append(fullname)
 			
                 for row in self.call('list.cart'):
                         if row['boxes']:
                                 for box in row['boxes'].split():
-                                        if box not in carts:
+                                        if not carts.has_key(box):
                                                 carts[box] = []
                                         carts[box].append(row['name'])
 
@@ -138,10 +138,10 @@ class Command(command):
 				boxes where name='%s'""" % box)
 			id, os = self.db.fetchone()
 
-			if box not in carts:
+			if not carts.has_key(box):
 				carts[box] = []
 
-			if box not in pallets:
+			if not pallets.has_key(box):
 				pallets[box] = []
 
 			self.addOutput(box, (os, string.join(pallets[box]),

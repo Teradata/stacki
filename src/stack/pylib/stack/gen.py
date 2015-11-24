@@ -205,7 +205,7 @@ class Generator:
 		# If this is a subsequent file tag and the optional PERMS
 		# or OWNER attributes are missing, use the previous value(s).
 		
-		if file in self.rcsFiles:
+		if self.rcsFiles.has_key(file):
 			(orig_owner, orig_perms) = self.rcsFiles[file]
 			if not perms:
 				perms = orig_perms
@@ -760,14 +760,14 @@ class Generator_redhat(Generator):
 		list.append('%packages --ignoremissing')
 		self.ks['rpms-on'].sort()
 		for e in self.ks['rpms-on']:
-			if e in self.rpm_context:
+			if self.rpm_context.has_key(e):
 				(roll, nodefile, color) = self.rpm_context[e]
 			else:
 				(roll, nodefile, color) = (none, none, none)
 			list.append((e, roll, nodefile, color))
 		self.ks['rpms-off'].sort()
 		for e in self.ks['rpms-off']:
-			if e in self.rpm_context:
+			if self.rpm_context.has_key(e):
 				(roll, nodefile, color) = self.rpm_context[e]
 			else:
 				(roll, nodefile, color) = (none, none, none)
@@ -1098,7 +1098,7 @@ class Generator_sunos(Generator):
 		while child:
 			auto_reg[child.nodeName] = self.getChildText(child).strip()
 			child = iter.nextSibling()
-		if 'type' not in auto_reg:
+		if not auto_reg.has_key('type'):
 			self.ks['sysidcfg'].append('auto_reg=disable')
 			return
 		auto_reg_type = auto_reg.pop('type')
@@ -1182,7 +1182,7 @@ class Generator_sunos(Generator):
 		else:
 			enabled='true'
 
-		if name not in self.service_instances:
+		if not self.service_instances.has_key(name):
 			self.service_instances[name] = []
 		self.service_instances[name].append((instance,enabled))
 		# This is only to placate the getChildText
@@ -1203,7 +1203,7 @@ class Generator_sunos(Generator):
 			else:
 				net[child.nodeName] = self.getChildText(child).strip()
 			child = iter.nextSibling()
-		if 'interface' not in net:
+		if not net.has_key('interface'):
 			net['interface'] = 'PRIMARY'
 		self.ks['sysidcfg'].append("network_interface=%s{" %
 			net.pop('interface'))

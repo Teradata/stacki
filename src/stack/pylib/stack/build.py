@@ -199,7 +199,7 @@ class DistributionBuilder(Builder):
 	if arch == self.dist.arch:
 		if self.allRolls:
 			return 1
-		if key in self.useRolls:
+		if self.useRolls.has_key(key):
 			version, enabled = self.useRolls[key]
 			if enabled and version == ver:
 				return 1
@@ -423,14 +423,14 @@ class DistributionBuilder(Builder):
 	rpm = None
 	try:
         	rpm = self.dist.getRPM(name)
-	except stack.dist.DistRPMList as e:
+	except stack.dist.DistRPMList, e:
 		for r in e.list:
 			if r.getPackageArch() == self.dist.getArch():
 				rpm = r
 				break
 
         if not rpm:
-            raise ValueError("could not find %s" % name)
+            raise ValueError, "could not find %s" % name
 
         dbdir = os.path.join(root, 'var', 'lib', 'rpm')
         if not os.path.isdir(dbdir):
@@ -458,7 +458,7 @@ class DistributionBuilder(Builder):
         shutil.rmtree(os.path.join(root, 'var'))
 
         if retval != 0:
-            raise BuildError("could not apply RPM %s" % (name))
+            raise BuildError, "could not apply RPM %s" % (name)
 
         return retval
 
@@ -618,7 +618,7 @@ class DistributionBuilder(Builder):
 		name = e.getUniqueName() # name w/ arch string appended
 	    else:
                 name = e.getName()
-            if name not in dict or e >= dict[name]:
+            if not dict.has_key(name) or e >= dict[name]:
                 dict[name] = e
 
         # Extract the File objects from the dictionary and return

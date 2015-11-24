@@ -344,9 +344,9 @@ class GraphHandler(stack.util.ParseXML):
 		self.attrs.arch		= self.attrs.default.arch
 		self.attrs.release	= self.attrs.default.release
 
-		if 'arch' in attrs:
+		if attrs.has_key('arch'):
 			self.attrs.arch = attrs['arch']
-		if 'release' in attrs:
+		if attrs.has_key('release'):
 			self.attrs.release = attrs['release']
 
 	def endElement_to(self, name):
@@ -362,9 +362,9 @@ class GraphHandler(stack.util.ParseXML):
 		self.attrs.arch		= self.attrs.default.arch
 		self.attrs.release	= self.attrs.default.release
 		
-		if 'arch' in attrs:
+		if attrs.has_key('arch'):
 			self.attrs.arch = attrs['arch']
-		if 'release' in attrs:
+		if attrs.has_key('release'):
 			self.attrs.release = attrs['release']
 
 
@@ -377,19 +377,19 @@ class GraphHandler(stack.util.ParseXML):
 	# <edge>
 	
 	def startElement_edge(self, name, attrs):
-		if 'arch' in attrs:
+		if attrs.has_key('arch'):
 			self.attrs.default.arch = attrs['arch']
 		else:
 			self.attrs.default.arch = None
-		if 'release' in attrs:
+		if attrs.has_key('release'):
 			self.attrs.default.release = attrs['release']
 		else:
 			self.attrs.default.release	= None
-		if 'to' in attrs:
+		if attrs.has_key('to'):
 			self.attrs.parent = attrs['to']
 		else:
 			self.attrs.parent = None
-		if 'from' in attrs:
+		if attrs.has_key('from'):
 			self.attrs.child = attrs['from']
 		else:
 			self.attrs.child = None

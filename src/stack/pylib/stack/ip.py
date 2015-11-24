@@ -247,10 +247,10 @@ class IPGenerator:
 
     def curr(self):
         if (self.addr & IPAddr(~self.netmask)) == ~self.netmask:
-            raise IPError('At top of address range')
+            raise IPError, 'At top of address range'
 
         if (self.addr & IPAddr(~self.netmask)) == 0x00:
-            raise IPError('At bottom of address range')
+            raise IPError, 'At bottom of address range'
 
         return self.addr
 
@@ -264,10 +264,10 @@ class IPGenerator:
         addr = self.addr + n
 
         if (addr & IPAddr(~self.netmask)) == ~self.netmask:
-            raise IPError('At top of address range')
+            raise IPError, 'At top of address range'
 
         if (addr & IPAddr(~self.netmask)) == 0x00:
-            raise IPError('At bottom of address range')
+            raise IPError, 'At bottom of address range'
 
         self.addr = addr
         return self.addr

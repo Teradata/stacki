@@ -225,7 +225,7 @@ class Application(stack.app.Application):
     def __init__(self, argv=None):
         stack.app.Application.__init__(self, argv)
         self.rcfileHandler = RCFileHandler
-        if 'MYSQL_HOST' in os.environ:
+        if os.environ.has_key('MYSQL_HOST'):
             self.host	= os.environ['MYSQL_HOST']
         else:
             self.host	= 'localhost'
