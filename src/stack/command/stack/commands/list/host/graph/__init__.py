@@ -227,10 +227,10 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tcolor=black;')
 		dict = {}
 		for node in handler.getOrderGraph().getNodes():
-			try:
-				handler.parseNode(node, 0) # Skip <eval>
-			except stack.util.KickstartNodeError:
-				pass
+			#try:
+			#	handler.parseNode(node, 0) # Skip <eval>
+			#except stack.util.KickstartNodeError:
+			#	pass
 			try:
 				color = styleMap[node.getRoll()].nodeColor
 			except:
@@ -260,10 +260,10 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tfontsize=32;')
 		dot.append('\t\tcolor=black;')
 		for node in handler.getMainGraph().getNodes():
-			try:
-				handler.parseNode(node, 0) # Skip <eval>
-			except stack.util.KickstartNodeError:
-				pass
+			#try:
+			#	handler.parseNode(node, 0) # Skip <eval>
+			#except stack.util.KickstartNodeError:
+			#	pass
 			try:
 				color = styleMap[node.getRoll()].nodeColor
 			except:
