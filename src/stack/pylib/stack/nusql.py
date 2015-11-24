@@ -277,7 +277,7 @@ class Application(stack.sql.Application):
 				return qval
 			except:
 				print("Error in query (%d) [%s]\n" % (qval,vmsg))
-				raise SQLerror(query)
+				raise SQLerror, query 
 
 	def mergeDBandParameters(self):
 		dbkeys=self.dbvalues.keys()

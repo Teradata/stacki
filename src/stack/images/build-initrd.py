@@ -135,7 +135,7 @@ class App(stack.app.Application):
 		for pkg in pkgs:
 			RPM = self.boot.findFile(pkg)
 			if not RPM:
-				raise DistError("Could not find %s rpm" % (pkg))
+				raise DistError, "Could not find %s rpm" % (pkg)
 
 			print("Applying package %s" % (pkg))
 

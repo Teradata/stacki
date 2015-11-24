@@ -167,7 +167,7 @@ class ServiceController:
 				plugin_class = getattr(m, 'Plugin')
 				if not issubclass(plugin_class, 
 						stack.sql.InsertEthersPlugin):
-					raise Exception('Invalid class')
+					raise Exception, 'Invalid class'
 				
 				# Instantiate plugin
 				p = plugin_class(app)
@@ -361,7 +361,7 @@ class InsertEthers(GUI):
 
 			if self.sql.execute(query) == 0:
 				self.errorGUI(_("No appliance names in database"))
-				raise InsertError(msg)
+				raise InsertError, msg
 
 			app_string = []
 			for row in self.sql.fetchall():
@@ -385,7 +385,7 @@ class InsertEthers(GUI):
 		if self.sql.execute(query) == 0:
 			msg = _("Could not find appliance (%s) in database") \
 				% (app_string[index])
-			raise InsertError(msg)
+			raise InsertError, msg
 
 		self.appliance, basename = self.sql.fetchone()
 		
@@ -592,19 +592,21 @@ class InsertEthers(GUI):
 
 		s = os.system(cmd)
 		if s != 0:
-			raise InsertError("Could not insert %s into database" % nodename)
+			raise InsertError, \
+				"Could not insert %s into database" % nodename
 
 		cmd = '/opt/stack/bin/stack add host interface %s interface=NULL ' % nodename +\
 			'default=true mac=%s name=%s ip=%s network=%s' % \
 			(mac, nodename, ip, self.subnet)
 		s = os.system(cmd)
 		if s != 0:
-			raise InsertError("Could not insert %s into database" % nodename)
+			raise InsertError, \
+				"Could not insert %s into database" % nodename
 
 		rows = self.sql.execute('select id from nodes where name="%s"' % \
 			nodename)
 		if not rows:
-			raise InsertError("Could not find %s in database" % nodename)
+			raise InsertError, "Could not find %s in database" % nodename
 
 		nodeid = self.sql.fetchone()[0]
 		self.controller.added(nodename, nodeid)
@@ -712,7 +714,7 @@ class InsertEthers(GUI):
 		try:
 			status = int(fields[8])
 		except:
-			raise ValueError(_("Apache log file not well formed!"))
+			raise ValueError, _("Apache log file not well formed!")
 
 		nodeid = int(self.sql.getNodeId(fields[0]))
 		self.sql.execute('select name from nodes where id=%d' % nodeid)
@@ -720,8 +722,9 @@ class InsertEthers(GUI):
 			name, = self.sql.fetchone()
 		except:
 			if status == 200:
-				raise InsertError(_("Unknown node %s got a kickstart file!") \
-				 % fields[0])
+				raise InsertError, \
+				 _("Unknown node %s got a kickstart file!") \
+				 % fields[0]
 			return
 
 		if name not in self.kickstarted:
@@ -761,12 +764,12 @@ class InsertEthers(GUI):
 					self.kickstarted.keys()[0])
 				# Use exception structure so we dont have 
 				# to keep track of the state.
-				raise InsertDone(_("Suggest Done"))
+				raise InsertDone, _("Suggest Done")
 
 			if self.maxNew > 0:
 				self.maxNew -= 1
 				if self.maxNew == 0:
-					raise InsertDone(_("Suggest Done"))
+					raise InsertDone, _("Suggest Done")
 
 			self.rank = self.rank + 1
 
@@ -823,7 +826,8 @@ class InsertEthers(GUI):
 					'where name="%s"' % self.hostname
 				rows = self.sql.execute(query)
 				if rows:
-					raise InsertError("Node %s already exists" % self.hostname)
+					raise InsertError,\
+					 "Node %s already exists" % self.hostname
 
 		except (ValueError, InsertError) as msg:
 			self.errorGUI(msg)
@@ -978,7 +982,7 @@ class App(stack.sql.Application):
 			return
 
 		if os.path.isfile(self.lockFile):
-			raise Exception(_("error - lock file %s exists") % self.lockFile)
+			raise Exception, _("error - lock file %s exists") % self.lockFile
 			sys.exit(-1)
 		else:
 			os.system('touch %s' % self.lockFile)

@@ -430,7 +430,7 @@ class DistributionBuilder(Builder):
 				break
 
         if not rpm:
-            raise ValueError("could not find %s" % name)
+            raise ValueError, "could not find %s" % name
 
         dbdir = os.path.join(root, 'var', 'lib', 'rpm')
         if not os.path.isdir(dbdir):
@@ -458,7 +458,7 @@ class DistributionBuilder(Builder):
         shutil.rmtree(os.path.join(root, 'var'))
 
         if retval != 0:
-            raise BuildError("could not apply RPM %s" % (name))
+            raise BuildError, "could not apply RPM %s" % (name)
 
         return retval
 
