@@ -344,7 +344,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 				depsHash[dep.name] = None
 
 		for node,cond in nodes:
-			if node.name in depsHash:
+			if depsHash.has_key(node.name):
 				nodesHash[node.name] = None
 
 		list = []
@@ -426,7 +426,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		# Also create a post section to preseed any
 		# compiled salt templated on the node.
 
-                if 'appliance' in attrs and not \
+                if attrs.has_key('appliance') and not \
 			attrs['appliance'] == 'frontend':
 
                         self.addText('<post>\n')

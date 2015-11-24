@@ -154,14 +154,14 @@ class App(stack.sql.Application):
         def run(self):
 
 		ipaddr = None
-		if 'REMOTE_ADDR' in os.environ:
+		if os.environ.has_key('REMOTE_ADDR'):
                 	ipaddr = os.environ['REMOTE_ADDR']
                 if not ipaddr:
                         return
 
         	syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
                 
-		if 'HTTP_X_STACK_PARTITIONINFO' in os.environ:
+		if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
 
 			partinfo = os.environ['HTTP_X_STACK_PARTITIONINFO']
                         try:

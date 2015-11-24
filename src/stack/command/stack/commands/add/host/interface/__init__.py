@@ -186,7 +186,7 @@ class Command(stack.commands.add.host.command):
                         fields.append('mac')
 
 		for key in fields:
-			if key in params:
+			if params.has_key(key):
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
 

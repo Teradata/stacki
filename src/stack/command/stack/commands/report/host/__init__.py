@@ -121,7 +121,7 @@ class Command(command):
                         host  = row['host']
                         alias = row['alias']
 
-                        if host not in row:
+                        if not row.has_key(host):
                                 aliases[host] = []
                         aliases[host].append(alias)
                         
@@ -148,7 +148,7 @@ class Command(command):
                                 names.append('%s.%s' % (host, zone))
                         if default:
                                 names.append(host)
-                        if host in aliases:
+                        if aliases.has_key(host):
                                 for alias in aliases.get(host):
                                         names.append(alias)
 

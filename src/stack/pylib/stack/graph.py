@@ -242,18 +242,18 @@ class Graph:
 
 		
 	def addEdge(self, e):
-		if e.getParent().name not in self.nodes:
+		if not self.nodes.has_key(e.getParent().name):
 			self.nodes[e.getParent().name] = e.getParent()
-		if e.getChild().name not in self.nodes:
+		if not self.nodes.has_key(e.getChild().name):
 			self.nodes[e.getChild().name] = e.getChild()
 
-		if e.getParent() in self.adjList:
+		if self.adjList.has_key(e.getParent()):
 			self.adjList[e.getParent()].append(e)
 		else:
 			self.adjList[e.getParent()] = [ e ]
 
 	def hasNode(self, node):
-		if node in self.nodes:
+		if self.nodes.has_key(node):
 			return 1
 		return 0
 
@@ -263,7 +263,7 @@ class Graph:
 		return None
 
 	def __getitem__(self, node):
-		if node in self.adjList:
+		if self.adjList.has_key(node):
 			return self.adjList[node]
 		else:
 			return []

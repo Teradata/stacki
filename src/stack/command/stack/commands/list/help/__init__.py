@@ -141,7 +141,7 @@ class Command(stack.commands.list.command):
 		dirs = tree.getDirs()
 		dirs.sort()
 
-		if 'COLUMNS' in os.environ:
+		if os.environ.has_key('COLUMNS'):
 			cols = os.environ['COLUMNS']
 			
 		for dir in dirs:

@@ -199,7 +199,7 @@ class DistributionBuilder(Builder):
 	if arch == self.dist.arch:
 		if self.allRolls:
 			return 1
-		if key in self.useRolls:
+		if self.useRolls.has_key(key):
 			version, enabled = self.useRolls[key]
 			if enabled and version == ver:
 				return 1
@@ -618,7 +618,7 @@ class DistributionBuilder(Builder):
 		name = e.getUniqueName() # name w/ arch string appended
 	    else:
                 name = e.getName()
-            if name not in dict or e >= dict[name]:
+            if not dict.has_key(name) or e >= dict[name]:
                 dict[name] = e
 
         # Extract the File objects from the dictionary and return

@@ -140,7 +140,7 @@ def sphinxtoc():
 	for line in list:
 		l = line.split()
 		verb = l[0]
-		if verb not in verblist:
+		if not verblist.has_key(verb):
 			verblist[verb] = []
 		cmd = '.'.join(line.split())
 		verblist[verb].append(cmd)
@@ -178,7 +178,7 @@ def markdoc():
 
 		# Keep a list of the verbs to
 		# generate a TOC
-		if verb not in cli_toc:
+		if not cli_toc.has_key(verb):
 			cli_toc[verb] = []
 		cli_toc[verb].append(line.split()[1:])
 

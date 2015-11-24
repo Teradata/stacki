@@ -138,7 +138,7 @@ class Command(stack.commands.RollArgumentProcessor,
 				o = getattr(module, 'RollName')
 			except AttributeError:
 				continue
-			if o not in dict:
+			if not dict.has_key(o):
 				dict[o] = []
 			dict[o].append(string.join(dir.split(os.sep), ' '))
 
@@ -159,7 +159,7 @@ class Command(stack.commands.RollArgumentProcessor,
 				continue
 			seenrolls.append(roll)
 		
-			if roll in dict:
+			if dict.has_key(roll):
 				for command in dict[roll]:
 					self.addOutput(roll, command)
 			else:
