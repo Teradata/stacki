@@ -95,6 +95,7 @@
 import os
 import sys
 import string
+import json
 import stack.util
 import stack.profile
 import stack.graph
@@ -188,14 +189,28 @@ class Command(stack.commands.list.host.command):
 			
 			cwd = os.getcwd()
 			os.chdir(self.basedir)
-			dot = self.createDotGraph(handler,
-				self.readDotGraphStyles())
-			os.chdir(cwd)
-			for line in dot:
-				self.addOutput(host, line)
+
+			if 'type' in params and params['type'] == 'json':
+                                dot = self.createJSONGraph(handler)
+				os.chdir(cwd)
+				self.addOutput(host, dot)
+                        else:
+                                dot = self.createDotGraph(handler,
+                                        self.readDotGraphStyles())
+				os.chdir(cwd)
+				for line in dot:
+					self.addOutput(host, line)
 
 		self.endOutput(padChar='')
-	
+
+	def createJSONGraph(self, handler):
+		"Output JSON format for D3 graph"
+		D = []
+		#fill array of edge parent and children
+		for e in handler.getMainGraph().getEdges():
+			D.append({"source": str(e.parent.name), "target": str(e.child.name)})
+
+		return json.dumps(D)	
 	
 	def createDotGraph(self, handler, styleMap):
 		dot = []
