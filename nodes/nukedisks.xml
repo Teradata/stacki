@@ -15,7 +15,6 @@ sys.path.append('/opt/stack/lib')
 
 import stack_partition
 import os
-from stack.bool import str2bool
 
 nukedisks = '&nukedisks;'
 
@@ -37,11 +36,18 @@ def initDiskLabel(disk):
 	cmd += ' > /dev/null 2>&amp;1'
 	os.system(cmd)
 
-p = stack_partition.StackPartition()
-disks = p.getDisks()
+def getdisklist(s):
+	if s.upper() in ['ALL','TRUE','Y','YES']:
+		p = stack_partition.StackPartition()
+		return p.getDisks()
+	if s.upper() in ['NONE','FALSE','N','NO']:
+		return []
 
-if str2bool(nukedisks):
-	for disk in disks:
+	return s.split()
+
+disks = getdisklist(nukedisks)
+
+for disk in disks:
 		initDiskLabel(disk)
 
 </pre>
