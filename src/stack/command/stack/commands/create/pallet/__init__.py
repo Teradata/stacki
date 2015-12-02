@@ -162,7 +162,7 @@ class Builder:
 
 
 	def copyXMLs(self, name, version, arch):
-		print 'Copying graph and node XML files'
+		print('Copying graph and node XML files')
 
 		cwd = os.getcwd()
 		srcdir = os.path.join(cwd, '..')
@@ -484,7 +484,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		import stack.bootable
 		import stack
 
-		print 'Configuring pallet to be bootable ... ', name
+		print('Configuring pallet to be bootable ... ', name)
 
 		#
 		# get 'stacki' pallet info

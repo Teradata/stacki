@@ -46,7 +46,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-libxml2</package>
 <package>foundation-wget</package>
 <package>foundation-python-setuptools</package>
-<package>foundation-python-ipaddress</package>
+<package>foundation-py-ipaddress</package>
 <package>libdnet</package>
 
 

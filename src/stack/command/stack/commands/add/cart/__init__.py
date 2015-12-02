@@ -41,11 +41,12 @@
 
 import os
 import sys
+import grp
+import stat
 import string
 import stack.file
 import stack.commands
 from stack.exception import *
-
 
 class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.add.command):
@@ -58,7 +59,6 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-
                 if not len(args):
                         raise ArgRequired(self, 'cart')
                 if len(args) > 1:
@@ -120,4 +120,47 @@ class Command(stack.commands.CartArgumentProcessor,
                 self.db.execute("""
                 	insert into carts(name) values ('%s')
                         """ % cart)
+
+		# make sure apache can read all the files and directories
+
+		gr_name, gr_passwd, gr_gid, gr_mem = grp.getgrnam('apache')
+
+                cartpath = '/export/stack/carts/%s' % cart
+
+		for dirpath, dirnames, filenames in os.walk(cartpath):
+			try:
+				os.chown(dirpath, -1, gr_gid)
+			except:
+				pass
+
+			perms = os.stat(dirpath)[stat.ST_MODE]
+			perms = perms | stat.S_IRGRP | stat.S_IXGRP
+
+			#
+			# apache needs to be able to write in the cart directory
+			# when carts are compiled on the fly
+			#
+			if dirpath == cartpath:
+				perms |= stat.S_IWGRP
+
+			try:
+				os.chmod(dirpath, perms)
+			except:
+				pass
+
+			for file in filenames:
+				filepath = os.path.join(dirpath, file)
+
+				try:
+					os.chown(filepath, -1, gr_gid)
+				except:
+					pass
+
+				perms = os.stat(filepath)[stat.ST_MODE]
+				perms = perms | stat.S_IRGRP
+
+				try:
+					os.chmod(filepath, perms)
+				except:
+					pass
 

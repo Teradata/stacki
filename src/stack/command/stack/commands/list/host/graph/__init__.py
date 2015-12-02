@@ -95,6 +95,7 @@
 import os
 import sys
 import string
+import json
 import stack.util
 import stack.profile
 import stack.graph
@@ -151,51 +152,64 @@ class Command(stack.commands.list.host.command):
 		self.drawSize		= size
 		
 		for host in self.getHostnames(args):
-			self.db.execute("""
-				select d.name, d.graph from
-				nodes n, distributions d where
-				n.distribution=d.id and n.name='%s'
-				""" % host)
-			(dist, graph) = self.db.fetchone()
 
-			distrodir = self.command('report.distribution')
-			
-			self.basedir  = os.path.join(distrodir.strip(), dist,
-				arch, 'build')
-			if basedir:
-				if not os.path.exists(basedir):
-                                        raise CommandError(self, 'cannot read directory "%s"' % basedir)
-				self.basedir = basedir
+			box = None
+			for row in self.call('list.host', [ host ]):
+				box = row['box']
+			if not box:
+				continue
 
-			graphdir = os.path.join(self.basedir, 'graphs', graph)
-			if not os.path.exists(graphdir):
-                                raise CommandError(self, 'cannot read directory "%s"' % graphdir)
+			dirs = []
+			for row in self.call('list.pallet'):
+				boxes = row['boxes'].split(' ')
+				if box in boxes:
+					dirs.append(os.path.join(os.sep, 'export', 'stack', 'pallets', 
+								 row['name'], row['version'], row['os'], 
+								 row['arch'], 'graph'))
 
-			parser  = make_parser()
+			for row in self.call('list.cart'):
+				boxes = row['boxes'].split(' ')
+				if box in boxes:
+					dirs.append(os.path.join(os.sep, 'export', 'stack', 'carts', 
+								 row['name'], 'graph'))
+
+			parser = make_parser()
 			attrs = self.db.getHostAttrs(host)
 			handler = stack.profile.GraphHandler(attrs, {}, prune=False)
 
-			for file in os.listdir(graphdir):
-				root, ext = os.path.splitext(file)
-				if ext == '.xml':
-					path = os.path.join(graphdir, file)
-					if not os.path.isfile(path):
-						continue
-					fin = open(path, 'r')
-					parser.setContentHandler(handler)
-					parser.parse(fin)
-					fin.close()
+			for dir in dirs:
+				if not os.path.exists(dir):
+					continue
+				for file in os.listdir(dir):
+					root, ext = os.path.splitext(file)
+					if ext == '.xml':
+						path = os.path.join(dir, file)
+						if not os.path.isfile(path):
+							continue
+						fin = open(path, 'r')
+						parser.setContentHandler(handler)
+						parser.parse(fin)
+						fin.close()
 			
-			cwd = os.getcwd()
-			os.chdir(self.basedir)
-			dot = self.createDotGraph(handler,
-				self.readDotGraphStyles())
-			os.chdir(cwd)
-			for line in dot:
-				self.addOutput(host, line)
+			if 'type' in params and params['type'] == 'json':
+                                dot = self.createJSONGraph(handler)
+				self.addOutput(host, dot)
+                        else:
+                                dot = self.createDotGraph(handler,
+                                        self.readDotGraphStyles())
+				for line in dot:
+					self.addOutput(host, line)
 
 		self.endOutput(padChar='')
-	
+
+	def createJSONGraph(self, handler):
+		"Output JSON format for D3 graph"
+		D = []
+		#fill array of edge parent and children
+		for e in handler.getMainGraph().getEdges():
+			D.append({"source": str(e.parent.name), "target": str(e.child.name)})
+
+		return json.dumps(D)	
 	
 	def createDotGraph(self, handler, styleMap):
 		dot = []
@@ -227,10 +241,10 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tcolor=black;')
 		dict = {}
 		for node in handler.getOrderGraph().getNodes():
-			try:
-				handler.parseNode(node, 0) # Skip <eval>
-			except stack.util.KickstartNodeError:
-				pass
+			#try:
+			#	handler.parseNode(node, 0) # Skip <eval>
+			#except stack.util.KickstartNodeError:
+			#	pass
 			try:
 				color = styleMap[node.getRoll()].nodeColor
 			except:
@@ -260,10 +274,10 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tfontsize=32;')
 		dot.append('\t\tcolor=black;')
 		for node in handler.getMainGraph().getNodes():
-			try:
-				handler.parseNode(node, 0) # Skip <eval>
-			except stack.util.KickstartNodeError:
-				pass
+			#try:
+			#	handler.parseNode(node, 0) # Skip <eval>
+			#except stack.util.KickstartNodeError:
+			#	pass
 			try:
 				color = styleMap[node.getRoll()].nodeColor
 			except:

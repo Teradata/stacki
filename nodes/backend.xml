@@ -33,6 +33,11 @@ for o in listpallet:
 	if '&box;' in boxes:
 		print '&lt;repo&gt; --name="%s" --baseurl=http://127.0.0.1/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (o['name'], o['name'], o['version'], o['arch'])
 
+for o in stack.api.Call('list cart'):
+	boxes = o['boxes'].split()
+	if '&box;' in boxes:
+		print '&lt;repo&gt; --name="%s" --baseurl=http://127.0.0.1/install/carts/%s&lt;/repo&gt;' % (o['name'], o['name'])
+
 </eval>
 
 </main>

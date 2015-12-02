@@ -88,6 +88,11 @@ chmod 0444 /etc/pki/tls/certs/localhost.crt
 	Allow from all
 </Directory>
 
+# allow all access to the carts RPMS
+<Directory /var/www/html/install/carts>
+	Allow from all
+</Directory>
+
 SSLCACertificateFile /etc/httpd/conf/ssl.ca/ca-bundle
 ]]>
 </file>

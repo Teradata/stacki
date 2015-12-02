@@ -195,7 +195,7 @@ class App(stack.sql.Application):
                 # The following attributes are one shot booleans and
                 # should always be reset even if the partinfo was corrupt.
                 
-		os.system('/opt/stack/bin/stack set host attr %s attr=nukedisks value=false' % ipaddr)
+		os.system('/opt/stack/bin/stack set host attr %s attr=nukedisks value=none' % ipaddr)
 		os.system('/opt/stack/bin/stack set host attr %s attr=nukecontroller value=false' % ipaddr)
                 
 		print 'Content-type: application/octet-stream'

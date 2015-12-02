@@ -82,6 +82,7 @@
 <post>
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
+chmod 775 /export/stack/carts
 </post>
 
 <!--
