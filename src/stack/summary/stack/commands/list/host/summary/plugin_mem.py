@@ -1,3 +1,8 @@
+#
+# @SI_Copyright@
+# @SI_Copyright@
+#
+
 import stack.commands
 
 class Plugin(stack.commands.Plugin):
