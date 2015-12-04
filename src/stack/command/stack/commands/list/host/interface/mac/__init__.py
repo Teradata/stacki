@@ -10,7 +10,7 @@ from stack.exception import *
 class Command(stack.commands.Command):
 	"""
 	List all NIC's on a machine. Currently works
-	for Dell.
+	for Dell, HP.
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
@@ -20,6 +20,7 @@ class Command(stack.commands.Command):
 	"""
 	MustBeRoot = 0
 	DELL = "dell"
+	HP   = "hewlett"
 
 	def run(self, params, args):
 		if not len(args):
@@ -61,4 +62,7 @@ class Command(stack.commands.Command):
 		# Run implementation specific code
 		if Command.DELL in bmc_info.manufacturer_name.lower():
 			self.runImplementation('%s' % Command.DELL,
+				(host, ipmi_ip, uname, pwd))
+		elif Command.HP in bmc_info.manufacturer_name.lower():
+			self.runImplementation('hp',
 				(host, ipmi_ip, uname, pwd))
