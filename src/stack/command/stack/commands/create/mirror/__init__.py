@@ -243,7 +243,7 @@ class Command(stack.commands.create.command):
 		file.write('\t<info version="%s" release="0" arch="%s"/>\n' % 
 			(version, arch))
 
-		file.write('\t<iso maxsize="0" bootable="0" mkisofs=""/>\n')
+		file.write('\t<iso maxsize="0" addcomps="0" bootable="0" mkisofs=""/>\n')
 		file.write('\t<rpm rolls="0" bin="1" src="0"/>/\n')
 		file.write('</roll>\n')
 		file.close()

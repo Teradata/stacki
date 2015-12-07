@@ -513,13 +513,12 @@ if [ -f /tmp/rolls.xml ] ; then
 	# Change the method as well. Needed for WAN kickstart.
 	rm -f /sbin/mpath_prio_*
 	/opt/stack/lib/anaconda_stack.py \
-		--stage2 http://localhost/install/distributions/default/x86_64/images/install.img \
+		--stage2 http://localhost/install/pallets/stacki/3.0/redhat/x86_64/images/install.img \
 		--kickstart /tmp/ks.cfg \
 		--graphical \
 		--noselinux \
 		--lang en_US \
-		--keymap us \
-		--repo http://localhost/install/distributions/default/x86_64
+		--keymap us
 fi
 /usr/bin/killall --quiet pty-wrapper.py" > /tmp/stack-install.sh
 

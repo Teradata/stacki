@@ -1,27 +1,9 @@
 #!/opt/stack/bin/python
 
 import os
-import stack.installcgi
-import stack.roll
 
-#
-# first download the minimum set of packages in order to build a kickstart
-# file (i.e., all the roll-<rollname>-kickstart.*rpm files
-#
-icgi = stack.installcgi.InstallCGI()
-g = stack.roll.Generator()
-
-if os.path.exists('/tmp/rolls.xml'):
-	g.parse('/tmp/rolls.xml')
-elif os.path.exists('/tmp/pallets.xml'):
-	g.parse('/tmp/pallets.xml')
-
-rolls = g.rolls
-
-for roll in rolls:
-	icgi.getKickstartFiles(roll)
-
-icgi.rebuildDistro(rolls)
+cmd = 'mkdir -p /export/stack ; ln -s /mnt/cdrom /export/stack/pallets'
+os.system(cmd)
 
 #
 # now generate the kickstart file with the command line

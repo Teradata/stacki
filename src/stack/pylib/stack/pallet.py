@@ -244,9 +244,14 @@ class GetPallet:
 
 				# get name and version of each pallet from list and store the sizes for each
 				for path in P:
-					info = path.strip('/mnt/cdrom/').split('/')
-					name = info[0]
-					version = info[1]
+					info = path.split('/')
+
+					if len(info) < 5:
+						continue
+
+					name = info[3]
+					version = info[4]
+
 					pallet = name + '---' + version
 					palletPath = '/mnt/cdrom/' + name + '/' + version + '/'
 

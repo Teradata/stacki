@@ -253,6 +253,21 @@ class WelcomeWindow(InstallWindow):
 		self.regenerateKickstartFile()
 
 		#
+		# used to debug frontend building
+		#
+		file = open('/proc/cmdline', 'r')
+		args = file.readline().split()
+		file.close()
+
+		if 'stack-debug' in args:
+			import time
+
+			file = open('/tmp/wait', 'w')
+			file.close()
+			while os.path.exists('/tmp/wait'):
+				time.sleep(5)
+
+		#
 		# after rebuilding the kickstart file, stop this
 		# version of anaconda and let the anaconda script restart it
 		#
