@@ -43,7 +43,7 @@ if 'boss' in args:
 	#
 	# we are a boss
 	#
-	if 'stackiq-debug' in args:
+	if 'stack-debug' in args:
 		#
 		# debug development code
 		#

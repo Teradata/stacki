@@ -588,6 +588,9 @@ class RollInfoFile(File,
 		
 	def isBootable(self):
 		return int(self.attrs['iso']['bootable'])
+
+	def needsComps(self):
+		return int(self.attrs['iso']['addcomps'])
 		
 	def hasRolls(self):
 		if self.attrs['rpm']['rolls'] != '0':

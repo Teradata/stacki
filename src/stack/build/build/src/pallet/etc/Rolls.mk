@@ -102,6 +102,7 @@ __ROLLS_MK = yes
 ROLLS.API	= 6.0.2
 
 BOOTABLE		= 0
+ADDCOMPS		= 0
 INCLUDE_PROFILES	= 1
 INCLUDE_GRAPHS  	= 1
 INCLUDE_RPMS		= 1
@@ -189,7 +190,7 @@ roll-$(ROLL).xml:
 	@echo "<color edge=\"$(COLOR)\" node=\"$(COLOR)\"/>" >> $@
 	@echo "<info version=\"$(VERSION)\" release=\"$(RELEASE)\""\
 		"arch=\"$(ARCH)\" os=\"$(ROLLS.OS)\"/>" >> $@
-	@echo "<iso maxsize=\"$(ISOSIZE)\" bootable=\"$(BOOTABLE)\""\
+	@echo "<iso maxsize=\"$(ISOSIZE)\" addcomps=\"$(ADDCOMPS)\" bootable=\"$(BOOTABLE)\""\
 		"mkisofs=\"$(MKISOFSFLAGS)\"/>" >> $@
 	@echo "<$(TARGET_PKG) rolls=\"$(WITHROLLS)\""\
 		"bin=\"$(INCLUDE_RPMS)\" src=\"0\"/>" >> $@

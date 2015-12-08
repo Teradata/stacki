@@ -97,7 +97,9 @@ DEPENDS.DIRS	= patch-files
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap: install-rpm
+bootstrap:
+	yum install -y libxml2-devel
+	$(MAKE) install-rpm
 
 build:
 	tar -xzf Python-$(VERSION).tgz

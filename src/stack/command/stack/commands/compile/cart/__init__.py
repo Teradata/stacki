@@ -206,8 +206,23 @@ class Command(stack.commands.CartArgumentProcessor,
 			#
 			# ensure only one process can update the cart at a time
 			#
-			mutex = stack.lock.Mutex('/var/tmp/cart.%s.mutex'
-				% (cart))
+			mutexfile = '/var/tmp/cart.%s.mutex' % cart
+			mutex = stack.lock.Mutex(mutexfile)
+
+			gr_name, gr_passwd, gr_gid, gr_mem = \
+				grp.getgrnam('apache')
+			try:
+				os.chown(mutexfile, -1, gr_gid)
+			except:
+				pass
+
+			perms = os.stat(mutexfile)[stat.ST_MODE]
+			perms = perms | stat.S_IRGRP | stat.S_IWGRP
+
+			try:
+				os.chmod(mutexfile, perms)
+			except:
+				pass
 
 			retval = mutex.acquire_nonblocking()
 			if retval == 0:

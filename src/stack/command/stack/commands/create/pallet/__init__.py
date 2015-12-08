@@ -110,6 +110,7 @@ import stack.dist
 import stack.file
 import stack.roll
 import stack.util
+import stack.bootable
 from stack.exception import *
 
 
@@ -141,6 +142,7 @@ class Builder:
 		cmd = 'mkisofs -V "%s" %s -r -T -f -o %s .' % \
 			(volname, extraflags, os.path.join(cwd, isoName))
 
+		print('mkisofs: cmd %s' % cmd)
 		os.chdir(rollDir)
 		subprocess.call(shlex.split(cmd), stdin = None, stdout = None,
 			stderr = None)
@@ -153,12 +155,21 @@ class Builder:
 		
 	def writerepo(self, name, version, arch):
 		print('Writing repo data')
-		cwd = os.getcwd()
-		palletdir = os.path.join(os.getcwd(), 'disk1', name, version,
+		basedir = os.getcwd()
+		palletdir = os.path.join(basedir, 'disk1', name, version,
 			'redhat', arch)
 		os.chdir(palletdir)
-		subprocess.call([ 'createrepo', '.' ])
-		os.chdir(cwd)
+
+		cmd = [ 'createrepo' ]
+		if self.config.needsComps():
+			self.addComps(basedir)
+			cmd.append('--groupfile')
+			cmd.append(
+				os.path.join(basedir, 'RedHat/base/comps.xml'))
+		cmd.append('.')
+		subprocess.call(cmd)
+
+		os.chdir(basedir)
 
 
 	def copyXMLs(self, name, version, arch):
@@ -194,6 +205,7 @@ class Builder:
 		if roll.isRollForeign():
 			self.command('add.pallet', [ roll.getFullName(),
 				'dir=%s' % dir, 'updatedb=n' ])
+
 		else:
 			tmp = self.mktemp()
 			os.makedirs(tmp)
@@ -334,27 +346,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		import stack.roll
 		import stack.gen
 
-		# The default-all distribution includes all of the
-		# installed pallets on the system and is used to generate a
-		# kickstart files for the everything appliance. This gives us
-		# a list of RPMs that we know we need from the source
-		# os/updates CDs.
-
-		cwd = os.getcwd()
-
-		print('making default-all')
-
-		self.command('create.distribution', [ 'default-all',
-			'inplace=true', 'resolve=true', 'md5=false' ])
-
-		#
-		# copy the 'everything' node and graph file into the distribution
-		#
-		basedir = os.path.join('default-all', self.arch, 'build')
-		xml = self.command('list.node.xml', [ 'everything',
-			'basedir=%s' % basedir, 'eval=n' ] )
-
-		os.chdir(cwd)
+		xml = self.command('list.node.xml', [ 'everything', 'eval=n' ] )
 
 		#
 		# make sure the XML string is ASCII and not unicode, 
@@ -372,28 +364,6 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			if len(line) and line[0] not in [ '#', '%' ]:
 				rpms.append(line)
 
-		# The default-os distribution includes just the source
-		# os/update CDs (already in pallet form).
-		# The default-all distribution is
-		# still used for the comps file and the anaconda source 
-		# code.  We need this since anaconda and comps are missing
-		# from the foreign pallets (os/update CDs).
-
-		print('making default-os')
-
-		self.command('create.distribution', [ 'default-os',
-			'inplace=true', 'resolve=true', 'md5=false' ])
-
-		#
-		# make sure a comps.xml file is present
-		#
-		comps = os.path.join('default-os', self.arch, 'RedHat',
-			'base', 'comps.xml')
-		if not os.path.exists(comps):
-			print('\n\tCould not find a comps.xml file.')
-			print('\tCopy a comps.xml file into the CentOS pallet\n')
-			sys.exit(-1)
-
 		#
 		# use yum to resolve dependencies
 		#
@@ -410,18 +380,41 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		import yum
 
 		#
-		# need to create a repo here because the 'md5=false' flag above
-		# does not call createrepo and we need it below for yum to work
+		# create a yum.conf file that contains only repos from the
+		# default-all box
 		#
-		os.system('/usr/share/createrepo/genpkgmetadata.py ' +
-			'--groupfile RedHat/base/comps.xml ' +
-			'default-os/%s' % self.arch)
+		cwd = os.getcwd()
+		yumconf = os.path.join(cwd, 'yum.conf')
+
+		file = open(yumconf, 'w')
+
+		file.write('[main]\n')
+		file.write('cachedir=%s/cache\n' % cwd)
+		file.write('keepcache=0\n')
+		file.write('debuglevel=2\n')
+		file.write('logfile=%s/yum.log\n' % cwd)
+		file.write('pkgpolicy=newest\n')
+		file.write('distroverpkg=redhat-release\n')
+		file.write('tolerant=1\n')
+		file.write('exactarch=1\n')
+		file.write('obsoletes=1\n')
+		file.write('gpgcheck=0\n')
+		file.write('plugins=0\n')
+		file.write('metadata_expire=1800\n')
+		file.write('reposdir=%s\n' % cwd)
+
+		for o in self.call('list.pallet', []):
+			boxes = o['boxes'].split()
+			if 'default-all' in boxes:
+				file.write('[%s]\n' % o['name'])
+				file.write('name=%s\n' % o['name'])
+				file.write('baseurl=file:///export/stack/pallets/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['arch']))
+
+		file.close()
 
 		a = yum.YumBase()
-		a.doConfigSetup(fn='%s' % os.path.join(cwd, 'BUILD',
-			'roll-%s-%s' % (self.config.getRollName(),
-			self.config.getRollVersion()), 'yum.conf'),
-			init_plugins=False)
+
+		a.doConfigSetup(fn='%s' % yumconf, init_plugins=False)
 		a.conf.cache = 0
 		a.doTsSetup()
 		a.doRepoSetup()
@@ -461,27 +454,61 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 							pkgs.append(r)
 							done = 0
 
-		# Now build a list of rocks (required) and non-rocks (optional)
-		# rpms and return both of these list.  When the ISOs are created
-		# all the required packages are first.
+		#
+		# copy all the selected files into the pallet but before we
+		# do that, rewrite the yum.conf file to include only the
+		# 'default-os' box which will ensure that we only put
+		# os-related packages in the os pallet (otherwise, packages
+		# from the 'stacki' pallet would leak into the os pallet
+		#
+		file = open(yumconf, 'w')
+
+		file.write('[main]\n')
+		file.write('cachedir=%s/cache\n' % cwd)
+		file.write('keepcache=0\n')
+		file.write('debuglevel=2\n')
+		file.write('logfile=%s/yum.log\n' % cwd)
+		file.write('pkgpolicy=newest\n')
+		file.write('distroverpkg=redhat-release\n')
+		file.write('tolerant=1\n')
+		file.write('exactarch=1\n')
+		file.write('obsoletes=1\n')
+		file.write('gpgcheck=0\n')
+		file.write('plugins=0\n')
+		file.write('metadata_expire=1800\n')
+		file.write('reposdir=%s\n' % cwd)
+
+		for o in self.call('list.pallet', []):
+			boxes = o['boxes'].split()
+			if 'default-os' in boxes:
+				file.write('[%s]\n' % o['name'])
+				file.write('name=%s\n' % o['name'])
+				file.write('baseurl=file:///export/stack/pallets/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['arch']))
+
+		file.close()
+		destdir = os.path.join(cwd, 'RPMS')
+
+		for s in selected:
+			subprocess.call([ 'yumdownloader',
+				'--destdir=%s' % destdir, '-c', yumconf, s ],
+				stdin = None, stdout = None, stderr = None)
 		
-		tree = stack.file.Tree(os.path.join(os.getcwd(),
-			'default-os', self.arch))
+		stacki = []
+		nonstacki = []
 
-		stack = []
-		nonstack = []
-		for rpm in tree.getFiles(os.path.join('RedHat', 'RPMS')):
+		tree = stack.file.Tree(destdir)
+
+		for rpm in tree.getFiles():
 			if rpm.getBaseName() in selected:
-				stack.append(rpm)
+				stacki.append(rpm)
 			else:
-				nonstack.append(rpm)
+				nonstacki.append(rpm)
 
-		return (stack, nonstack)
+		return (stacki, nonstacki)
 
 
 	def makeBootable(self, name):
 		import stack.roll
-		import stack.bootable
 		import stack
 
 		print('Configuring pallet to be bootable ... ', name)
@@ -535,6 +562,23 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		self.boot.installBootfiles(destination)
 		
 		return
+
+
+	def addComps(self, basedir):
+		localrolldir = os.path.join(self.config.getRollName(), 
+			self.config.getRollVersion(), 'redhat', 
+			self.config.getRollArch())
+
+		destination = os.path.join(basedir, 'disk1')
+		rolldir = os.path.join(destination, localrolldir)
+
+		boot = stack.bootable.Bootable(basedir, rolldir)
+
+		pkg = boot.findFile('foundation-comps')
+		if not pkg:
+			raise CommandError(self, 'could not find RPM "foundation-comps"')
+
+		boot.applyRPM(pkg, basedir)
 
 
 	def run(self):
@@ -648,9 +692,8 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 				
 			if id == 1 and self.config.isBootable() == 1:
 				self.makeBootable(name)
-			
-			self.mkisofs(isoname, self.config.getRollName(), name)
 
+			self.mkisofs(isoname, self.config.getRollName(), name)
 
 		
 class MetaRollBuilder(Builder):
