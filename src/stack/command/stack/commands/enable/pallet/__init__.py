@@ -186,3 +186,9 @@ class Command(stack.commands.RollArgumentProcessor,
 					and version='%s' and %s and arch='%s')
                                         )""" % (box, roll, version, rel, arch))
 
+		# Regenerate stacki.repo
+		os.system("""
+			/opt/stack/bin/stack report host yum localhost | 
+			/opt/stack/bin/stack report script | 
+			/bin/sh
+			""")
