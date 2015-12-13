@@ -144,6 +144,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					self.addOutput(host, 'assumeyes=1')
 
 			self.addOutput(host,'</file>')
+			self.addOutput(host,'yum clean all')
 
 		self.endOutput(padChar='')
 
