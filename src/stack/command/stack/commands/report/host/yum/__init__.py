@@ -119,10 +119,10 @@ class Command(stack.commands.HostArgumentProcessor,
 			frontend_private_ip = self.db.getHostAttr(host,
 				'Kickstart_PrivateAddress')
 
+			self.addOutput(host, '<file name="/etc/yum.repos.d/stacki.repo">')
 			for pallet in self.getBoxPallets(box):
 				pname, pversion, prel, parch = pallet
 
-				self.addOutput(host, '<file name="/etc/yum.repos.d/%s.repo">' % pname)
 
 				self.addOutput(host, '[%s-%s]' %
 					(pname, pversion))
@@ -131,12 +131,10 @@ class Command(stack.commands.HostArgumentProcessor,
 				self.addOutput(host, 'baseurl=http://%s/install/pallets/%s/%s/redhat/%s' % (frontend_private_ip, pname, pversion, parch))
 				self.addOutput(host, 'assumeyes=1')
 
-				self.addOutput(host,'</file>')
 
 			output = self.call('list.cart')
 			for o in output:
 				if box in o['boxes'].split():
-					self.addOutput(host, '<file name="/etc/yum.repos.d/%s.repo">'% o['name'])
 
 					self.addOutput(host, '[%s-cart]' %
 						o['name'])
@@ -145,7 +143,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					self.addOutput(host, 'baseurl=http://%s/install/carts/%s' % (frontend_private_ip, o['name']))
 					self.addOutput(host, 'assumeyes=1')
 
-					self.addOutput(host,'</file>')
+			self.addOutput(host,'</file>')
 
 		self.endOutput(padChar='')
 
