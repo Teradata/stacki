@@ -368,7 +368,8 @@ class Application(stack.app.Application):
 				user='%s' % self.getUsername(),\
                                 db='%s' % self.getDatabase(),\
 				passwd='%s' % self.getPassword(),\
-				unix_socket='/var/opt/stack/mysql/mysql.sock')
+				unix_socket='/var/opt/stack/mysql/mysql.sock',
+				autocommit=True)
 
             # This is the database cursor for the rocks command line interface
             self.db = stack.commands.DatabaseConnection(self.link)

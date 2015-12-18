@@ -479,7 +479,10 @@ class InsertEthers(GUI):
 
 		if self.sql.execute(query) > 0:
 			(rank, max_rank) = self.sql.fetchone()
-			self.rank = max_rank + 1
+			try:
+				self.rank = int(max_rank) + 1
+			except:
+				self.rank = 0
 		else:
 			self.rank = int(GetAttr('discovery.base.rack'))
 
