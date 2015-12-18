@@ -162,42 +162,6 @@ class Implementation(stack.commands.Implementation):
 
 		cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
 			% (self.owner.mountPoint, destdir)
-		print('cmd: %s' % cmd)
 		subprocess.call(shlex.split(cmd))
-		# subprocess.call(shlex.split(cmd), 
-		# 	stdout = open('/dev/null'), stderr = open('/dev/null'))
-
-		return (name, vers, arch)
-
-
-		#
-		# DEAD CODE?
-		# DEAD CODE?
-		# DEAD CODE?
-		#
-
-		if stack.release == '7.x' and not os.path.exists(liveosdir):
-			os.makedirs(liveosdir)
-
-		cdtree = stack.file.Tree(self.owner.mountPoint)
-		for dir in cdtree.getDirs():
-			for file in cdtree.getFiles(dir):
-				if stack.release == '7.x' and dir == 'LiveOS' \
-					and file.getName().endswith('.img'):
-
-					os.system('cp -p %s %s' % (
-						file.getFullName(), 
-						liveosdir))
-				else:
-					if not file.getName().endswith('.rpm'):
-						continue
-					if file.getPackageArch() != 'src' and \
-						file.getBaseName() != 'comps' and \
-						file.getName() != 'comps.rpm' \
-						and not (arch == 'i386' and \
-						re.match('^kudzu.*', file.getBaseName())):
-							os.system('cp -p %s %s' % (
-								file.getFullName(), 
-								destdir))
 
 		return (name, vers, arch)

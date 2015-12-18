@@ -92,120 +92,78 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
 import os
-import shlex
-import subprocess
+import sys
 import json
 import syslog
-import stack.sql
+import stack.api
 
+def setPartitionInfo(host, part):
+	cmd = [ host ]
 
-class App(stack.sql.Application):
+	(dev,sect,size,id,fstype,fflags,pflags,mnt,uuid) = part
 
-	def __init__(self):
-		stack.sql.Application.__init__(self)
-		self.response = ''
+	if dev:
+		cmd.append('device=%s' % dev)
+	if sect:
+		cmd.append('sectorstart=%s' % sect)
+	if size:
+		cmd.append('size=%s' % size)
+	if id:
+		cmd.append('partid=%s' % id)
+	if fstype:
+		cmd.append('fs=%s' % fstype)
+	if fflags:
+		cmd.append('formatflags=%s' % fflags)
+	if pflags:
+		cmd.append('partitionflags=%s' % pflags)
+	if mnt:
+		cmd.append('mountpoint=%s' % mnt)
+	if uuid:
+		cmd.append('uuid=%s' % uuid)
 
+	stack.api.Call('add host partition', cmd)
 
-	def setPartitionInfo(self, host, part):
-		columns = []
-		values = []
+	return
 
-		columns.append('node')
-		values.append('%s' % self.getNodeId(host))
-
-		(dev,sect,size,id,fstype,fflags,pflags,mnt,uuid) = part
-
-		if dev:
-			columns.append('device')
-			values.append('"%s"' % dev)
-		if sect:
-			columns.append('sectorstart')
-			values.append('"%s"' % sect)
-		if size:
-			columns.append('partitionsize')
-			values.append('"%s"' % size)
-		if id:
-			columns.append('partitionid')
-			values.append('"%s"' % id)
-		if fstype:
-			columns.append('fstype')
-			values.append('"%s"' % fstype)
-		if fflags:
-			columns.append('formatflags')
-			values.append('"%s"' % fflags)
-		if pflags:
-			columns.append('partitionflags')
-			values.append('"%s"' % pflags)
-		if mnt:
-			columns.append('mountpoint')
-			values.append('"%s"' % mnt)
-		if uuid:
-			columns.append('uuid')
-			values.append('"%s"' % uuid)
-
-		insert = 'insert into partitions (%s) values (%s);' % \
-			(','.join(columns), ','.join(values))
-
-		return insert
-
-
-        def run(self):
-
-		ipaddr = None
-		if os.environ.has_key('REMOTE_ADDR'):
-                	ipaddr = os.environ['REMOTE_ADDR']
-                if not ipaddr:
-                        return
-
-        	syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
-                
-		if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
-
-			partinfo = os.environ['HTTP_X_STACK_PARTITIONINFO']
-                        try:
-				partinfo = json.loads(partinfo)
-                        except:
-                                syslog.syslog(syslog.LOG_ERR, 'invalid partinfo %s' % partinfo)
-                                partinfo = None
-
-                        if partinfo:
-#                                syslog.syslog(syslog.LOG_INFO, 'partinfo %s' % partinfo)
-                                
-                                p = subprocess.Popen( [ '/opt/stack/bin/stack',
-                                                        'remove',
-                                                        'host',
-                                                        'partition',
-                                                        ipaddr ], stdout=None, stderr=None)
-                                rc = p.wait()
-
-                                self.connect()
-
-                                inserts = []
-                                for disk in partinfo.keys():
-                                        for part in partinfo[disk]:
-                                                inserts.append(self.setPartitionInfo(ipaddr, part))
-
-                                for insert in inserts:
-                                        self.execute(insert)
-
-                                self.close()
-
-                # The following attributes are one shot booleans and
-                # should always be reset even if the partinfo was corrupt.
-                
-		os.system('/opt/stack/bin/stack set host attr %s attr=nukedisks value=none' % ipaddr)
-		os.system('/opt/stack/bin/stack set host attr %s attr=nukecontroller value=false' % ipaddr)
-                
-		print 'Content-type: application/octet-stream'
-		print 'Content-length: %d' % (len(''))
-		print ''
-		print ''
-
-		return
+##
+## MAIN
+##
+ipaddr = None
+if os.environ.has_key('REMOTE_ADDR'):
+	ipaddr = os.environ['REMOTE_ADDR']
+if not ipaddr:
+	sys.exit(0)
 
 syslog.openlog('setDbPartitions.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
-app = App()
-app.run()
+
+syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
+
+if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
+	partinfo = os.environ['HTTP_X_STACK_PARTITIONINFO']
+	try:
+		partinfo = json.loads(partinfo)
+	except:
+		syslog.syslog(syslog.LOG_ERR, 'invalid partinfo %s' % partinfo)
+		partinfo = None
+
+	if partinfo:
+		stack.api.Call('remove host partition', [ ipaddr ])
+
+		for disk in partinfo.keys():
+			for part in partinfo[disk]:
+				setPartitionInfo(ipaddr, part)
+
+# The following attributes are one shot booleans and
+# should always be reset even if the partinfo was corrupt.
+
+stack.api.Call('set host attr', [ ipaddr, 'attr=nukedisks', 'value=none'])
+stack.api.Call('set host attr', [ ipaddr, 'attr=nukecontroller', 'value=false'])
+
+print 'Content-type: application/octet-stream'
+print 'Content-length: %d' % (len(''))
+print ''
+print ''
+
 syslog.closelog()
+

@@ -135,6 +135,11 @@ class Command(stack.commands.add.host.command):
 	The VLAN ID to assign the interface
 	</param>
 
+	<param type='boolean' name='default'>
+	If true, the name associated with this interface becomes the hostname
+	and the interface's gateway becomes the default gateway.
+	</param>
+
 	<example cmd='add host interface backend-0-0 interface=eth1 ip=192.168.1.2 network=private name=fast-0-0'>
 	Add interface "eth1" to host "backend-0-0" with the given
 	IP address, network assignment, and name.
@@ -159,7 +164,7 @@ class Command(stack.commands.add.host.command):
                 for dict in self.call('list.host.interface', [ host ]):
                         if interface == dict['interface']:
                                 raise CommandError(self, 'interface exists')
-                        if mac == dict['mac']:
+                        if mac and mac == dict['mac']:
                                 raise CommandError(self, 'mac exists')
 
 

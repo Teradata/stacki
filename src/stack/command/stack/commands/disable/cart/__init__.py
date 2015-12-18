@@ -93,3 +93,10 @@ class Command(stack.commands.CartArgumentProcessor,
 				cart = (select id from carts where name='%s')
 				""" % (box, cart))
 
+		# Regenerate stacki.repo
+		os.system("""
+			/opt/stack/bin/stack report host yum localhost | 
+			/opt/stack/bin/stack report script | 
+			/bin/sh
+			""")
+
