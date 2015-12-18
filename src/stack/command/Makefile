@@ -100,6 +100,9 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap: install-rpm
 
+doc:
+	$(STACKBUILD)/src/pallet/etc/doc/genrcldocs stacki markdoc
+
 command.py: stack/commands/__init__.py
 	cat stack/commands/__init__.py > $@
 	echo "import datetime" >> $@
@@ -129,3 +132,4 @@ install::
 
 clean::
 	find stack -name *.pyc -exec rm -f {} \;
+	rm -rf cli
