@@ -104,11 +104,11 @@ class Command(stack.commands.add.os.command):
 
 	<param type='string' name='address'>
 	Host or network address
-	</arg>
+	</param>
 	
 	<param type='string' name='gateway'>
 	Network or device gateway
-	</arg>
+	</param>
 
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route

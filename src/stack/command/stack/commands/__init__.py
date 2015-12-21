@@ -894,7 +894,7 @@ class DocStringHandler(handler.ContentHandler,
 		return s
 
 	
-	def getUsageText(self, colors):
+	def getUsageText(self, colors=None):
                 if colors:
                         bold   = colors['bold']['code']
                         unbold = colors['reset']['code']
@@ -1059,7 +1059,7 @@ class DocStringHandler(handler.ContentHandler,
 			s = s + '### Description\n\n'
 			s = s + self.section['description'].strip() + '\n\n'
 
-		if self.section['arg']:
+		if 'arg' in self.section and self.section['arg']:
 			s = s + '### Arguments\n\n'
 			for ((name, type, opt, rep), txt) in \
 				self.section['arg']:
@@ -1070,7 +1070,7 @@ class DocStringHandler(handler.ContentHandler,
 				s += '\n   %s\n\n' % txt.strip()
 			s = s + '\n'
 
-		if self.section['param']:
+		if 'param' in self.section and self.section['param']:
 			s = s + '### Parameters\n'
 			for ((name, type, opt, rep), txt) in \
 				self.section['param']:
@@ -1081,7 +1081,7 @@ class DocStringHandler(handler.ContentHandler,
 				s += '\n   %s\n' % txt.strip()
 			s = s + '\n'
 
-		if self.section['example']:
+		if 'example' in self.section and self.section['example']:
 			s = s + '### Examples\n\n'
 			for (cmd, txt) in self.section['example']:
 				s += '* `stack %s`\n' % cmd.strip()
@@ -1090,7 +1090,7 @@ class DocStringHandler(handler.ContentHandler,
 				s += '\n'
 			s = s + '\n'
 
-		if self.section['related']:
+		if 'related' in self.section and self.section['related']:
 			s = s + '### Related\n'
 			for related in self.section['related']:
 				r = '-'.join(related.split()).strip()
