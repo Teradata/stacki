@@ -39,6 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+import os
 import stack.commands
 from stack.exception import *
 
