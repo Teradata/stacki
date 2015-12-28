@@ -69,6 +69,9 @@ bootstrap:
 	yum install -y audit-libs-devel
 	yum install -y system-config-keyboard
 	yum install -y cmake
+	yum install -y apr-devel
+	yum install -y libcurl-devel
+	yum install -y httpd-devel
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 

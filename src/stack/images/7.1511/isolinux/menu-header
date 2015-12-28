@@ -1,0 +1,4 @@
+timeout 100
+
+menu resolution 640 480
+menu background splash.png

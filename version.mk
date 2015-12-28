@@ -9,4 +9,4 @@ KICKSTART_LANG		= "en_US"
 KICKSTART_LANGSUPPORT	= "en_US"
 
 CODENAME		= Hyper
-export RELEASE		= 6.x
+export RELEASE		= 7.x

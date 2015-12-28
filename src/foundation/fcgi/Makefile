@@ -98,6 +98,9 @@ DEPENDS.DIRS	= patch-files
 include $(STACKBUILD)/etc/CCRules.mk
 
 
+bootstrap:
+	$(MAKE) install-rpm
+
 build:
 	tar zvfx $(NAME)-$(VERSION).tar.gz
 	cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../

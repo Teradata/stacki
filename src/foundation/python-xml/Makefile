@@ -97,6 +97,7 @@ DEPENDS.DIRS	= patch-files
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap: install-rpm
 
 build:
 	gunzip -c PyXML-$(VERSION).tar.gz | $(TAR) -xf -

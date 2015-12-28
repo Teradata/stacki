@@ -95,6 +95,8 @@ DEPENDS.FILES	= pexpect-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap: install-rpm
+
 build:
 	gunzip -c pexpect-$(VERSION).tar.gz | $(TAR) -xf -
 	(								\
