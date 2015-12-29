@@ -62,8 +62,9 @@ for pallet in g.rolls:
 <package>stack-config-server</package>
 <package>git</package>
 
-<!-- genisoimages to create pallets -->
+<!-- rpms to create pallets -->
 <package>genisoimage</package>
+<package>createrepo</package>
 
 <!-- packages required for stack create package -->
 <package>rpm-build</package>
