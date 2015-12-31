@@ -146,10 +146,10 @@ class Implementation(stack.commands.Implementation):
 			os.system('find . ! -name TRANS.TBL -print | cpio -mpud %s' %
 				  roll_dir)
 
-			#
-			# check for LiveOS
-			#
 			if stack.release == '7.x':
+				#
+				# check for LiveOS
+				#
 				liveosdir = os.path.join(self.owner.mountPoint,
 					'LiveOS')
 
@@ -159,9 +159,19 @@ class Implementation(stack.commands.Implementation):
 						' -print | cpio -mpud ' +
 						'%s' % specific_roll_dir)
 
+				#
+				# check for images
+				#
+				imagesdir = os.path.join(self.owner.mountPoint,
+					'images')
+
+				if os.path.exists(imagesdir):
+					os.chdir(self.owner.mountPoint)
+					os.system('find images ! -name TRANS.TBL ' +
+						' -print | cpio -mpud ' +
+						'%s' % specific_roll_dir)
+
 		# after copying the roll, make sure everyone (apache included)
 		# can traverse the directories
 		os.system('find %s -type d -exec chmod a+rx {} \;' % roll_dir)
 		os.chdir(cwd)
-
-RollName = "stacki"

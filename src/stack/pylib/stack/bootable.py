@@ -176,6 +176,12 @@ class Bootable:
 							return file
 					except:
 						pass
+
+					try:
+						if file.getName() == name:
+							return file
+					except:
+						pass
 		for key in trees:
 			if key == 'local':
 				continue
@@ -185,6 +191,12 @@ class Bootable:
 				for file in tree.getFiles(d):
 					try:
 						if file.getPackageName() == name:
+							return file
+					except:
+						pass
+
+					try:
+						if file.getName() == name:
 							return file
 					except:
 						pass
@@ -262,13 +274,17 @@ class Bootable:
 			#
 			# squashfs.img from LiveOS
 			#
-			liveolddir = 'default/x86_64/LiveOS'
+			f = self.findFile('squashfs.img')
+			if not f:
+				raise ValueError, \
+					"could not find 'squashfs.img'"
+
+			fileold = f.getFullName()
+
 			livenewdir = os.path.join(destination, 'LiveOS')
 			if not os.path.exists(livenewdir):
 				os.makedirs(livenewdir)
 
-			fileold = os.path.join(os.path.join(liveolddir,
-				'squashfs.img'))
 			filenew = os.path.join(livenewdir, 'squashfs.img')
 
 			os.rename(fileold, filenew)

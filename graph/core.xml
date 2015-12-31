@@ -12,10 +12,6 @@
 		<head>pre-ssh-key</head>
 	</order>
 
-	<order head="storage-controller-client">
-		<tail>partition</tail>
-	</order>
-
 	<order head="ca">
 		<tail>ssl-client</tail>
 	</order>

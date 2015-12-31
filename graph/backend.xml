@@ -24,6 +24,14 @@
 		<head>networking-client</head>
 	</order>
 
+	<order head="storage-controller-client">
+		<tail>nukedisks</tail>
+	</order>
+
+	<order head="nukedisks">
+		<tail>partition</tail>
+	</order>
+
 	<order head="TAIL">
 		<tail>backend</tail>
 	</order>
@@ -45,6 +53,7 @@
 		<to>routes-client</to>
 		<to>pxeboot</to>
 		<to>storage-controller-client</to>
+		<to>nukedisks</to>
 	</edge>
 
 	<edge from="client" to="client-firewall" cond="firewall"/>

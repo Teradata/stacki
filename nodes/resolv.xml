@@ -21,7 +21,6 @@ All rights reserved. stacki(r) v3.0 www.stacki.com
 <!-- Give each host knowledge of itself. -->
 <file name="/etc/hosts">
 127.0.0.1	localhost.localdomain localhost
-&Kickstart_PublicAddress;	&Kickstart_PublicHostname;
 &hostaddr;	&hostname;.&domainname; &hostname;
 </file>
 
