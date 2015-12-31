@@ -181,10 +181,12 @@ class Builder:
 			'redhat', arch)
 
 		os.chdir(destdir)
-		shutil.copytree(os.path.join(srcdir, 'graph'),
-			os.path.join(destdir, 'graph'))
-		shutil.copytree(os.path.join(srcdir, 'nodes'),
-			os.path.join(destdir, 'nodes'))
+                if os.path.exists(os.path.join(srcdir, 'graph')):
+                    shutil.copytree(os.path.join(srcdir, 'graph'),
+                        os.path.join(destdir, 'graph'))
+                if os.path.exists(os.path.join(srcdir, 'nodes')):
+                    shutil.copytree(os.path.join(srcdir, 'nodes'),
+                        os.path.join(destdir, 'nodes'))
 		os.chdir(cwd)
 
 		
