@@ -55,24 +55,34 @@ if [ $? -eq 0 ]; then
 else
 	numcpus=`grep -c processor /proc/cpuinfo`
 	arch=`uname -p`
-	echo "STACKI: kickstart: $kickstart?arch=$arch&np=$numcpus" > /run/install/k.debug
-	echo "STACKI: kickstart: $kickstart?arch=$arch&np=$numcpus" > /tmp/k.debug
 
-	/bin/curl -w "%{http_code}\\n" -o /tmp/ks.xml --insecure \
-		--local-port 1-100 --retry 3 \
-		"$kickstart?arch=$arch&np=$numcpus" > /tmp/httpcode
-	httpcode=`cat /tmp/httpcode`
-	if [ "$httpcode" -eq "200" ]
-	then
-		cat /tmp/ks.xml | \
-		/opt/stack/bin/stack list host profile 2> /tmp/kgen.debug | \
-		/opt/stack/bin/stack list host installfile section=kickstart \
-		> /tmp/ks.cfg 2>> /tmp/kgen.debug
-		parse_kickstart /tmp/ks.cfg
-		run_kickstart
-	else
-		warn "failed to fetch kickstart from $kickstart"
-	fi
+	#
+	# keep trying to get a kickstart file
+	#
+	fini=0
+	while [ $fini -eq 0 ]
+	do
+		info "STACKI: kickstart: $kickstart?arch=$arch&np=$numcpus"
+		echo "STACKI: kickstart: $kickstart?arch=$arch&np=$numcpus" > /run/install/k.debug
+		echo "STACKI: kickstart: $kickstart?arch=$arch&np=$numcpus" > /tmp/k.debug
+		/bin/curl -w "%{http_code}\\n" -o /tmp/ks.xml --insecure \
+			--local-port 1-100 --retry 3 \
+			"$kickstart?arch=$arch&np=$numcpus" > /tmp/httpcode
+		httpcode=`cat /tmp/httpcode`
+		if [ "$httpcode" -eq "200" ]
+		then
+			cat /tmp/ks.xml | \
+			/opt/stack/bin/stack list host profile 2> /tmp/kgen.debug | \
+			/opt/stack/bin/stack list host installfile section=kickstart \
+			> /tmp/ks.cfg 2>> /tmp/kgen.debug
+			parse_kickstart /tmp/ks.cfg
+			run_kickstart
+			fini=1
+		else
+			warn "failed to fetch kickstart from $kickstart"
+			sleep 2
+		fi
+	done
 fi
 
 # if fetch_url "$kickstart" /tmp/ks.cfg; then
