@@ -39,7 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-ROLLROOT	= ../../../..
+ROLLROOT	= ../../../../..
 FILES		= isolinux.bin isolinux.cfg menu.cfg splash.png \
 			vesamenu.c32 chain.c32
 

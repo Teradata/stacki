@@ -173,4 +173,15 @@ rm /tmp/my.cnf
 /opt/stack/bin/stack set attr attr=megacli.flags value="WB,NORA,Direct,NoCachedBadBBU"
 </post>
 
+
+<!--
+	now that all the host data is in the database, let's write /etc/hosts.
+	this will make the stack commands execute much faster because we won't
+	be waiting for DNS timeouts.
+-->
+
+<post>
+/opt/stack/bin/stack report host > /etc/hosts
+</post>
+
 </kickstart>

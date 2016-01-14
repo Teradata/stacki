@@ -248,6 +248,9 @@ class Bootable:
 			fileold = os.path.join(os.path.join(images,
 				'upgrade.img'))
 			filenew = os.path.join(imagesdir, 'upgrade.img')
+			print('fileold %s' % fileold)
+			print('filenew %s' % filenew)
+			shutil.copy(fileold, filenew)
 		else:
 			#
 			# install.img
@@ -255,8 +258,8 @@ class Bootable:
 			fileold = os.path.join(os.path.join(images,
 				'install.img'))
 			filenew = os.path.join(imagesdir, 'install.img')
+			os.rename(fileold, filenew)
 
-		os.rename(fileold, filenew)
 		os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		if stack.release == '7.x':
@@ -280,6 +283,7 @@ class Bootable:
 					"could not find 'squashfs.img'"
 
 			fileold = f.getFullName()
+			print('fileold %s' % f.getFullName())
 
 			livenewdir = os.path.join(destination, 'LiveOS')
 			if not os.path.exists(livenewdir):
@@ -287,7 +291,9 @@ class Bootable:
 
 			filenew = os.path.join(livenewdir, 'squashfs.img')
 
-			os.rename(fileold, filenew)
+			print('fileold %s' % fileold)
+			print('filenew %s' % filenew)
+			shutil.copy(fileold, filenew)
 			os.chmod(filenew,
 				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 

@@ -39,7 +39,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../../..
 EXTRAS.DIRS	= opt usr
 
 include $(STACKBUILD)/etc/CCRules.mk

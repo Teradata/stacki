@@ -38,10 +38,6 @@ if [ -f $cluster_kickstart ]; then
 fi
 
 
-<!-- in order to automount, the hostname must be in /etc/hosts -->
-/opt/stack/bin/stack report host > /tmp/hosts
-mv /tmp/hosts /etc/hosts
-
 <!-- set up the install directory so it can be served by the web -->
 (
 	cd /var/www/html ;

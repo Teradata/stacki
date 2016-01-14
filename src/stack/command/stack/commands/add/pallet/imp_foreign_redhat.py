@@ -143,7 +143,6 @@ class Implementation(stack.commands.Implementation):
 			
 		OS = 'redhat'
 		roll_dir = os.path.join(prefix, name, vers, OS, arch)
-		# destdir = os.path.join(roll_dir, 'RPMS')
 		destdir = roll_dir
 
 		if stack.release == '7.x':

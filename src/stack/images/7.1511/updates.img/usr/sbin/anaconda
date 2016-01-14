@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/stack/bin/python
 
 import subprocess
 import shutil
@@ -36,10 +36,49 @@ if 'boss' in args:
 #
 # call the real anaconda
 #
-s = subprocess.Popen('/usr/sbin/anaconda.real')
+
+s = subprocess.Popen(['/usr/sbin/anaconda.real'])
 s.wait()
 
 if 'boss' in args:
+	#
+	# get the repos configured
+	#
+	# first move all the existing repo files out of the way
+	#
+	os.system('mv /etc/anaconda.repos.d/*.repo /tmp/')
+
+	#
+	# now build a new repo file with all the selected pallets
+	#
+	import stack.roll
+
+	g = stack.roll.Generator()
+
+	if os.path.exists('/tmp/rolls.xml'):
+		g.parse('/tmp/rolls.xml')
+	elif os.path.exists('/tmp/pallets.xml'):
+		g.parse('/tmp/pallets.xml')
+
+	file = open('/etc/anaconda.repos.d/stacki.repo', 'w')
+
+	baserepo = None
+	for pallet in g.rolls:
+		(pname, pver, prel, parch, purl, pdiskid) = pallet
+
+		file.write('[%s-%s]\n' % (pname, pver))
+		file.write('name=%s %s\n' % (pname, pver))
+		file.write('baseurl=http://localhost/install/pallets/%s/%s/redhat/x86_64\n' % (pname, pver))
+		file.write('assumeyes=1\n')
+
+		#
+		# need to make a "base" repo address
+		#
+		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+			baserepo = 'http://localhost/install/pallets/%s/%s/redhat/x86_64' % (pname, pver)
+			
+	file.close()
+
 	#
 	# we are a boss
 	#
@@ -48,6 +87,7 @@ if 'boss' in args:
 		# debug development code
 		#
 		file = open('/tmp/wait', 'w')
+		file.write('/usr/sbin/anaconda.real --repo=%s\n' % baserepo)
 		file.close()
 		while os.path.exists('/tmp/wait'):
 			time.sleep(5)
@@ -62,6 +102,14 @@ if 'boss' in args:
 	#
 	# if we are a boss, then restart anaconda
 	#
-	s = subprocess.Popen('/usr/sbin/anaconda.real')
+	s = subprocess.Popen(['/usr/sbin/anaconda.real', '--repo=%s' % baserepo])
 	s.wait()
 
+	if 'stack-debug' in args:
+		#
+		# debug development code
+		#
+		file = open('/tmp/wait', 'w')
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)
