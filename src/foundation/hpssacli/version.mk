@@ -1,3 +1,1 @@
 NAME	= hpssacli
-VERSION = 2.30
-RELEASE = 6.0

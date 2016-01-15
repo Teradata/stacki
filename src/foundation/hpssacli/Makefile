@@ -41,22 +41,19 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-RPMFILE		= hpssacli-$(VERSION)-$(RELEASE).x86_64.rpm
-
-DEPENDS.FILES	= $(RPMFILE)
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+
 build:
-	mkdir $(CURDIR)/tmp/
-	rpm -i --force --noscripts --badreloc \
-		--relocate /=$(CURDIR)/tmp/ $(RPMFILE)
+	make -C $(RELEASE) build
 
 install::
-	mkdir -p $(ROOT)/$(PKGROOT)/sbin
-	$(INSTALL) -m755 \
-		$(CURDIR)/tmp/opt/hp/hpssacli/bld/hpssacli \
-		$(ROOT)/$(PKGROOT)/sbin/hpssacli
+	make -C $(RELEASE) install
 
 clean::
-	rm -rf tmp
+	make -C $(RELEASE) clean
+
+nuke::
+	make -C $(RELEASE) nuke
+
