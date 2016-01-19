@@ -129,8 +129,9 @@ class Command(stack.commands.RollArgumentProcessor,
 
 		for (roll, version, release) in self.getRollNames(args, params):
 			self.db.execute("""select r.arch, r.os from rolls r
-				where r.name='%s' and r.version='%s' """
-				% (roll, version))
+				where r.name='%s' and r.version='%s' and
+				r.rel='%s' """
+				% (roll, version, release))
 			
 			# For each pallet determine it is enabled
 			# in any boxes.
@@ -139,9 +140,9 @@ class Command(stack.commands.RollArgumentProcessor,
 				self.db.execute("""select b.name from
 					stacks s, rolls r, boxes b where
 					r.name='%s' and r.arch='%s' and
-					r.version='%s' and
+					r.version='%s' and r.rel='%s' and
 					s.roll=r.id and s.box=b.id """
-					% (roll, arch, version))
+					% (roll, arch, version, release))
 
 				boxes = []
 				for box, in self.db.fetchall():
