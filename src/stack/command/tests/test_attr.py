@@ -51,7 +51,7 @@ ENVIRONMENT = 'pytest'
 
 def setup_module(module):
         Call('add host %s' % HOST)
-        Call('set host attr %s attr=environment value=%s' % (HOST, ENVIRONMENT))
+        Call('set host environment %s environment=%s' % (HOST, ENVIRONMENT))
         Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
 
 def teardown_module(module):

@@ -484,7 +484,7 @@ class HostArgumentProcessor:
                         environments = [ ]
 			for e, in self.db.select("""
                         	distinct environment 
-	                        from environment_attributes
+	                        from nodes
                                 """):
                                 
                                 environments.append(e)
@@ -533,7 +533,7 @@ class HostArgumentProcessor:
 
 
 		# If we have any Ad-Hoc groupings we need to load the attributes
-		# for every host if the nodes tables.  Since this is a lot of
+		# for every host in the nodes tables.  Since this is a lot of
 		# work handle the common case and avoid the work when just
 		# a list of hosts.
 		#
@@ -1503,12 +1503,14 @@ class DatabaseConnection:
                 dict = self.cache.get('host-intrinsic-attrs-dict')
                 if not dict:
                         dict = {}
-                        for (name, rack, rank, cpus) in self.select("""
-                        	name,rack,rank,cpus from nodes
+                        for (name, environment, rack, rank, cpus) in self.select("""
+                        	name,environment,rack,rank,cpus from nodes
                                 """):
                                 dict[name] = [ (None, 'rack', rack),
                                                (None, 'rank', rank),
                                                (None, 'cpus', cpus) ]
+                                if environment:
+                                        dict[name].append((None, 'environment', environment))
 
                         for (name, box, appliance, membership) in \
 				self.select(""" n.name, b.name,
@@ -1674,27 +1676,13 @@ class DatabaseConnection:
                                         H[h] = {}
                                 H[h][ConcatAttr(s, a, slash=True)] = v
 
-                        for h, in self.select('name from nodes'):
+                        for (h, env) in self.select('name, environment from nodes'):
 
 				if not H.has_key(h):
 					H[h] = {}
 
                                 app  = self.getHostAppliance(h)
                                 os   = self.getHostOS(h)
-
-		                try:
-                            		env = H[h]['environment']
-		                except:
-		                        try:
-                		                env = O[os]['environment']
-		                        except:
-		                                try:
-		                                        env = A[app]['environment']
-		                                except:
-                		                        try:
-                                		                env = G['environment']
-		                                        except:
-                		                                env = None
 
 		                # Build the attribute dictionary for the host
 		                d = {}

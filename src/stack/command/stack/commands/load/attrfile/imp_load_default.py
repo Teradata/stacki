@@ -174,15 +174,14 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 			self.owner.attrs[target].update(attrs)
 
-		# If there is a global environment specified add the
-		# value to every host.
-
+		# If there is a global environment specified make
+                # sure each host is in that environment.
+                
 		try:
 			env = self.owner.attrs['global']['environment']
 		except:
 			env = None
 		if env:
-			for target in self.owner.attrs.keys():
-				self.owner.attrs[target]['environment'] = env
-
+                        self.owner.call('set.host.environment',
+                                [ target, 'environment=%s' % env ])
 

@@ -39,34 +39,41 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+
 import stack.commands
+from stack.exception import *
 
-class Plugin(stack.commands.Plugin):
+class Command(stack.commands.set.host.command):
+	"""
+	Specifies an Environment for the gives hosts.  Environments are
+        used to add another level to attribute resolution.  This is commonly
+        used to partition a single Frontend into managing multiple clusters.
+	
+	<arg type='string' name='host' repeat='1'>
+	One or more host names.
+	</arg>
 
-        def provides(self):
-                return 'basic'
+	<param type='string' name='environment' optional='0'>
+	The environment name to assign to each host.
+	</param>
 
-        def run(self, hosts):
-                dict = {}
-                for host in hosts:
-                        dict[host] = True
-                        
-                for row in self.db.select("""
-	                n.name, n.rack, n.rank, n.cpus, a.name, b.name,
-                        n.environment, n.runaction, n.installaction from
-			nodes n, appliances a, boxes b where 
-			n.appliance = a.id and n.box = b.id """):
+	<example cmd='set host environment backend environment=test'>
+        Assign all backend appliance host to the test environment.
+	</example>
+	"""
 
-                        if dict.has_key(row[0]):
-                                dict[row[0]] = row[1:]
-        
-                return { 'keys' : [ 'rack',
-                                    'rank',
-                                    'cpus',
-                                    'appliance',
-                                    'box',
-                                    'environment',
-                                    'runaction',
-                                    'installaction' ],
-                        'values': dict }
+	def run(self, params, args):
+
+		(environment, ) = self.fillParams([
+                        ('environment', None, True)
+                        ])
+		
+		if not len(args):
+                        raise ArgRequired(self, 'host')
+
+		for host in self.getHostnames(args):
+			self.db.execute("""
+                        	update nodes set environment='%s' where
+				name='%s'
+                                """ % (environment, host))
 

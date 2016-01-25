@@ -145,6 +145,11 @@ class Command(command):
 	The box name for the host. The default is: "default".
 	</param>
 
+        <param type='string' name='environment'>
+        Name of the host environment.  For most users this is not specified.
+        Environments allow you to partition hosts into logical groups.
+	</param>
+
 	<example cmd='add host backend-0-1'>
 	Adds the host "backend-0-1" to the database with 1 CPU, a membership
 	name of "backend", a rack number of 0, and rank of 1.
@@ -189,14 +194,15 @@ class Command(command):
 			rank = None
 				
 		# fillParams with the above default values
-		(appliance, membership, numCPUs, rack, rank, box) = \
+		(appliance, membership, numCPUs, rack, rank, box, environment) = \
 			self.fillParams( [
 				('appliance', appliance),
 				('membership', None),
 				('cpus', 1),
 				('rack', rack),
 				('rank', rank),
-				('box', 'default') ])
+				('box', 'default'),
+                                ('environment', '') ])
 
 		if not membership and not appliance:
                         raise ParamRequired(self, ('membership', 'appliance'))
@@ -206,10 +212,6 @@ class Command(command):
 		if rank == None:
                         raise ParamRequired(self, 'rank')
 
-#		try:
-#			rank = int(rank)
-#		except:
-#                        raise ParamType(self, 'rank', 'integer')
 		try:
 			numCPUs = int(numCPUs)
                 except:
@@ -235,13 +237,16 @@ class Command(command):
 		if box not in self.getBoxNames():
 			raise CommandError(self, 'box "%s" is not in the database' % box)
 	
-		self.db.execute("""insert into nodes
-				(name, appliance, box, cpus, rack, 
-				rank) values ( '%s',
-				(select id from appliances where name='%s'),
-				(select id from boxes where name='%s'),
-				'%d', '%s', '%s')""" % (host, appliance, box,
-				numCPUs, rack, rank))
+		self.db.execute("""
+                	insert into nodes
+			(name, appliance, box, environment, cpus, rack, rank)
+                        values
+                        ('%s',
+			(select id from appliances where name='%s'),
+			(select id from boxes where name='%s'),
+			'%s', '%d', '%s', '%s')
+                        """ %
+                        (host, appliance, box, environment, numCPUs, rack, rank))
 
 
 	def run(self, params, args):
