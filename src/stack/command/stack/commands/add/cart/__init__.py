@@ -134,7 +134,7 @@ class Command(stack.commands.CartArgumentProcessor,
 				pass
 
 			perms = os.stat(dirpath)[stat.ST_MODE]
-			perms = perms | stat.S_IRGRP | stat.S_IXGRP
+			perms = perms | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP
 
 			#
 			# apache needs to be able to write in the cart directory
