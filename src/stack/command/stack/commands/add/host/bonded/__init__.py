@@ -142,7 +142,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		(channel, interfaces, ip, network, name, opts) = self.fillParams([
+		(channel, ifaces, ip, network, name, opts) = self.fillParams([
 			('channel', None, True),
 			('interfaces', None, True),
 			('ip', None, True),
@@ -177,17 +177,17 @@ class Command(stack.commands.add.host.command):
 				'of valid networks.')
 
 		interfaces = []
-		if ',' in interfaces:
+		if ',' in ifaces:
 			#
 			# comma-separated list
 			#
-			for i in interfaces.split(','):
+			for i in ifaces.split(','):
 				interfaces.append(i.strip())
 		else:
 			#
 			# assume it is a space-separated list
 			#
-			for i in interfaces.split():
+			for i in ifaces.split():
 				interfaces.append(i.strip())
 			
 		#
