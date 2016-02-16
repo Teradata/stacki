@@ -139,8 +139,8 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-                (option, interface, mac) = self.fillParams([
-                        ('option',    None, True),
+                (options, interface, mac) = self.fillParams([
+                        ('options',    None, True),
                         ('interface', None),
                         ('mac',       None)
                         ])
@@ -148,23 +148,23 @@ class Command(stack.commands.set.host.command):
 		if not interface and not mac:
                         raise ParamRequired(self, ('interface', 'mac'))
                 
-		if string.upper(option) == 'NULL':
-			option = 'NULL'
+		if string.upper(options) == 'NULL':
+			options = 'NULL'
 
 		for host in self.getHostnames(args):
                         if interface:
 				self.db.execute("""
                                 	update networks, nodes set 
-					networks.option=NULLIF('%s','NULL') where
+					networks.options=NULLIF('%s','NULL') where
                                         nodes.name='%s' and networks.node=nodes.id and
                                         networks.device like '%s'
-                                        """ % (option, host, interface))
+                                        """ % (options, host, interface))
                         else:
 				self.db.execute("""
                                 	update networks, nodes set 
-					networks.option=NULLIF('%s','NULL') where
+					networks.options=NULLIF('%s','NULL') where
                                         nodes.name='%s' and networks.node=nodes.id and
                                         networks.mac like '%s'
-                                        """ % (option, host, mac))
+                                        """ % (options, host, mac))
                 
 
