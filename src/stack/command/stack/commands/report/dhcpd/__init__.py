@@ -161,14 +161,25 @@ class Command(stack.commands.HostArgumentProcessor,
 			# look for a physical private interface that has an
 			# IP address assigned to it.
 			#
-			for (mac, ip, dev, netname) in self.db.select("""
-                       		n.mac, n.ip, n.device, s.name
-                               	from networks n, subnets s, nodes where
-                               	n.node     = nodes.id and 
+			for (mac, ip, dev) in self.db.select("""
+				n.mac, n.ip, n.device
+				from networks n, nodes where
+				n.node     = nodes.id and
 				nodes.name = '%s'     and
-				n.subnet   = s.id     and
+				n.mac is not NULL and
 				(n.vlanid is NULL or n.vlanid = 0)
                                	""" % name):
+				if not ip:
+					ip = self.resolve_ip(name, dev)
+				netname = None
+				if ip:
+					r = self.db.select("""
+					s.name from subnets s, networks nt,
+					nodes n where nt.node=n.id and
+					n.name='%s' and nt.subnet=s.id and
+					nt.ip = '%s'""" % (name, ip))
+					if r:
+						(netname, ) = r[0]
                                 if ip and mac and dev and netname:
                                         self.addOutput('', '\nhost %s.%s.%s {' %
                                         	(name, netname, dev))
@@ -191,9 +202,16 @@ class Command(stack.commands.HostArgumentProcessor,
                                 
                                         self.addOutput('', '}')
 
-
 		self.addOutput('', '</file>')
 
+	def resolve_ip(self, host, device):
+			(ip, channel), = self.db.select("""nt.ip,
+			nt.channel from networks nt, nodes n
+			where n.name='%s' and nt.device='%s' and
+			nt.node=n.id""" % (host, device))
+			if channel:
+				return self.resolve_ip(host, channel)
+			return ip
 
 
 	def writeDhcpSysconfig(self):

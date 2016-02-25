@@ -79,7 +79,7 @@ class Command(stack.commands.Command,
                         raise ParamRequired(self, ('interface', 'network'))
 
 		for host in hosts:
-			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.options ' +\
+			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.main, nt.options ' +\
 				'from networks nt, nodes n, subnets s where '+\
 				'nt.node=n.id and nt.subnet=s.id and '      +\
 				'n.name="%s"' % host
@@ -96,18 +96,14 @@ class Command(stack.commands.Command,
 				("network %s on " % network if network else '')+\
 				"host %s" % host)
 			else:
-				(ip, netname, net, dev, opts) = self.db.fetchone()
+				(ip, netname, net, dev, default_if, opts) = self.db.fetchone()
 
-			if opts:
-				opts = opts + ' bridgename=%s' % bridge
-			else:
-				opts = 'bridgename=%s' % bridge
-
+			channel = bridge
 			# Set ip and subnet to NULL for original device
 			self.command('set.host.interface.ip',
 				[host, 'interface=%s' % dev,'ip=NULL'])
-			self.command('set.host.interface.subnet',
-				[host, 'interface=%s' % dev, 'subnet=NULL'])
+			self.command('set.host.interface.network',
+				[host, 'interface=%s' % dev, 'network=NULL'])
                         
 			# Create new bridge interface
 			a_h_i_args = [host, "interface=%s" % bridge, 'network=%s' % net,
@@ -119,5 +115,8 @@ class Command(stack.commands.Command,
 			self.command('set.host.interface.options',
 				[host, 'interface=%s' % bridge, 'options=bridge'])
 			# Set the original device to point to the bridge
-			self.command('set.host.interface.options',
-				[host, 'interface=%s' % dev, 'options=%s' % opts])
+			self.command('set.host.interface.channel',
+				[host, 'interface=%s' % dev, 'channel=%s' % bridge])
+			if default_if == 1:
+				self.command('set.host.interface.default',
+					[host, 'interface=%s' % bridge, 'default=True'])
