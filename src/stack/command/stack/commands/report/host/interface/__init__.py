@@ -221,8 +221,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				configured = 1
 
 		# If device is a bonding device
-		reg = re.compile('bond[0-9]+')
-		if reg.match(device):
+		bond_reg = re.compile('bond[0-9]+')
+		if bond_reg.match(device):
 			# Check if there are bonding options set
 			for opt in options:
 				if opt.startswith('bonding-opts='):
@@ -235,13 +235,12 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# check if this is part of a bonded channel
 		#
-		if channel and reg.match(channel):
+		if channel and bond_reg.match(channel):
 			self.addOutput(host, 'BOOTPROTO=none')
 			self.addOutput(host, 'ONBOOT=yes')
 			self.addOutput(host, 'MASTER=%s' % channel)
 			self.addOutput(host, 'SLAVE=yes')
 			configured = 1
-
 
 		# If device is a bridge device
 		if 'bridge' in options:
@@ -256,14 +255,20 @@ class Command(stack.commands.HostArgumentProcessor,
 			configured = 1
 
 		# If device is part of a bridge
-		for opt in options:
-			if opt.startswith('bridgename='):
-				bridge = opt.split('=')[1]
-				self.addOutput(host, 'BOOTPROTO=none')
-				self.addOutput(host, 'ONBOOT=yes')
-				self.addOutput(host, 'BRIDGE=%s' % bridge)
-				configured = 1
-				break
+
+		if channel:
+			sql = """select net.options from
+				networks net, nodes n, subnets s where
+				net.device='%s' and n.name='%s' and
+				net.node=n.id""" % (channel, host)
+			rows = self.db.execute(sql)
+			if rows:
+				options = self.db.fetchone()
+				if "bridge" in options:
+					self.addOutput(host, 'BOOTPROTO=none')
+					self.addOutput(host, 'ONBOOT=yes')
+					self.addOutput(host, 'BRIDGE=%s' % channel)
+					configured = 1
 
 		if vlanid:
 			self.addOutput(host, 'VLAN=yes')
