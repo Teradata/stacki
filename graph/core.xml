@@ -35,10 +35,18 @@
 		<to>selinux</to>
 		<to>postshell</to>
 		<to>partition</to>
-		<to>yum</to>
+		<to>yum-base</to>
 		<to>ssl</to>
 		<to>ssh</to>
 	</edge>
+
+	<edge from="client" to="yum-client" />
+	<edge from="server" to="yum-server" />
+
+	<order head="yum-base">
+		<tail>yum-client</tail>
+		<tail>yum-server</tail>
+	</order>
 
 	<edge from="client">
 		<to>ssl-client</to>

@@ -32,9 +32,6 @@ tolerant=1
 exactarch=1
 assumeyes=0
 </file>
-
-<report name="host.yum">&hostname;</report>
-
 </post>
 
 </kickstart> 

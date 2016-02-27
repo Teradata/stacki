@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart>
+
+	<description>
+	Create yum config file on frontend
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</si_copyright>
+
+<post>
+/opt/stack/bin/stack report host yum &hostname; | \
+	/opt/stack/bin/stack report script | sh
+</post>
+
+</kickstart>
