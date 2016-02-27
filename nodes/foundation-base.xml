@@ -46,6 +46,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-wget</package>
 <package>foundation-python-setuptools</package>
 <package>foundation-py-ipaddress</package>
+<package>foundation-redhat</package>
 <package>libdnet</package>
 
 
