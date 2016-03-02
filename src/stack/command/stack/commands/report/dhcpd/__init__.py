@@ -148,8 +148,21 @@ class Command(stack.commands.HostArgumentProcessor,
                         	ipg.broadcast())
 			self.addOutput('', '}\n')
 
-		for name, in self.db.select("name from nodes order by rack, rank"):
+                data = { }
+		for row in self.db.select("name from nodes order by rack, rank"):
+                        data[row[0]] = []
                         
+		for row in self.db.select("""
+			nodes.name, n.mac, n.ip, n.device
+			from networks n, nodes where
+			n.node     = nodes.id and
+			n.mac is not NULL and
+			(n.vlanid is NULL or n.vlanid = 0)
+                        """):
+			data[row[0]].append(row[1:])
+
+                for name in data.keys():
+
                         kickstartable = self.str2bool(
                                 self.db.getHostAttr(name, 'kickstartable'))
                         
@@ -161,14 +174,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			# look for a physical private interface that has an
 			# IP address assigned to it.
 			#
-			for (mac, ip, dev) in self.db.select("""
-				n.mac, n.ip, n.device
-				from networks n, nodes where
-				n.node     = nodes.id and
-				nodes.name = '%s'     and
-				n.mac is not NULL and
-				(n.vlanid is NULL or n.vlanid = 0)
-                               	""" % name):
+			for (mac, ip, dev) in data[name]:
 				if not ip:
 					ip = self.resolve_ip(name, dev)
 				netname = None

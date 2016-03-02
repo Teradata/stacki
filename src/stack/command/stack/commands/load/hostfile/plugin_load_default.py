@@ -72,14 +72,15 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				box          = hosts[host].get('box')
 				rack         = hosts[host].get('rack')
 				rank         = hosts[host].get('rank')
-				if appliance:
-					args.append('appliance=%s' % appliance)
-				if box:
-					args.append('box=%s' % box)
-				if rack:
-					args.append('rack=%s' % rack)
-				if rank:
-					args.append('rank=%s' % rank)
+
+                                for paramName in [ 'appliance', 'box',
+                                                   'rack', 'rank' ]:
+                                        paramValue = hosts[host].get(paramName)
+                                        if paramValue:
+                                                args.append('%s=%s' %
+                                                        (paramName, paramValue))
+                                                del hosts[host][paramName]
+
 				self.owner.call('add.host', args)
 
 			#
@@ -99,19 +100,26 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					self.owner.call('set.host.%s' % key,
 						[ host, '%s=%s' % (key, hosts[host][key]) ])
 
-			if host not in interfaces.keys():
-				continue
 
-			#
-			# process the host's interface(s) 
-			#
+		#
+		# process the host's interface(s) 
+		#
 
-			#	
-			# first remove all the existing interfaces for this
-			# host
-			#	
-			self.removeInterfaces(host)
+                hosts = interfaces.keys()
 
+		# First remove all the existing interfaces for all
+		# the hosts in the spreadsheet.  Hit the database
+                # O(1) rather than O(n), this is why we do this
+                # outside of the loop.
+
+                params = []
+                for host in hosts:
+                        params.append(host)
+                params.append('all=true')
+		self.owner.call('remove.host.interface', params)
+                
+                for host in hosts:
+                        
 			for interface in interfaces[host].keys():
 				ip = None
 				mac = None
@@ -145,6 +153,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				# now add the interface
 				#
 				cmdparams = [ host,
+                                        'unsafe=true', 
 					'interface=%s' % interface,
 					'default=%s' % default ]
 				if mac:

@@ -175,19 +175,16 @@ class Command(stack.commands.load.command):
 
                 # Set each host's default boot action to os, before we
                 # build out the DHCP file with sync.config
-                
-                for host in self.hosts.keys():
-                        self.call('set.host.boot', 
-                                  [ host, 'action=os' ])
 
+                params = []
+                for host in self.hosts.keys():
+                        params.append(host)
+                params.append('action=os')
+		self.call('set.host.boot', params)
                 
 		self.call('sync.config')
 
-                # Only sync the host config for the hosts in the
-                # imported spreadsheet.
-                
-                for host in self.hosts.keys():
-                        self.call('sync.host.config', [ host ])
+                self.call('sync.host.config', self.hosts.keys())
 		
 		#
 		# checkin the hosts spreadsheet
