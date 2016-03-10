@@ -7,6 +7,9 @@ class CLI:
 	def run(self, args):
 		cmd = [ '/opt/stack/sbin/MegaCli' ]
 		cmd.extend(args)
+		file = open('/tmp/MegaCli.log', 'a+')
+		file.write('cmd: %s\n' % ' '.join(cmd))
+		file.close()
 		cmd.extend(['-AppLogFile','/tmp/MegaCli.log'])
 
 		result = []
@@ -28,6 +31,12 @@ class CLI:
 		self.run(['-CfgForeign', '-Clear', '-a%d' % adapter])
 		self.run(['-AdpSetProp', 'BootWithPinnedCache', '1',
 			'-a%d' % adapter])
+
+		enclosure = self.getEnclosure(adapter)
+		for slot in self.getSlots(adapter):
+			self.run(['-PDMakeGood', '-PhysDrv',
+				"'[%s:%s]'" % (enclosure, slot), '-Force',
+				'-a%s' % adapter ])
 
 	def getAdapter(self):
 		for (k, v) in self.run(['-adpCount']):
@@ -59,6 +68,36 @@ class CLI:
 
 		return slots
 
+	def doRaid10(self, adapter, disks, flags):
+		cmd = [ '-CfgSpanAdd', '-r10' ]
+
+		pdperarray = 2
+		for f in flags.split():
+			opt = f.split('=')
+			if opt[0] == 'pdperarray':
+				try:
+					pdperarray = int(opt[1])
+				except:
+					pdperarray = 2
+
+		try:
+			numarrays = len(disks) / pdperarray
+		except:
+			numarrays = 1
+
+		j = 0
+		for i in range(0, numarrays, 1):
+			d = []
+			for k in range(j, j + pdperarray, 1):
+				d.append(disks[k])
+			j += pdperarray
+
+			cmd.append('-Array%d[%s]' % (i, ','.join(d)))
+
+		cmd.append('-a%d' % adapter)
+		self.run(cmd)
+
+
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
 		cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
@@ -67,20 +106,24 @@ class CLI:
 		for slot in slots:
 			disks.append('%s:%d' % (enclosure, slot))
 
-		cmd.append('[%s]' % ','.join(disks)) 
+		if raidlevel == '10':
+			self.doRaid10(adapter, disks, flags)
+		else:
+			cmd.append('[%s]' % ','.join(disks)) 
 
-		if flags:
-			cmd.extend(flags)
+			if flags:
+				cmd.extend(flags)
 
-		if hotspares:
-			hs = []
-			for hotspare in hotspares:
-				hs.append('%s:%d' % (enclosure, hotspare))
+			if hotspares:
+				hs = []
+				for hotspare in hotspares:
+					hs.append('%s:%d' % (enclosure,
+						hotspare))
 
-			cmd.append('-Hsp[%s]' % ','.join(hs))
+				cmd.append('-Hsp[%s]' % ','.join(hs))
 
-		cmd.append('-a%d' % adapter)
-		self.run(cmd)
+			cmd.append('-a%d' % adapter)
+			self.run(cmd)
 
 	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
 		for hotspare in hotspares:
