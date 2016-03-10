@@ -391,6 +391,7 @@ class RollArgumentProcessor:
 				raise CommandError(self, 'unknown pallet "%s"' % arg)
 			for (name, ver, rel) in self.db.fetchall():
 				list.append((name, ver, rel))
+                        rel = '%'
 				
 		return list
 
