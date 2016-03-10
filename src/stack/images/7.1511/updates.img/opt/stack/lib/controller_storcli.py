@@ -45,7 +45,7 @@ class CLI:
 	def doNuke(self, adapter):
 		self.run(['/c%d/vall' % adapter,'delete', 'force'])
 		self.run(['/c%d/fall' % adapter,'delete'])
-		self.run(['/c%d' % adapter, 'set', 'jbod=off'])
+		self.run(['/c%d' % adapter, 'set', 'jbod=off', 'force'])
 		self.run(['/c%d' % adapter, 'set', 'bootwithpinnedcache=on'])
 
 	def getAdapter(self):
@@ -76,10 +76,18 @@ class CLI:
 	def getSlots(self, adapter):
 		slots = []
 		res = self.run(['/c%d/sall' % adapter, 'show'])
-		for disk in res['Response Data']['Drive Information']:
-			d = disk["EID:Slt"]
-			e,s = d.split(":")
-			slots.append(int(s))
+		if res['Command Status']['Status'] == 'Failure':
+			eid = self.getEnclosure(adapter)
+			if eid:
+				res = self.run([
+					'/c%d/e%d/sall' % (adapter, eid),
+					'show'])
+
+		if res['Command Status']['Status'] == 'Success':
+			for disk in res['Response Data']['Drive Information']:
+				d = disk["EID:Slt"]
+				e,s = d.split(":")
+				slots.append(int(s))
 
 		return slots
 
