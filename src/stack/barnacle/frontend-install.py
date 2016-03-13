@@ -251,6 +251,10 @@ line = '%s\t%s %s\n' % (attributes['Kickstart_PrivateAddress'],
 	attributes['Kickstart_PrivateHostname'], attributes['Info_FQDN'])
 f.write(line)
 f.close()
+
+# set the hostname to the user-entered FQDN
+print('Setting hostname to %s' % attributes['Info_FQDN'])
+subprocess.call(['/usr/bin/hostname', attributes['Info_FQDN']])
 	
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
