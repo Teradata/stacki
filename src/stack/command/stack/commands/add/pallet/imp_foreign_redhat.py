@@ -163,4 +163,18 @@ class Implementation(stack.commands.Implementation):
 			% (self.owner.mountPoint, destdir)
 		subprocess.call(shlex.split(cmd))
 
+		#
+		# create roll-<name>.xml file
+		#
+		xmlfile = open('%s/roll-%s.xml' % (roll_dir, name), 'w')
+
+		xmlfile.write('<roll name="%s" interface="6.0.2">\n' % name)
+		xmlfile.write('<color edge="white" node="white"/>\n')
+		xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, stack.release, arch, OS))
+		xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
+		xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
+		xmlfile.write('</roll>\n')
+
+		xmlfile.close()
+
 		return (name, vers, arch)

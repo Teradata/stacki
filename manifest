@@ -44,6 +44,7 @@ foundation-sphinx
 foundation-tidy
 foundation-wget
 hpssacli
+ipxe
 lighttpd
 MegaCLI
 stack-build

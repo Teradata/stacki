@@ -11,7 +11,7 @@
 	</si_copyright>
 
 <post>
-/opt/stack/bin/stack report host yum &hostname; | \
+/opt/stack/bin/stack report host yum &Kickstart_PrivateHostname; | \
 	/opt/stack/bin/stack report script | sh
 </post>
 

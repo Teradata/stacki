@@ -25,6 +25,7 @@
 
 <eval shell="/opt/stack/bin/python" mode="xml">
 import os
+import urlparse
 import stack.roll
 
 g = stack.roll.Generator()
@@ -37,7 +38,14 @@ elif os.path.exists('/tmp/pallets.xml'):
 print g.rolls
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
-	print '&lt;repo&gt; --name="%s" --baseurl=http://localhost/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (pname, pname, pver, parch)
+
+	u = urlparse.urlparse(purl)
+	if u.netloc == '127.0.0.1':
+		host = 'localhost'
+	else:
+		host = u.netloc
+
+	print '&lt;repo&gt; --name="%s" --baseurl=http://%s/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (pname, host, pname, pver, parch)
 </eval>
 
 </main>
@@ -88,8 +96,8 @@ for pallet in g.rolls:
         restore roll.
 -->
 
-/opt/stack/bin/stack set host attr localhost attr=roll_install_on_the_fly value=true \
-        shadow=yes
+/opt/stack/bin/stack set host attr &Kickstart_PrivateHostname; \
+	attr=roll_install_on_the_fly value=true shadow=yes
 
 <!--
 	 Default to system (passwd/shadow) authentication.
@@ -102,6 +110,12 @@ for pallet in g.rolls:
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
 chmod 775 /export/stack/carts
+</post>
+
+<post>
+<file name="/etc/hostname">
+&Info_FQDN;
+</file>
 </post>
 
 <!--

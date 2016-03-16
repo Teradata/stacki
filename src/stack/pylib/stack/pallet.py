@@ -93,6 +93,7 @@
 from __future__ import print_function
 import os
 import subprocess
+import stack
 import stack.media
 import time
 
@@ -301,8 +302,8 @@ class GetPallet:
 				continue
 
 			path = os.path.join(name, version, 'redhat', arch)
-			url = os.path.join(url, path)
-			cutdirs = len(url.split(os.sep)) - 3
+			purl = os.path.join(url, path)
+			cutdirs = len(purl.split(os.sep)) - 3
 			localpath = os.path.join(
 				'/mnt/sysimage/export/stack/pallets/', path)
 
@@ -314,7 +315,7 @@ class GetPallet:
 			flags += '--read-timeout=10 --tries=3'
 
 			cmd = '/usr/bin/wget %s --cut-dirs=%d %s' % (flags,
-				cutdirs, url)
+				cutdirs, purl)
 
 			if not dialog:
 				os.system(cmd)
@@ -335,7 +336,12 @@ class GetPallet:
 				A = filter(None, err.split("Length:"))
 				for i in A:
 					if '[application' in i:
-						totalsize += int(round(int(i.split('(')[0].strip()) * 0.001))
+						try:
+							filesize = int(i.split()[0])
+						except:
+							filesize = 1
+
+						totalsize += int(round(filesize * 0.001))
 
 				# totalsize is only used as a flag now
 				dialog.initPallet(name, version, totalsize)
@@ -356,3 +362,25 @@ class GetPallet:
 
 				dialog.updateProgress(100)
 				dialog.completePallet()
+
+			#
+			# if this is the stacki pallet for 7.x then we need to
+			# copy the LiveOS and images directories into the 
+			# destination
+			#
+			if name == 'stacki' and stack.release == '7.x':
+				os.chdir(localpath)
+
+				purl = os.path.join(url, 'LiveOS')
+				cutdirs = len(purl.split(os.sep)) - 4
+
+				cmd = '/usr/bin/wget %s --cut-dirs=%d %s' \
+					% (flags, cutdirs, purl)
+				os.system(cmd)
+
+				purl = os.path.join(url, 'images')
+				cutdirs = len(purl.split(os.sep)) - 4
+
+				cmd = '/usr/bin/wget %s --cut-dirs=%d %s' \
+					% (flags, cutdirs, purl)
+				os.system(cmd)

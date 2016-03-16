@@ -185,6 +185,14 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, 'ipmitool lan set %s auth ADMIN PASSWORD'
 			% (channel))
 
+		# add a root user at id 2
+		self.addOutput(host, 'ipmitool user set name 2 root')
+		self.addOutput(host, 'ipmitool user set password 2 %s'
+			% (password))
+		self.addOutput(host, 'ipmitool channel setaccess ' +
+			'%s ' % (channel) +
+			'2 link=on ipmi=on callin=on privilege=4')
+
 		self.addOutput(host, '</file>')
 
 

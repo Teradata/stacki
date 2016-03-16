@@ -141,6 +141,15 @@ class Command(stack.commands.HostArgumentProcessor,
                                 self.addOutput(host, 'GATEWAY=%s' % gateway)
 
                         self.addOutput(host, '</file>')
-                
+
+			#
+			# 7.x requires the hostname to be placed into
+			# /etc/hostname
+			#
+			if stack.release == '7.x':
+				self.addOutput(host,
+					'<file name="/etc/hostname">')
+				self.addOutput(host, '%s' % hostname)
+				self.addOutput(host, '</file>')
 
             	self.endOutput(padChar='')

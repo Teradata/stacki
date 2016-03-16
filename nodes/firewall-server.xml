@@ -17,7 +17,7 @@ All rights reserved. stacki(r) v3.0 www.stacki.com
 
 <!-- apply the firewall rules to the frontend -->
 
-/opt/stack/bin/stack report host firewall localhost | \
+/opt/stack/bin/stack report host firewall &Kickstart_PrivateHostname; | \
 	/opt/stack/bin/stack report script > /tmp/do-firewall.sh
 
 chmod a+x /tmp/do-firewall.sh

@@ -21,8 +21,8 @@
 
 <post>
 
-/opt/stack/bin/stack report host route localhost | \
-/opt/stack/bin/stack report script attrs="`/opt/stack/bin/stack report host attr localhost pydict=true`" | /bin/bash 
+/opt/stack/bin/stack report host route &Kickstart_PrivateHostname; | \
+/opt/stack/bin/stack report script attrs="`/opt/stack/bin/stack report host attr &Kickstart_PrivateHostname; pydict=true`" | /bin/bash 
 
 </post>
 

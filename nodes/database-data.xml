@@ -112,12 +112,6 @@ if os.path.exists('/tmp/site.attrs'):
 	gateway=&Kickstart_PrivateGateway;	\
 	dns=false pxe=true
 
-<!--
-	set the frontend's primary network to be the public network. this
-	network will be used to generate the hostname for the frontend.
--->
-# /opt/stack/bin/stack set host interface default localhost network=public
-
 <!-- set default os to whatever the frontend is -->
 
 /opt/stack/bin/stack set attr attr=os value=&os;

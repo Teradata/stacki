@@ -15,7 +15,6 @@ import time
 import subprocess
 import stack.roll
 import stack.pallet
-import stack.installcgi
 
 class DownloadFrame(wx.Frame):
 	"""This is a test frame for displaying progress of downloading pallets"""
@@ -124,8 +123,6 @@ def do_download(dialog=None):
 	cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
 	os.system(cmd)
 
-	icgi = stack.installcgi.InstallCGI(rootdir='/mnt/sysimage/export/stack')
-
 	g = stack.roll.Generator()
 	getpallet = stack.pallet.GetPallet()
 
@@ -156,19 +153,15 @@ def do_download(dialog=None):
 		getpallet.downloadDVDPallets(pallets)
 		getpallet.downloadNetworkPallets(pallets)
 
-	# display rebuild distribution message
-	dialog.doneMessage()
-
-	cwd = os.getcwd()
-	os.chdir('/mnt/sysimage/export/stack')
-	icgi.rebuildDistro(pallets)
-	os.chdir(cwd)
+	if dialog:
+		# display rebuild distribution message
+		dialog.doneMessage()
 
 	cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
 	os.system(cmd)
 
-	#close the dialog
 	if dialog:
+		#close the dialog
 		wx.CallAfter(dialog.Destroy)
 
 def start(func, *args): # helper method to run a function in another thread
