@@ -142,7 +142,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		(channel, interfaces, ip, network, name, opts) = self.fillParams([
+		(channel, ifaces, ip, network, name, opts) = self.fillParams([
 			('channel', None, True),
 			('interfaces', None, True),
 			('ip', None, True),
@@ -177,44 +177,56 @@ class Command(stack.commands.add.host.command):
 				'of valid networks.')
 
 		interfaces = []
-		if ',' in interfaces:
+		if ',' in ifaces:
 			#
 			# comma-separated list
 			#
-			for i in interfaces.split(','):
+			for i in ifaces.split(','):
 				interfaces.append(i.strip())
 		else:
 			#
 			# assume it is a space-separated list
 			#
-			for i in interfaces.split():
+			for i in ifaces.split():
 				interfaces.append(i.strip())
 			
 		#
-		# check if the physical interfaces exist
+		# check if the physical interfaces exist.
+		# Also check if one of them is a default
+		# interface. If it is, then the bond becomes
+		# the default interface for the machine
 		#
+		default_if = False
 		for i in interfaces:
-			rows = self.db.execute("""select net.device from
-				networks net, nodes n where
-				net.device = '%s' and n.name = '%s' and
-				net.node = n.id""" % (i, host))
+			rows = self.db.execute("""
+				select net.device, net.main
+				from networks net, nodes n where
+				net.device = '%s' and n.name = '%s'
+				and net.node = n.id""" % (i, host))
 
 			if rows == 0:
 				raise CommandError(self, 'interface "%s" does not exist for host "%s"' % (i, host))
+			for (dev, default) in self.db.fetchall():
+				if default == 1:
+					default_if = True
+
 
 		#
 		# ok, we're good to go
 		#
 		# add the bonded interface
 		#
-		self.command('add.host.interface', [
+		cmd_args = [
                         host,
                         'interface=%s' % channel,
                         'ip=%s' % ip,
                         'module=bonding',
                         'name=%s' % name,
                         'network=%s' % network
-                        ])
+                        ]
+		if default_if:
+			cmd_args.append("default=True")
+		self.command('add.host.interface', cmd_args)
 
 		# Set the options for the interface
 		if opts:
@@ -234,7 +246,6 @@ class Command(stack.commands.add.host.command):
 				(host, 'interface=%s' % i, 'ip=NULL'))
 			self.command('set.host.interface.name',
 				(host, 'interface=%s' % i, 'name=NULL'))
-
 			self.command('set.host.interface.channel',
 				(host, 'interface=%s' % i, 'channel=%s' % channel))
 
