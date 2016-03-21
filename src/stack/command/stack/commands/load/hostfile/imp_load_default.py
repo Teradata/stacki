@@ -396,11 +396,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				#
 				if re.match('bond[0-9]+$', interface):
 					found = 0
-					for interface in self.owner.interfaces[name].keys():
-						if 'channel' not in self.owner.interfaces[name][interface].keys():
+					for iface in self.owner.interfaces[name].keys():
+						if 'channel' not in self.owner.interfaces[name][iface].keys():
 							continue
 
-						if interface == self.owner.interfaces[name][interface]['channel']:
+						if interface == self.owner.interfaces[name][iface]['channel']:
 							found = 1
 							break
 
