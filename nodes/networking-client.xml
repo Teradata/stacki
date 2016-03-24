@@ -31,9 +31,11 @@ flags = []
 for i in os.environ:
 	if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
 		devinfo = os.environ[i].split()
-		iface = devinfo[0]
+		iface   = devinfo[0]
 		macaddr = devinfo[1].lower()
-		module = devinfo[2]
+		module  = ''
+		if len(devinfo) > 2:
+			module = devinfo[2]
 
 		ks = ''
 		if len(devinfo) > 3:
