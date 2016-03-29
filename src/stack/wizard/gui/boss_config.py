@@ -252,8 +252,8 @@ class Page2(wx.Panel):
 			"(e.g., dev.stacki.com)", \
 			data.get('Info_FQDN'), None)
 		d, helpBitmap1, self.cb = createCb(self, \
-			"Devices", "This is the interface that connects the " + \
-			"frontend to the outside network", list,
+			"Devices", "This is the interface that connects to the " + \
+			"network that will be used by the frontend to install backend hosts", list,
 			data.get('Kickstart_PrivateInterface'))
 		ip, helpBitmap2, self.tc1 = createTc(self, "IP",
 			"IP address for the device",
