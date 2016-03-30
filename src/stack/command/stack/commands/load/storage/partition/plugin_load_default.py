@@ -88,7 +88,7 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 					cmdargs.append('size=%s' % size)
 					cmdargs.append('type=%s' % type)
 					if options:
-						cmdargs.append('options="%s"' % options)
+						cmdargs.append('options=%s' % options)
 
 					self.owner.call('add.storage.partition',
 						cmdargs)
