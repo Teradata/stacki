@@ -16,6 +16,7 @@ sys.path.append('/opt/stack/lib')
 import stack_partition
 import os
 from stack.bool import str2bool
+import re
 
 release = '&release;'
 
@@ -76,6 +77,9 @@ def loadSpreadsheetPartitions(disk_info):
 				file.write(st + "\n")
 			lvm_mountpts.append(v['mountpoint'])
 	
+	# Check raid information
+	md_re = re.compile("^md[0-9]+$")
+	raid_lines = []
 	# Write remaining - check if its a logvol definition
 	for o in disk_info:
 		# Skip lvm, volgroup since they are already written.
@@ -95,12 +99,27 @@ def loadSpreadsheetPartitions(disk_info):
 				(o['mountpoint'], o['fstype'], \
 				o['options'].replace("'","").replace('"', ''), \
 				o['device'], size)
+		elif md_re.match(o['device']):
+			s = "raid %s --fstype %s --device %s %s" % \
+				(o['mountpoint'],o['fstype'],o['device'],
+				o['options'].replace("'","").replace('"', ''))
+			raid_lines.append(s)
+			st = ""
+		elif o['fstype'] == 'raid':
+			st = "part %s %s --ondisk=%s %s" % \
+				(o['mountpoint'], size, o['device'],
+				o['options'].replace("'","").replace('"', ''))
 		else:
 			st = "part %s %s --fstype=%s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['fstype'], \
 				o['device'], \
 				o['options'].replace("'","").replace('"', ''))
 		file.write(st + "\n")
+
+	# Write all the raid lines
+
+	for line in raid_lines:
+		file.write(line + "\n")
 	file.close()
 
 def str2bool(s):
