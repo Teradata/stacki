@@ -13,28 +13,56 @@ All rights reserved. stacki(r) v3.0 www.stacki.com
 import sys
 sys.path.append('/opt/stack/lib')
 
-import stack_partition
+import subprocess
 import os
+import shlex
+import stack_partition
 
 nukedisks = '&nukedisks;'
+FNULL = open(os.devnull, 'w')
+
+def str2bool(s):
+	if s and s.upper() in [ 'ALL', 'YES', 'Y', 'TRUE', '1' ]:
+		return 1
+	else:
+		return 0
+
+def removeLVM():
+	for (display, remove) in [
+			('/sbin/lvdisplay --all -c', '/sbin/lvremove --force'),
+			('/sbin/vgdisplay -c', '/sbin/vgremove --force'),
+			('/sbin/pvdisplay -c', '/sbin/pvremove --force') ]:
+
+		p = subprocess.Popen(shlex.split(display),
+			stdout = subprocess.PIPE)
+		(o, e) = p.communicate()
+		for line in o.split():
+			l = line.split(':')
+			if len(l) > 0:
+				target = l[0]
+				cmd = '%s %s' % (remove, target)
+				subprocess.call(shlex.split(cmd),
+					stdout = FNULL,
+					stderr = subprocess.STDOUT)
 
 def initDiskLabel(disk):
 	# break down software disk arrays
-	cmd = '/sbin/mdadm --stop --scan > /dev/null 2>&amp;1'
-	os.system(cmd)
+	cmd = '/sbin/mdadm --stop --scan'
+	subprocess.call(shlex.split(cmd),
+		stdout = FNULL, stderr = subprocess.STDOUT)
 
 	cmd = '/sbin/mdadm --zero-superblock /dev/%s' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
+	subprocess.call(shlex.split(cmd),
+		stdout = FNULL, stderr = subprocess.STDOUT)
 
 	# Clear out the master boot record of the drive
 	cmd = '/bin/dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
+	subprocess.call(shlex.split(cmd), 
+		stdout = FNULL, stderr = subprocess.STDOUT)
 
 	cmd = '/usr/sbin/parted -s /dev/%s mklabel gpt' % disk
-	cmd += ' > /dev/null 2>&amp;1'
-	os.system(cmd)
+	subprocess.call(shlex.split(cmd),
+		stdout = FNULL, stderr = subprocess.STDOUT)
 
 def getdisklist(s):
 	if s.upper() in ['ALL','TRUE','Y','YES']:
@@ -47,9 +75,11 @@ def getdisklist(s):
 
 disks = getdisklist(nukedisks)
 
-for disk in disks:
-		initDiskLabel(disk)
+if str2bool(nukedisks):
+	removeLVM()
 
+for disk in disks:
+	initDiskLabel(disk)
 </pre>
 
 </kickstart>
