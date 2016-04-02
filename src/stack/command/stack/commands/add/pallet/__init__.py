@@ -175,6 +175,7 @@ class Command(stack.commands.add.command):
 			# root of the CD implies a Solaris 10 disc.
 
 			treeinfo = os.path.join(self.mountPoint, '.treeinfo')
+			diskinfo = os.path.join(self.mountPoint, './.disk/info')
 			cdtoc    = os.path.join(self.mountPoint, '.cdtoc')
 			
 			if os.path.exists(treeinfo):
@@ -184,6 +185,14 @@ class Command(stack.commands.add.command):
 				if res and updatedb:
 					self.insert(res[0], res[1], '', res[2],
 						    'redhat')
+			if os.path.exists(diskinfo):
+				res = self.runImplementation('foreign_ubuntu',
+						       (clean, prefix,
+							diskinfo))
+				print(res)
+				if res and updatedb:
+					self.insert(res[0], res[1], res[3],
+						    res[2], 'ubuntu')
 			else:
                                 raise CommandError(self, 'unknown os on media')
 
@@ -261,3 +270,5 @@ class Command(stack.commands.add.command):
 			else:
                                 raise CommandError(self, 'CDROM not mounted')
 
+
+RollName = "stacki"
