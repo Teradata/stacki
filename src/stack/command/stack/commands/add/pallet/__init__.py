@@ -269,6 +269,3 @@ class Command(stack.commands.add.command):
 				self.copy(clean, dir, updatedb)
 			else:
                                 raise CommandError(self, 'CDROM not mounted')
-
-
-RollName = "stacki"

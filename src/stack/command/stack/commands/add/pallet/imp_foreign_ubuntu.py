@@ -160,5 +160,3 @@ class Implementation(stack.commands.Implementation):
 		xmlfile.close()
 
 		return (name, vers, arch, release)
-
-RollName = "stacki"
