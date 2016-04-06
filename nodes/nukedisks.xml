@@ -29,9 +29,9 @@ def str2bool(s):
 
 def removeLVM():
 	for (display, remove) in [
-			('/sbin/lvdisplay --all -c', '/sbin/lvremove --force'),
-			('/sbin/vgdisplay -c', '/sbin/vgremove --force'),
-			('/sbin/pvdisplay -c', '/sbin/pvremove --force') ]:
+			('lvdisplay --all -c', 'lvremove --force'),
+			('vgdisplay -c', 'vgremove --force'),
+			('pvdisplay -c', 'pvremove --force') ]:
 
 		p = subprocess.Popen(shlex.split(display),
 			stdout = subprocess.PIPE)
@@ -47,20 +47,20 @@ def removeLVM():
 
 def initDiskLabel(disk):
 	# break down software disk arrays
-	cmd = '/sbin/mdadm --stop --scan'
+	cmd = 'mdadm --stop --scan'
 	subprocess.call(shlex.split(cmd),
 		stdout = FNULL, stderr = subprocess.STDOUT)
 
-	cmd = '/sbin/mdadm --zero-superblock /dev/%s' % disk
+	cmd = 'mdadm --zero-superblock /dev/%s' % disk
 	subprocess.call(shlex.split(cmd),
 		stdout = FNULL, stderr = subprocess.STDOUT)
 
 	# Clear out the master boot record of the drive
-	cmd = '/bin/dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
+	cmd = 'dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
 	subprocess.call(shlex.split(cmd), 
 		stdout = FNULL, stderr = subprocess.STDOUT)
 
-	cmd = '/usr/sbin/parted -s /dev/%s mklabel gpt' % disk
+	cmd = 'parted -s /dev/%s mklabel gpt' % disk
 	subprocess.call(shlex.split(cmd),
 		stdout = FNULL, stderr = subprocess.STDOUT)
 
