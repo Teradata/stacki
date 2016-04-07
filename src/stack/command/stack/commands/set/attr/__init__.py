@@ -147,6 +147,8 @@ class Command(command):
 		(key, value, shadow, force) = self.doParams()
 
 		(scope, attr) = stack.attr.SplitAttr(key)
+		if not attr:
+			raise CommandError(self, 'illegal attribute: attr parameter is empty')
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
 
 		if not force:

@@ -174,6 +174,13 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			attrs = {}
 
 		#
+		# if there is an empty key in the attrs dictionary, remove
+		# it, otherwise it will cause an exception below.
+		#
+		if '' in attrs.keys():
+			del attrs['']
+
+		#
 		# make sure all the attributes are XML escaped including
 		# the extra characters that are invalid in an entity
 		# value.
@@ -186,6 +193,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 						     '^': '&#x5E;'})
 			except:
 				a = attrs[key]
+
 			attrs[key] = a
 
 		if 'os' not in attrs:

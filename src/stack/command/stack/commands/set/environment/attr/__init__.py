@@ -135,8 +135,9 @@ class Command(stack.commands.set.attr.command, stack.commands.set.environment.co
                         raise ArgRequired(self, 'environment')
 
 		(scope, attr) = stack.attr.SplitAttr(key)
+		if not attr:
+			raise CommandError(self, 'illegal attribute: attr parameter is empty')
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
-
 
 		if not force:		# test if attr exists
 			list = []

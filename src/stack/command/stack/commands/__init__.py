@@ -1554,7 +1554,6 @@ class DatabaseConnection:
                 if not dict:
                         dict = {}
 
-                        
                         # Global Attributes
 
                         G = {}
@@ -1574,7 +1573,12 @@ class DatabaseConnection:
 						v = x
 				else:
 					(s, a, v) = row
-                                G[ConcatAttr(s, a, slash=True)] = v
+
+				#
+				# all attribute keys must be non-null
+				#
+				if a:
+					G[ConcatAttr(s, a, slash=True)] = v
 
                 	# OS Attributes
 
@@ -1597,7 +1601,8 @@ class DatabaseConnection:
 					(o, s, a, v) = row
                                 if not O.has_key(o):
                                         O[o] = {}
-                                O[o][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					O[o][ConcatAttr(s, a, slash=True)] = v
 
 	                # Environment Attributes
 
@@ -1620,7 +1625,8 @@ class DatabaseConnection:
                                         (e, s, a, v) = row
                                 if not E.has_key(e):
                                         E[e] = {}
-                                E[e][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					E[e][ConcatAttr(s, a, slash=True)] = v
 			
 			# Appliance Attributes
 
@@ -1649,7 +1655,8 @@ class DatabaseConnection:
                                         (app, s, a, v) = row
                                 if not A.has_key(app):
                                         A[app] = {}
-                                A[app][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					A[app][ConcatAttr(s, a, slash=True)] = v
 
 			# Host Attributes
                         H = {}
@@ -1675,7 +1682,8 @@ class DatabaseConnection:
 					(h, s, a, v) = row
                                 if not H.has_key(h):
                                         H[h] = {}
-                                H[h][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					H[h][ConcatAttr(s, a, slash=True)] = v
 
                         for (h, env) in self.select('name, environment from nodes'):
 
@@ -1707,9 +1715,11 @@ class DatabaseConnection:
                 		                (s, a) = SplitAttr(key)
                         		        d[key] = (s, a, value, 'H')
 					for (s, a, v) in self.getIntrinsicAttrs():
-						d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
+						if a:
+							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
 					for (s, a, v) in self.getHostIntrinsicAttrs(h):
-						d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
+						if a:
+							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
 
                                 dict[h] = d
 
