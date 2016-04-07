@@ -162,6 +162,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				attr = default
 			self.addOutput(host, '%s=%s' % (var, attr))
 
+		self.addOutput(host, 'ipmitool lan set %s ipsrc static'
+			% (channel))
 		self.addOutput(host, 'ipmitool lan set %s ipaddr %s'
 			% (channel, ip))
 		self.addOutput(host, 'ipmitool lan set %s netmask %s'
