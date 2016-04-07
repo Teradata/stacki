@@ -185,7 +185,7 @@ class Command(stack.commands.add.command):
 				if res and updatedb:
 					self.insert(res[0], res[1], '', res[2],
 						    'redhat')
-			if os.path.exists(diskinfo):
+			elif os.path.exists(diskinfo):
 				res = self.runImplementation('foreign_ubuntu',
 						       (clean, prefix,
 							diskinfo))
