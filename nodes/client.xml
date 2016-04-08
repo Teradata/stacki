@@ -19,6 +19,9 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 </copyright>
 
 
+<package>ipmitool</package>
+
+
 <main>
 <reboot/>
 </main>
