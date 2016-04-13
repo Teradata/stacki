@@ -43,7 +43,7 @@ def render_network(screen, data):
 		lb.append(d, d)
 
 	#create input fields
-	e0 = Entry(21, text=data.get('Kickstart_PrivateHostname'), scroll=0, \
+	e0 = Entry(21, text=data.get('Kickstart_PrivateHostname'), scroll=1, \
 		returnExit=0)
 	e1 = Entry(21, text=data.get('Kickstart_PrivateAddress'), scroll=0, \
 		returnExit=0)
