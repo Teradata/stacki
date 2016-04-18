@@ -227,4 +227,4 @@ class Command(stack.commands.Command,
 		self.runImplementation(method, [self.hosts, cmd])
 
 		if self.collate:
-			self.endOutput(trimOwner = False)
+			self.endOutput(header=['host','output'], trimOwner = False)
