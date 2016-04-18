@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+	<description>
+	Your @template@ pallet description here
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</si_copyright>
+
+<!--
+     List packages that will only be
+     installed on backends
+	<package>package-backend-1</package>
+	<package>package-backend-2</package>
+-->
+
+<!-- Post section that will be run
+     only on backends
+<post>
+</post>
+-->
+
+</kickstart>

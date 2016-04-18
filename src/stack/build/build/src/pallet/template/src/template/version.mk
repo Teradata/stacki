@@ -1,0 +1,2 @@
+NAME	= @template@
+VERSION	= @version@

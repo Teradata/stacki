@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="no"?>
+
+<graph>
+
+	<description>
+
+	The @template@ Pallet
+
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</si_copyright>
+
+
+	<edge from="base" to="@template@-base" />
+	<edge from="server" to="@template@-server" />
+	<edge from="client" to="@template@-client" />
+
+	<!-- Add ordering of edges here. This defines
+	     the order in which the node XML files
+	     are run -->
+	<!--
+	     For example, to run the post section in @template@-base
+	     after the resolv.xml from the stacki pallet, use the
+	     following directive
+	     <order head="resolv" tail="@template@-base" />
+	-->
+</graph>
