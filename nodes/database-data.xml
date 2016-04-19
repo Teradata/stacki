@@ -126,15 +126,11 @@ if os.path.exists('/tmp/site.attrs'):
 	broadcast
 	default gateway (frontend)
 	default gateway (backend nodes)
-	frontend public interface over private network
 -->
 /opt/stack/bin/stack add route address=224.0.0.0 gateway=private netmask=255.255.255.0
 
 /opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
 
-/opt/stack/bin/stack add route address=&Kickstart_PublicAddress; \
-	gateway=&Kickstart_PrivateAddress; netmask=255.255.255.255
-	
 <!-- frontend private network -->
 
 /opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
