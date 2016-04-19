@@ -263,9 +263,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if channel:
 				self.owner.interfaces[name][interface]['channel'] = channel
 			if options:
-				if re.match('bond[0-9]+$', interface):
-					options = 'bonding-opts="%s"' % options
-
 				self.owner.interfaces[name][interface]['options'] = options
 			if vlan:
 				self.owner.interfaces[name][interface]['vlan'] = vlan
