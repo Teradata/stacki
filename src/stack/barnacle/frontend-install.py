@@ -254,7 +254,7 @@ f.close()
 
 # set the hostname to the user-entered FQDN
 print('Setting hostname to %s' % attributes['Info_FQDN'])
-subprocess.call(['/usr/bin/hostname', attributes['Info_FQDN']])
+subprocess.call(['hostname', attributes['Info_FQDN']])
 	
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
