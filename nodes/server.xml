@@ -39,13 +39,7 @@ print g.rolls
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
 
-	u = urlparse.urlparse(purl)
-	if u.netloc == '127.0.0.1':
-		host = 'localhost'
-	else:
-		host = u.netloc
-
-	print '&lt;repo&gt; --name="%s" --baseurl=http://%s/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (pname, host, pname, pver, parch)
+	print '&lt;repo&gt; --name="%s" --baseurl=http://localhost/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (pname, pname, pver, parch)
 </eval>
 
 </main>
