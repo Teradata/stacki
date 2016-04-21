@@ -51,7 +51,10 @@ def loadSpreadsheetPartitions(disk_info):
 			size = "--size=" + str(o['size'])
 			if o['size'] in ['recommended', 'hibernation']:
 				size = '--' + o['size']
-				
+
+			if o['size'] == '0':
+				size = '--size=1 --grow'
+
 			st = "part %s %s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['device'], \
 				o['options'].replace("'","").replace('"', ''))
