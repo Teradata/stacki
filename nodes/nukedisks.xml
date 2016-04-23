@@ -38,7 +38,7 @@ def removeLVM():
 		(o, e) = p.communicate()
 		for line in o.split():
 			l = line.split(':')
-			if len(l) > 0:
+			if len(l) > 0 and l[0].startswith('/dev'):
 				target = l[0]
 				cmd = '%s %s' % (remove, target)
 				subprocess.call(shlex.split(cmd),
