@@ -48,6 +48,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 
 bootstrap:
+	yum install -y xz-devel
 	$(MAKE) install-rpm
 
 build:
