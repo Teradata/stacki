@@ -40,11 +40,12 @@
 # @SI_Copyright@
 
 
-import csv
 import re
 import sys
+import stack.csv
 import stack.commands
 from stack.bool import *
+from stack.exception import *
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -61,31 +62,31 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		if appliance not in self.appliances:
 			msg = 'appliance "%s" does not exist in the database' \
 				% appliance
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 
 	def checkIP(self, ip):
 		for o in self.list_host_interface:
 			if o['ip'] == ip:
 				msg = 'IP "%s" is already in the database' % ip
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 	def checkMAC(self, mac):
 		for o in self.list_host_interface:
 			if o['mac'].lower() == mac:
 				msg = 'MAC "%s" is already in the database' \
 					% mac
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 	def checkNetwork(self, network):
 		if network not in self.networks:
 			msg = 'network "%s" does not exist in the database' \
 				% network
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 
 	def checkBox(self, box):
 		if box not in self.boxes:
 			msg = 'box "%s" does not exist in the database' % box
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 
 	def run(self, args):
 		filename, = args
@@ -97,20 +98,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.boxes = self.getBoxNames()
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
-		reader = csv.reader(open(filename, 'rU'))
+		reader = stack.csv.reader(open(filename, 'rU'))
 
 		header = None
 		for row in reader:
-
-                        # Ignore empty rows in the csv which happens
-                        # frequently with excel
-                        
-                        empty = True
-                        for cell in row:
-                                if cell.strip():
-                                        empty = False
-                        if empty:
-                                continue
 
 			if not header:
 				header = row
@@ -122,14 +113,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					'interface', 'rack', 'rank', 'network' ]
 
 				for i in range(0, len(row)):
-					header[i] = header[i].strip().lower()
-
 					if header[i] in required:
 						required.remove(header[i])
 
 				if len(required) > 0:
 					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				continue
 
@@ -151,7 +140,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			notes = None
 
 			for i in range(0, len(row)):
-				field = row[i].strip()
+				field = row[i]
 				if not field:
 					continue
 
@@ -169,7 +158,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					ip = field
 					if not ipRegex.match(ip):
 						msg = 'invalid IP %s in the input file' % ip
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 				elif header[i] == 'mac':
 					#
 					# make sure the MAC has lowercase
@@ -179,9 +168,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				elif header[i] == 'interface':
 					interface = field.lower()
 				elif header[i] == 'network':
-					network = field
+					network = field.lower()
 				elif header[i] == 'interface hostname':
-					ifhostname = field
+					ifhostname = field.lower()
 				elif header[i] == 'channel':
 					channel = field
 				elif header[i] == 'options':
@@ -191,11 +180,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						vlan = int(field)
 					except:
 						msg = 'VLAN "%s" must be an integer' % field
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 
 					if vlan < 1:
 						msg = 'VLAN "%s" must be greater than 0' % vlan
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 				elif header[i] == 'boss':
 					boss = field
                                 elif header[i] == 'default':
@@ -205,7 +194,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						
 			if not name:
 				msg = 'empty host name found in "name" column'
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 			if name not in self.owner.hosts.keys():
 				self.owner.hosts[name] = {}
@@ -218,7 +207,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if 'appliance' in self.owner.hosts[name].keys() and \
 						self.owner.hosts[name]['appliance'] != appliance:
 					msg = 'two different appliance types specified for host "%s"' % name
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				self.owner.hosts[name]['appliance'] = appliance
 
@@ -226,7 +215,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if 'rack' in self.owner.hosts[name].keys() and \
 						self.owner.hosts[name]['rack'] != rack:
 					msg = 'two different rack numbers specified for host "%s"' % name
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				self.owner.hosts[name]['rack'] = rack
 
@@ -234,7 +223,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if 'rank' in self.owner.hosts[name].keys() and \
 						self.owner.hosts[name]['rank'] != rank:
 					msg = 'two different rank numbers specified for host "%s"' % name
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				self.owner.hosts[name]['rank'] = rank
 
@@ -246,7 +235,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 			if interface in self.owner.interfaces[name].keys():
 				msg = 'interface "%s" already specified for host "%s"' % (interface, name)
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 			self.owner.interfaces[name][interface] = {}
 
@@ -313,7 +302,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			#
 			if 'appliance' not in self.owner.hosts[name].keys():
 				msg = 'must supply an appliance type for host "%s"' % (name)
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 			else:
 				self.checkAppliance(
 					self.owner.hosts[name]['appliance'])
@@ -344,11 +333,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							multiple_defaults = True
 				if not default:
 					msg = 'host "%s" has multiple interfaces but none of the interfaces are designated as\na "default" interface. add a "default" column to your spreadsheet and\nmark one of the interfaces as "True" in the default column' % name
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				if multiple_defaults:
 					msg = 'host "%s" has more than one interface designated as the "default" interface.\nedit your spreadsheet so that only one interface is the "default".' % name
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 					
 			#
 			# interface specific checks
@@ -362,7 +351,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 #					self.checkIP(ip)
 					if ip in ips:
 						msg = 'duplicate IP "%s" in the input file' % ip
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 
 					ips.append(ip)
 
@@ -374,7 +363,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 #					self.checkMAC(mac)
 					if mac in macs:
 						msg = 'duplicate MAC "%s" in the input file' % mac
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 
 					macs.append(mac)
 
@@ -404,5 +393,5 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					if not found:
 						msg = 'bonded interface "%s" is specified for host "%s", ' % (interface, name)
 						msg += 'but there is no channel "%s" specified for any interface associated with this host' % (interface)
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
 

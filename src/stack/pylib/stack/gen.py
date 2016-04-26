@@ -199,6 +199,7 @@ class Generator:
 		 	l.append('\tfi;')
 			l.append('\techo "original" | /opt/stack/bin/ci -q %s;' %
 			 	file)
+                        l.append('\t/opt/stack/bin/rcs -noriginal: %s;' % file)
 			l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
 			l.append('fi')
 
@@ -242,8 +243,9 @@ class Generator:
 		l.append('')
 		l.append('if [ -f %s ]; then' % file)
 		l.append('\techo "stack" | /opt/stack/bin/ci -q %s;' % file)
+		l.append('\t/opt/stack/bin/rcs -Nstack: %s;' % file)
 		l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
-		l.append('fi')		
+		l.append('fi')
 
 		if owner:
 			l.append('chown %s %s' % (owner, file))
@@ -278,8 +280,8 @@ class Generator:
 		attr = node.attributes
 
 		if attr.getNamedItem((None, 'os')):
-			os = attr.getNamedItem((None, 'os')).value
-			if os != self.getOS():
+			OS = attr.getNamedItem((None, 'os')).value
+			if OS != self.getOS():
 				return ''
 
 		if attr.getNamedItem((None, 'name')):
@@ -323,8 +325,9 @@ class Generator:
 		fileText = self.getChildText(node)
 
 		if fileName:
+                        p, f = os.path.split(fileName)
+                        s    = 'if [ ! -e %s ]; then mkdir -p %s; fi\n' % (p, p)
 
-			s = ''
 			if rcs:
 				s += self.rcsBegin(fileName, fileOwner, filePerms)
 

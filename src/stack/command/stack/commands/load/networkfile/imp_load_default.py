@@ -40,13 +40,14 @@
 # @SI_Copyright@
 #
 
-# check all this shit here
+# check all this awesomeness here
 # check if valid netmask/ip
 # check if name exists and is correct
 # if not private, check for default (later)
-import csv
+
 import re
 import sys
+import stack.csv
 import stack.commands
 import ast
 from ipaddress import IPv4Address, IPv4Network, IPv6Network, IPv6Address 
@@ -62,7 +63,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 	def checkValidIP(self,name,keyname,key):
 			if not key:
 				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname,name)
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
 			else:
 				key = u'%s' % key
 
@@ -75,11 +76,12 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			except:
 				msg = 'Hey! I need a valid %s for the ' % keyname
 				msg += '"%s" network.' % name
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
+
 	def checkValidNetwork(self,name,keyname,key):
 			if not key:
 				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname,name)
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
 			else:
 				key = u'%s' % key
 
@@ -92,7 +94,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			except:
 				msg = 'Hey! I need a valid %s for the ' % keyname
 				msg += '"%s" network.' % name
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
 
 	def run(self, args):
 		filename, = args
@@ -103,22 +105,12 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 		for i in subnets:
 			self.owner.current_networks[i['network']] = i
 
-		reader = csv.reader(open(filename, 'rU'))
+		reader = stack.csv.reader(open(filename, 'rU'))
 		header = None
 		line = 0
 
 		for row in reader:
 			line += 1
-
-                        # Ignore empty rows in the csv which happens
-                        # frequently with excel
-                        
-			empty = True
-                        for cell in row:
-                                if cell.strip():
-                                        empty = False
-                        if empty:
-                                continue
 
 			if not header:
 				header = row
@@ -126,10 +118,10 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				#
 				# make checking the header easier
 				#
-				required = ['NETWORK', 'ZONE', 'ADDRESS', 'MASK','GATEWAY', 'MTU', 'DNS','PXE']
+				required = ['network', 'zone', 'address', 'mask','gateway', 'mtu', 'dns','pxe']
 
 				for i in range(0, len(row)):
-					header[i] = header[i].strip().lower()
+					header[i] = header[i].lower()
 
 					if header[i] in required:
 						required.remove(header[i])
@@ -137,7 +129,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				if len(required) > 0:
 					msg = 'the following required fields are not present in the input file: '
 					msg += '"%s"' % ', '.join(required)	
-					CommandError(self, msg)
+					CommandError(self.owner, msg)
 
 				continue
 
@@ -151,7 +143,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			gateway = None
 
 			for i in range(0, len(row)):
-				field = row[i].strip()
+				field = row[i]
 				if not field:
 					continue
 
@@ -192,7 +184,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			if not name:
 				msg = 'Hey! I need a network name in line '
 				msg += '%s' % line
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
 			else:
 				self.owner.networks[name]['network'] = name 
 
@@ -213,7 +205,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			except:
 				msg = 'Hey! I need valid address/netmask for the '
 				msg += '"%s" network.' % name
-				raise CommandError(self, msg)
+				raise CommandError(self.owner, msg)
 
 			# I'm going to do myself a favor and clean the zone here.
 			# Otherwise I have to check if it's None or False or some
@@ -233,10 +225,10 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				% (line - 1)
 			msg += '%s networks. Do you have duplicates?' \
 				% len(self.owner.networks.keys())
-			raise CommandError(self, msg)
+			raise CommandError(self.owner, msg)
 
 		# bail if 'private' is not defined			
 		if 'private' not in self.owner.networks.keys() and \
 			'private' not in self.owner.current_networks.keys():
 			msg = '"private" network not found'
-			raise CommandError(self, msg)
+			raise CommandError(self.owner, msg)

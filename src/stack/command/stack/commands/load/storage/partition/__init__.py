@@ -39,7 +39,6 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-import csv
 import re
 import os
 import os.path

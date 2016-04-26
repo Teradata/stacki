@@ -2238,13 +2238,14 @@ class Command:
 				continue
 
 			# Find either the .py or .pyc but only load each
-			# module once.  This also plugins to be compiled
+			# module once.  This allows plugins to be compiled
 			# and does not require source code releases.
 
 			if ext not in [ '.py', '.pyc']:
 				continue
 
 		 	module = '%s.%s' % (self.__module__, base)
+
 		 	__import__(module)
 		 	module = eval(module)
 		 	try:

@@ -93,7 +93,6 @@
 
 import os
 import re
-import csv
 import sys
 import string
 import socket

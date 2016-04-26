@@ -101,7 +101,6 @@ import stack.profile
 import stack.commands
 from xml.sax import saxutils
 from xml.sax import handler
-from xml.sax import make_parser
 
 class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 	"""
@@ -295,9 +294,8 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 					'compile', 'cart', o['name'] ],
 					stdout = devnull, stderr = devnull)
 
-		parser  = make_parser()
 		handler = stack.profile.GraphHandler(attrs, entities,
-			directories = items)
+                                                     directories = items)
 
 		for item in items:
 			graph = os.path.join(item, 'graph')
@@ -306,12 +304,10 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
-				if ext == '.xml':
-					path = os.path.join(graph, file)
-					fin = open(path, 'r')
-					parser.setContentHandler(handler)
-					parser.parse(fin)
-					fin.close()
+                                if ext in [ '.xml', '.pro' ]:
+                                        self.runImplementation(ext[1:], 
+                                                               (os.path.join(graph, file), 
+                                                                handler))
 
 		graph = handler.getMainGraph()
 		if graph.hasNode(root):
@@ -321,8 +317,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			sys.exit(-1)
 				
 		nodes = stack.profile.FrameworkIterator(graph).run(root)
-		deps  = stack.profile.OrderIterator\
-			(handler.getOrderGraph()).run()
+		deps  = stack.profile.OrderIterator(handler.getOrderGraph()).run()
 
 		# Initialize the hash table for the framework
 		# nodes, and filter out everyone not for our

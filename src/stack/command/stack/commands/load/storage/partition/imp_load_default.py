@@ -39,10 +39,11 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-import csv
 import re
-import stack.commands
 import sys
+import stack.csv
+import stack.commands
+from stack.exception import *
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -60,16 +61,16 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		#
 		if device == None:
 			msg = 'empty value found for "device" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 		if mountpoint == None:
 			msg = 'empty value found for "mountpoint" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 		if size == None:
 			msg = 'empty value found for "size" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 		if fstype == None or fstype == 'None':
 			msg = 'empty value found for "type" column at line %d' % line
-			sys.exit((-1, msg, ''))
+			raise CommandError(self.owner, msg)
 		if host not in self.owner.hosts.keys():
 			self.owner.hosts[host] = {}
 		
@@ -93,7 +94,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		self.appliances = self.getApplianceNames()
 
-		reader = csv.reader(open(filename, 'rU'))
+		reader = stack.csv.reader(open(filename, 'rU'))
 		header = None
 		line = 0
 
@@ -103,34 +104,21 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		for row in reader:
 			line += 1
 
-                        # Ignore empty rows in the csv which happens
-                        # frequently with excel
-                        
-                        empty = True
-                        for cell in row:
-                                if cell.strip():
-                                        empty = False
-                        if empty:
-                                continue
-
 			if not header:
 				header = row
 
 				#
 				# make checking the header easier
 				#
-				required = ['name', 'device', 'mountpoint',
-					'size', 'type']
+				required = ['name', 'device', 'mountpoint', 'size', 'type']
 
 				for i in range(0, len(row)):
-					header[i] = header[i].strip().lower()
-
 					if header[i] in required:
 						required.remove(header[i])
 
 				if len(required) > 0:
 					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					sys.exit((-1, msg, ''))
+					raise CommandError(self.owner, msg)
 
 				continue
 			
@@ -141,7 +129,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			options = None
 
 			for i in range(0, len(row)):
-				field = row[i].strip()
+				field = row[i]
 				if not field:
 					continue
 
@@ -159,7 +147,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						size = int(field)
 						if size < 0:
 							msg = 'size "%d" must be 0 or greater' % size
-							sys.exit((-1, msg, ''))
+							raise CommandError(self.owner, msg)
 					except:
 						if field.lower() == 'recommended':
 							size = -1
@@ -167,7 +155,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							size =  -2
 						else:
 							msg = 'size "%s" must be an integer' % field
-							sys.exit((-1, msg, ''))
+							raise CommandError(self.owner, msg)
 				elif header[i] == 'type':
 					type = field.lower()
 				elif header[i] == 'options':
@@ -178,7 +166,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			#
 			if line == 1 and not name:
 				msg = 'empty host name found in "name" column'
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 			if name in self.appliances or name == 'global':
 				hosts = [ name ]
@@ -187,7 +175,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 			if not hosts:
 				msg = '"%s" is not host nor is it an appliance in the database' % name
-				sys.exit((-1, msg, ''))
+				raise CommandError(self.owner, msg)
 
 			for host in hosts:
 				self.doit(host, device, mountpoint, 
@@ -227,8 +215,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						#
 						if da not in type_dict[host + '-lvm']: 
 							msg = 'pv "%s" not defined' % da
-							sys.exit((-1, msg, ''))
+							raise CommandError(self.owner, msg)
 				elif not hd_regexp.match(d):
 					if d not in type_dict[host + '-volgroup']:
 						msg = 'volgroup "%s" not defined' % d
-						sys.exit((-1, msg, ''))
+						raise CommandError(self.owner, msg)
