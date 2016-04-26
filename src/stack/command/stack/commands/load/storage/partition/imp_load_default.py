@@ -220,3 +220,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					if d not in type_dict[host + '-volgroup']:
 						msg = 'volgroup "%s" not defined' % d
 						raise CommandError(self.owner, msg)
+					else:
+						# If its a volgroup, a --name option is required
+						try:
+							name_opt = d_map['options'].index("--name=")
+						except:
+							msg = 'Volgroup "%s" for host "%s" '+ \
+								'needs "--name=<volname>" ' + \
+								'in the OPTIONS field' % (d, host)
+							raise CommandError(self.owner, msg)
