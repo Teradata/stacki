@@ -33,7 +33,7 @@ class Iterator(object):
 
                         # after stripping col 0 '#' is a comment
 
-                        if row[0][0] == '#':
+                        if len(row[0]) > 0 and row[0][0] == '#':
                                 row = None
                                 continue
 
