@@ -853,17 +853,21 @@ class Command(stack.commands.create.command,
 		roller = getattr(stack.commands.create.pallet,
 			'RollBuilder_%s' % (self.os))
 		if len(args) == 1:
+			if not os.path.isfile(args[0]):
+				raise CommandError(self, 'File not found: %s' % args[0])
 			base, ext = os.path.splitext(args[0])
 			if ext == '.xml':
 				builder = roller(args[0], self.command,
 					self.call)
 			else:
-                                raise CommandError(self, 'missing xml file')
+				raise CommandError(self, 'missing xml file')
 		elif len(args) > 1:
 			for arg in args:
+				if not os.path.isfile(arg):
+					raise CommandError(self, 'File not found: %s' % arg)
 				base, ext = os.path.splitext(arg)
 				if not ext == '.iso':
-                                        raise CommandError(self, 'bad iso file')
+					raise CommandError(self, 'bad iso file')
 			builder = MetaRollBuilder(args, name, version,
 				self.command)
 			
