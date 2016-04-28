@@ -128,6 +128,8 @@ class Implementation(stack.commands.Implementation):
 					name = 'RHEL'
 				elif value == 'CentOS':
 					name = 'CentOS'
+				elif value == 'Oracle Linux Server':
+					name = 'Oracle'
 			elif key == 'version':
 				vers = value
 			elif key == 'arch':

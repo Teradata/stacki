@@ -428,6 +428,8 @@ class RollFile(File):
 						name = 'RHEL'
 					elif value == 'CentOS':
 						name = 'CentOS'
+					elif value == 'Oracle Linux Server':
+						name = 'Oracle'
 				elif key == 'version':
 					version = value
 				elif key == 'arch':
