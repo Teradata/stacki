@@ -125,11 +125,14 @@ class CLI:
 			cmd.append('-a%d' % adapter)
 			self.run(cmd)
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, flags):
 		for hotspare in hotspares:
 			cmd = [ '-PDHSP', '-Set', '-PhysDrv',
 				'[%s:%d]' % (enclosure, hotspare),
 				'-a%d' % adapter ]
+
+			if flags:
+				cmd.extend(flags)
 
 			self.run(cmd)
 
