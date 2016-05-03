@@ -62,8 +62,8 @@ bootstrap:
 	yum install -y swig
 	yum install -y gtk2-devel
 	yum install -y mesa-libGLU-devel
-	yum install -y pygobject2-devel
-	yum install -y pycairo-devel
+	-yum install -y pygobject2-devel
+	-yum install -y pycairo-devel
 	yum install -y mkisofs
 	yum install -y intltool
 	yum install -y audit-libs-devel
