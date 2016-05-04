@@ -164,6 +164,12 @@ def do_download(dialog=None):
 		#close the dialog
 		wx.CallAfter(dialog.Destroy)
 
+	#eject DVD after completion
+	media = stack.media.Media()
+	if media.mounted():
+		media.umountCD()
+		media.ejectCD()
+
 def start(func, *args): # helper method to run a function in another thread
 	thread = threading.Thread(target=func, args=args)
 	thread.setDaemon(True)
