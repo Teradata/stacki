@@ -615,6 +615,7 @@ class DialogNetwork(wx.Panel):
 	def __init__(self, parent, page):
 		wx.Panel.__init__(self, parent)
 		self.parent = parent
+		self.page = page
 
 		png = wx.Image('/opt/stack/bin/network.png',
 			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
@@ -666,57 +667,60 @@ class DialogNetwork(wx.Panel):
 		self.parent.Destroy()
 
 	def OnUrlLoad(self, event):
-		try:
-			if not self.urlText.Value:
-				wx.MessageBox('Please enter a URL to the location ' + \
-					'of pallets', 'Incomplete',
+		if not self.urlText.Value:
+			wx.MessageBox('Please enter a URL to the location ' + \
+				'of pallets', 'Incomplete',
+				wx.OK | wx.ICON_ERROR)
+			return
+		else:
+			url = self.urlText.Value
+			if url.find("http://") != 0:
+				url = "http://" + url
+			if not url.find("/install/pallets/") > 0:
+				url = url.rstrip("//")
+				url = url + "/install/pallets/"
+
+			#
+			# Call boss_get_pallet_info.py to download pallet
+			# information from network.
+			#
+			p = subprocess.Popen(
+				['/opt/stack/bin/boss_get_pallet_info.py',
+				url],
+				stdout = subprocess.PIPE, stderr = \
+					subprocess.PIPE)
+			o, e = p.communicate()
+			rc = p.wait()
+
+			if rc == 0:
+				pallets = pickle.loads(o)
+				for p in pallets:
+					index = \
+						self.page.list1.InsertStringItem(
+							sys.maxint, p['name'])
+					self.page.list1.SetStringItem(index,
+						1, p['version'])
+					self.page.list1.SetStringItem(index,
+						2, p['id'])
+					self.page.list1.SetStringItem(index,
+						3, p['url'])
+					self.page.pallets.append(p)
+			else:
+				print(e)
+				wx.MessageBox('Sorry, cannot recognize ' + \
+					'the URL', 'Invalid URL',
 					wx.OK | wx.ICON_ERROR)
 				return
-			else:
-				url = self.urlText.Value
-				if url.find("http://") != 0:
-					url = "http://" + url
-				if not url.find("/install/pallets/") > 0:
-					url = url.rstrip("//")
-					url = url + "/install/pallets/"
 
-				#
-				# Call boss_get_pallet_info.py to download pallet
-				# information from network.
-				#
-				p = subprocess.Popen(
-					['/opt/stack/bin/boss_get_pallet_info.py',
-					url],
-					stdout = subprocess.PIPE, stderr = \
-						subprocess.PIPE)
-				o, e = p.communicate()
-				rc = p.wait()
+			self.parent.Destroy()
 
-				if rc == 0:
-					pallets = pickle.loads(o)
-					for p in pallets:
-						index = \
-							self.page.list1.InsertStringItem(
-								sys.maxint, p['name'])
-						self.page.list1.SetStringItem(index,
-							1, p['version'])
-						self.page.list1.SetStringItem(index,
-							2, p['id'])
-						self.page.list1.SetStringItem(index,
-							3, p['url'])
-						self.page.pallets.append(p)
-				else:
-					print(e)
-					wx.MessageBox('Sorry, cannot recognize ' + \
-						'the URL', 'Invalid URL',
-						wx.OK | wx.ICON_ERROR)
-					return
-
-				self.Destroy()
-		except:
-			wx.MessageBox('Sorry, cannot recognize the URL',
-				'Invalid URL', wx.OK | wx.ICON_ERROR)
-			return
+# Don't catch the exception so we can debug messed
+# up build environments
+#
+#		except:
+#			wx.MessageBox('Sorry, cannot recognize the URL',
+#				'EXCEPTION', wx.OK | wx.ICON_ERROR)
+#			return
 
 
 class DialogDVDEject(wx.Panel):
