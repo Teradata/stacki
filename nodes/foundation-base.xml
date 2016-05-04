@@ -41,7 +41,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-rcs</package>
 <package>foundation-gawk</package>
 <package>foundation-readline</package>
-<package>foundation-mysql</package>
 <package>foundation-libxml2</package>
 <package>foundation-wget</package>
 <package>foundation-python-setuptools</package>
