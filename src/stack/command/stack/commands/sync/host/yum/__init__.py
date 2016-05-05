@@ -33,9 +33,10 @@ class Command(stack.commands.sync.host.command):
 	"""
 
 	def run(self, params, args):
+		sys.stdout = open('/dev/null')
+		sys.stderr = open('/dev/null')
 
 		hosts = self.getHostnames(args, managed_only=1)
-
 		me = self.db.getHostname('localhost')
 
 		threads = []
@@ -49,9 +50,13 @@ class Command(stack.commands.sync.host.command):
 				cmd += 'ssh -T -x %s ' % host
 			cmd += 'bash > /dev/null 2>&1 '
 
-			p = Parallel(cmd)
-			threads.append(p)
-			p.start()
+			try:
+				p = Parallel(cmd)
+				p.start()
+				threads.append(p)
+			except:
+				pass
+
 		#
 		# collect the threads
 		#
