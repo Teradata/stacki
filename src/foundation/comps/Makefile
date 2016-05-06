@@ -1,6 +1,6 @@
 #
 # @SI_Copyright@
-# @SI_Copyrighr@
+# @SI_Copyright@
 #
 
 PKGROOT		= /opt/stack
@@ -10,11 +10,6 @@ DISTVERSION	= $(shell stack report version)
 RPM.ARCH	= noarch
 
 include $(STACKBUILD)/etc/CCRules.mk
-
-bootstrap:	rpm
-	-mkdir -p /export/stack/contrib/default/$(DISTVERSION)/x86_64/RPMS
-	-cp ../../../build-cluster-core*/RPMS/noarch/foundation-comps* \
-		/export/stack/contrib/default/$(DISTVERSION)/x86_64/RPMS
 
 build: 
 
