@@ -74,7 +74,7 @@ def ldconf():
 	subprocess.call(['ldconfig'])
 
 def usage():
-	print("Requried arguments:")
+	print("Required arguments:")
 	print("\t--stacki-iso=ISO : path to stacki ISO")
 	print("\t--stacki-version=version : stacki version")
 	print("\t--stacki-name=name : stacki name (usually 'stacki')")
@@ -176,13 +176,13 @@ else:
 
 if not os.path.exists(cciso):
 	print("Error: File '{0}' does not exist.".format(cciso))
-	exit()
+	sys.exit(1)
 if not os.path.exists(osiso1):
 	print("Error: File '{0}' does not exist.".format(osiso1))
-	exit()
+	sys.exit(1)
 if osiso2 and not os.path.exists(osiso2):
 	print("Error: File '{0}' does not exist.".format(osiso2))
-	exit()
+	sys.exit(1)
 
 banner("Boostrap Stack Command Line")
 
