@@ -36,7 +36,7 @@ def umount(dest):
 def installrpms(pkgs):
 	cmd = [ 'yum', '-y', 'install' ]
 	cmd += pkgs
-	subprocess.call(cmd)
+	return subprocess.call(cmd)
 
 def generate_multicast():
 	a = random.randrange(225,240)
@@ -206,7 +206,11 @@ pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'foundation-python-xml', 'foundation-redhat', 'deltarpm', 
 	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
 	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
-installrpms(pkgs)
+
+return_code = installrpms(pkgs)
+if return_code != 0:
+	print("Error: stacki package installation failed")
+	sys.exit(1)
 
 banner("Configuring dynamic linker for stacki")
 ldconf()
