@@ -61,7 +61,7 @@ def loadSpreadsheetPartitions(disk_info):
 			if o['size'] in ['recommended', 'hibernation']:
 				size = '--' + o['size']
 
-			if o['size'] == '0':
+			if str(o['size']) == '0':
 				size = '--size=1 --grow'
 
 			if md_re.match(o['device']):

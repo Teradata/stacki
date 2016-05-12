@@ -59,7 +59,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	</param>
 
 	<param type='string' name='mountpoint' optional='1'>
-	Comma separated list of mountpoints
+	Mountpoint to create
 	</param>
 
         <param type='int' name='size' optional='1'>
@@ -67,7 +67,7 @@ class Command(stack.commands.HostArgumentProcessor,
         </param>
 
 	<param type='string' name='type' optional='1'>
-	Type of partition E.g: ext4, ext3 etc.
+	Type of partition E.g: ext4, ext3, xfs, raid, etc.
 	</param>
 
 	<param type='string' name='options' optional='0'>
@@ -156,7 +156,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			name = args[0]
 
-		device, size, type, mountpt, options = self.fillParams([
+		device, size, fstype, mountpt, options = self.fillParams([
 			('device', None, True),
 			('size', None), 
 			('type', None), 
@@ -165,43 +165,25 @@ class Command(stack.commands.HostArgumentProcessor,
 			])
 
 		if not device:
-			raise ArgRequired(self, 'device')
+			raise ParamRequired(self, 'device')
 		if not mountpt:
-			raise ArgRequired(self, 'mountpoint')
+			raise ParamRequired(self, 'mountpoint')
 
-		sizes = []
-		# Validate sizes
+		# Validate size
 		if size:
-			for s in size.split(','):
-				try:
-					s = int(s)
-				except:
-					#
-					# If mountpoint is 'swap' then allow
-					# 'hibernate', 'recommended' as sizes.
-					#
-					if (device == 'swap' or mountpoint == 'swap') and \
-						size == 'recommended':
-						size = -1
-					elif (device == 'swap' or mountpoint == 'swap') and \
-						size == 'hibernation':
-						size = -2
-					else:
+			try:
+				s = int(size)
+			except:
+				#
+				# If mountpoint is 'swap' then allow
+				# 'hibernate', 'recommended' as sizes.
+				#
+				if mountpt == 'swap' and \
+					size not in ['recommended', 'hibernation']:
 						raise ParamType(self, 'size', 'integer')
-						if s < 0:
-							raise ParamValue(self, 'size', '>= 0')
-				sizes.append(s)
+			if s < 0:
+				raise ParamValue(self, 'size', '>= 0')
 
-		mountpts = mountpt.split(',')
-		types = type.split(',')
-		options_arr = []
-
-		if options:
-			options_arr = options.split(',')
-
-		if not (len(sizes) == len(mountpts) == len(types)):
-			raise CommandError(self, 'enter size, mountpoint, type for each partition on a device')
-	
 		#
 		# look up the id in the appropriate 'scope' table
 		#
@@ -220,19 +202,16 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# make sure the specification for mountpt doesn't already exist
 		#
-		for m in mountpts:
-			self.checkIt(device, scope, tableid, m)
+		self.checkIt(device, scope, tableid, mountpt)
+
+		if not options:
+			options = ""
 		
 		#
 		# now add the specifications to the database
 		#
-		for i in range(len(mountpts)):
-			if i >= len(options_arr):
-				option_val = ""
-			else:
-				option_val = options_arr[i]
-			self.db.execute("""insert into storage_partition
-				(Scope, TableID, device, Mountpoint,
-				Size, FsType, Options) values ('%s', %s, '%s', '%s',
-				%s, '%s', '%s') """ % (scope, tableid, device,
-				mountpts[i], sizes[i], types[i], option_val))
+		self.db.execute("""insert into storage_partition
+			(Scope, TableID, device, Mountpoint,
+			Size, FsType, Options) values ('%s', %s, '%s', '%s',
+			%s, '%s', '%s') """ % (scope, tableid, device,
+			mountpt, size, fstype, options))
