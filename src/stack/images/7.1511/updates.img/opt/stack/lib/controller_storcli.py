@@ -3,6 +3,7 @@
 from __future__ import print_function
 from subprocess import *
 import json
+import re
 
 class CLI:
 
@@ -96,18 +97,48 @@ class CLI:
 		args = ['/c%d' % adapter, 'add','vd',
 			'type=r%s' % raidlevel]
 
+
+		# Check to see if size argument is present
+		# in flags. If it is, it MUST BE added
+		# immediately after the type=raidtype argument
+		# The size=<vd size> is a positional argument
+		# and will fail if it's in any other location
+		if flags:
+			f = flags.split()
+			size_re = re.compile("^size=")
+			size_idx = -1
+			found = False
+			for flag in f:
+				size_idx = size_idx + 1
+				if size_re.match(flag.lower()):
+					found = True
+					break
+			if found:
+				size_arg = f.pop(size_idx)
+				args.append(size_arg)
+
 		disks = []
 		for slot in slots:
 			if enclosure:
 				disks.append('%s:%d' % (enclosure, slot))
 			else:
 				disks.append('%s' % slot)
-
 		args.append('drives=%s' % ','.join(disks))
-
 		if flags:
-			f = flags.split()
 			args.extend(f)
+
+		# For Striped Raid sets, add a sensible
+		# pdperarray= argument if one isn't present.
+		if raidlevel in ['10','50','60']:
+			try:
+				flags.index('pdperarray=')
+			except:
+				if raidlevel == '10':
+					args.append('pdperarray=2')
+				if raidlevel == '50':
+					args.append('pdperarray=3')
+				if raidlevel == '60':
+					args.append('pdperarray=4')
 
 		if hotspares:
 			hs = []
