@@ -3,6 +3,7 @@
 # @SI_Copyright@
 #
 
+import sys
 import stack.commands
 from stack.commands.sync.host import Parallel
 from stack.commands.sync.host import timeout
