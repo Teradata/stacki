@@ -14,8 +14,6 @@ All rights reserved. stacki(r) v3.1 www.stacki.com
 
   
 <post>
-<!-- clean up ssh_host* files. They will be recreated on first boot -->
-rm -f /etc/ssh/ssh_host_*
 </post>
 
 
