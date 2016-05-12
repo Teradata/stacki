@@ -90,7 +90,12 @@ chmod a+x /opt/stack/lib/do_partition.py
 
 </pre>
 
-<post cond="'&boot_device;' != '' and '&release;' == '6.x'">
+<post cond="'&release;' == '6.x'">
+
+# Only proceed if boot_device is defined on this node
+if [ "x&boot_device;" == "x" ]; then
+  exit
+fi
 
 # grub-install will create several files, but it won't create grub.conf/menu.lst
 
