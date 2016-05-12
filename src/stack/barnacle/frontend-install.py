@@ -36,7 +36,7 @@ def umount(dest):
 def installrpms(pkgs):
 	cmd = [ 'yum', '-y', 'install' ]
 	cmd += pkgs
-	subprocess.call(cmd)
+	return subprocess.call(cmd)
 
 def generate_multicast():
 	a = random.randrange(225,240)
@@ -74,7 +74,7 @@ def ldconf():
 	subprocess.call(['ldconfig'])
 
 def usage():
-	print("Requried arguments:")
+	print("Required arguments:")
 	print("\t--stacki-iso=ISO : path to stacki ISO")
 	print("\t--stacki-version=version : stacki version")
 	print("\t--stacki-name=name : stacki name (usually 'stacki')")
@@ -176,13 +176,13 @@ else:
 
 if not os.path.exists(cciso):
 	print("Error: File '{0}' does not exist.".format(cciso))
-	exit()
+	sys.exit(1)
 if not os.path.exists(osiso1):
 	print("Error: File '{0}' does not exist.".format(osiso1))
-	exit()
+	sys.exit(1)
 if osiso2 and not os.path.exists(osiso2):
 	print("Error: File '{0}' does not exist.".format(osiso2))
-	exit()
+	sys.exit(1)
 
 banner("Boostrap Stack Command Line")
 
@@ -206,7 +206,11 @@ pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'foundation-python-xml', 'foundation-redhat', 'deltarpm', 
 	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
 	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
-installrpms(pkgs)
+
+return_code = installrpms(pkgs)
+if return_code != 0:
+	print("Error: stacki package installation failed")
+	sys.exit(1)
 
 banner("Configuring dynamic linker for stacki")
 ldconf()

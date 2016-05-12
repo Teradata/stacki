@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -113,18 +113,12 @@ install::
 	$(INSTALL) -m 0755 kdoc kgen cfgen kroll screengen \
 		$(ROOT)/$(PKGROOT)/sbin/
 
-	
 	mkdir -p $(ROOT)/$(PKGROOT)/etc
 	$(INSTALL) -m 0644 $(RCFILES) $(ROOT)/$(PKGROOT)/etc/
 
 	mkdir -p $(ROOT)/export/stack/sbin
 	$(INSTALL) -m 0755 kcgi $(ROOT)/export/stack/sbin/kickstart.cgi
 	$(INSTALL) -m 0755 utils/*.cgi $(ROOT)/export/stack/sbin/
-
-	mkdir -p $(ROOT)/export/stack/site-profiles/default/$(VERSION)/nodes
-	$(INSTALL) -m 0644 $(wildcard site-nodes/*.xml) \
-		$(ROOT)/export/stack/site-profiles/default/$(VERSION)/nodes/
-
 
 
 clean::

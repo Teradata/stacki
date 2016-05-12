@@ -788,6 +788,7 @@ class DeviceTree(object):
         file.close()
         # STACKI
 	partition_actions=[]
+	md_actions = []
 	vg_actions=[]
 	lv_actions=[]
 	pv_actions=[]
@@ -802,12 +803,16 @@ class DeviceTree(object):
             if a.isCreate() and a.isDevice():
                 if a.device.type == 'partition':
                     partition_actions.append(a)
+		elif a.device.type == 'mdarray':
+		    md_actions.append(a)
                 elif a.device.type == 'lvmvg':
                     vg_actions.append(a)
                 elif a.device.type == 'lvmlv':
                     lv_actions.append(a)
                 else:
                     other_actions.append(a)
+	    elif a.isCreate() and a.isFormat() and a.device.format.type == 'mdmember':
+		md_actions.append(a)
 	    elif a.isCreate() and a.isFormat() and a.device.format.type == 'lvmpv': 
                 pv_actions.append(a)
             else:
@@ -816,6 +821,9 @@ class DeviceTree(object):
         # Create partitions first (Eg: sda1, sda2 etc)
         for a in partition_actions:
             executeAction(a)
+	# Create MD arrays next (eg. md0, md1, etc)
+	for a in md_actions:
+	    executeAction(a)
         # Create Physical Volumes next
         for a in pv_actions:
             executeAction(a)

@@ -7,8 +7,8 @@ Base class for all nodes.
 </description>
 
 <si_copyright>
-(c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v3.0 www.stacki.com
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
 </si_copyright>
 
 <copyright>
@@ -28,7 +28,14 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <keyboard>&Kickstart_Keyboard;</keyboard>
 
 <timezone>--utc &Kickstart_Timezone;</timezone>
-<bootloader>--location=mbr</bootloader>
+<eval shell="/opt/stack/bin/python" mode="xml">
+if '&boot_device;' != '' and '&release;' == '6.x':
+	print "&lt;bootloader&gt;--location=none&lt;/bootloader&gt;"
+elif '&boot_device;' != '' and '&release;' == '7.x':
+	print "&lt;bootloader&gt;--location=mbr --boot-drive=&boot_device;&lt;/bootloader&gt;"
+else:
+	print "&lt;bootloader&gt;--location=mbr&lt;/bootloader&gt;"
+</eval>
 
 </main>
 
