@@ -19,12 +19,13 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 </copyright>
 
 
-<package>ipmitool</package>
-
-
 <main>
 <reboot/>
 </main>
+
+
+<package>ipmitool</package>
+<package>OpenIPMI</package>
 
 
 <pre>
@@ -56,6 +57,11 @@ enabled=0
 gpgcheck=0
 </file>
 </pre>
+
+
+<post>
+/sbin/chkconfig ipmi on
+</post>
 
 
 </kickstart> 
