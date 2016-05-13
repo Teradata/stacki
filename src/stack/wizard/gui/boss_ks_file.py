@@ -23,6 +23,12 @@ for pallet in g.rolls:
 	nodes_url = "%s/%s/%s/redhat/%s/nodes" % (pallet[4],pallet[0],pallet[1],pallet[3])
 	os.system("%s %s" % (wget_cmd, nodes_url))
 
+# RHEL 7 needs the repodata files too
+wget_cmd = "/usr/bin/wget -r -nH -R TRANS.TBL --cut-dirs=2"
+for pallet in g.rolls:
+	repodata_url = "%s/%s/%s/redhat/%s/repodata" % (pallet[4],pallet[0],pallet[1],pallet[3])
+	os.system("%s %s" % (wget_cmd, repodata_url))
+
 os.chdir(cwd)
 
 #
