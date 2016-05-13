@@ -263,7 +263,7 @@ class Command(stack.commands.create.command):
 
 		try:
 			release = stack.release
-		except: AttributeError:
+		except AttributeError:
 			release = 0
 			
 		(url, name, version, release, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
