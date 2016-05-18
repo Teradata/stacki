@@ -48,7 +48,7 @@ def generate_multicast():
 	d = random.randrange(1,255)
 	return str(a)+'.'+str(b)+'.'+str(c)+'.'+str(d)
 
-def repoconfig(ccmnt, ccname, ccver, osmnt):
+def repoconfig(ccmnt, ccname, ccver, osmnt, updatemnt, updatename, updatever):
 	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
 
 	file = open('/etc/yum.repos.d/stack.repo', 'w')
@@ -63,6 +63,13 @@ def repoconfig(ccmnt, ccname, ccver, osmnt):
 	file.write('baseurl=file://%s\n' % osmnt)
 	file.write('assumeyes=1\n')
 	file.write('gpgcheck=no\n')
+	if updatemnt:
+		file.write('[Update]\n')
+		file.write('name=Update\n')
+		file.write('baseurl=file://%s/%s/%s/redhat/x86_64\n'
+			% (updatemnt, updatename, updatever))
+		file.write('assumeyes=1\n')
+		file.write('gpgcheck=no\n')
 	file.close()
 
 	
@@ -84,6 +91,9 @@ def usage():
 
 	print()
 	print("Optional arguments:")
+	print("\t--update-iso=ISO1 : path(s) to OS update ISO")
+	print("\t--update-version=version : OS update version")
+	print("\t--update-name=name : OS update name (e.g., 'CentOS-Update')")
 	print("\t--noX : Don't require X11 for frontend wizard. Use text mode")
 	sys.exit(-1)
 
@@ -106,7 +116,8 @@ os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 #
 opts, args = getopt.getopt(sys.argv[1:], '', [
 	'stacki-iso=', 'stacki-version=', 'stacki-name=',
-	'os-iso=', 'os-version=', 'os-name=', 'noX' ]) 
+	'os-iso=', 'os-version=', 'os-name=', 'update-iso=', 'update-version=',
+	'update-name=', 'noX' ]) 
 
 stacki_iso = None
 stacki_version = None
@@ -114,6 +125,9 @@ stacki_name = None
 os_iso = None
 os_version = None
 os_name = None
+update_iso = None
+update_version = None
+update_name = None
 noX = 0
 no_net_reconfig = 0
 
@@ -130,6 +144,12 @@ for opt, arg in opts:
 		os_version = arg
 	elif opt == '--os-name':
 		os_name = arg
+	elif opt == '--update-iso':
+		update_iso = arg
+	elif opt == '--update-version':
+		update_version = arg
+	elif opt == '--update-name':
+		update_name = arg
 	elif opt == '--noX':
 		noX = 1
 
@@ -174,6 +194,15 @@ if len(os_iso) > 1:
 else:
 	osiso2 = None
 
+updatename = None
+updatever = None
+updateiso = None
+
+if update_name:
+	updatename = update_name
+	updatever = update_version
+	updateiso = update_iso
+
 if not os.path.exists(cciso):
 	print("Error: File '{0}' does not exist.".format(cciso))
 	sys.exit(1)
@@ -182,6 +211,9 @@ if not os.path.exists(osiso1):
 	sys.exit(1)
 if osiso2 and not os.path.exists(osiso2):
 	print("Error: File '{0}' does not exist.".format(osiso2))
+	sys.exit(1)
+if updateiso and not os.path.exists(updateiso):
+	print("Error: File '{0}' does not exist.".format(updateiso))
 	sys.exit(1)
 
 banner("Boostrap Stack Command Line")
@@ -198,8 +230,13 @@ copy(osiso1, osdest)
 if osiso2:
 	copy(osiso2, osdest)
 
+updatedest = None
+if updateiso:
+	updatedest = '/export/stack/pallets/%s' % updatename
+	copy(updateiso, updatedest)
+
 # create repo config file
-repoconfig(ccdest, ccname, ccver, osdest)
+repoconfig(ccdest, ccname, ccver, osdest, updatedest, updatename, updatever)
 
 # install rpms
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
@@ -283,7 +320,7 @@ banner("Run Setup Script")
 subprocess.call(['sh', '/tmp/run.sh'])
 
 # before we add the pallets, clean up the old OS that we copied to the disk
-subprocess.call(['/bin/rm', '-rf', osdest])
+subprocess.call(['/bin/rm', '-rf', osdest, updatedest])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])

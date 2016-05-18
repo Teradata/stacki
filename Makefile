@@ -72,6 +72,7 @@ bootstrap:
 	yum install -y apr-devel
 	yum install -y libcurl-devel
 	yum install -y httpd-devel
+	yum install -y createrepo
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 

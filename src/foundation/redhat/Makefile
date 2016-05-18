@@ -65,6 +65,7 @@ RPMS = newt rpm-python newt-python
 build: 
 
 install::
+	-mkdir $(ROOT)/$(PKGROOT)/redhat
 	./getrpms.py $(ROOT)/$(PKGROOT)/redhat $(RPMS)
 	rm -rf $(ROOT)/$(PKGROOT)/redhat/var
 

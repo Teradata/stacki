@@ -97,6 +97,9 @@ DEPENDS.DIRS	= cgi conf
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap:
+	yum install -y pcre-devel
+
 build:
 	tar zvfx $(NAME)-$(VERSION).tar.gz
 	(								\
