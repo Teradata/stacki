@@ -700,7 +700,7 @@ class Generator_redhat(Generator):
 		(roll, nodefile, color) = self.get_context(node)
 		pre_attrs = {}
 		# Collect arguments to the pre section
-		for this_attr in ['interpreter', 'arg']:
+		for this_attr in ['interpreter', 'notify', 'arg']:
 			if attr.getNamedItem((None, this_attr)):
 				pre_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
 		self.ks['pre'].append((pre_attrs, self.getChildText(node), roll, nodefile, color))
@@ -712,7 +712,7 @@ class Generator_redhat(Generator):
 		(roll, nodefile, color) = self.get_context(node)
 		post_attrs = {}
 		# Collect arguments to the post section
-		for this_attr in ['interpreter', 'arg']:
+		for this_attr in ['interpreter', 'notify', 'arg']:
 			if attr.getNamedItem((None, this_attr)):
 				post_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
 		self.ks['post'].append((post_attrs, self.getChildText(node), roll, nodefile, color))
@@ -757,6 +757,24 @@ class Generator_redhat(Generator):
 		list.append('%end')
 		return list
 
+	def generate_notify(self, args, nodefile):
+		''' generate some code to collect the contents of notify xml attrs as they are run
+		TODO: make this code do something useful intead of just append to a file :)
+		'''
+		filename = '/tmp/notif.txt'
+		# if notify='' --> just use the node.xml filename w/o extension
+		msg = os.path.splitext(os.path.basename(nodefile))[0]
+		# otherwise, use the string provided
+		if args['notify']:
+			msg = args['notify']
+		notify_cmd = '\necho "%s" >> %s' % (msg, filename)
+		if 'interpreter' in args and 'python' in args['interpreter']:
+			notify_cmd = 'fi = open("%s", "a")\n' % filename
+			notify_cmd += 'fi.write("%s\\n")\n' % msg
+			notify_cmd += 'fi.close()\n'
+			notify_cmd += 'fi = None\n'
+		return notify_cmd
+
 	def generate_pre(self):
 		pre_list = []
 		pre_list.append('')
@@ -777,6 +795,9 @@ class Generator_redhat(Generator):
 				log_line = ' --log=/tmp/ks-pre.log %s' % args['arg']
 			else:
 				log_line = ' --log=%s' % self.log
+			# if there's a notify argument, prepend it to text
+			if 'notify' in args:
+				text = self.generate_notify(args, nodefile) + text
 			pre_list.append(('%s %s' % (pre_header, log_line), roll, nodefile, color))
 			pre_list.append((text + '\n',roll, nodefile, color))
 			pre_list.append(('%end'))
@@ -803,6 +824,9 @@ class Generator_redhat(Generator):
 				log_line = ' %s --log=/mnt/sysimage%s' % (args['arg'], self.log)
 			else:
 				log_line = ' --log=%s' % self.log
+			# if there's a notify argument, prepend the notification code to the text
+			if 'notify' in args:
+				text = self.generate_notify(args, nodefile) + text
 			post_list.append(('%s %s' % (post_header, log_line), roll, nodefile, color))
 			post_list.append((text + '\n',roll, nodefile, color))
 			post_list.append(('%end'))
