@@ -698,45 +698,24 @@ class Generator_redhat(Generator):
 	def handle_pre(self, node):
 		attr = node.attributes
 		(roll, nodefile, color) = self.get_context(node)
-		# Parse the interpreter attribute
-		if attr.getNamedItem((None, 'interpreter')):
-			interpreter = '--interpreter ' + \
-				attr.getNamedItem((None, 'interpreter')).value
-		else:
-			interpreter = ''
-		# Parse any additional arguments to the interpreter
-		# or to the post section
-		if attr.getNamedItem((None, 'arg')):
-			arg = attr.getNamedItem((None, 'arg')).value
-		else:
-			arg = ''
-		list = []
-		list.append(string.strip(string.join([interpreter, arg])))
-		list.append(self.getChildText(node))
-		self.ks['pre'].append((list, roll, nodefile, color))
+		pre_attrs = {}
+		# Collect arguments to the pre section
+		for this_attr in ['interpreter', 'arg']:
+			if attr.getNamedItem((None, this_attr)):
+				pre_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
+		self.ks['pre'].append((pre_attrs, self.getChildText(node), roll, nodefile, color))
 
 	# <post>
 	
 	def handle_post(self, node):
 		attr = node.attributes
 		(roll, nodefile, color) = self.get_context(node)
-		# Parse the interpreter attribute
-		if attr.getNamedItem((None, 'interpreter')):
-			interpreter = '--interpreter ' + \
-				attr.getNamedItem((None, 'interpreter')).value
-		else:
-			interpreter = ''
-		# Parse any additional arguments to the interpreter
-		# or to the post section
-		if attr.getNamedItem((None, 'arg')):
-			arg = attr.getNamedItem((None, 'arg')).value
-		else:
-			arg = ''
-		list = []
-		# Add the interpreter and args to the %post line
-		list.append(string.strip(string.join([interpreter, arg])))
-		list.append(self.getChildText(node))
-		self.ks['post'].append((list, roll, nodefile, color))
+		post_attrs = {}
+		# Collect arguments to the post section
+		for this_attr in ['interpreter', 'arg']:
+			if attr.getNamedItem((None, this_attr)):
+				post_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
+		self.ks['post'].append((post_attrs, self.getChildText(node), roll, nodefile, color))
 		
 	# <boot>
 	
@@ -782,13 +761,23 @@ class Generator_redhat(Generator):
 		pre_list = []
 		pre_list.append('')
 
-		for list in self.ks['pre']:
-			(args, text) = list[0][0], list[0][1]
-			roll = list[1]
-			nodefile = list[2]
-			color = list[3]
-			pre_list.append(('%%pre --log=/tmp/ks-pre.log %s' %
-				args, roll, nodefile, color))
+		for ks_pre_data in self.ks['pre']:
+			args = ks_pre_data[0]
+			text = ks_pre_data[1]
+			roll = ks_pre_data[2]
+			nodefile = ks_pre_data[3]
+			color = ks_pre_data[4]
+			log_line = '/tmp/ks-pre.log'
+			pre_header = '%pre'
+			# Add the interpreter, if applicable
+			if 'interpreter' in args:
+				pre_header += " --interpreter " + args['interpreter']
+			# Assumes all args get added on to the logline
+			if 'arg' in args:
+				log_line = ' --log=/tmp/ks-pre.log %s' % args['arg']
+			else:
+				log_line = ' --log=%s' % self.log
+			pre_list.append(('%s %s' % (pre_header, log_line), roll, nodefile, color))
 			pre_list.append((text + '\n',roll, nodefile, color))
 			pre_list.append(('%end'))
 			
@@ -798,20 +787,23 @@ class Generator_redhat(Generator):
 		post_list = []
 		post_list.append(('', None, None))
 
-		for list in self.ks['post']:
-			(args, text) = list[0][0], list[0][1]
-			roll = list[1]
-			nodefile = list[2]
-			color = list[3]
-			log = self.log
-			try:
-				i = args.index('--nochroot')
-				if i >= 0:
-					log = '/mnt/sysimage/%s' % self.log
-			except:
-				pass
-			post_list.append(('%%post --log=%s %s' %
-				(log, args), roll, nodefile, color))
+		for ks_post_data in self.ks['post']:
+			args = ks_post_data[0]
+			text = ks_post_data[1]
+			roll = ks_post_data[2]
+			nodefile = ks_post_data[3]
+			color = ks_post_data[4]
+			log_line = self.log
+			post_header = '%post'
+			# Add the interpreter, if applicable
+			if 'interpreter' in args:
+				post_header += " --interpreter " + args['interpreter']
+			# Assumes all args get added on to the logline
+			if 'arg' in args and  '--nochroot' in args['arg']:
+				log_line = ' %s --log=/mnt/sysimage%s' % (args['arg'], self.log)
+			else:
+				log_line = ' --log=%s' % self.log
+			post_list.append(('%s %s' % (post_header, log_line), roll, nodefile, color))
 			post_list.append((text + '\n',roll, nodefile, color))
 			post_list.append(('%end'))
 			
