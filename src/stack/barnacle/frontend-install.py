@@ -320,7 +320,9 @@ banner("Run Setup Script")
 subprocess.call(['sh', '/tmp/run.sh'])
 
 # before we add the pallets, clean up the old OS that we copied to the disk
-subprocess.call(['/bin/rm', '-rf', osdest, updatedest])
+subprocess.call(['/bin/rm', '-rf', osdest])
+if updatedest:
+	subprocess.call(['/bin/rm', '-rf', updatedest])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])
