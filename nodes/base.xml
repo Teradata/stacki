@@ -42,6 +42,8 @@ else:
 
 <package cond="'&release;' == '7.x'">net-tools</package>
 <package>foundation-rcs</package>
+<package>mlocate</package>
+<package>vim</package>
 
 
 <post>
@@ -88,6 +90,7 @@ if $programname == 'SCL' then ~
 <boot order="post">
 mkdir -p /var/log/stacki/ks
 mv /tmp/ks-script* /var/log/stacki/ks
+updatedb
 </boot>
 
 </kickstart> 
