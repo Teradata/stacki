@@ -117,7 +117,9 @@ class Implementation(stack.commands.Implementation):
 		line = file.readlines()
 		file.close()
 		info = line[0].split()
-		name,vers,release, = info[0],info[1],info[-1][1:-1]
+                dashidx = info.index('-')
+                txtrel = info[dashidx - 2].strip('"')
+		name,vers,release, = info[0],info[1],txtrel
 
 		if not name:
 			name = "BaseOS"

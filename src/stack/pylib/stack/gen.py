@@ -698,45 +698,24 @@ class Generator_redhat(Generator):
 	def handle_pre(self, node):
 		attr = node.attributes
 		(roll, nodefile, color) = self.get_context(node)
-		# Parse the interpreter attribute
-		if attr.getNamedItem((None, 'interpreter')):
-			interpreter = '--interpreter ' + \
-				attr.getNamedItem((None, 'interpreter')).value
-		else:
-			interpreter = ''
-		# Parse any additional arguments to the interpreter
-		# or to the post section
-		if attr.getNamedItem((None, 'arg')):
-			arg = attr.getNamedItem((None, 'arg')).value
-		else:
-			arg = ''
-		list = []
-		list.append(string.strip(string.join([interpreter, arg])))
-		list.append(self.getChildText(node))
-		self.ks['pre'].append((list, roll, nodefile, color))
+		pre_attrs = {}
+		# Collect arguments to the pre section
+		for this_attr in ['interpreter', 'arg']:
+			if attr.getNamedItem((None, this_attr)):
+				pre_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
+		self.ks['pre'].append((pre_attrs, self.getChildText(node), roll, nodefile, color))
 
 	# <post>
 	
 	def handle_post(self, node):
 		attr = node.attributes
 		(roll, nodefile, color) = self.get_context(node)
-		# Parse the interpreter attribute
-		if attr.getNamedItem((None, 'interpreter')):
-			interpreter = '--interpreter ' + \
-				attr.getNamedItem((None, 'interpreter')).value
-		else:
-			interpreter = ''
-		# Parse any additional arguments to the interpreter
-		# or to the post section
-		if attr.getNamedItem((None, 'arg')):
-			arg = attr.getNamedItem((None, 'arg')).value
-		else:
-			arg = ''
-		list = []
-		# Add the interpreter and args to the %post line
-		list.append(string.strip(string.join([interpreter, arg])))
-		list.append(self.getChildText(node))
-		self.ks['post'].append((list, roll, nodefile, color))
+		post_attrs = {}
+		# Collect arguments to the post section
+		for this_attr in ['interpreter', 'arg']:
+			if attr.getNamedItem((None, this_attr)):
+				post_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
+		self.ks['post'].append((post_attrs, self.getChildText(node), roll, nodefile, color))
 		
 	# <boot>
 	
@@ -782,13 +761,23 @@ class Generator_redhat(Generator):
 		pre_list = []
 		pre_list.append('')
 
-		for list in self.ks['pre']:
-			(args, text) = list[0][0], list[0][1]
-			roll = list[1]
-			nodefile = list[2]
-			color = list[3]
-			pre_list.append(('%%pre --log=/tmp/ks-pre.log %s' %
-				args, roll, nodefile, color))
+		for ks_pre_data in self.ks['pre']:
+			args = ks_pre_data[0]
+			text = ks_pre_data[1]
+			roll = ks_pre_data[2]
+			nodefile = ks_pre_data[3]
+			color = ks_pre_data[4]
+			log_line = '/tmp/ks-pre.log'
+			pre_header = '%pre'
+			# Add the interpreter, if applicable
+			if 'interpreter' in args:
+				pre_header += " --interpreter " + args['interpreter']
+			# Assumes all args get added on to the logline
+			if 'arg' in args:
+				log_line = ' --log=/tmp/ks-pre.log %s' % args['arg']
+			else:
+				log_line = ' --log=%s' % self.log
+			pre_list.append(('%s %s' % (pre_header, log_line), roll, nodefile, color))
 			pre_list.append((text + '\n',roll, nodefile, color))
 			pre_list.append(('%end'))
 			
@@ -798,20 +787,23 @@ class Generator_redhat(Generator):
 		post_list = []
 		post_list.append(('', None, None))
 
-		for list in self.ks['post']:
-			(args, text) = list[0][0], list[0][1]
-			roll = list[1]
-			nodefile = list[2]
-			color = list[3]
-			log = self.log
-			try:
-				i = args.index('--nochroot')
-				if i >= 0:
-					log = '/mnt/sysimage/%s' % self.log
-			except:
-				pass
-			post_list.append(('%%post --log=%s %s' %
-				(log, args), roll, nodefile, color))
+		for ks_post_data in self.ks['post']:
+			args = ks_post_data[0]
+			text = ks_post_data[1]
+			roll = ks_post_data[2]
+			nodefile = ks_post_data[3]
+			color = ks_post_data[4]
+			log_line = self.log
+			post_header = '%post'
+			# Add the interpreter, if applicable
+			if 'interpreter' in args:
+				post_header += " --interpreter " + args['interpreter']
+			# Assumes all args get added on to the logline
+			if 'arg' in args and  '--nochroot' in args['arg']:
+				log_line = ' %s --log=/mnt/sysimage%s' % (args['arg'], self.log)
+			else:
+				log_line = ' --log=%s' % self.log
+			post_list.append(('%s %s' % (post_header, log_line), roll, nodefile, color))
 			post_list.append((text + '\n',roll, nodefile, color))
 			post_list.append(('%end'))
 			
@@ -855,7 +847,279 @@ class Generator_redhat(Generator):
 		
 		return list
 
+class MainNodeFilter_ubuntu(NodeFilter):
+	"""
+	This class either accepts or reject tags
+	from the node XML files. All tags are under
+	the <main>*</main> tags.
+	Each and every one of these tags needs to
+	have a handler for them in the Generator
+	class.
+	"""
+	def acceptNode(self, node):
 
+		if node.nodeName not in [
+			'kickstart',
+			'main', 	# <main><*></main>
+			'debian-installer',
+			'auto-install',
+			'time',
+			'console-setup',
+			'keyboard-configuration',
+			'debconf',
+			'mirror',
+			'apt-setup',
+			'pkgsel',
+			'live-installer',
+			'netcfg',
+			'clock-setup',
+			'user-setup',
+			'passwd',
+			'partman',
+			'partman-auto',
+			'partman-lvm',
+			'partman-auto-lvm',
+			'partman-md',
+			'pkgsel',
+			'tasksel',
+			'timezone',
+			]:
+			return self.FILTER_SKIP
+			
+		if not self.isCorrectCond(node):
+			return self.FILTER_SKIP
+
+		return self.FILTER_ACCEPT
+
+class OtherNodeFilter_ubuntu(NodeFilter):
+	"""
+	This class accepts tags that define the
+	pre section, post section and the packages
+	section in the node XML files. The handlers
+	for these are present in the Generator class.
+	"""
+	def acceptNode(self, node):
+		if node.nodeName == 'kickstart':
+			return self.FILTER_ACCEPT
+
+		if node.nodeName not in [
+			'cluster',
+			'package',
+			'patch',
+			'pre',
+			'late_command',
+			'grub_installer',
+			'finish_install',
+			'post',
+			]:
+			return self.FILTER_SKIP
+
+		if not self.isCorrectCond(node):
+			return self.FILTER_SKIP
+			
+		return self.FILTER_ACCEPT
+
+class Generator_ubuntu(Generator):
+
+	def __init__(self):
+		Generator.__init__(self)	
+		self.ks                 = {}
+		self.ks['order']	= []
+		self.ks['main']         = []
+		self.ks['packages']     = []
+		self.ks['finish']	= []
+		self.ks['pre']          = []
+		self.ks['post']         = []
+		self.finish_section     = 0
+		self.log = '/var/log/stack-install.log'
+	
+	##
+	## Parsing Section
+	##
+	
+	def parse(self, xml_string):
+		import cStringIO
+		xml_buf = cStringIO.StringIO(xml_string)
+		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
+		filter = MainNodeFilter_ubuntu(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
+			filter, 0)
+		node = iter.nextNode()
+		while node:
+
+			if node.nodeName == 'kickstart':
+				self.handle_kickstart(node)
+			elif node.nodeName == 'main':
+				#print ('printing node name in main while 2 %s' ,node.nodeName)
+				child = iter.firstChild()
+				while child:
+					self.handle_mainChild(child)
+					child = iter.nextSibling()
+			node = iter.nextNode()
+
+		filter = OtherNodeFilter_ubuntu(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
+			filter, 0)
+		node = iter.nextNode()
+		while node:
+			if node.nodeName != 'kickstart':
+				self.order(node)
+				eval('self.handle_%s(node)' % (node.nodeName))
+			node = iter.nextNode()
+
+
+	# <kickstart>
+	
+	def handle_kickstart(self, node):
+		# pull out the attr to handle generic conditionals
+		# this replaces the old arch/os logic but still
+		# supports the old syntax
+
+		if node.attributes:
+			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			if attrs:
+				dict = eval(attrs.value)
+				for (k,v) in dict.items():
+					self.attrs[k] = v
+
+	def handle_mainChild(self, node):
+		attr = node.attributes
+		roll, nodefile, color = self.get_context(node)
+		if 'tasksel' in node.nodeName:
+			self.ks['main'].append('%s %s' % (node.nodeName, self.getChildText(node)))
+		else:
+			self.ks['main'].append('d-i %s/%s' % (node.nodeName, self.getChildText(node)))
+	
+	def handle_late_command(self, node):
+		txt = self.getChildText(node)
+		commands = txt.split(";")
+		
+		for (idx, command) in enumerate(commands):
+			command = command.strip()
+			if not command:
+				continue
+			
+			if not self.ks['post']:
+				self.ks['post'].append('d-i preseed/%s string %s;\\' % (node.nodeName.strip(), command))
+			elif idx < len(commands) - 2:
+				self.ks['post'].append('%s;\\' % command)
+			else:
+				self.ks['post'].append('%s' % command)
+			
+
+	def handle_grub_installer(self, node):
+		self.ks['finish'].append('d-i grub-installer/%s' % self.getChildText(node))
+
+	def handle_finish_install(self, node):
+		self.ks['finish'].append('d-i finish-install/%s' % self.getChildText(node))
+
+		
+	def get_context(self, node):
+		# This function returns the rollname,
+		# and nodefile of the node currently being
+		# processed
+		attr = node.attributes
+		roll = None
+		nodefile = None
+		color = None
+		if attr.getNamedItem((None, 'roll')):
+			roll = attr.getNamedItem((None, 'roll')).value
+		if attr.getNamedItem((None, 'file')):
+			nodefile = attr.getNamedItem((None, 'file')).value
+		if attr.getNamedItem((None, 'color')):
+			color = attr.getNamedItem((None, 'color')).value
+		return (roll, nodefile, color)
+	
+	# <post>
+	def handle_post(self, node):
+		"""Function works in an interesting way. On solaris the post
+		sections are executed in the installer environment rather than
+		in the installed environment. So the way we do it is to write
+		a script for every post section, with the correct interpreter
+		and execute it with a chroot command.
+		"""
+		# TODO remove return later
+		return
+		attr = node.attributes
+		# By default we always want to chroot, unless
+		# otherwise specified
+		if attr.getNamedItem((None, 'chroot')):
+			chroot = attr.getNamedItem((None, 'chroot')).value
+		else:
+			chroot = 'yes'
+
+		# By default, the interpreter is always /bin/sh, unless
+		# otherwise specified.
+		if attr.getNamedItem((None, 'interpreter')):
+			interpreter = attr.getNamedItem((None,
+				'interpreter')).value
+		else:
+			interpreter = '/bin/sh'
+
+		# The args that are supplied are for the command that
+		# you want to run, and not to the installer section.
+		if attr.getNamedItem((None, 'arg')):
+			arg = attr.getNamedItem((None, 'arg')).value
+		else:
+			arg = ''
+
+		list = []
+
+		if self.finish_section == 0:
+			list.append("d-i preseed/late_command string in-target")
+
+		if chroot == 'yes':
+			list.append("\tin-target cat > /a/tmp/post_section_%d << '__eof__'; \\"
+					% self.finish_section)
+			list.append("#!%s" % interpreter)
+			list.append(self.getChildText(node))
+			list.append("__eof__")
+			list.append("\tin-target chmod a+rx /a/tmp/post_section_%d; \\"
+					% self.finish_section)
+			list.append("\tin-target chroot /a /tmp/post_section_%d %s; \\"
+					% (self.finish_section, arg))
+		else:
+			if interpreter is not '/bin/sh':
+				list.append("\tin-target cat > /tmp/post_section_%d "
+					"<< '__eof__'; \\"
+					% self.finish_section)
+				list.append("#!%s" % interpreter)
+				list.append(self.getChildText(node))
+				list.append("__eof__")
+				list.append("\tin-target chmod a+rx /tmp/post_section_%d;"
+					% self.finish_section)
+				list.append("\t%s /tmp/post_section_%d;"
+					% (interpreter, self.finish_section))
+			
+			else:
+				list.append(self.getChildText(node))
+
+		self.finish_section = self.finish_section+1
+		self.ks['finish'] += list
+
+	def generate_main(self):
+		list = []
+		list.append('')
+		list += self.ks['main']
+		return list
+
+	def generate_packages(self):
+		list = []
+		list.append('')
+		list += self.ks['packages']
+		return list
+
+	def generate_post(self):
+		list = []
+		list.append('')
+		list += self.ks['post']
+		return list
+
+	def generate_finish(self):
+		list = []
+		list.append('')
+		list += self.ks['finish']
+		return list
 		
 class MainNodeFilter_sunos(NodeFilter):
 	"""

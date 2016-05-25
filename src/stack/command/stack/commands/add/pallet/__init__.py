@@ -189,7 +189,6 @@ class Command(stack.commands.add.command):
 				res = self.runImplementation('foreign_ubuntu',
 						       (clean, prefix,
 							diskinfo))
-				print(res)
 				if res and updatedb:
 					self.insert(res[0], res[1], res[3],
 						    res[2], 'ubuntu')
