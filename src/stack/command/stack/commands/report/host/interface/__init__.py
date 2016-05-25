@@ -333,6 +333,8 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.endOutput(padChar = '')
 
+	def run_ubuntu(self, host):
+		pass
                 
 	def run_redhat(self, host):
 		self.db.execute("""select id, name, mask, mtu
