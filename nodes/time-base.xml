@@ -3,7 +3,7 @@
 <kickstart>
 
 <description>
-Network Time Protocol
+Time Configuration
 </description>
 
 <si_copyright>
@@ -23,23 +23,9 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 
 <post>
-<!-- Turn on the service -->
-/sbin/chkconfig ntpd on 
-
-<!-- NTP needs a kick in the pants every so often -->
-
-<file name="/etc/cron.hourly/ntp" perms="0755">
-#!/bin/sh
-if ! ( /usr/sbin/ntpq -pn 2&gt; /dev/null | grep -e '^\*' &gt; /dev/null ); then
-    /etc/rc.d/init.d/ntpd restart &gt; /dev/null 2&gt;&amp;1 
-fi
-</file>
-
-<file name="/etc/sysconfig/ntpd">
-OPTIONS="-A -u ntp:ntp -p /var/run/ntpd.pid"
-</file>
-
+/sbin/hwclock --systohc --utc
 </post>
+
 
 </kickstart> 
 

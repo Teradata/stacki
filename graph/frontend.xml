@@ -53,6 +53,10 @@
 		<head>database-data</head>
 	</order>
 
+	<order head="time-server">
+		<tail>time-base</tail>
+	</order>
+
 	<order head="TAIL">
 		<tail>install</tail>
 		<tail>partitions-save-server</tail>
@@ -69,7 +73,7 @@
 		<to>base</to>
 		<to>apache</to>
 		<to>security-server</to>
-		<to>ntp-server</to>
+		<to>time-server</to>
 		<to>install</to>
 		<to>pxe</to>
 		<to>insert-rolls</to>

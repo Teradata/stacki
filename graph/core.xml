@@ -30,7 +30,7 @@
 		<to>logrotate</to>
 		<to>rpc</to>
 		<to>node</to>
-		<to>ntp</to>
+		<to>time-base</to>
 		<to>firewall</to>
 		<to>selinux</to>
 		<to>postshell</to>
