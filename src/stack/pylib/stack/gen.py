@@ -881,8 +881,7 @@ class MainNodeFilter_ubuntu(NodeFilter):
 			'partman-auto-lvm',
 			'partman-md',
 			'pkgsel',
-			'tasksel',
-			'timezone',
+			'tasksel'
 			]:
 			return self.FILTER_SKIP
 			
