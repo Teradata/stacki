@@ -329,6 +329,8 @@ subprocess.call([stackpath, 'add', 'pallet', cciso])
 subprocess.call([stackpath, 'add', 'pallet', osiso1])
 if osiso2:
 	subprocess.call([stackpath, 'add', 'pallet', osiso2])
+if updateiso:
+	subprocess.call([stackpath, 'add', 'pallet', updateiso])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
 
 # all done
