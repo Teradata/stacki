@@ -700,7 +700,7 @@ class Generator_redhat(Generator):
 		(roll, nodefile, color) = self.get_context(node)
 		pre_attrs = {}
 		# Collect arguments to the pre section
-		for this_attr in ['interpreter', 'notify', 'arg']:
+		for this_attr in ['interpreter', 'notify', 'arg', 'wait']:
 			if attr.getNamedItem((None, this_attr)):
 				pre_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
 		self.ks['pre'].append((pre_attrs, self.getChildText(node), roll, nodefile, color))
@@ -712,7 +712,7 @@ class Generator_redhat(Generator):
 		(roll, nodefile, color) = self.get_context(node)
 		post_attrs = {}
 		# Collect arguments to the post section
-		for this_attr in ['interpreter', 'notify', 'arg']:
+		for this_attr in ['interpreter', 'notify', 'arg', 'wait']:
 			if attr.getNamedItem((None, this_attr)):
 				post_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
 		self.ks['post'].append((post_attrs, self.getChildText(node), roll, nodefile, color))
@@ -777,6 +777,18 @@ class Generator_redhat(Generator):
 				log_line = ' --log=/tmp/ks-pre.log %s' % args['arg']
 			else:
 				log_line = ' --log=%s' % self.log
+			if 'wait' in args:
+				# to be polite, send a notification that we're waiting
+				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
+				wait_string = '\n%%pre\nchmod a+x %s\n' % notify_script
+				waitfile = '/tmp/wait.txt'
+				msg = 'waiting for %s in %s' % (waitfile, os.path.basename(nodefile))
+				wait_string += '%s %s\n\n' % (notify_script, msg)
+				wait_string += 'touch %s\n' % waitfile
+				wait_string += 'while [ -f %s ]; do\n' % waitfile
+				wait_string += '\tsleep 2;\ndone\n'
+				wait_string += '%end\n'
+				pre_list.append((wait_string, roll, nodefile, color))
 			# if there's a notify argument, prepend it to text
 			if 'notify' in args:
 				msg = args['notify']
@@ -813,6 +825,18 @@ class Generator_redhat(Generator):
 				log_line = ' %s --log=/mnt/sysimage%s' % (args['arg'], self.log)
 			else:
 				log_line = ' --log=%s' % self.log
+			if 'wait' in args:
+				# to be polite, send a notification that we're waiting
+				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
+				wait_string = '\n%%post --nochroot\nchmod a+x %s\n' % notify_script
+				waitfile = '/tmp/wait.txt'
+				msg = 'waiting for %s in %s' % (waitfile, os.path.basename(nodefile))
+				wait_string += '%s %s\n\n' % (notify_script, msg)
+				wait_string += 'touch %s\n' % waitfile
+				wait_string += 'while [ -f %s ]; do\n' % waitfile
+				wait_string += '\tsleep 2;\ndone\n'
+				wait_string += '%end\n'
+				post_list.append((wait_string, roll, nodefile, color))
 			# if there's a notify argument, prepend the notification code to the text
 			if 'notify' in args:
 				msg = args['notify']
