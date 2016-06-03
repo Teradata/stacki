@@ -113,7 +113,7 @@ class Command(stack.commands.remove.appliance.command,
 	"""
 
 	def run(self, params, args):
-		(rulename, ) = self.fillParams([ ('rulename', None, Type) ])
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
                         raise ArgRequired(self, 'appliance')
