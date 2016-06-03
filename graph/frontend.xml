@@ -38,6 +38,7 @@
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
+		<tail>time-server</tail>
 	</order>
 
 	<order head="node">
