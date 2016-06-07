@@ -44,6 +44,7 @@ else:
 <package>foundation-rcs</package>
 <package>mlocate</package>
 <package>vim</package>
+<package>pciutils</package>
 
 
 <post>
