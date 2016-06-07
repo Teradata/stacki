@@ -140,11 +140,12 @@ class Command(stack.commands.run.command):
 		gen = getattr(stack.gen,'Generator_%s' % self.os)()
 		gen.parse(xml)
 
-		rpms = []
+		rpms = set()
 		for line in gen.generate('packages'):
-			if line.find('%package') == -1 and line.find('%end') == -1 and line not in rpms:
-				script.append('yum install -y %s' % line)
-				rpms.append(line)
+			if line.find('%package') == -1 and line.find('%end') == -1:
+				rpms.add(line)
+		if rpms:
+			script.append('yum install -y %s' % ' '.join(rpms))
 
 		cur_proc = False
 		for line in gen.generate('post'):
