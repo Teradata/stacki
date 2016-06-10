@@ -55,8 +55,7 @@ for name in rpms:
 		stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	o, e = p.communicate()
 	for line in o.split('\n'):
-		if line.startswith('file:///'):
-			subprocess.call(['rpm', '-i', '--force', '--excludedocs',
-				'--badreloc', '--relocate', '/=%s' % root, 
-				'--nodeps', line])
+		subprocess.call(['rpm', '-i', '--force', '--excludedocs',
+			'--badreloc', '--relocate', '/=%s' % root,
+			'--nodeps', line])
 
