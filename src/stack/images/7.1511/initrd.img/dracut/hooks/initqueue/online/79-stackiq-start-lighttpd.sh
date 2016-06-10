@@ -13,8 +13,12 @@ ln -s /updates/opt /opt
 #
 netif="$1"
 
-. /tmp/net.$netif.dhcpopts
-server="${new_next_server:-$new_dhcp_server_identifier}"
+server=""
+if [ -f /tmp/net.$netif.dhcpopts ]
+then
+	. /tmp/net.$netif.dhcpopts
+	server="${new_next_server:-$new_dhcp_server_identifier}"
+fi
 
 #
 # create stack.conf for lighttpd
