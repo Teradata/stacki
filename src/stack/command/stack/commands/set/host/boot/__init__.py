@@ -180,11 +180,6 @@ class Command(stack.commands.set.host.command):
 				ramdisk = row['ramdisk']
 				args    = row['args']
 
-		if not kernel:
-			print('bootaction "%s" for host "%s" is invalid' % \
-				(action, host))
-			sys.exit(-1)
-
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.
