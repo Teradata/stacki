@@ -51,11 +51,18 @@ bootstrap:
 	yum install -y xz-devel
 	$(MAKE) install-rpm
 
+refresh:
+	git clone git://git.ipxe.org/ipxe.git
+	(cd ipxe ; git archive --format=tgz HEAD > \
+		../ipxe-$(VERSION)-`date +%Y%m%d`.tgz)
+
 build:
 	mkdir $(NAME)
 	(cd $(NAME) ; tar zvfx ../$(NAME)-$(VERSION)-$(RELEASE).tgz)
 	(								\
 		cd $(NAME)/src ;					\
+		awk -f ../../config.awk config/general.h > general.h ;	\
+		mv general.h config/ ;					\
 		$(MAKE) everything ; 					\
 	)
 
@@ -76,5 +83,4 @@ tgz:
 
 clean::
 	rm -rf $(NAME)
-	rm -rf ipxe-src
 
