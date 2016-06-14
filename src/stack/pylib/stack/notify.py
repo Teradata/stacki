@@ -1,3 +1,6 @@
+# @SI_Copyright@
+# @SI_Copyright@
+
 #! /opt/stack/bin/python
 
 import sys
