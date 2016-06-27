@@ -700,10 +700,11 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		
 class MetaRollBuilder(Builder):
 
-	def __init__(self, files, rollname, version, command):
+	def __init__(self, files, rollname, version, release, command):
 		self.version = version.strip()
 		self.rollname = rollname
 		self.command = command
+		self.release = release
 
 		Builder.__init__(self)
 
@@ -736,7 +737,7 @@ class MetaRollBuilder(Builder):
 			arch = arch[0]
 		else:
 			arch = 'any'
-		name = "%s-%s.%s" % (rollName, self.version, arch)
+		name = "%s-%s-%s.%s" % (rollName, self.version, self.release, arch)
 
     		# Create the meta pallet
 					
@@ -835,9 +836,15 @@ class Command(stack.commands.create.command,
 		except AttributeError:
 			version = 'X'
 
-		(name, version, newest) = self.fillParams([
+		try:
+			release = stack.release
+		except AttributeError:
+			release = 0
+
+		(name, version, release, newest) = self.fillParams([
                         ('name', None),
 			('version', version),
+			('release',release),
 			('newest', True) 
                         ])
 		# Yes, globals are probably bad. But this is the fastest
@@ -868,7 +875,7 @@ class Command(stack.commands.create.command,
 				base, ext = os.path.splitext(arg)
 				if not ext == '.iso':
 					raise CommandError(self, 'bad iso file')
-			builder = MetaRollBuilder(args, name, version,
+			builder = MetaRollBuilder(args, name, version, release,
 				self.command)
 			
 		builder.run()
