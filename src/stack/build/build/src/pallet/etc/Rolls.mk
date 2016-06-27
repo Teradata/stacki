@@ -146,9 +146,8 @@ endif
 # --------------------------------------------------------------------- #
 
 .PHONY: roll
-roll: $(TARGET_PKG)s roll-$(ROLL).xml 
+roll: $(TARGET_PKG)s roll-$(ROLL).xml rpm-mkdirs
 	(								\
-		mkdir build-$(ROLL)-$(STACK);				\
 		cd build-$(ROLL)-$(STACK);				\
 		rm -rf disk*;						\
 		env GNUPGHOME=$(STACKBUILD.ABSOLUTE)/../.gnupg		\
