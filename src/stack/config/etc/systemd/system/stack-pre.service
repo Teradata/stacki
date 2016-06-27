@@ -1,0 +1,14 @@
+[Unit]
+Description=stack-pre
+Before=network-pre.target
+Wants=network-pre.target
+Requires=local-fs.target
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/stack/sbin/stack_run_pre
+RemainAfterExit=yes
+
+[Install]
+WantedBy=network.target

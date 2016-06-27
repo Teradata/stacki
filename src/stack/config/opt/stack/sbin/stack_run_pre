@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ -f /etc/sysconfig/stack-pre ]; then
+    /bin/mv /etc/sysconfig/stack-pre /root/stack-pre.sh
+    /bin/bash /root/stack-pre.sh &gt;&gt; /root/stack-pre.log 2&gt;&amp;1
+fi
+
