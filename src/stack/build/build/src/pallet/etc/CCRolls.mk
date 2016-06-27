@@ -56,11 +56,11 @@ include $(ROLLSBUILD)/etc/Rolls.mk
 
 .PHONY: clean.all nuke.all
 clean.all:: clean
-	$(MAKE) -C src clean.order
-	$(MAKE) -C src clean
+	-$(MAKE) -C src clean.order
+	-$(MAKE) -C src clean
 
 nuke.all:: nuke
-	$(MAKE) -C src nuke
+	-$(MAKE) -C src nuke
 
 .PHONY: manifest-check
 manifest-check:
