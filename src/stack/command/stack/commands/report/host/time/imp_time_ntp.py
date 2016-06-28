@@ -85,7 +85,7 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host,
 			'<file name="/etc/cron.hourly/ntp" perms="0755">')
 		self.owner.addOutput(host, '#!/bin/sh')
-		self.owner.addOutput(host, 'if ! ( /usr/sbin/ntpq -pn 2&gt; /dev/null | grep -e '^\*' &gt; /dev/null ); then')
+		self.owner.addOutput(host, 'if ! ( /usr/sbin/ntpq -pn 2&gt; /dev/null | grep -e \'^\*\' &gt; /dev/null ); then')
 		self.owner.addOutput(host, '    /etc/rc.d/init.d/ntpd restart &gt; /dev/null 2&gt;&amp;1')
 		self.owner.addOutput(host, 'fi')
 		self.owner.addOutput(host, '</file>')
