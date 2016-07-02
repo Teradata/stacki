@@ -1,0 +1,57 @@
+=============================
+Patching initrd.img
+=============================
+Anaconda source is patched.
+When moving Anaconda from version A to version B, do the following
+
+In version A
+1. untar anaconda tarball
+2. for every file in patch-files/versionA/, run diff -Naur against the original
+3. pipe the output of the diff into a patch file - anaconda.patch.
+
+In version B
+1. untar anaconda tarball
+2. apply patch from the patchfile anaconda.patch
+3. all the files that changed will have a file.orig file next to it.
+4. Copy all the changed files into patch-files/versionB
+
+Just to verify, do a diff between patch-files/versionA
+and patch-files/versionB - call this DIFF X
+Also do a diff between original/versionA and original/versionB - call
+this DIFF Y
+
+Compare the 2 diffs DIFF X & DIFF Y.
+They should both be identical. The 2 diffs should not have
+any STACKI params mentioned in them.
+
+
+
+=============================
+Patching install.img
+=============================
+Install.img is patched.
+When moving install.img from version A to version B
+In version A
+1. mount install.img on dir mntA
+2. for all files in A/patch-files/usr, EXCEPT usr/bin/anaconda
+   create a diff patch M against mntA/usr
+
+In version B
+1. mount install.img on dir mntB
+2. for all patch-files in A/patch-files/usr, execpt usr/bin/anaconda,
+   copy files from mntB to B/patch-files/usr
+3. Apply diff patch M
+
+In version A
+1. Create a diff patch N between A/patch-files/opt/stack/bin/anaconda_stack.py and mntA/usr/bin/anaconda
+
+In version B
+2. Copy orig mntB/usr/bin/anaconda to B/patch-files/opt/stack/bin/anaconda_stack.py
+3. Apply diff patch N against B/patch-files/opt/stack/bin/anaconda_stack.py 
+
+Copy all the other files from A/patch-files/opt to B/patch-files/opt
+
+Create a patch I between mntA and A/patch-files (only the files that exist in the patch-files dir)
+Create a patch J between mntB and B/patch-files (only the files that exist in the patch-files dir)
+Compare patch I and patch J. They should be identical
+
