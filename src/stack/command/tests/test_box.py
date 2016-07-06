@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ def test_box():
         # set box for this host
 
         result = Call('set host box', [ 'localhost', 'box=%s' % box ])
-        assert ReturnCode() == 0 and result == []
+        assert ReturnCode() == 0
 
 	# verify box was set
 
@@ -86,16 +86,16 @@ def test_box():
 	# restore prev setting
 
 	result = Call('set host box', [ 'localhost', 'box=%s' % prevBox ])
-	assert ReturnCode() == 0 and result == []
+	assert ReturnCode() == 0
 
         # remove box
 
         result = Call('remove box', [ box ])
-        assert ReturnCode() == 0 and result == []
+        assert ReturnCode() == 0
 
 	# try to remove default
 	#	"remove box" should protect against this
 
        	result = Call('remove box', [ 'default' ])
-	assert ReturnCode() == 255 and result == []
+	assert ReturnCode() == 255
 

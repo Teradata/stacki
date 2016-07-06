@@ -1,0 +1,12 @@
+[Unit]
+Description=stack-post
+After=multi-user.target
+Requires=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/stack/sbin/stack_run_post
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

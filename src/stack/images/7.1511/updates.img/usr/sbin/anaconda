@@ -52,6 +52,7 @@ if 'boss' in args:
 	# now build a new repo file with all the selected pallets
 	#
 	import stack.roll
+	import urlparse
 
 	g = stack.roll.Generator()
 
@@ -66,16 +67,22 @@ if 'boss' in args:
 	for pallet in g.rolls:
 		(pname, pver, prel, parch, purl, pdiskid) = pallet
 
+		u = urlparse.urlparse(purl)
+		if u.netloc == '127.0.0.1':
+			host = 'localhost'
+		else:
+			host = u.netloc	
+
 		file.write('[%s-%s]\n' % (pname, pver))
 		file.write('name=%s %s\n' % (pname, pver))
-		file.write('baseurl=http://localhost/install/pallets/%s/%s/redhat/x86_64\n' % (pname, pver))
+		file.write('baseurl=http://%s/install/pallets/%s/%s/redhat/x86_64\n' % (host, pname, pver))
 		file.write('assumeyes=1\n')
 
 		#
 		# need to make a "base" repo address
 		#
 		if pname in [ 'CentOS', 'RHEL', 'os' ]:
-			baserepo = 'http://localhost/install/pallets/%s/%s/redhat/x86_64' % (pname, pver)
+			baserepo = 'http://%s/install/pallets/%s/%s/redhat/x86_64' % (host, pname, pver)
 			
 	file.close()
 

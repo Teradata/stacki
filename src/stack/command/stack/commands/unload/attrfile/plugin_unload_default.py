@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -38,8 +38,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-#
-# @Copyright@
+
 
 import stack.commands
 

@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -391,6 +391,7 @@ class RollArgumentProcessor:
 				raise CommandError(self, 'unknown pallet "%s"' % arg)
 			for (name, ver, rel) in self.db.fetchall():
 				list.append((name, ver, rel))
+                        rel = '%'
 				
 		return list
 
@@ -484,7 +485,7 @@ class HostArgumentProcessor:
                         environments = [ ]
 			for e, in self.db.select("""
                         	distinct environment 
-	                        from environment_attributes
+	                        from nodes
                                 """):
                                 
                                 environments.append(e)
@@ -533,7 +534,7 @@ class HostArgumentProcessor:
 
 
 		# If we have any Ad-Hoc groupings we need to load the attributes
-		# for every host if the nodes tables.  Since this is a lot of
+		# for every host in the nodes tables.  Since this is a lot of
 		# work handle the common case and avoid the work when just
 		# a list of hosts.
 		#
@@ -1503,12 +1504,14 @@ class DatabaseConnection:
                 dict = self.cache.get('host-intrinsic-attrs-dict')
                 if not dict:
                         dict = {}
-                        for (name, rack, rank, cpus) in self.select("""
-                        	name,rack,rank,cpus from nodes
+                        for (name, environment, rack, rank, cpus) in self.select("""
+                        	name,environment,rack,rank,cpus from nodes
                                 """):
                                 dict[name] = [ (None, 'rack', rack),
                                                (None, 'rank', rank),
                                                (None, 'cpus', cpus) ]
+                                if environment:
+                                        dict[name].append((None, 'environment', environment))
 
                         for (name, box, appliance, membership) in \
 				self.select(""" n.name, b.name,
@@ -1551,7 +1554,6 @@ class DatabaseConnection:
                 if not dict:
                         dict = {}
 
-                        
                         # Global Attributes
 
                         G = {}
@@ -1571,7 +1573,12 @@ class DatabaseConnection:
 						v = x
 				else:
 					(s, a, v) = row
-                                G[ConcatAttr(s, a, slash=True)] = v
+
+				#
+				# all attribute keys must be non-null
+				#
+				if a:
+					G[ConcatAttr(s, a, slash=True)] = v
 
                 	# OS Attributes
 
@@ -1594,7 +1601,8 @@ class DatabaseConnection:
 					(o, s, a, v) = row
                                 if not O.has_key(o):
                                         O[o] = {}
-                                O[o][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					O[o][ConcatAttr(s, a, slash=True)] = v
 
 	                # Environment Attributes
 
@@ -1617,7 +1625,8 @@ class DatabaseConnection:
                                         (e, s, a, v) = row
                                 if not E.has_key(e):
                                         E[e] = {}
-                                E[e][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					E[e][ConcatAttr(s, a, slash=True)] = v
 			
 			# Appliance Attributes
 
@@ -1646,7 +1655,8 @@ class DatabaseConnection:
                                         (app, s, a, v) = row
                                 if not A.has_key(app):
                                         A[app] = {}
-                                A[app][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					A[app][ConcatAttr(s, a, slash=True)] = v
 
 			# Host Attributes
                         H = {}
@@ -1672,29 +1682,16 @@ class DatabaseConnection:
 					(h, s, a, v) = row
                                 if not H.has_key(h):
                                         H[h] = {}
-                                H[h][ConcatAttr(s, a, slash=True)] = v
+				if a:
+					H[h][ConcatAttr(s, a, slash=True)] = v
 
-                        for h, in self.select('name from nodes'):
+                        for (h, env) in self.select('name, environment from nodes'):
 
 				if not H.has_key(h):
 					H[h] = {}
 
                                 app  = self.getHostAppliance(h)
                                 os   = self.getHostOS(h)
-
-		                try:
-                            		env = H[h]['environment']
-		                except:
-		                        try:
-                		                env = O[os]['environment']
-		                        except:
-		                                try:
-		                                        env = A[app]['environment']
-		                                except:
-                		                        try:
-                                		                env = G['environment']
-		                                        except:
-                		                                env = None
 
 		                # Build the attribute dictionary for the host
 		                d = {}
@@ -1718,9 +1715,11 @@ class DatabaseConnection:
                 		                (s, a) = SplitAttr(key)
                         		        d[key] = (s, a, value, 'H')
 					for (s, a, v) in self.getIntrinsicAttrs():
-						d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
+						if a:
+							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
 					for (s, a, v) in self.getHostIntrinsicAttrs(h):
-						d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
+						if a:
+							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
 
                                 dict[h] = d
 
@@ -2239,13 +2238,14 @@ class Command:
 				continue
 
 			# Find either the .py or .pyc but only load each
-			# module once.  This also plugins to be compiled
+			# module once.  This allows plugins to be compiled
 			# and does not require source code releases.
 
 			if ext not in [ '.py', '.pyc']:
 				continue
 
 		 	module = '%s.%s' % (self.__module__, base)
+
 		 	__import__(module)
 		 	module = eval(module)
 		 	try:

@@ -690,6 +690,42 @@ def setupDisplay(anaconda, options, addons=None):
         #
         # we are a boss
         #
+
+        #
+        # if this is a USB install, then we'll see a kernel command line
+        # parameter that looks like:
+        #
+        #       inst.stage2=hd:sda1:/
+        #
+        # and we want to parse out the disk device (e.g., 'sda1')
+        #
+        device = None
+        for cmdarg in args:
+            if cmdarg.startswith('inst.stage2='):
+                b = cmdarg.split('=')
+                c = b[1].split(':')
+                if len(c) > 1 and c[0] == 'hd':
+                    device = c[1]
+                    break
+
+        if not device:
+            device = 'cdrom'
+
+        cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
+        os.system(cmd)
+
+        import shutil
+
+        #
+        # determine if this is a light's out install
+        #
+        if os.path.exists('/mnt/cdrom/tmp/rolls.xml'):
+            shutil.copyfile('/mnt/cdrom/tmp/rolls.xml', '/tmp/rolls.xml')
+        if os.path.exists('/mnt/cdrom/tmp/pallets.xml'):
+            shutil.copyfile('/mnt/cdrom/tmp/pallets.xml', '/tmp/pallets.xml')
+        if os.path.exists('/mnt/cdrom/tmp/site.attrs'):
+            shutil.copyfile('/mnt/cdrom/tmp/site.attrs', '/tmp/site.attrs')
+
         if not os.path.exists('/tmp/rolls.xml') or \
                 not os.path.exists('/tmp/site.attrs'):
 
@@ -725,7 +761,6 @@ def setupDisplay(anaconda, options, addons=None):
             # 
             # RHEL 7.x wants the kickstart file in /run/install
             # 
-            import shutil
             shutil.copyfile('/tmp/ks.cfg', '/run/install/ks.cfg')
 
             file = open('/tmp/boss.ks.cfg.done', 'w')

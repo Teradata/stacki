@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -51,7 +51,7 @@ ENVIRONMENT = 'pytest'
 
 def setup_module(module):
         Call('add host %s' % HOST)
-        Call('set host attr %s attr=environment value=%s' % (HOST, ENVIRONMENT))
+        Call('set host environment %s environment=%s' % (HOST, ENVIRONMENT))
         Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
 
 def teardown_module(module):

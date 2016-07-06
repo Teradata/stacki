@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -141,6 +141,15 @@ class Command(stack.commands.HostArgumentProcessor,
                                 self.addOutput(host, 'GATEWAY=%s' % gateway)
 
                         self.addOutput(host, '</file>')
-                
+
+			#
+			# 7.x requires the hostname to be placed into
+			# /etc/hostname
+			#
+			if stack.release == '7.x':
+				self.addOutput(host,
+					'<file name="/etc/hostname">')
+				self.addOutput(host, '%s' % hostname)
+				self.addOutput(host, '</file>')
 
             	self.endOutput(padChar='')

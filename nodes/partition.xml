@@ -3,8 +3,8 @@
 <kickstart>
 
 <si_copyright>
-(c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v3.0 www.stacki.com
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
 </si_copyright>
 
 <!-- default partitioning scheme -->
@@ -20,18 +20,21 @@ import re
 
 release = '&release;'
 
-def doBootDisk(file, disk):
+def doBootDisk(disk):
+
+	f = open('/tmp/system_partition_info', 'w')
+
 	if release == '7.x':
-		file.write('part biosboot --fstype=biosboot --size=1 ' +
+		f.write('part biosboot --fstype=biosboot --size=1 ' +
 			'--ondisk=%s\n' % disk)
-	file.write('part / --size=16000 --fstype=ext4 --ondisk=%s\n' % disk)
-	file.write('part swap --size=1000 --ondisk=%s\n' % disk)
-	file.write('part /var --size=16000 --fstype=xfs --ondisk=%s\n' % disk)
-	file.write('part /state/partition1 --size=1 --grow --fstype=xfs ' +
+	f.write('part / --size=16000 --fstype=ext4 --ondisk=%s\n' % disk)
+	f.write('part swap --size=1000 --ondisk=%s\n' % disk)
+	f.write('part /var --size=16000 --fstype=xfs --ondisk=%s\n' % disk)
+	f.write('part /state/partition1 --size=1 --grow --fstype=xfs ' +
 		'--ondisk=%s\n' % disk)
+	f.close()
 	
 def loadSpreadsheetPartitions(disk_info):
-	file = open("/tmp/user_partition_info", "w")
 
 	type_dict = {}
 	val_arr = []
@@ -44,6 +47,12 @@ def loadSpreadsheetPartitions(disk_info):
 		val_arr.append(o)
 		type_dict[type] = val_arr
 
+	# Check raid information
+
+	part_lines = []
+	raid_lines = []
+	lvm_lines = []
+	md_re = re.compile("^md[0-9]+$")
 	# Write all definitions of type lvm i.e. pv's
 	if 'lvm' in type_dict:
 		lvm_info = type_dict['lvm']
@@ -51,11 +60,20 @@ def loadSpreadsheetPartitions(disk_info):
 			size = "--size=" + str(o['size'])
 			if o['size'] in ['recommended', 'hibernation']:
 				size = '--' + o['size']
-				
-			st = "part %s %s --ondisk=%s %s" % \
+
+			if str(o['size']) == '0':
+				size = '--size=1 --grow'
+
+			if md_re.match(o['device']):
+				st = "raid %s --device %s %s" % \
+				(o['mountpoint'], o['device'], \
+				o['options'].replace("'","").replace('"', ''))
+				raid_lines.append(st)
+			else:
+				st = "part %s %s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['device'], \
 				o['options'].replace("'","").replace('"', ''))
-			file.write(st + "\n")
+				part_lines.append(st)
 
 	lvm_mountpts = []
 	# Write all volgroups - Make a note of these.
@@ -74,12 +92,9 @@ def loadSpreadsheetPartitions(disk_info):
 				st = "volgroup %s %s %s" % \
 					(v['mountpoint'], d, \
 					v['options'].replace("'","").replace('"', ''))
-				file.write(st + "\n")
+				lvm_lines.append(st)
 			lvm_mountpts.append(v['mountpoint'])
 	
-	# Check raid information
-	md_re = re.compile("^md[0-9]+$")
-	raid_lines = []
 	# Write remaining - check if its a logvol definition
 	for o in disk_info:
 		# Skip lvm, volgroup since they are already written.
@@ -99,28 +114,34 @@ def loadSpreadsheetPartitions(disk_info):
 				(o['mountpoint'], o['fstype'], \
 				o['options'].replace("'","").replace('"', ''), \
 				o['device'], size)
+			lvm_lines.append(st)
 		elif md_re.match(o['device']):
 			s = "raid %s --fstype %s --device %s %s" % \
 				(o['mountpoint'],o['fstype'],o['device'],
 				o['options'].replace("'","").replace('"', ''))
 			raid_lines.append(s)
-			st = ""
 		elif o['fstype'] == 'raid':
 			st = "part %s %s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['device'],
 				o['options'].replace("'","").replace('"', ''))
+			part_lines.append(st)
 		else:
 			st = "part %s %s --fstype=%s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['fstype'], \
 				o['device'], \
 				o['options'].replace("'","").replace('"', ''))
-		file.write(st + "\n")
+			part_lines.append(st)
 
+	# Write all the partition lines
+	f = open("/tmp/user_partition_info", "w")
+	for line in part_lines:
+		f.write(line + '\n')
 	# Write all the raid lines
-
 	for line in raid_lines:
-		file.write(line + "\n")
-	file.close()
+		f.write(line + "\n")
+	for line in lvm_lines:
+		f.write(line + "\n")
+	f.close()
 
 def str2bool(s):
 	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
@@ -135,15 +156,12 @@ def str2bool(s):
 p = stack_partition.StackPartition()
 disks = p.getDisks()
 
-file = open('/tmp/system_partition_info', 'w')
-
 output = <eval>/opt/stack/bin/stack report host storage partition &hostname;</eval>
 
 if output:
 	loadSpreadsheetPartitions(output)
 else:
-	doBootDisk(file, disks[0])
-file.close()
+	doBootDisk(disks[0])
 
 </pre>
 </kickstart>

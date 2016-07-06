@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -700,10 +700,11 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		
 class MetaRollBuilder(Builder):
 
-	def __init__(self, files, rollname, version, command):
+	def __init__(self, files, rollname, version, release, command):
 		self.version = version.strip()
 		self.rollname = rollname
 		self.command = command
+		self.release = release
 
 		Builder.__init__(self)
 
@@ -736,7 +737,7 @@ class MetaRollBuilder(Builder):
 			arch = arch[0]
 		else:
 			arch = 'any'
-		name = "%s-%s.%s" % (rollName, self.version, arch)
+		name = "%s-%s-%s.%s" % (rollName, self.version, self.release, arch)
 
     		# Create the meta pallet
 					
@@ -835,9 +836,15 @@ class Command(stack.commands.create.command,
 		except AttributeError:
 			version = 'X'
 
-		(name, version, newest) = self.fillParams([
+		try:
+			release = stack.release
+		except AttributeError:
+			release = 0
+
+		(name, version, release, newest) = self.fillParams([
                         ('name', None),
 			('version', version),
+			('release',release),
 			('newest', True) 
                         ])
 		# Yes, globals are probably bad. But this is the fastest
@@ -853,18 +860,22 @@ class Command(stack.commands.create.command,
 		roller = getattr(stack.commands.create.pallet,
 			'RollBuilder_%s' % (self.os))
 		if len(args) == 1:
+			if not os.path.isfile(args[0]):
+				raise CommandError(self, 'File not found: %s' % args[0])
 			base, ext = os.path.splitext(args[0])
 			if ext == '.xml':
 				builder = roller(args[0], self.command,
 					self.call)
 			else:
-                                raise CommandError(self, 'missing xml file')
+				raise CommandError(self, 'missing xml file')
 		elif len(args) > 1:
 			for arg in args:
+				if not os.path.isfile(arg):
+					raise CommandError(self, 'File not found: %s' % arg)
 				base, ext = os.path.splitext(arg)
 				if not ext == '.iso':
-                                        raise CommandError(self, 'bad iso file')
-			builder = MetaRollBuilder(args, name, version,
+					raise CommandError(self, 'bad iso file')
+			builder = MetaRollBuilder(args, name, version, release,
 				self.command)
 			
 		builder.run()

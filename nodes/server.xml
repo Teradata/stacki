@@ -10,8 +10,8 @@
 	</description>
 
 	<si_copyright>
-	(c) 2006 - 2015 StackIQ Inc.
-	All rights reserved. stacki(r) v3.0 www.stacki.com
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.1 www.stacki.com
 	</si_copyright>
 
 
@@ -25,6 +25,7 @@
 
 <eval shell="/opt/stack/bin/python" mode="xml">
 import os
+import urlparse
 import stack.roll
 
 g = stack.roll.Generator()
@@ -37,6 +38,7 @@ elif os.path.exists('/tmp/pallets.xml'):
 print g.rolls
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
+
 	print '&lt;repo&gt; --name="%s" --baseurl=http://localhost/install/pallets/%s/%s/redhat/%s&lt;/repo&gt;' % (pname, pname, pver, parch)
 </eval>
 
@@ -88,8 +90,8 @@ for pallet in g.rolls:
         restore roll.
 -->
 
-/opt/stack/bin/stack set host attr localhost attr=roll_install_on_the_fly value=true \
-        shadow=yes
+/opt/stack/bin/stack set host attr &Kickstart_PrivateHostname; \
+	attr=roll_install_on_the_fly value=true shadow=yes
 
 <!--
 	 Default to system (passwd/shadow) authentication.
@@ -102,6 +104,12 @@ for pallet in g.rolls:
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
 chmod 775 /export/stack/carts
+</post>
+
+<post>
+<file name="/etc/hostname">
+&Info_FQDN;
+</file>
 </post>
 
 <!--

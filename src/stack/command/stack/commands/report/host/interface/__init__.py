@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -162,6 +162,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				attr = default
 			self.addOutput(host, '%s=%s' % (var, attr))
 
+		self.addOutput(host, 'ipmitool lan set %s ipsrc static'
+			% (channel))
 		self.addOutput(host, 'ipmitool lan set %s ipaddr %s'
 			% (channel, ip))
 		self.addOutput(host, 'ipmitool lan set %s netmask %s'
@@ -184,6 +186,14 @@ class Command(stack.commands.HostArgumentProcessor,
 			% (channel))
 		self.addOutput(host, 'ipmitool lan set %s auth ADMIN PASSWORD'
 			% (channel))
+
+		# add a root user at id 2
+		self.addOutput(host, 'ipmitool user set name 2 root')
+		self.addOutput(host, 'ipmitool user set password 2 %s'
+			% (password))
+		self.addOutput(host, 'ipmitool channel setaccess ' +
+			'%s ' % (channel) +
+			'2 link=on ipmi=on callin=on privilege=4')
 
 		self.addOutput(host, '</file>')
 
@@ -323,6 +333,8 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.endOutput(padChar = '')
 
+	def run_ubuntu(self, host):
+		pass
                 
 	def run_redhat(self, host):
 		self.db.execute("""select id, name, mask, mtu

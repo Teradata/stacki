@@ -1,0 +1,24 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Time Configuration
+</description>
+
+<si_copyright>
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
+</si_copyright>
+
+<copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</copyright>
+
+
+<post>
+<report name="host.time">&hostname;</report>
+</post>
+
+</kickstart> 

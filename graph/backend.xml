@@ -32,6 +32,10 @@
 		<tail>partition</tail>
 	</order>
 
+	<order head="time-client">
+		<tail>time-base</tail>
+	</order>
+
 	<order head="TAIL">
 		<tail>backend</tail>
 	</order>
@@ -45,7 +49,7 @@
 
 	<edge from="client">
 		<to>base</to>
-		<to>ntp-client</to>
+		<to>time-client</to>
 		<to>networking-client</to>
 		<to>node-certs</to>
 		<to>resolv</to>

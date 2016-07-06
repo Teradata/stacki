@@ -68,17 +68,35 @@ class CLI:
 
 		return slots
 
-	def doRaid10(self, adapter, disks, flags):
-		cmd = [ '-CfgSpanAdd', '-r10' ]
+	def doStrippedRaid(self, raidlevel, adapter, enclosure, slots,
+			hotspares, flags):
 
-		pdperarray = 2
+		if raidlevel == '10':
+			cmd = [ '-CfgSpanAdd', '-r10' ]
+			pdperarray = 2
+		elif raidlevel == '50':
+			cmd = [ '-CfgSpanAdd', '-r50' ]
+			pdperarray = 5
+		elif raidlevel == '60':
+			cmd = [ '-CfgSpanAdd', '-r60' ]
+			pdperarray = 6
+		else:
+			return
+
+		disks = []
+		for slot in slots:
+			disks.append('%s:%d' % (enclosure, slot))
+
+		options = []
 		for f in flags.split():
 			opt = f.split('=')
 			if opt[0] == 'pdperarray':
 				try:
 					pdperarray = int(opt[1])
 				except:
-					pdperarray = 2
+					pass
+			else:
+				options.append(f)
 
 		try:
 			numarrays = len(disks) / pdperarray
@@ -95,41 +113,57 @@ class CLI:
 			cmd.append('-Array%d[%s]' % (i, ','.join(d)))
 
 		cmd.append('-a%d' % adapter)
+
+		if options:
+			cmd.extend(options)
+
 		self.run(cmd)
+
+		# 
+		# support for dedicated hot spares for 10, 50 and 60
+		# is convoluted with MegaCLI, so we will only support
+		# global hot spares with this.
+		# 
+		self.doGlobalHotSpare(adapter, enclosure, hotspares,
+			' '.join(options))
 
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
-		cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
 
-		disks = []
-		for slot in slots:
-			disks.append('%s:%d' % (enclosure, slot))
-
-		if raidlevel == '10':
-			self.doRaid10(adapter, disks, flags)
+		if raidlevel in [ '10', '50', '60' ]:
+			self.doStrippedRaid(raidlevel, adapter, enclosure,
+				slots, hotspares, flags)
 		else:
-			cmd.append('[%s]' % ','.join(disks)) 
+			cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
 
-			if flags:
-				cmd.extend(flags)
+			disks = []
+			for slot in slots:
+				disks.append('%s:%d' % (enclosure, slot))
+
+			cmd.append('[%s]' % ','.join(disks)) 
 
 			if hotspares:
 				hs = []
 				for hotspare in hotspares:
 					hs.append('%s:%d' % (enclosure,
 						hotspare))
-
 				cmd.append('-Hsp[%s]' % ','.join(hs))
+			if flags:
+				cmd.append(flags)
 
 			cmd.append('-a%d' % adapter)
 			self.run(cmd)
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares):
+
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, flags):
 		for hotspare in hotspares:
 			cmd = [ '-PDHSP', '-Set', '-PhysDrv',
 				'[%s:%d]' % (enclosure, hotspare),
 				'-a%d' % adapter ]
+
+			if flags:
+				cmd.append(flags)
 
 			self.run(cmd)
 

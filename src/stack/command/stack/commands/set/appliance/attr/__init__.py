@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -132,6 +132,9 @@ class Command(stack.commands.set.attr.command, stack.commands.set.appliance.comm
 		(key, value, shadow, force) = self.doParams()
 
 		(scope, attr) = stack.attr.SplitAttr(key)
+		if not attr:
+			raise CommandError(self, 'illegal attribute: attr parameter is empty')
+
 		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
 
 		if not force:		# test if attr exists

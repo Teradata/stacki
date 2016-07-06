@@ -9,8 +9,8 @@ This file is used as a connection point for other XML configuration nodes.
 </description>
 
 <si_copyright>
-(c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v3.0 www.stacki.com
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
 </si_copyright>
 
 <copyright>
@@ -22,6 +22,10 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <main>
 <reboot/>
 </main>
+
+
+<package>ipmitool</package>
+<package>OpenIPMI</package>
 
 
 <pre>
@@ -53,6 +57,11 @@ enabled=0
 gpgcheck=0
 </file>
 </pre>
+
+
+<post>
+/sbin/chkconfig ipmi on
+</post>
 
 
 </kickstart> 

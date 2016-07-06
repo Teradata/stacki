@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -140,11 +140,12 @@ class Command(stack.commands.run.command):
 		gen = getattr(stack.gen,'Generator_%s' % self.os)()
 		gen.parse(xml)
 
-		rpms = []
+		rpms = set()
 		for line in gen.generate('packages'):
-			if line.find('%package') == -1 and line.find('%end') == -1 and line not in rpms:
-				script.append('yum install -y %s' % line)
-				rpms.append(line)
+			if line.find('%package') == -1 and line.find('%end') == -1:
+				rpms.add(line)
+		if rpms:
+			script.append('yum install -y %s' % ' '.join(rpms))
 
 		cur_proc = False
 		for line in gen.generate('post'):

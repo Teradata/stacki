@@ -1,0 +1,5 @@
+#!/bin/bash
+if [ -f /etc/sysconfig/stack-post ]; then
+    /bin/mv /etc/sysconfig/stack-post /root/stack-post.sh
+    /bin/bash /root/stack-post.sh &gt;&gt; /root/stack-post.log 2&gt;&amp;1
+fi

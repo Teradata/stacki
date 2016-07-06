@@ -11,8 +11,8 @@
 	</description>
 
         <si_copyright>
-        (c) 2006 - 2015 StackIQ Inc.
-        All rights reserved. stacki(r) v3.0 www.stacki.com
+        (c) 2006 - 2016 StackIQ Inc.
+        All rights reserved. stacki(r) v3.1 www.stacki.com
         </si_copyright>
 
         <copyright>
@@ -143,10 +143,7 @@ CREATE TABLE boxes (
 grant select on cluster.boxes to ''@'localhost';
 grant select on cluster.boxes to ''@'%.local';
 
-<!-- Nodes
- NOT NORMALIZED: Name is a repeat from the networks table. Nodes.name should be
- "networks.name where device='eth0'"
- -->
+<!-- Nodes -->
 
 DROP TABLE IF EXISTS nodes;
 CREATE TABLE nodes (
@@ -154,6 +151,7 @@ CREATE TABLE nodes (
   Name		varchar(128) default NULL,
   Appliance	int(11) default '2',
   Box		int(11) default '1',
+  Environment	varchar(64) default NULL,
   CPUs		int(11) NOT NULL default '1',
   Rack		varchar(64) default NULL,
   Rank		varchar(64) default NULL,

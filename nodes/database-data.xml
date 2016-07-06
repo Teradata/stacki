@@ -6,8 +6,8 @@
 	</description>
 
         <si_copyright>
-        (c) 2006 - 2015 StackIQ Inc.
-        All rights reserved. stacki(r) v3.0 www.stacki.com
+        (c) 2006 - 2016 StackIQ Inc.
+        All rights reserved. stacki(r) v3.1 www.stacki.com
         </si_copyright>
 
         <copyright>
@@ -112,12 +112,6 @@ if os.path.exists('/tmp/site.attrs'):
 	gateway=&Kickstart_PrivateGateway;	\
 	dns=false pxe=true
 
-<!--
-	set the frontend's primary network to be the public network. this
-	network will be used to generate the hostname for the frontend.
--->
-# /opt/stack/bin/stack set host interface default localhost network=public
-
 <!-- set default os to whatever the frontend is -->
 
 /opt/stack/bin/stack set attr attr=os value=&os;
@@ -132,15 +126,11 @@ if os.path.exists('/tmp/site.attrs'):
 	broadcast
 	default gateway (frontend)
 	default gateway (backend nodes)
-	frontend public interface over private network
 -->
 /opt/stack/bin/stack add route address=224.0.0.0 gateway=private netmask=255.255.255.0
 
 /opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
 
-/opt/stack/bin/stack add route address=&Kickstart_PublicAddress; \
-	gateway=&Kickstart_PrivateAddress; netmask=255.255.255.255
-	
 <!-- frontend private network -->
 
 /opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
@@ -169,8 +159,6 @@ if os.path.exists('/tmp/site.attrs'):
 <file name="/etc/my.cnf" perms="644" expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-<!-- Set MegaCLI Flags -->
-/opt/stack/bin/stack set attr attr=megacli.flags value="WB,NORA,Direct,NoCachedBadBBU"
 </post>
 
 

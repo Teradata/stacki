@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -127,16 +127,46 @@ class Command(stack.commands.list.host.command):
 
                 self.beginOutput()
 
+                data = {}
+                for host in self.getHostnames():
+                        data[host] = []
+                for row in self.db.select("""
+                        distinctrow
+                        n.name,
+			IF(net.subnet, sub.name, NULL),
+                        net.device, net.mac, net.main, net.ip,
+                        net.module, net.name, net.vlanid, net.options,
+                        net.channel
+                        from
+                        nodes n, networks net, subnets sub
+                        where
+                        net.node=n.id
+                        and (net.subnet=sub.id or net.subnet is NULL)
+                        order by net.device
+                        """):
+                        data[row[0]].append(row[1:])
+                        
                 for host in self.getHostnames(args):
-                        self.db.execute("""select distinctrow
-				IF(net.subnet, sub.name, NULL),
-				net.device, net.mac, net.main, net.ip,
-				net.module, net.name, net.vlanid, net.options,
-				net.channel
-				from nodes n, networks net, subnets sub
-				where n.name='%s' and net.node=n.id
-				and (net.subnet=sub.id or net.subnet is NULL)
-				order by net.device""" % host )
+#                        self.db.select("""distinctrow
+#				IF(net.subnet, sub.name, NULL),
+#				net.device, net.mac, net.main, net.ip,
+#				net.module, net.name, net.vlanid, net.options,
+#				net.channel
+#				from nodes n, networks net, subnets sub
+#				where n.name='%s' and net.node=n.id
+#				and (net.subnet=sub.id or net.subnet is NULL)
+#				order by net.device""" % host )
+
+#			for (network,
+#                             interface,
+#                             mac,
+#                             default,
+#                             ip,
+#                             module,
+#                             name,
+#                             vlan,
+#                             options,
+#                             channel) in self.db.fetchall():
 
 			for (network,
                              interface,
@@ -147,7 +177,7 @@ class Command(stack.commands.list.host.command):
                              name,
                              vlan,
                              options,
-                             channel) in self.db.fetchall():
+                             channel) in data[host]:
 
                 		if interface and reg.match(interface):
                                         # If device name matches vlan*

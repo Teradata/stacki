@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -180,11 +180,6 @@ class Command(stack.commands.set.host.command):
 				ramdisk = row['ramdisk']
 				args    = row['args']
 
-		if not kernel:
-			print('bootaction "%s" for host "%s" is invalid' % \
-				(action, host))
-			sys.exit(-1)
-
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.
@@ -244,13 +239,11 @@ class Command(stack.commands.set.host.command):
                                 pass
 
 
-	def writePxebootCfg(self, host, action):
+	def writePxebootCfg(self, host, action, interfaces):
 		#
 		# Get the IP and NETMASK of the host
 		#
-		for row in self.call('list.host.interface',
-				[ host, 'expanded=true' ]):
-
+		for row in interfaces:
 			ip = row['ip']
 			if ip:
 				#
@@ -297,6 +290,7 @@ class Command(stack.commands.set.host.command):
 				where id = %s """ % (action, bootid))
 		return
 
+        
 	def run(self, params, args):
 		(action,) = self.fillParams([('action', )])
 		
@@ -306,7 +300,18 @@ class Command(stack.commands.set.host.command):
 		if action not in [ 'os', 'run', 'install', None ]:
                 	raise ParamValue(self, 'action', '"os", "run" or "install"')
 
-		for host in self.getHostnames(args):
+                hosts      = self.getHostnames(args)
+                paramList  = []
+                interfaces = {}
+                for host in hosts:
+                        paramList.append(host)
+                        interfaces[host] = []
+                paramList.append('expanded=true')
+		for row in self.call('list.host.interface', paramList):
+                        interfaces[row['host']].append(row)
+
+                frontend_host = self.db.getHostAttr('localhost', 'Kickstart_PrivateHostname')
+		for host in hosts:
 			if action:
 				self.updateBoot(host, action)
 
@@ -314,10 +319,9 @@ class Command(stack.commands.set.host.command):
                         # if this host is the frontend, then generate the
                         # default configuration file
                         #
-                        frontend_host = self.db.getHostAttr('localhost', 'Kickstart_PrivateHostname')
                         if host == frontend_host:
                                 self.writeDefaultPxebootCfg()
                         else:
-				self.writePxebootCfg(host, action)
+				self.writePxebootCfg(host, action, interfaces[host])
 
 

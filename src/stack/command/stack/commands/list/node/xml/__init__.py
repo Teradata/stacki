@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -101,7 +101,6 @@ import stack.profile
 import stack.commands
 from xml.sax import saxutils
 from xml.sax import handler
-from xml.sax import make_parser
 
 class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 	"""
@@ -174,6 +173,13 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			attrs = {}
 
 		#
+		# if there is an empty key in the attrs dictionary, remove
+		# it, otherwise it will cause an exception below.
+		#
+		if '' in attrs.keys():
+			del attrs['']
+
+		#
 		# make sure all the attributes are XML escaped including
 		# the extra characters that are invalid in an entity
 		# value.
@@ -186,6 +192,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 						     '^': '&#x5E;'})
 			except:
 				a = attrs[key]
+
 			attrs[key] = a
 
 		if 'os' not in attrs:
@@ -287,9 +294,8 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 					'compile', 'cart', o['name'] ],
 					stdout = devnull, stderr = devnull)
 
-		parser  = make_parser()
 		handler = stack.profile.GraphHandler(attrs, entities,
-			directories = items)
+                                                     directories = items)
 
 		for item in items:
 			graph = os.path.join(item, 'graph')
@@ -298,12 +304,10 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
-				if ext == '.xml':
-					path = os.path.join(graph, file)
-					fin = open(path, 'r')
-					parser.setContentHandler(handler)
-					parser.parse(fin)
-					fin.close()
+                                if ext in [ '.xml', '.pro' ]:
+                                        self.runImplementation(ext[1:], 
+                                                               (os.path.join(graph, file), 
+                                                                handler))
 
 		graph = handler.getMainGraph()
 		if graph.hasNode(root):
@@ -313,8 +317,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			sys.exit(-1)
 				
 		nodes = stack.profile.FrameworkIterator(graph).run(root)
-		deps  = stack.profile.OrderIterator\
-			(handler.getOrderGraph()).run()
+		deps  = stack.profile.OrderIterator(handler.getOrderGraph()).run()
 
 		# Initialize the hash table for the framework
 		# nodes, and filter out everyone not for our

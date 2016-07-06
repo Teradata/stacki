@@ -38,6 +38,7 @@
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
+		<tail>time-server</tail>
 	</order>
 
 	<order head="node">
@@ -51,6 +52,10 @@
 	<order tail="firewall-server">
 		<head>networking-server</head>
 		<head>database-data</head>
+	</order>
+
+	<order head="time-server">
+		<tail>time-base</tail>
 	</order>
 
 	<order head="TAIL">
@@ -69,7 +74,7 @@
 		<to>base</to>
 		<to>apache</to>
 		<to>security-server</to>
-		<to>ntp-server</to>
+		<to>time-server</to>
 		<to>install</to>
 		<to>pxe</to>
 		<to>insert-rolls</to>

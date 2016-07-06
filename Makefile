@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -44,34 +44,36 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 bootstrap:
-	yum groupinstall -y Gnome
+	yum groupinstall -y "Desktop Platform Development"
 	yum groupinstall -y "Compatibility Libraries"
 	yum groupinstall -y "Development Tools"
-	yum install -y rpm-build
-	yum install -y redhat-rpm-config
-	yum install -y gcc
-	yum install -y gcc-c++
-	yum install -y gettext
-	yum install -y eject
-	yum install -y binutils-devel
-	yum install -y openssl-devel
-	yum install -y bzip2-devel
-	yum install -y ncurses-devel
-	yum install -y readline-devel
-	yum install -y sqlite-devel
-	yum install -y swig
-	yum install -y gtk2-devel
-	yum install -y mesa-libGLU-devel
-	yum install -y pygobject2-devel
-	yum install -y pycairo-devel
-	yum install -y mkisofs
-	yum install -y intltool
-	yum install -y audit-libs-devel
-	yum install -y system-config-keyboard
-	yum install -y cmake
-	yum install -y apr-devel
-	yum install -y libcurl-devel
-	yum install -y httpd-devel
+	yum install -y rpm-build \
+	redhat-rpm-config \
+	gcc \
+	gcc-c++ \
+	gettext \
+	eject \
+	binutils-devel \
+	openssl-devel \
+	bzip2-devel \
+	ncurses-devel \
+	readline-devel \
+	sqlite-devel \
+	swig \
+	gtk2-devel \
+	mesa-libGLU-devel \
+	pygobject2-devel \
+	pycairo-devel \
+	mkisofs \
+	intltool \
+	audit-libs-devel \
+	system-config-keyboard \
+	cmake \
+	apr-devel \
+	libcurl-devel \
+	httpd-devel \
+	syslinux \
+	createrepo
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 

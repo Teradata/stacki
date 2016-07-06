@@ -8,11 +8,11 @@ Frontend Appliance Node.
 </description>
 
 <si_copyright>
-(c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v3.0 www.stacki.com
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
 </si_copyright>
 
-<package>ipmitool</package>
+
 <package>stack-command</package>
 
 

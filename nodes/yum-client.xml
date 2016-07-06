@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart>
+
+	<description>
+	Create yum config file on backend
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.1 www.stacki.com
+	</si_copyright>
+
+<post>
+<report name="host.yum">&hostname;</report>
+</post>
+
+</kickstart>

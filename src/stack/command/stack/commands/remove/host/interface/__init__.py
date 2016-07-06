@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -114,6 +114,12 @@ class Command(stack.commands.remove.host.command):
 	<param type='string' name='mac'>
  	MAC address of the interface that should be removed.
  	</param>
+
+        <param type='bool' name='all'>
+        When set to true the command will remove all interfaces for the
+        hosts.  This is used internally in Stacki to speed up bulk changes in
+        the cluster.
+        </param>
  	
 	<example cmd='remove host interface backend-0-0 interface=eth1'>
 	Removes the interface eth1 on host backend-0-0.
@@ -126,16 +132,23 @@ class Command(stack.commands.remove.host.command):
 
 	def run(self, params, args):
 
-                (interface, mac) = self.fillParams([
+                (interface, mac, all) = self.fillParams([
                         ('interface', None),
-                        ('mac',       None)
+                        ('mac',       None),
+                        ('all',     'false')
                         ])
-
-		if not interface and not mac:
+                 
+		all = self.str2bool(all)
+		if not all and not interface and not mac:
                         raise ParamRequired(self, ('interface', 'mac'))
 
 		for host in self.getHostnames(args):
-                        if interface:
+                        if all:
+                                self.db.execute("""
+                        		delete from networks where 
+                                        node=(select id from nodes where name='%s')
+                                        """ %  (host))
+                        elif interface:
                                 self.db.execute("""
                         		delete from networks where 
                                         node=(select id from nodes where name='%s')

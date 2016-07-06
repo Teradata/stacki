@@ -7,8 +7,8 @@ Foundation Packages
 </description>
 
 <si_copyright>
-(c) 2006 - 2015 StackIQ Inc.
-All rights reserved. stacki(r) v3.0 www.stacki.com
+(c) 2006 - 2016 StackIQ Inc.
+All rights reserved. stacki(r) v3.1 www.stacki.com
 </si_copyright>
 
 <copyright>
@@ -41,11 +41,11 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-rcs</package>
 <package>foundation-gawk</package>
 <package>foundation-readline</package>
-<package>foundation-mysql</package>
 <package>foundation-libxml2</package>
 <package>foundation-wget</package>
 <package>foundation-python-setuptools</package>
 <package>foundation-py-ipaddress</package>
+<package>foundation-redhat</package>
 <package>libdnet</package>
 
 

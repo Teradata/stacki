@@ -21,6 +21,7 @@ from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import pickle
 
 (PageChangeEvent, EVT_PAGE_CHANGE) = wx.lib.newevent.NewEvent()
+(DialogChangeEvent, EVT_DIALOG_CHANGE) = wx.lib.newevent.NewEvent()
 
 def createLogo(panel):
 	png = wx.Image('/opt/stack/bin/logo.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
@@ -252,8 +253,8 @@ class Page2(wx.Panel):
 			"(e.g., dev.stacki.com)", \
 			data.get('Info_FQDN'), None)
 		d, helpBitmap1, self.cb = createCb(self, \
-			"Devices", "This is the interface that connects the " + \
-			"frontend to the outside network", list,
+			"Devices", "This is the interface that connects to the " + \
+			"network that will be used by the frontend to install backend hosts", list,
 			data.get('Kickstart_PrivateInterface'))
 		ip, helpBitmap2, self.tc1 = createTc(self, "IP",
 			"IP address for the device",
@@ -487,7 +488,6 @@ class Page6(wx.Panel):
 		#apply sizer to page
 		setSizer(self, sizer)
 
-
 	def OnSelectAll(self, event):
 		num = self.list1.GetItemCount()
 		for i in range(num):
@@ -535,14 +535,87 @@ class Page6(wx.Panel):
 			wx.PostEvent(self.parent, PageChangeEvent(page=Page4))
 
 class AddPalletsDialog(wx.Dialog):
+
 	def __init__(self, *args, **kw):
 		super(AddPalletsDialog, self).__init__(*args, title=kw['title'])
 
-		self.page = kw["page"]
-		self.InitUI()
+		self.current_dialog = None
 		self.SetSize((500, 200))
+		self.page = kw['page']
 
-	def InitUI(self):
+		self.Bind(EVT_DIALOG_CHANGE, self.OnDialogChange)
+		wx.PostEvent(self, DialogChangeEvent(dialog=DialogSelect))
+
+	def OnDialogChange(self, event):
+		dialog = event.dialog(self, self.page)
+		if dialog == None:
+			return
+		if self.current_dialog:
+			self.current_dialog.Destroy()
+		self.current_dialog = dialog
+		dialog.Layout()
+		dialog.Fit()
+		dialog.Refresh()
+
+class DialogSelect(wx.Panel):
+
+	def __init__(self, parent, page):
+		wx.Panel.__init__(self, parent)
+		self.parent = parent
+
+		png = wx.Image('/opt/stack/bin/basket_add.png',
+			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+		imageDisk = wx.StaticBitmap(self, -1, png, (10, 5),
+			(png.GetWidth(), png.GetHeight()))
+
+		helpImage = createHelp(self, "Choose DVD if you have another disk of pallets to install. " + \
+			"Choose network if you have pallets at a remote network location with a provided URL.")
+
+		#create sizer
+		sizer = wx.GridBagSizer(3, 2)
+
+		#create label and text input
+		lb = wx.StaticText(self, label='Select a method to add more pallets to the list')
+
+		#create buttons
+		dvdButton = createButton(self, self.OnDVD, "DVD")
+		urlButton = createButton(self, self.OnNetwork, "Network")
+
+		#create box for input url
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(lb)
+		hbox.Add(helpImage, 0, wx.LEFT, 10)
+		vbox.Add(hbox)
+
+		#create box for action buttons
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(dvdButton, 0, wx.LEFT, 20)
+		hbox2.Add(urlButton, 0, wx.LEFT, 20)
+
+		#add to form
+		fgs = wx.FlexGridSizer(2, 2, 9, 25)
+		fgs.AddMany([(imageDisk, 0, wx.TOP, 20), (vbox, 0, wx.TOP, 20)])
+		sizer.Add(fgs, pos=(1, 0), span=(1, 5),
+			flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=20)
+		sizer.Add(hbox2, pos=(2, 1), span=(1, 5),
+			flag=wx.ALIGN_RIGHT|wx.RIGHT, border=20)
+
+		#apply sizer to the dialog
+		setSizer(self, sizer)
+
+	def OnNetwork(self, event):
+		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogNetwork))
+
+	def OnDVD(self, event):
+		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogDVDEject))
+
+class DialogNetwork(wx.Panel):
+
+	def __init__(self, parent, page):
+		wx.Panel.__init__(self, parent)
+		self.parent = parent
+		self.page = page
 
 		png = wx.Image('/opt/stack/bin/network.png',
 			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
@@ -590,76 +663,172 @@ class AddPalletsDialog(wx.Dialog):
 		#apply sizer to the dialog
 		setSizer(self, sizer)
 
+	def OnClose(self, event):
+		self.parent.Destroy()
+
 	def OnUrlLoad(self, event):
-		try:
-			if not self.urlText.Value:
-				wx.MessageBox('Please enter a URL to the location ' + \
-					'of pallets', 'Incomplete',
+		if not self.urlText.Value:
+			wx.MessageBox('Please enter a URL to the location ' + \
+				'of pallets', 'Incomplete',
+				wx.OK | wx.ICON_ERROR)
+			return
+		else:
+			url = self.urlText.Value
+			if url.find("http://") != 0:
+				url = "http://" + url
+			if not url.find("/install/pallets/") > 0:
+				url = url.rstrip("//")
+				url = url + "/install/pallets/"
+
+			#
+			# Call boss_get_pallet_info.py to download pallet
+			# information from network.
+			#
+			p = subprocess.Popen(
+				['/opt/stack/bin/boss_get_pallet_info.py',
+				url],
+				stdout = subprocess.PIPE, stderr = \
+					subprocess.PIPE)
+			o, e = p.communicate()
+			rc = p.wait()
+
+			if rc == 0:
+				pallets = pickle.loads(o)
+				for p in pallets:
+					index = \
+						self.page.list1.InsertStringItem(
+							sys.maxint, p['name'])
+					self.page.list1.SetStringItem(index,
+						1, p['version'])
+					self.page.list1.SetStringItem(index,
+						2, p['id'])
+					self.page.list1.SetStringItem(index,
+						3, p['url'])
+					self.page.pallets.append(p)
+			else:
+				print(e)
+				wx.MessageBox('Sorry, cannot recognize ' + \
+					'the URL', 'Invalid URL',
 					wx.OK | wx.ICON_ERROR)
 				return
-			else:
-				url = self.urlText.Value
-				if url.find("http://") != 0:
-					url = "http://" + url
-				if not url.find("/install/pallets/") > 0:
-					url = url.rstrip("//")
-					url = url + "/install/pallets/"
 
-				#
-				# Call boss_get_pallet_info.py to download pallet
-				# information from network.
-				#
-				p = subprocess.Popen(
-					['/opt/stack/bin/boss_get_pallet_info.py',
-					url],
-					stdout = subprocess.PIPE, stderr = \
-						subprocess.PIPE)
-				o, e = p.communicate()
-				rc = p.wait()
+			self.parent.Destroy()
 
-				if rc == 0:
-					pallets = pickle.loads(o)
-					for p in pallets:
-						index = \
-							self.page.list1.InsertStringItem(
-								sys.maxint, p['name'])
-						self.page.list1.SetStringItem(index,
-							1, p['version'])
-						self.page.list1.SetStringItem(index,
-							2, p['id'])
-						self.page.list1.SetStringItem(index,
-							3, p['url'])
-						self.page.pallets.append(p)
-				else:
-					print(e)
-					wx.MessageBox('Sorry, cannot recognize ' + \
-						'the URL', 'Invalid URL',
-						wx.OK | wx.ICON_ERROR)
-					return
+# Don't catch the exception so we can debug messed
+# up build environments
+#
+#		except:
+#			wx.MessageBox('Sorry, cannot recognize the URL',
+#				'EXCEPTION', wx.OK | wx.ICON_ERROR)
+#			return
 
-				self.Destroy()
-		except:
-			wx.MessageBox('Sorry, cannot recognize the URL',
-				'Invalid URL', wx.OK | wx.ICON_ERROR)
-			return
 
-	def OnDVDEject(self, event):
+class DialogDVDEject(wx.Panel):
+
+	def __init__(self, parent, page):
+		wx.Panel.__init__(self, parent)
+		self.parent = parent
+
+		png = wx.Image('/opt/stack/bin/disk.png',
+			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+		imageDisk = wx.StaticBitmap(self, -1, png, (10, 5),
+			(png.GetWidth(), png.GetHeight()))
+
+		helpImage = createHelp(self, "This disk is not the current installation disk but another disk with extra pallets that you might have")
+
+		#create sizer
+		sizer = wx.GridBagSizer(3, 2)
+
+		#create label and text input
+		lb = wx.StaticText(self, label='Add more pallets from another DVD')
+
+		#create buttons
+		closeButton = createButton(self, self.OnClose, "Cancel")
+		startButton = createButton(self, self.OnBegin, "Start")
+
+		#create box for input url
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(lb)
+		hbox.Add(helpImage, 0, wx.LEFT, 10)
+		vbox.Add(hbox)
+
+		#create box for action buttons
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(closeButton, 0, wx.LEFT, 20)
+		hbox2.Add(startButton, 0, wx.LEFT, 20)
+
+		#add to form
+		fgs = wx.FlexGridSizer(2, 2, 9, 25)
+		fgs.AddMany([(imageDisk, 0, wx.TOP, 20), (vbox, 0, wx.TOP, 20)])
+		sizer.Add(fgs, pos=(1, 0), span=(1, 5),
+			flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=20)
+		sizer.Add(hbox2, pos=(2, 1), span=(1, 5),
+			flag=wx.ALIGN_RIGHT|wx.RIGHT, border=20)
+
+		#apply sizer to the dialog
+		setSizer(self, sizer)
+
+	def OnBegin(self, event):
 		media = stack.media.Media()
 		media.umountCD()
 		media.ejectCD()
+		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogDVDLoad))
+
+	def OnClose(self, event):
+		self.parent.Destroy()
+
+
+class DialogDVDLoad(wx.Panel):
+
+	def __init__(self, parent, page):
+		wx.Panel.__init__(self, parent)
+		self.parent = parent
+		self.page = page
+
+		png = wx.Image('/opt/stack/bin/disk.png',
+			wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+		imageDisk = wx.StaticBitmap(self, -1, png, (10, 5),
+			(png.GetWidth(), png.GetHeight()))
+
+		helpImage = createHelp(self, "Loading will not install pallets but only make them available to select")
+
+		#create sizer
+		sizer = wx.GridBagSizer(3, 2)
+
+		#create label and text input
+		lb = wx.StaticText(self, label='Please insert the DVD to load pallets')
+
+		#create buttons
+		closeButton = createButton(self, self.OnClose, "Cancel")
+		loadButton = createButton(self, self.OnDVDLoad, "Load")
+
+		#create box for input url
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		hbox.Add(lb)
+		hbox.Add(helpImage, 0, wx.LEFT, 10)
+		vbox.Add(hbox)
+
+		#create box for action buttons
+		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox2.Add(closeButton, 0, wx.LEFT, 20)
+		hbox2.Add(loadButton, 0, wx.LEFT, 20)
+
+		#add to form
+		fgs = wx.FlexGridSizer(2, 2, 9, 25)
+		fgs.AddMany([(imageDisk, 0, wx.TOP, 20), (vbox, 0, wx.TOP, 20)])
+		sizer.Add(fgs, pos=(1, 0), span=(1, 5),
+			flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=20)
+		sizer.Add(hbox2, pos=(2, 1), span=(1, 5),
+			flag=wx.ALIGN_RIGHT|wx.RIGHT, border=20)
+
+		#apply sizer to the dialog
+		setSizer(self, sizer)
 
 	def OnDVDLoad(self, event):
-		media = stack.media.Media()
-		media.mountCD()
-
-		#get more pallets
-		packages = []
-
-		rolls = media.getRollsFromCD()
-		disk_id = media.getId()
-		for w in rolls:
-			packages.append((w[0], w[1], disk_id))
-
+		#get pallets from DVD
+		packages = self.page.data.getDVDPallets()
 		for i in packages:
 			if i[0] == None:
 				continue
@@ -668,8 +837,12 @@ class AddPalletsDialog(wx.Dialog):
 			self.page.list1.SetStringItem(index, 2, i[2])
 			self.page.list1.SetStringItem(index, 3, '')
 
+		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogDVDEject))
+		self.parent.Destroy()
+
 	def OnClose(self, event):
-		self.Destroy()
+		self.parent.Destroy()
+
 
 class Page7(wx.Panel):
 	def __init__(self, parent, data):

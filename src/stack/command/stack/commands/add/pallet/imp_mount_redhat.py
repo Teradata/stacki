@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -97,5 +97,5 @@ class Implementation(stack.commands.Implementation):
 	"""Mount the ISO Image on Linux"""
 
 	def run(self, iso):
-		os.system('mount -o loop %s %s > /dev/null' % (iso, self.owner.mountPoint))
+		os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.owner.mountPoint))
 	

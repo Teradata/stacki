@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -56,11 +56,11 @@ include $(ROLLSBUILD)/etc/Rolls.mk
 
 .PHONY: clean.all nuke.all
 clean.all:: clean
-	$(MAKE) -C src clean.order
-	$(MAKE) -C src clean
+	-$(MAKE) -C src clean.order
+	-$(MAKE) -C src clean
 
 nuke.all:: nuke
-	$(MAKE) -C src nuke
+	-$(MAKE) -C src nuke
 
 .PHONY: manifest-check
 manifest-check:

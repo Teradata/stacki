@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -53,7 +53,7 @@ class Plugin(stack.commands.Plugin):
                         
                 for row in self.db.select("""
 	                n.name, n.rack, n.rank, n.cpus, a.name, b.name,
-			n.runaction, n.installaction from
+                        n.environment, n.runaction, n.installaction from
 			nodes n, appliances a, boxes b where 
 			n.appliance = a.id and n.box = b.id """):
 
@@ -65,6 +65,7 @@ class Plugin(stack.commands.Plugin):
                                     'cpus',
                                     'appliance',
                                     'box',
+                                    'environment',
                                     'runaction',
                                     'installaction' ],
                         'values': dict }

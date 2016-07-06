@@ -36,7 +36,7 @@ def umount(dest):
 def installrpms(pkgs):
 	cmd = [ 'yum', '-y', 'install' ]
 	cmd += pkgs
-	subprocess.call(cmd)
+	return subprocess.call(cmd)
 
 def generate_multicast():
 	a = random.randrange(225,240)
@@ -48,7 +48,7 @@ def generate_multicast():
 	d = random.randrange(1,255)
 	return str(a)+'.'+str(b)+'.'+str(c)+'.'+str(d)
 
-def repoconfig(ccmnt, ccname, ccver, osmnt):
+def repoconfig(ccmnt, ccname, ccver, osmnt, updatemnt, updatename, updatever):
 	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
 
 	file = open('/etc/yum.repos.d/stack.repo', 'w')
@@ -63,6 +63,13 @@ def repoconfig(ccmnt, ccname, ccver, osmnt):
 	file.write('baseurl=file://%s\n' % osmnt)
 	file.write('assumeyes=1\n')
 	file.write('gpgcheck=no\n')
+	if updatemnt:
+		file.write('[Update]\n')
+		file.write('name=Update\n')
+		file.write('baseurl=file://%s/%s/%s/redhat/x86_64\n'
+			% (updatemnt, updatename, updatever))
+		file.write('assumeyes=1\n')
+		file.write('gpgcheck=no\n')
 	file.close()
 
 	
@@ -74,7 +81,7 @@ def ldconf():
 	subprocess.call(['ldconfig'])
 
 def usage():
-	print("Requried arguments:")
+	print("Required arguments:")
 	print("\t--stacki-iso=ISO : path to stacki ISO")
 	print("\t--stacki-version=version : stacki version")
 	print("\t--stacki-name=name : stacki name (usually 'stacki')")
@@ -84,6 +91,9 @@ def usage():
 
 	print()
 	print("Optional arguments:")
+	print("\t--update-iso=ISO1 : path(s) to OS update ISO")
+	print("\t--update-version=version : OS update version")
+	print("\t--update-name=name : OS update name (e.g., 'CentOS-Update')")
 	print("\t--noX : Don't require X11 for frontend wizard. Use text mode")
 	sys.exit(-1)
 
@@ -106,7 +116,8 @@ os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 #
 opts, args = getopt.getopt(sys.argv[1:], '', [
 	'stacki-iso=', 'stacki-version=', 'stacki-name=',
-	'os-iso=', 'os-version=', 'os-name=', 'noX' ]) 
+	'os-iso=', 'os-version=', 'os-name=', 'update-iso=', 'update-version=',
+	'update-name=', 'noX' ]) 
 
 stacki_iso = None
 stacki_version = None
@@ -114,6 +125,9 @@ stacki_name = None
 os_iso = None
 os_version = None
 os_name = None
+update_iso = None
+update_version = None
+update_name = None
 noX = 0
 no_net_reconfig = 0
 
@@ -130,6 +144,12 @@ for opt, arg in opts:
 		os_version = arg
 	elif opt == '--os-name':
 		os_name = arg
+	elif opt == '--update-iso':
+		update_iso = arg
+	elif opt == '--update-version':
+		update_version = arg
+	elif opt == '--update-name':
+		update_name = arg
 	elif opt == '--noX':
 		noX = 1
 
@@ -174,15 +194,27 @@ if len(os_iso) > 1:
 else:
 	osiso2 = None
 
+updatename = None
+updatever = None
+updateiso = None
+
+if update_name:
+	updatename = update_name
+	updatever = update_version
+	updateiso = update_iso
+
 if not os.path.exists(cciso):
 	print("Error: File '{0}' does not exist.".format(cciso))
-	exit()
+	sys.exit(1)
 if not os.path.exists(osiso1):
 	print("Error: File '{0}' does not exist.".format(osiso1))
-	exit()
+	sys.exit(1)
 if osiso2 and not os.path.exists(osiso2):
 	print("Error: File '{0}' does not exist.".format(osiso2))
-	exit()
+	sys.exit(1)
+if updateiso and not os.path.exists(updateiso):
+	print("Error: File '{0}' does not exist.".format(updateiso))
+	sys.exit(1)
 
 banner("Boostrap Stack Command Line")
 
@@ -198,15 +230,24 @@ copy(osiso1, osdest)
 if osiso2:
 	copy(osiso2, osdest)
 
+updatedest = None
+if updateiso:
+	updatedest = '/export/stack/pallets/%s' % updatename
+	copy(updateiso, updatedest)
+
 # create repo config file
-repoconfig(ccdest, ccname, ccver, osdest)
+repoconfig(ccdest, ccname, ccver, osdest, updatedest, updatename, updatever)
 
 # install rpms
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
 	'foundation-python-xml', 'foundation-redhat', 'deltarpm', 
 	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
 	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
-installrpms(pkgs)
+
+return_code = installrpms(pkgs)
+if return_code != 0:
+	print("Error: stacki package installation failed")
+	sys.exit(1)
 
 banner("Configuring dynamic linker for stacki")
 ldconf()
@@ -251,6 +292,10 @@ line = '%s\t%s %s\n' % (attributes['Kickstart_PrivateAddress'],
 	attributes['Kickstart_PrivateHostname'], attributes['Info_FQDN'])
 f.write(line)
 f.close()
+
+# set the hostname to the user-entered FQDN
+print('Setting hostname to %s' % attributes['Info_FQDN'])
+subprocess.call(['hostname', attributes['Info_FQDN']])
 	
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
@@ -276,12 +321,16 @@ subprocess.call(['sh', '/tmp/run.sh'])
 
 # before we add the pallets, clean up the old OS that we copied to the disk
 subprocess.call(['/bin/rm', '-rf', osdest])
+if updatedest:
+	subprocess.call(['/bin/rm', '-rf', updatedest])
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', cciso])
 subprocess.call([stackpath, 'add', 'pallet', osiso1])
 if osiso2:
 	subprocess.call([stackpath, 'add', 'pallet', osiso2])
+if updateiso:
+	subprocess.call([stackpath, 'add', 'pallet', updateiso])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
 
 # all done

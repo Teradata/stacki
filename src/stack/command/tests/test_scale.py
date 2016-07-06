@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -45,17 +45,16 @@ import time
 import pytest
 from stack.api import *
 
-NUMRACKS    = 10
-RACKSIZE    = 10
+NUMRACKS    = 1
+RACKSIZE    = 1
 ENVIRONMENT = 'pytest'
 
 def setup_module(module):
         for rack in range(1000, 1000 + NUMRACKS):
                 for rank in range(0, RACKSIZE):
                         host = 'backend-%d-%d' % (rack, rank)
-                        Call('add host %s' % host)
-                        Call('set host attr %s attr=environment value=%s' %
-                             (host, ENVIRONMENT))
+                        Call('add host %s environment=%s' % (host, ENVIRONMENT))
+
         Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
 
         result = Call('list host %s' % ENVIRONMENT)

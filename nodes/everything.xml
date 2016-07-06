@@ -32,5 +32,7 @@
 
 	<package>libtirpc</package>
 
+	<package>xfsprogs</package>
+
 </kickstart> 
 

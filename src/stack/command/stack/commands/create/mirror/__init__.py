@@ -1,8 +1,8 @@
 # @SI_Copyright@
 #                             www.stacki.com
-#                                  v3.0
+#                                  v3.1
 # 
-#      Copyright (c) 2006 - 2015 StackIQ Inc. All rights reserved.
+#      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -229,9 +229,9 @@ class Command(stack.commands.create.command):
 			os.chdir(cwd)
 
 
-	def makeRollXML(self, name, version, arch, xmlfilename):
+	def makeRollXML(self, name, version, release, arch, xmlfilename):
 		file = open(xmlfilename, 'w')
-		file.write('<roll name="%s" interface="6.0.2">\n' % name)
+		file.write('<roll name="%s" interface="3.1">\n' % name)
 
 		rolltime = time.strftime('%X')
 		rolldate = time.strftime('%b %d %Y')
@@ -240,8 +240,8 @@ class Command(stack.commands.create.command):
 			(rolltime, rolldate, rollzone))
 
 		file.write('\t<color edge="lawngreen" node="lawngreen"/>\n')
-		file.write('\t<info version="%s" release="0" arch="%s"/>\n' % 
-			(version, arch))
+		file.write('\t<info version="%s" release="%s" arch="%s"/>\n' %
+			(version, release, arch))
 
 		file.write('\t<iso maxsize="0" addcomps="0" bootable="0" mkisofs=""/>\n')
 		file.write('\t<rpm rolls="0" bin="1" src="0"/>/\n')
@@ -260,11 +260,17 @@ class Command(stack.commands.create.command):
 			version = stack.version
 		except AttributeError:
 			version = 'X'
+
+		try:
+			release = stack.release
+		except AttributeError:
+			release = 0
 			
-		(url, name, version, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
+		(url, name, version, release, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
                         ('url', None),
 			('name', None),
 			('version', version),
+			('release', release),
 			('arch', self.arch), 
 			('repoid', None),
 			('repoconfig', None),
@@ -327,7 +333,7 @@ class Command(stack.commands.create.command):
 			pass
 		else:
 			xmlfilename = 'roll-%s.xml' % name
-			self.makeRollXML(name, version, arch, xmlfilename)
+			self.makeRollXML(name, version, release, arch, xmlfilename)
 			self.command('create.pallet', [ '%s' % (xmlfilename), 'newest=%s' % newest] )
 		
 		self.clean()

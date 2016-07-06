@@ -21,7 +21,7 @@ class Attr:
 	Info_CertificateState = "California"
 	Info_ClusterContact = ""
 	Info_ClusterLatlong = "N32.87 W117.22"
-	Info_ClusterName = ""
+	Info_ClusterName = "Stacki"
 	Info_FQDN = ""
 	Info_ClusterURL = ""
 	Kickstart_DistroDir = "/export/stack"
@@ -291,7 +291,6 @@ class Data:
 
 		if value == 'Automated':
 			self.data.partition = 'Automated'
-			self.data.nukedisks = str(True)
 		elif value == 'Manual':
 			self.data.partition = 'Manual'
 		else:

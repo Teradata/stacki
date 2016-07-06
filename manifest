@@ -14,7 +14,6 @@ foundation-py-inotify
 foundation-py-IPy
 foundation-py-jinja2
 foundation-py-libxml2dom
-foundation-py-lockfile
 foundation-py-M2Crypto
 foundation-py-msgpack
 foundation-py-MySQL-python
@@ -44,6 +43,7 @@ foundation-sphinx
 foundation-tidy
 foundation-wget
 hpssacli
+ipxe
 lighttpd
 MegaCLI
 stack-build
