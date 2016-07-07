@@ -4,10 +4,33 @@ import subprocess
 import shutil
 import os
 import time
+import re
+import urllib
 
 file = open('/proc/cmdline', 'r')
 args = file.readline().split()
 file.close()
+
+# Check to see if there's a user-specified site.attrs / rolls.xml on the kernel command line
+for arg in args:
+	match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
+	if not match:
+		continue
+	uri = match.group(2)
+
+	try:
+		resp = urllib.urlopen(uri)
+		# non-http uri's return None for getcode()
+		if r.getcode() == 404:
+			raise
+		if 'stacki.attrs' in arg:
+			open('/tmp/site.attrs', 'w').write(resp.read())
+		if 'stacki.pallet' in arg:
+			open('/tmp/rolls.xml', 'w').write(resp.read())
+	except:
+		# if there's trouble connecting, safest bet is to proceed without it
+		pass
+
 
 if 'boss' in args:
 	#
