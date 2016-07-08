@@ -21,7 +21,7 @@ for arg in args:
 	try:
 		resp = urllib.urlopen(uri)
 		# non-http uri's return None for getcode()
-		if r.getcode() == 404:
+		if resp.getcode() == 404:
 			raise
 		if 'stacki.attrs' in arg:
 			open('/tmp/site.attrs', 'w').write(resp.read())
