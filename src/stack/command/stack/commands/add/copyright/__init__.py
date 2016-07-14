@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                             www.stacki.com
-#                                  v3.1
+#                               stacki.com
+#                                  v3.2
 # 
 #      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
@@ -109,14 +109,20 @@ class Command(stack.commands.add.command):
 	"""
 
 	def iter(self, dir, file, root):
+
 		try:
-			#
-			# skip source control files
-			#
-			if '.git' in file.getFullName().split('/'):
-				return
+			dirs = file.getFullName().split('/')
 		except:
-			pass
+                        dirs = [ ]
+
+                # Don't process non-source code.
+
+                for skip in [ '.git', 'build-' ]:
+                        if skip in dirs:
+                                return
+                        for d in dirs:
+                                if d.find(skip) == 0:
+                                        return
 
 		try:
 			fin = open(file.getFullName(), 'r')
@@ -193,13 +199,20 @@ class Command(stack.commands.add.command):
 		self.copyright = copyright['stacki-short']
 		self.tree.apply(self.iter)
 
-		print('Inserting rocks copyright into source code files...')
-		self.pattern   = [ '@' + 'Copyright@', '@' + 'Copyright@' ]
-		self.copyright = copyright['rocks-long']
-		self.tree.apply(self.iter)
 
-		print('Inserting rocks copyright into XML files...')
-		self.pattern = [ '<' + 'copyright>', '<' + '/copyright>' ]
-		self.copyright = copyright['rocks-short']
-		self.tree.apply(self.iter)
+                # No reason to keep updating the Rocks stuff, we forked years
+                # ago and never looked back.
+                #
+                # Keep the code here if for when/if the trees ever come back
+                # together.
+
+#		print('Inserting rocks copyright into source code files...')
+#		self.pattern   = [ '@' + 'Copyright@', '@' + 'Copyright@' ]
+#		self.copyright = copyright['rocks-long']
+#		self.tree.apply(self.iter)
+
+#		print('Inserting rocks copyright into XML files...')
+#		self.pattern = [ '<' + 'copyright>', '<' + '/copyright>' ]
+#		self.copyright = copyright['rocks-short']
+#		self.tree.apply(self.iter)
 
