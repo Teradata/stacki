@@ -37,7 +37,6 @@ CREATE TABLE access (
 insert into access (command, groupid) values ("*", 0); 
 
 grant select on cluster.access to ''@'localhost';
-grant select on cluster.access to ''@'%.local';
 
 <!-- Aliases -->
 
@@ -50,7 +49,6 @@ CREATE TABLE aliases (
 );
 
 grant select on cluster.aliases to ''@'localhost';
-grant select on cluster.aliases to ''@'%.local';
 
 <!-- Attributes -->
 
@@ -63,7 +61,6 @@ CREATE TABLE global_attributes (
 );
 
 grant select (scope, attr, value) on cluster.global_attributes to ''@'localhost';
-grant select (scope, attr, value) on cluster.global_attributes to ''@'%.local';
 
 DROP TABLE IF EXISTS os_attributes;
 CREATE TABLE os_attributes (
@@ -75,7 +72,6 @@ CREATE TABLE os_attributes (
 );
 
 grant select (os, scope, attr, value) on cluster.os_attributes to ''@'localhost';
-grant select (os, scope, attr, value) on cluster.os_attributes to ''@'%.local';
 
 DROP TABLE IF EXISTS environment_attributes;
 CREATE TABLE environment_attributes (
@@ -87,7 +83,6 @@ CREATE TABLE environment_attributes (
 );
 
 grant select (environment, scope, attr, value) on cluster.environment_attributes to ''@'localhost';
-grant select (environment, scope, attr, value) on cluster.environment_attributes to ''@'%.local';
 
 
 DROP TABLE IF EXISTS appliance_attributes;
@@ -102,7 +97,6 @@ CREATE TABLE appliance_attributes (
 grant select (appliance, scope, attr, value) on cluster.appliance_attributes
 	to ''@'localhost';
 grant select (appliance, scope, attr, value) on cluster.appliance_attributes
-	to ''@'%.local';
 
 DROP TABLE IF EXISTS node_attributes;
 CREATE TABLE node_attributes (
@@ -114,7 +108,6 @@ CREATE TABLE node_attributes (
 );
 
 grant select (node, scope, attr, value) on cluster.node_attributes to ''@'localhost';
-grant select (node, scope, attr, value) on cluster.node_attributes to ''@'%.local';
 
 <!-- Appliances -->
 
@@ -128,7 +121,6 @@ CREATE TABLE appliances (
 );
 
 grant select on cluster.appliances to ''@'localhost';
-grant select on cluster.appliances to ''@'%.local';
 
 <!-- Boxes -->
 
@@ -141,7 +133,6 @@ CREATE TABLE boxes (
 );
 
 grant select on cluster.boxes to ''@'localhost';
-grant select on cluster.boxes to ''@'%.local';
 
 <!-- Nodes -->
 
@@ -161,7 +152,6 @@ CREATE TABLE nodes (
 );
 
 grant select on cluster.nodes to ''@'localhost';
-grant select on cluster.nodes to ''@'%.local';
 
 <!-- Networks -->
 
@@ -185,7 +175,6 @@ CREATE TABLE networks (
 );
 
 grant select on cluster.networks to ''@'localhost';
-grant select on cluster.networks to ''@'%.local';
 
 <!-- Subnets Table -->
 
@@ -204,7 +193,6 @@ CREATE TABLE subnets (
 );
 
 grant select on cluster.subnets to ''@'localhost';
-grant select on cluster.subnets to ''@'%.local';
 
 <!-- Routes -->
 
@@ -217,7 +205,6 @@ CREATE TABLE global_routes (
 );
 
 grant select on cluster.global_routes to ''@'localhost';
-grant select on cluster.global_routes to ''@'%.local';
 
 DROP TABLE IF EXISTS os_routes;
 CREATE TABLE os_routes (
@@ -229,7 +216,6 @@ CREATE TABLE os_routes (
 );
 
 grant select on cluster.os_routes to ''@'localhost';
-grant select on cluster.os_routes to ''@'%.local';
 
 DROP TABLE IF EXISTS appliance_routes;
 CREATE TABLE appliance_routes (
@@ -241,7 +227,6 @@ CREATE TABLE appliance_routes (
 );
 
 grant select on cluster.appliance_routes to ''@'localhost';
-grant select on cluster.appliance_routes to ''@'%.local';
 
 DROP TABLE IF EXISTS node_routes;
 CREATE TABLE node_routes (
@@ -253,7 +238,6 @@ CREATE TABLE node_routes (
 );
 
 grant select on cluster.node_routes to ''@'localhost';
-grant select on cluster.node_routes to ''@'%.local';
 
 <!-- Stacks -->
 
@@ -264,7 +248,6 @@ CREATE TABLE stacks (
 );
 
 grant select on cluster.stacks to ''@'localhost';
-grant select on cluster.stacks to ''@'%.local';
 
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
@@ -273,7 +256,6 @@ CREATE TABLE cart_stacks (
 );
 
 grant select on cluster.cart_stacks to ''@'localhost';
-grant select on cluster.cart_stacks to ''@'%.local';
 
 <!-- Carts -->
 
@@ -285,7 +267,6 @@ CREATE TABLE carts (
 );
 
 grant select on cluster.carts to ''@'localhost';
-grant select on cluster.carts to ''@'%.local';
 
 <!-- Roll.  What Rolls are installed and used by default. -->
 
@@ -301,7 +282,6 @@ CREATE TABLE rolls (
 );
 
 grant select on cluster.rolls to ''@'localhost';
-grant select on cluster.rolls to ''@'%.local';
 
 <!-- Partitions. stores all the partitions for all the appliances -->
 
@@ -322,7 +302,6 @@ CREATE TABLE partitions (
 );
 
 grant select on cluster.partitions to ''@'localhost';
-grant select on cluster.partitions to ''@'%.local';
 
 <!-- Boot/Action Tables -->
 DROP TABLE IF EXISTS boot;
@@ -334,7 +313,6 @@ CREATE TABLE boot (
 );
 
 grant select on cluster.boot to ''@'localhost';
-grant select on cluster.boot to ''@'%.local';
 
 DROP TABLE IF EXISTS bootaction;
 CREATE TABLE bootaction (
@@ -347,7 +325,6 @@ CREATE TABLE bootaction (
 );
 
 grant select on cluster.bootaction to ''@'localhost';
-grant select on cluster.bootaction to ''@'%.local';
 
 <!-- Firewall Tables -->
 
@@ -367,7 +344,6 @@ CREATE TABLE global_firewall (
 );
 
 grant select on cluster.global_firewall to ''@'localhost';
-grant select on cluster.global_firewall to ''@'%.local';
 
 DROP TABLE IF EXISTS os_firewall;
 CREATE TABLE os_firewall (
@@ -386,7 +362,6 @@ CREATE TABLE os_firewall (
 );
 
 grant select on cluster.os_firewall to ''@'localhost';
-grant select on cluster.os_firewall to ''@'%.local';
 
 DROP TABLE IF EXISTS appliance_firewall;
 CREATE TABLE appliance_firewall (
@@ -405,7 +380,6 @@ CREATE TABLE appliance_firewall (
 );
 
 grant select on cluster.appliance_firewall to ''@'localhost';
-grant select on cluster.appliance_firewall to ''@'%.local';
 
 DROP TABLE IF EXISTS node_firewall;
 CREATE TABLE node_firewall (
@@ -424,7 +398,6 @@ CREATE TABLE node_firewall (
 );
 
 grant select on cluster.node_firewall to ''@'localhost';
-grant select on cluster.node_firewall to ''@'%.local';
 
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (
@@ -435,7 +408,6 @@ CREATE TABLE public_keys (
 );
 
 grant select on cluster.public_keys to ''@'localhost';
-grant select on cluster.public_keys to ''@'%.local';
 
 DROP TABLE IF EXISTS storage_controller;
 CREATE TABLE storage_controller (
@@ -450,7 +422,6 @@ CREATE TABLE storage_controller (
 );
 
 grant select on cluster.storage_controller to ''@'localhost';
-grant select on cluster.storage_controller to ''@'%.local';
 
 DROP TABLE IF EXISTS storage_partition;
 CREATE TABLE storage_partition (
@@ -464,7 +435,6 @@ CREATE TABLE storage_partition (
 );
 
 grant select on cluster.storage_partition to ''@'localhost';
-grant select on cluster.storage_partition to ''@'%.local';
 
 grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
