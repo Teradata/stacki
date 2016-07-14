@@ -160,9 +160,6 @@ class Command(stack.commands.list.command):
 			except AttributeError:
 				continue
 		
-			if o.MustBeRoot and not self.isRootUser():
-				continue
-
 			# Format the brief usage to fit within the
 			# width of the user's window (default to 80 cols)
 			
