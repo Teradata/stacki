@@ -11,25 +11,33 @@ file = open('/proc/cmdline', 'r')
 args = file.readline().split()
 file.close()
 
+dbgfi = open('/tmp/fetch_stacki_data.txt', 'w')
 # Check to see if there's a user-specified site.attrs / rolls.xml on the kernel command line
 for arg in args:
 	match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
 	if not match:
 		continue
 	uri = match.group(2)
+	dbgfi.write("{0}\t{1}\n".format(arg, uri))
 
 	try:
 		resp = urllib.urlopen(uri)
 		# non-http uri's return None for getcode()
-		if r.getcode() == 404:
-			raise
+		if resp.getcode() == 404:
+			dbgfi.write("got 404 on {0}\n".format(uri))
+			raise Exception('404 while trying to fetch: {0}'.format(uri))
 		if 'stacki.attrs' in arg:
+			dbgfi.write("writing /tmp/site.attrs\n")
 			open('/tmp/site.attrs', 'w').write(resp.read())
 		if 'stacki.pallet' in arg:
+			dbgfi.write("writing /tmp/rolls.xml\n")
 			open('/tmp/rolls.xml', 'w').write(resp.read())
-	except:
+	except Exception as e:
+		dbgfi.write("exception on {0}\t{1}\n".format(arg, match.group(2)))
+		dbgfi.write("{0}\n".format(e))
 		# if there's trouble connecting, safest bet is to proceed without it
 		pass
+dbgfi.close()
 
 
 if 'boss' in args:
