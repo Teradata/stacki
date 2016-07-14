@@ -128,14 +128,9 @@ class GetPallet:
 			if found_disk == 'false':
 				self.media.ejectCD()
 
-				if 0:
-					self.anaconda.intf.messageWindow(_("Install Pallet"),
-						_("Put Pallet disk")
-						+ " '%s' " % (diskname)
-						+ _("in the drive\n"))
-				else:
-					print('Put Pallet disk %s in drive' \
-						% diskname)
+				print('Put Pallet disk %s in drive' % diskname)
+				# sleepless infinite polling makes sadness
+				time.sleep(3)
 
 	def downloadDVDPallets(self, pallets, dialog=None):
 		#
