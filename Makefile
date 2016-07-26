@@ -73,7 +73,8 @@ bootstrap:
 	libcurl-devel \
 	httpd-devel \
 	syslinux \
-	createrepo
+	createrepo \
+	perl-ExtUtils-MakeMaker
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
