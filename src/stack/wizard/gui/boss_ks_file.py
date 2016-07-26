@@ -29,6 +29,12 @@ for pallet in g.rolls:
 	#
 	graphdir = '/export/stack/pallets/%s/%s/redhat/%s/graph' \
 		% (pallet[0], pallet[1], pallet[3])
+	#
+	# If graph directory does not exist, this could
+	# indicate a foreign pallet. Ignore, and move on
+	#
+	if not os.path.exists(graphdir):
+		continue
 	for file in os.listdir(graphdir):
 		base, ext = os.path.splitext(file)
 		if ext == '.pro':
