@@ -241,10 +241,9 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		#	
 		items = []
 		try:
-			for name, version, rel, arch in self.getBoxPallets(
-					attrs['box']):
-				items.append(os.path.join('/export', 'stack',
-					'pallets', name, version, 'redhat', arch))
+			for name, version, rel, arch, osname in self.getBoxPallets(attrs['box']):
+                                items.append(os.path.join('/export', 'stack',
+					'pallets', name, version, osname, arch))
 		except:
 			#
 			# there is no output from 'getBoxPallets()'.

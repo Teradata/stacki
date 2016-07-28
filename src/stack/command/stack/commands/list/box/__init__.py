@@ -115,7 +115,7 @@ class Command(command):
                 carts   = {}
 
 		for box in self.getBoxNames(args):
-			for name, version, rel, arch in self.getBoxPallets(box):
+			for name, version, rel, arch, osname in self.getBoxPallets(box):
 				fullname = '%s-%s' % (name, version)
 				if rel:
 					fullname += '-%s' % rel

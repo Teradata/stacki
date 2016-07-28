@@ -268,7 +268,6 @@ class BoxArgumentProcessor:
 
 		return list
 
-
 	def getBoxPallets(self, box = 'default'):
 		"""Returns a list of pallets for a box"""
 
@@ -280,12 +279,12 @@ class BoxArgumentProcessor:
 		pallets = []
 
 		rows = self.db.execute("""select r.name, r.version, r.rel,
-			r.arch from
+			r.arch, b.os from
 			rolls r, boxes b, stacks s where b.name = '%s' and
 			b.id = s.box and s.roll = r.id""" % box)
 
-		for name, version, rel, arch in self.db.fetchall():
-			pallets.append((name, version, rel, arch))
+		for name, version, rel, arch, osname in self.db.fetchall():
+			pallets.append((name, version, rel, arch, osname))
 
 		return pallets
 		

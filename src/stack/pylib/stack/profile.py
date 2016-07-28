@@ -573,8 +573,16 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.xml	= []
 		self.filename	= filename
 		self.stripText  = 0
-
 		self.attributes = attrs
+
+                try:
+                        list = filename.split(os.sep)
+                        self.osname = list[-4]
+                except:
+                        self.osname = 'redhat'
+
+
+                
 
 	def evalCond(self, attrs):
 		arch = None
@@ -614,7 +622,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 	def endElement_copyright(self, name):
 		pass
 	
-	# <kickstart>
+	# <kickstart> -- or whatever the outermost tag is (os dependent)
 	
 	def startElement_kickstart(self, name, attrs):
 	
@@ -654,21 +662,6 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.startElementDefault(name, attrs)
 			
 
-	def startElement_jumpstart(self, name, attrs):
-		if attrs.get('roll'):
-			self.node.setRoll(attrs.get('roll'))
-		else:
-			self.node.setRoll('unknown')
-			
-		if attrs.get('interface'):
-			self.node.setShape('box')
-		else:
-			self.node.setShape('ellipse')
- 
-			
-		self.node.setFilename(self.filename)
-		self.startElementDefault(name, attrs)
-	
 	# <include>
 
 	def startElement_include(self, name, attrs):
@@ -903,11 +896,14 @@ class Pass1NodeHandler(handler.ContentHandler,
 
 		
 	def startElement(self, name, attrs):
-		try:
-			func = getattr(self, "startElement_%s" % name)
-		except AttributeError:
-			self.startElementDefault(name, attrs)
-			return
+                if name == self.osname:
+			func = getattr(self, "startElement_kickstart")
+                else:
+                        try:
+                                func = getattr(self, "startElement_%s" % name)
+                        except AttributeError:
+                                self.startElementDefault(name, attrs)
+                                return
 		func(name, attrs)
 
 

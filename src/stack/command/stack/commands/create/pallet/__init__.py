@@ -172,13 +172,13 @@ class Builder:
 		os.chdir(basedir)
 
 
-	def copyXMLs(self, name, version, arch):
+	def copyXMLs(self, osname, name, version, arch):
 		print('Copying graph and node XML files')
 
 		cwd = os.getcwd()
 		srcdir = os.path.join(cwd, '..')
 		destdir = os.path.join(cwd, 'disk1', name, version,
-			'redhat', arch)
+			osname, arch)
 
 		os.chdir(destdir)
                 if os.path.exists(os.path.join(srcdir, 'graph')):
@@ -621,24 +621,17 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			else:
 				print() 
 				
-			if self.config.getRollInterface() == '4.0':
-				# old style
-				root = os.path.join(name,
-						    self.config.getRollName(),
-						    self.config.getRollVersion(),
-						    self.config.getRollArch())
-				rpmsdir = os.path.join('RedHat', 'RPMS')
-			else:
-				root = os.path.join(name,
-						    self.config.getRollName(),
-						    self.config.getRollVersion(),
-						    'redhat',
-						    self.config.getRollArch())
+			root = os.path.join(name,
+					    self.config.getRollName(),
+					    self.config.getRollVersion(),
+					    self.config.getRollOS(),
+					    self.config.getRollArch())
 
-				rpmsdir = 'RPMS'
+			rpmsdir = 'RPMS'
 
 			os.makedirs(root)
-			os.makedirs(os.path.join(root, rpmsdir))
+                        if self.config.getRollOS() == 'redhat':
+                                os.makedirs(os.path.join(root, rpmsdir))
 			
 			# Symlink in all the RPMS
 			
@@ -666,19 +659,21 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			shutil.copy(self.config.getFullName(), root)
 			
 			# Create the .discinfo file
-					
+			
 			self.stampDisk(name, self.config.getRollName(), 
-				self.config.getRollArch(), id)
+                                       self.config.getRollArch(), id)
 				
 			# write repodata 
-			self.writerepo(self.config.getRollName(),
-				self.config.getRollVersion(),
-				self.config.getRollArch())
+                        if self.config.getRollOS() == 'redhat':
+                                self.writerepo(self.config.getRollName(),
+                                               self.config.getRollVersion(),
+                                               self.config.getRollArch())
 
 			# copy the graph and node XMLs files into the pallet
-			self.copyXMLs(self.config.getRollName(),
-				self.config.getRollVersion(),
-				self.config.getRollArch())
+			self.copyXMLs(self.config.getRollOS(),
+                                      self.config.getRollName(),
+                                      self.config.getRollVersion(),
+                                      self.config.getRollArch())
 			
 			# make the ISO.  This code will change and move into
 			# the base class, and supported bootable pallets.  Get
