@@ -157,10 +157,12 @@ class Command(stack.commands.list.host.command):
 		if len(args) == 0:
 			host = 'localhost'
 		# If we're reading from input
+		xml = ''
 		if not sys.stdin.isatty():
-			xml = ''
 			for line in sys.stdin.readlines():
 				xml += line
+
+		if xml:
 			self.addOutput('localhost',
 				self.annotate(
 				'<?xml version="1.0" standalone="no"?>'))
