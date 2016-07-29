@@ -157,7 +157,7 @@ if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
 # The following attributes are one shot booleans and
 # should always be reset even if the partinfo was corrupt.
 
-stack.api.Call('set host attr', [ ipaddr, 'attr=nukedisks', 'value=none'])
+stack.api.Call('set host attr', [ ipaddr, 'attr=nukedisks', 'value=false'])
 stack.api.Call('set host attr', [ ipaddr, 'attr=nukecontroller', 'value=false'])
 
 print 'Content-type: application/octet-stream'
