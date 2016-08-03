@@ -148,7 +148,6 @@ class Command(stack.commands.list.host.command):
 			('os','redhat'),
 			])
 
-		self.section = section
 		self.os	     = os
 		self.annotation=self.str2bool(annotation)
 		self.beginOutput()
@@ -164,7 +163,7 @@ class Command(stack.commands.list.host.command):
 			self.addOutput('localhost',
 				self.annotate(
 				'<?xml version="1.0" standalone="no"?>'))
-			self.runImplementation(self.os, ('localhost', xml))
+			self.runImplementation(self.os, ('localhost', xml, section))
 
 		# If no input is given
 		else:		
@@ -174,7 +173,7 @@ class Command(stack.commands.list.host.command):
 					self.annotate(
 					'<?xml version="1.0" standalone="no"?>'
 					))
-				self.runImplementation(self.os, (host, None))
+				self.runImplementation(self.os, (host, None, section))
 
 		if self.annotation:
 			self.endOutput(padChar='', header=[

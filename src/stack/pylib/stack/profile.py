@@ -185,6 +185,8 @@ class GraphHandler(handler.ContentHandler,
 		   handler.ErrorHandler,
 		   AttributeHandler):
 
+        # TODO -- nuke the entities, this is dead code and confusing
+
 	def __init__(self, attrs, entities={}, prune=True, directories=[ '.' ]):
 		handler.ContentHandler.__init__(self)
 		self.setAttributes(attrs)
@@ -197,7 +199,7 @@ class GraphHandler(handler.ContentHandler,
 		self.attrs.order		= stack.util.Struct()
 		self.attrs.order.default	= stack.util.Struct()
 		self.attributes			= attrs
-		self.entities			= entities
+		self.entities			= entities # not used ?
 		self.roll			= ''
 		self.text			= ''
 		self.os				= attrs['os']
@@ -574,12 +576,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.filename	= filename
 		self.stripText  = 0
 		self.attributes = attrs
-
-                try:
-                        list = filename.split(os.sep)
-                        self.osname = list[-4]
-                except:
-                        self.osname = 'redhat'
+                self.osname     = attrs['os']
 
 
                 
@@ -951,11 +948,12 @@ class Pass2NodeHandler(handler.ContentHandler,
 		self.kstags  = {}
 		self.kskey = None
 		self.kstext = []
+                self.osname = attrs['os']
 
 	def startElement(self, name, attrs):
 		self.kstext = []
 		
-		if name == 'kickstart' or name == 'jumpstart':
+		if name == 'kickstart' or name == self.osname:
 			return
 		
 		if name in [ 'url', 'lang', 'keyboard', 'text', 'reboot',
@@ -974,10 +972,12 @@ class Pass2NodeHandler(handler.ContentHandler,
 			s += ' file="%s"' % self.node.getFilename()
 		if 'color' not in attrs.getNames():
 			s += ' color="%s"' % self.node.getFillColor()
+
+
 		self.xml.append('<%s%s>' % (name, s))
 		
 	def endElement(self, name):
-		if name == 'kickstart' or name == 'jumpstart':
+		if name == 'kickstart' or name == self.osname:
 			return
 
 		if self.kskey:

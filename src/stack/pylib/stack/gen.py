@@ -269,11 +269,16 @@ class Generator:
 	def handle_mainChild(self, node):
 		attr = node.attributes
 		roll, nodefile, color = self.get_context(node)
-		try:
-			eval('self.handle_main_%s(node)' % node.nodeName)
-		except AttributeError:
+                try:
+			fn = eval('self.handle_main_%s' % node.nodeName)
+                except AttributeError:
+                        fn = None
+                if fn:
+                        fn(node)
+                else:
 			self.ks['main'].append(('%s %s' % (node.nodeName,
 				self.getChildText(node)), roll, nodefile, color))
+
 
 		
 	def parseFile(self, node):
@@ -373,8 +378,12 @@ class Generator:
 			if child.nodeType == child.TEXT_NODE:
 				text += child.nodeValue
 			elif child.nodeType == child.ELEMENT_NODE:
-				text += eval('self.handle_child_%s(child)' \
-					% (child.nodeName))
+                                try:
+                                        fn = eval('self.handle_child_%s' % child.nodeName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        text += fn(child)
 		return text
 
 	
@@ -404,24 +413,15 @@ class Generator:
 
 	def generate_order(self):
 		list = []
-		list.append('#')
-		list.append('# Node Traversal Order')
-		list.append('#')
 		for (roll, nodefile, color) in self.ks['order']:
-			list.append(('# %s (%s)' % (nodefile, roll),
-				roll, nodefile, color))
-		list.append('#')
+                        list.append(nodefile)
 		return list
 
 	def generate_debug(self):
 		list = []
-		list.append('#')
-		list.append('# Debugging Information')
-		list.append('#')
 		for text in self.ks['debug']:
 			for line in string.split(text, '\n'):
 				list.append('# %s' % line)
-		list.append('#')
 		return list
 
 	def annotate(self, l, annotation=False):
@@ -441,11 +441,11 @@ class Generator:
 					o.append(line)
 		return o
 
-class MainNodeFilter_redhat(NodeFilter):
+class MainNodeFilter(NodeFilter):
 
 	def acceptNode(self, node):
 	
-		if node.nodeName in [ 'kickstart', 'main' ]:
+		if node.nodeName in [ 'profile', 'main' ]:
 			return self.FILTER_ACCEPT
 
                 if not (node.parentNode and node.parentNode.nodeName == 'main'):
@@ -457,22 +457,15 @@ class MainNodeFilter_redhat(NodeFilter):
 		return self.FILTER_ACCEPT
 
 
-class OtherNodeFilter_redhat(NodeFilter):
+class OtherNodeFilter(NodeFilter):
+
 	def acceptNode(self, node):
 
-		if node.nodeName == 'kickstart':
+		if node.nodeName == 'profile':
 			return self.FILTER_ACCEPT
-			
-		if node.nodeName not in [
-			'attributes', 
-			'debug',
-			'description',
-			'package',
-			'pre', 
-			'post',
-			'boot'
-			]:
-			return self.FILTER_SKIP
+
+                if node.nodeName in [ '#document', 'main' ]:
+                        return self.FILTER_SKIP
 			
 		if not self.isCorrectCond(node):
 			return self.FILTER_SKIP
@@ -483,7 +476,7 @@ class OtherNodeFilter_redhat(NodeFilter):
 class Generator_redhat(Generator):
 
 	def __init__(self):
-		Generator.__init__(self)	
+		Generator.__init__(self)
 		self.ks                 = {}
 		self.ks['order']	= []
 		self.ks['debug']	= []
@@ -494,6 +487,15 @@ class Generator_redhat(Generator):
 		self.ks['post']         = []
 		self.ks['boot-pre']	= []
 		self.ks['boot-post']	= []
+
+                # We could set these elsewhere but this is the current
+                # definition of the RedHat Generator.
+                #
+                # We used to do i386 (not anymore)
+
+                self.setOS('redhat')
+		self.setArch('x86_64')
+
 
 		self.rpm_context	= {}
 		self.log = '/var/log/stack-install.log'
@@ -507,14 +509,14 @@ class Generator_redhat(Generator):
 		import cStringIO
 		xml_buf = cStringIO.StringIO(xml_string)
 		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = MainNodeFilter_redhat(self.attrs)
+		filter = MainNodeFilter(self.attrs)
 		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
 			filter, 0)
 		node = iter.nextNode()
 		
 		while node:
-			if node.nodeName == 'kickstart':
-				self.handle_kickstart(node)
+			if node.nodeName == 'profile':
+				self.handle_profile(node)
 			elif node.nodeName == 'main':
 				child = iter.firstChild()
 				while child:
@@ -523,20 +525,25 @@ class Generator_redhat(Generator):
 
 			node = iter.nextNode()
 			
-		filter = OtherNodeFilter_redhat(self.attrs)
+		filter = OtherNodeFilter(self.attrs)
 		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
 			filter, 0)
 		node = iter.nextNode()
 		while node:
-			if node.nodeName != 'kickstart':
+			if node.nodeName != 'profile':
 				self.order(node)
-				eval('self.handle_%s(node)' % (node.nodeName))
+                                try:
+                                        fn = eval('self.handle_%s' % node.nodeName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        fn(node)
 			node = iter.nextNode()
 
 
-	# <kickstart>
+	# <profile>
 	
-	def handle_kickstart(self, node):
+	def handle_profile(self, node):
 		# pull out the attr to handle generic conditionals
 		# this replaces the old arch/os logic but still
 		# supports the old syntax

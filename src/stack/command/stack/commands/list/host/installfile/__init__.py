@@ -104,7 +104,7 @@ class ProfileNodeFilter(stack.gen.NodeFilter):
 	def acceptNode(self, node):
 		if node.nodeName == 'profile':
 			return self.FILTER_ACCEPT
-		if node.nodeName == 'section':
+		if node.nodeName == 'chapter':
 			return self.FILTER_ACCEPT
 
 		return self.FILTER_SKIP
@@ -115,12 +115,12 @@ class Command(stack.commands.Command):
 	Process an XML-based installation file and output an OS-specific
 	installation file (e.g., a kickstart or jumpstart file).
 
-	<param type='string' name='section'>
-	Which section within the XML installation file to process (e.g.,
+	<param type='string' name='chapter'>
+	Which chapter within the XML installation file to process (e.g.,
 	"kickstart", "begin", etc.).
 	</param>
 
-	<example cmd='list host installfile section="kickstart"'>
+	<example cmd='list host installfile chapter="kickstart"'>
 	Output a RedHat-compliant kickstart file.
 	</example>
 	"""
@@ -136,7 +136,7 @@ class Command(stack.commands.Command):
 
 
 	def run(self, params, args):
-		section, = self.fillParams([ ('section', None, True) ])
+		chapter, = self.fillParams([ ('chapter', None, True) ])
 
 		self.xml_doc = xml.dom.ext.reader.Sax2.FromXmlStream(sys.stdin)
 		self.xml_filter = ProfileNodeFilter({})
@@ -147,12 +147,12 @@ class Command(stack.commands.Command):
 		done = 0
 		text = ''
 		while node and done == 0:
-			if node.nodeName == 'section':
+			if node.nodeName == 'chapter':
 				attr = node.attributes
-				section_name = \
+				chapter_name = \
 					attr.getNamedItem((None, 'name')).value
 
-				if section_name == section:
+				if chapter_name == chapter:
 					text = self.getChildText(node)
 					done = 1
 

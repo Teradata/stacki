@@ -45,53 +45,55 @@ import stack.commands
 import stack.gen
 
 class Implementation(stack.commands.Implementation):
+
+        def output(self, text, tag=False):
+                if tag:
+                        self.owner.addOutput(self.host, self.owner.annotate(text))
+                else:
+                        self.owner.addOutput(self.host, text)
+
 	def run(self, args):
 
-		host = args[0]
-		xml = args[1]
+		host      = args[0]
+		xml       = args[1]
+                section   = args[2]
+                self.host = host
 
-		c_gen = getattr(stack.gen,'Generator_%s' % self.owner.os)
-		self.generator = c_gen()
-		self.generator.setArch(self.owner.arch)
-		self.generator.setOS(self.owner.os)
-
-		if xml == None:
-			xml = self.owner.command('list.host.xml', 
-			[
-			 host,
-			 'os=%s' % self.owner.os,
-			])
-		self.runXML(xml, host)
-
-	def runXML(self, xml, host):
-		"""Reads the XML host profile and outputs a RedHat 
-		Kickstart file."""
-
-		list = []
-		self.generator.parse(xml)
-		if self.owner.section == 'all':
-			for section in [
-				'order',
-				'debug',
+                if section in [ 'all' ]:
+			sections = [
 				'main',
 				'packages',
 				'pre',
 				'post',
 				'boot',
 				'installclass'
-				]:
-				list += self.generator.generate(section,
-					annotation=self.owner.annotation)
-		else:
-			list += self.generator.generate(self.owner.section,
-					annotation=self.owner.annotation)
-		self.owner.addOutput(host,
-			self.owner.annotate('<profile lang="kickstart">'))
-		self.owner.addOutput(host,
-			self.owner.annotate('<section name="kickstart">'))
-		self.owner.addOutput(host, self.owner.annotate('<![CDATA['))
-		for i in list:
-			self.owner.addOutput(host, i)
-		self.owner.addOutput(host, self.owner.annotate(']]>'))
-		self.owner.addOutput(host, self.owner.annotate('</section>'))
-		self.owner.addOutput(host, self.owner.annotate('</profile>'))
+				]
+                else:
+                        sections = [ section ]
+
+		generator = stack.gen.Generator_redhat()
+		if xml == None:
+			xml = self.owner.command('list.host.xml', [ host, 'os=redhat' ])
+		generator.parse(xml)
+
+		self.output('<profile os="redhat">', True)
+		self.output('<chapter name="order">', True)
+		self.output('<![CDATA[')
+                for line in generator.generate('order'):
+                        self.output(line)
+		self.output(']]>')
+		self.output('</chapter>', True)
+		self.output('<chapter name="debug">', True)
+		self.output('<![CDATA[')
+                for line in generator.generate('debug'):
+                        self.output(line)
+		self.output(']]>')
+		self.output('</debug>', True)
+		self.output('<chapter name="kickstart">', True)
+		self.output('<![CDATA[')
+                for section in sections:
+                        for line in generator.generate(section, annotation=self.owner.annotation):
+                                self.output(line)
+		self.output(self.owner.annotate(']]>'))
+		self.output(self.owner.annotate('</chapter>'))
+		self.output(self.owner.annotate('</profile>'))

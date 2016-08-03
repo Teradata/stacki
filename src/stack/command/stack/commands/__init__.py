@@ -165,6 +165,8 @@ class OSArgumentProcessor:
 				list.append('sunos')
 			elif s in [ 'ubuntu' ]:
 				list.append('ubuntu')
+                        elif s in [ 'suse' ]:
+                                list.append('suse')
 			elif s in [ 'vmware' ]:
 				list.append('vmware')
 			elif s in [ 'xenserver' ]:
@@ -175,6 +177,7 @@ class OSArgumentProcessor:
 			list.append('redhat')
 			list.append('sunos')
 			list.append('ubuntu')
+			list.append('suse')
 			list.append('vmware')
 			list.append('xenserver')
 
