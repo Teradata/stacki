@@ -196,7 +196,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				type_dict[type_key] = device_arr
 
 		# Regexp to match Hard disk labels
-		hd_label_regexp = '([shv]d[a-z]+)|(md[0-9]+)'
+		hd_label_regexp = '(xvd[a-z]+)|([shv]d[a-z]+)|(md[0-9]+)'
 		hd_regexp = re.compile(hd_label_regexp)
 
 		# Revalidate the spreadsheet to check if pv's, volgroups have been defined
@@ -218,7 +218,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							raise CommandError(self.owner, msg)
 				elif not hd_regexp.match(d):
 					if d not in type_dict[host + '-volgroup']:
-						msg = 'volgroup "%s" not defined' % d
+						msg = 'unrecgonized block device label or undefined volgroup "%s"' % d
 						raise CommandError(self.owner, msg)
 					else:
 						# If its a volgroup, a --name option is required
