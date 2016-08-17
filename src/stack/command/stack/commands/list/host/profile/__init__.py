@@ -91,6 +91,7 @@
 # @Copyright@
 
 import sys
+import string
 import stack.commands
 import stack.gen
 from stack.exception import *
@@ -98,43 +99,31 @@ from stack.exception import *
 
 class Command(stack.commands.list.host.command):
 	"""
-	Outputs a XML wrapped Kickstart/Jumpstart profile for the given hosts.
-	If not, profiles are listed for all hosts in the cluster. If input is
-	fed from STDIN via a pipe, the argument list is ignored and XML is
-	read from STDIN.  This command is used for debugging the Rocks
-	configuration graph.
+        Outputs a XML wrapped installer profile for the given hosts.
+
+        If no hosts are specified the profiles for all hosts are listed.
+	
+        If input is fed from STDIN via a pipe, the argument list is
+	ignored and XML is read from STDIN.  This command is used for
+	debugging the Stacki configuration graph.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, info about
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host profile compute-0-0'>
-	Generates a Kickstart/Jumpstart profile for compute-0-0.
+	<example cmd='list host profile backend-0-0'>
+	Generates a Kickstart/Jumpstart profile for backend-0-0.
 	</example>
 
-	<example cmd='list host xml compute-0-0 | rocks list host profile'>
+	<example cmd='list host xml backend-0-0 | stack list host profile'>
 	Does the same thing as above but reads XML from STDIN.
 	</example>
-	"""
+
+        """
 
 	MustBeRoot = 1
 
-	# Annotation function. If annotation is required
-	# return a list of [text, rollname, nodefile, rollcolor]
-	# Otherwise simply return the text string
-	def annotate(self, o):
-		if type(o) == str or type(o) == unicode:
-			if self.annotation:
-				return [o, None, None, None]
-			else:
-				return o
-		if type(o) == tuple:
-			if self.annotation:
-				return list(o)
-			else:
-				return o[0]
-			
 	def run(self, params, args):
 		"""Generate the OS specific profile file(s) in a single XML
 		stream (e.g. Kickstart or Jumpstart).  If a host argument
@@ -142,42 +131,42 @@ class Command(stack.commands.list.host.command):
 		on stdin."""
 
 		# By default, print all sections of kickstart/jumpstart file
-		(section, annotation, os) = self.fillParams([
-			('section','all'),
-			('annotate','false'),
-			('os','redhat'),
-			])
+		(annotate, ) = self.fillParams([ ('annotate', 'false') ])
 
-		self.os	     = os
-		self.annotation=self.str2bool(annotation)
-		self.beginOutput()
+		annotate = self.str2bool(annotate)
 
 		hosts = self.getHostnames(args)
 		if len(args) == 0:
 			host = 'localhost'
-		# If we're reading from input
-		if not sys.stdin.isatty():
-			xml = ''
-			for line in sys.stdin.readlines():
-				xml += line
-			self.addOutput('localhost',
-				self.annotate(
-				'<?xml version="1.0" standalone="no"?>'))
-			self.runImplementation(self.os, ('localhost', xml, section))
 
-		# If no input is given
-		else:		
+
+		self.beginOutput()
+
+                # When attached to a tty there is no XML input on stdin so we
+                # need to generate it.
+
+		if sys.stdin.isatty():
+
 			for host in self.getHostnames(args):
-				self.os = self.db.getHostOS(host)
-				self.addOutput(host,
-					self.annotate(
-					'<?xml version="1.0" standalone="no"?>'
-					))
-				self.runImplementation(self.os, (host, None, section))
+				osname = self.db.getHostOS(host)
+                                xml    = self.command('list.host.xml', [ host, 'os=%s' % osname ])
 
-		if self.annotation:
-			self.endOutput(padChar='', header=[
-					'host','output','pallet',
-					'nodefile', 'color'])
-		else:
-			self.endOutput(padChar='')
+				self.addOutput(host, '<?xml version="1.0" standalone="no"?>')
+				self.runImplementation(osname, (host, xml))
+
+                # No tty so assume an XML document is on stdin
+
+                else:
+                        osname = None
+			xml    = ''
+
+			for line in sys.stdin.readlines():
+                                if line.find('<profile os="') == 0:
+                                        osname = line.split()[1][3:].strip('"')
+				xml += line
+
+			self.addOutput('localhost', '<?xml version="1.0" standalone="no"?>')
+			self.runImplementation(osname, ('localhost', xml))
+
+
+		self.endOutput(padChar='')

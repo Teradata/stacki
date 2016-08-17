@@ -93,431 +93,20 @@
 # @Copyright@
 
 import string
-import types
-import sys
 import os
-import time
-import xml.dom.NodeFilter
 import xml.dom.ext.reader.Sax2
-import stack.js
-import stack.cond
-	
+import stack.gen	
 		
 
-class NodeFilter(xml.dom.NodeFilter.NodeFilter):
-
-	def __init__(self, attrs):
-		self.attrs = attrs
-
-	def isCorrectCond(self, node):
-
-		attr = node.attributes.getNamedItem((None, 'arch'))
-		if attr:
-			arch = attr.value
-		else:
-			arch = None
-
-		attr = node.attributes.getNamedItem((None, 'os'))
-		if attr:
-			os = attr.value
-			if os == 'linux':
-				os = 'redhat'
-		else:
-			os = None
-
-		attr = node.attributes.getNamedItem((None, 'release'))
-		if attr:
-			release = attr.value
-		else:
-			release = None
-
-		attr = node.attributes.getNamedItem((None, 'cond'))
-		if attr:
-			cond = attr.value
-		else:
-			cond = None
-
-		expr = stack.cond.CreateCondExpr(arch, os, release, cond)
-		return stack.cond.EvalCondExpr(expr, self.attrs)
-
-
-
-class ProfileSnippet:
-        
-        def __init__(self, text, source):
-                self.source	= source
-                self.text	= text
-
-        def getText(self):
-                return self.text
-
-        def getSource(self):
-                return self.source
-
-                
-
-class ProfileSection:
-
-        def __init__(self):
-                self.snippets = []
-
-        def append(self, text, source=None):
-                self.snippets.append(ProfileSnippet(text, source))
-
-        def generate(self, cdata=True):
-                prev = None
-                open = False
-                list = []
-
-                if cdata:
-                        cdataStart = '<![CDATA['
-                        cdataEnd   = ']]>'
-                else:
-                        cdataStart = ''
-                        cdataEnd   = ''
-
-                for snippet in self.snippets:
-                        source = snippet.getSource()
-                        text   = snippet.getText()
-
-                        if not source:
-                                source = 'internal'
-
-                        if source != prev:
-                                if open:
-                                        list.append('\t\t%s</subsection>' % cdataEnd)
-                                list.append('\t\t<subsection source="%s">%s' % 
-                                            (source, cdataStart))
-                                open = True
-                        list.append(snippet.getText())
-                        prev = source
-                if open:
-	                list.append('\t\t%s</subsection>' % cdataEnd)
-                return list
-
-		
-class Generator:
-	"""Base class for various DOM based kickstart graph generators.
-	The input to all Generators is assumed to be the XML output of KPP."""
-	
-	def __init__(self):
-		self.attrs		= {}
-                self.arch		= None
-		self.rcsFiles		= {}
-                self.nodeFilesDict	= {}
-                self.nodeFilesList	= []
-                self.debugSection	= ProfileSection()
-                self.mainSection	= ProfileSection()
-
-	def setArch(self, arch):
-		self.arch = arch
-		
-	def getArch(self):
-		return self.arch
-	
-	def setOS(self, osname):
-		self.os = osname
-		
-	def getOS(self):
-		return self.os
-
-	def rcsBegin(self, file, owner, perms):
-		"""
-		If the is the first time we've seen a file ci/co it.  Otherwise
-		just track the ownership and perms from the <file> tag .
-		"""
-		
-		rcsdir	= os.path.join(os.path.dirname(file), 'RCS')
-		rcsfile = '%s,v' % os.path.join(rcsdir, os.path.basename(file))
-		l	= []
-
-		l.append('')
-
-		if file not in self.rcsFiles:
-			l.append('if [ ! -f %s ]; then' % rcsfile)
-			l.append('\tif [ ! -f %s ]; then' % file)
-			l.append('\t\ttouch %s;' % file)
-			l.append('\tfi')
-			l.append('\tif [ ! -d %s ]; then' % rcsdir)
-			l.append('\t\tmkdir -m 700 %s' % rcsdir)
-			l.append('\t\tchown 0:0 %s' % rcsdir)
-		 	l.append('\tfi;')
-			l.append('\techo "original" | /opt/stack/bin/ci -q %s;' %
-			 	file)
-                        l.append('\t/opt/stack/bin/rcs -noriginal: %s;' % file)
-			l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
-			l.append('fi')
-
-		# If this is a subsequent file tag and the optional PERMS
-		# or OWNER attributes are missing, use the previous value(s).
-		
-		if self.rcsFiles.has_key(file):
-			(orig_owner, orig_perms) = self.rcsFiles[file]
-			if not perms:
-				perms = orig_perms
-			if not owner:
-				owner = orig_owner
-
-		self.rcsFiles[file] = (owner, perms)
-		
-		if owner:
-			l.append('chown %s %s' % (owner, file))
-			l.append('chown %s %s' % (owner, rcsfile))
-
-		if perms:
-			l.append('chmod %s %s' % (perms, file))
-
-		l.append('')
-
-		return string.join(l, '\n')
-
-	def rcsEnd(self, file, owner, perms):
-		"""
-		Run the final ci/co of a <file>.  The ownership of both the
-		file and rcs file are changed to match the last requested
-		owner in the file tag.  The perms of the file (not the file
-		file) are also modified.
-
-		The file is checked out locked, which is why we don't modify
-		the perms of the RCS file itself.
-		"""
-		rcsdir	= os.path.join(os.path.dirname(file), 'RCS')
-		rcsfile = '%s,v' % os.path.join(rcsdir, os.path.basename(file))
-		l	= []
-
-		l.append('')
-		l.append('if [ -f %s ]; then' % file)
-		l.append('\techo "stack" | /opt/stack/bin/ci -q %s;' % file)
-		l.append('\t/opt/stack/bin/rcs -Nstack: %s;' % file)
-		l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
-		l.append('fi')
-
-		if owner:
-			l.append('chown %s %s' % (owner, file))
-			l.append('chown %s %s' % (owner, rcsfile))
-
-		if perms:
-			l.append('chmod %s %s' % (perms, file))
-
-		return string.join(l, '\n')
-
-	
-        def getAttr(self, node, attr):
-		a = node.attributes.getNamedItem((None, attr))
-                if a:
-                        return a.value
-                else:
-                        return ''
-                
-	
-	def order(self, node):
-		"""
-		Stores the order of traversal of the nodes
-		Useful for debugging.
-		"""
-                nodefile = self.getAttr(node, 'file')
-
-                if nodefile and nodefile not in self.nodeFilesDict:
-                        self.nodeFilesDict[nodefile] = True
-                        self.nodeFilesList.append(nodefile)
-		
-	def handle_mainChild(self, node):
-		attr = node.attributes
-		if attr.getNamedItem((None, 'file')):
-			nodefile = attr.getNamedItem((None, 'file')).value
-                else:
-                        nodefile = None
-                try:
-			fn = eval('self.handle_main_%s' % node.nodeName)
-                except AttributeError:
-                        fn = None
-                if fn:
-                        text = fn(node)
-                else:
-                        text = '%s %s' % (node.nodeName, self.getChildText(node))
-                self.mainSection.append(text, nodefile)
-
-
-
-		
-	def parseFile(self, node):
-		attr = node.attributes
-
-		if attr.getNamedItem((None, 'os')):
-			OS = attr.getNamedItem((None, 'os')).value
-			if OS != self.getOS():
-				return ''
-
-		if attr.getNamedItem((None, 'name')):
-			fileName = attr.getNamedItem((None, 'name')).value
-		else:
-			fileName = ''
-
-		if attr.getNamedItem((None, 'mode')):
-			fileMode = attr.getNamedItem((None, 'mode')).value
-		else:
-			fileMode = 'create'
-
-		if attr.getNamedItem((None, 'owner')):
-			fileOwner = attr.getNamedItem((None, 'owner')).value
-		else:
-			fileOwner = ''
-
-		if attr.getNamedItem((None, 'perms')):
-			filePerms = attr.getNamedItem((None, 'perms')).value
-		else:
-			filePerms = ''
-
-		if attr.getNamedItem((None, 'vars')):
-			fileQuoting = attr.getNamedItem((None, 'vars')).value
-		else:
-			fileQuoting = 'literal'
-
-		if attr.getNamedItem((None, 'expr')):
-			fileCommand = attr.getNamedItem((None, 'expr')).value
-		else:
-			fileCommand = None
-
-		# Have the ability to turn off/on RCS checkins
-		if attr.getNamedItem((None, 'rcs')):
-			t = attr.getNamedItem((None, 'rcs')).value.lower()
-			if t == 'false' or t == 'off':
-				rcs = False
-		else:
-			rcs = True
-
-		fileText = self.getChildText(node)
-
-		if fileName:
-                        p, f = os.path.split(fileName)
-                        s    = 'if [ ! -e %s ]; then mkdir -p %s; fi\n' % (p, p)
-
-			if rcs:
-				s += self.rcsBegin(fileName, fileOwner, filePerms)
-
-			if fileMode == 'append':
-				gt = '>>'
-			else:
-				gt = '>'
-
-			if fileCommand:
-				s += '%s %s %s\n' % (fileCommand, gt, fileName)
-			if not fileText:
-				s += 'touch %s\n' % fileName
-			else:
-				if fileQuoting == 'expanded':
-					eof = "EOF"
-				else:
-					eof = "'EOF'"
-
-				s += "cat %s %s << %s" % (gt, fileName, eof)
-				if fileText[0] != '\n':
-					s += '\n'
-				s += fileText
-				if fileText[-1] != '\n':
-					s += '\n'
-				s += 'EOF\n'
-
-			# If RCS is disabled, we still need to have support
-			# for changing permissions, and owners.
-			if not rcs:
-				if fileOwner:
-					s += 'chown %s %s\n' % (fileOwner, fileName)
-				if filePerms:
-					s += 'chmod %s %s\n' % (filePerms, fileName)
-		return s
-	
-	# <*>
-	#	<*> - tags that can go inside any other tags
-	# </*>
-
-	def getChildText(self, node):
-		text = ''
-		for child in node.childNodes:
-			if child.nodeType == child.TEXT_NODE:
-				text += child.nodeValue
-			elif child.nodeType == child.ELEMENT_NODE:
-                                try:
-                                        fn = eval('self.handle_child_%s' % child.nodeName)
-                                except AttributeError:
-                                        fn = None
-                                if fn:
-                                        text += fn(child)
-		return text
-
-	
-	# <*>
-	#	<file>
-	# </*>
-	
-	def handle_child_file(self, node):
-		return self.parseFile(node)
-
-	##
-	## Generator Section
-	##
-			
-	def generate(self, section, annotation=False):
-		"""Dump the requested section of the kickstart file.  If none 
-		exists do nothing."""
-		list = []
-		try:
-			f = getattr(self, "generate_%s" % section)
-		except AttributeError:
-			f = None
-		if f:
-			list += f()
-
-		return list
-
-	def generate_order(self):
-                return self.nodeFilesList
-
-	def generate_debug(self):
-                return self.debugSection.generate()
-
-
-class MainNodeFilter(NodeFilter):
-
-	def acceptNode(self, node):
-	
-		if node.nodeName in [ 'profile', 'main' ]:
-			return self.FILTER_ACCEPT
-
-                if not (node.parentNode and node.parentNode.nodeName == 'main'):
-			return self.FILTER_SKIP
-
-		if not self.isCorrectCond(node):
-			return self.FILTER_SKIP
-
-		return self.FILTER_ACCEPT
-
-
-class OtherNodeFilter(NodeFilter):
-
-	def acceptNode(self, node):
-
-		if node.nodeName == 'profile':
-			return self.FILTER_ACCEPT
-
-                if node.nodeName in [ '#document', 'main' ]:
-                        return self.FILTER_SKIP
-			
-		if not self.isCorrectCond(node):
-			return self.FILTER_SKIP
-
-		return self.FILTER_ACCEPT
-
-
-class Generator_redhat(Generator):
+class Generator(stack.gen.Generator):
 
 	def __init__(self):
-		Generator.__init__(self)
-                self.preSection			= ProfileSection()
-                self.postSection		= ProfileSection()
+		stack.gen.Generator.__init__(self)
+                self.preSection			= stack.gen.ProfileSection()
+                self.postSection		= stack.gen.ProfileSection()
                 self.bootSection		= {}
-                self.bootSection['pre']		= ProfileSection()
-                self.bootSection['post']	= ProfileSection()
+                self.bootSection['pre']		= stack.gen.ProfileSection()
+                self.bootSection['post']	= stack.gen.ProfileSection()
                 self.packages			= {}
 		self.log			= '/var/log/stack-install.log'
 
@@ -538,7 +127,7 @@ class Generator_redhat(Generator):
 		import cStringIO
 		xml_buf = cStringIO.StringIO(xml_string)
 		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = MainNodeFilter(self.attrs)
+		filter = stack.gen.MainNodeFilter(self.attrs)
 		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
 			filter, 0)
 		node = iter.nextNode()
@@ -554,7 +143,7 @@ class Generator_redhat(Generator):
 
 			node = iter.nextNode()
 			
-		filter = OtherNodeFilter(self.attrs)
+		filter = stack.gen.OtherNodeFilter(self.attrs)
 		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
 			filter, 0)
 		node = iter.nextNode()
@@ -722,7 +311,7 @@ class Generator_redhat(Generator):
 
 	def generate_packages(self):
 
-                section = ProfileSection()
+                section = stack.gen.ProfileSection()
                 dict	= {}
 
                 for (rpm, (enabled, nodefile)) in self.packages.items():
@@ -752,7 +341,7 @@ class Generator_redhat(Generator):
                 return self.postSection.generate()
 
 	def generate_boot(self):
-                section = ProfileSection()
+                section = stack.gen.ProfileSection()
 
 		# check in/out all modified files
 

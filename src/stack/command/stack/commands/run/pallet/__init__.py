@@ -114,8 +114,8 @@ class Command(stack.commands.run.command):
 	kernel).
 	</arg>
 
-	<example cmd='run pallet viz'>		
-	Installs the Viz pallet onto the current system.
+	<example cmd='run pallet ubuntu'>		
+	Installs the Ubuntu pallet onto the current system.
 	</example>
 	"""
 

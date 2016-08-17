@@ -1,4 +1,3 @@
-#
 # @SI_Copyright@
 #                               stacki.com
 #                                  v3.2
@@ -42,58 +41,42 @@
 #
 
 import stack.commands
-import stack.gen
+import stack.redhat.gen
 
 class Implementation(stack.commands.Implementation):
-
-        def output(self, text, tag=False):
-                if tag:
-                        self.owner.addOutput(self.host, self.owner.annotate(text))
-                else:
-                        self.owner.addOutput(self.host, text)
 
 	def run(self, args):
 
 		host      = args[0]
 		xml       = args[1]
-                section   = args[2]
-                self.host = host
 
-                if section in [ 'all' ]:
-			sections = [
-				'main',
-				'packages',
-				'pre',
-				'post',
-				'boot',
-				'installclass'
-				]
-                else:
-                        sections = [ section ]
-
-		generator = stack.gen.Generator_redhat()
-		if xml == None:
-			xml = self.owner.command('list.host.xml', [ host, 'os=redhat' ])
+		generator = stack.redhat.gen.Generator()
 		generator.parse(xml)
 
-		self.output('<profile os="redhat">', True)
-		self.output('<chapter name="order">', True)
-		self.output('<![CDATA[')
+		self.owner.addOutput(host, '<profile os="redhat">')
+
+		self.owner.addOutput(host, '<chapter name="meta">')
+                self.owner.addOutput(host, '\t<section name="order">')
                 for line in generator.generate('order'):
-                        self.output(line)
-		self.output(']]>')
-		self.output('</chapter>', True)
-		self.output('<chapter name="debug">', True)
-		self.output('<![CDATA[')
+	                self.owner.addOutput(host, '\t\t%s' % line)
+                self.owner.addOutput(host, '\t</section>')
+                self.owner.addOutput(host, '\t<section name="debug">')
                 for line in generator.generate('debug'):
-                        self.output(line)
-		self.output(']]>')
-		self.output('</debug>', True)
-		self.output('<chapter name="kickstart">', True)
-		self.output('<![CDATA[')
-                for section in sections:
-                        for line in generator.generate(section, annotation=self.owner.annotation):
-                                self.output(line)
-		self.output(self.owner.annotate(']]>'))
-		self.output(self.owner.annotate('</chapter>'))
-		self.output(self.owner.annotate('</profile>'))
+                        self.owner.addOutput(host, line)
+                self.owner.addOutput(host, '\t</section>')
+		self.owner.addOutput(host, '</chapter>')
+
+
+		self.owner.addOutput(host, '<chapter name="kickstart">')
+                for section in [ 'main',
+                                 'packages',
+                                 'pre',
+                                 'post',
+                                 'boot' ]:
+                        self.owner.addOutput(host, '\t<section name="%s">' % section)
+                        for line in generator.generate(section):
+                                self.owner.addOutput(host, line)
+                        self.owner.addOutput(host, '\t</section>')
+		self.owner.addOutput(host, '</chapter>')
+
+		self.owner.addOutput(host, '</profile>')

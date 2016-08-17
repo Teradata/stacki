@@ -966,8 +966,8 @@ class Pass2NodeHandler(handler.ContentHandler,
 		for attrName in attrs.getNames():
 			attrValue = attrs.get(attrName)
 			s += ' %s="%s"' % (attrName, attrValue)
-		if 'roll' not in attrs.getNames():
-			s += ' roll="%s"' % self.node.getRoll()
+		if 'pallet' not in attrs.getNames():
+			s += ' pallet="%s"' % self.node.getRoll()
 		if 'file' not in attrs.getNames():
 			s += ' file="%s"' % self.node.getFilename()
 		if 'color' not in attrs.getNames():

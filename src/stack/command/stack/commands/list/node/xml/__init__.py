@@ -387,7 +387,7 @@ class Command(stack.commands.list.command,
 		# the previously parsed nodes
 
 		self.addText('<?xml version="1.0" standalone="no"?>\n')
-		self.addText('<!DOCTYPE rocks-graph [\n')
+		self.addText('<!DOCTYPE stacki-profile [\n')
 		keys = attrs.keys()
 		keys.sort()
 		for k in keys:
