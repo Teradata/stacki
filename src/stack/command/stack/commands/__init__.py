@@ -2027,6 +2027,10 @@ class Command:
 		self.rc = None # return code
 		self.level = 0
 
+
+		# List of loaded implementations.
+		self.impl_list = {}
+
                 # Look up terminal colors safely using tput, uncolored if
                 # this fails.
                 
@@ -2227,18 +2231,17 @@ class Command:
                 return results
 
 
-
-	def runImplementation(self, name, args=None):
-
-		list = []
-		loadedModules = []
+	def loadImplementation(self, name=None):
 		dir = eval('%s.__path__[0]' % self.__module__)
 		for file in os.listdir(dir):
 			base, ext = os.path.splitext(file)
 
-			if base != 'imp_%s' % name:
+			if not base.startswith('imp_'):
 				continue
 
+			if name:
+				if base != 'imp_%s' % name:
+					continue
 			# Find either the .py or .pyc but only load each
 			# module once.  This allows plugins to be compiled
 			# and does not require source code releases.
@@ -2252,11 +2255,23 @@ class Command:
 		 	module = eval(module)
 		 	try:
 		 		o = getattr(module, 'Implementation')(self)
+				self.impl_list[base] = o
 		 	except AttributeError:
 		 		continue
 
-			return o.run(args)
+	def runImplementation(self, name, args=None):
+		# Check to see if implementation list
+		# has named implementation. If not, try
+		# to load named implementation
+		impl_name = 'imp_%s' % name
+		if not self.impl_list.has_key(impl_name):
+			self.loadImplementation(name)
 
+		# If the named implementation was loaded,
+		# return the output from running the
+		# implementation
+		if self.impl_list.has_key(impl_name):
+			return self.impl_list[impl_name].run(args)
 
 
 	def isRootUser(self):
