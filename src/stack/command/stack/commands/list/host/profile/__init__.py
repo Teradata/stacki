@@ -136,37 +136,34 @@ class Command(stack.commands.list.host.command):
 		annotate = self.str2bool(annotate)
 
 		hosts = self.getHostnames(args)
-		if len(args) == 0:
-			host = 'localhost'
-
 
 		self.beginOutput()
 
                 # When attached to a tty there is no XML input on stdin so we
                 # need to generate it.
 
-		if sys.stdin.isatty():
+		xml    = ''
 
-			for host in self.getHostnames(args):
+		# If the command is not on a TTY, then try to read XML input.
+		if not sys.stdin.isatty():
+			for line in sys.stdin.readlines():
+                                if line.find('<profile os="') == 0:
+                                        osname = line.split()[1][3:].strip('"')
+				xml += line
+
+		# If there's no XML input, either we have TTY, or we're running
+		# in an environment where TTY cannot be created (ie. apache)
+		if not xml:
+			for host in hosts:
 				osname = self.db.getHostOS(host)
                                 xml    = self.command('list.host.xml', [ host, 'os=%s' % osname ])
 
 				self.addOutput(host, '<?xml version="1.0" standalone="no"?>')
 				self.runImplementation(osname, (host, xml))
 
-                # No tty so assume an XML document is on stdin
-
+		# If we DO have XML input, simply parse it.
                 else:
-                        osname = None
-			xml    = ''
-
-			for line in sys.stdin.readlines():
-                                if line.find('<profile os="') == 0:
-                                        osname = line.split()[1][3:].strip('"')
-				xml += line
-
 			self.addOutput('localhost', '<?xml version="1.0" standalone="no"?>')
 			self.runImplementation(osname, ('localhost', xml))
-
 
 		self.endOutput(padChar='')
