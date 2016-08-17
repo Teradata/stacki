@@ -1,6 +1,7 @@
 #!/opt/stack/bin/python
 
 import os
+import shutil
 
 # Create a pallets directory in RAMDISK
 os.makedirs("/export/stack/pallets")
@@ -14,14 +15,32 @@ g.parse(f)
 
 # Download the graph and node XML files
 # for all selected pallets
-wget_cmd = "/usr/bin/wget -r -nH -A xml --cut-dirs=2"
+wget_cmd = "/usr/bin/wget -r -nH -A xml,pro --cut-dirs=2"
 cwd = os.getcwd()
 os.chdir("/export/stack/pallets")
 for pallet in g.rolls:
-	graph_url = "%s/%s/%s/redhat/%s/graph" % (pallet[4],pallet[0],pallet[1],pallet[3])
-	os.system("%s %s" % (wget_cmd, graph_url))
 	nodes_url = "%s/%s/%s/redhat/%s/nodes" % (pallet[4],pallet[0],pallet[1],pallet[3])
 	os.system("%s %s" % (wget_cmd, nodes_url))
+	graph_url = "%s/%s/%s/redhat/%s/graph" % (pallet[4],pallet[0],pallet[1],pallet[3])
+	os.system("%s %s" % (wget_cmd, graph_url))
+
+	#
+	# convert any .pro files to .xml
+	#
+	graphdir = '/export/stack/pallets/%s/%s/redhat/%s/graph' \
+		% (pallet[0], pallet[1], pallet[3])
+	#
+	# If graph directory does not exist, this could
+	# indicate a foreign pallet. Ignore, and move on
+	#
+	if not os.path.exists(graphdir):
+		continue
+	for file in os.listdir(graphdir):
+		base, ext = os.path.splitext(file)
+		if ext == '.pro':
+			profile = os.path.join(graphdir, file)
+			xmlfile	= os.path.join(graphdir, '%s.xml' % base)
+			shutil.copyfile(profile, xmlfile)
 
 # RHEL 7 needs the repodata files too
 wget_cmd = "/usr/bin/wget -r -nH -R TRANS.TBL --cut-dirs=2"

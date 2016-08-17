@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.2
+#                                  v3.3
 # 
 #      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
@@ -519,13 +519,8 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		# get 'stacki' pallet info
 		#
 		stacki_name = 'stacki'
-		stacki_version = None
-		stacki_arch = None
-		for o in self.call('list.pallet', [ 'stacki' ]):
-			if stack.release == o['release']:
-				stacki_version = o['version']
-				stacki_arch = o['arch']
-				break
+		stacki_version = os.environ['ROLLVERSION']
+		stacki_arch = 'x86_64'
 
 		# 
 		# create a minimal kickstart file. this will get us to the

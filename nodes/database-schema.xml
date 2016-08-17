@@ -12,7 +12,7 @@
 
         <si_copyright>
         (c) 2006 - 2016 StackIQ Inc.
-        All rights reserved. stacki(r) v3.2 stacki.com
+        All rights reserved. stacki(r) v3.3 stacki.com
         </si_copyright>
 
         <copyright>
@@ -94,9 +94,7 @@ CREATE TABLE appliance_attributes (
   Shadow        text default NULL
 );
 
-grant select (appliance, scope, attr, value) on cluster.appliance_attributes
-	to ''@'localhost';
-grant select (appliance, scope, attr, value) on cluster.appliance_attributes
+grant select (appliance, scope, attr, value) on cluster.appliance_attributes to ''@'localhost';
 
 DROP TABLE IF EXISTS node_attributes;
 CREATE TABLE node_attributes (
@@ -442,6 +440,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 
 /opt/stack/bin/mysqladmin --defaults-extra-file=/opt/stack/etc/root.my.cnf \
 	--user=root create cluster
+
 /opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
 	--user=root  cluster &lt; /tmp/tables.sql
 

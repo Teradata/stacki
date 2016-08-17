@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.2
+#                                  v3.3
 # 
 #      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
@@ -144,7 +144,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		return retval
 
 
-	def writeIPMI(self, host, ip, channel, netmask):
+	def writeIPMI(self, host, ip, channel, netmask, gateway):
 		defaults = [ ('IPMI_SI', 'yes'),
 			('DEV_IPMI', 'yes'),
 			('IPMI_WATCHDOG', 'no'),
@@ -168,6 +168,12 @@ class Command(stack.commands.HostArgumentProcessor,
 			% (channel, ip))
 		self.addOutput(host, 'ipmitool lan set %s netmask %s'
 			% (channel, netmask))
+
+		if not gateway:
+			gateway = '0.0.0.0'
+		self.addOutput(host, 'ipmitool lan set %s defgw ipaddr %s'
+			% (channel, gateway))
+
 		self.addOutput(host, 'ipmitool lan set %s arp respond on'
 			% (channel))
 
@@ -352,15 +358,16 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.db.execute("""select distinctrow 
 			net.mac, net.ip, net.device, net.vlanid,
-			net.subnet, net.module, net.options, net.channel
-			from networks net, nodes n where net.node = n.id
+			net.subnet, net.module, net.options, net.channel,
+			s.gateway from networks net, nodes n, subnets s
+			where net.node = n.id and net.subnet = s.id 
 			and n.name = "%s" order by net.device""" % (host))
 
 		udev_output = ""
 
 		for row in self.db.fetchall():
 			(mac, ip, device, vlanid, subnetid, module, options,
-				channel) = row
+				channel, gateway) = row
 
 			netname = None
 			netmask = None
@@ -384,7 +391,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				continue # don't do anything if noreport set
 
 			if device == 'ipmi':
-				self.writeIPMI(host, ip, channel, netmask)
+				self.writeIPMI(host, ip, channel, netmask,
+					gateway)
 
 				# ipmi is special, skip the standard stuff
 				continue

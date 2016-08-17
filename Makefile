@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.2
+#                                  v3.3
 # 
 #      Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
 # 
@@ -73,7 +73,8 @@ bootstrap:
 	libcurl-devel \
 	httpd-devel \
 	syslinux \
-	createrepo
+	createrepo \
+	perl-ExtUtils-MakeMaker
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
