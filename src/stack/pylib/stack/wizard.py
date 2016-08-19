@@ -213,6 +213,16 @@ class Data:
 			self.data.Info_FQDN:
 			return (False, "Please fill out all entries", "Incomplete")
 		else:
+			#invalid dns format
+			D = self.data.Kickstart_PrivateDNSServers.split(",")
+			try:
+				for d in D:
+					ip = stack.ip.IPGenerator(d, "255.255.255.255")
+			except:
+				print(traceback.format_exc())
+				return (False, "DNS entry not in proper format", "Input Error")
+
+			#calculate other attributes
 			self.data.Kickstart_PrivateKickstartHost = \
 				self.data.Kickstart_PrivateAddress
 			self.data.Info_ClusterURL = \
