@@ -1,4 +1,3 @@
-#
 # @SI_Copyright@
 #                               stacki.com
 #                                  v3.3
@@ -41,57 +40,96 @@
 # @SI_Copyright@
 #
 
+from xml.sax import saxutils
+from xml.sax import handler
+from xml.sax import make_parser
 import stack.commands
-import stack.gen
+import stack.redhat.gen
+
+class ProfileHandler(handler.ContentHandler,
+                     handler.DTDHandler,
+                     handler.EntityResolver,
+                     handler.ErrorHandler):
+
+	def __init__(self):
+		handler.ContentHandler.__init__(self)
+                self.recording = False
+                self.text      = ''
+                self.doc       = []
+
+	def startElement(self, name, attrs):
+                if name == 'chapter' and attrs.get('name') == 'kickstart':
+                        self.recording	= True
+
+	def endElement(self, name):
+                if self.recording:
+                        self.doc.append(self.text)
+                        self.text = ''
+
+                if name == 'chapter':
+                        self.recording = False
+
+	def characters(self, s):
+                if self.recording:
+                        self.text += s
+
+        def document(self):
+                return self.doc
+
+
+
+
 
 class Implementation(stack.commands.Implementation):
+
 	def run(self, args):
 
-		host = args[0]
-		xml = args[1]
+		host	= args[0]
+		xml	= args[1]
+                native	= args[2]
+                profile	= []
 
-		c_gen = getattr(stack.gen,'Generator_%s' % self.owner.os)
-		self.generator = c_gen()
-		self.generator.setArch(self.owner.arch)
-		self.generator.setOS(self.owner.os)
+		generator = stack.redhat.gen.Generator()
+		generator.parse(xml)
 
-		if xml == None:
-			xml = self.owner.command('list.host.xml', 
-			[
-			 host,
-			 'os=%s' % self.owner.os,
-			])
-		self.runXML(xml, host)
+                profile.append('<?xml version="1.0" standalone="no"?>')
+                profile.append('<profile os="redhat">')
+                profile.append('<chapter name="meta">')
+                profile.append('\t<section name="order">')
+                for line in generator.generate('order'):
+                        profile.append('%s' % line)
+                profile.append('\t</section>')
+                profile.append('\t<section name="debug">')
+                for line in generator.generate('debug'):
+                        profile.append(line)
+                profile.append('\t</section>')
+                profile.append('</chapter>')
 
-	def runXML(self, xml, host):
-		"""Reads the XML host profile and outputs a RedHat 
-		Kickstart file."""
+                profile.append('<chapter name="kickstart">')
+                for section in [ 'main',
+                                 'packages',
+                                 'pre',
+                                 'post',
+                                 'boot' ]:
+                        profile.append('\t<section name="%s">' % section)
+                        for line in generator.generate(section):
+                                profile.append(line)
+                        profile.append('\t</section>')
 
-		list = []
-		self.generator.parse(xml)
-		if self.owner.section == 'all':
-			for section in [
-				'order',
-				'debug',
-				'main',
-				'packages',
-				'pre',
-				'post',
-				'boot',
-				'installclass'
-				]:
-				list += self.generator.generate(section,
-					annotation=self.owner.annotation)
-		else:
-			list += self.generator.generate(self.owner.section,
-					annotation=self.owner.annotation)
-		self.owner.addOutput(host,
-			self.owner.annotate('<profile lang="kickstart">'))
-		self.owner.addOutput(host,
-			self.owner.annotate('<section name="kickstart">'))
-		self.owner.addOutput(host, self.owner.annotate('<![CDATA['))
-		for i in list:
-			self.owner.addOutput(host, i)
-		self.owner.addOutput(host, self.owner.annotate(']]>'))
-		self.owner.addOutput(host, self.owner.annotate('</section>'))
-		self.owner.addOutput(host, self.owner.annotate('</profile>'))
+                profile.append('</chapter>')
+                profile.append('</profile>')
+
+
+                if native:
+			parser = make_parser()
+			handler = ProfileHandler()
+			parser.setContentHandler(handler)
+                        for line in profile:
+                                parser.feed('%s\n' % line)
+                        profile = handler.document()
+
+                for line in profile:
+                        self.owner.addOutput(host, line)
+
+
+

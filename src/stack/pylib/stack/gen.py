@@ -140,15 +140,75 @@ class NodeFilter(xml.dom.NodeFilter.NodeFilter):
 		expr = stack.cond.CreateCondExpr(arch, os, release, cond)
 		return stack.cond.EvalCondExpr(expr, self.attrs)
 
+
+
+class ProfileSnippet:
+        
+        def __init__(self, text, source):
+                self.source	= source
+                self.text	= text
+
+        def getText(self):
+                return self.text
+
+        def getSource(self):
+                return self.source
+
+                
+
+class ProfileSection:
+
+        def __init__(self):
+                self.snippets = []
+
+        def append(self, text, source=None):
+                self.snippets.append(ProfileSnippet(text, source))
+
+        def generate(self, cdata=True):
+                prev = None
+                open = False
+                list = []
+
+                if cdata:
+                        cdataStart = '<![CDATA['
+                        cdataEnd   = ']]>'
+                else:
+                        cdataStart = ''
+                        cdataEnd   = ''
+
+                for snippet in self.snippets:
+                        source = snippet.getSource()
+                        text   = snippet.getText()
+
+                        if not source:
+                                source = 'internal'
+
+                        if source != prev:
+                                if open:
+                                        list.append('\t\t%s</subsection>' % cdataEnd)
+                                list.append('\t\t<subsection source="%s">%s' % 
+                                            (source, cdataStart))
+                                open = True
+                        list.append(snippet.getText())
+                        prev = source
+                if open:
+	                list.append('\t\t%s</subsection>' % cdataEnd)
+                return list
+
 		
 class Generator:
 	"""Base class for various DOM based kickstart graph generators.
 	The input to all Generators is assumed to be the XML output of KPP."""
 	
 	def __init__(self):
-		self.attrs	= {}
-		self.arch	= None
-		self.rcsFiles	= {}
+		self.attrs		= {}
+                self.arch		= None
+		self.rcsFiles		= {}
+                self.nodeFilesDict	= {}
+                self.nodeFilesSection	= ProfileSection()
+                self.debugSection	= ProfileSection()
+                self.mainSection	= ProfileSection()
+		self.log		= '/var/log/stack-install.log'
 
 	def setArch(self, arch):
 		self.arch = arch
@@ -162,20 +222,6 @@ class Generator:
 	def getOS(self):
 		return self.os
 
-	def isDisabled(self, node):
-		return node.attributes.getNamedItem((None, 'disable'))
-
-	def isMeta(self, node):
-		attr  = node.attributes
-		type  = attr.getNamedItem((None, 'type'))
-		if type:
-			type = type.value
-		else:
-			type = 'rpm'
-		if type  == 'meta':
-			return 1
-		return 0
-	
 	def rcsBegin(self, file, owner, perms):
 		"""
 		If the is the first time we've seen a file ci/co it.  Otherwise
@@ -257,23 +303,40 @@ class Generator:
 		return string.join(l, '\n')
 
 	
+        def getAttr(self, node, attr):
+		a = node.attributes.getNamedItem((None, attr))
+                if a:
+                        return a.value
+                else:
+                        return ''
+                
+	
 	def order(self, node):
 		"""
 		Stores the order of traversal of the nodes
 		Useful for debugging.
 		"""
-		roll, nodefile, color = self.get_context(node)
-		if (roll, nodefile, color) not in self.ks['order']:
-			self.ks['order'].append((roll, nodefile, color))
+                nodefile = self.getAttr(node, 'file')
+
+                if nodefile and nodefile not in self.nodeFilesDict:
+                        self.nodeFilesDict[nodefile] = True
+                        self.nodeFilesSection.append(nodefile)
 		
 	def handle_mainChild(self, node):
-		attr = node.attributes
-		roll, nodefile, color = self.get_context(node)
-		try:
-			eval('self.handle_main_%s(node)' % node.nodeName)
-		except AttributeError:
-			self.ks['main'].append(('%s %s' % (node.nodeName,
-				self.getChildText(node)), roll, nodefile, color))
+                nodefile = self.getAttr(node, 'file')
+		attr     = node.attributes
+
+                try:
+			fn = eval('self.handle_main_%s' % node.nodeName)
+                except AttributeError:
+                        fn = None
+                if fn:
+                        text = fn(node)
+                else:
+                        text = '%s %s' % (node.nodeName, self.getChildText(node))
+                self.mainSection.append(text, nodefile)
+
+
 
 		
 	def parseFile(self, node):
@@ -373,9 +436,62 @@ class Generator:
 			if child.nodeType == child.TEXT_NODE:
 				text += child.nodeValue
 			elif child.nodeType == child.ELEMENT_NODE:
-				text += eval('self.handle_child_%s(child)' \
-					% (child.nodeName))
+                                try:
+                                        fn = eval('self.handle_child_%s' % child.nodeName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        text += fn(child)
 		return text
+
+	def parse(self, xml_string):
+		import cStringIO
+		xml_buf = cStringIO.StringIO(xml_string)
+		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
+		filter = stack.gen.MainNodeFilter(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
+			filter, 0)
+		node = iter.nextNode()
+		
+		while node:
+			if node.nodeName == 'profile':
+				self.handle_profile(node)
+			elif node.nodeName == 'main':
+				child = iter.firstChild()
+				while child:
+					self.handle_mainChild(child)
+					child = iter.nextSibling()
+			node = iter.nextNode()
+			
+		filter = stack.gen.OtherNodeFilter(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
+		node = iter.nextNode()
+		while node:
+			if node.nodeName != 'profile':
+				self.order(node)
+                                try:
+                                        fn = eval('self.handle_%s' % node.nodeName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        fn(node)
+			node = iter.nextNode()
+
+
+	# <profile>
+	
+	def handle_profile(self, node):
+		# pull out the attr to handle generic conditionals
+		# this replaces the old arch/os logic but still
+		# supports the old syntax
+
+		if node.attributes:
+			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			if attrs:
+				dict = eval(attrs.value)
+				for (k,v) in dict.items():
+					self.attrs[k] = v
+
 
 	
 	# <*>
@@ -384,12 +500,19 @@ class Generator:
 	
 	def handle_child_file(self, node):
 		return self.parseFile(node)
+	
+	# <debug>
+	
+	def handle_debug(self, node):
+                self.debugSection.append(self.getChildText(node), 
+                                         self.getAttr(node, 'file'))
 
-	##
+	
+        ##
 	## Generator Section
 	##
 			
-	def generate(self, section, annotation=False):
+	def generate(self, section):
 		"""Dump the requested section of the kickstart file.  If none 
 		exists do nothing."""
 		list = []
@@ -400,52 +523,20 @@ class Generator:
 		if f:
 			list += f()
 
-		return self.annotate(list, annotation)
+		return list
 
 	def generate_order(self):
-		list = []
-		list.append('#')
-		list.append('# Node Traversal Order')
-		list.append('#')
-		for (roll, nodefile, color) in self.ks['order']:
-			list.append(('# %s (%s)' % (nodefile, roll),
-				roll, nodefile, color))
-		list.append('#')
-		return list
+                return self.nodeFilesSection.generate()
 
 	def generate_debug(self):
-		list = []
-		list.append('#')
-		list.append('# Debugging Information')
-		list.append('#')
-		for text in self.ks['debug']:
-			for line in string.split(text, '\n'):
-				list.append('# %s' % line)
-		list.append('#')
-		return list
+                return self.debugSection.generate()
 
-	def annotate(self, l, annotation=False):
-		o = []
-		if annotation:
-			for line in l:
-				if type(line) == str or \
-					type(line) == unicode:
-					o.append([line, None, 'Internal', None])
-				else:
-					o.append(list(line))
-		else:
-			for line in l:
-				if type(line) == tuple:
-					o.append(line[0])
-				else:
-					o.append(line)
-		return o
 
-class MainNodeFilter_redhat(NodeFilter):
+class MainNodeFilter(NodeFilter):
 
 	def acceptNode(self, node):
 	
-		if node.nodeName in [ 'kickstart', 'main' ]:
+		if node.nodeName in [ 'profile', 'main' ]:
 			return self.FILTER_ACCEPT
 
                 if not (node.parentNode and node.parentNode.nodeName == 'main'):
@@ -457,22 +548,15 @@ class MainNodeFilter_redhat(NodeFilter):
 		return self.FILTER_ACCEPT
 
 
-class OtherNodeFilter_redhat(NodeFilter):
+class OtherNodeFilter(NodeFilter):
+
 	def acceptNode(self, node):
 
-		if node.nodeName == 'kickstart':
+		if node.nodeName == 'profile':
 			return self.FILTER_ACCEPT
-			
-		if node.nodeName not in [
-			'attributes', 
-			'debug',
-			'description',
-			'package',
-			'pre', 
-			'post',
-			'boot'
-			]:
-			return self.FILTER_SKIP
+
+                if node.nodeName in [ '#document', 'main' ]:
+                        return self.FILTER_SKIP
 			
 		if not self.isCorrectCond(node):
 			return self.FILTER_SKIP
@@ -480,971 +564,3 @@ class OtherNodeFilter_redhat(NodeFilter):
 		return self.FILTER_ACCEPT
 
 
-class Generator_redhat(Generator):
-
-	def __init__(self):
-		Generator.__init__(self)	
-		self.ks                 = {}
-		self.ks['order']	= []
-		self.ks['debug']	= []
-		self.ks['main']         = []
-		self.ks['rpms-on']	= []
-		self.ks['rpms-off']	= []
-		self.ks['pre' ]         = []
-		self.ks['post']         = []
-		self.ks['boot-pre']	= []
-		self.ks['boot-post']	= []
-
-		self.rpm_context	= {}
-		self.log = '/var/log/stack-install.log'
-
-	
-	##
-	## Parsing Section
-	##
-	
-	def parse(self, xml_string):
-		import cStringIO
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = MainNodeFilter_redhat(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		
-		while node:
-			if node.nodeName == 'kickstart':
-				self.handle_kickstart(node)
-			elif node.nodeName == 'main':
-				child = iter.firstChild()
-				while child:
-					self.handle_mainChild(child)
-					child = iter.nextSibling()
-
-			node = iter.nextNode()
-			
-		filter = OtherNodeFilter_redhat(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		while node:
-			if node.nodeName != 'kickstart':
-				self.order(node)
-				eval('self.handle_%s(node)' % (node.nodeName))
-			node = iter.nextNode()
-
-
-	# <kickstart>
-	
-	def handle_kickstart(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
-		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
-			if attrs:
-				dict = eval(attrs.value)
-				for (k,v) in dict.items():
-					self.attrs[k] = v
-
-	def get_context(self, node):
-		# This function returns the rollname,
-		# and nodefile of the node currently being
-		# processed
-		attr = node.attributes
-		roll = None
-		nodefile = None
-		color = None
-		if attr.getNamedItem((None, 'roll')):
-			roll = attr.getNamedItem((None, 'roll')).value
-		if attr.getNamedItem((None, 'file')):
-			nodefile = attr.getNamedItem((None, 'file')).value
-		if attr.getNamedItem((None, 'color')):
-			color = attr.getNamedItem((None, 'color')).value
-		return (roll, nodefile, color)
-	# <main>
-	#	<clearpart>
-	# </main>
-	
-	def handle_main_clearpart(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		attr = node.attributes
-		if attr.getNamedItem((None, 'partition')):
-			arg = attr.getNamedItem((None, 'partition')).value
-		else:
-			arg = ''
-
-		#
-		# the web form sets the environment variable 'partition'
-		# (although, we may find that it makes sense for other
-		# sources to set it too).
-		#
-		try:
-			os_arg = os.environ['partition']
-		except:
-			os_arg = ''
-
-		clearpart = self.getChildText(node)
-
-		if (arg == '') or (os_arg == '') or (arg == os_arg):
-			self.ks['main'].append(('clearpart %s' % clearpart,
-				roll, nodefile, color))
-
-	
-	# <main>
-	#	<lilo>
-	# </main>
-	
-	def handle_main_lilo(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('bootloader %s' %
-			self.getChildText(node), roll, nodefile, color))
-		return
-
-
-	# <main>
-	#	<bootloader>
-	# </main>
-
-	def handle_main_bootloader(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('bootloader %s' %
-			self.getChildText(node), roll, nodefile, color))
-		return
-
-	# <main>
-	#	<lang>
-	# </main>
-
-	def handle_main_lang(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('lang %s' %
-			self.getChildText(node), roll, nodefile, color))
-		return
-
-	# <main>
-	#	<langsupport>
-	# </main>
-
-	def handle_main_langsupport(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('langsupport --default=%s' %
-			self.getChildText(node).strip(),
-			roll, nodefile, color))
-
-		return
-
-	# <main>
-	#	<volgroup>
-	# </main>
-
-	def handle_main_volgroup(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('volgroup %s' %
-			self.getChildText(node).strip(),
-			roll, nodefile, color))
-
-		return
-
-	# <main>
-	#	<logvol>
-	# </main>
-
-	def handle_main_logvol(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['main'].append(('logvol %s' %
-			self.getChildText(node).strip(),
-			roll, nodefile, color))
-		return
-
-	# <debug>
-	
-	def handle_debug(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		self.ks['debug'].append((self.getChildText(node), roll, nodefile, color))
-	
-	# <package>
-	def handle_package(self, node):
-		rpm = self.getChildText(node).strip()
-		if self.isDisabled(node):
-			key = 'rpms-off'
-		else:
-			key = 'rpms-on'
-
-		if self.isMeta(node):
-			rpm = '@' + rpm	
-
-
-		# if the RPM is to be turned off, only add if it is not 
-		# in the on list.
-
-		if key == 'rpms-off':
-			if rpm not in self.ks['rpms-on']:
-				self.ks[key].append(rpm)
-
-		# if RPM is turned on, make sure it is not in the off list
-
-		if key == 'rpms-on':
-			self.ks[key].append(rpm)
-
-			if rpm in self.ks['rpms-off']:
-				self.ks['rpms-off'].remove(rpm)
-
-		self.rpm_context[rpm] = self.get_context(node)
-
-	# <pre>
-	
-	def handle_pre(self, node):
-		attr = node.attributes
-		(roll, nodefile, color) = self.get_context(node)
-		pre_attrs = {}
-		# Collect arguments to the pre section
-		for this_attr in ['interpreter', 'notify', 'arg', 'wait']:
-			if attr.getNamedItem((None, this_attr)):
-				pre_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
-		self.ks['pre'].append((pre_attrs, self.getChildText(node), roll, nodefile, color))
-
-	# <post>
-	
-	def handle_post(self, node):
-		attr = node.attributes
-		(roll, nodefile, color) = self.get_context(node)
-		post_attrs = {}
-		# Collect arguments to the post section
-		for this_attr in ['interpreter', 'notify', 'arg', 'wait']:
-			if attr.getNamedItem((None, this_attr)):
-				post_attrs[this_attr] = attr.getNamedItem((None, this_attr)).value
-		self.ks['post'].append((post_attrs, self.getChildText(node), roll, nodefile, color))
-		
-	# <boot>
-	
-	def handle_boot(self, node):
-		(roll, nodefile, color) = self.get_context(node)
-		attr = node.attributes
-		if attr.getNamedItem((None, 'order')):
-			order = attr.getNamedItem((None, 'order')).value
-		else:
-			order = 'pre'
-
-		self.ks['boot-%s' % order].append(
-			(self.getChildText(node), roll, nodefile, color))
-
-
-	def generate_main(self):
-		list = []
-		list.append('')
-		list += self.ks['main']
-		return list
-
-	def generate_packages(self):
-		list = []
-		list.append('%packages --ignoremissing')
-		self.ks['rpms-on'].sort()
-		for e in self.ks['rpms-on']:
-			if self.rpm_context.has_key(e):
-				(roll, nodefile, color) = self.rpm_context[e]
-			else:
-				(roll, nodefile, color) = (none, none, none)
-			list.append((e, roll, nodefile, color))
-		self.ks['rpms-off'].sort()
-		for e in self.ks['rpms-off']:
-			if self.rpm_context.has_key(e):
-				(roll, nodefile, color) = self.rpm_context[e]
-			else:
-				(roll, nodefile, color) = (none, none, none)
-			list.append(('-'+ e, roll, nodefile, color))
-		list.append('%end')
-		return list
-
-	def generate_pre(self):
-		pre_list = []
-		pre_list.append('')
-
-		for ks_pre_data in self.ks['pre']:
-			args = ks_pre_data[0]
-			text = ks_pre_data[1]
-			roll = ks_pre_data[2]
-			nodefile = ks_pre_data[3]
-			color = ks_pre_data[4]
-			log_line = '/tmp/ks-pre.log'
-			pre_header = '%pre'
-			# Add the interpreter, if applicable
-			if 'interpreter' in args:
-				pre_header += " --interpreter " + args['interpreter']
-			# Assumes all args get added on to the logline
-			if 'arg' in args:
-				log_line = ' --log=/tmp/ks-pre.log %s' % args['arg']
-			else:
-				log_line = ' --log=%s' % self.log
-			if 'wait' in args:
-				# to be polite, send a notification that we're waiting
-				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
-				wait_string = '\n%%pre\nchmod a+x %s\n' % notify_script
-				waitfile = '/tmp/wait.txt'
-				msg = 'waiting for %s in %s' % (waitfile, os.path.basename(nodefile))
-				wait_string += '%s %s\n\n' % (notify_script, msg)
-				wait_string += 'touch %s\n' % waitfile
-				wait_string += 'while [ -f %s ]; do\n' % waitfile
-				wait_string += '\tsleep 2;\ndone\n'
-				wait_string += '%end\n'
-				pre_list.append((wait_string, roll, nodefile, color))
-			# if there's a notify argument, prepend it to text
-			if 'notify' in args:
-				msg = args['notify']
-				# if notify='' --> just use the node.xml filename w/o extension
-				if not msg:
-					msg = os.path.splitext(os.path.basename(nodefile))[0]
-				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
-				notify_cmd = '\n%%pre\nchmod a+x %s\n' % notify_script
-				notify_cmd += '%s %s\n\n%%end\n\n' % (notify_script, msg)
-				pre_list.append((notify_cmd, roll, nodefile, color))
-			pre_list.append(('%s %s' % (pre_header, log_line), roll, nodefile, color))
-			pre_list.append((text + '\n',roll, nodefile, color))
-			pre_list.append(('%end'))
-			
-		return pre_list
-
-	def generate_post(self):
-		post_list = []
-		post_list.append(('', None, None))
-
-		for ks_post_data in self.ks['post']:
-			args = ks_post_data[0]
-			text = ks_post_data[1]
-			roll = ks_post_data[2]
-			nodefile = ks_post_data[3]
-			color = ks_post_data[4]
-			log_line = self.log
-			post_header = '%post'
-			# Add the interpreter, if applicable
-			if 'interpreter' in args:
-				post_header += " --interpreter " + args['interpreter']
-			# Assumes all args get added on to the logline
-			if 'arg' in args and  '--nochroot' in args['arg']:
-				log_line = ' %s --log=/mnt/sysimage%s' % (args['arg'], self.log)
-			else:
-				log_line = ' --log=%s' % self.log
-			if 'wait' in args:
-				# to be polite, send a notification that we're waiting
-				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
-				wait_string = '\n%%post --nochroot\nchmod a+x %s\n' % notify_script
-				waitfile = '/tmp/wait.txt'
-				msg = 'waiting for %s in %s' % (waitfile, os.path.basename(nodefile))
-				wait_string += '%s %s\n\n' % (notify_script, msg)
-				wait_string += 'touch %s\n' % waitfile
-				wait_string += 'while [ -f %s ]; do\n' % waitfile
-				wait_string += '\tsleep 2;\ndone\n'
-				wait_string += '%end\n'
-				post_list.append((wait_string, roll, nodefile, color))
-			# if there's a notify argument, prepend the notification code to the text
-			if 'notify' in args:
-				msg = args['notify']
-				# if notify='' --> just use the node.xml filename w/o extension
-				if not msg:
-					msg = os.path.splitext(os.path.basename(nodefile))[0]
-				notify_script = '/opt/stack/lib/python2.6/site-packages/stack/notify.py'
-				notify_cmd = '\n%%post --nochroot\nchmod a+x %s\n' % notify_script
-				notify_cmd += '%s %s\n\n%%end\n\n' % (notify_script, msg)
-				post_list.append((notify_cmd, roll, nodefile, color))
-			post_list.append(('%s %s' % (post_header, log_line), roll, nodefile, color))
-			post_list.append((text + '\n',roll, nodefile, color))
-			post_list.append(('%end'))
-			
-		return post_list
-
-
-	def generate_boot(self):
-		list = []
-		list.append('')
-		list.append('%%post --log=%s' % self.log)
-		
-		# Boot PRE
-		#	- check in/out all modified files
-		#	- write the <boot order="pre"> text
-		
-		list.append('')
-		list.append("cat >> /etc/sysconfig/stack-pre << '__EOF__'")
-
-		for (file, (owner, perms)) in self.rcsFiles.items():
-			s = self.rcsEnd(file, owner, perms)
-			list.append(s)
-
-		for l in self.ks['boot-pre']:
-			list.append(l)
-
-		list.append('__EOF__')
-
-		# Boot POST
-		#	- write the <boot order="post"> text
-		
-		list.append('')
-		list.append("cat >> /etc/sysconfig/stack-post << '__EOF__'")
-
-		for l in self.ks['boot-post']:
-			list.append(l)
-
-		list.append('__EOF__')
-		list.append('')
-
-		list.append('%end')
-		
-		return list
-
-class MainNodeFilter_sunos(NodeFilter):
-	"""
-	This class either accepts or reject tags
-	from the node XML files. All tags are under
-	the <main>*</main> tags.
-	Each and every one of these tags needs to
-	have a handler for them in the Generator
-	class.
-	"""
-	def acceptNode(self, node):
-		if node.nodeName == 'jumpstart':
-			return self.FILTER_ACCEPT
-
-		if node.nodeName not in [
-			'main', 	# <main><*></main>
-			'clearpart', 	# Clears the disk partitions
-			'url', 		# URL to download all the packages from
-			'part', 	# Partition information
-			'size',
-			'filesys',
-			'slice',
-			'locale',
-			'timezone',
-			'timeserver',
-			'terminal',
-			'name_service',
-			'domain_name',
-			'name_server',
-			'nfs4_domain',
-			'search',
-			'rootpw', 	# root password
-			'network',	# specify network configuration
-			'interface',	# network interface
-			'hostname',	# hostname
-			'ip_address',	# IP Address
-			'netmask',	# Netmask information
-			'default_route',# Default Gateway
-			'dhcp',		# to DHCP or not to DHCP
-			'protocol_ipv6',# to IPv6 or not to IPv6
-			'display',	# Display config
-			'monitor',	# Monitor config
-			'keyboard',	# Keyboard Config
-			'pointer',	# Mouse config
-			'security_policy', # Security config
-			'auto_reg',	# Auto Registration
-			'type',	# Auto Registration
-			]:
-			return self.FILTER_SKIP
-			
-		if not self.isCorrectCond(node):
-			return self.FILTER_SKIP
-	
-		return self.FILTER_ACCEPT
-
-
-
-class OtherNodeFilter_sunos(NodeFilter):
-	"""
-	This class accepts tags that define the
-	pre section, post section and the packages
-	section in the node XML files. The handlers
-	for these are present in the Generator class.
-	"""
-	def acceptNode(self, node):
-		if node.nodeName == 'jumpstart':
-			return self.FILTER_ACCEPT
-
-		if node.nodeName not in [
-			'cluster',
-			'package',
-			'patch',
-			'pre',
-			'post',
-			]:
-			return self.FILTER_SKIP
-
-		if not self.isCorrectCond(node):
-			return self.FILTER_SKIP
-			
-		return self.FILTER_ACCEPT
-		
-		
-class Generator_sunos(Generator):
-	"""
-	Handles all the XML tags that are acceptable
-	and generates a jumpstart compatible output
-	"""
-	def __init__(self):
-		Generator.__init__(self)
-		self.ks = {}
-		self.ks['main']		= []
-		self.ks['url']		= ''
-		self.ks['order']	= [] # Order of traversal
-		self.ks['sysidcfg']	= [] # The Main section
-		self.ks['part']		= [] # Partitioning
-		self.ks['profile']	= [] # Misc. Profile Information
-		self.ks['pkg_on']	= [] # Selected Packages
-		self.ks['pkg_off']	= [] # Deselected Packages
-		self.ks['pkgcl_on']	= [] # Selected Package Clusters
-		self.ks['pkgcl_off']	= [] # Deselected Package Clusters
-		self.ks['patch']	= [] # List of patches
-		self.ks['begin']	= [] # Begin Section
-		self.ks['finish']	= [] # Finish Section
-		self.ks['service_on']	= [] # Enabled Services section
-		self.ks['service_off']	= [] # Disabled Services section
-		self.finish_section	= 0  # Iterator. This counts up for
-					     # every post section that's
-					     # encountered
-					     
-		self.service_instances	= {}
-						
-
-	def parse(self, xml_string):
-		"""
-		Creates an XML tree representation of the XML string,
-		decompiles it, and parses the string.
-		"""
-		import cStringIO
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = MainNodeFilter_sunos(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		
-		while node:
-			if node.nodeName == 'jumpstart':
-				self.handle_jumpstart(node)
-			elif node.nodeName == 'main':
-				child = iter.firstChild()
-				while child:
-					self.handle_mainChild(child)
-					child = iter.nextSibling()
-					
-			elif node.nodeName in [
-				'name_service',
-				'network',
-				'auto_reg',
-				]:
-				f = getattr(self, "handle_%s" % node.nodeName)
-				f(node, iter)
-
-			node = iter.nextNode()
-
-		filter = OtherNodeFilter_sunos(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		while node:
-			if node.nodeName != 'jumpstart':
-				self.order(node)
-				eval('self.handle_%s(node)' % (node.nodeName))
-			node = iter.nextNode()
-
-	# <jumpstart>
-	
-	def handle_jumpstart(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
-		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
-			if attrs:
-				dict = eval(attrs.value)
-				for (k,v) in dict.items():
-					self.attrs[k] = v
-
-	# <main>
-	#	<clearpart>
-	# </main>
-	
-	def handle_main_clearpart(self, node):
-		self.ks['part'][0:0] = ['fdisk\trootdisk\tsolaris\tall']
-
-	# <main>
-	#	<url>
-	# </main>
-	
-	def handle_main_url(self, node):
-		self.ks['url'] = self.getChildText(node).strip()
-	
-	# <main>
-	#	<rootpw>
-	# </main>
-	
-	def handle_main_rootpw(self, node):
-		self.ks['sysidcfg'].append("root_password=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<locale>
-	# </main>
-	
-	def handle_main_locale(self, node):
-		self.ks['sysidcfg'].append("system_locale=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<timezone>
-	# </main>
-
-	def handle_main_timezone(self, node):
-		self.ks['sysidcfg'].append("timezone=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<timeserver>
-	# </main>
-
-	def handle_main_timeserver(self, node):
-		self.ks['sysidcfg'].append("timeserver=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<nfs4_domain>
-	# </main>
-
-	def handle_main_nfs4_domain(self, node):
-		self.ks['sysidcfg'].append("nfs4_domain=%s" %
-			self.getChildText(node).strip())
-
-
-	# <name_service>
-	
-	def handle_name_service(self, node, iter):
-		dns = {}
-		child = iter.firstChild()
-		while child:
-			dns[child.nodeName] = self.getChildText(child).strip()
-			child = iter.nextSibling()
-		self.ks['sysidcfg'].append("name_service=DNS {")
-		for i in dns:
-			self.ks['sysidcfg'].append('\t%s=%s' % (i, dns[i]))
-		self.ks['sysidcfg'].append('}')
-			
-	
-	# <auto_registration>
-	def handle_auto_reg(self, node, iter):
-		auto_reg = {}
-		child = iter.firstChild()
-		while child:
-			auto_reg[child.nodeName] = self.getChildText(child).strip()
-			child = iter.nextSibling()
-		if not auto_reg.has_key('type'):
-			self.ks['sysidcfg'].append('auto_reg=disable')
-			return
-		auto_reg_type = auto_reg.pop('type')
-		if auto_reg_type in ['disable', 'none']:
-			self.ks['sysidcfg'].append("auto_reg=%s" % auto_reg_type)
-			return
-		self.ks['sysidcfg'].append('auto_reg=%s {')
-		for i in auto_reg:
-			self.ks['sysidcfg'].append('\t%s=%s' % (i,auto_reg[i]))
-		self.ks['sysidcfg'].append('}')
-		
-	# <main>
-	#	<security_policy>
-	# </main>
-	
-	def handle_main_security_policy(self, node):
-		self.ks['sysidcfg'].append("security_policy=%s" %
-			self.getChildText(node).strip())
-	
-	# <main>
-	#	<display>
-	# </main>
-	
-	def handle_main_display(self, node):
-		self.ks['sysidcfg'].append("display=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<monitor>
-	# </main>
-	
-	def handle_main_monitor(self, node):
-		self.ks['sysidcfg'].append("monitor=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<keyboard>
-	# </main>
-	
-	def handle_main_keyboard(self, node):
-		self.ks['sysidcfg'].append("keyboard=%s" %
-			self.getChildText(node).strip())
-
-	# <main>
-	#	<pointer>
-	# </main>
-	
-	def handle_main_pointer(self, node):
-		self.ks['sysidcfg'].append("pointer=%s" %
-			self.getChildText(node).strip())
-		
-
-	# <*>
-	#	<service>
-	# </*>
-	
-	def handle_child_service(self, node):
-		# Handle the <service> tags that enable
-		# or disable services in Solaris
-		
-		# Get name and enabled flags
-		attr = node.attributes
-		name = None
-		enabled = 'true'
-		instance = 'default'
-		if attr.getNamedItem((None, 'name')):
-			name = attr.getNamedItem((None, 'name')).value
-		# If there's no name return
-		if not name:
-			return ''
-
-		if attr.getNamedItem((None, 'instance')):
-			instance = attr.getNamedItem((None, 'instance')).value
-
-		# populate the correct list, depending on
-		# whether the service is enabled or disabled.
-		if attr.getNamedItem((None, 'enabled')):
-			enabled = attr.getNamedItem((None, 'enabled')).value
-		if enabled == 'no' or enabled == 'false':
-			enabled = 'false'
-		else:
-			enabled='true'
-
-		if not self.service_instances.has_key(name):
-			self.service_instances[name] = []
-		self.service_instances[name].append((instance,enabled))
-		# This is only to placate the getChildText
-		# function. There's no need to return anything, as
-		# a separate list is being populated to be used
-		# later.
-		return ''
-
-	# <network>
-	
-	def handle_network(self, node, iter):
-		net = {}
-		dhcp = 0
-		child = iter.firstChild()
-		while child :
-			if child.nodeName =='dhcp':
-				dhcp = 1
-			else:
-				net[child.nodeName] = self.getChildText(child).strip()
-			child = iter.nextSibling()
-		if not net.has_key('interface'):
-			net['interface'] = 'PRIMARY'
-		self.ks['sysidcfg'].append("network_interface=%s{" %
-			net.pop('interface'))
-		if dhcp == 1:
-			self.ks['sysidcfg'].append("\t\tdhcp")
-		for i in net:
-			self.ks['sysidcfg'].append("\t\t%s=%s" % (i, net[i]))
-		self.ks['sysidcfg'].append("}")
-
-
-	# <package>
-	
-	def handle_package(self, node):
-		attr = node.attributes
-		if self.isMeta(node):
-			key = "pkgcl"
-		else:
-			key = "pkg"
-
-		if self.isDisabled(node):
-			key = key + "_off"
-		else:
-			key = key + "_on"
-
-		self.ks[key].append(self.getChildText(node).strip())
-		
-	# patch
-	def handle_patch(self, node):
-		attr = node.attributes
-		self.ks['patch'].append(self.getChildText(node))
-	# <pre>
-		
-	def handle_pre(self, node):
-		self.ks['begin'].append(self.getChildText(node))
-
-	# <post>
-	
-	def handle_post(self, node):
-		"""Function works in an interesting way. On solaris the post
-		sections are executed in the installer environment rather than
-		in the installed environment. So the way we do it is to write
-		a script for every post section, with the correct interpreter
-		and execute it with a chroot command.
-		"""
-		attr = node.attributes
-		# By default we always want to chroot, unless
-		# otherwise specified
-		if attr.getNamedItem((None, 'chroot')):
-			chroot = attr.getNamedItem((None, 'chroot')).value
-		else:
-			chroot = 'yes'
-
-		# By default, the interpreter is always /bin/sh, unless
-		# otherwise specified.
-		if attr.getNamedItem((None, 'interpreter')):
-			interpreter = attr.getNamedItem((None,
-				'interpreter')).value
-		else:
-			interpreter = '/bin/sh'
-
-		# The args that are supplied are for the command that
-		# you want to run, and not to the installer section.
-		if attr.getNamedItem((None, 'arg')):
-			arg = attr.getNamedItem((None, 'arg')).value
-		else:
-			arg = ''
-
-		list = []
-		if chroot == 'yes':
-			list.append("cat > /a/tmp/post_section_%d << '__eof__'"
-					% self.finish_section)
-			list.append("#!%s" % interpreter)
-			list.append(self.getChildText(node))
-			list.append("__eof__")
-			list.append("chmod a+rx /a/tmp/post_section_%d"
-					% self.finish_section)
-			list.append("chroot /a /tmp/post_section_%d %s"
-					% (self.finish_section, arg))
-		else:
-			if interpreter is not '/bin/sh':
-				list.append("cat > /tmp/post_section_%d "
-					"<< '__eof__'"
-					% self.finish_section)
-				list.append("#!%s" % interpreter)
-				list.append(self.getChildText(node))
-				list.append("__eof__")
-				list.append("chmod a+rx /tmp/post_section_%d"
-					% self.finish_section)
-				list.append("%s /tmp/post_section_%d"
-					% (interpreter, self.finish_section))
-			
-			else:
-				list.append(self.getChildText(node))
-
-		self.finish_section = self.finish_section+1
-		self.ks['finish'] += list
-
-	def generate(self, section):
-		"""Function generates the requested section
-		of the jumpstart file"""
-		
-		list = []
-		
-		f = getattr(self, 'generate_%s' % section )
-		list += f()
-		return list
-
-
-	def generate_begin(self):
-		""" Generates the pre installation scripts"""
-		list = []
-		list += self.ks['begin']
-		return list
-
-	def generate_finish(self):
-		list = []
-		list += self.generate_order()
-		list += self.ks['finish']
-
-		# Generate and add the services section to the finish
-		# script. 
-		list += self.generate_services()
-		# And we're done
-		
-		return list
-
-	def generate_profile(self):
-		if self.ks['url'] != '':
-			location = self.ks['url']
-		else:
-			location = "local_file\t/cdrom"
-		list = []
-		list.append("# Installation Type")
-		list.append("install_type\tinitial_install")
-		list.append("\n")
-		list.append("# System Type")
-		list.append("system_type\tstandalone")
-		list.append("\n")
-		list.append("# Profile Information")
-		list.append("\n")
-		list += self.ks['profile']
-		list.append("# Partition Information")
-		list += self.ks['part']
-		list.append("\n")
-		list.append("# Packages Section")
-		for i in self.ks['pkgcl_on']:
-			list.append('cluster\t%s' % i)
-		for i in self.ks['pkgcl_off']:
-			list.append('cluster\t%s\tdelete' % i)
-		for i in self.ks['pkg_on']:
-			list.append('package\t%s\tadd' % i)
-		for i in self.ks['pkg_off']:
-			list.append('package\t%s\tdelete' % i)
-		if len(self.ks['patch']) > 0:
-			patch_list = string.join(self.ks['patch'],',')
-			list.append('patch %s local_file /cdrom/Solaris_10/Patches' % patch_list)
-
-		return list
-		
-	def generate_sysidcfg(self):
-		list = []
-		list += self.ks['sysidcfg']
-		return list
-
-	def generate_rules(self):
-		list = []
-		list.append("any\t-\tbegin\tprofile\tfinish")
-		return list
-
-	def generate_services(self):
-
-		# Generates an XML file with a list of 
-		# all enabled and disabled services. This
-		# is going to be used when assembling services
-		# on compute nodes.
-		# The way to do this is to copy the service manifest
-		# xml file to /var/svc/manifest/ which should be done by
-		# an explicit cp command in the post section. Then enable
-		# these services by adding them to the site.xml command
-		# on the target machine.
-
-		if len(self.service_instances) == 0:
-			return []
-		list= []
-
-		list.append("cat > /a/var/svc/profile/site.xml << '_xml_eof_'")
-		# XML Headers, and doctype
-		list.append("<?xml version='1.0'?>")
-		list.append("<!DOCTYPE service_bundle SYSTEM "
-			"'/usr/share/lib/xml/dtd/service_bundle.dtd.1'>")
-
-		# Start service bundle
-		list.append("<service_bundle type='profile' name='site'"
-			"\n\txmlns:xi='http://www.w3.org/2001/XInclude' >")
-
-		for i in self.service_instances.keys():
-			list.append("\t<service name='%s' version='1' type='service'>" % i)
-			for j in self.service_instances[i]:
-				list.append("\t\t<instance name='%s' enabled='%s'/>" \
-						% (j[0], j[1]))
-			list.append("\t</service>")
-
-		# End Service bundle
-		list.append("</service_bundle>")
-		list.append('_xml_eof_')
-
-		return list

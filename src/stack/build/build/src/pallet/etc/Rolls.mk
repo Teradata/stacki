@@ -180,7 +180,9 @@ ifeq ($(OS),redhat)
 ROLLS.OS=linux
 endif
 else
+ifeq ($(ROLLS.OS),)
 ROLLS.OS=$(OS)
+endif
 endif
 
 roll-$(ROLL).xml:

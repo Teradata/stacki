@@ -102,7 +102,8 @@ import stack.commands
 from xml.sax import saxutils
 from xml.sax import handler
 
-class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
+class Command(stack.commands.list.command, 
+              stack.commands.BoxArgumentProcessor):
 	"""
 	Lists the XML configuration information for a host. The graph
 	traversal for the XML output is rooted at the XML node file
@@ -212,18 +213,13 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 			
 		if 'membership' not in attrs:
 			attrs['membership'] = 'Frontend'
-	
+
 		if len(args) != 1:
                         raise ArgRequired(self, 'node')
 		root = args[0]
 
 		doEval = self.str2bool(evalp)
 		allowMissing = self.str2bool(missing)
-
-		if attrs['os'] == 'sunos':
-			starter_tag = "jumpstart"
-		else:
-			starter_tag = "kickstart"
 
 		import stack
 
@@ -241,10 +237,9 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		#	
 		items = []
 		try:
-			for name, version, rel, arch in self.getBoxPallets(
-					attrs['box']):
-				items.append(os.path.join('/export', 'stack',
-					'pallets', name, version, 'redhat', arch))
+			for name, version, rel, arch, osname in self.getBoxPallets(attrs['box']):
+                                items.append(os.path.join('/export', 'stack',
+					'pallets', name, version, osname, arch))
 		except:
 			#
 			# there is no output from 'getBoxPallets()'.
@@ -392,7 +387,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		# the previously parsed nodes
 
 		self.addText('<?xml version="1.0" standalone="no"?>\n')
-		self.addText('<!DOCTYPE rocks-graph [\n')
+		self.addText('<!DOCTYPE stacki-profile [\n')
 		keys = attrs.keys()
 		keys.sort()
 		for k in keys:
@@ -402,7 +397,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 		d = {}
 		for key in attrs.keys():
 			d[key] = '&%s;' % key
-		self.addText('<%s attrs="%s">\n' % (starter_tag, d))
+		self.addText('<profile os="%s" attrs="%s">\n' % (attrs['os'], d))
 		if attrs['os'] == 'redhat':
 			self.addText('<loader>\n')
 			self.addText('%s\n' % saxutils.escape(kstext))
@@ -457,7 +452,7 @@ class Command(stack.commands.list.command, stack.commands.BoxArgumentProcessor):
 					self.addText(line)
 				self.addText('</post>\n')
                 
-		self.addText('</%s>\n' % starter_tag)
+		self.addText('</profile>\n')
 		
 		
 

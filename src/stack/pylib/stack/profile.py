@@ -185,6 +185,8 @@ class GraphHandler(handler.ContentHandler,
 		   handler.ErrorHandler,
 		   AttributeHandler):
 
+        # TODO -- nuke the entities, this is dead code and confusing
+
 	def __init__(self, attrs, entities={}, prune=True, directories=[ '.' ]):
 		handler.ContentHandler.__init__(self)
 		self.setAttributes(attrs)
@@ -197,7 +199,7 @@ class GraphHandler(handler.ContentHandler,
 		self.attrs.order		= stack.util.Struct()
 		self.attrs.order.default	= stack.util.Struct()
 		self.attributes			= attrs
-		self.entities			= entities
+		self.entities			= entities # not used ?
 		self.roll			= ''
 		self.text			= ''
 		self.os				= attrs['os']
@@ -573,8 +575,11 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.xml	= []
 		self.filename	= filename
 		self.stripText  = 0
-
 		self.attributes = attrs
+                self.osname     = attrs['os']
+
+
+                
 
 	def evalCond(self, attrs):
 		arch = None
@@ -614,7 +619,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 	def endElement_copyright(self, name):
 		pass
 	
-	# <kickstart>
+	# <kickstart> -- or whatever the outermost tag is (os dependent)
 	
 	def startElement_kickstart(self, name, attrs):
 	
@@ -654,21 +659,6 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.startElementDefault(name, attrs)
 			
 
-	def startElement_jumpstart(self, name, attrs):
-		if attrs.get('roll'):
-			self.node.setRoll(attrs.get('roll'))
-		else:
-			self.node.setRoll('unknown')
-			
-		if attrs.get('interface'):
-			self.node.setShape('box')
-		else:
-			self.node.setShape('ellipse')
- 
-			
-		self.node.setFilename(self.filename)
-		self.startElementDefault(name, attrs)
-	
 	# <include>
 
 	def startElement_include(self, name, attrs):
@@ -903,11 +893,14 @@ class Pass1NodeHandler(handler.ContentHandler,
 
 		
 	def startElement(self, name, attrs):
-		try:
-			func = getattr(self, "startElement_%s" % name)
-		except AttributeError:
-			self.startElementDefault(name, attrs)
-			return
+                if name == self.osname:
+			func = getattr(self, "startElement_kickstart")
+                else:
+                        try:
+                                func = getattr(self, "startElement_%s" % name)
+                        except AttributeError:
+                                self.startElementDefault(name, attrs)
+                                return
 		func(name, attrs)
 
 
@@ -955,11 +948,12 @@ class Pass2NodeHandler(handler.ContentHandler,
 		self.kstags  = {}
 		self.kskey = None
 		self.kstext = []
+                self.osname = attrs['os']
 
 	def startElement(self, name, attrs):
 		self.kstext = []
 		
-		if name == 'kickstart' or name == 'jumpstart':
+		if name == 'kickstart' or name == self.osname:
 			return
 		
 		if name in [ 'url', 'lang', 'keyboard', 'text', 'reboot',
@@ -972,16 +966,18 @@ class Pass2NodeHandler(handler.ContentHandler,
 		for attrName in attrs.getNames():
 			attrValue = attrs.get(attrName)
 			s += ' %s="%s"' % (attrName, attrValue)
-		if 'roll' not in attrs.getNames():
-			s += ' roll="%s"' % self.node.getRoll()
+		if 'pallet' not in attrs.getNames():
+			s += ' pallet="%s"' % self.node.getRoll()
 		if 'file' not in attrs.getNames():
 			s += ' file="%s"' % self.node.getFilename()
 		if 'color' not in attrs.getNames():
 			s += ' color="%s"' % self.node.getFillColor()
+
+
 		self.xml.append('<%s%s>' % (name, s))
 		
 	def endElement(self, name):
-		if name == 'kickstart' or name == 'jumpstart':
+		if name == 'kickstart' or name == self.osname:
 			return
 
 		if self.kskey:

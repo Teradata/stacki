@@ -91,6 +91,7 @@
 # @Copyright@
 
 import sys
+import string
 import stack.commands
 import stack.gen
 from stack.exception import *
@@ -98,89 +99,67 @@ from stack.exception import *
 
 class Command(stack.commands.list.host.command):
 	"""
-	Outputs a XML wrapped Kickstart/Jumpstart profile for the given hosts.
-	If not, profiles are listed for all hosts in the cluster. If input is
-	fed from STDIN via a pipe, the argument list is ignored and XML is
-	read from STDIN.  This command is used for debugging the Rocks
-	configuration graph.
+        Outputs a XML wrapped installer profile for the given hosts.
+
+        If no hosts are specified the profiles for all hosts are listed.
+	
+        If input is fed from STDIN via a pipe, the argument list is
+	ignored and XML is read from STDIN.  This command is used for
+	debugging the Stacki configuration graph.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, info about
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host profile compute-0-0'>
-	Generates a Kickstart/Jumpstart profile for compute-0-0.
+	<example cmd='list host profile backend-0-0'>
+	Generates a Kickstart profile for backend-0-0.
 	</example>
 
-	<example cmd='list host xml compute-0-0 | rocks list host profile'>
+	<example cmd='list host xml backend-0-0 | stack list host profile'>
 	Does the same thing as above but reads XML from STDIN.
 	</example>
-	"""
+
+        """
 
 	MustBeRoot = 1
 
-	# Annotation function. If annotation is required
-	# return a list of [text, rollname, nodefile, rollcolor]
-	# Otherwise simply return the text string
-	def annotate(self, o):
-		if type(o) == str or type(o) == unicode:
-			if self.annotation:
-				return [o, None, None, None]
-			else:
-				return o
-		if type(o) == tuple:
-			if self.annotation:
-				return list(o)
-			else:
-				return o[0]
-			
 	def run(self, params, args):
-		"""Generate the OS specific profile file(s) in a single XML
-		stream (e.g. Kickstart or Jumpstart).  If a host argument
-		is provided use it, otherwise assume the cooked XML is
-		on stdin."""
 
-		# By default, print all sections of kickstart/jumpstart file
-		(section, annotation, os) = self.fillParams([
-			('section','all'),
-			('annotate','false'),
-			('os','redhat'),
-			])
-
-		self.section = section
-		self.os	     = os
-		self.annotation=self.str2bool(annotation)
-		self.beginOutput()
+		(native, ) = self.fillParams([ ('native', 'false') ])
+                native     = self.str2bool(native)
 
 		hosts = self.getHostnames(args)
-		if len(args) == 0:
-			host = 'localhost'
-		# If we're reading from input
-		xml = ''
+
+		self.beginOutput()
+
+                # When attached to a tty there is no XML input on stdin so we
+                # need to generate it.
+
+		xml    = ''
+                osname = None
+
+		# If the command is not on a TTY, then try to read XML input.
+
 		if not sys.stdin.isatty():
 			for line in sys.stdin.readlines():
+                                if line.find('<profile os="') == 0:
+                                        osname = line.split()[1][3:].strip('"')
 				xml += line
 
-		if xml:
-			self.addOutput('localhost',
-				self.annotate(
-				'<?xml version="1.0" standalone="no"?>'))
-			self.runImplementation(self.os, ('localhost', xml))
+		# If there's no XML input, either we have TTY, or we're running
+		# in an environment where TTY cannot be created (ie. apache)
 
-		# If no input is given
-		else:		
-			for host in self.getHostnames(args):
-				self.os = self.db.getHostOS(host)
-				self.addOutput(host,
-					self.annotate(
-					'<?xml version="1.0" standalone="no"?>'
-					))
-				self.runImplementation(self.os, (host, None))
+		if not xml:
+			for host in hosts:
+                                osname	= self.db.getHostOS(host)
+                                xml	= self.command('list.host.xml', [ host ])
 
-		if self.annotation:
-			self.endOutput(padChar='', header=[
-					'host','output','pallet',
-					'nodefile', 'color'])
-		else:
-			self.endOutput(padChar='')
+				self.runImplementation(osname, (host, xml, native))
+
+		# If we DO have XML input, simply parse it.
+
+                else:
+			self.runImplementation(osname, ('localhost', xml, native))
+
+		self.endOutput(padChar='')

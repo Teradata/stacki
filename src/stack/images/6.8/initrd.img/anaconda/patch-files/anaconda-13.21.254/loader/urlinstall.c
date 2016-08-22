@@ -699,7 +699,7 @@ int getFileFromUrl(char * url, char * dest,
 	sprintf(np, "%d", ncpus);
 
 	string_size = strlen("https://") + strlen(host) + strlen("/") +
-		strlen(base) + strlen("?arch=") + strlen(arch) +
+		strlen(base) + strlen("?os=redhat&arch=") + strlen(arch) +
 		strlen("&np=") + strlen(np) + 1;
 
 	if ((file = alloca(string_size)) == NULL) {
@@ -708,7 +708,7 @@ int getFileFromUrl(char * url, char * dest,
 	}
 	memset(file, 0, string_size);
 
-	sprintf(file, "https://%s/%s?arch=%s&np=%s", host, base, arch, np);
+	sprintf(file, "https://%s/%s?os=redhat&arch=%s&np=%s", host, base, arch, np);
 
 	logMessage(INFO, "ks location: %s", file);
 

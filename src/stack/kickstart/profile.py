@@ -103,57 +103,121 @@ import syslog
 import stack.lock
 import stack.api
 
-mutex     = stack.lock.Mutex('/var/tmp/kickstart.mutex')
-semaphore = stack.lock.Semaphore('/var/tmp/kickstart.semaphore')
-form      = cgi.FieldStorage()		# URL attributes
-report    = []				# Output
-caddr	  = os.environ['REMOTE_ADDR']
-cport     = int(os.environ['REMOTE_PORT'])
 
-syslog.openlog('kickstart', syslog.LOG_PID, syslog.LOG_LOCAL0)
-syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (caddr, cport))
+class Client:
+        """
+        Metadata for the calling client, this is always passed to
+        the profile-os module to generate the installer script.
+        """
 
-# Deny all requests that come from non-priviledged ports
-# This means only a root user can request a kickstart file
-		
-if cport > 1023:
-	print("Content-type: text/html")
-	print("Status: 401 Unauthorized")
-	print()
-	print("<h1>Unauthorized</h1>")
-	sys.exit(1)
+        def __init__(self, **kwargs):
+                self.form = cgi.FieldStorage()
+                self.addr = kwargs.get('addr')
+                self.port = kwargs.get('port')
+                self.arch = kwargs.get('arch')
+                self.np   = kwargs.get('np')
+                self.os   = kwargs.get('os')
+
+                if self.addr == None:
+                        self.addr = os.environ['REMOTE_ADDR']
+                if self.port == None:
+                        self.port = int(os.environ['REMOTE_PORT'])
+
+                if not self.arch:
+                        try:
+                                self.arch = self.form['arch'].value
+                        except:
+                                self.arch = None
+                        if not self.arch or re.search('[^a-zA-Z0-9_]+', self.arch):
+                                print("Content-type: text/html")
+                                print("Status: 500 Internal Error\n")
+                                print("<h1>Invalid arch field</h1>")
+                                sys.exit(1)
+
+                if not self.np:
+                        try:
+                                self.np = self.form['np'].value
+                        except:
+                                self.np = None
+                        if not self.np or re.search('[^0-9]+', self.np):
+                                print("Content-type: text/html")
+                                print("Status: 500 Internal Error\n")
+                                print("<h1>Invalid np field</h1>")
+                                sys.exit(1)
+
+                if not self.os:
+                        try:
+                                self.os = self.form['os'].value
+                        except:
+                                self.os = None
+                        if not self.os:
+                                print("Content-type: text/html")
+                                print("Status: 500 Internal Error\n")
+                                print("<h1>Invalid os field</h1>")
+                                sys.exit(1)
+
+                try:
+                        osModule     = __import__('profile.%s' % self.os)
+                        osClass      = eval('osModule.%s.Profile' % self.os)
+                        self.profile = osClass()
+                except ImportError:
+                        self.profile = None
 
 
-# Require the ARCH and NP fields in the URL and sanitize
-# them for use in the database.
-# Loader provides these today, so we should never trigger this code.
+        def pre(self):
+                """
+                Run the OS-specific pre-semaphore code.
+                """
+                if self.profile:
+                        self.profile.pre(self)
 
-try:
-	arch = form['arch'].value
-except:
-	arch = None
-if not arch or re.search('[^a-zA-Z0-9_]+', arch):
-	print("Content-type: text/html")
-	print("Status: 500 Internal Error")
-	print()
-	print("<h1>Invalid arch field</h1>")
-	sys.exit(1)
+        def main(self):
+                """
+                Run the OS-specific profile generator.
+                """
+                if self.profile:
+                        self.profile.main(self)
 
-try:
-	np = form['np'].value
-except:
-	np = None
-if not np or re.search('[^0-9]+', np):
-	print("Content-type: text/html")
-	print("Status: 500 Internal Error")
-	print()
-	print("<h1>Invalid np field</h1>")
-	sys.exit(1)
-
+        def post(self):
+                """
+                Run the OS-specific post-semaphore code.
+                """
+                if self.profile:
+                        self.profile.post(self)
+                else:
+                        print("Content-type: text/html")
+                        print("Status: 500 Internal Error\n")
+                        print("<h1>Unsupported OS</h1>")
         
-# Use a semaphore to restrict the number of concurrent kickstart
-# file generators.  The first time through we set the semaphore
-# to the number of CPUs (not a great guess, but reasonable).
+
+mutex     = stack.lock.Mutex('/var/tmp/profile.mutex')
+semaphore = stack.lock.Semaphore('/var/tmp/profile.semaphore')
+
+
+if not os.environ.has_key('REMOTE_ADDR'):
+
+        # CGI's always set this, so if it doesn't exist someone is
+        # running this directly on the command line for debugging
+
+        if len(sys.argv) == 2:
+                client_os = sys.argv[1]
+        else:
+                client_os = 'redhat'
+        client = Client(**{ 'addr' : '127.0.0.1',
+                            'port' : 0,
+                            'arch' : 'x86_64',
+                            'os'   : client_os,
+                            'np'   : '1' })
+else:
+        client = Client()
+
+syslog.openlog('profile', syslog.LOG_PID, syslog.LOG_LOCAL0)
+syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (client.addr, client.port))
+client.pre()
+
+# Use a semaphore to restrict the number of concurrent profile
+# generators.  The first time through we set the semaphore to the
+# number of CPUs (not a great guess, but reasonable).
 
 empty = False
 mutex.acquire()
@@ -169,7 +233,7 @@ if count == 0:
 	# Out of resources force the client to retry,
 	# and exit the cgi after we release the mutex.
 	print("Content-type: text/html")
-	print( "Status: 503 Service Busy")
+	print("Status: 503 Service Busy")
 	print("Retry-After: 15")
 	print()
 	print("<h1>Service is Busy</h1>")
@@ -178,49 +242,19 @@ else:
 	count -= 1
 	semaphore.write(count)
 mutex.release()
-
 if empty:
 	sys.exit(0)
 
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
 
-stack.api.Call('set host attr', [ caddr, 'attr=arch', 'value=%s' % arch ])
-stack.api.Call('set host cpus', [ caddr, 'cpus=%s' % np ])
-
-cmd = '/opt/stack/bin/stack list host xml arch=%s os=redhat %s' % \
-    (arch, caddr)
-for line in os.popen(cmd).readlines():
-	report.append(line[:-1])
-
 #
-# get the avalanche attributes
+# Generate the system profile
 #
 
-result = stack.api.Call('list host attr', [ caddr ])
-attrs  = {}
-for dict in result:
-	if dict['attr'] in [
-			'Kickstart_PrivateKickstartHost',
-			'trackers',
-			'pkgservers' ]:
-		attrs[dict['attr']] = dict['value'] 
+stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.arch ])
+stack.api.Call('set host cpus', [ client.addr, 'cpus=%s' % client.np ])
+client.main()
 
-if not attrs.has_key('trackers'):
-	attrs['trackers'] = attrs['Kickstart_PrivateKickstartHost']
-if not attrs.has_key('pkgservers'):
-	attrs['pkgservers'] = attrs['Kickstart_PrivateKickstartHost']
-
-#
-# Done
-#
-if report:
-	out = string.join(report, '\n')
-	print('Content-type: application/octet-stream')
-	print('Content-length: %d' % (len(out)))
-	print('X-Avalanche-Trackers: %s' % (attrs['trackers']))
-	print('X-Avalanche-Pkg-Servers: %s' % (attrs['pkgservers']))
-	print('')
-	print(out)
 		
 #
 # Release resource semaphore.
@@ -231,3 +265,4 @@ count = semaphore.read() + 1
 semaphore.write(count)
 mutex.release()
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore pop %d' % count)
+client.post()
