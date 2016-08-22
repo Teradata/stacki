@@ -40,43 +40,96 @@
 # @SI_Copyright@
 #
 
+from xml.sax import saxutils
+from xml.sax import handler
+from xml.sax import make_parser
 import stack.commands
 import stack.redhat.gen
+
+class ProfileHandler(handler.ContentHandler,
+                     handler.DTDHandler,
+                     handler.EntityResolver,
+                     handler.ErrorHandler):
+
+	def __init__(self):
+		handler.ContentHandler.__init__(self)
+                self.recording = False
+                self.text      = ''
+                self.doc       = []
+
+	def startElement(self, name, attrs):
+                if name == 'chapter' and attrs.get('name') == 'kickstart':
+                        self.recording	= True
+
+	def endElement(self, name):
+                if self.recording:
+                        self.doc.append(self.text)
+                        self.text = ''
+
+                if name == 'chapter':
+                        self.recording = False
+
+	def characters(self, s):
+                if self.recording:
+                        self.text += s
+
+        def document(self):
+                return self.doc
+
+
+
+
 
 class Implementation(stack.commands.Implementation):
 
 	def run(self, args):
 
-		host      = args[0]
-		xml       = args[1]
+		host	= args[0]
+		xml	= args[1]
+                native	= args[2]
+                profile	= []
 
 		generator = stack.redhat.gen.Generator()
 		generator.parse(xml)
 
-		self.owner.addOutput(host, '<profile os="redhat">')
-
-		self.owner.addOutput(host, '<chapter name="meta">')
-                self.owner.addOutput(host, '\t<section name="order">')
+                profile.append('<?xml version="1.0" standalone="no"?>')
+                profile.append('<profile os="redhat">')
+                profile.append('<chapter name="meta">')
+                profile.append('\t<section name="order">')
                 for line in generator.generate('order'):
-	                self.owner.addOutput(host, '\t\t%s' % line)
-                self.owner.addOutput(host, '\t</section>')
-                self.owner.addOutput(host, '\t<section name="debug">')
+                        profile.append('%s' % line)
+                profile.append('\t</section>')
+                profile.append('\t<section name="debug">')
                 for line in generator.generate('debug'):
-                        self.owner.addOutput(host, line)
-                self.owner.addOutput(host, '\t</section>')
-		self.owner.addOutput(host, '</chapter>')
+                        profile.append(line)
+                profile.append('\t</section>')
+                profile.append('</chapter>')
 
-
-		self.owner.addOutput(host, '<chapter name="kickstart">')
+                profile.append('<chapter name="kickstart">')
                 for section in [ 'main',
                                  'packages',
                                  'pre',
                                  'post',
                                  'boot' ]:
-                        self.owner.addOutput(host, '\t<section name="%s">' % section)
+                        profile.append('\t<section name="%s">' % section)
                         for line in generator.generate(section):
-                                self.owner.addOutput(host, line)
-                        self.owner.addOutput(host, '\t</section>')
-		self.owner.addOutput(host, '</chapter>')
+                                profile.append(line)
+                        profile.append('\t</section>')
 
-		self.owner.addOutput(host, '</profile>')
+                profile.append('</chapter>')
+                profile.append('</profile>')
+
+
+                if native:
+			parser = make_parser()
+			handler = ProfileHandler()
+			parser.setContentHandler(handler)
+                        for line in profile:
+                                parser.feed('%s\n' % line)
+                        profile = handler.document()
+
+                for line in profile:
+                        self.owner.addOutput(host, line)
+
+
+

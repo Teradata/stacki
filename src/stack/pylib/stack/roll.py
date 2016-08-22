@@ -226,16 +226,18 @@ class ScreenNodeFilter(stack.gen.NodeFilter):
 # Figure out what Platform we are on.  For now assume any Linux platform
 # is RedHat / CentOS
 		
-hostOS = os.uname()[0].lower()
-if hostOS == 'linux':
-	hostOS = 'redhat'
-osGenerator = getattr(stack.gen, 'Generator_%s' % hostOS)
+#hostOS = os.uname()[0].lower()
+#if hostOS == 'linux':
+#	hostOS = 'redhat'
+#osGenerator = getattr(stack.gen, 'Generator_%s' % hostOS)
+
 
 	
 
-class Generator(osGenerator):
+#class Generator(osGenerator):
+class Generator():
 	def __init__(self):
-		osGenerator.__init__(self)	
+		#osGenerator.__init__(self)	
 		self.rolls = []
 		self.os = os.uname()[0].lower()
 		return

@@ -213,7 +213,7 @@ class Command(stack.commands.list.command,
 			
 		if 'membership' not in attrs:
 			attrs['membership'] = 'Frontend'
-	
+
 		if len(args) != 1:
                         raise ArgRequired(self, 'node')
 		root = args[0]

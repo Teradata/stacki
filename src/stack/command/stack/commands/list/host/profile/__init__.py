@@ -113,7 +113,7 @@ class Command(stack.commands.list.host.command):
 	</arg>
 
 	<example cmd='list host profile backend-0-0'>
-	Generates a Kickstart/Jumpstart profile for backend-0-0.
+	Generates a Kickstart profile for backend-0-0.
 	</example>
 
 	<example cmd='list host xml backend-0-0 | stack list host profile'>
@@ -125,15 +125,9 @@ class Command(stack.commands.list.host.command):
 	MustBeRoot = 1
 
 	def run(self, params, args):
-		"""Generate the OS specific profile file(s) in a single XML
-		stream (e.g. Kickstart or Jumpstart).  If a host argument
-		is provided use it, otherwise assume the cooked XML is
-		on stdin."""
 
-		# By default, print all sections of kickstart/jumpstart file
-		(annotate, ) = self.fillParams([ ('annotate', 'false') ])
-
-		annotate = self.str2bool(annotate)
+		(native, ) = self.fillParams([ ('native', 'false') ])
+                native     = self.str2bool(native)
 
 		hosts = self.getHostnames(args)
 
@@ -143,8 +137,10 @@ class Command(stack.commands.list.host.command):
                 # need to generate it.
 
 		xml    = ''
+                osname = None
 
 		# If the command is not on a TTY, then try to read XML input.
+
 		if not sys.stdin.isatty():
 			for line in sys.stdin.readlines():
                                 if line.find('<profile os="') == 0:
@@ -153,17 +149,17 @@ class Command(stack.commands.list.host.command):
 
 		# If there's no XML input, either we have TTY, or we're running
 		# in an environment where TTY cannot be created (ie. apache)
+
 		if not xml:
 			for host in hosts:
-				osname = self.db.getHostOS(host)
-                                xml    = self.command('list.host.xml', [ host, 'os=%s' % osname ])
+                                osname	= self.db.getHostOS(host)
+                                xml	= self.command('list.host.xml', [ host ])
 
-				self.addOutput(host, '<?xml version="1.0" standalone="no"?>')
-				self.runImplementation(osname, (host, xml))
+				self.runImplementation(osname, (host, xml, native))
 
 		# If we DO have XML input, simply parse it.
+
                 else:
-			self.addOutput('localhost', '<?xml version="1.0" standalone="no"?>')
-			self.runImplementation(osname, ('localhost', xml))
+			self.runImplementation(osname, ('localhost', xml, native))
 
 		self.endOutput(padChar='')

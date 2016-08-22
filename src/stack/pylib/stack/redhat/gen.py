@@ -108,7 +108,6 @@ class Generator(stack.gen.Generator):
                 self.bootSection['pre']		= stack.gen.ProfileSection()
                 self.bootSection['post']	= stack.gen.ProfileSection()
                 self.packages			= {}
-		self.log			= '/var/log/stack-install.log'
 
                 # We could set these elsewhere but this is the current
                 # definition of the RedHat Generator.
@@ -119,60 +118,6 @@ class Generator(stack.gen.Generator):
 		self.setArch('x86_64')
 
 	
-	##
-	## Parsing Section
-	##
-
-	def parse(self, xml_string):
-		import cStringIO
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = stack.gen.MainNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		
-		while node:
-			if node.nodeName == 'profile':
-				self.handle_profile(node)
-			elif node.nodeName == 'main':
-				child = iter.firstChild()
-				while child:
-					self.handle_mainChild(child)
-					child = iter.nextSibling()
-
-			node = iter.nextNode()
-			
-		filter = stack.gen.OtherNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		while node:
-			if node.nodeName != 'profile':
-				self.order(node)
-                                try:
-                                        fn = eval('self.handle_%s' % node.nodeName)
-                                except AttributeError:
-                                        fn = None
-                                if fn:
-                                        fn(node)
-			node = iter.nextNode()
-
-
-	# <profile>
-	
-	def handle_profile(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
-		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
-			if attrs:
-				dict = eval(attrs.value)
-				for (k,v) in dict.items():
-					self.attrs[k] = v
-
 	# <main>
 	#	<clearpart>
 	# </main>
@@ -216,13 +161,6 @@ class Generator(stack.gen.Generator):
 		return 'langsupport --default=%s' % self.getChildText(node).strip()
 
 
-	# <debug>
-	
-	def handle_debug(self, node):
-                self.debugSection.append(self.getChildText(node), 
-                                         self.getAttr(node, 'file'))
-
-	
 	# <package>
 
 	def handle_package(self, node):

@@ -205,9 +205,10 @@ class Generator:
                 self.arch		= None
 		self.rcsFiles		= {}
                 self.nodeFilesDict	= {}
-                self.nodeFilesList	= []
+                self.nodeFilesSection	= ProfileSection()
                 self.debugSection	= ProfileSection()
                 self.mainSection	= ProfileSection()
+		self.log		= '/var/log/stack-install.log'
 
 	def setArch(self, arch):
 		self.arch = arch
@@ -319,14 +320,12 @@ class Generator:
 
                 if nodefile and nodefile not in self.nodeFilesDict:
                         self.nodeFilesDict[nodefile] = True
-                        self.nodeFilesList.append(nodefile)
+                        self.nodeFilesSection.append(nodefile)
 		
 	def handle_mainChild(self, node):
-		attr = node.attributes
-		if attr.getNamedItem((None, 'file')):
-			nodefile = attr.getNamedItem((None, 'file')).value
-                else:
-                        nodefile = None
+                nodefile = self.getAttr(node, 'file')
+		attr     = node.attributes
+
                 try:
 			fn = eval('self.handle_main_%s' % node.nodeName)
                 except AttributeError:
@@ -445,6 +444,55 @@ class Generator:
                                         text += fn(child)
 		return text
 
+	def parse(self, xml_string):
+		import cStringIO
+		xml_buf = cStringIO.StringIO(xml_string)
+		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
+		filter = stack.gen.MainNodeFilter(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
+			filter, 0)
+		node = iter.nextNode()
+		
+		while node:
+			if node.nodeName == 'profile':
+				self.handle_profile(node)
+			elif node.nodeName == 'main':
+				child = iter.firstChild()
+				while child:
+					self.handle_mainChild(child)
+					child = iter.nextSibling()
+			node = iter.nextNode()
+			
+		filter = stack.gen.OtherNodeFilter(self.attrs)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
+		node = iter.nextNode()
+		while node:
+			if node.nodeName != 'profile':
+				self.order(node)
+                                try:
+                                        fn = eval('self.handle_%s' % node.nodeName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        fn(node)
+			node = iter.nextNode()
+
+
+	# <profile>
+	
+	def handle_profile(self, node):
+		# pull out the attr to handle generic conditionals
+		# this replaces the old arch/os logic but still
+		# supports the old syntax
+
+		if node.attributes:
+			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			if attrs:
+				dict = eval(attrs.value)
+				for (k,v) in dict.items():
+					self.attrs[k] = v
+
+
 	
 	# <*>
 	#	<file>
@@ -452,12 +500,19 @@ class Generator:
 	
 	def handle_child_file(self, node):
 		return self.parseFile(node)
+	
+	# <debug>
+	
+	def handle_debug(self, node):
+                self.debugSection.append(self.getChildText(node), 
+                                         self.getAttr(node, 'file'))
 
-	##
+	
+        ##
 	## Generator Section
 	##
 			
-	def generate(self, section, annotation=False):
+	def generate(self, section):
 		"""Dump the requested section of the kickstart file.  If none 
 		exists do nothing."""
 		list = []
@@ -471,7 +526,7 @@ class Generator:
 		return list
 
 	def generate_order(self):
-                return self.nodeFilesList
+                return self.nodeFilesSection.generate()
 
 	def generate_debug(self):
                 return self.debugSection.generate()
@@ -508,277 +563,4 @@ class OtherNodeFilter(NodeFilter):
 
 		return self.FILTER_ACCEPT
 
-
-class Generator_redhat(Generator):
-
-	def __init__(self):
-		Generator.__init__(self)
-                self.preSection			= ProfileSection()
-                self.postSection		= ProfileSection()
-                self.bootSection		= {}
-                self.bootSection['pre']		= ProfileSection()
-                self.bootSection['post']	= ProfileSection()
-                self.packages			= {}
-		self.log			= '/var/log/stack-install.log'
-
-                # We could set these elsewhere but this is the current
-                # definition of the RedHat Generator.
-                #
-                # We used to do i386 (not anymore)
-
-                self.setOS('redhat')
-		self.setArch('x86_64')
-
-	
-	##
-	## Parsing Section
-	##
-
-	def parse(self, xml_string):
-		import cStringIO
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = MainNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		
-		while node:
-			if node.nodeName == 'profile':
-				self.handle_profile(node)
-			elif node.nodeName == 'main':
-				child = iter.firstChild()
-				while child:
-					self.handle_mainChild(child)
-					child = iter.nextSibling()
-
-			node = iter.nextNode()
-			
-		filter = OtherNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
-		node = iter.nextNode()
-		while node:
-			if node.nodeName != 'profile':
-				self.order(node)
-                                try:
-                                        fn = eval('self.handle_%s' % node.nodeName)
-                                except AttributeError:
-                                        fn = None
-                                if fn:
-                                        fn(node)
-			node = iter.nextNode()
-
-
-	# <profile>
-	
-	def handle_profile(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
-		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
-			if attrs:
-				dict = eval(attrs.value)
-				for (k,v) in dict.items():
-					self.attrs[k] = v
-
-	# <main>
-	#	<clearpart>
-	# </main>
-	
-	def handle_main_clearpart(self, node):
-		attr = node.attributes
-
-		if attr.getNamedItem((None, 'partition')):
-			arg = attr.getNamedItem((None, 'partition')).value
-		else:
-			arg = ''
-
-		#
-		# the web form sets the environment variable 'partition'
-		# (although, we may find that it makes sense for other
-		# sources to set it too).
-		#
-		try:
-			os_arg = os.environ['partition']
-		except:
-			os_arg = ''
-
-		if (arg == '') or (os_arg == '') or (arg == os_arg):
-                        return 'clearpart %s' % self.getChildText(node)
-
-
-	
-	# <main>
-	#	<lilo>
-	# </main>
-	
-	def handle_main_lilo(self, node):
-		return 'bootloader %s' % self.getChildText(node).strip()
-
-
-	# <main>
-	#	<langsupport>
-	# </main>
-
-	def handle_main_langsupport(self, node):
-		return 'langsupport --default=%s' % self.getChildText(node).strip()
-
-
-	# <debug>
-	
-	def handle_debug(self, node):
-                self.debugSection.append(self.getChildText(node), 
-                                         self.getAttr(node, 'file'))
-
-	
-	# <package>
-
-	def handle_package(self, node):
-                nodefile = self.getAttr(node, 'file')
-		rpm      = self.getChildText(node).strip()
-                type     = self.getAttr(node, 'type')
-
-                if self.getAttr(node, 'disable'):
-                        enabled = False
-                else:
-                        enabled = True
-
-                if type == 'meta':
-                        rpm = '@%s' % rpm
-
-                # Once a package is disabled it stays disabled, so
-                # only update the dictionary if the package doesn't
-                # exist or is currently enabled.
-
-                if rpm in self.packages:
-                        (e, n) = self.packages[rpm]
-                        if e:
-                                self.packages[rpm] = (enabled, nodefile)
-                else:
-                        self.packages[rpm] = (enabled, nodefile)
-
-
-	# <pre>
-	
-	def handle_pre(self, node):
-                nodefile	= self.getAttr(node, 'file')
-                interpreter	= self.getAttr(node, 'interpreter')
-                arg		= self.getAttr(node, 'arg')
-
-                s = '%pre'
-                if interpreter:
-                        s += ' --interpreter %s' % interpreter
-                s += ' --log=%s %s' % (self.log, arg)
-                s += '\n%s' % self.getChildText(node)
-                s += '%end'
-			
-                self.preSection.append(s, nodefile)
-
-
-	# <post>
-	
-	def handle_post(self, node):
-                nodefile	= self.getAttr(node, 'file')
-                interpreter	= self.getAttr(node, 'interpreter')
-                arg		= self.getAttr(node, 'arg')
-
-                s = '%post'
-                if interpreter:
-                        s += ' --interpreter %s' % interpreter
-                if arg and '--nochroot' in arg:
-                        s += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
-                else:
-                        s += ' --log=%s %s' % (self.log, arg)
-                s += '\n%s' % self.getChildText(node)
-                s += '%end'
-			
-                self.postSection.append(s, nodefile)
-
-
-		
-	# <boot>
-	
-	def handle_boot(self, node):
-                nodefile	= self.getAttr(node, 'file')
-                order		= self.getAttr(node, 'order')
-                
-                if not order:
-                        order	= 'pre'
-
-                s = '%%post --log=%s\n' % self.log
-                s += "cat >> /etc/sysconfig/stack-%s << '__EOF__'\n" % order
-		s += '%s' % self.getChildText(node)
-                s += '__EOF__\n'
-                s += '%end'
-
-                self.bootSection[order].append(s, nodefile)
-
-
-	def generate_main(self):
-                return self.mainSection.generate()
-
-	def generate_packages(self):
-
-                section = ProfileSection()
-                dict	= {}
-
-                for (rpm, (enabled, nodefile)) in self.packages.items():
-                        if not dict.has_key(nodefile):
-                                dict[nodefile] = []
-                        if not enabled:
-                                rpm = '-%s' % rpm
-                        dict[nodefile].append(rpm)
-                
-                for (nodefile, rpms) in dict.items():
-                        rpms.sort()
-                        for rpm in rpms:
-                                section.append(rpm, nodefile)
-                        
-                list = []
-		list.append('%packages --ignoremissing')
-                for line in section.generate(cdata=False):
-                        list.append(line)
-		list.append('%end')
-		return list
-
-
-	def generate_pre(self):
-                return self.preSection.generate()
-
-	def generate_post(self):
-                return self.postSection.generate()
-
-	def generate_boot(self):
-                section = ProfileSection()
-
-		# check in/out all modified files
-
-                s = '%%post --log=%s\n' % self.log
-                s += "cat >> /etc/sysconfig/stack-pre << '__EOF__'\n"
-		for (file, (owner, perms)) in self.rcsFiles.items():
-			s += '%s' % self.rcsEnd(file, owner, perms)
-                s += '\n__EOF__\n'
-                s += '%end'
-		section.append(s)
-
-		list = []
-
-		# Boot PRE
-
-                for line in section.generate():
-                        list.append(line)
-                for line in self.bootSection['pre'].generate():
-                        list.append(line)
-
-
-		# Boot POST
-		
-                for line in self.bootSection['post'].generate():
-                        list.append(line)
-
-		
-		return list
 

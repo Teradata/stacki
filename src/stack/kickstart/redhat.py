@@ -29,7 +29,7 @@ class Profile(profile.ProfileBase):
         def main(self, client):
 
                 report = []
-                cmd = '/opt/stack/bin/stack list host xml arch=%s os=%s %s' % (client.arch, client.os, client.addr)
+                cmd = '/opt/stack/bin/stack list host xml %s' % client.addr
                 for line in os.popen(cmd).readlines():
                         report.append(line[:-1])
 
