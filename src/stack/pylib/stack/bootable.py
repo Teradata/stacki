@@ -110,7 +110,7 @@ class Bootable:
 		# for each pallet/cart.
 		#
 		box = None
-		for o in stack.api.Call('list host', [ 'host=localhost']):
+		for o in stack.api.Call('list host', [ 'localhost']):
 			box = o['box']
 
 		if not box:
