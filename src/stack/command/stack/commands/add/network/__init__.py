@@ -100,9 +100,9 @@ from stack.exception import *
 
 class Command(stack.commands.add.command):
 	"""
-	Add a network to the database. By default both the "public" and
-	"private" networks are already defined.
-		
+	Add a network to the database. By default,
+	the "private" network is already defined.
+
 	<arg name='name'>
 	Name of the new network.
 	</arg>
