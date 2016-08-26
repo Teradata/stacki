@@ -1007,28 +1007,24 @@ class DocStringHandler(handler.ContentHandler,
 			s = s + '"""""""""""\n'
 			s = s + self.section['description'] + '\n\n'
 
-		if self.section['arg']:
+		if self.section['reqarg'] or self.section['optarg']:
 			s = s + 'Arguments\n'
 			s = s + '"""""""""\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['arg']:
-				if opt:
-					s += '``[%s]``\n' % name
-				else:
-					s += '``{%s}``\n' % name
-				s += '%s\n\n' % txt
+			for (name, type, rep, txt) in self.section['reqarg']:
+				s += '``[%s]``\n' % name
+			for (name, type, rep, txt) in self.section['optarg']:
+				s += '``{%s}``\n' % name
+			s += '%s\n\n' % txt
 			s = s + '\n'
 
-		if self.section['param']:
+		if self.section['reqparam'] or self.section['optparam']:
 			s = s + 'Parameters\n'
 			s = s + '""""""""""\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['param']:
-				if opt:
-					s += '``[%s=%s]``\n' % (name, type)
-				else:
-					s += '``{%s=%s}``\n' % (name, type)
-				s += '%s\n' % txt
+			for (name, type, rep, txt) in self.section['reqparam']:
+				s += '``[%s=%s]``\n' % (name, type)
+			for (name, type, rep, txt) in self.section['optparam']:
+				s += '``{%s=%s}``\n' % (name, type)
+			s += '%s\n' % txt
 			s = s + '\n'
 
 		if self.section['example']:
@@ -1060,26 +1056,22 @@ class DocStringHandler(handler.ContentHandler,
 			s = s + '### Description\n\n'
 			s = s + self.section['description'].strip() + '\n\n'
 
-		if 'arg' in self.section and self.section['arg']:
+		if self.section['reqarg'] or self.section['optarg']:
 			s = s + '### Arguments\n\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['arg']:
-				if opt:
-					s += '* `[%s]`\n' % name
-				else:
-					s += '* `{%s}`\n' % name
-				s += '\n   %s\n\n' % txt.strip()
+			for (name, type, rep, txt) in self.section['reqarg']:
+				s += '* `[%s]`\n' % name
+			for (name, type, rep, txt) in self.section['optarg']:
+				s += '* `{%s}`\n' % name
+			s += '\n   %s\n\n' % txt.strip()
 			s = s + '\n'
 
-		if 'param' in self.section and self.section['param']:
+		if self.section['reqparam'] or self.section['optparam']:
 			s = s + '### Parameters\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['param']:
-				if opt:
-					s += '* `[%s=%s]`\n' % (name, type)
-				else:
-					s += '* `{%s=%s}`\n' % (name, type)
-				s += '\n   %s\n' % txt.strip()
+			for (name, type, rep, txt) in self.section['reqparam']:
+				s += '* `[%s=%s]`\n' % (name, type)
+			for (name, type, rep, txt) in self.section['optparam']:
+				s += '* `{%s=%s}`\n' % (name, type)
+			s += '\n   %s\n' % txt.strip()
 			s = s + '\n'
 
 		if 'example' in self.section and self.section['example']:
