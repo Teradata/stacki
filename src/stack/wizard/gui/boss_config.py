@@ -608,7 +608,12 @@ class DialogSelect(wx.Panel):
 		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogNetwork))
 
 	def OnDVD(self, event):
-		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogDVDEject))
+		#unmount and eject
+		media = stack.media.Media()
+		media.umountCD()
+		media.ejectCD()
+
+		wx.PostEvent(self.parent, DialogChangeEvent(dialog=DialogDVDLoad))
 
 class DialogNetwork(wx.Panel):
 
@@ -673,46 +678,56 @@ class DialogNetwork(wx.Panel):
 				wx.OK | wx.ICON_ERROR)
 			return
 		else:
-			url = self.urlText.Value
-			if url.find("http://") != 0:
-				url = "http://" + url
-			if not url.find("/install/pallets/") > 0:
-				url = url.rstrip("//")
-				url = url + "/install/pallets/"
+			try:
+				url = self.urlText.Value
+				if url.find("http://") != 0:
+					url = "http://" + url
+				if not url.find("/install/pallets/") > 0:
+					url = url.rstrip("//")
+					url = url + "/install/pallets/"
 
-			#
-			# Call boss_get_pallet_info.py to download pallet
-			# information from network.
-			#
-			p = subprocess.Popen(
-				['/opt/stack/bin/boss_get_pallet_info.py',
-				url],
-				stdout = subprocess.PIPE, stderr = \
-					subprocess.PIPE)
-			o, e = p.communicate()
-			rc = p.wait()
+				#
+				# Call boss_get_pallet_info.py to download pallet
+				# information from network.
+				#
+				p = subprocess.Popen(
+					['/opt/stack/bin/boss_get_pallet_info.py',
+					url],
+					stdout = subprocess.PIPE, stderr = \
+						subprocess.PIPE)
+				o, e = p.communicate()
+				rc = p.wait()
 
-			if rc == 0:
-				pallets = pickle.loads(o)
-				for p in pallets:
-					index = \
-						self.page.list1.InsertStringItem(
-							sys.maxint, p['name'])
-					self.page.list1.SetStringItem(index,
-						1, p['version'])
-					self.page.list1.SetStringItem(index,
-						2, p['id'])
-					self.page.list1.SetStringItem(index,
-						3, p['url'])
-					self.page.pallets.append(p)
-			else:
-				print(e)
-				wx.MessageBox('Sorry, cannot recognize ' + \
-					'the URL', 'Invalid URL',
-					wx.OK | wx.ICON_ERROR)
+				if rc == 0:
+					pallets = pickle.loads(o)
+					for p in pallets:
+						index = \
+							self.page.list1.InsertStringItem(
+								sys.maxint, p['name'])
+						self.page.list1.SetStringItem(index,
+							1, p['version'])
+						self.page.list1.SetStringItem(index,
+							2, p['id'])
+						self.page.list1.SetStringItem(index,
+							3, p['url'])
+						self.page.pallets.append(p)
+				else:
+					print(e)
+					wx.MessageBox('Sorry, cannot recognize ' + \
+						'the URL', 'Invalid URL',
+						wx.OK | wx.ICON_ERROR)
+					return
+
+				self.parent.Destroy()
+
+			except OSError as err:
+				if "No such file" in str(err):
+					wx.MessageBox('Missing a file for installation', \
+						'File Missing', wx.OK | wx.ICON_ERROR)
+				else:
+					wx.MessageBox('OS Error: %s' % err, \
+						'OS Error', wx.OK | wx.ICON_ERROR)
 				return
-
-			self.parent.Destroy()
 
 # Don't catch the exception so we can debug messed
 # up build environments
@@ -827,6 +842,11 @@ class DialogDVDLoad(wx.Panel):
 		setSizer(self, sizer)
 
 	def OnDVDLoad(self, event):
+
+		#mount cdrom
+		cmd = 'mount /dev/cdrom /mnt/cdrom'
+		os.system(cmd)
+
 		#get pallets from DVD
 		packages = self.page.data.getDVDPallets()
 		for i in packages:

@@ -121,7 +121,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 			self.addOutput(host, '<file name="/etc/yum.repos.d/stacki.repo">')
 			for pallet in self.getBoxPallets(box):
-				pname, pversion, prel, parch = pallet
+				pname, pversion, prel, parch, pos = pallet
 
 
 				self.addOutput(host, '[%s-%s]' %

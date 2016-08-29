@@ -100,20 +100,26 @@ import stack.commands
 
 class Implementation(stack.commands.Implementation):	
 	"""
-	Copy a Linux OS CD. This is when the CD is a standard CentOS
-	RHEL or Scientific Linux CD
+	Copy a Linux OS CD. This supports RHEL, CentOS,
+	Oracle Enterprise Linux, and Scientific Linux.
 	"""
+
+	def check_impl(self):
+		self.treeinfo = os.path.join(self.owner.mountPoint, '.treeinfo')
+		if os.path.exists(self.treeinfo):
+			return True
+		return False
 
 	def run(self, args):
 		import stack
 
-		(clean, prefix, treeinfo) = args
+		(clean, prefix) = args
 
 		name = None
 		vers = None
 		arch = None
 
-		file = open(treeinfo, 'r')
+		file = open(self.treeinfo, 'r')
 		for line in file.readlines():
 			a = line.split('=')
 
@@ -179,4 +185,4 @@ class Implementation(stack.commands.Implementation):
 
 		xmlfile.close()
 
-		return (name, vers, arch)
+		return (name, vers, stack.release, arch, OS)

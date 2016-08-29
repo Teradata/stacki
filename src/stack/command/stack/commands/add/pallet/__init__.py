@@ -164,36 +164,25 @@ class Command(stack.commands.add.command):
 		if len(dict) == 0:
 			
 			# If the roll_info hash is empty, that means there are
-			# no Rocks recognizable rolls on the Disc. This mean
+			# no stacki recognizable rolls on the Disc. This mean
 			# it may just be a normal OS CD like CentOS, RHEL,
-			# Scientific Linux or Solaris. In any case it's a
+			# Ubuntu, or SuSE. In any case it's a
 			# foreign CD, and should be treated as such.
 			#
-			# Check the OS of the CD. This is pretty easily
-			# discernable. A .treeinfo file in the root of the CD
-			# implies an RHEL based disc, and a .cdtoc file in the
-			# root of the CD implies a Solaris 10 disc.
+			self.loadImplementation()
+			impl_found = False
+			for i in self.impl_list:
+				if hasattr(self.impl_list[i], 'check_impl'):
+					if self.impl_list[i].check_impl():
+						impl_found = True
+						res = self.runImplementation(i, (clean, prefix))
+						break
 
-			treeinfo = os.path.join(self.mountPoint, '.treeinfo')
-			diskinfo = os.path.join(self.mountPoint, './.disk/info')
-			cdtoc    = os.path.join(self.mountPoint, '.cdtoc')
-			
-			if os.path.exists(treeinfo):
-				res = self.runImplementation('foreign_redhat',
-						       (clean, prefix,
-							treeinfo))
-				if res and updatedb:
-					self.insert(res[0], res[1], '', res[2],
-						    'redhat')
-			elif os.path.exists(diskinfo):
-				res = self.runImplementation('foreign_ubuntu',
-						       (clean, prefix,
-							diskinfo))
-				if res and updatedb:
-					self.insert(res[0], res[1], res[3],
-						    res[2], 'ubuntu')
-			else:
+			if not impl_found:
                                 raise CommandError(self, 'unknown os on media')
+
+			if res and updatedb:
+					self.insert(res[0], res[1], res[2], res[3], res[4])
 
 		#
 		# Keep going even if a foreign pallet.  Safe to loop over an
@@ -240,8 +229,6 @@ class Command(stack.commands.add.command):
 		updatedb = self.str2bool(updatedb)
 
 		self.mountPoint = '/mnt/cdrom'
-		if self.os == 'sunos':
-			self.mountPoint = '/cdrom'
 		if not os.path.exists(self.mountPoint):
 			os.makedirs(self.mountPoint)
 
@@ -249,21 +236,21 @@ class Command(stack.commands.add.command):
 		# the command line. Make sure we get the complete 
 		# path for each file.
 			
-		list = []
+		isolist = []
 		for arg in args:
 			arg = os.path.join(os.getcwd(), arg)
 			if os.path.exists(arg) and arg.endswith('.iso'):
-				list.append(arg)
+				isolist.append(arg)
 			else:
 				print("Cannot find %s or %s "\
 					"is not and ISO image" % (arg, arg))
 		
-		for iso in list:	# have a set of iso files
+		for iso in isolist:	# have a set of iso files
 			self.runImplementation('mount_%s' % self.os, iso)
 			self.copy(clean, dir, updatedb)
 			self.runImplementation('umount_%s' % self.os)
 			
-		if not list:		# no files specified look for a cdrom
+		if not isolist:		# no files specified look for a cdrom
 			if self.runImplementation('mounted_%s' % self.os):
 				self.copy(clean, dir, updatedb)
 			else:
