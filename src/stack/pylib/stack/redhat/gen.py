@@ -107,7 +107,8 @@ class Generator(stack.gen.Generator):
                 self.bootSection		= {}
                 self.bootSection['pre']		= stack.gen.ProfileSection()
                 self.bootSection['post']	= stack.gen.ProfileSection()
-                self.packages			= {}
+                self.shellSection		= stack.gen.ProfileSection()
+                self.packageSet			= stack.gen.PackageSet()
 
                 # We could set these elsewhere but this is the current
                 # definition of the RedHat Generator.
@@ -176,16 +177,7 @@ class Generator(stack.gen.Generator):
                 if type == 'meta':
                         rpm = '@%s' % rpm
 
-                # Once a package is disabled it stays disabled, so
-                # only update the dictionary if the package doesn't
-                # exist or is currently enabled.
-
-                if rpm in self.packages:
-                        (e, n) = self.packages[rpm]
-                        if e:
-                                self.packages[rpm] = (enabled, nodefile)
-                else:
-                        self.packages[rpm] = (enabled, nodefile)
+                self.packageSet.append(rpm, enabled, nodefile)
 
 
 	# <pre>
@@ -212,15 +204,33 @@ class Generator(stack.gen.Generator):
                 interpreter	= self.getAttr(node, 'interpreter')
                 arg		= self.getAttr(node, 'arg')
 
-                s = '%post'
-                if interpreter:
-                        s += ' --interpreter %s' % interpreter
-                if arg and '--nochroot' in arg:
-                        s += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
-                else:
-                        s += ' --log=%s %s' % (self.log, arg)
-                s += '\n%s' % self.getChildText(node)
-                s += '%end'
+                if self.getProfileType() == 'native':
+                        s = '%post'
+                        if interpreter:
+                                s += ' --interpreter %s' % interpreter
+                        if arg and '--nochroot' in arg:
+                                s += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
+                        else:
+                                s += ' --log=%s %s' % (self.log, arg)
+                        s += '\n%s' % self.getChildText(node)
+                        s += '%end'
+
+                elif self.getProfileType() == 'shell':
+
+                        # TODO: This needs a lot of work, we should
+                        # handle different shells by creating files in
+                        # bash and then running them as commands
+                        # including logging and cleanup.  For now this
+                        # is only trying to handle this case of 'stack
+                        # report' commands.
+                        #
+                        # See stack run pallet for most of this code
+
+                        if interpreter:
+                                return
+                        if arg and '--nochroot' in arg:
+                                return
+                        s = self.getChildText(node)
 			
                 self.postSection.append(s, nodefile)
 
@@ -248,28 +258,30 @@ class Generator(stack.gen.Generator):
                 return self.mainSection.generate()
 
 	def generate_packages(self):
+                dict	 = self.packageSet.getPackages()
+                enabled  = dict['enabled']
+                disabled = dict['disabled']
+                section  = stack.gen.ProfileSection()
 
-                section = stack.gen.ProfileSection()
-                dict	= {}
+                if self.getProfileType() == 'native':
+                        section.append('%packages --ignoremissing')
+                        for (nodefile, rpms) in enabled.items():
+                                rpms.sort()
+                                for rpm in rpms:
+                                        section.append(rpm, nodefile)
 
-                for (rpm, (enabled, nodefile)) in self.packages.items():
-                        if not dict.has_key(nodefile):
-                                dict[nodefile] = []
-                        if not enabled:
-                                rpm = '-%s' % rpm
-                        dict[nodefile].append(rpm)
-                
-                for (nodefile, rpms) in dict.items():
-                        rpms.sort()
-                        for rpm in rpms:
-                                section.append(rpm, nodefile)
+                        for (nodefile, rpms) in disabled.items():
+                                rpms.sort()
+                                for rpm in rpms:
+                                        section.append('-%s' % rpm, nodefile)
+                        section.append('%end')
+                elif self.getProfileType() == 'shell':
+                        for (nodefile, rpms) in enabled.items():
+                                rpms.sort()
+                                for rpm in rpms:
+                                        section.append('yum install -y %s' % rpm, nodefile)
                         
-                list = []
-		list.append('%packages --ignoremissing')
-                for line in section.generate(cdata=False):
-                        list.append(line)
-		list.append('%end')
-		return list
+                return section.generate(cdata=False)
 
 
 	def generate_pre(self):
@@ -308,4 +320,8 @@ class Generator(stack.gen.Generator):
 
 		
 		return list
+
+        def generate_shell(self):
+                for line in self.generate_packages():
+                        print line
 

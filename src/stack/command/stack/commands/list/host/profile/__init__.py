@@ -126,18 +126,13 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		(native, ) = self.fillParams([ ('native', 'false') ])
-                native     = self.str2bool(native)
+		(profile, document) = self.fillParams([ ('profile',  'native'),
+                                                        ('document', 'true') ])
 
-		hosts = self.getHostnames(args)
-
-		self.beginOutput()
-
-                # When attached to a tty there is no XML input on stdin so we
-                # need to generate it.
-
-		xml    = ''
-                osname = None
+                document  = self.str2bool(document)
+		hosts	  = self.getHostnames(args)
+		xmlinput  = ''
+                osname    = None
 
 		# If the command is not on a TTY, then try to read XML input.
 
@@ -145,21 +140,24 @@ class Command(stack.commands.list.host.command):
 			for line in sys.stdin.readlines():
                                 if line.find('<profile os="') == 0:
                                         osname = line.split()[1][3:].strip('"')
-				xml += line
+				xmlinput += line
+
+
+		self.beginOutput()
 
 		# If there's no XML input, either we have TTY, or we're running
 		# in an environment where TTY cannot be created (ie. apache)
 
-		if not xml:
+		if not xmlinput:
 			for host in hosts:
-                                osname	= self.db.getHostOS(host)
-                                xml	= self.command('list.host.xml', [ host ])
+                                osname	 = self.db.getHostOS(host)
+                                xmlinput = self.command('list.host.xml', [ host ])
 
-				self.runImplementation(osname, (host, xml, native))
+				self.runImplementation(osname, (host, xmlinput, profile, document))
 
 		# If we DO have XML input, simply parse it.
 
                 else:
-			self.runImplementation(osname, ('localhost', xml, native))
+			self.runImplementation(osname, ('localhost', xmlinput, profile, document))
 
 		self.endOutput(padChar='')

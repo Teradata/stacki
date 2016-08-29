@@ -134,6 +134,19 @@ class Command(command):
 			if not ip:
 				continue
 
+                        # TODO (maybe)
+                        #
+                        # The name of the interface should be the name
+                        # in the interface list (not from nodes
+                        # table).  If this doesn't exist than use the
+                        # name in the nodes table.  But always use the
+                        # zone from the networks table.
+                        #
+                        # Don't do anything right now, this has
+                        # implications on the dhcpd.conf, dns, and
+                        # spreadsheet loading, and who knows what
+                        # else.
+
                         host    = row['host']
 			network = row['network']
                         default = row['default']

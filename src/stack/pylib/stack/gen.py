@@ -154,8 +154,6 @@ class ProfileSnippet:
         def getSource(self):
                 return self.source
 
-                
-
 class ProfileSection:
 
         def __init__(self):
@@ -195,6 +193,43 @@ class ProfileSection:
 	                list.append('\t\t%s</subsection>' % cdataEnd)
                 return list
 
+
+class PackageSet:
+
+        def __init__(self):
+                self.packages = {}
+
+        def append(self, package, enabled=True, source=None):
+                """
+                Add a package to the set, Once a package is disabled it stays
+                disabled, so only update the dictionary if the package
+                doesn't exist or is currently enabled.
+                """
+                if package in self.packages:
+                        (e, n) = self.packages[package]
+                        if e:
+                                self.packages[package] = (enabled, source)
+                else:
+                        self.packages[package] = (enabled, source)
+
+
+        def getPackages(self):
+
+                dict = { 'enabled': {}, 'disabled' : {} }
+
+                for (package, (enabled, source)) in self.packages.items():
+                        if enabled:
+                                d = dict['enabled']
+                        else:
+                                d = dict['disabled']
+                        if not d.has_key(source):
+                                d[source] = []
+                        d[source].append(package)
+                
+                return dict
+
+                
+
 		
 class Generator:
 	"""Base class for various DOM based kickstart graph generators.
@@ -203,6 +238,8 @@ class Generator:
 	def __init__(self):
 		self.attrs		= {}
                 self.arch		= None
+                self.os			= None
+		self.profileType	= 'native'
 		self.rcsFiles		= {}
                 self.nodeFilesDict	= {}
                 self.nodeFilesSection	= ProfileSection()
@@ -221,6 +258,12 @@ class Generator:
 		
 	def getOS(self):
 		return self.os
+
+	def setProfileType(self, profileType):
+		self.profileType = profileType
+		
+	def getProfileType(self):
+		return self.profileType
 
 	def rcsBegin(self, file, owner, perms):
 		"""

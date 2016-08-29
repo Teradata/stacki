@@ -55,10 +55,8 @@ os.chdir(cwd)
 #
 cmd = '/opt/stack/bin/stack list node xml frontend '
 cmd += 'attrs="/tmp/site.attrs" 2> /dev/null'
-cmd += '| /opt/stack/bin/stack list host profile '
-cmd += '| /opt/stack/bin/stack list host installfile '
-cmd += 'section=kickstart > '
-cmd += '/tmp/ks.cfg 2> /tmp/ks.cfg.debug'
+cmd += '| /opt/stack/bin/stack list host profile document=false'
+cmd += '> /tmp/ks.cfg 2> /tmp/ks.cfg.debug'
 
 os.system(cmd)
 

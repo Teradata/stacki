@@ -40,6 +40,7 @@
 # @SI_Copyright@
 #
 
+import string
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
@@ -58,8 +59,8 @@ class ProfileHandler(handler.ContentHandler,
                 self.doc       = []
 
 	def startElement(self, name, attrs):
-                if name == 'chapter' and attrs.get('name') == 'kickstart':
-                        self.recording	= True
+                if name == 'chapter' and attrs.get('name') in [ 'kickstart', 'bash' ]:
+                        self.recording = True
 
 	def endElement(self, name):
                 if self.recording:
@@ -74,9 +75,10 @@ class ProfileHandler(handler.ContentHandler,
                         self.text += s
 
         def document(self):
-                return self.doc
-
-
+                doc = []
+                for text in self.doc:
+	                doc.append(text.strip())
+                return doc
 
 
 
@@ -84,16 +86,18 @@ class Implementation(stack.commands.Implementation):
 
 	def run(self, args):
 
-		host	= args[0]
-		xml	= args[1]
-                native	= args[2]
-                profile	= []
+		host	    = args[0]
+		xmlinput    = args[1]
+                profileType = args[2]
+                isDocument  = args[3]
+                profile	    = []
+		generator   = stack.redhat.gen.Generator()
 
-		generator = stack.redhat.gen.Generator()
-		generator.parse(xml)
+                generator.setProfileType(profileType)
+		generator.parse(xmlinput)
 
                 profile.append('<?xml version="1.0" standalone="no"?>')
-                profile.append('<profile os="redhat">')
+                profile.append('<profile-%s os="redhat">' % generator.getProfileType())
                 profile.append('<chapter name="meta">')
                 profile.append('\t<section name="order">')
                 for line in generator.generate('order'):
@@ -105,24 +109,36 @@ class Implementation(stack.commands.Implementation):
                 profile.append('\t</section>')
                 profile.append('</chapter>')
 
-                profile.append('<chapter name="kickstart">')
-                for section in [ 'main',
-                                 'packages',
-                                 'pre',
-                                 'post',
-                                 'boot' ]:
-                        profile.append('\t<section name="%s">' % section)
-                        for line in generator.generate(section):
-                                profile.append(line)
-                        profile.append('\t</section>')
+                if generator.getProfileType() == 'native':
+                        profile.append('<chapter name="kickstart">')
+                        for section in [ 'main',
+                                         'packages',
+                                         'pre',
+                                         'post',
+                                         'boot' ]:
+                                profile.append('\t<section name="%s">' % section)
+                                for line in generator.generate(section):
+                                        profile.append(line)
+                                profile.append('\t</section>')
+                        profile.append('</chapter>')
 
-                profile.append('</chapter>')
-                profile.append('</profile>')
+                elif generator.getProfileType() == 'shell':
+                        profile.append('<chapter name="bash">')
+                        profile.append('#! /bin/bash')
+                        for section in [ 'packages',
+                                         'post' ]:
+                                profile.append('\t<section name="%s">' % section)
+                                for line in generator.generate(section):
+                                        profile.append(line)
+                                profile.append('\t</section>')
+                        profile.append('</chapter>')
+
+                profile.append('</profile-%s>' % generator.getProfileType())
 
 
-                if native:
-			parser = make_parser()
-			handler = ProfileHandler()
+                if not isDocument:
+			parser  = make_parser()
+                        handler = ProfileHandler()
 			parser.setContentHandler(handler)
                         for line in profile:
                                 parser.feed('%s\n' % line)

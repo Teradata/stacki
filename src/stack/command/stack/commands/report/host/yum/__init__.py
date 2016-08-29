@@ -111,40 +111,14 @@ class Command(stack.commands.HostArgumentProcessor,
 	"""
 
 	def run(self, params, args):
+
 		self.beginOutput()
 
 		for host in self.getHostnames(args):
-			box = self.db.getHostAttr(host, 'box')
-
-			frontend_private_ip = self.db.getHostAttr(host,
-				'Kickstart_PrivateAddress')
-
-			self.addOutput(host, '<file name="/etc/yum.repos.d/stacki.repo">')
-			for pallet in self.getBoxPallets(box):
-				pname, pversion, prel, parch = pallet
-
-
-				self.addOutput(host, '[%s-%s]' %
-					(pname, pversion))
-				self.addOutput(host, 'name=%s %s' %
-					(pname, pversion))
-				self.addOutput(host, 'baseurl=http://%s/install/pallets/%s/%s/redhat/%s' % (frontend_private_ip, pname, pversion, parch))
-				self.addOutput(host, 'assumeyes=1')
-
-
-			output = self.call('list.cart')
-			for o in output:
-				if box in o['boxes'].split():
-
-					self.addOutput(host, '[%s-cart]' %
-						o['name'])
-					self.addOutput(host, 'name=%s cart' %
-						o['name'])
-					self.addOutput(host, 'baseurl=http://%s/install/carts/%s' % (frontend_private_ip, o['name']))
-					self.addOutput(host, 'assumeyes=1')
-
-			self.addOutput(host,'</file>')
-			self.addOutput(host,'yum clean all')
+                        osname = self.db.getHostOS(host)
+                        server = self.db.getHostAttr(host, 'Kickstart_PrivateAddress')
+                        
+                        self.runImplementation(osname, (host, server))
 
 		self.endOutput(padChar='')
 
