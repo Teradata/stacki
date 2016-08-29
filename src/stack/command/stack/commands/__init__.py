@@ -2247,7 +2247,8 @@ class Command:
 		 	module = eval(module)
 		 	try:
 		 		o = getattr(module, 'Implementation')(self)
-				self.impl_list[base] = o
+				n = re.sub('^imp_','', base)
+				self.impl_list[n] = o
 		 	except AttributeError:
 		 		continue
 
@@ -2255,15 +2256,14 @@ class Command:
 		# Check to see if implementation list
 		# has named implementation. If not, try
 		# to load named implementation
-		impl_name = 'imp_%s' % name
-		if not self.impl_list.has_key(impl_name):
+		if not self.impl_list.has_key(name):
 			self.loadImplementation(name)
 
 		# If the named implementation was loaded,
 		# return the output from running the
 		# implementation
-		if self.impl_list.has_key(impl_name):
-			return self.impl_list[impl_name].run(args)
+		if self.impl_list.has_key(name):
+			return self.impl_list[name].run(args)
 
 
 	def isRootUser(self):
