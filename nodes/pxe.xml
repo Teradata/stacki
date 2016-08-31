@@ -101,22 +101,22 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 /opt/stack/bin/stack add bootaction action="install" \
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
-	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="install no-parallel-format" \
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
-	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="install headless" \
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
-	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac inst.vnc ramdisk_size=300000"
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac inst.vnc ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="rescue" \
 	kernel="vmlinuz-&version;-&arch;" \
 	ramdisk="initrd.img-&version;-&arch;" \
-	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/kickstart.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
 
 </post>
 
