@@ -161,6 +161,7 @@ class Command(stack.commands.add.command):
 			roll = stack.file.RollInfoFile(filename.strip())
 			dict[roll.getRollName()] = roll
 			
+                print (dict)
 		if len(dict) == 0:
 			
 			# If the roll_info hash is empty, that means there are

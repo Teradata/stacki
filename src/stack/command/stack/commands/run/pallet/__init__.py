@@ -91,20 +91,12 @@
 # @Copyright@
 
 import os
-import string
-import popen2
-import stack.gen
-import stack.file
-import stack.commands
-import tempfile
 import sys
-from xml.dom.ext.reader import Sax2
+import string
+import subprocess
+import stack.commands
 from stack.exception import *
 
-rpm_force_template = """[ $? -ne 0 ] && \\
-echo "# YUM failed - trying with RPM" && \\
-rpm -Uvh --force --nodeps %s"""
-	
 class Command(stack.commands.run.command):
 	"""
 	Installs a pallet on the fly
@@ -136,49 +128,61 @@ class Command(stack.commands.run.command):
 				'pallet=%s' % string.join(rolls, ',') ])
 		else:
 			xml = sys.stdin.read()
-		reader = Sax2.Reader()
-		gen = getattr(stack.gen,'Generator_%s' % self.os)()
-		gen.parse(xml)
 
-		rpms = set()
-		for line in gen.generate('packages'):
-			if line.find('%package') == -1 and line.find('%end') == -1:
-				rpms.add(line)
-		if rpms:
-			script.append('yum install -y %s' % ' '.join(rpms))
+                p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell document=false',
+                                     stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE, shell=True)
+                p.stdin.write(xml)
+                (o, e) = p.communicate()
+                if p.returncode == 0:
+                        sys.stdout.write(o)
+                else:
+                        sys.stderr.write(e)
 
-		cur_proc = False
-		for line in gen.generate('post'):
-			if not line.startswith('%post') and not line.startswith('%end'):
-				script.append(line)
-			else:
-				if cur_proc == True:
-					script.append('__POSTEOF__')
-					script.append('%s %s' % (interpreter,
-						t_name))
-					cur_proc = False
-				try:
-					i = line.split().index('--interpreter')
-				except ValueError:
-					continue
-				interpreter = line.split()[i+1]
-				t_name = tempfile.mktemp()
-				cur_proc = True
-				script.append('cat > %s << "__POSTEOF__"' %
-					t_name)
-		
-		script.append('\n# Boot scripts\n')
-		for line in gen.generate('boot'):
-			#
-			# skip lines that start with '%post' or '%end'
-			#
-			if line[0:5] == '%post' or line[0:4] == '%end':
-				continue
-
-			script.append(line)
-
-		if dryrun:
-			self.addText(string.join(script, '\n'))
-		else:
-			os.system(string.join(script, '\n'))
+#		reader = Sax2.Reader()
+#		gen = getattr(stack.gen,'Generator_%s' % self.os)()
+#		gen.parse(xml)
+#
+#		rpms = set()
+#		for line in gen.generate('packages'):
+#			if line.find('%package') == -1 and line.find('%end') == -1:
+#				rpms.add(line)
+#		if rpms:
+#			script.append('yum install -y %s' % ' '.join(rpms))
+#
+#		cur_proc = False
+#		for line in gen.generate('post'):
+#			if not line.startswith('%post') and not line.startswith('%end'):
+#				script.append(line)
+#			else:
+#				if cur_proc == True:
+#					script.append('__POSTEOF__')
+#					script.append('%s %s' % (interpreter,
+#						t_name))
+#					cur_proc = False
+#				try:
+#					i = line.split().index('--interpreter')
+#				except ValueError:
+#					continue
+#				interpreter = line.split()[i+1]
+#				t_name = tempfile.mktemp()
+#				cur_proc = True
+#				script.append('cat > %s << "__POSTEOF__"' %
+#					t_name)
+#		
+#		script.append('\n# Boot scripts\n')
+#		for line in gen.generate('boot'):
+#			#
+#			# skip lines that start with '%post' or '%end'
+#			#
+#			if line[0:5] == '%post' or line[0:4] == '%end':
+#				continue
+#
+#			script.append(line)
+#
+#		if dryrun:
+#			self.addText(string.join(script, '\n'))
+#		else:
+#			os.system(string.join(script, '\n'))
 

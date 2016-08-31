@@ -2266,6 +2266,8 @@ class Command:
 			return self.impl_list[name].run(args)
 
 
+
+
 	def isRootUser(self):
 		"""Returns TRUE if running as the root account."""
 		if os.geteuid() == 0:
