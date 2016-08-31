@@ -67,8 +67,8 @@ class Implementation(stack.commands.Implementation):
                                 yum.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
                                 yum.append('assumeyes=1')
 
-			yum.append('</file>')
-			yum.append('yum clean all')
+		yum.append('</file>')
+		yum.append('yum clean all')
 
                 for line in yum:
                         self.owner.addOutput(host, line)

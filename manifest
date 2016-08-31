@@ -42,6 +42,7 @@ foundation-redhat
 foundation-sphinx
 foundation-tidy
 foundation-wget
+git-lfs
 hpssacli
 ipxe
 lighttpd
