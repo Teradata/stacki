@@ -5,23 +5,81 @@ import subprocess
 import stack.media
 import stack.wizard
 
+import sys
+import traceback
+import urllib2
+import pickle
+
+#
+# set network config and snack flags
+#
+config_net = True
+noX = False
+no_partition = False
+
+for s in sys.argv:
+	if s == '--no-net-reconfig':
+		config_net = False
+	elif s == '--noX':
+		noX = True
+	elif s == '--no-partition':
+		no_partition = True
+
+
+if not os.environ.has_key('DISPLAY'):
+	noX = True
+
+print('Set network during boss_config: ' + str(config_net))
+print('Use snack installation instead of wx: ' + str(noX))
+print('Disable partitioning: ' + str(no_partition))
+
+#
+# make sure the installation ISO is mounted on /mnt/cdrom. it could be a
+# USB stick or DVD
+#
+cmdline = open('/proc/cmdline', 'r')
+cmdargs = cmdline.readline()
+cmdline.close()
+
+#
+# if this is a USB install, then we'll see a kernel command line parameter
+# that looks like:
+#
+#	inst.stage2=hd:sda1:/
+#
+# and we want to parse out the disk device (e.g., 'sda1')
+#
+
+device = None
+for cmdarg in cmdargs.split():
+	if cmdarg.startswith('inst.stage2='):
+		b = cmdarg.split('=')
+		c = b[1].split(':')
+		if len(c) > 1 and c[0] == 'hd':
+			device = c[1]
+			break
+
+		# Create /mnt/cdrom if it doesn't exist
+		if not os.path.exists('/mnt/cdrom'):
+			os.makedirs('/mnt/cdrom')
+		cmd = 'mount /dev/%s /mnt/cdrom' % device
+		os.system(cmd)
+
 #try to get wxpython
 try:
 	import wx
 except ImportError:
-	HAS_WX = False
-else:
-	HAS_WX = True
+	noX = True
 
-import sys
-import traceback
-import urllib2
+if noX:
+	p = subprocess.Popen(["/opt/stack/bin/boss_config_snack.py"])
+	rc = p.wait()
+	sys.exit(rc)
+
+
 import wx.lib.newevent
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-import pickle
 
-(PageChangeEvent, EVT_PAGE_CHANGE) = wx.lib.newevent.NewEvent()
-(DialogChangeEvent, EVT_DIALOG_CHANGE) = wx.lib.newevent.NewEvent()
 
 def createLogo(panel):
 	png = wx.Image('/opt/stack/bin/logo.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
@@ -926,63 +984,10 @@ class Boss(wx.Frame):
 		page.Fit()
 		page.Refresh()
 
-#
-# set network config and snack flags
-#
-config_net = True
-noX = False
-no_partition = False
+(PageChangeEvent, EVT_PAGE_CHANGE) = wx.lib.newevent.NewEvent()
+(DialogChangeEvent, EVT_DIALOG_CHANGE) = wx.lib.newevent.NewEvent()
 
-for s in sys.argv:
-	if s == '--no-net-reconfig':
-		config_net = False
-	elif s == '--noX':
-		noX = True
-	elif s == '--no-partition':
-		no_partition = True
-
-print('Set network during boss_config: ' + str(config_net))
-print('Use snack installation instead of wx: ' + str(noX))
-print('Disable partitioning: ' + str(no_partition))
-
-#
-# make sure the installation ISO is mounted on /mnt/cdrom. it could be a
-# USB stick or DVD
-#
-cmdline = open('/proc/cmdline', 'r')
-cmdargs = cmdline.readline()
-cmdline.close()
-
-#
-# if this is a USB install, then we'll see a kernel command line parameter
-# that looks like:
-#
-#	inst.stage2=hd:sda1:/
-#
-# and we want to parse out the disk device (e.g., 'sda1')
-#
-device = None
-for cmdarg in cmdargs.split():
-	if cmdarg.startswith('inst.stage2='):
-		b = cmdarg.split('=')
-		c = b[1].split(':')
-		if len(c) > 1 and c[0] == 'hd':
-			device = c[1]
-			break
-if not device:
-	device = 'cdrom'
-
-cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
-os.system(cmd)
-
-if noX or not HAS_WX:
-	execfile("/opt/stack/bin/boss_config_snack.py")
-else:
-	try:
-		app = wx.App()
-		app.TopWindow = Boss(None, title='Stacki Installation')
-		app.TopWindow.Show()
-		app.MainLoop()
-	except:
-		print("Falling back to snack installation...")
-		execfile("/opt/stack/bin/boss_config_snack.py")
+app = wx.App()
+app.TopWindow = Boss(None, title='Stacki Installation')
+app.TopWindow.Show()
+app.MainLoop()
