@@ -93,6 +93,7 @@
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
 DEPENDS.FILES	= pygtk-$(VERSION).tar.gz
+ROLL.MEMBERSHIP = none
 
 include $(STACKBUILD)/etc/CCRules.mk
 
