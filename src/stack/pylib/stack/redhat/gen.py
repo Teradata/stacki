@@ -94,6 +94,7 @@
 
 import string
 import os
+import tempfile
 import xml.dom.ext.reader.Sax2
 import stack.gen	
 		
@@ -217,22 +218,23 @@ class Generator(stack.gen.Generator):
 
                 elif self.getProfileType() == 'shell':
 
-                        # TODO: This needs a lot of work, we should
-                        # handle different shells by creating files in
-                        # bash and then running them as commands
-                        # including logging and cleanup.  For now this
-                        # is only trying to handle this case of 'stack
-                        # report' commands.
-                        #
-                        # See stack run pallet for most of this code
+                        section = self.getChildText(node)
+                        tmp     = tempfile.mktemp()
 
                         if interpreter:
-                                return
-                        if arg and '--nochroot' in arg:
-                                return
-                        s = self.getChildText(node)
+                                script  = 'cat > %s << "__EOF_%s__"\n' % (tmp, tmp)
+                                script += '#! %s\n\n' % interpreter
+                                script += section
+                                script += '__EOF_%s__\n\n' % tmp
+                                script += 'chmod +x %s\n' % tmp
+                                script += '%s\n' % tmp
+                        elif arg and '--nochroot' in arg:
+                                # just ignore all the --nochroot stuff
+                                script = ''
+                        else:
+                                script = section
 			
-                self.postSection.append(s, nodefile)
+                self.postSection.append(script, nodefile)
 
 
 		
@@ -243,13 +245,19 @@ class Generator(stack.gen.Generator):
                 order		= self.getAttr(node, 'order')
                 
                 if not order:
-                        order	= 'pre'
+                        order = 'pre'
+                
+                s = ''
 
-                s = '%%post --log=%s\n' % self.log
+                if self.getProfileType() == 'native':
+                        s = '%%post --log=%s\n' % self.log
+
                 s += "cat >> /etc/sysconfig/stack-%s << '__EOF__'\n" % order
 		s += '%s' % self.getChildText(node)
                 s += '__EOF__\n'
-                s += '%end'
+
+                if self.getProfileType() == 'native':
+                        s += '%end'
 
                 self.bootSection[order].append(s, nodefile)
 
@@ -294,13 +302,15 @@ class Generator(stack.gen.Generator):
                 section = stack.gen.ProfileSection()
 
 		# check in/out all modified files
-
-                s = '%%post --log=%s\n' % self.log
+                s = ''
+                if self.getProfileType() == 'native':
+                        s += '%%post --log=%s\n' % self.log
                 s += "cat >> /etc/sysconfig/stack-pre << '__EOF__'\n"
 		for (file, (owner, perms)) in self.rcsFiles.items():
 			s += '%s' % self.rcsEnd(file, owner, perms)
                 s += '\n__EOF__\n'
-                s += '%end'
+                if self.getProfileType() == 'native':
+                        s += '%end'
 		section.append(s)
 
 		list = []

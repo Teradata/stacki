@@ -126,7 +126,8 @@ class Implementation(stack.commands.Implementation):
                         profile.append('<chapter name="bash">')
                         profile.append('#! /bin/bash')
                         for section in [ 'packages',
-                                         'post' ]:
+                                         'post',
+					 'boot' ]:
                                 profile.append('\t<section name="%s">' % section)
                                 for line in generator.generate(section):
                                         profile.append(line)
