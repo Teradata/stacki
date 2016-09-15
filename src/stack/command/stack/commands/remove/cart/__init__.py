@@ -78,3 +78,8 @@ class Command(stack.commands.CartArgumentProcessor,
 			self.db.execute("delete from carts where name = '%s'"
 				% cart)
 
+		os.system("""
+			/opt/stack/bin/stack report host yum localhost | 
+			/opt/stack/bin/stack report script | 
+			/bin/sh
+			""")
