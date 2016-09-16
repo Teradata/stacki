@@ -112,6 +112,11 @@ chmod 775 /export/stack/carts
 </file>
 </post>
 
+<!-- Set Number of CPUs in the database -->
+<post>
+/sbin/chkconfig stack-num-cpus on
+</post>
+
 <!--
 	The restore roll needs a default (empty) git repository in order to
 	build
