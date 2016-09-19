@@ -118,7 +118,7 @@ class Command(stack.commands.add.host.command):
                         ('alias', None, True)
                         ])
 		
-                if not host:
+                if not hosts:
                         raise ArgRequired(self, 'host')
 		if not len(hosts) == 1:
                         raise ArgUnique(self, 'host')
