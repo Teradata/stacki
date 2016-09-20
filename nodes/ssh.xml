@@ -40,7 +40,7 @@ non-root user
 -->
 
 chmod a+rx /root
-mkdir /root/.ssh
+mkdir -p /root/.ssh
 chmod a+rx /root/.ssh
 
 <!-- Turn off challenge-response so we get normal passwd auth. -->
