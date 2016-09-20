@@ -13,6 +13,7 @@ import string
 import subprocess
 import random
 import getopt
+import tempfile
 
 def banner(string):
 	print('#######################################')
@@ -20,11 +21,12 @@ def banner(string):
 	print('#######################################')	
 
 def copy(source, dest):
+	isodir = tempfile.tempdir()
 	banner("Copying %s to local disk" % source)
 	subprocess.call(['mkdir', '-p', dest])
-	subprocess.call(['mount', '-o', 'loop', source, '/media'])
-	subprocess.call(['cp', '-r', '/media/.', dest])
-	subprocess.call(['umount', '/media'])
+	subprocess.call(['mount', '-o', 'loop', source, isodir])
+	subprocess.call(['cp', '-r', isodir, dest])
+	subprocess.call(['umount', isodir])
 
 def mount(source, dest):
 	subprocess.call(['mkdir', '-p', dest])
@@ -48,28 +50,21 @@ def generate_multicast():
 	d = random.randrange(1,255)
 	return str(a)+'.'+str(b)+'.'+str(c)+'.'+str(d)
 
-def repoconfig(ccmnt, ccname, ccver, osmnt, updatemnt, updatename, updatever):
-	subprocess.call('mv /etc/yum.repos.d/*.repo /tmp/', shell = True)
+def repoconfig(mountdir):
+
+	for (r, d, f) in os.walk(mountdir):
+		for name in f:
+			if name == 'roll-stacki.xml':
+				repodir = r
+				break
 
 	file = open('/etc/yum.repos.d/stack.repo', 'w')
 	file.write('[stacki]\n')
 	file.write('name=stacki\n')
-	file.write('baseurl=file://%s/%s/%s/redhat/x86_64\n'
-		% (ccmnt, ccname, ccver))
+	file.write('baseurl=file://%s\n'
+		% (repodir))
 	file.write('assumeyes=1\n')
 	file.write('gpgcheck=no\n')
-	file.write('[OS]\n')
-	file.write('name=OS\n')
-	file.write('baseurl=file://%s\n' % osmnt)
-	file.write('assumeyes=1\n')
-	file.write('gpgcheck=no\n')
-	if updatemnt:
-		file.write('[Update]\n')
-		file.write('name=Update\n')
-		file.write('baseurl=file://%s/%s/%s/redhat/x86_64\n'
-			% (updatemnt, updatename, updatever))
-		file.write('assumeyes=1\n')
-		file.write('gpgcheck=no\n')
 	file.close()
 
 	
@@ -85,17 +80,9 @@ def usage():
 	print("\t--stacki-iso=ISO : path to stacki ISO")
 	print("\t--stacki-version=version : stacki version")
 	print("\t--stacki-name=name : stacki name (usually 'stacki')")
-	print("\t--os-iso=ISO1,ISO2 : path(s) to OS ISO(s)")
-	print("\t--os-version=version : OS version")
-	print("\t--os-name=name : OS name (e.g., 'CentOS')")
-
-	print()
 	print("Optional arguments:")
-	print("\t--update-iso=ISO1 : path(s) to OS update ISO")
-	print("\t--update-version=version : OS update version")
-	print("\t--update-name=name : OS update name (e.g., 'CentOS-Update')")
+	print("\t--extra-iso=iso1,iso2,iso3.. : list of pallets to add")
 	print("\t--noX : Don't require X11 for frontend wizard. Use text mode")
-	sys.exit(-1)
 
 ##
 ## MAIN
@@ -116,40 +103,17 @@ os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 #
 opts, args = getopt.getopt(sys.argv[1:], '', [
 	'stacki-iso=', 'stacki-version=', 'stacki-name=',
-	'os-iso=', 'os-version=', 'os-name=', 'update-iso=', 'update-version=',
-	'update-name=', 'noX' ]) 
+	'extra-iso=', 'noX' ]) 
 
 stacki_iso = None
-stacki_version = None
-stacki_name = None
-os_iso = None
-os_version = None
-os_name = None
-update_iso = None
-update_version = None
-update_name = None
+extra_iso = []
 noX = 0
-no_net_reconfig = 0
 
 for opt, arg in opts:
 	if opt == '--stacki-iso':
-		stacki_iso = arg.split(',')
-	elif opt == '--stacki-version':
-		stacki_version = arg
-	elif opt == '--stacki-name':
-		stacki_name = arg
-	elif opt == '--os-iso':
-		os_iso = arg.split(',')
-	elif opt == '--os-version':
-		os_version = arg
-	elif opt == '--os-name':
-		os_name = arg
-	elif opt == '--update-iso':
-		update_iso = arg
-	elif opt == '--update-version':
-		update_version = arg
-	elif opt == '--update-name':
-		update_name = arg
+		stacki_iso = arg
+	elif opt == '--extra-iso':
+		extra_iso = arg.split(',')
 	elif opt == '--noX':
 		noX = 1
 
@@ -158,96 +122,37 @@ if not stacki_iso:
 	usage()
 	sys.exit(-1)
 
-if not stacki_version:
-	print('--stacki-version is not specified\n')
-	usage()
-	sys.exit(-1)
-
-if not stacki_name:
-	print('--stacki-name is not specified\n')
-	usage()
-	sys.exit(-1)
-
-if not os_iso:
-	print('--os-iso is not specified\n')
-	usage()
-	sys.exit(-1)
-
-if not os_version:
-	print('--os-version is not specified\n')
-	usage()
-	sys.exit(-1)
-
-if not os_name:
-	print('--os-name is not specified\n')
-	usage()
-	sys.exit(-1)
-
-ccname = stacki_name
-ccver = stacki_version
-cciso = stacki_iso[0]
-osname = os_name
-osver = os_version
-osiso1 = os_iso[0]
-if len(os_iso) > 1:
-	osiso2 = os_iso[1]
-else:
-	osiso2 = None
-
-updatename = None
-updatever = None
-updateiso = None
-
-if update_name:
-	updatename = update_name
-	updatever = update_version
-	updateiso = update_iso
-
-if not os.path.exists(cciso):
-	print("Error: File '{0}' does not exist.".format(cciso))
+if not os.path.exists(stacki_iso):
+	print("Error: File '{0}' does not exist.".format(stacki_iso))
 	sys.exit(1)
-if not os.path.exists(osiso1):
-	print("Error: File '{0}' does not exist.".format(osiso1))
-	sys.exit(1)
-if osiso2 and not os.path.exists(osiso2):
-	print("Error: File '{0}' does not exist.".format(osiso2))
-	sys.exit(1)
-if updateiso and not os.path.exists(updateiso):
-	print("Error: File '{0}' does not exist.".format(updateiso))
-	sys.exit(1)
+
+for iso in extra_iso:
+	if not os.path.exists(iso):
+		print("Error: File '{0}' does not exist.".format(iso))
+		sys.exit(1)
 
 banner("Boostrap Stack Command Line")
 
 # turn off NetworkManager so it doesn't overwrite our networking info
 subprocess.call(['service', 'NetworkManager', 'stop'])
 
-# copy the isos
-ccdest = '/export/stack/pallets'
-copy(cciso, ccdest)
+stacki_iso = os.path.abspath(stacki_iso)
 
-osdest = '/export/stack/pallets/%s' % osname
-copy(osiso1, osdest)
-if osiso2:
-	copy(osiso2, osdest)
-
-updatedest = None
-if updateiso:
-	updatedest = '/export/stack/pallets/%s' % updatename
-	copy(updateiso, updatedest)
+mountdir = tempfile.mkdtemp()
+mount(stacki_iso, mountdir)
 
 # create repo config file
-repoconfig(ccdest, ccname, ccver, osdest, updatedest, updatename, updatever)
+repoconfig(mountdir)
 
-# install rpms
 pkgs = [ 'stack-command', 'foundation-python', 'stack-pylib',
-	'foundation-python-xml', 'foundation-redhat', 'deltarpm', 
-	'python-deltarpm', 'createrepo', 'foundation-py-wxPython',
-	'stack-wizard', 'net-tools', 'foundation-py-pygtk' ]
+	'foundation-python-xml', 'foundation-redhat', 
+	'foundation-py-wxPython','foundation-py-pygtk',
+	'stack-wizard', 'net-tools']
 
 return_code = installrpms(pkgs)
 if return_code != 0:
 	print("Error: stacki package installation failed")
-	sys.exit(1)
+	sys.exit(return_code)
 
 banner("Configuring dynamic linker for stacki")
 ldconf()
@@ -259,7 +164,7 @@ if not os.path.exists('/tmp/site.attrs') and not \
 	# /tmp/site.attrs and /tmp/rolls.xml
 	#
 	banner("Launch Boss-Config")
-	mount(cciso, '/mnt/cdrom')
+	mount(stacki_iso, '/mnt/cdrom')
 	cmd = [ '/opt/stack/bin/python', '/opt/stack/bin/boss_config.py',
 		'--no-partition', '--no-net-reconfig' ]
 	if noX:
@@ -296,10 +201,11 @@ f.close()
 # set the hostname to the user-entered FQDN
 print('Setting hostname to %s' % attributes['Info_FQDN'])
 subprocess.call(['hostname', attributes['Info_FQDN']])
-	
+
+stackpath = '/opt/stack/bin/stack'
+subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
-stackpath = '/opt/stack/bin/stack'
 f = open("/tmp/stack.xml", "w")
 cmd = [ stackpath, 'list', 'node', 'xml', 'server',
 	'attrs={0}'.format(repr(attributes))]
@@ -311,7 +217,7 @@ banner("Process XML")
 # pipe that output to stack run pallet and output run.sh
 infile = open("/tmp/stack.xml", "r")
 outfile = open("/tmp/run.sh", "w")
-subprocess.call([stackpath, 'run', 'pallet'], stdin=infile, stdout=outfile)
+subprocess.call([stackpath, 'run', 'pallet', 'stacki'], stdin=infile, stdout=outfile)
 infile.close()
 outfile.close()
 
@@ -319,18 +225,11 @@ banner("Run Setup Script")
 # run run.sh
 subprocess.call(['sh', '/tmp/run.sh'])
 
-# before we add the pallets, clean up the old OS that we copied to the disk
-subprocess.call(['/bin/rm', '-rf', osdest])
-if updatedest:
-	subprocess.call(['/bin/rm', '-rf', updatedest])
-
 banner("Adding Pallets")
-subprocess.call([stackpath, 'add', 'pallet', cciso])
-subprocess.call([stackpath, 'add', 'pallet', osiso1])
-if osiso2:
-	subprocess.call([stackpath, 'add', 'pallet', osiso2])
-if updateiso:
-	subprocess.call([stackpath, 'add', 'pallet', updateiso])
+subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
+for iso in extra_iso:
+	iso = os.path.abspath(iso)
+	subprocess.call([stackpath, 'add', 'pallet', iso])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
 
 # all done
