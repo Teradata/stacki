@@ -93,7 +93,6 @@
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
 DEPENDS.FILES	= $(SRCFILE)
-ROLL.MEMBERSHIP = none
 
 include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE).mk
