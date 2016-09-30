@@ -239,7 +239,7 @@ class Command(stack.commands.list.command,
 		try:
 			for name, version, rel, arch, osname in self.getBoxPallets(attrs['box']):
                                 items.append(os.path.join('/export', 'stack',
-					'pallets', name, version, osname, arch))
+					'pallets', name, version, rel, osname, arch))
 		except:
 			#
 			# there is no output from 'getBoxPallets()'.
@@ -263,7 +263,7 @@ class Command(stack.commands.list.command,
 				(pname, pver, prel, parch, purl, pdiskid) \
 					= pallet
 				items.append(os.path.join('/export',
-					'stack', 'pallets', pname, pver,
+					'stack', 'pallets', pname, pver, prel,
 					'redhat', parch))
 
 		#

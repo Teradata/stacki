@@ -54,10 +54,9 @@ class Implementation(stack.commands.Implementation):
 		for pallet in self.owner.getBoxPallets(box):
                         pname, pversion, prel, parch, pos = pallet
 
-                        yum.append('[%s-%s]' % (pname, pversion))
-                        yum.append('name=%s %s' % (pname, pversion))
-                        yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s' % 
-                                   (server, pname, pversion, pos, parch))
+                        yum.append('[%s-%s-%s]' % (pname, pversion, prel))
+                        yum.append('name=%s %s %s' % (pname, pversion, prel))
+                        yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
                         yum.append('assumeyes=1')
 
                 for o in self.owner.call('list.cart'):

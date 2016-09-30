@@ -380,6 +380,11 @@ class RollFile(File):
 			self.diskid, self.foreign = self.getRollInfo()
 
 	def getRollInfoFromXML(self):
+		name = None
+		version = None
+		release = None
+		arch = None
+
 		cdtree = stack.file.Tree('/mnt/cdrom')
 		for dir in cdtree.getDirs():
 			for file in cdtree.getFiles(dir):
@@ -406,7 +411,8 @@ class RollFile(File):
 		diskid = None
 		foreign = 0
 
-		cmd = 'mount -o loop %s /mnt/cdrom' % self.getFullName()
+		cmd = 'mount -o loop %s /mnt/cdrom > /dev/null 2>&1' % \
+			self.getFullName()
 		retcode = os.system(cmd)
 		if retcode:
 			return name, version, release, arch, diskid, foreign

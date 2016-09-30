@@ -206,15 +206,15 @@ class Generator(stack.gen.Generator):
                 arg		= self.getAttr(node, 'arg')
 
                 if self.getProfileType() == 'native':
-                        s = '%post'
+                        script = '%post'
                         if interpreter:
-                                s += ' --interpreter %s' % interpreter
+                                script += ' --interpreter %s' % interpreter
                         if arg and '--nochroot' in arg:
-                                s += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
+                                script += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
                         else:
-                                s += ' --log=%s %s' % (self.log, arg)
-                        s += '\n%s' % self.getChildText(node)
-                        s += '%end'
+                                script += ' --log=%s %s' % (self.log, arg)
+                        script += '\n%s' % self.getChildText(node)
+                        script += '%end'
 
                 elif self.getProfileType() == 'shell':
 
@@ -235,8 +235,6 @@ class Generator(stack.gen.Generator):
                                 script = section
 			
                 self.postSection.append(script, nodefile)
-
-
 		
 	# <boot>
 	

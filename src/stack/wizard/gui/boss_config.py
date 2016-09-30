@@ -490,8 +490,9 @@ class Page6(wx.Panel):
 		self.list1 = CheckListCtrl(rightPanel)
 		self.list1.InsertColumn(0, 'Pallet Name', width = 140)
 		self.list1.InsertColumn(1, 'Version')
-		self.list1.InsertColumn(2, 'Id', width = 100)
-		self.list1.InsertColumn(3, 'Network', width = 170)
+		self.list1.InsertColumn(2, 'Release')
+		self.list1.InsertColumn(3, 'Id', width = 100)
+		self.list1.InsertColumn(4, 'Network', width = 170)
 
 		#keep track of loading pallets
 		self.pallets = []
@@ -506,7 +507,8 @@ class Page6(wx.Panel):
 			index = self.list1.InsertStringItem(sys.maxint, i[0])
 			self.list1.SetStringItem(index, 1, i[1])
 			self.list1.SetStringItem(index, 2, i[2])
-			self.list1.SetStringItem(index, 3, '')
+			self.list1.SetStringItem(index, 3, i[3])
+			self.list1.SetStringItem(index, 4, '')
 
 		#left panel for buttons
 		leftPanel = wx.Panel(self, -1)
@@ -567,14 +569,18 @@ class Page6(wx.Panel):
 		num = self.list1.GetItemCount()
 		for i in range(num):
 			if self.list1.IsChecked(i):
-				n = str(self.list1.GetItem(i, 0).GetText())
-				v = str(self.list1.GetItem(i, 1).GetText())
-				d = str(self.list1.GetItem(i, 2).GetText())
-				u = str(self.list1.GetItem(i, 3).GetText())
-				o = {'name' : n, 'version' : v, 'id' : d, 'url' : u}
+				name = str(self.list1.GetItem(i, 0).GetText())
+				version = str(self.list1.GetItem(i, 1).GetText())
+				release = str(self.list1.GetItem(i, 2).GetText())
+				diskid = str(self.list1.GetItem(i, 3).GetText())
+				url = str(self.list1.GetItem(i, 4).GetText())
 
-				#if no disk_id then assume it is a netroll
-				if not d:
+				o = {'name' : name, 'version' : version,
+					'release' : release, 'id' : diskid,
+					'url' : url}
+
+				#if no diskid then assume it is a netroll
+				if not diskid:
 					netrolls.append(o)
 				else:
 					dvdrolls.append(o)

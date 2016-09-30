@@ -98,7 +98,7 @@ import stack.commands
 
 class Implementation(stack.commands.Implementation):
 	"""
-	Copy a native redhat (meaning Rocks) roll.
+	Copy a native Stacki roll.
 	"""
 	
 	def run(self, args):
@@ -108,70 +108,77 @@ class Implementation(stack.commands.Implementation):
 		name = info.getRollName()
 		vers = info.getRollVersion()
 		arch = info.getRollArch()
-		OS   = info.getRollOS()
+		release = info.getRollRelease()
+		OS = info.getRollOS()
 
-		# Get the destination, ie. where should the roll be put.
-		# This is always rolls_directory/roll_name/
 		roll_dir = os.path.join(prefix, name)
-		specific_roll_dir = os.path.join(roll_dir, vers, OS, arch)
+		new_roll_dir = os.path.join(roll_dir, vers, release, OS, arch)
+		old_roll_dir = os.path.join(roll_dir, vers, OS, arch)
 
-
+		#
 		# Clean out the existing roll directory if asked
-		
-		if clean and os.path.exists(specific_roll_dir):
-			print('Cleaning %s version %s ' % (name, vers), end=' ')
+		#
+		if clean and (os.path.exists(new_roll_dir) or 
+				os.path.exists(old_roll_dir)):
+			print('Cleaning %s %s-%s' %
+				(name, vers, release), end=' ')
 			print('for %s from the pallets directory' % arch)
-			os.system('/bin/rm -rf %s' % specific_roll_dir)
-			os.makedirs(specific_roll_dir)
 
-		# Finally copy the roll to the HD
-		sys.stdout.write('Copying %s to pallets ...' % name)
+			if os.path.exists(new_roll_dir):
+				os.system('/bin/rm -rf %s' % new_roll_dir)
+			elif os.path.exists(old_roll_dir):
+				os.system('/bin/rm -rf %s' % old_roll_dir)
+
+		#
+		# copy the roll to the HD
+		#
+		sys.stdout.write('Copying %s %s-%s to pallets ...' %
+			(name, vers, release))
 		sys.stdout.flush()
-		cwd = os.getcwd()
+
 		os.chdir(os.path.join(self.owner.mountPoint, name))
-		## CHECK FOR OLD FORMAT ##
-		p1 = os.path.join(vers, arch, 'RedHat')
-		if os.path.exists(p1):
-			# Get the RPMS
-			os.chdir(p1)
-			os.system('find RPMS -type f ! -name TRANS.TBL | ' +\
-				'cpio -mpud %s' % specific_roll_dir)
 
-			# Get the XML file from the roll
-			os.chdir(os.path.join(self.owner.mountPoint, name, vers, arch))
-			os.system('find * -prune -type f -name roll-*.xml | ' +\
-				'cpio -mpud %s' % specific_roll_dir)
+		old_format = os.path.join(vers, OS, arch)
+		new_format = os.path.join(vers, release, OS, arch)
+		if os.path.exists(old_format):
+			os.chdir(old_format)
+		elif os.path.exists(new_format):
+			os.chdir(new_format)
 		else:
-			## END CHECK FOR OLD FORMAT ##
-			os.system('find . ! -name TRANS.TBL -print | cpio -mpud %s' %
-				  roll_dir)
+			raise CommandError(self.owner, 'unrecognized pallet format')
 
-			if stack.release == '7.x':
-				#
-				# check for LiveOS
-				#
-				liveosdir = os.path.join(self.owner.mountPoint,
-					'LiveOS')
+		os.system('find . ! -name TRANS.TBL -print | cpio -mpud %s'
+			% new_roll_dir)
 
-				if os.path.exists(liveosdir):
-					os.chdir(self.owner.mountPoint)
-					os.system('find LiveOS ! -name TRANS.TBL ' +
-						' -print | cpio -mpud ' +
-						'%s' % specific_roll_dir)
+		#
+		# go back to the top of the pallet
+		#
+		os.chdir(os.path.join(self.owner.mountPoint, name))
 
-				#
-				# check for images
-				#
-				imagesdir = os.path.join(self.owner.mountPoint,
-					'images')
+		if stack.release == '7.x':
+			#
+			# check for LiveOS
+			#
+			liveosdir = os.path.join(self.owner.mountPoint, 'LiveOS')
 
-				if os.path.exists(imagesdir):
-					os.chdir(self.owner.mountPoint)
-					os.system('find images ! -name TRANS.TBL ' +
-						' -print | cpio -mpud ' +
-						'%s' % specific_roll_dir)
+			if os.path.exists(liveosdir):
+				os.chdir(self.owner.mountPoint)
+				os.system('find LiveOS ! -name TRANS.TBL ' +
+					' -print | cpio -mpud %s' % new_roll_dir)
 
+			#
+			# check for images
+			#
+			imagesdir = os.path.join(self.owner.mountPoint, 'images')
+
+			if os.path.exists(imagesdir):
+				os.chdir(self.owner.mountPoint)
+				os.system('find images ! -name TRANS.TBL ' +
+					' -print | cpio -mpud %s' % new_roll_dir)
+
+		#
 		# after copying the roll, make sure everyone (apache included)
 		# can traverse the directories
+		#
 		os.system('find %s -type d -exec chmod a+rx {} \;' % roll_dir)
-		os.chdir(cwd)
+

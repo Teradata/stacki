@@ -123,7 +123,7 @@ class Builder:
 	def mktemp(self):
 		return tempfile.mktemp(dir=self.tempdir)
 		
-	def makeBootable(self, name):
+	def makeBootable(self, name, version, release, arch):
 		pass
 				
 	def mkisofs(self, isoName, rollName, diskName, rollDir):
@@ -153,11 +153,11 @@ class Builder:
 		os.chdir(cwd)
 
 		
-	def writerepo(self, name, version, arch):
+	def writerepo(self, name, version, release, arch):
 		print('Writing repo data')
 		basedir = os.getcwd()
 		palletdir = os.path.join(basedir, 'disk1', name, version,
-			'redhat', arch)
+			release, 'redhat', arch)
 		os.chdir(palletdir)
 
 		cmd = [ 'createrepo' ]
@@ -172,13 +172,13 @@ class Builder:
 		os.chdir(basedir)
 
 
-	def copyXMLs(self, osname, name, version, arch):
+	def copyXMLs(self, osname, name, version, release, arch):
 		print('Copying graph and node XML files')
 
 		cwd = os.getcwd()
 		srcdir = os.path.join(cwd, '..')
 		destdir = os.path.join(cwd, 'disk1', name, version,
-			osname, arch)
+			release, osname, arch)
 
 		os.chdir(destdir)
                 if os.path.exists(os.path.join(srcdir, 'graph')):
@@ -346,7 +346,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 	def getExternalRPMS(self):
 		import stack.roll
-		import stack.gen
+		import stack.redhat.gen
 
 		xml = self.command('list.node.xml', [ 'everything', 'eval=n' ] )
 
@@ -356,7 +356,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		#
 		xmlinput = xml.encode('ascii', 'ignore')
 
-		generator = stack.gen.Generator_redhat()
+		generator = stack.redhat.gen.Generator()
 		generator.setArch(self.arch)
 		generator.setOS('redhat')
 		generator.parse(xmlinput)
@@ -410,7 +410,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			if 'default-all' in boxes:
 				file.write('[%s]\n' % o['name'])
 				file.write('name=%s\n' % o['name'])
-				file.write('baseurl=file:///export/stack/pallets/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['arch']))
+				file.write('baseurl=file:///export/stack/pallets/%s/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['release'], o['arch']))
 
 		file.close()
 
@@ -485,7 +485,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			if 'default-os' in boxes:
 				file.write('[%s]\n' % o['name'])
 				file.write('name=%s\n' % o['name'])
-				file.write('baseurl=file:///export/stack/pallets/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['arch']))
+				file.write('baseurl=file:///export/stack/pallets/%s/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['release'], o['arch']))
 
 		file.close()
 		destdir = os.path.join(cwd, 'RPMS')
@@ -509,18 +509,11 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		return (stacki, nonstacki)
 
 
-	def makeBootable(self, name):
+	def makeBootable(self, name, version, release, arch):
 		import stack.roll
 		import stack
 
 		print('Configuring pallet to be bootable ... ', name)
-
-		#
-		# get 'stacki' pallet info
-		#
-		stacki_name = 'stacki'
-		stacki_version = os.environ['ROLLVERSION']
-		stacki_arch = 'x86_64'
 
 		# 
 		# create a minimal kickstart file. this will get us to the
@@ -534,8 +527,8 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			fout.write('lang en_US\n')
 			fout.write('keyboard us\n')
 		else:
-			distdir = os.path.join('mnt', 'cdrom', stacki_name,
-				stacki_version, 'redhat', stacki_arch)
+			distdir = os.path.join('mnt', 'cdrom', name,
+				version, release, 'redhat', arch)
 
 			fout.write('install\n')
 			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
@@ -548,9 +541,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		#
 		# add isolinux files
 		# 
-		localrolldir = os.path.join(self.config.getRollName(), 
-			self.config.getRollVersion(), 'redhat', 
-			self.config.getRollArch())
+		localrolldir = os.path.join(name, version, release, 'redhat', arch)
 
 		destination = os.path.join(os.getcwd(), 'disk1')
 		rolldir = os.path.join(destination, localrolldir)
@@ -562,13 +553,40 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 
 
 	def addComps(self, basedir):
-		localrolldir = os.path.join(self.config.getRollName(), 
-			self.config.getRollVersion(), 'redhat', 
-			self.config.getRollArch())
-
+		#
+		# need to copy foundation-comps from stacki into the pallet
+		# build directory for the OS pallet
+		#
 		destination = os.path.join(basedir, 'disk1')
+		localrolldir = os.path.join(self.config.getRollName(), 
+			self.config.getRollVersion(),
+			self.config.getRollRelease(), 'redhat',
+			self.config.getRollArch())
 		rolldir = os.path.join(destination, localrolldir)
 
+		sversion = None
+		srelease = None
+		sarch = None
+		sos = None
+		output = self.call('list.pallet', [ 'stacki' ])
+		for o in output:
+			if o['version'] == stack.version:
+				sversion = o['version']
+				srelease = o['release']
+				sarch = o['arch']
+				sos = o['os']
+
+		if not sversion:
+			raise CommandError(self, 'could not stacki pallet version "%s"' % stack.version)
+
+		foundation_comps = os.path.join('/export', 'stack',
+			'pallets', 'stacki', sversion,
+			srelease, sos, sarch, 'RPMS',
+			'foundation-comps-%s-%s.noarch.rpm' %
+			(sversion, srelease))
+		dst = os.path.join(rolldir, 'RPMS')
+		shutil.copy(foundation_comps, dst)
+				
 		boot = stack.bootable.Bootable(basedir, rolldir)
 
 		pkg = boot.findFile('foundation-comps')
@@ -583,7 +601,6 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		# Make a list of all the files that we need to copy onto the
 		# pallets cds.  Don't worry about what the file types are right
 		# now, we can figure that out later.
-			
 		list = []
 		if self.config.hasRPMS():
 			list.extend(self.getRPMS('RPMS'))
@@ -619,6 +636,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 			root = os.path.join(name,
 					    self.config.getRollName(),
 					    self.config.getRollVersion(),
+					    self.config.getRollRelease(),
 					    self.config.getRollOS(),
 					    self.config.getRollArch())
 
@@ -662,12 +680,14 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
                         if self.config.getRollOS() == 'redhat':
                                 self.writerepo(self.config.getRollName(),
                                                self.config.getRollVersion(),
+                                               self.config.getRollRelease(),
                                                self.config.getRollArch())
 
 			# copy the graph and node XMLs files into the pallet
 			self.copyXMLs(self.config.getRollOS(),
                                       self.config.getRollName(),
                                       self.config.getRollVersion(),
+                                      self.config.getRollRelease(),
                                       self.config.getRollArch())
 			
 			# make the ISO.  This code will change and move into
@@ -683,7 +703,10 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 				name)
 				
 			if id == 1 and self.config.isBootable() == 1:
-				self.makeBootable(name)
+				self.makeBootable(self.config.getRollName(),
+					self.config.getRollVersion(),
+					self.config.getRollRelease(),
+					self.config.getRollArch())
 
 			self.mkisofs(isoname, self.config.getRollName(), name)
 
@@ -747,6 +770,7 @@ class MetaRollBuilder(Builder):
 		for roll in self.rolls:
 			xml = os.path.join(tmp, roll.getRollName(), 
 				roll.getRollVersionString(), 
+				roll.getRollRelease(), 
 				'redhat',
 				roll.getRollArch(),
 				'roll-%s.xml' % roll.getRollName())
@@ -755,6 +779,7 @@ class MetaRollBuilder(Builder):
 				xml = os.path.join(tmp,
 					roll.getRollName(),
 					roll.getRollVersionString(),
+					roll.getRollRelease(),
 					roll.getRollArch(),
 					'roll-%s.xml' % roll.getRollName())
 
@@ -801,6 +826,11 @@ class Command(stack.commands.create.command,
 	stacki running on this machine).
 	</param>
 
+	<param type='string' name='release'>
+	The release id of the created pallet. (default = the release id of 
+	stacki running on this machine).
+	</param>
+
 	<param type='boolean' name='newest'>
 	</param>
 
@@ -834,7 +864,7 @@ class Command(stack.commands.create.command,
 		(name, version, release, newest) = self.fillParams([
                         ('name', None),
 			('version', version),
-			('release',release),
+			('release', release),
 			('newest', True) 
                         ])
 		# Yes, globals are probably bad. But this is the fastest
