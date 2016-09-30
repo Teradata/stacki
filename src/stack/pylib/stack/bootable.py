@@ -124,11 +124,11 @@ class Bootable:
 			boxes  = o['boxes'].split()
 			if box in boxes:
 				pallets.append((o['name'], o['version'],
-					o['arch']))
+					o['release'], o['arch']))
 
-		for name, ver, arch in pallets:
+		for name, ver, release, arch in pallets:
 			palletpath = os.path.join('/export', 'stack', 'pallets',
-				name, ver, 'redhat', arch)
+				name, ver, release, 'redhat', arch)
 
 			self.filetree[name] = stack.file.Tree(palletpath)
 

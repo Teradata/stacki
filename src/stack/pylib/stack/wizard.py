@@ -86,21 +86,30 @@ class Data:
 		return getattr(self.data, attr)
 
 	def getDVDPallets(self):
-		#packages = [('test','ver','diskId'), ('test2','ver2','diskId')]
+		# packages = [('test', 'ver', 'rel', 'diskId'),
+		#		('test2', 'ver2', 'rel', 'diskId')]
 
 		#check if CD is mounted and get list
 		packages = []
 		media = stack.media.Media()
 
-		cdInfo = media.getCDInfo()
-		disk_id = media.getId()
+		media.mountCD()
+		rollfile = stack.file.RollFile('/dev/null')
+		name, version, release, arch, diskid, foreign = \
+			rollfile.getRollInfo()
+		diskid = media.getId()
 
-		if cdInfo[1] == 'RHEL' or cdInfo[1] == 'CentOS':
-		       packages.append((cdInfo[1], cdInfo[4], disk_id))
+		timestamp, name, arch, disknum, version = media.getCDInfo()
+		diskid = media.getId()
+		
+		if name in [ 'RHEL', 'CentOS' ]:
+			release = stack.release
+			packages.append((name, version, release, diskid))
 		else:
-		       rolls = media.getRollsFromCD()
-		       for w in rolls:
-		               packages.append((w[0], w[1], disk_id))	
+			rolls = media.getRollsFromCD()
+			for name, version, release, arch in rolls:
+				packages.append((name, version, release, diskid))
+
 		return packages
 
 	def validateTimezone(self, zone):
@@ -323,7 +332,6 @@ class Data:
 			return (True, "", "")
 
 	def generateSummary(self):
-
 		#string of pallets
 		text = ""
 		pallets = []
@@ -334,7 +342,7 @@ class Data:
 			pallets.extend(self.data.netrolls)
 
 		for p in pallets:
-			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['id']
+			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['release'] + ' ' + p['id']
 
 		#display summary data
 		summaryStr = 'Hostname: ' + self.data.Info_FQDN + '\n' + \
@@ -375,6 +383,7 @@ class Data:
 				roll = SubElement(rolls, 'roll', \
 					name=w['name'], \
 					version=w['version'], \
+					release=w['release'], \
 					arch='x86_64', \
 					url='http://127.0.0.1/mnt/cdrom/', \
 					diskid=w['id'])
@@ -385,6 +394,7 @@ class Data:
 				roll = SubElement(rolls, 'roll', \
 					name=w['name'], \
 					version=w['version'], \
+					release=w['release'], \
 					arch='x86_64', \
 					url=w['url'], \
 					diskid='')

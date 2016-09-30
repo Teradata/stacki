@@ -177,6 +177,7 @@ class Media:
 		archinfo = None
 		diskid = None
 		vers = None
+		release = None
 
 		if os.path.exists('/mnt/cdrom/.treeinfo'):
 			file = open('/mnt/cdrom/.treeinfo', 'r')
@@ -238,38 +239,6 @@ class Media:
 		return (timestamp, name, archinfo, diskid, vers)
 
 
-	def getCDInfoFromXML(self):
-		retval = (None, None, None)
-
-		self.mountCD()
-		cdtree = stack.file.Tree('/mnt/cdrom')
-		for dir in cdtree.getDirs():
-			for file in cdtree.getFiles(dir):
-				try:
-					xmlfile = stack.file.RollInfoFile(
-							file.getFullName())
-
-					rollname = xmlfile.getRollName()
-					rollversion = xmlfile.getRollVersion()
-					rollarch = xmlfile.getRollArch()
-
-					if rollname != None and \
-						rollversion != None and \
-							rollarch != None:
-
-						retval = (rollname, \
-							rollversion, rollarch)
-						break
-
-				except:
-					continue
-
-			if retval != (None, None, None):
-				break
-
-		return retval
-
-
 	def getId(self):
 		"""Get the Id of the physical roll CD."""
 
@@ -296,19 +265,23 @@ class Media:
 						'%s/%s' % (r, fname))
 					rollname = xmlfile.getRollName()
 					rollversion = xmlfile.getRollVersion()
+					rollrelease = xmlfile.getRollRelease()
 					rollarch = xmlfile.getRollArch()
 
 					if not rollname:
 						continue
 					if not rollversion:
 						continue
+					if not rollrelease:
+						continue
 					if not rollarch:
 						continue
-					roll_list.append((rollname, rollversion, rollarch))
+
+					roll_list.append((rollname, rollversion,
+						rollrelease, rollarch))
 
 		return roll_list
 				
-		
 
 	def listRolls(self, url, diskid, rollList):
 		if os.path.exists('/tmp/updates/stack/bin/wget'):
