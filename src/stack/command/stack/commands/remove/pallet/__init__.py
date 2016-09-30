@@ -119,6 +119,11 @@ class Command(stack.commands.RollArgumentProcessor,
 	supplied, then all versions of a pallet will be removed.
 	</param>
 	
+	<param type='string' name='release'>
+	The release id of the pallet to be removed. If no release id is
+	supplied, then all releases of a pallet will be removed.
+	</param>
+
 	<param type='string' name='arch'>
 	The architecture of the pallet to be removed. If no architecture is
 	supplied, then all architectures will be removed.
@@ -142,7 +147,7 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                (arch, OS ) = self.fillParams([
+                (arch, OS) = self.fillParams([
                         ('arch', '%'),
                         ('os','%')
                         ])
@@ -162,24 +167,25 @@ class Command(stack.commands.RollArgumentProcessor,
 
 			# Remove each arch's instance of this pallet version
 			for (thisos, thisarch,) in self.db.fetchall():
-				self.clean_roll(roll, version, thisos, thisarch)
+				self.clean_pallet(roll, version, release, thisos,
+					thisarch)
 
 		self.endOutput(padChar='')
 
 
-	def clean_roll(self, roll, version, OS, arch):
+	def clean_pallet(self, roll, version, release, OS, arch):
 		""" Remove pallet files and database entry for this arch. Calls 
 		the Host OS specific function for proper filesystem cleanup. """
 
-		self.addOutput('', 'Removing "%s" (%s,%s,%s) pallet ...' %
-			(roll, version, arch, OS))
+		self.addOutput('', 'Removing %s %s-%s-%s-%s pallet ...' %
+			(roll, version, release, OS, arch))
 
 		prefix = '/export/stack/pallets'
 
         	os.system('/bin/rm -rf %s' %
-			os.path.join(prefix, roll, version, OS, arch))
+			os.path.join(prefix, roll, version, release, OS, arch))
 
-		f = [ prefix, roll, version, OS ]
+		f = [ prefix, roll, version, release, OS ]
 		i = len(f) - 1
 
 		while f != [ prefix ]:
@@ -207,9 +213,9 @@ class Command(stack.commands.RollArgumentProcessor,
 		# Remove pallet from database as well
 		self.db.execute("""
 			delete from rolls where
-			name = '%s' and version = '%s' and arch = '%s'
-			and os = '%s'
-			""" % (roll, version, arch, OS))
+			name = '%s' and version = '%s' and rel = '%s' and
+			arch = '%s' and os = '%s'
+			""" % (roll, version, release, arch, OS))
 
 		# Regenerate stacki.repo
 		os.system("""
@@ -217,3 +223,4 @@ class Command(stack.commands.RollArgumentProcessor,
 			/opt/stack/bin/stack report script | 
 			/bin/sh
 			""")
+

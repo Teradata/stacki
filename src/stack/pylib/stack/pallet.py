@@ -247,9 +247,10 @@ class GetPallet:
 
 					name = info[3]
 					version = info[4]
+					release = info[5]
 
 					pallet = name + '---' + version
-					palletPath = '/mnt/cdrom/' + name + '/' + version + '/'
+					palletPath = '/mnt/cdrom/' + name + '/' + version + '/' + release + '/'
 
 					# get the size of pallet
 					proc = subprocess.Popen( ['du', '-b', palletPath, '--summarize'], \
@@ -296,7 +297,7 @@ class GetPallet:
 			if diskid != '':
 				continue
 
-			path = os.path.join(name, version, 'redhat', arch)
+			path = os.path.join(name, version, release, 'redhat', arch)
 			purl = os.path.join(url, path)
 			cutdirs = len(purl.split(os.sep)) - 3
 			localpath = os.path.join(

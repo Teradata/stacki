@@ -19,16 +19,16 @@ wget_cmd = "/usr/bin/wget -r -nH -A xml,pro --cut-dirs=2"
 cwd = os.getcwd()
 os.chdir("/export/stack/pallets")
 for pallet in g.rolls:
-	nodes_url = "%s/%s/%s/redhat/%s/nodes" % (pallet[4],pallet[0],pallet[1],pallet[3])
+	nodes_url = "%s/%s/%s/%s/redhat/%s/nodes" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
 	os.system("%s %s" % (wget_cmd, nodes_url))
-	graph_url = "%s/%s/%s/redhat/%s/graph" % (pallet[4],pallet[0],pallet[1],pallet[3])
+	graph_url = "%s/%s/%s/%s/redhat/%s/graph" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
 	os.system("%s %s" % (wget_cmd, graph_url))
 
 	#
 	# convert any .pro files to .xml
 	#
-	graphdir = '/export/stack/pallets/%s/%s/redhat/%s/graph' \
-		% (pallet[0], pallet[1], pallet[3])
+	graphdir = '/export/stack/pallets/%s/%s/%s/redhat/%s/graph' \
+		% (pallet[0], pallet[1], pallet[2], pallet[3])
 	#
 	# If graph directory does not exist, this could
 	# indicate a foreign pallet. Ignore, and move on
@@ -45,7 +45,7 @@ for pallet in g.rolls:
 # RHEL 7 needs the repodata files too
 wget_cmd = "/usr/bin/wget -r -nH -R TRANS.TBL --cut-dirs=2"
 for pallet in g.rolls:
-	repodata_url = "%s/%s/%s/redhat/%s/repodata" % (pallet[4],pallet[0],pallet[1],pallet[3])
+	repodata_url = "%s/%s/%s/%s/redhat/%s/repodata" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
 	os.system("%s %s" % (wget_cmd, repodata_url))
 
 os.chdir(cwd)

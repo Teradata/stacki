@@ -106,14 +106,14 @@ if 'boss' in args:
 
 		file.write('[%s-%s]\n' % (pname, pver))
 		file.write('name=%s %s\n' % (pname, pver))
-		file.write('baseurl=http://%s/install/pallets/%s/%s/redhat/x86_64\n' % (host, pname, pver))
+		file.write('baseurl=http://%s/install/pallets/%s/%s/%s/redhat/x86_64\n' % (host, pname, pver, prel))
 		file.write('assumeyes=1\n')
 
 		#
 		# need to make a "base" repo address
 		#
 		if pname in [ 'CentOS', 'RHEL', 'os' ]:
-			baserepo = 'http://%s/install/pallets/%s/%s/redhat/x86_64' % (host, pname, pver)
+			baserepo = 'http://%s/install/pallets/%s/%s/%s/redhat/x86_64' % (host, pname, pver, prel)
 			
 	file.close()
 

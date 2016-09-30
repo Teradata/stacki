@@ -118,6 +118,7 @@ class Implementation(stack.commands.Implementation):
 		name = None
 		vers = None
 		arch = None
+		release = None
 
 		file = open(self.treeinfo, 'r')
 		for line in file.readlines():
@@ -148,21 +149,23 @@ class Implementation(stack.commands.Implementation):
 			vers = stack.version
 		if not arch:
 			arch = 'x86_64'
+		if not release:
+			release = stack.release
 			
 		OS = 'redhat'
-		roll_dir = os.path.join(prefix, name, vers, OS, arch)
+		roll_dir = os.path.join(prefix, name, vers, release, OS, arch)
 		destdir = roll_dir
 
 		if stack.release == '7.x':
 			liveosdir = os.path.join(roll_dir, 'LiveOS')
 
 		if clean and os.path.exists(roll_dir):
-			print('Cleaning %s version %s ' % (name, vers), end=' ')
-			print('for %s from pallets directory' % arch)
+			print('Cleaning %s %s-%s' % (name, vers, release))
+
 			os.system('/bin/rm -rf %s' % roll_dir)
 			os.makedirs(roll_dir)
 
-		print('Copying "%s" (%s,%s) pallet ...' % (name, vers, arch))
+		print('Copying %s %s-%s pallet ...' % (name, vers, release))
 
 		if not os.path.exists(destdir):
 			os.makedirs(destdir)
@@ -178,11 +181,11 @@ class Implementation(stack.commands.Implementation):
 
 		xmlfile.write('<roll name="%s" interface="6.0.2">\n' % name)
 		xmlfile.write('<color edge="white" node="white"/>\n')
-		xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, stack.release, arch, OS))
+		xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, release, arch, OS))
 		xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
 		xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
 		xmlfile.write('</roll>\n')
 
 		xmlfile.close()
 
-		return (name, vers, stack.release, arch, OS)
+		return (name, vers, release, arch, OS)
