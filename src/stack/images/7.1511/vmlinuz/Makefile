@@ -49,5 +49,5 @@ build:
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
-	cp vmlinuz $(ROOT)/$(PKGROOT)/vmlinuz-$(VERSION)-$(ARCH)
+	cp vmlinuz $(ROOT)/$(PKGROOT)/vmlinuz-$(VERSION)-$(RELEASE)-$(ARCH)
 

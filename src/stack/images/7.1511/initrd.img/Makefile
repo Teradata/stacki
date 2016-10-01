@@ -56,7 +56,7 @@ install::
 	mkdir -p $(ROOT)/$(PKGROOT)
 	(cd build ; \
 		find . | cpio --quiet -c -o | xz -9 --format=lzma > \
-			$(ROOT)/$(PKGROOT)/initrd.img-$(VERSION)-$(ARCH) \
+			$(ROOT)/$(PKGROOT)/initrd.img-$(VERSION)-$(RELEASE)-$(ARCH) \
 	)
 
 clean::

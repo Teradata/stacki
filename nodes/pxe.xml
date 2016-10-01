@@ -74,23 +74,23 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 <post cond="'&release;' == '6.x'">
 
 /opt/stack/bin/stack add bootaction action="install" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction action="install no-parallel-format" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
 
 /opt/stack/bin/stack add bootaction action="install headless" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction action="rescue" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
 
 </post>
@@ -99,23 +99,23 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 <post cond="'&release;' == '7.x'">
 
 /opt/stack/bin/stack add bootaction action="install" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="install no-parallel-format" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="install headless" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac inst.vnc ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction action="rescue" \
-	kernel="vmlinuz-&version;-&arch;" \
-	ramdisk="initrd.img-&version;-&arch;" \
+	kernel="vmlinuz-&version;-&release;-&arch;" \
+	ramdisk="initrd.img-&version;-&release;-&arch;" \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
 
 </post>
