@@ -65,6 +65,7 @@ bootstrap:
 	pygobject2-devel \
 	pycairo-devel \
 	mkisofs \
+	libblkid-devel \
 	intltool \
 	audit-libs-devel \
 	system-config-keyboard \
