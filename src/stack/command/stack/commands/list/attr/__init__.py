@@ -91,8 +91,8 @@
 # @Copyright@
 
 import sys
-import socket
 import string
+import re
 import stack.attr
 import stack.commands
 
@@ -107,32 +107,39 @@ class Command(stack.commands.list.command):
 
 	def run(self, params, args):
 
-		key, = self.fillParams([ ('attr', None) ])
-		scope = None
-		attr  = None
+		(key, shadow, ) = self.fillParams([ ('attr', None),
+			('shadow', 'False') ])
+		shadow = self.str2bool(shadow)	
+		key_regex = None
 		if key:
 			(scope, attr) = stack.attr.SplitAttr(key)
-		key = stack.attr.ConcatAttr(scope, attr)
+			key_regex = re.compile(stack.attr.ConcatAttr(scope, attr))
 
 		attrs      = {}
 		intrinsics = {}
 		for (s, a, v) in self.db.getIntrinsicAttrs():
 			k = stack.attr.ConcatAttr(s, a)
-			attrs[k]      = (s, a, v)
+			attrs[k]      = (s, a, v, None)
 			intrinsics[k] = True
 
-		rows = self.db.execute("""select scope, attr, value from 
+		rows = self.db.select("""scope, attr, value, shadow from 
 			global_attributes""")
-		if rows:
-			for s, a, v in self.db.fetchall():
-				k = stack.attr.ConcatAttr(s, a)
-				if intrinsics.has_key(k):
-					continue
-				attrs[k] = (s, a, v)
+		if not rows:
+			rows = self.db.select("""select scope, attr, value from
+			global_attributes""")
 
-		keys = attrs.keys()
-		keys.sort()
-		
+		for row in rows:
+			if len(row) == 4:
+				(s, a, v, x) = row
+			
+			else:
+				x = None
+				(s, a, v) = row
+			k = stack.attr.ConcatAttr(s, a)
+			if intrinsics.has_key(k):
+				continue
+			attrs[k] = (s, a, v, x)
+
 		self.beginOutput()
 
 		# The addOutput, endOutput used is slightly different here.
@@ -141,25 +148,30 @@ class Command(stack.commands.list.command):
 		# output look odd. So we set the OWNER and First header to
 		# null.
 
-		
-		if attr:	# get unique attribute
-			for k in keys:
-				(s, a, v) = attrs[k]
-				if key == k:
-					if intrinsics.has_key(k):
-						source = 'I'
-					else:
-						source = 'G'
+		keys = attrs.keys()
+		keys.sort()	
+		for k in keys:
+			if key_regex:
+				m = key_regex.match(k)
+				if m and m.group() == k:
+					continue
+
+			(s, a, v, x) = attrs[k]
+			if intrinsics.has_key(k):
+				source = 'I'
+			else:
+				source = 'G'
+
+			if shadow:
+				if x:
+					self.addOutput(None, (s, a, x, source))
+				else:
 					self.addOutput(None, (s, a, v, source))
-		else:
-			for k in keys:
-				(s, a, v) = attrs[k]
-				if not scope or (s and s.find(scope) == 0):
-					if intrinsics.has_key(k):
-						source = 'I'
-					else:
-						source = 'G'
-					self.addOutput(None, (s, a, v, source))
+			else:
+				if not v:
+					continue
+
+				self.addOutput(None, (s, a, v, source))
 				
 		self.endOutput(header=[None, 'scope', 'attr', 
 				       'value', 'source' ])

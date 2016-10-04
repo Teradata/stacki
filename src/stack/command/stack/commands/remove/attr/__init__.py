@@ -93,6 +93,7 @@
 
 import stack.attr
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.command):
 	"""
@@ -108,18 +109,13 @@ class Command(stack.commands.remove.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None, True) ])
+		(key, ) = self.fillParams([ ('attr', None) ])
+		if not key:
+			raise ParamRequired(self, 'attr')
                  
-		attr = stack.attr.NormalizeAttr(key)
-		for row in self.call('list.attr'):
-			s = row['scope']
-			a = row['attr']
-			if attr == stack.attr.ConcatAttr(s, a):
-				self.db.execute("""
-                                	delete from
-					global_attributes where
-					scope = binary '%s' and
-					attr  = binary '%s'
-					""" % (s, a))
+		(scope, attr) = stack.attr.SplitAttr(key)
+		self.db.execute(""" delete from global_attributes
+			where scope = binary '%s' and
+			attr = binary '%s' """ % (scope, attr))
 
 

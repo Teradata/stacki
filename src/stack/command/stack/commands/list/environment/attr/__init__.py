@@ -92,7 +92,6 @@
 
 
 import sys
-import socket
 import string
 import stack.attr
 import stack.commands
@@ -112,45 +111,62 @@ class Command(stack.commands.list.environment.command):
 
 	def run(self, params, args):
 
-		key, = self.fillParams([ ('attr', None) ])
-		scope = None
-		attr  = None
+		(key,shadow,) = self.fillParams([ 
+			('attr', None),
+			('shadow', 'False') ])
+		
+		shadow = self.str2bool(shadow)
+		key_regex = None
 		if key:
 			(scope, attr) = stack.attr.SplitAttr(key)
-		key = stack.attr.ConcatAttr(scope, attr)
+			key_regex = re.compile(stack.attr.ConcatAttr(scope, attr))
 
 		self.beginOutput()
 
 		if args:
 			envs = args
 		else:
-			self.db.execute("""
-				select distinct environment 
+			envs = self.db.select("""
+				distinct environment 
 				from environment_attributes
 				order by environment
 				""")
-			envs = []
-			for env in self.db.fetchall():
-				envs.append(env)
 
 		for env in envs:
 			attrs = []
-			self.db.execute("""
-				select scope, attr, value from
+			rows = self.db.select("""
+				scope, attr, value, shadow from
 				environment_attributes where environment='%s'
 				order by scope, attr
 				""" % env)
-			for s, a, v in self.db.fetchall():
+			if not rows:
+				rows = self.db.select("""
+					scope, attr, value from
+					environment_attributes where environment='%s'
+					order by scope, attr
+					""" % env)
+			for row in rows:
+				if len(row) == 4:
+					(s, a, v, x) = row
+				else:
+					x = None
+					(s, a, v) = row
 				attrs.append((stack.attr.ConcatAttr(s, a),
-					      s, a, v))
+					      s, a, v, x))
 			
-			if attr:	# get unique attribute
-				for (k, s, a, v) in attrs:
-					if key == k:
+			for (k, s, a, v, x) in attrs:
+				if key_regex:
+					m = key_regex.match(k)
+					if m and m.group() == k:
+						continue
+				if shadow:
+					if x:
+						self.addOutput(env, (s, a, x))
+					else:
 						self.addOutput(env, (s, a, v))
-			else:
-				for (k, s, a, v) in attrs:
-					if not scope or s.find(scope) == 0:
+						
+				else:
+					if not x:
 						self.addOutput(env, (s, a, v))
 
 		self.endOutput(header=['environment', 'scope', 'attr', 'value' ],

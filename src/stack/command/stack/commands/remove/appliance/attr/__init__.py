@@ -92,6 +92,7 @@
 
 import stack.attr
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.appliance.command):
 	"""
@@ -101,9 +102,9 @@ class Command(stack.commands.remove.appliance.command):
 	One or more appliances
 	</arg>
 	
-	<arg type='string' name='attr' optional='0'>
+	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</arg>
+ 	</param>
  	
 	<example cmd='remove appliance attr backend attr=sge'>
 	Removes the attribute sge for backend appliances
@@ -111,21 +112,15 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None, False) ])
+		(key, ) = self.fillParams([ ('attr', None) ])
+		if not key:
+			raise ParamRequired(self, 'attr')
 
+		(scope, attr) = stack.attr.SplitAttr(key)
 		for appliance in self.getApplianceNames(args):
-			attr = stack.attr.NormalizeAttr(key)
-			for row in self.call('list.appliance.attr', [ appliance ]):
-				s = row['scope']
-				a = row['attr']
-				if attr == stack.attr.ConcatAttr(s, a):
-					self.db.execute("""
-						delete from
-						appliance_attributes where 
-						appliance =
-						(select id from appliances where
-						name='%s') and
-						scope = binary '%s' and
-						attr = binary '%s'
-						""" % (appliance, s, a))
+			self.db.execute("""
+				delete from appliance_attributes where 
+				appliance = (select id from appliances where
+				name='%s') and scope = binary '%s' and
+				attr = binary '%s' """ % (appliance, scope, attr))
 
