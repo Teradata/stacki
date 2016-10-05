@@ -111,9 +111,10 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		key,  = self.fillParams([ ('attr', None) ])
+		(key, shadow,)  = self.fillParams([ ('attr', None), ('shadow','True') ])
 		scope = None
 		attr  = None
+		shadow = self.str2bool(shadow)
 		if key:
 			(scope, attr) = stack.attr.SplitAttr(key)
 		key = stack.attr.ConcatAttr(scope, attr)
@@ -124,8 +125,8 @@ class Command(stack.commands.list.host.command):
 
 		for host in self.getHostnames(args):
 
-			dict = self.db.getHostAttrs(host,
-						    showsource=True, slash=True)
+			dict = self.db.getHostAttrs(host, showsource=True,
+				slash=True, shadow=shadow)
 			attrs = {}
 			for (k, v) in dict.items():
 				(s, a) = stack.attr.SplitAttr(k)

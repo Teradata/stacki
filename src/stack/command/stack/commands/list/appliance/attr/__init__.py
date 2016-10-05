@@ -93,6 +93,7 @@
 
 import sys
 import string
+import re
 import stack.attr
 import stack.commands
 
@@ -111,37 +112,56 @@ class Command(stack.commands.list.appliance.command):
 
 	def run(self, params, args):
 
-		key, = self.fillParams([ ('attr', None) ])
-		scope = None
-		attr  = None
+		(key, shadow,) = self.fillParams([
+			('attr', None),
+			('shadow','False') ])
+		shadow = self.str2bool(shadow)
+		key_regex = None
 		if key:
 			(scope, attr) = stack.attr.SplitAttr(key)
-		key = stack.attr.ConcatAttr(scope, attr)
+			key_regex = re.compile(stack.attr.ConcatAttr(scope, attr))
 		
 		self.beginOutput()
 		
 		for appliance in self.getApplianceNames(args):
 
 			attrs = []
-			self.db.execute("""
-				select attr.scope, attr.attr, attr.value from 
-				appliance_attributes attr, appliances a
-				where
-				attr.appliance=a.id and a.name='%s'
+			rows = self.db.select("""
+				attr.scope, attr.attr, attr.value, attr.shadow
+				from appliance_attributes attr, appliances a
+				where attr.appliance=a.id and a.name='%s'
 				order by attr.scope, attr.attr
 				""" % appliance)
-			for s, a, v in self.db.fetchall():
+			if not rows:
+				rows = self.db.select("""
+					attr.scope, attr.attr, attr.value
+					from appliance_attributes attr, appliances a
+					where attr.appliance=a.id and a.name='%s'
+					order by attr.scope, attr.attr
+					""" % appliance)
+			for row in rows:
+				if len(row) == 4:
+					(s, a, v, x) = row
+				else:
+					x = None
+					(s, a, v) = row
 				attrs.append((stack.attr.ConcatAttr(s, a),
-					      s, a, v))
+					      s, a, v, x))
 			
-			if attr:	# get unique attribute
-				for (k, s, a, v) in attrs:
-					if key == k:
+			for (k, s, a, v, x) in attrs:
+				if key_regex:
+					m = key_regex.match(k)
+					if m and m.group() == k:
+						continue
+				if shadow:
+					if x:
 						self.addOutput(appliance,
-							       (s, a, v))
-			else:
-				for (k, s, a, v) in attrs:
-					if not scope or s.find(scope) == 0:
+						       (s, a, x))
+					else:
+						self.addOutput(appliance,
+							(s, a, v))
+				else:
+					if not x:
 						self.addOutput(appliance,
 							       (s, a, v))
 

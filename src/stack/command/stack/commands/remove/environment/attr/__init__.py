@@ -112,22 +112,16 @@ class Command(stack.commands.remove.environment.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None, True) ])
+		(key, ) = self.fillParams([ ('attr', None) ])
+		if not key:
+			raise ParamRequired(self, "attr")
                  
 		if not args:
                         raise ArgRequired(self, 'environment')
                 
+		(scope, attr) == stack.attr.SplitAttr(key)
 		for env in args:
-			attr = stack.attr.NormalizeAttr(key)
-			for row in self.call('list.environment.attr', [ env ]):
-				s = row['scope']
-				a = row['attr']
-				if attr == stack.attr.ConcatAttr(s, a):
-					self.db.execute("""
-						delete from 
-						environment_attributes where 
-						environment = '%s' and
-						scope = binary '%s' and
-						attr = binary '%s'
-						""" % (env, s, a))
+			self.db.execute(""" delete from environment_attributes 
+			where environment = '%s' and scope = binary '%s' and
+			attr = binary '%s' """ % (env, scope, attr))
 

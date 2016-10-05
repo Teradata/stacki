@@ -58,6 +58,7 @@ class Implementation(stack.commands.Implementation):
                         yum.append('name=%s %s %s' % (pname, pversion, prel))
                         yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
                         yum.append('assumeyes=1')
+                        yum.append('gpgcheck=0')
 
                 for o in self.owner.call('list.cart'):
                         if box in o['boxes'].split():
@@ -65,6 +66,7 @@ class Implementation(stack.commands.Implementation):
                                 yum.append('name=%s cart' % o['name'])
                                 yum.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
                                 yum.append('assumeyes=1')
+                                yum.append('gpgcheck=0')
 
 		yum.append('</file>')
 		yum.append('yum clean all')
