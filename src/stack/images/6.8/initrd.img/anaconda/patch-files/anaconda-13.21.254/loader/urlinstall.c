@@ -650,7 +650,7 @@ int getFileFromUrl(char * url, char * dest,
 #endif
 
 	if (!strlen(url)) {
-		base = strdup("install/sbin/kickstart.cgi");
+		base = strdup("install/sbin/profile.cgi");
 		host = strdup(loaderData->nextServer);
 	}
 	else {

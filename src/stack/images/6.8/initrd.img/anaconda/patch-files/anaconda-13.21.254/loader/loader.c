@@ -1091,7 +1091,7 @@ static void parseCmdLineFlags(struct loaderData_s * loaderData,
         }
         else if (!strncasecmp(argv[i], "central=", 8)) {
             char    *p;
-            char    *cgi = "install/sbin/kickstart.cgi";
+            char    *cgi = "install/sbin/profile.cgi";
 
             p = (char*) malloc(strlen(argv[i]) + strlen(cgi) + 12);
 
