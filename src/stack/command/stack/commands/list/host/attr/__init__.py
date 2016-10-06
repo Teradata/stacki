@@ -112,12 +112,10 @@ class Command(stack.commands.list.host.command):
 	def run(self, params, args):
 
 		(key, shadow,)  = self.fillParams([ ('attr', None), ('shadow','True') ])
-		scope = None
-		attr  = None
 		shadow = self.str2bool(shadow)
 		if key:
 			(scope, attr) = stack.attr.SplitAttr(key)
-		key = stack.attr.ConcatAttr(scope, attr)
+			key = stack.attr.ConcatAttr(scope, attr, slash=False)
 
 		self.beginOutput()
 
@@ -126,7 +124,7 @@ class Command(stack.commands.list.host.command):
 		for host in self.getHostnames(args):
 
 			dict = self.db.getHostAttrs(host, showsource=True,
-				slash=True, shadow=shadow)
+				slash=True, filter=key, shadow=shadow)
 			attrs = {}
 			for (k, v) in dict.items():
 				(s, a) = stack.attr.SplitAttr(k)
@@ -134,16 +132,9 @@ class Command(stack.commands.list.host.command):
 				attrs[k] = (s, a, v[0], v[1])
 				# (scope, attr, value, source)
 				 
-			if attr:	# get unique attribute
-				for (k, (s, a, v, o)) in attrs.items():
-					if key == k:
-						output.append((host, 
-							       k, s, a, v, o))
-			else:
-				for (k, (s, a, v, o)) in attrs.items():
-					if not scope or s.find(scope) == 0:
-						output.append((host,
-							       k, s, a, v, o))
+			for (k, (s, a, v, o)) in attrs.items():
+				output.append((host, 
+				       k, s, a, v, o))
 
 		output.sort(key = lambda x: x[1])
 		for (h, k, s, a, v, o) in output:

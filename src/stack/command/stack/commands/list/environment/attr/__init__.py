@@ -157,7 +157,7 @@ class Command(stack.commands.list.environment.command):
 			for (k, s, a, v, x) in attrs:
 				if key_regex:
 					m = key_regex.match(k)
-					if m and m.group() == k:
+					if not m or m.group()  != k:
 						continue
 				if shadow:
 					if x:
