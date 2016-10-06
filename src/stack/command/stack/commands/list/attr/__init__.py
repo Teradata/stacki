@@ -153,7 +153,7 @@ class Command(stack.commands.list.command):
 		for k in keys:
 			if key_regex:
 				m = key_regex.match(k)
-				if m and m.group() == k:
+				if not m or not m.group() != k:
 					continue
 
 			(s, a, v, x) = attrs[k]

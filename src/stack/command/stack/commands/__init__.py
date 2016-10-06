@@ -161,12 +161,10 @@ class OSArgumentProcessor:
 			s = arg.lower()
 			if s in [ 'centos', 'redhat' ]:
 				list.append('redhat')
-			elif s in [ 'solaris', 'sunos' ]:
-				list.append('sunos')
 			elif s in [ 'ubuntu' ]:
 				list.append('ubuntu')
-                        elif s in [ 'suse' ]:
-                                list.append('suse')
+                        elif s in [ 'suse', 'sles' ]:
+                                list.append('sles')
 			elif s in [ 'vmware' ]:
 				list.append('vmware')
 			elif s in [ 'xenserver' ]:
@@ -175,9 +173,8 @@ class OSArgumentProcessor:
 				raise CommandError(self, 'unknown os "%s"' % arg)
 		if not list:
 			list.append('redhat')
-			list.append('sunos')
 			list.append('ubuntu')
-			list.append('suse')
+			list.append('sles')
 			list.append('vmware')
 			list.append('xenserver')
 

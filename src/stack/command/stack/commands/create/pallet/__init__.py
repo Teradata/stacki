@@ -232,7 +232,7 @@ class Builder:
 			
 
 
-class RollBuilder_redhat(Builder, stack.dist.Arch):
+class RollBuilder(Builder, stack.dist.Arch):
 
 	def __init__(self, file, command, call):
 		Builder.__init__(self)
@@ -601,6 +601,7 @@ class RollBuilder_redhat(Builder, stack.dist.Arch):
 		# Make a list of all the files that we need to copy onto the
 		# pallets cds.  Don't worry about what the file types are right
 		# now, we can figure that out later.
+
 		list = []
 		if self.config.hasRPMS():
 			list.extend(self.getRPMS('RPMS'))
@@ -867,6 +868,7 @@ class Command(stack.commands.create.command,
 			('release', release),
 			('newest', True) 
                         ])
+
 		# Yes, globals are probably bad. But this is the fastest
 		# to getting what we want. Otherise have to pass all this
 		# in various arg lines to the defined classes and defs 
@@ -876,22 +878,18 @@ class Command(stack.commands.create.command,
                 if len(args) == 0:
                         raise ArgRequired(self, 'pallet')
                 
-		# Set pallet Builder to correct OS
-		roller = getattr(stack.commands.create.pallet,
-			'RollBuilder_%s' % (self.os))
 		if len(args) == 1:
 			if not os.path.isfile(args[0]):
-				raise CommandError(self, 'File not found: %s' % args[0])
+				raise CommandError(self, 'file %s not found' % args[0])
 			base, ext = os.path.splitext(args[0])
 			if ext == '.xml':
-				builder = roller(args[0], self.command,
-					self.call)
+				builder = RollBuilder(args[0], self.command, self.call)
 			else:
 				raise CommandError(self, 'missing xml file')
 		elif len(args) > 1:
 			for arg in args:
 				if not os.path.isfile(arg):
-					raise CommandError(self, 'File not found: %s' % arg)
+					raise CommandError(self, 'file %s not found' % arg)
 				base, ext = os.path.splitext(arg)
 				if not ext == '.iso':
 					raise CommandError(self, 'bad iso file')
