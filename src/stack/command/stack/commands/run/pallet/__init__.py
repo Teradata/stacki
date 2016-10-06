@@ -97,11 +97,11 @@ import subprocess
 import stack.commands
 from stack.exception import *
 
-class Command(stack.commands.run.command):
+class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 	"""
 	Installs a pallet on the fly
 	
-	<arg optional='1' type='string' name='pallet' repeat='1'>
+	<arg optional='0' type='string' name='pallet' repeat='1'>
 	List of pallets. This should be the pallet base name (e.g., base, hpc,
 	kernel).
 	</arg>
@@ -112,6 +112,15 @@ class Command(stack.commands.run.command):
 	"""
 
 	def run(self, params, args):
+
+		if not args:
+			raise ArgRequired(self, 'pallet')
+
+		# calling getRollNames will throw an exception if pallet isn't in the DB
+		try:
+			self.getRollNames(args, params)
+		except CommandError:
+			raise
 
 		(dryrun, ) = self.fillParams([ ('dryrun', 'true')])
 		
