@@ -92,6 +92,7 @@
 
 import stack.attr
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
@@ -111,21 +112,16 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None, True) ])
+		(key, ) = self.fillParams([ ('attr', None) ])
+		if not key:
+			self.ParamRequired(self, 'attr')
+		(scope, attr) = stack.attr.SplitAttr(key)
                  
 		for host in self.getHostnames(args):
-			attr = stack.attr.NormalizeAttr(key)
-			for row in self.call('list.host.attr', [ host ]):
-				s = row['scope']
-				a = row['attr']
-				if attr == stack.attr.ConcatAttr(s, a):
-					self.db.execute("""
-						delete from
-						node_attributes where 
-						node =
-						(select id from nodes where
-						name='%s') and
-						scope = binary '%s' and
-						attr = binary '%s'
-						""" % (host, s, a))
+			self.db.execute("""
+				delete from node_attributes where 
+				node = (select id from nodes where
+				name='%s') and scope = binary '%s'
+				and attr = binary '%s' """ % \
+				(host, scope, attr))
 

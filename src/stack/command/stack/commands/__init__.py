@@ -1535,7 +1535,8 @@ class DatabaseConnection:
 		return attrs
 
 
-	def getHostAttrs(self, host, showsource=False, slash=False, filter=None):
+	def getHostAttrs(self, host, showsource=False, slash=False, filter=None,
+		shadow = True):
 		"""Return a dictionary of KEY x VALUE pairs for the host
 		specific attributes for the given host.
 		"""
@@ -1560,16 +1561,15 @@ class DatabaseConnection:
 			for row in rows:
 				if len(row) == 4:
 					(s, a, v, x) = row
-					if x:
-						v = x
 				else:
+					x = None
 					(s, a, v) = row
 
 				#
 				# all attribute keys must be non-null
 				#
 				if a:
-					G[ConcatAttr(s, a, slash=True)] = v
+					G[ConcatAttr(s, a, slash=True)] = (v, x)
 
                 	# OS Attributes
 
@@ -1586,14 +1586,13 @@ class DatabaseConnection:
 			for row in rows:
 				if len(row) == 5:
 					(o, s, a, v, x) = row
-					if x:
-						v = x
 				else:
+					x = None
 					(o, s, a, v) = row
                                 if not O.has_key(o):
                                         O[o] = {}
 				if a:
-					O[o][ConcatAttr(s, a, slash=True)] = v
+					O[o][ConcatAttr(s, a, slash=True)] = (v, x)
 
 	                # Environment Attributes
 
@@ -1610,14 +1609,13 @@ class DatabaseConnection:
                         for row in rows:
                         	if len(row) == 5:
 	                                (e, s, a, v, x) = row
-                                        if x:
-        	                                v = x
                                 else:
+					x = None
                                         (e, s, a, v) = row
                                 if not E.has_key(e):
                                         E[e] = {}
 				if a:
-					E[e][ConcatAttr(s, a, slash=True)] = v
+					E[e][ConcatAttr(s, a, slash=True)] = (v, x)
 			
 			# Appliance Attributes
 
@@ -1640,14 +1638,13 @@ class DatabaseConnection:
                         for row in rows:
 	                        if len(row) == 5:
         	                        (app, s, a, v, x) = row
-                                	if x:
-                                        	v = x
                                 else:
+					x = None
                                         (app, s, a, v) = row
                                 if not A.has_key(app):
                                         A[app] = {}
 				if a:
-					A[app][ConcatAttr(s, a, slash=True)] = v
+					A[app][ConcatAttr(s, a, slash=True)] = (v, x)
 
 			# Host Attributes
                         H = {}
@@ -1667,14 +1664,13 @@ class DatabaseConnection:
 			for row in rows:
 				if len(row) == 5:
 					(h, s, a, v, x) = row
-					if x:
-						v = x
 				else:
+					x = None
 					(h, s, a, v) = row
                                 if not H.has_key(h):
                                         H[h] = {}
 				if a:
-					H[h][ConcatAttr(s, a, slash=True)] = v
+					H[h][ConcatAttr(s, a, slash=True)] = (v, x)
 
                         for (h, env) in self.select('name, environment from nodes'):
 
@@ -1722,10 +1718,29 @@ class DatabaseConnection:
 		attrs = {}
 		for (k, (scope, attr, value, source)) in dict[host].items():
 			key = ConcatAttr(scope, attr, slash)
-			if showsource:
-				attrs[key] = (value, source)
+			# Non-intrinsic attributes
+			if type(value) == type(()):
+				(v, x) = value
+				# If we want shadow attributes
+				if shadow:
+					# If shadow attribute exists
+					if x:
+						val = x
+					else:
+						val = v
+				# if we don't want shadow
+				else:
+					if v:
+						val = v
+					else:
+						continue
+			# Intrinsic attributes
 			else:
-				attrs[key] = value
+				val = value
+			if showsource:
+				attrs[key] = (val, source)
+			else:
+				attrs[key] = val
 
 
                 
@@ -1736,18 +1751,13 @@ class DatabaseConnection:
 		# case where filter is a complete attribute name.
 					
 		if filter:
+			import re
+			regex = re.compile(filter)
 			for attr in attrs.keys():
-
-				if filter == attr: # exact match
+				m = regex.match(attr)
+				if m and m.group() == attr:
 					continue
 
-				if filter[-1] != '.':
-					p = '%s.' % filter
-				else:
-					p = filter
-				if attr.find(p) == 0:
-					continue # (sub)scope match
-				
 				del attrs[attr] # no match
 
 		return attrs

@@ -215,7 +215,7 @@
 +        }
 +        else if (!strncasecmp(argv[i], "central=", 8)) {
 +            char    *p;
-+            char    *cgi = "install/sbin/kickstart.cgi";
++            char    *cgi = "install/sbin/profile.cgi";
 +
 +            p = (char*) malloc(strlen(argv[i]) + strlen(cgi) + 12);
 +
@@ -1003,7 +1003,7 @@
 +#endif
 +
 +	if (!strlen(url)) {
-+		base = strdup("install/sbin/kickstart.cgi");
++		base = strdup("install/sbin/profile.cgi");
 +		host = strdup(loaderData->nextServer);
 +	}
 +	else {
