@@ -341,6 +341,45 @@ class Command(stack.commands.HostArgumentProcessor,
 
 	def run_ubuntu(self, host):
 		pass
+
+	def run_sles(self, host):
+		import os
+
+		result = self.call('list.host.interface', [ host ])
+		for o in result:
+			interface = None
+			ip = None
+			netmask = None
+			netname = None
+			network = None
+			broadcast = None
+
+			interface = o['interface']
+			ip = o['ip']
+			netname = o['network']
+
+			if not netname or not ip or not interface:
+				continue
+
+			netresult = self.call('list.network', [ netname ])
+			for net in netresult:
+				if net['network'] == netname:
+					network = net['address']
+					netmask = net['mask']
+					broadcast = os.popen("/usr/bin/ipcalc -b %s %s" % (ip, netmask) + " | awk -F =  '{print $2}'").read()
+					break
+
+			if not network or not netmask or not broadcast:
+				continue
+
+			print("cat > /etc/sysconfig/network/ifcfg-%s << '__EOF__'" % (interface))
+			print('IPADDR=%s' % ip.strip())
+			print('NETMASK=%s' % netmask.strip())
+			print('NETWORK=%s' % network.strip())
+			print('BROADCAST=%s' % broadcast.strip())
+			print('STARTMODE=auto')
+			print('USERCONTROL=no')
+			print('__EOF__')
                 
 	def run_redhat(self, host):
 		self.db.execute("""select id, name, mask, mtu
