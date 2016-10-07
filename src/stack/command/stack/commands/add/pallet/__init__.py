@@ -95,6 +95,7 @@ import os
 import sys
 import string
 import popen2
+import subprocess
 import stack.file
 import stack.commands
 from stack.exception import *
@@ -245,12 +246,30 @@ class Command(stack.commands.add.command):
 				print("Cannot find %s or %s "\
 					"is not and ISO image" % (arg, arg))
 		
-		for iso in isolist:	# have a set of iso files
-			self.runImplementation('mount_%s' % self.os, iso)
-			self.copy(clean, dir, updatedb)
-			self.runImplementation('umount_%s' % self.os)
+		if isolist:
+			#
+			# before we mount the ISO, make sure there are no active
+			# mounts on the mountpoint
+			#
+			file = open('/proc/mounts')
+
+			for line in file.readlines():
+				l = line.split()
+				if l[1].strip() == self.mountPoint:
+					subprocess.call(
+						[ 'umount', self.mountPoint ])
+
+			for iso in isolist:	# have a set of iso files
+				cwd = os.getcwd()
+				self.runImplementation('mount_%s' % self.os, iso)
+				self.copy(clean, dir, updatedb)
+				os.chdir(cwd)
+				self.runImplementation('umount_%s' % self.os)
 			
-		if not isolist:		# no files specified look for a cdrom
+		else:
+			#
+			# no files specified look for a cdrom
+			#
 			if self.runImplementation('mounted_%s' % self.os):
 				self.copy(clean, dir, updatedb)
 			else:
