@@ -97,7 +97,6 @@ import os
 import types
 import string
 import stack.file
-import stack.ks
 import xml.sax
 
 class DistError(Exception):
@@ -516,11 +515,15 @@ class Distribution(Base):
 		return os.path.join(self.getReleasePath(), 'build')
     
 	def getKickstartFile(self, file, distdir=None):
-		cwd = os.getcwd()
-		os.chdir(self.getRootPath())
-		retval = stack.ks.KickstartFile(file, self.arch, distdir)
-		os.chdir(cwd)
-		return retval
+                return 'THIS IS DEAD CODE'
+
+#               import stack.ks
+#
+#		cwd = os.getcwd()
+#		os.chdir(self.getRootPath())
+#		retval = stack.ks.KickstartFile(file, self.arch, distdir)
+#		os.chdir(cwd)
+#		return retval
 
 	def getSiteRPMSPath(self):
 		l = []

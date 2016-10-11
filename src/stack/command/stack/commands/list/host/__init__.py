@@ -99,7 +99,7 @@ class command(stack.commands.HostArgumentProcessor,
 	
 class Command(command):
 	"""
-	List the membership, CPU count and physical position info for
+	List the Appliance, CPU count and physical position info for
 	a list of hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>

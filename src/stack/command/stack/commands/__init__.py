@@ -181,34 +181,6 @@ class OSArgumentProcessor:
 		return list
 	
 
-class MembershipArgumentProcessor:
-	"""An Interface class to add the ability to process membership
-	arguments."""
-	
-	def getMembershipNames(self, args=None):
-		"""Returns a list of membership names from the database.
-		For each arg in the ARGS list find all the membership
-		names that match the arg (assume SQL regexp).  If an
-		arg does not match anything in the database we raise an
-		exception.If the ARGS list is empty return all membership names.
-		"""
-		list = []
-		if not args:
-			args = [ '%' ] # find all memberships
-		for arg in args:
-			rows = self.db.execute(
-				"""select membership from appliances where
-				name like '%s'""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
-				raise CommandError(self, 'unknown membership "%s"' % arg)
-			for name, in self.db.fetchall():
-				list.append(name)
-		return list
-
-		
-	
 class ApplianceArgumentProcessor:
 	"""An Interface class to add the ability to process appliance
 	arguments."""
@@ -399,12 +371,17 @@ class HostArgumentProcessor:
 	"""An Interface class to add the ability to process host arguments."""
 	
 	def getHostnames(self, names=[], managed_only=False, subnet=None, order='asc'):
-		"""Expands the given list of names to valid cluster 
-		hostnames.  A name can be a hostname, IP address, our
-		group (membership name), or a MAC address. Any combination of
-		these is valid.
-		If the names list is empty a list of all hosts in the cluster
-		is returned.
+		"""Expands the given list of names to valid cluster hostnames.  A name
+                can be:
+
+                - hostname
+                - IP address
+                - appliance name
+                - MAC address
+
+                Any combination of these is valid.  If the names list
+		is empty a list of all hosts in the cluster is
+		returned.
 		
 		The following groups are recognized:
 		
@@ -418,7 +395,8 @@ class HostArgumentProcessor:
 		shells (for example, the following appliances usually don't
 		have ssh login access: 'Ethernet Switches', 'Power Units',
 		'Remote Management')
-		"""
+
+                """
 
 		adhoc    = False
 		hostList = []
@@ -490,13 +468,11 @@ class HostArgumentProcessor:
                                 environments.append(e)
 
 			appliances  = []
-			memberships = []
-			for (name, membership) in self.db.select("""
-				name, membership from appliances
+			for (name, ) in self.db.select("""
+				name from appliances
 				"""):
                                 
 				appliances.append(name)
-				memberships.append(membership)
 
 			racks = []
 			for (rack,) in self.db.select("""
@@ -510,9 +486,6 @@ class HostArgumentProcessor:
                                         adhoc = True
 				elif host in appliances:
 					host = '[appliance=="%s"]' % host
-					adhoc = True
-				elif host in memberships:
-					host = '[membership=="%s"]' % host
 					adhoc = True
 				elif host.find('rack') == 0:
 					for i in racks:
@@ -1504,16 +1477,16 @@ class DatabaseConnection:
                                 if environment:
                                         dict[name].append((None, 'environment', environment))
 
-                        for (name, box, appliance, membership) in \
+                        for (name, box, appliance, longname) in \
 				self.select(""" n.name, b.name,
-                                a.name, a.membership from
+                                a.name, a.longname from
 				nodes n, boxes b, appliances a where
 				n.appliance=a.id and n.box=b.id """):
 
                                 dict[name].extend(
                                         [ (None, 'box', box),
                                           (None, 'appliance', appliance),
-                                          (None, 'membership', membership)
+                                          (None, 'appliance.longname', longname)
                                         ])
                                 
                         for (name, zone, address) in self.select("""

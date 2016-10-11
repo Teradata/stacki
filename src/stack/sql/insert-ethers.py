@@ -340,7 +340,7 @@ class InsertEthers(GUI):
 		self.screen.pushHelpLine(' ')
 
 
-	def membershipGUI(self):
+	def applianceLongNameGUI(self):
 		#
 		# if self.appliance_name is not empty don't ask
 		# 
@@ -351,12 +351,12 @@ class InsertEthers(GUI):
 
 		else:
 			#
-			# display all memberships to the user -- let them choose
+			# display all longnames to the user -- let them choose
 			# which type of machine they want to integrate
 			#
 			query = """
-				select membership from appliances where
-				public = 'yes' order by membership
+				select longname from appliances where
+				public = 'yes' order by longname
 				"""
 
 			if self.sql.execute(query) == 0:
@@ -379,7 +379,7 @@ class InsertEthers(GUI):
 		#
 		query = """
 			select a.id, a.name from appliances a where
-			a.membership = '%s'
+			a.longname = '%s'
 			""" % app_string[index]
 
 		if self.sql.execute(query) == 0:
@@ -465,7 +465,7 @@ class InsertEthers(GUI):
 		# the 'select rack,' and 'group by rack' clauses are
 		# there because there is a weird side-effect with
 		# using just max(rank) *and* when there are no rows
-		# that match the membership/rack specification. the
+		# that match the appliance/rack specification. the
 		# select will return one row with the NULL value.
 		# but, if we add 'select rack,' and 'group by rack'
 		# then if no rows match, the select will return 0
@@ -589,7 +589,7 @@ class InsertEthers(GUI):
 			return
 
 		cmd = '/opt/stack/bin/stack add host %s ' % nodename +\
-			'membership="%s" '% self.appliance_name +\
+			'longname="%s" '% self.appliance_name +\
 			'rack=%d rank=%d distribution="%s"' % \
 			(self.cabinet , self.rank, self.distribution)
 
@@ -821,7 +821,7 @@ class InsertEthers(GUI):
 
 		try:
 
-			self.membershipGUI()
+			self.applianceLongNameGUI()
 			self.initializeRank()
 
 			if self.hostname:

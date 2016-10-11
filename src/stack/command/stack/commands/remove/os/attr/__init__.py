@@ -92,7 +92,7 @@
 
 import stack.attr
 import stack.commands
-from stack.exceptions import *
+from stack.exception import *
 
 class Command(stack.commands.remove.os.command):
 	"""
@@ -112,13 +112,12 @@ class Command(stack.commands.remove.os.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None) ])
-		if not key:
-			raise ParamRequired(self, "attr")
+
+		key,  = self.fillParams([ ('attr', None, True) ])
 		(scope, attr) = stack.attr.SplitAttr(key)
                  
 		for os in self.getOSNames(args):
-			self.db.execute(""" delete from os_attributes
+			self.db.execute("""delete from os_attributes
 				where os = '%s' and scope = binary '%s' and
 				attr = binary '%s' """ % (os, scope, attr))
 

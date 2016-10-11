@@ -120,9 +120,9 @@ class Command(command):
 	default of 1 CPU is inserted into the database.
         </param>
 
-	<param type='string' name='membership'>
-	Appliance membership name.  If not provided and the host name is of
-	the standard form the membership is taken from the basename of 
+	<param type='string' name='longname'>
+	Long appliance name.  If not provided and the host name is of
+	the standard form the long name is taken from the basename of 
 	the host.
 	</param>
 
@@ -150,12 +150,12 @@ class Command(command):
 	</param>
 
 	<example cmd='add host backend-0-1'>
-	Adds the host "backend-0-1" to the database with 1 CPU, a membership
+	Adds the host "backend-0-1" to the database with 1 CPU, a appliance
 	name of "backend", a rack number of 0, and rank of 1.
 	</example>
 
-	<example cmd='add host backend rack=0 rank=1 membership=Backend'>
-	Adds the host "backend" to the database with 1 CPU, a membership name
+	<example cmd='add host backend rack=0 rank=1 longname=Backend'>
+	Adds the host "backend" to the database with 1 CPU, a long appliance name
 	of "Backend", a rack number of 0, and rank of 1.
 	</example>
 
@@ -170,7 +170,7 @@ class Command(command):
 	
 		# If the name is of the form appliancename-rack-rank
 		# then do the right thing and figure out the default
-		# values for membership, rack, and rank.  If the appliance 
+		# values for appliane, rack, and rank.  If the appliance 
 		# name is not found in the database, or the rack/rank numbers
 		# are invalid do not guess any defaults.  The name is
 		# either 100% used or 0% used.
@@ -193,18 +193,18 @@ class Command(command):
 			rank = None
 				
 		# fillParams with the above default values
-		(appliance, membership, numCPUs, rack, rank, box, environment) = \
+		(appliance, longname, numCPUs, rack, rank, box, environment) = \
 			self.fillParams( [
 				('appliance', appliance),
-				('membership', None),
+				('longname', None),
 				('cpus', 1),
 				('rack', rack),
 				('rank', rank),
 				('box', 'default'),
                                 ('environment', '') ])
 
-		if not membership and not appliance:
-                        raise ParamRequired(self, ('membership', 'appliance'))
+		if not longname and not appliance:
+                        raise ParamRequired(self, ('longname', 'appliance'))
 
 		if rack == None:
                         raise ParamRequired(self, 'rack')
@@ -218,17 +218,17 @@ class Command(command):
                 if numCPUs < 0:
                         raise ParamValue(self, 'cpus', '> 0')
 
-		if membership and not appliance:
+		if longname and not appliance:
 			#
 			# look up the appliance name
 			#
 			for o in self.call('list.appliance'):
-				if o['membership'] == membership:
+				if o['long name'] == longname:
 					appliance = o['appliance']
 					break
 
 			if not appliance:
-                        	raise CommandError(self, 'membership "%s" is not in the database' % membership)
+                        	raise CommandError(self, 'longname "%s" is not in the database' % longname)
 
 		if appliance not in appliances:
 			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)

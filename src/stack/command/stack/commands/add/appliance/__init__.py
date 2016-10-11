@@ -111,10 +111,10 @@ class Command(command):
 	The appliance name (e.g., 'backend', 'frontend', 'nas').
 	</arg>
 
-	<param type='string' name='membership'>
-	The full membership name of the appliance. This name will be displayed
+	<param type='string' name='longname'>
+	The full name of the appliance. This name will be displayed
 	in the appliances menu by insert-ethers (e.g., 'backend'). If
-	not supplied, the membership name is set to the appliance name.
+	not supplied, the long name is set to the appliance name.
 	</param>
 
 	<param type='string' name='node'>
@@ -127,7 +127,7 @@ class Command(command):
 	the Appliance menu. The default is 'yes'.
 	</param>
 
-	<example cmd='add appliance nas membership="NAS Appliance" node=nas public=yes'>
+	<example cmd='add appliance nas longname="NAS Appliance" node=nas public=yes'>
 	</example>
 	"""
 
@@ -137,16 +137,16 @@ class Command(command):
                         raise ArgUnique(self, 'appliance')
 		appliance = args[0]
 
-		(membership, node, public) = self.fillParams([
-                        ('membership', None),
+		(longname, node, public) = self.fillParams([
+                        ('longname', None),
                         ('node', ''),
                         ('public', 'y')
                         ])
 
 		public  = self.bool2str(self.str2bool(public))
 		
-		if not membership:
-			membership = string.capitalize(appliance)
+		if not longname:
+			longname = string.capitalize(appliance)
 
 		#
 		# check for duplicates
@@ -161,9 +161,9 @@ class Command(command):
 		# ok, we're good to go
 		#
 		self.db.execute("""
-			insert into appliances (name, membership, public) values
+			insert into appliances (name, longname, public) values
 			('%s', '%s', '%s')
-			""" %  (appliance, membership, public))
+			""" %  (appliance, longname, public))
 
 		if not node:
 			kickstartable = False

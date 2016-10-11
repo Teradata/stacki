@@ -85,9 +85,9 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert the base appliances into the database -->
 
-/opt/stack/bin/stack add appliance frontend membership=Frontend node=server \
+/opt/stack/bin/stack add appliance frontend longname=Frontend node=server \
 	public=no
-/opt/stack/bin/stack add appliance backend  membership=Backend node=backend
+/opt/stack/bin/stack add appliance backend  longname=Backend node=backend
 
 <!-- manage firewall rules by default -->
 /opt/stack/bin/stack set attr attr=firewall value=true
@@ -119,7 +119,7 @@ if os.path.exists('/tmp/site.attrs'):
 <!-- frontend host -->
 
 /opt/stack/bin/stack "add host" &Kickstart_PrivateHostname; \
-	membership=Frontend rack=0 rank=0
+	appliance=frontend rack=0 rank=0
 
 <!-- routes
 	multicast (bottom 255 addresses only)

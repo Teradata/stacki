@@ -211,8 +211,8 @@ class Command(stack.commands.list.command,
 		if 'box' not in attrs:
 			attrs['box'] = 'default'
 			
-		if 'membership' not in attrs:
-			attrs['membership'] = 'Frontend'
+		if 'appliance.longname' not in attrs:
+			attrs['appliance.longname'] = 'Frontend'
 
 		if len(args) != 1:
                         raise ArgRequired(self, 'node')

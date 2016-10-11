@@ -117,16 +117,16 @@ class Command(command):
 	def run(self, params, args):
 		for app in self.getApplianceNames(args):
 			self.db.execute("""
-				select membership, public
+				select longname, public
 				from appliances where name='%s'
 				""" % app)
 
-			(mem, pub) = self.db.fetchone()
+			(longname, pub) = self.db.fetchone()
 
 			str = "add appliance %s " % app
 
-			if mem:
-				str += "membership=%s " % self.quote(mem)
+			if longname:
+				str += "longname=%s " % self.quote(longname)
 			if pub:
 				str += "public=%s" % pub
 				

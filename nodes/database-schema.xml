@@ -113,7 +113,7 @@ DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default '',
-  Membership	varchar(64) NOT NULL default '',
+  LongName	varchar(64) NOT NULL default '',
   Public	enum('yes','no') NOT NULL default 'no',
   PRIMARY KEY (ID)
 );
@@ -237,6 +237,7 @@ CREATE TABLE node_routes (
 
 grant select on cluster.node_routes to ''@'localhost';
 
+
 <!-- Stacks -->
 
 DROP TABLE IF EXISTS stacks;
@@ -254,6 +255,27 @@ CREATE TABLE cart_stacks (
 );
 
 grant select on cluster.cart_stacks to ''@'localhost';
+
+
+<!-- Groups -->
+
+DROP TABLE IF EXISTS groups;
+CREATE TABLE groups (
+  ID 		int(11) NOT NULL auto_increment,
+  Name		varchar(128) NOT NULL default '',
+  PRIMARY KEY (ID) 
+);
+
+grant select on cluster.groups to ''@'localhost';
+
+
+DROP TABLE IF EXISTS memberships;
+CREATE TABLE memberships (
+  NodeID	int(11) NOT NULL,
+  GroupID	int(11) NOT NULL
+);
+
+grant select on cluster.memberships to ''@'localhost';
 
 <!-- Carts -->
 
