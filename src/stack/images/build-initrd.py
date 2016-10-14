@@ -99,6 +99,7 @@ import sys
 import stack.app
 import stack.bootable
 import stack.file
+from stack.exception import *
 
 
 class App(stack.app.Application):
@@ -135,7 +136,7 @@ class App(stack.app.Application):
 		for pkg in pkgs:
 			RPM = self.boot.findFile(pkg)
 			if not RPM:
-				raise DistError, "Could not find %s rpm" % (pkg)
+				raise CommandError(self, "Could not find %s rpm" % (pkg))
 
 			print("Applying package %s" % (pkg))
 
