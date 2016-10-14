@@ -12,20 +12,12 @@ import sys
 from xml.etree.ElementTree import Element, SubElement, ElementTree, tostring
 
 class Attr:
-	HttpConf = "/etc/httpd/conf"
-	HttpConfigDirExt = "/etc/httpd/conf.d"
-	HttpRoot = "/var/www/html"
 	Info_CertificateCountry = "US"
 	Info_CertificateLocality = "Solana Beach"
 	Info_CertificateOrganization = "StackIQ"
 	Info_CertificateState = "California"
-	Info_ClusterContact = ""
 	Info_ClusterLatlong = "N32.87 W117.22"
-	Info_ClusterName = "Stacki"
 	Info_FQDN = ""
-	Info_ClusterURL = ""
-	Kickstart_DistroDir = "/export/stack"
-	Kickstart_BoxDir = "/export/stack"
 	Kickstart_Keyboard = "us"
 	Kickstart_Lang = "en_US"
 	Kickstart_Langsupport = "en_US"
@@ -33,19 +25,7 @@ class Attr:
 	Kickstart_Timezone = ""
 	RootDir = "/root"
 
-	Kickstart_PublicAddress = ""
-	Kickstart_PublicBroadcast = ""
-	Kickstart_PublicDNSDomain = ""
-	Kickstart_PublicDNSServers = ""
-	Kickstart_PublicEthernet = ""
-	Kickstart_PublicGateway = ""
-	Kickstart_PublicHostname = ""
-	Kickstart_PublicInterface = ""
-	Kickstart_PublicKickstartHost = ""
 	Kickstart_PublicNTPHost = "pool.ntp.org"
-	Kickstart_PublicNetmask = ""
-	Kickstart_PublicNetmaskCIDR = ""
-	Kickstart_PublicNetwork = ""
 
 	Kickstart_PrivateAddress = ""
 	Kickstart_PrivateBroadcast = ""
@@ -61,7 +41,6 @@ class Attr:
 	Kickstart_PrivateNetmask = ""
 	Kickstart_PrivateNetmaskCIDR = ""
 	Kickstart_PrivateNetwork = ""
-	Kickstart_PrivateSyslogHost = ""
 	Kickstart_PrivateKickstartBasedir = "distributions"
 	Kickstart_PrivateNTPHost = ""
 
@@ -234,8 +213,6 @@ class Data:
 			#calculate other attributes
 			self.data.Kickstart_PrivateKickstartHost = \
 				self.data.Kickstart_PrivateAddress
-			self.data.Info_ClusterURL = \
-				"http://" + self.data.Info_FQDN + "/"
 			self.data.Kickstart_PrivateNTPHost = \
 				self.data.Kickstart_PrivateAddress
 			#self.data.Kickstart_PrivateHostname =
