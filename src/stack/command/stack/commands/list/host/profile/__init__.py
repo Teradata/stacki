@@ -141,7 +141,8 @@ class Command(stack.commands.list.host.command):
                                 if line.find('<profile os="') == 0:
                                         osname = line.split()[1][3:].strip('"')
 				xmlinput += line
-
+			if not osname:
+				raise CommandError(self, "OS name not specified in profile")
 
 		self.beginOutput()
 
