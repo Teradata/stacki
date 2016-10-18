@@ -771,9 +771,11 @@ class DialogNetwork(wx.Panel):
 						self.page.list1.SetStringItem(index,
 							1, p['version'])
 						self.page.list1.SetStringItem(index,
-							2, p['id'])
+							2, p['release'])
 						self.page.list1.SetStringItem(index,
-							3, p['url'])
+							3, p['id'])
+						self.page.list1.SetStringItem(index,
+							4, p['url'])
 						self.page.pallets.append(p)
 				else:
 					print(e)
