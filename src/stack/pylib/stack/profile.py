@@ -618,6 +618,12 @@ class Pass1NodeHandler(handler.ContentHandler,
 
 	def endElement_copyright(self, name):
 		pass
+
+	def startElement_si_copyright(self, name, attrs):
+		self.stripText = 1
+
+	def endElement_si_copyright(self, name):
+		pass
 	
 	# <kickstart> -- or whatever the outermost tag is (os dependent)
 	
