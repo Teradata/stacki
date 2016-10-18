@@ -217,7 +217,8 @@ banner("Process XML")
 # pipe that output to stack run pallet and output run.sh
 infile = open("/tmp/stack.xml", "r")
 outfile = open("/tmp/run.sh", "w")
-subprocess.call([stackpath, 'run', 'pallet', 'stacki'], stdin=infile, stdout=outfile)
+subprocess.call([stackpath, 'run', 'pallet', 'database=false'], stdin=infile,
+	stdout=outfile)
 infile.close()
 outfile.close()
 

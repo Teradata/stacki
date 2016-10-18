@@ -113,18 +113,21 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 
 	def run(self, params, args):
 
-		if not args:
-			raise ArgRequired(self, 'pallet')
+		(database,) = self.fillParams([ ('database', 'true') ])
+                database = self.str2bool(database)
 
-		# calling getRollNames will throw an exception if pallet isn't in the DB
-		try:
-			self.getRollNames(args, params)
-		except CommandError:
-			raise
+		if database:
+			if not args:
+				raise ArgRequired(self, 'pallet')
 
-		(dryrun, ) = self.fillParams([ ('dryrun', 'true')])
-		
-                dryrun = self.str2bool(dryrun)
+			#
+			# calling getRollNames will throw an exception if pallet
+			# isn't in the DB
+			#
+			try:
+				self.getRollNames(args, params)
+			except CommandError:
+				raise
                 
 		script = []
 		script.append('#!/bin/sh')
@@ -133,8 +136,11 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 		for roll in args:
 			rolls.append(roll)
 		if sys.stdin.isatty():
-			xml = self.command('list.host.xml', [ 'localhost', 
-				'pallet=%s' % string.join(rolls, ',') ])
+			cmdparams = [ 'localhost' ]
+			if rolls:
+				cmdparams.append('pallet=%s' %
+					string.join(rolls, ','))
+			xml = self.command('list.host.xml', cmdparams)
 		else:
 			xml = sys.stdin.read()
 
