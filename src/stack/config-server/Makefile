@@ -105,4 +105,5 @@ install::
 	$(INSTALL) -m755 profile.d/ssh-key.csh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 profile.d/ssh-key.sh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 init.d/stack-num-cpus $(ROOT)/etc/init.d/
-	$(INSTALL) -m755 cgi/pallets.py $(ROOT)/export/stack/pallets/index.cgi
+	$(INSTALL) -m755 cgi/index.cgi $(ROOT)/export/stack/pallets/index.cgi
+	$(INSTALL) -m755 cgi/pallets.cgi $(ROOT)/export/stack/pallets/pallets.cgi
