@@ -73,6 +73,10 @@ for pallet in g.rolls:
 <package>stack-build</package>
 <package>redhat-rpm-config</package>
 
+<!-- text-based spreadsheet editor -->
+<package>sc-im</package>
+
+
 <!-- /mnt/cdrom needed to create pallets -->
 <post>
     if [ ! -d /mnt/cdrom ]; then

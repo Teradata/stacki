@@ -1,0 +1,3 @@
+NAME	= sc-im
+VERSION	= 0.4.0
+RELEASE	= 20161019
