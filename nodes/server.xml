@@ -63,6 +63,7 @@ for pallet in g.rolls:
 <package>libcurl-devel</package>
 <package>stack-config-server</package>
 <package>git</package>
+<package>git-lfs</package>
 
 <!-- rpms to create pallets -->
 <package>genisoimage</package>
@@ -128,6 +129,7 @@ chmod 775 /export/stack/carts
 
 <boot order="post">
 git init /export/site-roll/stack/src/roll/restore
+git lfs install
 </boot>
 
 </kickstart> 
