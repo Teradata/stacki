@@ -161,6 +161,7 @@ class ProfileSection:
 
         def append(self, text, source=None):
                 self.snippets.append(ProfileSnippet(text, source))
+                return self
 
         def generate(self, cdata=True):
                 prev = None
