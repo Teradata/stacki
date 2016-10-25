@@ -346,8 +346,8 @@ class Generator:
 		return string.join(l, '\n')
 
 	
-        def getAttr(self, node, attr):
-		a = node.attributes.getNamedItem((None, attr))
+        def getAttr(self, node, attr, ns=None):
+		a = node.attributes.getNamedItem((ns, attr))
                 if a:
                         return a.value
                 else:
