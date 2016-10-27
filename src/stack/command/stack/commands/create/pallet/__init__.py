@@ -153,15 +153,15 @@ class Builder:
 		os.chdir(cwd)
 
 		
-	def writerepo(self, name, version, release, arch):
+	def writerepo(self, name, version, release, OS, arch):
 		print('Writing repo data')
 		basedir = os.getcwd()
 		palletdir = os.path.join(basedir, 'disk1', name, version,
-			release, 'redhat', arch)
+			release, OS, arch)
 		os.chdir(palletdir)
 
 		cmd = [ 'createrepo' ]
-		if self.config.needsComps():
+		if OS == 'redhat' and self.config.needsComps():
 			self.addComps(basedir)
 			cmd.append('--groupfile')
 			cmd.append(
@@ -678,10 +678,11 @@ class RollBuilder(Builder, stack.dist.Arch):
                                        self.config.getRollArch(), id)
 				
 			# write repodata 
-                        if self.config.getRollOS() == 'redhat':
+                        if self.config.getRollOS() in [ 'redhat', 'sles' ]:
                                 self.writerepo(self.config.getRollName(),
                                                self.config.getRollVersion(),
                                                self.config.getRollRelease(),
+                                               self.config.getRollOS(),
                                                self.config.getRollArch())
 
 			# copy the graph and node XMLs files into the pallet
