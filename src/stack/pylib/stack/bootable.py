@@ -298,18 +298,6 @@ class Bootable:
 				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		#
-		# put the 'barnacle' executable in the ISO
-		#
-		name = 'stack-barnacle'
-		RPM = self.findFile(name)
-		if RPM:
-			self.applyRPM(RPM, destination)
-			src = os.path.join(destination, 'opt', 'stack',
-				'bin', 'frontend-install.py')
-			dst = os.path.join(destination, 'frontend-install.py')
-			os.rename(src, dst)
-
-		#
 		# clean up other image files from the stack-image RPM
 		#
 		shutil.rmtree(os.path.join(destination, 'opt'),
