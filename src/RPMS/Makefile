@@ -39,10 +39,10 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-ROLLROOT	= ../..
-RPM.STRATEGY    = copy
+ifndef ROLL
+include ../../version.mk
+endif
 
-include $(STACKBUILD)/etc/CCRules.mk
-
-
-
+RELEASE = $(shell $(STACKBUILD)/bin/redhat-release)
+bootstrap rpm pkg clean nuke dump-info:
+	make -C $(RELEASE) $@
