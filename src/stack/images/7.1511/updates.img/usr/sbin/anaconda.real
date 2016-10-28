@@ -714,6 +714,10 @@ def setupDisplay(anaconda, options, addons=None):
         cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
         os.system(cmd)
 
+	# Turn off Network Manager
+	cmd = 'systemctl stop NetworkManager.service'
+	os.system(cmd)
+
         import shutil
 
         #
