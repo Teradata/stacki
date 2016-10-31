@@ -144,7 +144,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		return retval
 
 
-	def writeIPMI(self, host, ip, channel, netmask, gateway):
+	def writeIPMI(self, host, OS, ip, channel, netmask, gateway):
 		defaults = [ ('IPMI_SI', 'yes'),
 			('DEV_IPMI', 'yes'),
 			('IPMI_WATCHDOG', 'no'),
@@ -153,8 +153,12 @@ class Command(stack.commands.HostArgumentProcessor,
 			('IPMI_POWERCYCLE', 'no'),
 			('IPMI_IMB', 'no') ]
 
-		self.addOutput(host,
-			'<file name="/etc/sysconfig/ipmi" perms="500">')
+		if OS == 'redhat':
+			self.addOutput(host,
+				'<file name="/etc/sysconfig/ipmi" perms="500">')
+		elif OS == 'sles':
+			self.addOutput(host,
+				"cat > /etc/sysconfig/ipmi << '__EOF__'")
 
 		for var, default in defaults:
 			attr = self.db.getHostAttr(host, var)
@@ -201,7 +205,11 @@ class Command(stack.commands.HostArgumentProcessor,
 			'%s ' % (channel) +
 			'2 link=on ipmi=on callin=on privilege=4')
 
-		self.addOutput(host, '</file>')
+		if OS == 'redhat':
+			self.addOutput(host, '</file>')
+		elif OS == 'sles':
+			self.addOutput(host, '__EOF__')
+			self.addOutput(host, 'chmod 500 /etc/sysconfig/ipmi')
 
 
 	def writeConfig(self, host, mac, ip, device, netmask, vlanid, mtu,
@@ -367,19 +375,27 @@ class Command(stack.commands.HostArgumentProcessor,
 					network = net['address']
 					netmask = net['mask']
 					broadcast = os.popen("/usr/bin/ipcalc -b %s %s" % (ip, netmask) + " | awk -F =  '{print $2}'").read()
+					gateway = net['gateway']
 					break
 
 			if not network or not netmask or not broadcast:
 				continue
 
-			print("cat > /etc/sysconfig/network/ifcfg-%s << '__EOF__'" % (interface))
-			print('IPADDR=%s' % ip.strip())
-			print('NETMASK=%s' % netmask.strip())
-			print('NETWORK=%s' % network.strip())
-			print('BROADCAST=%s' % broadcast.strip())
-			print('STARTMODE=auto')
-			print('USERCONTROL=no')
-			print('__EOF__')
+			if interface == 'ipmi':
+				channel = o['channel']
+
+				self.writeIPMI(host, 'sles', ip, channel,
+					netmask, gateway)
+
+			else:
+				print("cat > /etc/sysconfig/network/ifcfg-%s << '__EOF__'" % (interface))
+				print('IPADDR=%s' % ip.strip())
+				print('NETMASK=%s' % netmask.strip())
+				print('NETWORK=%s' % network.strip())
+				print('BROADCAST=%s' % broadcast.strip())
+				print('STARTMODE=auto')
+				print('USERCONTROL=no')
+				print('__EOF__')
                 
 	def run_redhat(self, host):
 		self.db.execute("""select id, name, mask, mtu
@@ -430,8 +446,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				continue # don't do anything if noreport set
 
 			if device == 'ipmi':
-				self.writeIPMI(host, ip, channel, netmask,
-					gateway)
+				self.writeIPMI(host, 'redhat', ip, channel,
+					netmask, gateway)
 
 				# ipmi is special, skip the standard stuff
 				continue
