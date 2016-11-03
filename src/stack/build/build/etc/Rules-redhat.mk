@@ -147,20 +147,17 @@ ifeq ($(filter $(ROLL), $(ROLL.MEMBERSHIP)),$(ROLL))
 	@echo "# Do not edit"   >> $@
 	@echo "#"               >> $@
 	@echo                   >> $@
-	@for a in i386 i486 i586 i686 x86_64 noarch; do                         	\
-		for x in *.$$a.rpm; do                                          	\
-			if [ -f $$x ]; then                                     	\
-				echo "nuke::"					>> $@;	\
-				echo -e '\trm $$(REDHAT.RPMS)'"/$$a/$$x"	>> $@;	\
-				echo 'rpm::'					>> $@;	\
-				echo -e '\tmkdir -p $$(REDHAT.RPMS)'"/$$a" 	>> $@;	\
-				echo -e "\tcp -p $$x "'$$(REDHAT.RPMS)'"/$$a/"	>> $@;	\
-				echo 'install-rpm:: rpm'			>> $@;	\
-				echo -e '\trpm -Uhv --force --nodeps $$(REDHAT.RPMS)'"/$$a/$$x"	>> $@; \
-				echo                                    	>> $@;  \
-			fi;                                                     	\
-		done;                                                           	\
-	done
+	@for rpmfile in *.rpm; do                                                                       \
+		arch=`rpm -qp --queryformat "%{ARCH}" $$rpmfile`				>> $@;  \
+		echo "nuke::"									>> $@;	\
+		echo -e '\trm $$(REDHAT.RPMS)'"/$$arch/$$rpmfile"				>> $@;	\
+		echo 'rpm::'									>> $@;	\
+		echo -e '\tmkdir -p $$(REDHAT.RPMS)'"/$$arch" 					>> $@;	\
+		echo -e "\tcp -p $$rpmfile "'$$(REDHAT.RPMS)'"/$$arch/"				>> $@;	\
+		echo 'install-rpm:: rpm'							>> $@;	\
+		echo -e '\trpm -Uhv --force --nodeps $$(REDHAT.RPMS)'"/$$arch/$$rpmfile"	>> $@;	\
+		echo                                    					>> $@;  \
+	done;
 
 include .buildenv-$(ROLL)/copy.mk
 
