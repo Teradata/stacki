@@ -112,6 +112,7 @@ class CLI:
 
 			cmd.append('-Array%d[%s]' % (i, ','.join(d)))
 
+		cmd.append('-force')
 		cmd.append('-a%d' % adapter)
 
 		if options:
@@ -152,6 +153,7 @@ class CLI:
 			if flags:
 				cmd.append(flags)
 
+			cmd.append('-force')
 			cmd.append('-a%d' % adapter)
 			self.run(cmd)
 

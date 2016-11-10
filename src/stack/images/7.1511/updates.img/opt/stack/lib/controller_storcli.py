@@ -97,7 +97,6 @@ class CLI:
 		args = ['/c%d' % adapter, 'add','vd',
 			'type=r%s' % raidlevel]
 
-
 		# Check to see if size argument is present
 		# in flags. If it is, it MUST BE added
 		# immediately after the type=raidtype argument
@@ -151,6 +150,7 @@ class CLI:
 
 			args.append('spares=%s' % ','.join(hs))
 
+		args.append('force')
 		self.run(args)
 
 	def doGlobalHotSpare(self, adapter, enclosure, hotspares, options):
