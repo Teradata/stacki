@@ -53,65 +53,66 @@ class Command(stack.commands.report.host.command):
 	</arg>
 	"""
 
-	def run(self, params, args):
-
-		self.beginOutput()
-
+	def outputResolv(self, host):
                 zones = {}
 		dns = {}	
+
                 for row in self.call('list.network'):
                         zones[row['network']] = row['zone']
 			dns[row['network']] = row['dns']
+
+		search = []
+		for zone in zones.values():
+			if zone not in search:
+				search.append(zone)
+
+		if search:
+			self.addOutput(host, 'search %s' % string.join(search))
                         
-		for host in self.getHostnames(args):
+		# The default search path should always have the
+		# hosts default network first in the list, after
+		# that go by whatever ordering list.network returns.
+		#
+		# If the default network is 'public' use the
+		# public DNS rather that the server on the boss.
 
-                        self.addOutput(host,'<file name="/etc/resolv.conf">')
+		#
+		# or
+		#
 
-                        search = []
-                        for zone in zones.values():
-                        	if zone not in search:
-                                        search.append(zone)
-			if search:
-				self.addOutput(host,
-					'search %s' % string.join(search))
-                        
-                        # The default search path should always have the
-                        # hosts default network first in the list, after
-                        # that go by whatever ordering list.network returns.
-                        #
-                        # If the default network is 'public' use the
-                        # public DNS rather that the server on the boss.
+		#
+		# if any network has 'dns' set to true, then the frontend
+		# is serving DNS for that network, so make sure the
+		# frontend is listed as the first DNS server, then list
+		# the public DNS server
+		#
+		for row in self.call('list.host.interface', [ host ]):
+			network = row['network']
+			if dns.has_key(network) and dns[network]:
+				frontend = self.db.getHostAttr(host,
+					'Kickstart_PrivateAddress')
+				self.addOutput(host, 'nameserver %s' %
+					frontend)
+				break
 
-			#
-			# or
-			#
-
-			#
-			# if any network has 'dns' set to true, then the frontend
-			# is serving DNS for that network, so make sure the
-			# frontend is listed as the first DNS server, then list
-			# the public DNS server
-			#
-                	for row in self.call('list.host.interface', [ host ]):
-				network = row['network']
-				if dns.has_key(network) and dns[network]:
-					frontend = self.db.getHostAttr(host,
-						'Kickstart_PrivateAddress')
-					self.addOutput(host, 'nameserver %s' %
-						frontend)
-					break
-
+		remotedns = self.db.getHostAttr(host,
+			'Kickstart_PublicDNSServers')
+		if not remotedns:
 			remotedns = self.db.getHostAttr(host,
-				'Kickstart_PublicDNSServers')
-			if not remotedns:
-				remotedns = self.db.getHostAttr(host,
-					'Kickstart_PrivateDNSServers')
-			if remotedns:
-				servers = remotedns.split(',')
-				for server in servers:
-					self.addOutput(host, 'nameserver %s' % server.strip())
+				'Kickstart_PrivateDNSServers')
+		if remotedns:
+			servers = remotedns.split(',')
+			for server in servers:
+				self.addOutput(host,
+					'nameserver %s' % server.strip())
 
-			self.addOutput(host,'</file>')
 
-		self.endOutput(padChar='')
+	def run(self, params, args):
+		self.beginOutput()
+
+                for host in self.getHostnames(args):
+			osname = self.db.getHostAttr(host, 'os')
+			self.runImplementation(osname, [host])
+
+		self.endOutput(padChar = '')
 
