@@ -83,6 +83,15 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 				self.owner.call('add.host', args)
 
+			if 'installaction' in hosts[host]:
+				action = 'action=%s' % hosts[host]['installaction']
+				self.owner.call('set.host.installaction', [host, action])
+				del hosts[host]['installaction']
+			if 'runaction' in hosts[host]:
+				action = 'action=%s' % hosts[host]['runaction']
+				self.owner.call('set.host.runaction', [host, action])
+				del hosts[host]['runaction']
+
 			#
 			# set the host attributes that are explicitly 
 			# identified in the spreadsheet
