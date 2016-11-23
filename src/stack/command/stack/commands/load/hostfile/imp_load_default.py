@@ -141,6 +141,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			notes = None
 			installaction = None
 			runaction = None
+			groups = None
 
 			for i in range(0, len(row)):
 				field = row[i]
@@ -198,6 +199,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					installaction = field
 				elif header[i] == 'runaction':
 					runaction = field
+				elif header[i] == 'groups':
+					groups = field
 						
 			if not name:
 				msg = 'empty host name found in "name" column'
@@ -285,6 +288,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				else:
 					self.owner.hosts[name]['runaction'] = runaction
 
+			if groups:
+				self.owner.hosts[name]['groups'] = groups.split(',')
 
 		#
 		# check if the 'Boss' column was set

@@ -61,6 +61,22 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 	def run(self, args):
 		hosts, interfaces = args
 		existinghosts = self.getHostnames()
+		existing_memberships = {}
+		existing_groups = {}
+		for group in self.owner.call('list.group'):
+			existing_groups[group['group']] = group['hosts']
+		for member in self.owner.call('list.host.group'):
+			existing_memberships[member['host']] = member['groups']
+
+		# prune group assignments
+		for host in hosts.keys():
+			if host not in existinghosts:
+				continue
+
+			for group in existing_memberships[host]:
+				self.owner.call('remove.host.group', [host, 'group=%s' % group])
+
+
 
 		for host in hosts.keys():
 			#
@@ -92,6 +108,15 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				self.owner.call('set.host.runaction', [host, action])
 				del hosts[host]['runaction']
 
+			if 'groups' in hosts[host]:
+				for groupname in hosts[host]['groups']:
+					if groupname not in existing_groups:
+						self.owner.call('add.group', [groupname])
+						existing_groups[groupname] = None
+
+					param = 'group=%s' % groupname
+					self.owner.call('add.host.group', [host, param])
+				del hosts[host]['groups']
 			#
 			# set the host attributes that are explicitly 
 			# identified in the spreadsheet
