@@ -479,6 +479,8 @@ class Generator:
 		for child in node.childNodes:
 			if child.nodeType == child.TEXT_NODE:
 				text += child.nodeValue
+			elif child.nodeType == child.CDATA_SECTION_NODE:
+				text += child.nodeValue
 			elif child.nodeType == child.ELEMENT_NODE:
                                 try:
                                         fn = eval('self.handle_child_%s' % child.nodeName)
