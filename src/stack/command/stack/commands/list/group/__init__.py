@@ -65,23 +65,20 @@ class Command(stack.commands.list.command):
                         groups[row[0]] = []
 
                 for row in self.db.select(
-                        """
-                        g.name, n.name from
-            		groups g, memberships m, nodes n
-                        where
-                        n.id = m.nodeid and
-                        g.id = m.groupid
+                        """g.name, n.name
+                        from groups g, memberships m, nodes n
+                        where n.id = m.nodeid and g.id = m.groupid
                         """):
-                        g = row[0]
-                        n = row[1]
-                        groups[g] = []
-                        groups[g].append(n)
+			
+                        groupname, hostname = row
+			if groupname in groups:
+				groups[groupname].append(hostname)
+			else:
+				groups[groupname] = hostname
 
-                groupNames = groups.keys()
-                groupNames.sort()
-                for g in groupNames:
-                        members = len(groups[g])
-                        self.addOutput(g, [ members] )
-                        
+                for group in sorted(groups):
+                        members = ' '.join(groups[group])
+                        self.addOutput(group, [members])
+
 		self.endOutput(header=['group', 'hosts'], trimOwner=False)
 
