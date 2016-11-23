@@ -95,6 +95,7 @@ import sys
 import string
 import stack.commands
 import os
+import subprocess
 from stack.exception import *
 
 class Command(stack.commands.set.host.command):
@@ -121,150 +122,6 @@ class Command(stack.commands.set.host.command):
 	"RUNACTION" column.
 	</example>
 	"""
-
-	def writeDefaultPxebootCfg(self):
-		nrows = self.db.execute("""
-                	select kernel, ramdisk, args from
-			bootaction where action='install'
-                        """)
-
-		if nrows == 1:
-			kernel, ramdisk, args = self.db.fetchone()
-
-			filename = '/tftpboot/pxelinux/pxelinux.cfg/default'
-			file = open(filename, 'w')
-			file.write('default stack\n')
-			file.write('prompt 0\n')
-			file.write('label stack\n')
-
-			if len(kernel) > 6 and kernel[0:7] == 'vmlinuz':
-				file.write('\tkernel %s\n' % (kernel))
-			if len(ramdisk) > 0:
-				if len(args) > 0:
-					args += ' initrd=%s' % ramdisk
-				else:
-					args = 'initrd=%s' % ramdisk
-			if len(args) > 0:
-				file.write('\tappend %s\n' % (args))
-
-			# If using ksdevice=bootif we need to
-			# pass the PXE information to loader.
-			
-			if args and args.find('bootif') != -1:
-				file.write('\tipappend 2\n')
-
-			file.close()
-
-			#
-			# make sure apache can update the file
-			#
-			os.system('chown root.apache %s' % (filename))
-			os.system('chmod 664 %s' % (filename))
-
-
-	def writeFile(self, host, action, filename, ip, netmask, gateway):
-		# Get the bootaction for the host (install or os) and
-		# lookup the actual kernel, ramdisk, and args for the
-		# specific action.
-
-		for row in self.call('list.host', [ host ]):
-			if action == 'install':
-				bootaction = row['installaction']
-			else:
-				bootaction = row['runaction']
-
-		kernel = ramdisk = args = None
-		for row in self.call('list.bootaction'):
-			if row['action'] == bootaction:
-				kernel  = row['kernel']
-				ramdisk = row['ramdisk']
-				args    = row['args']
-
-		# If the ksdevice= is set fill in the network
-		# information as well.  This will avoid the DHCP
-		# request inside anaconda.
-
-		if args and args.find('ksdevice=') != -1:
-			dnsserver = self.db.getHostAttr(host,
-				'Kickstart_PrivateDNSServers')
-			nextserver = self.db.getHostAttr(host,
-				'Kickstart_PrivateKickstartHost')
-			
-			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
-				(ip, gateway, netmask, dnsserver, nextserver)
-
-		if filename != None:
-			file = open(filename, 'w')	
-			file.write('default stack\n')
-			file.write('prompt 0\n')
-			file.write('label stack\n')
-
-			if kernel:
-				if kernel[0:7] == 'vmlinuz':
-					file.write('\tkernel %s\n' % (kernel))
-				else:
-					file.write('\t%s\n' % (kernel))
-			if ramdisk and len(ramdisk) > 0:
-				if len(args) > 0:
-					args += ' initrd=%s' % ramdisk
-				else:
-					args = 'initrd=%s' % ramdisk
-
-			if args and len(args) > 0:
-				file.write('\tappend %s\n' % (args))
-
-			# If using ksdevice=bootif we need to
-			# pass the PXE information to loader.
-			
-			if args and args.find('bootif') != -1:
-				file.write('\tipappend 2\n')
-
-			file.close()
-
-			#
-			# make sure apache can update the file
-			#
-			import pwd
-			import grp
-
-                        uid = pwd.getpwnam('root').pw_uid
-			gid = grp.getgrnam('apache').gr_gid
-                        try:
-                                os.chown(filename, uid, gid)
-                        except OSError:
-                                pass
-                        try:
-				os.chmod(filename, 0o664)
-                        except OSError:
-                                pass
-
-
-	def writePxebootCfg(self, host, action, interfaces):
-		#
-		# Get the IP and NETMASK of the host
-		#
-		for row in interfaces:
-			ip = row['ip']
-			if ip:
-				#
-				# Compute the HEX IP filename for the host
-				#
-				filename = '/tftpboot/pxelinux/pxelinux.cfg/'
-				hexstr = ''
-				for i in string.split(ip, '.'):
-					hexstr += '%02x' % (int(i))
-				filename += '%s' % hexstr.upper()
-
-				if row['pxe']:
-					self.writeFile(host, action, filename,
-						ip, row['mask'], row['gateway'])
-				else:
-					#
-					# if present, remove the old PXE
-					# config file
-					#
-					if os.path.exists(filename):
-						os.unlink(filename)
 
 	def updateBoot(self, host, action):
 		#
@@ -301,27 +158,20 @@ class Command(stack.commands.set.host.command):
                 	raise ParamValue(self, 'action', '"os", "run" or "install"')
 
                 hosts      = self.getHostnames(args)
-                paramList  = []
-                interfaces = {}
-                for host in hosts:
-                        paramList.append(host)
-                        interfaces[host] = []
-                paramList.append('expanded=true')
-		for row in self.call('list.host.interface', paramList):
-                        interfaces[row['host']].append(row)
-
-                frontend_host = self.db.getHostAttr('localhost', 'Kickstart_PrivateHostname')
 		for host in hosts:
 			if action:
 				self.updateBoot(host, action)
-
-                        #
-                        # if this host is the frontend, then generate the
-                        # default configuration file
-                        #
-                        if host == frontend_host:
-                                self.writeDefaultPxebootCfg()
-                        else:
-				self.writePxebootCfg(host, action, interfaces[host])
-
-
+			output = self.command('report.host.pxefile',[host, 'action=%s' % action])
+			print(output)
+			p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
+				stdin = subprocess.PIPE,
+				stdout= subprocess.PIPE,
+				stderr= subprocess.PIPE)
+			o, e = p.communicate(output)
+			print (o, e)
+			psh = subprocess.Popen(['/bin/sh'],
+				stdin = subprocess.PIPE,
+				stdout= subprocess.PIPE,
+				stderr= subprocess.PIPE)
+			out, err = psh.communicate(o)
+			print (out, err)
