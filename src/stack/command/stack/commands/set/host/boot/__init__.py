@@ -162,16 +162,13 @@ class Command(stack.commands.set.host.command):
 			if action:
 				self.updateBoot(host, action)
 			output = self.command('report.host.pxefile',[host, 'action=%s' % action])
-			print(output)
 			p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
 				stdin = subprocess.PIPE,
 				stdout= subprocess.PIPE,
 				stderr= subprocess.PIPE)
 			o, e = p.communicate(output)
-			print (o, e)
 			psh = subprocess.Popen(['/bin/sh'],
 				stdin = subprocess.PIPE,
 				stdout= subprocess.PIPE,
 				stderr= subprocess.PIPE)
 			out, err = psh.communicate(o)
-			print (out, err)
