@@ -31,7 +31,8 @@ class Command(stack.commands.Command,
 
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
 			ip = row['ip']
-			if ip:
+			pxe = row['pxe']
+			if ip and pxe:
 				#
 				# Compute the HEX IP filename for the host
 				#
