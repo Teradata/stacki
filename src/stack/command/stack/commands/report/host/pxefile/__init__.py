@@ -62,5 +62,6 @@ class Command(stack.commands.Command,
 				action = o[0]['action']
 			# Run the OS-specific implementation
 			pxeInfo = self.getHostPXEInfo(host, action)
-			self.runImplementation(osname, pxeInfo)
+			if pxeInfo:
+				self.runImplementation(osname, pxeInfo)
 		self.endOutput(padChar='')
