@@ -53,7 +53,7 @@ class Implementation(stack.commands.Implementation):
 			if device == 'ipmi':
 				self.owner.addOutput(host, '<file name="/etc/sysconfig/ipmi" perms="500">')
 				self.owner.writeIPMI(host, ip, channel,
-					netmask, gateway)
+					netmask, gateway, vlanid)
 				self.owner.addOutput(host, '</file>')
 
 				# ipmi is special, skip the standard stuff

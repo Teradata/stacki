@@ -238,7 +238,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, ']]>')
 
 
-	def writeIPMI(self, host, ip, channel, netmask, gateway):
+	def writeIPMI(self, host, ip, channel, netmask, gateway, vlan=0):
 		defaults = [ ('IPMI_SI', 'yes'),
 			('DEV_IPMI', 'yes'),
 			('IPMI_WATCHDOG', 'no'),
@@ -267,6 +267,13 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.addOutput(host, 'ipmitool lan set %s arp respond on'
 			% (channel))
+
+		if vlan:
+			vlanid = vlan
+		else:
+			vlanid = "off"
+		self.addOutput(host, "ipmitool lan set %s vlan id %s" % \
+			(channel, vlanid))
 
 		attr = self.db.getHostAttr(host, 'ipmi_password')
 		if attr:
