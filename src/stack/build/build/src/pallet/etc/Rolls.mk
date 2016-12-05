@@ -198,12 +198,12 @@ roll-$(ROLL).xml:
 		"bin=\"$(INCLUDE_RPMS)\" src=\"0\"/>" >> $@
 	@echo "<author name=\"$(USER)\""\
 		"host=\"$(shell /bin/hostname)\"/>" >> $@
-	@echo "<gitstatus><![CDATA["			>> $@
-	-git status           				>> $@
-	@echo "]]></gitstatus>"				>> $@
-	@echo "<gitlog>"				>> $@
-	-git log | awk '/^commit / { print $$2; }'	>> $@
-	@echo "</gitlog>"				>> $@
+	@echo "<gitstatus><![CDATA["				>> $@
+	-git status 2>/dev/null					>> $@
+	@echo "]]></gitstatus>"					>> $@
+	@echo "<gitlog>"					>> $@
+	-git log 2>/dev/null | awk '/^commit / { print $$2; }'	>> $@
+	@echo "</gitlog>"					>> $@
 	@echo "</roll>" >> $@
 
 clean::
