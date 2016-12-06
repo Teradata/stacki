@@ -23,6 +23,13 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			appliance = o['appliance']
 			rack = o['rack']
 			rank = o['rank']
+			installaction = o['installaction']
+			runaction = o['runaction']
+
+		groups = None
+		output, = self.call('list.host.group', [host])
+		if output['groups']:
+			groups = ','.join(output['groups'].split())
 
 		ip = None
 		mac = None
@@ -48,6 +55,9 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 				appliance = None
 				rack = None
 				rank = None
+				installaction = None
+				runaction = None
+				groups = None
 
 			ip = o['ip']
 			mac = o['mac']
@@ -62,7 +72,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 			row = [ name, interface_hostname, default, appliance, rack,
 				rank, ip, mac, interface, network, channel,
-				options, vlan ]
+				options, vlan, installaction, runaction, groups ]
 
 			csv_w.writerow(row)
 
@@ -70,7 +80,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 		header = ['NAME', 'INTERFACE HOSTNAME', 'DEFAULT', 'APPLIANCE', 'RACK',
 			'RANK', 'IP', 'MAC', 'INTERFACE', 'NETWORK',
-			'CHANNEL', 'OPTIONS', 'VLAN']
+			'CHANNEL', 'OPTIONS', 'VLAN', 'INSTALLACTION', 'RUNACTION', 'GROUPS']
 
 		# CSV writer requires fileIO.
 		# Setup string IO processing
