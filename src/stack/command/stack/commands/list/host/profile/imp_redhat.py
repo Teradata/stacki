@@ -41,38 +41,17 @@
 #
 
 import string
-from xml.sax import make_parser
 import stack.commands
 import stack.gen
 import stack.redhat.gen
 
 
-class Implementation(stack.commands.Implementation):
+class Implementation(stack.commands.list.host.profile.implementation):
 
-	def run(self, args):
+        def generator(self):
+                return stack.redhat.gen.Generator()
 
-		host	    = args[0]
-		xmlinput    = args[1]
-                profileType = args[2]
-                chapter     = args[3]
-                profile	    = []
-		generator   = stack.redhat.gen.Generator()
-
-                generator.setProfileType(profileType)
-		generator.parse(xmlinput)
-
-                profile.append('<?xml version="1.0" standalone="no"?>')
-                profile.append('<profile-%s os="redhat">' % generator.getProfileType())
-                profile.append('<chapter name="meta">')
-                profile.append('\t<section name="order">')
-                for line in generator.generate('order'):
-                        profile.append('%s' % line)
-                profile.append('\t</section>')
-                profile.append('\t<section name="debug">')
-                for line in generator.generate('debug'):
-                        profile.append(line)
-                profile.append('\t</section>')
-                profile.append('</chapter>')
+        def chapter(self, generator, profile):
 
                 if generator.getProfileType() == 'native':
                         profile.append('<chapter name="kickstart">')
@@ -98,22 +77,5 @@ class Implementation(stack.commands.Implementation):
                                         profile.append(line)
                                 profile.append('\t</section>')
                         profile.append('</chapter>')
-
-                profile.append('</profile-%s>' % generator.getProfileType())
-
-
-                if chapter:
-			parser  = make_parser()
-                        handler = stack.gen.ProfileHandler()
-
-			parser.setContentHandler(handler)
-                        for line in profile:
-                                parser.feed('%s\n' % line)
-
-                        profile = handler.getChapter(chapter)
-
-                for line in profile:
-                        self.owner.addOutput(host, line)
-
 
 
