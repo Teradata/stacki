@@ -104,7 +104,7 @@ class Command(stack.commands.report.command):
 		xml += '</post>\n'
 		xml += '</profile>\n' 
 
-                p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell document=false',
+                p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE, shell=True)

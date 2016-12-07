@@ -154,7 +154,7 @@ then
 		cp /tmp/ks.cfg /tmp/ks.xml
 	fi
 
-	cat /tmp/ks.xml | /opt/stack/bin/stack list host profile document=false 2> /tmp/kgen.debug > /tmp/k
+	cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=kickstart 2> /tmp/kgen.debug > /tmp/k
 	if [ $? = 0 ]
 	then 
 		mv /tmp/k /tmp/ks.cfg

@@ -126,10 +126,10 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		(profile, document) = self.fillParams([ ('profile',  'native'),
-                                                        ('document', 'true') ])
+		(profile, chapter) = self.fillParams([
+                        ('profile',  'native'),
+                        ('chapter', None) ])
 
-                document  = self.str2bool(document)
 		hosts	  = self.getHostnames(args)
 		xmlinput  = ''
                 osname    = None
@@ -154,11 +154,11 @@ class Command(stack.commands.list.host.command):
                                 osname	 = self.db.getHostOS(host)
                                 xmlinput = self.command('list.host.xml', [ host ])
 
-				self.runImplementation(osname, (host, xmlinput, profile, document))
+				self.runImplementation(osname, (host, xmlinput, profile, chapter))
 
 		# If we DO have XML input, simply parse it.
 
                 else:
-			self.runImplementation(osname, ('localhost', xmlinput, profile, document))
+			self.runImplementation(osname, ('localhost', xmlinput, profile, chapter))
 
 		self.endOutput(padChar='')

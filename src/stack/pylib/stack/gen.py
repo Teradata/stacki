@@ -97,6 +97,7 @@ import types
 import sys
 import os
 import time
+from xml.sax import handler
 import xml.dom.NodeFilter
 import xml.dom.ext.reader.Sax2
 import stack.js
@@ -243,6 +244,7 @@ class Generator:
 		self.profileType	= 'native'
 		self.rcsFiles		= {}
                 self.nodeFilesDict	= {}
+                self.stackiSection	= ProfileSection()
                 self.nodeFilesSection	= ProfileSection()
                 self.debugSection	= ProfileSection()
                 self.mainSection	= ProfileSection()
@@ -546,7 +548,13 @@ class Generator:
 	
 	def handle_child_file(self, node):
 		return self.parseFile(node)
-	
+
+        # <stacki>
+
+        def handle_stacki(self, node):
+                self.stackiSection.append(self.getChildText(node),
+                                          self.getAttr(node, 'file'))
+
 	# <debug>
 	
 	def handle_debug(self, node):
@@ -573,6 +581,9 @@ class Generator:
 
 	def generate_order(self):
                 return self.nodeFilesSection.generate()
+
+        def generate_stacki(self):
+                return self.stackiSection.generate()
 
 	def generate_debug(self):
                 return self.debugSection.generate()
@@ -608,5 +619,44 @@ class OtherNodeFilter(NodeFilter):
 			return self.FILTER_SKIP
 
 		return self.FILTER_ACCEPT
+
+
+class ProfileHandler(handler.ContentHandler,
+                     handler.DTDHandler,
+                     handler.EntityResolver,
+                     handler.ErrorHandler):
+
+	def __init__(self):
+		handler.ContentHandler.__init__(self)
+                self.recording = False
+                self.text      = ''
+                self.chapters  = {}
+                self.chapter   = None
+
+	def startElement(self, name, attrs):
+                if name == 'chapter':
+                        self.chapter   = self.chapters[attrs.get('name')] = []
+                        self.recording = True
+
+	def endElement(self, name):
+                if self.recording:
+                        self.chapter.append(self.text)
+                        self.text = ''
+
+                if name == 'chapter':
+                        self.recording = False
+
+	def characters(self, s):
+                if self.recording:
+                        self.text += s
+
+        def getChapter(self, chapter):
+                doc = []
+                if chapter in self.chapters:
+                        for text in self.chapters[chapter]:
+                        	doc.append(text.strip())
+                return doc
+
+
 
 

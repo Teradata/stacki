@@ -41,45 +41,10 @@
 #
 
 import string
-from xml.sax import saxutils
-from xml.sax import handler
 from xml.sax import make_parser
 import stack.commands
+import stack.gen
 import stack.redhat.gen
-
-class ProfileHandler(handler.ContentHandler,
-                     handler.DTDHandler,
-                     handler.EntityResolver,
-                     handler.ErrorHandler):
-
-	def __init__(self):
-		handler.ContentHandler.__init__(self)
-                self.recording = False
-                self.text      = ''
-                self.doc       = []
-
-	def startElement(self, name, attrs):
-                if name == 'chapter' and attrs.get('name') in [ 'kickstart', 'bash' ]:
-                        self.recording = True
-
-	def endElement(self, name):
-                if self.recording:
-                        self.doc.append(self.text)
-                        self.text = ''
-
-                if name == 'chapter':
-                        self.recording = False
-
-	def characters(self, s):
-                if self.recording:
-                        self.text += s
-
-        def document(self):
-                doc = []
-                for text in self.doc:
-	                doc.append(text.strip())
-                return doc
-
 
 
 class Implementation(stack.commands.Implementation):
@@ -89,7 +54,7 @@ class Implementation(stack.commands.Implementation):
 		host	    = args[0]
 		xmlinput    = args[1]
                 profileType = args[2]
-                isDocument  = args[3]
+                chapter     = args[3]
                 profile	    = []
 		generator   = stack.redhat.gen.Generator()
 
@@ -137,13 +102,15 @@ class Implementation(stack.commands.Implementation):
                 profile.append('</profile-%s>' % generator.getProfileType())
 
 
-                if not isDocument:
+                if chapter:
 			parser  = make_parser()
-                        handler = ProfileHandler()
+                        handler = stack.gen.ProfileHandler()
+
 			parser.setContentHandler(handler)
                         for line in profile:
                                 parser.feed('%s\n' % line)
-                        profile = handler.document()
+
+                        profile = handler.getChapter(chapter)
 
                 for line in profile:
                         self.owner.addOutput(host, line)
