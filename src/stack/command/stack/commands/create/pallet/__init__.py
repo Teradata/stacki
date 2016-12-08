@@ -851,6 +851,106 @@ class Command(stack.commands.create.command,
 	<related>list pallet</related>
 	"""
 
+	def fetch_from_git(self, url, branch):
+		"""
+		Fetch a pallet from a github repo, then clone and make roll
+		"""
+
+		# 1. Create landing directory
+		# 2. Clone / pull source
+		# 3. Checkout requested commit
+		# 4. Build a roll.xml and run gen-order in .src/
+		# 5. Hand the roll.xml filename back, to run through RollBuilder()
+
+		git_src_dir = '/export/git_pallets/'
+		git_repo_name = url.split('/')[-1].replace('.git', '')
+		try:
+			os.mkdir(git_src_dir)
+		except OSError:
+			pass
+		os.chdir(git_src_dir)
+
+		# check if the source dir already exists and is a git repo
+		if os.path.exists(git_repo_name + '/.git'):
+			os.chdir(git_src_dir + git_repo_name)
+			cmd = 'git pull'
+		elif os.path.exists(git_repo_name):
+			msg = 'Error, directory "%s" already exists and is not a git repo' % git_src_dir + git_repo_name
+			raise CommandError(self, msg)
+		else:
+			cmd = 'git clone %s' % url
+
+		# clone or pull
+		try:
+			proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		except OSError:
+			raise CommandError(self, 'Unable to find "git" in $PATH')
+		print('Retrieving git repo %s with "%s", this may take a while' % (url, cmd))
+		stdout, stderr = proc.communicate()
+
+		if stderr or proc.returncode != 0:
+			print(stderr)
+			raise CommandError(self, 'Unable to retrieve git repository: %s' % url)
+
+		# checkout the commit
+		os.chdir(git_src_dir + git_repo_name)
+		cmd = 'git checkout %s' % branch
+		proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		stdout, stderr = proc.communicate()
+
+		if proc.returncode != 0:
+			print(stderr)
+			raise CommandError(self, 'Unable to checkout: %s' % branch)
+
+		# get roll name from version.mk
+		pallet_name = ''
+		if not os.path.isfile('version.mk'):
+			raise CommandError(self, 'Unable to find version.mk in git repo')
+		with open('version.mk') as version_file:
+			for line in version_file.readlines():
+				if 'ROLL' in line.split():
+					pallet_name = line.split('=')[-1].strip()
+					break
+			else:
+				raise CommandError(self, 'Could not find ROLL in version.mk')
+
+		# create order-pallet.mk
+		if os.path.exists('./src'):
+			os.chdir('./src')
+			
+			cmd = '/opt/stack/share/build/bin/gen-order'
+			proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			stdout, stderr = proc.communicate()
+
+			if stderr or proc.returncode != 0:
+				print(stderr)
+				raise CommandError(self, '"gen-order" had errors')
+			else:
+				with open('order-%s.mk' % pallet_name, 'w') as mkorder:
+					mkorder.write(stdout)
+			os.chdir(git_src_dir + git_repo_name)
+
+		# create roll-pallet.xml
+		roll_xml_fname = 'roll-%s.xml' % pallet_name
+		cmd = 'make %s' % roll_xml_fname
+		proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		stdout, stderr = proc.communicate()
+
+		if proc.returncode != 0:
+			print(stderr)
+			raise CommandError(self, '"make %s" had errors' % roll_xml_fname)
+		else:
+			output_file = '/tmp/%s-make-output.txt' % pallet_name
+			print('saving "make" output to %s' % output_file)
+			with open(output_file, 'w') as output_file:
+				output_file.write('STDERR:')
+				output_file.write(stderr)
+				output_file.write('STDOUT:')
+				output_file.write(stdout)
+
+		return roll_xml_fname
+
+
 	def run(self, params, args):
 
 		try:
@@ -863,11 +963,12 @@ class Command(stack.commands.create.command,
 		except AttributeError:
 			release = 0
 
-		(name, version, release, newest) = self.fillParams([
+		(name, version, release, newest, commit) = self.fillParams([
                         ('name', None),
 			('version', version),
 			('release', release),
-			('newest', True) 
+			('newest', True),
+			('commit', 'master'),
                         ])
 
 		# Yes, globals are probably bad. But this is the fastest
@@ -880,9 +981,12 @@ class Command(stack.commands.create.command,
                         raise ArgRequired(self, 'pallet')
                 
 		if len(args) == 1:
+			base, ext = os.path.splitext(args[0])
+			if ext == '.git':
+				args[0] = self.fetch_from_git(args[0], commit)
+				base, ext = os.path.splitext(args[0])
 			if not os.path.isfile(args[0]):
 				raise CommandError(self, 'file %s not found' % args[0])
-			base, ext = os.path.splitext(args[0])
 			if ext == '.xml':
 				builder = RollBuilder(args[0], self.command, self.call)
 			else:
