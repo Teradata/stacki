@@ -603,7 +603,7 @@ class HostArgumentProcessor:
 		if host_filter:
 			# filter(func, iterable) requires that func take a single argument
 			# so we use functools.partial to get a function with one argument 'locked'
-			part_func = partial(hostfilter, self)
+			part_func = partial(host_filter, self)
 			list = filter(part_func, list)
                         
 		return list
