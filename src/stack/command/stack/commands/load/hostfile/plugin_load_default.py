@@ -149,8 +149,10 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
                 params = []
                 for host in hosts:
                         params.append(host)
-                params.append('all=true')
-		self.owner.call('remove.host.interface', params)
+		# only remove all interfaces from hosts if hostnames were actually specified *cough*
+                if params:
+                        params.append('all=true')
+	                self.owner.call('remove.host.interface', params)
                 
                 for host in hosts:
                         
