@@ -52,12 +52,24 @@ class Command(stack.commands.list.host.command):
 	for all the known hosts is listed.
 	</arg>
 
+        <param type='string' name='group'>
+        Restricts the output to only members of a group. This can be a single
+        group name or a comma separated list of group names.
+        </param>
+
 	<example cmd='list host group backend-0-0'>
 	List the groups for backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
+
+		(group,) = self.fillParams([ ('group', None) ])
+
+                if group:
+                        groups = group.split(',')
+                else:
+                        groups = None
 
 		self.beginOutput()
 
@@ -78,8 +90,19 @@ class Command(stack.commands.list.host.command):
                                 """ % host):
                                 membership[row[0]].append(row[1])
                                 
-                for host in hosts:
-                        self.addOutput(host, string.join(membership[host], ' '))
+
+                if groups:
+                        for host in hosts:
+                                match = []
+                                for group in membership[host]:
+                                        if group in groups:
+                                                match.append(group)
+                                if match:
+                                        self.addOutput(host, string.join(match, ' '))
+                else:
+                        for host in hosts:
+                                self.addOutput(host, string.join(membership[host], ' '))
+
 
 		self.endOutput(header=['host', 'groups'], trimOwner = 0)
 

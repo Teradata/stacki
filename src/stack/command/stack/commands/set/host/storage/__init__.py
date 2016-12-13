@@ -78,7 +78,7 @@ class Command(stack.commands.set.host.command):
 		megacmd = None
 
 		if action == 'configure':
-			flags = self.db.getHostAttr(host, 'storage.lsi.flags')
+			flags = self.getHostAttr(host, 'storage.lsi.flags')
 
 			megacmd = '/opt/stack/sbin/MegaCli -CfgForeign -Clear '
 			megacmd += '-a%s > /dev/null 2>&1 ' % (adapter)

@@ -90,11 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-import sys
-import socket
-import stack.attr
 import stack.commands
-import string
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -104,42 +100,98 @@ class Command(stack.commands.list.host.command):
 	Host name of machine
 	</arg>
 	
-	<example cmd='list host attr compute-0-0'>
-	List the attributes for compute-0-0.
+        <param type='string' name='attr'>
+        A shell syntax glob pattern to specify to attributes to
+        be listed.
+        </param>
+
+	<example cmd='list host attr backend-0-0'>
+	List the attributes for backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
 
-		(key, shadow,)  = self.fillParams([ ('attr', None), ('shadow','True') ])
-		shadow = self.str2bool(shadow)
-		if key:
-			(scope, attr) = stack.attr.SplitAttr(key)
-			key = stack.attr.ConcatAttr(scope, attr, slash=False)
+                (resolve, ) = self.fillParams([('resolve', 'true')])
+                resolve     = self.str2bool(resolve)
+                hosts       = self.getHostnames(args)
 
-		self.beginOutput()
+                argv = []
+                for p in params:
+                        if not p in ['resolve']:
+                                argv.append('%s=%s' % (p, params[p]))
 
-		output = []
+                hostAttrs = {}
+                hosts.sort()
+                for host in hosts:
+                        hostAttrs[host] = {}
 
-		for host in self.getHostnames(args):
+                for row in self.call('list.attr', hosts + ['scope=host'] + argv):
+                        hostAttrs[row['host']][row['attr']] = ('host', 
+                                                               row['value'], 
+                                                               row['internal'])
 
-			dict = self.db.getHostAttrs(host, showsource=True,
-				slash=True, filter=key, shadow=shadow)
-			attrs = {}
-			for (k, v) in dict.items():
-				(s, a) = stack.attr.SplitAttr(k)
-				k = stack.attr.NormalizeAttr(k)
-				attrs[k] = (s, a, v[0], v[1])
-				# (scope, attr, value, source)
-				 
-			for (k, (s, a, v, o)) in attrs.items():
-				output.append((host, 
-				       k, s, a, v, o))
+                for host in hosts:
 
-		output.sort(key = lambda x: x[1])
-		for (h, k, s, a, v, o) in output:
-			self.addOutput(h, (s, a, v, o))
-		 
-		self.endOutput(header=['host', 'scope', 'attr', 'value',
-				       'source' ], trimOwner=False)
+                        attrs = {}
+                        if resolve:
+
+                                # Global Attributes
+
+                                for row in self.call('list.attr', argv):
+                                        attrs[row['attr']] = ('global', 
+                                                              row['value'], 
+                                                              row['internal'])
+
+                                # OS Attributes
+
+                                for row in self.call('list.attr', 
+                                                     ['%s' % self.db.getHostOS(host), 
+                                                      'scope=os'] + argv):
+                                        attrs[row['attr']] = ('os', 
+                                                              row['value'], 
+                                                              row['internal'])
+
+                                # Appliance Attributes
+
+                                for row in self.call('list.attr', 
+                                                     ['%s' % self.db.getHostAppliance(host), 
+                                                      'scope=appliance'] + argv):
+                                        attrs[row['attr']] = ('appliance', 
+                                                              row['value'], 
+                                                              row['internal'])
+
+                                # Environment Attributes
+
+                                env = self.db.getHostEnvironment(host)
+                                if env:
+                                        for row in self.call('list.attr', 
+                                                             ['%s' % env, 
+                                                              'scope=environment'] + argv):
+                                                attrs[row['attr']] = ('environment', 
+                                                                      row['value'], 
+                                                                      row['internal'])
+                                        
+                        for key in attrs:
+                                if not key in hostAttrs[host]:
+                                        hostAttrs[host][key] = attrs[key]
+
+                self.beginOutput()
+
+                for host in hosts:
+                        attrs = hostAttrs[host]
+                        keys  = attrs.keys()
+                        keys.sort()
+                        for a in keys:
+                                (s, v, i) = attrs[a]
+                                if resolve:
+                                        self.addOutput(host, (a, s, i, v))
+                                else:
+                                        self.addOutput(host, (a, i, v))
+
+                if resolve:
+                        self.endOutput(header=['host', 'attr', 'scope', 'internal', 'value' ])
+                else:
+                        self.endOutput(header=['host', 'attr', 'internal', 'value' ])
+
 

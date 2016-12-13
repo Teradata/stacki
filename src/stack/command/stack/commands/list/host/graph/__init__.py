@@ -173,9 +173,12 @@ class Command(stack.commands.list.host.command):
 					dirs.append(os.path.join(os.sep, 'export', 'stack', 'carts', 
 								 row['name'], 'graph'))
 
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
+
 			parser = make_parser()
-			attrs = self.db.getHostAttrs(host)
-			handler = stack.profile.GraphHandler(attrs, {}, prune=False)
+			handler = stack.profile.GraphHandler(attrs, prune=False)
 
 			for dir in dirs:
 				if not os.path.exists(dir):

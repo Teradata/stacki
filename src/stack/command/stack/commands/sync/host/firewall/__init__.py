@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,74 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.2  2011/04/14 23:08:59  anoop
-# Move parallel class up one level, so that all sync commands can
-# take advantage of it.
-#
-# Added rocks sync host sharedkey. This distributes the 411 shared key
-# to compute nodes
-#
-# Revision 1.1  2010/10/22 16:39:28  phil
-# Sync host firewall command.
-# Cut/Paste for sync.host.network command
-#
-# Revision 1.15  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.14  2010/05/27 00:11:33  bruno
-# firewall fixes
-#
-# Revision 1.13  2010/05/20 22:07:33  bruno
-# fix
-#
-# Revision 1.12  2010/05/20 00:31:45  bruno
-# gonna get some serious 'star power' off this commit.
-#
-# put in code to dynamically configure the static-routes file based on
-# networks (no longer the hardcoded 'eth0').
-#
-# Revision 1.11  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.10  2010/02/22 21:32:48  bruno
-# need to also update /etc/sysconfig/network
-#
-# Revision 1.9  2009/08/28 19:54:47  bruno
-# also update the static routes file when syncing the network
-#
-# Revision 1.8  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.7  2009/02/24 00:53:04  bruno
-# add the flag 'managed_only' to getHostnames(). if managed_only is true and
-# if no host names are provide to getHostnames(), then only machines that
-# traditionally have ssh login shells will be in the list returned from
-# getHostnames()
-#
-# Revision 1.6  2009/02/09 00:29:04  bruno
-# parallelize 'rocks sync host network'
-#
-# Revision 1.5  2009/01/13 23:11:33  bruno
-# add full pathname to 'service' command so folks can run insert-ethers via
-# sudo.
-#
-# Revision 1.4  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.3  2008/09/22 20:20:42  bruno
-# change 'rocks config host interface|network' to
-# change 'rocks report host interface|network'
-#
-# Revision 1.2  2008/09/16 23:46:14  bruno
-# wait for the network service to restart
-#
-# Revision 1.1  2008/08/22 23:26:38  bruno
-# closer
-#
-#
-#
 
 import os
 import time
@@ -151,10 +84,10 @@ class Command(stack.commands.sync.host.command):
 
 		threads = []
 		for host in hosts:
-			#
-			# get the attributes for the host
-			#
-			attrs = self.db.getHostAttrs(host)
+
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
 
 			if self.str2bool(attrs.get('firewall')) != True:
 				continue

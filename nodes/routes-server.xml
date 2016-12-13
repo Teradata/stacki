@@ -22,7 +22,7 @@
 <post>
 
 /opt/stack/bin/stack report host route &Kickstart_PrivateHostname; | \
-/opt/stack/bin/stack report script attrs="`/opt/stack/bin/stack report host attr &Kickstart_PrivateHostname; pydict=true`" | /bin/bash 
+/opt/stack/bin/stack report script | /bin/bash 
 
 </post>
 

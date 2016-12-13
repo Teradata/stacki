@@ -91,33 +91,12 @@
 # @Copyright@
 
 
-import os
-import stat
-import time
-import sys
-import string
-import stack.attr
 import stack.commands
 from stack.exception import *
 
-class command(stack.commands.set.command):
-
-        def doParams(self):
-                
-		(attr, value, shadow, force) = self.fillParams([
-                        ('attr',   None, True),
-                        ('value',  None, True),
-			('shadow', 'n'),
-			('force',  'y')
-                        ])
-
-                shadow = self.str2bool(shadow)  
-		force  = self.str2bool(force)
-                
-                return (attr, value, shadow, force)
-                
-        
-class Command(command):
+class Command(stack.commands.Command,
+              stack.commands.OSArgumentProcessor,
+              stack.commands.ApplianceArgumentProcessor):
 	"""
 	Sets a global attribute for all nodes
 
@@ -144,28 +123,92 @@ class Command(command):
 
 	def run(self, params, args):
 
-		(key, value, shadow, force) = self.doParams()
+		(attr, value, shadow, force, scope, obj) = self.fillParams([
+                        ('attr',   None, True),
+                        ('value',  None, True),
+			('shadow', 'n'),
+			('force',  'y'),
+                        ('scope',  'global'),
+                        ('object', None)
+                        ])
 
-		(scope, attr) = stack.attr.SplitAttr(key)
-		if not attr:
-			raise CommandError(self, 'illegal attribute: attr parameter is empty')
-		aflag = 'attr=%s' % stack.attr.ConcatAttr(scope, attr)
+                shadow = self.str2bool(shadow)  
+		force  = self.str2bool(force)
+
+                if scope not in [ 'global',
+                                  'os',
+                                  'environment',
+                                  'appliance',
+                                  'host' ]:
+                        raise CommandError(self, 'invalid scope "%s"' % scope)
+
+
+                if scope == 'global':
+                        lcmd  = 'list.attr'
+                        rcmd  = 'remove.attr'
+                        flags = []
+                else:
+                        if not obj:
+                                raise CommandError(self, 'object not specified')
+                        lcmd  = 'list.%s.attr' % scope
+                        rcmd  = 'remove.%s.attr' % scope
+                        flags = [ obj ]
+                flags.append("attr=%s" % attr)
 
 		if not force:
-			if self.command('list.attr', [ aflag ]):
-                                raise CommandError(self, 'attr "%s" exists' % aflag)
+			if self.command(lcmd, flags):
+                                raise CommandError(self, 'attr "%s" exists' % attr)
 
-		self.command('remove.attr', [ aflag ] )
-
+		self.command(rcmd, flags)
+                
 		if shadow:
 			s = "'%s'" % value
 			v = 'NULL'
 		else:
 			s = 'NULL'
 			v = "'%s'" % value
-
-		self.db.execute("""
-			insert into global_attributes
-			(scope, attr, value, shadow)
-			values ('%s', '%s', %s, %s)
-			""" % (scope, attr, v, s))
+                        
+                if scope == 'os':
+                        obj = self.getOSNames([obj])[0]
+                        self.db.execute(
+                                """
+			        insert into attributes
+			        (scope, attr, value, shadow, pointerstr)
+			        values ('%s', '%s', %s, %s, '%s')
+			        """ % (scope, attr, v, s, obj))
+                elif scope == 'environment':
+                        self.db.execute(
+                                """
+			        insert into attributes
+			        (scope, attr, value, shadow, pointerstr)
+			        values ('%s', '%s', %s, %s, '%s')
+			        """ % (scope, attr, v, s, obj))
+                elif scope == 'appliance':
+                        obj = self.getApplianceNames([obj])[0]
+                        self.db.execute(
+                                """
+			        insert into attributes
+			        (scope, attr, value, shadow, pointerid)
+			        values (
+                                	'%s', '%s', %s, %s, 
+                                	(select id from appliances where name='%s')
+                                )
+			        """ % (scope, attr, v, s, obj))
+                elif scope == 'host':
+                        obj = self.db.getHostname(obj)
+                        self.db.execute(
+                                """
+			        insert into attributes
+			        (scope, attr, value, shadow, pointerid)
+			        values (
+                                	'%s', '%s', %s, %s, 
+                                	(select id from nodes where name='%s')
+                                )
+			        """ % (scope, attr, v, s, obj))
+                else:
+			self.db.execute(
+                                """
+			        insert into attributes
+			        (scope, attr, value, shadow)
+			        values ('%s', '%s', %s, %s)
+			        """ % (scope, attr, v, s))

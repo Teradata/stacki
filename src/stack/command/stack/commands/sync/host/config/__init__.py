@@ -56,6 +56,11 @@ class Command(stack.commands.Command,
 		hosts = self.getHostnames(args)
 		self.s = stack.util.Struct()
 		for host in hosts:
+
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
+
 			self.s.host  = host
-			self.s.attrs = self.db.getHostAttrs(host)
+                        self.s.attrs = attrs
 			self.runPlugins(host)

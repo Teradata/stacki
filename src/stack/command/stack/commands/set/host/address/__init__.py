@@ -185,24 +185,22 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		if len(params) == 0:
                         raise CommandError(self, 'no parameters specified')
 
+                attrs = {}
+                for row in self.call('list.host.attr', [ 'localhost' ]):
+                        attrs[row['attr']] = row['value']
+
 		if not ip:
-			ip = self.db.getHostAttr('localhost',
-				'Kickstart_PublicAddress')
+			ip = attrs['Kickstart_PublicAddress']
 		if not netmask:
-			netmask = self.db.getHostAttr('localhost',
-				'Kickstart_PublicNetmask')
+			netmask = attrs['Kickstart_PublicNetmask']
 		if not shortname:
-			shortname = self.db.getHostAttr('localhost',
-				'Kickstart_PrivateHostname')
+			shortname = attrs['Kickstart_PrivateHostname']
 		if not domainname:
-			domainname = self.db.getHostAttr('localhost',
-				'Kickstart_PublicDNSDomain')
+			domainname = attrs['Kickstart_PublicDNSDomain']
 		if not gateway:
-			gateway = self.db.getHostAttr('localhost',
-				'Kickstart_PublicGateway')
+			gateway = attrs['Kickstart_PublicGateway']
 		if not dns:
-			dns = self.db.getHostAttr('localhost',
-				'Kickstart_PublicDNSServers')
+			dns = attrs['Kickstart_PublicDNSServers']
 
 		ip = ip.strip()
 		netmask = netmask.strip()
@@ -221,10 +219,8 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		if host != self.db.getHostname('localhost'):
                         raise CommandError(self, 'must supply the current name of this frontend')
 
-		oldhost = self.db.getHostAttr('localhost',
-			'Kickstart_PrivateHostname')
-		oldip = self.db.getHostAttr('localhost',
-			'Kickstart_PublicAddress')
+		oldhost = attrs['Kickstart_PrivateHostname']
+		oldip   = attrs['Kickstart_PublicAddress']
 
 		oldhost = oldhost.strip()
 		oldip = oldip.strip()
@@ -252,43 +248,33 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 
 		if oldip != ip:
 			print('')
-			print('\tnew IP: %s' % (ip))
-			print('\told IP: %s' % (oldip))
+			print('\tnew IP: %s' % ip)
+			print('\told IP: %s' % oldip)
 
-		if netmask != self.db.getHostAttr('localhost',
-				'Kickstart_PublicNetmask'):
+		if netmask != attrs['Kickstart_PublicNetmask']:
 			print('')
-			print('\tnew netmask: %s' % (netmask))
-			print('\told netmask: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicNetmask')))
+			print('\tnew netmask: %s' % netmask)
+			print('\told netmask: %s' % attrs['Kickstart_PublicNetmask'])
 
-		if gateway != self.db.getHostAttr('localhost',
-				'Kickstart_PublicGateway'):
+		if gateway != attrs['Kickstart_PublicGateway']:
 			print('')
-			print('\tnew gateway: %s' % (gateway))
-			print('\told gateway: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicGateway')))
+			print('\tnew gateway: %s' % gateway)
+			print('\told gateway: %s' % attrs['Kickstart_PublicGateway'])
 
-		if dns != self.db.getHostAttr('localhost',
-				'Kickstart_PublicDNSServers'):
+		if dns != attrs['Kickstart_PublicDNSServers']:
 			print('')
-			print('\tnew dns: %s' % (dns))
-			print('\told dns: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicDNSServers')))
+			print('\tnew dns: %s' % dns)
+			print('\told dns: %s' % attrs['Kickstart_PublicDNSServers'])
 
-		if shortname != self.db.getHostAttr('localhost',
-				'Kickstart_PrivateHostname'):
+		if shortname != attrs['Kickstart_PrivateHostname']:
 			print('')
-			print('\tnew shortname: %s' % (shortname))
-			print('\told shortname: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PrivateHostname')))
+			print('\tnew shortname: %s' % shortname)
+			print('\told shortname: %s' % attrs['Kickstart_PrivateHostname'])
 
-		if domainname != self.db.getHostAttr('localhost',
-				'Kickstart_PublicDNSDomain'):
+		if domainname != attrs['Kickstart_PublicDNSDomain']:
 			print('')
-			print('\tnew domain: %s' % (domainname))
-			print('\told domain: %s' % (self.db.getHostAttr(
-				'localhost', 'Kickstart_PublicDNSDomain')))
+			print('\tnew domain: %s' % domainname)
+			print('\told domain: %s' % attrs['Kickstart_PublicDNSDomain'])
 
 		print('')
 		print('If this looks correct, then enter the current UNIX root')
@@ -404,7 +390,9 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		# there are times when we will not be able to consistently
 		# ssh to this host (because the network name is in flux).
 		#
-		attrs = self.db.getHostAttrs('localhost')
+                attrs = {}
+                for row in self.call('list.host.attr', [ 'localhost' ]):
+                        attrs[row['attr']] = row['value']
 
 		cmd = '/opt/stack/bin/stack report host interface localhost |'
 		cmd += '/opt/stack/bin/stack report script '

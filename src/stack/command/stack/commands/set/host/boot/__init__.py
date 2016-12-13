@@ -185,10 +185,12 @@ class Command(stack.commands.set.host.command):
 		# request inside anaconda.
 
 		if args and args.find('ksdevice=') != -1:
-			dnsserver = self.db.getHostAttr(host,
-				'Kickstart_PrivateDNSServers')
-			nextserver = self.db.getHostAttr(host,
-				'Kickstart_PrivateKickstartHost')
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
+                        
+			dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
+			nextserver = attrs.get('Kickstart_PrivateKickstartHost')
 			
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
 				(ip, gateway, netmask, dnsserver, nextserver)
@@ -310,7 +312,7 @@ class Command(stack.commands.set.host.command):
 		for row in self.call('list.host.interface', paramList):
                         interfaces[row['host']].append(row)
 
-                frontend_host = self.db.getHostAttr('localhost', 'Kickstart_PrivateHostname')
+                frontend_host = self.getAttr('Kickstart_PrivateHostname')
 		for host in hosts:
 			if action:
 				self.updateBoot(host, action)

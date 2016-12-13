@@ -28,7 +28,16 @@ class Command(stack.commands.Command,
 		targets = {}
 		host_attrs = {}
 		csv_attrs = []
+
+                # TODO 
+                #
+                # getHostAttrs is dead
+                # use list * attr commands
+                # use list host attr resolve=false to get only host attributes
+                # look at 'internal' column and ignore intenal attributes
+
 		for host in self.getHostnames([]):
+
 			attrs = self.db.getHostAttrs(host, showsource=True, slash=True,
 				filter=attr_filter, shadow=False)
 			attrs = [(k, v) for k, v in attrs.iteritems()]

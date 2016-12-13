@@ -72,8 +72,6 @@ class Command(stack.commands.add.host.command):
 		
                 if not hosts:
                         raise ArgRequired(self, 'host')
-		if not len(hosts) == 1:
-                        raise ArgUnique(self, 'host')
 
                 exists = False
                 for row in self.call('list.group'):

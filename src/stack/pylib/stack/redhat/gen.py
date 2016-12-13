@@ -124,13 +124,8 @@ class Generator(stack.gen.Generator):
 	#	<clearpart>
 	# </main>
 	
-	def handle_main_clearpart(self, node):
-		attr = node.attributes
-
-		if attr.getNamedItem((None, 'partition')):
-			arg = attr.getNamedItem((None, 'partition')).value
-		else:
-			arg = ''
+	def handle_main_stack_clearpart(self, node):
+                arg = self.getAttr(node, 'partition')
 
 		#
 		# the web form sets the environment variable 'partition'
@@ -151,7 +146,7 @@ class Generator(stack.gen.Generator):
 	#	<lilo>
 	# </main>
 	
-	def handle_main_lilo(self, node):
+	def handle_main_stack_lilo(self, node):
 		return 'bootloader %s' % self.getChildText(node).strip()
 
 
@@ -159,13 +154,13 @@ class Generator(stack.gen.Generator):
 	#	<langsupport>
 	# </main>
 
-	def handle_main_langsupport(self, node):
+	def handle_main_stack_langsupport(self, node):
 		return 'langsupport --default=%s' % self.getChildText(node).strip()
 
 
 	# <package>
 
-	def handle_package(self, node):
+	def handle_stack_package(self, node):
                 nodefile = self.getAttr(node, 'file')
 		rpm      = self.getChildText(node).strip()
                 type     = self.getAttr(node, 'type')
@@ -183,7 +178,7 @@ class Generator(stack.gen.Generator):
 
 	# <pre>
 	
-	def handle_pre(self, node):
+	def handle_stack_pre(self, node):
                 nodefile	= self.getAttr(node, 'file')
                 interpreter	= self.getAttr(node, 'interpreter')
                 arg		= self.getAttr(node, 'arg')
@@ -200,7 +195,7 @@ class Generator(stack.gen.Generator):
 
 	# <post>
 	
-	def handle_post(self, node):
+	def handle_stack_post(self, node):
                 nodefile	= self.getAttr(node, 'file')
                 interpreter	= self.getAttr(node, 'interpreter')
                 arg		= self.getAttr(node, 'arg')
@@ -238,7 +233,7 @@ class Generator(stack.gen.Generator):
 		
 	# <boot>
 	
-	def handle_boot(self, node):
+	def handle_stack_boot(self, node):
                 nodefile	= self.getAttr(node, 'file')
                 order		= self.getAttr(node, 'order')
                 

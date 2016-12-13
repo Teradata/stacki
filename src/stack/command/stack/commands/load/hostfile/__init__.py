@@ -150,7 +150,7 @@ class Command(stack.commands.load.command):
 			('processor', 'default')
                         ])
 
-                googleacct = self.str2bool(self.db.getHostAttr('localhost', 'google.credential'))
+                googleacct = self.str2bool(self.getAttr('google.credential'))
                 if googleacct:
 			#
 			# this may be a Google spreadsheet

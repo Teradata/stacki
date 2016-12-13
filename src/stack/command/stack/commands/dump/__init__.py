@@ -116,8 +116,8 @@ class command(stack.commands.Command):
 		return s
 
 	def dump(self, line):
-#		self.addText('echo "Running /opt/stack/bin/stack %s"\n' % line)
 		self.addText('/opt/stack/bin/stack %s\n' % line)
+#		self.addText('./stack.py %s\n' % line)
 
 	
 class Command(command):

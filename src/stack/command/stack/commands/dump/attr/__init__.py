@@ -115,7 +115,7 @@ class Command(stack.commands.dump.command):
 				""")
 			
 		for row in self.db.fetchall():
-			attr   = stack.attr.ConcatAttr(row[0], row[1], True)
+			attr   = stack.attr.ConcatAttr(row[0], row[1])
 			value  = self.quote(row[2])
 			shadow = ''
 			if len(row) == 4 and row[3]:
@@ -123,6 +123,6 @@ class Command(stack.commands.dump.command):
 				shadow = 'shadow=true'
 
 			if value:
-				self.dump('add attr %s %s %s' %
+				self.dump('add attr attr=%s value=%s %s' %
 					  (attr, value, shadow))
 

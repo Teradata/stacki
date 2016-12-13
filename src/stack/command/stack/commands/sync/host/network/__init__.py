@@ -123,10 +123,9 @@ class Command(stack.commands.sync.host.command):
 		threads = []
 		for host in hosts:
 
-			#
-			# get the attributes for the host
-			#
-			attrs = self.db.getHostAttrs(host)
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
 
 			cmd = '/opt/stack/bin/stack report host interface '
 			cmd += '%s | ' % host

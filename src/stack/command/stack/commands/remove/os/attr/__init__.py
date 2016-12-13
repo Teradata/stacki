@@ -90,9 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-import stack.attr
 import stack.commands
-from stack.exception import *
 
 class Command(stack.commands.remove.os.command):
 	"""
@@ -113,11 +111,14 @@ class Command(stack.commands.remove.os.command):
 
 	def run(self, params, args):
 
-		key,  = self.fillParams([ ('attr', None, True) ])
-		(scope, attr) = stack.attr.SplitAttr(key)
+		(attr, )  = self.fillParams([ ('attr', None, True) ])
                  
 		for os in self.getOSNames(args):
-			self.db.execute("""delete from os_attributes
-				where os = '%s' and scope = binary '%s' and
-				attr = binary '%s' """ % (os, scope, attr))
+			self.db.execute(
+                                """
+                                delete from attributes where
+                                scope      = 'os' and 
+                                pointerstr = '%s' and
+				attr       = '%s'
+                                """ % (os, attr))
 

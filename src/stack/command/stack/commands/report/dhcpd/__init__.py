@@ -163,8 +163,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
                 for name in data.keys():
 
-                        kickstartable = self.str2bool(
-                                self.db.getHostAttr(name, 'kickstartable'))
+                        kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
                         
                        	mac = None
                        	ip  = None

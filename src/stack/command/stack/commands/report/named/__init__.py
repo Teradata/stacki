@@ -172,8 +172,7 @@ class Command(stack.commands.report.command):
                 s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
                                            
 		
-		fwds = self.db.getHostAttr('localhost',
-                	'Kickstart_PublicDNSServers')
+		fwds = self.getAttr('Kickstart_PublicDNSServers')
 		if not fwds:
 			#
 			# in the case of only one interface on the frontend,
@@ -181,8 +180,7 @@ class Command(stack.commands.report.command):
 			# defined and Kickstart_PrivateDNSServers will have
 			# the correct DNS servers
 			#
-			fwds = self.db.getHostAttr('localhost',
-				'Kickstart_PrivateDNSServers')
+			fwds = self.getAttr('Kickstart_PrivateDNSServers')
 
 			if not fwds:
 				return

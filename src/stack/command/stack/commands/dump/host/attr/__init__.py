@@ -131,7 +131,7 @@ class Command(stack.commands.dump.host.command):
 		for row in self.db.fetchall():
 
 			host   = row[0]
-			attr   = stack.attr.ConcatAttr(row[1], row[2], True)
+			attr   = stack.attr.ConcatAttr(row[1], row[2])
 			value  = self.quote(row[3])
 			shadow = ''
 			if len(row) == 5 and row[4]:
@@ -158,6 +158,6 @@ class Command(stack.commands.dump.host.command):
 				continue
 
 			if value:
-				self.dump('add host attr %s %s %s %s' %
+				self.dump('add host attr %s attr=%s value=%s %s' %
 					  (host, attr, value, shadow))
 

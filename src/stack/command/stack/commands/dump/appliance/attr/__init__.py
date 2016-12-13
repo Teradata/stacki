@@ -132,7 +132,7 @@ class Command(stack.commands.dump.appliance.command):
 		for row in self.db.fetchall():
 
 			appliance = row[0]
-			attr      = stack.attr.ConcatAttr(row[1], row[2], True)
+			attr      = stack.attr.ConcatAttr(row[1], row[2])
 			value     = self.quote(row[3])
 			shadow    = ''
 			if len(row) == 5 and row[4]:
@@ -147,6 +147,6 @@ class Command(stack.commands.dump.appliance.command):
 				continue
 
 			if value:
-				self.dump('add appliance attr %s %s %s %s' %
+				self.dump('add appliance attr %s attr=%s value=%s %s' %
 					  (appliance, attr, value, shadow))
 

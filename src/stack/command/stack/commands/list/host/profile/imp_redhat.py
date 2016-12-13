@@ -96,7 +96,6 @@ class Implementation(stack.commands.Implementation):
                 generator.setProfileType(profileType)
 		generator.parse(xmlinput)
 
-                profile.append('<?xml version="1.0" standalone="no"?>')
                 profile.append('<profile-%s os="redhat">' % generator.getProfileType())
                 profile.append('<chapter name="meta">')
                 profile.append('\t<section name="order">')

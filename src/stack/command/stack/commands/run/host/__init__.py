@@ -172,8 +172,8 @@ class Command(stack.commands.Command,
                         ('timeout', '0'),		# Set timeout for commands
 			('delay', '0'),			# Set delay between each thread
 			('collate', 'y'),		# Collate output
-			('threads',self.db.getHostAttr('localhost','run.host.threads')),
-			('method',self.db.getHostAttr('localhost','run.host.impl'))
+			('threads', self.getAttr('run.host.threads')),
+			('method', self.getAttr('run.host.impl'))
 			])
 
 		# Get list of hosts to run the command on

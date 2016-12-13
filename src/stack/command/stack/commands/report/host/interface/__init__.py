@@ -161,7 +161,7 @@ class Command(stack.commands.HostArgumentProcessor,
 				"cat > /etc/sysconfig/ipmi << '__EOF__'")
 
 		for var, default in defaults:
-			attr = self.db.getHostAttr(host, var)
+			attr = self.getHostAttr(host, var)
 			if not attr:
 				attr = default
 			self.addOutput(host, '%s=%s' % (var, attr))
@@ -181,7 +181,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, 'ipmitool lan set %s arp respond on'
 			% (channel))
 
-		attr = self.db.getHostAttr(host, 'ipmi_password')
+		attr = self.getHostAttr(host, 'ipmi_password')
 		if attr:
 			password = attr
 		else:
@@ -341,7 +341,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 
                 for host in self.getHostnames(args):
-			osname = self.db.getHostAttr(host, 'os')
+			osname = self.getHostAttr(host, 'os')
 			f = getattr(self, 'run_%s' % (osname))
 			f(host)
 
@@ -434,7 +434,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			# Host attributes can override the subnets tables
 			# definition of the netmask.
 
-			x = self.db.getHostAttr(host,
+			x = self.getHostAttr(host,
 				'network.%s.netmask' % netname)
 			if x:
 				netmask = x

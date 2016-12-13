@@ -135,7 +135,7 @@ class Command(command):
 
 		state = self.str2bool(s)
 
-		vm_controller = self.db.getHostAttr('localhost', 'airboss')
+		vm_controller = self.getAttr('airboss')
 
 		if not vm_controller:
 			raise CommandError(self, 'the "airboss" attribute is not set')

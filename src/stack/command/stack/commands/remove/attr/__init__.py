@@ -91,9 +91,7 @@
 # @Copyright@
 
 
-import stack.attr
 import stack.commands
-from stack.exception import *
 
 class Command(stack.commands.remove.command):
 	"""
@@ -109,13 +107,13 @@ class Command(stack.commands.remove.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None) ])
-		if not key:
-			raise ParamRequired(self, 'attr')
+	        (attr, ) = self.fillParams([ ('attr', None, True) ])
                  
-		(scope, attr) = stack.attr.SplitAttr(key)
-		self.db.execute(""" delete from global_attributes
-			where scope = binary '%s' and
-			attr = binary '%s' """ % (scope, attr))
+		self.db.execute(
+                        """
+        	        delete from attributes where
+			scope = 'global' and
+			attr  = binary '%s'
+                        """ % (attr))
 
 

@@ -228,8 +228,6 @@ class Command(stack.commands.list.command,
 		attrs['release'] = stack.release
 		attrs['root']	 = root
 		
-		entities = {}
-
 		# Parse the XML graph files in the chosen directory
 
 		#	
@@ -289,8 +287,7 @@ class Command(stack.commands.list.command,
 					'compile', 'cart', o['name'] ],
 					stdout = devnull, stderr = devnull)
 
-		handler = stack.profile.GraphHandler(attrs, entities,
-                                                     directories = items)
+		handler = stack.profile.GraphHandler(attrs, directories = items)
 
 		for item in items:
 			graph = os.path.join(item, 'graph')
@@ -386,23 +383,15 @@ class Command(stack.commands.list.command,
 		# Now print everyone out with the header kstext from
 		# the previously parsed nodes
 
-		self.addText('<?xml version="1.0" standalone="no"?>\n')
-		self.addText('<!DOCTYPE stacki-profile [\n')
-		keys = attrs.keys()
-		keys.sort()
-		for k in keys:
-			v = attrs[k]
-			self.addText('\t<!ENTITY %s "%s">\n' % (k, v))
-		self.addText(']>\n')
-		d = {}
-		for key in attrs.keys():
-			d[key] = '&%s;' % key
-		self.addText('<profile os="%s" attrs="%s">\n' % (attrs['os'], d))
+		self.addText('<stack:profile stack:os="%s"' % attrs['os'])
+                self.addText(' xmlns:stack="http://www.stacki.com"')
+                self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
+
 		if attrs['os'] == 'redhat':
-			self.addText('<loader>\n')
+			self.addText('<stack:loader>\n')
 			self.addText('%s\n' % saxutils.escape(kstext))
 			self.addText('%kgen\n')
-			self.addText('</loader>\n')
+			self.addText('</stack:loader>\n')
 
 		for node in parsed:
 
@@ -429,14 +418,14 @@ class Command(stack.commands.list.command,
                 if attrs.has_key('appliance') and not \
 			attrs['appliance'] == 'frontend':
 
-                        self.addText('<post>\n')
+                        self.addText('<stack:post>\n')
                         self.addText('mkdir -p /opt/stack/etc\n')
-                        self.addText('<file name="/opt/stack/etc/profile.cfg" perms="0640">\n')
+                        self.addText('<stack:file stack:name="/opt/stack/etc/profile.cfg" stack:perms="0640">\n')
                         self.addText('[attr]\n')
                         for k in keys:
                                 self.addText('%s = %s\n' % (k, attrs[k]))
-                        self.addText('</file>\n')
-                        self.addText('</post>\n')
+                        self.addText('</stack:file>\n')
+                        self.addText('</stack:post>\n')
 
 			try:
 				fin = open(os.path.join(os.sep, 'export', 
@@ -447,12 +436,12 @@ class Command(stack.commands.list.command,
 			except:
 				fin = None
 			if fin:
-				self.addText('<post>\n')
+				self.addText('<stack:post>\n')
 				for line in fin.readlines():
 					self.addText(line)
-				self.addText('</post>\n')
+				self.addText('</stack:post>\n')
                 
-		self.addText('</profile>\n')
+		self.addText('</stack:profile>\n')
 		
 		
 

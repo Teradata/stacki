@@ -35,7 +35,6 @@ if os.path.exists('/tmp/rolls.xml'):
 elif os.path.exists('/tmp/pallets.xml'):
 	g.parse('/tmp/pallets.xml')
 
-print g.rolls
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
 

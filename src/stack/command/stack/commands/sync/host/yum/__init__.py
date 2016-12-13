@@ -80,7 +80,10 @@ class Command(stack.commands.sync.host.command):
 
 		threads = []
 		for host in hosts:
-			attrs = self.db.getHostAttrs(host)
+
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
 
 			cmd = '/opt/stack/bin/stack report host yum %s | ' % host
 			cmd += '/opt/stack/bin/stack report script | '

@@ -92,87 +92,266 @@
 
 import sys
 import string
-import re
+import fnmatch
 import stack.attr
 import stack.commands
 
-class Command(stack.commands.list.command):
+
+class Command(stack.commands.Command):
 	"""
 	Lists the set of global attributes.
+
+        <param type='string' name='attr'>
+        A shell syntax glob pattern to specify to attributes to
+        be listed.
+        </param>
+
+        <param type='boolean' name='shadow'>
+        Specifies is shadow attributes are listed, the default
+        is False.
+        </param>
 
 	<example cmd='list attr'>
 	List the global attributes.
 	</example>
 	"""
 
+        def get_global(self, objects):
+                attrs    = self.get_attributes('global', None, objects)
+                readonly = {}
+
+                for (ip, host, subnet, netmask) in self.db.select(
+                                """
+				n.ip, if(n.name, n.name, nd.name), 
+                                s.address, s.mask from 
+                                networks n, appliances a, subnets s, nodes nd 
+                                where 
+                                n.node=nd.id and nd.appliance=a.id and 
+                                a.name='frontend' and n.subnet=s.id and 
+                                s.name='private'
+                                """):
+                        readonly['Kickstart_PrivateKickstartHost'] = ip
+                        readonly['Kickstart_PrivateAddress'] = ip
+                        readonly['Kickstart_PrivateHostname'] = host
+                        ipg = stack.ip.IPGenerator(subnet, netmask)
+                        readonly['Kickstart_PrivateBroadcast'] = '%s' % ipg.broadcast()
+
+                for (ip, host, zone, subnet, netmask) in self.db.select(
+                                """
+                                n.ip, if(n.name, n.name, nd.name), 
+                                s.zone, s.address, s.mask from 
+                                networks n, appliances a, subnets s, nodes nd 
+                                where 
+                                n.node=nd.id and nd.appliance=a.id and
+				a.name='frontend' and n.subnet=s.id and 
+                                s.name='public'
+                                """):
+                        readonly['Kickstart_PublicAddress'] = ip
+                        readonly['Kickstart_PublicHostname'] = '%s.%s' % (host, zone)
+                        stack.ip.IPGenerator(subnet, netmask)
+			readonly['Kickstart_PublicBroadcast'] = '%s' % ipg.broadcast()
+
+                for (name, subnet, netmask, zone) in self.db.select(
+                                """
+                                name, address, mask, zone from 
+                                subnets
+				"""):
+                        ipg = stack.ip.IPGenerator(subnet, netmask)
+                        if name == 'private':
+                                readonly['Kickstart_PrivateDNSDomain'] = zone
+                                readonly['Kickstart_PrivateNetwork'] = subnet
+                                readonly['Kickstart_PrivateNetmask'] = netmask
+                                readonly['Kickstart_PrivateNetmaskCIDR'] = '%s' % ipg.cidr()
+                        elif name == 'public':
+                                readonly['Kickstart_PublicDNSDomain'] = zone
+                                readonly['Kickstart_PublicNetwork'] = subnet
+                                readonly['Kickstart_PublicNetmask'] = netmask
+                                readonly['Kickstart_PublicNetmaskCIDR'] = 's' % ipg.cidr()
+
+                readonly['release'] = stack.release
+                readonly['version'] = stack.version
+
+                for key in readonly:
+                        attrs['global'][key] = (readonly[key], None, False)
+
+                return attrs
+
+        def get_os(self, oses):
+                return self.get_attributes('os', None, oses)
+
+        def get_environment(self, environments):
+                return self.get_attributes('environment', None, environments)
+
+        def get_appliance(self, appliances):
+                return self.get_attributes('appliance', 'appliances', appliances)
+
+        def get_host(self, hosts):
+                attrs    = self.get_attributes('host', 'nodes', hosts)
+                readonly = {}
+
+                for (name, environment, rack, rank, cpus) in self.db.select(
+                                """
+                        	name,environment,rack,rank,cpus from nodes
+                                """):
+                        readonly[name]         = {}
+                        readonly[name]['rack'] = rack
+                        readonly[name]['rank'] = rank
+                        readonly[name]['cpu']  = cpus
+                        if environment:
+                                readonly[name]['environment'] = environment
+
+                for (name, box, appliance, longname) in self.db.select(
+                                """ 
+                                n.name, b.name,
+                                a.name, a.longname from
+                                nodes n, boxes b, appliances a where
+                                n.appliance=a.id and n.box=b.id
+                                """):
+
+                        readonly[name]['box']                = box
+                        readonly[name]['appliance']          = appliance
+                        readonly[name]['appliance.longname'] = longname
+                                
+                for (name, zone, address) in self.db.select(
+                                """
+				n.name, s.zone, nt.ip from
+				networks nt, nodes n, subnets s where
+				nt.main=true and nt.node=n.id and
+				nt.subnet=s.id
+                                """):
+                        readonly[name]['hostaddr']   = address
+                        readonly[name]['domainname'] = zone
+
+                for host in hosts:
+                        readonly[host]['os']       = self.db.getHostOS(host)
+                        readonly[host]['hostname'] = host
+
+
+                for host in attrs:
+                        host_attrs    = attrs[host]
+                        host_readonly = readonly[host]
+
+                        for key in host_readonly:
+                                host_attrs[key] = (host_readonly[key], None, False)
+
+                return attrs
+
+
+        def get_attributes(self, scope, table=None, objects=None):
+                attrs = {}
+    		for object in objects:
+                        attrs[object] = {}
+
+                if scope == 'global':
+                        shadow = """
+                        scope, attr, value, shadow from attributes
+                        where scope = 'global'
+                        """
+                        noshadow = """
+                        scope, attr, value from attributes
+                        where scope = 'global'
+                        """
+                else:
+                        if table: # lookup requires a join
+                                shadow = """
+                                x.name, a.attr, a.value, a.shadow 
+                                from attributes a, %s x where
+                                a.scope = '%s' and a.pointerid = x.id
+                                """ % (table, scope)
+                                noshadow = """
+                                x.name, a.attr, a.value
+                                from attributes a, %s x where
+                                a.scope = '%s' and a.pointerid = x.id
+                                """ % (table, scope)
+                        else:
+                                shadow = """
+                                pointerstr, attr, value, shadow
+                                from attributes where
+                                scope = '%s'
+                                """ % scope
+                                noshadow = """
+                                pointerstr, attr, value
+                                from attributes where
+                                scope = '%s'
+                                """ % scope
+
+                rows = self.db.select(shadow)
+                if not rows:
+                        self.db.select(noshadow)
+
+	        for row in rows:
+		        if len(row) == 4:
+			        (obj, a, v, x) = row
+		        else:
+			        x = None
+			        (obj, a, v) = row
+                        if attrs.has_key(obj):
+			        attrs[obj][a] = (v, x, True)
+
+                return attrs
+
+
+
 	def run(self, params, args):
 
-		(key, shadow, ) = self.fillParams([ ('attr', None),
-			('shadow', 'False') ])
-		shadow = self.str2bool(shadow)	
-		key_regex = None
-		if key:
-			(scope, attr) = stack.attr.SplitAttr(key)
-			key_regex = re.compile(stack.attr.ConcatAttr(scope, attr))
+                (glob, shadow, scope) = self.fillParams([ 
+                        ('attr',   None),
+                        ('shadow', 'true'),
+                        ('scope',  'global')
+                ])
 
-		attrs      = {}
-		intrinsics = {}
-		for (s, a, v) in self.db.getIntrinsicAttrs():
-			k = stack.attr.ConcatAttr(s, a)
-			attrs[k]      = (s, a, v, None)
-			intrinsics[k] = True
+		shadow = self.str2bool(shadow)
 
-		rows = self.db.select("""scope, attr, value, shadow from 
-			global_attributes""")
-		if not rows:
-			rows = self.db.select("""select scope, attr, value from
-			global_attributes""")
+                if scope == 'global':
+                        objects		= [ 'global' ]
+                        attributes	= self.get_global(objects)
+                elif scope == 'os':
+                        objects		= args
+                        attributes	= self.get_os(objects)
+                elif scope == 'environment':
+                        objects		= args
+                        attributes	= self.get_environment(objects)
+                elif scope == 'appliance':
+                        objects		= args
+                        attributes	= self.get_appliance(objects)
+                elif scope == 'host':
+                        objects		= args
+                        attributes	= self.get_host(objects)
 
-		for row in rows:
-			if len(row) == 4:
-				(s, a, v, x) = row
-			
-			else:
-				x = None
-				(s, a, v) = row
-			k = stack.attr.ConcatAttr(s, a)
-			if intrinsics.has_key(k):
-				continue
-			attrs[k] = (s, a, v, x)
+                if glob:
+                        for o in objects:
+                                matches = {}
+                                for key in fnmatch.filter(attributes[o].keys(), glob):
+                                        matches[key] = attributes[o][key]
+                                attributes[o] = matches
 
-		self.beginOutput()
+                self.beginOutput()
 
-		# The addOutput, endOutput used is slightly different here.
-		# Usually the first argument to addOutput is the OWNER which
-		# in this case would be the scope, but that really makes the
-		# output look odd. So we set the OWNER and First header to
-		# null.
+                objects.sort()
+                for o in objects:
+                        attrs = attributes[o]
+                        keys  = attrs.keys()
+                        keys.sort()
+                        for a in keys:
+                                (v, x, rw) = attrs[a]
+                                if rw:
+                                        internal = None
+                                else:
+                                        internal = True
+                                attr  = a
+                                value = v
+                                if shadow and x:
+                                        value = x
 
-		keys = attrs.keys()
-		keys.sort()	
-		for k in keys:
-			if key_regex:
-				m = key_regex.match(k)
-				if not m or not m.group() != k:
-					continue
+                                if scope == 'global':
+                                        self.addOutput(attr, (internal, value))
+                                else:
+                                        self.addOutput(o, (attr, internal, value))
+                                        
 
-			(s, a, v, x) = attrs[k]
-			if intrinsics.has_key(k):
-				source = 'I'
-			else:
-				source = 'G'
+                if scope == 'global':
+                        self.endOutput(header=['attr', 'internal', 'value' ])
+                else:
+                        self.endOutput(header=[scope, 'attr', 'internal', 'value' ])
 
-			if shadow:
-				if x:
-					self.addOutput(None, (s, a, x, source))
-				else:
-					self.addOutput(None, (s, a, v, source))
-			else:
-				if not v:
-					continue
-
-				self.addOutput(None, (s, a, v, source))
-				
-		self.endOutput(header=[None, 'scope', 'attr', 
-				       'value', 'source' ])
 

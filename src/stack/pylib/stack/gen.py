@@ -347,7 +347,7 @@ class Generator:
 		return string.join(l, '\n')
 
 	
-        def getAttr(self, node, attr, ns=None):
+        def getAttr(self, node, attr, ns='http://www.stacki.com'):
 		a = node.attributes.getNamedItem((ns, attr))
                 if a:
                         return a.value
@@ -367,17 +367,28 @@ class Generator:
                         self.nodeFilesSection.append(nodefile)
 		
 	def handle_mainChild(self, node):
+
                 nodefile = self.getAttr(node, 'file')
+
 		attr     = node.attributes
 
+                tokens = node.nodeName.split(':')
+
+                if len(tokens) == 2:
+                        (ns, name) = tokens
+                        fnname     = '%s_%s' % (ns, name)
+                else:
+                        name       = node.nodeName
+                        fnname     = name
+
                 try:
-			fn = eval('self.handle_main_%s' % node.nodeName)
+			fn = eval('self.handle_main_%s' % node.fnname)
                 except AttributeError:
                         fn = None
                 if fn:
                         text = fn(node)
                 else:
-                        text = '%s %s' % (node.nodeName, self.getChildText(node))
+                        text = '%s %s' % (name, self.getChildText(node))
                 self.mainSection.append(text, nodefile)
 
 
@@ -481,7 +492,8 @@ class Generator:
 				text += child.nodeValue
 			elif child.nodeType == child.ELEMENT_NODE:
                                 try:
-                                        fn = eval('self.handle_child_%s' % child.nodeName)
+                                        name = string.join(node.nodeName.split(':'), '_')
+                                        fn   = eval('self.handle_child_%s' % name)
                                 except AttributeError:
                                         fn = None
                                 if fn:
@@ -493,14 +505,13 @@ class Generator:
 		xml_buf = cStringIO.StringIO(xml_string)
 		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
 		filter = stack.gen.MainNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT,
-			filter, 0)
+		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
 		node = iter.nextNode()
 		
 		while node:
-			if node.nodeName == 'profile':
+			if node.nodeName == 'stack:profile':
 				self.handle_profile(node)
-			elif node.nodeName == 'main':
+			elif node.nodeName == 'stack:main':
 				child = iter.firstChild()
 				while child:
 					self.handle_mainChild(child)
@@ -511,10 +522,11 @@ class Generator:
 		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
 		node = iter.nextNode()
 		while node:
-			if node.nodeName != 'profile':
+			if node.nodeName != 'stack:profile':
 				self.order(node)
+                                name = string.join(node.nodeName.split(':'), '_')
                                 try:
-                                        fn = eval('self.handle_%s' % node.nodeName)
+                                        fn = eval('self.handle_%s' % name)
                                 except AttributeError:
                                         fn = None
                                 if fn:
@@ -580,10 +592,10 @@ class MainNodeFilter(NodeFilter):
 
 	def acceptNode(self, node):
 	
-		if node.nodeName in [ 'profile', 'main' ]:
+		if node.nodeName in [ 'stack:profile', 'stack:main' ]:
 			return self.FILTER_ACCEPT
 
-                if not (node.parentNode and node.parentNode.nodeName == 'main'):
+                if not (node.parentNode and node.parentNode.nodeName == 'stack:main'):
 			return self.FILTER_SKIP
 
 		if not self.isCorrectCond(node):
@@ -596,10 +608,10 @@ class OtherNodeFilter(NodeFilter):
 
 	def acceptNode(self, node):
 
-		if node.nodeName == 'profile':
+		if node.nodeName == 'stack:profile':
 			return self.FILTER_ACCEPT
 
-                if node.nodeName in [ '#document', 'main' ]:
+                if node.nodeName in [ '#document', 'stack:main' ]:
                         return self.FILTER_SKIP
 			
 		if not self.isCorrectCond(node):

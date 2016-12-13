@@ -112,15 +112,15 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None) ])
-		if not key:
-			raise ParamRequired(self, 'attr')
+		(attr, ) = self.fillParams([ ('attr', None, True) ])
 
-		(scope, attr) = stack.attr.SplitAttr(key)
 		for appliance in self.getApplianceNames(args):
-			self.db.execute("""
-				delete from appliance_attributes where 
-				appliance = (select id from appliances where
-				name='%s') and scope = binary '%s' and
-				attr = binary '%s' """ % (appliance, scope, attr))
+			self.db.execute(
+                                """
+				delete from attributes 
+                                where
+                                scope     = 'appliance' and
+				pointerid = (select id from appliances where name='%s') and
+				attr      = '%s'
+                                """ % (appliance, attr))
 

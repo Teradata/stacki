@@ -78,7 +78,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		# 
 		# now check at the appliance level
 		# 
-		appliance = self.db.getHostAttr(host, 'appliance')
+		appliance = self.getHostAttr(host, 'appliance')
 
 		output = self.call('list.storage.controller', [ appliance ])
 		if output:

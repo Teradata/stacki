@@ -151,8 +151,8 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert-ethers base numbers -->
 
-/opt/stack/bin/stack set attr attr=discovery/base.rank value=0
-/opt/stack/bin/stack set attr attr=discovery/base.rack value=0
+/opt/stack/bin/stack set attr attr=discovery.base.rank value=0
+/opt/stack/bin/stack set attr attr=discovery.base.rack value=0
 
 <!-- use long passwords in the database -->
 <file name="/tmp/my.cnf" expr="grep -v '^old_passwords' /etc/my.cnf"/>

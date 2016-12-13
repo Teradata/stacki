@@ -90,9 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-import stack.attr
 import stack.commands
-from stack.exception import *
 
 class Command(stack.commands.remove.host.command):
 	"""
@@ -112,16 +110,16 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		(key, ) = self.fillParams([ ('attr', None) ])
-		if not key:
-			self.ParamRequired(self, 'attr')
-		(scope, attr) = stack.attr.SplitAttr(key)
+
+		(attr, ) = self.fillParams([ ('attr', None, True) ])
                  
 		for host in self.getHostnames(args):
-			self.db.execute("""
-				delete from node_attributes where 
-				node = (select id from nodes where
-				name='%s') and scope = binary '%s'
-				and attr = binary '%s' """ % \
-				(host, scope, attr))
+			self.db.execute(
+                                """	
+				delete from attributes 
+                                where
+                                scope     = 'host' and
+				pointerid = (select id from nodes where name='%s') and
+				attr      = '%s'
+                                """ % (host, attr))
 

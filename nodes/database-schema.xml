@@ -52,6 +52,19 @@ grant select on cluster.aliases to ''@'localhost';
 
 <!-- Attributes -->
 
+DROP TABLE IF EXISTS attributes;
+CREATE TABLE attributes (
+  Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
+  Attr          varchar(128) NOT NULL,
+  Value         text,
+  Shadow        text default NULL,
+  PointerID	int(11),
+  PointerStr    varchar(32)
+);
+
+grant select (scope, attr, value) on cluster.global_attributes to ''@'localhost';
+
+
 DROP TABLE IF EXISTS global_attributes;
 CREATE TABLE global_attributes (
   Scope         varchar(128) default '',

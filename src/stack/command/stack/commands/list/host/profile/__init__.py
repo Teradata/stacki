@@ -107,7 +107,7 @@ class Command(stack.commands.list.host.command):
 	ignored and XML is read from STDIN.  This command is used for
 	debugging the Stacki configuration graph.
 
-	<arg optional='1' type='string' name='host' repeat='1'>
+	<arg optional='1' type='string' name='host'>
 	Zero, one or more host names. If no host names are supplied, info about
 	all the known hosts is listed.
 	</arg>
@@ -130,7 +130,6 @@ class Command(stack.commands.list.host.command):
                                                         ('document', 'true') ])
 
                 document  = self.str2bool(document)
-		hosts	  = self.getHostnames(args)
 		xmlinput  = ''
                 osname    = None
 
@@ -138,8 +137,8 @@ class Command(stack.commands.list.host.command):
 
 		if not sys.stdin.isatty():
 			for line in sys.stdin.readlines():
-                                if line.find('<profile os="') == 0:
-                                        osname = line.split()[1][3:].strip('"')
+                                if line.find('<stack:profile stack:os="') == 0:
+                                        osname = line.split()[1][9:].strip('"')
 				xmlinput += line
                 if xmlinput and not osname:
                         raise CommandError(self, "OS name not specified in profile")
@@ -150,15 +149,19 @@ class Command(stack.commands.list.host.command):
 		# in an environment where TTY cannot be created (ie. apache)
 
 		if not xmlinput:
-			for host in hosts:
-                                osname	 = self.db.getHostOS(host)
-                                xmlinput = self.command('list.host.xml', [ host ])
+                        hosts = self.getHostnames(args)
+                        if len(hosts) != 1:
+                                raise ArgUnique(self, 'host')
+                        host = hosts[0]
 
-				self.runImplementation(osname, (host, xmlinput, profile, document))
+                        osname	 = self.db.getHostOS(host)
+                        xmlinput = self.command('list.host.xml', [ host ])
+
+                        self.runImplementation(osname, (host, xmlinput, profile, document))
 
 		# If we DO have XML input, simply parse it.
 
                 else:
 			self.runImplementation(osname, ('localhost', xmlinput, profile, document))
 
-		self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=True)

@@ -62,17 +62,20 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 		self.beginOutput()
 
 		for host in self.getHostnames(args):
-			protocol = self.db.getHostAttr(host, 'time.protocol')
 
-			appliance = self.db.getHostAttr(host, 'appliance')
-			timeserver = self.db.getHostAttr(host, 'time.server')
+                        attrs = {}
+                        for row in self.call('list.host.attr', [ host ]):
+                                attrs[row['attr']] = row['value']
+
+			protocol   = attrs.get('time.protocol')
+			appliance  = attrs.get('appliance')
+			timeserver = attrs.get('time.server')
+
 			if not timeserver:
 				if appliance == 'frontend':
-					timeserver = self.db.getHostAttr(host,
-						'Kickstart_PublicNTPHost')
+					timeserver = attrs.get('Kickstart_PublicNTPHost')
 				else:
-					timeserver = self.db.getHostAttr(host,
-						'Kickstart_PrivateNTPHost')
+					timeserver = attrs.get('Kickstart_PrivateNTPHost')
 
 			self.runImplementation('time_%s' % protocol,
 				(host, appliance, timeserver))

@@ -405,7 +405,8 @@ class HostArgumentProcessor:
                 #
                 # list the frontend first
                 #
-            	frontends = self.db.select("""
+            	frontends = self.db.select(
+                        """
                 	n.name from
 			nodes n, appliances a where a.name = "frontend"
 			and a.id = n.appliance order by rack, rank %s
@@ -414,7 +415,8 @@ class HostArgumentProcessor:
                 #
                 # now get the backend appliances
                 #
-                backends = self.db.select("""
+                backends = self.db.select(
+                        """
                 	n.name from
 			nodes n, appliances a where a.name != "frontend"
 			and a.id = n.appliance order by rack, rank %s
@@ -460,24 +462,25 @@ class HostArgumentProcessor:
 			# code.
 
                         environments = [ ]
-			for e, in self.db.select("""
-                        	distinct environment 
-	                        from nodes
-                                """):
-                                
+			for e, in self.db.select(
+                                        """
+                                        distinct environment 
+                                        from nodes
+                                        """):
                                 environments.append(e)
 
 			appliances  = []
-			for (name, ) in self.db.select("""
-				name from appliances
-				"""):
-                                
+			for (name, ) in self.db.select(
+                                        """
+                                        name from appliances
+                                        """):
 				appliances.append(name)
 
 			racks = []
-			for (rack,) in self.db.select("""
-                                distinct(rack) from nodes
-				"""):
+			for (rack, ) in self.db.select(
+                                        """
+                                        distinct(rack) from nodes
+                                        """):
 				racks.append(rack)
 			list = []
 			for host in names:
@@ -514,9 +517,14 @@ class HostArgumentProcessor:
 		# since we need to looked the managed attribute.
 
 		hostAttrs  = {}
+                for host in hostList:
+                        hostAttrs[host] = {}
 		if adhoc or managed_only:
-			for host in hostList:
-				hostAttrs[host] = self.db.getHostAttrs(host)
+                        for row in self.call('list.host.attr', hostList):
+                                h = row['host']
+                                a = row['attr']
+                                v = row['value']
+				hostAttrs[h][a] = v
 			
 
 		# Finally iterate over all the host/groups
@@ -1171,7 +1179,7 @@ class DatabaseConnection:
                 m.update(command.strip())
                 k = m.hexdigest()
 
-#                print 'select', k
+#                print 'select', k, command
                 if self.cache.has_key(k):
                 	rows = self.cache[k]
 #                        print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
@@ -1226,54 +1234,46 @@ class DatabaseConnection:
                 Return the OS name for the given host.
                 """
 
-                # Since this is called for all host on every
-                # command run (licensing does this) grab everyone
-                # in one select and cache a dictionary.
-                #
-                # Two levels of caching here:
-                # 1) low level select() cache
-                # 2) method level 'HostOS' cache
-                #
-                # The first level clearly isn't used, since the
-                # second prevents the select() from being
-                # repeated.
-                
-		dict = self.cache.get('host-os-dict')
-                if not dict:
-                        dict = {}
-                	for (name, os) in self.select("""
+                for (name, os) in self.select(
+                                """
 				n.name, b.os from
-				boxes b, nodes n where
-				n.box=b.id
+				boxes b, nodes n 
+                                where
+				n.box = b.id
                         	"""):
-                        	dict[name] = os
-                if self.caching:
-                	self.cache['host-os-dict'] = dict
-
-                os = dict.get(host)
-                if not os:
-                        os = 'redhat'
-		return os
+                        if name == host:
+                                return os
+		return None
 
         def getHostAppliance(self, host):
                 """
                 Returns the appliance for a given host.
                 """
 
-		dict = self.cache.get('host-appliance-dict')
-                if not dict:
-                        dict = {}
-                        for (name, appliance) in self.select("""
+                for (name, appliance) in self.select(
+                                """
                         	n.name, a.name from
-                                nodes n, appliances a where
+                                nodes n, appliances a 
+                                where
                                 n.appliance = a.id
                                 """):
-                                dict[name] = appliance
-                if self.caching:
-                	self.cache['host-appliance-dict'] = dict
+                        if name == host:
+                                return appliance
+                return None
 
-                return dict.get(host)
-                
+        def getHostEnvironment(self, host):
+                """
+                Returns the environment for a given host.
+                """
+                pass
+                for (name, environment) in self.select(
+                                """
+                                name, environment from nodes
+                                """):
+                        if name == host:
+                                return environment
+                return None
+
 
 	def getHostRoutes(self, host, showsource=0):
 
@@ -1369,393 +1369,6 @@ class DatabaseConnection:
 
 		return routes
 
-
-	def getIntrinsicAttrs(self):
-		"""
-                Return a list of (scope, attr, value) tuples for all the
-		global intrinsic attributes.
-		"""
-
-                list = self.cache.get('intrinsic-attrs-list')
-                if not list:
-                        list = []
-			for (ip, host, subnet, netmask) in self.select("""
-				n.ip, if(n.name, n.name, nd.name), 
-                                s.address, s.mask from 
-                                networks n, appliances a, subnets s, nodes nd 
-                                where 
-                                n.node=nd.id and nd.appliance=a.id and 
-                                a.name='frontend' and n.subnet=s.id and 
-                                s.name='private'
-                                """):
-                                list.append((None, 'Kickstart_PrivateKickstartHost',
-                                             ip))
-				list.append((None, 'Kickstart_PrivateAddress',
-                                             ip))
-				list.append((None, 'Kickstart_PrivateHostname',
-                                             host))
-				ipg = stack.ip.IPGenerator(subnet, netmask)
-				list.append((None, 'Kickstart_PrivateBroadcast',
-                                             '%s' % ipg.broadcast()))
-
-			for (ip, host, zone, subnet, netmask) in self.select("""
-				n.ip, if(n.name, n.name, nd.name), 
-                                s.zone, s.address, s.mask from 
-                                networks n, appliances a, subnets s, nodes nd 
-                                where 
-                                n.node=nd.id and nd.appliance=a.id and
-				a.name='frontend' and n.subnet=s.id and 
-                                s.name='public'
-                                """):
-				list.append((None, 'Kickstart_PublicAddress',
-                                             ip))
-				list.append((None, 'Kickstart_PublicHostname',
-                                             '%s.%s' % (host, zone)))
-				ipg = stack.ip.IPGenerator(subnet, netmask)
-				list.append((None, 'Kickstart_PublicBroadcast',
-                                             '%s' % ipg.broadcast()))
-
-			for (name, subnet, netmask, zone) in self.select("""
-				name, address, mask, zone from 
-                                subnets
-				"""):
-				if name == 'private':
-					ipg = stack.ip.IPGenerator(subnet, 
-                                                                   netmask)
-					list.append((None,
-                                                     'Kickstart_PrivateDNSDomain', 
-                                                     zone))
-					list.append((None, 
-                                                     'Kickstart_PrivateNetwork',
-                                                     subnet))
-					list.append((None, 
-                                                     'Kickstart_PrivateNetmask',
-						     netmask))
-					list.append((None, 
-                                                     'Kickstart_PrivateNetmaskCIDR', 
-						     '%s' % ipg.cidr()))
-				elif name == 'public':
-					ipg = stack.ip.IPGenerator(subnet, 
-                                                                   netmask)
-                                        list.append((None,
-                                                     'Kickstart_PublicDNSDomain', 
-                                                     zone))
-					list.append((None, 
-                                                     'Kickstart_PublicNetwork',
-                                                     subnet))
-					list.append((None, 
-                                                     'Kickstart_PublicNetmask',
-                                                     netmask))
-					list.append((None, 
-                                                     'Kickstart_PublicNetmaskCIDR', 
-						     '%s' % ipg.cidr()))
-
-			list.append((None, 'release', stack.release))
-			list.append((None, 'version', stack.version))
-
-                        if self.caching:
-                        	self.cache['intrinsic-attrs-list'] = list
-        
-		return list
-
-	
-	def getHostIntrinsicAttrs(self, host):
-		"""
-                Return a list of (scope, attr, value) tuples for all the
-		HOST intrinsic attributes.
-		"""
-
-                dict = self.cache.get('host-intrinsic-attrs-dict')
-                if not dict:
-                        dict = {}
-                        for (name, environment, rack, rank, cpus) in self.select("""
-                        	name,environment,rack,rank,cpus from nodes
-                                """):
-                                dict[name] = [ (None, 'rack', rack),
-                                               (None, 'rank', rank),
-                                               (None, 'cpus', cpus) ]
-                                if environment:
-                                        dict[name].append((None, 'environment', environment))
-
-                        for (name, box, appliance, longname) in \
-				self.select(""" n.name, b.name,
-                                a.name, a.longname from
-				nodes n, boxes b, appliances a where
-				n.appliance=a.id and n.box=b.id """):
-
-                                dict[name].extend(
-                                        [ (None, 'box', box),
-                                          (None, 'appliance', appliance),
-                                          (None, 'appliance.longname', longname)
-                                        ])
-                                
-                        for (name, zone, address) in self.select("""
-				n.name, s.zone, nt.ip from
-				networks nt, nodes n, subnets s where
-				nt.main=true and nt.node=n.id and
-				nt.subnet=s.id
-                                """):
-                                dict[name].append((None, 'hostaddr', address))
-                                dict[name].append((None, 'domainname', zone))
-
-                        if self.caching:
-                                self.cache['host-intrinsic-attrs-dict'] = dict
-
-                attrs = dict[host]
-                attrs.append((None, 'os', self.getHostOS(host)))
-		attrs.append((None, 'hostname', host))
-
-		return attrs
-
-
-	def getHostAttrs(self, host, showsource=False, slash=False, filter=None,
-		shadow = True):
-		"""Return a dictionary of KEY x VALUE pairs for the host
-		specific attributes for the given host.
-		"""
-
-                host = self.getHostname(host)
-                dict = self.cache.get('host-attrs-dict')
-                if not dict:
-                        dict = {}
-
-                        # Global Attributes
-
-                        G = {}
-                        rows = self.select("""
-				scope, attr, value, shadow from 
-                                global_attributes
-                                """)
-                        if not rows:
-				rows = self.select("""
-					scope, attr, value from 
-                                        global_attributes
-					""")
-			for row in rows:
-				if len(row) == 4:
-					(s, a, v, x) = row
-				else:
-					x = None
-					(s, a, v) = row
-
-				#
-				# all attribute keys must be non-null
-				#
-				if a:
-					G[ConcatAttr(s, a, slash=True)] = (v, x)
-
-                	# OS Attributes
-
-                        O = {}
-			rows = self.select("""
-				os, scope, attr, value, shadow from
-                                os_attributes
-                                """)
-			if not rows:
-				rows = self.select("""
-					os, scope, attr, value from
-					os_attributes
-					""")
-			for row in rows:
-				if len(row) == 5:
-					(o, s, a, v, x) = row
-				else:
-					x = None
-					(o, s, a, v) = row
-                                if not O.has_key(o):
-                                        O[o] = {}
-				if a:
-					O[o][ConcatAttr(s, a, slash=True)] = (v, x)
-
-	                # Environment Attributes
-
-                        E = {}
-                        rows = self.select("""
-				environment, scope, attr, value, shadow from
-                                environment_attributes
-				""")
-                        if not rows:
-                                rows = self.select("""
-					environment, scope, attr, value from
-					environment_attributes
-					""")
-                        for row in rows:
-                        	if len(row) == 5:
-	                                (e, s, a, v, x) = row
-                                else:
-					x = None
-                                        (e, s, a, v) = row
-                                if not E.has_key(e):
-                                        E[e] = {}
-				if a:
-					E[e][ConcatAttr(s, a, slash=True)] = (v, x)
-			
-			# Appliance Attributes
-
-                        A = {}
-                        rows = self.select("""
-					app.name, 
-                                        a.scope, a.attr, a.value, a.shadow from
-                                        appliance_attributes a, appliances app 
-                                        where
-                                        a.appliance=app.id
-                                        """)
-                        if not rows:
-                                rows = self.select("""
-					app.name,
-                                        a.scope, a.attr, a.value from
-                                        appliance_attributes a, appliances app 
-                                        where
-                                        a.appliance=app.id
-                                        """)
-                        for row in rows:
-	                        if len(row) == 5:
-        	                        (app, s, a, v, x) = row
-                                else:
-					x = None
-                                        (app, s, a, v) = row
-                                if not A.has_key(app):
-                                        A[app] = {}
-				if a:
-					A[app][ConcatAttr(s, a, slash=True)] = (v, x)
-
-			# Host Attributes
-                        H = {}
-			rows = self.select("""
-				n.name, 
-                                a.scope, a.attr, a.value, a.shadow from
-				node_attributes a, nodes n where
-                                n.id=a.node
-				""")
-			if not rows:
-				rows = self.select("""
-					n.name, 
-                                        a.scope, a.attr, a.value from
-					node_attributes a, nodes n where 
-                                        n.id=a.node
-					""")
-			for row in rows:
-				if len(row) == 5:
-					(h, s, a, v, x) = row
-				else:
-					x = None
-					(h, s, a, v) = row
-                                if not H.has_key(h):
-                                        H[h] = {}
-				if a:
-					H[h][ConcatAttr(s, a, slash=True)] = (v, x)
-
-                        for (h, env) in self.select('name, environment from nodes'):
-
-				if not H.has_key(h):
-					H[h] = {}
-
-                                app  = self.getHostAppliance(h)
-                                os   = self.getHostOS(h)
-
-		                # Build the attribute dictionary for the host
-		                d = {}
-        		        for (key, value) in G.items():
-	                	        (s, a) = SplitAttr(key)
-        	                	d[key] = (s, a, value, 'G')
-	          	      	if O.has_key(os):
-        	        	        for (key, value) in O[os].items():
-                	        	        (s, a) = SplitAttr(key)
-                        	        	d[key] = (s, a, value, 'O')
-		                if A.has_key(app):
-        		                for (key, value) in A[app].items():
-                		                (s, a) = SplitAttr(key)
-                        		        d[key] = (s, a, value, 'A')
-		                if env and E.has_key(env):
-        		                for (key, value) in E[env].items():
-                		                (s, a) = SplitAttr(key)
-                        		        d[key] = (s, a, value, 'E')
-		                if H.has_key(h):
-        		                for (key, value) in H[h].items():
-                		                (s, a) = SplitAttr(key)
-                        		        d[key] = (s, a, value, 'H')
-					for (s, a, v) in self.getIntrinsicAttrs():
-						if a:
-							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
-					for (s, a, v) in self.getHostIntrinsicAttrs(h):
-						if a:
-							d[ConcatAttr(s, a, slash=True)] = (s, a, v, 'I')
-
-                                dict[h] = d
-
-                        if self.caching:
-                        	self.cache['host-attrs-dict'] = dict
-
-                # Create the attr dictionary that gets returned
-		
-		attrs = {}
-		for (k, (scope, attr, value, source)) in dict[host].items():
-			key = ConcatAttr(scope, attr, slash)
-			# Non-intrinsic attributes
-			if type(value) == type(()):
-				(v, x) = value
-				# If we want shadow attributes
-				if shadow:
-					# If shadow attribute exists
-					if x:
-						val = x
-					else:
-						val = v
-				# if we don't want shadow
-				else:
-					if v:
-						val = v
-					else:
-						continue
-			# Intrinsic attributes
-			else:
-				val = value
-			if showsource:
-				attrs[key] = (val, source)
-			else:
-				attrs[key] = val
-
-
-                
-		# If we have a filter delete all attributes that
-		# do not have FILTER as their prefix.  Enforce
-		# the filter being a complete (sub)scope by adding
-		# a period to the end if one is missing.  Handle
-		# case where filter is a complete attribute name.
-					
-		if filter:
-			import re
-			regex = re.compile(filter)
-			for attr in attrs.keys():
-				m = regex.match(attr)
-				if m and m.group() == attr:
-					continue
-
-				del attrs[attr] # no match
-
-		return attrs
-
-
-	def getHostAttr(self, host, key, showsource=False):
-		"""Return the value for the host specific attribute KEY or
-		None if it does not exist.
-		"""
-
-		host   = self.getHostname(host)
-                attrs  = self.getHostAttrs(host, showsource=True, slash=True)
-                (s, a) = SplitAttr(key)
-                attr   = ConcatAttr(s, a, slash=True)
-
-                if attrs.has_key(attr):
-                        (value, source) = attrs[attr]
-                else:
-                        value = source = None
-
-                if showsource:
-                        return (value, source)
-                else:
-                        return value
-		
 
 	def getNodeName(self, hostname, subnet=None):
 
@@ -2324,7 +1937,7 @@ class Command:
 		self.output.append(list)
 		
 		
-	def endOutput(self, header=[], padChar='-', trimOwner=True):
+	def endOutput(self, header=[], padChar='-', trimOwner=False):
 		"""Pretty prints the output list buffer."""
 
 		# Handle the simple case of no output, and bail out
@@ -2386,6 +1999,8 @@ class Command:
 		# one owner (usually a hostname).  We have only one owner
 		# there is no reason to display it.  The caller can use
 		# trimOwner=False to disable this optimization.
+                #
+                # CORRECTION: The default is now trimOwner=True
 
 		if trimOwner:
 			owner = ''
@@ -2398,14 +2013,6 @@ class Command:
 		else:
 			self.startOfLine = 0
 			
-		# Add the trailing ':' to the owner column of
-		# each line of the output.  Do this here so
-		# we don't also add it to the header row.
-			
-		for line in self.output:
-			if line[0]:
-				line[0] += ':'
-		
 		# Add the header to the output and start formatting.  We
 		# keep the header optional and separate from the output
 		# so the above decision (startOfLine) can be made.
@@ -2473,11 +2080,12 @@ class Command:
 		for line in output:
 			list = []
 			for i in range(self.startOfLine, len(line)):
-				if line[i] in [ None, 'None:' ]:
+				if line[i] in [ None, 'None' ]:
 					s = ''
 				else:
 					s = str(line[i])
-				if padChar != '':
+
+				if padChar != '' and i != len(line)-1:
 					if s:
 						o = s.ljust(colwidth[i])
 					else:
@@ -2703,6 +2311,15 @@ class Command:
 		args: list of string arguments"""
 		
 		pass
+
+        def getAttr(self, attr):
+                return self.getHostAttr('localhost', attr)
+
+        def getHostAttr(self, host, attr):
+                for row in self.call('list.host.attr', [ host, 'attr=%s' % attr ]):
+                        return row['value']
+                return None
+
 
 
 

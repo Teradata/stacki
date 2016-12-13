@@ -1,5 +1,5 @@
-#
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -51,28 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2010/09/07 23:52:59  bruno
-# star power for gb
-#
-# Revision 1.5  2009/05/01 19:07:01  mjk
-# chimi con queso
-#
-# Revision 1.4  2009/03/04 20:15:31  bruno
-# moved 'dbreport hosts' and 'dbreport resolv' into the command line
-#
-# Revision 1.3  2008/10/18 00:55:56  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:39  mjk
-# copyright storm on
-#
-# Revision 1.1  2008/01/23 19:05:35  bruno
-# can now add kernel boot parameters to the running configuration with the rocks
-# command line
-#
-#
+
 
 import os
 import sys
@@ -98,7 +77,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 		for host in self.getHostnames(args):
-			flags = self.db.getHostAttr(host, 'bootflags')
+			flags = self.getHostAttr(host, 'bootflags')
 			if not flags:
 				flags = ''
 			self.addOutput(host, '%s' % flags)

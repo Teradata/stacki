@@ -93,47 +93,48 @@
 import sys
 import socket
 import stack.commands
+from stack.exception import *
 
 class Command(stack.commands.list.host.command):
 	"""
-	Lists the monolithic XML configuration file for hosts. For each host
-	supplied on the command line, this command prints the hostname and
-	XML file configuration for that host. This is the same XML
-	configuration file that is sent back to a host when a host begins
-	it's installation procedure.
+	Lists the monolithic XML configuration file for a host.
+	Tis is the same XML configuration file that is sent back to a 
+        host when a host begins its installation procedure.
 
-	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no host names are supplied, info about
-	all the known hosts is listed.
+	<arg optional='1' type='string' name='host'>
+        Hostname for requested XML document.
 	</arg>
 
 	<example cmd='list host xml compute-0-0'>
 	List the XML configuration file for compute-0-0.
 	</example>
-
-	<example cmd='list host xml'>
-	List the XML configuration files for all known hosts.
-	</example>
 	"""
 
 	def run(self, params, args):
 
-                (roll, ) = self.fillParams([('pallet', )])
+                (pallet, ) = self.fillParams([('pallet', )])
+
+		hosts = self.getHostnames(args)
+                if len(hosts) != 1:
+                        raise ArgUnique(self, 'host')
+                host = hosts[0]
                 
 		self.beginOutput()
 
-		for host in self.getHostnames(args):
+                # Call "stack list node xml" with attrs{} dictionary
+                # set from the database.
 
-			# Call "stack list node xml" with attrs{} dictionary
-			# set from the database.
+                attrs = {}
+                for row in self.call('list.host.attr', [ host ]):
+                        attrs[row['attr']] = row['value']
 
-			attrs = self.db.getHostAttrs(host)
-			args = [ attrs['node'] ]
-			args.append('attrs=%s' % attrs)
-			if roll:
-				args.append('pallet=%s' % roll)
-			xml = self.command('list.node.xml', args)
-			for line in xml.split('\n'):
-				self.addOutput(host, line)
+                args = [ attrs['node'] ]
+                args.append('attrs=%s' % attrs)
+                if pallet:
+                        args.append('pallet=%s' % pallet)
+                xml = self.command('list.node.xml', args)
+                for line in xml.split('\n'):
+                        self.addOutput(host, line)
 
-		self.endOutput(padChar='')
+
+		self.endOutput(padChar='', trimOwner=True)

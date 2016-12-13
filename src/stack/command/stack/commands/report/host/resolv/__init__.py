@@ -95,16 +95,16 @@ class Command(stack.commands.report.host.command):
                 	for row in self.call('list.host.interface', [ host ]):
 				network = row['network']
 				if dns.has_key(network) and dns[network]:
-					frontend = self.db.getHostAttr(host,
+					frontend = self.getHostAttr(host,
 						'Kickstart_PrivateAddress')
 					self.addOutput(host, 'nameserver %s' %
 						frontend)
 					break
 
-			remotedns = self.db.getHostAttr(host,
+			remotedns = self.getHostAttr(host,
 				'Kickstart_PublicDNSServers')
 			if not remotedns:
-				remotedns = self.db.getHostAttr(host,
+				remotedns = self.getHostAttr(host,
 					'Kickstart_PrivateDNSServers')
 			if remotedns:
 				servers = remotedns.split(',')

@@ -117,7 +117,7 @@ class Command(stack.commands.dump.environment.command):
 		for row in self.db.fetchall():
 
 			env    = row[0]
-			attr   = stack.attr.ConcatAttr(row[1], row[2], True)
+			attr   = stack.attr.ConcatAttr(row[1], row[2])
 			value  = self.quote(row[3])
 			shadow = ''
 			if len(row) == 5 and row[4]:
@@ -125,6 +125,6 @@ class Command(stack.commands.dump.environment.command):
 				shadow = 'shadow=true'
 				
 			if value:
-				self.dump('add environment attr %s %s %s %s' %
+				self.dump('add environment attr %s attr=%s value=%s %s' %
 					  (env, attr, value, shadow))
 
