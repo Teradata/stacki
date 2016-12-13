@@ -248,18 +248,57 @@ if empty:
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
 
 #
-# Generate the system profile
+# set some values in the database based on the web request
 #
-
 stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.arch ])
 stack.api.Call('set host cpus', [ client.addr, 'cpus=%s' % client.np ])
-client.main()
 
+#
+# add all the detected network interfaces to the database
+#
+ifaces = []
+macs = []
+modules = []
+flags = []
+
+for i in os.environ:
+	if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
+		devinfo = os.environ[i].split()
+		iface   = devinfo[0]
+		macaddr = devinfo[1].lower()
+		module  = ''
+		if len(devinfo) > 2:
+			module = devinfo[2]
+
+		ks = ''
+		if len(devinfo) > 3:
+			ks = 'ks'
+
+		ifaces.append(iface)
+		macs.append(macaddr)
+		modules.append(module)
+		flags.append(ks)
+
+params = []
+if len(ifaces) > 0 and len(macs) > 0:
+	params.append('interface=%s' % ','.join(ifaces))
+	params.append('mac=%s' % ','.join(macs))
+
+	if len(modules) > 0:
+		params.append('module=%s' % (','.join(modules)))
+	if len(flags) > 0:
+		params.append('flag=%s' % (','.join(flags)))
+
+	stack.api.Call('config host interface', [ client.addr ] + params)
+
+#
+# Generate the system profile
+#
+client.main()
 		
 #
 # Release resource semaphore.
 #
-
 mutex.acquire()
 count = semaphore.read() + 1
 semaphore.write(count)

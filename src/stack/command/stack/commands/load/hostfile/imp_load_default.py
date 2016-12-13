@@ -96,6 +96,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.appliances = self.getApplianceNames()
 		self.networks = self.getNetworkNames()
 		self.boxes = self.getBoxNames()
+		self.actions = [entry['action'] for entry in self.owner.call('list.bootaction')]
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
 		reader = stack.csv.reader(open(filename, 'rU'))
@@ -138,6 +139,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			boss = None
                         default = None
 			notes = None
+			installaction = None
+			runaction = None
+			groups = None
 
 			for i in range(0, len(row)):
 				field = row[i]
@@ -191,6 +195,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
                                         default = field
 				elif header[i] == 'notes':
 					notes = field
+				elif header[i] == 'installaction':
+					installaction = field
+				elif header[i] == 'runaction':
+					runaction = field
+				elif header[i] == 'groups':
+					groups = field
 						
 			if not name:
 				msg = 'empty host name found in "name" column'
@@ -264,6 +274,22 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				else:
 					self.owner.hosts[name]['notes'] += \
 						', %s' % notes
+			if installaction:
+				if installaction not in self.actions:
+					msg = 'installaction "%s" does not exist in the database' % installaction
+					raise CommandError(self.owner, msg)
+				else:
+					self.owner.hosts[name]['installaction'] = installaction
+
+			if runaction:
+				if runaction not in self.actions:
+					msg = 'bootaction "%s" does not exist in the database' % runaction
+					raise CommandError(self.owner, msg)
+				else:
+					self.owner.hosts[name]['runaction'] = runaction
+
+			if groups:
+				self.owner.hosts[name]['groups'] = groups.split(',')
 
 		#
 		# check if the 'Boss' column was set

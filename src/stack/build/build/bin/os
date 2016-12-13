@@ -105,6 +105,8 @@ case $OS in
     Linux)
 	if [ -f /etc/redhat-release ]; then
 		echo redhat
+	elif [ -f /etc/SuSE-release ]; then
+		echo suse
 	else
 		echo linux
 	fi

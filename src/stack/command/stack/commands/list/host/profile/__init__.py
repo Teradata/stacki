@@ -92,9 +92,67 @@
 
 import sys
 import string
+from xml.sax import make_parser
 import stack.commands
 import stack.gen
 from stack.exception import *
+
+class implementation(stack.commands.Implementation):
+
+        def generator(self):
+                pass
+
+        def chapter(self, generator, profile):
+                pass
+
+
+	def run(self, args):
+
+                host        = args[0]
+                xmlinput    = args[1]
+                profileType = args[2]
+                chapter     = args[3]
+                profile     = []
+		generator   = self.generator()
+
+                generator.setProfileType(profileType)
+		generator.parse(xmlinput)
+
+                profile.append('<?xml version="1.0" standalone="no"?>')
+                profile.append('<profile-%s>' % generator.getProfileType())
+
+                profile.append('<chapter name="stacki">')
+                for line in generator.generate('stacki'):
+	                profile.append('%s' % line)
+		profile.append('</chapter>')
+
+		profile.append('<chapter name="meta">')
+                profile.append('\t<section name="order">')
+                for line in generator.generate('order'):
+	                profile.append('%s' % line)
+                profile.append('\t</section>')
+                profile.append('\t<section name="debug">')
+                for line in generator.generate('debug'):
+                        profile.append(line)
+                profile.append('\t</section>')
+		profile.append('</chapter>')
+
+                self.chapter(generator, profile)
+
+                profile.append('</profile-%s>' % generator.getProfileType())
+
+                if chapter:
+			parser  = make_parser()
+			handler = stack.gen.ProfileHandler()
+
+			parser.setContentHandler(handler)
+                        for line in profile:
+                                parser.feed('%s\n' % line)
+
+                        profile = handler.getChapter(chapter)
+
+                for line in profile:
+                        self.owner.addOutput(host, line)
 
 
 class Command(stack.commands.list.host.command):
@@ -126,10 +184,10 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		(profile, document) = self.fillParams([ ('profile',  'native'),
-                                                        ('document', 'true') ])
+		(profile, chapter) = self.fillParams([
+                        ('profile', 'native'),
+                        ('chapter', None) ])
 
-                document  = self.str2bool(document)
 		xmlinput  = ''
                 osname    = None
 
@@ -157,11 +215,11 @@ class Command(stack.commands.list.host.command):
                         osname	 = self.db.getHostOS(host)
                         xmlinput = self.command('list.host.xml', [ host ])
 
-                        self.runImplementation(osname, (host, xmlinput, profile, document))
+                        self.runImplementation(osname, (host, xmlinput, profile, chapter))
 
 		# If we DO have XML input, simply parse it.
 
                 else:
-			self.runImplementation(osname, ('localhost', xmlinput, profile, document))
+			self.runImplementation(osname, ('localhost', xmlinput, profile, chapter))
 
 		self.endOutput(padChar='', trimOwner=True)

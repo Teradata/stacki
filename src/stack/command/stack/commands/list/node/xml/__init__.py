@@ -408,39 +408,11 @@ class Command(stack.commands.list.command,
 				      "in %s node: %s" \
 				      % (node, msg)
 
-                # Create profile.cfg file of all the attributes used
-                # To create the XML Profile.  Since the DB is on the
-                # frontend do this only for non-frontend appliances.
-		#
-		# Also create a post section to preseed any
-		# compiled salt templated on the node.
+                # Run plugins if not the Frontend
 
-                if attrs.has_key('appliance') and not \
-			attrs['appliance'] == 'frontend':
+                if attrs.has_key('appliance') and not attrs['appliance'] == 'frontend':
+                        self.runPlugins(attrs)
 
-                        self.addText('<stack:post>\n')
-                        self.addText('mkdir -p /opt/stack/etc\n')
-                        self.addText('<stack:file stack:name="/opt/stack/etc/profile.cfg" stack:perms="0640">\n')
-                        self.addText('[attr]\n')
-                        for k in keys:
-                                self.addText('%s = %s\n' % (k, attrs[k]))
-                        self.addText('</stack:file>\n')
-                        self.addText('</stack:post>\n')
-
-			try:
-				fin = open(os.path.join(os.sep, 'export', 
-							'stack', 'salt', 
-							'compiled', 
-							attrs['hostname'], 
-							'kickstart.xml'), 'r')
-			except:
-				fin = None
-			if fin:
-				self.addText('<stack:post>\n')
-				for line in fin.readlines():
-					self.addText(line)
-				self.addText('</stack:post>\n')
-                
 		self.addText('</stack:profile>\n')
 		
 		

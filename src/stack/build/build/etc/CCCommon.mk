@@ -47,7 +47,17 @@ __CCCOMMON_MK = yes
 ##
 
 -include $(ROLLROOT)/version.mk
-STACK	?= $(shell git branch | fgrep '*' | awk '{ print $$2; }' | tr / _  | tr - _)
+# try a little harder to get a symbolic reference out of git:
+# print the first of the following:
+#   symbolic-ref of HEAD on current branch (basically the branch name; most common)
+#   a tag name associated with current commit (detached head state)
+#   the abbreviated tag (detached head, no tag)
+#   empty string (this isn't a git repo)
+STACK	?= $(shell echo \
+                   `git symbolic-ref -q --short HEAD  2>/dev/null || \
+                    git describe --tags --exact-match 2>/dev/null || \
+                    git rev-parse --short HEAD        2>/dev/null` | \
+                    tr / _ | tr - _)
 RELEASE	?= $(STACK)
 
 ##

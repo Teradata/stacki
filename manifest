@@ -52,7 +52,6 @@ lighttpd
 MegaCLI
 netaddr
 stack-admin
-stack-barnacle
 stack-build
 stack-command
 stack-config

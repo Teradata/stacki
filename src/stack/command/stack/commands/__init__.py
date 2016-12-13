@@ -104,6 +104,7 @@ import json
 import marshal
 import hashlib
 import subprocess
+from functools import partial
 import stack
 from stack.cond import EvalCondExpr
 from stack.attr import *
@@ -370,7 +371,7 @@ class RollArgumentProcessor:
 class HostArgumentProcessor:
 	"""An Interface class to add the ability to process host arguments."""
 	
-	def getHostnames(self, names=[], managed_only=False, subnet=None, order='asc'):
+	def getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
 		"""Expands the given list of names to valid cluster hostnames.  A name
                 can be:
 
@@ -395,6 +396,18 @@ class HostArgumentProcessor:
 		shells (for example, the following appliances usually don't
 		have ssh login access: 'Ethernet Switches', 'Power Units',
 		'Remote Management')
+
+		The 'host_filter' flag is a callable (function, lambda, etc)
+		that will be passed along with the final host list to filter().
+		Equivalent code would look something like this:
+		[host for host in final_host_list if host_filter(host)]
+
+		Because filter() requires the callable to have only one arg,
+		to allow access to 'self' as well as the host, host_filter()
+		and 'self' are frozen with 'functools.partial', even if 'self'
+		isn't required.  The second arg will be each host name in the list.
+		For example:
+		host_filter = lambda self, host: self.db.getHostOS(host) == 'redhat'
 
                 """
 
@@ -593,7 +606,13 @@ class HostArgumentProcessor:
 			
 			list.append(hostDict[host])
 
-
+		# finally, apply the host_filter function, if it was passed
+		# explicitly check host_filter, because filter(None, iterable) has a semantic meaning
+		if host_filter:
+			# filter(func, iterable) requires that func take a single argument
+			# so we use functools.partial to get a function with one argument 'locked'
+			part_func = partial(host_filter, self)
+			list = filter(part_func, list)
                         
 		return list
 

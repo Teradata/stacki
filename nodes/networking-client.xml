@@ -19,47 +19,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <post>
 
-<eval shell="/opt/stack/bin/python">
-import os
-import re
-
-ifaces = []
-macs = []
-modules = []
-flags = []
-
-for i in os.environ:
-	if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
-		devinfo = os.environ[i].split()
-		iface   = devinfo[0]
-		macaddr = devinfo[1].lower()
-		module  = ''
-		if len(devinfo) > 2:
-			module = devinfo[2]
-
-		ks = ''
-		if len(devinfo) > 3:
-			ks = 'ks'
-
-		ifaces.append(iface)
-		macs.append(macaddr)
-		modules.append(module)
-		flags.append(ks)
-
-params = None
-if len(ifaces) > 0 and len(macs) > 0:
-	params = 'interface="%s" mac="%s"' % (','.join(ifaces), ','.join(macs))
-
-	if len(modules) > 0:
-		params += ' module="%s"' % (','.join(modules))
-	if len(flags) > 0:
-		params += ' flag="%s"' % (','.join(flags))
-
-	os.system('/opt/stack/bin/stack config host interface &hostname; ' +
-		'%s' % params)
-
-</eval>
-
 <report name="host.network">&hostname;</report>
 <report name="host.interface">&hostname;</report>
 

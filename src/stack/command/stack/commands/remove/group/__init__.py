@@ -73,7 +73,7 @@ class Command(stack.commands.remove.command):
                                 break
                 if hosts == None:
                         raise CommandError(self, 'group %s does not exist' % group)
-                if hosts > 0:
+                if len(hosts) > 0:
                         raise CommandError(self, 'group %s is in use' % group)
                 
                 self.db.execute(
@@ -82,5 +82,4 @@ class Command(stack.commands.remove.command):
                         where
                         name = '%s'
                         """ % group)
-
 

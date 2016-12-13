@@ -96,11 +96,16 @@ fi
 ##
 ## insert SuSe detection here
 ##
+if [ -f /etc/SuSE-release ]; then
+	DIST=`head -1 /etc/SuSE-release | awk '{print $1;}'`
 
 case $DIST in
     CentOS|Red|Scientific)
 	echo centos
         ;;
+    SUSE)
+	echo sles
+	;;
     *)
         echo unknown
         ;;

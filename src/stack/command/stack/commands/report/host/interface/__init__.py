@@ -115,103 +115,6 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def isPhysicalHost(self, host):
-		#
-		# determine if this is 'physical' machine, that is, not a VM.
-		#
-		rows = self.db.execute("""show tables like 'vm_nodes' """)
-
-		if rows == 0:
-			#
-			# the Xen roll is not installed, so all hosts are
-			# physical hosts
-			#
-			retval = 1
-		else:
-			rows = self.db.execute("""select vn.id from
-				vm_nodes vn, nodes n where
-				n.name = '%s' and vn.node = n.id""" % (host))
-
-			if rows == 0:
-				#
-				# this host is *not* in the VM nodes table, so
-				# it is a physical host
-				#
-				retval = 1
-			else:
-				retval = 0
-
-		return retval
-
-
-	def writeIPMI(self, host, OS, ip, channel, netmask, gateway):
-		defaults = [ ('IPMI_SI', 'yes'),
-			('DEV_IPMI', 'yes'),
-			('IPMI_WATCHDOG', 'no'),
-			('IPMI_WATCHDOG_OPTIONS', '"timeout=60"'),
-			('IPMI_POWEROFF', 'no'),
-			('IPMI_POWERCYCLE', 'no'),
-			('IPMI_IMB', 'no') ]
-
-		if OS == 'redhat':
-			self.addOutput(host,
-				'<file name="/etc/sysconfig/ipmi" perms="500">')
-		elif OS == 'sles':
-			self.addOutput(host,
-				"cat > /etc/sysconfig/ipmi << '__EOF__'")
-
-		for var, default in defaults:
-			attr = self.getHostAttr(host, var)
-			if not attr:
-				attr = default
-			self.addOutput(host, '%s=%s' % (var, attr))
-
-		self.addOutput(host, 'ipmitool lan set %s ipsrc static'
-			% (channel))
-		self.addOutput(host, 'ipmitool lan set %s ipaddr %s'
-			% (channel, ip))
-		self.addOutput(host, 'ipmitool lan set %s netmask %s'
-			% (channel, netmask))
-
-		if not gateway:
-			gateway = '0.0.0.0'
-		self.addOutput(host, 'ipmitool lan set %s defgw ipaddr %s'
-			% (channel, gateway))
-
-		self.addOutput(host, 'ipmitool lan set %s arp respond on'
-			% (channel))
-
-		attr = self.getHostAttr(host, 'ipmi_password')
-		if attr:
-			password = attr
-		else:
-			password = 'admin'
-
-		self.addOutput(host, 'ipmitool user set password 1 %s'
-			% (password))
-
-		self.addOutput(host, 'ipmitool lan set %s access on'
-			% (channel))
-		self.addOutput(host, 'ipmitool lan set %s user'
-			% (channel))
-		self.addOutput(host, 'ipmitool lan set %s auth ADMIN PASSWORD'
-			% (channel))
-
-		# add a root user at id 2
-		self.addOutput(host, 'ipmitool user set name 2 root')
-		self.addOutput(host, 'ipmitool user set password 2 %s'
-			% (password))
-		self.addOutput(host, 'ipmitool channel setaccess ' +
-			'%s ' % (channel) +
-			'2 link=on ipmi=on callin=on privilege=4')
-
-		if OS == 'redhat':
-			self.addOutput(host, '</file>')
-		elif OS == 'sles':
-			self.addOutput(host, '__EOF__')
-			self.addOutput(host, 'chmod 500 /etc/sysconfig/ipmi')
-
-
 	def writeConfig(self, host, mac, ip, device, netmask, vlanid, mtu,
 			options, channel):
 
@@ -335,6 +238,68 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, ']]>')
 
 
+	def writeIPMI(self, host, ip, channel, netmask, gateway, vlan=0):
+		defaults = [ ('IPMI_SI', 'yes'),
+			('DEV_IPMI', 'yes'),
+			('IPMI_WATCHDOG', 'no'),
+			('IPMI_WATCHDOG_OPTIONS', '"timeout=60"'),
+			('IPMI_POWEROFF', 'no'),
+			('IPMI_POWERCYCLE', 'no'),
+			('IPMI_IMB', 'no') ]
+
+		for var, default in defaults:
+			attr = self.db.getHostAttr(host, var)
+			if not attr:
+				attr = default
+			self.addOutput(host, '%s=%s' % (var, attr))
+
+		self.addOutput(host, 'ipmitool lan set %s ipsrc static'
+			% (channel))
+		self.addOutput(host, 'ipmitool lan set %s ipaddr %s'
+			% (channel, ip))
+		self.addOutput(host, 'ipmitool lan set %s netmask %s'
+			% (channel, netmask))
+
+		if not gateway:
+			gateway = '0.0.0.0'
+		self.addOutput(host, 'ipmitool lan set %s defgw ipaddr %s'
+			% (channel, gateway))
+
+		self.addOutput(host, 'ipmitool lan set %s arp respond on'
+			% (channel))
+
+		if vlan:
+			vlanid = vlan
+		else:
+			vlanid = "off"
+		self.addOutput(host, "ipmitool lan set %s vlan id %s" % \
+			(channel, vlanid))
+
+		attr = self.db.getHostAttr(host, 'ipmi_password')
+		if attr:
+			password = attr
+		else:
+			password = 'admin'
+
+		self.addOutput(host, 'ipmitool user set password 1 %s'
+			% (password))
+
+		self.addOutput(host, 'ipmitool lan set %s access on'
+			% (channel))
+		self.addOutput(host, 'ipmitool lan set %s user'
+			% (channel))
+		self.addOutput(host, 'ipmitool lan set %s auth ADMIN PASSWORD'
+			% (channel))
+
+		# add a root user at id 2
+		self.addOutput(host, 'ipmitool user set name 2 root')
+		self.addOutput(host, 'ipmitool user set password 2 %s'
+			% (password))
+		self.addOutput(host, 'ipmitool channel setaccess ' +
+			'%s ' % (channel) +
+			'2 link=on ipmi=on callin=on privilege=4')
+
+
 	def run(self, params, args):
 
 		self.interface, = self.fillParams([('interface', ), ])
@@ -342,192 +307,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
                 for host in self.getHostnames(args):
 			osname = self.getHostAttr(host, 'os')
-			f = getattr(self, 'run_%s' % (osname))
-			f(host)
+			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar = '')
-
-	def run_ubuntu(self, host):
-		pass
-
-	def run_sles(self, host):
-		import os
-
-		result = self.call('list.host.interface', [ host ])
-		for o in result:
-			interface = None
-			ip = None
-			netmask = None
-			netname = None
-			network = None
-			broadcast = None
-
-			interface = o['interface']
-			ip = o['ip']
-			netname = o['network']
-
-			if not netname or not ip or not interface:
-				continue
-
-			netresult = self.call('list.network', [ netname ])
-			for net in netresult:
-				if net['network'] == netname:
-					network = net['address']
-					netmask = net['mask']
-					broadcast = os.popen("/usr/bin/ipcalc -b %s %s" % (ip, netmask) + " | awk -F =  '{print $2}'").read()
-					gateway = net['gateway']
-					break
-
-			if not network or not netmask or not broadcast:
-				continue
-
-			if interface == 'ipmi':
-				channel = o['channel']
-
-				self.writeIPMI(host, 'sles', ip, channel,
-					netmask, gateway)
-
-			else:
-				print("cat > /etc/sysconfig/network/ifcfg-%s << '__EOF__'" % (interface))
-				print('IPADDR=%s' % ip.strip())
-				print('NETMASK=%s' % netmask.strip())
-				print('NETWORK=%s' % network.strip())
-				print('BROADCAST=%s' % broadcast.strip())
-				print('STARTMODE=auto')
-				print('USERCONTROL=no')
-				print('__EOF__')
-                
-	def run_redhat(self, host):
-		self.db.execute("""select id, name, mask, mtu
-			from subnets""")
-
-		#
-		# need to prefetch the subnets data because we can't do a
-		# self.db.execute() in the middle of a self.db.fetchall() loop
-		# because it resets the MySQL cursor
-		#
-		subnets = {}
-		for row in self.db.fetchall():
-			id = row[0]
-			subnets[id] = row
-
-		self.db.execute("""select distinctrow 
-			net.mac, net.ip, net.device, net.vlanid,
-			net.subnet, net.module, net.options, net.channel,
-			s.gateway from networks net, nodes n, subnets s
-			where net.node = n.id and net.subnet = s.id 
-			and n.name = "%s" order by net.device""" % (host))
-
-		udev_output = ""
-
-		for row in self.db.fetchall():
-			(mac, ip, device, vlanid, subnetid, module, options,
-				channel, gateway) = row
-
-			netname = None
-			netmask = None
-			mtu = None
-
-			if subnetid:
-				id, netname, netmask, mtu = subnets[subnetid]
-
-			# Host attributes can override the subnets tables
-			# definition of the netmask.
-
-			x = self.getHostAttr(host,
-				'network.%s.netmask' % netname)
-			if x:
-				netmask = x
-			
-			optionlist = []
-			if options:
-				optionlist = shlex.split(options)
-			if 'noreport' in optionlist:
-				continue # don't do anything if noreport set
-
-			if device == 'ipmi':
-				self.writeIPMI(host, 'redhat', ip, channel,
-					netmask, gateway)
-
-				# ipmi is special, skip the standard stuff
-				continue
-
-			if device and device[0:4] != 'vlan':
-				#
-				# output a script to update modprobe.conf
-				#
-				self.writeModprobe(host, device, module,
-					optionlist)
-
-			if vlanid:
-				#
-				# look up the name of the interface that
-				# maps to this VLAN spec
-				#
-				rows = self.db.execute("""select net.device from
-					networks net, nodes n where
-					n.id = net.node and n.name = '%s'
-					and net.subnet = %d and
-					net.device not like 'vlan%%' """ %
-					(host, subnetid))
-
-				if rows:
-					dev, = self.db.fetchone()
-					#
-					# check if already referencing 
-					# a physical device
-					#
-					if dev != device:
-						device = '%s.%d' % (dev, vlanid)
-
-			#
-			# for interfaces that have bridges attached, make sure
-			# we get the MTU of the network that is associated
-			# with the *bridge* and 
-			#
-			for opt in optionlist:
-				if opt.startswith('bridgename='):
-					bridge = opt.split('=')[1]
-
-					rows = self.db.execute("""select
-						s.mtu from networks net,
-						nodes n, subnets s where
-						n.name = '%s' and
-						n.id = net.node and 
-						net.device = '%s' and
-						net.subnet = s.id """ %
-						(host, bridge))
-
-					if rows:
-						mtu, = self.db.fetchone()
-
-			if self.interface:
-				if self.interface == device:
-					self.writeConfig(host, mac, ip, device,
-						netmask, vlanid, mtu, optionlist,
-						channel)
-			else:
-				s = '<file name="'
-				s += '/etc/sysconfig/network-scripts/ifcfg-'
-				s += '%s">' % (device)
-
-				self.addOutput(host, s)
-				self.writeConfig(host, mac, ip, device,
-					netmask, vlanid, mtu, optionlist, channel)
-				self.addOutput(host, '</file>')
-
-				ib_re = re.compile('^ib[0-9]+$')
-				if not ib_re.match(device):
-					udev_output += 'SUBSYSTEM=="net", '
-					udev_output += 'ACTION=="add", '
-					udev_output += 'DRIVERS=="?*", '
-					udev_output += 'ATTR{address}=="%s", ' % mac
-					udev_output += 'ATTR{type}=="1", '
-					udev_output += 'KERNEL=="eth*", '
-					udev_output += 'NAME="%s"\n\n' % device
-
-		if udev_output:
-			self.addOutput(host, '<file name="/etc/udev/rules.d/70-persistent-net.rules">')
-			self.addOutput(host, udev_output)
-			self.addOutput(host, '</file>')
+		self.endOutput(padChar = '', trimOwner=True)
 

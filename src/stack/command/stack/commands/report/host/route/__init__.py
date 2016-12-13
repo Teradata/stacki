@@ -87,55 +87,22 @@ class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
 	"""
 	Create a report that contains the static routes for a host.
-
+ 
 	<arg optional='0' type='string' name='host'>
 	Host name of machine
 	</arg>
-	
+
 	<example cmd='report host route compute-0-0'>
 	Create a report of the static routes assigned to compute-0-0.
 	</example>
 	"""
 
-	def getRoute(self, network, netmask, gateway):
-
-		s = 'any '
-
-		# Skip the default route (reported elsewhere)
-		
-		if network == '0.0.0.0':
-			return None
-			
-		# Is the a host or network route?
-				
-		if netmask == '255.255.255.255':
-			s += 'host %s ' % network
-		else:
-			s += 'net %s netmask %s ' % (network, netmask)
-			
-		# Is this a gateway or device route?
-				
-		if gateway.count('.') == 3:
-			s += 'gw %s' % gateway
-		else:
-			s += 'dev %s' % gateway
-			
-		return s
-		
-	
 	def run(self, params, args):
-
 		self.beginOutput()
 
-		for host in self.getHostnames(args):
-			self.addOutput(host,
-				'<file name="/etc/sysconfig/static-routes">')
-			routes = self.db.getHostRoutes(host)
-			for (key, val) in routes.items():
-				s = self.getRoute(key, val[0], val[1])
-				if s:
-					self.addOutput(host, s)
-			self.addOutput(host,'</file>')
+                for host in self.getHostnames(args):
+			osname = self.db.getHostAttr(host, 'os')
+			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar='')
+		self.endOutput(padChar = '')
 

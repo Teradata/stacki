@@ -178,4 +178,4 @@ class Command(command):
 			self.addOutput('localhost',h)
 			f.close()
 		
-		self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=True)
