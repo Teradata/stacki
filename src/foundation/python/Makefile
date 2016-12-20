@@ -98,7 +98,7 @@ DEPENDS.DIRS	= patch-files
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap:
-	yum install -y libxml2-devel
+	yum install -y libxml2-devel curses-devel
 	$(MAKE) install-rpm
 
 build:
