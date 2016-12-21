@@ -60,9 +60,12 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		hosts = self.getHostnames(args)
 
+		self.beginOutput()
+
 		if len(hosts) == 0:
 			output = []
-			print(output)
+			self.addOutput('', '%s' % output)
+			self.endOutput(padChar = '')
 			return
 		elif len(hosts) > 1:
                         raise ArgUnique(self, 'host')
@@ -75,7 +78,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.partition', [ host ])
 		if output:
-			print(output)
+			self.addOutput('', '%s' % output)
+			self.endOutput(padChar = '')
 			return
 
 		# 
@@ -85,7 +89,8 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		output = self.call('list.storage.partition', [ appliance ])
 		if output:
-			print(output)
+			self.addOutput('', '%s' % output)
+			self.endOutput(padChar = '')
 			return
 
 		#
@@ -93,7 +98,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = self.call('list.storage.partition', ['globalOnly=y'])
 		if output:
-			print(output)
+			self.addOutput('', '%s' % output)
+			self.endOutput(padChar = '')
 			return
 
 		#
@@ -101,4 +107,5 @@ class Command(stack.commands.HostArgumentProcessor,
 		# configuration for this host
 		#
 		output = []
-		print(output)
+		self.addOutput('', '%s' % output)
+		self.endOutput(padChar = '')
