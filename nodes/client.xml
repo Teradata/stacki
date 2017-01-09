@@ -24,10 +24,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 </main>
 
 
-<package>ipmitool</package>
-<package>OpenIPMI</package>
-
-
 <pre>
 
 <!-- start lighttpd for the Avalanche Installer -->
