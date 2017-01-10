@@ -125,21 +125,21 @@ class Command(stack.commands.list.command,
 		query = None
 		if scope == 'global':
 			if globalOnlyFlag:
-				query = """select scope, device, mountpoint, size, fstype, options 
+				query = """select scope, device, mountpoint, size, fstype, options, partid 
 					from storage_partition
 					where scope = 'global'
 					order by fstype, size"""
 			else:
-				query = """(select scope, device, mountpoint, size, fstype, options 
+				query = """(select scope, device, mountpoint, size, fstype, options, partid 
 					from storage_partition 
 					where scope = 'global'
 					order by fstype, size) UNION ALL
 					(select a.name, p.device, p.mountpoint, p.size, 
-					p.fstype, p.options from storage_partition as p inner join 
+					p.fstype, p.options, p.partid from storage_partition as p inner join 
 					nodes as a on p.tableid=a.id where p.scope='host' 
 					order by p.fstype, p.size) UNION ALL 
 					(select a.name, p.device, p.mountpoint, p.size,
-					p.fstype, p.options from storage_partition as p inner join 
+					p.fstype, p.options, p.partid from storage_partition as p inner join 
 					appliances as a on p.tableid=a.id where 
 					p.scope='appliance' order by p.fstype, p.size)"""
 		elif scope == 'os':
@@ -148,13 +148,13 @@ class Command(stack.commands.list.command,
 			#
 			return
 		elif scope == 'appliance':
-			query = """select scope, device, mountpoint, size, fstype,
-				options from storage_partition where scope = "appliance"
+			query = """select scope, device, mountpoint, size, fstype, options, partid
+				from storage_partition where scope = "appliance"
 				and tableid = (select id from appliances
                                 where name = '%s') order by fstype, size""" % args[0]
 		elif scope == 'host':
-			query = """select scope, device, mountpoint, size, fstype,
-				options from storage_partition where scope="host" and 
+			query = """select scope, device, mountpoint, size, fstype, options, partid
+				from storage_partition where scope="host" and 
 				tableid = (select id from nodes 
 				where name = '%s') order by fstype, size""" % args[0]
 
@@ -167,16 +167,27 @@ class Command(stack.commands.list.command,
 
 		i = 0
 		for row in self.db.fetchall():
-			name, device, mountpoint, size, fstype, options = row
+			name, device, mountpoint, size, fstype, options, partid = row
 			if size == -1:
 				size = "recommended"
 			elif size == -2:
 				size = "hibernation"	
+
 			if name == "host" or name == "appliance":
 				name = args[0]	
-			self.addOutput(name, [ device, mountpoint, 
-				size, fstype, options])
+
+			if mountpoint == 'None':
+				mountpoint = None
+
+			if fstype == 'None':
+				fstype = None
+
+			if partid == 0:
+				partid = None
+
+			self.addOutput(name, [device, partid, mountpoint, 
+				size, fstype, options, partid])
 
 			i += 1
-		self.endOutput(header=['scope', 'device', 'mountpoint', 'size', 
-			'fstype', 'options'], trimOwner = 0)
+
+		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner = 0)

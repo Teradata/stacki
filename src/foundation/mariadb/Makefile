@@ -100,7 +100,7 @@ DEPENDS.FILES	= mariadb-$(VERSION).tar.gz
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap: install-rpm
-	co $(PKGROOT)/etc/my.cnf
+	co -f $(PKGROOT)/etc/my.cnf
 
 build:
 	gunzip -c mariadb-$(VERSION).tar.gz | $(TAR) -xf -

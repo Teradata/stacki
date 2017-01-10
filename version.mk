@@ -1,5 +1,7 @@
 export ROLL		= stacki
-export ROLLVERSION	= 3.3
+export ROLLVERSION	= 3.3_$(shell date +%Y%m%d)
+
+VERSION			= 3.3_$(shell date +%Y%m%d)
 
 COLOR			= lightsteelblue
 BOOTABLE		= 1

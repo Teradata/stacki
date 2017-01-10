@@ -104,6 +104,7 @@ import stack.lock
 import stack.api
 
 
+
 class Client:
         """
         Metadata for the calling client, this is always passed to
@@ -132,6 +133,7 @@ class Client:
                                 print("Content-type: text/html")
                                 print("Status: 500 Internal Error\n")
                                 print("<h1>Invalid arch field</h1>")
+				self.status('install profile.cgi error (Invalid arch field)')
                                 sys.exit(1)
 
                 if not self.np:
@@ -143,6 +145,7 @@ class Client:
                                 print("Content-type: text/html")
                                 print("Status: 500 Internal Error\n")
                                 print("<h1>Invalid np field</h1>")
+				self.status('install profile.cgi error (Invalid np field)')
                                 sys.exit(1)
 
                 if not self.os:
@@ -154,6 +157,7 @@ class Client:
                                 print("Content-type: text/html")
                                 print("Status: 500 Internal Error\n")
                                 print("<h1>Invalid os field</h1>")
+				self.status('install profile.cgi error (Invalid os field)')
                                 sys.exit(1)
 
                 try:
@@ -188,11 +192,28 @@ class Client:
                         print("Content-type: text/html")
                         print("Status: 500 Internal Error\n")
                         print("<h1>Unsupported OS</h1>")
+
+	def status(self, message):
+		if self.interactive == 1:
+			return
+			
+		import socket
+		import json
+
+		msg = { 'source' : self.addr, 'channel' : 'health',
+			'message' : message }
+		m = json.dumps(msg)
+
+		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		tx.sendto("%s" % m, ('10.1.19.15', 5000))
+		tx.close()
         
+##
+## MAIN
+##
 
 mutex     = stack.lock.Mutex('/var/tmp/profile.mutex')
 semaphore = stack.lock.Semaphore('/var/tmp/profile.semaphore')
-
 
 if not os.environ.has_key('REMOTE_ADDR'):
 
@@ -208,8 +229,13 @@ if not os.environ.has_key('REMOTE_ADDR'):
                             'arch' : 'x86_64',
                             'os'   : client_os,
                             'np'   : '1' })
+
+	client.interactive = 1
 else:
         client = Client()
+	client.interactive = 0
+
+client.status('install profile.cgi started')
 
 syslog.openlog('profile', syslog.LOG_PID, syslog.LOG_LOCAL0)
 syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (client.addr, client.port))
@@ -238,6 +264,7 @@ if count == 0:
 	print()
 	print("<h1>Service is Busy</h1>")
 	empty = True
+	client.status('install profile.cgi retry')
 else:
 	count -= 1
 	semaphore.write(count)
@@ -305,3 +332,4 @@ semaphore.write(count)
 mutex.release()
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore pop %d' % count)
 client.post()
+client.status('install profile.cgi profile sent')

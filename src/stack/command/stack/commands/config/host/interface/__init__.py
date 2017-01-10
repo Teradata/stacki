@@ -185,82 +185,39 @@ class Command(stack.commands.config.host.command):
 			
 			discovered_macs.append(a)
 
+		pre_config=self.command('list.host.interface',[host])
 		#
-		# make sure all the MACs are in the database
+		# First, assign the correct names to the mac addresses
 		#
 		for (mac, interface, module, ks) in discovered_macs:
 			rows = self.db.execute("""select mac from networks
 				where mac = '%s' """ % (mac))
-			if rows == 0:
-				#
-				# the mac is not in the database. but check
-				# if the interface is already in the database.
-				# if so, then we just need to set the MAC
-				# for the interface.
-				#
-				rows = self.db.execute("""select * from
-					networks where device = '%s' and
-					node = (select id from nodes where
-					name = '%s')""" % (interface, host))
-
-				if rows == 1:
-					self.command('set.host.interface.mac',
-						(host, 'interface=%s' % interface,
-						'mac=%s' % mac))
-					#
-					# since the MAC changed, we are not
-					# guaranteed that the module will be
-					# correct. we need to clear out the
-					# module field
-					#
-					self.command(
-						'set.host.interface.module',
-						(host, 'interface=%s' % interface,
-						'module=NULL'))
-				else:
-					self.command('add.host.interface', 
-						(host, 'interface=%s' % interface,
-						'mac=%s' % mac))
-
-				sync_config = 1
-
-		#
-		# update the interface-to-mac mapping
-		#
-		for (mac, interface, module, ks) in discovered_macs:
-			self.command('set.host.interface.interface', 
-				(host, 'interface=%s' % interface,
-					'mac=%s' % mac))
-
-		#
-		# let's see if the private interface moved
-		#
-		for (mac, interface, module, ks) in discovered_macs:
-			if ks != 'ks':
+			if rows:
+				self.command('set.host.interface.interface',
+					[host, 'interface=%s' % interface, 'mac=%s' % mac])
+			else:
 				continue
 
-			rows = self.db.execute("""select mac,device from
-				networks where subnet = (select id from
-				subnets where name = 'private') and node =
-				(select id from nodes where name = '%s') """
-				% (host))
-				
-			if rows == 1:
-				(old_mac, old_interface) = self.db.fetchone()
+			if module:
+				self.command('set.host.interface.module',
+					[host, 'interface=%s' % interface, 'module=%s' % module])
 
-				if old_mac != mac:
-					#
-					# the private network moved. swap the
-					# networking info for these two
-					# interfaces
-					#
-					self.command('swap.host.interface',
-						(host, 'sync-config=no',
-						'interfaces=%s,%s' %
-						(old_interface, interface)))
+		#
+		# Add any missing/new interfaces to the database
+		#
+		for (mac, interface, module, ks) in discovered_macs:
+			rows = self.db.execute("""select mac from networks
+				where mac = '%s' """ % (mac))
+			if not rows:
+				self.command('add.host.interface',
+					[host, 'interface=%s' % interface, 'mac=%s' % mac, ])
+			if module:
+				self.command('set.host.interface.module',
+					[host, 'interface=%s' % interface, 'module=%s' % module])
 
-					sync_config = 1
 
-		if sync_config:
+		post_config=self.command('list.host.interface',[host])
+
+		if pre_config != post_config:
 			self.command('sync.config')	
 

@@ -464,6 +464,7 @@ CREATE TABLE storage_partition (
  Mountpoint	varchar(128) NOT NULL default '',
  Size		int(11) NOT NULL,
  FsType		varchar(128) NOT NULL default '',
+ PartID		int(11) NOT NULL,
  Options        varchar(512) NOT NULL default ''
 );
 

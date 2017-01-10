@@ -46,6 +46,9 @@ else:
 <package>vim</package>
 <package>pciutils</package>
 
+<package>ipmitool</package>
+<package>OpenIPMI</package>
+
 
 <post>
 /sbin/chkconfig stack-pre on

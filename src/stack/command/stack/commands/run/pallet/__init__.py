@@ -128,7 +128,16 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 				self.getRollNames(args, params)
 			except CommandError:
 				raise
-                
+
+			for arg in args:
+				# if a roll/pallet isn't in the stacks table it isn't enabled.
+				rows = self.db.execute("""
+					select * from stacks
+					where roll = (select id from rolls where name = '%s')""" % arg)
+				if not rows:
+					msg = 'Cannot run a pallet that is not enabled: %s' % arg
+					raise CommandError(self, msg)
+
 		script = []
 		script.append('#!/bin/sh')
 

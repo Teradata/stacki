@@ -83,12 +83,18 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 					size = partition['size']
 					type = partition['type']
 					options = partition['options']
+					partid = partition['partid']
 
-					cmdargs.append('mountpoint=%s' % mountpt)
+					if mountpt:
+						cmdargs.append('mountpoint=%s' % mountpt)
+					if type:
+						cmdargs.append('type=%s' % type)
+
 					cmdargs.append('size=%s' % size)
-					cmdargs.append('type=%s' % type)
 					if options:
 						cmdargs.append('options=%s' % options)
+					if partid:
+						cmdargs.append('partid=%s' % partid)
 
 					self.owner.call('add.storage.partition',
 						cmdargs)

@@ -73,6 +73,11 @@ class Command(stack.commands.HostArgumentProcessor,
 	<param type='string' name='options' optional='0'>
 	Options that need to be supplied while adding partitions.
 	</param>
+
+	<param type='string' name='partid' optional='1'>
+	The relative partition id for this partition. Partitions will be
+	created in ascending partition id order.
+	</param>
 	
 	<example cmd='add storage partition compute-0-0 device=sda mountpoint=/var
 		size=50 type=ext4'>
@@ -156,18 +161,18 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			name = args[0]
 
-		device, size, fstype, mountpt, options = self.fillParams([
-			('device', None, True),
-			('size', None), 
-			('type', None), 
-			('mountpoint', None, True),
-			('options', None)
-			])
+		device, size, fstype, mountpt, options, partid = \
+			self.fillParams([
+				('device', None, True),
+				('size', None), 
+				('type', None), 
+				('mountpoint', None),
+				('options', None),
+				('partid', None),
+				])
 
 		if not device:
 			raise ParamRequired(self, 'device')
-		if not mountpt:
-			raise ParamRequired(self, 'mountpoint')
 
 		# Validate size
 		if size:
@@ -183,6 +188,18 @@ class Command(stack.commands.HostArgumentProcessor,
 						raise ParamType(self, 'size', 'integer')
 			if s < 0:
 				raise ParamValue(self, 'size', '>= 0')
+
+		# Validate partid
+		if partid:
+			try:
+				p = int(partid)
+			except:
+				partid = None
+
+			if p < 1:
+				raise ParamValue(self, 'partid', '>= 0')
+
+			partid = p
 
 		#
 		# look up the id in the appropriate 'scope' table
@@ -202,7 +219,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# make sure the specification for mountpt doesn't already exist
 		#
-		self.checkIt(device, scope, tableid, mountpt)
+		if mountpt:
+			self.checkIt(device, scope, tableid, mountpt)
 
 		if not options:
 			options = ""
@@ -210,8 +228,13 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# now add the specifications to the database
 		#
+		sqlvars = "Scope, TableID, device, Mountpoint, Size, FsType, Options"
+		sqldata = "'%s', %s, '%s', '%s', %s, '%s', '%s'" % \
+			(scope, tableid, device, mountpt, size, fstype, options)
+
+		if partid:
+			sqlvars += ", PartID"
+			sqldata += ", %s" % partid
+
 		self.db.execute("""insert into storage_partition
-			(Scope, TableID, device, Mountpoint,
-			Size, FsType, Options) values ('%s', %s, '%s', '%s',
-			%s, '%s', '%s') """ % (scope, tableid, device,
-			mountpt, size, fstype, options))
+			(%s) values (%s) """ % (sqlvars, sqldata))

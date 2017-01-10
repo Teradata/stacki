@@ -141,9 +141,20 @@ class Command(stack.commands.Command,
 		headers.sort()
 		headers.insert(0, 'target')
 
-		csvwriter = csv.writer(sys.stdout)
-		csvwriter.writerow(headers)
-		sys.stdout.flush()
+		# CSV writer requires fileIO.
+		# Setup string IO processing
+		csv_f = cStringIO.StringIO()
+		csv_w = csv.writer(csv_f)
+		csv_w.writerow(headers)
+		csv_f.flush()
+		csv_w = csv.DictWriter(csv_f, headers)
+		csv_w.writerows(csv_attrs)
 
-		csvwriter = csv.DictWriter(sys.stdout, headers)
-		csvwriter.writerows(csv_attrs)
+		# Get string from StringIO object
+		s = csv_f.getvalue().strip()
+		csv_f.close()
+
+		self.beginOutput()
+		self.addOutput('localhost', s)
+		self.endOutput()
+

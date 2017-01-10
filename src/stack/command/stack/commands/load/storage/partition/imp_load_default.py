@@ -55,21 +55,17 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, device, mountpoint, size, fstype, options, line):
+	def doit(self, host, device, partid, mountpoint, size, fstype,
+			options, line):
+
 		#
 		# error checking
 		#
 		if device == None:
 			msg = 'empty value found for "device" column at line %d' % line
 			raise CommandError(self.owner, msg)
-		if mountpoint == None:
-			msg = 'empty value found for "mountpoint" column at line %d' % line
-			raise CommandError(self.owner, msg)
 		if size == None:
 			msg = 'empty value found for "size" column at line %d' % line
-			raise CommandError(self.owner, msg)
-		if fstype == None or fstype == 'None':
-			msg = 'empty value found for "type" column at line %d' % line
 			raise CommandError(self.owner, msg)
 		if host not in self.owner.hosts.keys():
 			self.owner.hosts[host] = {}
@@ -84,6 +80,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		partition_detail_map['size'] = size
 		partition_detail_map['type'] = fstype
 		partition_detail_map['options'] = options
+		partition_detail_map['partid'] = partid
 
 		# Append partition info to the map
 		partitions_list.append(partition_detail_map)
@@ -96,11 +93,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		reader = stack.csv.reader(open(filename, 'rU'))
 		header = None
-		line = 0
 
 		name = None
 		type_dict = {}
 
+		rowid = 1
+		line = 0
 		for row in reader:
 			line += 1
 
@@ -110,7 +108,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				#
 				# make checking the header easier
 				#
-				required = ['name', 'device', 'mountpoint', 'size', 'type']
+				required = ['name', 'device', 'size' ]
 
 				for i in range(0, len(row)):
 					if header[i] in required:
@@ -121,12 +119,15 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					raise CommandError(self.owner, msg)
 
 				continue
-			
+
+			rowid += 1
+
 			device = None
-			mountpoint = None
+			mountpoint = ''
 			size = None
-			type = None
+			type = ''
 			options = None
+			partid = None
 
 			for i in range(0, len(row)):
 				field = row[i]
@@ -135,6 +136,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				if header[i] == 'name':
 					name = field.lower()
+
+					#
+					# every time the name changes, reset
+					# the rowid
+					#
+					rowid = 1
 
 				elif header[i] == 'device':
 					device = field.lower()
@@ -160,7 +167,15 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					type = field.lower()
 				elif header[i] == 'options':
 					options = field
-	
+				elif header[i] == 'partid':
+					try:
+						partid = int(field)
+						if partid < 1:
+							msg = 'partid "%d" must be 1 or greater' % partid
+							raise CommandError(self.owner, msg)
+					except:
+						pass
+
 			#
 			# the first non-header line must have a host name
 			#
@@ -177,8 +192,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				msg = '"%s" is not host nor is it an appliance in the database' % name
 				raise CommandError(self.owner, msg)
 
+			if not partid:
+				partid = rowid
+
 			for host in hosts:
-				self.doit(host, device, mountpoint, 
+				self.doit(host, device, partid, mountpoint, 
 					size, type, options, line)
 				#
 				# Create type_dict with the {fstype : mountpoints}
@@ -229,3 +247,4 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 								'needs "--name=<volname>" ' + \
 								'in the OPTIONS field' % (d, host)
 							raise CommandError(self.owner, msg)
+
