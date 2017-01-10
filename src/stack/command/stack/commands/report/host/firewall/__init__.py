@@ -162,7 +162,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-		for host in self.getHostnames(args):
+                hosts = self.getHostnames(args)
+		for host in hosts:
 			s = '<file name="/etc/sysconfig/iptables" perms="500">'
 			self.addOutput(host, s)
 			# First, get a list of all rules for every host,
@@ -222,5 +223,5 @@ class Command(stack.commands.HostArgumentProcessor,
 
 			self.addOutput(host, '</file>')
 
-		self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
 

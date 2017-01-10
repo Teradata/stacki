@@ -80,6 +80,6 @@ class Command(stack.commands.set.environment.command):
 
                 for env in args:
 		        self.command('set.attr', [ 'scope=environment', 
-                                                   'object=%s' % os ] + argv)
+                                                   'object=%s' % env ] + argv)
 
 

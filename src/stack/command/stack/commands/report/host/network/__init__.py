@@ -111,7 +111,8 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.beginOutput()
 		
-		for host in self.getHostnames(args):
+                hosts = self.getHostnames(args)
+		for host in hosts:
                         self.addOutput(host, '<file name="/etc/sysconfig/network">')
                         self.addOutput(host, 'NETWORKING=yes')
 
@@ -152,4 +153,4 @@ class Command(stack.commands.HostArgumentProcessor,
 				self.addOutput(host, '%s' % hostname)
 				self.addOutput(host, '</file>')
 
-            	self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))

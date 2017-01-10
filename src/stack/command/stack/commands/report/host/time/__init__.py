@@ -61,7 +61,8 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 	def run(self, params, args):
 		self.beginOutput()
 
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+                for host in hosts:
 
                         attrs = {}
                         for row in self.call('list.host.attr', [ host ]):
@@ -80,5 +81,6 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 			self.runImplementation('time_%s' % protocol,
 				(host, appliance, timeserver))
 
-		self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+
 

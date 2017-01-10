@@ -112,7 +112,12 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-                (pallet, ) = self.fillParams([('pallet', )])
+                (pallet, debug ) = self.fillParams([
+                        ('pallet', ),
+                        ('debug', 'false')
+                ])
+
+                debug = self.str2bool(debug)
 
 		hosts = self.getHostnames(args)
                 if len(hosts) != 1:
@@ -133,8 +138,9 @@ class Command(stack.commands.list.host.command):
                 if pallet:
                         args.append('pallet=%s' % pallet)
                 xml = self.command('list.node.xml', args)
-                for line in xml.split('\n'):
-                        self.addOutput(host, line)
+                if not debug:
+                        for line in xml.split('\n'):
+                                self.addOutput(host, line)
 
 
 		self.endOutput(padChar='', trimOwner=True)

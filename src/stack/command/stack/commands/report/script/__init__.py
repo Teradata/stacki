@@ -86,7 +86,7 @@ class Command(stack.commands.report.command):
                         ('os', self.os),
 			('attrs', {}) ])
 
-		xml = '<?xml version="1.0" standalone="no"?>\n'
+		xml = ''
 
 		if attrs:
 			attrs = eval(attrs)
@@ -95,14 +95,18 @@ class Command(stack.commands.report.command):
 				xml += '\t<!ENTITY %s "%s">\n' % (k, v)
 			xml += ']>\n'
 
-		xml += '<profile os="%s" attrs="%s">\n' % (osname, attrs)
+		xml += '<stack:profile '
+                xml += 'stack:os="%s" ' % osname
+                xml += 'xmlns="http://www.stacki.com" '
+                xml += 'xmlns:stack="http://www.stacki.com" '
+                xml += 'stack:attrs="%s">\n' % attrs
 		xml += '<post>\n'
 
 		for line in sys.stdin.readlines():
 			xml += line
 
 		xml += '</post>\n'
-		xml += '</profile>\n' 
+		xml += '</stack:profile>\n' 
 
                 p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
                                      stdin=subprocess.PIPE,

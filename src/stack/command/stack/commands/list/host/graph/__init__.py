@@ -244,14 +244,7 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tcolor=black;')
 		dict = {}
 		for node in handler.getOrderGraph().getNodes():
-			#try:
-			#	handler.parseNode(node, 0) # Skip <eval>
-			#except stack.util.KickstartNodeError:
-			#	pass
-			try:
-				color = styleMap[node.getRoll()].nodeColor
-			except:
-				color = 'white'
+                        color = 'white'
 			node.setFillColor(color)
 			dot.append(node.getDot('\t\t', 'order'))
 
@@ -259,12 +252,8 @@ class Command(stack.commands.list.host.command):
 		iter.run()
 
 		for e in handler.getOrderGraph().getEdges():
-			try:
-				color = styleMap[e.getRoll()].edgeColor
-				style = 'bold'
-			except:
-				color = 'black'
-				style = 'invis'
+                        color = 'black'
+                        style = 'bold'
 			e.setColor(color)
 			e.setStyle(style)
 			dot.append(e.getDot('\t\t', 'order'))
@@ -277,21 +266,11 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tfontsize=32;')
 		dot.append('\t\tcolor=black;')
 		for node in handler.getMainGraph().getNodes():
-			#try:
-			#	handler.parseNode(node, 0) # Skip <eval>
-			#except stack.util.KickstartNodeError:
-			#	pass
-			try:
-				color = styleMap[node.getRoll()].nodeColor
-			except:
-				color = 'white'
+                        color = 'white'
 			node.setFillColor(color)
 			dot.append(node.getDot('\t\t'))
 		for e in handler.getMainGraph().getEdges():
-			try:
-				color = styleMap[e.getRoll()].edgeColor
-			except:
-				color = 'black'
+                        color = 'black'
 			e.setColor(color)
 			e.setStyle('bold')
 			dot.append(e.getDot('\t\t'))
@@ -331,9 +310,9 @@ class Command(stack.commands.list.host.command):
 				fin.close()
 				r = h.getRollName()
 				map[r] = stack.util.Struct()
-				map[r].edgeColor = h.getEdgeColor()
-				map[r].nodeColor = h.getNodeColor()
-				map[r].nodeShape = h.getNodeShape()
+				map[r].edgeColor = 'black'
+				map[r].nodeColor = 'black'
+				map[r].nodeShape = 'ellipse'
 
 		return map
 

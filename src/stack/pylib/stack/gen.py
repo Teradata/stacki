@@ -100,6 +100,7 @@ import time
 from xml.sax import handler
 import xml.dom.NodeFilter
 import xml.dom.ext.reader.Sax2
+from stack.bool import *
 import stack.js
 import stack.cond
 	
@@ -107,40 +108,44 @@ import stack.cond
 
 class NodeFilter(xml.dom.NodeFilter.NodeFilter):
 
-	def __init__(self, attrs):
+	def __init__(self, attrs, ns=None):
 		self.attrs = attrs
+                self.ns    = ns
 
-	def isCorrectCond(self, node):
 
-		attr = node.attributes.getNamedItem((None, 'arch'))
-		if attr:
-			arch = attr.value
-		else:
-			arch = None
+        def inNamespace(self, node):
+                if self.ns and self.ns == node.namespaceURI:
+                        return True
+                return False
 
-		attr = node.attributes.getNamedItem((None, 'os'))
-		if attr:
-			os = attr.value
-			if os == 'linux':
-				os = 'redhat'
-		else:
-			os = None
+        def getAttr(self, node, attr):
+		a = node.attributes.getNamedItem((self.ns, attr))
+                if a:
+                        return a.value
+                else:
+                        return ''
 
-		attr = node.attributes.getNamedItem((None, 'release'))
-		if attr:
-			release = attr.value
-		else:
-			release = None
+class StackNodeFilter(NodeFilter):
 
-		attr = node.attributes.getNamedItem((None, 'cond'))
-		if attr:
-			cond = attr.value
-		else:
-			cond = None
+                
+        def acceptNode(self, node):
 
-		expr = stack.cond.CreateCondExpr(arch, os, release, cond)
-		return stack.cond.EvalCondExpr(expr, self.attrs)
+                if node.localName == 'profile' and node.parentNode.nodeName == '#document':
+                        return self.FILTER_ACCEPT
 
+                if not self.inNamespace(node):
+                        return self.FILTER_SKIP
+
+                arch    = self.getAttr(node, 'arch')
+		osname  = self.getAttr(node, 'os')
+                release = self.getAttr(node, 'release')
+                cond    = self.getAttr(node, 'cond')
+		expr    = stack.cond.CreateCondExpr(arch, osname, release, cond)
+
+                if not stack.cond.EvalCondExpr(expr, self.attrs):
+                        return self.FILTER_SKIP
+
+                return self.FILTER_ACCEPT
 
 
 class ProfileSnippet:
@@ -356,6 +361,16 @@ class Generator:
                 else:
                         return ''
                 
+	def isCorrectCond(self, node):
+
+                arch    = self.getAttr(node, 'arch')
+		osname  = self.getAttr(node, 'os')
+                release = self.getAttr(node, 'release')
+                cond    = self.getAttr(node, 'cond')
+
+		expr = stack.cond.CreateCondExpr(arch, osname, release, cond)
+		return stack.cond.EvalCondExpr(expr, self.attrs)
+
 	
 	def order(self, node):
 		"""
@@ -368,87 +383,119 @@ class Generator:
                         self.nodeFilesDict[nodefile] = True
                         self.nodeFilesSection.append(nodefile)
 		
-	def handle_mainChild(self, node):
-
-                nodefile = self.getAttr(node, 'file')
-
-		attr     = node.attributes
-
-                tokens = node.nodeName.split(':')
-
-                if len(tokens) == 2:
-                        (ns, name) = tokens
-                        fnname     = '%s_%s' % (ns, name)
-                else:
-                        name       = node.nodeName
-                        fnname     = name
-
-                try:
-			fn = eval('self.handle_main_%s' % node.fnname)
-                except AttributeError:
-                        fn = None
-                if fn:
-                        text = fn(node)
-                else:
-                        text = '%s %s' % (name, self.getChildText(node))
-                self.mainSection.append(text, nodefile)
-
-
 
 		
-	def parseFile(self, node):
-		attr = node.attributes
+	# <*>
+	#	<*> - tags that can go inside any other tags
+	# </*>
 
-		if attr.getNamedItem((None, 'os')):
-			OS = attr.getNamedItem((None, 'os')).value
-			if OS != self.getOS():
-				return ''
+	def getChildText(self, node):
+		text = ''
+		for child in node.childNodes:
+			if child.nodeType == child.TEXT_NODE:
+				text += child.nodeValue
+			elif child.nodeType == child.CDATA_SECTION_NODE:
+				text += child.nodeValue
+			elif child.nodeType == child.ELEMENT_NODE:
+                                if self.isCorrectCond(child):
+                                        if child.namespaceURI == 'http://www.stacki.com':
+                                                fnname = 'stack_%s' % child.localName
+                                        else:
+                                                fnname = string.join(child.nodeName.split(':'), '_')
+                                        try:
+                                                fn = eval('self.handle_child_%s' % fnname)
+                                        except AttributeError:
+                                                fn = None
+                                        if fn:
+                                                text += fn(child)
+		return text
 
-		if attr.getNamedItem((None, 'name')):
-			fileName = attr.getNamedItem((None, 'name')).value
-		else:
-			fileName = ''
+	def parse(self, xml_string):
+		import cStringIO
 
-		if attr.getNamedItem((None, 'mode')):
-			fileMode = attr.getNamedItem((None, 'mode')).value
-		else:
-			fileMode = 'create'
+		xml_buf = cStringIO.StringIO(xml_string)
+		doc     = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
+		filter  = stack.gen.MainNodeFilter(self.attrs, 'http://www.stacki.com')
+		iter    = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
+		node    = iter.nextNode()
 
-		if attr.getNamedItem((None, 'owner')):
-			fileOwner = attr.getNamedItem((None, 'owner')).value
-		else:
-			fileOwner = ''
+		while node:
+			if node.localName == 'profile':
+				self.handle_stack_profile(node)
+			elif node.localName == 'main':
+                                child = iter.firstChild()
+                                while child:
+                                        nodefile = self.getAttr(child, 'file')
+                                        try:
+                                                fn = eval('self.handle_main_stack_%s' % child.localName)
+                                        except AttributeError:
+                                                fn = None
+                                        if fn:
+                                                text = fn(node)
+                                        else:
+                                                text = '%s %s' % (child.localName, self.getChildText(child))
+                                        self.mainSection.append(text, nodefile)
+                                        child = iter.nextSibling()
+			node = iter.nextNode()
+			
+		filter = stack.gen.OtherNodeFilter(self.attrs, 'http://www.stacki.com')
+		iter   = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
+		node   = iter.nextNode()
+		while node:
+			if node.localName != 'profile':
+				self.order(node)
+                                try:
+                                        fn = eval('self.handle_stack_%s' % node.localName)
+                                except AttributeError:
+                                        fn = None
+                                if fn:
+                                        fn(node)
+			node = iter.nextNode()
 
-		if attr.getNamedItem((None, 'perms')):
-			filePerms = attr.getNamedItem((None, 'perms')).value
-		else:
-			filePerms = ''
 
-		if attr.getNamedItem((None, 'vars')):
-			fileQuoting = attr.getNamedItem((None, 'vars')).value
-		else:
+	# <profile>
+	
+	def handle_stack_profile(self, node):
+		# pull out the attr to handle generic conditionals
+		# this replaces the old arch/os logic but still
+		# supports the old syntax
+
+		if node.attributes:
+			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			if attrs:
+				dict = eval(attrs.value)
+				for (k,v) in dict.items():
+					self.attrs[k] = v
+
+
+	
+	# <*>
+	#	<file>
+	# </*>
+	
+	def handle_child_stack_file(self, node):
+
+                fileName    = self.getAttr(node, 'name')
+                fileMode    = self.getAttr(node, 'mode')
+                fileOwner   = self.getAttr(node, 'owner')
+                filePerms   = self.getAttr(node, 'perms')
+                fileQuoting = self.getAttr(node, 'vars')
+                fileCommand = self.getAttr(node, 'expr')
+                fileRCS     = self.getAttr(node, 'rcs')
+		fileText    = self.getChildText(node)
+
+                if not fileQuoting:
 			fileQuoting = 'literal'
-
-		if attr.getNamedItem((None, 'expr')):
-			fileCommand = attr.getNamedItem((None, 'expr')).value
-		else:
-			fileCommand = None
-
-		# Have the ability to turn off/on RCS checkins
-		if attr.getNamedItem((None, 'rcs')):
-			t = attr.getNamedItem((None, 'rcs')).value.lower()
-			if t == 'false' or t == 'off':
-				rcs = False
-		else:
-			rcs = True
-
-		fileText = self.getChildText(node)
+                if fileRCS:
+                        fileRCS = str2bool(fileRCS)
+                else:
+                        fileRCS = True
 
 		if fileName:
                         p, f = os.path.split(fileName)
                         s    = 'if [ ! -e %s ]; then mkdir -p %s; fi\n' % (p, p)
 
-			if rcs:
+			if fileRCS:
 				s += self.rcsBegin(fileName, fileOwner, filePerms)
 
 			if fileMode == 'append':
@@ -476,100 +523,23 @@ class Generator:
 
 			# If RCS is disabled, we still need to have support
 			# for changing permissions, and owners.
-			if not rcs:
+			if not fileRCS:
 				if fileOwner:
 					s += 'chown %s %s\n' % (fileOwner, fileName)
 				if filePerms:
 					s += 'chmod %s %s\n' % (filePerms, fileName)
 		return s
 	
-	# <*>
-	#	<*> - tags that can go inside any other tags
-	# </*>
-
-	def getChildText(self, node):
-		text = ''
-		for child in node.childNodes:
-			if child.nodeType == child.TEXT_NODE:
-				text += child.nodeValue
-			elif child.nodeType == child.CDATA_SECTION_NODE:
-				text += child.nodeValue
-			elif child.nodeType == child.ELEMENT_NODE:
-                                try:
-                                        name = string.join(node.nodeName.split(':'), '_')
-                                        fn   = eval('self.handle_child_%s' % name)
-                                except AttributeError:
-                                        fn = None
-                                if fn:
-                                        text += fn(child)
-		return text
-
-	def parse(self, xml_string):
-		import cStringIO
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc = xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter = stack.gen.MainNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
-		node = iter.nextNode()
-		
-		while node:
-			if node.nodeName == 'stack:profile':
-				self.handle_profile(node)
-			elif node.nodeName == 'stack:main':
-				child = iter.firstChild()
-				while child:
-					self.handle_mainChild(child)
-					child = iter.nextSibling()
-			node = iter.nextNode()
-			
-		filter = stack.gen.OtherNodeFilter(self.attrs)
-		iter = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
-		node = iter.nextNode()
-		while node:
-			if node.nodeName != 'stack:profile':
-				self.order(node)
-                                name = string.join(node.nodeName.split(':'), '_')
-                                try:
-                                        fn = eval('self.handle_%s' % name)
-                                except AttributeError:
-                                        fn = None
-                                if fn:
-                                        fn(node)
-			node = iter.nextNode()
-
-
-	# <profile>
-	
-	def handle_profile(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
-		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
-			if attrs:
-				dict = eval(attrs.value)
-				for (k,v) in dict.items():
-					self.attrs[k] = v
-
-
-	
-	# <*>
-	#	<file>
-	# </*>
-	
-	def handle_child_file(self, node):
-		return self.parseFile(node)
 
         # <stacki>
 
-        def handle_stacki(self, node):
+        def handle_stack_stacki(self, node):
                 self.stackiSection.append(self.getChildText(node),
                                           self.getAttr(node, 'file'))
 
 	# <debug>
 	
-	def handle_debug(self, node):
+	def handle_stack_debug(self, node):
                 self.debugSection.append(self.getChildText(node), 
                                          self.getAttr(node, 'file'))
 
@@ -601,35 +571,35 @@ class Generator:
                 return self.debugSection.generate()
 
 
-class MainNodeFilter(NodeFilter):
+class MainNodeFilter(StackNodeFilter):
 
 	def acceptNode(self, node):
-	
-		if node.nodeName in [ 'stack:profile', 'stack:main' ]:
+
+                if StackNodeFilter.acceptNode(self, node) == self.FILTER_SKIP:
+                        return self.FILTER_SKIP
+
+                if node.localName in [ 'profile', 'main' ]:
 			return self.FILTER_ACCEPT
 
-                if not (node.parentNode and node.parentNode.nodeName == 'stack:main'):
-			return self.FILTER_SKIP
-
-		if not self.isCorrectCond(node):
+                if not (node.parentNode and node.parentNode.localName == 'main'):
 			return self.FILTER_SKIP
 
 		return self.FILTER_ACCEPT
 
 
-class OtherNodeFilter(NodeFilter):
+class OtherNodeFilter(StackNodeFilter):
 
 	def acceptNode(self, node):
 
-		if node.nodeName == 'stack:profile':
+                if StackNodeFilter.acceptNode(self, node) == self.FILTER_SKIP:
+                        return self.FILTER_SKIP
+
+		if node.localName == 'profile':
 			return self.FILTER_ACCEPT
 
-                if node.nodeName in [ '#document', 'stack:main' ]:
+                if node.localName in [ 'main' ]:
                         return self.FILTER_SKIP
 			
-		if not self.isCorrectCond(node):
-			return self.FILTER_SKIP
-
 		return self.FILTER_ACCEPT
 
 

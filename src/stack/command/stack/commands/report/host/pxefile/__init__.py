@@ -23,7 +23,7 @@ class Command(stack.commands.Command,
 		# Get the IP and NETMASK of the host
 		#
 	
-		appliance = self.db.getHostAttr(host, 'appliance')
+		appliance = self.getHostAttr(host, 'appliance')
 		if appliance == 'frontend':
 			filename = '/tftpboot/pxelinux/pxelinux.cfg/default'
 			action = 'os'
@@ -64,4 +64,5 @@ class Command(stack.commands.Command,
 			pxeInfo = self.getHostPXEInfo(host, action)
 			if pxeInfo:
 				self.runImplementation(osname, pxeInfo)
-		self.endOutput(padChar='')
+
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))

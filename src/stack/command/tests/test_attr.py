@@ -63,8 +63,8 @@ def test_attr(table=None, owner=None):
 	Tests the Scoping rules for attributes.  Called without
 	arguments this test the global attributes.
 	
-	table = os | appliance | host
-	owner = osname | appliancename | hostname
+	table = os | environment | appliance | host
+	owner = osname | environmentname | appliancename | hostname
 	"""
 
 	if not table:
@@ -72,40 +72,21 @@ def test_attr(table=None, owner=None):
 	if not owner:
 		owner = ''
 
-	result = Call('remove %s attr' % table, ('%s attr=a.b.c.d' % owner).split())
+        attr   = 'a.b.c.d'
+	result = Call('remove %s attr' % table, ('%s attr=%s' % (owner, attr)).split())
 	assert ReturnCode() == 0 and result == [ ]
 
-	for (key, (scope, attr)) in [ ('a.b.c.d', ('a.b.c', 'd')),
-				      ('a/b.c.d', ('a', 'b.c.d')),
-				      ('a.b/c.d', ('a.b', 'c.d')),
-				      ('a.b.c/d', ('a.b.c', 'd')) ]:
+        value  = str(random.randint(0, 100))
+        result = Call('set %s attr' % table,
+                      ('%s attr=%s value=%s' % (owner, attr, value)).split())
+        assert ReturnCode() == 0 and result == [ ]
 
-		value = str(random.randint(0, 100))
+        result = Call('list %s attr' % table, ('%s attr=%s' % (owner, attr)).split())
+        assert ReturnCode() == 0 and len(result) == 1
+        assert result[0]['attr']  == attr
+        assert result[0]['value'] == value
 
-		result = Call('set %s attr' % table,
-			      ('%s attr=%s value=%s' % (owner, key, value)).split())
-		assert ReturnCode() == 0 and result == [ ]
-
-		if key != 'a.b.c.d':
-			result = Call('list %s attr' % table,
-				      ('%s attr=%s' %
-				       (owner, key.replace('/', '.'))).split())
-			assert ReturnCode() == 0 and len(result) == 1
-			assert result[0]['scope'] == scope
-			assert result[0]['attr']  == attr
-			assert result[0]['value'] == value
-
-		result = Call('list %s attr' % table,
-			      ('%s attr=%s' % (owner, key)).split())
-
-		assert ReturnCode() == 0 and len(result) == 1
-		assert result[0]['scope'] == scope
-		assert result[0]['attr']  == attr
-		assert result[0]['value'] == value
-
-
-		result = Call('remove %s attr' % table,
-		      ('%s attr=a.b.c.d' % owner).split())
+        result = Call('remove %s attr' % table, ('%s attr=%s' % (owner, attr)).split())
 	assert ReturnCode() == 0 and result == [ ]
 
 	

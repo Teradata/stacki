@@ -248,7 +248,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			('IPMI_IMB', 'no') ]
 
 		for var, default in defaults:
-			attr = self.db.getHostAttr(host, var)
+			attr = self.getHostAttr(host, var)
 			if not attr:
 				attr = default
 			self.addOutput(host, '%s=%s' % (var, attr))
@@ -275,7 +275,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, "ipmitool lan set %s vlan id %s" % \
 			(channel, vlanid))
 
-		attr = self.db.getHostAttr(host, 'ipmi_password')
+		attr = self.getHostAttr(host, 'ipmi_password')
 		if attr:
 			password = attr
 		else:
@@ -305,9 +305,11 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.interface, = self.fillParams([('interface', ), ])
 		self.beginOutput()
 
-                for host in self.getHostnames(args):
+
+                hosts = self.getHostnames(args)
+                for host in hosts:
 			osname = self.getHostAttr(host, 'os')
 			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar = '', trimOwner=True)
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
 

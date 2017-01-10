@@ -297,6 +297,7 @@ class Command(stack.commands.list.command,
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
                                 if ext in [ '.xml', '.pro' ]:
+                                        ext = '.xml' ## REMOVE THIS
                                         self.runImplementation(ext[1:], 
                                                                (os.path.join(graph, file), 
                                                                 handler))
@@ -361,8 +362,9 @@ class Command(stack.commands.list.command,
 		# Iterate over the nodes and parse everyone we need
 		# to parse.
 
-		parsed = []
-		kstext = ''
+		parsed     = []
+		kstext     = ''
+                namespaces = []
 		for node in list:
 			if not node:
 				continue
@@ -379,12 +381,19 @@ class Command(stack.commands.list.command,
 				handler.parseNode(node, doEval, self)
 				parsed.append(node)
 				kstext += node.getKSText()
+                                namespaces.append(node.getNamespaces())
 
 		# Now print everyone out with the header kstext from
 		# the previously parsed nodes
 
+                n = {} # build a dict of xmlns declarations used
+                for d in namespaces:
+                        for (uri, ns) in d.items():
+                                n[ns] = uri
+
 		self.addText('<stack:profile stack:os="%s"' % attrs['os'])
-                self.addText(' xmlns:stack="http://www.stacki.com"')
+                for (ns, uri) in n.items():
+                        self.addText(' xmlns:%s="%s"' % (ns, uri))
                 self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
 
 		if attrs['os'] == 'redhat':
@@ -397,8 +406,15 @@ class Command(stack.commands.list.command,
 
 			# If we are only expanding a pallet subgraph
 			# then do not ouput the XML for other nodes
-				
-			if pallets and node.getRoll() not in pallets:
+
+                        pallet   = None
+                        try:
+                                filename = node.getFilename()
+                                pallet   = filename.split('pallets')[1].split(os.sep)[1]
+                        except:
+                                pass
+
+			if pallets and pallet not in pallets:
 				continue
 				
 			try:

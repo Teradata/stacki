@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,33 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.6  2011/03/24 19:37:01  phil
-# Wrap routes report inside of XML tag to make it like interfaces,networks.
-# Add ability to report host addr to output a python dictionary
-# mod routes-*.xml and sync host network to use new output format
-#
-# Revision 1.5  2010/10/06 21:49:47  phil
-# If a user puts in 0.0.0.0 destination without a 0.0.0.0 netmask, then we
-# potentially get a conflict on the gateway. Simplify test ignoring netmask.
-#
-# Revision 1.4  2010/09/07 23:53:00  bruno
-# star power for gb
-#
-# Revision 1.3  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.2  2009/05/01 19:07:02  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 00:03:00  mjk
-# - checkpoint for route commands
-# - gateway is dead (now a default route)
-# - removed comment rows from schema (let's see what breaks)
-# - removed short-name from appliance (let's see what breaks)
-# - dbreport static-routes is dead
-#
+
 
 import sys
 import socket
@@ -100,9 +75,10 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                for host in self.getHostnames(args):
-			osname = self.db.getHostAttr(host, 'os')
+		hosts = self.getHostnames(args)
+                for host in hosts:
+			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar = '')
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
 

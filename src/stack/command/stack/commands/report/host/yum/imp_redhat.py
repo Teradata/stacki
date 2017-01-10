@@ -47,7 +47,7 @@ class Implementation(stack.commands.Implementation):
         def run(self, args):
                 host	= args[0]
                 server	= args[1]
-                box	= selfgetHostAttr(host, 'box')
+                box	= self.owner.getHostAttr(host, 'box')
                 yum	= []
 
                 yum.append('<file name="/etc/yum.repos.d/stacki.repo">')

@@ -106,12 +106,8 @@ class implementation(stack.commands.Implementation):
                 pass
 
 
-	def run(self, args):
+	def run(self, (xmlinput, profileType, chapter)):
 
-                host        = args[0]
-                xmlinput    = args[1]
-                profileType = args[2]
-                chapter     = args[3]
                 profile     = []
 		generator   = self.generator()
 
@@ -152,7 +148,7 @@ class implementation(stack.commands.Implementation):
                         profile = handler.getChapter(chapter)
 
                 for line in profile:
-                        self.owner.addOutput(host, line)
+                        self.owner.addOutput(None, line)
 
 
 class Command(stack.commands.list.host.command):
@@ -215,11 +211,11 @@ class Command(stack.commands.list.host.command):
                         osname	 = self.db.getHostOS(host)
                         xmlinput = self.command('list.host.xml', [ host ])
 
-                        self.runImplementation(osname, (host, xmlinput, profile, chapter))
+                        self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		# If we DO have XML input, simply parse it.
 
                 else:
-			self.runImplementation(osname, ('localhost', xmlinput, profile, chapter))
+			self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		self.endOutput(padChar='', trimOwner=True)

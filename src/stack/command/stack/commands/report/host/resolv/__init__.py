@@ -106,9 +106,10 @@ class Command(stack.commands.report.host.command):
 
 		self.beginOutput()
 
-                for host in self.getHostnames(args):
-			osname = self.getHostAttr(host, 'os')
+		hosts = self.getHostnames(args)
+                for host in hosts:
+			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar = '', trimOwner=True)
+		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
 
