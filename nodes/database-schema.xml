@@ -62,7 +62,7 @@ CREATE TABLE attributes (
   PointerStr    varchar(32)
 );
 
-grant select (scope, attr, value) on cluster.global_attributes to ''@'localhost';
+grant select (scope, attr, value) on cluster.attributes to ''@'localhost';
 
 
 DROP TABLE IF EXISTS global_attributes;
