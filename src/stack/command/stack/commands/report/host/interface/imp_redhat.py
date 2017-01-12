@@ -50,10 +50,10 @@ class Implementation(stack.commands.Implementation):
 				continue # don't do anything if noreport set
 
 			if device == 'ipmi':
-				self.owner.addOutput(host, '<file name="/etc/sysconfig/ipmi" perms="500">')
+				self.owner.addOutput(host, '<stack:file stack:name="/etc/sysconfig/ipmi" stack:perms="500">')
 				self.owner.writeIPMI(host, ip, channel,
 					netmask, gateway, vlanid)
-				self.owner.addOutput(host, '</file>')
+				self.owner.addOutput(host, '</stack:file>')
 
 				# ipmi is special, skip the standard stuff
 				continue
@@ -71,14 +71,14 @@ class Implementation(stack.commands.Implementation):
 						netmask, vlanid, mtu, optionlist,
 						channel)
 			else:
-				s = '<file name="'
+				s = '<stack:file stack:name="'
 				s += '/etc/sysconfig/network-scripts/ifcfg-'
 				s += '%s">' % (device)
 
 				self.owner.addOutput(host, s)
 				self.owner.writeConfig(host, mac, ip, device,
 					netmask, vlanid, mtu, optionlist, channel)
-				self.owner.addOutput(host, '</file>')
+				self.owner.addOutput(host, '</stack:file>')
 
 				ib_re = re.compile('^ib[0-9]+$')
 				if not ib_re.match(device):
@@ -91,7 +91,7 @@ class Implementation(stack.commands.Implementation):
 					udev_output += 'NAME="%s"\n\n' % device
 
 		if udev_output:
-			self.owner.addOutput(host, '<file name="/etc/udev/rules.d/70-persistent-net.rules">')
+			self.owner.addOutput(host, '<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">')
 			self.owner.addOutput(host, udev_output)
-			self.owner.addOutput(host, '</file>')
+			self.owner.addOutput(host, '</stack:file>')
 

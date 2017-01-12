@@ -51,14 +51,14 @@ class Implementation(stack.commands.Implementation):
 	"""
 
 	def client(self, host, timeserver):
-		self.owner.addOutput(host, '<file name="/etc/chrony.conf">')
+		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
 		self.owner.addOutput(host, 'server %s' % timeserver)
 		self.owner.addOutput(host, 'allow %s' % timeserver)
 		self.owner.addOutput(host, 'local stratum 10')
 		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift')
 		self.owner.addOutput(host, 'logdir /var/log/chrony')
 		self.owner.addOutput(host, 'log measurements statistics tracking')
-		self.owner.addOutput(host, '</file>')
+		self.owner.addOutput(host, '</stack:file>')
 
 
 	def server(self, host, timeserver):
@@ -82,7 +82,7 @@ class Implementation(stack.commands.Implementation):
 
 		ip = stack.ip.IPGenerator(address, mask)
 
-		self.owner.addOutput(host, '<file name="/etc/chrony.conf">')
+		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
 		self.owner.addOutput(host, 'server %s iburst' % timeserver)
 		self.owner.addOutput(host, 'local stratum 10')
 		self.owner.addOutput(host, 'stratumweight 0')
@@ -94,7 +94,7 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host, 'logchange 0.5')
 		self.owner.addOutput(host, 'logdir /var/log/chrony')
 		self.owner.addOutput(host, 'log measurements statistics tracking')
-		self.owner.addOutput(host, '</file>')
+		self.owner.addOutput(host, '</stack:file>')
 
 
 	def run(self, args):

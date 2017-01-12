@@ -113,7 +113,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		
                 hosts = self.getHostnames(args)
 		for host in hosts:
-                        self.addOutput(host, '<file name="/etc/sysconfig/network">')
+                        self.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network">')
                         self.addOutput(host, 'NETWORKING=yes')
 
                         network = None
@@ -141,16 +141,16 @@ class Command(stack.commands.HostArgumentProcessor,
                         if gateway:
                                 self.addOutput(host, 'GATEWAY=%s' % gateway)
 
-                        self.addOutput(host, '</file>')
+                        self.addOutput(host, '</stack:file>')
 
 			#
 			# 7.x requires the hostname to be placed into
 			# /etc/hostname
 			#
 			if stack.release == '7.x':
-				self.addOutput(host,
-					'<file name="/etc/hostname">')
+				self.addOutput(host, 
+					'<stack:file stack:name="/etc/hostname">')
 				self.addOutput(host, '%s' % hostname)
-				self.addOutput(host, '</file>')
+				self.addOutput(host, '</stack:file>')
 
 		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))

@@ -107,7 +107,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 
 	def writeDhcpDotConf(self):
-		self.addOutput('', '<file name="/etc/dhcp/dhcpd.conf">')
+		self.addOutput('', '<stack:file stack:name="/etc/dhcp/dhcpd.conf">')
 
                 self.addOutput('', stack.text.DoNotEdit())
 		self.addOutput('', 'ddns-update-style none;')
@@ -207,7 +207,7 @@ class Command(stack.commands.HostArgumentProcessor,
                                 
                                         self.addOutput('', '}')
 
-		self.addOutput('', '</file>')
+		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
 			(ip, channel), = self.db.select("""nt.ip,
@@ -220,7 +220,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 
 	def writeDhcpSysconfig(self):
-		self.addOutput('', '<file name="/etc/sysconfig/dhcpd">')
+		self.addOutput('', '<stack:file stack:name="/etc/sysconfig/dhcpd">')
                 self.addOutput('', stack.text.DoNotEdit())
 
                 devices = ''
@@ -236,7 +236,7 @@ class Command(stack.commands.HostArgumentProcessor,
                         devices += '%s ' % device
 
 		self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())
-		self.addOutput('', '</file>')
+		self.addOutput('', '</stack:file>')
 		
 
 

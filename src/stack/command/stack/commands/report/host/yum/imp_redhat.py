@@ -50,7 +50,7 @@ class Implementation(stack.commands.Implementation):
                 box	= self.owner.getHostAttr(host, 'box')
                 yum	= []
 
-                yum.append('<file name="/etc/yum.repos.d/stacki.repo">')
+                yum.append('<stack:file stack:name="/etc/yum.repos.d/stacki.repo">')
 		for pallet in self.owner.getBoxPallets(box):
                         pname, pversion, prel, parch, pos = pallet
 
@@ -68,7 +68,7 @@ class Implementation(stack.commands.Implementation):
                                 yum.append('assumeyes=1')
                                 yum.append('gpgcheck=0')
 
-		yum.append('</file>')
+		yum.append('</stack:file>')
 		yum.append('yum clean all')
 
                 for line in yum:

@@ -45,7 +45,7 @@ class Implementation(stack.commands.Implementation):
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
 				(ip, gateway, netmask, dnsserver, nextserver)
 
-		self.owner.addOutput(host, '<file name="%s" owner="root:apache" perms="0664" rcs="off"><![CDATA[' % filename)
+		self.owner.addOutput(host, '<stack:file stack:name="%s" stack:owner="root:apache" stack:perms="0664" stack:rcs="off"><![CDATA[' % filename)
 		self.owner.addOutput(host, 'default stack')
 		self.owner.addOutput(host,'prompt 0')
 		self.owner.addOutput(host,'label stack')
@@ -71,5 +71,5 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host,'\tipappend 2')
 
 
-		self.owner.addOutput(host, ']]></file>')
+		self.owner.addOutput(host, ']]></stack:file>')
 

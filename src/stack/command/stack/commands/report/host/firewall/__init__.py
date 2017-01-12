@@ -164,7 +164,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
                 hosts = self.getHostnames(args)
 		for host in hosts:
-			s = '<file name="/etc/sysconfig/iptables" perms="500">'
+			s = '<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">'
 			self.addOutput(host, s)
 			# First, get a list of all rules for every host,
 			# fully resolved
@@ -221,7 +221,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			#	'udp', 'REJECT', 'INPUT', None, None)
 			#self.addOutput(host, rule)
 
-			self.addOutput(host, '</file>')
+			self.addOutput(host, '</stack:file>')
 
 		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
 

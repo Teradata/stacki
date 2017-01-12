@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,19 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:59  bruno
-# star power for gb
-#
-# Revision 1.2  2009/06/03 18:53:43  mjk
-# - sudo support for ubuntu boy (this is cool)
-# - connect to DB over the network socket not the UNIX domain socket
-# - added x11 param to stack.run.host to disable x11forwarding
-#
-# Revision 1.1  2009/05/20 10:05:25  mjk
-# *** empty log message ***
-#
 
 import stack
 import stack.commands
@@ -84,10 +72,10 @@ class Command(stack.commands.report.command):
 			host = self.db.getHostname()
 
 		self.beginOutput()
-		self.addOutput('', '<file name="%s/__init__.py" mode="append">'
+		self.addOutput('', '<stack:file stack:name="%s/__init__.py" stack:mode="append">'
 			% stack.__path__[0])
 		self.addOutput('', 'DatabaseHost = "%s"' % host)
-		self.addOutput('', '</file>')
+		self.addOutput('', '</stack:file>')
 		self.endOutput(padChar='')
 
 

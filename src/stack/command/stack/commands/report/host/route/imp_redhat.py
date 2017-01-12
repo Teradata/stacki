@@ -39,11 +39,11 @@ class Implementation(stack.commands.Implementation):
 
 		host = args[0]
 		self.owner.addOutput(host,
-			'<file name="/etc/sysconfig/static-routes">')
+			'<stack:file stack:name="/etc/sysconfig/static-routes">')
 		routes = self.owner.db.getHostRoutes(host)
 		for (key, val) in routes.items():
 			s = self.getRoute(key, val[0], val[1])
 			if s:
 				self.owner.addOutput(host, s)
-		self.owner.addOutput(host,'</file>')
+		self.owner.addOutput(host,'</stack:file>')
 

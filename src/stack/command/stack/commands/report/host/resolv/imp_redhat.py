@@ -13,7 +13,7 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		host = args[0]
 
-		self.owner.addOutput(host, '<file name="/etc/resolv.conf">')
+		self.owner.addOutput(host, '<stack:file stack:name="/etc/resolv.conf">')
 		self.owner.outputResolv(host)
-		self.owner.addOutput(host, '</file>')
+		self.owner.addOutput(host, '</stack:file>')
 

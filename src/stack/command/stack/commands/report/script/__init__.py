@@ -97,15 +97,14 @@ class Command(stack.commands.report.command):
 
 		xml += '<stack:profile '
                 xml += 'stack:os="%s" ' % osname
-                xml += 'xmlns="http://www.stacki.com" '
                 xml += 'xmlns:stack="http://www.stacki.com" '
                 xml += 'stack:attrs="%s">\n' % attrs
-		xml += '<post>\n'
+		xml += '<stack:post>\n'
 
 		for line in sys.stdin.readlines():
 			xml += line
 
-		xml += '</post>\n'
+		xml += '</stack:post>\n'
 		xml += '</stack:profile>\n' 
 
                 p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',

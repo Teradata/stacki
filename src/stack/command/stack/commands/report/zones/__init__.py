@@ -175,8 +175,8 @@ class Command(stack.commands.report.command):
 			file.close()
 		# if it doesn't exist, create a stub file
 		else:
-			s += "</file>\n"
-			s += '<file name="%s" perms="0644">\n' % filename
+			s += "</stack:file>\n"
+			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += ';Extra host mappings go here. Example\n'
 			s += ';myhost	A	10.1.1.1\n'
 
@@ -247,12 +247,12 @@ class Command(stack.commands.report.command):
                         zone = network['zone']
 			filename = '/var/named/%s.domain' % name
 			s = ''
-			s += '<file name="%s" perms="0644">\n' % filename
+			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (zone, zone, serial, zone, zone)
 			s += 'ns A 127.0.0.1\n\n'
 			s += self.hostlines(name, zone)
 			s += self.hostlocal(name, zone)
-			s += '</file>\n'
+			s += '</stack:file>\n'
 			self.addOutput('', s)
 
                 #    
@@ -272,10 +272,10 @@ class Command(stack.commands.report.command):
 			r_sn = string.join(sn, '.')
 
 			filename = '/var/named/reverse.%s.domain.%s' % (name, r_sn)
-			s += '<file name="%s" perms="0644">\n' % filename
+			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (name, name, serial, name, name)
 			s += self.reversehostlines(r_sn, name)
-			s += '</file>\n'
+			s += '</stack:file>\n'
 
 		self.addOutput('', s)
 		self.endOutput(padChar = '')

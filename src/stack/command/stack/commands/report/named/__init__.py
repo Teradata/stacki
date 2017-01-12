@@ -158,7 +158,7 @@ class Command(stack.commands.report.command):
                 for row in self.call('list.network', [ 'dns=true' ]):
                         networks.append(row)
                         		
-		s = '<file name="/etc/named.conf" perms="0644">\n'
+		s = '<stack:file stack:name="/etc/named.conf" stack:perms="0644">\n'
 		s += stack.text.DoNotEdit()
                 s += '# Site additions go in /etc/named.conf.local\n\n'
                 
@@ -211,7 +211,7 @@ class Command(stack.commands.report.command):
 			s += '\n'
 			
 		s += '\ninclude "/etc/rndc.key";\n'
-		s += '</file>\n'
+		s += '</stack:file>\n'
 
 		self.beginOutput()
 		self.addOutput('', s)
