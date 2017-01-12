@@ -37,7 +37,7 @@
 	Also setup the correct directories and their
 	permissions for running the database
 -->
-mkdir -p /var/opt/stack
+mkdir -p /var/opt/stack/mysql
 
 groupadd -g 403 stackdb
 useradd -u 403 -g stackdb -d /var/opt/stack/mysql -m -s /bin/false stackdb
