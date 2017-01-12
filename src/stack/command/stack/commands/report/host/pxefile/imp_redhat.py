@@ -37,9 +37,9 @@ class Implementation(stack.commands.Implementation):
 		# request inside anaconda.
 
 		if args and args.find('ksdevice=') != -1:
-			dnsserver = self.owner.db.getHostAttr(host,
+			dnsserver = self.owner.getHostAttr(host,
 				'Kickstart_PrivateDNSServers')
-			nextserver = self.owner.db.getHostAttr(host,
+			nextserver = self.owner.getHostAttr(host,
 				'Kickstart_PrivateKickstartHost')
 			
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
