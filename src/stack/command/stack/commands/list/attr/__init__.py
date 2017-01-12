@@ -166,7 +166,7 @@ class Command(stack.commands.Command):
                                 readonly['Kickstart_PublicDNSDomain'] = zone
                                 readonly['Kickstart_PublicNetwork'] = subnet
                                 readonly['Kickstart_PublicNetmask'] = netmask
-                                readonly['Kickstart_PublicNetmaskCIDR'] = 's' % ipg.cidr()
+                                readonly['Kickstart_PublicNetmaskCIDR'] = '%s' % ipg.cidr()
 
                 readonly['release'] = stack.release
                 readonly['version'] = stack.version
