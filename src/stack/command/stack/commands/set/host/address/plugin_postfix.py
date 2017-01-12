@@ -106,9 +106,9 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		(oldhost, oldip, password) = args
 
-		shortname = self.owner.db.getHostAttr('localhost',
+		shortname = self.owner.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
-		domainname = self.owner.db.getHostAttr('localhost',
+		domainname = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicDNSDomain')
 
 		print('Updating postfix')

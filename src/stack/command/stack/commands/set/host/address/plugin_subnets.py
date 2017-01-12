@@ -106,11 +106,11 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		(oldhost, oldip, password) = args
 
-		network = self.owner.db.getHostAttr('localhost',
+		network = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicNetwork')
-		netmask = self.owner.db.getHostAttr('localhost',
+		netmask = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicNetmask')
-		domainname = self.owner.db.getHostAttr('localhost',
+		domainname = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicDNSDomain')
 
 		print('Updating subnets')

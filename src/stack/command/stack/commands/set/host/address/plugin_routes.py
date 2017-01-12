@@ -105,13 +105,13 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		(oldhost, oldip, password) = args
 
-		shortname = self.owner.db.getHostAttr('localhost',
+		shortname = self.owner.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
-		gateway = self.owner.db.getHostAttr('localhost',
+		gateway = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicGateway')
-		private_gateway = self.owner.db.getHostAttr('localhost',
+		private_gateway = self.owner.getHostAttr('localhost',
 			'Kickstart_PrivateGateway')
-		ip = self.owner.db.getHostAttr('localhost',
+		ip = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicAddress')
 
 		print('Updating routes')

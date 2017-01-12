@@ -106,9 +106,9 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		(oldhost, oldip, password) = args
 
-		shortname = self.owner.db.getHostAttr('localhost',
+		shortname = self.owner.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
-		domainname = self.owner.db.getHostAttr('localhost',
+		domainname = self.owner.getHostAttr('localhost',
 			'Kickstart_PublicDNSDomain')
 
 		print('Updating CA certificates')
@@ -157,15 +157,15 @@ class Plugin(stack.commands.Plugin):
 		cmd += '/usr/bin/openssl req -new -nodes -config '
 		cmd += '/etc/security/ca/ca.cfg -keyout private/localhost.key '
 		cmd += ' -subj "'
-		cmd += '/C=%s/ ' % self.owner.db.getHostAttr('localhost',
+		cmd += '/C=%s/ ' % self.owner.getHostAttr('localhost',
 			'Info_CertificateCountry')
-		cmd += 'ST=%s/ ' % self.owner.db.getHostAttr('localhost',
+		cmd += 'ST=%s/ ' % self.owner.getHostAttr('localhost',
 			'Info_CertificateState')
-		cmd += 'L=%s/ ' % self.owner.db.getHostAttr('localhost',
+		cmd += 'L=%s/ ' % self.owner.getHostAttr('localhost',
 			'Info_CertificateLocality')
-		cmd += 'O=%s/ ' % self.owner.db.getHostAttr('localhost',
+		cmd += 'O=%s/ ' % self.owner.getHostAttr('localhost',
 			'Info_CertificateOrganization')
-		cmd += 'OU=%s/ ' % self.owner.db.getHostAttr('localhost',
+		cmd += 'OU=%s/ ' % self.owner.getHostAttr('localhost',
 			'Kickstart_PrivateHostname')
 		cmd += 'CN=%s.%s" ' % (shortname, domainname)
 		cmd += '> certs/localhost.csr 2> /dev/null ; '

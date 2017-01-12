@@ -56,7 +56,7 @@ class Plugin(stack.commands.Plugin):
 		return []
 
 	def run(self, host):
-		appliance = self.owner.db.getHostAttr(host, 'appliance')
+		appliance = self.owner.getHostAttr(host, 'appliance')
 		if appliance == 'frontend':
 			return
 
