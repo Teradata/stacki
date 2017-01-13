@@ -22,8 +22,8 @@ mkdir -p /etc/security/ca/new-certs
 
 <file name="/etc/security/ca/ca.cfg" perms="0640" owner="root.apache">
 [ req ]
-default_bits		= 1024
-default_md		= md5
+default_bits		= 2048
+default_md		= sha512
 string_mask		= nombstr	# permitted characters
 distinguished_name	= req_distinguished_name
 
