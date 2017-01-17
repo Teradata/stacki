@@ -148,7 +148,7 @@ class Command(stack.commands.Command):
                                 """):
                         readonly['Kickstart_PublicAddress'] = ip
                         readonly['Kickstart_PublicHostname'] = '%s.%s' % (host, zone)
-                        stack.ip.IPGenerator(subnet, netmask)
+                        ipg = stack.ip.IPGenerator(subnet, netmask)
 			readonly['Kickstart_PublicBroadcast'] = '%s' % ipg.broadcast()
 
                 for (name, subnet, netmask, zone) in self.db.select(
