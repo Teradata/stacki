@@ -44,10 +44,10 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 bootstrap:
-	yum groupinstall -y "Desktop Platform Development"
+	-yum groupinstall -y "Desktop Platform Development"
 	yum groupinstall -y "Compatibility Libraries"
-	yum groupinstall -y "Development Tools"
-	yum install -y rpm-build \
+	yum groupinstall --skip-broken -y "Development Tools"
+	yum install --skip-broken -y rpm-build \
 	redhat-rpm-config \
 	gcc \
 	gcc-c++ \
