@@ -275,15 +275,6 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, "ipmitool lan set %s vlan id %s" % \
 			(channel, vlanid))
 
-		attr = self.getHostAttr(host, 'ipmi_password')
-		if attr:
-			password = attr
-		else:
-			password = 'admin'
-
-		self.addOutput(host, 'ipmitool user set password 1 %s'
-			% (password))
-
 		self.addOutput(host, 'ipmitool lan set %s access on'
 			% (channel))
 		self.addOutput(host, 'ipmitool lan set %s user'
@@ -293,6 +284,11 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		# add a root user at id 2
 		self.addOutput(host, 'ipmitool user set name 2 root')
+
+		password = self.getHostAttr(host, 'ipmi_password')
+		if not password:
+			password = 'admin'
+
 		self.addOutput(host, 'ipmitool user set password 2 %s'
 			% (password))
 		self.addOutput(host, 'ipmitool channel setaccess ' +
