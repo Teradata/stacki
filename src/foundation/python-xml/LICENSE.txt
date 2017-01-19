@@ -1,5 +1,6 @@
+==========
 python-xml
-----------
+==========
 
 This file collects the licences for the various pieces of software
 included in this package, sorted by the package name in alphabetical

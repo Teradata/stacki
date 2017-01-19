@@ -1,5 +1,6 @@
+========
 py-numpy
---------
+========
 
 Copyright (c) 2005-2011, NumPy Developers.
 All rights reserved.

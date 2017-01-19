@@ -1,5 +1,6 @@
+===========
 py-M2Crypto
------------
+===========
 
 Copyright (c) 1999-2004 Ng Pheng Siong. All rights reserved.
 

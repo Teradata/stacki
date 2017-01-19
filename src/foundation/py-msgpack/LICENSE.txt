@@ -1,5 +1,6 @@
+==========
 py-msgpack
-----------
+==========
 
 Copyright (C) 2008-2011 INADA Naoki <songofacandy@gmail.com>
 

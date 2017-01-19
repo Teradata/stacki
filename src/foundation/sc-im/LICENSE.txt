@@ -1,5 +1,6 @@
+=====
 sc-im
------
+=====
 
 Copyright (c) 2013-2015, Andrés Martinelli <andmarti@gmail.com>
 All rights reserved.

@@ -1,5 +1,6 @@
+=========
 py-pyipmi
----------
+=========
 
 Copyright (c) 2012, Calxeda Inc.
 

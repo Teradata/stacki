@@ -1,5 +1,6 @@
+======
 py-POW
-------
+======
 
 Copyright (c) 2001, 2002, Peter Shannon                                  
 All rights reserved.                                                     

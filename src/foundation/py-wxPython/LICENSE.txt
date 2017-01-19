@@ -1,5 +1,6 @@
+===========
 py-wxPython
------------
+===========
 
                 wxWindows Library Licence, Version 3.1
                 ======================================

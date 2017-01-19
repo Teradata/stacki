@@ -1,5 +1,6 @@
+======
 py-IPy
-------
+======
 
 Copyright (c) 2006, INL
 Copyright (c) 2001-2005, Maximillian Dornseif

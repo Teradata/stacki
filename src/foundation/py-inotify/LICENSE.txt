@@ -1,5 +1,6 @@
+==========
 py-inotify
-----------
+==========
 
 Copyright (c) 2010 Sebastien Martini <seb@dbzteam.org>
 

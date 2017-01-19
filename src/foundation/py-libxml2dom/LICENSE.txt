@@ -1,5 +1,6 @@
+=============
 py-libxml2dom
--------------
+=============
 
 Copyright (C) 2003, 2004, 2005 Paul Boddie <paul@boddie.org.uk>
 

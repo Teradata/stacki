@@ -1,5 +1,6 @@
+========
 pygments
---------
+========
 
 Copyright (c) 2006-2013 by the respective authors (see AUTHORS file).
 All rights reserved.

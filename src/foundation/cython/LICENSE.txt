@@ -1,5 +1,6 @@
+======
 cython
-------
+======
 
 The original Pyrex code as of 2006-04 is licensed under the following
 license: "Copyright stuff: Pyrex is free of restrictions. You may use,

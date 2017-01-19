@@ -1,5 +1,6 @@
+====
 iPXE
-----
+====
 
 In general iPXE files are licensed under the GPL.  For historical
 reasons, individual files may contain their own licence declarations.
