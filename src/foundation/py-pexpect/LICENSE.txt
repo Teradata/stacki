@@ -1,0 +1,9 @@
+py-pexpect
+----------
+
+Pexpect is Open Source, Free, and all Good that stuff.
+License: Python Software Foundation License
+         http://www.opensource.org/licenses/PythonSoftFoundation.html
+
+Noah Spurrier
+
