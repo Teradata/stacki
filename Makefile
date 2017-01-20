@@ -79,3 +79,6 @@ bootstrap:
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
+LICENSE.all.txt:
+	cat LICENSE.txt > $@
+	find src -name LICENSE.txt -exec cat {} \; >> $@
