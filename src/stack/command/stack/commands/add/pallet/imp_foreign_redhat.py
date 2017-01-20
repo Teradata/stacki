@@ -133,7 +133,7 @@ class Implementation(stack.commands.Implementation):
 			if key == 'family':
 				if value == 'Red Hat Enterprise Linux':
 					name = 'RHEL'
-				elif value == 'CentOS':
+				elif value.startswith('CentOS'):
 					name = 'CentOS'
 				elif value == 'Oracle Linux Server':
 					name = 'Oracle'

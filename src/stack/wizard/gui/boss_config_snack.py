@@ -166,7 +166,7 @@ def render_pallets(screen, data):
 
 		#insert pallet info into checkbox tree
 		for p in packages:
-			line = p[0] + ' ' + p[1] + ' ' + p[2]
+			line = p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3]
 			ct.addItem(line, (0, snackArgs['append']))
 
 		#create buttons
@@ -249,7 +249,7 @@ def process_data(page, btn_value, result):
 			for p in result:
 				a = p.split(" ")
 				selected_pallets.append(
-					{'name': a[0], 'version': a[1], 'id': a[2]})
+					{'name': a[0], 'version': a[1], 'release': a[2], 'id': a[3]})
 
 			#takes two arguments of dvd-pallets and network-pallets
 			validated, message, title = \
