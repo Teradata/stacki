@@ -3,7 +3,7 @@
                               stacki.com
                                  v3.3
 
-     Copyright (c) 2006 - 2016 StackIQ Inc. All rights reserved.
+     Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
