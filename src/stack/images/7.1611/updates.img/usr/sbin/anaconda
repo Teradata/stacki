@@ -1,0 +1,153 @@
+#!/opt/stack/bin/python
+
+import subprocess
+import shutil
+import os
+import time
+import re
+import urllib
+
+file = open('/proc/cmdline', 'r')
+args = file.readline().split()
+file.close()
+
+dbgfi = open('/tmp/fetch_stacki_data.txt', 'w')
+# Check to see if there's a user-specified site.attrs / rolls.xml on the kernel command line
+for arg in args:
+	match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
+	if not match:
+		continue
+	uri = match.group(2)
+	dbgfi.write("{0}\t{1}\n".format(arg, uri))
+
+	try:
+		resp = urllib.urlopen(uri)
+		# non-http uri's return None for getcode()
+		if resp.getcode() == 404:
+			dbgfi.write("got 404 on {0}\n".format(uri))
+			raise Exception('404 while trying to fetch: {0}'.format(uri))
+		if 'stacki.attrs' in arg:
+			dbgfi.write("writing /tmp/site.attrs\n")
+			open('/tmp/site.attrs', 'w').write(resp.read())
+		if 'stacki.pallet' in arg:
+			dbgfi.write("writing /tmp/rolls.xml\n")
+			open('/tmp/rolls.xml', 'w').write(resp.read())
+	except Exception as e:
+		dbgfi.write("exception on {0}\t{1}\n".format(arg, match.group(2)))
+		dbgfi.write("{0}\n".format(e))
+		# if there's trouble connecting, safest bet is to proceed without it
+		pass
+dbgfi.close()
+
+
+if 'boss' in args:
+	#
+	# we are a boss
+	#
+
+	#
+	# restart lighttpd 
+	#
+	if os.path.exists('/run/install/tmp/stack.conf'):
+		shutil.copyfile('/run/install/tmp/stack.conf',
+			'/tmp/stack.conf')
+	else:
+		#
+		# create a dummy stack.conf
+		#
+		file = open('/tmp/stack.conf', 'w')
+		file.write('var.trackers = ""\n')
+		file.write('var.pkgservers = ""\n')
+		file.close()
+
+	subprocess.call([ '/opt/lighttpd/sbin/lighttpd', '-f', 
+		'/opt/lighttpd/conf/lighttpd.conf', '-m',
+		'/opt/lighttpd/lib/' ])
+
+#
+# call the real anaconda
+#
+
+s = subprocess.Popen(['/usr/sbin/anaconda.real'])
+s.wait()
+
+if 'boss' in args:
+	#
+	# get the repos configured
+	#
+	# first move all the existing repo files out of the way
+	#
+	os.system('mv /etc/anaconda.repos.d/*.repo /tmp/')
+
+	#
+	# now build a new repo file with all the selected pallets
+	#
+	import stack.roll
+	import urlparse
+
+	g = stack.roll.Generator()
+
+	if os.path.exists('/tmp/rolls.xml'):
+		g.parse('/tmp/rolls.xml')
+	elif os.path.exists('/tmp/pallets.xml'):
+		g.parse('/tmp/pallets.xml')
+
+	file = open('/etc/anaconda.repos.d/stacki.repo', 'w')
+
+	baserepo = None
+	for pallet in g.rolls:
+		(pname, pver, prel, parch, purl, pdiskid) = pallet
+
+		u = urlparse.urlparse(purl)
+		if u.netloc == '127.0.0.1':
+			host = 'localhost'
+		else:
+			host = u.netloc	
+
+		file.write('[%s-%s]\n' % (pname, pver))
+		file.write('name=%s %s\n' % (pname, pver))
+		file.write('baseurl=http://%s/install/pallets/%s/%s/%s/redhat/x86_64\n' % (host, pname, pver, prel))
+		file.write('assumeyes=1\n')
+
+		#
+		# need to make a "base" repo address
+		#
+		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+			baserepo = 'http://%s/install/pallets/%s/%s/%s/redhat/x86_64' % (host, pname, pver, prel)
+			
+	file.close()
+
+	#
+	# we are a boss
+	#
+	if 'stack-debug' in args:
+		#
+		# debug development code
+		#
+		file = open('/tmp/wait', 'w')
+		file.write('/usr/sbin/anaconda.real --repo=%s\n' % baserepo)
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)
+
+	#
+	#
+	# kill all instances of 'anaconda.real' and 'Xorg'
+	#
+	os.system('killall -9 anaconda.real')
+	os.system('killall -9 Xorg')
+
+	#
+	# if we are a boss, then restart anaconda
+	#
+	s = subprocess.Popen(['/usr/sbin/anaconda.real', '--repo=%s' % baserepo])
+	s.wait()
+
+	if 'stack-debug' in args:
+		#
+		# debug development code
+		#
+		file = open('/tmp/wait', 'w')
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)

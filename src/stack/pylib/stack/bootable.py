@@ -241,17 +241,7 @@ class Bootable:
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
 
-		if stack.release == '7.x':
-			#
-			# upgrade.img
-			#
-			fileold = os.path.join(os.path.join(images,
-				'upgrade.img'))
-			filenew = os.path.join(imagesdir, 'upgrade.img')
-			print('fileold %s' % fileold)
-			print('filenew %s' % filenew)
-			shutil.copy(fileold, filenew)
-		else:
+		if stack.release == '6.x':
 			#
 			# install.img
 			#
@@ -259,8 +249,7 @@ class Bootable:
 				'install.img'))
 			filenew = os.path.join(imagesdir, 'install.img')
 			os.rename(fileold, filenew)
-
-		os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+			os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		if stack.release == '7.x':
 			#
