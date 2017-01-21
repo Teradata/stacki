@@ -44,7 +44,7 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 bootstrap:
-	-yum groupinstall -y "Desktop Platform Development"
+	-yum groupinstall -y "Development and Creative Workstation"
 	yum groupinstall -y "Compatibility Libraries"
 	yum groupinstall --skip-broken -y "Development Tools"
 	yum install --skip-broken -y rpm-build \
@@ -75,7 +75,8 @@ bootstrap:
 	httpd-devel \
 	syslinux \
 	createrepo \
-	perl-ExtUtils-MakeMaker
+	perl-ExtUtils-MakeMaker \
+	asciidoc
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
