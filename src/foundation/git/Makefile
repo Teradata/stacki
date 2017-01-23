@@ -52,6 +52,7 @@ build:
 		cd $(NAME)-$(VERSION);	\
 		./configure --prefix=$(PKGROOT); \
 		$(MAKE) all;	\
+		$(MAKE) man;	\
 	)
 
 install::
@@ -60,8 +61,13 @@ install::
 		cd $(NAME)-$(VERSION);	\
 		$(MAKE) DESTDIR=$(ROOT)	\
 			install;	\
+		$(MAKE) DESTDIR=$(ROOT)	\
+			install-man;	\
 	)
+	find $(ROOT)/$(PKGROOT)/share/man/man1/ -type f -exec gzip -f {} \;
 	find $(ROOT)/$(PKGROOT)/share/man/man3/ -type f -exec gzip -f {} \;
+	find $(ROOT)/$(PKGROOT)/share/man/man5/ -type f -exec gzip -f {} \;
+	find $(ROOT)/$(PKGROOT)/share/man/man7/ -type f -exec gzip -f {} \;
 
 clean::
 	rm -rf $(NAME)-$(VERSION)
