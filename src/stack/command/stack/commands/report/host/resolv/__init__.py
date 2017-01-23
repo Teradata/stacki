@@ -84,12 +84,18 @@ class Command(stack.commands.report.host.command):
 		# if any network has 'dns' set to true, then the frontend
 		# is serving DNS for that network, so make sure the
 		# frontend is listed as the first DNS server, then list
-		# the public DNS server
+		# the public DNS server. The IP address of the DNS server
+		# should be the one on the network that serves out
+		# DNS. Not the primary network of the frontend.
 		#
+
 		for row in self.call('list.host.interface', [ host ]):
 			network = row['network']
 			if dns.has_key(network) and dns[network]:
 				frontend = self.getHostAttr(host, 'Kickstart_PrivateAddress')
+				for intf in self.call('list.host.interface',['localhost']):
+					if intf['network'] == network:
+						frontend = intf['ip']
 				self.addOutput(host, 'nameserver %s' % frontend)
 				break
 
