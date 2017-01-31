@@ -53,8 +53,8 @@ build:
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
 	(cd build ; \
-		find . | cpio -c -o | gzip -9cv > \
-		$(ROOT)/$(PKGROOT)/updates.img ; \
+		mksquashfs * $(ROOT)/$(PKGROOT)/updates.img \
+			-keep-as-directory ; \
 	)
 
 clean::

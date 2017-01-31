@@ -6,7 +6,7 @@ command -v getarg >/dev/null || . /lib/dracut-lib.sh
 
 info "STACKIQ: starting lighttpd"
 
-ln -s /updates/opt /opt
+# [ ! -h /opt ] && ln -s /updates/opt /opt
 
 #
 # initqueue/online hook passes interface name as $1
