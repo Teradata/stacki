@@ -30,11 +30,11 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <timezone>--utc &Kickstart_Timezone;</timezone>
 <eval shell="/opt/stack/bin/python" mode="xml">
 if '&boot_device;' != '' and '&release;' == '6.x':
-	print "&lt;bootloader&gt;--location=none&lt;/bootloader&gt;"
+	print "&lt;stack:bootloader&gt;--location=none&lt;/stack:bootloader&gt;"
 elif '&boot_device;' != '' and '&release;' == '7.x':
-	print "&lt;bootloader&gt;--location=mbr --boot-drive=&boot_device;&lt;/bootloader&gt;"
+	print "&lt;stack:bootloader&gt;--location=mbr --boot-drive=&boot_device;&lt;/stack:bootloader&gt;"
 else:
-	print "&lt;bootloader&gt;--location=mbr&lt;/bootloader&gt;"
+	print "&lt;stack:bootloader&gt;--location=mbr&lt;/stack:bootloader&gt;"
 </eval>
 
 </main>
