@@ -46,6 +46,8 @@ import types
 def str2bool(s):
 	"""Converts an on/off, yes/no, true/false string to
 	True/False."""
+	if type(s) == types.BooleanType:
+		return s
 	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
 		return True
 	else:
@@ -59,9 +61,3 @@ def bool2str(b):
 		else:
 			return 'no'
 	return None
-
-	if b:
-		return 'yes'
-	else:
-		return 'no'
-
