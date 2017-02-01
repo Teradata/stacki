@@ -1,31 +1,31 @@
 # @SI_Copyright@
 #                               stacki.com
 #                                  v3.3
-# 
+#
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-# 	 "This product includes software developed by StackIQ" 
-#  
+# features or use of this software must display the following acknowledgement:
+#
+# 	 "This product includes software developed by StackIQ"
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -43,40 +43,40 @@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
 #  		         version 5.4 (Maverick)
-#  
+#
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
+# All rights reserved.
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
+# features or use of this software must display the following acknowledgement:
+#
 # 	"This product includes software developed by the Rocks(r)
 # 	Cluster Group at the San Diego Supercomputer Center at the
 # 	University of California, San Diego and its contributors."
-# 
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of
+# the associated name, interested parties should contact Technology
+# Transfer & Intellectual Property Services, University of California,
+# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910,
 # Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
+#
 # THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -95,7 +95,6 @@ import os
 import stat
 import time
 import sys
-import string
 import stack.commands
 from stack.exception import *
 
@@ -106,7 +105,7 @@ class command(stack.commands.ApplianceArgumentProcessor,
 class Command(command):
 	"""
 	Add an appliance specification to the database.
-	
+
 	<arg type='string' name='appliance'>
 	The appliance name (e.g., 'backend', 'frontend', 'nas').
 	</arg>
@@ -121,9 +120,9 @@ class Command(command):
 	The name of the root XML node (e.g., 'backend', 'nas'). If
 	not supplied, the node name is set to the appliance name.
 	</param>
-	
+
 	<param type='bool' name='public'>
-	True means this appliance will be displayed by 'insert-ethers' in 
+	True means this appliance will be displayed by 'insert-ethers' in
 	the Appliance menu. The default is 'yes'.
 	</param>
 
@@ -144,9 +143,9 @@ class Command(command):
                         ])
 
 		public  = self.bool2str(self.str2bool(public))
-		
+
 		if not longname:
-			longname = string.capitalize(appliance)
+			longname = str.capitalize(appliance)
 
 		#
 		# check for duplicates
@@ -177,4 +176,4 @@ class Command(command):
                         'attr=kickstartable',
 			'value=%s' % self.bool2str(kickstartable)
                         ])
-		
+
