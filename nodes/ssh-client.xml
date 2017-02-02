@@ -55,7 +55,7 @@ cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null
 </post>
 
 
-<post cond="not ssh.use_dns">
+<post cond="not &ssh.use_dns;">
 
 <file name="/etc/ssh/sshd_config" mode="append">
 UseDNS no
