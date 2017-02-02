@@ -578,7 +578,8 @@ class RollBuilder(Builder, stack.dist.Arch):
 				sos = o['os']
 
 		if not sversion:
-			raise CommandError(self, 'could not stacki pallet version "%s"' % stack.version)
+			msg = 'could not find stacki pallet matching version "%s" in "stack list pallet"'
+			raise CommandError(self, msg % stack.version)
 
 		foundation_comps = os.path.join('/export', 'stack',
 			'pallets', 'stacki', sversion,
