@@ -34,5 +34,8 @@
 
 	<package>xfsprogs</package>
 
+	<package>git</package>
+	<package>perl-Git</package>
+
 </kickstart> 
 
