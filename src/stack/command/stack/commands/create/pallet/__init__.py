@@ -888,6 +888,15 @@ class GitRollBuilder(Builder):
 			print(stdout)
 			raise CommandError(self, 'Unable to checkout: %s' % self.commitish)
 
+		# clean the directory
+		cmd = 'git clean -xfd'
+		proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		stdout, stderr = proc.communicate()
+
+		if proc.returncode != 0:
+			print(stdout)
+			raise CommandError(self, 'Unable to clean git directory')
+
 
 	def make_roll(self):
 		# get roll name from version.mk
