@@ -211,11 +211,24 @@ class Command(stack.commands.RollArgumentProcessor,
 				break
 
 		# Remove pallet from database as well
+		# we need the id before deleting, as it's a fkey
 		self.db.execute("""
-			delete from rolls where
+			select id from rolls where
 			name = '%s' and version = '%s' and rel = '%s' and
 			arch = '%s' and os = '%s'
 			""" % (roll, version, release, arch, OS))
+
+		doomed_pallet_id = self.db.fetchone()
+
+		# remove from the list of pallets and stacks
+		self.db.execute("""
+			delete from rolls where
+			id = '%s'
+			""" % doomed_pallet_id)
+		self.db.execute("""
+			delete from stacks where
+			roll = '%s'
+			""" % doomed_pallet_id)
 
 		# Regenerate stacki.repo
 		os.system("""
