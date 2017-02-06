@@ -110,6 +110,7 @@ install::
 
 	mkdir -p $(ROOT)/export/stack/sbin/profile
 	$(INSTALL) -m 0755 profile.py  $(ROOT)/export/stack/sbin/profile.cgi
+	$(INSTALL) -m 0755 pallets_xml.py  $(ROOT)/export/stack/sbin/pallets_xml.cgi
 	$(INSTALL) -m 0755 __init__.py $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 redhat.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 utils/*.cgi $(ROOT)/export/stack/sbin/
