@@ -118,14 +118,14 @@ class Command(stack.commands.list.box.command,
 		boxes = self.getBoxNames(args)
 
 		for box in boxes:
-			self.db.execute("""select r.name, r.arch, r.version from
+			self.db.execute("""select r.name, r.arch, r.version, r.rel from
 				stacks s, rolls r, boxes b where
 				s.roll = r.id and s.box = b.id and
 				b.name = '%s' """ % box)
 			
-			for (roll, arch, version) in self.db.fetchall():
-				self.addOutput(box, (roll, arch, version))
+			for (roll, arch, version, release) in self.db.fetchall():
+				self.addOutput(box, (roll, arch, version, release))
 
-		self.endOutput(header=['box', 'pallet', 'arch', 'version'],
+		self.endOutput(header=['box', 'pallet', 'arch', 'version', 'release'],
 			trimOwner=False)
 
