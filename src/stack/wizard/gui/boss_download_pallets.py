@@ -177,7 +177,7 @@ def start(func, *args): # helper method to run a function in another thread
 
 def main():
 	if noX or not HAS_WX:
-		start(do_download)
+		do_download()
 	else:
 		app = wx.App(False)
 		dialog = DownloadFrame(None, "Downloading Pallets")
