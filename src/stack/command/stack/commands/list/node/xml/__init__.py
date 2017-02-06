@@ -114,7 +114,8 @@ class Command(stack.commands.list.command,
 
 	<param type='string' name='attrs'>
 	A list of attributes. This list must be in python dictionary form,
-	e.g., attrs="{ 'os': 'redhat', 'arch' : 'x86_64' }"
+	e.g., attrs="{ 'os': 'redhat', 'arch' : 'x86_64' }" or must be a
+	file of key:value pairs separated by newlines.
 	</param>
 
 	<param type='string' name='pallet'>
