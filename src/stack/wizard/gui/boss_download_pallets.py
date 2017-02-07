@@ -120,8 +120,8 @@ def do_download(dialog=None):
 	cmd = 'mkdir -p /mnt/cdrom ; mount /dev/cdrom /mnt/cdrom'
 	os.system(cmd)
 
-	cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
-	os.system(cmd)
+	#cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
+	#os.system(cmd)
 
 	g = stack.roll.Generator()
 	getpallet = stack.pallet.GetPallet()
@@ -132,16 +132,16 @@ def do_download(dialog=None):
 	elif os.path.exists('/tmp/rolls.xml'):
 		filename = '/tmp/rolls.xml'
 
-	if not filename:
-		if 0:
-			#
-			# XXX not sure if we need to do this
-			#
-			media = stack.media.Media()
-			if media.mounted():
-				media.ejectCD()
-
-		sys.exit(0)
+	#if not filename:
+	#	if 0:
+	#		#
+	#		# XXX not sure if we need to do this
+	#		#
+	#		media = stack.media.Media()
+	#		if media.mounted():
+	#			media.ejectCD()
+	#
+	#	sys.exit(0)
 
 	g.parse(filename)
 	pallets = g.rolls
@@ -157,8 +157,8 @@ def do_download(dialog=None):
 		# display rebuild distribution message
 		dialog.doneMessage()
 
-	cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
-	os.system(cmd)
+	#cmd = 'rm -f /install ; ln -s /mnt/sysimage/export/stack /install'
+	#os.system(cmd)
 
 	if dialog:
 		#close the dialog
