@@ -46,7 +46,6 @@ class Attr:
 
 	Kickstart_PrivateRootPassword = ""
 	Kickstart_PrivateDjangoRootPassword = ""
-	Kickstart_PrivateMD5RootPassword = ""
 	Kickstart_PrivatePortableRootPassword = ""
 	Kickstart_PrivateSHARootPassword = ""
 
@@ -276,10 +275,6 @@ class Data:
 			# different format
 			self.data.Kickstart_PrivateDjangoRootPassword = \
 				enc.enc_django(value)
-
-			# MD5 hash for Root password. Required for
-			# things like Cloudstack
-			self.data.Kickstart_PrivateMD5RootPassword = enc.enc_md5(value)
 
 			return (True, "", "")
 
