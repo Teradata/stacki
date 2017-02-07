@@ -47,7 +47,6 @@ class Attr:
 	Kickstart_PrivateRootPassword = ""
 	Kickstart_PrivateDjangoRootPassword = ""
 	Kickstart_PrivatePortableRootPassword = ""
-	Kickstart_PrivateSHARootPassword = ""
 
 	nukedisks = False
 	devices = {}
@@ -263,9 +262,6 @@ class Data:
 
 			# encrypt the root password
 			self.data.Kickstart_PrivateRootPassword = enc.enc_crypt(value)
-
-			# mysql requires a sha(sha()) password
-			self.data.Kickstart_PrivateSHARootPassword = enc.enc_shasha(value)
 
 			# Wordpress requires a portable root password
 			self.data.Kickstart_PrivatePortableRootPassword = \

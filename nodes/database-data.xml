@@ -60,7 +60,6 @@ if os.path.exists('/tmp/site.attrs'):
 			
 			if key in [ 'Kickstart_PrivatePortableRootPassword', \
 					'Kickstart_PrivateRootPassword', \
-					'Kickstart_PrivateSHARootPassword', \
 					'Kickstart_PrivateDjangoRootPassword' ]:
 				extra = 'shadow=y'
 			else:
