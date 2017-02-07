@@ -255,11 +255,10 @@ class Data:
 			return (False, "Passwords do not match", "Incomplete")
 
 		else:
-			enc=stack.password.Enc()
-			value = pw1
+			p = stack.password.Password()
 
 			# encrypt the root password
-			self.data.Kickstart_PrivateRootPassword = enc.enc_crypt(value)
+			self.data.Kickstart_PrivateRootPassword = p.get_crypt_pw(pw1)
 
 			return (True, "", "")
 
