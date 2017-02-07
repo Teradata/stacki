@@ -45,8 +45,6 @@ class Attr:
 	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
-	Kickstart_PrivateDjangoRootPassword = ""
-	Kickstart_PrivatePortableRootPassword = ""
 
 	nukedisks = False
 	devices = {}
@@ -262,15 +260,6 @@ class Data:
 
 			# encrypt the root password
 			self.data.Kickstart_PrivateRootPassword = enc.enc_crypt(value)
-
-			# Wordpress requires a portable root password
-			self.data.Kickstart_PrivatePortableRootPassword = \
-				enc.enc_portable(value)
-
-			# Django requires a sha1 password in a slightly
-			# different format
-			self.data.Kickstart_PrivateDjangoRootPassword = \
-				enc.enc_django(value)
 
 			return (True, "", "")
 
