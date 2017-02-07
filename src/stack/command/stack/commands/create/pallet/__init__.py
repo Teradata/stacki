@@ -114,6 +114,9 @@ import stack.util
 import stack.bootable
 from stack.exception import *
 
+from xml.sax import make_parser
+import stack.gen
+
 
 class Builder:
 
@@ -349,7 +352,10 @@ class RollBuilder(Builder, stack.dist.Arch):
 		import stack.roll
 		import stack.redhat.gen
 
-		xml = self.command('list.node.xml', [ 'everything', 'eval=n' ] )
+                attrs = {}
+                for row in self.call('list.host.attr', [ 'localhost' ]):
+                        attrs[row['attr']] = row['value']
+		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
 
 		#
 		# make sure the XML string is ASCII and not unicode, 
@@ -358,15 +364,38 @@ class RollBuilder(Builder, stack.dist.Arch):
 		xmlinput = xml.encode('ascii', 'ignore')
 
 		generator = stack.redhat.gen.Generator()
+		generator.setProfileType('native')
 		generator.setArch(self.arch)
 		generator.setOS('redhat')
 		generator.parse(xmlinput)
 
 		rpms = []
+		profile = []
+                profile.append('<?xml version="1.0" standalone="no"?>')
+                profile.append('<profile-%s>' % generator.getProfileType())
+                profile.append('<chapter name="kickstart">')
+                profile.append('<section name="packages">')
 		for line in generator.generate('packages'):
-			if len(line) and line[0] not in [ '#', '%' ]:
-				rpms.append(line)
+			profile.append(line)
+                profile.append('</section>')
+                profile.append('</chapter>')
+                profile.append('</profile-%s>' % generator.getProfileType())
 
+		parser  = make_parser()
+		handler = stack.gen.ProfileHandler()
+
+		parser.setContentHandler(handler)
+                for line in profile:
+			parser.feed('%s\n' % line)
+
+                packages = handler.getChapter('kickstart')
+		for line in packages:
+			if len(line.strip()):
+				if line.startswith('#'):
+					continue
+				if line.startswith('%'):
+					continue
+				rpms.append(line.strip())
 		#
 		# use yum to resolve dependencies
 		#
