@@ -118,11 +118,11 @@ case $ARCH in
     i386|i486|i586|i686)
         echo i386
         ;;
-    i86pc)
+    x86_64|ia64|ppc|i86pc)
         echo $ARCH
         ;;
-    x86_64|ia64|ppc)
-        echo $ARCH
+    armv7l)
+        echo armv7hl
         ;;
     *)
         echo unknown
