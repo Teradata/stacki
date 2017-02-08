@@ -223,6 +223,10 @@ class Command(stack.commands.list.command,
 		doEval = self.str2bool(evalp)
 		allowMissing = self.str2bool(missing)
 
+		# yes, this was already imported above.  Take it out and it crashes looking up .version.
+		# First added in commit 38623be.  No one knows why it's needed.
+		import stack
+
 		# Add more values to the attributes
 		attrs['version'] = stack.version
 		attrs['release'] = stack.release
