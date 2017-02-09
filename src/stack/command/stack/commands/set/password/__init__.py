@@ -113,6 +113,7 @@ class Command(stack.commands.Command):
 		if p[0] != 'root':
 			raise CommandError(self, 'must be root (or have root privileges) to run this command')
 
+		# note that plugin_unix does not care what the current password is, but other plugins could...
 		old_password = getpass.getpass('current system password: ')
 
 		while 1:
