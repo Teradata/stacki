@@ -23,7 +23,6 @@ class Attr:
 	Kickstart_Langsupport = "en_US"
 
 	Kickstart_Timezone = ""
-	RootDir = "/root"
 
 	Kickstart_PublicNTPHost = "pool.ntp.org"
 
@@ -35,13 +34,11 @@ class Attr:
 	Kickstart_PrivateGateway = ""
 	Kickstart_PrivateHostname = ""
 	Kickstart_PrivateInterface = ""
-	Kickstart_PrivateKickstartCGI = "sbin/kickstart.cgi"
 	Kickstart_PrivateKickstartHost = ""
 	Kickstart_PrivateNTPHost = ""
 	Kickstart_PrivateNetmask = ""
 	Kickstart_PrivateNetmaskCIDR = ""
 	Kickstart_PrivateNetwork = ""
-	Kickstart_PrivateKickstartBasedir = "distributions"
 	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
