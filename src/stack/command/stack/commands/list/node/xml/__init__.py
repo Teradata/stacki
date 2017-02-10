@@ -310,7 +310,7 @@ class Command(stack.commands.list.command,
 		if graph.hasNode(root):
 			root = graph.getNode(root)
 		else:
-			raise CommandError(self, 'error - node %s in not in graph' % root)
+			raise CommandError(self, 'error - node "%s" not in graph' % root)
 
 		nodes = stack.profile.FrameworkIterator(graph).run(root)
 		deps  = stack.profile.OrderIterator(handler.getOrderGraph()).run()

@@ -45,10 +45,6 @@ class Attr:
 	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
-	Kickstart_PrivateDjangoRootPassword = ""
-	Kickstart_PrivateMD5RootPassword = ""
-	Kickstart_PrivatePortableRootPassword = ""
-	Kickstart_PrivateSHARootPassword = ""
 
 	nukedisks = False
 	devices = {}
@@ -259,27 +255,10 @@ class Data:
 			return (False, "Passwords do not match", "Incomplete")
 
 		else:
-			enc=stack.password.Enc()
-			value = pw1
+			p = stack.password.Password()
 
 			# encrypt the root password
-			self.data.Kickstart_PrivateRootPassword = enc.enc_crypt(value)
-
-			# mysql requires a sha(sha()) password
-			self.data.Kickstart_PrivateSHARootPassword = enc.enc_shasha(value)
-
-			# Wordpress requires a portable root password
-			self.data.Kickstart_PrivatePortableRootPassword = \
-				enc.enc_portable(value)
-
-			# Django requires a sha1 password in a slightly
-			# different format
-			self.data.Kickstart_PrivateDjangoRootPassword = \
-				enc.enc_django(value)
-
-			# MD5 hash for Root password. Required for
-			# things like Cloudstack
-			self.data.Kickstart_PrivateMD5RootPassword = enc.enc_md5(value)
+			self.data.Kickstart_PrivateRootPassword = p.get_crypt_pw(pw1)
 
 			return (True, "", "")
 
