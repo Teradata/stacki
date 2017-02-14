@@ -49,17 +49,19 @@ build:
 	../../build-initrd.py --rpms=$(REDHAT.RPMS) --pkgs="$(OVERLAY.PKGS)" \
 		--update-pkgs="$(OVERLAY.UPDATE.PKGS)" --build-directory=build
 	find $(EXTRAS.DIRS) -type f | cpio -pduv build
+	(cd build ; \
+		mksquashfs * ../updates.img \
+			-keep-as-directory ; \
+	)
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
-	(cd build ; \
-		mksquashfs * $(ROOT)/$(PKGROOT)/updates.img \
-			-keep-as-directory ; \
-	)
+	$(INSTALL) updates.img $(ROOT)/$(PKGROOT)
 
 clean::
 	rm -rf build
 	rm -rf $(OVERLAY.PKGS)
+	rm -rf updates.img
 
 nuke::
 	rm -rf default
