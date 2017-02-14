@@ -395,7 +395,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 					continue
 				if line.startswith('%'):
 					continue
-				rpms.append(line.strip())
+				for p in line.split():
+					rpms.append(p.strip())
+
 		#
 		# use yum to resolve dependencies
 		#
@@ -520,10 +522,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.close()
 		destdir = os.path.join(cwd, 'RPMS')
 
-		for s in selected:
-			subprocess.call([ 'yumdownloader',
-				'--destdir=%s' % destdir, '-c', yumconf, s ],
-				stdin = None, stdout = None, stderr = None)
+		cmd = [ 'yumdownloader','--destdir=%s' % destdir,'-y','-c', yumconf ]
+		cmd.extend(selected)
+		subprocess.call(cmd, stdin = None)
 		
 		stacki = []
 		nonstacki = []
