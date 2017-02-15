@@ -106,11 +106,11 @@ build:
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
-	(								\
-		cd readline-$(VERSION);					\
-		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
-		chmod 755 $(ROOT)/$(PKGROOT)/lib/libhistory.so.5.1;	\
-		chmod 755 $(ROOT)/$(PKGROOT)/lib/libreadline.so.5.1;	\
+	(									\
+		cd readline-$(VERSION);						\
+		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;			\
+		chmod 755 $(ROOT)/$(PKGROOT)/lib/libhistory.so.$(VERISON);	\
+		chmod 755 $(ROOT)/$(PKGROOT)/lib/libreadline.so.$(VERSION);	\
 	)
 
 clean::
