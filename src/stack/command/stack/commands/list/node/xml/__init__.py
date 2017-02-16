@@ -99,6 +99,7 @@ import subprocess
 import stack
 import stack.profile
 import stack.commands
+from stack.exception import *
 from xml.sax import saxutils
 from xml.sax import handler
 
@@ -113,7 +114,8 @@ class Command(stack.commands.list.command,
 
 	<param type='string' name='attrs'>
 	A list of attributes. This list must be in python dictionary form,
-	e.g., attrs="{ 'os': 'redhat', 'arch' : 'x86_64' }"
+	e.g., attrs="{ 'os': 'redhat', 'arch' : 'x86_64' }" or must be a
+	file of key:value pairs separated by newlines.
 	</param>
 
 	<param type='string' name='pallet'>
@@ -221,6 +223,8 @@ class Command(stack.commands.list.command,
 		doEval = self.str2bool(evalp)
 		allowMissing = self.str2bool(missing)
 
+		# yes, this was already imported above.  Take it out and it crashes looking up .version.
+		# First added in commit 38623be.  No one knows why it's needed.
 		import stack
 
 		# Add more values to the attributes
@@ -306,9 +310,8 @@ class Command(stack.commands.list.command,
 		if graph.hasNode(root):
 			root = graph.getNode(root)
 		else:
-			print('error - node %s in not in graph' % root)
-			sys.exit(-1)
-				
+			raise CommandError(self, 'error - node "%s" not in graph' % root)
+
 		nodes = stack.profile.FrameworkIterator(graph).run(root)
 		deps  = stack.profile.OrderIterator(handler.getOrderGraph()).run()
 

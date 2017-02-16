@@ -129,7 +129,7 @@ def loadSpreadsheetPartitions(disk_info):
 			st = "part %s %s --fstype=%s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['fstype'], \
 				o['device'], \
-				o['options'].replace("'","").replace('"', ''))
+				o['options'])
 			part_lines.append(st)
 
 	# Write all the partition lines

@@ -111,7 +111,7 @@ buildpath = sys.argv[2]
 tree = stack.file.Tree(os.getcwd())
 
 builtfiles = []
-for arch in [ 'noarch', 'i386', 'x86_64' ]:
+for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
 	builtfiles  += tree.getFiles(os.path.join(buildpath, 'RPMS', arch))
 
 manifest = []

@@ -102,8 +102,7 @@ import string
 import syslog
 import stack.lock
 import stack.api
-
-
+import stack.bool
 
 class Client:
         """
@@ -281,42 +280,61 @@ stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.
 stack.api.Call('set host attr', [ client.addr, 'attr=cpus', 'value=%s' % client.np ])
 
 #
-# add all the detected network interfaces to the database
+# update the MAC info in the database
 #
-ifaces = []
-macs = []
-modules = []
-flags = []
+# but there are certain cases in which you don't want the MACs updated -- in
+# that case, set the attribute 'profile.update_macs' to 'false'.
+#
+profile_update_macs = 1
 
-for i in os.environ:
-	if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
-		devinfo = os.environ[i].split()
-		iface   = devinfo[0]
-		macaddr = devinfo[1].lower()
-		module  = ''
-		if len(devinfo) > 2:
-			module = devinfo[2]
+output = stack.api.Call('list host attr',
+	[ client.addr, 'attr=profile.update_macs' ])
 
-		ks = ''
-		if len(devinfo) > 3:
-			ks = 'ks'
+if output:
+	row = output[0]
 
-		ifaces.append(iface)
-		macs.append(macaddr)
-		modules.append(module)
-		flags.append(ks)
+	if not stack.bool.str2bool(row['value']):
+		profile_update_macs = 0
 
-params = []
-if len(ifaces) > 0 and len(macs) > 0:
-	params.append('interface=%s' % ','.join(ifaces))
-	params.append('mac=%s' % ','.join(macs))
+if profile_update_macs:
+	#
+	# add all the detected network interfaces to the database
+	#
+	ifaces = []
+	macs = []
+	modules = []
+	flags = []
 
-	if len(modules) > 0:
-		params.append('module=%s' % (','.join(modules)))
-	if len(flags) > 0:
-		params.append('flag=%s' % (','.join(flags)))
+	for i in os.environ:
+		if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
+			devinfo = os.environ[i].split()
+			iface   = devinfo[0]
+			macaddr = devinfo[1].lower()
+			module  = ''
+			if len(devinfo) > 2:
+				module = devinfo[2]
 
-	stack.api.Call('config host interface', [ client.addr ] + params)
+			ks = ''
+			if len(devinfo) > 3:
+				ks = 'ks'
+
+			ifaces.append(iface)
+			macs.append(macaddr)
+			modules.append(module)
+			flags.append(ks)
+
+	params = []
+	if len(ifaces) > 0 and len(macs) > 0:
+		params.append('interface=%s' % ','.join(ifaces))
+		params.append('mac=%s' % ','.join(macs))
+
+		if len(modules) > 0:
+			params.append('module=%s' % (','.join(modules)))
+		if len(flags) > 0:
+			params.append('flag=%s' % (','.join(flags)))
+
+		stack.api.Call('config host interface',
+			[ client.addr ] + params)
 
 #
 # Generate the system profile

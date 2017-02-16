@@ -110,7 +110,7 @@ EXECS	= tracker-client unregister-file tracker-server peer-done stop-server
 MYSQL	= 1
 
 ifeq ($(MYSQL),1)
-SERVERLIBS	= -L/opt/stack/lib64 -lmysqlclient
+SERVERLIBS	= -L/opt/stack/$(LIB) -lmysqlclient
 CFLAGS		+= -DWITH_MYSQL 
 endif
 

@@ -62,6 +62,13 @@ class Command(stack.commands.report.host.command):
 			dns[row['network']] = row['dns']
 
 		search = []
+		# The default search path should always have the
+		# hosts default network first in the list, after
+		# that go by whatever ordering list.network returns.
+		for intf in self.call('list.host.interface',[host,'expanded=True']):
+			if intf['default'] == True and intf['zone']:
+				search.append(intf['zone'])
+
 		for zone in zones.values():
 			if zone not in search:
 				search.append(zone)
@@ -69,9 +76,6 @@ class Command(stack.commands.report.host.command):
 		if search:
 			self.addOutput(host, 'search %s' % string.join(search))
                         
-		# The default search path should always have the
-		# hosts default network first in the list, after
-		# that go by whatever ordering list.network returns.
 		#
 		# If the default network is 'public' use the
 		# public DNS rather that the server on the boss.

@@ -1629,6 +1629,8 @@ class Command:
 		self.arch = os.uname()[4]
 		if self.arch in [ 'i386', 'i486', 'i586', 'i686' ]:
 			self.arch = 'i386'
+		elif self.arch in [ 'armv7l' ]:
+			self.arch = 'armv7hl'
 
 		self.os = os.uname()[0].lower()
 		if self.os == 'linux':
