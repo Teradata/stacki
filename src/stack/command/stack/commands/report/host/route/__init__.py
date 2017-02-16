@@ -117,6 +117,5 @@ class Command(stack.commands.HostArgumentProcessor,
                 for host in hosts:
 			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])
-
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 

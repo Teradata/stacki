@@ -278,7 +278,7 @@ syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
 # set some values in the database based on the web request
 #
 stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.arch ])
-stack.api.Call('set host cpus', [ client.addr, 'cpus=%s' % client.np ])
+stack.api.Call('set host attr', [ client.addr, 'attr=cpus', 'value=%s' % client.np ])
 
 #
 # add all the detected network interfaces to the database

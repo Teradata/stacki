@@ -63,9 +63,9 @@
 
 case "$1" in
 start)
+	cpus=`grep 'processor' /proc/cpuinfo | wc -l`
 	action "Setting the number of CPUs in the database:" \
-		/opt/stack/bin/stack set host cpus localhost \
-		cpus=`grep 'processor' /proc/cpuinfo | wc -l`
+		/opt/stack/bin/stack set host attr localhost attr=cpus value=$cpus
 	;;
 
 stop)

@@ -223,5 +223,5 @@ class Command(stack.commands.HostArgumentProcessor,
 
 			self.addOutput(host, '</stack:file>')
 
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 

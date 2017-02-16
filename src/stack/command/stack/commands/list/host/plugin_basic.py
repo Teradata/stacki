@@ -51,18 +51,22 @@ class Plugin(stack.commands.Plugin):
                 for host in hosts:
                         dict[host] = True
                         
-                for row in self.db.select("""
-	                n.name, n.rack, n.rank, n.cpus, a.name, b.name,
-                        n.environment, n.runaction, n.installaction from
-			nodes n, appliances a, boxes b where 
-			n.appliance = a.id and n.box = b.id """):
+                for row in self.db.select(
+                        """
+                        n.name, n.rack, n.rank, a.name, b.name, 
+                        e.name, n.runaction, n.installaction from 
+                        (
+                          (nodes n left join environments e on n.environment=e.id) 
+                          left join boxes b on n.box=b.id
+                        ) 
+                        left join appliances a on n.appliance=a.id;
+                        """):
 
                         if dict.has_key(row[0]):
                                 dict[row[0]] = row[1:]
         
                 return { 'keys' : [ 'rack',
                                     'rank',
-                                    'cpus',
                                     'appliance',
                                     'box',
                                     'environment',

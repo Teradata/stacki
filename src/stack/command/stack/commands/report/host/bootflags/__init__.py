@@ -122,5 +122,5 @@ class Command(stack.commands.HostArgumentProcessor,
 				flags = ''
 			self.addOutput(host, '%s' % flags)
 			
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 

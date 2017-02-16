@@ -307,5 +307,5 @@ class Command(stack.commands.HostArgumentProcessor,
 			osname = self.getHostAttr(host, 'os')
 			self.runImplementation(osname, [host])
 
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 

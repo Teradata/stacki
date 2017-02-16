@@ -148,7 +148,7 @@ class implementation(stack.commands.Implementation):
                         profile = handler.getChapter(chapter)
 
                 for line in profile:
-                        self.owner.addOutput(None, line)
+                        self.owner.addOutput('', line)
 
 
 class Command(stack.commands.list.host.command):
@@ -218,4 +218,4 @@ class Command(stack.commands.list.host.command):
                 else:
 			self.runImplementation(osname, (xmlinput, profile, chapter))
 
-		self.endOutput(padChar='', trimOwner=True)
+		self.endOutput(padChar='')

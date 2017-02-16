@@ -64,11 +64,5 @@ class Command(stack.commands.set.os.command):
 	"""
 
 	def run(self, params, args):
-
-                argv = []
-                for p in params:
-                        argv.append('%s=%s' % (p, params[p]))
-
-                for os in self.getOSNames(args):
-		        self.command('set.attr', [ 'scope=os', 
-                                                   'object=%s' % os ] + argv)
+		self.command('set.attr', self._argv + [ 'scope=os' ])
+		return self.rc

@@ -1,5 +1,5 @@
-#
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -51,36 +51,20 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:53:00  bruno
-# star power for gb
-#
-# Revision 1.3  2009/05/01 19:07:02  mjk
-# chimi con queso
-#
-# Revision 1.2  2008/10/18 00:55:56  mjk
-# copyright 5.1
-#
-# Revision 1.1  2008/05/30 22:15:16  bruno
-# can now install a frontend off CD with the distro moved to
-# /export/rocks/install
-#
-#
 
 import stack.commands
 
 class Command(stack.commands.report.command):
 	"""
-	Output the version of Rocks.
+	Output the version of Stacki.
 
 	<example cmd='report version'>
-	Output the current Rocks version.
+	Output the current Stacki version.
 	</example>
 	"""
 
 	def run(self, params, args):
 		self.beginOutput()
 		self.addOutput('', stack.version)
-		self.endOutput(padChar='')
+		self.endOutput()
 

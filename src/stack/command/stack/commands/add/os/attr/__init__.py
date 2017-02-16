@@ -65,6 +65,6 @@ class Command(stack.commands.add.os.command):
 	"""
 
 	def run(self, params, args):
-		self.command('set.os.attr', self._argv + [ 'force=no' ])
+		self.command('add.attr', self._argv + [ 'scope=os' ])
 		return self.rc
 

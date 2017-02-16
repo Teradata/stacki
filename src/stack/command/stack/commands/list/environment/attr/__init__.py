@@ -55,11 +55,5 @@ class Command(stack.commands.list.environment.command):
 	"""
 
 	def run(self, params, args):
-
-                argv = args
-                for p in params:
-                        argv.append('%s=%s' % (p, params[p]))
-                argv.append('scope=environment')
-
-                self.addText(self.command('list.attr', argv))
+		self.addText(self.command('list.attr', self._argv + [ 'scope=environment' ]))
                 return self.rc

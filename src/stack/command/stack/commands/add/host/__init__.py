@@ -100,9 +100,10 @@ import stack.commands
 from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.BoxArgumentProcessor,
-		stack.commands.add.command):
+              stack.commands.ApplianceArgumentProcessor,
+              stack.commands.BoxArgumentProcessor,
+              stack.commands.EnvironmentArgumentProcessor,
+              stack.commands.add.command):
 	pass
 	
 class Command(command):
@@ -114,11 +115,6 @@ class Command(command):
 	basename-rack-rank the default values for the appliance, rack,
 	and rank parameters are taken from the hostname.
         </arg>
-
-        <param type='' name='cpus'>
-        Number of CPUs (cores) in the given host.  If not provided the
-	default of 1 CPU is inserted into the database.
-        </param>
 
 	<param type='string' name='longname'>
 	Long appliance name.  If not provided and the host name is of
@@ -193,11 +189,10 @@ class Command(command):
 			rank = None
 				
 		# fillParams with the above default values
-		(appliance, longname, numCPUs, rack, rank, box, environment) = \
+		(appliance, longname, rack, rank, box, environment) = \
 			self.fillParams( [
 				('appliance', appliance),
 				('longname', None),
-				('cpus', 1),
 				('rack', rack),
 				('rank', rank),
 				('box', 'default'),
@@ -210,13 +205,6 @@ class Command(command):
                         raise ParamRequired(self, 'rack')
 		if rank == None:
                         raise ParamRequired(self, 'rank')
-
-		try:
-			numCPUs = int(numCPUs)
-                except:
-                        raise ParamType(self, 'cpus', 'integer')
-                if numCPUs < 0:
-                        raise ParamValue(self, 'cpus', '> 0')
 
 		if longname and not appliance:
 			#
@@ -235,17 +223,21 @@ class Command(command):
 
 		if box not in self.getBoxNames():
 			raise CommandError(self, 'box "%s" is not in the database' % box)
-	
+
 		self.db.execute("""
                 	insert into nodes
-			(name, appliance, box, environment, cpus, rack, rank)
+			(name, appliance, box, rack, rank)
                         values
                         ('%s',
 			(select id from appliances where name='%s'),
 			(select id from boxes where name='%s'),
-			'%s', '%d', '%s', '%s')
+			'%s', '%s')
                         """ %
-                        (host, appliance, box, environment, numCPUs, rack, rank))
+                        (host, appliance, box, rack, rank))
+
+                if environment:
+                        self.command('set.host.environment', [ host, environment ])
+                        
 
 
 	def run(self, params, args):

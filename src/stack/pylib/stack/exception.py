@@ -81,11 +81,15 @@ class ArgParamBaseError(UsageError):
                         args = arg
                         
                 list = []
-                for a in args:
-                        list.append('"%s"' % a)
-                args = string.join(list, ' or ')
+                if args:
+                        for a in args:
+                                list.append('"%s"' % a)
+                        args = string.join(list, ' or ')
+                        args += ' '
+                else:
+                        args = ''
                                 
-                m = '%s %s %s' % (args, self.argumentType(), msg)
+                m = '%s%s %s' % (args, self.argumentType(), msg)
                 super(ArgParamBaseError, self).__init__(cmd, m)
 
         def argumentType(self):
@@ -102,7 +106,7 @@ class ArgError(ArgParamBaseError):
                 
 class ArgRequired(ArgError):
 
-        def __init__(self, cmd, arg):
+        def __init__(self, cmd, arg=None):
                 super(ArgRequired, self).__init__(cmd, arg, 'is required')
 
 class ArgValue(ArgError):
@@ -112,7 +116,7 @@ class ArgValue(ArgError):
 
 class ArgUnique(ArgValue):
 
-        def __init__(self, cmd, arg):
+        def __init__(self, cmd, arg=None):
                 super(ArgUnique, self).__init__(cmd, arg, 'unique')
 
 

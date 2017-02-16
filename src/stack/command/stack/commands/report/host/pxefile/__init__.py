@@ -1,7 +1,6 @@
-#
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
-#
+# @SI_Copyright@
+# @SI_Copyright@
+
 
 import os
 import stack.commands
@@ -65,4 +64,4 @@ class Command(stack.commands.Command,
 			if pxeInfo:
 				self.runImplementation(osname, pxeInfo)
 
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)

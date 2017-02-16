@@ -121,6 +121,6 @@ class Command(stack.commands.HostArgumentProcessor,
                         
                         self.runImplementation(osname, (host, server))
 
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 
 

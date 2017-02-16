@@ -56,12 +56,6 @@ class Command(stack.commands.list.os.command):
 	"""
 
 	def run(self, params, args):
-
-                argv = self.getOSNames(args)
-                for p in params:
-                        argv.append('%s=%s' % (p, params[p]))
-                argv.append('scope=os')
-
-                self.addText(self.command('list.attr', argv))
+		self.addText(self.command('list.attr', self._argv + [ 'scope=os' ]))
                 return self.rc
 

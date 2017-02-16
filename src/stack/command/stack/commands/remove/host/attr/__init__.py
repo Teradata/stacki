@@ -110,16 +110,5 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-
-		(attr, ) = self.fillParams([ ('attr', None, True) ])
-                 
-		for host in self.getHostnames(args):
-			self.db.execute(
-                                """	
-				delete from attributes 
-                                where
-                                scope     = 'host' and
-				pointerid = (select id from nodes where name='%s') and
-				attr      = '%s'
-                                """ % (host, attr))
-
+		self.command('set.attr', self._argv + [ 'scope=host', 'value=' ])
+		return self.rc

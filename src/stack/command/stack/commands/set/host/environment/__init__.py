@@ -39,11 +39,12 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-
+import string
 import stack.commands
 from stack.exception import *
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.EnvironmentArgumentProcessor,
+              stack.commands.set.host.command):
 	"""
 	Specifies an Environment for the gives hosts.  Environments are
         used to add another level to attribute resolution.  This is commonly
@@ -71,9 +72,13 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
                         raise ArgRequired(self, 'host')
 
+		if environment and environment not in self.getEnvironmentNames():
+                        raise CommandError(self, 'environment parameter not valid')
+
 		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set environment='%s' where
-				name='%s'
+                        	update nodes set environment=
+				(select id from environments where name='%s')
+				where name='%s'
                                 """ % (environment, host))
 

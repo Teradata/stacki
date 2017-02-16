@@ -150,37 +150,43 @@ def Debug(message, level=syslog.LOG_DEBUG):
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
 
-	def getOSNames(self, args=None):
-		"""Returns a list of OS names.  For each arg in the ARGS list
-		normalize the name to one of either 'linux' or 'sunos' as
-		they are the only supported OSes.  If the ARGS list is empty
-		return a list of all supported OS names.
-		"""
-
+        def getOSNames(self, args=None):
 		list = []
+		if not args:
+			args = [ '%' ] # find all appliances
 		for arg in args:
-			s = arg.lower()
-			if s in [ 'centos', 'redhat' ]:
-				list.append('redhat')
-			elif s in [ 'ubuntu' ]:
-				list.append('ubuntu')
-                        elif s in [ 'suse', 'sles' ]:
-                                list.append('sles')
-			elif s in [ 'vmware' ]:
-				list.append('vmware')
-			elif s in [ 'xenserver' ]:
-				list.append('xenserver')
-			else:
-				raise CommandError(self, 'unknown os "%s"' % arg)
-		if not list:
-			list.append('redhat')
-			list.append('ubuntu')
-			list.append('sles')
-			list.append('vmware')
-			list.append('xenserver')
-
+                        if arg == 'centos':
+                                arg = 'redhat'
+			rows = self.db.execute("""select name from oses
+				where name like '%s' order by name""" % arg)
+			if rows == 0 and arg == '%': # empty table is OK
+				continue
+			if rows < 1:
+				raise CommandError(self, 'unknown environment "%s"' % arg)
+			for name, in self.db.fetchall():
+				list.append(name)
 		return list
+
 	
+class EnvironmentArgumentProcessor:
+	"""An Interface class to add the ability to process environment
+	arguments."""
+		
+        def getEnvironmentNames(self, args=None):
+		list = []
+		if not args:
+			args = [ '%' ] # find all appliances
+		for arg in args:
+			rows = self.db.execute("""select name from environments
+				where name like '%s'""" % arg)
+			if rows == 0 and arg == '%': # empty table is OK
+				continue
+			if rows < 1:
+				raise CommandError(self, 'unknown environment "%s"' % arg)
+			for name, in self.db.fetchall():
+				list.append(name)
+		return list
+
 
 class ApplianceArgumentProcessor:
 	"""An Interface class to add the ability to process appliance
@@ -477,8 +483,8 @@ class HostArgumentProcessor:
                         environments = [ ]
 			for e, in self.db.select(
                                         """
-                                        distinct environment 
-                                        from nodes
+                                        distinct name
+                                        from environments
                                         """):
                                 environments.append(e)
 
@@ -1284,10 +1290,13 @@ class DatabaseConnection:
                 """
                 Returns the environment for a given host.
                 """
-                pass
+
                 for (name, environment) in self.select(
                                 """
-                                name, environment from nodes
+                                n.name, e.name from
+                                nodes n, environments e
+                                where
+                                n.environment=e.id
                                 """):
                         if name == host:
                                 return environment
@@ -2014,12 +2023,13 @@ class Command:
 			return
 
 
-		# Loop over the output and check if there is more than
-		# one owner (usually a hostname).  We have only one owner
-		# there is no reason to display it.  The caller can use
-		# trimOwner=False to disable this optimization.
+                # By default always display the owner (col 0), but if
+                # all lines have no owner set skip it.
                 #
-                # CORRECTION: The default is now trimOwner=True
+                # If trimOwner=True optimize the output to not display
+                # the owner IFF all lines have the same owner.  This
+                # looks like grep output across multiple or single
+                # files.
 
 		if trimOwner:
 			owner = ''
@@ -2030,7 +2040,10 @@ class Command:
 				if not owner == line[0]:
 					self.startOfLine = 0
 		else:
-			self.startOfLine = 0
+                        self.startOfLine = 1
+                        for line in self.output:
+                                if line[0]:
+                                        self.startOfLine = 0
 			
 		# Add the header to the output and start formatting.  We
 		# keep the header optional and separate from the output

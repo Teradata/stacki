@@ -97,7 +97,11 @@ import stack.attr
 import stack.commands
 
 
-class Command(stack.commands.Command):
+class Command(stack.commands.Command,
+              stack.commands.OSArgumentProcessor,
+              stack.commands.ApplianceArgumentProcessor,
+              stack.commands.EnvironmentArgumentProcessor,
+              stack.commands.HostArgumentProcessor):
 	"""
 	Lists the set of global attributes.
 
@@ -116,8 +120,7 @@ class Command(stack.commands.Command):
 	</example>
 	"""
 
-        def get_global(self, objects):
-                attrs    = self.get_attributes('global', None, objects)
+        def addGlobalAttrs(self, attributes):
                 readonly = {}
 
                 for (ip, host, subnet, netmask) in self.db.select(
@@ -172,31 +175,23 @@ class Command(stack.commands.Command):
                 readonly['version'] = stack.version
 
                 for key in readonly:
-                        attrs['global'][key] = (readonly[key], None, False)
+                        attributes['global'][key] = (readonly[key], None, 'const', 'global')
 
-                return attrs
+                return attributes
 
-        def get_os(self, oses):
-                return self.get_attributes('os', None, oses)
 
-        def get_environment(self, environments):
-                return self.get_attributes('environment', None, environments)
-
-        def get_appliance(self, appliances):
-                return self.get_attributes('appliance', 'appliances', appliances)
-
-        def get_host(self, hosts):
-                attrs    = self.get_attributes('host', 'nodes', hosts)
+        def addHostAttrs(self, attributes):
                 readonly = {}
 
-                for (name, environment, rack, rank, cpus) in self.db.select(
+                for (name, environment, rack, rank) in self.db.select(
                                 """
-                        	name,environment,rack,rank,cpus from nodes
+                        	n.name, e.name, n.rack, n.rank 
+                                from nodes n
+                                left join environments e on n.environment=e.id
                                 """):
                         readonly[name]         = {}
                         readonly[name]['rack'] = rack
                         readonly[name]['rank'] = rank
-                        readonly[name]['cpu']  = cpus
                         if environment:
                                 readonly[name]['environment'] = environment
 
@@ -222,136 +217,166 @@ class Command(stack.commands.Command):
                         readonly[name]['hostaddr']   = address
                         readonly[name]['domainname'] = zone
 
-                for host in hosts:
+                for host in readonly:
                         readonly[host]['os']       = self.db.getHostOS(host)
                         readonly[host]['hostname'] = host
 
+                for host in attributes:
+                        a = attributes[host]
+                        r = readonly[host]
 
-                for host in attrs:
-                        host_attrs    = attrs[host]
-                        host_readonly = readonly[host]
+                        for key in r:
+                                a[key] = (r[key], None, 'const', 'host')
 
-                        for key in host_readonly:
-                                host_attrs[key] = (host_readonly[key], None, False)
+                return attributes
 
-                return attrs
-
-
-        def get_attributes(self, scope, table=None, objects=None):
-                attrs = {}
-    		for object in objects:
-                        attrs[object] = {}
-
-                if scope == 'global':
-                        shadow = """
-                        scope, attr, value, shadow from attributes
-                        where scope = 'global'
-                        """
-                        noshadow = """
-                        scope, attr, value from attributes
-                        where scope = 'global'
-                        """
-                else:
-                        if table: # lookup requires a join
-                                shadow = """
-                                x.name, a.attr, a.value, a.shadow 
-                                from attributes a, %s x where
-                                a.scope = '%s' and a.pointerid = x.id
-                                """ % (table, scope)
-                                noshadow = """
-                                x.name, a.attr, a.value
-                                from attributes a, %s x where
-                                a.scope = '%s' and a.pointerid = x.id
-                                """ % (table, scope)
-                        else:
-                                shadow = """
-                                pointerstr, attr, value, shadow
-                                from attributes where
-                                scope = '%s'
-                                """ % scope
-                                noshadow = """
-                                pointerstr, attr, value
-                                from attributes where
-                                scope = '%s'
-                                """ % scope
-
-                rows = self.db.select(shadow)
-                if not rows:
-                        self.db.select(noshadow)
-
-	        for row in rows:
-		        if len(row) == 4:
-			        (obj, a, v, x) = row
-		        else:
-			        x = None
-			        (obj, a, v) = row
-                        if attrs.has_key(obj):
-			        attrs[obj][a] = (v, x, True)
-
-                return attrs
 
 
 
 	def run(self, params, args):
 
-                (glob, shadow, scope) = self.fillParams([ 
+                (glob, shadow, scope, resolve) = self.fillParams([ 
                         ('attr',   None),
-                        ('shadow', 'true'),
-                        ('scope',  'global')
+                        ('shadow', True),
+                        ('scope',  'global'),
+                        ('resolve', None)
                 ])
 
-		shadow = self.str2bool(shadow)
+		shadow  = self.str2bool(shadow)
+                lookup  = { 'global'     : { 'fn'     : lambda x=None: [ 'global' ],
+                                             'const'  : self.addGlobalAttrs,
+                                             'resolve': False,
+                                             'table'  : None },
+                            'os'         : { 'fn'     : self.getOSNames,
+                                             'const'  : lambda x: x,
+                                             'resolve': False,
+                                             'table'  : 'oses' },
+                            'appliance'  : { 'fn'     : self.getApplianceNames, 
+                                             'const'  : lambda x: x,
+                                             'resolve': False,
+                                             'table'  : 'appliances' },
+                            'environment': { 'fn'     : self.getEnvironmentNames,
+                                             'const'  : lambda x: x,
+                                             'resolve': False,
+                                             'table'  : 'environments' },
+                            'host'       : { 'fn'     : self.getHostnames,
+                                             'const'  : self.addHostAttrs,
+                                             'resolve': True,
+                                             'table'  : 'nodes' }}
 
-                if scope == 'global':
-                        objects		= [ 'global' ]
-                        attributes	= self.get_global(objects)
-                elif scope == 'os':
-                        objects		= args
-                        attributes	= self.get_os(objects)
-                elif scope == 'environment':
-                        objects		= args
-                        attributes	= self.get_environment(objects)
-                elif scope == 'appliance':
-                        objects		= args
-                        attributes	= self.get_appliance(objects)
-                elif scope == 'host':
-                        objects		= args
-                        attributes	= self.get_host(objects)
+                if scope not in lookup.keys():
+                        raise CommandError(self, 'invalid scope "%s"' % scope)
 
+                if resolve == None:
+                        resolve = lookup[scope]['resolve']
+                else:
+                        resolve = self.str2bool(resolve)
+
+
+                attributes = {}
+                for s in lookup.keys():
+                        attributes[s] = {}
+                        for target in lookup[s]['fn']():
+                                attributes[s][target] = {}
+
+                        table = lookup[s]['table']
+                        if table:
+                                rows = self.db.select("""
+                        		t.name, a.attr, a.value, a.shadow 
+	                                from attributes a, %s t where
+        	                        a.scope = '%s' and a.scopeid = t.id
+                	                """ % (table, s))
+                                if rows:
+                                        for (o, a, v, x) in rows:
+                                                attributes[s][o][a] = (v, x, 'var', s)
+                                else:
+                                        for (o, a, v) in self.db.select("""
+	                                	t.name, a.attr, a.value
+	        	                        from attributes a, %s t where
+        	        	                a.scope = '%s' and a.scopeid = t.id
+                	        	        """ % (table, s)):
+                        	                attributes[s][o][a] = (v, None, 'var', s)
+
+                        else:
+                                o = target
+                                rows = self.db.select("""
+                                	attr, value, shadow from attributes
+	                                where scope = '%s'
+        	                        """ % s)
+                                if rows:
+                                	for (a, v, x) in rows:
+                                                attributes[s][o][a] = (v, x, 'var', s)
+                                else:
+                                        for (a, v) in self.db.select("""
+                                		attr, value from attributes
+	                                	where scope = '%s'
+	                                	""" % s):
+	                                        attributes[s][o][a] = (v, None, 'var', s)
+                
+                        # Mix in any const attributes
+                        lookup[s]['const'](attributes[s])
+
+
+                targets = lookup[scope]['fn'](args)
+                targets.sort()
+
+                if resolve and scope != 'global':
+                        for o in targets:
+                                for (a, (v, x, t, s)) in attributes['global']['global'].items():
+                                	if not attributes[scope][o].has_key(a):
+                                                attributes[scope][o][a] = (v, x, t, s)
+                if resolve and scope == 'host':
+                        for o in targets:
+                                parent = attributes['os'][self.db.getHostOS(o)]
+                                for (a, (v, x, t, s)) in parent.items():
+                                        if not attributes[scope][o].has_key(a):
+                                                attributes[scope][o][a] = (v, x, t, s)
+
+                                parent = attributes['appliance'][self.db.getHostAppliance(o)]
+                                for (a, (v, x, t, s)) in parent.items():
+                                        if not attributes[scope][o].has_key(a):
+                                                attributes[scope][o][a] = (v, x, t, s)
+
+                                env = self.db.getHostEnvironment(o)
+                                if env:
+                                        parent = attributes['environment'][env]
+                                        for (a, (v, x, t, s)) in parent.items():
+                                                if not attributes[scope][o].has_key(a):
+                                                        attributes[scope][o][a] = (v, x, t, s)
+
+
+                                     
+                                     
                 if glob:
-                        for o in objects:
+                        for o in targets:
                                 matches = {}
-                                for key in fnmatch.filter(attributes[o].keys(), glob):
-                                        matches[key] = attributes[o][key]
-                                attributes[o] = matches
+                                for key in fnmatch.filter(attributes[scope][o].keys(), glob):
+                                        matches[key] = attributes[scope][o][key]
+                                attributes[scope][o] = matches
+
+
+                        
 
                 self.beginOutput()
 
-                objects.sort()
-                for o in objects:
-                        attrs = attributes[o]
+                for o in targets:
+                        attrs = attributes[scope][o]
                         keys  = attrs.keys()
                         keys.sort()
                         for a in keys:
-                                (v, x, rw) = attrs[a]
-                                if rw:
-                                        internal = None
-                                else:
-                                        internal = True
-                                attr  = a
-                                value = v
-                                if shadow and x:
-                                        value = x
-
+                                (v, x, t, s) = attrs[a]
+                                if x:
+                                        t = 'shadow'
+                                        if shadow:
+                                                v = x
                                 if scope == 'global':
-                                        self.addOutput(attr, (internal, value))
+                                        self.addOutput(s, (t, a, v))
                                 else:
-                                        self.addOutput(o, (attr, internal, value))
+                                        self.addOutput(o, (s, t, a, v))
                                         
-
                 if scope == 'global':
-                        self.endOutput(header=['attr', 'internal', 'value' ])
+                        self.endOutput(header=['scope', 'type', 'attr', 'value' ])
                 else:
-                        self.endOutput(header=[scope, 'attr', 'internal', 'value' ])
+                        self.endOutput(header=[scope, 'scope', 'type', 'attr', 'value' ])
 
 

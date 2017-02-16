@@ -110,15 +110,6 @@ class Command(stack.commands.remove.os.command):
 	"""
 
 	def run(self, params, args):
-
-		(attr, )  = self.fillParams([ ('attr', None, True) ])
-                 
-		for os in self.getOSNames(args):
-			self.db.execute(
-                                """
-                                delete from attributes where
-                                scope      = 'os' and 
-                                pointerstr = '%s' and
-				attr       = '%s'
-                                """ % (os, attr))
+		self.command('set.attr', self._argv + [ 'scope=os', 'value=' ])
+		return self.rc
 

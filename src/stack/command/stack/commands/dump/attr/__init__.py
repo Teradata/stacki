@@ -101,28 +101,17 @@ class Command(stack.commands.dump.command):
 
 	def run(self, params, args):
 
-		try:
-			self.db.execute("""
-				select scope, attr, value, shadow from
-				global_attributes
-				order by scope, attr
-				""")
-		except:
-			self.db.execute("""
-				select scope, attr, value from
-				global_attributes
-				order by scope, attr
-				""")
-			
-		for row in self.db.fetchall():
-			attr   = stack.attr.ConcatAttr(row[0], row[1])
-			value  = self.quote(row[2])
-			shadow = ''
-			if len(row) == 4 and row[3]:
-				value  = self.quote(row[3])
-				shadow = 'shadow=true'
+                for row in self.call('list.attr'):
+                        t = row['type']
+                        a = row['attr']
+                        v = self.quote(row['value'])
+                        
+                        if t == 'const':
+                                continue
 
-			if value:
-				self.dump('add attr attr=%s value=%s %s' %
-					  (attr, value, shadow))
+                        s = ''
+                        if t == 'shadow':
+                                s = 'shadow=true'
+
+                        self.dump('"set attr" scope=global force=false attr=%s value=%s %s' % (a, v, s))
 

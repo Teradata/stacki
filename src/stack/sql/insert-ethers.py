@@ -285,7 +285,6 @@ class InsertEthers(GUI):
 		self.device		= None
 		self.module		= None
 		self.hostname		= None
-		self.ncpus		= 1
 		self.logfile		= None
 
 		self.kickstartable	= True

@@ -98,9 +98,8 @@ class command(stack.commands.HostArgumentProcessor,
 	pass
 	
 class Command(command):
-	"""
-	List the Appliance, CPU count and physical position info for
-	a list of hosts.
+	"""List the Appliance, and physical position info for a list of
+	hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, info about
@@ -114,7 +113,8 @@ class Command(command):
 	<example cmd='list host'>
 	List info for all known hosts.
 	</example>
-	"""
+
+        """
 	def run(self, params, args):
             
 		(order, ) = self.fillParams([ ('order', 'asc') ])

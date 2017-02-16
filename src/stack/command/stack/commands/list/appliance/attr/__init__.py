@@ -55,12 +55,6 @@ class Command(stack.commands.list.appliance.command):
 	"""
 
 	def run(self, params, args):
-
-                argv = self.getApplianceNames(args)
-                for p in params:
-                        argv.append('%s=%s' % (p, params[p]))
-                argv.append('scope=appliance')
-
-                self.addText(self.command('list.attr', argv))
+		self.addText(self.command('list.attr', self._argv + [ 'scope=appliance' ]))
                 return self.rc
 

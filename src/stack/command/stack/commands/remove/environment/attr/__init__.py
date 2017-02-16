@@ -46,7 +46,7 @@ class Command(stack.commands.remove.environment.command):
 	"""
 	Remove an attribute for an Environment.
 
-	<arg type='string' name='environment' repeat='1' optional='0'>
+	<arg type='string' name='environment' repeat='1' optional='1'>
 	One or more Environment specifications (e.g., 'test').
 	</arg>
 	
@@ -60,18 +60,5 @@ class Command(stack.commands.remove.environment.command):
 	"""
 
 	def run(self, params, args):
-
-		(attr, ) = self.fillParams([ ('attr', None, True) ])
-                 
-		if not args:
-                        raise ArgRequired(self, 'environment')
-                
-		for env in args:
-			self.db.execute(
-                                """
-                                delete from attributes where
-                                scope      = 'environment' and 
-                                pointerstr = '%s' and
-				attr       = '%s'
-                                """ % (env, attr))
-
+		self.command('set.attr', self._argv + [ 'scope=environment', 'value=' ])
+		return self.rc

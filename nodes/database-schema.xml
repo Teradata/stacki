@@ -58,67 +58,39 @@ CREATE TABLE attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL,
-  PointerID	int(11),
-  PointerStr    varchar(32)
+  ScopeID	int(11),
 );
 
 grant select (scope, attr, value) on cluster.attributes to ''@'localhost';
 
+<!-- OSes -->
 
-DROP TABLE IF EXISTS global_attributes;
-CREATE TABLE global_attributes (
-  Scope         varchar(128) default '',
-  Attr          varchar(128) NOT NULL,
-  Value         text,
-  Shadow        text default NULL
+DROP TABLE IF EXISTS oses;
+CREATE TABLE oses (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default '',
+  PRIMARY KEY (ID)
 );
 
-grant select (scope, attr, value) on cluster.global_attributes to ''@'localhost';
+grant select on cluster.oses to ''@'localhost';
 
-DROP TABLE IF EXISTS os_attributes;
-CREATE TABLE os_attributes (
-  OS		varchar(32) NOT NULL default 'redhat',
-  Scope         varchar(128) default '',
-  Attr          varchar(128) NOT NULL,
-  Value         text,
-  Shadow        text default NULL
+insert into oses (name) values ("redhat");
+insert into oses (name) values ("ubuntu");
+insert into oses (name) values ("sles");
+insert into oses (name) values ("vmware");
+insert into oses (name) values ("xenserver");
+
+<!-- Environments -->
+
+DROP TABLE IF EXISTS environments;
+CREATE TABLE environments (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default '',
+  PRIMARY KEY (ID)
 );
 
-grant select (os, scope, attr, value) on cluster.os_attributes to ''@'localhost';
+grant select on cluster.environments to ''@'localhost';
 
-DROP TABLE IF EXISTS environment_attributes;
-CREATE TABLE environment_attributes (
-  Environment   varchar(32) NOT NULL,
-  Scope         varchar(128) default '',
-  Attr          varchar(128) NOT NULL,
-  Value         text,
-  Shadow        text default NULL
-);
-
-grant select (environment, scope, attr, value) on cluster.environment_attributes to ''@'localhost';
-
-
-DROP TABLE IF EXISTS appliance_attributes;
-CREATE TABLE appliance_attributes (
-  Appliance     int(11) NOT NULL default '0',
-  Scope         varchar(128) default '',
-  Attr          varchar(128) NOT NULL,
-  Value         text,
-  Shadow        text default NULL
-);
-
-grant select (appliance, scope, attr, value) on cluster.appliance_attributes to ''@'localhost';
-
-DROP TABLE IF EXISTS node_attributes;
-CREATE TABLE node_attributes (
-  Node		int(11) NOT NULL default '0',
-  Scope         varchar(128) default '',
-  Attr		varchar(128) NOT NULL,
-  Value		text,
-  Shadow        text default NULL
-);
-
-grant select (node, scope, attr, value) on cluster.node_attributes to ''@'localhost';
 
 <!-- Appliances -->
 
@@ -153,8 +125,7 @@ CREATE TABLE nodes (
   Name		varchar(128) default NULL,
   Appliance	int(11) default '2',
   Box		int(11) default '1',
-  Environment	varchar(64) default NULL,
-  CPUs		int(11) NOT NULL default '1',
+  Environment	int(11) default NULL,
   Rack		varchar(64) default NULL,
   Rank		varchar(64) default NULL,
   RunAction	varchar(64) default 'os',

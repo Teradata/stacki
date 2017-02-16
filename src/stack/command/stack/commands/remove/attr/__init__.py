@@ -107,13 +107,7 @@ class Command(stack.commands.remove.command):
 	"""
 
 	def run(self, params, args):
-	        (attr, ) = self.fillParams([ ('attr', None, True) ])
-                 
-		self.db.execute(
-                        """
-        	        delete from attributes where
-			scope = 'global' and
-			attr  = binary '%s'
-                        """ % (attr))
+		self.command('set.attr', self._argv + [ 'value=' ])
+		return self.rc
 
 

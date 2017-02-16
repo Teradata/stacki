@@ -69,11 +69,10 @@ class Command(stack.commands.set.host.command):
 
 	def run(self, params, args):
 
-                argv = []
+                argv = args
+                argv.append('scope=host')
                 for p in params:
                         argv.append('%s=%s' % (p, params[p]))
 
-		for host in self.getHostnames(args):
-		        self.command('set.attr', [ 'scope=host', 
-                                                   'object=%s' % host ] + argv)
+                self.command('set.attr', argv)
 

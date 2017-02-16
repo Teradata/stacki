@@ -112,15 +112,5 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-		(attr, ) = self.fillParams([ ('attr', None, True) ])
-
-		for appliance in self.getApplianceNames(args):
-			self.db.execute(
-                                """
-				delete from attributes 
-                                where
-                                scope     = 'appliance' and
-				pointerid = (select id from appliances where name='%s') and
-				attr      = '%s'
-                                """ % (appliance, attr))
-
+		self.command('set.attr', self._argv + [ 'scope=appliance', 'value=' ])
+		return self.rc

@@ -130,11 +130,11 @@ class Command(command):
 	def run(self, params, args):
 		for host in self.getHostnames(args):
 			self.db.execute("""select 
-				n.cpus, n.rack, n.rank, a.longname, 
+				n.rack, n.rank, a.longname, 
 				n.runaction, n.installaction
 				from nodes n, appliances a where
 				n.appliance=a.id and n.name='%s'""" % host)
-			(cpus, rack, rank, longname, runaction,
+			(rack, rank, longname, runaction,
 				installaction) = self.db.fetchone()
 
 			# do not dump the localhost since the installer
@@ -143,9 +143,9 @@ class Command(command):
 			if self.db.getHostname() == host:
 				continue
 
-			self.dump('"add host" %s cpus=%s rack=%s rank=%s '
+			self.dump('"add host" %s rack=%s rank=%s '
 				'longname=%s' %
-				(host, cpus, rack, rank, 
+				(host, rack, rank, 
 				self.quote(longname)))
 
 			#

@@ -41,5 +41,6 @@
 
 import stack.commands
 
-class command(stack.commands.set.command):
+class command(stack.commands.EnvironmentArgumentProcessor, stack.commands.set.command):
 	pass
+

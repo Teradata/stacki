@@ -81,6 +81,6 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 			self.runImplementation('time_%s' % protocol,
 				(host, appliance, timeserver))
 
-		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+		self.endOutput(padChar='', trimOwner=True)
 
 

@@ -70,11 +70,10 @@ class Command(stack.commands.set.appliance.command):
 
 	def run(self, params, args):
 
-                argv = []
+                argv = args
+                argv.append('scope=appliance')
                 for p in params:
                         argv.append('%s=%s' % (p, params[p]))
 
-		for appliance in self.getApplianceNames(args):
-		        self.command('set.attr', [ 'scope=appliance', 
-                                                   'object=%s' % appliance ] + argv)
+                self.command('set.attr', argv)
 

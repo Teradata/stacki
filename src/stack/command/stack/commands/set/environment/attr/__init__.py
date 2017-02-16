@@ -71,15 +71,11 @@ class Command(stack.commands.set.environment.command):
 
 	def run(self, params, args):
 
-                if not args:
-                        raise ArgRequired(self, 'environment')
-
-                argv = []
+                argv = args
+                argv.append('scope=environment')
                 for p in params:
                         argv.append('%s=%s' % (p, params[p]))
 
-                for env in args:
-		        self.command('set.attr', [ 'scope=environment', 
-                                                   'object=%s' % env ] + argv)
+                self.command('set.attr', argv)
 
 
