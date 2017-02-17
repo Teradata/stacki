@@ -2016,12 +2016,13 @@ class Command:
 			return
 
 
-		# Loop over the output and check if there is more than
-		# one owner (usually a hostname).  We have only one owner
-		# there is no reason to display it.  The caller can use
-		# trimOwner=False to disable this optimization.
+                # By default always display the owner (col 0), but if
+                # all lines have no owner set skip it.
                 #
-                # CORRECTION: The default is now trimOwner=True
+                # If trimOwner=True optimize the output to not display
+                # the owner IFF all lines have the same owner.  This
+                # looks like grep output across multiple or single
+                # files.
 
 		if trimOwner:
 			owner = ''
@@ -2032,7 +2033,10 @@ class Command:
 				if not owner == line[0]:
 					self.startOfLine = 0
 		else:
-			self.startOfLine = 0
+                        self.startOfLine = 1
+                        for line in self.output:
+                                if line[0]:
+                                        self.startOfLine = 0
 			
 		# Add the header to the output and start formatting.  We
 		# keep the header optional and separate from the output
