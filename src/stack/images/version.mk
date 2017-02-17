@@ -10,3 +10,4 @@ OS.DEPENDENCIES	= NetworkManager-devel		\
 		iscsi-initiator-utils-devel	\
 		newt-devel			\
 		squashfs-tools
+ORDER = 99
