@@ -36,6 +36,7 @@
 
 	<package>git</package>
 	<package>perl-Git</package>
+	<package>perl-TermReadKey</package>
+	<package>libgnome-keyring</package>
 
 </kickstart> 
-

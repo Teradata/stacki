@@ -49,6 +49,8 @@ else:
 <package>ipmitool</package>
 <package>OpenIPMI</package>
 
+<package>grub2</package>
+<package>grub2-tools</package>
 
 <post>
 /sbin/chkconfig stack-pre on
