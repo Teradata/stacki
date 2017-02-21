@@ -35,8 +35,8 @@ found = []
 for name, version, release, arch, url, diskid in generator.rolls:
 		purl = '%s/%s/%s/%s/%s/%s/' % (url, name, version, release, 'redhat', arch)
 
-		stack.api.Call('add.pallet',[purl])
-		stack.api.Call('enable.pallet', [name])
+		print '\n'.join(stack.api.Call('add.pallet',[purl]))
+		print '\n'.join(stack.api.Call('enable.pallet', [name]))
 
 </post>
 

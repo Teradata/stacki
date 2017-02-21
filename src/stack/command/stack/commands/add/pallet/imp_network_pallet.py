@@ -66,7 +66,9 @@ class Implementation(stack.commands.Implementation):
 		p = urlparse.urlparse(loc)
 		path = os.path.normpath(p.path)
 		cut_dirs = len(path.split(os.sep)) - 1
-		wget_cmd = ['wget', '-nv',
+		# Normalize URL. Otherwise cutdirs behaves inconsistently
+		norm_loc = "%s://%s%s/" % (p.scheme, p.netloc, path)
+		wget_cmd = ['wget', '-q',
 			'-r', # recursive download
 			'-nH', # Don't create host directory
 			'-np',	# Don't create parent directories
@@ -74,11 +76,11 @@ class Implementation(stack.commands.Implementation):
 			'--cut-dirs=%d' % cut_dirs, 
 			'--reject=TBL,index.html*',
 			'-P',destdir, # directory to save files to
-			loc ]
+			norm_loc ]
 
 		print ' '.join(wget_cmd)
 
-		s = subprocess.Popen(wget_cmd, stdout=sys.stdout, stderr=sys.stderr)
+		s = subprocess.Popen(wget_cmd, stdout=sys.stdout, stderr=sys.stdout)
 		rc = s.wait()
 		os.chdir(cwd)
 		shutil.rmtree(tempdir)
