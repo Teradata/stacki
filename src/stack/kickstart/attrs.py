@@ -1,12 +1,15 @@
 #!/opt/stack/bin/python
 import os
 import sys
+import cgi
+
 from itertools import groupby
 from operator import itemgetter
 
 import stack.api
 import stack.ip
 import stack.password
+import stack.bool
 
 
 def netmask_to_cidr(netmask):
@@ -85,7 +88,11 @@ out += 'Kickstart_PrivateNetwork:{0}\n'.format(net_ip)
 out += 'Kickstart_PrivateRootPassword:{0}\n'.format(password)
 out += 'Kickstart_PublicNTPHost:{0}\n'.format('pool.ntp.org')
 out += 'Kickstart_Timezone:{0}\n'.format(timezone)
-out += 'nukedisks:False'
+
+params = cgi.FieldStorage()
+nukeval = params.getfirst('nukedisks', False)
+
+out += 'nukedisks:{0}'.format(stack.bool.str2bool(nukeval))
 
 print 'Content-type: text/plaintext'
 print 'Content-length: %d' % len(out)
