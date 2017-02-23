@@ -76,7 +76,7 @@ bootstrap:
 	syslinux \
 	createrepo \
 	perl-ExtUtils-MakeMaker \
-	asciidoc
+	asciidoc xmlto
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src $@
 
