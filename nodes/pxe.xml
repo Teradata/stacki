@@ -76,22 +76,22 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 /opt/stack/bin/stack add bootaction action="install" \
 	kernel="vmlinuz-&version;-&release;-&arch;" \
 	ramdisk="initrd.img-&version;-&release;-&arch;" \
-	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction action="install no-parallel-format" \
 	kernel="vmlinuz-&version;-&release;-&arch;" \
 	ramdisk="initrd.img-&version;-&release;-&arch;" \
-	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
 
 /opt/stack/bin/stack add bootaction action="install headless" \
 	kernel="vmlinuz-&version;-&release;-&arch;" \
 	ramdisk="initrd.img-&version;-&release;-&arch;" \
-	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction action="rescue" \
 	kernel="vmlinuz-&version;-&release;-&arch;" \
 	ramdisk="initrd.img-&version;-&release;-&arch;" \
-	args="ks ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
 
 </post>
 
