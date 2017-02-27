@@ -22,6 +22,25 @@
 
 <main>
 <reboot> --eject </reboot>
+
+<eval shell="/opt/stack/bin/python" mode="xml">
+import os
+import urlparse
+import stack.roll
+
+g = stack.roll.Generator()
+
+if os.path.exists('/tmp/rolls.xml'):
+	g.parse('/tmp/rolls.xml')
+elif os.path.exists('/tmp/pallets.xml'):
+	g.parse('/tmp/pallets.xml')
+
+for pallet in g.rolls:
+	(pname, pver, prel, parch, purl, pdiskid) = pallet
+
+	print '&lt;stack:repo&gt; --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s&lt;/stack:repo&gt;' % (pname, purl, pname, pver, prel, parch)
+</eval>
+
 </main>
 
 
