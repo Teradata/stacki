@@ -95,6 +95,7 @@ import string
 import fnmatch
 import stack.attr
 import stack.commands
+import stack.ip
 
 
 class Command(stack.commands.Command):

@@ -109,7 +109,6 @@ import stack
 from stack.cond import EvalCondExpr
 from stack.attr import *
 import stack.graph
-import stack.ip
 from stack.exception import *
 from stack.bool import *
 import xml
