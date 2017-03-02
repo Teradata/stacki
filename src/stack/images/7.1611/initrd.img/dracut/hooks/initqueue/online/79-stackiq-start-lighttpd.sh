@@ -53,6 +53,13 @@ fi
 #
 # start lighttpd
 #
-/opt/lighttpd/sbin/lighttpd -f /opt/lighttpd/conf/lighttpd.conf \
+
+# If we're a frontend, then mount cdrom before starting lighttpd
+if getargbool 0 frontend; then
+	mkdir -p /mnt/cdrom
+	mount /dev/cdrom /mnt/cdrom
+fi
+/opt/lighttpd/sbin/lighttpd \
+	-f /opt/lighttpd/conf/lighttpd.conf \
 	-m /opt/lighttpd/lib/
 

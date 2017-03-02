@@ -552,20 +552,14 @@ class RollBuilder(Builder, stack.dist.Arch):
 		# 
 		fout = open(os.path.join('disk1', 'ks.cfg'), 'w')
 
-		if stack.release == '7.x':
-			fout.write('install\n')
-			fout.write('url --url file:///mnt/cdrom\n')
-			fout.write('lang en_US\n')
-			fout.write('keyboard us\n')
-		else:
-			distdir = os.path.join('mnt', 'cdrom', name,
-				version, release, 'redhat', arch)
-
-			fout.write('install\n')
-			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
-			fout.write('lang en_US\n')
-			fout.write('keyboard us\n')
-			fout.write('interactive\n')
+		palletdir = os.path.join(name,
+			version, release, 'redhat', arch)
+		distdir = os.path.join('mnt','cdrom', palletdir)
+		fout.write('install\n')
+		fout.write('lang en_US\n')
+		fout.write('keyboard us\n')
+		fout.write('url --url http://127.0.0.1/%s\n' % distdir)
+		fout.write('interactive\n')
 
 		fout.close()
 

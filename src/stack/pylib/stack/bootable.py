@@ -113,10 +113,6 @@ class Bootable:
 		for o in stack.api.Call('list host', [ 'localhost']):
 			box = o['box']
 
-		if not box:
-			raise ValueError, 'could not find box for "localhost"'
-			return
-
 		self.filetree['local'] = stack.file.Tree(localdir)
 
 		pallets = []
@@ -233,10 +229,7 @@ class Bootable:
 				shutil.move(os.path.join(images, file),
 					os.path.join(isolinux, 'initrd.img'))
 
-		if stack.release == '7.x':
-			imagesdir = os.path.join(destination, 'images')
-		else:
-			imagesdir = os.path.join(self.palletdir, 'images')
+		imagesdir = os.path.join(self.palletdir, 'images')
 
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
@@ -274,7 +267,7 @@ class Bootable:
 			fileold = f.getFullName()
 			print('fileold %s' % f.getFullName())
 
-			livenewdir = os.path.join(destination, 'LiveOS')
+			livenewdir = os.path.join(self.palletdir, 'LiveOS')
 			if not os.path.exists(livenewdir):
 				os.makedirs(livenewdir)
 

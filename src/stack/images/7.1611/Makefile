@@ -39,8 +39,10 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+SRCDIRS = initrd.img updates.img vmlinuz isolinux
+
 dump-info bootstrap rpm pkg clean nuke build install:
-	for x in initrd.img updates.img vmlinuz isolinux; do \
+	for x in $(SRCDIRS) ; do \
 		if [ -d $$x ]; then				\
 			(cd $$x; $(MAKE) $@);	 		\
 		fi;				 		\
