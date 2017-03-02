@@ -5,26 +5,13 @@ import cgi
 
 from itertools import groupby
 from operator import itemgetter
+import ipaddress
 
 import stack.api
-import stack.ip
 import stack.password
 import stack.bool
 
 
-def netmask_to_cidr(netmask):
-	''' return the number of bits in the (decimal) netmask '''
-
-	cidr = 0
-	try:
-		cidr = bin(netmask).count('1')
-	except TypeError:
-		for octet in netmask.split('.'):
-			cidr += sum([bin(int(octet)).count('1')])
-	return cidr
-
-
-# get IP of connecting client
 remote_ip = os.environ.get('REMOTE_ADDR', None)
 
 if not remote_ip:
@@ -54,12 +41,11 @@ timezone = hostattrs['Kickstart_Timezone']['value']
 p = stack.password.Password()
 password = p.get_crypt_pw('password')
 
-cidr = netmask_to_cidr(netmask)
 
-ipaddr = stack.ip.IPAddr(remote_ip)
-netmask = stack.ip.IPAddr(netmask)
-# calculate the broadcast address
-broadcast = stack.ip.IPAddr((ipaddr & netmask) | ~netmask)
+# calculate the broadcast address, cidr
+ipnetwork = ipaddress.IPv4Network(unicode(net_ip + '/' + netmask))
+broadcast = ipnetwork.broadcast_address
+cidr = ipnetwork.prefixlen
 
 out = '''Info_CertificateCountry:US
 Info_CertificateLocality:Solana Beach
