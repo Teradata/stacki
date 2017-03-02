@@ -191,9 +191,13 @@ def turnOnFilesystems(anaconda):
 	# to /state/partition1. If /state/partition1 doesn't
 	# exist either, just ignore
         import os
-	if not os.path.exists('/export'):
-		if os.path.exists('/state/partition1'):
-			os.symlink('/state/partition1','/export')
+	if not os.path.exists('/mnt/sysimage/export'):
+		if os.path.exists('/mnt/sysimage/state/partition1'):
+			pwd = os.getcwd()
+			os.chdir('/mnt/sysimage')
+			os.symlink('state/partition1',
+				'export')
+			os.chdir(pwd)
 
     else:
         #
