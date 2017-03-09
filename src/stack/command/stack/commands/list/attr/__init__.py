@@ -95,8 +95,8 @@ import string
 import fnmatch
 import stack.attr
 import stack.commands
-import stack.ip
 
+import ipaddress
 
 class Command(stack.commands.Command):
 	"""
@@ -134,8 +134,9 @@ class Command(stack.commands.Command):
                         readonly['Kickstart_PrivateKickstartHost'] = ip
                         readonly['Kickstart_PrivateAddress'] = ip
                         readonly['Kickstart_PrivateHostname'] = host
-                        ipg = stack.ip.IPGenerator(subnet, netmask)
-                        readonly['Kickstart_PrivateBroadcast'] = '%s' % ipg.broadcast()
+                        ipnetwork = ipaddress.IPv4Network(unicode(
+				subnet + '/' + netmask))
+                        readonly['Kickstart_PrivateBroadcast'] = '%s' % ipnetwork.broadcast_address
 
                 for (ip, host, zone, subnet, netmask) in self.db.select(
                                 """
@@ -149,25 +150,27 @@ class Command(stack.commands.Command):
                                 """):
                         readonly['Kickstart_PublicAddress'] = ip
                         readonly['Kickstart_PublicHostname'] = '%s.%s' % (host, zone)
-                        ipg = stack.ip.IPGenerator(subnet, netmask)
-			readonly['Kickstart_PublicBroadcast'] = '%s' % ipg.broadcast()
+                        ipnetwork = ipaddress.IPv4Network(unicode(
+				subnet + '/' + netmask))
+			readonly['Kickstart_PublicBroadcast'] = '%s' % ipnetwork.broadcast_address
 
                 for (name, subnet, netmask, zone) in self.db.select(
                                 """
                                 name, address, mask, zone from 
                                 subnets
 				"""):
-                        ipg = stack.ip.IPGenerator(subnet, netmask)
+                        ipnetwork = ipaddress.IPv4Network(unicode(
+				subnet + '/' + netmask))
                         if name == 'private':
                                 readonly['Kickstart_PrivateDNSDomain'] = zone
                                 readonly['Kickstart_PrivateNetwork'] = subnet
                                 readonly['Kickstart_PrivateNetmask'] = netmask
-                                readonly['Kickstart_PrivateNetmaskCIDR'] = '%s' % ipg.cidr()
+                                readonly['Kickstart_PrivateNetmaskCIDR'] = '%s' % ipnetwork.prefixlen
                         elif name == 'public':
                                 readonly['Kickstart_PublicDNSDomain'] = zone
                                 readonly['Kickstart_PublicNetwork'] = subnet
                                 readonly['Kickstart_PublicNetmask'] = netmask
-                                readonly['Kickstart_PublicNetmaskCIDR'] = '%s' % ipg.cidr()
+                                readonly['Kickstart_PublicNetmaskCIDR'] = '%s' % ipnetwork.prefixlen
 
                 readonly['release'] = stack.release
                 readonly['version'] = stack.version
