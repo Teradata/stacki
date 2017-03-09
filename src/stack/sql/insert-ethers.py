@@ -100,14 +100,16 @@ import string
 import time
 import signal
 import snack
+import bisect
+import syslog
+from gettext import gettext as _
+import ipaddress
+
 import stack.sql
-import stack.ip
 import stack.util
 import stack.app
 from stack.api.get import *
 import stack.kickstart
-import syslog
-from gettext import gettext as _
 from stack.exception import *
 
 
@@ -273,6 +275,9 @@ class InsertEthers(GUI):
 		self.lastmsg		= ''
 		self.client		= ''
 		self.setDistribution('default')
+
+		self.ipnetwork		= None
+		self.currentip		= None
 
 		## Things for Dumping/Restoring 
 		self.doRestart		= 1
@@ -529,52 +534,53 @@ class InsertEthers(GUI):
 		
 		self.sql.execute("select address,mask from subnets where name='%s'" % (subnet))
 		network,netmask = self.sql.fetchone()
-		return network,netmask
+		return network, netmask
 			
 	def getnextIP(self, subnet):
-	
-		network,mask = self.getnetwork(subnet)
-		mask_ip = stack.ip.IPAddr(mask)
-		network_ip = stack.ip.IPAddr(network)
-		bcast_ip = stack.ip.IPAddr(network_ip | stack.ip.IPAddr(~mask_ip))
-		bcast = "%s" % (bcast_ip)
+		if not self.ipnetwork:
+			network, mask = self.getnetwork(subnet)
+			self.ipnetwork = ipaddress.IPv4Network(unicode(network + '/' + mask))
 		
-		if self.ipaddr is not None :
+		if self.ipaddr and self.maxNew == 1:
 			return self.ipaddr
 
-		if bcast != '' and mask != '':
-		
-			# Create the IPGenerator and if the user choose a 
-			# base ip address to the IPGenerator to start there.
-			# Should really be a method in the class to set this,
-			# but I need this today on 3.2.0.  Revisit soon (mjk)
-			
-			ip = stack.ip.IPGenerator(bcast, mask)
-			if self.sql.ipBaseAddress:
-				ip.addr = stack.ip.IPAddr(
-							self.sql.ipBaseAddress)
+		# if this is our first call of getnextIP(), we need to find our starting IP in the range of IP's
+		if not self.currentip:
+			# if we weren't given one, default to broadcast-1
+			if not self.sql.ipBaseAddress:
+				self.sql.ipBaseAddress = str(self.ipnetwork.broadcast_address - 1)
 
-			#
-			# look in the database for a free address
-			#
-			while 1:
-			
-				# Go to the next ip address.  Default is still
-				# to count backwards, but allow the user to
-				# set us to count forwards.
-				
-				ip.next(self.sql.ipIncrement)
-				
-				nodeid = self.sql.getNodeId(ip.curr())
-				if nodeid is None:
-					return ip.curr()
+			starting_ip = int(ipaddress.IPv4Address(unicode(self.sql.ipBaseAddress)))
+			# iterating over a /8 IPv4Network() object to get to the right
+			# starting point is very slow. pathological case: minutes
+			# so we do a bisect over the int representation of the IP's
+			# to get there faster, then instead of iterating over hosts()
+			# keep track of our index and increment by hand.
 
-		#
-		# if we make it to here, an error occurred
-		#
-		print('error: getnextIP: could not get IP address ', end=' ')
-		print('for device (%s)' % (dev))
-		return '0.0.0.0'
+			# get index of starting ip into the list of IP's (not hosts!) in this network
+			network_range = range(self.ipnetwork.network_address, self.ipnetwork.broadcast_address + 1)
+			host_index = bisect.bisect_left(network_range, starting_ip)
+			# add this index to the int() value of the bottom IP address (eg '10.0.0.0' -> 167772160)
+			# This new number is the integer value of the IP.  Use *that* to track the IP addresses.
+			self.currentip = ipaddress.IPv4Address(host_index + int(self.ipnetwork.network_address))
+
+		while True:
+			# start out with the current IP
+			next_ip = int(self.currentip)
+			# if we increment to the network or broadcast IP we should stop
+			if int(self.ipnetwork.network_address) >= next_ip:
+				raise InsertError('Error: Next IP is below allowable hosts in the "%s" network' % subnet)
+			if int(self.ipnetwork.broadcast_address) <= next_ip:
+				raise InsertError('Error: Next IP is above allowable hosts in the "%s" network' % subnet)
+
+			# if the ip is already associated with a node, increment and loop
+			nodeid = self.sql.getNodeId(str(ipaddress.IPv4Address(next_ip)))
+			if nodeid:
+				self.currentip = next_ip + self.sql.ipIncrement
+				msg = 'IP %s is taken, adding %s to find next available' % (next_ip, self.sql.ipIncrement)
+				syslog.syslog(syslog.LOG_DEBUG, msg)
+			else:
+				return str(ipaddress.IPv4Address(next_ip))
 
 
 	def addit(self, mac, nodename, ip, netmask):
