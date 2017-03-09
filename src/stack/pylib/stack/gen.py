@@ -101,7 +101,6 @@ from xml.sax import handler
 import xml.dom.NodeFilter
 import xml.dom.ext.reader.Sax2
 from stack.bool import *
-import stack.js
 import stack.cond
 	
 		
