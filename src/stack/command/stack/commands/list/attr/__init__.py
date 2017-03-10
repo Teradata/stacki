@@ -93,6 +93,7 @@
 import sys
 import string
 import fnmatch
+import ipaddress
 import stack.attr
 import stack.commands
 
