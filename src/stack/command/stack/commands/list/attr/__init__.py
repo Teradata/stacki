@@ -96,8 +96,6 @@ import fnmatch
 import stack.attr
 import stack.commands
 
-import ipaddress
-
 class Command(stack.commands.Command,
               stack.commands.OSArgumentProcessor,
               stack.commands.ApplianceArgumentProcessor,
