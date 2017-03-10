@@ -227,7 +227,7 @@ class Data:
 			#calculate public network interfaces
 			try:
 				ipnetwork = ipaddress.IPv4Network(unicode(
-					self.data.Kickstart_PrivateAddress + '/'
+					self.data.Kickstart_PrivateAddress + '/' +
 					self.data.Kickstart_PrivateNetmask),
 					strict=False)
 				self.data.Kickstart_PrivateNetwork = str(ipnetwork.network_address)
