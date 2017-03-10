@@ -1199,6 +1199,10 @@ if __name__ == "__main__":
             if drive.type != "cdrom":
                 continue
 
+	    # STACKI
+	    # Unmount from /mnt/cdrom before trying to eject
+	    os.system('umount /mnt/cdrom')
+	    # STACKI
             log.info("attempting to eject %s" % drive.path)
             drive.eject()
 

@@ -95,8 +95,10 @@ import os.path
 import sys
 import stack
 import string
+
+import ipaddress
+
 import stack.commands
-import stack.ip
 import stack.text
 
 class Command(stack.commands.HostArgumentProcessor,
@@ -141,11 +143,12 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.addOutput('', '\tdefault-lease-time\t\t1200;')
 			self.addOutput('', '\tmax-lease-time\t\t\t1200;')
 
-			ipg  = stack.ip.IPGenerator(network, netmask)
+			ipnetwork = ipaddress.IPv4Network(unicode(
+				network + '/' + netmask))
                         self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
 			self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
 			self.addOutput('', '\toption broadcast-address\t%s;' %
-                        	ipg.broadcast())
+                        	ipnetwork.broadcast_address)
 			self.addOutput('', '}\n')
 
                 data = { }

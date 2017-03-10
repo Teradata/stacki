@@ -114,6 +114,9 @@ import stack.util
 import stack.bootable
 from stack.exception import *
 
+from xml.sax import make_parser
+import stack.gen
+
 
 class Builder:
 
@@ -349,7 +352,10 @@ class RollBuilder(Builder, stack.dist.Arch):
 		import stack.roll
 		import stack.redhat.gen
 
-		xml = self.command('list.node.xml', [ 'everything', 'eval=n' ] )
+                attrs = {}
+                for row in self.call('list.host.attr', [ 'localhost' ]):
+                        attrs[row['attr']] = row['value']
+		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
 
 		#
 		# make sure the XML string is ASCII and not unicode, 
@@ -358,14 +364,39 @@ class RollBuilder(Builder, stack.dist.Arch):
 		xmlinput = xml.encode('ascii', 'ignore')
 
 		generator = stack.redhat.gen.Generator()
+		generator.setProfileType('native')
 		generator.setArch(self.arch)
 		generator.setOS('redhat')
 		generator.parse(xmlinput)
 
 		rpms = []
+		profile = []
+                profile.append('<?xml version="1.0" standalone="no"?>')
+                profile.append('<profile-%s>' % generator.getProfileType())
+                profile.append('<chapter name="kickstart">')
+                profile.append('<section name="packages">')
 		for line in generator.generate('packages'):
-			if len(line) and line[0] not in [ '#', '%' ]:
-				rpms.append(line)
+			profile.append(line)
+                profile.append('</section>')
+                profile.append('</chapter>')
+                profile.append('</profile-%s>' % generator.getProfileType())
+
+		parser  = make_parser()
+		handler = stack.gen.ProfileHandler()
+
+		parser.setContentHandler(handler)
+                for line in profile:
+			parser.feed('%s\n' % line)
+
+                packages = handler.getChapter('kickstart')
+		for line in packages:
+			if len(line.strip()):
+				if line.startswith('#'):
+					continue
+				if line.startswith('%'):
+					continue
+				for p in line.split():
+					rpms.append(p.strip())
 
 		#
 		# use yum to resolve dependencies
@@ -491,10 +522,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.close()
 		destdir = os.path.join(cwd, 'RPMS')
 
-		for s in selected:
-			subprocess.call([ 'yumdownloader',
-				'--destdir=%s' % destdir, '-c', yumconf, s ],
-				stdin = None, stdout = None, stderr = None)
+		cmd = [ 'yumdownloader','--destdir=%s' % destdir,'-y','-c', yumconf ]
+		cmd.extend(selected)
+		subprocess.call(cmd, stdin = None)
 		
 		stacki = []
 		nonstacki = []
@@ -522,20 +552,14 @@ class RollBuilder(Builder, stack.dist.Arch):
 		# 
 		fout = open(os.path.join('disk1', 'ks.cfg'), 'w')
 
-		if stack.release == '7.x':
-			fout.write('install\n')
-			fout.write('url --url file:///mnt/cdrom\n')
-			fout.write('lang en_US\n')
-			fout.write('keyboard us\n')
-		else:
-			distdir = os.path.join('mnt', 'cdrom', name,
-				version, release, 'redhat', arch)
-
-			fout.write('install\n')
-			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
-			fout.write('lang en_US\n')
-			fout.write('keyboard us\n')
-			fout.write('interactive\n')
+		palletdir = os.path.join(name,
+			version, release, 'redhat', arch)
+		distdir = os.path.join('mnt','cdrom', palletdir)
+		fout.write('install\n')
+		fout.write('lang en_US\n')
+		fout.write('keyboard us\n')
+		fout.write('url --url http://127.0.0.1/%s\n' % distdir)
+		fout.write('interactive\n')
 
 		fout.close()
 

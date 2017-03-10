@@ -93,8 +93,10 @@
 
 import os
 import string
+
+import ipaddress
+
 import stack.commands
-import stack.ip
 import stack.text
 
 config_preamble = """options {
@@ -154,24 +156,24 @@ class Command(stack.commands.report.command):
 
 	def run(self, params, args):
                 
-                networks = []
-                for row in self.call('list.network', [ 'dns=true' ]):
-                        networks.append(row)
-                        		
+		networks = []
+		for row in self.call('list.network', [ 'dns=true' ]):
+			networks.append(row)
+					
 		s = '<stack:file stack:name="/etc/named.conf" stack:perms="0644">\n'
 		s += stack.text.DoNotEdit()
-                s += '# Site additions go in /etc/named.conf.local\n\n'
-                
+		s += '# Site additions go in /etc/named.conf.local\n\n'
 
-                acl = [ '127.0.0.0/24']
-                for network in networks:
-                        ip = stack.ip.IPGenerator(network['address'],
-                                                  network['mask'])
-                        cidr = ip.cidr()
-                        acl.append('%s/%s' % (network['address'], cidr))
-                s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
-                                           
-		
+
+		acl = [ '127.0.0.0/24']
+		for network in networks:
+			ipnetwork = ipaddress.IPv4Network(unicode(
+					network['address'] + '/' + network['mask']))
+			cidr = ipnetwork.prefixlen
+			acl.append('%s/%s' % (network['address'], cidr))
+		s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
+
+
 		fwds = self.getAttr('Kickstart_PublicDNSServers')
 		if not fwds:
 			#
@@ -187,21 +189,21 @@ class Command(stack.commands.report.command):
 
 		forwarders = string.join(fwds.split(','), ';')
 		s += config_preamble % (forwarders)
-                
-                # For every network, get the base subnet,
-                # and reverse it. This is basically the
-                # format that named understands
-                
-                for network in networks:
-                        sn = self.getSubnet(network['address'], network['mask'])
-                        sn.reverse()
+
+		# For every network, get the base subnet,
+		# and reverse it. This is basically the
+		# format that named understands
+
+		for network in networks:
+			sn = self.getSubnet(network['address'], network['mask'])
+			sn.reverse()
 			r_sn = string.join(sn, '.')
-                        s += zone_template % (network['zone'],
-                                              network['network'],
-                                              r_sn,
-                                              network['network'],
-                                              r_sn)
-                        
+			s += zone_template % (network['zone'],
+					      network['network'],
+					      r_sn,
+					      network['network'],
+					      r_sn)
+
 		# Check if there are local modifications to named.conf
 		if os.path.exists('/etc/named.conf.local'):
 			f = open('/etc/named.conf.local', 'r')

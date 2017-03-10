@@ -92,7 +92,6 @@
 
 import string
 import stack.commands
-import stack.ip
 import stack.text
 import os.path
 

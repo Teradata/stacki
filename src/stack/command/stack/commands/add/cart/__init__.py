@@ -56,9 +56,18 @@ class Command(stack.commands.CartArgumentProcessor,
 	<arg type='string' name='cart'>
         The name of the cart to be created.
 	</arg>
+
+	<param type='string' name='os'>
+	The OS you wish to build a cart for (e.g., 'redhat', 'sles', 'ubuntu').
+	This will create default OS-specific node and graph XML files in the
+	cart.
+	Default: redhat.
+	</param>
 	"""		
 
 	def run(self, params, args):
+		self.osname, = self.fillParams([('os', 'redhat'), ])
+
                 if not len(args):
                         raise ArgRequired(self, 'cart')
                 if len(args) > 1:
@@ -73,45 +82,15 @@ class Command(stack.commands.CartArgumentProcessor,
 
                 # If the directory does not exist create it along with
                 # a skeleton template.
-                
+
                 tree = stack.file.Tree('/export/stack/carts')
                 if not cart in tree.getDirs():
                 	for dir in [ 'RPMS', 'nodes', 'graph' ]:
                 		os.makedirs(os.path.join(tree.getRoot(), cart, dir))
-                                
-                        graph = open(os.path.join(tree.getRoot(), cart, 'graph', 'cart-%s.xml' % cart), 'w')
-                        graph.write("""<?xml version="1.0" standalone="no"?>
-<graph>
 
-	<description>
-        %s cart
-	</description>
-
-        <order head="backend" tail="cart-%s-backend"/>
-        <edge  from="backend"   to="cart-%s-backend"/>
-
-</graph>
-""" % (cart, cart, cart))
-                        graph.close()
-                        
-                        node = open(os.path.join(tree.getRoot(), cart, 'nodes', 'cart-%s-backend.xml' % cart), 'w')
-                        node.write("""<?xml version="1.0" standalone="no"?>
-<kickstart>
-
-	<description>
-        %s cart backend appliance extensions
-	</description>
-
-        <!-- <package></package> -->
-
-<!-- shell code for post RPM installation -->
-<post>
-
-</post>
-</kickstart>
-""" % cart)
-                        node.close()
-                        
+                        cartpath = os.path.join(tree.getRoot(), cart)
+			args = [ cart, cartpath ]
+			self.runImplementation(self.osname, args)
 
                 # Files were already on disk either manually created or by the
                 # simple template above.

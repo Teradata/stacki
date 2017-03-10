@@ -5,10 +5,12 @@ import subprocess
 import traceback
 import stack.sql
 import stack.password
-import stack.ip
 import stack.media
 import stack.file
 import sys
+import ipaddress
+import socket
+
 from xml.etree.ElementTree import Element, SubElement, ElementTree, tostring
 
 class Attr:
@@ -23,7 +25,6 @@ class Attr:
 	Kickstart_Langsupport = "en_US"
 
 	Kickstart_Timezone = ""
-	RootDir = "/root"
 
 	Kickstart_PublicNTPHost = "pool.ntp.org"
 
@@ -35,13 +36,11 @@ class Attr:
 	Kickstart_PrivateGateway = ""
 	Kickstart_PrivateHostname = ""
 	Kickstart_PrivateInterface = ""
-	Kickstart_PrivateKickstartCGI = "sbin/kickstart.cgi"
 	Kickstart_PrivateKickstartHost = ""
 	Kickstart_PrivateNTPHost = ""
 	Kickstart_PrivateNetmask = ""
 	Kickstart_PrivateNetmaskCIDR = ""
 	Kickstart_PrivateNetwork = ""
-	Kickstart_PrivateKickstartBasedir = "distributions"
 	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
@@ -198,11 +197,11 @@ class Data:
 			return (False, "Please fill out all entries", "Incomplete")
 		else:
 			#invalid dns format
-			D = self.data.Kickstart_PrivateDNSServers.split(",")
+			dns_ips = self.data.Kickstart_PrivateDNSServers.split(",")
 			try:
-				for d in D:
-					ip = stack.ip.IPGenerator(d, "255.255.255.255")
-			except:
+				for ip in dns_ips:
+					ip = socket.inet_aton(ip)
+			except socket.error:
 				print(traceback.format_exc())
 				return (False, "DNS entry not in proper format", "Input Error")
 
@@ -227,12 +226,13 @@ class Data:
 
 			#calculate public network interfaces
 			try:
-				ip = stack.ip.IPGenerator( \
-					self.data.Kickstart_PrivateAddress, \
-					self.data.Kickstart_PrivateNetmask)
-				self.data.Kickstart_PrivateNetwork = ip.get_network()
-				self.data.Kickstart_PrivateBroadcast = ip.broadcast()
-				self.data.Kickstart_PrivateNetmaskCIDR = ip.cidr()
+				ipnetwork = ipaddress.IPv4Network(unicode(
+					self.data.Kickstart_PrivateAddress + '/'
+					self.data.Kickstart_PrivateNetmask),
+					strict=False)
+				self.data.Kickstart_PrivateNetwork = str(ipnetwork.network_address)
+				self.data.Kickstart_PrivateBroadcast = str(ipnetwork.broadcast_address)
+				self.data.Kickstart_PrivateNetmaskCIDR = str(ipnetwork.prefixlen)
 				self.data.Kickstart_PrivateEthernet = \
 					self.data.devices[ \
 						self.data.Kickstart_PrivateInterface]

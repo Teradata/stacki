@@ -38,7 +38,7 @@ elif os.path.exists('/tmp/pallets.xml'):
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
 
-	print '&lt;stack:repo&gt; --name="%s" --baseurl=http://localhost/install/pallets/%s/%s/%s/redhat/%s&lt;/stack:repo&gt;' % (pname, pname, pver, prel, parch)
+	print '&lt;stack:repo&gt; --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s&lt;/stack:repo&gt;' % (pname, purl, pname, pver, prel, parch)
 </eval>
 
 </main>

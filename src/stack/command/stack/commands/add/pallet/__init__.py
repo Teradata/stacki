@@ -238,13 +238,27 @@ class Command(stack.commands.add.command):
 		# path for each file.
 			
 		isolist = []
+		network_pallets = []
 		for arg in args:
+			if arg.startswith('http') or \
+				arg.startswith('ftp'):
+				network_pallets.append(arg)
+				continue
 			arg = os.path.join(os.getcwd(), arg)
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				isolist.append(arg)
 			else:
 				print("Cannot find %s or %s "\
 					"is not and ISO image" % (arg, arg))
+
+		if not isolist and not network_pallets:
+			#
+			# no files specified look for a cdrom
+			#
+			if self.runImplementation('mounted_%s' % self.os):
+				self.copy(clean, dir, updatedb)
+			else:
+                                raise CommandError(self, 'CDROM not mounted')
 		
 		if isolist:
 			#
@@ -266,11 +280,6 @@ class Command(stack.commands.add.command):
 				os.chdir(cwd)
 				self.runImplementation('umount_%s' % self.os)
 			
-		else:
-			#
-			# no files specified look for a cdrom
-			#
-			if self.runImplementation('mounted_%s' % self.os):
-				self.copy(clean, dir, updatedb)
-			else:
-                                raise CommandError(self, 'CDROM not mounted')
+		elif network_pallets:
+			for pallet in network_pallets:
+				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))

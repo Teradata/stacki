@@ -1,0 +1,264 @@
+#!/opt/stack/bin/python
+
+import subprocess
+import shutil
+import os
+import time
+import re
+import urllib
+import sys
+import signal
+
+# Start logging
+import logging
+log = logging.getLogger("stack-anaconda")
+log.setLevel(logging.DEBUG)
+log.addHandler(logging.StreamHandler(strm=sys.stdout))
+log.addHandler(logging.FileHandler('/tmp/stack-anaconda.log'))
+
+# Check to see if we're running as boss
+file = open('/proc/cmdline', 'r')
+args = file.readline().split()
+file.close()
+
+
+def stack_debug():
+	#
+	# debug development code
+	#
+	if 'stack-debug' in args:
+		log.warn('STACKDEBUG PAUSE - remove /tmp/wait to resume')
+		file = open('/tmp/wait', 'w')
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)
+
+
+stack_debug()
+
+anaconda_real_cmd = ['/usr/sbin/anaconda.real']
+
+#
+# restart lighttpd 
+#
+if os.path.exists('/run/install/tmp/stack.conf'):
+	shutil.copyfile('/run/install/tmp/stack.conf',
+		'/tmp/stack.conf')
+else:
+	#
+	# create a dummy stack.conf
+	#
+	file = open('/tmp/stack.conf', 'w')
+	file.write('var.trackers = ""\n')
+	file.write('var.pkgservers = ""\n')
+	file.close()
+
+# Kill an existing instance of lighttpd if it's running
+l = subprocess.Popen(['ps','-o','pid','--no-headers','-C','lighttpd'],
+	stdout=subprocess.PIPE, stderr=None)
+o, e  = l.communicate()
+for pid in o.split('\n'):
+	if pid.strip():
+		log.debug('Stopping lighttpd (pid %d)' % int(pid.strip()))
+		os.kill(int(pid.strip()), signal.SIGTERM)
+log.info('Starting lighttpd')
+lighttpd_proc = subprocess.Popen(
+	['/opt/lighttpd/sbin/lighttpd', '-f', 
+	'/opt/lighttpd/conf/lighttpd.conf', '-m',
+	'/opt/lighttpd/lib/'])
+
+
+if 'boss' in args:
+	# We are a frontend
+	
+	# Check to see if there's a user-specified
+	# site.attrs / rolls.xml on the kernel command line
+	for arg in args:
+		match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
+		if not match:
+			continue
+		uri = match.group(2)
+		log.info("{0}\t{1}".format(arg, uri))
+	
+		try:
+			resp = urllib.urlopen(uri)
+			# non-http uri's return None for getcode()
+			if resp.getcode() == 404:
+				log.error("got 404 on {0}\n".format(uri))
+			if 'stacki.attrs' in arg:
+				log.info("writing /tmp/site.attrs")
+				open('/tmp/site.attrs', 'w').write(resp.read())
+			if 'stacki.pallet' in arg:
+				log.info("writing /tmp/rolls.xml")
+				open('/tmp/rolls.xml', 'w').write(resp.read())
+		except Exception as e:
+			log.error("exception on {0}\t{1}".format(arg, match.group(2)))
+			log.error("{0}".format(e))
+			# if there's trouble connecting, safest bet is to proceed without it
+			pass
+
+	#
+	# if this is a USB install, then we'll see a kernel command line
+	# parameter that looks like:
+	#
+	#       inst.stage2=hd:sda1:/
+	#
+	# and we want to parse out the disk device (e.g., 'sda1')
+	#
+	device = None
+	for cmdarg in args:
+		if cmdarg.startswith('inst.stage2='):
+		    b = cmdarg.split('=')
+		    c = b[1].split(':')
+		    if len(c) > 1 and c[0] == 'hd':
+		        device = c[1]
+		        break
+
+	if not device:
+		device = 'cdrom'
+
+	cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
+	os.system(cmd)
+
+	# Turn off Network Manager
+	cmd = 'systemctl stop NetworkManager.service'
+	os.system(cmd)
+
+	import shutil
+
+	#
+	# determine if this is a light's out install
+	#
+	if os.path.exists('/mnt/cdrom/tmp/rolls.xml'):
+		shutil.copyfile('/mnt/cdrom/tmp/rolls.xml', '/tmp/rolls.xml')
+	if os.path.exists('/mnt/cdrom/tmp/pallets.xml'):
+		shutil.copyfile('/mnt/cdrom/tmp/pallets.xml', '/tmp/pallets.xml')
+	if os.path.exists('/mnt/cdrom/tmp/site.attrs'):
+		shutil.copyfile('/mnt/cdrom/tmp/site.attrs', '/tmp/site.attrs')
+
+	if not os.path.exists('/tmp/rolls.xml') or \
+		    not os.path.exists('/tmp/site.attrs'):
+
+		# Start X
+		log.info('Starting X')
+		x11_proc = subprocess.Popen(
+			["Xorg", "-br", "-logfile", "/tmp/X.log",
+			":1", "vt6", "-s", "1440", "-ac",
+			"-nolisten", "tcp", "-dpi", "96",
+			"-noreset"],
+			stdout=None, stderr = None)
+
+		metacity_proc = subprocess.Popen(
+			["metacity", "--display", ":1", "--sm-disable"],
+			stdout=None, stderr = None)
+
+		# Start boss
+		log.debug('Starting Boss Configuration')
+		bossenv = os.environ.copy()
+		bossenv['LD_LIBRARY_PATH'] = '/opt/stack/lib'
+		bossenv['DISPLAY'] = ':1'
+		s = subprocess.Popen('/opt/stack/bin/boss_config.py', env = bossenv)
+		s.wait()	
+		log.debug('Boss Configuration Complete')
+		metacity_proc.terminate()
+		# Terminate X
+		log.info('Terminating X')
+		x11_proc.terminate()
+		timeout = 30
+		rc = None
+		while timeout > 0:
+			rc = x11_proc.poll()
+			if rc == None:
+				time.sleep(1)
+				timeout = timeout - 1
+			else:
+				break
+		
+		if rc == None:
+			x11_proc.kill()
+			rc = x11_proc.poll()
+		log.info('X terminated with exit code: %d' % rc)
+
+
+	if not os.path.exists('/tmp/boss.ks.cfg.done'):
+		#
+		# build kickstart file for the boss
+		#
+		bossenv = os.environ.copy()
+		if bossenv.has_key('LD_LIBRARY_PATH'):
+		    bossenv['LD_LIBRARY_PATH'] = \
+		        '%s:/opt/stack/lib:/tmp/updates/lib64' \
+		         % bossenv['LD_LIBRARY_PATH']
+		else:
+		    bossenv['LD_LIBRARY_PATH'] = \
+		        '/opt/stack/lib:/tmp/updates/lib64'
+
+		log.debug('Building Boss Kickstart File.')
+		file = open('boss_ks_file.debug', 'w')
+		s = subprocess.Popen('/opt/stack/bin/boss_ks_file.py',
+		    env = bossenv,
+		    stdout = file, stderr = subprocess.STDOUT)
+		s.wait()	
+		file.close()
+  
+		# 
+		# RHEL 7.x wants the kickstart file in /run/install
+		# 
+		shutil.copyfile('/tmp/ks.cfg', '/run/install/ks.cfg')
+
+		file = open('/tmp/boss.ks.cfg.done', 'w')
+		file.close()
+		log.debug('Building Boss Kickstart File Complete.')
+
+	#
+	# get the repos configured
+	#
+	# first move all the existing repo files out of the way
+	#
+	os.system('mv /etc/anaconda.repos.d/*.repo /tmp/')
+
+	#
+	# now build a new repo file with all the selected pallets
+	#
+	import stack.roll
+
+	g = stack.roll.Generator()
+
+	if os.path.exists('/tmp/rolls.xml'):
+		g.parse('/tmp/rolls.xml')
+	elif os.path.exists('/tmp/pallets.xml'):
+		g.parse('/tmp/pallets.xml')
+
+	repo_file = open('/etc/anaconda.repos.d/stacki.repo', 'w')
+
+	baserepo = None
+	for pallet in g.rolls:
+		(pname, pver, prel, parch, purl, pdiskid) = pallet
+
+		repo_file.write('[%s-%s]\n' % (pname, pver))
+		repo_file.write('name=%s %s\n' % (pname, pver))
+		repo_file.write('baseurl=%s/%s/%s/%s/redhat/x86_64\n' % (purl, pname, pver, prel))
+		repo_file.write('assumeyes=1\n')
+		repo_file.write('enabled=1\n')
+
+		#
+		# need to make a "base" repo address
+		#
+		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+			baserepo = '%s/%s/%s/%s/redhat/x86_64' % (purl, pname, pver, prel)
+			
+	repo_file.close()
+	anaconda_real_cmd.append('--repo=%s' % baserepo)
+
+# STACKI
+	
+#
+# Now start CentOS Anaconda
+#
+s = subprocess.Popen(anaconda_real_cmd)
+s.wait()
+
+#
+# debug development code
+#
+stack_debug()

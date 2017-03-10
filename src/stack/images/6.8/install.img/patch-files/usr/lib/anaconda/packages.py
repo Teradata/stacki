@@ -187,33 +187,17 @@ def turnOnFilesystems(anaconda):
     file.close()
 
     if 'boss' in args:
-        import subprocess
+	# If /export does not exist, create a symlink
+	# to /state/partition1. If /state/partition1 doesn't
+	# exist either, just ignore
         import os
-
-        #
-        # if we are a boss, then download the selected rolls
-        #
-        w = anaconda.intf.waitWindow(_("Downloading pallets"),
-            _("Downloading all selected pallets"))
-
-        log.debug('STACKI: Downloading pallets: start')
-
-        bossenv = os.environ.copy()
-        if bossenv.has_key('LD_LIBRARY_PATH'):
-            bossenv['LD_LIBRARY_PATH'] = \
-                '%s:/opt/stack/lib' % bossenv['LD_LIBRARY_PATH'] 
-        else:
-            bossenv['LD_LIBRARY_PATH'] = '/opt/stack/lib'
-
-        bossenv['DISPLAY'] = ':1'
-
-        s = subprocess.Popen('/opt/stack/bin/boss_download_pallets.py',
-		env = bossenv)
-        s.wait()
-
-        log.debug('STACKI: Downloading pallets: complete')
-
-        w.pop()
+	if not os.path.exists('/mnt/sysimage/export'):
+		if os.path.exists('/mnt/sysimage/state/partition1'):
+			pwd = os.getcwd()
+			os.chdir('/mnt/sysimage')
+			os.symlink('state/partition1',
+				'export')
+			os.chdir(pwd)
 
     else:
         #

@@ -43,7 +43,6 @@
 
 import os
 import stack.commands
-import stack.ip
 
 class Implementation(stack.commands.Implementation):	
 	"""
@@ -80,7 +79,8 @@ class Implementation(stack.commands.Implementation):
 		if not address or not mask:
 			return
 
-		ip = stack.ip.IPGenerator(address, mask)
+		ipnetwork = ipaddress.IPv4Network(unicode(
+			address + '/' + mask))
 
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
 		self.owner.addOutput(host, 'server %s iburst' % timeserver)
@@ -88,7 +88,7 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host, 'stratumweight 0')
 		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift')
 		self.owner.addOutput(host, 'rtcsync')
-		self.owner.addOutput(host, 'allow %s/%s' % (address, ip.cidr()))
+		self.owner.addOutput(host, 'allow %s/%s' % (address, ipnetwork.prefixlen))
 		self.owner.addOutput(host, 'bindcmdaddress 127.0.0.1')
 		self.owner.addOutput(host, 'bindcmdaddress ::1')
 		self.owner.addOutput(host, 'logchange 0.5')

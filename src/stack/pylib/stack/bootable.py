@@ -113,10 +113,6 @@ class Bootable:
 		for o in stack.api.Call('list host', [ 'localhost']):
 			box = o['box']
 
-		if not box:
-			raise ValueError, 'could not find box for "localhost"'
-			return
-
 		self.filetree['local'] = stack.file.Tree(localdir)
 
 		pallets = []
@@ -233,25 +229,12 @@ class Bootable:
 				shutil.move(os.path.join(images, file),
 					os.path.join(isolinux, 'initrd.img'))
 
-		if stack.release == '7.x':
-			imagesdir = os.path.join(destination, 'images')
-		else:
-			imagesdir = os.path.join(self.palletdir, 'images')
+		imagesdir = os.path.join(self.palletdir, 'images')
 
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
 
-		if stack.release == '7.x':
-			#
-			# upgrade.img
-			#
-			fileold = os.path.join(os.path.join(images,
-				'upgrade.img'))
-			filenew = os.path.join(imagesdir, 'upgrade.img')
-			print('fileold %s' % fileold)
-			print('filenew %s' % filenew)
-			shutil.copy(fileold, filenew)
-		else:
+		if stack.release == '6.x':
 			#
 			# install.img
 			#
@@ -259,8 +242,7 @@ class Bootable:
 				'install.img'))
 			filenew = os.path.join(imagesdir, 'install.img')
 			os.rename(fileold, filenew)
-
-		os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+			os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		if stack.release == '7.x':
 			#
@@ -285,7 +267,7 @@ class Bootable:
 			fileold = f.getFullName()
 			print('fileold %s' % f.getFullName())
 
-			livenewdir = os.path.join(destination, 'LiveOS')
+			livenewdir = os.path.join(self.palletdir, 'LiveOS')
 			if not os.path.exists(livenewdir):
 				os.makedirs(livenewdir)
 

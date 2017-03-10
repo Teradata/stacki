@@ -43,7 +43,6 @@
 
 import os
 import stack.commands
-import stack.ip
 
 class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
 	"""

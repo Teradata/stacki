@@ -66,10 +66,11 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 		for group in self.owner.call('list.group'):
 			existing_groups[group['group']] = group['hosts']
 		for member in self.owner.call('list.host.group'):
-			existing_memberships[member['host']] = member['groups']
+			existing_memberships[member['host']] = member['groups'].split()
 
-		# prune group assignments
+		# prune group assignments for incoming hosts
 		for host in hosts.keys():
+			# no need to prune hosts not from the spreadsheet, or totally new hosts
 			if host not in existinghosts:
 				continue
 
