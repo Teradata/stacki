@@ -157,14 +157,16 @@ class OSArgumentProcessor:
 		for arg in args:
                         if arg == 'centos':
                                 arg = 'redhat'
-			rows = self.db.execute("""select name from oses
-				where name like '%s' order by name""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
+                        for name, in self.db.select(
+                                        """
+                                        name from oses 
+                                        where name like '%s' order by name
+                                        """ % arg):
+                                list.append(name)
+			if len(list) == 0 and arg == '%': # empty table is OK
 				continue
-			if rows < 1:
-				raise CommandError(self, 'unknown environment "%s"' % arg)
-			for name, in self.db.fetchall():
-				list.append(name)
+			if len(list)  < 1:
+				raise CommandError(self, 'unknown os "%s"' % arg)
 		return list
 
 	
@@ -1646,6 +1648,17 @@ class Command:
 		# List of loaded implementations.
 		self.impl_list = {}
 
+                # Figure out the width of the terminal
+
+                self.width = 0
+		if sys.stdout.isatty():
+                        try:
+                                r, c = os.popen('stty size', 'r').read().split()
+                                self.width = int(c)
+                        except:
+                                pass
+                        
+
                 # Look up terminal colors safely using tput, uncolored if
                 # this fails.
                 
@@ -1953,17 +1966,16 @@ class Command:
 
 		# VALS can be a list, tuple, or primitive type.
 
-
 		list = [ '%s' % owner ]
 		
 		if type(vals) == types.ListType:
 			list.extend(vals)
-		if type(vals) == types.TupleType:
+		elif type(vals) == types.TupleType:
 			for e in vals:
 				list.append(e)
 		else:
 			list.append(vals)
-			
+
 		self.output.append(list)
 		
 		
@@ -1976,7 +1988,7 @@ class Command:
 
 		if not self.output:
 			return
-			
+
 		# The OUTPUT-FORMAT option can change the default from
 		# human readable text to something else.  Currently
 		# supports:
@@ -2035,17 +2047,17 @@ class Command:
 
 		if trimOwner:
 			owner = ''
-			self.startOfLine = 1
+			startOfLine = 1
 			for line in self.output:
 				if not owner:
 					owner = line[0]
 				if not owner == line[0]:
-					self.startOfLine = 0
+					startOfLine = 0
 		else:
-                        self.startOfLine = 1
+                        startOfLine = 1
                         for line in self.output:
                                 if line[0]:
-                                        self.startOfLine = 0
+                                        startOfLine = 0
 			
 		# Add the header to the output and start formatting.  We
 		# keep the header optional and separate from the output
@@ -2078,42 +2090,41 @@ class Command:
  				if itemlen > colwidth[i]:
 					colwidth[i] = itemlen
 
-                isHeader = False
-		if header:
+
+
+                # If we know the output is too long for the terminal
+                # use an switch from table view to a field view that
+                # will display nicer (e.g. stack list os boot).
+ 
+                if self.width and header and startOfLine == 0 and (sum(colwidth)+len(line)) > self.width:
+                        maxWidth = 0
+                        for label in output[0][1:]:
+                                n = len(label)
+                                if n > maxWidth:
+                                        maxWidth = n
+                        for line in output[1:]:
+                                for i in range(0, len(line)):
+                                        if line[i] in [ None, 'None' ]:
+                                                s = ''
+                                        else:
+                                                s = str(line[i])
+                                        if s:
+                                                self.addText('%s%s%s %s\n' % (self.colors['bold']['code'],
+                                                                              output[0][i].ljust(maxWidth),
+                                                                              self.colors['reset']['code'],
+                                                                              s))
+                                self.addText('\n')
+                        return
+
+
+                if header:
                         isHeader = True
-			if self._params.has_key('output-header'):
-				if not str2bool(self._params['output-header']):
-					output = output[1:]
-                                        isHeader = False
-
-		# Allow the OUTPUT-COL command line parameter to be used to
-		# filter the set of columns returned.  This is used to customize
-		# output for easier parsing in shell scripts.  If you use it
-		# consider using/creating a report command instead.  This will
-		# only disable columns and will not change the order.  To use
-		# just list the header names comma separated.  Even better,
-		# don't use this.
-		#
-		# ex:
-		#
-		# $ stack list pallet output-col=name,version
-
-		if header:
-			if self._params.has_key('output-col'):
-				cols = self._params['output-col'].split(',')
-			else:
-				cols = header
-			outputCols = []
-			for name in header[self.startOfLine:]:
-				outputCols.append(name in cols)
-		else:
-			outputCols = None # actually means do everything
-				
-
+                else:
+                        isHeader = False
                 o = ''
 		for line in output:
 			list = []
-			for i in range(self.startOfLine, len(line)):
+			for i in range(startOfLine, len(line)):
 				if line[i] in [ None, 'None' ]:
 					s = ''
 				else:
@@ -2132,20 +2143,10 @@ class Command:
                                                         o,
                                                         self.colors['reset']['code'])
 				list.append(o)
-			self.addText('%s\n' % self.outputRow(list, outputCols))
+			self.addText('%s\n' % string.join(list, ' '))
                         isHeader = False
 
 
-	def outputRow(self, list, colmap=None):
-		if colmap:
-			filteredList = []
-			for i in range(0, len(colmap)):
-				if colmap[i]:
-					filteredList.append(list[i])
-			list = filteredList
-		return string.join(list, ' ')
-				
-		
 	def usage(self):
 		if self.__doc__:
 			handler = DocStringHandler()

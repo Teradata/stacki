@@ -90,7 +90,6 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function
 import sys
 import string
 import stack.commands
@@ -123,52 +122,46 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def updateBoot(self, host, action):
-		#
-		# is there already an entry in the boot table
-		#
-		nrows = self.db.execute("""select b.id from boot b, nodes n
-			where n.name = '%s' and n.id = b.node""" % host)
-
-		if nrows < 1:
-			#
-			# insert a new row
-			#
-			self.db.execute("""insert into boot (node, action)
-				values((select id from nodes where name = '%s'),
-				"%s") """ % (host, action))
-		else:
-			#
-			# update an existing row
-			#
-			bootid, = self.db.fetchone()
-
-			self.db.execute("""update boot set action = "%s"
-				where id = %s """ % (action, bootid))
-		return
-
-        
 	def run(self, params, args):
-		(action,) = self.fillParams([('action', )])
-		
+
 		if not len(args):
                 	raise ArgRequired(self, 'host')
 
-		if action not in [ 'os', 'run', 'install', None ]:
-                	raise ParamValue(self, 'action', '"os", "run" or "install"')
+		(action,) = self.fillParams([
+                        ('action', None, True)
+                ])
+		
+
+                actions = [ 'os', 'install' ]
+		if action not in actions:
+                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
+
+
+                boot = {}
+                for h, a in self.db.select(
+                                """
+                                n.name, b.action from 
+                                nodes n, boot b where
+                                n.id = b.node
+                                """):
+                        boot[h] = a
 
                 hosts = self.getHostnames(args)
-		for host in hosts:
-			if action:
-				self.updateBoot(host, action)
-			output = self.command('report.host.pxefile',[host, 'action=%s' % action])
-			p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
-				stdin = subprocess.PIPE,
-				stdout= subprocess.PIPE,
-				stderr= subprocess.PIPE)
-			o, e = p.communicate(output)
-			psh = subprocess.Popen(['/bin/sh'],
-				stdin = subprocess.PIPE,
-				stdout= subprocess.PIPE,
-				stderr= subprocess.PIPE)
-			out, err = psh.communicate(o)
+                for host in hosts:
+                        if host in boot.keys():
+                                self.db.execute(
+                                        """
+                                        update boot set action = '%s'
+                                        where node = (select id from nodes where name = '%s')
+                                        """ % (action, host))
+                        else:
+                                self.db.execute(
+                                        """
+                                        insert into boot (action, node) values 
+                                        (
+                                        '%s',
+                                        (select id from nodes where name = '%s')
+                                        ) 
+                                        """ % (action, host))
+
+                self.command('sync.host.boot', hosts)

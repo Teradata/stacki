@@ -329,19 +329,19 @@ class Command(stack.commands.Command,
                         for o in targets:
                                 parent = attributes['os'][self.db.getHostOS(o)]
                                 for (a, (v, x, t, s)) in parent.items():
-                                        if not attributes[scope][o].has_key(a):
+                                        if not attributes[scope][o].has_key(a) or s != scope:
                                                 attributes[scope][o][a] = (v, x, t, s)
 
                                 parent = attributes['appliance'][self.db.getHostAppliance(o)]
                                 for (a, (v, x, t, s)) in parent.items():
-                                        if not attributes[scope][o].has_key(a):
+                                        if not attributes[scope][o].has_key(a) or s != scope:
                                                 attributes[scope][o][a] = (v, x, t, s)
 
                                 env = self.db.getHostEnvironment(o)
                                 if env:
                                         parent = attributes['environment'][env]
                                         for (a, (v, x, t, s)) in parent.items():
-                                                if not attributes[scope][o].has_key(a):
+                                                if not attributes[scope][o].has_key(a) or s != scope:
                                                         attributes[scope][o][a] = (v, x, t, s)
 
 

@@ -56,12 +56,4 @@ class Plugin(stack.commands.Plugin):
 		return []
 
 	def run(self, host):
-		appliance = self.owner.getHostAttr(host, 'appliance')
-		if appliance == 'frontend':
-			return
-
-		s = self.owner.call('list.host.boot', [host])
-		action = s[0]['action']
-		if action == None:
-			self.owner.command('set.host.boot',
-				[host, 'action=install'])
+                self.owner.command('sync.host.boot', self.owner.s.hosts)

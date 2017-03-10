@@ -53,8 +53,11 @@ class Command(stack.commands.Command,
 	</arg>
 	"""
 	def run(self, params, args):
-		hosts = self.getHostnames(args)
-		self.s = stack.util.Struct()
+
+		hosts        = self.getHostnames(args)
+		self.s       = stack.util.Struct()
+                self.s.hosts = hosts
+
 		for host in hosts:
 
                         attrs = {}
@@ -63,4 +66,5 @@ class Command(stack.commands.Command,
 
 			self.s.host  = host
                         self.s.attrs = attrs
+
 			self.runPlugins(host)

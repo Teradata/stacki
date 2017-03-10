@@ -17,21 +17,74 @@ class Command(stack.commands.Command,
 	Generate PXE file for a specified action
 	</param>
 	"""
-	def getHostPXEInfo(self, host, action):
-		#
-		# Get the IP and NETMASK of the host
-		#
-	
-		appliance = self.getHostAttr(host, 'appliance')
-		if appliance == 'frontend':
-			filename = '/tftpboot/pxelinux/pxelinux.cfg/default'
-			action = 'os'
-			return (host, action, filename, None, None, None)
+
+	def run(self, params, args):
+
+		hosts = self.getHostnames(args, managed_only=True)
+
+		(action, ) = self.fillParams([
+			('action', None)
+                ])
+
+                actions = [ 'os', 'install' ]
+		if action and action not in actions:
+                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
+
+                ha = {}
+                for host in hosts:
+                        ha[host] = { 
+                                'host'       : host,
+                                'action'     : None,
+                                'type'       : action,
+                                'dnsserver'  : self.getHostAttr(host, 
+                                                                'Kickstart_PrivateDNSServers'),
+                                'nextserver' : self.getHostAttr(host, 
+                                                                'Kickstart_PrivateKickstartHost')
+                        }
+
+
+                if not action: # param can override the db
+                        for row in self.call('list.host.boot', hosts):
+                                ha[row['host']]['type'] = row['action']
+
+
+                for row in self.call('list.host', hosts):
+                        h = ha[row['host']]
+                        if h['type'] == 'install':
+                               h['action'] = row['installaction']
+                        elif h['type'] == 'os':
+                               h['action'] = row['osaction']
+                        h['os']        = row['os']
+                        h['appliance'] = row['appliance']
+
+                ba = {}
+                for row in self.call('list.bootaction'):
+                        ba[(row['bootaction'], row['type'], row['os'])] = row
+
+                for host in hosts:
+                        h   = ha[host]
+                        key = (h['action'], h['type'], None)
+                        if ba.has_key(key):
+                                b = ba[key]
+                                h['kernel']  = b['kernel']
+                                h['ramdisk'] = b['ramdisk']
+                                h['args']    = b['args']
+                        key = (h['action'], h['type'], h['os'])
+                        if ba.has_key(key):
+                                b = ba[key]
+                                h['kernel']  = b['kernel']
+                                h['ramdisk'] = b['ramdisk']
+                                h['args']    = b['args']
+
 
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
-			ip = row['ip']
+                        h   = ha[row['host']]
+			ip  = row['ip']
 			pxe = row['pxe']
-			if ip and pxe:
+
+                        if h['appliance'] == 'frontend':
+                                h['filename'] = '/tftpboot/pxelinux/pxelinux.cfg/default'
+                        elif ip and pxe:
 				#
 				# Compute the HEX IP filename for the host
 				#
@@ -41,27 +94,13 @@ class Command(stack.commands.Command,
 					hexstr += '%02x' % (int(i))
 				filename += '%s' % hexstr.upper()
 
-				return (host, action, filename,
-					ip, row['mask'], row['gateway'])
-
-	def run(self, params, args):
-		# Get a list of hosts
-		hosts = self.getHostnames(args, managed_only=True)
-
-		(action, ) = self.fillParams([
-			('action',None)])
+                                h['filename'] = filename
+                                h['ip']       = ip
+                                h['mask']     = row['mask']
+                                h['gateway']  = row['gateway']
 
 		self.beginOutput()
 		for host in hosts:
-			osname = self.db.getHostOS(host)
-			# If actions aren't specified on the command line
-			# get info from the database
-			if not action:
-				o = self.call('list.host.boot',[host])
-				action = o[0]['action']
-			# Run the OS-specific implementation
-			pxeInfo = self.getHostPXEInfo(host, action)
-			if pxeInfo:
-				self.runImplementation(osname, pxeInfo)
-
+                        if ha[host]['action']:
+				self.runImplementation(ha[host]['os'], ha[host])
 		self.endOutput(padChar='', trimOwner=True)

@@ -53,13 +53,17 @@ class Plugin(stack.commands.Plugin):
                         
                 for row in self.db.select(
                         """
-                        n.name, n.rack, n.rank, a.name, b.name, 
-                        e.name, n.runaction, n.installaction from 
-                        (
-                          (nodes n left join environments e on n.environment=e.id) 
-                          left join boxes b on n.box=b.id
-                        ) 
-                        left join appliances a on n.appliance=a.id;
+                        n.name, n.rack, n.rank, 
+                        a.name,
+                        b.os, b.name, 
+                        e.name, 
+                        bno.name, bni.name from 
+                        nodes n 
+                        left join appliances a   on n.appliance     = a.id
+                        left join boxes b        on n.box           = b.id 
+                        left join environments e on n.environment   = e.id 
+                        left join bootnames bno  on n.osaction      = bno.id 
+                        left join bootnames bni  on n.installaction = bni.id
                         """):
 
                         if dict.has_key(row[0]):
@@ -68,9 +72,10 @@ class Plugin(stack.commands.Plugin):
                 return { 'keys' : [ 'rack',
                                     'rank',
                                     'appliance',
+                                    'os',
                                     'box',
                                     'environment',
-                                    'runaction',
+                                    'osaction',
                                     'installaction' ],
                         'values': dict }
 

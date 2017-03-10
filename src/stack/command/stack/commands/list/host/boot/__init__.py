@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,20 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:06:58  mjk
-# chimi con queso
-#
-# Revision 1.1  2008/12/15 22:27:21  bruno
-# convert pxeboot and pxeaction tables to boot and bootaction tables.
-#
-# this enables merging the pxeaction and vm_profiles tables
-#
-#
+
 
 import sys
 import socket
@@ -82,8 +70,8 @@ class Command(stack.commands.list.host.command):
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host boot compute-0-0'>
-	List the current boot action for compute-0-0.
+	<example cmd='list host boot backend-0-0'>
+	List the current boot action for backend-0-0.
 	</example>
 
 	<example cmd='list host boot'>
@@ -93,13 +81,17 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
+                boot = {}
+                for h,b in self.db.select(
+                        """
+                        n.name, b.action from nodes n
+                        left join boot b on
+                        n.id = b.node
+                        """):
+                        boot[h] = b
+
 		self.beginOutput()
-
 		for host in self.getHostnames(args):
-			self.db.execute("""select b.action from 
-				nodes n, boot b where n.id = b.node and
-				n.name = '%s' """ % host)
-			self.addOutput(host, self.db.fetchone())
-
+                        self.addOutput(host, boot[host])
 		self.endOutput(header=['host', 'action'])
 
