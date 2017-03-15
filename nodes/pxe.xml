@@ -34,7 +34,7 @@ service tftp
         wait                    = yes
         user                    = root
         server                  = /usr/sbin/in.tftpd
-        server_args             = -s /tftpboot/pxelinux
+        server_args             = --verbose --secure /tftpboot/pxelinux
         instances               = 1
 	per_source		= 11
 	cps			= 1000 2

@@ -198,10 +198,10 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			# You probably don't need this since a bad netmask and a bad
 			# IP will both be caught.
 			try:
-				if IPv4Network(u"%s/%s" % (address,mask), strict=False):
-					pass	
-				elif IPv6Network(u"%s/%s" % (address,mask), strict=False):
-					pass	
+				if IPv4Network(u"%s/%s" % (address,mask)):
+					pass
+				elif IPv6Network(u"%s/%s" % (address,mask)):
+					pass
 			except:
 				msg = 'Hey! I need valid address/netmask for the '
 				msg += '"%s" network.' % name

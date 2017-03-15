@@ -25,6 +25,10 @@
 	</order>
 
 	<order head="storage-controller-client">
+		<tail>discover-disks</tail>
+	</order>
+
+	<order head="discover-disks">
 		<tail>nukedisks</tail>
 	</order>
 
@@ -57,6 +61,7 @@
 		<to>routes-client</to>
 		<to>pxeboot</to>
 		<to>storage-controller-client</to>
+		<to>discover-disks</to>
 		<to>nukedisks</to>
 	</edge>
 
