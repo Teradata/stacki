@@ -1,31 +1,31 @@
 # @SI_Copyright@
 #                               stacki.com
 #                                  v3.3
-# 
+#
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-# 	 "This product includes software developed by StackIQ" 
-#  
+# features or use of this software must display the following acknowledgement:
+#
+# 	 "This product includes software developed by StackIQ"
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -43,40 +43,40 @@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
 #  		         version 5.4 (Maverick)
-#  
+#
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
+# All rights reserved.
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#  
+#
 # 1. Redistributions of source code must retain the above copyright
 # notice, this list of conditions and the following disclaimer.
-#  
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 # notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
+# following disclaimer in the documentation and/or other materials provided
 # with the distribution.
-#  
+#
 # 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
+# features or use of this software must display the following acknowledgement:
+#
 # 	"This product includes software developed by the Rocks(r)
 # 	Cluster Group at the San Diego Supercomputer Center at the
 # 	University of California, San Diego and its contributors."
-# 
+#
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of
+# the associated name, interested parties should contact Technology
+# Transfer & Intellectual Property Services, University of California,
+# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910,
 # Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
+#
 # THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -106,7 +106,7 @@ class Command(stack.commands.remove.host.command):
 	<arg type='string' name='host' optional='1' repeat='1'>
 	One or more named hosts.
 	</arg>
-	
+
 	<param type='string' name='interface'>
  	Name of the interface that should be removed.
  	</param>
@@ -120,7 +120,7 @@ class Command(stack.commands.remove.host.command):
         hosts.  This is used internally in Stacki to speed up bulk changes in
         the cluster.
         </param>
- 	
+
 	<example cmd='remove host interface backend-0-0 interface=eth1'>
 	Removes the interface eth1 on host backend-0-0.
 	</example>
@@ -137,7 +137,7 @@ class Command(stack.commands.remove.host.command):
                         ('mac',       None),
                         ('all',     'false')
                         ])
-                 
+
 		all = self.str2bool(all)
 		if not all and not interface and not mac:
                         raise ParamRequired(self, ('interface', 'mac'))
@@ -145,18 +145,24 @@ class Command(stack.commands.remove.host.command):
 		for host in self.getHostnames(args):
                         if all:
                                 self.db.execute("""
-                        		delete from networks where 
+                        		delete from networks where
                                         node=(select id from nodes where name='%s')
                                         """ %  (host))
                         elif interface:
-                                self.db.execute("""
-                        		delete from networks where 
+                                rows_affected = self.db.execute("""
+                        		delete from networks where
                                         node=(select id from nodes where name='%s')
                                         and device like '%s'
                                         """ %  (host, interface))
+
+								if not rows_affected:
+									raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
                         else:
-                                self.db.execute("""
-                        		delete from networks where 
+                                rows_affected = self.db.execute("""
+                        		delete from networks where
                                         node=(select id from nodes where name='%s')
                                         and mac like '%s'
                                         """ %  (host, mac))
+
+								if not rows_affected:
+									raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))
