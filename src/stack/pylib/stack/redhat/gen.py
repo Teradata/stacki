@@ -188,7 +188,7 @@ class Generator(stack.gen.Generator):
                         s += ' --interpreter %s' % interpreter
                 s += ' --log=%s %s' % (self.log, arg)
                 s += '\n%s' % self.getChildText(node)
-                s += '%end'
+                s += '\n%end'
 			
                 self.preSection.append(s, nodefile)
 
@@ -209,7 +209,7 @@ class Generator(stack.gen.Generator):
                         else:
                                 script += ' --log=%s %s' % (self.log, arg)
                         script += '\n%s' % self.getChildText(node)
-                        script += '%end'
+                        script += '\n%end'
 
                 elif self.getProfileType() == 'shell':
 
@@ -250,7 +250,7 @@ class Generator(stack.gen.Generator):
                 s += '__EOF__\n'
 
                 if self.getProfileType() == 'native':
-                        s += '%end'
+                        s += '\n%end'
 
                 self.bootSection[order].append(s, nodefile)
 
@@ -303,7 +303,7 @@ class Generator(stack.gen.Generator):
 			s += '%s' % self.rcsEnd(file, owner, perms)
                 s += '\n__EOF__\n'
                 if self.getProfileType() == 'native':
-                        s += '%end'
+                        s += '\n%end'
 		section.append(s)
 
 		list = []
