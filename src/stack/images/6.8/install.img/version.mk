@@ -4,4 +4,4 @@ OVERLAY.PKGS	= foundation-py-wxPython foundation-python-xml \
 	stack-command foundation-python foundation-gawk foundation-redhat \
 	libtiff createrepo nss-softokn-freebl stack-ekv stack-tracker \
 	stack-piece-pipe tigervnc-server stack-wizard foundation-py-pexpect \
-	eject
+	eject foundation-py-ipaddress
