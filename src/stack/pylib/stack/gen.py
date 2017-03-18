@@ -282,22 +282,22 @@ class Generator:
 		rcsfile = '%s,v' % os.path.join(rcsdir, os.path.basename(file))
 		l	= []
 
-		l.append('')
 
+                l.append('')
 		if file not in self.rcsFiles:
-			l.append('if [ ! -f %s ]; then' % rcsfile)
-			l.append('\tif [ ! -f %s ]; then' % file)
-			l.append('\t\ttouch %s;' % file)
+                        l.append('if [ -e /opt/stack/bin/rcs ]; then')
+			l.append('\tif [ ! -f %s ]; then' % rcsfile)
+			l.append('\t\tif [ ! -f %s ]; then' % file)
+			l.append('\t\t\ttouch %s' % file)
+			l.append('\t\tfi')
+			l.append('\t\tif [ ! -d %s ]; then' % rcsdir)
+			l.append('\t\t\tmkdir -m 700 %s' % rcsdir)
+			l.append('\t\t\tchown 0:0 %s' % rcsdir)
+		 	l.append('\t\tfi')
+			l.append('\t\techo "original" | /opt/stack/bin/ci -q %s' % file)
+                        l.append('\t\t/opt/stack/bin/rcs -noriginal: %s' % file)
+			l.append('\t\t/opt/stack/bin/co -q -f -l %s' % file)
 			l.append('\tfi')
-			l.append('\tif [ ! -d %s ]; then' % rcsdir)
-			l.append('\t\tmkdir -m 700 %s' % rcsdir)
-			l.append('\t\tchown 0:0 %s' % rcsdir)
-		 	l.append('\tfi;')
-			l.append('\techo "original" | /opt/stack/bin/ci -q %s;' %
-			 	file)
-                        l.append('\t/opt/stack/bin/rcs -noriginal: %s;' % file)
-			l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
-			l.append('fi')
 
 		# If this is a subsequent file tag and the optional PERMS
 		# or OWNER attributes are missing, use the previous value(s).
@@ -312,13 +312,13 @@ class Generator:
 		self.rcsFiles[file] = (owner, perms)
 		
 		if owner:
-			l.append('chown %s %s' % (owner, file))
-			l.append('chown %s %s' % (owner, rcsfile))
-
+			l.append('\tchown %s %s' % (owner, file))
+			l.append('\tchown %s %s' % (owner, rcsfile))
 		if perms:
-			l.append('chmod %s %s' % (perms, file))
+			l.append('\tchmod %s %s' % (perms, file))
 
-		l.append('')
+                l.append('fi')
+                l.append('')
 
 		return string.join(l, '\n')
 
@@ -336,19 +336,24 @@ class Generator:
 		rcsfile = '%s,v' % os.path.join(rcsdir, os.path.basename(file))
 		l	= []
 
-		l.append('')
-		l.append('if [ -f %s ]; then' % file)
-		l.append('\techo "stack" | /opt/stack/bin/ci -q %s;' % file)
-		l.append('\t/opt/stack/bin/rcs -Nstack: %s;' % file)
-		l.append('\t/opt/stack/bin/co -q -f -l %s;' % file)
-		l.append('fi')
+                l.append('if [ -e /opt/stack/bin/rcs ]; then')
+		l.append('\tif [ -f %s ]; then' % file)
+		l.append('\t\techo "stack" | /opt/stack/bin/ci -q %s' % file)
+		l.append('\t\t/opt/stack/bin/rcs -Nstack: %s' % file)
+		l.append('\t\t/opt/stack/bin/co -q -f -l %s' % file)
+		l.append('\tfi')
+
+		if owner:
+			l.append('\tchown %s %s' % (owner, rcsfile))
+
+                l.append('fi')
 
 		if owner:
 			l.append('chown %s %s' % (owner, file))
-			l.append('chown %s %s' % (owner, rcsfile))
-
 		if perms:
 			l.append('chmod %s %s' % (perms, file))
+
+                l.append('')
 
 		return string.join(l, '\n')
 
