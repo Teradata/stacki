@@ -298,6 +298,9 @@ class Generator:
                         l.append('\t\t/opt/stack/bin/rcs -noriginal: %s' % file)
 			l.append('\t\t/opt/stack/bin/co -q -f -l %s' % file)
 			l.append('\tfi')
+                        if owner:
+                                l.append('\tchown %s %s' % (owner, rcsfile))
+                        l.append('fi')
 
 		# If this is a subsequent file tag and the optional PERMS
 		# or OWNER attributes are missing, use the previous value(s).
@@ -312,12 +315,10 @@ class Generator:
 		self.rcsFiles[file] = (owner, perms)
 		
 		if owner:
-			l.append('\tchown %s %s' % (owner, file))
-			l.append('\tchown %s %s' % (owner, rcsfile))
+			l.append('chown %s %s' % (owner, file))
 		if perms:
-			l.append('\tchmod %s %s' % (perms, file))
+			l.append('chmod %s %s' % (perms, file))
 
-                l.append('fi')
                 l.append('')
 
 		return string.join(l, '\n')
