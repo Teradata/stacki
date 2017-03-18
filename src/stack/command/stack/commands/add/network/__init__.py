@@ -175,8 +175,6 @@ class Command(stack.commands.add.command):
 		try:
 			if ipaddress.IPv4Network(u"%s/%s" % (address, mask)):
 				pass
-			if ipaddress.IPv6Network(u"%s/%s" % (address, mask)):
-				pass
 		except:
 			msg = '%s/%s is not a valid network address and subnet mask combination'
 			raise CommandError(self, msg % (address, mask))

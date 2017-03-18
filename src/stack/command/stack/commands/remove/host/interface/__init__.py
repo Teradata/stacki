@@ -155,8 +155,8 @@ class Command(stack.commands.remove.host.command):
                                         and device like '%s'
                                         """ %  (host, interface))
 
-								if not rows_affected:
-									raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
+				if not rows_affected:
+					raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
                         else:
                                 rows_affected = self.db.execute("""
                         		delete from networks where
@@ -164,5 +164,5 @@ class Command(stack.commands.remove.host.command):
                                         and mac like '%s'
                                         """ %  (host, mac))
 
-								if not rows_affected:
-									raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))
+				if not rows_affected:
+					raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))
