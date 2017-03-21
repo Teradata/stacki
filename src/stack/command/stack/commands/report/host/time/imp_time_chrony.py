@@ -41,6 +41,7 @@
 # @SI_Copyright@
 #
 
+import ipaddress
 import os
 import stack.commands
 
