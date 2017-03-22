@@ -510,6 +510,9 @@ class Page6(wx.Panel):
 			self.list1.SetStringItem(index, 3, i[3])
 			self.list1.SetStringItem(index, 4, '')
 
+			# By default select the pallet
+			self.list1.Select(index)
+
 		#left panel for buttons
 		leftPanel = wx.Panel(self, -1)
 		sel = wx.Button(leftPanel, -1, 'Select All', size=(100, -1))
