@@ -18,16 +18,14 @@ class Command(stack.commands.Command,
 	Generate PXE file for a specified action
 	</param>
 	"""
-	def getHostPXEInfo(self, host, action):
+	def getHostHexIP(self, host):
 		#
 		# Get the IP and NETMASK of the host
 		#
 	
 		appliance = self.getHostAttr(host, 'appliance')
 		if appliance == 'frontend':
-			filename = '/tftpboot/pxelinux/pxelinux.cfg/default'
-			action = 'os'
-			return (host, action, filename, None, None, None)
+			return None
 
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
 			ip = row['ip']
@@ -36,14 +34,26 @@ class Command(stack.commands.Command,
 				#
 				# Compute the HEX IP filename for the host
 				#
-				filename = '/tftpboot/pxelinux/pxelinux.cfg/'
 				hexstr = ''
 				for i in string.split(ip, '.'):
 					hexstr += '%02x' % (int(i))
-				filename += '%s' % hexstr.upper()
 
-				return (host, action, filename,
-					ip, row['mask'], row['gateway'])
+				return hexstr.upper()
+
+	def getBootParams(self, host, action):
+		for row in self.call('list.host', [ host ]):
+			if action == 'install':
+				bootaction = row['installaction']
+			else:
+				bootaction = row['runaction']
+
+		kernel = ramdisk = args = None
+		for row in self.call('list.bootaction'):
+			if row['action'] == bootaction:
+				kernel  = row['kernel']
+				ramdisk = row['ramdisk']
+				args    = row['args']
+		return (kernel, ramdisk, args)
 
 	def run(self, params, args):
 		# Get a list of hosts
@@ -53,16 +63,6 @@ class Command(stack.commands.Command,
 			('action',None)])
 
 		self.beginOutput()
-		for host in hosts:
-			osname = self.db.getHostOS(host)
-			# If actions aren't specified on the command line
-			# get info from the database
-			if not action:
-				o = self.call('list.host.boot',[host])
-				action = o[0]['action']
-			# Run the OS-specific implementation
-			pxeInfo = self.getHostPXEInfo(host, action)
-			if pxeInfo:
-				self.runImplementation(osname, pxeInfo)
-
+		self.runPlugins([hosts, action])
 		self.endOutput(padChar='', trimOwner=(len(hosts) == 1))
+
