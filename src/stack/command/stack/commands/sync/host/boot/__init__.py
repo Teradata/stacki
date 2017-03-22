@@ -13,7 +13,7 @@ class Command(stack.commands.sync.host.command):
                                      stdout = subprocess.PIPE,
                                      stderr = subprocess.PIPE)
 
-                for row in self.call('report.host.pxefile', 
+                for row in self.call('report.host.bootfile', 
                                      self.getHostnames(args, managed_only=True)):
                         p.stdin.write('%s\n' % row['col-1'])
                 o, e = p.communicate('')

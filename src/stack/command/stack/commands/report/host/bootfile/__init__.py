@@ -18,6 +18,7 @@ class Command(stack.commands.Command,
 	</param>
 	"""
 
+
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args, managed_only=True)
@@ -26,9 +27,9 @@ class Command(stack.commands.Command,
 			('action', None)
                 ])
 
-                actions = [ 'os', 'install' ]
-		if action and action not in actions:
-                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
+#                actions = [ 'os', 'install' ]
+#		if action and action not in actions:
+#                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
 
                 ha = {}
                 for host in hosts:
@@ -76,31 +77,31 @@ class Command(stack.commands.Command,
                                 h['ramdisk'] = b['ramdisk']
                                 h['args']    = b['args']
 
-
-		for row in self.call('list.host.interface', [host, 'expanded=True']):
+                argv = []
+                for host in hosts:
+                        argv.append(host)
+                argv.append('expanded=true')
+		for row in self.call('list.host.interface', argv):
                         h   = ha[row['host']]
 			ip  = row['ip']
 			pxe = row['pxe']
 
                         if h['appliance'] == 'frontend':
-                                h['filename'] = '/tftpboot/pxelinux/pxelinux.cfg/default'
+                                h['filename'] = None
                         elif ip and pxe:
 				#
 				# Compute the HEX IP filename for the host
 				#
-				filename = '/tftpboot/pxelinux/pxelinux.cfg/'
 				hexstr = ''
 				for i in string.split(ip, '.'):
 					hexstr += '%02x' % (int(i))
-				filename += '%s' % hexstr.upper()
-
-                                h['filename'] = filename
+                                h['filename'] = hexstr.upper()
                                 h['ip']       = ip
                                 h['mask']     = row['mask']
                                 h['gateway']  = row['gateway']
 
 		self.beginOutput()
-		for host in hosts:
-                        if ha[host]['action']:
-				self.runImplementation(ha[host]['os'], ha[host])
+		self.runPlugins(ha)
 		self.endOutput(padChar='', trimOwner=True)
+
+

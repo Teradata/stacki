@@ -165,3 +165,4 @@ class Command(stack.commands.set.host.command):
                                         """ % (action, host))
 
                 self.command('sync.host.boot', hosts)
+
