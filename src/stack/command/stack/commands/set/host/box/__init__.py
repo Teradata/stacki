@@ -76,11 +76,3 @@ class Command(stack.commands.set.host.command,
 				(select id from boxes where name='%s')
 				where name='%s' """
 				% (box, host))
-
-		# Regenerate stacki.repo
-		os.system("""
-                	/opt/stack/bin/stack report host yum localhost | 
-			/opt/stack/bin/stack report script | 
-			/bin/sh
-			""")
-
