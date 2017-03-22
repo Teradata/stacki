@@ -47,7 +47,6 @@ foundation-wget
 git
 git-lfs
 hpssacli
-ipxe
 lighttpd
 MegaCLI
 netaddr
