@@ -35,7 +35,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
                                        'os=%s' % b_os ]):
                         if b_os == '':
                                 b_os = None
-                        if b_action == row['action'] and b_type == row['type'] and b_os == row['os']:
+                        if b_action == row['bootaction'] and b_type == row['type'] and b_os == row['os']:
                                 return True
                 return False
 
