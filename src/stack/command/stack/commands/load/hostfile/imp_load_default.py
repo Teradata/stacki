@@ -405,12 +405,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if network:
 					self.checkNetwork(network)
 
-				# check if 'ip' could exist in 'network'
-				network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
-				ipnetwork = ipaddress.IPv4Network(unicode(network_ip + '/' + netmask))
-				if ipaddress.IPv4Address(unicode(ip)) not in ipnetwork:
-					msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
-					raise CommandError(self.owner, msg)
+					# check if 'ip' could exist in 'network'
+					network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
+					ipnetwork = ipaddress.IPv4Network(unicode(network_ip + '/' + netmask))
+					if ipaddress.IPv4Address(unicode(ip)) not in ipnetwork:
+						msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
+						raise CommandError(self.owner, msg)
 
 				#
 				# if 'channel' is specified and if it starts

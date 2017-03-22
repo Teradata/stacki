@@ -167,7 +167,7 @@ def render_pallets(screen, data):
 		#insert pallet info into checkbox tree
 		for p in packages:
 			line = p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3]
-			ct.addItem(line, (0, snackArgs['append']))
+			ct.addItem(line, (0, snackArgs['append']), selected=1)
 
 		#create buttons
 		bb = ButtonBar(screen, (("Continue", "continue"), ("Back", "back")))

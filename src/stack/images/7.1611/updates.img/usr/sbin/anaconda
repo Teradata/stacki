@@ -21,6 +21,7 @@ file = open('/proc/cmdline', 'r')
 args = file.readline().split()
 file.close()
 
+devnull = open(os.devnull, 'w')
 
 def stack_debug():
 	#
@@ -146,11 +147,11 @@ if 'boss' in args:
 			":1", "vt6", "-s", "1440", "-ac",
 			"-nolisten", "tcp", "-dpi", "96",
 			"-noreset"],
-			stdout=None, stderr = None)
+			stdout = devnull, stderr = devnull)
 
 		metacity_proc = subprocess.Popen(
 			["metacity", "--display", ":1", "--sm-disable"],
-			stdout=None, stderr = None)
+			stdout=devnull, stderr=devnull)
 
 		# Start boss
 		log.debug('Starting Boss Configuration')

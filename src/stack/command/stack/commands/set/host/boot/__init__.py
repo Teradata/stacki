@@ -161,7 +161,7 @@ class Command(stack.commands.set.host.command):
 		for host in hosts:
 			if action:
 				self.updateBoot(host, action)
-			output = self.command('report.host.pxefile',[host, 'action=%s' % action])
+			output = self.command('report.host.bootfile',[host, 'action=%s' % action])
 			p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
 				stdin = subprocess.PIPE,
 				stdout= subprocess.PIPE,

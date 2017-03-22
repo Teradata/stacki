@@ -72,7 +72,7 @@ except ImportError:
 	noX = True
 
 if noX:
-	p = subprocess.Popen(["/opt/stack/bin/boss_config_snack.py"])
+	p = subprocess.Popen(["/opt/stack/bin/boss_config_snack.py"] + sys.argv[1:])
 	rc = p.wait()
 	sys.exit(rc)
 
@@ -501,7 +501,7 @@ class Page6(wx.Panel):
 		packages = data.getDVDPallets()
 
 		#populate list of rolls
-		for i in packages:
+		for idx, i in enumerate(packages):
 			if i[0] == None:
 				continue
 			index = self.list1.InsertStringItem(sys.maxint, i[0])
@@ -509,6 +509,9 @@ class Page6(wx.Panel):
 			self.list1.SetStringItem(index, 2, i[2])
 			self.list1.SetStringItem(index, 3, i[3])
 			self.list1.SetStringItem(index, 4, '')
+
+			# By default select the pallet
+			self.list1.CheckItem(idx)
 
 		#left panel for buttons
 		leftPanel = wx.Panel(self, -1)
