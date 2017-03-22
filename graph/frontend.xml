@@ -45,8 +45,8 @@
 		<tail>database-data</tail>
 	</order>
 
-	<order head="firewall">
-		<tail>firewall-server</tail>
+	<order head="firewall-server">
+		<tail>firewall-base</tail>
 	</order>
 
 	<order tail="firewall-server">
@@ -82,6 +82,7 @@
 		<to>dhcp-server</to>
 		<to>dns-server</to>
 		<to>firewall-server</to>
+		<to>firewall-base</to>
 		<to>partitions-save-server</to>
 		<to>routes-server</to>
 		<to>kernel-server</to>
@@ -89,7 +90,7 @@
 		<to>database</to>
 		<to>database-data</to>
 		<to>database-schema</to>
-		<to>foundation-base</to>
+		<to>foundation-server</to>
 		<to>ssh-server</to>
 		<to>storage-controller-server</to>
 	</edge>
