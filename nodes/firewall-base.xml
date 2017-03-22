@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart>
+
+	<description>
+	  Default firewall rules for all appliances.  Disable everything but SSH.
+	</description>
+
+	<si_copyright>
+	</si_copyright>
+
+	<copyright>
+	  Copyright (c) 2000 - 2010 The Regents of the University of California.
+	  All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+	</copyright>
+
+
+	<package cond="'&release;' == '7.x'">iptables-services</package>
+
+
+<post cond="'&release;' == '7.x'">
+/usr/bin/systemctl disable firewalld
+/usr/bin/systemctl enable iptables
+/usr/bin/systemctl disable ip6tables
+</post>
+
+
+<post cond="'&release;' == '6.x'">
+/sbin/chkconfig iptables on
+</post>
+
+
+</kickstart> 
+

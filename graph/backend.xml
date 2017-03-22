@@ -16,11 +16,11 @@
 		<tail>base</tail>
 	</order>
 
-	<order head="firewall">
-		<tail>client-firewall</tail>
+	<order head="firewall-base">
+		<tail>-firewall-client</tail>
 	</order>
 
-	<order tail="client-firewall">
+	<order tail="firewall-base">
 		<head>networking-client</head>
 	</order>
 
@@ -65,7 +65,8 @@
 		<to>nukedisks</to>
 	</edge>
 
-	<edge from="client" to="client-firewall" cond="firewall"/>
+	<edge from="client" to="firewall-client" cond="firewall"/>
+	<edge from="client" to="firewall-base"   cond="firewall"/>
 
 </graph>
 

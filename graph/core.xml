@@ -31,7 +31,6 @@
 		<to>rpc</to>
 		<to>node</to>
 		<to>time-base</to>
-		<to>firewall</to>
 		<to>selinux</to>
 		<to>postshell</to>
 		<to>partition</to>
