@@ -72,7 +72,7 @@ except ImportError:
 	noX = True
 
 if noX:
-	p = subprocess.Popen(["/opt/stack/bin/boss_config_snack.py"])
+	p = subprocess.Popen(["/opt/stack/bin/boss_config_snack.py"] + sys.argv[1:])
 	rc = p.wait()
 	sys.exit(rc)
 
