@@ -25,7 +25,7 @@ class Command(stack.commands.Command,
 	
 		appliance = self.getHostAttr(host, 'appliance')
 		if appliance == 'frontend':
-			return None
+			return []
 
 		hex_ip_list = []
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
