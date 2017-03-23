@@ -186,6 +186,11 @@ class Command(stack.commands.Command,
         def addHostAttrs(self, attributes):
                 readonly = {}
 
+                boxes = {}
+                for row in self.call('list.box'):
+                        boxes[row['name']] = { 'pallets': row['pallets'].split(),
+                                               'carts'  : row['carts'].split() }
+
                 for (name, environment, rack, rank) in self.db.select(
                                 """
                         	n.name, e.name, n.rack, n.rank 
@@ -207,6 +212,8 @@ class Command(stack.commands.Command,
                                 """):
 
                         readonly[name]['box']                = box
+                        readonly[name]['pallets']            = boxes[box]['pallets']
+                        readonly[name]['carts']              = boxes[box]['carts']
                         readonly[name]['appliance']          = appliance
                         readonly[name]['appliance.longname'] = longname
                                 
@@ -223,6 +230,7 @@ class Command(stack.commands.Command,
                 for host in readonly:
                         readonly[host]['os']       = self.db.getHostOS(host)
                         readonly[host]['hostname'] = host
+
 
                 for host in attributes:
                         a = attributes[host]
