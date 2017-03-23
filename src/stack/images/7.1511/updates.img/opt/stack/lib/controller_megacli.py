@@ -132,6 +132,9 @@ class CLI:
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
 
+		if not enclosure:
+			enclosure = ''
+
 		if raidlevel in [ '10', '50', '60' ]:
 			self.doStrippedRaid(raidlevel, adapter, enclosure,
 				slots, hotspares, flags)
