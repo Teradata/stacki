@@ -84,7 +84,7 @@ class Plugin(stack.commands.Plugin):
 		return 'interface'
 
 	def requires(self):
-		return [ 'boot', 'redis' ]
+		return [ 'boot', 'TAIL']
 		
 	def run(self, host):
 		self.owner.db.execute("""delete from networks where 
