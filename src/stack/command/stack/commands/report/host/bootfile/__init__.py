@@ -25,8 +25,9 @@ class Command(stack.commands.Command,
 	
 		appliance = self.getHostAttr(host, 'appliance')
 		if appliance == 'frontend':
-			return None
+			return []
 
+		hex_ip_list = []
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
 			ip = row['ip']
 			pxe = row['pxe']
@@ -38,7 +39,8 @@ class Command(stack.commands.Command,
 				for i in string.split(ip, '.'):
 					hexstr += '%02x' % (int(i))
 
-				return hexstr.upper()
+				hex_ip_list.append(hexstr.upper())
+		return hex_ip_list
 
 	def getBootParams(self, host, action):
 		for row in self.call('list.host', [ host ]):

@@ -173,14 +173,15 @@ class Command(stack.commands.load.command):
 		args = self.hosts, self.interfaces
 		self.runPlugins(args)
 
-                # Set each host's default boot action to os, before we
-                # build out the DHCP file with sync.config
-
+                # Set default boot action of a host to os,
+		# if it doesn't already have a bootaction set
                 params = []
-                for host in self.hosts.keys():
-                        params.append(host)
-                params.append('action=os')
-		self.call('set.host.boot', params)
+		for boot in self.call('list.host.boot', self.hosts.keys()):
+			if boot['action'] == None:
+				params.append(boot['host'])
+		if params:
+			params.append('action=os')
+			self.call('set.host.boot', params)
                 
 		self.call('sync.config')
 

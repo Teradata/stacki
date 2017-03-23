@@ -52,8 +52,5 @@ class Implementation(stack.commands.Implementation):
 		if args and len(args) > 0:
 			self.owner.addOutput(host,'\tappend %s' % args)
 
-		# If using ksdevice=bootif we need to
-		# pass the PXE information to loader.
-		
-		if args and args.find('bootif') != -1:
+		if action == "install":
 			self.owner.addOutput(host,'\tipappend 2')
