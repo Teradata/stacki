@@ -193,6 +193,11 @@ class Command(stack.commands.Command):
                 attrs    = self.get_attributes('host', 'nodes', hosts)
                 readonly = {}
 
+                boxes = {}
+                for row in self.call('list.box'):
+                        boxes[row['name']] = { 'pallets': row['pallets'].split(),
+                                               'carts'  : row['carts'].split() }
+
                 for (name, environment, rack, rank, cpus) in self.db.select(
                                 """
                         	name,environment,rack,rank,cpus from nodes
@@ -213,6 +218,8 @@ class Command(stack.commands.Command):
                                 """):
 
                         readonly[name]['box']                = box
+                        readonly[name]['pallets']            = boxes[box]['pallets']
+                        readonly[name]['carts']              = boxes[box]['carts']
                         readonly[name]['appliance']          = appliance
                         readonly[name]['appliance.longname'] = longname
                                 
