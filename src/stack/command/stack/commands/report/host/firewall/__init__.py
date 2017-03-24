@@ -144,15 +144,21 @@ class Command(stack.commands.HostArgumentProcessor,
 				if rows:
 					interface = self.db.fetchone()[0]
 					s += ' -o %s' % interface
+			if rule['flags'] != None:
+				s += ' %s' % rule['flags']
+			s += ' -j %s' % rule['action']
+
 			if rule['protocol'] != 'all' and \
 				rule['protocol'] != None:
 				s += ' -p %s' % rule['protocol']
 			if rule['service'] != 'all' and \
 				rule['service'] != None:
-				s += ' --dport %s' % rule['service']
-			if rule['flags'] != None:
-				s += ' %s' % rule['flags']
-			s += ' -j %s' % rule['action']
+				if rule['protocol'] == 'all':
+					tmp_rule = s
+					s = "%s -p tcp --dport %s\n" % (tmp_rule, rule['service'])
+					s += "%s -p udp --dport %s" % (tmp_rule, rule['service'])
+				else:
+					s += ' --dport %s' % rule['service']
 
 			self.addOutput(host, s)
 			self.addOutput(host,'')
