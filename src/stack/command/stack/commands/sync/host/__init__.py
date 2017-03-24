@@ -88,8 +88,12 @@ class command(stack.commands.HostArgumentProcessor,
 	pass
 
 class Parallel(threading.Thread):
-	def __init__(self, cmd):
+	def __init__(self, cmd, out = None):
 		self.cmd = cmd
+		if not out:
+			self.out = {"output":"", "error":"", "rc":0}
+		else:
+			self.out = out
 		while threading.activeCount() > max_threading:
 			time.sleep(0.001)
 		threading.Thread.__init__(self)
@@ -97,10 +101,10 @@ class Parallel(threading.Thread):
 	def run(self):
 		p = subprocess.Popen(self.cmd,
 			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE,
+			stderr=subprocess.STDOUT,
 			shell=True)
 		(o, e) = p.communicate()
-		if p.returncode == 0:
-			sys.stdout.write(o)
-		else:
-			sys.stderr.write(e)
+		rc = p.wait()
+		self.out['output'] = o
+		self.out['error'] = e
+		self.out['rc'] = rc
