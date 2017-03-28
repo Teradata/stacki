@@ -138,10 +138,7 @@ class Builder:
 		else:
 			extraflags = ''
 
-		volname = '%s %s' % (rollName, diskName)
-		if len(volname) > 32:
-			volname = volname[0:32]
-			
+		volname = "stacki"
 		cwd = os.getcwd()
 		cmd = 'mkisofs -V "%s" %s -r -T -f -o %s .' % \
 			(volname, extraflags, os.path.join(cwd, isoName))
@@ -573,7 +570,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 			fout.write('lang en_US\n')
 			fout.write('keyboard us\n')
 			fout.write('interactive\n')
-			fout.write('url --url hd:sda1:%s\n' % palletdir)
+			fout.write('url --url hd:LABEL=stacki:%s\n' % palletdir)
 			fout.close()
 
 		#
