@@ -232,9 +232,15 @@ def process_data(page, btn_value, result):
 		#network
 		elif page == 2:
 			fqhn, eth, ip, subnet, gateway, dns = result
+
+			#check the FQDN for appliance names
 			validated, message, title = \
-				data.validateNetwork((fqhn, eth, ip, subnet, \
-					gateway, dns), config_net)
+				data.validateDomain(fqhn)
+			if validated:
+				#check for valid network config
+				validated, message, title = \
+					data.validateNetwork((fqhn, eth, ip, subnet, \
+						gateway, dns), config_net)
 		#password
 		elif page == 3:
 			pw1, pw2 = result
