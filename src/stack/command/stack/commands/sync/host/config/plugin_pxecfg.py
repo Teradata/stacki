@@ -55,13 +55,14 @@ class Plugin(stack.commands.Plugin):
 	def requires(self):
 		return []
 
-	def run(self, host):
-		appliance = self.owner.getHostAttr(host, 'appliance')
-		if appliance == 'frontend':
-			return
+	def run(self, hosts):
+		for host in hosts:
+			appliance = self.owner.getHostAttr(host, 'appliance')
+			if appliance == 'frontend':
+				continue
 
-		s = self.owner.call('list.host.boot', [host])
-		action = s[0]['action']
-		if action == None:
-			self.owner.command('set.host.boot',
-				[host, 'action=install'])
+			s = self.owner.call('list.host.boot', [host])
+			action = s[0]['action']
+			if action == None:
+				self.owner.command('set.host.boot',
+					[host, 'action=install'])

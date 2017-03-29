@@ -70,13 +70,14 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'firewall'
 
-	def run(self, host):
+	def run(self, hosts):
 		#
 		# since we are not setting any command line parameters, we
 		# just need to remove all rows in the database that match this
 		# host
 		#
-		self.db.execute("""delete from node_firewall where
-			node = (select id from nodes where
-			name = '%s')""" % host)	
+		for host in hosts:
+			self.db.execute("""delete from node_firewall where
+				node = (select id from nodes where
+				name = '%s')""" % host)	
 
