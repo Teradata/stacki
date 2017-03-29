@@ -176,6 +176,13 @@ class Data:
 		self.data.devices = devices
 		return devices
 
+	def validateDomain(self, value):
+		s = value.split(".")[0]
+		if s.lower() == "frontend" or s.lower() == "backend":
+			return (False, "Cannot have appliance name as a domain", "Domain Error")
+		else:
+			return (True, "", "")
+
 	def validateNetwork(self, tup, config_net=False):
 
 		fqhn, eth, ip, subnet, gateway, dns = tup

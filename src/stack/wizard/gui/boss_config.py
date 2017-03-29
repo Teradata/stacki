@@ -356,14 +356,22 @@ class Page2(wx.Panel):
 		setSizer(self, sizer)
 
 	def OnPage4(self, event):
+		fqdn = str(self.tc0.Value)
 		tup = (str(self.tc0.Value), str(self.cb.Value), str(self.tc1.Value),
 			str(self.tc2.Value), str(self.tc3.Value), str(self.tc4.Value))
 
-		validated, message, title = self.data.validateNetwork(tup, config_net)
+		#check the FQDN for appliance names
+		validated, message, title = self.data.validateDomain(fqdn)
 		if not validated:
 			wx.MessageBox(message, title, wx.OK | wx.ICON_ERROR)	
 		else:
-			wx.PostEvent(self.parent, PageChangeEvent(page=Page4))
+			#check for valid network config
+			validated, message, title = self.data.validateNetwork(tup, config_net)
+			if not validated:
+				wx.MessageBox(message, title, wx.OK | wx.ICON_ERROR)	
+			else:
+				#proceed to next page
+				wx.PostEvent(self.parent, PageChangeEvent(page=Page4))
 
 	def OnPage1(self, event):
 		wx.PostEvent(self.parent, PageChangeEvent(page=Page1))
