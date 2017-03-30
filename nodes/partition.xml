@@ -27,7 +27,7 @@ def doBootDisk(disk):
 	if release == '7.x':
 		f.write('part biosboot --fstype=biosboot --size=1 ' +
 			'--ondisk=%s\n' % disk)
-	f.write('part / --size=16000 --fstype=ext4 --ondisk=%s\n' % disk)
+	f.write('part / --size=16000 --fstype=xfs --ondisk=%s\n' % disk)
 	f.write('part swap --size=1000 --ondisk=%s\n' % disk)
 	f.write('part /var --size=16000 --fstype=xfs --ondisk=%s\n' % disk)
 	f.write('part /state/partition1 --size=1 --grow --fstype=xfs ' +
