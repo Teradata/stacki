@@ -135,8 +135,10 @@ class Implementation(stack.commands.Implementation):
 					name = 'RHEL'
 				elif value.startswith('CentOS'):
 					name = 'CentOS'
-				elif value == 'Oracle Linux Server':
-					name = 'Oracle'
+				elif value.startswith('Oracle'):
+					name = 'OLE'
+				elif value.startswith('Scientific'):
+					name = 'SL'
 			elif key == 'version':
 				vers = value
 			elif key == 'arch':

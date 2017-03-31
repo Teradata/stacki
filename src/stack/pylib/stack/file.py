@@ -434,8 +434,10 @@ class RollFile(File):
 						name = 'RHEL'
 					elif value.startswith('CentOS'):
 						name = 'CentOS'
-					elif value == 'Oracle Linux Server':
-						name = 'Oracle'
+					elif value.startswith('Oracle'):
+						name = 'OLE'
+					elif value.startswith('Scientific'):
+						name = 'SL'
 				elif key == 'version':
 					version = value
 				elif key == 'arch':
@@ -463,7 +465,6 @@ class RollFile(File):
 			# will be 1, 2, etc.
 			#
 			diskid = d
-
 		if not name:
 			name = "BaseOS"
 			foreign = 1
@@ -477,7 +478,6 @@ class RollFile(File):
 			diskid = '1'
 
 		os.system('umount /mnt/cdrom')
-
 		return name, version, release, arch, diskid, foreign
 
 	def __cmp__(self, file):
