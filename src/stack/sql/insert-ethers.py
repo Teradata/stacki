@@ -93,7 +93,7 @@
 # @Copyright@
 
 
-from __future__ import print_function
+#from __future__ import print_function
 import sys
 import os
 import string
@@ -268,13 +268,13 @@ class InsertEthers(GUI):
 		self.maxNew		= -1 
 		self.appliance		= None
 		self.basename		= None
-		self.distid		= None
+		self.ksid		= None
 		self.restart_services	= 0
 		self.inserted		= []
 		self.kickstarted	= {}
 		self.lastmsg		= ''
 		self.client		= ''
-		self.setDistribution('default')
+		self.box		= 'default'
 
 		self.ipnetwork		= None
 		self.currentip		= None
@@ -322,9 +322,8 @@ class InsertEthers(GUI):
 	def setMax(self, max):
 		self.maxNew = max
 
-	def setDistribution(self, distribution):
-		self.distribution = distribution
-		self.dist_lockfile = '/var/lock/%s' % self.distribution
+	def setBox(self, box):
+		self.box = box
 
 	def setSubnet(self, subnet):
 		self.subnet = subnet
@@ -397,13 +396,13 @@ class InsertEthers(GUI):
 		# Check if the appliance is kickstartable. We only need
 		# to check the appliance_attributes table in this instance
 		# since this value cannot be in any other table yet.
-		query = 'select if(aa.value="yes", True, False) from '	+\
-			'appliance_attributes aa, appliances a where '	+\
-			'a.name="%s" and aa.appliance=a.id ' % basename+\
-			'and aa.attr="kickstartable"'
+		query = """select if(aa.value="yes", True, False) from 
+			attributes aa, appliances a where a.name="%s" 
+			and aa.scope="appliance" and aa.attr="kickstartable" 
+			and aa.pointerid=a.id;""" % basename
 		rows = self.sql.execute(query)
 		if rows > 0:
-			self.distid = 1
+			self.ksid = 1
 			self.kickstartable = bool(self.sql.fetchone()[0])
 
 		#
@@ -430,10 +429,9 @@ class InsertEthers(GUI):
 				ks = '(*)'
 			else:	# An error
 				ks = '(%s)' % self.kickstarted[name]
-			macs_n_names += '%s\t%s\t%s\n' % (mac, name, ks)
-
+			macs_n_names += '%s    %s    %s    %s\n' % (mac, name, self.box, ks)
+		
 		self.textbox.setText(macs_n_names)
-
 		self.form.draw()
 		self.screen.refresh()
 
@@ -596,8 +594,8 @@ class InsertEthers(GUI):
 
 		cmd = '/opt/stack/bin/stack add host %s ' % nodename +\
 			'longname="%s" '% self.appliance_name +\
-			'rack=%d rank=%d distribution="%s"' % \
-			(self.cabinet , self.rank, self.distribution)
+			'rack=%d rank=%d box="%s"' % \
+			(self.cabinet , self.rank, self.box)
 
 		s = os.system(cmd)
 		if s != 0:
@@ -624,7 +622,7 @@ class InsertEthers(GUI):
 		list = [(mac, nodename)]
 		list.extend(self.inserted)
 		self.inserted = list
-		if self.distid is not None:
+		if self.ksid is not None:
 			self.kickstarted[nodename] = 0
 
 		syslog.syslog(syslog.LOG_DEBUG, 'addit: inserted')
@@ -713,9 +711,8 @@ class InsertEthers(GUI):
 		"""Look in log line for a kickstart request."""
 		
 		# Track accesses both with and without local certs.
-		interesting = line.count('install/sbin/public/kickstart.cgi') \
-			or line.count('install/sbin/kickstart.cgi') \
-			or line.count('install/sbin/public/jumpstart.cgi')
+		interesting = line.count('install/sbin/public/profile.cgi') \
+			or line.count('install/sbin/profile.cgi')
 		if not interesting:
 			return 
 
@@ -749,7 +746,7 @@ class InsertEthers(GUI):
 
 		tokens = string.split(line[:-1])
 		if len(tokens) > 5 and tokens[4] == 'dhcpd:' and \
-		   (tokens[5] in [ 'DHCPDISCOVER', 'BOOTREQUEST' ]):
+		   (tokens[5] in [ 'DHCPDISCOVER' ]):
 			
 			# Remove the ":" from the interface value. If
 			# this request does not come from our private
@@ -799,27 +796,28 @@ class InsertEthers(GUI):
 				# will now show up (and not be flagged as
 				# repeated).
 				#
-				cmd = '/sbin/service syslog restart '
+#				cmd = '/sbin/service rsyslog restart '
+				cmd = '/usr/bin/sytemctl restart rsyslog '
 				cmd += '> /dev/null 2>&1'
 				os.system(cmd)
 
-	def distDone(self):
-		if os.path.exists(self.dist_lockfile):
-			self.warningGUI(_("stacki distribution is not ready\n\n")
-				+ _("Please wait for 'stack create distribution' to complete\n"))
+	def getBox(self):
+		self.sql.execute("select id from boxes where name='%s'" % (self.box))
+		box = self.sql.fetchone()
+		if box == None:
+			self.warningGUI(_("There is no box named: %s\n\n\n\n" % self.box)
+			+ _("Create it and try again.\n"))
 			return 0
 		return 1
 
 			
 	def run(self):
-
 		self.startGUI()
 
 		#
-		# make sure 'stack create distribution' is not still building the
-		# distro
+		# make sure the box requested exists 
 		#
-		if self.distDone() == 0:
+		if self.getBox() == 0:
 			self.endGUI()
 			return
 
@@ -941,7 +939,7 @@ class App(stack.sql.Application):
 			('rack=', 'number'),
 			('inc=', 'number'),
 			('rank=', 'number'),
-			('distribution=', 'distribution'),
+			('box=', 'box'),
 			('update'),
 			('network=', 'network name')
 		])
@@ -968,8 +966,8 @@ class App(stack.sql.Application):
 			self.insertor.setRank(int(c[1]))
 		elif c[0] == '--update':
 			self.doUpdate = 1
-		elif c[0] == '--distribution':
-			self.insertor.setDistribution(c[1])
+		elif c[0] == '--box':
+			self.insertor.setBox(c[1])
 		elif c[0] == '--network':
 			self.insertor.setSubnet(c[1])
 		return 0
