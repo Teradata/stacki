@@ -67,12 +67,12 @@ def loadSpreadsheetPartitions(disk_info):
 			if md_re.match(o['device']):
 				st = "raid %s --device %s %s" % \
 				(o['mountpoint'], o['device'], \
-				o['options'].replace("'","").replace('"', ''))
+				o['options'])
 				raid_lines.append(st)
 			else:
 				st = "part %s %s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['device'], \
-				o['options'].replace("'","").replace('"', ''))
+				o['options'])
 				part_lines.append(st)
 
 	lvm_mountpts = []
@@ -91,7 +91,7 @@ def loadSpreadsheetPartitions(disk_info):
 				# Ignore size options
 				st = "volgroup %s %s %s" % \
 					(v['mountpoint'], d, \
-					v['options'].replace("'","").replace('"', ''))
+					v['options'])
 				lvm_lines.append(st)
 			lvm_mountpts.append(v['mountpoint'])
 	
@@ -112,18 +112,18 @@ def loadSpreadsheetPartitions(disk_info):
 		if o['device'] in lvm_mountpts:
 			st = "logvol %s --fstype %s %s --vgname=%s %s" % \
 				(o['mountpoint'], o['fstype'], \
-				o['options'].replace("'","").replace('"', ''), \
+				o['options'], \
 				o['device'], size)
 			lvm_lines.append(st)
 		elif md_re.match(o['device']):
 			s = "raid %s --fstype %s --device %s %s" % \
 				(o['mountpoint'],o['fstype'],o['device'],
-				o['options'].replace("'","").replace('"', ''))
+				o['options'])
 			raid_lines.append(s)
 		elif o['fstype'] == 'raid':
 			st = "part %s %s --ondisk=%s %s" % \
 				(o['mountpoint'], size, o['device'],
-				o['options'].replace("'","").replace('"', ''))
+				o['options'])
 			part_lines.append(st)
 		else:
 			st = "part %s %s --fstype=%s --ondisk=%s %s" % \
