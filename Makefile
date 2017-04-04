@@ -54,6 +54,7 @@ bootstrap:
 	gettext \
 	eject \
 	binutils-devel \
+	byacc \
 	openssl-devel \
 	bzip2-devel \
 	ncurses-devel \

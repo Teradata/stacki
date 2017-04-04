@@ -245,7 +245,7 @@ if 'boss' in args:
 		#
 		# need to make a "base" repo address
 		#
-		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+		if pname in [ 'CentOS', 'RHEL', 'os', 'OLE', 'SL' ]:
 			baserepo = '%s/%s/%s/%s/redhat/x86_64' % (purl, pname, pver, prel)
 			
 	repo_file.close()

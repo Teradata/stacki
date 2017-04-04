@@ -42,7 +42,7 @@
 PKGROOT		= /usr
 ROLLROOT	= ../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION).tar.gz
-
+RPM.EXTRAS	= "AutoReq: 0"
 include $(STACKBUILD)/etc/CCRules.mk
 
 

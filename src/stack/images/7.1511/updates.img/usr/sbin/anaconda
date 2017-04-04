@@ -112,7 +112,7 @@ if 'boss' in args:
 		#
 		# need to make a "base" repo address
 		#
-		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+		if pname in [ 'CentOS', 'RHEL', 'os', 'SL', 'OLE' ]:
 			baserepo = 'http://%s/install/pallets/%s/%s/%s/redhat/x86_64' % (host, pname, pver, prel)
 			
 	file.close()
