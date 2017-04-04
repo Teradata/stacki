@@ -67,4 +67,16 @@ chmod 600 /tmp/authorized_keys
 
 </pre>
 
+<pre cond="'&release;' == '7.x'">
+
+<file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400" rcs="off">
+<eval>
+/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
+</eval>
+</file>
+
+/sbin/sshd -f /etc/ssh/sshd_config.anaconda \
+	-h /etc/ssh/ssh_host_ecdsa_key -p 2200
+</pre>
+
 </kickstart>
