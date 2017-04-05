@@ -52,6 +52,7 @@ else:
 <package>grub2</package>
 <package>grub2-tools</package>
 <package>wget</package>
+<package>bridge-utils</package>
 
 <post>
 /sbin/chkconfig stack-pre on
