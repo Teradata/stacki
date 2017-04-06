@@ -147,10 +147,23 @@ class Command(stack.commands.HostArgumentProcessor,
 				self.addOutput(host, 'ONBOOT=yes')
 				configured = 1
 
+		#
 		# If device is a bonding device
+		#
 		bond_reg = re.compile('bond[0-9]+')
 		if bond_reg.match(device):
+			#
+			# if a 'bond*' device is present, then always make
+			# sure it is enabled on boot.
+			#
+			if not configured:
+				self.addOutput(host, 'BOOTPROTO=none')
+				self.addOutput(host, 'ONBOOT=yes')
+				configured = 1
+			
+			#
 			# Check if there are bonding options set
+			#
 			for opt in options:
 				if opt.startswith('bonding-opts='):
 					i = opt.find('=')
@@ -172,6 +185,14 @@ class Command(stack.commands.HostArgumentProcessor,
 		# If device is a bridge device
 		if 'bridge' in options:
 			self.addOutput(host, 'TYPE=Bridge')
+
+			#
+			# if there is no IP address associated with this
+			# bridge, still make sure it enabled on boot.
+			#
+			if not configured:
+				self.addOutput(host, 'BOOTPROTO=none')
+				self.addOutput(host, 'ONBOOT=yes')
 
 			#
 			# Don't write the MTU in the bridge configuration
