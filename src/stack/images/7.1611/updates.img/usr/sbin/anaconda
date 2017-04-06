@@ -75,7 +75,7 @@ if 'boss' in args:
 	# Check to see if there's a user-specified
 	# site.attrs / rolls.xml on the kernel command line
 	for arg in args:
-		match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
+		match = re.search('^stacki.(attrfile|palletfile)=(.+)$', arg)
 		if not match:
 			continue
 		uri = match.group(2)
@@ -86,10 +86,10 @@ if 'boss' in args:
 			# non-http uri's return None for getcode()
 			if resp.getcode() == 404:
 				log.error("got 404 on {0}\n".format(uri))
-			if 'stacki.attrs' in arg:
+			if 'stacki.attrfile' in arg:
 				log.info("writing /tmp/site.attrs")
 				open('/tmp/site.attrs', 'w').write(resp.read())
-			if 'stacki.pallet' in arg:
+			if 'stacki.palletfile' in arg:
 				log.info("writing /tmp/rolls.xml")
 				open('/tmp/rolls.xml', 'w').write(resp.read())
 		except Exception as e:
