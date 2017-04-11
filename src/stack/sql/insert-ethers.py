@@ -102,14 +102,14 @@ import signal
 import snack
 import bisect
 import syslog
-from gettext import gettext as _
 import ipaddress
-
 import stack.sql
 import stack.util
 import stack.app
-from stack.api.get import *
 import stack.kickstart
+from gettext import gettext as _
+from stack.api.get import *
+from stack.api import *
 from stack.exception import *
 
 
@@ -333,7 +333,7 @@ class InsertEthers(GUI):
 		GUI.startGUI(self)
 
 		self.form = snack.GridForm(self.screen,
-					   _("Inserted Appliances"), 1, 1)
+					   _("Discovered Hosts"), 1, 1)
 		self.textbox = snack.Textbox(50, 4, "", scroll = 1)
 		self.form.add(self.textbox, 0, 0)
 
@@ -614,7 +614,8 @@ class InsertEthers(GUI):
 			nodename)
 		if not rows:
 			raise InsertError, "Could not find %s in database" % nodename
-
+		# obviates use of default file in tftp dir
+		Call('report.host.bootfile', [nodename, 'action=install'])
 		nodeid = self.sql.fetchone()[0]
 		self.controller.added(nodename, nodeid)
 		self.restart_services = 1
