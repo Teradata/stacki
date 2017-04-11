@@ -95,17 +95,16 @@ def backend(nodestorage, disks, raids):
 	# reconnect all Stack disks
 	#
 	for disk in nodedisks.keys():
-		if nodestorage.isStackDisk(nodedisks[disk]):
-			part = nodestorage.addPartitions(nodedisks[disk],
-				format = 0)
-			parts += part
+		part = nodestorage.addPartitions(nodedisks[disk],
+			format = 0)
+		parts += part
 
-			#
-			# this disk is recognized, so remove it from
-			# nodedisks and disks
-			#
-			del i[disk]
-			disks.remove(disk)
+		#
+		# this disk is recognized, so remove it from
+		# nodedisks and disks
+		#
+		del i[disk]
+		disks.remove(disk)
 			
 	nodedisks = i
 
