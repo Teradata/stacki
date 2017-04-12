@@ -466,7 +466,7 @@ class Generator:
 		# supports the old syntax
 
 		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			attrs = node.attributes.getNamedItem((node.namespaceURI, 'attrs'))
 			if attrs:
 				dict = eval(attrs.value)
 				for (k,v) in dict.items():
