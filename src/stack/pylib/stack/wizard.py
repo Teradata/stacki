@@ -179,7 +179,7 @@ class Data:
 	def validateDomain(self, value):
 		s = value.split(".")[0]
 		if s.lower() == "frontend" or s.lower() == "backend":
-			return (False, "Cannot have appliance name as a domain", "Domain Error")
+			return (False, "Cannot have an appliance name as a hostname", "Hostname Error")
 		else:
 			return (True, "", "")
 
