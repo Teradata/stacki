@@ -77,8 +77,9 @@ bootstrap:
 	syslinux \
 	createrepo \
 	perl-ExtUtils-MakeMaker \
-	asciidoc xmlto
+	asciidoc xmlto yum-utils
 	$(MAKE) -C src/stack/build $@
+	. /etc/profile.d/stack-build.sh
 	$(MAKE) -C src $@
 
 LICENSE.all.txt:
