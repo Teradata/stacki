@@ -45,6 +45,7 @@ DEPENDS.FILES	= $(NAME)-$(VERSION).tar.gz
 RPM.EXTRAS	= "AutoReq: 0"
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap: install-rpm
 
 build:
 	$(TAR) -xzf $(NAME)-$(VERSION).tar.gz
