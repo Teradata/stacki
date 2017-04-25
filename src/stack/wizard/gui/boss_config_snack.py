@@ -221,7 +221,10 @@ def process_data(page, btn_value, result):
 		else:
 			page = page - 1
 	elif btn_value == 'cancel':
-		page = 10
+		if page == 5:
+			page = 6
+		else:
+			page = 10
 	elif btn_value == 'ok':
 		page = page
 	else:
