@@ -144,13 +144,14 @@ class Command(stack.commands.list.command,
 	"""
 
 	def run(self, params, args):
-		(attributes, pallets, evalp, missing, generator) = \
+		(attributes, pallets, evalp, missing, generator, basedir) = \
 			self.fillParams([
 				('attrs', ),
 				('pallet', ),
 				('eval', 'yes'),
 				('missing-check', 'no'),
-				('gen', 'kgen')
+				('gen', 'kgen'),
+				('basedir',None),
 				])
 			
 		if pallets:
@@ -290,6 +291,10 @@ class Command(stack.commands.list.command,
 				subprocess.Popen([ '/opt/stack/bin/stack',
 					'compile', 'cart', o['name'] ],
 					stdout = devnull, stderr = devnull)
+
+		if basedir:
+			if os.path.exists(basedir) and os.path.isdir(basedir):
+				items = [os.path.realpath(basedir)]
 
 		handler = stack.profile.GraphHandler(attrs, directories = items)
 
