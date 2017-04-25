@@ -288,7 +288,7 @@ class Command(stack.commands.Command):
 
                 rows = self.db.select(shadow)
                 if not rows:
-                        self.db.select(noshadow)
+                        rows = self.db.select(noshadow)
 
 	        for row in rows:
 		        if len(row) == 4:
