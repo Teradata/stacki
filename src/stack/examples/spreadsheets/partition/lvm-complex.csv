@@ -1,0 +1,13 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+backend-0-0,sda,biosboot,1,biosboot,
+,sda,/boot,500,xfs,
+,sda,pv.01,25000,lvm,
+,pv.01,vg_sys,0,volgroup,
+,vg_sys,/,2048,xfs,--name=lv_root
+,vg_sys,swap,1024,xfs,--name=lv_swap
+,vg_sys,/usr,6144,xfs,--name=lv_usr
+,vg_sys,/var,4096,xfs,"--name=lv_var --fsoptions=defaults,nodev"
+,vg_sys,/var/log,2048,xfs,"--name=lv_var_log --fsoptions=defaults,nodev,noexec,nosuid"
+,vg_sys,/home,500,xfs,"--name=lv_home --fsoptions=defaults,nodev,nosuid"
+,vg_sys,/opt,2560,xfs,"--name=lv_opt --fsoptions=defaults,nodev,nosuid"
+,vg_sys,/tmp,2048,xfs,"--name=lv_tmp --fsoptions=defaults,nodev,noexec,nosuid"

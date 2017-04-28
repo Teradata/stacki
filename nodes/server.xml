@@ -76,6 +76,9 @@ for pallet in g.rolls:
 <!-- text-based spreadsheet editor -->
 <package>sc-im</package>
 
+<!-- example spreadsheets -->
+<package>stack-examples</package>
+
 
 <!-- /mnt/cdrom needed to create pallets -->
 <post>
