@@ -351,7 +351,7 @@ class RollArgumentProcessor:
 		if params.has_key('arch'):
 			arch = params['arch']
 		else:
-			arch = self.arch # System Architecture
+			arch = "%" # SQL wildcard
 	
 		list = []
 		if not args:
