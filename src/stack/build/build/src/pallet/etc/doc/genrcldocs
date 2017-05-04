@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/opt/stack/bin/python
 #
 # @Copyright@
 #  				Rocks(r)
@@ -90,7 +90,7 @@
 import os
 import sys
 import string
-
+import stack.api
 	
 # create all the roll-<command>.sgml files
 
@@ -252,12 +252,8 @@ def markdoc():
 def getCommands(roll=None):
 	list	 = []
 	if roll:
-		isHeader = 1
-		for line in os.popen('/opt/stack/bin/stack list pallet command %s' % roll).readlines():
-			if isHeader:
-				isHeader = 0
-				continue
-			list.append(line[:-1].strip())
+		for cmd in stack.api.Call('list pallet command',[roll]):
+			list.append(cmd['command'])
 	return list
 
 roll     = sys.argv[1]
