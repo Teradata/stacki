@@ -184,12 +184,14 @@ def markdoc():
 
 
 	# Generate Global / Comprehensive TOC File
-	cli_toc_file = open('cli/CLI-documentation.md','w')
-	cli_toc_file.write("# stacki Command Line Interface Reference\n\n")
+	cli_toc_file = open('cli/%s-CLI-documentation.md' % roll,'w')
+	cli_toc_file.write("### %s Command Line Interface Reference\n\n" % roll)
 
 	# Main Page Sidebar
 	cli_sidebar = open('cli/_Sidebar.md','w')
-	cli_sidebar.write('[Command Line Interface](CLI-documentation)\n\n')
+	cli_sidebar.write("### %s CLI\n\n" % roll)
+	cli_sidebar.write('[Home](Home)\n\n')
+	cli_sidebar.write('[Command Line Interface](%s-CLI-documentation)\n\n' % roll)
 
 	# Get a list of verbs
 	verbs = cli_toc.keys()
@@ -198,13 +200,13 @@ def markdoc():
 		# Verb-specific TOC files named <verb>-commands.md. 
 
 		# Write each verb to the Global TOC and the main page
-		cli_toc_file.write('* [%s](%s-commands)\n' % (verb, verb))
+		cli_toc_file.write('* [%s](%s-%s-commands)\n' % (verb, roll, verb))
 		# Connect the verb TOC file to the Main Sidebar
-		cli_sidebar.write('* [%s](%s-commands)\n' % (verb, verb))
+		cli_sidebar.write('* [%s](%s-%s-commands)\n' % (verb, roll, verb))
 
 		# Create the verb TOC file
-		print "Writing verbfile cli/%s/%s-commands.md" % (verb, verb)
-		verbfile = open('cli/%s/%s-commands.md' % (verb, verb), 'w')
+		print "Writing verbfile cli/%s/%s-%s-commands.md" % (verb, roll, verb)
+		verbfile = open('cli/%s/%s-%s-commands.md' % (verb, roll, verb), 'w')
 		# Title of verb TOC
 		verbfile.write("# %s commands\n\n" % verb)
 
@@ -212,7 +214,8 @@ def markdoc():
 		verb_sidebar = open('cli/%s/_Sidebar.md' % (verb), 'w')
 
 		# Main Page Link
-		verb_sidebar.write('[Command Line Interface](CLI-documentation)\n\n')
+		verb_sidebar.write('[Home](Home)\n\n')
+		verb_sidebar.write('[Command Line Interface](%s-CLI-documentation)\n\n' % roll)
 
 		# Get the current verb we're processing
 		i = verbs.index(verb)
@@ -220,10 +223,10 @@ def markdoc():
 		# Add all the verbs before the current one to the sidebar
 		non_exp_verbs = verbs[:i]
 		for n in non_exp_verbs:
-			verb_sidebar.write("* [%s](%s-commands)\n"% (n,n))
+			verb_sidebar.write("* [%s](%s-%s-commands)\n"% (n, roll, n))
 
 		# Current verb and its dependents in the sidebar
-		verb_sidebar.write("* [%s](%s-commands)\n" % (verb, verb))
+		verb_sidebar.write("* [%s](%s-%s-commands)\n" % (verb, roll, verb))
 		for cli in cli_toc[verb]:
 			# Get command name
 			cmd = '%s %s' % (verb, ' '.join(cli).strip())
@@ -242,7 +245,7 @@ def markdoc():
 		# Add all verbs after the current verb in the sidebar
 		non_exp_verbs = verbs[i+1:]
 		for n in non_exp_verbs:
-			verb_sidebar.write("* [%s](%s-commands)\n"% (n,n))
+			verb_sidebar.write("* [%s](%s-%s-commands)\n"% (n, roll, n))
 		verbfile.close()
 		verb_sidebar.close()
 
