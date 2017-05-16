@@ -19,7 +19,8 @@
 
 
 <post>
-rm -f /etc/yum.repos.d/*repo
+mkdir /etc/yum.repos.d/save
+mv /etc/yum.repos.d/*repo /etc/yum.repos.d/save/
 
 <file name="/etc/yum.conf">
 [main]

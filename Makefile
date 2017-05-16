@@ -42,6 +42,7 @@
 ROLLROOT = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
+-include version-$(ARCH).mk
 
 bootstrap:
 	-yum groupinstall -y "Development and Creative Workstation"
