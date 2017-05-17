@@ -118,7 +118,8 @@ class Command(stack.commands.create.command):
 	repo will be downloaded.
 
 	<param type='string' name='url'>	
-	The network location of the repository of packages.
+	The location of the repository of packages to mirror.  Can be an 
+	http(s) or ftp URL, or a local path.
 	</param>
 	
 	<param type='string' name='name'>
@@ -170,24 +171,41 @@ class Command(stack.commands.create.command):
 	Creates a mirror for RHEL 6.5 based on the latest packages from cdn.redhat.com.
 	The pallet ISO will be named rhel-6-server-rpms-6.5-0.x86_64.disk1.iso.
 	</example>
+
+	<example cmd='create mirror url=/tmp/ansible_deps name=ansible version=4.0'>
+	Creates a pallet based on packages already collected in /tmp/ansible_deps
+	to install Ansible with dependencies.
+	The pallet ISO will be named ansible-4.0-7.x.x86_64.disk1.iso
+	</example>
 	"""
 
-	def mirror(self, mirror_path):
-		cmd = 'wget -erobots=off --reject "*.drpm" '
-		cmd += '--reject "anaconda*rpm" -m -nv -np %s' % (mirror_path)
-		proc = subprocess.Popen(shlex.split(cmd), stdin = None,
-			stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-		o, e = proc.communicate()
+	def mirror(self, mirror_url):
+		try:
+			scheme, url = mirror_url.split('://')
+		except ValueError:
+			# If there is no scheme, mirror_url is just a local file
+			scheme = None
+			url = mirror_url
 
-		if len(mirror_path) > 6:
-			if mirror_path[0:6] == 'ftp://':
-				mirrordir = mirror_path[6:]
-			elif mirror_path[0:7] == 'http://':
-				mirrordir = mirror_path[7:]
-			else:
-				mirrordir = mirror_path
+		# wget doesn't support the file:// scheme, but we'll just use the symlink
+		if scheme == 'file':
+			scheme = None
 
-		os.symlink(mirrordir, 'RPMS')
+		# wget only supports http(s) and ftp
+		if scheme and scheme not in ('http', 'ftp', 'https'):
+			msg = "'%s' is not supported in 'stack create mirror'" % scheme
+			raise CommandError(self, msg)
+
+		# use wget to do the mirroring.
+		if scheme:
+			cmd = 'wget -erobots=off --reject "*.drpm" --reject "anaconda*rpm" '
+			cmd += ' --mirror --no-verbose --no-parent %s' % (scheme + '://' + url)
+			proc = subprocess.Popen(shlex.split(cmd), stdin = None,
+				stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+			o, e = proc.communicate()
+
+		# finally, symlink the directory to RPM's
+		os.symlink(url, 'RPMS')
 
 	def repoquery(self,repoid, repoconfig):
 		cmd = 'repoquery -qa --repoid=%s' % repoid
