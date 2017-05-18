@@ -245,6 +245,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						except:
 							msg = 'Volgroup "%s" for host "%s" '+ \
 								'needs "--name=<volname>" ' + \
-								'in the OPTIONS field' % (d, host)
-							raise CommandError(self.owner, msg)
+								'in the OPTIONS field'
+							raise CommandError(self.owner, msg % (d, host))
 
