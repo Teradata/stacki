@@ -66,4 +66,17 @@ nuke.all:: nuke
 manifest-check:
 	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) build-$(ROLL)-$(STACK)
 
+# Build 3rdparty directory
+
+.PHONY: 3rdparty
+3rdparty: manifest.src
+	-mkdir $(REDHAT.ROOT)/3rdparty
+	( 							\
+		for file in `cat manifest.src`; do		\
+		if [ -f $$file ]; then				\
+			cp $$file $(REDHAT.ROOT)/3rdparty/;	\
+		fi;						\
+		done						\
+	)
+
 endif # __CCROLLS_MK
