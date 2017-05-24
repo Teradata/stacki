@@ -1,4 +1,3 @@
-#
 # @SI_Copyright@
 #                               stacki.com
 #                                  v3.3
@@ -43,6 +42,7 @@
 #
 
 import os
+import sys
 import stack.commands
 
 class Plugin(stack.commands.Plugin):

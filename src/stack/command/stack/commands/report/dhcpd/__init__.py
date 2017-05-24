@@ -164,10 +164,16 @@ class Command(stack.commands.HostArgumentProcessor,
                         """):
 			data[row[0]].append(row[1:])
 
+                kickstartable = {}
+                for name in data.keys():
+                        kickstartable[name] = False
+                argv = data.keys()
+                argv.append('attr=kickstartable')
+                for row in self.call('list.host.attr', argv):
+                        kickstartable[row['host']] = self.str2bool(row['value'])
+
                 for name in data.keys():
 
-                        kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
-                        
                        	mac = None
                        	ip  = None
                        	dev = None
@@ -196,7 +202,7 @@ class Command(stack.commands.HostArgumentProcessor,
                                         self.addOutput('', '\thardware ethernet\t%s;' % mac)
                                         self.addOutput('', '\tfixed-address\t\t%s;' % ip)
 
-                                        if kickstartable:
+                                        if kickstartable[name]:
                                         	self.addOutput('', '\tfilename\t\t"pxelinux.0";')
 
                                                 server = servers.get(netname)

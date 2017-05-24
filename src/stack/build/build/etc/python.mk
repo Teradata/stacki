@@ -104,11 +104,18 @@ PY.VERSION	= 2.6
 PY.PATH		= /opt/stack/bin/python
 PY.LIB		= python$(PY.VERSION)
 PY.STACK	= /opt/stack/lib/$(PY.LIB)/site-packages/
-PY.TEST		= /opt/stack/bin/py.test
+PY.TEST		= /opt/stack/bin/py.test-$(PY.VERSION)
+
+PY3.VERSION	= 3.6.1
+PY3.PATH	= /opt/stack/bin/python3
+PY3.LIB		= python$(PY3.VERSION)
+PY3.STACK	= /opt/stack/lib/$(PY3.LIB)/site-packages/
+PY3.TEST	= /opt/stack/bin/py.test
 
 .PHONY: test
 test:
-	$(PY.TEST) $(PY.TEST.FLAGS) -v tests
+	$(PY.TEST)  $(PY.TEST.FLAGS) -v tests
+	$(PY3.TEST) $(PY3.TEST.FLAGS) -v tests
 
 clean::
 	@if [ -d tests ]; then 					\

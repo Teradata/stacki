@@ -23,13 +23,9 @@ class Command(stack.commands.Command,
 
 		hosts = self.getHostnames(args, managed_only=True)
 
-		(action, ) = self.fillParams([
+		(action,) = self.fillParams([
 			('action', None)
                 ])
-
-#                actions = [ 'os', 'install' ]
-#		if action and action not in actions:
-#                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
 
                 ha = {}
                 for host in hosts:
@@ -37,17 +33,15 @@ class Command(stack.commands.Command,
                                 'host'       : host,
                                 'action'     : None,
                                 'type'       : action,
-                                'dnsserver'  : self.getHostAttr(host, 
-                                                                'Kickstart_PrivateDNSServers'),
-                                'nextserver' : self.getHostAttr(host, 
-                                                                'Kickstart_PrivateKickstartHost')
+                                'attrs'      : {}
                         }
 
-
+                for row in self.call('list.host.attr', hosts):
+                        ha[row['host']]['attrs'][row['attr']] = row['value']
+                        
                 if not action: # param can override the db
                         for row in self.call('list.host.boot', hosts):
                                 ha[row['host']]['type'] = row['action']
-
 
                 for row in self.call('list.host', hosts):
                         h = ha[row['host']]

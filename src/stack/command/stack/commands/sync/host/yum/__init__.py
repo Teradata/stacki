@@ -72,11 +72,18 @@ class Command(stack.commands.sync.host.command):
 	"""
 
 	def run(self, params, args):
-		sys.stdout = open('/dev/null')
-		sys.stderr = open('/dev/null')
+
+                self.notify('Sync Host Yum\n')
 
 		hosts = self.getHostnames(args, managed_only=1)
-		me = self.db.getHostname('localhost')
+		me    = self.db.getHostname('localhost')
+
+                # Only shutdown stdout/stderr if we not local
+                for host in hosts:
+                        if host != me:
+                                sys.stdout = open('/dev/null')
+                                sys.stderr = open('/dev/null')
+                                break
 
 		threads = []
 		for host in hosts:

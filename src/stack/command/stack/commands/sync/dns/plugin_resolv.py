@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 # 
 # @Copyright@
 #  				Rocks(r)
@@ -53,7 +54,6 @@
 #
 
 import stack.commands
-import subprocess
 
 class Plugin(stack.commands.Plugin):
 
@@ -61,13 +61,4 @@ class Plugin(stack.commands.Plugin):
 		return 'resolv'
 
 	def run(self, args):
-		o = self.owner.command('report.host.resolv', [ 'localhost' ])
-		p1 = subprocess.Popen(
-			['/opt/stack/bin/stack','report','script'], 
-			stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
-		out = p1.communicate(o)[0]
-		p2 = subprocess.Popen(['/bin/sh'], stdin=subprocess.PIPE,
-			stdout=None, stderr=None)
-
-		p2.communicate(out)
+		self.owner.report('report.host.resolv', [ 'localhost' ])

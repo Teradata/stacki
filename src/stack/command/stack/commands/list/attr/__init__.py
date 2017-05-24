@@ -246,14 +246,18 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 
-                (glob, shadow, scope, resolve) = self.fillParams([ 
+                (glob, shadow, scope, resolve, var, const) = self.fillParams([ 
                         ('attr',   None),
                         ('shadow', True),
                         ('scope',  'global'),
-                        ('resolve', None)
+                        ('resolve', None),
+                        ('var', True),
+                        ('const', True)
                 ])
 
 		shadow  = self.str2bool(shadow)
+                var     = self.str2bool(var)
+                const   = self.str2bool(const)
                 lookup  = { 'global'     : { 'fn'     : lambda x=None: [ 'global' ],
                                              'const'  : self.addGlobalAttrs,
                                              'resolve': False,
@@ -283,49 +287,50 @@ class Command(stack.commands.Command,
                 else:
                         resolve = self.str2bool(resolve)
 
-
                 attributes = {}
                 for s in lookup.keys():
                         attributes[s] = {}
                         for target in lookup[s]['fn']():
                                 attributes[s][target] = {}
 
-                        table = lookup[s]['table']
-                        if table:
-                                rows = self.db.select("""
-                        		t.name, a.attr, a.value, a.shadow 
-	                                from attributes a, %s t where
-        	                        a.scope = '%s' and a.scopeid = t.id
-                	                """ % (table, s))
-                                if rows:
-                                        for (o, a, v, x) in rows:
-                                                attributes[s][o][a] = (v, x, 'var', s)
-                                else:
-                                        for (o, a, v) in self.db.select("""
-	                                	t.name, a.attr, a.value
-	        	                        from attributes a, %s t where
-        	        	                a.scope = '%s' and a.scopeid = t.id
-                	        	        """ % (table, s)):
-                        	                attributes[s][o][a] = (v, None, 'var', s)
+                        if var:
+                                table = lookup[s]['table']
+                                if table:
+                                        rows = self.db.select("""
+                        			t.name, a.attr, a.value, a.shadow 
+	                                	from attributes a, %s t where
+	        	                        a.scope = '%s' and a.scopeid = t.id
+                	                	""" % (table, s))
+                                        if rows:
+                                                for (o, a, v, x) in rows:
+                                                        attributes[s][o][a] = (v, x, 'var', s)
+                                        else:
+                                                for (o, a, v) in self.db.select("""
+	                                		t.name, a.attr, a.value
+		        	                        from attributes a, %s t where
+        		        	                a.scope = '%s' and a.scopeid = t.id
+                		        	        """ % (table, s)):
+                                                        attributes[s][o][a] = (v, None, 'var', s)
 
-                        else:
-                                o = target
-                                rows = self.db.select("""
-                                	attr, value, shadow from attributes
-	                                where scope = '%s'
-        	                        """ % s)
-                                if rows:
-                                	for (a, v, x) in rows:
-                                                attributes[s][o][a] = (v, x, 'var', s)
-                                else:
-                                        for (a, v) in self.db.select("""
-                                		attr, value from attributes
-	                                	where scope = '%s'
-	                                	""" % s):
-	                                        attributes[s][o][a] = (v, None, 'var', s)
-                
-                        # Mix in any const attributes
-                        lookup[s]['const'](attributes[s])
+	                        else:
+        	                        o = target
+                	                rows = self.db.select("""
+                        	        	attr, value, shadow from attributes
+	                        	        where scope = '%s'
+	        	                        """ % s)
+        	                        if rows:
+                	                	for (a, v, x) in rows:
+                        	                        attributes[s][o][a] = (v, x, 'var', s)
+	                                else:
+        	                                for (a, v) in self.db.select("""
+                	                		attr, value from attributes
+	                	                	where scope = '%s'
+	                        	        	""" % s):
+	                                	        attributes[s][o][a] = (v, None, 'var', s)
+
+                        if const:
+                                # Mix in any const attributes
+                                lookup[s]['const'](attributes[s])
 
 
                 targets = lookup[scope]['fn'](args)

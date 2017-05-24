@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,48 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.9  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.8  2010/06/30 17:37:33  anoop
-# Overhaul of the naming system. We now support
-# 1. Multiple zone/domains
-# 2. Serving DNS for multiple domains
-# 3. No FQDN support for network names
-#    - FQDN must be split into name & domain.
-#    - Each piece information will go to a
-#      different table
-# Hopefully, I've covered the basics, and not broken
-# anything major
-#
-# Revision 1.7  2009/05/29 16:51:42  phil
-# Eliminate the 2+ second hole where named was down. Replace service restart with service reload.
-#
-# Revision 1.6  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.5  2009/01/13 23:11:33  bruno
-# add full pathname to 'service' command so folks can run insert-ethers via
-# sudo.
-#
-# Revision 1.4  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.3  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.2  2007/08/09 21:27:40  bruno
-# make sure the subnet list is a list of lists
-#
-# Revision 1.1  2007/08/08 22:14:41  bruno
-# moved 'dbreport named' and 'dbreport dns' to rocks command line
-#
-# Revision 1.1  2007/07/02 18:41:01  bruno
-# added 'rocks sync config' (insert-ethers --update) and more sync cleanup
-#
-#
+
 
 import os
 import sys
@@ -183,5 +143,8 @@ class Command(stack.commands.sync.command):
 
 
 	def run(self, params, args):
+
+                self.notify('Sync DNS\n')
+
 		self.runPlugins()
 		os.system('/sbin/service named reload > /dev/null 2>&1')

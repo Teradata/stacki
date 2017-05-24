@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,32 +51,34 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.7  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.6  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.5  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.4  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.3  2007/06/19 16:42:43  mjk
-# - fix add host interface docstring xml
-# - update copyright
-#
-# Revision 1.2  2007/06/07 21:23:05  mjk
-# - command derive from verb.command class
-# - default is MustBeRoot
-# - list.command / dump.command set MustBeRoot = 0
-# - removed plugin non-bugfix
-#
 
+
+import subprocess
 import stack.commands
 
 class command(stack.commands.Command):
-	pass
+        notifications = True
+
+	def report(self, cmd, args=[]):
+                """
+                For report commands that output XML, this method runs the command
+                and processes the XML to create system files.
+                """
+
+                p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
+                                     stdin  = subprocess.PIPE,
+                                     stdout = subprocess.PIPE,
+                                     stderr = subprocess.PIPE)
+
+                for row in self.call(cmd, args):
+                        p.stdin.write('%s\n' % row['col-1'])
+                o, e = p.communicate('')
+
+                psh = subprocess.Popen(['/bin/sh'],
+                                       stdin  = subprocess.PIPE,
+                                       stdout = subprocess.PIPE,
+                                       stderr = subprocess.PIPE)
+                out, err = psh.communicate(o)
+
+
+

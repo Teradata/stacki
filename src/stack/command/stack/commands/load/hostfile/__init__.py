@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-
+import sys
 import shutil
 import os.path
 import stack.commands
@@ -168,23 +168,27 @@ class Command(stack.commands.load.command):
 
 		self.hosts = {}
 		self.interfaces = {}
+
+                sys.stderr.write('Loading Spreadsheet\n')
 		self.runImplementation('load_%s' % processor, (filename, ))
 
+                sys.stderr.write('Configuring Database\n')
 		args = self.hosts, self.interfaces
 		self.runPlugins(args)
 
                 # Set each host's default boot action to os, before we
                 # build out the DHCP file with sync.config
 
-                params = []
-                for host in self.hosts.keys():
-                        params.append(host)
-                params.append('action=os')
-		self.call('set.host.boot', params)
+                sys.stderr.write('Setting Bootaction to OS\n')
+                argv = self.hosts.keys()
+                argv.append('action=os')
+                argv.append('sync=false')
+		self.call('set.host.boot', argv)
                 
 		self.call('sync.config')
 
-                self.call('sync.host.config', self.hosts.keys())
+                argv = self.hosts.keys()
+                self.call('sync.host.config', argv)
 		
 		#
 		# checkin the hosts spreadsheet

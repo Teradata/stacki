@@ -39,10 +39,11 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
+import sys
 import stack.commands
 import stack.util
 
-class Command(stack.commands.Command,
+class Command(stack.commands.sync.host.command,
 	stack.commands.HostArgumentProcessor):
 	"""
 	!!! Rocks+ Internal Only !!!
@@ -54,17 +55,15 @@ class Command(stack.commands.Command,
 	"""
 	def run(self, params, args):
 
-		hosts        = self.getHostnames(args)
-		self.s       = stack.util.Struct()
-                self.s.hosts = hosts
+                self.notify('Sync Host Config\n')
 
-		for host in hosts:
+                hosts = self.getHostnames(args)
+                attrs = {}
 
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+                for host in self.getHostnames(args):
+                        attrs[host] = {}
+                for row in self.call('list.host.attr', hosts):
+                        attrs[row['host']][row['attr']] = row['value']
 
-			self.s.host  = host
-                        self.s.attrs = attrs
-
-			self.runPlugins(host)
+                self.runPlugins({ 'hosts': hosts,
+                                  'attrs': attrs })

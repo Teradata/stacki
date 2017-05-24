@@ -95,20 +95,23 @@ import re
 import os
 import shutil
 import string
-import UserDict
+try:
+	from UserDict import UserDict
+except ImportError:
+	from collections import UserDict
 from random import randrange
 import stack
 import stack.commands
 from stack.exception import *
 
-class Textsub(UserDict.UserDict):
+class Textsub(UserDict):
 	"""Substitutes variables in the text with their values
 	from the compiled dictionary"""
 
 	def __init__(self, dict=None):
 		self.re = None
 		self.regex = None
-		UserDict.UserDict.__init__(self, dict)
+		UserDict.__init__(self, dict)
 
 	def compile(self):
 		if len(self.data) > 0:

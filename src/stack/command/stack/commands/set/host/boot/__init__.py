@@ -127,11 +127,13 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
                 	raise ArgRequired(self, 'host')
 
-		(action,) = self.fillParams([
-                        ('action', None, True)
+		(action, sync) = self.fillParams([
+                        ('action', None, True),
+                        ('sync', True)
                 ])
 		
 
+                sync    = self.str2bool(sync)
                 actions = [ 'os', 'install' ]
 		if action not in actions:
                         raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
@@ -164,5 +166,6 @@ class Command(stack.commands.set.host.command):
                                         ) 
                                         """ % (action, host))
 
-                self.command('sync.host.boot', hosts)
+                if sync:
+                        self.command('sync.host.boot', hosts)
 

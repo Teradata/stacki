@@ -55,5 +55,8 @@ class Plugin(stack.commands.Plugin):
 	def requires(self):
 		return []
 
-	def run(self, host):
-                self.owner.command('sync.host.boot', self.owner.s.hosts)
+	def run(self, h):
+                hosts = h['hosts']
+                attrs = h['attrs']
+
+                self.owner.command('sync.host.boot', hosts)

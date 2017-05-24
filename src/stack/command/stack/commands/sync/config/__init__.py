@@ -109,7 +109,7 @@ class Command(stack.commands.sync.command):
 	"""
 
 	def run(self, params, args):
-		#
-		# run the plugins
-		#
+
+                self.notify('Sync Config\n')
+
 		self.runPlugins()

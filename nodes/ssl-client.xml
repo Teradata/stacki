@@ -33,9 +33,9 @@ CN=&hostname;.&Kickstart_PrivateDNSDomain;" \
 	&gt; $cert/csr 2&gt;/dev/null
 )
 
-echo "&lt;file name='/etc/pki/tls/private/localhost.key' perms='0400'&gt;"
+echo "&lt;stack:file stack:name='/etc/pki/tls/private/localhost.key' stack:perms='0400'&gt;"
 cat $cert/key
-echo "&lt;/file&gt;"
+echo "&lt;/stack:file&gt;"
 
 <!-- Sign the Request with our CA-->
 (
@@ -46,9 +46,9 @@ cd /etc/security/ca; \
 	&gt; $cert/crt 2&gt;/dev/null
 )
 
-echo "&lt;file name='/etc/pki/tls/certs/localhost.crt' perms='0444'&gt;"
+echo "&lt;stack:file stack:name='/etc/pki/tls/certs/localhost.crt' stack:perms='0444'&gt;"
 cat $cert/crt
-echo "&lt;/file&gt;"
+echo "&lt;/stack:file&gt;"
 rm -rf $cert
 </eval>
 </post>

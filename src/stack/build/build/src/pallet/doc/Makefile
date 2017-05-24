@@ -99,10 +99,12 @@ include $(STACKBUILD)/etc/CCRules.mk
 default: $(NAME).spec ../$(NAME)-$(VERSION).tar.gz
 
 html: predoc index.sgml
-	jw --backend html --dsl $(PWD)/rocks.dsl#html index.sgml
+	echo legacy -- no longer uses docbook
+	echo jw --backend html --dsl $(PWD)/rocks.dsl#html index.sgml
 
 pdf: predoc index.sgml
-	jw --backend pdf --dsl $(PWD)/rocks.dsl#print index.sgml
+	echo legacy -- no longer uses docbook
+	echo jw --backend pdf --dsl $(PWD)/rocks.dsl#print index.sgml
 
 build: html pdf
 

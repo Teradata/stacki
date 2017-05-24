@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 # 
 # @Copyright@
 #  				Rocks(r)
@@ -50,60 +51,13 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.7  2010/07/27 20:24:38  bruno
-# bug fixes
-#
-# Revision 1.6  2010/06/30 17:37:33  anoop
-# Overhaul of the naming system. We now support
-# 1. Multiple zone/domains
-# 2. Serving DNS for multiple domains
-# 3. No FQDN support for network names
-#    - FQDN must be split into name & domain.
-#    - Each piece information will go to a
-#      different table
-# Hopefully, I've covered the basics, and not broken
-# anything major
-#
-# Revision 1.5  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.4  2009/03/04 21:16:54  bruno
-# replace getGlobalVar with getHostAttr
-#
-# Revision 1.3  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.2  2008/03/06 23:41:40  mjk
-# copyright storm on
-#
-# Revision 1.1  2007/08/08 22:14:41  bruno
-# moved 'dbreport named' and 'dbreport dns' to rocks command line
-#
-#
 
-import os
 import stack.commands
-import subprocess
 
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'named'
-		
 
 	def run(self, args):
-		o = self.owner.command('report.named', [])
-		p1 = subprocess.Popen(
-			['/opt/stack/bin/stack', 'report', 'script'], 
-			stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
-		out = p1.communicate(o)[0]
-		p2 = subprocess.Popen(['/bin/sh'], stdin=subprocess.PIPE,
-			stdout=None, stderr=None)
-
-		p2.communicate(out)
+		self.owner.report('report.named')

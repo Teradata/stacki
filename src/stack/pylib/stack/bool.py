@@ -41,12 +41,10 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-import types
-
 def str2bool(s):
 	"""Converts an on/off, yes/no, true/false string to
 	True/False."""
-	if type(s) == types.BooleanType:
+	if type(s) == bool:
 		return s
 	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
 		return True
@@ -55,9 +53,9 @@ def str2bool(s):
 
 def bool2str(b):
 	"""Converts an 1/0 to a yes/no"""
-	if type(b) in [ types.BooleanType, types.IntType ]:
-        	if b:
-			return 'yes'
-		else:
-			return 'no'
+	if type(b) in [ bool, int ]:
+                if b:
+                        return 'yes'
+                else:
+                        return 'no'
 	return None

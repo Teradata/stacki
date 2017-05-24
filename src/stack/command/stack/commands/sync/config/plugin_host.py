@@ -40,6 +40,7 @@
 # @SI_Copyright@
 
 import os
+import sys
 import stack.commands
 
 class Plugin(stack.commands.Plugin):
@@ -52,12 +53,4 @@ class Plugin(stack.commands.Plugin):
 		return []
 
 	def run(self, args):
-		h = self.owner.command('report.host', [])
-		f = open('/etc/hosts', 'w')
-		f.write("%s\n" % h)
-		f.close()
-
-                if os.path.exists('/srv/salt/rocks'):
-	                f = open('/srv/salt/rocks/hosts', 'w')
-			f.write("%s\n" % h)
-			f.close()
+		self.owner.command('sync.host')

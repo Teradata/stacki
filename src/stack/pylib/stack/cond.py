@@ -1,10 +1,7 @@
 #! /opt/stack/bin/python
 #
-# Code for handling the new conditional attributes for both the graph
-# edges and nodes.
-#
-# The old style arch/os/release attributes are still supported in the
-# new code.
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -56,36 +53,16 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:53:08  bruno
-# star power for gb
-#
-# Revision 1.3  2010/04/24 01:01:43  anoop
-# Killed 2 birds with a single checkin
-#
-# 1. Bug Fix
-# <edge cond=s1 from=a><to cond=s2>b</to></edge>
-# This caused condition s2 to overwrite condition s1. Fixed so that both
-# s2 and s1 are evaluated, and not just the last one
-#
-# 2. Bug Fix: This was the big one, where
-# a --(cond)--> b ----> c and cond=false would result in
-# "a, c" being included in the graph when the correct response
-# was just "a".
-#
-# Revision 1.2  2009/05/01 19:07:08  mjk
-# chimi con queso
-#
-# Revision 1.1  2008/12/23 01:18:09  mjk
-# missed one
-#
+
 
 import string
-import UserDict
+try:
+	from UserDict import UserDict
+except ImportError:
+	from collections import UserDict
 
 
-class _CondEnv(UserDict.UserDict):
+class _CondEnv(UserDict):
 	"""This is a special dictionary that rather than throwing
 	an exception when an item is not found it just returns None.  It is
 	used to create a special local() environment where all unresolved
@@ -105,7 +82,7 @@ class _CondEnv(UserDict.UserDict):
 			return False
 		
 		try:
-			val = UserDict.UserDict.__getitem__(self, key)
+			val = UserDict.__getitem__(self, key)
 		except:
 			return None	# undefined vars are None
 

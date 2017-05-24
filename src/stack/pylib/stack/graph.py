@@ -1,9 +1,9 @@
 #! /opt/stack/bin/python
 # 
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -23,16 +23,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -52,91 +52,91 @@
 # @Copyright@
 #
 # $Log$
-# Revision 1.13  2010/09/07 23:53:08  bruno
+# Revision 1.13	 2010/09/07 23:53:08  bruno
 # star power for gb
 #
-# Revision 1.12  2009/05/01 19:07:08  mjk
+# Revision 1.12	 2009/05/01 19:07:08  mjk
 # chimi con queso
 #
-# Revision 1.11  2008/10/18 00:56:02  mjk
+# Revision 1.11	 2008/10/18 00:56:02  mjk
 # copyright 5.1
 #
-# Revision 1.10  2008/03/06 23:41:44  mjk
+# Revision 1.10	 2008/03/06 23:41:44  mjk
 # copyright storm on
 #
-# Revision 1.9  2007/06/23 04:03:24  mjk
+# Revision 1.9	2007/06/23 04:03:24  mjk
 # mars hill copyright
 #
-# Revision 1.8  2006/09/11 22:47:23  mjk
+# Revision 1.8	2006/09/11 22:47:23  mjk
 # monkey face copyright
 #
-# Revision 1.7  2006/08/10 00:09:41  mjk
+# Revision 1.7	2006/08/10 00:09:41  mjk
 # 4.2 copyright
 #
-# Revision 1.6  2006/01/16 06:48:59  mjk
+# Revision 1.6	2006/01/16 06:48:59  mjk
 # fix python path for source built foundation python
 #
-# Revision 1.5  2005/10/12 18:08:42  mjk
+# Revision 1.5	2005/10/12 18:08:42  mjk
 # final copyright for 4.1
 #
-# Revision 1.4  2005/09/16 01:02:21  mjk
+# Revision 1.4	2005/09/16 01:02:21  mjk
 # updated copyright
 #
-# Revision 1.3  2005/07/11 23:51:35  mjk
+# Revision 1.3	2005/07/11 23:51:35  mjk
 # use rocks version of python
 #
-# Revision 1.2  2005/05/24 21:21:57  mjk
+# Revision 1.2	2005/05/24 21:21:57  mjk
 # update copyright, release is not any closer
 #
-# Revision 1.1  2005/03/01 00:22:08  mjk
+# Revision 1.1	2005/03/01 00:22:08  mjk
 # moved to base roll
 #
-# Revision 1.15  2004/03/25 03:15:48  bruno
+# Revision 1.15	 2004/03/25 03:15:48  bruno
 # touch 'em all!
 #
 # update version numbers to 3.2.0 and update copyrights
 #
-# Revision 1.14  2004/02/04 20:29:37  mjk
+# Revision 1.14	 2004/02/04 20:29:37  mjk
 # graph reverse was broken
 #
-# Revision 1.13  2004/02/02 21:43:52  mjk
+# Revision 1.13	 2004/02/02 21:43:52  mjk
 # remove coloring from base graph classes
 #
-# Revision 1.12  2004/01/30 18:41:19  mjk
+# Revision 1.12	 2004/01/30 18:41:19  mjk
 # edges have color
 #
-# Revision 1.11  2004/01/29 20:28:43  mjk
+# Revision 1.11	 2004/01/29 20:28:43  mjk
 # added fillColor to nodes
 #
-# Revision 1.10  2003/08/15 22:34:46  mjk
+# Revision 1.10	 2003/08/15 22:34:46  mjk
 # 3.0.0 copyright
 #
-# Revision 1.9  2003/05/22 16:39:28  mjk
+# Revision 1.9	2003/05/22 16:39:28  mjk
 # copyright
 #
-# Revision 1.8  2003/04/29 18:37:38  mjk
+# Revision 1.8	2003/04/29 18:37:38  mjk
 # fixed reverving
 #
-# Revision 1.7  2003/04/28 16:01:58  mjk
+# Revision 1.7	2003/04/28 16:01:58  mjk
 # reverse() doesn't change pointers
 #
-# Revision 1.6  2003/04/25 23:16:37  mjk
+# Revision 1.6	2003/04/25 23:16:37  mjk
 # mo graph
 #
-# Revision 1.5  2003/04/24 16:56:13  mjk
+# Revision 1.5	2003/04/24 16:56:13  mjk
 # - Better DFS Graph traversing
 # - Adding includes directory for the graph
 #
-# Revision 1.4  2003/02/17 18:43:04  bruno
+# Revision 1.4	2003/02/17 18:43:04  bruno
 # updated copyright to 2003
 #
-# Revision 1.3  2002/10/18 21:33:26  mjk
+# Revision 1.3	2002/10/18 21:33:26  mjk
 # Rocks 2.3 Copyright
 #
-# Revision 1.2  2002/02/21 21:33:28  bruno
+# Revision 1.2	2002/02/21 21:33:28  bruno
 # added new copyright
 #
-# Revision 1.1  2001/09/10 18:31:12  mjk
+# Revision 1.1	2001/09/10 18:31:12  mjk
 # wish I remembered what changed...
 #
 
@@ -215,7 +215,7 @@ class Graph:
 
 	def __init__(self):
 		self.adjList	= {}
-		self.nodes      = {}
+		self.nodes	= {}
 
 	def getNodes(self):
 		list = []
@@ -231,7 +231,7 @@ class Graph:
 			
 
 	def reverse(self):
-		adjList      = self.adjList
+		adjList	     = self.adjList
 		self.adjList = {}
 		for key, node in self.nodes.items():
 			node.reverse()
@@ -257,7 +257,7 @@ class Graph:
 			return 1
 		return 0
 
-        def getNode(self, node):
+	def getNode(self, node):
 		if self.hasNode(node):
 			return self.nodes[node]
 		return None

@@ -314,11 +314,6 @@ class Generator:
 
 		self.rcsFiles[file] = (owner, perms)
 		
-		if owner:
-			l.append('chown %s %s' % (owner, file))
-		if perms:
-			l.append('chmod %s %s' % (perms, file))
-
                 l.append('')
 
 		return string.join(l, '\n')
@@ -438,7 +433,12 @@ class Generator:
                                         if fn:
                                                 text = fn(node)
                                         else:
-                                                text = '%s %s' % (child.localName, self.getChildText(child))
+                                                tagText   = child.localName
+                                                childText = self.getChildText(child)
+                                                if childText:
+                                                        text = '%s %s' % (tagText, childText)
+                                                else:
+                                                        text = '%s' % tagText
                                         self.mainSection.append(text, nodefile)
                                         child = iter.nextSibling()
 			node = iter.nextNode()
@@ -526,13 +526,10 @@ class Generator:
 					s += '\n'
 				s += 'EOF\n'
 
-			# If RCS is disabled, we still need to have support
-			# for changing permissions, and owners.
-			if not fileRCS:
-				if fileOwner:
-					s += 'chown %s %s\n' % (fileOwner, fileName)
-				if filePerms:
-					s += 'chmod %s %s\n' % (filePerms, fileName)
+                        if fileOwner:
+				s += 'chown %s %s\n' % (fileOwner, fileName)
+			if filePerms:
+				s += 'chmod %s %s\n' % (filePerms, fileName)
 		return s
 	
 

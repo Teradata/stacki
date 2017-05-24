@@ -1,5 +1,6 @@
-# $Id$
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -50,41 +51,19 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.5  2011/04/14 23:08:58  anoop
-# Move parallel class up one level, so that all sync commands can
-# take advantage of it.
-#
-# Added rocks sync host sharedkey. This distributes the 411 shared key
-# to compute nodes
-#
-# Revision 1.4  2010/09/07 23:53:03  bruno
-# star power for gb
-#
-# Revision 1.3  2009/05/01 19:07:04  mjk
-# chimi con queso
-#
-# Revision 1.2  2008/10/18 00:55:58  mjk
-# copyright 5.1
-#
-# Revision 1.1  2008/08/22 23:26:38  bruno
-# closer
-#
-#
-#
 
 import stack.commands
 import threading
 import subprocess
 import shlex
 import sys
+import os
 
 max_threading = 512
 timeout	= 30
 
 class command(stack.commands.HostArgumentProcessor,
-        stack.commands.sync.command):
+              stack.commands.sync.command):
 	pass
 
 class Parallel(threading.Thread):
@@ -104,3 +83,27 @@ class Parallel(threading.Thread):
 			sys.stdout.write(o)
 		else:
 			sys.stderr.write(e)
+
+class Command(command):
+        """
+        Writes the /etc/hosts file based on the configuration database
+        """
+
+	def run(self, params, args):
+
+                self.notify('Sync Host\n')
+
+		output = self.command('report.host')
+		f = open('/etc/hosts', 'w')
+		f.write("%s\n" % output)
+		f.close()
+
+                if os.path.exists('/srv/salt/rocks'):
+	                f = open('/srv/salt/rocks/hosts', 'w')
+			f.write("%s\n" % output)
+			f.close()
+
+
+
+
+

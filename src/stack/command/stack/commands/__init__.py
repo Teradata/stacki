@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v3.3
+#				stacki.com
+#				   v3.3
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -19,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -40,9 +40,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -62,16 +62,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -119,6 +119,7 @@ from xml.sax._exceptions import SAXParseException
 
 
 _logPrefix = ''
+
 def Log(message, level=syslog.LOG_INFO):
 	"""
 	Send a message to syslog
@@ -149,19 +150,19 @@ def Debug(message, level=syslog.LOG_DEBUG):
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
 
-        def getOSNames(self, args=None):
+	def getOSNames(self, args=None):
 		list = []
 		if not args:
 			args = [ '%' ] # find all appliances
 		for arg in args:
-                        if arg == 'centos':
-                                arg = 'redhat'
-                        for name, in self.db.select(
-                                        """
-                                        name from oses 
-                                        where name like '%s' order by name
-                                        """ % arg):
-                                list.append(name)
+			if arg == 'centos':
+				arg = 'redhat'
+			for name, in self.db.select(
+					"""
+					name from oses 
+					where name like '%s' order by name
+					""" % arg):
+				list.append(name)
 			if len(list) == 0 and arg == '%': # empty table is OK
 				continue
 			if len(list)  < 1:
@@ -173,7 +174,7 @@ class EnvironmentArgumentProcessor:
 	"""An Interface class to add the ability to process environment
 	arguments."""
 		
-        def getEnvironmentNames(self, args=None):
+	def getEnvironmentNames(self, args=None):
 		list = []
 		if not args:
 			args = [ '%' ] # find all appliances
@@ -312,17 +313,17 @@ class NetworkArgumentProcessor:
 		return netname
 	
 class CartArgumentProcessor:
-        """An Interface class to add the ability to process cart arguments."""
+	"""An Interface class to add the ability to process cart arguments."""
 
-        def getCartNames(self, args, params):
+	def getCartNames(self, args, params):
 	
 		list = []
 		if not args:
 			args = [ '%' ] # find all cart names
 		for arg in args:
 			rows = self.db.execute("""
-                        	select name from carts
-                                where name like binary '%s'
+				select name from carts
+				where name like binary '%s'
 				""" % arg)
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
@@ -332,16 +333,16 @@ class CartArgumentProcessor:
 				list.append(name)
 		return list
 
-        
+	
 class RollArgumentProcessor:
 	"""An Interface class to add the ability to process pallet arguments."""
 	
 	def getRollNames(self, args, params):
 		"""Returns a list of (name, version, release) tuples from the pallet
-		table in the database.  If the PARAMS['version'] is provided
+		table in the database.	If the PARAMS['version'] is provided
 		only pallets of that version are included otherwise no filtering
-		on version number is performed.  If the ARGS list is empty then
-		all pallet names are returned.  SQL regexp can be used in 
+		on version number is performed.	 If the ARGS list is empty then
+		all pallet names are returned.	SQL regexp can be used in 
 		both the version parameter and arg list, but must expand to 
 		something.
 		"""
@@ -370,7 +371,7 @@ class RollArgumentProcessor:
 				raise CommandError(self, 'unknown pallet "%s"' % arg)
 			for (name, ver, rel) in self.db.fetchall():
 				list.append((name, ver, rel))
-                        rel = '%'
+			rel = '%'
 				
 		return list
 
@@ -379,15 +380,15 @@ class HostArgumentProcessor:
 	"""An Interface class to add the ability to process host arguments."""
 	
 	def getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
-		"""Expands the given list of names to valid cluster hostnames.  A name
-                can be:
+		"""Expands the given list of names to valid cluster hostnames.	A name
+		can be:
 
-                - hostname
-                - IP address
-                - appliance name
-                - MAC address
+		- hostname
+		- IP address
+		- appliance name
+		- MAC address
 
-                Any combination of these is valid.  If the names list
+		Any combination of these is valid.  If the names list
 		is empty a list of all hosts in the cluster is
 		returned.
 		
@@ -412,42 +413,42 @@ class HostArgumentProcessor:
 		Because filter() requires the callable to have only one arg,
 		to allow access to 'self' as well as the host, host_filter()
 		and 'self' are frozen with 'functools.partial', even if 'self'
-		isn't required.  The second arg will be each host name in the list.
+		isn't required.	 The second arg will be each host name in the list.
 		For example:
 		host_filter = lambda self, host: self.db.getHostOS(host) == 'redhat'
 
-                """
+		"""
 
-		adhoc    = False
+		adhoc	 = False
 		hostList = []
 		hostDict = {}
 
-                #
-                # list the frontend first
-                #
-            	frontends = self.db.select(
-                        """
-                	n.name from
+		#
+		# list the frontend first
+		#
+		frontends = self.db.select(
+			"""
+			n.name from
 			nodes n, appliances a where a.name = "frontend"
 			and a.id = n.appliance order by rack, rank %s
-                        """ % order)
-                                
-                #
-                # now get the backend appliances
-                #
-                backends = self.db.select(
-                        """
-                	n.name from
+			""" % order)
+				
+		#
+		# now get the backend appliances
+		#
+		backends = self.db.select(
+			"""
+			n.name from
 			nodes n, appliances a where a.name != "frontend"
 			and a.id = n.appliance order by rack, rank %s
-                        """ % order)
+			""" % order)
 
-                hosts = [ ]
+		hosts = [ ]
 
-                if frontends:
-                        hosts.extend(frontends)
-                if backends:
-                        hosts.extend(backends)
+		if frontends:
+			hosts.extend(frontends)
+		if backends:
+			hosts.extend(backends)
 
 		for host, in hosts:
 
@@ -470,43 +471,43 @@ class HostArgumentProcessor:
 				hostDict[host] = None
 			else:
 				hostDict[host] = self.db.getNodeName(host,
-                                                                     subnet)
+								     subnet)
 				
 
 		if names:
 			
 			# Environment, Appliance, and Rack grouping are special 
-                        # since we can just say things like "compute" "rack1".
+			# since we can just say things like "compute" "rack1".
 			# To force all code through ad-hoc grouping convert
 			# any hostnames in this format to the general purpose
 			# code.
 
-                        environments = [ ]
+			environments = [ ]
 			for e, in self.db.select(
-                                        """
-                                        distinct name
-                                        from environments
-                                        """):
-                                environments.append(e)
+					"""
+					distinct name
+					from environments
+					"""):
+				environments.append(e)
 
 			appliances  = []
 			for (name, ) in self.db.select(
-                                        """
-                                        name from appliances
-                                        """):
+					"""
+					name from appliances
+					"""):
 				appliances.append(name)
 
 			racks = []
 			for (rack, ) in self.db.select(
-                                        """
-                                        distinct(rack) from nodes
-                                        """):
+					"""
+					distinct(rack) from nodes
+					"""):
 				racks.append(rack)
 			list = []
 			for host in names:
-                                if host in environments:
-                                        host = '[environment=="%s"]' % host
-                                        adhoc = True
+				if host in environments:
+					host = '[environment=="%s"]' % host
+					adhoc = True
 				elif host in appliances:
 					host = '[appliance=="%s"]' % host
 					adhoc = True
@@ -537,19 +538,19 @@ class HostArgumentProcessor:
 		# since we need to looked the managed attribute.
 
 		hostAttrs  = {}
-                for host in hostList:
-                        hostAttrs[host] = {}
+		for host in hostList:
+			hostAttrs[host] = {}
 		if adhoc or managed_only:
-                        for row in self.call('list.host.attr', hostList):
-                                h = row['host']
-                                a = row['attr']
-                                v = row['value']
+			for row in self.call('list.host.attr', hostList):
+				h = row['host']
+				a = row['attr']
+				v = row['value']
 				hostAttrs[h][a] = v
 			
 
 		# Finally iterate over all the host/groups
 
-		list     = []
+		list	 = []
 		explicit = {}
 		for name in names:
 
@@ -620,7 +621,7 @@ class HostArgumentProcessor:
 			# so we use functools.partial to get a function with one argument 'locked'
 			part_func = partial(host_filter, self)
 			list = filter(part_func, list)
-                        
+			
 		return list
 
 
@@ -669,12 +670,12 @@ class PartitionArgumentProcessor:
 	def getPartitionsDB(self, host):
 		partitions = []
 
-           	for (size, mnt, device) in self.db.select("""
-                	p.partitionsize, p.mountpoint,
+		for (size, mnt, device) in self.db.select("""
+			p.partitionsize, p.mountpoint,
 			p.device from partitions p, nodes n where
 			p.node = n.id and n.name = '%s' order by device
-                        """ % host):
-                        
+			""" % host):
+			
 			if mnt in [ '', 'swap' ]:
 				continue
 			if len(mnt) > 0 and mnt[0] != '/':
@@ -742,11 +743,11 @@ class PartitionArgumentProcessor:
 		#
 		# first find the boot disk
 		#
-                for (device, mnt) in self.db.select("""
+		for (device, mnt) in self.db.select("""
 			p.device, p.mountpoint from
 			partitions p, nodes n where p.node = n.id and
 			n.name = '%s' order by p.device""" % host):
-                        
+			
 			dev = re.split('[0-9]+$', device)
 			disk = dev[0]
 
@@ -783,8 +784,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.users			= users
 		self.section			= {}
 		self.section['description']	= ''
-                self.section['optarg']		= []
-                self.section['reqarg']		= []
+		self.section['optarg']		= []
+		self.section['reqarg']		= []
 		self.section['optparam']	= []
 		self.section['reqparam']	= []
 		self.section['example']		= []
@@ -850,10 +851,10 @@ class DocStringHandler(handler.ContentHandler,
 				s += '\t<varlistentry>\n'
 				if opt:
 					optStart = '<optional>'
-					optEnd   = '</optional>'
+					optEnd	 = '</optional>'
 				else:
 					optStart = ''
-					optEnd   = ''
+					optEnd	 = ''
 				key = '%s=' % name
 				val = '<replaceable>%s</replaceable>' % type
 				s += '\t<term>%s%s%s%s</term>\n' % \
@@ -902,37 +903,37 @@ class DocStringHandler(handler.ContentHandler,
 
 	
 	def getUsageText(self, colors=None):
-                if colors:
-                        bold   = colors['bold']['code']
-                        unbold = colors['reset']['code']
-                else:
-                	bold   = ''
-                        unbold = ''
-                
+		if colors:
+			bold   = colors['bold']['code']
+			unbold = colors['reset']['code']
+		else:
+			bold   = ''
+			unbold = ''
+		
 		s = ''
 		for (name, type, rep, txt) in self.section['reqarg']:
-                        if rep:
-                                dots = ' ...'
-                        else:
-                                dots = ''
+			if rep:
+				dots = ' ...'
+			else:
+				dots = ''
 			s += '{%s%s%s%s} ' % (bold, name, unbold, dots)
 		for (name, type, rep, txt) in self.section['optarg']:
-                        if rep:
-                                dots = ' ...'
-                        else:
-                                dots = ''
+			if rep:
+				dots = ' ...'
+			else:
+				dots = ''
 			s += '[%s%s%s%s] ' % (bold, name, unbold, dots)
 		for (name, type, rep, txt) in self.section['reqparam']:
-                        if rep:
-                                dots = ' ...'
-                        else:
-                                dots = ''
+			if rep:
+				dots = ' ...'
+			else:
+				dots = ''
 			s += '{%s%s%s=%s%s} ' % (bold, name, unbold, type, dots)
 		for (name, type, rep, txt) in self.section['optparam']:
-                        if rep:
-                                dots = ' ...'
-                        else:
-                                dots = ''
+			if rep:
+				dots = ' ...'
+			else:
+				dots = ''
 			s += '[%s%s%s=%s%s] ' % (bold, name, unbold, type, dots)
 		if s and s[-1] == ' ':
 			return s[:-1]
@@ -945,13 +946,13 @@ class DocStringHandler(handler.ContentHandler,
 		else:
 			prompt = '$'
 
-                if colors:
-                        bold   = colors['bold']['code']
-                        unbold = colors['reset']['code']
-                else:
-                	bold   = ''
-                        unbold = ''
-                
+		if colors:
+			bold   = colors['bold']['code']
+			unbold = colors['reset']['code']
+		else:
+			bold   = ''
+			unbold = ''
+		
 		s  = ''
 		s += 'stack %s %s' % (self.name, self.getUsageText(colors))
 		s += '\n\n%sDescription%s\n' % (bold, unbold)
@@ -959,30 +960,30 @@ class DocStringHandler(handler.ContentHandler,
 		if self.section['reqarg'] or self.section['optarg']:
 			s += '\n%sArguments%s\n\n' % (bold, unbold)
 			for (name, type, rep, txt) in self.section['reqarg']:
-                                if rep:
-                                        dots = ' ...'
-                                else:
-                                        dots = ''
-                                s += '\t{%s%s%s%s}\n%s\n' % (bold, name, unbold, dots, txt)
+				if rep:
+					dots = ' ...'
+				else:
+					dots = ''
+				s += '\t{%s%s%s%s}\n%s\n' % (bold, name, unbold, dots, txt)
 			for (name, type, rep, txt) in self.section['optarg']:
-                                if rep:
-                                        dots = ' ...'
-                                else:
-                                        dots = ''
+				if rep:
+					dots = ' ...'
+				else:
+					dots = ''
 				s += '\t[%s%s%s%s]\n%s\n' % (bold, name, unbold, dots, txt)
 		if self.section['reqparam'] or self.section['optparam']:
 			s += '\n%sParameters%s\n\n' % (bold, unbold)
 			for (name, type, rep, txt) in self.section['reqparam']:
-                                if rep:
-                                        dots = ' ...'
-                                else:
-                                        dots = ''
+				if rep:
+					dots = ' ...'
+				else:
+					dots = ''
 				s += '\t{%s%s%s=%s%s}\n%s\n' % (bold, name, unbold, type, dots, txt)
 			for (name, type, rep, txt) in self.section['optparam']:
-                                if rep:
-                                        dots = ' ...'
-                                else:
-                                        dots = ''
+				if rep:
+					dots = ' ...'
+				else:
+					dots = ''
 				s += '\t[%s%s%s=%s%s]\n%s\n' % (bold, name, unbold, type, dots, txt)
 		if self.section['example']:
 			s += '\n%sExamples%s\n\n' % (bold, unbold)
@@ -1104,7 +1105,7 @@ class DocStringHandler(handler.ContentHandler,
 		self.key  = None
 		self.text = ''
 		if name in [ 'arg', 'param' ]:
-                        type = attrs.get('type')
+			type = attrs.get('type')
 			if not type:
 				type = 'string'
 			try:
@@ -1129,19 +1130,19 @@ class DocStringHandler(handler.ContentHandler,
 			self.section['reqparam'].sort()
 			self.section['optparam'].sort()
 			self.section['related'].sort()
-                elif tag == 'arg':
-                        name, type, optional, repeat = self.key
-                        if optional:
-                                self.section['optarg'].append((name, type, repeat, self.text))
-                        else:
-                                self.section['reqarg'].append((name, type, repeat, self.text))
-                elif tag == 'param':
-                        name, type, optional, repeat = self.key
-                        if optional:
-                                self.section['optparam'].append((name, type, repeat, self.text))
-                        else:
-                                self.section['reqparam'].append((name, type, repeat, self.text))
-                elif tag == 'example':
+		elif tag == 'arg':
+			name, type, optional, repeat = self.key
+			if optional:
+				self.section['optarg'].append((name, type, repeat, self.text))
+			else:
+				self.section['reqarg'].append((name, type, repeat, self.text))
+		elif tag == 'param':
+			name, type, optional, repeat = self.key
+			if optional:
+				self.section['optparam'].append((name, type, repeat, self.text))
+			else:
+				self.section['reqparam'].append((name, type, repeat, self.text))
+		elif tag == 'example':
 			self.section['example'].append((self.key, self.text))
 		else:
 			if self.section.has_key(tag):
@@ -1171,72 +1172,72 @@ class DatabaseConnection:
 			self.database = None
 			self.link     = None
 
-                # Optional envinormnet variable STACKCACHE can be used
-                # to disable database caching.  Default is to cache.
-                
-                caching = os.environ.get('STACKCACHE')
-                if caching:
-                        caching = str2bool(caching)
-                else:
-                        caching = True
-                self.cache   = {}
-                self.caching = caching
+		# Optional envinormnet variable STACKCACHE can be used
+		# to disable database caching.	Default is to cache.
+		
+		caching = os.environ.get('STACKCACHE')
+		if caching:
+			caching = str2bool(caching)
+		else:
+			caching = True
+		self.cache   = {}
+		self.caching = caching
 
 
-        def enableCache(self):
-                self.caching = True
+	def enableCache(self):
+		self.caching = True
 
-        def disableCache(self):
-                self.caching = False
-                self.clearCache()
+	def disableCache(self):
+		self.caching = False
+		self.clearCache()
 
-        def clearCache(self):
-                self.cache = {}
+	def clearCache(self):
+		self.cache = {}
 
-        def select(self, command):
+	def select(self, command):
 		if not self.link:
-                        return [ ]
-                
-		from _mysql_exceptions import *
+			return [ ]
+		
+		from _mysql_exceptions import OperationalError, ProgrammingError
 
-                rows = [ ]
-                
-                m = hashlib.md5()
-                m.update(command.strip())
-                k = m.hexdigest()
+		rows = [ ]
+		
+		m = hashlib.md5()
+		m.update(command.strip())
+		k = m.hexdigest()
 
-#                print 'select', k, command
-                if self.cache.has_key(k):
-                	rows = self.cache[k]
-#                        print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
-                else:
-                        try:
-                        	self.execute('select %s' % command)
-                        	rows = self.fetchall()
-                        except (OperationalError, ProgrammingError):
-                                # Permission error return the empty set
-                                # Syntax errors throw exceptions
-                                rows = [ ]
-                                
-                        if self.caching:
-                                self.cache[k] = rows
+#		 print 'select', k, command
+		if self.cache.has_key(k):
+			rows = self.cache[k]
+#			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
+		else:
+			try:
+				self.execute('select %s' % command)
+				rows = self.fetchall()
+			except (OperationalError, ProgrammingError):
+				# Permission error return the empty set
+				# Syntax errors throw exceptions
+				rows = [ ]
+				
+			if self.caching:
+				self.cache[k] = rows
 
-                return rows
+		return rows
 
-                                        
+					
 	def execute(self, command):
-                command = command.strip()
+		command = command.strip()
 
-                if command.find('select') == -1:
-                        self.clearCache()
-                                                
+		if command.find('select') == -1:
+			self.clearCache()
+						
 		if self.link:
 			t0 = time.time()
 			result = self.link.execute(command)
-                        t1 = time.time()
-                        Debug('SQL EX: %.3f %s' % ((t1-t0), command))
+			t1 = time.time()
+			Debug('SQL EX: %.3f %s' % ((t1-t0), command))
 			return result
-                
+		
 		return None
 
 	def fetchone(self):
@@ -1256,52 +1257,52 @@ class DatabaseConnection:
 		
 
 	def getHostOS(self, host):
-                """
-                Return the OS name for the given host.
-                """
+		"""
+		Return the OS name for the given host.
+		"""
 
-                for (name, os) in self.select(
-                                """
+		for (name, os) in self.select(
+				"""
 				n.name, b.os from
 				boxes b, nodes n 
-                                where
+				where
 				n.box = b.id
-                        	"""):
-                        if name == host:
-                                return os
+				"""):
+			if name == host:
+				return os
 		return None
 
-        def getHostAppliance(self, host):
-                """
-                Returns the appliance for a given host.
-                """
+	def getHostAppliance(self, host):
+		"""
+		Returns the appliance for a given host.
+		"""
 
-                for (name, appliance) in self.select(
-                                """
-                        	n.name, a.name from
-                                nodes n, appliances a 
-                                where
-                                n.appliance = a.id
-                                """):
-                        if name == host:
-                                return appliance
-                return None
+		for (name, appliance) in self.select(
+				"""
+				n.name, a.name from
+				nodes n, appliances a 
+				where
+				n.appliance = a.id
+				"""):
+			if name == host:
+				return appliance
+		return None
 
-        def getHostEnvironment(self, host):
-                """
-                Returns the environment for a given host.
-                """
+	def getHostEnvironment(self, host):
+		"""
+		Returns the environment for a given host.
+		"""
 
-                for (name, environment) in self.select(
-                                """
-                                n.name, e.name from
-                                nodes n, environments e
-                                where
-                                n.environment=e.id
-                                """):
-                        if name == host:
-                                return environment
-                return None
+		for (name, environment) in self.select(
+				"""
+				n.name, e.name from
+				nodes n, environments e
+				where
+				n.environment=e.id
+				"""):
+			if name == host:
+				return environment
+		return None
 
 
 	def getHostRoutes(self, host, showsource=0):
@@ -1310,24 +1311,24 @@ class DatabaseConnection:
 		routes = {}
 		
 		# global
-                
+		
 		for (n, m, g, s) in self.select("""
-                        network, netmask, gateway, subnet from
+			network, netmask, gateway, subnet from
 			global_routes
-                        """):
+			"""):
 			if s:
 				for dev, in self.select("""
-                                        net.device from
-				       	subnets s, networks net, nodes n where
+					net.device from
+					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%' 
 					""" % (s, host)):
-                                        g = dev
+					g = dev
 			if showsource:
-                        	routes[n] = (m, g, 'G')
-                        else:
-                        	routes[n] = (m, g)
+				routes[n] = (m, g, 'G')
+			else:
+				routes[n] = (m, g)
 
 		# os
 				
@@ -1337,22 +1338,22 @@ class DatabaseConnection:
 			r.os='%s' and n.name='%s'
 			"""  % (self.getHostOS(host), host)):
 			if s:
-                                for dev, in self.select("""
-                                        net.device from
+				for dev, in self.select("""
+					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-                                        g = dev
+					g = dev
 			if showsource:
 				routes[n] = (m, g, 'O')
-                        else:
+			else:
 				routes[n] = (m, g)
 
 		# appliance
 
-                for (n, m, g, s) in self.select("""
+		for (n, m, g, s) in self.select("""
 			r.network, r.netmask, r.gateway,
 			r.subnet from
 			appliance_routes r,
@@ -1360,40 +1361,40 @@ class DatabaseConnection:
 			appliances app where
 			n.appliance=app.id and 
 			r.appliance=app.id and n.name='%s'
-                        """ % host):
+			""" % host):
 			if s:
 				for dev, in self.select("""
-                                        net.device from
+					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-                                        g = dev
+					g = dev
 			if showsource:
 				routes[n] = (m, g, 'A')
-                        else:
+			else:
 				routes[n] = (m, g)
 
 		# host
-                
+		
 		for (n, m, g, s) in self.select("""
 			r.network, r.netmask, r.gateway,
 			r.subnet from node_routes r, nodes n where
 			n.name='%s' and n.id=r.node
-                        """ % host):
+			""" % host):
 			if s:
 				for dev, in self.select("""
-                                        net.device from
+					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-                                        g = dev
+					g = dev
 			if showsource:
 				routes[n] = (m, g, 'H')
-                        else:
+			else:
 				routes[n] = (m, g)
 
 		return routes
@@ -1404,22 +1405,22 @@ class DatabaseConnection:
 		if not subnet:
 			return hostname
 
-                result = None
-                
+		result = None
+		
 		for (netname, zone) in self.select("""
-                        net.name, s.zone from
+			net.name, s.zone from
 			nodes n, networks net, subnets s where n.name = '%s'
 			and net.node = n.id and net.subnet = s.id and
 			s.name = '%s'
-                        """ % (hostname, subnet)):
+			""" % (hostname, subnet)):
 
-                        # If interface exists, but name is not set
+			# If interface exists, but name is not set
 			# infer name from nodes table, and append
 			# dns zone
 			if not netname:
 				netname = hostname
 			result = '%s.%s' % (netname, zone)
-                
+		
 		return result
 
 
@@ -1514,8 +1515,8 @@ class DatabaseConnection:
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\
 						'nt.node=n.id and '		+\
-						's.zone="%s" and ' % (domain)+   \
-						'(nt.name="%s" or n.name="%s")'  \
+						's.zone="%s" and ' % (domain)+	 \
+						'(nt.name="%s" or n.name="%s")'	 \
 						% (name, name)
 
 					self.link.execute(cmd)
@@ -1626,7 +1627,7 @@ class Command:
 		self.text = ''
 		
 		self.output = []
-        
+	
 		self.arch = os.uname()[4]
 		if self.arch in [ 'i386', 'i486', 'i586', 'i686' ]:
 			self.arch = 'i386'
@@ -1647,40 +1648,40 @@ class Command:
 		# List of loaded implementations.
 		self.impl_list = {}
 
-                # Figure out the width of the terminal
+		# Figure out the width of the terminal
 
-                self.width = 0
+		self.width = 0
 		if sys.stdout.isatty():
-                        try:
-                                r, c = os.popen('stty size', 'r').read().split()
-                                self.width = int(c)
-                        except:
-                                pass
-                        
+			try:
+				r, c = os.popen('stty size', 'r').read().split()
+				self.width = int(c)
+			except:
+				pass
+			
 
-                # Look up terminal colors safely using tput, uncolored if
-                # this fails.
-                
-                self.colors = {
-                        'bold': { 'tput': 'bold', 'code': '' },
-                        'reset': { 'tput': 'sgr0', 'code': '' },
-                        'beginline': { 'tput': 'smul', 'code': ''},
-                        'endline': { 'tput': 'rmul', 'code': ''}
-                        }
-                if sys.stdout.isatty():
+		# Look up terminal colors safely using tput, uncolored if
+		# this fails.
+		
+		self.colors = {
+			'bold': { 'tput': 'bold', 'code': '' },
+			'reset': { 'tput': 'sgr0', 'code': '' },
+			'beginline': { 'tput': 'smul', 'code': ''},
+			'endline': { 'tput': 'rmul', 'code': ''}
+			}
+		if sys.stdout.isatty():
 			for key in self.colors.keys():
 				c = 'tput %s' % self.colors[key]['tput']
-                	        try:
-	                        	p = subprocess.Popen(c.split(),
-        	                                             stdout=subprocess.PIPE)
-                	        except:
-                        	        continue
-	                       	(o, e) = p.communicate()
-        	               	if p.returncode == 0:
-                	       		self.colors[key]['code'] = o
+				try:
+					p = subprocess.Popen(c.split(),
+							     stdout=subprocess.PIPE)
+				except:
+					continue
+				(o, e) = p.communicate()
+				if p.returncode == 0:
+					self.colors[key]['code'] = o
 
 
-        def fillParams(self, names, params=None):
+	def fillParams(self, names, params=None):
 		"""Returns a list of variables with either default
 		values of the values in the PARAMS dictionary.
 		
@@ -1688,7 +1689,7 @@ class Command:
 			KEY - key name of PARAMS dictionary
 			DEFAULT - default value if key in not in dict
 		PARAMS - optional dictionary
-                REQUIRED - optional boolean (True means param is required)
+		REQUIRED - optional boolean (True means param is required)
 		
 		For example:
 		
@@ -1709,19 +1710,19 @@ class Command:
 		# for each element in the names list make sure it is also
 		# a tuple.  If the second element (default value) is missing
 		# use None.  If the third element is missing assume the
-                # parameter is not required.
-                		
+		# parameter is not required.
+				
 		pdlist = []
 		for e in names:
 			if type(e) in [ types.ListType, types.TupleType]:
-                                if len(e) == 3:
-                                        tuple = ( e[0], e[1], e[2] )
-                                elif len(e) == 2:
-                                        tuple = ( e[0], e[1], False )
-                                elif len(e) == 1:
-                                        tuple = ( e[0], None, False )
-                                else:
-                                        assert len(e) in [ 1, 2, 3 ]
+				if len(e) == 3:
+					tuple = ( e[0], e[1], e[2] )
+				elif len(e) == 2:
+					tuple = ( e[0], e[1], False )
+				elif len(e) == 1:
+					tuple = ( e[0], None, False )
+				else:
+					assert len(e) in [ 1, 2, 3 ]
 			else:
 				tuple = ( e[0], None, False )
 			pdlist.append(tuple)
@@ -1734,8 +1735,8 @@ class Command:
 			if params.has_key(key):
 				list.append(params[key])
 			else:
-                                if required:
-                                        raise ParamRequired(self, key)
+				if required:
+					raise ParamRequired(self, key)
 				list.append(default)
 
 		return list
@@ -1750,9 +1751,15 @@ class Command:
 		a = args[:]
 		a.append('output-format=binary')
 		s = self.command(command, a)
- 		if s:
+		if s:
 			return marshal.loads(s)
 		return [ ]
+
+
+	def notify(self, message):
+#		 print self.level
+		if self.notifications:
+			sys.stderr.write('%s%s' % (_logPrefix, message))
 
 		
 	def command(self, command, args=[]):
@@ -1788,7 +1795,7 @@ class Command:
 				continue
 
 			# Find either the .py or .pyc but only load each
-			# module once.  This also plugins to be compiled
+			# module once.	This also plugins to be compiled
 			# and does not require source code releases.
 
 			if os.path.splitext(file)[1] not in [ '.py', '.pyc']:
@@ -1849,13 +1856,13 @@ class Command:
 	def runPlugins(self, args='', plugins=None):
 		if not plugins:
 			plugins = self.loadPlugins()
-                results = [ ]
+		results = [ ]
 		for plugin in plugins:
-                        Log('run %s' % plugin)
-                        retval = plugin.run(args)
-                        if not retval == None:
-                                results.append((plugin.provides(), retval))
-                return results
+			Log('run %s' % plugin)
+			retval = plugin.run(args)
+			if not retval == None:
+				results.append((plugin.provides(), retval))
+		return results
 
 
 	def loadImplementation(self, name=None):
@@ -1870,22 +1877,22 @@ class Command:
 				if base != 'imp_%s' % name:
 					continue
 			# Find either the .py or .pyc but only load each
-			# module once.  This allows plugins to be compiled
+			# module once.	This allows plugins to be compiled
 			# and does not require source code releases.
 
 			if ext not in [ '.py', '.pyc']:
 				continue
 
-		 	module = '%s.%s' % (self.__module__, base)
+			module = '%s.%s' % (self.__module__, base)
 
-		 	__import__(module)
-		 	module = eval(module)
-		 	try:
-		 		o = getattr(module, 'Implementation')(self)
+			__import__(module)
+			module = eval(module)
+			try:
+				o = getattr(module, 'Implementation')(self)
 				n = re.sub('^imp_','', base)
 				self.impl_list[n] = o
-		 	except AttributeError:
-		 		continue
+			except AttributeError:
+				continue
 
 	def runImplementation(self, name, args=None):
 		# Check to see if implementation list
@@ -2002,14 +2009,14 @@ class Command:
 			format = 'text'
 
 		if format in [ 'json', 'python', 'binary' ]:
-                        if not header: # need to build a generic header
-                                if len(self.output) > 0:
-                                        rows = len(self.output[0])
-                                else:
-                                        rows = 0
-                                header = [ ]
-                                for i in range(0, rows):
-                                        header.append('col-%d' % i)
+			if not header: # need to build a generic header
+				if len(self.output) > 0:
+					rows = len(self.output[0])
+				else:
+					rows = 0
+				header = [ ]
+				for i in range(0, rows):
+					header.append('col-%d' % i)
 			list = []
 			for line in self.output:
 				dict = {}
@@ -2017,12 +2024,12 @@ class Command:
 					if header[i]:
 						key = header[i]
 						val = line[i]
-                                                if dict.has_key(key):
-                                                        if not type(dict[key]) ==types.ListType:
-                                                                dict[key] = [ dict[key] ]
-                                                        dict[key].append(val)
-                                                else:
-                                                        dict[key] = val
+						if dict.has_key(key):
+							if not type(dict[key]) ==types.ListType:
+								dict[key] = [ dict[key] ]
+							dict[key].append(val)
+						else:
+							dict[key] = val
 				list.append(dict)
 			if format == 'python':
 				self.addText('%s' % list)
@@ -2036,13 +2043,13 @@ class Command:
 			return
 
 
-                # By default always display the owner (col 0), but if
-                # all lines have no owner set skip it.
-                #
-                # If trimOwner=True optimize the output to not display
-                # the owner IFF all lines have the same owner.  This
-                # looks like grep output across multiple or single
-                # files.
+		# By default always display the owner (col 0), but if
+		# all lines have no owner set skip it.
+		#
+		# If trimOwner=True optimize the output to not display
+		# the owner IFF all lines have the same owner.	This
+		# looks like grep output across multiple or single
+		# files.
 
 		if trimOwner:
 			owner = ''
@@ -2053,16 +2060,16 @@ class Command:
 				if not owner == line[0]:
 					startOfLine = 0
 		else:
-                        startOfLine = 1
-                        for line in self.output:
-                                if line[0]:
-                                        startOfLine = 0
+			startOfLine = 1
+			for line in self.output:
+				if line[0]:
+					startOfLine = 0
 			
 		# Add the header to the output and start formatting.  We
 		# keep the header optional and separate from the output
 		# so the above decision (startOfLine) can be made.
 
- 		if header:
+		if header:
 			list = []
 			for field in header:
 				if field:
@@ -2086,41 +2093,41 @@ class Command:
 						itemlen = len(repr(line[i]))
 				else:
 					itemlen = len(line[i])
- 				if itemlen > colwidth[i]:
+				if itemlen > colwidth[i]:
 					colwidth[i] = itemlen
 
 
 
-                # If we know the output is too long for the terminal
-                # switch from table view to a field view that will
-                # display nicer (e.g. stack list os boot).
+		# If we know the output is too long for the terminal
+		# switch from table view to a field view that will
+		# display nicer (e.g. stack list os boot).
  
-                if self.width and header and startOfLine == 0 and (sum(colwidth)+len(line)) > self.width:
-                        maxWidth = 0
-                        for label in output[0]:
-                                n = len(label)
-                                if n > maxWidth:
-                                        maxWidth = n
-                        for line in output[1:]:
-                                for i in range(0, len(line)):
-                                        if line[i] in [ None, 'None' ]:
-                                                s = ''
-                                        else:
-                                                s = str(line[i])
-                                        if s:
-                                                self.addText('%s%s%s %s\n' % (self.colors['bold']['code'],
-                                                                              output[0][i].ljust(maxWidth),
-                                                                              self.colors['reset']['code'],
-                                                                              s))
-                                self.addText('\n')
-                        return
+		if self.width and header and startOfLine == 0 and (sum(colwidth)+len(line)) > self.width:
+			maxWidth = 0
+			for label in output[0]:
+				n = len(label)
+				if n > maxWidth:
+					maxWidth = n
+			for line in output[1:]:
+				for i in range(0, len(line)):
+					if line[i] in [ None, 'None' ]:
+						s = ''
+					else:
+						s = str(line[i])
+					if s:
+						self.addText('%s%s%s %s\n' % (self.colors['bold']['code'],
+									      output[0][i].ljust(maxWidth),
+									      self.colors['reset']['code'],
+									      s))
+				self.addText('\n')
+			return
 
 
-                if header:
-                        isHeader = True
-                else:
-                        isHeader = False
-                o = ''
+		if header:
+			isHeader = True
+		else:
+			isHeader = False
+		o = ''
 		for line in output:
 			list = []
 			for i in range(startOfLine, len(line)):
@@ -2137,13 +2144,13 @@ class Command:
 							padChar)
 				else:
 					o = s
-                                if isHeader:
-                                        o = '%s%s%s' % (self.colors['bold']['code'],
-                                                        o,
-                                                        self.colors['reset']['code'])
+				if isHeader:
+					o = '%s%s%s' % (self.colors['bold']['code'],
+							o,
+							self.colors['reset']['code'])
 				list.append(o)
 			self.addText('%s\n' % string.join(list, ' '))
-                        isHeader = False
+			isHeader = False
 
 
 	def usage(self):
@@ -2180,7 +2187,7 @@ class Command:
 			for line in self.__doc__.split('\n'):
 				self.addText('%d:%s\n' % (i, line))
 				i += 1
-                                
+				
 		else:
 			handler = DocStringHandler(command, users)
 			parser = make_parser()
@@ -2198,48 +2205,48 @@ class Command:
 				self.addText(handler.getPlainText(self.colors))
 
 
-        def hasAccess(self, name):
+	def hasAccess(self, name):
 
-                allowed = False
-                gid     = os.getgid()
-                groups  = os.getgroups()
-                
-                if gid not in groups:
-                        # Installer has no supplemental groups so we need to
-                        # include the default group.
-                        # Outside the installer it is already in the
-                        # supplemental list.
-                	groups.append(gid)
+		allowed = False
+		gid	= os.getgid()
+		groups	= os.getgroups()
+		
+		if gid not in groups:
+			# Installer has no supplemental groups so we need to
+			# include the default group.
+			# Outside the installer it is already in the
+			# supplemental list.
+			groups.append(gid)
 
-                rows =  self.db.select('command, groupid from access')
-                if rows:
-                        for c,g in rows:
-                        	if g in groups:
-                        		if fnmatch.filter([ name ], c):
-	                                	allowed = True
-                else:
+		rows =	self.db.select('command, groupid from access')
+		if rows:
+			for c,g in rows:
+				if g in groups:
+					if fnmatch.filter([ name ], c):
+						allowed = True
+		else:
 
-                        # If the access table does not exist fallback
-                        # onto the previous MustBeRoot style access
-                        # control.
-                        #
-                        # This is also the case for the installer.
+			# If the access table does not exist fallback
+			# onto the previous MustBeRoot style access
+			# control.
+			#
+			# This is also the case for the installer.
 
-                        if self.MustBeRoot:
-                                if self.isRootUser() or self.isApacheUser():
-                        		allowed = True
-                        else:
-                                allowed = True
-                        
-                return allowed
+			if self.MustBeRoot:
+				if self.isRootUser() or self.isApacheUser():
+					allowed = True
+			else:
+				allowed = True
+			
+		return allowed
 
-                        
+			
 	def runWrapper(self, name, argv, level=0):
 		"""Performs various checks and logging on the command before 
 		the run() method is called.  Derived classes should NOT
 		need to override this."""
 
-                username = pwd.getpwuid(os.geteuid())[0]
+		username = pwd.getpwuid(os.geteuid())[0]
 
 		self.level = level
 		
@@ -2251,7 +2258,7 @@ class Command:
 		global _logPrefix
 		_logPrefix = ''
 		for i in range(0, self.level):
-			_logPrefix += '        '
+			_logPrefix += '	       '
 
 		Log('user %s called "%s"' % (username, command))
 
@@ -2268,8 +2275,8 @@ class Command:
 		# quote them into a single argument.
 		#
 		# We only do this when we find an argument and starts with
-		# '['.  So the '[' character is safe anywhere else on the 
-		# command line.  But if you start an argument with one it
+		# '['.	So the '[' character is safe anywhere else on the 
+		# command line.	 But if you start an argument with one it
 		# need to be closed eventually.
 
 		s = ''
@@ -2317,9 +2324,9 @@ class Command:
 		if list and list[0] == 'help':
 			self.help(name, dict)
 		else:
-                        if not self.hasAccess(name):
+			if not self.hasAccess(name):
 				raise CommandError(self, 'user "%s" does not have access "%s"' %
-                                      (username, name))
+				      (username, name))
 			else:
 				self._argv   = argv # raw arg list
 				self._args   = list # required arguments
@@ -2346,13 +2353,13 @@ class Command:
 		
 		pass
 
-        def getAttr(self, attr):
-                return self.getHostAttr('localhost', attr)
+	def getAttr(self, attr):
+		return self.getHostAttr('localhost', attr)
 
-        def getHostAttr(self, host, attr):
-                for row in self.call('list.host.attr', [ host, 'attr=%s' % attr ]):
-                        return row['value']
-                return None
+	def getHostAttr(self, host, attr):
+		for row in self.call('list.host.attr', [ host, 'attr=%s' % attr ]):
+			return row['value']
+		return None
 
 
 
@@ -2360,7 +2367,7 @@ class Command:
 class Module:
 	def __init__(self, command):
 		self.owner = command
-		self.db    = command.db
+		self.db	   = command.db
 
 	def run(self, args):
 		"""All derived classes should override this method. This
@@ -2384,14 +2391,14 @@ class Plugin(Module):
 		
 	def requires(self):
 		"""Returns a list of plug-in identifiers that must be
-		run before this Plugin.  This is optional for all 
+		run before this Plugin.	 This is optional for all 
 		derived classes."""
 
 		return []
 
 	def precedes(self):
 		"""Returns a list of plug-in identifiers that can only by
-		run after this Plugin.  This is optional for all derived
+		run after this Plugin.	This is optional for all derived
 		classes."""
 
 		return []

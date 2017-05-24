@@ -41,6 +41,7 @@
 #
 # @Copyright@
 
+import sys
 import stack.commands
 from stack.bool import *
 
@@ -79,7 +80,11 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 
 
+                sys.stderr.write('\tAdd Host\n')
 		for host in hosts.keys():
+
+                        sys.stderr.write('\t\t%s\r' % host)
+
 			#
 			# add the host if it doesn't exist
 			#
@@ -101,12 +106,20 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				self.owner.call('add.host', args)
 
 			if 'installaction' in hosts[host]:
-				action = 'action=%s' % hosts[host]['installaction']
-				self.owner.call('set.host.installaction', [host, action])
+				self.owner.call('set.host.bootaction', 
+                                                [ host,
+                                                  'sync=false',
+                                                  'type=install',
+                                                  'action=%s' % hosts[host]['installaction']
+                                          ])
 				del hosts[host]['installaction']
 			if 'runaction' in hosts[host]:
-				action = 'action=%s' % hosts[host]['runaction']
-				self.owner.call('set.host.runaction', [host, action])
+				self.owner.call('set.host.bootaction', 
+                                                [ host, 
+                                                  'sync=false',
+                                                  'type=os',
+                                                  'action=%s' % hosts[host]['runaction']
+                                          ])
 				del hosts[host]['runaction']
 
 			if 'groups' in hosts[host]:
@@ -136,26 +149,24 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						[ host, '%s=%s' % (key, hosts[host][key]) ])
 
 
+                        sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
+
+
 		#
 		# process the host's interface(s) 
 		#
 
                 hosts = interfaces.keys()
+                argv  = interfaces.keys()
 
-		# First remove all the existing interfaces for all
-		# the hosts in the spreadsheet.  Hit the database
-                # O(1) rather than O(n), this is why we do this
-                # outside of the loop.
-
-                params = []
-                for host in hosts:
-                        params.append(host)
-		# only remove all interfaces from hosts if hostnames were actually specified *cough*
-                if params:
-                        params.append('all=true')
-	                self.owner.call('remove.host.interface', params)
+                if argv: # remove previous host interfaces (if any)
+                        argv.append('all=true')
+	                self.owner.call('remove.host.interface', argv)
                 
+                sys.stderr.write('\tAdd Host Interface\n')
                 for host in hosts:
+
+                        sys.stderr.write('\t\t%s\r' % host)
                         
 			for interface in interfaces[host].keys():
 				ip = None
@@ -225,4 +236,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					self.owner.call(
 						'set.host.interface.options',
 						cmdparams)
+
+                        sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
+
 

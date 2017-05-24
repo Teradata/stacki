@@ -11,14 +11,16 @@ class Command(stack.commands.set.host.command):
 
 	def run(self, params, args):
 
-                (req_action, req_type) = self.fillParams([
+                (req_action, req_type, req_sync) = self.fillParams([
                         ('action', None, True),
-                        ('type', None, True)
+                        ('type', None, True),
+                        ('sync', True)
                 ])
 
 		if not len(args):
                         raise ArgRequired(self, 'host')
 
+                req_sync   = self.str2bool(req_sync)
                 req_type   = req_type.lower()
 		req_action = req_action.lower()
                 types      = { 'os'     : 'osaction',
@@ -44,7 +46,8 @@ class Command(stack.commands.set.host.command):
                                 where nodes.name = '%s'
                                 """ % (types[req_type], req_action, req_type, host))
 
-                self.command('sync.host.boot', hosts)
+                if req_sync:
+                        self.command('sync.host.boot', hosts)
 
 
 

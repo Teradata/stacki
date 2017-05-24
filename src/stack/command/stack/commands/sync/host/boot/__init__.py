@@ -8,19 +8,8 @@ class Command(stack.commands.sync.host.command):
 
 	def run(self, params, args):
 
-                p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
-                                     stdin  = subprocess.PIPE,
-                                     stdout = subprocess.PIPE,
-                                     stderr = subprocess.PIPE)
+                self.notify('Sync Host Boot\n')
 
-                for row in self.call('report.host.bootfile', 
-                                     self.getHostnames(args, managed_only=True)):
-                        p.stdin.write('%s\n' % row['col-1'])
-                o, e = p.communicate('')
-
-                psh = subprocess.Popen(['/bin/sh'],
-                                       stdin  = subprocess.PIPE,
-                                       stdout = subprocess.PIPE,
-                                       stderr = subprocess.PIPE)
-                out, err = psh.communicate(o)
-    
+                argv = self.getHostnames(args, managed_only=True)
+                argv.append('notify=true')
+                self.report('report.host.bootfile', argv)

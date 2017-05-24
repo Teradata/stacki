@@ -9,6 +9,7 @@ from stack.exception import *
 class Implementation(stack.commands.Implementation):
 
 	def run(self, h):
+
 		host     = h['host']
 		ip       = h['ip']
 		mask     = h['mask']
@@ -17,6 +18,11 @@ class Implementation(stack.commands.Implementation):
                 ramdisk  = h['ramdisk']
                 args     = h['args']
 		filename = h['filename']
+                attrs    = h['attrs']
+
+                dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
+                nextserver = attrs.get('Kickstart_PrivateKickstartHost')
+
 
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP

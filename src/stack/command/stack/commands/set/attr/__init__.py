@@ -114,7 +114,7 @@ class Command(stack.commands.Command,
                 # allow the attr argument to be a glob.
 
                 if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', glob):
-                        raise CommandError(self, 'invalid attr "%s"'  % glob)
+                        raise CommandError(self, 'invalid attr name "%s"'  % glob)
 
                 # Assume that attrs is a glob and get a list of
                 # matching attributes for the scope.

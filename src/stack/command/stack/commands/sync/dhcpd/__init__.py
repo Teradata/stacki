@@ -50,18 +50,10 @@ class Command(stack.commands.sync.command):
 	DHCPD service"""
 
 	def run(self, params, args):
-		output = self.command('report.dhcpd')
-		p = subprocess.Popen([ '/opt/stack/bin/stack',
-				'report', 'script'],
-				stdin=subprocess.PIPE,
-				stdout=subprocess.PIPE,
-				stderr=subprocess.PIPE,)
-		o, e = p.communicate(output)
-		p2 = subprocess.Popen(['/bin/sh'],
-				stdin=subprocess.PIPE,
-				stdout=None,
-				stderr=None,
-				shell=True)
-		p2.communicate(o)
+
+                self.notify('Sync DHCP\n')
+
+		self.report('report.dhcpd')
+                
 		subprocess.call(['/sbin/service','dhcpd','restart'],
-			stdout=open('/dev/null'), stderr=open('/dev/null'))
+                                stdout=open('/dev/null'), stderr=open('/dev/null'))

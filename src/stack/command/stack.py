@@ -1,8 +1,8 @@
 #! /opt/stack/bin/python
 #
 # @SI_Copyright@
-#                               stacki.com
-#                                  v3.3
+#				stacki.com
+#				   v3.3
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -21,7 +21,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -42,9 +42,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -64,16 +64,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -93,6 +93,7 @@
 # @Copyright@
 
 from __future__ import print_function
+from builtins import input
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -116,7 +117,7 @@ syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
 # Several Commands are run in the installation environment before the
-# cluster database is created.  To enable this we only attempt to establish
+# cluster database is created.	To enable this we only attempt to establish
 # a database connection, if it fails it is not considered an error.
 
 
@@ -292,16 +293,16 @@ class RCL_Completer:
 		if len(tokens) > 0:
 			t = tokens.pop(0)
 			if d.children.has_key(t):
-				print('  '*level, t)
+				print('	 '*level, t)
 				self.print_mod_cmd(d.children[t], tokens, level+1)
 			else:
 				for i in d.children:
 					if i.startswith(t):
-						print('  '*level, i)
+						print('	 '*level, i)
 						self.print_mod_cmd(d.children[i], [], level+1)
 		else:
 			for i in d.children:
-				print('  '*level, i)
+				print('	 '*level, i)
 				self.print_mod_cmd(d.children[i], [], level+1)
 
 	# Completer function. This function takes in a list of tokens, and
@@ -333,12 +334,12 @@ def run_command(args):
 	# Check if the stack command has been quoted.
 
 	module = None
-        if not args:
-                return
-        
+	if not args:
+		return
+
 	cmd = args[0].split()
 	if len(cmd) > 1:
-		s = 'stack.commands.%s' % string.join(cmd, '.')
+		s = 'stack.commands.%s' % '.'.join(cmd)
 		try:
 			__import__(s)
 			module = eval(s)
@@ -348,12 +349,13 @@ def run_command(args):
 
 	# Treat the entire command line as if it were a python
 	# command module and keep popping arguments off the end
-	# until we get a match.  If no match is found issue an
+	# until we get a match.	 If no match is found issue an
 	# error
 
 	if not module:
 		for i in range(len(args), 0, -1):
-			s = 'stack.commands.%s' % string.join(args[:i], '.')
+			s = 'stack.commands.%s' % '.'.join(args[:i])
+			print (s)
 			try:
 				__import__(s)
 				module = eval(s)
@@ -366,9 +368,9 @@ def run_command(args):
 		sys.stderr.write('Error - Invalid stack command "%s"\n' % args[0])
 		return -1
 
-	name = string.join(string.split(s, '.')[2:], ' ')
+	name = ' '.join(string.split(s, '.')[2:])
 
-        import stack.exception
+	import stack.exception
 
 	# If we can load the command object then fall through and invoke the run()
 	# method.  Otherwise the user did not give a complete command line and
@@ -378,20 +380,20 @@ def run_command(args):
 		import stack.commands.list.help
 		help = stack.commands.list.help.Command(Database)
 		fullmodpath = s.split('.')
-		submodpath  = string.join(fullmodpath[2:], '/')
-                try:
-                        help.run({'subdir': submodpath}, [])
-                except stack.exception.CommandError, e:
-                        sys.stderr.write('%s\n' % e)
-                        return -1
+		submodpath  = '/'.join(fullmodpath[2:])
+		try:
+			help.run({'subdir': submodpath}, [])
+		except stack.exception.CommandError as e:
+			sys.stderr.write('%s\n' % e)
+			return -1
 		print(help.getText())
 		return -1
 
-        
+	
 	# Check to see if STACKDEBUG variable is set.
 	# This determines if the stack trace should be
 	# dumped when an exception occurs.
-        
+	
 	STACKDEBUG = None
 	if os.environ.has_key('STACKDEBUG'):
 		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
@@ -404,7 +406,7 @@ def run_command(args):
 	except stack.exception.CommandError as e:
 		sys.stderr.write('%s\n' % e)
 		syslog.syslog(syslog.LOG_ERR, '%s' % e)
-                return -1
+		return -1
 	except:
 		# Sanitize Exceptions, and log them.
 		exc, msg, tb = sys.exc_info()
@@ -447,7 +449,7 @@ def run_cli(prompt):
 	# Start main rcli loop
 	while not done:
 		try:
-			cmd = raw_input(prompt)
+			cmd = input(prompt)
 			readline.write_history_file(histfile)
 			if cmd == 'exit':
 				done = 1
@@ -466,12 +468,12 @@ if len(sys.argv) == 1:
 	# opening the stack shell is a bad idea. Instead
 	# just run help, and quit
 	if not sys.stdout.isatty():
-                rc = run_command(['help'])
+		rc = run_command(['help'])
 		sys.exit(rc)
 	else:
 		os.environ['TERM'] = 'vt100'
 		import readline
-                run_cli('%s > ' % (os.path.basename(sys.argv[0])))
+		run_cli('%s > ' % (os.path.basename(sys.argv[0])))
 else:
 	args = sys.argv[1:]
 	rc = run_command(args)

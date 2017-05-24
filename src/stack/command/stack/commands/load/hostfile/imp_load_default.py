@@ -101,7 +101,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		# need all the info from networks(/subnets)
 		self.networks = dict((k,next(v)) for k,v in groupby(self.owner.call('list.network'), itemgetter('network')))
 		self.boxes = self.getBoxNames()
-		self.actions = [entry['action'] for entry in self.owner.call('list.bootaction')]
+		self.actions = [entry['bootaction'] for entry in self.owner.call('list.bootaction')]
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
 		reader = stack.csv.reader(open(filename, 'rU'))
