@@ -93,6 +93,7 @@
 		<to>database-schema</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
+		<to>node-certs</to>
 		<to>storage-controller-server</to>
 	</edge>
 
