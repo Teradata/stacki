@@ -2,29 +2,37 @@
 
 <kickstart>
 
-
 <description>
-PXE first configuration for client nodes
+Provides a method for PXE-ing nodes to reset their boot action to 'os' (localdisk)
 </description>
 
-<copyright>
-Copyright (c) 2000 - 2010 The Regents of the University of California.
-All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
-</copyright>
-
+<si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</si_copyright>
 
 <post>
 
-<!-- set the node to boot from local disk on the next reboot -->
+<!-- for backends, the pxeserver is kickstart_privateaddr -->
+pxeserver=&Kickstart_PrivateAddress;
 
-CURL=/usr/bin/curl
-if [ -f /bin/curl ]
-then
-	CURL=/bin/curl
+<!-- check to see if this is a pxe-booting frontend -->
+grep boss /proc/cmdline 2>&amp;1 /dev/null
+if [ $? -eq 0 ]; then
+	pxeserver=$(sed -r -n 's/.* stacki.pxeserver=([.[:alnum:]]*) .*/\1/p' /proc/cmdline;)
 fi
 
-$CURL --insecure -o /dev/null \
-	https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+curl_cmd=/usr/bin/curl
+
+<!-- on an installing system, curl may be in /bin? -->
+if [ -f /bin/curl ]; then
+	curl_cmd=/bin/curl
+fi
+
+pxe_cgi_url=https://${pxeserver}/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+echo $pxeserver >> /tmp/pxeserver.txt
+echo $pxe_cgi_url >> /tmp/pxeserver.txt
+${curl_cmd} --insecure --output /dev/null ${pxe_cgi_url}
 
 </post>
 
