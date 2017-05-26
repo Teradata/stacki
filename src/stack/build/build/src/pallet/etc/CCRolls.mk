@@ -47,13 +47,6 @@ default: roll
 include $(STACKBUILD)/etc/CCCommon.mk
 include $(ROLLSBUILD)/etc/Rolls.mk
 
-# Force profile RPM to always rebuild.  This is what we used to
-# do before we started using DEPENDENCIES.  Rebuilding is fast
-# and makes sure we always have the correct nodes/graphs.
-
-.PHONY: $(RPM.TARGET)
-
-
 .PHONY: clean.all nuke.all
 clean.all:: clean
 	-$(MAKE) -C src clean.order
