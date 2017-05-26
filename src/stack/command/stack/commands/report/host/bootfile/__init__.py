@@ -23,10 +23,6 @@ class Command(stack.commands.Command,
 		# Get the IP and NETMASK of the host
 		#
 	
-		appliance = self.getHostAttr(host, 'appliance')
-		if appliance == 'frontend':
-			return []
-
 		hex_ip_list = []
 		for row in self.call('list.host.interface', [host, 'expanded=True']):
 			ip = row['ip']
