@@ -56,6 +56,12 @@ class Data:
 	def __init__(self):
 		self.data = Attr()
 
+		self.arch = os.uname()[4]
+		if self.arch in [ 'i386', 'i486', 'i586', 'i686' ]:
+			self.arch = 'i386'
+		elif self.arch in [ 'armv7l' ]:
+			self.arch = 'armv7hl'
+
 	def get(self, attr):
 		return getattr(self.data, attr)
 
@@ -175,6 +181,13 @@ class Data:
 
 		self.data.devices = devices
 		return devices
+
+	def validateDomain(self, value):
+		s = value.split(".")[0]
+		if s.lower() == "frontend" or s.lower() == "backend":
+			return (False, "Cannot have an appliance name as a hostname", "Hostname Error")
+		else:
+			return (True, "", "")
 
 	def validateNetwork(self, tup, config_net=False):
 
@@ -340,7 +353,7 @@ class Data:
 					name=w['name'], \
 					version=w['version'], \
 					release=w['release'], \
-					arch='x86_64', \
+					arch=self.arch, \
 					url='http://127.0.0.1/mnt/cdrom/', \
 					diskid=w['id'])
 
@@ -351,7 +364,7 @@ class Data:
 					name=w['name'], \
 					version=w['version'], \
 					release=w['release'], \
-					arch='x86_64', \
+					arch=self.arch, \
 					url=w['url'], \
 					diskid='')
 

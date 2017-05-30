@@ -1,0 +1,7 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+node207,sda,biosboot,1,biosboot,
+,sda,swap,8192,swap,
+,sda,/var/lib/docker,0,xfs,"--mkfsoptions=""-n ftype=1"""
+,sda,/boot,1024,xfs,
+,sda,/,16000,xfs,
+,sda,/var,26000,xfs,

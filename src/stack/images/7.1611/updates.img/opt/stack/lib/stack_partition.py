@@ -36,8 +36,9 @@ class StackPartition:
 	def getRaids(self):
 		raids = []
 
-		if os.path.exists('/dev/md/md-device-map'):
-			file = open('/dev/md/md-device-map', 'r')
+		mdstat = '/proc/mdstat'
+		if os.path.exists(mdstat):
+			file = open(mdstat, 'r')
 			for line in file.readlines():
 				l = string.split(line)
 				if len(l) > 0 and l[0][0:2] == 'md':
@@ -131,7 +132,6 @@ class StackPartition:
 		uuid = os.popen(cmd).readline().strip()
 		if len(uuid) > 0:
 			mntpoint = self.findMntInFstab("UUID=%s" % uuid)
-		
 		if mntpoint == '':
 			mntpoint = self.findMntInFstab('/dev/' + devicename)
 
@@ -544,9 +544,8 @@ class StackPartition:
 				if not fstype or 'linux-swap' in fstype:
 					continue
 
-				os.system('mount /dev/%s %s' \
-					% (partition, mountpoint) + \
-					' > /dev/null 2>&1')
+				cmd ='mount /dev/%s %s >/dev/null 2>&1' % (partition, mountpoint)
+				os.system(cmd)
 
 				if os.path.exists(fstab):
 					file = open(fstab)
@@ -683,9 +682,15 @@ class StackPartition:
 				nodepartid, nodefstype, nodebootflags,
 				nodepartflags, nodemntpoint, nodeuuid) = node
 
-			if nodemntpoint == '' or nodemntpoint[0:4] == 'raid':
+			if nodemntpoint[0:4] == 'raid':
 				continue
 
+			if nodemntpoint == '':
+				if nodebootflags == "bios_grub":
+					nodemntpoint = "biosboot"
+					nodefstype = "biosboot"
+				else:
+					continue
 			#
 			# only add raid partitions if they have a mountpoint
 			# defined by their respective 'md' device.
@@ -699,8 +704,8 @@ class StackPartition:
 
 			args = [ nodemntpoint ]
 
-			if (nodemntpoint != '/' and nodemntpoint != '/var' \
-				and nodemntpoint != '/boot') and not format:
+			if not format and \
+				nodemntpoint not in ['/var','/','/boot','/boot/efi', "biosboot"]:
 				args.append('--noformat')
 			else:
 				if nodefstype == '':

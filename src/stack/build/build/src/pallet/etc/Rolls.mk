@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -126,10 +126,10 @@ endif
 export ROLL
 
 include $(STACKBUILD)/etc/Rules.mk
-include $(ROLLSBUILD)/etc/roll-profile.mk
 
-.PHONY: profile
-profile: rpm
+# When running at the roll directory, make roll as
+# the default target
+.DEFAULT_GOAL = roll
 
 MKISOFSFLAGS = "-b isolinux/isolinux.bin -c isolinux/boot.cat \
 	-no-emul-boot -boot-load-size 4 -boot-info-table"

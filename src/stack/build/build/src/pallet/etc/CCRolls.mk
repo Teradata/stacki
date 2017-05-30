@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -47,13 +47,6 @@ default: roll
 include $(STACKBUILD)/etc/CCCommon.mk
 include $(ROLLSBUILD)/etc/Rolls.mk
 
-# Force profile RPM to always rebuild.  This is what we used to
-# do before we started using DEPENDENCIES.  Rebuilding is fast
-# and makes sure we always have the correct nodes/graphs.
-
-.PHONY: $(RPM.TARGET)
-
-
 .PHONY: clean.all nuke.all
 clean.all:: clean
 	-$(MAKE) -C src clean.order
@@ -65,5 +58,18 @@ nuke.all:: nuke
 .PHONY: manifest-check
 manifest-check:
 	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) build-$(ROLL)-$(STACK)
+
+# Build 3rdparty directory
+
+.PHONY: 3rdparty
+3rdparty: manifest.src
+	-mkdir $(REDHAT.ROOT)/3rdparty
+	( 							\
+		for file in `cat manifest.src`; do		\
+		if [ -f $$file ]; then				\
+			cp $$file $(REDHAT.ROOT)/3rdparty/;	\
+		fi;						\
+		done						\
+	)
 
 endif # __CCROLLS_MK

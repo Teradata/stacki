@@ -2,7 +2,7 @@
 # 
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -432,10 +432,12 @@ class RollFile(File):
 				if key == 'family':
 					if value == 'Red Hat Enterprise Linux':
 						name = 'RHEL'
-					elif value == 'CentOS':
+					elif value.startswith('CentOS'):
 						name = 'CentOS'
-					elif value == 'Oracle Linux Server':
-						name = 'Oracle'
+					elif value.startswith('Oracle'):
+						name = 'OLE'
+					elif value.startswith('Scientific'):
+						name = 'SL'
 				elif key == 'version':
 					version = value
 				elif key == 'arch':
@@ -463,21 +465,19 @@ class RollFile(File):
 			# will be 1, 2, etc.
 			#
 			diskid = d
-
 		if not name:
 			name = "BaseOS"
 			foreign = 1
 		if not version:
-			version = '1.0'
+			version = stack.version
 		if not release:
-			release = '1'
+			release = stack.release
 		if not arch:
 			arch = 'x86_64'
 		if not diskid:
 			diskid = '1'
 
 		os.system('umount /mnt/cdrom')
-
 		return name, version, release, arch, diskid, foreign
 
 	def __cmp__(self, file):

@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -42,6 +42,7 @@
 ROLLROOT = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
+-include version-$(ARCH).mk
 
 bootstrap:
 	-yum groupinstall -y "Development and Creative Workstation"
@@ -54,6 +55,7 @@ bootstrap:
 	gettext \
 	eject \
 	binutils-devel \
+	byacc \
 	openssl-devel \
 	bzip2-devel \
 	ncurses-devel \
@@ -76,8 +78,9 @@ bootstrap:
 	syslinux \
 	createrepo \
 	perl-ExtUtils-MakeMaker \
-	asciidoc xmlto
+	asciidoc xmlto yum-utils
 	$(MAKE) -C src/stack/build $@
+	. /etc/profile.d/stack-build.sh
 	$(MAKE) -C src $@
 
 LICENSE.all.txt:

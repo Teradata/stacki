@@ -11,8 +11,8 @@
 	</description>
 
         <si_copyright>
-        (c) 2006 - 2016 StackIQ Inc.
-        All rights reserved. stacki(r) v3.3 stacki.com
+        (c) 2006 - 2017 StackIQ Inc.
+        All rights reserved. stacki(r) v4.0 stacki.com
         </si_copyright>
 
         <copyright>
@@ -61,7 +61,7 @@ CREATE TABLE attributes (
   ScopeID	int(11),
 );
 
-grant select (scope, attr, value) on cluster.attributes to ''@'localhost';
+grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
 
 <!-- OSes -->
 

@@ -2,7 +2,7 @@
 # 
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -436,10 +436,10 @@ class Generator:
                                                 tagText   = child.localName
                                                 childText = self.getChildText(child)
                                                 if childText:
-                                                        text = '%s %s' % (tagText, childText)
-                                                else:
-                                                        text = '%s' % tagText
-                                        self.mainSection.append(text, nodefile)
+							text = '%s %s' % (tagText, childText)
+						else:
+						        text = '%s' % tagText
+                                                self.mainSection.append(text, nodefile)
                                         child = iter.nextSibling()
 			node = iter.nextNode()
 			
@@ -466,7 +466,7 @@ class Generator:
 		# supports the old syntax
 
 		if node.attributes:
-			attrs = node.attributes.getNamedItem((None, 'attrs'))
+			attrs = node.attributes.getNamedItem((node.namespaceURI, 'attrs'))
 			if attrs:
 				dict = eval(attrs.value)
 				for (k,v) in dict.items():
@@ -526,7 +526,7 @@ class Generator:
 					s += '\n'
 				s += 'EOF\n'
 
-                        if fileOwner:
+			if fileOwner:
 				s += 'chown %s %s\n' % (fileOwner, fileName)
 			if filePerms:
 				s += 'chmod %s %s\n' % (filePerms, fileName)

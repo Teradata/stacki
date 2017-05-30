@@ -1,0 +1,12 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+node207,md0,/,0,ext4,--level=RAID1 raid.01 raid.02
+,md1,/var,0,xfs,--level=RAID0 raid.03 raid.04
+,md2,/export,0,xfs,--level=RAID1 raid.05 raid.06
+,sda,biosboot,1,biosboot,
+,sdb,biosboot,1,biosboot,
+,sda,raid.01,16000,raid,
+,sdb,raid.02,16000,raid,
+,sda,raid.03,16000,raid,
+,sdb,raid.04,16000,raid,
+,sda,raid.05,0,raid,
+,sdb,raid.06,0,raid,

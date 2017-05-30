@@ -1,0 +1,7 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+node207,sda,swap,8192,swap,
+,sda,biosboot,1,biosboot,
+,sda,/,0,ext4,
+,sdb,pv.01,1,lvm,--grow
+,pv.01,volgrp01,0,volgroup,
+,volgrp01,/var/lib/mysql,0,xfs,--name=mysql_libs

@@ -80,6 +80,6 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'partition'
 
-	def run(self, host):
-		self.owner.command('remove.host.partition', [ host ])
+	def run(self, hosts):
+		self.owner.command('remove.host.partition', hosts )
 		

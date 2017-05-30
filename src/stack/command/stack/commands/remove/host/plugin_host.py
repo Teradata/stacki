@@ -84,9 +84,10 @@ class Plugin(stack.commands.Plugin):
 		#
 		# make sure this plugin runs last
 		#
-		return [ 'TAIL' ]
+		return [ 'interface', 'TAIL']
 		
-	def run(self, host):
-		self.owner.db.execute("""delete from nodes where
-			name = '%s' """ % host)
+	def run(self, hosts):
+		for host in hosts:
+			self.owner.db.execute("""delete from nodes where
+				name = '%s' """ % host)
 
