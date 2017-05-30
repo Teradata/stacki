@@ -19,18 +19,12 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 <package>foundation-python</package>
 <package>foundation-python-xml</package>
-<package>foundation-py-docutils</package>
-<package>foundation-py-numpy</package>
-<package>foundation-py-IPy</package>
-<package>foundation-py-M2Crypto</package>
 <package>foundation-py-pygobject</package>
 <package>foundation-py-pygtk</package>
 <package>foundation-py-MySQL-python</package>
 <package>foundation-py-pycairo</package>
 <package>foundation-py-libxml2dom</package>
-<package>foundation-python-daemon</package>
 <package>foundation-python-pytest</package>
-<package>foundation-py-inotify</package>
 <package>foundation-rcs</package>
 <package>foundation-readline</package>
 <package>foundation-libxml2</package>

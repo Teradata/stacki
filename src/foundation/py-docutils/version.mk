@@ -1,2 +1,0 @@
-DOCUTILS_NAME = docutils
-VERSION = 0.11
