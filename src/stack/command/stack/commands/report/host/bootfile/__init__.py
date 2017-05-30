@@ -6,6 +6,12 @@
 import os
 import stack.commands
 from stack.exception import *
+import struct
+import socket
+
+from itertools import groupby
+from operator import itemgetter
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -19,23 +25,16 @@ class Command(stack.commands.Command,
 	</param>
 	"""
 	def getHostHexIP(self, host):
-		#
-		# Get the IP and NETMASK of the host
-		#
-	
+		"""
+		Return list of IP's (in hex format) for each interface where pxe=true for `host`
+		"""
 		hex_ip_list = []
-		for row in self.call('list.host.interface', [host, 'expanded=True']):
-			ip = row['ip']
-			pxe = row['pxe']
-			if ip and pxe:
-				#
+		for iface in self.host_interfaces[host]:
+			if iface['ip'] and iface['pxe']:
 				# Compute the HEX IP filename for the host
-				#
-				hexstr = ''
-				for i in string.split(ip, '.'):
-					hexstr += '%02x' % (int(i))
-
-				hex_ip_list.append(hexstr.upper())
+				# inet_aton('a.b.c.d') -> binary (bytes) repr of (long) int
+				# struct unpacks that into a python Long, which we then cast to a hex value
+				hex_ip_list.append("%08X" % struct.unpack('!L', socket.inet_aton(iface['ip']))[0])
 		return hex_ip_list
 
 	def getBootParams(self, host, action):
@@ -59,6 +58,14 @@ class Command(stack.commands.Command,
 
 		(action, ) = self.fillParams([
 			('action',None)])
+
+		# since we'll look up iface data for every host in 'hosts' anyway, get it all at once
+		# stored as a class-level variable in a dict[hostname] -> [list of iface dicts]
+		self.host_interfaces = dict(
+			(k,list(v)) for k,v in groupby(
+			self.call('list.host.interface', hosts + ['expanded=True']),
+			itemgetter('host')
+			))
 
 		self.beginOutput()
 		self.runPlugins([hosts, action])

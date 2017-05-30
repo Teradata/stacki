@@ -21,11 +21,11 @@ class Implementation(stack.commands.Implementation):
 		# request inside anaconda.
 
 		if args and args.find('ksdevice=') != -1:
-			for row in self.owner.call('list.host.interface', [host, 'expanded=True']):
-				if row['ip'] and row['pxe']:
-					ip = row['ip']
-					gateway = row['gateway']
-					netmask = row['mask']
+			for iface in self.owner.host_interfaces[host]:
+				if iface['ip'] and iface['pxe']:
+					ip = iface['ip']
+					gateway = iface['gateway']
+					netmask = iface['mask']
 					args += ' ip=%s gateway=%s netmask=%s' % (ip, gateway, netmask) 
 			dnsserver = self.owner.getHostAttr(host,
 				'Kickstart_PrivateDNSServers')

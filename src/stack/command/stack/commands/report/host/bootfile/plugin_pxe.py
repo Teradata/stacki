@@ -43,24 +43,35 @@ import os
 import sys
 import stack.commands
 
+from itertools import groupby
+from operator import itemgetter
+
 class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		hosts = args[0]
 		action = args[1]
+
+		# Get all host bootactions at once, unless 'action' was specified
+		host_actions = {}
+		if not action:
+			host_actions = dict(
+				(k,next(v)) for k,v in groupby(
+				self.owner.call('list.host.boot', hosts),
+				itemgetter('host')
+				))
+
 		for host in hosts:
 			# If actions aren't specified on the command line
 			# get info from the database
 			if not action:
-				o = self.owner.call('list.host.boot',[host])
-				action = o[0]['action']
+				this_action = host_actions[host]['action']
+			else:
+				this_action = action
 			# Run the OS-specific implementation
 			osname = self.owner.db.getHostOS(host)
-			hex_ip_list = self.owner.getHostHexIP(host)
-			if hex_ip_list == []:
-				return
 
-			for ip in hex_ip_list:
+			for ip in self.owner.getHostHexIP(host):
 				filename = '/tftpboot/pxelinux/pxelinux.cfg/%s' % ip
 				self.owner.addOutput(host, '<stack:file stack:name="%s" stack:owner="root:apache" stack:perms="0664" stack:rcs="off"><![CDATA[' % filename)
-				self.owner.runImplementation("%s_pxe" % osname, [host, action])
+				self.owner.runImplementation("%s_pxe" % osname, [host, this_action])
 				self.owner.addOutput(host, ']]></stack:file>')
