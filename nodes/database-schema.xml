@@ -58,7 +58,7 @@ CREATE TABLE attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL,
-  ScopeID	int(11),
+  ScopeID	int(11)
 );
 
 grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
@@ -129,7 +129,7 @@ CREATE TABLE nodes (
   Rack		varchar(64) default NULL,
   Rank		varchar(64) default NULL,
   OSAction	int(11) default '2',
-  InstallAction	int(11) default '1',,
+  InstallAction	int(11) default '1',
   PRIMARY KEY  (ID)
 );
 
