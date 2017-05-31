@@ -8,7 +8,6 @@ foundation-py-gspread
 foundation-py-ipaddress
 foundation-py-jinja2
 foundation-py-libxml2dom
-foundation-py-PIL
 foundation-py-pycairo
 foundation-py-PyMySQL
 foundation-py-requests
