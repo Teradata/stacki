@@ -93,7 +93,6 @@
 # @Copyright@
 
 from __future__ import print_function
-from builtins import input
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -355,7 +354,6 @@ def run_command(args):
 	if not module:
 		for i in range(len(args), 0, -1):
 			s = 'stack.commands.%s' % '.'.join(args[:i])
-			print (s)
 			try:
 				__import__(s)
 				module = eval(s)
@@ -449,7 +447,7 @@ def run_cli(prompt):
 	# Start main rcli loop
 	while not done:
 		try:
-			cmd = input(prompt)
+			cmd = raw_input(prompt)
 			readline.write_history_file(histfile)
 			if cmd == 'exit':
 				done = 1
