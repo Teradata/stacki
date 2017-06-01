@@ -259,12 +259,12 @@ class BoxArgumentProcessor:
 
 		pallets = []
 
-		rows = self.db.execute("""select r.name, r.version, r.rel,
-			r.arch, b.os from
-			rolls r, boxes b, stacks s where b.name = '%s' and
-			b.id = s.box and s.roll = r.id""" % box)
+		rows = self.db.select("""r.name, r.version, r.rel,
+			r.arch, o.name from rolls r, boxes b,
+			stacks s, oses o where b.name = '%s' and
+			b.id = s.box and s.roll = r.id and b.os=o.id""" % box)
 
-		for name, version, rel, arch, osname in self.db.fetchall():
+		for name, version, rel, arch, osname in rows:
 			pallets.append((name, version, rel, arch, osname))
 
 		return pallets
