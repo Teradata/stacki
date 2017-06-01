@@ -221,7 +221,10 @@ def process_data(page, btn_value, result):
 		else:
 			page = page - 1
 	elif btn_value == 'cancel':
-		page = 10
+		if page == 5:
+			page = 6
+		else:
+			page = 10
 	elif btn_value == 'ok':
 		page = page
 	else:
@@ -232,9 +235,15 @@ def process_data(page, btn_value, result):
 		#network
 		elif page == 2:
 			fqhn, eth, ip, subnet, gateway, dns = result
+
+			#check the FQDN for appliance names
 			validated, message, title = \
-				data.validateNetwork((fqhn, eth, ip, subnet, \
-					gateway, dns), config_net)
+				data.validateDomain(fqhn)
+			if validated:
+				#check for valid network config
+				validated, message, title = \
+					data.validateNetwork((fqhn, eth, ip, subnet, \
+						gateway, dns), config_net)
 		#password
 		elif page == 3:
 			pw1, pw2 = result

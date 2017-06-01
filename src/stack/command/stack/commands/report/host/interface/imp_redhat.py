@@ -6,6 +6,7 @@
 import os
 import sys
 import re
+import shlex
 import stack.commands
 
 class Implementation(stack.commands.Implementation):

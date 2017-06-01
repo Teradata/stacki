@@ -1,8 +1,8 @@
 #! /opt/stack/bin/python
 #
 # @SI_Copyright@
-#				stacki.com
-#				   v3.3
+#                               stacki.com
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -93,7 +93,6 @@
 # @Copyright@
 
 from __future__ import print_function
-from builtins import input
 import warnings
 warnings.filterwarnings("ignore")
 

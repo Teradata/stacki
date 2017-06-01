@@ -1,0 +1,4 @@
+NAME,SLOT,RAID LEVEL,ARRAY ID,OPTIONS
+global,0,1,1,
+,1,1,1,
+,*,0,*,

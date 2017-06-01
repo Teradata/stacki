@@ -1,0 +1,1419 @@
+diff -aur ../anaconda-13.21.254/loader/init.c anaconda-13.21.254/loader/init.c
+--- ../anaconda-13.21.254/loader/init.c	2015-02-03 06:11:57.000000000 -0800
++++ anaconda-13.21.254/loader/init.c	2017-04-24 12:20:07.753860975 -0700
+@@ -370,6 +370,25 @@
+ 
+ }
+ 
++#ifdef  STACKI
++static int dontReboot(void) {
++	int fd;
++	int len;
++	char buf[1024];
++
++	/* look through /proc/cmdline for special options */
++	if ((fd = open("/proc/cmdline", O_RDONLY,0)) > 0) {
++		len = read(fd, buf, sizeof(buf) - 1);
++		close(fd);
++
++		if (len > 0 && strstr(buf, "stack-debug")) {
++			return 1;
++		}
++	}
++	return 0;
++}
++#endif
++
+ static int getInitPid(void) {
+     int fd = 0, pid = -1, ret;
+     char * buf = calloc(1, 10);
+@@ -767,8 +786,13 @@
+      * room for more logs, driver disks, etc.
+      */
+     if (totalMemory() < MIN_TMPFS_RAM) {
++#ifdef	STACKI
++        if (mount("none", "/tmp", "tmpfs", 0, "size=500m"))
++            fatal_error(1);
++#else
+         if (mount("none", "/tmp", "tmpfs", 0, "size=250m"))
+             fatal_error(1);
++#endif
+     } else {
+         if (mount("none", "/tmp", "tmpfs", 0, "size=50%"))
+             fatal_error(1);
+@@ -874,6 +898,13 @@
+         }
+     }
+ 
++#ifdef  STACKI
++    /*
++     * ignore child processes that throw error stati when
++     * they terminate
++     */
++    shutdown_method = REBOOT;
++#else
+     if (!WIFEXITED(waitStatus) ||
+         (WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus))) {
+ 
+@@ -916,6 +947,13 @@
+     } else {
+         shutdown_method = REBOOT;
+     }
++#endif
++
++#ifdef  STACKI
++    while(dontReboot()) {
++            sleep(10);
++    }
++#endif
+ 
+     shutDown(doKill, shutdown_method);
+ 
+diff -aur ../anaconda-13.21.254/loader/kickstart.c anaconda-13.21.254/loader/kickstart.c
+--- ../anaconda-13.21.254/loader/kickstart.c	2015-12-14 11:42:49.000000000 -0800
++++ anaconda-13.21.254/loader/kickstart.c	2017-04-24 12:20:07.753860975 -0700
+@@ -57,6 +57,10 @@
+ /* boot flags */
+ extern uint64_t flags;
+ 
++#ifdef  STACKI
++extern void writeInterfacesFile(struct loaderData_s *);
++#endif
++
+ struct ksCommandNames {
+     int code;
+     char * name;
+@@ -186,6 +190,13 @@
+         } else if (*start == '%') {
+             /* assumed - anything starting with %something is a section */
+             inSection = 1;
++#ifdef  STACKI
++        } else if (!*start || *start == '<') {
++            /* do nothing */
++            /* this makes anaconda ignore our XML statements in the */
++            /* kickstart file */
++            ;
++#endif
+         } else if  (*chptr == '\\') {
+             /* JKFIXME: this should be handled better, but at least we 
+              * won't segfault now */
+@@ -322,7 +333,28 @@
+       3 - kickstart file named path not there
+ */
+ int getKickstartFromBlockDevice(char *device, char *path) {
++#ifdef	STACKI
++	int	rc;
++
++	rc = getFileFromBlockDevice(device, path, "/tmp/ks.cfg");
++
++	/*
++	 * make sure /mnt/cdrom is the mount point for the Stacki bits
++	 */
++	if (!rc) {
++		logMessage(INFO,
++			"STACKI:getKickstartFromBlockDevice:trying to mount device %s", device);
++
++		if (doPwMount(device, "/mnt/cdrom", "iso9660", "ro", NULL)) {
++			logMessage(ERROR,
++				"STACKI:start_httpd:doPwMount failed\n");
++		}
++	}
++
++	return(rc);
++#else
+     return getFileFromBlockDevice(device, path, "/tmp/ks.cfg");
++#endif
+ }
+ 
+ static char *newKickstartLocation(const char *origLocation) {
+@@ -394,7 +426,17 @@
+ 
+     while (rc != 0) {
+         if (!strncmp(c, "ks", 2)) {
++#ifdef  STACKI
++            /*
++             * make the default kickstart method the URL method
++             */
++            rc = kickstartFromUrl("", loaderData);
++            if (rc) {
++                return;
++            }
++#else
+             rc = kickstartFromNfs(NULL, loaderData);
++#endif
+             loaderData->ksFile = strdup("/tmp/ks.cfg");
+         } else if (!strncmp(c, "http", 4) || !strncmp(c, "ftp://", 6)) {
+             rc = kickstartFromUrl(c, loaderData);
+@@ -408,12 +450,34 @@
+         } else if (!strncmp(c, "hd:", 3)) {
+             rc = kickstartFromHD(c);
+             loaderData->ksFile = strdup("/tmp/ks.cfg");
++#ifdef  STACKI
++        {
++            /*
++             * bring the network up, even if it a hard disk based install
++             */
++            iface_t iface;
++
++            iface_init_iface_t(&iface);
++            kickstartNetworkUp(loaderData, &iface);
++	}
++#endif
+         } else if (!strncmp(c, "bd:", 3)) {
+             rc = kickstartFromBD(c);
+             loaderData->ksFile = strdup("/tmp/ks.cfg");
+         } else if (!strncmp(c, "cdrom", 5)) {
+             rc = kickstartFromCD(c);
+             loaderData->ksFile = strdup("/tmp/ks.cfg");
++#ifdef  STACKI
++        {
++            /*
++             * bring the network up, even if it a CD-based install
++             */
++            iface_t iface;
++
++            iface_init_iface_t(&iface);
++            kickstartNetworkUp(loaderData, &iface);
++	}
++#endif
+         } else if (!strncmp(c, "file:", 5)) {
+             loaderData->ksFile = c+5;
+             break;
+@@ -440,6 +504,13 @@
+         }
+     }
+ 
++#ifdef  STACKI
++    /*
++     * if we get a kickstart file, try to write the '/tmp/interfaces' file
++     */
++    writeInterfacesFile(loaderData);
++#endif
++
+     flags |= LOADER_FLAGS_KICKSTART;
+     return;
+ }
+diff -aur ../anaconda-13.21.254/loader/loader.c anaconda-13.21.254/loader/loader.c
+--- ../anaconda-13.21.254/loader/loader.c	2016-01-21 06:25:47.000000000 -0800
++++ anaconda-13.21.254/loader/loader.c	2017-04-24 12:20:07.753860975 -0700
+@@ -1073,6 +1073,33 @@
+         }
+         else if (!strcasecmp(argv[i], "ks") || !strncasecmp(argv[i], "ks=", 3))
+             loaderData->ksFile = strdup(argv[i]);
++#ifdef STACKI
++        else if (!strncasecmp(argv[i], "nextserver=", 11)) {
++            loaderData->nextServer = strdup(argv[i]+11);
++        }
++        else if (!strncasecmp(argv[i], "ekv", 3)) {
++            loaderData->ekv = 1;
++        }
++        else if (!strncasecmp(argv[i], "build", 5)) {
++            loaderData->server = 1;
++        }
++        else if (!strncasecmp(argv[i], "nowatchdog", 10)) {
++            loaderData->nowatchdog = 1;
++        }
++        else if (!strncasecmp(argv[i], "mac=", 4)) {
++            loaderData->mac = strdup(argv[i]+4);
++        }
++        else if (!strncasecmp(argv[i], "central=", 8)) {
++            char    *p;
++            char    *cgi = "install/sbin/profile.cgi";
++
++            p = (char*) malloc(strlen(argv[i]) + strlen(cgi) + 12);
++
++            sprintf(p, "ks=http://%s/%s", argv[i]+8, cgi);
++            loaderData->ksFile = p;
++            logMessage(INFO, "STACKI:central:server is %s", loaderData->ksFile);
++        }
++#endif
+         else if (!strncasecmp(argv[i], "display=", 8))
+             setenv("DISPLAY", argv[i] + 8, 1);
+         else if ((!strncasecmp(argv[i], "lang=", 5)) && 
+@@ -1234,6 +1261,30 @@
+         }
+     }
+ 
++#ifdef STACKI 
++    /*
++     * Do this only for the frontend, since this confuses the compute
++     * nodes.  Use the build argument (loaderData->server) for this.
++     *
++     * if 'ksdevice=' isn't specified on the command line, then
++     * default the kickstart device to eth1
++     *  
++     * on frontend installs, this will bypass an anaconda screen that
++     * asks the user to choose which network interface should be
++     * used for the installation. 
++     *      
++     * if the user wishes to use a different interface, they just need
++     * to specify 'ksdevice=ethx' where 'ethx' is their interface of
++     * choice.
++     */     
++    if (loaderData->server) {
++    	if (loaderData->netDev_set != 1) {
++        	loaderData->netDev = strdup("eth1");
++        	loaderData->netDev_set = 1;
++    	}
++    }
++#endif 
++
+     readNetInfo(&loaderData);
+ 
+     /* NULL terminates the array of extra args */
+@@ -1678,7 +1729,12 @@
+ 
+                 /* populate netDev based on any kickstart data */
+                 setupIfaceStruct(&iface, loaderData);
++#ifdef STACKI
++                rc = readNetConfig(devName, &iface, loaderData->netCls,
++                    loaderData->method, loaderData->server);
++#else
+                 rc = readNetConfig(devName, &iface, loaderData->netCls, loaderData->method);
++#endif
+ 
+                 /* set the hostname if we have that */
+                 if (loaderData->hostname) {
+@@ -1982,6 +2038,76 @@
+     free(modules);
+ }
+ 
++#ifdef STACKI
++/*
++ * Watchdog timer code
++ */
++static int watchdog_quantum	= 30;	/* seconds */
++static int watchdog_trigger	= 4;	/* 120 seconds */
++static int watchdog_ticks   	= 0;
++static int watchdog_enabled 	= 0;
++
++static void
++watchdog_handler(int sig)
++{
++	if ( watchdog_enabled ) {
++		if ( ++watchdog_ticks > watchdog_trigger ) {
++			exit(0);	/* reboot the machine */
++		} else {
++			alarm(watchdog_quantum);		
++		}
++	}
++} /* watchdog_handler */
++
++void
++watchdog_reset()
++{
++	watchdog_ticks = 0;
++}
++
++void
++watchdog_off()
++{
++	watchdog_enabled = 0;
++	watchdog_ticks   = 0;
++
++	/*
++	 * cancel any pending alarm
++	 */
++	alarm(0);
++} /* watchdog_off */
++
++
++void
++watchdog_on(short int is_server)
++{
++	struct sigaction	sig;
++
++	sig.sa_handler = watchdog_handler;
++	sig.sa_flags   = SA_RESTART;
++	sigemptyset(&sig.sa_mask);
++
++	if ( sigaction(SIGALRM, &sig, NULL) < 0 ) {
++		fprintf(stderr, "main:sigaction:failed:SIGARLM\n");
++	}
++
++	if (is_server) {
++		/*
++		 * double the client value. on frontend installs, it gives
++		 * the user a longer amount of time to get through the
++		 * anaconda network screens. the screens are only displayed
++		 * if the frontend doesn't get a DHCP response for its
++		 * public network.
++		 */
++		watchdog_trigger = 8;
++	}
++
++	watchdog_ticks   = 0;
++	watchdog_enabled = 1;
++	alarm(watchdog_quantum);		
++} /* watchdog_on */
++#endif
++
+ int main(int argc, char ** argv) {
+     int i, rc, ret, pid, status;
+     int isDevelMode = 0;
+@@ -2333,7 +2459,24 @@
+         logMessage(INFO, "getting kickstart file");
+ 
+         if (!ksFile)
++#ifdef  STACKI
++        {
++            /*
++             * If we can't get the kickstart file still let the dialogs
++             * pop up (good for debuging) but reboot the machine and try
++             * again using the watchdog.
++             */
++            if (loaderData.nowatchdog == 0) {
++                watchdog_on(loaderData.server);
++            }
++#endif
+             getKickstartFile(&loaderData);
++#ifdef STACKI
++            if (loaderData.nowatchdog == 0) {
++                watchdog_off();
++            }
++        }
++#endif
+         if (FL_KICKSTART(flags) && 
+             (ksReadCommands((ksFile)?ksFile:loaderData.ksFile)!=LOADER_ERROR)) {
+             markFirstKsNetworkCommand();
+@@ -2356,6 +2499,9 @@
+     migrate_runtime_directory("/usr");
+     migrate_runtime_directory("/lib");
+     migrate_runtime_directory("/lib64");
++#ifdef STACKI
++    migrate_runtime_directory("/opt");
++#endif
+     ret = symlink("/mnt/runtime/etc/selinux", "/etc/selinux");
+     copyDirectory("/mnt/runtime/etc","/etc", NULL, copyErrorFn);
+     copyDirectory("/mnt/runtime/var","/var", NULL, copyErrorFn);
+@@ -2424,12 +2570,22 @@
+     path = getenv("PATH");
+     while (path && path[0]) {
+         int n = strcspn(path, ":");
++
++#ifdef	STACKI
++        char *binpath;
++	/*
++	 * XXX - may be able to manipulate this with the PATH environment
++	 * varible. hard code for now.
++	 */
++	binpath = strdup("/usr/bin/anaconda");
++#else
+         char c, *binpath;
+ 
+         c = path[n];
+         path[n] = '\0';
+         checked_asprintf(&binpath, "%s/anaconda", path);
+         path[n] = c;
++#endif
+ 
+         if (!access(binpath, X_OK)) {
+             *argptr++ = strdupa(binpath);
+diff -aur ../anaconda-13.21.254/loader/loader.h anaconda-13.21.254/loader/loader.h
+--- ../anaconda-13.21.254/loader/loader.h	2015-02-03 06:11:57.000000000 -0800
++++ anaconda-13.21.254/loader/loader.h	2017-04-24 12:20:07.753860975 -0700
+@@ -152,6 +152,13 @@
+     char * bonding_opts;
+     int ipinfo_set;
+     char * ksFile;
++#ifdef STACKI
++    short int ekv;
++    short int server;
++    short int nowatchdog;
++    char * mac;
++    char * nextServer;
++#endif
+     int method;
+     char * ddsrc;
+     void * stage2Data;
+diff -aur ../anaconda-13.21.254/loader/Makefile.am anaconda-13.21.254/loader/Makefile.am
+--- ../anaconda-13.21.254/loader/Makefile.am	2015-02-03 06:11:57.000000000 -0800
++++ anaconda-13.21.254/loader/Makefile.am	2017-04-24 12:20:07.753860975 -0700
+@@ -38,6 +38,9 @@
+ endif
+ 
+ COMMON_CFLAGS      = -DUSE_LOGDEV -DVERSION='"$(PACKAGE_VERSION)"'
++# STACKI
++COMMON_CFLAGS      += -DSTACKI
++# end
+ 
+ loader_CFLAGS      = $(COMMON_CFLAGS) $(GLIB_CFLAGS) $(LIBNM_GLIB_CFLAGS) \
+                      $(LIBCURL_CFLAGS) $(IPV6_CFLAGS) $(LIBARCHIVE_CFLAGS) \
+diff -aur ../anaconda-13.21.254/loader/net.c anaconda-13.21.254/loader/net.c
+--- ../anaconda-13.21.254/loader/net.c	2016-03-29 11:29:16.000000000 -0700
++++ anaconda-13.21.254/loader/net.c	2017-04-24 12:20:07.753860975 -0700
+@@ -441,8 +441,14 @@
+     return;
+ }
+ 
++#ifdef STACKI
+ int readNetConfig(char * device, iface_t * iface,
+-                  char * dhcpclass, int methodNum) {
++                  char * dhcpclass, int methodNum, short int isServer)
++#else
++int readNetConfig(char * device, iface_t * iface,
++                  char * dhcpclass, int methodNum)
++#endif
++{
+     int err;
+     int ret;
+     int i = 0;
+@@ -493,6 +499,18 @@
+             post_link_sleep > iface->dhcptimeout ? post_link_sleep : iface->dhcptimeout);
+         newtPopWindow();
+ 
++#ifdef	STACKI
++        if ((isServer) && (i > 0)) {
++            /*
++             * if this is a frontend install, just ignore the error.
++             * this is for the case when we are doing a frontend install and
++             * there is no connectivity to an outside network.
++             */
++
++            i = 0;
++        }
++#endif
++
+         if (i > 0) {
+             if (FL_CMDLINE(flags)) {
+                 fprintf(stderr, _("There was an error configuring your network "
+@@ -2119,6 +2137,33 @@
+         }
+     }
+ 
++#ifdef STACKI
++    /*
++     * If you haven't chosen a ksdevice but did give the mac address
++     * of the device you want to use, search for it here.
++     */
++    if (!loaderData->netDev && loaderData->mac) {
++	char * mac;
++
++	mac = iface_mac2str(devs[i]->device);
++	if (mac && !strcasecmp(mac, loaderData->mac)) {
++		logMessage(INFO,
++			"chooseNetworkInterface: matched MAC %s, using %s",
++			mac, devs[i]->device);
++
++		foundDev = 1;
++		free(loaderData->netDev);
++		loaderData->netDev = devs[i]->device;
++		loaderData->netDev_set = 1;
++	}
++    } else {
++	/*
++	 * try sending a DHCP message on all network devices, the first one
++	 * that answers, we'll use.
++	 */
++    }
++#endif
++
+     if (ksMacAddr)
+         free(ksMacAddr);
+ 
+@@ -2277,6 +2322,14 @@
+     /* JKFIXME: should display link status */
+     deviceNum = 0;
+     ask = 1;
++
++#ifdef	STACKI
++    /*
++     * skip the next while loop
++     */
++    ask = 0;
++#endif
++
+     while (ask) {
+         rc = newtWinMenu(_("Networking Device"),
+                          _("You have multiple network devices on this system. "
+@@ -2349,6 +2402,44 @@
+         }
+     }
+ 
++#ifdef	STACKI
++    deviceNum = -1;
++    for (i = 0; devs[i]; i++) {
++	int	err;
++	iface_t	iface;
++
++	if (!devs[i]->device) {
++		continue;
++	}
++
++	iface_init_iface_t(&iface);
++
++	strcpy(iface.device, devs[i]->device);
++	iface.ipv4method = IPV4_DHCP_METHOD;
++
++	if ((err = writeEnabledNetInfo(&iface)) != 0) {
++		logMessage(ERROR, "STACKI:failed to write %s data for %s (%d)",
++			SYSCONFIG_PATH, devs[i]->device, err);
++		continue;
++        }
++
++	if (wait_for_iface_activation(devs[i]->device, iface.dhcptimeout)
++			== 0) {
++		logMessage(INFO,
++			"STACKI:chooseNetworkInterface:using:device (%s)",
++			devs[i]->device);
++
++		deviceNum = i;
++		break;
++	}
++    }
++
++    if (deviceNum == -1) {
++	logMessage(CRITICAL, "STACKI:chooseNetworkInterface:couldn't find a network device that is connected to a frontend");
++	return LOADER_ERROR;
++    }
++#endif
++
+     loaderData->netDev = devices[deviceNum];
+     return LOADER_OK;
+ }
+@@ -2475,8 +2566,13 @@
+         }
+ 
+         setupIfaceStruct(iface, loaderData);
++#ifdef STACKI
++        rc = readNetConfig(loaderData->netDev, iface, loaderData->netCls,
++                           loaderData->method, loaderData->server);
++#else
+         rc = readNetConfig(loaderData->netDev, iface, loaderData->netCls,
+                            loaderData->method);
++#endif
+ 
+         if (rc == LOADER_ERROR) {
+             logMessage(ERROR, "unable to activate device %s", devicename);
+@@ -2631,7 +2727,13 @@
+     if (device == NULL) {
+         logMessage(ERROR, "%s (%d): network device %s not found",
+                    __func__, __LINE__, ifname);
++#ifndef	STACKI
++        /*
++         * this is a bug -- the g_object_unref() was called just a few lines
++         * above this.
++         */
+         g_object_unref(client);
++#endif
+     }
+ 
+     return 3;
+diff -aur ../anaconda-13.21.254/loader/net.h anaconda-13.21.254/loader/net.h
+--- ../anaconda-13.21.254/loader/net.h	2016-01-07 10:33:48.000000000 -0800
++++ anaconda-13.21.254/loader/net.h	2017-04-24 12:20:07.753860975 -0700
+@@ -59,8 +59,13 @@
+ 
+ typedef int int32;
+ 
++#ifdef STACKI
++int readNetConfig(char * device, iface_t * iface,
++                  char * dhcpclass, int methodNum, short int);
++#else
+ int readNetConfig(char * device, iface_t * iface,
+                   char * dhcpclass, int methodNum);
++#endif
+ int configureTCPIP(char * device, iface_t * iface, struct netconfopts * opts,
+                    int methodNum);
+ int manualNetConfig(char * device, iface_t * iface,
+diff -aur ../anaconda-13.21.254/loader/urlinstall.c anaconda-13.21.254/loader/urlinstall.c
+--- ../anaconda-13.21.254/loader/urlinstall.c	2015-02-03 06:11:57.000000000 -0800
++++ anaconda-13.21.254/loader/urlinstall.c	2017-04-24 12:20:07.753860975 -0700
+@@ -31,6 +31,20 @@
+ #include <errno.h>
+ #include <glib.h>
+ 
++#ifdef  STACKI
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <signal.h>
++#include <time.h>
++#include "../isys/isys.h"
++#include "../isys/imount.h"
++
++#include <glib.h>
++#include <NetworkManager.h>
++#include <nm-client.h>
++#endif
++
+ #include "../isys/iface.h"
+ 
+ #include "copy.h"
+@@ -52,7 +66,21 @@
+ 
+ char **extraHeaders = NULL;
+ 
+-static char **headers() {
++#ifdef	STACKI
++static void writeAvalancheInfo(char *, char *);
++static int num_cpus();
++static char *get_driver_name(char *);
++#ifdef	LATER
++static void dump_dhcp4_config(NMDHCP4Config *);
++#endif
++#endif
++
++#ifdef	STACKI
++static char **headers(struct loaderData_s *loaderData)
++#else
++static char **headers()
++#endif
++{
+     int len = 2;
+ 
+     /* The list of HTTP headers is unlikely to change, unless a new ethernet
+@@ -81,14 +109,42 @@
+             dev = devices[i]->device;
+             mac = iface_mac2str(dev);
+ 
++#ifdef	STACKI
++            char *drivername;
++
++            drivername = get_driver_name(dev);
++
++            logMessage(INFO, "STACKI:headers: mac (%s)", mac);
++            logMessage(INFO, "STACKI:headers: drivername (%s)", drivername);
++#endif
++
+             if (mac) {
+                 extraHeaders = realloc(extraHeaders, (len+1)*sizeof(char *));
++#ifdef  STACKI
++                /* A hint as to our primary interface. */
++                if (!strcmp(dev, loaderData->netDev)) {
++			checked_asprintf(&extraHeaders[len],
++				"X-RHN-Provisioning-MAC-%d: %s %s %s ks",
++                                i, dev, mac, drivername);
++                } else {
++			checked_asprintf(&extraHeaders[len],
++				"X-RHN-Provisioning-MAC-%d: %s %s %s",
++                                i, dev, mac, drivername);
++                }
++
++#else
+                 checked_asprintf(&extraHeaders[len], "X-RHN-Provisioning-MAC-%d: %s %s",
+                                  i, dev, mac);
++#endif
+ 
+                 len++;
+                 free(mac);
+             }
++#ifdef	STACKI
++            if (drivername) {
++                free(drivername);
++            }
++#endif
+         }
+     }
+ 
+@@ -133,10 +189,35 @@
+     char **ehdrs = NULL;
+     int status;
+ 
++#ifdef	STACKI
++    if (!strncmp(ui->url, "http", 4))
++        ehdrs = headers(loaderData);
++#else
+     if (!strncmp(ui->url, "http", 4))
+         ehdrs = headers();
++#endif
+ 
++#ifdef	STACKI
++	/*
++	 * try harder to get the images. since we start lighttpd right before
++	 * we call this function, lighttpd may not be ready yet.
++	 */
++	{
++		int	i;
++
++		for (i = 0 ; i < 10 ; ++i) {
++			status = urlinstTransfer(loaderData, ui, ehdrs, dest);
++
++			if (status == 0) {
++				break;
++			}
++
++			usleep(200000);
++		}
++	}
++#else
+     status = urlinstTransfer(loaderData, ui, ehdrs, dest);
++#endif
+     if (status) {
+         if (!silentErrors) {
+             newtWinMessage(_("Error"), _("OK"),
+@@ -231,6 +312,32 @@
+     return 0;
+ }
+ 
++#ifdef STACKI
++void
++start_httpd()
++{
++	/*
++	 * the first two NULLs are place holders for the 'nextServer' info
++	 */
++	char	*args[] = { "/opt/lighttpd/sbin/lighttpd", 
++				"-f", "/opt/lighttpd/conf/lighttpd.conf",
++				"-D", NULL };
++	int	pid;
++
++	/*
++	 * start the service
++	 */
++	logMessage(INFO, "STACKI:start_httpd:starting lighttpd");
++
++	pid = fork();
++	if (pid != 0) {
++		execv(args[0], args);
++		logMessage(ERROR, "STACKI:start_httpd:lighttpd failed\n");
++	}
++}
++#endif
++
++
+ char *mountUrlImage(struct installMethod *method, char *location,
+                     struct loaderData_s *loaderData) {
+     urlInstallData *stage2Data = (urlInstallData *) loaderData->stage2Data;
+@@ -295,6 +402,16 @@
+             }
+ 
+             case URL_STAGE_FETCH: {
++#ifdef  STACKI
++                /*
++                 * before we start the web server, make sure /tmp/stack.conf
++                 * exists
++                 */
++                if (access("/tmp/stack.conf", F_OK) != 0) {
++                    writeAvalancheInfo(NULL, NULL);	
++                }
++                start_httpd();
++#endif
+                 if (loadUrlImages(loaderData, &ui)) {
+                     stage = URL_STAGE_MAIN;
+ 
+@@ -318,21 +435,290 @@
+     return ui.url;
+ }
+ 
++#ifdef	STACKI
++char *
++get_driver_name(char *dev)
++{
++	FILE	*file;
++	int	retval = 1;
++	char	field1[80];
++	char	device[80];
++	char	module[80];
++
++	if ((file = fopen("/tmp/modprobe.conf", "r")) == NULL) {
++		return(strdup("none"));
++	}
++
++	while (retval != EOF) {
++		memset(field1, 0, sizeof(field1));
++		memset(device, 0, sizeof(device));
++		memset(module, 0, sizeof(module));
++
++		retval = fscanf(file, "%s", field1);
++		if ((retval == 1) && (strcmp(field1, "alias") == 0)) {
++
++			retval = fscanf(file, "%s %s", device, module);
++			if ((retval == 2) && (strcmp(device, dev) == 0)) {
++				fclose(file);
++				return(strdup(module));
++			}
++		}
++	}
++
++	fclose(file);
++	return(strdup("none"));
++}
++
++
++/*
++ * the file /tmp/interfaces will help us on frontend installs when
++ * we are associating MAC addresses with IP address and with driver
++ * names
++ *
++ * XXX: this code segment is copy of the code in the function below, so
++ * if in future releases of the anaconda installer if the loop in the
++ * code segment below changes, then this function will have to be updated
++ * too.
++ */
++
++void
++writeInterfacesFile(struct loaderData_s *loaderData)
++{
++	struct device	**devices;
++	int		i, fd;
++	char		*dev, *mac, tmpstr[128], *drivername;
++
++	logMessage(INFO, "STACKI:writeInterfacesFile");
++
++	if ((fd = open("/tmp/interfaces",
++			O_WRONLY|O_CREAT|O_TRUNC, 0666)) < 0) {
++		logMessage(ERROR, "STACKI:writeInterfacesFile:failed to open '/tmp/interfaces'");
++		return;
++	}
++
++	devices = getDevices(DEVICE_NETWORK);
++	for (i = 0; devices && devices[i]; i++) {
++		dev = devices[i]->device;
++		mac = iface_mac2str(dev);
++
++		drivername = get_driver_name(dev);
++
++		if (mac) {
++                        /* A hint as to our primary interface. */
++                        if (!strcmp(dev, loaderData->netDev)) {
++                                snprintf(tmpstr, sizeof(tmpstr),
++                                "X-RHN-Provisioning-MAC-%d: %s %s %s ks\r\n",
++                                i, dev, mac, drivername);
++                        } else { 
++                                snprintf(tmpstr, sizeof(tmpstr),
++                                "X-RHN-Provisioning-MAC-%d: %s %s %s\r\n",
++                                i, dev, mac, drivername);
++                        } 
++
++			if (write(fd, tmpstr, strlen(tmpstr)) < 0) {
++				logMessage(ERROR,
++				    "STACKI:writeInterfacesFile::write failed");
++			}
++
++			free(mac);
++		}
++
++		free(drivername);
++	}
++
++	close(fd);
++	return;
++}
++#endif
++
++#ifdef	STACKI
++char	*trackers = NULL;
++char	*pkgservers = NULL;
++#endif
++
+ int getFileFromUrl(char * url, char * dest, 
+                    struct loaderData_s * loaderData) {
+     struct iurlinfo ui;
+     char **ehdrs = NULL;
+     int rc;
+     iface_t iface;
++#ifdef  STACKI
++    NMClient *client = NULL;
++    NMState state;
++    const GPtrArray *devices;
++    int i;
++#endif
+ 
+     iface_init_iface_t(&iface);
+ 
++#ifdef  STACKI
++    if (kickstartNetworkUp(loaderData, &iface)) {
++        logMessage(ERROR, "STACKI:getFileFromUrl:unable to bring up network");
++        return(1);
++    }
++
++    /*
++     * get the 'next-server' value from the dhcp response
++     */
++    g_type_init();
++
++    if ((client = nm_client_new()) == NULL) {
++        logMessage(ERROR, "STACKI:getFileFromUrl:nm_client_new() failed");
++        return(1);
++    }
++
++    if ((state = nm_client_get_state(client)) != NM_STATE_CONNECTED) {
++        logMessage(ERROR, "STACKI:getFileFromUrl:nm_client_get_state() failed");
++        logMessage(INFO, "STACKI:getFileFromUrl:g_object_unref:client 0x%lx",
++            (unsigned long int)client);
++        g_object_unref(client);
++        return(1);
++    }
++
++    devices = nm_client_get_devices(client);
++    for (i = 0; i < devices->len; i++) {
++        NMDevice *candidate = g_ptr_array_index(devices, i);
++        const char *devname = nm_device_get_iface(candidate);
++        NMDHCP4Config *dhcp = NULL;
++        const char *server_name = NULL;
++        char nextserver[INET_ADDRSTRLEN+1];
++
++        if (nm_device_get_state(candidate) != NM_DEVICE_STATE_ACTIVATED)
++            continue;
++
++        if (strcmp(iface.device, devname))
++            continue;
++
++        dhcp = nm_device_get_dhcp4_config(candidate);
++        if (!dhcp) {
++            logMessage(ERROR, "no boot options received by DHCP");
++            continue;
++        }
++
++        server_name = nm_dhcp4_config_get_one_option(dhcp, "server_name");
++        if (server_name) {
++        	strcpy(nextserver, server_name);
++		loaderData->nextServer = strdup(nextserver);
++	} else {
++        	loaderData->nextServer = NULL;
++	}
++
++        /*
++         * If no server_name use the gateway.
++         */
++        if (!loaderData->nextServer) {
++            const char *routers = NULL;
++            char gateway[INET_ADDRSTRLEN+1];
++
++            routers = nm_dhcp4_config_get_one_option(dhcp, "routers");
++            if (routers) {
++                strcpy(gateway, routers);
++                loaderData->nextServer = strdup(gateway);
++            }
++        }
++    }
++
++    logMessage(INFO, "STACKI:getFileFromUrl:g_object_unref:2:client 0x%lx",
++        (unsigned long int)client);
++    g_object_unref(client);
++
++    logMessage(INFO, "%s: nextServer %s",
++		"STACKI:getFileFromUrl", loaderData->nextServer);
++#else
+     if (kickstartNetworkUp(loaderData, &iface)) {
+         logMessage(ERROR, "unable to bring up network");
+         return 1;
+     }
++#endif
+ 
+     memset(&ui, 0, sizeof(ui));
++
++#ifdef	STACKI
++{
++	int	string_size;
++	int	ncpus;
++	char	np[16];
++	char	*arch;
++	char	*base;
++	char	*host;
++	char	*file;
++
++#if defined(__i386__)
++	arch = "i386";
++#elif defined(__x86_64__)
++	arch = "x86_64";
++#endif
++
++	if (!strlen(url)) {
++		base = strdup("install/sbin/profile.cgi");
++		host = strdup(loaderData->nextServer);
++	}
++	else {
++		char	*p, *q;
++
++		base = NULL;
++		host = NULL;
++
++		p = strstr(url, "//");
++		if (p != NULL) {
++			p += 2;
++
++			/*
++			 * 'base' is the file name
++			 */
++			base = strchr(p, '/');
++			if (base != NULL) {
++				base += 1;
++			}
++
++			/*
++		 	 * now get the host portion of the URL
++			 */
++			q = strchr(p, '/');
++			if (q != NULL) {
++				*q = '\0';
++				host = strdup(p);
++			}
++		}
++		
++		if (!base || !host) {
++			logMessage(ERROR,
++				"kickstartFromUrl:url (%s) not well formed.\n",
++				url);
++			return(1);
++		}
++	}
++
++	/*
++	 * seed random number generator
++	 * Used for nack backoff.
++	 */
++	srand(time(NULL));
++
++	ncpus = num_cpus();
++	sprintf(np, "%d", ncpus);
++
++	string_size = strlen("https://") + strlen(host) + strlen("/") +
++		strlen(base) + strlen("?os=redhat&arch=") + strlen(arch) +
++		strlen("&np=") + strlen(np) + 1;
++
++	if ((file = alloca(string_size)) == NULL) {
++		logMessage(ERROR, "kickstartFromUrl:alloca failed\n");
++		return(1);
++	}
++	memset(file, 0, string_size);
++
++	sprintf(file, "https://%s/%s?os=redhat&arch=%s&np=%s", host, base, arch, np);
++
++	logMessage(INFO, "ks location: %s", file);
++
++	ui.url = file;
++
++        if (!strncmp(ui.url, "http", 4)) {
++            ehdrs = headers(loaderData);
++        }
++    }
++#else
+     ui.url = url;
+ 
+     logMessage(INFO, "file location: %s", url);
+@@ -340,13 +726,55 @@
+     if (!strncmp(url, "http", 4)) {
+         ehdrs = headers();
+     }
++#endif
+ 
++#ifdef	STACKI
++    {
++	int retry = 0;
++
++	while (retry < 60) {
++		rc = urlinstTransfer(loaderData, &ui, ehdrs, dest);
++		if (rc) {
++			logMessage(WARNING, "STACKI:failed to retrieve %s", ui.url);
++			++retry;
++			sleep(1);
++		} else {
++			break;
++		}
++	}
++    }
++#else
+     rc = urlinstTransfer(loaderData, &ui, ehdrs, dest);
++#endif
++
+     if (rc) {
+         logMessage(ERROR, "failed to retrieve %s", ui.url);
+         return 1;
+     }
+ 
++#ifdef	STACKI
++    if (trackers == NULL) {
++	if (loaderData->nextServer != NULL) {
++		trackers = strdup(loaderData->nextServer);
++	} else {
++		trackers = strdup("127.0.0.1");
++	}
++    }
++
++    if (pkgservers == NULL) {
++	if (loaderData->nextServer != NULL) {
++		pkgservers = strdup(loaderData->nextServer);
++	} else {
++		pkgservers = strdup("127.0.0.1");
++	}
++    }
++
++    writeAvalancheInfo(trackers, pkgservers);
++
++    free(trackers);
++    free(pkgservers);
++#endif
++
+     return 0;
+ }
+ 
+@@ -420,4 +848,104 @@
+     logMessage(INFO, "results of url ks, url %s", url);
+ }
+ 
++#ifdef	STACKI
++static int
++num_cpus()
++{
++	FILE	*file;
++	int	cpus = 0;
++	char	str[128];
++
++	if ((file = fopen("/proc/cpuinfo", "r")) != NULL) {
++
++		while (fscanf(file, "%s", str) != EOF) {
++			if (strcmp(str, "processor") == 0) {
++				++cpus;
++			}
++		}
++
++		fclose(file);
++	}
++
++	/*
++	 * always return at least 1 CPU
++	 */
++	if (cpus == 0) {
++		cpus = 1;
++	}
++
++	return(cpus);
++}
++
++static void
++writeAvalancheInfo(char *trackers, char *pkgservers)
++{
++	int	fd;
++	char	str[512];
++
++	if ((fd = open("/tmp/stack.conf",
++					O_WRONLY|O_CREAT|O_TRUNC, 0666)) < 0) {
++		logMessage(ERROR, "STACKI:writeAvalancheInfo:failed to open '/tmp/stack.conf'");
++	}
++
++	/*
++	 * the next server (the ip address of the server that gave us a
++	 * kickstart file), is passed to lighttpd through a configuration file.
++	 * write that value into it.
++	 */
++	if (trackers != NULL) {
++		sprintf(str, "var.trackers = \"%s\"\n", trackers);
++	} else {
++		sprintf(str, "var.trackers = \"127.0.0.1\"\n");
++	}
++
++	if (write(fd, str, strlen(str)) < 0) {
++		logMessage(ERROR, "STACKI:writeAvalancheInfo:write failed");
++	}
++
++	if (pkgservers != NULL) {
++		sprintf(str, "var.pkgservers = \"%s\"\n", pkgservers);
++	} else {
++		sprintf(str, "var.pkgservers = \"127.0.0.1\"\n");
++	}
++
++	if (write(fd, str, strlen(str)) < 0) {
++		logMessage(ERROR, "STACKI:writeAvalancheInfo:write failed");
++	}
++
++	close(fd);
++}
++
++#ifdef	LATER
++/*
++ * for debugging NetworkManager DHCP responses
++ */
++static void
++print_one_dhcp4_option (gpointer key, gpointer data, gpointer user_data)
++{
++	const char *option = (const char *) key;
++	const char *value = (const char *) data;
++
++	g_print ("  %s:   %s\n", option, value);
++}
++
++static void
++dump_dhcp4_config (NMDHCP4Config *config)
++{
++	GHashTable *options = NULL;
++
++	if (!config) {
++		return;
++	}
++
++	g_print("STACKI:dump_dhcp4_config:DHCP4 Options:\n");
++
++	g_object_get(G_OBJECT (config), NM_DHCP4_CONFIG_OPTIONS, &options,
++		NULL);
++        g_hash_table_foreach(options, print_one_dhcp4_option, NULL);
++}
++#endif
++
++#endif
++
+ /* vim:set shiftwidth=4 softtabstop=4: */
+diff -aur ../anaconda-13.21.254/loader/urls.c anaconda-13.21.254/loader/urls.c
+--- ../anaconda-13.21.254/loader/urls.c	2015-02-03 06:11:57.000000000 -0800
++++ anaconda-13.21.254/loader/urls.c	2017-04-24 12:20:07.764866443 -0700
+@@ -120,6 +120,91 @@
+     return 1;
+ }
+ 
++#ifdef	STACKI
++extern char	*trackers;
++extern char	*pkgservers;
++static int	sleeptime = 0;
++
++static size_t
++returnedheaders(void *ptr, size_t size, size_t nmemb, void *userdata)
++{
++	char	*p, *q;
++
++	if ((p = strchr(ptr, ' ')) != NULL) {
++		*p = '\0';
++		++p;
++
++		/*
++		 * strip whitespace off the back of the string
++		 */
++		q = p + strlen(p) - 1;
++		while (isspace(*q)) {
++			if (q <= p) {
++				break;
++			}
++			*q = '\0';
++			--q;
++		}
++		
++		if (strcmp(ptr, "X-Avalanche-Trackers:") == 0) {
++			trackers = strdup(p);
++		} else if (strcmp(ptr, "X-Avalanche-Pkg-Servers:") == 0) {
++			pkgservers = strdup(p);
++		} else if (strcmp(ptr, "Retry-After:") == 0) {
++			sleeptime = atoi(p);
++		}
++	}
++
++	return(size*nmemb);
++}
++
++#define KS_RETRY_MAX 30
++#define KS_RETRY_MIN 5
++
++extern void	watchdog_on(short int);
++extern void	watchdog_off();
++
++void
++serverBusy(short int is_server)
++{
++	int	sleepmin = KS_RETRY_MIN;
++
++	/*
++	 * Don't let the watchdog fire if the kickstart server is
++	 * reporting busy
++	 */
++	watchdog_off();
++
++	if (sleeptime <= 0) {
++		/*
++		 * Backoff a random interval between KS_RETRY_MIN and
++		 * KS_RETRY_MAX
++		 */
++		sleeptime = sleepmin + ((KS_RETRY_MAX - sleepmin) *
++			(rand()/(float)RAND_MAX));
++	}
++
++	winStatus(44, 3, _("Server Busy"),
++		_("Retry for a kickstart file in %d seconds"), sleeptime, 0);
++
++	/*
++	 * this must be in a loop, as the alarm associated with the watchdog
++	 * timer is sending a signal which interrupts the sleep().
++	 */
++	while ((sleeptime = sleep(sleeptime)) != 0) {
++		;
++	}
++
++	newtPopWindow();
++
++	/*
++	 * Re-enable the watchdog
++	 */
++	watchdog_on(is_server);
++}
++
++#endif
++
+ int urlinstTransfer(struct loaderData_s *loaderData, struct iurlinfo *ui,
+                     char **extraHeaders, char *dest) {
+     struct progressCBdata *cb_data;
+@@ -146,6 +231,15 @@
+     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10);
+     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+ 
++#ifdef STACKI
++    /*
++     * make sure the request comes from a privileged port.
++     * we'll start at port 1 and then allow a scan up to port 1023
++     */
++    curl_easy_setopt(curl, CURLOPT_LOCALPORT, 1);
++    curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, 1023);
++#endif
++
+     /* If a proxy was provided, add the options for that now. */
+     if (loaderData->proxy && strcmp(loaderData->proxy, "")) {
+         curl_easy_setopt(curl, CURLOPT_PROXY, loaderData->proxy);
+@@ -189,8 +283,61 @@
+         curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, cb_data);
+     }
+ 
++#ifdef	STACKI
++    if (strncmp(ui->url, "https", 5) == 0) {
++        /*
++         * don't verify the authenticity of the peer's certificate
++         */
++        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
++
++        /*
++         * don't verify that the server cert is for the server it is known as
++         */
++        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
++
++        /*
++         * only parse the returned headers when we are trying to get a
++         * kickstart file (that is, we're using https).
++         */
++        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, returnedheaders);
++    }
++#endif
++
+     /* Finally, do the transfer. */
+     status = curl_easy_perform(curl);
++
++#ifdef	STACKI
++{
++	/*
++	* retry if the server told us it is busy
++	*/
++	int	done = 0;
++	int	tries = 0;
++
++	while (!done && status && (tries < 50)) {
++		long	errorcode;
++
++		if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE,
++				&errorcode) != CURLE_OK) {
++			done = 1;
++			continue;
++		}
++
++		logMessage(INFO, "STACKI: HTTP status code (%ld)", errorcode);
++
++		if (errorcode == 503) {
++			serverBusy(loaderData->server);
++
++			logMessage(INFO, "transferring %s", ui->url);
++			status = curl_easy_perform(curl);
++			++tries;
++		} else {
++			done = 1;
++			continue;
++		}
++	}
++}
++#endif
+     if (status)
+         logMessage(ERROR, "Error downloading %s: %s", ui->url, curl_easy_strerror(status));
+ 

@@ -77,6 +77,7 @@
 		<to>time-server</to>
 		<to>install</to>
 		<to>pxe</to>
+		<to>pxeboot</to>
 		<to>insert-rolls</to>
 		<to>networking-server</to>
 		<to>dhcp-server</to>
@@ -92,6 +93,7 @@
 		<to>database-schema</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
+		<to>node-certs</to>
 		<to>storage-controller-server</to>
 	</edge>
 

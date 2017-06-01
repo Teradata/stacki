@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#				stacki.com
-#				   v3.3
+#                               stacki.com
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -356,6 +356,11 @@ class RollArgumentProcessor:
 			rel = params['release']
 		else:
 			rel = '%' # SQL wildcard
+
+		if params.has_key('arch'):
+			arch = params['arch']
+		else:
+			arch = "%" # SQL wildcard
 	
 		list = []
 		if not args:
@@ -364,7 +369,8 @@ class RollArgumentProcessor:
 			rows = self.db.execute("""select distinct name,version,rel
 				from rolls where name like binary '%s' and 
 				version like binary '%s' and 
-				rel like binary '%s' """ % (arg, version, rel))
+				rel like binary '%s' and
+				arch like binary '%s' """ % (arg, version, rel, arch))
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
@@ -1061,7 +1067,10 @@ class DocStringHandler(handler.ContentHandler,
 
 		if self.section['description']:
 			s = s + '### Description\n\n'
-			s = s + self.section['description'].strip() + '\n\n'
+			m = self.section['description'].split('\n')
+			m = map(string.strip, m)
+			desc = '\n'.join(m)
+			s = s + desc + '\n\n'
 
 		if self.section['reqarg'] or self.section['optarg']:
 			s = s + '### Arguments\n\n'

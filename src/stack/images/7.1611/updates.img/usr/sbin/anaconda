@@ -75,7 +75,7 @@ if 'boss' in args:
 	# Check to see if there's a user-specified
 	# site.attrs / rolls.xml on the kernel command line
 	for arg in args:
-		match = re.search('^stacki.(attrs|pallet)=(.+)$', arg)
+		match = re.search('^stacki.(attrfile|palletfile)=(.+)$', arg)
 		if not match:
 			continue
 		uri = match.group(2)
@@ -86,10 +86,10 @@ if 'boss' in args:
 			# non-http uri's return None for getcode()
 			if resp.getcode() == 404:
 				log.error("got 404 on {0}\n".format(uri))
-			if 'stacki.attrs' in arg:
+			if 'stacki.attrfile' in arg:
 				log.info("writing /tmp/site.attrs")
 				open('/tmp/site.attrs', 'w').write(resp.read())
-			if 'stacki.pallet' in arg:
+			if 'stacki.palletfile' in arg:
 				log.info("writing /tmp/rolls.xml")
 				open('/tmp/rolls.xml', 'w').write(resp.read())
 		except Exception as e:
@@ -102,23 +102,23 @@ if 'boss' in args:
 	# if this is a USB install, then we'll see a kernel command line
 	# parameter that looks like:
 	#
-	#       inst.stage2=hd:sda1:/
+	#       inst.ks=hd:LABEL=stacki:<path>
 	#
-	# and we want to parse out the disk device (e.g., 'sda1')
+	# and we want to parse out the disk device (e.g., 'LABEL=stacki')
 	#
-	device = None
+	mount_args = ""
 	for cmdarg in args:
-		if cmdarg.startswith('inst.stage2='):
-		    b = cmdarg.split('=')
+		if cmdarg.startswith('inst.ks='):
+		    b = cmdarg.split('=',1)
 		    c = b[1].split(':')
 		    if len(c) > 1 and c[0] == 'hd':
-		        device = c[1]
+			mount_args = "-o loop %s" % c[1]
 		        break
 
-	if not device:
-		device = 'cdrom'
+	if len(mount_args) == 0:
+		mount_args = '/dev/cdrom'
 
-	cmd = 'mkdir -p /mnt/cdrom ; mount /dev/%s /mnt/cdrom' % device
+	cmd = 'mkdir -p /mnt/cdrom ; mount %s /mnt/cdrom' % mount_args
 	os.system(cmd)
 
 	# Turn off Network Manager
@@ -245,7 +245,7 @@ if 'boss' in args:
 		#
 		# need to make a "base" repo address
 		#
-		if pname in [ 'CentOS', 'RHEL', 'os' ]:
+		if pname in [ 'CentOS', 'RHEL', 'os', 'OLE', 'SL' ]:
 			baserepo = '%s/%s/%s/%s/redhat/x86_64' % (purl, pname, pver, prel)
 			
 	repo_file.close()

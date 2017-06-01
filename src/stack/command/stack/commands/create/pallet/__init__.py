@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -138,10 +138,7 @@ class Builder:
 		else:
 			extraflags = ''
 
-		volname = '%s %s' % (rollName, diskName)
-		if len(volname) > 32:
-			volname = volname[0:32]
-			
+		volname = "stacki"
 		cwd = os.getcwd()
 		cmd = 'mkisofs -V "%s" %s -r -T -f -o %s .' % \
 			(volname, extraflags, os.path.join(cwd, isoName))
@@ -558,10 +555,23 @@ class RollBuilder(Builder, stack.dist.Arch):
 		fout.write('install\n')
 		fout.write('lang en_US\n')
 		fout.write('keyboard us\n')
-		fout.write('url --url http://127.0.0.1/%s\n' % distdir)
 		fout.write('interactive\n')
+		if release == '7.x':
+			fout.write('url --url cdrom:cdrom:%s\n' % palletdir)
+		else:
+			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
 
 		fout.close()
+
+		# Write USB file
+		if release == '7.x':
+			fout = open(os.path.join('disk1', 'ks-usb.cfg'), 'w')
+			fout.write('install\n')
+			fout.write('lang en_US\n')
+			fout.write('keyboard us\n')
+			fout.write('interactive\n')
+			fout.write('url --url hd:LABEL=stacki:%s\n' % palletdir)
+			fout.close()
 
 		#
 		# add isolinux files

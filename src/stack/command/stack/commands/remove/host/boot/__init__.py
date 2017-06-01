@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -114,34 +114,33 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 	
+	def getHostHexIP(self, host):
+		#
+		# Get the IP and NETMASK of the host
+		#
+	
+		appliance = self.getHostAttr(host, 'appliance')
+		if appliance == 'frontend':
+			return []
+
+		hex_ip_list = []
+		for row in self.call('list.host.interface', [host, 'expanded=True']):
+			ip = row['ip']
+			pxe = row['pxe']
+			if ip and pxe:
+				#
+				# Compute the HEX IP filename for the host
+				#
+				hexstr = ''
+				for i in string.split(ip, '.'):
+					hexstr += '%02x' % (int(i))
+
+				hex_ip_list.append(hexstr.upper())
+		return hex_ip_list
+
 	def run(self, params, args):
 		if not len(args):
                         raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
-
-			self.db.execute("""delete from boot where boot.node =
-				(select id from nodes where name='%s')""" % 
-				host)
-				
-			#
-			# remove the pxe configuration file
-			#
-			rows = self.db.execute("""select networks.ip from
-				networks, nodes, subnets where
-				networks.node = nodes.id and
-				networks.subnet = subnets.id and
-				nodes.name = '%s' """ % host)
-
-			for ipaddr, in self.db.fetchall():
-				if not ipaddr:
-					return
-
-				filename = '/tftpboot/pxelinux/pxelinux.cfg/'
-				for i in string.split(ipaddr, '.'):
-					hexstr = '%02x' % (int(i))
-					filename += '%s' % hexstr.upper()
-
-				if os.path.exists(filename):
-					os.unlink(filename)
-
+		hosts = self.getHostnames(args)
+		self.runPlugins(hosts)

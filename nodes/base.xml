@@ -7,8 +7,8 @@ Base class for all nodes.
 </description>
 
 <si_copyright>
-(c) 2006 - 2016 StackIQ Inc.
-All rights reserved. stacki(r) v3.3 stacki.com
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
 </si_copyright>
 
 <copyright>
@@ -52,6 +52,7 @@ else:
 <package>grub2</package>
 <package>grub2-tools</package>
 <package>wget</package>
+<package>bridge-utils</package>
 
 <post>
 /sbin/chkconfig stack-pre on

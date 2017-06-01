@@ -56,6 +56,7 @@ stack-command
 stack-config
 stack-config-server
 stack-ekv
+stack-examples
 stack-images
 stack-kickstart
 stack-piece-pipe

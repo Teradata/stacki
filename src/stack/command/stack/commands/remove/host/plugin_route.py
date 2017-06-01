@@ -70,5 +70,6 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'route'
 
-	def run(self, host):
-		self.owner.command('remove.host.route', [ host, 'address=%' ])
+	def run(self, hosts):
+		hosts.append('address=%')
+		self.owner.command('remove.host.route', hosts)

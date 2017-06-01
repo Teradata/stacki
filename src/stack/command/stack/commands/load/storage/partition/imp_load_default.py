@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -245,6 +245,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						except:
 							msg = 'Volgroup "%s" for host "%s" '+ \
 								'needs "--name=<volname>" ' + \
-								'in the OPTIONS field' % (d, host)
-							raise CommandError(self.owner, msg)
+								'in the OPTIONS field'
+							raise CommandError(self.owner, msg % (d, host))
 

@@ -16,26 +16,14 @@ generate its own keypair.
 </description>
 
 <si_copyright>
-(c) 2006 - 2016 StackIQ Inc.
-All rights reserved. stacki(r) v3.3 stacki.com
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
 </si_copyright>
 
 <copyright>
 Copyright (c) 2000 - 2010 The Regents of the University of California.
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
 </copyright>
-
-<pre cond="'&release;' == '7.x'">
-
-<file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400">
-<eval>
-/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
-</eval>
-</file>
-
-/sbin/sshd -f /etc/ssh/sshd_config.anaconda \
-	-h /etc/ssh/ssh_host_ecdsa_key -p 2200
-</pre>
 
 
 <post>

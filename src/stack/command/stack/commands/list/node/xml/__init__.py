@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -144,13 +144,14 @@ class Command(stack.commands.list.command,
 	"""
 
 	def run(self, params, args):
-		(attributes, pallets, evalp, missing, generator) = \
+		(attributes, pallets, evalp, missing, generator, basedir) = \
 			self.fillParams([
 				('attrs', ),
 				('pallet', ),
 				('eval', 'yes'),
 				('missing-check', 'no'),
-				('gen', 'kgen')
+				('gen', 'kgen'),
+				('basedir',None),
 				])
 			
 		if pallets:
@@ -291,6 +292,10 @@ class Command(stack.commands.list.command,
 					'compile', 'cart', o['name'] ],
 					stdout = devnull, stderr = devnull)
 
+		if basedir:
+			if os.path.exists(basedir) and os.path.isdir(basedir):
+				items = [os.path.realpath(basedir)]
+
 		handler = stack.profile.GraphHandler(attrs, directories = items)
 
 		for item in items:
@@ -310,7 +315,7 @@ class Command(stack.commands.list.command,
 		if graph.hasNode(root):
 			root = graph.getNode(root)
 		else:
-			raise CommandError(self, 'error - node "%s" not in graph' % root)
+			raise CommandError(self, 'node "%s" not in graph' % root)
 
 		nodes = stack.profile.FrameworkIterator(graph).run(root)
 		deps  = stack.profile.OrderIterator(handler.getOrderGraph()).run()

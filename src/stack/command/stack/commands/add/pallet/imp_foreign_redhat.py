@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -135,8 +135,10 @@ class Implementation(stack.commands.Implementation):
 					name = 'RHEL'
 				elif value.startswith('CentOS'):
 					name = 'CentOS'
-				elif value == 'Oracle Linux Server':
-					name = 'Oracle'
+				elif value.startswith('Oracle'):
+					name = 'OLE'
+				elif value.startswith('Scientific'):
+					name = 'SL'
 			elif key == 'version':
 				vers = value
 			elif key == 'arch':

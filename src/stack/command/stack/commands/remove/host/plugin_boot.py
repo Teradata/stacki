@@ -88,6 +88,6 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'boot'
 
-	def run(self, host):
-		self.owner.command('remove.host.boot', [ host ])
+	def run(self, hosts):
+		self.owner.command('remove.host.boot', hosts)
 

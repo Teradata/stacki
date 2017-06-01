@@ -5,7 +5,7 @@
 #
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -103,7 +103,7 @@ import stack.util
 
 if len(sys.argv) != 3:
 	print('error - use make manifest-check')
-	sys.exit(-1)
+	sys.exit(1)
 
 rollname  = sys.argv[1]
 buildpath = sys.argv[2]
@@ -130,7 +130,7 @@ for filename in [ 'manifest', 'manifest.%s' % rollname ]:
 	file.close()
 
 if not found:
-	print('error - cannot manifest')
+	print('Cannot find manifest file')
 	sys.exit(0)
 
 built = []
@@ -153,15 +153,18 @@ for rpm in builtfiles:
 	except:
 		pass
 
-
+exit_code = 0
 if len(manifest) != len(built):
 	print('\nERROR - the following packages were not built:')
 	for pkg in manifest:
 		if pkg not in built:
 			print('\t%s' % pkg)
+	exit_code += 1
 
 if len(notmanifest) > 0:
 	print('\nERROR - the following packages were built but not in manifest:')
 	for pkg in notmanifest:
 		print('\t%s' % pkg)
+	exit_code += 1
 
+sys.exit(exit_code)

@@ -3,28 +3,22 @@
 <kickstart>
 
 <description>
-Place the root ssh public key from the installation machine on to
-the installed machine
+Copy root's public key from the Frontend to the installing nodes.
+If additional keys are listed in the authorized_keys attribute, copy those as well.
 </description>
 
 <si_copyright>
-(c) 2006 - 2016 StackIQ Inc.
-All rights reserved. stacki(r) v3.3 stacki.com
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
 </si_copyright>
 
 <post>
-
-<!-- make sure the appropriate directories exist -->
-
-for i in "/root/.ssh" ; do
-	if [ ! -d $i ]; then
-		/bin/mkdir -p $i
-	fi
-done
+<!-- make sure the /root/.ssh exists -->
+/bin/mkdir -p /root/.ssh
 </post>
 
+<post cond="sync.ssh.authkey">
 <!-- propagate root's public ssh key -->
-<post cond="&sync.ssh.authkey;">
 <file name="/root/.ssh/authorized_keys">
 <eval shell="sh">
 cat /root/.ssh/id_rsa.pub
@@ -32,5 +26,36 @@ cat /root/.ssh/id_rsa.pub
 </file>
 
 </post>
+
+<!-- allow additional public keys in the authorized_keys attr
+     this allows pxebooting frontends to have passwordless access
+ -->
+<post cond="authorized_keys">
+<!-- append either the contents of the authorized_keys attr
+     or the contents of the file it points to
+ -->
+
+cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
+<eval shell="bash" mode="xml">
+curl_cmd=/usr/bin/curl
+
+<!-- on an installing system, curl may be in /bin? -->
+if [ -f /bin/curl ]; then
+	curl_cmd=/bin/curl
+fi
+
+keys='&authorized_keys;'
+<!-- curl can handle http(s)/ftp/file -->
+if [[ $keys == http* ]] || [[ $keys == ftp* ]] || [[ $keys == file* ]] ; then
+	$curl_cmd --silent --insecure $keys
+else
+	echo $keys
+fi
+
+</eval>
+EOF
+
+</post>
+
 
 </kickstart> 

@@ -6,8 +6,8 @@
 	</description>
 
         <si_copyright>
-        (c) 2006 - 2016 StackIQ Inc.
-        All rights reserved. stacki(r) v3.3 stacki.com
+        (c) 2006 - 2017 StackIQ Inc.
+        All rights reserved. stacki(r) v4.0 stacki.com
         </si_copyright>
 
         <copyright>
@@ -43,7 +43,7 @@ if os.path.exists('/tmp/site.attrs'):
 			#
 			key = l[0].strip()
 
-			if key in [ 'hostname', 'rack', 'rank', 'os' ]:
+			if key in [ 'hostname', 'rack', 'rank', 'os', 'nukedisks', 'nukecontroller' ]:
 				continue
 
 			v = l[1].strip()

@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -115,8 +115,8 @@ class Command(command):
 		if len(args) < 1:
                         raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
-			self.runPlugins(host)
+		hosts = self.getHostnames(args)
+		self.runPlugins(hosts)
 
 		#	
 		# sync the config when done

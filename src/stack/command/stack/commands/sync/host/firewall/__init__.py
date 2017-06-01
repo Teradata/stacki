@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -121,8 +121,12 @@ class Command(stack.commands.sync.host.command):
 		me = self.db.getHostname('localhost')
 
 		threads = []
+		out = {}
+		host_output = {}
 		for host in hosts:
 
+			host_output[host]= {"output":"", "error":"","rc":0}
+			out[host] = ""
                         attrs = {}
                         for row in self.call('list.host.attr', [ host ]):
                                 attrs[row['attr']] = row['value']
@@ -138,7 +142,7 @@ class Command(stack.commands.sync.host.command):
 				cmd += 'ssh -T -x %s ' % host
 			cmd += 'bash > /dev/null 2>&1 '
 
-			p = Parallel(cmd)
+			p = Parallel(cmd, host_output[host])
 			threads.append(p)
 			p.start()
 		#
@@ -147,15 +151,19 @@ class Command(stack.commands.sync.host.command):
 		for thread in threads:
 			thread.join(timeout)
 
+		for host in host_output:
+			if host_output[host]["rc"]:
+				out[host] += host_output[host]['output']
+
 		if restartit:
 			threads = []
 			for host in hosts:
-				cmd = '/sbin/service iptables restart '
-				cmd += '> /dev/null 2>&1'
+				cmd = '/sbin/service iptables restart'
 				if me != host:
 					cmd = 'ssh -T -x %s "%s"' % (host, cmd)
 
-				p = Parallel(cmd)
+				host_output[host]= {"output":"", "error":"","rc":0}
+				p = Parallel(cmd, host_output[host])
 				threads.append(p)
 				p.start()
 
@@ -165,4 +173,14 @@ class Command(stack.commands.sync.host.command):
 			for thread in threads:
 				thread.join(timeout)
 
+		for host in host_output:
+			if host_output[host]["rc"]:
+				out[host] += host_output[host]['output']
+
+		self.beginOutput()
+		for host in out:
+			if len(out[host]):
+				self.addOutput(host, out[host])
+
 		self.runPlugins(hosts)
+		self.endOutput(header=['host','output'])

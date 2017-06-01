@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -46,9 +46,8 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'group'
 
-	def run(self, host):
-		self.owner.db.execute("""
-			delete
-			from memberships
-			where nodeid = (select id from nodes where name = '%s') """ %
-			(host))
+	def run(self, hosts):
+		for host in hosts:
+			self.owner.db.execute("""delete from memberships
+				where nodeid = (select id from nodes where name = '%s') """ %
+				(host))

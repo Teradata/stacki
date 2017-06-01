@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -142,6 +142,17 @@ class Command(stack.commands.CartArgumentProcessor,
 				pass
 
 			file = open(fingerprint, 'w')
+
+			#
+			# make sure apache can write this file
+			#
+			perms = os.stat(fingerprint)[stat.ST_MODE]
+			perms = perms | stat.S_IRGRP | stat.S_IWGRP
+			try:
+				os.chmod(fingerprint, perms)
+			except:
+				pass
+
 			for filename in newfinger.keys():
 				file.write('%s %s %s\n' % (filename,
 					newfinger[filename]['size'],
@@ -174,11 +185,11 @@ class Command(stack.commands.CartArgumentProcessor,
 
 			#
 			# apache needs to be able to write in the cart
-			# directory when carts are compiled on the fly
+			# and repodata directores when carts are compiled on
+			# the fly
 			#
-			if dirpath == cartpath:
+			if dirpath in [ cartpath, repodata ]:
 				perms |= stat.S_IWGRP
-
 			try:
 				os.chmod(dirpath, perms)
 			except:
@@ -195,6 +206,12 @@ class Command(stack.commands.CartArgumentProcessor,
 				perms = os.stat(filepath)[stat.ST_MODE]
 				perms = perms | stat.S_IRGRP
 
+				#
+				# apache needs to be able to write all files
+				# in the repodata directory
+				#
+				if dirpath == repodata:
+					perms = perms | stat.S_IWGRP
 				try:
 					os.chmod(filepath, perms)
 				except:

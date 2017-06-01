@@ -1,6 +1,6 @@
 # @SI_Copyright@
 #                               stacki.com
-#                                  v3.3
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -110,8 +110,6 @@ install::
 
 	mkdir -p $(ROOT)/export/stack/sbin/profile
 	$(INSTALL) -m 0755 profile.py  $(ROOT)/export/stack/sbin/profile.cgi
-	$(INSTALL) -m 0755 pallets_xml.py  $(ROOT)/export/stack/sbin/pallets_xml.cgi
-	$(INSTALL) -m 0755 attrs.py  $(ROOT)/export/stack/sbin/attrs.cgi
 	$(INSTALL) -m 0755 __init__.py $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 redhat.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 utils/*.cgi $(ROOT)/export/stack/sbin/
