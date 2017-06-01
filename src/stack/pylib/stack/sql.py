@@ -1,8 +1,8 @@
 #! /opt/stack/bin/python
 #
-# Below is for testing with older versions of Rocks
-#! /usr/bin/python
-# 
+# @SI_Copyright@
+# @SI_Copyright@
+#
 # @Copyright@
 #  				Rocks(r)
 #  		         www.rocksclusters.org
@@ -53,151 +53,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.30  2011/05/19 18:39:29  anoop
-# reading the password file should be done correctly, with or without spaces
-#
-# Revision 1.29  2010/09/07 23:53:08  bruno
-# star power for gb
-#
-# Revision 1.28  2009/05/01 19:07:08  mjk
-# chimi con queso
-#
-# Revision 1.27  2009/04/29 00:52:24  bruno
-# make sure legacy apps (insert-ethers) can connect to the new database
-#
-# Revision 1.26  2009/03/23 23:03:57  bruno
-# can build frontends and computes
-#
-# Revision 1.25  2009/03/06 22:45:41  bruno
-# nuke 'dbreport access' and 'dbreport machines'
-#
-# Revision 1.24  2008/10/18 00:56:02  mjk
-# copyright 5.1
-#
-# Revision 1.23  2008/07/22 00:34:41  bruno
-# first whack at vlan support
-#
-# Revision 1.22  2008/03/06 23:41:44  mjk
-# copyright storm on
-#
-# Revision 1.21  2007/07/06 04:53:00  phil
-# Same code change as in rocks command line. Allows plain old users to run dbreports
-#
-# Revision 1.20  2007/07/03 04:58:42  phil
-# Add a password for apache access to the database.
-# Randomly generate password and store in /root/.my.cnf.
-# Modify stack.py and sql.py to read the password, if available
-#
-# Revision 1.19  2007/06/23 04:03:24  mjk
-# mars hill copyright
-#
-# Revision 1.18  2006/09/11 22:47:23  mjk
-# monkey face copyright
-#
-# Revision 1.17  2006/08/10 00:09:41  mjk
-# 4.2 copyright
-#
-# Revision 1.16  2006/06/22 23:20:10  mjk
-# removed unused commands dictionary
-#
-# Revision 1.15  2006/03/11 05:08:57  phil
-# Change the way argument processing is done (perhaps move to app.py)
-# This supposed to be backwards compatible with current sql-aware code like
-# insert-ethers, add-extra-nic, etc.  optiucsd/src/netdb has a developing example of how this works
-#
-# Revision 1.14  2006/01/23 18:51:49  bruno
-# insert_id() is dropped in python 2.4 (it's deprecated in 2.3)
-#
-# Revision 1.13  2006/01/20 22:51:14  mjk
-# python 2.4 changes
-#
-# Revision 1.12  2006/01/16 06:49:00  mjk
-# fix python path for source built foundation python
-#
-# Revision 1.11  2005/10/12 18:08:42  mjk
-# final copyright for 4.1
-#
-# Revision 1.10  2005/09/16 01:02:21  mjk
-# updated copyright
-#
-# Revision 1.9  2005/07/11 23:51:35  mjk
-# use rocks version of python
-#
-# Revision 1.8  2005/05/27 22:08:59  bruno
-# the 'added' and 'removed' plugin functions now also get the nodeid
-#
-# Revision 1.7  2005/05/24 21:30:10  fds
-# Tweaks
-#
-# Revision 1.6  2005/05/24 21:21:57  mjk
-# update copyright, release is not any closer
-#
-# Revision 1.5  2005/05/23 23:59:24  fds
-# Frontend Restore
-#
-# Revision 1.4  2005/03/14 20:32:33  fds
-# insert-ethers plugin base class. Also app_global variable accessor method.
-#
-# Revision 1.2  2005/03/10 01:18:21  fds
-# Redoing brunos 1.2 diff that got lost. No kickstart-profiles.
-#
-# Revision 1.20  2004/08/13 19:58:26  fds
-# Support for cluster shepherd.
-#
-# Revision 1.19  2004/03/25 03:15:48  bruno
-# touch 'em all!
-#
-# update version numbers to 3.2.0 and update copyrights
-#
-# Revision 1.18  2003/08/15 22:34:46  mjk
-# 3.0.0 copyright
-#
-# Revision 1.17  2003/08/15 21:07:26  mjk
-# - RC files only built one per directory (fixed)
-# - Default CGI arch is native (used to be i386)
-# - Added scheduler,nameservices to rocksrc.xml
-# - insert-ethers know what scheduler and nameservice we use
-# - I forget what else
-#
-# Revision 1.16  2003/08/05 21:10:50  mjk
-# applet support
-#
-# Revision 1.15  2003/05/22 16:39:28  mjk
-# copyright
-#
-# Revision 1.14  2003/02/17 18:43:04  bruno
-# updated copyright to 2003
-#
-# Revision 1.13  2002/10/18 21:33:26  mjk
-# Rocks 2.3 Copyright
-#
-# Revision 1.12  2002/10/02 18:56:43  fds
-# Added close method to cleanup open database connections
-#
-# Revision 1.11  2002/06/28 18:15:54  mjk
-# - works when database is checked in
-#
-# Revision 1.10  2002/02/21 21:33:28  bruno
-# added new copyright
-#
-# Revision 1.9  2001/11/09 23:50:54  mjk
-# - Post release ia64 changes
-#
-# Revision 1.7  2001/11/09 00:19:02  mjk
-# ia64 changes
-#
-# Revision 1.5  2001/11/08 23:39:54  mjk
-# --host changes to kcgi
-#
-# Revision 1.3  2001/10/24 20:23:33  mjk
-# Big ass commit
-#
-# Revision 1.1  2001/05/16 21:44:40  mjk
-# - Major changes in CD building
-# - Added ip.py, sql.py for SQL oriented scripts
-#
 
 from __future__ import print_function
 import os
@@ -215,7 +70,7 @@ import stack.commands
 
 hasSQL = 1
 try:
-    from MySQLdb import *
+    from pymysql import *
 except ImportError:
     hasSQL = 0
 
