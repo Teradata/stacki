@@ -267,7 +267,7 @@ class Generator(stack.gen.Generator):
                 if self.getProfileType() == 'native':
                         section.append('%packages --ignoremissing')
                         for (nodefile, rpms) in enabled.items():
-                                rpms.sort()
+				rpms.sort()
                                 for rpm in rpms:
                                         section.append(rpm, nodefile)
 
@@ -277,11 +277,14 @@ class Generator(stack.gen.Generator):
                                         section.append('-%s' % rpm, nodefile)
                         section.append('%end')
                 elif self.getProfileType() == 'shell':
+			s = ""
                         for (nodefile, rpms) in enabled.items():
-                                rpms.sort()
-                                for rpm in rpms:
-                                        section.append('yum install -y %s' % rpm, nodefile)
-                        
+				if rpms:
+                                	rpms.sort()
+					s = s + ' %s' % ' '.join(rpms)
+			if s:
+				section.append("yum install -y %s" % s, None)
+
                 return section.generate(cdata=False)
 
 
