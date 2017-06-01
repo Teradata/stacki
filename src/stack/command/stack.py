@@ -142,7 +142,7 @@ except:
 # Now make the connection to the DB
 
 try:
-	from MySQLdb import *
+        import pymysql
 
 	if os.geteuid() == 0:
 		username = 'apache'
@@ -153,14 +153,14 @@ try:
 	# network.
 
 	if os.path.exists('/var/opt/stack/mysql/mysql.sock'):
-		Database = connect(db='cluster',
+		Database = pymysql.connect(db='cluster',
 			host='localhost',
 			user=username,
 			passwd='%s' % passwd,
 			unix_socket='/var/opt/stack/mysql/mysql.sock',
 			autocommit=True)
 	else:
-		Database = connect(db='cluster',
+		Database = pymysql.connect(db='cluster',
 			host='%s' % host,
 			user=username,
 			passwd='%s' % passwd,
@@ -169,7 +169,7 @@ try:
 
 except ImportError:
 	Database = None
-except OperationalError:
+except pymysql.err.OperationalError:
 	Database = None
 
 def run_command(args):
