@@ -273,6 +273,7 @@ def run_command(args):
 if len(sys.argv) == 1:
         rc = run_command(['help'])
         sys.exit(rc)
+
 else:
 	args = sys.argv[1:]
 	rc = run_command(args)

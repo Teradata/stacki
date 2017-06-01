@@ -106,8 +106,13 @@ build:
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)/
 	mkdir -p $(ROOT)/etc/profile.d/
+	mkdir -p $(ROOT)/opt/stack/share/licenses/
 	$(INSTALL) -m0555 stack-build.sh  $(ROOT)/etc/profile.d
 	$(INSTALL) -m0555 stack-build.csh $(ROOT)/etc/profile.d
+	(								\
+		cd LICENSE;						\
+		find . -type f | cpio -pudv $(ROOT)/opt/stack/share/licenses/; \
+	)
 	(								\
 		cd build;						\
 		find . | cpio -pduv $(ROOT)/$(PKGROOT)/;		\
