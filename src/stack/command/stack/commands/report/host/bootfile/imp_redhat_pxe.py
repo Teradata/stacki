@@ -19,6 +19,7 @@ class Implementation(stack.commands.Implementation):
                 args     = h['args']
 		filename = h['filename']
                 attrs    = h['attrs']
+		action	 = h['action']
 
                 dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
                 nextserver = attrs.get('Kickstart_PrivateKickstartHost')
