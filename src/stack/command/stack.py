@@ -172,163 +172,6 @@ except ImportError:
 except OperationalError:
 	Database = None
 
-class command_struct:
-	def __init__(self):
-		#self.name = ''
-		self.isCommand = False
-		self.children = {}
-
-class RCL_Completer:
-	def __init__(self):
-		self.cmd_hierarchy = command_struct()
-		self.cmd_path = os.path.join(get_python_lib(), 'stack/commands')
-		self.module_list = []
-
-	def populate_cmd_hierarchy(self):
-		# Walk the command hierarchy
-		for r, d, f in os.walk(self.cmd_path):
-			# Get the relative path for a module.
-			# Example: if r is
-			# /opt/stack/lib/python2.6/site-packages/stack/commands/run/host
-			# return run/host
-			m = os.path.relpath(r, self.cmd_path)
-			# If it's the current directory, ignore
-			if m == '.':
-				continue
-
-			# Convert directory structure to module path
-			m = m.replace('/','.')
-			try:
-				# Import the module
-				f = __import__('stack.commands.%s' % m)
-				# Get the command class from the module
-				cmd_class = eval('stack.commands.%s.Command' % m)
-				# If we get the Command class, and it happens to be
-				# a proper class, then append it to runnable module
-				# list. Otherwise, skip over it.
-				if type(cmd_class) == types.ClassType:
-					self.module_list.append(m)
-			except:
-				continue
-
-		# For every runnable module, add it to the command hierarchy.
-		# Some modules are runnable, and have children, whereas others
-		# have only children. For example, run.hadoop and run.hadoop.test
-		# are valid, but simply "run" isnt valid
-		for mod in self.module_list:
-			cur = self.cmd_hierarchy
-			# Split the module string
-			mod_split = mod.split('.')
-			leaf_mod = mod_split[-1]
-			# All parts of the module except the leaf
-			for i in mod_split:
-				# Create and navigate to the end of
-				# the current module tree
-				if not cur.children.has_key(i):
-					cur.children[i] = command_struct()
-				cur = cur.children[i]
-				#cur.name=i
-			# Set last module as a runnable command
-			cur.isCommand = True
-	
-	# Function to traverse a subgraph of the command graph,
-	# given the start of the subgraph, and a list of tokens
-	# to traverse
-	def traverse(self, d, tokens, incomplete, result):
-		# If we've reached a leaf node, return
-		if len(d.children) == 0:
-			return
-		# If we're not yet at the last token, keep
-		# the traversal going
-		if len(tokens) > 1:
-			t = tokens.pop(0)
-			if d.children.has_key(t):
-				self.traverse(d.children[t], tokens, incomplete, result)
-		# If we're at the last token in the list of tokens.
-		elif len(tokens) == 1:
-			t = tokens.pop(0)
-			# First check if the last token is a valid token
-			if d.children.has_key(t):
-				cur = d.children[t]
-				# If the token is valid, but is incomplete -
-				# this means that the token was entered fully
-				# on the command line, but no space was added
-				# that means it's a valid token for completion
-				if incomplete:
-					result.append(t)
-				# If it's complete, that means it's processed,
-				# and its children may be traversed
-				else:
-					# Also, if token is a valid command,
-					# add an empty string to the result list,
-					# so that it stays valid, and does not move
-					# to a child node.
-					if cur.isCommand and len(cur.children) > 0:
-						result.append('')
-					# Move on to the child node if the token is
-					# valid and complete.
-					self.traverse(cur, tokens, incomplete, result)
-			# if the token is not valid, check if it's a part of
-			# an existing valid token, and add all of them
-			else:
-				for i in d.children:
-					if i.startswith(t):
-						result.append(i)
-
-		# If we've finished processing all tokens, return the children
-		# of the last token.
-		elif len(tokens) == 0:
-			for i in d.children:
-				result.append(i)
-
-
-	# Function that pretty prints the tree of commands that
-	# can be run. This function is very similar to the traversal
-	# function, and accomplishes the print using a very similar
-	# recursive traversal. Meant for testing only.
-	def print_mod_cmd(self, d, tokens, level):
-		if len(d.children) == 0:
-			return
-		if len(tokens) > 0:
-			t = tokens.pop(0)
-			if d.children.has_key(t):
-				print('  '*level, t)
-				self.print_mod_cmd(d.children[t], tokens, level+1)
-			else:
-				for i in d.children:
-					if i.startswith(t):
-						print('  '*level, i)
-						self.print_mod_cmd(d.children[i], [], level+1)
-		else:
-			for i in d.children:
-				print('  '*level, i)
-				self.print_mod_cmd(d.children[i], [], level+1)
-
-	# Completer function. This function takes in a list of tokens, and
-	# returns the a list of possible completions given the tokens.
-	def completer(self, token, state):
-		# Get the contents of the line buffer
-		r = readline.get_line_buffer()
-		# Check to see if the line is complete. If there is a space
-		# at the end, that means that the set of tokens is complete
-		if len(r) > 0 and r[-1] == ' ':
-			incomplete = False
-		else:
-			incomplete = True
-		# Get the tokens from the readline buffer.
-		tokens = readline.get_line_buffer().split()
-		result = []
-		# traverse the command hierarchy from the top down.
-		self.traverse(self.cmd_hierarchy, tokens, incomplete, result)
-		# Add a space to every returned result, so that we get completed
-		# tokens for the next traversal
-		f = lambda x: x + ' '
-		result = map(f, result)
-
-		# Returns the results of the traversal
-		return result[state]
-
-
 def run_command(args):
 	# Check if the stack command has been quoted.
 
@@ -353,7 +196,7 @@ def run_command(args):
 
 	if not module:
 		for i in range(len(args), 0, -1):
-			s = 'stack.commands.%s' % string.join(args[:i], '.')
+			s = 'stack.commands.%s' % '.'.join(args[:i])
 			try:
 				__import__(s)
 				module = eval(s)
@@ -426,52 +269,11 @@ def run_command(args):
 		return 0
 	return -1
 
-# Function that runs calls the Stack Command Line Interpreter.
-def run_cli(prompt):
-	rcl = RCL_Completer()
-	rcl.populate_cmd_hierarchy()
-	
-	# Setup a file to record history
-	histfile = os.path.expanduser("~/.rcli_hist")
 
-	if not os.path.exists(histfile):
-		f = open(histfile, 'w')
-		f.close()
-	readline.read_history_file(histfile)
-
-	# Setup tab completion
-	readline.parse_and_bind("tab: complete")
-	readline.set_completer(rcl.completer)
-
-	done = 0
-	# Start main rcli loop
-	while not done:
-		try:
-			cmd = raw_input(prompt)
-			readline.write_history_file(histfile)
-			if cmd == 'exit':
-				done = 1
-			else:
-				rc = run_command(shlex.split(cmd))
-		except EOFError:
-			print()
-			done = 1
-		except KeyboardInterrupt:
-			print()
-			done = 1
-
-# If the command line is empty, open the stack shell
 if len(sys.argv) == 1:
-	# If we're piping the output through something else
-	# opening the stack shell is a bad idea. Instead
-	# just run help, and quit
-	if not sys.stdout.isatty():
-                rc = run_command(['help'])
-		sys.exit(rc)
-	else:
-		os.environ['TERM'] = 'vt100'
-		import readline
-                run_cli('%s > ' % (os.path.basename(sys.argv[0])))
+        rc = run_command(['help'])
+        sys.exit(rc)
+
 else:
 	args = sys.argv[1:]
 	rc = run_command(args)
