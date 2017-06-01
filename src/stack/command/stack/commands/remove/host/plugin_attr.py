@@ -81,7 +81,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, hosts):
 		for host in hosts:
-			self.owner.db.execute("""delete from node_attributes where 
-				node = (select id from nodes where name = '%s')""" %
+			self.owner.db.execute("""delete from attributes
+				where scope="host" and 
+				scopeid=(select id from nodes where name = '%s')""" %
 				host)
 

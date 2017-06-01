@@ -143,8 +143,10 @@ class Command(stack.commands.Command,
                 # 	add := force=false
                 # 	set := force=true
 
-		if not force and attrs:
-                        raise CommandError(self, 'attr "%s" exists' % glob)
+		if not force:
+			for target in attrs:
+				if len(attrs[target]):
+                			raise CommandError(self, 'attr "%s" exists for %s' % (glob, target))
 
                 # Before we do the insert remove any existing values, otherwise
                 # we need to mess around with 'update' vs 'insert' commands.
