@@ -1272,10 +1272,10 @@ class DatabaseConnection:
 
 		for (name, os) in self.select(
 				"""
-				n.name, b.os from
-				boxes b, nodes n 
-				where
-				n.box = b.id
+				n.name, o.name from
+				boxes b, nodes n, oses o
+				where n.box = b.id and
+				b.os = o.id
 				"""):
 			if name == host:
 				return os

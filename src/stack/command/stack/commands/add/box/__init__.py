@@ -125,5 +125,5 @@ class Command(stack.commands.BoxArgumentProcessor,
 		OS, = self.fillParams([ ('os', 'redhat') ])
 
 		self.db.execute("""insert into boxes (name, os) values
-			('%s', '%s')""" % (box, OS))
+			('%s', (select id from oses where name='%s'))""" % (box, OS))
 

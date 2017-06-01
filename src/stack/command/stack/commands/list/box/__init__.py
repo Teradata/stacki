@@ -134,9 +134,9 @@ class Command(command):
 		self.beginOutput()
 
 		for box in self.getBoxNames(args):
-			self.db.execute("""select id, os from
-				boxes where name='%s'""" % box)
-			id, os = self.db.fetchone()
+			id, os = self.db.select("""b.id, o.name from
+				boxes b, oses o where b.name='%s'
+				and b.os=o.id""" % box)[0]
 
 			if not carts.has_key(box):
 				carts[box] = []

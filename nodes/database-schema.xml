@@ -111,11 +111,42 @@ DROP TABLE IF EXISTS boxes;
 CREATE TABLE boxes (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default 'default',
-  OS		varchar(32) NOT NULL default 'redhat',
+  OS		varchar(32) NOT NULL references oses,
   PRIMARY KEY (ID)
 );
 
 grant select on cluster.boxes to ''@'localhost';
+
+<!-- Boot/Action Tables -->
+
+DROP TABLE IF EXISTS boot;
+CREATE TABLE boot (
+	Node		int(11) NOT NULL default '0',
+	Action		enum ('install', 'os')
+);
+grant select on cluster.boot to ''@'localhost';
+
+DROP TABLE IF EXISTS bootnames;
+CREATE TABLE bootnames (
+	ID		int(11) NOT NULL auto_increment,
+	Name		varchar(128) NOT NULL,
+	Type		enum ('install', 'os') NOT NULL,
+	PRIMARY KEY (ID)
+);
+grant select on cluster.bootnames to ''@'localhost';
+	
+
+DROP TABLE IF EXISTS bootactions;
+CREATE TABLE bootactions (
+	BootName	int(11) NOT NULL references bootnames,
+	OS		int(11) NOT NULL references oses,
+	Kernel		varchar(256) default NULL,
+	Ramdisk		varchar(256) default NULL,
+	Args		varchar(1024) default NULL,
+	PRIMARY KEY (BootName)
+);
+grant select on cluster.bootactions to ''@'localhost';
+
 
 <!-- Nodes -->
 
@@ -123,13 +154,13 @@ DROP TABLE IF EXISTS nodes;
 CREATE TABLE nodes (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(128) default NULL,
-  Appliance	int(11) default '2',
-  Box		int(11) default '1',
-  Environment	int(11) default NULL,
+  Appliance	int(11) default NULL references appliances,
+  Box		int(11) default NULL references boxes,
+  Environment	int(11) default NULL references environments,
   Rack		varchar(64) default NULL,
   Rank		varchar(64) default NULL,
-  OSAction	int(11) default '2',
-  InstallAction	int(11) default '1',
+  OSAction	int(11) default NULL references bootactions,
+  InstallAction	int(11) default NULL references bootactions,
   PRIMARY KEY  (ID)
 );
 
@@ -306,36 +337,6 @@ CREATE TABLE partitions (
 );
 
 grant select on cluster.partitions to ''@'localhost';
-
-<!-- Boot/Action Tables -->
-
-DROP TABLE IF EXISTS boot;
-CREATE TABLE boot (
-	Node		int(11) NOT NULL default '0',
-	Action		enum ('install', 'os')
-);
-grant select on cluster.boot to ''@'localhost';
-
-DROP TABLE IF EXISTS bootnames;
-CREATE TABLE bootnames (
-	ID		int(11) NOT NULL auto_increment,
-	Name		varchar(128) NOT NULL,
-	Type		enum ('install', 'os') NOT NULL,
-	PRIMARY KEY (ID)
-);
-grant select on cluster.bootnames to ''@'localhost';
-	
-
-DROP TABLE IF EXISTS bootactions;
-CREATE TABLE bootactions (
-	BootName	int(11) NOT NULL,
-	OS		int(11) NOT NULL,
-	Kernel		varchar(256) default NULL,
-	Ramdisk		varchar(256) default NULL,
-	Args		varchar(1024) default NULL
-);
-grant select on cluster.bootactions to ''@'localhost';
-
 
 
 <!-- Firewall Tables -->

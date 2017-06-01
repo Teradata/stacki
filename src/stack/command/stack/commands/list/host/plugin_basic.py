@@ -55,7 +55,7 @@ class Plugin(stack.commands.Plugin):
                         """
                         n.name, n.rack, n.rank, 
                         a.name,
-                        b.os, b.name, 
+                        o.name, b.name, 
                         e.name, 
                         bno.name, bni.name from 
                         nodes n 
@@ -64,6 +64,7 @@ class Plugin(stack.commands.Plugin):
                         left join environments e on n.environment   = e.id 
                         left join bootnames bno  on n.osaction      = bno.id 
                         left join bootnames bni  on n.installaction = bni.id
+			left join oses o	 on b.os = o.id
                         """):
 
                         if dict.has_key(row[0]):
