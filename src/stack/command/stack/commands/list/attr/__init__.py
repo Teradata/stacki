@@ -336,33 +336,31 @@ class Command(stack.commands.Command,
                 targets = lookup[scope]['fn'](args)
                 targets.sort()
 
+                if resolve and scope == 'host':
+			for o in targets:
+				env = self.db.getHostEnvironment(o)
+				if env:
+					parent = attributes['environment'][env]
+					for (a, (v, x, t, s)) in parent.items():
+						if not attributes[scope][o].has_key(a):
+							attributes[scope][o][a] = (v, x, t, s)
+
+				parent = attributes['appliance'][self.db.getHostAppliance(o)]
+				for (a, (v, x, t, s)) in parent.items():
+					if not attributes[scope][o].has_key(a):
+						attributes[scope][o][a] = (v, x, t, s)
+
+				parent = attributes['os'][self.db.getHostOS(o)]
+				for (a, (v, x, t, s)) in parent.items():
+					if not attributes[scope][o].has_key(a):
+						attributes[scope][o][a] = (v, x, t, s)
+
                 if resolve and scope != 'global':
                         for o in targets:
                                 for (a, (v, x, t, s)) in attributes['global']['global'].items():
                                 	if not attributes[scope][o].has_key(a):
                                                 attributes[scope][o][a] = (v, x, t, s)
-                if resolve and scope == 'host':
-                        for o in targets:
-                                parent = attributes['os'][self.db.getHostOS(o)]
-                                for (a, (v, x, t, s)) in parent.items():
-                                        if not attributes[scope][o].has_key(a) or s != scope:
-                                                attributes[scope][o][a] = (v, x, t, s)
 
-                                parent = attributes['appliance'][self.db.getHostAppliance(o)]
-                                for (a, (v, x, t, s)) in parent.items():
-                                        if not attributes[scope][o].has_key(a) or s != scope:
-                                                attributes[scope][o][a] = (v, x, t, s)
-
-                                env = self.db.getHostEnvironment(o)
-                                if env:
-                                        parent = attributes['environment'][env]
-                                        for (a, (v, x, t, s)) in parent.items():
-                                                if not attributes[scope][o].has_key(a) or s != scope:
-                                                        attributes[scope][o][a] = (v, x, t, s)
-
-
-                                     
-                                     
                 if glob:
                         for o in targets:
                                 matches = {}
@@ -396,3 +394,5 @@ class Command(stack.commands.Command,
                         self.endOutput(header=[scope, 'scope', 'type', 'attr', 'value' ])
 
 
+
+RollName = "stacki"
