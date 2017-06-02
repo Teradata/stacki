@@ -1,2 +1,3 @@
-VERSION = 3.10
-ARCHIVENAME=PyYAML
+VERSION		= 3.12
+ARCHIVENAME	= PyYAML
+URL		= http://pyyaml.org/wiki/PyYAML
