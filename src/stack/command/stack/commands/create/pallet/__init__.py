@@ -100,7 +100,6 @@ import time
 import tempfile
 import shutil
 import popen2
-import pexpect
 import socket
 import subprocess
 import shlex
@@ -246,32 +245,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 	def mkisofs(self, isoName, rollName, diskName):
 		Builder.mkisofs(self, isoName, rollName, diskName, diskName)
 		
-	def signRPM(self, rpm):
-	
-		# Only sign RPMs that were build on this host.  This
-		# allows pallets to include 3rd party RPMs that will
-		# not be signed by the pallet builder.
-		
-		cmd = "rpm -q --qf '%%{BUILDHOST}' -p %s" % rpm.getFullName()
-		buildhost = os.popen(cmd).readline()
-		hostname  = socket.gethostname()
-		
-		if buildhost == hostname:
-			cmd = 'rpm --resign %s' % rpm.getFullName()
-			try:		
-				child = pexpect.spawn(cmd)
-				child.expect('phrase: ')
-				child.sendline()
-				child.expect(pexpect.EOF)
-				child.close()
-			except:
-				pass
-			os.system("rpm -qp %s --qf " 
-				"'%%{name}-%%{version}-%%{release}: "
-				"%%{sigmd5}\n'"
-				% rpm.getFullName())
-		
-
 	def getRPMS(self, path):
 		"""Return a list of all the RPMs in the given path, if multiple
 		versions of a package are found only the most recent one will
@@ -641,8 +614,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 		list = []
 		if self.config.hasRPMS():
 			list.extend(self.getRPMS('RPMS'))
-		for rpm in list:
-			self.signRPM(rpm)
 
 		# Make a list of both required and optional packages.  The copy
 		# code is here since python is by-reference for everything.

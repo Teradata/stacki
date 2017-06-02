@@ -22,7 +22,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-py-docutils</package>
 <package>foundation-py-numpy</package>
 <package>foundation-py-IPy</package>
-<package>foundation-py-pexpect</package>
 <package>foundation-py-M2Crypto</package>
 <package>foundation-py-pygobject</package>
 <package>foundation-py-pygtk</package>
