@@ -20,6 +20,7 @@ class Implementation(stack.commands.Implementation):
 		filename = h['filename']
                 attrs    = h['attrs']
 		action	 = h['action']
+		type	 = h['type']
 
                 dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
                 nextserver = attrs.get('Kickstart_PrivateKickstartHost')
@@ -51,5 +52,5 @@ class Implementation(stack.commands.Implementation):
 		if args and len(args) > 0:
 			self.owner.addOutput(host,'\tappend %s' % args)
 
-		if action == "install":
+		if type == "install":
 			self.owner.addOutput(host,'\tipappend 2')
