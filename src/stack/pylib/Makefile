@@ -99,6 +99,10 @@ DEPENDS.DIRS	= stack
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+dump-info::
+	@echo "STACK_RELEASE   = $(STACK_RELEASE)"
+	@echo "STACK_VERSION   = $(STACK_VERSION)"
+
 bootstrap: install-rpm
 
 build:
