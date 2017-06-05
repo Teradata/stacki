@@ -53,56 +53,12 @@ __CCRULES_MK = yes
 include $(STACKBUILD)/etc/CCCommon.mk
 include $(STACKBUILD)/etc/Rules.mk
 
-
 ##
-## Docbook changes for Clustercorp
+## Default RELEASE, official build process will override this
 ##
 
-ifeq ($(SUMMARY_COMPATIBLE),)
-SUMMARY_COMPATIBLE	= $(VERSION)
-endif
+-include $(ROLLROOT)/version.mk
 
-SUMMARY_MAINTAINER	= &stackiq;
-SUMMARY_ARCHITECTURE	= $(ARCH)
-
-entities.sgml::
-	echo "<!ENTITY rollname-l \"&roll-$(ROLL)-l;\">" >> $@
-	echo "<!ENTITY rollname-s \"&roll-$(ROLL)-s;\">" >> $@
-	echo "<!ENTITY rollname-d \"&roll-$(ROLL)-d;\">" >> $@
-	echo "<!ENTITY rollname \"&roll-$(ROLL);\">" >> $@
-	for platform in $(ROLL_PLATFORMS); do \
-		echo "<!ENTITY platform-$$platform \"<entry>yes</entry>\">" >> $@; \
-	done
-	cat $(DOCROOT)/rocksplus-general-entities.sgml >> $@
-	for roll in $(ROLL_REQUIRES); do \
-		echo "<!ENTITY overview-$$roll-depend \"<row><entry namest="req">&roll-$$roll-s;</entry></row>\">" >> $@; \
-	done
-	for roll in $(ROLL_CONFLICTS); do \
-		echo "<!ENTITY overview-$$roll-depend \"<row><entry namest="con">&roll-$$roll-s;</entry></row>\">" >> $@; \
-	done
-	cat $(DOCROOT)/rocksplus-overview-entities.sgml >> $@
-
-predoc::
-	if [ ! -f ./rocks+.dsl ]; then cp $(DOCROOT)/rocks+.dsl .; fi;
-	if [ ! -f ./rocksplus.css ]; then cp $(DOCROOT)/rocksplus.css .; fi;
-
-predoctemplates::
-	cp $(DOCROOT)/rocksplus-overview.sgml \
-		roll-rocksplus-overview.sgml
-	cp $(DOCROOT)/rocksplus-overview-entities.sgml \
-		roll-rocksplus-overview-entities.sgml
-	cp $(DOCROOT)/rocksplus-copyright.sgml \
-		roll-rocksplus-copyright.sgml
-	[ -d $(DOCROOT)/images/ ] &&	\
-	for i in $(DOCROOT)/images/*.png; do	\
-		b=`basename $$i`;		\
-		[ ! -f images/roll-$$b ] && 	\
-			cp $$i images/roll-$$b;	\
-		done;
-
-clean::
-	@rm -f rocks+.dsl
-	@rm -f rocksplus.css
 
 
 endif # __CCRULES_MK
