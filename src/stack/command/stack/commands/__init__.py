@@ -1005,60 +1005,6 @@ class DocStringHandler(handler.ContentHandler,
 	def getParsedText(self):
 		return '%s' % self.section
 		
-	def getSphinxText(self):
-		cli = "stack %s" % self.name
-		lnk = '.'.join(self.name.split()).strip()
-		s = '.. _%s:\n\n' % lnk
-		s = s + '%s\n' % self.name + '-' * len(self.name) +'\n\n'
-		s = s + 'Usage\n'
-		s = s + '"""""\n\n'
-		cmd = "stack %s %s" % (self.name, self.getUsageText().strip())
-		s = s + '``%s``\n\n' % cmd.strip()
-
-		if self.section['description']:
-			s = s + 'Description\n'
-			s = s + '"""""""""""\n'
-			s = s + self.section['description'] + '\n\n'
-
-		if self.section['reqarg'] or self.section['optarg']:
-			s = s + 'Arguments\n'
-			s = s + '"""""""""\n'
-			for (name, type, rep, txt) in self.section['reqarg']:
-				s += '``[%s]``\n' % name
-			for (name, type, rep, txt) in self.section['optarg']:
-				s += '``{%s}``\n' % name
-			s += '%s\n\n' % txt
-			s = s + '\n'
-
-		if self.section['reqparam'] or self.section['optparam']:
-			s = s + 'Parameters\n'
-			s = s + '""""""""""\n'
-			for (name, type, rep, txt) in self.section['reqparam']:
-				s += '``[%s=%s]``\n' % (name, type)
-			for (name, type, rep, txt) in self.section['optparam']:
-				s += '``{%s=%s}``\n' % (name, type)
-			s += '%s\n' % txt
-			s = s + '\n'
-
-		if self.section['example']:
-			s = s + 'Examples\n'
-			s = s + '""""""""\n\n'
-			for (cmd, txt) in self.section['example']:
-				s += '``stack %s``\n\n' % cmd.strip()
-				if txt:
-					s += '%s\n\n' % txt
-			s = s + '\n'
-
-		if self.section['related']:
-			s = s + 'Related\n'
-			s = s + '"""""""\n\n'
-			for related in self.section['related']:
-				r = '.'.join(related.split())
-				s += ':ref:`%s`\n\n' % r.strip()
-
-		s = s + '\n'
-		return s
-
 	def getMarkDown(self):
 		s = '## %s\n\n' % self.name
 		s = s + '### Usage\n\n'
@@ -2206,8 +2152,6 @@ class Command:
 				self.addText(handler.getDocbookText())
 			elif format == 'parsed':
 				self.addText(handler.getParsedText())
-			elif format == 'sphinx':
-				self.addText(handler.getSphinxText())
 			elif format == 'md':
 				self.addText(handler.getMarkDown())
 			else:

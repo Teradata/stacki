@@ -50,112 +50,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.3  2011/01/28 02:17:28  mjk
-# Docbook cleanup (using Viz Roll as proto-type)
-# - consistent entity naming (no more mixing of '-' and '_')
-# - roll compat page only lists specified rolls (version.mk)
-# - added note about using all OS cds with non-core rolls (e.g. viz)
-# - added entities for roll names, and bools
-# - logical styles used instead of direct formatting
-#   e.g. constant vs. emphasis
-# Works for Viz (needs new devel env installed)
-# TODO: Update Base Roll to further standardize (slow)
-# TODO: Cleanup all other Rolls (fast)
-#
-# Revision 1.2  2010/09/07 23:53:05  bruno
-# star power for gb
-#
-# Revision 1.1  2010/06/22 21:07:44  mjk
-# build env moving into base roll
-#
-# Revision 1.5  2009/05/01 19:07:15  mjk
-# chimi con queso
-#
-# Revision 1.4  2008/10/18 00:56:07  mjk
-# copyright 5.1
-#
-# Revision 1.3  2008/03/06 23:41:50  mjk
-# copyright storm on
-#
-# Revision 1.2  2007/06/19 21:40:31  mjk
-# do not use NAME in roll-profile.mk
-#
-# Revision 1.1  2007/06/16 01:37:58  mjk
-# - better copyrights
-# - added genrcldocs (gen rocks command line docs)
-#
 
 import os
 import sys
 import string
 import stack.api
 	
-# create all the roll-<command>.sgml files
-
-def docbook():
-	for line in list:
-		cmd  = 'stack %s help format=docbook' % line
-		fout = 'roll-%s.sgml' % string.join(line.split(' '), '-')
-		os.system('%s > %s' % (cmd, fout))
-
-	# create the roll command chapter file
-	
-	prevVerb = ''
-	file = open('roll-commands.sgml', 'w')
-	file.write('<chapter id="roll-commands">\n')
-	file.write('<title>Command Reference</title>\n\n')
-
-	for line in list:
-		currVerb = line.split(' ')[0]
-		if currVerb != prevVerb:
-			if prevVerb:
-				file.write('</section>\n')
-			file.write('\n<section id="command-%s"><title>%s</title>\n' % (currVerb, currVerb))
-		file.write('&source-roll-%s;\n' % string.join(line.split(' '), '-'))
-		prevVerb = currVerb
-
-	if prevVerb:
-		file.write('</section>\n')
-	file.write('</chapter>\n')
-	file.close()
-
-def sphinx():
-	try:
-		os.mkdir('cli')
-	except OSError:
-		pass
-	for line in list:
-		cmd = 'stack %s help format=sphinx' % line
-		f = '.'.join(line.split()) + '.rst'
-		cmdline = '%s > cli/%s' % (cmd, f)
-		print "Running %s" % cmdline
-		os.system(cmdline)
-
-	sphinxtoc()
-
-def sphinxtoc():
-	verblist = {}
-	for line in list:
-		l = line.split()
-		verb = l[0]
-		if not verblist.has_key(verb):
-			verblist[verb] = []
-		cmd = '.'.join(line.split())
-		verblist[verb].append(cmd)
-	
-	print "Writing Sphinx TOC"
-	for verb in verblist:
-		verbfile = open('cli/%s.toc.rst' % verb, 'w')
-		verbfile.write('%s\n' % verb)
-		verbfile.write('='*len(verb) + '\n\n')
-		verbfile.write('.. toctree::\n')
-		verbfile.write('\t:maxdepth: 1\n\n')
-		for cmd in verblist[verb]:
-			verbfile.write('\t%s\n' % cmd)
-		verbfile.close()
-
 
 def markdoc():
 	try:
@@ -267,12 +167,9 @@ list = getCommands(roll)
 
 if len(sys.argv) > 2:
 	fmt 	 = sys.argv[2]
-else:
-	fmt = 'docbook'
 
 import __main__
 f = getattr(__main__, fmt)
-	
 
 f()
 

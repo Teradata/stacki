@@ -4,7 +4,6 @@ foundation-cython
 foundation-gd
 foundation-libxml2
 foundation-mariadb
-foundation-py-gspread
 foundation-py-ipaddress
 foundation-py-jinja2
 foundation-py-libxml2dom
@@ -20,7 +19,6 @@ foundation-py-yaml
 foundation-rcs
 foundation-readline
 foundation-redhat
-foundation-sphinx
 foundation-wget
 git
 git-lfs

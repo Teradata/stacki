@@ -118,31 +118,6 @@ class Command(stack.commands.load.command):
 	<related>unload hostfile</related>
 	"""		
 
-	def doGoogle(self, filename):
-		import gspread
-		import csv
-		import getpass
-
-		username = raw_input(
-			'Enter your Google account name: ')
-		password = getpass.getpass(
-			'Enter your Google account password: ')
-
-		gc = gspread.login(username, password)
-		worksheet = gc.open(filename).sheet1
-		reader = worksheet.get_all_values()
-			
-		filename = '/tmp/%s.csv' % filename
-		file = open(filename, 'w')
-		writer = csv.writer(file)
-
-		for row in reader:
-			writer.writerow(row)
-
-		file.close()
-	
-		return filename
-
 
 	def run(self, params, args):
                 filename, processor = self.fillParams([
@@ -150,21 +125,11 @@ class Command(stack.commands.load.command):
 			('processor', 'default')
                         ])
 
-                googleacct = self.str2bool(self.getAttr('google.credential'))
-                if googleacct:
-			#
-			# this may be a Google spreadsheet
-			#
-			googlefile = self.doGoogle(filename)
-			if not googlefile:
-                                raise CommandError(self, 'file "%s" does not exist' % filename)
-			filename = googlefile
-                else:
-                	if not file:
-                        	raise ParamRequired(self, 'file')
+		if not file:
+			raise ParamRequired(self, 'file')
 
-                        if not os.path.exists(filename):
-                                raise CommandError(self, 'file "%s" does not exist' % filename)
+		if not os.path.exists(filename):
+			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.hosts = {}
 		self.interfaces = {}
