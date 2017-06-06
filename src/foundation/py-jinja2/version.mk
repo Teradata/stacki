@@ -1,2 +1,3 @@
-VERSION = 2.6
-ARCHIVENAME = Jinja2
+VERSION		= 2.9.6
+ARCHIVENAME	= jinja
+URL		= https://github.com/pallets/jinja/
