@@ -95,6 +95,10 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 					enclosure = hosts[host][array]['enclosure'].strip()
 					cmdargs.append('enclosure=%s' % enclosure)
 
+				if 'adapter' in hosts[host][array].keys():
+					adapter = hosts[host][array]['adapter'].strip()
+					cmdargs.append('adapter=%s' % adapter)
+
 				if 'options' in hosts[host][array].keys():
 					options = hosts[host][array]['options']
 					cmdargs.append('options="%s"' % options)
