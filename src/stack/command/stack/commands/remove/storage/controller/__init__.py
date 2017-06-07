@@ -181,10 +181,10 @@ class Command(stack.commands.remove.command,
 		deletesql = """delete from storage_controller where
 			scope = '%s' and tableid = %s """ % (scope, tableid)
 
-		if adapter != '*':
+		if adapter != -1:
 			deletesql += ' and adapter = %s' % adapter
 
-		if enclosure != '*':
+		if enclosure != -1:
 			deletesql += ' and enclosure = %s' % enclosure
 
 		if slot != '*':
