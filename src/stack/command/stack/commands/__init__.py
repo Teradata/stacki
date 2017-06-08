@@ -1102,7 +1102,7 @@ class DocStringHandler(handler.ContentHandler,
 class DatabaseConnection:
 
 	"""Wrapper class for all database access.  The methods are based on
-	those provided from the MySQLdb library and some other Stack
+	those provided from the pymysql library and some other Stack
 	specific methods are added.  All StackCommands own an instance of
 	this object (self.db).
 	"""

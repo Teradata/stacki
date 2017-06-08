@@ -95,7 +95,7 @@
 
 from __future__ import print_function 
 import stack.commands
-from MySQLdb import *
+from pymysql import *
 
 class Plugin(stack.commands.Plugin):
 

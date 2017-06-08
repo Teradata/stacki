@@ -21,7 +21,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 <package>foundation-python-xml</package>
 <package>foundation-py-pygobject</package>
 <package>foundation-py-pygtk</package>
-<package>foundation-py-MySQL-python</package>
+<package>foundation-py-PyMySQL</package>
 <package>foundation-py-pycairo</package>
 <package>foundation-py-libxml2dom</package>
 <package>foundation-python-pytest</package>
