@@ -1,4 +1,6 @@
 #!/sur/bin/env python
+#
+# This file has been modified from the original by StackIQ
 
 ###################################
 # Author: Kevin Ollivier
