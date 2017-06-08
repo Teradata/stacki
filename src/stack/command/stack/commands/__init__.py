@@ -116,7 +116,7 @@ from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
 from xml.sax._exceptions import SAXParseException
-
+from pymysql import OperationalError, ProgrammingError
 
 _logPrefix = ''
 def Log(message, level=syslog.LOG_INFO):
@@ -1144,8 +1144,6 @@ class DatabaseConnection:
 		if not self.link:
                         return [ ]
                 
-		from _mysql_exceptions import *
-
                 rows = [ ]
                 
                 m = hashlib.md5()
