@@ -116,7 +116,7 @@ from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
 from xml.sax._exceptions import SAXParseException
-
+from pymysql import OperationalError, ProgrammingError
 
 _logPrefix = ''
 
@@ -1111,7 +1111,7 @@ class DocStringHandler(handler.ContentHandler,
 class DatabaseConnection:
 
 	"""Wrapper class for all database access.  The methods are based on
-	those provided from the MySQLdb library and some other Stack
+	those provided from the pymysql library and some other Stack
 	specific methods are added.  All StackCommands own an instance of
 	this object (self.db).
 	"""
@@ -1127,7 +1127,7 @@ class DatabaseConnection:
 			self.database = None
 			self.link     = None
 
-		# Optional envinormnet variable STACKCACHE can be used
+		# Optional envinorment variable STACKCACHE can be used
 		# to disable database caching.	Default is to cache.
 		
 		caching = os.environ.get('STACKCACHE')
@@ -1151,35 +1151,33 @@ class DatabaseConnection:
 
 	def select(self, command):
 		if not self.link:
-			return [ ]
-		
-		from _mysql_exceptions import OperationalError, ProgrammingError
+                        return [ ]
+                
+                rows = [ ]
+                
+                m = hashlib.md5()
+                m.update(command.strip())
+                k = m.hexdigest()
 
-		rows = [ ]
-		
-		m = hashlib.md5()
-		m.update(command.strip())
-		k = m.hexdigest()
+#                print 'select', k, command
+                if self.cache.has_key(k):
+                	rows = self.cache[k]
+#                        print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
+                else:
+                        try:
+                        	self.execute('select %s' % command)
+                        	rows = self.fetchall()
+                        except (OperationalError, ProgrammingError):
+                                # Permission error return the empty set
+                                # Syntax errors throw exceptions
+                                rows = [ ]
+                                
+                        if self.caching:
+                                self.cache[k] = rows
 
-#		 print 'select', k, command
-		if self.cache.has_key(k):
-			rows = self.cache[k]
-#			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
-		else:
-			try:
-				self.execute('select %s' % command)
-				rows = self.fetchall()
-			except (OperationalError, ProgrammingError):
-				# Permission error return the empty set
-				# Syntax errors throw exceptions
-				rows = [ ]
-				
-			if self.caching:
-				self.cache[k] = rows
+                return rows
 
-		return rows
-
-					
+                                        
 	def execute(self, command):
 		command = command.strip()
 

@@ -21,7 +21,7 @@
 
   <package>stack-sql</package>
   <package>foundation-mariadb</package>
-  <package>foundation-py-MySQL-python</package>
+  <package>foundation-py-pymysql</package>
 
 <post>
 
@@ -122,10 +122,10 @@ import re
 import string
 import base64
 
-import MySQLdb
+import pymysql
 
 # Connect to the database
-d = MySQLdb.connect(user='root', db='mysql', passwd='',
+d = pymysql.connect(user='root', db='mysql', passwd='',
 	unix_socket='/var/opt/stack/mysql/mysql.sock',
 	autocommit=True)
 
