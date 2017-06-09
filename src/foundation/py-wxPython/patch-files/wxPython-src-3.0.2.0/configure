@@ -37217,6 +37217,8 @@ else
 fi
 
 # STACKIQ
+# 
+# This software has been modified by StackIQ with the addition of this block of code.
 pkg_failed=no
 # STACKIQ
 
