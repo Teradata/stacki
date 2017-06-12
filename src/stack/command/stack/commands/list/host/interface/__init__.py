@@ -147,26 +147,6 @@ class Command(stack.commands.list.host.command):
                         data[row[0]].append(row[1:])
                         
                 for host in self.getHostnames(args):
-#                        self.db.select("""distinctrow
-#				IF(net.subnet, sub.name, NULL),
-#				net.device, net.mac, net.main, net.ip,
-#				net.module, net.name, net.vlanid, net.options,
-#				net.channel
-#				from nodes n, networks net, subnets sub
-#				where n.name='%s' and net.node=n.id
-#				and (net.subnet=sub.id or net.subnet is NULL)
-#				order by net.device""" % host )
-
-#			for (network,
-#                             interface,
-#                             mac,
-#                             default,
-#                             ip,
-#                             module,
-#                             name,
-#                             vlan,
-#                             options,
-#                             channel) in self.db.fetchall():
 
 			for (network,
                              interface,
@@ -203,20 +183,20 @@ class Command(stack.commands.list.host.command):
                                                 vlan,
                                                 options,
                                                 channel
-                                                ))
+                                        ))
                                 else:
 					if network:
-                                                mask = networks[network]['mask']
+                                                mask    = networks[network]['mask']
                                                 gateway = networks[network]['gateway']
-                                                zone = networks[network]['zone']
-                                                dns = networks[network]['dns']
-                                                pxe = networks[network]['pxe']
+                                                zone    = networks[network]['zone']
+                                                dns     = networks[network]['dns']
+                                                pxe     = networks[network]['pxe']
 					else:
-						mask = None
+						mask    = None
 						gateway = None
-						zone = None
-						dns = None
-						pxe = None
+						zone    = None
+						dns     = None
+						pxe     = None
 				
                                         self.addOutput(host, (
                                                 interface,
@@ -234,37 +214,37 @@ class Command(stack.commands.list.host.command):
                                                 vlan,
                                                 options,
                                                 channel
-                                                ))
+                                        ))
 
                 if not expanded:
                         self.endOutput(header=[ 'host',
-                                'interface',
-                                'default',
-                                'network',
-                                'mac',
-                                'ip',
-                                'name',
-                                'module',
-                                'vlan',
-                                'options',
-                                'channel'
-                                ])
+                                                'interface',
+                                                'default',
+                                                'network',
+                                                'mac',
+                                                'ip',
+                                                'name',
+                                                'module',
+                                                'vlan',
+                                                'options',
+                                                'channel'
+                                        ])
                 else:
                         self.endOutput(header=[ 'host',
-                                'interface',
-                                'default',
-                                'network',
-                                'mac',
-                                'ip',
-                                'mask',
-                                'gateway',
-                                'name',
-                                'zone',
-                                'dns',
-                                'pxe',
-                                'module',
-                                'vlan',
-                                'options',
-                                'channel'
-                                ])
+                                                'interface',
+                                                'default',
+                                                'network',
+                                                'mac',
+                                                'ip',
+                                                'mask',
+                                                'gateway',
+                                                'name',
+                                                'zone',
+                                                'dns',
+                                                'pxe',
+                                                'module',
+                                                'vlan',
+                                                'options',
+                                                'channel'
+                                        ])
 
