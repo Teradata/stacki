@@ -21,7 +21,7 @@
 
   <package>stack-sql</package>
   <package>foundation-mariadb</package>
-  <package>foundation-py-pymysql</package>
+  <package>foundation-py-PyMySQL</package>
 
 <post>
 
