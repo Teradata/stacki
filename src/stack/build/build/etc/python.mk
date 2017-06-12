@@ -115,7 +115,8 @@ PY3.TEST	= /opt/stack/bin/py.test
 .PHONY: test
 test:
 	$(PY.TEST)  $(PY.TEST.FLAGS) -v tests
-	$(PY3.TEST) $(PY3.TEST.FLAGS) -v tests
+	@echo "To run python 3 tests do the following"
+	@echo $(PY3.TEST) $(PY3.TEST.FLAGS) -v tests
 
 clean::
 	@if [ -d tests ]; then 					\
