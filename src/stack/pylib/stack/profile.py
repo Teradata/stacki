@@ -101,7 +101,6 @@ import popen2
 import socket
 import base64
 import syslog
-import stack.sql
 import stack.util
 import stack.graph
 import stack.cond
