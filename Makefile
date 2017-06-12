@@ -44,41 +44,32 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 -include version-$(ARCH).mk
 
-bootstrap:
-	-yum groupinstall -y "Development and Creative Workstation"
-	yum groupinstall -y "Compatibility Libraries"
-	yum groupinstall --skip-broken -y "Development Tools"
-	yum install --skip-broken -y rpm-build \
-	redhat-rpm-config \
-	gcc \
-	gcc-c++ \
-	gettext \
-	eject \
-	binutils-devel \
-	byacc \
-	openssl-devel \
-	bzip2-devel \
-	ncurses-devel \
-	readline-devel \
-	sqlite-devel \
-	swig \
-	gtk2-devel \
-	mesa-libGLU-devel \
-	pygobject2-devel \
-	pycairo-devel \
-	mkisofs \
-	libblkid-devel \
-	intltool \
-	audit-libs-devel \
-	system-config-keyboard \
-	cmake \
-	apr-devel \
-	libcurl-devel \
-	httpd-devel \
-	syslinux \
-	createrepo \
-	perl-ExtUtils-MakeMaker \
-	asciidoc xmlto yum-utils
+GROUPS=developer-workstation-environment \
+	compat-libraries development
+
+PACKAGES=rpm-build redhat-rpm-config gcc \
+	gcc-c++ gettext eject binutils-devel \
+	byacc openssl-devel  bzip2-devel \
+	ncurses-devel readline-devel \
+	sqlite-devel swig gtk2-devel \
+	mesa-libGLU-devel pygobject2-devel \
+	pycairo-devel mkisofs libblkid-devel \
+	intltool audit-libs-devel \
+	system-config-keyboard cmake \
+	apr-devel libcurl-devel \
+	httpd-devel syslinux squashfs-tools \
+	createrepo asciidoc xmlto \
+	yum-utils perl-ExtUtils-MakeMaker
+
+$(GROUPS):
+	yum groupinstall -y $@
+
+$(PACKAGES):
+	yum install -y $@
+
+ospackages: $(GROUPS) $(PACKAGES)
+
+bootstrap: ospackages
 	$(MAKE) -C src/stack/build $@
 	. /etc/profile.d/stack-build.sh
 	$(MAKE) -C src $@
