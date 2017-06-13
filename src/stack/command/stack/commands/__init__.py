@@ -487,6 +487,8 @@ class HostArgumentProcessor:
                                                 l.append('where os == "%s"' % target)
                                         elif scope == 'b':
                                                 l.append('where box == "%s"' % target)
+                                        elif scope == 'g':
+                                                l.append('where group.%s == True' % target)
                                         elif scope == 'r':
                                                 l.append('where rack == "%s"' % target)
 					adhoc = True
@@ -1495,11 +1497,15 @@ class DatabaseConnection:
                                 if not s:
                                         for x, in self.select("""name from oses"""):
                                                 if x == hostname:
-                                                        s = '"e:%s" for %s hosts' % (hostname, hostname)
+                                                        s = '"o:%s" for %s hosts' % (hostname, hostname)
                                 if not s:
                                         for x, in self.select("""name from boxes"""):
                                                 if x == hostname:
-                                                        s = '"e:%s" for hosts using the %s box' % (hostname, hostname)
+                                                        s = '"b:%s" for hosts using the %s box' % (hostname, hostname)
+                                if not s:
+                                        for x, in self.select("""name from groups"""):
+                                                if x == hostname:
+                                                        s = '"g:%s" for host in the %s group' % (hostname, hostname)
                                 if not s:
                                         if hostname.find('rack') == 0:
                                                 s = '"r:%s" for hosts in %s' % (hostname, hostname)

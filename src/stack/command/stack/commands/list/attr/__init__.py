@@ -231,6 +231,11 @@ class Command(stack.commands.Command,
                         readonly[host]['os']       = self.db.getHostOS(host)
                         readonly[host]['hostname'] = host
 
+                for row in self.call('list.host.group'):
+                        for group in row['groups'].split():
+                                readonly[row['host']]['group.%s' % group] = 'true'
+                        readonly[row['host']]['groups'] = row['groups']
+                
 
                 for host in attributes:
                         a = attributes[host]
