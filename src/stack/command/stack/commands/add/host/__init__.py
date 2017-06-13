@@ -277,7 +277,7 @@ class Command(command):
                         (host, appliance, boxid, rack, rank, osaction_id, installaction_id))
 
                 if environment:
-                        self.command('set.host.environment', [ host, environment ])
+                        self.command('set.host.environment', [ host, "environment=%s" % environment ])
                         
 
 	def run(self, params, args):

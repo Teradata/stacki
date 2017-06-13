@@ -50,6 +50,7 @@ RACKSIZE    = 1
 ENVIRONMENT = 'pytest'
 
 def setup_module(module):
+	Call('add environment %s' % ENVIRONMENT)
         for rack in range(1000, 1000 + NUMRACKS):
                 for rank in range(0, RACKSIZE):
                         host = 'backend-%d-%d' % (rack, rank)
@@ -62,7 +63,8 @@ def setup_module(module):
 
                         
 def teardown_module(module):
-        Call('remove host %s' % ENVIRONMENT)
+	Call('remove host %s' % ENVIRONMENT)
+	Call('remove environment %s' % ENVIRONMENT)
 
 
 def test_scale():
