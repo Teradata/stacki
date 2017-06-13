@@ -73,7 +73,7 @@ class _CondEnv(UserDict):
 
 		# print '__getitem__', key
 		
-		# Handle boolean special since there are not in the
+		# Handle boolean special since they are not in the
 		# environment
 
 		if key.lower() == 'true':
@@ -87,16 +87,16 @@ class _CondEnv(UserDict):
 			return None	# undefined vars are None
 
 		# Try to convert value to an integer
-		try:
-			return int(val)
-		except ValueError:
-			pass
+#		try:
+#			return int(val)
+#		except ValueError:
+#			pass
 
 		# Try to convert value to a float
-		try:
-			return float(val)
-		except ValueError:
-			pass
+#		try:
+#			return float(val)
+#		except ValueError:
+#			pass
 
 		# Try to convert value to a boolean
 		

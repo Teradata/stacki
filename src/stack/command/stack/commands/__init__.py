@@ -391,20 +391,13 @@ class HostArgumentProcessor:
 
 		- hostname
 		- IP address
-		- appliance name
 		- MAC address
+                - where COND (e.g. 'where appliance=="backend"')
 
 		Any combination of these is valid.  If the names list
 		is empty a list of all hosts in the cluster is
 		returned.
 		
-		The following groups are recognized:
-		
-		rackN - All non-frontend host in rack N
-		appliancename - All appliances of a given type (e.g. compute)
-		[ cond ] - Ad-Hoc attribute/cond groups
-			(e.g. [ appliance=="compute" ])
-
 		The 'managed_only' flag means that the list of hosts will
 		*not* contain hosts that traditionally don't have ssh login
 		shells (for example, the following appliances usually don't
@@ -480,60 +473,28 @@ class HostArgumentProcessor:
 								     subnet)
 				
 
+                l = []
 		if names:
-			
-			# Environment, Appliance, and Rack grouping are special 
-			# since we can just say things like "compute" "rack1".
-			# To force all code through ad-hoc grouping convert
-			# any hostnames in this format to the general purpose
-			# code.
-
-			environments = [ ]
-			for e, in self.db.select(
-					"""
-					distinct name
-					from environments
-					"""):
-				environments.append(e)
-
-			appliances  = []
-			for (name, ) in self.db.select(
-					"""
-					name from appliances
-					"""):
-				appliances.append(name)
-
-			racks = []
-			for (rack, ) in self.db.select(
-					"""
-					distinct(rack) from nodes
-					"""):
-				racks.append(rack)
-			list = []
 			for host in names:
-				if host in environments:
-					host = '[environment=="%s"]' % host
+                                tokens = host.split(':', 1)
+                                if len(tokens) == 2:
+                                        scope, target = tokens
+                                        if scope == 'a':
+                                                l.append('where appliance == "%s"' % target)
+                                        elif scope == 'e':
+                                                l.append('where environment == "%s"' % target)
+                                        elif scope == 'o':
+                                                l.append('where os == "%s"' % target)
+                                        elif scope == 'b':
+                                                l.append('where box == "%s"' % target)
+                                        elif scope == 'r':
+                                                l.append('where rack == "%s"' % target)
 					adhoc = True
-				elif host in appliances:
-					host = '[appliance=="%s"]' % host
+                                        continue
+                                if host.find('where') == 0:
 					adhoc = True
-				elif host.find('rack') == 0:
-					for i in racks:
-						if host.find('rack%s' % i) == 0:
-							try:
-								isinstance(int(i),int)
-								host = '[rack==%s]' % int(i)
-								adhoc = True
-							except ValueError:
-								host = '[rack=="%s"]' % i
-								adhoc = True
-				elif host[0] == '[':
-					adhoc = True
-
-				list.append(host)
-				
-			names = list	# names is now the new ad-hoc syntax
-
+                                l.append(host)
+                names = l
 
 		# If we have any Ad-Hoc groupings we need to load the attributes
 		# for every host in the nodes tables.  Since this is a lot of
@@ -562,12 +523,11 @@ class HostArgumentProcessor:
 
 			# ad-hoc group
 			
-			if name[0] == '[': # group
+                        if name.find('where') == 0:
 				for host in hostList:
-					exp = name[1:-1]
+					exp = name[5:]
 					try:
-						res = EvalCondExpr(exp,
-								   hostAttrs[host])
+						res = EvalCondExpr(exp, hostAttrs[host])
 					except SyntaxError:
 						raise CommandError(self, 'group syntax "%s"' % exp)
 					if res:
@@ -1518,7 +1478,33 @@ class DatabaseConnection:
 						return self.getHostname(hostname)
 
 					fin.close()
-				
+
+                                # HostArgumentProcessor has changed
+                                # handling of appliances (and others)
+                                # as hsotnames.  So do some work here
+                                # to point the user to the new syntax.
+
+                                s = ''
+                                for x, in self.select("""name from appliances"""):
+                                        if x == hostname:
+                                                s = '"a:%s" for %s appliances' % (hostname, hostname)
+                                if not s:
+                                        for x, in self.select("""name from environments"""):
+                                                if x == hostname:
+                                                        s = '"e:%s" for hosts in the %s environment' % (hostname, hostname)
+                                if not s:
+                                        for x, in self.select("""name from oses"""):
+                                                if x == hostname:
+                                                        s = '"e:%s" for %s hosts' % (hostname, hostname)
+                                if not s:
+                                        for x, in self.select("""name from boxes"""):
+                                                if x == hostname:
+                                                        s = '"e:%s" for hosts using the %s box' % (hostname, hostname)
+                                if not s:
+                                        if hostname.find('rack') == 0:
+                                                s = '"r:%s" for hosts in %s' % (hostname, hostname)
+                                if s:
+                                        raise CommandError(self, 'use %s' % s)
 				raise CommandError(self, 'cannot resolve host "%s"' % hostname)
 					
 		
@@ -2288,8 +2274,10 @@ class Command:
 		for arg in argv:
 			if not arg:
 				continue
-			if arg[0] == '[': # ad-hoc group
-				list.append(arg)
+#			if arg[0] == '[': # ad-hoc group
+#				list.append(arg)
+                        if arg.find('where') == 0:
+                                list.append(arg)
 			elif len(arg.split('=',1)) == 2:
 				(key, val) = arg.split('=', 1)
 				dict[key] = val
