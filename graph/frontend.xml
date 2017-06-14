@@ -60,7 +60,6 @@
 
 	<order head="TAIL">
 		<tail>install</tail>
-		<tail>partitions-save-server</tail>
 	</order>
 
 
@@ -84,7 +83,6 @@
 		<to>dns-server</to>
 		<to>firewall-server</to>
 		<to>firewall-base</to>
-		<to>partitions-save-server</to>
 		<to>routes-server</to>
 		<to>kernel-server</to>
 		<to>ca</to>

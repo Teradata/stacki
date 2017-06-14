@@ -6,10 +6,16 @@ ROLLROOT	= ../../..
 DEPENDS.DIRS	= spreadsheets
 include $(STACKBUILD)/etc/CCRules.mk
 
+ifeq ($(ROLLVERSION),)
+ROLLVERSION = $(RPM_PACKAGE_VERSION)
+endif
+
+
 build:
 	echo "Building sample spreadsheets"
 
 install::
+	env
 	mkdir -p $(ROOT)/opt/stack/share/examples/spreadsheets/
 	(cd spreadsheets/partition ; \
 	for x in *.csv; do	\

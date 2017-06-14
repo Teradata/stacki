@@ -1,32 +1,27 @@
-<?xml version="1.0" standalone="no"?>
+#!/opt/stack/bin/python
+#
+# @SI_Copyright@
+# @SI_Copyright@
+#
 
-<kickstart>
-
-<si_copyright>
-(c) 2006 - 2017 StackIQ Inc.
-All rights reserved. stacki(r) v4.0 stacki.com
-</si_copyright>
-
-<pre cond="'&release;' == '7.x'">
-<!-- Load SCSI Generic Module. Required for HPSSACLI,
-     and StorCLI, on RHEL/CentOS 7.x -->
-modprobe sg
-</pre>
-
-<pre interpreter="/opt/stack/bin/python">
 import sys
-sys.path.append('/opt/stack/lib')
 
-def str2bool(s):
-	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
-		return 1
-	else:
-		return 0
+sys.path.append('/tmp')
+from stack_site import *
+
+sys.path.append('/opt/stack/lib')
+from stacki_storage import *
+
+
+##
+## functions
+##
 
 def getController():
-
 	# Check if a controller is listed explicitly
-	controller_type = '&storage.adapter.type;'
+	controller_type = None
+	if attributes.has_key('storage.adapter.type'):
+		controller_type = attributes['storage.adapter.type']
 
 	# If controller type is specified, make that
 	# the only possible choice. Otherwise, list
@@ -59,16 +54,24 @@ def getController():
 
 	return(None, None)
 
+##
+## MAIN
+##
+
 #
 # only run this code if 'nukecontroller' is true
 #
-if not str2bool('&nukecontroller;'):
+if attributes.has_key('nukecontroller'):
+	nukecontroller = attributes['nukecontroller']
+else:
+	nukecontroller = 'false'
+
+if not attr2bool(nukecontroller):
 	sys.exit(0)
 
 # Get the Controller Object, the adapter info,
 
 (ctrl, adapter) = getController()
-
 
 if ctrl == None:
 	sys.exit(0)
@@ -76,15 +79,10 @@ if ctrl == None:
 if adapter == None:
 	sys.exit(0)
 
-output = \
-<eval>
-/opt/stack/bin/stack report host storage controller &hostname;
-</eval>
-
 #
-# if no output, then just nuke the first adapter and exit
+# if no csv_controller data, then just nuke the first adapter and exit
 #
-if not output:
+if not csv_controller:
 	ctrl.doNuke(adapter)
 	sys.exit(0)
 
@@ -93,7 +91,7 @@ if not output:
 # reconstruct the arrays
 #
 arrayids = []
-for o in output:
+for o in csv_controller:
 	arrayid = o['arrayid']
 	if arrayid not in arrayids:
 		arrayids.append(o['arrayid'])
@@ -111,7 +109,7 @@ for arrayid in arrayids:
 	adapter = None
 	options = ''
 		
-	for o in output:
+	for o in csv_controller:
 		if o['arrayid'] != arrayid:
 			continue
 
@@ -178,7 +176,7 @@ raidlevel = None
 hotspares = []
 options = ''
 
-for o in output:
+for o in csv_controller:
 	if 'arrayid' in o.keys() and o['arrayid'] == '*' and \
 			'slot' in o.keys() and o['slot'] == '*':
 
@@ -215,15 +213,3 @@ for o in output:
 			ctrl.doRaid(raidlevel, adapter, enclosure, [ slot ],
 				hotspares, options)
 
-
-
-</pre>
-
-<post cond="'&release;' == '7.x'">
-<file name="/etc/modules-load.d/sg.conf">
-# Bug in CentOS / RHEL 7.0. SCSI Generic Module
-# is not loaded by default
-sg
-</file>
-</post>
-</kickstart> 

@@ -140,7 +140,10 @@ except:
 
 if action == 'os':
 	stack.api.Call('set host boot', [ ipaddr, 'action=%s' % action ])
-
+	stack.api.Call('set host attr', [ ipaddr, 'attr=nukedisks',
+		'value=false'])
+	stack.api.Call('set host attr', [ ipaddr, 'attr=nukecontroller',
+		'value=false'])
         
 print 'Content-type: application/octet-stream'
 print 'Content-length: %d' % (len(''))

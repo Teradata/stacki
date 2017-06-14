@@ -1,6 +1,7 @@
 fcgi
 foundation-comps
 foundation-cython
+foundation-future
 foundation-gd
 foundation-libxml2
 foundation-mariadb
@@ -11,6 +12,7 @@ foundation-py-pycairo
 foundation-py-PyMySQL
 foundation-py-requests
 foundation-python
+foundation-python-py
 foundation-python-pytest
 foundation-python-setuptools
 foundation-python-xml
@@ -38,6 +40,7 @@ stack-piece-pipe
 stack-pxeboot
 stack-pylib
 stack-sql
+stack-storage-config
 stack-summary
 stack-tracker
 stack-wizard

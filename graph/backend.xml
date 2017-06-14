@@ -8,10 +8,6 @@
 
 	<!-- Graph Ordering for Kickstart Generation -->
 
-	<order tail="HEAD">
-		<head>partitions-save</head>
-	</order>
-
 	<order head="backend">
 		<tail>base</tail>
 	</order>
@@ -22,18 +18,6 @@
 
 	<order tail="firewall-base">
 		<head>networking-client</head>
-	</order>
-
-	<order head="storage-controller-client">
-		<tail>discover-disks</tail>
-	</order>
-
-	<order head="discover-disks">
-		<tail>nukedisks</tail>
-	</order>
-
-	<order head="nukedisks">
-		<tail>partition</tail>
 	</order>
 
 	<order head="time-client">
@@ -57,12 +41,9 @@
 		<to>networking-client</to>
 		<to>node-certs</to>
 		<to>resolv</to>
-		<to>partitions-save</to>
 		<to>routes-client</to>
 		<to>pxeboot</to>
-		<to>storage-controller-client</to>
-		<to>discover-disks</to>
-		<to>nukedisks</to>
+		<to>storage</to>
 	</edge>
 
 	<edge from="client" to="firewall-client" cond="firewall"/>
