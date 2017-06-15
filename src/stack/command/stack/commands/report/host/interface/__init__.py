@@ -133,7 +133,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			# Check for IB
 			ib_re = re.compile('^ib[0-9]+$')
 			if not ib_re.match(device):
-				self.addOutput(host, 'HWADDR=%s' % mac)
+				self.addOutput(host, 'MACADDR=%s' % mac)
 
 		if dhcp:
 			self.addOutput(host, 'BOOTPROTO=dhcp')
