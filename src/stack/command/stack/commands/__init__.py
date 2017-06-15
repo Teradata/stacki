@@ -1961,7 +1961,15 @@ class Command:
 		if not format:
 			format = 'text'
 
-		if format in [ 'json', 'python', 'binary' ]:
+                tokens = format.split(':')
+                if len(tokens) == 1:
+                        format      = tokens[0]
+                        format_args = None
+                else:
+                        format      = tokens[0]
+                        format_args = tokens[1].lower()
+
+		if format in [ 'col', 'shell', 'json', 'python', 'binary' ]:
 			if not header: # need to build a generic header
 				if len(self.output) > 0:
 					rows = len(self.output[0])
@@ -1983,8 +1991,24 @@ class Command:
 							dict[key].append(val)
 						else:
 							dict[key] = val
-				list.append(dict)
-			if format == 'python':
+                                list.append(dict)
+                        if format == 'col':
+                                for row in list:
+                                        try:
+                                                self.addText('%s\n' % row[format_args])
+                                        except KeyError:
+                                                pass
+                        elif format == 'shell':
+                                rows = len(list)
+                                for i in range(0, rows):
+                                        if rows > 1:
+                                                n = '%d_' % i
+                                        else:
+                                                n = ''
+                                        for k,v in list[i].items():
+                                                self.addText('stack_%s%s="%s"\n' % (n,k,v))
+                                        self.addText('\n')
+			elif format == 'python':
 				self.addText('%s' % list)
 			elif format == 'binary':
 				self.addText(marshal.dumps(list))

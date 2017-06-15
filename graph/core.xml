@@ -18,7 +18,6 @@
 
 	<order head="TAIL">
 		<tail>postshell</tail>
-		<tail>do-partition</tail>
 	</order>
 
 
@@ -26,14 +25,12 @@
 
 	<edge from="base">
 		<to>pre-ssh-key</to>
-		<to>disk-stamp</to>
 		<to>logrotate</to>
 		<to>rpc</to>
 		<to>node</to>
 		<to>time-base</to>
 		<to>selinux</to>
 		<to>postshell</to>
-		<to>partition</to>
 		<to>yum-base</to>
 		<to>ssl</to>
 		<to>ssh</to>
@@ -50,10 +47,6 @@
 	<edge from="client">
 		<to>ssl-client</to>
 		<to>ssh-client</to>
-	</edge>
-
-	<edge from="partition">
-		<to>do-partition</to>
 	</edge>
 
 </graph>

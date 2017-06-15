@@ -115,7 +115,18 @@ class Command(command):
 		if len(args) < 1:
                         raise ArgRequired(self, 'host')
 
+                me    = self.db.getHostname()
 		hosts = self.getHostnames(args)
+
+                # Don't allow the user to remove the host the command
+                # is running on.  Right now that means cannot remove
+                # the Frontend, but checked this way will allow for
+                # future multiple Frontend's where you may still want 
+                # to remove some but not all of them.
+
+                if me in hosts:
+                        raise CommandError(self, 'cannot remove "%s"' % me)
+                print hosts, me
 		self.runPlugins(hosts)
 
 		#	

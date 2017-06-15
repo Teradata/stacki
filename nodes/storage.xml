@@ -7,88 +7,64 @@
 All rights reserved. stacki(r) v4.0 stacki.com
 </si_copyright>
 
-<pre>
 
-<file name="/tmp/db_partition_info.py">
-StackVersion = '&version;'
-StackRelease = '&release;'
-KickstartHost = '&Kickstart_PrivateKickstartHost;'
+<pre cond="'&release;' == '7.x'">
 
-<eval shell="python" mode="xml">
-import os
-import string
-import re
-import sys
-import syslog
-import stack.sql
+<!-- Load SCSI Generic Module. Required for HPSSACLI,
+     and StorCLI, on RHEL/CentOS 7.x -->
 
-class App(stack.sql.Application):
-
-	def __init__(self):
-		stack.sql.Application.__init__(self)
-		self.hostname = None
-
-	def setHostname(self, hostname):
-		self.hostname = hostname
-
-	def getPartitionInfo(self):
-		partinfo = {}
-
-		self.execute('select partitions.device, partitions.mountpoint, '
-			'partitions.sectorstart, partitions.partitionsize, '
-			'partitions.partitionid, partitions.fstype, '
-			'partitions.partitionflags, partitions.formatflags '
-			'from partitions,nodes '
-			'where partitions.node = nodes.id and '
-			'nodes.name = "%s" ' % self.hostname +
-			'order by partitions.device')
-
-		for dev,mnt,sect,size,id,fstype,pflags,fflags in \
-								self.fetchall():
-
-			s = (dev,sect,size,id,fstype,pflags,fflags,mnt)
-
-			if dev[0:2] == 'md':
-				devbasename = dev
-			else:
-				a = re.split('[0-9]+$', dev)
-				devbasename = a[0]
-
-			if not partinfo.has_key(devbasename):
-				partinfo[devbasename] = [ s ]
-			else:
-				partinfo[devbasename].append(s)
-
-		return partinfo
-
-
-        def run(self):
-		#
-		# if we are installing a standalone node (e.g., a frontend
-		# or a web server) the database will not be accessible, so
-		# don't do anything and just return
-		#
-		if self.connect():
-			partinfo = self.getPartitionInfo()
-			print 'dbpartinfo = ', repr(partinfo)
-			self.close()
-		else:
-			print 'dbpartinfo = {}'
-
-		return
-
-
-app = App()
-app.setHostname('&hostname;')
-app.run()
-</eval>
-
-</file>
-
-chmod a+x /opt/stack/lib/do_partition.py
-/opt/stack/lib/do_partition.py > /tmp/partition-info
+modprobe sg
 
 </pre>
+
+
+<pre>
+
+mkdir -p /tmp/stack_site/
+cat /run/install/tmp/ks.xml | \
+	/opt/stack/bin/stack list host profile chapter=stacki \
+	2> /tmp/profile_stack_site.debug \
+	> /tmp/stack_site/__init__.py
+
+/opt/stack/bin/initialize-storage.py
+
+/opt/stack/bin/configure-controllers.py
+
+# 
+# need to call 'initialize-storage.py' again after reconfiguring the
+# hardware disk controller because it may have created new LUNs and the 
+# master boot record on a LUN may be corrupted and require initialization.
+# 
+/opt/stack/bin/initialize-storage.py
+
+/opt/stack/bin/configure-partitions.py > /tmp/partition-info
+
+</pre>
+
+
+<package>stack-storage-config</package>
+
+
+<post arg='--nochroot'>
+mkdir /mnt/sysimage/tmp/stack_site
+cp /tmp/stack_site/__init__.py /mnt/sysimage/tmp/stack_site/
+</post>
+
+<post>
+/opt/stack/bin/record-partitions.py
+</post>
+
+
+<post cond="'&release;' == '7.x'">
+
+<file name="/etc/modules-load.d/sg.conf">
+# Bug in CentOS / RHEL 7.0. SCSI Generic Module
+# is not loaded by default
+sg
+</file>
+
+</post>
+
 
 <post cond="'&release;' == '6.x'">
 
@@ -159,6 +135,7 @@ mv /tmp/stacki-grub.log /root/
 sed -i "s/${desired_grub_boot_drive},0/hd0,0/g" $GRUB_CONF
 
 </post>
+
 
 </kickstart> 
 

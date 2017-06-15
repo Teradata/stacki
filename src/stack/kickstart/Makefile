@@ -94,7 +94,7 @@
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
 DEPENDS.FILES	= $(wildcard *.py)
-DEPENDS.DIRS	= site-nodes utils
+DEPENDS.DIRS	= utils
 
 
 include $(STACKBUILD)/etc/CCRules.mk

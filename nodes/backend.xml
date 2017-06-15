@@ -43,5 +43,15 @@ for o in stack.api.Call('list cart'):
 </main>
 
 
+<post cond="'&release;' == '7.x'">
+cp /run/install/tmp/stack.conf /tmp/stack.conf
+</post>
+
+
+<post>
+/opt/stack/bin/peer-done
+</post>
+
+
 </kickstart> 
 

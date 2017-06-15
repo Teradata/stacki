@@ -37,6 +37,7 @@ fi
 #
 mkdir -p /run/install/tmp
 cp /tmp/stack.conf /run/install/tmp/stack.conf
+cp /tmp/ks.xml /run/install/tmp/ks.xml
 
 #
 # if lighttpd was already running, then kill it since we may have

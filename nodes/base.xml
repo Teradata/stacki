@@ -95,6 +95,14 @@ if $programname == 'SCL' then ~
 </file>
 </post>
 
+
+<post>
+<file name="/etc/stack-release">
+stacki release &version; (&release;)
+</file>
+</post>
+
+
 <boot order="post">
 mkdir -p /var/log/stacki/ks
 mv /tmp/ks-script* /var/log/stacki/ks
