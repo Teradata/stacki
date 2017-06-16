@@ -177,7 +177,6 @@ def EvalCondExpr(cond, attrs):
 	cond = cond.replace('.', '_DOT_')
 	cond = cond.replace('&&', ' and ')
 	cond = cond.replace('||', ' or ')
-	cond = cond.replace('!=', ' is not ')
 
 	env = _CondEnv()
 	for (k,v) in attrs.items():
