@@ -53,12 +53,4 @@ __CCRULES_MK = yes
 include $(STACKBUILD)/etc/CCCommon.mk
 include $(STACKBUILD)/etc/Rules.mk
 
-##
-## Default RELEASE, official build process will override this
-##
-
--include $(ROLLROOT)/version.mk
-
-
-
 endif # __CCRULES_MK
