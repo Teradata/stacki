@@ -144,6 +144,8 @@ if action == 'os':
 		'value=false'])
 	stack.api.Call('set host attr', [ ipaddr, 'attr=nukecontroller',
 		'value=false'])
+	stack.api.Call('set host attr', [ ipaddr, 'attr=secureerase',
+		'value=false'])
         
 print 'Content-type: application/octet-stream'
 print 'Content-length: %d' % (len(''))
