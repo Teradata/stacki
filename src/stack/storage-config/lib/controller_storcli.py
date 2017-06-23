@@ -43,11 +43,29 @@ class CLI:
 				result[k] = v
 		return result
 
-	def doNuke(self, adapter):
-		self.run(['/c%d/vall' % adapter,'delete', 'force'])
-		self.run(['/c%d/fall' % adapter,'delete'])
+	def doNuke(self, enclosure, adapter):
+		self.run(['/c%d/vall' % adapter, 'delete', 'force'])
+		self.run(['/c%d/fall' % adapter, 'delete'])
 		self.run(['/c%d' % adapter, 'set', 'jbod=off', 'force'])
 		self.run(['/c%d' % adapter, 'set', 'bootwithpinnedcache=on'])
+
+		if enclosure:
+			adapteraddress = '/c%d/e%d' % (adapter, enclosure)
+		else:
+			adapteraddress = '/c%d' % adapter
+
+		for slot in self.getSlots(adapter):
+			self.run(['%s/s%d' % (adapteraddress, slot),
+				'set', 'good', 'force'])
+
+	def doSecureErase(self, enclosure, adapter, slot):
+		if enclosure:
+			slotaddress = '/c%d/e%d/s%d' % \
+				(adapter, enclosure, slot)
+		else:
+			slotaddress = '/c%d/s%d' % (adapter, slot)
+
+		self.run([slotaddress, 'secureerase', 'force'])
 
 	def getAdapter(self):
 		res = self.run(['show', 'ctrlcount'])

@@ -26,17 +26,24 @@ class CLI:
 			result.append((k,v))
 		return result
 
-	def doNuke(self, adapter):
+	def doNuke(self, enclosure, adapter):
 		self.run(['-CfgClr', '-a%d' % adapter])
 		self.run(['-CfgForeign', '-Clear', '-a%d' % adapter])
 		self.run(['-AdpSetProp', 'BootWithPinnedCache', '1',
 			'-a%d' % adapter])
 
-		enclosure = self.getEnclosure(adapter)
+		if not enclosure:
+			enclosure = self.getEnclosure(adapter)
+
 		for slot in self.getSlots(adapter):
 			self.run(['-PDMakeGood', '-PhysDrv',
 				"'[%s:%s]'" % (enclosure, slot), '-Force',
 				'-a%s' % adapter ])
+
+	def doSecureErase(self, enclosure, adapter, slot):
+		self.run(['-PDInstantSecureErase', '-PhysDrv',
+			"'[%s:%s]'" % (enclosure, slot), '-Force',
+			'-a%s' % adapter ])
 
 	def getAdapter(self):
 		for (k, v) in self.run(['-adpCount']):

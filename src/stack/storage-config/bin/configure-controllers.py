@@ -58,14 +58,25 @@ def getController():
 ## MAIN
 ##
 
-#
-# only run this code if 'nukecontroller' is true
-#
 if attributes.has_key('nukecontroller'):
 	nukecontroller = attributes['nukecontroller']
 else:
 	nukecontroller = 'false'
 
+if attributes.has_key('secureerase'):
+	secureerase = attributes['secureerase']
+else:
+	secureerase = 'false'
+
+#
+# if 'secureerase' is true, then that implies that 'nukecontroller' is true
+#
+if attr2bool(secureerase):
+	nukecontroller = 'true'
+	
+#
+# only run this code if 'nukecontroller' is true
+#
 if not attr2bool(nukecontroller):
 	sys.exit(0)
 
@@ -80,12 +91,10 @@ if adapter == None:
 	sys.exit(0)
 
 #
-# if no csv_controller data, then just nuke the first adapter and exit
+# if no csv_controller data, then just exit
 #
 if not csv_controller:
-	ctrl.doNuke(adapter)
 	sys.exit(0)
-
 
 #
 # reconstruct the arrays
@@ -141,10 +150,15 @@ for arrayid in arrayids:
 	if not enclosure:
 		enclosure = ctrl.getEnclosure(adapter)
 
-	if adapter not in nuked:
-		ctrl.doNuke(adapter)
-		nuked.append(adapter)
+	ea = '%s:%s' % (enclosure, adapter)
+
+	if ea not in nuked:
+		ctrl.doNuke(enclosure, adapter)
+		nuked.append(ea)
 		freeslots[adapter] = ctrl.getSlots(adapter)
+
+		for slot in freeslots[adapter]:
+			ctrl.doSecureErase(enclosure, adapter, slot)
 
 	slots.sort()
 
