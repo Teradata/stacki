@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -19,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -76,21 +76,21 @@ class Command(stack.commands.CartArgumentProcessor,
 			carts = []
 
 		for cart in carts:
-                    
+		    
 			# For each cart determine if it is enabled
 			# in any box.
-                        
-                        boxes = []
+			
+			boxes = []
 
-                        for row in self.db.select("""b.name from
-                                cart_stacks s, carts c, boxes b where
-                                c.name='%s' and
-                                s.cart=c.id and s.box=b.id """
+			for row in self.db.select("""b.name from
+				cart_stacks s, carts c, boxes b where
+				c.name='%s' and
+				s.cart=c.id and s.box=b.id """
 				% cart):
 
-                        	boxes.append(row[0])
+				boxes.append(row[0])
 			
-			self.addOutput(cart, string.join(boxes,' '))
+			self.addOutput(cart, ' '.join(boxes))
 
 		self.endOutput(header=['name', 'boxes'], trimOwner=False)
 

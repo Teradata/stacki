@@ -115,7 +115,7 @@ class Command(command):
 
 	def run(self, params, args):
 		if len(args) < 1:
-                        raise ArgRequired(self, 'appliance')
+			raise ArgRequired(self, 'appliance')
 
 		appliances = self.getApplianceNames(args)
 

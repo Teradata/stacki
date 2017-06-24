@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -19,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -40,9 +40,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -62,16 +62,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -114,25 +114,25 @@ class Command(command):
 	List info for all known hosts.
 	</example>
 
-        """
+	"""
 	def run(self, params, args):
-            
+	    
 		(order, ) = self.fillParams([ ('order', 'asc') ])
-                
-                hosts = self.getHostnames(args, order=order)
-            
+		
+		hosts = self.getHostnames(args, order=order)
+	    
 		header = [ 'host' ]
-                values = { }
-                for host in hosts:
-                        values[host] = [ ]
-                        
-                for (provides, result) in self.runPlugins(hosts):
-                        header.extend(result['keys'])
-                        for h,v in result['values'].items():
-                                values[h].extend(v)
+		values = { }
+		for host in hosts:
+			values[host] = [ ]
+			
+		for (provides, result) in self.runPlugins(hosts):
+			header.extend(result['keys'])
+			for h,v in result['values'].items():
+				values[h].extend(v)
 
-                self.beginOutput()
-                for host in hosts:
+		self.beginOutput()
+		for host in hosts:
 			self.addOutput(host, values[host])
-                self.endOutput(header = header, trimOwner=False)
+		self.endOutput(header = header, trimOwner=False)
 

@@ -48,34 +48,34 @@ import stack.redhat.gen
 
 class Implementation(stack.commands.list.host.profile.implementation):
 
-        def generator(self):
-                return stack.redhat.gen.Generator()
+	def generator(self):
+		return stack.redhat.gen.Generator()
 
-        def chapter(self, generator, profile):
+	def chapter(self, generator, profile):
 
-                if generator.getProfileType() == 'native':
-                        profile.append('<chapter name="kickstart">')
-                        for section in [ 'main',
-                                         'packages',
-                                         'pre',
-                                         'post',
-                                         'boot' ]:
-                                profile.append('\t<section name="%s">' % section)
-                                for line in generator.generate(section):
-                                        profile.append(line)
-                                profile.append('\t</section>')
-                        profile.append('</chapter>')
-
-                elif generator.getProfileType() == 'shell':
-                        profile.append('<chapter name="bash">')
-                        profile.append('#! /bin/bash')
-                        for section in [ 'packages',
-                                         'post',
+		if generator.getProfileType() == 'native':
+			profile.append('<chapter name="kickstart">')
+			for section in [ 'main',
+					 'packages',
+					 'pre',
+					 'post',
 					 'boot' ]:
-                                profile.append('\t<section name="%s">' % section)
-                                for line in generator.generate(section):
-                                        profile.append(line)
-                                profile.append('\t</section>')
-                        profile.append('</chapter>')
+				profile.append('\t<section name="%s">' % section)
+				for line in generator.generate(section):
+					profile.append(line)
+				profile.append('\t</section>')
+			profile.append('</chapter>')
+
+		elif generator.getProfileType() == 'shell':
+			profile.append('<chapter name="bash">')
+			profile.append('#! /bin/bash')
+			for section in [ 'packages',
+					 'post',
+					 'boot' ]:
+				profile.append('\t<section name="%s">' % section)
+				for line in generator.generate(section):
+					profile.append(line)
+				profile.append('\t</section>')
+			profile.append('</chapter>')
 
 

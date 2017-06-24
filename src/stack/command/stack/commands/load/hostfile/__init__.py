@@ -120,10 +120,10 @@ class Command(stack.commands.load.command):
 
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([
-                        ('file', None),
+		filename, processor = self.fillParams([
+			('file', None),
 			('processor', 'default')
-                        ])
+			])
 
 		if not file:
 			raise ParamRequired(self, 'file')
@@ -134,26 +134,26 @@ class Command(stack.commands.load.command):
 		self.hosts = {}
 		self.interfaces = {}
 
-                sys.stderr.write('Loading Spreadsheet\n')
+		sys.stderr.write('Loading Spreadsheet\n')
 		self.runImplementation('load_%s' % processor, (filename, ))
 
-                sys.stderr.write('Configuring Database\n')
+		sys.stderr.write('Configuring Database\n')
 		args = self.hosts, self.interfaces
 		self.runPlugins(args)
 
-                # Set each host's default boot action to os, before we
-                # build out the DHCP file with sync.config
+		# Set each host's default boot action to os, before we
+		# build out the DHCP file with sync.config
 
-                sys.stderr.write('Setting Bootaction to OS\n')
-                argv = self.hosts.keys()
-                argv.append('action=os')
-                argv.append('sync=false')
+		sys.stderr.write('Setting Bootaction to OS\n')
+		argv = self.hosts.keys()
+		argv.append('action=os')
+		argv.append('sync=false')
 		self.call('set.host.boot', argv)
-                
+		
 		self.call('sync.config')
 
-                argv = self.hosts.keys()
-                self.call('sync.host.config', argv)
+		argv = self.hosts.keys()
+		self.call('sync.host.config', argv)
 		
 		#
 		# checkin the hosts spreadsheet

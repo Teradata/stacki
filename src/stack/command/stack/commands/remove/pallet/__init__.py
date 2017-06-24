@@ -147,13 +147,13 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                (arch, OS) = self.fillParams([
-                        ('arch', '%'),
-                        ('os','%')
-                        ])
+		(arch, OS) = self.fillParams([
+			('arch', '%'),
+			('os','%')
+			])
 
-                if len(args) < 1:
-                        raise ArgRequired(self, 'pallet')
+		if len(args) < 1:
+			raise ArgRequired(self, 'pallet')
 
 		for (roll, version, release) in self.getRollNames(args, params):
 			rows = self.db.execute("""
@@ -182,7 +182,7 @@ class Command(stack.commands.RollArgumentProcessor,
 
 		prefix = '/export/stack/pallets'
 
-        	os.system('/bin/rm -rf %s' %
+		os.system('/bin/rm -rf %s' %
 			os.path.join(prefix, roll, version, release, OS, arch))
 
 		f = [ prefix, roll, version, release, OS ]
@@ -191,7 +191,7 @@ class Command(stack.commands.RollArgumentProcessor,
 		while f != [ prefix ]:
 			d = '/'.join(f)
 
-                        try:
+			try:
 				if os.listdir(d):
 					#
 					# this directory has at least one element in
@@ -199,8 +199,8 @@ class Command(stack.commands.RollArgumentProcessor,
 					# this loop).
 					#
 					break
-                        except:
-                                break
+			except:
+				break
 
 			os.system('/bin/rm -rf %s' % d)
 

@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -19,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -56,5 +56,5 @@ class Command(stack.commands.list.appliance.command):
 
 	def run(self, params, args):
 		self.addText(self.command('list.attr', self._argv + [ 'scope=appliance' ]))
-                return self.rc
+		return self.rc
 

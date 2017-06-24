@@ -2,10 +2,10 @@
 # @SI_COPYRIGHT@
 # @SI_COPYRIGHT@        
 #               
-                        
+			
 import os       
 import stack.commands
-                        
+			
 class Implementation(stack.commands.Implementation):
 
 	def run(self, args):
@@ -22,11 +22,11 @@ class Implementation(stack.commands.Implementation):
 <graph>
 
 	<description>
-        %s cart
+	%s cart
 	</description>
 
-        <order head="backend" tail="cart-%s-backend"/>
-        <edge  from="backend"   to="cart-%s-backend"/>
+	<order head="backend" tail="cart-%s-backend"/>
+	<edge  from="backend"   to="cart-%s-backend"/>
 
 </graph>
 """ % (cart, cart, cart))

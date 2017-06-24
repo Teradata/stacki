@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -129,8 +129,7 @@ def Log(message, level=syslog.LOG_INFO):
 def Debug(message, level=syslog.LOG_DEBUG):
 	"""If the environment variable STACKDEBUG is set,
 	send a message to syslog and stderr."""
-	if os.environ.has_key('STACKDEBUG') and \
-		str2bool(os.environ['STACKDEBUG']):
+	if 'STACKDEBUG' in os.environ and str2bool(os.environ['STACKDEBUG']):
 		m = ''
 		p = ''
 		for c in message.strip():
@@ -347,17 +346,17 @@ class RollArgumentProcessor:
 		something.
 		"""
 
-		if params.has_key('version'):
+		if 'version' in params:
 			version = params['version']
 		else:
 			version = '%' # SQL wildcard
 
-		if params.has_key('release'):
+		if 'release' in params:
 			rel = params['release']
 		else:
 			rel = '%' # SQL wildcard
 
-		if params.has_key('arch'):
+		if 'arch' in params:
 			arch = params['arch']
 		else:
 			arch = "%" # SQL wildcard
@@ -392,7 +391,7 @@ class HostArgumentProcessor:
 		- hostname
 		- IP address
 		- MAC address
-                - where COND (e.g. 'where appliance=="backend"')
+		- where COND (e.g. 'where appliance=="backend"')
 
 		Any combination of these is valid.  If the names list
 		is empty a list of all hosts in the cluster is
@@ -473,30 +472,30 @@ class HostArgumentProcessor:
 								     subnet)
 				
 
-                l = []
+		l = []
 		if names:
 			for host in names:
-                                tokens = host.split(':', 1)
-                                if len(tokens) == 2:
-                                        scope, target = tokens
-                                        if scope == 'a':
-                                                l.append('where appliance == "%s"' % target)
-                                        elif scope == 'e':
-                                                l.append('where environment == "%s"' % target)
-                                        elif scope == 'o':
-                                                l.append('where os == "%s"' % target)
-                                        elif scope == 'b':
-                                                l.append('where box == "%s"' % target)
-                                        elif scope == 'g':
-                                                l.append('where group.%s == True' % target)
-                                        elif scope == 'r':
-                                                l.append('where rack == "%s"' % target)
+				tokens = host.split(':', 1)
+				if len(tokens) == 2:
+					scope, target = tokens
+					if scope == 'a':
+						l.append('where appliance == "%s"' % target)
+					elif scope == 'e':
+						l.append('where environment == "%s"' % target)
+					elif scope == 'o':
+						l.append('where os == "%s"' % target)
+					elif scope == 'b':
+						l.append('where box == "%s"' % target)
+					elif scope == 'g':
+						l.append('where group.%s == True' % target)
+					elif scope == 'r':
+						l.append('where rack == "%s"' % target)
 					adhoc = True
-                                        continue
-                                if host.find('where') == 0:
+					continue
+				if host.find('where') == 0:
 					adhoc = True
-                                l.append(host)
-                names = l
+				l.append(host)
+		names = l
 
 		# If we have any Ad-Hoc groupings we need to load the attributes
 		# for every host in the nodes tables.  Since this is a lot of
@@ -525,7 +524,7 @@ class HostArgumentProcessor:
 
 			# ad-hoc group
 			
-                        if name.find('where') == 0:
+			if name.find('where') == 0:
 				for host in hostList:
 					exp = name[5:]
 					try:
@@ -535,7 +534,7 @@ class HostArgumentProcessor:
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
-						if not explicit.has_key(host):
+						if not host in explicit:
 							explicit[host] = False
 #					Debug('group %s is %s for %s' %
 #				      (exp, res, host))
@@ -546,7 +545,7 @@ class HostArgumentProcessor:
 				for host in fnmatch.filter(hostList, name):
 					s = self.db.getHostname(host, subnet)
 					hostDict[host] = s
-					if not explicit.has_key(host):
+					if not host in explicit:
 						explicit[host] = False
 					
 
@@ -1062,7 +1061,7 @@ class DocStringHandler(handler.ContentHandler,
 		elif tag == 'example':
 			self.section['example'].append((self.key, self.text))
 		else:
-			if self.section.has_key(tag):
+			if tag in self.section:
 				self.section[tag].append(self.text)
 		
 	def characters(self, s):
@@ -1113,33 +1112,33 @@ class DatabaseConnection:
 
 	def select(self, command):
 		if not self.link:
-                        return [ ]
-                
-                rows = [ ]
-                
-                m = hashlib.md5()
-                m.update(command.strip())
-                k = m.hexdigest()
+			return [ ]
+		
+		rows = [ ]
+		
+		m = hashlib.md5()
+		m.update(command.strip().encode('utf-8'))
+		k = m.hexdigest()
 
-#                print 'select', k, command
-                if self.cache.has_key(k):
-                	rows = self.cache[k]
-#                        print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
-                else:
-                        try:
-                        	self.execute('select %s' % command)
-                        	rows = self.fetchall()
-                        except (OperationalError, ProgrammingError):
-                                # Permission error return the empty set
-                                # Syntax errors throw exceptions
-                                rows = [ ]
-                                
-                        if self.caching:
-                                self.cache[k] = rows
+#		 print 'select', k, command
+		if k in self.cache:
+			rows = self.cache[k]
+#			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
+		else:
+			try:
+				self.execute('select %s' % command)
+				rows = self.fetchall()
+			except (OperationalError, ProgrammingError):
+				# Permission error return the empty set
+				# Syntax errors throw exceptions
+				rows = [ ]
+				
+			if self.caching:
+				self.cache[k] = rows
 
-                return rows
+		return rows
 
-                                        
+					
 	def execute(self, command):
 		command = command.strip()
 
@@ -1481,36 +1480,36 @@ class DatabaseConnection:
 
 					fin.close()
 
-                                # HostArgumentProcessor has changed
-                                # handling of appliances (and others)
-                                # as hsotnames.  So do some work here
-                                # to point the user to the new syntax.
+				# HostArgumentProcessor has changed
+				# handling of appliances (and others)
+				# as hsotnames.	 So do some work here
+				# to point the user to the new syntax.
 
-                                s = ''
-                                for x, in self.select("""name from appliances"""):
-                                        if x == hostname:
-                                                s = '"a:%s" for %s appliances' % (hostname, hostname)
-                                if not s:
-                                        for x, in self.select("""name from environments"""):
-                                                if x == hostname:
-                                                        s = '"e:%s" for hosts in the %s environment' % (hostname, hostname)
-                                if not s:
-                                        for x, in self.select("""name from oses"""):
-                                                if x == hostname:
-                                                        s = '"o:%s" for %s hosts' % (hostname, hostname)
-                                if not s:
-                                        for x, in self.select("""name from boxes"""):
-                                                if x == hostname:
-                                                        s = '"b:%s" for hosts using the %s box' % (hostname, hostname)
-                                if not s:
-                                        for x, in self.select("""name from groups"""):
-                                                if x == hostname:
-                                                        s = '"g:%s" for host in the %s group' % (hostname, hostname)
-                                if not s:
-                                        if hostname.find('rack') == 0:
-                                                s = '"r:%s" for hosts in %s' % (hostname, hostname)
-                                if s:
-                                        raise CommandError(self, 'use %s' % s)
+				s = ''
+				for x, in self.select("""name from appliances"""):
+					if x == hostname:
+						s = '"a:%s" for %s appliances' % (hostname, hostname)
+				if not s:
+					for x, in self.select("""name from environments"""):
+						if x == hostname:
+							s = '"e:%s" for hosts in the %s environment' % (hostname, hostname)
+				if not s:
+					for x, in self.select("""name from oses"""):
+						if x == hostname:
+							s = '"o:%s" for %s hosts' % (hostname, hostname)
+				if not s:
+					for x, in self.select("""name from boxes"""):
+						if x == hostname:
+							s = '"b:%s" for hosts using the %s box' % (hostname, hostname)
+				if not s:
+					for x, in self.select("""name from groups"""):
+						if x == hostname:
+							s = '"g:%s" for host in the %s group' % (hostname, hostname)
+				if not s:
+					if hostname.find('rack') == 0:
+						s = '"r:%s" for hosts in %s' % (hostname, hostname)
+				if s:
+					raise CommandError(self, 'use %s' % s)
 				raise CommandError(self, 'cannot resolve host "%s"' % hostname)
 					
 		
@@ -1569,7 +1568,8 @@ class Command:
 
 		self.db = DatabaseConnection(database)
 
-		self.text = ''
+		self.text  = ''
+		self.bytes = b''
 		
 		self.output = []
 	
@@ -1603,7 +1603,6 @@ class Command:
 			except:
 				pass
 			
-
 		# Look up terminal colors safely using tput, uncolored if
 		# this fails.
 		
@@ -1613,7 +1612,9 @@ class Command:
 			'beginline': { 'tput': 'smul', 'code': ''},
 			'endline': { 'tput': 'rmul', 'code': ''}
 			}
-		if sys.stdout.isatty():
+		if sys.stdout.isatty() and False:
+			# TODO(p3) - figure out why we aren't capturing the tput code
+			# correctly.  We get data but not the full escape seq
 			for key in self.colors.keys():
 				c = 'tput %s' % self.colors[key]['tput']
 				try:
@@ -1649,7 +1650,7 @@ class Command:
 
 		# make sure names is a list or tuple
 		
-		if not type(names) in [ types.ListType, types.TupleType ]:
+		if not type(names) in [ type([]), type(()) ]:
 			names = [ names ]
 
 		# for each element in the names list make sure it is also
@@ -1659,7 +1660,7 @@ class Command:
 				
 		pdlist = []
 		for e in names:
-			if type(e) in [ types.ListType, types.TupleType]:
+			if type(e) in [ type([]), type(()) ]:
 				if len(e) == 3:
 					tuple = ( e[0], e[1], e[2] )
 				elif len(e) == 2:
@@ -1677,7 +1678,7 @@ class Command:
 
 		list = []
 		for (key, default, required) in pdlist:
-			if params.has_key(key):
+			if key in params:
 				list.append(params[key])
 			else:
 				if required:
@@ -1698,6 +1699,7 @@ class Command:
 		s = self.command(command, a)
 		if s:
 			return marshal.loads(s)
+
 		return [ ]
 
 
@@ -1712,12 +1714,13 @@ class Command:
 		Returns and output string."""
 
 		modpath = 'stack.commands.%s' % command
+#		print('+ ', command)
 		__import__(modpath)
 		mod = eval(modpath)
 
 		try:
 			o = getattr(mod, 'Command')(self.db.database)
-			name = string.join(string.split(command, '.'), ' ')
+			name = ' '.join(command.split('.'))
 		except AttributeError:
 			return ''
 
@@ -1726,6 +1729,7 @@ class Command:
 		# the return code.  The actual text is what we return.
 
 		self.rc = o.runWrapper(name, args, self.level + 1)
+#		print ('- ', command)
 		return o.getText()
 
 
@@ -1792,7 +1796,7 @@ class Command:
 			
 		list = []
 		for node in PluginOrderIterator(graph).run():
-			if dict.has_key(node):
+			if node in dict:
 				list.append(dict[node])
 
 		return list
@@ -1843,13 +1847,13 @@ class Command:
 		# Check to see if implementation list
 		# has named implementation. If not, try
 		# to load named implementation
-		if not self.impl_list.has_key(name):
+		if not name in self.impl_list:
 			self.loadImplementation(name)
 
 		# If the named implementation was loaded,
 		# return the output from running the
 		# implementation
-		if self.impl_list.has_key(name):
+		if name in self.impl_list:
 			return self.impl_list[name].run(args)
 
 
@@ -1880,7 +1884,7 @@ class Command:
 
 	
 	def strWordWrap(self, line, indent=''):
-		if os.environ.has_key('COLUMNS'):
+		if 'COLUMNS' in os.environ:
 			cols = os.environ['COLUMNS']
 		else:
 			cols = 80
@@ -1897,16 +1901,24 @@ class Command:
 			
 	def clearText(self):
 		"""Reset the output text buffer."""
-		self.text = ''
+		self.text  = ''
+		self.bytes = b''
 		
 	def addText(self, s):
 		"""Append a string to the output text buffer."""
 		if s:
-			self.text += s
+			if type(s) == type(''):
+				self.text += s
+			else:
+				self.bytes += s
 		
 	def getText(self):
 		"""Returns the output text buffer."""
-		return self.text	
+		if self.text:
+			return self.text
+		if self.bytes:
+			return self.bytes
+		return None
 
 	def beginOutput(self):
 		"""Reset the output list buffer."""
@@ -1919,9 +1931,9 @@ class Command:
 
 		list = [ '%s' % owner ]
 		
-		if type(vals) == types.ListType:
+		if type(vals) == type([]):
 			list.extend(vals)
-		elif type(vals) == types.TupleType:
+		elif type(vals) == type(()):
 			for e in vals:
 				list.append(e)
 		else:
@@ -1953,13 +1965,13 @@ class Command:
 		if not format:
 			format = 'text'
 
-                tokens = format.split(':')
-                if len(tokens) == 1:
-                        format      = tokens[0]
-                        format_args = None
-                else:
-                        format      = tokens[0]
-                        format_args = tokens[1].lower()
+		tokens = format.split(':')
+		if len(tokens) == 1:
+			format	    = tokens[0]
+			format_args = None
+		else:
+			format	    = tokens[0]
+			format_args = tokens[1].lower()
 
 		if format in [ 'col', 'shell', 'json', 'python', 'binary' ]:
 			if not header: # need to build a generic header
@@ -1977,29 +1989,29 @@ class Command:
 					if header[i]:
 						key = header[i]
 						val = line[i]
-						if dict.has_key(key):
+						if key in dict:
 							if not type(dict[key]) ==types.ListType:
 								dict[key] = [ dict[key] ]
 							dict[key].append(val)
 						else:
 							dict[key] = val
-                                list.append(dict)
-                        if format == 'col':
-                                for row in list:
-                                        try:
-                                                self.addText('%s\n' % row[format_args])
-                                        except KeyError:
-                                                pass
-                        elif format == 'shell':
-                                rows = len(list)
-                                for i in range(0, rows):
-                                        if rows > 1:
-                                                n = '%d_' % i
-                                        else:
-                                                n = ''
-                                        for k,v in list[i].items():
-                                                self.addText('stack_%s%s="%s"\n' % (n,k,v))
-                                        self.addText('\n')
+				list.append(dict)
+			if format == 'col':
+				for row in list:
+					try:
+						self.addText('%s\n' % row[format_args])
+					except KeyError:
+						pass
+			elif format == 'shell':
+				rows = len(list)
+				for i in range(0, rows):
+					if rows > 1:
+						n = '%d_' % i
+					else:
+						n = ''
+					for k,v in list[i].items():
+						self.addText('stack_%s%s="%s"\n' % (n,k,v))
+					self.addText('\n')
 			elif format == 'python':
 				self.addText('%s' % list)
 			elif format == 'binary':
@@ -2055,7 +2067,7 @@ class Command:
 			for i in range(0, len(line)):
 				if len(colwidth) <= i:
 					colwidth.append(0)
-				if type(line[i]) != types.StringType:
+				if type(line[i]) != type(''):
 					if line[i] == None:
 						itemlen = 0
 					else:
@@ -2118,7 +2130,8 @@ class Command:
 							o,
 							self.colors['reset']['code'])
 				list.append(o)
-			self.addText('%s\n' % string.join(list, ' '))
+
+			self.addText('%s\n' % ' '.join(list))
 			isHeader = False
 
 
@@ -2146,7 +2159,7 @@ class Command:
 		else:
 			users = []
 			
-		if flags.has_key('format'):
+		if 'format' in flags:
 			format = flags['format'].lower()
 		else:
 			format = 'plain'
@@ -2218,7 +2231,7 @@ class Command:
 		self.level = level
 		
 		if argv:
-			command = '%s %s' % (name, string.join(argv,' '))
+			command = '%s %s' % (name, ' '.join(argv))
 		else:
 			command = name
 
@@ -2282,8 +2295,8 @@ class Command:
 				continue
 #			if arg[0] == '[': # ad-hoc group
 #				list.append(arg)
-                        if arg.find('where') == 0:
-                                list.append(arg)
+			if arg.find('where') == 0:
+				list.append(arg)
 			elif len(arg.split('=',1)) == 2:
 				(key, val) = arg.split('=', 1)
 				dict[key] = val

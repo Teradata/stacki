@@ -47,6 +47,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	tar -xzf Python-$(VERSION).tgz
+	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
 	( 								\
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT);			\
@@ -59,12 +60,6 @@ install::
 		cd Python-$(VERSION);					\
 		$(MAKE) install DESTDIR=$(ROOT) ;			\
 	)
-#	cp sitecustomize.py $(ROOT)/$(PKGROOT)/lib/python2.6
-#	mkdir -p $(ROOT)/$(PKGROOT)/usr/bin;
-#	(								\
-#		cd $(ROOT)/$(PKGROOT)/usr/bin;				\
-#		ln -s ../../bin/python .;				\
-#	)
 
 clean::
 	rm -rf Python-$(VERSION)

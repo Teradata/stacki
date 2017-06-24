@@ -104,12 +104,12 @@ class Command(stack.commands.set.host.command):
 	</arg>
 	
 	<param type='string' name='interface'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface.
- 	</param>
+	MAC address of the interface.
+	</param>
 
 	<param type='string' name='options'>
 	The options for an interface. Use options=NULL to clear.
@@ -139,32 +139,32 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-                (options, interface, mac) = self.fillParams([
-                        ('options',    None, True),
-                        ('interface', None),
-                        ('mac',       None)
-                        ])
+		(options, interface, mac) = self.fillParams([
+			('options',    None, True),
+			('interface', None),
+			('mac',       None)
+			])
 
 		if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
-                
+			raise ParamRequired(self, ('interface', 'mac'))
+		
 		if string.upper(options) == 'NULL':
 			options = 'NULL'
 
 		for host in self.getHostnames(args):
-                        if interface:
+			if interface:
 				self.db.execute("""
-                                	update networks, nodes set 
+					update networks, nodes set 
 					networks.options=NULLIF('%s','NULL') where
-                                        nodes.name='%s' and networks.node=nodes.id and
-                                        networks.device like '%s'
-                                        """ % (options, host, interface))
-                        else:
+					nodes.name='%s' and networks.node=nodes.id and
+					networks.device like '%s'
+					""" % (options, host, interface))
+			else:
 				self.db.execute("""
-                                	update networks, nodes set 
+					update networks, nodes set 
 					networks.options=NULLIF('%s','NULL') where
-                                        nodes.name='%s' and networks.node=nodes.id and
-                                        networks.mac like '%s'
-                                        """ % (options, host, mac))
-                
+					nodes.name='%s' and networks.node=nodes.id and
+					networks.mac like '%s'
+					""" % (options, host, mac))
+		
 

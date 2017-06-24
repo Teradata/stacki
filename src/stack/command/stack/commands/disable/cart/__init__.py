@@ -74,16 +74,16 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-                if len(args) < 1:
-                        raise ArgRequired(self, 'cart')
+		if len(args) < 1:
+			raise ArgRequired(self, 'cart')
 
-                box, = self.fillParams([ ('box', 'default') ])
+		box, = self.fillParams([ ('box', 'default') ])
 
 		rows = self.db.execute("""
 			select * from boxes where name='%s' """ % box)
 
 		if not rows:
-                        raise CommandError(self, 'unknown box "%s"' % box)
+			raise CommandError(self, 'unknown box "%s"' % box)
 		
 		for cart in self.getCartNames(args, params):
 			self.db.execute("""

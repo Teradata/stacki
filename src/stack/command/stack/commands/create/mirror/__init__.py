@@ -285,7 +285,7 @@ class Command(stack.commands.create.command):
 			release = 0
 			
 		(url, name, version, release, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
-                        ('url', None),
+			('url', None),
 			('name', None),
 			('version', version),
 			('release', release),
@@ -294,7 +294,7 @@ class Command(stack.commands.create.command):
 			('repoconfig', None),
 			('newest', 'yes'),
 			('urlonly', 'no')
-                        ])
+			])
 
 		# Any call to reposync creates a directory
 		# We don't want that if urlstatus is True.
@@ -310,7 +310,7 @@ class Command(stack.commands.create.command):
 				name = 'updates'
 
 		if not repoid and not url:
-                        raise ParamRequired(self, ('url', 'repoid'))
+			raise ParamRequired(self, ('url', 'repoid'))
 
 		# Query the repo to see if it exists and we can get to it.
 		rpms,repoerr = self.repoquery(repoid, repoconfig)

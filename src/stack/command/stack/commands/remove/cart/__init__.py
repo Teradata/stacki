@@ -65,8 +65,8 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-                if not len(args):
-                        raise ArgRequired(self, 'cart')
+		if not len(args):
+			raise ArgRequired(self, 'cart')
 
 		cartpath = '/export/stack/carts'
 		for cart in self.getCartNames(args, params):

@@ -115,11 +115,11 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
-                for host in hosts:
-                        osname = self.db.getHostOS(host)
-                        server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
-                        
-                        self.runImplementation(osname, (host, server))
+		for host in hosts:
+			osname = self.db.getHostOS(host)
+			server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
+			
+			self.runImplementation(osname, (host, server))
 
 		self.endOutput(padChar='', trimOwner=True)
 

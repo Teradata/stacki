@@ -58,9 +58,9 @@ class Plugin(stack.commands.Plugin):
 			[ attrs['hostname'] ])
 		controller_output = row[0]['col-1']
 
-        	self.owner.addText('<stack:stacki><![CDATA[\n')
-                self.owner.addText('attributes = %s\n' % pformat(attrs))
-                self.owner.addText("""
+		self.owner.addText('<stack:stacki><![CDATA[\n')
+		self.owner.addText('attributes = %s\n' % pformat(attrs))
+		self.owner.addText("""
 #
 # Generic For All OSes
 #
@@ -71,5 +71,5 @@ csv_controller = %s
 """
 % (partition_output, controller_output))
 
-                self.owner.addText(']]></stack:stacki>\n')
+		self.owner.addText(']]></stack:stacki>\n')
 

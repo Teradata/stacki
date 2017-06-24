@@ -115,10 +115,10 @@ class Command(stack.commands.add.command):
 	def run(self, params, args):
 
 		(address, gateway, netmask) = self.fillParams([
-                        ('address', None, True),
-                        ('gateway', None, True),
-                        ('netmask', '255.255.255.255')
-                        ])
+			('address', None, True),
+			('gateway', None, True),
+			('netmask', '255.255.255.255')
+			])
 
 		#
 		# determine if this is a subnet identifier
@@ -137,9 +137,9 @@ class Command(stack.commands.add.command):
 		rows = self.db.execute("""select * from global_routes
 			where network='%s'""" % address)
 		if rows:
-                        raise CommandError(self, 'route exists')
+			raise CommandError(self, 'route exists')
 			
 		self.db.execute("""insert into global_routes
-                                values ('%s', '%s', %s, %s)""" %
-                                (address, netmask, gateway, subnet))
+				values ('%s', '%s', %s, %s)""" %
+				(address, netmask, gateway, subnet))
 

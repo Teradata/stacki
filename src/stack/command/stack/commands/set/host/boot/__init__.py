@@ -125,47 +125,47 @@ class Command(stack.commands.set.host.command):
 	def run(self, params, args):
 
 		if not len(args):
-                	raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		(action, sync) = self.fillParams([
-                        ('action', None, True),
-                        ('sync', True)
-                ])
+			('action', None, True),
+			('sync', True)
+		])
 		
 
-                sync    = self.str2bool(sync)
-                actions = [ 'os', 'install' ]
+		sync    = self.str2bool(sync)
+		actions = [ 'os', 'install' ]
 		if action not in actions:
-                        raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
+			raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
 
 
-                boot = {}
-                for h, a in self.db.select(
-                                """
-                                n.name, b.action from 
-                                nodes n, boot b where
-                                n.id = b.node
-                                """):
-                        boot[h] = a
+		boot = {}
+		for h, a in self.db.select(
+				"""
+				n.name, b.action from 
+				nodes n, boot b where
+				n.id = b.node
+				"""):
+			boot[h] = a
 
-                hosts = self.getHostnames(args)
-                for host in hosts:
-                        if host in boot.keys():
-                                self.db.execute(
-                                        """
-                                        update boot set action = '%s'
-                                        where node = (select id from nodes where name = '%s')
-                                        """ % (action, host))
-                        else:
-                                self.db.execute(
-                                        """
-                                        insert into boot (action, node) values 
-                                        (
-                                        '%s',
-                                        (select id from nodes where name = '%s')
-                                        ) 
-                                        """ % (action, host))
+		hosts = self.getHostnames(args)
+		for host in hosts:
+			if host in boot.keys():
+				self.db.execute(
+					"""
+					update boot set action = '%s'
+					where node = (select id from nodes where name = '%s')
+					""" % (action, host))
+			else:
+				self.db.execute(
+					"""
+					insert into boot (action, node) values 
+					(
+					'%s',
+					(select id from nodes where name = '%s')
+					) 
+					""" % (action, host))
 
-                if sync:
-                        self.command('sync.host.boot', hosts)
+		if sync:
+			self.command('sync.host.boot', hosts)
 

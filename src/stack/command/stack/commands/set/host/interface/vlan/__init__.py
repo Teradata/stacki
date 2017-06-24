@@ -102,18 +102,18 @@ class Command(stack.commands.set.host.command):
 	</arg>
 	
 	<param type='string' name='interface'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface.
- 	</param>
+	MAC address of the interface.
+	</param>
 
 	<param type='string' name='vlan' optional='0'>
 	The VLAN ID that should be updated. This must be an integer and the
 	pair 'subnet/vlan' must be defined in the VLANs table.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='set host interface vlan backend-0-0-0 interface=eth0 vlan=3'>
 	Sets backend-0-0-0's private interface to VLAN ID 3.
 	</example>
@@ -121,32 +121,32 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-                (vlan, interface, mac) = self.fillParams([
-                        ('vlan',      None, True),
-                        ('interface', None),
-                        ('mac',       None)
-                        ])
+		(vlan, interface, mac) = self.fillParams([
+			('vlan',      None, True),
+			('interface', None),
+			('mac',       None)
+			])
 
 		if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
+			raise ParamRequired(self, ('interface', 'mac'))
 		try:
 			vlanid = int(vlan)
 		except:
-                        raise ParamType(self, 'vlan', 'integer')
+			raise ParamType(self, 'vlan', 'integer')
 
 		for host in self.getHostnames(args):
-                        if interface:
-                                self.db.execute("""
-                                	update networks net, nodes n
-                                        set net.vlanid = IF(%d = 0, NULL, %d)
-                                        where net.device like '%s' and
-                                        n.name = '%s' and net.node = n.id
-                                        """ % (vlanid, vlanid, interface, host))
-                        else:
-                                self.db.execute("""
-                                	update networks net, nodes n
-                                        set net.vlanid = IF(%d = 0, NULL, %d)
-                                        where net.mac like'%s' and
-                                        n.name = '%s' and net.node = n.id
-                                        """ % (vlanid, vlanid, mac, host))
+			if interface:
+				self.db.execute("""
+					update networks net, nodes n
+					set net.vlanid = IF(%d = 0, NULL, %d)
+					where net.device like '%s' and
+					n.name = '%s' and net.node = n.id
+					""" % (vlanid, vlanid, interface, host))
+			else:
+				self.db.execute("""
+					update networks net, nodes n
+					set net.vlanid = IF(%d = 0, NULL, %d)
+					where net.mac like'%s' and
+					n.name = '%s' and net.node = n.id
+					""" % (vlanid, vlanid, mac, host))
 

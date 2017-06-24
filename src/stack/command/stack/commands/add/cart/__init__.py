@@ -51,10 +51,10 @@ from stack.exception import *
 class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.add.command):
 	"""
-        Add a cart.
+	Add a cart.
 	
 	<arg type='string' name='cart'>
-        The name of the cart to be created.
+	The name of the cart to be created.
 	</arg>
 
 	<param type='string' name='os'>
@@ -68,43 +68,43 @@ class Command(stack.commands.CartArgumentProcessor,
 	def run(self, params, args):
 		self.osname, = self.fillParams([('os', 'redhat'), ])
 
-                if not len(args):
-                        raise ArgRequired(self, 'cart')
-                if len(args) > 1:
-                        raise ArgUnique(self, 'cart')
+		if not len(args):
+			raise ArgRequired(self, 'cart')
+		if len(args) > 1:
+			raise ArgUnique(self, 'cart')
 
-                cart = args[0]
+		cart = args[0]
 
-                for row in self.db.select("""
-                        * from carts where name = '%s'
-                        """ % cart):
-                        raise CommandError(self, '"%s" cart exists' % cart)
+		for row in self.db.select("""
+			* from carts where name = '%s'
+			""" % cart):
+			raise CommandError(self, '"%s" cart exists' % cart)
 
-                # If the directory does not exist create it along with
-                # a skeleton template.
+		# If the directory does not exist create it along with
+		# a skeleton template.
 
-                tree = stack.file.Tree('/export/stack/carts')
-                if not cart in tree.getDirs():
-                	for dir in [ 'RPMS', 'nodes', 'graph' ]:
-                		os.makedirs(os.path.join(tree.getRoot(), cart, dir))
+		tree = stack.file.Tree('/export/stack/carts')
+		if not cart in tree.getDirs():
+			for dir in [ 'RPMS', 'nodes', 'graph' ]:
+				os.makedirs(os.path.join(tree.getRoot(), cart, dir))
 
-                        cartpath = os.path.join(tree.getRoot(), cart)
+			cartpath = os.path.join(tree.getRoot(), cart)
 			args = [ cart, cartpath ]
 			self.runImplementation(self.osname, args)
 
-                # Files were already on disk either manually created or by the
-                # simple template above.
-                # Add the cart to the database so we can enable it for a box
+		# Files were already on disk either manually created or by the
+		# simple template above.
+		# Add the cart to the database so we can enable it for a box
 
-                self.db.execute("""
-                	insert into carts(name) values ('%s')
-                        """ % cart)
+		self.db.execute("""
+			insert into carts(name) values ('%s')
+			""" % cart)
 
 		# make sure apache can read all the files and directories
 
 		gr_name, gr_passwd, gr_gid, gr_mem = grp.getgrnam('apache')
 
-                cartpath = '/export/stack/carts/%s' % cart
+		cartpath = '/export/stack/carts/%s' % cart
 
 		for dirpath, dirnames, filenames in os.walk(cartpath):
 			try:

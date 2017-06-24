@@ -102,7 +102,7 @@ class Command(stack.commands.add.host.command):
 	</arg>
 	
 	<param type='string' name='alias' optional='0'>
-        Alias for the host.
+	Alias for the host.
 	</param>
 
 	<example cmd='add host alias backend-0-0 alias=b00'>
@@ -112,27 +112,27 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 
-                hosts = self.getHostnames(args)
-                
-		(alias, ) = self.fillParams([
-                        ('alias', None, True)
-                        ])
+		hosts = self.getHostnames(args)
 		
-                if not hosts:
-                        raise ArgRequired(self, 'host')
+		(alias, ) = self.fillParams([
+			('alias', None, True)
+			])
+		
+		if not hosts:
+			raise ArgRequired(self, 'host')
 		if not len(hosts) == 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
-                host = hosts[0]
-                for dict in self.call('list.host.alias', [ 'host=%s' % host ]):
-                        if alias == dict['alias']:
-                                raise CommandError(self, 'alias "%s" exists' % alias)
+		host = hosts[0]
+		for dict in self.call('list.host.alias', [ 'host=%s' % host ]):
+			if alias == dict['alias']:
+				raise CommandError(self, 'alias "%s" exists' % alias)
 
 		self.db.execute("""
-                	insert into aliases (node, name)
+			insert into aliases (node, name)
 			values (
-                        (select id from nodes where name='%s'),
-                        '%s'
-                        )
-                        """ % (host, alias))
+			(select id from nodes where name='%s'),
+			'%s'
+			)
+			""" % (host, alias))
 

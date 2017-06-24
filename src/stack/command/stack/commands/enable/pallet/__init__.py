@@ -147,25 +147,25 @@ class Command(stack.commands.RollArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-                if len(args) < 1:
-                        raise ArgRequired(self, 'pallet')
+		if len(args) < 1:
+			raise ArgRequired(self, 'pallet')
 
-                (arch, box) = self.fillParams([
-                        ('arch', self.arch),
-                        ('box', 'default')
-                        ])
+		(arch, box) = self.fillParams([
+			('arch', self.arch),
+			('box', 'default')
+			])
 
 		rows = self.db.execute("""
 			select * from boxes where name='%s'
 			""" % box)
 		if not rows:
-                        raise CommandError(self, 'unknown box "%s"' % box)
+			raise CommandError(self, 'unknown box "%s"' % box)
 		
 		for (roll, version, release) in self.getRollNames(args, params):
-                        if release:
-                                rel = "rel='%s'" % release
-                        else:
-                                rel = 'rel=""'
+			if release:
+				rel = "rel='%s'" % release
+			else:
+				rel = 'rel=""'
 
 			rows = self.db.execute("""
 				select b.name from
@@ -178,13 +178,13 @@ class Command(stack.commands.RollArgumentProcessor,
 				""" % (roll, version, rel, arch, box))
 
 			if not rows:
-                                self.db.execute("""
+				self.db.execute("""
 					insert into stacks(box, roll)
-                                        values (
-                                        (select id from boxes where name='%s'),
-                                        (select id from rolls where name='%s'
+					values (
+					(select id from boxes where name='%s'),
+					(select id from rolls where name='%s'
 					and version='%s' and %s and arch='%s')
-                                        )""" % (box, roll, version, rel, arch))
+					)""" % (box, roll, version, rel, arch))
 
 		# Regenerate stacki.repo
 		os.system("""

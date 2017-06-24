@@ -104,7 +104,7 @@ config_preamble = """options {
 	dump-file "/var/named/data/cache_dump.db";
 	statistics-file "/var/named/data/named_stats.txt";
 	forwarders { %s; };
-        allow-query { private; };
+	allow-query { private; };
 };
 
 controls {
@@ -155,7 +155,7 @@ class Command(stack.commands.report.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		networks = []
 		for row in self.call('list.network', [ 'dns=true' ]):
 			networks.append(row)

@@ -109,7 +109,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 
 	def run(self, params, args):
 		if len(args) != 1:
-                        raise ArgRequired(self, 'box')
+			raise ArgRequired(self, 'box')
 
 		boxes = self.getBoxNames(args)
 

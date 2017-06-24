@@ -108,18 +108,18 @@ class Command(stack.commands.remove.host.command):
 	</arg>
 
 	<param type='string' name='interface'>
- 	Name of the interface that should be removed.
- 	</param>
+	Name of the interface that should be removed.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface that should be removed.
- 	</param>
+	MAC address of the interface that should be removed.
+	</param>
 
-        <param type='bool' name='all'>
-        When set to true the command will remove all interfaces for the
-        hosts.  This is used internally in Stacki to speed up bulk changes in
-        the cluster.
-        </param>
+	<param type='bool' name='all'>
+	When set to true the command will remove all interfaces for the
+	hosts.  This is used internally in Stacki to speed up bulk changes in
+	the cluster.
+	</param>
 
 	<example cmd='remove host interface backend-0-0 interface=eth1'>
 	Removes the interface eth1 on host backend-0-0.
@@ -132,37 +132,37 @@ class Command(stack.commands.remove.host.command):
 
 	def run(self, params, args):
 
-                (interface, mac, all) = self.fillParams([
-                        ('interface', None),
-                        ('mac',       None),
-                        ('all',     'false')
-                        ])
+		(interface, mac, all) = self.fillParams([
+			('interface', None),
+			('mac',       None),
+			('all',     'false')
+			])
 
 		all = self.str2bool(all)
 		if not all and not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
+			raise ParamRequired(self, ('interface', 'mac'))
 
 		for host in self.getHostnames(args):
-                        if all:
-                                self.db.execute("""
-                        		delete from networks where
-                                        node=(select id from nodes where name='%s')
-                                        """ %  (host))
-                        elif interface:
-                                rows_affected = self.db.execute("""
-                        		delete from networks where
-                                        node=(select id from nodes where name='%s')
-                                        and device like '%s'
-                                        """ %  (host, interface))
+			if all:
+				self.db.execute("""
+					delete from networks where
+					node=(select id from nodes where name='%s')
+					""" %  (host))
+			elif interface:
+				rows_affected = self.db.execute("""
+					delete from networks where
+					node=(select id from nodes where name='%s')
+					and device like '%s'
+					""" %  (host, interface))
 
 				if not rows_affected:
 					raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
-                        else:
-                                rows_affected = self.db.execute("""
-                        		delete from networks where
-                                        node=(select id from nodes where name='%s')
-                                        and mac like '%s'
-                                        """ %  (host, mac))
+			else:
+				rows_affected = self.db.execute("""
+					delete from networks where
+					node=(select id from nodes where name='%s')
+					and mac like '%s'
+					""" %  (host, mac))
 
 				if not rows_affected:
 					raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))

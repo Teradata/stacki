@@ -166,10 +166,10 @@ class Command(stack.commands.Command,
 
 		# Parse Params
 		(cmd, managed, x11, t, d, collate, n, method) = self.fillParams([
-                        ('command', None, True),	# Command
-                        ('managed', 'y'),		# Run on Managed Hosts only
-                        ('x11', 'n'),			# Run without X11
-                        ('timeout', '0'),		# Set timeout for commands
+			('command', None, True),	# Command
+			('managed', 'y'),		# Run on Managed Hosts only
+			('x11', 'n'),			# Run without X11
+			('timeout', '0'),		# Set timeout for commands
 			('delay', '0'),			# Set delay between each thread
 			('collate', 'y'),		# Collate output
 			('threads', self.getAttr('run.host.threads')),
@@ -183,9 +183,9 @@ class Command(stack.commands.Command,
 		try:
 			self.timeout = int(t)
 		except:
-                        raise ParamType(self, 'timeout', 'integer')
+			raise ParamType(self, 'timeout', 'integer')
 		if self.timeout < 0:
-                        raise ParamValue(self, 'timeout', '> 0')
+			raise ParamValue(self, 'timeout', '> 0')
 
 		# Get Number of threads to run concurrently
 		if n == None:
@@ -202,7 +202,7 @@ class Command(stack.commands.Command,
 		try:
 			self.delay = float(d)
 		except:	
-                        raise ParamType(self, 'delay', 'float')
+			raise ParamType(self, 'delay', 'float')
 
 		# Check if we want to unset the Display
 		if not self.str2bool(x11):

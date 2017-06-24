@@ -112,7 +112,7 @@ class Command(stack.commands.list.host.command):
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	select name from aliases where
+				select name from aliases where
 				node = (select id from nodes where name='%s')
 				""" % host)
 			for alias, in self.db.fetchall():

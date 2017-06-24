@@ -142,7 +142,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			options = None
 			vlan = None
 			boss = None
-                        default = None
+			default = None
 			notes = None
 			installaction = None
 			runaction = None
@@ -196,8 +196,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						raise CommandError(self.owner, msg)
 				elif header[i] == 'boss':
 					boss = field
-                                elif header[i] == 'default':
-                                        default = field
+				elif header[i] == 'default':
+					default = field
 				elif header[i] == 'notes':
 					notes = field
 				elif header[i] == 'installaction':
@@ -254,7 +254,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 			self.owner.interfaces[name][interface] = {}
 
-                        if default:
+			if default:
 				self.owner.interfaces[name][interface]['default'] = default
 			if ip:
 				self.owner.interfaces[name][interface]['ip'] = ip

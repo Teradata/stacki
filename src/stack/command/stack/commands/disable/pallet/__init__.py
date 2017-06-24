@@ -142,25 +142,25 @@ class Command(stack.commands.RollArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-                if len(args) < 1:
-                        raise ArgRequired(self, 'pallet')
+		if len(args) < 1:
+			raise ArgRequired(self, 'pallet')
 
-                (arch, box) = self.fillParams([
-                        ('arch', self.arch),
-                        ('box', 'default')
-                        ])
+		(arch, box) = self.fillParams([
+			('arch', self.arch),
+			('box', 'default')
+			])
 
 		rows = self.db.execute("""
 			select * from boxes where name = '%s'
 			""" % box)
 		if not rows:
-                        raise CommandError(self, 'unknown box "%s"' % box)
+			raise CommandError(self, 'unknown box "%s"' % box)
 		
 		for (roll, version, release) in self.getRollNames(args, params):
-                        if release:
-                                rel = "rel='%s'" % release
-                        else:
-                                rel = 'rel=""'
+			if release:
+				rel = "rel='%s'" % release
+			else:
+				rel = 'rel=""'
 
 			self.db.execute("""
 				delete from stacks where

@@ -101,17 +101,17 @@ class Command(stack.commands.dump.command):
 
 	def run(self, params, args):
 
-                for row in self.call('list.attr'):
-                        t = row['type']
-                        a = row['attr']
-                        v = self.quote(row['value'])
-                        
-                        if t == 'const':
-                                continue
+		for row in self.call('list.attr'):
+			t = row['type']
+			a = row['attr']
+			v = self.quote(row['value'])
+			
+			if t == 'const':
+				continue
 
-                        s = ''
-                        if t == 'shadow':
-                                s = 'shadow=true'
+			s = ''
+			if t == 'shadow':
+				s = 'shadow=true'
 
-                        self.dump('"set attr" scope=global force=false attr=%s value=%s %s' % (a, v, s))
+			self.dump('"set attr" scope=global force=false attr=%s value=%s %s' % (a, v, s))
 

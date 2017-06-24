@@ -65,13 +65,13 @@ class Command(stack.commands.unload.command):
 	"""		
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([
-                        ('file', None, True),
+		filename, processor = self.fillParams([
+			('file', None, True),
 			('processor', 'default')
-                        ])
+			])
 
 		if not os.path.exists(filename):
-                        raise CommandError(self, 'file "%s" does not exist' % filename)
+			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.runImplementation('unload_%s' % processor, (filename, ))
 

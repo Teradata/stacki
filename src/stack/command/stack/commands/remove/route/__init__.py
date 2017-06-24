@@ -109,7 +109,7 @@ class Command(stack.commands.remove.command):
 
 	def run(self, params, args):
 
-                (address, ) = self.fillParams([ ('address', None, True) ])
+		(address, ) = self.fillParams([ ('address', None, True) ])
 
 		self.db.execute("""delete from global_routes where 
 			network = '%s'""" % address)

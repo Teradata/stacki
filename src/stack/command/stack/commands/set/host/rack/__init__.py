@@ -113,15 +113,15 @@ class Command(stack.commands.set.host.command):
 	def run(self, params, args):
 
 		(rack, ) = self.fillParams([
-                        ('rack', None, True)
-                        ])
+			('rack', None, True)
+			])
 		
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set rack='%s' where
+				update nodes set rack='%s' where
 				name='%s'
-                                """ % (rack, host))
+				""" % (rack, host))
 

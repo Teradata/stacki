@@ -99,7 +99,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	machines, this is the contents of the file /etc/sysconfig/network).
 
 	<arg type='string' name='host' repeat='1'>
-        Hostname.
+	Hostname.
 	</arg>
 
 	<example cmd='report host network compute-0-0'>
@@ -111,37 +111,37 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.beginOutput()
 		
-                hosts = self.getHostnames(args)
+		hosts = self.getHostnames(args)
 		for host in hosts:
-                        self.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network">')
-                        self.addOutput(host, 'NETWORKING=yes')
+			self.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network">')
+			self.addOutput(host, 'NETWORKING=yes')
 
-                        network = None
-                        zone    = None
-                        name    = None
-                        gateway = None
-                        for row in self.call('list.host.interface', [ host ]):
-                                if row['default']:
-                                        network = row['network']
-                                        name    = row['name']
-                                        if not name:
-                                                name = host
+			network = None
+			zone    = None
+			name    = None
+			gateway = None
+			for row in self.call('list.host.interface', [ host ]):
+				if row['default']:
+					network = row['network']
+					name    = row['name']
+					if not name:
+						name = host
 
-                        if network:
-                                for row in self.call('list.network', [ network ]):
-                                        gateway = row['gateway']
-                                        zone    = row['zone']
+			if network:
+				for row in self.call('list.network', [ network ]):
+					gateway = row['gateway']
+					zone    = row['zone']
 
-                        if zone:
-                                hostname = '%s.%s' % (name, zone)
-                        else:
-                                hostname = name
-                        self.addOutput(host, 'HOSTNAME=%s' % hostname)
+			if zone:
+				hostname = '%s.%s' % (name, zone)
+			else:
+				hostname = name
+			self.addOutput(host, 'HOSTNAME=%s' % hostname)
 
-                        if gateway:
-                                self.addOutput(host, 'GATEWAY=%s' % gateway)
+			if gateway:
+				self.addOutput(host, 'GATEWAY=%s' % gateway)
 
-                        self.addOutput(host, '</stack:file>')
+			self.addOutput(host, '</stack:file>')
 
 			#
 			# 7.x requires the hostname to be placed into

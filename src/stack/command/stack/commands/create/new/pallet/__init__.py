@@ -292,11 +292,11 @@ class Command(stack.commands.create.new.command):
 
 	def run(self, params, args):
 
-                (self.name, self.version, self.color) = self.fillParams([
-                        ('name', None, True),
+		(self.name, self.version, self.color) = self.fillParams([
+			('name', None, True),
 			('version', '1.0'),
-                        ('color', self.colorNode())
-                        ])
+			('color', self.colorNode())
+			])
 
 		self.setDict()
 		self.createDirsFiles()

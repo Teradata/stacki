@@ -113,15 +113,15 @@ class Command(stack.commands.set.host.command):
 	def run(self, params, args):
 
 		(rank, ) = self.fillParams([
-                        ('rank', None, True)
-                        ])
+			('rank', None, True)
+			])
 		
 		if not len(args):
-                	raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set rank='%s' where
+				update nodes set rank='%s' where
 				name='%s'
-                                """ % (rank, host))
+				""" % (rank, host))
 				

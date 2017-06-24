@@ -138,7 +138,7 @@ class Command(stack.commands.config.host.command):
 		hosts = self.getHostnames(args)
 
 		if len(hosts) != 1:
-                	raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 

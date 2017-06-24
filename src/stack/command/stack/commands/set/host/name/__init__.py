@@ -112,23 +112,23 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		hosts = self.getHostnames(args)
-                (name, ) = self.fillParams([
-                        ('name', None, True)
-                        ])
+		(name, ) = self.fillParams([
+			('name', None, True)
+			])
 		
 		if not len(hosts) == 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 		if name in self.getHostnames():
-                        raise CommandError(self, 'name already exists')
+			raise CommandError(self, 'name already exists')
 			
 		host = hosts[0]
-                
-		self.db.execute("""
-                	update nodes set name='%s' where
-			name='%s'
-                        """ % (name, host))
 		
-                        
+		self.db.execute("""
+			update nodes set name='%s' where
+			name='%s'
+			""" % (name, host))
+		
+			
 

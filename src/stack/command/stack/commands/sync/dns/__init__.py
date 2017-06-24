@@ -144,7 +144,7 @@ class Command(stack.commands.sync.command):
 
 	def run(self, params, args):
 
-                self.notify('Sync DNS\n')
+		self.notify('Sync DNS\n')
 
 		self.runPlugins()
 		os.system('/sbin/service named reload > /dev/null 2>&1')

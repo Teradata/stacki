@@ -120,21 +120,21 @@ class Command(stack.commands.dump.host.command):
 
 	def run(self, params, args):
 
-        	for dict in self.call('list.host.interface'):
+		for dict in self.call('list.host.interface'):
 
-                	if not dict['interface']:
-                        	continue # skip unconfigured dicts
-                                 
-                        if dict['host'] == self.db.getHostname():
-                                continue # skip frontend
+			if not dict['interface']:
+				continue # skip unconfigured dicts
+				 
+			if dict['host'] == self.db.getHostname():
+				continue # skip frontend
 
 			self.dump('"add host interface" %s interface=%s' %
-                                (dict['host'], dict['interface']))
+				(dict['host'], dict['interface']))
 
-                        for option in dict.keys():
-                                if option == 'host':
-                                        continue
-                                if dict[option]:
-                                        self.dump('"set host interface %s" %s %s=%s' %
-                                                (option, dict['host'], option, dict[option]))
+			for option in dict.keys():
+				if option == 'host':
+					continue
+				if dict[option]:
+					self.dump('"set host interface %s" %s %s=%s' %
+						(option, dict['host'], option, dict[option]))
 

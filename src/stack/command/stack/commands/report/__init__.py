@@ -96,14 +96,14 @@ class command(stack.commands.Command):
 	MustBeRoot = 0
 
 	def getSubnet(self, subnet, netmask):
-                """
-                This Function returns a subnet with a
-                CIDR netmask that is not a multiple of
-                8. This means subnets smaller than /24 (25-32)
-                will result in the correct subnet being
-                computed for named.conf.
-                """
-                
+		"""
+		This Function returns a subnet with a
+		CIDR netmask that is not a multiple of
+		8. This means subnets smaller than /24 (25-32)
+		will result in the correct subnet being
+		computed for named.conf.
+		"""
+		
 		s_list = subnet.split('.')
 		s_list = map(int, s_list)
 		

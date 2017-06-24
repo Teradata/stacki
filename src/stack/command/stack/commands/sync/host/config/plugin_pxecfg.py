@@ -56,7 +56,7 @@ class Plugin(stack.commands.Plugin):
 		return []
 
 	def run(self, h):
-                hosts = h['hosts']
-                attrs = h['attrs']
+		hosts = h['hosts']
+		attrs = h['attrs']
 
-                self.owner.command('sync.host.boot', hosts)
+		self.owner.command('sync.host.boot', hosts)

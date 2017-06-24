@@ -102,10 +102,10 @@ class Command(stack.commands.set.host.command):
 	</arg>
 
 	<param type='string' name='interface' optional='0'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
- 	<param type='string' name='mac' optional='0'>
+	<param type='string' name='mac' optional='0'>
 	The mac address of the interface. Usually of the form dd:dd:dd:dd:dd:dd
 	where d is a hex digit. This format is not enforced. Use mac=NULL to
 	clear the mac address.
@@ -118,19 +118,19 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-                (interface, mac) = self.fillParams([
-                        ('interface', None, True),
-                        ('mac',       None, True)
-                        ])
+		(interface, mac) = self.fillParams([
+			('interface', None, True),
+			('mac',       None, True)
+			])
 
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
-                for host in self.getHostnames(args):
+		for host in self.getHostnames(args):
 			self.db.execute("""
-        	        	update networks, nodes set 
+				update networks, nodes set 
 				networks.mac=NULLIF('%s','NULL') where
 				nodes.name='%s' and networks.node=nodes.id and
 				networks.device like '%s'
-        	                """ % (mac, host, interface))
+				""" % (mac, host, interface))
 

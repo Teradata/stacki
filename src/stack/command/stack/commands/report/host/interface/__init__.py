@@ -323,8 +323,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 
 
-                hosts = self.getHostnames(args)
-                for host in hosts:
+		hosts = self.getHostnames(args)
+		for host in hosts:
 			osname = self.getHostAttr(host, 'os')
 			self.runImplementation(osname, [host])
 

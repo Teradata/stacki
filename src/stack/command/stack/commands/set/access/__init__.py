@@ -47,20 +47,20 @@ from stack.exception import *
 
 class Command(stack.commands.set.command):
 	"""
-        Sets an Access control pattern.
-        
+	Sets an Access control pattern.
+	
 	<param name="command" optional='0'>
 	Command Pattern.
 	</param>
-        
+	
 	<param name="group" optional='0'>
 	Group name / ID for access.
 	</param>
-        
+	
 	<example cmd='set access command="*" group=apache'>
 	Give "apache" group access to all "stack" commands
 	</example>
-        
+	
 	<example cmd='set access command="list*" group=wheel'>
 	Give "wheel" group access to all "stack list" commands
 	</example>
@@ -68,12 +68,12 @@ class Command(stack.commands.set.command):
 
 	def run(self, params, args):
 
-                
+		
 		(cmd, group) = self.fillParams([
-                        ('command', None, True),
-                        ('group',   None, True)
-                        ])
-                 
+			('command', None, True),
+			('group',   None, True)
+			])
+		 
 		groupid = None
 		try:
 			groupid = int(group)
@@ -89,7 +89,7 @@ class Command(stack.commands.set.command):
 		if groupid == None:
 			raise CommandError(self, 'cannot find group %s' % group)
 
-                self.db.execute("""
-                	insert into access (command, groupid)
-                        values ('%s', %d)
-                        """ % (cmd, groupid))
+		self.db.execute("""
+			insert into access (command, groupid)
+			values ('%s', %d)
+			""" % (cmd, groupid))

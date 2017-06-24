@@ -75,7 +75,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if target != 'global' and target not in appliances:
 				host = self.db.getHostname(target)
 				if not host:
-                                        raise CommandError(self.owner, 'target "%s" is not an known appliance or host name' % host)
+					raise CommandError(self.owner, 'target "%s" is not an known appliance or host name' % host)
 
 			if target not in self.owner.attrs.keys():
 				self.owner.attrs[target] = {}

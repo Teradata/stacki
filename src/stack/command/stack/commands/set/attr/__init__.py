@@ -45,10 +45,10 @@ import stack.commands
 from stack.exception import *
 
 class Command(stack.commands.Command,
-              stack.commands.OSArgumentProcessor,
-              stack.commands.ApplianceArgumentProcessor,
-              stack.commands.EnvironmentArgumentProcessor,
-              stack.commands.HostArgumentProcessor):
+	      stack.commands.OSArgumentProcessor,
+	      stack.commands.ApplianceArgumentProcessor,
+	      stack.commands.EnvironmentArgumentProcessor,
+	      stack.commands.HostArgumentProcessor):
 	"""
 	Sets a global attribute for all nodes
 
@@ -77,109 +77,109 @@ class Command(stack.commands.Command,
 	def run(self, params, args):
 
 		(glob, value, shadow, force, scope) = self.fillParams([
-                        ('attr',   None, True),
-                        ('value',  None, True),
+			('attr',   None, True),
+			('value',  None, True),
 			('shadow', False),
 			('force',  True),
-                        ('scope',  'global'),
-                        ])
+			('scope',  'global'),
+			])
 
-                shadow = self.str2bool(shadow)  
+		shadow = self.str2bool(shadow)  
 		force  = self.str2bool(force)
 
-                # All the set|add|remove attribute commands for every scope
-                # go through this code and just have stubbed out code to
-                # get the right arguments passed down to here.
-                #
-                # This keeps all the attribute stuff in one place.
+		# All the set|add|remove attribute commands for every scope
+		# go through this code and just have stubbed out code to
+		# get the right arguments passed down to here.
+		#
+		# This keeps all the attribute stuff in one place.
 
-                lookup = { 'global'     : { 'fn'   : lambda x=None : [],
-                                            'table': None },
-                           'os'         : { 'fn'   : self.getOSNames, 
-                                            'table': 'oses' },
-                           'appliance'  : { 'fn'   : self.getApplianceNames, 
-                                            'table': 'appliances' },
-                           'environment': { 'fn'   : self.getEnvironmentNames,
-                                            'table': 'environments' },
-                           'host'       : { 'fn'   : self.getHostnames,
-                                            'table': 'nodes' }}
+		lookup = { 'global'     : { 'fn'   : lambda x=None : [],
+					    'table': None },
+			   'os'         : { 'fn'   : self.getOSNames, 
+					    'table': 'oses' },
+			   'appliance'  : { 'fn'   : self.getApplianceNames, 
+					    'table': 'appliances' },
+			   'environment': { 'fn'   : self.getEnvironmentNames,
+					    'table': 'environments' },
+			   'host'       : { 'fn'   : self.getHostnames,
+					    'table': 'nodes' }}
 
-                if scope not in lookup.keys():
-                        raise CommandError(self, 'invalid scope "%s"' % scope)
+		if scope not in lookup.keys():
+			raise CommandError(self, 'invalid scope "%s"' % scope)
 
-                if not scope == 'global' and not args:
-                        raise ArgRequired(self)
+		if not scope == 'global' and not args:
+			raise ArgRequired(self)
 
-                # If the value is set (we are not removing attributes) do not
-                # allow the attr argument to be a glob.
+		# If the value is set (we are not removing attributes) do not
+		# allow the attr argument to be a glob.
 
-                if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', glob):
-                        raise CommandError(self, 'invalid attr name "%s"'  % glob)
+		if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', glob):
+			raise CommandError(self, 'invalid attr name "%s"'  % glob)
 
-                # Assume that attrs is a glob and get a list of
-                # matching attributes for the scope.
+		# Assume that attrs is a glob and get a list of
+		# matching attributes for the scope.
 
 
-                targets = lookup[scope]['fn'](args)
-                if scope == 'global':
-                        attrs = []
-                else:
-                        attrs = {}
-                        for target in targets:
-                                attrs[target] = []
+		targets = lookup[scope]['fn'](args)
+		if scope == 'global':
+			attrs = []
+		else:
+			attrs = {}
+			for target in targets:
+				attrs[target] = []
 
-                for row in self.call('list.attr', 
-                                     copy(targets) + [ 'resolve=false', 
-                                                       'scope=%s' % scope, 
-                                                       'attr=%s'  % glob ]):
-                        if scope == 'global':
-                                attrs.append(row['attr'])
-                        else:
-                                attrs[row[scope]].append(row['attr'])
+		for row in self.call('list.attr', 
+				     copy(targets) + [ 'resolve=false', 
+						       'scope=%s' % scope, 
+						       'attr=%s'  % glob ]):
+			if scope == 'global':
+				attrs.append(row['attr'])
+			else:
+				attrs[row[scope]].append(row['attr'])
 
-                # If the attribute is already defined and force=False
-                # complain
-                #
-                # 	add := force=false
-                # 	set := force=true
+		# If the attribute is already defined and force=False
+		# complain
+		#
+		# 	add := force=false
+		# 	set := force=true
 
 		if not force:
 			for target in attrs:
 				if len(attrs[target]):
-                			raise CommandError(self, 'attr "%s" exists for %s' % (glob, target))
+					raise CommandError(self, 'attr "%s" exists for %s' % (glob, target))
 
-                # Before we do the insert remove any existing values, otherwise
-                # we need to mess around with 'update' vs 'insert' commands.
+		# Before we do the insert remove any existing values, otherwise
+		# we need to mess around with 'update' vs 'insert' commands.
 
-                if scope == 'global':
-                        for attr in attrs:
-                                self.db.execute(
-                                        """
-                                        delete from attributes where
-                                        scope = '%s' and
-                                        attr  = binary '%s'
-                                        """ % (scope, attr))
-                else:
-                        table = lookup[scope]['table']
-                        for target in targets:
-                                for attr in attrs[target]:
-                                        self.db.execute(
-                                        	"""
-                                                delete from attributes where
-                                                scope    = '%s' and 
-                                                scopeid  = (select id from %s where name='%s') and
-                                                attr     = '%s'
-                                                """ % (scope, table, target, attr))
+		if scope == 'global':
+			for attr in attrs:
+				self.db.execute(
+					"""
+					delete from attributes where
+					scope = '%s' and
+					attr  = binary '%s'
+					""" % (scope, attr))
+		else:
+			table = lookup[scope]['table']
+			for target in targets:
+				for attr in attrs[target]:
+					self.db.execute(
+						"""
+						delete from attributes where
+						scope    = '%s' and 
+						scopeid  = (select id from %s where name='%s') and
+						attr     = '%s'
+						""" % (scope, table, target, attr))
 
-                # If the command was called with "value=" stop here and treat the
-                # command as a remove command.
+		# If the command was called with "value=" stop here and treat the
+		# command as a remove command.
 
-                if not value:
-                        return
-                
-                
-                # Figure out if this a shadow attribute and then insert into the
-                # correct table.
+		if not value:
+			return
+		
+		
+		# Figure out if this a shadow attribute and then insert into the
+		# correct table.
 
 		if shadow:
 			s = "'%s'" % value
@@ -187,24 +187,24 @@ class Command(stack.commands.Command,
 		else:
 			s = 'NULL'
 			v = "'%s'" % value
-                        
+			
 
-                if scope == 'global':
+		if scope == 'global':
 			self.db.execute(
-                                """
-			        insert into attributes
-			        (scope, attr, value, shadow)
-			        values ('%s', '%s', %s, %s)
-			        """ % (scope, glob, v, s))
-                else:
-                        table = lookup[scope]['table']
-                        for target in targets:
-                                self.db.execute(
-                                        """
-                                        insert into attributes
-                                        (scope, attr, value, shadow, scopeid)
-                                        values (
-	                                	'%s', '%s', %s, %s,
-                                		(select id from %s where name='%s')
-                                        )
-                                        """ % (scope, glob, v, s, table, target))
+				"""
+				insert into attributes
+				(scope, attr, value, shadow)
+				values ('%s', '%s', %s, %s)
+				""" % (scope, glob, v, s))
+		else:
+			table = lookup[scope]['table']
+			for target in targets:
+				self.db.execute(
+					"""
+					insert into attributes
+					(scope, attr, value, shadow, scopeid)
+					values (
+						'%s', '%s', %s, %s,
+						(select id from %s where name='%s')
+					)
+					""" % (scope, glob, v, s, table, target))

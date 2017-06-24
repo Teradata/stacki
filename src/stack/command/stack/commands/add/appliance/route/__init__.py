@@ -118,16 +118,16 @@ class Command(stack.commands.add.appliance.command):
 
 	def run(self, params, args):
 
-                apps = self.getApplianceNames(args)
+		apps = self.getApplianceNames(args)
 
 		(address, gateway, netmask,) = self.fillParams([
-                        ('address', None, True),
-                        ('gateway', None, True),
-                        ('netmask', '255.255.255.255')
-                        ])
+			('address', None, True),
+			('gateway', None, True),
+			('netmask', '255.255.255.255')
+			])
 		
 		if len(args) == 0:
-                        raise ParamRequired(self, 'appliance')
+			raise ParamRequired(self, 'appliance')
 
 
 		#
@@ -135,7 +135,7 @@ class Command(stack.commands.add.appliance.command):
 		#
 		subnet = 0
 		rows = self.db.execute("""
-                	select id from subnets where
+			select id from subnets where
 			name = '%s' """ % gateway)
 
 		if rows == 1:
@@ -164,4 +164,4 @@ class Command(stack.commands.add.appliance.command):
 			self.db.execute("""insert into appliance_routes values 
 				((select id from appliances where name='%s'),
 				'%s', '%s', %s, %s)""" %
-                	        (app, address, netmask, gateway, subnet))
+				(app, address, netmask, gateway, subnet))

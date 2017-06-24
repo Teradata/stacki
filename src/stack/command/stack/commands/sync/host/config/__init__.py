@@ -55,15 +55,15 @@ class Command(stack.commands.sync.host.command,
 	"""
 	def run(self, params, args):
 
-                self.notify('Sync Host Config\n')
+		self.notify('Sync Host Config\n')
 
-                hosts = self.getHostnames(args)
-                attrs = {}
+		hosts = self.getHostnames(args)
+		attrs = {}
 
-                for host in self.getHostnames(args):
-                        attrs[host] = {}
-                for row in self.call('list.host.attr', hosts):
-                        attrs[row['host']][row['attr']] = row['value']
+		for host in self.getHostnames(args):
+			attrs[host] = {}
+		for row in self.call('list.host.attr', hosts):
+			attrs[row['host']][row['attr']] = row['value']
 
-                self.runPlugins({ 'hosts': hosts,
-                                  'attrs': attrs })
+		self.runPlugins({ 'hosts': hosts,
+				  'attrs': attrs })

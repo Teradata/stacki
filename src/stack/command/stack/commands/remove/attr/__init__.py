@@ -99,8 +99,8 @@ class Command(stack.commands.remove.command):
 
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='remove attr attr=cpus'>
 	Removes the global attribute named 'cpus'.
 	</example>

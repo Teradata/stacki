@@ -115,12 +115,12 @@ class Command(stack.commands.BoxArgumentProcessor,
 
 	def run(self, params, args):
 		if len(args) != 1:
-                        raise ArgUnique(self, 'box')
+			raise ArgUnique(self, 'box')
 
 		box = args[0]
 		
 		if box in self.getBoxNames():
-                        raise CommandError(self, 'box "%s" exists' % box)
+			raise CommandError(self, 'box "%s" exists' % box)
 
 		OS, = self.fillParams([ ('os', 'redhat') ])
 

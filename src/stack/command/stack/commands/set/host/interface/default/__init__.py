@@ -44,8 +44,8 @@ from stack.exception import *
 
 class Command(stack.commands.set.host.interface.command):
 	"""
-        Designates one network as the default route for a set of hosts.
-        Either the interface or network paramater is required.
+	Designates one network as the default route for a set of hosts.
+	Either the interface or network paramater is required.
 
 	<arg optional='1' repeat='1' type='string' name='host'>
 	Host name.
@@ -53,36 +53,36 @@ class Command(stack.commands.set.host.interface.command):
 	
 	<param optional='0' type='string' name='interface'>
 	Device name of the default interface.
- 	</param>
+	</param>
 
-        <param optional='0' type='string' name='network'>
- 	Network name of the default interface.
- 	</param>
+	<param optional='0' type='string' name='network'>
+	Network name of the default interface.
+	</param>
 
-        <param optional='0' type='string' name='mac'>
- 	MAC address name of the default interface.
- 	</param>
+	<param optional='0' type='string' name='mac'>
+	MAC address name of the default interface.
+	</param>
 
-        <param optional='0' type='bool' name='default'>
-        Can be used to set the value of default to False.
-        </param>
+	<param optional='0' type='bool' name='default'>
+	Can be used to set the value of default to False.
+	</param>
 	"""
 
 	def run(self, params, args):
 
-                (default, interface, network, mac) = self.fillParams([
-                        ('default', 'true'),
-                        ('interface', None),
-                        ('network', None),
-                        ('mac', None),
-                        ])
+		(default, interface, network, mac) = self.fillParams([
+			('default', 'true'),
+			('interface', None),
+			('network', None),
+			('mac', None),
+			])
 
-                default = self.str2bool(default)
+		default = self.str2bool(default)
 
 		if not interface and not network and not mac:
-                        raise ParamRequired(self, ('interface', 'network', 'mac'))
+			raise ParamRequired(self, ('interface', 'network', 'mac'))
 
-                for host in self.getHostnames(args):
+		for host in self.getHostnames(args):
 			valid = False
 			# Check validity of params. Match them against the
 			# values in the database to check params.
@@ -113,7 +113,7 @@ class Command(stack.commands.set.host.interface.command):
 					break
 			if valid:
 				if default:
-                       			sql_clear_cmd = """update networks net,
+					sql_clear_cmd = """update networks net,
 						nodes n set net.main = 0
 						where n.name = '%s' and
 						net.node = n.id """ % (host)

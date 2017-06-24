@@ -45,8 +45,8 @@ import string
 import stack.commands
 
 class Command(stack.commands.report.host.command):
-        """
-        Generate the /etc/resolv.conf for a host
+	"""
+	Generate the /etc/resolv.conf for a host
 
 	<arg optional='0' repeat='1' type='string' name='host'>
 	Host name of machine
@@ -54,11 +54,11 @@ class Command(stack.commands.report.host.command):
 	"""
 
 	def outputResolv(self, host):
-                zones = {}
+		zones = {}
 		dns = {}	
 
-                for row in self.call('list.network'):
-                        zones[row['network']] = row['zone']
+		for row in self.call('list.network'):
+			zones[row['network']] = row['zone']
 			dns[row['network']] = row['dns']
 
 		search = []
@@ -75,7 +75,7 @@ class Command(stack.commands.report.host.command):
 
 		if search:
 			self.addOutput(host, 'search %s' % string.join(search))
-                        
+			
 		#
 		# If the default network is 'public' use the
 		# public DNS rather that the server on the boss.
@@ -117,7 +117,7 @@ class Command(stack.commands.report.host.command):
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
-                for host in hosts:
+		for host in hosts:
 			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])
 

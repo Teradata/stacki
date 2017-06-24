@@ -81,17 +81,17 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-                boot = {}
-                for h,b in self.db.select(
-                        """
-                        n.name, b.action from nodes n
-                        left join boot b on
-                        n.id = b.node
-                        """):
-                        boot[h] = b
+		boot = {}
+		for h,b in self.db.select(
+			"""
+			n.name, b.action from nodes n
+			left join boot b on
+			n.id = b.node
+			"""):
+			boot[h] = b
 
 		self.beginOutput()
 		for host in self.getHostnames(args):
-                        self.addOutput(host, boot[host])
+			self.addOutput(host, boot[host])
 		self.endOutput(header=['host', 'action'])
 

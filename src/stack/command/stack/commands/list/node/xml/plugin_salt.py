@@ -49,19 +49,19 @@ class Plugin(stack.commands.Plugin):
 		return 'salt'
 
 	def run(self, attrs):
-                try:
-                        fin = open(os.path.join(os.sep, 'export', 
-                                                'stack', 'salt', 
-                                                'compiled', 
-                                                attrs['hostname'], 
-                                                'kickstart.xml'), 'r')
-                except:
-                        fin = None
-                if fin:
-                        self.owner.addText('<stack:post>\n')
-                        for line in fin.readlines():
-                                self.owner.addText(line)
-                        self.addText('</stack:post>\n')
-                
+		try:
+			fin = open(os.path.join(os.sep, 'export', 
+						'stack', 'salt', 
+						'compiled', 
+						attrs['hostname'], 
+						'kickstart.xml'), 'r')
+		except:
+			fin = None
+		if fin:
+			self.owner.addText('<stack:post>\n')
+			for line in fin.readlines():
+				self.owner.addText(line)
+			self.addText('</stack:post>\n')
+		
 
 

@@ -116,7 +116,7 @@ class Command(stack.commands.remove.appliance.command,
 		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'appliance')
+			raise ArgRequired(self, 'appliance')
 
 		for app in self.getApplianceNames(args):
 			sql = """appliance = (select id from appliances where

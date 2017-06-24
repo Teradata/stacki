@@ -114,7 +114,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
-                for host in hosts:
+		for host in hosts:
 			osname = self.db.getHostOS(host)
 			self.runImplementation(osname, [host])
 		self.endOutput(padChar='', trimOwner=True)

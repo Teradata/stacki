@@ -113,7 +113,7 @@ class Command(command):
 	def run(self, params, args):
 
 		if len(args) < 1:
-                        raise ArgRequired(self, 'os')
+			raise ArgRequired(self, 'os')
 			
 		for os in self.getOSNames(args):
 			self.runPlugins(os)

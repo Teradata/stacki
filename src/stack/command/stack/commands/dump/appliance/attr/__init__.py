@@ -58,19 +58,19 @@ class Command(stack.commands.dump.appliance.command):
 
 	def run(self, params, args):
 
-                for row in self.call('list.appliance.attr', args):
-                        app = row['appliance']
-                        t   = row['type']
-                        a   = row['attr']
-                        v   = self.quote(row['value'])
-                        
-                        if t == 'const':
-                                continue
+		for row in self.call('list.appliance.attr', args):
+			app = row['appliance']
+			t   = row['type']
+			a   = row['attr']
+			v   = self.quote(row['value'])
+			
+			if t == 'const':
+				continue
 
-                        s = ''
-                        if t == 'shadow':
-                                s = 'shadow=true'
+			s = ''
+			if t == 'shadow':
+				s = 'shadow=true'
 
-                        self.dump('"set attr" scope=appliance object=%s force=false attr=%s value=%s %s' % (app, a, v, s))
+			self.dump('"set attr" scope=appliance object=%s force=false attr=%s value=%s %s' % (app, a, v, s))
 
 

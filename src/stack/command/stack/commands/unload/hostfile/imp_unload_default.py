@@ -61,7 +61,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		reader = stack.csv.reader(open(filename, 'rU'))
 		header = None
-                dict   = {}
+		dict   = {}
 		for row in reader:
 			if not header:
 				header = row
@@ -76,7 +76,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						required.remove(header[i])
 
 				if len(required) > 0:
-                                        raise CommandError(self.owner, 'csv file is missing column(s) "%s"' % ', '.join(required))
+					raise CommandError(self.owner, 'csv file is missing column(s) "%s"' % ', '.join(required))
 
 				continue
 
@@ -84,10 +84,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				field = row[i]
 
 				if header[i] == 'name' and field in hosts:
-                                        dict[field] = True
+					dict[field] = True
 
 
-                for host in dict.keys():
+		for host in dict.keys():
 			self.owner.call('remove.host', [ host ])
 		self.owner.call('sync.config')
 		self.owner.call('sync.host.config')

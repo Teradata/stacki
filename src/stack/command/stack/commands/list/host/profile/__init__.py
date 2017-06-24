@@ -94,70 +94,73 @@ import sys
 import string
 from xml.sax import make_parser
 import stack.commands
+print ("X")
 import stack.gen
 from stack.exception import *
 
 class implementation(stack.commands.Implementation):
 
-        def generator(self):
-                pass
+	def generator(self):
+		pass
 
-        def chapter(self, generator, profile):
-                pass
+	def chapter(self, generator, profile):
+		pass
 
 
-	def run(self, (xmlinput, profileType, chapter)):
+	def run(self, x):
 
-                profile     = []
+		(xmlinput, profileType, chapter) = x
+
+		profile     = []
 		generator   = self.generator()
 
-                generator.setProfileType(profileType)
+		generator.setProfileType(profileType)
 		generator.parse(xmlinput)
 
-                profile.append('<?xml version="1.0" standalone="no"?>')
-                profile.append('<profile-%s>' % generator.getProfileType())
+		profile.append('<?xml version="1.0" standalone="no"?>')
+		profile.append('<profile-%s>' % generator.getProfileType())
 
-                profile.append('<chapter name="stacki">')
-                for line in generator.generate('stacki'):
-	                profile.append('%s' % line)
+		profile.append('<chapter name="stacki">')
+		for line in generator.generate('stacki'):
+			profile.append('%s' % line)
 		profile.append('</chapter>')
 
 		profile.append('<chapter name="meta">')
-                profile.append('\t<section name="order">')
-                for line in generator.generate('order'):
-	                profile.append('%s' % line)
-                profile.append('\t</section>')
-                profile.append('\t<section name="debug">')
-                for line in generator.generate('debug'):
-                        profile.append(line)
-                profile.append('\t</section>')
+		profile.append('\t<section name="order">')
+		for line in generator.generate('order'):
+			profile.append('%s' % line)
+		profile.append('\t</section>')
+		profile.append('\t<section name="debug">')
+		for line in generator.generate('debug'):
+			profile.append(line)
+		profile.append('\t</section>')
 		profile.append('</chapter>')
 
-                self.chapter(generator, profile)
+		self.chapter(generator, profile)
 
-                profile.append('</profile-%s>' % generator.getProfileType())
+		profile.append('</profile-%s>' % generator.getProfileType())
 
-                if chapter:
+		if chapter:
 			parser  = make_parser()
 			handler = stack.gen.ProfileHandler()
 
 			parser.setContentHandler(handler)
-                        for line in profile:
-                                parser.feed('%s\n' % line)
+			for line in profile:
+				parser.feed('%s\n' % line)
 
-                        profile = handler.getChapter(chapter)
+			profile = handler.getChapter(chapter)
 
-                for line in profile:
-                        self.owner.addOutput('', line)
+		for line in profile:
+			self.owner.addOutput('', line)
 
 
 class Command(stack.commands.list.host.command):
 	"""
-        Outputs a XML wrapped installer profile for the given hosts.
+	Outputs a XML wrapped installer profile for the given hosts.
 
-        If no hosts are specified the profiles for all hosts are listed.
+	If no hosts are specified the profiles for all hosts are listed.
 	
-        If input is fed from STDIN via a pipe, the argument list is
+	If input is fed from STDIN via a pipe, the argument list is
 	ignored and XML is read from STDIN.  This command is used for
 	debugging the Stacki configuration graph.
 
@@ -174,28 +177,28 @@ class Command(stack.commands.list.host.command):
 	Does the same thing as above but reads XML from STDIN.
 	</example>
 
-        """
+	"""
 
 	MustBeRoot = 1
 
 	def run(self, params, args):
 
 		(profile, chapter) = self.fillParams([
-                        ('profile', 'native'),
-                        ('chapter', None) ])
+			('profile', 'native'),
+			('chapter', None) ])
 
 		xmlinput  = ''
-                osname    = None
+		osname    = None
 
 		# If the command is not on a TTY, then try to read XML input.
 
 		if not sys.stdin.isatty():
 			for line in sys.stdin.readlines():
-                                if line.find('<stack:profile stack:os="') == 0:
-                                        osname = line.split()[1][9:].strip('"')
+				if line.find('<stack:profile stack:os="') == 0:
+					osname = line.split()[1][9:].strip('"')
 				xmlinput += line
-                if xmlinput and not osname:
-                        raise CommandError(self, "OS name not specified in profile")
+		if xmlinput and not osname:
+			raise CommandError(self, "OS name not specified in profile")
 
 		self.beginOutput()
 
@@ -203,19 +206,19 @@ class Command(stack.commands.list.host.command):
 		# in an environment where TTY cannot be created (ie. apache)
 
 		if not xmlinput:
-                        hosts = self.getHostnames(args)
-                        if len(hosts) != 1:
-                                raise ArgUnique(self, 'host')
-                        host = hosts[0]
+			hosts = self.getHostnames(args)
+			if len(hosts) != 1:
+				raise ArgUnique(self, 'host')
+			host = hosts[0]
 
-                        osname	 = self.db.getHostOS(host)
-                        xmlinput = self.command('list.host.xml', [ host ])
+			osname	 = self.db.getHostOS(host)
+			xmlinput = self.command('list.host.xml', [ host ])
 
-                        self.runImplementation(osname, (xmlinput, profile, chapter))
+			self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		# If we DO have XML input, simply parse it.
 
-                else:
+		else:
 			self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		self.endOutput(padChar='')

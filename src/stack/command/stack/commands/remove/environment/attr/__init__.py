@@ -52,8 +52,8 @@ class Command(stack.commands.remove.environment.command):
 	
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='remove environment attr test attr=sge'>
 	Removes the attribute sge for text environment machines.
 	</example>

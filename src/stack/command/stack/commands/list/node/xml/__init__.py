@@ -90,7 +90,8 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function 
+
+
 import os
 import sys
 import string
@@ -104,7 +105,7 @@ from xml.sax import saxutils
 from xml.sax import handler
 
 class Command(stack.commands.list.command, 
-              stack.commands.BoxArgumentProcessor):
+	      stack.commands.BoxArgumentProcessor):
 	"""
 	Lists the XML configuration information for a host. The graph
 	traversal for the XML output is rooted at the XML node file
@@ -218,7 +219,7 @@ class Command(stack.commands.list.command,
 			attrs['appliance.longname'] = 'Frontend'
 
 		if len(args) != 1:
-                        raise ArgRequired(self, 'node')
+			raise ArgRequired(self, 'node')
 		root = args[0]
 
 		doEval = self.str2bool(evalp)
@@ -241,7 +242,7 @@ class Command(stack.commands.list.command,
 		items = []
 		try:
 			for name, version, rel, arch, osname in self.getBoxPallets(attrs['box']):
-                                items.append(os.path.join('/export', 'stack',
+				items.append(os.path.join('/export', 'stack',
 					'pallets', name, version, rel, osname, arch))
 		except:
 			#
@@ -305,11 +306,11 @@ class Command(stack.commands.list.command,
 
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
-                                if ext in [ '.xml', '.pro' ]:
-                                        ext = '.xml' ## REMOVE THIS
-                                        self.runImplementation(ext[1:], 
-                                                               (os.path.join(graph, file), 
-                                                                handler))
+				if ext in [ '.xml', '.pro' ]:
+					ext = '.xml' ## REMOVE THIS
+					self.runImplementation(ext[1:], 
+							       (os.path.join(graph, file), 
+								handler))
 
 		graph = handler.getMainGraph()
 		if graph.hasNode(root):
@@ -348,7 +349,7 @@ class Command(stack.commands.list.command,
 				depsHash[dep.name] = None
 
 		for node,cond in nodes:
-			if depsHash.has_key(node.name):
+			if node.name in depsHash:
 				nodesHash[node.name] = None
 
 		list = []
@@ -372,7 +373,7 @@ class Command(stack.commands.list.command,
 
 		parsed     = []
 		kstext     = ''
-                namespaces = []
+		namespaces = []
 		for node in list:
 			if not node:
 				continue
@@ -389,20 +390,20 @@ class Command(stack.commands.list.command,
 				handler.parseNode(node, doEval, self)
 				parsed.append(node)
 				kstext += node.getKSText()
-                                namespaces.append(node.getNamespaces())
+				namespaces.append(node.getNamespaces())
 
 		# Now print everyone out with the header kstext from
 		# the previously parsed nodes
 
-                n = {} # build a dict of xmlns declarations used
-                for d in namespaces:
-                        for (uri, ns) in d.items():
-                                n[ns] = uri
+		n = {} # build a dict of xmlns declarations used
+		for d in namespaces:
+			for (uri, ns) in d.items():
+				n[ns] = uri
 
 		self.addText('<stack:profile stack:os="%s"' % attrs['os'])
-                for (ns, uri) in n.items():
-                        self.addText(' xmlns:%s="%s"' % (ns, uri))
-                self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
+		for (ns, uri) in n.items():
+			self.addText(' xmlns:%s="%s"' % (ns, uri))
+		self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
 
 		if attrs['os'] == 'redhat':
 			self.addText('<stack:loader>\n')
@@ -415,27 +416,25 @@ class Command(stack.commands.list.command,
 			# If we are only expanding a pallet subgraph
 			# then do not ouput the XML for other nodes
 
-                        pallet   = None
-                        try:
-                                filename = node.getFilename()
-                                pallet   = filename.split('pallets')[1].split(os.sep)[1]
-                        except:
-                                pass
+			pallet   = None
+			try:
+				filename = node.getFilename()
+				pallet   = filename.split('pallets')[1].split(os.sep)[1]
+			except:
+				pass
 
 			if pallets and pallet not in pallets:
 				continue
 				
 			try:
 				self.addText('%s\n' % node.getXML())
-			except Exception, msg:
-				raise stack.util.KickstartNodeError, \
-				      "in %s node: %s" \
-				      % (node, msg)
+			except Exception as msg:
+				raise stack.util.KickstartNodeError("in %s node: %s" % (node, msg))
 
-                # Run plugins if not the Frontend
+		# Run plugins if not the Frontend
 
-                if attrs.has_key('appliance') and not attrs['appliance'] == 'frontend':
-                        self.runPlugins(attrs)
+		if 'appliance' in attrs and not attrs['appliance'] == 'frontend':
+			self.runPlugins(attrs)
 
 		self.addText('</stack:profile>\n')
 		

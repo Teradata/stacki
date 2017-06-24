@@ -70,9 +70,9 @@ class Command(stack.commands.Command,
 		if attr_filter:
 			regex = re.compile(attr_filter)
 
-                #
-                # use list host attr resolve=false to get only host attributes
-                # look at 'internal' column and ignore intenal attributes
+		#
+		# use list host attr resolve=false to get only host attributes
+		# look at 'internal' column and ignore intenal attributes
 		#
 		for host in self.getHostnames([]):
 			host_attrs = self.call('list.host.attr',

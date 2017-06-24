@@ -76,7 +76,7 @@ class Command(stack.commands.Command,
 		hosts = self.getHostnames(args)
 
 		if not interface and not network:
-                        raise ParamRequired(self, ('interface', 'network'))
+			raise ParamRequired(self, ('interface', 'network'))
 
 		for host in hosts:
 			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.main, nt.options ' +\
@@ -104,7 +104,7 @@ class Command(stack.commands.Command,
 				[host, 'interface=%s' % dev,'ip=NULL'])
 			self.command('set.host.interface.network',
 				[host, 'interface=%s' % dev, 'network=NULL'])
-                        
+			
 			# Create new bridge interface
 			a_h_i_args = [host, "interface=%s" % bridge, 'network=%s' % net,
 				'name=%s' % netname]

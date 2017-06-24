@@ -102,14 +102,14 @@ class Command(stack.commands.set.host.command):
 	</arg>
 	
 	<param type='string' name='interface'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface.
- 	</param>
+	MAC address of the interface.
+	</param>
 
- 	<param type='string' name='network' optional='1'>
+	<param type='string' name='network' optional='1'>
 	The network address of the interface. This is a named network and must be
 	listable by the command 'rocks list network'.
 	</param>
@@ -121,31 +121,31 @@ class Command(stack.commands.set.host.command):
 	
 	def run(self, params, args):
 
-                (network, interface, mac) = self.fillParams([
-                        ('network',   None, True),
-                        ('interface', None),
-                        ('mac',       None)
-                        ])
+		(network, interface, mac) = self.fillParams([
+			('network',   None, True),
+			('interface', None),
+			('mac',       None)
+			])
 
 		if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
+			raise ParamRequired(self, ('interface', 'mac'))
 
 		for host in self.getHostnames(args):
 			if interface:
 				self.db.execute("""
-                                	update networks net, nodes n 
+					update networks net, nodes n 
 					set net.subnet=
-                                        (select id from subnets s where s.name='%s')
-                                        where
-                                        n.name='%s' and net.node=n.id and
-                                        net.device like '%s'
-                                        """ % (network, host, interface))
-                        else:
+					(select id from subnets s where s.name='%s')
+					where
+					n.name='%s' and net.node=n.id and
+					net.device like '%s'
+					""" % (network, host, interface))
+			else:
 				self.db.execute("""
-                                	update networks net, nodes n 
+					update networks net, nodes n 
 					set net.subnet=
-                                        (select id from subnets s where s.name='%s')
-                                        where
-                                        n.name='%s' and net.node=n.id and
-                                        net.mac like '%s'
-                                        """ % (network, host, mac))
+					(select id from subnets s where s.name='%s')
+					where
+					n.name='%s' and net.node=n.id and
+					net.mac like '%s'
+					""" % (network, host, mac))

@@ -1,8 +1,8 @@
 #! /opt/stack/bin/python
 #
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -142,7 +142,7 @@ except:
 # Now make the connection to the DB
 
 try:
-        import pymysql
+	import pymysql
 
 	if os.geteuid() == 0:
 		username = 'apache'
@@ -193,7 +193,6 @@ def run_command(args):
 	# command module and keep popping arguments off the end
 	# until we get a match.	 If no match is found issue an
 	# error
-
 	if not module:
 		for i in range(len(args), 0, -1):
 			s = 'stack.commands.%s' % '.'.join(args[:i])
@@ -209,7 +208,7 @@ def run_command(args):
 		sys.stderr.write('Error - Invalid stack command "%s"\n' % args[0])
 		return -1
 
-	name = ' '.join(string.split(s, '.')[2:])
+	name = ' '.join(s.split('.')[2:])
 
 	import stack.exception
 
@@ -236,7 +235,7 @@ def run_command(args):
 	# dumped when an exception occurs.
 	
 	STACKDEBUG = None
-	if os.environ.has_key('STACKDEBUG'):
+	if 'STACKDEBUG' in os.environ:
 		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
 
 	try:
@@ -271,8 +270,8 @@ def run_command(args):
 
 
 if len(sys.argv) == 1:
-        rc = run_command(['help'])
-        sys.exit(rc)
+	rc = run_command(['help'])
+	sys.exit(rc)
 
 else:
 	args = sys.argv[1:]

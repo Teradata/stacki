@@ -168,7 +168,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                hosts = self.getHostnames(args)
+		hosts = self.getHostnames(args)
 		for host in hosts:
 			s = '<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">'
 			self.addOutput(host, s)

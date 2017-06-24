@@ -153,9 +153,9 @@ class Command(stack.commands.add.host.command):
 		hosts = self.getHostnames(args)
 
 		if len(hosts) == 0:
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 		if len(hosts) > 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 	
 		host = hosts[0]
 
@@ -217,13 +217,13 @@ class Command(stack.commands.add.host.command):
 		# add the bonded interface
 		#
 		cmd_args = [
-                        host,
-                        'interface=%s' % channel,
-                        'ip=%s' % ip,
-                        'module=bonding',
-                        'name=%s' % name,
-                        'network=%s' % network
-                        ]
+			host,
+			'interface=%s' % channel,
+			'ip=%s' % ip,
+			'module=bonding',
+			'name=%s' % name,
+			'network=%s' % network
+			]
 		if default_if:
 			cmd_args.append("default=True")
 		self.command('add.host.interface', cmd_args)
@@ -231,10 +231,10 @@ class Command(stack.commands.add.host.command):
 		# Set the options for the interface
 		if opts:
 			self.command('set.host.interface.options', [
-                                host,
-                                'interface=%s' % channel,
+				host,
+				'interface=%s' % channel,
 				'options=bonding-opts="%s"' % opts
-                                ])
+				])
 		#
 		# clear out all networking info from the physical interfaces and
 		# then associate the interfaces with the bonded channel

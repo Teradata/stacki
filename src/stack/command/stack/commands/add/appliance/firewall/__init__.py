@@ -118,25 +118,25 @@ class Command(stack.commands.add.firewall.command,
 	keyword 'all'.
 	</param>
 	
-        <param type='string' name='network'>
-        The network for this rule. This is a named network
-        (e.g., 'private') and must be one listed by the command
-        'stack list network'.
+	<param type='string' name='network'>
+	The network for this rule. This is a named network
+	(e.g., 'private') and must be one listed by the command
+	'stack list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
 
-        <param type='string' name='output-network'>
-        The output network for this rule. This is a named
+	<param type='string' name='output-network'>
+	The output network for this rule. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'stack list network'.
+	'stack list network'.
 	</param>
 
-        <param type='string' name='chain' require='1'>
+	<param type='string' name='chain' require='1'>
 	The iptables 'chain' for this this rule (e.g., INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action' require='1'>
+	<param type='string' name='action' require='1'>
 	The iptables 'action' this rule (e.g., ACCEPT, REJECT, DROP).
 	</param>
 
@@ -169,12 +169,12 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-                
+		
 		(service, network, outnetwork, chain, action, protocol, flags,
-                         comment, table, rulename) = self.doParams()
+			 comment, table, rulename) = self.doParams()
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'appliance')
+			raise ArgRequired(self, 'appliance')
 
 		apps = self.getApplianceNames(args)
 

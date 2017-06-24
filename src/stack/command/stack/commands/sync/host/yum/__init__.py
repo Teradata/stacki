@@ -53,12 +53,12 @@ class Command(stack.commands.sync.host.command):
 	
 	When a cart or pallet is added to the 
 	frontend, to use the resulting repo but not
-        reinstall machines, sync the new repo to the 
+	reinstall machines, sync the new repo to the 
 	backends for immediate use.
 
 	<example cmd='sync host yum'>
 	Giving no hostname or regex will sync
-        to all backend nodes by default.
+	to all backend nodes by default.
 	</example>
 
 	<example cmd='sync host yum backend-0-0'>
@@ -73,24 +73,24 @@ class Command(stack.commands.sync.host.command):
 
 	def run(self, params, args):
 
-                self.notify('Sync Host Yum\n')
+		self.notify('Sync Host Yum\n')
 
 		hosts = self.getHostnames(args, managed_only=1)
 		me    = self.db.getHostname('localhost')
 
-                # Only shutdown stdout/stderr if we not local
-                for host in hosts:
-                        if host != me:
-                                sys.stdout = open('/dev/null')
-                                sys.stderr = open('/dev/null')
-                                break
+		# Only shutdown stdout/stderr if we not local
+		for host in hosts:
+			if host != me:
+				sys.stdout = open('/dev/null')
+				sys.stderr = open('/dev/null')
+				break
 
 		threads = []
 		for host in hosts:
 
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+			attrs = {}
+			for row in self.call('list.host.attr', [ host ]):
+				attrs[row['attr']] = row['value']
 
 			cmd = '/opt/stack/bin/stack report host yum %s | ' % host
 			cmd += '/opt/stack/bin/stack report script | '

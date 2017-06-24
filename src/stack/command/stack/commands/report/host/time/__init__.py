@@ -61,11 +61,11 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
-                for host in hosts:
+		for host in hosts:
 
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+			attrs = {}
+			for row in self.call('list.host.attr', [ host ]):
+				attrs[row['attr']] = row['value']
 
 			protocol   = attrs.get('time.protocol')
 			appliance  = attrs.get('appliance')

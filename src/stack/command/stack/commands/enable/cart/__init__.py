@@ -74,18 +74,18 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 	def run(self, params, args):
-                if len(args) < 1:
-                        raise ArgRequired(self, 'cart')
+		if len(args) < 1:
+			raise ArgRequired(self, 'cart')
 
-                (box, ) = self.fillParams([ ('box', 'default') ])
+		(box, ) = self.fillParams([ ('box', 'default') ])
 
 		rows = self.db.execute("""
 			select * from boxes where name='%s' """ % box)
 		if not rows:
-                        raise CommandError(self, 'unknown box "%s"' % box)
+			raise CommandError(self, 'unknown box "%s"' % box)
 			
 		for cart in self.getCartNames(args, params):
-                        enabled = False
+			enabled = False
 			for row in self.db.select("""
 				b.name from
 				cart_stacks s, carts c, boxes b where
@@ -93,15 +93,15 @@ class Command(stack.commands.CartArgumentProcessor,
 				s.box = b.id and s.cart = c.id
 				""" % (cart, box)):
 
-                                enabled = True
-                                
+				enabled = True
+				
 			if not enabled:
-                                self.db.execute("""
+				self.db.execute("""
 					insert into cart_stacks(box, cart)
-                                        values (
-                                        (select id from boxes where name='%s'),
-                                        (select id from carts where name='%s')
-                                        )""" % (box, cart))
+					values (
+					(select id from boxes where name='%s'),
+					(select id from carts where name='%s')
+					)""" % (box, cart))
 
 		# Regenerate stacki.repo
 		os.system("""

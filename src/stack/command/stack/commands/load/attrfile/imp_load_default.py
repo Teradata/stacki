@@ -86,7 +86,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		for row in reader:
 
-                        target = None
+			target = None
 			attrs = {}
 			for i in range(0, len(row)):
 				field = row[i]
@@ -114,13 +114,13 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			self.owner.attrs[target].update(attrs)
 
 		# If there is a global environment specified make
-                # sure each host is in that environment.
-                
+		# sure each host is in that environment.
+		
 		try:
 			env = self.owner.attrs['global']['environment']
 		except:
 			env = None
 		if env:
-                        self.owner.call('set.host.environment',
-                                [ target, 'environment=%s' % env ])
+			self.owner.call('set.host.environment',
+				[ target, 'environment=%s' % env ])
 

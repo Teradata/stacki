@@ -80,10 +80,10 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 
 
-                sys.stderr.write('\tAdd Host\n')
+		sys.stderr.write('\tAdd Host\n')
 		for host in hosts.keys():
 
-                        sys.stderr.write('\t\t%s\r' % host)
+			sys.stderr.write('\t\t%s\r' % host)
 
 			#
 			# add the host if it doesn't exist
@@ -95,31 +95,31 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				rack         = hosts[host].get('rack')
 				rank         = hosts[host].get('rank')
 
-                                for paramName in [ 'appliance', 'box',
-                                                   'rack', 'rank' ]:
-                                        paramValue = hosts[host].get(paramName)
-                                        if paramValue:
-                                                args.append('%s=%s' %
-                                                        (paramName, paramValue))
-                                                del hosts[host][paramName]
+				for paramName in [ 'appliance', 'box',
+						   'rack', 'rank' ]:
+					paramValue = hosts[host].get(paramName)
+					if paramValue:
+						args.append('%s=%s' %
+							(paramName, paramValue))
+						del hosts[host][paramName]
 
 				self.owner.call('add.host', args)
 
 			if 'installaction' in hosts[host]:
 				self.owner.call('set.host.bootaction', 
-                                                [ host,
-                                                  'sync=false',
-                                                  'type=install',
-                                                  'action=%s' % hosts[host]['installaction']
-                                          ])
+						[ host,
+						  'sync=false',
+						  'type=install',
+						  'action=%s' % hosts[host]['installaction']
+					  ])
 				del hosts[host]['installaction']
 			if 'runaction' in hosts[host]:
 				self.owner.call('set.host.bootaction', 
-                                                [ host, 
-                                                  'sync=false',
-                                                  'type=os',
-                                                  'action=%s' % hosts[host]['runaction']
-                                          ])
+						[ host, 
+						  'sync=false',
+						  'type=os',
+						  'action=%s' % hosts[host]['runaction']
+					  ])
 				del hosts[host]['runaction']
 
 			if 'groups' in hosts[host]:
@@ -149,25 +149,25 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						[ host, '%s=%s' % (key, hosts[host][key]) ])
 
 
-                        sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
+			sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
 
 
 		#
 		# process the host's interface(s) 
 		#
 
-                hosts = interfaces.keys()
-                argv  = interfaces.keys()
+		hosts = interfaces.keys()
+		argv  = interfaces.keys()
 
-                if argv: # remove previous host interfaces (if any)
-                        argv.append('all=true')
-	                self.owner.call('remove.host.interface', argv)
-                
-                sys.stderr.write('\tAdd Host Interface\n')
-                for host in hosts:
+		if argv: # remove previous host interfaces (if any)
+			argv.append('all=true')
+			self.owner.call('remove.host.interface', argv)
+		
+		sys.stderr.write('\tAdd Host Interface\n')
+		for host in hosts:
 
-                        sys.stderr.write('\t\t%s\r' % host)
-                        
+			sys.stderr.write('\t\t%s\r' % host)
+			
 			for interface in interfaces[host].keys():
 				ip = None
 				mac = None
@@ -176,7 +176,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				channel = None
 				options = None
 				vlan = None
-                                default = None
+				default = None
 
 				if 'ip' in interfaces[host][interface].keys():
 					ip = interfaces[host][interface]['ip']
@@ -194,14 +194,14 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					vlan = interfaces[host][interface]['vlan']
 				if 'default' in interfaces[host][interface].keys():
 					default = str2bool(interfaces[host][interface]['default'])
-                                else:
-                                        default = False
+				else:
+					default = False
 
 				#
 				# now add the interface
 				#
 				cmdparams = [ host,
-                                        'unsafe=true', 
+					'unsafe=true', 
 					'interface=%s' % interface,
 					'default=%s' % default ]
 				if mac:
@@ -214,7 +214,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					cmdparams.append('name=%s' % ifhostname)
 				if vlan:
 					cmdparams.append('vlan=%d' % vlan)
-                                if default:
+				if default:
 					cmdparams.append('name=%s' % host)
 				if 'bond' == interface[:4]:
 					cmdparams.append('module=bonding')
@@ -237,6 +237,6 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						'set.host.interface.options',
 						cmdparams)
 
-                        sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
+			sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
 
 

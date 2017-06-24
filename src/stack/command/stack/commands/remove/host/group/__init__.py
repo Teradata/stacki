@@ -52,7 +52,7 @@ class Command(stack.commands.remove.host.command):
 	</arg>
 
 	<param type='string' name='group' optional='0'>
-        Group for the host.
+	Group for the host.
 	</param>
 
 	<example cmd='remove host group backend-0-0 group=test'>
@@ -62,34 +62,34 @@ class Command(stack.commands.remove.host.command):
 
 	def run(self, params, args):
 
-                if len(args) == 0:
-                        raise ArgRequired(self, 'host')
-        
-                hosts = self.getHostnames(args)
-                
-		(group, ) = self.fillParams([
-                        ('group', None, True)
-                        ])
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+	
+		hosts = self.getHostnames(args)
 		
-                if not hosts:
-                        raise ArgRequired(self, 'host')
+		(group, ) = self.fillParams([
+			('group', None, True)
+			])
+		
+		if not hosts:
+			raise ArgRequired(self, 'host')
 		if not len(hosts) == 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
-                membership = {}
-                for row in self.call('list.host.group'):
-                        membership[row['host']] = row['groups']
-                for host in hosts:
-                        if group not in membership[host]:
-                                raise CommandError(self, '%s is not a member of %s' % (host, group))
+		membership = {}
+		for row in self.call('list.host.group'):
+			membership[row['host']] = row['groups']
+		for host in hosts:
+			if group not in membership[host]:
+				raise CommandError(self, '%s is not a member of %s' % (host, group))
 
-                for host in hosts:
-                        self.db.execute(
-                                """
-                                delete from memberships 
-                                where
-                                nodeid = (select id from nodes where name='%s')
-                                and
-                                groupid = (select id from groups where name='%s')
-                                """ % (host, group))
+		for host in hosts:
+			self.db.execute(
+				"""
+				delete from memberships 
+				where
+				nodeid = (select id from nodes where name='%s')
+				and
+				groupid = (select id from groups where name='%s')
+				""" % (host, group))
 

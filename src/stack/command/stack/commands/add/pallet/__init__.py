@@ -180,7 +180,7 @@ class Command(stack.commands.add.command):
 						break
 
 			if not impl_found:
-                                raise CommandError(self, 'unknown os on media')
+				raise CommandError(self, 'unknown os on media')
 
 			if res and updatedb:
 					self.insert(res[0], res[1], res[2], res[3], res[4])
@@ -189,7 +189,7 @@ class Command(stack.commands.add.command):
 		# Keep going even if a foreign pallet.  Safe to loop over an
 		# empty list.
 		#
- 		# For all pallets present, copy into the pallets directory.
+		# For all pallets present, copy into the pallets directory.
 		
 		for key, info in dict.items():
 			self.runImplementation('native_%s' % info.getRollOS(),
@@ -197,7 +197,7 @@ class Command(stack.commands.add.command):
 			if updatedb:
 				self.insert(info.getRollName(),
 					info.getRollVersion(),
-                                        info.getRollRelease(),
+					info.getRollRelease(),
 					info.getRollArch(),
 					info.getRollOS())
 
@@ -208,10 +208,10 @@ class Command(stack.commands.add.command):
 		not already present.
 		"""
 
-                rows = self.db.execute("""
-                       	select * from rolls where
-                        name='%s' and version='%s' and rel='%s' and arch='%s' and os='%s'
-                        """ % (name, version, release, arch, OS))
+		rows = self.db.execute("""
+			select * from rolls where
+			name='%s' and version='%s' and rel='%s' and arch='%s' and os='%s'
+			""" % (name, version, release, arch, OS))
 		if not rows:
 			self.db.execute("""insert into rolls
 				(name, version, rel, arch, os) values
@@ -221,10 +221,10 @@ class Command(stack.commands.add.command):
 
 	def run(self, params, args):
 		(clean, dir, updatedb) = self.fillParams([
-                        ('clean', 'n'),
+			('clean', 'n'),
 			('dir', '/export/stack/pallets'),
 			('updatedb', 'y')
-                        ])
+			])
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
@@ -258,7 +258,7 @@ class Command(stack.commands.add.command):
 			if self.runImplementation('mounted_%s' % self.os):
 				self.copy(clean, dir, updatedb)
 			else:
-                                raise CommandError(self, 'CDROM not mounted')
+				raise CommandError(self, 'CDROM not mounted')
 		
 		if isolist:
 			#

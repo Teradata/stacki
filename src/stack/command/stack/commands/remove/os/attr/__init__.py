@@ -102,8 +102,8 @@ class Command(stack.commands.remove.os.command):
 	
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='remove os attr linux attr=sge'>
 	Removes the attribute sge for linux OS machines.
 	</example>

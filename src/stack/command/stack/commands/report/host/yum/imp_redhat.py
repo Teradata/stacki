@@ -44,33 +44,33 @@ import stack.commands
 
 class Implementation(stack.commands.Implementation):
 
-        def run(self, args):
-                host	= args[0]
-                server	= args[1]
-                box	= self.owner.getHostAttr(host, 'box')
-                yum	= []
+	def run(self, args):
+		host	= args[0]
+		server	= args[1]
+		box	= self.owner.getHostAttr(host, 'box')
+		yum	= []
 
-                yum.append('<stack:file stack:name="/etc/yum.repos.d/stacki.repo">')
+		yum.append('<stack:file stack:name="/etc/yum.repos.d/stacki.repo">')
 		for pallet in self.owner.getBoxPallets(box):
-                        pname, pversion, prel, parch, pos = pallet
+			pname, pversion, prel, parch, pos = pallet
 
-                        yum.append('[%s-%s-%s]' % (pname, pversion, prel))
-                        yum.append('name=%s %s %s' % (pname, pversion, prel))
-                        yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
-                        yum.append('assumeyes=1')
-                        yum.append('gpgcheck=0')
+			yum.append('[%s-%s-%s]' % (pname, pversion, prel))
+			yum.append('name=%s %s %s' % (pname, pversion, prel))
+			yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
+			yum.append('assumeyes=1')
+			yum.append('gpgcheck=0')
 
-                for o in self.owner.call('list.cart'):
-                        if box in o['boxes'].split():
-                                yum.append('[%s-cart]' % o['name'])
-                                yum.append('name=%s cart' % o['name'])
-                                yum.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
-                                yum.append('assumeyes=1')
-                                yum.append('gpgcheck=0')
+		for o in self.owner.call('list.cart'):
+			if box in o['boxes'].split():
+				yum.append('[%s-cart]' % o['name'])
+				yum.append('name=%s cart' % o['name'])
+				yum.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
+				yum.append('assumeyes=1')
+				yum.append('gpgcheck=0')
 
 		yum.append('</stack:file>')
 		yum.append('yum clean all')
 
-                for line in yum:
-                        self.owner.addOutput(host, line)
+		for line in yum:
+			self.owner.addOutput(host, line)
 

@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -75,7 +75,7 @@ class UsageError(CommandError):
 class ArgParamBaseError(UsageError):
 	
 	def __init__(self, cmd, arg, msg):
-		if type(arg) == types.StringType:
+		if type(arg) == type(''):
 			args = [ arg ]
 		else:
 			args = arg
@@ -84,7 +84,7 @@ class ArgParamBaseError(UsageError):
 		if args:
 			for a in args:
 				list.append('"%s"' % a)
-			args = string.join(list, ' or ')
+			args = ' or '.join(list)
 			args += ' '
 		else:
 			args = ''

@@ -49,21 +49,21 @@ class Command(stack.commands.remove.command,
 	"""
 	Remove a storage partition configuration from the database.
 
-        <arg type='string' name='scope'>
+	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
 	'redhat'), a valid appliance (e.g., 'compute') or a valid host
 	(e.g., 'compute-0-0). No argument means the scope is 'global'.
-        </arg>
+	</arg>
 
 	<param type='string' name='device' optional='1'>
 	Device whose partition configuration needs to be removed from
 	the database.
 	</param>
 
-        <param type='string' name='mountpoint' optional='1'>
+	<param type='string' name='mountpoint' optional='1'>
 	Mountpoint for the partition that needs to be removed from
 	the database.
-        </param>
+	</param>
 
 	<example cmd='remove storage partition compute-0-0 device=sda'>
 	Remove the disk partition configuration for sda on compute-0-0.
@@ -103,7 +103,7 @@ class Command(stack.commands.remove.command,
 			except:
 				hosts = []
 		else:
-                        raise ArgError(self, 'scope', 'must be unique or missing')
+			raise ArgError(self, 'scope', 'must be unique or missing')
 
 		if not scope:
 			if args[0] in oses:

@@ -102,16 +102,16 @@ class Command(stack.commands.set.host.command):
 	</arg>
 	
 	<param type='string' name='interface'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface.
- 	</param>
+	MAC address of the interface.
+	</param>
 
-        <param type='string' name='ip' optional='0'>
-        IP address
-        </param>
+	<param type='string' name='ip' optional='0'>
+	IP address
+	</param>
 
 	<example cmd='set host interface ip backend-0-0 interface=eth1 ip=192.168.0.10'>
 	Sets the IP Address for the eth1 device on host backend-0-0.
@@ -119,34 +119,34 @@ class Command(stack.commands.set.host.command):
 	"""
 	
 	def run(self, params, args):
-                
+		
 		hosts = self.getHostnames(args)
-                (ip, interface, mac) = self.fillParams([
-                        ('ip',        None, True),
-                        ('interface', None),
-                        ('mac',       None)
-                        ])
+		(ip, interface, mac) = self.fillParams([
+			('ip',        None, True),
+			('interface', None),
+			('mac',       None)
+			])
 
 		if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
+			raise ParamRequired(self, ('interface', 'mac'))
 		if len(hosts) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		ip   = ip.upper() # null -> NULL
-                host = hosts[0]		
+		host = hosts[0]		
 
-                if interface:
-	                self.db.execute("""
+		if interface:
+			self.db.execute("""
 				update networks, nodes set 
 				networks.ip=NULLIF('%s','NULL') where
-                                nodes.name='%s' and networks.node=nodes.id and
-                                networks.device like '%s'
-                                """ % (ip, host, interface))
-                else:
-	                self.db.execute("""
+				nodes.name='%s' and networks.node=nodes.id and
+				networks.device like '%s'
+				""" % (ip, host, interface))
+		else:
+			self.db.execute("""
 				update networks, nodes set 
 				networks.ip=NULLIF('%s','NULL') where
-                                nodes.name='%s' and networks.node=nodes.id and
-                                networks.mac like '%s'
-                                """ % (ip, host, mac))
+				nodes.name='%s' and networks.node=nodes.id and
+				networks.mac like '%s'
+				""" % (ip, host, mac))
 

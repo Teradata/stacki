@@ -6,7 +6,7 @@ import stack.commands
 
 
 class command(stack.commands.OSArgumentProcessor, 
-              stack.commands.list.command):
+	      stack.commands.list.command):
 	pass
 	
 class Command(command):

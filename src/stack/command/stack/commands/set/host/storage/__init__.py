@@ -117,8 +117,8 @@ class Command(stack.commands.set.host.command):
 		# can't call 'rocks run host' here because the host
 		# argument processor tries to interpret ':' as a
 		# range of hosts (because it uses fillPositionalArgs!)
-                #
-                # TODO: Revist now that fillPositionArgs is dead
+		#
+		# TODO: Revist now that fillPositionArgs is dead
 		#
 		if megacmd:
 			cmd = '/usr/bin/ssh -x -q %s "%s"' % (host, megacmd)
@@ -127,19 +127,19 @@ class Command(stack.commands.set.host.command):
 
 	def run(self, params, args):
 		(encid, slot, action) = self.fillParams([
-                        ('enclosure', None, True),
+			('enclosure', None, True),
 			('slot', None, True),
-                        ('action', None, True) ])
+			('action', None, True) ])
 
 		validactions = [ 'online', 'offline', 'configure', 'locate-on',
 			'locate-off' ]
 		if action not in validactions:
-                        raise CommandError(self, '"action" must one of: %s' % ', '.join(validactions))
+			raise CommandError(self, '"action" must one of: %s' % ', '.join(validactions))
 
 		try:
 			encid = int(encid)
 		except:
-                        raise CommandError(self, '"enclosure" must be an integer')
+			raise CommandError(self, '"enclosure" must be an integer')
 		try:
 			slot = int(slot)
 		except:

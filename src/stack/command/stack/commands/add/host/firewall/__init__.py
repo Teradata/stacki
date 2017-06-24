@@ -115,36 +115,36 @@ class Command(stack.commands.add.firewall.command):
 	keyword 'all'.
 	</param>
 	
-        <param type='string' name='network'>
-        The network this rule service should be applied to. This is a named
+	<param type='string' name='network'>
+	The network this rule service should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+	'rocks list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
 
-        <param type='string' name='output-network' optional='1'>
-        The output network this rule should be applied to. This is a named
+	<param type='string' name='output-network' optional='1'>
+	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+	'rocks list network'.
 	</param>
 
-        <param type='string' name='chain' require='1'>
+	<param type='string' name='chain' require='1'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action' require='1'>
+	<param type='string' name='action' require='1'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>
 
-        <param type='string' name='flags'>
+	<param type='string' name='flags'>
 	Optional flags associated with this rule. An example flag is:
 	"-m state --state RELATED,ESTABLISHED".
 	</param>
 
-        <param type='string' name='comment'>
+	<param type='string' name='comment'>
 	A comment associated with this rule. The comment will be printed
 	directly above the rule in the firewall configuration file.
 	</param>
@@ -169,7 +169,7 @@ class Command(stack.commands.add.firewall.command):
 	</example>
 
 	<example cmd='add host firewall localhost network=all service="40000"
-        protocol="tcp" action="REJECT" chain="INPUT"'>
+	protocol="tcp" action="REJECT" chain="INPUT"'>
 	Reject TCP packets that are destined for port 40000 on all networks
 	on the INPUT chain.
 	This will be translated into the following rule:
@@ -182,7 +182,7 @@ class Command(stack.commands.add.firewall.command):
 			comment, table, rulename) = self.doParams()
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		hosts = self.getHostnames(args)
 

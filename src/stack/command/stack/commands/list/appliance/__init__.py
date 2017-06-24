@@ -94,7 +94,7 @@ import stack.commands
 
 
 class command(stack.commands.ApplianceArgumentProcessor,
-        stack.commands.list.command):
+	stack.commands.list.command):
 	pass
 
 class Command(command):

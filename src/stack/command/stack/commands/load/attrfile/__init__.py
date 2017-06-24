@@ -50,7 +50,7 @@ from stack.exception import *
 
 
 class Command(stack.commands.load.command,
-               stack.commands.HostArgumentProcessor):
+	       stack.commands.HostArgumentProcessor):
 	"""
 	Load attributes into the database
 	
@@ -93,11 +93,11 @@ class Command(stack.commands.load.command,
 			return
 
 		if ' ' in attr:
-                        raise CommandError(self, 'attribute "%s" cannot have a space character' % attr)
+			raise CommandError(self, 'attribute "%s" cannot have a space character' % attr)
 
 		a = attr.split('/')
 		if len(a) > 2:
-                        raise CommandError(self, 'attribute "%s" cannot have more than one "/"' % attr)
+			raise CommandError(self, 'attribute "%s" cannot have more than one "/"' % attr)
 
 		ctoken = '[A-Za-z_][A-Za-z0-9_]*$'
 		for t in a:
@@ -109,13 +109,13 @@ class Command(stack.commands.load.command,
 			
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([
-                        ('file', None, True),
+		filename, processor = self.fillParams([
+			('file', None, True),
 			('processor', 'default')
-                        ])
+			])
 
 		if not os.path.exists(filename):
-                        raise CommandError(self, 'file "%s" does not exist' % filename)
+			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		#
 		# implementations can't return values
@@ -127,14 +127,14 @@ class Command(stack.commands.load.command,
 
 		self.command('sync.config')
 
-                # Only sync the host config for the hosts in the
-                # imported spreadsheet.
+		# Only sync the host config for the hosts in the
+		# imported spreadsheet.
 
-                hosts = self.getHostnames()
-                for host in self.attrs.keys():
-                        if host in hosts:
-                                self.call('sync.host.config', [ host ])
-        
+		hosts = self.getHostnames()
+		for host in self.attrs.keys():
+			if host in hosts:
+				self.call('sync.host.config', [ host ])
+	
 
 		#
 		# checkin the attribute spreadsheet

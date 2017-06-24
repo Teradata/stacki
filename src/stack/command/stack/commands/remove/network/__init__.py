@@ -117,7 +117,7 @@ class Command(stack.commands.NetworkArgumentProcessor,
 
 	def run(self, params, args):
 		if not len(args):
-                        raise ArgRequired(self, 'network')
+			raise ArgRequired(self, 'network')
 			
 		# use the default argument handling but protect the user
 		# from ever deleting networks (subnets table) that are

@@ -178,7 +178,7 @@ class Plugin(stack.commands.Plugin):
 		cmd = 'cd /etc/security/ca; '
 		cmd += '/usr/bin/openssl x509 -req -days 2000 -CA ca.crt '
 		cmd += '-CAkey ca.key -CAserial ca.serial '
-        	cmd += '< /etc/pki/tls/certs/localhost.csr '
+		cmd += '< /etc/pki/tls/certs/localhost.csr '
 		cmd += '> /etc/pki/tls/certs/localhost.crt 2> /dev/null ; '
 		cmd += 'chmod 0444 /etc/pki/tls/certs/localhost.crt '
 		os.system(cmd)

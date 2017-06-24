@@ -111,13 +111,13 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		(comment, ) = self.fillParams([
-                        ('comment', None, True)
-                        ])
+			('comment', None, True)
+			])
 		
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""update nodes set comment="%s" where

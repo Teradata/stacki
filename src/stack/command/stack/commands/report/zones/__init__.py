@@ -115,15 +115,15 @@ class Command(stack.commands.report.command):
 	Prints out all the named zone.conf and reverse-zone.conf files in XML.
 	To actually create these files, run the output of the command through
 	"stack report script"
-        
+	
 	<example cmd='report zones'>
 	Prints contents of all the zone config files
 	</example>
-        
+	
 	<example cmd='report zones | stack report script'>
 	Creates zone config files in /var/named
 	</example>
-        
+	
 	<related>sync dns</related>
 	"""
 
@@ -232,19 +232,19 @@ class Command(stack.commands.report.command):
 	def run(self, params, args):
 		serial = int(time.time())
 
-                networks = []
-                for row in self.call('list.network', [ 'dns=true' ]):
-                        networks.append(row)
-                        
+		networks = []
+		for row in self.call('list.network', [ 'dns=true' ]):
+			networks.append(row)
+			
 		self.beginOutput()
 
-                #
-                # Forward Lookups
-                #
+		#
+		# Forward Lookups
+		#
 
-                for network in networks:
-                        name = network['network']
-                        zone = network['zone']
+		for network in networks:
+			name = network['network']
+			zone = network['zone']
 			filename = '/var/named/%s.domain' % name
 			s = ''
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
@@ -255,17 +255,17 @@ class Command(stack.commands.report.command):
 			s += '</stack:file>\n'
 			self.addOutput('', s)
 
-                #    
-                # Reverse Lookups
-                #
-                
+		#    
+		# Reverse Lookups
+		#
+		
 		subnet_list = {}
 		s = ''
-                for network in networks:
-                        address = network['address']
-                        mask    = network['mask']
-                        zone    = network['zone']
-                        name    = network['network']
+		for network in networks:
+			address = network['address']
+			mask    = network['mask']
+			zone    = network['zone']
+			name    = network['network']
 
 			sn = self.getSubnet(address, mask)
 			sn.reverse()

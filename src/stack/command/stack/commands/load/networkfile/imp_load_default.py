@@ -101,7 +101,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 
 		# get current networks for comparison
 		self.owner.current_networks = {}
-                subnets = self.owner.call('list.network', ['output-format=text'])
+		subnets = self.owner.call('list.network', ['output-format=text'])
 		for i in subnets:
 			self.owner.current_networks[i['network']] = i
 

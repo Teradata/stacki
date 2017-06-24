@@ -50,18 +50,18 @@ class Command(stack.commands.dump.environment.command):
 
 	def run(self, params, args):
 		
-                for row in self.call('list.environment.attr', args):
-                        env = row['environment']
-                        t   = row['type']
-                        a   = row['attr']
-                        v   = self.quote(row['value'])
-                        
-                        if t == 'const':
-                                continue
+		for row in self.call('list.environment.attr', args):
+			env = row['environment']
+			t   = row['type']
+			a   = row['attr']
+			v   = self.quote(row['value'])
+			
+			if t == 'const':
+				continue
 
-                        s = ''
-                        if t == 'shadow':
-                                s = 'shadow=true'
+			s = ''
+			if t == 'shadow':
+				s = 'shadow=true'
 
-                        self.dump('"set attr" scope=environment object=%s force=false attr=%s value=%s %s' % (env, a, v, s))
+			self.dump('"set attr" scope=environment object=%s force=false attr=%s value=%s %s' % (env, a, v, s))
 

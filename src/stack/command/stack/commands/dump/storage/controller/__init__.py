@@ -95,7 +95,7 @@
 import stack.commands
 
 class Command(stack.commands.ApplianceArgumentProcessor,
-        stack.commands.HostArgumentProcessor,
+	stack.commands.HostArgumentProcessor,
 	stack.commands.dump.command):
 
 	"""

@@ -111,61 +111,61 @@ class Command(command):
 
 	def run(self, param, args):
 		self.beginOutput()
-                self.addOutput('localhost', stack.text.DoNotEdit())
+		self.addOutput('localhost', stack.text.DoNotEdit())
 		self.addOutput('localhost', '#  Site additions go in /etc/hosts.local\n')
 		self.addOutput('localhost','127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 
-                aliases = {}
-                for row in self.call('list.host.alias'):
-                        host  = row['host']
-                        alias = row['alias']
+		aliases = {}
+		for row in self.call('list.host.alias'):
+			host  = row['host']
+			alias = row['alias']
 
-                        if not row.has_key(host):
-                                aliases[host] = []
-                        aliases[host].append(alias)
-                        
-                zones = {}
-                for row in self.call('list.network'):
-                	zones[row['network']] = row['zone']
-        
-                for row in self.call('list.host.interface'):
-                        ip = row['ip']
+			if not row.has_key(host):
+				aliases[host] = []
+			aliases[host].append(alias)
+			
+		zones = {}
+		for row in self.call('list.network'):
+			zones[row['network']] = row['zone']
+	
+		for row in self.call('list.host.interface'):
+			ip = row['ip']
 			if not ip:
 				continue
 
-                        # TODO (maybe)
-                        #
-                        # The name of the interface should be the name
-                        # in the interface list (not from nodes
-                        # table).  If this doesn't exist than use the
-                        # name in the nodes table.  But always use the
-                        # zone from the networks table.
-                        #
-                        # Don't do anything right now, this has
-                        # implications on the dhcpd.conf, dns, and
-                        # spreadsheet loading, and who knows what
-                        # else.
+			# TODO (maybe)
+			#
+			# The name of the interface should be the name
+			# in the interface list (not from nodes
+			# table).  If this doesn't exist than use the
+			# name in the nodes table.  But always use the
+			# zone from the networks table.
+			#
+			# Don't do anything right now, this has
+			# implications on the dhcpd.conf, dns, and
+			# spreadsheet loading, and who knows what
+			# else.
 
-                        host    = row['host']
+			host    = row['host']
 			network = row['network']
-                        default = row['default']
+			default = row['default']
 
 			if network:
-                        	zone = zones[network]
+				zone = zones[network]
 			else:
 				zone = None
 
-                        names = []
-                        if zone:
-                                names.append('%s.%s' % (host, zone))
-                        if default:
-                                names.append(host)
-                        if aliases.has_key(host):
-                                for alias in aliases.get(host):
-                                        names.append(alias)
+			names = []
+			if zone:
+				names.append('%s.%s' % (host, zone))
+			if default:
+				names.append(host)
+			if aliases.has_key(host):
+				for alias in aliases.get(host):
+					names.append(alias)
 
-                        self.addOutput('localhost', '%s\t%s' %
-                                               (ip, string.join(names)))
+			self.addOutput('localhost', '%s\t%s' %
+					       (ip, string.join(names)))
 
 
 		# Finally, add the hosts.local file to the list

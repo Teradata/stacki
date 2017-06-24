@@ -151,7 +151,7 @@ class Command(stack.commands.list.command,
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope = "appliance"
 				and tableid = (select id from appliances
-                                where name = '%s') order by fstype, size""" % args[0]
+				where name = '%s') order by fstype, size""" % args[0]
 		elif scope == 'host':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope="host" and 

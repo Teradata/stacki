@@ -48,7 +48,7 @@ import stack.commands
 from stack.exception import *
 
 class Command(stack.commands.load.command,
-               stack.commands.HostArgumentProcessor):
+	       stack.commands.HostArgumentProcessor):
 	"""
 	Take rows from a spreadsheet that describe how a host's disk partitions
 	should be configured and then place those values into the database.
@@ -69,7 +69,7 @@ class Command(stack.commands.load.command,
 	"""		
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([ 
+		filename, processor = self.fillParams([ 
 			('file', None, True),
 			('processor', 'default') 
 			])

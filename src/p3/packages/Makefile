@@ -41,7 +41,7 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-PACKAGES	= pytest
+PACKAGES	= pytest pymysql
 
 include $(STACKBUILD)/etc/CCRules.mk
 

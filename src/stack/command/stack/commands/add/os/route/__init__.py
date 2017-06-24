@@ -119,13 +119,13 @@ class Command(stack.commands.add.os.command):
 	def run(self, params, args):
 
 		(address, gateway, netmask) = self.fillParams([
-                        ('address', None, True),
-                        ('gateway', None, True),
-                        ('netmask', '255.255.255.255')
-                        ])
+			('address', None, True),
+			('gateway', None, True),
+			('netmask', '255.255.255.255')
+			])
 		
 		if len(args) == 0:
-                        raise ArgRequired(self, 'os')
+			raise ArgRequired(self, 'os')
 
 		oses = self.getOSNames(args)
 
@@ -152,7 +152,7 @@ class Command(stack.commands.add.os.command):
 				network='%s' and os='%s'""" % 
 				(address, os))
 			if rows:
-                                raise CommandError(self, 'route exists')
+				raise CommandError(self, 'route exists')
 		
 		# Now that we know things will work insert the route for
 		# all the OSes
@@ -160,5 +160,5 @@ class Command(stack.commands.add.os.command):
 		for os in oses:	
 			self.db.execute("""insert into os_routes values 
 				('%s', '%s', '%s', %s, %s)""" %
-                	        (os, address, netmask, gateway, subnet))
+				(os, address, netmask, gateway, subnet))
 

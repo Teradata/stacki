@@ -113,10 +113,10 @@ class Command(stack.commands.add.host.command):
 		key, = self.fillParams([ ('key', None, True) ])
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 		hosts = self.getHostnames(args)
 		if len(hosts) > 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 

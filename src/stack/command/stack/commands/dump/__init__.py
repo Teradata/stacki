@@ -133,7 +133,7 @@ class Command(command):
 	
 	def run(self, params, args):
 		if len(args):
-                        raise CommandError(self, 'command does not take arguments')
+			raise CommandError(self, 'command does not take arguments')
 		self.addText("#!/bin/bash\n\n")
 		self.runPlugins()
 		self.dump("sync config")

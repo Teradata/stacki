@@ -96,7 +96,7 @@ from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.add.command):
-        
+	
 	def serviceCheck(self, service):
 		#
 		# a service can look like:
@@ -132,7 +132,7 @@ class command(stack.commands.HostArgumentProcessor,
 					msg += 'is invalid. '
 					msg += 'it must be "integer" or '
 					msg += '"integer:integer"'
-                                        raise CommandError(self, msg)
+					raise CommandError(self, msg)
 				
 		#
 		# if we made it here, then the service definition looks good
@@ -157,10 +157,10 @@ class command(stack.commands.HostArgumentProcessor,
 			])
 		
 		if not network and not outnetwork:
-                        raise ParamRequired(self, ('network', 'output-network'))
+			raise ParamRequired(self, ('network', 'output-network'))
 
 		if table not in [ 'filter', 'raw', 'mangle','nat']:
-                        raise ParamError(self, 'table', 'is not valid')
+			raise ParamError(self, 'table', 'is not valid')
 
 		#
 		# check if the network exists
@@ -172,7 +172,7 @@ class command(stack.commands.HostArgumentProcessor,
 				name = '%s'""" % (network))
 
 			if rows == 0:
-                                raise CommandError(self, 'network "%s" not in the database. Run "stack list network" to get a list of valid networks.' % network)
+				raise CommandError(self, 'network "%s" not in the database. Run "stack list network" to get a list of valid networks.' % network)
 
 			network, = self.db.fetchone()
 		else:
@@ -226,7 +226,7 @@ class command(stack.commands.HostArgumentProcessor,
 		rows  = self.db.execute(query)
 		if rows:
 			raise CommandError(self, 'Rule with rulename %s already exists' %
-                                                   rulename)
+						   rulename)
 
 		query = """select * from %s where %s
 			service = '%s' and action = '%s' and chain = '%s' and
@@ -276,26 +276,26 @@ class Command(command):
 	keyword 'all'.
 	</param>
 	
-        <param type='string' name='network'>
-        The network this rule should be applied to. This is a named network
-        (e.g., 'private') and must be one listed by the command
-        'stack list network'.
+	<param type='string' name='network'>
+	The network this rule should be applied to. This is a named network
+	(e.g., 'private') and must be one listed by the command
+	'stack list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
 
-        <param type='string' name='output-network' optional='1'>
-        The output network this rule should be applied to. This is a named
+	<param type='string' name='output-network' optional='1'>
+	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'stack list network'.
+	'stack list network'.
 	</param>
 
-        <param type='string' name='chain' require='1'>
+	<param type='string' name='chain' require='1'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action' require='1'>
+	<param type='string' name='action' require='1'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>
@@ -331,9 +331,9 @@ table="filter" rulename="accept_public_ssh"'>
 	</example>
 	"""
 	def run(self, params, args):
-                
+		
 		(service, network, outnetwork, chain, action, protocol, flags,
-                         comment, table, rulename) = self.doParams()
+			 comment, table, rulename) = self.doParams()
 
 		self.checkRule('global_firewall', '', service, network,
 			outnetwork, chain, action, protocol, flags, comment, table, rulename)

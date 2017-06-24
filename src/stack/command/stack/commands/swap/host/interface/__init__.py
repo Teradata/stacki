@@ -164,7 +164,7 @@ class Command(stack.commands.swap.host.command):
 
 		interface = interfaces.split(',')
 		if len(interface) != 2:
-                        raise CommandError(self, 'must supply two interfaces')
+			raise CommandError(self, 'must supply two interfaces')
 
 		hosts = self.getHostnames(args)
 		for host in hosts:

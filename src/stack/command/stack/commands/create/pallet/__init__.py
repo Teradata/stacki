@@ -181,12 +181,12 @@ class Builder:
 			release, osname, arch)
 
 		os.chdir(destdir)
-                if os.path.exists(os.path.join(srcdir, 'graph')):
-                    shutil.copytree(os.path.join(srcdir, 'graph'),
-                        os.path.join(destdir, 'graph'))
-                if os.path.exists(os.path.join(srcdir, 'nodes')):
-                    shutil.copytree(os.path.join(srcdir, 'nodes'),
-                        os.path.join(destdir, 'nodes'))
+		if os.path.exists(os.path.join(srcdir, 'graph')):
+		    shutil.copytree(os.path.join(srcdir, 'graph'),
+			os.path.join(destdir, 'graph'))
+		if os.path.exists(os.path.join(srcdir, 'nodes')):
+		    shutil.copytree(os.path.join(srcdir, 'nodes'),
+			os.path.join(destdir, 'nodes'))
 		os.chdir(cwd)
 
 		
@@ -322,9 +322,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		import stack.roll
 		import stack.redhat.gen
 
-                attrs = {}
-                for row in self.call('list.host.attr', [ 'localhost' ]):
-                        attrs[row['attr']] = row['value']
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'localhost' ]):
+			attrs[row['attr']] = row['value']
 		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
 
 		#
@@ -341,24 +341,24 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 		rpms = []
 		profile = []
-                profile.append('<?xml version="1.0" standalone="no"?>')
-                profile.append('<profile-%s>' % generator.getProfileType())
-                profile.append('<chapter name="kickstart">')
-                profile.append('<section name="packages">')
+		profile.append('<?xml version="1.0" standalone="no"?>')
+		profile.append('<profile-%s>' % generator.getProfileType())
+		profile.append('<chapter name="kickstart">')
+		profile.append('<section name="packages">')
 		for line in generator.generate('packages'):
 			profile.append(line)
-                profile.append('</section>')
-                profile.append('</chapter>')
-                profile.append('</profile-%s>' % generator.getProfileType())
+		profile.append('</section>')
+		profile.append('</chapter>')
+		profile.append('</profile-%s>' % generator.getProfileType())
 
 		parser  = make_parser()
 		handler = stack.gen.ProfileHandler()
 
 		parser.setContentHandler(handler)
-                for line in profile:
+		for line in profile:
 			parser.feed('%s\n' % line)
 
-                packages = handler.getChapter('kickstart')
+		packages = handler.getChapter('kickstart')
 		for line in packages:
 			if len(line.strip()):
 				if line.startswith('#'):
@@ -651,8 +651,8 @@ class RollBuilder(Builder, stack.dist.Arch):
 			rpmsdir = 'RPMS'
 
 			os.makedirs(root)
-                        if self.config.getRollOS() == 'redhat':
-                                os.makedirs(os.path.join(root, rpmsdir))
+			if self.config.getRollOS() == 'redhat':
+				os.makedirs(os.path.join(root, rpmsdir))
 			
 			# Symlink in all the RPMS
 			
@@ -682,22 +682,22 @@ class RollBuilder(Builder, stack.dist.Arch):
 			# Create the .discinfo file
 			
 			self.stampDisk(name, self.config.getRollName(), 
-                                       self.config.getRollArch(), id)
+				       self.config.getRollArch(), id)
 				
 			# write repodata 
-                        if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-                                self.writerepo(self.config.getRollName(),
-                                               self.config.getRollVersion(),
-                                               self.config.getRollRelease(),
-                                               self.config.getRollOS(),
-                                               self.config.getRollArch())
+			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+				self.writerepo(self.config.getRollName(),
+					       self.config.getRollVersion(),
+					       self.config.getRollRelease(),
+					       self.config.getRollOS(),
+					       self.config.getRollArch())
 
 			# copy the graph and node XMLs files into the pallet
 			self.copyXMLs(self.config.getRollOS(),
-                                      self.config.getRollName(),
-                                      self.config.getRollVersion(),
-                                      self.config.getRollRelease(),
-                                      self.config.getRollArch())
+				      self.config.getRollName(),
+				      self.config.getRollVersion(),
+				      self.config.getRollRelease(),
+				      self.config.getRollArch())
 			
 			# make the ISO.  This code will change and move into
 			# the base class, and supported bootable pallets.  Get
@@ -761,7 +761,7 @@ class MetaRollBuilder(Builder):
 			arch = 'any'
 		name = "%s-%s-%s.%s" % (rollName, self.version, self.release, arch)
 
-    		# Create the meta pallet
+		# Create the meta pallet
 					
 		print('Building %s ...' % name)
 		tmp = self.mktemp()
@@ -1011,12 +1011,12 @@ class Command(stack.commands.create.command,
 			release = 0
 
 		(name, version, release, newest, commit) = self.fillParams([
-                        ('name', None),
+			('name', None),
 			('version', version),
 			('release', release),
 			('newest', True),
 			('commit-ish', 'master'),
-                        ])
+			])
 
 		# Yes, globals are probably bad. But this is the fastest
 		# to getting what we want. Otherise have to pass all this
@@ -1024,9 +1024,9 @@ class Command(stack.commands.create.command,
 		# in this file. Blame Greg, he said it was okay.
 		global newest
 
-                if len(args) == 0:
-                        raise ArgRequired(self, 'pallet')
-                
+		if len(args) == 0:
+			raise ArgRequired(self, 'pallet')
+		
 		if len(args) == 1:
 			base, ext = os.path.splitext(args[0])
 			if ext == '.git':

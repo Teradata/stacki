@@ -73,10 +73,10 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	"""
 	List the firewall rules for a given appliance type.
 
-        <arg optional='1' type='string' name='appliance' repeat='1'>
-        Zero, one or more appliance names. If no appliance names are supplied,x
+	<arg optional='1' type='string' name='appliance' repeat='1'>
+	Zero, one or more appliance names. If no appliance names are supplied,x
 	the firewall rules for all the appliances are listed.
-        </arg>
+	</arg>
 	"""
 
 	def run(self, params, args):
@@ -98,6 +98,6 @@ class Command(stack.commands.NetworkArgumentProcessor,
 					output_network, f))
 
 		self.endOutput(header=['appliance', 'name', 'table', 'service',
- 			'protocol', 'chain', 'action', 'network',
+			'protocol', 'chain', 'action', 'network',
 			'output-network', 'flags'], trimOwner=0)
 

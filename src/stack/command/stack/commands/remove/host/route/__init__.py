@@ -111,7 +111,7 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		(address, ) = self.fillParams([ ('address', None, True) ])
 
 		for host in self.getHostnames(args):

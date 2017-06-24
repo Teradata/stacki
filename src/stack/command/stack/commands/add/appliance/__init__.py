@@ -133,14 +133,14 @@ class Command(command):
 	def run(self, params, args):
 
 		if len(args) != 1:
-                        raise ArgUnique(self, 'appliance')
+			raise ArgUnique(self, 'appliance')
 		appliance = args[0]
 
 		(longname, node, public) = self.fillParams([
-                        ('longname', None),
-                        ('node', ''),
-                        ('public', 'y')
-                        ])
+			('longname', None),
+			('node', ''),
+			('public', 'y')
+			])
 
 		public  = self.bool2str(self.str2bool(public))
 
@@ -172,8 +172,8 @@ class Command(command):
 				'attr=node', 'value=%s' % node ])
 
 		self.command('add.appliance.attr', [
-                        appliance,
-                        'attr=kickstartable',
+			appliance,
+			'attr=kickstartable',
 			'value=%s' % self.bool2str(kickstartable)
-                        ])
+			])
 

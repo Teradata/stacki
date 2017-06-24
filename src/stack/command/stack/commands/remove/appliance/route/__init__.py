@@ -112,11 +112,11 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		(address, ) = self.fillParams([ ('address', None, True) ])
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'appliance')
+			raise ArgRequired(self, 'appliance')
 
 		for appliance in self.getApplianceNames(args):
 			self.db.execute("""

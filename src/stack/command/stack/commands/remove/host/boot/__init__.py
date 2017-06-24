@@ -140,7 +140,7 @@ class Command(stack.commands.remove.host.command):
 
 	def run(self, params, args):
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		hosts = self.getHostnames(args)
 		self.runPlugins(hosts)

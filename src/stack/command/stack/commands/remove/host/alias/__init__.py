@@ -115,20 +115,20 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-                
+		
 		(alias, ) = self.fillParams([
-                        ('alias', None)
-                        ])
+			('alias', None)
+			])
 
 		for host in self.getHostnames(args):
-                	if not alias: 
-                        	self.db.execute("""
-                                	delete from aliases where 
-                                        node = (select id from nodes where name='%s')
-                                        """ % host)
-                        else:
-                                self.db.execute("""
-                                	delete from aliases where 
-                                        node = (select id from nodes where name='%s')
-                                        and name = '%s'
-                                        """ % (host, alias))
+			if not alias: 
+				self.db.execute("""
+					delete from aliases where 
+					node = (select id from nodes where name='%s')
+					""" % host)
+			else:
+				self.db.execute("""
+					delete from aliases where 
+					node = (select id from nodes where name='%s')
+					and name = '%s'
+					""" % (host, alias))

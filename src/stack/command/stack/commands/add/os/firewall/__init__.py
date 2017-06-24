@@ -117,26 +117,26 @@ class Command(stack.commands.add.firewall.command,
 	keyword 'all'.
 	</param>
 	
-        <param type='string' name='network'>
-        The network this rule should be applied to. This is a named network
-        (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+	<param type='string' name='network'>
+	The network this rule should be applied to. This is a named network
+	(e.g., 'private') and must be one listed by the command
+	'rocks list network'.
 	To have this firewall rule apply to all networks, specify the
 	keyword 'all'.
 	</param>
 
-        <param type='string' name='output-network' optional='1'>
-        The output network this rule should be applied to. This is a named
+	<param type='string' name='output-network' optional='1'>
+	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-        'rocks list network'.
+	'rocks list network'.
 	</param>
 
-        <param type='string' name='chain' require='1'>
+	<param type='string' name='chain' require='1'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-        <param type='string' name='action' require='1'>
+	<param type='string' name='action' require='1'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>

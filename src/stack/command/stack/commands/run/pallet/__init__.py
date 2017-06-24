@@ -114,7 +114,7 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 	def run(self, params, args):
 
 		(database,) = self.fillParams([ ('database', 'true') ])
-                database = self.str2bool(database)
+		database = self.str2bool(database)
 
 		if database:
 			if not args:
@@ -153,14 +153,14 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 		else:
 			xml = sys.stdin.read()
 
-                p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
-                                     stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE, shell=True)
-                p.stdin.write(xml)
-                (o, e) = p.communicate()
-                if p.returncode == 0:
-                        sys.stdout.write(o)
-                else:
-                        sys.stderr.write(e)
+		p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
+				     stdin=subprocess.PIPE,
+				     stdout=subprocess.PIPE,
+				     stderr=subprocess.PIPE, shell=True)
+		p.stdin.write(xml)
+		(o, e) = p.communicate()
+		if p.returncode == 0:
+			sys.stdout.write(o)
+		else:
+			sys.stderr.write(e)
 

@@ -123,36 +123,34 @@ class Command(stack.commands.list.command):
 		# only command where we need to include this argument.
 		
 		(subdir, cols) = self.fillParams([
-                        ('subdir', ),
-                        ('cols', 80)
-                        ],
+			('subdir', ),
+			('cols', 80)
+			],
 			params)
 		
 		if subdir:
 			filepath = os.path.join(stack.commands.__path__[0],
 				subdir)
-			modpath  = 'stack.commands.%s' % \
-				string.join(subdir.split(os.sep), '.')
+			modpath  = 'stack.commands.%s' % '.'.join(subdir.split(os.sep))
 		else:
 			filepath = stack.commands.__path__[0]
 			modpath  = 'stack.commands'
 		
 		tree = stack.file.Tree(filepath)
-		dirs = tree.getDirs()
-		dirs.sort()
+		dirs = sorted(tree.getDirs())
 
-		if os.environ.has_key('COLUMNS'):
+		if 'COLUMNS' in os.environ:
 			cols = os.environ['COLUMNS']
 			
 		for dir in dirs:
 			if not dir:
 				continue
 				
-			module = '%s.%s' % (modpath, string.join(dir.split(os.sep),'.'))
-                        try:
-                        	__import__(module)
-                        except ImportError:
-                                raise CommandError(self, '%s import failed (missing or bad file)' % module)
+			module = '%s.%s' % (modpath, '.'.join(dir.split(os.sep)))
+			try:
+				__import__(module)
+			except ImportError:
+				raise CommandError(self, '%s import failed (missing or bad file)' % module)
 			module = eval(module)
 			
 			try:
@@ -163,7 +161,7 @@ class Command(stack.commands.list.command):
 			# Format the brief usage to fit within the
 			# width of the user's window (default to 80 cols)
 			
-			cmd = string.join(dir.split(os.sep),' ')
+			cmd = ' '.join(dir.split(os.sep))
 			l   = len(cmd) + 1
 			s   = ''
 			for arg in o.usage().split():

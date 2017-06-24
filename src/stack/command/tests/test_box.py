@@ -72,10 +72,10 @@ def test_box():
 	assert ReturnCode() == 0 and len(result) == 1
 	prevBox = result[0]['box']
 
-        # set box for this host
+	# set box for this host
 
-        result = Call('set host box', [ 'localhost', 'box=%s' % box ])
-        assert ReturnCode() == 0
+	result = Call('set host box', [ 'localhost', 'box=%s' % box ])
+	assert ReturnCode() == 0
 
 	# verify box was set
 
@@ -88,14 +88,14 @@ def test_box():
 	result = Call('set host box', [ 'localhost', 'box=%s' % prevBox ])
 	assert ReturnCode() == 0
 
-        # remove box
+	# remove box
 
-        result = Call('remove box', [ box ])
-        assert ReturnCode() == 0
+	result = Call('remove box', [ box ])
+	assert ReturnCode() == 0
 
 	# try to remove default
 	#	"remove box" should protect against this
 
-       	result = Call('remove box', [ 'default' ])
+	result = Call('remove box', [ 'default' ])
 	assert ReturnCode() == 255
 

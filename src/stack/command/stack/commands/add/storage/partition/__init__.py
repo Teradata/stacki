@@ -48,11 +48,11 @@ class Command(stack.commands.HostArgumentProcessor,
 	"""
 	Add a partition configuration to the database.
 
-        <arg type='string' name='scope'>
+	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
 	'redhat'), a valid appliance (e.g., 'compute') or a valid host
 	(e.g., 'compute-0-0). No argument means the scope is 'global'.
-        </arg>
+	</arg>
 
 	<param type='string' name='device' optional='1'>
 	Disk device on which we are creating partitions
@@ -62,9 +62,9 @@ class Command(stack.commands.HostArgumentProcessor,
 	Mountpoint to create
 	</param>
 
-        <param type='int' name='size' optional='1'>
+	<param type='int' name='size' optional='1'>
 	Size of the partition.
-        </param>
+	</param>
 
 	<param type='string' name='type' optional='1'>
 	Type of partition E.g: ext4, ext3, xfs, raid, etc.

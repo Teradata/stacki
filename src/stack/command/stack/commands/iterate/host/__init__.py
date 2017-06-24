@@ -105,16 +105,16 @@ class Command(command):
 	a shell command on the frontend with with '%' wildcard expansion for
 	every host specified.
 				
-        <arg optional='1' type='string' name='host' repeat='1'>
-        Zero, one or more host names. If no host names are supplied iterate over
+	<arg optional='1' type='string' name='host' repeat='1'>
+	Zero, one or more host names. If no host names are supplied iterate over
 	all hosts except the frontend.
-        </arg>
+	</arg>
 
-        <param optional='0' type='string' name='command'>
+	<param optional='0' type='string' name='command'>
 	The shell command to be run for each host.  The '%' character is used as
 	a wildcard to indicate the hostname.  Quoting of the '%' to expand to a 
 	literal is accomplished with '%%'.
-        </param>
+	</param>
 	
 	<example cmd='iterate host backend command="scp file %:/tmp/"'>
 	Copies file to the /tmp directory of every backend node
@@ -123,7 +123,7 @@ class Command(command):
 
 	def run(self, params, args):
 
-                (cmd, ) = self.fillParams([ ('command', None, True) ])
+		(cmd, ) = self.fillParams([ ('command', None, True) ])
 
 		self.beginOutput()
 

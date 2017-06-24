@@ -104,8 +104,8 @@ class Command(stack.commands.remove.appliance.command):
 	
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='remove appliance attr backend attr=sge'>
 	Removes the attribute sge for backend appliances
 	</example>

@@ -102,14 +102,14 @@ class Command(stack.commands.set.host.command):
 	</arg>
 	
 	<param type='string' name='interface'>
- 	Name of the interface.
- 	</param>
+	Name of the interface.
+	</param>
 
 	<param type='string' name='mac'>
- 	MAC address of the interface.
- 	</param>
- 	
- 	<param type='string' name='name' optional='0'>
+	MAC address of the interface.
+	</param>
+	
+	<param type='string' name='name' optional='0'>
 	Name of this interface (e.g. newname). This is only the
 	name associated with a certain interface. FQDNs are disallowed.
 	To set the domain or zone for an interface, use the
@@ -127,36 +127,36 @@ class Command(stack.commands.set.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-                (name, interface, mac) = self.fillParams([
-                        ('name',      None, True),
-                        ('interface', None),
-                        ('mac',       None)
-                        ])
+		(name, interface, mac) = self.fillParams([
+			('name',      None, True),
+			('interface', None),
+			('mac',       None)
+			])
 
 		if len(name.split('.')) > 1:
-                        raise ParamType(self, 'name', 'non-FQDN (base hostname)')
-                if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
+			raise ParamType(self, 'name', 'non-FQDN (base hostname)')
+		if not interface and not mac:
+			raise ParamRequired(self, ('interface', 'mac'))
 		if len(hosts) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
-                host = hosts[0]		
+		host = hosts[0]		
 
 		if name.upper() == "NULL":
 			name = host
 
-                if interface:
-                        self.db.execute("""
-                        	update networks, nodes set 
-                                networks.name='%s' where nodes.name='%s'
-                                and networks.node=nodes.id and
-                                networks.device like '%s'
-                                """ % (name, host, interface))
-                else:
-                        self.db.execute("""
-                        	update networks, nodes set 
-                                networks.name='%s' where nodes.name='%s'
-                                and networks.node=nodes.id and
-                                networks.mac like '%s'
-                                """ % (name, host, mac))
+		if interface:
+			self.db.execute("""
+				update networks, nodes set 
+				networks.name='%s' where nodes.name='%s'
+				and networks.node=nodes.id and
+				networks.device like '%s'
+				""" % (name, host, interface))
+		else:
+			self.db.execute("""
+				update networks, nodes set 
+				networks.name='%s' where nodes.name='%s'
+				and networks.node=nodes.id and
+				networks.mac like '%s'
+				""" % (name, host, mac))
 

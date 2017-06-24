@@ -117,7 +117,7 @@ class Command(stack.commands.remove.host.command,
 		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
 			sql = """node = (select id from nodes where

@@ -118,24 +118,24 @@ class Command(stack.commands.set.host.command):
 	def run(self, params, args):
 
 		(action, ) = self.fillParams([
-                        ('action', None, True)
-                        ])
+			('action', None, True)
+			])
 		
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		if action.lower() == 'none':
 			runaction = 'NULL'
 		else:
 			rows = self.db.execute("""
-                        	select * from bootaction where
+				select * from bootaction where
 				action = '%s' """ % action)
 			if rows != 1:
-                                raise CommandError(self, 'invalid action parameter')
+				raise CommandError(self, 'invalid action parameter')
 			runaction = "'%s'" % action
 			
-                for host in self.getHostnames(args):
+		for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set runaction=%s
+				update nodes set runaction=%s
 				where name='%s'
-                                """ % (runaction, host))
+				""" % (runaction, host))

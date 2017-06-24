@@ -57,14 +57,14 @@ class Command(stack.commands.set.host.command,
 	"""
 
 	def run(self, params, args):
-                
+		
 		(appliance, ) = self.fillParams([ ('appliance', None, True) ])
 		
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		if appliance not in self.getApplianceNames():
-                        raise CommandError(self, 'appliance parameter not valid')
+			raise CommandError(self, 'appliance parameter not valid')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""

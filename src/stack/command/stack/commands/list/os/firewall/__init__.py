@@ -73,10 +73,10 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	"""
 	List the firewall rules for an OS.
 
-        <arg optional='1' type='string' name='os' repeat='1'>
-        Zero, one or more OS names. If no OS names are supplied, the firewall
-        rules for all OSes are listed.
-        </arg>
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero, one or more OS names. If no OS names are supplied, the firewall
+	rules for all OSes are listed.
+	</arg>
 	"""
 
 	def run(self, params, args):

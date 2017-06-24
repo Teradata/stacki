@@ -127,9 +127,9 @@ class Command(stack.commands.sync.host.command):
 
 			host_output[host]= {"output":"", "error":"","rc":0}
 			out[host] = ""
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+			attrs = {}
+			for row in self.call('list.host.attr', [ host ]):
+				attrs[row['attr']] = row['value']
 
 			if self.str2bool(attrs.get('firewall')) != True:
 				continue

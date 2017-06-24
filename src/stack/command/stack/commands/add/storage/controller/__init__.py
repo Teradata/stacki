@@ -50,36 +50,36 @@ class Command(stack.commands.HostArgumentProcessor,
 	"""
 	Add a storage controller configuration to the database.
 
-        <arg type='string' name='scope'>
+	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
 	'redhat'), a valid appliance (e.g., 'backend') or a valid host
 	(e.g., 'backend-0-0). No argument means the scope is 'global'.
-        </arg>
+	</arg>
 
 	<param type='int' name='adapter' optional='1'>
 	Adapter address.
 	</param>
 
-        <param type='int' name='enclosure' optional='1'>
+	<param type='int' name='enclosure' optional='1'>
 	Enclosure address.
-        </param>
+	</param>
 
-        <param type='int' name='slot'>
+	<param type='int' name='slot'>
 	Slot address(es). This can be a comma-separated list meaning all disks
 	in the specified slots will be associated with the same array
-        </param>
+	</param>
 
-        <param type='int' name='raidlevel'>
+	<param type='int' name='raidlevel'>
 	RAID level. Raid 0, 1, 5, 6 and 10 are currently supported.
-        </param>
+	</param>
 
-        <param type='int' name='hotspare' optional='1'>
+	<param type='int' name='hotspare' optional='1'>
 	Slot address(es) of the hotspares associated with this array id. This
 	can be a comma-separated list (like the 'slot' parameter). If the
 	'arrayid' is 'global', then the specified slots are global hotspares.
-        </param>
+	</param>
 
-        <param type='string' name='arrayid'>
+	<param type='string' name='arrayid'>
 	The 'arrayid' is used to determine which disks are grouped as part
 	of the same array. For example, all the disks with arrayid of '1' will
 	be part of the same array. Arrayids must be integers starting at 1
@@ -88,8 +88,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	hotspare).
 	In addition, the arrays will be created in arrayid order, that is,
 	the array with arrayid equal to 1 will be created first, arrayid
-        equal to 2 will be created second, etc.
-        </param>
+	equal to 2 will be created second, etc.
+	</param>
 
 	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1'>
 	The disk in slot 1 on backend-0-0 should be a RAID 0 disk.
@@ -169,29 +169,29 @@ class Command(stack.commands.HostArgumentProcessor,
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
-                        ('adapter', None),
-                        ('enclosure', None),
-                        ('slot', None),
-                        ('hotspare', None),
-                        ('raidlevel', None),
+		adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
+			('adapter', None),
+			('enclosure', None),
+			('slot', None),
+			('hotspare', None),
+			('raidlevel', None),
 			('arrayid', None, True),
 			('options',''),
 			('force','n')
-                        ])
+			])
 
 		if not hotspare and not slot:
-                        raise ParamRequired(self, [ 'slot', 'hotspare' ])
+			raise ParamRequired(self, [ 'slot', 'hotspare' ])
 		if arrayid != 'global' and not raidlevel:
-                        raise ParamRequired(self, 'raidlevel')
+			raise ParamRequired(self, 'raidlevel')
 
 		if adapter:
 			try:
 				adapter = int(adapter)
 			except:
-                                raise ParamType(self, 'adapter', 'integer')
+				raise ParamType(self, 'adapter', 'integer')
 			if adapter < 0:
-                                raise ParamValue(self, 'adapter', '>= 0')
+				raise ParamValue(self, 'adapter', '>= 0')
 		else:
 			adapter = -1
 
@@ -199,9 +199,9 @@ class Command(stack.commands.HostArgumentProcessor,
 			try:
 				enclosure = int(enclosure)
 			except:
-                                raise ParamType(self, 'enclosure', 'integer')
+				raise ParamType(self, 'enclosure', 'integer')
 			if enclosure < 0:
-                                raise ParamValue(self, 'enclosure', '>= 0')
+				raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
 
@@ -217,11 +217,11 @@ class Command(stack.commands.HostArgumentProcessor,
 					try:
 						s = int(s)
 					except:
-                                                raise ParamType(self, 'slot', 'integer')
+						raise ParamType(self, 'slot', 'integer')
 					if s < 0:
-                                                raise ParamValue(self, 'slot', '>= 0')
+						raise ParamValue(self, 'slot', '>= 0')
 					if s in slots:
-                                                raise ParamError(self, 'slot', ' "%s" is listed twice' % s)
+						raise ParamError(self, 'slot', ' "%s" is listed twice' % s)
 				slots.append(s)
 
 		hotspares = []
@@ -230,11 +230,11 @@ class Command(stack.commands.HostArgumentProcessor,
 				try:
 					h = int(h)
 				except:	
-                                        raise ParamType(self, 'hotspare', 'integer')
+					raise ParamType(self, 'hotspare', 'integer')
 				if h < 0:
-                                        raise ParamValue(self, 'hostspare', '>= 0')
+					raise ParamValue(self, 'hostspare', '>= 0')
 				if h in hotspares:
-                                        raise ParamError(self, 'hostspare', ' "%s" is listed twice' % h)
+					raise ParamError(self, 'hostspare', ' "%s" is listed twice' % h)
 				hotspares.append(h)
 
 		if arrayid in [ 'global', '*' ]:
@@ -243,12 +243,12 @@ class Command(stack.commands.HostArgumentProcessor,
 			try:
 				arrayid = int(arrayid)
 			except:
-                                raise ParamType(self, 'arrayid', 'integer')
+				raise ParamType(self, 'arrayid', 'integer')
 			if arrayid < 1:
-                                raise ParamValue(self, 'arrayid', '>= 0')
+				raise ParamValue(self, 'arrayid', '>= 0')
 
 		if arrayid == 'global' and len(hotspares) == 0:
-                        raise ParamError(self, 'arrayid', 'is "global" with no hotspares. Please supply at least one hotspare')
+			raise ParamError(self, 'arrayid', 'is "global" with no hotspares. Please supply at least one hotspare')
 
 		#
 		# look up the id in the appropriate 'scope' table

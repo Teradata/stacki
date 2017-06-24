@@ -62,7 +62,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		hosts = self.getHostnames(args)
 
 		if len(hosts) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		self.beginOutput()
 

@@ -109,17 +109,17 @@ class Command(stack.commands.add.command):
 	</arg>
 	
 	<param name='address' optional='0'>
-        Network address.
+	Network address.
 	</param>
 	
 	<param name='mask' optional='0'>
-        Network mask.
+	Network mask.
 	</param>
 
-        <param name='gateway'>
-        Default gateway for the network. This is optional, not all networks
-        require gateways.
-        </param>
+	<param name='gateway'>
+	Default gateway for the network. This is optional, not all networks
+	require gateways.
+	</param>
 	
 	<param name='mtu'>
 	The MTU for the new network. Default is 1500.
@@ -132,43 +132,43 @@ class Command(stack.commands.add.command):
 	</param>
 	
 	<param type='boolean' name='dns'>
-        If set to True this network will be included in the builtin DNS server.
-        The default value is false.
+	If set to True this network will be included in the builtin DNS server.
+	The default value is false.
 	</param>
 
 	<param type='boolean' name='pxe'>
-        If set to True this network will be managed by the builtin DHCP/PXE
-        server.
-        The default is False.
+	If set to True this network will be managed by the builtin DHCP/PXE
+	server.
+	The default is False.
 	</param>
 	"""
 
-        def run(self, params, args):
+	def run(self, params, args):
 
-        	if len(args) != 1:
-                        raise ArgUnique(self, 'network')
-        	name = args[0]
-        	
+		if len(args) != 1:
+			raise ArgUnique(self, 'network')
+		name = args[0]
+		
 		(address, mask, gateway,
-                         mtu, zone, dns, pxe) = self.fillParams([
-                                 ('address',	None, True),
-                                 ('mask',	None, True),
-                                 ('gateway',	None),
-                                 ('mtu',       '1500'),
-                                 ('zone',	name),
-                                 ('dns',	'n'),
-                                 ('pxe',	'n')
-                                 ])
+			 mtu, zone, dns, pxe) = self.fillParams([
+				 ('address',	None, True),
+				 ('mask',	None, True),
+				 ('gateway',	None),
+				 ('mtu',       '1500'),
+				 ('zone',	name),
+				 ('dns',	'n'),
+				 ('pxe',	'n')
+				 ])
 
 		dns = self.str2bool(dns)
-                pxe = self.str2bool(pxe)
+		pxe = self.str2bool(pxe)
 
 		# Insert the name of the new network into the subnets
 		# table if it does not already exist
 			
 		rows = self.db.select("""
-        		* from subnets where name='%s'
-        		""" % name)
+			* from subnets where name='%s'
+			""" % name)
 		if len(rows):
 			raise CommandError(self, 'network "%s" exists' % name)
 
@@ -181,7 +181,7 @@ class Command(stack.commands.add.command):
 
 		self.db.execute("""
 			insert into subnets 
-        		(name, address, mask, gateway, mtu, zone, dns, pxe)
-                	values 
-        		('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
-        		""" % (name, address, mask, gateway, mtu, zone, dns, pxe))
+			(name, address, mask, gateway, mtu, zone, dns, pxe)
+			values 
+			('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
+			""" % (name, address, mask, gateway, mtu, zone, dns, pxe))

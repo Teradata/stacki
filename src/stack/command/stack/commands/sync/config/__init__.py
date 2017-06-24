@@ -110,6 +110,6 @@ class Command(stack.commands.sync.command):
 
 	def run(self, params, args):
 
-                self.notify('Sync Config\n')
+		self.notify('Sync Config\n')
 
 		self.runPlugins()

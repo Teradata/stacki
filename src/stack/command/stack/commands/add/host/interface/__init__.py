@@ -149,103 +149,103 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-                (interface, mac, network, ip, module,
-                         name, vlan, default, unsafe) = self.fillParams([
-                        ('interface', None),
-                        ('mac',       None),
-                        ('network',   None),
-                        ('ip',        None),
-                        ('module',    None),
-                        ('name',      None),
-                        ('vlan',      None),
-                        ('default',   None),
-                        ('unsafe',    'false')
-                        ])
+		(interface, mac, network, ip, module,
+			 name, vlan, default, unsafe) = self.fillParams([
+			('interface', None),
+			('mac',       None),
+			('network',   None),
+			('ip',        None),
+			('module',    None),
+			('name',      None),
+			('vlan',      None),
+			('default',   None),
+			('unsafe',    'false')
+			])
 
-                
+		
 		if not interface and not mac:
-                        raise ParamRequired(self, ('interface', 'mac'))
-                if name and len(name.split('.')) > 1:
-                        raise ParamType(self, 'name', 'non-FQDN (base hostname)')
+			raise ParamRequired(self, ('interface', 'mac'))
+		if name and len(name.split('.')) > 1:
+			raise ParamType(self, 'name', 'non-FQDN (base hostname)')
 		if len(hosts) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 
-                # Stacki can use the usafe parameter to disable the check if the
-                # interface already exists.  The spreadsheet loading uses this
-                # since before add.host.interface is called all the interfaces
-                # are removed.
-                
-                unsafe = self.str2bool(unsafe)
-                if not unsafe:
-                        for dict in self.call('list.host.interface', [ host ]):
-                                if interface == dict['interface']:
-                                        raise CommandError(self, 'interface exists')
-                                if mac and mac == dict['mac']:
-                                        raise CommandError(self, 'mac exists')
+		# Stacki can use the usafe parameter to disable the check if the
+		# interface already exists.  The spreadsheet loading uses this
+		# since before add.host.interface is called all the interfaces
+		# are removed.
+		
+		unsafe = self.str2bool(unsafe)
+		if not unsafe:
+			for dict in self.call('list.host.interface', [ host ]):
+				if interface == dict['interface']:
+					raise CommandError(self, 'interface exists')
+				if mac and mac == dict['mac']:
+					raise CommandError(self, 'mac exists')
 
 
 		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default']
 
-                # Insert the mac or interface into the database and then use
-                # that to key off of for all the subsequent fields.
-                # Give the MAC preferrence (need to pick one) but still do the
-                # right thing when MAC and Interface are both specified.
-                #
-                # The MAC handle includes some optimization to include more
-                # information on the initial insert, in order to reduce the
-                # updates for each extra field.
-                
-                if mac:
-                        handle = 'mac=%s' % mac
-                        fields.append('interface')
+		# Insert the mac or interface into the database and then use
+		# that to key off of for all the subsequent fields.
+		# Give the MAC preferrence (need to pick one) but still do the
+		# right thing when MAC and Interface are both specified.
+		#
+		# The MAC handle includes some optimization to include more
+		# information on the initial insert, in order to reduce the
+		# updates for each extra field.
+		
+		if mac:
+			handle = 'mac=%s' % mac
+			fields.append('interface')
 
-                        keys = [ 'node', 'mac' ]
-                        vals = [
-                        	'(select id from nodes where name="%s")' % host,
-                                '"%s"' % mac
-                        	]
+			keys = [ 'node', 'mac' ]
+			vals = [
+				'(select id from nodes where name="%s")' % host,
+				'"%s"' % mac
+				]
 
-                        if interface:
-                                fields.remove('interface')
-                                keys.append('device')
-                                vals.append('"%s"' % interface)
-                        if network:
-                                fields.remove('network')
-                                keys.append('subnet')
-                                vals.append('(select id from subnets s where s.name="%s")' % network)
-                        if ip:
-                                fields.remove('ip')
-                                keys.append('ip')
-                                vals.append('NULLIF("%s","NULL")' % ip.upper())
-                        if name:
-                        	if name.upper() == "NULL":
-                                	name = host
-                                fields.remove('name')
-                                keys.append('name')
-                                vals.append('"%s"' % name)
-                        if default:
-                                fields.remove('default')
-                                keys.append('main')
-                                vals.append('%d' % self.str2bool(default))
+			if interface:
+				fields.remove('interface')
+				keys.append('device')
+				vals.append('"%s"' % interface)
+			if network:
+				fields.remove('network')
+				keys.append('subnet')
+				vals.append('(select id from subnets s where s.name="%s")' % network)
+			if ip:
+				fields.remove('ip')
+				keys.append('ip')
+				vals.append('NULLIF("%s","NULL")' % ip.upper())
+			if name:
+				if name.upper() == "NULL":
+					name = host
+				fields.remove('name')
+				keys.append('name')
+				vals.append('"%s"' % name)
+			if default:
+				fields.remove('default')
+				keys.append('main')
+				vals.append('%d' % self.str2bool(default))
 
-                                
-                                
+				
+				
 			self.db.execute("""
-                        	insert into networks(%s) values (%s)
-                                """ % (string.join(keys, ','),
-                                        string.join(vals, ',')))
+				insert into networks(%s) values (%s)
+				""" % (string.join(keys, ','),
+					string.join(vals, ',')))
 
-                        
+			
 		else:
-                        handle = 'interface=%s' % interface
-                        fields.append('mac')
-                        
+			handle = 'interface=%s' % interface
+			fields.append('mac')
+			
 			self.db.execute("""
-                        	insert into networks(node, device)
+				insert into networks(node, device)
 				values ((select id from nodes where name='%s'), '%s')
-                                """ % (host, interface)) 
+				""" % (host, interface)) 
 
 		for key in fields:
 			if params.has_key(key):

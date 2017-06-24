@@ -14,16 +14,16 @@ class Implementation(stack.commands.Implementation):
 		ip       = h['ip']
 		mask     = h['mask']
 		gateway  = h['gateway']
-                kernel   = h['kernel']
-                ramdisk  = h['ramdisk']
-                args     = h['args']
+		kernel   = h['kernel']
+		ramdisk  = h['ramdisk']
+		args     = h['args']
 		filename = h['filename']
-                attrs    = h['attrs']
+		attrs    = h['attrs']
 		action	 = h['action']
 		type	 = h['type']
 
-                dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
-                nextserver = attrs.get('Kickstart_PrivateKickstartHost')
+		dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
+		nextserver = attrs.get('Kickstart_PrivateKickstartHost')
 
 
 		# If the ksdevice= is set fill in the network

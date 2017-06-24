@@ -119,50 +119,50 @@ class Command(stack.commands.NetworkArgumentProcessor,
 
 	def run(self, params, args):
 
-                (dns, pxe) = self.fillParams([('dns', None),
-                                              ('pxe', None)])
+		(dns, pxe) = self.fillParams([('dns', None),
+					      ('pxe', None)])
 
-                if dns:
-                        dns = self.str2bool(dns)
-                if pxe:
-                        pxe = self.str2bool(pxe)
-                        
+		if dns:
+			dns = self.str2bool(dns)
+		if pxe:
+			pxe = self.str2bool(pxe)
+			
 		self.beginOutput()
 
-                networks = {}
-                for row in self.db.select("""
-                	name, address, mask, gateway, mtu, zone,
-                        if(dns, 'True', 'False'),
-                        if(pxe, 'True', 'False')
-                        from subnets
-                        """):
-                        network = {}
-                        network['name']    = row[0]
-                        network['address'] = row[1]
-                        network['mask']    = row[2]
-                        network['gateway'] = row[3]
-                        network['mtu']     = row[4]
-                        network['zone']    = row[5]
-                        network['dns']     = self.str2bool(row[6])
-                        network['pxe']     = self.str2bool(row[7])
-                        if row[0]:
-                                networks[row[0]] = network
+		networks = {}
+		for row in self.db.select("""
+			name, address, mask, gateway, mtu, zone,
+			if(dns, 'True', 'False'),
+			if(pxe, 'True', 'False')
+			from subnets
+			"""):
+			network = {}
+			network['name']    = row[0]
+			network['address'] = row[1]
+			network['mask']    = row[2]
+			network['gateway'] = row[3]
+			network['mtu']     = row[4]
+			network['zone']    = row[5]
+			network['dns']     = self.str2bool(row[6])
+			network['pxe']     = self.str2bool(row[7])
+			if row[0]:
+				networks[row[0]] = network
 
-                for net in self.getNetworkNames(args):
-                        network = networks[net]
+		for net in self.getNetworkNames(args):
+			network = networks[net]
 
-                	if not (dns == None or network['dns'] == dns):
-                                continue
-                	if not (pxe == None or network['pxe'] == pxe):
-                                continue
-                        
+			if not (dns == None or network['dns'] == dns):
+				continue
+			if not (pxe == None or network['pxe'] == pxe):
+				continue
+			
 			self.addOutput(network['name'], [ network['address'],
-                                                        network['mask'],
-                                                        network['gateway'],
-                                                        network['mtu'],
-                                                        network['zone'],
-                                                        network['dns'],
-                                                        network['pxe'] ])     
+							network['mask'],
+							network['gateway'],
+							network['mtu'],
+							network['zone'],
+							network['dns'],
+							network['pxe'] ])     
 			
 		self.endOutput(trimOwner=False, header=['network', 'address', 'mask', 'gateway',
-                                               'mtu', 'zone', 'dns', 'pxe'])
+					       'mtu', 'zone', 'dns', 'pxe'])

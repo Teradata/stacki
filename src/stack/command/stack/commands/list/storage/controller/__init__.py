@@ -100,7 +100,7 @@ class Command(stack.commands.list.command,
 				hosts = []
 
 		else:
-                        raise ArgError(self, 'scope', 'must be unique or missing')
+			raise ArgError(self, 'scope', 'must be unique or missing')
 
 		if not scope:
 			if args[0] in oses:

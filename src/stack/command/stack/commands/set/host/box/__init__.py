@@ -44,7 +44,7 @@ import stack.commands
 from stack.exception import *
 
 class Command(stack.commands.set.host.command,
-              stack.commands.BoxArgumentProcessor):
+	      stack.commands.BoxArgumentProcessor):
 	"""
 	Sets the box for a list of hosts.
 	
@@ -63,7 +63,7 @@ class Command(stack.commands.set.host.command,
 
 	def run(self, params, args):
 		if not len(args):
-                        raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'host')
 
 		box, = self.fillParams([ ('box', None, True) ])
 		

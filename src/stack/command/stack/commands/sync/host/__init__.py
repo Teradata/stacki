@@ -63,7 +63,7 @@ max_threading = 512
 timeout	= 30
 
 class command(stack.commands.HostArgumentProcessor,
-        stack.commands.sync.command):
+	stack.commands.sync.command):
 	pass
 
 class Parallel(threading.Thread):
@@ -89,21 +89,21 @@ class Parallel(threading.Thread):
 		self.out['rc'] = rc
 
 class Command(command):
-        """
-        Writes the /etc/hosts file based on the configuration database
-        """
+	"""
+	Writes the /etc/hosts file based on the configuration database
+	"""
 
 	def run(self, params, args):
 
-                self.notify('Sync Host\n')
+		self.notify('Sync Host\n')
 
 		output = self.command('report.host')
 		f = open('/etc/hosts', 'w')
 		f.write("%s\n" % output)
 		f.close()
 
-                if os.path.exists('/srv/salt/rocks'):
-	                f = open('/srv/salt/rocks/hosts', 'w')
+		if os.path.exists('/srv/salt/rocks'):
+			f = open('/srv/salt/rocks/hosts', 'w')
 			f.write("%s\n" % output)
 			f.close()
 

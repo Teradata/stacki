@@ -123,7 +123,7 @@ class Command(stack.commands.list.appliance.command):
 			try:
 				(name, ) = self.db.fetchone()
 			except TypeError:
-                                raise CommandError(self, 'no such appliance "%s"' % app)
+				raise CommandError(self, 'no such appliance "%s"' % app)
 			if name:
 				xml = self.command('list.node.xml', [name])
 				for line in xml.split('\n'):

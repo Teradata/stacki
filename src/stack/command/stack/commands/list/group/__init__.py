@@ -56,29 +56,29 @@ class Command(stack.commands.list.command):
 
 		self.beginOutput()
 
-                groups = {}
+		groups = {}
 
-                for row in self.db.select(
-                        """
-                        name from groups
-                        """):
-                        groups[row[0]] = []
+		for row in self.db.select(
+			"""
+			name from groups
+			"""):
+			groups[row[0]] = []
 
-                for row in self.db.select(
-                        """g.name, n.name
-                        from groups g, memberships m, nodes n
-                        where n.id = m.nodeid and g.id = m.groupid
-                        """):
+		for row in self.db.select(
+			"""g.name, n.name
+			from groups g, memberships m, nodes n
+			where n.id = m.nodeid and g.id = m.groupid
+			"""):
 			
-                        groupname, hostname = row
+			groupname, hostname = row
 			if groupname in groups:
 				groups[groupname].append(hostname)
 			else:
 				groups[groupname] = hostname
 
-                for group in sorted(groups):
-                        members = ' '.join(groups[group])
-                        self.addOutput(group, [members])
+		for group in sorted(groups):
+			members = ' '.join(groups[group])
+			self.addOutput(group, [members])
 
 		self.endOutput(header=['group', 'hosts'], trimOwner=False)
 

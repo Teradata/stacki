@@ -105,7 +105,7 @@ class Command(stack.commands.Command):
 	"""
 	
 	def run(self, params, args):
-                
+		
 		if len(args):
 			raise CommandError(self, 'command does not take arguments')
 

@@ -120,12 +120,12 @@ class Command(command):
 	def run(self, params, args):
 
 		for dict in self.call('list.network'):
-                        self.dump('"add network" %s' % dict['network'])
-                         
-                        for option in dict.keys():
-                                if option == 'network':
-                                        continue
-                                if dict[option]:
-                                        self.dump('"set network %s" %s %s=%s' %
-                                                (option, dict['network'], option, dict[option]))
+			self.dump('"add network" %s' % dict['network'])
+			 
+			for option in dict.keys():
+				if option == 'network':
+					continue
+				if dict[option]:
+					self.dump('"set network %s" %s %s=%s' %
+						(option, dict['network'], option, dict[option]))
 

@@ -172,13 +172,11 @@
 #
 
 from __future__ import print_function
-import warnings
-warnings.filterwarnings("ignore")
 
 
 import os
 import sys
-import popen2
+import subprocess
 from xml.sax import handler
 
 # An exception for Kickstart builder trinity: kcgi, kgen, kpp
@@ -313,7 +311,12 @@ def startSpinner(cmd):
 	
 	Does not show standard error output."""
 
-	r, w, e = popen2.popen3(cmd)
+
+	p = subprocess.Popen(cmd,
+			     stdin  = subprocess.PIPE,
+			     stdout = subprocess.PIPE,
+			     stderr = subprocess.PIPE)
+
 	currLength  = 0
 	prevLength  = 0
 	spinChars   = '-\|/'

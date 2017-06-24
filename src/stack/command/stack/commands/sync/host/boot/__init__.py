@@ -8,8 +8,8 @@ class Command(stack.commands.sync.host.command):
 
 	def run(self, params, args):
 
-                self.notify('Sync Host Boot\n')
+		self.notify('Sync Host Boot\n')
 
-                argv = self.getHostnames(args, managed_only=True)
-                argv.append('notify=true')
-                self.report('report.host.bootfile', argv)
+		argv = self.getHostnames(args, managed_only=True)
+		argv.append('notify=true')
+		self.report('report.host.bootfile', argv)

@@ -71,12 +71,12 @@ class Command(stack.commands.load.command,
 	"""		
 
 	def run(self, params, args):
-                filename, processor = self.fillParams([
-                        ('file', None, True),
+		filename, processor = self.fillParams([
+			('file', None, True),
 			('processor', 'default') ])
 
 		if not os.path.exists(filename):
-                        raise CommandError(self, 'file "%s" does not exist' % filename)
+			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		#
 		# implementations can't return values

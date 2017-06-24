@@ -68,7 +68,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.endOutput(padChar = '')
 			return
 		elif len(hosts) > 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 

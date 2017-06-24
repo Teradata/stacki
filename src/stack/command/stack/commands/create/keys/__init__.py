@@ -124,7 +124,7 @@ class Command(command):
 		passphrase = self.str2bool(p)
 		
 		if os.path.exists(key):
-                        raise CommandError(self, "key file '%s' already exists" % key)
+			raise CommandError(self, "key file '%s' already exists" % key)
 
 		#
 		# generate the private key

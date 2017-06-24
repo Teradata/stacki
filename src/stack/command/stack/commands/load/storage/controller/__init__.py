@@ -50,7 +50,7 @@ import stack.commands
 from stack.exception import *
 
 class Command(stack.commands.load.command,
-               stack.commands.HostArgumentProcessor):
+	       stack.commands.HostArgumentProcessor):
 	"""
 	Take rows from a spreadsheet that describe how a host's disk controller
 	should be configured and then place those values into the database.
@@ -71,13 +71,13 @@ class Command(stack.commands.load.command,
 	"""		
 
 	def run(self, params, args):
-                filename, processor, force = self.fillParams([
-                        ('file', None, True),
+		filename, processor, force = self.fillParams([
+			('file', None, True),
 			('processor', 'default'),
 			('force', 'n') ])
 
 		if not os.path.exists(filename):
-                        raise CommandError(self, 'file "%s" does not exist' % filename)
+			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.force = self.str2bool(force)
 		#

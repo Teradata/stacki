@@ -51,9 +51,9 @@ class Command(stack.commands.sync.command):
 
 	def run(self, params, args):
 
-                self.notify('Sync DHCP\n')
+		self.notify('Sync DHCP\n')
 
 		self.report('report.dhcpd')
-                
+		
 		subprocess.call(['/sbin/service','dhcpd','restart'],
-                                stdout=open('/dev/null'), stderr=open('/dev/null'))
+				stdout=open('/dev/null'), stderr=open('/dev/null'))

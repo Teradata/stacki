@@ -43,7 +43,7 @@ import stack.commands
 from stack.exception import *
 
 class command(stack.commands.EnvironmentArgumentProcessor,
-              stack.commands.add.command):
+	      stack.commands.add.command):
 	pass
 
 
@@ -59,22 +59,22 @@ class Command(command):
 	def run(self, params, args):
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'environment')
-                if len(args) != 1:
-                        raise ArgUnique(self, 'environment')
+			raise ArgRequired(self, 'environment')
+		if len(args) != 1:
+			raise ArgUnique(self, 'environment')
 		environment = args[0]
 
-                dup = False
+		dup = False
 		for row in self.db.select(
-                        """
+			"""
 			* from environments where name='%s'
 			""" % environment):
-                        dup = True
-                if dup:
+			dup = True
+		if dup:
 			raise CommandError(self, 'environment "%s" already exists' % environment)
 
 		self.db.execute(
-                        """
-                	insert into environments (name) values ('%s')
-                	""" % environment)
+			"""
+			insert into environments (name) values ('%s')
+			""" % environment)
 		

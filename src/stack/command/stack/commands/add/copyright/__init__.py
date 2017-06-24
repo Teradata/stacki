@@ -113,16 +113,16 @@ class Command(stack.commands.add.command):
 		try:
 			dirs = file.getFullName().split('/')
 		except:
-                        dirs = [ ]
+			dirs = [ ]
 
-                # Don't process non-source code.
+		# Don't process non-source code.
 
-                for skip in [ '.git', 'build-' ]:
-                        if skip in dirs:
-                                return
-                        for d in dirs:
-                                if d.find(skip) == 0:
-                                        return
+		for skip in [ '.git', 'build-' ]:
+			if skip in dirs:
+				return
+			for d in dirs:
+				if d.find(skip) == 0:
+					return
 
 		try:
 			fin = open(file.getFullName(), 'r')
@@ -141,8 +141,8 @@ class Command(stack.commands.add.command):
 				if not state:
 					blocks += 1
 				else:
-			                prefix = line[0:pos]
-			                suffix = line[pos+len(self.pattern[0]):]
+					prefix = line[0:pos]
+					suffix = line[pos+len(self.pattern[0]):]
 					fout.write(line)
 					for text in self.copyright:
 						fout.write('%s%s%s' % (
@@ -200,11 +200,11 @@ class Command(stack.commands.add.command):
 		self.tree.apply(self.iter)
 
 
-                # No reason to keep updating the Rocks stuff, we forked years
-                # ago and never looked back.
-                #
-                # Keep the code here if for when/if the trees ever come back
-                # together.
+		# No reason to keep updating the Rocks stuff, we forked years
+		# ago and never looked back.
+		#
+		# Keep the code here if for when/if the trees ever come back
+		# together.
 
 #		print('Inserting rocks copyright into source code files...')
 #		self.pattern   = [ '@' + 'Copyright@', '@' + 'Copyright@' ]

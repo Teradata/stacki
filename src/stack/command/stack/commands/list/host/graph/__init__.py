@@ -173,9 +173,9 @@ class Command(stack.commands.list.host.command):
 					dirs.append(os.path.join(os.sep, 'export', 'stack', 'carts', 
 								 row['name'], 'graph'))
 
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+			attrs = {}
+			for row in self.call('list.host.attr', [ host ]):
+				attrs[row['attr']] = row['value']
 
 			parser = make_parser()
 			handler = stack.profile.GraphHandler(attrs, prune=False)
@@ -195,11 +195,11 @@ class Command(stack.commands.list.host.command):
 						fin.close()
 			
 			if 'type' in params and params['type'] == 'json':
-                                dot = self.createJSONGraph(handler)
+				dot = self.createJSONGraph(handler)
 				self.addOutput(host, dot)
-                        else:
-                                dot = self.createDotGraph(handler,
-                                        self.readDotGraphStyles())
+			else:
+				dot = self.createDotGraph(handler,
+					self.readDotGraphStyles())
 				for line in dot:
 					self.addOutput(host, line)
 
@@ -244,7 +244,7 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tcolor=black;')
 		dict = {}
 		for node in handler.getOrderGraph().getNodes():
-                        color = 'white'
+			color = 'white'
 			node.setFillColor(color)
 			dot.append(node.getDot('\t\t', 'order'))
 
@@ -252,8 +252,8 @@ class Command(stack.commands.list.host.command):
 		iter.run()
 
 		for e in handler.getOrderGraph().getEdges():
-                        color = 'black'
-                        style = 'bold'
+			color = 'black'
+			style = 'bold'
 			e.setColor(color)
 			e.setStyle(style)
 			dot.append(e.getDot('\t\t', 'order'))
@@ -266,11 +266,11 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tfontsize=32;')
 		dot.append('\t\tcolor=black;')
 		for node in handler.getMainGraph().getNodes():
-                        color = 'white'
+			color = 'white'
 			node.setFillColor(color)
 			dot.append(node.getDot('\t\t'))
 		for e in handler.getMainGraph().getEdges():
-                        color = 'black'
+			color = 'black'
 			e.setColor(color)
 			e.setStyle('bold')
 			dot.append(e.getDot('\t\t'))

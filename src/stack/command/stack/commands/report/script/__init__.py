@@ -121,7 +121,7 @@ class Command(stack.commands.report.command):
 
 	def run(self, params, args):
 		osname, attrs = self.fillParams([
-                        ('os', self.os),
+			('os', self.os),
 			('attrs', {}) ])
 
 		xml = ''
@@ -134,9 +134,9 @@ class Command(stack.commands.report.command):
 			xml += ']>\n'
 
 		xml += '<stack:profile '
-                xml += 'stack:os="%s" ' % osname
-                xml += 'xmlns:stack="http://www.stacki.com" '
-                xml += 'stack:attrs="%s">\n' % attrs
+		xml += 'stack:os="%s" ' % osname
+		xml += 'xmlns:stack="http://www.stacki.com" '
+		xml += 'stack:attrs="%s">\n' % attrs
 		xml += '<stack:post>\n'
 
 		for line in sys.stdin.readlines():
@@ -145,16 +145,16 @@ class Command(stack.commands.report.command):
 		xml += '</stack:post>\n'
 		xml += '</stack:profile>\n' 
 
-                p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
-                                     stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE, shell=True)
-                p.stdin.write(xml)
-                (o, e) = p.communicate()
-                if p.returncode == 0:
-                        sys.stdout.write(o)
-                else:
-                        sys.stderr.write(e)
+		p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
+				     stdin=subprocess.PIPE,
+				     stdout=subprocess.PIPE,
+				     stderr=subprocess.PIPE, shell=True)
+		p.stdin.write(xml)
+		(o, e) = p.communicate()
+		if p.returncode == 0:
+			sys.stdout.write(o)
+		else:
+			sys.stderr.write(e)
 
 
 

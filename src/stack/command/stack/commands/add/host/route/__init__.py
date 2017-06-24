@@ -117,12 +117,12 @@ class Command(stack.commands.add.host.command):
 
 	def run(self, params, args):
 
-                hosts = self.getHostnames(args)
-                
+		hosts = self.getHostnames(args)
+		
 		(address, gateway, netmask) = self.fillParams([
-                        ('address', None, True),
-                        ('gateway', None, True),
-                        ('netmask', '255.255.255.255')])
+			('address', None, True),
+			('gateway', None, True),
+			('netmask', '255.255.255.255')])
 		
 		#
 		# determine if this is a subnet identifier
@@ -148,7 +148,7 @@ class Command(stack.commands.add.host.command):
 				and n.name='%s'""" %	
 				(address, host)) 
 			if rows:
-                                raise CommandError(self, 'route exists')
+				raise CommandError(self, 'route exists')
 		
 		# Now that we know things will work insert the route for
 		# all the hosts
@@ -157,5 +157,5 @@ class Command(stack.commands.add.host.command):
 			self.db.execute("""insert into node_routes values 
 				((select id from nodes where name='%s'),
 				'%s', '%s', %s, %s)""" %
-                	        (host, address, netmask, gateway, subnet))
+				(host, address, netmask, gateway, subnet))
 

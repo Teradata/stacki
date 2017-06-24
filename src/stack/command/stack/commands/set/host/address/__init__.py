@@ -174,20 +174,20 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 
 	def run(self, params, args):
 		(ip, netmask, shortname, domainname, gateway, dns) = self.fillParams([
-                        ('ip', None),
+			('ip', None),
 			('netmask', None),
-                        ('shortname', None),
+			('shortname', None),
 			('domain', None),
-                        ('gateway', None),
+			('gateway', None),
 			('dns', None)
-                        ])
+			])
 
 		if len(params) == 0:
-                        raise CommandError(self, 'no parameters specified')
+			raise CommandError(self, 'no parameters specified')
 
-                attrs = {}
-                for row in self.call('list.host.attr', [ 'localhost' ]):
-                        attrs[row['attr']] = row['value']
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'localhost' ]):
+			attrs[row['attr']] = row['value']
 
 		if not ip:
 			ip = attrs['Kickstart_PublicAddress']
@@ -212,12 +212,12 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		hosts = self.getHostnames(args)
 
 		if len(hosts) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
 
 		if host != self.db.getHostname('localhost'):
-                        raise CommandError(self, 'must supply the current name of this frontend')
+			raise CommandError(self, 'must supply the current name of this frontend')
 
 		oldhost = attrs['Kickstart_PrivateHostname']
 		oldip   = attrs['Kickstart_PublicAddress']
@@ -290,7 +290,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		password = self.readpassword()
 
 		if crypt.crypt(clear_password, password) != password:
-                        raise CommandError(self, 'The current password you entered does not match the stored password')
+			raise CommandError(self, 'The current password you entered does not match the stored password')
 
 		#
 		# update the name in the nodes and networks tables first
@@ -390,9 +390,9 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		# there are times when we will not be able to consistently
 		# ssh to this host (because the network name is in flux).
 		#
-                attrs = {}
-                for row in self.call('list.host.attr', [ 'localhost' ]):
-                        attrs[row['attr']] = row['value']
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'localhost' ]):
+			attrs[row['attr']] = row['value']
 
 		cmd = '/opt/stack/bin/stack report host interface localhost |'
 		cmd += '/opt/stack/bin/stack report script '

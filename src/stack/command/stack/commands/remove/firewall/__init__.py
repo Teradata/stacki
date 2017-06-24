@@ -96,8 +96,8 @@ from stack.exception import *
 class command(stack.commands.remove.command):
 	def deleteRule(self, table, rulename, extrasql=None):
 
-                assert table
-                assert rulename
+		assert table
+		assert rulename
 
 		query = 'select * from %s where name="%s"' % (table, rulename)
 		if extrasql:
@@ -116,15 +116,15 @@ class Command(command):
 	"""
 	Remove a global firewall rule. To remove a rule, you must supply
 	the name of the rule.
-        
+	
 	<param type='string' name='rulename' optional='0'>
 	Name of the rule
 	</param>
 	"""
 
 	def run(self, params, args):
-                
+		
 		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-                
+		
 		self.deleteRule('global_firewall', rulename)
 

@@ -43,16 +43,16 @@ import stack.commands
 from stack.exception import *
 
 class command(stack.commands.set.command,
-              stack.commands.NetworkArgumentProcessor):
+	      stack.commands.NetworkArgumentProcessor):
 
-        def fillSetNetworkParams(self, args, paramName):
+	def fillSetNetworkParams(self, args, paramName):
 
-                networks = self.getNetworkNames(args)
-                if not networks:
-                        raise CommandError(self, 'network "%s" is not defined' % args)
+		networks = self.getNetworkNames(args)
+		if not networks:
+			raise CommandError(self, 'network "%s" is not defined' % args)
 
-                (param, ) = self.fillParams([ (paramName, None, True) ])
+		(param, ) = self.fillParams([ (paramName, None, True) ])
 
-                return (networks, param)
+		return (networks, param)
 
 

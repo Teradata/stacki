@@ -123,9 +123,9 @@ class Command(stack.commands.sync.host.command):
 		threads = []
 		for host in hosts:
 
-                        attrs = {}
-                        for row in self.call('list.host.attr', [ host ]):
-                                attrs[row['attr']] = row['value']
+			attrs = {}
+			for row in self.call('list.host.attr', [ host ]):
+				attrs[row['attr']] = row['value']
 
 			cmd = '/opt/stack/bin/stack report host interface '
 			cmd += '%s | ' % host

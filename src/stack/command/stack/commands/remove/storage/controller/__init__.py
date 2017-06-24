@@ -51,26 +51,26 @@ class Command(stack.commands.remove.command,
 	"""
 	Remove a storage controller configuration from the database.
 
-        <arg type='string' name='scope'>
+	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
 	'redhat'), a valid appliance (e.g., 'compute') or a valid host
 	(e.g., 'compute-0-0). No argument means the scope is 'global'.
-        </arg>
+	</arg>
 
 	<param type='int' name='adapter' optional='1'>
 	Adapter address. If adapter is '*', enclosure/slot address applies to
 	all adapters.
 	</param>
 
-        <param type='int' name='enclosure' optional='1'>
+	<param type='int' name='enclosure' optional='1'>
 	Enclosure address. If enclosure is '*', adapter/slot address applies
 	to all enclosures.
-        </param>
+	</param>
 
-        <param type='int' name='slot'>
+	<param type='int' name='slot'>
 	Slot address(es). This can be a comma-separated list. If slot is '*',
 	adapter/enclosure address applies to all slots.
-        </param>
+	</param>
 
 	<example cmd='remove storage controller compute-0-0 slot=1'>
 	Remove the disk array configuration for slot 1 on compute-0-0.
@@ -117,26 +117,26 @@ class Command(stack.commands.remove.command,
 				scope = 'host'
 
 		if not scope:
-                        raise ArgValue(self, 'scope', 'a valid os, appliance name or host name')
+			raise ArgValue(self, 'scope', 'a valid os, appliance name or host name')
 
 		if scope == 'global':
 			name = None
 		else:
 			name = args[0]
 
-                adapter, enclosure, slot = self.fillParams([
-                        ('adapter', None), 
-                        ('enclosure', None),
-                        ('slot', None, True)
-                        ])
+		adapter, enclosure, slot = self.fillParams([
+			('adapter', None), 
+			('enclosure', None),
+			('slot', None, True)
+			])
 
 		if adapter and adapter != '*':
 			try:
 				adapter = int(adapter)
 			except:
-                                raise ParamType(self, 'adapter', 'integer')
+				raise ParamType(self, 'adapter', 'integer')
 			if adapter < 0:
-                                raise ParamValue(self, 'adapter', '>= 0')
+				raise ParamValue(self, 'adapter', '>= 0')
 		else:
 			adapter = -1
 
@@ -144,9 +144,9 @@ class Command(stack.commands.remove.command,
 			try:
 				enclosure = int(enclosure)
 			except:
-                                raise ParamType(self, 'enclosure', 'integer')
+				raise ParamType(self, 'enclosure', 'integer')
 			if enclosure < 0:
-                                raise ParamValue(self, 'enclosure', '>= 0')
+				raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
 
@@ -156,11 +156,11 @@ class Command(stack.commands.remove.command,
 				try:
 					s = int(s)
 				except:
-                                        raise ParamType(self, 'slot', 'integer')
+					raise ParamType(self, 'slot', 'integer')
 				if s < 0:
-                                        raise ParamValue(self, 'slot', '>= 0')
+					raise ParamValue(self, 'slot', '>= 0')
 				if s in slots:
-                                        raise ParamError(self, 'slot', '"%s" is listed twice' % s)
+					raise ParamError(self, 'slot', '"%s" is listed twice' % s)
 				slots.append(s)
 
 		#

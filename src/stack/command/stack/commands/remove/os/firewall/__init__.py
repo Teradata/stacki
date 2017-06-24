@@ -114,7 +114,7 @@ class Command(stack.commands.remove.os.command,
 		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
 		if len(args) == 0:
-                        raise ArgRequired(self, 'os')
+			raise ArgRequired(self, 'os')
 		
 		for os in self.getOSNames(args):
 			sql = """os='%s'""" % (os)

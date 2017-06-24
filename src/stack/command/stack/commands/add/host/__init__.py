@@ -100,21 +100,21 @@ import stack.commands
 from stack.exception import *
 
 class command(stack.commands.HostArgumentProcessor,
-              stack.commands.ApplianceArgumentProcessor,
-              stack.commands.BoxArgumentProcessor,
-              stack.commands.EnvironmentArgumentProcessor,
-              stack.commands.add.command):
+	      stack.commands.ApplianceArgumentProcessor,
+	      stack.commands.BoxArgumentProcessor,
+	      stack.commands.EnvironmentArgumentProcessor,
+	      stack.commands.add.command):
 	pass
 	
 class Command(command):
 	"""
 	Add an new host to the cluster.
 
-        <arg type='string' name='host'>
-        A single host name.  If the hostname is of the standard form of
+	<arg type='string' name='host'>
+	A single host name.  If the hostname is of the standard form of
 	basename-rack-rank the default values for the appliance, rack,
 	and rank parameters are taken from the hostname.
-        </arg>
+	</arg>
 
 	<param type='string' name='longname'>
 	Long appliance name.  If not provided and the host name is of
@@ -122,12 +122,12 @@ class Command(command):
 	the host.
 	</param>
 
-        <param type='string' name='rack'>
-        The number of the rack where the machine is located. The convention
+	<param type='string' name='rack'>
+	The number of the rack where the machine is located. The convention
 	in Stacki is to start numbering at 0. If not provided and the host
 	name is of the standard form the rack number is taken from the host
 	name.
-        </param>
+	</param>
 
 	<param type='string' name='rank'>
 	The position of the machine in the rack. The convention in Stacki
@@ -140,9 +140,9 @@ class Command(command):
 	The box name for the host. The default is: "default".
 	</param>
 
-        <param type='string' name='environment'>
-        Name of the host environment.  For most users this is not specified.
-        Environments allow you to partition hosts into logical groups.
+	<param type='string' name='environment'>
+	Name of the host environment.  For most users this is not specified.
+	Environments allow you to partition hosts into logical groups.
 	</param>
 
 	<example cmd='add host backend-0-1'>
@@ -160,7 +160,7 @@ class Command(command):
 	"""
 
 	def addHost(self, host):
-                
+		
 		if host in self.getHostnames():
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
@@ -197,17 +197,17 @@ class Command(command):
 				('rack', rack),
 				('rank', rank),
 				('box', 'default'),
-                                ('environment', ''),
+				('environment', ''),
 				('osaction','default'),
 				('installaction','default') ])
 
 		if not longname and not appliance:
-                        raise ParamRequired(self, ('longname', 'appliance'))
+			raise ParamRequired(self, ('longname', 'appliance'))
 
 		if rack == None:
-                        raise ParamRequired(self, 'rack')
+			raise ParamRequired(self, 'rack')
 		if rank == None:
-                        raise ParamRequired(self, 'rank')
+			raise ParamRequired(self, 'rank')
 
 		if longname and not appliance:
 			#
@@ -219,7 +219,7 @@ class Command(command):
 					break
 
 			if not appliance:
-                        	raise CommandError(self, 'longname "%s" is not in the database' % longname)
+				raise CommandError(self, 'longname "%s" is not in the database' % longname)
 
 		if appliance not in appliances:
 			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)
@@ -272,17 +272,17 @@ class Command(command):
 				
 		self.db.execute("""insert into nodes
 			(name, appliance, box, rack, rank, osaction, installaction)
-                        values ('%s', (select id from appliances where name='%s'),
+			values ('%s', (select id from appliances where name='%s'),
 			%d, '%s', '%s', %d, %d) """ %
-                        (host, appliance, boxid, rack, rank, osaction_id, installaction_id))
+			(host, appliance, boxid, rack, rank, osaction_id, installaction_id))
 
-                if environment:
-                        self.command('set.host.environment', [ host, "environment=%s" % environment ])
-                        
+		if environment:
+			self.command('set.host.environment', [ host, "environment=%s" % environment ])
+			
 
 	def run(self, params, args):
 		if len(args) != 1:
-                        raise ArgUnique(self, 'host')
+			raise ArgUnique(self, 'host')
 
 		host = args[0]
 		self.addHost(host)

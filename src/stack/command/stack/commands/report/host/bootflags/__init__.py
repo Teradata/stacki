@@ -115,7 +115,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-                hosts = self.getHostnames(args)
+		hosts = self.getHostnames(args)
 		for host in hosts:
 			flags = self.getHostAttr(host, 'bootflags')
 			if not flags:

@@ -102,8 +102,8 @@ class Command(stack.commands.remove.host.command):
 	
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
- 	</param>
- 	
+	</param>
+	
 	<example cmd='remove host attr backend-0-0 attr=cpus'>
 	Removes the attribute cpus for host backend-0-0.
 	</example>
