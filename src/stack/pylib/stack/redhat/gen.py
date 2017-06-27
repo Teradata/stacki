@@ -95,7 +95,6 @@
 import string
 import os
 import tempfile
-#import xml.dom.ext.reader.Sax2
 import stack.gen	
 		
 
@@ -124,7 +123,7 @@ class Generator(stack.gen.Generator):
 	#	<clearpart>
 	# </main>
 	
-	def handle_main_stack_clearpart(self, node):
+	def handle_stack_main_clearpart(self, node):
 		arg = self.getAttr(node, 'partition')
 
 		#
@@ -146,7 +145,7 @@ class Generator(stack.gen.Generator):
 	#	<lilo>
 	# </main>
 	
-	def handle_main_stack_lilo(self, node):
+	def handle_stack_main_lilo(self, node):
 		return 'bootloader %s' % self.getChildText(node).strip()
 
 
@@ -154,7 +153,7 @@ class Generator(stack.gen.Generator):
 	#	<langsupport>
 	# </main>
 
-	def handle_main_stack_langsupport(self, node):
+	def handle_stack_main_langsupport(self, node):
 		return 'langsupport --default=%s' % self.getChildText(node).strip()
 
 
@@ -174,7 +173,7 @@ class Generator(stack.gen.Generator):
 			rpm = '@%s' % rpm
 
 		self.packageSet.append(rpm, enabled, nodefile)
-
+		return True
 
 	# <pre>
 	
@@ -191,6 +190,7 @@ class Generator(stack.gen.Generator):
 		s += '\n%end'
 			
 		self.preSection.append(s, nodefile)
+		return True
 
 
 	# <post>
@@ -230,6 +230,7 @@ class Generator(stack.gen.Generator):
 				script = section
 			
 		self.postSection.append(script, nodefile)
+		return True
 		
 	# <boot>
 	
@@ -253,6 +254,7 @@ class Generator(stack.gen.Generator):
 			s += '\n%end'
 
 		self.bootSection[order].append(s, nodefile)
+		return True
 
 
 	def generate_main(self):

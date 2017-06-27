@@ -74,7 +74,7 @@ class Command(stack.commands.report.host.command):
 				search.append(zone)
 
 		if search:
-			self.addOutput(host, 'search %s' % string.join(search))
+			self.addOutput(host, 'search %s' % ''.join(search))
 			
 		#
 		# If the default network is 'public' use the
@@ -95,7 +95,7 @@ class Command(stack.commands.report.host.command):
 
 		for row in self.call('list.host.interface', [ host ]):
 			network = row['network']
-			if dns.has_key(network) and dns[network]:
+			if network in dns and dns[network]:
 				frontend = self.getHostAttr(host, 'Kickstart_PrivateAddress')
 				for intf in self.call('list.host.interface',['localhost']):
 					if intf['network'] == network:

@@ -98,55 +98,12 @@ import sys
 import os
 import time
 from xml.sax import handler
-import xml.dom.NodeFilter
-#import xml.dom.ext.reader.Sax2
+import xml.dom.minidom
 from stack.bool import *
 import stack.cond
+from stack.profile import StackNSURI, StackNSLabel
 	
 		
-
-class NodeFilter(xml.dom.NodeFilter.NodeFilter):
-
-	def __init__(self, attrs, ns=None):
-		self.attrs = attrs
-		self.ns	   = ns
-
-
-	def inNamespace(self, node):
-		if self.ns and self.ns == node.namespaceURI:
-			return True
-		return False
-
-	def getAttr(self, node, attr):
-		a = node.attributes.getNamedItem((self.ns, attr))
-		if a:
-			return a.value
-		else:
-			return ''
-
-class StackNodeFilter(NodeFilter):
-
-		
-	def acceptNode(self, node):
-
-		if node.localName == 'profile' and node.parentNode.nodeName == '#document':
-			return self.FILTER_ACCEPT
-
-		if not self.inNamespace(node):
-			return self.FILTER_SKIP
-
-		arch	= self.getAttr(node, 'arch')
-		osname	= self.getAttr(node, 'os')
-		release = self.getAttr(node, 'release')
-		cond	= self.getAttr(node, 'cond')
-		expr	= stack.cond.CreateCondExpr(arch, osname, release, cond)
-
-		if not stack.cond.EvalCondExpr(expr, self.attrs):
-			return self.FILTER_SKIP
-
-		return self.FILTER_ACCEPT
-
-
 class ProfileSnippet:
 	
 	def __init__(self, text, source):
@@ -228,7 +185,7 @@ class PackageSet:
 				d = dict['enabled']
 			else:
 				d = dict['disabled']
-			if not d.has_key(source):
+			if not source in d:
 				d[source] = []
 			d[source].append(package)
 		
@@ -305,7 +262,7 @@ class Generator:
 		# If this is a subsequent file tag and the optional PERMS
 		# or OWNER attributes are missing, use the previous value(s).
 		
-		if self.rcsFiles.has_key(file):
+		if file in self.rcsFiles:
 			(orig_owner, orig_perms) = self.rcsFiles[file]
 			if not perms:
 				perms = orig_perms
@@ -316,7 +273,7 @@ class Generator:
 		
 		l.append('')
 
-		return string.join(l, '\n')
+		return '\n'.join(l)
 
 	def rcsEnd(self, file, owner, perms):
 		"""
@@ -351,17 +308,20 @@ class Generator:
 
 		l.append('')
 
-		return string.join(l, '\n')
+		return '\n'.join(l)
 
 	
-	def getAttr(self, node, attr, ns='http://www.stacki.com'):
-		a = node.attributes.getNamedItem((ns, attr))
+	def getAttr(self, node, attr, ns=StackNSURI):
+		a = node.attributes.getNamedItemNS(ns, attr)
 		if a:
 			return a.value
 		else:
 			return ''
 		
 	def isCorrectCond(self, node):
+
+		if not self.attrs or not node.nodeType == node.ELEMENT_NODE:
+			return True
 
 		arch	= self.getAttr(node, 'arch')
 		osname	= self.getAttr(node, 'os')
@@ -410,52 +370,35 @@ class Generator:
 						text += fn(child)
 		return text
 
+
+	def traverse(self, node):
+		terminal = False
+
+		if not self.isCorrectCond(node):
+			return
+		if not node.nodeType == node.ELEMENT_NODE:
+			return
+		if not node.namespaceURI == StackNSURI:
+			return
+
+		# Lookup the handler and run it. If the handler
+		# returns True we do NOT recurse further and assume
+		# the handler already did this.
+
+		try:
+			fn = eval('self.handle_stack_%s' % node.localName)
+		except AttributeError:
+			fn = None
+		if fn:
+			if fn(node) == True:
+				terminal = True
+		if not terminal:
+			for child in node.childNodes:
+				self.traverse(child)
+
 	def parse(self, xml_string):
-		import cStringIO
-
-		xml_buf = cStringIO.StringIO(xml_string)
-		doc	= xml.dom.ext.reader.Sax2.FromXmlStream(xml_buf)
-		filter	= stack.gen.MainNodeFilter(self.attrs, 'http://www.stacki.com')
-		iter	= doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
-		node	= iter.nextNode()
-
-		while node:
-			if node.localName == 'profile':
-				self.handle_stack_profile(node)
-			elif node.localName == 'main':
-				child = iter.firstChild()
-				while child:
-					nodefile = self.getAttr(child, 'file')
-					try:
-						fn = eval('self.handle_main_stack_%s' % child.localName)
-					except AttributeError:
-						fn = None
-					if fn:
-						text = fn(node)
-					else:
-						tagText	  = child.localName
-						childText = self.getChildText(child)
-						if childText:
-							text = '%s %s' % (tagText, childText)
-						else:
-							text = '%s' % tagText
-						self.mainSection.append(text, nodefile)
-					child = iter.nextSibling()
-			node = iter.nextNode()
-			
-		filter = stack.gen.OtherNodeFilter(self.attrs, 'http://www.stacki.com')
-		iter   = doc.createTreeWalker(doc, filter.SHOW_ELEMENT, filter, 0)
-		node   = iter.nextNode()
-		while node:
-			if node.localName != 'profile':
-				self.order(node)
-				try:
-					fn = eval('self.handle_stack_%s' % node.localName)
-				except AttributeError:
-					fn = None
-				if fn:
-					fn(node)
-			node = iter.nextNode()
+		doc = xml.dom.minidom.parseString(xml_string)
+		self.traverse(doc.getElementsByTagNameNS(StackNSURI, 'profile')[0])
 
 
 	# <profile>
@@ -466,14 +409,43 @@ class Generator:
 		# supports the old syntax
 
 		if node.attributes:
-			attrs = node.attributes.getNamedItem((node.namespaceURI, 'attrs'))
+			attrs = node.attributes.getNamedItemNS(StackNSURI, 'attrs')
 			if attrs:
 				dict = eval(attrs.value)
 				for (k,v) in dict.items():
 					self.attrs[k] = v
 
 
-	
+	# <main>
+	#	<*/>
+	#	*
+	# </main>
+
+	def handle_stack_main(self, node):
+		nodefile = self.getAttr(node, 'file')
+
+		for child in node.childNodes:
+			if not self.isCorrectCond(child):
+				continue
+			if child.nodeType == child.ELEMENT_NODE:
+				try:
+					fn = eval('self.handle_stack_main_%s' % child.localName)
+				except AttributeError:
+					fn = None
+				if fn:
+					text = fn(node)
+				else:
+					tagText	  = child.localName
+					childText = self.getChildText(child)
+				if childText:
+					text = '%s %s' % (tagText, childText)
+				else:
+					text = '%s' % tagText
+				self.mainSection.append(text, nodefile)
+			else:
+				self.mainSection.append(child.nodeValue, nodefile)
+		return True
+
 	# <*>
 	#	<file>
 	# </*>
@@ -538,13 +510,14 @@ class Generator:
 	def handle_stack_stacki(self, node):
 		self.stackiSection.append(self.getChildText(node),
 					  self.getAttr(node, 'file'))
+		return True
 
 	# <debug>
 	
 	def handle_stack_debug(self, node):
 		self.debugSection.append(self.getChildText(node), 
 					 self.getAttr(node, 'file'))
-
+		return True
 	
 	##
 	## Generator Section
@@ -571,38 +544,6 @@ class Generator:
 
 	def generate_debug(self):
 		return self.debugSection.generate()
-
-
-class MainNodeFilter(StackNodeFilter):
-
-	def acceptNode(self, node):
-
-		if StackNodeFilter.acceptNode(self, node) == self.FILTER_SKIP:
-			return self.FILTER_SKIP
-
-		if node.localName in [ 'profile', 'main' ]:
-			return self.FILTER_ACCEPT
-
-		if not (node.parentNode and node.parentNode.localName == 'main'):
-			return self.FILTER_SKIP
-
-		return self.FILTER_ACCEPT
-
-
-class OtherNodeFilter(StackNodeFilter):
-
-	def acceptNode(self, node):
-
-		if StackNodeFilter.acceptNode(self, node) == self.FILTER_SKIP:
-			return self.FILTER_SKIP
-
-		if node.localName == 'profile':
-			return self.FILTER_ACCEPT
-
-		if node.localName in [ 'main' ]:
-			return self.FILTER_SKIP
-			
-		return self.FILTER_ACCEPT
 
 
 class ProfileHandler(handler.ContentHandler,

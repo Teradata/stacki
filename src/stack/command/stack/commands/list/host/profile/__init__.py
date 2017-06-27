@@ -94,7 +94,6 @@ import sys
 import string
 from xml.sax import make_parser
 import stack.commands
-print ("X")
 import stack.gen
 from stack.exception import *
 
