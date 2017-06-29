@@ -12,13 +12,6 @@ peers		= {}
 
 MAX_PEERS 	= 3
 
-@app.route('/install/<path:path>/<filename>')
-def get_file_local(path, filename):
-	app.logger.debug("Requesting File: %s" % request.args )
-	file_location = '/var/www/html/install/%s' % (path)
-	response_file = '%s/%s' % (file_location, filename)
-	return send_from_directory(unquote(file_location), unquote(filename))
-
 @app.route('/avalanche/lookup', methods=['GET'])
 def lookup():
 	app.logger.debug("Requester : %s" % request.remote_addr )
@@ -120,6 +113,21 @@ def peerdone():
 @app.route('/avalanche/stop', methods=['GET'])
 def stop_server():
 	return "-1"
+
+@app.route('/install/<path:path>/<filename>')
+def get_file_local(path, filename):
+	app.logger.debug("Requesting File: %s" % request.args )
+	file_location = '/var/www/html/install/%s' % (path)
+	response_file = '%s/%s' % (file_location, filename)
+	return send_from_directory(unquote(file_location), unquote(filename))
+
+@app.route('/<path:path>/<filename>')
+def get_file_local(path, filename):
+	app.logger.debug("Requesting File: %s" % request.args )
+	file_location = '/%s' % (path)
+	response_file = '%s/%s' % (file_location, filename)
+	return send_from_directory(unquote(file_location), unquote(filename))
+
 
 def main():
 	import logging
