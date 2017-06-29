@@ -21,6 +21,25 @@ then
 fi
 
 #
+# create stack.conf for lighttpd
+#
+if [ "$server" != "" ]
+then
+	echo "var.trackers = \""$server"\"" > /tmp/stack.conf
+	echo "var.pkgservers = \""$server"\"" >> /tmp/stack.conf
+else
+	echo "var.trackers = \"""\"" > /tmp/stack.conf
+	echo "var.pkgservers = \"""\"" >> /tmp/stack.conf
+fi
+
+#
+# need to copy stack.conf since /tmp gets remounted during the root pivot
+#
+mkdir -p /run/install/tmp
+cp /tmp/stack.conf /run/install/tmp/stack.conf
+cp /tmp/ks.xml /run/install/tmp/ks.xml
+
+#
 # starting ludicrous speed
 #
 
@@ -37,7 +56,7 @@ while [ "$LUDICROUSPID" != "" ]; do
 	LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | /opt/stack/bin/awk '{print $2}'`
 done
 
-/opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment=initrd
+/opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
 
 

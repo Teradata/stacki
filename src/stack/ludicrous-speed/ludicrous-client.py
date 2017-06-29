@@ -77,8 +77,9 @@ def get_file_locally(path, filename):
 					peer_res = get_file(peer, remote_file)
 					if peer_res.status_code == 200:
 						save_file(peer_res.content, '%s/%s/' % (LOCAL_SAVE_LOCATION, path), filename)
-						register_file(params)
-						break
+						if ENVIRONMENT == 'regular':
+							register_file(params)
+							break
 					else:
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
@@ -93,7 +94,8 @@ def get_file_locally(path, filename):
 				tracker_res = requests.get('http://%s%s' % (TRACKER, remote_file))
 				if tracker_res.status_code == 200:
 					save_file(tracker_res.content, '%s/%s/' % (LOCAL_SAVE_LOCATION, path), filename)
-					register_file(params)
+					if ENVIRONMENT == 'regular':
+						register_file(params)
 				
 				
 		else:
@@ -114,7 +116,7 @@ def running():
 
 @app.route('/done')
 def peerdone():
-	peerdone_res = requests.get('http://%s/peerdone' % TRACKER)
+	peerdone_res = requests.get('http://%s/avalanche/peerdone' % TRACKER)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -122,8 +124,14 @@ def page_not_found(e):
 
 @click.command()
 @click.option('--environment', default='regular')
-def main(environment):
-	ENVIRONMENT = environment
+@click.option('--trackerfile', default='/tmp/stack.conf')
+def main(environment, trackerfile):
+	peerdone()
+	ENVIRONMENT 	= environment
+	with open(trackerfile) as f:
+		line = f.readline()
+		TRACKER = line.split(' ')[-1]
+	
 	if environment == 'initrd':
 		pid = os.fork()
 		if pid == 0:
