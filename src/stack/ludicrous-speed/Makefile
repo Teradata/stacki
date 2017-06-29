@@ -3,7 +3,7 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT 	= ../../..
-DEPENDS.FILES	= ludicrous-server.py ludicrous-client.py ludicrous-client.service
+DEPENDS.FILES	= ludicrous-server.py ludicrous-client.py ludicrous-client.service ludicrous-server.service
 
 include $(STACKBUILD)/etc/CCRules.mk
 
@@ -14,3 +14,4 @@ install::
 	$(INSTALL) -m 0755 ludicrous-server.py $(ROOT)/$(PKGROOT)/bin
 	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)/bin
 	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/lib/systemd/system/
+	$(INSTALL) -m 0644 ludicrous-server.service $(ROOT)/lib/systemd/system/

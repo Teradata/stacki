@@ -74,6 +74,11 @@ Include conf.d/stack.conf
 
 </post>
 
+<!-- Adding this temporarily -->
+<post>
+sed -i -r 's/(Listen 80)/#\1/' /etc/httpd/conf/httpd.conf
+</post>
+
 <post>
 <!-- Create Apache Profile.cgi mutex and semaphore -->
 mkdir -p /var/tmp
