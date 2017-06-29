@@ -3,6 +3,7 @@ PKGROOT			= /opt/stack/images
 OVERLAY.UPDATE.PKGS	= stack-command stack-pylib \
 	foundation-python \
 	foundation-python-xml \
+	foundation-py-PyMySQL \
 	foundation-py-flask \
 	foundation-py-werkzeug \
 	foundation-py-jinja2  \

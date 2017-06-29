@@ -1,6 +1,7 @@
 PKGROOT		= /opt/stack/images
 OVERLAY.PKGS	= foundation-py-wxPython \
 	foundation-python-xml \
+	foundation-py-PyMySQL \
 	foundation-redhat \
 	MegaCLI \
 	hpssacli \
