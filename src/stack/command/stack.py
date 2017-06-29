@@ -1,4 +1,4 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # @SI_Copyright@
 #				stacki.com
@@ -259,7 +259,7 @@ def run_command(args):
 		return -1
 
 	text = command.getText()
-	if len(text) > 0:
+	if text and len(text) > 0:
 		print(text, end='')
 		if text[len(text)-1] != '\n':
 			print()

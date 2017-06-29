@@ -18,23 +18,24 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 
 <main>
-<unsupported_hardware/>
 
-<install>
+unsupported_hardware
+install
+
 %include /tmp/partition-info
-</install>
 
-<lang>&Kickstart_Lang;</lang>
-<keyboard>&Kickstart_Keyboard;</keyboard>
+lang &Kickstart_Lang;
+keyboard &Kickstart_Keyboard;
 
-<timezone>--utc &Kickstart_Timezone;</timezone>
+timezone --utc &Kickstart_Timezone;
+
 <eval shell="/opt/stack/bin/python" mode="xml">
 if '&boot_device;' != '' and '&release;' == '6.x':
-	print "&lt;stack:bootloader&gt;--location=none&lt;/stack:bootloader&gt;"
+	print "bootloader --location=none"
 elif '&boot_device;' != '' and '&release;' == '7.x':
-	print "&lt;stack:bootloader&gt;--location=mbr --boot-drive=&boot_device;&lt;/stack:bootloader&gt;"
+	print "bootloader --location=mbr --boot-drive=&boot_device"
 else:
-	print "&lt;stack:bootloader&gt;--location=mbr&lt;/stack:bootloader&gt;"
+	print "bootloader --location=mbr&lt;"
 </eval>
 
 </main>

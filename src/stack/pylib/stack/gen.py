@@ -318,7 +318,7 @@ class Generator:
 		else:
 			return ''
 		
-	def isCorrectCond(self, node):
+	def cond(self, node):
 
 		if not self.attrs or not node.nodeType == node.ELEMENT_NODE:
 			return True
@@ -346,47 +346,34 @@ class Generator:
 
 		
 	# <*>
-	#	<*> - tags that can go inside any other tags
+        #	<![CDATA[ * ]]>
+	#	*
+	#	<*></*>
 	# </*>
 
-	def getChildText(self, node):
-		text = ''
-		for child in node.childNodes:
-			if child.nodeType == child.TEXT_NODE:
-				text += child.nodeValue
-			elif child.nodeType == child.CDATA_SECTION_NODE:
-				text += child.nodeValue
-			elif child.nodeType == child.ELEMENT_NODE:
-				if self.isCorrectCond(child):
-					if child.namespaceURI == 'http://www.stacki.com':
-						fnname = 'stack_%s' % child.localName
-					else:
-						fnname = string.join(child.nodeName.split(':'), '_')
-					try:
-						fn = eval('self.handle_child_%s' % fnname)
-					except AttributeError:
-						fn = None
-					if fn:
-						text += fn(child)
-		return text
+	def parse(self, xml_string):
+		doc = xml.dom.minidom.parseString(xml_string)
+		self.traverse(doc.getElementsByTagNameNS(StackNSURI, 'profile')[0])
 
 
 	def traverse(self, node):
 		terminal = False
 
-		if not self.isCorrectCond(node):
-			return
 		if not node.nodeType == node.ELEMENT_NODE:
 			return
 		if not node.namespaceURI == StackNSURI:
 			return
+		if not self.cond(node):
+			return
+
+		self.order(node)
 
 		# Lookup the handler and run it. If the handler
 		# returns True we do NOT recurse further and assume
 		# the handler already did this.
 
 		try:
-			fn = eval('self.handle_stack_%s' % node.localName)
+			fn = eval('self.traverse_stack_%s' % node.localName)
 		except AttributeError:
 			fn = None
 		if fn:
@@ -396,14 +383,30 @@ class Generator:
 			for child in node.childNodes:
 				self.traverse(child)
 
-	def parse(self, xml_string):
-		doc = xml.dom.minidom.parseString(xml_string)
-		self.traverse(doc.getElementsByTagNameNS(StackNSURI, 'profile')[0])
+
+	def collect(self, node):
+		l = []
+		for child in node.childNodes:
+			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
+				l.append(child.nodeValue)
+			elif child.nodeType == child.ELEMENT_NODE:
+				if not self.cond(child):
+					continue
+				if not child.namespaceURI == StackNSURI:
+					continue
+				try:
+					fn = eval('self.collect_stack_%s' % child.localName)
+				except AttributeError:
+					fn = None
+				if fn:
+					l.append(fn(child))
+		return ''.join(l)
+
 
 
 	# <profile>
 	
-	def handle_stack_profile(self, node):
+	def traverse_stack_profile(self, node):
 		# pull out the attr to handle generic conditionals
 		# this replaces the old arch/os logic but still
 		# supports the old syntax
@@ -417,40 +420,32 @@ class Generator:
 
 
 	# <main>
-	#	<*/>
-	#	*
-	# </main>
 
-	def handle_stack_main(self, node):
+	def traverse_stack_main(self, node):
 		nodefile = self.getAttr(node, 'file')
 
 		for child in node.childNodes:
-			if not self.isCorrectCond(child):
-				continue
-			if child.nodeType == child.ELEMENT_NODE:
-				try:
-					fn = eval('self.handle_stack_main_%s' % child.localName)
-				except AttributeError:
-					fn = None
-				if fn:
-					text = fn(node)
-				else:
-					tagText	  = child.localName
-					childText = self.getChildText(child)
-				if childText:
-					text = '%s %s' % (tagText, childText)
-				else:
-					text = '%s' % tagText
-				self.mainSection.append(text, nodefile)
-			else:
-				self.mainSection.append(child.nodeValue, nodefile)
+			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
+				self.mainSection.append(child.nodeValue.strip(), nodefile)
 		return True
 
-	# <*>
-	#	<file>
-	# </*>
+	# <stacki>
+
+	def traverse_stack_stacki(self, node):
+		self.stackiSection.append(self.collect(node),
+					  self.getAttr(node, 'file'))
+		return True
+
+	# <debug>
 	
-	def handle_child_stack_file(self, node):
+	def traverse_stack_debug(self, node):
+		self.debugSection.append(self.collect(node), 
+					 self.getAttr(node, 'file'))
+		return True
+	
+	# <file>
+	
+	def collect_stack_file(self, node):
 
 		fileName    = self.getAttr(node, 'name')
 		fileMode    = self.getAttr(node, 'mode')
@@ -459,7 +454,7 @@ class Generator:
 		fileQuoting = self.getAttr(node, 'vars')
 		fileCommand = self.getAttr(node, 'expr')
 		fileRCS	    = self.getAttr(node, 'rcs')
-		fileText    = self.getChildText(node)
+		fileText    = self.collect(node)
 
 		if not fileQuoting:
 			fileQuoting = 'literal'
@@ -505,20 +500,6 @@ class Generator:
 		return s
 	
 
-	# <stacki>
-
-	def handle_stack_stacki(self, node):
-		self.stackiSection.append(self.getChildText(node),
-					  self.getAttr(node, 'file'))
-		return True
-
-	# <debug>
-	
-	def handle_stack_debug(self, node):
-		self.debugSection.append(self.getChildText(node), 
-					 self.getAttr(node, 'file'))
-		return True
-	
 	##
 	## Generator Section
 	##

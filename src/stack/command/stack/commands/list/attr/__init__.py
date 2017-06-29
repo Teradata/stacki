@@ -151,7 +151,7 @@ class Command(stack.commands.Command,
 				"""):
 			readonly['Kickstart_PublicAddress'] = ip
 			readonly['Kickstart_PublicHostname'] = '%s.%s' % (host, zone)
-			ipnetwork = ipaddress.IPv4Network(subnet + '/' + netmask)
+			ipnetwork = ipaddress.IPv4Network(u'%s/%s' % (subnet, netmask))
 			readonly['Kickstart_PublicBroadcast'] = '%s' % ipnetwork.broadcast_address
 
 		for (name, subnet, netmask, zone) in self.db.select(
@@ -159,7 +159,7 @@ class Command(stack.commands.Command,
 				name, address, mask, zone from 
 				subnets
 				"""):
-			ipnetwork = ipaddress.IPv4Network(subnet + '/' + netmask)
+			ipnetwork = ipaddress.IPv4Network(u'%s/%s' % (subnet, netmask))
 			if name == 'private':
 				readonly['Kickstart_PrivateDNSDomain'] = zone
 				readonly['Kickstart_PrivateNetwork'] = subnet
@@ -370,7 +370,6 @@ class Command(stack.commands.Command,
 					matches[key] = attributes[scope][o][key]
 				attributes[scope][o] = matches
 
-
 			
 
 		self.beginOutput()
@@ -392,5 +391,6 @@ class Command(stack.commands.Command,
 			self.endOutput(header=['scope', 'type', 'attr', 'value' ])
 		else:
 			self.endOutput(header=[scope, 'scope', 'type', 'attr', 'value' ])
+
 
 

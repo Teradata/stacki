@@ -20,7 +20,7 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 
 
 <main>
-<rootpw>--iscrypted &Kickstart_PrivateRootPassword;</rootpw>
+rootpw --iscrypted &Kickstart_PrivateRootPassword;
 </main>
 
 

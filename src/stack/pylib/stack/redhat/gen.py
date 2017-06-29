@@ -119,49 +119,11 @@ class Generator(stack.gen.Generator):
 		self.setArch('x86_64')
 
 	
-	# <main>
-	#	<clearpart>
-	# </main>
-	
-	def handle_stack_main_clearpart(self, node):
-		arg = self.getAttr(node, 'partition')
-
-		#
-		# the web form sets the environment variable 'partition'
-		# (although, we may find that it makes sense for other
-		# sources to set it too).
-		#
-		try:
-			os_arg = os.environ['partition']
-		except:
-			os_arg = ''
-
-		if (arg == '') or (os_arg == '') or (arg == os_arg):
-			return 'clearpart %s' % self.getChildText(node)
-
-
-	
-	# <main>
-	#	<lilo>
-	# </main>
-	
-	def handle_stack_main_lilo(self, node):
-		return 'bootloader %s' % self.getChildText(node).strip()
-
-
-	# <main>
-	#	<langsupport>
-	# </main>
-
-	def handle_stack_main_langsupport(self, node):
-		return 'langsupport --default=%s' % self.getChildText(node).strip()
-
-
 	# <package>
 
-	def handle_stack_package(self, node):
+	def traverse_stack_package(self, node):
 		nodefile = self.getAttr(node, 'file')
-		rpm	 = self.getChildText(node).strip()
+		rpm	 = self.collect(node).strip()
 		type	 = self.getAttr(node, 'type')
 
 		if self.getAttr(node, 'disable'):
@@ -177,7 +139,7 @@ class Generator(stack.gen.Generator):
 
 	# <pre>
 	
-	def handle_stack_pre(self, node):
+	def traverse_stack_pre(self, node):
 		nodefile	= self.getAttr(node, 'file')
 		interpreter	= self.getAttr(node, 'interpreter')
 		arg		= self.getAttr(node, 'arg')
@@ -186,7 +148,7 @@ class Generator(stack.gen.Generator):
 		if interpreter:
 			s += ' --interpreter %s' % interpreter
 		s += ' --log=%s %s' % (self.log, arg)
-		s += '\n%s' % self.getChildText(node)
+		s += '\n%s' % self.collect(node)
 		s += '\n%end'
 			
 		self.preSection.append(s, nodefile)
@@ -195,7 +157,7 @@ class Generator(stack.gen.Generator):
 
 	# <post>
 	
-	def handle_stack_post(self, node):
+	def traverse_stack_post(self, node):
 		nodefile	= self.getAttr(node, 'file')
 		interpreter	= self.getAttr(node, 'interpreter')
 		arg		= self.getAttr(node, 'arg')
@@ -208,12 +170,12 @@ class Generator(stack.gen.Generator):
 				script += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
 			else:
 				script += ' --log=%s %s' % (self.log, arg)
-			script += '\n%s' % self.getChildText(node)
+			script += '\n%s' % self.collect(node)
 			script += '\n%end'
 
 		elif self.getProfileType() == 'shell':
 
-			section = self.getChildText(node)
+			section = self.collect(node)
 			tmp	= tempfile.mktemp()
 
 			if interpreter:
@@ -234,7 +196,7 @@ class Generator(stack.gen.Generator):
 		
 	# <boot>
 	
-	def handle_stack_boot(self, node):
+	def traverse_stack_boot(self, node):
 		nodefile	= self.getAttr(node, 'file')
 		order		= self.getAttr(node, 'order')
 		
@@ -247,7 +209,7 @@ class Generator(stack.gen.Generator):
 			s = '%%post --log=%s\n' % self.log
 
 		s += "cat >> /etc/sysconfig/stack-%s << '__EOF__'\n" % order
-		s += '%s' % self.getChildText(node)
+		s += '%s' % self.collect(node)
 		s += '__EOF__\n'
 
 		if self.getProfileType() == 'native':
