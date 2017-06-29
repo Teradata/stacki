@@ -61,7 +61,7 @@ l = subprocess.Popen(['ps','auwx'],
 p = subprocess.Popen(['grep','ludicrous'],
 	stdin=l.stdout, stdout=subprocess.PIPE, stderr=None)
 
-r = subprocess.Popen(['/opt/stack/bin/awk','{print $2}'],
+r = subprocess.Popen(['awk','{print $2}'],
 	stdin=p.stdout, stdout=subprocess.PIPE, stderr=None)
 
 for pid in r.stdout.read().split('\n'):

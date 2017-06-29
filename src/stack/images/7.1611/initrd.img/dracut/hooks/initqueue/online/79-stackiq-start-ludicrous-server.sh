@@ -49,11 +49,11 @@ if getargbool 0 frontend; then
 	mount /dev/cdrom /mnt/cdrom
 fi
 
-LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | /opt/stack/bin/awk '{print $2}'`
+LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | awk '{print $2}'`
 while [ "$LUDICROUSPID" != "" ]; do
 	
 	for pid in $LUDICROUSPID; do kill $pid; done
-	LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | /opt/stack/bin/awk '{print $2}'`
+	LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | awk '{print $2}'`
 done
 
 /opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
