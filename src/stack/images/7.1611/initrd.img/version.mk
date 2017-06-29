@@ -1,9 +1,13 @@
 ORDER			= 99
 PKGROOT			= /opt/stack/images
 OVERLAY.UPDATE.PKGS	= stack-command stack-pylib \
-	foundation-python foundation-python-xml \
-	foundation-gawk foundation-py-flask \
-	foundation-py-werkzeug foundation-py-jinja2  \
-	foundation-py-requests foundation-py-markupsafe \
-	foundation-py-itsdangerous foundation-py-click \
+	foundation-python \
+	foundation-python-xml \
+	foundation-py-flask \
+	foundation-py-werkzeug \
+	foundation-py-jinja2  \
+	foundation-py-requests \
+	foundation-py-markupsafe \
+	foundation-py-itsdangerous \
+	foundation-py-click \
 	ludicrous-speed
