@@ -1,9 +1,12 @@
-from flask import Flask, request, jsonify, send_from_directory, abort
+#!/opt/stack/bin/python
+
+from flask import Flask, request, jsonify, send_from_directory, abort, render_template, redirect
 from werkzeug.routing import BaseConverter
 from urllib2 import unquote
 from random import shuffle
 import stack.api
 import click
+import os
 
 app = Flask(__name__)
 
@@ -114,20 +117,39 @@ def peerdone():
 def stop_server():
 	return "-1"
 
+# route for RPMS
 @app.route('/install/<path:path>/<filename>')
 def get_file_local(path, filename):
 	app.logger.debug("Requesting File: %s" % request.args )
+	path = path.replace('//', '/')
 	file_location = '/var/www/html/install/%s' % (path)
 	response_file = '%s/%s' % (file_location, filename)
-	return send_from_directory(unquote(file_location), unquote(filename))
+	if os.path.isdir(response_file):
+		return redirect('%s/' % response_file, 301)
+	else:
+		return send_from_directory(unquote(file_location), unquote(filename))
 
+# catch all for returning static files
+# if the request is a directory, the the request will be redirected
 @app.route('/<path:path>/<filename>')
-def get_file_local(path, filename):
-	app.logger.debug("Requesting File: %s" % request.args )
+def get_file_catchall(path, filename):
+	path = path.replace('//', '/')
 	file_location = '/%s' % (path)
 	response_file = '%s/%s' % (file_location, filename)
-	return send_from_directory(unquote(file_location), unquote(filename))
+	if os.path.isdir(response_file):
+		return redirect('%s/' % response_file, 301)
+	else:
+		return send_from_directory(unquote(file_location), unquote(filename))
 
+
+# return a directory listing
+@app.route('/<path:path>/<filename>/')
+def get_repodata(path, filename):
+	path = path.replace('//', '/')
+	file_location = '/%s' % (path)
+	response_file = '%s/%s' % (file_location, filename)
+	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
+	return render_template('directory.html', items=items)
 
 def main():
 	import logging

@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+	<body>
+		<table>
+			<tbody>
+				{% for item in items %}
+					<tr><a href='{{ item }}'>{{ item }}</a></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</body>
+</html>
