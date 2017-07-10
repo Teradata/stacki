@@ -25,11 +25,11 @@ fi
 #
 if [ "$server" != "" ]
 then
-	echo "var.trackers = \""$server"\"" > /tmp/stack.conf
-	echo "var.pkgservers = \""$server"\"" >> /tmp/stack.conf
+	echo "var.trackers = "$server"" > /tmp/stack.conf
+	echo "var.pkgservers = "$server"" >> /tmp/stack.conf
 else
-	echo "var.trackers = \"""\"" > /tmp/stack.conf
-	echo "var.pkgservers = \"""\"" >> /tmp/stack.conf
+	echo "var.trackers = """ > /tmp/stack.conf
+	echo "var.pkgservers = """ >> /tmp/stack.conf
 fi
 
 #

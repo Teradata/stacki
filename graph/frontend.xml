@@ -60,6 +60,7 @@
 
 	<order head="TAIL">
 		<tail>install</tail>
+		<tail>ludicrous-server</tail>
 	</order>
 
 
@@ -93,6 +94,7 @@
 		<to>ssh-server</to>
 		<to>node-certs</to>
 		<to>storage-server</to>
+		<to>ludicrous-server</to>
 	</edge>
 
 </graph>
