@@ -10,10 +10,10 @@ import click
 app = Flask(__name__)
 
 tracker_settings = {
-	TRACKER 		: '',
-	PORT 			: 80,
-	LOCAL_SAVE_LOCATION 	: '/install',
-	ENVIRONMENT		: 'regular'
+	'TRACKER' 		: '',
+	'PORT' 			: 80,
+	'LOCAL_SAVE_LOCATION' 	: '/install',
+	'ENVIRONMENT'		: 'regular'
 }
 
 def hashit(filename):
