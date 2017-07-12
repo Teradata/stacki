@@ -11,7 +11,7 @@ file to add functionality to this appliance type.
 
 <main>
 
-<eval shell="/opt/stack/bin/python" mode="xml">
+<eval shell="python" mode="xml">
 
 import stack.api
 
@@ -23,7 +23,7 @@ listpallet = stack.api.Call('list pallet')
 for o in listpallet:
 	boxes = o['boxes'].split()
 	if '&box;' in boxes and o['name'] == 'stacki':
-		print url --url http://127.0.0.1/install/pallets/%s/%s/%s/%s/%s' % (o['name'], o['version'], o['release'], o['os'], o['arch'])
+		print('url --url http://127.0.0.1/install/pallets/%s/%s/%s/%s/%s' % (o['name'], o['version'], o['release'], o['os'], o['arch']))
 
 #
 # now output the repos
@@ -31,12 +31,12 @@ for o in listpallet:
 for o in listpallet:
 	boxes = o['boxes'].split()
 	if '&box;' in boxes:
-		print 'repo --name="%s" --baseurl=http://127.0.0.1/install/pallets/%s/%s/%s/%s/%s' % (o['name'], o['name'], o['version'], o['release'], o['os'], o['arch'])
+		print('repo --name="%s" --baseurl=http://127.0.0.1/install/pallets/%s/%s/%s/%s/%s' % (o['name'], o['name'], o['version'], o['release'], o['os'], o['arch']))
 
 for o in stack.api.Call('list cart'):
 	boxes = o['boxes'].split()
 	if '&box;' in boxes:
-		print 'repo --name="%s" --baseurl=http://127.0.0.1/install/carts/%s' % (o['name'], o['name'])
+		print('repo --name="%s" --baseurl=http://127.0.0.1/install/carts/%s' % (o['name'], o['name']))
 
 </eval>
 

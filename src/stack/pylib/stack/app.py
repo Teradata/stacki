@@ -160,7 +160,7 @@ class Application:
         # precedence.
 
         dirList = [ os.path.join(os.sep,'opt', self.projectName, 'etc') ]
-        if os.environ.has_key('HOME'):
+        if 'HOME' in os.environ:
             dirList.append(os.environ['HOME'])
         dirList.append('.')
 
@@ -238,7 +238,7 @@ class Application:
     
     def usage(self):
 
-        if os.environ.has_key('COLUMNS'):
+        if 'COLUMNS' in os.environ:
             cols = os.environ['COLUMNS']
         else:
             cols = 80

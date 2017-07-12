@@ -712,7 +712,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 			data = ''
 		self.xml.append(data)
 		self.xml.append('</stack:file>\n')
-		self.xml.append("cat %s | /opt/stack/bin/python -c '" % tmpfile)
+		self.xml.append("cat %s | /opt/stack/bin/python3 -c '" % tmpfile)
 		self.xml.append('\nimport base64\n')
 		self.xml.append('import sys\n')
 		self.xml.append("base64.decode(sys.stdin, sys.stdout)' > %s\n"
@@ -775,7 +775,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 
 		if self.evalShell == 'python':
 			self.evalShell = os.path.join(os.sep,
-				'opt', 'stack', 'bin', 'python')
+				'opt', 'stack', 'bin', 'python3')
 			self.evalText = ['import sys\nimport os\nsys.path.append(os.path.join("include", "applets"))\n']
 			
 		

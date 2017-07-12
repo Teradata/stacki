@@ -371,10 +371,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		#
 		# use yum to resolve dependencies
 		#
-		if stack.release == '7.x':
-			pythonver = '2.7'
-		else:
-			pythonver = '2.6'
+		pythonver = '3.6'
 
 		sys.path.append('/usr/lib/python%s/site-packages' % pythonver)
 		sys.path.append('/usr/lib64/python%s/site-packages' % pythonver)

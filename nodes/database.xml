@@ -115,7 +115,7 @@ done
 </post>
 
 <!-- Access control on the database -->
-<post interpreter='/opt/stack/bin/python'>
+<post interpreter='python'>
 import os
 import sys
 import re

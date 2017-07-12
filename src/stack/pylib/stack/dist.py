@@ -257,7 +257,7 @@ class Base(Arch):
 		for file in list:
 			if file.getBaseName() == name:
 				arch = file.getPackageArch()
-				if pkg.has_key(arch):
+				if arch in pkg:
 					# Already have a package for the arch, need to
 					# decide which one to use.
 					orig = pkg[arch]
@@ -530,7 +530,7 @@ class Distribution(Base):
 		if self.local:
 			for cpu in self.cpus:
 				l.append(os.path.join(self.local, 'RPMS', cpu))
-		if os.environ.has_key('RPMHOME'):
+		if 'RPMHOME' in os.environ:
 			for cpu in self.cpus:
 				l.append(os.path.join(os.environ['RPMHOME'],
 						      'RPMS', cpu))

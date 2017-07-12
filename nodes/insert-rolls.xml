@@ -18,7 +18,7 @@
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
         </copyright>
 
-<post interpreter='/opt/stack/bin/python'>
+<post interpreter='python'>
 import os
 import os.path
 import sys

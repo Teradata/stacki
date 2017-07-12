@@ -1,4 +1,3 @@
-#
 # @SI_Copyright@
 #                               stacki.com
 #                                  v4.0
@@ -45,7 +44,7 @@ import os
 import sys
 import csv
 import re
-import cStringIO
+from io import StringIO
 import stack.commands
 import stack.attr
 
@@ -54,105 +53,47 @@ class Command(stack.commands.Command,
 	"""
 	This command outputs all the attributes
 	of a system in a CSV format.
+
 	<param name="filter" type="string" optional="1">
 	Filter out only the attributes that you want.
 	</param>
 	"""
+
 	def run(self, params, args):
-		(attr_filter, ) = self.fillParams([
-			("filter",None),
-			])
-		headers = []
-		host_attrs = {}
-		csv_attrs = []
-		regex = None
+
+		(attr_filter, ) = self.fillParams([ ("filter", None), ])
+
+		header		= []
+		csv_attrs	= []
+		regex		= None
 
 		if attr_filter:
 			regex = re.compile(attr_filter)
 
-		#
-		# use list host attr resolve=false to get only host attributes
-		# look at 'internal' column and ignore intenal attributes
-		#
-		for host in self.getHostnames([]):
-			host_attrs = self.call('list.host.attr',
-				['resolve=false'])
-			for host_attr in host_attrs:
-				attr = host_attr['attr']
-				if host_attr['internal'] == 'True' or \
-					(regex and not regex.match(attr)):
+
+		for scope in [ 'global', 'os', 'appliance', 'environment', 'host' ]:
+			for row in self.call('list.attr', [ 'scope=%s' % scope, 'resolve=false', 'const=false', 'shadow=false' ]):
+				if scope == 'global':
+					target = 'global'
+				else:
+					target = row[scope]
+				attr   = row['attr']
+				value  = row['value']
+
+				if regex and regex.match(attr):
 					continue
-				hostname = host_attr['host']
-				csv_attrs.append({'target': hostname, attr:host_attr['value']})
 
-				if attr not in headers:
-					headers.append(attr)
+				csv_attrs.append({'target': target, attr: value})
+				if attr not in header:
+					header.append(attr)
 
-		# Get Appliance Attributes
-		appliance_attrs = self.call('list.appliance.attr')
+		header.sort()
+		header.insert(0, 'target')
 
-		for appliance_attr in appliance_attrs:
-			attr = appliance_attr['attr']
-			if regex and not regex.match(attr):
-				continue
-
-			target = appliance_attr['appliance']
-			csv_attrs.append({'target': target, attr:appliance_attr['value']})
-
-			if attr not in headers:
-				headers.append(attr)
-
-		# Get OS Attributes
-		os_attrs = self.call('list.os.attr')
-		for os_attr in os_attrs:
-			attr = os_attr['attr']
-			if regex and not regex.match(attr):
-				continue
-
-			target = os_attr['os']
-			csv_attrs.append({'target': target, attr:os_attr['value']})
-			if attr not in headers:
-				headers.append(attr)
-
-		# Get Environment Attributes
-		env_attrs = self.call('list.environment.attr')
-		for env_attr in env_attrs:
-			attr = env_attr['attr']
-			if regex and not regex.match(attr):
-				continue
-
-			target = env_attr['environment']
-			csv_attrs.append({'target': target, attr:env_attr['value']})
-			if attr not in headers:
-				headers.append(attr)
-
-		# Get Global Attributes
-		global_attrs = self.call('list.attr',
-			['key=%s' % attr_filter])
-		for global_attr in global_attrs:
-			attr = global_attr['attr']
-			if regex and not regex.match(attr):
-				continue
-			csv_attrs.append({'target': 'global', attr:global_attr['value']})
-			if attr not in headers:
-				headers.append(attr)
-
-		headers.sort()
-		headers.insert(0, 'target')
-
-		# CSV writer requires fileIO.
-		# Setup string IO processing
-		csv_f = cStringIO.StringIO()
-		csv_w = csv.writer(csv_f)
-		csv_w.writerow(headers)
-		csv_f.flush()
-		csv_w = csv.DictWriter(csv_f, headers)
-		csv_w.writerows(csv_attrs)
-
-		# Get string from StringIO object
-		s = csv_f.getvalue().strip()
-		csv_f.close()
+		s = StringIO()
+		w = csv.DictWriter(s, header)
+		w.writerows(csv_attrs)
 
 		self.beginOutput()
-		self.addOutput('localhost', s)
-		self.endOutput()
+		self.addOutput(None, s.getvalue())
+		self.endOutput(trimOwner=True)

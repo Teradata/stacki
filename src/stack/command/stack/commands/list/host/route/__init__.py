@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,24 +51,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.4  2010/09/07 23:52:56  bruno
-# star power for gb
-#
-# Revision 1.3  2009/06/02 17:28:12  bruno
-# added all missing doc strings
-#
-# Revision 1.2  2009/05/01 19:06:58  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/03/13 00:02:59  mjk
-# - checkpoint for route commands
-# - gateway is dead (now a default route)
-# - removed comment rows from schema (let's see what breaks)
-# - removed short-name from appliance (let's see what breaks)
-# - dbreport static-routes is dead
-#
 
 
 import sys
@@ -95,9 +78,7 @@ class Command(stack.commands.list.host.command):
 		for host in self.getHostnames(args):
 			routes = self.db.getHostRoutes(host, 1)
 
-			keys = routes.keys()
-			keys.sort()
-			for key in keys:		
+			for key in sorted(routes.keys()):		
 				self.addOutput(host, 
 					(key,
 					routes[key][0], 

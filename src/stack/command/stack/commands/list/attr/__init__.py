@@ -335,8 +335,7 @@ class Command(stack.commands.Command,
 				lookup[s]['const'](attributes[s])
 
 
-		targets = lookup[scope]['fn'](args)
-		targets.sort()
+		targets = sorted(lookup[scope]['fn'](args))
 
 		if resolve and scope == 'host':
 			for o in targets:

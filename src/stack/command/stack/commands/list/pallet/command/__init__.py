@@ -119,15 +119,12 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 
 		tree = stack.file.Tree(stack.commands.__path__[0])
-		dirs = tree.getDirs()
-		dirs.sort()
 
-		dict = {}		
-		for dir in dirs:
+		dict = {}
+		for dir in sorted(tree.getDirs()):
 			if not dir:
 				continue
-			modpath = 'stack.commands.%s' % \
-				string.join(dir.split(os.sep),'.')
+			modpath = 'stack.commands.%s' % '.'.join(dir.split(os.sep))
 			__import__(modpath)
 			module = eval(modpath)
 			try:
