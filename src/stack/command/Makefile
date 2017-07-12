@@ -103,12 +103,7 @@ bootstrap: install-rpm
 doc:
 	$(STACKBUILD)/src/pallet/etc/doc/genrcldocs stacki markdoc
 
-command.py: stack/commands/__init__.py
-	cat stack/commands/__init__.py > $@
-	echo "import datetime" >> $@
-	echo -e "builton = datetime.date(`date +"%Y,%-m,%-d"`)\n\n" >> $@
-
-build: command.py
+build:
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)/bin
@@ -122,12 +117,6 @@ install::
 	)
 	find $(ROOT)/$(PY.STACK)/stack/ -name "*.py" | gawk		\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
-	cp command.py $(ROOT)/$(PY.STACK)/stack/commands/
-	# make sure we keep __init__.py in place because if we only put
-	# __init__.pyc in a directory and if there is a __init__.py from also
-	# there (placed there by another command), then our __init__.pyc will
-	# be overwritten
-	@echo "from command import *" > $(ROOT)/$(PY.STACK)/stack/commands/__init__.py
 	find $(ROOT) -type d -exec chmod a+rx {} \;
 
 clean::

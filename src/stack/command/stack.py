@@ -92,10 +92,6 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function
-import warnings
-warnings.filterwarnings("ignore")
-
 import os
 import pwd
 import sys
