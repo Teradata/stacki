@@ -8,6 +8,7 @@ OVERLAY.PKGS	= foundation-py-wxPython \
 	storcli \
 	yum \
 	stack-wizard \
+	stack-storage-config \
 	foundation-py-ipaddress \
 	ludicrous-speed \
 	foundation-py-flask \
