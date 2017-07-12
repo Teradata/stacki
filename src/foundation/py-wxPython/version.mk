@@ -1,2 +1,2 @@
-PKGNAME	= foundation-wxPython
-VERSION = 3.0.2.0
+PKGNAME	= foundation-python-wxPython
+VERSION = 4.0.0a3
