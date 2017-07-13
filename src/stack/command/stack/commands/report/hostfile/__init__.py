@@ -24,7 +24,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			rack = o['rack']
 			rank = o['rank']
 			installaction = o['installaction']
-			runaction = o['runaction']
+			runaction = o['osaction']
 			box = o['box']
 
 		groups = None
