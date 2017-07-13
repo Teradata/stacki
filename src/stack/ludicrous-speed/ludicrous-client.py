@@ -130,7 +130,7 @@ def main(environment, trackerfile):
 	tracker_settings['ENVIRONMENT']	= environment
 	with open(trackerfile) as f:
 		line = f.readline()
-		tracker_settings['TRACKER'] = line.split(' ')[-1]
+		tracker_settings['TRACKER'] = line.split(' ')[-1].strip()
 	
 	peerdone()
 
