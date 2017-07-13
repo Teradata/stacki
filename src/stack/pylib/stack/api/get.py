@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -19,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -39,9 +39,8 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-from __future__ import print_function
 import os
-import ConfigParser
+import configparser
 import stack.api
 
 def GetHostname(host='localhost'):
@@ -75,22 +74,22 @@ def GetHostAttr(host, attribute):
 	Returns the value of the specified ATTRIBUTE for the given
 	HOST.  If no attribute is define it returns None.
 
-        If a profile.cfg file is found read the attribute from there
-        rather than from the database.
+	If a profile.cfg file is found read the attribute from there
+	rather than from the database.
 	"""
 
-        value = None
+	value = None
 
-        cfg = ConfigParser.RawConfigParser()
-        cfg.read(os.path.join(os.sep, 'opt', 'stack', 'etc', 'profile.cfg'))
-        try:
-                value = cfg.get('attr', attribute)
-        except:
-                result = stack.api.Call('list host attr', 
-                                        [host, 'attr=%s' % attribute])
-                if result:
-                        assert len(result) == 1
-                        value = result[0]['value']
+	cfg = configparser.RawConfigParser()
+	cfg.read(os.path.join(os.sep, 'opt', 'stack', 'etc', 'profile.cfg'))
+	try:
+		value = cfg.get('attr', attribute)
+	except:
+		result = stack.api.Call('list host attr', 
+					[host, 'attr=%s' % attribute])
+		if result:
+			assert len(result) == 1
+			value = result[0]['value']
 		
 	return value
 

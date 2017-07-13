@@ -4,7 +4,7 @@
 import stack.commands
 import string
 import csv
-import cStringIO
+from io import StringIO
 
 class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	"""
@@ -12,7 +12,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	<dummy />
 	"""
 
-	def doHost(self, host, csv_w):
+	def doHost(self, host):
 		row = []
 
 		name = host
@@ -24,7 +24,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			rack = o['rack']
 			rank = o['rank']
 			installaction = o['installaction']
-			runaction = o['runaction']
+			osaction = o['osaction']
 			box = o['box']
 
 		groups = None
@@ -57,7 +57,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 				rack = None
 				rank = None
 				installaction = None
-				runaction = None
+				osaction = None
 				groups = None
 				box = None
 
@@ -71,32 +71,25 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			vlan = o['vlan']
 
 			i += 1
+			
+			return [ name, interface_hostname, default, appliance, rack, rank,
+				 ip, mac, interface, network, channel, options, vlan,
+				 installaction, osaction, groups, box ]
 
-			row = [ name, interface_hostname, default, appliance, rack, rank,
-				ip, mac, interface, network, channel, options, vlan,
-				installaction, runaction, groups, box ]
-
-			csv_w.writerow(row)
 
 	def run(self, params, args):
 
 		header = ['NAME', 'INTERFACE HOSTNAME', 'DEFAULT', 'APPLIANCE', 'RACK', 'RANK',
-			'IP', 'MAC', 'INTERFACE', 'NETWORK', 'CHANNEL', 'OPTIONS', 'VLAN',
-			'INSTALLACTION', 'RUNACTION', 'GROUPS', 'BOX']
+			  'IP', 'MAC', 'INTERFACE', 'NETWORK', 'CHANNEL', 'OPTIONS', 'VLAN',
+			  'INSTALLACTION', 'OSACTION', 'GROUPS', 'BOX']
 
-		# CSV writer requires fileIO.
-		# Setup string IO processing
-		csv_f = cStringIO.StringIO()
-		csv_w = csv.writer(csv_f)
-		csv_w.writerow(header)
+		s = StringIO()
+		w = csv.writer(s)
+		w.writerow(header)
 
 		for host in self.getHostnames(args):
-			self.doHost(host, csv_w)
-
-		# Get string from StringIO object
-		s = csv_f.getvalue().strip()
-		csv_f.close()
+			w.writerow(self.doHost(host))
 
 		self.beginOutput()
-		self.addOutput('',s)
+		self.addOutput(None, s.getvalue().strip())
 		self.endOutput()

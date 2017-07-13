@@ -90,11 +90,9 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function
 import os
 import sys
 import string
-import popen2
 import subprocess
 import stack.file
 import stack.commands

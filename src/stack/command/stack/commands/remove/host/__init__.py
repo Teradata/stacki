@@ -126,7 +126,7 @@ class Command(command):
 
 		if me in hosts:
 			raise CommandError(self, 'cannot remove "%s"' % me)
-		print hosts, me
+
 		self.runPlugins(hosts)
 
 		#	

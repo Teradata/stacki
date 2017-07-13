@@ -97,13 +97,11 @@ import pwd
 import sys
 import string
 import syslog
+import getopt
 import stack	# need this so we can load the stack.commands.* modules
 import stack.exception
 from stack.bool import str2bool
-import types
 import time
-import shlex
-from distutils.sysconfig import get_python_lib
 import traceback
 
 # Open syslog
@@ -168,7 +166,8 @@ except ImportError:
 except pymysql.err.OperationalError:
 	Database = None
 
-def run_command(args):
+
+def run_command(args, debug=False):
 	# Check if the stack command has been quoted.
 
 	module = None
@@ -226,16 +225,8 @@ def run_command(args):
 		return -1
 
 	
-	# Check to see if STACKDEBUG variable is set.
-	# This determines if the stack trace should be
-	# dumped when an exception occurs.
-	
-	STACKDEBUG = None
-	if 'STACKDEBUG' in os.environ:
-		STACKDEBUG = str2bool(os.environ['STACKDEBUG'])
-
 	try:
-		command = getattr(module, 'Command')(Database)
+		command = getattr(module, 'Command')(Database, debug)
 		t0 = time.time()
 		rc = command.runWrapper(name, args[i:])
 #		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
@@ -265,11 +256,27 @@ def run_command(args):
 	return -1
 
 
-if len(sys.argv) == 1:
+try:
+	opts, args = getopt.getopt(sys.argv[1:],'', [ 'debug', 'help', 'version' ])
+except getopt.GetoptError as msg:
+	sys.stderr.write("error - %s\n" % msg)
+	sys.exit(1)
+
+debug = False
+for o,a in opts:
+	if o == '--debug':
+		debug = True
+	elif o == '--help':
+		rc = run_command(['help'])
+		sys.exit(rc)
+	elif o == '--version':
+		rc = run_command(['report.version'])
+		sys.exit(rc)
+
+
+if len(args) == 0:
 	rc = run_command(['help'])
 	sys.exit(rc)
-
 else:
-	args = sys.argv[1:]
-	rc = run_command(args)
+	rc = run_command(args, debug)
 	sys.exit(rc)

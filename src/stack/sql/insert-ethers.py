@@ -1,8 +1,8 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -21,7 +21,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -42,9 +42,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -64,16 +64,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -93,7 +93,6 @@
 # @Copyright@
 
 
-#from __future__ import print_function
 import sys
 import os
 import string
@@ -124,10 +123,9 @@ class ServiceController:
 
 	def __init__(self):
 		self.services = {}
-		self.ignoreList         = []
+		self.ignoreList		= []
 		self.plugins		= []
-		self.plugindir		= os.path.abspath(
-			'/opt/stack/var/plugins/')
+		self.plugindir		= os.path.abspath('/opt/stack/var/plugins/')
 
 
 	def isIgnored(self, service):
@@ -169,7 +167,7 @@ class ServiceController:
 				plugin_class = getattr(m, 'Plugin')
 				if not issubclass(plugin_class, 
 						stack.sql.InsertEthersPlugin):
-					raise Exception, 'Invalid class'
+					raise Exception('Invalid class')
 				
 				# Instantiate plugin
 				p = plugin_class(app)
@@ -364,7 +362,7 @@ class InsertEthers(GUI):
 
 			if self.sql.execute(query) == 0:
 				self.errorGUI(_("No appliance names in database"))
-				raise InsertError, msg
+				raise InsertError(msg)
 
 			app_string = []
 			for row in self.sql.fetchall():
@@ -388,7 +386,7 @@ class InsertEthers(GUI):
 		if self.sql.execute(query) == 0:
 			msg = _("Could not find appliance (%s) in database") \
 				% (app_string[index])
-			raise InsertError, msg
+			raise InsertError(msg)
 
 		self.appliance, basename = self.sql.fetchone()
 		
@@ -398,7 +396,7 @@ class InsertEthers(GUI):
 		query = """select if(aa.value="yes", True, False) from 
 			attributes aa, appliances a where a.name="%s" 
 			and aa.scope="appliance" and aa.attr="kickstartable" 
-			and aa.pointerid=a.id;""" % basename
+			and aa.scopeid=a.id;""" % basename
 		rows = self.sql.execute(query)
 		if rows > 0:
 			self.ksid = 1
@@ -428,7 +426,7 @@ class InsertEthers(GUI):
 				ks = '(*)'
 			else:	# An error
 				ks = '(%s)' % self.kickstarted[name]
-			macs_n_names += '%s    %s    %s    %s\n' % (mac, name, self.box, ks)
+			macs_n_names += '%s    %s    %s	   %s\n' % (mac, name, self.box, ks)
 		
 		self.textbox.setText(macs_n_names)
 		self.form.draw()
@@ -598,21 +596,19 @@ class InsertEthers(GUI):
 
 		s = os.system(cmd)
 		if s != 0:
-			raise InsertError, \
-				"Could not insert %s into database" % nodename
+			raise InsertError("Could not insert %s into database" % nodename)
 
 		cmd = '/opt/stack/bin/stack add host interface %s interface=NULL ' % nodename +\
 			'default=true mac=%s name=%s ip=%s network=%s' % \
 			(mac, nodename, ip, self.subnet)
 		s = os.system(cmd)
 		if s != 0:
-			raise InsertError, \
-				"Could not insert %s into database" % nodename
+			raise InsertError("Could not insert %s into database" % nodename)
 
 		rows = self.sql.execute('select id from nodes where name="%s"' % \
 			nodename)
 		if not rows:
-			raise InsertError, "Could not find %s in database" % nodename
+			raise InsertError("Could not find %s in database" % nodename)
 		# obviates use of default file in tftp dir
 		Call('report.host.bootfile', [nodename, 'action=install'])
 		nodeid = self.sql.fetchone()[0]
@@ -720,7 +716,7 @@ class InsertEthers(GUI):
 		try:
 			status = int(fields[8])
 		except:
-			raise ValueError, _("Apache log file not well formed!")
+			raise ValueError("Apache log file not well formed!")
 
 		nodeid = int(self.sql.getNodeId(fields[0]))
 		self.sql.execute('select name from nodes where id=%d' % nodeid)
@@ -728,9 +724,7 @@ class InsertEthers(GUI):
 			name, = self.sql.fetchone()
 		except:
 			if status == 200:
-				raise InsertError, \
-				 _("Unknown node %s got a kickstart file!") \
-				 % fields[0]
+				raise InsertError("Unknown node %s got a kickstart file!" % fields[0])
 			return
 
 		if name not in self.kickstarted:
@@ -770,12 +764,12 @@ class InsertEthers(GUI):
 					self.kickstarted.keys()[0])
 				# Use exception structure so we dont have 
 				# to keep track of the state.
-				raise InsertDone, _("Suggest Done")
+				raise InsertDone("Suggest Done")
 
 			if self.maxNew > 0:
 				self.maxNew -= 1
 				if self.maxNew == 0:
-					raise InsertDone, _("Suggest Done")
+					raise InsertDone("Suggest Done")
 
 			self.rank = self.rank + 1
 
@@ -833,10 +827,9 @@ class InsertEthers(GUI):
 					'where name="%s"' % self.hostname
 				rows = self.sql.execute(query)
 				if rows:
-					raise InsertError,\
-					 "Node %s already exists" % self.hostname
+					raise InsertError("Node %s already exists" % self.hostname)
 
-		except (ValueError, InsertError), msg:
+		except (ValueError, InsertError) as msg:
 			self.errorGUI(msg)
 			self.endGUI()
 			sys.stderr.write(_("%s\n") % str(msg))
@@ -873,7 +866,7 @@ class InsertEthers(GUI):
 				except InsertDone:
 					suggest_done = 1
 
-				except (ValueError, InsertError), msg:
+				except (ValueError, InsertError) as msg:
 					self.warningGUI(msg)
 				continue
 
@@ -883,7 +876,7 @@ class InsertEthers(GUI):
 			if access_line:
 				try:
 					self.listenKs(access_line)
-				except InsertError, msg:
+				except InsertError as msg:
 					self.warningGUI(msg)
 				continue
 
@@ -989,7 +982,7 @@ class App(stack.sql.Application):
 			return
 
 		if os.path.isfile(self.lockFile):
-			raise Exception, _("error - lock file %s exists") % self.lockFile
+			raise Exception("error - lock file %s exists" % self.lockFile)
 			sys.exit(-1)
 		else:
 			os.system('touch %s' % self.lockFile)
@@ -1011,8 +1004,8 @@ app = App(sys.argv)
 app.parseArgs()
 try:
 	app.run()
-except Exception, msg:
+except Exception as msg:
 	app.cleanup()
 	sys.stderr.write('error - ' + str(msg) + '\n')
-        syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)
+	syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)
 	sys.exit(1)

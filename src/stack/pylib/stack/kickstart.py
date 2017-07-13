@@ -168,7 +168,6 @@ class Application(stack.sql.Application):
 
 	def __init__(self, argv=None):
 		stack.sql.Application.__init__(self, argv)
-		self.rcfileHandler = RCFileHandler
 
 		# Default to our native architecture.
 		self.arch = self.getArch()
@@ -193,16 +192,6 @@ class Application(stack.sql.Application):
 			('lang=', 'language')])
 
 
-	def parseArgs(self, rcbase=None):
-
-		# Soak in the options from the rocks-distrc file so
-		# we know the path of our local distribution..
-
-		self.parseRC('default')
-
-		stack.sql.Application.parseArgs(self, rcbase)
-		
-	
 	def parseArg(self, c):
 		if stack.sql.Application.parseArg(self, c):
 			return 1
@@ -229,8 +218,7 @@ class Application(stack.sql.Application):
 		self.dist.setDist(dist)
 		
 		if not os.path.isdir(self.dist.getHomePath()):
-			raise DistError, "Cannot find distribution %s" \
-				% self.dist.getHomePath()
+			raise DistError("Cannot find distribution %s" % self.dist.getHomePath())
 			
 		if not self.dist.isBuilt():
 			self.dist.build()
@@ -243,7 +231,7 @@ class Application(stack.sql.Application):
 		DEPRICATED: use rpm.apply() method instead."""
 			
 		if not rpm:
-			raise DistError, "Couldn't find one of your rpms"
+			raise DistError("Couldn't find one of your rpms")
 
 		if not os.path.exists(self.rpmdb):
 			os.makedirs(self.rpmdb)			
@@ -257,26 +245,7 @@ class Application(stack.sql.Application):
 
 		rv = os.system(cmd)
 		if rv == 256:
-			raise DistError, "Could not apply one of your rpms"
+			raise DistError("Could not apply one of your rpms")
 		
 
-
-class RCFileHandler(stack.app.RCFileHandler):
-	
-	def __init__(self, application):
-		stack.app.RCFileHandler.__init__(self, application)
-
-	def startElement_path(self, name, attrs):
-		"""Parse the path tags. Since we only deal with built
-		distros, we dont care about the 'local' pathname."""
-
-		pathname = attrs.get('name')
-		path = attrs.get('value')
-
-		self.app.paths[pathname] = path
-
-		if pathname == 'root':
-			self.app.dist.setRoot(path)
-		elif pathname == 'dist':
-			self.app.dist.setDist(path)
 

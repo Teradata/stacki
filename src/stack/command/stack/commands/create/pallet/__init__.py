@@ -90,7 +90,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function
+
 import os
 import sys
 import re
@@ -99,7 +99,6 @@ import stat
 import time
 import tempfile
 import shutil
-import popen2
 import socket
 import subprocess
 import shlex
@@ -112,9 +111,9 @@ import stack.roll
 import stack.util
 import stack.bootable
 from stack.exception import *
-
 from xml.sax import make_parser
 import stack.gen
+
 
 
 class Builder:
@@ -1007,6 +1006,12 @@ class Command(stack.commands.create.command,
 		except AttributeError:
 			release = 0
 
+		# Yes, globals are probably bad. But this is the fastest
+		# to getting what we want. Otherise have to pass all this
+		# in various arg lines to the defined classes and defs 
+		# in this file. Blame Greg, he said it was okay.
+		global newest
+
 		(name, version, release, newest, commit) = self.fillParams([
 			('name', None),
 			('version', version),
@@ -1015,11 +1020,6 @@ class Command(stack.commands.create.command,
 			('commit-ish', 'master'),
 			])
 
-		# Yes, globals are probably bad. But this is the fastest
-		# to getting what we want. Otherise have to pass all this
-		# in various arg lines to the defined classes and defs 
-		# in this file. Blame Greg, he said it was okay.
-		global newest
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'pallet')

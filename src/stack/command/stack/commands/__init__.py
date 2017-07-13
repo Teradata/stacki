@@ -119,6 +119,7 @@ from xml.sax._exceptions import SAXParseException
 from pymysql import OperationalError, ProgrammingError
 
 _logPrefix = ''
+_debug     = False
 
 def Log(message, level=syslog.LOG_INFO):
 	"""
@@ -129,7 +130,7 @@ def Log(message, level=syslog.LOG_INFO):
 def Debug(message, level=syslog.LOG_DEBUG):
 	"""If the environment variable STACKDEBUG is set,
 	send a message to syslog and stderr."""
-	if 'STACKDEBUG' in os.environ and str2bool(os.environ['STACKDEBUG']):
+	if _debug:
 		m = ''
 		p = ''
 		for c in message.strip():
@@ -1561,15 +1562,18 @@ class Command:
 
 	MustBeRoot = 1
 	
-	def __init__(self, database):
+	def __init__(self, database, debug=False):
 		"""Creates a DatabaseConnection for the StackCommand to use.
 		This is called for all commands, including those that do not
 		require a database connection."""
+
+		stack.commands._debug = debug
 
 		self.db = DatabaseConnection(database)
 
 		self.text  = ''
 		self.bytes = b''
+
 		
 		self.output = []
 	

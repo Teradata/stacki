@@ -164,7 +164,7 @@ class Command(stack.commands.add.command):
 			shutil.copymode(file.getFullName(), tmp)
 			try:
 				shutil.copyfile(tmp, file.getFullName())
-			except IOError, msg:
+			except IOError as msg:
 				pass
 		os.unlink(tmp)
 				

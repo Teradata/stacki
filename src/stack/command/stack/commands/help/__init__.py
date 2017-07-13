@@ -1,4 +1,5 @@
-# $Id$
+# @SI_Copyright@
+# @SI_Copyright@
 #
 # @Copyright@
 #  				Rocks(r)
@@ -50,21 +51,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
-#
-# $Log$
-# Revision 1.8  2010/09/07 23:52:53  bruno
-# star power for gb
-#
-# Revision 1.7  2009/05/01 19:06:57  mjk
-# chimi con queso
-#
-# Revision 1.6  2008/10/18 00:55:49  mjk
-# copyright 5.1
-#
-# Revision 1.5  2008/08/18 21:16:06  mjk
-# - Added cols arg to list help (cols=0 means no line wrapping)
-# - Added help verb as a rocks help | grep XXX shortcut
-#
+
 
 import string
 import stack.commands
@@ -100,7 +87,7 @@ class Command(command):
 	def run(self, params, args):
 
 		help = self.command('list.help', [ 'cols=0' ])
-		sub  = string.join(args)
+		sub  = ''.join(args)
 
 		if not args:
 			self.addText(help)

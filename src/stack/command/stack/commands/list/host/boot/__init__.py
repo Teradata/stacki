@@ -53,10 +53,7 @@
 # @Copyright@
 
 
-import sys
-import socket
 import stack.commands
-import string
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -90,8 +87,25 @@ class Command(stack.commands.list.host.command):
 			"""):
 			boot[h] = b
 
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'attr=nuke*' ]):
+			host  = row['host']
+			attr  = row['attr']
+			value = self.str2bool(row['value'])
+			if host not in attrs:
+				attrs[host] = {}
+			attrs[host][attr] = value
+
+
 		self.beginOutput()
 		for host in self.getHostnames(args):
-			self.addOutput(host, boot[host])
-		self.endOutput(header=['host', 'action'])
+			nukedisks      = False
+			nukecontroller = False
+			if host in attrs:
+				a              = attrs[host]
+				nukedisks      = a.get('nukedisks')
+				nukecontroller = a.get('nukecontroller')
+				
+			self.addOutput(host, (boot[host], nukedisks, nukecontroller))
+		self.endOutput(header=['host', 'action', 'nukedisks', 'nukecontroller'])
 

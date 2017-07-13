@@ -151,8 +151,7 @@ class Bootable:
 		shutil.rmtree(os.path.join(root, dbdir))
 
 		if retval == 256:
-			raise ValueError, "could not apply RPM %s" % \
-				(rpm.getFullName())
+			raise ValueError("could not apply RPM %s" % rpm.getFullName())
 
 		return retval
 
@@ -209,7 +208,7 @@ class Bootable:
 		name = 'stack-images'
 		RPM = self.findFile(name)
 		if not RPM:
-			raise ValueError, "could not find %s" % name
+			raise ValueError("could not find %s" % name)
 
 		self.applyRPM(RPM, destination)
 
@@ -261,8 +260,7 @@ class Bootable:
 			#
 			f = self.findFile('squashfs.img')
 			if not f:
-				raise ValueError, \
-					"could not find 'squashfs.img'"
+				raise ValueError("could not find 'squashfs.img'")
 
 			fileold = f.getFullName()
 			print('fileold %s' % f.getFullName())

@@ -41,7 +41,7 @@
 
 import string
 import subprocess
-import marshal
+import json
 
 __stack__ = '/opt/stack/bin/stack'
 
@@ -54,7 +54,7 @@ def ReturnCode():
 	return rc
 
 
-def Call(cmd, args=None, format='binary', sudo=False):
+def Call(cmd, args=None, format='json', sudo=False):
 	"""
 	Call the Stack Command Line and return a python dictionary as the
 	result.  Currently only works with list commands.
@@ -92,7 +92,7 @@ def Call(cmd, args=None, format='binary', sudo=False):
 
 	if command[0] == 'list':
 		if s:
-			return marshal.loads(s)
+			return json.loads(s)
 		return [ ]
 	
 	if s:

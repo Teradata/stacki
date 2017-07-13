@@ -118,15 +118,20 @@ class Command(stack.commands.list.command):
 
 	def run(self, params, args):
 
-		# Because this command is called directly from the rock.py
+		# Because this command is called directly from the stack.py
 		# code we need to provide the params argument.  This is the
 		# only command where we need to include this argument.
 		
 		(subdir, cols) = self.fillParams([
 			('subdir', ),
-			('cols', 80)
-			],
-			params)
+			('cols', '80')
+			], params)
+
+		try:
+			cols = int(cols)
+		except:
+			cols = 80
+
 		
 		if subdir:
 			filepath = os.path.join(stack.commands.__path__[0],
@@ -139,9 +144,6 @@ class Command(stack.commands.list.command):
 		tree = stack.file.Tree(filepath)
 		dirs = sorted(tree.getDirs())
 
-		if 'COLUMNS' in os.environ:
-			cols = os.environ['COLUMNS']
-			
 		for dir in dirs:
 			if not dir:
 				continue
