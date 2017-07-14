@@ -106,11 +106,11 @@ class Command(stack.commands.set.host.command):
 	execute: "stack list bootaction".
 	</param>
 
-	<example cmd='set host runaction backend-0-0 action=os'>
+	<example cmd='set host osaction backend-0-0 action=os'>
 	Sets the run action to "os" for backend-0-0.
 	</example>
 
-	<example cmd='set host runaction backend-0-0 backend-0-1 action=memtest'>
+	<example cmd='set host osaction backend-0-0 backend-0-1 action=memtest'>
 	Sets the run action to "memtest" for backend-0-0 and backend-0-1.
 	</example>
 	"""
@@ -127,15 +127,22 @@ class Command(stack.commands.set.host.command):
 		if action.lower() == 'none':
 			runaction = 'NULL'
 		else:
-			rows = self.db.execute("""
-                        	select * from bootaction where
-				action = '%s' """ % action)
+			rows = self.db.execute(
+				"""
+				select ba.bootname from 
+				bootactions ba, bootnames bn 
+				where bn.name='%s' 
+				and ba.bootname=bn.id
+				and bn.type = 'os';
+				""" % (action))
+
 			if rows != 1:
                                 raise CommandError(self, 'invalid action parameter')
-			runaction = "'%s'" % action
-			
+			# OSaction is now an ID, not a name so fetch it.
+			osaction, = self.db.fetchone()
+
                 for host in self.getHostnames(args):
 			self.db.execute("""
-                        	update nodes set runaction=%s
+                        	update nodes set osaction=%s
 				where name='%s'
-                                """ % (runaction, host))
+                                """ % (osaction, host))
