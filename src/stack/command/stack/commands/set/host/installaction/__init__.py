@@ -128,11 +128,23 @@ class Command(stack.commands.set.host.command):
 			installaction = 'NULL'
 		else:
 			rows = self.db.execute("""
-                        	select * from bootaction where
-				action = '%s' """ % action)
+				select ba.bootname from 
+				bootactions ba, bootnames bn 
+				where bn.name='%s' 
+				and ba.bootname=bn.id
+				and bn.type = 'install';
+				""" % (action))
 			if rows != 1:
-                                raise CommandError(self, 'invalid action parameter')
-			installaction = "'%s'" % action
+				nrows = self.db.execute("""
+				select name from bootnames 
+				where type="install";
+				""")
+				actions = self.db.fetchall()
+				msg = '\n\nThese are the available actions: \n' 
+				msg += '\n'.join([ a[0] for a in actions])
+                                raise CommandError(self, 'invalid action parameter' + msg)
+			
+			installaction, = self.db.fetchone()
 			
 		for host in self.getHostnames(args):
 			self.db.execute("""
