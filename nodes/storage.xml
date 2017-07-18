@@ -25,7 +25,29 @@ cat /run/install/tmp/ks.xml | \
 	/opt/stack/bin/stack list host profile chapter=stacki \
 	2> /tmp/profile_stack_site.debug \
 	> /tmp/stack_site/__init__.py
+</pre>
 
+<pre interpreter="/opt/stack/bin/python">
+# if this is an installing frontend, the previous command writes an empty file
+# we need to populate it here
+
+# check if we're an installing frontend
+
+with open('/proc/cmdline') as cmdline:
+    frontend = 'frontend' in cmdline.read().split()
+
+if frontend:
+    attributes = {}
+    with open('/tmp/site.attrs') as attrs:
+        attributes = dict(line.strip().split(':', 1) for line in attrs.readlines())
+    with open('/tmp/stack_site/__init__.py', 'w') as stack_site:
+        stack_site.write('attributes = {0}\n'.format(str(attributes)))
+        stack_site.write('csv_partitions = []\n')
+        stack_site.write('csv_controller = []\n')
+
+</pre>
+
+<pre>
 /opt/stack/bin/initialize-storage.py
 
 /opt/stack/bin/configure-controllers.py
