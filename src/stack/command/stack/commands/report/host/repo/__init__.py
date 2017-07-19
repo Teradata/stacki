@@ -98,15 +98,15 @@ import stack.commands
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.BoxArgumentProcessor, stack.commands.report.command):
 	"""
-	Create a report that describes the yum.conf repo file that should be
-	put on hosts.
+	Create a report that describes the repository configuration file
+	that should be put on hosts.
 
 	<arg optional='0' type='string' name='host'>
 	Host name of machine
 	</arg>
 	
-	<example cmd='report host yum compute-0-0'>
-	Create a report of the yum.conf repo for compute-0-0.
+	<example cmd='report host repo compute-0-0'>
+	Create a report of the repository configuration file for compute-0-0.
 	</example>
 	"""
 
@@ -119,7 +119,11 @@ class Command(stack.commands.HostArgumentProcessor,
                         osname = self.db.getHostOS(host)
                         server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
                         
-                        self.runImplementation(osname, (host, server))
+			if osname in [ 'redhat', 'sles' ]:
+				self.runImplementation('repo',
+					(host, server, osname))
+			else:
+				self.runImplementation(osname, (host, server))
 
 		self.endOutput(padChar='', trimOwner=True)
 

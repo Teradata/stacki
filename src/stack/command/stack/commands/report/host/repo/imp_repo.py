@@ -47,30 +47,41 @@ class Implementation(stack.commands.Implementation):
         def run(self, args):
                 host	= args[0]
                 server	= args[1]
+		osname	= args[2]
                 box	= self.owner.getHostAttr(host, 'box')
-                yum	= []
+                repo	= []
 
-                yum.append('<stack:file stack:name="/etc/yum.repos.d/stacki.repo">')
+		if osname == 'redhat':
+			filename = '/etc/yum.repos.d/stacki.repo'
+		elif osname == 'sles':
+			filename = '/etc/zypp/repos.d/stacki.repo'
+
+		repo.append('<stack:file stack:name="%s">' % filename)
+
 		for pallet in self.owner.getBoxPallets(box):
                         pname, pversion, prel, parch, pos = pallet
 
-                        yum.append('[%s-%s-%s]' % (pname, pversion, prel))
-                        yum.append('name=%s %s %s' % (pname, pversion, prel))
-                        yum.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
-                        yum.append('assumeyes=1')
-                        yum.append('gpgcheck=0')
+                        repo.append('[%s-%s-%s]' % (pname, pversion, prel))
+                        repo.append('name=%s %s %s' % (pname, pversion, prel))
+                        repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
+                        repo.append('assumeyes=1')
+                        repo.append('gpgcheck=0')
 
                 for o in self.owner.call('list.cart'):
                         if box in o['boxes'].split():
-                                yum.append('[%s-cart]' % o['name'])
-                                yum.append('name=%s cart' % o['name'])
-                                yum.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
-                                yum.append('assumeyes=1')
-                                yum.append('gpgcheck=0')
+                                repo.append('[%s-cart]' % o['name'])
+                                repo.append('name=%s cart' % o['name'])
+                                repo.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
+                                repo.append('assumeyes=1')
+                                repo.append('gpgcheck=0')
 
-		yum.append('</stack:file>')
-		yum.append('yum clean all')
+		repo.append('</stack:file>')
 
-                for line in yum:
+		if osname == 'redhat':
+			repo.append('yum clean all')
+		elif osname == 'sles':
+			repo.append('zypper clean --all')
+
+                for line in repo:
                         self.owner.addOutput(host, line)
 

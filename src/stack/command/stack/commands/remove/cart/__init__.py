@@ -79,7 +79,7 @@ class Command(stack.commands.CartArgumentProcessor,
 				% cart)
 
 		os.system("""
-			/opt/stack/bin/stack report host yum localhost | 
+			/opt/stack/bin/stack report host repo localhost | 
 			/opt/stack/bin/stack report script | 
 			/bin/sh
 			""")

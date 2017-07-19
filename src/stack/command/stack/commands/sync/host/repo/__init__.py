@@ -49,31 +49,31 @@ from stack.commands.sync.host import timeout
 
 class Command(stack.commands.sync.host.command):
 	"""
-	Sync yum repo file to backend nodes.
+	Sync a repository configuration file to backend nodes.
 	
 	When a cart or pallet is added to the 
 	frontend, to use the resulting repo but not
         reinstall machines, sync the new repo to the 
 	backends for immediate use.
 
-	<example cmd='sync host yum'>
+	<example cmd='sync host repo'>
 	Giving no hostname or regex will sync
         to all backend nodes by default.
 	</example>
 
-	<example cmd='sync host yum backend-0-0'>
-	Sync yum inventory file on backend-0-0
+	<example cmd='sync host repo backend-0-0'>
+	Sync the repository inventory file on backend-0-0
 	</example>
 	
-	<example cmd='sync yum backend-0-[0-2]'>
-	Using regex, sync yum inventory file on backend-0-0
+	<example cmd='sync repo backend-0-[0-2]'>
+	Using regex, sync repository inventory file on backend-0-0
 	backend-0-1, and backend-0-2.
 	</example>
 	"""
 
 	def run(self, params, args):
 
-                self.notify('Sync Host Yum\n')
+                self.notify('Sync Host Repo\n')
 
 		hosts = self.getHostnames(args, managed_only=1)
 		me    = self.db.getHostname('localhost')
@@ -92,7 +92,7 @@ class Command(stack.commands.sync.host.command):
                         for row in self.call('list.host.attr', [ host ]):
                                 attrs[row['attr']] = row['value']
 
-			cmd = '/opt/stack/bin/stack report host yum %s | ' % host
+			cmd = '/opt/stack/bin/stack report host repo %s | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
 
 			if me != host:

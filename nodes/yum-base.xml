@@ -2,7 +2,7 @@
 <kickstart>
 
 	<description>
-	Configure yum
+	Configure the package repository
 	</description>
 
 	<si_copyright>

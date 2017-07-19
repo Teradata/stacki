@@ -2,7 +2,7 @@
 <kickstart>
 
 	<description>
-	Create yum config file on frontend
+	Create a repository conifugation file on a backend
 	</description>
 
 	<si_copyright>
@@ -11,8 +11,7 @@
 	</si_copyright>
 
 <post>
-/opt/stack/bin/stack report host yum &Kickstart_PrivateHostname; | \
-	/opt/stack/bin/stack report script | sh
+<report name="host.repo">&hostname;</report>
 </post>
 
 </kickstart>
