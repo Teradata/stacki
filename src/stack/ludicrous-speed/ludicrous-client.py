@@ -13,7 +13,8 @@ tracker_settings = {
 	'TRACKER' 		: '',
 	'PORT' 			: 80,
 	'LOCAL_SAVE_LOCATION' 	: '/install',
-	'ENVIRONMENT'		: 'regular'
+	'ENVIRONMENT'		: 'regular',
+	'SAVE_FILES'		: True
 }
 
 def hashit(filename):
@@ -95,7 +96,7 @@ def get_file_locally(path, filename):
 				tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 				if tracker_res.status_code == 200:
 					save_file(tracker_res.content, '%s/%s/' % (tracker_settings['LOCAL_SAVE_LOCATION'], path), filename)
-					if tracker_settings['ENVIRONMENT'] == 'regular':
+					if tracker_settings['SAVE_FILES']:
 						register_file(params)
 				
 				
@@ -103,7 +104,7 @@ def get_file_locally(path, filename):
 			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 			if tracker_res.status_code == 200:
 				save_file(tracker_res.content, '%s/%s/' % (tracker_settings['LOCAL_SAVE_LOCATION'], path), filename)
-				if tracker_settings['ENVIRONMENT'] == 'regular':
+				if tracker_settings['SAVE_FILES']:
 					register_file(params)
 
 	if file_exists(local_file):
@@ -126,8 +127,10 @@ def page_not_found(e):
 @click.command()
 @click.option('--environment', default='regular')
 @click.option('--trackerfile', default='/tmp/stack.conf')
-def main(environment, trackerfile):
+@click.option('--no-savefile', is_flag=True)
+def main(environment, trackerfile, no-savefile):
 	tracker_settings['ENVIRONMENT']	= environment
+	tracker_settings['SAVE_FILES']	= False if no-savefile else True
 	with open(trackerfile) as f:
 		line = f.readline()
 		tracker_settings['TRACKER'] = line.split(' ')[-1].strip()
