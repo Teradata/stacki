@@ -67,39 +67,45 @@
 #
 #
 
-import sys
-import string
 import stack.commands
-import os
+import stack.commands.set.bootaction
+from stack.exception import *
+
+import sys
 
 class Command(stack.commands.HostArgumentProcessor,
+	stack.commands.set.bootaction.command,
 	stack.commands.remove.command):
 
 	"""
 	Remove a boot action specification from the system.
 
-	<param type='string' name='action'>
+	<arg type='string' name='action'>
 	The label name for the boot action. You can see the boot action label
-	names by executing: 'rocks list bootaction'.
+	names by executing: 'stack list bootaction'.
+	</arg>
+
+	<param type='string' name='type'>
+	The 'type' parameter should be either 'os' or 'install'.
 	</param>
 
-	<example cmd='remove bootaction action=os'>
-	Remove the 'os' boot action from the system.
+	<param type='string' name='os' optional="1">
+	Specify the 'os' (e.g., 'redhat', 'sles', etc.)
+	</param>
+
+	<example cmd='remove bootaction action=default type=install'>
+	Remove the default bootaction for installation.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(action, ) = self.fillParams([('action', '%')])
+		(b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
+		if not self.actionExists(b_action, b_type, b_os):
+			raise CommandError(self, 'action/type/os "%s/%s/%s" does not exists' % (b_action, b_type, b_os))
 
-		# If no host list is provided remove the default action.
-		# Otherwise remove the action for each host.
-		
-		self.db.execute("""delete from bootaction where
-			bootaction.action = '%s' """ % action)
-
-		#	
-		# regenerate all the pxe boot configuration files
-		# including the default
-		#
-		self.command('set.host.boot', self.getHostnames())
+		self.db.execute("""delete from bootactions where
+			os in (select id from oses where name = "%s") and
+			bootname in (select id from bootnames where
+			name = "%s" and type = "%s") """ %
+			(b_os, b_action, b_type))
 
