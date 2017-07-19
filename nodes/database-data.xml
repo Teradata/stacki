@@ -162,19 +162,19 @@ if os.path.exists('/tmp/site.attrs'):
 <post>
 
 /opt/stack/bin/stack add bootaction pxeflash type=os \
-	kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe
+	kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe os=redhat
 
 /opt/stack/bin/stack add bootaction default type=os \
-	kernel="com32 chain.c32" args=hd0
+	kernel="com32 chain.c32" args=hd0 os=redhat
 
 /opt/stack/bin/stack add bootaction localboot type=os \
-	kernel="localboot 0"
+	kernel="localboot 0" os=redhat
 
 /opt/stack/bin/stack add bootaction hplocalboot type=os \
-	kernel="localboot -1"
+	kernel="localboot -1" os=redhat
 
 /opt/stack/bin/stack add bootaction memtest type=os \
-	kernel="kernel memtest"
+	kernel="kernel memtest" os=redhat
 
 <!-- frontend host -->
 
