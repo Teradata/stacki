@@ -167,8 +167,7 @@ class Command(stack.commands.report.command):
 
 		acl = [ '127.0.0.0/24']
 		for network in networks:
-			ipnetwork = ipaddress.IPv4Network(unicode(
-					network['address'] + '/' + network['mask']))
+			ipnetwork = ipaddress.IPv4Network(network['address'] + '/' + network['mask'])
 			cidr = ipnetwork.prefixlen
 			acl.append('%s/%s' % (network['address'], cidr))
 		s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
@@ -187,7 +186,7 @@ class Command(stack.commands.report.command):
 			if not fwds:
 				return
 
-		forwarders = string.join(fwds.split(','), ';')
+		forwarders = ';'.join(fwds.split(','))
 		s += config_preamble % (forwarders)
 
 		# For every network, get the base subnet,
@@ -197,7 +196,7 @@ class Command(stack.commands.report.command):
 		for network in networks:
 			sn = self.getSubnet(network['address'], network['mask'])
 			sn.reverse()
-			r_sn = string.join(sn, '.')
+			r_sn = '.'.join(sn)
 			s += zone_template % (network['zone'],
 					      network['network'],
 					      r_sn,

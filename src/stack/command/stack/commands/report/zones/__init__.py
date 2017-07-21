@@ -207,7 +207,7 @@ class Command(stack.commands.report.command):
 			t_ip = ip.split('.')[subnet_len:]
 			t_ip.reverse()
 			
-			s += '%s PTR %s.%s.\n' % (string.join(t_ip, '.'), name, zone)
+			s += '%s PTR %s.%s.\n' % ('.'.join(t_ip), name, zone)
 
 		#
 		# handle reverse local additions
@@ -269,7 +269,7 @@ class Command(stack.commands.report.command):
 
 			sn = self.getSubnet(address, mask)
 			sn.reverse()
-			r_sn = string.join(sn, '.')
+			r_sn = '.'.join(sn)
 
 			filename = '/var/named/reverse.%s.domain.%s' % (name, r_sn)
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename

@@ -71,7 +71,8 @@ class command(stack.commands.Command):
 				     stderr = subprocess.PIPE)
 
 		for row in self.call(cmd, args):
-			p.stdin.write('%s\n' % row['col-1'])
+			line = '%s\n' % row['col-1']
+			p.stdin.write(line.encode())
 		o, e = p.communicate('')
 
 		psh = subprocess.Popen(['/bin/sh'],

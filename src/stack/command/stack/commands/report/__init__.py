@@ -104,11 +104,8 @@ class command(stack.commands.Command):
 		computed for named.conf.
 		"""
 		
-		s_list = subnet.split('.')
-		s_list = map(int, s_list)
-		
-		n_list = netmask.split('.')
-		n_list = map(int, n_list)
+		s_list = list(map(int, subnet.split('.')))
+		n_list = list(map(int, netmask.split('.')))
 		
 		net_list = []
 		cidr = 0

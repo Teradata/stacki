@@ -143,8 +143,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.addOutput('', '\tdefault-lease-time\t\t1200;')
 			self.addOutput('', '\tmax-lease-time\t\t\t1200;')
 
-			ipnetwork = ipaddress.IPv4Network(unicode(
-				network + '/' + netmask))
+			ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
 			self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
 			self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
 			self.addOutput('', '\toption broadcast-address\t%s;' %
@@ -167,7 +166,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		kickstartable = {}
 		for name in data.keys():
 			kickstartable[name] = False
-		argv = data.keys()
+		argv = list(data)
 		argv.append('attr=kickstartable')
 		for row in self.call('list.host.attr', argv):
 			kickstartable[row['host']] = self.str2bool(row['value'])

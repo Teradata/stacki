@@ -764,7 +764,7 @@ class DocStringHandler(handler.ContentHandler,
 	def getDocbookText(self):
 		s  = ''
 		s += '<section id="stack-%s" xreflabel="%s">\n' % \
-			(string.join(self.name.split(' '), '-'), self.name)
+			('-'.join(self.name.split(' ')), self.name)
 		s += '<title>%s</title>\n' % self.name
 		s += '<cmdsynopsis>\n'
 		s += '\t<command>stack %s</command>\n' % self.name
@@ -858,7 +858,7 @@ class DocStringHandler(handler.ContentHandler,
 				s += '\t<varlistentry>\n'
 				s += '\t<term>'
 				s += '<xref linkend="stack-%s">' % \
-					string.join(related.split(' '), '-')
+					'-'.join(related.split(' '))
 				s += '</term>\n'
 				s += '\t<listitem>\n'
 				s += '\t<para>\n'
@@ -1425,7 +1425,7 @@ class DatabaseConnection:
 				n = hostname.split('.')
 				if len(n) > 1:
 					name = n[0]
-					domain = string.join(n[1:], '.')
+					domain = '.'.join(n[1:])
 					cmd = 'select n.name from nodes n, '	+\
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\

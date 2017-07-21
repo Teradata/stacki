@@ -132,7 +132,7 @@ class Command(stack.commands.remove.host.command):
 				# Compute the HEX IP filename for the host
 				#
 				hexstr = ''
-				for i in string.split(ip, '.'):
+				for i in ip.split('.'):
 					hexstr += '%02x' % (int(i))
 
 				hex_ip_list.append(hexstr.upper())
