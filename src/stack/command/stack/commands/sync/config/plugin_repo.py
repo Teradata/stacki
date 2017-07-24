@@ -44,7 +44,7 @@ import stack.commands
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
-		return 'yum'
+		return 'repo'
 		
 	def run(self, args):
 		self.owner.command('sync.host.repo', [ 'localhost' ])
