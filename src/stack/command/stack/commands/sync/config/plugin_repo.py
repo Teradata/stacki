@@ -47,5 +47,5 @@ class Plugin(stack.commands.Plugin):
 		return 'yum'
 		
 	def run(self, args):
-		self.owner.command('sync.host.yum', [ 'localhost' ])
+		self.owner.command('sync.host.repo', [ 'localhost' ])
 
