@@ -99,7 +99,7 @@ DEPENDS.RPMS	=
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap: install-rpm
+bootstrap: rpm install-rpm
 
 build:
 
