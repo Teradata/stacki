@@ -85,11 +85,11 @@ def get_file_locally(path, filename):
 					else:
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
-						unregister_file(unregister_params);	
+						unregister_file(unregister_params);
 				except:
 					unregister_params = params.copy()
 					unregister_params["peer"] = peer.split(":")[0]
-					unregister_file(unregister_params);	
+					unregister_file(unregister_params);
 
 			else:
 			# if no peers worked, use the frontend
@@ -98,8 +98,8 @@ def get_file_locally(path, filename):
 					save_file(tracker_res.content, '%s/%s/' % (tracker_settings['LOCAL_SAVE_LOCATION'], path), filename)
 					if tracker_settings['SAVE_FILES']:
 						register_file(params)
-				
-				
+
+
 		else:
 			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 			if tracker_res.status_code == 200:
@@ -127,23 +127,23 @@ def page_not_found(e):
 @click.command()
 @click.option('--environment', default='regular')
 @click.option('--trackerfile', default='/tmp/stack.conf')
-@click.option('--no-savefile', is_flag=True)
-def main(environment, trackerfile, no-savefile):
+@click.option('--nosavefile', is_flag=True)
+def main(environment, trackerfile, nosavefile):
 	tracker_settings['ENVIRONMENT']	= environment
-	tracker_settings['SAVE_FILES']	= False if no-savefile else True
+	tracker_settings['SAVE_FILES']	= False if nosavefile else True
 	with open(trackerfile) as f:
 		line = f.readline()
 		tracker_settings['TRACKER'] = line.split(' ')[-1].strip()
-	
+
 	peerdone()
 
 	if environment == 'initrd':
 		pid = os.fork()
 		if pid == 0:
 			os.setsid()
-			
+
 			pid = os.fork()
-			
+
 			if pid != 0:
 				os._exit(0)
 
@@ -155,6 +155,6 @@ def main(environment, trackerfile, no-savefile):
 			os._exit(0)
 	else:
 		app.run(host='0.0.0.0', port=tracker_settings['PORT'], debug=False)
-		
+
 if __name__ == "__main__":
 	main()
