@@ -51,7 +51,7 @@ root = sys.argv[1]
 rpms = sys.argv[2:]
 
 for name in rpms:
-	p = subprocess.Popen(['yumdownloader', '--urls', name],
+	p = subprocess.Popen(['yumdownloader', '-d0','--urls', name],
 		stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	o, e = p.communicate()
 	for line in o.split('\n'):
