@@ -56,7 +56,7 @@ while [ "$LUDICROUSPID" != "" ]; do
 	LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | awk '{print $2}'`
 done
 
-/opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf' --no-savefile;
+/opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf' --nosavefile;
 
 
 
