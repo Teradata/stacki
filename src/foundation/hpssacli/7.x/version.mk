@@ -1,3 +1,0 @@
-NAME		= hpssacli
-VERSION		= 2.30
-PKGRELEASE	= 6.0

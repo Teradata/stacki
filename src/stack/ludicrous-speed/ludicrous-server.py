@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
 from flask import Flask, request, jsonify, send_from_directory, abort, render_template, redirect
 from werkzeug.routing import BaseConverter
@@ -10,20 +10,20 @@ import os
 
 app = Flask(__name__)
 
-packages 	= {}
+packages	= {}
 peers		= {}
 
-MAX_PEERS 	= 3
+MAX_PEERS	= 3
 
 @app.route('/avalanche/lookup', methods=['GET'])
 def lookup():
 	app.logger.debug("Requester : %s" % request.remote_addr )
 	app.logger.debug("Requesting Lookup: %s" % request.args )
-	res 			= {}
-	res['success'] 		= True
-	ipaddr 			= request.remote_addr
-	port 			= request.args.get('port') or 80
-	hashcode 		= request.args.get('hashcode')
+	res			= {}
+	res['success']		= True
+	ipaddr			= request.remote_addr
+	port			= request.args.get('port') or 80
+	hashcode		= request.args.get('hashcode')
 
 	#app.logger.debug("peers before: %s" % peers )
 	#app.logger.debug("packages before: %s" % packages )
@@ -46,8 +46,8 @@ def lookup():
 	res['peers'] = []
 	shuffle(packages[hashcode])
 	for peer in packages[hashcode]:
-		peer_ready 	= peers[peer]['ready']
-		not_my_ip 	= peer != ipaddr
+		peer_ready	= peers[peer]['ready']
+		not_my_ip	= peer != ipaddr
 		if not_my_ip and peer_ready:
 			res['peers'].append("%s:%s" % (peer, peers[peer]['port']))
 		
@@ -63,11 +63,11 @@ def lookup():
 
 @app.route('/avalanche/register', methods=['GET'])
 def register():
-	res 			= {}
-	res['success'] 		= True
-	ipaddr 			= request.remote_addr
-	port 			= request.args.get('port') or 80
-	hashcode 		= request.args.get('hashcode')
+	res			= {}
+	res['success']		= True
+	ipaddr			= request.remote_addr
+	port			= request.args.get('port') or 80
+	hashcode		= request.args.get('hashcode')
 
 	# check if hash exists
 	if(hashcode not in packages):

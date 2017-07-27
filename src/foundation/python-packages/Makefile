@@ -46,14 +46,14 @@ PACKAGES	= pytest pymysql PyYAML Jinja2 six
 include $(STACKBUILD)/etc/CCRules.mk
 
 build: 
-	$(PY3.PATH) -mpip download $(PACKAGES)
+	$(PY.PATH) -mpip download $(PACKAGES)
 
 
 install::
 	mkdir -p $(ROOT)
 	(									\
 		for pkg in $(PACKAGES); do 					\
-			$(PY3.PATH) -mpip install -I --root=$(ROOT) $$pkg;	\
+			$(PY.PATH) -mpip install -I --root=$(ROOT) $$pkg;	\
 		done								\
 	)
 

@@ -48,7 +48,7 @@ build:
 	tar -xzf wxPython-$(VERSION).tar.gz
 	(								\
 		cd wxPython-$(VERSION);					\
-		$(PY3.PATH) ./build.py build 				\
+		$(PY.PATH) ./build.py build 				\
 			--gtk3						\
 			--destdir=$(PKGROOT);				\
 	)
@@ -56,7 +56,7 @@ build:
 install::
 	(								\
 		cd wxPython-$(VERSION);					\
-		$(PY3.PATH) ./build.py install				\
+		$(PY.PATH) ./build.py install				\
 			--gtk3						\
 			--destdir=$(ROOT) 				\
 			--prefix=$(PKGROOT);				\

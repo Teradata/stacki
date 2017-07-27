@@ -10,9 +10,9 @@ import click
 app = Flask(__name__)
 
 tracker_settings = {
-	'TRACKER' 		: '',
-	'PORT' 			: 80,
-	'LOCAL_SAVE_LOCATION' 	: '/install',
+	'TRACKER'		: '',
+	'PORT'			: 80,
+	'LOCAL_SAVE_LOCATION'	: '/install',
 	'ENVIRONMENT'		: 'regular'
 }
 
@@ -30,7 +30,7 @@ def file_exists(local_file):
 	return os.path.isfile(local_file)
 
 def lookup_file(params):
-	print 'http://%s/avalanche/lookup' % tracker_settings['TRACKER']
+	print ('http://%s/avalanche/lookup' % tracker_settings['TRACKER'])
 	try:
 		res = requests.get('http://%s/avalanche/lookup' % (tracker_settings['TRACKER']), params=params)
 	except:
@@ -62,9 +62,9 @@ def stream_it(response, content):
 
 @app.route('/install/<path:path>/<filename>')
 def get_file_locally(path, filename):
-	file_location 		= '%s/%s' % (tracker_settings['LOCAL_SAVE_LOCATION'], path)
-	local_file 		= '%s/%s' % (file_location, filename)
-	remote_file 		= '/install/%s/%s' % (path, filename)
+	file_location		= '%s/%s' % (tracker_settings['LOCAL_SAVE_LOCATION'], path)
+	local_file		= '%s/%s' % (file_location, filename)
+	remote_file		= '/install/%s/%s' % (path, filename)
 	im_the_requester	= request.remote_addr == "127.0.0.1"
 
 	# check if file is local
