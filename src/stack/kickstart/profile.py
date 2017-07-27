@@ -1,8 +1,8 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -21,7 +21,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -42,9 +42,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -64,16 +64,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -92,7 +92,6 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @Copyright@
 
-from __future__ import print_function
 import os
 import re
 import fcntl
@@ -105,92 +104,92 @@ import stack.api
 import stack.bool
 
 class Client:
-        """
-        Metadata for the calling client, this is always passed to
-        the profile-os module to generate the installer script.
-        """
+	"""
+	Metadata for the calling client, this is always passed to
+	the profile-os module to generate the installer script.
+	"""
 
-        def __init__(self, **kwargs):
-                self.form = cgi.FieldStorage()
-                self.addr = kwargs.get('addr')
-                self.port = kwargs.get('port')
-                self.arch = kwargs.get('arch')
-                self.np   = kwargs.get('np')
-                self.os   = kwargs.get('os')
+	def __init__(self, **kwargs):
+		self.form = cgi.FieldStorage()
+		self.addr = kwargs.get('addr')
+		self.port = kwargs.get('port')
+		self.arch = kwargs.get('arch')
+		self.np	  = kwargs.get('np')
+		self.os	  = kwargs.get('os')
 
-                if self.addr == None:
-                        self.addr = os.environ['REMOTE_ADDR']
-                if self.port == None:
-                        self.port = int(os.environ['REMOTE_PORT'])
+		if self.addr == None:
+			self.addr = os.environ['REMOTE_ADDR']
+		if self.port == None:
+			self.port = int(os.environ['REMOTE_PORT'])
 
-                if not self.arch:
-                        try:
-                                self.arch = self.form['arch'].value
-                        except:
-                                self.arch = None
-                        if not self.arch or re.search('[^a-zA-Z0-9_]+', self.arch):
-                                print("Content-type: text/html")
-                                print("Status: 500 Internal Error\n")
-                                print("<h1>Invalid arch field</h1>")
+		if not self.arch:
+			try:
+				self.arch = self.form['arch'].value
+			except:
+				self.arch = None
+			if not self.arch or re.search('[^a-zA-Z0-9_]+', self.arch):
+				print("Content-type: text/html")
+				print("Status: 500 Internal Error\n")
+				print("<h1>Invalid arch field</h1>")
 				self.status('install profile.cgi error (Invalid arch field)')
-                                sys.exit(1)
+				sys.exit(1)
 
-                if not self.np:
-                        try:
-                                self.np = self.form['np'].value
-                        except:
-                                self.np = None
-                        if not self.np or re.search('[^0-9]+', self.np):
-                                print("Content-type: text/html")
-                                print("Status: 500 Internal Error\n")
-                                print("<h1>Invalid np field</h1>")
+		if not self.np:
+			try:
+				self.np = self.form['np'].value
+			except:
+				self.np = None
+			if not self.np or re.search('[^0-9]+', self.np):
+				print("Content-type: text/html")
+				print("Status: 500 Internal Error\n")
+				print("<h1>Invalid np field</h1>")
 				self.status('install profile.cgi error (Invalid np field)')
-                                sys.exit(1)
+				sys.exit(1)
 
-                if not self.os:
-                        try:
-                                self.os = self.form['os'].value
-                        except:
-                                self.os = None
-                        if not self.os:
-                                print("Content-type: text/html")
-                                print("Status: 500 Internal Error\n")
-                                print("<h1>Invalid os field</h1>")
+		if not self.os:
+			try:
+				self.os = self.form['os'].value
+			except:
+				self.os = None
+			if not self.os:
+				print("Content-type: text/html")
+				print("Status: 500 Internal Error\n")
+				print("<h1>Invalid os field</h1>")
 				self.status('install profile.cgi error (Invalid os field)')
-                                sys.exit(1)
+				sys.exit(1)
 
-                try:
-                        osModule     = __import__('profile.%s' % self.os)
-                        osClass      = eval('osModule.%s.Profile' % self.os)
-                        self.profile = osClass()
-                except ImportError:
-                        self.profile = None
+		try:
+			osModule     = __import__('profile.%s' % self.os)
+			osClass	     = eval('osModule.%s.Profile' % self.os)
+			self.profile = osClass()
+		except ImportError:
+			self.profile = None
 
 
-        def pre(self):
-                """
-                Run the OS-specific pre-semaphore code.
-                """
-                if self.profile:
-                        self.profile.pre(self)
+	def pre(self):
+		"""
+		Run the OS-specific pre-semaphore code.
+		"""
+		if self.profile:
+			self.profile.pre(self)
 
-        def main(self):
-                """
-                Run the OS-specific profile generator.
-                """
-                if self.profile:
-                        self.profile.main(self)
+	def main(self):
+		"""
+		Run the OS-specific profile generator.
+		"""
+		if self.profile:
+			self.profile.main(self)
 
-        def post(self):
-                """
-                Run the OS-specific post-semaphore code.
-                """
-                if self.profile:
-                        self.profile.post(self)
-                else:
-                        print("Content-type: text/html")
-                        print("Status: 500 Internal Error\n")
-                        print("<h1>Unsupported OS</h1>")
+	def post(self):
+		"""
+		Run the OS-specific post-semaphore code.
+		"""
+		if self.profile:
+			self.profile.post(self)
+		else:
+			print("Content-type: text/html")
+			print("Status: 500 Internal Error\n")
+			print("<h1>Unsupported OS</h1>")
 
 	def status(self, message):
 		if self.interactive == 1:
@@ -204,34 +203,34 @@ class Client:
 		m = json.dumps(msg)
 
 		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		tx.sendto("%s" % m, ('10.1.19.15', 5000))
+		tx.sendto(m.encode(), ('10.1.19.15', 5000))
 		tx.close()
-        
+	
 ##
 ## MAIN
 ##
 
-mutex     = stack.lock.Mutex('/var/tmp/profile.mutex')
+mutex	  = stack.lock.Mutex('/var/tmp/profile.mutex')
 semaphore = stack.lock.Semaphore('/var/tmp/profile.semaphore')
 
-if not os.environ.has_key('REMOTE_ADDR'):
+if 'REMOTE_ADDR' not in os.environ:
 
-        # CGI's always set this, so if it doesn't exist someone is
-        # running this directly on the command line for debugging
+	# CGI's always set this, so if it doesn't exist someone is
+	# running this directly on the command line for debugging
 
-        if len(sys.argv) == 2:
-                client_os = sys.argv[1]
-        else:
-                client_os = 'redhat'
-        client = Client(**{ 'addr' : '127.0.0.1',
-                            'port' : 0,
-                            'arch' : 'x86_64',
-                            'os'   : client_os,
-                            'np'   : '1' })
+	if len(sys.argv) == 2:
+		client_os = sys.argv[1]
+	else:
+		client_os = 'redhat'
+	client = Client(**{ 'addr' : '127.0.0.1',
+			    'port' : 0,
+			    'arch' : 'x86_64',
+			    'os'   : client_os,
+			    'np'   : '1' })
 
 	client.interactive = 1
 else:
-        client = Client()
+	client = Client()
 	client.interactive = 0
 
 client.status('install profile.cgi started')
@@ -247,7 +246,9 @@ client.pre()
 empty = False
 mutex.acquire()
 count = semaphore.read()
+count = 1
 if count == None:
+	syslog.syslog(syslog.LOG_DEBUG, 'semaphore not found')
 	try:
 		cmd = "grep 'processor' /proc/cpuinfo | wc -l"
 		out = os.popen(cmd).readline()
@@ -255,6 +256,7 @@ if count == None:
 	except:
 		count = 8
 if count == 0:
+	syslog.syslog(syslog.LOG_DEBUG, 'semaphore found but zero')
 	# Out of resources force the client to retry,
 	# and exit the cgi after we release the mutex.
 	print("Content-type: text/html")
@@ -308,9 +310,9 @@ if profile_update_macs:
 	for i in os.environ:
 		if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
 			devinfo = os.environ[i].split()
-			iface   = devinfo[0]
+			iface	= devinfo[0]
 			macaddr = devinfo[1].lower()
-			module  = ''
+			module	= ''
 			if len(devinfo) > 2:
 				module = devinfo[2]
 

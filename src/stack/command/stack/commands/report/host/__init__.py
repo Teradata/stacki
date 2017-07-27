@@ -111,9 +111,9 @@ class Command(command):
 
 	def run(self, param, args):
 		self.beginOutput()
-		self.addOutput('localhost', stack.text.DoNotEdit())
-		self.addOutput('localhost', '#  Site additions go in /etc/hosts.local\n')
-		self.addOutput('localhost','127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
+		self.addOutput(None, stack.text.DoNotEdit())
+		self.addOutput(None, '#  Site additions go in /etc/hosts.local\n')
+		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 
 		aliases = {}
 		for row in self.call('list.host.alias'):
@@ -164,17 +164,16 @@ class Command(command):
 				for alias in aliases.get(host):
 					names.append(alias)
 
-			self.addOutput('localhost', '%s\t%s' %
-					       (ip, ''.join(names)))
+			self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
 
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
 		if os.path.exists(hostlocal):
 			f = open(hostlocal,'r')
-			self.addOutput('localhost','\n# Imported from /etc/hosts.local\n')
+			self.addOutput(None, '\n# Imported from /etc/hosts.local\n')
 			h = f.read()
-			self.addOutput('localhost',h)
+			self.addOutput(None, h)
 			f.close()
 		
 		self.endOutput(padChar='', trimOwner=True)

@@ -102,6 +102,7 @@ import snack
 import bisect
 import syslog
 import ipaddress
+import traceback
 import stack.sql
 import stack.util
 import stack.app
@@ -509,10 +510,10 @@ class InsertEthers(GUI):
 		p = subprocess.Popen(shlex.split(cmd), stdout = subprocess.PIPE)
 
 		for line in p.stdout.readlines():
-			tokens = string.split(line)
+			tokens = line.decode().split()
 
 			for i in tokens:
-				values = string.split(i, ':')
+				values = i.split(':')
 
 				if values[0] == 'Bcast':
 					bcast = values[1]
@@ -525,16 +526,15 @@ class InsertEthers(GUI):
 
 		return (bcast, mask)
 
-	def getnetwork(self,subnet):
-		
-		self.sql.execute("select address,mask from subnets where name='%s'" % (subnet))
+	def getnetwork(self, subnet):
+		self.sql.execute("select address,mask from subnets where name='%s'" % subnet)
 		network,netmask = self.sql.fetchone()
 		return network, netmask
 			
 	def getnextIP(self, subnet):
 		if not self.ipnetwork:
 			network, mask = self.getnetwork(subnet)
-			self.ipnetwork = ipaddress.IPv4Network(unicode(network + '/' + mask))
+			self.ipnetwork = ipaddress.IPv4Network(network + '/' + mask)
 		
 		if self.ipaddr and self.maxNew == 1:
 			return self.ipaddr
@@ -545,7 +545,7 @@ class InsertEthers(GUI):
 			if not self.sql.ipBaseAddress:
 				self.sql.ipBaseAddress = str(self.ipnetwork.broadcast_address - 1)
 
-			starting_ip = int(ipaddress.IPv4Address(unicode(self.sql.ipBaseAddress)))
+			starting_ip = int(ipaddress.IPv4Address(self.sql.ipBaseAddress))
 			# iterating over a /8 IPv4Network() object to get to the right
 			# starting point is very slow. pathological case: minutes
 			# so we do a bisect over the int representation of the IP's
@@ -553,7 +553,7 @@ class InsertEthers(GUI):
 			# keep track of our index and increment by hand.
 
 			# get index of starting ip into the list of IP's (not hosts!) in this network
-			network_range = range(self.ipnetwork.network_address, self.ipnetwork.broadcast_address + 1)
+			network_range = range(int(self.ipnetwork.network_address), int(self.ipnetwork.broadcast_address + 1))
 			host_index = bisect.bisect_left(network_range, starting_ip)
 			# add this index to the int() value of the bottom IP address (eg '10.0.0.0' -> 167772160)
 			# This new number is the integer value of the IP.  Use *that* to track the IP addresses.
@@ -609,8 +609,9 @@ class InsertEthers(GUI):
 			nodename)
 		if not rows:
 			raise InsertError("Could not find %s in database" % nodename)
-		# obviates use of default file in tftp dir
-		Call('report.host.bootfile', [nodename, 'action=install'])
+
+		Call('set.host.boot', [nodename, 'action=install'])
+
 		nodeid = self.sql.fetchone()[0]
 		self.controller.added(nodename, nodeid)
 		self.restart_services = 1
@@ -738,7 +739,7 @@ class InsertEthers(GUI):
 	def listenDhcp(self, line):
 		"""Look in log line for a DHCP discover message."""
 
-		tokens = string.split(line[:-1])
+		tokens = line[:-1].split()
 		if len(tokens) > 5 and tokens[4] == 'dhcpd:' and \
 		   (tokens[5] in [ 'DHCPDISCOVER' ]):
 			
@@ -1008,4 +1009,5 @@ except Exception as msg:
 	app.cleanup()
 	sys.stderr.write('error - ' + str(msg) + '\n')
 	syslog.syslog(syslog.LOG_ERR, 'error - %s' % msg)
+	syslog.syslog(syslog.LOG_ERR, traceback.format_exc())
 	sys.exit(1)

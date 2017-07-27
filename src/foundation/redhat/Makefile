@@ -60,7 +60,7 @@ DEPENDS.FILES	= getrpms.py
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-RPMS = newt rpm-python newt-python
+RPMS = rpm-python
 
 build: 
 

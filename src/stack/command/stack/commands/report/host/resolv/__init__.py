@@ -74,7 +74,7 @@ class Command(stack.commands.report.host.command):
 				search.append(zone)
 
 		if search:
-			self.addOutput(host, 'search %s' % ''.join(search))
+			self.addOutput(host, 'search %s' % ' '.join(search))
 			
 		#
 		# If the default network is 'public' use the

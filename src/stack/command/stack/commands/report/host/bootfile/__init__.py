@@ -36,6 +36,7 @@ class Command(stack.commands.Command,
 				'attrs'      : {}
 			}
 
+
 		for row in self.call('list.host.attr', hosts):
 			ha[row['host']]['attrs'][row['attr']] = row['value']
 			
@@ -59,13 +60,13 @@ class Command(stack.commands.Command,
 		for host in hosts:
 			h   = ha[host]
 			key = (h['action'], h['type'], None)
-			if ba.has_key(key):
+			if key in ba:
 				b = ba[key]
 				h['kernel']  = b['kernel']
 				h['ramdisk'] = b['ramdisk']
 				h['args']    = b['args']
 			key = (h['action'], h['type'], h['os'])
-			if ba.has_key(key):
+			if key in ba:
 				b = ba[key]
 				h['kernel']  = b['kernel']
 				h['ramdisk'] = b['ramdisk']
@@ -87,7 +88,7 @@ class Command(stack.commands.Command,
 				# Compute the HEX IP filename for the host
 				#
 				hexstr = ''
-				for i in string.split(ip, '.'):
+				for i in ip.split('.'):
 					hexstr += '%02x' % (int(i))
 				h['filename'] = hexstr.upper()
 				h['ip']       = ip

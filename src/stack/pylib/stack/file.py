@@ -113,7 +113,25 @@ class File:
 		# Timestamp and size can be explicitly set for foreign files.
 		self.setFile(file, timestamp, size)
 		self.imortal = 0
-	
+
+	def __eq__(self, file):
+		return self.__cmp__(file) == 0
+
+	def __ne__(self, file):
+		return self.__cmp__(file) != 0
+
+	def __lt__(self, file):
+		return self.__cmp__(file) < 0
+
+	def __le__(self, file):
+		return self.__cmp__(file) <= 0
+
+	def __gt__(self, file):
+		return self.__cmp__(file) > 0
+
+	def __ge__(self, file):
+		return self.__cmp__(file) >= 0
+
 	def __cmp__(self, file):
 		if self.getBaseName() != file.getBaseName() or \
 		 self.timestamp == file.timestamp:
@@ -257,19 +275,19 @@ class RPMBaseFile(File):
 		
 			s = self.filename	 # name-ver-rpmver.arch.rpm
 			for x in range(0, ext):
-				i = string.rfind(s, ".")
+				i = s.rfind(".")
 				s = self.filename[:i]
     
-			i = string.rfind(s, ".")
+			i = s.rfind(".")
 			self.list.append(s[i+1:])	# get architecture string
 			s = self.filename[:i]
 
-			i = string.rfind(s, "-")	# get RPM version string
+			i = s.rfind("-")	# get RPM version string
 			self.release = s[i+1:]
 			self.list.append(self.versionList(s[i+1:]))
 			s = self.filename[:i]
 
-			i = string.rfind(s, "-")	# get software version string
+			i = s.rfind("-")	# get software version string
 			self.version = s[i+1:]
 			self.list.append(self.versionList(s[i+1:]))
 
@@ -294,12 +312,12 @@ class RPMBaseFile(File):
 				else:
 					alpha = alpha + c
 					if num:
-						l.append(string.atoi(num))
+						l.append(int(num))
 						num = ''
 			if alpha:
 				l.append(alpha)
 			if num:
-				l.append(string.atol(num))
+				l.append(int(num))
 			list.append(l)
 		return list
 
@@ -363,8 +381,8 @@ class RPMFile(RPMBaseFile):
 		while dbdir:
 			if not os.listdir(dbdir):
 				shutil.rmtree(dbdir)
-			list = string.split(dbdir, os.sep)
-			dbdir = string.join(list[:-1], os.sep)
+			list = dbdir.split(os.sep)
+			dbdir = os.sep.join(list[:-1])
 
 		return retval
 
@@ -548,7 +566,7 @@ class RollInfoFile(File,
 			xml.append('\t<%s%s/>' % (tag, attrs))
 		xml.append('</roll>')
 		
-		return string.join(xml, '\n')
+		return '\n'.join(xml)
 		
 	def getRollName(self):
 		return self.attrs['roll']['name']
@@ -627,9 +645,9 @@ class Tree:
 		return self.tree.keys()
 
 	def clear(self, path=''):
-		l1 = string.split(path, os.sep)
+		l1 = path.split(os.sep)
 		for key in self.tree.keys():
-			l2 = string.split(key, os.sep)
+			l2 = key.split(os.sep)
 			if stack.util.list_isprefix(l1, l2):
 				del self.tree[key]
 	

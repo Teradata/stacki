@@ -25,7 +25,6 @@ class Implementation(stack.commands.Implementation):
 		dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
 		nextserver = attrs.get('Kickstart_PrivateKickstartHost')
 
-
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.

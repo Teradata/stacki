@@ -1,4 +1,4 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # ATLAS asks what type of x86 processor it should optimize for. here is
 # the question it asks:
@@ -13,8 +13,6 @@
 #	8. Pentium 4
 #	9. EM64T
 #
-
-from __future__ import print_function
 
 AMD_Athlon = 2
 AMD_Hammer_32 = 3
@@ -52,10 +50,10 @@ processors = [
 	('AuthenticAMD', '15', '5', AMD_Hammer_32),  # Opteron in 32-bit mode
 
 	('AuthenticAMD', '6', '10', AMD_Athlon),  # AMD Athlon MP 2800+
-	('AuthenticAMD', '6', '8', AMD_Athlon),  # AMD Athlon MP 2200+
+	('AuthenticAMD', '6', '8', AMD_Athlon),	 # AMD Athlon MP 2200+
 	('AuthenticAMD', '6', '6', AMD_Athlon),	# AMD Athlon MP
 	('AuthenticAMD', '6', '4', AMD_Athlon),	# AMD Athlon
-	('AuthenticAMD', '6', '2', AMD_Athlon)   # AMD Athlon
+	('AuthenticAMD', '6', '2', AMD_Athlon)	 # AMD Athlon
 ]
 
 family = ''

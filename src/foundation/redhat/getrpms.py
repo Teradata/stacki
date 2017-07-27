@@ -1,8 +1,8 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 # 
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -21,7 +21,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -42,7 +42,6 @@
 # @SI_Copyright@
 #
 
-from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -51,11 +50,10 @@ root = sys.argv[1]
 rpms = sys.argv[2:]
 
 for name in rpms:
-	p = subprocess.Popen(['yumdownloader', '--urls', name],
-		stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-	o, e = p.communicate()
-	for line in o.split('\n'):
+	p = subprocess.run(['yumdownloader', '--urls', name],
+			   stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+	for line in p.stdout.decode().split('\n'):
 		subprocess.call(['rpm', '-i', '--force', '--excludedocs',
-			'--badreloc', '--relocate', '/=%s' % root,
-			'--nodeps', line])
+				 '--badreloc', '--relocate', '/=%s' % root,
+				 '--nodeps', line])
 

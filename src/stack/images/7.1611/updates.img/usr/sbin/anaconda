@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/usr/bin/python
 
 import subprocess
 import shutil
@@ -13,7 +13,7 @@ import signal
 import logging
 log = logging.getLogger("stack-anaconda")
 log.setLevel(logging.DEBUG)
-log.addHandler(logging.StreamHandler(strm=sys.stdout))
+log.addHandler(logging.StreamHandler(stream=sys.stdout))
 log.addHandler(logging.FileHandler('/tmp/stack-anaconda.log'))
 
 # Check to see if we're running as boss

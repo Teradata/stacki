@@ -23,7 +23,7 @@
 <main>
 reboot --eject
 
-<eval shell="/opt/stack/bin/python" mode="xml">
+<eval shell="python" mode="xml">
 import os
 import urlparse
 import stack.roll
@@ -37,8 +37,7 @@ elif os.path.exists('/tmp/pallets.xml'):
 
 for pallet in g.rolls:
 	(pname, pver, prel, parch, purl, pdiskid) = pallet
-
-	print 'repo --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s' % (pname, purl, pname, pver, prel, parch)
+	print('repo --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s' % (pname, purl, pname, pver, prel, parch))
 </eval>
 
 </main>

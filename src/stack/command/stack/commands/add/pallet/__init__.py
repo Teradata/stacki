@@ -153,12 +153,14 @@ class Command(stack.commands.add.command):
 		# Populate the info hash. This hash contains pallet
 		# information about all the pallets present on disc.
 
-		r, w = popen2.popen2('find %s -type f -name roll-\*.xml' %
-				     self.mountPoint)
+		p = subprocess.run(['find', '%s' % self.mountPoint, '-type', 'f', '-name', 'roll-*.xml'],
+				   stdout=subprocess.PIPE)
+
 		dict = {}
-		for filename in r.readlines():
-			roll = stack.file.RollInfoFile(filename.strip())
-			dict[roll.getRollName()] = roll
+		for filename in p.stdout.decode().split('\n'):
+			if filename:
+				roll = stack.file.RollInfoFile(filename.strip())
+				dict[roll.getRollName()] = roll
 			
 		if len(dict) == 0:
 			
@@ -268,8 +270,7 @@ class Command(stack.commands.add.command):
 			for line in file.readlines():
 				l = line.split()
 				if l[1].strip() == self.mountPoint:
-					subprocess.call(
-						[ 'umount', self.mountPoint ])
+					subprocess.run([ 'umount', self.mountPoint ])
 
 			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()

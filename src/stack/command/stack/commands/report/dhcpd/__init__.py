@@ -95,11 +95,10 @@ import os.path
 import sys
 import stack
 import string
-
 import ipaddress
-
 import stack.commands
 import stack.text
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -154,13 +153,16 @@ class Command(stack.commands.HostArgumentProcessor,
 		for row in self.db.select("name from nodes order by rack, rank"):
 			data[row[0]] = []
 			
-		for row in self.db.select("""
-			nodes.name, n.mac, n.ip, n.device
-			from networks n, nodes where
-			n.node     = nodes.id and
-			n.mac is not NULL and
-			(n.vlanid is NULL or n.vlanid = 0)
-			"""):
+		for row in self.db.select(
+				"""
+				nodes.name, n.mac, n.ip, n.device
+				from subnets s, networks n, nodes where
+				n.node = nodes.id and
+				n.subnet = s.id and
+				s.pxe = TRUE and
+				n.mac is not NULL and
+				(n.vlanid is NULL or n.vlanid = 0)
+				"""):
 			data[row[0]].append(row[1:])
 
 		kickstartable = {}

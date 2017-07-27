@@ -44,7 +44,7 @@ cp /tmp/ks.xml /run/install/tmp/ks.xml
 # reconfigured it above (that is, a new /tmp/stack.conf may have been
 # written).
 #
-LIGHTTPDPID=`ps auwx | grep lighttpd | grep -v grep | /opt/stack/bin/awk '{print $2}'`
+LIGHTTPDPID=`ps auwx | grep lighttpd | grep -v grep | gawk '{print $2}'`
 
 if [ "$LIGHTTPDPID" != "" ]
 then
