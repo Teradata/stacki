@@ -148,9 +148,18 @@ class CLI:
 
 		return arrays
 
-	def doNuke(self, adapter):
+	def doNuke(self, enclosure, adapter):
+		#
+		# XXX - look at how to use enclosure
+		#
 		result = self.run([ 'slot=%d' % adapter, 'delete',
 			'forced', 'override' ])
+
+	def doSecureErase(self, enclosure, adapter, slot):
+		#
+		# XXX - stub for now
+		#
+		return
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):

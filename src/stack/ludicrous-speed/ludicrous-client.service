@@ -1,0 +1,13 @@
+[Unit]
+Description=Package tracking client
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/opt/stack/bin/python /opt/stack/bin/ludicrous-client.py
+StandardOutput=syslog
+StandardError=syslog
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

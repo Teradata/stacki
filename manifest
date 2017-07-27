@@ -22,6 +22,12 @@ foundation-rcs
 foundation-readline
 foundation-redhat
 foundation-wget
+foundation-py-click
+foundation-py-werkzeug
+ludicrous-speed
+foundation-py-flask
+foundation-py-markupsafe
+foundation-py-itsdangerous
 git
 git-lfs
 hpssacli

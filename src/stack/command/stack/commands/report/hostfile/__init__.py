@@ -1,5 +1,5 @@
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
+# @SI_Copyright@
+# @SI_Copyright@
 
 import stack.commands
 import string
@@ -20,12 +20,12 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 		output = self.call('list.host', [ host ])
 		for o in output:
-			appliance = o['appliance']
-			rack = o['rack']
-			rank = o['rank']
+			appliance     = o['appliance']
+			rack          = o['rack']
+			rank          = o['rank']
 			installaction = o['installaction']
-			osaction = o['osaction']
-			box = o['box']
+			osaction      = o['osaction']
+			box           = o['box']
 
 		groups = None
 		output, = self.call('list.host.group', [host])

@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<description>
+Unregister peer from ludicrous server
+</description>
+
+<si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</si_copyright>
+
+<post>
+
+<!-- for backends, the pxeserver is kickstart_privateaddr -->
+ludicrous-server=&Kickstart_PrivateAddress;
+
+<!-- check to see if this is a pxe-booting frontend -->
+grep boss /proc/cmdline 2>&amp;1 /dev/null
+if [ $? -eq 0 ]; then
+	ludicrous-server=$(sed -r -n 's/.* stacki.pxeserver=([.[:alnum:]]*) .*/\1/p' /proc/cmdline;)
+fi
+
+curl_cmd=/usr/bin/curl
+
+<!-- on an installing system, curl may be in /bin? -->
+if [ -f /bin/curl ]; then
+	curl_cmd=/bin/curl
+fi
+
+peerdone_url=https://${ludicrous-server}/avalanche/peerdone
+${curl_cmd} --insecure --output /dev/null ${peerdone_url}
+
+</post>
+
+</kickstart> 

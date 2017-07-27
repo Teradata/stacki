@@ -15,6 +15,7 @@ from stack_site import *
 
 sys.path.append('/opt/stack/lib')
 from stacki_storage import *
+import stack
 
 ##
 ## globals
@@ -456,7 +457,9 @@ host_partitions = getHostPartitions(disks, host_fstab)
 
 if not csv_partitions:
 	parts = []
-	if attributes['release'] == '7.x':
+	# on a frontend, get 'release' from the stack module
+	release = attributes.get('release', stack.release)
+	if release == '7.x':
 		parts.append( ('biosboot', 1, 'biosboot') )
 	parts.append( ('/', 16000, 'ext4') )
 	parts.append( ('swap', 1000, 'swap') )

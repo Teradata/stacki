@@ -159,6 +159,7 @@ if os.environ.has_key('HTTP_X_STACK_PARTITIONINFO'):
 
 stack.api.Call('set host attr', [ ipaddr, 'attr=nukedisks', 'value=false'])
 stack.api.Call('set host attr', [ ipaddr, 'attr=nukecontroller', 'value=false'])
+stack.api.Call('set host attr', [ ipaddr, 'attr=secureerase', 'value=false'])
 
 print 'Content-type: application/octet-stream'
 print 'Content-length: %d' % (len(''))

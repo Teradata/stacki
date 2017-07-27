@@ -52,25 +52,36 @@ else:
 	file = open('/tmp/stack.conf', 'w')
 	file.write('var.trackers = ""\n')
 	file.write('var.pkgservers = ""\n')
-	file.close()
+file.close()
 
 # Kill an existing instance of lighttpd if it's running
-l = subprocess.Popen(['ps','-o','pid','--no-headers','-C','lighttpd'],
+l = subprocess.Popen(['ps','auwx'],
 	stdout=subprocess.PIPE, stderr=None)
-o, e  = l.communicate()
-for pid in o.split('\n'):
-	if pid.strip():
-		log.debug('Stopping lighttpd (pid %d)' % int(pid.strip()))
-		os.kill(int(pid.strip()), signal.SIGTERM)
-log.info('Starting lighttpd')
-lighttpd_proc = subprocess.Popen(
-	['/opt/lighttpd/sbin/lighttpd', '-f', 
-	'/opt/lighttpd/conf/lighttpd.conf', '-m',
-	'/opt/lighttpd/lib/'])
 
+p = subprocess.Popen(['grep','ludicrous'],
+	stdin=l.stdout, stdout=subprocess.PIPE, stderr=None)
+
+r = subprocess.Popen(['awk','{print $2}'],
+	stdin=p.stdout, stdout=subprocess.PIPE, stderr=None)
+
+for pid in r.stdout.read().split('\n'):
+	if pid.strip():
+		log.debug('Stopping ludacris (pid %d)' % int(pid.strip()))
+		os.kill(int(pid.strip()), signal.SIGTERM)
+log.info('Starting ludacris tracking service')
+ludicrous_proc = subprocess.Popen(
+	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py', '--environment=updates'])
+
+#time.sleep(5)
 
 if 'boss' in args:
 	# We are a frontend
+
+	# Enable and Start Ludicrous Server
+	cmd = 'systemctl enable ludicrous-server.service'
+	os.system(cmd)
+	cmd = 'systemctl start ludicrous-server.service'
+	os.system(cmd)
 	
 	# Check to see if there's a user-specified
 	# site.attrs / rolls.xml on the kernel command line

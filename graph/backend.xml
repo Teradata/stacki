@@ -44,6 +44,7 @@
 		<to>routes-client</to>
 		<to>pxeboot</to>
 		<to>storage</to>
+		<to>peerdone</to>
 	</edge>
 
 	<edge from="client" to="firewall-client" cond="firewall"/>
