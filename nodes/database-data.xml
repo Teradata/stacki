@@ -24,7 +24,7 @@ cp /tmp/rolls.xml /mnt/sysimage/tmp
 
 </post>
 
-<post interpreter="/opt/stack/bin/python">
+<post interpreter="/opt/stack/bin/python3">
 
 import os.path
 

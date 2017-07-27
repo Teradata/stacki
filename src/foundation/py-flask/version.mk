@@ -1,2 +1,0 @@
-VERSION = 0.12
-ARCHIVENAME = Flask

@@ -66,11 +66,14 @@ r = subprocess.Popen(['awk','{print $2}'],
 
 for pid in r.stdout.read().split('\n'):
 	if pid.strip():
-		log.debug('Stopping ludacris (pid %d)' % int(pid.strip()))
+		log.debug('Stopping ludicrous (pid %d)' % int(pid.strip()))
 		os.kill(int(pid.strip()), signal.SIGTERM)
 log.info('Starting ludacris tracking service')
-ludicrous_proc = subprocess.Popen(
-	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py', '--environment=updates'])
+
+environ = os.environ.copy()
+environ['LD_LIBRARY_PATH'] = '/opt/stack/lib'
+
+ludicrous_proc = subprocess.Popen(['/opt/stack/bin/python3', '/opt/stack/bin/ludicrous-client.py', '--environment=updates'], env = environ)
 
 #time.sleep(5)
 
@@ -166,10 +169,8 @@ if 'boss' in args:
 
 		# Start boss
 		log.debug('Starting Boss Configuration')
-		bossenv = os.environ.copy()
-		bossenv['LD_LIBRARY_PATH'] = '/opt/stack/lib'
-		bossenv['DISPLAY'] = ':1'
-		s = subprocess.Popen('/opt/stack/bin/boss_config.py', env = bossenv)
+		environ['DISPLAY'] = ':1'
+		s = subprocess.Popen('/opt/stack/bin/boss_config.py', env = environ)
 		s.wait()	
 		log.debug('Boss Configuration Complete')
 		metacity_proc.terminate()
@@ -267,7 +268,7 @@ if 'boss' in args:
 #
 # Now start CentOS Anaconda
 #
-s = subprocess.Popen(anaconda_real_cmd)
+s = subprocess.Popen(anaconda_real_cmd, env = environ)
 s.wait()
 
 #

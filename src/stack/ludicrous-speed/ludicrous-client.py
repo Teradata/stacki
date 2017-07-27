@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory, abort
-from urllib2 import unquote
+from urllib.request import unquote
 from random import shuffle
 import os
 import requests

@@ -214,8 +214,15 @@ pretar::
 AFURL = https://sdartifact.td.teradata.com/artifactory/pkgs-generic-snapshot-sd/stacki/git
 
 ifneq ($(AFS),)
+.PHONY: afup
+afup:
+	for o in $(AFS); do curl -H X-JFrog-Art-Api:$(AFKEY) -T$$o $(AFURL)/; done
+
 pretar::
 	for o in $(AFS); do curl -H X-JFrog-Art-Api:$(AFKEY) -O $(AFURL)/$$o; done
+
+clean::
+	-rm -f $(AFS)
 endif
 
 # --------------------------------------------------------------------- #

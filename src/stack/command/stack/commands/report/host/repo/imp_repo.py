@@ -82,7 +82,7 @@ class Implementation(stack.commands.Implementation):
 		elif osname == 'sles':
 			repo.append('zypper clean --all')
 
-		for line in yum:
+		for line in repo:
 			self.owner.addOutput(host, line)
 
 

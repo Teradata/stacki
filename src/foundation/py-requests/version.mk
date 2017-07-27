@@ -1,2 +1,0 @@
-PYREQUESTS_NAME = requests
-VERSION = 2.5.0

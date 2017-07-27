@@ -2,7 +2,7 @@
 
 from flask import Flask, request, jsonify, send_from_directory, abort, render_template, redirect
 from werkzeug.routing import BaseConverter
-from urllib2 import unquote
+from urllib.request import unquote
 from random import shuffle
 import stack.api
 import click
@@ -154,7 +154,7 @@ def get_repodata(path, filename):
 def main():
 	import logging
 	logging.basicConfig(filename='/var/log/ludicrous-server.log',level=logging.DEBUG)
-	app.run(host='0.0.0.0', port=80, debug=False)
+	app.run(host='0.0.0.0', port=80, debug=True)
 
 if __name__ == "__main__":
 	main()

@@ -831,6 +831,8 @@ if __name__ == "__main__":
         stdoutLog.error("anaconda must be run as root.")
         sys.exit(1)
 
+    log.info('flags %s' % flags)
+
     # check if input kickstart should be saved
     if flags.nosave_input_ks:
         log.warning("Input kickstart will not be saved to the installed system due to the nosave option.")

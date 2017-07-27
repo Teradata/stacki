@@ -41,7 +41,7 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-PACKAGES	= pytest pymysql PyYAML Jinja2 six
+PACKAGES	= pytest pymysql PyYAML Jinja2 six Flask requests
 
 include $(STACKBUILD)/etc/CCRules.mk
 
