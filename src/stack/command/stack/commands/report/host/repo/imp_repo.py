@@ -1,7 +1,6 @@
-#
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -20,7 +19,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -39,75 +38,51 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-#
 
-import sys
+import os
 import stack.commands
-from stack.commands.sync.host import Parallel
-from stack.commands.sync.host import timeout
+
+class Implementation(stack.commands.Implementation):
+
+	def run(self, args):
+		host	= args[0]
+		server	= args[1]
+		osname	= args[2]
+		box	= self.owner.getHostAttr(host, 'box')
+		repo	= []
+
+		if osname == 'redhat':
+			filename = '/etc/yum.repos.d/stacki.repo'
+		elif osname == 'sles':
+			filename = '/etc/zypp/repos.d/stacki.repo'
+
+		repo.append('<stack:file stack:name="%s">' % filename)
+
+		for pallet in self.owner.getBoxPallets(box):
+			pname, pversion, prel, parch, pos = pallet
+
+			repo.append('[%s-%s-%s]' % (pname, pversion, prel))
+			repo.append('name=%s %s %s' % (pname, pversion, prel))
+			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
+			repo.append('assumeyes=1')
+			repo.append('gpgcheck=0')
+
+		for o in self.owner.call('list.cart'):
+			if box in o['boxes'].split():
+				repo.append('[%s-cart]' % o['name'])
+				repo.append('name=%s cart' % o['name'])
+				repo.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
+				repo.append('assumeyes=1')
+				repo.append('gpgcheck=0')
+
+		repo.append('</stack:file>')
+
+		if osname == 'redhat':
+			repo.append('yum clean all')
+		elif osname == 'sles':
+			repo.append('zypper clean --all')
+
+		for line in yum:
+			self.owner.addOutput(host, line)
 
 
-class Command(stack.commands.sync.host.command):
-	"""
-	Sync yum repo file to backend nodes.
-	
-	When a cart or pallet is added to the 
-	frontend, to use the resulting repo but not
-	reinstall machines, sync the new repo to the 
-	backends for immediate use.
-
-	<example cmd='sync host yum'>
-	Giving no hostname or regex will sync
-	to all backend nodes by default.
-	</example>
-
-	<example cmd='sync host yum backend-0-0'>
-	Sync yum inventory file on backend-0-0
-	</example>
-	
-	<example cmd='sync yum backend-0-[0-2]'>
-	Using regex, sync yum inventory file on backend-0-0
-	backend-0-1, and backend-0-2.
-	</example>
-	"""
-
-	def run(self, params, args):
-
-		self.notify('Sync Host Yum\n')
-
-		hosts = self.getHostnames(args, managed_only=1)
-		me    = self.db.getHostname('localhost')
-
-		# Only shutdown stdout/stderr if we not local
-		for host in hosts:
-			if host != me:
-				sys.stdout = open('/dev/null')
-				sys.stderr = open('/dev/null')
-				break
-
-		threads = []
-		for host in hosts:
-
-			attrs = {}
-			for row in self.call('list.host.attr', [ host ]):
-				attrs[row['attr']] = row['value']
-
-			cmd = '/opt/stack/bin/stack report host yum %s | ' % host
-			cmd += '/opt/stack/bin/stack report script | '
-
-			if me != host:
-				cmd += 'ssh -T -x %s ' % host
-			cmd += 'bash > /dev/null 2>&1 '
-
-			try:
-				p = Parallel(cmd)
-				p.start()
-				threads.append(p)
-			except:
-				pass
-
-		#
-		# collect the threads
-		#
-		for thread in threads:
-			thread.join(timeout)

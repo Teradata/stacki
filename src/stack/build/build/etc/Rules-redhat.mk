@@ -204,9 +204,6 @@ HOME		= $(CURDIR)
 
 # @echo "%__arch_install_post	%{nil}" >> $@
 
-.PHONY: pretar
-pretar::
-
 $(REDHAT.SOURCES)/$(TARBALL): clean
 	$(MAKE) pretar 
 	#@if [ `basename $(CURDIR)` = usersguide ]; then $(MAKE) predoc; fi;

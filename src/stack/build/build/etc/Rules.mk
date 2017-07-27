@@ -205,6 +205,19 @@ dump-info::
 	@echo "ORDER           = $(ORDER)"
 	@echo "ROLL.MEMBERSHIP = $(ROLL.MEMBERSHIP)"
 
+.PHONY: pretar
+pretar::
+
+# --------------------------------------------------------------------- #
+# Artifactory Support
+# --------------------------------------------------------------------- #
+AFURL = https://sdartifact.td.teradata.com/artifactory/pkgs-generic-snapshot-sd/stacki/git
+
+ifneq ($(AFS),)
+pretar::
+	for o in $(AFS); do curl -H X-JFrog-Art-Api:$(AFKEY) -O $(AFURL)/$$o; done
+endif
+
 # --------------------------------------------------------------------- #
 # Architecture
 # --------------------------------------------------------------------- #

@@ -37,12 +37,12 @@
 		<to>storage</to>
 	</edge>
 
-	<edge from="client" to="yum-client" />
-	<edge from="server" to="yum-server" />
+	<edge from="client" to="repo-client" />
+	<edge from="server" to="repo-server" />
 
 	<order head="yum-base">
-		<tail>yum-client</tail>
-		<tail>yum-server</tail>
+		<tail>repo-client</tail>
+		<tail>repo-server</tail>
 	</order>
 
 	<edge from="client">

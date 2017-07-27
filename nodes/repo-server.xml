@@ -2,7 +2,7 @@
 <kickstart>
 
 	<description>
-	Create yum config file on backend
+	Create a repository config file on frontend
 	</description>
 
 	<si_copyright>
@@ -11,7 +11,8 @@
 	</si_copyright>
 
 <post>
-<report name="host.yum">&hostname;</report>
+/opt/stack/bin/stack report host repo &Kickstart_PrivateHostname; | \
+	/opt/stack/bin/stack report script | sh
 </post>
 
 </kickstart>

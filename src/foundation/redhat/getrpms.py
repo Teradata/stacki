@@ -50,7 +50,7 @@ root = sys.argv[1]
 rpms = sys.argv[2:]
 
 for name in rpms:
-	p = subprocess.run(['yumdownloader', '--urls', name],
+	p = subprocess.run(['yumdownloader', '-d0', '--urls', name],
 			   stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	for line in p.stdout.decode().split('\n'):
 		subprocess.call(['rpm', '-i', '--force', '--excludedocs',
