@@ -1,7 +1,6 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
-from __future__ import print_function
-from subprocess import *
+import subprocess
 import json
 import re
 
@@ -21,8 +20,8 @@ class CLI:
 
 		f = open('/tmp/MegaSAS.log','a')
 		f.write('cmd: %s\n\n'  % ' '.join(cmd))
-		p = Popen(cmd, stdout=PIPE)
-		o, e = p.communicate()
+		p = subprocess.run(cmd, stdin=subprocess.PIPE)
+		o = p.stdout.decode()
 		f.write('%s\n\n' % o)
 		f.close()
 		if json_out:

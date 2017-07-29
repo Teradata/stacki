@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 #
 # @SI_Copyright@
 # @SI_Copyright@
@@ -20,7 +20,7 @@ from stacki_storage import *
 def getController():
 	# Check if a controller is listed explicitly
 	controller_type = None
-	if attributes.has_key('storage.adapter.type'):
+	if 'storage.adapter.type' in attributes:
 		controller_type = attributes['storage.adapter.type']
 
 	# If controller type is specified, make that
@@ -58,12 +58,12 @@ def getController():
 ## MAIN
 ##
 
-if attributes.has_key('nukecontroller'):
+if 'nukecontroller' in attributes:
 	nukecontroller = attributes['nukecontroller']
 else:
 	nukecontroller = 'false'
 
-if attributes.has_key('secureerase'):
+if 'secureerase' in attributes:
 	secureerase = attributes['secureerase']
 else:
 	secureerase = 'false'
@@ -143,7 +143,7 @@ for arrayid in arrayids:
 			raidlevel = o['raidlevel']
 
 		if 'options' in o.keys():
-			options  = o['options']
+			options	 = o['options']
 
 	if not adapter:
 		adapter = ctrl.getAdapter()

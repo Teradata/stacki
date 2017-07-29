@@ -1,6 +1,6 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
-from subprocess import *
+import subprocess
 
 class CLI:
 	debug = 0
@@ -12,8 +12,8 @@ class CLI:
 		file = open('/tmp/hpssacli.log', 'a')
 		file.write('cmd: %s\n' % ' '.join(cmd))
 
-		p = Popen(cmd, stdout=PIPE)
-		result = p.stdout.readlines()
+		p = subprocess.run(cmd, stdin=subprocess.PIPE)
+		result = p.stdout.decode()
 
 		file.write('result:\n')
 		for line in result:

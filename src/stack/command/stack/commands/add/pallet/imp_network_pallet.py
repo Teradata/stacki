@@ -47,7 +47,7 @@ import tempfile
 import shutil
 import sys
 import os
-import urlparse
+from urllib.parse import urlparse
 import stack.file
 from stack.exception import *
 
@@ -72,7 +72,7 @@ class Implementation(stack.commands.Implementation):
 			'-np',	# Don't create parent directories
 			'-A','roll-*.xml', # Only download roll-*.xml files
 			loc]
-		print ' '.join(wget_cmd)
+		print (' '.join(wget_cmd))
 		s = subprocess.Popen(wget_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		rc = s.wait()
 		o, e = s.communicate()
@@ -116,7 +116,7 @@ class Implementation(stack.commands.Implementation):
 			'-P',destdir, # directory to save files to
 			norm_loc ]
 
-		print ' '.join(wget_cmd)
+		print (' '.join(wget_cmd))
 
 		s = subprocess.Popen(wget_cmd, stdout=sys.stdout, stderr=sys.stdout)
 		rc = s.wait()

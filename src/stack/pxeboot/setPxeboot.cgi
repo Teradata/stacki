@@ -1,8 +1,8 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 #
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#				stacki.com
+#				   v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -21,7 +21,7 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 # 
-# 	 "This product includes software developed by StackIQ" 
+#	 "This product includes software developed by StackIQ" 
 #  
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
@@ -42,9 +42,9 @@
 # @SI_Copyright@
 #
 # @Copyright@
-#  				Rocks(r)
-#  		         www.rocksclusters.org
-#  		         version 5.4 (Maverick)
+#				Rocks(r)
+#			 www.rocksclusters.org
+#			 version 5.4 (Maverick)
 #  
 # Copyright (c) 2000 - 2010 The Regents of the University of California.
 # All rights reserved.	
@@ -64,16 +64,16 @@
 # 3. All advertising and press materials, printed or electronic, mentioning
 # features or use of this software must display the following acknowledgement: 
 #  
-# 	"This product includes software developed by the Rocks(r)
-# 	Cluster Group at the San Diego Supercomputer Center at the
-# 	University of California, San Diego and its contributors."
+#	"This product includes software developed by the Rocks(r)
+#	Cluster Group at the San Diego Supercomputer Center at the
+#	University of California, San Diego and its contributors."
 # 
 # 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
 # neither the name or logo of this software nor the names of its
 # authors may be used to endorse or promote products derived from this
 # software without specific prior written permission.  The name of the
 # software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".  For licensing of 
+# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
 # the associated name, interested parties should contact Technology 
 # Transfer & Intellectual Property Services, University of California, 
 # San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
@@ -104,11 +104,11 @@ syslog.openlog('setPxeBoot.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
 # get the name of the node that is issuing the request
 #
 ipaddr = None
-if os.environ.has_key('REMOTE_ADDR'):
+if 'REMOTE_ADDR' in os.environ:
 	ipaddr = os.environ['REMOTE_ADDR']
 if not ipaddr:
-        sys.exit(-1)
-        
+	sys.exit(-1)
+	
 syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
 
 # 'params' field should be a python dictionary of the form:
@@ -123,18 +123,18 @@ params = None
 action = None
 try:
 	params = form['params'].value
-        try:
-                params = json.loads(params)
-        	try:
-	        	action = params['action']
-        	except:
-		        syslog.syslog(syslog.LOG_ERR, 'no action speficied')
-        except:
-                syslog.syslog(syslog.LOG_ERR, 'invalid params %s' % params)
+	try:
+		params = json.loads(params)
+		try:
+			action = params['action']
+		except:
+			syslog.syslog(syslog.LOG_ERR, 'no action speficied')
+	except:
+		syslog.syslog(syslog.LOG_ERR, 'invalid params %s' % params)
 except:
-        syslog.syslog(syslog.LOG_ERR, 'missing params')
+	syslog.syslog(syslog.LOG_ERR, 'missing params')
 
-        
+	
 # The above let's us set the boot action to anything (e.g. 'install') but
 # here we lock thing down to only allow a reset to 'os'.
 
@@ -146,10 +146,10 @@ if action == 'os':
 		'value=false'])
 	stack.api.Call('set host attr', [ ipaddr, 'attr=secureerase',
 		'value=false'])
-        
-print 'Content-type: application/octet-stream'
-print 'Content-length: %d' % (len(''))
-print ''
-print ''
+	
+print('Content-type: application/octet-stream')
+print('Content-length: %d' % (len('')))
+print('')
+print('')
 
 syslog.closelog()

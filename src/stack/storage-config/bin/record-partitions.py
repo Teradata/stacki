@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 #
 # @SI_Copyright@
 # @SI_Copyright@
@@ -85,7 +85,7 @@ for p in partitions:
 
 random.seed(int(time.time()))
 
-if attributes.has_key('Kickstart_PrivateKickstartHost'):
+if 'Kickstart_PrivateKickstartHost' in attributes:
 	host = attributes['Kickstart_PrivateKickstartHost']
 
 	retries = 0

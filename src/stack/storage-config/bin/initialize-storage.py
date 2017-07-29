@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 #
 # @SI_Copyright@
 # @SI_Copyright@
@@ -30,10 +30,10 @@ def nukeLVM(volumegroup):
 			('vgdisplay -c', 'vgremove --force'),
 			('pvdisplay -c', 'pvremove --force') ]:
 
-		p = subprocess.Popen(shlex.split(display),
-			stdout = subprocess.PIPE, stderr = FNULL)
-		(o, e) = p.communicate()
-		for line in o.split():
+		p = subprocess.run(shlex.split(display),
+				   stdout = subprocess.PIPE, 
+				   stderr = FNULL)
+		for line in p.stdout.decode().split():
 			l = line.split(':')
 			if len(l) > 1 and (volumegroup == '*' or
 					volumegroup == l[1]):
@@ -60,7 +60,7 @@ def nukeMD(part):
 
 
 def nukeDisk(disk):
-	if attributes.has_key('disklabel'):
+	if 'disklabel' in attributes:
 		disklabel = attributes['disklabel']
 	else:
 		disklabel = 'gpt'
@@ -68,7 +68,7 @@ def nukeDisk(disk):
 	#
 	# Clear out the master boot record of the drive
 	#
-        cmd = 'dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
+	cmd = 'dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
 	subprocess.call(shlex.split(cmd),
 		stdout = FNULL, stderr = subprocess.STDOUT)
 
@@ -82,12 +82,12 @@ def nukeDisk(disk):
 ## MAIN
 ##
 
-if attributes.has_key('nukecontroller'):
+if 'nukecontroller' in attributes:
 	nukecontroller = attributes['nukecontroller']
 else:
 	nukecontroller = 'false'
 
-if attributes.has_key('nukedisks'):
+if 'nukedisks' in attributes:
 	n = attributes['nukedisks']
 
 	#

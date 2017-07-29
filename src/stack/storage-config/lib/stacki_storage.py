@@ -39,20 +39,20 @@ def getHostDisks(nukedisks):
 	#		'diskid'	: 1,
 	#		'part'		: [ 'sda1', 'sda2' ],
 	#		'raid'		: [ 'md0', 'md1' ],
-	# 		'lvm'		: [ 'volgrp01-var', 'volgrp02-export' ],
-	# 		'nuke'		: 0
+	#		'lvm'		: [ 'volgrp01-var', 'volgrp02-export' ],
+	#		'nuke'		: 0
 	#	}]
 	#
-	p = subprocess.Popen([ 'lsblk', '-lio', 'NAME,RM,RO,TYPE' ],
-		stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-	out = p.communicate()[0]
+	p = subprocess.run([ 'lsblk', '-lio', 'NAME,RM,RO,TYPE' ],
+			   stdin=subprocess.PIPE, 
+			   stdout=subprocess.PIPE,
+			   stderr=subprocess.PIPE)
 	
 	disks = []
 	diskentry = None
 	diskid = 1
 
-	for l in out.split('\n'):
+	for l in p.stdout.decode().split('\n'):
 		# Ignore empty lines
 		if not l.strip():
 			continue
@@ -127,16 +127,14 @@ def getHostMountpoint(host_fstab, uuid, label):
 def getDiskPartNumber(disk):
 	partnumber = 0
 
-	p = subprocess.Popen([ 'blkid', '-o', 'export',
-		'-s', 'PART_ENTRY_NUMBER', '-p', '/dev/%s' % disk ],
-		stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-	out = p.communicate()[0]
-
+	p = subprocess.run([ 'blkid', '-o', 'export', '-s', 'PART_ENTRY_NUMBER', '-p', '/dev/%s' % disk ],
+			   stdin=subprocess.PIPE, 
+			   stdout=subprocess.PIPE,
+			   stderr=subprocess.PIPE)
 	#
 	# the above should only return one line
 	#
-	arr = out.split('=')
+	arr = p.stdout.decode().split('=')
 
 	if len(arr) == 2:
 		partnumber = arr[1].strip()
@@ -150,14 +148,12 @@ def getHostPartitions(disks, host_fstab):
 	for d in disks:
 		disk = d['device']
 	
-		p = subprocess.Popen([ 'lsblk', '-nrbo', 
-			'NAME,SIZE,UUID,LABEL,MOUNTPOINT,FSTYPE',
-			'/dev/%s' % disk ],
-			stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
-		out = p.communicate()[0]
-		
-		for l in out.split('\n'):
+		p = subprocess.run([ 'lsblk', '-nrbo', 'NAME,SIZE,UUID,LABEL,MOUNTPOINT,FSTYPE', '/dev/%s' % disk ],
+				   stdin=subprocess.PIPE, 
+				   stdout=subprocess.PIPE,
+				   stderr=subprocess.PIPE)
+
+		for l in p.stdout.decode().split('\n'):
 			# Ignore empty lines
 			if not l.strip():
 				continue

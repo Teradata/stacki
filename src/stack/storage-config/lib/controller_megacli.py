@@ -1,6 +1,6 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
-from subprocess import *
+import subprocess
 
 class CLI:
 
@@ -13,8 +13,10 @@ class CLI:
 		cmd.extend(['-AppLogFile','/tmp/MegaCli.log'])
 
 		result = []
-		p = Popen(cmd, stdout=PIPE)
-		for line in p.stdout.readlines():
+
+		p = subprocess.run(cmd, subprocess.stdout=PIPE)
+
+		for line in p.stdout.decode().split('\n'):
 			tokens = line[:-1].split(':', 1)
 			if len(tokens) != 2:
 				continue

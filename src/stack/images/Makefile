@@ -49,6 +49,10 @@ include $(STACKBUILD)/etc/CCRules.mk
 bootstrap:
 	yum install -y $(OS.DEPENDENCIES)
 
+deploy: install-rpm
+	cp /opt/stack/images/initrd*	/tftpboot/pxelinux/
+	cp /opt/stack/images/vmlinuz*	/tftpboot/pxelinux/
+
 build:
 	make -C $(ANACONDA_VERSION) build
 

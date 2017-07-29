@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 #
 # @SI_Copyright@
 # @SI_Copyright@
@@ -95,9 +95,9 @@ def outputPartition(p, initialize):
 		#
 		# we are reusing partitions, so we only need 'onpart'
 		#
-		if p.has_key('uuid'):
+		if 'uuid' in p:
 			line += [ '--onpart=/dev/disk/by-uuid/%s' % p['uuid'] ]
-		elif p.has_key('diskpart'):
+		elif 'diskpart' in p:
 			line += [ '--onpart=%s' % p['diskpart'] ]
 
 	if not format:
@@ -106,7 +106,7 @@ def outputPartition(p, initialize):
 	if label:
 		line += [ '--label=%s' % label ]
 
-	print '%s' % ' '.join(line)
+	print('%s' % ' '.join(line))
 
 
 def sortPartId(entry):
@@ -150,7 +150,7 @@ def doPartitions(disk, initialize):
 		#
 		# skip all software RAID partitions (e.g., md0, md1, etc.)
 		#
-		if p.has_key('diskpart') and md_re.match(p['diskpart']):
+		if 'diskpart' in p and md_re.match(p['diskpart']):
 			continue
 
 		outputPartition(p, initialize)
@@ -159,13 +159,13 @@ def doPartitions(disk, initialize):
 
 
 def doOutputExistingLVM(name, fstab):
-	p = subprocess.Popen([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path',
-		'--noheadings', '--separator=:' ], 
-		stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-	out = p.communicate()[0]
 
-	for line in out.split('\n'):
+	p = subprocess.run([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path', '--noheadings', '--separator=:' ], 
+			   stdin=subprocess.PIPE, 
+			   stdout=subprocess.PIPE,
+			   stderr=subprocess.PIPE)
+
+	for line in p.stdout.decode().split('\n'):
 		l = line.split(':')
 		if len(l) > 2:
 			vgname = l[0].strip()
@@ -186,7 +186,7 @@ def doOutputExistingLVM(name, fstab):
 						if p['mountpoint'] not in [ '/', '/var', '/boot' ]:
 							line += [ '--noformat' ]
 
-						print '%s' % ' '.join(line)
+						print('%s' % ' '.join(line))
 		
 
 def doOutputLVM(device, partitions):
@@ -203,7 +203,7 @@ def doOutputLVM(device, partitions):
 			else:
 				line += [ '--size=%d' % p['size'] ]
 
-			print '%s' % ' '.join(line)
+			print('%s' % ' '.join(line))
 
 
 def isNewRaid(disks, partitions, options):
@@ -252,11 +252,11 @@ def doLVM(disks, partitions, fstab):
 	#
 	#	1) physical partition:
 	#
-        #		'fstype': 'lvm',
-        #		'device': 'sdb',
-        #		'mountpoint': 'pv.01',
-        #		'options': '--grow',
-        #		'size': 1L
+	#		'fstype': 'lvm',
+	#		'device': 'sdb',
+	#		'mountpoint': 'pv.01',
+	#		'options': '--grow',
+	#		'size': 1L
 	#
 	#	2) volume group:
 	#
@@ -283,8 +283,7 @@ def doLVM(disks, partitions, fstab):
 			is_new_lvm = isNewLVM(disks, partitions, p['device'])
 
 			if is_new_lvm:
-				print 'volgroup %s %s' % (p['mountpoint'],
-					p['device'])
+				print('volgroup %s %s' % (p['mountpoint'], p['device']))
 
 				#
 				# the 'mountpoint' in the 'volgroup'
@@ -297,13 +296,13 @@ def doLVM(disks, partitions, fstab):
 
 
 def getMDInfo(device):
-	p = subprocess.Popen([ 'mdadm', '--detail', '--export',
-		'/dev/%s' % device ],
-		stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-	out = p.communicate()[0]
 
-	for line in out.split('\n'):
+	p = subprocess.run([ 'mdadm', '--detail', '--export', '/dev/%s' % device ],
+			   stdin=subprocess.PIPE, 
+			   stdout=subprocess.PIPE,
+			   stderr=subprocess.PIPE)
+
+	for line in p.stdout.decode().split('\n'):
 		l = line.split('=')
 
 		if l[0] == 'MD_DEVNAME':
@@ -344,8 +343,7 @@ def doRAID(csv_partitions, host_partitions):
 	#
 	existing = []
 	for p in host_partitions:
-		if p.has_key('diskpart') and md_re.match(p['diskpart']) \
-				and p['diskpart'] not in existing:
+		if 'diskpart' in p and md_re.match(p['diskpart']) and p['diskpart'] not in existing:
 
 			existing.append(p['diskpart'])
 
@@ -376,7 +374,7 @@ def doRAID(csv_partitions, host_partitions):
 
 			line += [ '--useexisting' ]
 
-			print '%s' % ' '.join(line)
+			print('%s' % ' '.join(line))
 
 	for p in csv_partitions:
 		if md_re.match(p['device']) and p['device'] not in existing:
@@ -393,17 +391,17 @@ def doRAID(csv_partitions, host_partitions):
 			line += [ '--device %s' % p['device'] ]
 			line += [ '%s' % p['options'] ]
 
-			print '%s' % ' '.join(line)
+			print('%s' % ' '.join(line))
 
 ##
 ## MAIN
 ##
-if attributes.has_key('nukecontroller'):
+if 'nukecontroller' in attributes:
 	nukecontroller = attributes['nukecontroller']
 else:
 	nukecontroller = 'false'
 
-if attributes.has_key('nukedisks'):
+if 'nukedisks' in attributes:
 	n = attributes['nukedisks']
 
 	#
@@ -466,7 +464,7 @@ if not csv_partitions:
 	parts.append( ('/var', 16000, 'xfs') )
 	parts.append( ('/state/partition1', 0, 'xfs') )
 
-	if attributes.has_key('boot_device'):
+	if 'boot_device' in attributes:
 		bootdisk = attributes['boot_device']
 	else:
 		bootdisk = disks[0]['device']
