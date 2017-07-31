@@ -1,95 +1,15 @@
 #! /opt/stack/bin/python
 # 
 # @SI_Copyright@
-#				stacki.com
-#				   v4.0
-# 
-#      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-#	 "This product includes software developed by StackIQ" 
-#  
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2006 - 2017 StackIQ Inc.
+# All rights reserved. stacki(r) v4.0 stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 #
 # @Copyright@
-#				Rocks(r)
-#			 www.rocksclusters.org
-#			 version 5.4 (Maverick)
-#  
-# Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
-#	"This product includes software developed by the Rocks(r)
-#	Cluster Group at the San Diego Supercomputer Center at the
-#	University of California, San Diego and its contributors."
-# 
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.  The name of the
-# software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
-# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
-# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2000 - 2010 The Regents of the University of California
+# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
 import string
@@ -101,9 +21,8 @@ from xml.sax import handler
 import xml.dom.minidom
 from stack.bool import *
 import stack.cond
-from stack.profile import StackNSURI, StackNSLabel
-	
-		
+
+
 class ProfileSnippet:
 	
 	def __init__(self, text, source):
@@ -311,8 +230,8 @@ class Generator:
 		return '\n'.join(l)
 
 	
-	def getAttr(self, node, attr, ns=StackNSURI):
-		a = node.attributes.getNamedItemNS(ns, attr)
+	def getAttr(self, node, attr):
+		a = node.attributes.getNamedItem(attr)
 		if a:
 			return a.value
 		else:
@@ -323,10 +242,10 @@ class Generator:
 		if not self.attrs or not node.nodeType == node.ELEMENT_NODE:
 			return True
 
-		arch	= self.getAttr(node, 'arch')
-		osname	= self.getAttr(node, 'os')
-		release = self.getAttr(node, 'release')
-		cond	= self.getAttr(node, 'cond')
+		arch	= self.getAttr(node, 'stack:arch')
+		osname	= self.getAttr(node, 'stack:os')
+		release = self.getAttr(node, 'stack:release')
+		cond	= self.getAttr(node, 'stack:cond')
 
 		expr = stack.cond.CreateCondExpr(arch, osname, release, cond)
 		return stack.cond.EvalCondExpr(expr, self.attrs)
@@ -337,7 +256,7 @@ class Generator:
 		Stores the order of traversal of the nodes
 		Useful for debugging.
 		"""
-		nodefile = self.getAttr(node, 'file')
+		nodefile = self.getAttr(node, 'stack:file')
 
 		if nodefile and nodefile not in self.nodeFilesDict:
 			self.nodeFilesDict[nodefile] = True
@@ -353,7 +272,7 @@ class Generator:
 
 	def parse(self, xml_string):
 		doc = xml.dom.minidom.parseString(xml_string)
-		self.traverse(doc.getElementsByTagNameNS(StackNSURI, 'profile')[0])
+		self.traverse(doc.getElementsByTagName('stack:profile')[0])
 
 
 	def traverse(self, node):
@@ -361,8 +280,13 @@ class Generator:
 
 		if not node.nodeType == node.ELEMENT_NODE:
 			return
-		if not node.namespaceURI == StackNSURI:
+
+		ns  = node.prefix
+		tag = node.localName
+
+		if ns != 'stack':
 			return
+
 		if not self.cond(node):
 			return
 
@@ -373,7 +297,7 @@ class Generator:
 		# the handler already did this.
 
 		try:
-			fn = eval('self.traverse_stack_%s' % node.localName)
+			fn = eval('self.traverse_%s_%s' % (ns, tag))
 		except AttributeError:
 			fn = None
 		if fn:
@@ -392,10 +316,9 @@ class Generator:
 			elif child.nodeType == child.ELEMENT_NODE:
 				if not self.cond(child):
 					continue
-				if not child.namespaceURI == StackNSURI:
-					continue
 				try:
-					fn = eval('self.collect_stack_%s' % child.localName)
+					fn = eval('self.collect_%s_%s' % (child.prefix, 
+									  child.localName))
 				except AttributeError:
 					fn = None
 				if fn:
@@ -404,7 +327,7 @@ class Generator:
 
 
 
-	# <profile>
+	# <stack:profile>
 	
 	def traverse_stack_profile(self, node):
 		# pull out the attr to handle generic conditionals
@@ -412,48 +335,38 @@ class Generator:
 		# supports the old syntax
 
 		if node.attributes:
-			attrs = node.attributes.getNamedItemNS(StackNSURI, 'attrs')
+			attrs = node.attributes.getNamedItem('stack:attrs')
 			if attrs:
 				dict = eval(attrs.value)
 				for (k,v) in dict.items():
 					self.attrs[k] = v
 
 
-	# <main>
-
-	def traverse_stack_main(self, node):
-		nodefile = self.getAttr(node, 'file')
-
-		for child in node.childNodes:
-			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
-				self.mainSection.append(child.nodeValue.strip(), nodefile)
-		return True
-
-	# <stacki>
+	# <stack:stacki>
 
 	def traverse_stack_stacki(self, node):
 		self.stackiSection.append(self.collect(node),
-					  self.getAttr(node, 'file'))
+					  self.getAttr(node, 'stack:file'))
 		return True
 
-	# <debug>
+	# <stack:debug>
 	
 	def traverse_stack_debug(self, node):
 		self.debugSection.append(self.collect(node), 
-					 self.getAttr(node, 'file'))
+					 self.getAttr(node, 'stack:file'))
 		return True
 	
-	# <file>
+	# <stack:file>
 	
 	def collect_stack_file(self, node):
 
-		fileName    = self.getAttr(node, 'name')
-		fileMode    = self.getAttr(node, 'mode')
-		fileOwner   = self.getAttr(node, 'owner')
-		filePerms   = self.getAttr(node, 'perms')
-		fileQuoting = self.getAttr(node, 'vars')
-		fileCommand = self.getAttr(node, 'expr')
-		fileRCS	    = self.getAttr(node, 'rcs')
+		fileName    = self.getAttr(node, 'stack:name')
+		fileMode    = self.getAttr(node, 'stack:mode')
+		fileOwner   = self.getAttr(node, 'stack:owner')
+		filePerms   = self.getAttr(node, 'stack:perms')
+		fileQuoting = self.getAttr(node, 'stack:vars')
+		fileCommand = self.getAttr(node, 'stack:expr')
+		fileRCS	    = self.getAttr(node, 'stack:rcs')
 		fileText    = self.collect(node)
 
 		if not fileQuoting:

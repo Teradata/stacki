@@ -1,5 +1,4 @@
 #!/opt/stack/bin/python
-from __future__ import print_function
 import os
 import subprocess
 import stack.media
@@ -26,7 +25,7 @@ for s in sys.argv:
 		no_partition = True
 
 
-if not os.environ.has_key('DISPLAY'):
+if not 'DISPLAY' in os.environ:
 	noX = True
 
 print('Set network during boss_config: ' + str(config_net))

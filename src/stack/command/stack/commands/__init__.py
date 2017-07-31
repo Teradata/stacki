@@ -1,93 +1,13 @@
 # @SI_Copyright@
-#				stacki.com
-#				   v4.0
-# 
-#      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-#	 "This product includes software developed by StackIQ" 
-#  
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2006 - 2017 StackIQ Inc.
+# All rights reserved. stacki(r) v4.0 stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 #
 # @Copyright@
-#				Rocks(r)
-#			 www.rocksclusters.org
-#			 version 5.4 (Maverick)
-#  
-# Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
-#	"This product includes software developed by the Rocks(r)
-#	Cluster Group at the San Diego Supercomputer Center at the
-#	University of California, San Diego and its contributors."
-# 
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.  The name of the
-# software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
-# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
-# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2000 - 2010 The Regents of the University of California
+# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
 import os
@@ -111,21 +31,21 @@ from stack.attr import *
 import stack.graph
 from stack.exception import *
 from stack.bool import *
-import xml
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
-from xml.sax._exceptions import SAXParseException
 from pymysql import OperationalError, ProgrammingError
 
 _logPrefix = ''
 _debug     = False
+
 
 def Log(message, level=syslog.LOG_INFO):
 	"""
 	Send a message to syslog
 	"""
 	syslog.syslog(level, '%s%s' % (_logPrefix, message))
+
 
 def Debug(message, level=syslog.LOG_DEBUG):
 	"""If the environment variable STACKDEBUG is set,
@@ -153,7 +73,7 @@ class OSArgumentProcessor:
 	def getOSNames(self, args=None):
 		list = []
 		if not args:
-			args = [ '%' ] # find all appliances
+			args = ['%']		# find all appliances
 		for arg in args:
 			if arg == 'centos':
 				arg = 'redhat'
@@ -163,7 +83,7 @@ class OSArgumentProcessor:
 					where name like '%s' order by name
 					""" % arg):
 				list.append(name)
-			if len(list) == 0 and arg == '%': # empty table is OK
+			if len(list) == 0 and arg == '%':  # empty table is OK
 				continue
 			if len(list)  < 1:
 				raise CommandError(self, 'unknown os "%s"' % arg)
@@ -177,7 +97,7 @@ class EnvironmentArgumentProcessor:
 	def getEnvironmentNames(self, args=None):
 		list = []
 		if not args:
-			args = [ '%' ] # find all appliances
+			args = ['%'] # find all appliances
 		for arg in args:
 			rows = self.db.execute("""select name from environments
 				where name like '%s'""" % arg)
@@ -203,7 +123,7 @@ class ApplianceArgumentProcessor:
 		"""	
 		list = []
 		if not args:
-			args = [ '%' ] # find all appliances
+			args = ['%'] # find all appliances
 		for arg in args:
 			rows = self.db.execute("""select name from appliances 
 				where name like '%s'""" % arg)
@@ -228,7 +148,7 @@ class BoxArgumentProcessor:
 		"""
 		list = []
 		if not args:
-			args = [ '%' ] # find all boxes
+			args = ['%'] # find all boxes
 
 		for arg in args:
 			rows = self.db.execute("""select name from
@@ -255,7 +175,7 @@ class BoxArgumentProcessor:
 		#
 		# make sure 'box' exists
 		#
-		self.getBoxNames([ box ])	
+		self.getBoxNames([box])	
 
 		pallets = []
 
@@ -283,7 +203,7 @@ class NetworkArgumentProcessor:
 		"""
 		list = []
 		if not args:
-			args = [ '%' ] # find all networks
+			args = ['%'] # find all networks
 		for arg in args:
 			rows = self.db.execute("""select name from subnets
 				where name like '%s'""" % arg)
@@ -319,7 +239,7 @@ class CartArgumentProcessor:
 	
 		list = []
 		if not args:
-			args = [ '%' ] # find all cart names
+			args = ['%'] # find all cart names
 		for arg in args:
 			rows = self.db.execute("""
 				select name from carts
@@ -364,7 +284,7 @@ class RollArgumentProcessor:
 	
 		list = []
 		if not args:
-			args = [ '%' ] # find all pallet names
+			args = ['%'] # find all pallet names
 		for arg in args:
 			rows = self.db.execute("""select distinct name,version,rel
 				from rolls where name like binary '%s' and 
@@ -442,7 +362,7 @@ class HostArgumentProcessor:
 			and a.id = n.appliance order by rack, rank %s
 			""" % order)
 
-		hosts = [ ]
+		hosts = []
 
 		if frontends:
 			hosts.extend(frontends)
@@ -601,7 +521,7 @@ class PartitionArgumentProcessor:
 		xsize = x[0]
 		ysize = y[0]
 
-		suffixes = [ 'KB', 'MB', 'GB', 'TB', 'PB' ]
+		suffixes = ['KB', 'MB', 'GB', 'TB', 'PB']
 
 		xsuffix = xsize[-2:].upper()
 		ysuffix = ysize[-2:].upper()
@@ -644,7 +564,7 @@ class PartitionArgumentProcessor:
 			p.node = n.id and n.name = '%s' order by device
 			""" % host):
 			
-			if mnt in [ '', 'swap' ]:
+			if mnt in ['', 'swap']:
 				continue
 			if len(mnt) > 0 and mnt[0] != '/':
 				continue
@@ -1021,7 +941,7 @@ class DocStringHandler(handler.ContentHandler,
 			self.section['description'] = self.text
 		self.key  = None
 		self.text = ''
-		if name in [ 'arg', 'param' ]:
+		if name in ['arg', 'param']:
 			type = attrs.get('type')
 			if not type:
 				type = 'string'
@@ -1113,9 +1033,9 @@ class DatabaseConnection:
 
 	def select(self, command):
 		if not self.link:
-			return [ ]
+			return []
 		
-		rows = [ ]
+		rows = []
 		
 		m = hashlib.md5()
 		m.update(command.strip().encode('utf-8'))
@@ -1132,7 +1052,7 @@ class DatabaseConnection:
 			except (OperationalError, ProgrammingError):
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
-				rows = [ ]
+				rows = []
 				
 			if self.caching:
 				self.cache[k] = rows
@@ -1578,9 +1498,9 @@ class Command:
 		self.output = []
 	
 		self.arch = os.uname()[4]
-		if self.arch in [ 'i386', 'i486', 'i586', 'i686' ]:
+		if self.arch in ['i386', 'i486', 'i586', 'i686']:
 			self.arch = 'i386'
-		elif self.arch in [ 'armv7l' ]:
+		elif self.arch in ['armv7l']:
 			self.arch = 'armv7hl'
 
 		self.os = os.uname()[0].lower()
@@ -1654,8 +1574,8 @@ class Command:
 
 		# make sure names is a list or tuple
 		
-		if not type(names) in [ type([]), type(()) ]:
-			names = [ names ]
+		if not type(names) in [type([]), type(())]:
+			names = [names]
 
 		# for each element in the names list make sure it is also
 		# a tuple.  If the second element (default value) is missing
@@ -1664,7 +1584,7 @@ class Command:
 				
 		pdlist = []
 		for e in names:
-			if type(e) in [ type([]), type(()) ]:
+			if type(e) in [type([]), type(())]:
 				if len(e) == 3:
 					tuple = ( e[0], e[1], e[2] )
 				elif len(e) == 2:
@@ -1672,7 +1592,7 @@ class Command:
 				elif len(e) == 1:
 					tuple = ( e[0], None, False )
 				else:
-					assert len(e) in [ 1, 2, 3 ]
+					assert len(e) in [1, 2, 3]
 			else:
 				tuple = ( e[0], None, False )
 			pdlist.append(tuple)
@@ -1704,7 +1624,7 @@ class Command:
 		if s:
 			return marshal.loads(s)
 
-		return [ ]
+		return []
 
 
 	def notify(self, message):
@@ -1751,7 +1671,7 @@ class Command:
 			# module once.	This also plugins to be compiled
 			# and does not require source code releases.
 
-			if os.path.splitext(file)[1] not in [ '.py', '.pyc']:
+			if os.path.splitext(file)[1] not in ['.py', '.pyc']:
 				continue
 
 			module = '%s.%s' % (self.__module__, 
@@ -1809,7 +1729,7 @@ class Command:
 	def runPlugins(self, args='', plugins=None):
 		if not plugins:
 			plugins = self.loadPlugins()
-		results = [ ]
+		results = []
 		for plugin in plugins:
 			Log('run %s' % plugin)
 			retval = plugin.run(args)
@@ -1833,7 +1753,7 @@ class Command:
 			# module once.	This allows plugins to be compiled
 			# and does not require source code releases.
 
-			if ext not in [ '.py', '.pyc']:
+			if ext not in ['.py', '.pyc']:
 				continue
 
 			module = '%s.%s' % (self.__module__, base)
@@ -1933,7 +1853,7 @@ class Command:
 
 		# VALS can be a list, tuple, or primitive type.
 
-		list = [ '%s' % owner ]
+		list = ['%s' % owner]
 		
 		if type(vals) == type([]):
 			list.extend(vals)
@@ -1977,13 +1897,13 @@ class Command:
 			format	    = tokens[0]
 			format_args = tokens[1].lower()
 
-		if format in [ 'col', 'shell', 'json', 'python', 'binary' ]:
+		if format in ['col', 'shell', 'json', 'python', 'binary']:
 			if not header: # need to build a generic header
 				if len(self.output) > 0:
 					rows = len(self.output[0])
 				else:
 					rows = 0
-				header = [ ]
+				header = []
 				for i in range(0, rows):
 					header.append('col-%d' % i)
 			list = []
@@ -1995,7 +1915,7 @@ class Command:
 						val = line[i]
 						if key in dict:
 							if not type(dict[key]) ==types.ListType:
-								dict[key] = [ dict[key] ]
+								dict[key] = [dict[key]]
 							dict[key].append(val)
 						else:
 							dict[key] = val
@@ -2061,7 +1981,7 @@ class Command:
 					list.append(field.upper())
 				else:
 					list.append('')
-			output = [ list ]
+			output = [list]
 			output.extend(self.output)
 		else:
 			output = self.output
@@ -2095,7 +2015,7 @@ class Command:
 					maxWidth = n
 			for line in output[1:]:
 				for i in range(0, len(line)):
-					if line[i] in [ None, 'None' ]:
+					if line[i] in [None, 'None']:
 						s = ''
 					else:
 						s = str(line[i])
@@ -2116,7 +2036,7 @@ class Command:
 		for line in output:
 			list = []
 			for i in range(startOfLine, len(line)):
-				if line[i] in [ None, 'None' ]:
+				if line[i] in [None, 'None']:
 					s = ''
 				else:
 					s = str(line[i])
@@ -2159,7 +2079,7 @@ class Command:
 			return
 
 		if self.MustBeRoot:
-			users = [ 'root', 'apache' ]
+			users = ['root', 'apache']
 		else:
 			users = []
 			
@@ -2206,7 +2126,7 @@ class Command:
 		if rows:
 			for c,g in rows:
 				if g in groups:
-					if fnmatch.filter([ name ], c):
+					if fnmatch.filter([name], c):
 						allowed = True
 		else:
 
@@ -2343,7 +2263,7 @@ class Command:
 		return self.getHostAttr('localhost', attr)
 
 	def getHostAttr(self, host, attr):
-		for row in self.call('list.host.attr', [ host, 'attr=%s' % attr ]):
+		for row in self.call('list.host.attr', [host, 'attr=%s' % attr]):
 			return row['value']
 		return None
 

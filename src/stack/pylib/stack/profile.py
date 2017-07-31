@@ -1,95 +1,15 @@
 #! /opt/stack/bin/python
 #
 # @SI_Copyright@
-#				stacki.com
-#				   v4.0
-# 
-#      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-# 
-#	 "This product includes software developed by StackIQ" 
-#  
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY STACKIQ AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL STACKIQ OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2006 - 2017 StackIQ Inc.
+# All rights reserved. stacki(r) v4.0 stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 #
 # @Copyright@
-#				Rocks(r)
-#			 www.rocksclusters.org
-#			 version 5.4 (Maverick)
-#  
-# Copyright (c) 2000 - 2010 The Regents of the University of California.
-# All rights reserved.	
-#  
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#  
-# 1. Redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer.
-#  
-# 2. Redistributions in binary form must reproduce the above copyright
-# notice unmodified and in its entirety, this list of conditions and the
-# following disclaimer in the documentation and/or other materials provided 
-# with the distribution.
-#  
-# 3. All advertising and press materials, printed or electronic, mentioning
-# features or use of this software must display the following acknowledgement: 
-#  
-#	"This product includes software developed by the Rocks(r)
-#	Cluster Group at the San Diego Supercomputer Center at the
-#	University of California, San Diego and its contributors."
-# 
-# 4. Except as permitted for the purposes of acknowledgment in paragraph 3,
-# neither the name or logo of this software nor the names of its
-# authors may be used to endorse or promote products derived from this
-# software without specific prior written permission.  The name of the
-# software includes the following terms, and any derivatives thereof:
-# "Rocks", "Rocks Clusters", and "Avalanche Installer".	 For licensing of 
-# the associated name, interested parties should contact Technology 
-# Transfer & Intellectual Property Services, University of California, 
-# San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, 
-# Ph: (858) 534-5815, FAX: (858) 534-7345, E-MAIL:invent@ucsd.edu
-#  
-# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS''
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
-# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (c) 2000 - 2010 The Regents of the University of California
+# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
 import os
@@ -107,9 +27,6 @@ import stack.cond
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
-
-StackNSURI   = 'http://www.stacki.com'
-StackNSLabel = 'stack'
 
 
 class RollHandler(handler.ContentHandler,
@@ -201,6 +118,7 @@ class GraphHandler(handler.ContentHandler,
 		self.text			= ''
 		self.os				= attrs['os']
 		self.directories		= directories
+		self.xmlns			= ''
 
 		# Should we prune the graph while adding edges or not.
 		# Prune is the answer for most cases while traversing
@@ -208,6 +126,9 @@ class GraphHandler(handler.ContentHandler,
 		# representation of graph is required. 
 		self.prune			= prune
 
+
+	def nsAttrs(self):
+		return self.xmlns
 
 	def getMainGraph(self):
 		return self.graph.main
@@ -259,26 +180,17 @@ class GraphHandler(handler.ContentHandler,
 			# 1st Pass
 			#	- Expand XML Entities
 			#	- Expand EVAL tags
-			#	- Expand INCLUDE/SINCLUDE tag
 			#	- Logging for post sections
 
-			fin = open(xmlFile, 'r')
-			parser = make_parser()
-
+			fin       = open(xmlFile, 'r')
+			parser    = make_parser()
 			handler_1 = Pass1NodeHandler(node, xmlFile, self.attributes, eval, rcl)
 			parser.setContentHandler(handler_1)
 			parser.setFeature(handler.feature_namespaces, True)
-#			parser.setFeature(handler.feature_namespace_prefixes, True)
-			header = handler_1.getXMLHeader()
 
-			if self.os == 'redhat':
-				s = 'xmlns="%s" ' % StackNSURI
-			else:
-				s = ''
-			s += 'xmlns:stack="%s" ' % StackNSURI
-			s += 'xmlns:config="http://www.suse.com/1.0/configns" '
-			s += 'xmlns:xi="http://www.w3.org/2003/XInclude"'
-			header += '<stack:ns %s>' % s
+			xmlns   = handler_1.nsAttrs()
+			header  = handler_1.getXMLHeader()
+			header += '<stack:ns %s>' % xmlns
 
 			if 'STACKDEBUG' in os.environ:
 				i = 1
@@ -329,13 +241,11 @@ class GraphHandler(handler.ContentHandler,
 			# create their own XML, instead of requiring the
 			# user to annotate we do it for them.
 			
-			parser = make_parser()
-			xml = handler_1.getXML()
-
+			parser    = make_parser()
+			xml       = handler_1.getXML()
 			handler_2 = Pass2NodeHandler(node, self.attributes)
 			parser.setContentHandler(handler_2)
 			parser.setFeature(handler.feature_namespaces, True)
-#			parser.setFeature(handler.feature_namespace_prefixes, True)
 			if 'STACKDEBUG' in os.environ:
 				i = 1
 				for x in xml.split('\n'):
@@ -347,10 +257,10 @@ class GraphHandler(handler.ContentHandler,
 
 			# Attach the final XML to the node object so we can
 			# find it again.
-			node.addNamespaces(handler_2.xmlns)
 			node.addXML(handler_2.getXML())
 			node.addKSText(handler_2.getKSText())
 
+		self.xmlns = xmlns
 
 	def addOrder(self):
 		if self.graph.order.hasNode(self.attrs.order.head):
@@ -572,19 +482,76 @@ class GraphHandler(handler.ContentHandler,
 		self.text = self.text + s
 		
 
+class NodeHandler(handler.ContentHandler,
+		  handler.DTDHandler,
+		  handler.EntityResolver,
+		  handler.ErrorHandler,
+		  AttributeHandler):
 
-class Pass1NodeHandler(handler.ContentHandler,
-	handler.DTDHandler,
-	handler.EntityResolver,
-	handler.ErrorHandler,
-	AttributeHandler):
+	def __init__(self, node, attrs):
+		handler.ContentHandler.__init__(self)
+		self.attributes = attrs
+		self.os         = attrs['os']
+		self.node	= node
+		self.xml	= []
+		self.setAttributes(attrs)
+
+	def uri2ns(self, uri):
+		lookup = { 'http://www.stacki.com'           : 'stack',
+			   'http://www.suse.com/1.0/yast2ns' : 'sles',
+			   'http://www.suse.com/1.0/configns': 'config',
+			   'http://www.w3.org/2003/XInclude' : 'xi'
+		}
+		if uri in lookup:
+			return lookup[uri]
+		return ''
+
+	def nsAttrs(self):
+		if self.os == 'redhat':
+			attrs = [ 
+				'xmlns="http://www.stacki.com"',
+			]
+		elif self.os == 'sles':
+			attrs = [
+#				'xmlns="http://www.suse.com/1.0/yast2ns"',
+				'xmlns:sles="http://www.suse.com/1.0/yast2ns"',
+				'xmlns:config="http://www.suse.com/1.0/configns"',
+				'xmlns:xi="http://www.w3.org/2003/XInclude"'
+			]
+		attrs.append('xmlns:stack="http://www.stacki.com"')
+		return ' '.join(attrs)
+
+	def getAttr(self, attrs, key):
+		if key in attrs.getQNames():
+			return attrs.getValueByQName(key)
+		return None
+
+
+	def startElementNS(self, name, qname, attrs):
+
+		(uri, tag) = name
+		ns         = self.uri2ns(uri)
+
+		self.startTag(ns, tag, attrs)
+
+
+	def endElementNS(self, name, qname):
+
+		(uri, tag) = name
+		ns         = self.uri2ns(uri)
+
+		self.endTag(ns, tag)
+
+
+
+class Pass1NodeHandler(NodeHandler):
 
 	"""Sax Parser for the Kickstart Node files"""
 
 	def __init__(self, node, filename, attrs, eval=0, rcl=None):
-		handler.ContentHandler.__init__(self)
-		self.setAttributes(attrs)
-		self.node	= node
+
+		NodeHandler.__init__(self, node, attrs)
+
 		self.evalShell	= None
 		self.evalText	= []
 		self.rclCommand = None
@@ -593,20 +560,8 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.doEval	= eval
 		self.doCopy	= eval
 		self.rcl	= rcl
-		self.xml	= []
 		self.filename	= filename
 		self.stripText	= False
-		self.attributes = attrs
-		self.osname	= attrs['os']
-		self.namespaces = {}
-
-	def startPrefixMapping(self, ns, uri):
-		self.namespaces[uri] = ns
-
-	def getAttr(self, attrs, key):
-		if key in attrs.getQNames():
-			return attrs.getValueByQName(key)
-		return None
 
 	def evalCond(self, attrs):
 		arch	  = self.getAttr(attrs, 'arch')
@@ -616,116 +571,47 @@ class Pass1NodeHandler(handler.ContentHandler,
 
 		if osname == 'linux':
 			# Remnant of the Solaris port, keep this for now
-			# but it is clearly wrong now the we do Ubuntu and SLES.
+			# but it is clearly wrong now that we do Ubuntu and SLES.
 			osname = 'redhat'
 
 		return stack.cond.EvalCondExpr(stack.cond.CreateCondExpr(arch, osname, release, cond),
 					       self.attributes)
 
 
-	def startElement_stack_description(self, name, attrs):
+	def startTag_stack_description(self, ns, tag, attrs):
 		self.stripText = True
 
-	def endElement_stack_description(self, name):
+	def endTag_stack_description(self, ns, tag):
 		pass
 
-	def startElement_stack_changelog(self, name, attrs):
+	def startTag_stack_changelog(self, ns, tag, attrs):
 		self.stripText = True
 
-	def endElement_stack_changelog(self, name):
+	def endTag_stack_changelog(self, ns, tag):
 		pass
 
-	def startElement_stack_copyright(self, name, attrs):
+	def startTag_stack_copyright(self, ns, tag, attrs):
 		self.stripText = True
 
-	def endElement_stack_copyright(self, name):
+	def endTag_stack_copyright(self, ns, tag):
 		pass
 
-	def startElement_stack_si_copyright(self, name, attrs):
+	def startTag_stack_si_copyright(self, ns, tag, attrs):
 		self.stripText = True
 
-	def endElement_stack_si_copyright(self, name):
+	def endTag_stack_si_copyright(self, ns, tag):
 		pass
 
-	def startElement_stack_ns(self, name, attrs):
+	def startTag_stack_ns(self, ns, tag, attrs):
 		pass
 
-	def endElement_stack_ns(self, name):
+	def endTag_stack_ns(self, ns, tag):
 		pass
 	
-	# <include>
 
-	def startElement_stack_include(self, name, attrs):
-		filename = self.getAttr(attrs, 'file')
-		mode	 = self.getAttr(attrs, 'mode')
-		if not mode:
-			mode = 'quote'
+	# <stack:report>
 
-		file = open(os.path.join('include', filename), 'r')
-		for line in file.readlines():
-			if mode == 'quote':
-				if 'STACKDEBUG' in os.environ:
-					sys.stderr.write('[include]%s' %
-						saxutils.escape(line))
-				self.xml.append(saxutils.escape(line))
-			else:
-				if 'STACKDEBUG' in os.environ:
-					sys.stderr.write('[include]%s' % line)
-				self.xml.append(line)
-		file.close()
-
-	def endElement_stack_include(self, name):
-		pass
-	
-	# <sinclude> - same as include but allows for missing files
-
-	def startElement_stack_sinclude(self, name, attrs):
-		try:
-			self.startElement_include(name, attrs)
-		except IOError:
-			return
-
-	def endElement_stack_sinclude(self, name):
-		pass
-
-	# <copy>
-
-	def startElement_stack_copy(self, name, attrs):
-		if not self.evalCond(attrs):
-			self.stripText = True
-			return
-		if not self.doCopy:
-			return
-		src = self.getAttr(attrs, 'src')
-		dst = self.getAttr(attrs, 'dst')
-		if not dst:
-			dst = src
-
-		tmpfile = '/tmp/kpp.base64'
-		self.xml.append('<stack:file stack:name="%s"/>\n' % dst)
-		self.xml.append('<stack:file stack:name="%s">\n' % tmpfile)
-		try:
-			file = open(src, 'r')
-			data = base64.encodestring(file.read())
-			file.close()
-		except IOError:
-			data = ''
-		self.xml.append(data)
-		self.xml.append('</stack:file>\n')
-		self.xml.append("cat %s | /opt/stack/bin/python3 -c '" % tmpfile)
-		self.xml.append('\nimport base64\n')
-		self.xml.append('import sys\n')
-		self.xml.append("base64.decode(sys.stdin, sys.stdout)' > %s\n"
-			 % (dst))
-		self.xml.append('rm -rf /tmp/kpp.base64\n')
-		self.xml.append('rm -rf /tmp/RCS/kpp.base64,v\n')
-
-	def endElement_stack_copy(self, name):
-		pass
-
-	# <report>
-
-	def startElement_stack_report(self, name, attrs):
+	def startTag_stack_report(self, ns, tag, attrs):
 		self.doReport = True
 		if not self.evalCond(attrs):
 			self.stripText = True
@@ -738,7 +624,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 			self.rclCommand = 'report.%s' % command
 
 
-	def endElement_stack_report(self, name):
+	def endTag_stack_report(self, ns, tag):
 		if not self.doReport:
 			return
 		if not self.doEval or not self.rcl:
@@ -748,9 +634,9 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.rclArgs	= []
 		self.rclCommand = None
 
-	# <eval>
+	# <stack:eval>
 	
-	def startElement_stack_eval(self, name, attrs):
+	def startTag_stack_eval(self, ns, tag, attrs):
 		
 		self.setEvalState = True
 		if not self.evalCond(attrs):
@@ -779,7 +665,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 			self.evalText = ['import sys\nimport os\nsys.path.append(os.path.join("include", "applets"))\n']
 			
 		
-	def endElement_stack_eval(self, name):
+	def endTag_stack_eval(self, ns, tag):
 		if not self.setEvalState:
 			return
 		if not self.doEval:
@@ -811,9 +697,9 @@ class Pass1NodeHandler(handler.ContentHandler,
 		self.evalShell = None
 
 
-	# <post>
+	# <stack:post>
 
-	def startElement_stack_post(self, name, attrs):
+	def startTag_stack_post(self, ns, tag, attrs):
 		self.xml.append('\n'
 			'<stack:post>\n'
 			'<stack:file stack:name="/var/log/stack-install.log" stack:mode="append">\n'
@@ -822,10 +708,10 @@ class Pass1NodeHandler(handler.ContentHandler,
 			'</stack:post>\n'
 			'\n' %
 			self.node.getFilename())
-		self.startElementDefault_stack(name, attrs)
+		self.startTagDefault(ns, tag, attrs)
 
-	def endElement_stack_post(self, name):
-		self.endElementDefault_stack(name)
+	def endTag_stack_post(self, ns, tag):
+		self.endTagDefault(ns, tag)
 		self.xml.append('\n'
 			'<stack:post>\n'
 			'<stack:file stack:name="/var/log/stack-install.log" stack:mode="append">\n'
@@ -835,92 +721,87 @@ class Pass1NodeHandler(handler.ContentHandler,
 			'\n' %
 			self.node.getFilename())
 
+	# <stack:*>
 
-	# <*> PASS1
-
-	def startElementDefault_stack(self, name, attrs):
+	def startTagDefault_stack(self, ns, tag, attrs):
 		s = ''
 		for attrName in attrs.getQNames():
-			if attrName not in [ 'roll', 'file' ]:
-				attrValue = attrs.getValueByQName(attrName)
-				s += ' stack:%s="%s"' % (attrName, attrValue)
-		self.xml.append('<stack:%s%s>' % (name, s))
+			attrValue = attrs.getValueByQName(attrName)
+			if ns == 'stack' and attrName.find(':') == -1:
+				attrName = 'stack:%s' % attrName
+			s += ' %s="%s"' % (attrName, attrValue)
+		self.xml.append('<%s:%s%s>' % (ns, tag, s))
 		
-	def endElementDefault_stack(self, name):
-		self.xml.append('</stack:%s>' % name)
 
 
-	def startElementNS(self, x, qname, attrs):
+	# <*>
 
-		(uri, name) = x
-		if uri == StackNSURI and not qname:
-			qname = '%s:%s' % (StackNSLabel, name)
-
-		if uri == StackNSURI and name == 'kickstart':
-			name  = 'redhat'
-			qname = 'stack:redhat'
-
-		if uri == StackNSURI and name == self.osname:
-			s = ''
-			self.node.setFilename(self.filename)
-			for (key, value) in self.namespaces.items():
-				s += ' xmlns:%s="%s"' % (value, key)
-			self.xml.append('<%s%s>' % (qname, s))
-			return
-
-		func = None
-		if uri:
-			ns = self.namespaces[uri]
-			try:
-				func = getattr(self, "startElement_%s_%s" % (ns, name))
-			except AttributeError:
-				try:
-					func = getattr(self, "startElementDefault_%s" % ns)
-				except AttributeError:
-					pass
-
-		if func:
-			func(name, attrs)
+	def startTagDefault(self, ns, tag, attrs):
+		if ns:
+			qname = '%s:%s' % (ns, tag)
 		else:
-			s = ''
-			for attrName in attrs.getQNames():
-				attrValue = attrs.getValueByQName(attrName)
-				s += ' %s="%s"' % (attrName, attrValue)
-			self.xml.append('<%s%s>' % (qname, s))
+			qname = tag
+		s = ''
+		for attrName in attrs.getQNames():
+			attrValue = attrs.getValueByQName(attrName)
+			s += ' %s="%s"' % (attrName, attrValue)
+		self.xml.append('<%s%s>' % (qname, s))
 
+	###
 
-	def endElementNS(self, x, qname):
-
-		(uri, name) = x
-		if uri == StackNSURI and not qname:
-			qname = '%s:%s' % (StackNSLabel, name)
-
-
-		n     = ''
-		qname = name
-		if uri:
-			ns    = self.namespaces[uri]
-			qname = '%s:%s' % (ns, name)
-
-		if uri == StackNSURI and name == 'kickstart':
-			name  = 'redhat'
-			qname = 'stack:redhat'
-
-		func = None
-		if uri:
-			try:
-				func = getattr(self, "endElement_%s_%s" % (ns, name))
-			except AttributeError:
-				try:
-					func = getattr(self, "endElementDefault_%s" % ns)
-				except AttributeError:
-					pass
-
-		if func:
-			func(name)
+	def endTagDefault(self, ns, tag):
+		if ns:
+			qname = '%s:%s' % (ns, tag)
 		else:
-			self.xml.append('</%s>' % qname)
+			qname = tag
+		self.xml.append('</%s>' % qname)
 
+
+	def startTag(self, ns, tag, attrs):
+
+		if ns == 'stack':
+
+			# <stack:kickstart> is depracated
+			# <stack:redhat> is the new hotness
+			if tag == 'kickstart':
+				tag = 'redhat'
+
+			# <stack:[redhat|sles|...]>
+			#
+			# Add the xmlns back into the outer most tag for the next
+			# pass.
+			if tag == self.os:
+				self.node.setFilename(self.filename)
+				self.xml.append('<%s:%s %s>' % (ns, tag, self.nsAttrs()))
+				return
+
+		func = self.startTagDefault
+		if ns:
+			try:
+				func = getattr(self, 'startTag_%s_%s' % (ns, tag))
+			except AttributeError:
+				func = self.startTagDefault_stack
+
+		func(ns, tag, attrs)
+
+
+	def endTag(self, ns, tag):
+
+		if ns == 'stack':
+
+			# <stack:kickstart> is depracated
+			# <stack:redhat> is the new hotness
+			if tag == 'kickstart':
+				tag = 'redhat'
+
+		func = self.endTagDefault
+		if ns:
+			try:
+				func = getattr(self, "endTag_%s_%s" % (ns, tag))
+			except AttributeError:
+				pass
+
+		func(ns, tag)
 		self.stripText = False
 
 	def characters(self, s):
@@ -938,12 +819,7 @@ class Pass1NodeHandler(handler.ContentHandler,
 		return self.getXMLHeader() + ''.join(self.xml)
 
 
-class Pass2NodeHandler(handler.ContentHandler,
-	handler.DTDHandler,
-	handler.EntityResolver,
-	handler.ErrorHandler,
-	AttributeHandler):
-
+class Pass2NodeHandler(NodeHandler):
 	"""Sax Parser for XML before it is written to stdout.
 	All generated XML is filtered through this to append the file and
 	roll attributes to all tags.  The includes tags generated from eval
@@ -951,51 +827,23 @@ class Pass2NodeHandler(handler.ContentHandler,
 		
 
 	def __init__(self, node, attrs):
-		handler.ContentHandler.__init__(self)
-		self.setAttributes(attrs)
-		self.node = node
-		self.xml = []
-		self.kstags  = {}
-		self.kskey = None
+		NodeHandler.__init__(self, node, attrs)
+		self.kstags = {}
+		self.kskey  = None
 		self.kstext = []
-		self.osname = attrs['os']
-		self.namespaces = {}
-
-	def startPrefixMapping(self, ns, uri):
-		self.namespaces[uri] = ns
-
-	def getAttr(self, attrs, key):
-		if key in attrs.getQNames():
-			return attrs.getValueByQName(key)
-		return None
-
-	# PASS2
-
-	def startElementNS(self, x, qname, attrs):
-
-		(uri, name) = x
-		if uri == StackNSURI and not qname:
-			qname = '%s:%s' % (StackNSLabel, name)
-
-		# Fix case where in 'stack' namespace but the tag
-		# doesn't know it.  This happens on XML generated
-		# from <eval></eval> sections.
-
-		if uri and len(qname.split(':')) == 1:
-			qname = '%s:%s' % (self.namespaces[uri], name)
-
-		if uri == StackNSURI and name == 'kickstart':
-			name = self.osname
-
-		if name == self.osname:
-			self.xmlns = self.namespaces
-			return
 
 
-		if uri == StackNSURI:
+	def startTag(self, ns, tag, attrs):
 
-			# This is for the <loader></loader> section
-			if name in [ 'url', 
+		self.kskey = None
+
+		if ns == 'stack':
+
+			if tag == self.os:
+				return
+
+			# This is for the <loader></loader> section			
+			if tag in [ 'url', 
 				    'lang', 
 				    'keyboard', 
 				    'text', 
@@ -1003,46 +851,37 @@ class Pass2NodeHandler(handler.ContentHandler,
 				    'unsupported_hardware' ]:
 				self.kskey  = name
 				self.kstext = []
-			else:
-				self.kskey = None
-		else:
-			self.kskey = None
 						
 		s = ''
 		for attrName in attrs.getQNames():
 			attrValue = attrs.getValueByQName(attrName)
-			if attrName not in [ 'stack:file', 'stack:id' ]: # should never happen
-				s += ' %s="%s"' % (attrName, attrValue)
+			s += ' %s="%s"' % (attrName, attrValue)
 		s += ' stack:file="%s"' % self.node.getFilename()
-
+		
+		if ns:
+			qname = '%s:%s' % (ns, tag)
+		else:
+			qname = tag
 		self.xml.append('<%s%s>' % (qname, s))
 
 		
-	def endElementNS(self, x, qname):
+	def endTag(self, ns, tag):
 
-		(uri, name) = x
-		if uri == StackNSURI and not qname:
-			qname = '%s:%s' % (StackNSLabel, name)
-		
-		ns    = ''
-		qname = name
-		if uri:
-			ns    = self.namespaces[uri]
-			qname = '%s:%s' % (ns, name)
+		if ns == 'stack':
 
+			if tag == self.os:
+				return
 
-		if uri == StackNSURI and name == 'kickstart':
-			name = self.osname
+			if self.kskey:
+				if not self.kskey in self.kstags:
+					self.kstags[self.kskey] = []
+				self.kstags[self.kskey].append(''.join(self.kstext))
+				self.kskey = None
 
-		if name == self.osname:
-			return
-
-		if uri == StackNSURI and self.kskey:
-			if not self.kskey in self.kstags:
-				self.kstags[self.kskey] = []
-			self.kstags[self.kskey].append(''.join(self.kstext))
-			self.kskey = None
-			
+		if ns:
+			qname = '%s:%s' % (ns, tag)
+		else:
+			qname = tag
 		self.xml.append('</%s>' % qname)
 
 	def characters(self, s):
