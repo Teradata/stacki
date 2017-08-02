@@ -14,6 +14,7 @@ packages = {}
 peers = {}
 
 MAX_PEERS = 3
+ROOT_DIR = "/var/www/html"
 
 @app.errorhandler(404)
 def four_o_four(error=None):
@@ -125,24 +126,12 @@ def peerdone():
 def stop_server():
 	return "-1"
 
-# route for RPMS
-@app.route('/install/<path:path>/<filename>')
-def get_file_local(path, filename):
-	app.logger.debug("Requesting File: %s" % request.args )
-	path = path.replace('//', '/')
-	file_location = '/var/www/html/install/%s' % (path)
-	response_file = '%s/%s' % (file_location, filename)
-	if os.path.isdir(response_file):
-		return redirect('%s/' % response_file, 301)
-	else:
-		return send_from_directory(unquote(file_location), unquote(filename))
-
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
 @app.route('/<path:path>/<filename>')
-def get_file_catchall(path, filename):
+def get_file(path, filename):
 	path = path.replace('//', '/')
-	file_location = '/%s' % (path)
+	file_location = '%s/%s' % (ROOT_DIR, path)
 	response_file = '%s/%s' % (file_location, filename)
 	if os.path.isdir(response_file):
 		return redirect('%s/' % response_file, 301)
@@ -154,8 +143,33 @@ def get_file_catchall(path, filename):
 @app.route('/<path:path>/<filename>/')
 def get_repodata(path, filename):
 	path = path.replace('//', '/')
-	file_location = '/%s' % (path)
+	file_location = '%s/%s' % (ROOT_DIR, path)
 	response_file = '%s/%s' % (file_location, filename)
+	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
+	return render_template('directory.html', items=items)
+
+# catch all for returning static files
+# if the request is a directory, the the request will be redirected
+@app.route('/<filename>')
+def get_file_in_root(filename):
+	response_file = '%s/%s' % (ROOT_DIR, filename)
+	if os.path.isdir(response_file):
+		return redirect('%s/' % response_file, 301)
+	else:
+		return send_from_directory(ROOT_DIR, unquote(filename))
+
+
+# return a directory listing
+@app.route('/<filename>/')
+def get_repodata_in_root(filename):
+	response_file = '%s/%s' % (ROOT_DIR, filename)
+	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
+	return render_template('directory.html', items=items)
+
+# return a directory listing
+@app.route('/')
+def get_repodata_catchall():
+	response_file = '%s/' % (ROOT_DIR)
 	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
 	return render_template('directory.html', items=items)
 
