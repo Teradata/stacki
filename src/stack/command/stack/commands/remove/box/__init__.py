@@ -99,7 +99,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 	Remove a box specification from the database.
 
 	<arg type='string' name='box'>
-	Box name.
+	A list of boxes to remove.  Boxes must not have any hosts assigned.
 	</arg>
 	
 	<example cmd='remove box test'>
@@ -108,7 +108,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 	"""
 
 	def run(self, params, args):
-		if len(args) != 1:
+		if len(args) < 1:
                         raise ArgRequired(self, 'box')
 
 		boxes = self.getBoxNames(args)
