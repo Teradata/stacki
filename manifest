@@ -31,7 +31,6 @@ foundation-py-itsdangerous
 git
 git-lfs
 hpssacli
-lighttpd
 MegaCLI
 stack-admin
 stack-build
@@ -48,7 +47,6 @@ stack-pylib
 stack-sql
 stack-storage-config
 stack-summary
-stack-tracker
 stack-wizard
 storcli
 sc-im
