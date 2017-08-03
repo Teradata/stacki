@@ -106,7 +106,10 @@ install:: $(SCRIPTS)
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin/
 	$(INSTALL) -m0555 $(ANYONE) $(ROOT)/$(PKGROOT)/sbin/
 	$(INSTALL) -m0500 $(ROOTONLY) $(ROOT)/$(PKGROOT)/sbin/
-
+	(						     \
+		cd $(ROOT)/$(PKGROOT)/sbin;                  \
+		ln -s gen_random_pw generate_password;       \
+	)
 clean::
 	rm -f $(SCRIPTS)
-
+	rm -f generate_password
