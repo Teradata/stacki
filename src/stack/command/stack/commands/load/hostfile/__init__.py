@@ -125,7 +125,7 @@ class Command(stack.commands.load.command):
 			('processor', 'default')
                         ])
 
-		if not file:
+		if not filename:
 			raise ParamRequired(self, 'file')
 
 		if not os.path.exists(filename):
