@@ -64,6 +64,9 @@ class Command(stack.commands.set.network.command):
                 (networks, name) = self.fillSetNetworkParams(args, 'name')
                 if len(networks) > 1:
                         raise ArgUnique(self, 'network')
+
+                if ' ' in name:
+                        raise CommandError(self, 'network name must not contain a space')
 			        	
         	for network in networks:
 			self.db.execute("""
