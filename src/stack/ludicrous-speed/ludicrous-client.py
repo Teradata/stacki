@@ -186,7 +186,7 @@ def main(environment, trackerfile, nosavefile, port):
 		line = f.readline()
 		t = line.split(' ')[-1].strip()
 		tracker_settings['TRACKER'] = t.split(':')[0].strip()
-		tracker_settings['PORT'] = t.split(':')[1].strip()
+		tracker_settings['PORT'] = t.split(':')[-1].strip()
 
 	#peerdone()
 
