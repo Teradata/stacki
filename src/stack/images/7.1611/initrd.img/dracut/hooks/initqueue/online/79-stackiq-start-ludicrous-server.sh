@@ -25,11 +25,9 @@ fi
 #
 if [ "$server" != "" ]
 then
-	echo "var.trackers = "$server"" > /tmp/stack.conf
-	echo "var.pkgservers = "$server"" >> /tmp/stack.conf
+	echo "var.trackers = "$server:3825"" > /tmp/stack.conf
 else
 	echo "var.trackers = """ > /tmp/stack.conf
-	echo "var.pkgservers = """ >> /tmp/stack.conf
 fi
 
 #
@@ -49,11 +47,11 @@ if getargbool 0 frontend; then
 	mount /dev/cdrom /mnt/cdrom
 fi
 
-LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | awk '{print $2}'`
+LUDICROUSPID=`ps auwx | grep ludicrous-client | grep -v grep | awk '{print $2}'`
 while [ "$LUDICROUSPID" != "" ]; do
 	
 	for pid in $LUDICROUSPID; do kill $pid; done
-	LUDICROUSPID=`ps auwx | grep hunter2 | grep -v grep | awk '{print $2}'`
+	LUDICROUSPID=`ps auwx | grep ludicrous-client | grep -v grep | awk '{print $2}'`
 done
 
 /opt/stack/bin/python /opt/stack/bin/ludicrous-client.py --environment=initrd --trackerfile='/tmp/stack.conf' --nosavefile;

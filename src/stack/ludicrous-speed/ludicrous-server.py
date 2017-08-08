@@ -49,15 +49,16 @@ def lookup(hashcode):
 	res['peers'] = []
 	shuffle(packages[hashcode])
 	for peer in packages[hashcode]:
-		peer_ready	= peers[peer]['ready']
-		not_my_ip		= peer != ipaddr
+		peer_ready = peers[peer]['ready']
+		not_my_ip = peer != ipaddr
 		if not_my_ip and peer_ready:
 			res['peers'].append("%s:%s" % (peer, peers[peer]['port']))
 		
 		# if array of peers is max_peers, break
-		if len(res['peers']) == 10:
+		if len(res['peers']) == MAX_PEERS:
 			break
 
+	#res['peers'].append(":80")
 	return jsonify(res)
 
 @app.route('/avalanche/register/<port>/<hashcode>', methods=['POST'])
@@ -67,7 +68,7 @@ def register(port=80, hashcode=None):
 	ipaddr = request.remote_addr
 
 	if not hashcode:
-		return four_o_four("asdf")
+		return four_o_four()
 
 	# check if hash exists
 	if(hashcode not in packages):
@@ -176,7 +177,7 @@ def get_repodata_catchall():
 def main():
 	import logging
 	logging.basicConfig(filename='/var/log/ludicrous-server.log',level=logging.DEBUG)
-	app.run(host='0.0.0.0', port=80, debug=False)
+	app.run(host='0.0.0.0', port=3825, debug=False)
 
 if __name__ == "__main__":
 	main()

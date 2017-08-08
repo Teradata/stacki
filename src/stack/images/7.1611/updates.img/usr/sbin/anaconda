@@ -68,7 +68,7 @@ for pid in r.stdout.read().split('\n'):
 	if pid.strip():
 		log.debug('Stopping ludacris (pid %d)' % int(pid.strip()))
 		os.kill(int(pid.strip()), signal.SIGTERM)
-log.info('Starting ludacris tracking service')
+log.info('Starting ludicrous tracking service')
 ludicrous_proc = subprocess.Popen(
 	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py', '--environment=updates'])
 
@@ -77,12 +77,6 @@ ludicrous_proc = subprocess.Popen(
 if 'boss' in args:
 	# We are a frontend
 
-	# Enable and Start Ludicrous Server
-	cmd = 'systemctl enable ludicrous-server.service'
-	os.system(cmd)
-	cmd = 'systemctl start ludicrous-server.service'
-	os.system(cmd)
-	
 	# Check to see if there's a user-specified
 	# site.attrs / rolls.xml on the kernel command line
 	for arg in args:
