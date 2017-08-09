@@ -68,12 +68,13 @@ if frontend:
 
 
 <post arg='--nochroot'>
-mkdir /mnt/sysimage/tmp/stack_site
+mkdir -p /mnt/sysimage/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/sysimage/tmp/stack_site/
 </post>
 
 <post>
 /opt/stack/bin/record-partitions.py
+
 </post>
 
 
