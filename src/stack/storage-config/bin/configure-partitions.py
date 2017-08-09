@@ -15,6 +15,7 @@ from stack_site import *
 
 sys.path.append('/opt/stack/lib')
 from stacki_storage import *
+from stacki_default_part import rhel 
 import stack
 
 ##
@@ -459,12 +460,20 @@ if not csv_partitions:
 	parts = []
 	# on a frontend, get 'release' from the stack module
 	release = attributes.get('release', stack.release)
-	if release == '7.x':
-		parts.append( ('biosboot', 1, 'biosboot') )
-	parts.append( ('/', 16000, 'ext4') )
-	parts.append( ('swap', 1000, 'swap') )
-	parts.append( ('/var', 16000, 'xfs') )
-	parts.append( ('/state/partition1', 0, 'xfs') )
+	if os.path.exists('/sys/firmware/efi'):
+		default = 'uefi'
+	else:
+		default = 'default'
+
+	ostype = 'rhel7'
+	if attributes['os'] == 'redhat' and release == '6.x':
+		ostype = 'rhel6'
+
+	var = '%s_%s' % (ostype, default)
+	if hasattr(rhel, var):
+		parts = getattr(rhel, var)
+	else:
+		parts = getattr(rhel, 'default')
 
 	if attributes.has_key('boot_device'):
 		bootdisk = attributes['boot_device']

@@ -4,6 +4,11 @@ from subprocess import *
 
 class CLI:
 
+	setparams = [ 'rw', 'ro', 'blocked', 'removeblocked', 'wt',
+		'wb', 'forcedwb', 'immediate', 'ra', 'nora', 'adra', 'dsblpi',
+		'cached', 'direct', 'endskcache', 'disdskcache',
+		'cachedbadbbu', 'nocachedbadbbu' ]
+
 	def run(self, args):
 		cmd = [ '/opt/stack/sbin/MegaCli' ]
 		cmd.extend(args)
@@ -119,13 +124,40 @@ class CLI:
 
 			cmd.append('-Array%d[%s]' % (i, ','.join(d)))
 
+		setpropflags = []
+		for f in options:
+			#
+			# remove the '-' if present in the flag/option
+			#
+			g = f.translate(None, '-')
+			if g.lower() in self.setparams:
+				setpropflags.append(f)
+			else:
+				cmd.append(f)
+
 		cmd.append('-force')
 		cmd.append('-a%d' % adapter)
+		results = self.run(cmd)
 
-		if options:
-			cmd.extend(options)
+		#
+		# apply any flags that are not able to be set in
+		# the -CfgSpanAdd command
+		#
+		vid = None
+		for k,v in results:
+			value = v.split('Created VD')
+			if len(value) == 2:
+				try:
+					vid = int(value[1])
+					break
+				except:
+					vid = None
 
-		self.run(cmd)
+		if vid:
+			for f in setpropflags:
+				cmd = [ '-LDSetProp', f, '-L%d' % vid, 
+					'-a%d' % adapter ]
+				results = self.run(cmd)
 
 		# 
 		# support for dedicated hot spares for 10, 50 and 60
@@ -138,9 +170,6 @@ class CLI:
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
 			flags):
-
-		if not enclosure:
-			enclosure = ''
 
 		if raidlevel in [ '10', '50', '60' ]:
 			self.doStrippedRaid(raidlevel, adapter, enclosure,
@@ -160,12 +189,42 @@ class CLI:
 					hs.append('%s:%d' % (enclosure,
 						hotspare))
 				cmd.append('-Hsp[%s]' % ','.join(hs))
+
+			setpropflags = []
 			if flags:
-				cmd.append(flags)
+				for f in flags.split():
+					#
+					# remove the '-' if present in the
+					# flag
+					#
+					g = f.translate(None, '-')
+					if g.lower() in self.setparams:
+						setpropflags.append(f)
+					else:
+						cmd.append(f)
 
 			cmd.append('-force')
 			cmd.append('-a%d' % adapter)
-			self.run(cmd)
+			results = self.run(cmd)
+
+			#
+			# apply any flags that are not able to be set in
+			# the -CfgLdAdd command
+			#
+			vid = None
+			for k,v in results:
+				value = v.split('Created VD')
+				if len(value) == 2:
+					try:
+						vid = int(value[1])
+						break
+					except:
+						vid = None
+
+			for f in setpropflags:
+				cmd = [ '-LDSetProp', f, '-L%d' % vid, 
+					'-a%d' % adapter ]
+				results = self.run(cmd)
 
 
 	def doGlobalHotSpare(self, adapter, enclosure, hotspares, flags):
