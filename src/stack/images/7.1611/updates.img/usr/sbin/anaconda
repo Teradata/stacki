@@ -70,7 +70,7 @@ for pid in r.stdout.read().split('\n'):
 		os.kill(int(pid.strip()), signal.SIGTERM)
 log.info('Starting ludicrous tracking service')
 ludicrous_proc = subprocess.Popen(
-	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py', '--environment=updates'])
+	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py'])
 
 #time.sleep(5)
 

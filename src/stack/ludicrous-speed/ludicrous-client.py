@@ -139,7 +139,7 @@ def get_file_locally(path, filename):
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
 @app.route('/<path:path>/<filename>')
-def get_file(path, filename):
+def get_file_route(path, filename):
 	path = path.replace('//', '/')
 	save_location = client_settings['LOCAL_SAVE_LOCATION']
 	file_location = '%s/%s' % (save_location, path)
