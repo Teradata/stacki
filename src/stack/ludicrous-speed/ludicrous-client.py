@@ -88,7 +88,7 @@ def get_file_locally(path, filename):
 	environment = client_settings['ENVIRONMENT']
 
 	# check if file is local
-	if im_the_requester and not file_exists(local_file):
+	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
 		
 		hashcode = hashit(remote_file)
 		port = client_settings['PORT'] 
@@ -97,43 +97,46 @@ def get_file_locally(path, filename):
 		payload = res.json()
 		successful = res.status_code == 200 and payload['success']
 
-		if environment == 'regular' and successful and payload['peers']:
+		if successful and payload['peers']:
 			for peer in payload['peers']:
+				app.logger.debug("requesting file: %s from peer: %s", (filename, peer))
 				try:
 					peer_res = get_file(peer, remote_file)
 					if peer_res.status_code == 200:
+						app.logger.debug("  %s from %s was successful", (filename, peer))
 						save_file(peer_res.content, '%s/' % (file_location), filename)
 						if environment == 'regular':
 							register_file(port, hashcode)
 							break
 					else:
+						app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
 						unregister_file(hashcode, unregister_params);
-				except:
+				except Exception as e:
+					app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
+					app.logger.debug("    %s", e)
 					unregister_params = params.copy()
 					unregister_params["peer"] = peer.split(":")[0]
 					unregister_file(hashcode, unregister_params);
 
-			else:
-			# if no peers worked, use the frontend
-				tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
-				if tracker_res.status_code == 200:
-					save_file(tracker_res.content, '%s/' % (file_location), filename)
-					if client_settings['SAVE_FILES']:
-						register_file(port, hashcode)
-
-
-		else:
+	if not file_exists(local_file):
+		app.logger.debug("requesting %s from frontend", (filename))
+		try:
 			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 			if tracker_res.status_code == 200:
 				save_file(tracker_res.content, '%s/' % (file_location), filename)
 				if client_settings['SAVE_FILES']:
 					register_file(port, hashcode)
+		except Exception as e:
+			app.logger.debug("error requesting from frontend")
+			app.logger.debug("%s", (e))
 
 	if file_exists(local_file):
+		app.logger.debug("%s is saved locally", (filename))
 		return send_from_directory(unquote(file_location), unquote(filename))
 	else:
+		app.logger.debug("%s 404", (filename))
 		abort(404)
 
 # catch all for returning static files
@@ -179,6 +182,8 @@ def page_not_found(e):
 @click.option('--nosavefile', is_flag=True)
 @click.option('--port', default=80)
 def main(environment, trackerfile, nosavefile, port):
+	import logging
+	logging.basicConfig(filename='/var/log/ludicrous-client-debug.log',level=logging.DEBUG)
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
 	client_settings['PORT']	= port

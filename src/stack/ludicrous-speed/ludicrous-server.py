@@ -36,14 +36,12 @@ def lookup(hashcode):
 	ipaddr = request.remote_addr
 
 	# check if hash exists
-	if(hashcode not in packages):
+	if hashcode not in packages:
 		packages[hashcode] = []
 
 	# check if peer exists and is in our database
-	if(ipaddr not in peers):
-		hosts = [host['value'] for host in stack.api.Call('list.host.attr', ["attr=hostaddr"])]
-		if ipaddr not in hosts:
-			return four_o_four("Host not managed by frontend")
+	if not stack.api.Call('list.host.interface', [ipaddr]):
+		return four_o_four("Host not managed by frontend")
 
 	# return list of peers with the request hash
 	res['peers'] = []
@@ -71,11 +69,11 @@ def register(port=80, hashcode=None):
 		return four_o_four()
 
 	# check if hash exists
-	if(hashcode not in packages):
+	if hashcode not in packages:
 		packages[hashcode] = []
 
 	# check if peer exists and is in our database
-	if(ipaddr not in peers):
+	if ipaddr not in peers:
 		if ipaddr in [host['value'] for host in stack.api.Call('list.host.attr', ["attr=hostaddr"])]:
 			peers[ipaddr] = {
 				'ready': False,
@@ -85,7 +83,8 @@ def register(port=80, hashcode=None):
 			return four_o_four()
 
 	# register file
-	packages[hashcode].append(ipaddr)
+	if ipaddr not in packages[hashcode]:
+		packages[hashcode].append(ipaddr)
 
 	# mark peer as ready
 	peers[ipaddr]['ready'] = True
@@ -99,8 +98,8 @@ def unregister(hashcode):
 	res['success'] = True
 
 	app.logger.debug("unquoted ip addr: %s", ipaddr)
-	if packages.has_key(ipaddr) and ipaddr in packages[hashcode]:
-		packages[hashcode].remove(ipaddr)
+	if ipaddr in packages[hashcode]:
+		packages[hashcode] = [ ip for ip in packages[hashcode] if ip != ipaddr ]
 		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
 	else:
 		res['message'] = "'%s' was not registered for hash: %s" % (ipaddr, hashcode)
@@ -116,7 +115,7 @@ def peerdone():
 
 	for package in packages:
 		if ipaddr in packages[package]:
-			packages[package].remove(ipaddr)
+			packages[hashcode] = [ ip for ip in packages[package] if ip != ipaddr ]
 	
 	if ipaddr in peers:	
 		del(peers[ipaddr])	
