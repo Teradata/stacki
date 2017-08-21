@@ -9,6 +9,10 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 -include version-$(ARCH).mk
 
+.PHONY: 3rdparty
+3rdparty:
+	$(ROLLSBUILD)/bin/get3rdparty.py
+
 GROUPS=developer-workstation-environment \
 	compat-libraries development
 
@@ -34,11 +38,8 @@ $(PACKAGES):
 
 ospackages: $(GROUPS) $(PACKAGES)
 
-bootstrap: ospackages
+bootstrap: 3rdparty ospackages
 	$(MAKE) -C src/stack/build $@
 	. /etc/profile.d/stack-build.sh
 	$(MAKE) -C src $@
 
-LICENSE.all.txt:
-	cat LICENSE.txt > $@
-	find src -name LICENSE.txt -exec cat {} \; >> $@
