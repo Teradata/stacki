@@ -27,6 +27,16 @@ FNULL = open(os.devnull, 'w')
 
 
 ##
+## Manual Partitioning
+##
+manual = False
+if os.path.exists('/tmp/user_partition_info'):
+	with open('/tmp/user_partition_info', 'r') as f:
+		manual = 'manual' in f.read().split()
+if manual:
+	sys.exit(0)
+
+##
 ## functions
 ##
 
