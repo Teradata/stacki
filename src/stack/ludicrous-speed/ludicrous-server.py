@@ -115,12 +115,12 @@ def peerdone():
 
 	for package in packages:
 		if ipaddr in packages[package]:
-			packages[hashcode] = [ ip for ip in packages[package] if ip != ipaddr ]
+			packages[package] = [ ip for ip in packages[package] if ip != ipaddr ]
 	
 	if ipaddr in peers:	
 		del(peers[ipaddr])	
 
-	return ""
+	return jsonify(res)
 
 @app.route('/avalanche/stop', methods=['GET'])
 def stop_server():
