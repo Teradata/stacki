@@ -466,6 +466,10 @@ host_partitions = getHostPartitions(disks, host_fstab)
 # print 'host_partitions : %s' % host_partitions
 # print
 
+frontend = False
+with open('/proc/cmdline','r') as f:
+	frontend = 'frontend' in f.read().split()
+
 if not csv_partitions:
 	parts = []
 	# on a frontend, get 'release' from the stack module
@@ -489,6 +493,16 @@ if not csv_partitions:
 		bootdisk = attributes['boot_device']
 	else:
 		bootdisk = disks[0]['device']
+		if frontend:
+			nuke_bootdisk = True
+			for part in host_partitions:
+				if part['mountpoint'] == '/':
+					bootdisk = part['device']
+					nuke_bootdisk = False
+					break
+			if nuke_bootdisk:
+				disks[0]['nuke'] = 1
+
 
 	csv_partitions = []
 	partid = 1
