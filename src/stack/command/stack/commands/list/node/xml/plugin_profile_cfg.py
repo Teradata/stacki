@@ -17,7 +17,7 @@ class Plugin(stack.commands.Plugin):
 
 		self.owner.addText('<stack:post>\n')
 		self.owner.addText('mkdir -p /opt/stack/etc\n')
-		self.owner.addText('<stack:file stack:name="/opt/stack/etc/profile.cfg" perms="0640">\n')
+		self.owner.addText('<stack:file stack:name="/opt/stack/etc/profile.cfg" stack:perms="0640">\n')
 		self.owner.addText('[attr]\n')
 		for k in sorted(attrs.keys()):
 			self.owner.addText('%s = %s\n' % (k, attrs[k]))

@@ -513,7 +513,7 @@ class NodeHandler(handler.ContentHandler,
 			]
 		elif self.os == 'sles':
 			attrs = [
-#				'xmlns="http://www.suse.com/1.0/yast2ns"',
+				'xmlns="http://www.suse.com/1.0/yast2ns"',
 				'xmlns:sles="http://www.suse.com/1.0/yast2ns"',
 				'xmlns:config="http://www.suse.com/1.0/configns"',
 				'xmlns:xi="http://www.w3.org/2003/XInclude"'

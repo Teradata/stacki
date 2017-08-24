@@ -127,8 +127,10 @@ class Generator:
 		self.stackiSection	= ProfileSection()
 		self.nodeFilesSection	= ProfileSection()
 		self.debugSection	= ProfileSection()
-		self.mainSection	= ProfileSection()
+		self.packageSet		= PackageSet()
 		self.log		= '/var/log/stack-install.log'
+		self.doc                = None
+		self.root		= None
 
 	def setArch(self, arch):
 		self.arch = arch
@@ -229,54 +231,42 @@ class Generator:
 
 		return '\n'.join(l)
 
+
+	def debug(self, msg, node):
+		self.debugSection.append(msg, 
+					 self.getAttr(node, 'stack:file'))
 	
-	def getAttr(self, node, attr):
+	
+	def getAttr(self, node, attr, consume=False):
 		a = node.attributes.getNamedItem(attr)
 		if a:
+			if consume:
+				node.removeAttribute(attr)
 			return a.value
 		else:
 			return ''
 		
-	def cond(self, node):
-
-		if not self.attrs or not node.nodeType == node.ELEMENT_NODE:
-			return True
-
-		arch	= self.getAttr(node, 'stack:arch')
-		osname	= self.getAttr(node, 'stack:os')
-		release = self.getAttr(node, 'stack:release')
-		cond	= self.getAttr(node, 'stack:cond')
-
-		expr = stack.cond.CreateCondExpr(arch, osname, release, cond)
-		return stack.cond.EvalCondExpr(expr, self.attrs)
-
 	
-	def order(self, node):
-		"""
-		Stores the order of traversal of the nodes
-		Useful for debugging.
-		"""
-		nodefile = self.getAttr(node, 'stack:file')
-
-		if nodefile and nodefile not in self.nodeFilesDict:
-			self.nodeFilesDict[nodefile] = True
-			self.nodeFilesSection.append(nodefile)
-		
-
-		
-	# <*>
-        #	<![CDATA[ * ]]>
-	#	*
-	#	<*></*>
-	# </*>
-
 	def parse(self, xml_string):
-		doc = xml.dom.minidom.parseString(xml_string)
-		self.traverse(doc.getElementsByTagName('stack:profile')[0])
+		self.doc  = xml.dom.minidom.parseString(xml_string)
+		self.root = self.doc.getElementsByTagName('stack:profile')[0]
+		conds     = [ ]
+		expanded  = [ ]
+
+		for step in [ 'setup',		# load the attributes
+			      'prune',		# remove failed conds
+			      'expand',		# expand file tags
+			      'pre',		# pre step for subclasses
+			      'main',		# main loop for subclasses
+			      'post' ]:		# post step for subclasses
+			self.traverse(step, self.root)
 
 
-	def traverse(self, node):
-		terminal = False
+
+	def traverse(self, step, node):
+		return self._traverse(step, node)
+
+	def _traverse(self, step, node):
 
 		if not node.nodeType == node.ELEMENT_NODE:
 			return
@@ -284,28 +274,34 @@ class Generator:
 		ns  = node.prefix
 		tag = node.localName
 
-		if ns != 'stack':
-			return
-
-		if not self.cond(node):
-			return
-
-		self.order(node)
-
-		# Lookup the handler and run it. If the handler
-		# returns True we do NOT recurse further and assume
-		# the handler already did this.
+		# Lookup the handler and run it, then continue to
+		# recurse unless the handler returns False.
 
 		try:
-			fn = eval('self.traverse_%s_%s' % (ns, tag))
+			fn = getattr(self, 'traverse_%s_%s_%s' % (step, ns, tag))
 		except AttributeError:
-			fn = None
+			try:
+				fn = getattr(self, 'traverse_%s_%s' % (step, ns))
+			except AttributeError:
+				try:
+					fn = getattr(self, 'traverse_%s' % step)
+				except AttributeError:
+					fn = None
+
 		if fn:
-			if fn(node) == True:
-				terminal = True
-		if not terminal:
-			for child in node.childNodes:
-				self.traverse(child)
+			steps = self.getAttr(node, 'stack:visited').split()
+			steps.append(step)
+			node.setAttribute('stack:visited', ' '.join(steps))
+		else:
+			steps = self.getAttr(node, 'stack:skipped').split()
+			steps.append(step)
+			node.setAttribute('stack:skipped', ' '.join(steps))
+			
+		if fn and not fn(node):
+			return
+
+		for child in node.childNodes:
+			self._traverse(step, child)
 
 
 	def collect(self, node):
@@ -314,8 +310,6 @@ class Generator:
 			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
 				l.append(child.nodeValue)
 			elif child.nodeType == child.ELEMENT_NODE:
-				if not self.cond(child):
-					continue
 				try:
 					fn = eval('self.collect_%s_%s' % (child.prefix, 
 									  child.localName))
@@ -327,39 +321,79 @@ class Generator:
 
 
 
+	## ---------------------------------------------------- ##
+	## Traverse						##
+	## ---------------------------------------------------- ##
+
+	##
+	## setup
+	##
+
 	# <stack:profile>
 	
-	def traverse_stack_profile(self, node):
-		# pull out the attr to handle generic conditionals
-		# this replaces the old arch/os logic but still
-		# supports the old syntax
-
+	def traverse_setup_stack_profile(self, node):
 		if node.attributes:
 			attrs = node.attributes.getNamedItem('stack:attrs')
 			if attrs:
 				dict = eval(attrs.value)
 				for (k,v) in dict.items():
 					self.attrs[k] = v
-
-
-	# <stack:stacki>
-
-	def traverse_stack_stacki(self, node):
-		self.stackiSection.append(self.collect(node),
-					  self.getAttr(node, 'stack:file'))
+		else:
+			self.debug('error - <stack:profile> missing stack:attrs', node)
 		return True
 
-	# <stack:debug>
-	
-	def traverse_stack_debug(self, node):
-		self.debugSection.append(self.collect(node), 
-					 self.getAttr(node, 'stack:file'))
+	# <*>
+
+	def traverse_setup(self, node):
+
+		# Store the order of traversal of the nodes
+
+		nodefile = self.getAttr(node, 'stack:file')
+
+		if nodefile and nodefile not in self.nodeFilesDict:
+			self.nodeFilesDict[nodefile] = True
+			self.nodeFilesSection.append(nodefile)
+
 		return True
-	
+		
+
+		
+
+
+	##
+	## prune
+	##
+
+	# <*>
+
+	def traverse_prune(self, node):
+		arch	= self.getAttr(node, 'stack:arch', consume=True)
+		osname	= self.getAttr(node, 'stack:os', consume=True)
+		release = self.getAttr(node, 'stack:release', consume=True)
+		cond	= self.getAttr(node, 'stack:cond', consume=True)
+		expr    = stack.cond.CreateCondExpr(arch, osname, release, cond)
+
+		if not expr: # no cond keep going
+			return True
+
+		passed = stack.cond.EvalCondExpr(expr, self.attrs)
+		self.debug('info - cond is %s: %s' % (passed, expr), node)
+		if not passed:
+			parent = node.parentNode
+			if parent: # node might be orphaned
+				parent.removeChild(node)
+			return False # subtree is gone stop
+
+		return True
+
+	##
+	## expand
+	##
+		
 	# <stack:file>
-	
-	def collect_stack_file(self, node):
 
+	def traverse_expand_stack_file(self, node):
+	
 		fileName    = self.getAttr(node, 'stack:name')
 		fileMode    = self.getAttr(node, 'stack:mode')
 		fileOwner   = self.getAttr(node, 'stack:owner')
@@ -410,12 +444,102 @@ class Generator:
 				s += 'chown %s %s\n' % (fileOwner, fileName)
 			if filePerms:
 				s += 'chmod %s %s\n' % (filePerms, fileName)
-		return s
-	
+
+		node.parentNode.replaceChild(self.doc.createTextNode(s), node)
+		return False
 
 	##
-	## Generator Section
+	## main
 	##
+
+	# <stack:profile>
+
+	def traverse_main_stack_profile(self, node):
+		return True
+
+	# <stack:package>
+
+	def traverse_main_stack_package(self, node):
+		nodefile = self.getAttr(node, 'stack:file')
+		rpms	 = self.collect(node).strip().split()
+		type	 = self.getAttr(node, 'stack:type')
+
+		if self.getAttr(node, 'stack:disable'):
+			enabled = False
+		else:
+			enabled = True
+
+		for rpm in rpms:
+			if type == 'meta':
+				rpm = '@%s' % rpm
+			self.packageSet.append(rpm, enabled, nodefile)
+		return False
+
+	# <stack:stacki>
+
+	def traverse_main_stack_stacki(self, node):
+		self.stackiSection.append(self.collect(node),
+					  self.getAttr(node, 'stack:file'))
+		node.parentNode.removeChild(node)
+		return False
+
+	# <stack:debug>
+	
+	def traverse_main_stack_debug(self, node):
+		self.debugSection.append(self.collect(node), 
+					 self.getAttr(node, 'stack:file'))
+		node.parentNode.removeChild(node)
+		return False
+
+	# <*>
+
+	def traverse_main(self, node):
+		ns    = node.prefix
+		tag   = node.localName
+
+		attrs = []
+
+		for (key, val) in node.attributes.items():
+			if key == 'stack:file':
+				continue
+			attrs.append('%s="%s"' % (key, val))
+		
+		msg = 'error - <%s:%s' % (ns, tag)
+		if attrs:
+			msg += ' '
+			msg += ' '.join(attrs)
+		msg += '> no main handler'
+		self.debug(msg, node)
+
+		return True
+
+	
+	##
+	## post
+	##
+
+	# <*>
+
+	def traverse_post(self, node):
+
+		# stack:gc="true" mean garabage collect
+		# the node.
+		#
+		# Any previous traversal can set this attribute
+		# to have the tag removed from the tree.
+
+
+		gc = self.getAttr(node, 'stack:gc')
+		gc = str2bool(gc)
+
+		if gc:
+			node.parentNode.removeChild(node)
+		return True
+
+
+	## ---------------------------------------------------- ##
+	## Generate						##
+	## ---------------------------------------------------- ##
 			
 	def generate(self, section):
 		"""Dump the requested section of the kickstart file.  If none 

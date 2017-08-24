@@ -22,13 +22,13 @@ class Generator(stack.gen.Generator):
 
 	def __init__(self):
 		stack.gen.Generator.__init__(self)
-		self.preSection			= stack.gen.ProfileSection()
-		self.postSection		= stack.gen.ProfileSection()
-		self.bootSection		= {}
-		self.bootSection['pre']		= stack.gen.ProfileSection()
-		self.bootSection['post']	= stack.gen.ProfileSection()
-		self.shellSection		= stack.gen.ProfileSection()
-		self.packageSet			= stack.gen.PackageSet()
+		self.mainSection	 = ProfileSection()
+		self.preSection		 = stack.gen.ProfileSection()
+		self.postSection	 = stack.gen.ProfileSection()
+		self.bootSection	 = {}
+		self.bootSection['pre']	 = stack.gen.ProfileSection()
+		self.bootSection['post'] = stack.gen.ProfileSection()
+		self.shellSection	 = stack.gen.ProfileSection()
 
 		# We could set these elsewhere but this is the current
 		# definition of the RedHat Generator.
@@ -38,22 +38,29 @@ class Generator(stack.gen.Generator):
 		self.setOS('redhat')
 		self.setArch('x86_64')
 
-	
+	## ---------------------------------------------------- ##
+	## Traverse						##
+	## ---------------------------------------------------- ##
+
+	##
+	## main
+	##
+
 	# <stack:main>
 
-	def traverse_stack_main(self, node):
+	def traverse_main_stack_main(self, node):
 		nodefile = self.getAttr(node, 'stack:file')
 
 		for child in node.childNodes:
 			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
 				self.mainSection.append(child.nodeValue.strip(), nodefile)
-		return True
+		return False
 
 	# <stack:package>
 
-	def traverse_stack_package(self, node):
+	def traverse_main_stack_package(self, node):
 		nodefile = self.getAttr(node, 'stack:file')
-		rpm	 = self.collect(node).strip()
+		rpms	 = self.collect(node).strip().split()
 		type	 = self.getAttr(node, 'stack:type')
 
 		if self.getAttr(node, 'stack:disable'):
@@ -61,15 +68,15 @@ class Generator(stack.gen.Generator):
 		else:
 			enabled = True
 
-		if type == 'meta':
-			rpm = '@%s' % rpm
-
-		self.packageSet.append(rpm, enabled, nodefile)
-		return True
+		for rpm in rpms:
+			if type == 'meta':
+				rpm = '@%s' % rpm
+			self.packageSet.append(rpm, enabled, nodefile)
+		return False
 
 	# <stack:pre>
 	
-	def traverse_stack_pre(self, node):
+	def traverse_main_stack_pre(self, node):
 		nodefile	= self.getAttr(node, 'stack:file')
 		interpreter	= self.getAttr(node, 'stack:interpreter')
 		arg		= self.getAttr(node, 'stack:arg')
@@ -82,12 +89,12 @@ class Generator(stack.gen.Generator):
 		s += '\n%end'
 			
 		self.preSection.append(s, nodefile)
-		return True
+		return False
 
 
 	# <stack:post>
 	
-	def traverse_stack_post(self, node):
+	def traverse_main_stack_post(self, node):
 		nodefile	= self.getAttr(node, 'stack:file')
 		interpreter	= self.getAttr(node, 'stack:interpreter')
 		arg		= self.getAttr(node, 'stack:arg')
@@ -122,11 +129,11 @@ class Generator(stack.gen.Generator):
 				script = section
 			
 		self.postSection.append(script, nodefile)
-		return True
+		return False
 		
 	# <stack:boot>
 	
-	def traverse_stack_boot(self, node):
+	def traverse_main_stack_boot(self, node):
 		nodefile	= self.getAttr(node, 'stack:file')
 		order		= self.getAttr(node, 'stack:order')
 		
@@ -146,8 +153,12 @@ class Generator(stack.gen.Generator):
 			s += '\n%end'
 
 		self.bootSection[order].append(s, nodefile)
-		return True
+		return False
 
+
+	## ---------------------------------------------------- ##
+	## Generate						##
+	## ---------------------------------------------------- ##
 
 	def generate_main(self):
 		return self.mainSection.generate()
@@ -179,7 +190,7 @@ class Generator(stack.gen.Generator):
 			if s:
 				section.append("yum install -y %s" % s, None)
 
-		return section.generate(cdata=False)
+		return section.generate()
 
 
 	def generate_pre(self):
@@ -221,7 +232,4 @@ class Generator(stack.gen.Generator):
 		
 		return list
 
-	def generate_shell(self):
-		for line in self.generate_packages():
-			print (line)
 
