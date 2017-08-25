@@ -29,8 +29,8 @@ if [ -f /bin/curl ]; then
 	curl_cmd=/bin/curl
 fi
 
-peerdone_url=https://${ludicrous-server}/avalanche/peerdone
-${curl_cmd} --insecure --output /dev/null ${peerdone_url}
+peerdone_url=http://${ludicrous-server}:3825/avalanche/peerdone
+${curl_cmd} -X DELETE --output /dev/null ${peerdone_url}
 
 </post>
 
