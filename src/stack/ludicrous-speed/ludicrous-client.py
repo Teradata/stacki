@@ -8,6 +8,7 @@ import requests
 import hashlib
 import subprocess
 import click
+import signal
 
 app = Flask(__name__)
 
@@ -23,6 +24,19 @@ client_settings = {
 	'ENVIRONMENT' : 'regular',
 	'SAVE_FILES' : True
 }
+
+@app.errorhandler(404)
+def four_o_four(error=None):
+        error_message = error if type(error) is str else "File not found."
+        message = {
+                'status': 404,
+                'message': error_message
+        }
+
+        resp = jsonify(message)
+        resp.status_code = 404
+
+        return resp
 
 def hashit(filename):
 	hashcode = hashlib.md5()
@@ -87,6 +101,9 @@ def get_file_locally(path, filename):
 	im_the_requester = request.remote_addr == "127.0.0.1"
 	environment = client_settings['ENVIRONMENT']
 
+	if not client_settings['SAVE_FILES']:
+		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
+
 	# check if file is local
 	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
 		
@@ -137,7 +154,7 @@ def get_file_locally(path, filename):
 		return send_from_directory(unquote(file_location), unquote(filename))
 	else:
 		app.logger.debug("%s 404", (filename))
-		abort(404)
+		return four_o_four()
 
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
@@ -166,11 +183,12 @@ def get_repodata(path, filename):
 
 @app.route('/running')
 def running():
-	return "0"
+	return jsonify({"success": True})
 
-@app.route('/done')
+@app.route('/peerdone')
 def peerdone():
-	peerdone_res = requests.delete('http://%s/avalanche/peerdone' % tracker_settings['TRACKER'])
+	peerdone_res = requests.delete('http://%s/avalanche/peerdone' % tracker())
+	return jsonify({"success": True})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -183,6 +201,7 @@ def page_not_found(e):
 @click.option('--port', default=80)
 def main(environment, trackerfile, nosavefile, port):
 	import logging
+	#signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 	logging.basicConfig(filename='/var/log/ludicrous-client-debug.log',level=logging.DEBUG)
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
