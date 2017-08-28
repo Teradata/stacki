@@ -493,15 +493,14 @@ if not csv_partitions:
 		bootdisk = attributes['boot_device']
 	else:
 		bootdisk = disks[0]['device']
-		if frontend:
-			nuke_bootdisk = True
-			for part in host_partitions:
-				if part['mountpoint'] == '/':
-					bootdisk = part['device']
-					nuke_bootdisk = False
-					break
-			if nuke_bootdisk:
-				disks[0]['nuke'] = 1
+		nuke_bootdisk = True
+		for part in host_partitions:
+			if part['mountpoint'] == '/':
+				bootdisk = part['device']
+				nuke_bootdisk = False
+				break
+		if nuke_bootdisk:
+			disks[0]['nuke'] = 1
 
 
 	csv_partitions = []
