@@ -154,7 +154,7 @@ def get_file_locally(path, filename):
 		return send_from_directory(unquote(file_location), unquote(filename))
 	else:
 		app.logger.debug("%s 404", (filename))
-		return four_o_four()
+		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file), code=307)
 
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
