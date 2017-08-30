@@ -28,6 +28,25 @@ def sortDiskId(entry):
 	return key
 
 
+def getDeviceList(disks):
+	devices = []
+	for disk in disks:
+		for part in disk['part']:
+			device = '/dev/%s' % part
+			if device not in devices:
+				devices.append(device)
+
+		for raid in disk['raid']:
+			device = '/dev/%s' % raid
+			if device not in devices:
+				devices.append(device)
+
+		for lvm in disk['lvm']:
+			device = '/dev/mapper/%s' % lvm
+			if device not in devices:
+				devices.append(device)
+	return devices
+
 
 def getHostDisks(nukedisks):
 	#

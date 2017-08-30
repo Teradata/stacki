@@ -440,25 +440,10 @@ disks = getHostDisks(nukedisks)
 #
 # first try to find /etc/fstab on all the physical partitions 
 #
-host_fstab = []
-devices = []
-for disk in disks:
-	for part in disk['part']:
-		device = '/dev/%s' % part
-		if device not in devices:
-			devices.append(device)
+devices = getDeviceList(disks)
 
-	for raid in disk['raid']:
-		device = '/dev/%s' % raid
-		if device not in devices:
-			devices.append(device)
-
-	for lvm in disk['lvm']:
-		device = '/dev/mapper/%s' % lvm
-		if device not in devices:
-			devices.append(device)
-	
 host_fstab = getHostFstab(devices)
+
 host_partitions = getHostPartitions(disks, host_fstab)
 
 # print 'host_fstab : %s' % host_fstab
