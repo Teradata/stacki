@@ -203,9 +203,9 @@ class Client:
 			'message' : message }
 		m = json.dumps(msg)
 
-		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		tx.sendto("%s" % m, ('10.1.19.15', 5000))
-		tx.close()
+#		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#		tx.sendto("%s" % m, ('10.1.19.15', 5000))
+#		tx.close()
         
 ##
 ## MAIN
