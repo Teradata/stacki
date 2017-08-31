@@ -109,6 +109,14 @@ import time
 import shlex
 from distutils.sysconfig import get_python_lib
 import traceback
+import signal
+
+def sigint_handler(signal, frame):
+	print('\nInterrupted')
+	sys.exit(0)
+
+# attach a prettier interrupt handler to SIGINT (ctrl-c)
+signal.signal(signal.SIGINT, sigint_handler)
 
 # Open syslog
     
@@ -248,7 +256,7 @@ def run_command(args):
 		sys.stderr.write('%s\n' % e)
 		syslog.syslog(syslog.LOG_ERR, '%s' % e)
 		return -1
-	except:
+	except Exception as e:
 		# Sanitize Exceptions, and log them.
 		exc, msg, tb = sys.exc_info()
 		for line in traceback.format_tb(tb):
@@ -260,6 +268,11 @@ def run_command(args):
 		return -1
 
 	text = command.getText()
+
+	# set the SIGPIPE to the system default (instead of python default)
+	# before trying to print; prevents a stacktrace when exiting a pipe'd stack command
+	signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
 	if len(text) > 0:
 		print(text, end='')
 		if text[len(text)-1] != '\n':
