@@ -14,15 +14,103 @@
 
 import string
 import os
-import tempfile
 import stack.gen	
 		
+class MainTraversor(stack.gen.MainTraversor):
+
+	def traverse_stack_native(self, node):
+		lang = self.getAttr(node, 'stack:lang')
+
+		if lang == 'kickstart':
+			self.gen.nativeSection.append(self.collect(node),
+						      self.getAttr(node, 'stack:file'))
+			return False
+		return True
+
+
+	def traverse_stack_pre(self, node):
+		"""<stack:pre>
+
+		"""
+		nodefile = self.getAttr(node, 'stack:file')
+		shell    = self.getAttr(node, 'stack:shell')
+		flags    = [ ]
+
+		flags.append('--log=%s' % self.gen.log)
+		if shell:
+			flags.append('--interpreter %s' % shell)
+
+		script = '%%pre %s\n%s\n%%end' % (' '.join(flags),
+						  self.collect(node))
+			
+		self.gen.preSection.append(script, nodefile)
+		return False
+
+
+	def traverse_stack_post(self, node):
+		"""<stack:post>
+
+		"""
+		nodefile = self.getAttr(node, 'stack:file')
+		chroot   = self.getAttr(node, 'stack:chroot', default=True)
+		shell    = self.getAttr(node, 'stack:shell')
+		flags    = [ ]
+
+		if not chroot:
+			flags.append('--nochroot')
+			flags.append('--log=/mnt/sysimage%s' % self.gen.log)
+		else:
+			flags.append('--log=%s' % self.gen.log)
+
+		if shell:
+			if shell == 'python':
+				shell = '/opt/stack/bin/python3'
+			flags.append('--interpreter %s' % shell)
+
+		if self.gen.getProfileType() == 'native':
+			script = '%%post %s\n%s\n%%end' % (' '.join(flags), 
+							   self.collect(node))
+
+		elif self.gen.getProfileType() == 'shell' and chroot:
+			if shell:
+				script = self.bashify(shell, self.collect(node))
+			else:
+				script = self.collect(node)
+			
+		self.gen.postSection.append(script, nodefile)
+		return False
+		
+	def traverse_stack_boot(self, node):
+		"""<stack:boot>
+		
+		"""
+		nodefile = self.getAttr(node, 'stack:file')
+		order	 = self.getAttr(node, 'stack:order')
+		
+		if not order:
+			order = 'pre'
+		
+		s = ''
+
+		if self.gen.getProfileType() == 'native':
+			s = '%%post --log=%s\n' % self.gen.log
+
+		s += "cat >> /etc/sysconfig/stack-%s << '__EOF__'\n" % order
+		s += '%s' % self.collect(node)
+		s += '__EOF__\n'
+
+		if self.gen.getProfileType() == 'native':
+			s += '\n%end'
+
+		self.gen.bootSection[order].append(s, nodefile)
+		return False
+
 
 class Generator(stack.gen.Generator):
 
 	def __init__(self):
 		stack.gen.Generator.__init__(self)
-		self.mainSection	 = ProfileSection()
+		self.nativeSection	 = stack.gen.ProfileSection()
 		self.preSection		 = stack.gen.ProfileSection()
 		self.postSection	 = stack.gen.ProfileSection()
 		self.bootSection	 = {}
@@ -38,130 +126,14 @@ class Generator(stack.gen.Generator):
 		self.setOS('redhat')
 		self.setArch('x86_64')
 
-	## ---------------------------------------------------- ##
-	## Traverse						##
-	## ---------------------------------------------------- ##
+	def traversors(self):
+		"""Returns a list of Traversor that derived classes can change.
 
-	##
-	## main
-	##
+		"""
+		return [ MainTraversor(self) ]
 
-	# <stack:main>
-
-	def traverse_main_stack_main(self, node):
-		nodefile = self.getAttr(node, 'stack:file')
-
-		for child in node.childNodes:
-			if child.nodeType in [ child.TEXT_NODE, child.CDATA_SECTION_NODE]:
-				self.mainSection.append(child.nodeValue.strip(), nodefile)
-		return False
-
-	# <stack:package>
-
-	def traverse_main_stack_package(self, node):
-		nodefile = self.getAttr(node, 'stack:file')
-		rpms	 = self.collect(node).strip().split()
-		type	 = self.getAttr(node, 'stack:type')
-
-		if self.getAttr(node, 'stack:disable'):
-			enabled = False
-		else:
-			enabled = True
-
-		for rpm in rpms:
-			if type == 'meta':
-				rpm = '@%s' % rpm
-			self.packageSet.append(rpm, enabled, nodefile)
-		return False
-
-	# <stack:pre>
-	
-	def traverse_main_stack_pre(self, node):
-		nodefile	= self.getAttr(node, 'stack:file')
-		interpreter	= self.getAttr(node, 'stack:interpreter')
-		arg		= self.getAttr(node, 'stack:arg')
-
-		s = '%pre'
-		if interpreter:
-			s += ' --interpreter %s' % interpreter
-		s += ' --log=%s %s' % (self.log, arg)
-		s += '\n%s' % self.collect(node)
-		s += '\n%end'
-			
-		self.preSection.append(s, nodefile)
-		return False
-
-
-	# <stack:post>
-	
-	def traverse_main_stack_post(self, node):
-		nodefile	= self.getAttr(node, 'stack:file')
-		interpreter	= self.getAttr(node, 'stack:interpreter')
-		arg		= self.getAttr(node, 'stack:arg')
-
-		if self.getProfileType() == 'native':
-			script = '%post'
-			if interpreter:
-				script += ' --interpreter %s' % interpreter
-			if arg and '--nochroot' in arg:
-				script += ' --log=/mnt/sysimage%s %s' % (self.log, arg)
-			else:
-				script += ' --log=%s %s' % (self.log, arg)
-			script += '\n%s' % self.collect(node)
-			script += '\n%end'
-
-		elif self.getProfileType() == 'shell':
-
-			section = self.collect(node)
-			tmp	= tempfile.mktemp()
-
-			if interpreter:
-				script	= 'cat > %s << "__EOF_%s__"\n' % (tmp, tmp)
-				script += '#! %s\n\n' % interpreter
-				script += section
-				script += '__EOF_%s__\n\n' % tmp
-				script += 'chmod +x %s\n' % tmp
-				script += '%s\n' % tmp
-			elif arg and '--nochroot' in arg:
-				# just ignore all the --nochroot stuff
-				script = ''
-			else:
-				script = section
-			
-		self.postSection.append(script, nodefile)
-		return False
-		
-	# <stack:boot>
-	
-	def traverse_main_stack_boot(self, node):
-		nodefile	= self.getAttr(node, 'stack:file')
-		order		= self.getAttr(node, 'stack:order')
-		
-		if not order:
-			order = 'pre'
-		
-		s = ''
-
-		if self.getProfileType() == 'native':
-			s = '%%post --log=%s\n' % self.log
-
-		s += "cat >> /etc/sysconfig/stack-%s << '__EOF__'\n" % order
-		s += '%s' % self.collect(node)
-		s += '__EOF__\n'
-
-		if self.getProfileType() == 'native':
-			s += '\n%end'
-
-		self.bootSection[order].append(s, nodefile)
-		return False
-
-
-	## ---------------------------------------------------- ##
-	## Generate						##
-	## ---------------------------------------------------- ##
-
-	def generate_main(self):
-		return self.mainSection.generate()
+	def generate_native(self):
+		return self.nativeSection.generate()
 
 	def generate_packages(self):
 		dict	 = self.packageSet.getPackages()
@@ -200,36 +172,13 @@ class Generator(stack.gen.Generator):
 		return self.postSection.generate()
 
 	def generate_boot(self):
-		section = stack.gen.ProfileSection()
+		result = []
 
-		# check in/out all modified files
-		s = ''
-		if self.getProfileType() == 'native':
-			s += '%%post --log=%s\n' % self.log
-		s += "cat >> /etc/sysconfig/stack-pre << '__EOF__'\n"
-		for (file, (owner, perms)) in self.rcsFiles.items():
-			s += '%s' % self.rcsEnd(file, owner, perms)
-		s += '\n__EOF__\n'
-		if self.getProfileType() == 'native':
-			s += '\n%end'
-		section.append(s)
-
-		list = []
-
-		# Boot PRE
-
-		for line in section.generate():
-			list.append(line)
 		for line in self.bootSection['pre'].generate():
-			list.append(line)
-
-
-		# Boot POST
-		
+			result.append(line)
 		for line in self.bootSection['post'].generate():
-			list.append(line)
+			result.append(line)
 
-		
-		return list
+		return result
 
 

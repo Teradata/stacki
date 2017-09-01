@@ -18,7 +18,7 @@
         </copyright>
 
 
-<post arg="--nochroot">
+<post chroot="false">
 
 cp /tmp/site.attrs /mnt/sysimage/tmp
 chmod 400 /mnt/sysimage/tmp/site.attrs
@@ -26,7 +26,7 @@ cp /tmp/rolls.xml /mnt/sysimage/tmp
 
 </post>
 
-<post interpreter="/opt/stack/bin/python3">
+<post shell="python">
 
 import os.path
 

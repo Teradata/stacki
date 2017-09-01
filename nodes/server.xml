@@ -22,7 +22,7 @@
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </copyright>
 
-<main>
+<native lang="kickstart">
 reboot --eject
 
 <eval shell="python" mode="xml">
@@ -42,7 +42,7 @@ for pallet in g.rolls:
 	print('repo --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s' % (pname, purl, pname, pver, prel, parch))
 </eval>
 
-</main>
+</native>
 
 
 <package>stack-admin</package>

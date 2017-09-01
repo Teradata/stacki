@@ -20,7 +20,7 @@
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </copyright>
 
-<post interpreter='python'>
+<post shell='python'>
 import os
 import os.path
 import sys

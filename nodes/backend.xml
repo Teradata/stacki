@@ -9,8 +9,7 @@ file to add functionality to this appliance type.
 </description>
 
 
-<main>
-
+<native lang="kickstart">
 <eval shell="python" mode="xml">
 
 import stack.api
@@ -39,8 +38,7 @@ for o in stack.api.Call('list cart'):
 		print('repo --name="%s" --baseurl=http://127.0.0.1/install/carts/%s' % (o['name'], o['name']))
 
 </eval>
-
-</main>
+</native>
 
 
 <post cond="'&release;' == '7.x'">

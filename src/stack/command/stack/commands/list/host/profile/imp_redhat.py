@@ -20,7 +20,7 @@ class Implementation(stack.commands.list.host.profile.implementation):
 
 		if generator.getProfileType() == 'native':
 			profile.append('<chapter name="kickstart">')
-			for section in [ 'main',
+			for section in [ 'native',
 					 'packages',
 					 'pre',
 					 'post',

@@ -14,7 +14,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </copyright>
 
 
-<post arg="--nochroot">
+<post chroot="false">
 
 <!-- Place certificates and keys from our parent. -->
 

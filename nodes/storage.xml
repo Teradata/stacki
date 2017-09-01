@@ -28,7 +28,7 @@ cat /run/install/tmp/ks.xml | \
 	> /tmp/stack_site/__init__.py
 </pre>
 
-<pre interpreter="/opt/stack/bin/python3">
+<pre shell="python">
 # if this is an installing frontend, the previous command writes an empty file
 # we need to populate it here
 
@@ -67,7 +67,7 @@ if frontend:
 <package>stack-storage-config</package>
 
 
-<post arg='--nochroot'>
+<post chroot="false">
 mkdir /mnt/sysimage/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/sysimage/tmp/stack_site/
 </post>

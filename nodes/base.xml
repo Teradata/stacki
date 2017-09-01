@@ -19,7 +19,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </copyright>
 
 
-<main>
+<native lang="kickstart">
 
 unsupported_hardware
 install
@@ -40,7 +40,7 @@ else:
 	print "bootloader --location=mbr"
 </eval>
 
-</main>
+</native>
 
 
 <package cond="'&release;' == '7.x'">net-tools</package>

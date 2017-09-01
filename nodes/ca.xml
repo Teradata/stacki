@@ -53,7 +53,7 @@ countryName_default		= &Info_CertificateCountry;
 
 </post>
 
-<post arg="--nochroot">
+<post chroot="false">
 
 <!-- Place certificates and keys. -->
 

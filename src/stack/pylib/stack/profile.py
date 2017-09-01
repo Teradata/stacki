@@ -655,6 +655,11 @@ class Pass1NodeHandler(NodeHandler):
 			self.evalMode = mode
 		else:
 			self.evalMode = 'quote'
+		command = self.getAttr(attrs, 'command')
+		if command:
+			self.evalText  = None
+			self.evalShell = command
+
 
 		# Special case for python: add the applets directory
 		# to the python path.
@@ -708,7 +713,7 @@ class Pass1NodeHandler(NodeHandler):
 			'</stack:post>\n'
 			'\n' %
 			self.node.getFilename())
-		self.startTagDefault(ns, tag, attrs)
+		self.startTagDefault_stack(ns, tag, attrs)
 
 	def endTag_stack_post(self, ns, tag):
 		self.endTagDefault(ns, tag)
