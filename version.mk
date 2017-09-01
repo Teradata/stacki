@@ -1,5 +1,5 @@
 export ROLL		= stacki
-export ROLLVERSION	= 4.0_$(shell date +%Y%m%d)_$(shell git rev-parse --short HEAD)
+export ROLLVERSION	= 5.0_$(shell date +%Y%m%d)_$(shell git rev-parse --short HEAD)
 
 COLOR			= lightsteelblue
 ISOSIZE			= 0
