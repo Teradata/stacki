@@ -29,6 +29,9 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			row = [ network, address, netmask, gateway, 
 				mtu, zone, dns, pxe]
 
+			l = lambda x: '' if x == 'None' else x
+			row = map(l, row)
+
 			csv_w.writerow(row)
 
 	def run(self, params, args):
