@@ -609,6 +609,16 @@ class Pass1NodeHandler(NodeHandler):
 		pass
 	
 
+	# <stack:stack>
+
+	def startTag_stack_stack(self, ns, tag, attrs):
+		#
+		# Add the xmlns back into the outer most tag for the next
+		# pass.
+		self.node.setFilename(self.filename)
+		self.xml.append('<%s:%s %s>' % (ns, tag, self.nsAttrs()))
+
+
 	# <stack:report>
 
 	def startTag_stack_report(self, ns, tag, attrs):
@@ -763,23 +773,6 @@ class Pass1NodeHandler(NodeHandler):
 
 
 	def startTag(self, ns, tag, attrs):
-
-		if ns == 'stack':
-
-			# <stack:kickstart> is depracated
-			# <stack:redhat> is the new hotness
-			if tag == 'kickstart':
-				tag = 'redhat'
-
-			# <stack:[redhat|sles|...]>
-			#
-			# Add the xmlns back into the outer most tag for the next
-			# pass.
-			if tag == self.os:
-				self.node.setFilename(self.filename)
-				self.xml.append('<%s:%s %s>' % (ns, tag, self.nsAttrs()))
-				return
-
 		func = self.startTagDefault
 		if ns:
 			try:
@@ -791,13 +784,6 @@ class Pass1NodeHandler(NodeHandler):
 
 
 	def endTag(self, ns, tag):
-
-		if ns == 'stack':
-
-			# <stack:kickstart> is depracated
-			# <stack:redhat> is the new hotness
-			if tag == 'kickstart':
-				tag = 'redhat'
 
 		func = self.endTagDefault
 		if ns:
@@ -844,10 +830,14 @@ class Pass2NodeHandler(NodeHandler):
 
 		if ns == 'stack':
 
-			if tag == self.os:
+			if tag == 'stack':
 				return
 
 			# This is for the <loader></loader> section			
+			#
+			# This code is broken because of the stack:native tag.
+			# Q: Does it need to be fixed or removed?
+
 			if tag in [ 'url', 
 				    'lang', 
 				    'keyboard', 
@@ -874,7 +864,7 @@ class Pass2NodeHandler(NodeHandler):
 
 		if ns == 'stack':
 
-			if tag == self.os:
+			if tag == 'stack':
 				return
 
 			if self.kskey:

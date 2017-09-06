@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
   <description>
 
@@ -170,4 +170,4 @@ for cmd in cmd_set:
 	except:
 		sys.stderr.write("Could not execute %s\n" % cmd)
 </post>
-</kickstart>
+</stack>

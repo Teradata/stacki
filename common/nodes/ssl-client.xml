@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Secure Sockets Layer for non-frontend nodes.
@@ -55,4 +55,4 @@ rm -rf $cert
 </post>
 
 
-</kickstart> 
+</stack> 

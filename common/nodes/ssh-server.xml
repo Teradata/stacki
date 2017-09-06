@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
 <description>
 SSH config for frontend nodes.
@@ -18,5 +18,5 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </post>
 
 
-</kickstart>
+</stack>
 

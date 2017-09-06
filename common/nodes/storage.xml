@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <si_copyright>
 Copyright (c) 2006 - 2017 StackIQ Inc.
@@ -159,5 +159,5 @@ sed -i "s/${desired_grub_boot_drive},0/hd0,0/g" $GRUB_CONF
 </post>
 
 
-</kickstart> 
+</stack> 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Packages and configuration that should only be installed on servers
@@ -46,5 +46,5 @@ systemctl start ludicrous-server
 </post>
 
 
-</kickstart>
+</stack>
 

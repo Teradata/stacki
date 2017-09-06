@@ -10,66 +10,140 @@ import xml.dom.minidom
 from stack.bool import str2bool
 import stack.gen
 
-class Generator(stack.gen.Generator):
 
-	def __init__(self):
-		stack.gen.Generator.__init__(self)	
+class ExpandingTraversor(stack.gen.Traversor):
 
-		self.fragments = { }
-		self.scripts   = [ ]
-
-		self.setOS('sles')
-		self.setArch('x86_64')
+	stages   = { 'install-pre'     : 'pre-scripts',
+		     'install-pre-pkg' : 'postpartitioning-scripts',
+		     'install-post'    : 'chroot-scripts',
+		     'boot-pre'        : 'post-scripts',
+		     'boot-post'       : 'init-scripts' }
 
 
-	def parse(self, xml_string):
-		stack.gen.Generator.parse(self, xml_string)
+	def pre(self):
+		self.natives = [ ]
+
+	def post(self):
+		for child in self.natives:
+			self.gen.root.appendChild(child)
+
+	def traverse_stack_native(self, node):
+		"""<stack:native lang="yast">
+
+		Store the yast sections and delete everyone else.
+		"""
+		lang = self.getAttr(node, 'stack:lang')
+
+		if lang == 'yast':
+			for child in node.childNodes:
+				self.natives.append(child.cloneNode(deep=True))
+
+		node.parentNode.removeChild(node)
+		return False
 
 
-	## ---------------------------------------------------- ##
-	## Traverse						##
-	## ---------------------------------------------------- ##
+	def traverse_stack_script(self, node):
+		nodeid   = self.getAttr(node, 'stack:id')
+		nodefile = self.getAttr(node, 'stack:file')
+		stage    = self.getAttr(node, 'stack:stage',  default='install-post')
+		chroot   = self.getAttr(node, 'stack:chroot', default='true')
+		shell    = self.getAttr(node, 'stack:shell')
 
-	##
-	## expand
-	##
+		if shell == 'python':
+			shell = '/opt/stack/bin/python3'
 
-	# <stack:package>
+		stagename = self.stages[stage]
+		if not stagename == 'chroot-scripts':
+			chroot = '' # setting only valid for chroot-scripts
 
-	def traverse_expand_stack_package(self, node):
-		slesNS   = self.getAttr(self.root, 'xmlns:sles')
-		configNS = self.getAttr(self.root, 'xmlns:config')
 
-		# <software>
-		#	<packages config:type="list">
-		#		<package>?</package>
-		#		...
-		#	</package>
-		# </software>
+		# <scripts>
+		#   <STAGE config:type="list">
+		#     <script>
+		#       <filename>stacki-ipmi.sh</filename>
+		#       <interpreter>SHELL</interpreter>
+		#       <chrooted config:type="boolean">true|flase</chrooted>
+		#       <source>
+		#       ...
+		#       </source>
+		#     </script>
+	        #   </STAGE>
+		# </scripts>
 
-		packages = self.doc.createElementNS(slesNS, 'sles:packages')
-		packages.setAttributeNS(configNS, 'config:type', 'list')
+
+		root = self.newElementNode('sles:scripts')
+
+		scripttype = self.newElementNode('sles:%s' % stagename)
+		self.setAttribute(scripttype, 'config:type', 'list')
+		root.appendChild(scripttype)
+
+		script = self.newElementNode('sles:script')
+		scripttype.appendChild(script)
+
+		filename = self.newElementNode('sles:filename')
+		filename.appendChild(self.newTextNode('%s-%s' % (stage, nodeid)))
+		script.appendChild(filename)
+
+		if shell:
+			interpreter = self.newElementNode('sles:interpreter')
+			interpreter.appendChild(self.newTextNode(shell))
+			script.appendChild(interpreter)
+
+		if chroot:
+			chrooted = self.newElementNode('sles:chrooted')
+			self.setAttribute(chrooted, 'config:type', 'boolean')
+			chrooted.appendChild(self.newTextNode(shell))
+			script.appendChild(chrooted)
+
+		source = self.newElementNode('sles:source')
+		source.appendChild(self.newTextNode(self.collect(node)))
+		script.appendChild(source)
+
+		node.parentNode.replaceChild(root, node)
+		return False
+
+
+
+
+	def traverse_stack_package(self, node):
+		"""Expands <stack:package> to native autoyast syntax, later passes
+		will collect all these section to create a single
+		<software> section.
+
+		<software>
+			<packages config:type="list">
+			<package>?</package>
+			...
+			</package>
+		</software>
+
+		"""
+
+		packages = self.newElementNode('sles:packages')
+		self.setAttribute(packages, 'config:type', 'list')
 
 		for rpm in self.collect(node).strip().split():
-			package = self.doc.createElementNS(slesNS, 'sles:package')
-			package.appendChild(self.doc.createTextNode(rpm))
+			package = self.newElementNode('sles:package')
+			package.appendChild(self.newTextNode(rpm))
 			packages.appendChild(package)
 
-		software = self.doc.createElementNS(slesNS, 'sles:software')
+		software = self.newElementNode('sles:software')
 		software.appendChild(packages)
 
 		node.parentNode.replaceChild(software, node)
-
 		return False
 
-	##
-	## pre
-	##
 
-	# <sles:*>
+class DefraggingTraversor(stack.gen.Traversor):
 
-	def traverse_pre_sles(self, node):
+	def pre(self):
+		self.fragments = { }
 
+	def traverse_sles(self, node):
+		"""Finds all the config:type=list <sles:*> elements and moves them all
+		into a single hierarchy.
+
+		"""
 
 		if not self.getAttr(node, 'config:type') == 'list':
 			return True
@@ -108,23 +182,47 @@ class Generator(stack.gen.Generator):
 
 		return False 
 
-		
 
-	##
-	## main
-	##
 
-	# <stack:post>
 
-	def traverse_main_stack_post(self, node):
-		# For now nuke any post sections, but this should really
-		# be part of SUX
-		node.parentNode.removeChild(node)
-		return False
+class MainTraversor(stack.gen.MainTraversor):
 
-	# <sles:package>
+	def pre(self):
+		self.outers  = { }
+		self.scripts = [ ]
 
-	def traverse_main_sles_package(self, node):
+	def post(self):
+		self.gen.scriptsSection.append('<scripts>')
+		for child in self.scripts:
+			self.gen.scriptsSection.append(child.toxml())
+		self.gen.scriptsSection.append('</scripts>')
+
+	def traverse_stack_profile(self, node):
+		"""<stack:profile>
+
+		Grab the namespace information out of the outermost
+		tag and build the header for the final document.
+
+		"""
+		slesNS   = self.getAttr(self.gen.root, 'xmlns:sles')
+		configNS = self.getAttr(self.gen.root, 'xmlns:config')
+		xiNS     = self.getAttr(self.gen.root, 'xmlns:xi')
+
+		section = self.gen.headerSection
+		section.append('<?xml version="1.0"?>')
+		section.append('<!DOCTYPE profile>')
+		section.append('<profile xmlns="%s" xmlns:config="%s" xmlns:xi="%s">' % 
+			       (slesNS, configNS, xiNS))
+
+		section = self.gen.footerSection
+		section.append('</profile>')
+		return True
+
+
+	def traverse_sles_package(self, node):
+		"""<sles:package>
+
+		"""
 		nodefile = self.getAttr(node, 'stack:file')
 		pkg	 = self.collect(node).strip()
 
@@ -133,62 +231,75 @@ class Generator(stack.gen.Generator):
 		elif node.parentNode.nodeName == 'sles:remove-packages':
 			enabled = False
 
-		self.packageSet.append(pkg, enabled, nodefile)
-		self.traverse_main_sles(node)
+		self.gen.packageSet.append(pkg, enabled, nodefile)
+		self.traverse_sles(node)
 		return False
 
 
-	# <sles:scripts>
+	def traverse_sles_scripts(self, node):
+		"""Handle multiple <sles:scripts> sections by recording them in a
+		ProfileSection and marking the XML element for
+		garbarge collection.
 
-	def traverse_main_sles_scripts(self, node):
+		"""
 		for child in node.childNodes:
 			self.scripts.append(child)
 		node.setAttribute('stack:gc', 'true')
 		return True # keep going
 
 
-	# <sles:*>
+	def traverse_sles(self, node):
+		"""<sles:*>
 
-	def traverse_main_sles(self, node):
+		"""
 		node.tagName = node.localName
 		self.getAttr(node, 'stack:file', consume=True)
 		return True
 
 
-	# <xi:*>
+	def traverse_xi(self, node):
+		"""<xi:*>
 
-	def traverse_main_xi(self, node):
+		"""
 		self.getAttr(node, 'stack:file', consume=True)
 		return True
 
 
 
-	## ---------------------------------------------------- ##
-	## Generate						##
-	## ---------------------------------------------------- ##
+class Generator(stack.gen.Generator):
+
+	def __init__(self):
+		stack.gen.Generator.__init__(self)
+		self.headerSection  = stack.gen.ProfileSection()
+		self.footerSection  = stack.gen.ProfileSection()
+		self.nativeSection  = stack.gen.ProfileSection()
+		self.scriptsSection = stack.gen.ProfileSection()
+
+		self.setOS('sles')
+		self.setArch('x86_64')
+
+
+	def traversors(self):
+		return [ ExpandingTraversor(self), 
+			 DefraggingTraversor(self), 
+			 MainTraversor(self) ]
+
+	def post(self):
+		for child in self.root.childNodes:
+			self.nativeSection.append(child.toxml())
+
+	def generate_header(self):
+		return self.headerSection.generate()
 
 	def generate_native(self):
-		section = stack.gen.ProfileSection()
+		return self.nativeSection.generate()
 
-		slesNS   = self.getAttr(self.root, 'xmlns:sles')
-		configNS = self.getAttr(self.root, 'xmlns:config')
-		xiNS     = self.getAttr(self.root, 'xmlns:xi')
+	def generate_scripts(self):
+		return self.scriptsSection.generate()
 
-		section.append('<?xml version="1.0"?>')
-		section.append('<!DOCTYPE profile>')
-		section.append('<profile xmlns="%s" xmlns:config="%s" xmlns:xi="%s">' % (slesNS, configNS, xiNS))
+	def generate_footer(self):
+		return self.footerSection.generate()
 
-		for child in self.root.childNodes:
-			section.append(child.toxml())
-
-		section.append('<scripts>')
-		for child in self.scripts:
-			section.append(child.toxml())
-		section.append('</scripts>')
-
-		section.append('</profile>')
-
-		return section.generate()
 
 	def generate_packages(self):
 		dict	 = self.packageSet.getPackages()

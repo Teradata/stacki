@@ -659,6 +659,12 @@ class Generator:
 	def getProfileType(self):
 		return self.profileType
 
+	def post(self):
+		"""Called after the parsing is completed
+
+		"""
+		pass
+
 	def traversors(self):
 		"""Returns a list of Traversor that derived classes can change.
 
@@ -680,6 +686,8 @@ class Generator:
 			traversor.pre()
 			self.traverse(traversor, self.root)
 			traversor.post()
+
+		self.post()
 
 
 

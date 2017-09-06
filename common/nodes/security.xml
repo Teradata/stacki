@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
 <description>
 Security parent node for common security elements.
@@ -33,5 +33,5 @@ fi
 
 </post>
 
-</kickstart>
+</stack>
 

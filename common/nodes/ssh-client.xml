@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
 <description>
 SSH Config for backend nodes and other non-frontend appliances.
@@ -121,5 +121,5 @@ cat /etc/ssh/ssh_host_ed25519_key.pub 2> /dev/null
 </post>
 
 
-</kickstart>
+</stack>
 

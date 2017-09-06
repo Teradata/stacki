@@ -127,9 +127,6 @@ class Generator(stack.gen.Generator):
 		self.setArch('x86_64')
 
 	def traversors(self):
-		"""Returns a list of Traversor that derived classes can change.
-
-		"""
 		return [ MainTraversor(self) ]
 
 	def generate_native(self):

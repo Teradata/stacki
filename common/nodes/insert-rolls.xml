@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 	<description>
 
@@ -42,4 +42,4 @@ for name, version, release, arch, url, diskid in generator.rolls:
 
 </post>
 
-</kickstart> 
+</stack> 

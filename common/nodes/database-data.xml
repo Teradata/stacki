@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart interface="public">
+<stack>
 
 	<description>
 	Populate cluster database with initial data
@@ -234,4 +234,4 @@ rm /tmp/my.cnf
 /opt/stack/bin/stack report host > /etc/hosts
 </post>
 
-</kickstart>
+</stack>

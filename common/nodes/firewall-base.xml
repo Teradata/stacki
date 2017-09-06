@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<description>
 	  Default firewall rules for all appliances.  Disable everything but SSH.
@@ -33,5 +33,5 @@
 </post>
 
 
-</kickstart> 
+</stack> 
 

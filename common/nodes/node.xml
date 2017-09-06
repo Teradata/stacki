@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
 <description>
 A node is a machine in the cluster.  Node's are on a private network
@@ -54,5 +54,5 @@ MANDATORY_MANPATH /opt/stack/share/man
 
 </post>
 
-</kickstart> 
+</stack> 
 

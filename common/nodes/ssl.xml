@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Open SSL support
@@ -15,5 +15,5 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 
 <package>openssl</package>
 
-</kickstart> 
+</stack> 
 

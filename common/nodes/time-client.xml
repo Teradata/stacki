@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Time Configuration
@@ -23,4 +23,4 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <report name="host.time">&hostname;</report>
 </post>
 
-</kickstart> 
+</stack> 

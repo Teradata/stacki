@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Configure a node's network
@@ -36,5 +36,5 @@ chmod a+x /tmp/do-interface.sh
 </post>
 
 
-</kickstart> 
+</stack> 
 

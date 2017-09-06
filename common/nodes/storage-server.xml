@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<si_copyright>
 	Copyright (c) 2006 - 2017 StackIQ Inc.
@@ -22,5 +22,5 @@
 
 </post>
 
-</kickstart> 
+</stack> 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart interface="public">
+<stack>
 
 <description>
 Base class for all nodes.
@@ -112,4 +112,4 @@ mv /tmp/ks-script* /var/log/stacki/ks
 updatedb
 </boot>
 
-</kickstart> 
+</stack> 

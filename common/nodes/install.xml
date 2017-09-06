@@ -2,7 +2,7 @@
 
 
 
-<kickstart>
+<stack>
 
   <description>
   Do everything needed to kickstart backend nodes or, generally speaking,
@@ -52,5 +52,5 @@ fi
 
 </post>
 
-</kickstart> 
+</stack> 
 

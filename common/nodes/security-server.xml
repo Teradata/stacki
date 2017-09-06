@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
   <description>
 
@@ -16,4 +16,4 @@ Parent node for server security elements.
         </copyright>
 
 
-</kickstart>
+</stack>

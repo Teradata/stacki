@@ -2,7 +2,7 @@
 
 
 
-<kickstart>
+<stack>
 
   <description>
 
@@ -76,5 +76,5 @@ options {
 </post>
 
 
-</kickstart> 
+</stack> 
 

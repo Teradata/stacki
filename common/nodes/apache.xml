@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
   <description>
 
@@ -90,4 +90,4 @@ cat /proc/cpuinfo  | awk -F: '/^processor/{print $2;}' | wc -l > /var/tmp/profil
 chown apache:root /var/tmp/profile.semaphore
 </post>
 
-</kickstart> 
+</stack> 

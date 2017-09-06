@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Configure a node's network
@@ -27,4 +27,4 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </post>
 
 
-</kickstart> 
+</stack> 

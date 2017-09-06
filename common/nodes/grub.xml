@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Boot loader support (GRand Unified Bootloader)
@@ -28,4 +28,4 @@ cp /boot/grub/grub.conf /boot/grub/grub-orig.conf
 </post>
 
 
-</kickstart> 
+</stack> 

@@ -1,5 +1,5 @@
-/build-*-*/
-/src/order-*.mk
+*/build-*-*/
+*/src/order-*.mk
 .buildenv
 .buildenv-stacki
 .rpmmacros
@@ -9,4 +9,4 @@
 .DS_Store
 roll-*.xml
 .*.swp
-/3rdparty/
+*/3rdparty/

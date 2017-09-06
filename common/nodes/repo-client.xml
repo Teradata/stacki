@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<description>
 	Create a repository conifugation file on a backend
@@ -15,4 +15,4 @@
 <report name="host.repo">&hostname;</report>
 </post>
 
-</kickstart>
+</stack>

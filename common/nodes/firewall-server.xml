@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<description>
 	  Server node firewall rules
@@ -51,4 +51,4 @@ chmod a+x /tmp/do-firewall.sh
 </post>
 
 
-</kickstart>
+</stack>

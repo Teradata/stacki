@@ -15,12 +15,12 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, attrs):
 
-		self.owner.addText('<stack:post>\n')
+		self.owner.addText('<stack:script stack:stage="install-post">\n')
 		self.owner.addText('mkdir -p /opt/stack/etc\n')
 		self.owner.addText('<stack:file stack:name="/opt/stack/etc/profile.cfg" stack:perms="0640">\n')
 		self.owner.addText('[attr]\n')
 		for k in sorted(attrs.keys()):
 			self.owner.addText('%s = %s\n' % (k, attrs[k]))
 		self.owner.addText('</stack:file>\n')
-		self.owner.addText('</stack:post>\n')
+		self.owner.addText('</stack:script>\n')
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
 <description>
 Enable SSH
@@ -52,4 +52,4 @@ sed -e 's/#PermitUserEnvironment no/PermitUserEnvironment yes/' \
 
 </post>
 
-</kickstart> 
+</stack> 

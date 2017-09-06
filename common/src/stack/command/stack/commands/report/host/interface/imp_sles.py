@@ -3,6 +3,7 @@
 
 import sys
 import re
+import shlex
 import ipaddress
 import stack.commands
 
@@ -26,6 +27,9 @@ class Implementation(stack.commands.Implementation):
 			netname = o['network']
 			vlanid = o['vlan']
 			mac = o['mac']
+			options = []
+			if o['options']:
+				options = shlex.split(o['options'])
 
 			ib_re = re.compile('^ib[0-9]+$')
 			if mac:
@@ -76,7 +80,11 @@ class Implementation(stack.commands.Implementation):
 			else:
 				self.owner.addOutput(host, 'USERCONTROL=no')
 
-			self.owner.addOutput(host, 'STARTMODE=auto')
+			if 'onboot=no' in options:
+				self.owner.addOutput(host, 'STARTMODE=manual')
+			else:
+				self.owner.addOutput(host, 'STARTMODE=auto')
+
 			self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
 			self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
 			self.owner.addOutput(host, 'NETWORK=%s' % network.strip())

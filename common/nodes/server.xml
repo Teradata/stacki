@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart interface="public">
+<stack>
 
 	<description>
 	The 'server node' in the graph.
@@ -136,5 +136,5 @@ touch /root/.gitconfig
 HOME=/root git lfs install --force
 </boot>
 
-</kickstart> 
+</stack> 
 

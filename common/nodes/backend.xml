@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart interface="public">
+<stack>
 
 
 <description>
@@ -51,5 +51,5 @@ cp /run/install/tmp/stack.conf /tmp/stack.conf
 </post>
 
 
-</kickstart> 
+</stack> 
 

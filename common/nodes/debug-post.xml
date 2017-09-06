@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 
 
-<kickstart>
+<stack>
 
   <description>
   
@@ -27,5 +27,5 @@ while [ -f /tmp/yo ]; do
 done
 </post>
 
-</kickstart> 
+</stack> 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart interface="public">
+<stack>
 
 <description>
 The 'client node' in the graph.
@@ -62,4 +62,4 @@ gpgcheck=0
 </post>
 
 
-</kickstart> 
+</stack> 

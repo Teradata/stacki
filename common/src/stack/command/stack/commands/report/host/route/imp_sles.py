@@ -1,7 +1,6 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-
 import os
 import sys
 import stack.commands
@@ -61,31 +60,3 @@ class Implementation(stack.commands.Implementation):
 				break
 				
 		self.owner.addOutput(host, '</stack:file>')
-
-		#
-		# add interface specific routes
-		#
-		network = None
-		device = None
-
-		result = self.owner.call('list.host.interface', [ host ])
-		for o in result:
-			network = o['network']
-			device = o['interface']
-
-			if not o['default'] and network and device != 'ipmi': 
-
-				self.owner.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network/ifroute-%s">' % device)
-
-				for row in self.owner.call('list.network', [ network ]):
-					destination = row['address']
-					gateway	    = row['gateway']
-					netmask	    = row['mask']
-
-					self.owner.addOutput(host, '%s\t%s\t%s\t%s' % (destination, gateway, netmask, device))
-
-				self.owner.addOutput(host, '</stack:file>')
-
-				self.owner.addOutput(host, '__EOF__')
-				break
-

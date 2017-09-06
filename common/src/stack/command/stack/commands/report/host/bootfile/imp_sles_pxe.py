@@ -1,7 +1,5 @@
-#
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
-#
+# @SI_Copyright@
+# @SI_Copyright@
 
 import stack.commands
 from stack.exception import *
@@ -9,16 +7,16 @@ from stack.exception import *
 class Implementation(stack.commands.Implementation):
 	def run(self, h):
 
-		host     = h['host']
-		ip       = h['ip']
-		mask     = h['mask']
-		gateway  = h['gateway']
-		kernel   = h['kernel']
-		ramdisk  = h['ramdisk']
-		args     = h['args']
+		host	 = h['host']
+		ip	 = h['ip']
+		mask	 = h['mask']
+		gateway	 = h['gateway']
+		kernel	 = h['kernel']
+		ramdisk	 = h['ramdisk']
+		args	 = h['args']
 		filename = h['filename']
-		attrs    = h['attrs']
-		action   = h['action']
+		attrs	 = h['attrs']
+		action	 = h['action']
 		boottype = h['type']
 
 		self.owner.addOutput(host,'default stack')
@@ -38,5 +36,5 @@ class Implementation(stack.commands.Implementation):
 
 		if args and len(args) > 0:
 			self.owner.addOutput(host,'\tappend %s' % args)
-		if action == "install":
+		if boottype == "install":
 			self.owner.addOutput(host,'\tipappend 2')

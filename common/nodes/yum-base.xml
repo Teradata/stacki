@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<description>
 	Configure the package repository
@@ -37,5 +37,5 @@ assumeyes=0
 </file>
 </post>
 
-</kickstart> 
+</stack> 
 

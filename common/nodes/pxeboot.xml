@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Provides a method for PXE-ing nodes to reset their boot action to 'os' (localdisk)
@@ -37,5 +37,5 @@ ${curl_cmd} --insecure --output /dev/null ${pxe_cgi_url}
 
 </post>
 
-</kickstart> 
+</stack> 
 

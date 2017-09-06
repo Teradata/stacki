@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 	<description>
 	Dummy empty node for building the OS Roll, this is the
@@ -39,4 +39,4 @@
 	<package>perl-TermReadKey</package>
 	<package>libgnome-keyring</package>
 
-</kickstart> 
+</stack> 

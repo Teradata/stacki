@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 	<description>
 	 Stacki Frontend can serve Pallets to other Frontends
@@ -109,5 +109,5 @@ touch /var/www/html/robots.txt
 
 </post>
 
-</kickstart> 
+</stack> 
 

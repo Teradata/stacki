@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Append rules to logrotate to prune files in /var/log
@@ -87,5 +87,5 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </file>
 </post>
 
-</kickstart> 
+</stack> 
 

@@ -1,7 +1,5 @@
-#
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
-#
+# @SI_Copyright@
+# @SI_Copyright@
 
 import stack.commands
 from stack.exception import *
@@ -21,24 +19,38 @@ menuentry "Stacki UEFI Install" {
 }
 """
 
-os_template = """search.fs_label BOOTEFI root
+sles11_os_template = """search.fs_label BOOTEFI root
 chainloader ($root)/efi/SuSE/elilo.efi
+boot
+"""
+
+sles12_os_template = """search.fs_label BOOTEFI root
+configfile ($root)/efi/sles/grub.cfg
 boot
 """
 
 class Implementation(stack.commands.Implementation):
 	def run(self, h):
-		host     = h['host']
-		ip       = h['ip']
-		mask     = h['mask']
-		gateway  = h['gateway']
-		kernel   = h['kernel']
-		ramdisk  = h['ramdisk']
-		args     = h['args']
+		host	 = h['host']
+		ip	 = h['ip']
+		mask	 = h['mask']
+		gateway	 = h['gateway']
+		kernel	 = h['kernel']
+		ramdisk	 = h['ramdisk']
+		args	 = h['args']
 		filename = h['filename']
-		attrs    = h['attrs']
-		action   = h['action']
+		attrs	 = h['attrs']
+		action	 = h['action']
 		boottype = h['type']
+
+
+		# Get pallets for Host
+		pallets = self.owner.getHostAttr(h['host'], 'pallets')
+		os_template = sles11_os_template
+		for p in pallets:
+			if p.startswith('SLES-12'):
+				os_template = sles12_os_template
+				break
 
 		# Get the bootaction for the host (install or os) and
 		# lookup the actual kernel, ramdisk, and args for the

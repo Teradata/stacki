@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<kickstart>
+<stack>
 
 	<description>
 	Create a repository config file on frontend
@@ -16,4 +16,4 @@
 	/opt/stack/bin/stack report script | sh
 </post>
 
-</kickstart>
+</stack>

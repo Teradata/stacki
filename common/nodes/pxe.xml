@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Provides pre-execution environment (PXE) support for frontend machines.
@@ -71,4 +71,4 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 </post>
 
 
-</kickstart> 
+</stack> 

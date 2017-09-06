@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Generates the resolv.conf file for slave nodes.
@@ -27,4 +27,4 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 </post>
 
-</kickstart> 
+</stack> 

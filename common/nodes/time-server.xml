@@ -2,7 +2,7 @@
 
 
 
-<kickstart>
+<stack>
 
 <description>
 Time Configuration
@@ -35,5 +35,5 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </post>
 
 
-</kickstart> 
+</stack> 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Copy root's public key from the Frontend to the installing nodes.
@@ -59,4 +59,4 @@ EOF
 </post>
 
 
-</kickstart> 
+</stack> 

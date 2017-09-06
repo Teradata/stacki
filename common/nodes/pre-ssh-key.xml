@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart interface="public">
+<stack>
 
 <si_copyright>
 Copyright (c) 2006 - 2017 StackIQ Inc.
@@ -81,4 +81,4 @@ chmod 600 /tmp/authorized_keys
 	-h /etc/ssh/ssh_host_ecdsa_key -p 2200
 </pre>
 
-</kickstart>
+</stack>

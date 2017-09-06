@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 
-<kickstart>
+<stack>
 
 <description>
 Foundation Packages
@@ -58,4 +58,4 @@ fi
 
 </post>
 
-</kickstart> 
+</stack> 
