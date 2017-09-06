@@ -42,15 +42,15 @@ Stacki is CentOS first, this is where all of our develop starts.  You should sta
 ## Stacki for Ubuntu (Trusty, Wily, Xenial, or Yakkety)
 
 You asked, we listened, and now we’re releasing Stacki Ubuntu into the open source Stacki tree. You can now automatically install Ubuntu via a preseed network installation to boot backend machines from a Stacki frontend. The only thing you have to do is prep your frontend.
-It’s not as full-featured as what we do with CentOS/RHEL variants, but we will be building on what we have done with Ubuntu to be commensurate with CentOS and SLES in the coming weeks. Stay tuned.
+It's latest release now does multi-disk partitioning and multiple network interface configuration. We are starting to make a better preseed.
 In the meantime, follow the [GitHub README](https://github.com/Teradata/stacki-ubuntu/blob/master/README.md) and the requirements below to get started.
 
 ### Requirements:
 
 * A Stacki frontend with Stacki 4.0. It likely won’t work on anything less than 4.0.
-* [Stacki-ubuntu-frontend Pallet ](https://s3.amazonaws.com/stacki/public/pallets/4.0/open-source/stacki-ubuntu-frontend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = f54df866dc9a7f74b3b2378b3a07af15)
-* [Stacki-ubuntu-backend Pallet](https://s3.amazonaws.com/stacki/public/pallets/4.0/open-source/stacki-ubuntu-backend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = fd7594fc324a78cc3834432434f09916)
-* Ubuntu-Server iso from Trusty, Wily, Xenial, or Yakkety (e.g., ubuntu-16.04-server-amd64.iso) (you can do multiple versions)
+* [Stacki-ubuntu-frontend Pallet ](https://teradata-stacki.s3.amazonaws.com/release/stacki/4.x/stacki-ubuntu-frontend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = 451b71511db38146fc3ed83b52607c41)
+* [Stacki-ubuntu-backend Pallet](https://teradata-stacki.s3.amazonaws.com/release/stacki/4.x/stacki-ubuntu-backend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = 670e4df448162d7ee388ffdfe435b5b7)
+* Ubuntu-Server iso from Xenial, minor version 1,2, or 3 (e.g., ubuntu-16.04-server-amd64.iso)
 
 ## Stacki Ace (CentOS 7 for ARM)
 
