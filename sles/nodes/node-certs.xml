@@ -10,7 +10,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:script stack:stage="install-post">
 <!-- make sure the /root/.ssh exists -->
 /bin/mkdir -p /root/.ssh
-</script>
+</stack:script>
 
 <stack:script stack:stage="install-post" stack:cond="sync.ssh.authkey">
 <!-- propagate root's public ssh key -->

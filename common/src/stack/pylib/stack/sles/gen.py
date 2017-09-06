@@ -13,11 +13,11 @@ import stack.gen
 
 class ExpandingTraversor(stack.gen.Traversor):
 
-	stages   = { 'install-pre'     : 'pre-scripts',
-		     'install-pre-pkg' : 'postpartitioning-scripts',
-		     'install-post'    : 'chroot-scripts',
-		     'boot-pre'        : 'post-scripts',
-		     'boot-post'       : 'init-scripts' }
+	stages   = { 'install-pre'         : 'pre-scripts',
+		     'install-pre-package' : 'postpartitioning-scripts',
+		     'install-post'        : 'chroot-scripts',
+		     'boot-pre'            : 'post-scripts',
+		     'boot-post'           : 'init-scripts' }
 
 
 	def pre(self):

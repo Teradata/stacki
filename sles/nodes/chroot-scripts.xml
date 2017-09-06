@@ -31,7 +31,6 @@ echo "&hostname;.&domainname;" > /etc/HOSTNAME
 /usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
 
 /usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
-</stack:script>
 
 <stack:file name="/root/.ssh/authorized_keys" perms="0600">
 <stack:eval shell="python">
@@ -44,7 +43,7 @@ for line in file.readlines():
 chmod a+rx /root
 chmod a+rx /root/.ssh
 
-<file name="/opt/stack/bin/up.py" perm="0755">
+<stack:file stack:name="/opt/stack/bin/up.py" stack:perm="0755">
 #!/usr/bin/python
 
 import socket
@@ -57,11 +56,11 @@ from stack_site import *
 tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 tx.sendto('health up', (attributes['Kickstart_PrivateAddress'], 5000))
 tx.close()
-</file>
+</stack:file>
 
-<file name="/etc/cron.d/up">
+<stack:file stack:name="/etc/cron.d/up">
 * * * * * root /opt/stack/bin/up.py
-</file>
+</stack:file>
 
 rm -f /etc/zypp/repos.d/*
 

@@ -9,7 +9,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:package>foundation-py-PyMySQL</stack:package>
 
 
-<stack:script stage:stage="install-post">
+<stack:script stack:stage="install-post">
 
 <!--
 	set the hostname to the private name. this helps the stacki command
