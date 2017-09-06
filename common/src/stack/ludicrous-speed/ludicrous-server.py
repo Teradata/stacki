@@ -10,23 +10,30 @@ import os
 
 app = Flask(__name__)
 
-packages	= {}
-peers		= {}
+packages = {}
+peers = {}
 
-MAX_PEERS	= 3
+MAX_PEERS = 3
 
-@app.route('/avalanche/lookup', methods=['GET'])
-def lookup():
-	app.logger.debug("Requester : %s" % request.remote_addr )
-	app.logger.debug("Requesting Lookup: %s" % request.args )
-	res			= {}
-	res['success']		= True
-	ipaddr			= request.remote_addr
-	port			= request.args.get('port') or 80
-	hashcode		= request.args.get('hashcode')
+@app.errorhandler(404)
+def four_o_four(error=None):
+	error_message = error if type(error) is str else "File not found."
+	message = {
+		'status': 404,
+		'message': error_message
+	}
 
-	#app.logger.debug("peers before: %s" % peers )
-	#app.logger.debug("packages before: %s" % packages )
+	resp = jsonify(message)
+	resp.status_code = 404
+
+	return resp
+
+@app.route('/avalanche/lookup/<hashcode>', methods=['GET'])
+def lookup(hashcode):
+	res = {}
+	res['success'] = True
+	ipaddr = request.remote_addr
+
 	# check if hash exists
 	if(hashcode not in packages):
 		packages[hashcode] = []
@@ -34,13 +41,8 @@ def lookup():
 	# check if peer exists and is in our database
 	if(ipaddr not in peers):
 		hosts = [host['value'] for host in stack.api.Call('list.host.attr', ["attr=hostaddr"])]
-		if ipaddr in hosts:
-			peers[ipaddr] = {
-				'ready': False,
-				'port': port
-				}
-		else:
-			abort(404)
+		if ipaddr not in hosts:
+			return four_o_four("Host not managed by frontend")
 
 	# return list of peers with the request hash
 	res['peers'] = []
@@ -55,19 +57,16 @@ def lookup():
 		if len(res['peers']) == 10:
 			break
 
-	#app.logger.debug("peers after: %s" % peers )
-	#app.logger.debug("packages after: %s" % packages )
-	#app.logger.debug("response: %s" % res )
-	#app.logger.debug("\n\n\n\n\n")
 	return jsonify(res)
 
-@app.route('/avalanche/register', methods=['GET'])
-def register():
-	res			= {}
-	res['success']		= True
-	ipaddr			= request.remote_addr
-	port			= request.args.get('port') or 80
-	hashcode		= request.args.get('hashcode')
+@app.route('/avalanche/register/<port>/<hashcode>', methods=['POST'])
+def register(port=80, hashcode=None):
+	res = {}
+	res['success'] = True
+	ipaddr = request.remote_addr
+
+	if not hashcode:
+		return four_o_four("asdf")
 
 	# check if hash exists
 	if(hashcode not in packages):
@@ -81,7 +80,7 @@ def register():
 				'port': port
 				}
 		else:
-			abort(404)
+			return four_o_four()
 
 	# register file
 	packages[hashcode].append(ipaddr)
@@ -91,19 +90,28 @@ def register():
 
 	return jsonify(res)
 
-@app.route('/avalanche/unregister', methods=['GET'])
-def unregister():
+@app.route('/avalanche/unregister/hashcode/<hashcode>', methods=['DELETE'])
+def unregister(hashcode):
 	ipaddr = unquote(request.args['peer'])
+	res = {}
+	res['success'] = True
+
 	app.logger.debug("unquoted ip addr: %s", ipaddr)
-	hashcode = request.args['hashcode']
-	if ipaddr in packages[hashcode]:
+	if packages.has_key(ipaddr) and ipaddr in packages[hashcode]:
 		packages[hashcode].remove(ipaddr)
+		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
+	else:
+		res['message'] = "'%s' was not registered for hash: %s" % (ipaddr, hashcode)
 
-	return ""
 
-@app.route('/avalanche/peerdone', methods=['GET'])
+	return jsonify(res)
+
+@app.route('/avalanche/peerdone', methods=['DELETE'])
 def peerdone():
 	ipaddr = request.remote_addr
+	res = {}
+	res['success'] = True
+
 	for package in packages:
 		if ipaddr in packages[package]:
 			packages[package].remove(ipaddr)

@@ -9,4 +9,6 @@
 .DS_Store
 roll-*.xml
 .*.swp
+<<<<<<< HEAD
 */3rdparty/
+menu.cfg
