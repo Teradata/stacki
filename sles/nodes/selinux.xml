@@ -1,0 +1,12 @@
+<stack:stack>
+
+
+<stack:script stack:stage="install-post">
+<!-- disable SELinux -->
+<stack:file stack:name="/etc/selinux/config">
+SELINUX=disabled
+</stack:file>
+</stack:script>
+
+
+</stack:stack> 

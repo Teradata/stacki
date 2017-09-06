@@ -1,0 +1,16 @@
+<stack:stack>
+
+	<general>
+		<signature-handling>
+			<accept_unsigned_file config:type="boolean">true</accept_unsigned_file>
+			<accept_file_without_checksum config:type="boolean">true</accept_file_without_checksum>
+			<accept_verification_failed config:type="boolean">true</accept_verification_failed>
+			<accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+		</signature-handling>
+		<mode>
+			<!-- skip the "Confirm Installation" screen -->
+			<confirm config:type="boolean">false</confirm>
+		</mode>
+	</general>
+
+</stack:stack>

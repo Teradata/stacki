@@ -1,0 +1,20 @@
+<stack:stack>
+
+	<stack:description>
+	Handle for Backend Appliance
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+	
+	<users config:type="list">
+		<user>
+			<username>root</username>
+			<encrypted config:type="boolean">true</encrypted>
+			<user_password>&Kickstart_PrivateRootPassword;</user_password>
+		</user>
+	</users>
+	
+</stack:stack>

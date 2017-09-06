@@ -1,0 +1,56 @@
+<stack:stack>
+  
+	<stack:description>
+	Handle for Backend Appliance
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+  
+	<add-on>
+		<add_on_products config:type="list">
+			<stack:eval shell="python" mode="xml">
+import stack.api
+
+def add_on_pallet(host, name, version, release, OS, arch):
+	print('&lt;listentry>')
+	print('&lt;media_url>http://%s/install/pallets/%s/%s/%s/%s/%s&lt;/media_url>' % (host, name, version, release, OS, arch))
+	print('&lt;product>%s&lt;/product>' % name)
+	print('&lt;product_dir>/&lt;/product_dir>')
+	print('&lt;name>%s&lt;/name>' % name)
+	print('&lt;/listentry>')
+
+def add_on_cart(host, name):
+	print('&lt;listentry>')
+	print('&lt;media_url>http://%s/install/carts/%s&lt;/media_url>' % (host, name))
+	print('&lt;product>%s&lt;/product>' % name)
+	print('&lt;product_dir>/&lt;/product_dir>')
+	print('&lt;name>%s&lt;/name>' % name)
+	print('&lt;/listentry>')
+
+if '&yumserver;':
+	yumhost = '&yumserver;'
+else:
+	yumhost = '&Kickstart_PrivateKickstartHost;'
+
+result = stack.api.Call('list pallet')
+for o in result:
+	if '&box;' in o['boxes'].split() and \
+			o['name'] not in [ 'SLES' ]:
+
+		add_on_pallet(yumhost, o['name'],
+			o['version'], o['release'], o['os'], o['arch'])
+
+result = stack.api.Call('list cart')
+for o in result:
+	if '&box;' in o['boxes'].split():
+		# stack.api.Call('compile cart', [ o['name'] ])
+		add_on_cart(yumhost, o['name'])
+			</stack:eval>
+		</add_on_products>
+	</add-on>
+  
+</stack:stack> 
+

@@ -1,0 +1,20 @@
+<stack:stack>
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:package>iptables</stack:package>
+
+
+<stack:script stack:stage="install-post">
+/usr/bin/systemctl disable firewalld
+/usr/bin/systemctl enable iptables
+/usr/bin/systemctl disable ip6tables
+</stack:script>
+
+
+</stack:stack> 
+

@@ -1,0 +1,27 @@
+<stack:stack>
+
+	<kdump>
+		<add_crash_kernel config:type="boolean">true</add_crash_kernel>
+		<crash_kernel>0M-2G:128M,2G-6G:256M,6G-8G:512M,8G-:768M</crash_kernel>
+		<general>
+			<KDUMP_SAVEDIR>file:///var/crash/</KDUMP_SAVEDIR>
+		</general>
+	</kdump>
+	
+	<files config:type="list">
+		<file>
+			<file_script>
+				<interpreter>shell</interpreter>
+				<source>
+<![CDATA[
+#!/bin/sh
+echo "kernel.unknown_nmi_panic = 1" >> /etc/sysctl.conf
+sysctl -p
+]]>
+				</source>
+			</file_script>
+		</file>
+	</files>
+	
+</stack:stack>
+

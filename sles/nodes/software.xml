@@ -1,0 +1,22 @@
+<stack:stack>
+
+	<!--
+	    The Yast Profile must have at least one <software></software>
+	    section like the one below.  But after that Stacki allow you to
+	    use <stacki:package></stacki:package> as a standalone tag to add
+	    additional packages.  If you are extending the profile with a
+	    cart (or other pallets) use the simpler <stack:package> tag.
+	-->
+
+	<software stack:cond="'CaaSP-1.0-suse' in &pallets;">
+		<patterns config:type="list">
+			<pattern>MicroOS</pattern>
+		</patterns>
+		<patterns config:type="list">
+			<pattern>Stack</pattern>
+		</patterns>
+	</software>
+
+  
+</stack:stack>
+

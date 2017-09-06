@@ -1,0 +1,40 @@
+<stack:stack>
+
+	<stack:description>
+	Chroot scripts are executed before the machine reboots for the
+	first time.
+		
+	You can execute chroot scripts before the installation chroots
+	into the installed system and configures the boot loader or you
+	can execute a script after the chroot into the installed system
+	has happened.
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+<stack:script stack:stage="install-post">
+
+<stack:report name="host.interface">&hostname;</stack:report>
+<stack:report name="host.route">&hostname;</stack:report>
+<stack:report name="host.resolv">&hostname;</stack:report>
+
+#
+# the above command (report host resolv) writes /etc/resolv.conf. make sure
+# YaST doesn't overwrite it
+#
+
+awk '/NETCONFIG_DNS_POLICY/ { \
+	printf("NETCONFIG_DNS_POLICY=\"\"\n"); \
+	next; \
+} \
+{ print $0 }' /etc/sysconfig/network/config &gt; /tmp/config
+
+cp /tmp/config /etc/sysconfig/network/config
+
+</stack:script>
+
+</stack:stack> 
+

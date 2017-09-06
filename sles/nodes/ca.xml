@@ -1,0 +1,73 @@
+<stack:stack>
+
+<stack:si_copyright>
+Copyright (c) 2000 - 2010 The Regents of the University of California.
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org	
+</stack:si_copyright>
+
+
+<stack:script stack:stage="install-post">
+
+mkdir -p /etc/security/ca
+mkdir -p /etc/security/ca/new-certs
+
+<stack:file stack:name="/etc/security/ca/ca.cfg" stack:perms="0640" stack:owner="root.apache">
+[ req ]
+default_bits		= 2048
+default_md		= sha512
+string_mask		= nombstr	# permitted characters
+distinguished_name	= req_distinguished_name
+
+[ v3_ca ]
+basicConstraints	= CA:TRUE
+subjectKeyIdentifier	= hash
+authorityKeyIdentifier	= keyid:always,issuer:always
+
+[ req_distinguished_name ]
+0.organizationName	= Organization Name (company)
+organizationalUnitName	= Organizational Unit Name (department, division)
+localityName		= Locality Name (city, district)
+stateOrProvinceName	= State or Province Name (full name)
+countryName		= Country Name (2 letter code)
+countryName_min		= 2
+countryName_max		= 2
+commonName		= Common Name (hostname, IP, or your name)
+
+commonName_default		= &Info_FQDN;
+organizationalUnitName_default	= &Kickstart_PrivateHostname;-CA
+0.organizationName_default	= &Info_CertificateOrganization;
+localityName_default		= &Info_CertificateLocality;
+stateOrProvinceName_default	= &Info_CertificateState;
+countryName_default		= &Info_CertificateCountry;
+</stack:file>
+
+</stack:script>
+
+<stack:script stack:stage="install-post">
+
+<!-- Our Certificate Authority -->
+if [ ! -f /etc/security/ca/ca.key ]
+then
+(
+cd /etc/security/ca; \
+/usr/bin/openssl req -new -x509 -extensions v3_ca -nodes \
+	-keyout ca.key -days 5000 -batch -config ca.cfg > ca.crt; \
+chmod 0400 ca.key; \
+chmod 0444 ca.crt; \
+echo "01" > ca.serial 
+)
+fi
+
+
+<!-- Set perms so Apache can issue certs -->
+chmod 0750 /etc/security/ca
+chmod 0770 /etc/security/ca/new-certs
+chmod 0664 /etc/security/ca/ca.serial
+chmod 0440 /etc/security/ca/ca.key
+chmod 0640 /etc/security/ca/ca.cfg
+
+chgrp -R apache /etc/security/ca
+
+</stack:script>
+
+</stack:stack>

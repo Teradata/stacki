@@ -1,0 +1,27 @@
+<stack:stack>
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:script stack:stage="install-post">
+
+/opt/stack/bin/stack report host network &Kickstart_PrivateHostname; | \
+	/opt/stack/bin/stack report script > /tmp/do-network.sh
+
+chmod a+x /tmp/do-network.sh
+/tmp/do-network.sh
+
+/opt/stack/bin/stack report host interface &Kickstart_PrivateHostname; | \
+	/opt/stack/bin/stack report script > /tmp/do-interface.sh
+
+chmod a+x /tmp/do-interface.sh
+/tmp/do-interface.sh
+
+</stack:script>
+
+
+</stack:stack> 
+

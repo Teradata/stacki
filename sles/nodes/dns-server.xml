@@ -1,0 +1,67 @@
+<stack:stack>
+
+<stack:description>
+Configures a DNS nameserver for the cluster on the frontend.
+Both forward and reversed zones are defined using the database.
+</stack:description>
+
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:package>bind</stack:package>
+<stack:package>bind-utils</stack:package>
+
+
+<stack:script stack:stage="install-post">
+<!-- resolv.conf -->
+
+/opt/stack/bin/stack report host resolv &Kickstart_PrivateHostname; | \
+        /opt/stack/bin/stack report script > /tmp/do-resolv.sh
+
+chmod a+x /tmp/do-resolv.sh
+/tmp/do-resolv.sh
+
+<!-- write the DNS files -->
+/opt/stack/bin/stack sync dns
+
+<!-- Enable the DNS server -->
+/sbin/chkconfig named on
+
+chmod 770 /var/named
+chown root.named /var/named
+
+<stack:file stack:name="/var/named/named.local" stack:perms="0640" stack:owner="root.named">
+$TTL	86400
+@       IN      SOA     localhost. root.localhost.  (
+                                      1997022700 ; Serial
+                                      28800      ; Refresh
+                                      14400      ; Retry
+                                      3600000    ; Expire
+                                      86400 )    ; Minimum
+        IN      NS      localhost.
+1       IN      PTR     localhost.
+</stack:file>
+
+<!-- create /etc/rndc.key -->
+/usr/sbin/rndc-confgen -a 
+
+chmod 640 /etc/rndc.key
+chown root.named /etc/rndc.key
+
+<stack:file stack:name="/etc/rndc.conf" stack:perms="0640" stack:owner="root.named">
+include "/etc/rndc.key";
+options {
+	default-key "rndc-key";
+	default-server 127.0.0.1;
+};
+</stack:file>
+
+</stack:script>
+
+
+</stack:stack> 
+

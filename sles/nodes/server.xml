@@ -1,0 +1,65 @@
+<stack:stack>
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:package>stack-admin</stack:package>
+<stack:package>foundation-gd</stack:package>
+<stack:package>stack-config-server</stack:package>
+
+<stack:package>git-core</stack:package>
+
+<!--
+	XXX
+
+	original packages were:
+
+	<stack:package>git</stack:package>
+	<stack:package>git-lfs</stack:package>
+-->
+
+<!-- rpms to create pallets -->
+<stack:package>genisoimage</stack:package>
+<stack:package>createrepo</stack:package>
+
+<!-- packages required for stack create package -->
+<stack:package>rpm-build</stack:package>
+<stack:package>stack-build</stack:package>
+
+<!-- text-based spreadsheet editor -->
+
+<!--
+	<stack:package>sc-im</stack:package>
+-->
+
+<!-- example spreadsheets -->
+<stack:package>stack-examples</stack:package>
+
+
+<!-- /mnt/cdrom needed to create pallets -->
+<stack:script stack:stage="install-post">
+    if [ ! -d /mnt/cdrom ]; then
+        mkdir -p /mnt/cdrom
+    fi
+
+mkdir -p /export/stack/carts
+chown root:apache /export/stack/carts
+chmod 775 /export/stack/carts
+
+
+<!-- Set Number of CPUs in the database -->
+
+<!--
+	XXX
+
+	/sbin/chkconfig stack-num-cpus on
+-->
+
+
+</stack:script>
+
+</stack:stack> 
+

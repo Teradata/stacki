@@ -1,0 +1,189 @@
+<stack:stack>
+
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:script stack:stage="install-post" stack:shell="python">
+import os.path
+
+if os.path.exists('/tmp/site.attrs'):
+	file = open('/tmp/site.attrs', 'r')
+	for line in file.readlines():
+		l = line.split(':', 1)
+		if len(l) == 2:
+			#
+			# key/value pairs
+			#
+
+			#
+			# there are some attributes that don't belong in the
+			# database
+			#
+			key = l[0].strip()
+
+			if key in [ 'hostname', 'rack', 'rank', 'os', 'nukedisks', 'nukecontroller' ]:
+				continue
+
+			v = l[1].strip()
+			value = ''
+			for i in v:
+				if i == "'":
+					value += "'"
+					value += '"'
+					value += "\\'"
+					value += '"'
+					value += "'"
+				else:
+					value += i
+			
+			if key in [ 'Kickstart_PrivatePortableRootPassword', \
+					'Kickstart_PrivateRootPassword', \
+					'Kickstart_PrivateDjangoRootPassword' ]:
+				extra = 'shadow=y'
+			else:
+				extra = ''
+
+			os.system("/opt/stack/bin/stack set attr %s attr='%s' value='%s'"
+				% (extra, key, value))
+
+	file.close()
+</stack:script>
+
+<stack:script stack:stage="install-post">
+
+<!-- access control -->
+/opt/stack/bin/stack set access command='*'     group='apache'
+/opt/stack/bin/stack set access command='list*' group='wheel'
+
+<!-- insert the base box into the database -->
+/opt/stack/bin/stack add box default os=sles
+/opt/stack/bin/stack add box sles12 os=sles
+
+<!-- insert the base appliances into the database -->
+
+/opt/stack/bin/stack add appliance frontend longname=Frontend node=server \
+	public=no
+/opt/stack/bin/stack add appliance backend  longname=Backend node=backend
+
+<!-- manage firewall rules by default -->
+/opt/stack/bin/stack set attr attr=firewall value=true
+
+<!--	Set managed attribute for appliances.
+	This determines whether the appliances
+	can be ssh'ed into for running management
+	commands
+-->
+
+/opt/stack/bin/stack set attr attr=managed value=false
+
+/opt/stack/bin/stack set appliance attr frontend attr=managed value=false
+/opt/stack/bin/stack set appliance attr backend	 attr=managed value=true
+
+<!-- networks -->
+
+/opt/stack/bin/stack add network private	\
+	address=&Kickstart_PrivateNetwork;	\
+	mask=&Kickstart_PrivateNetmask;	        \
+	zone=&Kickstart_PrivateDNSDomain;	\
+	gateway=&Kickstart_PrivateGateway;	\
+	dns=false pxe=true
+
+<!-- set default os to whatever the frontend is -->
+
+/opt/stack/bin/stack set attr attr=os value=&os;
+
+/opt/stack/bin/stack add bootaction default type=os os=sles \
+	kernel="com32 chain.c32" args=hd0
+
+/opt/stack/bin/stack add bootaction pxeflash type=os os=sles \
+	kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe
+
+/opt/stack/bin/stack add bootaction localboot type=os os=sles \
+	kernel="localboot 0"
+
+/opt/stack/bin/stack add bootaction hplocalboot type=os os=sles \
+	kernel="localboot -1"
+
+/opt/stack/bin/stack add bootaction memtest type=os os=sles \
+	kernel="kernel memtest"
+
+<!-- XXX
+
+	OS-specific install actions go here
+-->
+
+/opt/stack/bin/stack add bootaction "default" \
+	os=sles type=install \
+	kernel="vmlinuz-sles-12-x86_64" \
+	ramdisk=initrd-sles-12-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+
+/opt/stack/bin/stack add bootaction "install sles 12" \
+	os=sles type=install \
+	kernel="vmlinuz-sles-12-x86_64" \
+	ramdisk=initrd-sles-12-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+
+/opt/stack/bin/stack add bootaction "rescue sles 12" \
+	os=sles type=install \
+	kernel="vmlinuz-sles-12-x86_64" \
+	ramdisk=initrd-sles-12-x86_64 \
+	args="splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+
+<!-- frontend host -->
+
+/opt/stack/bin/stack "add host" &Kickstart_PrivateHostname; \
+	appliance=frontend rack=0 rank=0
+
+<!-- routes
+	multicast (bottom 255 addresses only)
+	broadcast
+	default gateway (frontend)
+	default gateway (backend nodes)
+-->
+/opt/stack/bin/stack add route address=224.0.0.0 gateway=private netmask=255.255.255.0
+
+/opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
+
+<!-- frontend private network -->
+
+/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
+	network=private 						\
+	interface=&Kickstart_PrivateInterface;				\
+	mac=&Kickstart_PrivateEthernet;					\
+	ip=&Kickstart_PrivateAddress;					\
+	name=&Kickstart_PrivateHostname;
+
+/opt/stack/bin/stack set host interface default &Kickstart_PrivateHostname; \
+	interface=&Kickstart_PrivateInterface;				\
+	default=true
+
+<!-- SSH settings -->
+
+/opt/stack/bin/stack set attr attr=ssh.use_dns value=true
+/opt/stack/bin/stack set attr attr=sync.ssh.authkey value=true
+
+<!-- insert-ethers base numbers -->
+
+/opt/stack/bin/stack set attr attr=discovery.base.rank value=0
+/opt/stack/bin/stack set attr attr=discovery.base.rack value=0
+
+<!-- use long passwords in the database -->
+<stack:file stack:name="/tmp/my.cnf" stack:expr="grep -v '^old_passwords' /etc/my.cnf"/>
+<stack:file stack:name="/etc/my.cnf" stack:perms="644" stack:expr="cat /tmp/my.cnf"/>
+rm /tmp/my.cnf
+
+<!--
+	now that all the host data is in the database, let's write /etc/hosts.
+	this will make the stack commands execute much faster because we won't
+	be waiting for DNS timeouts.
+-->
+
+/opt/stack/bin/stack report host > /etc/hosts
+</stack:script>
+
+</stack:stack>

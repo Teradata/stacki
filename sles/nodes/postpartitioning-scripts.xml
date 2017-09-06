@@ -1,0 +1,18 @@
+<stack:stack>
+
+	<stack:description>
+	Executed after YaST has done the partitioning and written the
+	fstab. The empty system is already mounted to /mnt
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+<stack:script stack:stage="install-pre-package">
+/opt/stack/bin/stacki-status.py install postpartitioning
+</stack:script>
+
+</stack:stack> 
+

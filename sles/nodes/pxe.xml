@@ -1,0 +1,51 @@
+<stack:stack>
+
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:package>tftp</stack:package>
+<stack:package>syslinux</stack:package>
+<stack:package>xinetd</stack:package>
+<stack:package>stack-pxeboot</stack:package>
+
+
+<stack:script stack:stage="install-post">
+
+/usr/bin/systemctl enable xinetd
+
+<!-- pxe needs a tftp server -->
+<stack:file stack:name="/etc/xinetd.d/tftp">
+service tftp
+{
+        socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = --verbose --secure /tftpboot/pxelinux
+        instances               = 1
+	per_source		= 11
+	cps			= 1000 2
+	flags			= IPv4
+        disable                 = no
+}
+</stack:file>
+
+
+mkdir -p /tftpboot/pxelinux
+
+mkdir -p /tftpboot/pxelinux/pxelinux.cfg
+chown root.apache /tftpboot/pxelinux/pxelinux.cfg
+chmod 775 /tftpboot/pxelinux/pxelinux.cfg
+
+<!-- copy all the syslinux programs to the pxelinux directory -->
+cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
+
+</stack:script>
+
+
+</stack:stack> 

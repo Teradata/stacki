@@ -1,0 +1,99 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<description>
+	Frontend appliance graph for Stacki SLES
+	</description>
+
+
+	<!-- Order definitions -->
+
+	<order head="ca">
+		<tail>ssl-server</tail>
+	</order>
+
+	<order head="apache">
+		<tail>database</tail>
+	</order>
+
+	<order head="database">
+		<tail>database-schema</tail>
+	</order>
+
+	<order head="database-schema">
+		<tail>database-data</tail>
+	</order>
+
+	<order head="database-data">
+		<tail>dhcp-server</tail>
+		<tail>dns-server</tail>
+		<tail>install</tail>
+		<tail>networking-server</tail>
+		<tail>pxe</tail>
+		<tail>routes-server</tail>
+		<tail>server</tail>
+		<tail>time-server</tail>
+	</order>
+
+	<order head="node">
+		<tail>database-data</tail>
+	</order>
+
+	<order head="firewall-server">
+		<tail>firewall-base</tail>
+	</order>
+
+	<order tail="firewall-server">
+		<head>database-data</head>
+		<head>networking-server</head>
+	</order>
+
+	<order head="time-server">
+		<tail>time-base</tail>
+	</order>
+
+	<order head="TAIL">
+		<tail>install</tail>
+	</order>
+
+
+	<!-- Edge definitions --> 
+
+	<edge from="frontend">
+		<to>server</to>
+	</edge>
+
+	<edge from="server">
+		<to>base</to>
+
+		<to>apache</to>
+		<to>ca</to>
+		<to>database</to>
+		<to>database-data</to>
+		<to>database-schema</to>
+		<to>dhcp-server</to>
+		<to>dns-server</to>
+		<to>firewall-base</to>
+		<to>firewall-server</to>
+		<to>foundation-server</to>
+		<to>install</to>
+		<to>kernel-server</to>
+		<to>networking-server</to>
+		<to>node-certs</to>
+		<to>pxe</to>
+		<to>routes-server</to>
+		<to>ssl-server</to>
+		<to>storage-controller-server</to>
+		<to>time-server</to>
+	</edge>
+
+	<edge from="base">
+		<to>logrotate</to>
+		<to>node</to>
+		<to>selinux</to>
+		<to>ssh</to>
+		<to>ssl</to>
+		<to>time-base</to>
+	</edge>
+
+</graph>

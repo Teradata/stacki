@@ -1,0 +1,154 @@
+<stack:stack>
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+<stack:package>foundation-mariadb</stack:package>
+<stack:package>foundation-py-PyMySQL</stack:package>
+
+
+<stack:script stage:stage="install-post">
+
+<!--
+	set the hostname to the private name. this helps the stacki command
+	line find the host 'localhost' correctly
+-->
+/bin/hostname &hostname;
+
+<stack:file stack:name="/etc/hostname">
+&Info_FQDN;
+</stack:file>
+
+<!--
+	Add the stackdb user and group to the system.
+	This is the user that will run the Rocks database.
+	Also setup the correct directories and their
+	permissions for running the database
+-->
+mkdir -p /var/opt/stack/mysql
+
+groupadd -g 403 stackdb
+useradd -u 403 -g stackdb -d /var/opt/stack/mysql -m -s /bin/false stackdb
+
+chgrp -R stackdb /var/opt/stack/mysql
+chmod -R g+rwx   /var/opt/stack/mysql
+chmod a+rx /var/opt/stack/mysql
+
+<stack:file stack:name="/etc/ld.so.conf.d/foundation-mariadb.conf" stack:perms="0640">
+/opt/stack/lib64
+</stack:file>
+
+if [ -f /usr/sbin/ldconfig ]
+then
+	/usr/sbin/ldconfig
+elif [ -f /sbin/ldconfig ]
+then
+	/sbin/ldconfig
+fi
+
+
+<!-- Generate random password for root access to the database -->
+root_pw=`/opt/stack/sbin/gen_random_pw`
+<stack:file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
+	    stack:owner="root:root" stack:vars="expanded">
+[client]
+user		= root
+socket		= /var/opt/stack/mysql/mysql.sock
+password	= $root_pw
+</stack:file>
+
+<!-- Generate random password for apache access to database -->
+apache_pw=`/opt/stack/sbin/gen_random_pw`
+<stack:file stack:name="/opt/stack/etc/my.cnf"
+	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
+[mysqld]
+user		= stackdb
+port		= 40000
+socket		= /var/opt/stack/mysql/mysql.sock
+datadir		= /var/opt/stack/mysql
+
+[client]
+user		= apache
+port		= 40000
+socket		= /var/opt/stack/mysql/mysql.sock
+password	= $apache_pw
+</stack:file>
+
+<!--
+	Setup MariaDB to startup at boot
+	and start database
+-->
+/opt/stack/sbin/mysql-install-db
+
+/sbin/chkconfig foundation-mariadb on
+/etc/init.d/foundation-mariadb start
+
+<!--
+	Make sure that the database is
+	up and running
+-->
+/opt/stack/bin/mysqladmin -s ping > /dev/null
+while [ $? -eq 1 ]; do
+        sleep 1
+        /opt/stack/bin/mysqladmin -s ping > /dev/null
+done
+
+</stack:script>
+
+<!-- Access control on the database -->
+<stack:script stack:stage="install-post" stack:shell="python">
+import os
+import sys
+import re
+import string
+import base64
+
+import pymysql
+
+# Connect to the database
+d = pymysql.connect(user='root', db='mysql', passwd='',
+	unix_socket='/var/opt/stack/mysql/mysql.sock',
+	autocommit=True)
+
+try:
+	db = d.cursor()
+except:
+	sys.exit(-1)
+
+# Read the root database password from root.my.cnf
+conf_file = open('/opt/stack/etc/root.my.cnf')
+for line in conf_file.readlines():
+	if line.startswith('password'):
+		root_pass = line.split('=')[1].strip()
+		break
+conf_file.close()
+cmd_set = []
+
+# Password Access for root
+cmd_set.append('set password for "root"@"localhost"=PASSWORD("%s")' % root_pass)
+cmd_set.append('set password for "root"@"127.0.0.1"=PASSWORD("%s")' % root_pass)
+cmd_set.append('set password for "root"@"&hostname;"=PASSWORD("%s")' % root_pass)
+
+# Read the apache db password from my.cnf
+apache_conf_file = open('/opt/stack/etc/my.cnf')
+for line in apache_conf_file.readlines():
+	if line.startswith('password'):
+		apache_pass = line.split('=')[1].strip()
+		break
+
+apache_conf_file.close()
+
+# Password access for apache
+cmd_set.append('create user "apache"@"localhost" identified by "%s"' % apache_pass)
+cmd_set.append('create user "apache"@"127.0.0.1" identified by "%s"' % apache_pass)
+cmd_set.append('create user "apache"@"&hostname;" identified by "%s"' % apache_pass)
+
+for cmd in cmd_set:
+	try:
+		db.execute(cmd)
+	except:
+		sys.stderr.write("Could not execute %s\n" % cmd)
+</stack:script>
+</stack:stack>

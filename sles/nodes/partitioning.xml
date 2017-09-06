@@ -1,0 +1,19 @@
+<stack:stack>
+  
+	<stack:description>
+	This file "includes" the file /tmp/partition.xml that will be created
+	during the install by /opt/stack/bin/output-partition.py -- the source
+	for output-partition.py can be found in:
+		
+	../../frontend/src/images/11.3/sles-stacki.img-patches/opt/stack/bin/output-partition.py
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+	<xi:include href="/tmp/partition.xml"/>
+
+</stack:stack>
+

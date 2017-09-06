@@ -1,0 +1,450 @@
+<stack:stack>
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:script stack:stage="install-post">
+
+<stack:file stack:name="/tmp/tables.sql">
+<!-- Access -->
+
+DROP TABLE IF EXISTS access;
+CREATE TABLE access (
+  Command       varchar(128) NOT NULL,
+  GroupID       int(11) NOT NULL
+);
+
+<!-- enable root to run all commands -->
+
+insert into access (command, groupid) values ("*", 0); 
+
+grant select on cluster.access to ''@'localhost';
+
+<!-- Aliases -->
+
+DROP TABLE IF EXISTS aliases;
+CREATE TABLE aliases (
+  ID		int(11) NOT NULL auto_increment,
+  Node		int(11) NOT NULL default '0',
+  Name		varchar(32) default NULL,
+  PRIMARY KEY (ID) 
+);
+
+grant select on cluster.aliases to ''@'localhost';
+
+<!-- Attributes -->
+
+DROP TABLE IF EXISTS attributes;
+CREATE TABLE attributes (
+  Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
+  Attr          varchar(128) NOT NULL,
+  Value         text,
+  Shadow        text default NULL,
+  ScopeID	int(11)
+);
+
+grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
+
+<!-- OSes -->
+
+DROP TABLE IF EXISTS oses;
+CREATE TABLE oses (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default '',
+  PRIMARY KEY (ID)
+);
+
+grant select on cluster.oses to ''@'localhost';
+
+insert into oses (name) values ("redhat");
+insert into oses (name) values ("ubuntu");
+insert into oses (name) values ("sles");
+insert into oses (name) values ("vmware");
+insert into oses (name) values ("xenserver");
+
+<!-- Environments -->
+
+DROP TABLE IF EXISTS environments;
+CREATE TABLE environments (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default '',
+  PRIMARY KEY (ID)
+);
+
+grant select on cluster.environments to ''@'localhost';
+
+
+<!-- Appliances -->
+
+DROP TABLE IF EXISTS appliances;
+CREATE TABLE appliances (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default '',
+  LongName	varchar(64) NOT NULL default '',
+  Public	enum('yes','no') NOT NULL default 'no',
+  PRIMARY KEY (ID)
+);
+
+grant select on cluster.appliances to ''@'localhost';
+
+<!-- Boxes -->
+
+DROP TABLE IF EXISTS boxes;
+CREATE TABLE boxes (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(32) NOT NULL default 'default',
+  OS		int(11) NOT NULL references oses,
+  PRIMARY KEY (ID)
+);
+
+grant select on cluster.boxes to ''@'localhost';
+
+<!-- Boot/Action Tables -->
+
+DROP TABLE IF EXISTS boot;
+CREATE TABLE boot (
+	Node		int(11) NOT NULL default '0',
+	Action		enum ('install', 'os')
+);
+grant select on cluster.boot to ''@'localhost';
+
+DROP TABLE IF EXISTS bootnames;
+CREATE TABLE bootnames (
+	ID		int(11) NOT NULL auto_increment,
+	Name		varchar(128) NOT NULL,
+	Type		enum ('install', 'os') NOT NULL,
+	PRIMARY KEY (ID)
+);
+grant select on cluster.bootnames to ''@'localhost';
+	
+
+DROP TABLE IF EXISTS bootactions;
+CREATE TABLE bootactions (
+	BootName	int(11) NOT NULL references bootnames,
+	OS		int(11) NOT NULL references oses,
+	Kernel		varchar(256) default NULL,
+	Ramdisk		varchar(256) default NULL,
+	Args		varchar(1024) default NULL,
+	PRIMARY KEY (BootName)
+);
+grant select on cluster.bootactions to ''@'localhost';
+
+
+<!-- Nodes -->
+
+DROP TABLE IF EXISTS nodes;
+CREATE TABLE nodes (
+  ID		int(11) NOT NULL auto_increment,
+  Name		varchar(128) default NULL,
+  Appliance	int(11) default NULL references appliances,
+  Box		int(11) default NULL references boxes,
+  Environment	int(11) default NULL references environments,
+  Rack		varchar(64) default NULL,
+  Rank		varchar(64) default NULL,
+  OSAction	int(11) default NULL references bootactions,
+  InstallAction	int(11) default NULL references bootactions,
+  PRIMARY KEY  (ID)
+);
+
+grant select on cluster.nodes to ''@'localhost';
+
+<!-- Networks -->
+
+DROP TABLE IF EXISTS networks;
+CREATE TABLE networks (
+  ID		int(11) NOT NULL auto_increment,
+  Node		int(11) default NULL,
+  MAC		varchar(64) default NULL,
+  IP		varchar(32) default NULL,
+  Netmask	varchar(32) default NULL,
+  Gateway	varchar(32) default NULL,
+  Name		varchar(128) default NULL,
+  Device	varchar(32) default NULL,
+  Subnet	int(11)	default NULL references subnets,
+  Module	varchar(128) default NULL,
+  VlanID	int(11) default NULL,
+  Options	varchar(128) default NULL,
+  Channel	varchar(128) default NULL,
+  Main		boolean	default false,
+  PRIMARY KEY(ID)
+);
+
+grant select on cluster.networks to ''@'localhost';
+
+<!-- Subnets Table -->
+
+DROP TABLE IF EXISTS subnets;
+CREATE TABLE subnets (
+	ID		int(11)	NOT NULL AUTO_INCREMENT,
+	name		varchar(32)	UNIQUE NOT NULL,
+	zone		varchar(64)	NOT NULL ,
+	address		varchar(32)	NOT NULL,
+	mask		varchar(32)	NOT NULL,
+	gateway		varchar(32),
+	mtu		int(11)		default '1500',
+	dns		boolean		default false,
+	pxe		boolean		default false,
+	PRIMARY KEY(ID)
+);
+
+grant select on cluster.subnets to ''@'localhost';
+
+<!-- Routes -->
+
+DROP TABLE IF EXISTS global_routes;
+CREATE TABLE global_routes (
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets
+);
+
+grant select on cluster.global_routes to ''@'localhost';
+
+DROP TABLE IF EXISTS os_routes;
+CREATE TABLE os_routes (
+  OS		varchar(32) NOT NULL default 'sles',
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets
+);
+
+grant select on cluster.os_routes to ''@'localhost';
+
+DROP TABLE IF EXISTS appliance_routes;
+CREATE TABLE appliance_routes (
+  Appliance     int(11) NOT NULL default '0',
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets
+);
+
+grant select on cluster.appliance_routes to ''@'localhost';
+
+DROP TABLE IF EXISTS node_routes;
+CREATE TABLE node_routes (
+  Node		int(11) NOT NULL default '0',
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets
+);
+
+grant select on cluster.node_routes to ''@'localhost';
+
+
+<!-- Stacks -->
+
+DROP TABLE IF EXISTS stacks;
+CREATE TABLE stacks (
+  Box		int(11) NOT NULL default '1',
+  Roll		int(11) NOT NULL 
+);
+
+grant select on cluster.stacks to ''@'localhost';
+
+DROP TABLE IF EXISTS cart_stacks;
+CREATE TABLE cart_stacks (
+  Box		int(11) NOT NULL default '1',
+  Cart		int(11) NOT NULL 
+);
+
+grant select on cluster.cart_stacks to ''@'localhost';
+
+
+<!-- Groups -->
+
+DROP TABLE IF EXISTS groups;
+CREATE TABLE groups (
+  ID 		int(11) NOT NULL auto_increment,
+  Name		varchar(128) NOT NULL default '',
+  PRIMARY KEY (ID) 
+);
+
+grant select on cluster.groups to ''@'localhost';
+
+
+DROP TABLE IF EXISTS memberships;
+CREATE TABLE memberships (
+  NodeID	int(11) NOT NULL,
+  GroupID	int(11) NOT NULL
+);
+
+grant select on cluster.memberships to ''@'localhost';
+
+<!-- Carts -->
+
+DROP TABLE IF EXISTS carts;
+CREATE TABLE carts (
+  ID 		int(11) NOT NULL auto_increment,
+  Name		varchar(128) NOT NULL default '',
+  PRIMARY KEY (ID) 
+);
+
+grant select on cluster.carts to ''@'localhost';
+
+<!-- Roll.  What Rolls are installed and used by default. -->
+
+DROP TABLE IF EXISTS rolls;
+CREATE TABLE rolls (
+  ID 		int(11) NOT NULL auto_increment,
+  Name		varchar(128) NOT NULL default '',
+  Version	varchar(32) NOT NULL default '',
+  Rel		varchar(32) NOT NULL default '',
+  Arch		varchar(32) NOT NULL default '',
+  OS		varchar(32) NOT NULL default 'sles',
+  PRIMARY KEY (ID) 
+);
+
+grant select on cluster.rolls to ''@'localhost';
+
+<!-- Partitions. stores all the partitions for all the appliances -->
+
+DROP TABLE IF EXISTS partitions;
+CREATE TABLE partitions (
+	ID		int(11) NOT NULL auto_increment,
+	Node		int(11) NOT NULL default '0',
+	Device		varchar(128) NOT NULL default '',
+	Mountpoint	varchar(128) NOT NULL default '',
+	UUID		varchar(128) NOT NULL default '',
+	SectorStart	varchar(128) NOT NULL default '',
+	PartitionSize	varchar(128) NOT NULL default '',
+	PartitionID	varchar(128) NOT NULL default '',
+	FsType		varchar(128) NOT NULL default '',
+	PartitionFlags	varchar(128) NOT NULL default '',
+	FormatFlags	varchar(128) NOT NULL default '',
+	PRIMARY KEY (ID)
+);
+
+grant select on cluster.partitions to ''@'localhost';
+
+
+<!-- Firewall Tables -->
+
+DROP TABLE IF EXISTS global_firewall;
+CREATE TABLE global_firewall (
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL
+);
+
+grant select on cluster.global_firewall to ''@'localhost';
+
+DROP TABLE IF EXISTS os_firewall;
+CREATE TABLE os_firewall (
+  OS		varchar(32) NOT NULL default 'sles',
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL
+);
+
+grant select on cluster.os_firewall to ''@'localhost';
+
+DROP TABLE IF EXISTS appliance_firewall;
+CREATE TABLE appliance_firewall (
+  Appliance     int(11) NOT NULL default '0',
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL
+);
+
+grant select on cluster.appliance_firewall to ''@'localhost';
+
+DROP TABLE IF EXISTS node_firewall;
+CREATE TABLE node_firewall (
+  Node		int(11) NOT NULL default '0',
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL
+);
+
+grant select on cluster.node_firewall to ''@'localhost';
+
+DROP TABLE IF EXISTS public_keys;
+CREATE TABLE public_keys (
+ ID		int(11) NOT NULL auto_increment,
+ Node		int(11) NOT NULL default '0',
+ Public_Key	varchar(4096) default NULL,
+ PRIMARY KEY (ID)
+);
+
+grant select on cluster.public_keys to ''@'localhost';
+
+DROP TABLE IF EXISTS storage_controller;
+CREATE TABLE storage_controller (
+ Scope		enum('global', 'os', 'appliance', 'host'),
+ TableID	int(11) NOT NULL,
+ Adapter	int(11) NOT NULL,
+ Enclosure	int(11) NOT NULL,
+ Slot		int(11) NOT NULL,
+ RaidLevel	varchar(16) NOT NULL,
+ ArrayID	int(11) NOT NULL,
+ Options	varchar(512) NOT NULL default ''
+);
+
+grant select on cluster.storage_controller to ''@'localhost';
+
+DROP TABLE IF EXISTS storage_partition;
+CREATE TABLE storage_partition (
+ Scope		enum('global', 'os', 'appliance', 'host'),
+ TableID	int(11) NOT NULL,
+ Device		varchar(128) NOT NULL default '',
+ Mountpoint	varchar(128) NOT NULL default '',
+ Size		int(11) NOT NULL,
+ FsType		varchar(128) NOT NULL default '',
+ PartID		int(11) NOT NULL,
+ Options        varchar(512) NOT NULL default ''
+);
+
+grant select on cluster.storage_partition to ''@'localhost';
+
+grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
+grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
+</stack:file>
+
+/opt/stack/bin/mysqladmin --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+	--user=root create cluster
+
+/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+	--user=root  cluster &lt; /tmp/tables.sql
+
+</stack:script>
+
+</stack:stack>

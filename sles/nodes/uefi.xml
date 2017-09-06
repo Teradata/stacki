@@ -1,0 +1,37 @@
+<stack:stack>
+
+      <stack:package>grub2-x86_64-efi</stack:package>
+      <stack:package>shim</stack:package>
+      <stack:package>mokutil</stack:package>
+      <stack:package>mtools</stack:package>
+
+<stack:script stack:stage="boot-post" stack:shell="python">
+<![CDATA[
+import os
+import sys
+import subprocess
+
+efi_dev = None
+mtab = open('/etc/mtab','r')
+for mountline in mtab.readlines():
+	m = mountline.split()
+	if m[1].strip() == '/mnt/boot/efi':
+		efi_dev = m[0].strip()
+		break
+
+if efi_dev:
+	f = open('/mnt/etc/mtools.conf','a')
+	f.write('\ndrive x: file="%s"\n' % efi_dev)
+	f.close()
+]]>
+</stack:script>
+
+<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="boot-post">
+/usr/bin/mlabel x:BOOTEFI
+</stack:script>
+
+<stack:script stack:cond="'SLES-11.3-1.138' in &pallets;" stack:stage="boot-post" stack:chroot="false">
+MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
+</stack:script>
+
+</stack:stack>

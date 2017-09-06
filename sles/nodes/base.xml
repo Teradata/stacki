@@ -1,0 +1,64 @@
+<stack:stack>
+
+
+<stack:si_copyright>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:si_copyright>
+
+
+<stack:package>net-tools</stack:package>
+<stack:package>mlocate</stack:package>
+<stack:package>vim</stack:package>
+<stack:package>pciutils</stack:package>
+
+<stack:package>ipmitool</stack:package>
+<stack:package>OpenIPMI</stack:package>
+
+<stack:package>grub2</stack:package>
+<stack:package>wget</stack:package>
+<stack:package>bridge-utils</stack:package>
+
+
+<stack:script stack:stage="install-post">
+<!--
+	XXX
+
+	/sbin/chkconfig stack-pre on
+	/sbin/chkconfig stack-post on
+-->
+
+<!--
+	XXX
+
+	/sbin/chkconfig NetworkManager off
+-->
+
+
+<!-- Rsyslog Configuration file -->
+
+<stack:file stack:name="/etc/rsyslog.d/stacki.conf">
+/*
+	Turn off escape character parsing.
+	This keeps tabs and newlines intact.
+ */
+$EscapeControlCharactersOnReceive off
+
+# Send local0 facility to /var/log/local0
+local0.*    /var/log/local0
+
+/*
+   If we're calling this from StackI
+   command line, stop processing now
+*/
+if $programname == 'SCL' then ~
+</stack:file>
+
+<stack:file stack:name="/etc/stack-release">
+stacki release &version; (&release;)
+</stack:file>
+</stack:script>
+
+
+</stack:stack> 
+

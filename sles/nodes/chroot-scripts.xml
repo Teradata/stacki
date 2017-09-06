@@ -1,0 +1,74 @@
+<stack:stack>
+
+	<stack:description>
+	Chroot scripts are executed before the machine reboots for the
+	first time.
+
+	You can execute chroot scripts before the installation chroots
+	into the installed system and configures the boot loader or you
+	can execute a script after the chroot into the installed system
+	has happened.
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+<stack:script stack:stage="boot-post" chroot="false">
+/opt/stack/bin/stacki-status.py install chroot script
+
+mkdir -p /mnt/tmp/stack_site
+
+cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
+</stack:script>
+
+
+<stack:script stack:stage="boot-post">
+
+echo "&hostname;.&domainname;" > /etc/HOSTNAME
+
+/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+
+/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
+</stack:script>
+
+<stack:file name="/root/.ssh/authorized_keys" perms="0600">
+<stack:eval shell="python">
+file = open('/root/.ssh/id_rsa.pub')
+for line in file.readlines():
+	print(line.strip())
+</stack:eval>
+</stack:file>
+
+chmod a+rx /root
+chmod a+rx /root/.ssh
+
+<file name="/opt/stack/bin/up.py" perm="0755">
+#!/usr/bin/python
+
+import socket
+import json
+import sys
+
+sys.path.append('/tmp')
+from stack_site import *
+
+tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tx.sendto('health up', (attributes['Kickstart_PrivateAddress'], 5000))
+tx.close()
+</file>
+
+<file name="/etc/cron.d/up">
+* * * * * root /opt/stack/bin/up.py
+</file>
+
+rm -f /etc/zypp/repos.d/*
+
+<stack:report name="host.repo">&hostname;</stack:report>
+
+</stack:script>
+
+
+</stack:stack> 
+

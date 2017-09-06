@@ -1,0 +1,55 @@
+<stack:stack>
+
+	<stack:description>
+	SSH Config for backend nodes and other non-frontend appliances.
+		
+	We are using one key pair among all SSH servers in the
+	cluster. This implies we do not care about Man-in-the-Middle
+	attacks. We have subverted the protection for these attacks for
+	several releases (broadcastSSH).
+		
+	This logic should not be in the ssh.xml node so the frontend will
+	generate its own keypair.
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.3 stacki.com
+	</stack:copyright>
+	
+	<!-- TODO: smarter way to determine the OS version -->
+	<!-- Also, this cond might not even be required, and just work in 11 -->
+
+	<services-manager stack:cond="'SLES-12-sp2' in &pallets;">
+		<default_target>multi-user</default_target>
+		<services>
+			<enable config:type="list">
+				<service>sshd</service>
+			</enable>
+		</services>
+	</services-manager>
+	
+	<files config:type="list">
+		<file>
+			<file_path>/etc/ssh/ssh_host_rsa_key</file_path>
+			<file_permissions>0400</file_permissions>
+			<file_contents><stack:eval>/opt/stack/sbin/read-ssh-private-key RSA 2> /dev/null</stack:eval></file_contents>
+		</file>
+		<file>
+			<file_path>/etc/ssh/ssh_host_rsa_key.pub</file_path>
+			<file_permissions>0444</file_permissions>
+			<file_contents><stack:eval>cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null</stack:eval></file_contents>
+		</file>
+		<file>
+			<file_path>/etc/ssh/ssh_host_ecdsa_key</file_path>
+			<file_permissions>0400</file_permissions>
+			<file_contents><stack:eval>/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null</stack:eval></file_contents>
+		</file>
+		<file>
+			<file_path>/etc/ssh/ssh_host_ecdsa_key.pub</file_path>
+			<file_permissions>0444</file_permissions>
+			<file_contents><stack:eval>cat /etc/ssh/ssh_host_ecdsa_key.pub 2> /dev/null</stack:eval></file_contents>
+		</file>
+	</files>
+	
+</stack:stack>

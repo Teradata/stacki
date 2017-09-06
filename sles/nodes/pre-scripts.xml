@@ -1,0 +1,18 @@
+<stack:stack>
+
+	<stack:description>
+	These scripts run before partitioning and package installation but after
+	hardware detection.
+	</stack:description>
+	
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+<stack:script stack:stage="install-pre">
+/opt/stack/bin/stacki-status.py install pre-scripts
+</stack:script>
+
+</stack:stack>
+
