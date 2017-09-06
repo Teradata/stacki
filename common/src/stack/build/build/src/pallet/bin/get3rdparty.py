@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python3
+#!/usr/bin/python
 #
 # @SI_Copyright@
 # @SI_Copyright@

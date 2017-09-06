@@ -38,8 +38,9 @@ $(PACKAGES):
 
 ospackages: $(GROUPS) $(PACKAGES)
 
-bootstrap: 3rdparty ospackages
+bootstrap: ospackages
 	$(MAKE) -C src/stack/build $@
+	$(MAKE) 3rdparty
 	. /etc/profile.d/stack-build.sh
 	$(MAKE) -C src $@
 
