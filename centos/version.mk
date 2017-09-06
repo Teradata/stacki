@@ -11,4 +11,4 @@ CODENAME		= WithGreatPower
 export RELEASE		= $(shell $(STACKBUILD.ABSOLUTE)/bin/redhat-release)
 
 BOOTABLE		= 0
-ROLLS.OS		= sles
+ROLLS.OS		= redhat
