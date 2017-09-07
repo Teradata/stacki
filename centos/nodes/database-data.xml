@@ -146,6 +146,10 @@ if os.path.exists('/tmp/site.attrs'):
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
 
+/opt/stack/bin/stack add bootaction console type=install \
+	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000 console=ttyS0,115200n"
+
 /opt/stack/bin/stack add bootaction no-parallel-format type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
