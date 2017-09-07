@@ -28,8 +28,8 @@ import stack.cond
 class ProfileSnippet:
 	
 	def __init__(self, text, source):
-		self.source	= source
-		self.text	= text
+		self.source = source
+		self.text   = text
 
 	def getText(self):
 		return self.text
@@ -67,14 +67,14 @@ class ProfileSection:
 
 			if source != prev:
 				if open:
-					list.append('\t\t%s</subsection>' % cdataEnd)
-				list.append('\t\t<subsection source="%s">%s' % 
+					list.append('\t%s</section>' % cdataEnd)
+				list.append('\t<section source="%s">%s' % 
 					    (source, cdataStart))
 				open = True
-			list.append(snippet.getText())
+			list.append(text)
 			prev = source
 		if open:
-			list.append('\t\t%s</subsection>' % cdataEnd)
+			list.append('\t%s</section>' % cdataEnd)
 		return list
 
 
@@ -115,24 +115,6 @@ class PackageSet:
 		
 class ParsingTools:
 
-	def bashify(self, shell, script):
-		"""Creates a temporary file containing SCRIPT and makes it runnable by
-		the SHELL from within a bash shell.
-
-		"""
-		tmp  = tempfile.mktemp()
-		code = [ ]
-		
-		code.append('# bashify for %s' % shell)
-		code.append('cat > %s << "__EOF_%s__"' % (tmp, tmp))
-		code.append('#! %s\n' % shell)
-		code.append(script)
-		code.append('__EOF_%s__' % tmp)
-		code.append('chmod +x %s' % tmp)
-		code.appemnd('%s' % tmp)
-
-		return '\n'.join(code)
-
 	def getAttr(self, node, attr, *, consume=False, default=''):
 		a = node.attributes.getNamedItem(attr)
 		if a:
@@ -141,7 +123,15 @@ class ParsingTools:
 			return a.value
 		else:
 			return default
-		
+
+	def removeNode(self, node):
+		"""Safe way to remove a node, just replace it with empty text. The DOM
+		library sometimes gets confused on removing nodes near
+		the end of the document.
+
+		"""
+		node.parentNode.replaceChild(self.newTextNode(''), node)
+
 	def collect(self, node):
 		l = []
 		for child in node.childNodes:
@@ -341,7 +331,7 @@ class PruningTraversor(Traversor):
 		if not passed:
 			parent = node.parentNode
 			if parent: # node might be orphaned
-				parent.removeChild(node)
+				self.removeNode(node)
 			return False # subtree is gone stop
 
 		return True
@@ -441,8 +431,9 @@ class ExpandingTraversor(Traversor):
 		self.rcsFiles = { }
 
 	def post(self):
-		boot = self.newElementNode('stack:boot')
-		self.setAttribute(boot, 'stack:order', 'pre')
+		boot = self.newElementNode('stack:script')
+		self.setAttribute(boot, 'stack:stage', 'boot-pre')
+		self.setAttribute(boot, 'stack:id', 'rcsEnd')
 
 		for (file, (owner, perms)) in self.rcsFiles.items():
 			boot.appendChild(self.newTextNode('%s' % self.rcsEnd(file, owner, perms)))
@@ -514,6 +505,57 @@ class MainTraversor(Traversor):
 
 	"""
 
+	def pre(self):
+		self.scripts = { 'install-post': collections.OrderedDict(),
+				 'boot-pre'    : collections.OrderedDict(),
+				 'boot-post'   : collections.OrderedDict() }
+
+	def shellPackages(self, enabled, disabled):
+		pass
+
+	def post(self):
+		section  = self.gen.shellSection
+		packages = self.gen.packageSet.getPackages()
+
+		enabled = [ ]
+		for (nodefile, pkgs) in packages['enabled'].items():
+			enabled.extend(pkgs)
+
+		disabled = [ ]
+		for (nodefile, pkgs) in packages['disabled'].items():
+			disabled.extend(pkgs)
+	
+		section.append('DO_PACKAGES=1')
+		section.append('DO_INSTALL_POST=1')
+		section.append('DO_BOOT_PRE=0')
+		section.append('DO_BOOT_POST=1')
+		section.append('\t ')
+		section.append('')
+
+		for stage in self.scripts: # write the functions
+			for label in self.scripts[stage]:
+				section.snippets.append(self.scripts[stage][label])
+
+		section.append('if [ $DO_PACKAGES -eq 1 ]; then')
+		section.append(self.shellPackages(enabled, disabled))
+		section.append('fi\n')
+
+		section.append('if [ $DO_INSTALL_POST -eq 1 ]; then')
+		for label in self.scripts['install-post']:
+			section.append('\t%s' % label)
+		section.append('fi\n')
+
+		section.append('if [ $DO_BOOT_PRE -eq 1 ]; then')
+		for label in self.scripts['boot-pre']:
+			section.append('\t%s' % label)
+		section.append('fi\n')
+
+		section.append('if [ $DO_BOOT_POST -eq 1 ]; then')
+		for label in self.scripts['boot-post']:
+			section.append('\t%s' % label)
+		section.append('fi\n')
+		
+
 	def traverse_stack_profile(self, node):
 		"""<stack:profile>
 
@@ -543,6 +585,37 @@ class MainTraversor(Traversor):
 		return False
 
 
+	def traverse_stack_script(self, node):
+		"""<stack:script>
+
+		"""
+		stage  = self.getAttr(node, 'stack:stage',  default='install-post')
+		chroot = self.getAttr(node, 'stack:chroot', default='true')
+
+		if stage in [ 'install-pre', 'install-pre-package' ] or not chroot == 'true':
+			return False # ignore pre and nochroot stuff
+
+		label = '%s-%s' % (stage, self.getAttr(node, 'stack:id'))
+		shell = self.getAttr(node, 'stack:shell')
+		if shell == 'python':
+			shell = '/opt/stack/bin/python3'
+
+		fn = [ ]
+		fn.append('function stack-%s {' % label)
+		if shell:
+			fn.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
+			fn.append('#! %s\n' % shell)
+		fn.append(self.collect(node))
+		if shell:
+			fn.append('__EOF_%s__' % label)
+			fn.append('chmod +x /tmp/%s' % label)
+			fn.append('/tmp/%s' % label)
+		fn.append('}\n\n')
+
+		self.scripts[stage][label] = stack.gen.ProfileSnippet('\n'.join(fn),
+								      self.getAttr(node, 'stack:file'))
+		return False
+
 	def traverse_stack_stacki(self, node):
 		"""<stack:stacki>
 
@@ -552,7 +625,7 @@ class MainTraversor(Traversor):
 		"""
 		self.gen.stackiSection.append(self.collect(node),
 					      self.getAttr(node, 'stack:file'))
-		node.parentNode.removeChild(node)
+		self.removeNode(node)
 		return False
 
 	# <stack:debug>
@@ -567,9 +640,8 @@ class MainTraversor(Traversor):
 		level    = self.getAttr(node, 'stack:level')
 		msg      = self.collect(node)
 
-		self.gen.debugSection.append('%s - %s' % (level, msg), 
-					     nodefile)
-		node.parentNode.removeChild(node)
+		self.gen.debugSection.append('%s - %s' % (level, msg), nodefile)
+		self.removeNode(node)
 		return False
 
 	# <*>
@@ -604,6 +676,11 @@ class CleaningTraversor(Traversor):
 
 	"""
 
+	def pre(self):
+		fout = open('/tmp/profile.xml', 'w')
+		fout.write(self.gen.root.toxml())
+		fout.close()
+
 	def traverse(self, node):
 		"""<*>
 
@@ -618,7 +695,7 @@ class CleaningTraversor(Traversor):
 		gc = str2bool(gc)
 
 		if gc:
-			node.parentNode.removeChild(node)
+			self.removeNode(node)
 		return True
 
 
@@ -636,6 +713,7 @@ class Generator:
 		self.stackiSection	= ProfileSection()
 		self.orderSection	= ProfileSection()
 		self.debugSection	= ProfileSection()
+		self.shellSection	= ProfileSection()
 		self.packageSet		= PackageSet()
 		self.log		= '/var/log/stack-install.log'
 		self.doc                = None
@@ -714,12 +792,13 @@ class Generator:
 				try:
 					fn = getattr(traversor, 'traverse')
 				except AttributeError:
-					fn = None
+					fn = lambda node: False
 
-		if fn and not fn(node):
+		if not fn(node):
 			return
 
-		for child in node.childNodes:
+		children = node.childNodes
+		for child in children:
 			self._traverse(traversor, child)
 
 
@@ -780,7 +859,7 @@ class ProfileHandler(handler.ContentHandler,
 		doc = []
 		if chapter in self.chapters:
 			for text in self.chapters[chapter]:
-				doc.append(text.strip())
+				doc.append(text.lstrip())
 		return doc
 
 

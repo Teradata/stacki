@@ -17,24 +17,14 @@ class Implementation(stack.commands.list.host.profile.implementation):
 	def chapter(self, generator, profile):
 		if generator.getProfileType() == 'native':
 			profile.append('<chapter name="yast">')
-			for section in [ 'header',
-					 'native',
-					 'scripts',
-					 'footer' ]:
-				profile.append('\t<section name="%s">' % section)
-				for line in generator.generate(section):
-					profile.append(line)
-				profile.append('\t</section>')
+			for line in generator.generate('native'):
+				profile.append(line)
 			profile.append('</chapter>')
 
 		elif generator.getProfileType() == 'shell':
 			profile.append('<chapter name="bash">')
-			profile.append('#! /bin/bash')
-			for section in [ 'packages' ]:
-				profile.append('\t<section name="%s">' % section)
-				for line in generator.generate(section):
-					profile.append(line)
-				profile.append('\t</section>')
+			for line in generator.generate('shell'):
+				profile.append(line)
 			profile.append('</chapter>')
 
 

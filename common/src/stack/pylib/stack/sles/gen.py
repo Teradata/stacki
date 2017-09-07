@@ -5,11 +5,16 @@
 
 import string
 import os
-import tempfile
+import collections
 import xml.dom.minidom
 from stack.bool import str2bool
 import stack.gen
 
+class ShellProfileTraversor(stack.gen.MainTraversor):
+
+	def shellPackages(self, enabled, disabled):
+		return 'zypper install -f -y %s' % ' '.join(enabled)
+		
 
 class ExpandingTraversor(stack.gen.Traversor):
 
@@ -271,8 +276,8 @@ class Generator(stack.gen.Generator):
 	def __init__(self):
 		stack.gen.Generator.__init__(self)
 		self.headerSection  = stack.gen.ProfileSection()
-		self.footerSection  = stack.gen.ProfileSection()
 		self.nativeSection  = stack.gen.ProfileSection()
+		self.footerSection  = stack.gen.ProfileSection()
 		self.scriptsSection = stack.gen.ProfileSection()
 
 		self.setOS('sles')
@@ -280,28 +285,34 @@ class Generator(stack.gen.Generator):
 
 
 	def traversors(self):
-		return [ ExpandingTraversor(self), 
-			 DefraggingTraversor(self), 
-			 MainTraversor(self) ]
+		profileType = self.getProfileType()
+		workers     = [ ]
+
+		if profileType == 'native':
+			workers.extend([ ExpandingTraversor(self), 
+					 DefraggingTraversor(self), 
+					 MainTraversor(self) ])
+		elif profileType == 'shell':
+			workers.extend([ ShellProfileTraversor(self) ])
+
+		return workers
 
 	def post(self):
 		for child in self.root.childNodes:
 			self.nativeSection.append(child.toxml())
 
-	def generate_header(self):
-		return self.headerSection.generate()
-
 	def generate_native(self):
-		return self.nativeSection.generate()
+		profile = self.headerSection.generate()
+		profile.extend(self.nativeSection.generate())
+		profile.extend(self.scriptsSection.generate())
+		profile.extend(self.footerSection.generate())
+		return profile
 
-	def generate_scripts(self):
-		return self.scriptsSection.generate()
+	def generate_shell(self):
+		profile  = [ '#! /bin/bash' ]
+		profile.extend(self.shellSection.generate())
+		return profile
 
-	def generate_footer(self):
-		return self.footerSection.generate()
-
-
-	def generate_packages(self):
 		dict	 = self.packageSet.getPackages()
 		enabled	 = dict['enabled']
 		disabled = dict['disabled']
@@ -316,6 +327,7 @@ class Generator(stack.gen.Generator):
 			section.append("zypper install -f -y %s" %
 				       s, None)
 
-		return section.generate()
+		profile.extend(section.generate())
+		return profile
 
 
