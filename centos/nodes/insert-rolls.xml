@@ -20,6 +20,13 @@
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </copyright>
 
+<post>
+<!-- Clean out pallets and carts directories before adding pallets -->
+<post>
+find /export/stack/pallets/* -type d -prune -exec rm  -rf {} \;
+find /export/stack/carts/* -type d -prune -exec rm  -rf {} \;
+</post>
+
 <post shell='python'>
 import os
 import os.path
