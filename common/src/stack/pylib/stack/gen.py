@@ -676,10 +676,10 @@ class CleaningTraversor(Traversor):
 
 	"""
 
-	def pre(self):
-		fout = open('/tmp/profile.xml', 'w')
-		fout.write(self.gen.root.toxml())
-		fout.close()
+#	def pre(self):
+#		fout = open('/tmp/profile.xml', 'w')
+#		fout.write(self.gen.root.toxml())
+#		fout.close()
 
 	def traverse(self, node):
 		"""<*>
