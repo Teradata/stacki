@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
 <description>
@@ -31,7 +29,7 @@ keyboard &Kickstart_Keyboard;
 
 timezone --utc &Kickstart_Timezone;
 
-<eval shell="python" mode="xml">
+<eval shell="/opt/stack/bin/python3" mode="xml">
 if '&boot_device;' != '' and '&release;' == '6.x':
 	print "bootloader --location=none"
 elif '&boot_device;' != '' and '&release;' == '7.x':

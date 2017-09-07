@@ -238,10 +238,6 @@ class SetupTraversor(Traversor):
 		self.nodeFiles = collections.OrderedDict()
 		self.nodeID    = 0
 
-	def post(self):
-		for nodeFile in self.nodeFiles:
-			self.gen.orderSection.append(nodeFile)
-
 	def traverse_stack_profile(self, node):
 		"""<stack:profile>
 
@@ -275,8 +271,11 @@ class SetupTraversor(Traversor):
 		node.setAttribute('stack:id', '%d' % self.nodeID)
 
 		nodefile = self.getAttr(node, 'stack:file')
-		if nodefile and nodefile not in self.nodeFiles:
-			self.nodeFiles[nodefile] = True
+		if nodefile:
+			nodefile = os.path.relpath(nodefile, '/export/stack')
+			if nodefile not in self.nodeFiles:
+				self.nodeFiles[nodefile] = True
+				self.debug('parsed %s' % nodefile, level='info')
 
 		return True
 
@@ -591,14 +590,12 @@ class MainTraversor(Traversor):
 		"""
 		stage  = self.getAttr(node, 'stack:stage',  default='install-post')
 		chroot = self.getAttr(node, 'stack:chroot', default='true')
+		shell  = self.getAttr(node, 'stack:shell')
 
 		if stage in [ 'install-pre', 'install-pre-package' ] or not chroot == 'true':
 			return False # ignore pre and nochroot stuff
 
 		label = '%s-%s' % (stage, self.getAttr(node, 'stack:id'))
-		shell = self.getAttr(node, 'stack:shell')
-		if shell == 'python':
-			shell = '/opt/stack/bin/python3'
 
 		fn = [ ]
 		fn.append('function stack-%s {' % label)
@@ -640,7 +637,7 @@ class MainTraversor(Traversor):
 		level    = self.getAttr(node, 'stack:level')
 		msg      = self.collect(node)
 
-		self.gen.debugSection.append('%s - %s' % (level, msg), nodefile)
+		self.gen.debugSection.append('%-6s- %s' % (level, msg), nodefile)
 		self.removeNode(node)
 		return False
 
@@ -653,16 +650,13 @@ class MainTraversor(Traversor):
 
 		"""
 
-		ns    = node.prefix
-		tag   = node.localName
 		attrs = []
-
 		for (key, val) in node.attributes.items():
 			if key == 'stack:file': # omit from msg
 				continue
 			attrs.append('%s="%s"' % (key, val))
 		
-		msg = 'error - <%s:%s' % (ns, tag)
+		msg = '%-6s- <%s' % ('error', node.tagName)
 		if attrs:
 			msg += ' '
 			msg += ' '.join(attrs)
@@ -675,11 +669,6 @@ class CleaningTraversor(Traversor):
 	"""Last Pass
 
 	"""
-
-#	def pre(self):
-#		fout = open('/tmp/profile.xml', 'w')
-#		fout.write(self.gen.root.toxml())
-#		fout.close()
 
 	def traverse(self, node):
 		"""<*>
@@ -711,7 +700,6 @@ class Generator:
 		self.profileType	= 'native'
 		self.rcsFiles		= {}
 		self.stackiSection	= ProfileSection()
-		self.orderSection	= ProfileSection()
 		self.debugSection	= ProfileSection()
 		self.shellSection	= ProfileSection()
 		self.packageSet		= PackageSet()
@@ -750,8 +738,16 @@ class Generator:
 		return [ MainTraversor(self) ]
 
 	def parse(self, xml_string):
+		debug     = True # write files after each traversal
+		i         = 0
 		self.doc  = xml.dom.minidom.parseString(xml_string)
 		self.root = self.doc.getElementsByTagName('stack:profile')[0]
+
+		if debug:
+			fout = open('/tmp/gen-%d-pre.xml' % i, 'w')
+			fout.write(self.root.toxml())
+			fout.close()
+			i += 1
 
 		traversors = [ ]
 		traversors.append(SetupTraversor(self))
@@ -764,9 +760,16 @@ class Generator:
 			traversor.pre()
 			self.traverse(traversor, self.root)
 			traversor.post()
+			if debug:
+				fout = open('/tmp/gen-parse-%d-%s.%s.xml' % 
+					    (i, 
+					     traversor.__module__,
+					     traversor.__class__.__name__), 'w')
+				fout.write(self.root.toxml())
+				fout.close()
+				i += 1
 
 		self.post()
-
 
 
 	def traverse(self, traversor, node):
@@ -816,15 +819,16 @@ class Generator:
 
 		return list
 
-	def generate_order(self):
-		return self.orderSection.generate()
-
 	def generate_stacki(self):
 		return self.stackiSection.generate()
 
 	def generate_debug(self):
 		return self.debugSection.generate()
 
+	def generate_bash(self):
+		profile  = [ '#! /bin/bash' ]
+		profile.extend(self.shellSection.generate())
+		return profile
 
 class ProfileHandler(handler.ContentHandler,
 		     handler.DTDHandler,

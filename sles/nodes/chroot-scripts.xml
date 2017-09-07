@@ -33,7 +33,7 @@ echo "&hostname;.&domainname;" > /etc/HOSTNAME
 /usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
 
 <stack:file name="/root/.ssh/authorized_keys" perms="0600">
-<stack:eval shell="python">
+<stack:eval shell="/opt/stack/bin/python3">
 file = open('/root/.ssh/id_rsa.pub')
 for line in file.readlines():
 	print(line.strip())

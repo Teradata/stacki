@@ -5,7 +5,7 @@
       <stack:package>mokutil</stack:package>
       <stack:package>mtools</stack:package>
 
-<stack:script stack:stage="boot-post" stack:shell="python">
+<stack:script stack:stage="boot-post" stack:shell="/opt/stack/bin/python3">
 <![CDATA[
 import os
 import sys

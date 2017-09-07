@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
 <si_copyright>
@@ -31,7 +29,7 @@ fi
 -->
 
 cat &gt; /tmp/authorized_keys &lt;&lt; 'EOF'
-<eval shell="python">
+<eval shell="/opt/stack/bin/python3">
 
 import os
 

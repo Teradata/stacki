@@ -15,7 +15,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:script stack:stage="install-post" stack:cond="sync.ssh.authkey">
 <!-- propagate root's public ssh key -->
 <stack:file stack:name="/root/.ssh/authorized_keys">
-<stack:eval stack:shell="sh">
+<stack:eval>
 cat /root/.ssh/id_rsa.pub
 </stack:eval>
 </stack:file>
@@ -30,7 +30,7 @@ cat /root/.ssh/id_rsa.pub
  -->
 
 cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
-<stack:eval stack:shell="bash" stack:mode="xml">
+<stack:eval stack:mode="xml">
 curl_cmd=/usr/bin/curl
 
 <!-- on an installing system, curl may be in /bin? -->

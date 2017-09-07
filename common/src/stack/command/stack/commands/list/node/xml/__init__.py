@@ -318,6 +318,9 @@ class Command(stack.commands.list.command,
 		self.addText(' %s' % handler.nsAttrs())
 		self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
 
+
+		## Q: Do we still use this?
+
 		if attrs['os'] == 'redhat':
 			self.addText('<stack:loader>\n')
 			self.addText('%s\n' % saxutils.escape(kstext))

@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
 <description>
@@ -21,7 +19,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <post cond="sync.ssh.authkey">
 <!-- propagate root's public ssh key -->
 <file name="/root/.ssh/authorized_keys">
-<eval shell="sh">
+<eval>
 cat /root/.ssh/id_rsa.pub
 </eval>
 </file>
@@ -37,7 +35,7 @@ cat /root/.ssh/id_rsa.pub
  -->
 
 cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
-<eval shell="bash" mode="xml">
+<eval mode="xml">
 curl_cmd=/usr/bin/curl
 
 <!-- on an installing system, curl may be in /bin? -->

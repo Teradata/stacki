@@ -23,8 +23,12 @@ class implementation(stack.commands.Implementation):
 		pass
 
 	def chapter(self, generator, profile):
-		pass
+		profileType = generator.getProfileType()
 
+		profile.append('<chapter name="main">')
+		for line in generator.generate(profileType):
+			profile.append(line)
+		profile.append('</chapter>')
 
 	def run(self, x):
 
@@ -36,28 +40,21 @@ class implementation(stack.commands.Implementation):
 		generator.setProfileType(profileType)
 		generator.parse(xmlinput)
 
-		profile.append('<?xml version="1.0" standalone="no"?>')
-		profile.append('<profile-%s>' % generator.getProfileType())
+		profile.append('<profile type="%s">' % generator.getProfileType())
 
 		profile.append('<chapter name="stacki">')
 		for line in generator.generate('stacki'):
 			profile.append('%s' % line)
 		profile.append('</chapter>')
 
-		profile.append('<chapter name="meta">')
-		profile.append('\t<section name="order">')
-		for line in generator.generate('order'):
-			profile.append('%s' % line)
-		profile.append('\t</section>')
-		profile.append('\t<section name="debug">')
+		profile.append('<chapter name="debug">')
 		for line in generator.generate('debug'):
 			profile.append(line)
-		profile.append('\t</section>')
 		profile.append('</chapter>')
 
 		self.chapter(generator, profile)
 
-		profile.append('</profile-%s>' % generator.getProfileType())
+		profile.append('</profile>')
 
 		if chapter:
 			parser  = make_parser()
@@ -71,6 +68,7 @@ class implementation(stack.commands.Implementation):
 
 		for line in profile:
 			self.owner.addOutput('', line)
+
 
 
 class Command(stack.commands.list.host.command):

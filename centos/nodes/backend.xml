@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
 
@@ -10,7 +8,7 @@ file to add functionality to this appliance type.
 
 
 <native lang="kickstart">
-<eval shell="python" mode="xml">
+<eval shell="/opt/stack/bin/python3" mode="xml">
 
 import stack.api
 

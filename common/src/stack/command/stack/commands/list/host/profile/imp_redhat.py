@@ -16,7 +16,7 @@ class Implementation(stack.commands.list.host.profile.implementation):
 	def generator(self):
 		return stack.redhat.gen.Generator()
 
-	def chapter(self, generator, profile):
+	def XXchapter(self, generator, profile):
 
 		if generator.getProfileType() == 'native':
 			profile.append('<chapter name="kickstart">')
@@ -31,16 +31,10 @@ class Implementation(stack.commands.list.host.profile.implementation):
 				profile.append('\t</section>')
 			profile.append('</chapter>')
 
-		elif generator.getProfileType() == 'shell':
-			profile.append('<chapter name="bash">')
-			profile.append('#! /bin/bash')
-			for section in [ 'packages',
-					 'post',
-					 'boot' ]:
-				profile.append('\t<section name="%s">' % section)
-				for line in generator.generate(section):
-					profile.append(line)
-				profile.append('\t</section>')
+		elif generator.getProfileType() == 'bash':
+			profile.append('<chapter name="main">')
+			for line in generator.generate('bash'):
+				profile.append(line)
 			profile.append('</chapter>')
 
 

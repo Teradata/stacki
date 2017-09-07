@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
 	<description>
@@ -25,7 +23,7 @@
 <native lang="kickstart">
 reboot --eject
 
-<eval shell="python" mode="xml">
+<eval shell="/opt/stack/bin/python3" mode="xml">
 import os
 import urlparse
 import stack.roll

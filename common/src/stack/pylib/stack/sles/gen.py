@@ -10,7 +10,7 @@ import xml.dom.minidom
 from stack.bool import str2bool
 import stack.gen
 
-class ShellProfileTraversor(stack.gen.MainTraversor):
+class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
 		return 'zypper install -f -y %s' % ' '.join(enabled)
@@ -53,9 +53,6 @@ class ExpandingTraversor(stack.gen.Traversor):
 		stage    = self.getAttr(node, 'stack:stage',  default='install-post')
 		chroot   = self.getAttr(node, 'stack:chroot', default='true')
 		shell    = self.getAttr(node, 'stack:shell')
-
-		if shell == 'python':
-			shell = '/opt/stack/bin/python3'
 
 		stagename = self.stages[stage]
 		if not stagename == 'chroot-scripts':
@@ -292,12 +289,15 @@ class Generator(stack.gen.Generator):
 			workers.extend([ ExpandingTraversor(self), 
 					 DefraggingTraversor(self), 
 					 MainTraversor(self) ])
-		elif profileType == 'shell':
-			workers.extend([ ShellProfileTraversor(self) ])
+		elif profileType == 'bash':
+			workers.extend([ BashProfileTraversor(self) ])
 
 		return workers
 
 	def post(self):
+		"""Add the final XML document to the nativeSection.
+
+		"""
 		for child in self.root.childNodes:
 			self.nativeSection.append(child.toxml())
 
@@ -308,26 +308,9 @@ class Generator(stack.gen.Generator):
 		profile.extend(self.footerSection.generate())
 		return profile
 
-	def generate_shell(self):
+	def generate_bash(self):
 		profile  = [ '#! /bin/bash' ]
 		profile.extend(self.shellSection.generate())
-		return profile
-
-		dict	 = self.packageSet.getPackages()
-		enabled	 = dict['enabled']
-		disabled = dict['disabled']
-		section	 = stack.gen.ProfileSection()
-
-		s = ""
-		for (nodefile, rpms) in enabled.items():
-			if rpms:
-				rpms.sort()
-				s = s + ' %s' % ' '.join(rpms)
-		if s:
-			section.append("zypper install -f -y %s" %
-				       s, None)
-
-		profile.extend(section.generate())
 		return profile
 
 

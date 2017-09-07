@@ -1,5 +1,3 @@
-<?xml version="1.0" standalone="no"?>
-
 <stack>
 
   <description>
@@ -117,7 +115,7 @@ done
 </post>
 
 <!-- Access control on the database -->
-<post shell='python'>
+<post shell='/opt/stack/bin/python3'>
 import os
 import sys
 import re

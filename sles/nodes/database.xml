@@ -98,7 +98,7 @@ done
 </stack:script>
 
 <!-- Access control on the database -->
-<stack:script stack:stage="install-post" stack:shell="python">
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
 import os
 import sys
 import re
