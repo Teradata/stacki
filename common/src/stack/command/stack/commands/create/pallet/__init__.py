@@ -567,7 +567,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 			rpmsdir = 'RPMS'
 
 			os.makedirs(root)
-			if self.config.getRollOS() == 'redhat':
+			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
 				os.makedirs(os.path.join(root, rpmsdir))
 			
 			# Symlink in all the RPMS
