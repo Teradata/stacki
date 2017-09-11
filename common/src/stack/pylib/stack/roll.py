@@ -102,39 +102,19 @@ class Generator():
 	## Parsing Section
 	##
 	def parse(self, file):
-		doc  = xml.dom.minidom.parseFile(file)
+		doc  = xml.dom.minidom.parse(file)
 		node = doc.getElementsByTagName('roll')
 
-		attr = node.attributes
-		if attr.getNamedItem((None, 'name')):
-			name = attr.getNamedItem((None, 'name')).value
-		else:
-			name = ''
+		if len(node) != 1:
+			return
 
-		if attr.getNamedItem((None, 'version')):
-			version = attr.getNamedItem((None, 'version')).value
-		else:
-			version = ''
-
-		if attr.getNamedItem((None, 'arch')):
-			arch = attr.getNamedItem((None, 'arch')).value
-		else:
-			arch = ''
-
-		if attr.getNamedItem((None, 'url')):
-			url = attr.getNamedItem((None, 'url')).value
-		else:
-			url = ''
-
-		if attr.getNamedItem((None, 'diskid')):
-			diskid = attr.getNamedItem((None, 'diskid')).value
-		else:
-			diskid = ''
-
-		if attr.getNamedItem((None, 'release')):
-			release = attr.getNamedItem((None, 'release')).value
-		else:
-			release = ''
+		attrs = node[0]
+		name = attrs.getAttribute('name')
+		version = attrs.getAttribute('version')
+		arch = attrs.getAttribute('arch')
+		url = attrs.getAttribute('url')
+		diskid = attrs.getAttribute('diskid')
+		release = attrs.getAttribute('release')
 
 		self.rolls.append((name, version, release, arch, url, diskid))
 
