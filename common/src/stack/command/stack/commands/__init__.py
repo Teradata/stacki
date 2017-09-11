@@ -1528,7 +1528,7 @@ class Command:
 		self.width = 0
 		if sys.stdout.isatty():
 			try:
-				r, c = os.popen('stty size', 'r').read().split()
+				r, c = os.get_terminal_size()
 				self.width = int(c)
 			except:
 				pass
