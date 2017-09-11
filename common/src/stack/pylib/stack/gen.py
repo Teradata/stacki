@@ -595,10 +595,13 @@ class MainTraversor(Traversor):
 		if stage in [ 'install-pre', 'install-pre-package' ] or not chroot == 'true':
 			return False # ignore pre and nochroot stuff
 
-		label = '%s-%s' % (stage, self.getAttr(node, 'stack:id'))
+		l = 'stack_%s_%s' % (stage, self.getAttr(node, 'stack:id'))
+
+		# make sure all the '-' characters are translated to '_' characters
+		label = l.translate(str.maketrans('-', '_'))
 
 		fn = [ ]
-		fn.append('function stack-%s {' % label)
+		fn.append('function %s {' % label)
 		if shell:
 			fn.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
 			fn.append('#! %s\n' % shell)

@@ -73,7 +73,7 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 		else:
 			xml = sys.stdin.read()
 
-		p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
+		p = subprocess.Popen('/opt/stack/bin/stack list host profile chapter=main profile=bash',
 				     stdin=subprocess.PIPE,
 				     stdout=subprocess.PIPE,
 				     stderr=subprocess.PIPE, shell=True)
