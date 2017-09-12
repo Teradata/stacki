@@ -31,7 +31,7 @@ PACKAGES=rpm-build redhat-rpm-config gcc \
 	yum-utils perl-ExtUtils-MakeMaker \
 	webkitgtk3-devel gtk3-devel \
 	gstreamer-devel popt-devel \
-	gstreamer1-devel GConf2-devel
+	gstreamer1-devel GConf2-devel \
 	gstreamer-python-devel.x86_64 \
 	gstreamer1-plugins-base-devel.x86_64
 
