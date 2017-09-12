@@ -72,7 +72,8 @@ log.info('Starting ludicrous tracking service')
 ludicrous_proc = subprocess.Popen(
 	['/opt/stack/bin/python', '/opt/stack/bin/ludicrous-client.py'])
 
-#time.sleep(5)
+# give ludicrous a chance to start
+time.sleep(5)
 
 if 'boss' in args:
 	# We are a frontend
