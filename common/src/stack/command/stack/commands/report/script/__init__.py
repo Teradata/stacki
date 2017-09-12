@@ -58,15 +58,15 @@ class Command(stack.commands.report.command):
 		xml += 'stack:os="%s" ' % osname
 		xml += 'xmlns:stack="http://www.stacki.com" '
 		xml += 'stack:attrs="%s">\n' % attrs
-		xml += '<stack:post>\n'
+		xml += '<stack:script stack:stage="install-post">\n'
 
 		for line in sys.stdin.readlines():
 			xml += line
 
-		xml += '</stack:post>\n'
+		xml += '</stack:script>\n'
 		xml += '</stack:profile>\n' 
 
-		p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
+		p = subprocess.Popen('/opt/stack/bin/stack list host profile chapter=main profile=bash',
 				     stdin=subprocess.PIPE,
 				     stdout=subprocess.PIPE,
 				     stderr=subprocess.PIPE, shell=True)

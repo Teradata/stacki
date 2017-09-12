@@ -161,11 +161,13 @@ class Command(stack.commands.HostArgumentProcessor,
 			""" % self.db.getHostname()):
 			devices += '%s ' % device
 
-		self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())
+		if self.os == 'redhat':
+			self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())
+		if self.os == 'sles':
+			self.addOutput('', 'DHCPD_INTERFACE="%s"' % devices.strip())
+
 		self.addOutput('', '</stack:file>')
 		
-
-
 
 	def run(self, params, args):
 

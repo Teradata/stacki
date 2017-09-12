@@ -608,15 +608,22 @@ class MainTraversor(Traversor):
 		label = l.translate(str.maketrans('-', '_'))
 
 		fn = [ ]
+		code = [ ]
 		fn.append('function %s {' % label)
 		if shell:
-			fn.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
-			fn.append('#! %s\n' % shell)
-		fn.append(self.collect(node))
+			code.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
+			code.append('#! %s\n' % shell)
+		body = self.collect(node)
+		if body:
+			code.append(body)
 		if shell:
-			fn.append('__EOF_%s__' % label)
-			fn.append('chmod +x /tmp/%s' % label)
-			fn.append('/tmp/%s' % label)
+			code.append('__EOF_%s__' % label)
+			code.append('chmod +x /tmp/%s' % label)
+			code.append('/tmp/%s' % label)
+		if not code:
+			# the bash shell 'no op' command
+			code.append(':')
+		fn.extend(code)
 		fn.append('}\n\n')
 
 		self.scripts[stage][label] = stack.gen.ProfileSnippet('\n'.join(fn),

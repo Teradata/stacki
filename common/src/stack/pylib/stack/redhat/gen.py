@@ -18,7 +18,10 @@ import stack.gen
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
-		return 'yum install -f -y %s' % ' '.join(enabled)
+		if enabled:
+			return 'yum install -f -y %s' % ' '.join(enabled)
+		
+		return None
 		
 		
 class LegacyTraversor(stack.gen.Traversor):

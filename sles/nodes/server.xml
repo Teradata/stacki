@@ -8,6 +8,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 
 <stack:package>stack-admin</stack:package>
 <stack:package>foundation-gd</stack:package>
+<stack:package>foundation-rcs</stack:package>
 <stack:package>stack-config-server</stack:package>
 
 <stack:package>git-core</stack:package>

@@ -19,6 +19,8 @@ chown dhcpd.nogroup /var/lib/dhcp/db/dhcpd.leases
 
 /usr/bin/systemctl enable dnsmasq
 
+/usr/bin/systemctl disable wicked
+
 </stack:script>
 
 </stack:stack> 

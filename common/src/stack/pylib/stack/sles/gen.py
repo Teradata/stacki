@@ -9,7 +9,10 @@ import stack.gen
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
-		return 'zypper install -f -y %s' % ' '.join(enabled)
+		if enabled:
+			return 'zypper install -f -y %s' % ' '.join(enabled)
+
+		return None
 		
 
 class ExpandingTraversor(stack.gen.Traversor):
