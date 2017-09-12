@@ -123,7 +123,9 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 		#
 
 		hosts = interfaces.keys()
-		argv  = interfaces.keys()
+		argv = []
+		for a in interfaces.keys():
+			argv.append(a)
 
 		if argv: # remove previous host interfaces (if any)
 			argv.append('all=true')

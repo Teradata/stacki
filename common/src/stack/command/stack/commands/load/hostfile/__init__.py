@@ -66,14 +66,20 @@ class Command(stack.commands.load.command):
 		# build out the DHCP file with sync.config
 
 		sys.stderr.write('Setting Bootaction to OS\n')
-		argv = self.hosts.keys()
+
+		argv = []
+		for a in self.hosts.keys():
+			argv.append(a)
 		argv.append('action=os')
 		argv.append('sync=false')
+
 		self.call('set.host.boot', argv)
 		
 		self.call('sync.config')
 
-		argv = self.hosts.keys()
+		argv = []
+		for a in self.hosts.keys():
+			argv.append(a)
 		self.call('sync.host.config', argv)
 		
 		#

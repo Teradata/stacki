@@ -18,10 +18,10 @@ class Iterator(object):
         def __iter__(self):
                 return self
 
-        def next(self):
+        def __next__(self):
                 row = None
                 while not row:
-                        row = self.reader.next()
+                        row = self.reader.__next__()
 
                         # skip empty lines
                         # strip all cells of whitespace

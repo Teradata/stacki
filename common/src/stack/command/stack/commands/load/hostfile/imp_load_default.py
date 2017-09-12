@@ -312,7 +312,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			# if there is only one interface, make it the default
 			#
 			if len(ifaces) == 1:
-				self.owner.interfaces[name][ifaces[0]]['default'] = 'True'
+				for interface in ifaces:
+					self.owner.interfaces[name][interface]['default'] = 'True'
 			else:
 				#
 				# if there is more than one interface for this
