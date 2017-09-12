@@ -73,14 +73,14 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 		else:
 			xml = sys.stdin.read()
 
-		p = subprocess.Popen('/opt/stack/bin/stack list host profile profile=shell chapter=bash',
+		p = subprocess.Popen('/opt/stack/bin/stack list host profile chapter=main profile=bash',
 				     stdin=subprocess.PIPE,
 				     stdout=subprocess.PIPE,
 				     stderr=subprocess.PIPE, shell=True)
-		p.stdin.write(xml)
+		p.stdin.write(xml.encode())
 		(o, e) = p.communicate()
 		if p.returncode == 0:
-			sys.stdout.write(o)
+			sys.stdout.write(o.decode())
 		else:
-			sys.stderr.write(e)
+			sys.stderr.write(e.decode())
 

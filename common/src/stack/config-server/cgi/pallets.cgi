@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
 import os
 import os.path

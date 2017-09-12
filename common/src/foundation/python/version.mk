@@ -1,3 +1,3 @@
 VERSION = 3.6.1
-RPM.EXTRAS = "AutoReqProv: no"
+RPM.EXTRAS = "AutoReq: no"
 ORDER = 2

@@ -1,4 +1,4 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # @SI_Copyright@
 # Copyright (c) 2006 - 2017 StackIQ Inc.

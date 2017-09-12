@@ -185,7 +185,7 @@ class Command(stack.commands.list.command,
 					= pallet
 				items.append(os.path.join('/export',
 					'stack', 'pallets', pname, pver, prel,
-					'redhat', parch))
+					self.os, parch))
 
 		#
 		# get the carts associated with the box

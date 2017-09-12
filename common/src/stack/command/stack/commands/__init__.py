@@ -1504,9 +1504,15 @@ class Command:
 		elif self.arch in ['armv7l']:
 			self.arch = 'armv7hl'
 
-		self.os = os.uname()[0].lower()
-		if self.os == 'linux':
+		if os.path.exists('/etc/centos-release') or \
+				os.path.exists('/etc/redhat-release'):
 			self.os = 'redhat'
+		elif os.path.exists('/etc/SuSE-release'):
+			self.os = 'sles'
+		else:
+			self.os = os.uname()[0].lower()
+			if self.os == 'linux':
+				self.os = 'redhat'
 		
 		self._args   = None
 		self._params = None
@@ -1523,7 +1529,7 @@ class Command:
 		self.width = 0
 		if sys.stdout.isatty():
 			try:
-				r, c = os.popen('stty size', 'r').read().split()
+				r, c = os.get_terminal_size()
 				self.width = int(c)
 			except:
 				pass
