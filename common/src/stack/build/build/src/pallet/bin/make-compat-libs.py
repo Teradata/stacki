@@ -1,4 +1,4 @@
-#! /opt/stack/bin/python
+#! /opt/stack/bin/python3
 #
 # Queries a set of binary files for their dynamically-linked libraries.
 # Outputs a list of library files (that exist locally), suitable for building

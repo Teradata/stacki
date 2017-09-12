@@ -45,8 +45,7 @@ class Implementation(stack.commands.Implementation):
 		if not address or not mask:
 			return
 
-		ipnetwork = ipaddress.IPv4Network(unicode(
-			address + '/' + mask))
+		ipnetwork = ipaddress.IPv4Network(str(address + '/' + mask))
 
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
 		self.owner.addOutput(host, 'server %s iburst' % timeserver)

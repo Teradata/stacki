@@ -8,11 +8,6 @@ All rights reserved. stacki(r) v4.0 stacki.com
 
 
 <stack:package>foundation-python</stack:package>
-<stack:package>foundation-python-pytest</stack:package>
-<stack:package>foundation-python-setuptools</stack:package>
-<stack:package>foundation-python-xml</stack:package>
-<stack:package>foundation-py-ipaddress</stack:package>
-<stack:package>foundation-py-PyMySQL</stack:package>
 <stack:package>foundation-libxml2</stack:package>
 <stack:package>foundation-wget</stack:package>
 

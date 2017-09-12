@@ -15,15 +15,15 @@ import time
 
 class Password:
 	def __init__(self):
-		s = long(time.time()*pow(10, 9))
+		s = int(time.time()*pow(10, 9))
 		random.seed(s)
 
 	def get_rand(self, num_bytes=16):
 		c = ''
 		for i in range(num_bytes):
 			c = c + chr(random.getrandbits(8))
-			random.seed(long(time.time()*pow(10, 9)))
-		return c
+			random.seed(int(time.time()*pow(10, 9)))
+		return c.encode()
 
 	def get_salt(self):
 		salt = '$1$'
@@ -35,7 +35,7 @@ class Password:
 		if not c_pw:
 			c = self.get_rand()
 			c_pw = base64.urlsafe_b64encode(c)
-			c_pw = c_pw.rstrip('=')
+			c_pw = c_pw.rstrip('='.encode())
 		return c_pw
 
 	def get_crypt_pw(self, c_pw = None):

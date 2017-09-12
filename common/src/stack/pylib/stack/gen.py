@@ -535,24 +535,36 @@ class MainTraversor(Traversor):
 			for label in self.scripts[stage]:
 				section.snippets.append(self.scripts[stage][label])
 
-		section.append('if [ $DO_PACKAGES -eq 1 ]; then')
-		section.append(self.shellPackages(enabled, disabled))
-		section.append('fi\n')
+		#
+		# each section must have at least one line in it or else it will
+		# throw an error
+		#
+		script = self.shellPackages(enabled, disabled)
+		if script:
+			section.append('if [ $DO_PACKAGES -eq 1 ]; then')
+			section.append(script)
+			section.append('fi\n')
 
-		section.append('if [ $DO_INSTALL_POST -eq 1 ]; then')
-		for label in self.scripts['install-post']:
-			section.append('\t%s' % label)
-		section.append('fi\n')
+		script = self.scripts['install-post']
+		if script:
+			section.append('if [ $DO_INSTALL_POST -eq 1 ]; then')
+			for label in script:
+				section.append('\t%s' % label)
+			section.append('fi\n')
 
-		section.append('if [ $DO_BOOT_PRE -eq 1 ]; then')
-		for label in self.scripts['boot-pre']:
-			section.append('\t%s' % label)
-		section.append('fi\n')
+		script = self.scripts['boot-pre']
+		if script:
+			section.append('if [ $DO_BOOT_PRE -eq 1 ]; then')
+			for label in script:
+				section.append('\t%s' % label)
+			section.append('fi\n')
 
-		section.append('if [ $DO_BOOT_POST -eq 1 ]; then')
-		for label in self.scripts['boot-post']:
-			section.append('\t%s' % label)
-		section.append('fi\n')
+		script = self.scripts['boot-post']
+		if script:
+			section.append('if [ $DO_BOOT_POST -eq 1 ]; then')
+			for label in script:
+				section.append('\t%s' % label)
+			section.append('fi\n')
 		
 
 	def traverse_stack_profile(self, node):
