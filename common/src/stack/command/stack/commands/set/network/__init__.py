@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class command(stack.commands.set.command,
 	      stack.commands.NetworkArgumentProcessor):

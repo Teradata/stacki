@@ -5,11 +5,10 @@
 # @SI_Copyright@
 
 
-import re
-import sys
 import stack.csv
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	

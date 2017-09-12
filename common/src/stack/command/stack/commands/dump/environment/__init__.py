@@ -6,5 +6,6 @@
 
 import stack.commands
 
+
 class command(stack.commands.dump.command):
 	pass

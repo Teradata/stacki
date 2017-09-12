@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.host.command):
 	"""
 	Remove an attribute for a host.

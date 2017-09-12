@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
-from pprint import *
+from pprint import pformat
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 	"Common <stacki></stacki> section"

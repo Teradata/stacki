@@ -13,6 +13,7 @@
 import stack
 import stack.commands
 
+
 class Command(stack.commands.report.command):
 	"""
 	Reports hostname of the database.

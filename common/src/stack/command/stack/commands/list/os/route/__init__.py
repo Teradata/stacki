@@ -26,6 +26,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.os.command):
 	"""
 	"""

@@ -10,13 +10,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
 import pwd
 import getpass
-import crypt
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
 
 
 class Command(stack.commands.Command):

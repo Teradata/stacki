@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired, CommandError
+
 
 class Command(stack.commands.set.host.interface.command):
 	"""
@@ -86,11 +87,11 @@ class Command(stack.commands.set.host.interface.command):
 				self.db.execute(sql_set_cmd)
 			else:
 				if network:
-					raise CommandError(self, "Network '%s' for '%s' not found" % \
+					raise CommandError(self, "Network '%s' for '%s' not found" % 
 						(network, host))
 				elif interface:
-					raise CommandError(self, "Interface '%s' for '%s' not found" % \
+					raise CommandError(self, "Interface '%s' for '%s' not found" % 
 						(interface, host))
 				elif mac:
-					raise CommandError(self, "MAC Address '%s' for '%s' not found" % \
+					raise CommandError(self, "MAC Address '%s' for '%s' not found" % 
 						(mac, host))

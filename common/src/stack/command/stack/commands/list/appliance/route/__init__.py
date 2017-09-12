@@ -24,10 +24,8 @@
 # - added list.os.route
 #
 
-import sys
-import socket
 import stack.commands
-import string
+
 
 class Command(stack.commands.list.appliance.command):
 	"""
@@ -43,7 +41,7 @@ class Command(stack.commands.list.appliance.command):
 				r.subnet from appliance_routes r, appliances a
 				where r.appliance=a.id and a.name='%s'""" % app)
 
-			for network,netmask,gateway,subnet in \
+			for network, netmask, gateway, subnet in \
 				self.db.fetchall():
 
 				if subnet:

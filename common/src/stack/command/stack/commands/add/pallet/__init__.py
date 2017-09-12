@@ -11,12 +11,10 @@
 # @Copyright@
 
 import os
-import sys
-import string
 import subprocess
 import stack.file
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
 
 
 class Command(stack.commands.add.command):
@@ -168,8 +166,8 @@ class Command(stack.commands.add.command):
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				isolist.append(arg)
 			else:
-				print("Cannot find %s or %s "\
-					"is not and ISO image" % (arg, arg))
+				print("Cannot find %s or %s "
+				      "is not and ISO image" % (arg, arg))
 
 		if not isolist and not network_pallets:
 			#

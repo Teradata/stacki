@@ -4,7 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from stack.bool import *
+from stack.bool import str2bool, bool2str
+
 
 def test_str2bool():
 

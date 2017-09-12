@@ -12,8 +12,6 @@
 
 import os
 import time
-import string
-import types
 import stack.commands
 
 preamble_template = """$TTL 3D
@@ -53,9 +51,9 @@ class Command(stack.commands.report.command):
 
 		s = ""
 
-		self.db.execute("select n.name, nt.ip, nt.name "+\
-			"from subnets s, nodes n, networks nt "	+\
-			"where s.zone='%s' " % (zone)	+\
+		self.db.execute("select n.name, nt.ip, nt.name " +
+			"from subnets s, nodes n, networks nt "	 +
+			"where s.zone='%s' " % (zone)	+
 			"and nt.subnet=s.id and nt.node=n.id")
 
 		for (name, ip, network_name) in self.db.fetchall():
@@ -73,8 +71,8 @@ class Command(stack.commands.report.command):
 			# Now record the aliases. We always substitute 
 			# network names with aliases. Nothing else will
 			# be allowed
-			self.db.execute('select a.name from aliases a, '+\
-				'networks nt where nt.node=a.node and '	+\
+			self.db.execute('select a.name from aliases a, ' +
+				'networks nt where nt.node=a.node and '	+
 				'nt.ip="%s"' % (ip))
 
 			for alias, in self.db.fetchall():
@@ -108,9 +106,9 @@ class Command(stack.commands.report.command):
 
 		s = ''
 		subnet_len = len(r_sn.split('.'))
-		self.db.execute('select nt.name, nt.ip, s.zone ' +\
-				'from networks nt, subnets s where ' +\
-				's.name="%s" ' % (s_name)	+\
+		self.db.execute('select nt.name, nt.ip, s.zone ' +
+				'from networks nt, subnets s where ' +
+				's.name="%s" ' % (s_name)	+
 				'and nt.subnet=s.id')
 
 		# Remove all elements of the IP address that are
@@ -198,4 +196,4 @@ class Command(stack.commands.report.command):
 			s += '</stack:file>\n'
 
 		self.addOutput('', s)
-		self.endOutput(padChar = '')
+		self.endOutput(padChar='')

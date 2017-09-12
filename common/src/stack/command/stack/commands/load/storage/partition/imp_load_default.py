@@ -5,10 +5,10 @@
 # @SI_Copyright@
 
 import re
-import sys
 import stack.csv
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -26,10 +26,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		#
 		# error checking
 		#
-		if device == None:
+		if device is None:
 			msg = 'empty value found for "device" column at line %d' % line
 			raise CommandError(self.owner, msg)
-		if size == None:
+		if size is None:
 			msg = 'empty value found for "size" column at line %d' % line
 			raise CommandError(self.owner, msg)
 		if host not in self.owner.hosts.keys():

@@ -13,6 +13,8 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
+from stack.exceptions import ArgRequired
+
 
 class Command(stack.commands.add.firewall.command):
 	"""

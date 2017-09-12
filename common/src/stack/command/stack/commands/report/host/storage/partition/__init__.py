@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from __future__ import print_function
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -30,7 +30,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		if len(hosts) == 0:
 			output = []
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 		elif len(hosts) > 1:
 			raise ArgUnique(self, 'host')
@@ -44,7 +44,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.partition', [ host ])
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		# 
@@ -55,7 +55,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.partition', [ appliance ])
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		#
@@ -64,7 +64,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.partition', ['globalOnly=y'])
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		#
@@ -73,4 +73,4 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = []
 		self.addOutput('', '%s' % output)
-		self.endOutput(padChar = '')
+		self.endOutput(padChar='')

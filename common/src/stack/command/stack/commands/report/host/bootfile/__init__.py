@@ -5,9 +5,8 @@
 # @SI_Copyright@
 
 
-import os
 import stack.commands
-from stack.exception import *
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -50,9 +49,9 @@ class Command(stack.commands.Command,
 		for row in self.call('list.host', hosts):
 			h = ha[row['host']]
 			if h['type'] == 'install':
-			       h['action'] = row['installaction']
+				h['action'] = row['installaction']
 			elif h['type'] == 'os':
-			       h['action'] = row['osaction']
+				h['action'] = row['osaction']
 			h['os']        = row['os']
 			h['appliance'] = row['appliance']
 

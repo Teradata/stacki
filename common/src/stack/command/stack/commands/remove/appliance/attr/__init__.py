@@ -12,7 +12,7 @@
 
 import stack.attr
 import stack.commands
-from stack.exception import *
+
 
 class Command(stack.commands.remove.appliance.command):
 	"""

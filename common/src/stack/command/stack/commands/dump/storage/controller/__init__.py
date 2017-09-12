@@ -14,6 +14,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
 	stack.commands.dump.command):
@@ -42,15 +43,15 @@ class Command(stack.commands.ApplianceArgumentProcessor,
 				if 'hotspare' in hosts[scope][arrayid].keys():
 					hotspare = hosts[scope][arrayid]['hotspare']
 
-				if enclosure != None:
+				if enclosure is not None:
 					cmd.append('enclosure=%s' % enclosure)
-				if adapter != None:
+				if adapter is not None:
 					cmd.append('adapter=%s' % adapter)
-				if slot != None and slot != []:
+				if slot is not None and slot != []:
 					cmd.append('slot=%s' % ','.join(slot))
-				if raidlevel != None:
+				if raidlevel is not None:
 					cmd.append('raidlevel=%s' % raidlevel)
-				if hotspare != None:
+				if hotspare is not None:
 					cmd.append('hotspare=%s' %
 						','.join(hotspare))
 
@@ -64,27 +65,27 @@ class Command(stack.commands.ApplianceArgumentProcessor,
 		hosts[scope] = {}
 
 		for o in output:
-			if o['adapter'] != None:
+			if o['adapter'] is not None:
 				adapter = '%s' % o['adapter']
 			else:
 				adapter = None
 
-			if o['enclosure'] != None:
+			if o['enclosure'] is not None:
 				enclosure = '%s' % o['enclosure']
 			else:
 				enclosure = None
 
-			if o['slot'] != None:
+			if o['slot'] is not None:
 				slot = '%s' % o['slot']
 			else:
 				slot = None
 
-			if o['raidlevel'] != None:
+			if o['raidlevel'] is not None:
 				raidlevel = '%s' % o['raidlevel']
 			else:
 				raidlevel = None
 
-			if o['arrayid'] != None:
+			if o['arrayid'] is not None:
 				arrayid = '%s' % o['arrayid']
 			else:
 				arrayid = None

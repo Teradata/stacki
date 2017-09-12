@@ -6,18 +6,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
 import sys
-import string
 import getopt
-import types
 import stack.util
-import xml
-from xml.sax import saxutils
-from xml.sax import handler
-from xml.sax import make_parser
-from xml.sax._exceptions import SAXParseException
+
 
 class Application:
 
@@ -160,7 +153,7 @@ class Application:
 				v = e[0]
 			else:
 				v = e
-			if v[len(v)-1] != '=':
+			if v[len(v) - 1] != '=':
 				list.append(' [--' + v + ']')
 
 		# Add argument long options
@@ -171,7 +164,7 @@ class Application:
 			else:
 				v = e
 				h = 'arg'
-			if v[len(v)-1] == '=':
+			if v[len(v) - 1] == '=':
 				list.append(' [--' + v[:-1] + ' ' + h + ']')
 
 		list.append(self.usageTail())

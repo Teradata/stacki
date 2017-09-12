@@ -1,8 +1,9 @@
 # @SI_Copyight@
 # @SI_Copyight@
 
-from stack.exception import *
+from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 import stack.commands
+
 
 class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 

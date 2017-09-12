@@ -4,7 +4,7 @@
 #
 
 import stack.commands
-from stack.exception import *
+
 
 class Implementation(stack.commands.Implementation):
 
@@ -33,15 +33,15 @@ class Implementation(stack.commands.Implementation):
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
 				(ip, gateway, mask, dnsserver, nextserver)
 
-		self.owner.addOutput(host,'default stack')
-		self.owner.addOutput(host,'prompt 0')
-		self.owner.addOutput(host,'label stack')
+		self.owner.addOutput(host, 'default stack')
+		self.owner.addOutput(host, 'prompt 0')
+		self.owner.addOutput(host, 'label stack')
 
 		if kernel:
 			if kernel[0:7] == 'vmlinuz':
-				self.owner.addOutput(host,'\tkernel %s' % (kernel))
+				self.owner.addOutput(host, '\tkernel %s' % (kernel))
 			else:
-				self.owner.addOutput(host,'\t%s' % (kernel))
+				self.owner.addOutput(host, '\t%s' % (kernel))
 		if ramdisk and len(ramdisk) > 0:
 			if len(args) > 0:
 				args += ' initrd=%s' % ramdisk
@@ -49,7 +49,7 @@ class Implementation(stack.commands.Implementation):
 				args = 'initrd=%s' % ramdisk
 
 		if args and len(args) > 0:
-			self.owner.addOutput(host,'\tappend %s' % args)
+			self.owner.addOutput(host, '\tappend %s' % args)
 
 		if type == "install":
-			self.owner.addOutput(host,'\tipappend 2')
+			self.owner.addOutput(host, '\tipappend 2')

@@ -11,7 +11,6 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
 
 
 class Command(stack.commands.dump.host.command):

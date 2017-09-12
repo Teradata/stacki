@@ -6,15 +6,15 @@
 
 
 import re
-import sys
 from operator import itemgetter
 from itertools import groupby
 import ipaddress
 
 import stack.csv
 import stack.commands
-from stack.bool import *
-from stack.exception import *
+from stack.bool import str2bool
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -64,7 +64,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			self.owner.call('list.host.interface')
 		self.appliances = self.getApplianceNames()
 		# need all the info from networks(/subnets)
-		self.networks = dict((k,next(v)) for k,v in groupby(self.owner.call('list.network'), itemgetter('network')))
+		self.networks = dict((k, next(v)) for k, v in groupby(self.owner.call('list.network'), itemgetter('network')))
 		self.boxes = self.getBoxNames()
 		self.actions = [entry['bootaction'] for entry in self.owner.call('list.bootaction')]
 		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
@@ -322,7 +322,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				default = False
 				multiple_defaults = False
 				for interface in ifaces:
-					if 'default' in self.owner.interfaces[name][interface] and str2bool(self.owner.interfaces[name][interface]['default']) == True:
+					if 'default' in self.owner.interfaces[name][interface] and str2bool(self.owner.interfaces[name][interface]['default']) is True:
 						if not default:
 							default = True
 						else:
@@ -372,8 +372,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 					# check if 'ip' could exist in 'network'
 					network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
-					ipnetwork = ipaddress.IPv4Network(unicode(network_ip + '/' + netmask))
-					if ipaddress.IPv4Address(unicode(ip)) not in ipnetwork:
+					ipnetwork = ipaddress.IPv4Network(network_ip + '/' + netmask)
+					if ipaddress.IPv4Address(ip) not in ipnetwork:
 						msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
 						raise CommandError(self.owner, msg)
 

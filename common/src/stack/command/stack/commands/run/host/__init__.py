@@ -11,15 +11,9 @@
 # @Copyright@
 
 
-import threading
 import os
-import sys
-import time
-import socket
-import subprocess
-import shlex
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamType, ParamValue
 
 
 class Command(stack.commands.Command,
@@ -108,7 +102,7 @@ class Command(stack.commands.Command,
 			raise ParamValue(self, 'timeout', '> 0')
 
 		# Get Number of threads to run concurrently
-		if n == None:
+		if n is None:
 			self.numthreads = 0
 		else:
 			try:
@@ -116,7 +110,7 @@ class Command(stack.commands.Command,
 			except:
 				raise ParamType(self, 'threads', 'integer')
 			if self.numthreads < 0:
-				raise ParamValue(self, 'threads','> 0')
+				raise ParamValue(self, 'threads', '> 0')
 
 		# Get time to pause between subsequent threads
 		try:
@@ -135,7 +129,7 @@ class Command(stack.commands.Command,
 		self.cmd = cmd
 
 		# Get the implementation to run. By default, run SSH
-		if method == None:
+		if method is None:
 			method = 'ssh'
 
 		# Check if we should collate the output
@@ -147,4 +141,4 @@ class Command(stack.commands.Command,
 		self.runImplementation(method, [self.hosts, cmd])
 
 		if self.collate:
-			self.endOutput(header=['host','output'], trimOwner = False)
+			self.endOutput(header=['host', 'output'], trimOwner=False)

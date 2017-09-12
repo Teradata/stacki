@@ -23,6 +23,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.NetworkArgumentProcessor,
 	stack.commands.list.appliance.command):
 	"""

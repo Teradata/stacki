@@ -13,6 +13,7 @@
 import stack.commands
 import re
 
+
 class Command(stack.commands.list.host.command):
 	"""
 	Lists the interface definitions for hosts. For each host supplied on

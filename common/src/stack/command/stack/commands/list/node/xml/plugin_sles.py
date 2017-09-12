@@ -1,8 +1,6 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-import os
-from pprint import *
 import stack.commands
 
 
@@ -17,7 +15,7 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, attrs):
 
-		if not 'os' in attrs or attrs['os'] != 'sles':
+		if 'os' not in attrs or attrs['os'] != 'sles':
 			return
 
 		row = self.owner.call('report.host.storage.partition',

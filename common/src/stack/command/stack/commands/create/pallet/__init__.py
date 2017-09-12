@@ -13,13 +13,10 @@
 
 import os
 import sys
-import re
 import string
-import stat
 import time
 import tempfile
 import shutil
-import socket
 import subprocess
 import shlex
 import glob
@@ -30,7 +27,7 @@ import stack.file
 import stack.roll
 import stack.util
 import stack.bootable
-from stack.exception import *
+from stack.exception import CommandError, ArgRequired
 from xml.sax import make_parser
 import stack.gen
 
@@ -63,8 +60,8 @@ class Builder:
 
 		print('mkisofs: cmd %s' % cmd)
 		os.chdir(rollDir)
-		subprocess.call(shlex.split(cmd), stdin = None, stdout = None,
-			stderr = None)
+		subprocess.call(shlex.split(cmd), stdin=None, stdout=None,
+			stderr=None)
 
 		if self.config.isBootable():
 			subprocess.call([ 'isohybrid',
@@ -184,7 +181,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 					continue
 					
 				# Resolve package versions
-				if newest == True:		
+				if newest is True:		
 					name = file.getUniqueName()
 				else:
 					name = file.getFullName()
@@ -348,8 +345,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 				group = a.comps.return_group(
 					rpm[1:].encode('utf-8'))
 
-				for r in group.mandatory_packages.keys() + \
-						group.default_packages.keys():
+				for r in group.mandatory_packages.keys() + group.default_packages.keys():
 					if r not in selected:
 						selected.append(r)
 			elif rpm not in selected:
@@ -408,9 +404,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.close()
 		destdir = os.path.join(cwd, 'RPMS')
 
-		cmd = [ 'yumdownloader','--destdir=%s' % destdir,'-y','-c', yumconf ]
+		cmd = [ 'yumdownloader', '--destdir=%s' % destdir, '-y', '-c', yumconf ]
 		cmd.extend(selected)
-		subprocess.call(cmd, stdin = None)
+		subprocess.call(cmd, stdin=None)
 		
 		stacki = []
 		nonstacki = []
@@ -440,7 +436,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 		palletdir = os.path.join(name,
 			version, release, 'redhat', arch)
-		distdir = os.path.join('mnt','cdrom', palletdir)
+		distdir = os.path.join('mnt', 'cdrom', palletdir)
 		fout.write('install\n')
 		fout.write('lang en_US\n')
 		fout.write('keyboard us\n')

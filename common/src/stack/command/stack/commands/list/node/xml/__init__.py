@@ -13,16 +13,13 @@
 
 
 import os
-import sys
-import string
-import socket
 import subprocess
 import stack
 import stack.profile
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, CommandError
 from xml.sax import saxutils
-from xml.sax import handler
+
 
 class Command(stack.commands.list.command, 
 	      stack.commands.BoxArgumentProcessor):
@@ -72,7 +69,7 @@ class Command(stack.commands.list.command,
 				('eval', 'yes'),
 				('missing-check', 'no'),
 				('gen', 'kgen'),
-				('basedir',None),
+				('basedir', None),
 				])
 			
 		if pallets:
@@ -211,13 +208,13 @@ class Command(stack.commands.list.command,
 				#
 				subprocess.Popen([ '/opt/stack/bin/stack',
 					'compile', 'cart', o['name'] ],
-					stdout = devnull, stderr = devnull)
+					stdout=devnull, stderr=devnull)
 
 		if basedir:
 			if os.path.exists(basedir) and os.path.isdir(basedir):
 				items = [os.path.realpath(basedir)]
 
-		handler = stack.profile.GraphHandler(attrs, directories = items)
+		handler = stack.profile.GraphHandler(attrs, directories=items)
 
 		for item in items:
 			graph = os.path.join(item, 'graph')
@@ -249,7 +246,7 @@ class Command(stack.commands.list.command,
 		# old arch,os test are part of this now are still supported
 		
 		nodesHash = {}
-		for node,cond in nodes:
+		for node, cond in nodes:
 			nodesHash[node.name] = node
 			if not stack.cond.EvalCondExpr(cond, attrs):
 				nodesHash[node.name] = None
@@ -259,23 +256,23 @@ class Command(stack.commands.list.command,
 		# generator type (e.g. 'kgen').
 
 		depsHash = {}
-		for node,gen in deps:
+		for node, gen in deps:
 			depsHash[node.name] = node
 			if gen not in [ None, generator ]:
 				depsHash[node.name] = None
 
-		for dep,gen in deps:
+		for dep, gen in deps:
 			if not nodesHash.get(dep.name):
 				depsHash[dep.name] = None
 
-		for node,cond in nodes:
+		for node, cond in nodes:
 			if node.name in depsHash:
 				nodesHash[node.name] = None
 
 		list = []
-		for dep,gen in deps:
+		for dep, gen in deps:
 			if dep.name == 'TAIL':
-				for node,cond in nodes:
+				for node, cond in nodes:
 					list.append(nodesHash[node.
 							      name])
 			else:
@@ -284,7 +281,7 @@ class Command(stack.commands.list.command,
 		# if there was not a 'TAIL' tag, then add the
 		# the nodes to the list here
 
-		for node,cond in nodes:
+		for node, cond in nodes:
 			if nodesHash[node.name] not in list:
 				list.append(nodesHash[node.name])
 

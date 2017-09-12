@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgError, ParamValue
+
 
 class Command(stack.commands.remove.command,
 		stack.commands.OSArgumentProcessor,

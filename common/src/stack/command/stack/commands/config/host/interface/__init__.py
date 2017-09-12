@@ -10,10 +10,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import re
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique
+
 
 class Command(stack.commands.config.host.command):
 	"""
@@ -105,7 +104,7 @@ class Command(stack.commands.config.host.command):
 			
 			discovered_macs.append(a)
 
-		pre_config=self.command('list.host.interface',[host])
+		pre_config = self.command('list.host.interface', [host])
 		#
 		# First, assign the correct names to the mac addresses
 		#
@@ -136,7 +135,7 @@ class Command(stack.commands.config.host.command):
 					[host, 'interface=%s' % interface, 'module=%s' % module])
 
 
-		post_config=self.command('list.host.interface',[host])
+		post_config = self.command('list.host.interface', [host])
 
 		if pre_config != post_config:
 			self.command('sync.config')	

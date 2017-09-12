@@ -16,6 +16,7 @@ import subprocess
 import stack.commands
 import stack.gen
 
+
 class Command(stack.commands.report.command):
 	"""
 	Take STDIN XML input and create a shell script that can be executed

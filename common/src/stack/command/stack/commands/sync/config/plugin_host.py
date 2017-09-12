@@ -4,9 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
-import sys
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 	"Writes /etc/hosts"

@@ -7,7 +7,7 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+
 
 class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
 
@@ -25,11 +25,11 @@ class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
 					setlist.append(k)
 		return setlist
 
-	def returnDiffs(self,network):
-		for k,v in self.networks[network].iteritems():
+	def returnDiffs(self, network):
+		for k, v in self.networks[network].iteritems():
 			self.networks[network][k] = str(v or '')
 
-		for k,v in self.current_networks[network].iteritems():
+		for k, v in self.current_networks[network].iteritems():
 			self.current_networks[network][k] = str(v or '')
 		a = set(self.current_networks[network].items())
 		b = set(self.networks[network].items())
@@ -37,20 +37,19 @@ class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
 		return c
 
 	def run(self, args):
-		self.networks,self.current_networks = args
+		self.networks, self.current_networks = args
 		netsforset = self.removeNetwork(self.networks)
 		for network in self.networks:
 			if network in netsforset:
 				# get the diffs between what is and what is to be
 				diffs = self.returnDiffs(network)
 				for diff in diffs:
-					setnetargs = [network, str('%s=%s' \
-							% (diff[0], diff[1]))]
+					setnetargs = [network, str('%s=%s' % (diff[0], diff[1]))]
 					self.owner.call('set.network.%s' % 
 							diff[0], setnetargs)
 
 			else:
 				addnetargs = [network]
-				for k,v in self.networks[network].items():
-					addnetargs.append("%s=%s" % (k,v))
+				for k, v in self.networks[network].items():
+					addnetargs.append("%s=%s" % (k, v))
 				self.owner.call('add.network', addnetargs)

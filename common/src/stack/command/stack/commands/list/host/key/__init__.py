@@ -19,6 +19,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.host.command):
 	"""
 	List the public keys for hosts.
@@ -33,7 +34,7 @@ class Command(stack.commands.list.host.command):
 		self.beginOutput()
 
 		for host in self.getHostnames(args):
-			rows = self.db.execute("""select id, public_key from
+			self.db.execute("""select id, public_key from
 				public_keys where node = (select id from
 				nodes where name = '%s') """ % host)
 		
@@ -47,5 +48,5 @@ class Command(stack.commands.list.host.command):
 					i += 1
 
 		self.endOutput(header=['host', 'id', 'public key'],
-			trimOwner = 0)
+			trimOwner=False)
 

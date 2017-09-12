@@ -4,10 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import sys
-import socket
-import string
 import stack.commands
+
 
 class Command(stack.commands.report.host.command):
 	"""
@@ -30,8 +28,8 @@ class Command(stack.commands.report.host.command):
 		# The default search path should always have the
 		# hosts default network first in the list, after
 		# that go by whatever ordering list.network returns.
-		for intf in self.call('list.host.interface',[host,'expanded=True']):
-			if intf['default'] == True and intf['zone']:
+		for intf in self.call('list.host.interface', [host, 'expanded=True']):
+			if intf['default'] is True and intf['zone']:
 				search.append(intf['zone'])
 
 		for zone in zones.values():
@@ -62,7 +60,7 @@ class Command(stack.commands.report.host.command):
 			network = row['network']
 			if network in dns and dns[network]:
 				frontend = self.getHostAttr(host, 'Kickstart_PrivateAddress')
-				for intf in self.call('list.host.interface',['localhost']):
+				for intf in self.call('list.host.interface', ['localhost']):
 					if intf['network'] == network:
 						frontend = intf['ip']
 				self.addOutput(host, 'nameserver %s' % frontend)

@@ -15,13 +15,13 @@
 
 import os
 import types
-import string
 import stack.file
-import xml.sax
+
 
 class DistError(Exception):
 	pass
 	
+
 class DistRPMList(DistError):
 	def __init__(self, list):
 		Exception.__init__(self, list)

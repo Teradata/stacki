@@ -6,6 +6,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.appliance.command):
 	"""
 	Lists the set of attributes for appliances.

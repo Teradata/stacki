@@ -7,6 +7,7 @@
 import os
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
 	"Include compiled salt templates into profile"
 

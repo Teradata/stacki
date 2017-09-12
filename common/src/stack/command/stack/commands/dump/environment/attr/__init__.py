@@ -8,6 +8,7 @@
 import stack.attr
 import stack.commands
 
+
 class Command(stack.commands.dump.environment.command):
 	"""
 	Dump the set of attributes for the Environment

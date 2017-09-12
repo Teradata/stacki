@@ -10,10 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
 import stack
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique, CommandError
+
 
 class Command(stack.commands.BoxArgumentProcessor,
 	stack.commands.add.command):

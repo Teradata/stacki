@@ -7,6 +7,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.os.command):
 	"""
 	Adds an attribute to an os and sets the associated values 

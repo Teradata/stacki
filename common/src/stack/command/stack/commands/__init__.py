@@ -18,26 +18,26 @@ import re
 import fnmatch
 import syslog
 import pwd
-import types
 import sys
 import json
 import marshal
 import hashlib
 import subprocess
-from functools import partial
-import stack
-from stack.cond import EvalCondExpr
-from stack.attr import *
-import stack.graph
-from stack.exception import *
-from stack.bool import *
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
+from functools import partial
+
+import stack.graph
+import stack
+from stack.cond import EvalCondExpr
+from stack.exception import CommandError, ParamRequired
+from stack.bool import str2bool, bool2str
 
 _logPrefix = ''
 _debug     = False
+
 
 
 def Log(message, level=syslog.LOG_INFO):
@@ -169,7 +169,7 @@ class BoxArgumentProcessor:
 
 		return list
 
-	def getBoxPallets(self, box = 'default'):
+	def getBoxPallets(self, box='default'):
 		"""Returns a list of pallets for a box"""
 
 		#
@@ -232,6 +232,7 @@ class NetworkArgumentProcessor:
 
 		return netname
 	
+
 class CartArgumentProcessor:
 	"""An Interface class to add the ability to process cart arguments."""
 
@@ -389,7 +390,7 @@ class HostArgumentProcessor:
 			if names:
 				hostDict[host] = None
 			else:
-				hostDict[host] = self.db.getNodeName(host,
+				hostDict[host] = self.db.getNodeName(host, 
 								     subnet)
 				
 
@@ -455,7 +456,7 @@ class HostArgumentProcessor:
 					if res:
 						s = self.db.getHostname(host, subnet)
 						hostDict[host] = s
-						if not host in explicit:
+						if host not in explicit:
 							explicit[host] = False
 #					Debug('group %s is %s for %s' %
 #				      (exp, res, host))
@@ -466,7 +467,7 @@ class HostArgumentProcessor:
 				for host in fnmatch.filter(hostList, name):
 					s = self.db.getHostname(host, subnet)
 					hostDict[host] = s
-					if not host in explicit:
+					if host not in explicit:
 						explicit[host] = False
 					
 
@@ -931,7 +932,7 @@ class DocStringHandler(handler.ContentHandler,
 			s = s + '### Related\n'
 			for related in self.section['related']:
 				r = '-'.join(related.split()).strip()
-				s += '[%s](%s)\n\n' % (related,r)
+				s += '[%s](%s)\n\n' % (related, r)
 
 		s = s + '\n'
 		return s
@@ -1070,7 +1071,7 @@ class DatabaseConnection:
 			t0 = time.time()
 			result = self.link.execute(command)
 			t1 = time.time()
-			Debug('SQL EX: %.3f %s' % ((t1-t0), command))
+			Debug('SQL EX: %.3f %s' % ((t1 - t0), command))
 			return result
 		
 		return None
@@ -1096,7 +1097,7 @@ class DatabaseConnection:
 		Return the OS name for the given host.
 		"""
 
-		for (name, os) in self.select(
+		for (name, osname) in self.select(
 				"""
 				n.name, o.name from
 				boxes b, nodes n, oses o
@@ -1104,7 +1105,7 @@ class DatabaseConnection:
 				b.os = o.id
 				"""):
 			if name == host:
-				return os
+				return osname
 		return None
 
 	def getHostAppliance(self, host):
@@ -1350,7 +1351,7 @@ class DatabaseConnection:
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\
 						'nt.node=n.id and '		+\
-						's.zone="%s" and ' % (domain)+	 \
+						's.zone="%s" and ' % domain     +\
 						'(nt.name="%s" or n.name="%s")'	 \
 						% (name, name)
 
@@ -1541,7 +1542,7 @@ class Command:
 			'reset': { 'tput': 'sgr0', 'code': '' },
 			'beginline': { 'tput': 'smul', 'code': ''},
 			'endline': { 'tput': 'rmul', 'code': ''}
-			}
+		}
 		if sys.stdout.isatty() and False:
 			# TODO(p3) - figure out why we aren't capturing the tput code
 			# correctly.  We get data but not the full escape seq
@@ -1634,7 +1635,7 @@ class Command:
 
 
 	def notify(self, message):
-#		 print self.level
+		#print(self.level)
 		if self.notifications:
 			sys.stderr.write('%s%s' % (_logPrefix, message))
 
@@ -1644,7 +1645,7 @@ class Command:
 		Returns and output string."""
 
 		modpath = 'stack.commands.%s' % command
-#		print('+ ', command)
+		#print('+ ', command)
 		__import__(modpath)
 		mod = eval(modpath)
 
@@ -1659,7 +1660,7 @@ class Command:
 		# the return code.  The actual text is what we return.
 
 		self.rc = o.runWrapper(name, args, self.level + 1)
-#		print ('- ', command)
+		#print ('- ', command)
 		return o.getText()
 
 
@@ -1739,7 +1740,7 @@ class Command:
 		for plugin in plugins:
 			Log('run %s' % plugin)
 			retval = plugin.run(args)
-			if not retval == None:
+			if retval is not None:
 				results.append((plugin.provides(), retval))
 		return results
 
@@ -1768,7 +1769,7 @@ class Command:
 			module = eval(module)
 			try:
 				o = getattr(module, 'Implementation')(self)
-				n = re.sub('^imp_','', base)
+				n = re.sub('^imp_', '', base)
 				self.impl_list[n] = o
 			except AttributeError:
 				continue
@@ -1777,7 +1778,7 @@ class Command:
 		# Check to see if implementation list
 		# has named implementation. If not, try
 		# to load named implementation
-		if not name in self.impl_list:
+		if name not in self.impl_list:
 			self.loadImplementation(name)
 
 		# If the named implementation was loaded,
@@ -1837,7 +1838,7 @@ class Command:
 	def addText(self, s):
 		"""Append a string to the output text buffer."""
 		if s:
-			if type(s) == type(''):
+			if isinstance(s, str):
 				self.text += s
 			else:
 				self.bytes += s
@@ -1859,17 +1860,17 @@ class Command:
 
 		# VALS can be a list, tuple, or primitive type.
 
-		list = ['%s' % owner]
-		
-		if type(vals) == type([]):
-			list.extend(vals)
-		elif type(vals) == type(()):
-			for e in vals:
-				list.append(e)
-		else:
-			list.append(vals)
+		out = ['%s' % owner]
 
-		self.output.append(list)
+		if isinstance(vals, type([])):
+			out.extend(vals)
+		elif isinstance(vals, tuple):
+			for e in vals:
+				out.append(e)
+		else:
+			out.append(vals)
+
+		self.output.append(out)
 		
 		
 	def endOutput(self, header=[], padChar='-', trimOwner=False):
@@ -1920,7 +1921,7 @@ class Command:
 						key = header[i]
 						val = line[i]
 						if key in dict:
-							if not type(dict[key]) ==types.ListType:
+							if not isinstance(dict[key], list):
 								dict[key] = [dict[key]]
 							dict[key].append(val)
 						else:
@@ -1939,8 +1940,8 @@ class Command:
 						n = '%d_' % i
 					else:
 						n = ''
-					for k,v in list[i].items():
-						self.addText('stack_%s%s="%s"\n' % (n,k,v))
+					for k, v in list[i].items():
+						self.addText('stack_%s%s="%s"\n' % (n, k, v))
 					self.addText('\n')
 			elif format == 'python':
 				self.addText('%s' % list)
@@ -1997,8 +1998,8 @@ class Command:
 			for i in range(0, len(line)):
 				if len(colwidth) <= i:
 					colwidth.append(0)
-				if type(line[i]) != type(''):
-					if line[i] == None:
+				if not isinstance(line[i], str):
+					if line[i] is None:
 						itemlen = 0
 					else:
 						itemlen = len(repr(line[i]))
@@ -2012,8 +2013,8 @@ class Command:
 		# If we know the output is too long for the terminal
 		# switch from table view to a field view that will
 		# display nicer (e.g. stack list os boot).
- 
-		if self.width and header and startOfLine == 0 and (sum(colwidth)+len(line)) > self.width:
+
+		if self.width and header and startOfLine == 0 and (sum(colwidth) + len(line)) > self.width:
 			maxWidth = 0
 			for label in output[0]:
 				n = len(label)
@@ -2026,10 +2027,10 @@ class Command:
 					else:
 						s = str(line[i])
 					if s:
-						self.addText('%s%s%s %s\n' % (self.colors['bold']['code'],
-									      output[0][i].ljust(maxWidth),
-									      self.colors['reset']['code'],
-									      s))
+						self.addText('%s%s%s %s\n' % (
+							self.colors['bold']['code'],
+							output[0][i].ljust(maxWidth),
+							self.colors['reset']['code'], s))
 				self.addText('\n')
 			return
 
@@ -2047,7 +2048,7 @@ class Command:
 				else:
 					s = str(line[i])
 
-				if padChar != '' and i != len(line)-1:
+				if padChar != '' and i != len(line) - 1:
 					if s:
 						o = s.ljust(colwidth[i])
 					else:
@@ -2128,9 +2129,9 @@ class Command:
 			# supplemental list.
 			groups.append(gid)
 
-		rows =	self.db.select('command, groupid from access')
+		rows = self.db.select('command, groupid from access')
 		if rows:
-			for c,g in rows:
+			for c, g in rows:
 				if g in groups:
 					if fnmatch.filter([name], c):
 						allowed = True
@@ -2197,7 +2198,7 @@ class Command:
 			if not arg:
 				continue
 
-			if   arg[0] == '[' and arg[-1] != ']':
+			if arg[0] == '[' and arg[-1] != ']':
 				s += '%s' % arg
 				n += 1
 				if n == 1:
@@ -2227,7 +2228,7 @@ class Command:
 #				list.append(arg)
 			if arg.find('where') == 0:
 				list.append(arg)
-			elif len(arg.split('=',1)) == 2:
+			elif len(arg.split('=', 1)) == 2:
 				(key, val) = arg.split('=', 1)
 				dict[key] = val
 			else:
@@ -2237,8 +2238,9 @@ class Command:
 			self.help(name, dict)
 		else:
 			if not self.hasAccess(name):
-				raise CommandError(self, 'user "%s" does not have access "%s"' %
-				      (username, name))
+				raise CommandError(self, 
+						   'user "%s" does not have access "%s"' % 
+						   (username, name))
 			else:
 				self._argv   = argv # raw arg list
 				self._args   = list # required arguments
@@ -2329,7 +2331,7 @@ class PluginOrderIterator(stack.graph.GraphIterator):
 		stack.graph.GraphIterator.run(self)
 		list = []
 		self.nodes.sort()
-		for time, node in self.nodes:
+		for tm, node in self.nodes:
 			list.append(node)
 		list.reverse()
 		return list

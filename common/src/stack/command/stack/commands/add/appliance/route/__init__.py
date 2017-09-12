@@ -12,7 +12,8 @@
 
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired, CommandError
+
 
 class Command(stack.commands.add.appliance.command):
 	"""

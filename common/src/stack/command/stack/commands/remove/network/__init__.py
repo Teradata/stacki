@@ -10,13 +10,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, CommandError
+
 
 class Command(stack.commands.NetworkArgumentProcessor,
 	stack.commands.remove.command):

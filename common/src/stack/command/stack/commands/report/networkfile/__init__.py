@@ -2,7 +2,6 @@
 # @SI_COPYRIGHT@
 
 import stack.commands
-import string
 import csv
 from io import StringIO
 

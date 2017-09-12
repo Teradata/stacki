@@ -17,6 +17,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.dump.host.command):
 	"""
 	"""

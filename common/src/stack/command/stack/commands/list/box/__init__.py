@@ -10,12 +10,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
 import stack.commands
+
 
 class command(stack.commands.list.command,
 	      stack.commands.BoxArgumentProcessor):
 	pass
+
 
 class Command(command):
 	"""
@@ -40,14 +41,14 @@ class Command(command):
 				if rel:
 					fullname += '-%s' % rel
 
-				if not box in pallets:
+				if box not in pallets:
 					pallets[box] = []
 				pallets[box].append(fullname)
 			
 		for row in self.call('list.cart'):
 			if row['boxes']:
 				for box in row['boxes'].split():
-					if not box in carts:
+					if box not in carts:
 						carts[box] = []
 					carts[box].append(row['name'])
 
@@ -58,10 +59,10 @@ class Command(command):
 				boxes b, oses o where b.name='%s'
 				and b.os=o.id""" % box)[0]
 
-			if not box in carts:
+			if box not in carts:
 				carts[box] = []
 
-			if not box in pallets:
+			if box not in pallets:
 				pallets[box] = []
 
 			self.addOutput(box, (os, ' '.join(pallets[box]),

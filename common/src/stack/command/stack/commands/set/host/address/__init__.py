@@ -10,15 +10,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 #
-# $Log:$
-#
 
-from __future__ import print_function
+
 import os.path
 import getpass
 import crypt
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique, CommandError
 
 
 class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
@@ -163,7 +161,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		# inform the user what they are about to do
 		#
 		print('')
-		print('You are about to apply new networking values' + \
+		print('You are about to apply new networking values' + 
 			' to your frontend:')
 
 		if oldip != ip:
@@ -215,7 +213,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		#
 		# update the name in the nodes and networks tables first
 		#
-		print('Updating host name and network interface values ' + \
+		print('Updating host name and network interface values ' + 
 			'in the database')
 
 		self.command('set.host.name', [ oldhost, shortname ])
@@ -336,7 +334,7 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		print('')
 		print('Update complete')
 		print('')
-		print('You must reboot your frontend now. When ' + \
+		print('You must reboot your frontend now. When ' + 
 			'the frontend reboots, ')
 		print('remember to reinstall the compute nodes.')
 		print('')

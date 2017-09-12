@@ -4,14 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from __future__ import print_function
 import re
 import os
 import os.path
-import sys
 import shutil
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
 
 
 class Command(stack.commands.load.command,

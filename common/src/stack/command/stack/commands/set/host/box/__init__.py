@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired
+
 
 class Command(stack.commands.set.host.command,
 	      stack.commands.BoxArgumentProcessor):

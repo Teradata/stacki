@@ -6,6 +6,7 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):

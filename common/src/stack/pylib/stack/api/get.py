@@ -8,6 +8,7 @@ import os
 import configparser
 import stack.api
 
+
 def GetHostname(host='localhost'):
 	"""
 	Takes the name, ip, or mac of any network interface of the

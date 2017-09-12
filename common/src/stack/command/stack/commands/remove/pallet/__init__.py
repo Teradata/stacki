@@ -16,12 +16,8 @@
 
 
 import os
-import stat
-import time
-import sys
-import string
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.RollArgumentProcessor,
@@ -69,7 +65,7 @@ class Command(stack.commands.RollArgumentProcessor,
 
 		(arch, OS) = self.fillParams([
 			('arch', '%'),
-			('os','%')
+			('os', '%')
 			])
 
 		if len(args) < 1:

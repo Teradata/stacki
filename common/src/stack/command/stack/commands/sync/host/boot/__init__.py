@@ -4,8 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import subprocess
 import stack.commands
+
 
 class Command(stack.commands.sync.host.command):
 

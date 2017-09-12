@@ -5,9 +5,9 @@
 # @SI_Copyright@
 
 import stack.commands
-import string
 import csv
 from io import StringIO
+
 
 class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	"""
@@ -16,7 +16,6 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	"""
 
 	def doHost(self, host):
-		row = []
 
 		name = host
 		interface_hostname = None

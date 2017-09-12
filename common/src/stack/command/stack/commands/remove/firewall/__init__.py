@@ -11,7 +11,8 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class command(stack.commands.remove.command):
 	def deleteRule(self, table, rulename, extrasql=None):
@@ -31,6 +32,7 @@ class command(stack.commands.remove.command):
 		if extrasql:
 			query = "%s and %s" % (query, extrasql)
 		self.db.execute(query)
+
 
 class Command(command):
 	"""

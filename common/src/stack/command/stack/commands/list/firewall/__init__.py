@@ -28,9 +28,11 @@
 
 import stack.commands
 
+
 class command(stack.commands.NetworkArgumentProcessor,
 	stack.commands.list.command):
 	pass
+
 
 class Command(command):
 	"""

@@ -6,8 +6,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from __future__ import absolute_import
 import csv
+
 
 class Iterator(object):
 

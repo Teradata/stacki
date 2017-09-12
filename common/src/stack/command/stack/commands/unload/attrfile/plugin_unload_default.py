@@ -7,6 +7,7 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
 
 	def provides(self):

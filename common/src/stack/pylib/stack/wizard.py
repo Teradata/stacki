@@ -1,5 +1,8 @@
 #! /opt/stack/bin/python
-from __future__ import print_function
+#
+# @SI_Copyright@
+# @SI_Copyright@
+
 import os
 import subprocess
 import traceback
@@ -7,11 +10,10 @@ import stack.sql
 import stack.password
 import stack.media
 import stack.file
-import sys
 import ipaddress
 import socket
+from xml.etree.ElementTree import Element, SubElement, ElementTree
 
-from xml.etree.ElementTree import Element, SubElement, ElementTree, tostring
 
 class Attr:
 	Info_CertificateCountry = "US"
@@ -50,6 +52,7 @@ class Attr:
 	partition = "Automated"
 	dvdrolls = None
 	netrolls = None
+
 
 class Data:
 
@@ -110,7 +113,7 @@ class Data:
 			'NETMASK=%s' % netmask
 		]
 		interfaceFile = '/etc/sysconfig/network-scripts/ifcfg-%s' % interface
-		f = open(interfaceFile,'w')
+		f = open(interfaceFile, 'w')
 		for line in lines:
 			f.write('%s\n' % line.strip())
 		f.close()
@@ -120,7 +123,7 @@ class Data:
 		if os.path.exists(ifDhcpFile):
 			os.remove(ifDhcpFile)
 		# Force network reconfiguration
-		cmd = ['/sbin/ifconfig', interface, addr, 'netmask',netmask]
+		cmd = ['/sbin/ifconfig', interface, addr, 'netmask', netmask]
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 		# Bring up network
 		cmd = ['/sbin/ifconfig', interface, 'up']
@@ -172,8 +175,7 @@ class Data:
 			a = line.split(":", 2)
 			d = a[1].strip()
 			m = a[2]
-			if not (d.find("virbr") > -1 or m.find("loopback") > -1 or \
-				m.find("noqueue") > -1):
+			if not (d.find("virbr") > -1 or m.find("loopback") > -1 or m.find("noqueue") > -1):
 				n1 = int(m.find("link/ether")) + 11
 				n2 = int(m.find("brd")) - 1
 				m = m[n1 : n2]
@@ -233,22 +235,21 @@ class Data:
 			dns = ""
 			for i in range(len(n)):
 				dns += n[i]
-				if i != len(n)-1:
+				if i != len(n) - 1:
 					dns += "."
 			self.data.Kickstart_PrivateDNSDomain = dns
 
 			#calculate public network interfaces
 			try:
-				ipnetwork = ipaddress.IPv4Network(unicode(
+				ipnetwork = ipaddress.IPv4Network(
 					self.data.Kickstart_PrivateAddress + '/' +
-					self.data.Kickstart_PrivateNetmask),
+					self.data.Kickstart_PrivateNetmask,
 					strict=False)
 				self.data.Kickstart_PrivateNetwork = str(ipnetwork.network_address)
 				self.data.Kickstart_PrivateBroadcast = str(ipnetwork.broadcast_address)
 				self.data.Kickstart_PrivateNetmaskCIDR = str(ipnetwork.prefixlen)
-				self.data.Kickstart_PrivateEthernet = \
-					self.data.devices[ \
-						self.data.Kickstart_PrivateInterface]
+				self.data.Kickstart_PrivateEthernet = self.data.devices[
+					self.data.Kickstart_PrivateInterface]
 				self.data.devices.pop(self.data.Kickstart_PrivateInterface)
 
 				if config_net:
@@ -335,10 +336,13 @@ class Data:
 
 		#write site.attrs
 		f = open('/tmp/site.attrs', 'w')
-		members = [attr for attr in dir(self.data) if not callable(attr) \
-			and not attr.startswith("__") and not attr == 'devices' and not \
-			attr == 'dvdrolls' and not attr == 'netrolls' and not \
-			attr == 'partition']
+		members = [attr for attr in dir(self.data) 
+			   if not callable(attr) and 
+			   not attr.startswith("__") and 
+			   not attr == 'devices' and 
+			   not attr == 'dvdrolls' and 
+			   not attr == 'netrolls' and
+			   not attr == 'partition']
 		for w in members:
 			v = getattr(self.data, w)
 			f.write(str(w) + ":" + str(v) + os.linesep)
@@ -349,23 +353,23 @@ class Data:
 		rolls = Element('rolls')
 		if self.data.dvdrolls:
 			for w in self.data.dvdrolls:
-				roll = SubElement(rolls, 'roll', \
-					name=w['name'], \
-					version=w['version'], \
-					release=w['release'], \
-					arch=self.arch, \
-					url='http://127.0.0.1/mnt/cdrom/', \
+				roll = SubElement(rolls, 'roll',
+					name=w['name'],
+					version=w['version'],
+					release=w['release'],
+					arch=self.arch,
+					url='http://127.0.0.1/mnt/cdrom/',
 					diskid=w['id'])
 
 		#write rolls from network
 		if self.data.netrolls:
 			for w in self.data.netrolls:
-				roll = SubElement(rolls, 'roll', \
-					name=w['name'], \
-					version=w['version'], \
-					release=w['release'], \
-					arch=self.arch, \
-					url=w['url'], \
+				roll = SubElement(rolls, 'roll',
+					name=w['name'],
+					version=w['version'],
+					release=w['release'],
+					arch=self.arch,
+					url=w['url'],
 					diskid='')
 
 		#write to file

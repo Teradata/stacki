@@ -11,9 +11,9 @@
 # @Copyright@
 
 
-import string
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class command(stack.commands.Command):
 	MustBeRoot = 0
@@ -24,11 +24,11 @@ class command(stack.commands.Command):
 		',', '.', '/'
 		]
 		
-	def quote(self, string):
+	def quote(self, str):
 		s = ''
 
-		if string != None:
-			for c in string:
+		if str is not None:
+			for c in str:
 				if c.isalnum() or c in self.safe_chars:
 					s += c
 				else:

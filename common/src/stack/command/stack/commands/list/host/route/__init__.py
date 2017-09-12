@@ -11,10 +11,8 @@
 # @Copyright@
 
 
-import sys
-import socket
 import stack.commands
-import string
+
 
 class Command(stack.commands.list.host.command):
 	"""

@@ -4,15 +4,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from __future__ import print_function
-import os
 import time
-import pytest
-from stack.api import *
+from stack.api import Call, ReturnCode
 
 NUMRACKS    = 1
 RACKSIZE    = 1
 ENVIRONMENT = 'pytest'
+
 
 def setup_module(module):
 	Call('add environment %s' % ENVIRONMENT)
@@ -37,11 +35,11 @@ def test_scale():
 	t0 = time.time()
 	Call('list host')
 	t1 = time.time()
-	print('list host (%.3fs)' % (t1-t0))
+	print('list host (%.3fs)' % (t1 - t0))
 	t0 = time.time()
 	Call('list host profile', [ 'backend-1000-0' ])
 	t1 = time.time()
-	print('list host profile (%.3fs)' % (t1-t0))
+	print('list host profile (%.3fs)' % (t1 - t0))
 	
 
 

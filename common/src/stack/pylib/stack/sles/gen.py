@@ -3,12 +3,8 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-import string
-import os
-import collections
-import xml.dom.minidom
-from stack.bool import str2bool
 import stack.gen
+
 
 class BashProfileTraversor(stack.gen.MainTraversor):
 

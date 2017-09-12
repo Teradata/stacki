@@ -11,13 +11,9 @@
 # @Copyright@
 
 
-import os
-import re
-import sys
-import string
-import socket
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError, ParamRequired, ArgUnique
+
 
 class command(stack.commands.HostArgumentProcessor,
 	      stack.commands.ApplianceArgumentProcessor,
@@ -26,6 +22,7 @@ class command(stack.commands.HostArgumentProcessor,
 	      stack.commands.add.command):
 	pass
 	
+
 class Command(command):
 	"""
 	Add an new host to the cluster.
@@ -118,15 +115,15 @@ class Command(command):
 				('rank', rank),
 				('box', 'default'),
 				('environment', ''),
-				('osaction','default'),
-				('installaction','default') ])
+				('osaction', 'default'),
+				('installaction', 'default') ])
 
 		if not longname and not appliance:
 			raise ParamRequired(self, ('longname', 'appliance'))
 
-		if rack == None:
+		if rack is None:
 			raise ParamRequired(self, 'rack')
-		if rank == None:
+		if rank is None:
 			raise ParamRequired(self, 'rank')
 
 		if longname and not appliance:
@@ -169,7 +166,7 @@ class Command(command):
 		if not ia:
 			(osname,) = self.db.select("name from oses where id=%d" % osid)[0]
 			raise CommandError(self, "Cannot find %s install action for OS %s" % 
-				(installaction, osname))
+					   (installaction, osname))
 		installaction_id = int(ia[0][0])
 
 		# Same logic as above. This time try to get bootaction where
@@ -186,7 +183,7 @@ class Command(command):
 		if not oa:
 			(osname,) = self.db.select("name from oses where id=%d" % osid)[0]
 			raise CommandError(self, "Cannot find %s os action for OS %s" % 
-				(osaction, osname))
+					   (osaction, osname))
 
 		osaction_id = int(oa[0][0])
 				

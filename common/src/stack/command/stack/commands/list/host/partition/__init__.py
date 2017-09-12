@@ -65,10 +65,8 @@
 #
 #
 
-import sys
-import socket
 import stack.commands
-import string
+
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -106,6 +104,6 @@ class Command(stack.commands.list.host.command):
 				self.addOutput(host, row)
 
 		self.endOutput(header=['host', 'device', 'mountpoint', 'uuid',
-			'start','size', 'id', 'type', 'flags', 'formatflags'])
+			'start', 'size', 'id', 'type', 'flags', 'formatflags'])
 
 

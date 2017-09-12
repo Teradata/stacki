@@ -11,8 +11,8 @@
 # @Copyright@
 
 import re
-import shlex
 import stack.commands
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -87,10 +87,8 @@ class Command(stack.commands.HostArgumentProcessor,
 			for opt in options:
 				if opt.startswith('bonding-opts='):
 					i = opt.find('=')
-					bo = opt[i+1:]
-					self.addOutput(host,
-						'BONDING_OPTS="%s"' \
-						% bo)
+					bo = opt[i + 1:]
+					self.addOutput(host, 'BONDING_OPTS="%s"' % bo)
 					break
 		#
 		# check if this is part of a bonded channel
@@ -167,7 +165,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		for opt in options:
 			if opt.startswith('mod-opts='):
 				i = opt.find('=')
-				modopts = opt[i+1:]
+				modopts = opt[i + 1:]
 				break
 		if modopts:
 			self.addOutput(host,
@@ -213,8 +211,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			vlanid = vlan
 		else:
 			vlanid = "off"
-		self.addOutput(host, "ipmitool lan set %s vlan id %s" % \
-			(channel, vlanid))
+		self.addOutput(host, "ipmitool lan set %s vlan id %s" % (channel, vlanid))
 
 		self.addOutput(host, 'ipmitool lan set %s access on'
 			% (channel))

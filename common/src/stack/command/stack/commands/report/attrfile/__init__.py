@@ -5,13 +5,12 @@
 # @SI_Copyright@
 #
 
-import os
-import sys
 import csv
 import re
 from io import StringIO
 import stack.commands
 import stack.attr
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):

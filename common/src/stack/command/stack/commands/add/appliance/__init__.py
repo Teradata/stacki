@@ -11,16 +11,14 @@
 # @Copyright@
 
 
-import os
-import stat
-import time
-import sys
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique, CommandError
+
 
 class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.add.command):
 	pass
+
 
 class Command(command):
 	"""
@@ -82,7 +80,7 @@ class Command(command):
 		self.db.execute("""
 			insert into appliances (name, longname, public) values
 			('%s', '%s', '%s')
-			""" %  (appliance, longname, public))
+			""" % (appliance, longname, public))
 
 		if not node:
 			kickstartable = False

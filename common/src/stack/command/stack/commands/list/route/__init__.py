@@ -4,10 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import sys
-import socket
 import stack.commands
-import string
+
 
 class Command(stack.commands.list.command):
 	"""
@@ -19,7 +17,7 @@ class Command(stack.commands.list.command):
 		
 		self.db.execute("""select network, netmask, gateway, subnet
 			from global_routes""")
-		for network,netmask,gateway,subnet in self.db.fetchall():
+		for network, netmask, gateway, subnet in self.db.fetchall():
 			if subnet:
 				rows = self.db.execute("""select name from
 					subnets where id = %s""" % subnet)

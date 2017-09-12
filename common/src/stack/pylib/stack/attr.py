@@ -18,7 +18,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
+
 
 def NormalizeAttr(attr):
 	"""Takes a fully-scoped attribute and returns a string

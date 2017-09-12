@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.report.command):
 	"""
 	Output the version of Stacki.

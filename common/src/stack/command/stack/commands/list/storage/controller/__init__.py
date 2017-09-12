@@ -7,7 +7,8 @@
 #
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgError, ParamValue
+
 
 class Command(stack.commands.list.command,
 		stack.commands.OSArgumentProcessor,
@@ -111,7 +112,7 @@ class Command(stack.commands.list.command,
 		name = None
 		if scope == 'global':
 			name = 'global'
-		elif scope in [ 'appliance', 'host'] :
+		elif scope in [ 'appliance', 'host']:
 			name = args[0]
 
 		self.beginOutput()
@@ -145,5 +146,5 @@ class Command(stack.commands.list.command,
 			i += 1
 
 		self.endOutput(header=['scope', 'enclosure', 'adapter', 'slot', 
-			'raidlevel', 'arrayid', 'options' ], trimOwner = 0)
+			'raidlevel', 'arrayid', 'options' ], trimOwner=False)
 

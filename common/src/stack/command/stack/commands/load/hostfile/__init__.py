@@ -14,7 +14,8 @@ import sys
 import shutil
 import os.path
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired, CommandError
+
 
 class Command(stack.commands.load.command):
 	"""
@@ -92,8 +93,7 @@ class Command(stack.commands.load.command):
 		# to 'sheetsfile'.
 		#
 		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not \
-				os.path.samefile(filename, sheetsfile):
+		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
 			shutil.copyfile(filename, '%s' % sheetsfile)
 
 		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile

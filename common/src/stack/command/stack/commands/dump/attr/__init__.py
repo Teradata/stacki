@@ -14,6 +14,7 @@
 import stack.attr
 import stack.commands
 
+
 class Command(stack.commands.dump.command):
 	"""
 	Dump the set of attributes

@@ -6,6 +6,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.host.command):
 	"""
 	Adds an attribute to a host and sets the associated values 

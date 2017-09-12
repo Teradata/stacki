@@ -19,6 +19,7 @@
 
 import stack.commands
 
+
 class command(stack.commands.OSArgumentProcessor,
 	stack.commands.dump.command):
 	pass

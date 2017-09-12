@@ -14,6 +14,8 @@ import os
 import sys
 import stack
 import stack.commands
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.Implementation):
 	"""

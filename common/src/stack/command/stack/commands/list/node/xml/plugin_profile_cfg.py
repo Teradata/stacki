@@ -4,8 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 	"Creates /opt/stack/etc/profile.cfg"

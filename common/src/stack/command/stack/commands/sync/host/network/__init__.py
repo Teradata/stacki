@@ -11,10 +11,10 @@
 # @Copyright@
 
 import os
-import time
 import stack.commands
 from stack.commands.sync.host import Parallel
 from stack.commands.sync.host import timeout
+
 
 class Command(stack.commands.sync.host.command):
 	"""

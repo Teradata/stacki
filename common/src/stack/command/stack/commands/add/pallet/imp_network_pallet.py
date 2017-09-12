@@ -14,7 +14,8 @@ import sys
 import os
 from urllib.parse import urlparse
 import stack.file
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.Implementation):
 	"""
@@ -32,12 +33,12 @@ class Implementation(stack.commands.Implementation):
 		os.chdir(tempdir)
 		wget_cmd = ['wget', '-nv',
 			'-r', # recursive download
-			'-l','1', # 1st level directory
+			'-l', '1', # 1st level directory
 			'-nd',	# Don't create directories
 			'-np',	# Don't create parent directories
-			'-A','roll-*.xml', # Only download roll-*.xml files
+			'-A', 'roll-*.xml', # Only download roll-*.xml files
 			loc]
-		print (' '.join(wget_cmd))
+		print(' '.join(wget_cmd))
 		s = subprocess.Popen(wget_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		rc = s.wait()
 		o, e = s.communicate()
@@ -78,10 +79,10 @@ class Implementation(stack.commands.Implementation):
 			'-m', # mirror
 			'--cut-dirs=%d' % cut_dirs, 
 			'--reject=TBL,index.html*',
-			'-P',destdir, # directory to save files to
+			'-P', destdir, # directory to save files to
 			norm_loc ]
 
-		print (' '.join(wget_cmd))
+		print(' '.join(wget_cmd))
 
 		s = subprocess.Popen(wget_cmd, stdout=sys.stdout, stderr=sys.stdout)
 		rc = s.wait()

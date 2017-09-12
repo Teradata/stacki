@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import sys
 import stack.commands
 import stack.util
+
 
 class Command(stack.commands.sync.host.command,
 	stack.commands.HostArgumentProcessor):

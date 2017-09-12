@@ -4,11 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import pytest
 import random
-import stack
-from stack.bool import *
-from stack.api import *
+from stack.api import Call, ReturnCode
 
 HOST	    = 'backend-1000-0'
 ENVIRONMENT = 'pytest'
@@ -19,6 +16,7 @@ def setup_module(module):
 	Call('add environment %s' % ENVIRONMENT)
 	Call('set host environment %s environment=%s' % (HOST, ENVIRONMENT))
 	Call('set environment attr %s attr=key value=value' % ENVIRONMENT)
+
 
 def teardown_module(module):
 	Call('remove host %s' % ENVIRONMENT)
@@ -61,12 +59,15 @@ def test_attr(table=None, owner=None):
 def test_os_attr():
 	test_attr('os', 'redhat')
 
+
 def test_environment_attr():
 	test_attr('environment', ENVIRONMENT)
 	
+
 def test_appliance_attr():
 	test_attr('appliance', 'backend')
 	test_attr('appliance', 'frontend')
+
 
 def test_host_attr():
 	test_attr('host', HOST)

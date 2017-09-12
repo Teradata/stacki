@@ -24,9 +24,8 @@
 
 import stack.commands
 import stack.commands.set.bootaction
-from stack.exception import *
+from stack.exception import CommandError
 
-import sys
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.set.bootaction.command,

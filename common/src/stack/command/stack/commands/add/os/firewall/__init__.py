@@ -14,6 +14,7 @@ import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
 
+
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.os.command):
 

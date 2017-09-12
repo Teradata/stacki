@@ -13,6 +13,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.host.command):
 	"""
 	Remove an alias from a host(s).

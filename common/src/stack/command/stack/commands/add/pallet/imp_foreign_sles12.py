@@ -6,6 +6,8 @@ import os
 import shlex
 import subprocess
 import stack.commands
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.Implementation):	
 	"""
@@ -100,7 +102,7 @@ class Implementation(stack.commands.Implementation):
 		# Copy pallet patches into the respective pallet
 		# directory
 		#
-		print ('Patching %s pallet' % self.name)
+		print('Patching %s pallet' % self.name)
 		patch_dir = '/opt/stack/%s-pallet-patches/%s' % \
 			(self.name, self.vers)
 		cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)

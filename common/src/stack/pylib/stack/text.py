@@ -6,6 +6,7 @@
 
 import time
 
+
 def DoNotEdit(prefix='# '):
 	"""Return standard warning to generated files"""
 

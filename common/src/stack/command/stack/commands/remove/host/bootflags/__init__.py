@@ -10,10 +10,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import sys
-import string
 import stack.commands
-import os
+
 
 class Command(stack.commands.remove.host.command):
 	"""

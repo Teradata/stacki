@@ -10,18 +10,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
 import os.path
-import stat
 import time
-import sys
-import string
 import subprocess
 import shlex
 import stack
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError, ParamRequired
 
 
 class Command(stack.commands.create.command):
@@ -120,23 +116,23 @@ class Command(stack.commands.create.command):
 		if scheme:
 			cmd = 'wget -erobots=off --reject "*.drpm" --reject "anaconda*rpm" '
 			cmd += ' --mirror --no-verbose --no-parent %s' % (scheme + '://' + url)
-			proc = subprocess.Popen(shlex.split(cmd), stdin = None,
-				stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			o, e = proc.communicate()
 
 		# finally, symlink the directory to RPM's
 		os.symlink(url, 'RPMS')
 
-	def repoquery(self,repoid, repoconfig):
+	def repoquery(self, repoid, repoconfig):
 		cmd = 'repoquery -qa --repoid=%s' % repoid
 
 		if repoconfig:
 			cmd = cmd + ' --config=%s' % repoconfig
 
-		proc = subprocess.Popen(shlex.split(cmd), stdin = None,
-			stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-		o,e = proc.communicate()
-		return o,e
+		proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		o, e = proc.communicate()
+		return o, e
 
 	def reposync(self, repoid, repoconfig, newest, urlonly):
 		cmd = 'reposync --norepopath -r %s -p %s' % (repoid, repoid)
@@ -144,21 +140,21 @@ class Command(stack.commands.create.command):
 		if repoconfig:
 			cmd += ' -c %s' % repoconfig
 
-		if self.str2bool(newest) == True:
+		if self.str2bool(newest) is True:
 			cmd += ' -n'
 
-		if self.str2bool(urlonly) == True:
+		if self.str2bool(urlonly) is True:
 			cmd += ' -u'
-			proc = subprocess.Popen(shlex.split(cmd), stdin = None,
-				stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-			o,e = proc.communicate()
-			return o,e
+			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			o, e = proc.communicate()
+			return o, e
 		else:
-			proc = subprocess.Popen(shlex.split(cmd), stdin = None,
-				stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			o, e = proc.communicate()
 
-		if repoid and (self.str2bool(urlonly) == False):
+		if repoid and (self.str2bool(urlonly) is False):
 			cwd = os.getcwd()
 			os.chdir(repoid)
 			# Check if RPMS dir already exists
@@ -223,7 +219,7 @@ class Command(stack.commands.create.command):
 		# following code.
 		urlstatus = self.str2bool(urlonly)
 
-		if name == None:
+		if name is None:
 			if repoid:
 				name = repoid
 			else:
@@ -233,7 +229,7 @@ class Command(stack.commands.create.command):
 			raise ParamRequired(self, ('url', 'repoid'))
 
 		# Query the repo to see if it exists and we can get to it.
-		rpms,repoerr = self.repoquery(repoid, repoconfig)
+		rpms, repoerr = self.repoquery(repoid, repoconfig)
 		if repoerr and rpms == 'None' and not url:
 			msg =  "I do not think this repoid "
 			msg += "means what you think "
@@ -243,14 +239,14 @@ class Command(stack.commands.create.command):
 			raise CommandError(self, msg)
 
 		# If urlonly, just print what will be downloaded.
-		if urlstatus  == True:
-			rpms, err = self.reposync(repoid,repoconfig,newest,urlonly)
+		if urlstatus is True:
+			rpms, err = self.reposync(repoid, repoconfig, newest, urlonly)
 			print(rpms)
 			os.system('rm -fr %s' % repoid)
 
 		cwd = os.getcwd()
 
-		if repoid and (urlstatus == False):
+		if repoid and (urlstatus is False):
 			if not os.path.exists(repoid):
 				os.makedirs(repoid)	
 			os.chdir(repoid)
@@ -261,10 +257,10 @@ class Command(stack.commands.create.command):
 		
 		if url:
 			self.mirror(url)
-		elif repoid and urlstatus == False:
+		elif repoid and urlstatus is False:
 			self.reposync(repoid, repoconfig, newest, urlonly)
 
-		if repoid and (urlstatus == False):
+		if repoid and (urlstatus is False):
 			os.chdir(repoid)
 
 		if urlstatus:
@@ -276,5 +272,5 @@ class Command(stack.commands.create.command):
 		
 		self.clean()
 
-		if repoid and (urlstatus == False):
+		if repoid and (urlstatus is False):
 			os.chdir(cwd)

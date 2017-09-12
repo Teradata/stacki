@@ -13,7 +13,8 @@
 
 import string
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired
+
 
 class Command(stack.commands.set.host.command):
 	"""

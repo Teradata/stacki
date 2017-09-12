@@ -12,7 +12,6 @@
 
 
 import os
-import sys
 import string
 import stack.file
 import stack.commands
@@ -44,7 +43,7 @@ class Command(stack.commands.sync.command):
 		mask = 32
 		Net = string.split(net, ".")
 		for i in Net:
-			for j in range(0,8):
+			for j in range(0, 8):
 				if int(i) & 2**j:
 					break
 				mask -= 1
@@ -63,7 +62,7 @@ class Command(stack.commands.sync.command):
 		for i in w:
 			work.append(int(i))
 
-		for i in range(0,4):
+		for i in range(0, 4):
 			if netmask < 8:
 				break
 			else:
@@ -83,13 +82,13 @@ class Command(stack.commands.sync.command):
 
 			list = [ subnet ]
 		else:
-			for i in range(0, 2**(8-netmask)):
+			for i in range(0, 2**(8 - netmask)):
 				work[octet_index] = octet_value + i
 				if work[octet_index] > 254:
 					break
 
 				subnet = []
-				for j in range(0, octet_index+1):
+				for j in range(0, octet_index + 1):
 					subnet.append('%d' % (work[j]))
 
 				if list == []:

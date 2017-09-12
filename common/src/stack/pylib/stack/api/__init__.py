@@ -4,13 +4,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import string
 import subprocess
 import json
 
 __stack__ = '/opt/stack/bin/stack'
 
 rc = None
+
 
 def ReturnCode():
 	"""

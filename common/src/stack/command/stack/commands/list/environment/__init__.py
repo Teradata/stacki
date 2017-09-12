@@ -6,9 +6,11 @@
 
 import stack.commands
 
+
 class command(stack.commands.EnvironmentArgumentProcessor,
 	stack.commands.list.command):
 	pass
+
 
 class Command(command):
 	"""

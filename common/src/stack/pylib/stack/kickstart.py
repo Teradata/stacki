@@ -105,9 +105,7 @@
 #
 #
 
-from __future__ import print_function
 import os
-import sys
 import stack.sql
 import stack.dist
 from stack.dist import DistError

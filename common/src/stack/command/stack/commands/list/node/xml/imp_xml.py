@@ -7,6 +7,7 @@
 from xml.sax import make_parser
 import stack.commands
 
+
 class Implementation(stack.commands.Implementation):
 
 	def __init__(self, command):

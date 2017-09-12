@@ -12,16 +12,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
 import collections
-import types
-import sys
-import tempfile
 import os
-import time
 from xml.sax import handler
 import xml.dom.minidom
-from stack.bool import *
+from stack.bool import str2bool
 import stack.cond
 
 
@@ -36,6 +31,7 @@ class ProfileSnippet:
 
 	def getSource(self):
 		return self.source
+
 
 class ProfileSection:
 
@@ -106,7 +102,7 @@ class PackageSet:
 				d = dict['enabled']
 			else:
 				d = dict['disabled']
-			if not source in d:
+			if source not in d:
 				d[source] = []
 			d[source].append(package)
 		
@@ -146,13 +142,12 @@ class ParsingTools:
 				l.append(fn(child))
 
 		return ''.join(l)
-
-
 	
 
 ## -----------------------------------------------------------------------------
 ## Traversors
 ## -----------------------------------------------------------------------------
+
 
 class Traversor(ParsingTools):
 
@@ -250,7 +245,7 @@ class SetupTraversor(Traversor):
 			attrs = node.attributes.getNamedItem('stack:attrs')
 			if attrs:
 				dict = eval(attrs.value)
-				for (k,v) in dict.items():
+				for (k, v) in dict.items():
 					self.gen.attrs[k] = v
 		else:
 			self.debug('<stack:profile> missing stack:attrs', 
@@ -844,6 +839,7 @@ class Generator:
 		profile  = [ '#! /bin/bash' ]
 		profile.extend(self.shellSection.generate())
 		return profile
+
 
 class ProfileHandler(handler.ContentHandler,
 		     handler.DTDHandler,

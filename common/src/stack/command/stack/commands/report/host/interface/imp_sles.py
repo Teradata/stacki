@@ -1,11 +1,11 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-import sys
 import re
 import shlex
 import ipaddress
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):

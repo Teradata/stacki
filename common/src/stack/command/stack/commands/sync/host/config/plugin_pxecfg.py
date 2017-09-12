@@ -7,9 +7,8 @@
 #
 #
 
-import os
 import stack.commands
-import subprocess
+
 
 class Plugin(stack.commands.Plugin):
 	"Sets the hosts' bootaction to install"

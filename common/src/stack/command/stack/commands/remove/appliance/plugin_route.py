@@ -28,12 +28,13 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'route'
 
 	def run(self, appliance):
-		self.owner.db.execute('delete from appliance_routes where ' +\
-			'appliance_routes.appliance=(select id from appliances ' +\
+		self.owner.db.execute('delete from appliance_routes where ' +
+			'appliance_routes.appliance=(select id from appliances ' +
 			'where name="%s")' % appliance)

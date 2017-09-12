@@ -11,11 +11,11 @@
 # @Copyright@
 
 import sys
-import string
 from xml.sax import make_parser
 import stack.commands
 import stack.gen
-from stack.exception import *
+from stack.exception import CommandError, ArgUnique
+
 
 class implementation(stack.commands.Implementation):
 

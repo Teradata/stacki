@@ -4,10 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import pytest
 import stack
-from stack.bool import *
-from stack.api import *
+from stack.bool import str2bool
+from stack.api import Call
+
 
 def test_command():
 	"""

@@ -8,7 +8,8 @@
 
 import sys
 import stack.commands
-from stack.bool import *
+from stack.bool import str2bool
+
 
 class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 

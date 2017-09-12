@@ -10,10 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import spwd
 import subprocess
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 
@@ -32,9 +32,9 @@ class Plugin(stack.commands.Plugin):
 		# use the system to change the password
 		#
 		p = subprocess.Popen(['/usr/sbin/chpasswd'],
-			stdin  = subprocess.PIPE,
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE)
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE)
 		o, e = p.communicate('root:%s' % new_password)
 
 		#

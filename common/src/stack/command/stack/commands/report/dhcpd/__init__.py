@@ -10,11 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import os.path
-import sys
 import stack
-import string
 import ipaddress
 import stack.commands
 import stack.text
@@ -130,9 +126,9 @@ class Command(stack.commands.HostArgumentProcessor,
 						if not server:
 							server = servers.get('default')
 
-						self.addOutput('','\tserver-name\t\t"%s";'
+						self.addOutput('', '\tserver-name\t\t"%s";'
 							% server)
-						self.addOutput('','\tnext-server\t\t%s;'
+						self.addOutput('', '\tnext-server\t\t%s;'
 							% server)
 				
 					self.addOutput('', '}')

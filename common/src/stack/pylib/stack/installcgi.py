@@ -56,10 +56,11 @@ import shutil
 import stack.file
 import stack.util
 
+
 class InstallCGI:
 
 	def __init__(self, rootdir=None):
-		if rootdir == None:
+		if rootdir is None:
 			self.rootdir = '/export/stack'
 		else:
 			self.rootdir = rootdir
@@ -74,7 +75,7 @@ class InstallCGI:
 
 
 	def createPopt(self, dir=None):
-		if dir == None:
+		if dir is None:
 			dir = self.rootdir
 
 		if not os.path.exists(dir):
