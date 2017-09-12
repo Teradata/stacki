@@ -12,6 +12,7 @@ class command(stack.commands.OSArgumentProcessor,
 	      stack.commands.list.command):
 	pass
 	
+
 class Command(command):
 	"""
 	Lists the OSes defined.

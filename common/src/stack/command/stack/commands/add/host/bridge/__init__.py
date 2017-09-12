@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired, CommandError
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -34,8 +35,8 @@ class Command(stack.commands.Command,
 	def run(self, params, args):
 		(bridge, interface, network) = self.fillParams([
 			('name', None, True),
-			('interface',''),
-			('network',''),
+			('interface', ''),
+			('network', ''),
 			])
 
 		hosts = self.getHostnames(args)
@@ -45,8 +46,8 @@ class Command(stack.commands.Command,
 
 		for host in hosts:
 			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.main, nt.options ' +\
-				'from networks nt, nodes n, subnets s where '+\
-				'nt.node=n.id and nt.subnet=s.id and '      +\
+				'from networks nt, nodes n, subnets s where ' +\
+				'nt.node=n.id and nt.subnet=s.id and ' +\
 				'n.name="%s"' % host
 			
 			if network:
@@ -56,17 +57,16 @@ class Command(stack.commands.Command,
 
 			r = self.db.execute(sql)
 			if r == 0:
-				raise CommandError(self, 'Could not find ' +\
-				("interface %s configured on " % interface if interface else '')+\
-				("network %s on " % network if network else '')+\
+				raise CommandError(self, 'Could not find ' +
+				("interface %s configured on " % interface if interface else '') +
+				("network %s on " % network if network else '') +
 				"host %s" % host)
 			else:
 				(ip, netname, net, dev, default_if, opts) = self.db.fetchone()
 
-			channel = bridge
 			# Set ip and subnet to NULL for original device
 			self.command('set.host.interface.ip',
-				[host, 'interface=%s' % dev,'ip=NULL'])
+				[host, 'interface=%s' % dev, 'ip=NULL'])
 			self.command('set.host.interface.network',
 				[host, 'interface=%s' % dev, 'network=NULL'])
 			

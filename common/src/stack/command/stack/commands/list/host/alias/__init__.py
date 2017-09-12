@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.host.command):
 	"""
 	Lists the aliases for a host.
@@ -38,5 +39,5 @@ class Command(stack.commands.list.host.command):
 			for alias, in self.db.fetchall():
 				self.addOutput(host, alias)
 
-		self.endOutput(header=['host', 'alias'], trimOwner = 0)
+		self.endOutput(header=['host', 'alias'], trimOwner=False)
 

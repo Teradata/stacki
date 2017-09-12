@@ -13,6 +13,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.command):
 	"""
 	Remove a global attribute.

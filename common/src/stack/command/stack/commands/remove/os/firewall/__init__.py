@@ -12,7 +12,8 @@
 
 import stack.commands
 import stack.commands.remove.firewall
-from stack.exception import *
+from stack.exception import ArgRequired
+
 
 class Command(stack.commands.remove.os.command,
 	stack.commands.remove.firewall.command):

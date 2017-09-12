@@ -10,11 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
 
 
@@ -56,7 +51,7 @@ class Command(stack.commands.RollArgumentProcessor,
 			# For each pallet determine it is enabled
 			# in any boxes.
 			
-			for arch,OS in self.db.fetchall():
+			for arch, osname in self.db.fetchall():
 				self.db.execute("""select b.name from
 					stacks s, rolls r, boxes b where
 					r.name='%s' and r.arch='%s' and
@@ -69,7 +64,7 @@ class Command(stack.commands.RollArgumentProcessor,
 					boxes.append(box)
 
 				self.addOutput(roll, (version, release, arch,
-						      OS, ' '.join(boxes)))
+						      osname, ' '.join(boxes)))
 
 		self.endOutput(header=['name', 'version', 'release', 'arch',
 			'os', 'boxes'], trimOwner=False)

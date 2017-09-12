@@ -10,8 +10,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
 import stack.commands
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -39,11 +39,11 @@ class Command(stack.commands.HostArgumentProcessor,
 		if table == 'filter':
 			self.getPreamble(host)
 		for rule in rules:
-			if rule['comment'] != None:
+			if rule['comment'] is not None:
 				self.addOutput(host, '# %s' % rule['comment'])
 			s = '-A %s' % rule['chain']
 			if rule['network'] != 'all' and \
-				rule['network'] != None:
+				rule['network'] is not None:
 				query = "select nt.device from networks nt," +\
 					"nodes n, subnets s where " +\
 					"s.name='%s' and " % (rule['network']) +\
@@ -54,7 +54,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					interface = self.db.fetchone()[0]
 					s += ' -i %s' % interface
 			if rule['output-network'] != 'all' and \
-				rule['output-network'] != None:
+				rule['output-network'] is not None:
 				query = "select nt.device from networks nt," +\
 					"nodes n, subnets s where " +\
 					"s.name='%s' and " % (rule['output-network']) +\
@@ -64,15 +64,15 @@ class Command(stack.commands.HostArgumentProcessor,
 				if rows:
 					interface = self.db.fetchone()[0]
 					s += ' -o %s' % interface
-			if rule['flags'] != None:
+			if rule['flags'] is not None:
 				s += ' %s' % rule['flags']
 			s += ' -j %s' % rule['action']
 
 			if rule['protocol'] != 'all' and \
-				rule['protocol'] != None:
+				rule['protocol'] is not None:
 				s += ' -p %s' % rule['protocol']
 			if rule['service'] != 'all' and \
-				rule['service'] != None:
+				rule['service'] is not None:
 				if rule['protocol'] == 'all':
 					tmp_rule = s
 					s = "%s -p tcp --dport %s\n" % (tmp_rule, rule['service'])
@@ -81,9 +81,9 @@ class Command(stack.commands.HostArgumentProcessor,
 					s += ' --dport %s' % rule['service']
 
 			self.addOutput(host, s)
-			self.addOutput(host,'')
+			self.addOutput(host, '')
 
-		self.addOutput(host,'COMMIT')
+		self.addOutput(host, 'COMMIT')
 				
 	def run(self, params, args):
 		self.beginOutput()
@@ -94,7 +94,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.addOutput(host, s)
 			# First, get a list of all rules for every host,
 			# fully resolved
-			rules = self.call('list.host.firewall',[host])
+			rules = self.call('list.host.firewall', [host])
 
 			# Separate the rules into accept rules, reject rules,
 			# and other rules.

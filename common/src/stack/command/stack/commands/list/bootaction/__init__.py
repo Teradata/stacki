@@ -4,11 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import sys
-import socket
-import string
-from stack.exception import *
 import stack.commands
+
 
 class Command(stack.commands.list.command):
 	"""
@@ -32,13 +29,13 @@ class Command(stack.commands.list.command):
 				"""):
 
 			if req_type == '':
-				if b_type != None:
+				if b_type is not None:
 					continue
 			elif req_type and req_type != b_type:
 				continue
 
 			if req_os == '':
-				if b_os != None:
+				if b_os is not None:
 					continue
 			elif req_os and req_os != b_os:
 				continue

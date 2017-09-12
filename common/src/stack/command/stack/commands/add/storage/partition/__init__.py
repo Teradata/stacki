@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError, ArgRequired, ArgValue, ParamRequired, ParamType, ParamValue
+
 
 class Command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,

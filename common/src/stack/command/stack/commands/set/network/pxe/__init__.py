@@ -6,6 +6,7 @@
 
 import stack.commands.set.network
 
+
 class Command(stack.commands.set.network.command):
 	"""
 	Enables or Disables PXE for one of more networks.

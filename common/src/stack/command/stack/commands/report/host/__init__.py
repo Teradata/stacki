@@ -10,14 +10,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
 import stack.commands
 import stack.text
 import os.path
 
+
 class command(stack.commands.HostArgumentProcessor,
 	      stack.commands.report.command):
 	pass
+
 
 class Command(command):
 	"""
@@ -90,7 +91,7 @@ class Command(command):
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
 		if os.path.exists(hostlocal):
-			f = open(hostlocal,'r')
+			f = open(hostlocal, 'r')
 			self.addOutput(None, '\n# Imported from /etc/hosts.local\n')
 			h = f.read()
 			self.addOutput(None, h)

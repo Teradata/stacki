@@ -12,11 +12,10 @@
 
 
 import os
-import sys
-import string
 import stack.file
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Command(stack.commands.list.command):
 	"""The Help Command print the usage of all the registered

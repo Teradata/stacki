@@ -10,8 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import time
 import stack.commands
 from stack.commands.sync.host import Parallel
 from stack.commands.sync.host import timeout
@@ -45,13 +43,13 @@ class Command(stack.commands.sync.host.command):
 		host_output = {}
 		for host in hosts:
 
-			host_output[host]= {"output":"", "error":"","rc":0}
+			host_output[host]= {"output": "", "error": "", "rc": 0}
 			out[host] = ""
 			attrs = {}
 			for row in self.call('list.host.attr', [ host ]):
 				attrs[row['attr']] = row['value']
 
-			if self.str2bool(attrs.get('firewall')) != True:
+			if self.str2bool(attrs.get('firewall')) is not True:
 				continue
 
 			cmd = '/opt/stack/bin/stack report host firewall '
@@ -82,7 +80,7 @@ class Command(stack.commands.sync.host.command):
 				if me != host:
 					cmd = 'ssh -T -x %s "%s"' % (host, cmd)
 
-				host_output[host]= {"output":"", "error":"","rc":0}
+				host_output[host]= {"output": "", "error": "", "rc": 0}
 				p = Parallel(cmd, host_output[host])
 				threads.append(p)
 				p.start()
@@ -103,4 +101,4 @@ class Command(stack.commands.sync.host.command):
 				self.addOutput(host, out[host])
 
 		self.runPlugins(hosts)
-		self.endOutput(header=['host','output'])
+		self.endOutput(header=['host', 'output'])

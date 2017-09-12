@@ -12,7 +12,8 @@
 
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique, CommandError
+
 
 class Command(stack.commands.set.host.command):
 	"""

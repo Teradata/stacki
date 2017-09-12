@@ -3,11 +3,10 @@
 # @SI_COPYRIGHT@
 #
 
-import os
-import sys
 import re
 import shlex
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
@@ -34,7 +33,7 @@ class Implementation(stack.commands.Implementation):
 
 			mtu = None
 			if subnet:
-				subnetInfo = self.owner.call('list.network',[subnet])
+				subnetInfo = self.owner.call('list.network', [subnet])
 				mtu = subnetInfo[0]['mtu']
 
 			# Host attributes can override the subnets tables

@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.os.command):
 	"""
 	Remove an attribute for an OS.

@@ -5,7 +5,7 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+
 
 class Command(stack.commands.set.appliance.command):
 	"""

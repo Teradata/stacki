@@ -6,11 +6,10 @@
 #
 
 
-import re
-import sys
 import stack.csv
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
@@ -27,13 +26,13 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		#
 		# error checking
 		#
-		if slot == None:
+		if slot is None:
 			msg = 'empty value found for "slot" column at line %d' % line
 			CommandError(self.owner, msg)
-		if raid == None:
+		if raid is None:
 			msg = 'empty value found for "raid level" column at line %d' % line
 			CommandError(self.owner, msg)
-		if array == None:
+		if array is None:
 			msg = 'empty value found for "array id" column at line %d' % line
 			CommandError(self.owner, msg)
 

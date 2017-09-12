@@ -26,6 +26,7 @@ import stack.commands
 import stack.commands.dump
 import stack.commands.dump.firewall
 
+
 class Command(stack.commands.dump.host.command,
 	stack.commands.dump.firewall.command):
 	"""

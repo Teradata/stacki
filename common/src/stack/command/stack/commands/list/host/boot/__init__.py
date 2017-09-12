@@ -13,6 +13,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.host.command):
 	"""
 	Lists the current bot action for hosts. For each host supplied on the
@@ -37,7 +38,7 @@ class Command(stack.commands.list.host.command):
 	def run(self, params, args):
 
 		boot = {}
-		for h,b in self.db.select(
+		for h, b in self.db.select(
 			"""
 			n.name, b.action from nodes n
 			left join boot b on

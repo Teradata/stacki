@@ -3,7 +3,6 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-import string
 import stack.commands
 import stack.gen
 import stack.sles.gen

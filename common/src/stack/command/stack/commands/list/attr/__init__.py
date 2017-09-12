@@ -10,12 +10,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import sys
-import string
 import fnmatch
 import ipaddress
 import stack.attr
 import stack.commands
+from stack.exception import CommandError
+
 
 class Command(stack.commands.Command,
 	      stack.commands.OSArgumentProcessor,
@@ -204,7 +204,7 @@ class Command(stack.commands.Command,
 		if scope not in lookup.keys():
 			raise CommandError(self, 'invalid scope "%s"' % scope)
 
-		if resolve == None:
+		if resolve is None:
 			resolve = lookup[scope]['resolve']
 		else:
 			resolve = self.str2bool(resolve)
@@ -263,23 +263,23 @@ class Command(stack.commands.Command,
 				if env:
 					parent = attributes['environment'][env]
 					for (a, (v, x, t, s)) in parent.items():
-						if not a in attributes[scope][o]:
+						if a not in attributes[scope][o]:
 							attributes[scope][o][a] = (v, x, t, s)
 
 				parent = attributes['appliance'][self.db.getHostAppliance(o)]
 				for (a, (v, x, t, s)) in parent.items():
-					if not a in attributes[scope][o]:
+					if a not in attributes[scope][o]:
 						attributes[scope][o][a] = (v, x, t, s)
 
 				parent = attributes['os'][self.db.getHostOS(o)]
 				for (a, (v, x, t, s)) in parent.items():
-					if not a in attributes[scope][o]:
+					if a not in attributes[scope][o]:
 						attributes[scope][o][a] = (v, x, t, s)
 
 		if resolve and scope != 'global':
 			for o in targets:
 				for (a, (v, x, t, s)) in attributes['global']['global'].items():
-					if not a in attributes[scope][o]:
+					if a not in attributes[scope][o]:
 						attributes[scope][o][a] = (v, x, t, s)
 
 		if glob:

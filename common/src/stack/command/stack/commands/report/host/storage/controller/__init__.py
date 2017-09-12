@@ -5,9 +5,9 @@
 # @SI_Copyright@
 # 
 
-from __future__ import print_function
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -40,7 +40,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.controller', [ host ])
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		# 
@@ -51,7 +51,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.controller', [ appliance ])
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		#
@@ -60,7 +60,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		output = self.call('list.storage.controller')
 		if output:
 			self.addOutput('', '%s' % output)
-			self.endOutput(padChar = '')
+			self.endOutput(padChar='')
 			return
 
 		#
@@ -69,4 +69,4 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		output = []
 		self.addOutput('', '%s' % output)
-		self.endOutput(padChar = '')
+		self.endOutput(padChar='')

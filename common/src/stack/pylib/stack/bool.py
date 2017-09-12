@@ -6,6 +6,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
+
 def str2bool(s):
 	"""Converts an on/off, yes/no, true/false string to
 	True/False."""
@@ -15,6 +16,7 @@ def str2bool(s):
 		return True
 	else:
 		return False
+
 
 def bool2str(b):
 	"""Converts an 1/0 to a yes/no"""

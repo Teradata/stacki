@@ -1,8 +1,6 @@
 # @SI_Copyright@
 # @SI_Copyright@
 
-import os
-import sys
 import stack.commands
 
 #
@@ -14,6 +12,7 @@ import stack.commands
 #
 #	/etc/sysconfig/network/ifroute-<interface name>
 #
+
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):

@@ -10,6 +10,7 @@
 import stack.commands
 import subprocess
 
+
 class Command(stack.commands.sync.command):
 	"""Rebuild the DHCPD configuration files on the frontend and restart the
 	DHCPD service"""
@@ -20,5 +21,5 @@ class Command(stack.commands.sync.command):
 
 		self.report('report.dhcpd')
 		
-		subprocess.call(['/sbin/service','dhcpd','restart'],
+		subprocess.call(['/sbin/service', 'dhcpd', 'restart'],
 				stdout=open('/dev/null'), stderr=open('/dev/null'))

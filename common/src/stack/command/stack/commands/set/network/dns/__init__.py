@@ -6,6 +6,7 @@
 
 import stack.commands.set.network
 
+
 class Command(stack.commands.set.network.command):
 	"""
 	Enables or Disables DNS for one of more networks.

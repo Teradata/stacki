@@ -14,10 +14,7 @@
 
 import os
 import pwd
-import sys
 import string
-import getopt
-import types
 import stack.util
 import stack.app
 import stack.commands
@@ -27,7 +24,7 @@ import stack.commands
 
 hasSQL = 1
 try:
-	from pymysql import *
+	from pymysql import connect
 except ImportError:
 	hasSQL = 0
     
@@ -43,23 +40,23 @@ class Application(stack.app.Application):
 
 		self.report	= []
 
-		self.params={}
-		self.params['db'] = ['cluster','database']
-		self.params['password'] = ['','password']
-		self.params['host'] = [self.host,'host']
-		self.params['user'] = ['','host']
+		self.params = {}
+		self.params['db'] = ['cluster', 'database']
+		self.params['password'] = ['', 'password']
+		self.params['host'] = [self.host, 'host']
+		self.params['user'] = ['', 'host']
 		
-		self.shortParamsAlias ={}
+		self.shortParamsAlias = {}
 		self.shortParamsAlias['d'] = 'db'
 		self.shortParamsAlias['u'] = 'user'
 		self.shortParamsAlias['p'] = 'password'
 
-		self.flags={}
-		self.flags['help'] = [0,'print help']
-		self.flags['verbose'] = [0,'print debug info']
+		self.flags = {}
+		self.flags['help'] = [0, 'print help']
+		self.flags['verbose'] = [0, 'print debug info']
 
 
-		self.shortFlagsAlias={}
+		self.shortFlagsAlias = {}
 		self.shortFlagsAlias['v'] = 'verbose'
 		self.shortFlagsAlias['h'] = 'help'
 
@@ -68,14 +65,14 @@ class Application(stack.app.Application):
 		self.formatOptions()
 
    
-	def extendOrReplace(self,currentList,newList):
+	def extendOrReplace(self, currentList, newList):
 
 		# this takes elements of a newList and either overwrites elements of
 		# of the currentList with new values or extends the list
 		# if a list element is a tuple, just compare the first element of
 		# each tuple.
 
-		currentKeys=[]
+		currentKeys = []
 		for key in currentList:
 			if type(key) == type(()):
 				currentKeys.append(key[0])
@@ -98,24 +95,24 @@ class Application(stack.app.Application):
 	def formatOptions(self):
 
 		# Create the short options
-		options=[]
+		options = []
 		for key in self.shortFlagsAlias.keys():
 			options.append(key)
 		for key in self.shortParamsAlias.keys():
-			options.append((key+":",self.params[self.shortParamsAlias[key]][1]))
+			options.append((key + ":", self.params[self.shortParamsAlias[key]][1]))
 
-		self.getopt.s = self.extendOrReplace(self.getopt.s,options)
+		self.getopt.s = self.extendOrReplace(self.getopt.s, options)
 
 		# Create the long options
-		options=[]
+		options = []
 		for key in self.params.keys():
-			option=( key+'=',"%s"%self.params[key][1])
+			option = (key + '=', "%s" % self.params[key][1])
 			options.append(option)
 		for key in self.flags.keys():
-			option=( key,"%s"%self.flags[key][1])
+			option = (key, "%s" % self.flags[key][1])
 			options.append(option)
 
-		self.getopt.l = self.extendOrReplace(self.getopt.l,options)
+		self.getopt.l = self.extendOrReplace(self.getopt.l, options)
 
 		return 0
 
@@ -127,11 +124,11 @@ class Application(stack.app.Application):
 		if len(rval) > 0:
 			return rval
 		try:
-			file=open('/opt/stack/etc/my.cnf','r')
+			file = open('/opt/stack/etc/my.cnf', 'r')
 			for line in file.readlines():
-				l=line.split('=')
+				l = line.split('=')
 				if len(l) > 1 and l[0].strip() == "password" :
-					rval=l[1].strip()
+					rval = l[1].strip()
 					break
 			file.close()
 		except:
@@ -155,18 +152,18 @@ class Application(stack.app.Application):
 	def parseArg(self, c):
 		if stack.app.Application.parseArg(self, c):
 			return 1
-		opt,val = c
-		shortopt=opt[1:len(opt)]
+		opt, val = c
+		shortopt = opt[1:len(opt)]
 		if shortopt in self.shortFlagsAlias.keys():
-			self.flags[self.shortFlagsAlias[shortopt]][0]= 1
+			self.flags[self.shortFlagsAlias[shortopt]][0] = 1
 		if shortopt in self.shortParamsAlias.keys():
-			self.params[self.shortParamsAlias[shortopt]][0]= val
+			self.params[self.shortParamsAlias[shortopt]][0] = val
 
-		longopt=opt[2:len(opt)]
+		longopt = opt[2:len(opt)]
 		if longopt in self.flags.keys():
-			self.flags[longopt][0]= 1
+			self.flags[longopt][0] = 1
 		if longopt in self.params.keys():
-			self.params[longopt][0]= val
+			self.params[longopt][0] = val
 
 		os.environ['MYSQL_HOST'] = self.params['host'][0]
 
@@ -175,10 +172,10 @@ class Application(stack.app.Application):
 
 	def connect(self):
 		if hasSQL:
-			self.link = connect(host='%s' % self.getHost(),\
-					    user='%s' % self.getUsername(),\
-					    db='%s' % self.getDatabase(),\
-					    passwd='%s' % self.getPassword(),\
+			self.link = connect(host='%s' % self.getHost(),
+					    user='%s' % self.getUsername(),
+					    db='%s' % self.getDatabase(),
+					    passwd='%s' % self.getPassword(),
 					    unix_socket='/var/opt/stack/mysql/mysql.sock',
 					    autocommit=True)
 
@@ -189,7 +186,7 @@ class Application(stack.app.Application):
 			# Get a database cursor which is used to manage the context of
 			# a fetch operation
 			if self.flags['verbose'][0]:
-				print("connect:connected",self.link)
+				print("connect:connected", self.link)
 			self.cursor = self.link.cursor()
 			return 1
 		return 0
@@ -232,7 +229,7 @@ class Application(stack.app.Application):
 		cmd = '/opt/stack/bin/stack report host attr localhost '
 		cmd += 'attr=%s_%s' % (service, component)
 
-		p = subprocess.Popen(shlex.split(cmd), stdout = subprocess.PIPE)
+		p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
 		value = p.stdout.readlines()[0]
 
 		return value.strip()

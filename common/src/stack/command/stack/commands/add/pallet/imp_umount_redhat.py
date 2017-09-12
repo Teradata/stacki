@@ -14,6 +14,7 @@
 import os
 import stack.commands
 
+
 class Implementation(stack.commands.Implementation):
 	"""Unmount the ISO image on linux"""
 	

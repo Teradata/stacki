@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
 	"""

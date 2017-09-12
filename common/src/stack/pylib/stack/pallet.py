@@ -10,12 +10,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
 import subprocess
 import stack
 import stack.media
 import time
+
 
 class GetPallet:
 	def __init__(self):
@@ -72,8 +72,12 @@ class GetPallet:
 						if os.path.isdir(palletDir):
 
 							# get the disk size
-							proc = subprocess.Popen( ['du', '-b', palletDir, '--summarize' ], \
-								stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+							proc = subprocess.Popen(['du', 
+										 '-b', 
+										 palletDir,
+										 '--summarize' ], 
+										stdout=subprocess.PIPE, 
+										stderr=subprocess.PIPE)
 							(out, err) = proc.communicate()
 							size = int(filter(None, out.split('\n'))[0].split('\t')[0])
 
@@ -153,8 +157,12 @@ class GetPallet:
 				self.totalsizes = {}
 
 				# on the DVD look for roll-*.xml and put path into a list
-				proc = subprocess.Popen( ['find', '/mnt/cdrom/', '-type', 'f',
-					'-name', 'roll-*.xml'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				proc = subprocess.Popen(['find', 
+							 '/mnt/cdrom/', 
+							 '-type', 'f', 
+							 '-name', 'roll-*.xml'], 
+							stdout=subprocess.PIPE, 
+							stderr=subprocess.PIPE)
 				(out, err) = proc.communicate()
 				P = filter(None, out.split('\n'))
 
@@ -173,8 +181,10 @@ class GetPallet:
 					palletPath = '/mnt/cdrom/' + name + '/' + version + '/' + release + '/'
 
 					# get the size of pallet
-					proc = subprocess.Popen( ['du', '-b', palletPath, '--summarize'], \
-						stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+					proc = subprocess.Popen(['du', '-b', palletPath, 
+								 '--summarize'], 
+								stdout=subprocess.PIPE,
+								stderr=subprocess.PIPE)
 					(out, err) = proc.communicate()
 
 					size = int(filter(None, out.split('\n'))[0].split('\t')[0])
@@ -195,8 +205,10 @@ class GetPallet:
 
 				# start download DVD pallets
 				arg = 'dir=' + basePalletDir
-				proc = subprocess.Popen( [ '/opt/stack/bin/stack', 'add', 'pallet',
-					'updatedb=n', arg ], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				proc = subprocess.Popen(['/opt/stack/bin/stack', 
+							 'add', 'pallet', 'updatedb=n', arg ], 
+							stdout=subprocess.PIPE, 
+							stderr=subprocess.PIPE)
 
 				# while DVD pallets download, update progress bar
 				while proc.poll() is None:
@@ -241,8 +253,9 @@ class GetPallet:
 				spi = cmd.split()
 				spi.append('--spider')
 
-				proc = subprocess.Popen( spi, \
-                                stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				proc = subprocess.Popen(spi,
+							stdout=subprocess.PIPE, 
+							stderr=subprocess.PIPE)
 				(out, err) = proc.communicate()
 
 				totalsize = 0
@@ -263,8 +276,9 @@ class GetPallet:
 				dialog.initPallet(name, version, totalsize)
 
 				cmd = cmd.split()
-				proc = subprocess.Popen( cmd, \
-					stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+				proc = subprocess.Popen(cmd,
+							stdout=subprocess.PIPE, 
+							stderr=subprocess.PIPE)
 
 				# update the progress bar
 				size = 0

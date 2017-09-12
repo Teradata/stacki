@@ -5,13 +5,12 @@
 # @SI_Copyright@
 
 import os
-import sys
 import grp
 import stat
-import string
 import stack.file
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, ArgUnique, CommandError
+
 
 class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.add.command):
@@ -49,7 +48,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		# a skeleton template.
 
 		tree = stack.file.Tree('/export/stack/carts')
-		if not cart in tree.getDirs():
+		if cart not in tree.getDirs():
 			for dir in [ 'RPMS', 'nodes', 'graph' ]:
 				os.makedirs(os.path.join(tree.getRoot(), cart, dir))
 

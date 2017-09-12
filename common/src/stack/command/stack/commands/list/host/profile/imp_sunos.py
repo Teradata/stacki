@@ -1,23 +1,23 @@
 import stack.commands
 import stack.gen
 
+
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
 
 		host = args[0]
 		xml = args[1]
 
-		c_gen = getattr(stack.gen,'Generator_%s' % self.owner.os)
+		c_gen = getattr(stack.gen, 'Generator_%s' % self.owner.os)
 		self.generator = c_gen()
 		self.generator.setArch(self.owner.arch)
 		self.generator.setOS(self.owner.os)
 
-		if xml == None:
-			xml = self.owner.command('list.host.xml', 
-			[
-			 host,
-			 'os=%s' % self.owner.os,
-			])
+		if xml is None:
+			xml = self.owner.command('list.host.xml', [
+				host,
+				'os=%s' % self.owner.os,
+				])
 		self.runXML(xml, host)
 
 	def runXML(self, xml, host):
@@ -47,12 +47,12 @@ class Implementation(stack.commands.Implementation):
 		self.get_section = []
 		if self.section == 'all':
 			self.get_section = [
-			"begin",
-			"profile",
-			"sysidcfg",
-			"finish",
-			"rules",
-			]
+				"begin",
+				"profile",
+				"sysidcfg",
+				"finish",
+				"rules",
+				]
 		else:
 			self.get_section.append(self.section)
 		for section in self.get_section:

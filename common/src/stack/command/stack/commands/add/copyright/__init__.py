@@ -11,8 +11,6 @@
 # @Copyright@
 
 import os
-import sys
-import string
 import tempfile
 import shutil
 import stack.file
@@ -65,7 +63,7 @@ class Command(stack.commands.add.command):
                                         blocks += 1
                                 else:
                                         prefix = line[0:pos]
-                                        suffix = line[pos+len(self.pattern[0]):]
+                                        suffix = line[pos + len(self.pattern[0]):]
                                         fout.write(line)
                                         for text in self.copyright:
                                                 fout.write('%s%s%s' % (
@@ -101,7 +99,7 @@ class Command(stack.commands.add.command):
                 copyright['rocks-long']   = os.path.join(path, 'copyright-rocks-short')
                 copyright['rocks-short']  = os.path.join(path, 'copyright-rocks-short')
 
-                for (k,v) in copyright.items():
+                for (k, v) in copyright.items():
                         file = open(v, 'r')
                         copyright[k] = []
                         print(file)

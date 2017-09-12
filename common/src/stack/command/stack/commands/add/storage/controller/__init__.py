@@ -7,7 +7,8 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
+
 
 class Command(stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
@@ -141,8 +142,8 @@ class Command(stack.commands.HostArgumentProcessor,
 			('hotspare', None),
 			('raidlevel', None),
 			('arrayid', None, True),
-			('options',''),
-			('force','n')
+			('options', ''),
+			('force', 'n')
 			])
 
 		if not hotspare and not slot:

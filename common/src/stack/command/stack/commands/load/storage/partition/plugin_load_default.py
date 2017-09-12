@@ -6,6 +6,7 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 

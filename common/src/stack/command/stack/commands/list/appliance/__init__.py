@@ -17,6 +17,7 @@ class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
+
 class Command(command):
 	"""
 	Lists the appliances defined in the cluster database.

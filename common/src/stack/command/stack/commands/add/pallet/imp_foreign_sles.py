@@ -44,6 +44,8 @@ import os
 import shlex
 import subprocess
 import stack.commands
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.Implementation):	
 	"""
@@ -118,7 +120,7 @@ class Implementation(stack.commands.Implementation):
 
 
 		# Copy SLES Pallet patches into the SLES pallet directory
-		print ("Patching SLES pallet")
+		print("Patching SLES pallet")
 		patch_dir = '/opt/stack/SLES-pallet-patches/%s/' % self.vers
 		cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
 		subprocess.call(shlex.split(cmd))

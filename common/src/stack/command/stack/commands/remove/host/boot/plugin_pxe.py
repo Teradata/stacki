@@ -5,8 +5,8 @@
 # @SI_Copyright@
 
 import os
-import sys
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 	def requires(self):

@@ -10,12 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 #
-# $Log:$
-#
 
-from __future__ import print_function
 import os
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 

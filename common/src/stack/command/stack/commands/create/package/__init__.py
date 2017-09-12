@@ -18,6 +18,7 @@ import stack
 import stack.commands
 import string
 		
+
 class Command(stack.commands.create.command):
 	"""
 	Create a RedHat or Solaris package from a given directory.  The
@@ -80,7 +81,7 @@ class Command(stack.commands.create.command):
 				('prefix',),
 				('version', stack.version),
 				('release', '1'),
-				('rpmextra','AutoReqProv: no'),
+				('rpmextra', 'AutoReqProv: no'),
 			])
 
 		rocksRoot = os.environ['ROCKSBUILD']
@@ -90,7 +91,7 @@ class Command(stack.commands.create.command):
 		
 		tmp = tempfile.mktemp()
 		os.makedirs(tmp)
-		shutil.copy(os.path.join(rocksRoot,'etc', 'create-package.mk'),
+		shutil.copy(os.path.join(rocksRoot, 'etc', 'create-package.mk'),
 			    os.path.join(tmp, 'Makefile'))
 		cwd = os.getcwd()
 		os.chdir(tmp)

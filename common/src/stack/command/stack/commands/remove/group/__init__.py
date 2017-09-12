@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, ArgUnique, CommandError
+
 
 class Command(stack.commands.remove.command):
 	"""
@@ -36,7 +37,7 @@ class Command(stack.commands.remove.command):
 			if group == row['group']:
 				hosts = row['hosts']
 				break
-		if hosts == None:
+		if hosts is None:
 			raise CommandError(self, 'group %s does not exist' % group)
 		if len(hosts) > 0:
 			raise CommandError(self, 'group %s is in use' % group)

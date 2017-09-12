@@ -18,13 +18,14 @@ import os.path
 import string
 import stack.file
 
+
 class Media:
 
 	def mounted(self):
 		"Returns true if the /mnt/cdrom device is mounted"
 
 		rv = 0
-		f = open('/proc/mounts','r')
+		f = open('/proc/mounts', 'r')
 		for line in f:
 			if '/mnt/cdrom' in line:
 				rv = 1
@@ -45,8 +46,7 @@ class Media:
 		#
 		# loader creates '/tmp/stack-cdrom' -- the cdrom device
 		#
-		rc = os.system('mount -o ro /tmp/stack-cdrom'
-			+ ' %s > /dev/null 2>&1' % (mountpoint))
+		rc = os.system('mount -o ro /tmp/stack-cdrom %s > /dev/null 2>&1' % (mountpoint))
 
 		return rc
 
@@ -57,7 +57,7 @@ class Media:
               
 		mountpoint = os.path.join(prefix, 'mnt', 'cdrom')
 		os.system('umount %s > /dev/null 2>&1' % (mountpoint))
-                return
+		return
 
 
 	def ejectCD(self):
@@ -164,7 +164,7 @@ class Media:
 
 		(timestamp, name, archinfo, diskid, version) = self.getCDInfo()
 
-		if name != None and diskid != None:
+		if name is not None and diskid is not None:
 			str = '%s - Disk %s' % (name, diskid)
 		else:
 			str = 'Not Identified'
@@ -178,7 +178,7 @@ class Media:
 		roll_list = []
 		self.mountCD()
 		regexp = re.compile('roll-.*.xml')
-		for r,d,f in os.walk('/mnt/cdrom'):
+		for r, d, f in os.walk('/mnt/cdrom'):
 			for fname in f:
 				if regexp.match(fname):
 					xmlfile = stack.file.RollInfoFile(

@@ -14,6 +14,7 @@
 import subprocess
 import stack.commands
 
+
 class command(stack.commands.Command):
 	notifications = True
 
@@ -23,10 +24,10 @@ class command(stack.commands.Command):
 		and processes the XML to create system files.
 		"""
 
-		p = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
-				     stdin  = subprocess.PIPE,
-				     stdout = subprocess.PIPE,
-				     stderr = subprocess.PIPE)
+		p = subprocess.Popen(['/opt/stack/bin/stack', 'report', 'script'],
+				     stdin=subprocess.PIPE,
+				     stdout=subprocess.PIPE,
+				     stderr=subprocess.PIPE)
 
 		for row in self.call(cmd, args):
 			line = '%s\n' % row['col-1']
@@ -34,9 +35,9 @@ class command(stack.commands.Command):
 		o, e = p.communicate('')
 
 		psh = subprocess.Popen(['/bin/sh'],
-				       stdin  = subprocess.PIPE,
-				       stdout = subprocess.PIPE,
-				       stderr = subprocess.PIPE)
+				       stdin=subprocess.PIPE,
+				       stdout=subprocess.PIPE,
+				       stderr=subprocess.PIPE)
 		out, err = psh.communicate(o)
 
 

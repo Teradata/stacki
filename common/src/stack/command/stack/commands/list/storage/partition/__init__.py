@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgError, ParamValue
+
 
 class Command(stack.commands.list.command,
 		stack.commands.OSArgumentProcessor,
@@ -155,4 +156,4 @@ class Command(stack.commands.list.command,
 
 			i += 1
 
-		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner = 0)
+		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner=False)

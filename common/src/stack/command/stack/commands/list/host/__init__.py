@@ -10,13 +10,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import time
 import stack.commands
+
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass
 	
+
 class Command(command):
 	"""List the Appliance, and physical position info for a list of
 	hosts.
@@ -48,11 +49,11 @@ class Command(command):
 			
 		for (provides, result) in self.runPlugins(hosts):
 			header.extend(result['keys'])
-			for h,v in result['values'].items():
+			for h, v in result['values'].items():
 				values[h].extend(v)
 
 		self.beginOutput()
 		for host in hosts:
 			self.addOutput(host, values[host])
-		self.endOutput(header = header, trimOwner=False)
+		self.endOutput(header=header, trimOwner=False)
 

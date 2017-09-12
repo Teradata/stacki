@@ -4,8 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import types
-import string
+
 
 class StackError(Exception):
 
@@ -24,6 +23,7 @@ class CommandError(StackError):
 	def __init__(self, cmd, msg):
 		self.cmd = cmd
 		super(CommandError, self).__init__(msg)
+
 
 class UsageError(CommandError):
 	
@@ -60,6 +60,7 @@ class ArgParamBaseError(UsageError):
 	def argumentType(self):
 		return ''
 	
+
 class ArgError(ArgParamBaseError):
 	
 	def __init__(self, cmd, arg, msg):
@@ -74,10 +75,12 @@ class ArgRequired(ArgError):
 	def __init__(self, cmd, arg=None):
 		super(ArgRequired, self).__init__(cmd, arg, 'is required')
 
+
 class ArgValue(ArgError):
 
 	def __init__(self, cmd, arg, value):
 		super(ArgValue, self).__init__(cmd, arg, 'must be %s' % value)
+
 
 class ArgUnique(ArgValue):
 
@@ -94,10 +97,12 @@ class ParamError(ArgParamBaseError):
 	def argumentType(self):
 		return 'parameter'
 		
+
 class ParamRequired(ParamError):
 
 	def __init__(self, cmd, param):
 		super(ParamRequired, self).__init__(cmd, param, 'is required')
+
 
 class ParamType(ParamError):
 
@@ -107,6 +112,7 @@ class ParamType(ParamError):
 		else:
 			article = 'a'
 		super(ParamType, self).__init__(cmd, param, 'must be %s %s' % (article, type))
+
 
 class ParamValue(ParamError):
 

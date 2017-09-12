@@ -96,7 +96,7 @@
 #
 
 import string
-import stack.util
+
 
 class Node:
 	def __init__(self, name):
@@ -142,8 +142,8 @@ class Edge:
 		self.parent	= a
 		self.child	= b
 		self.isReversed	= 0 
-		a.setOutDegree(a.getOutDegree()+1)
-		b.setInDegree(b.getInDegree()+1)
+		a.setOutDegree(a.getOutDegree() + 1)
+		b.setInDegree(b.getInDegree() + 1)
 
 	def reverse(self):
 		if self.isReversed:
@@ -174,13 +174,13 @@ class Graph:
 
 	def getNodes(self):
 		list = []
-		for key,val in self.nodes.items():
+		for key, val in self.nodes.items():
 			list.append(val)
 		return list
 
 	def getEdges(self):
 		list = []
-		for key,val in self.adjList.items():
+		for key, val in self.adjList.items():
 			list.extend(val)
 		return list
 			
@@ -190,7 +190,7 @@ class Graph:
 		self.adjList = {}
 		for key, node in self.nodes.items():
 			node.reverse()
-		for key,val in adjList.items():
+		for key, val in adjList.items():
 			for edge in val:
 				edge.reverse()
 				self.addEdge(edge)
@@ -225,7 +225,7 @@ class Graph:
 		
 	def __repr__(self):
 		list = []
-		for key,val in self.adjList.items():
+		for key, val in self.adjList.items():
 			for e in val:
 				list.append(e.__repr__())
 		return string.join(list, '\n')

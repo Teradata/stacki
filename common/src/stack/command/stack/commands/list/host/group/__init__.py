@@ -5,8 +5,8 @@
 # @SI_Copyright@
 
 
-import string
 import stack.commands
+
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -69,5 +69,5 @@ class Command(stack.commands.list.host.command):
 				self.addOutput(host, ' '.join(membership[host]))
 
 
-		self.endOutput(header=['host', 'groups'], trimOwner = 0)
+		self.endOutput(header=['host', 'groups'], trimOwner=False)
 

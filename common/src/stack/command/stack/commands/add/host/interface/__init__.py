@@ -11,13 +11,9 @@
 # @Copyright@
 
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamRequired, ParamType, ArgUnique, CommandError
+
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -70,17 +66,17 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		(interface, mac, network, ip, module,
-			 name, vlan, default, unsafe) = self.fillParams([
-			('interface', None),
-			('mac',       None),
-			('network',   None),
-			('ip',        None),
-			('module',    None),
-			('name',      None),
-			('vlan',      None),
-			('default',   None),
-			('unsafe',    'false')
-			])
+		 name, vlan, default, unsafe) = self.fillParams([
+			 ('interface', None),
+			 ('mac',       None),
+			 ('network',   None),
+			 ('ip',        None),
+			 ('module',    None),
+			 ('name',      None),
+			 ('vlan',      None),
+			 ('default',   None),
+			 ('unsafe',    'false')
+			 ])
 
 		
 		if not interface and not mac:

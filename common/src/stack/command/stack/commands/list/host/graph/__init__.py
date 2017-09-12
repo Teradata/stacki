@@ -13,7 +13,6 @@
 
 
 import os
-import sys
 import string
 import json
 import stack.util
@@ -21,9 +20,9 @@ import stack.profile
 import stack.graph
 import stack.file
 import stack.commands
-from stack.exception import *
 
 from xml.sax import make_parser
+
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -61,7 +60,7 @@ class Command(stack.commands.list.host.command):
 			[('arch', self.arch),
 			('basedir', ),
 			('landscape', 'n'),
-			('size','100,100'),
+			('size', '100,100'),
 			])
 
 		self.beginOutput()
@@ -162,7 +161,7 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tlabel="Ordering Contraints";')
 		dot.append('\t\tfontsize=32;')
 		dot.append('\t\tcolor=black;')
-		dict = {}
+
 		for node in handler.getOrderGraph().getNodes():
 			color = 'white'
 			node.setFillColor(color)

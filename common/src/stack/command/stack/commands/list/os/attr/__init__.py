@@ -7,6 +7,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.os.command):
 	"""
 	Lists the set of attributes for OSes.

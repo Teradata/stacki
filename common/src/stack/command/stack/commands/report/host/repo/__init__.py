@@ -12,8 +12,8 @@
 # @Copyright@
 #
 
-import os
 import stack.commands
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.BoxArgumentProcessor, stack.commands.report.command):

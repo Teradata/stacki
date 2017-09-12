@@ -13,22 +13,23 @@
 import stack.commands
 import threading
 import subprocess
-import shlex
-import sys
+import time
 import os
 
 max_threading = 512
 timeout	= 30
 
+
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.sync.command):
 	pass
 
+
 class Parallel(threading.Thread):
-	def __init__(self, cmd, out = None):
+	def __init__(self, cmd, out=None):
 		self.cmd = cmd
 		if not out:
-			self.out = {"output":"", "error":"", "rc":0}
+			self.out = {"output": "", "error": "", "rc": 0}
 		else:
 			self.out = out
 		while threading.activeCount() > max_threading:
@@ -45,6 +46,7 @@ class Parallel(threading.Thread):
 		self.out['output'] = o
 		self.out['error'] = e
 		self.out['rc'] = rc
+
 
 class Command(command):
 	"""

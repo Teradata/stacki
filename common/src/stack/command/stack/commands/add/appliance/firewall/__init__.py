@@ -13,7 +13,8 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
-from stack.exception import *
+from stack.exception import ArgRequired
+
 
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.appliance.command):
@@ -91,7 +92,7 @@ class Command(stack.commands.add.firewall.command,
 	def run(self, params, args):
 		
 		(service, network, outnetwork, chain, action, protocol, flags,
-			 comment, table, rulename) = self.doParams()
+		 comment, table, rulename) = self.doParams()
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')

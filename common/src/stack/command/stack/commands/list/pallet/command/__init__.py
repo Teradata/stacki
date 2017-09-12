@@ -11,13 +11,9 @@
 # @Copyright@
 
 import os
-import stat
-import time
-import sys
 import string
 import stack.file
 import stack.commands
-from stack.exception import *
 
 
 class Command(stack.commands.RollArgumentProcessor,
@@ -55,7 +51,7 @@ class Command(stack.commands.RollArgumentProcessor,
 				o = getattr(module, 'RollName')
 			except AttributeError:
 				continue
-			if not o in dict:
+			if o not in dict:
 				dict[o] = []
 			dict[o].append(string.join(dir.split(os.sep), ' '))
 
@@ -63,8 +59,7 @@ class Command(stack.commands.RollArgumentProcessor,
 		# pallet names from the database
 		if len(args) == 0:
 			roll_list = self.getRollNames(args, params)
-			f = lambda x: x[0]
-			rolls = map(f, roll_list)
+			rolls = map(lambda x: x[0], roll_list)
 		else:
 			rolls = args
 			

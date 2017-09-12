@@ -13,9 +13,9 @@
 # $Log:$
 #
 
-from __future__ import print_function
 import os
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 

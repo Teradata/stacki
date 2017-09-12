@@ -10,13 +10,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
-import sys
 import shlex
 import subprocess
 import stack.file
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):	
 	"""

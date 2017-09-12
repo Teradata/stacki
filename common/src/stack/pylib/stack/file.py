@@ -13,8 +13,6 @@
 # @Copyright@
 
 
-from __future__ import print_function
-import sys
 import os
 import string
 import re
@@ -53,8 +51,7 @@ class File:
 		return self.__cmp__(file) >= 0
 
 	def __cmp__(self, file):
-		if self.getBaseName() != file.getBaseName() or \
-		 self.timestamp == file.timestamp:
+		if self.getBaseName() != file.getBaseName() or self.timestamp == file.timestamp:
 			rc = 0
 		elif self.timestamp > file.timestamp:
 			rc = 1
@@ -103,7 +100,7 @@ class File:
 	def explode(self):
 
 		# If the file is a symbolic link to a file, follow the link
-		 # and copy the file.	 Links to directories are not exanded.
+		# and copy the file.	 Links to directories are not exanded.
 
 		file = self.getFullName()
 		if os.path.islink(file):
@@ -112,10 +109,10 @@ class File:
 				os.unlink(file)
 				shutil.copy2(orig, file)
 		
-				  # Fix the timestamp back to that of 
-				  # the original file. The above copy seems 
-				  # to do this for us, but I'm going to 
-				  # leave this in to make sure it always works.
+				# Fix the timestamp back to that of 
+				# the original file. The above copy seems 
+				# to do this for us, but I'm going to 
+				# leave this in to make sure it always works.
 		
 				tm = os.path.getmtime(orig)
 				os.utime(file, (tm, tm))
@@ -127,7 +124,7 @@ class File:
 		return self.timestamp
 
 	def getSize(self):
-		return float(self.size) / (1024*1024)
+		return float(self.size) / (1024 * 1024)
     
 	def getUniqueName(self):
 		return self.filename
@@ -199,17 +196,17 @@ class RPMBaseFile(File):
 				s = self.filename[:i]
     
 			i = s.rfind(".")
-			self.list.append(s[i+1:])	# get architecture string
+			self.list.append(s[i + 1:])	# get architecture string
 			s = self.filename[:i]
 
 			i = s.rfind("-")	# get RPM version string
-			self.release = s[i+1:]
-			self.list.append(self.versionList(s[i+1:]))
+			self.release = s[i + 1:]
+			self.list.append(self.versionList(s[i + 1:]))
 			s = self.filename[:i]
 
 			i = s.rfind("-")	# get software version string
-			self.version = s[i+1:]
-			self.list.append(self.versionList(s[i+1:]))
+			self.version = s[i + 1:]
+			self.list.append(self.versionList(s[i + 1:]))
 
 	
 			self.list.append(self.filename[:i]) # get package name
@@ -481,7 +478,7 @@ class RollInfoFile(File,
 			if tag == 'roll':
 				continue
 			attrs = ''
-			for key,val in self.attrs[tag].items():
+			for key, val in self.attrs[tag].items():
 				attrs += ' %s="%s"' % (key, val)
 			xml.append('\t<%s%s/>' % (tag, attrs))
 		xml.append('</roll>')
@@ -596,13 +593,12 @@ class Tree:
 		v = []
 		for f in files:
 			filepath = os.path.join(path, f)
-			if os.path.isdir(filepath) and not \
-			os.path.islink(filepath):
+			if os.path.isdir(filepath) and not os.path.islink(filepath):
 				self.build(os.path.join(dir, f))
 			else:
-				if re.match('.*\.rpm$', f) != None:
+				if re.match('.*\.rpm$', f) is not None:
 					v.append(RPMFile(filepath))
-				elif re.match('roll-.*\.iso$', f) != None:
+				elif re.match('roll-.*\.iso$', f) is not None:
 					v.append(RollFile(filepath))
 				else:
 					v.append(File(filepath))

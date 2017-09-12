@@ -3,10 +3,8 @@
 # @SI_COPYRIGHT@
 #
 
-import os
-import sys
-import re
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):
 
@@ -45,5 +43,5 @@ class Implementation(stack.commands.Implementation):
 			s = self.getRoute(key, val[0], val[1])
 			if s:
 				self.owner.addOutput(host, s)
-		self.owner.addOutput(host,'</stack:file>')
+		self.owner.addOutput(host, '</stack:file>')
 

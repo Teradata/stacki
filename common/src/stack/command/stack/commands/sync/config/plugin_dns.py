@@ -6,9 +6,8 @@
 #
 #
 
-import os
-import sys
 import stack.commands
+
 
 class Plugin(stack.commands.Plugin):
 	"Writes DNS configuration"
@@ -17,5 +16,5 @@ class Plugin(stack.commands.Plugin):
 		return 'dns'
 
 	def run(self, args):
-		self.owner.command('sync.dns',[])
+		self.owner.command('sync.dns', [])
 

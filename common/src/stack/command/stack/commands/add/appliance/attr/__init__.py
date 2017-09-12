@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.appliance.command):
 	"""
 	Adds an attribute to an appliance and sets the associated values 

@@ -11,7 +11,8 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, ArgUnique, CommandError
+
 
 class Command(stack.commands.add.host.command):
 	"""
@@ -92,8 +93,8 @@ class Command(stack.commands.add.host.command):
 			name = '%s'""" % (network))
 
 		if rows == 0:
-			raise CommandError(self, 'network "%s" not in the database.\n' +\
-				'Run "rocks list network" to get a list\n' +\
+			raise CommandError(self, 'network "%s" not in the database.\n' +
+				'Run "rocks list network" to get a list\n' +
 				'of valid networks.')
 
 		interfaces = []

@@ -11,7 +11,8 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, ArgUnique, CommandError
+
 
 class Command(stack.commands.add.host.command):
 	"""

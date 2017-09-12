@@ -12,7 +12,6 @@
 
 
 import os
-import string
 
 import ipaddress
 
@@ -136,4 +135,4 @@ class Command(stack.commands.report.command):
 
 		self.beginOutput()
 		self.addOutput('', s)
-		self.endOutput(padChar = '')
+		self.endOutput(padChar='')

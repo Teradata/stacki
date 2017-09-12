@@ -4,11 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
 import grp
-import sys
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Command(stack.commands.set.command):
 	"""
@@ -45,13 +44,13 @@ class Command(stack.commands.set.command):
 		except ValueError:
 			pass
 
-		if groupid == None:
+		if groupid is None:
 			try:
 				groupid = grp.getgrnam(group).gr_gid
 			except KeyError:
 				raise CommandError(self, 'cannot find group %s' % group)
 
-		if groupid == None:
+		if groupid is None:
 			raise CommandError(self, 'cannot find group %s' % group)
 
 		self.db.execute("""

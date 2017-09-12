@@ -5,7 +5,6 @@
 # @SI_Copyright@
 #
 
-import string
 import stack.commands
 import stack.gen
 import stack.redhat.gen

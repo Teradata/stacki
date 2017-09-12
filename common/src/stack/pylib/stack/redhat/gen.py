@@ -12,9 +12,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import string
-import os
 import stack.gen	
+
 
 class BashProfileTraversor(stack.gen.MainTraversor):
 

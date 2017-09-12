@@ -19,11 +19,14 @@ from xml.sax import handler
 
 # An exception for Kickstart builder trinity: kcgi, kgen, kpp
 
+
 class KickstartError(Exception):
 	pass
 
+
 class KickstartGraphError(KickstartError):
 	pass
+
 
 class KickstartNodeError(KickstartError):
 	pass
@@ -35,6 +38,7 @@ class KickstartNodeError(KickstartError):
 #	foo.oof = foo.bar
 #
 # cool, huh?
+
 
 class Struct:
     pass
@@ -48,7 +52,8 @@ def list2str(list):
 
 
 def listcmp(l1, l2):
-    return map(lambda a,b: a==b, l1, l2)
+    return map(lambda a, b: a == b, l1, l2)
+
 
 def listdup(e, n):
     l = []
@@ -84,8 +89,8 @@ def mkdir(newdir):
 	if os.path.isdir(newdir):
 		pass
 	elif os.path.isfile(newdir):
-		raise OSError("a file with the same name as the desired " \
-					"dir, '%s', already exists." % newdir)
+		raise OSError("a file with the same name as the desired dir, '%s', already exists." % 
+			      newdir)
 	else:
 		head, tail = os.path.split(newdir)
 		if head and not os.path.isdir(head):
@@ -151,16 +156,16 @@ def startSpinner(cmd):
 
 
 	p = subprocess.Popen(cmd,
-			     stdin  = subprocess.PIPE,
-			     stdout = subprocess.PIPE,
-			     stderr = subprocess.PIPE)
+			     stdin=subprocess.PIPE,
+			     stdout=subprocess.PIPE,
+			     stderr=subprocess.PIPE)
 
 	currLength  = 0
 	prevLength  = 0
 	spinChars   = '-\|/'
 	spinIndex   = 0
-	while 1:
-		line = e.readline()
+	while True:
+		line = p.readline()
 		if not line:
 			break
 		if len(line) > 79:
@@ -176,14 +181,11 @@ def startSpinner(cmd):
 		print(spin + data + pad + '\r', end=' ')
 		prevLength = currLength
 		sys.stdout.flush()
-	r.close()
-	w.close()
-	e.close()
 		
 	# Cleanup screen when done
 		
 	pad = ''
-	for i in range(0,78):
+	for i in range(0, 78):
 		pad = pad + ' '
 	print('\r%s\r' % pad, end=' ')
 	

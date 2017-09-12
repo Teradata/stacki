@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.host.command):
 	"""
 	Remove a static route for a host.

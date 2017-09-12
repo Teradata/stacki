@@ -6,10 +6,8 @@
 #
 #
 
-import os
-import sys
 import stack.commands
-import subprocess
+
 
 class Plugin(stack.commands.Plugin):
 	"Writes /etc/dhcpd.conf"

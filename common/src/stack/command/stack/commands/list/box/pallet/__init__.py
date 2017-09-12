@@ -10,11 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
 
 
@@ -43,8 +38,8 @@ class Command(stack.commands.list.box.command,
 				s.roll = r.id and s.box = b.id and
 				b.name = '%s' """ % box)
 			
-			for (roll, arch, version, release, os) in self.db.fetchall():
-				self.addOutput(box, (roll, arch, version, release, os))
+			for (roll, arch, version, release, osname) in self.db.fetchall():
+				self.addOutput(box, (roll, arch, version, release, osname))
 
 		self.endOutput(header=['box', 'pallet', 'arch', 'version', 'release', 'os'],
 			trimOwner=False)

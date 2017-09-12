@@ -10,11 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
 
 
@@ -71,9 +66,9 @@ class Command(stack.commands.NetworkArgumentProcessor,
 		for net in self.getNetworkNames(args):
 			network = networks[net]
 
-			if not (dns == None or network['dns'] == dns):
+			if not (dns is None or network['dns'] == dns):
 				continue
-			if not (pxe == None or network['pxe'] == pxe):
+			if not (pxe is None or network['pxe'] == pxe):
 				continue
 			
 			self.addOutput(network['name'], [ network['address'],

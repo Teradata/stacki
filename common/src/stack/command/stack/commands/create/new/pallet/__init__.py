@@ -10,19 +10,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import re
 import os
 import shutil
 import string
-try:
-	from UserDict import UserDict
-except ImportError:
-	from collections import UserDict
+from collections import UserDict
 from random import randrange
 import stack
 import stack.commands
-from stack.exception import *
+
 
 class Textsub(UserDict):
 	"""Substitutes variables in the text with their values
@@ -35,8 +31,8 @@ class Textsub(UserDict):
 
 	def compile(self):
 		if len(self.data) > 0:
-			if self.re == None:
-				self.regex = re.compile("(%s)" % \
+			if self.re is None:
+				self.regex = re.compile("(%s)" % 
 					'|'.join(map(re.escape,
 						self.data.keys())))
 
@@ -143,10 +139,10 @@ class Command(stack.commands.create.new.command):
 
 		str = "template"
 		i = string.find(name, str) 
-		if i == -1 :
+		if i == -1:
 			return name
 
-		new =  name[0:i] + self.name + name[i+len(str):]
+		new = name[0:i] + self.name + name[i + len(str):]
 		os.rename(name, new)
 		return new 
 
@@ -167,7 +163,7 @@ class Command(stack.commands.create.new.command):
 		"""write text as file"""
 		try:
 			f = open(name, 'w')
-			f.write (text)
+			f.write(text)
 			f.close()
 		except IOError:
 			print("Error writing file %s" % name)
@@ -189,7 +185,7 @@ class Command(stack.commands.create.new.command):
 		for file in fnames:
 			fullname = os.path.join(dirname, file)
 
-			if string.find(fullname, "images/") > 0 :
+			if string.find(fullname, "images/") > 0:
 				# don't change image files names
 				continue
 

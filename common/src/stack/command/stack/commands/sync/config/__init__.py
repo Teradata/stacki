@@ -10,9 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import os
-import sys
-import string
 import stack.file
 import stack.commands
 

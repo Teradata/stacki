@@ -25,6 +25,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.dump.os.command):
 	"""
 	Dump the set of attributes

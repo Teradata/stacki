@@ -12,7 +12,7 @@
 
 import os
 import stack.commands
-from stack.exception import *
+
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.iterate.command):
@@ -72,7 +72,7 @@ class Command(command):
 			for i in range(0, len(cmd)):
 				curr = cmd[i]
 				try:
-					next = cmd[i+1]
+					next = cmd[i + 1]
 				except:
 					next = ''
 				if curr == '%':

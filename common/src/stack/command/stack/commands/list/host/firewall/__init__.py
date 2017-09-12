@@ -13,6 +13,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.NetworkArgumentProcessor,
 	stack.commands.list.host.command):
 	"""

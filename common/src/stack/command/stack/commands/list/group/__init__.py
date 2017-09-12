@@ -4,11 +4,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import os
-import stat
-import time
-import sys
-import string
 import stack.commands
 
 

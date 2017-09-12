@@ -4,8 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import pytest
 import stack
+
 
 def test_version():
 	"""

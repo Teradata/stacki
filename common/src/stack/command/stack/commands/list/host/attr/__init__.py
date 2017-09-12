@@ -12,6 +12,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.host.command):
 	"""
 	Lists the set of attributes for hosts.

@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import string
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, ParamValue, CommandError
+
 
 class Command(stack.commands.set.host.command):
 	"""

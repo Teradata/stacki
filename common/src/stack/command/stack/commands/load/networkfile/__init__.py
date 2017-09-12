@@ -6,13 +6,12 @@
 #
 
 
-import re
 import os
 import os.path
-import sys
 import shutil
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Command(stack.commands.load.command,
 		stack.commands.NetworkArgumentProcessor):

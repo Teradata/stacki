@@ -12,6 +12,7 @@ import subprocess
 import stack.commands
 import stack.lock
 
+
 class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.compile.command):
 	"""
@@ -49,7 +50,7 @@ class Command(stack.commands.CartArgumentProcessor,
 					fmtime = l[2].strip()	
 
 					existingfinger[fname] = {
-						'size' : fsize, 
+						'size'  : fsize, 
 						'mtime' : fmtime }
 			file.close()
 

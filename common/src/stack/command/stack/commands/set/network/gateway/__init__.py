@@ -5,7 +5,8 @@
 # @SI_Copyright@
 
 import stack.commands.set.network
-from stack.exception import *
+from stack.exception import ArgUnique
+
 
 class Command(stack.commands.set.network.command):
 	"""

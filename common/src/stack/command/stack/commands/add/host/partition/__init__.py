@@ -6,10 +6,8 @@
 # @SI_Copyright@
 #
 
-import os
-import sys
 import stack.commands
-from stack.exception import *
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -55,13 +53,13 @@ class Command(stack.commands.Command,
 		sectorstart, size, partitionid,
 		fs, partitionflags, formatflags) = self.fillParams([
 				("device", None, True),
-				("mountpoint",""),
-				("uuid",""),
+				("mountpoint", ""),
+				("uuid", ""),
 				("sectorstart", 0),
 				("size", 0),
 				("partid", ""),
 				("fs", ""),
-				("partitionflags",""),
+				("partitionflags", ""),
 				("formatflags", ""),
 			])
 

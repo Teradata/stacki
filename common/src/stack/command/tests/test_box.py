@@ -4,11 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import pytest
 import random
-import stack
-from stack.bool import *
-from stack.api import *
+from stack.api import Call, ReturnCode
+
 
 def test_box():
 	"""

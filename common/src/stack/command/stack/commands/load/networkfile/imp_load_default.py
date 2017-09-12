@@ -10,13 +10,11 @@
 # check if name exists and is correct
 # if not private, check for default (later)
 
-import re
-import sys
 import stack.csv
 import stack.commands
-import ast
 from ipaddress import IPv4Address, IPv4Network, IPv6Network, IPv6Address 
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.NetworkArgumentProcessor,
 	stack.commands.Implementation):	
@@ -25,9 +23,9 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 	Put network configuration into the database based on
 	a comma-separated formatted file.
 	"""
-	def checkValidIP(self,name,keyname,key):
+	def checkValidIP(self, name, keyname, key):
 			if not key:
-				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname,name)
+				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname, name)
 				raise CommandError(self.owner, msg)
 			else:
 				key = u'%s' % key
@@ -36,16 +34,16 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			try:
 				if IPv4Address(key):
 					self.owner.networks[name][keyname] = key 
-				elif IPv6Address(gateway):
+				elif IPv6Address(key):
 					self.owner.networks[name][keyname] = key
 			except:
 				msg = 'Hey! I need a valid %s for the ' % keyname
 				msg += '"%s" network.' % name
 				raise CommandError(self.owner, msg)
 
-	def checkValidNetwork(self,name,keyname,key):
+	def checkValidNetwork(self, name, keyname, key):
 			if not key:
-				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname,name)
+				msg = 'Hey! I need a valid %s for the "%s" network.' % (keyname, name)
 				raise CommandError(self.owner, msg)
 			else:
 				key = u'%s' % key
@@ -54,7 +52,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			try:
 				if IPv4Network(key):
 					self.owner.networks[name][keyname] = key 
-				elif IPv6Network(gateway):
+				elif IPv6Network(key):
 					self.owner.networks[name][keyname] = key
 			except:
 				msg = 'Hey! I need a valid %s for the ' % keyname
@@ -83,7 +81,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				#
 				# make checking the header easier
 				#
-				required = ['network', 'zone', 'address', 'mask','gateway', 'mtu', 'dns','pxe']
+				required = ['network', 'zone', 'address', 'mask', 'gateway', 'mtu', 'dns', 'pxe']
 
 				for i in range(0, len(row)):
 					header[i] = header[i].lower()
@@ -154,18 +152,18 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				self.owner.networks[name]['network'] = name 
 
 			# Validated addresses and netmask.
-			self.checkValidIP(name,'address',address)
-			self.checkValidNetwork(name,'mask',mask)
+			self.checkValidIP(name, 'address', address)
+			self.checkValidNetwork(name, 'mask', mask)
 			if gateway != 'None':
-				self.checkValidIP(name,'gateway',gateway)
+				self.checkValidIP(name, 'gateway', gateway)
 
 			# You have an address and a mask check if they're valid together.
 			# You probably don't need this since a bad netmask and a bad
 			# IP will both be caught.
 			try:
-				if IPv4Network(u"%s/%s" % (address,mask)):
+				if IPv4Network(u"%s/%s" % (address, mask)):
 					pass
-				elif IPv6Network(u"%s/%s" % (address,mask)):
+				elif IPv6Network(u"%s/%s" % (address, mask)):
 					pass
 			except:
 				msg = 'Hey! I need valid address/netmask for the '

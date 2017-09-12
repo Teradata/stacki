@@ -12,7 +12,8 @@
 
 import string
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError, ParamRequired, ParamError
+
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.add.command):
@@ -45,7 +46,7 @@ class command(stack.commands.HostArgumentProcessor,
 
 			for a in ports:
 				try:
-					i = int(a)
+					int(a)
 				except:
 					msg = 'port specification "%s" ' % \
 						service
@@ -79,7 +80,7 @@ class command(stack.commands.HostArgumentProcessor,
 		if not network and not outnetwork:
 			raise ParamRequired(self, ('network', 'output-network'))
 
-		if table not in [ 'filter', 'raw', 'mangle','nat']:
+		if table not in [ 'filter', 'raw', 'mangle', 'nat']:
 			raise ParamError(self, 'table', 'is not valid')
 
 		#
@@ -253,7 +254,7 @@ table="filter" rulename="accept_public_ssh"'>
 	def run(self, params, args):
 		
 		(service, network, outnetwork, chain, action, protocol, flags,
-			 comment, table, rulename) = self.doParams()
+		 comment, table, rulename) = self.doParams()
 
 		self.checkRule('global_firewall', '', service, network,
 			outnetwork, chain, action, protocol, flags, comment, table, rulename)

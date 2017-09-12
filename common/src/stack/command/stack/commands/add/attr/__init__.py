@@ -6,6 +6,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.command):
 	"""
 	Adds a global attribute for all nodes

@@ -11,8 +11,8 @@
 # @Copyright@
 
 
-import string
 import stack.commands
+
 
 class command(stack.commands.Command):
 	MustBeRoot = 0

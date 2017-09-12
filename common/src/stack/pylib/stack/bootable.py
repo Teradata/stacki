@@ -12,11 +12,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-from __future__ import print_function
 import os
 import shutil
 import stack.file
 import stack.api
+
 
 class Bootable:
 
@@ -201,9 +201,9 @@ class Bootable:
 		# clean up other image files from the stack-image RPM
 		#
 		shutil.rmtree(os.path.join(destination, 'opt'),
-			ignore_errors = 1)
+			ignore_errors=1)
 		shutil.rmtree(os.path.join(destination, 'var'),
-			ignore_errors = 1)
+			ignore_errors=1)
 
 		return
 

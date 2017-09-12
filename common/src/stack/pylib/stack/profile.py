@@ -14,11 +14,6 @@
 
 import os
 import sys
-import string
-import xml
-import socket
-import base64
-import syslog
 import subprocess
 import stack.util
 import stack.graph
@@ -154,13 +149,11 @@ class GraphHandler(handler.ContentHandler,
 				if os.path.isfile(file):
 					xml[0] = file
 			if not xml[1]:
-				file = os.path.join(dir, 'extend-%s.xml'\
-						    % node.name)
+				file = os.path.join(dir, 'extend-%s.xml' % node.name)
 				if os.path.isfile(file):
 					xml[1] = file
 			if not xml[2]:
-				file = os.path.join(dir, 'replace-%s.xml'\
-						    % node.name)
+				file = os.path.join(dir, 'replace-%s.xml' % node.name)
 				if os.path.isfile(file):
 					xml[2] = file
 
@@ -222,9 +215,8 @@ class GraphHandler(handler.ContentHandler,
 				try:
 					parser.feed(line)
 				except:
-					print('XML parse error in ' + \
-						'file %s ' % xmlFile + \
-						'on line %d\n' % linenumber)
+					print('XML parse error in file %s on line %d\n' % 
+					      (xmlFile, linenumber))
 					raise
 				
 			if 'STACKDEBUG' in os.environ:
@@ -696,9 +688,9 @@ class Pass1NodeHandler(NodeHandler):
 
 
 		p = subprocess.Popen([ '%s' % self.evalShell ],
-				     stdin  = subprocess.PIPE,
-				     stdout = subprocess.PIPE,
-				     stderr = subprocess.PIPE)
+				     stdin=subprocess.PIPE,
+				     stdout=subprocess.PIPE,
+				     stderr=subprocess.PIPE)
 
 		s = ''.join(self.evalText)
 		out, err = p.communicate(s.encode())
@@ -844,7 +836,7 @@ class Pass2NodeHandler(NodeHandler):
 				    'text', 
 				    'reboot', 
 				    'unsupported_hardware' ]:
-				self.kskey  = name
+				self.kskey  = tag
 				self.kstext = []
 						
 		s = ''
@@ -868,7 +860,7 @@ class Pass2NodeHandler(NodeHandler):
 				return
 
 			if self.kskey:
-				if not self.kskey in self.kstags:
+				if self.kskey not in self.kstags:
 					self.kstags[self.kskey] = []
 				self.kstags[self.kskey].append(''.join(self.kstext))
 				self.kskey = None
@@ -914,8 +906,8 @@ class Node(stack.graph.Node):
 	def addKSText(self, text):
 		self.kstext.append(text)
 			
-	def addXML(self, xml):
-		self.xml.append(xml)
+	def addXML(self, str):
+		self.xml.append(str)
 		
 	def getFilename(self):
 		return self.filename
@@ -945,6 +937,7 @@ class Node(stack.graph.Node):
 class Edge(stack.graph.Edge):
 	def __init__(self, a, b):
 		stack.graph.Edge.__init__(self, a, b)
+
 
 class FrameworkEdge(Edge):
 	def __init__(self, a, b):

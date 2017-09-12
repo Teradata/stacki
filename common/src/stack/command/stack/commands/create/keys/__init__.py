@@ -12,7 +12,8 @@
 
 import os
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class command(stack.commands.create.command):
 	MustBeRoot = 0

@@ -13,7 +13,6 @@
 # @Copyright@
 
 
-import string
 try:
 	from UserDict import UserDict
 except ImportError:
@@ -137,7 +136,7 @@ def EvalCondExpr(cond, attrs):
 	cond = cond.replace('||', ' or ')
 
 	env = _CondEnv()
-	for (k,v) in attrs.items():
+	for (k, v) in attrs.items():
 		env[k.replace('.', '_DOT_')] = v
 		
 	# print 'EvalCondExpr', cond

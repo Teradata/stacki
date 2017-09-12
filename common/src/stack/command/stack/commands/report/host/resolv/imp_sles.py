@@ -3,10 +3,8 @@
 # @SI_COPYRIGHT@
 #
 
-import os
-import sys
-import re
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):
 

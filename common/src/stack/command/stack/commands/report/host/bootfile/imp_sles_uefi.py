@@ -2,7 +2,7 @@
 # @SI_Copyright@
 
 import stack.commands
-from stack.exception import *
+
 
 install_template = """set gfxpayload=keep
 insmod gzio
@@ -28,6 +28,7 @@ sles12_os_template = """search.fs_label BOOTEFI root
 configfile ($root)/efi/sles/grub.cfg
 boot
 """
+
 
 class Implementation(stack.commands.Implementation):
 	def run(self, h):

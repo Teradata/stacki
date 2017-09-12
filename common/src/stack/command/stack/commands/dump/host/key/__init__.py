@@ -22,6 +22,7 @@
 
 import stack.commands
 
+
 class Command(stack.commands.dump.host.command):
 	"""
 	Dump the public keys for hosts.

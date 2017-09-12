@@ -6,7 +6,8 @@
 
 import os.path
 import stack.commands
-from stack.exception import *
+from stack.exception import CommandError
+
 
 class Command(stack.commands.unload.command):
 	"""

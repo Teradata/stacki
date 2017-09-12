@@ -39,11 +39,12 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
 
-from __future__ import print_function
 import os
 import sys
 import stack
 import stack.commands
+from stack.exception import CommandError
+
 
 class Implementation(stack.commands.Implementation):
 	"""

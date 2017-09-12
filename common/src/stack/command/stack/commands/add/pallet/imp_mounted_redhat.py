@@ -13,6 +13,7 @@
 import os
 import stack.commands
 
+
 class Implementation(stack.commands.Implementation):
 	"""
 	Determines if a Roll is currently mounted.

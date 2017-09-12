@@ -6,6 +6,7 @@
 
 import stack.commands.set.network
 
+
 class Command(stack.commands.set.network.command):
 	"""
 	Sets the MTU for one or more networks.

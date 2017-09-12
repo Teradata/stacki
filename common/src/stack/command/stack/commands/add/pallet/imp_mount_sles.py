@@ -43,6 +43,7 @@
 import os
 import stack.commands
 
+
 class Implementation(stack.commands.Implementation):
 	"""Mount the ISO Image on Linux"""
 

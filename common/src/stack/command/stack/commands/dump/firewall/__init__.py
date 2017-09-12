@@ -29,6 +29,7 @@
 
 import stack.commands
 
+
 class command(stack.commands.NetworkArgumentProcessor, 
 	stack.commands.dump.command):
 

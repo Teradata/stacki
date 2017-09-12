@@ -6,8 +6,8 @@
 # @SI_Copyright@
 #
 
-import os
 import stack.commands
+
 
 class Implementation(stack.commands.Implementation):	
 	"""

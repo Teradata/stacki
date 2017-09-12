@@ -17,6 +17,7 @@
 
 import stack.commands
 
+
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.swap.command):
 	pass

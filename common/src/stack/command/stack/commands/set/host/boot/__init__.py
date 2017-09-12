@@ -10,12 +10,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @Copyright@
 
-import sys
-import string
 import stack.commands
-import os
-import subprocess
-from stack.exception import *
+from stack.exception import ArgRequired, ParamValue
+
 
 class Command(stack.commands.set.host.command):
 	"""

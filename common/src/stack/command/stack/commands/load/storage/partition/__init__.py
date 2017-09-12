@@ -4,13 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-import re
 import os
 import os.path
-import sys
 import shutil
 import stack.commands
-from stack.exception import *
+from stack.exception import ParamValue, CommandError
+
 
 class Command(stack.commands.load.command,
 	       stack.commands.HostArgumentProcessor):

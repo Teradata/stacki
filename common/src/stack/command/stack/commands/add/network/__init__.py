@@ -11,13 +11,10 @@
 # @Copyright@
 
 
-import os
-import sys
-import types
-import string
 import ipaddress
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgUnique, CommandError
+
 
 class Command(stack.commands.add.command):
 	"""

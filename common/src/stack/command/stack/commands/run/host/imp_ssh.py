@@ -4,13 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @SI_Copyright@
 
-from __future__ import print_function
 import stack.commands
 import threading
 import socket
 import time
 import subprocess
-import sys
+
 
 class Implementation(stack.commands.Implementation):
 
@@ -54,7 +53,7 @@ class Implementation(stack.commands.Implementation):
 			while running_threads < numthreads and i < len(hosts):
 				host = hosts[i]
 
-				host_output[host] = {'output':None, 'retval':-1}
+				host_output[host] = {'output': None, 'retval': -1}
 				p = Parallel(cmd, host, host_output[host], timeout)
 				p.setDaemon(True)
 				p.start()
@@ -149,9 +148,9 @@ class Parallel(threading.Thread):
 		# the command line.
 		if online:
 			proc = subprocess.Popen([ 'ssh', self.host, self.cmd ],
-						stdin = None,
-						stdout = subprocess.PIPE,
-						stderr = subprocess.STDOUT)
+						stdin=None,
+						stdout=subprocess.PIPE,
+						stderr=subprocess.STDOUT)
 
 			# If we dont have a timeout, just wait for the process
 			# to finish
@@ -160,10 +159,10 @@ class Parallel(threading.Thread):
 			else:
 				hit_timeout = False
 				start_time = time.time()
-				while hit_timeout == False:
+				while hit_timeout is False:
 					# Check if process is done
 					retval = proc.poll()
-					if retval != None:
+					if retval is not None:
 						break
 					# If we're not done, check if we're out
 					# of time.
@@ -172,12 +171,12 @@ class Parallel(threading.Thread):
 						break
 					# If we're not done, and not timed out yet,
 					# just wait
-					if retval == None:
+					if retval is None:
 						time.sleep(0.25)
 			
 				# If we hit a timeout, terminate, and
 				# get return code
-				if hit_timeout == True:
+				if hit_timeout is True:
 					proc.terminate()
 					retval = proc.wait()
 

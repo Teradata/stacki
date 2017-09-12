@@ -11,11 +11,13 @@
 # @Copyright@
 
 import stack.commands
-from stack.exception import *
+from stack.exception import ArgRequired, CommandError
+
 
 class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.remove.command):
 	pass
+
 
 class Command(command):
 	"""
