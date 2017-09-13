@@ -10,6 +10,15 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap-redhat::
+	yum install -y openssl-devel readline-devel
+	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
+
+
+bootstrap:: install-rpm
+	ldconfig
+
+
 build:
 	tar -xzf Python-$(VERSION).tgz
 	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../

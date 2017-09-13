@@ -26,7 +26,6 @@ ADDCOMPS		= 0
 INCLUDE_PROFILES	= 1
 INCLUDE_GRAPHS  	= 1
 INCLUDE_RPMS		= 1
-ISOSIZE			= 600
 
 TAREXCLUDES	= --exclude src --exclude 'build-*'
 
@@ -66,7 +65,8 @@ endif
 # --------------------------------------------------------------------- #
 
 .PHONY: roll
-roll: $(TARGET_PKG)s roll-$(ROLL).xml rpm-mkdirs
+preroll::
+roll: preroll $(TARGET_PKG)s roll-$(ROLL).xml rpm-mkdirs
 	(								\
 		cd build-$(ROLL)-$(STACK);				\
 		rm -rf disk*;						\

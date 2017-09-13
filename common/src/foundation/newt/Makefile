@@ -10,6 +10,9 @@ DEPENDS.FILES	= newt-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+bootstrap-redhat::
+	yum install -y slang-devel popt-devel
+
 build:
 	tar -xzf newt-$(VERSION).tar.gz
 	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../

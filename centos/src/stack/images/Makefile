@@ -11,8 +11,8 @@ include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE)-$(ARCH).mk
 
 
-bootstrap:
-	yum install -y $(OS.DEPENDENCIES)
+#bootstrap:
+#	yum install -y $(OS.DEPENDENCIES)
 
 deploy: install-rpm
 	cp /opt/stack/images/initrd*	/tftpboot/pxelinux/

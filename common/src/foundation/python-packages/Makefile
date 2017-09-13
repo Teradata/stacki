@@ -6,9 +6,11 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-PACKAGES	= pytest pymysql PyYAML Jinja2 six Flask requests
+PACKAGES	= pytest pymysql PyYAML Jinja2 six Flask requests flake8
 
 include $(STACKBUILD)/etc/CCRules.mk
+
+bootstrap:: install-rpm
 
 build: 
 	$(PY.PATH) -mpip download $(PACKAGES)

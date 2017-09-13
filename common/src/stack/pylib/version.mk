@@ -1,4 +1,4 @@
-ORDER		= 4
+ORDER		= 10
 RPM.ARCH	= noarch
 
 STACK_VERSION	= $(ROLLVERSION)

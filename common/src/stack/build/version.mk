@@ -1,2 +1,2 @@
-ORDER		= 0
-RPM.ARCH	= noarch
+ORDER    = -1
+RPM.ARCH = noarch

@@ -16,11 +16,13 @@ curr = {}
 cwd = os.getcwd()
 for entry in os.listdir('.'):
 	if os.path.isdir(entry):
+#		print '+', entry
 		os.chdir(entry)
 		stdout, stderr = Popen(['make', 'dump-info'], 
 				       stderr=PIPE, stdout=PIPE).communicate()
 
 		for line in stdout.split('\n'):
+#			print line
 			if not line:
 				continue
 			try:

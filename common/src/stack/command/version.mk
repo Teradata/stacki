@@ -1,2 +1,2 @@
-ORDER		= 5
+ORDER		= 10
 RPM.ARCH	= noarch

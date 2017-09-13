@@ -18,7 +18,7 @@ PY.TEST.FLAGS   = -s
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap: install-rpm
+bootstrap:: install-rpm
 
 doc:
 	$(STACKBUILD)/src/pallet/etc/doc/genrcldocs stacki markdoc

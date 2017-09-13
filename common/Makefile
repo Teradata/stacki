@@ -7,45 +7,23 @@
 ROLLROOT = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
--include version-$(ARCH).mk
+include version.mk
 
 .PHONY: 3rdparty
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-GROUPS=developer-workstation-environment \
-	compat-libraries development
-
-PACKAGES=rpm-build redhat-rpm-config gcc \
-	gcc-c++ gettext eject binutils-devel \
-	byacc openssl-devel  bzip2-devel \
-	ncurses-devel readline-devel \
-	sqlite-devel swig gtk2-devel \
-	mesa-libGLU-devel pygobject2-devel \
-	pycairo-devel mkisofs libblkid-devel \
-	intltool audit-libs-devel \
-	system-config-keyboard cmake \
-	apr-devel libcurl-devel \
-	httpd-devel syslinux squashfs-tools \
-	createrepo asciidoc xmlto \
-	yum-utils perl-ExtUtils-MakeMaker \
-	webkitgtk3-devel gtk3-devel \
-	gstreamer-devel popt-devel \
-	gstreamer1-devel GConf2-devel \
-	gstreamer-python-devel.x86_64 \
-	gstreamer1-plugins-base-devel.x86_64
-
-$(GROUPS):
-	yum groupinstall -y $@
-
-$(PACKAGES):
-	yum install -y $@
-
-ospackages: $(GROUPS) $(PACKAGES)
-
-bootstrap: ospackages
+bootstrap::
 	$(MAKE) -C src/stack/build $@
-	$(MAKE) 3rdparty
-	. /etc/profile.d/stack-build.sh
-	$(MAKE) -C src $@
+	$(MAKE) -C src/stack/config $@
+ifeq ($(STACKBUILD),)
+	@echo
+	@echo
+	@echo Stacki build environment is now installed. Before you can
+	@echo continue you will need to logout and login again. Then re-run
+	@echo "make bootstrap" again.
+	@echo
+	@echo
+endif
+	$(MAKE) -C src bootstrap
 
