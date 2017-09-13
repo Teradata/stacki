@@ -19,7 +19,7 @@ class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
 		if enabled:
-			return 'yum install -f -y %s' % ' '.join(enabled)
+			return 'yum install -y %s' % ' '.join(enabled)
 		
 		return None
 		

@@ -613,7 +613,7 @@ class MainTraversor(Traversor):
 		if shell:
 			code.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
 			code.append('#! %s\n' % shell)
-		body = self.collect(node)
+		body = self.collect(node).strip()
 		if body:
 			code.append(body)
 		if shell:
