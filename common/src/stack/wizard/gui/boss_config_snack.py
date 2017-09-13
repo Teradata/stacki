@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 import sys
 from snack import *
 import stack.wizard
@@ -8,9 +8,10 @@ def render_timezone(screen):
 	#get list of timezones
 	cities = []
 	for line in open('/opt/stack/bin/timezones.txt'):
-		line = line.replace('\n', '')
-		line = filter(None, line.split('\t'))
-		cities.append((line[0], line[0]))
+		tokens = line.split('\t', 1)
+		if len(tokens) == 2:
+			city = tokens[0].strip()
+		cities.append((city, city))
 
 	#render window to choose a timezone
 	result = ListboxChoiceWindow(screen, "Stacki Installation", \

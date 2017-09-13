@@ -172,7 +172,7 @@ class Data:
 		output = ''
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 		for line in p.stdout.readlines():
-			a = line.split(":", 2)
+			a = line.decode().split(":", 2)
 			d = a[1].strip()
 			m = a[2]
 			if not (d.find("virbr") > -1 or m.find("loopback") > -1 or m.find("noqueue") > -1):

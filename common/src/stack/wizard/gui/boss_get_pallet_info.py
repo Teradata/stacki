@@ -1,14 +1,14 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
 
 import os, sys
-import urllib2
+from urllib import urlopen
 import json
 import pickle
 
 if __name__ == '__main__':
 	url = sys.argv[1]
 	url_cgi = url + '/pallets.cgi'
-	response = urllib2.urlopen(url_cgi)
+	response = urlopen(url_cgi)
 	pallets = json.loads(response.read())
 	for pallet in pallets:
 		pallet['id'] = ''

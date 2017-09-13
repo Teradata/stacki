@@ -26,7 +26,7 @@ class Password:
 	def get_salt(self):
 		salt = '$1$'
 		s = self.get_rand()
-		salt = salt + base64.urlsafe_b64encode(s)[0:8]
+		salt = salt + base64.urlsafe_b64encode(s)[0:8].decode()
 		return salt
 
 	def get_cleartext_pw(self, c_pw=None):

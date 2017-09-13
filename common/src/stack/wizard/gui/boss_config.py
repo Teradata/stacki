@@ -1,4 +1,5 @@
-#!/opt/stack/bin/python
+#!/opt/stack/bin/python3
+
 import os
 import subprocess
 import stack.media
@@ -6,7 +7,6 @@ import stack.wizard
 
 import sys
 import traceback
-import urllib2
 import pickle
 
 #
@@ -25,7 +25,7 @@ for s in sys.argv:
 		no_partition = True
 
 
-if not 'DISPLAY' in os.environ:
+if 'DISPLAY' not in os.environ:
 	noX = True
 
 print('Set network during boss_config: ' + str(config_net))
@@ -85,12 +85,14 @@ def createLogo(panel):
 	return wx.StaticBitmap(panel, -1, png, (10, 5),
 		(png.GetWidth(), png.GetHeight()))
 
+
 def createHelp(panel, text):
 	png = wx.Image('/opt/stack/bin/help.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
 	bitmap = wx.StaticBitmap(panel, -1, png, (10, 5),
 		(png.GetWidth(), png.GetHeight()))
 	bitmap.SetToolTip(wx.ToolTip(text))
 	return bitmap
+
 
 def createSizer(v, h, page, title):
 	sizer = wx.GridBagSizer(v, h)
@@ -101,20 +103,24 @@ def createSizer(v, h, page, title):
 		flag=wx.EXPAND|wx.LEFT|wx.BOTTOM, border=20)
 	return sizer
 
+
 def createContinue(page, func):
 	btn = wx.Button(page, label="Continue")
 	btn.Bind(wx.EVT_BUTTON, func)
 	return btn
+
 
 def createButton(page, func, label):
 	btn = wx.Button(page, label=label)
 	btn.Bind(wx.EVT_BUTTON, func)
 	return btn
 
+
 def createBack(page, func):
 	btn = wx.Button(page, label="Back")
 	btn.Bind(wx.EVT_BUTTON, func)
 	return btn
+
 
 def createComboBox(page, list, label, value):
 	if label == "Timezone":
@@ -127,6 +133,7 @@ def createComboBox(page, list, label, value):
 	cb.SetBackgroundColour(wx.WHITE)
 	return cb
 
+
 def createRadio(page, label, text, style):
 	if style:
 		r = wx.RadioButton(page, label=label, pos=(10, 30), style=style)	
@@ -134,6 +141,7 @@ def createRadio(page, label, text, style):
 		r = wx.RadioButton(page, label=label, pos=(10, 30))	
 	help = createHelp(page, text)
 	return (r, help)
+
 
 def createTextCtrl(page, value, style):
 	if style:
@@ -144,16 +152,19 @@ def createTextCtrl(page, value, style):
 	tc.SetBackgroundColour(wx.WHITE)
 	return tc
 
+
 def setSizer(page, sizer):
 	sizer.AddGrowableCol(1)
 	sizer.AddGrowableRow(2)
 	page.SetSizerAndFit(sizer)
+
 
 def createCb(page, label, text, list, value):
 	lb = wx.StaticText(page, label=label)
 	help = createHelp(page, text)
 	cb = createComboBox(page, list, label, value)
 	return (lb, help, cb)
+
 
 def createTc(page, label, text, value, style):
 	lb = wx.StaticText(page, label=label)
@@ -202,7 +213,7 @@ class Page1(wx.Panel):
 
 		#get label, help and combo-box for timezones
 		lb, img, self.cb = createCb(self, "Timezone", 
-			"Select the city or nearest city in the\ntimezone " + \
+			"Select the city or nearest city in the\ntimezone " + 
 			"of this cluster", cities, data.get('Kickstart_Timezone'))
 
 		#bind update map function to combobox
@@ -287,6 +298,7 @@ class Page1(wx.Panel):
 		else:
 			wx.PostEvent(self.parent, PageChangeEvent(page=Page2))
 
+
 class Page2(wx.Panel):
 	def __init__(self, parent, data):
 		wx.Panel.__init__(self, parent)
@@ -305,25 +317,25 @@ class Page2(wx.Panel):
 
 		#create labels, bitmaps and inputs
 		fqdn, helpBitmap0, self.tc0 = createTc(self,
-			"Fully Qualified Host Name", \
-			"This must be the fully-qualified domain name\n" + \
-			"(e.g., dev.stacki.com)", \
+			"Fully Qualified Host Name",
+			"This must be the fully-qualified domain name\n" +
+			"(e.g., dev.stacki.com)",
 			data.get('Info_FQDN'), None)
-		d, helpBitmap1, self.cb = createCb(self, \
-			"Devices", "This is the interface that connects to the " + \
+		d, helpBitmap1, self.cb = createCb(self,
+			"Devices", "This is the interface that connects to the " +
 			"network that will be used by the frontend to install backend hosts", list,
 			data.get('Kickstart_PrivateInterface'))
 		ip, helpBitmap2, self.tc1 = createTc(self, "IP",
 			"IP address for the device",
 			data.get('Kickstart_PrivateAddress'), None)
 		mask, helpBitmap3, self.tc2 = createTc(self, "Netmask",
-			"Netmask for the device", \
+			"Netmask for the device",
 			data.get('Kickstart_PrivateNetmask'), None)
 		gw, helpBitmap4, self.tc3 = createTc(self, "Gateway",
-			"IP address of your public gateway", \
+			"IP address of your public gateway",
 			data.get('Kickstart_PrivateGateway'), None)
 		dns, helpBitmap5, self.tc4 = createTc(self, "DNS Servers",
-			"Supply a comma separated list of your DNS servers " + \
+			"Supply a comma separated list of your DNS servers " +
 			"if you have more than one",
 			data.get('Kickstart_PrivateDNSServers'), None)
 
@@ -388,7 +400,7 @@ class Page4(wx.Panel):
 		#create labels, bitmaps and inputs
 		pass1, helpBitmap1, self.tc1 = createTc(self, "Password", \
 			"The root password for this cluster", "", wx.TE_PASSWORD)
-		pass2, helpBitmap2, self.tc2 = createTc(self, "Confirm Password", \
+		pass2, helpBitmap2, self.tc2 = createTc(self, "Confirm Password", 
 			"Confirm your password", "", wx.TE_PASSWORD)
 
 		#put elements into form
@@ -426,6 +438,7 @@ class Page4(wx.Panel):
 
 	def OnPage2(self, event):
 		wx.PostEvent(self.parent, PageChangeEvent(page=Page2))
+
 
 class Page5(wx.Panel):
 	def __init__(self, parent, data):
@@ -481,6 +494,7 @@ class Page5(wx.Panel):
 
 	def OnPage4(self, event):
 		wx.PostEvent(self.parent, PageChangeEvent(page=Page4))
+
 
 class Page6(wx.Panel):
 
