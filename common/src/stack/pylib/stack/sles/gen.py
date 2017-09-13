@@ -208,12 +208,13 @@ class MainTraversor(stack.gen.MainTraversor):
 		slesNS   = self.getAttr(self.gen.root, 'xmlns:sles')
 		configNS = self.getAttr(self.gen.root, 'xmlns:config')
 		xiNS     = self.getAttr(self.gen.root, 'xmlns:xi')
+		stackNS  = self.getAttr(self.get.root, 'xmlms:stack')
 
 		section = self.gen.headerSection
 		section.append('<?xml version="1.0"?>')
 		section.append('<!DOCTYPE profile>')
-		section.append('<profile xmlns="%s" xmlns:config="%s" xmlns:xi="%s">' % 
-			       (slesNS, configNS, xiNS))
+		section.append('<profile xmlns="%s" xmlns:config="%s" xmlns:xi="%s" xmlns:stack="%s">' % 
+			       (slesNS, configNS, xiNS, stackNS))
 
 		section = self.gen.footerSection
 		section.append('</profile>')
