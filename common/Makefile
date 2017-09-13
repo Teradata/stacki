@@ -13,7 +13,7 @@ include version.mk
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap::
+bootstrap:: 3rdparty
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src/stack/config $@
 ifeq ($(STACKBUILD),)

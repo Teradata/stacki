@@ -19,8 +19,11 @@ DEPENDS.FILES	= mariadb-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap:: install-rpm
-	co -f $(PKGROOT)/etc/my.cnf
+#bootstrap:: install-rpm
+#	co -f $(PKGROOT)/etc/my.cnf
+
+bootstrap::
+	yum install -y cmake
 
 build:
 	gunzip -c mariadb-$(VERSION).tar.gz | $(TAR) -xf -

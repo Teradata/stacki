@@ -1,8 +1,6 @@
-fcgi
 foundation-comps
 foundation-cython
 foundation-gd
-foundation-libxml2
 foundation-mariadb
 foundation-py-pycairo
 foundation-python
@@ -15,7 +13,6 @@ foundation-wget
 ludicrous-speed
 git
 git-lfs
-lighttpd
 MegaCLI
 stack-admin
 stack-build
@@ -26,13 +23,11 @@ stack-ekv
 stack-examples
 stack-images
 stack-kickstart
-stack-piece-pipe
 stack-pxeboot
 stack-pylib
 stack-sql
 stack-storage-config
 stack-summary
-stack-tracker
 stack-wizard
 storcli
 sc-im

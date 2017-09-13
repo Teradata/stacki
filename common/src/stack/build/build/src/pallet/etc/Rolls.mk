@@ -104,6 +104,9 @@ ifeq ($(ROLLS.OS),)
 ROLLS.OS=$(OS)
 endif
 endif
+ifeq ($(ISOSIZE),)
+ISOSIZE=0
+endif
 
 roll-$(ROLL).xml:
 	@echo "<roll name=\"$(ROLL)\" interface=\"$(ROLLS.API)\">" > $@
