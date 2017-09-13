@@ -23,9 +23,4 @@ preroll:: common
 	cp -r ../common/build-$(ROLL)-$(STACK)/RPMS/* build-$(ROLL)-$(STACK)/RPMS/
 
 
-#pallet: common local
-#	echo
-#	echo "building stacki pallet, CentOS edition"
-#	echo
-
 
