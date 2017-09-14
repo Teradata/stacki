@@ -10,7 +10,7 @@ ROLLROOT	= ../../..
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap-redhat::
-	yum install -y webkitgtk3-devel gtk3-devel gstreamer-devel popt-devel gstreamer1-devel GConf2-devel gstreamer-python-devel gstreamer1-plugins-base-devel
+	yum install -y webkitgtk3-devel gtk3-devel gstreamer-devel popt-devel gstreamer1-devel GConf2-devel gstreamer-python-devel gstreamer1-plugins-base-devel mesa-libGLU-devel
 
 build:
 	tar -xzf wxPython-$(VERSION).tar.gz

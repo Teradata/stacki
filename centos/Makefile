@@ -12,9 +12,10 @@ ROLLROOT   = .
 bootstrap::
 	-yum group install -y "Development Tools"
 	-yum group install -y "Infrastructure Server"
-	-yum install -y createrepo genisoimage emacs
+	-yum install -y createrepo genisoimage git emacs vim
 	$(MAKE) -C ../common $@
 	$(MAKE) 3rdparty
+	$(MAKE) -C src bootstrap
 
 common:
 	make -C ../common rpms

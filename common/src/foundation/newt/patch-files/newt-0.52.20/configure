@@ -3962,7 +3962,7 @@ else
 $as_echo "$PYTHONVERS" >&6; }
 fi
 
-PYTHONVERS=python3.6
+PYTHONVERS=python3 python3.6
 
 
 
