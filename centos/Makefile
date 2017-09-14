@@ -17,10 +17,8 @@ bootstrap::
 	$(MAKE) 3rdparty
 	$(MAKE) -C src bootstrap
 
-common:
+preroll::
 	make -C ../common rpms
-
-preroll:: common
 	mkdir -p build-$(ROLL)-$(STACK)/RPMS
 	cp -r ../common/build-$(ROLL)-$(STACK)/RPMS/* build-$(ROLL)-$(STACK)/RPMS/
 

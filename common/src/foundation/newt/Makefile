@@ -17,18 +17,17 @@ bootstrap:: install-rpm
 
 build:
 	tar -xzf newt-$(VERSION).tar.gz
-	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
 	( 								\
 		cd newt-$(VERSION);					\
 		./configure --prefix=$(PKGROOT); 			\
-		$(MAKE);						\
+		$(MAKE) PYTHONVERS=$(PY.LIB);				\
 	)
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
 	(								\
 		cd newt-$(VERSION);					\
-		$(MAKE) install DESTDIR=$(ROOT);			\
+		$(MAKE) PYTHONVERS=$(PY.LIB) install DESTDIR=$(ROOT);	\
 	)
 
 clean::
