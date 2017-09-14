@@ -13,7 +13,7 @@ include version.mk
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap:: 3rdparty
+bootstrap::
 	$(MAKE) -C src/stack/build $@
 	$(MAKE) -C src/stack/config $@
 ifeq ($(STACKBUILD),)
@@ -24,6 +24,8 @@ ifeq ($(STACKBUILD),)
 	@echo "make bootstrap" again.
 	@echo
 	@echo
-endif
+	@/bin/false # stop the caller from continuing
+else
+	$(MAKE) 3rdparty
 	$(MAKE) -C src bootstrap
-
+endif

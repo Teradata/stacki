@@ -2,7 +2,7 @@
 
 This repository includes the following code from other projects.
 
-* mariadb-10.2.6.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/mariadb-10.2.6.tar.gz]
+* newt-0.52.20.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/newt-0.52.20.tar.gz]
 * libxml2-2.7.8.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/libxml2-2.7.8.tar.gz]
 * storcli-1.17.08-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/storcli-1.17.08-1.noarch.rpm]
 * lighttpd-1.4.28.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/lighttpd-1.4.28.tar.gz]
@@ -19,4 +19,3 @@ This repository includes the following code from other projects.
 * Python-3.6.1.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/Python-3.6.1.tgz]
 * git-lfs-1.4.3-1.el6.x86_64.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/git-lfs-1.4.3-1.el6.x86_64.rpm]
 * MegaCli-8.07.07-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/MegaCli-8.07.07-1.noarch.rpm]
-* newt-0.52.20.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/newt-0.52.20.tar.gz]

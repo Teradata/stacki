@@ -7,13 +7,14 @@ ROLLROOT   = .
 
 .PHONY: 3rdparty
 3rdparty:
-	-$(ROLLSBUILD)/bin/get3rdparty.py
+	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap:: 3rdparty
-	yum group install -y "Development Tools"
-	yum group install -y "Infrastructure Server"
-	yum install -y createrepo genisoimage emacs
+bootstrap::
+	-yum group install -y "Development Tools"
+	-yum group install -y "Infrastructure Server"
+	-yum install -y createrepo genisoimage emacs
 	$(MAKE) -C ../common $@
+	$(MAKE) 3rdparty
 
 common:
 	make -C ../common rpms
