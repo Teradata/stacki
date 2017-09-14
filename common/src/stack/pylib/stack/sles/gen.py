@@ -208,7 +208,7 @@ class MainTraversor(stack.gen.MainTraversor):
 		slesNS   = self.getAttr(self.gen.root, 'xmlns:sles')
 		configNS = self.getAttr(self.gen.root, 'xmlns:config')
 		xiNS     = self.getAttr(self.gen.root, 'xmlns:xi')
-		stackNS  = self.getAttr(self.get.root, 'xmlms:stack')
+		stackNS  = self.getAttr(self.gen.root, 'xmlns:stack')
 
 		section = self.gen.headerSection
 		section.append('<?xml version="1.0"?>')
