@@ -63,7 +63,7 @@ def lookup_file(hashcode):
 
 def get_file(peer, remote_file):
 	try:
-		res = requests.get('http://%s%s' % (peer, remote_file))
+		res = requests.get('http://%s%s' % (peer, remote_file), timeout=1)
 	except:
 		raise
 
