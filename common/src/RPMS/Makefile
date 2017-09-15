@@ -8,6 +8,7 @@ ifndef ROLL
 include ../../version.mk
 endif
 
-RELEASE = $(shell $(STACKBUILD)/bin/redhat-release)
+RELEASE = $(shell $(STACKBUILD)/bin/os-release)
+
 bootstrap rpm pkg clean nuke dump-info:
 	make -C $(RELEASE) $@
