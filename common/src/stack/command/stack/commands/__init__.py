@@ -1529,7 +1529,7 @@ class Command:
 		self.width = 0
 		if sys.stdout.isatty():
 			try:
-				r, c = os.get_terminal_size()
+				c, r = os.get_terminal_size()
 				self.width = int(c)
 			except:
 				pass
@@ -2013,7 +2013,6 @@ class Command:
 		# If we know the output is too long for the terminal
 		# switch from table view to a field view that will
 		# display nicer (e.g. stack list os boot).
-
 		if self.width and header and startOfLine == 0 and (sum(colwidth) + len(line)) > self.width:
 			maxWidth = 0
 			for label in output[0]:
