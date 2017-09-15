@@ -1,0 +1,4 @@
+ORDER		= 99
+PKGROOT		= /opt/stack/images
+IMAGE_VERSION	= 12
+SUSE_PRODUCT	= SLES

@@ -1,0 +1,75 @@
+#!/bin/sh
+
+#=============================================
+# do the voodoo that we do
+#---------------------------------------------
+
+unset PYTHONPATH
+export LD_LIBRARY_PATH=/opt/stack/lib
+
+/opt/stack/bin/stacki-profile.py
+
+#
+# stacki-profile.py outputs the file /tmp/stacki-profile.xml which contains
+# two "chapters":
+#
+#	1) "yast" chapter. This is the autoinst.xml file.
+# 	2) "stacki" chapter. This is python code that will be imported into
+#		other programs that run during the install in order to
+#		configure the system.
+#
+
+cat /tmp/stacki-profile.xml \
+	| /opt/stack/bin/stack list host profile chapter=main \
+	> /tmp/profile/autoinst.xml
+
+mkdir -p /tmp/stack_site/
+
+cat /tmp/stacki-profile.xml \
+	| /opt/stack/bin/stack list host profile chapter=stacki \
+	> /tmp/stack_site/__init__.py
+
+/opt/stack/bin/stacki-status.py install profile parsed
+
+
+# add stack.conf and start ludicrous
+
+FRONTEND=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
+YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['yumserver']);")
+
+echo "tracker = ${FRONTEND}" > /tmp/stack.conf
+
+/opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
+
+#
+# configure the hardware disk array controller first
+#
+/opt/stack/bin/configure-controllers.py
+
+#
+# then configure the partitions
+#
+/opt/stack/bin/output-partition.py > /tmp/partition.xml
+
+# Configure the bootloader
+/opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml
+
+#
+# give ourselves the ability to hold the installation prior to the start of yast
+#
+grep stack-debug /proc/cmdline 2>&1 > /dev/null
+if [ $? -eq 0 ]
+then
+	touch /tmp/wait
+	while [ -f /tmp/wait ]
+	do
+		echo "Stacki debug wait loop - remove /tmp/wait to continue"
+		sleep 1
+		/opt/stack/bin/stacki-status.py install wait 1
+	done
+fi
+
+if [[ -n $YUMSERVER ]]
+then
+	sed -i 's/'"$FRONTEND"'/'"$YUMSERVER"'/' /etc/install.inf
+fi

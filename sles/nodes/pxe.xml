@@ -11,6 +11,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:package>syslinux</stack:package>
 <stack:package>xinetd</stack:package>
 <stack:package>stack-pxeboot</stack:package>
+<stack:package>stacki-sles-images</stack:package>
 
 
 <stack:script stack:stage="install-post">
@@ -41,6 +42,9 @@ mkdir -p /tftpboot/pxelinux
 mkdir -p /tftpboot/pxelinux/pxelinux.cfg
 chown root.apache /tftpboot/pxelinux/pxelinux.cfg
 chmod 775 /tftpboot/pxelinux/pxelinux.cfg
+
+cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux/
+cp /opt/stack/images/initrd* /tftpboot/pxelinux/
 
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/

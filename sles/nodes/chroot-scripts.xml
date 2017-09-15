@@ -15,7 +15,7 @@
 	All rights reserved. stacki(r) v3.0 www.stacki.com
 	</stack:copyright>
 
-<stack:script stack:stage="boot-post" chroot="false">
+<stack:script stack:stage="install-post" chroot="false">
 /opt/stack/bin/stacki-status.py install chroot script
 
 mkdir -p /mnt/tmp/stack_site
@@ -24,7 +24,7 @@ cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 </stack:script>
 
 
-<stack:script stack:stage="boot-post">
+<stack:script stack:stage="install-post">
 
 echo "&hostname;.&domainname;" > /etc/HOSTNAME
 

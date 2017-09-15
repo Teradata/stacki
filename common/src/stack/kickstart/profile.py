@@ -123,7 +123,7 @@ class Client:
 		m = json.dumps(msg)
 
 		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		tx.sendto(m.encode(), ('10.1.19.15', 5000))
+		tx.sendto(m.encode(), ('127.0.0.1', 5000))
 		tx.close()
 	
 ##

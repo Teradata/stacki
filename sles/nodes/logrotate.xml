@@ -7,6 +7,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 
 
 <stack:script stack:stage="install-post">
+
 <stack:file stack:name="/etc/logrotate.d/stack">
 /var/log/auth {
 	size=100M

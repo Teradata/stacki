@@ -7,17 +7,6 @@ All rights reserved. stacki(r) v4.0 stacki.com
 </stack:si_copyright>
 
 
-<stack:package>fcgi</stack:package>
-
-<!--
-	XXX
-
-	orignial package:
-
-	<stack:package>stack-tracker</stack:package>
--->
-
-
 <stack:script stack:stage="install-post">
 
 <stack:file stack:name="/etc/rc.d/init.d/stack-tracker" stack:perms="755"><![CDATA[#!/bin/sh

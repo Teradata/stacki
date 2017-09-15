@@ -12,7 +12,6 @@
 
 <stack:script stack:stage="boot-post">
 echo "Running stacki init-script"
-ls /etc/sysconfig/network
 </stack:script>
 
 </stack:stack> 

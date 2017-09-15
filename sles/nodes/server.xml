@@ -10,17 +10,9 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:package>foundation-gd</stack:package>
 <stack:package>foundation-rcs</stack:package>
 <stack:package>stack-config-server</stack:package>
+<stack:package>ludicrous-speed</stack:package>
 
 <stack:package>git-core</stack:package>
-
-<!--
-	XXX
-
-	original packages were:
-
-	<stack:package>git</stack:package>
-	<stack:package>git-lfs</stack:package>
--->
 
 <!-- rpms to create pallets -->
 <stack:package>genisoimage</stack:package>
@@ -59,6 +51,8 @@ chmod 775 /export/stack/carts
 	/sbin/chkconfig stack-num-cpus on
 -->
 
+/usr/bin/systemctl enable ludicrous-server
+/usr/bin/systemctl start ludicrous-server
 
 </stack:script>
 
