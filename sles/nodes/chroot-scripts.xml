@@ -32,17 +32,6 @@ echo "&hostname;.&domainname;" > /etc/HOSTNAME
 
 /usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
 
-<stack:file name="/root/.ssh/authorized_keys" perms="0600">
-<stack:eval shell="/opt/stack/bin/python3">
-file = open('/root/.ssh/id_rsa.pub')
-for line in file.readlines():
-	print(line.strip())
-</stack:eval>
-</stack:file>
-
-chmod a+rx /root
-chmod a+rx /root/.ssh
-
 <stack:file stack:name="/opt/stack/bin/up.py" stack:perm="0755">
 #!/usr/bin/python
 

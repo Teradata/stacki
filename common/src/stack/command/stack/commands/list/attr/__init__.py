@@ -45,7 +45,7 @@ class Command(stack.commands.Command,
 
 		for (ip, host, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if(n.name, n.name, nd.name), 
+				n.ip, if (n.name <> NULL, n.name, nd.name), 
 				s.address, s.mask from 
 				networks n, appliances a, subnets s, nodes nd 
 				where 
@@ -61,7 +61,7 @@ class Command(stack.commands.Command,
 
 		for (ip, host, zone, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if(n.name, n.name, nd.name), 
+				n.ip, if (n.name <> NULL, n.name, nd.name), 
 				s.zone, s.address, s.mask from 
 				networks n, appliances a, subnets s, nodes nd 
 				where 
