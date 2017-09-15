@@ -23,10 +23,7 @@ All rights reserved. stacki(r) v4.0 stacki.com
 <stack:package>stack-build</stack:package>
 
 <!-- text-based spreadsheet editor -->
-
-<!--
-	<stack:package>sc-im</stack:package>
--->
+<stack:package>sc-im</stack:package>
 
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>

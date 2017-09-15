@@ -10,6 +10,7 @@ ROLLROOT	= ../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION)-$(RELEASE).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk
+-include build-$(OS).mk
 
 
 refresh:
