@@ -20,6 +20,7 @@ build:
 	( 								\
 		cd newt-$(VERSION);					\
 		./configure --prefix=$(PKGROOT); 			\
+		PATH=/bin:/usr/bin:$(PKGROOT)/bin;			\
 		$(MAKE) PYTHONVERS=$(PY.LIB);				\
 	)
 
@@ -27,6 +28,7 @@ install::
 	mkdir -p $(ROOT)/$(PKGROOT)
 	(								\
 		cd newt-$(VERSION);					\
+		PATH=/bin:/usr/bin:$(PKGROOT)/bin;			\
 		$(MAKE) PYTHONVERS=$(PY.LIB) install DESTDIR=$(ROOT);	\
 	)
 
