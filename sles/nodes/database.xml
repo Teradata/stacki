@@ -47,7 +47,6 @@ then
 	/sbin/ldconfig
 fi
 
-
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
 <stack:file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
@@ -58,16 +57,20 @@ socket		= /var/opt/stack/mysql/mysql.sock
 password	= $root_pw
 </stack:file>
 
-<!-- Generate random password for apache access to database -->
-apache_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/opt/stack/etc/my.cnf"
-	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
+<stack:file stack:name="/opt/stack/etc/my.cnf.d/server.cnf" stack:perms="0400"
+	    stack:owner="stackdb:stackdb">
 [mysqld]
 user		= stackdb
 port		= 40000
 socket		= /var/opt/stack/mysql/mysql.sock
 datadir		= /var/opt/stack/mysql
+</stack:file>
 
+
+<!-- Generate random password for apache access to database -->
+apache_pw=`/opt/stack/sbin/gen_random_pw`
+<stack:file stack:name="/opt/stack/etc/my.cnf"
+	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
 port		= 40000
@@ -81,8 +84,8 @@ password	= $apache_pw
 -->
 /opt/stack/sbin/mysql-install-db
 
-/sbin/chkconfig foundation-mariadb on
-/etc/init.d/foundation-mariadb start
+/usr/bin/systemctl enable mariadb
+/usr/bin/systemctl start mariadb
 
 <!--
 	Make sure that the database is
@@ -106,6 +109,16 @@ import base64
 
 import pymysql
 
+def get_pass_from_conf(f):
+	passwd = None
+	conf_file = open(f, 'r')
+	for line in conf_file.readlines():
+		if line.startswith('password'):
+			passwd = line.split('=')[1].strip()
+			break
+	conf_file.close()
+	return passwd
+	
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd='',
 	unix_socket='/var/opt/stack/mysql/mysql.sock',
@@ -117,12 +130,8 @@ except:
 	sys.exit(-1)
 
 # Read the root database password from root.my.cnf
-conf_file = open('/opt/stack/etc/root.my.cnf')
-for line in conf_file.readlines():
-	if line.startswith('password'):
-		root_pass = line.split('=')[1].strip()
-		break
-conf_file.close()
+
+root_pass = get_pass_from_conf('/opt/stack/etc/root.my.cnf')
 cmd_set = []
 
 # Password Access for root
@@ -131,13 +140,7 @@ cmd_set.append('set password for "root"@"127.0.0.1"=PASSWORD("%s")' % root_pass)
 cmd_set.append('set password for "root"@"&hostname;"=PASSWORD("%s")' % root_pass)
 
 # Read the apache db password from my.cnf
-apache_conf_file = open('/opt/stack/etc/my.cnf')
-for line in apache_conf_file.readlines():
-	if line.startswith('password'):
-		apache_pass = line.split('=')[1].strip()
-		break
-
-apache_conf_file.close()
+apache_pass = get_pass_from_conf('/opt/stack/etc/my.cnf')
 
 # Password access for apache
 cmd_set.append('create user "apache"@"localhost" identified by "%s"' % apache_pass)

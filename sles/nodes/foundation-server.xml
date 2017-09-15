@@ -8,7 +8,6 @@ All rights reserved. stacki(r) v4.0 stacki.com
 
 
 <stack:package>foundation-python</stack:package>
-<stack:package>foundation-wget</stack:package>
 
 
 <stack:script stack:stage="install-post">
