@@ -4,12 +4,13 @@
 ROLLROOT   = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
+-include bootstrap.mk
 
 .PHONY: 3rdparty
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap:: 3rdparty
+bootstrap::  $(GROUPS) $(PACKAGES)
 	# Install package sets here
 	# individual bootstrap requirement go in package
 	# makefiles using the bootstrap-suse tag
@@ -19,6 +20,7 @@ bootstrap:: 3rdparty
 	#yum group install -y "Infrastructure Server"
 	#yum install -y createrepo genisoimage emacs
 	$(MAKE) -C ../common $@
+	$(MAKE) 3rdparty
 
 common:
 	make -C ../common rpms
