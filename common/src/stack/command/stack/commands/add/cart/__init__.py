@@ -25,12 +25,12 @@ class Command(stack.commands.CartArgumentProcessor,
 	The OS you wish to build a cart for (e.g., 'redhat', 'sles', 'ubuntu').
 	This will create default OS-specific node and graph XML files in the
 	cart.
-	Default: redhat.
+	Default: the native os.
 	</param>
 	"""		
 
 	def run(self, params, args):
-		self.osname, = self.fillParams([('os', 'redhat'), ])
+		self.osname, = self.fillParams([('os', self.os), ])
 
 		if not len(args):
 			raise ArgRequired(self, 'cart')
