@@ -16,7 +16,7 @@ class Password:
 			c = os.urandom(16)
 			c_pw = base64.urlsafe_b64encode(c).rstrip(b'=')
 		
-		return c_pw
+		return c_pw.decode()
 
 	def get_crypt_pw(self, c_pw=None):
 		# if c_pw was not specified, generate a random password
