@@ -78,7 +78,7 @@ user		= stackdb
 port		= 40000
 socket		= /var/opt/stack/mysql/mysql.sock
 datadir		= /var/opt/stack/mysql
-</stack:file>
+</file>
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
 <file name="/opt/stack/etc/my.cnf"
