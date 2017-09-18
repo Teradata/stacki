@@ -1,14 +1,12 @@
 #!/opt/stack/bin/python3
 
-from flask import Flask, request, jsonify, send_from_directory, abort, render_template, redirect
+from flask import Flask, request, jsonify, send_from_directory, render_template, redirect
 from urllib.request import unquote
-from random import shuffle
 import os
 import requests
 import hashlib
 import subprocess
 import click
-import signal
 
 app = Flask(__name__)
 
@@ -25,6 +23,7 @@ client_settings = {
 	'SAVE_FILES' : True
 }
 
+
 @app.errorhandler(404)
 def four_o_four(error=None):
         error_message = error if type(error) is str else "File not found."
@@ -38,21 +37,26 @@ def four_o_four(error=None):
 
         return resp
 
+
 def hashit(filename):
 	hashcode = hashlib.md5()
 	hashcode.update(filename.encode('utf-8'))
 	return hashcode.hexdigest()
+
 
 def save_file(content, location, filename):
 	subprocess.call(['mkdir', '-p', location])
 	with open(location + filename, 'wb') as f:
 		f.write(content)
 
+
 def file_exists(local_file):
 	return os.path.isfile(local_file)
 
+
 def tracker():
 	return "%s:%s" % (tracker_settings['TRACKER'], tracker_settings['PORT'])
+
 
 def lookup_file(hashcode):
 	try:
@@ -61,6 +65,7 @@ def lookup_file(hashcode):
 		raise
 	return res
 
+
 def get_file(peer, remote_file):
 	try:
 		res = requests.get('http://%s%s' % (peer, remote_file), timeout=1)
@@ -68,6 +73,7 @@ def get_file(peer, remote_file):
 		raise
 
 	return res
+
 
 def register_file(port, hashcode):
 	try:
@@ -79,6 +85,7 @@ def register_file(port, hashcode):
 	except:
 		raise
 
+
 def unregister_file(hashcode, params):
 	try:
 		res = requests.delete('http://%s/avalanche/unregister/hashcode/%s' % (
@@ -89,8 +96,10 @@ def unregister_file(hashcode, params):
 	except:
 		raise
 
+
 def stream_it(response, content):
 	response.write(content)
+
 
 @app.route('/install/<path:path>/<filename>')
 def get_file_locally(path, filename):
@@ -129,13 +138,13 @@ def get_file_locally(path, filename):
 						app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
-						unregister_file(hashcode, unregister_params);
+						unregister_file(hashcode, unregister_params)
 				except Exception as e:
 					app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
 					app.logger.debug("    %s", e)
 					unregister_params = params.copy()
 					unregister_params["peer"] = peer.split(":")[0]
-					unregister_file(hashcode, unregister_params);
+					unregister_file(hashcode, unregister_params)
 
 	if not file_exists(local_file):
 		app.logger.debug("requesting %s from frontend", (filename))
@@ -155,6 +164,7 @@ def get_file_locally(path, filename):
 	else:
 		app.logger.debug("%s 404", (filename))
 		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file), code=307)
+
 
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
@@ -185,14 +195,17 @@ def get_repodata(path, filename):
 def running():
 	return jsonify({"success": True})
 
+
 @app.route('/peerdone')
 def peerdone():
 	peerdone_res = requests.delete('http://%s/avalanche/peerdone' % tracker())
 	return jsonify({"success": True})
 
+
 @app.errorhandler(404)
 def page_not_found(e):
 	return "", 404
+
 
 @click.command()
 @click.option('--environment', default='regular')
@@ -202,7 +215,7 @@ def page_not_found(e):
 def main(environment, trackerfile, nosavefile, port):
 	import logging
 	#signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-	logging.basicConfig(filename='/var/log/ludicrous-client-debug.log',level=logging.DEBUG)
+	logging.basicConfig(filename='/var/log/ludicrous-client-debug.log', level=logging.DEBUG)
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
 	client_settings['PORT']	= port
@@ -232,6 +245,7 @@ def main(environment, trackerfile, nosavefile, port):
 			os._exit(0)
 	else:
 		app.run(host='0.0.0.0', port=client_settings['PORT'], debug=False)
+
 
 if __name__ == "__main__":
 	main()

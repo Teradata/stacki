@@ -1,11 +1,9 @@
 #!/opt/stack/bin/python3
 
-from flask import Flask, request, jsonify, send_from_directory, abort, render_template, redirect
-from werkzeug.routing import BaseConverter
+from flask import Flask, request, jsonify, send_from_directory, render_template, redirect
 from urllib.request import unquote
 from random import shuffle
 import stack.api
-import click
 import os
 
 app = Flask(__name__)
@@ -15,6 +13,7 @@ peers = {}
 
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
+
 
 @app.errorhandler(404)
 def four_o_four(error=None):
@@ -28,6 +27,7 @@ def four_o_four(error=None):
 	resp.status_code = 404
 
 	return resp
+
 
 @app.route('/avalanche/lookup/<hashcode>', methods=['GET'])
 def lookup(hashcode):
@@ -58,6 +58,7 @@ def lookup(hashcode):
 
 	#res['peers'].append(":80")
 	return jsonify(res)
+
 
 @app.route('/avalanche/register/<port>/<hashcode>', methods=['POST'])
 def register(port=80, hashcode=None):
@@ -91,6 +92,7 @@ def register(port=80, hashcode=None):
 
 	return jsonify(res)
 
+
 @app.route('/avalanche/unregister/hashcode/<hashcode>', methods=['DELETE'])
 def unregister(hashcode):
 	ipaddr = unquote(request.args['peer'])
@@ -107,6 +109,7 @@ def unregister(hashcode):
 
 	return jsonify(res)
 
+
 @app.route('/avalanche/peerdone', methods=['DELETE'])
 def peerdone():
 	ipaddr = request.remote_addr
@@ -122,9 +125,11 @@ def peerdone():
 
 	return jsonify(res)
 
+
 @app.route('/avalanche/stop', methods=['GET'])
 def stop_server():
 	return "-1"
+
 
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
@@ -148,6 +153,7 @@ def get_repodata(path, filename):
 	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
 	return render_template('directory.html', items=items)
 
+
 # catch all for returning static files
 # if the request is a directory, the the request will be redirected
 @app.route('/<filename>')
@@ -166,6 +172,7 @@ def get_repodata_in_root(filename):
 	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
 	return render_template('directory.html', items=items)
 
+
 # return a directory listing
 @app.route('/')
 def get_repodata_catchall():
@@ -173,10 +180,12 @@ def get_repodata_catchall():
 	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
 	return render_template('directory.html', items=items)
 
+
 def main():
 	import logging
-	logging.basicConfig(filename='/var/log/ludicrous-server.log',level=logging.DEBUG)
+	logging.basicConfig(filename='/var/log/ludicrous-server.log', level=logging.DEBUG)
 	app.run(host='0.0.0.0', port=3825, debug=False)
+
 
 if __name__ == "__main__":
 	main()

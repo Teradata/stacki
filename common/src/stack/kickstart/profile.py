@@ -14,14 +14,13 @@
 
 import os
 import re
-import fcntl
 import sys
 import cgi
-import string
 import syslog
 import stack.lock
 import stack.api
 import stack.bool
+
 
 class Client:
 	"""
@@ -37,9 +36,9 @@ class Client:
 		self.np	  = kwargs.get('np')
 		self.os	  = kwargs.get('os')
 
-		if self.addr == None:
+		if self.addr is None:
 			self.addr = os.environ['REMOTE_ADDR']
-		if self.port == None:
+		if self.port is None:
 			self.port = int(os.environ['REMOTE_PORT'])
 
 		if not self.arch:
@@ -130,6 +129,7 @@ class Client:
 ## MAIN
 ##
 
+
 mutex	  = stack.lock.Mutex('/var/tmp/profile.mutex')
 semaphore = stack.lock.Semaphore('/var/tmp/profile.semaphore')
 
@@ -166,7 +166,7 @@ client.pre()
 empty = False
 mutex.acquire()
 count = semaphore.read()
-if count == None:
+if count is None:
 	syslog.syslog(syslog.LOG_DEBUG, 'semaphore not found')
 	try:
 		cmd = "grep 'processor' /proc/cpuinfo | wc -l"

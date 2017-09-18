@@ -10,10 +10,9 @@
 from __future__ import print_function
 import os
 import sys
-import string
-import syslog
 import stack.api
 import profile
+
 
 class Profile(profile.ProfileBase):
 

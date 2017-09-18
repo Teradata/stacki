@@ -3,10 +3,12 @@
 import sys
 from stack.password import Password
 
+
 def usage():
 	print('`{0}` alone will generate a random cleartext password string'.format(sys.argv[0]))
 	print('`{0} crypt` will generate a random hashed password string'.format(sys.argv[0]))
 	print('`{0} crypt $CLEARTEXT`` alone will generate a hashed from $CLEARTEXT'.format(sys.argv[0]))
+
 
 if __name__ == '__main__':
 	# if no args specified, generate a random 'cleartext' password string

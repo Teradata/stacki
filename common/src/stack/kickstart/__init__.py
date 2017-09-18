@@ -6,6 +6,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+
 class ProfileBase:
 
         def pre(self, client):
