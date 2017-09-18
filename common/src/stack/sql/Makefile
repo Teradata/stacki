@@ -1,6 +1,6 @@
 # @copyright@
 # Copyright (c) 2006 - 2017 StackIQ Inc.
-# All rights reserved. stacki(r) v4.0 stacki.com
+# All rights reserved. stacki(r) v5.0 stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 #
@@ -15,7 +15,7 @@ SCRIPTS		= insert-ethers
 PLUGINS		= $(wildcard plugins/*py)
 PLUGINDIR	= $(PKGROOT)/var/plugins/insertethers
 ROLLROOT	= ../../..
-DEPENDS.FILES	= backup-cluster-db.sh insert-ethers.py insert-ethersrc.xml staterc.xml
+DEPENDS.FILES	= backup-cluster-db.sh insert-ethers.py insert-ethersrc.xml 
 DEPENDS.DIRS	= plugins po
 
 include $(STACKBUILD)/etc/CCRules.mk
