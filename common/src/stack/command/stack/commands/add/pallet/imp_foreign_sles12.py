@@ -48,9 +48,6 @@ class Implementation(stack.commands.Implementation):
 						
 						if v[3] == 'sles':
 							self.name = 'SLES'
-						elif v[3] == 'caasp':
-							self.name = 'CaaSP'
-							self.release = 'suse'
 						elif v[3] == 'sle-sdk':
 							self.name = v[3].upper()
 
@@ -78,9 +75,9 @@ class Implementation(stack.commands.Implementation):
 		(clean, prefix)	 = args
 
 		if not self.name:
-			raise CommandError(self, 'unknown SLES/CaaSP on media')
+			raise CommandError(self, 'unknown SLES on media')
 		if not self.vers:
-			raise CommandError(self, 'unknown SLES/CaaSP version on media')
+			raise CommandError(self, 'unknown SLES version on media')
 			
 		OS = 'sles'
 		roll_dir = os.path.join(prefix, self.name, self.vers, self.release, OS, self.arch)
@@ -105,11 +102,12 @@ class Implementation(stack.commands.Implementation):
 		# Copy pallet patches into the respective pallet
 		# directory
 		#
-		print('Patching %s pallet' % self.name)
 		patch_dir = '/opt/stack/%s-pallet-patches/%s' % \
 			(self.name, self.vers)
-		cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
-		subprocess.call(shlex.split(cmd))
+		if os.path.exists(patch_dir):
+			print('Patching %s pallet' % self.name)
+			cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
+			subprocess.call(shlex.split(cmd))
 
 		#
 		# create roll-<name>.xml file

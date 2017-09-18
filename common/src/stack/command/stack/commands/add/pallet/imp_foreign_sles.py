@@ -32,8 +32,11 @@ class Implementation(stack.commands.Implementation):
 					key = l[0].strip()
 					value = l[1].strip()
 
-					if key == 'NAME' and value == 'SUSE_SLES':
-						self.name = 'SLES'
+					if key == 'NAME':
+						if value == 'SUSE_SLES':
+							self.name = 'SLES'
+						elif value == 'sle-sdk':
+							self.name = 'SLE-SDK'
 					elif key == 'VERSION':
 						self.vers = value
 					elif key == 'RELEASE':
@@ -65,7 +68,7 @@ class Implementation(stack.commands.Implementation):
 			raise CommandError(self, 'unknown SLES version on media')
 			
 		OS = 'sles'
-		roll_dir = os.path.join(prefix, self.name, self.vers, OS, self.arch)
+		roll_dir = os.path.join(prefix, self.name, self.vers, self.release, OS, self.arch)
 		destdir = roll_dir
 
 		if clean and os.path.exists(roll_dir):
@@ -85,10 +88,11 @@ class Implementation(stack.commands.Implementation):
 
 
 		# Copy SLES Pallet patches into the SLES pallet directory
-		print("Patching SLES pallet")
-		patch_dir = '/opt/stack/SLES-pallet-patches/%s/' % self.vers
-		cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
-		subprocess.call(shlex.split(cmd))
+		patch_dir = '/opt/stack/%s-pallet-patches/%s/' % (self.name, self.vers)
+		if os.path.exists(patch_dir):
+			print ("Patching SLES pallet")
+			cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
+			subprocess.call(shlex.split(cmd))
 
 		#
 		# create roll-<name>.xml file
