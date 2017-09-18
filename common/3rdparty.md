@@ -10,6 +10,7 @@ This repository includes the following code from other projects.
 * git-lfs-1.4.3-1.el7.x86_64.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/git-lfs-1.4.3-1.el7.x86_64.rpm]
 * gd-2.0.33.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/gd-2.0.33.tar.gz]
 * rcs-5.7.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/rcs-5.7.tar.gz]
+* mariadb-10.2.6.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/mariadb-10.2.6.tar.gz]
 * fcgi-2.4.0.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/fcgi-2.4.0.tar.gz]
 * sc-im-0.4.0-20161021.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/sc-im-0.4.0-20161021.tgz]
 * Python-3.6.1.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/Python-3.6.1.tgz]

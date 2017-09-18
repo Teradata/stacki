@@ -1,5 +1,4 @@
 foundation-comps
-foundation-cython
 foundation-gd
 foundation-mariadb
 foundation-py-pycairo
@@ -9,9 +8,7 @@ foundation-py-wxPython
 foundation-rcs
 foundation-newt
 foundation-redhat
-foundation-wget
 ludicrous-speed
-git
 git-lfs
 MegaCLI
 stack-admin
