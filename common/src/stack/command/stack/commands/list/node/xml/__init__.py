@@ -223,8 +223,7 @@ class Command(stack.commands.list.command,
 
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
-				if ext in [ '.xml', '.pro' ]:
-					ext = '.xml' ## TODO - kill this once stacki-pro is dead
+				if ext == '.xml':
 					self.runImplementation(ext[1:], 
 							       (os.path.join(graph, file), 
 								handler))
