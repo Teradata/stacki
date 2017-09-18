@@ -21,16 +21,34 @@ class Command(stack.commands.CartArgumentProcessor,
 	The name of the cart to be created.
 	</arg>
 
-	<param type='string' name='os'>
-	The OS you wish to build a cart for (e.g., 'redhat', 'sles', 'ubuntu').
-	This will create default OS-specific node and graph XML files in the
-	cart.
-	Default: the native os.
-	</param>
 	"""		
+	def createFiles(self, name, path):
+
+		# write the graph file
+
+		graph = open(os.path.join(path, 'graph', 'cart-%s.xml' % name), 'w')
+		graph.write('<graph>\n\n')
+		graph.write('\t<description>\n\t%s cart\n\t</description>\n\n' % name)
+		graph.write('\t<order head="backend" tail="cart-%s-backend"/>\n' % name)
+		graph.write('\t<edge  from="backend"   to="cart-%s-backend"/>\n\n' % name)
+		graph.write('</graph>\n')
+		graph.close()
+
+		# write the node file
+		node = open(os.path.join(path, 'nodes', 'cart-%s-backend.xml' % name), 'w')
+		node.write('<stack:stack>\n\n')
+		node.write('\t<stack:description>\n')
+		node.write('\t%s cart backend appliance extensions\n' % name)
+		node.write('\t</stack:description>\n\n')
+		node.write('\t<stack:package><!-- add packages here --></stack:package>\n\n')
+		node.write('<stack:script stack:stage="install-post">\n')
+		node.write('<!-- add shell code for post install configuration -->\n')
+		node.write('</stack:script>\n\n')
+		node.write('</stack:stack>\n')
+		node.close()
+		
 
 	def run(self, params, args):
-		self.osname, = self.fillParams([('os', self.os), ])
 
 		if not len(args):
 			raise ArgRequired(self, 'cart')
@@ -54,7 +72,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 			cartpath = os.path.join(tree.getRoot(), cart)
 			args = [ cart, cartpath ]
-			self.runImplementation(self.osname, args)
+			self.createFiles(cart, cartpath)
 
 		# Files were already on disk either manually created or by the
 		# simple template above.
