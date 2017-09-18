@@ -18,8 +18,18 @@ import sys
 import syslog
 import getopt
 import traceback
-import stack	     # need this so we can load the stack.commands.* modules
-import stack.exception
+import signal
+import stack        # need this so we can load the stack.commands.* modules
+from stack.exception import CommandError
+
+
+def sigint_handler(signal, frame):
+	print('\nInterrupted')
+	sys.exit(0)
+
+
+# attach a prettier interrupt handler to SIGINT (ctrl-c)
+signal.signal(signal.SIGINT, sigint_handler)
 
 # Open syslog
 
@@ -122,8 +132,6 @@ def run_command(args, debug=False):
 
 	name = ' '.join(s.split('.')[2:])
 
-	import stack.exception
-
 	# If we can load the command object then fall through and invoke the run()
 	# method.  Otherwise the user did not give a complete command line and
 	# we call the help command based on the partial command given.
@@ -135,7 +143,7 @@ def run_command(args, debug=False):
 		submodpath = '/'.join(fullmodpath[2:])
 		try:
 			help.run({'subdir': submodpath}, [])
-		except stack.exception.CommandError as e:
+		except CommandError as e:
 			sys.stderr.write('%s\n' % e)
 			return -1
 		print(help.getText())
@@ -146,11 +154,11 @@ def run_command(args, debug=False):
 #		 t0 = time.time()
 		rc = command.runWrapper(name, args[i:])
 #		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
-	except stack.exception.CommandError as e:
+	except CommandError as e:
 		sys.stderr.write('%s\n' % e)
 		syslog.syslog(syslog.LOG_ERR, '%s' % e)
 		return -1
-	except:
+	except Exception as e:
 		# Sanitize Exceptions, and log them.
 		exc, msg, tb = sys.exc_info()
 		for line in traceback.format_tb(tb):
@@ -162,6 +170,11 @@ def run_command(args, debug=False):
 		return -1
 
 	text = command.getText()
+
+	# set the SIGPIPE to the system default (instead of python default)
+	# before trying to print; prevents a stacktrace when exiting a pipe'd stack command
+	signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
 	if text and len(text) > 0:
 		print(text, end='')
 		if text[len(text) - 1] != '\n':

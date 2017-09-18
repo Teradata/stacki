@@ -42,10 +42,13 @@
 		<to>node-certs</to>
 		<to>resolv</to>
 		<to>routes-client</to>
-		<to>pxeboot</to>
 		<to>storage</to>
+		<to>pxeboot</to>
 		<to>peerdone</to>
 	</edge>
+
+	<order head="storage" tail="pxeboot" />
+	<order head="pxeboot" tail="peerdone" />
 
 	<edge from="client" to="firewall-client" cond="firewall"/>
 	<edge from="client" to="firewall-base"   cond="firewall"/>

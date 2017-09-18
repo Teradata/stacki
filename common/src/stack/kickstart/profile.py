@@ -166,7 +166,6 @@ client.pre()
 empty = False
 mutex.acquire()
 count = semaphore.read()
-count = 1
 if count == None:
 	syslog.syslog(syslog.LOG_DEBUG, 'semaphore not found')
 	try:

@@ -19,7 +19,14 @@ from stack.exception import CommandError
 
 class Command(stack.commands.Command):
 	"""
-	Change the root password for relevant cluster services.
+	Change the root password for relevant cluster services.  In particular, this changes the Unix
+	'root' account password for the Frontend.  Note that this password is also the default
+	password for all backend nodes, but backends will not have their passwords set to the new
+	password until after a reinstall.
+
+	<example cmd='set password'>
+	Set the password for Stacki.  You will be prompted for the current password and the new password.
+	</example>
 	"""
 	
 	def run(self, params, args):

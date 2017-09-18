@@ -208,7 +208,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						try:
 							name_opt = d_map['options'].index("--name=")
 						except:
-							msg = 'Volgroup "%s" for host "%s" '+ \
+							msg = 'Volgroup "%s" for host "%s" ' + \
 								'needs "--name=<volname>" ' + \
 								'in the OPTIONS field'
 							raise CommandError(self.owner, msg % (d, host))

@@ -57,14 +57,12 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		if dhcp:
 			self.addOutput(host, 'BOOTPROTO=dhcp')
-			self.addOutput(host, 'ONBOOT=yes')
 			configured = 1
 		else:
 			if ip and netmask:
 				self.addOutput(host, 'IPADDR=%s' % ip)
 				self.addOutput(host, 'NETMASK=%s' % netmask)
 				self.addOutput(host, 'BOOTPROTO=static')
-				self.addOutput(host, 'ONBOOT=yes')
 				configured = 1
 
 		#
@@ -78,7 +76,6 @@ class Command(stack.commands.HostArgumentProcessor,
 			#
 			if not configured:
 				self.addOutput(host, 'BOOTPROTO=none')
-				self.addOutput(host, 'ONBOOT=yes')
 				configured = 1
 			
 			#
@@ -95,7 +92,6 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		if channel and bond_reg.match(channel):
 			self.addOutput(host, 'BOOTPROTO=none')
-			self.addOutput(host, 'ONBOOT=yes')
 			self.addOutput(host, 'MASTER=%s' % channel)
 			self.addOutput(host, 'SLAVE=yes')
 			configured = 1
@@ -110,7 +106,6 @@ class Command(stack.commands.HostArgumentProcessor,
 			#
 			if not configured:
 				self.addOutput(host, 'BOOTPROTO=none')
-				self.addOutput(host, 'ONBOOT=yes')
 
 			#
 			# Don't write the MTU in the bridge configuration
@@ -132,18 +127,21 @@ class Command(stack.commands.HostArgumentProcessor,
 				options = self.db.fetchone()
 				if "bridge" in options:
 					self.addOutput(host, 'BOOTPROTO=none')
-					self.addOutput(host, 'ONBOOT=yes')
 					self.addOutput(host, 'BRIDGE=%s' % channel)
 					configured = 1
 
 		if vlanid:
 			self.addOutput(host, 'VLAN=yes')
-			self.addOutput(host, 'ONBOOT=yes')
 			configured = 1
 
 		if not configured:
 			self.addOutput(host, 'BOOTPROTO=none')
 			self.addOutput(host, 'ONBOOT=no')
+		else:
+			if 'onboot=no' in options:
+				self.addOutput(host, 'ONBOOT=no')
+			else:
+				self.addOutput(host, 'ONBOOT=yes')
 
 		if mtu:
 			self.addOutput(host, 'MTU=%s' % mtu)

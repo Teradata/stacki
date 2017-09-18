@@ -343,7 +343,6 @@ class ExpandingTraversor(Traversor):
 		If the is the first time we've seen a file ci/co it.  Otherwise
 		just track the ownership and perms from the <file> tag .
 		"""
-		rcsFiles = { }
 		rcsdir	 = os.path.join(os.path.dirname(file), 'RCS')
 		rcsfile  = '%s,v' % os.path.join(rcsdir, os.path.basename(file))
 		l	 = []

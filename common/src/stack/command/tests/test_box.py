@@ -62,3 +62,25 @@ def test_box():
 	result = Call('remove box', [ 'default' ])
 	assert ReturnCode() == 255
 
+	# remove multiple boxes
+	# Add the first box back
+
+	result = Call('add box', [ box ])
+	assert ReturnCode() == 0 and result == []
+
+	# get a second box name
+	done = False
+	while not done:
+		second_box = 'default-%s' % str(random.randint(0, 100))
+		result = Call('list box', [ second_box ])
+		if ReturnCode() and not result:
+			done = True
+	assert second_box
+
+	result = Call('add box', [ second_box ])
+	assert ReturnCode() == 0 and result == []
+
+	# remove multiple boxes
+
+	result = Call('remove box', [ box, second_box ])
+	assert ReturnCode() == 0

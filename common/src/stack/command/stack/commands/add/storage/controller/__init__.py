@@ -128,7 +128,7 @@ class Command(stack.commands.HostArgumentProcessor,
 				scope = 'host'
 
 		if not scope:
-			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % arg[0])
+			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % args[0])
 
 		if scope == 'global':
 			name = 'global'

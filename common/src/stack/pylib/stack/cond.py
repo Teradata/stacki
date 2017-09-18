@@ -57,10 +57,13 @@ class _CondEnv(UserDict):
 
 		# Try to convert value to a boolean
 		
-		if val.lower() in [ 'on', 'true', 'yes', 'y' ]:
-			return True
-		if val.lower() in [ 'off', 'false', 'no', 'n' ]:
-			return False
+		try:
+			if val.lower() in [ 'on', 'true', 'yes', 'y' ]:
+				return True
+			if val.lower() in [ 'off', 'false', 'no', 'n' ]:
+				return False
+		except:
+			pass
 
 		# Everything else is returned as a string
 

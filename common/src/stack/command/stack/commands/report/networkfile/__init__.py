@@ -1,5 +1,5 @@
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
+# @SI_Copyright@
+# @SI_Copyright@
 
 import stack.commands
 import csv
@@ -12,26 +12,43 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	<dummy />
 	"""
 
+	def doNetwork(self, csv_w):
+		row = []
+
+		output = self.call('list.network')
+
+		for o in output:
+			network = o['network']
+			zone = o['zone']
+			netmask = o['mask']
+			mtu = o['mtu']
+			dns = o['dns']
+			address = o['address']
+			gateway = o['gateway']
+			pxe = o['pxe']
+			row = [ network, address, netmask, gateway, 
+				mtu, zone, dns, pxe]
+
+			row = map(lambda x: '' if x == 'None' else x, row)
+
+			csv_w.writerow(row)
+
 	def run(self, params, args):
 
 		header = ['NETWORK', 'ADDRESS', 'MASK', 'GATEWAY', 'MTU', 'ZONE', 'DNS', 'PXE']
 
-		s = StringIO()
-		w = csv.writer(s)
-		w.writerow(header)
+		# CSV writer requires fileIO.
+		# Setup string IO processing
+		csv_f = StringIO()
+		csv_w = csv.writer(csv_f)
+		csv_w.writerow(header)
 
-		for row in self.call('list.network'):
-			network = row['network']
-			zone    = row['zone']
-			netmask = row['mask']
-			mtu     = row['mtu']
-			dns     = row['dns']
-			address = row['address']
-			gateway = row['gateway']
-			pxe     = row['pxe']
+		self.doNetwork(csv_w)
 
-			w.writerow([ network, address, netmask, gateway, mtu, zone, dns, pxe])
+		# Get string from StringIO object
+		s = csv_f.getvalue().strip()
+		csv_f.close()
 
 		self.beginOutput()
-		self.addOutput(None, s.getvalue().strip())
+		self.addOutput('', s)
 		self.endOutput()

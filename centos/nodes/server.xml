@@ -62,6 +62,8 @@ for pallet in g.rolls:
 <package>stack-config-server</package>
 <package>git</package>
 <package>git-lfs</package>
+<!-- perl-Error required for some git functionality -->
+<package>perl-Error</package>
 
 <!-- rpms to create pallets -->
 <package>genisoimage</package>

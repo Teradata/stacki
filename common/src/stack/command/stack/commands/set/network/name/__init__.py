@@ -5,7 +5,7 @@
 # @SI_Copyright@
 
 import stack.commands.set.network
-from stack.exception import ArgUnique
+from stack.exception import ArgUnique, CommandError
 
 
 class Command(stack.commands.set.network.command):
@@ -31,6 +31,9 @@ class Command(stack.commands.set.network.command):
 		if len(networks) > 1:
 			raise ArgUnique(self, 'network')
 					
+		if ' ' in name:
+			raise CommandError(self, 'network name must not contain a space')
+
 		for network in networks:
 			self.db.execute("""
 				update subnets set name='%s' where

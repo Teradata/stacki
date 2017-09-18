@@ -55,7 +55,7 @@ class Command(stack.commands.set.host.command):
 				and ba.bootname=bn.id
 				and bn.type = 'install';
 				""" % (action))
-			if rows != 1:
+			if rows < 1:
 				nrows = self.db.execute("""
 				select name from bootnames 
 				where type="install";

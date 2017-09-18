@@ -43,7 +43,7 @@ class Command(stack.commands.sync.host.command):
 		host_output = {}
 		for host in hosts:
 
-			host_output[host]= {"output": "", "error": "", "rc": 0}
+			host_output[host] = {"output": "", "error": "", "rc": 0}
 			out[host] = ""
 			attrs = {}
 			for row in self.call('list.host.attr', [ host ]):
@@ -80,7 +80,7 @@ class Command(stack.commands.sync.host.command):
 				if me != host:
 					cmd = 'ssh -T -x %s "%s"' % (host, cmd)
 
-				host_output[host]= {"output": "", "error": "", "rc": 0}
+				host_output[host] = {"output": "", "error": "", "rc": 0}
 				p = Parallel(cmd, host_output[host])
 				threads.append(p)
 				p.start()

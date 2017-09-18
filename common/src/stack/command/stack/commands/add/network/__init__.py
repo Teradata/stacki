@@ -65,7 +65,10 @@ class Command(stack.commands.add.command):
 		if len(args) != 1:
 			raise ArgUnique(self, 'network')
 		name = args[0]
-		
+
+		if ' ' in name:
+			raise CommandError(self, 'network name must not contain a space')
+
 		(address, mask, gateway,
 			 mtu, zone, dns, pxe) = self.fillParams([
 				 ('address',	None, True),

@@ -18,6 +18,7 @@ from stack_site import *
 
 sys.path.append('/opt/stack/lib')
 from stacki_storage import *
+from stacki_default_part import rhel 
 import stack
 
 ##
@@ -27,6 +28,16 @@ host_partitions = []
 md_re = re.compile("^md[0-9]+$")
 FNULL = open(os.devnull, 'w')
 
+
+##
+## Manual Partitioning
+##
+manual = False
+if os.path.exists('/tmp/user_partition_info'):
+	with open('/tmp/user_partition_info', 'r') as f:
+		manual = 'manual' in f.read().split()
+if manual:
+	sys.exit(0)
 
 ##
 ## functions
@@ -430,25 +441,10 @@ disks = getHostDisks(nukedisks)
 #
 # first try to find /etc/fstab on all the physical partitions 
 #
-host_fstab = []
-devices = []
-for disk in disks:
-	for part in disk['part']:
-		device = '/dev/%s' % part
-		if device not in devices:
-			devices.append(device)
+devices = getDeviceList(disks)
 
-	for raid in disk['raid']:
-		device = '/dev/%s' % raid
-		if device not in devices:
-			devices.append(device)
-
-	for lvm in disk['lvm']:
-		device = '/dev/mapper/%s' % lvm
-		if device not in devices:
-			devices.append(device)
-	
 host_fstab = getHostFstab(devices)
+
 host_partitions = getHostPartitions(disks, host_fstab)
 
 # print 'host_fstab : %s' % host_fstab
@@ -456,21 +452,42 @@ host_partitions = getHostPartitions(disks, host_fstab)
 # print 'host_partitions : %s' % host_partitions
 # print
 
+frontend = False
+with open('/proc/cmdline','r') as f:
+	frontend = 'frontend' in f.read().split()
+
 if not csv_partitions:
 	parts = []
 	# on a frontend, get 'release' from the stack module
 	release = attributes.get('release', stack.release)
-	if release == '7.x':
-		parts.append( ('biosboot', 1, 'biosboot') )
-	parts.append( ('/', 16000, 'ext4') )
-	parts.append( ('swap', 1000, 'swap') )
-	parts.append( ('/var', 16000, 'xfs') )
-	parts.append( ('/state/partition1', 0, 'xfs') )
+	if os.path.exists('/sys/firmware/efi'):
+		default = 'uefi'
+	else:
+		default = 'default'
+
+	ostype = 'rhel7'
+	if release == '6.x':
+		ostype = 'rhel6'
+
+	var = '%s_%s' % (ostype, default)
+	if hasattr(rhel, var):
+		parts = getattr(rhel, var)
+	else:
+		parts = getattr(rhel, 'default')
 
 	if 'boot_device' in attributes:
 		bootdisk = attributes['boot_device']
 	else:
 		bootdisk = disks[0]['device']
+		nuke_bootdisk = True
+		for part in host_partitions:
+			if part['mountpoint'] == '/':
+				bootdisk = part['device']
+				nuke_bootdisk = False
+				break
+		if nuke_bootdisk:
+			disks[0]['nuke'] = 1
+
 
 	csv_partitions = []
 	partid = 1

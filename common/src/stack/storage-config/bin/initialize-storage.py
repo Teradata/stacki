@@ -105,6 +105,23 @@ if 'nukedisks' in attributes:
 else:
 	nukedisks = 'false'
 
+if not attr2bool(nukedisks):
+
+	disks = getHostDisks(nukedisks)
+	devicelist = getDeviceList(disks)
+	host_fstab = getHostFstab(devicelist)
+	partitions = getHostPartitions(devicelist, host_fstab)
+	if not partitions:
+		nukedisks = ['*']
+	else:
+		slash_found = False
+		for part in partitions:
+			if part['mountpoint'] == '/':
+				slash_found = True
+				break
+		if not slash_found:
+			nukedisks = [ disks[0] ]
+
 if not attr2bool(nukecontroller) and not attr2bool(nukedisks):
 	#
 	# nothing to do, so let's exit

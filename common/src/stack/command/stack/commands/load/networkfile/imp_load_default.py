@@ -154,7 +154,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 			# Validated addresses and netmask.
 			self.checkValidIP(name, 'address', address)
 			self.checkValidNetwork(name, 'mask', mask)
-			if gateway != 'None':
+			if gateway is not None:
 				self.checkValidIP(name, 'gateway', gateway)
 
 			# You have an address and a mask check if they're valid together.
