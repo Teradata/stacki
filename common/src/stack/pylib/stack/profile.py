@@ -588,10 +588,10 @@ class Pass1NodeHandler(NodeHandler):
 	def endTag_stack_copyright(self, ns, tag):
 		pass
 
-	def startTag_stack_si_copyright(self, ns, tag, attrs):
+	def startTag_stack_rocks(self, ns, tag, attrs):
 		self.stripText = True
 
-	def endTag_stack_si_copyright(self, ns, tag):
+	def endTag_stack_rocks(self, ns, tag):
 		pass
 
 	def startTag_stack_ns(self, ns, tag, attrs):
