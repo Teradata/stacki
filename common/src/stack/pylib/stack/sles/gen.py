@@ -20,11 +20,11 @@ class BashProfileTraversor(stack.gen.MainTraversor):
 
 class ExpandingTraversor(stack.gen.Traversor):
 
-	stages   = { 'install-pre'         : 'pre-scripts',
+	stages	 = { 'install-pre'	   : 'pre-scripts',
 		     'install-pre-package' : 'postpartitioning-scripts',
-		     'install-post'        : 'chroot-scripts',
-		     'boot-pre'            : 'post-scripts',
-		     'boot-post'           : 'init-scripts' }
+		     'install-post'	   : 'chroot-scripts',
+		     'boot-pre'		   : 'post-scripts',
+		     'boot-post'	   : 'init-scripts' }
 
 
 	def pre(self):
@@ -50,11 +50,11 @@ class ExpandingTraversor(stack.gen.Traversor):
 
 
 	def traverse_stack_script(self, node):
-		nodeid   = self.getAttr(node, 'stack:id')
+		nodeid	 = self.getAttr(node, 'stack:id')
 		nodefile = self.getAttr(node, 'stack:file')
-		stage    = self.getAttr(node, 'stack:stage',  default='install-post')
-		chroot   = self.getAttr(node, 'stack:chroot', default='true')
-		shell    = self.getAttr(node, 'stack:shell')
+		stage	 = self.getAttr(node, 'stack:stage',  default='install-post')
+		chroot	 = self.getAttr(node, 'stack:chroot', default='true')
+		shell	 = self.getAttr(node, 'stack:shell')
 
 		stagename = self.stages[stage]
 		if not stagename == 'chroot-scripts':
@@ -64,14 +64,14 @@ class ExpandingTraversor(stack.gen.Traversor):
 		# <scripts>
 		#   <STAGE config:type="list">
 		#     <script>
-		#       <filename>stacki-ipmi.sh</filename>
-		#       <interpreter>SHELL</interpreter>
-		#       <chrooted config:type="boolean">true|flase</chrooted>
-		#       <source>
-		#       ...
-		#       </source>
+		#	<filename>stacki-ipmi.sh</filename>
+		#	<interpreter>SHELL</interpreter>
+		#	<chrooted config:type="boolean">true|flase</chrooted>
+		#	<source>
+		#	...
+		#	</source>
 		#     </script>
-	        #   </STAGE>
+		#   </STAGE>
 		# </scripts>
 
 
@@ -192,10 +192,15 @@ class DefraggingTraversor(stack.gen.Traversor):
 class MainTraversor(stack.gen.MainTraversor):
 
 	def pre(self):
-		self.outers  = { }
-		self.scripts = [ ]
+		self.scripts  = [ ]
+		self.software = [ ]
 
 	def post(self):
+		self.gen.softwareSection.append('<software>')
+		for child in self.software:
+			self.gen.softwareSection.append(child.toxml())
+		self.gen.softwareSection.append('</software>')
+
 		self.gen.scriptsSection.append('<scripts>')
 		for child in self.scripts:
 			self.gen.scriptsSection.append(child.toxml())
@@ -208,10 +213,10 @@ class MainTraversor(stack.gen.MainTraversor):
 		tag and build the header for the final document.
 
 		"""
-		slesNS   = self.getAttr(self.gen.root, 'xmlns:sles')
+		slesNS	 = self.getAttr(self.gen.root, 'xmlns:sles')
 		configNS = self.getAttr(self.gen.root, 'xmlns:config')
-		xiNS     = self.getAttr(self.gen.root, 'xmlns:xi')
-		stackNS  = self.getAttr(self.gen.root, 'xmlns:stack')
+		xiNS	 = self.getAttr(self.gen.root, 'xmlns:xi')
+		stackNS	 = self.getAttr(self.gen.root, 'xmlns:stack')
 
 		section = self.gen.headerSection
 		section.append('<?xml version="1.0"?>')
@@ -239,6 +244,18 @@ class MainTraversor(stack.gen.MainTraversor):
 		self.gen.packageSet.append(pkg, enabled, nodefile)
 		self.traverse_sles(node)
 		return False
+
+
+	def traverse_sles_software(self, node):
+		"""Handle multiple <sles:software> sections by recording them in a
+		ProfileSection and marking the XML element for
+		garbarge collection.
+
+		"""
+		for child in node.childNodes:
+			self.software.append(child)
+		node.setAttribute('stack:gc', 'true')
+		return True # keep going
 
 
 	def traverse_sles_scripts(self, node):
@@ -275,10 +292,11 @@ class Generator(stack.gen.Generator):
 
 	def __init__(self):
 		stack.gen.Generator.__init__(self)
-		self.headerSection  = stack.gen.ProfileSection()
-		self.nativeSection  = stack.gen.ProfileSection()
-		self.footerSection  = stack.gen.ProfileSection()
-		self.scriptsSection = stack.gen.ProfileSection()
+		self.headerSection   = stack.gen.ProfileSection()
+		self.nativeSection   = stack.gen.ProfileSection()
+		self.footerSection   = stack.gen.ProfileSection()
+		self.softwareSection = stack.gen.ProfileSection()
+		self.scriptsSection  = stack.gen.ProfileSection()
 
 		self.setOS('sles')
 		self.setArch('x86_64')
@@ -286,7 +304,7 @@ class Generator(stack.gen.Generator):
 
 	def traversors(self):
 		profileType = self.getProfileType()
-		workers     = [ ]
+		workers	    = [ ]
 
 		if profileType == 'native':
 			workers.extend([ ExpandingTraversor(self), 
@@ -307,12 +325,13 @@ class Generator(stack.gen.Generator):
 	def generate_native(self):
 		profile = self.headerSection.generate()
 		profile.extend(self.nativeSection.generate())
+		profile.extend(self.softwareSection.generate())
 		profile.extend(self.scriptsSection.generate())
 		profile.extend(self.footerSection.generate())
 		return profile
 
 	def generate_bash(self):
-		profile  = [ '#! /bin/bash' ]
+		profile	 = [ '#! /bin/bash' ]
 		profile.extend(self.shellSection.generate())
 		return profile
 
