@@ -1,6 +1,6 @@
 #!/opt/stack/bin/python3
 #
-# @SI_Copyright@
+# @copyright@
 #				stacki.com
 #				   v3.2
 # 
@@ -39,9 +39,9 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# @SI_Copyright@
+# @copyright@
 #
-# @Copyright@
+# @rocks@
 #				Rocks(r)
 #			 www.rocksclusters.org
 #			 version 5.4 (Maverick)
@@ -90,7 +90,7 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# @Copyright@
+# @rocks@
 
 import os
 import os.path

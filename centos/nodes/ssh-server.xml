@@ -4,11 +4,11 @@
 SSH config for frontend nodes.
 </description>
 
-<si_copyright>
+<copyright>
 Copyright (c) 2006 - 2017 StackIQ Inc.
 All rights reserved. stacki(r) v4.0 stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</si_copyright>
+</copyright>
 
   
 <post>

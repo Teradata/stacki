@@ -1,4 +1,4 @@
-# @SI_Copyright@
+# @copyright@
 #			      www.stacki.com
 #				   v3.1
 # 
@@ -37,7 +37,7 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# @SI_Copyright@
+# @copyright@
 #
 
 import os

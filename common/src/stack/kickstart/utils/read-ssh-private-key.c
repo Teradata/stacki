@@ -4,11 +4,11 @@ static char rcsid[] = "$Id$";
  * Allow a non-root user (depending on the permissions for this executable)
  * to read the Cluster Private Key. This app is intended to run setuid root.
  *
- * @Copyright@
+ * @rocks@
  * Copyright (c) 2000 - 2010 The Regents of the University of California
  * All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
  * https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
- * @Copyright@
+ * @rocks@
  *
  * test with: gcc -o read-private-key read-private-key.c
  * $Log$

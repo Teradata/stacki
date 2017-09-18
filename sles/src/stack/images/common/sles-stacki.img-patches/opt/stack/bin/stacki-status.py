@@ -1,7 +1,7 @@
 #!/opt/stack/bin/python3 -E
 #
-# @SI_Copyright@
-# @SI_Copyright@
+# @copyright@
+# @copyright@
 #
 
 import socket

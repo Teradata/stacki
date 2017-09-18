@@ -1,8 +1,8 @@
 <stack:stack>
 
 
-<stack:si_copyright>
-</stack:si_copyright>
+<stack:copyright>
+</stack:copyright>
 
 
 <stack:package>openssl</stack:package>

@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python
 # 
-# @SI_Copyright@
-# @SI_Copyright@
+# @copyright@
+# @copyright@
 
 import stack.gen
 

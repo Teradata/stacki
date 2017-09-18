@@ -1,9 +1,14 @@
 <stack:stack>
 
-<stack:si_copyright>
+<stack:copyright>
 (c) 2006 - 2017 StackIQ Inc.
 All rights reserved. stacki(r) v4.0 stacki.com
-</stack:si_copyright>
+</stack:copyright>
+
+<stack:rocks>
+(c) 2006 - 2017 StackIQ Inc.
+All rights reserved. stacki(r) v4.0 stacki.com
+</stack:rocks>
 
 
 <stack:script stack:stage="install-post">

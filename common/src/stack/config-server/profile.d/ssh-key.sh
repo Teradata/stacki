@@ -4,11 +4,11 @@
 # generate a ssh key if one doesn't exist
 #
 #
-# @Copyright@
+# @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @Copyright@
+# @rocks@
 #
 #
 # $Log$

@@ -5,11 +5,11 @@ Copy root's public key from the Frontend to the installing nodes.
 If additional keys are listed in the authorized_keys attribute, copy those as well.
 </description>
 
-<si_copyright>
+<copyright>
 Copyright (c) 2006 - 2017 StackIQ Inc.
 All rights reserved. stacki(r) v4.0 stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</si_copyright>
+</copyright>
 
 <post>
 <!-- make sure the /root/.ssh exists -->

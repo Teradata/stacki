@@ -1,5 +1,5 @@
-# @SI_Copyright@
-# @SI_Copyright@
+# @copyright@
+# @copyright@
 
 YUMLIST = MegaCLI storcli hpssacli \
 		stack-command \

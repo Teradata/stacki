@@ -1,14 +1,14 @@
-# @SI_Copyright@
+# @copyright@
 # Copyright (c) 2006 - 2017 StackIQ Inc.
 # All rights reserved. stacki(r) v4.0 stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-# @SI_Copyright@
+# @copyright@
 #
-# @Copyright@
+# @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @Copyright@
+# @rocks@
 
 import os
 import tempfile
@@ -109,16 +109,19 @@ class Command(stack.commands.add.command):
                 # We breakup the string below to protect this code segment
                 # for insert-copyright detecting the tags.  Otherwise we
                 # could not run on ourselves.
-                self.tree = stack.file.Tree('../../..')
+                self.tree = stack.file.Tree('../../../..')
                 
                 print('Inserting stacki copyright into source code files...')
-                self.pattern   = [ '@' + 'SI_Copyright@', '@' + 'SI_Copyright@' ]
+                self.pattern   = [ '@' + 'copyright@', '@' + 'copyright@' ]
                 self.copyright = copyright['stacki-long']
                 self.tree.apply(self.iter)
 
                 print('Inserting stacki copyright into XML files...')
-                self.pattern = [ '<' + 'si_copyright>', '<' + '/si_copyright>' ]
+                self.pattern = [ '<' + 'copyright>', '<' + '/copyright>' ]
                 self.copyright = copyright['stacki-short']
+                self.tree.apply(self.iter)
+
+                self.pattern = [ '<' + 'stack:copyright>', '<' + '/stack:copyright>' ]
                 self.tree.apply(self.iter)
 
 
@@ -129,12 +132,15 @@ class Command(stack.commands.add.command):
                 # together.
 
                 print('Inserting rocks copyright into source code files...')
-                self.pattern   = [ '@' + 'Copyright@', '@' + 'Copyright@' ]
+                self.pattern   = [ '@' + 'rocks@', '@' + 'rocks@' ]
                 self.copyright = copyright['rocks-long']
                 self.tree.apply(self.iter)
                 
                 print('Inserting rocks copyright into XML files...')
-                self.pattern = [ '<' + 'copyright>', '<' + '/copyright>' ]
+                self.pattern = [ '<' + 'rocks>', '<' + '/rocks>' ]
                 self.copyright = copyright['rocks-short']
+                self.tree.apply(self.iter)
+
+                self.pattern = [ '<' + 'stack:rocks>', '<' + '/stack:rocks>' ]
                 self.tree.apply(self.iter)
 

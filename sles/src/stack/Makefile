@@ -1,5 +1,5 @@
-# @SI_Copyright@
-# @SI_Copyright@
+# @copyright@
+# @copyright@
 
 dump-info bootstrap rpm pkg install-rpm clean nuke:
 	for x in *; do					\

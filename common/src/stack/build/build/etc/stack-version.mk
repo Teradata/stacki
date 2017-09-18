@@ -1,14 +1,14 @@
-# @SI_Copyright@
+# @copyright@
 # Copyright (c) 2006 - 2017 StackIQ Inc.
 # All rights reserved. stacki(r) v4.0 stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-# @SI_Copyright@
+# @copyright@
 #
-# @Copyright@
+# @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @Copyright@
+# @rocks@
 
 ifndef __RELEASE_MK
 __RELEASE_MK = yes
@@ -34,26 +34,5 @@ VERSION_NAME = "$(RELEASE_NAME)"
 # loader as an attribute on the URL kickstart request line.
 
 PROJECT_NAME = stack
-
-# All docbook stuff include a publication date, let make this global
-# right here.
-
-PUBDATE = $(shell date +'%b %d %Y')
-YEAR = $(shell date +'%Y')
-
-rocks-copyright.txt:
-	@rm -f $@
-	@touch $@
-	@echo '@Copyright@' >> $@
-	@echo 'Copyright (c) 2000 - 2010 The Regents of the University of California' >> $@
-	@echo 'All rights reserved. Rocks(r) v5.4 www.rocksclusters.org' >> $@
-	@echo 'https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt' >> $@
-	@echo '@Copyright@' >> $@
-	-cat $@ | grep -v "^@Copyright" | expand -- > $@.tmp
-	-mv $@.tmp $@
-
-
-clean::
-	@rm -f rocks-copyright.txt
 
 endif

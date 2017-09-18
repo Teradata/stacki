@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python3
 #
-# @SI_Copyright@
-# @SI_Copyright@
+# @copyright@
+# @copyright@
 
 import os
 import sys
