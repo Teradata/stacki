@@ -26,10 +26,10 @@ class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
 		return setlist
 
 	def returnDiffs(self, network):
-		for k, v in self.networks[network].iteritems():
+		for k, v in self.networks[network].items():
 			self.networks[network][k] = str(v or '')
 
-		for k, v in self.current_networks[network].iteritems():
+		for k, v in self.current_networks[network].items():
 			self.current_networks[network][k] = str(v or '')
 		a = set(self.current_networks[network].items())
 		b = set(self.networks[network].items())
