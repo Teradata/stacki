@@ -25,7 +25,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 	</arg>
 	
 	<param type='string' name='os'>
-	OS associated with the box. Default is 'redhat'
+	OS associated with the box. Default is the native os (e.g., 'redhat', 'sles').
 	</param>
 
 	<example cmd='add box develop'>
@@ -42,7 +42,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 		if box in self.getBoxNames():
 			raise CommandError(self, 'box "%s" exists' % box)
 
-		OS, = self.fillParams([ ('os', 'redhat') ])
+		OS, = self.fillParams([ ('os', self.os) ])
 
 		self.db.execute("""insert into boxes (name, os) values
 			('%s', (select id from oses where name='%s'))""" % (box, OS))
