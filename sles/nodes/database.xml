@@ -131,7 +131,6 @@ except:
 	sys.exit(-1)
 
 # Read the root database password from root.my.cnf
-
 root_pass = get_pass_from_conf('/opt/stack/etc/root.my.cnf')
 cmd_set = []
 
