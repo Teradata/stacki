@@ -11,7 +11,6 @@
 # @rocks@
 
 import sys
-import string
 import subprocess
 import stack.commands
 from stack.exception import ArgRequired, CommandError
@@ -67,8 +66,7 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 		if sys.stdin.isatty():
 			cmdparams = [ 'localhost' ]
 			if rolls:
-				cmdparams.append('pallet=%s' %
-					string.join(rolls, ','))
+				cmdparams.append('pallet=%s' % ','.join(rolls))
 			xml = self.command('list.host.xml', cmdparams)
 		else:
 			xml = sys.stdin.read()

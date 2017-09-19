@@ -31,7 +31,9 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 			self.owner.call('remove.storage.partition', target)
 
 			# Get list of devices for this host
-			devices = hosts[host].keys()
+			devices = []
+			for d in hosts[host].keys():
+				devices.append(d)
 			devices.sort()
 
 			# Loop through all devices in the list
@@ -47,14 +49,14 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 
 					mountpt = partition['mountpoint']
 					size = partition['size']
-					type = partition['type']
+					parttype = partition['type']
 					options = partition['options']
 					partid = partition['partid']
 
 					if mountpt:
 						cmdargs.append('mountpoint=%s' % mountpt)
-					if type:
-						cmdargs.append('type=%s' % type)
+					if parttype:
+						cmdargs.append('type=%s' % parttype)
 
 					cmdargs.append('size=%s' % size)
 					if options:
