@@ -33,7 +33,7 @@ class Password:
 		if not c_pw:
 			c = self.get_rand()
 			c_pw = base64.urlsafe_b64encode(c)
-			c_pw = c_pw.rstrip('='.encode())
+			c_pw = c_pw.rstrip(b'=').decode()
 		return c_pw
 
 	def get_crypt_pw(self, c_pw=None):
