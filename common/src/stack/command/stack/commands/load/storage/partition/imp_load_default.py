@@ -179,7 +179,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				type_dict[type_key] = device_arr
 
 		# Regexp to match Hard disk labels
-		hd_label_regexp = '(xvd[a-z]+)|([shv]d[a-z]+)|(md[0-9]+)'
+		hd_label_regexp = '(xvd[a-z]+)|([shv]d[a-z]+)|(md[0-9]+)(nvme[0-9]+n[0-9]+)'
 		hd_regexp = re.compile(hd_label_regexp)
 
 		# Revalidate the spreadsheet to check if pv's, volgroups have been defined
