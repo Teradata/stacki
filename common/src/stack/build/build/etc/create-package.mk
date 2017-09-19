@@ -3,8 +3,8 @@
 # directory into an RPM copied into the contrib area.
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 StackIQ Inc.
-# All rights reserved. stacki(r) v5.0 stacki.com
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 #
