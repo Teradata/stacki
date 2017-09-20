@@ -77,7 +77,7 @@ else
 		if [ "$httpcode" -eq "200" ]
 		then
 			cat /tmp/ks.xml | \
-			/opt/stack/bin/stack list host profile chapter=kickstart  2> /tmp/kgen.debug > /tmp/ks.cfg
+			/opt/stack/bin/stack list host profile chapter=main 2> /tmp/kgen.debug > /tmp/ks.cfg
 			parse_kickstart /tmp/ks.cfg
 			run_kickstart
 			fini=1
