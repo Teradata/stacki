@@ -12,7 +12,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>syslinux</stack:package>
 <stack:package>xinetd</stack:package>
 <stack:package>stack-pxeboot</stack:package>
-<stack:package>stacki-sles-images</stack:package>
+<stack:package>stack-sles-images</stack:package>
 
 
 <stack:script stack:stage="install-post">
