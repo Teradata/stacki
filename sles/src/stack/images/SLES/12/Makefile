@@ -10,6 +10,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 EXTRACT := xzcat
 
+include images.mk
 include ../../common/images.mk
 
 install:: 

@@ -4,14 +4,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-YUMLIST = MegaCLI storcli hpssacli \
-		stack-command \
-		stack-pylib	\
-		foundation-python \
-		foundation-python-packages \
-		stack-storage-config \
-		ludicrous-speed
-
 TEMPDIR := $(shell mktemp -d)
 
 PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)
@@ -21,7 +13,7 @@ include ../../common/images-$(OS).mk
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
-rpminst: localrepo getpackages
+rpminst: localrepo getpackages getextrapackages
 	rpm --dbpath $(TEMPDIR) -ivh --nodeps --force --badreloc \
 		--relocate=/=$(CURDIR)/sles-stacki $(RPMLOC)
 	rm -rf $(TEMPDIR)
