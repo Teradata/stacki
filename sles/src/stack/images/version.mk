@@ -1,2 +1,2 @@
-NAME		= stacki-sles-images
+NAME		= stack-sles-images
 ORDER		= 99
