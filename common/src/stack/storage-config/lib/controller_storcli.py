@@ -20,7 +20,7 @@ class CLI:
 
 		f = open('/tmp/MegaSAS.log','a')
 		f.write('cmd: %s\n\n'  % ' '.join(cmd))
-		p = subprocess.run(cmd, stdin=subprocess.PIPE)
+		p = subprocess.run(cmd, stdout=subprocess.PIPE)
 		o = p.stdout.decode()
 		f.write('%s\n\n' % o)
 		f.close()
@@ -29,7 +29,7 @@ class CLI:
 			result = j['Controllers'][0]
 		else:
 			result = {}
-			for line in o.split('\n'):
+			for line in o.splitlines():
 				line = line.strip()
 				tokens = line.split('=')
 				if len(tokens) < 2:

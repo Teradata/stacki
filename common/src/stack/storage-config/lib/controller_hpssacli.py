@@ -1,11 +1,15 @@
 #!/opt/stack/bin/python3
 
+import os
 import subprocess
 
 class CLI:
 	debug = 0
 
 	def run(self, args):
+		if not os.path.exists('/opt/stack/sbin/hpssacli'):
+			return []
+
 		cmd = [ '/opt/stack/sbin/hpssacli', 'ctrl' ]
 		cmd.extend(args)
 

@@ -19,10 +19,10 @@ class CLI:
 
 		result = []
 
-		p = subprocess.run(cmd, subprocess.stdout=PIPE)
+		p = subprocess.run(cmd, stdout=subprocess.PIPE)
 
-		for line in p.stdout.decode().split('\n'):
-			tokens = line[:-1].split(':', 1)
+		for line in p.stdout.decode().splitlines():
+			tokens = line.split(':', 1)
 			if len(tokens) != 2:
 				continue
 			(k, v) = tokens
