@@ -8,8 +8,7 @@ ROLLROOT	= ../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-# SRCDIRS = SLES/11.3 SLES/12
-SRCDIRS = SLES/11.3
+SRCDIRS = SLES/11.3 SLES/12
 
 build:
 	for i in $(SRCDIRS); do \

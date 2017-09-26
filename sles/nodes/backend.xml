@@ -10,6 +10,13 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
+
+<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
+/usr/bin/systemctl disable wickedd-dhcp4.service
+/usr/bin/systemctl disable wickedd-dhcp6.service
+</stack:script>
+
+
 <stack:script stack:stage="boot-pre">
 /sbin/chkconfig ipmi on
 service ipmi start
@@ -17,5 +24,6 @@ chmod +x /tmp/ipmisetup
 /tmp/ipmisetup
 rm -rf /tmp/ipmisetup
 </stack:script>
+
 
 </stack:stack> 
