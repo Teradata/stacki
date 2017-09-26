@@ -46,7 +46,12 @@ info "anaconda fetching kickstart from $kickstart"
 # STACKI
 
 # Setup ld.conf for /opt/stack/lib (python3 needs this)
+if [ ! -f /etc/ld.so.conf ]; then
+echo "include ld.so.conf.d/*.conf" > /etc/ld.so.conf
+fi
+
 echo /opt/stack/lib > /etc/ld.so.conf.d/stacki.conf
+
 ldconfig
 
 grep -q "frontend" /proc/cmdline
