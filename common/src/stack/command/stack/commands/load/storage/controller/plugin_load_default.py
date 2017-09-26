@@ -31,8 +31,15 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 
 			self.owner.call('remove.storage.controller', cmdargs)
 
-			arrayids = hosts[host].keys()
+			arrayids = []
+			extra = []
+			for a in hosts[host].keys():
+				if type(a) == int:
+					arrayids.append(a)
+				else:
+					extra.append(a)
 			arrayids.sort()
+			arrayids.extend(extra)
 
 			for array in arrayids:
 				cmdargs = []
