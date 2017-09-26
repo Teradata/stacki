@@ -12,6 +12,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.bool import str2bool
 import stack.gen	
 
 
@@ -114,11 +115,11 @@ class MainTraversor(stack.gen.MainTraversor):
 		flags    = [ ]
 
 		if stage == 'install-post':
-			chroot = self.getAttr(node, 'stack:chroot', default='true')
+			chroot = str2bool(self.getAttr(node, 'stack:chroot', default='true'))
 		else:
-			chroot = ''
+			chroot = False
 
-		if not chroot == 'true':
+		if stage == 'install-post' and not chroot:
 			flags.append('--nochroot')
 			flags.append('--log /mnt/sysimage%s' % self.gen.log)
 		else:

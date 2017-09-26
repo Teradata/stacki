@@ -317,11 +317,11 @@ class Command(stack.commands.list.command,
 
 		## Q: Do we still use this?
 
-		if attrs['os'] == 'redhat':
-			self.addText('<stack:loader>\n')
-			self.addText('%s\n' % saxutils.escape(kstext))
-			self.addText('%kgen\n')
-			self.addText('</stack:loader>\n')
+#		if attrs['os'] == 'redhat':
+#			self.addText('<stack:loader>\n')
+#			self.addText('%s\n' % saxutils.escape(kstext))
+#			self.addText('%kgen\n')
+#			self.addText('</stack:loader>\n')
 
 		for node in parsed:
 
