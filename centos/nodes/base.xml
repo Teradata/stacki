@@ -103,6 +103,12 @@ stacki release &version; (&release;)
 </file>
 </post>
 
+<post>
+<file name="/etc/ld.so.conf.d/stack.conf">
+/opt/stack/lib
+</file>
+ldconfig
+</post>
 
 <boot order="post">
 mkdir -p /var/log/stacki/ks

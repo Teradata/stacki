@@ -11,25 +11,20 @@
 	</copyright>
 
 <package>foundation-python</package>
-<package>foundation-py-requests</package>
-<package>foundation-py-werkzeug</package>
-<package>foundation-py-jinja</package>
-<package>foundation-py-markupsafe</package>
-<package>foundation-py-itsdangerous</package>
-<package>foundation-py-click</package>
-<package>foundation-py-flask</package>
+<package>foundation-python-packages</package>
 <package>ludicrous-speed</package>
 
 <post cond="'&release;' == '7.x'">
 /usr/bin/systemctl enable ludicrous-client 
+</post>
+
+<post cond="'&release;' == '6.x'">
 /sbin/chkconfig ludicrous-client on
 </post>
-
 <!-- Change Stacki.repo to localhost -->
 <post>
-
+<file name="/tmp/stack.conf">
+tacker = frontend:3825
+</file>
 </post>
-
-
 </stack> 
-

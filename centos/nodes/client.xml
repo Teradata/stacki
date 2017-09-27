@@ -25,14 +25,7 @@ reboot
 
 
 <pre>
-
-<!-- start lighttpd for the Avalanche Installer -->
-
 cp /run/install/tmp/stack.conf /tmp/stack.conf
-
-/opt/lighttpd/sbin/lighttpd -f /opt/lighttpd/conf/lighttpd.conf \
-	-m /opt/lighttpd/lib/
-
 </pre>
 
 <pre>
@@ -55,9 +48,12 @@ gpgcheck=0
 </pre>
 
 
-<post>
+<post cond="'&release;' == '6.x'">
 /sbin/chkconfig ipmi on
 </post>
 
+<post cond="'&release;' == '7.x'">
+systemctl enable ipmi
+</post>
 
 </stack> 
