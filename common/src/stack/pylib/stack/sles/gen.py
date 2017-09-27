@@ -93,10 +93,10 @@ class ExpandingTraversor(stack.gen.Traversor):
 			interpreter.appendChild(self.newTextNode(shell))
 			script.appendChild(interpreter)
 
-		if chroot:
+		if stagename == 'chroot-scripts':
 			chrooted = self.newElementNode('sles:chrooted')
 			self.setAttribute(chrooted, 'config:type', 'boolean')
-			chrooted.appendChild(self.newTextNode(shell))
+			chrooted.appendChild(self.newTextNode(chroot))
 			script.appendChild(chrooted)
 
 		source = self.newElementNode('sles:source')
