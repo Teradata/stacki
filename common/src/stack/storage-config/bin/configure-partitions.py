@@ -130,7 +130,7 @@ def sortPartId(entry):
 	try:
 		key = entry['partid']
 		if not key:
-			key = sys.maxint
+			key = sys.maxsize
 	except:
 		key = sys.maxint
 

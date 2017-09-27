@@ -20,6 +20,15 @@ from stacki_storage import *
 ## functions
 ##
 
+def sortids(entry):
+	try:
+		v = int(entry)
+	except:
+		v = sys.maxsize
+
+	return v
+
+
 def getController():
 	# Check if a controller is listed explicitly
 	controller_type = None
@@ -108,7 +117,7 @@ for o in csv_controller:
 	if arrayid not in arrayids:
 		arrayids.append(o['arrayid'])
 
-arrayids.sort()
+arrayids.sort(key = sortids)
 
 nuked = []
 freeslots = {}
@@ -120,7 +129,7 @@ for arrayid in arrayids:
 	enclosure = None
 	adapter = None
 	options = ''
-		
+
 	for o in csv_controller:
 		if o['arrayid'] != arrayid:
 			continue
@@ -131,7 +140,6 @@ for arrayid in arrayids:
 				hotspares.append(o['slot'])
 			else:
 				slots.append(o['slot'])
-
 		if 'adapter' in o.keys() and not adapter:
 			try:
 				adapter = int(o['adapter'])
@@ -163,7 +171,7 @@ for arrayid in arrayids:
 		for slot in freeslots[adapter]:
 			ctrl.doSecureErase(enclosure, adapter, slot)
 
-	slots.sort()
+	slots.sort(key = sortids)
 
 	if len(slots) == 1 and slots[0] == '*':
 		#
