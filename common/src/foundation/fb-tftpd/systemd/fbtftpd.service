@@ -1,0 +1,15 @@
+[Unit]
+Description=FaceBook Tftp Server
+
+[Service]
+ExecStart=/opt/stack/bin/python3 \
+	/opt/stack/bin/in.fbtftpd \
+	--root /tftpboot/pxelinux \
+	--port 69 --retries 30 \
+	--timeout_s 30
+Restart=always
+TimeoutStartSec=10
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
