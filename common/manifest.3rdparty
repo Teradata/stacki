@@ -10,3 +10,5 @@ sc-im-0.4.0-20161021.tgz
 storcli-1.17.08-1.noarch.rpm
 wxPython-4.0.0a3.tar.gz
 mariadb-10.2.6.tar.gz
+redis-4.0.2.tar.gz
+zeromq-4.2.2.tar.gz

@@ -1,0 +1,42 @@
+#
+# /usr/lib//systemd/system/redis.service
+#
+
+[Unit]
+Description=Redis Server
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=forking
+
+PIDFile=/var/run/redis.pid
+
+# Prevent writes to /usr, /boot, and /etc
+ProtectSystem=full
+PrivateDevices=true
+
+# Prevent accessing /home, /root and /run/user
+ProtectHome=true
+
+# Execute pre and post scripts as root, otherwise it does it as User=
+PermissionsStartOnly=true
+
+# Start main service
+Environment="REDIS_CONF=/etc/redis.conf"
+ExecStart=/opt/stack/bin/redis-server $REDIS_CONF
+
+# Stopping service
+KillMode=process
+KillSignal=SIGTERM
+
+# Don't want to see an automated SIGKILL ever
+SendSIGKILL=no
+
+# If redis crashes
+Restart=on-abort
+RestartSec=5s
+UMask=007
