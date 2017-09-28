@@ -35,9 +35,9 @@ cat /tmp/stacki-profile.xml \
 # add stack.conf and start ludicrous
 
 FRONTEND=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
-YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['yumserver']);")
+YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\nif 'yumserver' in attributes: print(attributes['yumserver'])\")")
 
-echo "tracker = ${FRONTEND}" > /tmp/stack.conf
+echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
 /opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
@@ -72,4 +72,6 @@ fi
 if [[ -n $YUMSERVER ]]
 then
 	sed -i 's/'"$FRONTEND"'/'"$YUMSERVER"'/' /etc/install.inf
+else
+	sed -i 's/'"$FRONTEND"'/'"127.0.0.1"'/' /etc/install.inf
 fi
