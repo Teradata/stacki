@@ -54,7 +54,7 @@ class ExpandingTraversor(stack.gen.Traversor):
 		nodefile = self.getAttr(node, 'stack:file')
 		stage	 = self.getAttr(node, 'stack:stage',  default='install-post')
 		chroot	 = self.getAttr(node, 'stack:chroot', default='true')
-		shell	 = self.getAttr(node, 'stack:shell')
+		shell	 = self.getAttr(node, 'stack:shell', default='shell')
 
 		stagename = self.stages[stage]
 		if not stagename == 'chroot-scripts':
