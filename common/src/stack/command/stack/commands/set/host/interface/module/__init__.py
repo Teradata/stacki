@@ -11,7 +11,6 @@
 # @rocks@
 
 
-import string
 import stack.commands
 from stack.exception import ParamRequired
 
@@ -53,7 +52,7 @@ class Command(stack.commands.set.host.command):
 		if not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 		
-		if string.upper(module) == 'NULL':
+		if module.upper() == 'NULL':
 			module = 'NULL'
 
 		for host in self.getHostnames(args):
