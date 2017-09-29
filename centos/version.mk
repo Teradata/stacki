@@ -10,5 +10,5 @@ KICKSTART_LANGSUPPORT	= "en_US"
 CODENAME		= WithGreatPower
 export RELEASE		= $(shell $(STACKBUILD.ABSOLUTE)/bin/os-release)
 
-BOOTABLE		= 1
+BOOTABLE		= 0
 ROLLS.OS		= redhat

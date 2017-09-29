@@ -32,6 +32,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <package>foundation-python-setuptools</package>
 <package>foundation-py-ipaddress</package>
 <package>foundation-redhat</package>
+<package>foundation-fbftpd</package>
 <package>libdnet</package>
 <package>rsync</package>
 

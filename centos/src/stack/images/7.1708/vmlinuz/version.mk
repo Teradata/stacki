@@ -1,0 +1,1 @@
+PKGROOT			= /opt/stack/images
