@@ -317,7 +317,7 @@ class Subscriber(threading.Thread):
 		while True:
 			try:
 				channel, pkt = self.sub.recv_multipart()
-				msg = Message(channel)
+				msg = Message(channel.decode())
 				msg.loads(pkt)
 			except:
 				continue

@@ -47,7 +47,7 @@ import socket
 import threading
 import signal
 import daemon
-import daemon.pidlockfile
+import lockfile.pidlockfile
 import zmq
 import json
 import stack.mq
@@ -76,8 +76,7 @@ class Subscriber(stack.mq.Subscriber):
 		else:
 			message.addHop()
 			try:
-				self.tx.sendto(message.dumps(), 
-					self.dst)
+				self.tx.sendto(message.dumps().encode(), self.dst)
 			except: # ignore failed sends
 				pass
 
@@ -162,7 +161,7 @@ except:
 
 
 if 'STACKDEBUG' not in os.environ:
-	lock = daemon.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
+	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' %
 					('rmq-shipper', 'rmq-shipper'))
 	daemon.DaemonContext(pidfile=lock).open()
 
