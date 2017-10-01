@@ -21,7 +21,7 @@ bootstrap:: install-rpm
 
 build:
 	tar -xzf Python-$(VERSION).tgz
-	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
+#	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
 	( 								\
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT) 			\

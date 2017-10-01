@@ -80,8 +80,7 @@ class AttributeHandler:
 
 	def setAttributes(self, attrs):
 		list = []
-		list.append('<?xml version="1.0" standalone="no"?>\n')
-		list.append('<!DOCTYPE stack-graph [\n')
+		list.append('<!DOCTYPE stack PUBLIC "stack" "http://www.stacki.com" [\n')
 		for k in sorted(attrs.keys()):
 			v = attrs[k]
 			list.append('\t<!ENTITY %s "%s">\n' % (k, v))
@@ -176,7 +175,7 @@ class GraphHandler(handler.ContentHandler,
 			#	- Logging for post sections
 
 			fin       = open(xmlFile, 'r')
-			parser    = make_parser()
+			parser    = make_parser(["stack.expatreader"])
 			handler_1 = Pass1NodeHandler(node, xmlFile, self.attributes, eval, rcl)
 			parser.setContentHandler(handler_1)
 			parser.setFeature(handler.feature_namespaces, True)
@@ -190,6 +189,10 @@ class GraphHandler(handler.ContentHandler,
 				for x in header.split('\n'):
 					sys.stderr.write('[parse1 %4d]%s\n' % (i, x))
 					i += 1
+			if parser._parser:
+				print(header)
+				parser._parser.ExternalEntityRefHandler = lambda a,b,c,d: 1
+
 			parser.feed(header)
 
 			linenumber = 0
@@ -233,7 +236,7 @@ class GraphHandler(handler.ContentHandler,
 			# create their own XML, instead of requiring the
 			# user to annotate we do it for them.
 			
-			parser    = make_parser()
+			parser    = make_parser(["stack.expatreader"])
 			xml       = handler_1.getXML()
 			handler_2 = Pass2NodeHandler(node, self.attributes)
 			parser.setContentHandler(handler_2)
