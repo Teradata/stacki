@@ -11,7 +11,7 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap-redhat::
-	yum install -y openssl-devel readline-devel
+	yum install -y openssl-devel readline-devel bz2-devel xz-devel
 	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
 
 
@@ -24,7 +24,7 @@ build:
 #	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
 	( 								\
 		cd Python-$(VERSION);					\
-		./configure --prefix=$(PKGROOT) 			\
+		./configure --prefix=$(PKGROOT)				\
 			--enable-shared					\
 			--without-pymalloc;				\
 		$(MAKE);						\

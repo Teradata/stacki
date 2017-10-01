@@ -13,64 +13,19 @@
 
 	<edge from="backend" os="sles">
 		<to>general</to>
-		<to>bootloader</to>
 		<to>kdump</to>
+		<to>bootloader</to>
 		<to>partitioning</to>
+		<to>ssh-client</to>
 		<to>add-on</to>
 		<to>users</to>
-		<to>pre-scripts</to>
-		<to>postpartitioning-scripts</to>
-		<to>chroot-scripts</to>
 		<to>uefi</to>
-		<to>init-scripts</to>
-		<to>post-scripts</to>
-		<to>ssh-client</to>
+		<to>foundation-python</to>
 	</edge>
 
 
 	<order tail="HEAD">
 		<head>general</head>
-	</order>
-
-	<order head="general">
-		<tail>bootloader</tail>
-	</order>
-
-	<order head="kdump">
-		<tail>bootloader</tail>
-	</order>
-
-	<order head="bootloader">
-		<tail>partitioning</tail>
-	</order>
-
-	<order head="partitioning">
-		<tail>add-on</tail>
-		<tail>ssh-client</tail>
-	</order>
-
-	<order head="add-on">
-		<tail>users</tail>
-	</order>
-
-	<order head="users">
-		<tail>pre-scripts</tail>
-	</order>
-
-	<order head="pre-scripts">
-		<tail>postpartitioning-scripts</tail>
-	</order>
-
-	<order head="postpartitioning-scripts">
-		<tail>init-scripts</tail>
-	</order>
-
-	<order head="init-scripts">
-		<tail>chroot-scripts</tail>
-	</order>
-
-	<order head="chroot-scripts">
-		<tail>post-scripts</tail>
 	</order>
 
 	<order head="TAIL">

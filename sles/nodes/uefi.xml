@@ -1,11 +1,15 @@
 <stack:stack>
 
-      <stack:package>grub2-x86_64-efi</stack:package>
-      <stack:package>shim</stack:package>
-      <stack:package>mokutil</stack:package>
-      <stack:package>mtools</stack:package>
 
-<stack:script stack:stage="boot-post" stack:shell="/opt/stack/bin/python3">
+<stack:package>
+grub2-x86_64-efi
+shim
+mokutil
+mtools
+</stack:package>
+
+
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:chroot="false">
 <![CDATA[
 import os
 import sys
@@ -26,12 +30,13 @@ if efi_dev:
 ]]>
 </stack:script>
 
-<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="boot-post">
+<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
 /usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
-<stack:script stack:cond="'SLES-11.3-1.138' in &pallets;" stack:stage="boot-post" stack:chroot="false">
+<stack:script stack:cond="'SLES-11.3-1.138' in &pallets;" stack:stage="install-post" stack:chroot="false">
 MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
 </stack:script>
+
 
 </stack:stack>

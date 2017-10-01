@@ -10,7 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import string
 import stack.commands
 from stack.exception import ParamRequired
 
@@ -56,7 +55,7 @@ class Command(stack.commands.set.host.command):
 		if not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 
-		if string.upper(channel) == 'NULL':
+		if channel.upper() == 'NULL':
 			channel = 'NULL'
 
 		for host in self.getHostnames(args):

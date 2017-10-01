@@ -54,6 +54,8 @@ else:
 <package>grub2-tools</package>
 <package>wget</package>
 <package>bridge-utils</package>
+<package disable="1">iwl*</package>
+<package disable="1">ivtv*</package>
 
 <post>
 /sbin/chkconfig stack-pre on

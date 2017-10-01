@@ -11,13 +11,88 @@
 	</stack:copyright>
 
 
+<stack:script stack:stage="install-post" stack:chroot="false">
+#!/bin/sh
+
+mkdir -p /mnt/tmp/stack_site
+cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
+</stack:script>
+
 <stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
 /usr/bin/systemctl disable wickedd-dhcp4.service
 /usr/bin/systemctl disable wickedd-dhcp6.service
+
+rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
+rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
+</stack:script>
+
+<stack:script stack:stage="install-post">
+
+echo "&hostname;.&domainname;" > /etc/HOSTNAME
+
+/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+
+/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
+
+<stack:file stack:name="/opt/stack/bin/up.py" stack:perms="0755">
+#!/usr/bin/python
+
+import socket
+import json
+import sys
+
+sys.path.append('/tmp')
+from stack_site import *
+
+tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tx.sendto('health up', (attributes['Kickstart_PrivateAddress'], 5000))
+tx.close()
+</stack:file>
+
+<stack:file stack:name="/etc/cron.d/up">
+* * * * * root /opt/stack/bin/up.py
+</stack:file>
+
+<!-- repo config -->
+rm -f /etc/zypp/repos.d/*
+<stack:report name="host.repo">&hostname;</stack:report>
+
 </stack:script>
 
 
 <stack:script stack:stage="boot-pre">
+
+<!-- networking config -->
+<stack:report name="host.interface">&hostname;</stack:report>
+<stack:report name="host.route">&hostname;</stack:report>
+<stack:report name="host.resolv">&hostname;</stack:report>
+
+#
+# the above command (report host resolv) writes /etc/resolv.conf. make sure
+# YaST doesn't overwrite it
+#
+
+awk '/NETCONFIG_DNS_POLICY/ { \
+	printf("NETCONFIG_DNS_POLICY=\"\"\n"); \
+	next; \
+} \
+{ print $0 }' /etc/sysconfig/network/config &gt; /tmp/config
+
+cp /tmp/config /etc/sysconfig/network/config
+
+<!-- populate root's authorized_keys -->
+<stack:file name="/root/.ssh/authorized_keys" stack:perms="0600">
+<stack:eval shell="/opt/stack/bin/python3">
+file = open('/root/.ssh/id_rsa.pub')
+for line in file.readlines():
+	print(line.strip())
+</stack:eval>
+</stack:file>
+
+chmod a+rx /root
+chmod a+rx /root/.ssh
+
+<!-- ipmi config -->
 /sbin/chkconfig ipmi on
 service ipmi start
 chmod +x /tmp/ipmisetup
@@ -27,3 +102,4 @@ rm -rf /tmp/ipmisetup
 
 
 </stack:stack> 
+

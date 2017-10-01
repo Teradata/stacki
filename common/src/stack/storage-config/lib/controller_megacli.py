@@ -113,7 +113,7 @@ class CLI:
 				options.append(f)
 
 		try:
-			numarrays = len(disks) / pdperarray
+			numarrays = int(len(disks) / pdperarray)
 		except:
 			numarrays = 1
 

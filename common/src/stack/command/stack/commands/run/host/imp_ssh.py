@@ -97,11 +97,15 @@ class Implementation(stack.commands.Implementation):
 
 		# Gather and print the output
 		for host in host_output:
+			print(host_output)
 			if not collate:
 				if host_output[host]['output']:
 					print(str(host_output[host]['output']))
 			else:
-				out = (host_output[host]['output']).decode('utf').split('\n')
+				if isinstance((host_output[host]['output']), bytes):
+					out = (host_output[host]['output']).decode('utf').split('\n')
+				else:
+					out = (host_output[host]['output']).split('\n')
 				for line in out:
 					self.owner.addOutput(host, line)
 
