@@ -189,10 +189,6 @@ class GraphHandler(handler.ContentHandler,
 				for x in header.split('\n'):
 					sys.stderr.write('[parse1 %4d]%s\n' % (i, x))
 					i += 1
-			if parser._parser:
-				print(header)
-				parser._parser.ExternalEntityRefHandler = lambda a,b,c,d: 1
-
 			parser.feed(header)
 
 			linenumber = 0

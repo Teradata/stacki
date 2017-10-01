@@ -22,6 +22,14 @@ install::
 	$(PY.PATH) -mpip install \
 		-I --root=$(ROOT) $(PACKAGES)
 
+#	$(PY.PATH) -mpip --disable-pip-version-check download $(PACKAGES)
+#	(									\
+#		$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) pytest;	\
+#		for pkg in $(PACKAGES); do 					\
+#			$(PY.PATH) -mpip install -I --root=$(ROOT) $$pkg;	\
+#		done								\
+#	)
+
 
 clean::
 	rm -rf *.whl
