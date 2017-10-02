@@ -62,24 +62,26 @@
 # source function library
 . /etc/rc.d/init.d/functions
 
-prog=rmq-producer
-pidfile=/var/run/$prog/$prog.pid
+name=rmq-producer
+prog=/opt/stack/sbin/${name}
+pidfile=/var/run/${name}/${name}.pid
 
 RETVAL=0
 
 start() {
-    echo -n $"Starting RMQ Producer: "
-    if [ -f $pidfile ]; then
-        PID=`cat $pidfile`
-        echo RMQ Producer already running: $PID
+    echo -n $"Starting $name: "
+    checkproc -p ${pidfile} $prog
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        echo "$name is already running: $PID"
         exit 2;
     fi
 
-    if [ ! -d /var/run/$prog ]; then
-        mkdir /var/run/$prog
+    if [ ! -d `dirname $pidfile` ]; then
+        mkdir -p `dirname $pidfile`
     fi
 
-    daemon --check $prog /opt/stack/sbin/$prog
+    $prog
     RETVAL=$?
     echo
 
@@ -91,7 +93,7 @@ start() {
 }
 
 stop() {
-    echo -n $"Stopping RMQ Producer: "
+    echo -n $"Stopping $name: "
     killproc -p ${pidfile} $prog
     RETVAL=$?
     echo
@@ -118,12 +120,12 @@ case "$1" in
     [ -f "$pidfile" ] && restart
     ;;
   status)
-    if [ -f $pidfile ]; then
-        echo $"RMQ Producer is running."
-        RETVAL=0
+    checkproc -p ${pidfile} $prog
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        echo $"$name is running."
     else
-        echo $"RMQ Producer is not running."
-        RETVAL=3
+        echo $"$name is not running."
     fi
     ;;
   *)
