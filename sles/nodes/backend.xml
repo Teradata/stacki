@@ -11,8 +11,12 @@
 	</stack:copyright>
 
 
-<stack:package>foundation-python</stack:package>
+<stack:script stack:stage="install-post" stack:chroot="false">
+#!/bin/sh
 
+mkdir -p /mnt/tmp/stack_site
+cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
+</stack:script>
 
 <stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
 /usr/bin/systemctl disable wickedd-dhcp4.service
@@ -30,7 +34,7 @@ echo "&hostname;.&domainname;" > /etc/HOSTNAME
 
 /usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
 
-<stack:file stack:name="/opt/stack/bin/up.py" stack:perm="0755">
+<stack:file stack:name="/opt/stack/bin/up.py" stack:perms="0755">
 #!/usr/bin/python
 
 import socket
@@ -73,7 +77,7 @@ awk '/NETCONFIG_DNS_POLICY/ { \
 cp /tmp/config /etc/sysconfig/network/config
 
 <!-- populate root's authorized_keys -->
-<stack:file name="/root/.ssh/authorized_keys" perms="0600">
+<stack:file name="/root/.ssh/authorized_keys" stack:perms="0600">
 <stack:eval shell="/opt/stack/bin/python3">
 file = open('/root/.ssh/id_rsa.pub')
 for line in file.readlines():
