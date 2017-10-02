@@ -7,18 +7,11 @@
 
 import stack.commands
 import shutil
+from collections import namedtuple
+from pytest import main
+from glob import glob
 
-def test_dir(path):
-	total, used, free = shutil.disk_usage(path)
-	result = ["",""]
-	result[0] = "Check if `%s` is not full" % path
-	try:
-		assert free > 0
-		result[1] = "[ Passed ]"
-	except:
-		result[1] = "[ Failed ]"
 
-	return result
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -27,13 +20,5 @@ class Command(stack.commands.Command,
 	"""
 
 	def run(self, params, args):
-
-		test_results = []
-
-		for path in ['/', '/var', '/export']:
-			test_results.append(test_dir(path))
-
-		self.beginOutput()
-		for result in test_results:
-			self.addOutput("", result)
-		self.endOutput(header=["","Test", "Result"])
+		tests = glob('tests/*')
+		main(['-x', '-v', *tests])
