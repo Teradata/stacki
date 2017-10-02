@@ -20,6 +20,7 @@
 		<to>add-on</to>
 		<to>users</to>
 		<to>uefi</to>
+		<to>foundation-python</to>
 	</edge>
 
 

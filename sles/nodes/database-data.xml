@@ -118,10 +118,7 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack add bootaction memtest type=os os=sles \
 	kernel="kernel memtest"
 
-<!-- XXX
-
-	OS-specific install actions go here
--->
+<!-- install actions -->
 
 /opt/stack/bin/stack add bootaction "default" \
 	os=sles type=install \

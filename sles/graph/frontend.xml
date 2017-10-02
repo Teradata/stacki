@@ -75,7 +75,6 @@
 		<to>dns-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
-		<to>foundation-server</to>
 		<to>install</to>
 		<to>kernel-server</to>
 		<to>networking-server</to>
@@ -94,6 +93,7 @@
 		<to>ssh</to>
 		<to>ssl</to>
 		<to>time-base</to>
+		<to>foundation-python</to>
 	</edge>
 
 </graph>
