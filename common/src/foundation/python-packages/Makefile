@@ -9,7 +9,7 @@ ROLLROOT	= ../../..
 PACKAGES	= pytest pymysql PyYAML Jinja2 \
 		  six Flask requests flake8 \
 		  ConfigParser python-daemon lockfile \
-		  redis pyzmq
+		  redis pyzmq testinfra
 
 include $(STACKBUILD)/etc/CCRules.mk
 
