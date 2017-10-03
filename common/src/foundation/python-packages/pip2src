@@ -129,11 +129,10 @@ with open('versions.json', 'w') as text:
 
 # Build the src/ directories
 
-for key in PackageSet:
-	package = PackageSet[key]
-	if os.path.exists(package.name):
-		continue # don't overwrite existing stuff
+for package in PackageSet.values():
 	srcdir = os.path.join('src', package.name)
+	if os.path.exists(srcdir):
+		continue # don't overwrite existing stuff
 	os.makedirs(srcdir)
 
 	with open(os.path.join(srcdir, 'Makefile'), 'w') as makefile:
@@ -146,8 +145,8 @@ include $(STACKBUILD)/etc/CCRules.mk
 build:
 
 install::
-	$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) %s==%s
-""" % (package.name, package.version))
+	$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) %s==$(VERSION)
+""" % package.name)
 		if package.bootstrap:
 			makefile.write('\nbootstrap:: install-rpm\n')
 
@@ -155,14 +154,22 @@ install::
 		ver.write('NAME=foundation-python-%s\n' % package.name)
 		ver.write('VERSION=%s\n' % package.version)
 
+
+# Create top-level foundation-python-packages.xml
+xml = []
+xml.append('<stack:stack>')
+xml.append('')
+for package in PackageSet.values():
 	if package.master:
-		with open(os.path.join(srcdir, 'foundation-python-%s.xml' % package.name), 'w') as xml:
-			xml.write('<stack:stack>\n\n')
-			xml.write('\t<stack:package>foundation-python-%s</stack:package>\n\n' % package.name)
-			if package.dependencies:
-				xml.write('\t<!-- dependencies -->\n')
-				for dep in package.dependencies:
-					xml.write('\t<stack:package>foundation-python-%s</stack:package>\n' % dep)
-			xml.write('\n</stack:stack>\n')
+		xml.append('\t<!-- %s -->' % package.name)
+		xml.append('\t<stack:package>foundation-python-%s</stack:package>' % package.name)
+		if package.dependencies:
+			for dep in package.dependencies:
+				xml.append('\t<stack:package>foundation-python-%s</stack:package>' % dep.name)
+		xml.append('')
+xml.append('</stack:stack>')
+
+with open('packages.xml', 'w') as text:
+	text.write('\n'.join(xml))
 
 

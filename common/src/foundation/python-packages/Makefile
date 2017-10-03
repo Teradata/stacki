@@ -10,7 +10,7 @@ pkg bootstrap: src
 refresh:
 	-rm versions.json
 
-src: packages.json
+src: packages.json pip2src
 	$(MAKE) clean
 	./pip2src
 
