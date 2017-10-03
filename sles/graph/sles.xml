@@ -21,6 +21,7 @@
 		<to>users</to>
 		<to>uefi</to>
 		<to>foundation-python</to>
+		<to>mq-client</to>
 	</edge>
 
 
