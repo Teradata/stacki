@@ -14,11 +14,18 @@ class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.unpack.command):
 	"""
 	Unpack a cart into the carts directory.
+	
 	Assumes it was packed with "stack pack cart."
 
-	If it wasn't, don't come crying to me.
+	Also assumes the cart name matches the xml
+	file naming scheme.
 
-	File is uncompressed into /export/stack/carts
+	If your cart wasn't, don't come crying to me.
+
+	File is uncompressed into /export/stack/carts/.
+
+	If the cart doesn't exist, it's added to the 
+	database.
 
 	<arg type='string' name='cart'>
 	The name of the cart to be created.
@@ -73,6 +80,5 @@ class Command(stack.commands.CartArgumentProcessor,
 			cartfile = cartfile[0]
 
 		cart = args[0]
-#		path,cart = (os.path.split(cart))
 		self.addCart(cart)
 		self.unpackCart(cart,cartfile,cartsdir)

@@ -136,12 +136,11 @@ class Command(stack.commands.create.new.command):
 	def changeName(self, dir, name):
 		"""If a name contains 'template', substitute with the pallet
 		name"""
-
 		str = "template"
-		i = string.find(name, str) 
+		i = name.find(str)
 		if i == -1:
 			return name
-
+		
 		new = name[0:i] + self.name + name[i + len(str):]
 		os.rename(name, new)
 		return new 
@@ -177,15 +176,13 @@ class Command(stack.commands.create.new.command):
 		self.writeFile(nameout, text)
 
 
-	def rollName(self, arg, dirname, fnames):
+	def rollName(self, dirname, dirs, fnames):
 		"""Rename 'template/' with the pallet name, update file names to
 		include a pallet name where needed, and update file text."""
 		dirname = self.changeName("", dirname)
-
 		for file in fnames:
 			fullname = os.path.join(dirname, file)
-
-			if string.find(fullname, "images/") > 0:
+			if fullname.find("images/") > 0:
 				# don't change image files names
 				continue
 
@@ -202,8 +199,8 @@ class Command(stack.commands.create.new.command):
 				'/opt/stack/share/build/src/pallet/template'
 
 		shutil.copytree(template_dir, self.name)
-
-		os.path.walk(self.name, self.rollName, [])
+		for root,dirs,fnames in os.walk(self.name,self.rollName,[]):
+			self.rollName(root,dirs,fnames)
 
 
 	def run(self, params, args):
@@ -213,7 +210,5 @@ class Command(stack.commands.create.new.command):
 			('version', '1.0'),
 			('color', self.colorNode())
 			])
-
 		self.setDict()
 		self.createDirsFiles()
-
