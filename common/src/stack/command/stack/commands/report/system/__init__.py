@@ -10,8 +10,7 @@ import shutil
 from collections import namedtuple
 from pytest import main
 from glob import glob
-
-
+import os
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -20,5 +19,9 @@ class Command(stack.commands.Command,
 	"""
 
 	def run(self, params, args):
+		current_dir = os.getcwd()
+		os.chdir('/opt/stack/lib/python3.6/site-packages/stack/commands/report/system')
 		tests = glob('tests/*')
 		main(['-x', '-v', *tests])
+		os.chdir(current_dir)
+	
