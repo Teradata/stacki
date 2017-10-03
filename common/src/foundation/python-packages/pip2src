@@ -1,0 +1,168 @@
+#! /opt/stack/bin/python3
+
+import os
+import json
+import subprocess
+import tempfile
+
+
+class Package:
+
+	def __init__(self, name, *, master=False):
+		self.name         = name
+		self.master       = master
+		self.bootstrap    = False
+		self.version      = None
+		self.dependencies = [ ]
+
+
+class Scanner:
+
+	def __init__(self, root):
+		self.root     = root
+		self.metadata = []
+		self.packages = []
+		self.traverse(root)
+
+	def traverse(self, root):
+		for x in os.listdir(root):
+			path = os.path.join(root, x)
+			tokens = x.rsplit('.', 1)
+			if len(tokens) == 2:
+				if tokens[1] == 'dist-info':
+					self.readWheel(path)
+					continue
+				if tokens[1] == 'egg-info':
+					self.readEgg(path)
+					continue
+			if os.path.isdir(path):
+				self.traverse(path)
+
+	def readWheel(self, path):
+		print('\tfound whl %s' % os.path.split(path)[-1])
+		with open(os.path.join(path, 'metadata.json'), 'r') as text:
+			meta = json.load(text)
+		package = Package(meta['name'])
+		package.version = meta['version']
+		self.packages.append(package)
+
+
+	def readEgg(self, path):
+		print('\tfound egg %s' % os.path.split(path)[-1])
+		with open(os.path.join(path, 'PKG-INFO'), 'r') as text:
+			for line in text:
+				tokens = line.split(':', 1)
+				if len(tokens) == 2:
+					if tokens[0] == 'Name':
+						name = tokens[1].strip()
+					elif tokens[0] == 'Version':
+						version = tokens[1].strip()
+		package = Package(name)
+		package.version = version
+		self.packages.append(package)
+		
+
+# Build the PackageSet
+
+PackageSet = {}
+with open('packages.json', 'r') as text:
+	code = []
+	for line in text: # json doesn't allow comments (we do)
+		if not line.startswith('//'):
+			code.append(line)
+	manifest = json.loads(''.join(code))
+	for name in manifest:
+		package = Package(name, master=True)
+		package.bootstrap = manifest[name].get('bootstrap')
+		package.version   = manifest[name].get('version')
+		PackageSet[name] = package
+
+
+# If we have versions.json file populate any missing version with the previously
+# computed values.
+
+if os.path.exists('versions.json'):
+	with open('versions.json', 'r') as text:
+		versions = json.loads(text.read())
+	for package in PackageSet.values():
+		if not package.version:
+			package.version = versions[package.name]
+
+# Compute dependencies and versions
+#
+# There's no PIP interface for this so for each master package (above) install
+# it into a tmp directory and then go find the metadata.json files to figure
+# out what got installed. Yes this means we build things twice when all
+# packages get refreshed.
+
+pkgnames = sorted(PackageSet.keys())
+for pkgname in pkgnames:
+	with tempfile.TemporaryDirectory() as tmp:
+		version = PackageSet[pkgname].version
+		if version:
+			target = '%s==%s' % (pkgname, version)
+		else:
+			target = pkgname
+		print('Unpacking %s' % target)
+		subprocess.run(['/opt/stack/bin/python3', '-mpip', 
+				 'install', '-I', '--root=%s' % tmp, target],
+			       stdout=subprocess.PIPE)
+		print('Scanning  %s' % pkgname)
+		for package in Scanner(tmp).packages:
+			if package.name == pkgname:
+				PackageSet[pkgname].version = package.version
+			else:
+				package.bootstrap = PackageSet[pkgname].bootstrap
+				PackageSet[pkgname].dependencies.append(package)
+				PackageSet[package.name] = package
+				
+
+# Write out the computed version
+
+version = {}
+for package in PackageSet.values():
+	if package.master:
+		version[package.name] = package.version
+with open('versions.json', 'w') as text:
+	text.write(json.dumps(version))
+
+
+# Build the src/ directories
+
+for key in PackageSet:
+	package = PackageSet[key]
+	if os.path.exists(package.name):
+		continue # don't overwrite existing stuff
+	srcdir = os.path.join('src', package.name)
+	os.makedirs(srcdir)
+
+	with open(os.path.join(srcdir, 'Makefile'), 'w') as makefile:
+		makefile.write("""
+PKGROOT  = /opt/stack
+ROLLROOT = ../../../../../..
+
+include $(STACKBUILD)/etc/CCRules.mk
+
+build:
+
+install::
+	$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) %s==%s
+""" % (package.name, package.version))
+		if package.bootstrap:
+			makefile.write('\nbootstrap:: install-rpm\n')
+
+	with open(os.path.join(srcdir, 'version.mk'), 'w') as ver:
+		ver.write('NAME=foundation-python-%s\n' % package.name)
+		ver.write('VERSION=%s\n' % package.version)
+
+	if package.master:
+		with open(os.path.join(srcdir, 'foundation-python-%s.xml' % package.name), 'w') as xml:
+			xml.write('<stack:stack>\n\n')
+			xml.write('\t<stack:package>foundation-python-%s</stack:package>\n\n' % package.name)
+			if package.dependencies:
+				xml.write('\t<!-- dependencies -->\n')
+				for dep in package.dependencies:
+					xml.write('\t<stack:package>foundation-python-%s</stack:package>\n' % dep)
+			xml.write('\n</stack:stack>\n')
+
+

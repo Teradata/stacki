@@ -6,30 +6,22 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-PACKAGES	= pytest pymysql PyYAML Jinja2 \
-		  six Flask requests flake8 \
-		  ConfigParser python-daemon lockfile \
-		  redis pyzmq
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap:: install-rpm
+refresh:
+	-rm versions.json
 
-build: 
+build:
+	$(MAKE) clean
+	./pip2src
 
-install::
-	mkdir -p $(ROOT)
-	$(PY.PATH) -mpip install \
-		-I --root=$(ROOT) $(PACKAGES)
+bootstrap::
+	for d in src/*; do $(MAKE) -C $$d $@; done
 
-#	$(PY.PATH) -mpip --disable-pip-version-check download $(PACKAGES)
-#	(									\
-#		$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) pytest;	\
-#		for pkg in $(PACKAGES); do 					\
-#			$(PY.PATH) -mpip install -I --root=$(ROOT) $$pkg;	\
-#		done								\
-#	)
+pkg: build
+	for d in src/*; do $(MAKE) -C $$d $@; done
 
 
 clean::
-	rm -rf *.whl
+	-rm -rf src

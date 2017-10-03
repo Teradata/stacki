@@ -1,0 +1,24 @@
+// All packages added here will use pip to pull in their dependencies,
+// so do NOT specify package dependencies here. Each package
+// dictionary may optionally have any of the following entries:
+//
+// "bootstrap" - package (add depencies) will be added to the bootstrap
+// target.
+//
+// "version" - set the version of the package to be pulled from
+// pip. There is no mechanism to force a specific version of a
+// dependency, this is considered a feature.
+
+{
+	"configparser":		{}, 
+	"Flask":		{}, 
+	"PyYAML":		{}, 
+	"flake8":		{ "bootstrap": true }, 
+	"PyMySQL":		{ "bootstrap": true }, 
+	"pytest":		{ "bootstrap": true },
+	"python-daemon":	{ "bootstrap": true }, 
+	"pyzmq":		{ "bootstrap": true },
+	"redis":		{ "bootstrap": true }, 
+	"requests":		{}, 
+	"six":			{ "bootstrap": true }
+}
