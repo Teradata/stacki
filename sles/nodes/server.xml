@@ -52,6 +52,15 @@ chmod 775 /export/stack/carts
 /usr/bin/systemctl enable ludicrous-server
 /usr/bin/systemctl start ludicrous-server
 
+<!-- disable the "wickedd-dhcp*" servers -->
+/usr/bin/systemctl disable wickedd-dhcp4.service
+/usr/bin/systemctl disable wickedd-dhcp6.service
+
+rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
+rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
+
+</stack:script>
+
 </stack:script>
 
 </stack:stack> 
