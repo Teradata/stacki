@@ -4,24 +4,21 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
-
-include $(STACKBUILD)/etc/CCRules.mk
+pkg bootstrap: src
+	for x in src/*; do $(MAKE) -C $$x $@; done
 
 refresh:
 	-rm versions.json
 
-build:
+src: packages.json
 	$(MAKE) clean
 	./pip2src
 
-bootstrap::
-	for d in src/*; do $(MAKE) -C $$d $@; done
-
-pkg: build
-	for d in src/*; do $(MAKE) -C $$d $@; done
-
-
-clean::
+clean:
 	-rm -rf src
+
+dump-info:
+	@echo "NAME = foundation-python-packages"
+	@echo "ORDER = 20"
+	@echo "DIR = $(CURDIR)"
+
