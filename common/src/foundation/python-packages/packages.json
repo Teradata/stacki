@@ -15,10 +15,9 @@
 	"PyYAML":		{}, 
 	"flake8":		{ "bootstrap": true }, 
 	"PyMySQL":		{ "bootstrap": true }, 
-	"pytest":		{ "bootstrap": true },
 	"python-daemon":	{ "bootstrap": true }, 
 	"pyzmq":		{ "bootstrap": true },
 	"redis":		{ "bootstrap": true }, 
 	"requests":		{}, 
-	"six":			{ "bootstrap": true }
+	"testinfra":		{ "bootstrap": true }
 }
