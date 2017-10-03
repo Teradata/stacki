@@ -1,14 +1,6 @@
-#!/bin/bash
-# rmq-publisher		Init script for Stack Message Queue Publisher
-#
-# chkconfig: - 90 85
-# description:  Enabled the RMQ Publisher daemon
-# processname:  rmq-publisher
-# pidfile: /var/run/rmq-publisher/rmq-publisher.pid
-#
 # @SI_Copyright@
-#                               stacki.com
-#                                  v4.0
+#			       stacki.com
+#				  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -46,91 +38,53 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-#
 
-### BEGIN INIT INFO
-# Provides: rmq-publisher
-# Required-Start: $local_fs $network
-# Required-Stop: $local_fs $network
-# Default-Start:
-# Default-Stop: 0 1 6
-# Short-Description: start or stop rmq-publisher
-# Description: Stack Message Queue Publisher
-### END INIT INFO
+import stack.commands
 
 
-# source function library
-. /etc/rc.d/init.d/functions
+class Plugin(stack.commands.Plugin):
 
-name=rmq-publisher
-prog=/opt/stack/sbin/${name}
-pidfile=/var/run/${name}/${name}.pid
+	def requires(self):
+		return ['basic']
+	
+	def provides(self):
+		return 'redis_status'
 
-RETVAL=0
+	def run(self, hosts):
+	
+		host_status = { }
+		for host in hosts:
+			host_status[host] = None
+		
+		frontend_list = []
+		frontend_list.append('localhost')
 
-start() {
-    echo -n $"Starting $name: "
-    checkproc -p ${pidfile} $prog
-    RETVAL=$?
-    if [ $RETVAL -eq 0 ]; then
-        echo "$name is already running: $PID"
-        exit 2;
-    fi
+		# If we have the redis module try to find the frontend
+		# on which the Redis server is running.
 
-    if [ ! -d `dirname $pidfile` ]; then
-        mkdir -p `dirname $pidfile`
-    fi
+		validRedisConnection = False
+		ret_val = {'keys': [], 'values': {}}
+		try:
+			import redis
+		except:
+			return ret_val
+		
+		for frontend in frontend_list:
+			try:
+				r = redis.StrictRedis(host=frontend)
+				validRedisConnection = True
+				break
+			except:
+				pass
 
-    $prog
-    RETVAL=$?
-    echo
+		if not validRedisConnection:
+			return ret_val
 
-    if [ $RETVAL -eq 0 ]; then
-        success
-    else
-        failure
-    fi
-}
+		for host in hosts:
+			status =r.get('host:%s:status' % host) 
+			if status:
+				status = status.decode()
+			host_status[host] = ( status, )
 
-stop() {
-    echo -n $"Stopping $name: "
-    killproc -p ${pidfile} $prog
-    RETVAL=$?
-    echo
-}
-
-restart() {
-    stop
-    start
-}
-
-case "$1" in
-  start)
-    start
-    ;;
-  stop) 
-    stop
-    ;;
-  restart|force-reload)
-    restart
-    ;;
-  reload)
-    ;;
-  condrestart)
-    [ -f "$pidfile" ] && restart
-    ;;
-  status)
-    checkproc -p ${pidfile} $prog
-    RETVAL=$?
-    if [ $RETVAL -eq 0 ]; then
-        echo $"$name is running."
-    else
-        echo $"$name is not running."
-    fi
-    ;;
-  *)
-    echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
-    exit 1
-esac
-
-exit $RETVAL
+		r = { 'keys' : [ 'status' ], 'values': host_status }
+		return r

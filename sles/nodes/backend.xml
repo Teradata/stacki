@@ -53,6 +53,10 @@ tx.close()
 * * * * * root /opt/stack/bin/up.py
 </stack:file>
 
+<!-- repo config -->
+rm -f /etc/zypp/repos.d/*
+<stack:report name="host.repo">&hostname;</stack:report>
+
 </stack:script>
 
 
@@ -87,10 +91,6 @@ for line in file.readlines():
 
 chmod a+rx /root
 chmod a+rx /root/.ssh
-
-<!-- repo config -->
-rm -f /etc/zypp/repos.d/*
-<stack:report name="host.repo">&hostname;</stack:report>
 
 <!-- ipmi config -->
 /sbin/chkconfig ipmi on

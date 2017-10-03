@@ -124,4 +124,3 @@ class Command(stack.commands.CartArgumentProcessor,
 					os.chmod(filepath, perms)
 				except:
 					pass
-
