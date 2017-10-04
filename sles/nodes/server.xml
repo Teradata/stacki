@@ -61,7 +61,5 @@ rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
 
 </stack:script>
 
-</stack:script>
-
 </stack:stack> 
 
