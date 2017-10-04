@@ -1,29 +1,37 @@
-<?xml version="1.0" standalone="no"?>
+<stack:stack>
 
-<kickstart>
+<stack:description>
+Your @template@ pallet description here
+</stack:description>
 
-
-	<description>
-	Your @template@ pallet description here
-	</description>
-
-	<copyright>
-	Copyright (c) 2006 - 2017 Teradata
-	All rights reserved. Stacki(r) v5.x stacki.com
-	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
 
 <!--
-     List packages that will only be
-     installed on backends
-	<package>package-backend-1</package>
-	<package>package-backend-2</package>
+List packages that will be installed
+on backends only.
+
+<stack:package>package-1</package>
+<stack:package>package-2</stack:package>
 -->
 
-<!-- Post section that will be run
-     only on backends
-<post>
-</post>
+<!-- 
+     Pre section that will be run on
+     backends only.
+
+<stack:script stack:stage="install-pre">
+</stack:script>
 -->
 
-</kickstart>
+<!-- Post section that will be run on
+     backends only.
+
+<stack:script stack:stage="install-post">
+</stack:script>
+
+-->
+
+</stack:stack>
