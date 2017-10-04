@@ -30,55 +30,20 @@ class Command(stack.commands.dump.host.command):
 
 	def run(self, params, args):
 
-		hosts = self.getHostnames(args)
-
-		try:
-			self.db.execute("""
-				select n.name, a.scope, a.attr,
-				a.value, a.shadow from 
-				node_attributes a, nodes n where
-				a.node=n.id
-				order by n.name, a.scope, a.value
-				""")
-		except:
-			self.db.execute("""
-				select n.name, a.scope, a.attr,
-				a.value from 
-				node_attributes a, nodes n where
-				a.node=n.id
-				order by n.name, a.scope, a.value
-				""")
+		for row in self.call('list.host.attr', args):
+			host	= row['host']
+			s	= row['scope']
+			t	= row['type']
+			a	= row['attr']
+			v	= self.quote(row['value'])
 			
-		for row in self.db.fetchall():
-
-			host   = row[0]
-			attr   = stack.attr.ConcatAttr(row[1], row[2])
-			value  = self.quote(row[3])
-			shadow = ''
-			if len(row) == 5 and row[4]:
-				value  = self.quote(row[4])
-				shadow = 'shadow=true'
-				
-			# Filter out rows for hosts we don't care about.
-			# Easier to do this post than use multiple
-			# select statements.
-			
-			if host not in hosts:
+			if t == 'const' or s != 'host':
 				continue
 
-			# Don't dump the os and arch attributes since
-			# they are set by kickstart.  This allows
-			# nodes to change their os/arch after a
-			# restore roll is applied to a upgraded
-			# cluster.
-			#
-			# Are there more attributes we need add to this
-			# exclude list?
+			flag = ''
+			if t == 'shadow':
+				flag = 'shadow=true'
 
-			if attr in [ 'arch', 'os' ]:
-				continue
+			self.dump('"set attr" scope=host %s force=false attr=%s value=%s %s' % (host, a, v, flag))
 
-			if value:
-				self.dump('add host attr %s attr=%s value=%s %s' %
-					  (host, attr, value, shadow))
 

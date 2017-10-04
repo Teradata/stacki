@@ -110,7 +110,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			default = None
 			notes = None
 			installaction = None
-			runaction = None
+			osaction = None
 			groups = None
 
 			for i in range(0, len(row)):
@@ -167,8 +167,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					notes = field
 				elif header[i] == 'installaction':
 					installaction = field
-				elif header[i] == 'runaction':
-					runaction = field
+				elif header[i] in [ 'osaction', 'runaction' ]:
+					osaction = field
 				elif header[i] == 'groups':
 					groups = field
 						
@@ -251,12 +251,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				else:
 					self.owner.hosts[name]['installaction'] = installaction
 
-			if runaction:
-				if runaction not in self.actions:
-					msg = 'bootaction "%s" does not exist in the database' % runaction
+			if osaction:
+				if osaction not in self.actions:
+					msg = 'bootaction "%s" does not exist in the database' % osaction
 					raise CommandError(self.owner, msg)
 				else:
-					self.owner.hosts[name]['runaction'] = runaction
+					self.owner.hosts[name]['osaction'] = osaction
 
 			if groups:
 				self.owner.hosts[name]['groups'] = groups.split(',')

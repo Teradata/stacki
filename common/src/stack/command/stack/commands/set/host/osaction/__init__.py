@@ -46,7 +46,7 @@ class Command(stack.commands.set.host.command):
 			raise ArgRequired(self, 'host')
 
 		if action.lower() == 'none':
-			runaction = 'NULL'
+			osaction = 'NULL'
 		else:
 			rows = self.db.execute(
 				"""

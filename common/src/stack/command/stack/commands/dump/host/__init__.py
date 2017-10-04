@@ -49,10 +49,10 @@ class Command(command):
 		for host in self.getHostnames(args):
 			self.db.execute("""select 
 				n.rack, n.rank, a.longname, 
-				n.runaction, n.installaction
+				n.osaction, n.installaction
 				from nodes n, appliances a where
 				n.appliance=a.id and n.name='%s'""" % host)
-			(rack, rank, longname, runaction,
+			(rack, rank, longname, osaction,
 				installaction) = self.db.fetchone()
 
 			# do not dump the localhost since the installer
@@ -67,11 +67,11 @@ class Command(command):
 				self.quote(longname)))
 
 			#
-			# now set the runaction and installaction for each host
+			# now set the osaction and installaction for each host
 			#
-			if runaction:
-				self.dump('"set host runaction" %s action=%s'
-					% (host, self.quote(runaction)))
+			if osaction:
+				self.dump('"set host osaction" %s action=%s'
+					% (host, self.quote(osaction)))
 			if installaction:
 				self.dump('"set host installaction" %s action=%s'
 					% (host, self.quote(installaction)))
