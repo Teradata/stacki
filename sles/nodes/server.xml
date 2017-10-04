@@ -36,6 +36,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
         mkdir -p /mnt/cdrom
     fi
 
+mkdir -p /export
+chmod og+rx /export
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
 chmod 775 /export/stack/carts
@@ -72,8 +74,6 @@ AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
 AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL
 </stack:file>
-
-</stack:script>
 
 </stack:stack> 
 
