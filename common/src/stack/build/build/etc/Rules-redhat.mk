@@ -129,7 +129,7 @@ $(REDHAT.SOURCES)/$(TARBALL): clean
 	#@if [ `basename $(CURDIR)` = usersguide ]; then $(MAKE) predoc; fi;
 	@rm -rf $(RPMNAME)
 	@ln -s . $(RPMNAME)
-	tar -cf $@ --exclude $(RPMNAME)/$(RPMNAME) $(TAREXCLUDES) $(RPMNAME)/*
+	tar -chf $@ --exclude $(RPMNAME)/$(RPMNAME) $(TAREXCLUDES) $(RPMNAME)/*
 	@rm $(RPMNAME)
 
 $(REDHAT.SOURCES)/$(TARBALL.GZ): $(REDHAT.SOURCES)/$(TARBALL)
@@ -303,7 +303,7 @@ ifeq ($(RPM.STRATEGY),source)
 	#@if [ `basename $(CURDIR)` = usersguide ]; then $(MAKE) predoc; fi;
 	@rm -rf $(RPMNAME)
 	@ln -s . $(RPMNAME)
-	tar -cf $(REDHAT.SOURCES)/$(TARBALL)				\
+	tar -chf $(REDHAT.SOURCES)/$(TARBALL)				\
 		--exclude $(RPMNAME)/$(RPMNAME)				\
 		$(TAREXCLUDES)						\
 		$(RPMNAME)/* $(RPMNAME)/.buildenv-$(ROLL)
