@@ -45,7 +45,8 @@ for filename in [ 'manifest', 'manifest.%s' % rollname ]:
 		l = line.strip()
 		if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
 			continue
-		manifest.append(l)
+		if l not in manifest: # ignore duplicates
+			manifest.append(l)
 	file.close()
 
 if os.path.exists('manifest.d'):
@@ -55,7 +56,8 @@ if os.path.exists('manifest.d'):
 				l = line.strip()
 				if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
 					continue
-				manifest.append(l)
+				if l not in manifest: # ignore duplicates
+					manifest.append(l)
 			found = True
 
 if not found:
