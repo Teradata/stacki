@@ -36,6 +36,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
         mkdir -p /mnt/cdrom
     fi
 
+mkdir -p /export
+chmod og+rx /export
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
 chmod 775 /export/stack/carts
@@ -52,6 +54,27 @@ chmod 775 /export/stack/carts
 /usr/bin/systemctl enable ludicrous-server
 /usr/bin/systemctl start ludicrous-server
 
+<!-- disable the "wickedd-dhcp*" servers -->
+/usr/bin/systemctl disable wickedd-dhcp4.service
+/usr/bin/systemctl disable wickedd-dhcp6.service
+
+rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
+rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
+
+<!-- explicitly write the sshd configuration file -->
+<stack:file stack:name="/etc/ssh/sshd_config" stack:perms="640">
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding yes
+PermitUserEnvironment yes
+Subsystem sftp /usr/lib/ssh/sftp-server
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL
+UseDNS no
+</stack:file>
 </stack:script>
 
 </stack:stack> 

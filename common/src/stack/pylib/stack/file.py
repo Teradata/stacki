@@ -412,7 +412,7 @@ class RollFile(File):
 		if not diskid:
 			diskid = '1'
 
-		os.system('umount /mnt/cdrom')
+		os.system('umount /mnt/cdrom > /dev/null 2>&1')
 		return name, version, release, arch, diskid, foreign
 
 	def __cmp__(self, file):

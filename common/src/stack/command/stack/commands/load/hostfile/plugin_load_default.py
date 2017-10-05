@@ -79,14 +79,14 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						  'action=%s' % hosts[host]['installaction']
 					  ])
 				del hosts[host]['installaction']
-			if 'runaction' in hosts[host]:
+			if 'osaction' in hosts[host]:
 				self.owner.call('set.host.bootaction', 
 						[ host, 
 						  'sync=false',
 						  'type=os',
-						  'action=%s' % hosts[host]['runaction']
+						  'action=%s' % hosts[host]['osaction']
 					  ])
-				del hosts[host]['runaction']
+				del hosts[host]['osaction']
 
 			if 'groups' in hosts[host]:
 				for groupname in hosts[host]['groups']:

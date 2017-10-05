@@ -22,7 +22,7 @@ sles-stacki.img: dirs rpminst
 	@echo "Building sles-stacki.img"
 	# SymLink /usr/bin/python to foundation-python
 	mkdir -p $(CURDIR)/sles-stacki/usr/bin
-	ln -s /opt/stack/bin/python $(CURDIR)/sles-stacki/usr/bin/python
+	ln -s /opt/stack/bin/python3 $(CURDIR)/sles-stacki/usr/bin/python
 	# Patch the sles-stacki image
 	-(cd ../../common/sles-stacki.img-patches && \
 		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/sles-stacki/) )

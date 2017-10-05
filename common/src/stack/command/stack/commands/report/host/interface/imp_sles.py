@@ -45,23 +45,21 @@ class Implementation(stack.commands.Implementation):
 					udev_output += 'KERNEL=="eth*", '
 					udev_output += 'NAME="%s"\n\n' % interface
 
-			if not netname or not ip or not interface:
+			if not interface:
 				continue
 
-			netresult = self.owner.call('list.network', [ netname ])
-			for net in netresult:
-				if net['network'] == netname:
-					network = net['address']
-					netmask = net['mask']
-					ipnet = ipaddress.IPv4Network('%s/%s' % (network, netmask))
-					broadcast = '%s' % ipnet.broadcast_address
-					gateway = net['gateway']
-					if gateway == 'None':
-						gateway = None
-					break
-
-			if not network or not netmask or not broadcast:
-				continue
+			if netname:
+				netresult = self.owner.call('list.network', [ netname ])
+				for net in netresult:
+					if net['network'] == netname:
+						network = net['address']
+						netmask = net['mask']
+						ipnet = ipaddress.IPv4Network('%s/%s' % (network, netmask))
+						broadcast = '%s' % ipnet.broadcast_address
+						gateway = net['gateway']
+						if gateway == 'None':
+							gateway = None
+						break
 
 			if interface == 'ipmi':
 				channel = o['channel']
@@ -86,12 +84,20 @@ class Implementation(stack.commands.Implementation):
 			if 'onboot=no' in options:
 				self.owner.addOutput(host, 'STARTMODE=manual')
 			else:
-				self.owner.addOutput(host, 'STARTMODE=auto')
+				if ip:
+					self.owner.addOutput(host, 'STARTMODE=auto')
+				else:
+					self.owner.addOutput(host, 'STARTMODE=off')
 
-			self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
-			self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
-			self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
-			self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+			if ip:
+				self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
+			if netmask:
+				self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
+			if network:
+				self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
+			if broadcast:
+				self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+
 			self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
 			self.owner.addOutput(host, '</stack:file>')
 

@@ -1,15 +1,18 @@
 <stack:stack>
 
+<stack:description>
+	UEFI configuration for SLES machines
+</stack:description>
 
-<stack:package>
-grub2-x86_64-efi
-shim
-mokutil
-mtools
-</stack:package>
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
 
+<stack:package>mtools</stack:package>
 
-<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:chroot="false">
+<stack:script stack:stage="install-post" stack:shell="python" stack:chroot="false">
 <![CDATA[
 import os
 import sys

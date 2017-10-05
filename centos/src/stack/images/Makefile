@@ -10,7 +10,6 @@ include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE).mk
 -include $(RELEASE)-$(ARCH).mk
 
-
 bootstrap::
 	yum install -y $(OS.DEPENDENCIES)
 

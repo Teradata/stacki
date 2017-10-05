@@ -65,7 +65,6 @@
 
 	<edge from="server">
 		<to>base</to>
-
 		<to>apache</to>
 		<to>ca</to>
 		<to>database</to>
@@ -84,16 +83,8 @@
 		<to>ssl-server</to>
 		<to>storage-controller-server</to>
 		<to>time-server</to>
-	</edge>
-
-	<edge from="base">
-		<to>logrotate</to>
-		<to>node</to>
-		<to>selinux</to>
-		<to>ssh</to>
-		<to>ssl</to>
-		<to>time-base</to>
-		<to>foundation-python</to>
+		<to>mq-server</to>
+		<to>uefi-server</to>
 	</edge>
 
 </graph>

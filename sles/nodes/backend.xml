@@ -10,6 +10,27 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
+<stack:script stack:stage="install-pre">
+
+<!-- Copy root's public key to backend nodes during installation -->
+<stack:file stack:name="/authorized_keys" stack:perms="0400"><stack:eval shell="/opt/stack/bin/python3">
+file = open('/root/.ssh/id_rsa.pub')
+for line in file.readlines():
+	print(line.strip())
+</stack:eval></stack:file>
+
+<!-- Copy frontend's host key to backend nodes during installation -->
+<stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400"><stack:eval>
+/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
+</stack:eval>
+</stack:file>
+</stack:script>
+
+<!-- Start SSH Server on backend host during installation -->
+<stack:script stack:stage="install-pre">
+# Start ssh server on port 2200
+/usr/sbin/sshd -p 2200 -o AuthorizedKeysFile=/authorized_keys
+</stack:script>
 
 <stack:script stack:stage="install-post" stack:chroot="false">
 #!/bin/sh
@@ -45,7 +66,11 @@ sys.path.append('/tmp')
 from stack_site import *
 
 tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tx.sendto('health up', (attributes['Kickstart_PrivateAddress'], 5000))
+
+msg = { 'channel' : 'health', 'message' : 'up' }
+m = json.dumps(msg)
+
+tx.sendto(m.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
 tx.close()
 </stack:file>
 

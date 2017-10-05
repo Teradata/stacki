@@ -24,16 +24,19 @@ class command(stack.commands.Command):
 		',', '.', '/'
 		]
 		
-	def quote(self, str):
-		s = ''
+	def quote(self, s):
+		retval = ''
 
-		if str is not None:
-			for c in str:
-				if c.isalnum() or c in self.safe_chars:
-					s += c
-				else:
-					s += '\\%s' % c
-		return s
+		if s is not None:
+			try:
+				for c in str(s):
+					if c.isalnum() or c in self.safe_chars:
+						retval += c
+					else:
+						retval += '\\%s' % c
+			except:
+				pass
+		return retval
 
 	def dump(self, line):
 		self.addText('/opt/stack/bin/stack %s\n' % line)

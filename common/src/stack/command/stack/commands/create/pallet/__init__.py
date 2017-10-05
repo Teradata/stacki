@@ -20,6 +20,7 @@ import shutil
 import subprocess
 import shlex
 import glob
+import json
 import stack
 import stack.commands
 import stack.dist
@@ -28,8 +29,6 @@ import stack.roll
 import stack.util
 import stack.bootable
 from stack.exception import CommandError, ArgRequired
-from xml.sax import make_parser
-import stack.gen
 
 
 
@@ -127,11 +126,11 @@ class Builder:
 		else:
 			tmp = self.mktemp()
 			os.makedirs(tmp)
-			os.system('mount -o loop -t iso9660 %s %s' %
+			os.system('mount -o loop -t iso9660 %s %s > /dev/null 2>&1' %
 				  (roll.getFullName(), tmp))
 			tree = stack.file.Tree(tmp)
 			tree.apply(self.copyFile, dir)
-			os.system('umount %s' % tmp)
+			os.system('umount %s > /dev/null 2>&1' % tmp)
 			shutil.rmtree(tmp)
 
 
@@ -255,48 +254,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		generator.setOS('redhat')
 		generator.parse(xmlinput)
 
-		rpms = []
-		profile = []
-		profile.append('<?xml version="1.0" standalone="no"?>')
-		profile.append('<profile-%s>' % generator.getProfileType())
-		profile.append('<chapter name="kickstart">')
-		profile.append('<section name="packages">')
-		for line in generator.generate('packages'):
-			profile.append(line)
-		profile.append('</section>')
-		profile.append('</chapter>')
-		profile.append('</profile-%s>' % generator.getProfileType())
+		# call the getPackages, for just enabled packages and flatten it
+		rpms = [pkg for node_pkgs in generator.packageSet.getPackages()['enabled'].values() for pkg in node_pkgs]
 
-		parser  = make_parser()
-		handler = stack.gen.ProfileHandler()
-
-		parser.setContentHandler(handler)
-		for line in profile:
-			parser.feed('%s\n' % line)
-
-		packages = handler.getChapter('kickstart')
-		for line in packages:
-			if len(line.strip()):
-				if line.startswith('#'):
-					continue
-				if line.startswith('%'):
-					continue
-				for p in line.split():
-					rpms.append(p.strip())
-
-		#
-		# use yum to resolve dependencies
-		#
-		pythonver = '3.6'
-
-		sys.path.append('/usr/lib/python%s/site-packages' % pythonver)
-		sys.path.append('/usr/lib64/python%s/site-packages' % pythonver)
-		sys.path.append('/usr/lib/python%s/lib-dynload' % pythonver)
-		sys.path.append('/usr/lib64/python%s/lib-dynload' % pythonver)
-
-		import yum
-
-		#
 		# create a yum.conf file that contains only repos from the
 		# default-all box
 		#
@@ -311,7 +271,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.write('debuglevel=2\n')
 		file.write('logfile=%s/yum.log\n' % cwd)
 		file.write('pkgpolicy=newest\n')
-		file.write('distroverpkg=redhat-release\n')
+		file.write('distroverpkg=os-release\n')
 		file.write('tolerant=1\n')
 		file.write('exactarch=1\n')
 		file.write('obsoletes=1\n')
@@ -329,46 +289,16 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 		file.close()
 
-		a = yum.YumBase()
+		# Use system python (2.x)
+		cmd = ['/usr/bin/python', '/opt/stack/sbin/yumresolver', yumconf]
+		cmd.extend(rpms)
+		proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		stdout, stdrr = proc.communicate()
 
-		a.doConfigSetup(fn='%s' % yumconf, init_plugins=False)
-		a.conf.cache = 0
-		a.doTsSetup()
-		a.doRepoSetup()
-		a.doRpmDBSetup()
-		a.doSackSetup()
-		a.doGroupSetup()
-
-		selected = []
-		for rpm in rpms + [ '@base', '@core' ]:
-			if rpm[0] == '@':
-				group = a.comps.return_group(
-					rpm[1:].encode('utf-8'))
-
-				for r in group.mandatory_packages.keys() + group.default_packages.keys():
-					if r not in selected:
-						selected.append(r)
-			elif rpm not in selected:
-				selected.append(rpm)
-
-		pkgs = []
-		avail = a.pkgSack.returnNewestByNameArch()
-		for p in avail:
-			if p.name in selected:
-				pkgs.append(p)
-
-		done = 0
-		while not done:
-			done = 1
-			results = a.findDeps(pkgs)
-			for pkg in results.keys():
-				for req in results[pkg].keys():
-					reqlist = results[pkg][req]
-					for r in reqlist:
-						if r.name not in selected:
-							selected.append(r.name)
-							pkgs.append(r)
-							done = 0
+		try:
+			selected = json.loads(stdout)
+		except ValueError:
+			raise CommandError(self, 'Unable to parse yum dependency resolution')
 
 		#
 		# copy all the selected files into the pallet but before we
@@ -385,7 +315,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.write('debuglevel=2\n')
 		file.write('logfile=%s/yum.log\n' % cwd)
 		file.write('pkgpolicy=newest\n')
-		file.write('distroverpkg=redhat-release\n')
+		file.write('distroverpkg=os-release\n')
 		file.write('tolerant=1\n')
 		file.write('exactarch=1\n')
 		file.write('obsoletes=1\n')
@@ -662,8 +592,7 @@ class MetaRollBuilder(Builder):
 				arch.append(roll.getRollArch())
 
 		if not self.rollname:
-			name.sort()
-			rollName = string.join(name, '+')
+			rollName = '+'.join(name)
 		else:
 			rollName = self.rollname
 	
@@ -936,6 +865,11 @@ class Command(stack.commands.create.command,
 			('commit-ish', 'master'),
 			])
 
+		# I'm always leaving mounts around. I'm lazy.		
+		mounted = os.path.ismount('/mnt/cdrom')
+		while mounted:
+			os.system('umount /mnt/cdrom > /dev/null 2>&1')
+			mounted = os.path.ismount('/mnt/cdrom')
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'pallet')
@@ -961,4 +895,3 @@ class Command(stack.commands.create.command,
 				self.command)
 			
 		builder.run()
-

@@ -36,15 +36,9 @@ boot
 class Implementation(stack.commands.Implementation):
 	def run(self, h):
 		host	 = h['host']
-		ip	 = h['ip']
-		mask	 = h['mask']
-		gateway	 = h['gateway']
 		kernel	 = h['kernel']
 		ramdisk	 = h['ramdisk']
 		args	 = h['args']
-		filename = h['filename']
-		attrs	 = h['attrs']
-		action	 = h['action']
 		boottype = h['type']
 
 

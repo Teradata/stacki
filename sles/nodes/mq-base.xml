@@ -1,0 +1,20 @@
+<stack:stack>
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>stack-mq</stack:package>
+<stack:package>foundation-zeromq</stack:package>
+
+<stack:script stack:stage="install-post">
+systemctl enable rmq-publisher
+chkconfig --add rmq-publisher
+
+systemctl enable rmq-producer
+chkconfig --add rmq-producer
+</stack:script>
+
+</stack:stack>

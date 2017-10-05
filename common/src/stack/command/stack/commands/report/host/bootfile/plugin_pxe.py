@@ -25,7 +25,9 @@ class Plugin(stack.commands.Plugin):
 						'tftpboot', 'pxelinux', 
 						'pxelinux.cfg', filename)
 
-			self.owner.addOutput(host, '<stack:file stack:name="%s" stack:owner="root:apache" stack:perms="0664" stack:rcs="off"><![CDATA[' % filename)
+			self.owner.addOutput(host, '<stack:file stack:name="%s" \
+				stack:owner="root:apache" stack:perms="0664" \
+				stack:rcs="off"><![CDATA[' % filename)
 			self.owner.runImplementation("%s_pxe" % osname, h)
 			self.owner.addOutput(host, ']]></stack:file>')
 

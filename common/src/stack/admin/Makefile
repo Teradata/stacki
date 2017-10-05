@@ -12,12 +12,12 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../..
-DEPENDS.FILES	= gen_random_pw.py stack-console.py		
+DEPENDS.FILES	= gen_random_pw.py stack-console.py yumresolver.py
 
 include $(ROCKSBUILD)/etc/CCRules.mk
 
-ROOTONLY	= gen_random_pw
-ANYONE		= stack-console
+ROOTONLY	= gen_random_pw yumresolver
+ANYONE		= stack-console 
 SCRIPTS		= $(ANYONE) $(ROOTONLY)
 
 build:

@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+
+	<description>
+	StackI Pro Pallet
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2017 StackIQ Inc.
+	All rights reserved. stacki(r) v4.0 stacki.com
+	</si_copyright>
+
+
+<package>stack-mq</package>
+<package>foundation-zeromq</package>
+
+
+<post>
+systemctl enable rmq-publisher
+chkconfig --add rmq-publisher
+
+systemctl enable rmq-producer
+chkconfig --add rmq-producer
+</post>
+
+<boot order="post">
+/opt/stack/bin/rmq-publish -c alert 'kickstart completed'
+</boot>
+
+
+</kickstart>

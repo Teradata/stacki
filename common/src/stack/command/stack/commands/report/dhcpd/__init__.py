@@ -15,6 +15,25 @@ import ipaddress
 import stack.commands
 import stack.text
 
+header = """
+ddns-update-style none;
+
+option space PXE;
+option PXE.mtftp-ip    code 1 = ip-address;
+option PXE.mtftp-cport code 2 = unsigned integer 16;
+option PXE.mtftp-sport code 3 = unsigned integer 16;
+option PXE.mtftp-tmout code 4 = unsigned integer 8;
+option PXE.mtftp-delay code 5 = unsigned integer 8;
+
+option client-arch code 93 = unsigned integer 16;
+"""
+
+filename = """	if option client-arch = 00:07 {
+		filename "uefi/shim.efi";
+	} else {
+		filename "pxelinux.0";
+	}"""
+
 
 class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
@@ -27,7 +46,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '<stack:file stack:name="/etc/dhcp/dhcpd.conf">')
 
 		self.addOutput('', stack.text.DoNotEdit())
-		self.addOutput('', 'ddns-update-style none;')
+		self.addOutput('', '%s' % header)
 
 		# Build a dictionary of DHCPD server addresses
 		# for each subnet that serves PXE (DHCP).
@@ -69,28 +88,18 @@ class Command(stack.commands.HostArgumentProcessor,
 		for row in self.db.select("name from nodes order by rack, rank"):
 			data[row[0]] = []
 			
-		for row in self.db.select(
-				"""
-				nodes.name, n.mac, n.ip, n.device
-				from subnets s, networks n, nodes where
-				n.node = nodes.id and
-				n.subnet = s.id and
-				s.pxe = TRUE and
-				n.mac is not NULL and
-				(n.vlanid is NULL or n.vlanid = 0)
-				"""):
+		for row in self.db.select("""
+			nodes.name, n.mac, n.ip, n.device
+			from networks n, nodes where
+			n.node = nodes.id and
+			n.mac is not NULL and
+			(n.vlanid is NULL or n.vlanid = 0)
+			"""):
 			data[row[0]].append(row[1:])
 
-		kickstartable = {}
-		for name in data.keys():
-			kickstartable[name] = False
-		argv = list(data)
-		argv.append('attr=kickstartable')
-		for row in self.call('list.host.attr', argv):
-			kickstartable[row['host']] = self.str2bool(row['value'])
-
 		for name in data.keys():
 
+			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
 			mac = None
 			ip  = None
 			dev = None
@@ -119,16 +128,16 @@ class Command(stack.commands.HostArgumentProcessor,
 					self.addOutput('', '\thardware ethernet\t%s;' % mac)
 					self.addOutput('', '\tfixed-address\t\t%s;' % ip)
 
-					if kickstartable[name]:
-						self.addOutput('', '\tfilename\t\t"pxelinux.0";')
+					if kickstartable:
 
+						self.addOutput('', filename)
 						server = servers.get(netname)
 						if not server:
 							server = servers.get('default')
 
-						self.addOutput('', '\tserver-name\t\t"%s";'
+						self.addOutput('','\tserver-name\t\t"%s";'
 							% server)
-						self.addOutput('', '\tnext-server\t\t%s;'
+						self.addOutput('','\tnext-server\t\t%s;'
 							% server)
 				
 					self.addOutput('', '}')
@@ -136,13 +145,13 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
-			(ip, channel), = self.db.select("""nt.ip,
+		(ip, channel), = self.db.select("""nt.ip,
 			nt.channel from networks nt, nodes n
 			where n.name='%s' and nt.device='%s' and
 			nt.node=n.id""" % (host, device))
-			if channel:
-				return self.resolve_ip(host, channel)
-			return ip
+		if channel:
+			return self.resolve_ip(host, channel)
+		return ip
 
 
 	def writeDhcpSysconfig(self):
