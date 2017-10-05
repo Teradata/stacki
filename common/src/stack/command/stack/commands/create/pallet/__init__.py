@@ -126,11 +126,11 @@ class Builder:
 		else:
 			tmp = self.mktemp()
 			os.makedirs(tmp)
-			os.system('mount -o loop -t iso9660 %s %s' %
+			os.system('mount -o loop -t iso9660 %s %s > /dev/null 2>&1' %
 				  (roll.getFullName(), tmp))
 			tree = stack.file.Tree(tmp)
 			tree.apply(self.copyFile, dir)
-			os.system('umount %s' % tmp)
+			os.system('umount %s > /dev/null 2>&1' % tmp)
 			shutil.rmtree(tmp)
 
 
@@ -592,8 +592,7 @@ class MetaRollBuilder(Builder):
 				arch.append(roll.getRollArch())
 
 		if not self.rollname:
-			name.sort()
-			rollName = string.join(name, '+')
+			rollName = '+'.join(name)
 		else:
 			rollName = self.rollname
 	
@@ -866,6 +865,11 @@ class Command(stack.commands.create.command,
 			('commit-ish', 'master'),
 			])
 
+		# I'm always leaving mounts around. I'm lazy.		
+		mounted = os.path.ismount('/mnt/cdrom')
+		while mounted:
+			os.system('umount /mnt/cdrom > /dev/null 2>&1')
+			mounted = os.path.ismount('/mnt/cdrom')
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'pallet')
@@ -891,6 +895,3 @@ class Command(stack.commands.create.command,
 				self.command)
 			
 		builder.run()
-
-
-RollName = "stacki"

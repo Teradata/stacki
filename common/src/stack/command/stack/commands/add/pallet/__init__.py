@@ -188,7 +188,9 @@ class Command(stack.commands.add.command):
 			for line in file.readlines():
 				l = line.split()
 				if l[1].strip() == self.mountPoint:
-					subprocess.run([ 'umount', self.mountPoint ])
+					cmd = 'umount %s' % self.mountPoint
+					cmd += ' > /dev/null 2>&1'
+					subprocess.run([ cmd ], shell=True)
 
 			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()
