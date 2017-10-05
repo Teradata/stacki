@@ -75,6 +75,7 @@ AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL
 UseDNS no
 </stack:file>
+</stack:script>
 
 </stack:stack> 
 
