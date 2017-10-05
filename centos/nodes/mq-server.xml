@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="no"?>
+
+<kickstart>
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<package>foundation-redis</package>
+
+<post>
+systemctl enable redis
+
+systemctl enable rmq-processor
+chkconfig --add rmq-processor
+</post>
+
+
+</kickstart>
+
