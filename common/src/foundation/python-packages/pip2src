@@ -1,4 +1,7 @@
 #! /opt/stack/bin/python3
+#
+# @copyright@
+# @copyright@
 
 import os
 import json
@@ -13,6 +16,7 @@ class Package:
 		self.master       = master
 		self.bootstrap    = False
 		self.version      = None
+		self.appliances   = [ ]
 		self.dependencies = [ ]
 
 
@@ -62,6 +66,9 @@ class Scanner:
 		self.packages.append(package)
 		
 
+
+Prefix = 'foundation-python'
+
 # Build the PackageSet
 
 PackageSet = {}
@@ -75,6 +82,10 @@ with open('packages.json', 'r') as text:
 		package = Package(name, master=True)
 		package.bootstrap = manifest[name].get('bootstrap')
 		package.version   = manifest[name].get('version')
+		if manifest[name].get('fe'):
+			package.appliances.append('frontend')
+		if manifest[name].get('be'):
+			package.appliances.append('backend')
 		PackageSet[name] = package
 
 
@@ -138,7 +149,7 @@ for package in PackageSet.values():
 	with open(os.path.join(srcdir, 'Makefile'), 'w') as makefile:
 		makefile.write("""
 PKGROOT  = /opt/stack
-ROLLROOT = ../../../../../..
+ROLLROOT = ../../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
@@ -151,25 +162,41 @@ install::
 			makefile.write('\nbootstrap:: install-rpm\n')
 
 	with open(os.path.join(srcdir, 'version.mk'), 'w') as ver:
-		ver.write('NAME=foundation-python-%s\n' % package.name)
+		ver.write('NAME=%s-%s\n' % (Prefix, package.name))
 		ver.write('VERSION=%s\n' % package.version)
 
 
-# Create top-level foundation-python-packages.xml
-xml = []
-xml.append('<stack:stack>')
-xml.append('')
-for package in PackageSet.values():
-	if package.master:
-		xml.append('\t<!-- %s -->' % package.name)
-		xml.append('\t<stack:package>foundation-python-%s</stack:package>' % package.name)
-		if package.dependencies:
-			for dep in package.dependencies:
-				xml.append('\t<stack:package>foundation-python-%s</stack:package>' % dep.name)
-		xml.append('')
-xml.append('</stack:stack>')
+# Create graph and node files
 
-with open('packages.xml', 'w') as text:
-	text.write('\n'.join(xml))
+xmldir = os.path.join('nodes')
+if not os.path.exists(xmldir):
+	os.makedirs(xmldir)
+for pkgname in pkgnames:
+	with open(os.path.join(xmldir, '%s-%s.xml' % (Prefix, pkgname)), 'w') as node:
+		node.write('<stack:stack>\n\t<stack:package>%s-%s</stack:package>\n\n' % (Prefix, pkgname))
+		for dep in PackageSet[pkgname].dependencies:
+			node.write('\t<stack:package>%s-%s</stack:package>\n' % (Prefix, dep.name))
+		node.write('\n</stack:stack>')
+
+xmldir = os.path.join('graph')
+if not os.path.exists(xmldir):
+	os.makedirs(xmldir)
+with open(os.path.join(xmldir, '%s.xml' % Prefix), 'w') as graph:
+	graph.write('<graph>\n')
+	for pkgname in pkgnames:
+		for appliance in PackageSet[pkgname].appliances:
+			graph.write('\t<edge from="%s" to="%s-%s"/>\n' % (appliance, Prefix, pkgname))
+		if PackageSet[pkgname].appliances:
+			graph.write('\n')
+	graph.write('</graph>')
+		
+
+# Create top-level manifest
+
+with open('manifest', 'w') as text:
+	for pkgname in pkgnames:
+		text.write('%s-%s\n' % (Prefix, pkgname))
+		for dep in PackageSet[pkgname].dependencies:
+			text.write('\t%s-%s\n' % (Prefix, dep.name))
 
 

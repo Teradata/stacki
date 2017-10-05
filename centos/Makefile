@@ -24,6 +24,9 @@ preroll::
 	make -C ../common rpms
 	mkdir -p build-$(ROLL)-$(STACK)/RPMS
 	cp -r ../common/build-$(ROLL)-$(STACK)/RPMS/* build-$(ROLL)-$(STACK)/RPMS/
+	cp -r ../common/manifest.d/*.manifest manifest.d/
+	cp -r ../common/nodes/*.xml nodes/
+	cp -r ../common/graph/*.xml graph/
 
 
 

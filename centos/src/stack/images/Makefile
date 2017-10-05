@@ -11,7 +11,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE)-$(ARCH).mk
 
 
-bootstrap:
+bootstrap::
 	yum install -y $(OS.DEPENDENCIES)
 
 deploy: install-rpm

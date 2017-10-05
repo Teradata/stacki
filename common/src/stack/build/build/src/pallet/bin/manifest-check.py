@@ -48,8 +48,18 @@ for filename in [ 'manifest', 'manifest.%s' % rollname ]:
 		manifest.append(l)
 	file.close()
 
+if os.path.exists('manifest.d'):
+	for f in os.listdir('manifest.d'):
+		with open(os.path.join('manifest.d', f), 'r') as text:
+			for line in text.readlines():
+				l = line.strip()
+				if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
+					continue
+				manifest.append(l)
+			found = True
+
 if not found:
-	print('Cannot find manifest file')
+	print('Cannot find any manifest files')
 	sys.exit(0)
 
 built = []

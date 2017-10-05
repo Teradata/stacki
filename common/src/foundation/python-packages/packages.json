@@ -5,19 +5,23 @@
 // "bootstrap" - package (add depencies) will be added to the bootstrap
 // target.
 //
+// "fe" - package will be installed on the Frontend
+//
+// "be" - package will be installed on Backends
+//
 // "version" - set the version of the package to be pulled from
 // pip. There is no mechanism to force a specific version of a
 // dependency, this is considered a feature.
 
 {
-	"configparser":		{}, 
-	"Flask":		{}, 
-	"PyYAML":		{}, 
-	"flake8":		{ "bootstrap": true }, 
-	"PyMySQL":		{ "bootstrap": true }, 
-	"python-daemon":	{ "bootstrap": true }, 
-	"pyzmq":		{ "bootstrap": true },
-	"redis":		{ "bootstrap": true }, 
-	"requests":		{}, 
-	"testinfra":		{ "bootstrap": true }
+	"configparser":		{ "fe": true, "be": true }, 
+	"Flask":		{ "fe": true }, 
+	"PyYAML":		{ "fe": true }, 
+	"flake8":		{ "fe": true, "bootstrap": true }, 
+	"PyMySQL":		{ "fe": true, "bootstrap": true }, 
+	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
+	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
+	"redis":		{ "fe": true, "bootstrap": true }, 
+	"requests":		{ "fe": true }, 
+	"testinfra":		{ "fe": true, "bootstrap": true }
 }

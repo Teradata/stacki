@@ -4,7 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-pkg bootstrap: src
+rpm pkg bootstrap: src
 	for x in src/*; do $(MAKE) -C $$x $@; done
 
 refresh:
@@ -13,9 +13,12 @@ refresh:
 src: packages.json pip2src
 	$(MAKE) clean
 	./pip2src
+	cp manifest  ../../../manifest.d/foundation-python.manifest
+	cp nodes/*.xml ../../../nodes/
+	cp graph/*.xml ../../../graph/
 
 clean:
-	-rm -rf src
+	-rm -rf src graph nodes manifest
 
 dump-info:
 	@echo "NAME = foundation-python-packages"
