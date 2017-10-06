@@ -57,11 +57,13 @@ def sles11():
 		ET.SubElement(root, "loader_type").text = "grub"
 
 def sles12():
-	boot = ET.SubElement(g, "boot_mbr")
-	boot.set("config:type","boolean")
-	boot.text="true"
-
-	ET.SubElement(root, "loader_type").text = "grub2"
+	if efi:
+		ET.SubElement(root, "loader_type").text = "grub2-efi"
+	else:
+		boot = ET.SubElement(g, "boot_mbr")
+		boot.set("config:type","boolean")
+		boot.text="true"
+		ET.SubElement(root, "loader_type").text = "grub2"
 
 def caasp():
 	ET.SubElement(g,"generic_mbr").text = "true"

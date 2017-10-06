@@ -18,10 +18,8 @@ class Implementation(stack.commands.Implementation):
 		kernel   = h['kernel']
 		ramdisk  = h['ramdisk']
 		args     = h['args']
-		filename = h['filename']
 		attrs    = h['attrs']
-		action	 = h['action']
-		type	 = h['type']
+		boottype = h['type']
 
 		dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
 		nextserver = attrs.get('Kickstart_PrivateKickstartHost')
@@ -52,5 +50,5 @@ class Implementation(stack.commands.Implementation):
 		if args and len(args) > 0:
 			self.owner.addOutput(host, '\tappend %s' % args)
 
-		if type == "install":
+		if boottype == "install":
 			self.owner.addOutput(host, '\tipappend 2')
