@@ -2,7 +2,7 @@
 <graph>
 
 	<description>
-	SLES graph for Stacki.
+	SLES graph for Stacki backend nodes
 	</description>
 
 	<copyright>
@@ -12,6 +12,7 @@
 	</copyright>
 
 	<edge from="backend" os="sles">
+		<to>base</to>
 		<to>general</to>
 		<to>kdump</to>
 		<to>bootloader</to>
@@ -19,11 +20,10 @@
 		<to>ssh-client</to>
 		<to>add-on</to>
 		<to>users</to>
-		<to>uefi</to>
 		<to>foundation-python</to>
 		<to>mq-client</to>
+		<to>uefi-client</to>
 	</edge>
-
 
 	<order tail="HEAD">
 		<head>general</head>

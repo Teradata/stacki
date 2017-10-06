@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<description>
+	Common graph for Stacki SLES frontend and backends
+	</description>
+
+	<edge from="base">
+		<to>logrotate</to>
+		<to>node</to>
+		<to>selinux</to>
+		<to>ssh</to>
+		<to>ssl</to>
+		<to>time-base</to>
+		<to>foundation-python</to>
+		<to>uefi-base</to>
+		<to>mq-base</to>
+	</edge>
+
+</graph>

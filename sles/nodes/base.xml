@@ -22,19 +22,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 <stack:script stack:stage="install-post">
-<!--
-	XXX
-
-	/sbin/chkconfig stack-pre on
-	/sbin/chkconfig stack-post on
--->
-
-<!--
-	XXX
-
-	/sbin/chkconfig NetworkManager off
--->
-
 
 <!-- Rsyslog Configuration file -->
 
@@ -59,7 +46,6 @@ if $programname == 'SCL' then ~
 stacki release &version; (&release;)
 </stack:file>
 </stack:script>
-
 
 </stack:stack> 
 

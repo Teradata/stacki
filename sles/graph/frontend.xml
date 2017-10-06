@@ -84,17 +84,7 @@
 		<to>storage-controller-server</to>
 		<to>time-server</to>
 		<to>mq-server</to>
-	</edge>
-
-	<edge from="base">
-		<to>logrotate</to>
-		<to>node</to>
-		<to>selinux</to>
-		<to>ssh</to>
-		<to>ssl</to>
-		<to>time-base</to>
-		<to>foundation-python</to>
-		<to>mq-base</to>
+		<to>uefi-server</to>
 	</edge>
 
 </graph>

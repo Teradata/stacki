@@ -6,14 +6,9 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:package>stack-mq</stack:package>
-
 <stack:script stack:stage="install-post">
-systemctl enable rmq-publisher
-chkconfig --add rmq-publisher
-
-systemctl enable rmq-producer
-chkconfig --add rmq-producer
+systemctl enable rmq-shipper
+chkconfig --add rmq-shipper
 
 <stack:report name="host.mq">&hostname;</stack:report>
 <!-- the following channels are shipped by default -->
