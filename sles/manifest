@@ -1,10 +1,14 @@
 foundation-comps
+foundation-fbtftpd
 foundation-gd
 foundation-mariadb
+foundation-newt
 foundation-python
 foundation-python-packages
+foundation-py-pycairo
 foundation-rcs
-foundation-newt
+foundation-redis
+foundation-zeromq
 ludicrous-speed
 MegaCLI
 stack-admin
@@ -14,6 +18,7 @@ stack-config
 stack-config-server
 stack-ekv
 stack-examples
+stack-mq
 stack-sles-images
 stack-kickstart
 stack-pxeboot
