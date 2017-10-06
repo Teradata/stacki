@@ -62,7 +62,11 @@ sys.path.append('/tmp')
 from stack_site import *
 
 tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tx.sendto('health up', (attributes['Kickstart_PrivateAddress'], 5000))
+
+msg = { 'channel' : 'health', 'message' : 'up' }
+m = json.dumps(msg)
+
+tx.sendto(m.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
 tx.close()
 </stack:file>
 
