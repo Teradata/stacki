@@ -20,7 +20,6 @@
 		<to>ssh-client</to>
 		<to>add-on</to>
 		<to>users</to>
-		<to>foundation-python</to>
 		<to>mq-client</to>
 		<to>uefi-client</to>
 	</edge>
