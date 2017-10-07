@@ -45,6 +45,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 		output = self.call('list.host.interface', [ host ])
 		i = 0
+		rows = []
 		for o in output:
 			if o['name'] != name:
 				interface_hostname = o['name']
@@ -74,10 +75,10 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 			i += 1
 			
-			return [ name, interface_hostname, default, appliance, rack, rank,
-				 ip, mac, interface, network, channel, options, vlan,
-				 installaction, osaction, groups, box ]
-
+			rows.append([ name, interface_hostname, default, appliance, rack, rank,
+				ip, mac, interface, network, channel, options, vlan,
+				installaction, osaction, groups, box ])
+		return(rows)
 
 	def run(self, params, args):
 
@@ -90,8 +91,9 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 		w.writerow(header)
 
 		for host in self.getHostnames(args):
-			w.writerow(self.doHost(host))
+			for r in self.doHost(host):
+				w.writerow(self.doHost(host)[0])
 
 		self.beginOutput()
-		self.addOutput(None, s.getvalue().strip())
+		self.addOutput('', s.getvalue().strip())
 		self.endOutput()
