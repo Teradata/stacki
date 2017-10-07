@@ -50,7 +50,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			if o['name'] != name:
 				interface_hostname = o['name']
 			else:
-				interface_hostname = None
+				interface_hostname = name
 
 			if i > 0:
 				#
@@ -74,7 +74,6 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			vlan = o['vlan']
 
 			i += 1
-			
 			rows.append([ name, interface_hostname, default, appliance, rack, rank,
 				ip, mac, interface, network, channel, options, vlan,
 				installaction, osaction, groups, box ])
@@ -92,7 +91,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 		for host in self.getHostnames(args):
 			for r in self.doHost(host):
-				w.writerow(self.doHost(host)[0])
+				w.writerow(r)
 
 		self.beginOutput()
 		self.addOutput('', s.getvalue().strip())
