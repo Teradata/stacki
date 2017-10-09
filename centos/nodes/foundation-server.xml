@@ -18,18 +18,15 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 
 
 <package>foundation-python</package>
-<package>foundation-python-xml</package>
 <package>foundation-py-pygobject</package>
 <package>foundation-py-pygtk</package>
 <package>foundation-py-PyMySQL</package>
 <package>foundation-py-pycairo</package>
 <package>foundation-py-libxml2dom</package>
-<package>foundation-python-pytest</package>
 <package>foundation-rcs</package>
 <package>foundation-readline</package>
 <package>foundation-libxml2</package>
 <package>foundation-wget</package>
-<package>foundation-python-setuptools</package>
 <package>foundation-py-ipaddress</package>
 <package>foundation-redhat</package>
 <package>foundation-fbftpd</package>

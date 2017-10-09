@@ -45,7 +45,7 @@ class Builder:
 		pass
 				
 	def mkisofs(self, isoName, rollName, diskName, rollDir):
-		print('Building ISO image for %s ...' % diskName)
+		print('Building ISO image for %s' % diskName)
 
 		if self.config.isBootable():
 			extraflags = self.config.getISOFlags()
@@ -54,10 +54,10 @@ class Builder:
 
 		volname = "stacki"
 		cwd = os.getcwd()
-		cmd = 'mkisofs -V "%s" %s -r -T -f -o %s .' % \
+		cmd = 'mkisofs -quiet -V "%s" %s -r -T -f -o %s .' % \
 			(volname, extraflags, os.path.join(cwd, isoName))
 
-		print('mkisofs: cmd %s' % cmd)
+#		print('mkisofs: cmd %s' % cmd)
 		os.chdir(rollDir)
 		subprocess.call(shlex.split(cmd), stdin=None, stdout=None,
 			stderr=None)
@@ -90,19 +90,16 @@ class Builder:
 	def copyXMLs(self, osname, name, version, release, arch):
 		print('Copying graph and node XML files')
 
-		cwd = os.getcwd()
-		srcdir = os.path.join(cwd, '..')
-		destdir = os.path.join(cwd, 'disk1', name, version,
-			release, osname, arch)
-
-		os.chdir(destdir)
-		if os.path.exists(os.path.join(srcdir, 'graph')):
-		    shutil.copytree(os.path.join(srcdir, 'graph'),
-			os.path.join(destdir, 'graph'))
-		if os.path.exists(os.path.join(srcdir, 'nodes')):
-		    shutil.copytree(os.path.join(srcdir, 'nodes'),
-			os.path.join(destdir, 'nodes'))
-		os.chdir(cwd)
+		dst = os.path.join('disk1', name, version, release, osname, arch)
+		
+		for xml in [ 'graph', 'nodes' ]:
+			os.makedirs(os.path.join(dst, xml))
+			for src in [ xml, os.path.join('..', xml) ]:
+				for filename in os.listdir(src):
+					base, ext = os.path.splitext(filename)
+					if ext == '.xml':
+						shutil.copy(os.path.join(src, filename),
+							    os.path.join(dst, xml, filename))
 
 		
 	def copyFile(self, path, file, root):

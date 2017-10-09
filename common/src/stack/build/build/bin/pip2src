@@ -83,9 +83,9 @@ with open('packages.json', 'r') as text:
 		package.bootstrap = manifest[name].get('bootstrap')
 		package.version   = manifest[name].get('version')
 		if manifest[name].get('fe'):
-			package.appliances.append('frontend')
+			package.appliances.append('server')
 		if manifest[name].get('be'):
-			package.appliances.append('backend')
+			package.appliances.append('client')
 		PackageSet[name] = package
 
 

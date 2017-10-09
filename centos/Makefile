@@ -23,10 +23,12 @@ bootstrap::
 preroll::
 	make -C ../common rpms
 	mkdir -p build-$(ROLL)-$(STACK)/RPMS
+	mkdir -p build-$(ROLL)-$(STACK)/graph
+	mkdir -p build-$(ROLL)-$(STACK)/nodes
 	mkdir -p build-$(ROLL)-$(STACK)/manifest.d
-	cp ../common/manifest ../common/build-$(ROLL)-$(STACK)/manifest.d/common.manifest
 	for d in RPMS manifest.d; do cp -r ../common/build-$(ROLL)-$(STACK)/$$d/* build-$(ROLL)-$(STACK)/$$d/; done
-	for x in nodes graph; do cp -r ../common/build-$(ROLL)-$(STACK)/$$x/*.xml build-$(ROLL)-$(STACK)/$$d/; done
+	for x in graph nodes; do cp -r ../common/build-$(ROLL)-$(STACK)/$$x/*.xml build-$(ROLL)-$(STACK)/$$x/; done
+	cp ../common/manifest ../common/build-$(ROLL)-$(STACK)/manifest.d/common.manifest
 
 
 
