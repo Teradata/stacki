@@ -21,9 +21,10 @@ if not msg:
 sys.path.append('/tmp')
 from stack_site import *
 
-health = "health %s" % ' '.join(msg)
+health = {"channel":"health",
+	"message":' '.join(msg)}
 
 tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tx.sendto(health.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
+tx.sendto(json.dumps(health).encode(), (attributes['Kickstart_PrivateAddress'], 5000))
 tx.close()
 
