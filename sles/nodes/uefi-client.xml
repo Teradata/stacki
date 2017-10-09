@@ -11,6 +11,21 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:package>mtools</stack:package>
+<stack:package>uefi-boot-method</stack:package>
+
+<stack:script stack:stage="install-pre">
+if [ -d /sys/firmware/efi ]; then
+	netboot=`efibootmgr | awk '/^BootCurrent:/{print $2;}'`
+	[ ! -z $netboot ] &amp;&amp; echo $netboot > /tmp/uefi_netboot
+fi
+</stack:script>
+
+<stack:script stack:stage="install-post" stack:chroot="false">
+if [ -f /tmp/uefi_netboot ]; then
+	mkdir -p /mnt/opt/stack/etc/
+	mv /tmp/uefi_netboot /mnt/opt/stack/etc/uefi_netboot
+fi
+</stack:script>
 
 <stack:script stack:stage="install-post" stack:shell="python" stack:chroot="false">
 <![CDATA[
@@ -41,5 +56,9 @@ if efi_dev:
 MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
+<stack:script stack:stage="boot-post">
+systemctl enable uefi-boot-method
+systemctl start uefi-boot-method
+</stack:script>
 
 </stack:stack>

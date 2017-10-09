@@ -1,6 +1,6 @@
 # @SI_Copyright@
-#				   stacki.com
-#				      v4.0
+#                               stacki.com
+#                                  v4.0
 # 
 #      Copyright (c) 2006 - 2017 StackIQ Inc. All rights reserved.
 # 
@@ -38,35 +38,21 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # @SI_Copyright@
-
-import os
-import stack.commands
+#
 
 
-class Plugin(stack.commands.Plugin):
-	"""
-	Generate a UEFI specific configuration file
-	"""
-	def requires(self):
-		return []
+PKGROOT		= /opt/stack
+ROLLROOT	= ../../..
+DEPENDS.FILES	= uefi_boot_method.py uefi-boot-method.service
 
-	def provides(self):
-		return 'uefi'
+include $(STACKBUILD)/etc/CCRules.mk
 
-	def run(self, ha):
-		for host in ha:
-			# If actions aren't specified on the command line
-			# get info from the database
-			ip = None
-			if 'ip' in ha[host]:
-				ip = ha[host]['ip']
-			if not ip:
-				continue
-			osname = ha[host]['os']
-			filename = os.path.join(os.path.sep,
-				'tftpboot', 'pxelinux', 'uefi', 'grub.cfg-%s' % ip)
-			self.owner.addOutput(host, '<stack:file stack:name="%s" \
-				stack:owner="root:apache" stack:perms="0664" \
-				stack:rcs="off"><![CDATA[' % filename)
-			self.owner.runImplementation("%s_uefi" % osname, ha[host])
-			self.owner.addOutput(host, ']]></stack:file>')
+
+build:
+
+
+install::
+	mkdir -p $(ROOT)/opt/stack/bin/ $(ROOT)/lib/systemd/system/
+	$(INSTALL) -m 0755 uefi_boot_method.py $(ROOT)/opt/stack/bin/
+	$(INSTALL) -m 0644 uefi-boot-method.service $(ROOT)/lib/systemd/system/
+
