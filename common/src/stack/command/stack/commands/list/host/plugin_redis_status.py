@@ -46,7 +46,10 @@ class Plugin(stack.commands.Plugin):
 			return ret_val
 
 		for host in hosts:
-			status =r.get('host:%s:status' % host) 
+			try:
+				status = r.get('host:%s:status' % host) 
+			except:
+				status = None
 			if status:
 				status = status.decode()
 			host_status[host] = ( status, )
