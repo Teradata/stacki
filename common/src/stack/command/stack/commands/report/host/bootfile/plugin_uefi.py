@@ -57,7 +57,9 @@ class Plugin(stack.commands.Plugin):
 		for host in ha:
 			# If actions aren't specified on the command line
 			# get info from the database
-			ip = ha[host]['ip']
+			ip = None
+			if 'ip' in ha[host]:
+				ip = ha[host]['ip']
 			if not ip:
 				continue
 			osname = ha[host]['os']
