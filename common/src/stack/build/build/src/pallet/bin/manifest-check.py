@@ -35,10 +35,18 @@ for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
 
 manifest = []
 
+manifests = [ 'manifest', 'manifest.%s' % rollname ]
+try:
+	for f in os.listdir(os.path.join(buildpath, 'manifest.d')):
+		manifests.append(os.path.join(buildpath, 'manifest.d', f))
+except FileNotFoundError:
+	pass
+
 found = False
-for filename in [ 'manifest', 'manifest.%s' % rollname ]:
+for filename in manifests:
 	if not os.path.exists(filename):
 		continue
+	print('searching %s' % filename)
 	found = True
 	file = open(filename, 'r')
 	for line in file.readlines():
@@ -48,17 +56,6 @@ for filename in [ 'manifest', 'manifest.%s' % rollname ]:
 		if l not in manifest: # ignore duplicates
 			manifest.append(l)
 	file.close()
-
-if os.path.exists('manifest.d'):
-	for f in os.listdir('manifest.d'):
-		with open(os.path.join('manifest.d', f), 'r') as text:
-			for line in text.readlines():
-				l = line.strip()
-				if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
-					continue
-				if l not in manifest: # ignore duplicates
-					manifest.append(l)
-			found = True
 
 if not found:
 	print('Cannot find any manifest files')
@@ -98,4 +95,6 @@ if len(notmanifest) > 0:
 		print('\t%s' % pkg)
 	exit_code += 1
 
+if exit_code == 0:
+	print('done')
 sys.exit(exit_code)

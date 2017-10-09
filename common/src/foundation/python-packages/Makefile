@@ -4,24 +4,31 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-rpm pkg bootstrap: src
+ROLLROOT	= ../../..
+ORDER           = 20
+RPM.STRATEGY    = custom
+
+include $(STACKBUILD)/etc/CCRules.mk
+
+rpm: src
+	for x in src/*; do $(MAKE) -C $$x $@; done
+bootstrap:: src
 	for x in src/*; do $(MAKE) -C $$x $@; done
 
 refresh:
 	-rm versions.json
 
-src: packages.json pip2src
+src: packages.json
 	$(MAKE) clean
-	./pip2src
-	cp manifest  ../../../manifest.d/foundation-python.manifest
-	cp nodes/*.xml ../../../nodes/
-	cp graph/*.xml ../../../graph/
+	../../stack/build/build/bin/pip2src
+	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d
+	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/nodes
+	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/graph
+	cp manifest    $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d/foundation-python.manifest
+	cp nodes/*.xml $(ROLLROOT)/build-$(ROLL)-$(STACK)/nodes/
+	cp graph/*.xml $(ROLLROOT)/build-$(ROLL)-$(STACK)/graph/
 
-clean:
-	-rm -rf src graph nodes manifest
+clean::
+	-rm -rf src graph nodes manifest .cache
 
-dump-info:
-	@echo "NAME = foundation-python-packages"
-	@echo "ORDER = 20"
-	@echo "DIR = $(CURDIR)"
 
