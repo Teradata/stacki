@@ -97,7 +97,6 @@ class Implementation(stack.commands.Implementation):
 
 		# Gather and print the output
 		for host in host_output:
-			print(host_output)
 			if not collate:
 				if host_output[host]['output']:
 					print(str(host_output[host]['output']))
