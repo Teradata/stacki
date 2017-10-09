@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage boot settings for non-standard iPXE/UEFI combinations
+After=syslog.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/stack/bin/uefi_boot_method.py --bootnext
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

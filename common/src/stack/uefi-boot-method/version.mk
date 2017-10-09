@@ -1,0 +1,1 @@
+NAME=uefi-boot-method
