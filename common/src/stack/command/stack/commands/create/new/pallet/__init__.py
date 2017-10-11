@@ -1,6 +1,6 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
-# All rights reserved. Stacki(r) v5.x stacki.com
+# Copyright (c) 2006 - 2017 StackIQ Inc.
+# All rights reserved. stacki(r) v5.0 stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 #
@@ -13,7 +13,6 @@
 import re
 import os
 import shutil
-import string
 from collections import UserDict
 from random import randrange
 import stack
@@ -24,10 +23,10 @@ class Textsub(UserDict):
 	"""Substitutes variables in the text with their values
 	from the compiled dictionary"""
 
-	def __init__(self, dict=None):
+	def __init__(self, d=None):
 		self.re = None
 		self.regex = None
-		UserDict.__init__(self, dict)
+		UserDict.__init__(self, d)
 
 	def compile(self):
 		if len(self.data) > 0:
@@ -65,6 +64,11 @@ class Command(stack.commands.create.new.command):
 	<param type='string' name='version'>
 	Version of the pallet. Typically the version of the
 	application to be palletized.
+	</param>
+
+	<param type='string' name='os'>
+	The OS of the pallet. 'sles', 'redhat' are acceptable options.
+	Any other values will result in a pallet unrecognized by stacki
 	</param>
 
 	<example cmd='create new pallet name=valgrind version=3.10.1'>
@@ -120,31 +124,18 @@ class Command(stack.commands.create.new.command):
 	def setDict(self):
 		"""Initialize dictionary. Key - a variable to
 		be substituted, value - the substitution value"""
-		dict = {"@template@" : self.name,
+		d = {"@template@" : self.name,
 			"@version@" : self.version,
 			"@color@" : self.color,
+			"@os@": self.osname,
 			"template.xml" : "%s.xml" % self.name,
 			"template.spec.in" : "%s.spec.in" % self.name,
 			"roll-template-usersguide.spec.in" :
 				"roll-%s-usersguide.spec.in" % self.name,
 		}
 
-		self.dict = Textsub(dict)
-		self.dict.compile()
-
-
-	def changeName(self, dir, name):
-		"""If a name contains 'template', substitute with the pallet
-		name"""
-		str = "template"
-		i = name.find(str)
-		if i == -1:
-			return name
-		
-		new = name[0:i] + self.name + name[i + len(str):]
-		os.rename(name, new)
-		return new 
-
+		self.d = Textsub(d)
+		self.d.compile()
 
 	def readFile(self, name):
 		"""Read text file, return a string"""
@@ -172,23 +163,9 @@ class Command(stack.commands.create.new.command):
 		"""Read file, make substitution in the text
 		and write it back"""
 
-		text = self.dict.sub(self.readFile(namein))
+		text = self.d.sub(self.readFile(namein))
 		self.writeFile(nameout, text)
 
-
-	def rollName(self, dirname, dirs, fnames):
-		"""Rename 'template/' with the pallet name, update file names to
-		include a pallet name where needed, and update file text."""
-		dirname = self.changeName("", dirname)
-		for file in fnames:
-			fullname = os.path.join(dirname, file)
-			if fullname.find("images/") > 0:
-				# don't change image files names
-				continue
-
-			if os.path.isfile(fullname):
-				newname = self.changeName("", fullname)
-				self.update(newname, newname)
 
 	def createDirsFiles(self):
 		""" Create directory structure for the new pallet"""
@@ -199,16 +176,30 @@ class Command(stack.commands.create.new.command):
 				'/opt/stack/share/build/src/pallet/template'
 
 		shutil.copytree(template_dir, self.name)
-		for root,dirs,fnames in os.walk(self.name,self.rollName,[]):
-			self.rollName(root,dirs,fnames)
+		for (r, d, f) in os.walk(self.name):
+			for directory in d:
+				if 'template' in directory:
+					newdir = directory.replace('template', self.name)
+					os.rename(os.path.join(r, directory),
+						os.path.join(r, newdir))
 
+		for (r, d, f) in os.walk(self.name):
+			for filename in f:
+				if 'template' in filename:
+					fn = os.path.join(r, filename.replace('template', self.name))
+					os.rename(os.path.join(r, filename), fn)
+				else:
+					fn = os.path.join(r, filename)
+				self.update(fn, fn)
 
 	def run(self, params, args):
 
-		(self.name, self.version, self.color) = self.fillParams([
+		(self.name, self.version, self.color, self.osname) = self.fillParams([
 			('name', None, True),
 			('version', '1.0'),
-			('color', self.colorNode())
+			('color', self.colorNode()),
+			('os', 'sles'),
 			])
+
 		self.setDict()
 		self.createDirsFiles()

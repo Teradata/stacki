@@ -95,6 +95,7 @@
 		<to>node-certs</to>
 		<to>storage-server</to>
 		<to>ludicrous-server</to>
+		<to>mq-server</to>
 	</edge>
 
 </graph>

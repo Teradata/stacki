@@ -35,6 +35,7 @@
 		<to>ssl</to>
 		<to>ssh</to>
 		<to>storage</to>
+		<to>mq-base</to>
 	</edge>
 
 	<edge from="client" to="repo-client" />

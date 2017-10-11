@@ -1,38 +1,29 @@
 <stack:stack>
 
-<stack:description>
-Your @template@ pallet description here
-</stack:description>
+	<stack:description>
+	@template@ pallet description here.
+	This node file will run only on frontend nodes
+	</stack:description>
 
-<stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
 <!--
-List packages that will be installed
-on a frontend only.
-
-<stack:package>package-1</package>
-<stack:package>package-2</stack:package>
+     List packages that will only be
+     installed on frontends
+	<stack:package>package1</stack:package>
+	<stack:package>package2</stack:package>
 -->
 
-<!-- 
-     Pre section that will be run on
-     a frontend only.
 
-<stack:script stack:stage="install-pre">
-</stack:script>
--->
 
-<!-- Post section that will be run on
-     a frontend only.
-
+<!-- Post section that will be run
+     only on frontends
 <stack:script stack:stage="install-post">
 </stack:script>
-
 -->
-
 
 </stack:stack>

@@ -46,6 +46,7 @@
 		<to>pxeboot</to>
 		<to>peerdone</to>
 		<to>ludicrous-client</to>
+		<to>mq-client</to>
 	</edge>
 
 	<order head="storage" tail="pxeboot" />
