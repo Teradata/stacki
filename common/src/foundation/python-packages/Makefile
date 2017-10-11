@@ -10,9 +10,7 @@ RPM.STRATEGY    = custom
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-rpm: src
-	for x in src/*; do $(MAKE) -C $$x $@; done
-bootstrap:: src
+bootstrap rpm: src
 	for x in src/*; do $(MAKE) -C $$x $@; done
 
 refresh:

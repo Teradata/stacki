@@ -12,11 +12,10 @@ ROLLROOT   = .
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap::
-	-yum group install -y "Development Tools"
-	-yum group install -y "Infrastructure Server"
-	-yum install -y createrepo genisoimage git emacs vim
+bootstrap:
 	$(MAKE) -C ../common $@
+	$(STACKBUILD)/bin/package-install -m "Development Tools" "Infrastructure Server"
+	$(STACKBUILD)/bin/package-install createrepo genisoimage git emacs vim
 	$(MAKE) 3rdparty
 	$(MAKE) -C src bootstrap
 
@@ -28,7 +27,7 @@ preroll::
 	mkdir -p build-$(ROLL)-$(STACK)/manifest.d
 	for d in RPMS manifest.d; do cp -r ../common/build-$(ROLL)-$(STACK)/$$d/* build-$(ROLL)-$(STACK)/$$d/; done
 	for x in graph nodes; do cp -r ../common/build-$(ROLL)-$(STACK)/$$x/*.xml build-$(ROLL)-$(STACK)/$$x/; done
-	cp ../common/manifest ../common/build-$(ROLL)-$(STACK)/manifest.d/common.manifest
+	cp ../common/manifest build-$(ROLL)-$(STACK)/manifest.d/common.manifest
 
 
 

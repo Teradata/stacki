@@ -16,7 +16,7 @@ STACKBUILD      = $(ROLLROOT)/src/stack/build/build
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap:: install-rpm
+bootstrap: install-rpm
 
 build:
 

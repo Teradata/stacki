@@ -10,7 +10,14 @@ ROLLROOT	= ../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION)-$(RELEASE).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk
--include build-$(OS).mk
+
+bootstrap:
+ifeq ($($OS),suse)
+	echo "Name: ncursesw" > /usr/lib64/pkgconfig/ncursesw.pc
+	echo "Description: Old school GUI" >> /usr/lib64/pkgconfig/ncursesw.pc
+	echo "Version: 5.9-40"  >> /usr/lib64/pkgconfig/ncursesw.pc
+	echo "Libs: -lncursesw" >> /usr/lib64/pkgconfig/ncursesw.pc
+endif
 
 
 refresh:

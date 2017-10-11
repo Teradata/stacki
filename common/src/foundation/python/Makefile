@@ -10,18 +10,19 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap-redhat::
-	yum install -y openssl-devel readline-devel bz2-devel xz-devel
+BOOTSTRAP        = readline-devel
+BOOTSTRAP.redhat = openssl-devel bz2-devel xz-devel
+BOOTSTRAP.suse   =
+
+bootstrap:
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
+	$(MAKE) install-rpm
 	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
-
-
-bootstrap:: install-rpm
 	ldconfig
 
 
 build:
 	tar -xzf Python-$(VERSION).tgz
-#	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
 	( 								\
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT)				\

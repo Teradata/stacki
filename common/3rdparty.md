@@ -4,7 +4,7 @@ This repository includes the following code from other projects.
 
 * MegaCli-8.07.07-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/MegaCli-8.07.07-1.noarch.rpm]
 * storcli-1.17.08-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/storcli-1.17.08-1.noarch.rpm]
-* pycairo-1.2.0.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/pycairo-1.2.0.tar.gz]
+* pycairo-1.15.3.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/pycairo-1.15.3.tar.gz]
 * wxPython-4.0.0a3.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/wxPython-4.0.0a3.tar.gz]
 * git-lfs-1.4.3-1.el7.x86_64.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/git-lfs-1.4.3-1.el7.x86_64.rpm]
 * gd-2.0.33.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/gd-2.0.33.tar.gz]

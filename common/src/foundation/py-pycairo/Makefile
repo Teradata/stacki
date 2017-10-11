@@ -19,17 +19,15 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	gunzip -c pycairo-$(VERSION).tar.gz | $(TAR) -xf -
-	(								\
+	(							\
 		cd pycairo-$(VERSION);				\
-		PATH=/opt/stack/bin:$$PATH				\
-			./configure --prefix=$(PKGROOT);		\
-		$(MAKE);						\
+		$(PY.PATH) setup.py build;			\
 	)
 
 install::
-	(								\
+	(							\
 		cd pycairo-$(VERSION);				\
-		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
+		$(PY.PATH) setup.py install --root=$(ROOT);	\
 	)
 
 

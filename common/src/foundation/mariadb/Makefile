@@ -19,8 +19,10 @@ DEPENDS.FILES	= mariadb-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap-redhat::
-	yum install -y cmake systemd-devel
+BOOTSTRAP = cmake systemd-devel
+
+bootstrap:
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP)
 
 build:
 	gunzip -c mariadb-$(VERSION).tar.gz | $(TAR) -xf -

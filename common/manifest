@@ -10,7 +10,6 @@ foundation-python
 foundation-rcs
 foundation-redis
 foundation-zeromq
-git-lfs
 ludicrous-speed
 sc-im
 stack-admin
@@ -29,3 +28,4 @@ stack-storage-config
 stack-summary
 stack-wizard
 storcli
+uefi-boot-method

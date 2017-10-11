@@ -10,8 +10,21 @@ include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE).mk
 -include $(RELEASE)-$(ARCH).mk
 
-bootstrap::
-	yum install -y $(OS.DEPENDENCIES)
+BOOTSTRAP = NetworkManager-devel	\
+	NetworkManager-glib-devel	\
+	libnl-devel			\
+	device-mapper-devel		\
+	rpm-devel			\
+	libarchive-devel		\
+	isomd5sum-devel			\
+	e2fsprogs-devel			\
+	iscsi-initiator-utils-devel	\
+	newt-devel			\
+	squashfs-tools
+
+bootstrap:
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP)
+
 
 deploy: install-rpm
 	cp /opt/stack/images/initrd*	/tftpboot/pxelinux/

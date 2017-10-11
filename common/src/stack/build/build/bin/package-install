@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# @copyright@
+# @copyright@
+
+zypper() {
+	for p in $@; do
+		if [ $meta == 1 ]; then
+			/usr/bin/zypper in -y -t pattern $p
+		else
+			/usr/bin/zypper in -y $p
+		fi
+	done
+}
+
+
+meta=0
+while getopts "m" opt; do
+	case $opt in
+	m)
+		meta=1
+		;;
+	?)
+		echo 'invalid option'
+		exit -1
+		;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+case `$STACKBUILD/bin/os` in
+suse)
+	zypper $@
+	;;
+redhat)
+	yum $@
+	;;
+esac
+
+exit 0

@@ -95,6 +95,8 @@ class Builder:
 		for xml in [ 'graph', 'nodes' ]:
 			os.makedirs(os.path.join(dst, xml))
 			for src in [ xml, os.path.join('..', xml) ]:
+				if not os.path.exists(src):
+					continue
 				for filename in os.listdir(src):
 					base, ext = os.path.splitext(filename)
 					if ext == '.xml':

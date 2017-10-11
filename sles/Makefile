@@ -7,27 +7,24 @@
 ROLLROOT   = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
--include bootstrap.mk
 
 .PHONY: 3rdparty
 3rdparty:
 	$(ROLLSBUILD)/bin/get3rdparty.py
 
-bootstrap::  $(GROUPS) $(PACKAGES)
-	# Install package sets here
-	# individual bootstrap requirement go in package
-	# makefiles using the bootstrap-suse tag
-	#
-	# E.g. (From RedHat)
-	#yum group install -y "Development Tools"
-	#yum group install -y "Infrastructure Server"
-	#yum install -y createrepo genisoimage emacs
+bootstrap:
 	$(MAKE) -C ../common $@
+	$(STACKBUILD)/bin/package-install -m 32bit Basis-Devel SDK-C-C++
+	$(STACKBUILD)/bin/package-install rpm-build libzip2 apache2 squashfs apache2-devel createrepo
 	$(MAKE) 3rdparty
+	$(MAKE) -C src bootstrap
 
-common:
+preroll::
 	make -C ../common rpms
-
-preroll:: common
 	mkdir -p build-$(ROLL)-$(STACK)/RPMS
-	cp -r ../common/build-$(ROLL)-$(STACK)/RPMS/* build-$(ROLL)-$(STACK)/RPMS/
+	mkdir -p build-$(ROLL)-$(STACK)/graph
+	mkdir -p build-$(ROLL)-$(STACK)/nodes
+	mkdir -p build-$(ROLL)-$(STACK)/manifest.d
+	for d in RPMS manifest.d; do cp -r ../common/build-$(ROLL)-$(STACK)/$$d/* build-$(ROLL)-$(STACK)/$$d/; done
+	for x in graph nodes; do cp -r ../common/build-$(ROLL)-$(STACK)/$$x/*.xml build-$(ROLL)-$(STACK)/$$x/; done
+	cp ../common/manifest build-$(ROLL)-$(STACK)/manifest.d/common.manifest

@@ -23,7 +23,7 @@ dump-info::
 	@echo "STACK_RELEASE   = $(STACK_RELEASE)"
 	@echo "STACK_VERSION   = $(STACK_VERSION)"
 
-bootstrap:: install-rpm
+bootstrap: install-rpm
 
 build:
 

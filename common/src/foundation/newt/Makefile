@@ -10,10 +10,11 @@ DEPENDS.FILES	= newt-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap-redhat::
-	yum install -y slang-devel popt-devel
+BOOTSTRAP = slang-devel popt-devel
 
-bootstrap:: install-rpm
+bootstrap:
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP)
+	$(MAKE) install-rpm
 
 build:
 	tar -xzf newt-$(VERSION).tar.gz
