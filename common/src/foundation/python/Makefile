@@ -11,7 +11,8 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap-redhat::
-	yum install -y openssl-devel readline-devel bz2-devel xz-devel
+	yum install -y openssl-devel readline-devel \
+		bzip2-libs bzip2-devel xz-devel
 	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
 
 
