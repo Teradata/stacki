@@ -6,6 +6,7 @@
 
 
 import stack.commands
+import sys
 
 
 class Command(stack.commands.Command,
@@ -96,6 +97,9 @@ class Command(stack.commands.Command,
 				h['ip']       = ip
 				h['mask']     = row['mask']
 				h['gateway']  = row['gateway']
+			else:
+				print("Non-frontend node has no pxe-able lines in list host interface")
+				sys.exit()
 
 		self.beginOutput()
 		self.runPlugins(ha)
