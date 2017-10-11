@@ -6,7 +6,7 @@
 
 
 import stack.commands
-import sys
+from stack.exception import CommandError
 
 
 class Command(stack.commands.Command,
@@ -32,7 +32,7 @@ class Command(stack.commands.Command,
 
 		ha = {}
 		for host in hosts:
-			ha[host] = { 
+			ha[host] = {
 				'host'       : host,
 				'action'     : None,
 				'type'       : action,
@@ -42,7 +42,7 @@ class Command(stack.commands.Command,
 
 		for row in self.call('list.host.attr', hosts):
 			ha[row['host']]['attrs'][row['attr']] = row['value']
-			
+
 		if not action: # param can override the db
 			for row in self.call('list.host.boot', hosts):
 				ha[row['host']]['type'] = row['action']
@@ -98,11 +98,8 @@ class Command(stack.commands.Command,
 				h['mask']     = row['mask']
 				h['gateway']  = row['gateway']
 			else:
-				print("Non-frontend node has no pxe-able lines in list host interface")
-				sys.exit()
+				raise CommandError(self, 'Non-frontend node has no pxe-able lines in list host interface')
 
 		self.beginOutput()
 		self.runPlugins(ha)
 		self.endOutput(padChar='', trimOwner=True)
-
-
