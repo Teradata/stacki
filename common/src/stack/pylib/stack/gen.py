@@ -754,7 +754,7 @@ class Generator:
 		return [ MainTraversor(self) ]
 
 	def parse(self, xml_string):
-		debug     = True # write files after each traversal
+		debug     = False # write files after each traversal
 		i         = 0
 		self.doc  = xml.dom.minidom.parseString(xml_string)
 		self.root = self.doc.getElementsByTagName('stack:profile')[0]
