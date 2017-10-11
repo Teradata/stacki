@@ -48,6 +48,5 @@ cp /run/install/tmp/stack.conf /tmp/stack.conf
 /opt/stack/bin/peer-done
 </post>
 
-
 </stack> 
 

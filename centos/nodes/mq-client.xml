@@ -1,6 +1,4 @@
-<?xml version="1.0" standalone="no"?>
-
-<kickstart>
+<stack:stack>
 
 <stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
@@ -8,19 +6,18 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<post>
+<stack:script stack:stage="install-post">
 systemctl enable rmq-shipper
 chkconfig --add rmq-shipper
 
-<report name="host.mq">&hostname;</report>
-
+<stack:report name="host.mq">&hostname;</stack:report>
 <!-- the following channels are shipped by default -->
-<file name="/etc/sysconfig/stack-mq-channels" mode="append">
+
+<stack:file stack:name="/etc/sysconfig/stack-mq-channels" stack:mode="append">
 alert
 health
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
-
-</kickstart>
+</stack:stack>

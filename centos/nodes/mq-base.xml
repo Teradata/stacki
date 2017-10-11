@@ -1,33 +1,20 @@
-<?xml version="1.0" standalone="no"?>
+<stack:stack>
 
-<kickstart>
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
 
+<stack:package>stack-mq</stack:package>
+<stack:package>foundation-zeromq</stack:package>
 
-	<description>
-	StackI Pro Pallet
-	</description>
-
-	<si_copyright>
-	(c) 2006 - 2017 StackIQ Inc.
-	All rights reserved. stacki(r) v4.0 stacki.com
-	</si_copyright>
-
-
-<package>stack-mq</package>
-<package>foundation-zeromq</package>
-
-
-<post>
+<stack:script stack:stage="install-post">
 systemctl enable rmq-publisher
 chkconfig --add rmq-publisher
 
 systemctl enable rmq-producer
 chkconfig --add rmq-producer
-</post>
+</stack:script>
 
-<boot order="post">
-/opt/stack/bin/rmq-publish -c alert 'kickstart completed'
-</boot>
-
-
-</kickstart>
+</stack:stack>
