@@ -9,7 +9,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 
-<stack:package>chrony</stack:package>
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">chrony</stack:package>
 
 
 <stack:script stack:stage="install-post">
