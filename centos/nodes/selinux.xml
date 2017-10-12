@@ -1,23 +1,23 @@
-<stack>
+<stack:stack>
 
 
-<description>
+<stack:description>
 Configure SELinux
-</description>
+</stack:description>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 <!-- disable SELinux -->
-<file name="/etc/selinux/config">
+<stack:file stack:name="/etc/selinux/config">
 SELINUX=disabled
-</file>
-</post>
+</stack:file>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 

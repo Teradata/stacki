@@ -1,24 +1,24 @@
-<stack>
+<stack:stack>
 
-  <description>
+  <stack:description>
 
 Sets up keys for the frontend Certificate Authority
 
-  </description>
+  </stack:description>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 mkdir -p /etc/security/ca
 mkdir -p /etc/security/ca/new-certs
 
-<file name="/etc/security/ca/ca.cfg" perms="0640" owner="root.apache">
+<stack:file stack:name="/etc/security/ca/ca.cfg" stack:perms="0640" stack:owner="root.apache">
 [ req ]
 default_bits		= 2048
 default_md		= sha512
@@ -46,11 +46,11 @@ organizationalUnitName_default	= &Kickstart_PrivateHostname;-CA
 localityName_default		= &Info_CertificateLocality;
 stateOrProvinceName_default	= &Info_CertificateState;
 countryName_default		= &Info_CertificateCountry;
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
-<post chroot="false">
+<stack:script stack:chroot="false" stack:stage="install-post">
 
 <!-- Place certificates and keys. -->
 
@@ -62,9 +62,9 @@ then
 	mv /tmp/security/ca.serial /mnt/sysimage/etc/security/ca/
 fi
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- Our Certificate Authority -->
 if [ ! -f /etc/security/ca/ca.key ]
@@ -89,6 +89,6 @@ chmod 0640 /etc/security/ca/ca.cfg
 
 chgrp -R apache /etc/security/ca
 
-</post>
+</stack:script>
 
-</stack>
+</stack:stack>

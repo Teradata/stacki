@@ -1,32 +1,32 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 A node is a machine in the cluster.  Node's are on a private network
 and get DHCP/NIS state from the frontend.
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<native lang="kickstart">
+<stack:native stack:lang="kickstart">
 rootpw --iscrypted &Kickstart_PrivateRootPassword;
-</native>
+</stack:native>
 
 
-<package>stack-config</package>
+<stack:package>stack-config</stack:package>
 
 
-<post>
+<stack:script stack:stage="install-post">
 <!-- configure IP forwarding -->
 gawk '/net\.ipv4\.ip_forward/ { \
 	printf("net.ipv4.ip_forward = 1\n"); \
@@ -34,22 +34,22 @@ gawk '/net\.ipv4\.ip_forward/ { \
 } \
 { print $0 }' /etc/sysctl.conf &gt; /tmp/sysctl.conf
 mv /tmp/sysctl.conf /etc/sysctl.conf
-</post>
+</stack:script>
 
-<post cond="'&release;' == '6.x'">
-<file name="/etc/man.config" mode="append">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:file stack:name="/etc/man.config" stack:mode="append">
 MANPATH /opt/stack/man
 MANPATH /opt/stack/share/man
-</file>
-</post>
+</stack:file>
+</stack:script>
 
-<post cond="'&release;' == '7.x'">
-<file name="/etc/man_db.conf" mode="append">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:file stack:name="/etc/man_db.conf" stack:mode="append">
 MANDATORY_MANPATH /opt/stack/man
 MANDATORY_MANPATH /opt/stack/share/man
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

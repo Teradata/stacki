@@ -1,25 +1,25 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Enable SSH
-</description>
+</stack:description>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<package>openssh</package>
-<package>openssh-clients</package>
-<package>openssh-server</package>
-<package>openssh-askpass</package>
-<package>xorg-x11-xauth</package>
+<stack:package>openssh</stack:package>
+<stack:package>openssh-clients</stack:package>
+<stack:package>openssh-server</stack:package>
+<stack:package>openssh-askpass</stack:package>
+<stack:package>xorg-x11-xauth</stack:package>
 
 
-<post>
-<file name="/etc/ssh/ssh_config">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/ssh/ssh_config">
 Host *
 	CheckHostIP             no
 	ForwardX11              yes
@@ -27,10 +27,10 @@ Host *
 	StrictHostKeyChecking   no
 	UsePrivilegedPort       no
 	Protocol		2,1
-</file>
-</post>
+</stack:file>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 <!--
 change permissions on /root/ and /root/.ssh/ directories so
 cluster-dist can read root's 'id_rsa.pub' when it's run by a
@@ -47,6 +47,6 @@ sed -e 's/#ChallengeResponseAuthentication yes/ChallengeResponseAuthentication n
 sed -e 's/#PermitUserEnvironment no/PermitUserEnvironment yes/' \
 	/tmp/sshd_config > /etc/ssh/sshd_config
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

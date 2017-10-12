@@ -1,19 +1,19 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 SSH config for frontend nodes.
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
   
-<post>
-</post>
+<stack:script stack:stage="install-post">
+</stack:script>
 
 
-</stack>
+</stack:stack>
 

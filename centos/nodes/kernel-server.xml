@@ -1,48 +1,48 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Packages and configuration that should only be installed on servers
 (e.g., frontend machines)
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
 <!-- packages that are needed to correctly rebuild the kernel roll -->
-<package>pcre</package>
-<package>pcre-devel</package>
-<package>keyutils</package>
-<package>keyutils-libs-devel</package>
-<package>iscsi-initiator-utils</package>
-<package>iscsi-initiator-utils-devel</package>
-<package>fcgi</package>
-<package>ludicrous-speed</package>
-<package>libblkid-devel</package>
-<package>isomd5sum-devel</package>
-<package>slang-devel</package>
-<package>newt-devel</package>
-<package>NetworkManager-devel</package>
-<package>NetworkManager-glib-devel</package>
-<package>yum-utils</package>
+<stack:package>pcre</stack:package>
+<stack:package>pcre-devel</stack:package>
+<stack:package>keyutils</stack:package>
+<stack:package>keyutils-libs-devel</stack:package>
+<stack:package>iscsi-initiator-utils</stack:package>
+<stack:package>iscsi-initiator-utils-devel</stack:package>
+<stack:package>fcgi</stack:package>
+<stack:package>ludicrous-speed</stack:package>
+<stack:package>libblkid-devel</stack:package>
+<stack:package>isomd5sum-devel</stack:package>
+<stack:package>slang-devel</stack:package>
+<stack:package>newt-devel</stack:package>
+<stack:package>NetworkManager-devel</stack:package>
+<stack:package>NetworkManager-glib-devel</stack:package>
+<stack:package>yum-utils</stack:package>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 systemctl enable ludicrous-server
 systemctl start ludicrous-server
 
-</post>
+</stack:script>
 
 
-</stack>
+</stack:stack>
 

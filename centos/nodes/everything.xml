@@ -1,40 +1,40 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	Dummy empty node for building the OS Roll, this is the
 	root of everything in the graph
-	</description>
+	</stack:description>
 
-	<package>kernel</package>
-	<package>kernel-devel</package>
+	<stack:package>kernel</stack:package>
+	<stack:package>kernel-devel</stack:package>
 
-	<package>gtkhtml2</package>
-	<package>gnome-python2-gtkhtml2</package>
+	<stack:package>gtkhtml2</stack:package>
+	<stack:package>gnome-python2-gtkhtml2</stack:package>
 
-	<package>rrdtool</package>
-	<package>ruby</package>
-	<package>lzo-devel</package>
-	<package>perl-Time-HiRes</package>
+	<stack:package>rrdtool</stack:package>
+	<stack:package>ruby</stack:package>
+	<stack:package>lzo-devel</stack:package>
+	<stack:package>perl-Time-HiRes</stack:package>
 
-	<package>postgresql</package>
-	<package>postgresql-libs</package>
-	<package>postgresql-server</package>
-	<package>snappy-devel</package>
+	<stack:package>postgresql</stack:package>
+	<stack:package>postgresql-libs</stack:package>
+	<stack:package>postgresql-server</stack:package>
+	<stack:package>snappy-devel</stack:package>
 
-	<package>perl-Digest-HMAC</package>
-	<package>perl-Digest-SHA1</package>
+	<stack:package>perl-Digest-HMAC</stack:package>
+	<stack:package>perl-Digest-SHA1</stack:package>
 
-	<package>grub</package>
-	<package>grub2</package>
-	<package>genisoimage</package>
+	<stack:package>grub</stack:package>
+	<stack:package>grub2</stack:package>
+	<stack:package>genisoimage</stack:package>
 
-	<package>libtirpc</package>
+	<stack:package>libtirpc</stack:package>
 
-	<package>xfsprogs</package>
+	<stack:package>xfsprogs</stack:package>
 
-	<package>git</package>
-	<package>perl-Git</package>
-	<package>perl-TermReadKey</package>
-	<package>libgnome-keyring</package>
+	<stack:package>git</stack:package>
+	<stack:package>perl-Git</stack:package>
+	<stack:package>perl-TermReadKey</stack:package>
+	<stack:package>libgnome-keyring</stack:package>
 
-</stack> 
+</stack:stack> 

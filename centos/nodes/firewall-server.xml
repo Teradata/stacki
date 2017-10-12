@@ -1,17 +1,17 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	  Server node firewall rules
-	</description>
+	</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- define the global firewall rules -->
 
@@ -47,7 +47,7 @@
 chmod a+x /tmp/do-firewall.sh
 /tmp/do-firewall.sh
 
-</post>
+</stack:script>
 
 
-</stack>
+</stack:stack>

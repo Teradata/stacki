@@ -1,32 +1,32 @@
-<stack>
+<stack:stack>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
 
-<pre cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-pre">
 
 <!-- Load SCSI Generic Module. Required for HPSSACLI,
      and StorCLI, on RHEL/CentOS 7.x -->
 
 modprobe sg
 
-</pre>
+</stack:script>
 
 
-<pre>
+<stack:script stack:stage="install-pre">
 
 mkdir -p /tmp/stack_site/
 cat /run/install/tmp/ks.xml | \
 	/opt/stack/bin/stack list host profile chapter=stacki \
 	2> /tmp/profile_stack_site.debug \
 	> /tmp/stack_site/__init__.py
-</pre>
+</stack:script>
 
-<pre shell="python">
+<stack:script stack:shell="python" stack:stage="install-pre">
 # if this is an installing frontend, the previous command writes an empty file
 # we need to populate it here
 
@@ -43,9 +43,9 @@ if frontend:
 		stack_site.write('attributes = {0}\n'.format(str(attributes)))
 		stack_site.write('csv_partitions = []\n')
 		stack_site.write('csv_controller = []\n')
-</pre>
+</stack:script>
 
-<pre>
+<stack:script stack:stage="install-pre">
 /opt/stack/bin/initialize-storage.py
 
 /opt/stack/bin/configure-controllers.py
@@ -59,35 +59,35 @@ if frontend:
 
 /opt/stack/bin/configure-partitions.py > /tmp/partition-info
 
-</pre>
+</stack:script>
 
 
-<package>stack-storage-config</package>
+<stack:package>stack-storage-config</stack:package>
 
 
-<post chroot="false">
+<stack:script stack:chroot="false" stack:stage="install-post">
 mkdir -p /mnt/sysimage/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/sysimage/tmp/stack_site/
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 /opt/stack/bin/record-partitions.py
 
-</post>
+</stack:script>
 
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 
-<file name="/etc/modules-load.d/sg.conf">
+<stack:file stack:name="/etc/modules-load.d/sg.conf">
 # Bug in CentOS / RHEL 7.0. SCSI Generic Module
 # is not loaded by default
 sg
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
 
-<post cond="'&release;' == '6.x'">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
 
 # Only proceed if boot_device is defined on this node
 if [ "x&boot_device;" == "x" ]; then
@@ -96,7 +96,7 @@ fi
 
 # grub-install will create several files, but it won't create grub.conf/menu.lst
 
-<file name="/boot/grub/grub.conf">
+<stack:file stack:name="/boot/grub/grub.conf">
 default=0
 timeout=0
 # commenting out splashimage because if drive isn't present at boottime,
@@ -107,7 +107,7 @@ title DISTRO RELEASE (KERNEL_VER)
 	root (hd0,0)
 	kernel VMLINUZ ro root=UUID= rd_NO_LUKS rd_NO_LVM LANG=en_US.UTF-8 rd_NO_MD SYSFONT=latarcyrheb-sun16  KEYBOARDTYPE=pc KEYTABLE=us rd_NO_DM rhgb quiet
 	initrd INITRAM
-</file>
+</stack:file>
 
 GRUB_CONF=/boot/grub/grub.conf
 sed -i "s/KERNEL_VER/`uname -r`/g" $GRUB_CONF
@@ -155,8 +155,8 @@ mv /tmp/stacki-grub.log /root/
 # the theory here is that BIOS will tell grub this is the first disk
 sed -i "s/${desired_grub_boot_drive},0/hd0,0/g" $GRUB_CONF
 
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 
 

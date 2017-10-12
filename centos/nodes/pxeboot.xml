@@ -1,16 +1,16 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Provides a method for PXE-ing nodes to reset their boot action to 'os' (localdisk)
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- for backends, the pxeserver is kickstart_privateaddr -->
 pxeserver=&Kickstart_PrivateAddress;
@@ -33,7 +33,7 @@ echo $pxeserver >> /tmp/pxeserver.txt
 echo $pxe_cgi_url >> /tmp/pxeserver.txt
 ${curl_cmd} --insecure --output /dev/null ${pxe_cgi_url}
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

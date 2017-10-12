@@ -1,31 +1,31 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	Populate cluster database with initial data
-	</description>
+	</stack:description>
 
-        <copyright>
+        <stack:copyright>
         Copyright (c) 2006 - 2017 Teradata
         All rights reserved. Stacki(r) v5.x stacki.com
         https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-        </copyright>
+        </stack:copyright>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
 
-<post chroot="false">
+<stack:script stack:chroot="false" stack:stage="install-post">
 
 cp /tmp/site.attrs /mnt/sysimage/tmp
 chmod 400 /mnt/sysimage/tmp/site.attrs
 cp /tmp/rolls.xml /mnt/sysimage/tmp
 
-</post>
+</stack:script>
 
-<post shell="/opt/stack/bin/python3">
+<stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
 
 import os.path
 
@@ -71,9 +71,9 @@ if os.path.exists('/tmp/site.attrs'):
 
 	file.close()
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- access control -->
 /opt/stack/bin/stack set access command='*'     group='apache'
@@ -115,32 +115,32 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack set attr attr=os value=&os;
 
-</post>
+</stack:script>
 
 <!-- now setup the global PXE boot default actions -->
 
-<post cond="'&release;' == '6.x'">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
 
 /opt/stack/bin/stack add bootaction default type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
-	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction no-parallel-format type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
-	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format"
 
 /opt/stack/bin/stack add bootaction headless type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
-	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm"
 
 /opt/stack/bin/stack add bootaction rescue type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
-	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
+	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
 
-</post>
+</stack:script>
 
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 
 /opt/stack/bin/stack add bootaction default type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
@@ -162,9 +162,9 @@ if os.path.exists('/tmp/site.attrs'):
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 
 /opt/stack/bin/stack add bootaction pxeflash type=os \
 	kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe os=redhat
@@ -220,11 +220,11 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack set attr attr=discovery.base.rack value=0
 
 <!-- use long passwords in the database -->
-<file name="/tmp/my.cnf" expr="grep -v '^old_passwords' /etc/my.cnf"/>
-<file name="/etc/my.cnf" perms="644" expr="cat /tmp/my.cnf"/>
+<stack:file stack:name="/tmp/my.cnf" stack:expr="grep -v '^old_passwords' /etc/my.cnf"/>
+<stack:file stack:name="/etc/my.cnf" stack:perms="644" stack:expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-</post>
+</stack:script>
 
 
 <!--
@@ -233,8 +233,8 @@ rm /tmp/my.cnf
 	be waiting for DNS timeouts.
 -->
 
-<post>
+<stack:script stack:stage="install-post">
 /opt/stack/bin/stack report host > /etc/hosts
-</post>
+</stack:script>
 
-</stack>
+</stack:stack>

@@ -1,33 +1,33 @@
-<stack>
+<stack:stack>
 
-  <description>
+  <stack:description>
 
   Apache HTTP Server
 
-  </description>
+  </stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-	<rocks>
+	<stack:rocks>
 	Copyright (c) 2000 - 2010 The Regents of the University of California
 	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 	https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-	</rocks>
+	</stack:rocks>
 
 
-  <package>httpd</package>
-  <package>httpd-devel</package>
-  <package>mod_ssl</package>
-  <package>curl</package>
+  <stack:package>httpd</stack:package>
+  <stack:package>httpd-devel</stack:package>
+  <stack:package>mod_ssl</stack:package>
+  <stack:package>curl</stack:package>
 
-<post>
+<stack:script stack:stage="install-post">
 /sbin/chkconfig httpd on
 
-<file name="/etc/httpd/conf.d/stack.conf"><![CDATA[
+<stack:file stack:name="/etc/httpd/conf.d/stack.conf"><![CDATA[
 #
 # Stacki Specific Apache configuration. 
 # Generated automatically by the apache.xml node.
@@ -64,23 +64,23 @@ DirectoryIndex index.cgi
 </Directory>
 
 ]]>
-</file>
+</stack:file>
 
 <!-- This should be done automatically by httpd.conf, but isn't for 
 	some reason. -->
-<file name="/etc/httpd/conf/httpd.conf" mode="append">
+<stack:file stack:name="/etc/httpd/conf/httpd.conf" stack:mode="append">
 Include conf.d/stack.conf
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 <!-- Create Apache Profile.cgi mutex and semaphore -->
 mkdir -p /var/tmp
 touch /var/tmp/profile.mutex
 chown apache:root /var/tmp/profile.mutex
 cat /proc/cpuinfo  | awk -F: '/^processor/{print $2;}' | wc -l > /var/tmp/profile.semaphore
 chown apache:root /var/tmp/profile.semaphore
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

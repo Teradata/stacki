@@ -1,36 +1,36 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	  Default firewall rules for all appliances.  Disable everything but SSH.
-	</description>
+	</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-	<rocks>
+	<stack:rocks>
 	Copyright (c) 2000 - 2010 The Regents of the University of California
 	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 	https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-	</rocks>
+	</stack:rocks>
 
 
-	<package cond="'&release;' == '7.x'">iptables-services</package>
+	<stack:package stack:cond="'&release;' == '7.x'">iptables-services</stack:package>
 
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 /usr/bin/systemctl disable firewalld
 /usr/bin/systemctl enable iptables
 /usr/bin/systemctl disable ip6tables
-</post>
+</stack:script>
 
 
-<post cond="'&release;' == '6.x'">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
 /sbin/chkconfig iptables on
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 
 

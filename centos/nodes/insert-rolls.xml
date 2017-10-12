@@ -1,31 +1,31 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 
 	Adds the pallets to the frontend
 
-	</description>
+	</stack:description>
 
-        <copyright>
+        <stack:copyright>
         Copyright (c) 2006 - 2017 Teradata
         All rights reserved. Stacki(r) v5.x stacki.com
         https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-        </copyright>
+        </stack:copyright>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 <!-- Clean out pallets and carts directories before adding pallets -->
 find /export/stack/pallets/* -type d -prune -exec rm  -rf {} \;
 find /export/stack/carts/* -type d -prune -exec rm  -rf {} \;
-</post>
+</stack:script>
 
-<post shell='/opt/stack/bin/python3'>
+<stack:script stack:shell='/opt/stack/bin/python3' stack:stage="install-post">
 import os
 import os.path
 import sys
@@ -44,6 +44,6 @@ for name, version, release, arch, url, diskid in generator.rolls:
 	print('\n'.join(stack.api.Call('add.pallet',[purl])))
 	print('\n'.join(stack.api.Call('enable.pallet', [name])))
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

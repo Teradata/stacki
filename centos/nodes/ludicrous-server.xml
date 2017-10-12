@@ -1,27 +1,27 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	 Ludicrous server service for tracking packages
-	</description>
+	</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-<package>foundation-py-requests</package>
-<package>foundation-py-werkzeug</package>
-<package>foundation-py-jinja2</package>
-<package>foundation-py-markupsafe</package>
-<package>foundation-py-itsdangerous</package>
-<package>foundation-py-click</package>
-<package>foundation-py-flask</package>
-<package>ludicrous-speed</package>
+<stack:package>foundation-py-requests</stack:package>
+<stack:package>foundation-py-werkzeug</stack:package>
+<stack:package>foundation-py-jinja2</stack:package>
+<stack:package>foundation-py-markupsafe</stack:package>
+<stack:package>foundation-py-itsdangerous</stack:package>
+<stack:package>foundation-py-click</stack:package>
+<stack:package>foundation-py-flask</stack:package>
+<stack:package>ludicrous-speed</stack:package>
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 /usr/bin/systemctl enable ludicrous-server
-</post>
+</stack:script>
 
-</stack>
+</stack:stack>
 

@@ -1,29 +1,29 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Boot loader support (GRand Unified Bootloader)
-</description>
+</stack:description>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<package>grub</package>
+<stack:package>grub</stack:package>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- take out the splashscreen -->
-<file name="/tmp/grub.conf" expr="grep -v splashimage /boot/grub/grub.conf"/>
+<stack:file stack:name="/tmp/grub.conf" stack:expr="grep -v splashimage /boot/grub/grub.conf"/>
 mv /tmp/grub.conf /boot/grub/grub.conf
 
 <!-- Preserve the original grub.conf -->
 cp /boot/grub/grub.conf /boot/grub/grub-orig.conf
 
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 

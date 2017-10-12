@@ -1,19 +1,18 @@
-<stack>
+<stack:stack>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
-<pre>
-
+<stack:script stack:stage="install-pre">
 <!-- propagate root's public ssh key for ekv -->
 
 <!-- if the authorized_keys file already exists, then don't recreate it -->
@@ -65,18 +64,18 @@ EOF
 
 chmod 600 /tmp/authorized_keys
 
-</pre>
+</stack:script>
 
-<pre cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-pre">
 
-<file name="/etc/ssh/ssh_host_ecdsa_key" perms="0400" rcs="off">
+<stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400" stack:rcs="off">
 <eval>
 /opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
 </eval>
-</file>
+</stack:file>
 
 /sbin/sshd -f /etc/ssh/sshd_config.anaconda \
 	-h /etc/ssh/ssh_host_ecdsa_key -p 2200
-</pre>
+</stack:script>
 
-</stack>
+</stack:stack>

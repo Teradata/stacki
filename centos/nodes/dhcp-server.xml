@@ -1,14 +1,14 @@
-<stack>
+<stack:stack>
 
-  <description>
+  <stack:description>
 
   Setup the DHCP server for the cluster
 
-  </description>
+  </stack:description>
 
-  <package>dhcp</package>
+  <stack:package>dhcp</stack:package>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- turn on dhcpd service -->
 /sbin/chkconfig dhcpd on
@@ -18,7 +18,7 @@
 <!-- disable dnsmasq -->
 /sbin/chkconfig --del dnsmasq
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

@@ -1,31 +1,31 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Time Configuration
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<package>ntp</package>
-<package>rdate</package> <!-- used to slam the clock -->
-<package>libcap</package>
+<stack:package>ntp</stack:package>
+<stack:package>rdate</stack:package> <!-- used to slam the clock -->
+<stack:package>libcap</stack:package>
 
 
-<post>
+<stack:script stack:stage="install-post">
 /sbin/hwclock --systohc --utc
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 
 

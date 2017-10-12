@@ -1,28 +1,28 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Generates the resolv.conf file for slave nodes.
 We point to all nameservers listed in the PrivateDNSServers
 entry in the app_globals table in the database.
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
-<report name="host.resolv">&hostname;</report>
+<stack:report name="host.resolv">&hostname;</stack:report>
 
 <!-- Give each host knowledge of itself. -->
-<file name="/etc/hosts">
+<stack:file stack:name="/etc/hosts">
 127.0.0.1	localhost.localdomain localhost
 &hostaddr;	&hostname;.&domainname; &hostname;
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

@@ -1,48 +1,48 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Foundation Packages
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<package>foundation-python</package>
-<package>foundation-py-pygobject</package>
-<package>foundation-py-pygtk</package>
-<package>foundation-py-PyMySQL</package>
-<package>foundation-py-pycairo</package>
-<package>foundation-py-libxml2dom</package>
-<package>foundation-rcs</package>
-<package>foundation-readline</package>
-<package>foundation-libxml2</package>
-<package>foundation-wget</package>
-<package>foundation-py-ipaddress</package>
-<package>foundation-redhat</package>
-<package>foundation-fbftpd</package>
-<package>libdnet</package>
-<package>rsync</package>
+<stack:package>foundation-python</stack:package>
+<stack:package>foundation-py-pygobject</stack:package>
+<stack:package>foundation-py-pygtk</stack:package>
+<stack:package>foundation-py-PyMySQL</stack:package>
+<stack:package>foundation-py-pycairo</stack:package>
+<stack:package>foundation-py-libxml2dom</stack:package>
+<stack:package>foundation-rcs</stack:package>
+<stack:package>foundation-readline</stack:package>
+<stack:package>foundation-libxml2</stack:package>
+<stack:package>foundation-wget</stack:package>
+<stack:package>foundation-py-ipaddress</stack:package>
+<stack:package>foundation-redhat</stack:package>
+<stack:package>foundation-fbftpd</stack:package>
+<stack:package>libdnet</stack:package>
+<stack:package>rsync</stack:package>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
-<file name="/etc/ld.so.conf.d/foundation.conf">
+<stack:file stack:name="/etc/ld.so.conf.d/foundation.conf">
 /lib
 /lib64
 /usr/lib
 /usr/lib64
 /opt/stack/lib
-</file>
+</stack:file>
 
 if [ -f /usr/sbin/ldconfig ]
 then
@@ -52,6 +52,6 @@ then
 	/sbin/ldconfig
 fi
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

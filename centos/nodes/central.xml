@@ -1,25 +1,25 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	 Stacki Frontend can serve Pallets to other Frontends
-	</description>
+	</stack:description>
 
-        <copyright>
+        <stack:copyright>
         Copyright (c) 2006 - 2017 Teradata
         All rights reserved. Stacki(r) v5.x stacki.com
         https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-        </copyright>
+        </stack:copyright>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
-<file name="/etc/httpd/conf.d/central.conf">
+<stack:file stack:name="/etc/httpd/conf.d/central.conf">
 <![CDATA[
 <Directory /var/www/html/install>
 	Options FollowSymLinks Indexes ExecCGI
@@ -44,11 +44,11 @@
 
 SSLCACertificateFile /etc/httpd/conf/ssl.ca/ca-bundle
 ]]>
-</file>
+</stack:file>
 
 mkdir -p /export/stack/pallets
 
-<file name="/export/stack/pallets/index.cgi" perms="755"><![CDATA[#!/opt/stack/bin/python3
+<stack:file stack:name="/export/stack/pallets/index.cgi" stack:perms="755"><![CDATA[#!/opt/stack/bin/python3
 
 import os
 
@@ -86,13 +86,13 @@ print('Content-length: %d' % (len(out)))
 print('')
 print(out)
 ]]>
-</file>
+</stack:file>
 
 mkdir -p /etc/httpd/conf/ssl.ca
 
 cp /etc/security/ca/ca.crt /etc/httpd/conf/ssl.ca/
 
-<file name="/etc/httpd/conf/ssl.ca/Makefile">
+<stack:file stack:name="/etc/httpd/conf/ssl.ca/Makefile">
 # Makefile to build the ca-bundle for HTTPS authentication.
 
 CERTS = $(wildcard *.crt)
@@ -102,13 +102,13 @@ ca-bundle: $(CERTS)
 
 clean:
 	rm ca-bundle
-</file>
+</stack:file>
 
 make -C /etc/httpd/conf/ssl.ca
 
 touch /var/www/html/robots.txt
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

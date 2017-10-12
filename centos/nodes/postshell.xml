@@ -1,20 +1,20 @@
-<stack>
+<stack:stack>
 
 
-<description>
+<stack:description>
 Allow interaction after all post sections have run
 If postshell is on the command line, wait until /mnt/sysimage/tmp/postshell
 is removed interactively.
-</description>
+</stack:description>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 grep -q "postshell" /proc/cmdline
 if [ $? -eq 0 ]; then
@@ -22,6 +22,6 @@ if [ $? -eq 0 ]; then
 	while [ -e /tmp/postshell ]; do /bin/sleep 5; done
 fi
 
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 

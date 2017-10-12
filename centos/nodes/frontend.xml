@@ -1,19 +1,19 @@
-<stack>
+<stack:stack>
 
 
-<description>
+<stack:description>
 Frontend Appliance Node.
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
 
-<package>stack-command</package>
+<stack:package>stack-command</stack:package>
 
 
-</stack> 
+</stack:stack> 
 

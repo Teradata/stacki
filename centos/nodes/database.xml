@@ -1,29 +1,29 @@
-<stack>
+<stack:stack>
 
-  <description>
+  <stack:description>
 
   NPACI Rocks Cluster Database. Includes client programs,
   python libraries, and Apache configuration.
 
-  </description>
+  </stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
-  <package>stack-sql</package>
-  <package>foundation-mariadb</package>
-  <package>foundation-py-PyMySQL</package>
+  <stack:package>stack-sql</stack:package>
+  <stack:package>foundation-mariadb</stack:package>
+  <stack:package>foundation-py-PyMySQL</stack:package>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!--
 	set the hostname to the private name. this helps the rocks command
@@ -46,10 +46,9 @@ chgrp -R stackdb /var/opt/stack/mysql
 chmod -R g+rwx   /var/opt/stack/mysql
 chmod a+rx /var/opt/stack/mysql
 
-<file name="/etc/ld.so.conf.d/foundation-mariadb.conf"
-	perms="0640">
+<stack:file stack:name="/etc/ld.so.conf.d/foundation-mariadb.conf" stack:perms="0640">
 /opt/stack/lib64
-</file>
+</stack:file>
 
 if [ -f /usr/sbin/ldconfig ]
 then
@@ -59,30 +58,30 @@ then
 	/sbin/ldconfig
 fi
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
-<file name="/opt/stack/etc/root.my.cnf" perms="0400"
+<file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
 	owner="root:root" vars="expanded">
 [client]
 user		= root
 socket		= /var/opt/stack/mysql/mysql.sock
 password	= $root_pw
-</file>
-<file name="/opt/stack/etc/my.cnf.d/server.cnf" perms="0400"
-	    owner="stackdb:stackdb">
+</stack:file>
+<file stack:name="/opt/stack/etc/my.cnf.d/server.cnf" stack:perms="0400"
+	    stack:owner="stackdb:stackdb">
 [mysqld]
 user		= stackdb
 port		= 40000
 socket		= /var/opt/stack/mysql/mysql.sock
 datadir		= /var/opt/stack/mysql
-</file>
+</stack:file>
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
-<file name="/opt/stack/etc/my.cnf"
-	owner="root:apache" perms="0640" vars="expanded">
+<file stack:name="/opt/stack/etc/my.cnf"
+	owner="root:apache" stack:perms="0640" vars="expanded">
 [mysqld]
 user		= stackdb
 port		= 40000
@@ -94,36 +93,36 @@ user		= apache
 port		= 40000
 socket		= /var/opt/stack/mysql/mysql.sock
 password	= $apache_pw
-</file>
+</stack:file>
 
-</post>
+</stack:script>
 
 <!--
 	Setup MariaDB to startup at boot
 	and start database
 -->
-<post>
+<stack:script stack:stage="install-post">
 /opt/stack/sbin/mysql-install-db
 
 /usr/bin/systemctl enable mariadb
 /usr/bin/systemctl start mariadb
 
-</post>
+</stack:script>
 <!--
 	Make sure that the database is
 	up and running
 -->
-<post>
+<stack:script stack:stage="install-post">
 /opt/stack/bin/mysqladmin -s ping > /dev/null
 while [ $? -eq 1 ]; do
         sleep 1
         /opt/stack/bin/mysqladmin -s ping > /dev/null
 done
 
-</post>
+</stack:script>
 
 <!-- Access control on the database -->
-<post shell='/opt/stack/bin/python3'>
+<stack:script stack:shell='/opt/stack/bin/python3' stack:stage="install-post">
 import os
 import sys
 import re
@@ -174,5 +173,5 @@ for cmd in cmd_set:
 		db.execute(cmd)
 	except:
 		sys.stderr.write("Could not execute %s\n" % cmd)
-</post>
-</stack>
+</stack:script>
+</stack:stack>

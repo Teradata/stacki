@@ -1,24 +1,24 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Append rules to logrotate to prune files in /var/log
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<post>
-<file name="/etc/logrotate.d/stack">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/logrotate.d/stack">
 /var/log/auth {
 	size=100M
 	postrotate
@@ -82,8 +82,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 			2&gt; /dev/null || true
 	endscript
 }
-</file>
-</post>
+</stack:file>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

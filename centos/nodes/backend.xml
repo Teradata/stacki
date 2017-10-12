@@ -1,13 +1,13 @@
-<stack>
+<stack:stack>
 
 
-<description>
+<stack:description>
 Backend Appliance Node. You should create your own extend-backend.xml
 file to add functionality to this appliance type.
-</description>
+</stack:description>
 
 
-<native lang="kickstart">
+<stack:native stack:lang="kickstart">
 <eval shell="/opt/stack/bin/python3" mode="xml">
 
 import stack.api
@@ -36,17 +36,17 @@ for o in stack.api.Call('list cart'):
 		print('repo --name="%s" --baseurl=http://127.0.0.1/install/carts/%s' % (o['name'], o['name']))
 
 </eval>
-</native>
+</stack:native>
 
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 cp /run/install/tmp/stack.conf /tmp/stack.conf
-</post>
+</stack:script>
 
 
-<post>
+<stack:script stack:stage="install-post">
 /opt/stack/bin/peer-done
-</post>
+</stack:script>
 
-</stack> 
+</stack:stack> 
 

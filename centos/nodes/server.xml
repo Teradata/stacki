@@ -1,26 +1,26 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	The 'server node' in the graph.
 
 	This file is used as a connection point for other XML
 	configuration nodes.
-	</description>
+	</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
-<native lang="kickstart">
+<stack:native stack:lang="kickstart">
 reboot --eject
 
 <eval shell="/opt/stack/bin/python3" mode="xml">
@@ -40,55 +40,55 @@ for pallet in g.rolls:
 	print('repo --name="%s" --baseurl=%s/%s/%s/%s/redhat/%s' % (pname, purl, pname, pver, prel, parch))
 </eval>
 
-</native>
+</stack:native>
 
 
-<package>stack-admin</package>
-<package>foundation-gd</package>
+<stack:package>stack-admin</stack:package>
+<stack:package>foundation-gd</stack:package>
 
 <!-- to build anaconda -->
-<package>device-mapper-devel</package>
-<package>isomd5sum-devel</package>
-<package>libarchive-devel</package>
-<package>libblkid-devel</package>
-<package>newt-devel</package>
-<package>slang-devel</package>
-<package>xmlto</package>
-<package>NetworkManager-devel</package>
-<package>NetworkManager-glib-devel</package>
-<package>dbus-devel</package>
-<package>iscsi-initiator-utils-devel</package>
-<package>libcurl-devel</package>
-<package>stack-config-server</package>
-<package>git</package>
-<package>git-lfs</package>
+<stack:package>device-mapper-devel</stack:package>
+<stack:package>isomd5sum-devel</stack:package>
+<stack:package>libarchive-devel</stack:package>
+<stack:package>libblkid-devel</stack:package>
+<stack:package>newt-devel</stack:package>
+<stack:package>slang-devel</stack:package>
+<stack:package>xmlto</stack:package>
+<stack:package>NetworkManager-devel</stack:package>
+<stack:package>NetworkManager-glib-devel</stack:package>
+<stack:package>dbus-devel</stack:package>
+<stack:package>iscsi-initiator-utils-devel</stack:package>
+<stack:package>libcurl-devel</stack:package>
+<stack:package>stack-config-server</stack:package>
+<stack:package>git</stack:package>
+<stack:package>git-lfs</stack:package>
 <!-- perl-Error required for some git functionality -->
-<package>perl-Error</package>
+<stack:package>perl-Error</stack:package>
 
 <!-- rpms to create pallets -->
-<package>genisoimage</package>
-<package>createrepo</package>
+<stack:package>genisoimage</stack:package>
+<stack:package>createrepo</stack:package>
 
 <!-- packages required for stack create package -->
-<package>rpm-build</package>
-<package>stack-build</package>
-<package>redhat-rpm-config</package>
+<stack:package>rpm-build</stack:package>
+<stack:package>stack-build</stack:package>
+<stack:package>redhat-rpm-config</stack:package>
 
 <!-- text-based spreadsheet editor -->
-<package>sc-im</package>
+<stack:package>sc-im</stack:package>
 
 <!-- example spreadsheets -->
-<package>stack-examples</package>
+<stack:package>stack-examples</stack:package>
 
 
 <!-- /mnt/cdrom needed to create pallets -->
-<post>
+<stack:script stack:stage="install-post">
     if [ ! -d /mnt/cdrom ]; then
         mkdir -p /mnt/cdrom
     fi
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 <!--
         all rolls added to a running frontend will be added 'on the fly', so
         set the roll_install_on_the_fly ottribute to true.
@@ -106,35 +106,35 @@ for pallet in g.rolls:
 -->
 /opt/stack/bin/stack set attr attr=user.auth value=unix
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 mkdir -p /export/stack/carts
 chown root:apache /export/stack/carts
 chmod 775 /export/stack/carts
-</post>
+</stack:script>
 
-<post>
-<file name="/etc/hostname">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/hostname">
 &Info_FQDN;
-</file>
-</post>
+</stack:file>
+</stack:script>
 
 <!-- Set Number of CPUs in the database -->
-<post>
+<stack:script stack:stage="install-post">
 /sbin/chkconfig stack-num-cpus on
-</post>
+</stack:script>
 
 <!--
 	The restore roll needs a default (empty) git repository in order to
 	build
 -->
 
-<boot order="post">
+<stack:order stack:stage="boot-post">
 git init /export/site-pallet/restore
 touch /root/.gitconfig
 HOME=/root git lfs install --force
-</boot>
+</stack:order>
 
-</stack> 
+</stack:stack> 
 

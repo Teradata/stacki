@@ -1,23 +1,23 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Base class for all nodes.
-</description>
+</stack:description>
 
-<copyright>
+<stack:copyright>
 Copyright (c) 2006 - 2017 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</copyright>
+</stack:copyright>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<native lang="kickstart">
+<stack:native stack:lang="kickstart">
 
 unsupported_hardware
 install
@@ -38,49 +38,49 @@ else:
 	print "bootloader --location=mbr"
 </eval>
 
-</native>
+</stack:native>
 
 
-<package cond="'&release;' == '7.x'">net-tools</package>
-<package>foundation-rcs</package>
-<package>mlocate</package>
-<package>vim</package>
-<package>pciutils</package>
+<stack:package stack:cond="'&release;' == '7.x'">net-tools</stack:package>
+<stack:package>foundation-rcs</stack:package>
+<stack:package>mlocate</stack:package>
+<stack:package>vim</stack:package>
+<stack:package>pciutils</stack:package>
 
-<package>ipmitool</package>
-<package>OpenIPMI</package>
+<stack:package>ipmitool</stack:package>
+<stack:package>OpenIPMI</stack:package>
 
-<package>grub2</package>
-<package>grub2-tools</package>
-<package>wget</package>
-<package>bridge-utils</package>
-<package enable="false">iwl*</package>
-<package enable="false">ivtv*</package>
+<stack:package>grub2</stack:package>
+<stack:package>grub2-tools</stack:package>
+<stack:package>wget</stack:package>
+<stack:package>bridge-utils</stack:package>
+<stack:package stack:enable="false">iwl*</stack:package>
+<stack:package stack:enable="false">ivtv*</stack:package>
 
-<post>
+<stack:script stack:stage="install-post">
 /sbin/chkconfig stack-pre on
 /sbin/chkconfig stack-post on
-</post>
+</stack:script>
 
 
-<post>
-<file name="/tmp/mdmonitor"
-	expr="sed -e 's/--user=root//' /etc/rc.d/init.d/mdmonitor"/>
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/tmp/mdmonitor"
+	stack:expr="sed -e 's/--user=root//' /etc/rc.d/init.d/mdmonitor"/>
 
-<file name="/etc/rc.d/init.d/mdmonitor" perms="755"
-	expr="cat /tmp/mdmonitor"/>
+<stack:file stack:name="/etc/rc.d/init.d/mdmonitor" stack:perms="755"
+	stack:expr="cat /tmp/mdmonitor"/>
 
 rm /tmp/mdmonitor
-</post>
+</stack:script>
 
 
-<post>
+<stack:script stack:stage="install-post">
 /sbin/chkconfig NetworkManager off
-</post>
+</stack:script>
 
 <!-- Rsyslog Configuration file -->
-<post>
-<file name="/etc/rsyslog.d/stacki.conf">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/rsyslog.d/stacki.conf">
 /*
 	Turn off escape character parsing.
 	This keeps tabs and newlines intact.
@@ -95,27 +95,27 @@ local0.*    /var/log/local0
    command line, stop processing now
 */
 if $programname == 'SCL' then ~
-</file>
-</post>
+</stack:file>
+</stack:script>
 
 
-<post>
-<file name="/etc/stack-release">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/stack-release">
 stacki release &version; (&release;)
-</file>
-</post>
+</stack:file>
+</stack:script>
 
-<post>
-<file name="/etc/ld.so.conf.d/stack.conf">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/etc/ld.so.conf.d/stack.conf">
 /opt/stack/lib
-</file>
+</stack:file>
 ldconfig
-</post>
+</stack:script>
 
-<boot order="post">
+<stack:script stack:stage="boot-post">
 mkdir -p /var/log/stacki/ks
 mv /tmp/ks-script* /var/log/stacki/ks
 updatedb
-</boot>
+</stack:script>
 
-</stack> 
+</stack:stack> 

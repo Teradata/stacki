@@ -1,30 +1,30 @@
-<stack>
+<stack:stack>
 
-	<description>
+	<stack:description>
 	 Ludicrous client service for tracking packages  
-	</description>
+	</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-<package>foundation-python</package>
-<package>foundation-python-packages</package>
-<package>ludicrous-speed</package>
+<stack:package>foundation-python</stack:package>
+<stack:package>foundation-python-packages</stack:package>
+<stack:package>ludicrous-speed</stack:package>
 
-<post cond="'&release;' == '7.x'">
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 /usr/bin/systemctl enable ludicrous-client 
-</post>
+</stack:script>
 
-<post cond="'&release;' == '6.x'">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
 /sbin/chkconfig ludicrous-client on
-</post>
+</stack:script>
 <!-- Change Stacki.repo to localhost -->
-<post>
-<file name="/tmp/stack.conf">
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/tmp/stack.conf">
 tacker = frontend:3825
-</file>
-</post>
-</stack> 
+</stack:file>
+</stack:script>
+</stack:stack> 

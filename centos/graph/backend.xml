@@ -50,7 +50,7 @@
 	</edge>
 
 	<order head="storage" tail="pxeboot" />
-	<order head="pxeboot" tail="peerdone" />
+	<order head="base" tail="peerdone" />
 
 	<edge from="client" to="firewall-client" cond="firewall"/>
 	<edge from="client" to="firewall-base"   cond="firewall"/>

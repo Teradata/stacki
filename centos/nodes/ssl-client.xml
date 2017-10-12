@@ -1,17 +1,17 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Secure Sockets Layer for non-frontend nodes.
-</description>
+</stack:description>
 
-<rocks>
+<stack:rocks>
 Copyright (c) 2000 - 2010 The Regents of the University of California
 All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</rocks>
+</stack:rocks>
 
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- Make a Certificate for Mod_SSL -->
 <eval mode="xml">
@@ -50,7 +50,7 @@ cat $cert/crt
 echo "&lt;/stack:file&gt;"
 rm -rf $cert
 </eval>
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 

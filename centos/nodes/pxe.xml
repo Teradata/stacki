@@ -1,32 +1,32 @@
-<stack>
+<stack:stack>
 
-<description>
+<stack:description>
 Provides pre-execution environment (PXE) support for frontend machines.
-</description>
+</stack:description>
 
-	<copyright>
+	<stack:copyright>
 	Copyright (c) 2006 - 2017 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-	</copyright>
+	</stack:copyright>
 
-        <rocks>
+        <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
         All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-        </rocks>
+        </stack:rocks>
 
-<package>tftp-server</package>
-<package>syslinux</package>
-<package>xinetd</package>
-<package>memtest86+</package>
-<package>stack-images</package>
-<package>stack-pxeboot</package>
+<stack:package>tftp-server</stack:package>
+<stack:package>syslinux</stack:package>
+<stack:package>xinetd</stack:package>
+<stack:package>memtest86+</stack:package>
+<stack:package>stack-images</stack:package>
+<stack:package>stack-pxeboot</stack:package>
 
-<post>
+<stack:script stack:stage="install-post">
 
 <!-- pxe needs a tftp server -->
-<file name="/etc/xinetd.d/tftp">
+<stack:file stack:name="/etc/xinetd.d/tftp">
 service tftp
 {
         socket_type             = dgram
@@ -41,7 +41,7 @@ service tftp
 	flags			= IPv4
         disable                 = no
 }
-</file>
+</stack:file>
 
 
 <!--	
@@ -55,9 +55,9 @@ cp /opt/stack/images/initrd.img* /tftpboot/pxelinux/
 
 cp /boot/memtest86* /tftpboot/pxelinux/memtest
 
-</post>
+</stack:script>
 
-<post>
+<stack:script stack:stage="install-post">
 
 mkdir -p /tftpboot/pxelinux/pxelinux.cfg
 chown root.apache /tftpboot/pxelinux/pxelinux.cfg
@@ -66,7 +66,7 @@ chmod 775 /tftpboot/pxelinux/pxelinux.cfg
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 
-</post>
+</stack:script>
 
 
-</stack> 
+</stack:stack> 
