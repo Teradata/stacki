@@ -10,6 +10,8 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 SRCDIRS = SLES/11.3 SLES/12
 
+bootstrap: # nothing to do
+
 build:
 	for i in $(SRCDIRS); do \
 		make -C $$i $@; \
