@@ -63,14 +63,14 @@ fi
 <stack:script stack:stage="install-post">
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
-<file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
+<stack:file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
 	owner="root:root" vars="expanded">
 [client]
 user		= root
 socket		= /var/opt/stack/mysql/mysql.sock
 password	= $root_pw
 </stack:file>
-<file stack:name="/opt/stack/etc/my.cnf.d/server.cnf" stack:perms="0400"
+<stack:file stack:name="/opt/stack/etc/my.cnf.d/server.cnf" stack:perms="0400"
 	    stack:owner="stackdb:stackdb">
 [mysqld]
 user		= stackdb
@@ -80,7 +80,7 @@ datadir		= /var/opt/stack/mysql
 </stack:file>
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
-<file stack:name="/opt/stack/etc/my.cnf"
+<stack:file stack:name="/opt/stack/etc/my.cnf"
 	owner="root:apache" stack:perms="0640" vars="expanded">
 [mysqld]
 user		= stackdb

@@ -8,10 +8,16 @@ def test_mariadb_enabled_and_running(host):
 	assert mariadb.is_enabled
 	assert mariadb.is_running
 
-def test_xinetd_enabled_and_running(host):
+def test_tftpd_enabled_and_running(host):
 	xinetd = host.service('xinetd')
-	assert xinetd.is_enabled
-	assert xinetd.is_running
+	fbtftpd = host.service('fbtftpd')
+	if not xinetd.is_enabled and not fbtftpd.is_enabled:
+		err = print("No tftp server is enabled.")
+		assert err
+
+	if not xinetd.is_running and not fbtftpd.is_running:
+		err = print("No tftp server is running.")
+		assert err
 
 def test_ludicrous_server_enabled_and_running(host):
 	ludicrous = host.service('ludicrous-server')
