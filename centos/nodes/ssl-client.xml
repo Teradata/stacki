@@ -14,7 +14,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <stack:script stack:stage="install-post">
 
 <!-- Make a Certificate for Mod_SSL -->
-<eval mode="xml">
+<stack:eval mode="xml">
 
 cert=`mktemp -dq /etc/security/ca/new-certs/cert.XXXXXX`
 
@@ -49,7 +49,7 @@ echo "&lt;stack:file stack:name='/etc/pki/tls/certs/localhost.crt' stack:perms='
 cat $cert/crt
 echo "&lt;/stack:file&gt;"
 rm -rf $cert
-</eval>
+</stack:eval>
 </stack:script>
 
 

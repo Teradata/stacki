@@ -28,7 +28,7 @@ fi
 -->
 
 cat &gt; /tmp/authorized_keys &lt;&lt; 'EOF'
-<eval shell="/opt/stack/bin/python3">
+<stack:eval shell="/opt/stack/bin/python3">
 
 import os
 
@@ -59,7 +59,7 @@ if os.path.isdir(keydir):
 		filename = os.path.join(keydir, keyfile)
 		readkeys(filename)
 
-</eval>
+</stack:eval>
 EOF
 
 chmod 600 /tmp/authorized_keys
@@ -69,9 +69,9 @@ chmod 600 /tmp/authorized_keys
 <stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-pre">
 
 <stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400" stack:rcs="off">
-<eval>
+<stack:eval>
 /opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
-</eval>
+</stack:eval>
 </stack:file>
 
 /sbin/sshd -f /etc/ssh/sshd_config.anaconda \
