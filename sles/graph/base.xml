@@ -13,6 +13,7 @@
 		<to>ssl</to>
 		<to>time-base</to>
 		<to>uefi-base</to>
+		<to>firewall-base</to>
 	</edge>
 
 </graph>
