@@ -4,7 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-ROLLROOT	= ../../../../..
+ROLLROOT	= ../../../../../..
 FILES		= isolinux.bin isolinux.cfg menu.cfg splash.png \
 			vesamenu.c32 chain.c32
 

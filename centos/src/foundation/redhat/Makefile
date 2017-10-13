@@ -10,7 +10,7 @@
 
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= getrpms.py
 
 include $(STACKBUILD)/etc/CCRules.mk

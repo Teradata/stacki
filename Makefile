@@ -17,9 +17,10 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 .PHONY: 3rdparty
-3rdparty:
-	cd common     && $(ROLLSBUILD)/bin/get3rdparty.py
-	cd $(BUILDOS) && $(ROLLSBUILD)/bin/get3rdparty.py
+3rdparty: # we need to do the for all OSes
+	cd common && $(ROLLSBUILD)/bin/get3rdparty.py
+	cd centos && $(ROLLSBUILD)/bin/get3rdparty.py
+	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
 	$(MAKE) -C common/src/stack/build bootstrap
