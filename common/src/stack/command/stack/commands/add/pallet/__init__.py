@@ -11,6 +11,7 @@
 # @rocks@
 
 import os
+import sys
 import subprocess
 import stack.file
 import stack.commands
@@ -100,8 +101,11 @@ class Command(stack.commands.add.command):
 			if not impl_found:
 				raise CommandError(self, 'unknown os on media')
 
-			if res and updatedb:
+			if res:
+				if updatedb:
 					self.insert(res[0], res[1], res[2], res[3], res[4])
+				if self.dryrun:
+					self.addOutput(res[0], [res[1], res[2], res[3], res[4]])
 
 		#
 		# Keep going even if a foreign pallet.  Safe to loop over an
@@ -112,12 +116,15 @@ class Command(stack.commands.add.command):
 		for key, info in dict.items():
 			self.runImplementation('native_%s' % info.getRollOS(),
 					       (clean, prefix, info))
+			name	= info.getRollName()
+			version	= info.getRollVersion()
+			release	= info.getRollRelease()
+			arch	= info.getRollArch()
+			osname	= info.getRollOS()
 			if updatedb:
-				self.insert(info.getRollName(),
-					info.getRollVersion(),
-					info.getRollRelease(),
-					info.getRollArch(),
-					info.getRollOS())
+				self.insert(name, version, release, arch, osname)
+			if self.dryrun:
+				self.addOutput(name, [version, release, arch, osname])
 
 
 	def insert(self, name, version, release, arch, OS):
@@ -138,14 +145,21 @@ class Command(stack.commands.add.command):
 
 
 	def run(self, params, args):
-		(clean, dir, updatedb) = self.fillParams([
+		(clean, dir, updatedb, dryrun) = self.fillParams([
 			('clean', 'n'),
 			('dir', '/export/stack/pallets'),
-			('updatedb', 'y')
+			('updatedb', 'y'),
+			('dryrun', 'n'),
 			])
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
+		self.dryrun = self.str2bool(dryrun)
+		if self.dryrun:
+			updatedb = False
+			self.out = sys.stderr
+		else:
+			self.out = sys.stdout
 
 		self.mountPoint = '/mnt/cdrom'
 		if not os.path.exists(self.mountPoint):
@@ -166,14 +180,17 @@ class Command(stack.commands.add.command):
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				isolist.append(arg)
 			else:
-				print("Cannot find %s or %s "
+				CommandError("Cannot find %s or %s "
 				      "is not and ISO image" % (arg, arg))
 
+		if self.dryrun:
+			self.beginOutput()
 		if not isolist and not network_pallets:
 			#
 			# no files specified look for a cdrom
 			#
-			if self.runImplementation('mounted_%s' % self.os):
+			cmd = 'mount | grep %s' % self.mountPoint
+			if os.system(cmd):
 				self.copy(clean, dir, updatedb)
 			else:
 				raise CommandError(self, 'CDROM not mounted')
@@ -194,11 +211,13 @@ class Command(stack.commands.add.command):
 
 			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()
-				self.runImplementation('mount_%s' % self.os, iso)
+				os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
 				self.copy(clean, dir, updatedb)
 				os.chdir(cwd)
-				self.runImplementation('umount_%s' % self.os)
+				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
 			
 		elif network_pallets:
 			for pallet in network_pallets:
 				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
+
+		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)

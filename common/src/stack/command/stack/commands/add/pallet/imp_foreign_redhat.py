@@ -77,36 +77,36 @@ class Implementation(stack.commands.Implementation):
 		roll_dir = os.path.join(prefix, name, vers, release, OS, arch)
 		destdir = roll_dir
 
-		if stack.release == '7.x':
-			liveosdir = os.path.join(roll_dir, 'LiveOS')
-
 		if clean and os.path.exists(roll_dir):
-			print('Cleaning %s %s-%s' % (name, vers, release))
+			self.owner.out.write('Cleaning %s %s-%s\n' % (name, vers, release))
+			self.owner.out.write('for %s from pallets directory\n' % self.arch)
 
-			os.system('/bin/rm -rf %s' % roll_dir)
-			os.makedirs(roll_dir)
+			if not self.dryrun:
+				os.system('/bin/rm -rf %s' % roll_dir)
+				os.makedirs(roll_dir)
 
-		print('Copying %s %s-%s pallet ...' % (name, vers, release))
+		self.owner.out.write('Copying %s %s-%s pallet ...\n' % (name, vers, release))
 
-		if not os.path.exists(destdir):
-			os.makedirs(destdir)
+		if not self.dryrun:
+			if not os.path.exists(destdir):
+				os.makedirs(destdir)
 
-		cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
-			% (self.owner.mountPoint, destdir)
-		subprocess.call(shlex.split(cmd))
+			cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
+				% (self.owner.mountPoint, destdir)
+			subprocess.call(shlex.split(cmd))
 
-		#
-		# create roll-<name>.xml file
-		#
-		xmlfile = open('%s/roll-%s.xml' % (roll_dir, name), 'w')
+			#
+			# create roll-<name>.xml file
+			#
+			xmlfile = open('%s/roll-%s.xml' % (roll_dir, name), 'w')
 
-		xmlfile.write('<roll name="%s" interface="6.0.2">\n' % name)
-		xmlfile.write('<color edge="white" node="white"/>\n')
-		xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, release, arch, OS))
-		xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
-		xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
-		xmlfile.write('</roll>\n')
+			xmlfile.write('<roll name="%s" interface="6.0.2">\n' % name)
+			xmlfile.write('<color edge="white" node="white"/>\n')
+			xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (vers, release, arch, OS))
+			xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
+			xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
+			xmlfile.write('</roll>\n')
 
-		xmlfile.close()
+			xmlfile.close()
 
 		return (name, vers, release, arch, OS)
