@@ -26,24 +26,29 @@ curlcmd = [ '/usr/bin/curl', '--local-port', '1-100',
 	'--output', '/tmp/stacki-profile.xml' ]
 
 o, e = p.communicate()
-output = o.decode()
-for line in output.split('\n'):
+for line in o.decode('utf-8').split('\n'):
 	interface = None
 	hwaddr = None
 	tokens = line.split()
 
-	if len(tokens) > 13:
+	if len(tokens) > 16:
 		# print 'tokens: %s' % tokens
 		#
 		# strip off last ':'
 		#
+		# if we look for link/ we'll get all
+		# interfaces, include IB, but get rid
+		# of the loopback
+
 		interface = tokens[1].strip()[0:-1]
+		if interface == 'lo':
+			continue
 
 		for i in range(2, len(tokens)):
-			if tokens[i] == 'link/ether':
-				#
-				# we know the next token is the ethernet MAC
-				#
+			if 'link/' in tokens[i]:
+		#
+		# we know the next token is the ethernet MAC
+		#
 				hwaddr = tokens[i+1]
 				break
 
@@ -51,9 +56,7 @@ for line in output.split('\n'):
 			curlcmd.append('--header')
 			curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
 				% (interface_number, interface, hwaddr))
-
 			interface_number += 1
-
 	curlcmd.append('-k')
 
 #
@@ -74,4 +77,3 @@ request = 'https://%s/install/sbin/profile.cgi?os=redhat&arch=x86_64&np=%d' % \
 curlcmd.append(request)
 
 subprocess.call(curlcmd, stdout=open('/dev/null'), stderr=open('/dev/null'))
-

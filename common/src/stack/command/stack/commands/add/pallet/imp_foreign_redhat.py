@@ -81,13 +81,13 @@ class Implementation(stack.commands.Implementation):
 			self.owner.out.write('Cleaning %s %s-%s\n' % (name, vers, release))
 			self.owner.out.write('for %s from pallets directory\n' % self.arch)
 
-			if not self.dryrun:
+			if not self.owner.dryrun:
 				os.system('/bin/rm -rf %s' % roll_dir)
 				os.makedirs(roll_dir)
 
 		self.owner.out.write('Copying %s %s-%s pallet ...\n' % (name, vers, release))
 
-		if not self.dryrun:
+		if not self.owner.dryrun:
 			if not os.path.exists(destdir):
 				os.makedirs(destdir)
 
