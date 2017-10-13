@@ -1,1 +1,1 @@
-{"configparser": "3.5.0", "Flask": "0.12.2", "PyYAML": "3.12", "flake8": "3.4.1", "PyMySQL": "0.7.11", "python-daemon": "2.1.2", "pyzmq": "16.0.2", "redis": "2.10.6", "requests": "2.18.4", "testinfra": "1.8.0"}
+{"configparser": "3.5.0", "Flask": "0.12.2", "PyYAML": "3.12", "flake8": "3.4.1", "PyMySQL": "0.7.11", "python-daemon": "2.1.2", "pyzmq": "16.0.2", "redis": "2.10.6", "requests": "2.18.4", "testinfra": "1.8.0", "django": null, "mod_wsgi": null}

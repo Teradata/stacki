@@ -1,0 +1,7 @@
+#
+# Stacki WebService syslog configuration
+#
+
+$EscapeControlCharactersOnReceive off
+local2.*    /var/log/local2
+if $programname == 'stacki-ws' then ~

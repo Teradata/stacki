@@ -1,0 +1,4 @@
+# Stacki REST API Specific configuration
+
+LoadModule wsgi_module modules/mod_wsgi.so
+WSGIScriptAlias /stack /var/www/cgi-bin/wsgi.py

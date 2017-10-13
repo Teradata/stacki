@@ -23,5 +23,7 @@
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
-	"testinfra":		{ "fe": true, "bootstrap": true }
+	"testinfra":		{ "fe": true, "bootstrap": true },
+	"django":		{ "fe": true },
+	"mod_wsgi":		{ "fe": true }
 }

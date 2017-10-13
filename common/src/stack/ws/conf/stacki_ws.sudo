@@ -1,0 +1,13 @@
+# Stacki - SUDO access to run sync commands as apache
+
+Cmnd_Alias STACK_SYNC = /opt/stack/bin/stack sync *, \
+			/opt/stack/bin/stack load *, \
+			/opt/stack/bin/stack unload *, \
+			/opt/stack/bin/stack remove host *
+Cmnd_Alias STACK_RUN = /opt/stack/bin/stack run host test *
+Cmnd_Alias STACK_LIST = /opt/stack/bin/stack list host profile *, \
+			/opt/stack/bin/stack list host xml *, \
+			/opt/stack/bin/stack list node xml *
+Defaults!STACK_SYNC !requiretty
+Defaults!STACK_LIST !requiretty
+apache ALL = (root) NOPASSWD:STACK_SYNC, (nobody) NOPASSWD:STACK_LIST, (root) NOPASSWD:STACK_RUN
