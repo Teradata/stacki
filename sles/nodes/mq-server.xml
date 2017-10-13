@@ -7,9 +7,17 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:package>foundation-redis</stack:package>
+<stack:package>stack-mq</stack:package>
+<stack:package>foundation-zeromq</stack:package>
 
 <stack:script stack:stage="install-post">
 systemctl enable redis
+
+systemctl enable rmq-publisher
+chkconfig --add rmq-publisher
+
+systemctl enable rmq-producer
+chkconfig --add rmq-producer
 
 systemctl enable rmq-processor
 chkconfig --add rmq-processor

@@ -29,6 +29,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 
+<stack:package>mlocate</stack:package>
+<stack:package>grub2</stack:package>
 
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">

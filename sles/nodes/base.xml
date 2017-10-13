@@ -18,10 +18,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>wget</stack:package>
 <stack:package>bridge-utils</stack:package>
 
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">mlocate</stack:package>
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">grub2</stack:package>
-
-
 <stack:script stack:stage="install-post">
 
 <!-- Rsyslog Configuration file -->

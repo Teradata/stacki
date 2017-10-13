@@ -7,6 +7,7 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
+<stack:package>chrony</stack:package>
 
 <stack:script stack:stage="install-post">
 /opt/stack/bin/stack set attr attr=time.protocol value=chrony

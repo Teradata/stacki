@@ -12,9 +12,7 @@
 		<to>ssh</to>
 		<to>ssl</to>
 		<to>time-base</to>
-		<to>foundation-python</to>
 		<to>uefi-base</to>
-		<to>mq-base</to>
 	</edge>
 
 </graph>
