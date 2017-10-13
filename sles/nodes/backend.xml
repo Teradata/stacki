@@ -10,6 +10,9 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">mlocate</stack:package>
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">grub2</stack:package>
+
 <stack:script stack:stage="install-pre">
 
 <!-- Copy root's public key to backend nodes during installation -->
@@ -24,6 +27,23 @@ for line in file.readlines():
 /opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
 </stack:eval>
 </stack:file>
+</stack:script>
+
+<!-- SLES 11 needs devpts mounted in order for sshd to create a pseudo terminal on login -->
+<stack:script stack:stage="install-pre">
+#!/bin/sh
+
+if [ ! -d /dev/pts ]
+then
+	mkdir /dev/pts
+fi
+
+mount | grep devpts
+
+if [ $? != 0 ]
+then
+	mount -t devpts devpts /dev/pts
+fi
 </stack:script>
 
 <!-- Start SSH Server on backend host during installation -->

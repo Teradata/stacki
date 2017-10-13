@@ -10,7 +10,6 @@ import stack.commands
 import subprocess
 import tempfile
 import shutil
-import sys
 import os
 from urllib.parse import urlparse
 import stack.file
@@ -38,8 +37,9 @@ class Implementation(stack.commands.Implementation):
 			'-np',	# Don't create parent directories
 			'-A', 'roll-*.xml', # Only download roll-*.xml files
 			loc]
-		print(' '.join(wget_cmd))
-		s = subprocess.Popen(wget_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		#self.owner.out.write('%s\n' % ' '.join(wget_cmd))
+		self.owner.out.write('Downloading Pallet Info file\n')
+		s = subprocess.Popen(wget_cmd, stdout=self.owner.out, stderr=subprocess.PIPE)
 		rc = s.wait()
 		o, e = s.communicate()
 		if rc:
@@ -61,13 +61,14 @@ class Implementation(stack.commands.Implementation):
 		OS = pallet.getRollOS()
 
 		destdir = os.path.join(prefix, name, vers, release, OS, arch)
-		if os.path.exists(destdir) and \
-			os.path.isdir(destdir):
-			shutil.rmtree(destdir)
-		os.makedirs(destdir)
+		if not self.owner.dryrun:
+			if os.path.exists(destdir) and \
+				os.path.isdir(destdir):
+				shutil.rmtree(destdir)
+			os.makedirs(destdir)
 
 		
-		p = urlparse.urlparse(loc)
+		p = urlparse(loc)
 		path = os.path.normpath(p.path)
 		cut_dirs = len(path.split(os.sep)) - 1
 		# Normalize URL. Otherwise cutdirs behaves inconsistently
@@ -82,12 +83,16 @@ class Implementation(stack.commands.Implementation):
 			'-P', destdir, # directory to save files to
 			norm_loc ]
 
-		print(' '.join(wget_cmd))
+		#self.owner.out.write('%s\n' % ' '.join(wget_cmd))
+		self.owner.out.write('Downloading %s %s-%s pallet\n' % (name, vers, release))
 
-		s = subprocess.Popen(wget_cmd, stdout=sys.stdout, stderr=sys.stdout)
-		rc = s.wait()
-		os.chdir(cwd)
-		shutil.rmtree(tempdir)
+		if not self.owner.dryrun:
+			s = subprocess.Popen(wget_cmd, stdout=self.owner.out, stderr=self.owner.out)
+			rc = s.wait()
+			os.chdir(cwd)
+			shutil.rmtree(tempdir)
 
+		if self.owner.dryrun:
+			self.owner.addOutput(name, [vers, release, arch, OS])
 		if updatedb:
 			self.owner.insert(name, vers, release, arch, OS)

@@ -65,6 +65,7 @@
 
 	<edge from="server">
 		<to>base</to>
+		<to>foundation-python</to>
 		<to>apache</to>
 		<to>ca</to>
 		<to>database</to>

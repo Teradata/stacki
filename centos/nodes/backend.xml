@@ -8,7 +8,7 @@ file to add functionality to this appliance type.
 
 
 <stack:native stack:lang="kickstart">
-<eval shell="/opt/stack/bin/python3" mode="xml">
+<stack:eval shell="/opt/stack/bin/python3" mode="xml">
 
 import stack.api
 
@@ -35,17 +35,34 @@ for o in stack.api.Call('list cart'):
 	if '&box;' in boxes:
 		print('repo --name="%s" --baseurl=http://127.0.0.1/install/carts/%s' % (o['name'], o['name']))
 
-</eval>
+</stack:eval>
 </stack:native>
 
+<!-- give me some status --> 
+
+<stack:script stack:stage="install-pre">
+/opt/stack/bin/stacki-status.py Running preinstall
+
+<stack:file name="/etc/ld.so.conf">
+include ld.so.conf.d/*.conf
+</stack:file>
+
+<stack:file name="/etc/ld.so.conf.d/stacki.conf">
+/opt/stack/lib
+</stack:file>
+ldconfig
+
+</stack:script>
+
+<!-- stacki-profile adds the extra interfaces -->
+<stack:script stack:stage="install-post" stack:chroot="false">
+/opt/stack/bin/stacki-profile.py
+
+/opt/stack/bin/stacki-status.py install complete rebooting
+</stack:script>
 
 <stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
 cp /run/install/tmp/stack.conf /tmp/stack.conf
-</stack:script>
-
-
-<stack:script stack:stage="install-post">
-/opt/stack/bin/peer-done
 </stack:script>
 
 </stack:stack> 

@@ -9,7 +9,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 <stack:package>foundation-python</stack:package>
-<stack:package>foundation-python-packages</stack:package>
 
 
 <stack:script stack:stage="install-post">

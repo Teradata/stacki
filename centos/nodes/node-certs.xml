@@ -19,9 +19,9 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:script stack:cond="sync.ssh.authkey" stack:stage="install-post">
 <!-- propagate root's public ssh key -->
 <stack:file stack:name="/root/.ssh/authorized_keys">
-<eval>
+<stack:eval>
 cat /root/.ssh/id_rsa.pub
-</eval>
+</stack:eval>
 </stack:file>
 
 </stack:script>
@@ -35,7 +35,7 @@ cat /root/.ssh/id_rsa.pub
  -->
 
 cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
-<eval mode="xml">
+<stack:eval mode="xml">
 curl_cmd=/usr/bin/curl
 
 <!-- on an installing system, curl may be in /bin? -->
@@ -51,7 +51,7 @@ else
 	echo $keys
 fi
 
-</eval>
+</stack:eval>
 EOF
 
 </stack:script>

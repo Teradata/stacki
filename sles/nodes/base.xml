@@ -9,17 +9,14 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 <stack:package>net-tools</stack:package>
-<stack:package>mlocate</stack:package>
 <stack:package>vim</stack:package>
 <stack:package>pciutils</stack:package>
 
 <stack:package>ipmitool</stack:package>
 <stack:package>OpenIPMI</stack:package>
 
-<stack:package>grub2</stack:package>
 <stack:package>wget</stack:package>
 <stack:package>bridge-utils</stack:package>
-
 
 <stack:script stack:stage="install-post">
 
@@ -45,6 +42,7 @@ if $programname == 'SCL' then ~
 <stack:file stack:name="/etc/stack-release">
 stacki release &version; (&release;)
 </stack:file>
+
 </stack:script>
 
 </stack:stack> 

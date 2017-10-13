@@ -44,7 +44,6 @@ class Implementation(stack.commands.Implementation):
 					if key == 'DISTRO':
 						a = value.split(',')
 						v = a[0].split(':')
-						relstring = a[1]
 						
 						if v[3] == 'sles':
 							self.name = 'SLES'
@@ -70,7 +69,6 @@ class Implementation(stack.commands.Implementation):
 
 
 	def run(self, args):
-		import stack
 
 		(clean, prefix)	 = args
 
@@ -84,19 +82,34 @@ class Implementation(stack.commands.Implementation):
 		destdir = roll_dir
 
 		if clean and os.path.exists(roll_dir):
-			print('Cleaning %s version %s ' % (self.name, self.vers), end=' ')
-			print('for %s from pallets directory' % self.arch)
-			os.system('/bin/rm -rf %s' % roll_dir)
-			os.makedirs(roll_dir)
+			self.owner.out.write('Cleaning %s version %s ' % (self.name, self.vers))
+			self.owner.out.write('for %s from pallets directory\n' % self.arch)
+			if not self.owner.dryrun:
+				os.system('/bin/rm -rf %s' % roll_dir)
+				os.makedirs(roll_dir)
 
-		print('Copying "%s" (%s,%s) pallet ...' % (self.name, self.vers, self.arch))
+		self.owner.out.write('Copying "%s" (%s,%s) pallet ...\n' % (self.name, self.vers, self.arch))
 
-		if not os.path.exists(destdir):
-			os.makedirs(destdir)
+		if not self.owner.dryrun:
+			if not os.path.exists(destdir):
+				os.makedirs(destdir)
 
-		cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
-			% (self.owner.mountPoint, destdir)
-		subprocess.call(shlex.split(cmd))
+			cmd = 'rsync -a --exclude "TRANS.TBL" %s/ %s/' \
+				% (self.owner.mountPoint, destdir)
+			subprocess.call(shlex.split(cmd))
+			#
+			# create roll-<name>.xml file
+			#
+			xmlfile = open('%s/roll-%s.xml' % (roll_dir, self.name), 'w')
+
+			xmlfile.write('<roll name="%s" interface="6.0.2">\n' % self.name)
+			xmlfile.write('<color edge="white" node="white"/>\n')
+			xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (self.vers, self.release, self.arch, OS))
+			xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
+			xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
+			xmlfile.write('</roll>\n')
+
+			xmlfile.close()
 
 		#
 		# Copy pallet patches into the respective pallet
@@ -105,23 +118,11 @@ class Implementation(stack.commands.Implementation):
 		patch_dir = '/opt/stack/%s-pallet-patches/%s' % \
 			(self.name, self.vers)
 		if os.path.exists(patch_dir):
-			print('Patching %s pallet' % self.name)
-			cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
-			subprocess.call(shlex.split(cmd))
+			self.owner.out.write('Patching %s pallet\n' % self.name)
+			if not self.owner.dryrun:
+				cmd = 'rsync -a %s/ %s/' % (patch_dir, destdir)
+				subprocess.call(shlex.split(cmd))
 
-		#
-		# create roll-<name>.xml file
-		#
-		xmlfile = open('%s/roll-%s.xml' % (roll_dir, self.name), 'w')
-
-		xmlfile.write('<roll name="%s" interface="6.0.2">\n' % self.name)
-		xmlfile.write('<color edge="white" node="white"/>\n')
-		xmlfile.write('<info version="%s" release="%s" arch="%s" os="%s"/>\n' % (self.vers, self.release, self.arch, OS))
-		xmlfile.write('<iso maxsize="0" addcomps="0" bootable="0"/>\n')
-		xmlfile.write('<rpm rolls="0" bin="1" src="0"/>\n')
-		xmlfile.write('</roll>\n')
-
-		xmlfile.close()
 
 		return (self.name, self.vers, self.release, self.arch, OS)
 

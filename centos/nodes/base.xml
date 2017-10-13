@@ -29,14 +29,14 @@ keyboard &Kickstart_Keyboard;
 
 timezone --utc &Kickstart_Timezone;
 
-<eval shell="/opt/stack/bin/python3" mode="xml">
+<stack:eval shell="/opt/stack/bin/python3" mode="xml">
 if '&boot_device;' != '' and '&release;' == '6.x':
 	print "bootloader --location=none"
 elif '&boot_device;' != '' and '&release;' == '7.x':
 	print "bootloader --location=mbr --boot-drive=&boot_device;"
 else:
 	print "bootloader --location=mbr"
-</eval>
+</stack:eval>
 
 </stack:native>
 
@@ -110,6 +110,12 @@ stacki release &version; (&release;)
 /opt/stack/lib
 </stack:file>
 ldconfig
+</stack:script>
+
+<stack:script stack:stage="install-post" stack:chroot="false">
+/opt/stack/bin/stacki-profile.py &gt; /root/prof.log 2&gt;&amp;1
+
+/opt/stack/bin/stacki-status.py install complete rebooting
 </stack:script>
 
 <stack:script stack:stage="boot-post">
