@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 RPMFILE		= $(NAME)-$(VERSION)-1.noarch.rpm
 DEPENDS.FILES	= $(RPMFILE)
 

@@ -6,7 +6,7 @@
 #
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= gui
 
 include $(STACKBUILD)/etc/CCRules.mk

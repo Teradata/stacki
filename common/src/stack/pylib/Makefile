@@ -14,7 +14,7 @@
 PYLIB		= $(wildcard *.py)
 PYAPI		= $(wildcard api/*.py)
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
 
 include $(STACKBUILD)/etc/CCRules.mk

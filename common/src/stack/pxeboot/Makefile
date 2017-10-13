@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /export/stack/sbin/
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(wildcard *.cgi)
 
 include $(STACKBUILD)/etc/CCRules.mk

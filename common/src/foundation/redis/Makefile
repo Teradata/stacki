@@ -40,7 +40,7 @@
 # @SI_Copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(ARCHIVENAME)-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk

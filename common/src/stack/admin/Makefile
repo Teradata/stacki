@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= gen_random_pw.py stack-console.py yumresolver.py
 
 include $(ROCKSBUILD)/etc/CCRules.mk

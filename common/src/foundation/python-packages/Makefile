@@ -4,7 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 ORDER           = 20
 RPM.STRATEGY    = custom
 
@@ -18,7 +18,7 @@ refresh:
 
 src: packages.json
 	$(MAKE) clean
-	../../stack/build/build/bin/pip2src
+	ROLLROOT=$(ROLLROOT) ../../stack/build/build/bin/pip2src
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/nodes
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/graph

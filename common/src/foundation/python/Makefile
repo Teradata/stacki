@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= Python-$(VERSION).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk

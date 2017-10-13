@@ -5,7 +5,7 @@
 # @copyright@
 #
 
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= spreadsheets
 include $(STACKBUILD)/etc/CCRules.mk
 
