@@ -29,6 +29,23 @@ for line in file.readlines():
 </stack:file>
 </stack:script>
 
+<!-- SLES 11 needs devpts mounted in order for sshd to create a pseudo terminal on login -->
+<stack:script stack:stage="install-pre">
+#!/bin/sh
+
+if [ ! -d /dev/pts ]
+then
+	mkdir /dev/pts
+fi
+
+mount | grep devpts
+
+if [ $? != 0 ]
+then
+	mount -t devpts devpts /dev/pts
+fi
+</stack:script>
+
 <!-- Start SSH Server on backend host during installation -->
 <stack:script stack:stage="install-pre">
 # Start ssh server on port 2200
