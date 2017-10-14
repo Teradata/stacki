@@ -83,10 +83,7 @@ class Command(stack.commands.Command,
 			h   = ha[row['host']]
 			ip  = row['ip']
 			pxe = row['pxe']
-
-			if h['appliance'] == 'frontend':
-				h['filename'] = None
-			elif ip and pxe:
+			if h['appliance'] != 'frontend' and ip and pxe:
 				#
 				# Compute the HEX IP filename for the host
 				#
@@ -98,7 +95,7 @@ class Command(stack.commands.Command,
 				h['mask']     = row['mask']
 				h['gateway']  = row['gateway']
 			else:
-				raise CommandError(self, 'Non-frontend node has no pxe-able lines in list host interface')
+				h['filename'] = None
 
 		self.beginOutput()
 		self.runPlugins(ha)
