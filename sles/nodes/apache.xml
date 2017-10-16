@@ -84,10 +84,67 @@ DocumentRoot	"/var/www/html"
 
 <!-- This should be done automatically by httpd.conf, but isn't for 
 	some reason. -->
-<stack:file name="/etc/apache2/httpd.conf" mode="append">
+<stack:file name="/etc/apache2/httpd.conf"><![CDATA[
+Include /etc/apache2/uid.conf
+Include /etc/apache2/server-tuning.conf
+ErrorLog /var/log/apache2/error_log
+
+<IfDefine !SYSCONFIG>
+  Include /etc/apache2/loadmodule.conf
+</IfDefine>
+
+Include /etc/apache2/listen.conf
+Include /etc/apache2/mod_log_config.conf
+
+<IfDefine !SYSCONFIG>
+  Include /etc/apache2/global.conf
+</IfDefine>
+
+Include /etc/apache2/mod_status.conf
+Include /etc/apache2/mod_info.conf
+Include /etc/apache2/mod_reqtimeout.conf
+Include /etc/apache2/mod_cgid-timeout.conf
+Include /etc/apache2/mod_usertrack.conf
+Include /etc/apache2/mod_autoindex-defaults.conf
+TypesConfig /etc/apache2/mime.types
+Include /etc/apache2/mod_mime-defaults.conf
+Include /etc/apache2/errors.conf
+Include /etc/apache2/ssl-global.conf
+
+<Directory />
+    Options None
+    AllowOverride None
+    <IfModule !mod_access_compat.c>
+        Require all denied
+    </IfModule>
+    <IfModule mod_access_compat.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</Directory>
+
+AccessFileName .htaccess
+
+<Files ~ "^\.ht">
+    <IfModule !mod_access_compat.c>
+        Require all denied
+    </IfModule>
+    <IfModule mod_access_compat.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
+DirectoryIndex index.html index.html.var
+
+Include /etc/apache2/default-server.conf
+
+IncludeOptional /etc/apache2/vhosts.d/*.conf
+
 Include /etc/apache2/stacki-conf.d/stack.conf
 Include /etc/apache2/stacki-conf.d/ssl.conf
 Include /etc/apache2/stacki-conf.d/https.conf
+]]>
 </stack:file>
 
 <stack:file stack:name="/etc/apache2/stacki-conf.d/ssl.conf"><![CDATA[
