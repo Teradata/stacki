@@ -22,6 +22,7 @@
 		<to>users</to>
 		<to>uefi-client</to>
 		<to>time-client</to>
+		<to>firewall-client</to>
 	</edge>
 
 	<edge from="backend" cond="pallets and 'SLES-12-sp2' in pallets">

@@ -1,0 +1,54 @@
+<stack:stack>
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+
+<!-- output the iptables rules -->
+<stack:script stack:stage="install-post">
+<stack:report name="host.firewall">&hostname;</stack:report>
+</stack:script>
+
+
+<stack:script stack:stage="install-post" stack:cond="'SLES-11.3-1.138' in &pallets;">
+<stack:file stack:name="/etc/init.d/stacki-iptables" stack:perms="0755">
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:       stacki-iptables
+# Required-Start: $network
+# Required-Stop:  $network
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# Short-Description: Apply iptables rules
+# Description:    Apply iptables rules to a host
+### END INIT INFO
+#
+
+case "$1" in
+start)
+	echo "Applying iptables rules"
+	cat /etc/sysconfig/iptables | /usr/sbin/iptables-restore
+;;
+
+stop)
+	/usr/sbin/iptables -F
+	;;
+
+*)
+	echo "Usage: $0 {start|stop}"
+	exit 1
+esac
+
+exit 0
+</stack:file>
+
+/sbin/chkconfig --add stacki-iptables
+</stack:script>
+
+
+</stack:stack> 
+
