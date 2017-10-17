@@ -1,1 +1,1 @@
-NAME	= stack-hwtest
+NAME = foundation-iperf
