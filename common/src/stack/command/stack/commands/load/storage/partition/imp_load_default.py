@@ -188,8 +188,15 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			device_map = self.owner.hosts[host]
 			for d in device_map.keys():
 				d_map = device_map[d][0]
-				# Check if volgroups have an already defined physical volume	
-				if d_map['type'] == 'volgroup':
+				# Check if raids have already been defined	
+				if d_map['options'] and 'raid.' in d_map['options'].lower():
+					options = d_map['options'].split()
+					for o in options:
+						if 'raid.' in o and o not in type_dict[host + '-raid']:
+							msg = "raid %s not defined" % o
+							raise CommandError(self.owner, msg)
+				# Check if volgroups have an already defined physical volume
+				elif d_map['type'] == 'volgroup':
 					device_arr = d.split(' ')
 					for da in device_arr:
 						#
