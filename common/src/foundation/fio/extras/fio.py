@@ -1,4 +1,3 @@
-#
 # @SI_Copyright@
 # Copyright (c) 2006 - 2014 StackIQ Inc. All rights reserved.
 # 
@@ -6,17 +5,16 @@
 # may not be modified, copied, or redistributed without the express written
 # consent of StackIQ Inc.
 # @SI_Copyright@
-#
 
 import os
-import sys
 import json
 import re
-import stat
 import subprocess
+
 
 def __virtual__():
 	return 'fio'
+
 
 def _global():
 	global_vars = {
@@ -31,9 +29,10 @@ def _global():
 	}
 	return global_vars
 
-def _rawdisk(filename, size = '5GB'):
+
+def _rawdisk(filename, size='5GB'):
 	p = subprocess.Popen(['/sbin/parted', '-m', filename, '-s', 'print'],
-		stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+		stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	o, e = p.communicate()
 	rc = p.wait()
 	if rc:
@@ -52,6 +51,7 @@ def _rawdisk(filename, size = '5GB'):
 	return {
 		'filename': filename,
 	}
+
 
 def _get_size(size):
 	size_str = str(size).strip()
@@ -76,10 +76,12 @@ def _get_size(size):
 	size = float(m.group(1))
 	return (size * mul)
 
+
 def _part_info(filename, size):
 	return {
 		'filename': filename,
 	}
+
 
 def _mount_info(filename, size):
 	if not os.path.exists(filename):
@@ -97,9 +99,9 @@ def _mount_info(filename, size):
 		else:
 			return {}
 
-	p = subprocess.Popen(['/bin/df','-P',dir],
-		stdout = subprocess.PIPE,
-		stderr = subprocess.PIPE)
+	p = subprocess.Popen(['/bin/df', '-P', dir],
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE)
 	o, e = p.communicate()
 	rc = p.wait()
 	if rc:
@@ -114,6 +116,7 @@ def _mount_info(filename, size):
 		'filename': filename,
 	}
 
+
 def run(tests):
 	g_params = _global()
 	global_params = ["[global]"]
@@ -125,7 +128,7 @@ def run(tests):
 	#
 	# do the write tests first, then the read tests
 	#
-	cmd = ['/opt/rocks/bin/fio', '--output-format=json', '-']
+	cmd = ['/opt/stack/bin/fio', '--output-format=json', '-']
 
 	for testname, name, disk in tests:
 		size = '10GB'
@@ -151,9 +154,9 @@ def run(tests):
 			#
 			# first do the write test 
 			#
-			p = subprocess.Popen(cmd, stdin  = subprocess.PIPE,
-				stdout = subprocess.PIPE,
-				stderr = subprocess.PIPE)
+			p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE)
 
 			test_params = [ '[job]' ]
 			test_params.append('readwrite=write')
@@ -198,8 +201,8 @@ def run(tests):
 		if not spec_test:
 			continue
 
-		p = subprocess.Popen(cmd, stdin  = subprocess.PIPE,
-			stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+		p = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		test_params = [ '[job]' ]
 		test_params.append('readwrite=read')

@@ -7,7 +7,7 @@
 # @SI_Copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../../../
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= files
 DEPENDS.RPMS	= iperf3
 
@@ -23,4 +23,3 @@ install::
 	$(INSTALL) -m0755 files/iperf3.init $(ROOT)/$(INIT_SCRIPTS_DIR)/iperf3
 	$(INSTALL) -m0755 files/iperf3.service $(ROOT)/usr/lib/systemd/system/iperf3.service
 
-clean:

@@ -6,11 +6,11 @@
 # consent of StackIQ Inc.
 # @SI_Copyright@
 
-PKGROOT		= /opt/rocks
-ROLLROOT	= ../../..
+PKGROOT		= /opt/stack
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION).tar.gz
 
-include $(ROCKSBUILD)/etc/CCRules.mk
+include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	gunzip -c $(NAME)-$(VERSION).tar.gz | $(TAR) -xf -
@@ -25,8 +25,8 @@ install::
 		cd $(NAME)-$(VERSION);	\
 		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install; \
 	)
-	mkdir -p $(ROOT)/$(PY.ROCKS)/salt/modules
-	$(INSTALL) -m0644 extras/fio.py $(ROOT)/$(PY.ROCKS)/salt/modules/fio.py
+	mkdir -p $(ROOT)/$(PY.STACK)/salt/modules
+	$(INSTALL) -m0644 extras/fio.py $(ROOT)/$(PY.STACK)/salt/modules/fio.py
 
 clean::
 	rm -rf $(NAME)-$(VERSION)
