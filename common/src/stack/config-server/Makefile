@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= init.d profile.d cgi
 
 include $(ROCKSBUILD)/etc/CCRules.mk

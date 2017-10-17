@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT 	= ../../..
+ROLLROOT 	= ../../../..
 DEPENDS.FILES	= ludicrous-server.py ludicrous-client.py ludicrous-client.service ludicrous-server.service directory.html
 
 include $(STACKBUILD)/etc/CCRules.mk

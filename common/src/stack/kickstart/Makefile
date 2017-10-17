@@ -12,7 +12,7 @@
 
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(wildcard *.py)
 DEPENDS.DIRS	= utils
 

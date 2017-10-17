@@ -6,7 +6,7 @@
 #
 
 PKGROOT		= /opt/stack/$(NAME)
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(NAME)-$(VERSION)-$(RELEASE).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk

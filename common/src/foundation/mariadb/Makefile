@@ -13,7 +13,7 @@
 PKGROOT		= /opt/stack
 PKGVAR		= /var/$(PKGROOT)/mysql
 INSTALLDB	= $(PKGROOT)/sbin/mysql-install-db
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= mariadb-$(VERSION).tar.gz
 #DEPENDS.DIRS	= patch-files
 

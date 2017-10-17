@@ -2,7 +2,9 @@ RPMLOC = $(shell find cache -type f -name *.rpm)
 
 localrepo:
 	mkdir -p $(CURDIR)/localrepo
-	ln -s $(REDHAT.RPMS) $(CURDIR)/localrepo 
+	@echo $(CURDIR)/../../../../RPMS
+	@echo $(REDHAT.ROOT)
+	ln -s $(CURDIR)/../../../../RPMS $(CURDIR)/localrepo 
 	createrepo $(CURDIR)/localrepo
 	@echo -e "[localdir] \n\
 name=local \n\

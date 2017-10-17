@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= gd-$(VERSION).tar.gz
 DEPENDS.DIRS	= patch-files
 

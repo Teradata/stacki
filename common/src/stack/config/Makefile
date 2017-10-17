@@ -10,9 +10,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= etc init.d
-STACKBUILD      = $(ROLLROOT)/src/stack/build/build
 
 include $(STACKBUILD)/etc/CCRules.mk
 

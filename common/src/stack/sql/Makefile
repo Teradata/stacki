@@ -14,7 +14,7 @@ PKGROOT		= /opt/stack
 SCRIPTS		= insert-ethers
 PLUGINS		= $(wildcard plugins/*py)
 PLUGINDIR	= $(PKGROOT)/var/plugins/insertethers
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= backup-cluster-db.sh insert-ethers.py insert-ethersrc.xml 
 DEPENDS.DIRS	= plugins po
 

@@ -13,7 +13,7 @@
 LIB		= lib
 CPPFLAGS	= -DVERSION="\"$(VERSION)\""
 MAKE.rpmflag	= -bb --define "__spec_install_post :"
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= $(wildcard *.c) $(wildcard *.py)
 
 include $(STACKBUILD)/etc/CCRules.mk

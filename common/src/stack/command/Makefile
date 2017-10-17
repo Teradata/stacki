@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
 DEPENDS.FILES	= stack.py
 PY.TEST.FLAGS   = -s

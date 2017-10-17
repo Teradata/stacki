@@ -2,7 +2,7 @@
 # @copyright@
 #
 
-ROLLROOT = ../../..
+ROLLROOT = ../../../..
 PKGROOT=/opt/stack
 DEPENDS.FILES=$(ARCHIVENAME)-$(VERSION).tar.gz
 
