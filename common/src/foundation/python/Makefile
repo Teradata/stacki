@@ -19,6 +19,7 @@ bootstrap:
 	$(MAKE) install-rpm
 	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
 	ldconfig
+	$(PY.PATH) -mensurepip
 
 
 build:
@@ -27,6 +28,7 @@ build:
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT)				\
 			--enable-shared					\
+			--with-ensurepip=install			\
 			--without-pymalloc;				\
 		$(MAKE);						\
 	)
