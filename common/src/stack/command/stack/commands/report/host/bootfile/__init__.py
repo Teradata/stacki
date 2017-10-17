@@ -6,6 +6,7 @@
 
 
 import stack.commands
+from stack.exception import CommandError
 
 
 class Command(stack.commands.Command,
@@ -31,7 +32,7 @@ class Command(stack.commands.Command,
 
 		ha = {}
 		for host in hosts:
-			ha[host] = { 
+			ha[host] = {
 				'host'       : host,
 				'action'     : None,
 				'type'       : action,
@@ -41,7 +42,7 @@ class Command(stack.commands.Command,
 
 		for row in self.call('list.host.attr', hosts):
 			ha[row['host']]['attrs'][row['attr']] = row['value']
-			
+
 		if not action: # param can override the db
 			for row in self.call('list.host.boot', hosts):
 				ha[row['host']]['type'] = row['action']
@@ -82,10 +83,7 @@ class Command(stack.commands.Command,
 			h   = ha[row['host']]
 			ip  = row['ip']
 			pxe = row['pxe']
-
-			if h['appliance'] == 'frontend':
-				h['filename'] = None
-			elif ip and pxe:
+			if h['appliance'] != 'frontend' and ip and pxe:
 				#
 				# Compute the HEX IP filename for the host
 				#
@@ -97,8 +95,10 @@ class Command(stack.commands.Command,
 				h['mask']     = row['mask']
 				h['gateway']  = row['gateway']
 
+		for host in dict(ha):
+			if 'filename' not in ha[host]:
+				del ha[host]
+
 		self.beginOutput()
 		self.runPlugins(ha)
 		self.endOutput(padChar='', trimOwner=True)
-
-
