@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 

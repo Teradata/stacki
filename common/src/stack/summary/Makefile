@@ -3,10 +3,9 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
 
 include $(STACKBUILD)/etc/CCRules.mk

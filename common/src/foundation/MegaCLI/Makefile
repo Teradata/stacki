@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 RPMFILE		= MegaCli-$(VERSION)-1.noarch.rpm
 DEPENDS.FILES	= $(RPMFILE)
 

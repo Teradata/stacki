@@ -68,7 +68,7 @@ endif
 preroll::
 roll: preroll $(TARGET_PKG)s roll-$(ROLL).xml rpm-mkdirs
 	(								\
-		cd build-$(ROLL)-$(STACK);				\
+		cd $(ROLLROOT)/build-$(ROLL)-$(STACK);			\
 		rm -rf disk*;						\
 		env GNUPGHOME=$(STACKBUILD.ABSOLUTE)/../.gnupg		\
 			Kickstart_Lang=$(KICKSTART_LANG)		\

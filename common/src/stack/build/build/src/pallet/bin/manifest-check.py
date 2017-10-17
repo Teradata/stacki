@@ -31,7 +31,11 @@ tree = stack.file.Tree(os.getcwd())
 
 builtfiles = []
 for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
-	builtfiles  += tree.getFiles(os.path.join(buildpath, 'RPMS', arch))
+	path = os.path.join(buildpath, 'RPMS', arch)
+#	print('searching %s' % path)
+	found = tree.getFiles(path)
+#	print('found %d file' % len(found))
+	builtfiles += found
 
 manifest = []
 
@@ -46,7 +50,7 @@ found = False
 for filename in manifests:
 	if not os.path.exists(filename):
 		continue
-	print('searching %s' % filename)
+	print('reading %s' % filename)
 	found = True
 	file = open(filename, 'r')
 	for line in file.readlines():

@@ -11,7 +11,7 @@
 # @rocks@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= pycairo-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk

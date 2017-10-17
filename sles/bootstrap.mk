@@ -1,10 +1,7 @@
-GROUPS=32bit Basis-Devel SDK-C-C++
+# @copyright@
+# @copyright@
 
-PACKAGES=rpm-build libzip2 apache2 squashfs cmake apache2-devel createrepo readline-devel slang-devel popt-devel systemd-devel
-
-$(GROUPS):
-	-zypper in -y -t pattern $@
-
-$(PACKAGES):
-	-zypper in -y $@
+bootstrap:
+	$(STACKBUILD)/bin/package-install -m 32bit Basis-Devel SDK-C-C++
+	$(STACKBUILD)/bin/package-install rpm-build libzip2 apache2 squashfs apache2-devel createrepo
 

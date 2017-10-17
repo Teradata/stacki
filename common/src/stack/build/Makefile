@@ -12,7 +12,7 @@
 
 PKGROOT		= /opt/stack/share/build
 STACKBUILD	= build
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.DIRS	= build
 DEPENDS.FILES	= stack-build.sh stack-build.csh
 DEPENDS.RPMS	=

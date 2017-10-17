@@ -5,7 +5,7 @@
 # @copyright@
 
 PKGROOT		= /opt/stack
-ROLLROOT	= ../../..
+ROLLROOT	= ../../../..
 DEPENDS.FILES	= newt-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk

@@ -4,7 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-ROLLROOT	= ../../../../..
+ROLLROOT	= ../../../../../..
 EXTRAS.DIRS	= opt usr
 
 include $(STACKBUILD)/etc/CCRules.mk

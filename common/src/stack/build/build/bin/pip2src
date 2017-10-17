@@ -149,7 +149,7 @@ for package in PackageSet.values():
 	with open(os.path.join(srcdir, 'Makefile'), 'w') as makefile:
 		makefile.write("""
 PKGROOT  = /opt/stack
-ROLLROOT = ../../../../..
+ROLLROOT = %s/../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
@@ -157,7 +157,7 @@ build:
 
 install::
 	$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) %s==$(VERSION)
-""" % package.name)
+""" % (os.environ['ROLLROOT'], package.name))
 		if package.bootstrap:
 			makefile.write('\nbootstrap: install-rpm\n')
 
