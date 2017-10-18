@@ -76,10 +76,13 @@ class Command(stack.commands.sync.host.command):
 		if restartit:
 			threads = []
 			for host in hosts:
-				cmd = '/sbin/service iptables restart'
+				if stack.release == '7.x' or stack.release == '12':
+					cmd = 'systemctl restart iptables'
+				else:
+					cmd = '/sbin/service iptables restart'
+
 				if me != host:
 					cmd = 'ssh -T -x %s "%s"' % (host, cmd)
-
 				host_output[host] = {"output": "", "error": "", "rc": 0}
 				p = Parallel(cmd, host_output[host])
 				threads.append(p)

@@ -143,13 +143,14 @@ class command(stack.commands.HostArgumentProcessor,
 	def checkRule(self, hierarchy, extrawhere, service, network, outnetwork,
 		chain, action, protocol, flags, comment, table, rulename):
 
-		query = 'select * from %s where name="%s"' % (hierarchy, rulename)
-		rows  = self.db.execute(query)
-		if rows:
-			raise CommandError(self, 'Rule with rulename %s already exists' %
-						   rulename)
-
-		query = """select * from %s where %s
+		if hierarchy == 'global_firewall':
+			query = 'select * from %s where name="%s"' % (hierarchy, rulename)
+			rows  = self.db.execute(query)
+			if rows:
+				raise CommandError(self, 'Rule with rulename %s already exists' %
+							   rulename)
+		else:
+			query = """select * from %s where %s
 			service = '%s' and action = '%s' and chain = '%s' and
 			if ('%s' = 'NULL', insubnet is NULL,
 				insubnet = %s) and
@@ -161,9 +162,9 @@ class command(stack.commands.HostArgumentProcessor,
 				flags = %s) """ % (hierarchy, extrawhere, service,
 			action, chain, network, network, outnetwork,
 			outnetwork, protocol, protocol, flags, flags)
-		rows  = self.db.execute(query)
-		if rows:
-			raise CommandError(self, 'firewall rule already exists')
+			rows  = self.db.execute(query)
+			if rows:
+				raise CommandError(self, 'firewall rule already exists')
 
 
 	def insertRule(self, hierarchy, extracol, extraval, service, network,

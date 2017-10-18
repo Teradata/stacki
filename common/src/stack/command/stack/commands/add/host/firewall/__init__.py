@@ -9,12 +9,12 @@
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
-
 import stack.commands
-from stack.exception import ArgRequired
+import stack.commands.add
+import stack.commands.add.firewall
 
-
-class Command(stack.commands.add.firewall.command):
+class Command(stack.commands.add.firewall.command,
+	stack.commands.add.host.command):
 	"""
 	Add a firewall rule for the specified hosts.
 
