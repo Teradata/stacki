@@ -85,11 +85,11 @@ class StackWS(View):
 
 		# filter out all the params
 		param_filter = lambda x: len(x.split('=')) == 2
-		params = filter(param_filter, args)
+		params = [p for p in filter(param_filter, args)]
 
 		# Filter out all the args
 		arg_filter = lambda x: len(x.split('=')) == 1
-		args = filter(arg_filter, args)
+		args = [a for a in filter(arg_filter, args)]
 
 		done = False
 		command = None

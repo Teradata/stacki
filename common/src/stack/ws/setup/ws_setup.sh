@@ -13,7 +13,10 @@ chmod 0640 /opt/stack/etc/django.secret
 
 # Create Django Database tables
 DJANGO_SETTINGS_MODULE=stack.restapi.settings \
-	/opt/stack/bin/django-admin.py syncdb --noinput
+	/opt/stack/bin/django-admin.py makemigrations
+
+DJANGO_SETTINGS_MODULE=stack.restapi.settings \
+	/opt/stack/bin/django-admin.py migrate
 
 # Create a default group
 /opt/stack/bin/stack add api group default

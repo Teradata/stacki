@@ -3,7 +3,7 @@
 # @copyright@
 #
 
-ROLLROOT = ../../..
+ROLLROOT = ../../../..
 include $(STACKBUILD)/etc/CCRules.mk
 
 build:
@@ -18,8 +18,8 @@ install::
 	$(INSTALL) -m0700 setup/* $(ROOT)/opt/stack/share/stack/bin/
 
 	# Install REST API Files
-	mkdir -p $(ROOT)/$(PY.STACK)/stack/restapi
-	$(INSTALL) -m0644 restapi/* $(ROOT)/$(PY.STACK)/stack/restapi/
+	mkdir -p $(ROOT)/$(PY.STACK)/stack
+	find restapi -type f -name \*.py | cpio -pudv $(ROOT)/$(PY.STACK)/stack/
 
 	# Install Command line and pylib
 	mkdir -p $(ROOT)/$(PY.STACK)/stack/commands
@@ -37,8 +37,8 @@ install::
 	$(INSTALL) -m0400 conf/stacki_ws.sudo $(ROOT)/etc/sudoers.d/stacki_ws
 
 	# Install Apache Config file
-	mkdir -p $(ROOT)/etc/httpd/conf.d
-	$(INSTALL) -m0644 conf/stacki_ws.httpd $(ROOT)/etc/httpd/conf.d/stacki_ws.conf
+	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d
+	$(INSTALL) -m0644 conf/stacki_ws.httpd $(ROOT)/etc/apache2/stacki-conf.d/ws.conf
 
 	# Install syslog file
 	mkdir -p $(ROOT)/etc/rsyslog.d/

@@ -24,6 +24,6 @@
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
 	"testinfra":		{ "fe": true, "bootstrap": true },
-	"django":		{ "fe": true },
-	"mod_wsgi":		{ "fe": true }
+	"Django":		{ "fe": true },
+	"mod-wsgi":		{ "fe": true }
 }

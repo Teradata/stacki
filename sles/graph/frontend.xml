@@ -86,6 +86,11 @@
 		<to>time-server</to>
 		<to>mq-server</to>
 		<to>uefi-server</to>
+		<to>restapi</to>
 	</edge>
+
+	<order head="database-data">
+		<tail>restapi</tail>
+	</order>
 
 </graph>
