@@ -184,7 +184,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 
 		# bail if there are apparent duplicates.
 		if len(self.owner.networks.keys()) < line - 1:
-			msg = 'I''ve detected %s lines in the file but only ' \
+			msg = 'I\'ve detected %s lines in the file but only ' \
 				% (line - 1)
 			msg += '%s networks. Do you have duplicates?' \
 				% len(self.owner.networks.keys())
