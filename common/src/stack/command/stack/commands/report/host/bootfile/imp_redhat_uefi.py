@@ -1,7 +1,6 @@
-#
-# @SI_COPYRIGHT@
-# @SI_COPYRIGHT@
-#
+# @copyright@
+# @copyright@
+
 
 import stack.commands
 

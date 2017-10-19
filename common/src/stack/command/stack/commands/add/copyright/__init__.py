@@ -109,7 +109,7 @@ class Command(stack.commands.add.command):
                 # We breakup the string below to protect this code segment
                 # for insert-copyright detecting the tags.  Otherwise we
                 # could not run on ourselves.
-                self.tree = stack.file.Tree('../../../..')
+                self.tree = stack.file.Tree('../../../../..')
                 
                 print('Inserting stacki copyright into source code files...')
                 self.pattern   = [ '@' + 'copyright@', '@' + 'copyright@' ]
