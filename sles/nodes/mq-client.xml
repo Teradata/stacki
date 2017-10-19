@@ -20,13 +20,39 @@ systemctl enable rmq-shipper
 chkconfig --add rmq-shipper
 
 <stack:report name="host.mq">&hostname;</stack:report>
-<!-- the following channels are shipped by default -->
 
+<!-- the following channels are shipped by default -->
 <stack:file stack:name="/etc/sysconfig/stack-mq-channels" stack:mode="append">
 alert
 health
 </stack:file>
 
 </stack:script>
+
+
+<stack:file stack:name="/opt/stack/bin/up.py" stack:perms="0755">
+#!/usr/bin/python
+
+import socket
+import json
+import sys
+
+sys.path.append('/tmp')
+from stack_site import *
+
+tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+msg = { 'channel' : 'health', 'message' : 'up' }
+m = json.dumps(msg)
+
+tx.sendto(m.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
+tx.close()
+</stack:file>
+
+<stack:file stack:cond="'SLES-11.3-1.138' in &pallets;" name="/etc/cron.d/up">
+* * * * * root /opt/stack/bin/up.py
+</stack:file>
+
+
 
 </stack:stack>
