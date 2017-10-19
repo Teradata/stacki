@@ -12,6 +12,10 @@ SRCDIRS = SLES/11.3 SLES/12
 
 bootstrap: # nothing to do
 
+deploy: install-rpm
+	cp /opt/stack/images/initrd*	/tftpboot/pxelinux/
+	cp /opt/stack/images/vmlinuz*	/tftpboot/pxelinux/
+
 build:
 	for i in $(SRCDIRS); do \
 		make -C $$i $@; \
