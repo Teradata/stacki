@@ -29,6 +29,8 @@ stack-sql
 stack-storage-config
 stack-summary
 stack-wizard
+stack-ws
+stack-ws-client
 storcli
 foundation-stream
 uefi-boot-method
