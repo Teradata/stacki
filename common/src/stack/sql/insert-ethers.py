@@ -15,9 +15,7 @@
 
 import sys
 import os
-import string
 import time
-import signal
 import snack
 import bisect
 import syslog
@@ -35,6 +33,7 @@ from stack.exception import *
 
 class InsertError(Exception):
 	pass
+
 
 class InsertDone(Exception):
 	pass
@@ -198,7 +197,7 @@ class InsertEthers(GUI):
 		self.ipnetwork		= None
 		self.currentip		= None
 
-		## Things for Dumping/Restoring 
+		# Things for Dumping/Restoring 
 		self.doRestart		= 1
 		self.mac		= None
 		self.ipaddr		= None
@@ -213,10 +212,10 @@ class InsertEthers(GUI):
 
 		self.kickstartable	= True
 
-	def setBasename(self,name):
+	def setBasename(self, name):
 		self.basename = name 
 
-	def setHostname(self,name):
+	def setHostname(self, name):
 		self.hostname = name 
 
 	def setIPaddr(self, ipaddr):
@@ -228,7 +227,7 @@ class InsertEthers(GUI):
 	def setBroadcast(self, bcast):
 		self.broadcast = bcast 
 
-	def setApplianceName(self,appliance_name):
+	def setApplianceName(self, appliance_name):
 		self.appliance_name = appliance_name 
 
 	def setCabinet(self, n):
@@ -252,7 +251,7 @@ class InsertEthers(GUI):
 
 		self.form = snack.GridForm(self.screen,
 					   _("Discovered Hosts"), 1, 1)
-		self.textbox = snack.Textbox(50, 4, "", scroll = 1)
+		self.textbox = snack.Textbox(50, 4, "", scroll=1)
 		self.form.add(self.textbox, 0, 0)
 
 		self.screen.drawRootText(0, 0, _("%s -- version %s") % 
@@ -294,7 +293,7 @@ class InsertEthers(GUI):
 			snack.ListboxChoiceWindow(self.screen,
 			_("Choose Appliance Type"), 
 			_("Select An Appliance Type:"),
-			app_string, buttons = (_("OK"), ), default = 0)
+			app_string, buttons=(_("OK"), ), default=0)
 
 		#
 		# Now try do sanity checking that appliance is OK
@@ -372,7 +371,7 @@ class InsertEthers(GUI):
 		form = snack.GridForm(self.screen, 
 			_("Not kickstarted, please wait..."), 1, 1)
 		textbox = snack.Textbox(35, 4, not_done, scroll=1)
-		form.add(textbox, 0,0)
+		form.add(textbox, 0, 0)
 
 		form.draw()
 		self.screen.refresh()
@@ -419,7 +418,7 @@ class InsertEthers(GUI):
 		#
 		if self.netmask is not None and self.broadcast is not None:
 			# The user specified broadcast, netmask
-			return(self.broadcast,self.netmask)
+			return(self.broadcast, self.netmask)
 		#
 		# get an IP address
 		#
@@ -427,7 +426,7 @@ class InsertEthers(GUI):
 		mask  = ''
 
 		cmd = '/sbin/ifconfig %s' % dev
-		p = subprocess.Popen(shlex.split(cmd), stdout = subprocess.PIPE)
+		p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
 
 		for line in p.stdout.readlines():
 			tokens = line.decode().split()
@@ -448,7 +447,7 @@ class InsertEthers(GUI):
 
 	def getnetwork(self, subnet):
 		self.sql.execute("select address,mask from subnets where name='%s'" % subnet)
-		network,netmask = self.sql.fetchone()
+		network, netmask = self.sql.fetchone()
 		return network, netmask
 			
 	def getnextIP(self, subnet):
@@ -504,8 +503,7 @@ class InsertEthers(GUI):
 			      (mac, nodename, ip, netmask))
 		
 		# Check to make sure mac does not already exist
-		rows = self.sql.execute('select id from networks '\
-			'where mac="%s"' % mac);
+		rows = self.sql.execute('select id from networks where mac="%s"' % mac)
 		if rows:
 			return
 
@@ -525,7 +523,7 @@ class InsertEthers(GUI):
 		if s != 0:
 			raise InsertError("Could not insert %s into database" % nodename)
 
-		rows = self.sql.execute('select id from nodes where name="%s"' % \
+		rows = self.sql.execute('select id from nodes where name="%s"' %
 			nodename)
 		if not rows:
 			raise InsertError("Could not find %s in database" % nodename)
@@ -576,7 +574,7 @@ class InsertEthers(GUI):
 	def discover(self, mac, dev):
 		"Returns 'true' if we inserted a new node, 'false' otherwise."
 		
-		retval = 'false'
+		retval = False
 
 		query = 'select mac from networks where mac="%s"' % (mac)
 
@@ -588,7 +586,7 @@ class InsertEthers(GUI):
 			self.addit(mac, nodename, ipaddr, netmask)
 			self.printDiscovered(mac)
 				
-			retval = 'true'
+			retval = True
 
 		return retval
 
@@ -606,7 +604,7 @@ class InsertEthers(GUI):
 			return 1
 
 		# If the nodes are not kickstartable
-		if self.kickstartable == False:
+		if self.kickstartable is False:
 			return 1
 
 		# Check if we can really go.
@@ -659,17 +657,22 @@ class InsertEthers(GUI):
 	def listenDhcp(self, line):
 		"""Look in log line for a DHCP discover message."""
 
-		tokens = line[:-1].split()
-		if len(tokens) > 5 and tokens[4] == 'dhcpd:' and \
-		   (tokens[5] in [ 'DHCPDISCOVER' ]):
-			
-			# Remove the ":" from the interface value. If
-			# this request does not come from our private
-			# net, ignore it.
+		# Split in the service name since redhat/sles/? prefix log
+		# messages in different ways. Also find the mac/eth relative to
+		# the DHCPDISCOVER message to handle the case for the collapsed
+		# syslog repeated output.
 
-			interface = tokens[9].replace(':','').strip()
-			
-			if self.discover(tokens[7], interface) == 'false':
+		tokens = line.split('dhcpd:')
+		if len(tokens) == 2:
+			tokens = tokens[1].split()
+			try:
+				i   = tokens.index('DHCPDISCOVER')
+				mac = tokens[i+2]
+				eth = tokens[i+4].replace(':', '').strip()
+			except:
+				return 
+			    
+			if self.discover(mac, eth) is False:
 				return
 
 			self.statusGUI()
@@ -694,32 +697,11 @@ class InsertEthers(GUI):
 
 			self.rank = self.rank + 1
 
-		elif len(tokens) > 6 and tokens[4] == 'last' and \
-			tokens[5] == 'message' and tokens[6] == 'repeated':
-
-			n = os.uname()[1]
-			shortname = n.split('.')[0]
-
-			if tokens[3] == shortname:
-				#
-				# restart syslog (only if the repeated messages
-				# are from the frontend).
-				#
-				# this addresses the case where a node is
-				# PXE booting before insert-ethers is started.
-				# by restarting syslog, the DHCP messages
-				# will now show up (and not be flagged as
-				# repeated).
-				#
-#				cmd = '/sbin/service rsyslog restart '
-				cmd = '/usr/bin/sytemctl restart rsyslog '
-				cmd += '> /dev/null 2>&1'
-				os.system(cmd)
 
 	def getBox(self):
 		self.sql.execute("select id from boxes where name='%s'" % (self.box))
 		box = self.sql.fetchone()
-		if box == None:
+		if box is None:
 			self.warningGUI(_("There is no box named: %s\n\n\n\n" % self.box)
 			+ _("Create it and try again.\n"))
 			return 0
@@ -757,10 +739,14 @@ class InsertEthers(GUI):
 			return
 
 		log = open('/var/log/messages', 'r')
-		log.seek(0,2)
+		log.seek(0, 2)
 
-		kslog = open('/var/log/httpd/ssl_access_log','r')
-		kslog.seek(0,2)
+		for dir in [ 'httpd', 'apache2' ]:
+			try:
+				kslog = open('/var/log/%s/ssl_access_log' % dir, 'r')
+			except:
+				pass
+		kslog.seek(0, 2)
 
 		#
 		# key used to quit
@@ -872,7 +858,7 @@ class App(stack.sql.Application):
 		elif c[0] == '--ipaddr':
 			self.insertor.setIPaddr(c[1])
 			self.insertor.setMax(1)
-		elif c[0] in ('--cabinet','--rack'):
+		elif c[0] in ('--cabinet', '--rack'):
 			self.insertor.setCabinet(int(c[1]))
 		elif c[0] == '--inc':
 			self.ipIncrement = int(c[1])
