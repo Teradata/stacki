@@ -81,24 +81,21 @@ class Command(stack.commands.Command,
 		argv.append('expanded=true')
 		for row in self.call('list.host.interface', argv):
 			h   = ha[row['host']]
+			if 'interfaces' not in h:
+				h['interfaces'] = []
+			if h['appliance'] == 'frontend':
+				continue
 			ip  = row['ip']
 			pxe = row['pxe']
-			if h['appliance'] != 'frontend' and ip and pxe:
-				#
-				# Compute the HEX IP filename for the host
-				#
-				hexstr = ''
-				for i in ip.split('.'):
-					hexstr += '%02x' % (int(i))
-				h['filename'] = hexstr.upper()
-				h['ip']       = ip
-				h['mask']     = row['mask']
-				h['gateway']  = row['gateway']
+			if ip and pxe:
+				h['interfaces'].append({
+					'ip'	: ip,
+					'mask'	: row['mask'],
+					'gateway': row['gateway']
+				})
 
-		for host in dict(ha):
-			if 'filename' not in ha[host]:
-				del ha[host]
 
 		self.beginOutput()
 		self.runPlugins(ha)
 		self.endOutput(padChar='', trimOwner=True)
+
