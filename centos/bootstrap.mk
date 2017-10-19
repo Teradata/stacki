@@ -5,5 +5,5 @@
 # @copyright@
 
 bootstrap:
-	$(STACKBUILD)/bin/package-install -m "Development Tools" "Infrastructure Server"
-	$(STACKBUILD)/bin/package-install createrepo genisoimage git emacs vim
+	../common/src/stack/build/build/bin/package-install -m "Development Tools" "Infrastructure Server"
+	../common/src/stack/build/build/bin/package-install createrepo genisoimage git emacs vim

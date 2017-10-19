@@ -26,6 +26,7 @@ ROLLROOT = .
 	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
+	$(MAKE) -C $(BUILDOS) -f bootstrap.mk bootstrap
 	$(MAKE) -C common/src/stack/build bootstrap
 
 bootstrap: bootstrap-make

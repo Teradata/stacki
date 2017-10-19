@@ -31,7 +31,8 @@ while getopts "m" opt; do
 done
 shift $(($OPTIND - 1))
 
-case `$STACKBUILD/bin/os` in
+path=`dirname $0`
+case `$path/os` in
 suse)
 	zypper $@
 	;;
