@@ -1,8 +1,9 @@
 MegaCLI
-foundation-fio
 foundation-comps
 foundation-fbtftpd
+foundation-fio
 foundation-gd
+foundation-iperf
 foundation-mariadb
 foundation-newt
 foundation-py-pycairo
@@ -10,8 +11,8 @@ foundation-py-wxPython
 foundation-python
 foundation-rcs
 foundation-redis
+foundation-stream
 foundation-zeromq
-foundation-iperf
 ludicrous-speed
 sc-im
 stack-admin
@@ -29,6 +30,7 @@ stack-sql
 stack-storage-config
 stack-summary
 stack-wizard
+stack-ws
+stack-ws-client
 storcli
-foundation-stream
 uefi-boot-method

@@ -1,4 +1,4 @@
-*/build-*-*/
+build-*-*/
 */src/order-*.mk
 .buildenv
 .buildenv-*
