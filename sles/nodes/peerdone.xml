@@ -1,0 +1,30 @@
+<stack:stack>
+
+<stack:description>
+Unregister peer from ludicrous server
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:script stack:stage="install-post">
+
+<!-- for backends, the pxeserver is kickstart_privateaddr -->
+ludicrous_server=&Kickstart_PrivateAddress;
+
+curl_cmd=/usr/bin/curl
+
+<!-- on an installing system, curl may be in /bin? -->
+if [ -f /bin/curl ]; then
+	curl_cmd=/bin/curl
+fi
+
+peerdone_url=http://${ludicrous_server}:3825/avalanche/peerdone
+${curl_cmd} -X DELETE --output /dev/null ${peerdone_url}
+
+</stack:script>
+
+</stack:stack> 

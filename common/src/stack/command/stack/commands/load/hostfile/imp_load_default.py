@@ -67,7 +67,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.networks = dict((k, next(v)) for k, v in groupby(self.owner.call('list.network'), itemgetter('network')))
 		self.boxes = self.getBoxNames()
 		self.actions = [entry['bootaction'] for entry in self.owner.call('list.bootaction')]
-		ipRegex = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
 		reader = stack.csv.reader(open(filename, 'rU'))
 
@@ -129,8 +128,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				elif header[i] == 'rank':
 					rank = field
 				elif header[i] == 'ip':
-					ip = field
-					if not ipRegex.match(ip):
+					try:
+						if ipaddress.IPv4Address(field):
+							ip = field
+						elif ipaddress.IPv4Address(field):
+							ip = field
+					except:
 						msg = 'invalid IP %s in the input file' % ip
 						raise CommandError(self.owner, msg)
 				elif header[i] == 'mac':

@@ -343,6 +343,8 @@ class HostArgumentProcessor:
 		hostList = []
 		hostDict = {}
 
+		l = lambda x: x.lower()
+		names = [ name for name in map(l, names) ]
 		#
 		# list the frontend first
 		#
@@ -1239,15 +1241,19 @@ class DatabaseConnection:
 	def getNodeName(self, hostname, subnet=None):
 
 		if not subnet:
+			rows = self.select("""name from nodes
+				where name like '%s'""" % hostname)
+			if rows:
+				(hostname, ) = rows[0]
 			return hostname
 
 		result = None
 		
 		for (netname, zone) in self.select("""
 			net.name, s.zone from
-			nodes n, networks net, subnets s where n.name = '%s'
+			nodes n, networks net, subnets s where n.name like '%s'
 			and net.node = n.id and net.subnet = s.id and
-			s.name = '%s'
+			s.name like '%s'
 			""" % (hostname, subnet)):
 
 			# If interface exists, but name is not set
@@ -1272,7 +1278,7 @@ class DatabaseConnection:
 
 		if hostname and self.link:
 			rows = self.link.execute("""select * from nodes where
-				name='%s'""" % hostname)
+				name like '%s'""" % hostname)
 			if rows:
 				return self.getNodeName(hostname, subnet)
 
