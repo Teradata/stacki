@@ -415,7 +415,9 @@ class HostArgumentProcessor:
 					adhoc = True
 					continue
 				if host.find('where') == 0:
+					l.append(host)
 					adhoc = True
+					continue
 				l.append(host.lower())
 		names = l
 
