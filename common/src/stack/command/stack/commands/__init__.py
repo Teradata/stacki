@@ -343,8 +343,6 @@ class HostArgumentProcessor:
 		hostList = []
 		hostDict = {}
 
-		l = lambda x: x.lower()
-		names = [ name for name in map(l, names) ]
 		#
 		# list the frontend first
 		#
@@ -418,7 +416,7 @@ class HostArgumentProcessor:
 					continue
 				if host.find('where') == 0:
 					adhoc = True
-				l.append(host)
+				l.append(host.lower())
 		names = l
 
 		# If we have any Ad-Hoc groupings we need to load the attributes
