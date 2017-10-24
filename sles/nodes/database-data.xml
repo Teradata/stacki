@@ -72,9 +72,9 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert the base appliances into the database -->
 
-/opt/stack/bin/stack add appliance frontend longname=Frontend node=server \
-	public=no
-/opt/stack/bin/stack add appliance backend  longname=Backend node=backend
+/opt/stack/bin/stack add appliance frontend longname=Frontend  node=server  public=false
+/opt/stack/bin/stack add appliance builder  longname=Builder   node=builder public=false
+/opt/stack/bin/stack add appliance backend  longname=Backend   node=backend
 
 <!-- manage firewall rules by default -->
 /opt/stack/bin/stack set attr attr=firewall value=true

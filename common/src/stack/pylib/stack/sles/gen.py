@@ -6,6 +6,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.bool import str2bool
 import stack.gen
 
 
@@ -115,21 +116,40 @@ class ExpandingTraversor(stack.gen.Traversor):
 		<software> section.
 
 		<software>
-			<packages config:type="list">
-			<package>?</package>
-			...
+			<patterns config:type="list"> <!-- stack:type="meta" -->
+				<pattern>?</pattern>
+			</patterns>
+			<packages config:type="list"> 
+				<package>?</package>
+				...
 			</package>
 		</software>
 
 		"""
 
-		packages = self.newElementNode('sles:packages')
-		self.setAttribute(packages, 'config:type', 'list')
+		meta	 = self.getAttr(node, 'stack:meta', default='false')
+		meta     = str2bool(meta)
 
-		for rpm in self.collect(node).strip().split():
-			package = self.newElementNode('sles:package')
-			package.appendChild(self.newTextNode(rpm))
-			packages.appendChild(package)
+		enabled  = self.getAttr(node, 'stack:enable', default='true')
+		enabled  = str2bool(enabled)
+
+
+		if not meta:
+			packages = self.newElementNode('sles:packages')
+			self.setAttribute(packages, 'config:type', 'list')
+
+			for rpm in self.collect(node).strip().split():
+				package = self.newElementNode('sles:package')
+				package.appendChild(self.newTextNode(rpm))
+				packages.appendChild(package)
+		else:
+			packages = self.newElementNode('sles:patterns')
+			self.setAttribute(packages, 'config:type', 'list')
+
+			for rpm in self.collect(node).strip().split():
+				package = self.newElementNode('sles:pattern')
+				package.appendChild(self.newTextNode(rpm))
+				packages.appendChild(package)
 
 		software = self.newElementNode('sles:software')
 		software.appendChild(packages)
