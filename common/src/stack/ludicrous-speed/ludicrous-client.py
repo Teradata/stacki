@@ -23,6 +23,8 @@ client_settings = {
 	'SAVE_FILES' : True
 }
 
+timed_out_hosts = []
+
 
 @app.errorhandler(404)
 def four_o_four(error=None):
@@ -68,7 +70,7 @@ def lookup_file(hashcode):
 
 def get_file(peer, remote_file):
 	try:
-		res = requests.get('http://%s%s' % (peer, remote_file), timeout=1)
+		res = requests.get('http://%s%s' % (peer, remote_file), timeout=0.1)
 	except:
 		raise
 
@@ -93,6 +95,12 @@ def unregister_file(hashcode, params):
 									hashcode),
 									params=params
 									)
+	except:
+		raise
+
+def unregister_host(host):
+	try:
+		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host))
 	except:
 		raise
 
@@ -124,7 +132,9 @@ def get_file_locally(path, filename):
 		successful = res.status_code == 200 and payload['success']
 
 		if successful and payload['peers']:
-			for peer in payload['peers']:
+			peers = set(payload['peers'])
+			for peer in peers.difference(timed_out_hosts):
+				peer_ip = peer.split(":")[0]
 				app.logger.debug("requesting file: %s from peer: %s", (filename, peer))
 				try:
 					peer_res = get_file(peer, remote_file)
@@ -136,15 +146,13 @@ def get_file_locally(path, filename):
 							break
 					else:
 						app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
-						unregister_params = params.copy()
-						unregister_params["peer"] = peer.split(":")[0]
-						unregister_file(hashcode, unregister_params)
+						unregister_host(peer_ip)
+				#except Timeout:
+				#	timed_out_hosts.append(peer)
 				except Exception as e:
 					app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
 					app.logger.debug("    %s", e)
-					unregister_params = params.copy()
-					unregister_params["peer"] = peer.split(":")[0]
-					unregister_file(hashcode, unregister_params)
+					unregister_host(peer_ip)
 
 	if not file_exists(local_file):
 		app.logger.debug("requesting %s from frontend", (filename))
