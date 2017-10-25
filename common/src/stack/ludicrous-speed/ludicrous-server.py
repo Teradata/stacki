@@ -3,8 +3,9 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template, redirect
 from urllib.request import unquote
 from random import shuffle
-import stack.api
 import os
+import logging
+from logging import FileHandler
 
 app = Flask(__name__)
 
@@ -39,10 +40,6 @@ def lookup(hashcode):
 	if hashcode not in packages:
 		packages[hashcode] = []
 
-	# check if peer exists and is in our database
-	if not stack.api.Call('list.host.interface', [ipaddr]):
-		return four_o_four("Host not managed by frontend")
-
 	# return list of peers with the request hash
 	res['peers'] = []
 	shuffle(packages[hashcode])
@@ -75,13 +72,10 @@ def register(port=80, hashcode=None):
 
 	# check if peer exists and is in our database
 	if ipaddr not in peers:
-		if ipaddr in [host['value'] for host in stack.api.Call('list.host.attr', ["attr=hostaddr"])]:
-			peers[ipaddr] = {
-				'ready': False,
-				'port': port
-				}
-		else:
-			return four_o_four()
+		peers[ipaddr] = {
+			'ready': False,
+			'port': port
+			}
 
 	# register file
 	if ipaddr not in packages[hashcode]:
@@ -99,7 +93,7 @@ def unregister(hashcode):
 	res = {}
 	res['success'] = True
 
-	app.logger.debug("unquoted ip addr: %s", ipaddr)
+	app.logger.info("unquoted ip addr: %s", ipaddr)
 	if ipaddr in packages[hashcode]:
 		packages[hashcode] = [ ip for ip in packages[hashcode] if ip != ipaddr ]
 		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
@@ -197,9 +191,11 @@ def get_repodata_catchall():
 
 
 def main():
-	import logging
-	logging.basicConfig(filename='/var/log/ludicrous-server.log', level=logging.DEBUG)
-	app.run(host='0.0.0.0', port=3825, debug=False)
+	logHandler = FileHandler('/var/log/ludicrous-server.log')
+	logHandler.setLevel(logging.INFO)
+	app.logger.setLevel(logging.INFO)
+	app.logger.addHandler(logHandler)
+	app.run(host='0.0.0.0', port=3825)
 
 
 if __name__ == "__main__":
