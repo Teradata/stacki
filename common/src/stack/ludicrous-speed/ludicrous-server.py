@@ -109,6 +109,21 @@ def unregister(hashcode):
 
 	return jsonify(res)
 
+@app.route('/avalanche/unregister/host/<host>', methods=['DELETE'])
+def unregister_host(host):
+	ipaddr = host
+	res = {}
+	res['success'] = True
+
+	for package in packages:
+		if ipaddr in packages[package]:
+			packages[package] = [ ip for ip in packages[package] if ip != ipaddr ]
+
+	if ipaddr in peers:
+		del(peers[ipaddr])
+
+	return jsonify(res)
+
 
 @app.route('/avalanche/peerdone', methods=['DELETE'])
 def peerdone():
@@ -121,7 +136,7 @@ def peerdone():
 			packages[package] = [ ip for ip in packages[package] if ip != ipaddr ]
 	
 	if ipaddr in peers:	
-		del(peers[ipaddr])	
+		del(peers[ipaddr])
 
 	return jsonify(res)
 

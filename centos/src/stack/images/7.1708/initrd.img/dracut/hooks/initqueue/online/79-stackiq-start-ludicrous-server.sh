@@ -36,7 +36,6 @@ fi
 mkdir -p /run/install/tmp
 cp /tmp/stack.conf /run/install/tmp/stack.conf
 cp /tmp/ks.xml /run/install/tmp/ks.xml
-
 #
 # starting ludicrous speed
 #
@@ -47,16 +46,6 @@ if getargbool 0 frontend; then
 	mount /dev/cdrom /mnt/cdrom
 fi
 
-LUDICROUSPID=`ps auwx | grep ludicrous-client | grep -v grep | awk '{print $2}'`
-while [ "$LUDICROUSPID" != "" ]; do
-	
-	for pid in $LUDICROUSPID; do kill $pid; done
-	LUDICROUSPID=`ps auwx | grep ludicrous-client | grep -v grep | awk '{print $2}'`
-done
-
 export LANG=en_US.UTF-8
-/usr/sbin/build-locale-archive
-/opt/stack/bin/python3 /opt/stack/bin/ludicrous-client.py --environment=initrd --trackerfile='/tmp/stack.conf' --nosavefile;
-
-
-
+/usr/sbin/build-locale-archive > /dev/null 2>&1
+/opt/stack/bin/ludicrous-client.py --environment=initrd --trackerfile='/tmp/stack.conf' --nosavefile

@@ -201,5 +201,5 @@ class Command(command):
 		if len(args) != 1:
 			raise ArgUnique(self, 'host')
 
-		host = args[0]
+		host = args[0].lower()
 		self.addHost(host)

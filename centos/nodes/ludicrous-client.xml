@@ -23,7 +23,7 @@
 <!-- Change Stacki.repo to localhost -->
 <stack:script stack:stage="install-post">
 <stack:file stack:name="/tmp/stack.conf">
-tacker = frontend:3825
+tracker = &Kickstart_PrivateAddress;:3825
 </stack:file>
 </stack:script>
 </stack:stack> 
