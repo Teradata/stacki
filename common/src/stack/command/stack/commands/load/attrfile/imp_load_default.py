@@ -24,12 +24,14 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		# Skip all header line until col[0] == 'target'
 
-		while True:
-			header = reader.next()
-			if len(header):
-				target = header[0].lower()
-				if target == 'target':
-					break
+		done = 0
+		while not done:
+			for header in reader:
+				if len(header):
+					target = header[0].lower()
+					if target == 'target':
+						done = 1
+						break
 
 		# Fix the header to be lowercase and strip out any
 		# leading or trailing whitespace.
