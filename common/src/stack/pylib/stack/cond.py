@@ -28,7 +28,7 @@ class _CondEnv(UserDict):
 	
 	def __getitem__(self, key):
 
-		# print '__getitem__', key
+#		print('__getitem__', key)
 		
 		# Handle boolean special since they are not in the
 		# environment
@@ -42,18 +42,6 @@ class _CondEnv(UserDict):
 			val = UserDict.__getitem__(self, key)
 		except:
 			return None	# undefined vars are None
-
-		# Try to convert value to an integer
-#		try:
-#			return int(val)
-#		except ValueError:
-#			pass
-
-		# Try to convert value to a float
-#		try:
-#			return float(val)
-#		except ValueError:
-#			pass
 
 		# Try to convert value to a boolean
 		
@@ -134,15 +122,21 @@ def EvalCondExpr(cond, attrs):
 		return True
 
 
-	cond = cond.replace('.', '_DOT_')
-	cond = cond.replace('&&', ' and ')
-	cond = cond.replace('||', ' or ')
+#	cond = cond.replace('.', '_DOT_')
+#	cond = cond.replace('&&', ' and ')
+#	cond = cond.replace('||', ' or ')
 
 	env = _CondEnv()
-	for (k, v) in attrs.items():
-		env[k.replace('.', '_DOT_')] = v
-		
-	# print 'EvalCondExpr', cond
+	for (key, value) in attrs.items():
+		tokens = key.split('.')
+		if len(tokens) == 1:
+			env[tokens[0]] = value
+		else:
+			tail = type('struct', (object, ), { tokens.pop(): value })
+			while len(tokens) > 1:
+				tail = type('struct', (object, ), { tokens.pop(): tail })
+			env[tokens.pop()] = tail
+
 	result = eval(cond, globals(), env)
 
 	return result
