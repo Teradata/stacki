@@ -38,10 +38,9 @@ class Command(stack.commands.CartArgumentProcessor,
 		
 	def unpackCart(self, cart, cartfile, cartsdir):
 		with tarfile.open(cartfile,'r:*') as tar:
-			cartdir = os.path.join(cartsdir,cart)
 			if self.checkCart(cartfile) == True:
 				print("Unpacking....%s" % cart)
-				tar.extractall(cartdir)
+				tar.extractall(cartsdir)
 			else:
 				print("That's no cart tarfile!")
 		

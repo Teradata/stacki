@@ -9,4 +9,4 @@ KICKSTART_LANGSUPPORT	= "en_US"
 
 CODENAME		= WithGreatPower
 
-BOOTABLE		= 0
+BOOTABLE		= 1
