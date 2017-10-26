@@ -65,6 +65,7 @@ user		= stackdb
 port		= 40000
 socket		= /var/opt/stack/mysql/mysql.sock
 datadir		= /var/opt/stack/mysql
+max_allowed_packet = 1024M
 </stack:file>
 
 
