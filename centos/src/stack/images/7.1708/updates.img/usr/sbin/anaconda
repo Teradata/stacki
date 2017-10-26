@@ -74,10 +74,10 @@ log.info('Starting ludicrous tracking service')
 environ = os.environ.copy()
 environ['LD_LIBRARY_PATH'] = '/opt/stack/lib'
 
-ludicrous_proc = subprocess.Popen(['/opt/stack/bin/python3', '/opt/stack/bin/ludicrous-client.py'], env=environ)
+ludicrous_proc = subprocess.Popen(['/opt/stack/bin/ludicrous-client.py'], env=environ)
 
 # give ludicrous a chance to start
-time.sleep(5)
+#time.sleep(1)
 
 if 'boss' in args:
 	# We are a frontend

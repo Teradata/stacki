@@ -92,11 +92,3 @@ else
 		fi
 	done
 fi
-
-# if fetch_url "$kickstart" /tmp/ks.cfg; then
-#    parse_kickstart /tmp/ks.cfg
-#    run_kickstart
-# else
-#    warn "failed to fetch kickstart from $kickstart"
-# fi
-# STACKI

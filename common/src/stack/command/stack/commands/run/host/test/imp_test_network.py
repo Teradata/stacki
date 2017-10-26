@@ -78,7 +78,7 @@ class Implementation(stack.commands.Implementation):
 			file.write('away %s\n' % aways)
 			for home in homes:
 				for away in aways:
-					iperf_cmd = '/opt/stack/sbin/iperf.py '
+					iperf_cmd = '/opt/stack/sbin/iperf3.py '
 					iperf_cmd += '%s %s' % (home,away)
 
 					cmd = 'ssh -T -x %s "%s"' % (home, iperf_cmd)

@@ -92,13 +92,11 @@ class Command(stack.commands.HostArgumentProcessor,
 			nodes.name, n.mac, n.ip, n.device
 			from networks n, nodes where
 			n.node = nodes.id and
-			n.mac is not NULL and
-			(n.vlanid is NULL or n.vlanid = 0)
+			n.mac is not NULL
 			"""):
 			data[row[0]].append(row[1:])
 
 		for name in data.keys():
-
 			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
 			mac = None
 			ip  = None
@@ -117,7 +115,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					s.name from subnets s, networks nt,
 					nodes n where nt.node=n.id and
 					n.name='%s' and nt.subnet=s.id and
-					nt.ip = '%s'""" % (name, ip))
+					s.pxe = TRUE and nt.ip = '%s'""" % (name, ip))
 					if r:
 						(netname, ) = r[0]
 				if ip and mac and dev and netname:
@@ -165,8 +163,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			where n.node = (select id from nodes where name = '%s') and
 			s.pxe = TRUE and
 			n.subnet = s.id and
-			n.ip is not NULL and
-			(n.vlanid is NULL or n.vlanid = 0)
+			n.ip is not NULL
 			""" % self.db.getHostname()):
 			devices += '%s ' % device
 
@@ -179,7 +176,6 @@ class Command(stack.commands.HostArgumentProcessor,
 		
 
 	def run(self, params, args):
-
 		self.beginOutput()
 		self.writeDhcpDotConf()
 		self.writeDhcpSysconfig()

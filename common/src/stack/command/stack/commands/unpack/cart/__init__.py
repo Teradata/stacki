@@ -38,22 +38,24 @@ class Command(stack.commands.CartArgumentProcessor,
 		
 	def unpackCart(self, cart, cartfile, cartsdir):
 		with tarfile.open(cartfile,'r:*') as tar:
-			cartdir = os.path.join(cartsdir,cart)
 			if self.checkCart(cartfile) == True:
-				print("unpacking")
-				tar.extractall(cartdir)
+				print("Unpacking....%s" % cart)
+				tar.extractall(cartsdir)
 			else:
 				print("That's no cart tarfile!")
 		
 		tar.close()
+		print("\n\nUnpacked!")
 		return
 
 	def checkCart(self,cartfile):
 		req =  ['RPMS', 'graph', 'nodes']
 		if tarfile.is_tarfile(cartfile) == True:
 			with tarfile.open(cartfile,'r:*') as tar:
-				files = tar.getnames()
-				if set(req).issubset(set(files)) == True:
+				files = tar.getmembers()
+				dirs = [ os.path.split(f.name)[-1] \
+					for f in files if f.isdir() == True ]
+				if set(req).issubset(set(dirs)) == True:
 					return True
 				else:
 					return False

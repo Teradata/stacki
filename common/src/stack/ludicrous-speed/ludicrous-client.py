@@ -7,6 +7,9 @@ import requests
 import hashlib
 import subprocess
 import click
+import logging
+from logging import FileHandler
+
 
 app = Flask(__name__)
 
@@ -22,6 +25,8 @@ client_settings = {
 	'ENVIRONMENT' : 'regular',
 	'SAVE_FILES' : True
 }
+
+timed_out_hosts = []
 
 
 @app.errorhandler(404)
@@ -68,7 +73,7 @@ def lookup_file(hashcode):
 
 def get_file(peer, remote_file):
 	try:
-		res = requests.get('http://%s%s' % (peer, remote_file), timeout=1)
+		res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
 	except:
 		raise
 
@@ -96,6 +101,12 @@ def unregister_file(hashcode, params):
 	except:
 		raise
 
+def unregister_host(host):
+	try:
+		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host))
+	except:
+		raise
+
 
 def stream_it(response, content):
 	response.write(content)
@@ -109,6 +120,7 @@ def get_file_locally(path, filename):
 	remote_file = '/install/%s/%s' % (path, filename)
 	im_the_requester = request.remote_addr == "127.0.0.1"
 	environment = client_settings['ENVIRONMENT']
+	port = client_settings['PORT'] 
 
 	if not client_settings['SAVE_FILES']:
 		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
@@ -117,37 +129,41 @@ def get_file_locally(path, filename):
 	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
 		
 		hashcode = hashit(remote_file)
-		port = client_settings['PORT'] 
 		params = {'port': port, 'hashcode': hashcode}
 		res = lookup_file(hashcode)
 		payload = res.json()
 		successful = res.status_code == 200 and payload['success']
 
 		if successful and payload['peers']:
-			for peer in payload['peers']:
-				app.logger.debug("requesting file: %s from peer: %s", (filename, peer))
+			peers = set(payload['peers'])
+			for peer in peers.difference(timed_out_hosts):
+				peer_ip = peer.split(":")[0]
+				app.logger.info("requesting file: %s from peer: %s", filename, peer)
 				try:
 					peer_res = get_file(peer, remote_file)
 					if peer_res.status_code == 200:
-						app.logger.debug("  %s from %s was successful", (filename, peer))
+						app.logger.info("  %s from %s was successful", filename, peer)
 						save_file(peer_res.content, '%s/' % (file_location), filename)
-						if environment == 'regular':
-							register_file(port, hashcode)
-							break
+						register_file(port, hashcode)
+						break
 					else:
-						app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
+						app.logger.info("  %s from %s was unsuccessful", filename, peer)
+						#unregister_host(peer_ip)
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
 						unregister_file(hashcode, unregister_params)
+				#except Timeout:
+				#	timed_out_hosts.append(peer)
 				except Exception as e:
-					app.logger.debug("  %s from %s was unsuccessful", (filename, peer))
-					app.logger.debug("    %s", e)
+					app.logger.info("  %s from %s was unsuccessful", filename, peer)
+					app.logger.info("    %s", e)
+					#unregister_host(peer_ip)
 					unregister_params = params.copy()
 					unregister_params["peer"] = peer.split(":")[0]
 					unregister_file(hashcode, unregister_params)
 
 	if not file_exists(local_file):
-		app.logger.debug("requesting %s from frontend", (filename))
+		app.logger.info("requesting %s from frontend", filename)
 		try:
 			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 			if tracker_res.status_code == 200:
@@ -155,14 +171,14 @@ def get_file_locally(path, filename):
 				if client_settings['SAVE_FILES']:
 					register_file(port, hashcode)
 		except Exception as e:
-			app.logger.debug("error requesting from frontend")
-			app.logger.debug("%s", (e))
+			app.logger.info("error requesting from frontend")
+			app.logger.info("%s", (e))
 
 	if file_exists(local_file):
-		app.logger.debug("%s is saved locally", (filename))
+		app.logger.info("%s is saved locally", (filename))
 		return send_from_directory(unquote(file_location), unquote(filename))
 	else:
-		app.logger.debug("%s 404", (filename))
+		app.logger.info("%s 404", (filename))
 		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file), code=307)
 
 
@@ -213,9 +229,12 @@ def page_not_found(e):
 @click.option('--nosavefile', is_flag=True)
 @click.option('--port', default=80)
 def main(environment, trackerfile, nosavefile, port):
-	import logging
-	#signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-	logging.basicConfig(filename='/var/log/ludicrous-client-debug.log', level=logging.DEBUG)
+	logHandler = FileHandler('/var/log/ludicrous-client-debug.log')
+	logHandler.setLevel(logging.DEBUG)
+	app.logger.setLevel(logging.DEBUG)
+	log = logging.getLogger('werkzeug')
+	log.setLevel(logging.DEBUG)
+	app.logger.addHandler(logHandler)
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
 	client_settings['PORT']	= port
@@ -238,13 +257,13 @@ def main(environment, trackerfile, nosavefile, port):
 				os._exit(0)
 
 			try:
-				app.run(host='0.0.0.0', port=client_settings['PORT'], debug=False)
+				app.run(host='0.0.0.0', port=client_settings['PORT'])
 			except:
 				pass
 		else:
 			os._exit(0)
 	else:
-		app.run(host='0.0.0.0', port=client_settings['PORT'], debug=False)
+		app.run(host='0.0.0.0', port=client_settings['PORT'])
 
 
 if __name__ == "__main__":
