@@ -24,14 +24,11 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		# Skip all header line until col[0] == 'target'
 
-		done = 0
-		while not done:
-			for header in reader:
-				if len(header):
-					target = header[0].lower()
-					if target == 'target':
-						done = 1
-						break
+		for header in reader:
+			if header[0].lower() == 'target':
+				break
+		else:
+			raise CommandError(self.owner, "'target' must be the first column in headers")
 
 		# Fix the header to be lowercase and strip out any
 		# leading or trailing whitespace.
