@@ -31,19 +31,9 @@ cat /tmp/stacki-profile.xml \
 
 /opt/stack/bin/stacki-status.py install profile parsed
 
-#
-# Configure and Start the SSH server
-#
-if [ ! -d /dev/pts ]
-then
-	mkdir /dev/pts
-fi
-mount | grep devpts
-if [ $? != 0 ]
-then
-	mount -t devpts devpts /dev/pts
-fi
+# Setup SSH config
 /opt/stack/bin/gen_ssh_config.py
+
 # Start ssh server on port 2200
 /usr/sbin/sshd -p 2200 -o AuthorizedKeysFile=/authorized_keys
 
@@ -75,9 +65,9 @@ grep stack-debug /proc/cmdline 2>&1 > /dev/null
 if [ $? -eq 0 ]
 then
 	touch /tmp/wait
+	echo "Stacki debug wait loop - remove /tmp/wait to continue"
 	while [ -f /tmp/wait ]
 	do
-		echo "Stacki debug wait loop - remove /tmp/wait to continue"
 		sleep 1
 		/opt/stack/bin/stacki-status.py install wait 1
 	done
