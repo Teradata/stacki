@@ -121,17 +121,18 @@ def EvalCondExpr(cond, attrs):
 	if not cond:
 		return True
 
-
-#	cond = cond.replace('.', '_DOT_')
-#	cond = cond.replace('&&', ' and ')
-#	cond = cond.replace('||', ' or ')
-
 	env = _CondEnv()
 	for (key, value) in attrs.items():
 		tokens = key.split('.')
 		if len(tokens) == 1:
 			env[tokens[0]] = value
 		else:
+			# Loop backwards through the attribute name and turn a
+			# dotted attribute into a valid python object.
+			#
+			# The 'struct' is meaningless, as the instance (not class) 
+			# is what we care about. The instance name comes from the
+			# tokens.pop().
 			tail = type('struct', (object, ), { tokens.pop(): value })
 			while len(tokens) > 1:
 				tail = type('struct', (object, ), { tokens.pop(): tail })

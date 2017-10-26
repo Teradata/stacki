@@ -4,6 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import os
 import subprocess
 import json
 
@@ -29,6 +30,10 @@ def Call(cmd, args=None, format='json', sudo=False):
 	"""
 
 	global rc
+
+	if not os.path.exists(__stack__):
+		# Bailout if stack command is missing (backend nodes)
+		return [ ]
 	
 	command = cmd.replace('.', ' ').strip().split()
 	
