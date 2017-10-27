@@ -260,6 +260,8 @@ class MainTraversor(stack.gen.MainTraversor):
 			enabled = True
 		elif node.parentNode.nodeName == 'sles:remove-packages':
 			enabled = False
+		elif node.parentNode.nodeName == 'sles:post-packages':
+			enabled = True
 		else:
 			return False
 
