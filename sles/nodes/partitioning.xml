@@ -14,6 +14,11 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
+<stack:stacki>
+csv_partitions = <stack:report name="host.storage.partition">&hostname;</stack:report>
+csv_controller = <stack:report name="host.storage.controller">&hostname;</stack:report>
+</stack:stacki>
+
 	<xi:include href="/tmp/partition.xml"/>
 
 </stack:stack>
