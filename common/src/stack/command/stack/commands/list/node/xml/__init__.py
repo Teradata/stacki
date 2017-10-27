@@ -323,6 +323,11 @@ class Command(stack.commands.list.command,
 #			self.addText('%kgen\n')
 #			self.addText('</stack:loader>\n')
 
+		# Run plugins if not the Frontend
+
+		if 'appliance' in attrs and not attrs['appliance'] == 'frontend':
+			self.runPlugins(attrs)
+
 		for node in parsed:
 
 			# If we are only expanding a pallet subgraph
@@ -342,11 +347,6 @@ class Command(stack.commands.list.command,
 				self.addText('%s\n' % node.getXML())
 			except Exception as msg:
 				raise stack.util.KickstartNodeError("in %s node: %s" % (node, msg))
-
-		# Run plugins if not the Frontend
-
-		if 'appliance' in attrs and not attrs['appliance'] == 'frontend':
-			self.runPlugins(attrs)
 
 		self.addText('</stack:profile>\n')
 		
