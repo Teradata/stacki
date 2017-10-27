@@ -98,5 +98,4 @@ if ostype:
 	if hasattr(this, ostype):
 		f = getattr(this, ostype)
 		f()
-		tree = ET.ElementTree(root)
-		tree.write("/tmp/bootloader.xml")
+		print (ET.tostring(root).decode())
