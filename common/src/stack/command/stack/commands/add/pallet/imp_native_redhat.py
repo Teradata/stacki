@@ -68,6 +68,9 @@ class Implementation(stack.commands.Implementation):
 			raise CommandError(self.owner, 'unrecognized pallet format')
 
 		if not self.owner.dryrun:
+			if not os.path.exists(new_roll_dir):
+				os.makedirs(new_roll_dir)
+
 			cmd = 'rsync -a --exclude "TRANS.TBL" . %s/' % new_roll_dir
 			subprocess.call(shlex.split(cmd))
 
