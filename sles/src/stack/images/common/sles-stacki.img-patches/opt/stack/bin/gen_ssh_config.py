@@ -3,6 +3,7 @@
 import os
 import sys
 import stat
+import subprocess
 
 sys.path.append("/tmp")
 import stack_site
@@ -23,7 +24,7 @@ os.chmod('/etc/ssh/ssh_host_ecdsa_key',stat.S_IRUSR)
 
 pts = '/dev/pts'
 if not os.path.isdir(pts):
-	os.makedir(pts)
+	os.makedirs(pts)
 
 f = open('/etc/mtab', 'r')
 found_pts = False
