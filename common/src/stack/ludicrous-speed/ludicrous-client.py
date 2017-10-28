@@ -65,7 +65,7 @@ def tracker():
 
 def lookup_file(hashcode):
 	try:
-		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode))
+		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
 	except:
 		raise
 	return res
@@ -86,7 +86,7 @@ def register_file(port, hashcode):
 									tracker(), 
 									port,
 									hashcode)
-									)
+									, timeout=(0.1, 5))
 	except:
 		raise
 
@@ -97,13 +97,13 @@ def unregister_file(hashcode, params):
 									tracker(),
 									hashcode),
 									params=params
-									)
+									, timeout=(0.1, 5))
 	except:
 		raise
 
 def unregister_host(host):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host))
+		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
 	except:
 		raise
 
