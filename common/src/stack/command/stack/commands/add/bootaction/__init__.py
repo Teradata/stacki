@@ -11,9 +11,18 @@ class Command(stack.commands.add.command):
 	"""
 	Add a bootaction specification to the system.
 	
-	<param type='string' name='action'>
+	<arg optional='0' type='string' name='action'>
 	Label name for the bootaction. You can see the bootaction label names by
 	executing: 'stack list bootaction [host(s)]'.
+	</arg>
+	
+	<param type='string' name='os'>
+	Operating System for the bootaction. 
+	The default os is Redhat.
+	</param>
+	
+	<param type='string' name='type'>
+	Type of bootaction. Either 'os' or 'install'.
 	</param>
 	
 	<param type='string' name='kernel'>
@@ -29,11 +38,11 @@ class Command(stack.commands.add.command):
 	lang= devfs=nomount pxe kssendmac selinux=0)
 	</param>
 	
-	<example cmd='add bootaction action=os kernel="localboot 0"'>
+	<example cmd='add bootaction os type=os kernel="localboot 0"'>
 	Add the 'os' bootaction.
 	</example>
 	
-	<example cmd='add bootaction action=memtest command="memtest"'>
+	<example cmd='add bootaction memtest type=os kernel="kernel memtest"'>
 	Add the 'memtest' bootaction.
 	</example>
 	"""
