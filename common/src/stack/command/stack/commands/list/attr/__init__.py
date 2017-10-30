@@ -103,10 +103,37 @@ class Command(stack.commands.Command,
 	def addHostAttrs(self, attributes):
 		readonly = {}
 
+		versions = {}
+		for row in self.call('list.pallet'):
+			# Compute a version number for each os pallet
+			#
+			# If the pallet already has a '.' take everything
+			# before the '.' and add '.x'. If the version has no
+			# '.' add '.x'
+			name    = row['name']
+			version = row['version']
+			release = row['release']
+			key     = '%s-%s-%s' % (name, version, release)
+
+			if name in [ 'SLES', 'CentOS' ]: # FIXME: Ubuntu is missing
+				versions[key] = (name, '%s.x' % version.split('.')[0])
+
 		boxes = {}
 		for row in self.call('list.box'):
-			boxes[row['name']] = { 'pallets': row['pallets'].split(),
-					       'carts'	: row['carts'].split() }
+			pallets = row['pallets'].split()
+			carts   = row['carts'].split()
+			
+			name    = 'unknown'
+			version = 'unknown'
+			for pallet in pallets:
+				if pallet in versions.keys():
+					(name, version) = versions[pallet]
+					break
+
+			boxes[row['name']] = { 'pallets'    : pallets,
+					       'carts'	    : carts,
+					       'os.name'    : name, 
+					       'os.version' : version }
 
 		for (name, environment, rack, rank) in self.db.select(
 				"""
@@ -127,12 +154,14 @@ class Command(stack.commands.Command,
 				nodes n, boxes b, appliances a where
 				n.appliance=a.id and n.box=b.id
 				"""):
-			
 			readonly[name]['box']		     = box
 			readonly[name]['pallets']	     = boxes[box]['pallets']
 			readonly[name]['carts']		     = boxes[box]['carts']
+#			readonly[name]['os.name']            = boxes[box]['os.name']
+			readonly[name]['os.version']         = boxes[box]['os.version']
 			readonly[name]['appliance']	     = appliance
 			readonly[name]['appliance.longname'] = longname
+
 				
 		for (name, zone, address) in self.db.select(
 				"""
