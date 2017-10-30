@@ -12,8 +12,7 @@ ludicredis = redis.StrictRedis()
 
 app = Flask(__name__)
 
-packages = {}
-peers = {}
+PEERS = set()
 
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
@@ -46,8 +45,12 @@ def lookup(hashcode):
 	for peer in peers:
 		# only append a peer if it is not the requester
 		if ipaddr not in peer.decode():
-			res['peers'].append("%s" % peer.decode())
-		
+                        peer_port = ludicredis.smembers('%s:PORT' % ipaddr)
+                        if peer_port:
+                                res['peers'].append("%s:%s" % (peer.decode(), peer_port.pop().decode()))
+                        else:
+                                res['peers'].append("%s:%s" % (peer.decode(), '80'))		
+
 		# if array of peers is max_peers, break
 		if len(res['peers']) == MAX_PEERS:
 			break
@@ -64,8 +67,14 @@ def register(port=80, hashcode=None):
 	if not hashcode:
 		return four_o_four()
 
+	# check if 
+	if ipaddr not in PEERS:
+		if not ludicredis.smembers("%s:PORT" % ipaddr):
+			ludicredis.sadd("%s:PORT" % ipaddr, "%s" % port)
+			PEERS.add(ipaddr)
+
 	# Register Package
-	ludicredis.sadd(hashcode, "%s:%s" % (ipaddr, port))
+	ludicredis.sadd(hashcode, "%s" % ipaddr)
 
 	return jsonify(res)
 
@@ -90,9 +99,7 @@ def peerdone():
 	res = {}
 	res['success'] = True
 
-	packages = ludicredis.scan(0)[1]
-
-	for package in packages:
+	for package in ludicredis.scan_iter():
 		try:
 			ludicredis.srem(package, ipaddr)
 		except:
