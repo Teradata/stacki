@@ -13,10 +13,7 @@
 # @rocks@
 
 
-try:
-	from UserDict import UserDict
-except ImportError:
-	from collections import UserDict
+from collections import UserDict
 
 
 class _CondEnv(UserDict):
@@ -28,7 +25,7 @@ class _CondEnv(UserDict):
 	
 	def __getitem__(self, key):
 
-#		print('__getitem__', key)
+		# print '__getitem__', key
 		
 		# Handle boolean special since they are not in the
 		# environment
@@ -43,8 +40,6 @@ class _CondEnv(UserDict):
 		except:
 			return None	# undefined vars are None
 
-		# Try to convert value to a boolean
-		
 		try:
 			if val.lower() in [ 'on', 'true', 'yes', 'y' ]:
 				return True
@@ -63,10 +58,10 @@ def CreateCondExpr(archs, oses, releases, cond):
 	arch, os, and release conditionals along with the new style
 	generic cond XML tag attribute.
 
-	ARCHS	= comma separated list of architectures
-	OSES	= comma separated list of oses
-	RELEASES	= command separated list of Rocks releases
-	COND	= boolean expression in Python syntax
+	ARCHS	 = comma separated list of architectures
+	OSES	 = comma separated list of oses
+	RELEASES = comma separated list of stacki releases
+	COND	 = boolean expression in Python syntax
 
 	The resulting expression string is the AND and all the above, where
 	the ARCHS, OSES, and RELEASES are also ORed.
@@ -101,8 +96,6 @@ def CreateCondExpr(archs, oses, releases, cond):
 		exprs.append("( %s )" % ' or '.join(list))
 
 	if cond:
-		# Make into a legal python variable by replace the scope ('.')
-		# operator with _DOT_.	The eval needs to do the same thing.
 		exprs.append(cond)	# AND of the above and the generic cond
 
 	return ' and '.join(exprs)
@@ -121,23 +114,31 @@ def EvalCondExpr(cond, attrs):
 	if not cond:
 		return True
 
-	env = _CondEnv()
-	for (key, value) in attrs.items():
-		tokens = key.split('.')
-		if len(tokens) == 1:
-			env[tokens[0]] = value
-		else:
-			# Loop backwards through the attribute name and turn a
-			# dotted attribute into a valid python object.
-			#
-			# The 'struct' is meaningless, as the instance (not class) 
-			# is what we care about. The instance name comes from the
-			# tokens.pop().
-			tail = type('struct', (object, ), { tokens.pop(): value })
-			while len(tokens) > 1:
-				tail = type('struct', (object, ), { tokens.pop(): tail })
-			env[tokens.pop()] = tail
+	cond = cond.replace('.', '_DOT_')
 
+	env = _CondEnv()
+	for (k, v) in attrs.items():
+
+		# FIXME
+		#
+		# list.attr:addHostAttrs we create [] attributes instead of strings
+		# catch when this happens and replace the '.' to '_DOT_' in the
+		# list elements.
+		#
+		# This is horrible, but fixes the code for now. Will open a ticket
+		# to clean this up.
+
+		if type(v) == type([]):
+			l = [ ]
+			for s in v:
+				l.append(s.replace('.', '_DOT_'))
+			v = l
+		else:
+			v = v.replace('.', '_DOT_')
+		k = k.replace('.', '_DOT_')
+#		print(cond, ':', k, ':', v)
+		env[k] = v
+		
 	result = eval(cond, globals(), env)
 
 	return result
