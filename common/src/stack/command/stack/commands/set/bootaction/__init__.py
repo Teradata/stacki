@@ -21,7 +21,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 		if b_type not in [ 'os', 'install' ]:
 			raise ParamValue(self, 'type', '"os" or "install"')
 
-		if b_type == 'install' and not b_os:
+		if not b_os:
 			b_os = 'redhat'
 
 		if b_os:
