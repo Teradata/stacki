@@ -257,15 +257,10 @@ class MainTraversor(stack.gen.MainTraversor):
 		pkg	 = self.collect(node).strip()
 
 		if node.parentNode.nodeName == 'sles:packages':
-			enabled = True
+			self.gen.packageSet.append(pkg, True, nodefile)
 		elif node.parentNode.nodeName == 'sles:remove-packages':
-			enabled = False
-		elif node.parentNode.nodeName == 'sles:post-packages':
-			enabled = True
-		else:
-			return False
+			self.gen.packageSet.append(pkg, False, nodefile)
 
-		self.gen.packageSet.append(pkg, enabled, nodefile)
 		self.traverse_sles(node)
 		return False
 
