@@ -14,13 +14,13 @@
 // dependency, this is considered a feature.
 
 {
-	"configparser":		{ "fe": true, "be": true }, 
+	"configparser":		{ "cond": "os.version != '11.x'", "fe": true, "be": true }, 
 	"Flask":		{ "fe": true }, 
 	"PyYAML":		{ "fe": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
 	"PyMySQL":		{ "fe": true, "bootstrap": true }, 
-	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
-	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
+	"python-daemon":	{ "cond": "os.version != '11.x'", "fe": true, "be": true, "bootstrap": true }, 
+	"pyzmq":		{ "cond": "os.version != '11.x'", "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
 	"testinfra":		{ "fe": true, "bootstrap": true },
