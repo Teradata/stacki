@@ -202,9 +202,7 @@ hotspares = []
 options = ''
 
 for o in csv_controller:
-	if 'arrayid' in o.keys() and o['arrayid'] == '*' and \
-			'slot' in o.keys() and o['slot'] == '*':
-
+	if 'slot' in o.keys() and o['slot'] == '*':
 		if 'adapter' in o.keys():
 			try:
 				adapter = int(o['adapter'])
@@ -234,7 +232,15 @@ for o in csv_controller:
 		if not enclosure:
 			enclosure = ctrl.getEnclosure(adapter)
 
-		for slot in freeslots[adapter]:
-			ctrl.doRaid(raidlevel, adapter, enclosure, [ slot ],
-				hotspares, options)
+		if 'arrayid' in o.keys():
+			# JBOD Mode for the remainder
+			if o['arrayid'] == '*':
+				for slot in freeslots[adapter]:
+					ctrl.doRaid(0, adapter, enclosure, [ slot ],
+						hotspares, options)
+
+			# RAID mode - Single array for remaining disks
+			else:
+				ctrl.doRaid(raidlevel, adapter, enclosure, freeslots[adapter],
+					hotspares, options)
 

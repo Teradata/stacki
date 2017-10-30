@@ -13,6 +13,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>mtools</stack:package>
 <stack:package>uefi-boot-method</stack:package>
 
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">grub2-x86_64-efi</stack:package>
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">shim</stack:package>
+<stack:package stack:cond="'SLES-12-sp2' in &pallets;">mokutil</stack:package>
+
 <stack:script stack:stage="install-pre">
 if [ -d /sys/firmware/efi ]; then
 	netboot=`efibootmgr | awk '/^BootCurrent:/{print $2;}'`

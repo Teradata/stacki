@@ -15,26 +15,7 @@ class Plugin(stack.commands.Plugin):
 		return 'stacki'
 
 	def run(self, attrs):
-		row = self.owner.call('report.host.storage.partition',
-			[ attrs['hostname'] ])
-		partition_output = row[0]['col-1']
-
-		row = self.owner.call('report.host.storage.controller',
-			[ attrs['hostname'] ])
-		controller_output = row[0]['col-1']
-
 		self.owner.addText('<stack:stacki><![CDATA[\n')
 		self.owner.addText('attributes = %s\n' % pformat(attrs))
-		self.owner.addText("""
-#
-# Generic For All OSes
-#
-csv_partitions = %s
-
-csv_controller = %s
-
-"""
-% (partition_output, controller_output))
-
 		self.owner.addText(']]></stack:stacki>\n')
 

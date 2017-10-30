@@ -55,6 +55,14 @@ CREATE TABLE attributes (
 
 grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
 
+DROP TABLE IF EXISTS attributes_doc;
+CREATE TABLE attributes_doc (
+  Attr          varchar(128) NOT NULL,
+  Doc           text
+);
+
+grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
+
 <!-- OSes -->
 
 DROP TABLE IF EXISTS oses;

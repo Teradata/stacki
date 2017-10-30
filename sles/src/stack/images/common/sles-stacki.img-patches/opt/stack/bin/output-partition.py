@@ -4,6 +4,7 @@ import shlex
 import subprocess
 import sys
 import os
+import time
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -452,6 +453,16 @@ def getHostFstab(disks):
 ##
 
 host_disks = getHostDisks()
+
+count = 5
+while count > 0:
+	if len(host_disks) == 0:
+		time.sleep(1)
+		count = count - 1
+		host_disks = getHostDisks()
+	else:
+		break
+
 host_fstab = getHostFstab(host_disks)
 host_partitions = getHostPartitions(host_disks, host_fstab)
 

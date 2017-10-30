@@ -16,6 +16,15 @@ zypper() {
 	done
 }
 
+yum() {
+	for p in "$@"; do
+		if [ $meta == 1 ]; then
+			/usr/bin/yum -y group install "$p"
+		else
+			/usr/bin/yum -y install "$p"
+		fi
+	done
+}
 
 meta=0
 while getopts "m" opt; do
@@ -37,7 +46,7 @@ suse)
 	zypper $@
 	;;
 redhat)
-	yum $@
+	yum "$@"
 	;;
 esac
 
