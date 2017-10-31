@@ -22,7 +22,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 			raise ParamValue(self, 'type', '"os" or "install"')
 
 		if not b_os:
-			b_os = 'redhat'
+			b_os = self.os
 
 		if b_os:
 			b_os = self.getOSNames([b_os])[0]
