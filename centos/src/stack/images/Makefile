@@ -10,6 +10,8 @@ include $(STACKBUILD)/etc/CCRules.mk
 -include $(RELEASE).mk
 -include $(RELEASE)-$(ARCH).mk
 
+SRCDIRS = 7.1708
+
 BOOTSTRAP = NetworkManager-devel	\
 	NetworkManager-glib-devel	\
 	libnl-devel			\
@@ -30,15 +32,13 @@ deploy: install-rpm
 	cp /opt/stack/images/initrd*	/tftpboot/pxelinux/
 	cp /opt/stack/images/vmlinuz*	/tftpboot/pxelinux/
 
+
 build:
-	make -C $(ANACONDA_VERSION) build
+	for i in $(SRCDIRS); do \
+		make -C $$i $@; \
+	done
 
-install::
-	make -C $(ANACONDA_VERSION) install
-
-clean::
-	make -C $(ANACONDA_VERSION) clean
-
-nuke::
-	make -C $(ANACONDA_VERSION) nuke
-
+install clean nuke::
+	for i in $(SRCDIRS); do \
+		make -C $$i $@; \
+	done

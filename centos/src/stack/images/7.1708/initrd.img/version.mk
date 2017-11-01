@@ -3,6 +3,7 @@ PKGROOT			= /opt/stack/images
 OVERLAY.PKGS = \
 	glibc-common
 OVERLAY.UPDATE.PKGS	= \
+	MegaCLI storcli \
 	foundation-python \
 	ludicrous-speed \
 	stack-command \

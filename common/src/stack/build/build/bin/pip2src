@@ -1,5 +1,4 @@
-#! /opt/stack/bin/python3  
-# -*- python -*-
+#! /opt/stack/bin/python3
 #
 # @copyright@
 # Copyright (c) 2006 - 2017 Teradata
@@ -86,14 +85,10 @@ with open('packages.json', 'r') as text:
 		package = Package(name, master=True)
 		package.bootstrap = manifest[name].get('bootstrap')
 		package.version   = manifest[name].get('version')
-
-		cond = manifest[name].get('cond')
-		if not cond:
-			cond = True
 		if manifest[name].get('fe'):
-			package.appliances.append(('server',  '%s' % cond))
+			package.appliances.append('server')
 		if manifest[name].get('be'):
-			package.appliances.append(('backend', '%s' % cond))
+			package.appliances.append('backend')
 		PackageSet[name] = package
 
 
@@ -192,8 +187,11 @@ if not os.path.exists(xmldir):
 with open(os.path.join(xmldir, '%s.xml' % Prefix), 'w') as graph:
 	graph.write('<graph>\n')
 	for pkgname in pkgnames:
-		for (appliance, cond) in PackageSet[pkgname].appliances:
-			graph.write('\t<edge cond="%s" from="%s" to="%s-%s"/>\n' % (cond, appliance, Prefix, pkgname))
+		for appliance in PackageSet[pkgname].appliances:
+			if appliance == 'server':
+				graph.write('\t<edge from="%s" to="%s-%s"/>\n' % (appliance, Prefix, pkgname))
+			else:
+				graph.write('\t<edge from="foundation-python" to="%s-%s" cond="appliance == \'backend\'"/>\n' % (Prefix, pkgname))
 		if PackageSet[pkgname].appliances:
 			graph.write('\n')
 	graph.write('</graph>')

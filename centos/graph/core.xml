@@ -36,6 +36,7 @@
 		<to>ssh</to>
 		<to>storage</to>
 		<to>mq-base</to>
+		<to>foundation-python</to>
 	</edge>
 
 	<edge from="client" to="repo-client" />
