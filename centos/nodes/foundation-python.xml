@@ -1,0 +1,34 @@
+<stack:stack>
+
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+
+<stack:package>foundation-python</stack:package>
+
+
+<stack:script stack:stage="install-post">
+
+<stack:file stack:name="/etc/ld.so.conf.d/foundation.conf">
+/lib
+/lib64
+/usr/lib
+/usr/lib64
+/opt/stack/lib
+</stack:file>
+
+if [ -f /usr/sbin/ldconfig ]
+then
+	/usr/sbin/ldconfig
+elif [ -f /sbin/ldconfig ]
+then
+	/sbin/ldconfig
+fi
+
+</stack:script>
+
+</stack:stack> 
