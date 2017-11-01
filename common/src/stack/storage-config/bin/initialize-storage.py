@@ -136,6 +136,15 @@ if attr2bool(nukecontroller):
 	nukedisks = [ '*' ]
 
 disks = getHostDisks(nukedisks)
+count = 5
+# Wait until we have disk info from the storage controller
+while count > 0:
+	if len(disks) == 0:
+		time.sleep(1)
+		count = count - 1
+		disks = getHostDisks()
+	else:
+		break
 
 #
 # nuke LVM first
