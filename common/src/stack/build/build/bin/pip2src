@@ -1,4 +1,5 @@
 #! /opt/stack/bin/python3
+# -*- python -*-
 #
 # @copyright@
 # Copyright (c) 2006 - 2017 Teradata
@@ -88,7 +89,7 @@ with open('packages.json', 'r') as text:
 		if manifest[name].get('fe'):
 			package.appliances.append('server')
 		if manifest[name].get('be'):
-			package.appliances.append('backend')
+			package.appliances.append('client')
 		PackageSet[name] = package
 
 
@@ -175,34 +176,35 @@ xmldir = os.path.join('nodes')
 if not os.path.exists(xmldir):
 	os.makedirs(xmldir)
 for pkgname in pkgnames:
-	with open(os.path.join(xmldir, '%s-%s.xml' % (Prefix, pkgname)), 'w') as node:
-		node.write('<stack:stack>\n\t<stack:package>%s-%s</stack:package>\n\n' % (Prefix, pkgname))
+	with open(os.path.join(xmldir, '%s-pip2src-%s.xml' % (Prefix, pkgname)), 'w') as node:
+		node.write('<stack:stack><stack:package>\n')
+		node.write('%s-%s\n' % (Prefix, pkgname))
 		for dep in PackageSet[pkgname].dependencies:
-			node.write('\t<stack:package>%s-%s</stack:package>\n' % (Prefix, dep.name))
-		node.write('\n</stack:stack>')
+			node.write('\t%s-%s\n' % (Prefix, dep.name))
+		node.write('</stack:package></stack:stack>')
 
 xmldir = os.path.join('graph')
 if not os.path.exists(xmldir):
 	os.makedirs(xmldir)
-with open(os.path.join(xmldir, '%s.xml' % Prefix), 'w') as graph:
+with open(os.path.join(xmldir, '%s-pip2src.xml' % Prefix), 'w') as graph:
 	graph.write('<graph>\n')
 	for pkgname in pkgnames:
 		for appliance in PackageSet[pkgname].appliances:
-			if appliance == 'server':
-				graph.write('\t<edge from="%s" to="%s-%s"/>\n' % (appliance, Prefix, pkgname))
-			else:
-				graph.write('\t<edge from="foundation-python" to="%s-%s" cond="appliance == \'backend\'"/>\n' % (Prefix, pkgname))
+			graph.write('\t<edge from="%s-%s" to="%s-pip2src-%s"/>\n' % (Prefix, appliance, Prefix, pkgname))
 		if PackageSet[pkgname].appliances:
 			graph.write('\n')
 	graph.write('</graph>')
 		
 
-# Create top-level manifest
+# Create manifests
 
-with open('manifest', 'w') as text:
-	for pkgname in pkgnames:
-		text.write('%s-%s\n' % (Prefix, pkgname))
+manifestdir = os.path.join('manifest.d')
+if not os.path.exists(manifestdir):
+	os.makedirs(manifestdir)
+for pkgname in pkgnames:
+	with open(os.path.join(manifestdir, '%s-%s.manifest' % (Prefix, pkgname)), 'w') as manifest:
+		manifest.write('%s-%s\n' % (Prefix, pkgname))
 		for dep in PackageSet[pkgname].dependencies:
-			text.write('\t%s-%s\n' % (Prefix, dep.name))
+			manifest.write('\t%s-%s\n' % (Prefix, dep.name))
 
 

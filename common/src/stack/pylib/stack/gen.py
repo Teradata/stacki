@@ -575,18 +575,20 @@ class MainTraversor(Traversor):
 		"""
 
 		nodefile = self.getAttr(node, 'stack:file')
-		pkgs	 = self.collect(node).strip().split()
 
 		meta	 = self.getAttr(node, 'stack:meta', default='false')
 		meta     = str2bool(meta)
 
 		enabled  = self.getAttr(node, 'stack:enable', default='true')
 		enabled  = str2bool(enabled)
-		
-		for pkg in pkgs:
-			if meta:
-				pkg = '@%s' % pkg
-			self.gen.packageSet.append(pkg, enabled, nodefile)
+
+		for line in self.collect(node).split('\n'):
+			pkg = line.strip()
+			if pkg:
+				if meta:
+					pkg = '@%s' % pkg
+				self.gen.packageSet.append(pkg, enabled, nodefile)
+
 		return False
 
 

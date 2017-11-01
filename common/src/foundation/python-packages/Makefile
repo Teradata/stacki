@@ -12,9 +12,9 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap rpm: src
 	for x in src/*; do $(MAKE) -C $$x $@; done
-	cp manifest    $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d/foundation-python.manifest
-	cp nodes/*.xml $(ROLLROOT)/build-$(ROLL)-$(STACK)/nodes/
-	cp graph/*.xml $(ROLLROOT)/build-$(ROLL)-$(STACK)/graph/
+	cp manifest.d/*.manifest $(ROLLROOT)/common/manifest.d/
+	cp nodes/*.xml $(ROLLROOT)/common/nodes/
+	cp graph/*.xml $(ROLLROOT)/common/graph/
 
 refresh:
 	-rm versions.json
@@ -27,6 +27,6 @@ src: packages.json
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/graph
 
 clean::
-	-rm -rf src graph nodes manifest .cache
+	-rm -rf src graph nodes manifest.d .cache
 
 

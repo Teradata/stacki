@@ -1,0 +1,21 @@
+<graph>
+
+	<description>
+	Backend Appliances
+	</description>
+
+	<copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</copyright>
+
+	<edge from="builder" to="backend"/>
+
+	<edge from="client" cond="os != 'sles' or os.version != '11.x'">
+		<to>foundation-python</to>
+		<to>foundation-python-client</to>
+		<to>mq-client</to>
+	</edge>
+
+</graph>

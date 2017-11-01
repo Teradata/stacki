@@ -35,7 +35,6 @@
 		<to>ssl</to>
 		<to>ssh</to>
 		<to>storage</to>
-		<to>mq-base</to>
 		<to>foundation-python</to>
 	</edge>
 

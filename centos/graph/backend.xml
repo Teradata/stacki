@@ -34,7 +34,7 @@
 	<edge from="backend">
 		<to>client</to>
 	</edge>
-
+	
 	<edge from="client">
 		<to>base</to>
 		<to>time-client</to>
@@ -46,7 +46,6 @@
 		<to>pxeboot</to>
 		<to>peerdone</to>
 		<to>ludicrous-client</to>
-		<to>mq-client</to>
 	</edge>
 
 	<order head="storage" tail="pxeboot" />

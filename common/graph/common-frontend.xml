@@ -1,0 +1,19 @@
+<graph>
+
+	<description>
+	Frontend Appliances
+	</description>
+
+	<copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</copyright>
+
+	<edge from="server">
+		<to>foundation-python</to>
+		<to>foundation-python-server</to>
+		<to>mq-server</to>
+	</edge>
+
+</graph>

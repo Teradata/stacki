@@ -20,12 +20,17 @@ import sys
 import stack.file
 import stack.util
 
-if len(sys.argv) != 3:
+if len(sys.argv) < 3:
 	print('error - use make manifest-check')
 	sys.exit(1)
 
-rollname  = sys.argv[1]
-buildpath = sys.argv[2]
+palletname = sys.argv[1]
+buildpath  = sys.argv[2]
+
+try:
+	secondary = sys.argv[3]
+except:
+	secondary = None
 
 tree = stack.file.Tree(os.getcwd())
 
@@ -34,22 +39,30 @@ for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
 	path = os.path.join(buildpath, 'RPMS', arch)
 #	print('searching %s' % path)
 	found = tree.getFiles(path)
-#	print('found %d file' % len(found))
+#	print('found %d files' % len(found))
 	builtfiles += found
 
-manifest = []
+manifest  = []
+manifests = [ ]
+search    = [ 'common', '.' ]
+if secondary:
+	search.append(secondary)
 
-manifests = [ 'manifest', 'manifest.%s' % rollname ]
-try:
-	for f in os.listdir(os.path.join(buildpath, 'manifest.d')):
-		manifests.append(os.path.join(buildpath, 'manifest.d', f))
-except FileNotFoundError:
-	pass
+for path in search:
+	filename = os.path.join(path, 'manifest')
+	if os.path.exists(filename):
+		manifests.append(filename)
+
+	dirname = os.path.join(path, 'manifest.d')
+	if os.path.exists(dirname):
+		for filename in os.listdir(dirname):
+			name, ext = os.path.splitext(filename)
+			if ext == '.manifest':
+				manifests.append(os.path.join(dirname, filename))
+
 
 found = False
 for filename in manifests:
-	if not os.path.exists(filename):
-		continue
 	print('reading %s' % filename)
 	found = True
 	file = open(filename, 'r')
@@ -100,5 +113,5 @@ if len(notmanifest) > 0:
 	exit_code += 1
 
 if exit_code == 0:
-	print('done')
+	print('passed')
 sys.exit(exit_code)

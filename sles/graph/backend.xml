@@ -11,9 +11,8 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
-	<edge from="builder" to="backend"/>
-
-	<edge from="backend" os="sles">
+	<edge from="backend">
+		<to>client</to>
 		<to>base</to>
 		<to>general</to>
 		<to>kdump</to>
@@ -26,11 +25,6 @@
 		<to>time-client</to>
 		<to>firewall-client</to>
 		<to>peerdone</to>
-	</edge>
-
-	<edge from="backend" cond="pallets and 'SLES-12-sp2' in pallets">
-		<to>foundation-python</to>
-		<to>mq-client</to>
 	</edge>
 
 	<order tail="HEAD">

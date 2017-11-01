@@ -65,7 +65,6 @@
 
 	<edge from="server">
 		<to>base</to>
-		<to>foundation-python</to>
 		<to>apache</to>
 		<to>ca</to>
 		<to>database</to>
@@ -84,7 +83,6 @@
 		<to>ssl-server</to>
 		<to>storage-controller-server</to>
 		<to>time-server</to>
-		<to>mq-server</to>
 		<to>uefi-server</to>
 		<to>restapi</to>
 	</edge>

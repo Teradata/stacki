@@ -50,11 +50,10 @@ endif
 preroll::
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
-	mkdir -p build-$(ROLL)-$(STACK)/manifest.d
+	cp common/graph/*      build-$(ROLL)-$(STACK)/graph/
+	cp common/nodes/*      build-$(ROLL)-$(STACK)/nodes/
 	cp $(BUILDOS)/graph/*  build-$(ROLL)-$(STACK)/graph/
 	cp $(BUILDOS)/nodes/*  build-$(ROLL)-$(STACK)/nodes/
-	cp common/manifest     build-$(ROLL)-$(STACK)/manifest.d/common.manifest
-	cp $(BUILDOS)/manifest build-$(ROLL)-$(STACK)/manifest.d/$(BUILDOS).manifest
 	make -C common/src     pkg
 	make -C $(BUILDOS)/src pkg
 

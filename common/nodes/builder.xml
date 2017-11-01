@@ -1,7 +1,7 @@
 <stack:stack>
 	
 	<stack:description>
-	Handle for Build Appliance
+	Build Appliance
 	</stack:description>
 
 	<stack:copyright>
@@ -10,13 +10,22 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-	<stack:package>git</stack:package>
-	<stack:package>stack-build</stack:package>
+	<stack:package>
+		git
+		stack-build
+	</stack:package>
 
 	<!-- bootstrap does this for you, but faster to do in installer -->
-	<stack:package stack:meta="true">32bit</stack:package>
-	<stack:package stack:meta="true">Basis-Devel</stack:package>
-	<stack:package stack:meta="true">SDK-C-C++</stack:package>
+	<stack:package stack:cond="os == 'sles'" stack:meta="true">
+		32bit
+		Basis-Devel
+		SDK-C-C++
+	</stack:package>
+
+	<stack:package stack:cond="os == 'redhat'" stack:meta="true">
+		Development Tools
+		Infrastructure Server
+	</stack:package>
 
 </stack:stack> 
 

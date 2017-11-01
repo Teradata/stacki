@@ -133,12 +133,16 @@ class ExpandingTraversor(stack.gen.Traversor):
 		enabled  = self.getAttr(node, 'stack:enable', default='true')
 		enabled  = str2bool(enabled)
 
+		pkgs = []
+		for line in self.collect(node).split('\n'):
+			pkg = line.strip()
+			if pkg:
+				pkgs.append(pkg)
 
 		if not meta:
 			packages = self.newElementNode('sles:packages')
 			self.setAttribute(packages, 'config:type', 'list')
-
-			for rpm in self.collect(node).strip().split():
+			for rpm in pkgs:
 				package = self.newElementNode('sles:package')
 				package.appendChild(self.newTextNode(rpm))
 				packages.appendChild(package)
@@ -146,7 +150,7 @@ class ExpandingTraversor(stack.gen.Traversor):
 			packages = self.newElementNode('sles:patterns')
 			self.setAttribute(packages, 'config:type', 'list')
 
-			for rpm in self.collect(node).strip().split():
+			for rpm in pkgs:
 				package = self.newElementNode('sles:pattern')
 				package.appendChild(self.newTextNode(rpm))
 				packages.appendChild(package)
