@@ -16,10 +16,7 @@ class Plugin(stack.commands.Plugin):
 		return 'redis_status'
 
 	def run(self, hosts):
-	
-		host_status = { }
-		for host in hosts:
-			host_status[host] = None
+		host_status = dict.fromkeys(hosts)
 		
 		frontend_list = []
 		frontend_list.append('localhost')

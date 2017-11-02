@@ -161,6 +161,7 @@ CREATE TABLE nodes (
   Rank		varchar(64) default NULL,
   OSAction	int(11) default NULL references bootactions,
   InstallAction	int(11) default NULL references bootactions,
+  Comment	varchar(140) default NULL,
   PRIMARY KEY  (ID)
 );
 

@@ -13,10 +13,8 @@ class Plugin(stack.commands.Plugin):
 		return 'basic'
 
 	def run(self, hosts):
-		dict = {}
-		for host in hosts:
-			dict[host] = True
-			
+		host_info = dict.fromkeys(hosts)
+
 		for row in self.db.select(
 			"""
 			n.name, n.rack, n.rank, 
@@ -33,8 +31,8 @@ class Plugin(stack.commands.Plugin):
 			left join oses o	 on b.os = o.id
 			"""):
 
-			if row[0] in dict:
-				dict[row[0]] = row[1:]
+			if row[0] in host_info:
+				host_info[row[0]] = row[1:]
 	
 		return { 'keys' : [ 'rack',
 				    'rank',
@@ -44,5 +42,5 @@ class Plugin(stack.commands.Plugin):
 				    'environment',
 				    'osaction',
 				    'installaction' ],
-			'values': dict }
+			'values': host_info }
 
