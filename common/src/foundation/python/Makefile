@@ -28,7 +28,7 @@ build:
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT)				\
 			--enable-shared					\
-			--with-ensurepip=install			\
+			--without-ensurepip				\
 			--without-pymalloc;				\
 		$(MAKE);						\
 	)

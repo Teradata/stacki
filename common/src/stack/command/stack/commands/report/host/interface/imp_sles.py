@@ -71,34 +71,53 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 'chmod 500 %s' % ipmisetup)
 				continue
 
-			self.owner.addOutput(host, 
-					     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
-					     % interface)
-			if vlanid:
-				parent_device = interface.strip().split('.')[0]
-				self.owner.addOutput(host, 'ETHERDEVICE=%s' % parent_device)
-				self.owner.addOutput(host, 'VLAN=yes')
-			else:
-				self.owner.addOutput(host, 'USERCONTROL=no')
 
-			if 'onboot=no' in options:
-				self.owner.addOutput(host, 'STARTMODE=manual')
-			else:
+			if len(interface.split(':')) == 2:
+				self.owner.addOutput(host, 
+						     '<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-%s">' 
+						     % interface.split(':')[0])
+				vnum = interface.split(':')[1]
 				if ip:
-					self.owner.addOutput(host, 'STARTMODE=auto')
+					self.owner.addOutput(host, 'IPADDR_%s=%s' % (vnum, ip.strip()))
+				if netmask:
+					self.owner.addOutput(host, 'NETMASK_%s=%s' % (vnum, netmask.strip()))
+				if network:
+					self.owner.addOutput(host, 'NETWORK_%s=%s' % (vnum, network.strip()))
+				if broadcast:
+					self.owner.addOutput(host, 'BROADCAST_%s=%s' % (vnum, broadcast.strip()))
+
+			else:
+				self.owner.addOutput(host, 
+						     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
+						     % interface)
+				if vlanid:
+					parent_device = interface.strip().split('.')[0]
+					self.owner.addOutput(host, 'ETHERDEVICE=%s' % parent_device)
+					self.owner.addOutput(host, 'VLAN=yes')
 				else:
-					self.owner.addOutput(host, 'STARTMODE=off')
+					self.owner.addOutput(host, 'USERCONTROL=no')
 
-			if ip:
-				self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
-			if netmask:
-				self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
-			if network:
-				self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
-			if broadcast:
-				self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+				if 'onboot=no' in options:
+					self.owner.addOutput(host, 'STARTMODE=manual')
+				else:
+					if ip:
+						self.owner.addOutput(host, 'STARTMODE=auto')
+					else:
+						self.owner.addOutput(host, 'STARTMODE=off')
+				
+				if ip:
+					self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
+				if netmask:
+					self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
+				if network:
+					self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
+				if broadcast:
+					self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
 
-			self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
+				if mac:
+					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
+
+			self.owner.addOutput(host, '\n')
 			self.owner.addOutput(host, '</stack:file>')
 
 		if udev_output:
@@ -107,3 +126,5 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host, udev_output)
 			self.owner.addOutput(host, '</stack:file>')
 
+
+RollName = "stacki"
