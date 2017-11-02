@@ -12,7 +12,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 BOOTSTRAP        = readline-devel
 BOOTSTRAP.redhat = openssl-devel bz2-libs bz2-devel xz-devel
-BOOTSTRAP.suse   =
+BOOTSTRAP.sles   =
 
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))

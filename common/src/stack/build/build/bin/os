@@ -26,17 +26,11 @@ case $OS in
 	if [ -f /etc/redhat-release ]; then
 		echo redhat
 	elif [ -f /etc/SuSE-release ]; then
-		echo suse
+		echo sles
 	else
 		echo linux
 	fi
         ;;
-    Darwin)
-        echo macosx
-        ;;
-    SunOS)
-	echo sunos
-	;;
     *)
         echo unknown
         ;;

@@ -95,15 +95,10 @@ clean::
 # Build to pallet.xml file
 # --------------------------------------------------------------------- #
 
-ifeq ($(ROLLS.API),4.0)
-ifeq ($(OS),redhat)
-ROLLS.OS=linux
-endif
-else
 ifeq ($(ROLLS.OS),)
 ROLLS.OS=$(OS)
 endif
-endif
+
 ifeq ($(ISOSIZE),)
 ISOSIZE=0
 endif

@@ -9,9 +9,9 @@ ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-BOOTSTRAP = gtk3-devel gstreamer-devel
+BOOTSTRAP        = gtk3-devel gstreamer-devel
 BOOTSTRAP.redhat = webkitgtk3-devel popt-devel gstreamer1-devel GConf2-devel gstreamer-python-devel gstreamer1-plugins-base-devel mesa-libGLU-devel
-BOOTSTRAP.suse   = freeglut-devel gstreamer-plugins-base-devel webkit2gtk3-devel libwebkitgtk3-devel
+BOOTSTRAP.slse   = freeglut-devel gstreamer-plugins-base-devel webkit2gtk3-devel libwebkitgtk3-devel
 
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))

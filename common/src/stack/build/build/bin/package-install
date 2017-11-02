@@ -9,15 +9,15 @@
 zypper() {
 	for p in $@; do
 		if [ $meta == 1 ]; then
-			/usr/bin/zypper in -y -t pattern $p
+			/usr/bin/zypper in -y -t pattern "$p"
 		else
-			/usr/bin/zypper in -y $p
+			/usr/bin/zypper in -y "$p"
 		fi
 	done
 }
 
 yum() {
-	for p in "$@"; do
+	for p in $@; do
 		if [ $meta == 1 ]; then
 			/usr/bin/yum -y group install "$p"
 		else
@@ -42,11 +42,11 @@ shift $(($OPTIND - 1))
 
 path=`dirname $0`
 case `$path/os` in
-suse)
+sles)
 	zypper $@
 	;;
 redhat)
-	yum "$@"
+	yum $@
 	;;
 esac
 

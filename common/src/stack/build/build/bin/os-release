@@ -22,10 +22,10 @@ case $RELEASE in
 	echo 7.x
 	;;
     *SUSE*11*)
-	echo sles11
+	echo 11.x
 	;;
     *SUSE*12*)
-	echo sles12
+	echo 12.x
 	;;
     *)
         echo unknown

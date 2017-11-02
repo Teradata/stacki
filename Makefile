@@ -5,15 +5,6 @@
 # @copyright@
 
 OS=$(shell common/src/stack/build/build/bin/os)
-ifeq ($(OS),redhat)
-BUILDOS=centos
-ROLLS.OS=redhat
-else
-ifeq ($(OS),suse)
-BUILDOS=sles
-ROLLS.OS=sles
-endif
-endif
 
 ROLLROOT = .
 
@@ -22,11 +13,11 @@ ROLLROOT = .
 .PHONY: 3rdparty
 3rdparty: # we need to do the for all OSes
 	cd common && $(ROLLSBUILD)/bin/get3rdparty.py
-	cd centos && $(ROLLSBUILD)/bin/get3rdparty.py
+	cd redhat && $(ROLLSBUILD)/bin/get3rdparty.py
 	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
-	$(MAKE) -C $(BUILDOS) -f bootstrap.mk bootstrap
+	$(MAKE) -C $(OS) -f bootstrap.mk bootstrap
 	$(MAKE) -C common/src/stack/build bootstrap
 
 bootstrap: bootstrap-make
@@ -43,8 +34,8 @@ else
 	$(MAKE) 3rdparty
 	$(MAKE) -C common/src $@
 endif
-	$(MAKE) -C $(BUILDOS) -f bootstrap.mk $@
-	$(MAKE) -C $(BUILDOS)/src $@
+	$(MAKE) -C $(OS) -f bootstrap.mk $@
+	$(MAKE) -C $(OS)/src $@
 
 
 preroll::
@@ -52,10 +43,10 @@ preroll::
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
 	cp common/graph/*      build-$(ROLL)-$(STACK)/graph/
 	cp common/nodes/*      build-$(ROLL)-$(STACK)/nodes/
-	cp $(BUILDOS)/graph/*  build-$(ROLL)-$(STACK)/graph/
-	cp $(BUILDOS)/nodes/*  build-$(ROLL)-$(STACK)/nodes/
+	cp $(OS)/graph/*       build-$(ROLL)-$(STACK)/graph/
+	cp $(OS)/nodes/*       build-$(ROLL)-$(STACK)/nodes/
 	make -C common/src     pkg
-	make -C $(BUILDOS)/src pkg
+	make -C $(OS)/src pkg
 
 clean::
 	rm -rf build-$(ROLL)-$(STACK)/graph/
