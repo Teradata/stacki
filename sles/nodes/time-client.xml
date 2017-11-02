@@ -7,7 +7,7 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">chrony</stack:package>
-<stack:package stack:cond="'SLES-11.3-1.138' in &pallets;">ntp</stack:package>
+<stack:package stack:cond="os.version == '12.x'">chrony</stack:package>
+<stack:package stack:cond="os.version == '11.x'">ntp</stack:package>
 
 </stack:stack> 

@@ -46,7 +46,11 @@
 		<to>pxeboot</to>
 		<to>peerdone</to>
 		<to>ludicrous-client</to>
+		<to>ssl-client</to>
+		<to>ssh-client</to>
+		<to>repo-client</to>
 	</edge>
+
 
 	<order head="storage" tail="pxeboot" />
 	<order head="base" tail="peerdone" />

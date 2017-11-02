@@ -1,12 +1,19 @@
 <stack:stack>
 
-<stack:rocks>
-Copyright (c) 2000 - 2010 The Regents of the University of California
-All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</stack:rocks>
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:package>foundation-mariadb</stack:package>
+        <stack:rocks>
+        Copyright (c) 2000 - 2010 The Regents of the University of California
+        All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+        https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+        </stack:rocks>
+
+	<stack:package>stack-sql</stack:package>
+	<stack:package>foundation-mariadb</stack:package>
 
 
 <stack:script stack:stage="install-post">
@@ -17,7 +24,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 -->
 /bin/hostname &hostname;
 
-<stack:file stack:name="/etc/hostname">
+<stack:file stack:name="/etc/hostname" cond="os == 'sles'">
 &Info_FQDN;
 </stack:file>
 

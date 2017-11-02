@@ -26,7 +26,6 @@ cp /tmp/rolls.xml /mnt/sysimage/tmp
 </stack:script>
 
 <stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
-
 import os.path
 
 if os.path.exists('/tmp/site.attrs'):

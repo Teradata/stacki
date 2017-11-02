@@ -57,3 +57,6 @@ preroll::
 	make -C common/src     pkg
 	make -C $(BUILDOS)/src pkg
 
+clean::
+	rm -rf build-$(ROLL)-$(STACK)/graph/
+	rm -rf build-$(ROLL)-$(STACK)/nodes/

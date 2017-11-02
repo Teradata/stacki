@@ -17,18 +17,6 @@
 		<to>ca</to>
 	</edge>
 
-	<order head="apache">
-		<tail>database</tail>
-	</order>
-
-	<order head="database">
-		<tail>database-schema</tail>
-	</order>
-
-	<order head="database-schema">
-		<tail>database-data</tail>
-	</order>
-
 	<order head="database-data">
 		<tail>install</tail>
 		<tail>routes-server</tail>
@@ -39,10 +27,6 @@
 		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
 		<tail>time-server</tail>
-	</order>
-
-	<order head="node">
-		<tail>database-data</tail>
 	</order>
 
 	<order head="firewall-server">
@@ -87,14 +71,12 @@
 		<to>routes-server</to>
 		<to>kernel-server</to>
 		<to>ca</to>
-		<to>database</to>
-		<to>database-data</to>
-		<to>database-schema</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
 		<to>node-certs</to>
 		<to>storage-server</to>
 		<to>ludicrous-server</to>
+		<to>repo-server</to>
 	</edge>
 
 </graph>

@@ -18,10 +18,7 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 	
-	<!-- TODO: smarter way to determine the OS version -->
-	<!-- Also, this cond might not even be required, and just work in 11 -->
-
-	<services-manager stack:cond="'SLES-12-sp2' in &pallets;">
+	<services-manager stack:cond="os.version == '12.x'">
 		<default_target>multi-user</default_target>
 		<services>
 			<enable config:type="list">

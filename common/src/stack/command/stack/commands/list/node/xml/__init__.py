@@ -18,6 +18,7 @@ import stack
 import stack.profile
 import stack.commands
 from stack.exception import ArgRequired, CommandError
+from xml.sax import make_parser
 from xml.sax import saxutils
 
 
@@ -224,9 +225,15 @@ class Command(stack.commands.list.command,
 			for file in os.listdir(graph):
 				base, ext = os.path.splitext(file)
 				if ext == '.xml':
-					self.runImplementation(ext[1:], 
-							       (os.path.join(graph, file), 
-								handler))
+					parser = make_parser(["stack.expatreader"])
+					parser.setContentHandler(handler)
+					parser.feed(handler.getXMLHeader())
+					with open(os.path.join(graph, file), 'r') as xml:
+						for line in xml.readlines():
+							if line.find('<?xml') != -1:
+								continue
+							parser.feed(line)
+
 
 		graph = handler.getMainGraph()
 		if graph.hasNode(root):

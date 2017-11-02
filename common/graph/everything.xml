@@ -1,0 +1,6 @@
+<graph>
+	<edge from="everything">
+		<to>frontend</to>
+		<to>backend</to>
+	</edge>
+</graph>

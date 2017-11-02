@@ -368,7 +368,7 @@ grant select on cluster.global_firewall to ''@'localhost';
 
 DROP TABLE IF EXISTS os_firewall;
 CREATE TABLE os_firewall (
-  OS		varchar(32) NOT NULL default 'redhat',
+  OS		varchar(32) NOT NULL default '&os;',
   Tabletype	enum('nat','filter','mangle','raw') NOT NULL
   		default 'filter',
   Name		varchar(256) default NULL,

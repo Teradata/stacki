@@ -12,18 +12,6 @@
 		<tail>ssl-server</tail>
 	</order>
 
-	<order head="apache">
-		<tail>database</tail>
-	</order>
-
-	<order head="database">
-		<tail>database-schema</tail>
-	</order>
-
-	<order head="database-schema">
-		<tail>database-data</tail>
-	</order>
-
 	<order head="database-data">
 		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
@@ -33,10 +21,6 @@
 		<tail>routes-server</tail>
 		<tail>server</tail>
 		<tail>time-server</tail>
-	</order>
-
-	<order head="node">
-		<tail>database-data</tail>
 	</order>
 
 	<order head="firewall-server">
@@ -67,9 +51,6 @@
 		<to>base</to>
 		<to>apache</to>
 		<to>ca</to>
-		<to>database</to>
-		<to>database-data</to>
-		<to>database-schema</to>
 		<to>dhcp-server</to>
 		<to>dns-server</to>
 		<to>firewall-base</to>

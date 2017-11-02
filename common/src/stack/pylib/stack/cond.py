@@ -138,7 +138,10 @@ def EvalCondExpr(cond, attrs):
 		k = k.replace('.', '_DOT_')
 #		print(cond, ':', k, ':', v)
 		env[k] = v
-		
-	result = eval(cond, globals(), env)
+
+	try:
+		result = eval(cond, globals(), env)
+	except:
+		result = False
 
 	return result

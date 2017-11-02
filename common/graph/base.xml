@@ -1,7 +1,7 @@
 <graph>
 
 	<description>
-	Frontend Appliances
+	Common Stack Graph
 	</description>
 
 	<copyright>
@@ -10,10 +10,8 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
-	<edge from="server">
-		<to>foundation-python</to>
-		<to>foundation-python-server</to>
-		<to>mq-server</to>
+	<edge from="base" cond="os != 'sles' or os.version != '11.x'">
+		<to>mq-base</to>
 	</edge>
 
 </graph>

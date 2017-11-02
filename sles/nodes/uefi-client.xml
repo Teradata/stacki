@@ -1,21 +1,25 @@
 <stack:stack>
 
-<stack:description>
+	<stack:description>
 	UEFI configuration for SLES machines
-</stack:description>
+	</stack:description>
 
-<stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:package>mtools</stack:package>
-<stack:package>uefi-boot-method</stack:package>
+	<stack:package>
+		mtools
+		uefi-boot-method
+	</stack:package>
 
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">grub2-x86_64-efi</stack:package>
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">shim</stack:package>
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">mokutil</stack:package>
+	<stack:package stack:cond="os.version == '12.x'">
+		grub2-x86_64-efi
+		shim
+		mokutil
+	</stack:package>
 
 <stack:script stack:stage="install-pre">
 if [ -d /sys/firmware/efi ]; then
@@ -52,11 +56,11 @@ if efi_dev:
 ]]>
 </stack:script>
 
-<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
+<stack:script stack:cond="os.version == '12.x'" stack:stage="install-post">
 /usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
-<stack:script stack:cond="'SLES-11.3-1.138' in &pallets;" stack:stage="install-post" stack:chroot="false">
+<stack:script stack:cond="os.version == '11.x'" stack:stage="install-post" stack:chroot="false">
 MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
 </stack:script>
 

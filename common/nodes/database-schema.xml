@@ -1,16 +1,16 @@
 <stack:stack>
 
-<stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:rocks>
-Copyright (c) 2000 - 2010 The Regents of the University of California
-All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</stack:rocks>
+	<stack:rocks>
+	Copyright (c) 2000 - 2010 The Regents of the University of California
+	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+	https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+	</stack:rocks>
 
 
 <stack:script stack:stage="install-post">
@@ -143,7 +143,7 @@ CREATE TABLE bootactions (
 	Kernel		varchar(256) default NULL,
 	Ramdisk		varchar(256) default NULL,
 	Args		varchar(1024) default NULL,
-	PRIMARY KEY (BootName)
+	PRIMARY KEY (BootName, OS)
 );
 grant select on cluster.bootactions to ''@'localhost';
 
@@ -221,7 +221,7 @@ grant select on cluster.global_routes to ''@'localhost';
 
 DROP TABLE IF EXISTS os_routes;
 CREATE TABLE os_routes (
-  OS		varchar(32) NOT NULL default 'sles',
+  OS		varchar(32) NOT NULL default '&os;',
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
@@ -312,7 +312,7 @@ CREATE TABLE rolls (
   Version	varchar(32) NOT NULL default '',
   Rel		varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
-  OS		varchar(32) NOT NULL default 'sles',
+  OS		varchar(32) NOT NULL default '&os;',
   PRIMARY KEY (ID) 
 );
 
@@ -360,7 +360,7 @@ grant select on cluster.global_firewall to ''@'localhost';
 
 DROP TABLE IF EXISTS os_firewall;
 CREATE TABLE os_firewall (
-  OS		varchar(32) NOT NULL default 'sles',
+  OS		varchar(32) NOT NULL default '&os;',
   Tabletype	enum('nat','filter','mangle','raw') NOT NULL
   		default 'filter',
   Name		varchar(256) default NULL,

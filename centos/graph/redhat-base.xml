@@ -38,18 +38,11 @@
 		<to>foundation-python</to>
 	</edge>
 
-	<edge from="client" to="repo-client" />
-	<edge from="server" to="repo-server" />
 
 	<order head="yum-base">
 		<tail>repo-client</tail>
 		<tail>repo-server</tail>
 	</order>
-
-	<edge from="client">
-		<to>ssl-client</to>
-		<to>ssh-client</to>
-	</edge>
 
 </graph>
 

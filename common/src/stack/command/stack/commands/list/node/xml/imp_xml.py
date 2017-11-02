@@ -12,16 +12,23 @@ class Implementation(stack.commands.Implementation):
 
 	def __init__(self, command):
 		stack.commands.Implementation.__init__(self, command)
-		self.parser = make_parser()
+		self.parser = make_parser(["stack.expatreader"])
 
 	def run(self, args):
 
 		filename = args[0]
 		handler  = args[1]
-
-		fin = open(filename, 'r')
+		
+		print('XXX', filename)
 		self.parser.setContentHandler(handler)
-		self.parser.parse(fin)
-		fin.close()
+#		print(handler.getXMLHeader())
+#		self.parser.feed(handler.getXMLHeader())
+		print('ZZZ')
+		with open(filename, 'r') as graph:
+			for line in graph.readlines():
+				print(line[:-1])
+				self.parser.feed(line)
+
+
 
 		

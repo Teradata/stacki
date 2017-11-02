@@ -10,8 +10,10 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">mlocate</stack:package>
-<stack:package stack:cond="'SLES-12-sp2' in &pallets;">grub2</stack:package>
+	<stack:package stack:cond="os.version == '12.x'">
+		mlocate
+		grub2
+	</stack:package>
 
 <stack:stacki>
 authorized_key="""<stack:eval>cat /root/.ssh/id_rsa.pub</stack:eval>"""
@@ -25,7 +27,7 @@ mkdir -p /mnt/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 </stack:script>
 
-<stack:script stack:cond="'SLES-12-sp2' in &pallets;" stack:stage="install-post">
+<stack:script stack:cond="os.version == '12.x'" stack:stage="install-post">
 /usr/bin/systemctl disable wickedd-dhcp4.service
 /usr/bin/systemctl disable wickedd-dhcp6.service
 
@@ -66,7 +68,7 @@ tx.sendto(m.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
 tx.close()
 </stack:file>
 
-<stack:file stack:cond="'SLES-11.3-1.138' in &pallets;" name="/etc/cron.d/up">
+<stack:file stack:cond="os.version == '11.x'" name="/etc/cron.d/up">
 * * * * * root /opt/stack/bin/up.py
 </stack:file>
 
