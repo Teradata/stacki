@@ -19,8 +19,8 @@ class command(stack.commands.HostArgumentProcessor,
 	
 
 class Command(command):
-	"""List the Appliance, and physical position info for a list of
-	hosts.
+	"""
+	List the Appliance, and physical position info for a list of hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, info about

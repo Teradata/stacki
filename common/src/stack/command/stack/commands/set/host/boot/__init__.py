@@ -44,12 +44,13 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		(action, sync) = self.fillParams([
+		(action, nukedisks, nukecontroller, sync) = self.fillParams([
 			('action', None, True),
+			('nukedisks', None, False),
+			('nukecontroller', None, False),
 			('sync', True)
 		])
 		
-
 		sync    = self.str2bool(sync)
 		actions = [ 'os', 'install' ]
 		if action not in actions:
@@ -82,6 +83,17 @@ class Command(stack.commands.set.host.command):
 					(select id from nodes where name = '%s')
 					) 
 					""" % (action, host))
+
+		args = hosts.copy()
+		if nukedisks:
+			nukedisks = self.str2bool(nukedisks)
+			args.extend(['attr=nukedisks', 'value=%s' % nukedisks])
+			self.command('set.host.attr',args)
+
+		if nukecontroller:
+			nukecontroller = self.str2bool(nukecontroller)
+			args.extend(['attr=nukecontroller', 'value=%s' % nukecontroller])
+			self.command('set.host.attr',args)
 
 		if sync:
 			self.command('sync.host.boot', hosts)

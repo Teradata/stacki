@@ -65,7 +65,7 @@ def tracker():
 
 def lookup_file(hashcode):
 	try:
-		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode))
+		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
 	except:
 		raise
 	return res
@@ -86,7 +86,7 @@ def register_file(port, hashcode):
 									tracker(), 
 									port,
 									hashcode)
-									)
+									, timeout=(0.1, 5))
 	except:
 		raise
 
@@ -97,13 +97,13 @@ def unregister_file(hashcode, params):
 									tracker(),
 									hashcode),
 									params=params
-									)
+									, timeout=(0.1, 5))
 	except:
 		raise
 
 def unregister_host(host):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host))
+		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
 	except:
 		raise
 
@@ -118,6 +118,7 @@ def get_file_locally(path, filename):
 	file_location = '%s/install/%s' % (save_location, path)
 	local_file = '%s/%s' % (file_location, filename)
 	remote_file = '/install/%s/%s' % (path, filename)
+	hashcode = hashit(remote_file)
 	im_the_requester = request.remote_addr == "127.0.0.1"
 	environment = client_settings['ENVIRONMENT']
 	port = client_settings['PORT'] 
@@ -128,7 +129,6 @@ def get_file_locally(path, filename):
 	# check if file is local
 	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
 		
-		hashcode = hashit(remote_file)
 		params = {'port': port, 'hashcode': hashcode}
 		res = lookup_file(hashcode)
 		payload = res.json()
@@ -165,7 +165,7 @@ def get_file_locally(path, filename):
 	if not file_exists(local_file):
 		app.logger.info("requesting %s from frontend", filename)
 		try:
-			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
+			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file), timeout=(0.1, 5))
 			if tracker_res.status_code == 200:
 				save_file(tracker_res.content, '%s/' % (file_location), filename)
 				if client_settings['SAVE_FILES']:

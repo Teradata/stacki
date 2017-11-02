@@ -6,11 +6,13 @@ from random import shuffle
 import os
 import logging
 from logging import FileHandler
+import redis
+
+ludicredis = redis.StrictRedis()
 
 app = Flask(__name__)
 
-packages = {}
-peers = {}
+PEERS = set()
 
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
@@ -36,24 +38,23 @@ def lookup(hashcode):
 	res['success'] = True
 	ipaddr = request.remote_addr
 
-	# check if hash exists
-	if hashcode not in packages:
-		packages[hashcode] = []
-
 	# return list of peers with the request hash
 	res['peers'] = []
-	shuffle(packages[hashcode])
-	for peer in packages[hashcode]:
-		peer_ready = peers[peer]['ready']
-		not_my_ip = peer != ipaddr
-		if not_my_ip and peer_ready:
-			res['peers'].append("%s:%s" % (peer, peers[peer]['port']))
-		
+	peers = list(ludicredis.smembers(hashcode))
+	shuffle(peers)
+	for peer in peers:
+		# only append a peer if it is not the requester
+		if ipaddr not in peer.decode():
+                        peer_port = ludicredis.smembers('%s:PORT' % ipaddr)
+                        if peer_port:
+                                res['peers'].append("%s:%s" % (peer.decode(), peer_port.pop().decode()))
+                        else:
+                                res['peers'].append("%s:%s" % (peer.decode(), '80'))		
+
 		# if array of peers is max_peers, break
 		if len(res['peers']) == MAX_PEERS:
 			break
 
-	#res['peers'].append(":80")
 	return jsonify(res)
 
 
@@ -66,23 +67,14 @@ def register(port=80, hashcode=None):
 	if not hashcode:
 		return four_o_four()
 
-	# check if hash exists
-	if hashcode not in packages:
-		packages[hashcode] = []
+	# check if 
+	if ipaddr not in PEERS:
+		if not ludicredis.smembers("%s:PORT" % ipaddr):
+			ludicredis.sadd("%s:PORT" % ipaddr, "%s" % port)
+			PEERS.add(ipaddr)
 
-	# check if peer exists and is in our database
-	if ipaddr not in peers:
-		peers[ipaddr] = {
-			'ready': False,
-			'port': port
-			}
-
-	# register file
-	if ipaddr not in packages[hashcode]:
-		packages[hashcode].append(ipaddr)
-
-	# mark peer as ready
-	peers[ipaddr]['ready'] = True
+	# Register Package
+	ludicredis.sadd(hashcode, "%s" % ipaddr)
 
 	return jsonify(res)
 
@@ -93,31 +85,13 @@ def unregister(hashcode):
 	res = {}
 	res['success'] = True
 
-	app.logger.info("unquoted ip addr: %s", ipaddr)
-	if ipaddr in packages[hashcode]:
-		packages[hashcode] = [ ip for ip in packages[hashcode] if ip != ipaddr ]
+	result = ludicredis.srem(hashcode, ipaddr)
+	if result:
 		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
 	else:
 		res['message'] = "'%s' was not registered for hash: %s" % (ipaddr, hashcode)
 
-
 	return jsonify(res)
-
-@app.route('/avalanche/unregister/host/<host>', methods=['DELETE'])
-def unregister_host(host):
-	ipaddr = host
-	res = {}
-	res['success'] = True
-
-	for package in packages:
-		if ipaddr in packages[package]:
-			packages[package] = [ ip for ip in packages[package] if ip != ipaddr ]
-
-	if ipaddr in peers:
-		del(peers[ipaddr])
-
-	return jsonify(res)
-
 
 @app.route('/avalanche/peerdone', methods=['DELETE'])
 def peerdone():
@@ -125,70 +99,18 @@ def peerdone():
 	res = {}
 	res['success'] = True
 
-	for package in packages:
-		if ipaddr in packages[package]:
-			packages[package] = [ ip for ip in packages[package] if ip != ipaddr ]
-	
-	if ipaddr in peers:	
-		del(peers[ipaddr])
-
+	for package in ludicredis.scan_iter():
+		try:
+			ludicredis.srem(package, ipaddr)
+		except:
+			pass	
+		
 	return jsonify(res)
 
 
 @app.route('/avalanche/stop', methods=['GET'])
 def stop_server():
 	return "-1"
-
-
-# catch all for returning static files
-# if the request is a directory, the the request will be redirected
-@app.route('/<path:path>/<filename>')
-def get_file(path, filename):
-	path = path.replace('//', '/')
-	file_location = '%s/%s' % (ROOT_DIR, path)
-	response_file = '%s/%s' % (file_location, filename)
-	if os.path.isdir(response_file):
-		return redirect('%s/' % response_file, 301)
-	else:
-		return send_from_directory(unquote(file_location), unquote(filename))
-
-
-# return a directory listing
-@app.route('/<path:path>/<filename>/')
-def get_repodata(path, filename):
-	path = path.replace('//', '/')
-	file_location = '%s/%s' % (ROOT_DIR, path)
-	response_file = '%s/%s' % (file_location, filename)
-	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
-	return render_template('directory.html', items=items)
-
-
-# catch all for returning static files
-# if the request is a directory, the the request will be redirected
-@app.route('/<filename>')
-def get_file_in_root(filename):
-	response_file = '%s/%s' % (ROOT_DIR, filename)
-	if os.path.isdir(response_file):
-		return redirect('%s/' % response_file, 301)
-	else:
-		return send_from_directory(ROOT_DIR, unquote(filename))
-
-
-# return a directory listing
-@app.route('/<filename>/')
-def get_repodata_in_root(filename):
-	response_file = '%s/%s' % (ROOT_DIR, filename)
-	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
-	return render_template('directory.html', items=items)
-
-
-# return a directory listing
-@app.route('/')
-def get_repodata_catchall():
-	response_file = '%s/' % (ROOT_DIR)
-	items = [ f for f in os.listdir(response_file) if f[0] != '.' ]
-	return render_template('directory.html', items=items)
-
 
 def main():
 	logHandler = FileHandler('/var/log/ludicrous-server.log')

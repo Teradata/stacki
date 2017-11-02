@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.set.host.command):
@@ -39,6 +39,9 @@ class Command(stack.commands.set.host.command):
 		
 		if not len(args):
 			raise ArgRequired(self, 'host')
+
+		if len(comment) > 140:
+			raise CommandError(self, 'comments must be no longer than 140 characters')
 
 		for host in self.getHostnames(args):
 			self.db.execute("""update nodes set comment="%s" where
