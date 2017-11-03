@@ -10,11 +10,12 @@
 import subprocess
 import sys
 import os
-import httplib
+import http.client
 import random
 import time
 import json
 import string
+import ssl
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -26,10 +27,13 @@ from stacki_storage import *
 # functions
 #
 
-def sendit(server, req, partinfo):
+context = ssl.SSLContext()
+context.verify_mode = ssl.CERT_NONE
+
+def sendit(server, partinfo):
 	status = 0
 
-	h = httplib.HTTPSConnection(server, key_file = None, cert_file = None)
+	h = http.client.HTTPSConnection(server, context = context)
 	h.putrequest('GET', '/install/sbin/public/setDbPartitions.cgi')
 
 	h.putheader('X-Stack-PartitionInfo', json.dumps(partinfo))
@@ -39,12 +43,8 @@ def sendit(server, req, partinfo):
 		response = h.getresponse()
 		status = response.status
 	except:
-		#
-		# assume the error occurred due to an
-		# authorization problem
-		#
-		status = 403
-		pass
+		sys.stderr.write('%s\n' % response)
+		sys.stderr.write('%\n' % status)
 
 	h.close()
 	return status
@@ -93,10 +93,8 @@ if 'Kickstart_PrivateKickstartHost' in attributes:
 
 	retries = 0
 	while retries < 3:
-		status = sendit(host, 
-			'/install/sbin/public/setDbPartitions.cgi',
-			partinfo)
-	
+		status = sendit(host, partinfo)
+
 		if status == 200:
 			break
 		else:
