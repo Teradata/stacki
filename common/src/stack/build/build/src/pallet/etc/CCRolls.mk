@@ -14,11 +14,14 @@ include $(ROLLSBUILD)/etc/Rolls.mk
 
 .PHONY: clean.all nuke.all
 clean.all:: clean
-	-$(MAKE) -C $(ROLLROOT)/src clean.order
-	-$(MAKE) -C $(ROLLROOT)/src clean
+	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src clean.order
+	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src clean
+	-$(MAKE) -C $(ROLLROOT)/common/src clean.order
+	-$(MAKE) -C $(ROLLROOT)/common/src clean
 
 nuke.all:: nuke
-	-$(MAKE) -C $(ROLLROOT)/src nuke
+	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src nuke
+	-$(MAKE) -C $(ROLLROOT)/common/src nuke
 
 .PHONY: manifest-check
 manifest-check:
