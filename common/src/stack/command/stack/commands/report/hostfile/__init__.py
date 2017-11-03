@@ -28,6 +28,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			installaction = o['installaction']
 			osaction      = o['osaction']
 			box           = o['box']
+			comment       = o['comment']
 
 		groups = None
 		output, = self.call('list.host.group', [host])
@@ -63,6 +64,7 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 				osaction = None
 				groups = None
 				box = None
+				comment = None
 
 			ip = o['ip']
 			mac = o['mac']
@@ -76,14 +78,14 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 			i += 1
 			rows.append([ name, interface_hostname, default, appliance, rack, rank,
 				ip, mac, interface, network, channel, options, vlan,
-				installaction, osaction, groups, box ])
+				installaction, osaction, groups, box, comment ])
 		return(rows)
 
 	def run(self, params, args):
 
 		header = ['NAME', 'INTERFACE HOSTNAME', 'DEFAULT', 'APPLIANCE', 'RACK', 'RANK',
 			  'IP', 'MAC', 'INTERFACE', 'NETWORK', 'CHANNEL', 'OPTIONS', 'VLAN',
-			  'INSTALLACTION', 'OSACTION', 'GROUPS', 'BOX']
+			  'INSTALLACTION', 'OSACTION', 'GROUPS', 'BOX', 'COMMENT']
 
 		s = StringIO()
 		w = csv.writer(s)

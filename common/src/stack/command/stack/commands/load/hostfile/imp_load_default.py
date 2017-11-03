@@ -107,7 +107,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			vlan = None
 			boss = None
 			default = None
-			notes = None
+			comment = None
 			installaction = None
 			osaction = None
 			groups = None
@@ -166,8 +166,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					boss = field
 				elif header[i] == 'default':
 					default = field
-				elif header[i] == 'notes':
-					notes = field
+				elif header[i] == 'comment':
+					comment = field
 				elif header[i] == 'installaction':
 					installaction = field
 				elif header[i] in [ 'osaction', 'runaction' ]:
@@ -241,12 +241,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if boss:
 				self.owner.hosts[name]['boss'] = boss
 
-			if notes:
-				if 'notes' not in self.owner.hosts[name].keys():
-					self.owner.hosts[name]['notes'] = notes
+			if comment:
+				if 'comment' not in self.owner.hosts[name].keys():
+					self.owner.hosts[name]['comment'] = comment
 				else:
-					self.owner.hosts[name]['notes'] += \
-						', %s' % notes
+					self.owner.hosts[name]['comment'] += \
+						', %s' % comment
 			if installaction:
 				if installaction not in self.actions:
 					msg = 'installaction "%s" does not exist in the database' % installaction

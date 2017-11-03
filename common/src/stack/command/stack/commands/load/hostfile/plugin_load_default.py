@@ -105,10 +105,9 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				if key == 'boss':
 					continue
 
-				if key == 'notes':
-					self.owner.call('set.host.attr',
-						[ host, 'attr=motd',
-						'value=%s'
+				if key == 'comment':
+					self.owner.call('set.host.comment',
+						[ host, 'comment=%s'
 						% hosts[host][key] ])
 				else:
 					self.owner.call('set.host.%s' % key,
