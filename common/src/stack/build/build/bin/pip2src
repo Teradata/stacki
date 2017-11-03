@@ -188,7 +188,10 @@ with open(os.path.join(xmldir, '%s.xml' % Prefix), 'w') as graph:
 	graph.write('<graph>\n')
 	for pkgname in pkgnames:
 		for appliance in PackageSet[pkgname].appliances:
-			graph.write('\t<edge from="%s" to="%s-%s"/>\n' % (appliance, Prefix, pkgname))
+			if appliance == 'server':
+				graph.write('\t<edge from="%s" to="%s-%s"/>\n' % (appliance, Prefix, pkgname))
+			else:
+				graph.write('\t<edge from="foundation-python" to="%s-%s" cond="appliance == \'backend\'"/>\n' % (Prefix, pkgname))
 		if PackageSet[pkgname].appliances:
 			graph.write('\n')
 	graph.write('</graph>')

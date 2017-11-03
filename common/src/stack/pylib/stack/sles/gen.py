@@ -9,12 +9,15 @@
 from stack.bool import str2bool
 import stack.gen
 
+zypp_template = """zypper install -f -y %s
+[ $? -ne 0 ] && echo "Package Installation Failed. Cannot Continue" && exit -1
+"""
 
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
 		if enabled:
-			return 'zypper install -f -y %s' % ' '.join(enabled)
+			return  zypp_template % ' '.join(enabled)
 
 		return None
 		
@@ -257,15 +260,10 @@ class MainTraversor(stack.gen.MainTraversor):
 		pkg	 = self.collect(node).strip()
 
 		if node.parentNode.nodeName == 'sles:packages':
-			enabled = True
+			self.gen.packageSet.append(pkg, True, nodefile)
 		elif node.parentNode.nodeName == 'sles:remove-packages':
-			enabled = False
-		elif node.parentNode.nodeName == 'sles:post-packages':
-			enabled = True
-		else:
-			return False
+			self.gen.packageSet.append(pkg, False, nodefile)
 
-		self.gen.packageSet.append(pkg, enabled, nodefile)
 		self.traverse_sles(node)
 		return False
 

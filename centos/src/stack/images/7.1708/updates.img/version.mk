@@ -8,6 +8,7 @@ OVERLAY.PKGS	= \
 	stack-wizard \
 	storcli \
 	yum \
+	foundation-newt \
 	foundation-python-Flask \
 		foundation-python-itsdangerous \
 		foundation-python-Werkzeug \
@@ -22,4 +23,5 @@ OVERLAY.PKGS	= \
 		foundation-python-urllib3 \
 		foundation-python-chardet \
 		foundation-python-certifi \
-		foundation-python-idna
+		foundation-python-idna \
+	foundation-python-six
