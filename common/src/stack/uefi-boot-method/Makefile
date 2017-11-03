@@ -19,4 +19,6 @@ install::
 	mkdir -p $(ROOT)/opt/stack/bin/ $(ROOT)/lib/systemd/system/
 	$(INSTALL) -m 0755 uefi_boot_method.py $(ROOT)/opt/stack/bin/
 	$(INSTALL) -m 0644 uefi-boot-method.service $(ROOT)/lib/systemd/system/
+	mkdir -p $(ROOT)/etc/init.d/
+	$(INSTALL) -m 0755 uefi-boot-method.init $(ROOT)/etc/init.d/uefi-boot-method
 

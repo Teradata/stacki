@@ -1,0 +1,77 @@
+#!/bin/bash
+# Reset UEFI Boot Method
+#
+# chkconfig: - 91 84
+# description:  Reset UEFI boot to Network First
+# processname:  uefi_boot_method.py
+#
+# @copyright@
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+#
+
+### BEGIN INIT INFO
+# Provides: uefi-boot-method
+# Required-Start: $local_fs
+# Required-Stop: $local_fs
+# Default-Start:
+# Default-Stop: 0 1 6
+# Short-Description: Set UEFI boot method
+# Description: Set UEFI Boot method to network first
+### END INIT INFO
+
+
+# source function library
+. /etc/rc.status
+
+prog=/opt/stack/bin/uefi_boot_method.py
+
+RETVAL=0
+
+start() {
+    echo -n $"Setting UEFI boot method to Network First: "
+    $prog >/dev/null
+    if [ $RETVAL -eq 0 ]; then
+	rc_status -v
+    else
+        rc_failed
+    fi
+}
+
+stop() {
+    echo
+}
+
+restart() {
+    stop
+    start
+}
+
+status() {
+	echo $"Current UEFI Boot Status: "
+	/usr/sbin/efibootmgr
+}
+
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  status)
+    status
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart)"
+    exit 1
+    ;;
+esac
+
+exit $RETVAL
