@@ -286,7 +286,6 @@ $(RPM.TARGET): $(DEPENDENCIES)
 	@echo -e "%{!?__debug_package: \\" >> $(HOME)/.rpmmacros
 	@echo -e "/usr/lib/rpm/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros
 	@echo -e "} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/brp-python-hardlink \\" >> $(HOME)/.rpmmacros
 	@echo -e "%{nil}" >> $(HOME)/.rpmmacros
 	@echo -e "$(RPM.MACROS.EXTRAS)"		>> $(HOME)/.rpmmacros
 	@echo 
@@ -451,6 +450,7 @@ endif
 	@$(PF) "Source: $(NAME)-$(VERSION).tar.gz\n" >> $@
 	@$(PF) "$(rpm.prefix)\n" >> $@
 	@$(PF) "$(rpm.arch)\n" >> $@
+	@$(PF) "BuildRoot: $(BUILDROOT)\n" >> $@
 	@$(PF) "$(rpm.requires)\n" >> $@
 	@echo -e "$(RPM.EXTRAS)" >> $@
 	@$(PF) "%%description\n" >> $@
