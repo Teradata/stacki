@@ -16,16 +16,16 @@ fi
 
 case $RELEASE in
     *6.*)
-	echo 6.x
+	echo rhel6
 	;;
     *7.*)
-	echo 7.x
+	echo rhel7
 	;;
     *SUSE*11*)
-	echo 11.x
+	echo sles11
 	;;
     *SUSE*12*)
-	echo 12.x
+	echo sles12
 	;;
     *)
         echo unknown
