@@ -64,9 +64,14 @@ if efi_dev:
 MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
-<stack:script stack:stage="boot-post">
+<stack:script stack:stage="boot-post" cond="os.version == '12.x'">
 systemctl enable uefi-boot-method
 systemctl start uefi-boot-method
+</stack:script>
+
+<stack:script stack:stage="boot-post" cond="os.version == '11.x'">
+chkconfig --add uefi-boot-method
+service uefi-boot-method start
 </stack:script>
 
 </stack:stack>
