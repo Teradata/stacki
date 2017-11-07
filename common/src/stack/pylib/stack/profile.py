@@ -555,10 +555,12 @@ class Pass1NodeHandler(NodeHandler):
 		self.stripText	= False
 
 	def evalCond(self, attrs):
-		arch	  = self.getAttr(attrs, 'arch')
-		osname	  = self.getAttr(attrs, 'os')
-		release	  = self.getAttr(attrs, 'release')
-		cond	  = self.getAttr(attrs, 'cond')
+		# Do both 'stack:' and '' for NS. See stack_report and stack_eval
+		# for background (hint: this hack is going away)
+		arch	  = self.getAttr(attrs, 'stack:arch')    or self.getAttr(attrs, 'arch')
+		osname	  = self.getAttr(attrs, 'stack:os')      or self.getAttr(attrs, 'os')
+		release	  = self.getAttr(attrs, 'stack:release') or self.getAttr(attrs, 'release')
+		cond	  = self.getAttr(attrs, 'stack:cond')    or self.getAttr(attrs, 'cond')
 
 		if osname == 'linux':
 			# Remnant of the Solaris port, keep this for now
@@ -620,9 +622,10 @@ class Pass1NodeHandler(NodeHandler):
 			return
 		if not self.doEval or not self.rcl:
 			return
-		command = self.getAttr(attrs, 'name')
-		if command:
-			self.rclCommand = 'report.%s' % command
+		# still allow non-namespace xml attributes (deprecated)
+		command = self.getAttr(attrs, 'stack:name') or self.getAttr(attrs, 'name')
+
+		self.rclCommand = 'report.%s' % command
 
 
 	def endTag_stack_report(self, ns, tag):
@@ -646,17 +649,27 @@ class Pass1NodeHandler(NodeHandler):
 			return
 		if not self.doEval:
 			return
-		shell = self.getAttr(attrs, 'shell')
+
+		# Same as stack_report still allow non-namespace xml
+		# attributes, we will kill this off after we know
+		# all the code uses stack:
+		#
+		# No risk here, this is not for tags just attributes
+		# w/in our tags.
+
+		shell = self.getAttr(attrs, 'stack:shell') or self.getAttr(attrs, 'shell')
 		if shell:
 			self.evalShell = shell
 		else:
 			self.evalShell = 'sh'
-		mode = self.getAttr(attrs, 'mode')
+
+		mode = self.getAttr(attrs, 'stack:mode') or self.getAttr(attrs, 'mode')
 		if mode:
 			self.evalMode = mode
 		else:
-			self.evalMode = 'quote'
-		command = self.getAttr(attrs, 'command')
+			self.evalMode = 'stack:quote'
+
+		command = self.getAttr(attrs, 'stack:command') or self.getAttr(attrs, 'command')
 		if command:
 			self.evalText  = None
 			self.evalShell = command
