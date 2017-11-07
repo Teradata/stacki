@@ -8,13 +8,22 @@ import stack.commands
 
 
 class Implementation(stack.commands.Implementation):
-	def run(self, h):
 
-		host	 = h['host']
-		kernel	 = h['kernel']
-		ramdisk	 = h['ramdisk']
-		args	 = h['args']
-		boottype = h['type']
+	def run(self, args):
+		h = args[0]
+		i = args[1]
+
+		host      = h['host']
+		kernel    = h['kernel']
+		ramdisk   = h['ramdisk']
+		args      = h['args']
+		attrs     = h['attrs']
+		boottype  = h['type']
+
+		interface = i['interface']
+		ip        = i['ip']
+		mask      = i['mask']
+		gateway   = i['gateway']
 
 		self.owner.addOutput(host, 'default stack')
 		self.owner.addOutput(host, 'prompt 0')
