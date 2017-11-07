@@ -2,6 +2,9 @@
 import sys
 from snack import *
 import stack.wizard
+import subprocess
+import json
+from urllib.request import urlopen
 
 def render_timezone(screen):
 
@@ -28,15 +31,15 @@ def render_network(screen, data):
 	g = GridForm(screen, "Stacki Installation", 2, 10)
 
 	#create labels
-	title = Textbox(20, 2, "Network", scroll=0, wrap = 0)
-	tb0 = Textbox(13, 1, "Hostname:", scroll=0, wrap=0)
-	space = Textbox(13, 1, "", scroll=0, wrap=0)
-	dev = Textbox(13, 2, "Devices:", scroll=0, wrap=0)
-	space2 = Textbox(13, 1, "", scroll=0, wrap=0)
-	tb1 = Textbox(13, 1, "IP:", scroll=0, wrap=0)
-	tb2 = Textbox(13, 1, "Netmask:", scroll=0, wrap=0)
-	tb3 = Textbox(13, 1, "Gateway:", scroll=0, wrap=0)
-	tb4 = Textbox(13, 2, "DNS Servers:", scroll=0, wrap=0)
+	title = Textbox(23, 2, "Network", scroll=0, wrap = 0)
+	tb0 = Textbox(16, 1, "Hostname (FQDN):", scroll=0, wrap=0)
+	space = Textbox(16, 1, "", scroll=0, wrap=0)
+	dev = Textbox(16, 2, "Devices:", scroll=0, wrap=0)
+	space2 = Textbox(16, 1, "", scroll=0, wrap=0)
+	tb1 = Textbox(16, 1, "IP:", scroll=0, wrap=0)
+	tb2 = Textbox(16, 1, "Netmask:", scroll=0, wrap=0)
+	tb3 = Textbox(16, 1, "Gateway:", scroll=0, wrap=0)
+	tb4 = Textbox(16, 2, "DNS Servers:", scroll=0, wrap=0)
 
 	#create list to choose device
 	lb = Listbox(2, scroll=0, returnExit=0, width=21, showCursor=0)
@@ -144,45 +147,127 @@ def render_partition(screen):
 	return result
 
 def render_pallets(screen, data):
-
-	#get list of pallets
-	packages = data.getDVDPallets()
-
-	#if no pallets, display this screen
-	if len(packages) == 0:
-		result = ButtonChoiceWindow(screen, "Error", \
-			"Please insert or mount a pallets DVD",
-			buttons=['Ok', 'Cancel'])
-		result = (result, "none")
-	else:
-		#create form
-		g = GridForm(screen, "Stacki Installation", 1, 3)
-
-		#create label
-		tb = Textbox(40, 2, "Pallets to Install", scroll=0, wrap = 0)
-
-		#create checkbox tree
-		ct = CheckboxTree(height = 5, scroll = 1)
-		ct.append("DVD Drive", item=None, selected=1)
-
-		#insert pallet info into checkbox tree
-		for p in packages:
-			line = p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3]
-			ct.addItem(line, (0, snackArgs['append']), selected=1)
-
-		#create buttons
-		bb = ButtonBar(screen, (("Continue", "continue"), ("Back", "back")))
-
-		#add elements to form
-		g.add(tb, 0, 0)
-		g.add(ct, 0, 1)
-		g.add(bb, 0, 2, growx = 1)
-
-		#return pressed button value and selected pallets
-		form_result = g.runOnce()
-		result = (bb.buttonPressed(form_result), ct.getSelection())
-
+	# Load the initial pallets from the boot cd (add an empy item for net data)
+	pallets = [x + ('',) for x in data.getDVDPallets()]
+	
+	# This will loop until Continue or Back is selected
+	while True:
+		grid = GridForm(screen, "Stacki Installation", 1, 3)
+	
+		# Create the dialog label
+		label = Textbox(60, 2, "Pallets to Install", scroll=0, wrap = 0)
+	
+		# Create the checkbox tree
+		checkbox_tree = CheckboxTree(height=10, width=60, scroll=1)
+	
+		# Insert pallet info into checkbox tree
+		for pallet in pallets:
+			checkbox_tree.append(' '.join(pallet), pallet, selected=1)
+	
+		# Create the buttons
+		buttons = ButtonBar(screen, (
+			("Continue", "continue"),
+			("Add Pallets", "add"),
+			("Back", "back")
+		))
+	
+		# Add the elements to the form
+		grid.add(label, 0, 0)
+		grid.add(checkbox_tree, 0, 1)
+		grid.add(buttons, 0, 2, growx = 1)
+	
+		# Return pressed button value and selected pallets
+		form_result = grid.runOnce()
+		button_pressed = buttons.buttonPressed(form_result)
+		
+		# Handle loading pallets
+		if button_pressed == "add":
+			handle_add_pallet(screen, data, pallets)
+		else:
+			result = (button_pressed, checkbox_tree.getSelection())
+			break	
+	
+	#from pudb.remote import set_trace; set_trace(term_size=(200, 60))
 	return result
+
+def handle_add_pallet(screen, data, pallets):
+	button_choice = ButtonChoiceWindow(
+		screen,
+		"Add Pallets",
+		"Select a method to add more pallets to the list.",
+		buttons=["DVD", "Network"]
+	)
+	
+	if button_choice == "dvd":
+		handle_add_dvd(screen, data, pallets)
+	else:
+		handle_add_network(screen, data, pallets)
+
+def handle_add_dvd(screen, data, pallets):
+	# Eject any existing media
+	media = stack.media.Media()
+	media.umountCD()
+	media.ejectCD()
+	
+	# Prompt the user to load the DVD
+	button_choice = ButtonChoiceWindow(
+		screen,
+		"Add Pallets",
+		"Please insert the DVD to load pallets.",
+		buttons=["Load", "Cancel"]
+	)
+	
+	if button_choice == "load":
+		# Mount the CD
+		subprocess.call(["mount", "/dev/cdrom", "/mnt/cdrom"])
+		
+		# Add any pallets (add a empty item for the net data)
+		pallets.extend([x + ('',) for x in data.getDVDPallets()])
+	
+
+def handle_add_network(screen, data, pallets):
+	# Prompt the user to enter the network URL
+	response = EntryWindow(
+		screen,
+		"Add Pallets",
+		"Please enter the location to load the network pallets:",
+		["URL"],
+		buttons=["Load", "Cancel"],
+		width=60,
+		entryWidth=46
+	)
+	
+	if response[0] == "load":
+		url = response[1][0]
+
+		# Transform the entered URL to our CGI path
+		if not url.startswith("http"):
+			url = "http://" + url
+		
+		if not url.find("/install/pallets/") > 0:
+			url = url.rstrip("/") + "/install/pallets/"
+
+		if not url.endswith("pallets.cgi"):
+			url = url + "pallets.cgi"
+		
+		# Load the pallet info from the network
+		try:
+			with urlopen(url) as response:
+				for pallet in json.loads(response.read()):
+					pallets.append((
+						pallet['name'],
+						pallet['version'],
+						pallet['release'],
+						'',
+						url[:-11]
+					))
+		except:
+			ButtonChoiceWindow(
+				screen,
+				"Invalid URL",
+				 "Unable to load pallets at provided URL.",
+				 buttons=["Ok"]
+			)
 
 def render_summary(screen, data):
 
@@ -254,16 +339,29 @@ def process_data(page, btn_value, result):
 			validated, message, title = data.validatePartition(str(result))
 		#pallets
 		elif page == 5:
-			#convert list of pallet strings to dict
-			selected_pallets = []
-			for p in result:
-				a = p.split(" ")
-				selected_pallets.append(
-					{'name': a[0], 'version': a[1], 'release': a[2], 'id': a[3]})
+			# Create out lists of selected pallets to validate
+			dvd_pallets = []
+			net_pallets = []
+			for item in result:
+				pallet =  {
+					'name': item[0],
+					'version': item[1],
+					'release': item[2],
+					'id': item[3],
+					'url': item[4]
+				}
 
-			#takes two arguments of dvd-pallets and network-pallets
-			validated, message, title = \
-				data.validatePallets(selected_pallets, [])
+				# If it has a disk id then it is a DVD pallet, else it is net
+				if pallet['id'] != '':
+					dvd_pallets.append(pallet)
+				else:
+					net_pallets.append(pallet)
+			
+			validated, message, title = data.validatePallets(
+				dvd_pallets,
+				net_pallets
+			)
+		
 		#summary
 		elif page == 6:
 			validated, message, title = data.writefiles()
