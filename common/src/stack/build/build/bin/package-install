@@ -7,7 +7,7 @@
 # @copyright@
 
 zypper() {
-	for p in $@; do
+	for p in "$@"; do
 		if [ $meta == 1 ]; then
 			/usr/bin/zypper in -y -t pattern $p
 		else
@@ -42,8 +42,8 @@ shift $(($OPTIND - 1))
 
 path=`dirname $0`
 case `$path/os` in
-suse)
-	zypper $@
+sles)
+	zypper "$@"
 	;;
 redhat)
 	yum "$@"
