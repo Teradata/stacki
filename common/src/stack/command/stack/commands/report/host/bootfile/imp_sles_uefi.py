@@ -34,19 +34,29 @@ boot
 
 
 class Implementation(stack.commands.Implementation):
-	def run(self, h):
-		host	 = h['host']
-		kernel	 = h['kernel']
-		ramdisk	 = h['ramdisk']
-		args	 = h['args']
-		boottype = h['type']
+
+	def run(self, args):
+		h = args[0]
+		i = args[1]
+
+		host      = h['host']
+		kernel    = h['kernel']
+		ramdisk   = h['ramdisk']
+		args      = h['args']
+		attrs     = h['attrs']
+		boottype  = h['type']
+
+		interface = i['interface']
+		ip        = i['ip']
+		mask      = i['mask']
+		gateway   = i['gateway']
 
 
 		# Get pallets for Host
 		pallets = self.owner.getHostAttr(h['host'], 'pallets')
 		os_template = sles11_os_template
 		for p in pallets:
-			if p.startswith('SLES-12'):
+			if p.startswith('SLES-12'): # Why not use attrs['os.version']?
 				os_template = sles12_os_template
 				break
 

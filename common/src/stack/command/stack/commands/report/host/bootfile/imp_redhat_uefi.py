@@ -28,13 +28,22 @@ configfile ($root)/efi/centos/grub.cfg
 
 
 class Implementation(stack.commands.Implementation):
-	def run(self, h):
-		host     = h['host']
-		kernel   = h['kernel']
-		ramdisk  = h['ramdisk']
-		args     = h['args']
-		boottype = h['type']
 
+	def run(self, args):
+		h = args[0]
+		i = args[1]
+
+		host      = h['host']
+		kernel    = h['kernel']
+		ramdisk   = h['ramdisk']
+		args      = h['args']
+		attrs     = h['attrs']
+		boottype  = h['type']
+
+		interface = i['interface']
+		ip        = i['ip']
+		mask      = i['mask']
+		gateway   = i['gateway']
 
 		# Get the bootaction for the host (install or os) and
 		# lookup the actual kernel, ramdisk, and args for the

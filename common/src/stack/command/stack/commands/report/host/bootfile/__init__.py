@@ -91,9 +91,9 @@ class Command(stack.commands.Command,
 			if ip and pxe:
 				h['interfaces'].append({
 					'interface': interface,
-					'ip'	: ip,
-					'mask'	: row['mask'],
-					'gateway': row['gateway']
+					'ip'	   : ip,
+					'mask'	   : row['mask'],
+					'gateway'  : row['gateway']
 				})
 
 
