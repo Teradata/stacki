@@ -44,6 +44,6 @@
 /opt/stack/bin/stack add bootaction rescue type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
-</script:script>
+</stack:script>
 
 </stack:stack>
