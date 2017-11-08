@@ -5,6 +5,9 @@
 # @copyright@
 
 OS=$(shell common/src/stack/build/build/bin/os)
+ifeq ($(OS),redhat)
+BOOTABLE=1
+endif
 
 ROLLROOT = .
 

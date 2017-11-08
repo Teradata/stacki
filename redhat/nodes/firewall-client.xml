@@ -12,7 +12,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:script stack:stage="install-post">
-<stack:report name="host.firewall">&hostname;</stack:report>
+<stack:report stack:name="host.firewall">&hostname;</stack:report>
 </stack:script>
 
 

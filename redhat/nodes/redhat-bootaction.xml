@@ -6,7 +6,7 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-<stack:script stack:stage="install-post" stack:cond="release == '6.x'">
+<stack:script stack:stage="install-post" stack:cond="release == 'redhat6'">
 /opt/stack/bin/stack add bootaction default type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm"
@@ -24,7 +24,7 @@
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm"
 </stack:script>
 
-<stack:script stack:stage="install-post" stack:cond="release == '7.x'">
+<stack:script stack:stage="install-post" stack:cond="release == 'redhat7'">
 /opt/stack/bin/stack add bootaction default type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"

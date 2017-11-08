@@ -15,7 +15,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:script stack:stage="install-post">
 
-<stack:report name="host.resolv">&hostname;</stack:report>
+<stack:report stack:name="host.resolv">&hostname;</stack:report>
 
 <!-- Give each host knowledge of itself. -->
 <stack:file stack:name="/etc/hosts">

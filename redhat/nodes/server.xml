@@ -23,7 +23,7 @@
 <stack:native stack:lang="kickstart">
 reboot --eject
 
-<stack:eval shell="/opt/stack/bin/python3" mode="xml">
+<stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 import os
 import urlparse
 import stack.roll

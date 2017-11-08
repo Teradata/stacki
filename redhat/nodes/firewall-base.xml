@@ -17,17 +17,17 @@
 	</stack:rocks>
 
 
-	<stack:package stack:cond="'&release;' == '7.x'">iptables-services</stack:package>
+	<stack:package stack:cond="release == 'redhat7'">iptables-services</stack:package>
 
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 /usr/bin/systemctl disable firewalld
 /usr/bin/systemctl enable iptables
 /usr/bin/systemctl disable ip6tables
 </stack:script>
 
 
-<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 /sbin/chkconfig iptables on
 </stack:script>
 

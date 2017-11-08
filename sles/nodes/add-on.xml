@@ -12,7 +12,7 @@
   
 	<add-on>
 		<add_on_products config:type="list">
-			<stack:eval shell="/opt/stack/bin/python3" mode="xml">
+			<stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 import stack.api
 
 def add_on_pallet(host, name, version, release, OS, arch):

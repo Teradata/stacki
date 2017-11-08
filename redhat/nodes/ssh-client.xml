@@ -42,7 +42,7 @@ cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null
 </stack:script>
 
 
-<stack:script stack:cond="not &ssh.use_dns;" stack:stage="install-post">
+<stack:script stack:cond="not ssh.use_dns" stack:stage="install-post">
 
 <stack:file stack:name="/etc/ssh/sshd_config" stack:mode="append">
 UseDNS no
@@ -51,7 +51,7 @@ UseDNS no
 </stack:script>
 
 
-<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 
 key="
 <stack:eval>
@@ -89,7 +89,7 @@ cat /etc/ssh/ssh_host_dsa_key.pub 2> /dev/null
 </stack:script>
 
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 
 <stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400">
 <stack:eval>

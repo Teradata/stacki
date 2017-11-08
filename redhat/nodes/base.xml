@@ -29,10 +29,10 @@ keyboard &Kickstart_Keyboard;
 
 timezone --utc &Kickstart_Timezone;
 
-<stack:eval shell="/opt/stack/bin/python3" mode="xml">
-if '&boot_device;' != '' and '&release;' == '6.x':
+<stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
+if '&boot_device;' != '' and '&release;' == 'redhat6':
 	print "bootloader --location=none"
-elif '&boot_device;' != '' and '&release;' == '7.x':
+elif '&boot_device;' != '' and '&release;' == 'redhat7':
 	print "bootloader --location=mbr --boot-drive=&boot_device;"
 else:
 	print "bootloader --location=mbr"
@@ -41,7 +41,7 @@ else:
 </stack:native>
 
 
-<stack:package stack:cond="'&release;' == '7.x'">net-tools</stack:package>
+<stack:package stack:cond="release == 'redhat7'">net-tools</stack:package>
 <stack:package>foundation-rcs</stack:package>
 <stack:package>mlocate</stack:package>
 <stack:package>vim</stack:package>

@@ -370,7 +370,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		fout.write('lang en_US\n')
 		fout.write('keyboard us\n')
 		fout.write('interactive\n')
-		if release == '7.x':
+		if release == 'redhat7':
 			fout.write('url --url cdrom:cdrom:%s\n' % palletdir)
 		else:
 			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
@@ -378,7 +378,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		fout.close()
 
 		# Write USB file
-		if release == '7.x':
+		if release == 'redhat7':
 			fout = open(os.path.join('disk1', 'ks-usb.cfg'), 'w')
 			fout.write('install\n')
 			fout.write('lang en_US\n')

@@ -36,14 +36,14 @@ gawk '/net\.ipv4\.ip_forward/ { \
 mv /tmp/sysctl.conf /etc/sysctl.conf
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 <stack:file stack:name="/etc/man.config" stack:mode="append">
 MANPATH /opt/stack/man
 MANPATH /opt/stack/share/man
 </stack:file>
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 <stack:file stack:name="/etc/man_db.conf" stack:mode="append">
 MANDATORY_MANPATH /opt/stack/man
 MANDATORY_MANPATH /opt/stack/share/man

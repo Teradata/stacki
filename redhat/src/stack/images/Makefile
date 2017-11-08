@@ -7,8 +7,7 @@
 ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
--include $(RELEASE).mk
--include $(RELEASE)-$(ARCH).mk
+include $(RELEASE).mk
 
 SRCDIRS = 7.1708
 

@@ -45,7 +45,7 @@ echo "&hostname;.&domainname;" > /etc/HOSTNAME
 
 <!-- repo config -->
 rm -f /etc/zypp/repos.d/*
-<stack:report name="host.repo">&hostname;</stack:report>
+<stack:report stack:name="host.repo">&hostname;</stack:report>
 
 
 <!-- host status message. this sends out the 'up' health message -->
@@ -79,9 +79,9 @@ tx.close()
 <stack:script stack:stage="boot-pre">
 
 <!-- networking config -->
-<stack:report name="host.interface">&hostname;</stack:report>
-<stack:report name="host.route">&hostname;</stack:report>
-<stack:report name="host.resolv">&hostname;</stack:report>
+<stack:report stack:name="host.interface">&hostname;</stack:report>
+<stack:report stack:name="host.route">&hostname;</stack:report>
+<stack:report stack:name="host.resolv">&hostname;</stack:report>
 
 #
 # the above command (report host resolv) writes /etc/resolv.conf. make sure
@@ -97,8 +97,8 @@ awk '/NETCONFIG_DNS_POLICY/ { \
 cp /tmp/config /etc/sysconfig/network/config
 
 <!-- populate root's authorized_keys -->
-<stack:file name="/root/.ssh/authorized_keys" stack:perms="0600">
-<stack:eval shell="/opt/stack/bin/python3">
+<stack:file stack:name="/root/.ssh/authorized_keys" stack:perms="0600">
+<stack:eval stack:shell="/opt/stack/bin/python3">
 file = open('/root/.ssh/id_rsa.pub')
 for line in file.readlines():
 	print(line.strip())

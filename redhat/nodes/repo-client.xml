@@ -11,7 +11,7 @@
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
-<stack:report name="host.repo">&hostname;</stack:report>
+<stack:report stack:name="host.repo">&hostname;</stack:report>
 </stack:script>
 
 </stack:stack>

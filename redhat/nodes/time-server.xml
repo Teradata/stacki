@@ -17,11 +17,11 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </stack:rocks>
 
 
-<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 /opt/stack/bin/stack set attr attr=time.protocol value=ntp
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 /opt/stack/bin/stack set attr attr=time.protocol value=chrony
 </stack:script>
 

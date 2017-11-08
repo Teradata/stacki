@@ -35,7 +35,7 @@ cat /root/.ssh/id_rsa.pub
  -->
 
 cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
-<stack:eval mode="xml">
+<stack:eval stack:mode="xml">
 curl_cmd=/usr/bin/curl
 
 <!-- on an installing system, curl may be in /bin? -->

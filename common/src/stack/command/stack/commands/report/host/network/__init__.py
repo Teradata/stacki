@@ -65,10 +65,10 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.addOutput(host, '</stack:file>')
 
 			#
-			# 7.x requires the hostname to be placed into
+			# Some version require the hostname to be placed into
 			# /etc/hostname
 			#
-			if stack.release == '7.x':
+			if stack.release in [ 'redhat7', 'sles11', 'sles12' ]:
 				self.addOutput(host, 
 					'<stack:file stack:name="/etc/hostname">')
 				self.addOutput(host, '%s' % hostname)

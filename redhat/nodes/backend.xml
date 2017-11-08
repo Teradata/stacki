@@ -6,9 +6,13 @@ Backend Appliance Node. You should create your own extend-backend.xml
 file to add functionality to this appliance type.
 </stack:description>
 
+<stack:stacki>
+csv_partitions = <stack:report stack:name="host.storage.partition">&hostname;</stack:report>
+csv_controller = <stack:report stack:name="host.storage.controller">&hostname;</stack:report>
+</stack:stacki>
 
 <stack:native stack:lang="kickstart">
-<stack:eval shell="/opt/stack/bin/python3" mode="xml">
+<stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 
 import stack.api
 
@@ -61,7 +65,7 @@ ldconfig
 /opt/stack/bin/stacki-status.py install complete rebooting
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 cp /run/install/tmp/stack.conf /tmp/stack.conf
 </stack:script>
 

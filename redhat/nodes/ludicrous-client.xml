@@ -12,11 +12,11 @@
 
 <stack:package>ludicrous-speed</stack:package>
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 /usr/bin/systemctl enable ludicrous-client 
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 /sbin/chkconfig ludicrous-client on
 </stack:script>
 <!-- Change Stacki.repo to localhost -->

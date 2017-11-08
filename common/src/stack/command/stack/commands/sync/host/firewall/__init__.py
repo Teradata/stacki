@@ -76,7 +76,7 @@ class Command(stack.commands.sync.host.command):
 		if restartit:
 			threads = []
 			for host in hosts:
-				if stack.release == '7.x' or stack.release == '12':
+				if stack.release in [ 'redhat7', 'sles12' ]:
 					cmd = 'systemctl restart iptables'
 				else:
 					cmd = '/sbin/service iptables restart'

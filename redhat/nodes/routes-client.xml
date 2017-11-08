@@ -18,7 +18,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 
 
 <stack:script stack:stage="install-post">
-<stack:report name="host.route">&hostname;</stack:report>
+<stack:report stack:name="host.route">&hostname;</stack:report>
 </stack:script>
 
 

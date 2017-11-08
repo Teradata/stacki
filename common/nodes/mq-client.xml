@@ -10,7 +10,7 @@
 systemctl enable rmq-shipper
 chkconfig --add rmq-shipper
 
-<stack:report name="host.mq">&hostname;</stack:report>
+<stack:report stack:name="host.mq">&hostname;</stack:report>
 <!-- the following channels are shipped by default -->
 
 <stack:file stack:name="/etc/sysconfig/stack-mq-channels" stack:mode="append">

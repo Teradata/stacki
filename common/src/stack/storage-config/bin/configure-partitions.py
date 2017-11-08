@@ -466,7 +466,7 @@ if not csv_partitions:
 		default = 'default'
 
 	ostype = 'rhel7'
-	if release == '6.x':
+	if release == 'redhat6':
 		ostype = 'rhel6'
 
 	var = '%s_%s' % (ostype, default)

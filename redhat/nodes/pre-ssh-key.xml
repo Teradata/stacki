@@ -28,7 +28,7 @@ fi
 -->
 
 cat &gt; /tmp/authorized_keys &lt;&lt; 'EOF'
-<stack:eval shell="/opt/stack/bin/python3">
+<stack:eval stack:shell="/opt/stack/bin/python3">
 
 import os
 
@@ -66,7 +66,7 @@ chmod 600 /tmp/authorized_keys
 
 </stack:script>
 
-<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-pre">
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-pre">
 
 <stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400" stack:rcs="off">
 <stack:eval>

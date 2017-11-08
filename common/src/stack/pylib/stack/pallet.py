@@ -294,11 +294,11 @@ class GetPallet:
 				dialog.completePallet()
 
 			#
-			# if this is the stacki pallet for 7.x then we need to
+			# if this is the stacki pallet for redhat7 then we need to
 			# copy the LiveOS and images directories into the 
 			# destination
 			#
-			if name == 'stacki' and stack.release == '7.x':
+			if name == 'stacki' and stack.release == 'redhat7':
 				os.chdir(localpath)
 
 				purl = os.path.join(url, 'LiveOS')

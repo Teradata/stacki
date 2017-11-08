@@ -153,7 +153,7 @@ class Bootable:
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
 
-		if stack.release == '6.x':
+		if stack.release == 'redhat6':
 			#
 			# install.img
 			#
@@ -163,7 +163,7 @@ class Bootable:
 			os.rename(fileold, filenew)
 			os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-		if stack.release == '7.x':
+		if stack.release == 'redhat7':
 			#
 			# updates.img
 			#
