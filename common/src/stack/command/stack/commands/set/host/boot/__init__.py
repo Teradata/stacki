@@ -85,16 +85,18 @@ class Command(stack.commands.set.host.command):
 					""" % (action, host))
 
 		args = hosts.copy()
-		if nukedisks:
-			nukedisks = self.str2bool(nukedisks)
-			args.extend(['attr=nukedisks', 'value=%s' % nukedisks])
-			self.command('set.host.attr',args)
-
-		if nukecontroller:
-			nukecontroller = self.str2bool(nukecontroller)
-			args.extend(['attr=nukecontroller', 'value=%s' % nukecontroller])
-			self.command('set.host.attr',args)
+		if len(args) > 0:
+			if nukedisks is not None:
+				nukedisks = self.str2bool(nukedisks)
+				args.extend(['attr=nukedisks', 'value=%s' % nukedisks])
+				self.command('set.host.attr',args)
+			if nukecontroller is not None:
+				nukecontroller = self.str2bool(nukecontroller)
+				args.extend(['attr=nukecontroller', 'value=%s' % nukecontroller])
+				self.command('set.host.attr',args)
 
 		if sync:
 			self.command('sync.host.boot', hosts)
 
+
+RollName = "stacki"
