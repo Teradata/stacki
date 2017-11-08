@@ -43,6 +43,7 @@
 		<to>resolv</to>
 		<to>routes-client</to>
 		<to>storage</to>
+		<to>storage-client</to>
 		<to>pxeboot</to>
 		<to>peerdone</to>
 		<to>ludicrous-client</to>

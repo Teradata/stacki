@@ -22,6 +22,7 @@
 
 <stack:native stack:lang="kickstart">
 reboot --eject
+text
 
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 import os

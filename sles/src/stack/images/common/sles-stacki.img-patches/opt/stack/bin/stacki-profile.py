@@ -8,6 +8,8 @@
 #
 
 import subprocess
+import random
+import time
 import os
 
 debug = open('/tmp/stacki-profile.debug', 'w')
@@ -34,8 +36,8 @@ p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
 
 interface_number = 0
 
-curlcmd = [ '/usr/bin/curl', '--local-port', '1-100',
-	'--output', '/tmp/stacki-profile.xml' ]
+curlcmd = [ '/usr/bin/curl', '-s', '-w', '%{http_code}', '--local-port', '1-100',
+	'--output', '/tmp/stacki-profile.xml', '--insecure' ]
 
 o, e = p.communicate()
 output = o.decode()
@@ -66,8 +68,6 @@ for line in output.split('\n'):
 
 			interface_number += 1
 
-curlcmd.append('--insecure')
-
 #
 # get the number of CPUs
 #
@@ -94,5 +94,19 @@ request = 'https://%s/install/sbin/profile.cgi?os=sles&arch=x86_64&np=%d' % \
 	(server, numcpus)
 curlcmd.append(request)
 
-subprocess.call(curlcmd, stdout=open('/dev/null'), stderr=open('/dev/null'))
+#
+# retry until we get an installation file. if the HTTP request fails, then sleep
+# for a random amount of time (between 3 and 10 seconds) before we retry.
+#
+http_code = 0
+while http_code != 200:
+	p = subprocess.Popen(curlcmd, stdout=subprocess.PIPE, stderr=open('/dev/null'))
+
+	try:
+		http_code = int(p.stdout.readline())
+	except:
+		http_code = 0
+
+	if http_code != 200:
+		time.sleep(random.randint(3, 10))
 
