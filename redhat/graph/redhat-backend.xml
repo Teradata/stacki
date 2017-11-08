@@ -49,6 +49,7 @@
 		<to>ludicrous-client</to>
 		<to>ssl-client</to>
 		<to>ssh-client</to>
+		<to>storage-client</to>
 		<to>repo-client</to>
 	</edge>
 

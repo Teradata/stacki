@@ -6,11 +6,6 @@ Backend Appliance Node. You should create your own extend-backend.xml
 file to add functionality to this appliance type.
 </stack:description>
 
-<stack:stacki>
-csv_partitions = <stack:report stack:name="host.storage.partition">&hostname;</stack:report>
-csv_controller = <stack:report stack:name="host.storage.controller">&hostname;</stack:report>
-</stack:stacki>
-
 <stack:native stack:lang="kickstart">
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 

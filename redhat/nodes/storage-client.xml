@@ -7,8 +7,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:stacki>
-csv_partitions = <stack:report name="host.storage.partition">&hostname;</stack:report>
-csv_controller = <stack:report name="host.storage.controller">&hostname;</stack:report>
+csv_partitions = <stack:report stack:name="host.storage.partition">&hostname;</stack:report>
+csv_controller = <stack:report stack:name="host.storage.controller">&hostname;</stack:report>
 </stack:stacki>
 
 </stack:stack> 
