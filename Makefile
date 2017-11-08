@@ -5,13 +5,14 @@
 # @copyright@
 
 OS=$(shell common/src/stack/build/build/bin/os)
-ifeq ($(OS),redhat)
-BOOTABLE=1
-endif
 
 ROLLROOT = .
 
 -include $(ROLLSBUILD)/etc/CCRolls.mk
+
+ifeq ($(OS),redhat)
+BOOTABLE=1
+endif
 
 .PHONY: 3rdparty
 3rdparty: # we need to do the for all OSes
