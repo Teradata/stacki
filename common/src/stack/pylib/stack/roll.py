@@ -1,4 +1,4 @@
-#! /opt/stack/bin/python
+#!/opt/stack/bin/python3
 # 
 # @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
@@ -103,19 +103,13 @@ class Generator():
 	##
 	def parse(self, file):
 		doc  = xml.dom.minidom.parse(file)
-		node = doc.getElementsByTagName('roll')
-
-		if len(node) != 1:
-			return
-
-		attrs = node[0]
-		name = attrs.getAttribute('name')
-		version = attrs.getAttribute('version')
-		arch = attrs.getAttribute('arch')
-		url = attrs.getAttribute('url')
-		diskid = attrs.getAttribute('diskid')
-		release = attrs.getAttribute('release')
-
-		self.rolls.append((name, version, release, arch, url, diskid))
-
-
+		nodes = doc.getElementsByTagName('roll')
+		for node in nodes:
+			attrs = node
+			name = attrs.getAttribute('name')
+			version = attrs.getAttribute('version')
+			arch = attrs.getAttribute('arch')
+			url = attrs.getAttribute('url')
+			diskid = attrs.getAttribute('diskid')
+			release = attrs.getAttribute('release')
+			self.rolls.append((name, version, release, arch, url, diskid))

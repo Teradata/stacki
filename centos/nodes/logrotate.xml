@@ -17,7 +17,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </stack:rocks>
 
 
-<stack:script stack:stage="install-post">
+<stack:script stack:cond="'&release;' == '6.x'" stack:stage="install-post">
 <stack:file stack:name="/etc/logrotate.d/stack">
 /var/log/auth {
 	size=100M
@@ -76,6 +76,25 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 	endscript
 }
 /var/log/local[1-9] {
+	size=10M
+	postrotate
+		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
+			2&gt; /dev/null || true
+	endscript
+}
+</stack:file>
+</stack:script>
+
+<stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-post">
+<stack:file stack:name="/etc/logrotate.d/stack">
+/var/log/audit/audit.log {
+	size=100M
+	postrotate
+		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
+			2&gt; /dev/null || true
+	endscript
+}
+/var/log/local[0-9] {
 	size=10M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \

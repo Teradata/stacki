@@ -50,6 +50,7 @@
 	<edge from="client">
 		<to>ssl-client</to>
 		<to>ssh-client</to>
+		<to>storage-client</to>
 	</edge>
 
 </graph>

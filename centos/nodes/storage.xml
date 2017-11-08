@@ -8,17 +8,12 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 <stack:script stack:cond="'&release;' == '7.x'" stack:stage="install-pre">
-
 <!-- Load SCSI Generic Module. Required for HPSSACLI,
      and StorCLI, on RHEL/CentOS 7.x -->
-
 modprobe sg
-
 </stack:script>
 
-
 <stack:script stack:stage="install-pre">
-
 mkdir -p /tmp/stack_site/
 cat /run/install/tmp/ks.xml | \
 	/opt/stack/bin/stack list host profile chapter=stacki \
