@@ -13,7 +13,7 @@ include order-$(ROLL).mk
 order-$(ROLL).mk: Makefile ../../version.mk $(shell find . -name version.mk)
 	python ../../common/src/stack/build/build/bin/gen-order > $@
 
--include $(RELEASE).mk
+-include order-$(ROLL)-$(RELEASE).mk
 
 clean.order:
 	-rm -f order-$(ROLL).mk
