@@ -167,9 +167,11 @@ class Bootable:
 			#
 			# updates.img
 			#
-			fileold = os.path.join(os.path.join(images,
-				'updates.img'))
+			fileold = os.path.join(os.path.join(images, 'updates.img'))
 			filenew = os.path.join(imagesdir, 'updates.img')
+
+			if not os.path.exists(fileold):
+				raise ValueError("cound not find '%s'" % fileold)
 
 			os.rename(fileold, filenew)
 			os.chmod(filenew,
