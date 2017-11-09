@@ -561,6 +561,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 				except ValueError as msg:
 					print('ERROR -', msg)
 					print('Pallet is not bootable')
+					self.config.setBootable(False)
 
 			self.mkisofs(isoname, self.config.getRollName(), name)
 

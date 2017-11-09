@@ -528,7 +528,13 @@ class RollInfoFile(File,
 		
 	def getRollRolls(self):
 		return self.attrs['rpm']['rolls']
-		
+
+	def setBootable(self, bootable=True):
+		x = 0
+		if bootable:
+			x = 1
+		self.attrs['iso']['bootable'] = x
+
 	def isBootable(self):
 		return int(self.attrs['iso']['bootable'])
 
