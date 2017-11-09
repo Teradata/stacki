@@ -15,12 +15,15 @@
 from stack.bool import str2bool
 import stack.gen	
 
+yum_template = """yum install -y %s
+[ $? -ne 0 ] && echo "Package Installation Failed. Cannot Continue" && exit -1
+"""
 
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
 		if enabled:
-			return 'yum install -y %s' % ' '.join(enabled)
+			return yum_template % ' '.join(enabled)
 		
 		return None
 		
