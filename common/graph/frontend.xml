@@ -12,18 +12,25 @@
 
 	<order head="apache"          tail="database"/>
 	<order head="database"        tail="database-schema"/>
-	<order head="database-schema" tail="database-data"/>
-	<order head="node"            tail="database-data"/>
+	<order head="database-schema" tail="database-data-init"/>
+	<order head="node"            tail="database-data-init"/>
 
-	<order head="database-data">
+	<order head="database-data-init">
 		<tail>&os;-bootaction</tail>
+	</order>
+
+	<order>
+		<head>&os;-bootaction</head>
+		<tail>database-data</tail>
 	</order>
 
 	<edge from="server">
 		<to>database</to>
 		<to>database-schema</to>
-		<to>database-data</to>
+		<to>database-data-init</to>
 		<to>&os;-bootaction</to>
+		<to>database-data</to>
+		<to>add-frontend-host</to>
 		<to>foundation-python</to>
 		<to>foundation-python-server</to>
 		<to>mq-server</to>
