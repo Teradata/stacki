@@ -292,7 +292,7 @@ class RollArgumentProcessor:
 				version like binary '%s' and 
 				rel like binary '%s' and
 				arch like binary '%s' """ % (arg, version, rel, arch))
-			if rows == 0 and arg == '%': # empty table is OK
+			if rows in [ 0, None ] and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
 				raise CommandError(self, 'unknown pallet "%s"' % arg)
