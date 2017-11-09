@@ -14,6 +14,7 @@ import fnmatch
 import ipaddress
 import stack.attr
 import stack.commands
+from stack.bool import str2bool
 from stack.exception import CommandError
 
 
@@ -184,11 +185,26 @@ class Command(stack.commands.Command,
 		
 
 		for host in attributes:
-			a = attributes[host]
-			r = readonly[host]
+			a  = attributes[host]
+			r  = readonly[host]
+			ro = True
 
-			for key in r:
-				a[key] = (r[key], None, 'const', 'host')
+			if 'const_overwrite' in a:
+
+				# This attribute allows a host to overwrite
+				# constant attributes. This is crazy dangerous,
+				# do not use this attribute.
+
+				(n, v, t, s) = a['const_overwrite']
+				ro = str2bool(v)
+
+			if ro:
+				for key in r: # slam consts on top of attrs
+					a[key] = (r[key], None, 'const', 'host')
+			else:
+				for key in r: # only add new consts to attrs
+					if key not in a:
+						a[key] = (r[key], None, 'const', 'host')
 
 		return attributes
 
