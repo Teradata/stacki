@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 		return 'attr'
 
 	def run(self, appliance):
-		self.owner.db.execute("""delete from appliance_attributes where 
-			appliance = (select id from appliances where name = '%s')""" %
+		self.owner.db.execute("""delete from attributes where scope = "appliance"
+			and scopeid = (select id from appliances where name = "%s")""" %
 			appliance)
 
