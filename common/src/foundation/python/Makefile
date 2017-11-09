@@ -11,7 +11,7 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 include $(STACKBUILD)/etc/CCRules.mk
 
 BOOTSTRAP        = readline-devel
-BOOTSTRAP.redhat = openssl-devel bz2-libs bz2-devel xz-devel
+BOOTSTRAP.redhat = openssl-devel bzip2-libs bzip2-devel xz-devel
 BOOTSTRAP.sles   =
 
 bootstrap:
