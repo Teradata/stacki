@@ -30,7 +30,6 @@
 		<to>database-data-init</to>
 		<to>&os;-bootaction</to>
 		<to>database-data</to>
-		<to>add-frontend-host</to>
 		<to>foundation-python</to>
 		<to>foundation-python-server</to>
 		<to>mq-server</to>
