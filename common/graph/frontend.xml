@@ -10,19 +10,17 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
-	<order head="apache"          tail="database"/>
-	<order head="database"        tail="database-schema"/>
-	<order head="database-schema" tail="database-data-init"/>
-	<order head="node"            tail="database-data-init"/>
+	<order head="apache"             tail="database"/>
+	<order head="database"           tail="database-schema"/>
+	<order head="database-schema"    tail="database-data-init"/>
+	<order head="node"               tail="database-data-init"/>
+	<order head="database-data-init" tail="&os;-bootaction"/>
+	<order head="&os;-bootaction"    tail="database-data"/>
 
-	<order head="database-data-init">
-		<tail>&os;-bootaction</tail>
+	<order head="database-data">
+		<tail>routes-server</tail>
 	</order>
 
-	<order>
-		<head>&os;-bootaction</head>
-		<tail>database-data</tail>
-	</order>
 
 	<edge from="server">
 		<to>database</to>
@@ -30,9 +28,9 @@
 		<to>database-data-init</to>
 		<to>&os;-bootaction</to>
 		<to>database-data</to>
-		<to>foundation-python</to>
 		<to>foundation-python-server</to>
 		<to>mq-server</to>
+		<to>routes-server</to>
 	</edge>
 
 </graph>

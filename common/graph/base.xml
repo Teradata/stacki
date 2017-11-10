@@ -11,6 +11,7 @@
 	</copyright>
 
 	<edge from="base" cond="os != 'sles' or os.version != '11.x'">
+		<to>foundation-python</to>
 		<to>mq-base</to>
 	</edge>
 

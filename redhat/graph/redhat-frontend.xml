@@ -19,7 +19,6 @@
 
 	<order head="database-data">
 		<tail>install</tail>
-		<tail>routes-server</tail>
 		<tail>insert-rolls</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
@@ -68,7 +67,6 @@
 		<to>dns-server</to>
 		<to>firewall-server</to>
 		<to>firewall-base</to>
-		<to>routes-server</to>
 		<to>kernel-server</to>
 		<to>ca</to>
 		<to>foundation-server</to>

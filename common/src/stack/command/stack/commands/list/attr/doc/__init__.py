@@ -47,6 +47,3 @@ class Command(stack.commands.Command):
 		self.endOutput(header=['attr', 'doc'])
 
 
-
-
-RollName = "stacki"

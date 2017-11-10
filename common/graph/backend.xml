@@ -13,7 +13,6 @@
 	<edge from="builder" to="backend"/>
 
 	<edge from="client" cond="os != 'sles' or os.version != '11.x'">
-		<to>foundation-python</to>
 		<to>foundation-python-client</to>
 		<to>mq-client</to>
 	</edge>
