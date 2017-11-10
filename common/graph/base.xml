@@ -17,6 +17,7 @@
 
 	<edge from="base">
 		<to>selinux</to>
+		<to>ssh-base</to>
 	</edge>
 
 </graph>
