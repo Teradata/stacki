@@ -31,7 +31,6 @@
 		<to>time-base</to>
 		<to>postshell</to>
 		<to>yum-base</to>
-		<to>ssl</to>
 		<to>storage</to>
 		<to>foundation-python</to>
 	</edge>
