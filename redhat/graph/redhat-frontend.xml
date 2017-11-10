@@ -24,7 +24,6 @@
 		<tail>pxe</tail>
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
-		<tail>dns-server</tail>
 		<tail>time-server</tail>
 	</order>
 
@@ -64,7 +63,6 @@
 		<to>insert-rolls</to>
 		<to>networking-server</to>
 		<to>dhcp-server</to>
-		<to>dns-server</to>
 		<to>firewall-server</to>
 		<to>firewall-base</to>
 		<to>kernel-server</to>

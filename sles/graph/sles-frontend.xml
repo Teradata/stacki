@@ -14,7 +14,6 @@
 
 	<order head="database-data">
 		<tail>dhcp-server</tail>
-		<tail>dns-server</tail>
 		<tail>install</tail>
 		<tail>networking-server</tail>
 		<tail>pxe</tail>
@@ -51,7 +50,6 @@
 		<to>apache</to>
 		<to>ca</to>
 		<to>dhcp-server</to>
-		<to>dns-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
 		<to>install</to>

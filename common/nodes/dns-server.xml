@@ -1,27 +1,28 @@
 <stack:stack>
 
-<stack:description>
-Configures a DNS nameserver for the cluster on the frontend.
-Both forward and reversed zones are defined using the database.
-</stack:description>
+	<stack:description>
+	Configures a DNS nameserver for the cluster on the frontend.
+	Both forward and reversed zones are defined using the database.
+	</stack:description>
 
 
-<stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
 
-<stack:package>bind</stack:package>
-<stack:package>bind-utils</stack:package>
+	<stack:package>
+		bind
+		bind-utils
+	</stack:package>
 
 
 <stack:script stack:stage="install-post">
 <!-- resolv.conf -->
 
-/opt/stack/bin/stack report host resolv &Kickstart_PrivateHostname; | \
-        /opt/stack/bin/stack report script > /tmp/do-resolv.sh
+/opt/stack/bin/stack report host resolv &Kickstart_PrivateHostname; | /opt/stack/bin/stack report script > /tmp/do-resolv.sh
 
 chmod a+x /tmp/do-resolv.sh
 /tmp/do-resolv.sh

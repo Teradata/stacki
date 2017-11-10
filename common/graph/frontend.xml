@@ -18,6 +18,7 @@
 	<order head="&os;-bootaction"    tail="database-data"/>
 
 	<order head="database-data">
+		<tail>dns-server</tail>
 		<tail>routes-server</tail>
 	</order>
 
@@ -29,6 +30,7 @@
 		<to>&os;-bootaction</to>
 		<to>database-data</to>
 		<to>foundation-python-server</to>
+		<to>dns-server</to>
 		<to>mq-server</to>
 		<to>routes-server</to>
 	</edge>
