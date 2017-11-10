@@ -32,6 +32,6 @@ if __name__ == '__main__':
 		cleartext_password = sys.argv[2].strip('\n')
 
 	if password_type == 'crypt':
-		print(p.get_crypt_pw(cleartext_password).decode())
+		print(p.get_crypt_pw(cleartext_password))
 	else:
-		print(p.get_cleartext_pw(cleartext_password).decode())
+		print(p.get_cleartext_pw(cleartext_password))
