@@ -17,4 +17,7 @@
 		<to>mq-client</to>
 	</edge>
 
+	<edge from="client">
+		<to>peerdone</to>
+	</edge>
 </graph>

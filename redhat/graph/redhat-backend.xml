@@ -45,7 +45,6 @@
 		<to>storage</to>
 		<to>storage-client</to>
 		<to>pxeboot</to>
-		<to>peerdone</to>
 		<to>ludicrous-client</to>
 		<to>ssl-client</to>
 		<to>ssh-client</to>
@@ -55,7 +54,8 @@
 
 
 	<order head="storage" tail="pxeboot" />
-	<order head="base" tail="peerdone" />
+
+	<order head="base" tail="peerdone" /> <!-- is this really required? -->
 
 	<edge from="client" to="firewall-client" cond="firewall"/>
 	<edge from="client" to="firewall-base"   cond="firewall"/>

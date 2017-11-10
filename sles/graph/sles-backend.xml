@@ -24,7 +24,6 @@
 		<to>uefi-client</to>
 		<to>time-client</to>
 		<to>firewall-client</to>
-		<to>peerdone</to>
 	</edge>
 
 	<order tail="HEAD">
