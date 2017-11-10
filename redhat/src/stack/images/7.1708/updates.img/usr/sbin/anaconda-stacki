@@ -2,6 +2,7 @@
 
 import subprocess
 import shutil
+import shlex
 import os
 import time
 import re
@@ -84,23 +85,33 @@ if 'boss' in args:
 			continue
 		uri = match.group(2)
 		log.info("{0}\t{1}".format(arg, uri))
-	
+		
+		# fetch the url on a privileged port, put it in /tmp, and send the http status code to STDOUT
+		curl_cmd = '/bin/curl --silent --write-out "%{{http_code}}\\n" --output /tmp/{0} --insecure --local-port 1-100 --retry 3 {1}'
+
+		if 'stacki.attrfile' in arg:
+			filename = 'site.attrs'
+		elif 'stacki.palletfile' in arg:
+			filename = 'rolls.xml'
+
+		log.info("writing /tmp/{0}".format(filename))
+		curl_proc = subprocess.Popen(
+			shlex.split(curl_cmd.format(filename, uri)),
+			stdout=subprocess.PIPE, stderr=None)
+
+		output, _ = curl_proc.communicate()
+		output = output.strip()
+		err_msg = "Error retrieving {0}. curl returned {1}\n"
+
 		try:
-			resp = urllib.urlopen(uri)
-			# non-http uri's return None for getcode()
-			if resp.getcode() == 404:
-				log.error("got 404 on {0}\n".format(uri))
-			if 'stacki.attrfile' in arg:
-				log.info("writing /tmp/site.attrs")
-				open('/tmp/site.attrs', 'w').write(resp.read())
-			if 'stacki.palletfile' in arg:
-				log.info("writing /tmp/rolls.xml")
-				open('/tmp/rolls.xml', 'w').write(resp.read())
-		except Exception as e:
-			log.error("exception on {0}\t{1}".format(arg, match.group(2)))
-			log.error("{0}".format(e))
-			# if there's trouble connecting, safest bet is to proceed without it
-			pass
+			http_code = int(output)
+		# if there are any issues, just log it and continue launching the installer
+		except ValueError:
+			log.error(err_msg.format(uri, output))
+			break
+		if curl_proc.returncode != 0 or http_code >= 400:
+			log.error(err_msg.format(uri, output))
+			break
 
 	#
 	# if this is a USB install, then we'll see a kernel command line
