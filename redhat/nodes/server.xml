@@ -62,7 +62,6 @@ for pallet in g.rolls:
 <stack:package>libcurl-devel</stack:package>
 <stack:package>stack-config-server</stack:package>
 <stack:package>git</stack:package>
-<stack:package>git-lfs</stack:package>
 <!-- perl-Error required for some git functionality -->
 <stack:package>perl-Error</stack:package>
 
@@ -134,7 +133,6 @@ chmod 775 /export/stack/carts
 <stack:script stack:stage="boot-post">
 git init /export/site-pallet/restore
 touch /root/.gitconfig
-HOME=/root git lfs install --force
 </stack:script>
 
 </stack:stack> 
