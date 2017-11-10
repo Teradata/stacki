@@ -29,7 +29,6 @@
 		<to>rpc</to>
 		<to>node</to>
 		<to>time-base</to>
-		<to>selinux</to>
 		<to>postshell</to>
 		<to>yum-base</to>
 		<to>ssl</to>

@@ -15,4 +15,8 @@
 		<to>mq-base</to>
 	</edge>
 
+	<edge from="base">
+		<to>selinux</to>
+	</edge>
+
 </graph>
