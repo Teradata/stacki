@@ -94,8 +94,10 @@ class Command(stack.commands.Command,
 				h['ip']       = ip
 				h['mask']     = row['mask']
 				h['gateway']  = row['gateway']
-			else:
-				h['filename'] = None
+
+		for host in dict(ha):
+			if 'filename' not in ha[host]:
+				del ha[host]
 
 		self.beginOutput()
 		self.runPlugins(ha)
