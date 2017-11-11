@@ -12,7 +12,7 @@ import string
 
 
 class Password:
-	def get_rand(self, num_bytes=16, choices = string.ascii_letters + string.digits):
+	def get_rand(self, num_bytes=16, choices=string.ascii_letters + string.digits):
 		password = ''
 		for _ in range(num_bytes):
 			random.seed(int(time.time() * pow(10, 9)))
