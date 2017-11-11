@@ -8,9 +8,6 @@
 	<edge from="base">
 		<to>logrotate</to>
 		<to>node</to>
-		<to>selinux</to>
-		<to>ssh</to>
-		<to>ssl</to>
 		<to>time-base</to>
 		<to>firewall-base</to>
 	</edge>

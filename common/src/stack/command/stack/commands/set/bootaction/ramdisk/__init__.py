@@ -10,6 +10,25 @@ from stack.exception import CommandError
 
 class Command(stack.commands.set.bootaction.command):
 	"""
+	Updates the ramdisk for a bootaction.
+	<arg type='string' name='bootaction' repeat='0' optional='1'>
+	Name of the bootaction that needs to be updated.
+	</arg>
+
+	<param type='string' name='os'>
+	os type of the bootaction.
+	</param>
+	<param type='string' name='type'>
+	type of the bootaction. Can be install or os.
+	</param>
+	<param type='string' name='ramdisk' optional='1'>
+	Updated ramdisk value.
+	</param>
+
+	<example cmd='set bootaction ramdisk memtest ramdisk="initrd.img-5.0-7.x-x86_64" type="os" os="redhat"'>
+	Sets the ramdisk for bootaction named memtest with type="os" and os="redhat"
+	to be "initrd.img-5.0-7.x-x86_64".
+	</example>
 	"""
 	
 	def run(self, params, args):

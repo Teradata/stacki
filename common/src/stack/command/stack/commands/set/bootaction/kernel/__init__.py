@@ -10,6 +10,25 @@ from stack.exception import CommandError
 
 class Command(stack.commands.set.bootaction.command):
 	"""
+	Updates the kernel for a bootaction.
+	<arg type='string' name='bootaction' repeat='0' optional='1'>
+	Name of the bootaction that needs to be updated.
+	</arg>
+	
+	<param type='string' name='os'>
+	os type of the bootaction.
+	</param>
+	<param type='string' name='type'>
+	type of the bootaction. Can be install or os.
+	</param>
+	<param type='string' name='kernel' optional='1'>
+	Updated kernel value.
+	</param>
+	
+	<example cmd='set bootaction kernel memtest kernel="memtest" type="os" os="redhat"'>
+	Sets the kernel for bootaction named memtest with type="os" and os="redhat" 
+	to be "memtest".
+	</example>
 	"""
 	
 	def run(self, params, args):
