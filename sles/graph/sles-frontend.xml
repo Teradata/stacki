@@ -14,11 +14,9 @@
 
 	<order head="database-data">
 		<tail>dhcp-server</tail>
-		<tail>dns-server</tail>
 		<tail>install</tail>
 		<tail>networking-server</tail>
 		<tail>pxe</tail>
-		<tail>routes-server</tail>
 		<tail>server</tail>
 		<tail>time-server</tail>
 	</order>
@@ -52,7 +50,6 @@
 		<to>apache</to>
 		<to>ca</to>
 		<to>dhcp-server</to>
-		<to>dns-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
 		<to>install</to>
@@ -60,7 +57,6 @@
 		<to>networking-server</to>
 		<to>node-certs</to>
 		<to>pxe</to>
-		<to>routes-server</to>
 		<to>ssl-server</to>
 		<to>storage-controller-server</to>
 		<to>time-server</to>

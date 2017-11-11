@@ -9,19 +9,19 @@ import base64
 import crypt
 import random
 import time
+import string
 
 
 class Password:
-	def __init__(self):
-		s = int(time.time() * pow(10, 9))
-		random.seed(s)
-
 	def get_rand(self, num_bytes=16):
-		c = ''
-		for i in range(num_bytes):
-			c = c + chr(random.getrandbits(8))
+		choices = string.ascii_letters + string.digits
+
+		password = ''
+		for _ in range(num_bytes):
 			random.seed(int(time.time() * pow(10, 9)))
-		return c.encode()
+			password += random.choice(choices)
+
+		return password.encode()
 
 	def get_salt(self):
 		salt = '$1$'
@@ -31,9 +31,7 @@ class Password:
 
 	def get_cleartext_pw(self, c_pw=None):
 		if not c_pw:
-			c = self.get_rand()
-			c_pw = base64.urlsafe_b64encode(c)
-			c_pw = c_pw.rstrip('='.encode())
+			c_pw = self.get_rand().decode()
 		return c_pw
 
 	def get_crypt_pw(self, c_pw=None):
@@ -41,4 +39,5 @@ class Password:
 		if not c_pw:
 			c_pw = self.get_cleartext_pw()
 		salt = self.get_salt()
+
 		return crypt.crypt(c_pw, salt)

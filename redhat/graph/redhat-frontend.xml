@@ -19,13 +19,11 @@
 
 	<order head="database-data">
 		<tail>install</tail>
-		<tail>routes-server</tail>
 		<tail>insert-rolls</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
-		<tail>dns-server</tail>
 		<tail>time-server</tail>
 	</order>
 
@@ -65,10 +63,8 @@
 		<to>insert-rolls</to>
 		<to>networking-server</to>
 		<to>dhcp-server</to>
-		<to>dns-server</to>
 		<to>firewall-server</to>
 		<to>firewall-base</to>
-		<to>routes-server</to>
 		<to>kernel-server</to>
 		<to>ca</to>
 		<to>foundation-server</to>
