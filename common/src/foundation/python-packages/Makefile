@@ -11,7 +11,7 @@ RPM.STRATEGY    = custom
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap rpm: src
-	for x in src/*; do $(MAKE) -C $$x $@; done
+	-for x in src/*; do $(MAKE) -C $$x $@; done
 	cp manifest.d/*.manifest $(ROLLROOT)/common/manifest.d/
 	cp nodes/*.xml $(ROLLROOT)/common/nodes/
 	cp graph/*.xml $(ROLLROOT)/common/graph/
