@@ -43,14 +43,12 @@ endif
 
 
 preroll::
+	make -C common/src pkg
+	make -C $(OS)/src pkg
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
-	cp common/graph/*      build-$(ROLL)-$(STACK)/graph/
-	cp common/nodes/*      build-$(ROLL)-$(STACK)/nodes/
-	cp $(OS)/graph/*       build-$(ROLL)-$(STACK)/graph/
-	cp $(OS)/nodes/*       build-$(ROLL)-$(STACK)/nodes/
-	make -C common/src     pkg
-	make -C $(OS)/src pkg
+	cp common/graph/* $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/
+	cp common/nodes/* $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/
 
 clean::
 	rm -rf build-$(ROLL)-$(STACK)/graph/
