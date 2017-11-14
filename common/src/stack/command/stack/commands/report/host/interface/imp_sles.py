@@ -78,13 +78,15 @@ class Implementation(stack.commands.Implementation):
 						     % interface.split(':')[0])
 				vnum = interface.split(':')[1]
 				if ip:
-					self.owner.addOutput(host, 'IPADDR_%s=%s' % (vnum, ip.strip()))
+					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip.strip()))
 				if netmask:
-					self.owner.addOutput(host, 'NETMASK_%s=%s' % (vnum, netmask.strip()))
+					self.owner.addOutput(host, 'NETMASK%s=%s' % (vnum, netmask.strip()))
 				if network:
-					self.owner.addOutput(host, 'NETWORK_%s=%s' % (vnum, network.strip()))
+					self.owner.addOutput(host, 'NETWORK%s=%s' % (vnum, network.strip()))
 				if broadcast:
-					self.owner.addOutput(host, 'BROADCAST_%s=%s' % (vnum, broadcast.strip()))
+					self.owner.addOutput(host, 'BROADCAST%s=%s' % (vnum, broadcast.strip()))
+					
+				self.owner.addOutput(host, 'LABEL%s=%s' % (vnum, vnum))
 
 			else:
 				self.owner.addOutput(host, 
