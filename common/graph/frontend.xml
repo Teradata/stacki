@@ -24,6 +24,7 @@
 
 
 	<edge from="server">
+		<to>apache</to>
 		<to>database</to>
 		<to>database-schema</to>
 		<to>database-data-init</to>

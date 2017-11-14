@@ -13,6 +13,7 @@
         </stack:rocks>
 
 	<stack:package>stack-sql</stack:package>
+	<stack:package>screen</stack:package>
 	<stack:package>foundation-mariadb</stack:package>
 
 
@@ -93,9 +94,21 @@ password	= $apache_pw
 -->
 /opt/stack/sbin/mysql-install-db
 
-/usr/bin/systemctl enable mariadb
-/usr/bin/systemctl start mariadb
+systemctl enable mariadb
 
+grep frontend /proc/cmdline &gt; /dev/null 2>&amp;1
+RES=$?
+if [ ${RES} -eq 0 ]; then
+
+export MYSQLD_OPTS="--defaults-file=/opt/stack/etc/my.cnf.d/server.cnf \
+	--basedir=/opt/stack --datadir=/var/opt/stack/mysql \
+	--user=stackdb"
+
+nohup /opt/stack/sbin/mysqld $MYSQLD_OPTS &amp;
+
+else
+        /usr/bin/systemctl start mariadb
+fi
 <!--
 	Make sure that the database is
 	up and running
@@ -105,7 +118,6 @@ while [ $? -eq 1 ]; do
         sleep 1
         /opt/stack/bin/mysqladmin -s ping > /dev/null
 done
-
 </stack:script>
 
 <!-- Access control on the database -->
