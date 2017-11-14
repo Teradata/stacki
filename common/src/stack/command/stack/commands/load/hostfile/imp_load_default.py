@@ -293,7 +293,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		# sanity checks
 		#
 		macs = []
-		ips = []
+		ips = {}
 		for name in self.owner.hosts.keys():
 			#
 			# ensure at least one of the host entries has an
@@ -347,13 +347,20 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					ip = self.owner.interfaces[name][interface]['ip']
 				except:
 					ip = None
+				try:
+					vlan = self.owner.interfaces[name][interface]['vlan']
+				except:
+					vlan = 'default'
 				if ip:
 #					self.checkIP(ip)
-					if ip in ips:
-						msg = 'duplicate IP "%s" in the input file' % ip
-						raise CommandError(self.owner, msg)
+					if vlan in ips:
+						if ip in ips[vlan]:
+							msg = 'duplicate IP "%s" in the input file' % ip
+							raise CommandError(self.owner, msg)
+					else:
+						ips[vlan] = []
 
-					ips.append(ip)
+					ips[vlan].append(ip)
 
 				try:
 					mac = self.owner.interfaces[name][interface]['mac']
