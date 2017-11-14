@@ -103,6 +103,12 @@ class ExpandingTraversor(stack.gen.Traversor):
 			chrooted.appendChild(self.newTextNode(chroot))
 			script.appendChild(chrooted)
 
+		if stagename == 'init-scripts':
+			network = self.newElementNode('sles:network_needed')
+			self.setAttribute(network, 'config:type', 'boolean')
+			network.appendChild(self.newTextNode('true'))
+			script.appendChild(network)
+
 		source = self.newElementNode('sles:source')
 		source.appendChild(self.newTextNode(self.collect(node)))
 		script.appendChild(source)
