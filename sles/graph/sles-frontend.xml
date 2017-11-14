@@ -47,7 +47,6 @@
 
 	<edge from="server">
 		<to>base</to>
-		<to>apache</to>
 		<to>ca</to>
 		<to>dhcp-server</to>
 		<to>firewall-base</to>
