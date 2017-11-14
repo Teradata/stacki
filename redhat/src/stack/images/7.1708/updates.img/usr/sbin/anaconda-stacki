@@ -74,7 +74,7 @@ ludicrous_proc = subprocess.Popen(['/opt/stack/bin/ludicrous-client.py'], env=en
 # give ludicrous a chance to start
 time.sleep(5)
 
-if 'boss' in args:
+if 'frontend' in args:
 	# We are a frontend
 
 	# Check to see if there's a user-specified

@@ -54,7 +54,6 @@
 
 	<edge from="server">
 		<to>base</to>
-		<to>apache</to>
 		<to>security-server</to>
 		<to>time-server</to>
 		<to>install</to>

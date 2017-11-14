@@ -105,13 +105,6 @@ stacki release &version; (&release;)
 </stack:file>
 </stack:script>
 
-<stack:script stack:stage="install-post">
-<stack:file stack:name="/etc/ld.so.conf.d/stack.conf">
-/opt/stack/lib
-</stack:file>
-ldconfig
-</stack:script>
-
 <stack:script stack:stage="install-post" stack:chroot="false">
 /opt/stack/bin/stacki-profile.py &gt; /root/prof.log 2&gt;&amp;1
 
