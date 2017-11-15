@@ -13,7 +13,6 @@
         </stack:rocks>
 
 	<stack:package>stack-sql</stack:package>
-	<stack:package>screen</stack:package>
 	<stack:package>foundation-mariadb</stack:package>
 
 
@@ -97,9 +96,13 @@ password	= $apache_pw
 /usr/bin/systemctl enable mariadb
 /usr/bin/systemctl start mariadb
 
+export MYSQLD_OPTS="--defaults-file=/opt/stack/etc/my.cnf.d/server.cnf \
+	--basedir=/opt/stack --datadir=/var/opt/stack/mysql \
+	--user=stackdb"
 <!-- may have to manually start the database -->
+/opt/stack/bin/mysqladmin -s ping > /dev/null
 if [ $? -ne 0 ] ; then
-	nohup /opt/stack/sbin/mysqld --defaults-file=/opt/stack/etc/my.cnf.d/server.cnf --basedir=/opt/stack --datadir=/var/opt/stack/mysql --user=stackdb &amp;
+	nohup /opt/stack/sbin/mysqld ${MYSQLD_OPTS} &gt;&gt; /root/mysqld.log 2&gt;&amp;1 &lt; /dev/null &amp;
 fi
 
 <!--
@@ -107,7 +110,7 @@ fi
 	up and running
 -->
 /opt/stack/bin/mysqladmin -s ping > /dev/null
-while [ $? -eq 1 ]; do
+while [ $? -ne 0 ]; do
         sleep 1
         /opt/stack/bin/mysqladmin -s ping > /dev/null
 done

@@ -29,7 +29,6 @@ find /export/stack/carts/* -type d -prune -exec rm  -rf {} \;
 import os
 import os.path
 import sys
-import stack.api
 import stack.roll
 
 if not os.path.exists('/tmp/rolls.xml'):
@@ -41,9 +40,9 @@ generator.parse('/tmp/rolls.xml')
 found = []
 for name, version, release, arch, url, diskid in generator.rolls:
 	purl = '%s/%s/%s/%s/%s/%s/' % (url, name, version, release, 'redhat', arch)
-	print('\n'.join(stack.api.Call('add.pallet',[purl])))
-	print('\n'.join(stack.api.Call('enable.pallet', [name])))
-
+	cmd = '/opt/stack/bin/stack'
+	os.system('%s add pallet %s' % (cmd,purl))
+	os.system('%s enable pallet %s' % (cmd,name))
 </stack:script>
 
 </stack:stack> 
