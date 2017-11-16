@@ -37,7 +37,6 @@ class Implementation(stack.commands.Implementation):
 
 			self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
 				(destination, gateway, netmask, device))
-			break
 
 		#
 		# the interface that is designated as the default interface,
