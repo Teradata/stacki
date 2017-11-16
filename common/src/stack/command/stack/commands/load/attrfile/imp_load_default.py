@@ -30,11 +30,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		else:
 			raise CommandError(self.owner, "'target' must be the first column in headers")
 
-		# Fix the header to be lowercase and strip out any
-		# leading or trailing whitespace.
+		# Strip out any leading or trailing whitespace in attr names.
 
 		for i in range(0, len(header)):
-			header[i] = header[i].lower()
+			header[i] = header[i].strip()
 
 
 		default = {}
