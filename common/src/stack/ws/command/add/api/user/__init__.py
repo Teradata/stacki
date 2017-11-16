@@ -47,10 +47,7 @@ class Command(stack.commands.Command,
 
 	def gen_random_pw(self):
 		p = Password()
-		c = p.get_rand(num_bytes=32)
-		c_pw = base64.urlsafe_b64encode(c)
-		c_pw = c_pw.rstrip('='.encode())
-		return c_pw.decode()
+		return p.get_cleartext_pw()
 
 	def run(self, params, args):
 		# Get Username
@@ -107,5 +104,3 @@ class Command(stack.commands.Command,
 		#f = open("%s.api.cred" % username, 'w')
 		print(json.dumps(j, indent=2))
 		#f.close()
-
-RollName = "stacki-pro"
