@@ -215,7 +215,6 @@ CREATE TABLE global_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Interface	varchar(32) default NULL,
   Subnet	int(11)	default NULL references subnets
 );
 
@@ -227,7 +226,6 @@ CREATE TABLE os_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Interface	varchar(32) default NULL,
   Subnet	int(11)	default NULL references subnets
 );
 
@@ -239,7 +237,6 @@ CREATE TABLE appliance_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Interface	varchar(32) default NULL,
   Subnet	int(11)	default NULL references subnets
 );
 
@@ -251,7 +248,6 @@ CREATE TABLE node_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Interface	varchar(32) default NULL,
   Subnet	int(11)	default NULL references subnets
 );
 
