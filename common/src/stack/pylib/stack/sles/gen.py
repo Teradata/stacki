@@ -58,7 +58,7 @@ class ExpandingTraversor(stack.gen.Traversor):
 		nodefile = self.getAttr(node, 'stack:file')
 		stage	 = self.getAttr(node, 'stack:stage',  default='install-post')
 		chroot	 = self.getAttr(node, 'stack:chroot', default='true')
-		shell	 = self.getAttr(node, 'stack:shell', default='shell')
+		shell	 = self.getAttr(node, 'stack:shell',  default='/bin/bash')
 
 		stagename = self.stages[stage]
 		if not stagename == 'chroot-scripts':
@@ -69,9 +69,10 @@ class ExpandingTraversor(stack.gen.Traversor):
 		#   <STAGE config:type="list">
 		#     <script>
 		#	<filename>stacki-ipmi.sh</filename>
-		#	<interpreter>SHELL</interpreter>
+		#	<interpreter>shell</interpreter>
 		#	<chrooted config:type="boolean">true|flase</chrooted>
 		#	<source>
+		#       #! SHELL
 		#	...
 		#	</source>
 		#     </script>
@@ -92,10 +93,9 @@ class ExpandingTraversor(stack.gen.Traversor):
 		filename.appendChild(self.newTextNode('%s-%s' % (stage, nodeid)))
 		script.appendChild(filename)
 
-		if shell:
-			interpreter = self.newElementNode('sles:interpreter')
-			interpreter.appendChild(self.newTextNode(shell))
-			script.appendChild(interpreter)
+		interpreter = self.newElementNode('sles:interpreter')
+		interpreter.appendChild(self.newTextNode('shell'))
+		script.appendChild(interpreter)
 
 		if stagename == 'chroot-scripts':
 			chrooted = self.newElementNode('sles:chrooted')
@@ -110,6 +110,7 @@ class ExpandingTraversor(stack.gen.Traversor):
 			script.appendChild(network)
 
 		source = self.newElementNode('sles:source')
+		source.appendChild(self.newTextNode('#! %s' % shell))
 		source.appendChild(self.newTextNode(self.collect(node)))
 		script.appendChild(source)
 
@@ -136,11 +137,13 @@ class ExpandingTraversor(stack.gen.Traversor):
 
 		"""
 
-		meta	 = self.getAttr(node, 'stack:meta', default='false')
-		meta     = str2bool(meta)
+		stage   = self.getAttr(node, 'stack:stage', default='install')
 
-		enabled  = self.getAttr(node, 'stack:enable', default='true')
-		enabled  = str2bool(enabled)
+		meta	= self.getAttr(node, 'stack:meta', default='false')
+		meta    = str2bool(meta)
+
+		enabled = self.getAttr(node, 'stack:enable', default='true')
+		enabled = str2bool(enabled)
 
 		pkgs = []
 		for line in self.collect(node).split('\n'):
@@ -149,7 +152,10 @@ class ExpandingTraversor(stack.gen.Traversor):
 				pkgs.append(pkg)
 
 		if not meta:
-			packages = self.newElementNode('sles:packages')
+			if stage == 'boot':
+				packages = self.newElementNode('sles:post-packages')
+			else:
+				packages = self.newElementNode('sles:packages')
 			self.setAttribute(packages, 'config:type', 'list')
 			for rpm in pkgs:
 				package = self.newElementNode('sles:package')
