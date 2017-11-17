@@ -75,6 +75,11 @@ tx.close()
 
 </stack:script>
 
+<stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
+<stack:report stack:name="host.interface">&hostname;</stack:report>
+<stack:report stack:name="host.route">&hostname;</stack:report>
+<stack:report stack:name="host.resolv">&hostname;</stack:report>
+</stack:script>
 
 <stack:script stack:stage="boot-pre">
 
