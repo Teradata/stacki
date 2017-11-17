@@ -17,7 +17,7 @@ docfile   = '3rdparty.md'
 resources = { }
 
 if not os.path.exists(manifest):
-	print('Cannot file manifest.3rdparty file')
+	print('no manifest.3rdparty found')
 	sys.exit(0)
 
 if not os.path.exists(cachedir):
@@ -43,7 +43,7 @@ fout.write("""# Third Party Resources
 This repository includes the following code from other projects.
 
 """)
-for resource in resources:
+for resource in sorted(resources.keys()):
 	fout.write('* %s [%s]\n' % (resource, resources[resource]))
 
 fout.close()

@@ -32,6 +32,11 @@ try:
 except:
 	secondary = None
 
+try:
+	release = sys.argv[4]
+except:
+	release = None
+
 tree = stack.file.Tree(os.getcwd())
 
 builtfiles = []
@@ -42,7 +47,6 @@ for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
 #	print('found %d files' % len(found))
 	builtfiles += found
 
-manifest  = []
 manifests = [ ]
 search    = [ 'common', '.' ]
 if secondary:
@@ -59,9 +63,11 @@ for path in search:
 			name, ext = os.path.splitext(filename)
 			if ext == '.manifest':
 				manifests.append(os.path.join(dirname, filename))
+			elif release and ext == '.%s' % release:
+				manifests.append(os.path.join(dirname, filename))
 
-
-found = False
+packages = { }
+found    = False
 for filename in manifests:
 	print('reading %s' % filename)
 	found = True
@@ -70,9 +76,16 @@ for filename in manifests:
 		l = line.strip()
 		if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
 			continue
-		if l not in manifest: # ignore duplicates
-			manifest.append(l)
+		if l[0] == '-': # use '-package' to turn off the check
+			packages[l[1:]] = False
+		elif l not in packages:
+			packages[l] = True
 	file.close()
+
+manifest = [ ]
+for pkg in packages:
+	if packages[pkg]:
+		manifest.append(pkg)
 
 if not found:
 	print('Cannot find any manifest files')

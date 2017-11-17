@@ -25,6 +25,6 @@ nuke.all:: nuke
 
 .PHONY: manifest-check
 manifest-check:
-	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) build-$(ROLL)-$(STACK) $(OS)
+	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) build-$(ROLL)-$(STACK) $(OS) $(RELEASE)
 
 endif # __CCROLLS_MK

@@ -4,13 +4,19 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-PKGLIST= rpm-build libzip2 apache2 squashfs apache2-devel createrepo cdrkit-cdrtools-compat
+PKGLIST = apache2 squashfs apache2-devel createrepo cdrkit-cdrtools-compat
+PATLIST = 32bit Basis-Devel
 
-ifeq ($(RELEASE), sles11)
-PKGLIST += brp-check-suse
+ifeq ($(RELEASE),sles12)
+PKGLIST += rpm-build libzip2
+PATLIST += SDK-C-C++
+endif
+
+ifeq ($(RELEASE),sles11)
+PKGLIST += libzip1 brp-check-suse
 endif
 
 bootstrap:
-	../common/src/stack/build/build/bin/package-install -m 32bit Basis-Devel SDK-C-C++
+	../common/src/stack/build/build/bin/package-install -m $(PATLIST)
 	../common/src/stack/build/build/bin/package-install $(PKGLIST)
 

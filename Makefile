@@ -5,6 +5,7 @@
 # @copyright@
 
 OS=$(shell common/src/stack/build/build/bin/os)
+RELEASE=$(shell common/src/stack/build/build/bin/os-release)
 
 ROLLROOT = .
 
@@ -21,7 +22,7 @@ endif
 	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
-	$(MAKE) -C $(OS) -f bootstrap.mk bootstrap
+	$(MAKE) -C $(OS) -f bootstrap.mk RELEASE=$(RELEASE) bootstrap
 	$(MAKE) -C common/src/stack/build bootstrap
 
 bootstrap: bootstrap-make
