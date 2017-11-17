@@ -10,7 +10,6 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:package>mtools</stack:package>
 <stack:package>uefi-boot-method</stack:package>
 
 <stack:script stack:stage="install-pre">
@@ -22,34 +21,9 @@ fi
 
 <stack:script stack:stage="install-post" stack:chroot="false">
 if [ -f /tmp/uefi_netboot ]; then
-	mkdir -p /mnt/opt/stack/etc/
-	mv /tmp/uefi_netboot /mnt/opt/stack/etc/uefi_netboot
+	mkdir -p /mnt/sysimage/opt/stack/etc/
+	mv /tmp/uefi_netboot /mnt/sysimage/opt/stack/etc/uefi_netboot
 fi
-</stack:script>
-
-<stack:script stack:stage="install-post" stack:shell="python" stack:chroot="false">
-<![CDATA[
-import os
-import sys
-import subprocess
-
-efi_dev = None
-mtab = open('/etc/mtab','r')
-for mountline in mtab.readlines():
-	m = mountline.split()
-	if m[1].strip() == '/mnt/boot/efi':
-		efi_dev = m[0].strip()
-		break
-
-if efi_dev:
-	f = open('/mnt/etc/mtools.conf','a')
-	f.write('\ndrive x: file="%s"\n' % efi_dev)
-	f.close()
-]]>
-</stack:script>
-
-<stack:script stack:stage="install-post">
-/usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
 <stack:script stack:stage="boot-post">

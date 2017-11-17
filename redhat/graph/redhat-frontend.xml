@@ -74,6 +74,7 @@
 		<to>ludicrous-server</to>
 		<to>repo-server</to>
 		<to>restapi</to>
+		<to>uefi-server</to>
 	</edge>
 
 
