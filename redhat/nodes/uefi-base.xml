@@ -10,8 +10,8 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:package>grub2-x86_64-efi</stack:package>
-<stack:package>shim</stack:package>
+<stack:package>grub2-efi-x64</stack:package>
+<stack:package>shim-x64</stack:package>
 <stack:package>mokutil</stack:package>
 
 </stack:stack>

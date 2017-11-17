@@ -50,6 +50,7 @@
 		<to>ssh-client</to>
 		<to>storage-client</to>
 		<to>repo-client</to>
+		<to>uefi-client</to>
 	</edge>
 
 

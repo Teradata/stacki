@@ -22,6 +22,7 @@
 		<tail>insert-rolls</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
+		<tail>restapi</tail>
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
 		<tail>time-server</tail>
@@ -72,6 +73,9 @@
 		<to>storage-server</to>
 		<to>ludicrous-server</to>
 		<to>repo-server</to>
+		<to>restapi</to>
+		<to>uefi-server</to>
 	</edge>
+
 
 </graph>

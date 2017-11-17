@@ -187,45 +187,9 @@ def render_pallets(screen, data):
 			result = (button_pressed, checkbox_tree.getSelection())
 			break	
 	
-	#from pudb.remote import set_trace; set_trace(term_size=(200, 60))
 	return result
 
 def handle_add_pallet(screen, data, pallets):
-	button_choice = ButtonChoiceWindow(
-		screen,
-		"Add Pallets",
-		"Select a method to add more pallets to the list.",
-		buttons=["DVD", "Network"]
-	)
-	
-	if button_choice == "dvd":
-		handle_add_dvd(screen, data, pallets)
-	else:
-		handle_add_network(screen, data, pallets)
-
-def handle_add_dvd(screen, data, pallets):
-	# Eject any existing media
-	media = stack.media.Media()
-	media.umountCD()
-	media.ejectCD()
-	
-	# Prompt the user to load the DVD
-	button_choice = ButtonChoiceWindow(
-		screen,
-		"Add Pallets",
-		"Please insert the DVD to load pallets.",
-		buttons=["Load", "Cancel"]
-	)
-	
-	if button_choice == "load":
-		# Mount the CD
-		subprocess.call(["mount", "/dev/cdrom", "/mnt/cdrom"])
-		
-		# Add any pallets (add a empty item for the net data)
-		pallets.extend([x + ('',) for x in data.getDVDPallets()])
-	
-
-def handle_add_network(screen, data, pallets):
 	# Prompt the user to enter the network URL
 	response = EntryWindow(
 		screen,

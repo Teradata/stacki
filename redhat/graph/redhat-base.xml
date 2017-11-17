@@ -33,6 +33,7 @@
 		<to>yum-base</to>
 		<to>storage</to>
 		<to>foundation-python</to>
+		<to>uefi-base</to>
 	</edge>
 
 
