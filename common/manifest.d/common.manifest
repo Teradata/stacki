@@ -6,8 +6,6 @@ foundation-gd
 foundation-iperf
 foundation-mariadb
 foundation-newt
-foundation-py-pycairo
-foundation-py-wxPython
 foundation-python
 foundation-rcs
 foundation-redis
