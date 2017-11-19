@@ -1,7 +1,6 @@
 PKGROOT		= /opt/stack/images
 OVERLAY.PKGS	= \
 	MegaCLI \
-	foundation-py-wxPython \
 	foundation-redhat \
 	ludicrous-speed \
 	stack-storage-config \
