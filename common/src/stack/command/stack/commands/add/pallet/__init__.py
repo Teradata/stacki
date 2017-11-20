@@ -99,7 +99,7 @@ class Command(stack.commands.add.command):
 						break
 
 			if not impl_found:
-				raise CommandError(self, 'unknown os on media')
+				raise CommandError(self, 'unknown pallet on %s' % self.mountPoint)
 
 			if res:
 				if updatedb:
@@ -172,8 +172,7 @@ class Command(stack.commands.add.command):
 		isolist = []
 		network_pallets = []
 		for arg in args:
-			if arg.startswith('http') or \
-				arg.startswith('ftp'):
+			if arg.startswith(('http', 'ftp')):
 				network_pallets.append(arg)
 				continue
 			arg = os.path.join(os.getcwd(), arg)
@@ -189,11 +188,11 @@ class Command(stack.commands.add.command):
 			#
 			# no files specified look for a cdrom
 			#
-			cmd = 'mount | grep %s' % self.mountPoint
-			if os.system(cmd):
+			rc = os.system('mount | grep %s' % self.mountPoint)
+			if rc == 0:
 				self.copy(clean, dir, updatedb)
 			else:
-				raise CommandError(self, 'CDROM not mounted')
+				raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
 		
 		if isolist:
 			#

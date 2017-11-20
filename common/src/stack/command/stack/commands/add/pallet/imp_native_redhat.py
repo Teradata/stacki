@@ -53,7 +53,7 @@ class Implementation(stack.commands.Implementation):
 		#
 		# copy the roll to the HD
 		#
-		self.owner.out.write('Copying %s %s-%s to pallets ...' %
+		self.owner.out.write('Copying %s %s-%s to pallets ...\n' %
 			(name, vers, release))
 
 		os.chdir(os.path.join(self.owner.mountPoint, name))
