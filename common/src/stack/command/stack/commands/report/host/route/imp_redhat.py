@@ -9,7 +9,7 @@ import stack.commands
 
 class Implementation(stack.commands.Implementation):
 
-	def getRoute(self, network, netmask, gateway):
+	def getRoute(self, network, netmask, gateway, interface):
 
 		s = 'any '
 
@@ -29,6 +29,9 @@ class Implementation(stack.commands.Implementation):
 				
 		if gateway.count('.') == 3:
 			s += 'gw %s' % gateway
+
+			if interface and interface != 'NULL':
+				s += 'dev %s' % interface
 		else:
 			s += 'dev %s' % gateway
 			
@@ -40,8 +43,10 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host,
 			'<stack:file stack:name="/etc/sysconfig/static-routes">')
 		routes = self.owner.db.getHostRoutes(host)
-		for (key, val) in routes.items():
-			s = self.getRoute(key, val[0], val[1])
+		for network in sorted(routes.keys()):
+			(netmask, gateway, interface) = routes[network]
+
+			s = self.getRoute(network, netmask, gateway, interface)
 			if s:
 				self.owner.addOutput(host, s)
 		self.owner.addOutput(host, '</stack:file>')

@@ -1150,8 +1150,8 @@ class DatabaseConnection:
 		
 		# global
 		
-		for (n, m, g, s) in self.select("""
-			network, netmask, gateway, subnet from
+		for (n, m, g, s, i) in self.select("""
+			network, netmask, gateway, subnet, interface from
 			global_routes
 			"""):
 			if s:
@@ -1164,15 +1164,15 @@ class DatabaseConnection:
 					""" % (s, host)):
 					g = dev
 			if showsource:
-				routes[n] = (m, g, 'G')
+				routes[n] = (m, g, i, 'G')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# os
 				
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from os_routes r, nodes n where
+			r.subnet, r.interface from os_routes r, nodes n where
 			r.os='%s' and n.name='%s'
 			"""  % (self.getHostOS(host), host)):
 			if s:
@@ -1185,15 +1185,15 @@ class DatabaseConnection:
 					""" % (s, host)):
 					g = dev
 			if showsource:
-				routes[n] = (m, g, 'O')
+				routes[n] = (m, g, i, 'O')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# appliance
 
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from
+			r.subnet, r.interface from
 			appliance_routes r,
 			nodes n,
 			appliances app where
@@ -1210,15 +1210,15 @@ class DatabaseConnection:
 					""" % (s, host)):
 					g = dev
 			if showsource:
-				routes[n] = (m, g, 'A')
+				routes[n] = (m, g, i, 'A')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# host
 		
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from node_routes r, nodes n where
+			r.subnet, r.interface from node_routes r, nodes n where
 			n.name='%s' and n.id=r.node
 			""" % host):
 			if s:
@@ -1231,9 +1231,9 @@ class DatabaseConnection:
 					""" % (s, host)):
 					g = dev
 			if showsource:
-				routes[n] = (m, g, 'H')
+				routes[n] = (m, g, i, 'H')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		return routes
 

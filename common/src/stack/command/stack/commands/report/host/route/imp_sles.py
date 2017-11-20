@@ -27,21 +27,31 @@ class Implementation(stack.commands.Implementation):
 		#
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network/routes">')
 
-		gateway = '0.0.0.0'
 
-		result = self.owner.call('list.host.route', [ host ])
-		for o in result:
-			destination = o['network']
-			netmask = o['netmask']
-			device = o['gateway']
+		routes = self.db.getHostRoutes(host)
+		for network in sorted(routes.keys()):
+			(netmask, gateway, interface) = routes[network]
+			destination = network
 
-			self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
-				(destination, gateway, netmask, device))
+			
+			# if interface is not set, use the default behavior
+			if not interface or interface == 'NULL':
+				device = gateway
+				gateway = '0.0.0.0'
+				self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
+					(destination, gateway, netmask, device))
+
+			else:
+				device = interface
+				self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
+					(destination, gateway, netmask, device))
+				
 
 		#
 		# the interface that is designated as the default interface,
 		# will be specified as the default route
 		#
+		gateway = '0.0.0.0'
 		result = self.owner.call('list.host.interface', [ host ])
 		for o in result:
 			if o['default']: 

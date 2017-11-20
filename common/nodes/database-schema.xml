@@ -215,7 +215,8 @@ CREATE TABLE global_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
 
 grant select on cluster.global_routes to ''@'localhost';
@@ -226,7 +227,8 @@ CREATE TABLE os_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
 
 grant select on cluster.os_routes to ''@'localhost';
@@ -237,7 +239,8 @@ CREATE TABLE appliance_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
 
 grant select on cluster.appliance_routes to ''@'localhost';
@@ -248,7 +251,8 @@ CREATE TABLE node_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
 
 grant select on cluster.node_routes to ''@'localhost';

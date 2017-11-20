@@ -31,14 +31,20 @@ class Command(stack.commands.add.command):
 	Specifies the netmask for a network route.  For a host route
 	this is not required and assumed to be 255.255.255.255
 	</param>
+
+	<param type='string' name='interface'>
+	Specific interface to send traffic through. Should only be used if
+	you need traffic to go through a VLAN interface (e.g., 'eth0.1').
+	</param>
 	"""
 
 	def run(self, params, args):
 
-		(address, gateway, netmask) = self.fillParams([
+		(address, gateway, netmask, interface) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
-			('netmask', '255.255.255.255')
+			('netmask', '255.255.255.255'),
+			('interface', None)
 			])
 
 		#
@@ -59,8 +65,14 @@ class Command(stack.commands.add.command):
 			where network='%s'""" % address)
 		if rows:
 			raise CommandError(self, 'route exists')
-			
+
+		#
+		# if interface is being set, check if it exists first
+		#
+		if not interface:
+			interface='NULL'
+		
 		self.db.execute("""insert into global_routes
-				values ('%s', '%s', %s, %s)""" %
-				(address, netmask, gateway, subnet))
+				values ('%s', '%s', %s, %s, '%s')""" %
+				(address, netmask, gateway, subnet, interface))
 

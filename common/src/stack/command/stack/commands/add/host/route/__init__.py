@@ -40,10 +40,12 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		
-		(address, gateway, netmask) = self.fillParams([
+		(address, gateway, netmask, interface) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
-			('netmask', '255.255.255.255')])
+			('netmask', '255.255.255.255'),
+			('interface', None),
+			])
 		
 		#
 		# determine if this is a subnet identifier
@@ -70,6 +72,17 @@ class Command(stack.commands.add.host.command):
 				(address, host)) 
 			if rows:
 				raise CommandError(self, 'route exists')
+
+		#
+		# if interface is being set, check if it exists first
+		#
+		if interface:
+			rows = self.db.execute("""select * from networks
+				where node=1 and device='%s'""" % interface)
+			if not rows:
+				raise CommandError(self, 'interface does not exist')
+		else:
+			interface='NULL'
 		
 		# Now that we know things will work insert the route for
 		# all the hosts
@@ -77,6 +90,6 @@ class Command(stack.commands.add.host.command):
 		for host in hosts:	
 			self.db.execute("""insert into node_routes values 
 				((select id from nodes where name='%s'),
-				'%s', '%s', %s, %s)""" %
-				(host, address, netmask, gateway, subnet))
+				'%s', '%s', %s, %s, '%s')""" %
+				(host, address, netmask, gateway, subnet, interface))
 
