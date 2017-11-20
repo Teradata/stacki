@@ -26,7 +26,7 @@ class Command(stack.commands.add.host.command):
 	Name of the channel
 	</param>
 
-	<example cmd='add host message backend-0-0 "hello world" channel=debug'>
+	<example cmd='add host message backend-0-0 message="hello world" channel=debug'>
 	Sends "hello world" over the debug channel using the Message
 	Queue on backend-0-0.
 	</example>
