@@ -179,8 +179,8 @@ class Command(stack.commands.add.command):
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				isolist.append(arg)
 			else:
-				CommandError("Cannot find %s or %s "
-				      "is not and ISO image" % (arg, arg))
+				msg = "Cannot find %s or %s is not an ISO image"
+				raise CommandError(self, msg % (arg, arg))
 
 		if self.dryrun:
 			self.beginOutput()
