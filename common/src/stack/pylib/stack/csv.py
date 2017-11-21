@@ -9,7 +9,7 @@
 import csv
 
 
-class Iterator(object):
+class Iterator(object, lcase):
 
         def __init__(self, input, lcase):
                 self.header = None
