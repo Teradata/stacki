@@ -11,6 +11,8 @@
 # @rocks@
 
 import stack.commands
+import socket
+import subprocess
 
 
 class Command(stack.commands.remove.host.command):
@@ -25,15 +27,29 @@ class Command(stack.commands.remove.host.command):
 	The address of the static route to remove. This argument is required.
 	</param>
 
+	<param type='string' name='syncnow' optional='1'>
+	if set to true, the routing table will be updated as well as the db.
+	</param>
+
 	<example cmd='remove host route backend-0-0 address=1.2.3.4'>
 	Remove the static route for the host 'backend-0-0' that has the
 	network address '1.2.3.4'.
+	</example>
+
+	<example cmd='remove host route backend-0-0 address=1.2.3.4 syncnow=true'>
+	Remove the static route for the host 'backend-0-0' that has the
+	network address '1.2.3.4' and remove the route from the routing table.
 	</example>
 	"""
 
 	def run(self, params, args):
 		
-		(address, ) = self.fillParams([ ('address', None, True) ])
+		(address, syncnow, ) = self.fillParams([ 
+			('address', None, True),
+			('syncnow', None)
+			])
+
+		syncnow = self.str2bool(syncnow)
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
@@ -42,3 +58,9 @@ class Command(stack.commands.remove.host.command):
 			and network = '%s'
 			""" % (host, address))
 
+			if host == socket.gethostname():
+                                if syncnow:
+                                        add_route = ['route', 'del', '-host', address]
+
+                                        # remove route from routing table
+                                        p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
