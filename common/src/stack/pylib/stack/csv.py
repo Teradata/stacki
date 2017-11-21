@@ -11,9 +11,10 @@ import csv
 
 class Iterator(object):
 
-        def __init__(self, input):
+        def __init__(self, input, lcase):
                 self.header = None
                 self.reader = csv.reader(input)
+                self.lcase  = lcase
                 
         def __iter__(self):
                 return self
@@ -45,13 +46,16 @@ class Iterator(object):
                         if not self.header:
                                 self.header = []
                                 for cell in row:
+                                    if self.lcase:
                                         self.header.append(cell.lower())
+                                    else:
+                                        self.header.append(cell)
                                 row = self.header
 
                 return row
 
 
-def reader(fin):
+def reader(fin, lcase=True):
         """
         Stacki version of the standard python cvs.reader() function with the
         following additions:
@@ -59,10 +63,10 @@ def reader(fin):
         - All cells have leading and trailing whitespace removed.
         - Empty rows are ignored.
         - A leading '#' comments out a line.
-        - Header row has all field names forced to lowercase
+        - lcase flag controls lower/upper casing of values. Default is lowercase
 
         All Stacki code should use stack.cvs.reader() instead of cvs.reader()
         """
-        return Iterator(fin)
+        return Iterator(fin, lcase)
 
 
