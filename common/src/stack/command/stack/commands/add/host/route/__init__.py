@@ -11,6 +11,8 @@
 # @rocks@
 
 import stack.commands
+import socket
+import subprocess
 from stack.exception import CommandError
 
 
@@ -30,6 +32,10 @@ class Command(stack.commands.add.host.command):
 	Network or device gateway
 	</param>
 
+	<param type='string' name='syncnow'>
+	Add route to the routing table immediately
+	</param>
+
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route
 	this is not required and assumed to be 255.255.255.255
@@ -40,11 +46,12 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		
-		(address, gateway, netmask, interface) = self.fillParams([
+		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
 			('netmask', '255.255.255.255'),
 			('interface', None),
+			('syncnow', None),
 			])
 		
 		#
@@ -87,9 +94,27 @@ class Command(stack.commands.add.host.command):
 		# Now that we know things will work insert the route for
 		# all the hosts
 		
+		syncnow = self.str2bool(syncnow)
 		for host in hosts:	
 			self.db.execute("""insert into node_routes values 
 				((select id from nodes where name='%s'),
 				'%s', '%s', %s, %s, '%s')""" %
 				(host, address, netmask, gateway, subnet, interface))
+			
+			#
+			# if host is frontend and sync now, add route to routing table
+			#
+			if host == socket.gethostname():
+                                if syncnow:
+                                        add_route = ['route', 'add', '-host', address]
 
+                                        if interface and interface != 'NULL':
+                                                add_route.append('dev')
+                                                add_route.append(interface)
+
+                                        if gateway:
+                                                add_route.append('gw')
+                                                add_route.append(gateway)
+
+                                        # add route to routing table
+                                        p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
