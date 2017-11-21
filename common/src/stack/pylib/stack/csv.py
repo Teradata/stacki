@@ -63,7 +63,7 @@ def reader(fin, lcase=True):
         - All cells have leading and trailing whitespace removed.
         - Empty rows are ignored.
         - A leading '#' comments out a line.
-        - lcase flag controls lower/upper casing of values. Default is lowercase
+        - lcase flag controls lowercase vs using as is. Default is lowercase
 
         All Stacki code should use stack.cvs.reader() instead of cvs.reader()
         """
