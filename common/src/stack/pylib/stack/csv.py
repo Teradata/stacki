@@ -9,9 +9,9 @@
 import csv
 
 
-class Iterator(object, lcase):
+class Iterator(object):
 
-        def __init__(self, input, lcase):
+        def __init__(self, input, lcase=True):
                 self.header = None
                 self.reader = csv.reader(input)
                 self.lcase  = lcase
