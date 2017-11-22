@@ -13,5 +13,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>grub2-efi-x64</stack:package>
 <stack:package>shim-x64</stack:package>
 <stack:package>mokutil</stack:package>
+<stack:package>efibootmgr</stack:package>
 
 </stack:stack>
