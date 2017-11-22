@@ -26,14 +26,6 @@ rootpw --iscrypted &Kickstart_PrivateRootPassword;
 <stack:package>stack-config</stack:package>
 
 <stack:script stack:stage="install-post">
-<stack:file stack:name="/etc/ld.so.conf.d/stack.conf">
-/opt/stack/lib
-</stack:file>
-ldconfig
-</stack:script>
-
-
-<stack:script stack:stage="install-post">
 <!-- configure IP forwarding -->
 gawk '/net\.ipv4\.ip_forward/ { \
 	printf("net.ipv4.ip_forward = 1\n"); \

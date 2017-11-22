@@ -43,17 +43,6 @@ chgrp -R stackdb /var/opt/stack/mysql
 chmod -R g+rwx   /var/opt/stack/mysql
 chmod a+rx /var/opt/stack/mysql
 
-<stack:file stack:name="/etc/ld.so.conf.d/foundation-mariadb.conf" stack:perms="0640">
-/opt/stack/lib64
-</stack:file>
-
-if [ -f /usr/sbin/ldconfig ]
-then
-	/usr/sbin/ldconfig
-elif [ -f /sbin/ldconfig ]
-then
-	/sbin/ldconfig
-fi
 
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`

@@ -19,6 +19,9 @@
 		<to>selinux-base</to>
 		<to>ssh-base</to>
 		<to>ssl-base</to>
+		<to>ldconfig</to>
 	</edge>
+
+	<order tail="HEAD" head="ldconfig"/>
 
 </graph>
