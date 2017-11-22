@@ -20,7 +20,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	def run(self, args):
 		filename, = args
 
-		reader = stack.csv.reader(open(filename, 'rU'))
+		reader = stack.csv.reader(open(filename, 'rU'), False)
 
 		# Skip all header line until col[0] == 'target'
 
