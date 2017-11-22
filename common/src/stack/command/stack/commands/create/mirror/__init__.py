@@ -13,10 +13,12 @@
 import os
 import os.path
 import time
+import requests
 import subprocess
 import shlex
 import stack
 import stack.commands
+import sys
 from stack.exception import CommandError, ParamRequired
 
 
@@ -70,12 +72,19 @@ class Command(stack.commands.create.command):
 	
 	Set to "false" or "no" to get all versions of the RPMs
 	in a repository.
+
+	Default is True.
 	</param>
 
 	<param type='boolean' name='urlonly'>	
 	Print only the list of RPMS in the repo to be downloaded. 
 	Useful for checking what will be downloaded.
-	Default is "no."
+	Default is False.
+	</param>
+
+	<param type='boolean' name='quiet'>	
+	Prints the downloading packages.
+	Default is True.
 	</param>
 
 	<example cmd='create mirror url=http://mirrors.kernel.org/centos/6.5/updates/x86_64/Packages name=updates version=6.5'>
@@ -95,7 +104,7 @@ class Command(stack.commands.create.command):
 	</example>
 	"""
 
-	def mirror(self, mirror_url):
+	def mirror(self, mirror_url, quiet):
 		try:
 			scheme, url = mirror_url.split('://')
 		except ValueError:
@@ -112,12 +121,25 @@ class Command(stack.commands.create.command):
 			msg = "'%s' is not supported in 'stack create mirror'" % scheme
 			raise CommandError(self, msg)
 
+		# check to see if the damn thing exists
+		if scheme != None:
+			request = requests.get(mirror_url)
+			if request.status_code != 200:
+				msg = "Can't access %s'. Check it and try again" %  mirror_ -rl
+				raise CommandError(self, msg)
 		# use wget to do the mirroring.
+
 		if scheme:
-			cmd = 'wget -erobots=off --reject "*.drpm" --reject "anaconda*rpm" '
-			cmd += ' --mirror --no-verbose --no-parent %s' % (scheme + '://' + url)
+			cmd = 'wget -erobots=off --reject="*.drpm","anaconda*rpm","index*" '
+			cmd += ' --mirror --progress=bar --no-verbose --no-parent %s' % \
+				(scheme + '://' + url)
 			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
 				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			# wget prints output to stderr. Of.all.the.things
+			if self.str2bool(quiet) is False:
+				for line in iter(proc.stderr.readline, b''): 
+					sys.stdout.buffer.write(line)
+					sys.stdout.buffer.flush()
 			o, e = proc.communicate()
 
 		# finally, symlink the directory to RPM's
@@ -134,7 +156,7 @@ class Command(stack.commands.create.command):
 		o, e = proc.communicate()
 		return o, e
 
-	def reposync(self, repoid, repoconfig, newest, urlonly):
+	def reposync(self, repoid, repoconfig, newest, urlonly, quiet):
 		cmd = 'reposync --norepopath -r %s -p %s' % (repoid, repoid)
 
 		if repoconfig:
@@ -149,6 +171,11 @@ class Command(stack.commands.create.command):
 				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			o, e = proc.communicate()
 			return o, e
+
+		if self.str2bool(quiet) is False:
+			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+				stdout=None, stderr=subprocess.PIPE)
+			o, e = proc.communicate()
 		else:
 			proc = subprocess.Popen(shlex.split(cmd), stdin=None,
 				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -200,7 +227,8 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			release = 0
 			
-		(url, name, version, release, arch, repoid, repoconfig, newest, urlonly) = self.fillParams([
+		(url, name, version, release, arch, repoid, 
+		repoconfig, newest, urlonly, quiet) = self.fillParams([
 			('url', None),
 			('name', None),
 			('version', version),
@@ -208,8 +236,9 @@ class Command(stack.commands.create.command):
 			('arch', self.arch), 
 			('repoid', None),
 			('repoconfig', None),
-			('newest', 'yes'),
-			('urlonly', 'no')
+			('newest', True),
+			('urlonly', False),
+			('quiet', True)
 			])
 
 		# Any call to reposync creates a directory
@@ -240,7 +269,7 @@ class Command(stack.commands.create.command):
 
 		# If urlonly, just print what will be downloaded.
 		if urlstatus is True:
-			rpms, err = self.reposync(repoid, repoconfig, newest, urlonly)
+			rpms, err = self.reposync(repoid, repoconfig, newest, urlonly, quiet)
 			print(rpms)
 			os.system('rm -fr %s' % repoid)
 
@@ -256,9 +285,9 @@ class Command(stack.commands.create.command):
 			self.clean()
 		
 		if url:
-			self.mirror(url)
+			self.mirror(url,quiet)
 		elif repoid and urlstatus is False:
-			self.reposync(repoid, repoconfig, newest, urlonly)
+			self.reposync(repoid, repoconfig, newest, urlonly, quiet)
 
 		if repoid and (urlstatus is False):
 			os.chdir(repoid)
