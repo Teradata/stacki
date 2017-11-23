@@ -110,7 +110,7 @@ if not attr2bool(nukedisks):
 	disks = getHostDisks(nukedisks)
 	devicelist = getDeviceList(disks)
 	host_fstab = getHostFstab(devicelist)
-	partitions = getHostPartitions(devicelist, host_fstab)
+	partitions = getHostPartitions(disks, host_fstab)
 	if not partitions:
 		nukedisks = ['*']
 	else:
