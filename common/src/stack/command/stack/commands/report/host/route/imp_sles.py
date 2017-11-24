@@ -33,7 +33,7 @@ class Implementation(stack.commands.Implementation):
 			(netmask, gateway, interface) = routes[network]
 			destination = network
 
-			
+
 			# if interface is not set, use the default behavior
 			if not interface or interface == 'NULL':
 				device = gateway
@@ -45,7 +45,7 @@ class Implementation(stack.commands.Implementation):
 				device = interface
 				self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
 					(destination, gateway, netmask, device))
-				
+
 
 		#
 		# the interface that is designated as the default interface,
@@ -54,9 +54,9 @@ class Implementation(stack.commands.Implementation):
 		gateway = '0.0.0.0'
 		result = self.owner.call('list.host.interface', [ host ])
 		for o in result:
-			if o['default']: 
+			if o['default']:
 				network = o['network']
-				device = o['interface']
+				device = o['interface'].split(':')[0]
 				destination = 'default'
 				netmask = '0.0.0.0'
 
@@ -69,5 +69,5 @@ class Implementation(stack.commands.Implementation):
 					break
 
 				break
-				
+
 		self.owner.addOutput(host, '</stack:file>')
