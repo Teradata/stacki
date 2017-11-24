@@ -31,7 +31,7 @@
 
 /opt/stack/bin/stack add bootaction console type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
-	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000 console=tty0 console=ttyS0,115200n"
+	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000 console=tty0 console=ttyS0,115200n8"
 
 /opt/stack/bin/stack add bootaction no-parallel-format type=install \
 	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
