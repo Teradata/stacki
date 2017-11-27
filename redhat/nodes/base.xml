@@ -54,6 +54,10 @@ else:
 <stack:package>grub2-tools</stack:package>
 <stack:package>wget</stack:package>
 <stack:package>bridge-utils</stack:package>
+<!-- Network test from stacki-pro -->
+<stack:package>iperf3</stack:package>
+<stack:package>foundation-iperf</stack:package>
+<!-- Don't install the wireless or tv rpms -->
 <stack:package stack:enable="false">iwl*</stack:package>
 <stack:package stack:enable="false">ivtv*</stack:package>
 
