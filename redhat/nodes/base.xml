@@ -109,6 +109,12 @@ stacki release &version; (&release;)
 </stack:file>
 </stack:script>
 
+<stack:script cond="sync.hosts" stack:stage="install-post">
+<stack:file name="/etc/hosts">
+<stack:report name="host"></stack:report>
+</stack:file>
+</stack:script>
+
 <stack:script stack:stage="install-post" stack:chroot="false">
 /opt/stack/bin/stacki-profile.py &gt; /root/prof.log 2&gt;&amp;1
 
