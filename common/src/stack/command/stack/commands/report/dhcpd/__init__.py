@@ -76,14 +76,14 @@ class Command(stack.commands.HostArgumentProcessor,
 			""" % self.db.getHostname()):
 
 			if self.os == 'sles':
-				device = device.split(':')[0]
+				device = device.split('.')[0].split(':')[0]
+				dhchp_settings = (netname, network, netmask, gateway, zone)
+				print(device)
 				if device in shared_networks:
-					shared_networks[device].append(
-						(netname, network, netmask, gateway, zone))
+					if dhchp_settings not in shared_networks[device]:
+						shared_networks[device].append(dhchp_settings)
 				else:
-					shared_networks[device] = []
-					shared_networks[device].append(
-						(netname, network, netmask, gateway, zone))
+					shared_networks[device] = [dhchp_settings]
 
 			else:
 				self.addOutput('', '\nsubnet %s netmask %s {'
