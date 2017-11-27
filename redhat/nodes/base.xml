@@ -109,7 +109,7 @@ stacki release &version; (&release;)
 </stack:file>
 </stack:script>
 
-<stack:script cond="sync.hosts" stack:stage="install-post">
+<stack:script stack:cond="sync.hosts" stack:stage="install-post">
 <stack:file name="/etc/hosts">
 <stack:report name="host"></stack:report>
 </stack:file>
