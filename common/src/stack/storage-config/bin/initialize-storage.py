@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import sys
 import os
+import time
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -142,7 +143,7 @@ while count > 0:
 	if len(disks) == 0:
 		time.sleep(2)
 		count = count - 1
-		disks = getHostDisks()
+		disks = getHostDisks(nukedisks)
 	else:
 		break
 
