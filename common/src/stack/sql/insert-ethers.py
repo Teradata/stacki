@@ -193,6 +193,7 @@ class InsertEthers(GUI):
 		self.lastmsg		= ''
 		self.client		= ''
 		self.box		= 'default'
+		self.bootaction		= 'default'
 
 		self.ipnetwork		= None
 		self.currentip		= None
@@ -241,6 +242,9 @@ class InsertEthers(GUI):
 
 	def setBox(self, box):
 		self.box = box
+
+	def setBootaction(self, bootaction):
+		self.bootaction = bootaction 
 
 	def setSubnet(self, subnet):
 		self.subnet = subnet
@@ -528,6 +532,9 @@ class InsertEthers(GUI):
 		if not rows:
 			raise InsertError("Could not find %s in database" % nodename)
 
+		if self.bootaction:
+			Call('set.host.installaction', [nodename, 'action=%s' % self.bootaction])
+
 		Call('set.host.boot', [nodename, 'action=install'])
 
 		nodeid = self.sql.fetchone()[0]
@@ -707,6 +714,17 @@ class InsertEthers(GUI):
 			return 0
 		return 1
 
+	def getBootaction(self):
+		self.sql.execute("select name from bootnames where name='%s'" % \
+				(self.bootaction))
+		box = self.sql.fetchone()
+		if box is None:
+			self.warningGUI(_("There is no bootaction named: \
+					%s\n\n\n\n" % self.bootaction)
+			+ _("Create it and try again.\n"))
+			return 0
+		return 1
+
 			
 	def run(self):
 		self.startGUI()
@@ -715,6 +733,10 @@ class InsertEthers(GUI):
 		# make sure the box requested exists 
 		#
 		if self.getBox() == 0:
+			self.endGUI()
+			return
+
+		if self.getBootaction() == 0:
 			self.endGUI()
 			return
 
@@ -840,6 +862,7 @@ class App(stack.sql.Application):
 			('inc=', 'number'),
 			('rank=', 'number'),
 			('box=', 'box'),
+			('bootaction=', 'set the bootaction'),
 			('update'),
 			('network=', 'network name')
 		])
@@ -870,6 +893,8 @@ class App(stack.sql.Application):
 			self.insertor.setBox(c[1])
 		elif c[0] == '--network':
 			self.insertor.setSubnet(c[1])
+		elif c[0] == '--bootaction':
+			self.insertor.setBootaction(c[1])
 		return 0
 
 
@@ -903,7 +928,6 @@ class App(stack.sql.Application):
 		self.insertor.run()
 
 		self.cleanup()
-
 
 syslog.openlog('insert-ethers', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
