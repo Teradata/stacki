@@ -110,9 +110,9 @@ stacki release &version; (&release;)
 </stack:script>
 
 <stack:script stack:cond="sync.hosts" stack:stage="install-post">
-<stack:file name="/etc/hosts">
-<stack:report name="host"></stack:report>
-</stack:file>
+<stack:eval>
+/opt/stack/bin/stack report host > /etc/hosts
+</stack:eval>
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:chroot="false">
