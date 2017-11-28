@@ -13,7 +13,7 @@
 
 /opt/stack/bin/stack add bootaction "console" os=sles type=install \
 	kernel="vmlinuz-sles-12-x86_64" ramdisk=initrd-sles-12-x86_64 \
-	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS1,115200n"
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS1,115200n8"
 
 /opt/stack/bin/stack add bootaction "rescue" os=sles type=install \
 	kernel="vmlinuz-sles-12-x86_64" ramdisk=initrd-sles-12-x86_64 \
@@ -25,7 +25,7 @@
 
 /opt/stack/bin/stack add bootaction "install sles 11.3 console" os=sles type=install \
 	kernel=vmlinuz-sles-11.3-x86_64 ramdisk=initrd-sles-11.3-x86_64 \
-	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS1,115200n"
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS1,115200n8"
 
 /opt/stack/bin/stack add bootaction "rescue sles 11.3" os=sles type=install \
 	kernel=vmlinuz-sles-11.3-x86_64 ramdisk=initrd-sles-11.3-x86_64 \

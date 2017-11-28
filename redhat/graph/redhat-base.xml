@@ -42,5 +42,7 @@
 		<tail>repo-server</tail>
 	</order>
 
+	<order head="node" tail="storage"/>
+
 </graph>
 

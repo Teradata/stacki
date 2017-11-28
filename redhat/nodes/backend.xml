@@ -46,11 +46,6 @@ for o in stack.api.Call('list cart'):
 include ld.so.conf.d/*.conf
 </stack:file>
 
-<stack:file name="/etc/ld.so.conf.d/stacki.conf">
-/opt/stack/lib
-</stack:file>
-ldconfig
-
 </stack:script>
 
 <!-- stacki-profile adds the extra interfaces -->

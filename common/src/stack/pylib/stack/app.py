@@ -181,8 +181,8 @@ class Application:
 				print(s)
 				l = len(e)
 				s = e
-			if s:
-				print(s)
+		if s:
+			print(s)
 
 
 	def help(self):

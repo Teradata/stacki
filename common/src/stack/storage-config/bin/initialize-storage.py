@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import sys
 import os
+import time
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -110,7 +111,7 @@ if not attr2bool(nukedisks):
 	disks = getHostDisks(nukedisks)
 	devicelist = getDeviceList(disks)
 	host_fstab = getHostFstab(devicelist)
-	partitions = getHostPartitions(devicelist, host_fstab)
+	partitions = getHostPartitions(disks, host_fstab)
 	if not partitions:
 		nukedisks = ['*']
 	else:
@@ -136,6 +137,15 @@ if attr2bool(nukecontroller):
 	nukedisks = [ '*' ]
 
 disks = getHostDisks(nukedisks)
+count = 10
+# Wait until we have disk info from the storage controller
+while count > 0:
+	if len(disks) == 0:
+		time.sleep(2)
+		count = count - 1
+		disks = getHostDisks(nukedisks)
+	else:
+		break
 
 #
 # nuke LVM first
