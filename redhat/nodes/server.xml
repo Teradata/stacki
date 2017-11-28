@@ -107,6 +107,8 @@ for pallet in g.rolls:
 -->
 /opt/stack/bin/stack set attr attr=user.auth value=unix
 
+<!-- add sync.hosts to default false -->
+/opt/stack/bin/stack set attr attr=sync.hosts value=False
 </stack:script>
 
 <stack:script stack:stage="install-post">

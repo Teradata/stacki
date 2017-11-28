@@ -54,6 +54,10 @@ else:
 <stack:package>grub2-tools</stack:package>
 <stack:package>wget</stack:package>
 <stack:package>bridge-utils</stack:package>
+<!-- Network test from stacki-pro -->
+<stack:package>iperf3</stack:package>
+<stack:package>foundation-iperf</stack:package>
+<!-- Don't install the wireless or tv rpms -->
 <stack:package stack:enable="false">iwl*</stack:package>
 <stack:package stack:enable="false">ivtv*</stack:package>
 
@@ -102,6 +106,12 @@ if $programname == 'SCL' then ~
 <stack:script stack:stage="install-post">
 <stack:file stack:name="/etc/stack-release">
 stacki release &version; (&release;)
+</stack:file>
+</stack:script>
+
+<stack:script stack:cond="sync.hosts" stack:stage="install-post">
+<stack:file name="/etc/hosts">
+<stack:report name="host"></stack:report>
 </stack:file>
 </stack:script>
 
