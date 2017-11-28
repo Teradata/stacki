@@ -109,9 +109,18 @@ class ExpandingTraversor(stack.gen.Traversor):
 			network.appendChild(self.newTextNode('true'))
 			script.appendChild(network)
 
+
+		label = 'stack_script_%s' % nodeid
+		code  = [ ]
+		code.append('cat > /tmp/%s << "__EOF_%s__"' % (label, label))
+		code.append('#! %s\n' % shell)
+		code.append(self.collect(node))
+		code.append('__EOF_%s__' % label)
+		code.append('chmod +x /tmp/%s' % label)
+		code.append('/tmp/%s' % label)
+
 		source = self.newElementNode('sles:source')
-		source.appendChild(self.newTextNode('#! %s' % shell))
-		source.appendChild(self.newTextNode(self.collect(node)))
+		source.appendChild(self.newTextNode('\n'.join(code)))
 		script.appendChild(source)
 
 		node.parentNode.replaceChild(root, node)
@@ -138,12 +147,9 @@ class ExpandingTraversor(stack.gen.Traversor):
 		"""
 
 		stage   = self.getAttr(node, 'stack:stage', default='install')
-
-		meta	= self.getAttr(node, 'stack:meta', default='false')
-		meta    = str2bool(meta)
-
-		enabled = self.getAttr(node, 'stack:enable', default='true')
-		enabled = str2bool(enabled)
+		enabled = str2bool(self.getAttr(node, 'stack:enable', default='true'))
+		pattern = str2bool(self.getAttr(node, 'stack:meta', default='fase'))
+			
 
 		pkgs = []
 		for line in self.collect(node).split('\n'):
@@ -151,27 +157,46 @@ class ExpandingTraversor(stack.gen.Traversor):
 			if pkg:
 				pkgs.append(pkg)
 
-		if not meta:
-			if stage == 'boot':
-				packages = self.newElementNode('sles:post-packages')
-			else:
-				packages = self.newElementNode('sles:packages')
-			self.setAttribute(packages, 'config:type', 'list')
-			for rpm in pkgs:
-				package = self.newElementNode('sles:package')
-				package.appendChild(self.newTextNode(rpm))
-				packages.appendChild(package)
-		else:
-			packages = self.newElementNode('sles:patterns')
-			self.setAttribute(packages, 'config:type', 'list')
+		if not pattern:
+			# Figure out if the package(s) are:
+			#
+			# post-packages   - installed on first boot for broken RPMs
+			# packages        - installed during installation as God intended
+			# remove-packages - deletes a package for no good reason
 
-			for rpm in pkgs:
-				package = self.newElementNode('sles:pattern')
-				package.appendChild(self.newTextNode(rpm))
-				packages.appendChild(package)
+			innerTag = 'sles:package'
+
+			if stage == 'boot':
+				outerTag = 'sles:post-packages'
+			else:
+				outerTag = 'sles:packages'
+
+			if not enabled:
+				outerTag = 'sles:remove-packages'
+		else:
+			# Patterns only support:
+			#
+			# post-pattern
+			# pattern
+			# (no remove patterns)
+
+			innerTag = 'sles:pattern'
+
+			if stage == 'boot':
+				outerTag = 'sles:post-patterns'
+			else:
+				outerTag = 'sles:patterns'
+
+
+		outer = self.newElementNode(outerTag)
+		self.setAttribute(outer, 'config:type', 'list')
+		for rpm in pkgs:
+			inner = self.newElementNode(innerTag)
+			inner.appendChild(self.newTextNode(rpm))
+			outer.appendChild(inner)
 
 		software = self.newElementNode('sles:software')
-		software.appendChild(packages)
+		software.appendChild(outer)
 
 		node.parentNode.replaceChild(software, node)
 		return False
