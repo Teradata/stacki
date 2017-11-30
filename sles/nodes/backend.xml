@@ -27,6 +27,7 @@ mkdir -p /mnt/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 </stack:script>
 
+<!--
 <stack:script stack:cond="os.version == '12.x'" stack:stage="install-post">
 /usr/bin/systemctl disable wickedd-dhcp4.service
 /usr/bin/systemctl disable wickedd-dhcp6.service
@@ -34,6 +35,7 @@ cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
 rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
 </stack:script>
+-->
 
 <stack:script stack:stage="install-post">
 

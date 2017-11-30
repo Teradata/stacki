@@ -57,11 +57,13 @@ chmod 775 /export/stack/carts
 /usr/bin/systemctl start ludicrous-server
 
 <!-- disable the "wickedd-dhcp*" servers -->
+<!--
 /usr/bin/systemctl disable wickedd-dhcp4.service
 /usr/bin/systemctl disable wickedd-dhcp6.service
 
 rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
 rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
+-->
 
 <!-- explicitly write the sshd configuration file -->
 <stack:file stack:name="/etc/ssh/sshd_config" stack:perms="640">
@@ -70,6 +72,7 @@ PasswordAuthentication yes
 ChallengeResponseAuthentication no
 UsePAM yes
 X11Forwarding yes
+AgentForwarding yes
 PermitUserEnvironment yes
 Subsystem sftp /usr/lib/ssh/sftp-server
 AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
