@@ -37,36 +37,67 @@ Once your servers are installed with Stacki, augment them with your favorite con
 
 ## Stacki for CentOS/RHEL version 5.0
 
+Install a base system:
 
-### Older Downloads
+[stackios-5.0_20171128_b0ed4e3-redhat7.x86_64.disk1.iso](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/stackios-5.0_20171128_b0ed4e3-redhat7.x86_64.disk1.iso) (md5: 06a32c320cf8ed546c01d6f5cbe9d31c)
+
+Install from a pre-installed CentOS/RHEL 7.4 system.
+
+**This pallet is required.**
+
+[stacki-5.0_20171128_b0ed4e3-redhat7.x86_64.disk1.iso](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/stacki-5.0_20171128_b0ed4e3-redhat7.x86_64.disk1.iso) (md5: f4c021dd6d7febe1b72a2a8cb81c8a81)
+
+**This is a minimal CentOS 7.4 1708 release.**
+[os-7.4_20171128-redhat7.x86_64.disk1.iso](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/os-7.4_20171128-redhat7.x86_64.disk1.iso) (md5: bc331bb2589fb2921b9b470e238824fa)
+
+Or use the CentOS-Everything or CentOS-DVD iso from CentOS 7.4 v1708. 
+Or rhel-server 7.4
+Or Oracle Linux (probably works).
+
+Additionally, if you are going to do UEFI, RedHat has a bad grub2-efi-x86 rpm. grub2-efi-x86 should be >= 1:2.02-0.65
+
+You'll need to get the update from either RedHat if you're using RHEL or download CentOS-Updates below.
+
+[CentOS-Updates-7.4_20171128-redhat7.x86_64.disk1.iso](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/CentOS-Updates-7.4_20171128-redhat7.x86_64.disk1.iso) (md5: b69f015c30f004a1ff27aed49931144e)
+
+If you're installing on pre-installed machine you need the frontend-install.py script also:
+
+[frontend-install.py](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/frontend-install.py)(md5: f64fc40d45eee0c8f2538b4aeb769011)
+
+You can get the md5sums from here:
+
+[md5sums.txt](http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/md5sums.xt) or check them on the releases page. 
+
+
+#### Older Downloads
 Stacki is CentOS first, this is where all of our develop starts.  You should start here as well before wandering of into Ubuntu and Pi land.
 
 
-### [Stacki 4.0 CentOS 6.x](http://stacki.s3.amazonaws.com/public/pallets/4.0/open-source/stackios-4.0-6.x.x86_64.disk1.iso?id=%22download_iso6_button%22&source=%22https://www.stackiq.com/downloads/%22&page=%22/downloads/%22)
+#### [Stacki 4.0 CentOS 6.x](http://stacki.s3.amazonaws.com/public/pallets/4.0/open-source/stackios-4.0-6.x.x86_64.disk1.iso?id=%22download_iso6_button%22&source=%22https://www.stackiq.com/downloads/%22&page=%22/downloads/%22)
 
-### [ Stacki 4.0 CentOS 7.3](http://stacki.s3.amazonaws.com/public/pallets/4.0/open-source/stackios-4.0_c4aff2a-7.x.x86_64.disk1.iso?id=%22download_iso7_button%22&source=%22https://www.stackiq.com/downloads/%22&page=%22/downloads/%22)
+#### [ Stacki 4.0 CentOS 7.3](http://stacki.s3.amazonaws.com/public/pallets/4.0/open-source/stackios-4.0_c4aff2a-7.x.x86_64.disk1.iso?id=%22download_iso7_button%22&source=%22https://www.stackiq.com/downloads/%22&page=%22/downloads/%22)
 
 
-## Stacki for Ubuntu (Trusty, Wily, Xenial, or Yakkety)
+#### Stacki for Ubuntu (Trusty, Wily, Xenial, or Yakkety)
 
 You asked, we listened, and now we’re releasing Stacki Ubuntu into the open source Stacki tree. You can now automatically install Ubuntu via a preseed network installation to boot backend machines from a Stacki frontend. The only thing you have to do is prep your frontend.
 It's latest release now does multi-disk partitioning and multiple network interface configuration. We are starting to make a better preseed.
 In the meantime, follow the [GitHub README](https://github.com/Teradata/stacki-ubuntu/blob/master/README.md) and the requirements below to get started.
 
-### Requirements:
+#### Requirements:
 
 * A Stacki frontend with Stacki 4.0. It likely won’t work on anything less than 4.0.
 * [Stacki-ubuntu-frontend Pallet ](https://teradata-stacki.s3.amazonaws.com/release/stacki/4.x/stacki-ubuntu-frontend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = 55ba30652556994860d5f492cba48939)
 * [Stacki-ubuntu-backend Pallet](https://teradata-stacki.s3.amazonaws.com/release/stacki/4.x/stacki-ubuntu-backend-4.0_20170414_c4aff2a-7.x.x86_64.disk1.iso) (MD5 = 694ff792eabf27fbdded062316e174b3)
 * Ubuntu-Server iso from Xenial, minor version 1,2, or 3 (e.g., ubuntu-16.04-server-amd64.iso)
 
-## Stacki Ace (CentOS 7 for ARM)
+#### Stacki Ace (CentOS 7 for ARM)
 
 Stacki Ace is the new open-source port of Stacki to the Raspberry Pi providing the quickest way to go from one Raspberry Pi with nothing installed to a fully functioning cluster. There is a “Stacki” Pallet that is built from the Stacki open-source repository and there is a new “Stacki-ace” Pallet that we created to specifically support the Pi.
 
 Once you have the required Raspberry Pis and the hardware, download the stacki-centos.img and ISOs (MD 5 checksum) below, and follow the [GitHub README](https://github.com/Teradata/stacki-ace/blob/master/README.md) to get started.
 
-### Hardware Requirements
+#### Hardware Requirements
 
 #### Frontend
 * [Raspberry Pi 3 Model B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
