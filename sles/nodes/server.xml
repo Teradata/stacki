@@ -72,7 +72,6 @@ PasswordAuthentication yes
 ChallengeResponseAuthentication no
 UsePAM yes
 X11Forwarding yes
-AgentForwarding yes
 PermitUserEnvironment yes
 Subsystem sftp /usr/lib/ssh/sftp-server
 AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
