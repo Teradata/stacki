@@ -54,7 +54,7 @@ for line in output.split('\n'):
 		interface = tokens[1].strip()[0:-1]
 
 		for i in range(2, len(tokens)):
-			if tokens[i] == 'link/ether':
+			if tokens[i] == 'link/':
 				#
 				# we know the next token is the ethernet MAC
 				#
