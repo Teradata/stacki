@@ -1,5 +1,11 @@
 ![alt tag](logo.png)
 
+
+# There's a new release!
+
+Stacki 5.0 was released on 11/30/2017. Go [here](https://github.com/Teradata/stacki/releases/latest) for more details and downloads. Installing is similar to previous versions; however, documents are lagging, just so's you know.
+
+
 * [documentation](https://github.com/StackIQ/stacki/wiki)
 * [mailing list](https://groups.google.com/forum/#!forum/stacki)
 
@@ -29,8 +35,10 @@ Once your servers are installed with Stacki, augment them with your favorite con
 
 # Downloads
 
-## Stacki for CentOS
+## Stacki for CentOS/RHEL version 5.0
 
+
+### Older Downloads
 Stacki is CentOS first, this is where all of our develop starts.  You should start here as well before wandering of into Ubuntu and Pi land.
 
 
