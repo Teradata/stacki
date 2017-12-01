@@ -57,7 +57,8 @@ class Scanner:
 
 	def readEgg(self, path):
 		print('\tfound egg %s' % os.path.split(path)[-1])
-		with open(os.path.join(path, 'PKG-INFO'), 'r') as text:
+		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
+		with open(os.path.join(path, 'PKG-INFO'), 'r', encoding='utf-8') as text:
 			for line in text:
 				tokens = line.split(':', 1)
 				if len(tokens) == 2:
