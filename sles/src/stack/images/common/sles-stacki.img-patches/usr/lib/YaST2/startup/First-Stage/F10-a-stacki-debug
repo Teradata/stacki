@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# @copyright@
+# @copyright@
+
 log "==============================="
 log "Starting F10-a-stacki-debug ..."
 log "==============================="
