@@ -30,6 +30,7 @@ install::
 
 	mkdir -p $(ROOT)/export/stack/sbin/profile
 	$(INSTALL) -m 0755 profile.py  $(ROOT)/export/stack/sbin/profile.cgi
+	$(INSTALL) -m 0755 register.py $(ROOT)/export/stack/sbin/register.cgi
 	$(INSTALL) -m 0755 __init__.py $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 redhat.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 sles.py  $(ROOT)/export/stack/sbin/profile/
