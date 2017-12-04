@@ -6,8 +6,24 @@
 Stacki 5.0 was released on 11/30/2017. Go [here](https://github.com/Teradata/stacki/releases/latest) for more details and downloads. Installing is similar to previous versions; however, documents are lagging, just so's you know.
 
 
-* [documentation](https://github.com/StackIQ/stacki/wiki)
-* [mailing list](https://groups.google.com/forum/#!forum/stacki)
+New release:
+
+* [Documentation for Stacki 5.0](https://github.com/Teradata/stacki/wiki)
+
+Previous release:
+* [Documentation for Stacki 4.0](https://github.com/Teradata/stacki/wiki)
+
+Join the mailing list. 
+
+Longer detailed solutions get posted to the mailing lis. 
+
+* [Mailing list](https://groups.google.com/forum/#!forum/stacki)
+
+Join the Slack Channel:
+
+Lots of things happen here. Smart things. Funny things. Questions whose answer is usually 'RTFM' but nicely said. 
+
+Once on googlegroups, email a request to be added.
 
 # Why Bare Metal Provisioning?
  
