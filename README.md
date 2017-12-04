@@ -13,17 +13,17 @@ New release:
 Previous release:
 * [Documentation for Stacki 4.0](https://github.com/Teradata/stacki/wiki)
 
-Join the mailing list. 
+* Mailing list and Slack.
 
-Longer detailed solutions get posted to the mailing lis. 
+Join the GoogleGroups  [mailing list](https://groups.google.com/forum/#!forum/stacki)
 
-* [Mailing list](https://groups.google.com/forum/#!forum/stacki)
+Longer, detailed solutions get posted to the mailing list. 
 
 Join the Slack Channel:
 
-Lots of things happen here. Smart things. Funny things. Questions whose answer is usually 'RTFM' but nicely said. 
+Lots of things happen here. Smart things. Funny things. Questions whose answer is usually 'RTFM' except we know how to say it nicely. Well, some of us do.
 
-Once on googlegroups, email a request to be added.
+Once on mailing list, email a request to be added. Eventually we'll get around to a 
 
 # What is Stacki?
 
@@ -33,15 +33,14 @@ The Stacki default installation process will bring bare metal infrastructure (or
  
 ## I know whatever, what does Stacki do?
 
-* Configure RAID controllers and partitioning (both customizable). This means you never have to touch a monitor and keyboard to customize the RAID configuration on machines, not even once. Set-up the RAID controller configuration via spreadsheet, ingest it, and install. The RAID will be configured on first installation with no human interaction required.
 * Install OS.
 * Configure OS.
+* Configure RAID controllers and partitioning (both customizable). This means you never have to touch a monitor and keyboard to customize the RAID configuration on machines, not even once. Set-up the RAID controller configuration via spreadsheet, ingest it, and install. The RAID will be configured on first installation with no human interaction required.
 * Configure networking. This includes configuring multiple network interfaces, multiple network types: IB, 10G, 1G, and authenticated SSH password-less access at boot.
-* Leave you to be productive, to focus on more interesting problems.
 * Machines are disposable. Everything is built from the ground up programmatically. Recovering from disasters is a simple rebuild.
 * Data is preserved across reinstalls.
-* Integrates with DevOps tools: Ansible, Puppet, Chef, 
-
+* Integrates with DevOps tools: Ansible, Puppet, Chef, Salt.
+* Leave you to be productive, to focus on more interesting problems.
 
 
 
