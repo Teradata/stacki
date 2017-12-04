@@ -78,7 +78,6 @@ class Command(stack.commands.HostArgumentProcessor,
 			if self.os == 'sles':
 				device = device.split('.')[0].split(':')[0]
 				dhchp_settings = (netname, network, netmask, gateway, zone)
-				print(device)
 				if device in shared_networks:
 					if dhchp_settings not in shared_networks[device]:
 						shared_networks[device].append(dhchp_settings)
