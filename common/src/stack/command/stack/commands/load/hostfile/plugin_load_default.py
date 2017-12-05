@@ -121,7 +121,18 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 		# process the host's interface(s) 
 		#
 
-		hosts = interfaces.keys()
+		hosts = list(interfaces.keys())
+
+		# ensure the fronted is the first to get loaded
+		_frontend = self.db.getHostname('localhost')
+		for index, host in enumerate(hosts):
+			if host == _frontend:
+				tmp_host = hosts[0]
+				hosts[0] = host
+				hosts[index] = tmp_host
+
+		print('after', hosts)
+
 		argv = []
 		for a in interfaces.keys():
 			argv.append(a)
@@ -131,6 +142,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			self.owner.call('remove.host.interface', argv)
 		
 		sys.stderr.write('\tAdd Host Interface\n')
+
 		for host in hosts:
 
 			sys.stderr.write('\t\t%s\r' % host)
