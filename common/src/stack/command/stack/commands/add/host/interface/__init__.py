@@ -167,3 +167,32 @@ class Command(stack.commands.add.host.command):
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
 
+
+		# check for multitenancy
+		_frontend = self.db.getHostname('localhost')
+		if _frontend != host and  ip:
+			_rows = self.db.select("""
+			n.device, s.gateway 
+			from networks n, subnets s
+			where n.node=(select id from nodes where name='%s')
+			and s.name='%s'
+			and s.id=n.subnet
+			""" % (_frontend, network))
+
+
+			if len(_rows) > 1:
+				_row = _rows[0] 
+				_device = _row[0].split('.')[0].split(':')[0]
+				_gateway = _row[1]
+
+				if self.os == 'sles':
+					_args = [
+						_frontend,
+						'address=%s' % ip,
+						'interface=%s' % _device,
+						'gateway=%s' % _gateway,
+						'syncnow=true',
+						]
+
+					self.call('remove.host.route', _args)
+					self.call('add.host.route', _args)
