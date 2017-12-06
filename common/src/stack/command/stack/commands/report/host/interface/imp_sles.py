@@ -98,11 +98,15 @@ class Implementation(stack.commands.Implementation):
 					self.owner.addOutput(host, 'VLAN=yes')
 				else:
 					self.owner.addOutput(host, 'USERCONTROL=no')
+				
+				dhcp = 'dhcp' in options
+				if dhcp:
+					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
 
 				if 'onboot=no' in options:
 					self.owner.addOutput(host, 'STARTMODE=manual')
 				else:
-					if ip:
+					if ip or dhcp:
 						self.owner.addOutput(host, 'STARTMODE=auto')
 					else:
 						self.owner.addOutput(host, 'STARTMODE=off')
