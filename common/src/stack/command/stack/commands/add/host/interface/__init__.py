@@ -191,6 +191,8 @@ class Command(stack.commands.add.host.command):
 						'address=%s' % ip,
 						'interface=%s' % _device,
 						'gateway=%s' % _gateway,
+						'syncnow=true',
 						]
 
+					self.call('remove.host.route', _args)
 					self.call('add.host.route', _args)
