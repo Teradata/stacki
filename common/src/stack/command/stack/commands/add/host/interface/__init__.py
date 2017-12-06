@@ -167,8 +167,10 @@ class Command(stack.commands.add.host.command):
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
 
-		if ip:
-			_frontend = self.db.getHostname('localhost')
+
+		# check for multitenancy
+		_frontend = self.db.getHostname('localhost')
+		if _frontend != host and  ip:
 			_rows = self.db.select("""
 			n.device, s.gateway 
 			from networks n, subnets s
@@ -191,7 +193,4 @@ class Command(stack.commands.add.host.command):
 						'gateway=%s' % _gateway,
 						]
 
-					try: 
-						self.call('add.host.route', _args)
-					except Exception as e:
-						pass
+					self.call('add.host.route', _args)
