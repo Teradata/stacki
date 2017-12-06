@@ -131,8 +131,6 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				hosts[0] = host
 				hosts[index] = tmp_host
 
-		print('after', hosts)
-
 		argv = []
 		for a in interfaces.keys():
 			argv.append(a)
