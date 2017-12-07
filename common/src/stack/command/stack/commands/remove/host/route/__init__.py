@@ -60,7 +60,7 @@ class Command(stack.commands.remove.host.command):
 
 			if host == socket.gethostname():
                                 if syncnow:
-                                        add_route = ['route', 'del', '-host', address]
+                                        del_route = ['route', 'del', '-host', address]
 
                                         # remove route from routing table
-                                        p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
+                                        p = subprocess.Popen(del_route, stdout=subprocess.PIPE)
