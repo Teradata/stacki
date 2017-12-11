@@ -23,8 +23,10 @@
 		<to>users</to>
 		<to>uefi-client</to>
 		<to>time-client</to>
-		<to>firewall-client</to>
 	</edge>
+
+	<edge from="client" to="firewall-client" cond="firewall"/>
+	<edge from="client" to="firewall-base"   cond="firewall"/>
 
 	<order tail="HEAD">
 		<head>general</head>

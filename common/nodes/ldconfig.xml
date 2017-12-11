@@ -10,13 +10,13 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:post>
+<stack:script stack:stage="install-post">
 <stack:file name="/etc/ld.so.conf.d/stacki.conf">
 /opt/stack/lib
 /opt/stack/lib64
 </stack:file>
-ldconfig
 
+ldconfig
 
 if [ -f /usr/sbin/ldconfig ]
 then
@@ -25,6 +25,6 @@ elif [ -f /sbin/ldconfig ]
 then
 	/sbin/ldconfig
 fi
-</stack:post>
+</stack:script>
 
 </stack:stack>

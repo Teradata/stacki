@@ -10,10 +10,10 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-	<stack:package>
-		git
-		stack-build
-	</stack:package>
+	<stack:package stack:cond="os == 'sles'">git-core</stack:package>
+	<stack:package stack:cond="os == 'redhat'">git</stack:package>
+
+	<stack:package>stack-build</stack:package>
 
 	<!-- bootstrap does this for you, but faster to do in installer -->
 	<stack:package stack:cond="os == 'sles'" stack:meta="true">

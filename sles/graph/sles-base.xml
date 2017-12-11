@@ -9,7 +9,6 @@
 		<to>logrotate</to>
 		<to>node</to>
 		<to>time-base</to>
-		<to>firewall-base</to>
 	</edge>
 
 </graph>
