@@ -189,23 +189,29 @@ try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
+
+	if Database is not None:
+		Database.close()
+	
 	sys.exit(1)
 
 debug = False
+rc = None
 for o, a in opts:
 	if o == '--debug':
 		debug = True
 	elif o == '--help':
 		rc = run_command(['help'])
-		sys.exit(rc)
 	elif o == '--version':
 		rc = run_command(['report.version'])
-		sys.exit(rc)
 
+if rc is None:
+	if len(args) == 0:
+		rc = run_command(['help'])
+	else:
+		rc = run_command(args, debug)
 
-if len(args) == 0:
-	rc = run_command(['help'])
-	sys.exit(rc)
-else:
-	rc = run_command(args, debug)
-	sys.exit(rc)
+if Database is not None:
+	Database.close()
+
+sys.exit(rc)
