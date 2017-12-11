@@ -36,4 +36,8 @@
 		<to>routes-server</to>
 	</edge>
 
+	<edge from="server" cond="aws">
+		<to>aws-server</to>
+	</edge>
+
 </graph>
