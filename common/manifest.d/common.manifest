@@ -14,6 +14,7 @@ foundation-zeromq
 ludicrous-speed
 sc-im
 stack-admin
+stack-aws
 stack-build
 stack-command
 stack-config

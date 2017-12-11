@@ -18,4 +18,8 @@
 		<to>peerdone</to>
 	</edge>
 
+	<edge from="client" cond="aws">
+		<to>aws-client</to>
+	</edge>
+
 </graph>

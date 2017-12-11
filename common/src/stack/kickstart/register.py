@@ -7,6 +7,7 @@ import os
 import re
 import cgi
 import sys
+import json
 import syslog
 import stack.api
 from stack.bool import *
@@ -25,7 +26,6 @@ def Lookup(key, pattern=None):
 
 	return value
 
-
 client   = os.environ['REMOTE_ADDR']
 port     = int(os.environ['REMOTE_PORT'])
 ami      = Lookup('ami')
@@ -36,15 +36,17 @@ box      = Lookup('box')
 ip       = Lookup('ip')
 mac      = Lookup('mac')
 
+
 if not stack.api.Call('list host', [ hostname ]):
 	stack.api.Call('add host', [ hostname, 
-				     'appliance=backend',
+				     'appliance=builder',
 				     'rack=%s' % zone,
 				     'rank=%s' % instance,
 				     'box=%s'  % box ])
 
-	stack.api.Call('set host attr', [ hostname, 'attr=aws',      'value=true' ])
-	stack.api.Call('set host attr', [ hostname, 'attr=nukedisk', 'value=true' ])
+	stack.api.Call('set host attr', [ hostname, 'attr=aws',       'value=true' ])
+	stack.api.Call('set host attr', [ hostname, 'attr=firewall',  'value=false' ])
+	stack.api.Call('set host attr', [ hostname, 'attr=nukedisks', 'value=true' ])
 
 	stack.api.Call('add host interface', [ hostname, 
 					       'ip=%s'  % ip, 
@@ -64,23 +66,35 @@ for row in stack.api.Call('list bootaction', [ 'type=install',
 	kernel  = row['kernel']
 	ramdisk = row['ramdisk']
 	args    = row['args']
-					       
+
+			
+server = None		       
+for row in stack.api.Call('list host attr', [ hostname, 
+					      'attr=Kickstart_PrivateKickstartHost' ]):
+	server = row['value']
 
 
-report = [ ]
-report.append('default=0')
-report.append('timeout=0')
-report.append('hiddenmenu')
-report.append('title Stacki Client Install')
-report.append('\troot (hd0,0)')
-report.append('\tkernel /boot/%s root=LABEL=/ console=tty1 console=ttyS0 selinux=0 nvme_core.io_timeout=4294967295 %s' % (kernel, args))
-report.append('\tinitrd /boot/%s' % ramdisk)
 
 
-if report:
-	out = '\n'.join(report)
-	print('Content-type: application/octet-stream')
-	print('Content-length: %d' % len(out))
-	print('')
-	print(out)
+grub = [ ]
+grub.append('default=0')
+grub.append('timeout=0')
+grub.append('hiddenmenu')
+grub.append('title Stacki Client Install')
+grub.append('\troot (hd0,0)')
+grub.append('\tkernel /boot/%s root=LABEL=/ console=tty1 console=ttyS0 selinux=0 nvme_core.io_timeout=4294967295 %s' % (kernel, args))
+grub.append('\tinitrd /boot/%s' % ramdisk)
+
+instructions = { }
+instructions['grub']       = '\n'.join(grub)
+instructions['images_url'] = 'http://%s/install/images' % server
+instructions['kernel']     = kernel
+instructions['ramdisk']    = ramdisk
+instructions['reboot']     = True
+
+out = json.dumps(instructions)
+print('Content-type: application/octet-stream')
+print('Content-length: %d' % len(out))
+print('')
+print(out)
 		
