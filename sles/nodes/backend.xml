@@ -93,12 +93,10 @@ awk '/NETCONFIG_DNS_POLICY/ { \
 
 cp /tmp/config /etc/sysconfig/network/config
 
-<!-- populate root's authorized_keys -->
-<stack:file stack:name="/root/.ssh/authorized_keys" stack:perms="0600">
-<stack:eval stack:shell="/opt/stack/bin/python3">
-file = open('/root/.ssh/id_rsa.pub')
-for line in file.readlines():
-	print(line.strip())
+<!-- propagate root's public ssh key -->
+<stack:file stack:name="/root/.ssh/authorized_keys">
+<stack:eval>
+cat /root/.ssh/id_rsa.pub
 </stack:eval>
 </stack:file>
 
