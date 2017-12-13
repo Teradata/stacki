@@ -14,8 +14,11 @@ from stack.bool import *
 
 
 def Lookup(key, pattern=None):
-	form  = cgi.FieldStorage()
-	value = form[key].value
+	try:
+		form  = cgi.FieldStorage()
+		value = form[key].value
+	except:
+		value = None
 
 	if pattern:
 		if re.search(pattern, field):
@@ -26,30 +29,34 @@ def Lookup(key, pattern=None):
 
 	return value
 
-client   = os.environ['REMOTE_ADDR']
-port     = int(os.environ['REMOTE_PORT'])
-ami      = Lookup('ami')
-zone     = Lookup('zone')
-instance = Lookup('instance')
-hostname = Lookup('hostname')
-box      = Lookup('box')
-ip       = Lookup('ip')
-mac      = Lookup('mac')
+client	  = os.environ['REMOTE_ADDR']
+port	  = int(os.environ['REMOTE_PORT'])
+ami	  = Lookup('ami')
+zone	  = Lookup('zone')
+instance  = Lookup('instance')
+hostname  = Lookup('hostname')
+appliance = Lookup('appliance')
+box	  = Lookup('box')
+ip	  = Lookup('ip')
+mac	  = Lookup('mac')
+
+if not appliance:
+	appliance = 'backend'
 
 
 if not stack.api.Call('list host', [ hostname ]):
 	stack.api.Call('add host', [ hostname, 
-				     'appliance=builder',
-				     'rack=%s' % zone,
-				     'rank=%s' % instance,
-				     'box=%s'  % box ])
+				     'appliance=%s' % appliance,
+				     'rack=%s'	    % zone,
+				     'rank=%s'	    % instance,
+				     'box=%s'	    % box ])
 
-	stack.api.Call('set host attr', [ hostname, 'attr=aws',       'value=true' ])
+	stack.api.Call('set host attr', [ hostname, 'attr=aws',	      'value=true' ])
 	stack.api.Call('set host attr', [ hostname, 'attr=firewall',  'value=false' ])
 	stack.api.Call('set host attr', [ hostname, 'attr=nukedisks', 'value=true' ])
 
 	stack.api.Call('add host interface', [ hostname, 
-					       'ip=%s'  % ip, 
+					       'ip=%s'	% ip, 
 					       'mac=%s' % mac,
 					       'interface=eth0',
 					       'network=private',
@@ -57,15 +64,15 @@ if not stack.api.Call('list host', [ hostname ]):
 
 report = [ ]
 for row in stack.api.Call('list host', [ hostname ]):
-	boot_os     = row['os']
+	boot_os	    = row['os']
 	boot_action = row['installaction']
 
 for row in stack.api.Call('list bootaction', [ 'type=install',
 					       'os=%s' % boot_os,
 					       boot_action ]):
-	kernel  = row['kernel']
+	kernel	= row['kernel']
 	ramdisk = row['ramdisk']
-	args    = row['args']
+	args	= row['args']
 
 			
 server = None		       
@@ -86,11 +93,11 @@ grub.append('\tkernel /boot/%s root=LABEL=/ console=tty1 console=ttyS0 selinux=0
 grub.append('\tinitrd /boot/%s' % ramdisk)
 
 instructions = { }
-instructions['grub']       = '\n'.join(grub)
+instructions['grub']	   = '\n'.join(grub)
 instructions['images_url'] = 'http://%s/install/images' % server
-instructions['kernel']     = kernel
-instructions['ramdisk']    = ramdisk
-instructions['reboot']     = True
+instructions['kernel']	   = kernel
+instructions['ramdisk']	   = ramdisk
+instructions['reboot']	   = True
 
 out = json.dumps(instructions)
 print('Content-type: application/octet-stream')
