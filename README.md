@@ -8,7 +8,7 @@ Stacki 5.0 was released on 11/30/2017. Go [here](https://github.com/Teradata/sta
 
 New release:
 
-* [Documentation for Stacki 5.0](https://github.com/Teradata/stacki/wiki)
+* [Documentation for Stacki 5.0](https://stackiq.github.io)
 
 Previous release:
 * [Documentation for Stacki 4.0](https://github.com/Teradata/stacki-documentation-4.x/wiki)
