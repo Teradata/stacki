@@ -55,17 +55,16 @@ class Command(stack.commands.HostArgumentProcessor,
 		for row in self.db.select("""
 			s.name, n.ip from
 			nodes nd, subnets s, networks n where 
-			s.id       = n.subnet and 
-			s.pxe      = TRUE     and 
-			n.node     = nd.id    and 
-			nd.name    = '%s'
+			s.id	   = n.subnet and 
+			s.pxe	   = TRUE     and 
+			n.node	   = nd.id    and 
+			nd.name	   = '%s'
 			""" % self.db.getHostname()):
-			servers[row[0]]    = row[1]
+			servers[row[0]]	   = row[1]
 			servers['default'] = row[1]
 		if len(servers) > 2:
 			del servers['default']
 
-		
 		shared_networks = {}
 		for (netname, network, netmask, gateway, zone, device) in self.db.select("""
 			s.name, s.address, s.mask, s.gateway, s.zone, n.device from 
@@ -148,6 +147,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		for name in data.keys():
 			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
+			aws = self.str2bool(self.getHostAttr(name, 'aws'))
 			mac = None
 			ip  = None
 			dev = None
@@ -168,7 +168,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					s.pxe = TRUE and nt.ip = '%s'""" % (name, ip))
 					if r:
 						(netname, ) = r[0]
-				if ip and mac and dev and netname:
+				if ip and mac and dev and netname and not aws:
 					self.addOutput('', '\nhost %s.%s.%s {' %
 						(name, netname, dev))
 					self.addOutput('', '\toption host-name\t"%s";' % name)

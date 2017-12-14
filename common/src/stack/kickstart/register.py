@@ -59,7 +59,8 @@ if not stack.api.Call('list host', [ hostname ]):
 					       'mac=%s' % mac,
 					       'interface=eth0',
 					       'network=private',
-					       'default=true'])
+					       'default=true',
+					       'options=dhcp'])
 
 report = [ ]
 for row in stack.api.Call('list host', [ hostname ]):
