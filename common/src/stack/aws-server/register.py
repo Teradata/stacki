@@ -40,9 +40,6 @@ box	  = Lookup('box')
 ip	  = Lookup('ip')
 mac	  = Lookup('mac')
 
-if not appliance:
-	appliance = 'backend'
-
 if not stack.api.Call('list host', [ hostname ]):
 	stack.api.Call('add host', [ hostname, 
 				     'appliance=%s' % appliance,

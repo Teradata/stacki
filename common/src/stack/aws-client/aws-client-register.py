@@ -31,7 +31,7 @@ class InstanceInfo:
 		self.zone      = self.__lookup('meta-data/placement/availability-zone')
 		self.instance  = self.__lookup('meta-data/instance-id')
 		self.hostname  = self.__lookup('meta-data/hostname')
-		self.ip        = self.__lookup('meta-data/local-ipv4')
+		self.ip	       = self.__lookup('meta-data/local-ipv4')
 		self.mac       = self.__lookup('meta-data/mac')
 		self.sshkey    = self.__lookup('meta-data/public-keys/0/openssh-key')
 
@@ -41,7 +41,7 @@ class InstanceInfo:
 		while not done:
 			try:
 				response = urlopen('http://169.254.169.254/latest/%s' % path)
-				done     = True
+				done	 = True
 			except urllib.error.HTTPError:
 				print('retry')
 				time.sleep(5)
@@ -57,14 +57,15 @@ class BootInstructions:
 	"""
 
 	def __init__(self):
-		self.master     = None
-		self.hostname   = None
-		self.box        = 'default'
-		self.reboot     = False
-		self.grub       = None
+		self.master	= None
+		self.hostname	= None
+		self.appliance	= 'backend'
+		self.box	= 'default'
+		self.reboot	= False
+		self.grub	= None
 		self.images_url = None
-		self.kernel     = None
-		self.ramdisk    = None
+		self.kernel	= None
+		self.ramdisk	= None
 
 	def parse(self, document):
 		"""
@@ -101,7 +102,7 @@ def Download(url, dst):
 # Grab the instance information and first pass of the boot instructions from
 # the instance's user-data.
 
-info         = InstanceInfo()
+info	     = InstanceInfo()
 instructions = BootInstructions()
 
 instructions.parse(info.user_data)
@@ -116,13 +117,14 @@ else:
 	hostname = info.hostname.split('.')[0]
 
 args = [ ]
-args.append('hostname=%s' % hostname)
-args.append('box=%s'      % instructions.box)
-args.append('ip=%s'       % info.ip)
-args.append('mac=%s'      % info.mac)
-args.append('instance=%s' % info.instance)
-args.append('ami=%s'      % info.ami)
-args.append('zone=%s'     % info.zone)
+args.append('hostname=%s'  % hostname)
+args.append('appliance=%s' % instructions.appliance)
+args.append('box=%s'	   % instructions.box)
+args.append('ip=%s'	   % info.ip)
+args.append('mac=%s'	   % info.mac)
+args.append('instance=%s'  % info.instance)
+args.append('ami=%s'	   % info.ami)
+args.append('zone=%s'	   % info.zone)
 p = subprocess.Popen(['/usr/bin/curl', '-s',
 		      '--local-port', '1-100',
 		      '--insecure',

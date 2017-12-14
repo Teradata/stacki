@@ -6,10 +6,14 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-	<stack:package>stack-aws</stack:package>
+	<stack:package>stack-aws-server</stack:package>
 
 <stack:script stack:stage="boot-post">
+
 ln -s /opt/stack/images /export/stack/images
+
+systemctl enable stack-aws-server-init
+
 </stack:script>
 
 </stack:stack>
