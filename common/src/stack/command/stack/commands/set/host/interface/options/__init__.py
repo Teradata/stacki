@@ -62,7 +62,7 @@ class Command(stack.commands.set.host.command):
 		(options, interface, mac) = self.fillParams([
 			('options',    None, True),
 			('interface', None),
-			('mac',       None)
+			('mac',	      None)
 			])
 
 		if not interface and not mac:
