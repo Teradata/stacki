@@ -18,6 +18,7 @@
 		<to>kdump</to>
 		<to>bootloader</to>
 		<to>partitioning</to>
+		<to>storage</to>
 		<to>ssh-client</to>
 		<to>add-on</to>
 		<to>users</to>
