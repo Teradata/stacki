@@ -35,7 +35,7 @@ if [ -f /tmp/uefi_netboot ]; then
 fi
 </stack:script>
 
-<stack:script stack:stage="install-post" stack:shell="python" stack:chroot="false">
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:chroot="false">
 <![CDATA[
 import os
 import sys

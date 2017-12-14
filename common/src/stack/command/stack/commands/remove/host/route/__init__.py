@@ -52,15 +52,15 @@ class Command(stack.commands.remove.host.command):
 		syncnow = self.str2bool(syncnow)
 
 		for host in self.getHostnames(args):
-			self.db.execute("""
+			res = self.db.execute("""
 			delete from node_routes where 
 			node = (select id from nodes where name='%s')
 			and network = '%s'
 			""" % (host, address))
 
-			if host == socket.gethostname():
-                                if syncnow:
-                                        del_route = ['route', 'del', '-host', address]
+			if res and host == socket.gethostname():
+				if syncnow:
+					del_route = ['route', 'del', '-host', address]
 
-                                        # remove route from routing table
-                                        p = subprocess.Popen(del_route, stdout=subprocess.PIPE)
+					# remove route from routing table
+					p = subprocess.Popen(del_route, stdout=subprocess.PIPE)
