@@ -18,6 +18,9 @@ while [ $? -ne 0 ]; do
 done
 cat /tmp/my-key >> /root/.ssh/authorized_keys
 rm /tmp/my-key
+
+systemctl enable stack-aws-client-register
+
 </stack:script>
 
 </stack:stack>

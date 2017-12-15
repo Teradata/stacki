@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! /opt/stack/bin/python3
 #
 # Using a combination of AWS user-data and data from the Frontend decide what
 # to do on next boot. For now this is just for the initial installation but
@@ -61,8 +61,10 @@ class BootInstructions:
 		self.hostname	= None
 		self.appliance	= 'backend'
 		self.box	= 'default'
+		self.boot	= 'os'
 		self.reboot	= False
 		self.grub	= None
+		self.grub2	= None
 		self.images_url = None
 		self.kernel	= None
 		self.ramdisk	= None
@@ -80,13 +82,16 @@ class BootInstructions:
 		for name in [ 'master',
 			      'hostname',
 			      'box',
+			      'boot',
 			      'reboot',
 			      'grub',
+			      'grub2',
 			      'images_url',
 			      'kernel',
 			      'ramdisk' ]:
 			if name in instructions:
 				exec('self.%s = """%s"""' % (name, instructions[name]))
+
 
 def Download(url, dst):
 	print('Download %s -> %s' % (url, dst))
@@ -134,23 +139,34 @@ p = subprocess.Popen(['/usr/bin/curl', '-s',
 o, e = p.communicate()
 instructions.parse(o.decode())
 
-if instructions.kernel:
-	Download(os.path.join(instructions.images_url, instructions.kernel), 
-		 os.path.join(os.sep, 'boot', instructions.kernel))
+if instructions.boot == 'install':
+	if instructions.kernel:
+		Download(os.path.join(instructions.images_url, instructions.kernel), 
+			 os.path.join(os.sep, 'boot', instructions.kernel))
 
-if instructions.ramdisk:
-	Download(os.path.join(instructions.images_url, instructions.ramdisk), 
-		 os.path.join(os.sep, 'boot', instructions.ramdisk))
+	if instructions.ramdisk:
+		Download(os.path.join(instructions.images_url, instructions.ramdisk), 
+			 os.path.join(os.sep, 'boot', instructions.ramdisk))
 
-if instructions.grub:
-	print('\nWrite Grub')
-	for line in instructions.grub.split('\n'):
-		print('\t%s' % line)
-	out = open(os.path.join(os.sep, 'etc', 'grub.conf'), 'w')
-	out.write(instructions.grub)
-	out.close()
 
-print('Reboot')
+	grubpath  = os.path.join(os.sep, 'etc', 'grub.conf')
+	grub2path = os.path.join(os.sep, 'etc', 'grub.d', '40_custom')
+	if os.path.exists(grub2path):
+		print('\nWrite Grub2')
+		for line in instructions.grub2.split('\n'):
+			print('\t%s' % line)
+		with open(grub2path, 'a') as out:
+			out.write(instructions.grub2)
+		with open(os.path.join(os.sep, 'etc', 'default', 'grub'), 'a') as out:
+			out.write('GRUB_DEFAULT="stacki install"\n')
+		os.system('grub2-mkconfig --output=/boot/grub2/grub.cfg')
+	else:
+		print('\nWrite Grub')
+		for line in instructions.grub.split('\n'):
+			print('\t%s' % line)
+		with open(grubpath, 'w') as out:
+			out.write(instructions.grub)
+
 if instructions.reboot == "True":
 	print('rebooting...')
 	os.system('/sbin/init 6')

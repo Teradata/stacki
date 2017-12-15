@@ -12,7 +12,9 @@ include $(STACKBUILD)/etc/CCRules.mk
 build:
 
 install::
+	mkdir -p $(ROOT)/etc/systemd/system
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin
+	$(INSTALL) -m 0664 aws-client-register.service $(ROOT)/etc/systemd/system/stack-aws-client-register.service
 	$(INSTALL) -m 0755 aws-client-register.py  $(ROOT)/$(PKGROOT)/sbin/aws-client-register
 
 
