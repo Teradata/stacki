@@ -30,6 +30,7 @@ class Implementation(stack.commands.Implementation):
 			netname = o['network']
 			vlanid = o['vlan']
 			mac = o['mac']
+			channel = o['channel']
 			options = []
 			if o['options']:
 				options = shlex.split(o['options'])
@@ -62,8 +63,6 @@ class Implementation(stack.commands.Implementation):
 						break
 
 			if interface == 'ipmi':
-				channel = o['channel']
-
 				ipmisetup = '/tmp/ipmisetup'
 				self.owner.addOutput(host, '<stack:file stack:name="%s">' % ipmisetup)
 				self.owner.writeIPMI(host, ip, channel, netmask, gateway, vlanid)
@@ -71,8 +70,10 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 'chmod 500 %s' % ipmisetup)
 				continue
 
-
 			if len(interface.split(':')) == 2:
+				#
+				# virtual interface configuration
+				#
 				self.owner.addOutput(host, 
 						     '<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 						     % interface.split(':')[0])
@@ -98,7 +99,7 @@ class Implementation(stack.commands.Implementation):
 					self.owner.addOutput(host, 'VLAN=yes')
 				else:
 					self.owner.addOutput(host, 'USERCONTROL=no')
-				
+
 				dhcp = 'dhcp' in options
 				if dhcp:
 					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
@@ -106,7 +107,14 @@ class Implementation(stack.commands.Implementation):
 				if 'onboot=no' in options:
 					self.owner.addOutput(host, 'STARTMODE=manual')
 				else:
-					if ip or dhcp:
+					if ip or dhcp or channel or 'bridge' in options:
+						#
+						# if there is an IP address, or this
+						# interface should DHCP, or anything in
+						# the 'channel' field (e.g., this is a
+						# bridged interface), or if 'bridge' is in
+						# the options, then turn this interface on
+						#
 						self.owner.addOutput(host, 'STARTMODE=auto')
 					else:
 						self.owner.addOutput(host, 'STARTMODE=off')
@@ -122,6 +130,19 @@ class Implementation(stack.commands.Implementation):
 
 				if mac:
 					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
+
+				#
+				# if this is a bridged interface, then go look for the
+				# physical interface this bridge is associated with
+				#
+				if 'bridge' in options:
+					for p in result:
+						if p['channel'] == interface:
+							self.owner.addOutput(host, 'BRIDGE=yes')
+							self.owner.addOutput(host, 'BRIDGE_FORWARDDELAY=0')
+							self.owner.addOutput(host, 'BRIDGE_STP=off')
+							self.owner.addOutput(host, 'BRIDGE_PORTS=%s' % p['interface'])
+							break
 
 			self.owner.addOutput(host, '\n')
 			self.owner.addOutput(host, '</stack:file>')
