@@ -76,9 +76,10 @@ if os.path.exists('/tmp/site.attrs'):
 
 <!-- insert the base appliances into the database -->
 
-/opt/stack/bin/stack add appliance frontend longname=Frontend  node=server  public=false
-/opt/stack/bin/stack add appliance builder  longname=Builder   node=builder public=false
-/opt/stack/bin/stack add appliance backend  longname=Backend   node=backend
+/opt/stack/bin/stack add appliance frontend  longname=Frontend  node=server  public=false
+/opt/stack/bin/stack add appliance builder   longname=Builder   node=builder public=false
+/opt/stack/bin/stack add appliance backend   longname=Backend   node=backend
+/opt/stack/bin/stack add appliance replicant longname=Replicant node=replicant
 
 <!-- manage firewall rules by default -->
 /opt/stack/bin/stack set attr attr=firewall value=true
@@ -93,6 +94,9 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack set appliance attr frontend attr=managed value=false
 /opt/stack/bin/stack set appliance attr backend	 attr=managed value=true
+
+<!-- ensure replicant appliances *don't* get 'const' attributes -->
+/opt/stack/bin/stack set appliance attr replicant attr=const_overwrite value=false
 
 <!-- networks -->
 

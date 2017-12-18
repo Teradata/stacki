@@ -31,9 +31,16 @@ cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 
 echo "&hostname;.&domainname;" > /etc/HOSTNAME
 
-/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+SERVER=&yumserver;
+if [ x"" == x$SERVER ]
+then
+	SERVER=&Kickstart_PrivateKickstartHost;
+fi
 
-/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
+/usr/bin/curl --insecure -o /dev/null https://$SERVER/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+
+/usr/bin/curl --insecure -o /dev/null https://$SERVER/install/sbin/public/setDbPartitions.cgi
+
 
 <!-- repo config -->
 rm -f /etc/zypp/repos.d/*
