@@ -24,7 +24,6 @@ class Implementation(stack.commands.Implementation):
 			repo.append('[%s-%s-%s]' % (pname, pversion, prel))
 			repo.append('name=%s %s %s' % (pname, pversion, prel))
 			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
-			repo.append('assumeyes=1')
 			repo.append('gpgcheck=0')
 
 		for o in self.owner.call('list.cart'):
@@ -32,7 +31,6 @@ class Implementation(stack.commands.Implementation):
 				repo.append('[%s-cart]' % o['name'])
 				repo.append('name=%s cart' % o['name'])
 				repo.append('baseurl=http://%s/install/carts/%s' % (server, o['name']))
-				repo.append('assumeyes=1')
 				repo.append('gpgcheck=0')
 
 		repo.append('</stack:file>')
