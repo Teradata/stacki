@@ -34,3 +34,10 @@ def test_stack_list_host():
 		vals = [ str(v) for v in o.values()]
 		print(' '.join(vals))
 
+def test_stack_list_host_interface():
+	output = api.Call('list host interface')
+	hdr = '\n\nHOST INTERFACE DEFAULT NETWORK MAC IP NAME MODULE VLAN OPTIONS CHANNEL'
+	print(hdr)
+	for o in output:
+		vals = [ str(v) for v in o.values()]
+		print(' '.join(vals))

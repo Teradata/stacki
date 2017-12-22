@@ -1,0 +1,122 @@
+<stack:stack>
+	
+	<stack:description>
+	The replicant appliance -- used to manufacture a frontend from a frontend.
+	</stack:description>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+
+<stack:package>
+	stack-command
+	stack-pylib
+</stack:package>
+
+
+<stack:script stack:stage="install-post">
+
+<!-- get pallets -->
+
+PALLETS="stacki-5.0-sles12.x86_64.disk1.iso SLE-12-SP2-Server-DVD-x86_64-GM-DVD1.iso"
+
+mkdir -p /export/replicant/pallets
+
+for i in $PALLETS
+do
+	curl -o /export/replicant/pallets/$i http://&yumserver;/install/replicant/&Kickstart_PrivateHostname;/$i
+	/opt/stack/bin/stack add pallet /export/replicant/pallets/$i
+done
+
+/opt/stack/bin/stack enable pallet %
+
+
+<!-- get CSVs -->
+
+mkdir -p /export/replicant/CSVs
+
+<!-- networks -->
+
+curl -o /export/replicant/CSVs/networks.csv http://&yumserver;/install/replicant/&Kickstart_PrivateHostname;/networks.csv
+/opt/stack/bin/stack load networkfile file=/export/replicant/CSVs/networks.csv
+
+<!-- hosts -->
+
+curl -o /export/replicant/CSVs/hosts.csv http://&yumserver;/install/replicant/&Kickstart_PrivateHostname;/hosts.csv
+/opt/stack/bin/stack load hostfile file=/export/replicant/CSVs/hosts.csv
+
+<!-- apply the configuration -->
+
+/opt/stack/bin/stack report host network localhost \
+	| /opt/stack/bin/stack report script | bash
+
+/opt/stack/bin/stack report host interface localhost \
+	| /opt/stack/bin/stack report script | bash
+
+/opt/stack/bin/stack report host route localhost \
+	| /opt/stack/bin/stack report script | bash
+
+</stack:script>
+
+
+<stack:script stack:stage="boot-pre">
+
+/opt/stack/bin/stack report host network localhost \
+	| /opt/stack/bin/stack report script | bash
+
+/opt/stack/bin/stack report host interface localhost \
+	| /opt/stack/bin/stack report script | bash
+
+/opt/stack/bin/stack report host route localhost \
+	| /opt/stack/bin/stack report script | bash
+
+</stack:script>
+
+
+<stack:script stack:stage="install-post">
+
+<stack:file stack:name="/export/replicant/reinstall-backend.py" stack:perms="0700">#!/opt/stack/bin/python3
+
+import shlex
+import subprocess
+import os
+import stack.api
+
+FNULL = open(os.devnull, 'w')
+
+stack.api.Call('remove.host.partition', [ 'a:backend' ])
+stack.api.Call('set.host.attr', [ 'a:backend', 'attr=nukedisks', 'value=true' ])
+stack.api.Call('set.host.attr', [ 'a:backend', 'attr=nukecontroller', 'value=true' ])
+stack.api.Call('set.host.boot', [ 'a:backend', 'action=install' ])
+
+for o in stack.api.Call('list.host', [ 'a:backend' ]):
+	cmd = 'ipmitool -I lanplus -U root -P admin -H %s.ipmi chassis power cycle' % o['host']
+	p = subprocess.run(shlex.split(cmd), stdout = FNULL, stderr = FNULL)
+
+</stack:file>
+
+</stack:script>
+
+
+
+
+<stack:script stack:stage="boot-post">
+
+<!-- for some reason, a rouge mysqld is running on first boot. kill it, then restart mysqld -->
+
+killall -9 mysqld
+systemctl restart mariadb
+
+</stack:script>
+
+
+<stack:script stack:stage="boot-post">
+/export/replicant/reinstall-backend.py
+</stack:script>
+
+
+
+</stack:stack>

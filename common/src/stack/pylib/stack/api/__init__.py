@@ -50,7 +50,7 @@ def Call(cmd, args=None, format='json', sudo=False):
 		list.append('output-format=%s' % format)
 	
 	s = None
-	p = subprocess.Popen(list, stdout=subprocess.PIPE)
+	p = subprocess.Popen(list, stdout=subprocess.PIPE, encoding='utf-8')
 	for line in p.stdout.readlines():
 		if not s:
 			s = line
