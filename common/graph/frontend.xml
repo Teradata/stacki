@@ -36,7 +36,7 @@
 		<to>routes-server</to>
 	</edge>
 
-	<edge from="server" cond="aws">
+	<edge from="server" cond="platform == 'aws'">
 		<to>aws-server</to>
 	</edge>
 

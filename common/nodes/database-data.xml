@@ -67,4 +67,10 @@ rm /tmp/my.cnf
 /opt/stack/bin/stack report host > /etc/hosts
 </stack:script>
 
+
+<stack:script cond="platform == 'aws'" stack:stage="install-post">
+<!-- Frontend DHCPs in AWS -->
+/opt/stack/bin/stack set host interface options &Kickstart_PrivateHostname; interface=&Kickstart_PrivateInterface; options=dhcp
+</stack:script>
+
 </stack:stack>

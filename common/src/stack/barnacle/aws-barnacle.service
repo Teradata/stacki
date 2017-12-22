@@ -1,9 +1,8 @@
 [Unit]
 After=network.target
-After=mariadb.service 
 
 [Service]
-ExecStart=/opt/stack/sbin/aws-server-init
+ExecStart=/opt/stack/sbin/aws-barnacle
 
 [Install]
 WantedBy=multi-user.target
