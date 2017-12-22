@@ -17,6 +17,9 @@ import subprocess
 import sys
 
 from stack.api.get import GetAttr
+from stack.commands import Command
+from stack.exception import CommandError
+
 
 class Discovery:
     """
@@ -74,20 +77,20 @@ class Discovery:
         
         if ipv4_network is not None:
             # Figure out the gateway for the interface and check that pxe is true
-            with connection.cursor() as cursor:
-                if cursor.execute(
-                    "SELECT gateway, pxe FROM subnets WHERE address=%s AND mask=%s",
-                    (str(ipv4_network.network_address), str(ipv4_network.netmask))
-                ) != 0:
-                    gateway, pxe = cursor.fetchone()
-                    if pxe == 1:
+            for row in self._command.call("list.network"):
+                if (
+                    row['address'] == str(ipv4_network.network_address) and 
+                    row['mask'] == str(ipv4_network.netmask)
+                ):
+                    if row['pxe'] == True:
                         # Make sure to filter out the gateway IP address
-                        gateway = ipaddress.IPv4Address(gateway)
+                        gateway = ipaddress.IPv4Address(row['gateway'])
                         return filterfalse(lambda x: x == gateway, ipv4_network.hosts())
                     else:
                         self._logger.warning("pxe not enabled on interface: %s", interface)
-                else:
-                    self._logger.warning("unknown network for interface: %s", interface)
+                    break
+            else:
+                self._logger.warning("unknown network for interface: %s", interface)
         
         # We couldn't find the network or it wasn't pxe enabled
         return None
@@ -112,20 +115,19 @@ class Discovery:
             self._logger.debug("trying IP address: %s", ip_address)
             
             # Make sure this IP isn't already taken
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT count(id) FROM networks WHERE ip=%s AND (device is NULL or device NOT LIKE 'vlan%%')",
-                    (str(ip_address),)
-                )
-
-                if cursor.fetchone()[0] == 0:
-                        # Looks like it is free
-                        self._logger.debug("IP address is free: %s", ip_address)
-
-                        return ip_address
-                else:
+            for row in self._command.call("list.host.interface"):
+                if (
+                    row['ip'] == ipaddress and
+                    row['interface'] == "NULL" or
+                    row['interface'].startswith("vlan")
+                ):
                     self._logger.debug("IP address already taken: %s", ip_address)
-            
+                    break
+            else:
+                # Looks like it is free
+                self._logger.debug("IP address is free: %s", ip_address)
+                return ip_address
+        
         # No IP addresses left
         return None
 
@@ -133,13 +135,14 @@ class Discovery:
         # Figure out the network for this interface
         network = None
         ipv4_network = self._get_ipv4_network_for_interface(interface)
-        if ipv4_network is not None: 
-            with connection.cursor() as cursor:
-                if cursor.execute(
-                    "SELECT name FROM subnets WHERE address=%s AND mask=%s",
-                    (str(ipv4_network.network_address), str(ipv4_network.netmask))
-                ) != 0:
-                    network = cursor.fetchone()[0]
+        if ipv4_network is not None:
+            for row in self._command.call("list.network"):
+                if (
+                    row['address'] == str(ipv4_network.network_address) and 
+                    row['mask'] == str(ipv4_network.netmask)
+                ):
+                    network = row['network']
+                    break
         
         # The network should alway be able to be found, unless something deleted it since the 
         # discovery daemon started running
@@ -245,25 +248,23 @@ class Discovery:
             self._logger.info("detected a dhcp request: %s %s", mac_address, interface)
 
             # Is this a new MAC address?
-            with self._connection.cursor() as cursor:
-                cursor.execute("SELECT count(id) FROM networks WHERE mac=%s", (mac_address,))
-                if cursor.fetchone()[0] == 0:
-                    # It is a new node
-                    self._logger.info("found a new node: %s %s", mac_address, interface)
-
-                    # Make sure we have an IP for it
-                    ip_address = self._get_next_ip_address(interface)
-                    if ip_address is None:
-                        self._logger.error("no IP addresses available for interface %s", interface)
-                    else:
-                        # Add the new node
-                        self._add_node(interface, mac_address, ip_address)
-
-                        # Increment the rank
-                        self._rank += 1
-                else:
+            for row in self._command.call("list.host.interface"):
+                if row['mac'] == mac_address:
                     self._logger.debug("node is already known: %s %s", mac_address, interface)
+                    break
+            else:
+                self._logger.info("found a new node: %s %s", mac_address, interface)
 
+                # Make sure we have an IP for it
+                ip_address = self._get_next_ip_address(interface)
+                if ip_address is None:
+                    self._logger.error("no IP addresses available for interface %s", interface)
+                else:
+                    # Add the new node
+                    self._add_node(interface, mac_address, ip_address)
+
+                    # Increment the rank
+                    self._rank += 1                    
         else:
             if "DHCPDISCOVER" in line:
                 self._logger.warning("DHCPDISCOVER found in line but didn't match regex:\n%s", line)
@@ -339,39 +340,23 @@ class Discovery:
 
         return False
 
-    def start(self, connection, appliance_name=None, appliance_long_name=None,
-        base_name=None, rack=None, rank=None, box=None, install_action=None):    
+    def start(self, command, appliance_name=None, base_name=None, 
+        rack=None, rank=None, box=None, install_action=None):    
         """
         Start the node discovery daemon.
         """
 
         # Only start if there isn't already a daemon running
-        if not self.is_running() and connection is not None:
-            # Make sure either appliance_name or appliance_long_name is set
-            if appliance_name and appliance_long_name:
-                raise ValueError("Only one of application_name and appliance_long_name may be set") 
-
-            # Find the appliance id and, if needed, appliance name
+        if not self.is_running():
+            # Make sure our appliance name is valid
             if appliance_name:
-                with connection.cursor() as cursor:
-                    if cursor.execute("SELECT id FROM appliances WHERE name=%s", (appliance_name,)) != 0:
-                        self._appliance_id = cursor.fetchone()[0]
-                        self._appliance_name = appliance_name
-                    else:
-                        raise ValueError(f"Unknown appliance with name {appliance_name}")
-
-            elif appliance_long_name:
-                with connection.cursor() as cursor:
-                    if cursor.execute(
-                        "SELECT id, name FROM appliances WHERE longname=%s",
-                        (appliance_long_name,)
-                    ) != 0:
-                        self._appliance_id, self._appliance_name = cursor.fetchone()
-                    else:
-                        raise ValueError(f"Unknown appliance with long name {appliance_long_name}")
-            
+                try:
+                    command.call("list.appliance", [appliance_name])
+                    self._appliance_name = appliance_name
+                except CommandError:
+                    raise ValueError(f"Unknown appliance with name {appliance_name}")
             else:
-                raise ValueError("One of either appliance_name or appliance_long_name needs to be set")
+                raise ValueError("The appliance_name needs to be set")
             
             # Set up the base name
             if base_name:
@@ -390,15 +375,14 @@ class Discovery:
                 # Start with with default
                 self._rank = int(GetAttr("discovery.base.rank"))
 
-                # Try to pull the next rank from the DB
-                with connection.cursor() as cursor:
-                    if cursor.execute(
-                        "SELECT max(rank) FROM nodes WHERE appliance=%s AND rack=%s",
-                        (self._appliance_id, self._rack)
+                # Try to pull the next rank based on the DB
+                for host in command.call("list.host"):
+                    if (
+                        host['appliance'] == self._appliance_name and 
+                        int(host['rack']) == self._rack and
+                        int(host['rank'] >= self._rank)
                     ):
-                        max_rank = cursor.fetchone()[0]
-                        if max_rank is not None:
-                            self._rank = int(max_rank) + 1  
+                        self._rank = int(host['rank']) + 1  
             else:
                 self._rank = int(rank)
             
@@ -406,26 +390,22 @@ class Discovery:
             if box is None:
                 self._box = "default"
             else:
-                with connection.cursor() as cursor:
-                    cursor.execute("SELECT count(id) FROM boxes WHERE name=%s", (box,))
-                    if cursor.fetchone()[0] != 0:
-                        self._box = box
-                    else:
-                        raise ValueError("Box does not exist")
+                try:
+                    command.call("list.box", [box])
+                    self._box = box
+                except CommandError:
+                    raise ValueError(f"Unknown box with name {box}")
             
             # Set up install_action and make sure is is valid
             if install_action is None:
                 self._install_action = "default"
             else:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT count(id) FROM bootnames WHERE type='install' and name=%s",
-                        (install_action,)
-                    )
-                    if cursor.fetchone()[0] != 0:
+                for action in command.call("list.bootaction"):
+                    if action['type'] == "install" and action['bootaction'] == install_action:
                         self._install_action = install_action
-                    else:
-                        raise ValueError("Install action is does not exist")
+                        break
+                else:
+                    raise ValueError(f"Unknown install action with name {install_action}")
             
             # Find our apache log
             if os.path.isfile("/var/log/httpd/ssl_access_log"):
@@ -446,9 +426,11 @@ class Discovery:
             if os.fork() != 0:
                 return
             
-            # Run connection on the connection passed in, so when the parent process closes theirs, we still have one
-            self._connection = connection
-            self._connection.connect()
+            # Reconnect to the db via the command connection passed in, so when
+            # the parent process closes theirs, we still have an open socket
+            self._command = command
+            self._command.db.database.connect()
+            self._command.db.link = self._command.db.database.cursor()
 
             # Now write out the daemon pid
             with open(self._PIDFILE, 'w') as f:
@@ -477,7 +459,7 @@ class Discovery:
             finally:
                 # All done, clean up
                 loop.close()
-                self._connection.close()
+                self._command.db.database.close()
                 self._cleanup()
             
             self._logger.info("discovery daemon stopped")
@@ -490,7 +472,7 @@ class Discovery:
         if self.is_running():
             try:
                 os.kill(self._get_pid(), signal.SIGTERM)
-            except OSError as e:
+            except OSError:
                 self._logger.exception("unable to stop discovery daemon")
                 return False
         
@@ -526,7 +508,7 @@ if __name__ == "__main__":
         )
         
         # Start the discovery daemon
-        discovery.start(connection, appliance_name="backend")
+        discovery.start(Command(connection), appliance_name="backend")
 
         # Close the DB connection
         connection.close()
