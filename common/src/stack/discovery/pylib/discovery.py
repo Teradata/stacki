@@ -117,9 +117,8 @@ class Discovery:
             # Make sure this IP isn't already taken
             for row in self._command.call("list.host.interface"):
                 if (
-                    row['ip'] == ipaddress and
-                    row['interface'] == "NULL" or
-                    row['interface'].startswith("vlan")
+                    row['ip'] == str(ip_address) and
+                    not row['interface'].startswith("vlan")
                 ):
                     self._logger.debug("IP address already taken: %s", ip_address)
                     break
@@ -380,7 +379,7 @@ class Discovery:
                     if (
                         host['appliance'] == self._appliance_name and 
                         int(host['rack']) == self._rack and
-                        int(host['rank'] >= self._rank)
+                        int(host['rank']) >= self._rank
                     ):
                         self._rank = int(host['rank']) + 1  
             else:
