@@ -138,3 +138,10 @@ class Command(stack.commands.add.host.command):
 
 					# add route to routing table
 					p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
+					
+					# add route to routes file
+					cmd = '/opt/stack/bin/stack report host route localhost | '
+					cmd += '/opt/stack/bin/stack report script | '
+					cmd += 'bash > /dev/null 2>&1 '
+
+					p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
