@@ -18,8 +18,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	One host name.
 	</arg>
 
-	<example cmd='report host storage controller compute-0-0'>
-	Output the storage controller configuration for compute-0-0.
+	<example cmd='report host storage controller backend-0-0'>
+	Output the storage controller configuration for backend-0-0.
 	</example>
 	"""
 

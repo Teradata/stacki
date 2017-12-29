@@ -25,7 +25,7 @@ class Implementation(rocks.commands.Implementation):
 
 		# Create the salt local client and runner client objects.
 		# The LocalClient is responsible for starting the job on
-		# a compute node
+		# a backend node
 		self.salt = salt.client.LocalClient()
 
 		# The runner client is responsible for managing the running

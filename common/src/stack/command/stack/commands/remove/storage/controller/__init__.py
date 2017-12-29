@@ -19,8 +19,8 @@ class Command(stack.commands.remove.command,
 
 	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'compute') or a valid host
-	(e.g., 'compute-0-0). No argument means the scope is 'global'.
+	'redhat'), a valid appliance (e.g., 'backend') or a valid host
+	(e.g., 'backend-0-0). No argument means the scope is 'global'.
 	</arg>
 
 	<param type='int' name='adapter' optional='1'>
@@ -38,12 +38,12 @@ class Command(stack.commands.remove.command,
 	adapter/enclosure address applies to all slots.
 	</param>
 
-	<example cmd='remove storage controller compute-0-0 slot=1'>
-	Remove the disk array configuration for slot 1 on compute-0-0.
+	<example cmd='remove storage controller backend-0-0 slot=1'>
+	Remove the disk array configuration for slot 1 on backend-0-0.
 	</example>
 
-	<example cmd='remove storage controller compute slot=1,2,3,4'>
-	Remove the disk array configuration for slots 1-4 for the compute
+	<example cmd='remove storage controller backend slot=1,2,3,4'>
+	Remove the disk array configuration for slots 1-4 for the backend
 	appliance.
 	</example>
 	"""

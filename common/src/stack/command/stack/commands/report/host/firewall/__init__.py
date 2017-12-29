@@ -22,8 +22,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Host name of machine
 	</arg>
 	
-	<example cmd='report host firewall compute-0-0'>
-	Create a report of the firewall rules for compute-0-0.
+	<example cmd='report host firewall backend-0-0'>
+	Create a report of the firewall rules for backend-0-0.
 	</example>
 	"""
 

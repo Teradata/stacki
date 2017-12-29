@@ -22,8 +22,8 @@ class Command(stack.commands.list.host.command):
 	Host name of machine
 	</arg>
 	
-	<example cmd='list host route compute-0-0'>
-	List the static routes assigned to compute-0-0.
+	<example cmd='list host route backend-0-0'>
+	List the static routes assigned to backend-0-0.
 	</example>
 	"""
 

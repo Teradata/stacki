@@ -23,8 +23,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Host name of machine
 	</arg>
 
-	<example cmd='report host route compute-0-0'>
-	Create a report of the static routes assigned to compute-0-0.
+	<example cmd='report host route backend-0-0'>
+	Create a report of the static routes assigned to backend-0-0.
 	</example>
 	"""
 
