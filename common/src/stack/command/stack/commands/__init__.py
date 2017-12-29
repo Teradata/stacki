@@ -899,7 +899,6 @@ class DocStringHandler(handler.ContentHandler,
 		if self.section['description']:
 			s = s + '### Description\n\n'
 			m = self.section['description'].split('\n')
-			m = map(string.strip, m)
 			desc = '\n'.join(m)
 			s = s + desc + '\n\n'
 
