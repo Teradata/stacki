@@ -10,7 +10,6 @@ from itertools import filterfalse
 import logging
 from logging.handlers import RotatingFileHandler
 import os
-import pymysql
 import re
 import signal
 import subprocess
@@ -355,7 +354,7 @@ class Discovery:
                 except CommandError:
                     raise ValueError(f"Unknown appliance with name {appliance_name}")
             else:
-                raise ValueError("The appliance_name needs to be set")
+                self._appliance_name = "backend"
             
             # Set up the base name
             if base_name:
@@ -476,53 +475,3 @@ class Discovery:
                 return False
         
         return True
-
-
-if __name__ == "__main__":
-    discovery = Discovery(logging_level=logging.DEBUG)
-
-    if sys.argv[1] == "--start":
-        # Start needs a database connection
-    
-        # Figure out the mysql password, if possible
-        password = None
-        with open("/opt/stack/etc/my.cnf", 'r') as f:
-            for line in f:
-                if line.startswith("password"):
-                    password = line.split('=')[1].strip()
-                    break
-        
-        if password is None:
-            print("Error: unable to connect to the database", file=sys.stderr)
-            sys.exit(1)
-        
-        # Try to connect to Mysql
-        connection = pymysql.connect(
-            db="cluster",
-            host="localhost",
-            user="apache",
-            passwd=password,
-            unix_socket="/var/opt/stack/mysql/mysql.sock",
-            autocommit=True
-        )
-        
-        # Start the discovery daemon
-        discovery.start(Command(connection), appliance_name="backend")
-
-        # Close the DB connection
-        connection.close()
-    
-    elif sys.argv[1] == "--stop":
-        # Try to stop the discovery daemon
-        if not discovery.stop():
-            print("Error: unable to stop discovery daemon", file=sys.stderr)
-            sys.exit(1)
-    
-    elif sys.argv[1] == "--status":
-        # Figure out the discovery daemon status
-        if discovery.is_running():
-            print("Status: daemon is running")
-        else:
-            print("Status: daemon is stopped")
-
-    sys.exit(0)
