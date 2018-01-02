@@ -23,8 +23,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Hostname.
 	</arg>
 
-	<example cmd='report host network compute-0-0'>
-	Output the network configuration for compute-0-0.
+	<example cmd='report host network backend-0-0'>
+	Output the network configuration for backend-0-0.
 	</example>
 	"""
 

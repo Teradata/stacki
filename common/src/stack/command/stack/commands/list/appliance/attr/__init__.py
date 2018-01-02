@@ -15,8 +15,8 @@ class Command(stack.commands.list.appliance.command):
 	Name of appliance
 	</arg>
 	
-	<example cmd='list appliance attr compute'>
-	List the attributes for compute appliances
+	<example cmd='list appliance attr backend'>
+	List the attributes for backend appliances
 	</example>
 	"""
 

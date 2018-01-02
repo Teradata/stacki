@@ -26,8 +26,8 @@ class Command(stack.commands.set.host.command):
 	The rack name (usually a number) to assign to each host.
 	</param>
 
-	<example cmd='set host rack compute-2-0 rack=2'>
-	Set the rack number to 2 for compute-2-0.
+	<example cmd='set host rack backend-2-0 rack=2'>
+	Set the rack number to 2 for backend-2-0.
 	</example>
 	"""
 

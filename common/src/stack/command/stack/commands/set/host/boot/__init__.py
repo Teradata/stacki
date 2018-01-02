@@ -31,10 +31,10 @@ class Command(stack.commands.set.host.command):
 	list of hosts will be rewritten.
 	</param>
 		
-	<example cmd='set host boot compute-0-0 action=os'>
-	On the next boot, compute-0-0 will boot the profile based on its
+	<example cmd='set host boot backend-0-0 action=os'>
+	On the next boot, backend-0-0 will boot the profile based on its
 	"run action". To see the node's "run action", execute:
-	"rocks list host compute-0-0" and examine the value in the
+	"rocks list host backend-0-0" and examine the value in the
 	"RUNACTION" column.
 	</example>
 	"""

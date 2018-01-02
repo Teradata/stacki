@@ -24,8 +24,8 @@ class Command(stack.commands.list.host.command):
 	Hostname for requested XML document.
 	</arg>
 
-	<example cmd='list host xml compute-0-0'>
-	List the XML configuration file for compute-0-0.
+	<example cmd='list host xml backend-0-0'>
+	List the XML configuration file for backend-0-0.
 	</example>
 	"""
 

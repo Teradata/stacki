@@ -685,6 +685,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.parser.setContentHandler(self)
 
 	def getDocbookText(self):
+		print('Docbook is no longer a viable format.')
+		raise(CommandError(self, 'Use "markdown"'))
 		s  = ''
 		s += '<section id="stack-%s" xreflabel="%s">\n' % \
 			('-'.join(self.name.split(' ')), self.name)
@@ -899,7 +901,6 @@ class DocStringHandler(handler.ContentHandler,
 		if self.section['description']:
 			s = s + '### Description\n\n'
 			m = self.section['description'].split('\n')
-			m = map(string.strip, m)
 			desc = '\n'.join(m)
 			s = s + desc + '\n\n'
 

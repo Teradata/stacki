@@ -25,8 +25,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='report host bootflags compute-0-0'>
-	Output the kernel boot flags for compute-0-0.
+	<example cmd='report host bootflags backend-0-0'>
+	Output the kernel boot flags for backend-0-0.
 	</example>
 	"""
 

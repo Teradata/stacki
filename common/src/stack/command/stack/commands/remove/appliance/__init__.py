@@ -30,8 +30,8 @@ class Command(command):
 	The name of the appliance.
 	</arg>
 	
-	<example cmd='remove appliance compute'>
-	Removes the compute appliance from the database.
+	<example cmd='remove appliance backend'>
+	Removes the backend appliance from the database.
 	</example>
 	"""
 

@@ -29,8 +29,8 @@ class Command(stack.commands.set.host.command):
 	The boot flags to set for the host.
 	</param>
 		
-	<example cmd='set host bootflags compute-0-0 flags="mem=1024M"'>
-	Apply the kernel boot flags "mem=1024M" to compute-0-0.
+	<example cmd='set host bootflags backend-0-0 flags="mem=1024M"'>
+	Apply the kernel boot flags "mem=1024M" to backend-0-0.
 	</example>
 	"""
 

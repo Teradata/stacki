@@ -25,8 +25,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Host name of machine
 	</arg>
 	
-	<example cmd='report host repo compute-0-0'>
-	Create a report of the repository configuration file for compute-0-0.
+	<example cmd='report host repo backend-0-0'>
+	Create a report of the repository configuration file for backend-0-0.
 	</example>
 	"""
 
