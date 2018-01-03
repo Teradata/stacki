@@ -1145,8 +1145,44 @@ class DatabaseConnection:
 
 	def getHostRoutes(self, host, showsource=0):
 
+		_frontend = self.getHostname('localhost')
 		host = self.getHostname(host)
 		routes = {}
+
+		# if needed, add default routes to support multitenancy
+		if _frontend == host:
+			_networks = self.select(
+			"""
+			n.ip, n.device, np.ip 
+			from networks n
+			left join networks np
+			on np.node != 1 and n.subnet = np.subnet
+			where n.node=(select id from nodes where name='%s')
+			""" % (_frontend))
+
+			_network_dict = {}
+			for _network in _networks:
+				if None in _network:
+					continue
+				(gateway, interface, destination) = _network
+				interface = interface.split('.')[0].split(':')[0]
+				
+				if destination in _network_dict:
+					routes[destination] = _network_dict[destination]
+				else:
+					if showsource:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface, 
+							'H')
+					else:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface,)
+
+				
 		
 		# global
 		
