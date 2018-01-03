@@ -16,4 +16,11 @@ pipeline {
             }
         }
     }
+    post {
+        failure {
+            node(label: 'vagrant_vbox_builder') {
+                sh "cd ${env.WORKSPACE}/stacki-iso-builder-${env.BUILD_NUMBER} && vagrant destroy -f"
+            }
+        }
+    }
 }
