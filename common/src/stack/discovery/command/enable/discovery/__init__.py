@@ -4,9 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import os
 import stack.commands
 from stack.discovery import Discovery
 from stack.exception import CommandError
+import time
 
 
 class Command(stack.commands.enable.command):
@@ -58,6 +60,7 @@ class Command(stack.commands.enable.command):
 		])
 
 		try:
+			# Call start
 			discovery.start(
 				self,
 				appliance_name=appliance,
@@ -67,5 +70,23 @@ class Command(stack.commands.enable.command):
 				box=box,
 				install_action=install_action
 			)
+			
+			# Wait up to a few seconds for the daemon to start
+			for _ in range(8):
+				# Are we up yet?
+				if discovery.is_running():
+					self.beginOutput()
+					self.addOutput('', "Discovery daemon has started")
+					self.endOutput()
+
+					break
+
+				# Take a quarter second nap
+				time.sleep(0.25)
+			else:
+				self.beginOutput()
+				self.addOutput('', "Warning: daemon might have not started")
+				self.endOutput()
+		
 		except ValueError as e:
 			raise CommandError(self, str(e)) from None

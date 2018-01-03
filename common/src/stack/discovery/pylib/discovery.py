@@ -14,6 +14,7 @@ import re
 import signal
 import subprocess
 import sys
+import time
 
 from stack.api.get import GetAttr
 from stack.commands import Command
@@ -417,12 +418,19 @@ class Discovery:
             if os.fork() != 0:
                 return
             
+            # Close stdin, stdout, stderr of our daemon
+            os.close(0)
+            os.close(1)
+            os.close(2)
+            
             # Seperate ourselves from the parent process
             os.setsid()
 
             # Fork again so we aren't a session leader
             if os.fork() != 0:
-                return
+                # Directly end this parent process, so it doesn't create another
+                # path back up to the caller
+                sys.exit(0)
             
             # Reconnect to the db via the command connection passed in, so when
             # the parent process closes theirs, we still have an open socket

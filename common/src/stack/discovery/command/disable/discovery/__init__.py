@@ -24,3 +24,7 @@ class Command(stack.commands.disable.command):
 		discovery = Discovery()
 
 		discovery.stop()
+
+		self.beginOutput()
+		self.addOutput('', "Discovery daemon has stopped")
+		self.endOutput()
