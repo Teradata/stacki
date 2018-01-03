@@ -10,6 +10,13 @@
 import subprocess
 import os
 
+from stack_site import attributes
+
+pallets = attributes['pallets']
+ostype = None
+if 'SLES-11.3-1.138' in pallets:
+	ostype = "sles11"
+
 def attr2bool(s):
 	if type(s) == type([]) and s:
 		return 1
@@ -66,9 +73,8 @@ def getHostDisks(nukedisks):
 	#	}]
 	#
 	lsblk = ['lsblk', '-lio', 'NAME,RM,RO,TYPE']
-	sles11 = True
 	# sles 11 doesn't support the TYPE column
-	if sles11:
+	if ostype == "sles11":
 		lsblk = ['lsblk', '-lio', 'NAME,RM,RO']
 	p = subprocess.run(lsblk,
 			   stdin=subprocess.PIPE,
@@ -90,7 +96,7 @@ def getHostDisks(nukedisks):
 		name = arr[0].strip()
 		removable = arr[1].strip()
 		readonly = arr[2].strip()
-		if sles11:
+		if ostype == "sles11":
 			mediatype = get_sles11_media_type(name)
 		else:
 			mediatype = arr[3].strip()
@@ -305,4 +311,5 @@ def get_sles11_media_type(dev_name):
 				return "part"
 			return arr[1]
 	# If we can't find what we are looking for, lie and say its "loop"
+	# I think that is the only other option if it is not a disk or parition.
 	return "loop"
