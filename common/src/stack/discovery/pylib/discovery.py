@@ -7,11 +7,13 @@
 import asyncio
 import ipaddress
 from itertools import filterfalse
+import json
 import logging
 from logging.handlers import RotatingFileHandler
 import os
 import re
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -19,6 +21,7 @@ import time
 from stack.api.get import GetAttr
 from stack.commands import Command
 from stack.exception import CommandError
+import stack.mq
 
 
 class Discovery:
@@ -234,6 +237,20 @@ class Discovery:
                 return
 
             self._logger.info("successfully added host %s", self.hostname)
+
+            # Post the host added message
+            message = json.dumps({
+                'channel': "discovery",
+                'message': {
+                    'type': "add",
+                    'interface': interface,
+                    'mac_address': mac_address,
+                    'ip_address': str(ip_address),
+                    'hostname': self.hostname
+                }
+            })
+
+            self._socket.sendto(message.encode(), ("localhost", stack.mq.ports.publish))
         else:
             self._logger.error("no network exists for interface %s", interface)
 
@@ -270,7 +287,25 @@ class Discovery:
 
     def _process_kickstart_line(self, line):
         if re.search("install/sbin(/public)?/profile.cgi", line):
-            self._logger.debug("KICKSTART: %s", line)
+            parts = line.split()
+            
+            try:
+                ip_address = ipaddress.ip_address(parts[0])
+                status_code = int(parts[8])
+                
+                # Post the host kickstart message
+                message = json.dumps({
+                    'channel': "discovery",
+                    'message': {
+                        'type': "kickstart",
+                        'ip_address': str(ip_address),
+                        'status_code': status_code
+                    }
+                })
+
+                self._socket.sendto(message.encode(), ("localhost", stack.mq.ports.publish))
+            except ValueError as e:
+                self._logger.error("Invalid Apache log format: %s", line)
 
     async def _monitor_log(self, log_path, process_line):
         # Open our log file
@@ -438,6 +473,9 @@ class Discovery:
             self._command.db.database.connect()
             self._command.db.link = self._command.db.database.cursor()
 
+            # Open the message queue socket
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
             # Now write out the daemon pid
             with open(self._PIDFILE, 'w') as f:
                 f.write("{}".format(os.getpid()))
@@ -466,6 +504,7 @@ class Discovery:
                 # All done, clean up
                 loop.close()
                 self._command.db.database.close()
+                self._socket.close()
                 self._cleanup()
             
             self._logger.info("discovery daemon stopped")

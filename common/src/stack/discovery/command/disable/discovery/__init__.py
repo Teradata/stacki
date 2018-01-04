@@ -6,6 +6,7 @@
 
 import stack.commands
 from stack.discovery import Discovery
+import time
 
 
 class Command(stack.commands.disable.command):
@@ -25,6 +26,19 @@ class Command(stack.commands.disable.command):
 
 		discovery.stop()
 
-		self.beginOutput()
-		self.addOutput('', "Discovery daemon has stopped")
-		self.endOutput()
+		# Wait up to a few seconds for the daemon to stop
+		for _ in range(8):
+			# Are we done yet?
+			if not discovery.is_running():
+				self.beginOutput()
+				self.addOutput('', "Discovery daemon has stopped")
+				self.endOutput()
+
+				break
+
+			# Take a quarter second nap
+			time.sleep(0.25)
+		else:
+			self.beginOutput()
+			self.addOutput('', "Warning: daemon might have not stopped")
+			self.endOutput()
