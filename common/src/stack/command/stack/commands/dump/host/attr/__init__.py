@@ -23,8 +23,8 @@ class Command(stack.commands.dump.host.command):
 	Host name of machine
 	</arg>
 	
-	<example cmd='dump host attr compute-0-0'>
-	Dump the attributes for compute-0-0.
+	<example cmd='dump host attr backend-0-0'>
+	Dump the attributes for backend-0-0.
 	</example>
 	"""
 

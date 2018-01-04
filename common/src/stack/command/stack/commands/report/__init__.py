@@ -22,7 +22,7 @@ class command(stack.commands.Command):
 		CIDR netmask that is not a multiple of
 		8. This means subnets smaller than /24 (25-32)
 		will result in the correct subnet being
-		computed for named.conf.
+		backendd for named.conf.
 		"""
 		
 		s_list = list(map(int, subnet.split('.')))

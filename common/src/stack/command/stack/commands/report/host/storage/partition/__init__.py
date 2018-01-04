@@ -17,8 +17,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	One host name.
 	</arg>
 
-	<example cmd='report host storage partition compute-0-0'>
-	Output the storage partition configuration for compute-0-0.
+	<example cmd='report host storage partition backend-0-0'>
+	Output the storage partition configuration for backend-0-0.
 	</example>
 	"""
 

@@ -25,8 +25,8 @@ class Command(stack.commands.list.host.command):
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host interface compute-0-0'>
-	List network interface info for compute-0-0.
+	<example cmd='list host interface backend-0-0'>
+	List network interface info for backend-0-0.
 	</example>
 
 	<example cmd='list host interface'>

@@ -26,8 +26,8 @@ class Command(stack.commands.set.host.command):
 	The rank number to assign to each host.
 	</param>
 
-	<example cmd='set host rank compute-0-2 rank=2'>
-	Set the rank number to 2 for compute-0-2.
+	<example cmd='set host rank backend-0-2 rank=2'>
+	Set the rank number to 2 for backend-0-2.
 	</example>
 	"""
 

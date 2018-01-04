@@ -57,8 +57,8 @@ class Command(stack.commands.list.command,
 	2nd pass generator. If not supplied, then use 'kgen'.
 	</param>
 
-	<example cmd='list node xml compute'>
-	Generate the XML graph starting at the XML node named 'compute.xml'.
+	<example cmd='list node xml backend'>
+	Generate the XML graph starting at the XML node named 'backend.xml'.
 	</example>
 	"""
 

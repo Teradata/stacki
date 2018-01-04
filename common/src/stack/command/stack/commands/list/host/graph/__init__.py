@@ -44,8 +44,8 @@ class Command(stack.commands.list.host.command):
 	Optional. If specified, the location of the XML node files.
 	</param>
 	
-	<example cmd='list host graph compute-0-0'>
-	Generates a graph for compute-0-0
+	<example cmd='list host graph backend-0-0'>
+	Generates a graph for backend-0-0
 	</example>
 	"""
 

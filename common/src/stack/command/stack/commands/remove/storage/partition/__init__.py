@@ -17,8 +17,8 @@ class Command(stack.commands.remove.command,
 
 	<arg type='string' name='scope'>
 	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'compute') or a valid host
-	(e.g., 'compute-0-0). No argument means the scope is 'global'.
+	'redhat'), a valid appliance (e.g., 'backend') or a valid host
+	(e.g., 'backend-0-0). No argument means the scope is 'global'.
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -31,16 +31,16 @@ class Command(stack.commands.remove.command,
 	the database.
 	</param>
 
-	<example cmd='remove storage partition compute-0-0 device=sda'>
-	Remove the disk partition configuration for sda on compute-0-0.
+	<example cmd='remove storage partition backend-0-0 device=sda'>
+	Remove the disk partition configuration for sda on backend-0-0.
 	</example>
 
-	<example cmd='remove storage partition compute-0-0 device=sda mountpoint=/var'>
-	Remove the disk partition configuration for partition /var on sda on compute-0-0.
+	<example cmd='remove storage partition backend-0-0 device=sda mountpoint=/var'>
+	Remove the disk partition configuration for partition /var on sda on backend-0-0.
 	</example>
 
-	<example cmd='remove storage partition compute'>
-	Remove the disk array configuration for compute
+	<example cmd='remove storage partition backend'>
+	Remove the disk array configuration for backend
 	appliance.
 	</example>
 	"""

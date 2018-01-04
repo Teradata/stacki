@@ -12,7 +12,7 @@ import string
 import stack.api
 	
 
-def markdoc():
+def markdown():
 	try:
 		os.mkdir('cli')
 	except OSError:
@@ -28,7 +28,7 @@ def markdoc():
 		except OSError:
 			pass
 		cmdline = '%s > cli/%s/%s' % (cmd, verb, f)
-		print "Running %s" % cmdline
+		print("Running %s" % cmdline)
 		os.system(cmdline)
 
 		# Keep a list of the verbs to
@@ -49,8 +49,7 @@ def markdoc():
 	cli_sidebar.write('[Command Line Interface](%s-CLI-documentation)\n\n' % roll)
 
 	# Get a list of verbs
-	verbs = cli_toc.keys()
-	verbs.sort()
+	verbs = sorted(cli_toc.keys())
 	for verb in verbs:
 		# Verb-specific TOC files named <verb>-commands.md. 
 
@@ -60,7 +59,7 @@ def markdoc():
 		cli_sidebar.write('* [%s](%s-%s-commands)\n' % (verb, roll, verb))
 
 		# Create the verb TOC file
-		print "Writing verbfile cli/%s/%s-%s-commands.md" % (verb, roll, verb)
+		print("Writing verbfile cli/%s/%s-%s-commands.md" % (verb, roll, verb))
 		verbfile = open('cli/%s/%s-%s-commands.md' % (verb, roll, verb), 'w')
 		# Title of verb TOC
 		verbfile.write("# %s commands\n\n" % verb)
