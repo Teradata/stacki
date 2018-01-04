@@ -1156,9 +1156,9 @@ class DatabaseConnection:
 			n.ip, n.device, np.ip 
 			from networks n
 			left join networks np
-			on np.node != 1 and n.subnet = np.subnet
+			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
 			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend))
+			""" % (_frontend, _frontend))
 
 			_network_dict = {}
 			for _network in _networks:
