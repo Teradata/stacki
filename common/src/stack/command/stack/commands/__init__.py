@@ -1199,7 +1199,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%' 
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'G')
 			else:
@@ -1220,7 +1220,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'O')
 			else:
@@ -1245,7 +1245,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'A')
 			else:
@@ -1266,7 +1266,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'H')
 			else:
