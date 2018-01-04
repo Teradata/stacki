@@ -36,15 +36,14 @@ class Implementation(stack.commands.Implementation):
 
 			# if interface is not set, use the default behavior
 			if not interface or interface == 'NULL':
-				device = gateway
-				gateway = '0.0.0.0'
-				self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
-					(destination, gateway, netmask, device))
+				interface = '-'
 
-			else:
-				device = interface
-				self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
-					(destination, gateway, netmask, device))
+			if not gateway or gateway == 'NULL':
+				gateway = '-'
+
+			device = interface
+			self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
+				(destination, gateway, netmask, device))
 
 
 		#

@@ -28,7 +28,8 @@ WantedBy=multi-user.target
 
 if [ -x /usr/bin/systemctl ]
 then
-	/usr/bin/systemctl disable firewalld
+	/usr/bin/systemctl disable SuSEfirewall
+	/usr/bin/systemctl disable SuSEfirewall_init
 	/usr/bin/systemctl disable ip6tables
 	/usr/bin/systemctl enable iptables
 	/usr/bin/systemctl enable stacki-iptables.service
