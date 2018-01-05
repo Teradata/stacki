@@ -198,20 +198,35 @@ class Discovery:
                 self._logger.error("failed to set install action for host %s:\n%s", self.hostname, result.stderr)
                 return
 
-            # Set the net node to install on boot
-            result = subprocess.run([
-                "/opt/stack/bin/stack",
-                "set",
-                "host",
-                "boot",
-                self.hostname,
-                "action=install"
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+            if self._install:
+                # Set the new node to install on boot
+                result = subprocess.run([
+                    "/opt/stack/bin/stack",
+                    "set",
+                    "host",
+                    "boot",
+                    self.hostname,
+                    "action=install"
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+                    
+                if result.returncode != 0:
+                    self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
+                    return
+            else:
+                # Set the new node to OS on boot
+                result = subprocess.run([
+                    "/opt/stack/bin/stack",
+                    "set",
+                    "host",
+                    "boot",
+                    self.hostname,
+                    "action=os"
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+                    
+                if result.returncode != 0:
+                    self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
+                    return
             
-            if result.returncode != 0:
-                self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
-                return
-
             # Sync the global config
             result = subprocess.run([
                 "/opt/stack/bin/stack",
@@ -233,7 +248,7 @@ class Discovery:
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
             
             if result.returncode != 0:
-                self._logger.error("unable to sync global host config:\n%s", result.stderr)
+                self._logger.error("unable to sync host config:\n%s", result.stderr)
                 return
 
             self._logger.info("successfully added host %s", self.hostname)
@@ -375,7 +390,7 @@ class Discovery:
         return False
 
     def start(self, command, appliance_name=None, base_name=None, 
-        rack=None, rank=None, box=None, install_action=None):    
+        rack=None, rank=None, box=None, install_action=None, install=None):    
         """
         Start the node discovery daemon.
         """
@@ -441,6 +456,12 @@ class Discovery:
                 else:
                     raise ValueError(f"Unknown install action with name {install_action}")
             
+            # Set up if we are installing the OS on boot
+            if install is None:
+                self._install = True
+            else:
+                self._install = bool(install)
+
             # Find our apache log
             if os.path.isfile("/var/log/httpd/ssl_access_log"):
                 kickstart_log = "/var/log/httpd/ssl_access_log"

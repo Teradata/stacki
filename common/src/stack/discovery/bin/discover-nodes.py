@@ -87,16 +87,18 @@ class TUI(Subscriber):
 parser = argparse.ArgumentParser()
 
 arguments = (
-	("--appliance", "appliance used to configure nodes"),
-	("--basename", "base name for the nodes"),
-	("--rack", "rack number to use"),
-	("--rank", "rank number to start from"),
-	("--box", "box used to configure nodes"),
-	("--installaction", "install action used to configure nodes")
+	("--appliance", "appliance used to configure nodes", "store"),
+	("--basename", "base name for the nodes", "store"),
+	("--rack", "rack number to use", "store"),
+	("--rank", "rank number to start from", "store"),
+	("--box", "box used to configure nodes", "store"),
+	("--installaction", "install action used to configure nodes", "store"),
+	("--no-install", "discover hosts but don't install OS", "store_true"),
+	("--debug", "enable extra debugging info in the log file", "store_true")
 )
 
 for argument in arguments:
-	parser.add_argument(argument[0], help=argument[1])
+	parser.add_argument(argument[0], help=argument[1], action=argument[2])
 
 args = parser.parse_args()
 
@@ -120,6 +122,12 @@ if args.box:
 
 if args.installaction:
 	command.append(f"installaction={args.installaction}")
+
+if args.no_install:
+	command.append("install=False")
+
+if args.debug:
+	command.append("debug=True")
 
 # Stop discovery it it happens to be running, so we can restart
 # it with our commandline arguments

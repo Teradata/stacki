@@ -4,6 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import logging
 import os
 import stack.commands
 from stack.discovery import Discovery
@@ -39,6 +40,14 @@ class Command(stack.commands.enable.command):
 	The install action used to configure discovered nodes. Defaults to 'default'.
 	</param>
 
+	<param type='boolean' name='install' optional='1'>
+	Set to False to prevent installing OS to discovered nodes. Defaults to True.
+	</param>
+
+	<param type='boolean' name='debug' optional='1'>
+	Add more verbose output into the discovery log file. Defaults to False.
+	</param>
+
 	<example cmd='enable discovery'>
 	Discover nodes and install the backend appliance using all defaults.
 	</example>
@@ -48,16 +57,23 @@ class Command(stack.commands.enable.command):
 	"""		
 
 	def run(self, params, args):
-		discovery = Discovery()
-
-		(appliance, base_name, rack, rank, box, install_action) = self.fillParams([
+		(appliance, base_name, rack, rank, box, install_action, install, debug) = self.fillParams([
 			("appliance", None),
 			("basename", None),
 			("rack", None),
 			("rank", None),
 			("box", None),
-			("installaction", None)
+			("installaction", None),
+			("install", True),
+			("debug", False)
 		])
+		install = self.str2bool(install)
+		debug = self.str2bool(debug)
+		
+		if debug:
+			discovery = Discovery(logging_level=logging.DEBUG)
+		else:
+			discovery = Discovery()
 
 		try:
 			# Call start
@@ -68,7 +84,8 @@ class Command(stack.commands.enable.command):
 				rack=rack,
 				rank=rank,
 				box=box,
-				install_action=install_action
+				install_action=install_action,
+				install=install
 			)
 			
 			# Wait up to a few seconds for the daemon to start
