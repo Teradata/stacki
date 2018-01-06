@@ -207,6 +207,8 @@ class NetworkArgumentProcessor:
 		for arg in args:
 			rows = self.db.execute("""select name from subnets
 				where name like '%s'""" % arg)
+			if not rows:
+				continue
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:

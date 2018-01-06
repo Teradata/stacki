@@ -1,7 +1,7 @@
 <stack:stack>
 
 <stack:description>
-Base class for all nodes.
+Base class for redhat nodes.
 </stack:description>
 
 <stack:copyright>
@@ -40,20 +40,12 @@ else:
 
 </stack:native>
 
-
 <stack:package stack:cond="release == 'redhat7'">net-tools</stack:package>
 <stack:package>foundation-rcs</stack:package>
 <stack:package>mlocate</stack:package>
-<stack:package>vim</stack:package>
-<stack:package>pciutils</stack:package>
-
-<stack:package>ipmitool</stack:package>
-<stack:package>OpenIPMI</stack:package>
 
 <stack:package>grub2</stack:package>
 <stack:package>grub2-tools</stack:package>
-<stack:package>wget</stack:package>
-<stack:package>bridge-utils</stack:package>
 <!-- Network test from stacki-pro -->
 <stack:package>iperf3</stack:package>
 <stack:package>foundation-iperf</stack:package>
@@ -80,39 +72,6 @@ rm /tmp/mdmonitor
 
 <stack:script stack:stage="install-post">
 /sbin/chkconfig NetworkManager off
-</stack:script>
-
-<!-- Rsyslog Configuration file -->
-<stack:script stack:stage="install-post">
-<stack:file stack:name="/etc/rsyslog.d/stacki.conf">
-/*
-	Turn off escape character parsing.
-	This keeps tabs and newlines intact.
- */
-$EscapeControlCharactersOnReceive off
-
-# Send local0 facility to /var/log/local0
-local0.*    /var/log/local0
-
-/*
-   If we're calling this from StackI
-   command line, stop processing now
-*/
-if $programname == 'SCL' then ~
-</stack:file>
-</stack:script>
-
-
-<stack:script stack:stage="install-post">
-<stack:file stack:name="/etc/stack-release">
-stacki release &version; (&release;)
-</stack:file>
-</stack:script>
-
-<stack:script stack:cond="sync.hosts" stack:stage="install-post">
-<stack:eval>
-/opt/stack/bin/stack report host > /etc/hosts
-</stack:eval>
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:chroot="false">
