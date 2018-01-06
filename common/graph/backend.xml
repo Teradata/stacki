@@ -12,9 +12,9 @@
 
 	<edge from="builder" to="backend"/>
 
-	<edge from="client">
-		<to cond="appliance != 'replicant'">foundation-python-client</to>
-		<to cond="appliance != 'replicant'">mq-client</to>
+	<edge from="client" >
+		<to cond="appliance !='replicant'">foundation-python-client</to>
+		<to cond="appliance !='replicant'">mq-client</to>
 		<to>peerdone</to>
 	</edge>
 
