@@ -18,6 +18,7 @@ stack-build
 stack-command
 stack-config
 stack-config-server
+stack-discovery
 stack-ekv
 stack-examples
 stack-kickstart
