@@ -1,0 +1,48 @@
+root:			common root cracklib-dict-full.rpm bind sles-stacki.img ?yast2-trans-<lang>.rpm ?configfiles
+rescue:			common rescue ?cracklib-dict-full.rpm
+configfiles:		control.xml?copy=1
+yast2-trans-ar.rpm:	yast2-trans-ar.rpm
+yast2-trans-bn.rpm:	yast2-trans-bn.rpm
+yast2-trans-gu.rpm:	yast2-trans-gu.rpm
+yast2-trans-hi.rpm:	yast2-trans-hi.rpm
+yast2-trans-ja.rpm:	yast2-trans-ja.rpm ipa-gothic-fonts.rpm
+yast2-trans-km.rpm:	yast2-trans-km.rpm
+yast2-trans-ko.rpm:	yast2-trans-ko.rpm un-fonts.rpm?list=*/UnDotum.ttf
+yast2-trans-mr.rpm:	yast2-trans-mr.rpm
+yast2-trans-pa.rpm:	yast2-trans-pa.rpm
+yast2-trans-si.rpm:	yast2-trans-si.rpm
+yast2-trans-ta.rpm:	yast2-trans-ta.rpm
+yast2-trans-th.rpm:	yast2-trans-th.rpm
+yast2-trans-zh_CN.rpm:	yast2-trans-zh_CN.rpm arphic-uming-fonts.rpm
+yast2-trans-zh_TW.rpm:	yast2-trans-zh_TW.rpm arphic-uming-fonts.rpm
+yast2-trans-ar_EG.rpm:	yast2-trans-ar.rpm
+yast2-trans-bn_BD.rpm:	yast2-trans-bn.rpm
+yast2-trans-bs_BA.rpm:	yast2-trans-bs.rpm
+yast2-trans-cy_GB.rpm:	yast2-trans-cy.rpm
+yast2-trans-et_EE.rpm:	yast2-trans-et.rpm
+yast2-trans-fa_IR.rpm:	yast2-trans-fa.rpm
+yast2-trans-gl_ES.rpm:	yast2-trans-gl.rpm
+yast2-trans-gu_IN.rpm:	yast2-trans-gu.rpm
+yast2-trans-hi_IN.rpm:	yast2-trans-hi.rpm
+yast2-trans-hr_HR.rpm:	yast2-trans-hr.rpm
+yast2-trans-id_ID.rpm:	yast2-trans-id.rpm
+yast2-trans-jv_ID.rpm:	yast2-trans-jv.rpm
+yast2-trans-ka_GE.rpm:	yast2-trans-ka.rpm
+yast2-trans-km_KH.rpm:	yast2-trans-km.rpm
+yast2-trans-ko_KR.rpm:	yast2-trans-ko.rpm
+yast2-trans-lo_LA.rpm:	yast2-trans-lo.rpm
+yast2-trans-lt_LT.rpm:	yast2-trans-lt.rpm
+yast2-trans-mk_MK.rpm:	yast2-trans-mk.rpm
+yast2-trans-mr_IN.rpm:	yast2-trans-mr.rpm
+yast2-trans-pa_IN.rpm:	yast2-trans-pa.rpm
+yast2-trans-ro_RO.rpm:	yast2-trans-ro.rpm
+yast2-trans-si_LK.rpm:	yast2-trans-si.rpm
+yast2-trans-sr_CS.rpm:	yast2-trans-sr.rpm
+yast2-trans-ta_IN.rpm:	yast2-trans-ta.rpm
+yast2-trans-th_TH.rpm:	yast2-trans-th.rpm
+yast2-trans-tr_TR.rpm:	yast2-trans-tr.rpm
+yast2-trans-uk_UA.rpm:	yast2-trans-uk.rpm
+yast2-trans-vi_VN.rpm:	yast2-trans-vi.rpm
+yast2-trans-wa_BE.rpm:	yast2-trans-wa.rpm
+yast2-trans-xh_ZA.rpm:	yast2-trans-xh.rpm
+yast2-trans-zu_ZA.rpm:	yast2-trans-zu.rpm

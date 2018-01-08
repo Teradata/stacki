@@ -65,37 +65,9 @@ def sles12():
 		boot.text="true"
 		ET.SubElement(root, "loader_type").text = "grub2"
 
-def caasp():
-	ET.SubElement(g,"generic_mbr").text = "true"
-	ET.SubElement(g,"gfxmode").text = "auto"
-	ET.SubElement(g,"hiddenmenu").text = "false"
-	ET.SubElement(g,"os_prober").text = "false"
-	ET.SubElement(g,"terminal").text = "gfxterm"
-
-	timeout = ET.SubElement(g,"timeout")
-	timeout.set("config:type","integer")
-	timeout.text = "8"
-
-	suse_btrfs = ET.SubElement(g,"suse_btrfs")
-	suse_btrfs.set("config:type","boolean")
-	suse_btrfs.text = "true"
-
-	ET.SubElement(root, "loader_type").text = "grub2"
-
-
-ostype = None
-if 'SLES-11.3-1.138' in pallets:
-	ostype = "sles11"
-
-elif 'SLES-12-sp2' in pallets:
-	ostype = "sles12"
-
-elif 'CaaSP-1.0-suse' in pallets:
-	ostype = "caasp"
-
-if ostype:
+if release:
 	this = sys.modules[__name__]
-	if hasattr(this, ostype):
-		f = getattr(this, ostype)
+	if hasattr(this, release):
+		f = getattr(this, release)
 		f()
 		print (ET.tostring(root).decode())

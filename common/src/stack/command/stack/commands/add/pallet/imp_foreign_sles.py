@@ -103,7 +103,7 @@ class Implementation(stack.commands.Implementation):
 			xmlfile.close()
 
 		# Copy SLES Pallet patches into the SLES pallet directory
-		patch_dir = '/opt/stack/%s-pallet-patches/%s/' % (self.name, self.vers)
+		patch_dir = '/opt/stack/%s-pallet-patches/%s/%s' % (self.name, self.vers, self.release)
 		if os.path.exists(patch_dir):
 			self.owner.out.write("Patching SLES pallet\n")
 			if not self.owner.dryrun:
