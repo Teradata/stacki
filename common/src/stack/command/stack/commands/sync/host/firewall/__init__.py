@@ -25,8 +25,8 @@ class Command(stack.commands.sync.host.command):
 	The default is: yes.
 	</param>
 
-	<example cmd='sync host firewall compute-0-0'>
-	Reconfigure and restart the firewall on compute-0-0.
+	<example cmd='sync host firewall backend-0-0'>
+	Reconfigure and restart the firewall on backend-0-0.
 	</example>
 	"""
 

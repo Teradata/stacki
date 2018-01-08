@@ -1,5 +1,12 @@
+import os
+
+
 def test_apache_enabled_and_running(host):
-	apache = host.service('httpd')
+	if os.path.exists('/etc/SuSE-release'):
+		apache = host.service('apache2')
+	else:
+		apache = host.service('httpd')
+
 	assert apache.is_enabled
 	assert apache.is_running
 

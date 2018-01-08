@@ -26,8 +26,8 @@ class Command(stack.commands.remove.appliance.command):
 	The address of the static route to remove.
 	</param>
 
-	<example cmd='remove appliance route compute address=1.2.3.4'>
-	Remove the static route for the 'compute' appliance that has the
+	<example cmd='remove appliance route backend address=1.2.3.4'>
+	Remove the static route for the 'backend' appliance that has the
 	network address '1.2.3.4'.
 	</example>
 	"""

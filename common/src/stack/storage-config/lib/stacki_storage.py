@@ -10,6 +10,13 @@
 import subprocess
 import os
 
+from stack_site import attributes
+
+pallets = attributes['pallets']
+ostype = None
+if 'SLES-11.3-1.138' in pallets:
+	ostype = "sles11"
+
 def attr2bool(s):
 	if type(s) == type([]) and s:
 		return 1
@@ -65,11 +72,14 @@ def getHostDisks(nukedisks):
 	#		'nuke'		: 0
 	#	}]
 	#
-	p = subprocess.run([ 'lsblk', '-lio', 'NAME,RM,RO,TYPE' ],
-			   stdin=subprocess.PIPE, 
+	lsblk = ['lsblk', '-lio', 'NAME,RM,RO,TYPE']
+	# sles 11 doesn't support the TYPE column
+	if ostype == "sles11":
+		lsblk = ['lsblk', '-lio', 'NAME,RM,RO']
+	p = subprocess.run(lsblk,
+			   stdin=subprocess.PIPE,
 			   stdout=subprocess.PIPE,
 			   stderr=subprocess.PIPE)
-	
 	disks = []
 	diskentry = None
 	diskid = 1
@@ -85,8 +95,11 @@ def getHostDisks(nukedisks):
 		arr = l.split()
 		name = arr[0].strip()
 		removable = arr[1].strip()
-		readonly  = arr[2].strip()
-		mediatype = arr[3].strip()
+		readonly = arr[2].strip()
+		if ostype == "sles11":
+			mediatype = get_sles11_media_type(name)
+		else:
+			mediatype = arr[3].strip()
 
 		if mediatype.startswith('raid'):
 			#
@@ -277,3 +290,26 @@ def getHostFstab(devices):
 
 	return host_fstab
 
+
+def get_sles11_media_type(dev_name):
+	"""Determines disk and partition for SLES 11.
+	Because SLES 11 doesn't support TYPE field on lsblk commands
+	"""
+	p = subprocess.run(["hwinfo", "--block", "--short"],
+		stdin=subprocess.PIPE,
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE)
+	for l in p.stdout.decode().split('\n'):
+		# Ignore empty lines or non-path
+		if not l.strip() or "/" not in l.strip():
+			continue
+		arr = l.split()
+		if dev_name == os.path.split(arr[0])[1]:
+			if str(arr[1]).lower() == "disk":
+				return "disk"
+			if str(arr[1]).lower() == "partition":
+				return "part"
+			return arr[1]
+	# If we can't find what we are looking for, lie and say its "loop"
+	# I think that is the only other option if it is not a disk or parition.
+	return "loop"

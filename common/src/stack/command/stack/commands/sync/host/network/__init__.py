@@ -26,8 +26,8 @@ class Command(stack.commands.sync.host.command):
 	The default is: yes.
 	</param>
 
-	<example cmd='sync host network compute-0-0'>
-	Reconfigure and restart the network on compute-0-0.
+	<example cmd='sync host network backend-0-0'>
+	Reconfigure and restart the network on backend-0-0.
 	</example>
 	"""
 

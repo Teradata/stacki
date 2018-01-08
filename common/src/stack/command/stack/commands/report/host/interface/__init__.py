@@ -30,8 +30,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	file will be delineated by &lt;file&gt; and &lt;/file&gt; tags).
 	</param>
 
-	<example cmd='report host interface compute-0-0 interface=eth0'>
-	Output a network configuration file for compute-0-0's eth0 interface.
+	<example cmd='report host interface backend-0-0 interface=eth0'>
+	Output a network configuration file for backend-0-0's eth0 interface.
 	</example>
 	"""
 

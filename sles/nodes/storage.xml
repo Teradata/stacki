@@ -1,0 +1,15 @@
+<stack:stack>
+
+  <stack:copyright>
+    Copyright (c) 2006 - 2017 Teradata All rights reserved. Stacki(r) v5.x stacki.com https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+  </stack:copyright>
+
+  <stack:package>
+    stack-storage-config
+  </stack:package>
+
+  <stack:script stack:stage="install-post">
+    /opt/stack/bin/record-partitions.py
+  </stack:script>
+
+</stack:stack>

@@ -207,6 +207,8 @@ class NetworkArgumentProcessor:
 		for arg in args:
 			rows = self.db.execute("""select name from subnets
 				where name like '%s'""" % arg)
+			if not rows:
+				continue
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
@@ -685,6 +687,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.parser.setContentHandler(self)
 
 	def getDocbookText(self):
+		print('Docbook is no longer a viable format.')
+		raise(CommandError(self, 'Use "markdown"'))
 		s  = ''
 		s += '<section id="stack-%s" xreflabel="%s">\n' % \
 			('-'.join(self.name.split(' ')), self.name)
@@ -899,7 +903,6 @@ class DocStringHandler(handler.ContentHandler,
 		if self.section['description']:
 			s = s + '### Description\n\n'
 			m = self.section['description'].split('\n')
-			m = map(string.strip, m)
 			desc = '\n'.join(m)
 			s = s + desc + '\n\n'
 
@@ -1145,8 +1148,44 @@ class DatabaseConnection:
 
 	def getHostRoutes(self, host, showsource=0):
 
+		_frontend = self.getHostname('localhost')
 		host = self.getHostname(host)
 		routes = {}
+
+		# if needed, add default routes to support multitenancy
+		if _frontend == host:
+			_networks = self.select(
+			"""
+			n.ip, n.device, np.ip 
+			from networks n
+			left join networks np
+			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
+			where n.node=(select id from nodes where name='%s')
+			""" % (_frontend, _frontend))
+
+			_network_dict = {}
+			for _network in _networks:
+				if None in _network:
+					continue
+				(gateway, interface, destination) = _network
+				interface = interface.split('.')[0].split(':')[0]
+				
+				if destination in _network_dict:
+					routes[destination] = _network_dict[destination]
+				else:
+					if showsource:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface, 
+							'H')
+					else:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface,)
+
+				
 		
 		# global
 		
@@ -1162,7 +1201,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%' 
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'G')
 			else:
@@ -1183,7 +1222,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'O')
 			else:
@@ -1208,7 +1247,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'A')
 			else:
@@ -1229,7 +1268,7 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
 				routes[n] = (m, g, i, 'H')
 			else:

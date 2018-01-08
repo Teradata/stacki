@@ -336,5 +336,5 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		print('')
 		print('You must reboot your frontend now. When ' + 
 			'the frontend reboots, ')
-		print('remember to reinstall the compute nodes.')
+		print('remember to reinstall the backend nodes.')
 		print('')
