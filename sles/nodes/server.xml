@@ -32,6 +32,9 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>mlocate</stack:package>
 <stack:package>grub2</stack:package>
 
+<!-- node discovery feature -->
+<stack:package>stack-discovery</stack:package>
+
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">
     if [ ! -d /mnt/cdrom ]; then
