@@ -20,7 +20,7 @@ class Command(stack.commands.enable.command):
 	Name of the appliance used to configure discovered nodes. Defaults to 'backend'.
 	</param>
 
-	<param type='string' name='appliance' optional='1'>
+	<param type='string' name='basename' optional='1'>
 	The base name for the discovered nodes. Defaults to the appliance name.
 	</param>
 
