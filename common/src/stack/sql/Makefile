@@ -38,10 +38,6 @@ install:: build
 	$(INSTALL) -m 0700 backup-cluster-db.sh \
 		$(ROOT)/etc/cron.daily/backup-cluster-db
 	$(INSTALL) -m 0644 $(PLUGINS) $(ROOT)/$(PLUGINDIR)
-	(\
-		cd $(ROOT)/$(PKGROOT)/sbin;	\
-		ln -s ./insert-ethers ./discover-nodes; \
-	)
 
 	$(MAKE) install -C po 
 
