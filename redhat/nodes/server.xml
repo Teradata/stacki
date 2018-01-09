@@ -81,6 +81,8 @@ for pallet in g.rolls:
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 
+<!-- node discovery feature -->
+<stack:package>stack-discovery</stack:package>
 
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">
