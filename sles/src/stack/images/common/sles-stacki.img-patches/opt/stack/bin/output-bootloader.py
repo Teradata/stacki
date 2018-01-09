@@ -13,15 +13,13 @@ import subprocess
 import sys
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes
 
 efi = False
 
 efivarsdir = "/sys/firmware/efi"
 if os.path.exists(efivarsdir) and os.path.isdir(efivarsdir):
 	efi = True
-
-pallets = attributes['pallets']
 
 root = ET.Element("bootloader")
 root.set('xmlns',"http://www.suse.com/1.0/yast2ns")
@@ -82,17 +80,7 @@ def caasp():
 
 	ET.SubElement(root, "loader_type").text = "grub2"
 
-
-ostype = None
-if 'SLES-11.3-1.138' in pallets:
-	ostype = "sles11"
-
-elif 'SLES-12-sp2' in pallets:
-	ostype = "sles12"
-
-elif 'CaaSP-1.0-suse' in pallets:
-	ostype = "caasp"
-
+ostype = attributes['release']
 if ostype:
 	this = sys.modules[__name__]
 	if hasattr(this, ostype):
