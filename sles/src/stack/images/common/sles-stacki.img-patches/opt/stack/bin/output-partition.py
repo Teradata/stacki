@@ -536,8 +536,10 @@ print('')
 # For 2, reformat "/", "/boot" (if present) and "/var" on the boot disk, then
 # reconnect all other discovered partitions.
 #
-
-if 'nukedisks' in attributes:
+# if host_fstab is an empty list, turning on nukedisks=True" to avoid SLES defaults
+if host_fstab == []:
+	nukedisks = 'true'
+elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
