@@ -63,10 +63,13 @@ def sles12():
 		boot.text="true"
 		ET.SubElement(root, "loader_type").text = "grub2"
 
-ostype = attributes['release']
+if attributes['os.version'] == "11.x":
+	ostype = "sles11"
+elif attributes['os.version'] == "12.x":
+	ostype = "sles12"
 if ostype:
 	this = sys.modules[__name__]
-	if hasattr(this, release):
-		f = getattr(this, release)
+	if hasattr(this, ostype):
+		f = getattr(this, ostype)
 		f()
 		print (ET.tostring(root).decode())
