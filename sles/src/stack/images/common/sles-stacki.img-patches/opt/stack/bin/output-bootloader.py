@@ -13,15 +13,13 @@ import subprocess
 import sys
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes
 
 efi = False
 
 efivarsdir = "/sys/firmware/efi"
 if os.path.exists(efivarsdir) and os.path.isdir(efivarsdir):
 	efi = True
-
-pallets = attributes['pallets']
 
 root = ET.Element("bootloader")
 root.set('xmlns',"http://www.suse.com/1.0/yast2ns")
@@ -65,7 +63,8 @@ def sles12():
 		boot.text="true"
 		ET.SubElement(root, "loader_type").text = "grub2"
 
-if release:
+ostype = attributes['release']
+if ostype:
 	this = sys.modules[__name__]
 	if hasattr(this, release):
 		f = getattr(this, release)

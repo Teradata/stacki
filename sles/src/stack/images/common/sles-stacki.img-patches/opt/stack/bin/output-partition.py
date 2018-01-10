@@ -7,7 +7,7 @@ import os
 import time
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes, csv_partitions
 
 sys.path.append('/opt/stack/lib')
 from stacki_default_part import sles
@@ -96,7 +96,9 @@ def outputPartition(p, initialize):
 			format = 'false'
 
 	xml_partitions.append('\t\t\t<partition>')
-	xml_partitions.append('\t\t\t\t<create config:type="boolean">%s</create>' % create)
+
+	if initialize == 'true':
+		xml_partitions.append('\t\t\t\t<create config:type="boolean">%s</create>' % create)
 
 	if mnt:
 		xml_partitions.append('\t\t\t\t<mount>%s</mount>' % mnt)
@@ -105,10 +107,11 @@ def outputPartition(p, initialize):
 		if p['size'] == 0:
 			xml_partitions.append('\t\t\t\t<size>max</size>')
 		else:
-			xml_partitions.append('\t\t\t\t<size>%dM</size>' % p['size'])
+			xml_partitions.append('\t\t\t\t<size>%dM</size>' %  p['size'])
 
 	if p['fstype']:
-		xml_partitions.append('\t\t\t\t<filesystem config:type="symbol">%s</filesystem>' % p['fstype'])
+		if initialize == 'true':
+			xml_partitions.append('\t\t\t\t<filesystem config:type="symbol">%s</filesystem>' % p['fstype'])
 		xml_partitions.append('\t\t\t\t<format config:type="boolean">%s</format>' % format)
 
 	#
@@ -216,7 +219,7 @@ def outputDisk(disk, initialize):
 	# only output XML configuration for this disk if there is partitioning
 	# configuration for this disk
 	#
-	if xml_partitions:
+	if xml_partitions and initialize == 'true':
 		if 'disklabel' in attributes:
 			disklabel = attributes['disklabel']
 		else:
@@ -234,6 +237,18 @@ def outputDisk(disk, initialize):
 		print('\t\t</partitions>')
 
 		print('\t</drive>')
+	elif xml_partitions and initialize == 'false':
+		if 'disklabel' in attributes:
+			disklabel = attributes['disklabel']
+		else:
+			disklabel = 'gpt'
+		print('\t<fstab>')
+		print('\t\t<use_existing_fstab config:type="boolean">true</use_existing_fstab>')
+		print('\t\t<partitions config:type="list">')
+		for p in xml_partitions:
+			print('%s' % p)
+		print('\t\t</partitions>')
+		print('\t</fstab>')
 
 	return
 
@@ -508,7 +523,6 @@ if not csv_partitions:
 
 print('<?xml version="1.0"?>')
 print('')
-print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
 
 #
 # there are 2 scenarios:
@@ -522,11 +536,19 @@ print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http:
 # For 2, reformat "/", "/boot" (if present) and "/var" on the boot disk, then
 # reconnect all other discovered partitions.
 #
-
-if 'nukedisks' in attributes:
+# if host_fstab is an empty list, turning on nukedisks=True" to avoid SLES defaults
+if host_fstab == []:
+	nukedisks = 'true'
+elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
+
+if nukedisks == 'true':
+	print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
+else:
+	print('<partitioning_advanced xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">')
+
 
 #
 # process all nuked disks first
@@ -547,6 +569,9 @@ for disk in host_disks:
 	if disk not in nukelist:
 		outputDisk(disk, initialize)	
 
-print('</partitioning>')
-print('')
 
+if nukedisks == 'true':
+	print('</partitioning>')
+else:
+	print('</partitioning_advanced>')
+print('')
