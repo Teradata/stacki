@@ -33,20 +33,23 @@ class Command(command):
 			switch_network = switch_interface['network']
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
-			* 
-			from switch_connections s
-			where s.switch=(select id from nodes where name='%s')
+			n.name, s.interface, sw.name, s.port, sub.name, s.vlan
+			from switch_connections s, nodes n, nodes sw, subnets sub
+			where s.host = n.id 
+			and s.switch = sw.id
+			and s.subnet = sub.id
+			and s.switch = (select id from nodes where name='%s')
 			""" % switch['host'])
 
 			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/x1052_temp_upload">')
+			self.addOutput(frontend, 'vlan 2-100')
 			for (host, interface, switch, port, subnet, vlan) in hosts:
-				#attr = self.getHostAttr(host, 'appliance')
-				attr = 'frontends'
+				attr = self.getHostAttr(host, 'appliance')
 				if attr == 'frontend':
 					self.addOutput(frontend, '!')
 					self.addOutput(frontend, 'interface gigabitethernet1/0/%s' % port)
 					self.addOutput(frontend,'  switchport mode general')
-					self.addOutput(frontend,'  switchport general allowed vlan add %s tagged' % vlan)
+					self.addOutput(frontend,'  switchport general allowed vlan add 2-100 tagged')
 					self.addOutput(frontend,'  switchport general allowed vlan add 1 untagged')
 				else:
 					self.addOutput(frontend, '!')

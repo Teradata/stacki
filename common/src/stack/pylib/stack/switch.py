@@ -200,50 +200,12 @@ class SwitchDellX1052(Switch):
 
 		return all_vlans
 
-	def write_config_block(self, config_file, port, vlans=None, frontend=False):
-		""" Write Interface blocks
-		interface gigabitethernet1/0/1
-		 lldp optional-tlv port-desc sys-name sys-desc sys-cap 802.3-mac-phy
-		!
-		interface gigabitethernet1/0/19
-		 switchport access vlan 2
-		!
-		interface gigabitethernet1/0/23
-		 switchport mode general
-		 switchport general allowed vlan add 2-5 tagged
-		 switchport general allowed vlan add 1 untagged
-		!
-		"""
-		config_file.write('!\n')
-
-		if frontend:
-			config_file.write('interface gigabitethernet1/0/%s\n' % port)
-			config_file.write('  switchport mode general\n')
-			config_file.write('  switchport general allowed vlan add %s tagged\n' % ','.join(vlans))
-			config_file.write('  switchport general allowed vlan add 1 untagged\n')
-		else:
-			_vlan, *args = vlans
-			config_file.write('interface gigabitethernet1/0/%s\n' % port)
-			config_file.write('  switchport access vlan %s\n' % _vlan)
-
-
 	def get_port_from_interface(self, line):
 		""" Get Port from gigabitethernet interface
 		interface gigabitethernet1/0/20 returns 20
 		"""
 		port = line.split('/')[-1]
 		return port
-
-	def update_running_config(self, hosts=None):
-		"""Creates blocks to update the switch
-		"""
-		print("Creating the Config File")
-		with open(self.upload_filename, 'w') as f:
-			
-			f.write('vlan 2-32\n')
-			self.write_config_block(f, 19, [3])
-			self.write_config_block(f, 23, [2,3,5,6,7,8], frontend=True)
-			f.write('!\n')
 
 	def parse_config(self, config_filename):
 		"""Parse the given configuration file and return a list of lists describing the vlan assignments per port."""
@@ -272,9 +234,9 @@ class SwitchDellX1052(Switch):
 	def configure(self, properties_list=None):
 		"""Go through the steps to configure a switch with the config stored in the database."""
 		try:
-			self.update_running_config()
 			self.connect()
 			self.upload()
+			self.apply_configuration()
 		except Exception as found_error:
 			self.log.error("%s: had exception: %s" % (self.switch_ip_address, str(found_error.message)))
 			self.__exit__()
