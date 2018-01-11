@@ -63,9 +63,9 @@ def sles12():
 		boot.text="true"
 		ET.SubElement(root, "loader_type").text = "grub2"
 
-if attributes['os.version'] == "11.x":
+if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 	ostype = "sles11"
-elif attributes['os.version'] == "12.x":
+if attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 	ostype = "sles12"
 if ostype:
 	this = sys.modules[__name__]

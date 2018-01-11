@@ -52,11 +52,15 @@ chmod a+rx /root
 mkdir -p /root/.ssh
 chmod a+rx /root/.ssh
 
-<!-- Turn off challenge-response so we get normal passwd auth. -->
-sed -e 's/#ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' \
-	/etc/ssh/sshd_config > /tmp/sshd_config
-sed -e 's/#PermitUserEnvironment no/PermitUserEnvironment yes/' \
-	/tmp/sshd_config > /etc/ssh/sshd_config
+<!-- Turn on challenge-response so we get normal passwd auth. -->
+sed -i -e '/^#ChallengeResponseAuthentication/c \
+ChallengeResponseAuthentication yes
+' /etc/ssh/sshd_config
+
+<!-- Permit User Environment -->
+sed -i -e '/^#PermitUserEnvironment/c \
+PermitUserEnvironment yes
+' /etc/ssh/sshd_config
 
 </stack:script>
 
