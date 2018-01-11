@@ -483,10 +483,13 @@ host_partitions = getHostPartitions(host_disks, host_fstab)
 
 if not csv_partitions:
 	parts = []
-	ostype = "sles11"
-	pallets = attributes['pallets']
-	if 'SLES-12-sp2' in pallets:
+	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
+		ostype = "sles11"
+	elif attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 		ostype = "sles12"
+	else:
+		# Give ostype some default
+		ostype = "sles11"
 
 	if os.path.exists('/sys/firmware/efi'):
 		default = 'uefi'
@@ -538,13 +541,13 @@ print('')
 #
 # if host_fstab is an empty list, turning on nukedisks=True" to avoid SLES defaults
 if host_fstab == []:
-	nukedisks = 'true'
+	nukedisks = 'True'
 elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
 
-if nukedisks == 'true':
+if nukedisks == 'True':
 	print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
 else:
 	print('<partitioning_advanced xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">')
@@ -570,7 +573,7 @@ for disk in host_disks:
 		outputDisk(disk, initialize)	
 
 
-if nukedisks == 'true':
+if nukedisks == 'True':
 	print('</partitioning>')
 else:
 	print('</partitioning_advanced>')

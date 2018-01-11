@@ -65,8 +65,11 @@ def sles12():
 
 if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 	ostype = "sles11"
-if attributes['os.version'] == "12.x" and attributes['os'] == "sles":
+elif attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 	ostype = "sles12"
+else:
+	# Give ostype some default
+	ostype = "sles11"
 if ostype:
 	this = sys.modules[__name__]
 	if hasattr(this, ostype):
