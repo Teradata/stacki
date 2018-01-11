@@ -573,7 +573,7 @@ for disk in host_disks:
 		outputDisk(disk, initialize)	
 
 
-if nukedisks == 'true':
+if nukedisks == 'True':
 	print('</partitioning>')
 else:
 	print('</partitioning_advanced>')
