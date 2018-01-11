@@ -69,7 +69,7 @@ def getHostDisks(nukedisks):
 	#
 	lsblk = ['lsblk', '-lio', 'NAME,RM,RO,TYPE']
 	# sles 11 doesn't support the TYPE column
-	if attributes['release'] == "sles11":
+	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 		lsblk = ['lsblk', '-lio', 'NAME,RM,RO']
 	p = subprocess.run(lsblk,
 			   stdin=subprocess.PIPE,
@@ -91,7 +91,7 @@ def getHostDisks(nukedisks):
 		name = arr[0].strip()
 		removable = arr[1].strip()
 		readonly = arr[2].strip()
-		if attributes['release'] == "sles11":
+		if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 			mediatype = get_sles11_media_type(name)
 		else:
 			mediatype = arr[3].strip()
