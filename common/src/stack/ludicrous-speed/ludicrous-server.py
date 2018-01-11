@@ -18,10 +18,12 @@ PEERS = set()
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
 REDIS_UPDATE_INTERVAL = 10
-REDIS_LAST_UPDATED = time()
+REDIS_LAST_UPDATED = {}
 
-def time_passed():
-    return time() - REDIS_LAST_UPDATED >= REDIS_UPDATE_INTERVAL
+def time_passed(host):
+	if host not in REDIS_LAST_UPDATED:
+		REDIS_LAST_UPDATED[host] = time()
+    return time() - REDIS_LAST_UPDATED[host] > REDIS_UPDATE_INTERVAL
 
 def updateKey(key, value, timeout=None):
 		"""
@@ -107,7 +109,7 @@ def lookup(hashcode):
 	ipaddr = request.remote_addr
 	_host = updateHostKeys(ipaddr)
 
-	if time_passed():
+	if time_passed(host):
 		updateKey('host:%s:status' % _host['name'],
 				       'Installing packages', 60*60)
 
