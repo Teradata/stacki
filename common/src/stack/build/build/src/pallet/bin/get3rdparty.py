@@ -9,6 +9,7 @@
 import os
 import sys
 import subprocess
+import time
 
 urlbase   = 'https://teradata-stacki.s3.amazonaws.com/3rdparty'
 manifest  = 'manifest.3rdparty'
@@ -32,10 +33,31 @@ fin.close()
 for resource in resources:
 	target = os.path.join(cachedir, resource)
 	if not os.path.exists(target):
-		print('download %s\n\t%s' % (resource, resources[resource]))
-		subprocess.call([ 'curl',
-				  '-sSo%s' % target,
-				  resources[resource] ])
+		retry = 3
+		while retry:
+			print('download %s\n\t%s' % (resource, resources[resource]))
+			cmd_line = [ 'curl',
+					'--retry','2',
+					'-w','%{http_code}',
+					'-sSo%s' % target,
+					resources[resource] ]
+			p = subprocess.Popen(cmd_line,
+					stdout=subprocess.PIPE,
+					stderr=subprocess.PIPE)
+			rc = p.wait()
+			o, e = p.communicate()
+			if rc:
+				retry = retry - 1
+				print(e)
+				time.sleep(1)
+			else:
+				if o.strip() == '200':
+					retry = 0
+				else:
+					retry = retry - 1
+					print("Error: Cannot download. HTTP STATUS: %s" % o)
+					os.unlink(target)
+					time.sleep(1)
 
 fout = open(docfile, 'w')
 fout.write("""# Third Party Resources
