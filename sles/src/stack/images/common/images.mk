@@ -6,9 +6,9 @@
 
 TEMPDIR := $(shell mktemp -d)
 
-PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/${IMAGE_RELEASE}
+PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(IMAGE_RELEASE)
 
-include ../../../common/images-$(OS).mk
+-include ../../../common/images-$(OS).mk
 
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
@@ -25,7 +25,7 @@ sles-stacki.img: dirs rpminst
 	ln -s /opt/stack/bin/python3 $(CURDIR)/sles-stacki/usr/bin/python
 	# Patch the sles-stacki image
 	-(cd ../../../common/sles-stacki.img-patches && \
-		(find . -type f  | cpio -pudv ../../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/${IMAGE_RELEASE}/sles-stacki/) )
+		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/$(IMAGE_RELEASE)/sles-stacki/) )
 	-(cd sles-stacki.img-patches && (find . -type f | cpio -pudv ../../../sles-stacki/) )
 	# Create a squash filesystem
 	mksquashfs $(CURDIR)/sles-stacki $@
