@@ -541,13 +541,13 @@ print('')
 #
 # if host_fstab is an empty list, turning on nukedisks=True" to avoid SLES defaults
 if host_fstab == []:
-	nukedisks = 'true'
+	nukedisks = 'True'
 elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
 
-if nukedisks == 'true':
+if nukedisks == 'True':
 	print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
 else:
 	print('<partitioning_advanced xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">')
