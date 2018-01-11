@@ -483,10 +483,13 @@ host_partitions = getHostPartitions(host_disks, host_fstab)
 
 if not csv_partitions:
 	parts = []
-	ostype = "sles11"
-	pallets = attributes['pallets']
-	if 'SLES-12-sp2' in pallets:
+	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
+		ostype = "sles11"
+	elif attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 		ostype = "sles12"
+	else:
+		# Give ostype some default
+		ostype = "sles11"
 
 	if os.path.exists('/sys/firmware/efi'):
 		default = 'uefi'
