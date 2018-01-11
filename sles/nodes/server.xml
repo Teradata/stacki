@@ -63,7 +63,7 @@ chmod 775 /export/stack/carts
 <stack:file stack:name="/etc/ssh/sshd_config" stack:perms="640">
 AuthorizedKeysFile .ssh/authorized_keys
 PasswordAuthentication yes
-ChallengeResponseAuthentication no
+ChallengeResponseAuthentication yes
 UsePAM yes
 X11Forwarding yes
 PermitUserEnvironment yes
@@ -73,6 +73,18 @@ AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL
 UseDNS no
 </stack:file>
+</stack:script>
+
+<stack:script stack:stage="install-post">
+<!-- Disable automatic hostname and default route assignment
+     for DHCP -->
+sed -i '/^DHCLIENT_SET_HOSTNAME/c \
+DHCLIENT_SET_HOSTNAME="no"
+' /etc/sysconfig/network/dhcp
+
+sed -i '/^DHCLIENT_SET_DEFAULT_ROUTE/c \
+DHCLIENT_SET_DEFAULT_ROUTE="no"
+' /etc/sysconfig/network/dhcp
 </stack:script>
 
 </stack:stack> 
