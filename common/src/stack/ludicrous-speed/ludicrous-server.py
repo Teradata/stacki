@@ -7,7 +7,6 @@ import os
 import logging
 from logging import FileHandler
 import redis
-from time import time
 
 ludicredis = redis.StrictRedis()
 
@@ -17,13 +16,7 @@ PEERS = set()
 
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
-REDIS_UPDATE_INTERVAL = 10
-REDIS_LAST_UPDATED = {}
-
-def time_passed(host):
-	if host not in REDIS_LAST_UPDATED:
-		REDIS_LAST_UPDATED[host] = time()
-    return time() - REDIS_LAST_UPDATED[host] > REDIS_UPDATE_INTERVAL
+REDIS_TTL = 30
 
 def updateKey(key, value, timeout=None):
 		"""
@@ -41,6 +34,16 @@ def updateKey(key, value, timeout=None):
 		"""
 		ludicredis.set(key, value)
 		ludicredis.expire(key, timeout)
+
+def getKey(key):
+		"""
+		Get the value of a *key* and *value* in the local Redis
+		database.
+
+		:param key: redis key
+		:type key: string
+		"""
+		ludicredis.get(key)
 
 def updateHostKeys(client):
 	"""
@@ -109,9 +112,9 @@ def lookup(hashcode):
 	ipaddr = request.remote_addr
 	_host = updateHostKeys(ipaddr)
 
-	if time_passed(host):
+	if not getKey('host:%s:status' % _host['name']):
 		updateKey('host:%s:status' % _host['name'],
-				       'Installing packages', 60*60)
+				       'Installing packages', REDIS_TTL)
 
 	# return list of peers with the request hash
 	res['peers'] = []
