@@ -34,14 +34,14 @@ class Command(command):
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
 			n.name, s.interface, sw.name, s.port, sub.name, s.vlan
-			from switch_connections s, nodes n, nodes sw, subnets sub
+			from switchports s, nodes n, nodes sw, subnets sub
 			where s.host = n.id 
 			and s.switch = sw.id
 			and s.subnet = sub.id
 			and s.switch = (select id from nodes where name='%s')
 			""" % switch['host'])
 
-			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/x1052_temp_upload">')
+			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['host'])
 			self.addOutput(frontend, 'vlan 2-100')
 			for (host, interface, switch, port, subnet, vlan) in hosts:
 				attr = self.getHostAttr(host, 'appliance')
