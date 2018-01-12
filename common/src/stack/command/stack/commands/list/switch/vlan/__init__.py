@@ -22,29 +22,28 @@ class Command(command):
 		for switch in self.call('list.host.interface', [s['host'] for s in _switches]):
 
 			# Get frontend ip for tftp address
-			_frontend, = [host for host in self.call('list.host.interface', ['localhost']) 
+			frontend, *xargs = [host for host in self.call('list.host.interface', ['localhost']) 
 					if host['network'] == switch['network']]
 
-			frontend_tftp_address = _frontend['ip']
+			frontend_tftp_address = frontend['ip']
 			switch_address = switch['ip']
+			switch_name = switch['host']
 			with stack.switch.SwitchDellX1052(switch_address, 'admin', 'admin') as switch:
 				switch.set_tftp_ip(frontend_tftp_address)
+				switch.set_filenames(switch_name)
 				switch.connect()
-				switch.download()
+				switch.get_vlan_table()
 				
-				with open('/tftpboot/pxelinux/x1052_temp_download', 'r') as f:
+				with open('/tmp/%s_vlan_table' % switch_name, 'r') as f:
 					lines = f.readlines()
 					_printline = False
 					for line in lines:
-						if 'set system' in line or 'interface vlan' in line:
+						if 'Vlan' in line or 'gi1/0/' in line:
 							_printline = True
-						if 'gigabitethernet' in line or 'exit':
+						if ',' not in line or not line or 'space' in line:
 							_printline = False
-						if 'crypto' in line:
+						if'console' in line:
 							break
 
 						if _printline:
 							print(line, end='')
-
-				print("switch config still WIP")
-RollName = "stacki"

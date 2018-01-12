@@ -43,9 +43,10 @@ class SwitchDellX1052(Switch):
 		self.new_vlans = None
 		self.all_vlans = None
 		self.path = '/tftpboot/pxelinux'
-		self.check_filename = "%s/x1052_temp_check" % self.path
-		self.download_filename = "%s/x1052_temp_download" % self.path
-		self.upload_filename = "%s/x1052_temp_upload" % self.path
+		self.switchname = "switch"
+		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
+		self.download_filename = "%s/%s_download" % (self.path, self.switchname)
+		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
 
 	def __enter__(self):
 		# Entry point of the context manager
@@ -100,25 +101,38 @@ class SwitchDellX1052(Switch):
 			raise Exception("SSH connection to " + self.switch_ip_address + " not available.")
 
 	def get_mac_address_table(self):
-		"""Download the file from the switch to the server"""
-		print('Downloading Mac Address Table')
-		start_time = int(time.time())
+		"""Download the mac address table"""
 		time.sleep(1)
 		command = 'show mac address-table'
 		self.child.expect('console#', timeout=60)
-		with open('/tmp/mac-address-table', 'wb') as macout:
+		with open('/tmp/%s_mac_address_table' % self.switchname, 'wb') as macout:
 			self.child.logfile = macout
 			self.child.sendline(command)
 			time.sleep(1)
 			self.send_spacebar(4)
 			self.child.expect('console#', timeout=60)
 		self.child.logfile = None
-		end_time = int(time.time())
+
+	def get_vlan_table(self):
+		"""Download the vlan table"""
+		time.sleep(1)
+		command = 'show vlan'
+		self.child.expect('console#', timeout=60)
+		with open('/tmp/%s_vlan_table' % self.switchname, 'wb') as macout:
+			print("opening vlan table file")
+			self.child.logfile = macout
+			self.child.sendline(command)
+			time.sleep(1)
+			self.send_spacebar(4)
+			self.child.expect('console#', timeout=60)
+		self.child.logfile = None
 
 	def send_spacebar(self, times=1):
 		"""Send Spacebar; Used to read more of the output"""
-		command = "\x20" * times
-		self.child.send(command)
+		command = "\x20"
+		for i in range(times):
+			self.child.send(command)
+			time.sleep(1)
 
 	def download(self, check=False):  # , source, destination):
 		"""Download the running-config from the switch to the server"""
@@ -240,6 +254,16 @@ class SwitchDellX1052(Switch):
 		except Exception as found_error:
 			self.log.error("%s: had exception: %s" % (self.switch_ip_address, str(found_error.message)))
 			self.__exit__()
+
+	def set_filenames(self, filename):
+		"""
+		Sets filenames for download, upload, and check files in /tftpboot/pxelinux
+		"""
+		self.switchname = filename
+		self.download_filename = "%s/%s_download" % (self.path, self.switchname)
+		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
+		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
+
 
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
