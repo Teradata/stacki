@@ -231,6 +231,62 @@ class NetworkArgumentProcessor:
 			netname = ''
 
 		return netname
+
+class SwitchArgumentProcessor:
+	"""An interface class to add the ability to process switch arguments."""
+
+	def getSwitchNames(self, args=None):
+		"""Returns a list of switch names from the database.
+		For each arg in the ARGS list find all the switch
+		names that match the arg (assume SQL regexp).  If an
+		arg does not match anything in the database we raise
+		an exception.  If the ARGS list is empty return all network names.
+		"""
+		switches = []
+		if not args:
+			args = ['%'] # find all switches
+		for arg in args:
+			rows = self.db.execute("""
+			select name from nodes
+			where name like '%s' and
+			appliance=(select id from appliances where name='switch')
+			""" % arg)
+
+			if rows == 0 and arg == '%': # empty table is OK
+				continue
+			if rows < 1:
+				raise CommandError(self, 'unknown network "%s"' % arg)
+			for name, in self.db.fetchall():
+				switches.append(name)
+
+		return switches
+
+	def getNetworkName(self, switchid):
+		"""Returns a switch name from the database that
+		is associated with the id 'netid'.
+		"""
+		if not switchid:
+			return ''
+
+		rows = self.db.execute("""select name from nodes where
+			id = %s""" % netid)
+
+		if rows > 0:
+			netname, = self.db.fetchone()
+		else:
+			netname = ''
+
+		return netname
+
+	def setSwitchHostVlan(self, switch, host, vlan):
+		self.db.execute("""
+		update switchports
+		set vlan=%s
+		where host=(select id from nodes where name='%s')
+		and switch=(select id from nodes where name='%s')
+		""" % (vlan, host, switch))
+
+			
 	
 
 class CartArgumentProcessor:
