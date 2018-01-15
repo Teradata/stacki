@@ -278,6 +278,28 @@ class SwitchArgumentProcessor:
 
 		return netname
 
+	def addSwitchHost(self, switch, host, port, vlan):
+		"""Add a host to switch
+		"""
+		query = """
+		insert into switchports
+		(host, interface, switch, port, subnet, vlan)
+		values ((select id from nodes where name = '%s'),
+			(select id from networks where subnet=(
+			  select subnet from networks where node=(
+			    select id from nodes where name='%s')
+			  )
+			  and node=(select id from nodes where name='%s')
+			  limit 1 
+			),
+			(select id from nodes where name = '%s'),
+			'%s',
+			(select subnet from networks where name='%s'),
+			'%s')
+		""" % (host, switch, host, switch, port, switch, vlan)
+
+		self.db.execute(' '.join(query.split()))
+
 	def setSwitchHostVlan(self, switch, host, vlan):
 		self.db.execute("""
 		update switchports
