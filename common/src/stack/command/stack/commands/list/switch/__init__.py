@@ -7,7 +7,7 @@
 import stack.commands
 import stack.util
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.SwitchArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
@@ -18,7 +18,7 @@ class Command(command):
 		
 		(order, ) = self.fillParams([ ('order', 'asc') ])
 				
-		hosts = self.getHostnames(args, order=order)
+		hosts = self.getSwitchNames(args)
 
 		header = ['host']
 		values = {}
