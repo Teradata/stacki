@@ -41,7 +41,7 @@ class Command(command):
 		host, port, vlan = self.fillParams([
 			('host', None, True),
 			('port', None, True),
-			('vlan', None, False),
+			('vlan', '1'),
 			])
 		switches = self.getSwitchNames(args)
 		if len(switches) > 1:
