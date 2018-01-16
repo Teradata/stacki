@@ -18,15 +18,14 @@
 	</stack:package>
 
 
-<stack:script stack:stage="boot-post">
+<stack:script stack:stage="install-post">
 
 <!-- download and add the stacki pallet -->
 <stack:eval stack:shell="/opt/stack/bin/python3">
 import os
 for pallet in &pallets;:
-	tokens = pallet.split('-')
-	if tokens[0] in [ 'stacki', 'SLES', 'CentOS' ]:
-		print('/opt/stack/bin/stack add pallet %s' % os.path.join('http://&Kickstart_PrivateAddress;', 'install', 'pallets', tokens[0], tokens[1], tokens[2], '&os;', '&arch;'))
+	tokens = pallet.rsplit('-', 2)
+	print('/opt/stack/bin/stack add pallet %s' % os.path.join('http://&Kickstart_PrivateAddress;', 'install', 'pallets', tokens[0], tokens[1], tokens[2], '&os;', '&arch;'))
 </stack:eval>
 
 <!-- create pallets.xml -->
@@ -41,18 +40,6 @@ for pallet in &pallets;:
 </stack:file>
 
 </stack:script>
-
-<!--
-
-/opt/stack/bin/stack report siteattr > /tmp/site.attrs
-/opt/stack/bin/stack list node xml server attrs=/tmp/site.attrs | /opt/stack/bin/stack list host profile chapter=main profile=bash > /tmp/run.sh 2>&amp;1
-bash /tmp/run.sh > /tmp/barnacle.log 2>&amp;1
-
-/opt/stack/bin/stack add pallet $STACKI_URL
-/opt/stack/bin/stack add pallet $OS_URL
-
-/opt/stack/bin/stack enable pallet %
--->
 
 </stack:stack> 
 

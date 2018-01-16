@@ -16,8 +16,9 @@ install::
 	mkdir -p $(ROOT)/etc/systemd/system
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin
 	mkdir -p $(ROOT)/export/stack/sbin
-	$(INSTALL) -m 0664 aws-barnacle.service $(ROOT)/etc/systemd/system/stack-aws-barnacle.service
-	$(INSTALL) -m 0755 aws-barnacle.sh      $(ROOT)/$(PKGROOT)/sbin/aws-barnacle
+	$(INSTALL) -m 0664 aws-barnacle.service       $(ROOT)/etc/systemd/system/stack-aws-barnacle.service
+	$(INSTALL) -m 0755 aws-barnacle.sh            $(ROOT)/$(PKGROOT)/sbin/aws-barnacle
+	$(INSTALL) -m 0755 aws-barnacle-prep-image.sh $(ROOT)/$(PKGROOT)/sbin/aws-barnacle-prep-image
 
 
 

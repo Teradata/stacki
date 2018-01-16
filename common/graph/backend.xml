@@ -25,6 +25,7 @@
 
 	<edge from="client" cond="platform == 'aws'">
 		<to>aws-client</to>
+		<to>aws-ssh-key</to>
 	</edge>
 
 </graph>

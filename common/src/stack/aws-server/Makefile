@@ -16,9 +16,9 @@ install::
 	mkdir -p $(ROOT)/etc/systemd/system
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin
 	mkdir -p $(ROOT)/export/stack/sbin
-	$(INSTALL) -m 0664 aws-server-init.service $(ROOT)/etc/systemd/system/stack-aws-server-init.service
-	$(INSTALL) -m 0755 aws-server-init.py      $(ROOT)/$(PKGROOT)/sbin/aws-server-init
-	$(INSTALL) -m 0755 register.py             $(ROOT)/export/stack/sbin/register.cgi
+	$(INSTALL) -m 0664 aws-server-init.service  $(ROOT)/etc/systemd/system/stack-aws-server-init.service
+	$(INSTALL) -m 0755 aws-server-init.py       $(ROOT)/$(PKGROOT)/sbin/aws-server-init
+	$(INSTALL) -m 0755 register.py              $(ROOT)/export/stack/sbin/register.cgi
 
 
 

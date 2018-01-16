@@ -1,13 +1,15 @@
 #! /opt/stack/bin/python3
 #
 # Using a combination of AWS user-data and data from the Frontend decide what
-# to do on next boot. For now this is just for the initial installation but
-# could be tied to 'list host boot' and run on every boot.
+# to do on next boot.
 #
 # The primary design goal is to keep this script self-contained to minimize the
 # dependencies added to the installation AMI.
 #
 # @copyright@
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
 import sys
@@ -81,6 +83,7 @@ class BootInstructions:
 
 		for name in [ 'master',
 			      'hostname',
+			      'appliance',
 			      'box',
 			      'boot',
 			      'reboot',
