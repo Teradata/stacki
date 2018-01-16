@@ -254,8 +254,6 @@ class SwitchArgumentProcessor:
 
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
-			if rows < 1:
-				raise CommandError(self, 'unknown network "%s"' % arg)
 			for name, in self.db.fetchall():
 				switches.append(name)
 
