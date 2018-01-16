@@ -21,7 +21,7 @@ class SwitchDellX1052(Switch):
 	"""Class for interfacing with a Dell x1052 switch.
 	"""
 
-	def __init__(self, switch_ip_address, username='admin', password='admin'):
+	def __init__(self, switch_ip_address, switchname='switch', username='admin', password='admin'):
 		# Grab the user supplied info, in case there is a difference (PATCH)
 		self.switch_ip_address = switch_ip_address
 		self.username = username
@@ -43,9 +43,9 @@ class SwitchDellX1052(Switch):
 		self.new_vlans = None
 		self.all_vlans = None
 		self.path = '/tftpboot/pxelinux'
-		self.switchname = "switch"
+		self.switchname = switchname
 		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
-		self.download_filename = "%s/%s_download" % (self.path, self.switchname)
+		self.download_filename = "%s/%s_running_config" % (self.path, self.switchname)
 		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
 
 	def __enter__(self):
@@ -260,7 +260,7 @@ class SwitchDellX1052(Switch):
 		Sets filenames for download, upload, and check files in /tftpboot/pxelinux
 		"""
 		self.switchname = filename
-		self.download_filename = "%s/%s_download" % (self.path, self.switchname)
+		self.download_filename = "%s/%s_running_config" % (self.path, self.switchname)
 		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
 		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
 

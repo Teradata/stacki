@@ -75,12 +75,13 @@ class Command(command):
 
 			frontend_tftp_address = _frontend['ip']
 			switch_address = switch['ip']
-			with stack.switch.SwitchDellX1052(switch_address, 'admin', 'admin') as switch:
+			switch_name = switch['host']
+			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
 				switch.get_mac_address_table()
 				
-				with open('/tmp/mac-address-table', 'r') as f:
+				with open('/tmp/%s_mac_address_table' % switch_name, 'r') as f:
 					lines = f.readlines()
 					for line in lines:
 						if confirmhosts:
@@ -88,4 +89,3 @@ class Command(command):
 						else:
 							print(line, end='')
 
-				print("switch config still WIP")

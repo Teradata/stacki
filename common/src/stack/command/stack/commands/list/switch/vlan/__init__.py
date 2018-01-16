@@ -28,7 +28,7 @@ class Command(command):
 			frontend_tftp_address = frontend['ip']
 			switch_address = switch['ip']
 			switch_name = switch['host']
-			with stack.switch.SwitchDellX1052(switch_address, 'admin', 'admin') as switch:
+			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.set_filenames(switch_name)
 				switch.connect()
