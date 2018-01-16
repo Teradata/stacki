@@ -119,14 +119,15 @@ class Implementation(stack.commands.Implementation):
 					else:
 						self.owner.addOutput(host, 'STARTMODE=off')
 				
-				if ip:
-					self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
-				if netmask:
-					self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
-				if network:
-					self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
-				if broadcast:
-					self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+				if not dhcp:
+					if ip:
+						self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
+					if netmask:
+						self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
+					if network:
+						self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
+					if broadcast:
+						self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
 
 				if mac:
 					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
@@ -153,5 +154,3 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host, udev_output)
 			self.owner.addOutput(host, '</stack:file>')
 
-
-RollName = "stacki"

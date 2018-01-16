@@ -30,7 +30,7 @@ class Implementation(stack.commands.Implementation):
 			options = row['options']
 			channel = row['channel']
 			gateway = row['gateway']
-			vlanid  = row['vlan']
+			vlanid	= row['vlan']
 
 			mtu = None
 			if subnet:

@@ -40,5 +40,5 @@ pallet_info = json.dumps(getPalletInfo())
 
 print('Content-type: application/json')
 print('Content-length: {}'.format(len(pallet_info)))
-print()
+print('')
 print(pallet_info)

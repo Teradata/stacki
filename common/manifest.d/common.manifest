@@ -14,6 +14,9 @@ foundation-zeromq
 ludicrous-speed
 sc-im
 stack-admin
+stack-aws-client
+stack-aws-server
+stack-barnacle
 stack-build
 stack-command
 stack-config
