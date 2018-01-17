@@ -10,6 +10,11 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
+	<edge from="barnacle">
+		<to>foundation-python-server</to>
+		<to>backend</to>
+	</edge>
+
 	<edge from="builder" to="backend"/>
 
 	<edge from="client" cond="appliance !='replicant'">
@@ -18,6 +23,11 @@
 	</edge>
 	<edge from="client">
 		<to>peerdone</to>
+	</edge>
+
+	<edge from="client" cond="platform == 'aws'">
+		<to>aws-client</to>
+		<to>aws-ssh-key</to>
 	</edge>
 
 </graph>

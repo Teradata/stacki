@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<stack:stack>
+	
+	<stack:description>
+	Barnacle Appliance
+	</stack:description>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2017 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+	<stack:package>
+		stack-pylib
+		stack-command
+		stack-barnacle
+	</stack:package>
+
+
+<stack:script stack:stage="install-post">
+
+<!-- download and add the stacki pallet -->
+<stack:eval stack:shell="/opt/stack/bin/python3">
+import os
+for pallet in &pallets;:
+	tokens = pallet.rsplit('-', 2)
+	print('/opt/stack/bin/stack add pallet %s' % os.path.join('http://&Kickstart_PrivateAddress;', 'install', 'pallets', tokens[0], tokens[1], tokens[2], '&os;', '&arch;'))
+</stack:eval>
+
+<!-- create pallets.xml -->
+<stack:file stack:name="/tmp/pallets.xml">
+&lt;rolls&gt;
+&lt;roll arch="&arch;" 
+      diskid="stacki - Disk 1"
+      name="stacki"
+      release="&release;"
+      url="http://127.0.0.1/mnt/cdrom/" version="&version;"/&gt;
+&lt;/rolls&gt;
+</stack:file>
+
+</stack:script>
+
+</stack:stack> 
+

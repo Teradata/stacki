@@ -36,4 +36,9 @@
 		<to>routes-server</to>
 	</edge>
 
+	<edge from="server" cond="platform == 'aws'">
+		<to>aws-server</to>
+		<to>aws-ssh-key</to>
+	</edge>
+
 </graph>

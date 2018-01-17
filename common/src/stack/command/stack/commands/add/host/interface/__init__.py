@@ -65,17 +65,18 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-		(interface, mac, network, ip, module,
-		 name, vlan, default, unsafe) = self.fillParams([
+		(interface, mac, network, ip, module, 
+		 name, vlan, default, unsafe, options) = self.fillParams([
 			 ('interface', None),
 			 ('mac',       None),
 			 ('network',   None),
-			 ('ip',        None),
+			 ('ip',	       None),
 			 ('module',    None),
 			 ('name',      None),
 			 ('vlan',      None),
 			 ('default',   None),
-			 ('unsafe',    'false')
+			 ('options',   None),
+			 ('unsafe',    False)
 			 ])
 
 		
@@ -102,7 +103,7 @@ class Command(stack.commands.add.host.command):
 					raise CommandError(self, 'mac exists')
 
 
-		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default']
+		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default', 'options' ]
 
 		# Insert the mac or interface into the database and then use
 		# that to key off of for all the subsequent fields.
@@ -145,8 +146,11 @@ class Command(stack.commands.add.host.command):
 				fields.remove('default')
 				keys.append('main')
 				vals.append('%d' % self.str2bool(default))
-
-				
+			if options:
+				fields.remove('options')
+				keys.append('options')
+				vals.append('%d' % self.str2bool(default))
+			
 				
 			self.db.execute("""
 				insert into networks(%s) values (%s)
