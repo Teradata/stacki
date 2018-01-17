@@ -6,7 +6,7 @@
 
 import stack.commands
 import stack.util
-import stack.switch
+from stack.switch import SwitchDellX1052
 import subprocess
 
 def confirm_hosts(macs, line):
@@ -76,7 +76,8 @@ class Command(command):
 			frontend_tftp_address = _frontend['ip']
 			switch_address = switch['ip']
 			switch_name = switch['host']
-			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
+
+			with SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
 				switch.get_mac_address_table()

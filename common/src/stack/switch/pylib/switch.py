@@ -14,34 +14,13 @@ import errno
 from ipaddress import IPv4Interface, ip_network
 
 class Switch():
-	pass	
-
-
-class SwitchDellX1052(Switch):
-	"""Class for interfacing with a Dell x1052 switch.
-	"""
-
 	def __init__(self, switch_ip_address, switchname='switch', username='admin', password='admin'):
 		# Grab the user supplied info, in case there is a difference (PATCH)
 		self.switch_ip_address = switch_ip_address
 		self.username = username
 		self.password = password
-		self.properties_list = None
-		# properties_list indices:
-		self.port = 0
-		self.mode = 1
-		self.vlan = 2
-		self.tagged = 3
-
-		# config file dicts
-		self.vlan_blocks = {}
-		self.interface_blocks = {}
 
 		self.stacki_server_ip = None
-		self.netmask = None
-		self.past_vlans = None
-		self.new_vlans = None
-		self.all_vlans = None
 		self.path = '/tftpboot/pxelinux'
 		self.switchname = switchname
 		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
@@ -58,6 +37,11 @@ class SwitchDellX1052(Switch):
 		except AttributeError:
 			## TODO: release file lock here
 			print("%s's self.child already terminated or never started." % self.switch_ip_address)
+
+
+class SwitchDellX1052(Switch):
+	"""Class for interfacing with a Dell x1052 switch.
+	"""
 
 	def connect(self):
 		"""Connect to the switch"""
@@ -112,6 +96,23 @@ class SwitchDellX1052(Switch):
 			self.send_spacebar(4)
 			self.child.expect('console#', timeout=60)
 		self.child.logfile = None
+	
+	def parse_mac_address_table(self):
+		"""Parse the mac address table and return list of connected macs"""
+		_hosts = []
+		with open('/tmp/%s_mac_address_table' % self.switchname, 'r') as f:
+			for line in f.readlines():
+				if 'dynamic' in line:
+					# appends line to list
+					# map just splits out the port 
+					#   from the interface
+					_hosts.append(list(
+					  map(lambda x: x.split('/')[-1],
+					  line.split())
+					))
+
+		return _hosts
+
 
 	def get_vlan_table(self):
 		"""Download the vlan table"""
@@ -245,7 +246,7 @@ class SwitchDellX1052(Switch):
 				my_list[parse_port - 1] = current_port_properties
 		return my_list
 
-	def configure(self, properties_list=None):
+	def configure(self):
 		"""Go through the steps to configure a switch with the config stored in the database."""
 		try:
 			self.connect()
