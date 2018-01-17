@@ -7,6 +7,7 @@
 import re
 import shlex
 import ipaddress
+from stack.bool import str2bool
 import stack.commands
 
 
@@ -15,24 +16,29 @@ class Implementation(stack.commands.Implementation):
 
 		host = args[0]
 
-		result = self.owner.call('list.host.interface', [ host ])
+		result = self.owner.call('list.host.interface', [ 'expanded=true', host ])
 		udev_output = ""
 		for o in result:
-			interface = None
-			ip = None
-			netmask = None
-			netname = None
-			network = None
-			broadcast = None
-
 			interface = o['interface']
-			ip = o['ip']
-			netname = o['network']
-			vlanid = o['vlan']
-			mac = o['mac']
-			channel = o['channel']
-			options = []
-			if o['options']:
+			default   = str2bool(o['default'])
+			ip        = o['ip']
+			netname   = o['network']
+			vlanid    = o['vlan']
+			mac       = o['mac']
+			channel   = o['channel']
+			options   = o['options']
+			netmask   = o['mask']
+			gateway   = o['gateway']
+
+			if netname:
+				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
+				broadcast = net.broadcast_address
+				network   = net.network_address
+			else:
+				broadcast = None
+				network   = None
+
+			if options:
 				options = shlex.split(o['options'])
 
 			ib_re = re.compile('^ib[0-9]+$')
@@ -48,19 +54,6 @@ class Implementation(stack.commands.Implementation):
 
 			if not interface:
 				continue
-
-			if netname:
-				netresult = self.owner.call('list.network', [ netname ])
-				for net in netresult:
-					if net['network'] == netname:
-						network = net['address']
-						netmask = net['mask']
-						ipnet = ipaddress.IPv4Network('%s/%s' % (network, netmask))
-						broadcast = '%s' % ipnet.broadcast_address
-						gateway = net['gateway']
-						if gateway == 'None':
-							gateway = None
-						break
 
 			if interface == 'ipmi':
 				ipmisetup = '/tmp/ipmisetup'
@@ -103,6 +96,12 @@ class Implementation(stack.commands.Implementation):
 				dhcp = 'dhcp' in options
 				if dhcp:
 					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
+					if default:
+						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="yes"')
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="yes"')
+					else:
+						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="no"')
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="no"')
 
 				if 'onboot=no' in options:
 					self.owner.addOutput(host, 'STARTMODE=manual')
