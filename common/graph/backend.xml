@@ -17,7 +17,7 @@
 
 	<edge from="builder" to="backend"/>
 
-	<edge from="client" cond="appliance !='replicant'">
+	<edge from="client" cond="appliance not in [ 'barnacle', 'replicant' ]">
 		<to>foundation-python-client</to>
 		<to>mq-client</to>
 	</edge>
