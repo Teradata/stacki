@@ -8,43 +8,47 @@
 
 import os
 import sys
+import json
 import subprocess
 
-urlbase   = 'https://teradata-stacki.s3.amazonaws.com/3rdparty'
-manifest  = 'manifest.3rdparty'
+filename  = '3rdparty.json'
 cachedir  = '3rdparty'
-docfile   = '3rdparty.md'
-resources = { }
+docfile	  = '3rdparty.md'
 
-if not os.path.exists(manifest):
-	print('no manifest.3rdparty found')
+if not os.path.exists(filename):
+	print('no %s found' % filename)
 	sys.exit(0)
 
 if not os.path.exists(cachedir):
 	os.mkdir(cachedir)
 
-fin = open(manifest, 'r')
-for line in fin.readlines():
-	resource = line.strip()
-	resources[resource] = os.path.join(urlbase, resource)
-fin.close()
+with open(filename, 'r') as text:
+	code = []
+	for line in text: # json doesn't allow comments (we do)
+		if not line.startswith('//'):
+			code.append(line)
+	manifest = json.loads(''.join(code))
 
-for resource in resources:
-	target = os.path.join(cachedir, resource)
-	if not os.path.exists(target):
-		print('download %s\n\t%s' % (resource, resources[resource]))
-		subprocess.call([ 'curl',
-				  '-sSo%s' % target,
-				  resources[resource] ])
+blobs = {}
+for section in manifest:
+	for blob in section['files']:
+		blobs[blob] = { 
+			'source' : os.path.join(section['urlbase'], blob),
+			'target' : os.path.join(cachedir, blob)
+		}
 
-fout = open(docfile, 'w')
-fout.write("""# Third Party Resources
 
-This repository includes the following code from other projects.
+for blob in blobs:
+	if not os.path.exists(blobs[blob]['target']):
+		print('download %s\n\t%s' % (blob, blobs[blob]['source']))
+		subprocess.call([ 'curl', '-sSo%s' % blobs[blob]['target'], blobs[blob]['source'] ])
 
-""")
-for resource in sorted(resources.keys()):
-	fout.write('* %s [%s]\n' % (resource, resources[resource]))
+
+with open(docfile, 'w') as fout:
+	fout.write('# Third Party Blobs\n\n')
+        fout.write('This repository includes the following code from other projects.\n\n')
+	for blob in sorted(blobs.keys()):
+		fout.write('* %s [%s]\n' % (blob, blobs[blob]['source']))
 
 fout.close()
 
