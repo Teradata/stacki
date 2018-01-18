@@ -1,0 +1,8 @@
+<stack:stack>
+
+<stack:script stack:stage="install-post">
+mkdir -p /etc/ansible
+ln -s /opt/stack/bin/ansible-hosts.py /etc/ansible/hosts
+</stack:script>
+
+</stack:stack>

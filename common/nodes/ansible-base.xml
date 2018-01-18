@@ -1,0 +1,16 @@
+<stack:stack>
+
+
+<stack:package>foundation-ansible</stack:package>
+
+<stack:script stack:stage="install-post">
+mkdir -p /etc/ansible
+
+<stack:file stack:name="/etc/ansible/ansible.cfg">
+[defaults]
+system_warnings = no
+</stack:file>
+
+</stack:script>
+
+</stack:stack>

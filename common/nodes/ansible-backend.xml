@@ -1,0 +1,11 @@
+<stack:stack>
+
+
+<stack:description>
+Your ansible roll description here
+</stack:description>
+<stack:script stack:stage="install-post">
+mkdir -p /etc/ansible
+<stack:report stack:name="ansible"/>
+</stack:script>
+</stack:stack>
