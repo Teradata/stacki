@@ -29,7 +29,10 @@
 import stack.commands
 
 
-class command(stack.commands.NetworkArgumentProcessor,
+class command(stack.commands.ApplianceArgumentProcessor,
+	stack.commands.NetworkArgumentProcessor,
+	stack.commands.OSArgumentProcessor,
+	stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
@@ -41,20 +44,7 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		self.beginOutput()
-
-		self.db.execute("""select insubnet, outsubnet, service,
-			protocol, chain, action, flags, comment, tabletype,
-			name from global_firewall""")
-
-		for i, o, s, p, c, a, f, cmt, tt, n in self.db.fetchall():
-			network = self.getNetworkName(i)
-			output_network = self.getNetworkName(o)
-
-			self.addOutput('', (n, tt, s, p, c, a, network,
-				output_network, f))
-
-		self.endOutput(header=['', 'name', 'table', 'service',
-			'protocol', 'chain', 'action', 'network',
-			'output-network', 'flags'])
+		(scope,) = self.fillParams([('scope', 'global')])
+		self.scope = scope
+		self.runPlugins(args=args)
 
