@@ -1,4 +1,4 @@
-# Third Party Resources
+# Third Party Blobs
 
 This repository includes the following code from other projects.
 
