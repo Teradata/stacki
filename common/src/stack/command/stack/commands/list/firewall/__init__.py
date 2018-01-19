@@ -36,15 +36,22 @@ class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
-
 class Command(command):
 	"""
+	Lists the set of global firewalls.
+	<param type='string' name='scope' default="global" optional="1">
+	scope of firewall rules which can be one of 'global', 'os', 
+	'appliance' and 'host'.
+	</param>
+	<example cmd='list firewall'>
 	List the global firewall rules.
-	<dummy />
+	</example>
+	<example cmd='list firewall scope="os"'>
+	List all the firewall rules associated with all os types.
+	</example>
 	"""
 
 	def run(self, params, args):
 		(scope,) = self.fillParams([('scope', 'global')])
 		self.scope = scope
 		self.runPlugins(args=args)
-

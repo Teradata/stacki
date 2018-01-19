@@ -31,8 +31,7 @@ import stack.commands
 
 class Plugin(stack.commands.Plugin):
 	"""
-	List the global firewall rules.
-	<dummy />
+	Generates firewall rules based on scope
 	"""
 
 	def formatRule(self, name, table, inid, outid, service, protocol,
@@ -59,6 +58,7 @@ class Plugin(stack.commands.Plugin):
 		else:
 			self.other_rules.append(rule)
 
+	# Add firewall rules for pxe=True networks
 	def addIntrinsicRules(self):
 		LUDICROUS_PORT = 3285
 
