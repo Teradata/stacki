@@ -98,15 +98,18 @@ class Command(stack.commands.HostArgumentProcessor,
 			# fully resolved
 			rules = self.call('list.host.firewall', [host])
 
-			# Separate the rules into accept rules, reject rules,
+			# Separate the rules into intrinsic rules, accept rules, reject rules,
 			# and other rules.
+			intrinsic_rules = []
 			accept_rules = []
 			other_rules = []
 			reject_rules = []
 
 			while rules:
 				rule = rules.pop()
-				if rule['action'] == 'ACCEPT':
+				if rule['type'] == 'const':
+					intrinsic_rules.append(rule)
+				elif rule['action'] == 'ACCEPT':
 					accept_rules.append(rule)
 				elif rule['action'] == 'REJECT':
 					reject_rules.append(rule)
@@ -115,8 +118,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				else:
 					other_rules.append(rule)
 
-			# order the rules by ACCEPT, OTHER, and REJECT
-			rules = accept_rules + other_rules + reject_rules
+			# order the rules by Intrinsic, ACCEPT, OTHER, and REJECT
+			rules = intrinsic_rules + accept_rules + other_rules + reject_rules
 
 			# Separate rules by the tables that they belong to.
 			# They can belong to the filter, nat, raw, and mangle tables.

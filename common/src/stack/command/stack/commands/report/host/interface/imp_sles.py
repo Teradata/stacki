@@ -32,8 +32,8 @@ class Implementation(stack.commands.Implementation):
 
 			if netname:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
-				broadcast = net.broadcast_address
-				network   = net.network_address
+				broadcast = str(net.broadcast_address)
+				network   = str(net.network_address)
 			else:
 				broadcast = None
 				network   = None
@@ -72,13 +72,13 @@ class Implementation(stack.commands.Implementation):
 						     % interface.split(':')[0])
 				vnum = interface.split(':')[1]
 				if ip:
-					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip.strip()))
+					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip))
 				if netmask:
-					self.owner.addOutput(host, 'NETMASK%s=%s' % (vnum, netmask.strip()))
+					self.owner.addOutput(host, 'NETMASK%s=%s' % (vnum, netmask))
 				if network:
-					self.owner.addOutput(host, 'NETWORK%s=%s' % (vnum, network.strip()))
+					self.owner.addOutput(host, 'NETWORK%s=%s' % (vnum, network))
 				if broadcast:
-					self.owner.addOutput(host, 'BROADCAST%s=%s' % (vnum, broadcast.strip()))
+					self.owner.addOutput(host, 'BROADCAST%s=%s' % (vnum, broadcast))
 					
 				self.owner.addOutput(host, 'LABEL%s=%s' % (vnum, vnum))
 
@@ -120,13 +120,13 @@ class Implementation(stack.commands.Implementation):
 				
 				if not dhcp:
 					if ip:
-						self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
+						self.owner.addOutput(host, 'IPADDR=%s' % ip)
 					if netmask:
-						self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
+						self.owner.addOutput(host, 'NETMASK=%s' % netmask)
 					if network:
-						self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
+						self.owner.addOutput(host, 'NETWORK=%s' % network)
 					if broadcast:
-						self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+						self.owner.addOutput(host, 'BROADCAST=%s' % broadcast)
 
 				if mac:
 					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())

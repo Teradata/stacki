@@ -29,32 +29,29 @@
 import stack.commands
 
 
-class command(stack.commands.NetworkArgumentProcessor,
+class command(stack.commands.ApplianceArgumentProcessor,
+	stack.commands.NetworkArgumentProcessor,
+	stack.commands.OSArgumentProcessor,
+	stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
-
 class Command(command):
 	"""
+	Lists the set of global firewalls.
+	<param type='string' name='scope' default="global" optional="1">
+	scope of firewall rules which can be one of 'global', 'os', 
+	'appliance' and 'host'.
+	</param>
+	<example cmd='list firewall'>
 	List the global firewall rules.
-	<dummy />
+	</example>
+	<example cmd='list firewall scope="os"'>
+	List all the firewall rules associated with all os types.
+	</example>
 	"""
 
 	def run(self, params, args):
-		self.beginOutput()
-
-		self.db.execute("""select insubnet, outsubnet, service,
-			protocol, chain, action, flags, comment, tabletype,
-			name from global_firewall""")
-
-		for i, o, s, p, c, a, f, cmt, tt, n in self.db.fetchall():
-			network = self.getNetworkName(i)
-			output_network = self.getNetworkName(o)
-
-			self.addOutput('', (n, tt, s, p, c, a, network,
-				output_network, f))
-
-		self.endOutput(header=['', 'name', 'table', 'service',
-			'protocol', 'chain', 'action', 'network',
-			'output-network', 'flags'])
-
+		(scope,) = self.fillParams([('scope', 'global')])
+		self.scope = scope
+		self.runPlugins(args=args)
