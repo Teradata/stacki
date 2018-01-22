@@ -252,12 +252,13 @@ class SwitchDellX1052(Switch):
 				my_list[parse_port - 1] = current_port_properties
 		return my_list
 
-	def configure(self):
+	def configure(self, persistent=False):
 		"""Go through the steps to configure a switch with the config stored in the database."""
 		try:
 			self.connect()
 			self.upload()
-			self.apply_configuration()
+			if persistent:
+				self.apply_configuration()
 		except Exception as found_error:
 			self.log.error("%s: had exception: %s" % (self.switch_ip_address, str(found_error.message)))
 			self.__exit__()

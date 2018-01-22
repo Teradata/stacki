@@ -9,7 +9,7 @@ import stack.util
 import stack.switch
 import subprocess
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.SwitchArgumentProcessor,
 	stack.commands.sync.command):
 		pass
 
@@ -19,10 +19,14 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
-		hosts = self.getHostnames(args)
-		frontend, *xargs = self.db.getHostname('localhost')
-		switches = self.call('list.switch', hosts)
-		for switch in self.call('list.host.interface', [s['host'] for s in switches]):
+		persistent, = self.fillParams([
+			('persistent', False)
+			])
+
+		persistent = self.str2bool(persistent)
+
+		switches = self.getSwitchNames(args)
+		for switch in self.call('list.host.interface', switches):
 
 			# Get frontend ip for tftp address
 			(frontend, *args) = [host for host in self.call('list.host.interface', ['localhost']) 
@@ -32,6 +36,4 @@ class Command(command):
 			switch_name = switch['host']
 			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as _switch:
 				_switch.set_tftp_ip(frontend_tftp_address)
-				_switch.set_filenames(switch_name)
-				_switch.connect()
-				_switch.upload()
+				_switch.configure(persistent=persistent)
