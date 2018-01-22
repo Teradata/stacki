@@ -25,7 +25,7 @@ def confirm_hosts(macs, line):
 				print("No machine is connected toswitch port %s" % _switch_port)
 	
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.SwitchArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
@@ -43,9 +43,8 @@ class Command(command):
 		confirmhosts = self.str2bool(confirmhosts)
 
 		macs = {}
-		hosts = self.getHostnames(args)
-		_switches = self.call('list.switch', hosts)
-		for switch in self.call('list.host.interface', [s['host'] for s in _switches]):
+		_switches = self.getSwitchNames(args)
+		for switch in self.call('list.host.interface', _switches):
 
 			# Get frontend ip for tftp address
 			(_frontend, *args) = [host for host in self.call('list.host.interface', ['localhost']) 
@@ -53,7 +52,7 @@ class Command(command):
 
 			# Send traffic through the switch first before requesting mac table
 			if pinghosts or confirmhosts:
-				_host_interfaces = [host for host in self.call('list.host.interface', hosts)
+				_host_interfaces = [host for host in self.call('list.host.interface')
 						if host['network'] == switch['network']]
 
 			if pinghosts:
@@ -77,16 +76,14 @@ class Command(command):
 			switch_address = switch['ip']
 			switch_name = switch['host']
 
+			self.beginOutput()
 			with SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
 				switch.get_mac_address_table()
-				
-				with open('/tmp/%s_mac_address_table' % switch_name, 'r') as f:
-					lines = f.readlines()
-					for line in lines:
-						if confirmhosts:
-							confirm_hosts(macs, line)
-						else:
-							print(line, end='')
 
+				hosts = switch.parse_mac_address_table()
+				for _vlan, _mac, _port, _ in hosts:
+					self.addOutput(switch_name, [_mac, _port, _vlan])
+
+			self.endOutput(header=['switch', 'mac',  'port', 'vlan'])
