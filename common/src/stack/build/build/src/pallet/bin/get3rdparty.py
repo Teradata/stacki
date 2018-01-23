@@ -8,65 +8,47 @@
 
 import os
 import sys
+import json
 import subprocess
-import time
 
-urlbase   = 'https://teradata-stacki.s3.amazonaws.com/3rdparty'
-manifest  = 'manifest.3rdparty'
+filename  = '3rdparty.json'
 cachedir  = '3rdparty'
-docfile   = '3rdparty.md'
-resources = { }
+docfile	  = '3rdparty.md'
 
-if not os.path.exists(manifest):
-	print('no manifest.3rdparty found')
+if not os.path.exists(filename):
+	print('no %s found' % filename)
 	sys.exit(0)
 
 if not os.path.exists(cachedir):
 	os.mkdir(cachedir)
 
-fin = open(manifest, 'r')
-for line in fin.readlines():
-	resource = line.strip()
-	resources[resource] = os.path.join(urlbase, resource)
-fin.close()
+with open(filename, 'r') as text:
+	code = []
+	for line in text: # json doesn't allow comments (we do)
+		if not line.startswith('//'):
+			code.append(line)
+	manifest = json.loads(''.join(code))
 
-for resource in resources:
-	target = os.path.join(cachedir, resource)
-	if not os.path.exists(target):
-		retry = 3
-		while retry:
-			print('download %s\n\t%s' % (resource, resources[resource]))
-			cmd_line = [ 'curl',
-					'--retry','2',
-					'-w','%{http_code}',
-					'-sSo%s' % target,
-					resources[resource] ]
-			p = subprocess.Popen(cmd_line,
-					stdout=subprocess.PIPE,
-					stderr=subprocess.PIPE)
-			rc = p.wait()
-			o, e = p.communicate()
-			if rc:
-				retry = retry - 1
-				print(e)
-				time.sleep(1)
-			else:
-				if o.strip() == '200':
-					retry = 0
-				else:
-					retry = retry - 1
-					print("Error: Cannot download. HTTP STATUS: %s" % o)
-					os.unlink(target)
-					time.sleep(1)
+blobs = {}
+for section in manifest:
+	for blob in section['files']:
+		blobs[blob] = { 
+			'source' : os.path.join(section['urlbase'], blob),
+			'target' : os.path.join(cachedir, blob)
+		}
 
-fout = open(docfile, 'w')
-fout.write("""# Third Party Resources
 
-This repository includes the following code from other projects.
+for blob in blobs:
+	if not os.path.exists(blobs[blob]['target']):
+		print('download %s\n\t%s' % (blob, blobs[blob]['source']))
+		subprocess.call([ 'curl', '-sSo%s' % blobs[blob]['target'], blobs[blob]['source'] ])
 
-""")
-for resource in sorted(resources.keys()):
-	fout.write('* %s [%s]\n' % (resource, resources[resource]))
+
+with open(docfile, 'w') as fout:
+	fout.write('# Third Party Blobs\n\n')
+        fout.write('This repository includes the following code from other projects.\n\n')
+	for blob in sorted(blobs.keys()):
+		fout.write('* %s [%s]\n' % (blob, blobs[blob]['source']))
 
 fout.close()
 
