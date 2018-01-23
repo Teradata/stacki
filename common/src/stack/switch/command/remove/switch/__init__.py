@@ -23,8 +23,8 @@ class Command(command):
 
 	def run(self, params, args):
 
-		if len(args) != 1:
-			raise ArgUnique(self, 'switch')
+		if len(args) < 1:
+			raise ArgRequired(self, 'switch')
 		
 		switches = self.getSwitchNames(args)
 
