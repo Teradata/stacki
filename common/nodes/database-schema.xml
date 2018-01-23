@@ -171,12 +171,9 @@ grant select on cluster.nodes to ''@'localhost';
 
 DROP TABLE IF EXISTS switchports;
 CREATE TABLE switchports (
-	host		int(11)		NOT NULL references nodes,
 	interface	int(11)		NOT NULL references networks,
 	switch		int(11)		NOT NULL references nodes,
 	port		int(11)		NOT NULL,
-	subnet		int(11)		NOT NULL references subnets,
-	vlan		int(5)		default 1,
 	PRIMARY KEY(switch, port)
 );
 
