@@ -119,6 +119,35 @@ class SwitchDellX1052(Switch):
 
 		return _hosts
 
+	def get_interface_status_table(self):
+		"""Download the interface status table"""
+		time.sleep(1)
+		command = 'show interface status'
+		self.child.expect('console#', timeout=60)
+		with open('/tmp/%s_interface_status_table' % self.switchname, 'wb') as macout:
+			self.child.logfile = macout
+			self.child.sendline(command)
+			time.sleep(1)
+			self.send_spacebar(4)
+			self.child.expect('console#', timeout=60)
+		self.child.logfile = None
+	
+	def parse_interface_status_table(self):
+		"""Parse the interface status and return list of port information"""
+		_hosts = []
+		with open('/tmp/%s_interface_status_table' % self.switchname, 'r') as f:
+			for line in f.readlines():
+				if 'gi1/0/' in line:
+					# appends line to list
+					# map just splits out the port 
+					#   from the interface
+					_hosts.append(list(
+					  map(lambda x: x.split('/')[-1],
+					  line.split())
+					))
+
+		return _hosts
+
 
 	def get_vlan_table(self):
 		"""Download the vlan table"""
