@@ -36,3 +36,4 @@ stack-ws
 stack-ws-client
 storcli
 uefi-boot-method
+foundation-ansible
