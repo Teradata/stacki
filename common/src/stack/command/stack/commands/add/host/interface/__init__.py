@@ -66,7 +66,7 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		(interface, mac, network, ip, module, 
-		 name, vlan, default, unsafe, options) = self.fillParams([
+		 name, vlan, default, options, unsafe) = self.fillParams([
 			 ('interface', None),
 			 ('mac',       None),
 			 ('network',   None),
@@ -149,7 +149,7 @@ class Command(stack.commands.add.host.command):
 			if options:
 				fields.remove('options')
 				keys.append('options')
-				vals.append('%d' % self.str2bool(default))
+				vals.append('%s' % options)
 			
 				
 			self.db.execute("""
