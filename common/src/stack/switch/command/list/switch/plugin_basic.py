@@ -25,6 +25,7 @@ class Plugin(stack.commands.Plugin):
 
 			if row[0] in host_info:
 				host_info[row[0]] = row[1:]
+			host_info[row[0]] += tuple([self.owner.getHostAttr(row[0], 'model')])
 
 		for host in dict(host_info):
 			if host_info[host] == None:
@@ -32,7 +33,9 @@ class Plugin(stack.commands.Plugin):
 	
 		return { 'keys' : [ 'rack',
 				    'rank',
-				    'appliance' ],
+				    'appliance',
+				    'model',
+				    ],
 			'values': host_info }
 
 
