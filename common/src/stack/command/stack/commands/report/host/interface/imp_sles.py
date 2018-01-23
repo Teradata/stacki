@@ -40,6 +40,8 @@ class Implementation(stack.commands.Implementation):
 
 			if options:
 				options = shlex.split(o['options'])
+			else:
+				options = []
 
 			ib_re = re.compile('^ib[0-9]+$')
 			if mac:
@@ -94,6 +96,7 @@ class Implementation(stack.commands.Implementation):
 					self.owner.addOutput(host, 'USERCONTROL=no')
 
 				dhcp = 'dhcp' in options
+
 				if dhcp:
 					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
 					if default:
@@ -152,4 +155,3 @@ class Implementation(stack.commands.Implementation):
 					     '<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">')
 			self.owner.addOutput(host, udev_output)
 			self.owner.addOutput(host, '</stack:file>')
-
