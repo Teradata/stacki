@@ -26,7 +26,8 @@ def confirm_hosts(macs, line):
 	
 
 class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
+	      stack.commands.list.command,
+	      stack.commands.HostArgumentProcessor):
 	pass
 
 class Command(command):
@@ -84,6 +85,12 @@ class Command(command):
 
 				hosts = switch.parse_mac_address_table()
 				for _vlan, _mac, _port, _ in hosts:
-					self.addOutput(switch_name, [_mac, _port, _vlan])
+					_hostname, _interface = self.db.select("""
+					  n.name, nt.device from
+					  nodes n, networks nt
+					  where nt.node=n.id
+					  and nt.mac='%s'
+					""" % _mac)
+					self.addOutput(switch_name, [_port, _mac, _hostname, _interface,  _vlan])
 
-			self.endOutput(header=['switch', 'mac',  'port', 'vlan'])
+			self.endOutput(header=['switch', 'port',  'mac', 'host', 'interface', 'vlan'])
