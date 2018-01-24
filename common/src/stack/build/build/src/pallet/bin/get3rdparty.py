@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import subprocess
+import time
 
 # JSON Structure
 # 3rdparty.json
@@ -62,7 +63,6 @@ def download_url(source, target, curl_args):
 		curl_cmd.extend(curl_args)
 	curl_cmd.extend(['-sSo%s' % target, source])
 	print('download %s\n\t%s' % (source, target))
-	print (' '.join(curl_cmd))
 	while retry:
 		p = subprocess.Popen(curl_cmd,
 			stdout=subprocess.PIPE,
