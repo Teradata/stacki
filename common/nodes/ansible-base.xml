@@ -6,7 +6,12 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:package>foundation-ansible</stack:package>
+<stack:package>foundation-ansible
+foundation-python-Jinja2
+foundation-python-MarkupSafe
+foundation-python-PyYAML
+foundation-python-six
+</stack:package>
 
 <stack:script stack:stage="install-post">
 mkdir -p /etc/ansible
