@@ -11,6 +11,46 @@ import sys
 import json
 import subprocess
 
+# JSON Structure
+# 3rdparty.json
+# The URLbase is the baseurl for all files
+# The authfile is the file that contains authentication
+# and authorization information to access <urlbase>/file
+#
+# urlbase: typically a web address pointing to a directory
+# example: https://teradata-stacki.s3.amazonaws.com/3rdparty
+#
+# files: the files present at the location
+# example: foundation-python-3.6.1-sles11.x86_64.rpm
+#
+# authfile: optional - Only required when accessing URLS that require authentication
+#
+#
+# [
+#	{
+#		"urlbase": "<baseurl1>",
+#		"files": [ "file1", "file2", ... ],
+#		"authfile": "<authfile1>.json"
+#	},
+#	{
+#		"urlbase": "<baseurl2>",
+#		"files": [ "file3", "file4", ... ],
+#	}
+# ]
+#
+# JSON Structure
+# authfile_basic.json
+# {
+#	"type": "basic",
+#	"username":"<username>",
+#	"password":"<password>"
+# }
+#
+# authfile_artifactory.json
+# {
+#	"type": "artifactory",
+#	"key:"<apikey>"
+# }
 
 def download_url(source, target, curl_args):
 	# Retry the curl command 3 times, in case of error
