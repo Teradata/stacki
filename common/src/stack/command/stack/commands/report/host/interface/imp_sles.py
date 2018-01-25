@@ -93,7 +93,7 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 
 						     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 						     % interface)
-				if vlanid:
+				if vlanid and self.owner.host_based_routing(host):
 					parent_device = interface.strip().split('.')[0]
 					self.owner.addOutput(host, 'ETHERDEVICE=%s' % parent_device)
 					self.owner.addOutput(host, 'VLAN=yes')
