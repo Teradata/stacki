@@ -303,7 +303,48 @@ class SwitchArgumentProcessor:
 		and switch=(select id from nodes where name='%s')
 		""" % (vlan, host, switch))
 
-			
+	def getSwitchesForHosts(self, hosts):
+		"""Return switches name for hosts
+		"""
+
+		_switches = []
+		for host in hosts:
+			_rows = self.db.select("""
+			n.name from 
+			nodes n, switchports s where
+			s.host=(select id from nodes where name='%s') and
+			s.switch=n.id
+			""" % host)
+
+			for row, in _rows:
+				_switches.append(row)
+
+		return set(_switches)
+
+	def getHostsForSwitch(self, switch):
+		"""Return a dictionary of hosts that are connected to the switch.
+		Each entry will be keyed off of the port since most of the information
+		stored by the switch is based off port. 
+		"""
+
+		_hosts = {}
+		_rows = self.db.select("""
+		  n.name, i.device, s.port, i.vlanid, i.mac from
+		  nodes n, networks i, switchports s where 
+		  s.switch=(select id from nodes where name='%s') and
+		  i.id = s.interface and
+		  n.id = s.host
+		""" % switch)
+		for host, interface, port, vlanid, mac in _rows:
+			_hosts[str(port)] = {
+				  'host': host,
+				  'interface': interface,
+				  'port': port,
+				  'vlan': vlanid,
+				  'mac': mac,
+				}
+
+		return _hosts
 	
 
 class CartArgumentProcessor:
