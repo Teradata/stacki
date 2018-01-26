@@ -18,6 +18,7 @@
 		<to>ssh-base</to>
 		<to>ssl-base</to>
 		<to>ldconfig</to>
+		<to>serial-console</to>
 	</edge>
 
 	<order tail="HEAD" head="ldconfig"/>

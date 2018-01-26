@@ -85,3 +85,9 @@ then
 else
 	sed -i 's/'"$FRONTEND"'/'"127.0.0.1"'/' /etc/install.inf
 fi
+
+#
+# execute code that runs just prior to the autoyast gui 
+#
+PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
+
