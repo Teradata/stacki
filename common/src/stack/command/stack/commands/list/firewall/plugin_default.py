@@ -46,7 +46,7 @@ class Plugin(stack.commands.Plugin):
 		else:
 			output_network = self.owner.getNetworkName(outid)
 
-		rule = (name, service, table, protocol, chain, action, network,
+		rule = (name, table, service, protocol, chain, action, network,
                         output_network, flags, comment, source, rule_type)
 
 		if action == 'ACCEPT':
@@ -69,29 +69,18 @@ class Plugin(stack.commands.Plugin):
 			protocol = 'all'
 			chain = 'all'
 			output_network = ''
-			flags = ''
-			service_list = ['http', 'https', 'tftp', 'dhcp', 'ssh', str(LUDICROUS_PORT)]
-			for service in service_list:
-				net_name = network['network']
-				comment = 'Accept all %s traffic on %s network - Intrinsic rule' % (service, net_name)
-				net_service = '%s-%s' % (net_name, service)
-
-				self.intrinsic_rules.append((net_service + '-INPUT', 'filter', service,
-					protocol, 'INPUT', 'ACCEPT', net_name, output_network,
-					flags, comment, 'G', 'const'))
-
-				self.intrinsic_rules.append((net_service + '-OUTPUT', 'filter', service,
-					protocol, 'OUTPUT', 'ACCEPT', net_name, output_network,
-					flags, comment, 'G', 'const'))
-
-				self.intrinsic_rules.append((net_service + '-FORWARD', 'filter', service,
-					protocol, 'FORWARD', 'ACCEPT', net_name, output_network,
-					flags, comment, 'G', 'const'))
+			flags = '-m multiport'
+			service_list = ['http', 'https', 'tftp', 'ssh', str(LUDICROUS_PORT)]
+			net_name = network['network']
+			comment = 'Accept all traffic on %s network - Intrinsic rule' % ( net_name)
+			self.intrinsic_rules.append(('STACKI-INTRINSIC', 'filter', ','.join(service_list),
+				protocol, 'INPUT', 'ACCEPT', net_name, output_network,
+				flags, comment, 'G', 'const'))
 
 	def printOutput(self, colName):
 		output_actions = self.intrinsic_rules + self.accept_rules + self.other_rules + self.reject_rules
 		for action in output_actions:
-			(name, service, table, protocol, chain, action, network,
+			(name, table, service, protocol, chain, action, network,
                         output_network, flags, comment, source, rule_type) = action
 
 			self.owner.addOutput(colName, (name, table, service,

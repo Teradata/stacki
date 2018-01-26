@@ -74,13 +74,15 @@ class Command(stack.commands.HostArgumentProcessor,
 				rule['service'] is not None:
 				if rule['protocol'] == 'all':
 					tmp_rule = s
+					if rule['flags'] is not None:
+						tmp_rule += ' %s' % rule['flags']
 					s = "%s -p tcp --dport %s\n" % (tmp_rule, rule['service'])
 					s += "%s -p udp --dport %s" % (tmp_rule, rule['service'])
 				else:
 					s += ' --dport %s' % rule['service']
+					if rule['flags'] is not None:
+						s += ' %s\n' % rule['flags']
 
-			if rule['flags'] is not None:
-				s += ' %s' % rule['flags']
 
 			self.addOutput(host, s)
 			self.addOutput(host, '')
@@ -124,7 +126,6 @@ class Command(stack.commands.HostArgumentProcessor,
 			# Separate rules by the tables that they belong to.
 			# They can belong to the filter, nat, raw, and mangle tables.
 			tables = {}
-			tables['filter'] = []
 			
 			while rules:
 				rule = rules.pop(0)
@@ -132,7 +133,6 @@ class Command(stack.commands.HostArgumentProcessor,
 				if table not in tables:
 					tables[table] = []
 				tables[table].append(rule)
-
 			# Generate rules for each of the table types
 			for tt in ['filter', 'nat', 'raw', 'mangle']:
 				# Finally print all the rules that are present
