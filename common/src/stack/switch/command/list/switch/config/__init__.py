@@ -17,7 +17,18 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
+		(raw,) = self.fillParams([
+			('raw', False),
+			])
+
+		raw = self.str2bool(raw)
+
 		_switches = self.getSwitchNames(args)
+
+		# Begin standard output if raw is False
+		if not raw:
+			self.beginOutput()
+
 		for switch in self.call('list.host.interface',  _switches):
 
 			# Get frontend ip for tftp address
@@ -27,7 +38,6 @@ class Command(command):
 			frontend_tftp_address = _frontend['ip']
 			switch_address = switch['ip']
 			switch_name = switch['host']
-			self.beginOutput()
 
 			# Connect to the switch
 			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
@@ -40,32 +50,35 @@ class Command(command):
 					_printline = True
 					_block = {}
 					for line in lines:
-						if 'crypto' in line:
-							break
+						if not raw:
+							if 'crypto' in line:
+								break
 
-						if 'gigabitethernet' in line:
-							_block['port'] = line.split('/')[-1].strip()
+							if 'gigabitethernet' in line:
+								_block['port'] = line.split('/')[-1].strip()
 
-						if 'switchport' in line and 'access' in line:
-							_, _type, _, _vlan = line.split()
-							_block['type'] = _type
-							_block['vlan'] = _vlan
+							if 'switchport' in line and 'access' in line:
+								_, _type, _, _vlan = line.split()
+								_block['type'] = _type
+								_block['vlan'] = _vlan
 
-						if '!' in line and _block:
-							try: 
-								self.addOutput(
-									switch_name,[
-									_block['port'],
-									_block['vlan'],
-									_block['type'],]
-									)
-							except:
-								pass
-							_block = {}
+							if '!' in line and _block:
+								try:
+									self.addOutput(
+										switch_name,[
+										_block['port'],
+										_block['vlan'],
+										_block['type'],]
+										)
+								except:
+									pass
+								_block = {}
 
-						if False:
+						else:
 							if _printline:
 								print(line, end='')
+
+		if not raw:
 			self.endOutput(header=[
 				'switch',
 				'port',
