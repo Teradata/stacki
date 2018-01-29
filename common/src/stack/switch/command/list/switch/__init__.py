@@ -18,21 +18,21 @@ class Command(command):
 		
 		(order, ) = self.fillParams([ ('order', 'asc') ])
 				
-		hosts = self.getSwitchNames(args)
+		switches = self.getSwitchNames(args)
 
-		header = ['host']
+		header = ['switch']
 		values = {}
-		for host in hosts:
-			values[host] = []
+		for switch in switches:
+			values[switch] = []
 
-		for (provides, result) in self.runPlugins(hosts):
+		for (provides, result) in self.runPlugins(switches):
 			header.extend(result['keys'])
 			for h, v in result['values'].items():
 				values[h].extend(v)
 
 		self.beginOutput()
-		for host in hosts:
-			if values[host]:
-				self.addOutput(host, values[host])
+		for switch in switches:
+			if values[switch]:
+				self.addOutput(switch, values[switch])
 		self.endOutput(header=header, trimOwner=False)
 
