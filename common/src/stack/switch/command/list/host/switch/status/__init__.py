@@ -47,6 +47,6 @@ class Command(command):
 				for _port,_ , _, _speed, _, _, _state, _, _ in ports:
 					if _port in _hosts:
 						host, interface, port, vlan, mac = _hosts[_port].values()
-						self.addOutput(switch_name, [_port, _speed, _state, mac,  vlan, host, interface])
+						self.addOutput(host, [_port, _speed, _state, mac,  vlan, switch_name, interface])
 
-		self.endOutput(header=['switch', 'port',  'speed', 'state', 'mac', 'vlan', 'host', 'interface'])
+		self.endOutput(header=['host', 'port',  'speed', 'state', 'mac', 'vlan', 'switch', 'interface'])
