@@ -33,11 +33,12 @@ class Command(command):
 			switch_network = switch_interface['network']
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
-			n.name, s.interface, sw.name, s.port, sub.name, s.vlan
-			from switchports s, nodes n, nodes sw, subnets sub
+			n.name, s.interface, sw.name, s.port, sub.name, i.vlanid
+			from switchports s, nodes n, nodes sw, subnets sub, networks i
 			where s.host = n.id 
 			and s.switch = sw.id
 			and s.subnet = sub.id
+			and s.interface = i.id
 			and s.switch = (select id from nodes where name='%s')
 			""" % switch['switch'])
 
