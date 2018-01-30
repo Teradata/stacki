@@ -14,6 +14,22 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List vlan table on switch.
+
+	Still experimental.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplies, info about
+	all the known switches is listed.
+	</arg>
+
+	<example cmd='list host switch-0-0'>
+	List vlan info for switch-0-0.
+	</example>
+
+	<example cmd='list switch'>
+	List vlan info for all known switches.
+	</example>
 	"""
 	def run(self, params, args):
 

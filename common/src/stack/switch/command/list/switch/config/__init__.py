@@ -14,6 +14,28 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List the running-config for the switch.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplied, info about
+	all the known switches is listed.
+	</arg>
+
+	<param optional='1' type='string' name='raw'>
+	If set, print out the raw config from the switch and not the table view.
+	</arg>
+
+	<example cmd='list switch config switch-0-0'>
+	List running-config for switch-0-0.
+	</example>
+
+	<example cmd='list switch'>
+	List running-config for all known switches.
+	</example>
+
+	<example cmd='list switch config switch-0-0 raw=true'>
+	List raw running-config for switch-0-0.
+	</example>
 	"""
 	def run(self, params, args):
 

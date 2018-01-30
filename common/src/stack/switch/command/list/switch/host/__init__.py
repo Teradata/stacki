@@ -20,6 +20,21 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List Interface, Port, Interface, Vlan, and Network of any hosts-to-switch
+	relationships being managed.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplies, info about
+	all the known switchs is listed.
+	</arg>
+
+	<example cmd='list host switch-0-0'>
+	List hosts connected to switch-0-0.
+	</example>
+
+	<example cmd='list switch'>
+	List any hosts on all known switches.
+	</example>
 	"""
 	def run(self, params, args):
 	    

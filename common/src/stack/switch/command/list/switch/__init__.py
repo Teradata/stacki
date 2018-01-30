@@ -13,6 +13,21 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List Appliance, physical position, and model of any hosts with appliance type
+	of `switch`.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplies, info about
+	all the known switches is listed.
+	</arg>
+
+	<example cmd='list host switch-0-0'>
+	List info for switch-0-0.
+	</example>
+
+	<example cmd='list switch'>
+	List info for all known switches/
+	</example>
 	"""
 	def run(self, params, args):
 		
