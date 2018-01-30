@@ -117,7 +117,7 @@ class SwitchDellX1052(Switch):
 					  line.split())
 					))
 
-		return _hosts
+		return sorted(_hosts, key=lambda x: x[2])
 
 	def get_interface_status_table(self):
 		"""Download the interface status table"""
