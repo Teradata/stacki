@@ -23,7 +23,7 @@ class Command(command):
 
 	<param optional='1' type='string' name='raw'>
 	If set, print out the raw config from the switch and not the table view.
-	</arg>
+	</param>
 
 	<example cmd='list switch config switch-0-0'>
 	List running-config for switch-0-0.
