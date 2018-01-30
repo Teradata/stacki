@@ -8,7 +8,7 @@ import stack.commands
 import stack.util
 import stack.switch
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.SwitchArgumentProcessor,
 	stack.commands.list.command):
 	pass
 
@@ -17,9 +17,8 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
-		hosts = self.getHostnames(args)
-		_switches = self.call('list.switch', hosts)
-		for switch in self.call('list.host.interface', [s['host'] for s in _switches]):
+		_switches = self.getSwitchNames(args)
+		for switch in self.call('list.host.interface', _switches):
 
 			# Get frontend ip for tftp address
 			frontend, *xargs = [host for host in self.call('list.host.interface', ['localhost']) 
