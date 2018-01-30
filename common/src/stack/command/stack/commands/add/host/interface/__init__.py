@@ -149,9 +149,8 @@ class Command(stack.commands.add.host.command):
 			if options:
 				fields.remove('options')
 				keys.append('options')
-				vals.append('%s' % options)
+				vals.append('"%s"' % options)
 			
-				
 			self.db.execute("""
 				insert into networks(%s) values (%s)
 				""" % (','.join(keys), ','.join(vals)))
