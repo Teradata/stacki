@@ -29,7 +29,7 @@ class Command(command):
 		for switch in self.call('list.switch'):
 		#	osname = self.getHostAttr(host, 'os')
 		#	self.runImplementation(osname, [host])
-			switch_interface, *xargs = self.call('list.host.interface', [switch['host']])
+			switch_interface, *xargs = self.call('list.host.interface', [switch['switch']])
 			switch_network = switch_interface['network']
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
@@ -39,9 +39,9 @@ class Command(command):
 			and s.switch = sw.id
 			and s.subnet = sub.id
 			and s.switch = (select id from nodes where name='%s')
-			""" % switch['host'])
+			""" % switch['switch'])
 
-			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['host'])
+			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
 			self.addOutput(frontend, 'vlan 2-100')
 			for (host, interface, switch, port, subnet, vlan) in hosts:
 				attr = self.getHostAttr(host, 'appliance')
