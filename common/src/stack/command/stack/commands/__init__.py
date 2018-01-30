@@ -290,7 +290,7 @@ class SwitchArgumentProcessor:
 			  limit 1 
 			),
 			(select id from nodes where name = '%s'),
-			'%s',
+			'%s')
 		""" % (switch, host, switch, port)
 
 		self.db.execute(' '.join(query.split()))

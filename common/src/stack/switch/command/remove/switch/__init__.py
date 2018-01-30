@@ -13,7 +13,7 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	Remove a new host with appliance type 'switch' from the cluster.
+	Remove a host with appliance type 'switch' from the cluster.
 
 	<arg type='string' name='switch'>
 	A single switch/host name. 

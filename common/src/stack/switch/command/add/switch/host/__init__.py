@@ -38,14 +38,13 @@ class Command(command):
 
 	def run(self, params, args):
 
-		host, port, vlan = self.fillParams([
+		host, port, = self.fillParams([
 			('host', None, True),
 			('port', None, True),
-			('vlan', '1'),
 			])
 		switches = self.getSwitchNames(args)
 		if len(switches) > 1:
 			raise ArgUnique(self, 'switch')
 
 		for switch in switches:
-			self.addSwitchHost(switch, host, port, vlan)
+			self.addSwitchHost(switch, host, port)

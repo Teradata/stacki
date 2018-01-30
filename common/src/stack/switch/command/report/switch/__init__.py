@@ -33,7 +33,7 @@ class Command(command):
 			switch_network = switch_interface['network']
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
-			n.name, s.interface, sw.name, s.port, sub.name, i.vlanid
+			n.name, s.port, i.vlanid
 			from switchports s, nodes n, nodes sw, subnets sub, networks i
 			where s.host = n.id 
 			and s.switch = sw.id
@@ -44,7 +44,7 @@ class Command(command):
 
 			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
 			self.addOutput(frontend, 'vlan 2-100')
-			for (host, interface, switch, port, subnet, vlan) in hosts:
+			for (host, port, vlan) in hosts:
 				attr = self.getHostAttr(host, 'appliance')
 				if attr == 'frontend':
 					self.addOutput(frontend, '!')
