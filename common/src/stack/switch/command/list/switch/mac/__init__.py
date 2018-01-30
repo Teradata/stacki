@@ -16,13 +16,17 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	List Appliance, physical position, and model of any hosts with appliance type
-	of `switch`.
+	List mac address table on switch.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
 	Zero, one or more switch names. If no switch names are supplies, info about
 	all the known switches is listed.
 	</arg>
+
+	<param optional='1' type='bool' name='pinghosts'>
+	Send a ping to each host connected to the switch. Hosts do not show up in the
+	mac address table if there is no traffic.
+	</param>
 
 	<example cmd='list host mac switch-0-0'>
 	List mac table for switch-0-0.
