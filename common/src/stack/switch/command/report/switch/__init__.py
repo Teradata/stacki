@@ -35,9 +35,9 @@ class Command(command):
 			hosts = self.db.select("""
 			n.name, s.port, i.vlanid
 			from switchports s, nodes n, nodes sw, subnets sub, networks i
-			where s.host = n.id 
+			where i.node = n.id
 			and s.switch = sw.id
-			and s.subnet = sub.id
+			and i.subnet = sub.id
 			and s.interface = i.id
 			and s.switch = (select id from nodes where name='%s')
 			""" % switch['switch'])
