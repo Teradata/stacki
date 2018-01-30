@@ -13,12 +13,14 @@ info "STACKIQ: initiating ludicrous speed"
 #
 netif="$1"
 
-server=""
-if [ -f /tmp/net.$netif.dhcpopts ]
-then
-	. /tmp/net.$netif.dhcpopts
-	server="${new_next_server:-$new_dhcp_server_identifier}"
-fi
+#server=""
+#if [ -f /tmp/net.$netif.dhcpopts ]
+#then
+#	. /tmp/net.$netif.dhcpopts
+#	server="${new_next_server:-$new_dhcp_server_identifier}"
+#fi
+
+server=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
 
 #
 # create stack.conf for lighttpd
