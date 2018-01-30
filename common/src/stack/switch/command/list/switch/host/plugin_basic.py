@@ -32,7 +32,7 @@ class Plugin(stack.commands.Plugin):
 				    'interface',
 				    'switch',
 				    'port',
-				    'subnet',
+				    'network',
 				    'vlan',
 				    ],
 			'values': host_info }
