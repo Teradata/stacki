@@ -30,7 +30,7 @@ class Implementation(stack.commands.Implementation):
 			netmask   = o['mask']
 			gateway   = o['gateway']
 
-			if netname:
+			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
 				broadcast = str(net.broadcast_address)
 				network   = str(net.network_address)
