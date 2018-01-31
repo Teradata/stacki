@@ -333,7 +333,7 @@ class SwitchArgumentProcessor:
 		  nodes n, networks i, switchports s where 
 		  s.switch=(select id from nodes where name='%s') and
 		  i.id = s.interface and
-		  n.id = s.host
+		  n.id = i.node
 		""" % switch)
 		for host, interface, port, vlanid, mac in _rows:
 			_hosts[str(port)] = {
