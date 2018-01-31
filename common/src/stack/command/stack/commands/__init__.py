@@ -313,8 +313,8 @@ class SwitchArgumentProcessor:
 		for host in hosts:
 			_rows = self.db.select("""
 			n.name from 
-			nodes n, switchports s where
-			s.host=(select id from nodes where name='%s') and
+			nodes n, switchports s, networks i where
+			s.interface in (select id from networks where node=(select id from nodes where name='%s')) and
 			s.switch=n.id
 			""" % host)
 
