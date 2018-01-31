@@ -167,18 +167,6 @@ CREATE TABLE nodes (
 
 grant select on cluster.nodes to ''@'localhost';
 
-<!-- Node/Switch Table -->
-
-DROP TABLE IF EXISTS switchports;
-CREATE TABLE switchports (
-	interface	int(11)		NOT NULL references networks,
-	switch		int(11)		NOT NULL references nodes,
-	port		int(11)		NOT NULL,
-	PRIMARY KEY(switch, port)
-);
-
-grant select on cluster.subnets to ''@'localhost';
-
 <!-- Networks -->
 
 DROP TABLE IF EXISTS networks;
@@ -216,6 +204,18 @@ CREATE TABLE subnets (
 	dns		boolean		default false,
 	pxe		boolean		default false,
 	PRIMARY KEY(ID)
+);
+
+grant select on cluster.subnets to ''@'localhost';
+
+<!-- Node/Switch Table -->
+
+DROP TABLE IF EXISTS switchports;
+CREATE TABLE switchports (
+	interface	int(11)		NOT NULL references networks,
+	switch		int(11)		NOT NULL references nodes,
+	port		int(11)		NOT NULL,
+	PRIMARY KEY(switch, port)
 );
 
 grant select on cluster.subnets to ''@'localhost';
