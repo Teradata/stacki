@@ -83,7 +83,15 @@ for row in stack.api.Call('list bootaction', [ 'type=install',
 					       boot_action ]):
 	kernel	= row['kernel']
 	ramdisk = row['ramdisk']
-	args	= row['args']
+
+	args = [ ]
+	for arg in row['args'].split():
+		tokens = arg.split('=')
+		if len(tokens) == 2 and tokens[0] == 'ip':
+			continue # nuke centos ip=bootif arg
+		args.append(arg)
+	args = ' '.join(args)
+
 
 			
 server = None		       
@@ -99,14 +107,14 @@ grub.append('default=0')
 grub.append('timeout=0')
 grub.append('title stacki install')
 grub.append('\troot (hd0,0)')
-#grub.append('\tkernel /boot/%s root=LABEL=/ console=tty1 console=ttyS0 selinux=0 nvme_core.io_timeout=4294967295 %s' % (kernel, args))
-grub.append('\tkernel /boot/%s %s' % (kernel, args))
+grub.append('\tkernel /boot/%s console=ttyS0 %s' % (kernel, args))
+#grub.append('\tkernel /boot/%s %s' % (kernel, args))
 grub.append('\tinitrd /boot/%s' % ramdisk)
 
 grub2 = [ ]
 grub2.append('menuentry "stacki install" {')
 grub2.append('\tset root="hd0,gpt1"')
-grub2.append('\tlinux  /boot/%s %s' % (kernel, args))
+grub2.append('\tlinux  /boot/%s console=ttyS0 %s' % (kernel, args))
 grub2.append('\tinitrd /boot/%s' % ramdisk)
 grub2.append('}')
 
