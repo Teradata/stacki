@@ -1,0 +1,77 @@
+<stack:stack>
+
+<!--
+	if the attribute 'read_only_serial_console' is true, then disable user input from the
+	serial console. this will ensure that the installation will not halt when a connection
+	is made on the serial console and a CR/LF is sent down the line. in AutoYaST, the
+	'default' key is 'F9 Abort', which means a CR/LF will engage the default key and
+	halt the installation.
+-->
+
+<stack:stacki>
+#
+# set the serial console into read-only mode
+#
+def set_tty():
+	import shlex
+	import subprocess
+	import stack.bool
+
+	if 'read_only_serial_console' not in attributes or \
+			not stack.bool.str2bool(attributes['read_only_serial_console']):
+		return
+
+	f = open('/proc/cmdline')
+	line = f.readline().split()
+	f.close()
+
+	for l in line:
+		if l.startswith('console='):
+			a = l.split('=')
+			for tty in a[1].split(','):
+				if tty.startswith('ttyS'):
+					cmd = 'stty -F /dev/%s -cread' % (tty)
+					subprocess.run(shlex.split(cmd))
+					break
+
+	return
+
+#
+# entry point to call generic code before autoyast starts
+#
+def patch():
+	try:
+		set_tty()
+	except:
+		pass
+</stack:stacki>
+
+
+<stack:script stack:stage="install-post" stack:cond="read_only_serial_console">
+
+<stack:file stack:name="/tmp/get_serial_tty" stack:perms="700">#!/opt/stack/bin/python3
+
+print('#!/bin/sh')
+print('log "S07-stacki-readonly-terminal..."')
+print('log "========================"')
+
+f = open('/proc/cmdline')
+line = f.readline().split()
+f.close()
+
+for l in line:
+	if l.startswith('console='):
+		a = l.split('=')
+		for tty in a[1].split(','):
+			if tty.startswith('ttyS'):
+				print('stty -F /dev/%s -cread' % (tty))
+				break
+</stack:file>
+
+/tmp/get_serial_tty > /usr/lib/YaST2/startup/Second-Stage/S07-stacki-readonly-terminal
+chmod 755 /usr/lib/YaST2/startup/Second-Stage/S07-stacki-readonly-terminal
+
+</stack:script>
+
+</stack:stack>
+

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -62,7 +62,7 @@ class Command(stack.commands.set.host.command):
 		(options, interface, mac) = self.fillParams([
 			('options',    None, True),
 			('interface', None),
-			('mac',       None)
+			('mac',	      None)
 			])
 
 		if not interface and not mac:

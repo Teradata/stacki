@@ -81,8 +81,9 @@ else
 		httpcode=`cat /tmp/httpcode`
 		if [ "$httpcode" -eq "200" ]
 		then
-			cat /tmp/ks.xml | \
-			/opt/stack/bin/stack list host profile chapter=main 2> /tmp/kgen.debug > /tmp/ks.cfg
+			mkdir -p /tmp/stack_site
+			cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=main   2>  /tmp/kgen.debug > /tmp/ks.cfg
+			cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=stacki 2>> /tmp/profile_stack_site.debug > /tmp/stack_site/__init__.py
 			parse_kickstart /tmp/ks.cfg
 			run_kickstart
 			fini=1

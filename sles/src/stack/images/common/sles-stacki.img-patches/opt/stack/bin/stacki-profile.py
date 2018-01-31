@@ -1,7 +1,7 @@
 #!/opt/stack/bin/python3 -E
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,6 +11,7 @@ import subprocess
 import random
 import time
 import os
+import json
 
 debug = open('/tmp/stacki-profile.debug', 'w')
 
@@ -90,6 +91,20 @@ if not server:
 		l = cmdarg.split('=')
 		if l[0].strip() == 'Server':
 			server = l[1]
+
+if not server:
+	# No server found on boot line, so maybe we are in AWS and can find
+	# it from the user-data json.
+	p = subprocess.Popen([ '/usr/bin/curl', 'http://169.254.169.254/latest/user-data' ],
+			     stdout=subprocess.PIPE,
+			     stderr=subprocess.PIPE)
+	o, e = p.communicate()
+	try:
+		data = json.loads(o)
+	except:
+		data = {}
+	server = data.get('master')
+
 
 request = 'https://%s/install/sbin/profile.cgi?os=sles&arch=x86_64&np=%d' % \
 	(server, numcpus)

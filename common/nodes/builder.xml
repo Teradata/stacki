@@ -5,15 +5,15 @@
 	</stack:description>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-	<stack:package>
-		git
-		stack-build
-	</stack:package>
+	<stack:package stack:cond="os == 'sles'">git-core</stack:package>
+	<stack:package stack:cond="os == 'redhat'">git</stack:package>
+
+	<stack:package>stack-build</stack:package>
 
 	<!-- bootstrap does this for you, but faster to do in installer -->
 	<stack:package stack:cond="os == 'sles'" stack:meta="true">

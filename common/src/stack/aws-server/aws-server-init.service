@@ -1,0 +1,9 @@
+[Unit]
+After=network.target
+After=mariadb.service 
+
+[Service]
+ExecStart=/opt/stack/sbin/aws-server-init
+
+[Install]
+WantedBy=multi-user.target

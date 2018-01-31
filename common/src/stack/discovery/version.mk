@@ -1,0 +1,1 @@
+RPM.ARCH	= noarch

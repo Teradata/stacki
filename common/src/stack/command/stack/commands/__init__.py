@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -207,6 +207,8 @@ class NetworkArgumentProcessor:
 		for arg in args:
 			rows = self.db.execute("""select name from subnets
 				where name like '%s'""" % arg)
+			if not rows:
+				continue
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
