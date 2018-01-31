@@ -171,7 +171,8 @@ class Command(stack.commands.Command,
 				nt.main=true and nt.node=n.id and
 				nt.subnet=s.id
 				"""):
-			readonly[name]['hostaddr']   = address
+			if address:
+				readonly[name]['hostaddr']   = address
 			readonly[name]['domainname'] = zone
 
 		for host in readonly:
