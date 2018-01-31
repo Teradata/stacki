@@ -17,8 +17,14 @@ import os
 import subprocess
 import json
 import time
-import urllib.error
-from urllib.request import urlopen
+try: # python3
+	from urllib.request import urlopen
+except ImportError: # python2
+	from urllib2 import urlopen
+try: # python3 
+	from urllib.error import HTTPError
+except ImportError: # python2
+	from urllib2 import HTTPError
 
 
 class InstanceInfo:
@@ -44,7 +50,7 @@ class InstanceInfo:
 			try:
 				response = urlopen('http://169.254.169.254/latest/%s' % path)
 				done	 = True
-			except urllib.error.HTTPError:
+			except HTTPError:
 				print('retry')
 				time.sleep(5)
 		value = response.read().decode()
