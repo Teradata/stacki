@@ -18,11 +18,10 @@ class Plugin(stack.commands.Plugin):
 
 		for row in self.db.select(
 			"""
-			n.name, ns.device, nw.name, s.port, sw.name, s.vlan 
+			n.name, ns.device, nw.name, s.port, sw.name, ns.vlanid
 			from switchports s, nodes n, nodes nw, networks ns, subnets sw
-			where s.host = n.id
+			where ns.node = n.id
 			and ns.id = s.interface
-			and sw.id = s.subnet
 			and s.switch = nw.id
 			"""):
 			if row[2] in switch_info:
