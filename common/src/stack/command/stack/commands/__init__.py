@@ -297,6 +297,21 @@ class SwitchArgumentProcessor:
 
 		self.db.execute(' '.join(query.split()))
 
+	def delSwitchHost(self, switch, host):
+		"""Add a host to switch
+		"""
+		query = """
+		delete from switchports
+		where interface in (
+			select id from networks where
+			node=(select id from nodes where name='%s') and
+			subnet=(select subnet from networks where
+				node=(select id from nodes where name='%s'))
+			)
+		and switch=(select id from nodes where name='%s')
+		""" % (host, switch, switch)
+		#print(query)
+		self.db.execute(' '.join(query.split()))
 	def setSwitchHostVlan(self, switch, host, vlan):
 		self.db.execute("""
 		update switchports

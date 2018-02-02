@@ -36,8 +36,4 @@ class Command(command):
 			('host', None, True),
 			])
 
-		rows = self.db.execute("""
-		delete from switchports
-		where host=(select id from nodes where name='%s')
-		and switch=(select id from nodes where name='%s')
-		""" % (host, switch))
+		self.delSwitchHost(switch, host)
