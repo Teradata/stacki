@@ -13,5 +13,5 @@ sles12_default = sles11_default
 
 sles12_uefi = sles11_uefi
 
-default = sles11_default
+default = sles12_default
 
