@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands.set.switch
-from stack.exception import ArgUnique
+from stack.exception import ArgUnique, CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
 	      stack.commands.add.switch.command):
@@ -47,4 +47,9 @@ class Command(command):
 			raise ArgUnique(self, 'switch')
 
 		for switch in switches:
-			self.addSwitchHost(switch, host, port)
+			# Make sure switch has an interface
+			if self.getSwitchNetwork(switch):
+				self.addSwitchHost(switch, host, port)
+			else:
+				raise CommandError(self,
+					"switch '%s' doesn't have an interface" % switch)
