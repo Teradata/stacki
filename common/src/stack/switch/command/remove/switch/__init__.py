@@ -27,5 +27,5 @@ class Command(command):
 			raise ArgRequired(self, 'switch')
 		
 		switches = self.getSwitchNames(args)
-
+		self.delSwitchEntries(switches)
 		self.call('remove.host', switches)
