@@ -261,45 +261,77 @@ class SwitchArgumentProcessor:
 
 		return switches
 
-	def getNetworkName(self, switchid):
-		"""Returns a switch name from the database that
-		is associated with the id 'netid'.
+	def delSwitchEntries(self, args=None):
+		"""Delete foreign key references from switchports"""
+		if not args:
+			return
+
+		for arg in args:
+			row = self.db.execute("""
+			delete from switchports
+			where switch=(select id from nodes where name='%s')
+			""" % arg)
+
+	def getSwitchNetwork(self, switch):
+		"""Returns the network the switch is on.
 		"""
-		if not switchid:
+		if not switch:
 			return ''
 
-		rows = self.db.execute("""select name from nodes where
-			id = %s""" % netid)
+		rows = self.db.execute("""
+			select subnet from networks where
+			node = (select id from nodes where name = '%s')
+			""" % switch)
 
-		if rows > 0:
-			netname, = self.db.fetchone()
+		if rows:
+			network, = self.db.fetchone()
 		else:
-			netname = ''
+			network = ''
 
-		return netname
+		return network
 
 	def addSwitchHost(self, switch, host, port):
-		"""Add a host to switch
 		"""
+		Add a host to switch.
+		Check if host has an interface on the same network as
+		the switch
+		"""
+
+		# Get the switch's network
+		switch_network = self.db.select("""
+			subnet from networks where node=(
+				select id from nodes where name='%s'
+				)
+			""" % switch)
+
+		if not switch_network:
+			raise CommandError(self,
+				"switch '%s' doesn't have an interface" % switch)
+
+		# Get the interface of the host that is on the same
+		# network as the switch
+		host_interface = self.db.select("""
+			id from networks where subnet='%s' and
+			node=(select id from nodes where name='%s')
+			""" % (switch_network[0][0],  host))
+
+		if not host_interface:
+			raise CommandError(self,
+				"host '%s' is not on a network with switch '%s'"
+				% ( host, switch ))
+
 		query = """
 		insert into switchports
 		(interface, switch, port)
-		values ((select id from networks where subnet=(
-			  select subnet from networks where node=(
-			    select id from nodes where name='%s')
-			  )
-			  and node=(select id from nodes where name='%s')
-			  limit 1 
-			),
+		values ('%s',
 			(select id from nodes where name = '%s'),
 			'%s')
-		""" % (switch, host, switch, port)
+		""" % (host_interface[0][0], switch, port)
 
 		self.db.execute(' '.join(query.split()))
 
 	def delSwitchHost(self, switch, host):
-		"""Add a host to switch
-		"""
+		"""Add a host to switch"""
 		query = """
 		delete from switchports
 		where interface in (
@@ -321,9 +353,7 @@ class SwitchArgumentProcessor:
 		""" % (vlan, host, switch))
 
 	def getSwitchesForHosts(self, hosts):
-		"""Return switches name for hosts
-		"""
-
+		"""Return switches name for hosts"""
 		_switches = []
 		for host in hosts:
 			_rows = self.db.select("""
