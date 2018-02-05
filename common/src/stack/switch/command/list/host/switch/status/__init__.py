@@ -16,6 +16,20 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List information about a switch's port(s) that a host(s) is connected to.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplies, info about
+	all the known switches is listed.
+	</arg>
+
+	<example cmd='list host switch status backend-0-0'>
+	List switch status info for any switches connected to backend-0-0.
+	</example>
+
+	<example cmd='list host switch status'>
+	List switch status info for all switches connected to all hosts.
+	</example>
 	"""
 	def run(self, params, args):
 

@@ -25,12 +25,12 @@ class Command(command):
 	all the known switches is listed.
 	</arg>
 
-	<example cmd='list host switch-0-0'>
-	List info for switch-0-0.
+	<example cmd='list switch status switch-0-0'>
+	List status info for switch-0-0.
 	</example>
 
-	<example cmd='list switch'>
-	List info for all known switches/
+	<example cmd='list switch status'>
+	List status info for all known switches/
 	</example>
 	"""
 	def run(self, params, args):
