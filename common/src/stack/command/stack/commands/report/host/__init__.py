@@ -37,24 +37,18 @@ class Command(command):
 		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 
 		aliases = {}
-		for row in self.call('list.host.alias'):
-			host  = row['host']
-			alias = row['alias']
-
-			if host not in row:
-				aliases[host] = []
-			aliases[host].append(alias)
-			
+		devices = {}
+		default = True
 		zones = {}
 		for row in self.call('list.network'):
 			zones[row['network']] = row['zone']
-	
+
 		for row in self.call('list.host.interface'):
 			ip = row['ip']
 			if not ip:
 				continue
 
-			# TODO (maybe)
+			# TODONE (maybe)
 			#
 			# The name of the interface should be the name
 			# in the interface list (not from nodes
@@ -66,11 +60,20 @@ class Command(command):
 			# implications on the dhcpd.conf, dns, and
 			# spreadsheet loading, and who knows what
 			# else.
-
 			host    = row['host']
 			network = row['network']
 			default = row['default']
+			interface = row['interface']
+			print("host: %s" %host)
 
+			aliases[host] = []
+			for row in self.call('list.host.alias',
+						[ '%s interface=%s' % (host, interface) ]):
+				if row['host'] == host and row['interface'] == interface:
+					print("row[alias]: %s" % row['alias'])
+					aliases[host].append(row['alias'])
+
+			print(network)
 			if network:
 				zone = zones[network]
 			else:
@@ -81,10 +84,10 @@ class Command(command):
 				names.append('%s.%s' % (host, zone))
 			if default:
 				names.append(host)
+			print("ALIASES: %s" %(aliases))
 			if host in aliases:
 				for alias in aliases.get(host):
 					names.append(alias)
-
 			self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
 
 
@@ -96,5 +99,5 @@ class Command(command):
 			h = f.read()
 			self.addOutput(None, h)
 			f.close()
-		
+
 		self.endOutput(padChar='', trimOwner=True)

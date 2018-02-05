@@ -22,6 +22,10 @@ class Command(stack.commands.add.host.command):
 	Host name of machine
 	</arg>
 	
+	<param type='string' name='interface' optional='0'>
+	Interface of host.
+	</param>
+
 	<param type='string' name='alias' optional='0'>
 	Alias for the host.
 	</param>
@@ -35,8 +39,9 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		
-		(alias, ) = self.fillParams([
-			('alias', None, True)
+		(alias, interface, ) = self.fillParams([
+			('alias', None, True),
+			('interface', None, True)
 			])
 		
 		if not hosts:
@@ -46,14 +51,24 @@ class Command(stack.commands.add.host.command):
 
 		host = hosts[0]
 		for dict in self.call('list.host.alias', [ 'host=%s' % host ]):
-			if alias == dict['alias']:
+			# Check if alias is already assigned to host and interface
+			if alias == dict['alias'] and\
+			 interface == dict['device'] and\
+			 hosts[0] == dict['host']:
 				raise CommandError(self, 'alias "%s" exists' % alias)
+			# Check if alias is assigned to another host
+			if alias == dict['alias'] and hosts[0] != dict['host']:
+				raise CommandError(self, 'alias "%s" exists for another host'
+									% alias)
 
+		self.db.execute("""select id from networks where
+						name='%s' and device='%s'""" % (host, interface))
+		if (self.db.fetchall()) == ():
+			raise CommandError(self, 'Interface does not exist')
+   		
 		self.db.execute("""
-			insert into aliases (node, name)
-			values (
-			(select id from nodes where name='%s'),
-			'%s'
-			)
-			""" % (host, alias))
+						insert into aliases (network, name)
+                        values ((select id from networks where 
+						name='%s' and device='%s'),'%s')
+                        """ % (host, interface, alias))
 

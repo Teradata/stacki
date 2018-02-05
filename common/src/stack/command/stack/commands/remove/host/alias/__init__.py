@@ -35,21 +35,37 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
+
 	def run(self, params, args):
-		
-		(alias, ) = self.fillParams([
-			('alias', None)
+
+
+		(alias, interface, ) = self.fillParams([
+			('alias', None),
+			('interface', None)
 			])
 
 		for host in self.getHostnames(args):
-			if not alias: 
+			if not alias and not interface:
 				self.db.execute("""
-					delete from aliases where 
-					node = (select id from nodes where name='%s')
+					delete from aliases where
+					network IN (select id from networks where name='%s')
 					""" % host)
-			else:
+			elif not alias:
 				self.db.execute("""
-					delete from aliases where 
-					node = (select id from nodes where name='%s')
+					delete from aliases where
+					network IN  (select id from networks where name='%s'
+					and device='%s')
+					""" % (host, interface))
+			elif not interface:
+				self.db.execute("""
+					delete from aliases where
+					network IN (select id from networks where name='%s')
 					and name = '%s'
 					""" % (host, alias))
+			else:
+				self.db.execute("""
+					delete from aliases where
+					network = (select id from networks where name='%s'
+					and device='%s')
+					and name = '%s'
+					""" % (host, interface, alias))
