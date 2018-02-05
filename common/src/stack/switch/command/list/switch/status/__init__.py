@@ -8,6 +8,7 @@ import stack.commands
 import stack.util
 from stack.switch import SwitchDellX1052
 import subprocess
+from stack.exception import CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
 	      stack.commands.list.command,
@@ -16,6 +17,21 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
+	List Port, Speed, State of the switch  and Mac, VLAN, Hostname, and interface
+	about each port on the switch.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplies, info about
+	all the known switches is listed.
+	</arg>
+
+	<example cmd='list host switch-0-0'>
+	List info for switch-0-0.
+	</example>
+
+	<example cmd='list switch'>
+	List info for all known switches/
+	</example>
 	"""
 	def run(self, params, args):
 
@@ -31,6 +47,10 @@ class Command(command):
 			frontend_tftp_address = _frontend['ip']
 			switch_address = switch['ip']
 			switch_name = switch['host']
+
+			# Check if the switch has an ip address
+			if not switch_address:
+				raise CommandError(self, '"%s" has no address to connect to.' % switch_name)
 
 			# Connect to switch
 			with SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
