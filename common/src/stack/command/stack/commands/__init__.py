@@ -462,8 +462,8 @@ class HostArgumentProcessor:
 						hostDict[host] = s
 						if host not in explicit:
 							explicit[host] = False
-#					Debug('group %s is %s for %s' %
-#				      (exp, res, host))
+					# Debug('group %s is %s for %s' %
+					# 	(exp, res, host))
 
 			# glob regex hostname
 
