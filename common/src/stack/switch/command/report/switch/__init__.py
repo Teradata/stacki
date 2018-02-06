@@ -30,7 +30,7 @@ class Command(command):
 
 
 		#hosts = self.getHostnames(args)
-		for switch in self.call('list.switch'):
+		for switch in self.call('list.switch', args):
 		#	osname = self.getHostAttr(host, 'os')
 		#	self.runImplementation(osname, [host])
 			frontend = self.db.getHostname('localhost')
