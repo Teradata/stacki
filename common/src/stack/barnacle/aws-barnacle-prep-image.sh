@@ -19,4 +19,17 @@ rm /root/.ssh/authorized_keys
 systemctl disable stack-aws-client-register
 systemctl enable  stack-aws-barnacle
 
+# dhclient needs more cleaning (CentOS)
+
+if [ -x /var/lib/dhclient ]; then
+	rm -rf /var/lib/dhclient/dhclient*
+	rm -f  /etc/udev/rules.d/70-persistent-net.rules
+
+	cfg=/etc/sysconfig/network-scripts/ifcfg-eth0
+	if [ -f $cfg ]; then
+		fgrep -v MACADDR /etc/sysconfig/network-scripts/ifcfg-eth0 > /tmp/ifcfg-eth0
+		mv /tmp/ifcfg-eth0 $cfg
+	fi
+fi
+
 /sbin/init 0

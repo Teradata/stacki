@@ -126,6 +126,7 @@ instructions['kernel']	   = kernel
 instructions['ramdisk']	   = ramdisk
 instructions['boot']	   = boot
 instructions['reboot']	   = boot == 'install'
+#instructions['reboot']	   = False
 
 out = json.dumps(instructions)
 print('Content-type: application/octet-stream')
