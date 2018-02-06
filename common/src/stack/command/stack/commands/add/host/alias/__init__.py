@@ -11,6 +11,7 @@
 # @rocks@
 
 import stack.commands
+import socket
 from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
@@ -47,6 +48,15 @@ class Command(stack.commands.add.host.command):
 			raise ArgRequired(self, 'host')
 		if not len(hosts) == 1:
 			raise ArgUnique(self, 'host')
+
+		if alias.isdigit():
+			raise CommandError(self, 'aliases cannot be only numbers')
+
+		try:
+			socket.inet_aton(alias)
+			raise CommandError(self, 'aliases cannot be an IP address')
+		except socket.error:
+			pass
 
 		host = hosts[0]
 		for dict in self.call('list.host.alias'):

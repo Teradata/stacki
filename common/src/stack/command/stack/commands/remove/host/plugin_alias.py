@@ -37,5 +37,5 @@ class Plugin(stack.commands.Plugin):
 	def run(self, hosts):
 		for host in hosts:
 			self.owner.db.execute("""delete from aliases where
-				node = (select id from nodes where name = '%s') """ %
+				network IN (select id from networks where name = '%s') """ %
 				(host))
