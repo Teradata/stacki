@@ -33,8 +33,6 @@ class Command(command):
 		for switch in self.call('list.switch'):
 		#	osname = self.getHostAttr(host, 'os')
 		#	self.runImplementation(osname, [host])
-			switch_interface, *xargs = self.call('list.host.interface', [switch['switch']])
-			switch_network,  = self.call('list.network', [switch['switch']])
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
 			n.name, s.port, i.vlanid
@@ -47,13 +45,6 @@ class Command(command):
 			""" % switch['switch'])
 
 			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
-
-			# Print out switch's ip address block
-			self.addOutput(frontend, '!')
-			self.addOutput(frontend, 'interface vlan 1')
-			self.addOutput(frontend, '  %s %s' % (switch_interface['ip'], switch_network['mask']))
-			self.addOutput(frontend, '  no ip address dhcp')
-			self.addOutput(frontend, '!')
 
 			# Set blank vlan from 2-50
 			self.addOutput(frontend, 'vlan 2-50')
