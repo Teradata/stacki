@@ -18,6 +18,10 @@ class command(stack.commands.HostArgumentProcessor,
 class Command(command):
 	"""
 	Output the switch configuration file.
+
+	<example cmd='report switch'>
+	Outputs data for /tftpboot/pxelunux/upload
+	</example>
 	"""
 
 	def run(self, params, args):
@@ -30,7 +34,7 @@ class Command(command):
 		#	osname = self.getHostAttr(host, 'os')
 		#	self.runImplementation(osname, [host])
 			switch_interface, *xargs = self.call('list.host.interface', [switch['switch']])
-			switch_network = switch_interface['network']
+			switch_network,  = self.call('list.network', [switch['switch']])
 			frontend = self.db.getHostname('localhost')
 			hosts = self.db.select("""
 			n.name, s.port, i.vlanid
@@ -43,7 +47,16 @@ class Command(command):
 			""" % switch['switch'])
 
 			self.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
-			self.addOutput(frontend, 'vlan 2-100')
+
+			# Print out switch's ip address block
+			self.addOutput(frontend, '!')
+			self.addOutput(frontend, 'interface vlan 1')
+			self.addOutput(frontend, '  %s %s' % (switch_interface['ip'], switch_network['mask']))
+			self.addOutput(frontend, '  no ip address dhcp')
+			self.addOutput(frontend, '!')
+
+			# Set blank vlan from 2-50
+			self.addOutput(frontend, 'vlan 2-50')
 			for (host, port, vlan) in hosts:
 				attr = self.getHostAttr(host, 'appliance')
 				if attr == 'frontend':
