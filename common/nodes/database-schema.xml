@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
   Node		int(11) NOT NULL default '0',
-  Network		int(11) NOT NULL default NULL,
+  Network		int(11) NOT NULL default '0',
   PRIMARY KEY (ID) 
 );
 
