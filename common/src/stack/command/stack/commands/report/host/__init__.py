@@ -35,20 +35,17 @@ class Command(command):
 		self.addOutput(None, stack.text.DoNotEdit())
 		self.addOutput(None, '#  Site additions go in /etc/hosts.local\n')
 		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
-
 		aliases = {}
-		devices = {}
-		default = True
 		zones = {}
 		for row in self.call('list.network'):
 			zones[row['network']] = row['zone']
-
+	
 		for row in self.call('list.host.interface'):
 			ip = row['ip']
 			if not ip:
 				continue
 
-			# TODONE (maybe)
+			# TODO (maybe)
 			#
 			# The name of the interface should be the name
 			# in the interface list (not from nodes
@@ -64,16 +61,13 @@ class Command(command):
 			network = row['network']
 			default = row['default']
 			interface = row['interface']
-			print("host: %s" %host)
 
 			aliases[host] = []
 			for row in self.call('list.host.alias',
 						[ '%s interface=%s' % (host, interface) ]):
 				if row['host'] == host and row['interface'] == interface:
-					print("row[alias]: %s" % row['alias'])
 					aliases[host].append(row['alias'])
 
-			print(network)
 			if network:
 				zone = zones[network]
 			else:
@@ -84,7 +78,6 @@ class Command(command):
 				names.append('%s.%s' % (host, zone))
 			if default:
 				names.append(host)
-			print("ALIASES: %s" %(aliases))
 			if host in aliases:
 				for alias in aliases.get(host):
 					names.append(alias)
