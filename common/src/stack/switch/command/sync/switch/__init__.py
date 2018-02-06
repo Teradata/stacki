@@ -49,6 +49,10 @@ class Command(command):
 		persistent = self.str2bool(persistent)
 
 		switches = self.getSwitchNames(args)
+
+		# Run report switch
+		self.report('report.switch')
+
 		for switch in self.call('list.host.interface', switches):
 
 			# Get frontend ip for tftp address
