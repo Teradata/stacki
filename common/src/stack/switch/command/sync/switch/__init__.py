@@ -15,7 +15,30 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	Uploads config file to switch
+	Reconfigure switch and optionally set the configuration 
+	to the startup configuration.
+
+	<arg optional='1' type='string' name='switch' repeat='1'>
+	Zero, one or more switch names. If no switch names are supplied,
+	all switches will be reconfigured.
+	</arg>
+
+	<param type='boolean' name='persistent'>
+	If "yes", then set the startup configuration.
+	The default is: yes.
+	</param>
+
+	<example cmd="sync switch switch-0-0">
+	Reconfigure and set startup configuration on switch-0-0.
+	</example>
+
+	<example cmd="sync switch switch-0-0 persistent=no">
+	Reconfigure switch-0-0 but dont set the startup configuration..
+	</example>
+
+	<example cmd="sync switch">
+	Reconfigure and set startup configuration on all switches.
+	</example>
 	"""
 	def run(self, params, args):
 
