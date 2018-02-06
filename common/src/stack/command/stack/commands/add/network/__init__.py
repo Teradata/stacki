@@ -99,9 +99,16 @@ class Command(stack.commands.add.command):
 			msg = '%s/%s is not a valid network address and subnet mask combination'
 			raise CommandError(self, msg % (address, mask))
 
-		self.db.execute("""
-			insert into subnets 
+		if gateway:
+			subnet_sql = """insert into subnets 
 			(name, address, mask, gateway, mtu, zone, dns, pxe)
-			values 
-			('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
-			""" % (name, address, mask, gateway, mtu, zone, dns, pxe))
+			values ('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
+			""" % (name, address, mask, gateway, mtu, zone, dns, pxe)
+
+		else:
+			subnet_sql = """ insert into subnets 
+			(name, address, mask, mtu, zone, dns, pxe)
+			values ('%s', '%s', '%s', '%s', '%s', %s, %s)
+			""" % (name, address, mask, mtu, zone, dns, pxe)
+			
+		self.db.execute(subnet_sql)
