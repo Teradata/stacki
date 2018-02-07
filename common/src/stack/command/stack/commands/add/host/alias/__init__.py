@@ -64,7 +64,7 @@ class Command(stack.commands.add.host.command):
 		host = hosts[0]
 		for dict in self.call('list.host.alias'):
 			if alias == dict['alias'] and\
-			 interface == dict['device'] and\
+			 interface == dict['interface'] and\
 			 hosts[0] == dict['host']:
 				raise CommandError(self, 'alias "%s" exists' % alias)
 			if alias == dict['alias'] and hosts[0] != dict['host']:
