@@ -8,6 +8,7 @@ import stack.commands
 import stack.util
 import stack.switch
 import subprocess
+from stack.exception import CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
 	stack.commands.sync.command):
@@ -56,8 +57,12 @@ class Command(command):
 		for switch in self.call('list.host.interface', switches):
 
 			# Get frontend ip for tftp address
-			(frontend, *args) = [host for host in self.call('list.host.interface', ['localhost']) 
-				if host['network'] == switch['network']]	
+			try:
+				(frontend, *args) = [host for host in self.call('list.host.interface', ['localhost']) 
+					if host['network'] == switch['network']]	
+			except:
+				raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])	
+
 			frontend_tftp_address = frontend['ip']
 			switch_address = switch['ip']
 			switch_name = switch['host']
