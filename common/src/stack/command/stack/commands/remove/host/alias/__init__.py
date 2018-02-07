@@ -29,6 +29,7 @@ class Command(stack.commands.remove.host.command):
 
 	<example cmd='remove host alias backend-0-0 alias=c-0-0'>
 	Removes the alias "c-0-0" for host "backend-0-0".
+	</example>
 
 	<example cmd='remove host alias backend-0-0 interface=eth0'>
 	Removes all aliases for "backend-0-0" assigned to "eth0"
