@@ -12,14 +12,15 @@
 
 
 import stack.commands
+from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.remove.host.command):
 	"""
-	Remove an alias from a host(s).
+	Remove an alias from a host.
 
-	<arg type='string' name='host' optional='1' repeat='1'>
-	One hosts.
+	<arg type='string' name='host' optional='0'>
+	One host.
 	</arg>
 	
 	<param type='string' name='alias'>
@@ -27,11 +28,14 @@ class Command(stack.commands.remove.host.command):
 	</param>
 
 	<example cmd='remove host alias backend-0-0 alias=c-0-0'>
-	Removes the alias c-0-0 for host backend-0-0.
+	Removes the alias "c-0-0" for host "backend-0-0".
+
+	<example cmd='remove host alias backend-0-0 interface=eth0'>
+	Removes all aliases for "backend-0-0" assigned to "eth0"
 	</example>
 
 	<example cmd='remove host alias backend-0-0'>
-	Removes all aliases for backend-0-0.
+	Removes all aliases for "backend-0-0".
 	</example>
 	"""
 
@@ -41,6 +45,12 @@ class Command(stack.commands.remove.host.command):
 			('alias', None),
 			('interface', None)
 			])
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+		if not len(hosts) == 1:
+			raise ArgUnique(self, 'host')
 
 		for host in self.getHostnames(args):
 			if not alias and not interface: 
