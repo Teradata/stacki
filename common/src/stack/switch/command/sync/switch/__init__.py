@@ -46,7 +46,7 @@ class Command(command):
 			('persistent', False)
 			])
 
-		persistent = self.str2bool(persistent)
+		_persistent = self.str2bool(persistent)
 
 		switches = self.getSwitchNames(args)
 
@@ -63,4 +63,4 @@ class Command(command):
 			switch_name = switch['host']
 			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as _switch:
 				_switch.set_tftp_ip(frontend_tftp_address)
-				_switch.configure(persistent=persistent)
+				_switch.configure(persistent=_persistent)

@@ -289,7 +289,7 @@ class SwitchDellX1052(Switch):
 			if persistent:
 				self.apply_configuration()
 		except Exception as found_error:
-			self.log.error("%s: had exception: %s" % (self.switch_ip_address, str(found_error.message)))
+			print("%s: had exception: %s" % (self.switch_ip_address, str(found_error)))
 			self.__exit__()
 
 	def set_filenames(self, filename):
