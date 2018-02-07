@@ -50,6 +50,11 @@ class Command(command):
 			self.addOutput(frontend, 'vlan 2-50')
 			for (host, port, vlan) in hosts:
 				attr = self.getHostAttr(host, 'appliance')
+
+				# if vlan isn't set, set vlan to '1'
+				if not vlan:
+					vlan = '1'
+
 				if attr == 'frontend':
 					self.addOutput(frontend, '!')
 					self.addOutput(frontend, 'interface gigabitethernet1/0/%s' % port)
