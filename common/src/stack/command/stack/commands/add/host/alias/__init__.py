@@ -71,13 +71,15 @@ class Command(stack.commands.add.host.command):
 				raise CommandError(self, 'alias "%s" exists' % alias)
 
 		self.db.execute("""select id from networks where
-				name='%s' and device='%s'""" % (host, interface))
+				node = (select id from nodes where name='%s')
+				and device='%s'""" % (host, interface))
 		if (self.db.fetchall()) == ():
 			raise CommandError(self, 'Interface does not exist')
 
 		self.db.execute("""
 			insert into aliases (network, name)
 			values ((select id from networks where
-			name='%s' and device='%s'),'%s')
+			node = (select id from nodes where name = '%s')
+			and device='%s'),'%s')
 			""" % (host, interface, alias))
 

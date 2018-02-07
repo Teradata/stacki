@@ -46,7 +46,7 @@ class Command(stack.commands.list.host.command):
 		for host in self.getHostnames(args):
 			if interface == None:
 				self.db.execute("""select device from networks where
-						node = (select id from nodes where name='%s')
+						node = (select id from nodes where name = '%s')
 						""" % host)
 				devices = self.db.fetchall()
 			else:
@@ -55,7 +55,8 @@ class Command(stack.commands.list.host.command):
 				self.db.execute("""
 						select name from aliases where
 						network = (select id from networks where 
-						name='%s' and device='%s')""" % (host, device))
+						node = (select id from nodes where name = '%s')
+						and device='%s')""" % (host, device))
 				for alias, in self.db.fetchall():
 					self.addOutput(host, (alias, device))
 

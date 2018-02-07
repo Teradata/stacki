@@ -57,24 +57,28 @@ class Command(stack.commands.remove.host.command):
 			if not alias and not interface: 
 				self.db.execute("""
 					delete from aliases where 
-					network IN (select id from networks where name='%s')
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s'))
 					""" % host)
 			elif not alias:
 				self.db.execute("""
 					delete from aliases where 
-					network IN  (select id from networks where name='%s'
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s')
 					and device='%s')
 					""" % (host, interface))
 			elif not interface:
 				self.db.execute("""
 					delete from aliases where 
-					network IN (select id from networks where name='%s')
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s'))
 					and name = '%s'
 					""" % (host, alias))
 			else:
 				self.db.execute("""
 					delete from aliases where 
-					network = (select id from networks where name='%s'
+					network = (select id from networks where 
+					node = (select id from nodes where name = '%s')
 					and device='%s')
 					and name = '%s'
 					""" % (host, interface, alias))
