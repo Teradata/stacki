@@ -27,12 +27,8 @@ class Command(command):
 	Port the host is connected to the switch on
 	</param>
 
-	<param type='string' name='vlan' optional='1'>
-	Vlan ID to be set on the switch
-	</param>
-	
-	<example cmd='add switch host switch-0 host=backend-0 port=20 vlan=2'>
-	Add host backend-0 to switch-0 connected to port 20 with vlan 2
+	<example cmd='add switch host switch-0 host=backend-0 port=20'>
+	Add host backend-0 to switch-0 connected to port 20
 	</example>
 	"""
 
