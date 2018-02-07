@@ -4,10 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands.set.switch
+import stack.commands
 from stack.exception import ArgUnique, CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
+	      stack.commands.HostArgumentProcessor,
 	      stack.commands.add.switch.command):
 	pass
 
@@ -41,6 +42,9 @@ class Command(command):
 		switches = self.getSwitchNames(args)
 		if len(switches) > 1:
 			raise ArgUnique(self, 'switch')
+
+		# Check if host exists
+		hosts = self.getHostnames([host])
 
 		for switch in switches:
 			# Make sure switch has an interface
