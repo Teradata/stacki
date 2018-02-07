@@ -49,6 +49,9 @@ class Command(stack.commands.add.host.command):
 		if not len(hosts) == 1:
 			raise ArgUnique(self, 'host')
 
+		if any(alias in hostnames for hostnames in self.getHostnames()):
+			raise CommandError(self, 'Hostname already in use.')
+
 		if alias.isdigit():
 			raise CommandError(self, 'aliases cannot be only numbers')
 
