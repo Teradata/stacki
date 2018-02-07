@@ -12,6 +12,7 @@
 
 
 import stack.commands
+from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.remove.host.command):
@@ -41,6 +42,12 @@ class Command(stack.commands.remove.host.command):
 			('alias', None),
 			('interface', None)
 			])
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+		if not len(hosts) == 1:
+			raise ArgUnique(self, 'host')
 
 		for host in self.getHostnames(args):
 			if not alias and not interface: 
