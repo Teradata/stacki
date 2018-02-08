@@ -58,27 +58,35 @@ class Command(stack.commands.remove.host.command):
 		if not all and not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 
+		networks = ()
 		for host in self.getHostnames(args):
 			if all:
 				self.db.execute("""
-					delete from networks where
+					select id from networks where
 					node=(select id from nodes where name='%s')
 					""" %  (host))
+				networks = self.db.fetchall()
 			elif interface:
+				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
-					delete from networks where
+					select id from networks where
 					node=(select id from nodes where name='%s')
 					and device like '%s'
 					""" %  (host, interface))
 
 				if not rows_affected:
 					raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
+				networks = self.db.fetchall()
 			else:
+				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
-					delete from networks where
+					select id from networks where
 					node=(select id from nodes where name='%s')
 					and mac like '%s'
 					""" %  (host, mac))
 
 				if not rows_affected:
 					raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))
+				networks = self.db.fetchall()
+			
+			self.runPlugins(networks)
