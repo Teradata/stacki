@@ -37,8 +37,11 @@ class Command(command):
 		for switch in self.call('list.host.interface', _switches):
 
 			# Get frontend ip for tftp address
-			frontend, *xargs = [host for host in self.call('list.host.interface', ['localhost']) 
-					if host['network'] == switch['network']]
+			try:
+				(_frontend, *args) = [host for host in self.call('list.host.interface', ['localhost'])
+						if host['network'] == switch['network']]
+			except:
+				raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])
 
 			frontend_tftp_address = frontend['ip']
 			switch_address = switch['ip']
