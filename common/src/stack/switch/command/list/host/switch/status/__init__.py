@@ -6,8 +6,6 @@
 
 import stack.commands
 import stack.util
-from stack.switch import SwitchDellX1052
-import subprocess
 from stack.exception import CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
@@ -19,9 +17,9 @@ class Command(command):
 	"""
 	List information about a switch's port(s) that a host(s) is connected to.
 
-	<arg optional='1' type='string' name='switch' repeat='1'>
-	Zero, one or more switch names. If no switch names are supplies, info about
-	all the known switches is listed.
+	<arg optional='1' type='string' name='host' repeat='1'>
+	Zero, one or more host names. If no hosts names are supplies, info about
+	all the known hosts is listed.
 	</arg>
 
 	<example cmd='list host switch status backend-0-0'>
@@ -34,36 +32,13 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
-		macs = {}
+		self.hosts = self.getHostnames(args)
 		_switches = self.getSwitchNames()
-		_hosts = list(set(self.getHostnames(args)).difference(_switches))
-		_switches = list(self.getSwitchesForHosts(_hosts))
 		self.beginOutput()
 		for switch in self.call('list.host.interface', _switches):
 
-			# Get frontend ip for tftp address
-			try:
-				(_frontend, *args) = [host for host in self.call('list.host.interface', ['localhost'])
-						if host['network'] == switch['network']]
-			except:
-				raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])
-
-			frontend_tftp_address = _frontend['ip']
-			switch_address = switch['ip']
 			switch_name = switch['host']
-
-			with SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
-				switch.set_tftp_ip(frontend_tftp_address)
-				switch.connect()
-				switch.get_interface_status_table()
-
-				# Get hosts connected to switch
-				_hosts = self.getHostsForSwitch(switch_name)
-
-				ports = switch.parse_interface_status_table()
-				for _port,_ , _, _speed, _, _, _state, _, _ in ports:
-					if _port in _hosts:
-						host, interface, port, vlan, mac = _hosts[_port].values()
-						self.addOutput(host, [mac, interface, vlan, switch_name,  _port, _speed, _state])
+			model = self.getHostAttr(switch_name, 'model')
+			self.runImplementation(model, [switch])
 
 		self.endOutput(header=['host', 'mac', 'interface', 'vlan', 'switch', 'port', 'speed', 'state'])
