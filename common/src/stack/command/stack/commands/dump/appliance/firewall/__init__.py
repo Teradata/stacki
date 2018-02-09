@@ -23,6 +23,15 @@ import stack.commands.dump.firewall
 class Command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.dump.firewall.command):
 	"""
+	Dump the set of firewall rules for appliances.
+
+	<arg optional='1' type='string' name='appliance'>
+	Name of appliance
+	</arg>
+
+	<example cmd='dump appliance firewall backend'>
+	List the firewall rules for backend appliances
+	</example>
 	"""
 
 	def run(self, params, args):

@@ -26,6 +26,14 @@ import stack.commands
 class Command(stack.commands.dump.host.command):
 	"""
 	Dump the public keys for hosts.
+
+	<arg optional='1' type='string' name='host'>
+	Host name of machine
+	</arg>
+
+	<example cmd='dump host key stacki-01'>
+	Dumps the public keys for stacki-01
+	</example>
 	"""
 
 	def run(self, params, args):

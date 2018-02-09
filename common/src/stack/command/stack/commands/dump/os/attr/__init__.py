@@ -12,6 +12,14 @@ import stack.commands
 class Command(stack.commands.dump.os.command):
 	"""
 	Dump the set of attributes for the OS
+
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero, one or more os names
+	</arg>
+
+	<example cmd='dump os attr redhat'>
+	Dump attribute information for redhat os.
+	</example>
 	"""
 
 	def run(self, params, args):

@@ -21,6 +21,11 @@ class Command(stack.commands.ApplianceArgumentProcessor,
 
 	"""
 	Dump the disk array controller configuration
+
+	<example cmd='dump storage controller'>
+	Dump the global, appliance and host specific controller
+	configuration
+	</example>
 	"""
 
 	def dumpit(self, hosts):

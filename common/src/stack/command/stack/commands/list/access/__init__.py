@@ -11,6 +11,10 @@ import stack.commands
 class Command(stack.commands.list.command):
 	"""
 	List the Access control for RCL commands
+
+	<example cmd='list access'>
+	List the Access control for RCL commands
+	</example>
 	"""		
 
 	def run(self, params, args):

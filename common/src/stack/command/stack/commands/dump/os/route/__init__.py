@@ -28,7 +28,15 @@ import stack.commands
 
 class Command(stack.commands.dump.os.command):
 	"""
-	Dump the set of attributes
+	Dump the set of routes for an OS.
+
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero, one or more os names
+	</arg>
+
+	<example cmd='dump os route redhat'>
+	Dump route information for redhat os
+	</example>
 	"""
 
 	def run(self, params, args):

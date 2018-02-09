@@ -23,6 +23,8 @@ class Command(stack.commands.add.command):
 
         This a used exclusively by stacki developers to ensure all files
         have current copyright statements.
+
+	<arg/>
         """
 
         def iter(self, dir, file, root):

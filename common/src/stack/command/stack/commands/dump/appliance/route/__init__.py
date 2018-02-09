@@ -28,6 +28,15 @@ import stack.commands
 
 class Command(stack.commands.dump.appliance.command):
 	"""
+	Dump the set of routes for appliances.
+
+	<arg optional='1' type='string' name='appliance'>
+	Name of appliance
+	</arg>
+
+	<example cmd='dump appliance route backend'>
+	List the routes for backend appliances
+	</example>
 	"""
 
 	def run(self, params, args):

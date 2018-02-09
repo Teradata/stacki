@@ -51,6 +51,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 
 class Command(command):
 	"""
+	Updates bootaction parameters.
 	"""
 
 	def run(self, params, args):

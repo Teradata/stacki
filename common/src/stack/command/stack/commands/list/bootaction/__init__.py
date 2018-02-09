@@ -10,6 +10,10 @@ import stack.commands
 class Command(stack.commands.list.command):
 	"""
 	Lists the available PXE OS Install targets.
+	
+	<example cmd='list bootaction'>
+	Lists the available PXE OS Install targets.
+	</example>
 	"""
 
 	def run(self, params, args):

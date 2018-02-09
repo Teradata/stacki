@@ -20,7 +20,7 @@ class Command(stack.commands.add.host.command):
 	Add a public key for a host. One use of this public key is to 
 	authenticate messages sent from remote services.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='0'>
 	Host name of machine
 	</arg>
 	
