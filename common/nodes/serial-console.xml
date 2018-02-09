@@ -60,6 +60,10 @@ line = f.readline().split()
 f.close()
 
 for l in line:
+	if l == 'skip_read_only_serial_console':
+		return
+
+for l in line:
 	if l.startswith('console='):
 		a = l.split('=')
 		for tty in a[1].split(','):
