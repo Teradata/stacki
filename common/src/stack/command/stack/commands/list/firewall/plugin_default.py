@@ -60,7 +60,7 @@ class Plugin(stack.commands.Plugin):
 
 	# Add firewall rules for pxe=True networks
 	def addIntrinsicRules(self):
-		LUDICROUS_PORT = 3285
+		LUDICROUS_PORT = 3825
 
 		# Get list of networks with pxe=True
 		netList = self.owner.call('list.network', ['pxe=True'])
