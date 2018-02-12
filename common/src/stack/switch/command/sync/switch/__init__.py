@@ -47,7 +47,7 @@ class Command(command):
 			('persistent', False)
 			])
 
-		_persistent = self.str2bool(persistent)
+		self.persistent = self.str2bool(persistent)
 
 		switches = self.getSwitchNames(args)
 
@@ -56,16 +56,6 @@ class Command(command):
 
 		for switch in self.call('list.host.interface', switches):
 
-			# Get frontend ip for tftp address
-			try:
-				(frontend, *args) = [host for host in self.call('list.host.interface', ['localhost']) 
-					if host['network'] == switch['network']]	
-			except:
-				raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])	
-
-			frontend_tftp_address = frontend['ip']
-			switch_address = switch['ip']
 			switch_name = switch['host']
-			with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as _switch:
-				_switch.set_tftp_ip(frontend_tftp_address)
-				_switch.configure(persistent=_persistent)
+			model = self.getHostAttr(switch_name, 'model')
+			self.runImplementation(model, [switch])
