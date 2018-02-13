@@ -49,7 +49,7 @@ def patch():
 
 <stack:script stack:stage="install-post" stack:cond="read_only_serial_console">
 
-<stack:file stack:name="/tmp/get_serial_tty" stack:perms="700">#!/opt/stack/bin/python3
+<stack:file stack:name="/usr/lib/YaST2/startup/Second-Stage/S07-stacki-readonly-terminal" stack:perms="755">#!/opt/stack/bin/python3
 
 print('#!/bin/sh')
 print('log "S07-stacki-readonly-terminal..."')
@@ -71,9 +71,6 @@ for l in line:
 				print('stty -F /dev/%s -cread' % (tty))
 				break
 </stack:file>
-
-/tmp/get_serial_tty > /usr/lib/YaST2/startup/Second-Stage/S07-stacki-readonly-terminal
-chmod 755 /usr/lib/YaST2/startup/Second-Stage/S07-stacki-readonly-terminal
 
 </stack:script>
 
