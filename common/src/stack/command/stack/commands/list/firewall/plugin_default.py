@@ -28,6 +28,7 @@
 
 import json
 import stack.commands
+from stack.mq import ports as rmqports
 
 class Plugin(stack.commands.Plugin):
 	"""
@@ -70,7 +71,8 @@ class Plugin(stack.commands.Plugin):
 			chain = 'all'
 			output_network = ''
 			flags = '-m multiport'
-			service_list = ['http', 'https', 'tftp', 'ssh', str(LUDICROUS_PORT)]
+			service_list = ['http', 'https', 'tftp', 'ssh', str(LUDICROUS_PORT),
+				str(rmqports.publish), str(rmqports.subscribe), str(rmqports.control)]
 			net_name = network['network']
 			comment = 'Accept all traffic on %s network - Intrinsic rule' % ( net_name)
 			self.intrinsic_rules.append(('STACKI-INTRINSIC', 'filter', ','.join(service_list),
