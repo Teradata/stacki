@@ -19,11 +19,9 @@ Join the GoogleGroups  [mailing list](https://groups.google.com/forum/#!forum/st
 
 Longer, detailed solutions get posted to the mailing list. 
 
-Join the Slack Channel:
+Join the [Slack Channel](https://join.slack.com/t/stacki/shared_invite/enQtMzEwOTIzMTIyOTk1LWMzMGJhZGUxNDc2ODczMDM1ODkwYmM5MGZlOWUxMTVmMDQ5NzZhZmVmNDEwZDIwZWY3NzVlOGM0NjIxMjJiYjY)
 
 Lots of things happen here. Smart things. Funny things. Questions whose answer is usually 'RTFM' except we know how to say it nicely. Well, some of us do.
-
-Once on mailing list, email a request to be added. Eventually we'll get around to a 
 
 # What is Stacki?
 
