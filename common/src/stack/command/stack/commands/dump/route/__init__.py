@@ -28,7 +28,11 @@ import stack.commands
 
 class Command(stack.commands.dump.command):
 	"""
-	Dump the set of routes
+	Dump the set of global routes
+
+	<example cmd='dump route'>
+	Dump all global routes
+	</example>
 	"""
 
 	def run(self, params, args):

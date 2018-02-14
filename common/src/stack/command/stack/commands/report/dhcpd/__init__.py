@@ -39,6 +39,9 @@ class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.
+	<example cmd='report dhcpd'>
+	Output the DHCP server configuration file.
+	</example>
 	"""
 
 

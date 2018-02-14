@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -15,6 +15,11 @@ STACK=/opt/stack/bin/stack
 cd /tmp
 $STACK report siteattr > site.attrs
 echo platform:aws     >> site.attrs
+
+ifconfig       > /dev/console
+cat site.attrs > /dev/console
+
+
 $STACK list node xml server attrs=site.attrs > profile.xml
 cat profile.xml | $STACK list host profile chapter=main profile=bash > profile.sh 2>&1
 bash profile.sh > barnacle.log 2>&1

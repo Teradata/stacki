@@ -10,6 +10,10 @@ import stack.commands
 class Command(stack.commands.list.command):
 	"""
 	List the current groups and the number of member hosts in each.
+
+	<example cmd='list group'>
+	List the current groups and the number of member hosts in each
+	</example>
 	"""		
 
 	def run(self, params, args):

@@ -82,7 +82,9 @@ class Command(stack.commands.HostArgumentProcessor,
 					s += ' --dport %s' % rule['service']
 					if rule['flags'] is not None:
 						s += ' %s\n' % rule['flags']
-
+			else:
+					if rule['flags'] is not None:
+						s += ' %s\n' % rule['flags']
 
 			self.addOutput(host, s)
 			self.addOutput(host, '')

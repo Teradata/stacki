@@ -15,6 +15,14 @@ import stack.commands
 
 class Command(stack.commands.dump.host.command):
 	"""
+	Dump the set of routes for hosts.
+	<arg optional='1' type='string' name='host'>
+	Host name of machine
+	</arg>
+
+	<example cmd='dump host route compute-0-0'>
+	Dump the routes for compute-0-0.
+	</example>
 	"""
 
 	def run(self, params, args):

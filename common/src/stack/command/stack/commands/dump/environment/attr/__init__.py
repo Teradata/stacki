@@ -12,6 +12,9 @@ import stack.commands
 class Command(stack.commands.dump.environment.command):
 	"""
 	Dump the set of attributes for the Environment
+	<example cmd='dump environment attr'>
+	Dump all the environment attributes
+	</example>
 	"""
 
 	def run(self, params, args):

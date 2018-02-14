@@ -30,6 +30,15 @@ import stack.commands.dump.firewall
 class Command(stack.commands.dump.host.command,
 	stack.commands.dump.firewall.command):
 	"""
+	Dump the set of host firewall rules
+
+	<arg optional='1' type='string' name='host'>
+	Host name of machine
+	</arg>
+
+	<example cmd='dump host firewall'>
+	Dump the set of all host firewall rules
+	</example>
 	"""
 
 	def run(self, params, args):

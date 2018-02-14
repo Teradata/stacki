@@ -11,6 +11,6 @@ This repository includes the following code from other projects.
 * rcs-5.7.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/rcs-5.7.tar.gz]
 * redis-4.0.2.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/redis-4.0.2.tar.gz]
 * sc-im-0.4.0-20161021.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/sc-im-0.4.0-20161021.tgz]
-* storcli-1.17.08-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/storcli-1.17.08-1.noarch.rpm]
+* storcli-007.0409.0000.0000-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/storcli-007.0409.0000.0000-1.noarch.rpm]
 * wxPython-4.0.0a3.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/wxPython-4.0.0a3.tar.gz]
 * zeromq-4.2.2.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/zeromq-4.2.2.tar.gz]

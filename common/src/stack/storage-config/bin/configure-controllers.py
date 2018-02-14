@@ -15,6 +15,7 @@ from stack_site import *
 sys.path.append('/opt/stack/lib')
 from stacki_storage import *
 
+from stack.bool import str2bool
 
 ##
 ## functions
@@ -71,25 +72,25 @@ def getController():
 ##
 
 if 'nukecontroller' in attributes:
-	nukecontroller = attributes['nukecontroller']
+	nukecontroller = str2bool(attributes['nukecontroller'])
 else:
-	nukecontroller = 'false'
+	nukecontroller = False
 
 if 'secureerase' in attributes:
-	secureerase = attributes['secureerase']
+	secureerase = str2bool(attributes['secureerase'])
 else:
-	secureerase = 'false'
+	secureerase = False
 
 #
 # if 'secureerase' is true, then that implies that 'nukecontroller' is true
 #
-if attr2bool(secureerase):
-	nukecontroller = 'true'
+if secureerase:
+	nukecontroller = True
 	
 #
 # only run this code if 'nukecontroller' is true
 #
-if not attr2bool(nukecontroller):
+if not nukecontroller:
 	sys.exit(0)
 
 # Get the Controller Object, the adapter info,
@@ -169,7 +170,8 @@ for arrayid in arrayids:
 		freeslots[adapter] = ctrl.getSlots(adapter)
 
 		for slot in freeslots[adapter]:
-			ctrl.doSecureErase(enclosure, adapter, slot)
+			if secureerase:
+				ctrl.doSecureErase(enclosure, adapter, slot)
 
 	slots.sort(key = sortids)
 

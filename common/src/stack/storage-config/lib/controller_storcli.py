@@ -3,6 +3,7 @@
 import subprocess
 import json
 import re
+from stack.bool import str2bool
 
 class CLI:
 
@@ -64,7 +65,12 @@ class CLI:
 		else:
 			slotaddress = '/c%d/s%d' % (adapter, slot)
 
-		self.run([slotaddress, 'secureerase', 'force'])
+		res = self.run([slotaddress, 'show','all'])
+		if res['Command Status']['Status'] == 'Failure':
+			return
+		s = res['Response Data']['Drive %s - Detailed Information' % slotaddress]['Drive %s Policies/Settings' % slotaddress]['Cryptographic Erase Capable']
+		if str2bool(s):
+			self.run([slotaddress, 'secureerase', 'force'])
 
 	def getAdapter(self):
 		res = self.run(['show', 'ctrlcount'])

@@ -17,6 +17,10 @@ import stack.commands
 class Command(stack.commands.report.command):
 	"""
 	Reports hostname of the database.
+
+	<example cmd='report dbhost'>
+	Reports hostname of the database
+	</example>
 	"""
 
 	def run(self, param, args):

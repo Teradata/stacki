@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python3
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -126,6 +126,7 @@ instructions['kernel']	   = kernel
 instructions['ramdisk']	   = ramdisk
 instructions['boot']	   = boot
 instructions['reboot']	   = boot == 'install'
+#instructions['reboot']	   = False
 
 out = json.dumps(instructions)
 print('Content-type: application/octet-stream')

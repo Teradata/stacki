@@ -32,6 +32,13 @@ import stack.commands
 
 class command(stack.commands.NetworkArgumentProcessor, 
 	stack.commands.dump.command):
+	"""
+	Dump the set of global firewall rules
+
+	<example cmd='dump firewall'>
+	Dump the set of all global firewall rules
+	</example>
+	"""
 
 	def dump_firewall(self, level='', id=''):
 		for t, n, i, o, s, p, a, c, f, cmt in self.db.fetchall():

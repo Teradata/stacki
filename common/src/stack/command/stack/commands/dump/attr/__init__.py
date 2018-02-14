@@ -18,6 +18,10 @@ import stack.commands
 class Command(stack.commands.dump.command):
 	"""
 	Dump the set of attributes
+
+	<example cmd='dump attr'>
+	Dump the set of all global attributes
+	</example>	
 	"""
 
 	def run(self, params, args):

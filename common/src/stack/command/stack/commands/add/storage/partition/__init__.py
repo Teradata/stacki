@@ -20,7 +20,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	(e.g., 'backend-0-0). No argument means the scope is 'global'.
 	</arg>
 
-	<param type='string' name='device' optional='1'>
+	<param type='string' name='device' optional='0'>
 	Disk device on which we are creating partitions
 	</param>
 

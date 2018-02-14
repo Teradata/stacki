@@ -12,14 +12,15 @@
 
 
 import stack.commands
+from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.remove.host.command):
 	"""
-	Remove an alias from a host(s).
+	Remove an alias from a host.
 
-	<arg type='string' name='host' optional='1' repeat='1'>
-	One hosts.
+	<arg type='string' name='host' optional='0'>
+	One host.
 	</arg>
 	
 	<param type='string' name='alias'>
@@ -27,29 +28,57 @@ class Command(stack.commands.remove.host.command):
 	</param>
 
 	<example cmd='remove host alias backend-0-0 alias=c-0-0'>
-	Removes the alias c-0-0 for host backend-0-0.
+	Removes the alias "c-0-0" for host "backend-0-0".
+	</example>
+
+	<example cmd='remove host alias backend-0-0 interface=eth0'>
+	Removes all aliases for "backend-0-0" assigned to "eth0"
 	</example>
 
 	<example cmd='remove host alias backend-0-0'>
-	Removes all aliases for backend-0-0.
+	Removes all aliases for "backend-0-0".
 	</example>
 	"""
 
 	def run(self, params, args):
-		
-		(alias, ) = self.fillParams([
-			('alias', None)
+
+		(alias, interface, ) = self.fillParams([
+			('alias', None),
+			('interface', None)
 			])
 
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+		if not len(hosts) == 1:
+			raise ArgUnique(self, 'host')
+
 		for host in self.getHostnames(args):
-			if not alias: 
+			if not alias and not interface: 
 				self.db.execute("""
 					delete from aliases where 
-					node = (select id from nodes where name='%s')
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s'))
 					""" % host)
+			elif not alias:
+				self.db.execute("""
+					delete from aliases where 
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s')
+					and device='%s')
+					""" % (host, interface))
+			elif not interface:
+				self.db.execute("""
+					delete from aliases where 
+					network IN (select id from networks where 
+					node = (select id from nodes where name = '%s'))
+					and name = '%s'
+					""" % (host, alias))
 			else:
 				self.db.execute("""
 					delete from aliases where 
-					node = (select id from nodes where name='%s')
+					network = (select id from networks where 
+					node = (select id from nodes where name = '%s')
+					and device='%s')
 					and name = '%s'
-					""" % (host, alias))
+					""" % (host, interface, alias))

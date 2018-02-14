@@ -185,14 +185,14 @@ class Command(command):
 	"""
 	Add a global firewall rule for the all hosts in the cluster.
 
-	<param type='string' name='service' require='1'>
+	<param type='string' name='service' optional='0'>
 	The service identifier, port number or port range. For example
 	"www", 8080 or 0:1024.
 	To have this firewall rule apply to all services, specify the
 	keyword 'all'.
 	</param>
 
-	<param type='string' name='protocol' require='1'>
+	<param type='string' name='protocol' optional='0'>
 	The protocol associated with the rule. For example, "tcp" or "udp".
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
@@ -212,12 +212,12 @@ class Command(command):
 	'stack list network'.
 	</param>
 
-	<param type='string' name='chain' require='1'>
+	<param type='string' name='chain' optional='0'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-	<param type='string' name='action' require='1'>
+	<param type='string' name='action' optional='0'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>

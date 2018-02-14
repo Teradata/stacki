@@ -1,5 +1,8 @@
-# @SI_Copyight@
-# @SI_Copyight@
+# @copyright@
+# Copyright (c) 2006 - 2018 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
 
 from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 import stack.commands
@@ -51,6 +54,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 
 class Command(command):
 	"""
+	Updates bootaction parameters.
 	"""
 
 	def run(self, params, args):

@@ -43,6 +43,9 @@ class Implementation(stack.commands.Implementation):
 			else:
 				options = []
 
+			if 'noreport' in options:
+				continue # don't do anything if noreport set
+
 			ib_re = re.compile('^ib[0-9]+$')
 			if mac:
 				if not ib_re.match(interface) and interface != 'ipmi':
