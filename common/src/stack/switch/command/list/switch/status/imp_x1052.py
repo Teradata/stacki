@@ -24,13 +24,15 @@ class Implementation(stack.commands.Implementation):
 		frontend_tftp_address = _frontend['ip']
 		switch_address = switch['ip']
 		switch_name = switch['host']
+		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
 		# Check if the switch has an ip address
 		if not switch_address:
 			raise CommandError(self, '"%s" has no address to connect to.' % switch_name)
 
-		# Connect to switch
-		with SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as switch:
+		# Connect to the switch
+		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
 			switch.set_tftp_ip(frontend_tftp_address)
 			switch.connect()
 			switch.get_interface_status_table()

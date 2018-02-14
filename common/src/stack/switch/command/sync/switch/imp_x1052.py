@@ -24,6 +24,10 @@ class Implementation(stack.commands.Implementation):
 		frontend_tftp_address = frontend['ip']
 		switch_address = switch['ip']
 		switch_name = switch['host']
-		with stack.switch.SwitchDellX1052(switch_address, switch_name, 'admin', 'admin') as _switch:
+		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
+
+		# Connect to the switch
+		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
 			_switch.set_tftp_ip(frontend_tftp_address)
 			_switch.configure(persistent=self.owner.persistent)

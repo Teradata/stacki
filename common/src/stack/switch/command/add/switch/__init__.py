@@ -14,7 +14,7 @@ class Command(command):
 	"""
 	Add a new host with appliance type 'switch' to the cluster.
 	This command calls 'add host'. It is a simpler way of setting 
-	the appliance type and the attr 'model'.
+	the appliance type and the attr 'switch_model'.
 
 	<arg type='string' name='switch'>
 	A single switch/host name. 
@@ -24,13 +24,27 @@ class Command(command):
 	The model number of the switch. Used to call implementations during
 	the switch configuration.
 	</param>
+
+	<param type='string' name='username'>
+	The username for the switch.
+	
+	Default: 'admin'
+	</param>
+
+	<param type='string' name='password'>
+	The password for the switch.
+	
+	Default: 'admin'
+	</param>
 	"""
 
 	def addSwitch(self, switchname, params):
 		# The model of the switch
 		# Defaults to x1052
-		model, = self.fillParams([
+		(model, username, password) = self.fillParams([
 		("model", "x1052"),
+		("username", "admin"),
+		("password", "admin"),
 		])
 
 		# Create a new list of params to add host call
@@ -48,11 +62,26 @@ class Command(command):
 			)
 
 
-		# Set the model of the switch to 'model' attr
+		# Set the model of the switch to 'switch_model' attr
 		self.call('set.host.attr', [
 			switchname,
-			"attr=model",
+			"attr=switch_model",
 			"value=%s" % model,
+			])
+
+		# Set the username of the switch to 'switch_username' attr
+		self.call('set.host.attr', [
+			switchname,
+			"attr=switch_username",
+			"value=%s" % username,
+			])
+
+		# Set the password of the switch to 'switch_password' attr
+		self.call('set.host.attr', [
+			switchname,
+			"attr=switch_password",
+			"value=%s" % password,
+			"shadow=True",
 			])
 
 
