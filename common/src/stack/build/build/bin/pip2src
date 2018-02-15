@@ -59,7 +59,7 @@ class Scanner:
 				for line in text:
 					if 'Name' in line or 'Version' in line:
 						key, value = line.strip().split(':')
-						meta[key.lower()] = value
+						meta[key.lower().strip()] = value.strip()
 
 		package = Package(meta['name'])
 		package.version = meta['version']
