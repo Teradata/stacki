@@ -48,8 +48,19 @@ class Scanner:
 
 	def readWheel(self, path):
 		print('\tfound whl %s' % os.path.split(path)[-1])
-		with open(os.path.join(path, 'metadata.json'), 'r') as text:
-			meta = json.load(text)
+		try:
+			# Try the normal metadata file first
+			with open(os.path.join(path, 'metadata.json'), 'r') as text:
+				meta = json.load(text)
+		except FileNotFoundError:
+			# If the normal file doesn't exist, try the old version
+			meta = {}
+			with open(os.path.join(path, 'METADATA'), 'r') as text:
+				for line in text:
+					if 'Name' in line or 'Version' in line:
+						key, value = line.strip().split(':')
+						meta[key.lower()] = value
+
 		package = Package(meta['name'])
 		package.version = meta['version']
 		self.packages.append(package)
