@@ -10,7 +10,8 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
-	<edge from="barnacle">
+	<order tail="barnacle" head="backend"/>
+	<edge  from="barnacle">
 		<to>foundation-python-server</to>
 		<to>backend</to>
 	</edge>

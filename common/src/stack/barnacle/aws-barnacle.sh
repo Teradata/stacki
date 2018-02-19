@@ -33,6 +33,15 @@ for x in *; do
 		/opt/stack/bin/stack add pallet $x
 	fi
 done
+for x in *; do
+	# The second pass is for SLES to make sure the stacki pallet
+	# patches the SLES pallet. We could be smart about this or
+	# just do it twice and not test for SLES vs CentOS or worry
+	# about pallet names. Or write this once and be done with it.
+	if [ -d $x ]; then
+		/opt/stack/bin/stack add pallet $x
+	fi
+done
 /opt/stack/bin/stack enable pallet %
 
 # reboot (but don't barnacle again)

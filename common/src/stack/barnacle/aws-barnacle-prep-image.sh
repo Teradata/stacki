@@ -13,13 +13,17 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+
 rm -rf /tmp/stack*
 rm /root/.ssh/authorized_keys
 
 systemctl disable stack-aws-client-register
-systemctl enable  stack-aws-barnacle
+systemctl enable stack-aws-barnacle
 
-# dhclient needs more cleaning (CentOS)
+
+# CentOS
+#
+# dhclient needs more cleaning
 
 if [ -x /var/lib/dhclient ]; then
 	rm -rf /var/lib/dhclient/dhclient*
@@ -32,4 +36,8 @@ if [ -x /var/lib/dhclient ]; then
 	fi
 fi
 
-/sbin/init 0
+echo
+echo "Frontend Barnacle is Ready"
+echo
+echo "Run /sbin/init 0 to shutdown the system"
+echo

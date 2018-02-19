@@ -18,7 +18,7 @@
 	</stack:package>
 
 
-<stack:script stack:stage="install-post">
+<stack:script>
 
 <!-- download and add the stacki pallet -->
 <stack:eval stack:shell="/opt/stack/bin/python3">
@@ -40,6 +40,23 @@ for pallet in &pallets;:
 </stack:file>
 
 </stack:script>
+
+
+<stack:script stack:stage="boot-post" stack:cond="os == 'sles'">
+<!-- Reset the zypper repos to point to local disk (what we just downloaded) -->
+<!-- This need to be run at boot-post for zypper to work -->
+
+ZYPPER=/usr/bin/zypper
+$ZYPPER rr 1 2 3
+for dir in /export/stack/pallets/*; do
+	if [ -d $dir ]; then
+		$ZYPPER ar $dir/*/*/*/x86_64 `basename $dir`
+	fi
+done
+$ZYPPER clean --all
+
+</stack:script>
+
 
 </stack:stack> 
 
