@@ -16,7 +16,80 @@ PEERS = set()
 
 MAX_PEERS = 3
 ROOT_DIR = "/var/www/html"
+REDIS_TTL = 30
 
+def updateKey(key, value, timeout=None):
+		"""
+		Create an new *key* and *value* in the local Redis
+		database with an optional *timeout*.
+		If the *key* already exist the value is blindly updated, and
+		the *timeout* is reset if it is specified.
+
+		:param key: redis key
+		:type key: string
+		:param value: key value
+		:type value: string
+		:param timeout: key timeout in seconds
+		:type timeout: int
+		"""
+		ludicredis.set(key, value)
+		ludicredis.expire(key, timeout)
+
+def getKey(key):
+		"""
+		Get the value of a *key* and *value* in the local Redis
+		database.
+
+		:param key: redis key
+		:type key: string
+		"""
+		ludicredis.get(key)
+
+def updateHostKeys(client):
+	"""
+	Updates the Redis keys for a given host in the cluster.
+	If Redis does not know about the host the cluster database is inspected and
+	the keys are created with a one hour timeout.
+	If Redis already contains the keys the timeout is reset.
+	The following Redis keys are defined for the host::
+
+		host:HOSTNAME:rack
+		host:HOSTNAME:rank
+		host:HOSTNAME:addr
+		host:IPADDRESS:name
+
+	:param addr: IP address
+	:type addr: string
+	:returns: dictionary with *name*, *addr*, *rack*, and *rank*
+	"""
+	if not client:
+		client = '127.0.0.1'
+
+	host = ludicredis.get('host:%s:name' % client)
+	if host:
+		host = host.decode()
+		rack = ludicredis.get('host:%s:rack' % host).decode()
+		rank = ludicredis.get('host:%s:rank' % host).decode()
+		addr = ludicredis.get('host:%s:addr' % host).decode()
+
+	if not host or not rack or not rank or not addr:
+		for row in stack.api.Call('list.host', [ client ]):
+			host = row['host']
+			rack = row['rack']
+			rank = row['rank']
+
+		if host:
+			updateKey('host:%s:name' % client, host,   60 * 60)
+			updateKey('host:%s:addr' % host,   client, 60 * 60)
+			updateKey('host:%s:rack' % host,   rack,   60 * 60)
+			updateKey('host:%s:rank' % host,   rank,   60 * 60)
+
+	d = { 'name': host,
+		 'addr': client,
+		 'rack': rack,
+		 'rank': rank }
+
+	return d
 
 @app.errorhandler(404)
 def four_o_four(error=None):
@@ -37,6 +110,11 @@ def lookup(hashcode):
 	res = {}
 	res['success'] = True
 	ipaddr = request.remote_addr
+	_host = updateHostKeys(ipaddr)
+
+	if not getKey('host:%s:status' % _host['name']):
+		updateKey('host:%s:status' % _host['name'],
+				       'Installing packages', REDIS_TTL)
 
 	# return list of peers with the request hash
 	res['peers'] = []
