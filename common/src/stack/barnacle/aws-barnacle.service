@@ -1,0 +1,8 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=/opt/stack/sbin/aws-barnacle
+
+[Install]
+WantedBy=multi-user.target

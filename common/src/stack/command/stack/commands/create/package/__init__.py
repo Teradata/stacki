@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -106,8 +106,8 @@ class Command(stack.commands.create.command):
 
 		# Create the RPM.EXTRAS directive that will add
 		# extra information to the specfile
-		rpm_extras = map(string.strip, rpmextra.split(','))
-		rpmextra = string.join(rpm_extras, '\\\\n')
+		rpm_extras = list(map(str.strip, rpmextra.split(',')))
+		rpmextra = '\\\\n'.join(rpm_extras)
 		file.write("RPM.EXTRAS=\"%s\"\n" % rpmextra)
 		file.close()
 
@@ -115,5 +115,3 @@ class Command(stack.commands.create.command):
 			self.addText(line)
 
 		shutil.rmtree(tmp)
-		
-

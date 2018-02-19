@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -20,7 +20,7 @@ class Command(stack.commands.add.host.command):
 	Add a public key for a host. One use of this public key is to 
 	authenticate messages sent from remote services.
 
-	<arg type='string' name='host'>
+	<arg type='string' name='host' optional='0'>
 	Host name of machine
 	</arg>
 	

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -462,8 +462,8 @@ class HostArgumentProcessor:
 						hostDict[host] = s
 						if host not in explicit:
 							explicit[host] = False
-#					Debug('group %s is %s for %s' %
-#				      (exp, res, host))
+					# Debug('group %s is %s for %s' %
+					# 	(exp, res, host))
 
 			# glob regex hostname
 

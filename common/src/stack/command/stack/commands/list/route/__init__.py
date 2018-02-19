@@ -9,6 +9,11 @@ import stack.commands
 
 class Command(stack.commands.list.command):
 	"""
+	List the global routes.
+
+	<example cmd='list route'>
+	Lists all the global routes for this cluster.
+	</example>
 	"""
 
 	def run(self, params, args):

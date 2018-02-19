@@ -1,5 +1,11 @@
 #!/bin/sh
-
+#
+# @copyright@
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+#
 #=============================================
 # do the voodoo that we do
 #---------------------------------------------
@@ -79,3 +85,9 @@ then
 else
 	sed -i 's/'"$FRONTEND"'/'"127.0.0.1"'/' /etc/install.inf
 fi
+
+#
+# execute code that runs just prior to the autoyast gui 
+#
+PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
+

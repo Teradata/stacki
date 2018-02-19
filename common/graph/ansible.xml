@@ -1,0 +1,24 @@
+<graph>
+
+	<description>
+
+	The ansible Roll
+
+	</description>
+
+	<si_copyright>
+	(c) 2006 - 2015 StackIQ Inc.
+	All rights reserved. stacki(r) v2.0 www.stacki.com
+	</si_copyright>
+
+        <order head="ansible-base">
+                <tail>ansible-server</tail>
+                <tail>ansible-backend</tail>
+        </order>
+
+        <edge from="server" to="ansible-server"/>
+        <edge from="ansible-server" to="ansible-base"/>
+        <edge from="client" to="ansible-backend" cond="ansible"/>
+        <edge from="ansible-backend" to="ansible-base" cond="ansible"/>
+
+</graph>

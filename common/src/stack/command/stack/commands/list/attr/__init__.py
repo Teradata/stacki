@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -171,7 +171,8 @@ class Command(stack.commands.Command,
 				nt.main=true and nt.node=n.id and
 				nt.subnet=s.id
 				"""):
-			readonly[name]['hostaddr']   = address
+			if address:
+				readonly[name]['hostaddr']   = address
 			readonly[name]['domainname'] = zone
 
 		for host in readonly:

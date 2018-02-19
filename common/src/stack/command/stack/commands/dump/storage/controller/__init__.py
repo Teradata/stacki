@@ -1,6 +1,6 @@
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -21,6 +21,11 @@ class Command(stack.commands.ApplianceArgumentProcessor,
 
 	"""
 	Dump the disk array controller configuration
+
+	<example cmd='dump storage controller'>
+	Dump the global, appliance and host specific controller
+	configuration
+	</example>
 	"""
 
 	def dumpit(self, hosts):

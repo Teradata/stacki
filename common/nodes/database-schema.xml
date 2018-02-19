@@ -1,7 +1,7 @@
 <stack:stack>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -35,8 +35,8 @@ grant select on cluster.access to ''@'localhost';
 DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
-  Node		int(11) NOT NULL default '0',
-  Name		varchar(32) default NULL,
+  Name		varchar(32) NOT NULL default '0',
+  Network		int(11) NOT NULL default '0',
   PRIMARY KEY (ID) 
 );
 

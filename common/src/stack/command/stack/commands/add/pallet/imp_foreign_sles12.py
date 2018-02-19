@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -115,8 +115,8 @@ class Implementation(stack.commands.Implementation):
 		# Copy pallet patches into the respective pallet
 		# directory
 		#
-		patch_dir = '/opt/stack/%s-pallet-patches/%s' % \
-			(self.name, self.vers)
+		patch_dir = '/opt/stack/%s-pallet-patches/%s/%s' % \
+			(self.name, self.vers, self.release)
 		if os.path.exists(patch_dir):
 			self.owner.out.write('Patching %s pallet\n' % self.name)
 			if not self.owner.dryrun:

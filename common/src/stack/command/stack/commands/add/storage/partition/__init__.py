@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -20,7 +20,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	(e.g., 'backend-0-0). No argument means the scope is 'global'.
 	</arg>
 
-	<param type='string' name='device' optional='1'>
+	<param type='string' name='device' optional='0'>
 	Disk device on which we are creating partitions
 	</param>
 

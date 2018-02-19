@@ -1,3 +1,4 @@
+-foundation-ansible
 -foundation-comps
 -foundation-fbtftpd
 -foundation-gd
@@ -18,3 +19,4 @@
 -stack-wizard
 -stack-ws
 -stack-ws-client
+-stack-discovery

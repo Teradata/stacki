@@ -1,6 +1,6 @@
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,11 +11,6 @@ import subprocess
 import os
 
 from stack_site import attributes
-
-pallets = attributes['pallets']
-ostype = None
-if 'SLES-11.3-1.138' in pallets:
-	ostype = "sles11"
 
 def attr2bool(s):
 	if type(s) == type([]) and s:
@@ -74,7 +69,7 @@ def getHostDisks(nukedisks):
 	#
 	lsblk = ['lsblk', '-lio', 'NAME,RM,RO,TYPE']
 	# sles 11 doesn't support the TYPE column
-	if ostype == "sles11":
+	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 		lsblk = ['lsblk', '-lio', 'NAME,RM,RO']
 	p = subprocess.run(lsblk,
 			   stdin=subprocess.PIPE,
@@ -96,7 +91,7 @@ def getHostDisks(nukedisks):
 		name = arr[0].strip()
 		removable = arr[1].strip()
 		readonly = arr[2].strip()
-		if ostype == "sles11":
+		if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 			mediatype = get_sles11_media_type(name)
 		else:
 			mediatype = arr[3].strip()

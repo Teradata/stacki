@@ -36,24 +36,5 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	"""
 
 	def run(self, params, args):
-		self.beginOutput()
-
-		for app in self.getApplianceNames(args):
-
-			self.db.execute("""select insubnet, outsubnet,
-				service, protocol, chain, action, flags,
-				comment, name, tabletype from appliance_firewall where
-				appliance = (select id from appliances where
-				name = '%s')""" % app)
-
-			for i, o, s, p, c, a, f, cmt, n, tt in self.db.fetchall():
-				network = self.getNetworkName(i)
-				output_network = self.getNetworkName(o)
-
-				self.addOutput(app, (n, tt, s, p, c, a, network,
-					output_network, f))
-
-		self.endOutput(header=['appliance', 'name', 'table', 'service',
-			'protocol', 'chain', 'action', 'network',
-			'output-network', 'flags'], trimOwner=0)
-
+		self.addText(self.command('list.firewall', self._argv + [ 'scope=appliance' ]))
+		return self.rc

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -7,6 +7,7 @@
 import re
 import shlex
 import ipaddress
+from stack.bool import str2bool
 import stack.commands
 
 
@@ -15,25 +16,35 @@ class Implementation(stack.commands.Implementation):
 
 		host = args[0]
 
-		result = self.owner.call('list.host.interface', [ host ])
+		result = self.owner.call('list.host.interface', [ 'expanded=true', host ])
 		udev_output = ""
 		for o in result:
-			interface = None
-			ip = None
-			netmask = None
-			netname = None
-			network = None
-			broadcast = None
-
 			interface = o['interface']
-			ip = o['ip']
-			netname = o['network']
-			vlanid = o['vlan']
-			mac = o['mac']
-			channel = o['channel']
-			options = []
-			if o['options']:
+			default   = str2bool(o['default'])
+			ip        = o['ip']
+			netname   = o['network']
+			vlanid    = o['vlan']
+			mac       = o['mac']
+			channel   = o['channel']
+			options   = o['options']
+			netmask   = o['mask']
+			gateway   = o['gateway']
+
+			if netname and ip and netmask:
+				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
+				broadcast = str(net.broadcast_address)
+				network   = str(net.network_address)
+			else:
+				broadcast = None
+				network   = None
+
+			if options:
 				options = shlex.split(o['options'])
+			else:
+				options = []
+
+			if 'noreport' in options:
+				continue # don't do anything if noreport set
 
 			ib_re = re.compile('^ib[0-9]+$')
 			if mac:
@@ -48,19 +59,6 @@ class Implementation(stack.commands.Implementation):
 
 			if not interface:
 				continue
-
-			if netname:
-				netresult = self.owner.call('list.network', [ netname ])
-				for net in netresult:
-					if net['network'] == netname:
-						network = net['address']
-						netmask = net['mask']
-						ipnet = ipaddress.IPv4Network('%s/%s' % (network, netmask))
-						broadcast = '%s' % ipnet.broadcast_address
-						gateway = net['gateway']
-						if gateway == 'None':
-							gateway = None
-						break
 
 			if interface == 'ipmi':
 				ipmisetup = '/tmp/ipmisetup'
@@ -79,13 +77,13 @@ class Implementation(stack.commands.Implementation):
 						     % interface.split(':')[0])
 				vnum = interface.split(':')[1]
 				if ip:
-					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip.strip()))
+					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip))
 				if netmask:
-					self.owner.addOutput(host, 'NETMASK%s=%s' % (vnum, netmask.strip()))
+					self.owner.addOutput(host, 'NETMASK%s=%s' % (vnum, netmask))
 				if network:
-					self.owner.addOutput(host, 'NETWORK%s=%s' % (vnum, network.strip()))
+					self.owner.addOutput(host, 'NETWORK%s=%s' % (vnum, network))
 				if broadcast:
-					self.owner.addOutput(host, 'BROADCAST%s=%s' % (vnum, broadcast.strip()))
+					self.owner.addOutput(host, 'BROADCAST%s=%s' % (vnum, broadcast))
 					
 				self.owner.addOutput(host, 'LABEL%s=%s' % (vnum, vnum))
 
@@ -101,8 +99,15 @@ class Implementation(stack.commands.Implementation):
 					self.owner.addOutput(host, 'USERCONTROL=no')
 
 				dhcp = 'dhcp' in options
+
 				if dhcp:
 					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
+					if default:
+						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="yes"')
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="yes"')
+					else:
+						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="no"')
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="no"')
 
 				if 'onboot=no' in options:
 					self.owner.addOutput(host, 'STARTMODE=manual')
@@ -119,14 +124,15 @@ class Implementation(stack.commands.Implementation):
 					else:
 						self.owner.addOutput(host, 'STARTMODE=off')
 				
-				if ip:
-					self.owner.addOutput(host, 'IPADDR=%s' % ip.strip())
-				if netmask:
-					self.owner.addOutput(host, 'NETMASK=%s' % netmask.strip())
-				if network:
-					self.owner.addOutput(host, 'NETWORK=%s' % network.strip())
-				if broadcast:
-					self.owner.addOutput(host, 'BROADCAST=%s' % broadcast.strip())
+				if not dhcp:
+					if ip:
+						self.owner.addOutput(host, 'IPADDR=%s' % ip)
+					if netmask:
+						self.owner.addOutput(host, 'NETMASK=%s' % netmask)
+					if network:
+						self.owner.addOutput(host, 'NETWORK=%s' % network)
+					if broadcast:
+						self.owner.addOutput(host, 'BROADCAST=%s' % broadcast)
 
 				if mac:
 					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
@@ -152,6 +158,3 @@ class Implementation(stack.commands.Implementation):
 					     '<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">')
 			self.owner.addOutput(host, udev_output)
 			self.owner.addOutput(host, '</stack:file>')
-
-
-RollName = "stacki"

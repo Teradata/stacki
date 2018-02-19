@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -44,7 +44,6 @@ class Command(stack.commands.report.command):
 	
 	<related>sync dns</related>
 	"""
-
 	def hostlines(self, name, zone):
 
 		"Lists the name->IP mappings for all hosts"
@@ -56,9 +55,9 @@ class Command(stack.commands.report.command):
 			"where s.zone='%s' " % (zone)	+
 			"and nt.subnet=s.id and nt.node=n.id")
 
-		for (name, ip, network_name) in self.db.fetchall():
+		for (name, device, network_name) in self.db.fetchall():
 
-			if ip is None:
+			if device is None:
 				continue
 
 			if network_name is None:
@@ -66,14 +65,14 @@ class Command(stack.commands.report.command):
 			
 			record = network_name
 
-			s += '%s A %s\n' % (record, ip)
+			s += '%s A %s\n' % (record, device)
 
 			# Now record the aliases. We always substitute 
 			# network names with aliases. Nothing else will
 			# be allowed
 			self.db.execute('select a.name from aliases a, ' +
-				'networks nt where nt.node=a.node and '	+
-				'nt.ip="%s"' % (ip))
+				'networks nt where nt.id=a.network and '	+
+				'nt.device="%s"' % (device))
 
 			for alias, in self.db.fetchall():
 				s += '%s CNAME %s\n' % (alias, record)

@@ -5,7 +5,7 @@
 	</description>
 
 	<copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
@@ -34,6 +34,11 @@
 		<to>dns-server</to>
 		<to>mq-server</to>
 		<to>routes-server</to>
+	</edge>
+
+	<edge from="server" cond="platform == 'aws'">
+		<to>aws-server</to>
+		<to>aws-ssh-key</to>
 	</edge>
 
 </graph>

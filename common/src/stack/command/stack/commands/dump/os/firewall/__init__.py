@@ -23,6 +23,15 @@ import stack.commands.dump.firewall
 class Command(stack.commands.OSArgumentProcessor,
 	stack.commands.dump.firewall.command):
 	"""
+	Dump the set of firewall rules for an os
+
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero or more OS names
+	</arg>
+
+	<example cmd='dump os firewall redhat'>
+	Dump firewall rules for redhat OS.
+	</example>
 	"""
 
 	def run(self, params, args):

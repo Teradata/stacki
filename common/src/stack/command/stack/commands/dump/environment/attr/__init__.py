@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -12,6 +12,9 @@ import stack.commands
 class Command(stack.commands.dump.environment.command):
 	"""
 	Dump the set of attributes for the Environment
+	<example cmd='dump environment attr'>
+	Dump all the environment attributes
+	</example>
 	"""
 
 	def run(self, params, args):
