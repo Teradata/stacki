@@ -15,6 +15,7 @@ import stack.commands
 
 
 class Command(stack.commands.HostArgumentProcessor,
+	stack.commands.SwitchArgumentProcessor,
 	stack.commands.report.command):
 	"""
 	Output the network configuration file for a host's interface.
@@ -93,6 +94,21 @@ class Command(stack.commands.HostArgumentProcessor,
 			'%s ' % (channel) +
 			'2 link=on ipmi=on callin=on privilege=4')
 
+
+	def host_based_routing(self, host):
+		"""Checks to see if host should be using host based routing or 
+		switch based routing.
+		"""
+		# Use host based routing always on the frontend
+		# Might change in the future but the default is True
+		if self.db.getHostAppliance(host) == 'frontend':
+			return True
+
+		# Use Switch based routing if host has a switch associated to it
+		if self.getSwitchesForHosts([host]):
+			return False
+
+		return True
 
 	def run(self, params, args):
 

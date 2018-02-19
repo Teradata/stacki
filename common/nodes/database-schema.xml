@@ -180,6 +180,16 @@ CREATE TABLE subnets (
 	PRIMARY KEY(ID)
 );
 
+<!-- Node/Switch Table -->
+
+DROP TABLE IF EXISTS switchports;
+CREATE TABLE switchports (
+	interface	int(11)		NOT NULL references networks,
+	switch		int(11)		NOT NULL references nodes,
+	port		int(11)		NOT NULL,
+	PRIMARY KEY(switch, port)
+);
+
 <!-- Routes -->
 
 DROP TABLE IF EXISTS global_routes;

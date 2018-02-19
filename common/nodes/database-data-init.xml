@@ -81,6 +81,7 @@ if os.path.exists('/tmp/site.attrs'):
 /opt/stack/bin/stack add appliance barnacle  longname=Barnacle  node=barnacle public=false
 /opt/stack/bin/stack add appliance backend   longname=Backend   node=backend
 /opt/stack/bin/stack add appliance replicant longname=Replicant node=replicant
+/opt/stack/bin/stack add appliance switch    longname=Switch    public=false
 
 <!-- manage firewall rules by default -->
 /opt/stack/bin/stack set attr attr=firewall value=true
@@ -95,6 +96,7 @@ if os.path.exists('/tmp/site.attrs'):
 
 /opt/stack/bin/stack set appliance attr frontend attr=managed value=false
 /opt/stack/bin/stack set appliance attr backend	 attr=managed value=true
+/opt/stack/bin/stack set appliance attr switch	 attr=managed value=false
 
 <!-- ensure replicant appliances *don't* get 'const' attributes -->
 /opt/stack/bin/stack set appliance attr replicant attr=const_overwrite value=false

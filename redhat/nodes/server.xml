@@ -81,6 +81,9 @@ for pallet in g.rolls:
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 
+<!-- stacki switch package -->
+<stack:package>stack-switch</stack:package>
+
 <!-- node discovery feature -->
 <stack:package>stack-discovery</stack:package>
 
