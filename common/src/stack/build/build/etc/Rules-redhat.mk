@@ -61,28 +61,9 @@ ifeq ($(RPM.STRATEGY),copy)
 
 ifeq ($(filter $(ROLL), $(ROLL.MEMBERSHIP)),$(ROLL))
 
-.buildenv-$(ROLL)/copy.mk:
-	@if [ ! -d .buildenv-$(ROLL) ]; then mkdir .buildenv-$(ROLL); fi
-	@echo "#"               >  $@
-	@echo "# Do not edit"   >> $@
-	@echo "#"               >> $@
-	@echo                   >> $@
-	@for rpmfile in *.rpm; do                                                                       \
-		arch=`rpm -qp --queryformat "%{ARCH}" $$rpmfile`				>> $@;  \
-		echo "nuke::"									>> $@;	\
-		echo -e '\trm $$(REDHAT.RPMS)'"/$$arch/$$rpmfile"				>> $@;	\
-		echo 'rpm::'									>> $@;	\
-		echo -e '\tmkdir -p $$(REDHAT.RPMS)'"/$$arch" 					>> $@;	\
-		echo -e "\tcp -p $$rpmfile "'$$(REDHAT.RPMS)'"/$$arch/"				>> $@;	\
-		echo 'install-rpm:: rpm'							>> $@;	\
-		echo -e '\trpm -Uhv --force --nodeps $$(REDHAT.RPMS)'"/$$arch/$$rpmfile"	>> $@;	\
-		echo                                    					>> $@;  \
-	done;
 
-include .buildenv-$(ROLL)/copy.mk
+include $(STACKBUILD)/etc/copy.mk
 
-clean::
-	@rm -f .buildenv-$(ROLL)/copy.mk
 
 else
 rpm:
