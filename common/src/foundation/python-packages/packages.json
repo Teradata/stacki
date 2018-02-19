@@ -18,6 +18,7 @@
 	"Flask":		{ "fe": true }, 
 	"PyYAML":		{ "fe": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
+	"pexpect":		{ "fe": true },
 	"PyMySQL":		{ "fe": true, "bootstrap": true }, 
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },

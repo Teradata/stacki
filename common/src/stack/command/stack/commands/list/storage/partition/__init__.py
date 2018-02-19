@@ -152,7 +152,7 @@ class Command(stack.commands.list.command,
 				partid = None
 
 			self.addOutput(name, [device, partid, mountpoint, 
-				size, fstype, options, partid])
+				size, fstype, options])
 
 			i += 1
 
