@@ -74,4 +74,4 @@ class Command(stack.commands.Command,
 
 		# If any of the tests failed, throw an error
 		if _return_code > 0:
-			raise CommandError("One or more tests failed")
+			raise CommandError(self, "One or more tests failed")
