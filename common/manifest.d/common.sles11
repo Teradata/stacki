@@ -16,6 +16,7 @@
 -stack-pxeboot
 -stack-sql
 -stack-summary
+-stack-switch
 -stack-wizard
 -stack-ws
 -stack-ws-client
