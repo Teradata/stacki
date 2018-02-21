@@ -70,7 +70,6 @@
 		<to>ca</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
-		<to>node-certs</to>
 		<to>storage-server</to>
 		<to>ludicrous-server</to>
 		<to>repo-server</to>
