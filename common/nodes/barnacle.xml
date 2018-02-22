@@ -58,5 +58,25 @@ $ZYPPER clean --all
 </stack:script>
 
 
+<stack:script stack:stage="boot-post" stack:cond="os == 'redhat'">
+<!-- Reset the zypper repos to point to local disk (what we just downloaded) -->
+
+REPOFILE=/etc/yum.repos.d/stacki.repo
+rm -f $REPOFILE
+for dir in /export/stack/pallets/*; do
+	if [ -d $dir ]; then
+		repo=(/$dir/*/*/*/x86_64)
+		echo [`basename $dir`]     >> $REPOFILE
+		echo name=`basename $dir`  >> $REPOFILE
+		echo baseurl=file:///$repo >> $REPOFILE
+		echo assumeyes=1           >> $REPOFILE
+		echo gpgcheck=0            >> $REPOFILE
+	fi
+done
+yum clean all
+
+</stack:script>
+
+
 </stack:stack> 
 
