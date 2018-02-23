@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Type=simple
-ExecStart=/opt/stack/bin/python3 /opt/stack/bin/ludicrous-client.py
+ExecStart=/opt/stack/bin/python3 /opt/stack/bin/ludicrous/ludicrous-client.py
 StandardOutput=syslog
 StandardError=syslog
 Restart=on-failure
