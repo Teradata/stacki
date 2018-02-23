@@ -22,6 +22,7 @@ class Plugin(stack.commands.Plugin):
 			from switchports s, nodes n, nodes nw, networks ns, subnets sw
 			where ns.node = n.id
 			and ns.id = s.interface
+			and ns.subnet = sw.id
 			and s.switch = nw.id
 			"""):
 			if row[2] in switch_info:
