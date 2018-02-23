@@ -53,6 +53,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				if rows:
 					interface = self.db.fetchone()[0]
 					s += ' -i %s' % interface
+				else:
+					continue
 			if rule['output-network'] != 'all' and \
 				rule['output-network'] is not None:
 				query = "select nt.device from networks nt," +\
