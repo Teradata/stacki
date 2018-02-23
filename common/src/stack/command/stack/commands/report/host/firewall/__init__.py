@@ -39,8 +39,6 @@ class Command(stack.commands.HostArgumentProcessor,
 		if table == 'filter':
 			self.getPreamble(host)
 		for rule in rules:
-			if rule['comment'] is not None:
-				self.addOutput(host, '# %s' % rule['comment'])
 			s = '-A %s' % rule['chain']
 			if rule['network'] != 'all' and \
 				rule['network'] is not None:
@@ -88,6 +86,16 @@ class Command(stack.commands.HostArgumentProcessor,
 					if rule['flags'] is not None:
 						s += ' %s\n' % rule['flags']
 
+			if rule['comment'] is not None:
+				self.addOutput(host, '# %s' % rule['comment'])
+			else:
+				comment = "# %s rule" % (rule['action'])
+				if rule['network'] == 'all':
+					comment =  comment + " for all networks"
+				elif rule['network'] is not None:
+					comment =  comment + " for %s network" % (rule['network'])
+
+				self.addOutput(host, comment)
 			self.addOutput(host, s)
 			self.addOutput(host, '')
 
