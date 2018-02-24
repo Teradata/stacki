@@ -33,7 +33,7 @@ class Command(stack.commands.report.host.command):
 				search.append(intf['zone'])
 
 		for zone in zones.values():
-			if zone not in search:
+			if zone and zone not in search:
 				search.append(zone)
 
 		if search:
