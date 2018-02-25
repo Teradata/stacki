@@ -20,6 +20,7 @@
 		<to>ldconfig</to>
 		<to>node-certs</to>
 		<to>serial-console</to>
+		<to>node</to>
 	</edge>
 
 	<order tail="HEAD" head="ldconfig"/>

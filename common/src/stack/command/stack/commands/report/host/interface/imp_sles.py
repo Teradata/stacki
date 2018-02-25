@@ -16,8 +16,10 @@ class Implementation(stack.commands.Implementation):
 
 		host = args[0]
 
-		result = self.owner.call('list.host.interface', [ 'expanded=true', host ])
+		bond_reg = re.compile('bond[0-9]+')
 		udev_output = ""
+
+		result = self.owner.call('list.host.interface', [ 'expanded=true', host ])
 		for o in result:
 			interface = o['interface']
 			default   = str2bool(o['default'])
@@ -29,6 +31,9 @@ class Implementation(stack.commands.Implementation):
 			options   = o['options']
 			netmask   = o['mask']
 			gateway   = o['gateway']
+
+			startmode = 'off'
+			bootproto = 'static'
 
 			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
@@ -89,8 +94,9 @@ class Implementation(stack.commands.Implementation):
 
 			else:
 				self.owner.addOutput(host, 
-						     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
-						     % interface)
+				     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
+				     % interface)
+
 				if vlanid and self.owner.host_based_routing(host):
 					parent_device = interface.strip().split('.')[0]
 					self.owner.addOutput(host, 'ETHERDEVICE=%s' % parent_device)
@@ -101,7 +107,7 @@ class Implementation(stack.commands.Implementation):
 				dhcp = 'dhcp' in options
 
 				if dhcp:
-					self.owner.addOutput(host, 'BOOTPROTO=dhcp')
+					bootproto = 'dhcp'
 					if default:
 						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="yes"')
 						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="yes"')
@@ -110,19 +116,19 @@ class Implementation(stack.commands.Implementation):
 						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="no"')
 
 				if 'onboot=no' in options:
-					self.owner.addOutput(host, 'STARTMODE=manual')
+					startmode = 'manual'
 				else:
 					if ip or dhcp or channel or 'bridge' in options:
 						#
 						# if there is an IP address, or this
 						# interface should DHCP, or anything in
 						# the 'channel' field (e.g., this is a
-						# bridged interface), or if 'bridge' is in
-						# the options, then turn this interface on
+						# bridged or bonded interface), or if 'bridge'
+						# is in the options, then turn this interface on
 						#
-						self.owner.addOutput(host, 'STARTMODE=auto')
+						startmode = 'auto'
 					else:
-						self.owner.addOutput(host, 'STARTMODE=off')
+						startmode = 'off'
 				
 				if not dhcp:
 					if ip:
@@ -136,6 +142,50 @@ class Implementation(stack.commands.Implementation):
 
 				if mac:
 					self.owner.addOutput(host, 'HWADDR=%s' % mac.strip())
+
+				#
+				# bonded interface, e.g., 'bond0'
+				#
+				if bond_reg.match(interface):
+					#
+					# if a 'bond*' device is present, then always make
+					# sure it is enabled on boot.
+					#
+					startmode = 'auto'
+
+					self.owner.addOutput(host, 'BONDING_MASTER=yes')
+
+					#
+					# find the interfaces that are part of this bond
+					#
+					i = 0
+					for p in result:
+						if p['channel'] == interface:
+							self.owner.addOutput(host,
+								'BONDING_SLAVE%d="%s"'
+								% (i, p['interface']))
+							i = i + 1
+
+					#
+					# Check if there are bonding options set
+					#
+					for opt in options:
+						if opt.startswith('bonding-opts='):
+							i = opt.find('=')
+							bo = opt[i + 1:]
+							self.owner.addOutput(host,
+								'BONDING_MODULE_OPTS="%s"' % bo)
+							break
+
+				#
+				# check if this is part of a bonded channel
+				#
+				if channel and bond_reg.match(channel):
+					startmode = 'auto'
+					bootproto = 'none'
+
+				self.owner.addOutput(host, 'STARTMODE=%s' % startmode)
+				self.owner.addOutput(host, 'BOOTPROTO=%s' % bootproto)
 
 				#
 				# if this is a bridged interface, then go look for the

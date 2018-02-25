@@ -18,21 +18,39 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </stack:rocks>
 
 
-<stack:native stack:lang="kickstart">
+<stack:native stack:cond="os == 'redhat'" stack:lang="kickstart">
 rootpw --iscrypted &Kickstart_PrivateRootPassword;
 </stack:native>
 
 
 <stack:package>stack-config</stack:package>
 
-<stack:script stack:stage="install-post">
+
 <!-- configure IP forwarding -->
-gawk '/net\.ipv4\.ip_forward/ { \
-	printf("net.ipv4.ip_forward = 1\n"); \
-	next; \
-} \
-{ print $0 }' /etc/sysctl.conf &gt; /tmp/sysctl.conf
-mv /tmp/sysctl.conf /etc/sysctl.conf
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
+f = open('/etc/sysctl.conf', 'r+')
+output = ''
+
+#
+# strip out any line that has net.ipv4.ip_forward = 1 in it
+#
+for line in f.readlines():
+	if 'net.ipv4.ip_forward' in line:
+		continue
+
+	output = output + line
+
+#
+# add net.ipv4.ip_forward
+#
+output = output + 'net.ipv4.ip_forward = 1\n'
+
+#
+# rewrite /etc/sysctl.conf
+#
+f.truncate()
+f.write(output)
+f.close()
 </stack:script>
 
 <stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
@@ -42,7 +60,7 @@ MANPATH /opt/stack/share/man
 </stack:file>
 </stack:script>
 
-<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
+<stack:script stack:cond="release == 'redhat7' or os == 'sles'" stack:stage="install-post">
 <stack:file stack:name="/etc/man_db.conf" stack:mode="append">
 MANDATORY_MANPATH /opt/stack/man
 MANDATORY_MANPATH /opt/stack/share/man
