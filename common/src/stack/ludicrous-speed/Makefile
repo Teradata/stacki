@@ -12,7 +12,7 @@ build:
 
 install::
 	# Make system directory if it doesn't exist
-	mkdir -p $(ROOT)/lib/systemd/system/
+	mkdir -p $(ROOT)/usr/lib/systemd/system
 
 	# Make ludicrous directory
 	mkdir -p $(ROOT)/$(PKGROOT)/ludicrous
@@ -24,7 +24,7 @@ install::
 	# Install ludicrous server
 	$(INSTALL) -m 0755 server.py $(ROOT)/$(PKGROOT)/ludicrous
 	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)/ludicrous
-	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/lib/systemd/system/
+	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/usr/lib/systemd/system
 
 	# Install ludicrous wsgi file
 	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/$(PKGROOT)/ludicrous
