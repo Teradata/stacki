@@ -27,12 +27,8 @@ class Command(stack.commands.CartArgumentProcessor,
 	If the cart doesn't exist, it's added to the 
 	database.
 
-	<arg type='string' name='cart'>
-	The name of the cart to be created.
-	</arg>
-
 	<param type='string' name='file' required='0'>
-	A bz2, xz, or gz file with your cart in it.
+	A bz2, xz, or tgz file with your cart in it.
 	</param>
 	"""		
 		
@@ -68,19 +64,13 @@ class Command(stack.commands.CartArgumentProcessor,
 
 	def run(self, params, args):
 		cartfile = self.fillParams([('file', None)])
-
 		cartsdir = '/export/stack/carts'
-
-		if not len(args):
-			raise ArgRequired(self, 'cart')
-		if len(args) > 1:
-			raise ArgUnique(self, 'cart')
 
 		if cartfile[0] == None:
                         raise ParamRequired(self, 'file')
 		else:
 			cartfile = cartfile[0]
 
-		cart = args[0]
+		cart = os.path.basename(cartfile).rsplit('.',1)[0]
 		self.addCart(cart)
 		self.unpackCart(cart,cartfile,cartsdir)
