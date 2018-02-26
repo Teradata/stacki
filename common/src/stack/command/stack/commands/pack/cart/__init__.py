@@ -7,7 +7,6 @@
 import os
 import tarfile, bz2, lzma
 import stack.commands
-#from stack.exception import ArgRequired, ArgUnique, CommandError, ParamValue
 from stack.exception import *
 
 
@@ -44,12 +43,12 @@ class Command(stack.commands.CartArgumentProcessor,
 	def packCart(self, cart, path, compression, suff):
 		cartfile = cart + '.%s' % suff
 		with tarfile.open(cartfile,'w:%s' % compression) as tar:
-			os.chdir(os.path.join(path,cart))
+			os.chdir(os.path.join(path))
 			if self.checkCart(path,cart) == True:
-				for name in os.listdir():
+				for name in os.listdir(cart):
 					if name not in [ 'fingerprint', 'repodata']:
 						print('adding %s' % name)
-						tar.add(name)
+						tar.add(cart + '/' + name)
 			else:
 				print("Cart has wrong directory structure.")
 		
@@ -58,7 +57,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 	def checkCart(self,path,cart):
 		req = ['RPMS', 'graph', 'nodes']
-		found = os.listdir()
+		found = os.listdir(cart)
 		return set(req).issubset(set(found))
 		
 
