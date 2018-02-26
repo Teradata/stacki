@@ -26,7 +26,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	GroundHog Day my friend, GroundHog Day.
 
 	<arg type='string' name='cart'>
-	The name of the cart to be created.
+	The name of the cart to be compressed.
 	</arg>
 
 	<param type='string' name='compression' required='1'>
@@ -38,6 +38,15 @@ class Command(stack.commands.CartArgumentProcessor,
 	Put the suffix on the subsequent cart file.
 	Default is tgz.
 	</param>
+
+	<example cmd="pack cart site-custom">
+	Tars up site-custom into site-custom.tgz.
+	Includes all dirs but repodata and fingerprint.
+
+	This does NOT remove the cart from the system.
+	</example>
+
+	<related>unpack cart file=</related>
 	"""		
 		
 	def packCart(self, cart, path, compression, suff):

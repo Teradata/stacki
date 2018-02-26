@@ -15,21 +15,34 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""
 	Unpack a cart into the carts directory.
 	
-	Assumes it was packed with "stack pack cart."
+	Assumes the directory structure has the following:
+
+	cartname/RPMS
+	cartname/nodes
+	cartname/graph
 
 	Also assumes the cart name matches the xml
 	file naming scheme.
-
-	If your cart wasn't, don't come crying to me.
+	
+	The cart name is the basename of the file provided
+	in the file= argument. 
 
 	File is uncompressed into /export/stack/carts/.
 
-	If the cart doesn't exist, it's added to the 
+	If the cart doesn't exist, it is added to the 
 	database.
 
 	<param type='string' name='file' required='0'>
 	A bz2, xz, or tgz file with your cart in it.
 	</param>
+
+	<example cmd='unpack cart file=site-custom.tgz'>
+	Add a cart called "site-custom" to the frontend.
+	Cart is added to database and sits in:
+	/export/stack/carts/site-custom
+	</example>
+
+	<related>pack cart "cartname"</related>
 	"""		
 		
 	def unpackCart(self, cart, cartfile, cartsdir):
