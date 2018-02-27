@@ -30,8 +30,13 @@ class Implementation(stack.commands.Implementation):
 		# Start of configuration file
 		self.owner.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
 
-		# Set blank vlan from 2-50
-		self.owner.addOutput(frontend, 'vlan 2-50')
+		# Set blank vlan from 2-100
+		#
+		# The reason we are creating blank vlan ids is so we 
+		# don't accidentally try to assign a v
+		#
+		#
+		self.owner.addOutput(frontend, 'vlan 2-100')
 		for (host, port, vlan) in hosts:
 			attr = self.owner.getHostAttr(host, 'appliance')
 
