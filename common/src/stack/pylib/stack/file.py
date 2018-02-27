@@ -19,6 +19,7 @@ import re
 import shutil
 import stack.util
 import xml.sax
+import subprocess
 try:
 	import rpm
 except ImportError:
@@ -167,76 +168,14 @@ class RPMBaseFile(File):
 		self.version = None
 		self.release = None
 
-		fd = os.open(file, os.O_RDONLY)
-		try:
-
-			ts = rpm.ts()
-			ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
-
-			rpminfo = ts.hdrFromFdno(fd)
-
-			basename = rpminfo[rpm.RPMTAG_NAME]
-			arch = rpminfo[rpm.RPMTAG_ARCH]
-			self.version = rpminfo[rpm.RPMTAG_VERSION]
-			self.release = rpminfo[rpm.RPMTAG_RELEASE]
-
-			self.list = [ basename, self.version, self.release,
-				arch ]
-		except:
-			pass
-		os.close(fd)
-
-		if not len(self.list):
-			# Remove ext count extensions, the default is 1, but for
-			# rolls we remove two (.diskN.iso)
-		
-			s = self.filename	 # name-ver-rpmver.arch.rpm
-			for x in range(0, ext):
-				i = s.rfind(".")
-				s = self.filename[:i]
-    
-			i = s.rfind(".")
-			self.list.append(s[i + 1:])	# get architecture string
-			s = self.filename[:i]
-
-			i = s.rfind("-")	# get RPM version string
-			self.release = s[i + 1:]
-			self.list.append(self.versionList(s[i + 1:]))
-			s = self.filename[:i]
-
-			i = s.rfind("-")	# get software version string
-			self.version = s[i + 1:]
-			self.list.append(self.versionList(s[i + 1:]))
-
-	
-			self.list.append(self.filename[:i]) # get package name
-	
-			self.list.reverse()		# we built the list backwards
-
-
-	def versionList(self, s):
-		list = []
-		for e in re.split('\.+|_+', s):
-			num	= ''
-			alpha	= ''
-			l	= []
-			for c in e:
-				if c in string.digits:
-					num = num + c
-					if alpha:
-						l.append(alpha)
-						alpha = ''
-				else:
-					alpha = alpha + c
-					if num:
-						l.append(int(num))
-						num = ''
-			if alpha:
-				l.append(alpha)
-			if num:
-				l.append(int(num))
-			list.append(l)
-		return list
+		rpmcmd = ['rpm', '-qp', file, '--queryformat', "%{NAME} %{VERSION} %{RELEASE} %{ARCH}"]
+		p = subprocess.Popen(rpmcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		rc = p.wait()
+		o, e = p.communicate()
+		if rc == 0:
+			self.list = o.decode().split()
+		else:
+			print ("Skipping %s - %s" % (file, e.decode()))
 
 	def getBaseName(self):
 		return self.list[0]

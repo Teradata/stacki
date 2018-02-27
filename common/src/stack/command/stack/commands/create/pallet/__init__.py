@@ -170,7 +170,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 			for file in tree.getFiles(dir):
 				try:
 					file.getPackageName()
-				except AttributeError:
+				except:
 					continue # skip all non-rpm files
 					
 				# Skip RPMS for other architecures
