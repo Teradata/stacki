@@ -14,20 +14,19 @@ install::
 	# Make system directory if it doesn't exist
 	mkdir -p $(ROOT)/usr/lib/systemd/system
 
-	# Make ludicrous directory
-	mkdir -p $(ROOT)/$(PKGROOT)/ludicrous
-
 	# Install directory templates
-	mkdir -p $(ROOT)/$(PKGROOT)/ludicrous/templates
-	$(INSTALL) -m 0755 directory.html $(ROOT)/$(PKGROOT)/ludicrous/templates/
+	mkdir -p $(ROOT)/$(PKGROOT)/templates
+	$(INSTALL) -m 0755 directory.html $(ROOT)/$(PKGROOT)/templates/
 
 	# Install ludicrous server
-	$(INSTALL) -m 0755 server.py $(ROOT)/$(PKGROOT)/ludicrous
-	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)/ludicrous
+	$(INSTALL) -m 0755 ludicrousServer.py $(ROOT)/$(PKGROOT)
+	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)
 	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/usr/lib/systemd/system
 
-	# Install ludicrous wsgi file
-	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/$(PKGROOT)/ludicrous
+
+	# Install WSGI File
+	mkdir -p $(ROOT)/var/www/cgi-bin
+	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/var/www/cgi-bin/
 
 	# Install Apache Config file
 	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d

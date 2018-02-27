@@ -2,6 +2,6 @@
 
 import sys
 
-sys.path.insert(0, '/opt/stack/bin/ludicrous')
+sys.path.insert(0, '/opt/stack/bin')
 
-from server import app as application
+from ludicrousServer import app as application
