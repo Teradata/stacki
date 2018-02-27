@@ -50,7 +50,7 @@ YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site im
 
 echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
-/opt/stack/bin/python3 -E /opt/stack/bin/ludicrous/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
+/opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
 #
 # configure the hardware disk array controller first
