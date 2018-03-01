@@ -32,4 +32,8 @@ install::
 	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d
 	$(INSTALL) -m0644 conf/ludicrous.conf $(ROOT)/etc/apache2/stacki-conf.d/ludicrous.conf
 
+	# Install Httpd Config file
+	mkdir -p $(ROOT)/etc/httpd/conf.d
+	$(INSTALL) -m0644 conf/ludicrous.conf $(ROOT)/etc/httpd/conf.d/ludicrous.conf
+
 clean::
