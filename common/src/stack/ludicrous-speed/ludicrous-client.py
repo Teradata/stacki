@@ -43,27 +43,31 @@ def four_o_four(error=None):
 
         return resp
 
-
+# Returns an md5 hash of a filename
 def hashit(filename):
 	hashcode = hashlib.md5()
 	hashcode.update(filename.encode('utf-8'))
 	return hashcode.hexdigest()
 
-
+# Save the file locally
 def save_file(content, location, filename):
 	subprocess.call(['mkdir', '-p', location])
 	with open(location + filename, 'wb') as f:
 		f.write(content)
 
 
+# Check if the file exists locally
 def file_exists(local_file):
 	return os.path.isfile(local_file)
 
-
+# Returns the tracking server's ip and port as a string to be used
+# in a request
 def tracker():
 	return "%s:%s" % (tracker_settings['TRACKER'], tracker_settings['PORT'])
 
-
+# Lookup a file to see if any hosts have it
+# Input is the md5 of the filename
+# returns a list of hosts
 def lookup_file(hashcode):
 	try:
 		# timeout=(connect timeout, read timeout).
@@ -73,6 +77,7 @@ def lookup_file(hashcode):
 	return res
 
 
+# Get a file from a host
 def get_file(peer, remote_file):
 	try:
 		# timeout=(connect timeout, read timeout).
@@ -83,6 +88,7 @@ def get_file(peer, remote_file):
 	return res
 
 
+# Register a file for a host on the frontend
 def register_file(port, hashcode):
 	try:
 		res = requests.post('http://%s/avalanche/register/%s/%s' % (
@@ -93,7 +99,7 @@ def register_file(port, hashcode):
 	except:
 		raise
 
-
+# Unregister a single file from a host on the frontend
 def unregister_file(hashcode, params):
 	try:
 		res = requests.delete('http://%s/avalanche/unregister/hashcode/%s' % (
