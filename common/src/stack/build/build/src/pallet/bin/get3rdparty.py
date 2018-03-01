@@ -25,13 +25,14 @@ import time
 # example: foundation-python-3.6.1-sles11.x86_64.rpm
 #
 # authfile: optional - Only required when accessing URLS that require authentication
-#
+# manifest: optional - Create a manifest directory and an entry for each package in files if they are RPM's
 #
 # [
 #	{
 #		"urlbase": "<baseurl1>",
 #		"files": [ "file1", "file2", ... ],
-#		"authfile": "<authfile1>.json"
+#		"authfile": "<authfile1>.json",
+#		"manifest": true
 #	},
 #	{
 #		"urlbase": "<baseurl2>",
@@ -109,6 +110,22 @@ def get_auth_info(authfile, url):
 	return curl_args
 
 
+def create_manifest(manifestd, filename):
+	rpmcmd = ['rpm', '-qp', filename, '--queryformat', "%{NAME}"]
+	proc = subprocess.Popen(rpmcmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	output, error = proc.communicate()
+
+	if proc.returncode == 1:
+		return
+	pkgname = output
+	with open(os.path.join(manifestd, pkgname + '.manifest'), 'w') as mfestfi:
+		mfestfi.write(pkgname)
+
+
+manifest_dir = './manifest.d'
+if len(sys.argv) > 1:
+	manifest_dir = os.path.join(sys.argv[1], 'manifest.d')
+
 filename  = '3rdparty.json'
 cachedir  = '3rdparty'
 docfile	  = '3rdparty.md'
@@ -120,19 +137,22 @@ if not os.path.exists(filename):
 if not os.path.exists(cachedir):
 	os.mkdir(cachedir)
 
+if not os.path.exists(manifest_dir):
+	os.mkdir(manifest_dir)
+
 with open(filename, 'r') as text:
 	code = []
 	for line in text: # json doesn't allow comments (we do)
 		if not line.startswith('//'):
 			code.append(line)
-	manifest = json.loads(''.join(code))
+	pkglist = json.loads(''.join(code))
 
 fout = open(docfile, 'w')
 fout.write('# Third Party Blobs\n\n')
 fout.write('This repository includes the following code from other projects.\n\n')
 
 blobs = {}
-for section in manifest:
+for section in pkglist:
 	if 'authfile' in section:
 		curl_args = get_auth_info(section['authfile'], section['urlbase'])
 		if not len(curl_args):
@@ -140,6 +160,10 @@ for section in manifest:
 			continue
 	else:
 		curl_args = []
+
+	do_manifest = False
+	if 'manifest' in section and section['manifest'] == True:
+		do_manifest = True
 
 	for blob in section['files']:
 		blobs[blob] = {
@@ -153,6 +177,8 @@ for section in manifest:
 			if not os.path.exists(dirname):
 				os.makedirs(dirname)
 			download_url(blobs[blob]['source'], blobs[blob]['target'], curl_args)
+		if do_manifest:
+			create_manifest(manifest_dir, blobs[blob]['target'])
 
 	for blob in sorted(blobs.keys()):
 		fout.write('* %s [%s]\n' % (blob, blobs[blob]['source']))
