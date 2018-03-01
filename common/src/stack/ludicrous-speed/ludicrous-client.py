@@ -51,10 +51,13 @@ def hashit(filename):
 
 # Save the file locally
 def save_file(content, location, filename):
-	subprocess.call(['mkdir', '-p', location])
-	with open(location + filename, 'wb') as f:
-		f.write(content)
-
+	try:
+		subprocess.call(['mkdir', '-p', location])
+		with open(location + filename, 'wb') as f:
+			f.write(content)
+	except:
+		app.logger.info("Error saving file")
+		raise
 
 # Check if the file exists locally
 def file_exists(local_file):
@@ -72,20 +75,18 @@ def lookup_file(hashcode):
 	try:
 		# timeout=(connect timeout, read timeout).
 		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
+		return res
 	except:
 		raise
-	return res
-
 
 # Get a file from a host
 def get_file(peer, remote_file):
 	try:
 		# timeout=(connect timeout, read timeout).
 		res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
+		return res
 	except:
 		raise
-
-	return res
 
 
 # Register a file for a host on the frontend
@@ -110,16 +111,12 @@ def unregister_file(hashcode, params):
 	except:
 		raise
 
+# Unregister all hosts packages on frontend
 def unregister_host(host):
 	try:
 		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
 	except:
 		raise
-
-
-def stream_it(response, content):
-	response.write(content)
-
 
 @app.route('/install/<path:path>/<filename>')
 def get_file_locally(path, filename):
