@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 tracker_settings = {
 	'TRACKER' : '',
-	'PORT' : 3825,
+	'PORT' : 80,
 }
 
 client_settings = {
@@ -74,7 +74,7 @@ def tracker():
 def lookup_file(hashcode):
 	try:
 		# timeout=(connect timeout, read timeout).
-		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
+		res = requests.get('http://%s/ludicrous/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
 		return res
 	except:
 		raise
@@ -92,7 +92,7 @@ def get_file(peer, remote_file):
 # Register a file for a host on the frontend
 def register_file(port, hashcode):
 	try:
-		res = requests.post('http://%s/avalanche/register/%s/%s' % (
+		res = requests.post('http://%s/ludicrous/register/%s/%s' % (
 									tracker(), 
 									port,
 									hashcode)
@@ -103,7 +103,7 @@ def register_file(port, hashcode):
 # Unregister a single file from a host on the frontend
 def unregister_file(hashcode, params):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/hashcode/%s' % (
+		res = requests.delete('http://%s/ludicrous/unregister/hashcode/%s' % (
 									tracker(),
 									hashcode),
 									params=params
@@ -114,7 +114,7 @@ def unregister_file(hashcode, params):
 # Unregister all hosts packages on frontend
 def unregister_host(host):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
+		res = requests.delete('http://%s/ludicrous/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
 	except:
 		raise
 
@@ -238,7 +238,7 @@ def running():
 
 @app.route('/peerdone')
 def peerdone():
-	peerdone_res = requests.delete('http://%s/avalanche/peerdone' % tracker())
+	peerdone_res = requests.delete('http://%s/ludicrous/peerdone' % tracker())
 	return jsonify({"success": True})
 
 
@@ -268,7 +268,7 @@ def main(environment, trackerfile, nosavefile, port):
 		line = f.readline()
 		t = line.split(' ')[-1].strip()
 		tracker_settings['TRACKER'] = t.split(':')[0].strip()
-		tracker_settings['PORT'] = t.split(':')[-1].strip()
+		#tracker_settings['PORT'] = t.split(':')[-1].strip()
 
 	#peerdone()
 
