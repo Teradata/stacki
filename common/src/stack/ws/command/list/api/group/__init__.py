@@ -16,7 +16,10 @@ class Command(stack.commands.Command):
 	"""
 	List all the users allowed to access
 	the API framework.
-	<dummy />
+	<example cmd='list api group'>
+	List all the users allowed to access
+	the API framework.
+	</example>
 	"""
 	def run(self, params, args):
 		g = Group.objects.all()

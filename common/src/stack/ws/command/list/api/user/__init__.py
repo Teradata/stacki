@@ -18,7 +18,11 @@ class Command(stack.commands.Command):
 	"""
 	List all users registered to use the API
 	and the groups they belong to.
-	<dummy />
+	
+	<example cmd='list api'>
+	List all users registered to use the API
+	and the groups they belong to.
+	</example>
 	"""
 	def run(self, params, args):
 		# Get all the Users

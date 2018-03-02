@@ -10,6 +10,28 @@ from stack.exception import ArgRequired, ParamValue, CommandError
 
 class Command(stack.commands.set.host.command):
 	"""
+	Update bootaction for a host.
+
+	<arg type='string' name='bootaction' repeat='1' optional='1'>
+	Host name of machine
+	</arg>
+
+	<param type='string' name='action' optional='0'>
+	bootaction name. This should already exist via 'stack list bootaction'
+	</param>
+
+	<param type='string' name='type' optional='0'>
+	type of bootaction. can be one of 'os' or 'install'
+	</param>
+
+	<param type='boolean' name='sync' optional='1'>
+	controls if 'sync host boot' needs to be run after
+	setting the bootaction.
+	</param>
+
+	<example cmd="set host bootaction action=memtest type=os sd-stacki-131">
+	sets the bootaction for sd-stacki-131 to memtest
+	</example>
 	"""
 
 	def run(self, params, args):
@@ -51,6 +73,3 @@ class Command(stack.commands.set.host.command):
 
 		if req_sync:
 			self.command('sync.host.boot', hosts)
-
-
-
