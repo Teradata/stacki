@@ -1,34 +1,46 @@
 <stack:stack>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
 /opt/stack/bin/stack add bootaction "default" os=sles type=install \
-	kernel="vmlinuz-sles-12-x86_64" ramdisk=initrd-sles-12-x86_64 \
-	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+	kernel="vmlinuz-sles-12-sp3-x86_64" ramdisk=initrd-sles-12-sp3-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp3/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
 
 /opt/stack/bin/stack add bootaction "console" os=sles type=install \
-	kernel="vmlinuz-sles-12-x86_64" ramdisk=initrd-sles-12-x86_64 \
-	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS1,115200n8"
+	kernel="vmlinuz-sles-12-sp3-x86_64" ramdisk=initrd-sles-12-sp3-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp3/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8"
 
 /opt/stack/bin/stack add bootaction "rescue" os=sles type=install \
-	kernel="vmlinuz-sles-12-x86_64" ramdisk=initrd-sles-12-x86_64 \
+	kernel="vmlinuz-sles-12-sp3-x86_64" ramdisk=initrd-sles-12-sp3-x86_64 \
+	args="splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+
+/opt/stack/bin/stack add bootaction "install sles 12.2" os=sles type=install \
+	kernel="vmlinuz-sles-12-sp2-x86_64" ramdisk=initrd-sles-12-sp2-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+
+/opt/stack/bin/stack add bootaction "install sles 12.2 console" os=sles type=install \
+	kernel="vmlinuz-sles-12-sp2-x86_64" ramdisk=initrd-sles-12-sp2-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8"
+
+/opt/stack/bin/stack add bootaction "rescue sles 12.2" os=sles type=install \
+	kernel="vmlinuz-sles-12-sp2-x86_64" ramdisk=initrd-sles-12-sp2-x86_64 \
 	args="splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
 
 /opt/stack/bin/stack add bootaction "install sles 11.3" os=sles type=install \
-	kernel=vmlinuz-sles-11.3-x86_64 ramdisk=initrd-sles-11.3-x86_64 \
+	kernel=vmlinuz-sles-11.3-1.138-x86_64 ramdisk=initrd-sles-11.3-1.138-x86_64 \
 	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0"
 
 /opt/stack/bin/stack add bootaction "install sles 11.3 console" os=sles type=install \
-	kernel=vmlinuz-sles-11.3-x86_64 ramdisk=initrd-sles-11.3-x86_64 \
-	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS1,115200n8"
+	kernel=vmlinuz-sles-11.3-1.138-x86_64 ramdisk=initrd-sles-11.3-1.138-x86_64 \
+	args="install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS0,115200n8"
 
 /opt/stack/bin/stack add bootaction "rescue sles 11.3" os=sles type=install \
-	kernel=vmlinuz-sles-11.3-x86_64 ramdisk=initrd-sles-11.3-x86_64 \
+	kernel=vmlinuz-sles-11.3-1.138-x86_64 ramdisk=initrd-sles-11.3-1.138-x86_64 \
 	args="splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
 </stack:script>
 

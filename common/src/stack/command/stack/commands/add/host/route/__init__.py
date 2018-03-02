@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,6 +11,8 @@
 # @rocks@
 
 import stack.commands
+import socket
+import subprocess
 from stack.exception import CommandError
 
 
@@ -30,6 +32,10 @@ class Command(stack.commands.add.host.command):
 	Network or device gateway
 	</param>
 
+	<param type='string' name='syncnow'>
+	Add route to the routing table immediately
+	</param>
+
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route
 	this is not required and assumed to be 255.255.255.255
@@ -40,11 +46,16 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		
-		(address, gateway, netmask) = self.fillParams([
+		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
-			('netmask', '255.255.255.255')])
+			('netmask', '255.255.255.255'),
+			('interface', None),
+			('syncnow', None),
+			])
 		
+		syncnow = self.str2bool(syncnow)
+
 		#
 		# determine if this is a subnet identifier
 		#
@@ -54,22 +65,52 @@ class Command(stack.commands.add.host.command):
 
 		if rows == 1:
 			subnet, = self.db.fetchone()
-			gateway = "''"
+			gateway = ""
 		else:
 			subnet = 'NULL'
-			gateway = "'%s'" % gateway
+			gateway = "%s" % gateway
 		
 		# Verify the route doesn't already exist.  If it does
 		# for any of the hosts raise a CommandError.
 		
 		for host in hosts:
-			rows = self.db.execute("""select * from 
+			_rows = self.db.select("""
+				r.network, r.interface, r.gateway from
 				node_routes r, nodes n where
-				r.node=n.id and r.network='%s' 
-				and n.name='%s'""" %	
-				(address, host)) 
-			if rows:
-				raise CommandError(self, 'route exists')
+				r.node=n.id and
+				r.network='%s' and
+				n.name='%s'
+				""" % (address, host))
+			if _rows:
+				if host != self.db.getHostname('localhost'):
+					raise CommandError(self, 'route exists')
+
+				if syncnow and host == self.db.getHostname('localhost'):
+					if self.os == 'sles':
+						for _row in _rows:
+							_ip = _row[0]
+							_device = _row[1].split(':')[0]
+							_gateway = _row[2]
+							_args = [
+								'localhost',
+								'address=%s' % _ip,
+								'interface=%s' % _device,
+								'gateway=%s' % _gateway,
+								'syncnow=true',
+								]
+
+							self.call('remove.host.route', _args)
+
+		#
+		# if interface is being set, check if it exists first
+		#
+		if interface:
+			rows = self.db.execute("""select * from networks
+				where node=1 and device='%s'""" % interface)
+			if not rows:
+				raise CommandError(self, 'interface does not exist')
+		else:
+			interface='NULL'
 		
 		# Now that we know things will work insert the route for
 		# all the hosts
@@ -77,6 +118,30 @@ class Command(stack.commands.add.host.command):
 		for host in hosts:	
 			self.db.execute("""insert into node_routes values 
 				((select id from nodes where name='%s'),
-				'%s', '%s', %s, %s)""" %
-				(host, address, netmask, gateway, subnet))
+				'%s', '%s', '%s', %s, '%s')""" %
+				(host, address, netmask, gateway, subnet, interface))
+			
+			#
+			# if host is frontend and sync now, add route to routing table
+			#
+			if host == socket.gethostname():
+				if syncnow:
+					add_route = ['route', 'add', '-host', address]
 
+					if interface and interface != 'NULL':
+						add_route.append('dev')
+						add_route.append(interface)
+
+					if gateway:
+						add_route.append('gw')
+						add_route.append(gateway)
+
+					# add route to routing table
+					p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
+					
+					# add route to routes file
+					cmd = '/opt/stack/bin/stack report host route localhost | '
+					cmd += '/opt/stack/bin/stack report script | '
+					cmd += 'bash > /dev/null 2>&1 '
+
+					p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)

@@ -1,6 +1,6 @@
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -16,7 +16,10 @@ class Command(stack.commands.Command):
 	"""
 	List all the users allowed to access
 	the API framework.
-	<dummy />
+	<example cmd='list api group'>
+	List all the users allowed to access
+	the API framework.
+	</example>
 	"""
 	def run(self, params, args):
 		g = Group.objects.all()

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -12,6 +12,14 @@ import stack.commands
 class Command(stack.commands.dump.os.command):
 	"""
 	Dump the set of attributes for the OS
+
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero, one or more os names
+	</arg>
+
+	<example cmd='dump os attr redhat'>
+	Dump attribute information for redhat os.
+	</example>
 	"""
 
 	def run(self, params, args):

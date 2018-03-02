@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -35,16 +35,16 @@ class Command(stack.commands.remove.host.command):
 	UUID of the mountpoint to be removed.
 	</param>
 
-	<example cmd='remove host partition compute-0-0'>
-	Remove all partitions from compute-0-0.
+	<example cmd='remove host partition backend-0-0'>
+	Remove all partitions from backend-0-0.
 	</example>
 
-	<example cmd='remove host partition compute-0-0 partition=/export'>
-	Remove only the /export partition from compute-0-0.
+	<example cmd='remove host partition backend-0-0 partition=/export'>
+	Remove only the /export partition from backend-0-0.
 	</example>
 
-	<example cmd='remove host partition compute-0-0 device=sdb1'>
-	Remove only the partition information for /dev/sdb1 on compute-0-0
+	<example cmd='remove host partition backend-0-0 device=sdb1'>
+	Remove only the partition information for /dev/sdb1 on backend-0-0
 	</example>
 	"""
 

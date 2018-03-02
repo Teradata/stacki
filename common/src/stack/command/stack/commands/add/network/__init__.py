@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -99,9 +99,16 @@ class Command(stack.commands.add.command):
 			msg = '%s/%s is not a valid network address and subnet mask combination'
 			raise CommandError(self, msg % (address, mask))
 
-		self.db.execute("""
-			insert into subnets 
+		if gateway:
+			subnet_sql = """insert into subnets 
 			(name, address, mask, gateway, mtu, zone, dns, pxe)
-			values 
-			('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
-			""" % (name, address, mask, gateway, mtu, zone, dns, pxe))
+			values ('%s', '%s', '%s', '%s', '%s', '%s', %s, %s)
+			""" % (name, address, mask, gateway, mtu, zone, dns, pxe)
+
+		else:
+			subnet_sql = """ insert into subnets 
+			(name, address, mask, mtu, zone, dns, pxe)
+			values ('%s', '%s', '%s', '%s', '%s', %s, %s)
+			""" % (name, address, mask, mtu, zone, dns, pxe)
+			
+		self.db.execute(subnet_sql)

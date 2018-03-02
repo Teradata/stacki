@@ -1,6 +1,6 @@
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -18,7 +18,11 @@ class Command(stack.commands.Command):
 	"""
 	List all users registered to use the API
 	and the groups they belong to.
-	<dummy />
+	
+	<example cmd='list api'>
+	List all users registered to use the API
+	and the groups they belong to.
+	</example>
 	"""
 	def run(self, params, args):
 		# Get all the Users

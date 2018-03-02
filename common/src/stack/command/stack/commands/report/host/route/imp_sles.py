@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -27,26 +27,35 @@ class Implementation(stack.commands.Implementation):
 		#
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network/routes">')
 
-		gateway = '0.0.0.0'
 
-		result = self.owner.call('list.host.route', [ host ])
-		for o in result:
-			destination = o['network']
-			netmask = o['netmask']
-			device = o['gateway']
+		routes = self.db.getHostRoutes(host)
+		for network in sorted(routes.keys()):
+			(netmask, gateway, interface) = routes[network]
+			destination = network
 
+
+			# if interface is not set, use the default behavior
+			if not interface or interface == 'NULL':
+				interface = '-'
+
+			if not gateway or gateway == 'NULL':
+				gateway = '-'
+
+			device = interface
 			self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
 				(destination, gateway, netmask, device))
+
 
 		#
 		# the interface that is designated as the default interface,
 		# will be specified as the default route
 		#
+		gateway = '0.0.0.0'
 		result = self.owner.call('list.host.interface', [ host ])
 		for o in result:
-			if o['default']: 
+			if o['default']:
 				network = o['network']
-				device = o['interface']
+				device = o['interface'].split(':')[0]
 				destination = 'default'
 				netmask = '0.0.0.0'
 
@@ -59,5 +68,5 @@ class Implementation(stack.commands.Implementation):
 					break
 
 				break
-				
+
 		self.owner.addOutput(host, '</stack:file>')

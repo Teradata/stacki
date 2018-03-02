@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -22,13 +22,13 @@ class Command(stack.commands.remove.host.command):
 	One or more named hosts.
 	</arg>
 	
-	<example cmd='remove host boot compute-0-0'>
-	Removes the boot configuration for host compute-0-0.
+	<example cmd='remove host boot backend-0-0'>
+	Removes the boot configuration for host backend-0-0.
 	</example>
 
-	<example cmd='remove host boot compute-0-0 compute-0-1'>
-	Removes the boot configuration for hosts compute-0-0 and
-	compute-0-1.
+	<example cmd='remove host boot backend-0-0 backend-0-1'>
+	Removes the boot configuration for hosts backend-0-0 and
+	backend-0-1.
 	</example>
 	"""
 	

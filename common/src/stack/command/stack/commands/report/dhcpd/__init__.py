@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -39,6 +39,9 @@ class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.
+	<example cmd='report dhcpd'>
+	Output the DHCP server configuration file.
+	</example>
 	"""
 
 
@@ -55,34 +58,83 @@ class Command(stack.commands.HostArgumentProcessor,
 		for row in self.db.select("""
 			s.name, n.ip from
 			nodes nd, subnets s, networks n where 
-			s.id       = n.subnet and 
-			s.pxe      = TRUE     and 
-			n.node     = nd.id    and 
-			nd.name    = '%s'
+			s.id	   = n.subnet and 
+			s.pxe	   = TRUE     and 
+			n.node	   = nd.id    and 
+			nd.name	   = '%s'
 			""" % self.db.getHostname()):
-			servers[row[0]]    = row[1]
+			servers[row[0]]	   = row[1]
 			servers['default'] = row[1]
 		if len(servers) > 2:
 			del servers['default']
 
-		for (netname, network, netmask, gateway, zone) in self.db.select("""
-			name, address, mask, gateway, zone from 
-			subnets where
-			pxe = TRUE
-			"""):
+		shared_networks = {}
+		for (netname, network, netmask, gateway, zone, device) in self.db.select("""
+			s.name, s.address, s.mask, s.gateway, s.zone, n.device from 
+			subnets s, networks n where
+			pxe	= TRUE and
+			node	= (select id from nodes where name='%s') and
+			subnet	= s.id
+			""" % self.db.getHostname()):
 
-			self.addOutput('', '\nsubnet %s netmask %s {'
-				% (network, netmask))
+			if self.os == 'sles':
+				device = device.split('.')[0].split(':')[0]
+				dhchp_settings = (netname, network, netmask, gateway, zone)
+				if device in shared_networks:
+					if dhchp_settings not in shared_networks[device]:
+						shared_networks[device].append(dhchp_settings)
+				else:
+					shared_networks[device] = [dhchp_settings]
 
-			self.addOutput('', '\tdefault-lease-time\t\t1200;')
-			self.addOutput('', '\tmax-lease-time\t\t\t1200;')
+			else:
+				self.addOutput('', '\nsubnet %s netmask %s {'
+					% (network, netmask))
 
-			ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
-			self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
-			self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
-			self.addOutput('', '\toption broadcast-address\t%s;' %
-				ipnetwork.broadcast_address)
-			self.addOutput('', '}\n')
+				self.addOutput('', '\tdefault-lease-time\t\t1200;')
+				self.addOutput('', '\tmax-lease-time\t\t\t1200;')
+
+				ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
+				self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
+				self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
+				self.addOutput('', '\toption broadcast-address\t%s;' %
+					ipnetwork.broadcast_address)
+				self.addOutput('', '}\n')
+		#
+		# if sles, add shared_network block to interfaces with multiple subnets
+		#
+		if self.os == 'sles':
+			for device in shared_networks.keys():
+				sn = shared_networks[device]
+				if len(sn) == 1:
+					for (netname, network, netmask, gateway, zone) in sn:
+						self.addOutput('', '\nsubnet %s netmask %s {'
+							% (network, netmask))
+
+						self.addOutput('', '\tdefault-lease-time\t\t1200;')
+						self.addOutput('', '\tmax-lease-time\t\t\t1200;')
+
+						ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
+						self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
+						self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
+						self.addOutput('', '\toption broadcast-address\t%s;' %
+							ipnetwork.broadcast_address)
+						self.addOutput('', '}\n')
+				else:
+					self.addOutput('', '\nshared-network %s {' % device)
+					for (netname, network, netmask, gateway, zone) in sn:
+						self.addOutput('', '\n\tsubnet %s netmask %s {'
+							% (network, netmask))
+
+						self.addOutput('', '\t\tdefault-lease-time\t\t1200;')
+						self.addOutput('', '\t\tmax-lease-time\t\t\t1200;')
+
+						ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
+						self.addOutput('', '\t\toption routers\t\t\t%s;' % gateway)
+						self.addOutput('', '\t\toption subnet-mask\t\t%s;' % netmask)
+						self.addOutput('', '\t\toption broadcast-address\t%s;' %
+							ipnetwork.broadcast_address)
+						self.addOutput('', '\t}\n')
+					self.addOutput('', '}\n')
 
 		data = { }
 		for row in self.db.select("name from nodes order by rack, rank"):
@@ -98,6 +150,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		for name in data.keys():
 			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
+			aws = self.str2bool(self.getHostAttr(name, 'aws'))
 			mac = None
 			ip  = None
 			dev = None
@@ -118,7 +171,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					s.pxe = TRUE and nt.ip = '%s'""" % (name, ip))
 					if r:
 						(netname, ) = r[0]
-				if ip and mac and dev and netname:
+				if ip and mac and dev and netname and not aws:
 					self.addOutput('', '\nhost %s.%s.%s {' %
 						(name, netname, dev))
 					self.addOutput('', '\toption host-name\t"%s";' % name)
@@ -165,7 +218,14 @@ class Command(stack.commands.HostArgumentProcessor,
 			n.subnet = s.id and
 			n.ip is not NULL
 			""" % self.db.getHostname()):
-			devices += '%s ' % device
+
+			# since sles doesn't use seperate config files for virtual 
+			# interfaces, we only add the actual interface to devices
+			if self.os == 'sles':
+				if ':' not in device:
+					devices += '%s ' % device
+			else:
+				devices += '%s ' % device
 
 		if self.os == 'redhat':
 			self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())

@@ -1,7 +1,7 @@
 <stack:stack>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -28,19 +28,15 @@ CREATE TABLE access (
 
 insert into access (command, groupid) values ("*", 0); 
 
-grant select on cluster.access to ''@'localhost';
-
 <!-- Aliases -->
 
 DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
-  Node		int(11) NOT NULL default '0',
-  Name		varchar(32) default NULL,
+  Name		varchar(32) NOT NULL default '0',
+  Network		int(11) NOT NULL default '0',
   PRIMARY KEY (ID) 
 );
-
-grant select on cluster.aliases to ''@'localhost';
 
 <!-- Attributes -->
 
@@ -53,15 +49,11 @@ CREATE TABLE attributes (
   ScopeID	int(11)
 );
 
-grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
-
 DROP TABLE IF EXISTS attributes_doc;
 CREATE TABLE attributes_doc (
   Attr          varchar(128) NOT NULL,
   Doc           text
 );
-
-grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
 
 <!-- OSes -->
 
@@ -71,8 +63,6 @@ CREATE TABLE oses (
   Name		varchar(32) NOT NULL default '',
   PRIMARY KEY (ID)
 );
-
-grant select on cluster.oses to ''@'localhost';
 
 insert into oses (name) values ("redhat");
 insert into oses (name) values ("ubuntu");
@@ -89,9 +79,6 @@ CREATE TABLE environments (
   PRIMARY KEY (ID)
 );
 
-grant select on cluster.environments to ''@'localhost';
-
-
 <!-- Appliances -->
 
 DROP TABLE IF EXISTS appliances;
@@ -103,8 +90,6 @@ CREATE TABLE appliances (
   PRIMARY KEY (ID)
 );
 
-grant select on cluster.appliances to ''@'localhost';
-
 <!-- Boxes -->
 
 DROP TABLE IF EXISTS boxes;
@@ -115,8 +100,6 @@ CREATE TABLE boxes (
   PRIMARY KEY (ID)
 );
 
-grant select on cluster.boxes to ''@'localhost';
-
 <!-- Boot/Action Tables -->
 
 DROP TABLE IF EXISTS boot;
@@ -124,7 +107,6 @@ CREATE TABLE boot (
 	Node		int(11) NOT NULL default '0',
 	Action		enum ('install', 'os')
 );
-grant select on cluster.boot to ''@'localhost';
 
 DROP TABLE IF EXISTS bootnames;
 CREATE TABLE bootnames (
@@ -133,8 +115,6 @@ CREATE TABLE bootnames (
 	Type		enum ('install', 'os') NOT NULL,
 	PRIMARY KEY (ID)
 );
-grant select on cluster.bootnames to ''@'localhost';
-	
 
 DROP TABLE IF EXISTS bootactions;
 CREATE TABLE bootactions (
@@ -145,8 +125,6 @@ CREATE TABLE bootactions (
 	Args		varchar(1024) default NULL,
 	PRIMARY KEY (BootName, OS)
 );
-grant select on cluster.bootactions to ''@'localhost';
-
 
 <!-- Nodes -->
 
@@ -164,8 +142,6 @@ CREATE TABLE nodes (
   Comment	varchar(140) default NULL,
   PRIMARY KEY  (ID)
 );
-
-grant select on cluster.nodes to ''@'localhost';
 
 <!-- Networks -->
 
@@ -188,8 +164,6 @@ CREATE TABLE networks (
   PRIMARY KEY(ID)
 );
 
-grant select on cluster.networks to ''@'localhost';
-
 <!-- Subnets Table -->
 
 DROP TABLE IF EXISTS subnets;
@@ -206,7 +180,15 @@ CREATE TABLE subnets (
 	PRIMARY KEY(ID)
 );
 
-grant select on cluster.subnets to ''@'localhost';
+<!-- Node/Switch Table -->
+
+DROP TABLE IF EXISTS switchports;
+CREATE TABLE switchports (
+	interface	int(11)		NOT NULL references networks,
+	switch		int(11)		NOT NULL references nodes,
+	port		int(11)		NOT NULL,
+	PRIMARY KEY(switch, port)
+);
 
 <!-- Routes -->
 
@@ -215,10 +197,9 @@ CREATE TABLE global_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
-
-grant select on cluster.global_routes to ''@'localhost';
 
 DROP TABLE IF EXISTS os_routes;
 CREATE TABLE os_routes (
@@ -226,10 +207,9 @@ CREATE TABLE os_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
-
-grant select on cluster.os_routes to ''@'localhost';
 
 DROP TABLE IF EXISTS appliance_routes;
 CREATE TABLE appliance_routes (
@@ -237,10 +217,9 @@ CREATE TABLE appliance_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
-
-grant select on cluster.appliance_routes to ''@'localhost';
 
 DROP TABLE IF EXISTS node_routes;
 CREATE TABLE node_routes (
@@ -248,11 +227,9 @@ CREATE TABLE node_routes (
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
 );
-
-grant select on cluster.node_routes to ''@'localhost';
-
 
 <!-- Stacks -->
 
@@ -262,16 +239,11 @@ CREATE TABLE stacks (
   Roll		int(11) NOT NULL 
 );
 
-grant select on cluster.stacks to ''@'localhost';
-
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
   Box		int(11) NOT NULL default '1',
   Cart		int(11) NOT NULL 
 );
-
-grant select on cluster.cart_stacks to ''@'localhost';
-
 
 <!-- Groups -->
 
@@ -282,16 +254,11 @@ CREATE TABLE groups (
   PRIMARY KEY (ID) 
 );
 
-grant select on cluster.groups to ''@'localhost';
-
-
 DROP TABLE IF EXISTS memberships;
 CREATE TABLE memberships (
   NodeID	int(11) NOT NULL,
   GroupID	int(11) NOT NULL
 );
-
-grant select on cluster.memberships to ''@'localhost';
 
 <!-- Carts -->
 
@@ -301,8 +268,6 @@ CREATE TABLE carts (
   Name		varchar(128) NOT NULL default '',
   PRIMARY KEY (ID) 
 );
-
-grant select on cluster.carts to ''@'localhost';
 
 <!-- Roll.  What Rolls are installed and used by default. -->
 
@@ -316,8 +281,6 @@ CREATE TABLE rolls (
   OS		varchar(32) NOT NULL default '&os;',
   PRIMARY KEY (ID) 
 );
-
-grant select on cluster.rolls to ''@'localhost';
 
 <!-- Partitions. stores all the partitions for all the appliances -->
 
@@ -337,9 +300,6 @@ CREATE TABLE partitions (
 	PRIMARY KEY (ID)
 );
 
-grant select on cluster.partitions to ''@'localhost';
-
-
 <!-- Firewall Tables -->
 
 DROP TABLE IF EXISTS global_firewall;
@@ -357,8 +317,6 @@ CREATE TABLE global_firewall (
   Comment       varchar(256) default NULL
 );
 
-grant select on cluster.global_firewall to ''@'localhost';
-
 DROP TABLE IF EXISTS os_firewall;
 CREATE TABLE os_firewall (
   OS		varchar(32) NOT NULL default '&os;',
@@ -374,8 +332,6 @@ CREATE TABLE os_firewall (
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
 );
-
-grant select on cluster.os_firewall to ''@'localhost';
 
 DROP TABLE IF EXISTS appliance_firewall;
 CREATE TABLE appliance_firewall (
@@ -393,8 +349,6 @@ CREATE TABLE appliance_firewall (
   Comment       varchar(256) default NULL
 );
 
-grant select on cluster.appliance_firewall to ''@'localhost';
-
 DROP TABLE IF EXISTS node_firewall;
 CREATE TABLE node_firewall (
   Node		int(11) NOT NULL default '0',
@@ -411,8 +365,6 @@ CREATE TABLE node_firewall (
   Comment       varchar(256) default NULL
 );
 
-grant select on cluster.node_firewall to ''@'localhost';
-
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (
  ID		int(11) NOT NULL auto_increment,
@@ -420,8 +372,6 @@ CREATE TABLE public_keys (
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
 );
-
-grant select on cluster.public_keys to ''@'localhost';
 
 DROP TABLE IF EXISTS storage_controller;
 CREATE TABLE storage_controller (
@@ -435,8 +385,6 @@ CREATE TABLE storage_controller (
  Options	varchar(512) NOT NULL default ''
 );
 
-grant select on cluster.storage_controller to ''@'localhost';
-
 DROP TABLE IF EXISTS storage_partition;
 CREATE TABLE storage_partition (
  Scope		enum('global', 'os', 'appliance', 'host'),
@@ -449,17 +397,42 @@ CREATE TABLE storage_partition (
  Options        varchar(512) NOT NULL default ''
 );
 
-grant select on cluster.storage_partition to ''@'localhost';
-
-grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
-grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
 </stack:file>
 
 /opt/stack/bin/mysqladmin --defaults-extra-file=/opt/stack/etc/root.my.cnf \
 	--user=root create cluster
 
 /opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
-	--user=root  cluster &lt; /tmp/tables.sql
+	--user=root cluster &lt; /tmp/tables.sql
+
+
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
+grant select on cluster.* to ''@'localhost';
+grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
+grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
+grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
+grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
+</stack:file>
+
+/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+	--user=root cluster &lt; /var/db/grants.sql
+
+
+<!--
+	this script can be used to restore a stacki database.
+
+	purposely make it read-only so someone doesn't accidentally execute it.
+-->
+<stack:file stack:name="/var/db/restore-stacki-database.sh" stack:perms="0400">#!/bin/sh
+
+/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+	--user=root cluster &lt; /var/db/mysql-backup-cluster
+
+/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+	--user=root cluster &lt; /var/db/grants.sql
+
+/opt/stack/bin/stack sync config
+</stack:file>
 
 </stack:script>
 

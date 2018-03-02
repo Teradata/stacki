@@ -1,3 +1,4 @@
+-foundation-ansible
 -foundation-comps
 -foundation-fbtftpd
 -foundation-gd
@@ -15,6 +16,8 @@
 -stack-pxeboot
 -stack-sql
 -stack-summary
+-stack-switch
 -stack-wizard
 -stack-ws
 -stack-ws-client
+-stack-discovery

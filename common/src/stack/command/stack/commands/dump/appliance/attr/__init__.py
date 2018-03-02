@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -16,8 +16,8 @@ class Command(stack.commands.dump.appliance.command):
 	Name of appliance
 	</arg>
 	
-	<example cmd='dump appliance attr compute'>
-	List the attributes for compute appliances
+	<example cmd='dump appliance attr backend'>
+	List the attributes for backend appliances
 	</example>
 	"""
 

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -26,8 +26,8 @@ class Command(stack.commands.sync.host.command):
 	The default is: yes.
 	</param>
 
-	<example cmd='sync host network compute-0-0'>
-	Reconfigure and restart the network on compute-0-0.
+	<example cmd='sync host network backend-0-0'>
+	Reconfigure and restart the network on backend-0-0.
 	</example>
 	"""
 

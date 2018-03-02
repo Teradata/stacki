@@ -14,10 +14,14 @@ foundation-zeromq
 ludicrous-speed
 sc-im
 stack-admin
+stack-aws-client
+stack-aws-server
+stack-barnacle
 stack-build
 stack-command
 stack-config
 stack-config-server
+stack-discovery
 stack-ekv
 stack-examples
 stack-kickstart
@@ -27,8 +31,10 @@ stack-pylib
 stack-sql
 stack-storage-config
 stack-summary
+stack-switch
 stack-wizard
 stack-ws
 stack-ws-client
 storcli
 uefi-boot-method
+foundation-ansible

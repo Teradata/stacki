@@ -44,13 +44,13 @@
 # drop the 's' -- it makes the commands easier to use. for example, this type
 # of interaction will be common:
 #
-#     # rocks list host partition compute-0-0
-#     # rocks remove host partition compute-0-0 /var
+#     # rocks list host partition backend-0-0
+#     # rocks remove host partition backend-0-0 /var
 #
 # or:
 #
-#     # rocks list host interface compute-0-0
-#     # rocks add host interface compute-0-0 if=eth1 ...
+#     # rocks list host interface backend-0-0
+#     # rocks add host interface backend-0-0 if=eth1 ...
 #
 # by dropping the 's', we can use bash history and only change the verb and
 # not also have to change 'interfaces' to 'interface'
@@ -78,8 +78,8 @@ class Command(stack.commands.list.host.command):
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='list host partition compute-0-0'>
-	List partition info for compute-0-0.
+	<example cmd='list host partition backend-0-0'>
+	List partition info for backend-0-0.
 	</example>
 
 	<example cmd='list host partition'>

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -32,12 +32,12 @@ class Command(command):
 	information for all hosts will be listed.
 	</arg>
 
-	<example cmd='dump host compute-0-0'>
-	Dump host compute-0-0 information.
+	<example cmd='dump host backend-0-0'>
+	Dump host backend-0-0 information.
 	</example>
 	
-	<example cmd='dump host compute-0-0 compute-0-1'>
-	Dump host compute-0-0 and compute-0-1 information.
+	<example cmd='dump host backend-0-0 backend-0-1'>
+	Dump host backend-0-0 and backend-0-1 information.
 	</example>
 		
 	<example cmd='dump host'>

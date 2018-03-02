@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -26,8 +26,8 @@ class Command(stack.commands.list.appliance.command):
 	Optional list of appliance names.
 	</arg>
 		
-	<example cmd='list appliance xml compute'>
-	Lists the XML profile for a compute appliance.
+	<example cmd='list appliance xml backend'>
+	Lists the XML profile for a backend appliance.
 	</example>
 
 	<example cmd='list appliance xml'>

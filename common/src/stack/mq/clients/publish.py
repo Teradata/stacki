@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python3
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,6 +11,7 @@ import string
 import socket
 import getopt
 import stack.mq
+import json
 
 try:
 	opt, args = getopt.getopt(sys.argv[1:], 'c:')
@@ -25,8 +26,9 @@ for o, a in opt:
 
 
 tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-pkt = '%s %s' % (channel, string.join(args))
+pkt = { "channel": channel,
+	"message": ' '.join(args) }
 
-tx.sendto(pkt, ('localhost', stack.mq.ports.publish))
+tx.sendto(json.dumps(pkt).encode(), ('localhost', stack.mq.ports.publish))
 
 

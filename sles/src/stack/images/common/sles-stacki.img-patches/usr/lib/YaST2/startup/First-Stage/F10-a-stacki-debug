@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# @copyright@
+# Copyright (c) 2006 - 2017 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+
 log "==============================="
 log "Starting F10-a-stacki-debug ..."
 log "==============================="
@@ -10,9 +17,9 @@ grep stack-debug /proc/cmdline 2>&1 > /dev/null
 if [ $? -eq 0 ]
 then
 	touch /tmp/wait
+	echo "Stacki debug wait loop - remove /tmp/wait to continue"
 	while [ -f /tmp/wait ]
 	do
-		echo "Stacki debug wait loop - remove /tmp/wait to continue"
 		sleep 1
 		/opt/stack/bin/stacki-status.py install wait 2
 	done

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -30,8 +30,8 @@ class Command(command):
 	The name of the appliance.
 	</arg>
 	
-	<example cmd='remove appliance compute'>
-	Removes the compute appliance from the database.
+	<example cmd='remove appliance backend'>
+	Removes the backend appliance from the database.
 	</example>
 	"""
 

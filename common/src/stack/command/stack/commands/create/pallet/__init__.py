@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -170,7 +170,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 			for file in tree.getFiles(dir):
 				try:
 					file.getPackageName()
-				except AttributeError:
+				except:
 					continue # skip all non-rpm files
 					
 				# Skip RPMS for other architecures
@@ -196,7 +196,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 
 	def spanDisks(self, files, disks=[]):
-		"""Given the pallet RPMS and compute the size
+		"""Given the pallet RPMS and backend the size
 		of all the files and return a list of files for each disk of 
 		the pallet.  The intention is for almost all pallets to be one
 		CD but for our OS pallet this is not the case."""

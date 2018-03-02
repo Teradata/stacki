@@ -5,19 +5,30 @@
 	</description>
 
 	<copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
+	<order tail="barnacle" head="backend"/>
+	<edge  from="barnacle">
+		<to>foundation-python-server</to>
+		<to>backend</to>
+	</edge>
+
 	<edge from="builder" to="backend"/>
 
-	<edge from="client" cond="os != 'sles' or os.version != '11.x'">
+	<edge from="client" cond="appliance not in [ 'barnacle', 'replicant' ]">
 		<to>foundation-python-client</to>
 		<to>mq-client</to>
 	</edge>
-
 	<edge from="client">
 		<to>peerdone</to>
 	</edge>
+
+	<edge from="client" cond="platform == 'aws'">
+		<to>aws-client</to>
+		<to>aws-ssh-key</to>
+	</edge>
+
 </graph>

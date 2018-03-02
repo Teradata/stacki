@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -33,7 +33,7 @@ class Command(stack.commands.report.host.command):
 				search.append(intf['zone'])
 
 		for zone in zones.values():
-			if zone not in search:
+			if zone and zone not in search:
 				search.append(zone)
 
 		if search:

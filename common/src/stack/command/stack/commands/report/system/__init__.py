@@ -1,16 +1,18 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 #
 
 import stack.commands
+from stack.exception import CommandError
 import shutil
 from collections import namedtuple
 from pytest import main
 from glob import glob
 import os
+
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -57,15 +59,19 @@ class Command(stack.commands.Command,
 
 		# make it real ugly.
 		if exitonfail == True and pretty == False:
-			main(['-v', '-x', *tests])
+			_return_code = main(['-v', '-x', *tests])
 		# exit with first failure
 		if exitonfail == True:
-			main(['-v', '-s', '-x', *tests])
+			_return_code = main(['-v', '-s', '-x', *tests])
 		# show tracebacks of failures but don't fail.
 		elif pretty == False:
-			main(['-v', '-s', *tests])
+			_return_code = main(['-v', '-s', *tests])
 		# pretty and no tracebacks
 		else:
-			main(['-v', '-s', '--tb=no', *tests])
+			_return_code = main(['-v', '-s', '--tb=no', *tests])
 
 		os.chdir(current_dir)
+
+		# If any of the tests failed, throw an error
+		if _return_code > 0:
+			raise CommandError(self, "One or more tests failed")

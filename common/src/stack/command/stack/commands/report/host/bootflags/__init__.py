@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -25,8 +25,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	all the known hosts is listed.
 	</arg>
 
-	<example cmd='report host bootflags compute-0-0'>
-	Output the kernel boot flags for compute-0-0.
+	<example cmd='report host bootflags backend-0-0'>
+	Output the kernel boot flags for backend-0-0.
 	</example>
 	"""
 

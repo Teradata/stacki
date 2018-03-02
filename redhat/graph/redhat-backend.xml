@@ -39,7 +39,6 @@
 		<to>base</to>
 		<to>time-client</to>
 		<to>networking-client</to>
-		<to>node-certs</to>
 		<to>resolv</to>
 		<to>routes-client</to>
 		<to>storage</to>

@@ -18,12 +18,14 @@
 	"Flask":		{ "fe": true }, 
 	"PyYAML":		{ "fe": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
+	"pexpect":		{ "fe": true },
 	"PyMySQL":		{ "fe": true, "bootstrap": true }, 
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
 	"testinfra":		{ "fe": true, "bootstrap": true },
-	"Django":		{ "fe": true },
-	"mod-wsgi":		{ "fe": true }
+	"Django":		{ "fe": true, "version": "1.11.6" },
+	"mod-wsgi":		{ "fe": true },
+	"netifaces":		{ "fe": true }
 }

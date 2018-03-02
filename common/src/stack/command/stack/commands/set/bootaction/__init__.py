@@ -1,5 +1,8 @@
-# @SI_Copyight@
-# @SI_Copyight@
+# @copyright@
+# Copyright (c) 2006 - 2018 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
 
 from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 import stack.commands
@@ -16,26 +19,32 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 
 		(b_type, b_os) = self.fillParams([
 			('type', None, True),
-			('os', '')])
+			('os', None)])
 
 		if b_type not in [ 'os', 'install' ]:
 			raise ParamValue(self, 'type', '"os" or "install"')
 
-		if not b_os:
-			b_os = self.os
-
+		#
+		# 'install' action type should have os parameter specified.
+		# 'os' action type need not have os parameter specified.
+		#
+		if b_type == "install" and not b_os:
+			raise ParamRequired(self, 'os is required for action=install')
 		if b_os:
 			b_os = self.getOSNames([b_os])[0]
 
 		return (b_action, b_type, b_os)
 
 	def actionExists(self, b_action, b_type, b_os=None):
-		for row in self.call('list.bootaction', 
-				     [ b_action, 
-				       'type=%s' % b_type, 
-				       'os=%s' % b_os ]):
+		if b_os:
+			arr = [b_action, 'type=%s' % b_type, 'os=%s' % b_os]
+		else:
+			arr = [b_action, 'type=%s' % b_type]
+
+		for row in self.call('list.bootaction', arr):
 			if b_os == '':
 				b_os = None
+			
 			if b_action == row['bootaction'] and b_type == row['type'] and b_os == row['os']:
 				return True
 		return False
@@ -51,6 +60,7 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 
 class Command(command):
 	"""
+	Updates bootaction parameters.
 	"""
 
 	def run(self, params, args):
@@ -90,10 +100,11 @@ class Command(command):
 			self.db.execute(
 				"""
 				insert into bootactions
-				(bootname)
+				(bootname, os)
 				values
 				(
-				(select id from bootnames where name='%s' and type='%s')
+				(select id from bootnames where name='%s' and type='%s'),
+				NULL
 				)""" % (b_action, b_type))
 			
 
@@ -101,11 +112,17 @@ class Command(command):
 					 (b_args,    'args'),
 					 (b_ramdisk, 'ramdisk') ]:
 			if flag:
-				self.command('set.bootaction.%s' % command, 
+				if b_os:
+					self.command('set.bootaction.%s' % command, 
 					     (b_action,
 					      'type=%s' % b_type, 
 					      'os=%s'   % b_os,
 					      '%s=%s'   % (command, flag)))
+				else:
+					self.command('set.bootaction.%s' % command,
+						(b_action,
+						'type=%s' % b_type,
+						'%s=%s'   % (command, flag)))
 			
 			
 

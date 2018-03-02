@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -207,6 +207,8 @@ class NetworkArgumentProcessor:
 		for arg in args:
 			rows = self.db.execute("""select name from subnets
 				where name like '%s'""" % arg)
+			if not rows:
+				continue
 			if rows == 0 and arg == '%': # empty table is OK
 				continue
 			if rows < 1:
@@ -231,6 +233,165 @@ class NetworkArgumentProcessor:
 			netname = ''
 
 		return netname
+
+class SwitchArgumentProcessor:
+	"""An interface class to add the ability to process switch arguments."""
+
+	def getSwitchNames(self, args=None):
+		"""Returns a list of switch names from the database.
+		For each arg in the ARGS list find all the switch
+		names that match the arg (assume SQL regexp).  If an
+		arg does not match anything in the database we raise
+		an exception.  If the ARGS list is empty return all network names.
+		"""
+		switches = []
+		if not args:
+			args = ['%'] # find all switches
+		for arg in args:
+			rows = self.db.execute("""
+			select name from nodes
+			where name like '%s' and
+			appliance=(select id from appliances where name='switch')
+			""" % arg)
+
+			if rows == 0 and arg == '%': # empty table is OK
+				continue
+			for name, in self.db.fetchall():
+				switches.append(name)
+
+		return switches
+
+	def delSwitchEntries(self, args=None):
+		"""Delete foreign key references from switchports"""
+		if not args:
+			return
+
+		for arg in args:
+			row = self.db.execute("""
+			delete from switchports
+			where switch=(select id from nodes where name='%s')
+			""" % arg)
+
+	def getSwitchNetwork(self, switch):
+		"""Returns the network the switch is on.
+		"""
+		if not switch:
+			return ''
+
+		rows = self.db.execute("""
+			select subnet from networks where
+			node = (select id from nodes where name = '%s')
+			""" % switch)
+
+		if rows:
+			network, = self.db.fetchone()
+		else:
+			network = ''
+
+		return network
+
+	def addSwitchHost(self, switch, host, port):
+		"""
+		Add a host to switch.
+		Check if host has an interface on the same network as
+		the switch
+		"""
+
+		# Get the switch's network
+		switch_network = self.db.select("""
+			subnet from networks where node=(
+				select id from nodes where name='%s'
+				)
+			""" % switch)
+
+		if not switch_network:
+			raise CommandError(self,
+				"switch '%s' doesn't have an interface" % switch)
+
+		# Get the interface of the host that is on the same
+		# network as the switch
+		host_interface = self.db.select("""
+			id from networks where subnet='%s' and
+			node=(select id from nodes where name='%s')
+			""" % (switch_network[0][0],  host))
+
+		if not host_interface:
+			raise CommandError(self,
+				"host '%s' is not on a network with switch '%s'"
+				% ( host, switch ))
+
+		query = """
+		insert into switchports
+		(interface, switch, port)
+		values ('%s',
+			(select id from nodes where name = '%s'),
+			'%s')
+		""" % (host_interface[0][0], switch, port)
+
+		self.db.execute(' '.join(query.split()))
+
+	def delSwitchHost(self, switch, host):
+		"""Add a host to switch"""
+		query = """
+		delete from switchports
+		where interface in (
+			select id from networks where
+			node=(select id from nodes where name='%s') and
+			subnet=(select subnet from networks where
+				node=(select id from nodes where name='%s'))
+			)
+		and switch=(select id from nodes where name='%s')
+		""" % (host, switch, switch)
+		#print(query)
+		self.db.execute(' '.join(query.split()))
+	def setSwitchHostVlan(self, switch, host, vlan):
+		self.db.execute("""
+		update switchports
+		set vlan=%s
+		where host=(select id from nodes where name='%s')
+		and switch=(select id from nodes where name='%s')
+		""" % (vlan, host, switch))
+
+	def getSwitchesForHosts(self, hosts):
+		"""Return switches name for hosts"""
+		_switches = []
+		for host in hosts:
+			_rows = self.db.select("""
+			n.name from 
+			nodes n, switchports s, networks i where
+			s.interface in (select id from networks where node=(select id from nodes where name='%s')) and
+			s.switch=n.id
+			""" % host)
+
+			for row, in _rows:
+				_switches.append(row)
+
+		return set(_switches)
+
+	def getHostsForSwitch(self, switch):
+		"""Return a dictionary of hosts that are connected to the switch.
+		Each entry will be keyed off of the port since most of the information
+		stored by the switch is based off port. 
+		"""
+
+		_hosts = {}
+		_rows = self.db.select("""
+		  n.name, i.device, s.port, i.vlanid, i.mac from
+		  nodes n, networks i, switchports s where 
+		  s.switch=(select id from nodes where name='%s') and
+		  i.id = s.interface and
+		  n.id = i.node
+		""" % switch)
+		for host, interface, port, vlanid, mac in _rows:
+			_hosts[str(port)] = {
+				  'host': host,
+				  'interface': interface,
+				  'port': port,
+				  'vlan': vlanid,
+				  'mac': mac,
+				}
+
+		return _hosts
 	
 
 class CartArgumentProcessor:
@@ -460,8 +621,8 @@ class HostArgumentProcessor:
 						hostDict[host] = s
 						if host not in explicit:
 							explicit[host] = False
-#					Debug('group %s is %s for %s' %
-#				      (exp, res, host))
+					# Debug('group %s is %s for %s' %
+					# 	(exp, res, host))
 
 			# glob regex hostname
 
@@ -685,6 +846,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.parser.setContentHandler(self)
 
 	def getDocbookText(self):
+		print('Docbook is no longer a viable format.')
+		raise(CommandError(self, 'Use "markdown"'))
 		s  = ''
 		s += '<section id="stack-%s" xreflabel="%s">\n' % \
 			('-'.join(self.name.split(' ')), self.name)
@@ -899,7 +1062,6 @@ class DocStringHandler(handler.ContentHandler,
 		if self.section['description']:
 			s = s + '### Description\n\n'
 			m = self.section['description'].split('\n')
-			m = map(string.strip, m)
 			desc = '\n'.join(m)
 			s = s + desc + '\n\n'
 
@@ -1145,13 +1307,49 @@ class DatabaseConnection:
 
 	def getHostRoutes(self, host, showsource=0):
 
+		_frontend = self.getHostname('localhost')
 		host = self.getHostname(host)
 		routes = {}
+
+		# if needed, add default routes to support multitenancy
+		if _frontend == host:
+			_networks = self.select(
+			"""
+			n.ip, n.device, np.ip 
+			from networks n
+			left join networks np
+			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
+			where n.node=(select id from nodes where name='%s')
+			""" % (_frontend, _frontend))
+
+			_network_dict = {}
+			for _network in _networks:
+				if None in _network:
+					continue
+				(gateway, interface, destination) = _network
+				interface = interface.split('.')[0].split(':')[0]
+				
+				if destination in _network_dict:
+					routes[destination] = _network_dict[destination]
+				else:
+					if showsource:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface, 
+							'H')
+					else:
+						_network_dict[destination] = (
+							'255.255.255.255', 
+							gateway, 
+							interface,)
+
+				
 		
 		# global
 		
-		for (n, m, g, s) in self.select("""
-			network, netmask, gateway, subnet from
+		for (n, m, g, s, i) in self.select("""
+			network, netmask, gateway, subnet, interface from
 			global_routes
 			"""):
 			if s:
@@ -1162,17 +1360,17 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%' 
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
-				routes[n] = (m, g, 'G')
+				routes[n] = (m, g, i, 'G')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# os
 				
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from os_routes r, nodes n where
+			r.subnet, r.interface from os_routes r, nodes n where
 			r.os='%s' and n.name='%s'
 			"""  % (self.getHostOS(host), host)):
 			if s:
@@ -1183,17 +1381,17 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
-				routes[n] = (m, g, 'O')
+				routes[n] = (m, g, i, 'O')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# appliance
 
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from
+			r.subnet, r.interface from
 			appliance_routes r,
 			nodes n,
 			appliances app where
@@ -1208,17 +1406,17 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
-				routes[n] = (m, g, 'A')
+				routes[n] = (m, g, i, 'A')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		# host
 		
-		for (n, m, g, s) in self.select("""
+		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet from node_routes r, nodes n where
+			r.subnet, r.interface from node_routes r, nodes n where
 			n.name='%s' and n.id=r.node
 			""" % host):
 			if s:
@@ -1229,11 +1427,11 @@ class DatabaseConnection:
 					net.node = n.id and n.name = '%s'
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
-					g = dev
+					i = dev
 			if showsource:
-				routes[n] = (m, g, 'H')
+				routes[n] = (m, g, i, 'H')
 			else:
-				routes[n] = (m, g)
+				routes[n] = (m, g, i)
 
 		return routes
 

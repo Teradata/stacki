@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -17,8 +17,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	One host name.
 	</arg>
 
-	<example cmd='report host storage partition compute-0-0'>
-	Output the storage partition configuration for compute-0-0.
+	<example cmd='report host storage partition backend-0-0'>
+	Output the storage partition configuration for backend-0-0.
 	</example>
 	"""
 

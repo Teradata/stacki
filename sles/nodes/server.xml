@@ -1,7 +1,7 @@
 <stack:stack>
 
 <stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
+Copyright (c) 2006 - 2018 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
@@ -32,6 +32,12 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>mlocate</stack:package>
 <stack:package>grub2</stack:package>
 
+<!-- stacki switch package -->
+<stack:package>stack-switch</stack:package>
+
+<!-- node discovery feature -->
+<stack:package>stack-discovery</stack:package>
+
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">
     if [ ! -d /mnt/cdrom ]; then
@@ -56,18 +62,11 @@ chmod 775 /export/stack/carts
 /usr/bin/systemctl enable ludicrous-server
 /usr/bin/systemctl start ludicrous-server
 
-<!-- disable the "wickedd-dhcp*" servers -->
-/usr/bin/systemctl disable wickedd-dhcp4.service
-/usr/bin/systemctl disable wickedd-dhcp6.service
-
-rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
-rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
-
 <!-- explicitly write the sshd configuration file -->
 <stack:file stack:name="/etc/ssh/sshd_config" stack:perms="640">
 AuthorizedKeysFile .ssh/authorized_keys
 PasswordAuthentication yes
-ChallengeResponseAuthentication no
+ChallengeResponseAuthentication yes
 UsePAM yes
 X11Forwarding yes
 PermitUserEnvironment yes
@@ -77,6 +76,18 @@ AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL
 UseDNS no
 </stack:file>
+</stack:script>
+
+<stack:script stack:stage="install-post">
+<!-- Disable automatic hostname and default route assignment
+     for DHCP -->
+sed -i '/^DHCLIENT_SET_HOSTNAME/c \
+DHCLIENT_SET_HOSTNAME="no"
+' /etc/sysconfig/network/dhcp
+
+sed -i '/^DHCLIENT_SET_DEFAULT_ROUTE/c \
+DHCLIENT_SET_DEFAULT_ROUTE="no"
+' /etc/sysconfig/network/dhcp
 </stack:script>
 
 </stack:stack> 

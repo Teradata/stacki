@@ -6,7 +6,7 @@
 	</description>
 
 	<copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
@@ -18,13 +18,16 @@
 		<to>kdump</to>
 		<to>bootloader</to>
 		<to>partitioning</to>
+		<to>storage</to>
 		<to>ssh-client</to>
 		<to>add-on</to>
 		<to>users</to>
 		<to>uefi-client</to>
 		<to>time-client</to>
-		<to>firewall-client</to>
 	</edge>
+
+	<edge from="client" to="firewall-client" cond="firewall"/>
+	<edge from="client" to="firewall-base"   cond="firewall"/>
 
 	<order tail="HEAD">
 		<head>general</head>

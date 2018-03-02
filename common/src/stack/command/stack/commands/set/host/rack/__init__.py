@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -26,8 +26,8 @@ class Command(stack.commands.set.host.command):
 	The rack name (usually a number) to assign to each host.
 	</param>
 
-	<example cmd='set host rack compute-2-0 rack=2'>
-	Set the rack number to 2 for compute-2-0.
+	<example cmd='set host rack backend-2-0 rack=2'>
+	Set the rack number to 2 for backend-2-0.
 	</example>
 	"""
 

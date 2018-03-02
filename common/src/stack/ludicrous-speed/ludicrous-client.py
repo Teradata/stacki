@@ -9,6 +9,7 @@ import subprocess
 import click
 import logging
 from logging import FileHandler
+from time import sleep
 
 
 app = Flask(__name__)
@@ -65,6 +66,7 @@ def tracker():
 
 def lookup_file(hashcode):
 	try:
+		# timeout=(connect timeout, read timeout).
 		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
 	except:
 		raise
@@ -73,6 +75,7 @@ def lookup_file(hashcode):
 
 def get_file(peer, remote_file):
 	try:
+		# timeout=(connect timeout, read timeout).
 		res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
 	except:
 		raise
@@ -130,9 +133,14 @@ def get_file_locally(path, filename):
 	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
 		
 		params = {'port': port, 'hashcode': hashcode}
-		res = lookup_file(hashcode)
-		payload = res.json()
-		successful = res.status_code == 200 and payload['success']
+
+		# Check if there are any hosts that have the file
+		try:
+			res = lookup_file(hashcode)
+			payload = res.json()
+			successful = res.status_code == 200 and payload['success']
+		except:
+			successful = False
 
 		if successful and payload['peers']:
 			peers = set(payload['peers'])
@@ -164,15 +172,28 @@ def get_file_locally(path, filename):
 
 	if not file_exists(local_file):
 		app.logger.info("requesting %s from frontend", filename)
-		try:
-			tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file), timeout=(0.1, 5))
-			if tracker_res.status_code == 200:
-				save_file(tracker_res.content, '%s/' % (file_location), filename)
-				if client_settings['SAVE_FILES']:
-					register_file(port, hashcode)
-		except Exception as e:
-			app.logger.info("error requesting from frontend")
-			app.logger.info("%s", (e))
+
+		# Keep trying to get file from frontend if there is a
+		# connection error or a timeout.
+		while True:
+			try:
+				# timeout=(connect timeout, read timeout).
+				tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file), timeout=(0.1, 5))
+				if tracker_res.status_code == 200:
+					save_file(tracker_res.content, '%s/' % (file_location), filename)
+					if client_settings['SAVE_FILES']:
+						register_file(port, hashcode)
+				break
+			except requests.ConnectTimeout:
+				app.logger.debug('Connect Timeout. Retrying.')
+				sleep(1)
+			except requests.ConnectionError:
+				app.logger.debug('Connection Error. Retrying.')
+				sleep(1)
+			except Exception as e:
+				app.logger.info("error requesting from frontend")
+				app.logger.info("%s", (e))
+				sleep(1)
 
 	if file_exists(local_file):
 		app.logger.info("%s is saved locally", (filename))
@@ -230,6 +251,8 @@ def page_not_found(e):
 @click.option('--port', default=80)
 def main(environment, trackerfile, nosavefile, port):
 	logHandler = FileHandler('/var/log/ludicrous-client-debug.log')
+	formatter = logging.Formatter("%(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S")
+	logHandler.setFormatter(formatter)
 	logHandler.setLevel(logging.DEBUG)
 	app.logger.setLevel(logging.DEBUG)
 	log = logging.getLogger('werkzeug')

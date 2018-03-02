@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -44,8 +44,8 @@ class Command(stack.commands.list.host.command):
 	Optional. If specified, the location of the XML node files.
 	</param>
 	
-	<example cmd='list host graph compute-0-0'>
-	Generates a graph for compute-0-0
+	<example cmd='list host graph backend-0-0'>
+	Generates a graph for backend-0-0
 	</example>
 	"""
 

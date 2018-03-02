@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -19,7 +19,7 @@ class Command(stack.commands.list.command,
 
 	<arg optional='1' type='string' name='host'>
 	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
-	appliance (e.g., 'compute') or a host.
+	appliance (e.g., 'backend') or a host.
 	If nothing is supplied, then the global storage partition
 	configuration will be output.
 	</arg>
@@ -29,13 +29,13 @@ class Command(stack.commands.list.command,
 	be displayed.
 	</param>
 
-	<example cmd='list storage partition compute-0-0'>
-	List host-specific storage partition configuration for compute-0-0.
+	<example cmd='list storage partition backend-0-0'>
+	List host-specific storage partition configuration for backend-0-0.
 	</example>
 
-	<example cmd='list storage partition compute'>
+	<example cmd='list storage partition backend'>
 	List appliance-specific storage partition configuration for all
-	compute appliances.
+	backend appliances.
 	</example>
 
 	<example cmd='list storage partition'>
@@ -152,7 +152,7 @@ class Command(stack.commands.list.command,
 				partid = None
 
 			self.addOutput(name, [device, partid, mountpoint, 
-				size, fstype, options, partid])
+				size, fstype, options])
 
 			i += 1
 

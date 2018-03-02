@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -35,16 +35,7 @@ class Command(command):
 		self.addOutput(None, stack.text.DoNotEdit())
 		self.addOutput(None, '#  Site additions go in /etc/hosts.local\n')
 		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
-
 		aliases = {}
-		for row in self.call('list.host.alias'):
-			host  = row['host']
-			alias = row['alias']
-
-			if host not in row:
-				aliases[host] = []
-			aliases[host].append(alias)
-			
 		zones = {}
 		for row in self.call('list.network'):
 			zones[row['network']] = row['zone']
@@ -66,10 +57,16 @@ class Command(command):
 			# implications on the dhcpd.conf, dns, and
 			# spreadsheet loading, and who knows what
 			# else.
-
 			host    = row['host']
 			network = row['network']
 			default = row['default']
+			interface = row['interface']
+
+			aliases[host] = []
+			for row in self.call('list.host.alias',
+						[ '%s interface=%s' % (host, interface) ]):
+				if row['host'] == host and row['interface'] == interface:
+					aliases[host].append(row['alias'])
 
 			if network:
 				zone = zones[network]
@@ -84,7 +81,6 @@ class Command(command):
 			if host in aliases:
 				for alias in aliases.get(host):
 					names.append(alias)
-
 			self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
 
 
@@ -96,5 +92,5 @@ class Command(command):
 			h = f.read()
 			self.addOutput(None, h)
 			f.close()
-		
+
 		self.endOutput(padChar='', trimOwner=True)

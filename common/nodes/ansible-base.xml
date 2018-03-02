@@ -1,0 +1,27 @@
+<stack:stack>
+
+<stack:copyright>
+Copyright (c) 2006 - 2017 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>foundation-ansible
+foundation-python-Jinja2
+foundation-python-MarkupSafe
+foundation-python-PyYAML
+foundation-python-six
+</stack:package>
+
+<stack:script stack:stage="install-post">
+mkdir -p /etc/ansible
+
+<stack:file stack:name="/etc/ansible/ansible.cfg">
+[defaults]
+system_warnings = no
+</stack:file>
+
+
+</stack:script>
+
+</stack:stack>

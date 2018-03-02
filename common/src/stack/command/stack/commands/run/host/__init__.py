@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -23,10 +23,10 @@ class Command(stack.commands.Command,
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, the command
-	is run on all 'managed' hosts. By default, all compute nodes are
+	is run on all 'managed' hosts. By default, all backend nodes are
 	'managed' nodes. To determine if a host is managed, execute:
 	'rocks list host attr hostname | grep managed'. If you see output like:
-	'compute-0-0: managed true', then the host is managed.
+	'backend-0-0: managed true', then the host is managed.
 	</arg>
 
 	<param type='string' name='command' optional='0'>

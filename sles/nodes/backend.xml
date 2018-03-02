@@ -5,7 +5,7 @@
 	</stack:description>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -27,54 +27,31 @@ mkdir -p /mnt/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 </stack:script>
 
-<stack:script stack:cond="os.version == '12.x'" stack:stage="install-post">
-/usr/bin/systemctl disable wickedd-dhcp4.service
-/usr/bin/systemctl disable wickedd-dhcp6.service
-
-rm -f /usr/lib/systemd/system/wickedd-dhcp4.service
-rm -f /usr/lib/systemd/system/wickedd-dhcp6.service
-</stack:script>
-
 <stack:script stack:stage="install-post">
 
 echo "&hostname;.&domainname;" > /etc/HOSTNAME
 
-/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+SERVER=&yumserver;
+if [ x"" == x$SERVER ]
+then
+	SERVER=&Kickstart_PrivateKickstartHost;
+fi
 
-/usr/bin/curl --insecure -o /dev/null https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi
+/usr/bin/curl --insecure -o /dev/null https://$SERVER/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}'
+
+/usr/bin/curl --insecure -o /dev/null https://$SERVER/install/sbin/public/setDbPartitions.cgi
+
 
 <!-- repo config -->
 rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.repo">&hostname;</stack:report>
 
 
-<!-- host status message. this sends out the 'up' health message -->
-<stack:file stack:name="/opt/stack/bin/up.py" stack:perms="0755">
-#!/usr/bin/python
-
-import socket
-import json
-import sys
-
-sys.path.append('/tmp')
-from stack_site import *
-
-tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-msg = { 'channel' : 'health', 'message' : 'up' }
-m = json.dumps(msg)
-
-tx.sendto(m.encode(), (attributes['Kickstart_PrivateAddress'], 5000))
-tx.close()
-</stack:file>
-
-<stack:file stack:cond="os.version == '11.x'" name="/etc/cron.d/up">
-* * * * * root /opt/stack/bin/up.py
-</stack:file>
-
-
+<stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
+<stack:report stack:name="host.interface">&hostname;</stack:report>
+<stack:report stack:name="host.route">&hostname;</stack:report>
+<stack:report stack:name="host.resolv">&hostname;</stack:report>
 </stack:script>
-
 
 <stack:script stack:stage="boot-pre">
 
@@ -96,12 +73,10 @@ awk '/NETCONFIG_DNS_POLICY/ { \
 
 cp /tmp/config /etc/sysconfig/network/config
 
-<!-- populate root's authorized_keys -->
-<stack:file stack:name="/root/.ssh/authorized_keys" stack:perms="0600">
-<stack:eval stack:shell="/opt/stack/bin/python3">
-file = open('/root/.ssh/id_rsa.pub')
-for line in file.readlines():
-	print(line.strip())
+<!-- propagate root's public ssh key -->
+<stack:file stack:name="/root/.ssh/authorized_keys">
+<stack:eval>
+cat /root/.ssh/id_rsa.pub
 </stack:eval>
 </stack:file>
 

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -25,8 +25,8 @@ class Command(stack.commands.sync.host.command):
 	The default is: yes.
 	</param>
 
-	<example cmd='sync host firewall compute-0-0'>
-	Reconfigure and restart the firewall on compute-0-0.
+	<example cmd='sync host firewall backend-0-0'>
+	Reconfigure and restart the firewall on backend-0-0.
 	</example>
 	"""
 
@@ -76,8 +76,10 @@ class Command(stack.commands.sync.host.command):
 		if restartit:
 			threads = []
 			for host in hosts:
-				if stack.release in [ 'redhat7', 'sles12' ]:
+				if stack.release in [ 'redhat7' ]:
 					cmd = 'systemctl restart iptables'
+				elif stack.release in [ 'sles12' ]:
+					cmd = 'systemctl restart stacki-iptables'
 				else:
 					cmd = '/sbin/service iptables restart'
 
@@ -96,7 +98,7 @@ class Command(stack.commands.sync.host.command):
 
 		for host in host_output:
 			if host_output[host]["rc"]:
-				out[host] += host_output[host]['output']
+				out[host] += host_output[host]['output'].decode()
 
 		self.beginOutput()
 		for host in out:

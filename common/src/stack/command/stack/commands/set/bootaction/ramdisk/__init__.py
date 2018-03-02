@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -52,7 +52,7 @@ class Command(stack.commands.set.bootaction.command):
 				"""
 				update bootactions 
 				set ramdisk = '%s' where
-				os = '0' and 
+				os is NULL and 
 				bootname = (select id from bootnames where name = '%s' and type = '%s')
 				""" % (b_ramdisk, b_action, b_type))
 			
