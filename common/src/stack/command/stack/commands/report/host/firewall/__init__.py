@@ -70,21 +70,16 @@ class Command(stack.commands.HostArgumentProcessor,
 			if rule['protocol'] != 'all' and \
 				rule['protocol'] is not None:
 				s += ' -p %s' % rule['protocol']
+			if rule['flags'] is not None:
+				s += ' %s' % rule['flags']
 			if rule['service'] != 'all' and \
 				rule['service'] is not None:
 				if rule['protocol'] == 'all':
 					tmp_rule = s
-					if rule['flags'] is not None:
-						tmp_rule += ' %s' % rule['flags']
 					s = "%s -p tcp --dport %s\n" % (tmp_rule, rule['service'])
 					s += "%s -p udp --dport %s" % (tmp_rule, rule['service'])
 				else:
 					s += ' --dport %s' % rule['service']
-					if rule['flags'] is not None:
-						s += ' %s\n' % rule['flags']
-			else:
-					if rule['flags'] is not None:
-						s += ' %s\n' % rule['flags']
 
 			if rule['comment'] is not None:
 				self.addOutput(host, '# %s' % rule['comment'])
