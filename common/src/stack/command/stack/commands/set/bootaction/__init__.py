@@ -30,30 +30,20 @@ class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
 		#
 		if b_type == "install" and not b_os:
 			raise ParamRequired(self, 'os is required for action=install')
-		print('before os chk ' + str(b_os))
 		if b_os:
 			b_os = self.getOSNames([b_os])[0]
-		print('after os chk')
 
 		return (b_action, b_type, b_os)
 
 	def actionExists(self, b_action, b_type, b_os=None):
-		print('chking if action exists %s, %s, %s' % (b_action, b_type, b_os))
 		if b_os:
 			arr = [b_action, 'type=%s' % b_type, 'os=%s' % b_os]
 		else:
 			arr = [b_action, 'type=%s' % b_type]
 
 		for row in self.call('list.bootaction', arr):
-			print('printing bootaction')
-			print(b_action, b_type, b_os)
 			if b_os == '':
 				b_os = None
-			print('printing row')
-			print(row)
-
-			if b_os == row['os']:
-				print('os matches')
 			if b_action == row['bootaction'] and b_type == row['type'] and b_os == row['os']:
 				return True
 		return False
@@ -120,7 +110,6 @@ class Command(command):
 		for (flag, command) in [ (b_kernel,  'kernel'),
 					 (b_args,    'args'),
 					 (b_ramdisk, 'ramdisk') ]:
-			print('flag =' + flag)
 			if flag:
 				if b_os:
 					self.command('set.bootaction.%s' % command, 
