@@ -7,7 +7,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:script stack:stage="install-post">
-stack report ansible | stack report script | bash
+/opt/stack/bin/stack report ansible | /opt/stack/bin/stack report script | bash
 </stack:script>
 
 </stack:stack>
