@@ -82,7 +82,7 @@ class Command(stack.commands.report.command):
 	def hostlocal(self, name, zone):
 		"Appends any manually defined hosts to domain file"
 		
-		filename = '/var/named/%s.domain.local' % name
+		filename = '%s/%s.domain.local' % (self.named, name)
 		s = ''
 		# If local file exists import from it
 		if os.path.isfile(filename):
@@ -105,16 +105,20 @@ class Command(stack.commands.report.command):
 
 		s = ''
 		subnet_len = len(r_sn.split('.'))
-		self.db.execute('select nt.name, nt.ip, s.zone ' +
-				'from networks nt, subnets s where ' +
+		self.db.execute('select nt.name, n.name, nt.ip, s.zone ' +
+				'from networks nt, subnets s, nodes n where ' +
 				's.name="%s" ' % (s_name)	+
-				'and nt.subnet=s.id')
+				'and nt.subnet=s.id and nt.node=n.id')
 
 		# Remove all elements of the IP address that are
 		# present in the subnet. This is done by counting
 		# the number of elements in the subnet, and popping
 		# that many from the IP address
-		for (name, ip, zone) in self.db.fetchall():
+		for (netname, nodename, ip, zone) in self.db.fetchall():
+			if netname:
+				name = netname
+			else:
+				name = nodename
 			if ip is None:
 				continue
 
@@ -129,8 +133,8 @@ class Command(stack.commands.report.command):
 		#
 		# handle reverse local additions
 		#
-		filename = '/var/named/reverse.%s.domain.%s.local' \
-			% (s_name, r_sn)
+		filename = '%s/reverse.%s.domain.%s.local' \
+			% (self.named, s_name, r_sn)
 		if os.path.exists(filename):
 			s += '\n;Imported from %s\n\n' % filename
 			f = open(filename, 'r')
@@ -152,7 +156,12 @@ class Command(stack.commands.report.command):
 		networks = []
 		for row in self.call('list.network', [ 'dns=true' ]):
 			networks.append(row)
-			
+
+		osname = self.getHostAttr('localhost', 'os')
+		if osname == 'sles':
+			self.named = '/var/lib/named'
+		elif osname == 'redhat':
+			self.named = '/var/named'
 		self.beginOutput()
 
 		#
@@ -162,7 +171,7 @@ class Command(stack.commands.report.command):
 		for network in networks:
 			name = network['network']
 			zone = network['zone']
-			filename = '/var/named/%s.domain' % name
+			filename = '%s/%s.domain' % (self.named, name)
 			s = ''
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (zone, zone, serial, zone, zone)
@@ -188,7 +197,7 @@ class Command(stack.commands.report.command):
 			sn.reverse()
 			r_sn = '.'.join(sn)
 
-			filename = '/var/named/reverse.%s.domain.%s' % (name, r_sn)
+			filename = '%s/reverse.%s.domain.%s' % (self.named, name, r_sn)
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (name, name, serial, name, name)
 			s += self.reversehostlines(r_sn, name)

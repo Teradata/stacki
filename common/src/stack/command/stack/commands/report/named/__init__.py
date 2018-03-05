@@ -18,7 +18,7 @@ import ipaddress
 import stack.commands
 import stack.text
 
-config_preamble = """options {
+config_preamble_redhat = """options {
 	directory "/var/named";
 	dump-file "/var/named/data/cache_dump.db";
 	statistics-file "/var/named/data/named_stats.txt";
@@ -44,6 +44,36 @@ zone "localhost" IN {
 zone "0.0.127.in-addr.arpa" IN {
 	type master;
 	file "named.local";
+	allow-update { none; };
+};
+"""
+
+config_preamble_sles = """options {
+	directory "/var/lib/named";
+	dump-file "/var/log/named_dump.db";
+	statistics-file "/var/log/named.stats";
+	forwarders { %s; };
+	allow-query { private; };
+};
+
+controls {
+	inet 127.0.0.1 allow { localhost; } keys { rndc-key; };
+};
+
+zone "." IN {
+	type hint;
+	file "root.hint";
+};
+
+zone "localhost" IN {
+	type master;
+	file "localhost.zone";
+	allow-update { none; };
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+	type master;
+	file "127.0.0.zone";
 	allow-update { none; };
 };
 """
@@ -106,7 +136,10 @@ class Command(stack.commands.report.command):
 				return
 
 		forwarders = ';'.join(fwds.split(','))
-		s += config_preamble % (forwarders)
+		if self.getHostAttr('localhost','os') == 'redhat':
+			s += config_preamble_redhat % (forwarders)
+		if self.getHostAttr('localhost','os') == 'sles':
+			s += config_preamble_sles % (forwarders)
 
 		# For every network, get the base subnet,
 		# and reverse it. This is basically the
