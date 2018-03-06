@@ -45,6 +45,7 @@ fi
 <!-- repo config -->
 rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.repo">&hostname;</stack:report>
+</stack:script>
 
 
 <stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
