@@ -19,9 +19,10 @@ Description=Stacki iptables starting and stopping
 After=network.target
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/sbin/iptables-restore /etc/sysconfig/iptables
 ExecStop=/usr/sbin/iptables -F
+RemainAfterExit=true
 
 [Install]
 WantedBy=multi-user.target
