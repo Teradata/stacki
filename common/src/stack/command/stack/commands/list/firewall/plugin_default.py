@@ -79,12 +79,18 @@ class Plugin(stack.commands.Plugin):
 			dns = network['dns']
 			if frontend:
 				if pxe:
-					service_list = ['http', 'https', 'tftp', str(LUDICROUS_PORT),
+					service_list = ['http', 'https', str(LUDICROUS_PORT),
 						str(rmqports.subscribe), str(rmqports.control) ]
 					comment = 'Accept Stacki traffic on %s network - Intrinsic rule' % ( net_name)
 					flags = '-m multiport'
 					self.intrinsic_rules.append(('STACKI-INSTALLATION-%s' % net_name.upper(), 'filter', ','.join(service_list),
 						protocol, 'INPUT', 'ACCEPT', net_name, output_network,
+						flags, comment, 'G', 'const'))
+					service_list = ['tftp', 'bootps', 'bootpc']
+					comment = 'Accept UDP traffic for TFTP on %s network - Intrinsic rule' % ( net_name)
+					flags = '-m multiport'
+					self.intrinsic_rules.append(('STACKI-TFTP-%s' % net_name.upper(), 'filter', ','.join(service_list),
+						'udp', 'INPUT', 'ACCEPT', net_name, output_network,
 						flags, comment, 'G', 'const'))
 					comment = "Accept UDP traffic for RMQ publisher over %s network - Intrinsic Rule" % (net_name)
 					flags = ''
