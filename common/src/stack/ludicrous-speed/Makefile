@@ -28,8 +28,6 @@ install::
 	mkdir -p $(ROOT)/var/www/cgi-bin
 	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/var/www/cgi-bin/ludicrous.py
 
-	# Install Apache Config file
-	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d
-	$(INSTALL) -m0644 conf/ludicrous.conf $(ROOT)/etc/apache2/stacki-conf.d/ludicrous.conf
+	# Install Apache Config file done in xml now
 
 clean::

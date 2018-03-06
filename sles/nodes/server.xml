@@ -11,7 +11,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>foundation-gd</stack:package>
 <stack:package>foundation-rcs</stack:package>
 <stack:package>stack-config-server</stack:package>
-<stack:package>ludicrous-speed</stack:package>
 
 <stack:package>git-core</stack:package>
 
@@ -58,9 +57,6 @@ chmod 775 /export/stack/carts
 
 	/sbin/chkconfig stack-num-cpus on
 -->
-
-/usr/bin/systemctl enable ludicrous-server
-/usr/bin/systemctl start ludicrous-server
 
 <!-- explicitly write the sshd configuration file -->
 <stack:file stack:name="/etc/ssh/sshd_config" stack:perms="640">
