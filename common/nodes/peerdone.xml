@@ -22,7 +22,7 @@ if [ -f /bin/curl ]; then
 	curl_cmd=/bin/curl
 fi
 
-peerdone_url=http://${ludicrous_server}:3825/avalanche/peerdone
+peerdone_url=http://${ludicrous_server}/ludicrous/peerdone
 ${curl_cmd} -X DELETE --output /dev/null ${peerdone_url}
 
 </stack:script>
