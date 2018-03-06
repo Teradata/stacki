@@ -105,7 +105,7 @@ def four_o_four(error=None):
 	return resp
 
 
-@app.route('/ludicrous/lookup/<hashcode>', methods=['GET'])
+@app.route('/lookup/<hashcode>', methods=['GET'])
 def lookup(hashcode):
 	res = {}
 	res['success'] = True
@@ -136,7 +136,7 @@ def lookup(hashcode):
 	return jsonify(res)
 
 
-@app.route('/ludicrous/register/<port>/<hashcode>', methods=['POST'])
+@app.route('/register/<port>/<hashcode>', methods=['POST'])
 def register(port=80, hashcode=None):
 	res = {}
 	res['success'] = True
@@ -157,7 +157,7 @@ def register(port=80, hashcode=None):
 	return jsonify(res)
 
 
-@app.route('/ludicrous/unregister/hashcode/<hashcode>', methods=['DELETE'])
+@app.route('/unregister/hashcode/<hashcode>', methods=['DELETE'])
 def unregister(hashcode):
 	ipaddr = unquote(request.args['peer'])
 	res = {}
@@ -171,7 +171,7 @@ def unregister(hashcode):
 
 	return jsonify(res)
 
-@app.route('/ludicrous/peerdone', methods=['DELETE'])
+@app.route('/peerdone', methods=['DELETE'])
 def peerdone():
 	ipaddr = request.remote_addr
 	res = {}
@@ -186,7 +186,7 @@ def peerdone():
 	return jsonify(res)
 
 
-@app.route('/ludicrous/stop', methods=['GET'])
+@app.route('/stop', methods=['GET'])
 def stop_server():
 	return "-1"
 
