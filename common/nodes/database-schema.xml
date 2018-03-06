@@ -119,7 +119,7 @@ CREATE TABLE bootnames (
 DROP TABLE IF EXISTS bootactions;
 CREATE TABLE bootactions (
 	BootName	int(11) NOT NULL references bootnames,
-	OS		int(11) NOT NULL references oses,
+	OS		int(11) references oses default NULL,
 	Kernel		varchar(256) default NULL,
 	Ramdisk		varchar(256) default NULL,
 	Args		varchar(1024) default NULL,
