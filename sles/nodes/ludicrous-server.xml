@@ -15,7 +15,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:script stack:stage="install-post">
 
-<stack:file stack:name="/etc/apache2/conf.d/ludicrous.conf">
+<stack:file stack:name="/etc/apache2/stacki-conf.d/ludicrous.conf">
 # Ludicrous Speed Downloads Specific configuration
 
 LoadModule wsgi_module modules/mod_wsgi.so
