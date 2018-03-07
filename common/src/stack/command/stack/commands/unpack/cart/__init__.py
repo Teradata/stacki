@@ -5,7 +5,7 @@
 # @copyright@
 
 import os
-import tarfile, bz2, lzma
+import tarfile
 import stack.commands
 from stack.exception import ArgRequired, ArgUnique, CommandError, ParamRequired
 
@@ -33,7 +33,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	database.
 
 	<param type='string' name='file' required='0'>
-	A bz2, xz, or tgz file with your cart in it.
+	A tgz file with your cart in it.
 	</param>
 
 	<example cmd='unpack cart file=site-custom.tgz'>

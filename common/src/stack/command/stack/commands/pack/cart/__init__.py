@@ -5,7 +5,7 @@
 # @copyright@
 
 import os
-import tarfile, bz2, lzma
+import tarfile
 import stack.commands
 from stack.exception import *
 
@@ -30,7 +30,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	</arg>
 
 	<param type='string' name='compression' required='1'>
-	Compression type can be bz2, xz, gz.
+	Compression type can be gz.
 	Default is gz.
 	</param>
 
@@ -83,18 +83,14 @@ class Command(stack.commands.CartArgumentProcessor,
 		if len(args) > 1:
 			raise ArgUnique(self, 'cart')
 
-		if comp not in ['gz', 'xz', 'bz2']:
-			raise ParamValue(self, 'compression', '"xz, gz, or bz2." "gz" is default.')
+		if comp not in ['gz']:
+			raise ParamValue(self, 'compression', '"gz" "gz" is default.')
 
 		cart = args[0]
 		path,cart = (os.path.split(cart))
 
 		if not path:
 			path = cartdir
-		if comp == 'xz':
-			suff = 'xz'
-		elif comp == 'bz2':
-			suff = 'bz2'
 
 		if suff != 'tgz':	
 			suff = suff
