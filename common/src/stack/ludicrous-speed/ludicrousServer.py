@@ -119,7 +119,7 @@ def lookup(hashcode):
 
 	# return list of peers with the request hash
 	res['peers'] = []
-	peers = list(ludicredis.smembers(hashcode))
+	peers = list(ludicredis.smembers("ludicrous:%s" % hashcode))
 	shuffle(peers)
 	for peer in peers:
 		# only append a peer if it is not the requester
@@ -153,7 +153,7 @@ def register(port=80, hashcode=None):
 			PEERS.add(ipaddr)
 
 	# Register Package
-	ludicredis.sadd(hashcode, "%s" % ipaddr)
+	ludicredis.sadd("ludicrous:%s" % hashcode, "%s" % ipaddr)
 
 	return jsonify(res)
 
@@ -164,7 +164,7 @@ def unregister(hashcode):
 	res = {}
 	res['success'] = True
 
-	result = ludicredis.srem(hashcode, ipaddr)
+	result = ludicredis.srem("ludicrous:%s" % hashcode, ipaddr)
 	if result:
 		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
 	else:
