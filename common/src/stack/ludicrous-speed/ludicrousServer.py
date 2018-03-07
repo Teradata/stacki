@@ -7,6 +7,7 @@ import os
 import logging
 from logging import FileHandler
 import redis
+import stack.api
 
 ludicredis = redis.StrictRedis()
 
@@ -105,7 +106,7 @@ def four_o_four(error=None):
 	return resp
 
 
-@app.route('/avalanche/lookup/<hashcode>', methods=['GET'])
+@app.route('/lookup/<hashcode>', methods=['GET'])
 def lookup(hashcode):
 	res = {}
 	res['success'] = True
@@ -118,7 +119,7 @@ def lookup(hashcode):
 
 	# return list of peers with the request hash
 	res['peers'] = []
-	peers = list(ludicredis.smembers(hashcode))
+	peers = list(ludicredis.smembers("ludicrous:%s" % hashcode))
 	shuffle(peers)
 	for peer in peers:
 		# only append a peer if it is not the requester
@@ -136,7 +137,7 @@ def lookup(hashcode):
 	return jsonify(res)
 
 
-@app.route('/avalanche/register/<port>/<hashcode>', methods=['POST'])
+@app.route('/register/<port>/<hashcode>', methods=['POST'])
 def register(port=80, hashcode=None):
 	res = {}
 	res['success'] = True
@@ -152,18 +153,18 @@ def register(port=80, hashcode=None):
 			PEERS.add(ipaddr)
 
 	# Register Package
-	ludicredis.sadd(hashcode, "%s" % ipaddr)
+	ludicredis.sadd("ludicrous:%s" % hashcode, "%s" % ipaddr)
 
 	return jsonify(res)
 
 
-@app.route('/avalanche/unregister/hashcode/<hashcode>', methods=['DELETE'])
+@app.route('/unregister/hashcode/<hashcode>', methods=['DELETE'])
 def unregister(hashcode):
 	ipaddr = unquote(request.args['peer'])
 	res = {}
 	res['success'] = True
 
-	result = ludicredis.srem(hashcode, ipaddr)
+	result = ludicredis.srem("ludicrous:%s" % hashcode, ipaddr)
 	if result:
 		res['message'] = "'%s' was unregistered for hash: %s" % (ipaddr, hashcode)
 	else:
@@ -171,7 +172,7 @@ def unregister(hashcode):
 
 	return jsonify(res)
 
-@app.route('/avalanche/peerdone', methods=['DELETE'])
+@app.route('/peerdone', methods=['DELETE'])
 def peerdone():
 	ipaddr = request.remote_addr
 	res = {}
@@ -186,9 +187,22 @@ def peerdone():
 	return jsonify(res)
 
 
-@app.route('/avalanche/stop', methods=['GET'])
-def stop_server():
-	return "-1"
+@app.route('/purge', methods=['DELETE'])
+def purge_packages():
+	res = {}
+	res['sucess'] = True
+	is_from_frontend = request.remote_addr == "127.0.0.1"
+	if is_from_frontend:
+		for package in ludicredis.scan_iter():
+			try:
+				if 'ludicrous' in package.decode():
+					result = ludicredis.delete(package)
+			except:
+				pass
+	else:
+		res['success'] = False
+	
+	return jsonify(res)
 
 def main():
 	logHandler = FileHandler('/var/log/ludicrous-server.log')

@@ -144,6 +144,7 @@ IncludeOptional /etc/apache2/vhosts.d/*.conf
 Include /etc/apache2/stacki-conf.d/stack.conf
 Include /etc/apache2/stacki-conf.d/ssl.conf
 Include /etc/apache2/stacki-conf.d/https.conf
+Include /etc/apache2/stacki-conf.d/ludicrous.conf
 ]]>
 </stack:file>
 

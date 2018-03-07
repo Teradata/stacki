@@ -13,8 +13,12 @@
 <stack:package>ludicrous-speed</stack:package>
 
 <stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
-/usr/bin/systemctl enable ludicrous-server
-</stack:script>
+<stack:file	stack:name="/etc/httpd/conf.d/ludicrous.conf">
+# Ludicrous Speed Downloads Specific configuration
 
+LoadModule wsgi_module modules/mod_wsgi.so
+WSGIScriptAlias /ludicrous /var/www/cgi-bin/ludicrous.py
+</stack:file>
+</stack:script>
 </stack:stack>
 

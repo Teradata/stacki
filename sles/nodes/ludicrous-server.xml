@@ -1,0 +1,32 @@
+<stack:stack>
+
+<stack:description>
+Ludicrous Speed Downloads Configuration
+</stack:description>
+
+
+<stack:copyright>
+Copyright (c) 2006 - 2018 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>ludicrous-speed</stack:package>
+
+<stack:script stack:stage="install-post">
+
+<stack:file stack:name="/etc/apache2/stacki-conf.d/ludicrous.conf">
+# Ludicrous Speed Downloads Specific configuration
+
+LoadModule wsgi_module modules/mod_wsgi.so
+WSGIScriptAlias /ludicrous /var/www/cgi-bin/ludicrous.py
+</stack:file>
+
+<!-- Append ludicrous speed apache configuration -->
+<stack:file stack:mode="append"
+	stack:name="/etc/apache2/conf.d/httpd.conf">
+Include /etc/apache2/stacki-conf.d/ludicrous.conf
+</stack:file>
+
+</stack:script>
+</stack:stack> 

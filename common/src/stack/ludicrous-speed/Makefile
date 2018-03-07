@@ -4,18 +4,30 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-PKGROOT		= /opt/stack
+PKGROOT		= /opt/stack/bin
 ROLLROOT 	= ../../../..
-DEPENDS.FILES	= ludicrous-server.py ludicrous-client.py ludicrous-client.service ludicrous-server.service directory.html
-
 include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 
 install::
-	mkdir -p $(ROOT)/$(PKGROOT)/bin/templates $(ROOT)/lib/systemd/system 
-	$(INSTALL) -m 0755 ludicrous-server.py $(ROOT)/$(PKGROOT)/bin
-	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)/bin
-	$(INSTALL) -m 0755 directory.html $(ROOT)/$(PKGROOT)/bin/templates/
-	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/lib/systemd/system/
-	$(INSTALL) -m 0644 ludicrous-server.service $(ROOT)/lib/systemd/system/
+	# Make system directory if it doesn't exist
+	mkdir -p $(ROOT)/usr/lib/systemd/system
+
+	# Install directory templates
+	mkdir -p $(ROOT)/$(PKGROOT)/templates
+	$(INSTALL) -m 0755 directory.html $(ROOT)/$(PKGROOT)/templates/
+
+	# Install ludicrous server
+	$(INSTALL) -m 0755 ludicrousServer.py $(ROOT)/$(PKGROOT)
+	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)
+	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/usr/lib/systemd/system
+
+
+	# Install WSGI File
+	mkdir -p $(ROOT)/var/www/cgi-bin
+	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/var/www/cgi-bin/ludicrous.py
+
+	# Install Apache Config file done in xml now
+
+clean::

@@ -60,6 +60,7 @@
 		<to>time-server</to>
 		<to>uefi-server</to>
 		<to>restapi</to>
+		<to>ludicrous-server</to>
 	</edge>
 
 	<order head="database-data">

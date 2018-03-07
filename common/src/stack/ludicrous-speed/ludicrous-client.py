@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 tracker_settings = {
 	'TRACKER' : '',
-	'PORT' : 3825,
+	'PORT' : 80,
 }
 
 client_settings = {
@@ -43,49 +43,56 @@ def four_o_four(error=None):
 
         return resp
 
-
+# Returns an md5 hash of a filename
 def hashit(filename):
 	hashcode = hashlib.md5()
 	hashcode.update(filename.encode('utf-8'))
 	return hashcode.hexdigest()
 
-
+# Save the file locally
 def save_file(content, location, filename):
-	subprocess.call(['mkdir', '-p', location])
-	with open(location + filename, 'wb') as f:
-		f.write(content)
+	try:
+		subprocess.call(['mkdir', '-p', location])
+		with open(location + filename, 'wb') as f:
+			f.write(content)
+	except:
+		app.logger.info("Error saving file")
+		raise
 
-
+# Check if the file exists locally
 def file_exists(local_file):
 	return os.path.isfile(local_file)
 
-
+# Returns the tracking server's ip and port as a string to be used
+# in a request
 def tracker():
 	return "%s:%s" % (tracker_settings['TRACKER'], tracker_settings['PORT'])
 
-
+# Lookup a file to see if any hosts have it
+# Input is the md5 of the filename
+# returns a list of hosts
 def lookup_file(hashcode):
 	try:
 		# timeout=(connect timeout, read timeout).
-		res = requests.get('http://%s/avalanche/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
+		res = requests.get('http://%s/ludicrous/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
+		return res
 	except:
 		raise
-	return res
 
-
+# Get a file from a host
 def get_file(peer, remote_file):
 	try:
 		# timeout=(connect timeout, read timeout).
 		res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
+		return res
 	except:
 		raise
 
-	return res
 
-
+# Register a file for a host on the frontend
 def register_file(port, hashcode):
 	try:
-		res = requests.post('http://%s/avalanche/register/%s/%s' % (
+		res = requests.post('http://%s/ludicrous/register/%s/%s' % (
 									tracker(), 
 									port,
 									hashcode)
@@ -93,10 +100,10 @@ def register_file(port, hashcode):
 	except:
 		raise
 
-
+# Unregister a single file from a host on the frontend
 def unregister_file(hashcode, params):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/hashcode/%s' % (
+		res = requests.delete('http://%s/ludicrous/unregister/hashcode/%s' % (
 									tracker(),
 									hashcode),
 									params=params
@@ -104,16 +111,12 @@ def unregister_file(hashcode, params):
 	except:
 		raise
 
+# Unregister all hosts packages on frontend
 def unregister_host(host):
 	try:
-		res = requests.delete('http://%s/avalanche/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
+		res = requests.delete('http://%s/ludicrous/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
 	except:
 		raise
-
-
-def stream_it(response, content):
-	response.write(content)
-
 
 @app.route('/install/<path:path>/<filename>')
 def get_file_locally(path, filename):
@@ -235,7 +238,7 @@ def running():
 
 @app.route('/peerdone')
 def peerdone():
-	peerdone_res = requests.delete('http://%s/avalanche/peerdone' % tracker())
+	peerdone_res = requests.delete('http://%s/ludicrous/peerdone' % tracker())
 	return jsonify({"success": True})
 
 
@@ -265,7 +268,7 @@ def main(environment, trackerfile, nosavefile, port):
 		line = f.readline()
 		t = line.split(' ')[-1].strip()
 		tracker_settings['TRACKER'] = t.split(':')[0].strip()
-		tracker_settings['PORT'] = t.split(':')[-1].strip()
+		#tracker_settings['PORT'] = t.split(':')[-1].strip()
 
 	#peerdone()
 
