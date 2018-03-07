@@ -7,6 +7,7 @@ import os
 import logging
 from logging import FileHandler
 import redis
+import stack.api
 
 ludicredis = redis.StrictRedis()
 
