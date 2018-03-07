@@ -187,9 +187,22 @@ def peerdone():
 	return jsonify(res)
 
 
-@app.route('/stop', methods=['GET'])
-def stop_server():
-	return "-1"
+@app.route('/purge', methods=['DELETE'])
+def purge_packages():
+	res = {}
+	res['sucess'] = True
+	is_from_frontend = request.remote_addr == "127.0.0.1"
+	if is_from_frontend:
+		for package in ludicredis.scan_iter():
+			try:
+				if 'ludicrous' in package.decode():
+					result = ludicredis.delete(package)
+			except:
+				pass
+	else:
+		res['success'] = False
+	
+	return jsonify(res)
 
 def main():
 	logHandler = FileHandler('/var/log/ludicrous-server.log')
