@@ -68,7 +68,7 @@ def nukeIt(disk):
 def outputPartition(p, initialize):
 	xml_partitions = []
 
-	if initialize == 'true':
+	if initialize.lower() == 'true':
 		create = 'true'
 	else:
 		create = 'false'
@@ -90,14 +90,14 @@ def outputPartition(p, initialize):
 	if mnt in [ '/', '/var', '/boot', '/boot/efi' ]:
 		format = 'true'
 	else:
-		if initialize == 'true':
+		if initialize.lower() == 'true':
 			format = 'true'
 		else:
 			format = 'false'
 
 	xml_partitions.append('\t\t\t<partition>')
 
-	if initialize == 'true':
+	if initialize.lower() == 'true':
 		xml_partitions.append('\t\t\t\t<create config:type="boolean">%s</create>' % create)
 
 	if mnt:
@@ -110,7 +110,7 @@ def outputPartition(p, initialize):
 			xml_partitions.append('\t\t\t\t<size>%dM</size>' %  p['size'])
 
 	if p['fstype']:
-		if initialize == 'true':
+		if initialize.lower() == 'true':
 			xml_partitions.append('\t\t\t\t<filesystem config:type="symbol">%s</filesystem>' % p['fstype'])
 		xml_partitions.append('\t\t\t\t<format config:type="boolean">%s</format>' % format)
 
@@ -186,7 +186,7 @@ def doPartitions(disk, initialize):
 
 	xml_partitions = []
 
-	if initialize == 'true':
+	if initialize.lower() == 'true':
 		#
 		# since we are wiping this disk, use the partitions from
 		# the CSV
@@ -219,7 +219,7 @@ def outputDisk(disk, initialize):
 	# only output XML configuration for this disk if there is partitioning
 	# configuration for this disk
 	#
-	if xml_partitions and initialize == 'true':
+	if xml_partitions and initialize.lower() == 'true':
 		if 'disklabel' in attributes:
 			disklabel = attributes['disklabel']
 		else:
@@ -237,7 +237,7 @@ def outputDisk(disk, initialize):
 		print('\t\t</partitions>')
 
 		print('\t</drive>')
-	elif xml_partitions and initialize == 'false':
+	elif xml_partitions and initialize.lower() == 'false':
 		if 'disklabel' in attributes:
 			disklabel = attributes['disklabel']
 		else:
@@ -539,15 +539,15 @@ print('')
 # For 2, reformat "/", "/boot" (if present) and "/var" on the boot disk, then
 # reconnect all other discovered partitions.
 #
-# if host_fstab is an empty list, turning on nukedisks=True" to avoid SLES defaults
+# if host_fstab is an empty list, turning on nukedisks=true" to avoid SLES defaults
 if host_fstab == []:
-	nukedisks = 'True'
+	nukedisks = 'true'
 elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
 
-if nukedisks == 'True':
+if nukedisks.lower() == 'true':
 	print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
 else:
 	print('<partitioning_advanced xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">')
@@ -573,7 +573,7 @@ for disk in host_disks:
 		outputDisk(disk, initialize)	
 
 
-if nukedisks == 'True':
+if nukedisks.lower() == 'true':
 	print('</partitioning>')
 else:
 	print('</partitioning_advanced>')
