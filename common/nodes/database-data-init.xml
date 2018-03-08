@@ -117,11 +117,11 @@ if os.path.exists('/tmp/site.attrs'):
 </stack:script>
 
 <stack:script stack:stage="install-post">
-/opt/stack/bin/stack add bootaction default     type=os kernel="com32 chain.c32" args=hd0
-/opt/stack/bin/stack add bootaction pxeflash    type=os kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe
-/opt/stack/bin/stack add bootaction localboot   type=os kernel="localboot 0"
-/opt/stack/bin/stack add bootaction hplocalboot type=os kernel="localboot -1"
-/opt/stack/bin/stack add bootaction memtest     type=os kernel="kernel memtest"
+/opt/stack/bin/stack add bootaction default     type=os os=&os; kernel="com32 chain.c32" args=hd0
+/opt/stack/bin/stack add bootaction pxeflash    type=os os=&os; kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe
+/opt/stack/bin/stack add bootaction localboot   type=os os=&os; kernel="localboot 0"
+/opt/stack/bin/stack add bootaction hplocalboot type=os os=&os; kernel="localboot -1"
+/opt/stack/bin/stack add bootaction memtest     type=os os=&os; kernel="kernel memtest"
 </stack:script>
 
 
