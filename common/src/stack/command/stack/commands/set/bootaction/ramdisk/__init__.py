@@ -52,7 +52,7 @@ class Command(stack.commands.set.bootaction.command):
 				"""
 				update bootactions 
 				set ramdisk = '%s' where
-				os is NULL and 
+				os = '0' and 
 				bootname = (select id from bootnames where name = '%s' and type = '%s')
 				""" % (b_ramdisk, b_action, b_type))
 			
