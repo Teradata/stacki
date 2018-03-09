@@ -38,6 +38,13 @@ stacki-initrd.img:
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf stacki-initrd/installkey.gpg~
+	# Add common patches to initrd
+	-(cd ../../../common/initrd-patches && \
+		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/$(IMAGE_RELEASE)/stacki-initrd/) )
+	# Add version specific patches to initrd
+	-(cd initrd-patches && \
+		(find . -type f  | cpio -pudv ../stacki-initrd/) )
+	# Pack it up
 	(				\
 		cd stacki-initrd;	\
 		find . | cpio -oc | gzip -c - > ../stacki-initrd.img; \
