@@ -4,17 +4,10 @@
 # @copyright@
 
 import os
-import re
-import subprocess
-import tempfile
 import time
-import fcntl
 import pexpect
-import errno
-from ipaddress import IPv4Interface, ip_network
 import logging
 from logging.handlers import RotatingFileHandler
-from stack.commands import Command
 import asyncio
 import signal
 import sys
