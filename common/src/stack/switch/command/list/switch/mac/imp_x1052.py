@@ -5,6 +5,7 @@
 # @copyright@
 
 import stack.commands
+import subprocess
 from stack.exception import CommandError
 from stack.switch import SwitchDellX1052
 

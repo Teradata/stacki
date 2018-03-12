@@ -35,9 +35,10 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			# add the host if it does exist
 			#
 			if host in existinghosts:
-				switch	= hosts[host].get('switch')
-				name	= hosts[host].get('host')
-				port	= hosts[host].get('port')
+				switch		= hosts[host].get('switch')
+				name		= hosts[host].get('host')
+				port		= hosts[host].get('port')
+				interface	= hosts[host].get('interface')
 
 				# delete the previous entry in case the interface 
 				# has changed
@@ -47,11 +48,14 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 						])
 
 				# add switch host
-				self.owner.call('add.switch.host', [
-						switch,
-						"host=%s" % name,
-						"port=%s" % port,
-						])
+
+				switch_args = [switch, "host=%s" % name, "port=%s" % port]
+
+				# if interface column is not null, add it to switch args
+				if interface:
+					switch_args.append("interface=%s" % interface)
+
+				self.owner.call('add.switch.host', switch_args)
 
 			sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
 

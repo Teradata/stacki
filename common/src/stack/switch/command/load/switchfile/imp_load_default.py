@@ -15,7 +15,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.Implementation):	
 
 	"""
-	Load host into the database based on comma-separated formatted
+	Load switch into the database based on comma-separated formatted
 	file.
 	"""
 
@@ -34,7 +34,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				#
 				# make checking the header easier
 				#
-				required = [ 'name', 'switch', 'port' ]
+				required = [ 'name', 'model',  'ip', 'mac', 
+					'interface', 'rack', 'rank', 'network']
 
 				for i in range(0, len(row)):
 					if header[i] in required:
@@ -49,9 +50,15 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			# Set default values to Null so it's easier to check if they
 			# didn't get assigned
 			name		= None
-			switch		= None
-			port		= None
+			model		= None
+			ip		= None
+			mac		= None
 			interface	= None
+			rack		= None
+			rank		= None
+			network		= None
+			username	= None
+			password	= None
 
 			# Set the appropriate variables
 			for i in range(0, len(row)):
@@ -61,43 +68,44 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				if header[i] == 'name':
 					name = field.lower()
-				if header[i] == 'switch':
-					switch = field
-				if header[i] == 'port':
-					port = field
+				if header[i] == 'model':
+					model = field.lower()
+				if header[i] == 'ip':
+					ip = field.lower()
+				if header[i] == 'mac':
+					mac = field.lower()
 				if header[i] == 'interface':
-					interface = field
+					interface = field.lower()
+				if header[i] == 'rack':
+					rack = field
+				if header[i] == 'rank':
+					rank = field
+				if header[i] == 'network':
+					network = field.lower()
+				if header[i] == 'username':
+					username = field
+				if header[i] == 'password':
+					password = field
 
 			# Check for any missing values that are required
 			if not name:
-				msg = 'empty host name found in "name" column'
+				msg = 'empty switch name found in "name" column'
 				raise CommandError(self.owner, msg)
 
-			if not switch:
-				msg = 'empty switch name found in "switch" column'
+			if not model:
+				msg = 'empty model name found in "model" column'
 				raise CommandError(self.owner, msg)
 
-			if switch not in self.owner.switches:
-				msg = """switch named "%s" not found in database.
-					 Add the switch with "add switch" command.
-					 """ % switch
-				raise CommandError(self.owner, msg)
-
-			if not port:
-				msg = 'empty host port found in "port" column'
-				raise CommandError(self.owner, msg)
-
-			if not port.isnumeric():
-				msg = 'Port "%s" is not numeric' % port
-				raise CommandError(self.owner, msg)
-
-
-
-			# If the host hasn't been assigned values, assign them
-			if name not in self.owner.hosts.keys():
-				self.owner.hosts[name] = {}
-				self.owner.hosts[name]['host'] = name
-				self.owner.hosts[name]['switch'] = switch
-				self.owner.hosts[name]['port'] = port
-				self.owner.hosts[name]['interface'] = interface
-
+			# Assign values
+			if name not in self.owner.switches.keys():
+				self.owner.switches[name] = {}
+				self.owner.switches[name]['switch']		= name
+				self.owner.switches[name]['model']		= model
+				self.owner.switches[name]['ip']			= ip
+				self.owner.switches[name]['mac']		= mac
+				self.owner.switches[name]['interface']		= interface
+				self.owner.switches[name]['rack'] 		= rack
+				self.owner.switches[name]['rank']		= rank
+				self.owner.switches[name]['network']		= network
+				self.owner.switches[name]['username']		= username
+				self.owner.switches[name]['password']		= password

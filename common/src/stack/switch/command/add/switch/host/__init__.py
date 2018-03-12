@@ -19,13 +19,19 @@ class Command(command):
 	<arg type='string' name='switch' optional='0' repeat='0'>
 	Name of the switch
 	</arg>
-	
+
 	<param type='string' name='host' optional='0'>
 	Name of the host being assigned a vlan id
 	</param>
-	
+
 	<param type='string' name='port' optional='0'>
 	Port the host is connected to the switch on
+	</param>
+
+	<param type='string' name='interface' optional='1'>
+	Name of the interface you want to use to connect to the switch.
+	Default: The first interface that is found that shares the
+	same network as the switch.
 	</param>
 
 	<example cmd='add switch host switch-0 host=backend-0 port=20'>
@@ -35,9 +41,10 @@ class Command(command):
 
 	def run(self, params, args):
 
-		host, port, = self.fillParams([
+		host, port, interface, = self.fillParams([
 			('host', None, True),
 			('port', None, True),
+			('interface', None, False),
 			])
 		switches = self.getSwitchNames(args)
 		if len(switches) > 1:
@@ -49,7 +56,7 @@ class Command(command):
 		for switch in switches:
 			# Make sure switch has an interface
 			if self.getSwitchNetwork(switch):
-				self.addSwitchHost(switch, host, port)
+				self.addSwitchHost(switch, host, port, interface)
 			else:
 				raise CommandError(self,
 					"switch '%s' doesn't have an interface" % switch)

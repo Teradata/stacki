@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ArgRequired
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.command):
 	"""
 	Sets the logical interface of a mac address for particular switches.
 
