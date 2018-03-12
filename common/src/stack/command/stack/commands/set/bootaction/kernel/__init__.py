@@ -52,7 +52,7 @@ class Command(stack.commands.set.bootaction.command):
 				"""
 				update bootactions 
 				set kernel = '%s' where
-				os is NULL and 
+				os = '0' and 
 				bootname = (select id from bootnames where name = '%s' and type = '%s')
 				""" % (b_kernel, b_action, b_type))
 			
