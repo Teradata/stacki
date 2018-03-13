@@ -8,41 +8,41 @@
 
 <stack:script stack:stage="install-post" stack:cond="release == 'redhat6'">
 /opt/stack/bin/stack add bootaction default type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm inst.text"
 
 /opt/stack/bin/stack add bootaction no-parallel-format type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format inst.text"
 
 /opt/stack/bin/stack add bootaction headless type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm inst.text"
 
 /opt/stack/bin/stack add bootaction rescue type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm inst.text"
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:cond="release == 'redhat7'">
 /opt/stack/bin/stack add bootaction default type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction console type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000 console=tty0 console=ttyS0,115200n8"
 
 /opt/stack/bin/stack add bootaction no-parallel-format type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction headless type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac inst.vnc ramdisk_size=300000"
 
 /opt/stack/bin/stack add bootaction rescue type=install \
-	kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
+	os=&os; kernel=vmlinuz-&version;-&release;-&arch; ramdisk=initrd.img-&version;-&release;-&arch; \
 	args="ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
 </stack:script>
 
