@@ -37,16 +37,19 @@ class Implementation(stack.commands.Implementation):
 
 		# Connect to the switch
 		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
-			switch.set_tftp_ip(frontend_tftp_address)
-			switch.connect()
-			switch.get_mac_address_table()
+			try:
+				switch.set_tftp_ip(frontend_tftp_address)
+				switch.connect()
+				switch.get_mac_address_table()
 
-			hosts = switch.parse_mac_address_table()
-			for _vlan, _mac, _port, _ in hosts:
-				_hostname, _interface = self.owner.db.select("""
-				  n.name, nt.device from
-				  nodes n, networks nt
-				  where nt.node=n.id
-				  and nt.mac='%s'
-				""" % _mac)[0]
-				self.owner.addOutput(switch_name, [_port, _mac, _hostname, _interface,  _vlan])
+				hosts = switch.parse_mac_address_table()
+				for _vlan, _mac, _port, _ in hosts:
+					_hostname, _interface = self.owner.db.select("""
+					  n.name, nt.device from
+					  nodes n, networks nt
+					  where nt.node=n.id
+					  and nt.mac='%s'
+					""" % _mac)[0]
+					self.owner.addOutput(switch_name, [_port, _mac, _hostname, _interface,  _vlan])
+			except:
+				raise CommandError(self, "There was an error getting the mac address table")

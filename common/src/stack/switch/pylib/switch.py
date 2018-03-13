@@ -57,12 +57,16 @@ class SwitchDellX1052(Switch):
 	def disconnect(self):
 		# q will exit out of an existing scrollable more/less type of prompt
 		# Probably not necessary, but a bit safer
-		self.child.sendline("\nq\n")
-		# exit should cleanly exit the ssh
-		self.child.sendline("\nexit\n")
-		# Just give it a few seconds to exit gracefully before terminate.
-		time.sleep(3)
-		self.child.terminate()
+
+		# if there isn't an exit status
+		# close the connection
+		if not self.child.exitstatus:
+			self.child.sendline("\nq\n")
+			# exit should cleanly exit the ssh
+			self.child.sendline("\nexit\n")
+			# Just give it a few seconds to exit gracefully before terminate.
+			time.sleep(3)
+			self.child.terminate()
 		
 
 	def _expect(self, look_for, custom_timeout=15):
@@ -216,7 +220,7 @@ class SwitchDellX1052(Switch):
 		"""Apply running-config to startup-config"""
 		try:
 			self.child.expect('console#')
-			self.child.sendline('copy running-config startup-config')
+			self.child.sendline('write')
 			self.child.expect('Overwrite file .startup-config.*\?')
 			self.child.sendline('Y')
 			self._expect('The copy operation was completed successfully')
