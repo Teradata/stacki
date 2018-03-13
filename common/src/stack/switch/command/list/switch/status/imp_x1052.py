@@ -6,7 +6,7 @@
 
 import stack.commands
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052
+from stack.switch import SwitchDellX1052, SwitchException
 
 
 class Implementation(stack.commands.Implementation):
@@ -33,16 +33,21 @@ class Implementation(stack.commands.Implementation):
 
 		# Connect to the switch
 		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
-			switch.set_tftp_ip(frontend_tftp_address)
-			switch.connect()
-			switch.get_interface_status_table()
+			try:
+				switch.set_tftp_ip(frontend_tftp_address)
+				switch.connect()
+				switch.get_interface_status_table()
 
-			ports = switch.parse_interface_status_table()
-			_hosts = self.owner.getHostsForSwitch(switch_name)
-			for _port,_ , _, _speed, _, _, _state, _, _ in ports:
-				# if there is a host we are managing on the port, show host information
-				if _port in _hosts:
-					host, interface, port, vlan, mac = _hosts[_port].values()
-					self.owner.addOutput(switch_name, [_port, _speed, _state, mac,  vlan, host, interface])
-				else:
-					self.owner.addOutput(switch_name, [_port, _speed, _state, '',  '', '', ''])
+				ports = switch.parse_interface_status_table()
+				_hosts = self.owner.getHostsForSwitch(switch_name)
+				for _port,_ , _, _speed, _, _, _state, _, _ in ports:
+					# if there is a host we are managing on the port, show host information
+					if _port in _hosts:
+						host, interface, port, vlan, mac = _hosts[_port].values()
+						self.owner.addOutput(switch_name, [_port, _speed, _state, mac,  vlan, host, interface])
+					else:
+						self.owner.addOutput(switch_name, [_port, _speed, _state, '',  '', '', ''])
+			except SwitchException as switch_error:
+				raise CommandError(self, switch_error)
+			except:
+				raise CommandError(self, "There was an error getting the status of the switch.")

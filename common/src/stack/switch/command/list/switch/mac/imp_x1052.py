@@ -7,7 +7,7 @@
 import stack.commands
 import subprocess
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052
+from stack.switch import SwitchDellX1052, SwitchException
 
 
 class Implementation(stack.commands.Implementation):
@@ -51,5 +51,7 @@ class Implementation(stack.commands.Implementation):
 					  and nt.mac='%s'
 					""" % _mac)[0]
 					self.owner.addOutput(switch_name, [_port, _mac, _hostname, _interface,  _vlan])
+			except SwitchException as switch_error:
+				raise CommandError(self, switch_error)
 			except:
 				raise CommandError(self, "There was an error getting the mac address table")

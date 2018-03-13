@@ -12,6 +12,11 @@ import asyncio
 import signal
 import sys
 
+
+# A custom exception just so its easier to differentiate from Switch exceptions and system ones
+class SwitchException(Exception):
+	pass
+
 class Switch():
 	def __init__(self, switch_ip_address, switchname='switch', username='admin', password='admin'):
 		# Grab the user supplied info, in case there is a difference (PATCH)
@@ -34,8 +39,8 @@ class Switch():
 		try:
 			self.disconnect()
 		except AttributeError:
+			pass
 			## TODO: release file lock here
-			print("%s's self.child already terminated or never started." % self.switch_ip_address)
 
 
 class SwitchDellX1052(Switch):
@@ -52,7 +57,7 @@ class SwitchDellX1052(Switch):
 			self._expect('Password:')
 			self.child.sendline(self.password)
 		except:
-			print("Couldn't connect to the switch")
+			raise SwitchException("Couldn't connect to the switch")
 
 	def disconnect(self):
 		# q will exit out of an existing scrollable more/less type of prompt
@@ -80,12 +85,12 @@ class SwitchDellX1052(Switch):
 				time.sleep(1)
 			debug_info = str(str(self.child.before) + str(self.child.buffer) + str(self.child.after))
 			self.__exit__()
-			raise Exception(self.switch_ip_address + " expected output '" + look_for +
+			raise SwitchException(self.switch_ip_address + " expected output '" + look_for +
 							"' from SSH connection timed out after " +
 							str(custom_timeout) + " seconds.\nBuffer: " + debug_info)
 		except pexpect.exceptions.EOF:
 			self.__exit__()
-			raise Exception("SSH connection to " + self.switch_ip_address + " not available.")
+			raise SwitchException("SSH connection to " + self.switch_ip_address + " not available.")
 
 	def get_mac_address_table(self):
 		"""Download the mac address table"""
@@ -225,7 +230,7 @@ class SwitchDellX1052(Switch):
 			self.child.sendline('Y')
 			self._expect('The copy operation was completed successfully')
 		except:
-			raise Exception('Could not confirm configuration')
+			raise SwitchException('Could not apply configuration to startup-config')
 		
 	def _vlan_parser(self, vlan_string):
 		"""Takes input of a bunch of numbers in gives back a string containing all numbers once.

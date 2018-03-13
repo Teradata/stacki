@@ -6,7 +6,7 @@
 
 import stack.commands
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052
+from stack.switch import SwitchDellX1052, SwitchException
 
 
 class Implementation(stack.commands.Implementation):
@@ -35,5 +35,7 @@ class Implementation(stack.commands.Implementation):
 				_switch.upload()
 				if self.owner.persistent:
 					_switch.apply_configuration()
+			except SwitchException as switch_error:
+				raise CommandError(self, switch_error)
 			except Exception as found_error:
 				raise CommandError(self, "There was an error syncing the switch")

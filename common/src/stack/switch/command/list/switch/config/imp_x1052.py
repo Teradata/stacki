@@ -6,7 +6,7 @@
 
 import stack.commands
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052
+from stack.switch import SwitchDellX1052, SwitchException
 
 
 class Implementation(stack.commands.Implementation):
@@ -29,39 +29,45 @@ class Implementation(stack.commands.Implementation):
 
 		# Connect to the switch
 		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
-			switch.set_tftp_ip(frontend_tftp_address)
-			switch.connect()
-			switch.download()
+			try:
+				switch.set_tftp_ip(frontend_tftp_address)
+				switch.connect()
+				switch.download()
 			
-			with open('/tftpboot/pxelinux/%s_running_config' % switch_name, 'r') as f:
-				lines = f.readlines()
-				_printline = True
-				_block = {}
-				for line in lines:
-					if not self.owner.raw:
-						if 'crypto' in line:
-							break
+				with open('/tftpboot/pxelinux/%s_running_config' % switch_name, 'r') as f:
+					lines = f.readlines()
+					_printline = True
+					_block = {}
+					for line in lines:
+						if not self.owner.raw:
+							if 'crypto' in line:
+								break
 
-						if 'gigabitethernet' in line:
-							_block['port'] = line.split('/')[-1].strip()
+							if 'gigabitethernet' in line:
+								_block['port'] = line.split('/')[-1].strip()
 
-						if 'switchport' in line and 'access' in line:
-							_, _type, _, _vlan = line.split()
-							_block['type'] = _type
-							_block['vlan'] = _vlan
+							if 'switchport' in line and 'access' in line:
+								_, _type, _, _vlan = line.split()
+								_block['type'] = _type
+								_block['vlan'] = _vlan
 
-						if '!' in line and _block:
-							try:
-								self.owner.addOutput(
-									switch_name,[
-									_block['port'],
-									_block['vlan'],
-									_block['type'],]
-									)
-							except:
-								pass
-							_block = {}
+							if '!' in line and _block:
+								try:
+									self.owner.addOutput(
+										switch_name,[
+										_block['port'],
+										_block['vlan'],
+										_block['type'],]
+										)
+								except:
+									pass
+								_block = {}
 
-					else:
-						if _printline:
-							print(line, end='')
+						# This is the line that gets hit if raw=true
+						else:
+							if _printline:
+								print(line, end='')
+			except SwitchException as switch_error:
+				raise CommandError(self, switch_error)
+			except Exception:
+				raise CommandError(self, "There was an error downloading the running config from the switch")
