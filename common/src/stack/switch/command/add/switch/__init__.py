@@ -84,6 +84,14 @@ class Command(command):
 			"shadow=True",
 			])
 
+		# Set the max allowable vlan ids of the switch to 'switch_max_vlan' attr
+		self.call('set.host.attr', [
+			switchname,
+			"attr=switch_max_vlan",
+			"value=128",
+			])
+
+
 
 	def run(self, params, args):
 
