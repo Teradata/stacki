@@ -19,7 +19,7 @@ def setup_module(module):
 
 
 def teardown_module(module):
-	Call('remove host %s' % ENVIRONMENT)
+	Call('remove host e:%s' % ENVIRONMENT, stderr=False)
 	Call('remove environment attr %s attr=*' % ENVIRONMENT)
 	Call('remove environment %s' % ENVIRONMENT)
 

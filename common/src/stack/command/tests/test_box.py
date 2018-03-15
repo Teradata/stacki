@@ -19,7 +19,7 @@ def test_box():
 	done = False
 	while not done:
 		box = 'default-%s' % str(random.randint(0, 100))
-		result = Call('list box', [ box ])
+		result = Call('list box', [ box ], stderr=False)
 		if ReturnCode() and not result:
 			done = True
 	assert box
@@ -59,7 +59,7 @@ def test_box():
 	# try to remove default
 	#	"remove box" should protect against this
 
-	result = Call('remove box', [ 'default' ])
+	result = Call('remove box', [ 'default' ], stderr=False)
 	assert ReturnCode() == 255
 
 	# remove multiple boxes
@@ -72,7 +72,7 @@ def test_box():
 	done = False
 	while not done:
 		second_box = 'default-%s' % str(random.randint(0, 100))
-		result = Call('list box', [ second_box ])
+		result = Call('list box', [ second_box ], stderr=False)
 		if ReturnCode() and not result:
 			done = True
 	assert second_box

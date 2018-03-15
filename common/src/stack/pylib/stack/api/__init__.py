@@ -5,6 +5,7 @@
 # @copyright@
 
 import os
+import sys
 import subprocess
 import json
 
@@ -20,7 +21,7 @@ def ReturnCode():
 	return rc
 
 
-def Call(cmd, args=None, format='json', sudo=False):
+def Call(cmd, args=None, format='json', sudo=False, *, stderr=True):
 	"""
 	Call the Stack Command Line and return a python dictionary as the
 	result.  Currently only works with list commands.
@@ -50,12 +51,16 @@ def Call(cmd, args=None, format='json', sudo=False):
 		list.append('output-format=%s' % format)
 	
 	s = None
-	p = subprocess.Popen(list, stdout=subprocess.PIPE, encoding='utf-8')
+	p = subprocess.Popen(list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
 	for line in p.stdout.readlines():
 		if not s:
 			s = line
 		else:
 			s += line
+	if stderr: # allow caller to see or ignore stdout
+		for line in p.stderr.readlines():
+			sys.stderr.write(line)
+		
 	rc = p.wait()
 	if rc:
 		return [ ]
