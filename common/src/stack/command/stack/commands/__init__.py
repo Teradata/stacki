@@ -273,7 +273,7 @@ class SwitchArgumentProcessor:
 			""" % arg)
 
 	def getSwitchNetwork(self, switch):
-		"""Returns the network the switch is on.
+		"""Returns the network the switch's management interface is on.
 		"""
 		if not switch:
 			return ''
@@ -290,7 +290,7 @@ class SwitchArgumentProcessor:
 
 		return network
 
-	def addSwitchHost(self, switch, host, port):
+	def addSwitchHost(self, switch, host, port, interface):
 		"""
 		Add a host to switch.
 		Check if host has an interface on the same network as
@@ -310,16 +310,47 @@ class SwitchArgumentProcessor:
 
 		# Get the interface of the host that is on the same
 		# network as the switch
-		host_interface = self.db.select("""
-			id from networks where subnet='%s' and
-			node=(select id from nodes where name='%s')
-			""" % (switch_network[0][0],  host))
 
-		if not host_interface:
+		# If the user entered an interface
+		if interface:
+			host_interface = self.db.select("""
+				id from networks
+				where subnet='%s'
+				and node=(select id from nodes where name='%s')
+				and device='%s'
+				""" % (switch_network[0][0],  host, interface))
+
+			if not host_interface:
+				raise CommandError(self,
+					"Interface '%s' isn't on a network with '%s'"
+					% ( interface, switch ))
+
+		# Grab the interface, if there is one, that is on the same network
+		# as the switch
+		else:
+			host_interface = self.db.select("""
+				id from networks where subnet='%s' and
+				node=(select id from nodes where name='%s')
+				""" % (switch_network[0][0],  host))
+
+			if not host_interface:
+				raise CommandError(self,
+					"host '%s' is not on a network with switch '%s'"
+					% ( host, switch ))
+
+		# Check if the port is already managed by the switch
+		rows = self.db.select("""
+			* from switchports
+			where port='%s'
+			and switch=(select id from nodes where name='%s')
+			""" % (port, switch))
+
+		if rows:
 			raise CommandError(self,
-				"host '%s' is not on a network with switch '%s'"
-				% ( host, switch ))
+				"Switch '%s' is alredy managing a host on port '%s'"
+				% (switch, port))
 
+		# if we got here, add the host to be managed switch
 		query = """
 		insert into switchports
 		(interface, switch, port)

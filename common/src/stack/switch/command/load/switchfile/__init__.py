@@ -20,10 +20,10 @@ from stack.exception import ParamRequired, CommandError
 class Command(stack.commands.load.command,
 	      stack.commands.SwitchArgumentProcessor):
 	"""
-	Load switch hosts info into the database.
+	Load switch info into the database.
 	
 	<param type='string' name='file'>
-	The file that contains the host data to be loaded into the
+	The file that contains the switch data to be loaded into the
 	database.
 	</param>
 
@@ -32,8 +32,8 @@ class Command(stack.commands.load.command,
 	database. Default: default.
 	</param>
 	
-	<example cmd='load switch hostfile file=hosts.csv'>
-	Load all the host info in file named hosts.csv and use the default
+	<example cmd='load switchfile file=hosts.csv'>
+	Load all the switch info in file named hosts.csv and use the default
 	processor.
 	</example>
 	"""		
@@ -51,19 +51,15 @@ class Command(stack.commands.load.command,
 		if not os.path.exists(filename):
 			raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		self.hosts = {}
-		self.switches = self.getSwitchNames()
+		self.switches= {}
 
 		sys.stderr.write('Loading Spreadsheet\n')
 		self.runImplementation('load_%s' % processor, (filename, ))
 
 		sys.stderr.write('Configuring Database\n')
-		args = self.hosts
+		args = self.switches
 		self.runPlugins(args)
 
-		sys.stderr.write('\tSyncing Switch\n')
-		self.call('sync.switch')
-		
 		#
 		# checkin the hosts spreadsheet
 		#

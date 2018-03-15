@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ParamType, ParamRequired, ArgUnique
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.command):
 	"""
 	Sets the logical name of a network interface on a particular switch.
 

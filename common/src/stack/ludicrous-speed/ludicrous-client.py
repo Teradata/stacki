@@ -56,7 +56,7 @@ def save_file(content, location, filename):
 		with open(location + filename, 'wb') as f:
 			f.write(content)
 	except:
-		app.logger.info("Error saving file")
+		app.logger.info("save_file: Error saving file")
 		raise
 
 # Check if the file exists locally
@@ -81,42 +81,77 @@ def lookup_file(hashcode):
 
 # Get a file from a host
 def get_file(peer, remote_file):
-	try:
-		# timeout=(connect timeout, read timeout).
-		res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
-		return res
-	except:
-		raise
+	_counter = 0
+	while _counter < 3:
+		try:
+			# timeout=(connect timeout, read timeout).
+			res = requests.get('http://%s%s' % (peer, remote_file), timeout=(0.1, 5))
+			return res
+		except requests.ConnectTimeout:
+			app.logger.debug('get_file: Connect Timeout. Retrying.')
+		except requests.ConnectionError:
+			app.logger.debug('get_file: Connection Error. Retrying.')
+		except:
+			app.logger.info("get_file: Error getting file from %s." % peer)
+
+		_counter += 1
 
 
 # Register a file for a host on the frontend
 def register_file(port, hashcode):
-	try:
-		res = requests.post('http://%s/ludicrous/register/%s/%s' % (
-									tracker(), 
+	_counter = 0
+	while _counter < 3:
+		try:
+			res = requests.post('http://%s/ludicrous/register/%s/%s' % (
+									tracker(),
 									port,
 									hashcode)
 									, timeout=(0.1, 5))
-	except:
-		raise
+			break
+		except requests.ConnectTimeout:
+			app.logger.debug('register_file: Connect Timeout. Retrying.')
+		except requests.ConnectionError:
+			app.logger.debug('register_file: Connection Error. Retrying.')
+		except:
+			app.logger.info("register_file: Error registering file.")
+
+		_counter += 1
 
 # Unregister a single file from a host on the frontend
 def unregister_file(hashcode, params):
-	try:
-		res = requests.delete('http://%s/ludicrous/unregister/hashcode/%s' % (
+	_counter = 0
+	while _counter < 3:
+		try:
+			res = requests.delete('http://%s/ludicrous/unregister/hashcode/%s' % (
 									tracker(),
 									hashcode),
 									params=params
 									, timeout=(0.1, 5))
-	except:
-		raise
+			break
+		except requests.ConnectTimeout:
+			app.logger.debug('unregister_file: Connect Timeout. Retrying.')
+		except requests.ConnectionError:
+			app.logger.debug('unregister_file: Connection Error. Retrying.')
+		except:
+			app.logger.info("unregister_file: Error unregistering file.")
+
+		_counter += 1
 
 # Unregister all hosts packages on frontend
 def unregister_host(host):
-	try:
-		res = requests.delete('http://%s/ludicrous/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
-	except:
-		raise
+	_counter = 0
+	while _counter < 3:
+		try:
+			res = requests.delete('http://%s/ludicrous/unregister/host/%s' % (tracker(), host), timeout=(0.1, 5))
+			break
+		except requests.ConnectTimeout:
+			app.logger.debug('unregister_host: Connect Timeout. Retrying.')
+		except requests.ConnectionError:
+			app.logger.debug('unregister_host: Connection Error. Retrying.')
+		except:
+			app.logger.info("unregister_host: Error unregistering host.")
+
+		_counter += 1
 
 @app.route('/install/<path:path>/<filename>')
 def get_file_locally(path, filename):
@@ -127,14 +162,14 @@ def get_file_locally(path, filename):
 	hashcode = hashit(remote_file)
 	im_the_requester = request.remote_addr == "127.0.0.1"
 	environment = client_settings['ENVIRONMENT']
-	port = client_settings['PORT'] 
+	port = client_settings['PORT']
 
 	if not client_settings['SAVE_FILES']:
 		return redirect('http://%s%s' % (tracker_settings['TRACKER'], remote_file))
 
 	# check if file is local
 	if client_settings['SAVE_FILES'] and im_the_requester and not file_exists(local_file):
-		
+
 		params = {'port': port, 'hashcode': hashcode}
 
 		# Check if there are any hosts that have the file
@@ -153,32 +188,27 @@ def get_file_locally(path, filename):
 				try:
 					peer_res = get_file(peer, remote_file)
 					if peer_res.status_code == 200:
-						app.logger.info("  %s from %s was successful", filename, peer)
 						save_file(peer_res.content, '%s/' % (file_location), filename)
+						app.logger.info("  %s from %s was successful", filename, peer)
 						register_file(port, hashcode)
 						break
 					else:
 						app.logger.info("  %s from %s was unsuccessful", filename, peer)
-						#unregister_host(peer_ip)
 						unregister_params = params.copy()
 						unregister_params["peer"] = peer.split(":")[0]
 						unregister_file(hashcode, unregister_params)
-				#except Timeout:
-				#	timed_out_hosts.append(peer)
-				except Exception as e:
+
+				except:
 					app.logger.info("  %s from %s was unsuccessful", filename, peer)
-					app.logger.info("    %s", e)
-					#unregister_host(peer_ip)
 					unregister_params = params.copy()
 					unregister_params["peer"] = peer.split(":")[0]
 					unregister_file(hashcode, unregister_params)
 
 	if not file_exists(local_file):
-		app.logger.info("requesting %s from frontend", filename)
-
 		# Keep trying to get file from frontend if there is a
 		# connection error or a timeout.
 		while True:
+			app.logger.info("requesting %s from frontend", filename)
 			try:
 				# timeout=(connect timeout, read timeout).
 				tracker_res = requests.get('http://%s%s' % (tracker_settings['TRACKER'], remote_file), timeout=(0.1, 5))
@@ -188,14 +218,13 @@ def get_file_locally(path, filename):
 						register_file(port, hashcode)
 				break
 			except requests.ConnectTimeout:
-				app.logger.debug('Connect Timeout. Retrying.')
+				app.logger.debug('Frontend Request: Connect Timeout. Retrying.')
 				sleep(1)
 			except requests.ConnectionError:
-				app.logger.debug('Connection Error. Retrying.')
+				app.logger.debug('Frontend Request: Connection Error. Retrying.')
 				sleep(1)
-			except Exception as e:
-				app.logger.info("error requesting from frontend")
-				app.logger.info("%s", (e))
+			except:
+				app.logger.info("Frontend Request: Error requesting %s from frontend" % filename)
 				sleep(1)
 
 	if file_exists(local_file):
@@ -253,6 +282,8 @@ def page_not_found(e):
 @click.option('--nosavefile', is_flag=True)
 @click.option('--port', default=80)
 def main(environment, trackerfile, nosavefile, port):
+
+	# Setup the logger
 	logHandler = FileHandler('/var/log/ludicrous-client-debug.log')
 	formatter = logging.Formatter("%(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S")
 	logHandler.setFormatter(formatter)
@@ -261,6 +292,7 @@ def main(environment, trackerfile, nosavefile, port):
 	log = logging.getLogger('werkzeug')
 	log.setLevel(logging.DEBUG)
 	app.logger.addHandler(logHandler)
+
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
 	client_settings['PORT']	= port

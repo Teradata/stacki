@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ParamRequired
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.command):
 	"""
 	Sets the network for named interface on one of more switches. 
 

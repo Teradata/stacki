@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ParamRequired, ArgUnique
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.command):
 	"""
 	Sets the IP address for the named interface for one switch.
 
