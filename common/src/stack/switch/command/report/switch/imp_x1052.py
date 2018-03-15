@@ -13,6 +13,7 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 
 		switch = args[0]
+		switch_name = switch['switch']
 		# Get the frontend since it requires a different
 		# config block
 		frontend = self.owner.db.getHostname('localhost')
@@ -25,15 +26,15 @@ class Implementation(stack.commands.Implementation):
 		and i.subnet = sub.id
 		and s.interface = i.id
 		and s.switch = (select id from nodes where name='%s')
-		""" % switch['switch'])
+		""" % switch_name)
 
 		# Start of configuration file
-		self.owner.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch['switch'])
+		self.owner.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch_name)
 
 		# Set blank vlan from 2-100
 		#
 		# The reason we are creating blank vlan ids is so we 
-		# don't accidentally try to assign a v
+		# don't accidentally try to assign a nonexistent vlanid
 		#
 		#
 		self.owner.addOutput(frontend, 'vlan 2-100')
