@@ -124,7 +124,7 @@ class Command(stack.commands.add.host.command):
 			#
 			# if host is frontend and sync now, add route to routing table
 			#
-			if host == socket.gethostname():
+			if host in self.getHostnames(['localhost']):
 				if syncnow:
 					add_route = ['route', 'add', '-host', address]
 
