@@ -5,89 +5,104 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-#=============================================
-# do the voodoo that we do
-#---------------------------------------------
 
-unset PYTHONPATH
+
+function debug_wait {
+	if grep stack-debug /proc/cmdline 2>&1 > /dev/null; then
+		touch /tmp/wait
+		echo "Stacki debug wait loop - remove /tmp/wait to continue"
+		while [ -f /tmp/wait ]; do
+			sleep 1
+			/opt/stack/bin/stacki-status.py install wait 1
+		done
+	fi
+}
+
+function frontend {
+	unset PYTHONPATH
+	/opt/stack/bin/python3 /opt/stack/bin/boss_config_snack.py
+	debug_wait
+}
+
+
+function backend {
+
+	/opt/stack/bin/stacki-profile.py
+
+	# stacki-profile.py outputs the file /tmp/stacki-profile.xml
+	# which contains two "chapters":
+	#
+	#	1) "yast" chapter. This is the autoinst.xml file.
+	# 	2) "stacki" chapter. This is python code that will be
+	#	   imported into other programs that run during the
+	#	   install in order to configure the system.
+
+
+	cat /tmp/stacki-profile.xml \
+		| /opt/stack/bin/stack list host profile chapter=main \
+		> /tmp/profile/autoinst.xml
+
+	mkdir -p /tmp/stack_site/
+
+	cat /tmp/stacki-profile.xml \
+		| /opt/stack/bin/stack list host profile chapter=stacki \
+		> /tmp/stack_site/__init__.py
+
+	/opt/stack/bin/stacki-status.py install profile parsed
+
+	# Setup SSH config
+	/opt/stack/bin/gen_ssh_config.py
+
+	# Start ssh server on port 2200
+	/usr/sbin/sshd -p 2200 -o AuthorizedKeysFile=/authorized_keys
+
+	# add stack.conf and start ludicrous
+
+	FRONTEND=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
+	YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\nif 'yumserver' in attributes: print(attributes['yumserver'])\")")
+
+	echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
+
+	/opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
+
+	#
+	# configure the hardware disk array controller first
+	#
+	/opt/stack/bin/configure-controllers.py
+
+	#
+	# then configure the partitions
+	#
+	/opt/stack/bin/output-partition.py > /tmp/partition.xml
+
+	# Configure the bootloader
+	/opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml
+
+	# give ourselves the ability to hold the installation prior to the start of yast
+
+	debug_wait
+
+	if [[ -n $YUMSERVER ]]; then
+		sed -i 's/'"$FRONTEND"'/'"$YUMSERVER"'/' /etc/install.inf
+	else
+		sed -i 's/'"$FRONTEND"'/'"127.0.0.1"'/' /etc/install.inf
+	fi
+
+	#
+	# execute code that runs just prior to the autoyast gui 
+	#
+	PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
+}
+
+
 export LD_LIBRARY_PATH=/opt/stack/lib
+echo /opt/stack/lib > /etc/ld.so.conf
+/sbin/ldconfig
 
-/opt/stack/bin/stacki-profile.py
-
-#
-# stacki-profile.py outputs the file /tmp/stacki-profile.xml which contains
-# two "chapters":
-#
-#	1) "yast" chapter. This is the autoinst.xml file.
-# 	2) "stacki" chapter. This is python code that will be imported into
-#		other programs that run during the install in order to
-#		configure the system.
-#
-
-cat /tmp/stacki-profile.xml \
-	| /opt/stack/bin/stack list host profile chapter=main \
-	> /tmp/profile/autoinst.xml
-
-mkdir -p /tmp/stack_site/
-
-cat /tmp/stacki-profile.xml \
-	| /opt/stack/bin/stack list host profile chapter=stacki \
-	> /tmp/stack_site/__init__.py
-
-/opt/stack/bin/stacki-status.py install profile parsed
-
-# Setup SSH config
-/opt/stack/bin/gen_ssh_config.py
-
-# Start ssh server on port 2200
-/usr/sbin/sshd -p 2200 -o AuthorizedKeysFile=/authorized_keys
-
-# add stack.conf and start ludicrous
-
-FRONTEND=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
-YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\nif 'yumserver' in attributes: print(attributes['yumserver'])\")")
-
-echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
-
-/opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
-
-#
-# configure the hardware disk array controller first
-#
-/opt/stack/bin/configure-controllers.py
-
-#
-# then configure the partitions
-#
-/opt/stack/bin/output-partition.py > /tmp/partition.xml
-
-# Configure the bootloader
-/opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml
-
-# give ourselves the ability to hold the installation prior to the start of yast
-#
-grep stack-debug /proc/cmdline 2>&1 > /dev/null
-if [ $? -eq 0 ]
-then
-	touch /tmp/wait
-	echo "Stacki debug wait loop - remove /tmp/wait to continue"
-	while [ -f /tmp/wait ]
-	do
-		sleep 1
-		/opt/stack/bin/stacki-status.py install wait 1
-	done
-fi
-
-if [[ -n $YUMSERVER ]]
-then
-	sed -i 's/'"$FRONTEND"'/'"$YUMSERVER"'/' /etc/install.inf
+if grep frontend /proc/cmdline 2>&1 > /dev/null; then
+	echo "Stacki Frontend Install"
+	frontend
 else
-	sed -i 's/'"$FRONTEND"'/'"127.0.0.1"'/' /etc/install.inf
+	echo "Stacki Backend Install"
+	backend
 fi
-
-#
-# execute code that runs just prior to the autoyast gui 
-#
-PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
-

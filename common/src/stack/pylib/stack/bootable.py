@@ -20,7 +20,7 @@ import stack.api
 
 class Bootable:
 
-	def __init__(self, localdir, palletdir):
+	def __init__(self, osname, localdir, palletdir):
 		self.palletdir = palletdir
 		self.filetree = {}
 
@@ -40,11 +40,11 @@ class Bootable:
 			boxes  = o['boxes'].split()
 			if box in boxes:
 				pallets.append((o['name'], o['version'],
-					o['release'], o['arch']))
+						o['release'], o['arch']))
 
 		for name, ver, release, arch in pallets:
 			palletpath = os.path.join('/export', 'stack', 'pallets',
-				name, ver, release, 'redhat', arch)
+						  name, ver, release, osname, arch)
 
 			self.filetree[name] = stack.file.Tree(palletpath)
 
@@ -56,16 +56,13 @@ class Bootable:
 
 		os.makedirs(os.path.join(root, dbdir))
 		reloc = os.system("rpm -q --queryformat '%{prefixes}\n' -p " +
-			rpm.getFullName() + "| grep none > /dev/null")
+				  rpm.getFullName() + "| grep none > /dev/null")
 
-		cmd = 'rpm -i --nomd5 --force --nodeps --ignorearch ' + \
-			'--dbpath %s ' % (dbdir)
+		cmd = 'rpm -i --nomd5 --force --nodeps --ignorearch --dbpath %s ' % (dbdir)
 		if reloc:
-			cmd = cmd + '--prefix %s %s %s' % (root, flags,
-							rpm.getFullName())
+			cmd = cmd + '--prefix %s %s %s' % (root, flags, rpm.getFullName())
 		else:
-			cmd = cmd + '--badreloc --relocate /=%s %s %s' \
-					% (root, flags, rpm.getFullName())
+			cmd = cmd + '--badreloc --relocate /=%s %s %s' % (root, flags, rpm.getFullName())
 
 		retval = os.system(cmd + ' > /dev/null 2>&1')
 		shutil.rmtree(os.path.join(root, dbdir))
@@ -120,92 +117,6 @@ class Bootable:
 
 
 	def installBootfiles(self, destination):
-		import stat
-		import stack
-
-		print('Applying boot files')
-
-		name = 'stack-images'
-		RPM = self.findFile(name)
-		if not RPM:
-			raise ValueError("could not find %s" % name)
-
-		self.applyRPM(RPM, destination)
-
-		images = os.path.join(destination, 'opt', 'stack', 'images')
-		isolinux = os.path.join(destination, 'isolinux')
-
-		shutil.move(os.path.join(images, 'isolinux'), isolinux)
-
-		#
-		# vmlinuz and initrd.img
-		#
-		for file in os.listdir(images):
-			if file.startswith('vmlinuz-'):
-				shutil.move(os.path.join(images, file),
-					os.path.join(isolinux, 'vmlinuz'))
-			if file.startswith('initrd.img-'):
-				shutil.move(os.path.join(images, file),
-					os.path.join(isolinux, 'initrd.img'))
-
-		imagesdir = os.path.join(self.palletdir, 'images')
-
-		if not os.path.exists(imagesdir):
-			os.makedirs(imagesdir)
-
-		if stack.release == 'redhat6':
-			#
-			# install.img
-			#
-			fileold = os.path.join(os.path.join(images,
-				'install.img'))
-			filenew = os.path.join(imagesdir, 'install.img')
-			os.rename(fileold, filenew)
-			os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-
-		if stack.release == 'redhat7':
-			#
-			# updates.img
-			#
-			fileold = os.path.join(os.path.join(images, 'updates.img'))
-			filenew = os.path.join(imagesdir, 'updates.img')
-
-			if not os.path.exists(fileold):
-				raise ValueError("cound not find '%s'" % fileold)
-
-			os.rename(fileold, filenew)
-			os.chmod(filenew,
-				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-
-			#
-			# squashfs.img from LiveOS
-			#
-			f = self.findFile('squashfs.img')
-			if not f:
-				raise ValueError("could not find 'squashfs.img'")
-
-			fileold = f.getFullName()
-			print('fileold %s' % f.getFullName())
-
-			livenewdir = os.path.join(self.palletdir, 'LiveOS')
-			if not os.path.exists(livenewdir):
-				os.makedirs(livenewdir)
-
-			filenew = os.path.join(livenewdir, 'squashfs.img')
-
-			print('fileold %s' % fileold)
-			print('filenew %s' % filenew)
-			shutil.copy(fileold, filenew)
-			os.chmod(filenew,
-				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-
-		#
-		# clean up other image files from the stack-image RPM
-		#
-		shutil.rmtree(os.path.join(destination, 'opt'),
-			ignore_errors=1)
-		shutil.rmtree(os.path.join(destination, 'var'),
-			ignore_errors=1)
-
 		return
+
 

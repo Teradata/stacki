@@ -1,0 +1,19 @@
+#!/bin/bash
+
+make -C sles/src/stack/images nuke
+make
+
+echo
+echo Deploy Images
+echo
+make -C sles/src/stack/images deploy
+echo
+echo Add Stacki Pallet
+echo
+stack add pallet build-stacki-feature_bootable/stacki-5.0-sles12.x86_64.disk1.iso clean=true
+echo
+echo Add SLES Pallet
+echo
+stack add pallet /export/stack/ISOs/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+
+make

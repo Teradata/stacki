@@ -41,7 +41,7 @@ class Builder:
 	def mktemp(self):
 		return tempfile.mktemp(dir=self.tempdir)
 		
-	def makeBootable(self, name, version, release, arch):
+	def makeBootable(self, name, version, release, osname, arch):
 		pass
 				
 	def mkisofs(self, isoName, rollName, diskName, rollDir):
@@ -351,54 +351,51 @@ class RollBuilder(Builder, stack.dist.Arch):
 		return (stacki, nonstacki)
 
 
-	def makeBootable(self, name, version, release, arch):
+	def makeBootable(self, name, version, release, osname, arch):
 		import stack.roll
 		import stack
 
-		print('Configuring pallet to be bootable ... ', name)
+		print('Configuring %s pallet to be bootable... ' % name)
 
-		# 
-		# create a minimal kickstart file. this will get us to the
-		# stacki wizard
-		# 
-		fout = open(os.path.join('disk1', 'ks.cfg'), 'w')
+		localrolldir = os.path.join(name, version, release, osname, arch)
+		destination  = os.path.join(os.getcwd(), 'disk1')
+		rolldir      = os.path.join(destination, localrolldir)
 
-		palletdir = os.path.join(name,
-			version, release, 'redhat', arch)
-		distdir = os.path.join('mnt', 'cdrom', palletdir)
-		fout.write('install\n')
-		fout.write('lang en_US\n')
-		fout.write('keyboard us\n')
-		fout.write('interactive\n')
-		if release == 'redhat7':
-			fout.write('url --url cdrom:cdrom:%s\n' % palletdir)
-		else:
-			fout.write('url --url http://127.0.0.1/%s\n' % distdir)
+		if osname == 'sles':
+			from stack.sles.bootable import Bootable
+			self.boot = Bootable(osname, os.getcwd(), rolldir)
 
-		fout.close()
+		elif osname == 'redhat':
+			from stack.redhat.bootable import Bootable
 
-		# Write USB file
-		if release == 'redhat7':
-			fout = open(os.path.join('disk1', 'ks-usb.cfg'), 'w')
-			fout.write('install\n')
-			fout.write('lang en_US\n')
-			fout.write('keyboard us\n')
-			fout.write('interactive\n')
-			fout.write('url --url hd:LABEL=stacki:%s\n' % palletdir)
-			fout.close()
+			self.boot = Bootable(osname, os.getcwd(), rolldir)
 
-		#
-		# add isolinux files
-		# 
-		localrolldir = os.path.join(name, version, release, 'redhat', arch)
+			# create a minimal kickstart file. this will get us to the
+			# stacki wizard
 
-		destination = os.path.join(os.getcwd(), 'disk1')
-		rolldir = os.path.join(destination, localrolldir)
-		self.boot = stack.bootable.Bootable(os.getcwd(), rolldir)
+			with open(os.path.join('disk1', 'ks.cfg'), 'w') as fout:
+				palletdir = os.path.join(name, version, release, 'redhat', arch)
+				distdir = os.path.join('mnt', 'cdrom', palletdir)
+				fout.write('install\n')
+				fout.write('lang en_US\n')
+				fout.write('keyboard us\n')
+				fout.write('interactive\n')
+				if release == 'redhat7':
+					fout.write('url --url cdrom:cdrom:%s\n' % palletdir)
+				else:
+					fout.write('url --url http://127.0.0.1/%s\n' % distdir)
 
-		self.boot.installBootfiles(destination)
+			# Write USB file
+			if release == 'redhat7':
+				with open(os.path.join('disk1', 'ks-usb.cfg'), 'w') as fout:
+					fout.write('install\n')
+					fout.write('lang en_US\n')
+					fout.write('keyboard us\n')
+					fout.write('interactive\n')
+					fout.write('url --url hd:LABEL=stacki:%s\n' % palletdir)
+
 		
-		return
+		self.boot.installBootfiles(destination)
 
 
 	def addComps(self, basedir):
@@ -408,9 +405,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		#
 		destination = os.path.join(basedir, 'disk1')
 		localrolldir = os.path.join(self.config.getRollName(), 
-			self.config.getRollVersion(),
-			self.config.getRollRelease(), 'redhat',
-			self.config.getRollArch())
+					    self.config.getRollVersion(),
+					    self.config.getRollRelease(), 'redhat',
+					    self.config.getRollArch())
 		rolldir = os.path.join(destination, localrolldir)
 
 		sversion = None
@@ -557,6 +554,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 					self.makeBootable(self.config.getRollName(),
 							  self.config.getRollVersion(),
 							  self.config.getRollRelease(),
+							  self.config.getRollOS(),
 							  self.config.getRollArch())
 				except ValueError as msg:
 					print('ERROR -', msg)
@@ -782,7 +780,7 @@ class GitRollBuilder(Builder):
 
 
 class Command(stack.commands.create.command,
-		stack.commands.HostArgumentProcessor):
+	      stack.commands.HostArgumentProcessor):
 
 	"""
 	Create a pallet.  You may specify either a single XML file or git URL 

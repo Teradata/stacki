@@ -13,9 +13,10 @@ assumeyes=1 \n\
 gpgcheck=0 \n\
 enabled=1" > localdir.repo
 
-getpackages:
+getpackages: localrepo
 	rm -rf cache
 	mkdir -p cache
+	zypper --pkg-cache-dir cache download $(YUMLIST.SLES)
 	zypper --pkg-cache-dir cache --reposd-dir $(CURDIR) clean --all
-	zypper --pkg-cache-dir cache --reposd-dir $(CURDIR) download $(YUMLIST)
+	zypper --pkg-cache-dir cache --reposd-dir $(CURDIR) download $(YUMLIST.STACK)
 

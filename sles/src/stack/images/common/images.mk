@@ -13,7 +13,8 @@ PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
-rpminst: localrepo getpackages getextrapackages
+# TODO: Need to fix this for SLES 11
+rpminst: getpackages
 	rpm --dbpath $(TEMPDIR) -ivh --nodeps --force --badreloc \
 		--relocate=/=$(CURDIR)/sles-stacki $(RPMLOC)
 	rm -rf $(TEMPDIR)

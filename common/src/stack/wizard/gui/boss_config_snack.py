@@ -1,10 +1,11 @@
 #!/opt/stack/bin/python3
+
 import sys
-from snack import *
+from snack import Button, ButtonBar, ButtonChoiceWindow, CheckboxTree, Entry, EntryWindow, GridForm, Listbox, ListboxChoiceWindow, SnackScreen, Textbox
 import stack.wizard
-import subprocess
 import json
 from urllib.request import urlopen
+
 
 def render_timezone(screen):
 
@@ -17,10 +18,11 @@ def render_timezone(screen):
 		cities.append((city, city))
 
 	#render window to choose a timezone
-	result = ListboxChoiceWindow(screen, "Stacki Installation", \
-		"Cluster Timezone", cities, width=40, buttons=('Continue', 'Cancel'), \
+	result = ListboxChoiceWindow(screen, "Stacki Installation",
+		"Cluster Timezone", cities, width=40, buttons=('Continue', 'Cancel'),
 		scroll=1, height=5)
 	return result
+
 
 def render_network(screen, data):
 
@@ -31,7 +33,7 @@ def render_network(screen, data):
 	g = GridForm(screen, "Stacki Installation", 2, 10)
 
 	#create labels
-	title = Textbox(23, 2, "Network", scroll=0, wrap = 0)
+	title = Textbox(23, 2, "Network", scroll=0, wrap=0)
 	tb0 = Textbox(16, 1, "Hostname (FQDN):", scroll=0, wrap=0)
 	space = Textbox(16, 1, "", scroll=0, wrap=0)
 	dev = Textbox(16, 2, "Devices:", scroll=0, wrap=0)
@@ -47,16 +49,16 @@ def render_network(screen, data):
 		lb.append(d, d)
 
 	#create input fields
-	e0 = Entry(21, text=data.get('Kickstart_PrivateHostname'), scroll=1, \
-		returnExit=0)
-	e1 = Entry(21, text=data.get('Kickstart_PrivateAddress'), scroll=0, \
-		returnExit=0)
-	e2 = Entry(21, text=data.get('Kickstart_PrivateNetmask'), scroll=0, \
-		returnExit=0)
-	e3 = Entry(21, text=data.get('Kickstart_PrivateGateway'), scroll=0, \
-		returnExit=0)
-	e4 = Entry(21, text=data.get('Kickstart_PrivateDNSServers'), scroll=0, \
-		returnExit=0)
+	e0 = Entry(21, text=data.get('Kickstart_PrivateHostname'), scroll=1,
+		   returnExit=0)
+	e1 = Entry(21, text=data.get('Kickstart_PrivateAddress'), scroll=0,
+		   returnExit=0)
+	e2 = Entry(21, text=data.get('Kickstart_PrivateNetmask'), scroll=0,
+		   returnExit=0)
+	e3 = Entry(21, text=data.get('Kickstart_PrivateGateway'), scroll=0,
+		   returnExit=0)
+	e4 = Entry(21, text=data.get('Kickstart_PrivateDNSServers'), scroll=0,
+		   returnExit=0)
 
 	#add elements to form
 	g.add(title, 0, 0)
@@ -92,9 +94,10 @@ def render_network(screen, data):
 		btn_value = "continue"
 
 	#return pressed button value and input values
-	result = (btn_value, (e0.value(), lb.current(), e1.value(), e2.value(), \
-		e3.value(), e4.value()))
+	result = (btn_value, (e0.value(), lb.current(), e1.value(), e2.value(),
+			      e3.value(), e4.value()))
 	return result
+
 
 def render_password(screen):
 
@@ -135,6 +138,7 @@ def render_password(screen):
 	result = (btn_value, (e1.value(), e2.value()))
 	return result
 
+
 def render_partition(screen):
 
 	#partition choices
@@ -142,9 +146,10 @@ def render_partition(screen):
 
 	#render window to choose partition type
 	result = ListboxChoiceWindow(screen, "Stacki Installation",
-		"Partition Settings", choices, buttons=('Continue', 'Back'), \
-		width=40, scroll = 0, height=2)
+		"Partition Settings", choices, buttons=('Continue', 'Back'),
+		width=40, scroll=0, height=2)
 	return result
+
 
 def render_pallets(screen, data):
 	# Load the initial pallets from the boot cd (add an empy item for net data)
@@ -155,7 +160,7 @@ def render_pallets(screen, data):
 		grid = GridForm(screen, "Stacki Installation", 1, 3)
 	
 		# Create the dialog label
-		label = Textbox(60, 2, "Pallets to Install", scroll=0, wrap = 0)
+		label = Textbox(60, 2, "Pallets to Install", scroll=0, wrap=0)
 	
 		# Create the checkbox tree
 		checkbox_tree = CheckboxTree(height=10, width=60, scroll=1)
@@ -174,7 +179,7 @@ def render_pallets(screen, data):
 		# Add the elements to the form
 		grid.add(label, 0, 0)
 		grid.add(checkbox_tree, 0, 1)
-		grid.add(buttons, 0, 2, growx = 1)
+		grid.add(buttons, 0, 2, growx=1)
 	
 		# Return pressed button value and selected pallets
 		form_result = grid.runOnce()
@@ -188,6 +193,7 @@ def render_pallets(screen, data):
 			break	
 	
 	return result
+
 
 def handle_add_pallet(screen, data, pallets):
 	# Prompt the user to enter the network URL
@@ -229,9 +235,10 @@ def handle_add_pallet(screen, data, pallets):
 			ButtonChoiceWindow(
 				screen,
 				"Invalid URL",
-				 "Unable to load pallets at provided URL.",
-				 buttons=["Ok"]
+				"Unable to load pallets at provided URL.",
+				buttons=["Ok"]
 			)
+
 
 def render_summary(screen, data):
 
@@ -242,21 +249,22 @@ def render_summary(screen, data):
 	g = GridForm(screen, "Stacki Installation", 1, 4)
 
 	#create elements
-	tb = Textbox(52, 2, "Summary", scroll=0, wrap = 0)
-	tb2 = Textbox(51, 16, summaryStr, scroll=1, wrap = 0)
-	tb3 = Textbox(52, 1, "", scroll=0, wrap = 0)
+	tb = Textbox(52, 2, "Summary", scroll=0, wrap=0)
+	tb2 = Textbox(51, 16, summaryStr, scroll=1, wrap=0)
+	tb3 = Textbox(52, 1, "", scroll=0, wrap=0)
 	bb = ButtonBar(screen, (("Finish", "finish"), ("Back", "back")))
 
 	#add elements to form
 	g.add(tb, 0, 0)
 	g.add(tb2, 0, 1)
 	g.add(tb3, 0, 2)
-	g.add(bb, 0, 3, growx = 1)
+	g.add(bb, 0, 3, growx=1)
 
 	#return the pressed button value
 	form_result = g.runOnce()
 	result = (bb.buttonPressed(form_result), "summary")
 	return result
+
 
 def process_data(page, btn_value, result):
 
@@ -292,8 +300,8 @@ def process_data(page, btn_value, result):
 			if validated:
 				#check for valid network config
 				validated, message, title = \
-					data.validateNetwork((fqhn, eth, ip, subnet, \
-						gateway, dns), config_net)
+					data.validateNetwork((fqhn, eth, ip, subnet,
+							      gateway, dns), config_net)
 		#password
 		elif page == 3:
 			pw1, pw2 = result
@@ -341,6 +349,7 @@ def process_data(page, btn_value, result):
 				page += 1
 	return page
 
+
 def render(screen, page, data):
 
 	# Determine page index and render the page.
@@ -360,6 +369,7 @@ def render(screen, page, data):
 		btn_value, values = render_summary(screen, data)
 
 	return process_data(page, btn_value, values)
+
 
 #begin
 config_net = True

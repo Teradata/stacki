@@ -1,8 +1,12 @@
-YUMLIST = MegaCLI storcli \
+YUMLIST.STACK = \
+	MegaCLI \
+	storcli \
 	stack-command \
 	stack-pylib	\
 	stack-storage-config \
+	stack-wizard \
 	ludicrous-speed \
+	foundation-newt \
 	foundation-python \
 	foundation-python-Flask \
 		foundation-python-itsdangerous \
@@ -20,7 +24,6 @@ YUMLIST = MegaCLI storcli \
 		foundation-python-certifi \
 		foundation-python-idna
 
-
-getextrapackages:
-	echo
+YUMLIST.SLES = \
+	libslang2
 

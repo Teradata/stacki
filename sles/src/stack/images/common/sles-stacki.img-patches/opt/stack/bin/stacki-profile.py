@@ -33,7 +33,7 @@ except:
 #
 linkcmd = [ 'ip', '-oneline', 'link', 'show' ]
 
-p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
+p = subprocess.Popen(linkcmd, stdout=subprocess.PIPE)
 
 interface_number = 0
 
@@ -60,7 +60,7 @@ for line in output.split('\n'):
 				#
 				# we know the next token is the ethernet MAC
 				#
-				hwaddr = tokens[i+1]
+				hwaddr = tokens[i + 1]
 				break
 
 		if interface and hwaddr:
@@ -106,8 +106,7 @@ if not server:
 	server = data.get('master')
 
 
-request = 'https://%s/install/sbin/profile.cgi?os=sles&arch=x86_64&np=%d' % \
-	(server, numcpus)
+request = 'https://%s/install/sbin/profile.cgi?os=sles&arch=x86_64&np=%d' % (server, numcpus)
 curlcmd.append(request)
 
 #
