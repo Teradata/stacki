@@ -11,7 +11,6 @@
 # @rocks@
 
 import stack.commands
-import socket
 import subprocess
 
 
@@ -58,7 +57,7 @@ class Command(stack.commands.remove.host.command):
 			and network = '%s'
 			""" % (host, address))
 
-			if res and host == socket.gethostname():
+			if res and host in self.getHostnames(['localhost']):
 				if syncnow:
 					del_route = ['route', 'del', '-host', address]
 
