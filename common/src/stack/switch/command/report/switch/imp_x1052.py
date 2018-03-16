@@ -15,7 +15,7 @@ class Implementation(stack.commands.Implementation):
 		switch = args[0]
 		switch_name = switch['switch']
 		switch_interface, *xargs = self.owner.call('list.host.interface', [switch_name])
-		switch_network, xargs = self.owner.call('list.network', [switch_interface['network']])
+		switch_network, *xargs = self.owner.call('list.network', [switch_interface['network']])
 		# Get the frontend since it requires a different
 		# config block
 		frontend = self.owner.db.getHostname('localhost')
@@ -36,7 +36,7 @@ class Implementation(stack.commands.Implementation):
 		# Write the static ip block
 		self.owner.addOutput(frontend, '!')
 		self.owner.addOutput(frontend, 'interface vlan 1')
-		self.owner.addOutput(frontend,'  ip address %s %s' % (switch_interface['ip'], switch_network['mask'])))
+		self.owner.addOutput(frontend,'  ip address %s %s' % (switch_interface['ip'], switch_network['mask']))
 		self.owner.addOutput(frontend,'  no ip address dhcp')
 		self.owner.addOutput(frontend, '!')
 
