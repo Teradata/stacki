@@ -95,19 +95,18 @@ class EnvironmentArgumentProcessor:
 	arguments."""
 		
 	def getEnvironmentNames(self, args=None):
-		list = []
+		environments = []
 		if not args:
-			args = ['%'] # find all appliances
+			args = [ '%' ]		 # find all appliances
 		for arg in args:
-			rows = self.db.execute("""select name from environments
-				where name like '%s'""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
+			found = False
+			for (envName, ) in self.db.select("name from environments where name like '%s'" % arg):
+				found = True
+				environments.append(envName)
+			if not found and arg != '%':
 				raise CommandError(self, 'unknown environment "%s"' % arg)
-			for name, in self.db.fetchall():
-				list.append(name)
-		return list
+
+		return environments
 
 
 class ApplianceArgumentProcessor:
@@ -121,19 +120,18 @@ class ApplianceArgumentProcessor:
 		arg does not match anything in the database we raise
 		an exception. If the ARGS list is empty return all appliance names.
 		"""	
-		list = []
+		appliances  = []
 		if not args:
-			args = ['%'] # find all appliances
+			args = [ '%' ]		 # find all appliances
 		for arg in args:
-			rows = self.db.execute("""select name from appliances 
-				where name like '%s'""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
+			found = False
+			for (appName, ) in self.db.select("name from appliances where name like '%s'" % arg):
+				found = True
+				appliances.append(appName)
+			if not found and arg != '%':
 				raise CommandError(self, 'unknown appliance "%s"' % arg)
-			for name, in self.db.fetchall():
-				list.append(name)
-		return list
+
+		return appliances
 
 
 class BoxArgumentProcessor:
@@ -146,28 +144,19 @@ class BoxArgumentProcessor:
 		arg does not match anything in the database we raise an
 		exception.  If the ARGS list is empty return all box names.
 		"""
-		list = []
+		boxes = []
 		if not args:
-			args = ['%'] # find all boxes
+			args = [ '%' ]		      # find all boxes
 
 		for arg in args:
-			rows = self.db.execute("""select name from
-				boxes where name like '%s'""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
-				if arg == '%':
-					# special processing for when the table
-					# is empty
-					continue
-				else:
-					raise CommandError(self,
-						'unknown box "%s"' % arg)
+			found = False
+			for (boxName, ) in self.db.select("name from boxes where name like '%s'" % arg):
+				found = True
+				boxes.append(boxName)
+			if not found and arg != '%s':
+				raise CommandError(self, 'unknown box "%s"' % arg)
 
-			for name, in self.db.fetchall():
-				list.append(name)
-
-		return list
+		return boxes
 
 	def getBoxPallets(self, box='default'):
 		"""Returns a list of pallets for a box"""
@@ -201,21 +190,22 @@ class NetworkArgumentProcessor:
 		arg does not match anything in the database we raise
 		an exception.  If the ARGS list is empty return all network names.
 		"""
-		list = []
+		networks = []
 		if not args:
-			args = ['%'] # find all networks
+			args = [ '%' ]		   # find all networks
 		for arg in args:
-			rows = self.db.execute("""select name from subnets
-				where name like '%s'""" % arg)
-			if not rows:
-				continue
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
-				raise CommandError(self, 'unknown network "%s"' % arg)
-			for name, in self.db.fetchall():
-				list.append(name)
-		return list
+			found = False
+			for (netName, ) in self.db.select("name from subnets where name like '%s'" % arg):
+				found = True
+				networks.append(netName)
+# TODO - Release code actually doesn't do this, we should be there might
+# be code that relies on this bug. Needs testing before using the below
+# code.
+#
+#			if not found and arg != '%':
+#				raise CommandError(self, 'unknown network "%s"' % arg)
+
+		return networks
 
 	def getNetworkName(self, netid):
 		"""Returns a network (subnet) name from the database that
@@ -430,21 +420,21 @@ class CartArgumentProcessor:
 
 	def getCartNames(self, args, params):
 	
-		list = []
+		carts = []
 		if not args:
-			args = ['%'] # find all cart names
+			args = [ '%' ]		 # find all cart names
 		for arg in args:
-			rows = self.db.execute("""
-				select name from carts
-				where name like binary '%s'
-				""" % arg)
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
+			found = False
+			for (cartName, ) in self.db.select("""
+				name from carts where
+				name like binary '%s'
+				""" % arg):
+				found = True
+				carts.append(cartName)
+			if not found and arg != '%':
 				raise CommandError(self, 'unknown cart "%s"' % arg)
-			for (name, ) in self.db.fetchall():
-				list.append(name)
-		return list
+
+		return carts
 
 	
 class RollArgumentProcessor:
@@ -475,24 +465,23 @@ class RollArgumentProcessor:
 		else:
 			arch = "%" # SQL wildcard
 	
-		list = []
+		pallets = []
 		if not args:
-			args = ['%'] # find all pallet names
+			args = [ '%' ]	       # find all pallet names
 		for arg in args:
-			rows = self.db.execute("""select distinct name,version,rel
-				from rolls where name like binary '%s' and 
+			found = False
+			for (name, ver, rel) in self.db.select("""
+				distinct name, version, rel from rolls where
+				name like binary '%s' and 
 				version like binary '%s' and 
 				rel like binary '%s' and
-				arch like binary '%s' """ % (arg, version, rel, arch))
-			if rows in [ 0, None ] and arg == '%': # empty table is OK
-				continue
-			if rows < 1:
+				arch like binary '%s' 
+				""" % (arg, version, rel, arch)):
+				found = True
+				pallets.append((name, ver, rel))
+			if not found and arg != '%':
 				raise CommandError(self, 'unknown pallet "%s"' % arg)
-			for (name, ver, rel) in self.db.fetchall():
-				list.append((name, ver, rel))
-			rel = '%'
-				
-		return list
+		return pallets
 
 
 class HostArgumentProcessor:

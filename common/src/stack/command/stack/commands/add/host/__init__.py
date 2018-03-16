@@ -77,8 +77,8 @@ class Command(command):
 	"""
 
 	def addHost(self, host):
-		
-		if host in self.getHostnames():
+
+		if self.db.select("select name from nodes where name like '%s'" % host):
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank
@@ -91,32 +91,31 @@ class Command(command):
 		appliances = self.getApplianceNames()
 
 		appliance = None
-		rack = None
-		rank = None
+		rack      = None
+		rank      = None
 
 		try:
 			basename, rack, rank = host.split('-')
 			if basename in appliances:
 				appliance = basename
-				rack = (rack)
-				rank = (rank)
+				rack      = (rack)   # wtf
+				rank      = (rank)   # wtf
 		except:
 			appliance = None
-			rack = None
-			rank = None
+			rack      = None
+			rank      = None
 				
 		# fillParams with the above default values
 		(appliance, longname, rack, rank, box, environment,
-			osaction, installaction) = \
-			self.fillParams( [
-				('appliance', appliance),
-				('longname', None),
-				('rack', rack),
-				('rank', rank),
-				('box', 'default'),
-				('environment', ''),
-				('osaction', 'default'),
-				('installaction', 'default') ])
+		 osaction, installaction) = self.fillParams( [
+			 ('appliance',     appliance),
+			 ('longname',      None),
+			 ('rack',          rack),
+			 ('rank',          rank),
+			 ('box',           'default'),
+			 ('environment',   ''),
+			 ('osaction',      'default'),
+			 ('installaction', 'default') ])
 
 		if not longname and not appliance:
 			raise ParamRequired(self, ('longname', 'appliance'))
@@ -144,57 +143,52 @@ class Command(command):
 		if box not in self.getBoxNames():
 			raise CommandError(self, 'box "%s" is not in the database' % box)
 
-		# Get IDs for OS and Box
-		boxid, osid = self.db.select("id, os from boxes where name='%s'" % box)[0]
-		boxid = int(boxid)
-		osid = int(osid)
+		osname = None
+		for row in self.call('list.box', [ box ]):
+			osname = row['os']
 
-		# Get Bootname ID matched against a triple of (bootname, boottype, OS)
-		ia = self.db.select("""b.id from bootnames b, bootactions ba 
-			where b.name="%s" and b.type="install" and b.id=ba.bootname
-			and ba.os=%d""" %
-			(installaction, osid))
-		# If we can't find one, try to get one where OS is set to 0, ie.
-		# common action for all OSes
-		if not ia:
-			ia = self.db.select("""b.id from bootnames b, bootactions ba 
-				where b.name="%s" and b.type="install" and b.id=ba.bootname
-				and ba.os=0"""
-				% installaction)
 
-		# If we cannot find an install action to map to, bail out
-		if not ia:
-			(osname,) = self.db.select("name from oses where id=%d" % osid)[0]
-			raise CommandError(self, "Cannot find %s install action for OS %s" % 
+		# Make sure the installaction and osaction both exist
+
+		if not self.call('list.bootaction', [ installaction, 
+						      'type=install', 
+						      'os=%s' % osname 
+						      ]):
+			raise CommandError(self,
+					   '"%s" install boot action for "%s" is missing' % 
 					   (installaction, osname))
-		installaction_id = int(ia[0][0])
 
-		# Same logic as above. This time try to get bootaction where
-		# boottype is "OS"
-		oa = self.db.select("""b.id from bootnames b, bootactions ba 
-			where b.name="%s" and b.type="os" and b.id=ba.bootname
-			and ba.os=%d""" % 
-			(osaction, osid))
-		if not oa:
-			oa = self.db.select("""b.id from bootnames b, bootactions ba 
-				where b.name="%s" and b.type="os" and b.id=ba.bootname
-				and ba.os=0""" % osaction)
-		# If we cannot find an os action to map to, bail out
-		if not oa:
-			(osname,) = self.db.select("name from oses where id=%d" % osid)[0]
-			raise CommandError(self, "Cannot find %s os action for OS %s" % 
+		if not self.call('list.bootaction', [ osaction, 
+						      'type=os', 
+						      'os=%s' % osname 
+						      ]):
+			raise CommandError(self,
+					   '"%s" os boot action for "%s" is missing' % 
 					   (osaction, osname))
 
-		osaction_id = int(oa[0][0])
-				
-		self.db.execute("""insert into nodes
-			(name, appliance, box, rack, rank, osaction, installaction)
-			values ('%s', (select id from appliances where name='%s'),
-			%d, '%s', '%s', %d, %d) """ %
-			(host, appliance, boxid, rack, rank, osaction_id, installaction_id))
+		self.db.execute("""
+			insert into nodes
+			(name, appliance, box, rack, rank)
+			values (
+				'%s', 
+			 	(select id from appliances where name='%s'),
+			 	(select id from boxes      where name='%s'),
+				'%s', '%s'
+			) 
+			""" % (host, appliance, box, rack, rank))
+
+
+		self.command('set.host.bootaction', 
+			     [ host, 'type=install', 'sync=false', 
+			       'action=%s' % installaction ])
+
+		self.command('set.host.bootaction', 
+			     [ host, 'type=os', 'sync=false', 
+			       'action=%s' % osaction ])
 
 		if environment:
-			self.command('set.host.environment', [ host, "environment=%s" % environment ])
+			self.command('set.host.environment', 
+				     [ host, "environment=%s" % environment ])
 			
 
 	def run(self, params, args):
