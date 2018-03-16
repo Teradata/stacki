@@ -11,6 +11,7 @@ ENVIRONMENT = 'pytest'
 
 
 def setup_module(module):
+	Call('remove host e:%s' % ENVIRONMENT, stderr=False)
 	Call('add environment %s' % ENVIRONMENT)
 			
 def teardown_module(module):
@@ -49,19 +50,24 @@ def test_scale():
 
 	for size in [ 10, 20, 30, 40, 100, 1000 ]:
 		print('size = %d' % size)
+
 		setup_hosts(size)
+
 		t0 = time.time()
-		Call('list host')
+		rows = Call('list host e:%s' % ENVIRONMENT)
 		t = (time.time() - t0)
 		print('list host'.ljust(32), '%.3fs' % t)
+
+		assert rows[0]['host'] # grab the first hostname
+		t0 = time.time()
+		Call('list host profile', [ rows[0]['host'] ])
+		t = (time.time() - t0)
+		print('list host profile'.ljust(32), '%.3fs' % t)
+
 		teardown_hosts()
 
 
-
-#	t0 = time.time()
-#	Call('list host profile', [ 'backend-1000-0' ])
-#	t1 = time.time()
-#	print('list host profile (%.3fs)' % (t1 - t0))
+		
 	
 
 

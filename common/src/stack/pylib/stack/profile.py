@@ -634,6 +634,8 @@ class Pass1NodeHandler(NodeHandler):
 		if not self.doEval or not self.rcl:
 			return
 		result = self.rcl.command(self.rclCommand, self.rclArgs)
+		if not result: # do not return None
+			result = ''
 		self.xml.append(result)
 		self.rclArgs	= []
 		self.rclCommand = None
@@ -811,6 +813,9 @@ class Pass1NodeHandler(NodeHandler):
 			self.xml.append(saxutils.escape(s))
 			
 	def getXML(self):
+#		print('getXML:', self.filename)
+#		print(self.xml)
+#		print(self.getXMLHeader())
 		return self.getXMLHeader() + ''.join(self.xml)
 
 

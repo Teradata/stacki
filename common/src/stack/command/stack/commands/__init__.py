@@ -65,7 +65,7 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		Log(message, level)
 		sys.__stderr__.write('%s\n' % m)
 		
-
+Debug('__init__:commands')
 
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
@@ -1194,8 +1194,9 @@ class DatabaseConnection:
 	this object (self.db).
 	"""
 
-	def __init__(self, db):
+	cache   = {}
 
+	def __init__(self, db, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
 		if db:
@@ -1205,16 +1206,16 @@ class DatabaseConnection:
 			self.database = None
 			self.link     = None
 
-		# Optional envinorment variable STACKCACHE can be used
-		# to disable database caching.	Default is to cache.
+		# Setup the global cache, new DatabaseConnections will all use
+		# this cache. The envinorment variable STACKCACHE can be used
+		# to override the optional CACHING arg.
+		#
+		# Note the cache is shared but the decision to cache is not.
 		
-		caching = os.environ.get('STACKCACHE')
-		if caching:
-			caching = str2bool(caching)
+		if os.environ.get('STACKCACHE'):
+			self.caching = str2bool(os.environ.get('STACKCACHE'))
 		else:
-			caching = True
-		self.cache   = {}
-		self.caching = caching
+			self.caching = caching
 
 
 	def enableCache(self):
@@ -1225,7 +1226,8 @@ class DatabaseConnection:
 		self.clearCache()
 
 	def clearCache(self):
-		self.cache = {}
+		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
+		DatabaseConnection.cache = {}
 
 	def select(self, command):
 		if not self.link:
@@ -1238,8 +1240,9 @@ class DatabaseConnection:
 		k = m.hexdigest()
 
 #		 print 'select', k, command
-		if k in self.cache:
-			rows = self.cache[k]
+		if k in DatabaseConnection.cache:
+			Debug('select %s' % k)
+			rows = DatabaseConnection.cache[k]
 #			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
 		else:
 			try:
@@ -1251,7 +1254,7 @@ class DatabaseConnection:
 				rows = []
 				
 			if self.caching:
-				self.cache[k] = rows
+				DatabaseConnection.cache[k] = rows
 
 		return rows
 
@@ -1259,7 +1262,7 @@ class DatabaseConnection:
 	def execute(self, command):
 		command = command.strip()
 
-		if command.find('select') == -1:
+		if command.find('select') != 0:
 			self.clearCache()
 						
 		if self.link:
@@ -1470,8 +1473,7 @@ class DatabaseConnection:
 	def getNodeName(self, hostname, subnet=None):
 
 		if not subnet:
-			rows = self.select("""name from nodes
-				where name like '%s'""" % hostname)
+			rows = self.select("name FROM nodes where name like '%s'" % hostname)
 			if rows:
 				(hostname, ) = rows[0]
 			return hostname
@@ -1717,13 +1719,14 @@ class Command:
 	"""
 
 	MustBeRoot = 1
-	
-	def __init__(self, database, debug=False):
+
+	def __init__(self, database, *, debug=None):
 		"""Creates a DatabaseConnection for the StackCommand to use.
 		This is called for all commands, including those that do not
 		require a database connection."""
 
-		stack.commands._debug = debug
+		if debug is not None:
+			stack.commands._debug = debug
 
 		self.db = DatabaseConnection(database)
 

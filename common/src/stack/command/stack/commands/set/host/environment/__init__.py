@@ -33,6 +33,8 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 		(environment, ) = self.fillParams([
 			('environment', None, True)
 			])
+
+		print('set host environment', environment)
 		
 		if not len(args):
 			raise ArgRequired(self, 'host')
