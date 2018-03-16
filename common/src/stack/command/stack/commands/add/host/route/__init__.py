@@ -11,7 +11,6 @@
 # @rocks@
 
 import stack.commands
-import socket
 import subprocess
 from stack.exception import CommandError
 
