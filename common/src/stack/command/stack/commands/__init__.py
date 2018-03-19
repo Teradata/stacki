@@ -153,7 +153,7 @@ class BoxArgumentProcessor:
 			for (boxName, ) in self.db.select("name from boxes where name like '%s'" % arg):
 				found = True
 				boxes.append(boxName)
-			if not found and arg != '%s':
+			if not found and arg != '%':
 				raise CommandError(self, 'unknown box "%s"' % arg)
 
 		return boxes
