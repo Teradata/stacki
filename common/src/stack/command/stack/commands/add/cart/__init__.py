@@ -49,7 +49,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		node.close()
 
 	# Call the sevice ludicrous-cleaner
-	def clean_ludicrous_packages():
+	def clean_ludicrous_packages(self):
 		_command = 'systemctl start ludicrous-cleaner'
 		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
@@ -131,4 +131,4 @@ class Command(stack.commands.CartArgumentProcessor,
 				except:
 					pass
 		# Clear the old packages
-		clean_ludicrous_packages()
+		self.clean_ludicrous_packages()
