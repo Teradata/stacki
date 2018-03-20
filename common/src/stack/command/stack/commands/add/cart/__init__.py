@@ -9,6 +9,7 @@ import grp
 import stat
 import stack.file
 import stack.commands
+import subprocess
 from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
@@ -46,6 +47,11 @@ class Command(stack.commands.CartArgumentProcessor,
 		node.write('</stack:script>\n\n')
 		node.write('</stack:stack>\n')
 		node.close()
+
+	# Call the sevice ludicrous-cleaner
+	def clean_ludicrous_packages():
+		_command = 'systemctl start ludicrous-cleaner'
+		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
 
 	def run(self, params, args):
@@ -124,3 +130,5 @@ class Command(stack.commands.CartArgumentProcessor,
 					os.chmod(filepath, perms)
 				except:
 					pass
+		# Clear the old packages
+		clean_ludicrous_packages()

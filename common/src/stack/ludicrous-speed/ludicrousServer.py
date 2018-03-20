@@ -186,6 +186,11 @@ def peerdone():
 		
 	return jsonify(res)
 
+@app.route('/status', methods=['GET'])
+def api_status():
+	res = {}
+	res['status'] = "good"
+	return jsonify(res)
 
 @app.route('/purge', methods=['DELETE'])
 def purge_packages():

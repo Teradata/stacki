@@ -143,6 +143,11 @@ class Command(stack.commands.add.command):
 				('%s', '%s', '%s', '%s', '%s')
 				""" % (name, version, release, arch, OS))
 
+	# Call the sevice ludicrous-cleaner
+	def clean_ludicrous_packages(self):
+		_command = 'systemctl start ludicrous-cleaner'
+		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 
 	def run(self, params, args):
 		(clean, dir, updatedb, dryrun) = self.fillParams([
@@ -227,3 +232,6 @@ class Command(stack.commands.add.command):
 				self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
 
 		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
+
+		# Clear the old packages
+		self.clean_ludicrous_packages()
