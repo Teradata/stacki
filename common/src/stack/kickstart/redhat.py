@@ -7,10 +7,9 @@
 # @copyright@
 
 
-from __future__ import print_function
-import os
 import sys
 import stack.api
+import subprocess
 import profile
 
 
@@ -30,11 +29,6 @@ class Profile(profile.ProfileBase):
 
 	def main(self, client):
 
-		report = []
-		cmd = '/opt/stack/bin/stack list host xml %s' % client.addr
-		for line in os.popen(cmd).readlines():
-			report.append(line[:-1])
-
 		#
 		# get the avalanche attributes
 		#
@@ -49,20 +43,30 @@ class Profile(profile.ProfileBase):
 				attrs[dict['attr']] = dict['value'] 
 
 		if 'trackers' not in attrs:
-			attrs['trackers'] = attrs['Kickstart_PrivateKickstartHost']
+			attrs['trackers']   = attrs['Kickstart_PrivateKickstartHost']
 		if 'pkgservers' not in attrs:
 			attrs['pkgservers'] = attrs['Kickstart_PrivateKickstartHost']
 
-		#
-		# Done
-		#
 
-		if report:
-			out = '\n'.join(report)
-			print('Content-type: application/octet-stream')
-			print('Content-length: %d' % (len(out)))
-			print('X-Avalanche-Trackers: %s' % (attrs['trackers']))
-			print('X-Avalanche-Pkg-Servers: %s' % (attrs['pkgservers']))
-			print('')
-			print(out)
+		p = subprocess.run(['/opt/stack/bin/stack', 'list', 'host', 'xml', client.addr ],
+				   stdout=subprocess.PIPE,
+				   stderr=subprocess.PIPE)
+		rc  = p.returncode
+		doc = [ ]
+
+		if rc == 0:
+			doc.append('Content-type: application/octet-stream')
+			doc.append('Content-length: %d' % len(p.stdout))
+			doc.append('X-Avalanche-Trackers: %s' % (attrs['trackers']))
+			doc.append('X-Avalanche-Pkg-Servers: %s' % (attrs['pkgservers']))
+			doc.append('')
+			doc.append(p.stdout.decode())
+		else:
+			doc.append('Content-type: text/html')
+			doc.append('Status: 500 Server Error')
+			doc.append('Retry-After: 60')
+			doc.append('')
+			doc.append(p.stderr.decode())
+		
+		print('\n'.join(doc))
 		
