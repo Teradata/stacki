@@ -26,6 +26,7 @@ class command(stack.commands.HostArgumentProcessor,
 		#       named service: ssh
 		#       specific port: 8069
 		#       port range: 0:1024
+		#	comma-separated combination of the above
 		#
 		if service == 'all':
 			#
@@ -33,27 +34,29 @@ class command(stack.commands.HostArgumentProcessor,
 			#
 			return
 
-		if service[0] in string.digits:
-			#
-			# if the first character is a number, then assume
-			# this is a port or port range:
-			#
-			ports = service.split(':')
-			if len(ports) > 2:
-				msg = 'port range "%s" is invalid. ' % service
-				msg += 'it must be "integer:integer"'
-				raise CommandError(self, msg)
+		for s in service.split(','):
 
-			for a in ports:
-				try:
-					int(a)
-				except:
-					msg = 'port specification "%s" ' % \
-						service
-					msg += 'is invalid. '
-					msg += 'it must be "integer" or '
-					msg += '"integer:integer"'
+			if s[0] in string.digits:
+				#
+				# if the first character is a number, then assume
+				# this is a port or port range:
+				#
+				ports = s.split(':')
+				if len(ports) > 2:
+					msg = 'port range "%s" is invalid. ' % s
+					msg += 'it must be "integer:integer"'
 					raise CommandError(self, msg)
+
+				for a in ports:
+					try:
+						int(a)
+					except:
+						msg = 'port specification "%s" ' % \
+							s
+						msg += 'is invalid. '
+						msg += 'it must be "integer" or '
+						msg += '"integer:integer"'
+						raise CommandError(self, msg)
 				
 		#
 		# if we made it here, then the service definition looks good
