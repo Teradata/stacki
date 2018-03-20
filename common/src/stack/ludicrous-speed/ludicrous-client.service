@@ -1,5 +1,5 @@
 [Unit]
-Description=Package tracking client
+Description=Ludicrous Speed Downloads Client
 After=syslog.target
 
 [Service]

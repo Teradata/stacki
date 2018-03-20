@@ -7,7 +7,7 @@
 -foundation-py-pycairo
 -foundation-py-wxPython
 -foundation-redis
--sc-im
+-foundation-sc-im
 -stack-admin
 -stack-config-server
 -stack-ekv

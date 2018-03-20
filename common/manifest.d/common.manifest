@@ -9,10 +9,10 @@ foundation-newt
 foundation-python
 foundation-rcs
 foundation-redis
+foundation-sc-im
 foundation-stream
 foundation-zeromq
 ludicrous-speed
-sc-im
 stack-admin
 stack-aws-client
 stack-aws-server

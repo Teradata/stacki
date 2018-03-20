@@ -10,6 +10,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:package>stack-kickstart</stack:package>
 
+<stack:script stack:stage="install-post">
+/opt/stack/bin/stack set attr attr=install.confirm value=false
+/opt/stack/bin/stack set attr attr=install.final_reboot value=false
+</stack:script>
 
 <stack:script stack:stage="install-post">
 
