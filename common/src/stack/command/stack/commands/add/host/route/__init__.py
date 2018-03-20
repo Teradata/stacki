@@ -31,6 +31,11 @@ class Command(stack.commands.add.host.command):
 	Network or device gateway
 	</param>
 
+	<param type='string' name='interface'>
+	The interface to send the bits over. Useful if 
+	you want to tag a packet.
+	</param>
+
 	<param type='string' name='syncnow'>
 	Add route to the routing table immediately
 	</param>
@@ -39,6 +44,13 @@ class Command(stack.commands.add.host.command):
 	Specifies the netmask for a network route.  For a host route
 	this is not required and assumed to be 255.255.255.255
 	</param>
+
+	<example cmd="add host route localhost address=10.0.0.2 gateway=10.0.0.1 interface=eth1.2 syncnow=true">
+	Add a host based route on the frontend to address 10.0.0.2 with the gateway 10.0.0.1
+	through interface eth1.2. This will tag the packet with the vlan ID of 2.
+	The syncnow flag being set to true will also add it to the live routing table so no network restart
+	is needed.
+	</example>
 	"""
 
 	def run(self, params, args):
