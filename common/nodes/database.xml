@@ -13,7 +13,7 @@
         </stack:rocks>
 
 	<stack:package>stack-sql</stack:package>
-	<stack:package>foundation-mariadb</stack:package>
+	<stack:package>mariadb</stack:package>
 
 
 <stack:script stack:stage="install-post">
@@ -34,18 +34,14 @@
 	Also setup the correct directories and their
 	permissions for running the database
 -->
-mkdir -p /var/opt/stack/mysql
+mkdir -p /var/run/mysql
 
 groupadd -g 403 stackdb
-useradd -u 403 -g stackdb -d /var/opt/stack/mysql -m -s /bin/false stackdb
+useradd -u 403 -g stackdb -d /var/run/mysql -m -s /bin/false stackdb
 
-chgrp -R stackdb /var/opt/stack/mysql
-chmod -R g+rwx   /var/opt/stack/mysql
-chmod a+rx /var/opt/stack/mysql
-
-<stack:file stack:name="/etc/ld.so.conf.d/foundation-mariadb.conf" stack:perms="0640">
-/opt/stack/lib64
-</stack:file>
+chgrp -R stackdb /var/run/mysql
+chmod -R g+rwx   /var/run/mysql
+chmod a+rx /var/run/mysql
 
 if [ -f /usr/sbin/ldconfig ]
 then
@@ -55,35 +51,80 @@ then
 	/sbin/ldconfig
 fi
 
+
+<stack:file stack:name="/etc/systemd/system/mysql">
+
+<![CDATA[
+[Unit]
+Description=MariaDB database server
+After=network.target
+After=syslog.target
+[Install]
+WantedBy=multi-user.target
+Alias=mysql.service
+Alias=mysqld.service
+[Service]
+Type=notify
+PrivateNetwork=false
+Environment="MYSQLD_OPTS=--defaults-file=/etc/my.cnf.d/server.cnf --datadir=/var/run/mysql --user=stackdb"
+User=stackdb
+Group=stackdb
+CapabilityBoundingSet=CAP_IPC_LOCK
+ProtectSystem=full
+PrivateDevices=true
+ProtectHome=true
+PermissionsStartOnly=true
+@SYSTEMD_EXECSTARTPRE@
+ExecStartPre=/bin/sh -c "systemctl unset-environment _WSREP_START_POSITION"
+ExecStartPre=/bin/sh -c "[ ! -e @bindir@/galera_recovery ] && VAR= || \
+ VAR=`@bindir@/galera_recovery`; [ $? -eq 0 ] \
+ && systemctl set-environment _WSREP_START_POSITION=$VAR || exit 1"
+ExecStart=@sbindir@/mysqld $MYSQLD_OPTS $_WSREP_NEW_CLUSTER $_WSREP_START_POSITION
+@SYSTEMD_EXECSTARTPOST@
+ExecStartPost=/bin/sh -c "systemctl unset-environment _WSREP_START_POSITION"
+KillMode=process
+KillSignal=SIGTERM
+SendSIGKILL=no
+Restart=on-abort
+RestartSec=5s
+UMask=007
+PrivateTmp=false
+LimitNOFILE=16364
+
+
+]]>
+</stack:file>
+
+
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/opt/stack/etc/root.my.cnf" stack:perms="0400"
+<stack:file stack:name="/etc/root.my.cnf" stack:perms="0400"
 	    stack:owner="root:root" stack:vars="expanded">
 [client]
 user		= root
-socket		= /var/opt/stack/mysql/mysql.sock
+socket		= /var/run/mysql/mysql.sock
 password	= $root_pw
 </stack:file>
 
-<stack:file stack:name="/opt/stack/etc/my.cnf.d/server.cnf" stack:perms="0400"
+<stack:file stack:name="/etc/my.cnf.d/server.cnf" stack:perms="0400"
 	    stack:owner="stackdb:stackdb">
 [mysqld]
 user		= stackdb
 port		= 40000
-socket		= /var/opt/stack/mysql/mysql.sock
-datadir		= /var/opt/stack/mysql
+socket		= /var/run/mysql/mysql.sock
+datadir		= /var/run/mysql
 max_allowed_packet = 1024M
 </stack:file>
 
 
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/opt/stack/etc/my.cnf"
+<stack:file stack:name="/etc/my.cnf"
 	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
 port		= 40000
-socket		= /var/opt/stack/mysql/mysql.sock
+socket		= /var/run/mysql/mysql.sock
 password	= $apache_pw
 </stack:file>
 
@@ -91,28 +132,28 @@ password	= $apache_pw
 	Setup MariaDB to startup at boot
 	and start database
 -->
-/opt/stack/sbin/mysql-install-db
+/usr/bin/mysql-install-db
 
-/usr/bin/systemctl enable mariadb
-/usr/bin/systemctl start mariadb
+/usr/bin/systemctl enable mysql
+/usr/bin/systemctl start mysql
 
-export MYSQLD_OPTS="--defaults-file=/opt/stack/etc/my.cnf.d/server.cnf \
-	--basedir=/opt/stack --datadir=/var/opt/stack/mysql \
+export MYSQLD_OPTS="--defaults-file=/etc/my.cnf.d/server.cnf \
+	--datadir=/var/run/mysql \
 	--user=stackdb"
 <!-- may have to manually start the database -->
-/opt/stack/bin/mysqladmin -s ping > /dev/null
+/usr/bin/mysqladmin -s ping > /dev/null
 if [ $? -ne 0 ] ; then
-	nohup /opt/stack/sbin/mysqld ${MYSQLD_OPTS} &gt;&gt; /root/mysqld.log 2&gt;&amp;1 &lt; /dev/null &amp;
+	nohup /usr/sbin/mysqld ${MYSQLD_OPTS} &gt;&gt; /root/mysqld.log 2&gt;&amp;1 &lt; /dev/null &amp;
 fi
 
 <!--
 	Make sure that the database is
 	up and running
 -->
-/opt/stack/bin/mysqladmin -s ping > /dev/null
+/usr/bin/mysqladmin -s ping > /dev/null
 while [ $? -ne 0 ]; do
         sleep 1
-        /opt/stack/bin/mysqladmin -s ping > /dev/null
+        /usr/bin/mysqladmin -s ping > /dev/null
 done
 </stack:script>
 
@@ -138,7 +179,7 @@ def get_pass_from_conf(f):
 	
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd='',
-	unix_socket='/var/opt/stack/mysql/mysql.sock',
+	unix_socket='/var/run/mysql/mysql.sock',
 	autocommit=True)
 
 try:
@@ -147,7 +188,7 @@ except:
 	sys.exit(-1)
 
 # Read the root database password from root.my.cnf
-root_pass = get_pass_from_conf('/opt/stack/etc/root.my.cnf')
+root_pass = get_pass_from_conf('/etc/root.my.cnf')
 cmd_set = []
 
 # Password Access for root
@@ -156,7 +197,7 @@ cmd_set.append('set password for "root"@"127.0.0.1"=PASSWORD("%s")' % root_pass)
 cmd_set.append('set password for "root"@"&hostname;"=PASSWORD("%s")' % root_pass)
 
 # Read the apache db password from my.cnf
-apache_pass = get_pass_from_conf('/opt/stack/etc/my.cnf')
+apache_pass = get_pass_from_conf('/etc/my.cnf')
 
 # Password access for apache
 cmd_set.append('create user "apache"@"localhost" identified by "%s"' % apache_pass)

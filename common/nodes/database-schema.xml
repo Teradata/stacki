@@ -399,10 +399,10 @@ CREATE TABLE storage_partition (
 
 </stack:file>
 
-/opt/stack/bin/mysqladmin --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf \
 	--user=root create cluster
 
-/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
 	--user=root cluster &lt; /tmp/tables.sql
 
 
@@ -414,7 +414,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
 </stack:file>
 
-/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
 	--user=root cluster &lt; /var/db/grants.sql
 
 
@@ -425,10 +425,10 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 -->
 <stack:file stack:name="/var/db/restore-stacki-database.sh" stack:perms="0400">#!/bin/sh
 
-/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
 	--user=root cluster &lt; /var/db/mysql-backup-cluster
 
-/opt/stack/bin/mysql --defaults-extra-file=/opt/stack/etc/root.my.cnf \
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
 	--user=root cluster &lt; /var/db/grants.sql
 
 /opt/stack/bin/stack sync config

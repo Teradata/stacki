@@ -16,7 +16,7 @@ import pwd, grp
 import pymysql
 
 # Get root credentials
-conf_file = open('/opt/stack/etc/root.my.cnf')
+conf_file = open('/etc/root.my.cnf')
 for line in conf_file.readlines():
 	if line.startswith('password'):
 		root_pass = line.split('=')[1].strip()
@@ -25,7 +25,7 @@ conf_file.close()
 
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd=root_pass,
-	unix_socket='/var/opt/stack/mysql/mysql.sock',
+	unix_socket='/var/run/mysql/mysql.sock',
 	autocommit=True)
 
 db = d.cursor()
@@ -45,7 +45,7 @@ f = open(django_conf_file, 'w+')
 f.write("""[client]
 user		= django
 port		= 40000
-socket		= /var/opt/stack/mysql/mysql.sock
+socket		= /var/run/mysql/mysql.sock
 password	= %s
 """ % django_pass)
 # Set owner and group to root:apache

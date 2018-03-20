@@ -46,7 +46,7 @@ syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 passwd = ''
 
 try:
-	file = open('/opt/stack/etc/my.cnf', 'r')
+	file = open('/etc/my.cnf', 'r')
 	for line in file.readlines():
 		if line.startswith('password'):
 			passwd = line.split('=')[1].strip()
@@ -73,12 +73,12 @@ try:
 	# Connect over UNIX socket if it exists, otherwise go over the
 	# network.
 
-	if os.path.exists('/var/opt/stack/mysql/mysql.sock'):
+	if os.path.exists('/var/run/mysql/mysql.sock'):
 		Database = pymysql.connect(db='cluster',
 				host='localhost',
 				user=username,
 				passwd='%s' % passwd,
-				unix_socket='/var/opt/stack/mysql/mysql.sock',
+				unix_socket='/var/run/mysql/mysql.sock',
 				autocommit=True)
 	else:
 		Database = pymysql.connect(db='cluster',

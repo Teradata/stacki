@@ -124,7 +124,7 @@ class Application(stack.app.Application):
 		if len(rval) > 0:
 			return rval
 		try:
-			file = open('/opt/stack/etc/my.cnf', 'r')
+			file = open('/etc/my.cnf', 'r')
 			for line in file.readlines():
 				l = line.split('=')
 				if len(l) > 1 and l[0].strip() == "password" :
@@ -176,7 +176,7 @@ class Application(stack.app.Application):
 					    user='%s' % self.getUsername(),
 					    db='%s' % self.getDatabase(),
 					    passwd='%s' % self.getPassword(),
-					    unix_socket='/var/opt/stack/mysql/mysql.sock',
+					    unix_socket='/var/run/mysql/mysql.sock',
 					    autocommit=True)
 
 			# This is the database cursor for the rocks command line interface

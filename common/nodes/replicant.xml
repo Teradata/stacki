@@ -108,7 +108,7 @@ for o in stack.api.Call('list.host', [ 'a:backend' ]):
 <!-- for some reason, a rouge mysqld is running on first boot. kill it, then restart mysqld -->
 
 killall -9 mysqld
-systemctl restart mariadb
+systemctl restart mysql
 
 </stack:script>
 

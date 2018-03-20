@@ -310,7 +310,7 @@ def _get_db_conn_(admin=False):
 	if admin == True:
 		username = 'apache'
 		# Get Cluster username and password
-		cluster_conf = open("/opt/stack/etc/my.cnf", 'r')
+		cluster_conf = open("/etc/my.cnf", 'r')
 		password = ''
 		for line in cluster_conf:
 			l = line.split("=")
@@ -324,7 +324,7 @@ def _get_db_conn_(admin=False):
 	link = pymysql.connect(
 		user = username,
 		passwd = password,
-		unix_socket='/var/opt/stack/mysql/mysql.sock',
+		unix_socket='/var/run/mysql/mysql.sock',
 		db = 'cluster', autocommit = True)
 	return link
 
