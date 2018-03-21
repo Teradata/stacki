@@ -40,6 +40,7 @@ class Command(stack.commands.list.host.command):
 
 		hosts = self.getHostnames(args)
 		membership = {}
+
 		for host in hosts:
 			membership[host] = []
 
@@ -50,6 +51,8 @@ class Command(stack.commands.list.host.command):
 			n.id = m.nodeid and g.id = m.groupid
 			order by g.name
 			"""):
+			if hostName not in membership:
+				membership[hostName] = []
 			membership[hostName].append(groupName)
 
 		if groups:
