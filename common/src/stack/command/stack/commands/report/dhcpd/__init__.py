@@ -96,8 +96,11 @@ class Command(stack.commands.HostArgumentProcessor,
 			"""):
 			data[row[0]].append(row[1:])
 
+		kickstartable = { }
+		for row in self.call('list.host.attr', [ 'attr=kickstartable' ]):
+			kickstartable[row['host']] = self.str2bool(row['attr'])
+
 		for name in data.keys():
-			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
 			mac = None
 			ip  = None
 			dev = None
@@ -126,7 +129,7 @@ class Command(stack.commands.HostArgumentProcessor,
 					self.addOutput('', '\thardware ethernet\t%s;' % mac)
 					self.addOutput('', '\tfixed-address\t\t%s;' % ip)
 
-					if kickstartable:
+					if kickstartable[name]:
 
 						self.addOutput('', filename)
 						server = servers.get(netname)

@@ -36,7 +36,7 @@ from stack.exception import CommandError, ParamRequired
 from stack.bool import str2bool, bool2str
 
 _logPrefix = ''
-_debug     = False
+_debug	   = False
 
 
 
@@ -1000,9 +1000,9 @@ class DatabaseConnection:
 	specific methods are added.  All StackCommands own an instance of
 	this object (self.db).
 	"""
+	cache   = {}
 
-	def __init__(self, db):
-
+	def __init__(self, db, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
 		if db:
@@ -1012,16 +1012,16 @@ class DatabaseConnection:
 			self.database = None
 			self.link     = None
 
-		# Optional envinorment variable STACKCACHE can be used
-		# to disable database caching.	Default is to cache.
-		
-		caching = os.environ.get('STACKCACHE')
-		if caching:
-			caching = str2bool(caching)
+		# Setup the global cache, new DatabaseConnections will all use
+		# this cache. The envinorment variable STACKCACHE can be used
+		# to override the optional CACHING arg.
+		#
+		# Note the cache is shared but the decision to cache is not.
+
+		if os.environ.get('STACKCACHE'):
+			self.caching = str2bool(os.environ.get('STACKCACHE'))
 		else:
-			caching = True
-		self.cache   = {}
-		self.caching = caching
+			self.caching = caching
 
 
 	def enableCache(self):
@@ -1032,7 +1032,8 @@ class DatabaseConnection:
 		self.clearCache()
 
 	def clearCache(self):
-		self.cache = {}
+		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
+		DatabaseConnection.cache = {}
 
 	def select(self, command):
 		if not self.link:
@@ -1045,8 +1046,9 @@ class DatabaseConnection:
 		k = m.hexdigest()
 
 #		 print 'select', k, command
-		if k in self.cache:
-			rows = self.cache[k]
+		if k in DatabaseConnection.cache:
+			Debug('select %s' % k)
+			rows = DatabaseConnection.cache[k]
 #			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
 		else:
 			try:
@@ -1058,7 +1060,7 @@ class DatabaseConnection:
 				rows = []
 				
 			if self.caching:
-				self.cache[k] = rows
+				DatabaseConnection.cache[k] = rows
 
 		return rows
 
@@ -1066,7 +1068,7 @@ class DatabaseConnection:
 	def execute(self, command):
 		command = command.strip()
 
-		if command.find('select') == -1:
+		if command.find('select') != 0:
 			self.clearCache()
 						
 		if self.link:
@@ -1357,7 +1359,7 @@ class DatabaseConnection:
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\
 						'nt.node=n.id and '		+\
-						's.zone="%s" and ' % domain     +\
+						's.zone="%s" and ' % domain	+\
 						'(nt.name="%s" or n.name="%s")'	 \
 						% (name, name)
 
@@ -1489,12 +1491,13 @@ class Command:
 
 	MustBeRoot = 1
 	
-	def __init__(self, database, debug=False):
+	def __init__(self, database, *, debug=None):
 		"""Creates a DatabaseConnection for the StackCommand to use.
 		This is called for all commands, including those that do not
 		require a database connection."""
 
-		stack.commands._debug = debug
+		if debug is not None:
+			stack.commands._debug = debug
 
 		self.db = DatabaseConnection(database)
 

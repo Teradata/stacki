@@ -37,5 +37,6 @@ class Plugin(stack.commands.Plugin):
 		return 'bootflags'
 
 	def run(self, hosts):
+		return
 		self.owner.command('remove.host.bootflags', hosts )
 		

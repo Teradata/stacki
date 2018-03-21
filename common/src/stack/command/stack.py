@@ -150,7 +150,7 @@ def run_command(args, debug=False):
 		return -1
 
 	try:
-		command = getattr(module, 'Command')(Database, debug)
+		command = getattr(module, 'Command')(Database, debug=debug)
 #		 t0 = time.time()
 		rc = command.runWrapper(name, args[i:])
 #		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
