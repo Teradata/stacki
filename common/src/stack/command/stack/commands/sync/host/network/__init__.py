@@ -12,6 +12,9 @@
 
 import os
 import stack.commands
+import tempfile
+import subprocess
+import io
 from stack.commands.sync.host import Parallel
 from stack.commands.sync.host import timeout
 
@@ -37,41 +40,33 @@ class Command(stack.commands.sync.host.command):
 		restartit = self.str2bool(restart)
 
 		hosts = self.getHostnames(args, managed_only=1)
+		run_hosts = self.getRunHosts(hosts)
 
 		me = self.db.getHostname('localhost')
 
 		threads = []
-		for host in hosts:
 
-			attrs = {}
-			for row in self.call('list.host.attr', [ host ]):
-				attrs[row['attr']] = row['value']
+		for h in run_hosts:
+			host = h['host']
+			hostname = h['name']
 
-			cmd = '/opt/stack/bin/stack report host interface '
-			cmd += '%s | ' % host
-			cmd += '/opt/stack/bin/stack report script '
-			cmd += 'attrs="%s" | ' % attrs
+			c = self.command('report.host.interface',[host]) + \
+				self.command('report.host.network',[host]) + \
+				self.command('report.host.route',[host])
+
+			s = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
+				stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			o, e = s.communicate(input=c.encode())
+			
+			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
+			cmd += '/opt/stack/bin/stack report host network %s && ' % host
+			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
+			cmd += '/opt/stack/bin/stack report script | '
 			if host != me:
-				cmd += 'ssh -T -x %s ' % host
-			cmd += 'bash > /dev/null 2>&1 '
+				cmd += 'ssh -T -x %s ' % hostname
+			cmd += 'bash > /dev/null 2>&1'
 
-			cmd += '; /opt/stack/bin/stack report host network '
-			cmd += '%s | ' % host
-			cmd += '/opt/stack/bin/stack report script '
-			cmd += 'attrs="%s" | ' % attrs
-			if host != me:
-				cmd += 'ssh -T -x %s ' % host
-			cmd += 'bash > /dev/null 2>&1 '
-
-			cmd += '; /opt/stack/bin/stack report host route '
-			cmd += '%s | ' % host
-			cmd += '/opt/stack/bin/stack report script '
-			cmd += 'attrs="%s" | ' % attrs
-			if host != me:
-				cmd += 'ssh -T -x %s ' % host
-			cmd += 'bash > /dev/null 2>&1 '
-
-			p = Parallel(cmd)
+			p = Parallel(cmd, stdin=o.decode())
 			threads.append(p)
 			p.start()
 
@@ -92,13 +87,15 @@ class Command(stack.commands.sync.host.command):
 			# restart the network
 			#
 			threads = []
-			for host in hosts:
+			for h in run_hosts:
+				host = h['host']
+				hostname = h['name']
 				cmd = '/sbin/service network restart '
 				cmd += '> /dev/null 2>&1 ; '
 				cmd += '/sbin/service ipmi restart > '
 				cmd += '/dev/null 2>&1'
 				if host != me:
-					cmd = 'ssh %s "%s"' % (host, cmd)
+					cmd = 'ssh %s "%s"' % (hostname, cmd)
 
 				p = Parallel(cmd)
 				threads.append(p)

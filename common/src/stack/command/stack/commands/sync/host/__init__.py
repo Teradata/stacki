@@ -20,14 +20,46 @@ max_threading = 512
 timeout	= 30
 
 
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.sync.command):
-	pass
+class command(stack.commands.sync.command,
+	stack.commands.HostArgumentProcessor):
+	def getRunHosts(self, hosts):
+		self.mgmt_networks = {}
+		run_hosts = []
+		self.attrs = self.call('list.host.attr',hosts)
+		f = lambda x: x['attr'] == 'stack.network'
+		network_attrs = list(filter(f, self.attrs))
+
+		self.mgmt_networks = {}
+		for host in hosts:
+			g = lambda x: x['host'] == host
+			s = list(filter(g, network_attrs))
+			if len(s):
+				network = s[0]['value']
+				if network not in self.mgmt_networks:
+					self.mgmt_networks[network] = []
+				self.mgmt_networks[network].append(host)
+
+		a = []
+		b = []
+		for net in self.mgmt_networks:
+			h = self.mgmt_networks[net]
+			a.extend(h)
+			b.extend(self.getHostnames(h, subnet=net))
+
+		for host in hosts:
+			if host in a:
+				idx = a.index(host)
+				run_hosts.append({'host':host, 'name':b[idx]})
+			else:
+				run_hosts.append({'host':host, 'name':host})
+
+		return run_hosts
 
 
 class Parallel(threading.Thread):
-	def __init__(self, cmd, out=None):
+	def __init__(self, cmd, out=None, stdin=None):
 		self.cmd = cmd
+		self.stdin = stdin
 		if not out:
 			self.out = {"output": "", "error": "", "rc": 0}
 		else:
@@ -37,14 +69,25 @@ class Parallel(threading.Thread):
 		threading.Thread.__init__(self)
 
 	def run(self):
-		p = subprocess.Popen(self.cmd,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.STDOUT,
-			shell=True)
-		(o, e) = p.communicate()
+		if not self.stdin:
+			p = subprocess.Popen(self.cmd,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				shell=True)
+			(o, e) = p.communicate()
+		else:
+			p = subprocess.Popen(self.cmd,
+				stdin=subprocess.PIPE,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				shell=True)
+			(o, e) = p.communicate(self.stdin.encode())
+		
 		rc = p.wait()
-		self.out['output'] = o
-		self.out['error'] = e
+		if o:
+			self.out['output'] = o.decode()
+		if e:
+			self.out['error'] = e.decode()
 		self.out['rc'] = rc
 
 
