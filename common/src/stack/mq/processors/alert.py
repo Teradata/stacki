@@ -32,10 +32,10 @@ class Processor(stack.mq.processors.ProcessorBase):
 		# Lookup the hostname of the source, if we don't find it
 		# just drop the alert since we don't know about the machine.
 
-		host = self.redis.get('addr:%s:name' % message.getSource())
+		host = self.redis.get('host:%s:name' % message.getSource()).decode()
 		if host:
 			message.setSource(host)
-			self.redis.rpush('alert:%s' % host, message.dumps(channel=False))
+			self.redis.rpush('alert:%s' % host, message.getMessage())
 
 		return None
 

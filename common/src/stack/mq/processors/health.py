@@ -79,13 +79,13 @@ class ProcessorBase(stack.mq.processors.ProcessorBase):
 				self.updateKey('host:%s:addr' % host,	client, 60 * 60)
 				self.updateKey('host:%s:rack' % host,	rack,	60 * 60)
 				self.updateKey('host:%s:rank' % host,	rank,	60 * 60)
+		if host:
+			return { 'name': host,
+				 'addr': client,
+				 'rack': rack,
+				 'rank': rank }
 
-		d = { 'name': host,
-			 'addr': client,
-			 'rack': rack,
-			 'rank': rank }
-
-		return d
+		return None
 
 
 
@@ -101,9 +101,10 @@ class Processor(ProcessorBase):
 	def process(self, msg):
 		keys = self.updateHostKeys(msg.getSource())
 
-		self.updateKey('host:%s:status' % keys['name'], 
-			       msg.getMessage(), 
-			       60 * 2)
+		if keys:
+			self.updateKey('host:%s:status' % keys['name'],
+				       msg.getMessage(),
+				       60 * 2)
 		return None
 
 
