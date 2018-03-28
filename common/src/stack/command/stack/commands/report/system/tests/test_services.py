@@ -11,7 +11,11 @@ def test_apache_enabled_and_running(host):
 	assert apache.is_running
 
 def test_mariadb_enabled_and_running(host):
-	mariadb = host.service('mysql')
+	if os.path.exists('/etc/SuSE-release'):
+		service_name = 'mysql'
+	else:
+		service_name = 'mariadb'
+	mariadb = host.service(service_name)
 	assert mariadb.is_enabled
 	assert mariadb.is_running
 

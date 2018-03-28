@@ -124,7 +124,7 @@ class Application(stack.app.Application):
 		if len(rval) > 0:
 			return rval
 		try:
-			file = open('/etc/my.cnf', 'r')
+			file = open('/etc/apache.my.cnf', 'r')
 			for line in file.readlines():
 				l = line.split('=')
 				if len(l) > 1 and l[0].strip() == "password" :

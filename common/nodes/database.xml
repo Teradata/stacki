@@ -14,9 +14,26 @@
 
 	<stack:package>stack-sql</stack:package>
 	<stack:package>mariadb</stack:package>
+	<stack:package stack:cond="os == 'redhat'">mariadb-server</stack:package>
 
 
 <stack:script stack:stage="install-post">
+
+
+<!--
+	The goal of this file is to get the distribution's stock
+	MariaDB installation to a known common state with as little
+	customization and reliance on a distro's packaged helper scripts
+	as possible.
+
+	Distro's seem to agree to put the mysql data files in /var/lib/mysql
+	But the socketfile dir varies, so we force it into /var/run/mysql
+
+	To make this possible, we start mysql in a controlled mode,
+	get the initial config right, then shut it back down and hand it over
+	to systemd
+-->
+
 
 <!--
 	set the hostname to the private name. this helps the stacki command
@@ -28,74 +45,6 @@
 &Info_FQDN;
 </stack:file>
 
-<!--
-	Add the stackdb user and group to the system.
-	This is the user that will run the Rocks database.
-	Also setup the correct directories and their
-	permissions for running the database
--->
-mkdir -p /var/run/mysql
-
-groupadd -g 403 stackdb
-useradd -u 403 -g stackdb -d /var/run/mysql -m -s /bin/false stackdb
-
-chgrp -R stackdb /var/run/mysql
-chmod -R g+rwx   /var/run/mysql
-chmod a+rx /var/run/mysql
-
-if [ -f /usr/sbin/ldconfig ]
-then
-	/usr/sbin/ldconfig
-elif [ -f /sbin/ldconfig ]
-then
-	/sbin/ldconfig
-fi
-
-
-<stack:file stack:name="/etc/systemd/system/mysql">
-
-<![CDATA[
-[Unit]
-Description=MariaDB database server
-After=network.target
-After=syslog.target
-[Install]
-WantedBy=multi-user.target
-Alias=mysql.service
-Alias=mysqld.service
-[Service]
-Type=notify
-PrivateNetwork=false
-Environment="MYSQLD_OPTS=--defaults-file=/etc/my.cnf.d/server.cnf --datadir=/var/run/mysql --user=stackdb"
-User=stackdb
-Group=stackdb
-CapabilityBoundingSet=CAP_IPC_LOCK
-ProtectSystem=full
-PrivateDevices=true
-ProtectHome=true
-PermissionsStartOnly=true
-@SYSTEMD_EXECSTARTPRE@
-ExecStartPre=/bin/sh -c "systemctl unset-environment _WSREP_START_POSITION"
-ExecStartPre=/bin/sh -c "[ ! -e @bindir@/galera_recovery ] && VAR= || \
- VAR=`@bindir@/galera_recovery`; [ $? -eq 0 ] \
- && systemctl set-environment _WSREP_START_POSITION=$VAR || exit 1"
-ExecStart=@sbindir@/mysqld $MYSQLD_OPTS $_WSREP_NEW_CLUSTER $_WSREP_START_POSITION
-@SYSTEMD_EXECSTARTPOST@
-ExecStartPost=/bin/sh -c "systemctl unset-environment _WSREP_START_POSITION"
-KillMode=process
-KillSignal=SIGTERM
-SendSIGKILL=no
-Restart=on-abort
-RestartSec=5s
-UMask=007
-PrivateTmp=false
-LimitNOFILE=16364
-
-
-]]>
-</stack:file>
-
-
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
 <stack:file stack:name="/etc/root.my.cnf" stack:perms="0400"
@@ -106,108 +55,144 @@ socket		= /var/run/mysql/mysql.sock
 password	= $root_pw
 </stack:file>
 
-<stack:file stack:name="/etc/my.cnf.d/server.cnf" stack:perms="0400"
-	    stack:owner="stackdb:stackdb">
-[mysqld]
-user		= stackdb
-port		= 40000
-socket		= /var/run/mysql/mysql.sock
-datadir		= /var/run/mysql
-max_allowed_packet = 1024M
-</stack:file>
-
+<!-- symlink to root's home dir -->
+ln -s /etc/root.my.cnf /root/.my.cnf
 
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/etc/my.cnf"
+<stack:file stack:name="/etc/apache.my.cnf"
 	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
-port		= 40000
 socket		= /var/run/mysql/mysql.sock
 password	= $apache_pw
 </stack:file>
 
+<!-- this is the config file mysql tools look at by default -->
+<stack:file stack:name="/etc/my.cnf"
+	    stack:owner="root:mysql" stack:perms="0640">
+[mysqld]
+user		= mysql
+socket		= /var/run/mysql/mysql.sock
+max_allowed_packet = 1024M
+
+[client]
+socket		= /var/run/mysql/mysql.sock
+</stack:file>
+
 <!--
-	Setup MariaDB to startup at boot
-	and start database
+	centos needs a new service file to set command line args as well as /var/run/mysql
 -->
-/usr/bin/mysql-install-db
 
-/usr/bin/systemctl enable mysql
-/usr/bin/systemctl start mysql
+<stack:file stack:name="/etc/systemd/system/mariadb.service"
+            stack:owner="root:root" stack:perms="0644"
+            stack:cond="os == 'redhat'">
+.include /usr/lib/systemd/system/mariadb.service
 
-export MYSQLD_OPTS="--defaults-file=/etc/my.cnf.d/server.cnf \
-	--datadir=/var/run/mysql \
-	--user=stackdb"
-<!-- may have to manually start the database -->
-/usr/bin/mysqladmin -s ping > /dev/null
-if [ $? -ne 0 ] ; then
-	nohup /usr/sbin/mysqld ${MYSQLD_OPTS} &gt;&gt; /root/mysqld.log 2&gt;&amp;1 &lt; /dev/null &amp;
+# note: 'defaults-file' must be the first arg here.
+[Service]
+RuntimeDirectory=mysql
+Environment="MYSQLD_OPTS=--defaults-file=/etc/my.cnf --user=mysql --basedir=/usr"
+# weird systemd behavior that requires an empty ExecStart before overwriting ExecStart
+ExecStart=
+ExecStart=/usr/bin/mysqld_safe $MYSQLD_OPTS
+</stack:file>
+
+<!-- we added a systemd file, so reload -->
+systemctl daemon-reload
+
+<!--
+	sql file to nuke default anonymous user inside mysql,
+	set our password on root, nuke some unused tables,
+	set the password for the apache user
+-->
+
+<stack:file stack:name="/root/initial.sql" stack:perms="0400"
+            stack:owner="root:root" stack:vars="expanded">
+UPDATE mysql.user SET Password=PASSWORD('$root_pw') WHERE User='root';
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+</stack:file>
+
+
+wait_for_mysql_up()
+{
+	# wait 5 sec each loop by default
+	WAIT_TIME=${1:-5}
+	echo "Waiting for database to come up"
+	mysqladmin -s ping > /dev/null
+	while [ $? -ne 0 ]; do
+		echo -n '.'
+		sleep $WAIT_TIME
+		mysqladmin -s ping > /dev/null
+	done
+}
+
+<!--
+	Setup the correct directories and their
+	permissions for running the database
+	we nuke this later because systemD wants to own it
+	but need it because the first start of maria is sans systemd
+-->
+
+mkdir -p       /var/run/mysql
+chgrp -R mysql /var/run/mysql
+chmod -R g+rwx /var/run/mysql
+chmod a+rx     /var/run/mysql
+
+<!--
+	install the basic mysql tables,
+	run in mysqld_safe mode to load initial db config `initial.sql`
+	then kill the mysqld_safe daemon before starting the service with systemd
+	note that this doesn't seem to be necessary on SLES, but it shouldn't hurt
+-->
+if [[ ! -z $(which mysql_install_db) ]]
+then
+	mysql_install_db --user=mysql
+	mysqld_safe --skip-grant-tables &amp;
+	MYSQLD_BG_PID=$!
+
+	wait_for_mysql_up
+
+	mysql -sfu root &lt; /root/initial.sql
+	rm -f /root/initial.sql
+
+	<!-- kill the mysqld_safe bg proc, and mysqld if it spawned it -->
+	kill -9 $MYSQLD_BG_PID
+	kill -9 `pidof mysqld`
+
+	<!-- systemd needs to create /var/run/mysql itself now -->
+	rm -rf /var/run/mysql
+else
+	echo "cannot find the mariadb installation command"
 fi
 
 <!--
-	Make sure that the database is
-	up and running
+	Find out what MariaDB is called on this OS,
+	Then set to startup at boot and start database now for initial config
 -->
-/usr/bin/mysqladmin -s ping > /dev/null
-while [ $? -ne 0 ]; do
-        sleep 1
-        /usr/bin/mysqladmin -s ping > /dev/null
-done
-</stack:script>
+MARIA_OR_MYSQL=$(systemctl list-unit-files | grep -e mariadb.service -e mysql.service | head -1 | sed -r 's/.service.*//')
 
-<!-- Access control on the database -->
-<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
-import os
-import sys
-import re
-import string
-import base64
+systemctl enable $MARIA_OR_MYSQL
+systemctl start  $MARIA_OR_MYSQL
 
-import pymysql
+<!--
+	set the password for the apache user, root user at localhost
+-->
 
-def get_pass_from_conf(f):
-	passwd = None
-	conf_file = open(f, 'r')
-	for line in conf_file.readlines():
-		if line.startswith('password'):
-			passwd = line.split('=')[1].strip()
-			break
-	conf_file.close()
-	return passwd
-	
-# Connect to the database
-d = pymysql.connect(user='root', db='mysql', passwd='',
-	unix_socket='/var/run/mysql/mysql.sock',
-	autocommit=True)
+<stack:file stack:name="/root/users.sql" stack:perms="0400"
+            stack:owner="root:root" stack:vars="expanded">
+CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
+CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
+CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";
+CREATE USER "root"@"&hostname;" IDENTIFIED BY "$root_pw";
+</stack:file>
 
-try:
-	db = d.cursor()
-except:
-	sys.exit(-1)
+mysql --defaults-file=/etc/root.my.cnf -sf &lt; /root/users.sql
+rm -f /root/users.sql
 
-# Read the root database password from root.my.cnf
-root_pass = get_pass_from_conf('/etc/root.my.cnf')
-cmd_set = []
-
-# Password Access for root
-cmd_set.append('set password for "root"@"localhost"=PASSWORD("%s")' % root_pass)
-cmd_set.append('set password for "root"@"127.0.0.1"=PASSWORD("%s")' % root_pass)
-cmd_set.append('set password for "root"@"&hostname;"=PASSWORD("%s")' % root_pass)
-
-# Read the apache db password from my.cnf
-apache_pass = get_pass_from_conf('/etc/my.cnf')
-
-# Password access for apache
-cmd_set.append('create user "apache"@"localhost" identified by "%s"' % apache_pass)
-cmd_set.append('create user "apache"@"127.0.0.1" identified by "%s"' % apache_pass)
-cmd_set.append('create user "apache"@"&hostname;" identified by "%s"' % apache_pass)
-
-for cmd in cmd_set:
-	try:
-		db.execute(cmd)
-	except:
-		sys.stderr.write("Could not execute %s\n" % cmd)
 </stack:script>
 </stack:stack>

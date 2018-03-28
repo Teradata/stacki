@@ -46,7 +46,7 @@ syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 passwd = ''
 
 try:
-	file = open('/etc/my.cnf', 'r')
+	file = open('/etc/apache.my.cnf', 'r')
 	for line in file.readlines():
 		if line.startswith('password'):
 			passwd = line.split('=')[1].strip()
