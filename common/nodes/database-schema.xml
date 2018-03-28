@@ -405,6 +405,11 @@ CREATE TABLE storage_partition (
 /usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
 	--user=root cluster &lt; /tmp/tables.sql
 
+<!-- Append the default database -->
+<stack:file stack:mode="append"
+        stack:name="/etc/root.my.cnf">
+database	= cluster
+</stack:file>
 
 <stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
 grant select on cluster.* to ''@'localhost';
