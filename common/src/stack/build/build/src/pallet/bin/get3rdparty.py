@@ -51,7 +51,7 @@ import time
 # authfile_artifactory.json
 # {
 #	"type": "artifactory",
-#	"key:"<apikey>"
+#	"key": "<apikey>"
 # }
 
 def download_url(source, target, curl_args):
