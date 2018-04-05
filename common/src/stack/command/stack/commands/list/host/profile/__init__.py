@@ -86,6 +86,11 @@ class Command(stack.commands.list.host.command):
 	all the known hosts is listed.
 	</arg>
 
+	<param type='boolean' name='hash'>
+	If 'yes', output a hash for this profile on stderr.
+	Default is 'no'.
+	</param>
+
 	<example cmd='list host profile backend-0-0'>
 	Generates a Kickstart profile for backend-0-0.
 	</example>
@@ -100,8 +105,9 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		(profile, chapter) = self.fillParams([
+		(profile, hashit, chapter) = self.fillParams([
 			('profile', 'native'),
+			('hash', 'n'),
 			('chapter', None) ])
 
 		xmlinput  = ''
@@ -139,3 +145,23 @@ class Command(stack.commands.list.host.command):
 			self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		self.endOutput(padChar='')
+
+		if self.str2bool(hashit):
+			import hashlib
+
+			#
+			# remove lines that contain attributes which we know will change after
+			# the host installs
+			#
+			m = hashlib.md5()
+
+			skip = [ 'nukedisks', 'nukecontroller' ]
+			for line in self.getText().split('\n'):
+				if any(s in line for s in skip):
+					continue
+
+				l = line + '\n'
+				m.update(l.encode())
+
+			sys.stderr.write('%s  profile\n' % m.hexdigest())
+
