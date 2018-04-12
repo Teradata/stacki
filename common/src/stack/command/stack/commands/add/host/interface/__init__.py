@@ -56,6 +56,10 @@ class Command(stack.commands.add.host.command):
 	and the interface's gateway becomes the default gateway.
 	</param>
 
+	<param type='string' name='channel'>
+	The channel for an interface.
+	</param>
+
 	<example cmd='add host interface backend-0-0 interface=eth1 ip=192.168.1.2 network=private name=fast-0-0'>
 	Add interface "eth1" to host "backend-0-0" with the given
 	IP address, network assignment, and name.
@@ -66,7 +70,7 @@ class Command(stack.commands.add.host.command):
 
 		hosts = self.getHostnames(args)
 		(interface, mac, network, ip, module, 
-		 name, vlan, default, options, unsafe) = self.fillParams([
+		 name, vlan, default, options, channel, unsafe) = self.fillParams([
 			 ('interface', None),
 			 ('mac',       None),
 			 ('network',   None),
@@ -76,6 +80,7 @@ class Command(stack.commands.add.host.command):
 			 ('vlan',      None),
 			 ('default',   None),
 			 ('options',   None),
+			 ('channel',   None),
 			 ('unsafe',    False)
 			 ])
 
@@ -103,7 +108,7 @@ class Command(stack.commands.add.host.command):
 					raise CommandError(self, 'mac exists')
 
 
-		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default', 'options' ]
+		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default', 'options', 'channel' ]
 
 		# Insert the mac or interface into the database and then use
 		# that to key off of for all the subsequent fields.
@@ -169,5 +174,4 @@ class Command(stack.commands.add.host.command):
 			if key in params:
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
-
 
