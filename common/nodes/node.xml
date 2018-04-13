@@ -1,0 +1,72 @@
+<stack:stack>
+
+<stack:description>
+A node is a machine in the cluster.  Node's are on a private network
+and get DHCP/NIS state from the frontend.
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2018 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:rocks>
+Copyright (c) 2000 - 2010 The Regents of the University of California
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+</stack:rocks>
+
+
+<stack:native stack:cond="os == 'redhat'" stack:lang="kickstart">
+rootpw --iscrypted &Kickstart_PrivateRootPassword;
+</stack:native>
+
+
+<stack:package>stack-config</stack:package>
+
+
+<!-- configure IP forwarding -->
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
+f = open('/etc/sysctl.conf', 'r+')
+output = ''
+
+#
+# strip out any line that has net.ipv4.ip_forward = 1 in it
+#
+for line in f.readlines():
+	if 'net.ipv4.ip_forward' in line:
+		continue
+
+	output = output + line
+
+#
+# add net.ipv4.ip_forward
+#
+output = output + 'net.ipv4.ip_forward = 1\n'
+
+#
+# rewrite /etc/sysctl.conf
+#
+f.truncate()
+f.write(output)
+f.close()
+</stack:script>
+
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
+<stack:file stack:name="/etc/man.config" stack:mode="append">
+MANPATH /opt/stack/man
+MANPATH /opt/stack/share/man
+</stack:file>
+</stack:script>
+
+<stack:script stack:cond="release == 'redhat7' or os == 'sles'" stack:stage="install-post">
+<stack:file stack:name="/etc/man_db.conf" stack:mode="append">
+MANDATORY_MANPATH /opt/stack/man
+MANDATORY_MANPATH /opt/stack/share/man
+</stack:file>
+
+</stack:script>
+
+</stack:stack> 
+

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -43,7 +43,7 @@ class ProcessorBase(stack.mq.processors.ProcessorBase):
 
 	def updateHostKeys(self, client):
 		"""
-		Updates the Redis keys for a given host in the cluster.  
+		Updates the Redis keys for a given host in the cluster.	 
 		If Redis does not know about the host the cluster database is inspected and
 		the keys are created with a one hour timeout.
 		If Redis already contains the keys the timeout is reset.
@@ -75,17 +75,17 @@ class ProcessorBase(stack.mq.processors.ProcessorBase):
 				rank = row['rank']
 
 			if host: 
-				self.updateKey('host:%s:name' % client, host,   60 * 60)
-				self.updateKey('host:%s:addr' % host,   client, 60 * 60)
-				self.updateKey('host:%s:rack' % host,   rack,   60 * 60)
-				self.updateKey('host:%s:rank' % host,   rank,   60 * 60)
+				self.updateKey('host:%s:name' % client, host,	60 * 60)
+				self.updateKey('host:%s:addr' % host,	client, 60 * 60)
+				self.updateKey('host:%s:rack' % host,	rack,	60 * 60)
+				self.updateKey('host:%s:rank' % host,	rank,	60 * 60)
+		if host:
+			return { 'name': host,
+				 'addr': client,
+				 'rack': rack,
+				 'rank': rank }
 
-		d = { 'name': host,
-			 'addr': client,
-			 'rack': rack,
-			 'rank': rank }
-
-		return d
+		return None
 
 
 
@@ -101,9 +101,10 @@ class Processor(ProcessorBase):
 	def process(self, msg):
 		keys = self.updateHostKeys(msg.getSource())
 
-		self.updateKey('host:%s:status' % keys['name'], 
-			       msg.getMessage(), 
-			       60 * 2)
+		if keys:
+			self.updateKey('host:%s:status' % keys['name'],
+				       msg.getMessage(),
+				       60 * 2)
 		return None
 
 

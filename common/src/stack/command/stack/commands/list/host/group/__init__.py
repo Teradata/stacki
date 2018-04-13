@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -40,21 +40,20 @@ class Command(stack.commands.list.host.command):
 
 		hosts = self.getHostnames(args)
 		membership = {}
-		
+
 		for host in hosts:
 			membership[host] = []
-			for row in self.db.select(
-				"""
-				n.name, g.name from
-				groups g, memberships m, nodes n
-				where
-				n.id = m.nodeid and
-				g.id = m.groupid and
-				n.name = '%s'
-				order by g.name
-				""" % host):
-				membership[row[0]].append(row[1])
-				
+
+		for hostName, groupName in self.db.select(
+			"""
+			n.name, g.name from
+			groups g, memberships m, nodes n where
+			n.id = m.nodeid and g.id = m.groupid
+			order by g.name
+			"""):
+			if hostName not in membership:
+				membership[hostName] = []
+			membership[hostName].append(groupName)
 
 		if groups:
 			for host in hosts:

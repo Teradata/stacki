@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -143,6 +143,11 @@ class Command(stack.commands.add.command):
 				('%s', '%s', '%s', '%s', '%s')
 				""" % (name, version, release, arch, OS))
 
+	# Call the sevice ludicrous-cleaner
+	def clean_ludicrous_packages(self):
+		_command = 'systemctl start ludicrous-cleaner'
+		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 
 	def run(self, params, args):
 		(clean, dir, updatedb, dryrun) = self.fillParams([
@@ -171,6 +176,7 @@ class Command(stack.commands.add.command):
 			
 		isolist = []
 		network_pallets = []
+		disk_pallets    = []
 		for arg in args:
 			if arg.startswith(('http', 'ftp')):
 				network_pallets.append(arg)
@@ -178,13 +184,15 @@ class Command(stack.commands.add.command):
 			arg = os.path.join(os.getcwd(), arg)
 			if os.path.exists(arg) and arg.endswith('.iso'):
 				isolist.append(arg)
+			elif os.path.isdir(arg):
+				disk_pallets.append(arg)
 			else:
 				msg = "Cannot find %s or %s is not an ISO image"
 				raise CommandError(self, msg % (arg, arg))
 
 		if self.dryrun:
 			self.beginOutput()
-		if not isolist and not network_pallets:
+		if not isolist and not network_pallets and not disk_pallets:
 			#
 			# no files specified look for a cdrom
 			#
@@ -215,8 +223,15 @@ class Command(stack.commands.add.command):
 				os.chdir(cwd)
 				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
 			
-		elif network_pallets:
+		if network_pallets:
 			for pallet in network_pallets:
 				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
+		
+		if disk_pallets:
+			for pallet in disk_pallets:
+				self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
 
 		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
+
+		# Clear the old packages
+		self.clean_ludicrous_packages()

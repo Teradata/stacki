@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -22,8 +22,8 @@ class Command(stack.commands.list.host.command):
 	Host name of machine
 	</arg>
 	
-	<example cmd='list host route compute-0-0'>
-	List the static routes assigned to compute-0-0.
+	<example cmd='list host route backend-0-0'>
+	List the static routes assigned to backend-0-0.
 	</example>
 	"""
 
@@ -34,12 +34,10 @@ class Command(stack.commands.list.host.command):
 		for host in self.getHostnames(args):
 			routes = self.db.getHostRoutes(host, 1)
 
-			for key in sorted(routes.keys()):		
-				self.addOutput(host, 
-					(key,
-					routes[key][0], 
-					routes[key][1], 
-					routes[key][2]))
+			for network in sorted(routes.keys()):
+				(netmask, gateway, interface, source) = routes[network]
+				self.addOutput(host,
+					(network, netmask, gateway,	source))
 
 		self.endOutput(header=['host', 
 			'network', 'netmask', 'gateway', 'source' ],

@@ -8,7 +8,7 @@
 	</stack:description>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -76,11 +76,16 @@ for pallet in g.rolls:
 <stack:package>redhat-rpm-config</stack:package>
 
 <!-- text-based spreadsheet editor -->
-<stack:package>sc-im</stack:package>
+<stack:package>foundation-sc-im</stack:package>
 
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 
+<!-- stacki switch package -->
+<stack:package>stack-switch</stack:package>
+
+<!-- node discovery feature -->
+<stack:package>stack-discovery</stack:package>
 
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">

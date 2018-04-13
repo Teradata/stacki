@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -26,6 +26,7 @@ class command(stack.commands.HostArgumentProcessor,
 		#       named service: ssh
 		#       specific port: 8069
 		#       port range: 0:1024
+		#	comma-separated combination of the above
 		#
 		if service == 'all':
 			#
@@ -33,27 +34,29 @@ class command(stack.commands.HostArgumentProcessor,
 			#
 			return
 
-		if service[0] in string.digits:
-			#
-			# if the first character is a number, then assume
-			# this is a port or port range:
-			#
-			ports = service.split(':')
-			if len(ports) > 2:
-				msg = 'port range "%s" is invalid. ' % service
-				msg += 'it must be "integer:integer"'
-				raise CommandError(self, msg)
+		for s in service.split(','):
 
-			for a in ports:
-				try:
-					int(a)
-				except:
-					msg = 'port specification "%s" ' % \
-						service
-					msg += 'is invalid. '
-					msg += 'it must be "integer" or '
-					msg += '"integer:integer"'
+			if s[0] in string.digits:
+				#
+				# if the first character is a number, then assume
+				# this is a port or port range:
+				#
+				ports = s.split(':')
+				if len(ports) > 2:
+					msg = 'port range "%s" is invalid. ' % s
+					msg += 'it must be "integer:integer"'
 					raise CommandError(self, msg)
+
+				for a in ports:
+					try:
+						int(a)
+					except:
+						msg = 'port specification "%s" ' % \
+							s
+						msg += 'is invalid. '
+						msg += 'it must be "integer" or '
+						msg += '"integer:integer"'
+						raise CommandError(self, msg)
 				
 		#
 		# if we made it here, then the service definition looks good
@@ -185,14 +188,14 @@ class Command(command):
 	"""
 	Add a global firewall rule for the all hosts in the cluster.
 
-	<param type='string' name='service' require='1'>
+	<param type='string' name='service' optional='0'>
 	The service identifier, port number or port range. For example
 	"www", 8080 or 0:1024.
 	To have this firewall rule apply to all services, specify the
 	keyword 'all'.
 	</param>
 
-	<param type='string' name='protocol' require='1'>
+	<param type='string' name='protocol' optional='0'>
 	The protocol associated with the rule. For example, "tcp" or "udp".
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
@@ -212,12 +215,12 @@ class Command(command):
 	'stack list network'.
 	</param>
 
-	<param type='string' name='chain' require='1'>
+	<param type='string' name='chain' optional='0'>
 	The iptables 'chain' this rule should be applied to (e.g.,
 	INPUT, OUTPUT, FORWARD).
 	</param>
 
-	<param type='string' name='action' require='1'>
+	<param type='string' name='action' optional='0'>
 	The iptables 'action' this rule should be applied to (e.g.,
 	ACCEPT, REJECT, DROP).
 	</param>

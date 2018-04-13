@@ -1,0 +1,11 @@
+[Unit]
+Description=Ludicrous Speed Downloads Package Cleanup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -s -X DELETE http://localhost/ludicrous/purge
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -15,7 +15,11 @@ from stack.exception import CommandError
 class Command(stack.commands.load.command,
 	       stack.commands.HostArgumentProcessor):
 	"""
-	Load attributes into the database
+	Load attributes into the database. The attribute csv file needs to have a mandatory 'target'
+	column with hostnames. There are 2 ways of specifying attribute name, value:
+	1. Add 'attrName', 'attrVal' columns  with attribute name and value respectively.
+	2. The attribute name can also be a column in the spreadsheet and the cell at the
+	intersection of a hostname row can contain the attribute value.
 	
 	<param type='string' name='file' optional='1'>
 	The file that contains the attribute data to be loaded into the
@@ -85,9 +89,7 @@ class Command(stack.commands.load.command,
 		#
 		self.attrs = {}
 		self.runImplementation('load_%s' % processor, (filename, ))
-
 		self.runPlugins(self.attrs)
-
 		self.command('sync.config')
 
 		# Only sync the host config for the hosts in the

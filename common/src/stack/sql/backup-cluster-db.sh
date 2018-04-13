@@ -58,7 +58,7 @@
 export HOME=/root
 cd /var/db
 
-/opt/stack/bin/mysqldump -u apache --opt cluster > mysql-backup-cluster
+/usr/bin/mysqldump -u apache --opt cluster > mysql-backup-cluster
 
 # To check in multiple versions, you need to have a lock on the
 # file. RCS will automatically ignore checkins for unchanged files.

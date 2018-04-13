@@ -1,11 +1,12 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import ipaddress
 import stack.commands.set.network
-from stack.exception import ArgUnique
+from stack.exception import ArgUnique, CommandError
 
 
 class Command(stack.commands.set.network.command):
@@ -30,6 +31,22 @@ class Command(stack.commands.set.network.command):
 		(networks, address) = self.fillSetNetworkParams(args, 'address')
 		if len(networks) > 1:
 			raise ArgUnique(self, 'network')
+
+		network = networks[0]
+		rows = self.db.select("""
+			mask from subnets where name='%s'
+			""" % network)
+
+		if not rows:
+			raise CommandError(self, 'network "%s" doesn\'t exist' % name)
+
+		mask = rows[0][0]
+		try:
+			if ipaddress.IPv4Network(u"%s/%s" % (address, mask)):
+				pass
+		except:
+			msg = '%s/%s is not a valid network address and subnet mask combination'
+			raise CommandError(self, msg % (address, mask))
 					
 		for network in networks:
 			self.db.execute("""

@@ -1,7 +1,7 @@
 <stack:stack>
 
 <stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
+Copyright (c) 2006 - 2018 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
@@ -19,8 +19,10 @@ Description=Stacki iptables starting and stopping
 After=network.target
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/sbin/iptables-restore /etc/sysconfig/iptables
+ExecStop=/usr/sbin/iptables -F
+RemainAfterExit=true
 
 [Install]
 WantedBy=multi-user.target
@@ -28,7 +30,8 @@ WantedBy=multi-user.target
 
 if [ -x /usr/bin/systemctl ]
 then
-	/usr/bin/systemctl disable firewalld
+	/usr/bin/systemctl disable SuSEfirewall2
+	/usr/bin/systemctl disable SuSEfirewall2_init
 	/usr/bin/systemctl disable ip6tables
 	/usr/bin/systemctl enable iptables
 	/usr/bin/systemctl enable stacki-iptables.service

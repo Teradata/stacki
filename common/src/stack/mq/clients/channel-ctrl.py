@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python3
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -40,7 +40,7 @@ context = zmq.Context()
 sock = context.socket(zmq.REQ)
 sock.connect("tcp://%s:%d" % (host, stack.mq.ports.control))
 
-sock.send(json.dumps(message))
-m = sock.recv()
-print(m)
+sock.send_string(json.dumps(message))
+m = sock.recv().decode()
+print (m)
 

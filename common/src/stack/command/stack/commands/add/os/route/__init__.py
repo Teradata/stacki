@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -39,10 +39,11 @@ class Command(stack.commands.add.os.command):
 
 	def run(self, params, args):
 
-		(address, gateway, netmask) = self.fillParams([
+		(address, gateway, netmask, interface) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
-			('netmask', '255.255.255.255')
+			('netmask', '255.255.255.255'),
+			('interface', None)
 			])
 		
 		if len(args) == 0:
@@ -74,12 +75,22 @@ class Command(stack.commands.add.os.command):
 				(address, os))
 			if rows:
 				raise CommandError(self, 'route exists')
+		#
+		# if interface is being set, check if it exists first
+		#
+		if interface:
+			rows = self.db.execute("""select * from networks
+				where node=1 and device='%s'""" % interface)
+			if not rows:
+				raise CommandError(self, 'interface does not exist')
+		else:
+			interface='NULL'	
 		
 		# Now that we know things will work insert the route for
 		# all the OSes
 		
 		for os in oses:	
 			self.db.execute("""insert into os_routes values 
-				('%s', '%s', '%s', %s, %s)""" %
-				(os, address, netmask, gateway, subnet))
+				('%s', '%s', '%s', %s, '%s', '%s')""" %
+				(os, address, netmask, gateway, subnet, interface))
 

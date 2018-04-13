@@ -7,7 +7,7 @@ import os
 import time
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes, csv_partitions
 
 sys.path.append('/opt/stack/lib')
 from stacki_default_part import sles
@@ -68,7 +68,7 @@ def nukeIt(disk):
 def outputPartition(p, initialize):
 	xml_partitions = []
 
-	if initialize == 'true':
+	if initialize.lower() == 'true':
 		create = 'true'
 	else:
 		create = 'false'
@@ -90,13 +90,15 @@ def outputPartition(p, initialize):
 	if mnt in [ '/', '/var', '/boot', '/boot/efi' ]:
 		format = 'true'
 	else:
-		if initialize == 'true':
+		if initialize.lower() == 'true':
 			format = 'true'
 		else:
 			format = 'false'
 
 	xml_partitions.append('\t\t\t<partition>')
-	xml_partitions.append('\t\t\t\t<create config:type="boolean">%s</create>' % create)
+
+	if initialize.lower() == 'true':
+		xml_partitions.append('\t\t\t\t<create config:type="boolean">%s</create>' % create)
 
 	if mnt:
 		xml_partitions.append('\t\t\t\t<mount>%s</mount>' % mnt)
@@ -105,10 +107,11 @@ def outputPartition(p, initialize):
 		if p['size'] == 0:
 			xml_partitions.append('\t\t\t\t<size>max</size>')
 		else:
-			xml_partitions.append('\t\t\t\t<size>%dM</size>' % p['size'])
+			xml_partitions.append('\t\t\t\t<size>%dM</size>' %  p['size'])
 
 	if p['fstype']:
-		xml_partitions.append('\t\t\t\t<filesystem config:type="symbol">%s</filesystem>' % p['fstype'])
+		if initialize.lower() == 'true':
+			xml_partitions.append('\t\t\t\t<filesystem config:type="symbol">%s</filesystem>' % p['fstype'])
 		xml_partitions.append('\t\t\t\t<format config:type="boolean">%s</format>' % format)
 
 	#
@@ -183,7 +186,7 @@ def doPartitions(disk, initialize):
 
 	xml_partitions = []
 
-	if initialize == 'true':
+	if initialize.lower() == 'true':
 		#
 		# since we are wiping this disk, use the partitions from
 		# the CSV
@@ -216,7 +219,7 @@ def outputDisk(disk, initialize):
 	# only output XML configuration for this disk if there is partitioning
 	# configuration for this disk
 	#
-	if xml_partitions:
+	if xml_partitions and initialize.lower() == 'true':
 		if 'disklabel' in attributes:
 			disklabel = attributes['disklabel']
 		else:
@@ -234,6 +237,18 @@ def outputDisk(disk, initialize):
 		print('\t\t</partitions>')
 
 		print('\t</drive>')
+	elif xml_partitions and initialize.lower() == 'false':
+		if 'disklabel' in attributes:
+			disklabel = attributes['disklabel']
+		else:
+			disklabel = 'gpt'
+		print('\t<fstab>')
+		print('\t\t<use_existing_fstab config:type="boolean">true</use_existing_fstab>')
+		print('\t\t<partitions config:type="list">')
+		for p in xml_partitions:
+			print('%s' % p)
+		print('\t\t</partitions>')
+		print('\t</fstab>')
 
 	return
 
@@ -468,10 +483,13 @@ host_partitions = getHostPartitions(host_disks, host_fstab)
 
 if not csv_partitions:
 	parts = []
-	ostype = "sles11"
-	pallets = attributes['pallets']
-	if 'SLES-12-sp2' in pallets:
+	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
+		ostype = "sles11"
+	elif attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 		ostype = "sles12"
+	else:
+		# Give ostype some default
+		ostype = "sles11"
 
 	if os.path.exists('/sys/firmware/efi'):
 		default = 'uefi'
@@ -508,7 +526,6 @@ if not csv_partitions:
 
 print('<?xml version="1.0"?>')
 print('')
-print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
 
 #
 # there are 2 scenarios:
@@ -522,11 +539,19 @@ print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http:
 # For 2, reformat "/", "/boot" (if present) and "/var" on the boot disk, then
 # reconnect all other discovered partitions.
 #
-
-if 'nukedisks' in attributes:
+# if host_fstab is an empty list, turning on nukedisks=true" to avoid SLES defaults
+if host_fstab == []:
+	nukedisks = 'true'
+elif 'nukedisks' in attributes:
 	nukedisks = attributes['nukedisks']
 else:
 	nukedisks = 'false'
+
+if nukedisks.lower() == 'true':
+	print('<partitioning xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns" config:type="list">')
+else:
+	print('<partitioning_advanced xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">')
+
 
 #
 # process all nuked disks first
@@ -547,6 +572,9 @@ for disk in host_disks:
 	if disk not in nukelist:
 		outputDisk(disk, initialize)	
 
-print('</partitioning>')
-print('')
 
+if nukedisks.lower() == 'true':
+	print('</partitioning>')
+else:
+	print('</partitioning_advanced>')
+print('')

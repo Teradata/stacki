@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -381,12 +381,13 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if network:
 					self.checkNetwork(network)
 
-					# check if 'ip' could exist in 'network'
-					network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
-					ipnetwork = ipaddress.IPv4Network(network_ip + '/' + netmask)
-					if ipaddress.IPv4Address(ip) not in ipnetwork:
-						msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
-						raise CommandError(self.owner, msg)
+					if ip:
+						# check if 'ip' could exist in 'network'
+						network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
+						ipnetwork = ipaddress.IPv4Network(network_ip + '/' + netmask)
+						if ipaddress.IPv4Address(ip) not in ipnetwork:
+							msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
+							raise CommandError(self.owner, msg)
 
 				#
 				# if 'channel' is specified and if it starts

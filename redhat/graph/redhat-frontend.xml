@@ -53,6 +53,8 @@
 		<to>server</to>
 	</edge>
 
+	<edge from="server" to="insert-rolls" cond="platform != 'aws'"/>
+
 	<edge from="server">
 		<to>base</to>
 		<to>security-server</to>
@@ -60,7 +62,6 @@
 		<to>install</to>
 		<to>pxe</to>
 		<to>pxeboot</to>
-		<to>insert-rolls</to>
 		<to>networking-server</to>
 		<to>dhcp-server</to>
 		<to>firewall-server</to>
@@ -69,7 +70,6 @@
 		<to>ca</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
-		<to>node-certs</to>
 		<to>storage-server</to>
 		<to>ludicrous-server</to>
 		<to>repo-server</to>

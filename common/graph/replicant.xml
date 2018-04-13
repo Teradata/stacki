@@ -1,0 +1,32 @@
+<graph>
+
+	<description>
+	The Steel appliance - build a backend node as frontend, that is, frontend manufacturing
+	</description>
+
+	<copyright>
+	Copyright (c) 2006 - 2018 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</copyright>
+
+	<edge from="replicant">
+		<to>general</to>
+		<to>users</to>
+		<to>server</to>
+		<to>ssh-client</to>
+		<to>add-on</to>
+		<to>partitioning</to>
+		<to>backend</to>
+		<to>mq-server</to>
+	</edge>
+
+	<order head="foundation-python">
+		<tail>database</tail>
+	</order>
+
+	<order head="backend">
+		<tail>replicant</tail>
+	</order>
+
+</graph>

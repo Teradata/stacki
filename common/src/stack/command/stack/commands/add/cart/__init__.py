@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -9,6 +9,7 @@ import grp
 import stat
 import stack.file
 import stack.commands
+import subprocess
 from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
@@ -46,6 +47,11 @@ class Command(stack.commands.CartArgumentProcessor,
 		node.write('</stack:script>\n\n')
 		node.write('</stack:stack>\n')
 		node.close()
+
+	# Call the sevice ludicrous-cleaner
+	def clean_ludicrous_packages(self):
+		_command = 'systemctl start ludicrous-cleaner'
+		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
 
 	def run(self, params, args):
@@ -124,3 +130,5 @@ class Command(stack.commands.CartArgumentProcessor,
 					os.chmod(filepath, perms)
 				except:
 					pass
+		# Clear the old packages
+		self.clean_ludicrous_packages()

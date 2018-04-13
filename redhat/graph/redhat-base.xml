@@ -27,7 +27,6 @@
 		<to>pre-ssh-key</to>
 		<to>logrotate</to>
 		<to>rpc</to>
-		<to>node</to>
 		<to>time-base</to>
 		<to>postshell</to>
 		<to>yum-base</to>

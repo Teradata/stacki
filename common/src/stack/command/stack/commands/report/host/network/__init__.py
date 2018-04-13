@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -23,8 +23,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	Hostname.
 	</arg>
 
-	<example cmd='report host network compute-0-0'>
-	Output the network configuration for compute-0-0.
+	<example cmd='report host network backend-0-0'>
+	Output the network configuration for backend-0-0.
 	</example>
 	"""
 

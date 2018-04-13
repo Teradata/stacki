@@ -9,7 +9,8 @@
 		</signature-handling>
 		<mode>
 			<!-- skip the "Confirm Installation" screen -->
-			<confirm config:type="boolean">false</confirm>
+			<confirm config:type="boolean">&install.confirm;</confirm>
+			<final_reboot config:type="boolean">&install.final_reboot;</final_reboot>
 		</mode>
 	</general>
 

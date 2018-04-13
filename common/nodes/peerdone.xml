@@ -5,7 +5,7 @@
 	</stack:description>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2017 Teradata
+	Copyright (c) 2006 - 2018 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -22,7 +22,7 @@ if [ -f /bin/curl ]; then
 	curl_cmd=/bin/curl
 fi
 
-peerdone_url=http://${ludicrous_server}:3825/avalanche/peerdone
+peerdone_url=http://${ludicrous_server}/ludicrous/peerdone
 ${curl_cmd} -X DELETE --output /dev/null ${peerdone_url}
 
 </stack:script>

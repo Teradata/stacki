@@ -29,6 +29,15 @@ import stack.commands
 
 class Command(stack.commands.list.os.command):
 	"""
+	List the routes for one of more OS
+
+	<arg optional='1' type='string' name='os' repeat='1'>
+	Zero, one or more os.
+	</arg>
+
+	<example cmd='list os route redhat'>
+	Lists the routes for redhat OS.
+	</example>
 	"""
 
 	def run(self, params, args):

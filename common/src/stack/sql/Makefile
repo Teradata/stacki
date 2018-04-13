@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -38,10 +38,6 @@ install:: build
 	$(INSTALL) -m 0700 backup-cluster-db.sh \
 		$(ROOT)/etc/cron.daily/backup-cluster-db
 	$(INSTALL) -m 0644 $(PLUGINS) $(ROOT)/$(PLUGINDIR)
-	(\
-		cd $(ROOT)/$(PKGROOT)/sbin;	\
-		ln -s ./insert-ethers ./discover-nodes; \
-	)
 
 	$(MAKE) install -C po 
 

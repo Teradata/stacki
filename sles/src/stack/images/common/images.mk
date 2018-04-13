@@ -1,14 +1,14 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
 TEMPDIR := $(shell mktemp -d)
 
-PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)
+PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(IMAGE_RELEASE)
 
-include ../../common/images-$(OS).mk
+-include ../../../common/images-$(OS).mk
 
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
@@ -24,9 +24,9 @@ sles-stacki.img: dirs rpminst
 	mkdir -p $(CURDIR)/sles-stacki/usr/bin
 	ln -s /opt/stack/bin/python3 $(CURDIR)/sles-stacki/usr/bin/python
 	# Patch the sles-stacki image
-	-(cd ../../common/sles-stacki.img-patches && \
-		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/sles-stacki/) )
-	-(cd sles-stacki.img-patches && (find . -type f | cpio -pudv ../../sles-stacki/) )
+	-(cd ../../../common/sles-stacki.img-patches && \
+		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/$(IMAGE_RELEASE)/sles-stacki/) )
+	-(cd sles-stacki.img-patches && (find . -type f | cpio -pudv ../../../sles-stacki/) )
 	# Create a squash filesystem
 	mksquashfs $(CURDIR)/sles-stacki $@
 
@@ -36,7 +36,7 @@ stacki-initrd.img:
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm ) 
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
-		--import ../../common/gnupg-keys/stacki.pub
+		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf stacki-initrd/installkey.gpg~
 	(				\
 		cd stacki-initrd;	\
@@ -44,16 +44,16 @@ stacki-initrd.img:
 	)
 
 keyring:
-	gpg --batch --import ../../common/gnupg-keys/stacki.pub
-	gpg --batch --import ../../common/gnupg-keys/stacki.priv
+	gpg --batch --import ../../../common/gnupg-keys/stacki.pub
+	gpg --batch --import ../../../common/gnupg-keys/stacki.priv
 
 build: sles-stacki.img stacki-initrd.img
 
 
 install:: keyring
 	mkdir -p $(ROOT)/$(PKGROOT)
-	$(INSTALL) -m0644 linux $(ROOT)/$(PKGROOT)/vmlinuz-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-$(ARCH)
-	$(INSTALL) -m0644 stacki-initrd.img $(ROOT)/$(PKGROOT)/initrd-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-$(ARCH)
+	$(INSTALL) -m0644 linux $(ROOT)/$(PKGROOT)/vmlinuz-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
+	$(INSTALL) -m0644 stacki-initrd.img $(ROOT)/$(PKGROOT)/initrd-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
 	# Copy over patch files
 	mkdir -p $(ROOT)/$(PALLET_PATCH_DIR)
 	cd $(SUSE_PRODUCT)-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR))

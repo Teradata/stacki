@@ -29,6 +29,12 @@ import stack.commands
 
 class Command(stack.commands.list.appliance.command):
 	"""
+	List the routes for a given appliance type.
+
+	<arg optional='1' type='string' name='appliance' repeat='1'>
+	Zero, one or more appliance names. If no appliance names are supplied,
+	the routes for all the appliances are listed.
+	</arg>
 	"""
 
 	def run(self, params, args):

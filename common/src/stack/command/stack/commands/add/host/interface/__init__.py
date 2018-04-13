@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -65,17 +65,18 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-		(interface, mac, network, ip, module,
-		 name, vlan, default, unsafe) = self.fillParams([
+		(interface, mac, network, ip, module, 
+		 name, vlan, default, options, unsafe) = self.fillParams([
 			 ('interface', None),
 			 ('mac',       None),
 			 ('network',   None),
-			 ('ip',        None),
+			 ('ip',	       None),
 			 ('module',    None),
 			 ('name',      None),
 			 ('vlan',      None),
 			 ('default',   None),
-			 ('unsafe',    'false')
+			 ('options',   None),
+			 ('unsafe',    False)
 			 ])
 
 		
@@ -102,7 +103,7 @@ class Command(stack.commands.add.host.command):
 					raise CommandError(self, 'mac exists')
 
 
-		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default']
+		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default', 'options' ]
 
 		# Insert the mac or interface into the database and then use
 		# that to key off of for all the subsequent fields.
@@ -145,9 +146,11 @@ class Command(stack.commands.add.host.command):
 				fields.remove('default')
 				keys.append('main')
 				vals.append('%d' % self.str2bool(default))
-
-				
-				
+			if options:
+				fields.remove('options')
+				keys.append('options')
+				vals.append('"%s"' % options)
+			
 			self.db.execute("""
 				insert into networks(%s) values (%s)
 				""" % (','.join(keys), ','.join(vals)))
@@ -166,4 +169,5 @@ class Command(stack.commands.add.host.command):
 			if key in params:
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
+
 

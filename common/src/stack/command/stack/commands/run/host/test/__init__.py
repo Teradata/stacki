@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -18,10 +18,10 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, the command
-	is run on all 'managed' hosts. By default, all compute nodes are
+	is run on all 'managed' hosts. By default, all backend nodes are
 	'managed' nodes. To determine if a host is managed, execute:
 	'stack list host attr hostname | grep managed'. If you see output like:
-	'compute-0-0: managed true', then the host is managed.
+	'backend-0-0: managed true', then the host is managed.
 	</arg>
 
 	<param type='string' name='test' optional='0'>
@@ -47,12 +47,12 @@ class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
 	host test" running, then output "is not running".
 	</param>
 
-	<example cmd='run host test compute-0-0 test="memory"'>
-	Run the "memory" test on compute-0-0.
+	<example cmd='run host test backend-0-0 test="memory"'>
+	Run the "memory" test on backend-0-0.
 	</example>
 
-	<example cmd='run host test compute test="all" extras="/tmp/test"'>
-	Run all the tests on all the compute nodes and store the results in
+	<example cmd='run host test backend test="all" extras="/tmp/test"'>
+	Run all the tests on all the backend nodes and store the results in
 	"/tmp/test.memory", "/tmp/test.disk" and "/tmp/test.network".
 	</example>
 	"""

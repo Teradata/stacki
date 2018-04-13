@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -11,7 +11,6 @@
 # @rocks@
 
 import os
-import string
 import stack.file
 import stack.commands
 
@@ -53,13 +52,13 @@ class Command(stack.commands.RollArgumentProcessor,
 				continue
 			if o not in dict:
 				dict[o] = []
-			dict[o].append(string.join(dir.split(os.sep), ' '))
+			dict[o].append(dir.replace(os.sep, ' '))
 
 		# If args are mentioned then use them, if not get all
 		# pallet names from the database
 		if len(args) == 0:
 			roll_list = self.getRollNames(args, params)
-			rolls = map(lambda x: x[0], roll_list)
+			rolls = [roll[0] for roll in roll_list]
 		else:
 			rolls = args
 			

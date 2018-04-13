@@ -2,7 +2,7 @@
 
 
 <stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
+Copyright (c) 2006 - 2018 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
@@ -10,6 +10,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:package>stack-kickstart</stack:package>
 
+<stack:script stack:stage="install-post">
+/opt/stack/bin/stack set attr attr=install.confirm value=false
+/opt/stack/bin/stack set attr attr=install.final_reboot value=false
+</stack:script>
 
 <stack:script stack:stage="install-post">
 

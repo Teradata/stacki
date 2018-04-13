@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -25,7 +25,7 @@ class Implementation(rocks.commands.Implementation):
 
 		# Create the salt local client and runner client objects.
 		# The LocalClient is responsible for starting the job on
-		# a compute node
+		# a backend node
 		self.salt = salt.client.LocalClient()
 
 		# The runner client is responsible for managing the running

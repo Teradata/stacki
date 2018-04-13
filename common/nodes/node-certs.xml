@@ -1,0 +1,60 @@
+<stack:stack>
+
+<stack:description>
+Copy root's public key from the Frontend to the installing nodes.
+If additional keys are listed in the authorized_keys attribute, copy those as well.
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2018 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:script stack:stage="install-post">
+<!-- make sure the /root/.ssh exists -->
+/bin/mkdir -p /root/.ssh
+</stack:script>
+
+<stack:script stack:cond="sync.ssh.authkey" stack:stage="install-post">
+<!-- propagate root's public ssh key -->
+<stack:file stack:name="/root/.ssh/authorized_keys">
+<stack:eval>
+cat /root/.ssh/id_rsa.pub
+</stack:eval>
+</stack:file>
+
+</stack:script>
+
+<!-- allow additional public keys in the authorized_keys attr
+     this allows pxebooting frontends to have passwordless access
+ -->
+<stack:script stack:cond="authorized_keys" stack:stage="install-post">
+<!-- append either the contents of the authorized_keys attr
+     or the contents of the file it points to
+ -->
+
+cat &lt;&lt; 'EOF' &gt;&gt; /root/.ssh/authorized_keys
+<stack:eval stack:mode="xml">
+curl_cmd=/usr/bin/curl
+
+<!-- on an installing system, curl may be in /bin? -->
+if [ -f /bin/curl ]; then
+	curl_cmd=/bin/curl
+fi
+
+keys='&authorized_keys;'
+<!-- curl can handle http(s)/ftp/file -->
+if [[ $keys == http* ]] || [[ $keys == ftp* ]] || [[ $keys == file* ]] ; then
+	$curl_cmd --silent --insecure $keys
+else
+	echo $keys
+fi
+
+</stack:eval>
+EOF
+
+</stack:script>
+
+
+</stack:stack> 

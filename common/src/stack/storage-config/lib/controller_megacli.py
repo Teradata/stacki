@@ -131,7 +131,7 @@ class CLI:
 			#
 			# remove the '-' if present in the flag/option
 			#
-			g = f.translate(None, '-')
+			g = f.replace('-', '')
 			if g.lower() in self.setparams:
 				setpropflags.append(f)
 			else:
@@ -199,7 +199,7 @@ class CLI:
 					# remove the '-' if present in the
 					# flag
 					#
-					g = f.translate(None, '-')
+					g = f.replace('-', '')
 					if g.lower() in self.setparams:
 						setpropflags.append(f)
 					else:

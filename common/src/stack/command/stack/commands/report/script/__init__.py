@@ -5,7 +5,7 @@
 # @rocks@
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -34,7 +34,7 @@ class Command(stack.commands.report.command):
 	Attributes to be used while building the output shell script.
 	</param>
 
-	<example cmd='report host interface compute-0-0 | stack report script'>
+	<example cmd='report host interface backend-0-0 | stack report script'>
 	Take the network interface XML output from 'stack report host interface'
 	and create a shell script.
 	</example>

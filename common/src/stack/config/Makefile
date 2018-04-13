@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -23,7 +23,7 @@ install::
 	mkdir -p $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 etc/profile.d/*sh	$(ROOT)/etc/profile.d/
 	mkdir -p $(ROOT)/etc/ld.so.conf.d/
-	$(INSTALL) -m0644 etc/ld.so.conf.d/stack.conf /etc/ld.so.conf.d/stack.conf
+	$(INSTALL) -m0644 etc/ld.so.conf.d/stack.conf $(ROOT)/etc/ld.so.conf.d/stack.conf
 	mkdir -p $(ROOT)/etc/rc.d/init.d
 	$(INSTALL) -m755 init.d/stack-dmesg	$(ROOT)/etc/rc.d/init.d/
 	$(INSTALL) -m755 init.d/stack-pre	$(ROOT)/etc/rc.d/init.d/

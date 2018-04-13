@@ -1,7 +1,7 @@
 #!/opt/stack/bin/python3 -E
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -13,15 +13,13 @@ import subprocess
 import sys
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes
 
 efi = False
 
 efivarsdir = "/sys/firmware/efi"
 if os.path.exists(efivarsdir) and os.path.isdir(efivarsdir):
 	efi = True
-
-pallets = attributes['pallets']
 
 root = ET.Element("bootloader")
 root.set('xmlns',"http://www.suse.com/1.0/yast2ns")
@@ -65,34 +63,13 @@ def sles12():
 		boot.text="true"
 		ET.SubElement(root, "loader_type").text = "grub2"
 
-def caasp():
-	ET.SubElement(g,"generic_mbr").text = "true"
-	ET.SubElement(g,"gfxmode").text = "auto"
-	ET.SubElement(g,"hiddenmenu").text = "false"
-	ET.SubElement(g,"os_prober").text = "false"
-	ET.SubElement(g,"terminal").text = "gfxterm"
-
-	timeout = ET.SubElement(g,"timeout")
-	timeout.set("config:type","integer")
-	timeout.text = "8"
-
-	suse_btrfs = ET.SubElement(g,"suse_btrfs")
-	suse_btrfs.set("config:type","boolean")
-	suse_btrfs.text = "true"
-
-	ET.SubElement(root, "loader_type").text = "grub2"
-
-
-ostype = None
-if 'SLES-11.3-1.138' in pallets:
+if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
 	ostype = "sles11"
-
-elif 'SLES-12-sp2' in pallets:
+elif attributes['os.version'] == "12.x" and attributes['os'] == "sles":
 	ostype = "sles12"
-
-elif 'CaaSP-1.0-suse' in pallets:
-	ostype = "caasp"
-
+else:
+	# Give ostype some default
+	ostype = "sles11"
 if ostype:
 	this = sys.modules[__name__]
 	if hasattr(this, ostype):

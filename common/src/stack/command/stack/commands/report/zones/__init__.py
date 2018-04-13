@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -44,7 +44,6 @@ class Command(stack.commands.report.command):
 	
 	<related>sync dns</related>
 	"""
-
 	def hostlines(self, name, zone):
 
 		"Lists the name->IP mappings for all hosts"
@@ -56,9 +55,9 @@ class Command(stack.commands.report.command):
 			"where s.zone='%s' " % (zone)	+
 			"and nt.subnet=s.id and nt.node=n.id")
 
-		for (name, ip, network_name) in self.db.fetchall():
+		for (name, device, network_name) in self.db.fetchall():
 
-			if ip is None:
+			if device is None:
 				continue
 
 			if network_name is None:
@@ -66,14 +65,14 @@ class Command(stack.commands.report.command):
 			
 			record = network_name
 
-			s += '%s A %s\n' % (record, ip)
+			s += '%s A %s\n' % (record, device)
 
 			# Now record the aliases. We always substitute 
 			# network names with aliases. Nothing else will
 			# be allowed
 			self.db.execute('select a.name from aliases a, ' +
-				'networks nt where nt.node=a.node and '	+
-				'nt.ip="%s"' % (ip))
+				'networks nt where nt.id=a.network and '	+
+				'nt.device="%s"' % (device))
 
 			for alias, in self.db.fetchall():
 				s += '%s CNAME %s\n' % (alias, record)
@@ -83,7 +82,7 @@ class Command(stack.commands.report.command):
 	def hostlocal(self, name, zone):
 		"Appends any manually defined hosts to domain file"
 		
-		filename = '/var/named/%s.domain.local' % name
+		filename = '%s/%s.domain.local' % (self.named, name)
 		s = ''
 		# If local file exists import from it
 		if os.path.isfile(filename):
@@ -106,16 +105,20 @@ class Command(stack.commands.report.command):
 
 		s = ''
 		subnet_len = len(r_sn.split('.'))
-		self.db.execute('select nt.name, nt.ip, s.zone ' +
-				'from networks nt, subnets s where ' +
+		self.db.execute('select nt.name, n.name, nt.ip, s.zone ' +
+				'from networks nt, subnets s, nodes n where ' +
 				's.name="%s" ' % (s_name)	+
-				'and nt.subnet=s.id')
+				'and nt.subnet=s.id and nt.node=n.id')
 
 		# Remove all elements of the IP address that are
 		# present in the subnet. This is done by counting
 		# the number of elements in the subnet, and popping
 		# that many from the IP address
-		for (name, ip, zone) in self.db.fetchall():
+		for (netname, nodename, ip, zone) in self.db.fetchall():
+			if netname:
+				name = netname
+			else:
+				name = nodename
 			if ip is None:
 				continue
 
@@ -130,8 +133,8 @@ class Command(stack.commands.report.command):
 		#
 		# handle reverse local additions
 		#
-		filename = '/var/named/reverse.%s.domain.%s.local' \
-			% (s_name, r_sn)
+		filename = '%s/reverse.%s.domain.%s.local' \
+			% (self.named, s_name, r_sn)
 		if os.path.exists(filename):
 			s += '\n;Imported from %s\n\n' % filename
 			f = open(filename, 'r')
@@ -153,7 +156,12 @@ class Command(stack.commands.report.command):
 		networks = []
 		for row in self.call('list.network', [ 'dns=true' ]):
 			networks.append(row)
-			
+
+		osname = self.getHostAttr('localhost', 'os')
+		if osname == 'sles':
+			self.named = '/var/lib/named'
+		elif osname == 'redhat':
+			self.named = '/var/named'
 		self.beginOutput()
 
 		#
@@ -163,7 +171,7 @@ class Command(stack.commands.report.command):
 		for network in networks:
 			name = network['network']
 			zone = network['zone']
-			filename = '/var/named/%s.domain' % name
+			filename = '%s/%s.domain' % (self.named, name)
 			s = ''
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (zone, zone, serial, zone, zone)
@@ -189,7 +197,7 @@ class Command(stack.commands.report.command):
 			sn.reverse()
 			r_sn = '.'.join(sn)
 
-			filename = '/var/named/reverse.%s.domain.%s' % (name, r_sn)
+			filename = '%s/reverse.%s.domain.%s' % (self.named, name, r_sn)
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
 			s += preamble_template % (name, name, serial, name, name)
 			s += self.reversehostlines(r_sn, name)

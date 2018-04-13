@@ -54,13 +54,13 @@
 		<to>install</to>
 		<to>kernel-server</to>
 		<to>networking-server</to>
-		<to>node-certs</to>
 		<to>pxe</to>
 		<to>ssl-server</to>
 		<to>storage-controller-server</to>
 		<to>time-server</to>
 		<to>uefi-server</to>
 		<to>restapi</to>
+		<to>ludicrous-server</to>
 	</edge>
 
 	<order head="database-data">

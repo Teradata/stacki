@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -30,12 +30,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		else:
 			raise CommandError(self.owner, "'target' must be the first column in headers")
 
-		# Strip out any leading or trailing whitespace in attr names.
-
-		for i in range(0, len(header)):
-			header[i] = header[i].strip()
-
-
 		default = {}
 
 		for attr in header:
@@ -44,6 +38,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		reserved = self.getApplianceNames()
 		reserved.append('global')
 		reserved.append('default')
+
+		attrVal  = None
+		attrName = None
 
 		for row in reader:
 
@@ -54,8 +51,17 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				self.owner.checkValue(field)
 				if header[i] == 'target':
 					target = field
+				elif header[i] == 'attrName':
+					attrName = field
+				elif header[i] == 'attrVal':
+					attrVal = field
 				else:
 					attrs[header[i]] = field
+
+				if attrVal:
+					attrs[attrName] = attrVal
+					attrVal  = None
+					attrName = None
 
 			if target == 'default':
 				default = attrs
@@ -63,7 +69,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				for key in default.keys():
 					if not attrs[key]:
 						attrs[key] = default[key]
-
+			print(attrs)
 			if target not in reserved:
 				host = self.db.getHostname(target)
 				if not host:

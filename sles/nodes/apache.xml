@@ -7,7 +7,7 @@ Apache HTTP Server
 
 
 <stack:copyright>
-Copyright (c) 2006 - 2017 Teradata
+Copyright (c) 2006 - 2018 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
@@ -144,6 +144,7 @@ IncludeOptional /etc/apache2/vhosts.d/*.conf
 Include /etc/apache2/stacki-conf.d/stack.conf
 Include /etc/apache2/stacki-conf.d/ssl.conf
 Include /etc/apache2/stacki-conf.d/https.conf
+Include /etc/apache2/stacki-conf.d/ludicrous.conf
 ]]>
 </stack:file>
 

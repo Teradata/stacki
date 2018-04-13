@@ -1,7 +1,7 @@
 #!/opt/stack/bin/python3
 #
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -17,7 +17,7 @@ import pymysql
 
 
 # Get root credentials
-conf_file = open('/opt/stack/etc/root.my.cnf')
+conf_file = open('/etc/root.my.cnf')
 for line in conf_file.readlines():
 	if line.startswith('password'):
 		root_pass = line.split('=')[1].strip()
@@ -26,7 +26,7 @@ conf_file.close()
 
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd=root_pass,
-	unix_socket='/var/opt/stack/mysql/mysql.sock',
+	unix_socket='/var/run/mysql/mysql.sock',
 	autocommit=True)
 
 db = d.cursor()

@@ -1,13 +1,12 @@
 # @copyright@
-# Copyright (c) 2006 - 2017 Teradata
+# Copyright (c) 2006 - 2018 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
 import os
-import tarfile, bz2, lzma
+import tarfile
 import stack.commands
-#from stack.exception import ArgRequired, ArgUnique, CommandError, ParamValue
 from stack.exception import *
 
 
@@ -27,11 +26,11 @@ class Command(stack.commands.CartArgumentProcessor,
 	GroundHog Day my friend, GroundHog Day.
 
 	<arg type='string' name='cart'>
-	The name of the cart to be created.
+	The name of the cart to be compressed.
 	</arg>
 
 	<param type='string' name='compression' required='1'>
-	Compression type can be bz2, xz, gz.
+	Compression type can be gz.
 	Default is gz.
 	</param>
 
@@ -39,17 +38,26 @@ class Command(stack.commands.CartArgumentProcessor,
 	Put the suffix on the subsequent cart file.
 	Default is tgz.
 	</param>
+
+	<example cmd="pack cart site-custom">
+	Tars up site-custom into site-custom.tgz.
+	Includes all dirs but repodata and fingerprint.
+
+	This does NOT remove the cart from the system.
+	</example>
+
+	<related>unpack cart file=</related>
 	"""		
 		
 	def packCart(self, cart, path, compression, suff):
 		cartfile = cart + '.%s' % suff
 		with tarfile.open(cartfile,'w:%s' % compression) as tar:
-			os.chdir(os.path.join(path,cart))
+			os.chdir(os.path.join(path))
 			if self.checkCart(path,cart) == True:
-				for name in os.listdir():
+				for name in os.listdir(cart):
 					if name not in [ 'fingerprint', 'repodata']:
 						print('adding %s' % name)
-						tar.add(name)
+						tar.add(cart + '/' + name)
 			else:
 				print("Cart has wrong directory structure.")
 		
@@ -58,7 +66,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 	def checkCart(self,path,cart):
 		req = ['RPMS', 'graph', 'nodes']
-		found = os.listdir()
+		found = os.listdir(cart)
 		return set(req).issubset(set(found))
 		
 
@@ -75,18 +83,14 @@ class Command(stack.commands.CartArgumentProcessor,
 		if len(args) > 1:
 			raise ArgUnique(self, 'cart')
 
-		if comp not in ['gz', 'xz', 'bz2']:
-			raise ParamValue(self, 'compression', '"xz, gz, or bz2." "gz" is default.')
+		if comp not in ['gz']:
+			raise ParamValue(self, 'compression', '"gz" "gz" is default.')
 
 		cart = args[0]
 		path,cart = (os.path.split(cart))
 
 		if not path:
 			path = cartdir
-		if comp == 'xz':
-			suff = 'xz'
-		elif comp == 'bz2':
-			suff = 'bz2'
 
 		if suff != 'tgz':	
 			suff = suff
