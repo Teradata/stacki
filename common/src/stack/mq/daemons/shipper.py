@@ -74,7 +74,7 @@ class Controller(threading.Thread):
 				msg = json.loads(pkt)
 				c = msg['command']
 			except:
-				self.rep.send('')
+				self.rep.send_string('')
 				c = ''
 			
 			if c == 'enable':
@@ -82,7 +82,7 @@ class Controller(threading.Thread):
 				if chan not in self.channels:
 					subscriber.subscribe(chan)
 					self.channels.append(chan)
-				self.rep.send('')
+				self.rep.send_string('Enabled channel: %s' % chan)
 
 			elif c == 'disable':
 				chan = str(msg['channel'])
@@ -90,13 +90,13 @@ class Controller(threading.Thread):
 					if not chan == 'rmq':
 						subscriber.unsubscribe(chan)
 					self.channels.remove(chan)
-				self.rep.send('')
+				self.rep.send_string('Disabled channel: %s' % chan)
 
 			elif c == 'status':
-				self.rep.send(json.dumps([self.channels, 
-							  subscriber.channels]))
+				channels = self.channels +  list(subscriber.channels.keys())
+				self.rep.send_string("Enabled channels: %s" % ' '.join(channels))
 			else:
-				self.rep.send('')
+				self.rep.send_string('')
 
 
 def Handler(signal, frame):

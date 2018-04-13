@@ -40,7 +40,7 @@ context = zmq.Context()
 sock = context.socket(zmq.REQ)
 sock.connect("tcp://%s:%d" % (host, stack.mq.ports.control))
 
-sock.send(json.dumps(message))
-m = sock.recv()
-print(m)
+sock.send_string(json.dumps(message))
+m = sock.recv().decode()
+print (m)
 
