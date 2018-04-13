@@ -27,6 +27,8 @@ class Implementation(stack.commands.Implementation):
 			netname   = o['network']
 			vlanid    = o['vlan']
 			mac       = o['mac']
+			if mac:
+				mac = mac.lower()
 			channel   = o['channel']
 			options   = o['options']
 			netmask   = o['mask']
