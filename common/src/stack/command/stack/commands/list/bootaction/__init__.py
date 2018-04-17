@@ -32,16 +32,10 @@ class Command(stack.commands.list.command):
 				left join oses o on ba.os = o.id
 				"""):
 
-			if req_type == '':
-				if b_type is not None:
-					continue
-			elif req_type and req_type != b_type:
+			if req_type is not None and req_type != b_type:
 				continue
 
-			if req_os == '':
-				if b_os is not None:
-					continue
-			elif req_os and req_os != b_os:
+			if req_os is not None and (b_os is not None and req_os != b_os):
 				continue
 
 			if args and b_action not in args:
