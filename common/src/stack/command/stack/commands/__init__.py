@@ -2274,11 +2274,18 @@ class Command:
 				else:
 					s = str(line[i])
 
+				# fill "cell" with padChar so it's as long
+				# as the longest field/header.
 				if padChar != '' and i != len(line) - 1:
 					if s:
 						o = s.ljust(colwidth[i])
 					else:
 						o = ''.ljust(colwidth[i],
+							padChar)
+				# *BUT* if this is the last column, it might be super
+				# long, so only pad it out as long as the header.
+				elif padChar != '' and i == len(line) - 1 and not s:
+					o = ''.ljust(len(output[0][i]),
 							padChar)
 				else:
 					o = s
