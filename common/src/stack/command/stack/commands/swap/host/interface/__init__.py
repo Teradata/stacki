@@ -39,7 +39,7 @@ class Command(stack.commands.swap.host.command):
 		#
 		rows = self.db.execute("""select id,module,options from
 			networks where mac = '%s' and node = (select id from
-			nodes where name = '%s') """ % (old_mac, host))
+			host_view where name = '%s') """ % (old_mac, host))
 		if rows != 1:
 			return
 
@@ -47,7 +47,7 @@ class Command(stack.commands.swap.host.command):
 
 		rows = self.db.execute("""select id,module,options from
 			networks where mac = '%s' and node = (select id from
-			nodes where name = '%s') """ % (new_mac, host))
+			host_view where name = '%s') """ % (new_mac, host))
 		if rows != 1:
 			return
 
@@ -93,14 +93,14 @@ class Command(stack.commands.swap.host.command):
 
 			self.db.execute("""
 				select mac from networks where node =
-				(select id from nodes where name = '%s') and
+				(select id from host_view where name = '%s') and
 				device = '%s' """ % (host, interface[0]))
 
 			m, = self.db.fetchone()
 			mac.append(m)
 
 			self.db.execute("""select mac from networks where node =
-				(select id from nodes where name = '%s') and
+				(select id from host_view where name = '%s') and
 				device = '%s' """ % (host, interface[1]))
 
 			m, = self.db.fetchone()

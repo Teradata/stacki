@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import stack.api
 import stack.commands
 from stack.exception import ArgRequired
 
@@ -33,16 +34,10 @@ class Command(stack.commands.set.host.command):
 
 	def run(self, params, args):
 
-		(rack, ) = self.fillParams([
-			('rack', None, True)
-			])
+		(rack, ) = self.fillParams([ ('rack', None, True) ])
 		
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update nodes set rack='%s' where
-				name='%s'
-				""" % (rack, host))
-
+		component = stack.api.Component()
+		component.set_multiple(self.getHostnames(args), rack=rack)

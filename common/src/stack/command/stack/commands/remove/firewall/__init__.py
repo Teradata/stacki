@@ -20,14 +20,6 @@ class command(stack.commands.remove.command):
 		assert table
 		assert rulename
 
-		query = 'select * from %s where name="%s"' % (table, rulename)
-		if extrasql:
-			query = "%s and %s" % (query, extrasql)
-		rows = self.db.execute(query)
-
-		if rows == 0:
-			raise CommandError(self, 'Could not find rule %s in %s' % (rulename, table))
-
 		query = 'delete from %s where name="%s"' % (table, rulename)
 		if extrasql:
 			query = "%s and %s" % (query, extrasql)

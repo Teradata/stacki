@@ -54,19 +54,19 @@ class Command(stack.commands.set.host.command):
 		for host in self.getHostnames(args):
 			if interface:
 				self.db.execute("""
-					update networks net, nodes n 
+					update networks net, host_view hv
 					set net.subnet=
 					(select id from subnets s where s.name='%s')
 					where
-					n.name='%s' and net.node=n.id and
+					hv.name='%s' and net.node=hv.id and
 					net.device like '%s'
 					""" % (network, host, interface))
 			else:
 				self.db.execute("""
-					update networks net, nodes n 
+					update networks net, host_view hv
 					set net.subnet=
 					(select id from subnets s where s.name='%s')
 					where
-					n.name='%s' and net.node=n.id and
+					hv.name='%s' and net.node=hv.id and
 					net.mac like '%s'
 					""" % (network, host, mac))

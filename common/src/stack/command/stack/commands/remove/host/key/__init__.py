@@ -33,22 +33,9 @@ class Command(stack.commands.remove.host.command):
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
-		hosts = self.getHostnames(args)
-		if len(hosts) > 1:
-			raise ArgUnique(self, 'host')
 
-		host = hosts[0]
-
-		rows = self.db.execute("""select * from public_keys where
-			id = %s and node = (select id from
-			nodes where name = '%s') """ % (id, host))
-
-		if rows == 0:
-			msg = "public key with id %s " % id
-			msg += "doesn't exist for host %s" % host
-			raise CommandError(self, msg)
-		
-		self.db.execute("""delete from public_keys where
-			id = %s and node = (select id from
-			nodes where name = '%s') """ % (id, host))
+		for host in self.getHostnames(args):
+			self.db.execute("""delete from public_keys where
+				id = '%s' and node = (select id from
+				host_view where name = '%s') """ % (id, host))
 

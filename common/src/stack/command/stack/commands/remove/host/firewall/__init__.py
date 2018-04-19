@@ -41,7 +41,7 @@ class Command(stack.commands.remove.host.command,
 			raise ArgRequired(self, 'host')
 
 		for host in self.getHostnames(args):
-			sql = """node = (select id from nodes where
+			sql = """node = (select id from host_view where
 				name = '%s')""" % (host)
 
 			self.deleteRule('node_firewall', rulename, sql)

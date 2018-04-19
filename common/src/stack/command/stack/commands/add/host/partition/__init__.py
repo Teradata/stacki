@@ -64,8 +64,8 @@ class Command(stack.commands.Command,
 			])
 
 		for host in hosts:
-			sql_cmd = """select p.id from partitions p, nodes n
-				where p.node=n.id and n.name="%s" and
+			sql_cmd = """select p.id from partitions p, host_view hv
+				where p.node=hv.id and hv.name="%s" and
 				p.device="%s" """ % (host, device)
 			self.db.execute(sql_cmd)
 			r = self.db.fetchall()
@@ -76,7 +76,7 @@ class Command(stack.commands.Command,
 				(node, device, mountpoint, uuid, sectorstart,
 				PartitionSize, PartitionID, FsType,
 				PartitionFlags, FormatFlags) values
-				((select id from nodes where name="%s"),
+				((select id from host_view where name="%s"),
 				'%s','%s','%s','%s','%s','%s','%s','%s','%s')""" \
 				% (host, device, mountpoint, uuid, sectorstart,
 				size, partitionid, fs, partitionflags, formatflags)

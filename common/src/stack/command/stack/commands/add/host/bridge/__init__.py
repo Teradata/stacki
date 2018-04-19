@@ -46,9 +46,9 @@ class Command(stack.commands.Command,
 
 		for host in hosts:
 			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.main, nt.options ' +\
-				'from networks nt, nodes n, subnets s where ' +\
-				'nt.node=n.id and nt.subnet=s.id and ' +\
-				'n.name="%s"' % host
+				'from networks nt, host_view hv, subnets s where ' +\
+				'nt.node=hv.id and nt.subnet=s.id and ' +\
+				'hv.name="%s"' % host
 			
 			if network:
 				sql = sql + ' and s.name="%s"' % network

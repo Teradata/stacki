@@ -20,7 +20,7 @@ class Plugin(stack.commands.Plugin):
 
 		for row in self.db.select(
 			"""
-			name, comment from nodes n
+			name, comment from host_view
 			"""):
 
 			if row[0] in host_info:

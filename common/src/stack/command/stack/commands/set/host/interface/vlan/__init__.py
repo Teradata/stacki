@@ -58,16 +58,16 @@ class Command(stack.commands.set.host.command):
 		for host in self.getHostnames(args):
 			if interface:
 				self.db.execute("""
-					update networks net, nodes n
+					update networks net, host_view hv
 					set net.vlanid = IF(%d = 0, NULL, %d)
 					where net.device like '%s' and
-					n.name = '%s' and net.node = n.id
+					hv.name = '%s' and net.node = hv.id
 					""" % (vlanid, vlanid, interface, host))
 			else:
 				self.db.execute("""
-					update networks net, nodes n
+					update networks net, host_view hv
 					set net.vlanid = IF(%d = 0, NULL, %d)
 					where net.mac like'%s' and
-					n.name = '%s' and net.node = n.id
+					hv.name = '%s' and net.node = hv.id
 					""" % (vlanid, vlanid, mac, host))
 

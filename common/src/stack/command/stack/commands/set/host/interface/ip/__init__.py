@@ -58,16 +58,16 @@ class Command(stack.commands.set.host.command):
 
 		if interface:
 			self.db.execute("""
-				update networks, nodes set 
+				update networks, host_view set 
 				networks.ip=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
+				host_view.name='%s' and networks.node=host_view.id and
 				networks.device like '%s'
 				""" % (ip, host, interface))
 		else:
 			self.db.execute("""
-				update networks, nodes set 
+				update networks, host_view set 
 				networks.ip=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
+				host_view.name='%s' and networks.node=host_view.id and
 				networks.mac like '%s'
 				""" % (ip, host, mac))
 

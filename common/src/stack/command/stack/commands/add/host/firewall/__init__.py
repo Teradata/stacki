@@ -107,7 +107,7 @@ class Command(stack.commands.add.firewall.command,
 		hosts = self.getHostnames(args)
 
 		for host in hosts:
-			sql = """node = (select id from nodes where
+			sql = """node = (select id from host_view where
 				name = '%s') and""" % host
 
 			self.checkRule('node_firewall', sql, service, network,
@@ -118,7 +118,7 @@ class Command(stack.commands.add.firewall.command,
 		# all the rules are valid, now let's add them
 		#
 		for host in hosts:
-			sql = "(select id from nodes where name='%s'), " % host
+			sql = "(select id from host_view where name='%s'), " % host
 
 			self.insertRule('node_firewall', 'node, ', sql, service,
 				network, outnetwork, chain, action, protocol,

@@ -9,6 +9,13 @@ import sys
 import subprocess
 import json
 
+from .component   import Component
+from .host        import Host
+from .appliance   import Appliance
+from .environment import Environment
+from .box         import Box
+from .bootaction  import BootAction
+
 __stack__ = '/opt/stack/bin/stack'
 
 rc = None
@@ -73,5 +80,7 @@ def Call(cmd, args=None, format='json', sudo=False, *, stderr=True):
 	if s:
 		return s.split('\n')
 	return [ ]
+
+
 
 

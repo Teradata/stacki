@@ -227,7 +227,7 @@ class Command(stack.commands.HostArgumentProcessor,
 				name = '%s' """ % name)
 			tableid, = self.db.fetchone()
 		elif scope == 'host':
-			self.db.execute("""select id from nodes where
+			self.db.execute("""select id from host_view where
 				name = '%s' """ % name)
 			tableid, = self.db.fetchone()
 

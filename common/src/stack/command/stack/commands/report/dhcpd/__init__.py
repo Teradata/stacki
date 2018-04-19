@@ -56,12 +56,12 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		servers = {}
 		for row in self.db.select("""
-			s.name, n.ip from
-			nodes nd, subnets s, networks n where 
-			s.id	   = n.subnet and 
+			s.name, net.ip from
+			host_view hv, subnets s, networks net where 
+			s.id	   = net.subnet and 
 			s.pxe	   = TRUE     and 
-			n.node	   = nd.id    and 
-			nd.name	   = '%s'
+			net.node   = hv.id    and 
+			hv.name	   = '%s'
 			""" % self.db.getHostname()):
 			servers[row[0]]	   = row[1]
 			servers['default'] = row[1]
@@ -70,10 +70,10 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		shared_networks = {}
 		for (netname, network, netmask, gateway, zone, device) in self.db.select("""
-			s.name, s.address, s.mask, s.gateway, s.zone, n.device from 
-			subnets s, networks n where
+			s.name, s.address, s.mask, s.gateway, s.zone, net.device from 
+			subnets s, networks net where
 			pxe	= TRUE and
-			node	= (select id from nodes where name='%s') and
+			node	= (select id from host_view where name='%s') and
 			subnet	= s.id
 			""" % self.db.getHostname()):
 
@@ -137,14 +137,14 @@ class Command(stack.commands.HostArgumentProcessor,
 					self.addOutput('', '}\n')
 
 		data = { }
-		for row in self.db.select("name from nodes order by rack, rank"):
+		for row in self.db.select("name from host_view order by rack, rank"):
 			data[row[0]] = []
 			
 		for row in self.db.select("""
-			nodes.name, n.mac, n.ip, n.device
-			from networks n, nodes where
-			n.node = nodes.id and
-			n.mac is not NULL
+			hv.name, net.mac, net.ip, net.device
+			from networks net, host_view hv where
+			net.node = hv.id and
+			net.mac is not NULL
 			"""):
 			data[row[0]].append(row[1:])
 
@@ -165,10 +165,10 @@ class Command(stack.commands.HostArgumentProcessor,
 				netname = None
 				if ip:
 					r = self.db.select("""
-					s.name from subnets s, networks nt,
-					nodes n where nt.node=n.id and
-					n.name='%s' and nt.subnet=s.id and
-					s.pxe = TRUE and nt.ip = '%s'""" % (name, ip))
+					s.name from subnets s, networks net,
+					host_view hv where net.node=hv.id and
+					hv.name='%s' and net.subnet=s.id and
+					s.pxe = TRUE and net.ip = '%s'""" % (name, ip))
 					if r:
 						(netname, ) = r[0]
 				if ip and mac and dev and netname and not aws:
@@ -196,10 +196,10 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
-		(ip, channel), = self.db.select("""nt.ip,
-			nt.channel from networks nt, nodes n
-			where n.name='%s' and nt.device='%s' and
-			nt.node=n.id""" % (host, device))
+		(ip, channel), = self.db.select("""net.ip,
+			net.channel from networks net, host_view hv
+			where hv.name='%s' and net.device='%s' and
+			net.node=hv.id""" % (host, device))
 		if channel:
 			return self.resolve_ip(host, channel)
 		return ip
@@ -212,11 +212,11 @@ class Command(stack.commands.HostArgumentProcessor,
 		devices = ''
 		for device, in self.db.select("""
 			device from
-			networks n, subnets s
-			where n.node = (select id from nodes where name = '%s') and
+			networks net, subnets s
+			where net.node = (select id from host_view where name = '%s') and
 			s.pxe = TRUE and
-			n.subnet = s.id and
-			n.ip is not NULL
+			net.subnet = s.id and
+			net.ip is not NULL
 			""" % self.db.getHostname()):
 
 			# since sles doesn't use seperate config files for virtual 

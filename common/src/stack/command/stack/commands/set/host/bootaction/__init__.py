@@ -65,10 +65,10 @@ class Command(stack.commands.set.host.command):
 		for host in hosts:
 			self.db.execute(
 				"""
-				update nodes
+				update host_view
 				set 
 				%s = (select id from bootnames where name='%s' and type='%s')
-				where nodes.name = '%s'
+				where name = '%s'
 				""" % (types[req_type], req_action, req_type, host))
 
 		if req_sync:

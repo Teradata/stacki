@@ -101,7 +101,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		"""
 		# Use host based routing always on the frontend
 		# Might change in the future but the default is True
-		if self.db.getHostAppliance(host) == 'frontend':
+		if self.db.getComponentAppliance(host) == 'frontend':
 			return True
 
 		# Use Switch based routing if host has a switch associated to it

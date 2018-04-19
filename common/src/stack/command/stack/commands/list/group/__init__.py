@@ -29,9 +29,9 @@ class Command(stack.commands.list.command):
 			groups[row[0]] = []
 
 		for row in self.db.select(
-			"""g.name, n.name
-			from groups g, memberships m, nodes n
-			where n.id = m.nodeid and g.id = m.groupid
+			"""g.name, hv.name
+			from groups g, memberships m, host_view hv
+			where hv.id = m.nodeid and g.id = m.groupid
 			"""):
 			
 			groupname, hostname = row

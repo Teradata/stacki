@@ -15,5 +15,5 @@ class Plugin(stack.commands.Plugin):
 	def run(self, hosts):
 		for host in hosts:
 			self.owner.db.execute("""delete from memberships
-				where nodeid = (select id from nodes where name = '%s') """ %
+				where nodeid = (select id from host_view where name = '%s') """ %
 				(host))

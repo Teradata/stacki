@@ -40,9 +40,9 @@ class Command(stack.commands.list.host.command):
 		boot = {}
 		for h, b in self.db.select(
 			"""
-			n.name, b.action from nodes n
+			hv.name, b.action from host_view hv
 			left join boot b on
-			n.id = b.node
+			hv.id = b.node
 			"""):
 			boot[h] = b
 

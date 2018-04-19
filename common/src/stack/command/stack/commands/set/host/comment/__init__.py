@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import stack.api
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
@@ -33,17 +34,11 @@ class Command(stack.commands.set.host.command):
 
 	def run(self, params, args):
 		
-		(comment, ) = self.fillParams([
-			('comment', None, True)
-			])
+		(comment, ) = self.fillParams([ ('comment', None, True) ])
 		
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		if len(comment) > 140:
-			raise CommandError(self, 'comments must be no longer than 140 characters')
-
-		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set comment="%s" where
-				name='%s'""" % (comment, host))
+		component = stack.api.Component()
+		component.set_multiple(self.getHostnames(args), comment=comment)
 		

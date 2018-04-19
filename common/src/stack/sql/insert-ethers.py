@@ -396,7 +396,7 @@ class InsertEthers(GUI):
 		# rows, just like we want.
 
 		query = """
-			select rank,max(rank) from nodes where
+			select rank,max(rank) from host_view where
 			appliance = %d and rack = %d
 			group by rack
 			""" % (self.appliance, self.cabinet)
@@ -527,7 +527,7 @@ class InsertEthers(GUI):
 		if s != 0:
 			raise InsertError("Could not insert %s into database" % nodename)
 
-		rows = self.sql.execute('select id from nodes where name="%s"' %
+		rows = self.sql.execute('select id from host_view where name="%s"' %
 			nodename)
 		if not rows:
 			raise InsertError("Could not find %s in database" % nodename)
@@ -645,7 +645,7 @@ class InsertEthers(GUI):
 			raise ValueError("Apache log file not well formed!")
 
 		nodeid = int(self.sql.getNodeId(fields[0]))
-		self.sql.execute('select name from nodes where id=%d' % nodeid)
+		self.sql.execute('select name from host_view where id=%d' % nodeid)
 		try:
 			name, = self.sql.fetchone()
 		except:
@@ -748,7 +748,7 @@ class InsertEthers(GUI):
 			self.initializeRank()
 
 			if self.hostname:
-				query = 'select id from nodes ' +\
+				query = 'select id from host_view ' +\
 					'where name="%s"' % self.hostname
 				rows = self.sql.execute(query)
 				if rows:

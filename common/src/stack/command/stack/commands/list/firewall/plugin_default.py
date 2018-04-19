@@ -1,30 +1,11 @@
-# $Id$
+# @copyright@
+# @copyright@
 #
 # @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.3  2010/05/07 23:13:32  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.2  2010/05/04 22:04:15  bruno
-# more firewall commands
-#
-# Revision 1.1  2010/04/30 22:07:16  bruno
-# first pass at the firewall commands. we can do global and host level
-# rules, that is, we can add, remove, open (calls add), close (also calls add),
-# list and dump the global rules and the host-specific rules.
-#
-#
 
 import json
 import stack.commands
@@ -172,7 +153,7 @@ class Plugin(stack.commands.Plugin):
 			self.db.execute("""select name, tabletype, insubnet,
 				outsubnet, service, protocol, chain, action,
 				flags, comment from os_firewall where os =
-				(select os from nodes where name = '%s')"""
+				(select os from host_view where name = '%s')"""
 				% (host))
 
 			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
@@ -204,7 +185,7 @@ class Plugin(stack.commands.Plugin):
 				outsubnet, service, protocol, chain, action,
 				flags, comment from appliance_firewall where
 				appliance =
-				(select appliance from nodes where name = '%s')
+				(select appliance from host_view where name = '%s')
 				""" % host)
 
 			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
@@ -246,7 +227,7 @@ class Plugin(stack.commands.Plugin):
 			self.db.execute("""select name, tabletype, insubnet,
 				outsubnet, service, protocol, chain, action,
 				flags, comment from node_firewall where node =
-				(select id from nodes where name = '%s')"""
+				(select id from host_view where name = '%s')"""
 				% (host))
 
 			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():

@@ -62,8 +62,8 @@ class Command(stack.commands.add.host.command):
 				insert into memberships 
 				(nodeid, groupid)
 				values (
-				(select id from nodes where name='%s'),
-				(select id from groups where name='%s'))
+				(select id from host_view where name='%s'),
+				(select id from groups    where name='%s'))
 				""" % (host, group))
 		
 

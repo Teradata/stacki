@@ -29,8 +29,8 @@ class Command(stack.commands.dump.host.command):
 		for host in self.getHostnames(args):
 			self.db.execute("""
 				select r.network, r.netmask, r.gateway,
-				r.subnet from node_routes r, nodes n where
-				r.node=n.id and n.name='%s'""" % host)
+				r.subnet from node_routes r, host_view hv where
+				r.node=hv.id and hv.name='%s'""" % host)
 
 			for n, m, g, s in self.db.fetchall():
 				if s:

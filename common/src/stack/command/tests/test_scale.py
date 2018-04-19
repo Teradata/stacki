@@ -48,6 +48,7 @@ def teardown_hosts():
 def test_scale():
 	print()
 
+#	for size in [ 200 ]:
 	for size in [ 10, 20, 30, 40, 100, 1000 ]:
 		print('size = %d' % size)
 

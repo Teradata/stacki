@@ -60,9 +60,9 @@ class Command(stack.commands.set.host.command):
 		boot = {}
 		for h, a in self.db.select(
 				"""
-				n.name, b.action from 
-				nodes n, boot b where
-				n.id = b.node
+				hv.name, b.action from 
+				host_view hv, boot b where
+				hv.id = b.node
 				"""):
 			boot[h] = a
 
@@ -72,7 +72,7 @@ class Command(stack.commands.set.host.command):
 				self.db.execute(
 					"""
 					update boot set action = '%s'
-					where node = (select id from nodes where name = '%s')
+					where node = (select id from host_view where name = '%s')
 					""" % (action, host))
 			else:
 				self.db.execute(
@@ -80,7 +80,7 @@ class Command(stack.commands.set.host.command):
 					insert into boot (action, node) values 
 					(
 					'%s',
-					(select id from nodes where name = '%s')
+					(select id from host_view where name = '%s')
 					) 
 					""" % (action, host))
 

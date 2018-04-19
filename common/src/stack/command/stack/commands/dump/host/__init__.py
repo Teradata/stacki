@@ -48,10 +48,10 @@ class Command(command):
 	def run(self, params, args):
 		for host in self.getHostnames(args):
 			self.db.execute("""select 
-				n.rack, n.rank, a.longname, 
-				n.osaction, n.installaction
-				from nodes n, appliances a where
-				n.appliance=a.id and n.name='%s'""" % host)
+				hv.rack, hv.rank, a.longname, 
+				hv.osaction, hv.installaction
+				from host_view hv, appliances a where
+				hv.appliance=a.id and hv.name='%s'""" % host)
 			(rack, rank, longname, osaction,
 				installaction) = self.db.fetchone()
 
