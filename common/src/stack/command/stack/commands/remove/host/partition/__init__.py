@@ -61,7 +61,7 @@ class Command(stack.commands.remove.host.command):
 		for host in self.getHostnames(args):
 			conditions = []
 			sql_cmd = """delete from partitions where
-				node=(select id from nodes
+				node=(select id from host_view
 				where name='%s')""" % host
 			if uuid:
 				conditions.append("uuid='%s'" % uuid)

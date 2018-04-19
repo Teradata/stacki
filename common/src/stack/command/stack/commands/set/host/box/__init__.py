@@ -37,7 +37,7 @@ class Command(stack.commands.set.host.command,
 		self.getBoxNames([ box ])
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set box=
+			self.db.execute("""update host_view set box=
 				(select id from boxes where name='%s')
 				where name='%s' """
 				% (box, host))

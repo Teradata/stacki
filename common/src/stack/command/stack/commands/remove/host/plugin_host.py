@@ -44,6 +44,13 @@ class Plugin(stack.commands.Plugin):
 		
 	def run(self, hosts):
 		for host in hosts:
-			self.owner.db.execute("""delete from nodes where
+			self.owner.db.execute(
+				"""
+				delete from hosts where
+				component = (select id from components where name = '%s')
+				""" % host)
+			self.owner.db.execute(
+				"""
+				delete from components where
 				name = '%s' """ % host)
 

@@ -56,33 +56,33 @@ class Command(stack.commands.set.host.interface.command):
 				if network and network == dict['network']:
 					valid = True
 					sql_set_cmd = """update networks net,
-					nodes n, subnets s set net.main = %d
-					where n.name = '%s' and s.name='%s'
-					and net.node = n.id and net.subnet=s.id""" % \
+					host_view hv, subnets s set net.main = %d
+					where hv.name = '%s' and s.name='%s'
+					and net.node = hv.id and net.subnet=s.id""" % \
 					(default, host, network)
 					break
 				if interface and interface == dict['interface']:
 					valid = True
 					sql_set_cmd = """update networks net,
-					nodes n set net.main = %d where
-					n.name = '%s' and net.node = n.id
+					host_view hv set net.main = %d where
+					hv.name = '%s' and net.node = hv.id
 					and net.device ='%s'""" % \
 					(default, host, interface)
 					break
 				if mac and mac == dict['mac']:
 					valid = True
 					sql_set_cmd = """update networks net,
-					nodes n set net.main = %d where
-					n.name = '%s' and net.node = n.id
+					host_view hv set net.main = %d where
+					hv.name = '%s' and net.node = hv.id
 					and net.mac ='%s'""" % \
 					(default, host, mac)
 					break
 			if valid:
 				if default:
 					sql_clear_cmd = """update networks net,
-						nodes n set net.main = 0
-						where n.name = '%s' and
-						net.node = n.id """ % (host)
+						host_view hv set net.main = 0
+						where hv.name = '%s' and
+						net.node = hv.id """ % (host)
 					self.db.execute(sql_clear_cmd)
 				self.db.execute(sql_set_cmd)
 			else:

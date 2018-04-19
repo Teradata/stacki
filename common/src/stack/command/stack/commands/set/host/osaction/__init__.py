@@ -64,7 +64,7 @@ class Command(stack.commands.set.host.command):
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-				update nodes set osaction=%s
+				update host_view set osaction=%s
 				where name='%s'
 				""" % (osaction, host))
 

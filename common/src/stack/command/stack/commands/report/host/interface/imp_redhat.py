@@ -183,9 +183,9 @@ class Implementation(stack.commands.Implementation):
 
 		if channel:
 			sql = """select net.options from
-				networks net, nodes n, subnets s where
-				net.device='%s' and n.name='%s' and
-				net.node=n.id""" % (channel, host)
+				networks net, host_view hv, subnets s where
+				net.device='%s' and hv.name='%s' and
+				net.node=hv.id""" % (channel, host)
 			rows = self.db.execute(sql)
 			if rows:
 				options = self.db.fetchone()

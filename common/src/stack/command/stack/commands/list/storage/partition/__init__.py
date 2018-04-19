@@ -100,7 +100,7 @@ class Command(stack.commands.list.command,
 					from storage_partition where scope = 'global') UNION ALL
 					(select a.name, p.device, p.mountpoint, p.size,
 					p.fstype, p.options, p.partid from storage_partition as p inner join
-					nodes as a on p.tableid=a.id where p.scope='host') UNION ALL
+					host_view as a on p.tableid=a.id where p.scope='host') UNION ALL
 					(select a.name, p.device, p.mountpoint, p.size,
 					p.fstype, p.options, p.partid from storage_partition as p inner join
 					appliances as a on p.tableid=a.id where
@@ -118,7 +118,7 @@ class Command(stack.commands.list.command,
 		elif scope == 'host':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope="host" and
-				tableid = (select id from nodes
+				tableid = (select id from host_view
 				where name = '%s') order by device,partid,fstype, size""" % args[0]
 
 		if not query:

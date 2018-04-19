@@ -53,7 +53,7 @@ class Command(stack.commands.remove.host.command):
 		for host in self.getHostnames(args):
 			res = self.db.execute("""
 			delete from node_routes where 
-			node = (select id from nodes where name='%s')
+			node = (select id from host_view where name='%s')
 			and network = '%s'
 			""" % (host, address))
 

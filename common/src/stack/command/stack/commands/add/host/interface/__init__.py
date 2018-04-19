@@ -120,7 +120,7 @@ class Command(stack.commands.add.host.command):
 
 			keys = [ 'node', 'mac' ]
 			vals = [
-				'(select id from nodes where name="%s")' % host,
+				'(select id from host_view where name="%s")' % host,
 				'"%s"' % mac
 				]
 
@@ -162,7 +162,7 @@ class Command(stack.commands.add.host.command):
 			
 			self.db.execute("""
 				insert into networks(node, device)
-				values ((select id from nodes where name='%s'), '%s')
+				values ((select id from host_view where name='%s'), '%s')
 				""" % (host, interface)) 
 
 		for key in fields:

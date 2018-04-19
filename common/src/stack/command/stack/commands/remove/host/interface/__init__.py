@@ -12,7 +12,7 @@
 
 
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import ParamRequired, CommandError, ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
@@ -58,19 +58,22 @@ class Command(stack.commands.remove.host.command):
 		if not all and not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+
 		networks = ()
 		for host in self.getHostnames(args):
 			if all:
 				self.db.execute("""
 					select id from networks where
-					node=(select id from nodes where name='%s')
+					node=(select id from host_view where name='%s')
 					""" %  (host))
 				networks = self.db.fetchall()
 			elif interface:
 				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
 					select id from networks where
-					node=(select id from nodes where name='%s')
+					node=(select id from host_view where name='%s')
 					and device like '%s'
 					""" %  (host, interface))
 
@@ -81,7 +84,7 @@ class Command(stack.commands.remove.host.command):
 				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
 					select id from networks where
-					node=(select id from nodes where name='%s')
+					node=(select id from host_view where name='%s')
 					and mac like '%s'
 					""" %  (host, mac))
 

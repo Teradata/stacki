@@ -68,7 +68,7 @@ class Command(stack.commands.Command,
 			   'environment': { 'fn'   : self.getEnvironmentNames,
 					    'table': 'environments' },
 			   'host'       : { 'fn'   : self.getHostnames,
-					    'table': 'nodes' }}
+					    'table': 'host_view' }}
 
 		if scope not in lookup.keys():
 			raise CommandError(self, 'invalid scope "%s"' % scope)

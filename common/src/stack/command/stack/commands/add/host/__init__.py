@@ -76,9 +76,13 @@ class Command(command):
 
 	"""
 
-	def addHost(self, host):
+	def run(self, params, args):
+		if len(args) != 1:
+			raise ArgUnique(self, 'host')
 
-		if self.db.select("select name from nodes where name like '%s'" % host):
+		host = args[0].lower()
+
+		if self.db.select("name from components where name like '%s'" % host):
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank
@@ -166,24 +170,42 @@ class Command(command):
 					   '"%s" os boot action for "%s" is missing' % 
 					   (osaction, osname))
 
+		# self.db.execute("""
+		# 	begin
+		# 	insert into components
+		# 	(name, appliance, rack, rank, type)
+		# 	values ('%s',
+		# 		(select id from appliances where name='%s'),
+		# 		'%s', '%s', 'host');
+		# 	insert into hosts
+		# 	(component, box)
+		# 	values ((select id from components where name='%s'),
+		# 		(select id from boxes      where name='%s'));
+		# 	end
+		# 	""" % (host, appliance, rack, rank,
+		# 	       host, box))
+
 		self.db.execute("""
-			insert into nodes
-			(name, appliance, box, rack, rank)
-			values (
-				'%s', 
-			 	(select id from appliances where name='%s'),
-			 	(select id from boxes      where name='%s'),
-				'%s', '%s'
-			) 
-			""" % (host, appliance, box, rack, rank))
+			insert into components
+			(name, appliance, rack, rank, type)
+			values ('%s',
+				(select id from appliances where name='%s'),
+				'%s', '%s', 'host')
+			""" % (host, appliance, rack, rank))
 
+		self.db.execute("""
+			insert into hosts
+			(component, box)
+			values ((select id from components where name='%s'),
+				(select id from boxes      where name='%s'))
+			""" % (host, box))
 
-		self.command('set.host.bootaction', 
-			     [ host, 'type=install', 'sync=false', 
+		self.command('set.host.bootaction',
+			     [ host, 'type=install', 'sync=false',
 			       'action=%s' % installaction ])
 
-		self.command('set.host.bootaction', 
-			     [ host, 'type=os', 'sync=false', 
+		self.command('set.host.bootaction',
+			     [ host, 'type=os', 'sync=false',
 			       'action=%s' % osaction ])
 
 		if environment:
@@ -191,9 +213,3 @@ class Command(command):
 				     [ host, "environment=%s" % environment ])
 			
 
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgUnique(self, 'host')
-
-		host = args[0].lower()
-		self.addHost(host)

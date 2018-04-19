@@ -44,7 +44,7 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-				update nodes set environment=
+				update host_view set environment=
 				(select id from environments where name='%s')
 				where name='%s'
 				""" % (environment, host))

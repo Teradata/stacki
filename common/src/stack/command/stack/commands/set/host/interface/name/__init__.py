@@ -68,16 +68,16 @@ class Command(stack.commands.set.host.command):
 
 		if interface:
 			self.db.execute("""
-				update networks, nodes set 
-				networks.name='%s' where nodes.name='%s'
-				and networks.node=nodes.id and
+				update networks, host_view set 
+				networks.name='%s' where host_view.name='%s'
+				and networks.node=host_view.id and
 				networks.device like '%s'
 				""" % (name, host, interface))
 		else:
 			self.db.execute("""
-				update networks, nodes set 
-				networks.name='%s' where nodes.name='%s'
-				and networks.node=nodes.id and
+				update networks, host_view set 
+				networks.name='%s' where host_view.name='%s'
+				and networks.node=host_view.id and
 				networks.mac like '%s'
 				""" % (name, host, mac))
 

@@ -46,9 +46,9 @@ class Command(stack.commands.list.host.command):
 
 		for hostName, groupName in self.db.select(
 			"""
-			n.name, g.name from
-			groups g, memberships m, nodes n where
-			n.id = m.nodeid and g.id = m.groupid
+			hv.name, g.name from
+			groups g, memberships m, host_view hv where
+			hv.id = m.nodeid and g.id = m.groupid
 			order by g.name
 			"""):
 			if hostName not in membership:

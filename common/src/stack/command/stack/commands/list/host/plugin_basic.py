@@ -17,17 +17,17 @@ class Plugin(stack.commands.Plugin):
 
 		for row in self.db.select(
 			"""
-			n.name, n.rack, n.rank, 
+			hv.name, hv.rack, hv.rank, hv.make, hv.model,
 			a.name,
 			o.name, b.name, 
 			e.name, 
 			bno.name, bni.name from 
-			nodes n 
-			left join appliances a   on n.appliance     = a.id
-			left join boxes b        on n.box           = b.id 
-			left join environments e on n.environment   = e.id 
-			left join bootnames bno  on n.osaction      = bno.id 
-			left join bootnames bni  on n.installaction = bni.id
+			host_view hv
+			left join appliances a   on hv.appliance     = a.id
+			left join boxes b        on hv.box           = b.id 
+			left join environments e on hv.environment   = e.id 
+			left join bootnames bno  on hv.osaction      = bno.id 
+			left join bootnames bni  on hv.installaction = bni.id
 			left join oses o	 on b.os = o.id
 			"""):
 
@@ -36,6 +36,8 @@ class Plugin(stack.commands.Plugin):
 	
 		return { 'keys' : [ 'rack',
 				    'rank',
+				    'make',
+				    'model',
 				    'appliance',
 				    'os',
 				    'box',

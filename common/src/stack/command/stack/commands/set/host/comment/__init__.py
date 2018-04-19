@@ -44,6 +44,6 @@ class Command(stack.commands.set.host.command):
 			raise CommandError(self, 'comments must be no longer than 140 characters')
 
 		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set comment="%s" where
+			self.db.execute("""update host_view set comment="%s" where
 				name='%s'""" % (comment, host))
 		

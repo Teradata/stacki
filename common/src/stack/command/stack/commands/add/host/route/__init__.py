@@ -87,10 +87,10 @@ class Command(stack.commands.add.host.command):
 		for host in hosts:
 			_rows = self.db.select("""
 				r.network, r.interface, r.gateway from
-				node_routes r, nodes n where
-				r.node=n.id and
+				node_routes r, host_view hv where
+				r.node=hv.id and
 				r.network='%s' and
-				n.name='%s'
+				hv.name='%s'
 				""" % (address, host))
 			if _rows:
 				if host != self.db.getHostname('localhost'):
@@ -128,7 +128,7 @@ class Command(stack.commands.add.host.command):
 		
 		for host in hosts:	
 			self.db.execute("""insert into node_routes values 
-				((select id from nodes where name='%s'),
+				((select id from host_view where name='%s'),
 				'%s', '%s', '%s', %s, '%s')""" %
 				(host, address, netmask, gateway, subnet, interface))
 			

@@ -16,9 +16,9 @@ class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		exists = False
 		for row in self.db.select("""
 			* from
-			networks net, nodes n where
-			n.name = '%s' and net.device = '%s' and
-			n.id = net.node
+			networks net, host_view hv where
+			hv.name = '%s' and net.device = '%s' and
+			hv.id = net.node
 			""" % (host, interface)):
 			exists = True
 
@@ -31,9 +31,9 @@ class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 		interface = None
 		for interface, in self.db.select("""
 			net.device from
-			networks net, subnets s, nodes n where
-			n.name='%s' and s.name='%s' and
-			n.id = net.node and
+			networks net, subnets s, host_view hv where
+			hv.name='%s' and s.name='%s' and
+			hv.id = net.node and
 			s.id = net.subnet
 			""" % (host, network)):
 			pass

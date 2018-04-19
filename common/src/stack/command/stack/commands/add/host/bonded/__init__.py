@@ -121,9 +121,9 @@ class Command(stack.commands.add.host.command):
 		for i in interfaces:
 			rows = self.db.execute("""
 				select net.device, net.main
-				from networks net, nodes n where
-				net.device = '%s' and n.name = '%s'
-				and net.node = n.id""" % (i, host))
+				from networks net, host_view hv where
+				net.device = '%s' and hv.name = '%s'
+				and net.node = hv.id""" % (i, host))
 
 			if rows == 0:
 				raise CommandError(self, 'interface "%s" does not exist for host "%s"' % (i, host))

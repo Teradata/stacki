@@ -49,9 +49,9 @@ class Command(stack.commands.set.host.command):
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-				update networks, nodes set 
+				update networks, host_view set 
 				networks.mac=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
+				host_view.name='%s' and networks.node=host_view.id and
 				networks.device like '%s'
 				""" % (mac, host, interface))
 

@@ -103,7 +103,7 @@ class Command(stack.commands.list.command,
 				raidlevel, arrayid, options
 				from storage_controller where
 				scope = "host" and tableid = (select
-				id from nodes where name = '%s')
+				id from host_view where name = '%s')
 				order by enclosure, adapter, slot""" % args[0]
 
 		if not query:

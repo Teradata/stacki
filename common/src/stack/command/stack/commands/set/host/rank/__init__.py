@@ -42,7 +42,7 @@ class Command(stack.commands.set.host.command):
 
 		for host in self.getHostnames(args):
 			self.db.execute("""
-				update nodes set rank='%s' where
+				update host_view set rank='%s' where
 				name='%s'
 				""" % (rank, host))
 				

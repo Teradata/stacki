@@ -50,10 +50,10 @@ class Command(stack.commands.report.command):
 
 		s = ""
 
-		self.db.execute("select n.name, nt.ip, nt.name " +
-			"from subnets s, nodes n, networks nt "	 +
+		self.db.execute("select hv.name, net.ip, net.name " +
+			"from subnets s, host_view hv, networks net "	 +
 			"where s.zone='%s' " % (zone)	+
-			"and nt.subnet=s.id and nt.node=n.id")
+			"and net.subnet=s.id and net.node=hv.id")
 
 		for (name, device, network_name) in self.db.fetchall():
 
@@ -71,8 +71,8 @@ class Command(stack.commands.report.command):
 			# network names with aliases. Nothing else will
 			# be allowed
 			self.db.execute('select a.name from aliases a, ' +
-				'networks nt where nt.id=a.network and '	+
-				'nt.device="%s"' % (device))
+				'networks net where net.id=a.network and '	+
+				'net.device="%s"' % (device))
 
 			for alias, in self.db.fetchall():
 				s += '%s CNAME %s\n' % (alias, record)
@@ -105,10 +105,10 @@ class Command(stack.commands.report.command):
 
 		s = ''
 		subnet_len = len(r_sn.split('.'))
-		self.db.execute('select nt.name, n.name, nt.ip, s.zone ' +
-				'from networks nt, subnets s, nodes n where ' +
+		self.db.execute('select net.name, hv.name, net.ip, s.zone ' +
+				'from networks net, subnets s, host_view hv where ' +
 				's.name="%s" ' % (s_name)	+
-				'and nt.subnet=s.id and nt.node=n.id')
+				'and net.subnet=s.id and net.node=hv.id')
 
 		# Remove all elements of the IP address that are
 		# present in the subnet. This is done by counting

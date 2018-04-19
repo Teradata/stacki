@@ -53,15 +53,15 @@ class Command(stack.commands.list.host.command):
 			data[host] = []
 		for row in self.db.select("""
 			distinctrow
-			n.name,
+			hv.name,
 			IF(net.subnet, sub.name, NULL),
 			net.device, net.mac, net.main, net.ip,
 			net.module, net.name, net.vlanid, net.options,
 			net.channel
 			from
-			nodes n, networks net, subnets sub
+			host_view hv, networks net, subnets sub
 			where
-			net.node=n.id
+			net.node=hv.id
 			and (net.subnet=sub.id or net.subnet is NULL)
 			order by net.device
 			"""):

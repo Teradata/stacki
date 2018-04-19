@@ -46,12 +46,12 @@ class Command(stack.commands.Command,
 
 		for (ip, host, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if (n.name <> NULL, n.name, nd.name), 
+				net.ip, if (net.name <> NULL, net.name, hv.name), 
 				s.address, s.mask from 
-				networks n, appliances a, subnets s, nodes nd 
+				networks net, appliances a, subnets s, host_view hv 
 				where 
-				n.node=nd.id and nd.appliance=a.id and 
-				a.name='frontend' and n.subnet=s.id and 
+				net.node=hv.id and hv.appliance=a.id and 
+				a.name='frontend' and net.subnet=s.id and 
 				s.name='private'
 				"""):
 			readonly['Kickstart_PrivateKickstartHost'] = ip
@@ -62,12 +62,12 @@ class Command(stack.commands.Command,
 
 		for (ip, host, zone, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if (n.name <> NULL, n.name, nd.name), 
+				net.ip, if (net.name <> NULL, net.name, hv.name), 
 				s.zone, s.address, s.mask from 
-				networks n, appliances a, subnets s, nodes nd 
+				networks net, appliances a, subnets s, host_view hv
 				where 
-				n.node=nd.id and nd.appliance=a.id and
-				a.name='frontend' and n.subnet=s.id and 
+				net.node=hv.id and hv.appliance=a.id and
+				a.name='frontend' and net.subnet=s.id and 
 				s.name='public'
 				"""):
 			readonly['Kickstart_PublicAddress'] = ip
@@ -101,7 +101,7 @@ class Command(stack.commands.Command,
 		return attributes
 
 
-	def addHostAttrs(self, attributes):
+	def addComponentAttrs(self, attributes):
 		readonly = {}
 
 		versions = {}
@@ -123,6 +123,7 @@ class Command(stack.commands.Command,
 		for row in self.call('list.box'):
 			pallets = row['pallets'].split()
 			carts   = row['carts'].split()
+			osname  = row['os']
 			
 			name    = 'unknown'
 			version = 'unknown'
@@ -133,66 +134,82 @@ class Command(stack.commands.Command,
 
 			boxes[row['name']] = { 'pallets'    : pallets,
 					       'carts'	    : carts,
-					       'os.name'    : name, 
+					       'os'         : osname, 
 					       'os.version' : version }
 
-		for (name, environment, rack, rank) in self.db.select(
+		for (_name, _type, _environment, _rack, _rank, _make, _model) in self.db.select(
 				"""
-				n.name, e.name, n.rack, n.rank 
-				from nodes n
-				left join environments e on n.environment=e.id
+				c.name, c.type, e.name, c.rack, c.rank, c.make, c.model
+				from components c
+				left join environments e on c.environment=e.id
 				"""):
-			readonly[name]	       = {}
-			readonly[name]['rack'] = rack
-			readonly[name]['rank'] = rank
-			if environment:
-				readonly[name]['environment'] = environment
+			readonly[_name]	             = {}
+			readonly[_name]['component'] = _name
+			readonly[_name]['type']      = _type
+			readonly[_name]['rack']      = _rack
+			readonly[_name]['rank']      = _rank
+			if _make:
+				readonly[_name]['make']  = _make
+			if _model:
+				readonly[_name]['model'] = _model
+			if _environment:
+				readonly[_name]['environment'] = _environment
 
-		for (name, box, appliance, longname) in self.db.select(
-				""" 
-				n.name, b.name,
-				a.name, a.longname from
-				nodes n, boxes b, appliances a where
-				n.appliance=a.id and n.box=b.id
+		for (_name, _appliance, _longname) in self.db.select(
+				"""
+				c.name, a.name, a.longname
+				from components c, appliances a where
+				c.appliance=a.id
 				"""):
-			readonly[name]['box']		     = box
-			readonly[name]['pallets']	     = boxes[box]['pallets']
-			readonly[name]['carts']		     = boxes[box]['carts']
-#			readonly[name]['os.name']            = boxes[box]['os.name']
-			readonly[name]['os.version']         = boxes[box]['os.version']
-			readonly[name]['appliance']	     = appliance
-			readonly[name]['appliance.longname'] = longname
+			readonly[_name]['appliance']	      = _appliance
+			readonly[_name]['appliance.longname'] = _longname
+
+		for (_name, _box) in self.db.select(
+				"""
+				hv.name, b.name
+				from host_view hv, boxes b where
+				hv.box=b.id
+				"""):
+			if _name in readonly:
+				readonly[_name]['box']        = _box
+				readonly[_name]['pallets']    = boxes[_box]['pallets']
+				readonly[_name]['carts']      = boxes[_box]['carts']
+				readonly[_name]['os']         = boxes[_box]['os']
+				readonly[_name]['os.version'] = boxes[_box]['os.version']
 
 				
-		for (name, zone, address) in self.db.select(
+		for (_name, _zone, _address) in self.db.select(
 				"""
-				n.name, s.zone, nt.ip from
-				networks nt, nodes n, subnets s where
-				nt.main=true and nt.node=n.id and
-				nt.subnet=s.id
+				c.name, s.zone, net.ip from
+				networks net, components c, subnets s where
+				net.main=true and net.node=c.id and
+				net.subnet=s.id
 				"""):
-			if address:
-				readonly[name]['hostaddr']   = address
-			readonly[name]['domainname'] = zone
+			if _address:
+				readonly[_name]['addr'] = _address
+			readonly[_name]['domainname'] = _zone
 
-		for host in readonly:
-			readonly[host]['os']	   = self.db.getHostOS(host)
-			readonly[host]['hostname'] = host
+		for _host in readonly:
+			if readonly[_host]['type'] == 'host':
+				# special host attribute names (should we deprecate these?)
+				readonly[_host]['hostname'] = readonly[_host]['component']
+				if 'addr' in readonly[_host]:
+					readonly[_host]['hostaddr'] = readonly[_host]['addr']
 
-		for row in self.call('list.host.group'):
-			for group in row['groups'].split():
-				readonly[row['host']]['group.%s' % group] = 'true'
-			readonly[row['host']]['groups'] = row['groups']
+		for _row in self.call('list.host.group'):
+			for group in _row['groups'].split():
+				readonly[_row['host']]['group.%s' % group] = 'true'
+			readonly[_row['host']]['groups'] = _row['groups']
 		
 
-		for host in attributes:
-			a  = attributes[host]
-			r  = readonly[host]
+		for component in attributes:
+			a  = attributes[component]
+			r  = readonly[component]
 			ro = True
 
 			if 'const_overwrite' in a:
 
-				# This attribute allows a host to overwrite
+				# This attribute allows a component to overwrite
 				# constant attributes. This is crazy dangerous,
 				# do not use this attribute.
 
@@ -201,11 +218,11 @@ class Command(stack.commands.Command,
 
 			if ro:
 				for key in r: # slam consts on top of attrs
-					a[key] = (r[key], None, 'const', 'host')
+					a[key] = (r[key], None, 'const', 'component')
 			else:
 				for key in r: # only add new consts to attrs
 					if key not in a:
-						a[key] = (r[key], None, 'const', 'host')
+						a[key] = (r[key], None, 'const', 'component')
 
 		return attributes
 
@@ -226,26 +243,36 @@ class Command(stack.commands.Command,
 		shadow	= self.str2bool(shadow)
 		var	= self.str2bool(var)
 		const	= self.str2bool(const)
-		lookup	= { 'global'	 : { 'fn'     : lambda x=None: [ 'global' ],
+		lookup	= { 'global'	 : { 'scope'  : 'global',
+					     'fn'     : lambda x=None: [ 'global' ],
 					     'const'  : self.addGlobalAttrs,
 					     'resolve': False,
 					     'table'  : None },
-			    'os'	 : { 'fn'     : self.getOSNames,
+			    'os'	 : { 'scope'  : 'os',
+					     'fn'     : self.getOSNames,
 					     'const'  : lambda x: x,
 					     'resolve': False,
 					     'table'  : 'oses' },
-			    'appliance'	 : { 'fn'     : self.getApplianceNames, 
+			    'appliance'	 : { 'scope'  : 'appliance',
+					     'fn'     : self.getApplianceNames, 
 					     'const'  : lambda x: x,
 					     'resolve': False,
 					     'table'  : 'appliances' },
-			    'environment': { 'fn'     : self.getEnvironmentNames,
+			    'environment': { 'scope'  : 'environment',
+					     'fn'     : self.getEnvironmentNames,
 					     'const'  : lambda x: x,
 					     'resolve': False,
 					     'table'  : 'environments' },
-			    'host'	 : { 'fn'     : self.getHostnames,
-					     'const'  : self.addHostAttrs,
+			    'component'  : { 'scope'  : 'component',
+					     'fn'     : self.getComponentNames,
+					     'const'  : self.addComponentAttrs,
 					     'resolve': True,
-					     'table'  : 'nodes' }}
+					     'table'  : 'components' },
+			    'host'	 : { 'scope'  : 'component',
+					     'fn'     : self.getHostnames,
+					     'const'  : self.addComponentAttrs,
+					     'resolve': True,
+					     'table'  : 'host_view' }}
 
 		if scope not in lookup.keys():
 			raise CommandError(self, 'invalid scope "%s"' % scope)
@@ -303,7 +330,7 @@ class Command(stack.commands.Command,
 
 		targets = sorted(lookup[scope]['fn'](args))
 
-		if resolve and scope == 'host':
+		if resolve and scope in [ 'component', 'host' ]:
 			for o in targets:
 				env = self.db.getHostEnvironment(o)
 				if env:

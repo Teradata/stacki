@@ -236,7 +236,7 @@ class Application(stack.app.Application):
 
 	
 	def getNodeId(self, host):
-		"""Lookup hostname in nodes table. Host may be a name
+		"""Lookup hostname in host_view table. Host may be a name
 		or an IP address. Returns None if not found."""
 
 		# Is host already an ID?
@@ -249,8 +249,8 @@ class Application(stack.app.Application):
 		# Try by name
 
 		self.execute(
-			"""select networks.node from nodes,networks where
-			networks.node = nodes.id and networks.name = "%s" and
+			"""select networks.node from host_view,networks where
+			networks.node = host_view.id and networks.name = "%s" and
 			(networks.device is NULL or
 			networks.device not like 'vlan%%') """ % (host))
 		try:
@@ -262,8 +262,8 @@ class Application(stack.app.Application):
 		# Try by IP
 	
 		self.execute(
-			"""select networks.node from nodes,networks where
-			networks.node = nodes.id and networks.ip ="%s" and
+			"""select networks.node from host_view,networks where
+			networks.node = host_view.id and networks.ip ="%s" and
 			(networks.device is NULL or
 			networks.device not like 'vlan%%') """ % (host))
 		try:

@@ -28,10 +28,6 @@ class Command(stack.commands.add.environment.command):
 	and apache).
 	</param>
 
-	<example cmd='set environment attr test sge False'>
-	Sets the sge attribution to False for test nodes
-	</example>
-
 	"""
 
 	def run(self, params, args):

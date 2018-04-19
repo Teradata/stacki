@@ -55,7 +55,7 @@ class Command(stack.commands.add.host.command):
 		# check if the key already exists
 		#
 		rows = self.db.execute("""select * from public_keys where
-			node = (select id from nodes where name = '%s') and
+			node = (select id from host_view where name = '%s') and
 			public_key = '%s' """ % (host, public_key))
 
 		if rows == 1:
@@ -66,6 +66,6 @@ class Command(stack.commands.add.host.command):
 		# add the key
 		#
 		self.db.execute("""insert into public_keys (node, public_key)
-			values ((select id from nodes where name = '%s'),
+			values ((select id from host_view where name = '%s'),
 			'%s') """ % (host, public_key))
 

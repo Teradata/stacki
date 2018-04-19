@@ -42,11 +42,11 @@ class Command(stack.commands.HostArgumentProcessor,
 			s = '-A %s' % rule['chain']
 			if rule['network'] != 'all' and \
 				rule['network'] is not None:
-				query = "select nt.device from networks nt," +\
-					"nodes n, subnets s where " +\
+				query = "select net.device from networks net," +\
+					"host_view hv, subnets s where " +\
 					"s.name='%s' and " % (rule['network']) +\
-					"n.name='%s' and " % host +\
-					"nt.node=n.id and nt.subnet=s.id"
+					"hv.name='%s' and " % host +\
+					"net.node=hv.id and net.subnet=s.id"
 				rows = self.db.execute(query)
 				if rows:
 					interface = self.db.fetchone()[0]
@@ -55,11 +55,11 @@ class Command(stack.commands.HostArgumentProcessor,
 					continue
 			if rule['output-network'] != 'all' and \
 				rule['output-network'] is not None:
-				query = "select nt.device from networks nt," +\
-					"nodes n, subnets s where " +\
+				query = "select net.device from networks net," +\
+					"host_view hv, subnets s where " +\
 					"s.name='%s' and " % (rule['output-network']) +\
-					"n.name='%s' and " % host +\
-					"nt.node=n.id and nt.subnet=s.id"
+					"hv.name='%s' and " % host +\
+					"net.node=hv.id and net.subnet=s.id"
 				rows = self.db.execute(query)
 				if rows:
 					interface = self.db.fetchone()[0]

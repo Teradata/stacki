@@ -23,6 +23,7 @@ import json
 import marshal
 import hashlib
 import subprocess
+from collections import OrderedDict
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
@@ -484,10 +485,177 @@ class RollArgumentProcessor:
 		return pallets
 
 
-class HostArgumentProcessor:
+class ComponentArgumentProcessor:
+	"""An Interface class to add the ability to process component arguments."""
+
+	def getComponentNames(self, names=[], *, 
+			      components=None, managed_only=False, filter=None, order='asc'):
+		"""Expands the given list of names to valide component
+		names. A name can be:
+
+		- component name
+		- a:appliance
+		- e:environment
+		- o:os
+		- b:box
+		- g:group
+		- r:rack
+		- where COND (e.g. 'where appliance=="backend"')
+
+		Any combination of these is valid.  If the names list
+		is empty a list of all hosts in the cluster is
+		returned.
+		
+		The 'filter' flag is a callable (function, lambda, etc)
+		that will be passed along with the final host list to filter().
+		Equivalent code would look something like this:
+		[host for host in final_host_list if filter(host)]
+
+		Because filter() requires the callable to have only one arg,
+		to allow access to 'self' as well as the host, host_filter()
+		and 'self' are frozen with 'functools.partial', even if 'self'
+		isn't required.	 The second arg will be each host name in the list.
+		For example:
+		host_filter = lambda self, host: self.db.getHostOS(host) == 'redhat'
+		"""
+
+		explicit = { }
+		if components is None:
+			components = OrderedDict()
+			for component, in self.db.select(
+				"""
+				c.name from 
+				components c, appliances a where
+				a.id = c.appliance
+				order by rack, rank %s
+				""" % order):
+				if names:
+					components[component] = False
+				else:
+					components[component] = True
+
+		cond = [ ]
+		if names:
+			for name in names:
+				tokens = name.split(':', 1)
+				if len(tokens) == 2:
+					scope, target = tokens
+					if scope == 'a':
+						cond.append('appliance == "%s"' % target)
+					elif scope == 'e':
+						cond.append('environment == "%s"' % target)
+					elif scope == 'o': # might not exist
+						cond.append('os == "%s"' % target)
+					elif scope == 'b': # might not exist
+						cond.append('box == "%s"' % target)
+					elif scope == 'g':
+						cond.append('group.%s == True' % target)
+					elif scope == 'r':
+						cond.append('rack == "%s"' % target)
+				elif name.find('where') == 0:
+					cond.append(name[5:])
+				elif '*' in name or '?' in name or '[' in name:
+					for component in fnmatch.filter(components.keys(), name):
+						components[component] = True
+				else:
+					name = name.lower()
+					if name not in components:
+						raise CommandError(self, 'unknown component "%s"' % name)
+					explicit[name] = components[name] = True
+
+		# Only calculate the attributes when needed
+		attrs = {}
+		if cond or managed_only:
+			for component in components:
+				attrs[component] = {}
+			for row in self.call('list.component.attr'):
+				_component = row['component']
+				if _component in components:
+					attrs[_component][row['attr']] = row['value']
+
+		for expr in cond:
+			for component in components:
+				try:
+					res = EvalCondExpr(expr, attrs[component])
+				except SyntaxError:
+					raise CommandError(self, 'group syntax "%s"' % expr)
+				if res:
+					components[component] = True
+					explicit[component]   = False
+
+		if managed_only:
+			for component in components:
+				managed = str2bool(attrs[component]['managed'])
+				if not managed and not explicit.get(component):
+					component[components] = False
+		
+		result = [ ]
+		for (component, enabled) in components.items():
+			if enabled:
+				result.append(component)
+
+		if filter:
+			# filter(func, iterable) requires that func take a single argument
+			# so we use functools.partial to get a function with one argument 'locked'
+			part_func = partial(filter, self)
+			result = filter(part_func, result)
+			
+		return result
+
+
+
+
+class HostArgumentProcessor(ComponentArgumentProcessor):
 	"""An Interface class to add the ability to process host arguments."""
-	
-	def getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
+
+	def getHostnames(self, names=[], managed_only=False, subnet=None, filter=None, order='asc'):
+
+		# Be kind to the user and always place "frontend" hosts at the
+		# top of the list.
+
+		components = OrderedDict()
+		for cond in [ 'a.name = "frontend"', 'a.name != "frontend"' ]:
+			for host, in self.db.select(
+				"""
+				hv.name from 
+				host_view hv, appliances a where
+				%s and a.id = hv.appliance
+				order by rack, rank %s
+				""" % (cond, order)):
+#				component = self.db.getNodeName(host, subnet)
+				component = host
+				if names:
+					components[component] = False
+				else:
+					components[component] = True
+
+		# Lookup the hostname so we can handle any valid name for the
+		# host (e.g. 'localhost')
+
+		hosts = [ ]
+		for name in names:
+			if re.search('^where|[:\*\?\[]', name):
+				hosts.append(name)
+			else:
+				hosts.append(self.db.getHostname(name))
+
+		hosts = self.getComponentNames(hosts, 
+					       managed_only=managed_only,
+					       components=components, 
+					       order=order)
+
+		# Adjust the hostname for the interface names for the given
+		# network
+
+		if subnet:
+			_hosts = [ ]
+			for host in hosts:
+				_hosts.append(self.db.getHostname(host, subnet))
+			hosts = _hosts
+
+		return hosts
+
+	def _getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
 		"""Expands the given list of names to valid cluster hostnames.	A name
 		can be:
 
@@ -529,20 +697,22 @@ class HostArgumentProcessor:
 		#
 		frontends = self.db.select(
 			"""
-			n.name from
-			nodes n, appliances a where a.name = "frontend"
-			and a.id = n.appliance order by rack, rank %s
-			""" % order)
+			hv.name from
+			host_view hv, appliances a where 
+			a.name = "frontend" and
+			a.id = hv.appliance 
+			order by rack, rank %s""" % order)
 				
 		#
 		# now get the backend appliances
 		#
 		backends = self.db.select(
 			"""
-			n.name from
-			nodes n, appliances a where a.name != "frontend"
-			and a.id = n.appliance order by rack, rank %s
-			""" % order)
+			hv.name from
+			host_view hv, appliances a where 
+			a.name != "frontend" and
+			a.id = hv.appliance 
+			order by rack, rank %s""" % order)
 
 		hosts = []
 
@@ -742,11 +912,13 @@ class PartitionArgumentProcessor:
 	def getPartitionsDB(self, host):
 		partitions = []
 
-		for (size, mnt, device) in self.db.select("""
-			p.partitionsize, p.mountpoint,
-			p.device from partitions p, nodes n where
-			p.node = n.id and n.name = '%s' order by device
-			""" % host):
+		for (size, mnt, device) in self.db.select(
+			"""
+			p.partitionsize, p.mountpoint, p.device from 
+			partitions p, host_view hv where
+			p.node = hv.id and 
+			hv.name = '%s' 
+			order by device""" % host):
 			
 			if mnt in ['', 'swap']:
 				continue
@@ -815,10 +987,13 @@ class PartitionArgumentProcessor:
 		#
 		# first find the boot disk
 		#
-		for (device, mnt) in self.db.select("""
+		for (device, mnt) in self.db.select(
+			"""
 			p.device, p.mountpoint from
-			partitions p, nodes n where p.node = n.id and
-			n.name = '%s' order by p.device""" % host):
+			partitions p, host_view hv where 
+			p.node = hv.id and
+			hv.name = '%s' 
+			order by p.device""" % host):
 			
 			dev = re.split('[0-9]+$', device)
 			disk = dev[0]
@@ -1256,7 +1431,11 @@ class DatabaseConnection:
 						
 		if self.link:
 			t0 = time.time()
-			result = self.link.execute(command)
+			try:
+				result = self.link.execute(command)
+			except:
+				Debug('SQL EX (error):  %s' % command)
+				raise
 			t1 = time.time()
 			Debug('SQL EX: %.3f %s' % ((t1 - t0), command))
 			return result
@@ -1286,9 +1465,9 @@ class DatabaseConnection:
 
 		for (name, osname) in self.select(
 				"""
-				n.name, o.name from
-				boxes b, nodes n, oses o
-				where n.box = b.id and
+				hv.name, o.name from
+				boxes b, host_view hv, oses o where
+				hv.box = b.id and
 				b.os = o.id
 				"""):
 			if name == host:
@@ -1302,10 +1481,9 @@ class DatabaseConnection:
 
 		for (name, appliance) in self.select(
 				"""
-				n.name, a.name from
-				nodes n, appliances a 
-				where
-				n.appliance = a.id
+				hv.name, a.name from
+				host_view hv, appliances a where
+				hv.appliance = a.id
 				"""):
 			if name == host:
 				return appliance
@@ -1318,10 +1496,9 @@ class DatabaseConnection:
 
 		for (name, environment) in self.select(
 				"""
-				n.name, e.name from
-				nodes n, environments e
-				where
-				n.environment=e.id
+				hv.name, e.name from
+				host_view hv, environments e where
+				hv.environment=e.id
 				"""):
 			if name == host:
 				return environment
@@ -1330,39 +1507,40 @@ class DatabaseConnection:
 
 	def getHostRoutes(self, host, showsource=0):
 
-		_frontend = self.getHostname('localhost')
+		frontend = self.getHostname('localhost')
 		host = self.getHostname(host)
 		routes = {}
 
 		# if needed, add default routes to support multitenancy
-		if _frontend == host:
-			_networks = self.select(
-			"""
-			n.ip, n.device, np.ip 
-			from networks n
-			left join networks np
-			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
-			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend, _frontend))
+		if frontend == host:
+			network_dict = {}
+			for network in self.select(
+				"""
+				n.ip, n.device, np.ip from
+				networks n
+				left join networks np
+				on np.node != (select id from host_view where name='%s') and 
+				n.subnet = np.subnet
+				where n.node=(select id from host_view where name='%s')
+				""" % (frontend, frontend)):
 
-			_network_dict = {}
-			for _network in _networks:
-				if None in _network:
+				if None in network:
 					continue
-				(gateway, interface, destination) = _network
+
+				(gateway, interface, destination) = network
 				interface = interface.split('.')[0].split(':')[0]
 				
-				if destination in _network_dict:
-					routes[destination] = _network_dict[destination]
+				if destination in network_dict:
+					routes[destination] = network_dict[destination]
 				else:
 					if showsource:
-						_network_dict[destination] = (
+						network_dict[destination] = (
 							'255.255.255.255', 
 							gateway, 
 							interface, 
 							'H')
 					else:
-						_network_dict[destination] = (
+						network_dict[destination] = (
 							'255.255.255.255', 
 							gateway, 
 							interface,)
@@ -1378,9 +1556,9 @@ class DatabaseConnection:
 			if s:
 				for dev, in self.select("""
 					net.device from
-					subnets s, networks net, nodes n where
+					subnets s, networks net, host_view hv where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
+					net.node = hv.id and hv.name = '%s'
 					and net.device not like 'vlan%%' 
 					""" % (s, host)):
 					i = dev
@@ -1393,15 +1571,15 @@ class DatabaseConnection:
 				
 		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from os_routes r, nodes n where
-			r.os='%s' and n.name='%s'
+			r.subnet, r.interface from os_routes r, host_view hv where
+			r.os='%s' and hv.name='%s'
 			"""  % (self.getHostOS(host), host)):
 			if s:
 				for dev, in self.select("""
 					net.device from
-					subnets s, networks net, nodes n where
+					subnets s, networks net, host_view hv where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
+					net.node = hv.id and hv.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
 					i = dev
@@ -1416,17 +1594,17 @@ class DatabaseConnection:
 			r.network, r.netmask, r.gateway,
 			r.subnet, r.interface from
 			appliance_routes r,
-			nodes n,
+			host_view hv,
 			appliances app where
-			n.appliance=app.id and 
-			r.appliance=app.id and n.name='%s'
+			hv.appliance=app.id and 
+			r.appliance=app.id and hv.name='%s'
 			""" % host):
 			if s:
 				for dev, in self.select("""
 					net.device from
-					subnets s, networks net, nodes n where
+					subnets s, networks net, host_view hv where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
+					net.node = hv.id and hv.name = '%s' 
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
 					i = dev
@@ -1439,15 +1617,15 @@ class DatabaseConnection:
 		
 		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from node_routes r, nodes n where
-			n.name='%s' and n.id=r.node
+			r.subnet, r.interface from node_routes r, host_view hv where
+			hv.name='%s' and hv.id=r.node
 			""" % host):
 			if s:
 				for dev, in self.select("""
 					net.device from
-					subnets s, networks net, nodes n where
+					subnets s, networks net, host_view hv where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
+					net.node = hv.id and hv.name = '%s'
 					and net.device not like 'vlan%%'
 					""" % (s, host)):
 					i = dev
@@ -1462,7 +1640,7 @@ class DatabaseConnection:
 	def getNodeName(self, hostname, subnet=None):
 
 		if not subnet:
-			rows = self.select("name FROM nodes where name like '%s'" % hostname)
+			rows = self.select("name from host_view where name like '%s'" % hostname)
 			if rows:
 				(hostname, ) = rows[0]
 			return hostname
@@ -1471,8 +1649,8 @@ class DatabaseConnection:
 		
 		for (netname, zone) in self.select("""
 			net.name, s.zone from
-			nodes n, networks net, subnets s where n.name like '%s'
-			and net.node = n.id and net.subnet = s.id and
+			host_view hv, networks net, subnets s where hv.name like '%s'
+			and net.node = hv.id and net.subnet = s.id and
 			s.name like '%s'
 			""" % (hostname, subnet)):
 
@@ -1497,7 +1675,7 @@ class DatabaseConnection:
 		# installer w/ the restore pallet
 
 		if hostname and self.link:
-			rows = self.link.execute("""select * from nodes where
+			rows = self.link.execute("""select * from host_view where
 				name like '%s'""" % hostname)
 			if rows:
 				return self.getNodeName(hostname, subnet)
@@ -1547,7 +1725,7 @@ class DatabaseConnection:
 
 		if not addr:
 			if self.link:
-				self.link.execute("""select name from nodes
+				self.link.execute("""select name from host_view
 					where name="%s" """ % hostname)
 				if self.link.fetchone():
 					return self.getNodeName(hostname, subnet)
@@ -1555,10 +1733,10 @@ class DatabaseConnection:
 				#
 				# see if this is a MAC address
 				#
-				self.link.execute("""select nodes.name from
-					networks,nodes where
-					nodes.id = networks.node and
-					networks.mac = '%s' """ % (hostname))
+				self.link.execute("""select hv.name from
+					networks net, host_view hv where
+					hv.id = net.node and
+					net.mac = '%s' """ % (hostname))
 				try:
 					hostname, = self.link.fetchone()
 					return self.getNodeName(hostname, subnet)
@@ -1573,12 +1751,12 @@ class DatabaseConnection:
 				if len(n) > 1:
 					name = n[0]
 					domain = '.'.join(n[1:])
-					cmd = 'select n.name from nodes n, '	+\
+					cmd = 'select hv.name from host_view hv, '	+\
 						'networks nt, subnets s where '	+\
 						'nt.subnet=s.id and '		+\
-						'nt.node=n.id and '		+\
+						'nt.node=hv.id and '		+\
 						's.zone="%s" and ' % domain     +\
-						'(nt.name="%s" or n.name="%s")'	 \
+						'(nt.name="%s" or hv.name="%s")' \
 						% (name, name)
 
 					self.link.execute(cmd)
@@ -1675,14 +1853,14 @@ class DatabaseConnection:
 			# hostname is in the networks table.  This last
 			# check handles the case where DNS is correct but
 			# the IP address used is different.
-			rows = self.link.execute('select nodes.name from '
-				'networks,nodes where '
-				'nodes.id=networks.node and ip="%s"' % (addr))
+			rows = self.link.execute('select hv.name from '
+				'networks net, host_view hv where '
+				'hv.id=net.node and net.ip="%s"' % (addr))
 			if not rows:
-				rows = self.link.execute('select nodes.name ' 
-					'from networks,nodes where '
-					'nodes.id=networks.node and '
-					'networks.name="%s"' % (hostname))
+				rows = self.link.execute('select hv.name ' 
+					'from networks net, host_view hv where '
+					'hv.id=net.node and '
+					'net.name="%s"' % (hostname))
 				if not rows:
 					raise CommandError(self, 'host "%s" is not in cluster'
 						% hostname)

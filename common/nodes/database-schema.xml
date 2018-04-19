@@ -129,22 +129,47 @@ CREATE TABLE bootactions (
 
 CREATE UNIQUE INDEX BootnameOS ON bootactions(BootName,OS);
 
-<!-- Nodes -->
+<!-- New Components and Hosts -->
 
-DROP TABLE IF EXISTS nodes;
-CREATE TABLE nodes (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(128) default NULL,
-  Appliance	int(11) default NULL references appliances,
-  Box		int(11) default NULL references boxes,
-  Environment	int(11) default NULL references environments,
-  Rack		varchar(64) default NULL,
-  Rank		varchar(64) default NULL,
-  OSAction	int(11) default NULL references bootactions,
-  InstallAction	int(11) default NULL references bootactions,
-  Comment	varchar(140) default NULL,
-  PRIMARY KEY  (ID)
+DROP TABLE IF EXISTS components;
+CREATE TABLE components (
+	ID		int(11) NOT NULL auto_increment,
+	Type		enum('host', 'switch'),
+	Name		varchar(128) default NULL,
+	Appliance	int(11)      default NULL references appliances,
+	Rack		varchar(64)  default NULL,
+	Rank		varchar(64)  default NULL,
+	Make		varchar(64)  default NULL,
+	Model		varchar(64)  default NULL,
+	Environment	int(11)      default NULL references environments,
+	Comment		varchar(132) default NULL,
+	PRIMARY KEY (ID)
 );
+
+DROP TABLE IF EXISTS hosts;
+CREATE TABLE hosts (
+	Component	int(11) default NULL references components,
+	Box		int(11) default NULL references boxes,
+	OSAction	int(11) default NULL references bootactions,
+	InstallAction	int(11) default NULL references bootactions
+);
+
+DROP TABLE IF EXISTS switches;
+CREATE TABLE switches (
+	Component	int(11) default NULL references components
+);
+
+DROP VIEW IF EXISTS host_view;
+CREATE VIEW host_view AS
+SELECT c.*, h.*
+FROM components c, hosts h
+WHERE c.ID = h.Component;
+
+DROP VIEW IF EXISTS switch_view;
+CREATE VIEW switch_view AS
+SELECT c.*, s.*
+FROM components c, switches s
+WHERE c.ID = s.Component;
 
 <!-- Networks -->
 
@@ -188,7 +213,7 @@ CREATE TABLE subnets (
 DROP TABLE IF EXISTS switchports;
 CREATE TABLE switchports (
 	interface	int(11)		NOT NULL references networks,
-	switch		int(11)		NOT NULL references nodes,
+	switch		int(11)		NOT NULL references components,
 	port		int(11)		NOT NULL,
 	PRIMARY KEY(switch, port)
 );
