@@ -24,6 +24,8 @@ class Command(stack.commands.report.command):
 
 	def run(self, params, args):
 		self.beginOutput()
-		self.addOutput('', stack.version)
-		self.endOutput()
+		self.addOutput('stacki', stack.version)
+		self.endOutput(header=['layer', 'version'], 
+			       trimOwner=True,
+			       trimHeader=True)
 
