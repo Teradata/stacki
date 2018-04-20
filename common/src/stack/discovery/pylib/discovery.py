@@ -80,6 +80,7 @@ class Discovery:
         
         if ipv4_network is not None:
             # Figure out the gateway for the interface and check that pxe is true
+            self._command.db.clearCache()
             for row in self._command.call("list.network"):
                 if (
                     row['address'] == str(ipv4_network.network_address) and 
@@ -118,6 +119,7 @@ class Discovery:
             self._logger.debug("trying IP address: %s", ip_address)
             
             # Make sure this IP isn't already taken
+            self._command.db.clearCache()
             for row in self._command.call("list.host.interface"):
                 if (
                     row['ip'] == str(ip_address) and
@@ -138,6 +140,7 @@ class Discovery:
         network = None
         ipv4_network = self._get_ipv4_network_for_interface(interface)
         if ipv4_network is not None:
+            self._command.db.clearCache()
             for row in self._command.call("list.network"):
                 if (
                     row['address'] == str(ipv4_network.network_address) and 
@@ -279,6 +282,7 @@ class Discovery:
             self._logger.info("detected a dhcp request: %s %s", mac_address, interface)
 
             # Is this a new MAC address?
+            self._command.db.clearCache()
             for row in self._command.call("list.host.interface"):
                 if row['mac'] == mac_address:
                     self._logger.debug("node is already known: %s %s", mac_address, interface)

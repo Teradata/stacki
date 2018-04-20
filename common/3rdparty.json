@@ -2,16 +2,12 @@
 	{
 		"urlbase": "https://teradata-stacki.s3.amazonaws.com/3rdparty",
 		"files": [
-			"gd-2.0.33.tar.gz", 
 		        "MegaCli-8.07.07-1.noarch.rpm", 
 		        "newt-0.52.20.tar.gz", 
-		        "pycairo-1.15.3.tar.gz", 
 		        "Python-3.6.1.tgz", 
 		        "rcs-5.7.tar.gz", 
 		        "sc-im-0.4.0-20161021.tgz", 
 			"storcli-007.0409.0000.0000-1.noarch.rpm",
-		        "wxPython-4.0.0a3.tar.gz", 
-		        "mariadb-10.2.6.tar.gz", 
 		        "redis-4.0.2.tar.gz", 
 		        "zeromq-4.2.2.tar.gz"
 		]

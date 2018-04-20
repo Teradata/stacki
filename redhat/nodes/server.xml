@@ -45,7 +45,7 @@ for pallet in g.rolls:
 
 
 <stack:package>stack-admin</stack:package>
-<stack:package>foundation-gd</stack:package>
+<stack:package>gd</stack:package>
 <stack:package>foundation-newt</stack:package>
 
 <!-- to build anaconda -->

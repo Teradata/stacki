@@ -9,7 +9,7 @@ import signal
 import zmq
 import pprint
 import stack.mq
-import stack.commands.list.host
+import stack.commands.sync.host
 
 
 class Subscriber(stack.mq.Subscriber):
@@ -46,7 +46,7 @@ class Subscriber(stack.mq.Subscriber):
 
 
 
-class Command(stack.commands.list.host.command):
+class Command(stack.commands.sync.host.command):
 	"""
 	Attaches to one or more hosts' Message Queue and displays
 	all messages on the provided channel(s).
@@ -75,7 +75,10 @@ class Command(stack.commands.list.host.command):
 				])
 
 		context = zmq.Context()
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		run_hosts = self.getRunHosts(hosts)
+		for h in run_hosts:
+			host = h['name']
 			subscriber = Subscriber(context, channel, host)
 			subscriber.setDaemon(True)
 			subscriber.start()

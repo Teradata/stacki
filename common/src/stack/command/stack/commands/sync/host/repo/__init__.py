@@ -42,6 +42,7 @@ class Command(stack.commands.sync.host.command):
 
 
 		hosts = self.getHostnames(args, managed_only=1)
+		run_hosts = self.getRunHosts(hosts)
 		me    = self.db.getHostname('localhost')
 
 		# Only shutdown stdout/stderr if we not local
@@ -52,17 +53,16 @@ class Command(stack.commands.sync.host.command):
 				break
 
 		threads = []
-		for host in hosts:
 
-			attrs = {}
-			for row in self.call('list.host.attr', [ host ]):
-				attrs[row['attr']] = row['value']
+		for h in run_hosts:
+			host = h['host']
+			hostname = h['name']
 
 			cmd = '/opt/stack/bin/stack report host repo %s | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
 
 			if me != host:
-				cmd += 'ssh -T -x %s ' % host
+				cmd += 'ssh -T -x %s ' % hostname
 			cmd += 'bash > /dev/null 2>&1 '
 
 			try:

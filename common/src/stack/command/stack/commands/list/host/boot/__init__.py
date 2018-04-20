@@ -47,14 +47,24 @@ class Command(stack.commands.list.host.command):
 			boot[h] = b
 
 		self.beginOutput()
-		for host in self.getHostnames(args):
+		hosts = self.getHostnames(args)
+		attrs = self.call('list.host.attr',hosts)
+		f_nukedisks = lambda x: x['attr'] == x['nukecontroller']
+		for host in hosts:
 			nukecontroller = False
-			nukedisks = self.getHostAttr(host, 'nukedisks')
+			nukedisks = False
+			f_nukedisks = lambda x: (x['host'] == host and x['attr'] == 'nukedisks')
+			nd = list(filter(f_nukedisks, attrs))
+			if nd:
+				nukedisks = nd[0]['value']
+			f_nukecon = lambda x: (x['host'] == host and x['attr'] == 'nukecontroller')
+			nc = list(filter(f_nukecon, attrs))
+			if nc:
+				nukecontroller = nd[0]['value']
 			if not nukedisks:
 				nukedisks = False
 			else:
 				nukedisks = self.str2bool(nukedisks)
-			nukecontroller = self.getHostAttr(host, 'nukecontroller')
 			if not nukecontroller:
 				nukecontroller = False
 			else:
@@ -62,6 +72,3 @@ class Command(stack.commands.list.host.command):
 			self.addOutput(host, (boot[host], nukedisks, nukecontroller))
 
 		self.endOutput(header=['host', 'action', 'nukedisks', 'nukecontroller'])
-
-
-RollName = "stacki"

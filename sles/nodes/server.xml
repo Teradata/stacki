@@ -8,7 +8,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 <stack:package>stack-admin</stack:package>
-<stack:package>foundation-gd</stack:package>
+<stack:package>gd</stack:package>
 <stack:package>foundation-rcs</stack:package>
 <stack:package>stack-config-server</stack:package>
 

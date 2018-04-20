@@ -33,14 +33,23 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.beginOutput()
 		
 		hosts = self.getHostnames(args)
-		for host in hosts:
-			self.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network">')
-			self.addOutput(host, 'NETWORKING=yes')
 
+		# Get os attribute for all hosts
+		a = hosts[:]
+		a.append('attr=os')
+		attrs = self.call('list.host.attr', a)
+
+		for host in hosts:
 			network = None
 			zone    = None
 			name    = None
 			gateway = None
+
+			# Get the host OS
+			hoa  = list(filter(lambda x: x['host'] == host, attrs))[0]
+			hostos = hoa['value']
+
+			# Get Host Interfaces
 			for row in self.call('list.host.interface', [ host ]):
 				if row['default']:
 					network = row['network']
@@ -57,21 +66,30 @@ class Command(stack.commands.HostArgumentProcessor,
 				hostname = '%s.%s' % (name, zone)
 			else:
 				hostname = name
-			self.addOutput(host, 'HOSTNAME=%s' % hostname)
 
-			if gateway:
-				self.addOutput(host, 'GATEWAY=%s' % gateway)
-
-			self.addOutput(host, '</stack:file>')
+			# For redhat, /etc/sysconfig/network is a file. For SuSE, it's a directory
+			if hostos == 'redhat':
+				self.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network">')
+				self.addOutput(host, 'NETWORKING=yes')
+				self.addOutput(host, 'HOSTNAME=%s' % hostname)
+				if gateway:
+					self.addOutput(host, 'GATEWAY=%s' % gateway)
+				self.addOutput(host, '</stack:file>')
 
 			#
 			# Some version require the hostname to be placed into
 			# /etc/hostname
 			#
-			if stack.release in [ 'redhat7', 'sles11', 'sles12' ]:
-				self.addOutput(host, 
-					'<stack:file stack:name="/etc/hostname">')
+			self.addOutput(host, 
+				'<stack:file stack:name="/etc/hostname">')
+			self.addOutput(host, '%s' % hostname)
+			self.addOutput(host, '</stack:file>')
+
+			# SuSE also requires a /etc/HOSTNAME file
+			if hostos == 'sles':
+				self.addOutput(host, '<stack:file stack:name="/etc/HOSTNAME">')
 				self.addOutput(host, '%s' % hostname)
 				self.addOutput(host, '</stack:file>')
+			
 
 		self.endOutput(padChar='', trimOwner=True)
