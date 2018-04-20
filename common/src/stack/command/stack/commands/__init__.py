@@ -2100,7 +2100,7 @@ class Command:
 		self.output.append(out)
 		
 		
-	def endOutput(self, header=[], padChar='-', trimOwner=False):
+	def endOutput(self, header=[], padChar='-', trimOwner=False, trimHeader=False):
 		"""Pretty prints the output list buffer."""
 
 		# Handle the simple case of no output, and bail out
@@ -2208,7 +2208,7 @@ class Command:
 		# keep the header optional and separate from the output
 		# so the above decision (startOfLine) can be made.
 
-		if header:
+		if header and not trimHeader:
 			list = []
 			for field in header:
 				if field:
