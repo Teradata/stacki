@@ -23,7 +23,7 @@ p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
 interface_number = 0
 
 curlcmd = [ '/usr/bin/curl', '--local-port', '1-100',
-	'--output', '/tmp/stacki-profile.xml' ]
+	'--output', '/tmp/stacki-profile.xml', '--insecure' ]
 
 o, e = p.communicate()
 for line in o.decode('utf-8').split('\n'):
@@ -57,7 +57,27 @@ for line in o.decode('utf-8').split('\n'):
 			curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
 				% (interface_number, interface, hwaddr))
 			interface_number += 1
-	curlcmd.append('-k')
+
+#
+# get the make/model of the installing server
+#
+p = subprocess.Popen([ '/usr/sbin/dmidecode', '-s', 'system-manufacturer' ],
+	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+o, e = p.communicate()
+try:
+	curlcmd.append('--header')
+	curlcmd.append('X-STACKI-MAKE: %s' % o.strip())
+except:
+	pass
+
+p = subprocess.Popen([ '/usr/sbin/dmidecode', '-s', 'system-product-name' ],
+	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+o, e = p.communicate()
+try:
+	curlcmd.append('--header')
+	curlcmd.append('X-STACKI-MODEL: %s' % o.strip())
+except:
+	pass
 
 #
 # get the number of CPUs
@@ -70,10 +90,10 @@ for line in f.readlines():
 		numcpus += 1
 f.close()
 
+querystring = [ 'os=redhat', 'arch=x86_64', 'np=%d' % numcpus ]
 server = attributes['Kickstart_PrivateAddress']
 
-request = 'https://%s/install/sbin/profile.cgi?os=redhat&arch=x86_64&np=%d' % \
-	(server, numcpus)
+request = 'https://%s/install/sbin/profile.cgi?%s' % (server, '&'.join(querystring))
 curlcmd.append(request)
 
 subprocess.call(curlcmd, stdout=open('/dev/null'), stderr=open('/dev/null'))
