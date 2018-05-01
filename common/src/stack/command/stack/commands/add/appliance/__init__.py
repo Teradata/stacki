@@ -82,16 +82,20 @@ class Command(command):
 			('%s', '%s', '%s')
 			""" % (appliance, longname, public))
 
-		if not node:
-			kickstartable = False
-		else:
-			kickstartable = True
+		# by default, appliances shouldn't be managed or kickstartable...
+		implied_attrs = {'kickstartable': False, 'managed': False}
+
+		# ... but if the user specified node, they probably want those to be True
+		if node:
 			self.command('add.appliance.attr', [ appliance,
 				'attr=node', 'value=%s' % node ])
+			implied_attrs['kickstartable'] = True
+			implied_attrs['managed'] = True
 
-		self.command('add.appliance.attr', [
-			appliance,
-			'attr=kickstartable',
-			'value=%s' % self.bool2str(kickstartable)
-			])
+		for attr, value in implied_attrs.items():
+			self.command('add.appliance.attr', [
+				appliance,
+				'attr=%s' % attr,
+				'value=%s' % value
+				])
 
