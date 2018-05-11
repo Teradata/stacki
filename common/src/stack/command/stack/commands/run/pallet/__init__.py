@@ -48,11 +48,13 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 			except CommandError:
 				raise
 
+			fe_box = self.call("list.host",["localhost"])[0]["box"]
 			for arg in args:
 				# if a roll/pallet isn't in the stacks table it isn't enabled.
-				rows = self.db.execute("""
-					select * from stacks
-					where roll = (select id from rolls where name = '%s')""" % arg)
+				cmd = """stacks.* from stacks, boxes, rolls where
+					rolls.name="%s" and boxes.name="%s" and
+					stacks.box=boxes.id and stacks.roll=rolls.id""" % (arg, fe_box)
+				rows = self.db.select(cmd)
 				if not rows:
 					msg = 'Cannot run a pallet that is not enabled: %s' % arg
 					raise CommandError(self, msg)
