@@ -80,8 +80,8 @@ class OSArgumentProcessor:
 			for name, in self.db.select(
 					"""
 					name from oses 
-					where name like '%s' order by name
-					""" % arg):
+					where name like %s order by name
+					""", arg):
 				list.append(name)
 			if len(list) == 0 and arg == '%':  # empty table is OK
 				continue
@@ -1218,7 +1218,7 @@ class DatabaseConnection:
 		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
 		DatabaseConnection.cache = {}
 
-	def select(self, command):
+	def select(self, command, args=None):
 		if not self.link:
 			return []
 		
@@ -1226,6 +1226,8 @@ class DatabaseConnection:
 		
 		m = hashlib.md5()
 		m.update(command.strip().encode('utf-8'))
+		if args:
+			m.update(' '.join(arg for arg in args).encode('utf-8'))
 		k = m.hexdigest()
 
 #		 print 'select', k, command
@@ -1235,7 +1237,7 @@ class DatabaseConnection:
 #			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
 		else:
 			try:
-				self.execute('select %s' % command)
+				self.execute('select %s' % command, args)
 				rows = self.fetchall()
 			except (OperationalError, ProgrammingError):
 				# Permission error return the empty set
@@ -1248,7 +1250,7 @@ class DatabaseConnection:
 		return rows
 
 					
-	def execute(self, command):
+	def execute(self, command, args=None):
 		command = command.strip()
 
 		if command.find('select') != 0:
@@ -1256,7 +1258,7 @@ class DatabaseConnection:
 						
 		if self.link:
 			t0 = time.time()
-			result = self.link.execute(command)
+			result = self.link.execute(command, args)
 			t1 = time.time()
 			Debug('SQL EX: %.3f %s' % ((t1 - t0), command))
 			return result
