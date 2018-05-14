@@ -32,7 +32,7 @@ from functools import partial
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
-from stack.exception import CommandError, ParamRequired
+from stack.exception import CommandError, ParamRequired, ArgNotFound
 from stack.bool import str2bool, bool2str
 
 _logPrefix = ''
@@ -86,7 +86,7 @@ class OSArgumentProcessor:
 			if len(list) == 0 and arg == '%':  # empty table is OK
 				continue
 			if len(list)  < 1:
-				raise CommandError(self, 'unknown os "%s"' % arg)
+				raise ArgNotFound(self, arg, 'OS')
 		return list
 
 	
@@ -104,7 +104,7 @@ class EnvironmentArgumentProcessor:
 				found = True
 				environments.append(envName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown environment "%s"' % arg)
+				raise ArgNotFound(self, arg, 'environment')
 
 		return environments
 
@@ -129,7 +129,7 @@ class ApplianceArgumentProcessor:
 				found = True
 				appliances.append(appName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown appliance "%s"' % arg)
+				raise ArgNotFound(self, arg, 'appliance')
 
 		return appliances
 
@@ -154,7 +154,7 @@ class BoxArgumentProcessor:
 				found = True
 				boxes.append(boxName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown box "%s"' % arg)
+				raise ArgNotFound(self, arg, 'box')
 
 		return boxes
 
@@ -203,7 +203,7 @@ class NetworkArgumentProcessor:
 # code.
 #
 #			if not found and arg != '%':
-#				raise CommandError(self, 'unknown network "%s"' % arg)
+#				raise ArgNotFound(self, arg, 'network')
 
 		return networks
 
@@ -432,7 +432,7 @@ class CartArgumentProcessor:
 				found = True
 				carts.append(cartName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown cart "%s"' % arg)
+				raise ArgNotFound(self, arg, 'cart')
 
 		return carts
 
@@ -480,7 +480,7 @@ class RollArgumentProcessor:
 				found = True
 				pallets.append((name, ver, rel))
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown pallet "%s"' % arg)
+				raise ArgNotFound(self, arg, 'pallet')
 		return pallets
 
 
