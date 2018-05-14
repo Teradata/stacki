@@ -15,6 +15,7 @@
 import os
 import sys
 import subprocess
+import itertools
 from xml.sax import handler
 
 # An exception for Kickstart builder trinity: kcgi, kgen, kpp
@@ -42,6 +43,14 @@ class KickstartNodeError(KickstartError):
 
 class Struct:
     pass
+
+
+def flatten(items):
+    ''' flatten a nested list of items
+    [(a,), (b,)]        -> [a, b]
+    [(a,), (b,) (c, d)] -> [a, b, c, d]
+    '''
+    return list(itertools.chain.from_iterable(items))
 
 
 def list2str(list):
