@@ -36,57 +36,37 @@ class Command(stack.commands.CartArgumentProcessor,
 	"""		
 
 
-	def getCartInfo(self, args, params):
-		carts = []
-		if not args:
-			args = [ '%' ]	   # find all cart info
-		for arg in args:
-			found = False
-			for (cartName, url, ) in self.db.select("""
-				name, url from carts where
-				name like binary %s
-				""", arg):
-				found = True
-				carts.append({'name':cartName, 'url':url})
-			if not found and arg != '%':
-				raise ArgNotFound(self, arg, 'cart')
-
-		return carts
-
-
 	def run(self, params, args):
-		expanded, = self.fillParams([ ('expanded', 'false') ])
+		expanded, = self.fillParams([ ('expanded', False) ])
 		expanded = self.str2bool(expanded)
+
+		# queury all the carts (fill the cache) and hit the db once
+
+		carts = {}
+		for name, url in self.db.select('name, url from carts'):
+			carts[name] = { 'url': url, 'boxes': [] }
+
+		for name, box in self.db.select("""
+			c.name, b.name from
+			cart_stacks s, carts c, boxes b where
+			s.cart=c.id and s.box=b.id
+			"""):
+			carts[name]['boxes'].append(box)
+
+
 		self.beginOutput()
 
-		try:
-			carts = self.getCartInfo(args, params)
-		except:
-			carts = []
+		for cart in self.getCartNames(args):
 
-		for cart in carts:
-		    
-			# For each cart determine if it is enabled
-			# in any box.
-			
-			boxes = []
+			output = [ ' '.join(carts[cart]['boxes']) ]
 
-			for row in self.db.select("""b.name from
-				cart_stacks s, carts c, boxes b where
-				c.name=%s and
-				s.cart=c.id and s.box=b.id """
-				, cart['name']):
+			if expanded is True:
+				output.append(carts[cart]['url'])
 
-				boxes.append(row[0])
-
-			output = [' '.join(boxes)]
-			if expanded:
-				output.append(cart['url'])
-
-			self.addOutput(cart['name'], output)
+			self.addOutput(cart, output)
 
 		header = ['name', 'boxes']
-		if expanded:
+		if expanded is True:
 			header.append('url')
 		self.endOutput(header=header, trimOwner=False)
 
