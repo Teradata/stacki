@@ -30,12 +30,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
-		try:
-			carts = self.getCartNames(args, params)
-		except:
-			carts = []
-
-		for cart in carts:
+		for cart in self.getCartNames(args):
 		    
 			# For each cart determine if it is enabled
 			# in any box.
