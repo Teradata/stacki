@@ -1,0 +1,23 @@
+---
+  - name: Copy Stacki ISO to frontend
+    copy:
+      src: "{{ lookup('env','STACKI_ISO') }}"
+      dest: /export/isos/
+      mode: 0644
+
+  - name: Setup /etc/host to a known good state
+    copy:
+      dest: /etc/hosts
+      content: |
+        127.0.0.1       localhost     localhost.localdomain
+        192.168.0.2     frontend-0-0  frontend-0-0.localdomain
+      mode: 0644
+
+  - name: Download frontend-install.py
+    get_url:
+      url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
+      dest: /root/
+      mode: 0744
+
+  - name: Barnacle the frontend
+    shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"

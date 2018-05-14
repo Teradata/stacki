@@ -1,0 +1,11 @@
+/bin
+/venv/
+/*.x86_64.disk1.iso
+.pytest_cache/
+__pycache__/
+.cache/
+/.vagrant/
+/reports/
+.idea/*
+test-suites/system/04-partitioning-install/.vagrant/
+vagrant_cwd
