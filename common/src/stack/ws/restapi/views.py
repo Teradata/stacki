@@ -277,7 +277,7 @@ class StackWS(View):
 				j = json.loads(text)
 			except:
 				j = {"Output":text}
-			return HttpResponse(str(json.dumps(text)),
+			return HttpResponse(str(json.dumps(j)),
 				content_type = "application/json")
 
 	# Check if command is blacklisted
