@@ -8,6 +8,7 @@
 
 import sys
 import stack.commands
+from stack.exception import CommandError
 from stack.bool import str2bool
 
 
@@ -39,6 +40,9 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 		for host in hosts.keys():
 			# no need to prune hosts not from the spreadsheet, or totally new hosts
 			if host not in existinghosts:
+				appliance    = hosts[host].get('appliance')
+				if appliance == 'frontend':
+					raise CommandError(self, 'Renaming frontend is not supported!')
 				continue
 
 			for group in existing_memberships[host]:
@@ -72,7 +76,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				self.owner.call('add.host', args)
 
 			if 'installaction' in hosts[host]:
-				self.owner.call('set.host.bootaction', 
+				self.owner.call('set.host.bootaction',
 						[ host,
 						  'sync=false',
 						  'type=install',
@@ -80,8 +84,8 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					  ])
 				del hosts[host]['installaction']
 			if 'osaction' in hosts[host]:
-				self.owner.call('set.host.bootaction', 
-						[ host, 
+				self.owner.call('set.host.bootaction',
+						[ host,
 						  'sync=false',
 						  'type=os',
 						  'action=%s' % hosts[host]['osaction']
@@ -98,7 +102,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					self.owner.call('add.host.group', [host, param])
 				del hosts[host]['groups']
 			#
-			# set the host attributes that are explicitly 
+			# set the host attributes that are explicitly
 			# identified in the spreadsheet
 			#
 			for key in hosts[host].keys():
@@ -118,7 +122,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 
 		#
-		# process the host's interface(s) 
+		# process the host's interface(s)
 		#
 
 		hosts = list(interfaces.keys())
@@ -138,13 +142,13 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 		if argv: # remove previous host interfaces (if any)
 			argv.append('all=true')
 			self.owner.call('remove.host.interface', argv)
-		
+
 		sys.stderr.write('\tAdd Host Interface\n')
 
 		for host in hosts:
 
 			sys.stderr.write('\t\t%s\r' % host)
-			
+
 			for interface in interfaces[host].keys():
 				ip = None
 				mac = None
@@ -178,7 +182,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				# now add the interface
 				#
 				cmdparams = [ host,
-					'unsafe=true', 
+					'unsafe=true',
 					'interface=%s' % interface,
 					'default=%s' % default ]
 				if mac:
