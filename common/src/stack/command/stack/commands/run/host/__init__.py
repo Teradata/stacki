@@ -214,7 +214,9 @@ class Command(command):
 			('threads', self.getAttr('run.host.threads')),
 			('method', self.getAttr('run.host.impl'))
 			])
-
+		#  Check that a command was even input:
+		if cmd == '':
+			raise ParamValue(self, 'cmd', 'string with contents')
 		# Get list of hosts to run the command on
 		self.hosts = self.getHostnames(args, self.str2bool(managed))
 		self.run_hosts = self.getRunHosts(self.hosts)
