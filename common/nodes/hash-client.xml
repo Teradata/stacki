@@ -1,0 +1,38 @@
+<stack:stack>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2018 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+<stack:script stack:stage="install-post">
+
+<stack:file stack:name="/opt/stack/etc/install.hash">
+<stack:eval>/opt/stack/bin/stack list host hash &hostname;</stack:eval></stack:file>
+
+</stack:script>
+
+
+<!-- the command below will output a MD5 hash for the host's profile on stderr -->
+
+<!--
+	the next two sections look a bit funky for SLES. this is because all
+	'stack:chroot="false"' scripts run before all 'stack:chroot="true"' scripts.
+	so, we need to run the script below to get the hash for the profile, then the following
+	script can run after the above 'stack:chroot="true"' in order to append the profile
+	hash to /opt/stack/etc/install.hash.
+-->
+<stack:script stack:chroot="false" stack:stage="install-post" cond="os == 'sles'">
+cat /tmp/stacki-profile.xml | \
+	PYTHONPATH= LD_LIBRARY_PATH=/opt/stack/lib /opt/stack/bin/stack list host profile hash=y \
+	2>> /mnt/tmp/install.hash \
+	> /dev/null
+</stack:script>
+
+<stack:script stack:stage="install-post" cond="os == 'sles'">
+cat /tmp/install.hash >> /opt/stack/etc/install.hash
+</stack:script>
+
+
+</stack:stack>
