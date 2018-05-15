@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import stack.api
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.set.host.command):
+class Command(stack.commands.set.host.command):
 	"""
 	Specifies an Environment for the gives hosts.  Environments are
 	used to add another level to attribute resolution.  This is commonly
@@ -30,22 +30,11 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 
 	def run(self, params, args):
 
-		(environment, ) = self.fillParams([
-			('environment', None, True)
-			])
+		(environment, ) = self.fillParams([ ('environment', None, True) ])
 
-		print('set host environment', environment)
-		
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		if environment and environment not in self.getEnvironmentNames():
-			raise CommandError(self, 'environment parameter not valid')
-
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update host_view set environment=
-				(select id from environments where name='%s')
-				where name='%s'
-				""" % (environment, host))
+		component = stack.api.Component()
+		component.set_multiple(self.getHostnames(args), environment=environment)
 

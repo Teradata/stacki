@@ -20,7 +20,7 @@ import getopt
 import traceback
 import signal
 import stack        # need this so we can load the stack.commands.* modules
-from stack.exception import CommandError
+from stack.exception import CommandError, StackError
 
 
 def sigint_handler(signal, frame):
@@ -155,6 +155,10 @@ def run_command(args, debug=False):
 		rc = command.runWrapper(name, args[i:])
 #		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
 	except CommandError as e:
+		sys.stderr.write('%s\n' % e)
+		syslog.syslog(syslog.LOG_ERR, '%s' % e)
+		return -1
+	except StackError as e:
 		sys.stderr.write('%s\n' % e)
 		syslog.syslog(syslog.LOG_ERR, '%s' % e)
 		return -1

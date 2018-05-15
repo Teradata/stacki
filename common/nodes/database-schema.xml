@@ -83,11 +83,11 @@ CREATE TABLE environments (
 
 DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '',
-  LongName	varchar(64) NOT NULL default '',
-  Public	enum('yes','no') NOT NULL default 'no',
-  PRIMARY KEY (ID)
+	ID		int(11) NOT NULL auto_increment,
+	Name		varchar(32) NOT NULL default '',
+	LongName	varchar(64) NOT NULL default '',
+	Public		enum('yes','no') NOT NULL default 'no',
+	PRIMARY		KEY (ID)
 );
 
 <!-- Boxes -->
@@ -134,7 +134,6 @@ CREATE UNIQUE INDEX BootnameOS ON bootactions(BootName,OS);
 DROP TABLE IF EXISTS components;
 CREATE TABLE components (
 	ID		int(11) NOT NULL auto_increment,
-	Type		enum('host', 'switch'),
 	Name		varchar(128) default NULL,
 	Appliance	int(11)      default NULL references appliances,
 	Rack		varchar(64)  default NULL,
@@ -143,33 +142,24 @@ CREATE TABLE components (
 	Model		varchar(64)  default NULL,
 	Environment	int(11)      default NULL references environments,
 	Comment		varchar(132) default NULL,
+	Host		int(11)      default NULL references hosts,
 	PRIMARY KEY (ID)
 );
 
 DROP TABLE IF EXISTS hosts;
 CREATE TABLE hosts (
-	Component	int(11) default NULL references components,
+	HostID		int(11) NOT NULL auto_increment,
 	Box		int(11) default NULL references boxes,
 	OSAction	int(11) default NULL references bootactions,
-	InstallAction	int(11) default NULL references bootactions
-);
-
-DROP TABLE IF EXISTS switches;
-CREATE TABLE switches (
-	Component	int(11) default NULL references components
+	InstallAction	int(11) default NULL references bootactions,
+	PRIMARY KEY (HostID)
 );
 
 DROP VIEW IF EXISTS host_view;
 CREATE VIEW host_view AS
 SELECT c.*, h.*
 FROM components c, hosts h
-WHERE c.ID = h.Component;
-
-DROP VIEW IF EXISTS switch_view;
-CREATE VIEW switch_view AS
-SELECT c.*, s.*
-FROM components c, switches s
-WHERE c.ID = s.Component;
+WHERE c.Host = h.HostID;
 
 <!-- Networks -->
 

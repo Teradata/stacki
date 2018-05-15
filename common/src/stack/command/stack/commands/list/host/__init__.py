@@ -10,11 +10,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import stack.api
 import stack.commands
 
 
 class command(stack.commands.HostArgumentProcessor,
-	stack.commands.list.command):
+	      stack.commands.list.command):
 	pass
 	
 
@@ -39,21 +40,12 @@ class Command(command):
 	def run(self, params, args):
 	    
 		(order, ) = self.fillParams([ ('order', 'asc') ])
-		
-		hosts = self.getHostnames(args, order=order)
-	    
-		header = [ 'host' ]
-		values = { }
-		for host in hosts:
-			values[host] = [ ]
-			
-		for (provides, result) in self.runPlugins(hosts):
-			header.extend(result['keys'])
-			for h, v in result['values'].items():
-				values[h].extend(v)
 
-		self.beginOutput()
-		for host in hosts:
-			self.addOutput(host, values[host])
-		self.endOutput(header=header, trimOwner=False)
+		names = self.getHostnames(args)
+		host  = stack.api.Host()
+
+		if names:
+			self.output(host.list_multiple(names))
+
+
 

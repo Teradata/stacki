@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+
+import stack.api
 import stack.commands
 from stack.exception import ArgRequired
 
-
-class Command(stack.commands.set.host.command,
-	      stack.commands.BoxArgumentProcessor):
+class Command(stack.commands.set.host.command):
 	"""
 	Sets the box for a list of hosts.
 	
@@ -27,17 +27,13 @@ class Command(stack.commands.set.host.command,
 	"""
 
 	def run(self, params, args):
+
+		(box, ) = self.fillParams([ ('box', None, True) ])
+
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		box, = self.fillParams([ ('box', None, True) ])
-		
-		# Check to make sure this is a valid box name
+		host = stack.api.Host()
+		host.set_multiple(self.getHostnames(args), box=box)
 
-		self.getBoxNames([ box ])
 
-		for host in self.getHostnames(args):
-			self.db.execute("""update host_view set box=
-				(select id from boxes where name='%s')
-				where name='%s' """
-				% (box, host))

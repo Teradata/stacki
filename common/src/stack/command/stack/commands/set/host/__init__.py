@@ -13,5 +13,6 @@
 import stack.commands
 
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
+class command(stack.commands.HostArgumentProcessor,
+	      stack.commands.set.command):
 	pass

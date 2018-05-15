@@ -4,12 +4,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import stack.api
 import stack.commands
 import stack.util
 
 
 class Command(stack.commands.sync.host.command,
-	stack.commands.HostArgumentProcessor):
+	      stack.commands.HostArgumentProcessor):
 	"""
 	!!! Rocks+ Internal Only !!!
 	Generate host specific configuration files

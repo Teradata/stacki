@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import stack.api
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.set.host.command,
-	      stack.commands.ApplianceArgumentProcessor):
+class Command(stack.commands.set.host.command):
 	"""
 	Set the Appliance for a list of hosts.
 	
@@ -29,14 +29,7 @@ class Command(stack.commands.set.host.command,
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		if appliance not in self.getApplianceNames():
-			raise CommandError(self, 'appliance parameter not valid')
-
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update host_view set appliance=
-				(select id from appliances where name = '%s')
-				where name='%s'
-				""" % (appliance, host))
+		host = stack.api.Host()
+		host.set_multiple(self.getHostnames(args), appliance=appliance)
 			
 

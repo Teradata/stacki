@@ -47,7 +47,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.db.execute(
 				"""
 				delete from hosts where
-				component = (select id from components where name = '%s')
+				hostid = (select host from components where name = '%s')
 				""" % host)
 			self.owner.db.execute(
 				"""

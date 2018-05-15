@@ -137,40 +137,28 @@ class Command(stack.commands.Command,
 					       'os'         : osname, 
 					       'os.version' : version }
 
-		for (_name, _type, _environment, _rack, _rank, _make, _model) in self.db.select(
+		for (_name, _rack, _rank, _make, _model, _appliance, _environment, _box) in self.db.select(
 				"""
-				c.name, c.type, e.name, c.rack, c.rank, c.make, c.model
+				c.name, c.rack, c.rank, c.make, c.model, a.name, e.name, b.name
 				from components c
-				left join environments e on c.environment=e.id
+				left join appliances a   on c.appliance   = a.id
+				left join environments e on c.environment = e.id
+				left join boxes b        on b.id = (select h.box from hosts h where h.hostid = c.host)
 				"""):
-			readonly[_name]	             = {}
+			readonly[_name]	             = { }
 			readonly[_name]['component'] = _name
-			readonly[_name]['type']      = _type
 			readonly[_name]['rack']      = _rack
 			readonly[_name]['rank']      = _rank
 			if _make:
 				readonly[_name]['make']  = _make
 			if _model:
 				readonly[_name]['model'] = _model
+			if _appliance:
+				readonly[_name]['appliance'] = _appliance
 			if _environment:
 				readonly[_name]['environment'] = _environment
-
-		for (_name, _appliance, _longname) in self.db.select(
-				"""
-				c.name, a.name, a.longname
-				from components c, appliances a where
-				c.appliance=a.id
-				"""):
-			readonly[_name]['appliance']	      = _appliance
-			readonly[_name]['appliance.longname'] = _longname
-
-		for (_name, _box) in self.db.select(
-				"""
-				hv.name, b.name
-				from host_view hv, boxes b where
-				hv.box=b.id
-				"""):
-			if _name in readonly:
+			if _box: # only hosts have boxes
+				readonly[_name]['type']       = 'host'
 				readonly[_name]['box']        = _box
 				readonly[_name]['pallets']    = boxes[_box]['pallets']
 				readonly[_name]['carts']      = boxes[_box]['carts']
@@ -189,9 +177,17 @@ class Command(stack.commands.Command,
 				readonly[_name]['addr'] = _address
 			readonly[_name]['domainname'] = _zone
 
+		# Not all components are hosts but all hosts are components. So
+		# for the host types find the host-specific attributes and mix
+		# those into the component-specific attributes.
+		#
+		# The 'box' attribute was found using the host_view, so this is
+		# really about attribute names not values. Things like
+		# 'hostname' need to remain since so much XML uses it (should
+		# really use 'component' instead).
+
 		for _host in readonly:
-			if readonly[_host]['type'] == 'host':
-				# special host attribute names (should we deprecate these?)
+			if readonly[_host].get('type') == 'host':
 				readonly[_host]['hostname'] = readonly[_host]['component']
 				if 'addr' in readonly[_host]:
 					readonly[_host]['hostaddr'] = readonly[_host]['addr']
@@ -236,8 +232,8 @@ class Command(stack.commands.Command,
 			('shadow', True),
 			('scope',  'global'),
 			('resolve', None),
-			('var', True),
-			('const', True)
+			('var',     True),
+			('const',   True)
 		])
 
 		shadow	= self.str2bool(shadow)
@@ -272,7 +268,7 @@ class Command(stack.commands.Command,
 					     'fn'     : self.getHostnames,
 					     'const'  : self.addComponentAttrs,
 					     'resolve': True,
-					     'table'  : 'host_view' }}
+					     'table'  : 'components' }}
 
 		if scope not in lookup.keys():
 			raise CommandError(self, 'invalid scope "%s"' % scope)
@@ -332,22 +328,26 @@ class Command(stack.commands.Command,
 
 		if resolve and scope in [ 'component', 'host' ]:
 			for o in targets:
-				env = self.db.getHostEnvironment(o)
+				env = self.db.getComponentEnvironment(o)
 				if env:
 					parent = attributes['environment'][env]
 					for (a, (v, x, t, s)) in parent.items():
 						if a not in attributes[scope][o]:
 							attributes[scope][o][a] = (v, x, t, s)
 
-				parent = attributes['appliance'][self.db.getHostAppliance(o)]
-				for (a, (v, x, t, s)) in parent.items():
-					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, x, t, s)
+				app = self.db.getComponentAppliance(o)
+				if app:
+					parent = attributes['appliance'][app]
+					for (a, (v, x, t, s)) in parent.items():
+						if a not in attributes[scope][o]:
+							attributes[scope][o][a] = (v, x, t, s)
 
-				parent = attributes['os'][self.db.getHostOS(o)]
-				for (a, (v, x, t, s)) in parent.items():
-					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, x, t, s)
+				osname = self.db.getHostOS(o)
+				if osname:
+					parent = attributes['os'][osname]
+					for (a, (v, x, t, s)) in parent.items():
+						if a not in attributes[scope][o]:
+							attributes[scope][o][a] = (v, x, t, s)
 
 		if resolve and scope != 'global':
 			for o in targets:
