@@ -1,5 +1,5 @@
 NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
-node207,md0,/,0,ext4,--level=RAID1 raid.01 raid.02
+backend-0-0,md0,/,0,ext4,--level=RAID1 raid.01 raid.02
 ,md1,pv.01,0,lvm,--level=RAID1 raid.03 raid.04
 ,md2,pv.02,0,lvm,--level=RAID0 raid.05 raid.06
 ,sda,biosboot,1,biosboot,

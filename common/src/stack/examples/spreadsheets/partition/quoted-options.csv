@@ -1,5 +1,5 @@
 NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
-node207,sda,biosboot,1,biosboot,
+global,sda,biosboot,1,biosboot,
 ,sda,swap,8192,swap,
 ,sda,/var/lib/docker,0,xfs,"--mkfsoptions=""-n ftype=1"""
 ,sda,/boot,1024,xfs,
