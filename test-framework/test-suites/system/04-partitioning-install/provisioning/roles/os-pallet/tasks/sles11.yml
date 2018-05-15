@@ -1,0 +1,32 @@
+---
+- name: Copy SLES 11 Stacki ISO to frontend
+  copy:
+    src: "{{ lookup('env','SLES_11_STACKI_ISO') }}"
+    dest: /export/isos/
+    mode: 0644
+  ignore_errors: yes
+
+- debug:
+    msg: "{{ lookup('env','SLES_11_STACKI_ISO')|basename }}"
+
+- name: Enable SLES 11 Box
+  command: /opt/stack/bin/stack add box sles11
+
+- name: Add SLES 11 Pallet
+  command: /opt/stack/bin/stack add pallet /export/isos/{{ lookup('env','SLES_11_STACKI_ISO')|basename }}
+
+- name: Enable SLES 11 Stacki Pallet
+  command: /opt/stack/bin/stack enable pallet stacki release=sles11 box=sles11
+
+- block:
+    - name: Download SLES-11-SP3-DVD-x86_64-GM-DVD1.iso
+      get_url:
+        url: http://stacki-builds.labs.teradata.com/installer-isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso
+        dest: /export/isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso
+        checksum: "sha1:d25fd4ada1e1d5c2296831841d6e157644268530"
+        mode: 0644
+    - name: Add SLES 11 Pallet
+      command: /opt/stack/bin/stack add pallet /export/isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso
+
+- name: Enable SLES 11 Pallet
+  command: /opt/stack/bin/stack enable pallet {{ ansible_distribution }} version=11.3 box=sles11
