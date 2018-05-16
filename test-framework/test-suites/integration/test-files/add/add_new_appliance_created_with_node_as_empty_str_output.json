@@ -1,0 +1,1 @@
+[{"appliance": "new_appliance_node_is_empty_str", "scope": "appliance", "type": "var", "attr": "kickstartable", "value": "False"}, {"appliance": "new_appliance_node_is_empty_str", "scope": "appliance", "type": "var", "attr": "managed", "value": "False"}]

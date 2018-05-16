@@ -1,6 +1,3 @@
-import os
-import subprocess
-
 import pytest
 
 @pytest.mark.usefixtures("revert_database")
