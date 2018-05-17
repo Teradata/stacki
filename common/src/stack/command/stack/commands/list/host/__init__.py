@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.bool import str2bool
 import stack.api
 import stack.commands
 
@@ -28,6 +29,14 @@ class Command(command):
 	all the known hosts is listed.
 	</arg>
 
+	<param type='boolean' name='hash'>
+	If 'yes', output "synced" or "outdated" which indicates if the host is "in sync"
+	with the box for the host (pallets and carts) and if the current installation file
+	(profile) is the same as the installation file that was used when the host was last
+	installed.
+	Default is 'no'.
+	</param>
+
 	<example cmd='list host backend-0-0'>
 	List info for backend-0-0.
 	</example>
@@ -39,13 +48,13 @@ class Command(command):
 	"""
 	def run(self, params, args):
 	    
-		(order, ) = self.fillParams([ ('order', 'asc') ])
+		(order, hash) = self.fillParams([ ('order', 'asc'), ('hash', False) ])
+		hash = str2bool(hash)
 
 		names = self.getHostnames(args)
 		host  = stack.api.Host()
 
 		if names:
-			self.output(host.list_multiple(names))
-
+			self.output(host.list_multiple(names, hash=hash))
 
 

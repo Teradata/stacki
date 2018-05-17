@@ -19,10 +19,10 @@ def str2bool(s):
 
 
 def bool2str(b):
-	"""Converts an 1/0 to a yes/no"""
+	"""Converts an 1/0 to a true/false"""
 	if type(b) in [ bool, int ]:
                 if b:
-                        return 'yes'
+                        return str(True)
                 else:
-                        return 'no'
+                        return str(False)
 	return None

@@ -28,7 +28,6 @@ stack-pxeboot
 stack-pylib
 stack-sql
 stack-storage-config
-stack-summary
 stack-switch
 stack-wizard
 stack-ws

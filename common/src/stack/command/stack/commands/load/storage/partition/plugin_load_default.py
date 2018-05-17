@@ -7,7 +7,7 @@
 import stack.commands
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor,
+class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 
 	"""
@@ -25,10 +25,25 @@ class Plugin(stack.commands.ApplianceArgumentProcessor,
 			# first remove the entries for this host
 			#
 			if host == 'global':
-				target = []
+				self.owner.call('remove.storage.partition', [])
 			else:
-				target = [ host ]
-			self.owner.call('remove.storage.partition', target)
+				try:
+					oses = self.getOSNames([host])
+					self.owner.call('remove.os.storage.partition', [host])
+				except:
+					pass
+
+				try:
+					appliances = self.getApplianceNames([host])
+					self.owner.call('remove.appliance.storage.partition', [host])
+				except:
+					pass
+
+				try:
+					hosts = self.getHostnames([host])
+					self.owner.call('remove.host.storage.partition', [host])
+				except:
+					pass
 
 			# Get list of devices for this host
 			devices = []

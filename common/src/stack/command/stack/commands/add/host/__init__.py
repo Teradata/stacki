@@ -73,6 +73,124 @@ class Command(stack.commands.BoxArgumentProcessor,
 
 	"""
 
+<<<<<<< HEAD
+=======
+	def addHost(self, host):
+
+		if self.db.select("name from nodes where name like '%s'" % host):
+			raise CommandError(self, 'host "%s" already exists in the database' % host)
+	
+		# If the name is of the form appliancename-rack-rank
+		# then do the right thing and figure out the default
+		# values for appliane, rack, and rank.  If the appliance 
+		# name is not found in the database, or the rack/rank numbers
+		# are invalid do not guess any defaults.  The name is
+		# either 100% used or 0% used.
+	
+		appliances = self.getApplianceNames()
+
+		appliance = None
+		rack      = None
+		rank      = None
+
+		try:
+			basename, rack, rank = host.split('-')
+			if basename in appliances:
+				appliance = basename
+				rack      = (rack)   # wtf
+				rank      = (rank)   # wtf
+		except:
+			appliance = None
+			rack      = None
+			rank      = None
+				
+		# fillParams with the above default values
+		(appliance, longname, rack, rank, box, environment,
+		 osaction, installaction) = self.fillParams( [
+			 ('appliance',     appliance),
+			 ('longname',      None),
+			 ('rack',          rack),
+			 ('rank',          rank),
+			 ('box',           'default'),
+			 ('environment',   ''),
+			 ('osaction',      'default'),
+			 ('installaction', 'default') ])
+
+		if not longname and not appliance:
+			raise ParamRequired(self, ('longname', 'appliance'))
+
+		if rack is None:
+			raise ParamRequired(self, 'rack')
+		if rank is None:
+			raise ParamRequired(self, 'rank')
+
+		if longname and not appliance:
+			#
+			# look up the appliance name
+			#
+			for o in self.call('list.appliance'):
+				if o['long name'] == longname:
+					appliance = o['appliance']
+					break
+
+			if not appliance:
+				raise CommandError(self, 'longname "%s" is not in the database' % longname)
+
+		if appliance not in appliances:
+			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)
+
+		if box not in self.getBoxNames():
+			raise CommandError(self, 'box "%s" is not in the database' % box)
+
+		osname = None
+		for row in self.call('list.box', [ box ]):
+			osname = row['os']
+
+
+		# Make sure the installaction and osaction both exist
+
+		if not self.call('list.bootaction', [ installaction, 
+						      'type=install', 
+						      'os=%s' % osname 
+						      ]):
+			raise CommandError(self,
+					   '"%s" install boot action for "%s" is missing' % 
+					   (installaction, osname))
+
+		if not self.call('list.bootaction', [ osaction, 
+						      'type=os', 
+						      'os=%s' % osname 
+						      ]):
+			raise CommandError(self,
+					   '"%s" os boot action for "%s" is missing' % 
+					   (osaction, osname))
+
+		self.db.execute("""
+			insert into nodes
+			(name, appliance, box, rack, rank)
+			values (
+				'%s', 
+			 	(select id from appliances where name='%s'),
+			 	(select id from boxes      where name='%s'),
+				'%s', '%s'
+			) 
+			""" % (host, appliance, box, rack, rank))
+
+
+		self.command('set.host.bootaction', 
+			     [ host, 'type=install', 'sync=false', 
+			       'action=%s' % installaction ])
+
+		self.command('set.host.bootaction', 
+			     [ host, 'type=os', 'sync=false', 
+			       'action=%s' % osaction ])
+
+		if environment:
+			self.command('set.host.environment', 
+				     [ host, "environment=%s" % environment ])
+			
+
+>>>>>>> develop
 	def run(self, params, args):
 		if len(args) != 1:
 			raise ArgUnique(self, 'host')

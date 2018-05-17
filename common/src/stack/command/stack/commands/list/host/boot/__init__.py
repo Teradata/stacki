@@ -49,7 +49,6 @@ class Command(stack.commands.list.host.command):
 		self.beginOutput()
 		hosts = self.getHostnames(args)
 		attrs = self.call('list.host.attr',hosts)
-		f_nukedisks = lambda x: x['attr'] == x['nukecontroller']
 		for host in hosts:
 			nukecontroller = False
 			nukedisks = False
@@ -60,7 +59,7 @@ class Command(stack.commands.list.host.command):
 			f_nukecon = lambda x: (x['host'] == host and x['attr'] == 'nukecontroller')
 			nc = list(filter(f_nukecon, attrs))
 			if nc:
-				nukecontroller = nd[0]['value']
+				nukecontroller = nc[0]['value']
 			if not nukedisks:
 				nukedisks = False
 			else:

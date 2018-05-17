@@ -88,6 +88,11 @@ class ArgUnique(ArgValue):
 		super(ArgUnique, self).__init__(cmd, arg, 'unique')
 
 
+class ArgNotFound(ArgError):
+
+	def __init__(self, cmd, arg, argtype):
+		super(ArgNotFound, self).__init__(cmd, arg, 'is not a valid %s' % argtype)
+
 
 class ParamError(ArgParamBaseError):
 	

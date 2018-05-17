@@ -16,6 +16,7 @@ chkconfig --add rmq-shipper
 <stack:file stack:name="/etc/sysconfig/stack-mq-channels" stack:mode="append">
 alert
 health
+installhash
 </stack:file>
 
 </stack:script>

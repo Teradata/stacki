@@ -8,6 +8,7 @@ import os
 import sys
 import subprocess
 import json
+from yapsy.IPlugin import IPlugin
 
 from .component   import Component
 from .host        import Host
@@ -15,6 +16,9 @@ from .appliance   import Appliance
 from .environment import Environment
 from .box         import Box
 from .bootaction  import BootAction
+
+class Plugin(IPlugin):
+	pass
 
 __stack__ = '/opt/stack/bin/stack'
 

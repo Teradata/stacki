@@ -34,7 +34,7 @@ import stack.api.base
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
-from stack.exception import CommandError, ParamRequired
+from stack.exception import CommandError, ParamRequired, ArgNotFound
 from stack.bool import str2bool, bool2str
 
 _logPrefix = ''
@@ -81,13 +81,13 @@ class OSArgumentProcessor:
 			for name, in self.db.select(
 					"""
 					name from oses 
-					where name like '%s' order by name
-					""" % arg):
+					where name like %s order by name
+					""", arg):
 				list.append(name)
 			if len(list) == 0 and arg == '%':  # empty table is OK
 				continue
 			if len(list)  < 1:
-				raise CommandError(self, 'unknown os "%s"' % arg)
+				raise ArgNotFound(self, arg, 'OS')
 		return list
 
 	
@@ -105,7 +105,7 @@ class EnvironmentArgumentProcessor:
 				found = True
 				environments.append(envName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown environment "%s"' % arg)
+				raise ArgNotFound(self, arg, 'environment')
 
 		return environments
 
@@ -130,7 +130,7 @@ class ApplianceArgumentProcessor:
 				found = True
 				appliances.append(appName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown appliance "%s"' % arg)
+				raise ArgNotFound(self, arg, 'appliance')
 
 		return appliances
 
@@ -155,7 +155,7 @@ class BoxArgumentProcessor:
 				found = True
 				boxes.append(boxName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown box "%s"' % arg)
+				raise ArgNotFound(self, arg, 'box')
 
 		return boxes
 
@@ -204,7 +204,7 @@ class NetworkArgumentProcessor:
 # code.
 #
 #			if not found and arg != '%':
-#				raise CommandError(self, 'unknown network "%s"' % arg)
+#				raise ArgNotFound(self, arg, 'network')
 
 		return networks
 
@@ -433,7 +433,7 @@ class CartArgumentProcessor:
 				found = True
 				carts.append(cartName)
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown cart "%s"' % arg)
+				raise ArgNotFound(self, arg, 'cart')
 
 		return carts
 
@@ -481,7 +481,7 @@ class RollArgumentProcessor:
 				found = True
 				pallets.append((name, ver, rel))
 			if not found and arg != '%':
-				raise CommandError(self, 'unknown pallet "%s"' % arg)
+				raise ArgNotFound(self, arg, 'pallet')
 		return pallets
 
 
@@ -1168,8 +1168,9 @@ class DatabaseConnection:
 		rows = []
 		
 		m = hashlib.md5()
-		s = '%s%s' % (query.strip(), args)
-		m.update(s.encode('utf-8'))
+		m.update(query.strip().encode('utf-8'))
+		if args:
+			m.update(' '.join(arg for arg in args).encode('utf-8'))
 		k = m.hexdigest()
 
 #		 print 'select', k, query
@@ -2254,11 +2255,18 @@ class Command:
 				else:
 					s = str(line[i])
 
+				# fill "cell" with padChar so it's as long
+				# as the longest field/header.
 				if padChar != '' and i != len(line) - 1:
 					if s:
 						o = s.ljust(colwidth[i])
 					else:
 						o = ''.ljust(colwidth[i],
+							padChar)
+				# *BUT* if this is the last column, it might be super
+				# long, so only pad it out as long as the header.
+				elif padChar != '' and i == len(line) - 1 and not s:
+					o = ''.ljust(len(output[0][i]),
 							padChar)
 				else:
 					o = s

@@ -82,7 +82,7 @@ class Host(Base):
 	def list(self, host):
 		return self.list_multiple((host, ))
 
-	def list_multiple(self, hosts):
+	def list_multiple(self, hosts, *, hash=False):
 
 		if not hosts:
 			return {}
@@ -129,14 +129,25 @@ class Host(Base):
 				break
 			except:
 				pass
+
 		for host in hosts:
-			try:
+			
+			try: # redis status
 				status = r.get('host:%s:status' % host) 
 			except:
 				status = None
 			if status:
 				status = status.decode()
 			result[host]['status'] = status
+
+			try: # redis installhash
+				installhash = r.get('host:%s:installhash' % host) 
+			except:
+				installhash = None
+			if installhash:
+				installhash = installhash.decode()
+
+
 			result[host].move_to_end('comment')
 
 		return result

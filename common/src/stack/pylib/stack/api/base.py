@@ -1,9 +1,11 @@
 # @copyright@
 # @copyright@
 
+from yapsy.PluginManager import PluginManager
 import os
-import importlib
-import pkgutil
+import sys
+#import importlib
+#import pkgutil
 
 #importlib.import_module('stack.api.plugins')
 
@@ -19,42 +21,27 @@ import pkgutil
 
 class Base:
 
-	db      = None
-	debug   = False
-	plugins = None
+	db             = None
+	debug          = False
+	plugin_manager = None
 
 	def __init__(self):
-		print('----')
-		if not Base.plugins:
-			mods = [ ]
-			path = os.path.join(os.path.dirname(os.path.abspath( __file__ )), 'plugins')
-			for f in os.listdir(path):
-				fname, ext = os.path.splitext(f)
-				if ext == '.py':
-					continue
-				continue
-				
-#		print(self.__module__)
-		print(d)
-		for x in pkgutil.iter_modules(d):
-			print(x)
-#		print(type(self.__module__))
-#		pkg = stack.api.plugins
-#		for x in pkgutil.iter_modules():
-#			print(x)
+		if not Base.plugin_manager:
+			path = __file__.split(os.sep)[:-1]
+			path.append('plugins')
+			path = os.sep.join(path)
 
+			pm = PluginManager()
+			pm.setPluginPlaces([ path ])
+			pm.collectPlugins()
+			for p in pm.getAllPlugins():
+				print(p.plugin_object.name())
 
-	# def __init__(self):
-	# 	plugins = {
-	# 		name: importlib.import_module(name)
-	# 		for finder, name, ispkg
-	# 		in self.__iter_namespace(stack.api.plugins)
-	# 	}
-	# 	print('--')
-	# 	print(plugins)
+			Base.plugin_manager = pm
 
-	# def __iter_namespace(self, pkg):
-	# 	return pkgutil.iter_modules(pkg.__path__, pkg.__name__ + '.')
+## Activate all loaded plugins
+#for pluginInfo in simplePluginManager.getAllPlugins():
+#   simplePluginManager.activatePluginByName(pluginInfo.name)
 
 
 	def setup(self, db, debug=False):

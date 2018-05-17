@@ -1,5 +1,5 @@
 NAME,SLOT,RAID LEVEL,ARRAY ID,OPTIONS
-node217,0,60,1,pdperarray=4
+backend-0-0,0,60,1,pdperarray=4
 ,1,60,1,
 ,2,60,1,
 ,3,60,1,
