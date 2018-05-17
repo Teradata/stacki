@@ -15,9 +15,15 @@
 
   - name: Download frontend-install.py
     get_url:
-      url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
+      url: https://raw.githubusercontent.com/Teradata/stacki/feature/auto_add_frontend_interfaces_to_db_STACKI_448/tools/fab/frontend-install.py
       dest: /root/
       mode: 0744
 
   - name: Barnacle the frontend
     shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"
+
+  - name: Set defalt route for eth0
+    shell: /opt/stack/bin/stack set host interface default localhost interface=eth0
+
+  - name: Sync stack network config
+    shell: /opt/stack/bin/stack sync host network localhost restart=true

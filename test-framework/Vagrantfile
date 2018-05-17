@@ -24,6 +24,7 @@ else
   TEST_FILES = ENV['TEST_FILES']
 end
 
+ENV['VAGRANT_FORCE_COLOR'] = '1'
 # Make sure Ansible can find our roles
 ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
 
@@ -48,6 +49,8 @@ Vagrant.configure("2") do |config|
       provider.memory = "1024"
       provider.cpus = 2
 
+      provider.customize ['modifyvm', :id, "--macaddress1", "08002781E802"]
+
       config.vm.synced_folder '.cache', "/export/isos", type: "virtualbox"
       config.vm.synced_folder TESTS, "/export/tests", type: "virtualbox"
       config.vm.synced_folder "reports", "/export/reports", type: "virtualbox"
@@ -65,6 +68,7 @@ Vagrant.configure("2") do |config|
       provider.memory = "1024"
       provider.cpus = 2
       provider.nic_model_type = "e1000"
+      provider.management_network_mac = "08:00:27:81:E8:02"
       provider.random :model => "random"
       
       config.vm.synced_folder '.cache', "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
@@ -81,6 +85,7 @@ Vagrant.configure("2") do |config|
     config.vm.hostname = "frontend-0-0.localdomain"
     config.vm.network "private_network",
       ip: "192.168.0.2",
+      mac: "525400000002",
       virtualbox__intnet: NAME,
       libvirt__network_name: NAME,
       libvirt__dhcp_enabled: false,
@@ -102,23 +107,24 @@ Vagrant.configure("2") do |config|
       config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
       config.vm.boot_timeout = 3600
 
-      config.vm.provider "virtualbox" do |vb, config|
-        vb.name = NAME + "_backend-0-#{i}"
-        vb.gui = false
-        vb.linked_clone = true
+      config.vm.provider "virtualbox" do |provider, config|
+        provider.name = NAME + "_backend-0-#{i}"
+        provider.gui = false
+        provider.linked_clone = true
         
-        vb.memory = "2048"
-        vb.cpus = 2
+        provider.memory = "2048"
+        provider.cpus = 2
 
-        vb.check_guest_additions = false
-        vb.functional_vboxsf = false
+        provider.check_guest_additions = false
+        provider.functional_vboxsf = false
 
-        vb.customize ['modifyvm', :id, '--boot1', 'net']
-        vb.customize ['modifyvm', :id, '--boot2', 'disk']
-        vb.customize ['modifyvm', :id, '--biospxedebug', 'on']
-        vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
-        vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
-        vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
+        provider.customize ['modifyvm', :id, '--boot1', 'net']
+        provider.customize ['modifyvm', :id, '--boot2', 'disk']
+        provider.customize ['modifyvm', :id, '--biospxedebug', 'on']
+        provider.customize ['modifyvm', :id, '--cableconnected2', 'on']
+        provider.customize ['modifyvm', :id, '--nicbootprio2', '1']
+        provider.customize ['modifyvm', :id, "--nictype2", '82540EM']
+        provider.customize ['modifyvm', :id, "--macaddress1", sprintf("08002781E8%02X", i+3)]
 
         config.vm.network "private_network", 
           mac: sprintf("5254000000%02X", i+3),
@@ -135,6 +141,7 @@ Vagrant.configure("2") do |config|
         provider.memory = "2048"
         provider.cpus = 2
         provider.nic_model_type = "e1000"
+        provider.management_network_mac = sprintf("08:00:27:81:E8:%02X", i+3)
         provider.random :model => "random"
 
         boot_network = {'network' => NAME}

@@ -9,6 +9,7 @@
 
 import subprocess
 import sys
+from stack.util import get_interfaces
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -16,47 +17,16 @@ from stack_site import *
 #
 # get the interfaces
 #
-linkcmd = [ 'ip', '-oneline', 'link', 'show' ]
-
-p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
-
 interface_number = 0
 
 curlcmd = [ '/usr/bin/curl', '--local-port', '1-100',
 	'--output', '/tmp/stacki-profile.xml' ]
 
-o, e = p.communicate()
-for line in o.decode('utf-8').split('\n'):
-	interface = None
-	hwaddr = None
-	tokens = line.split()
-
-	if len(tokens) > 16:
-		# print 'tokens: %s' % tokens
-		#
-		# strip off last ':'
-		#
-		# if we look for link/ we'll get all
-		# interfaces, include IB, but get rid
-		# of the loopback
-
-		interface = tokens[1].strip()[0:-1]
-		if interface == 'lo':
-			continue
-
-		for i in range(2, len(tokens)):
-			if 'link/' in tokens[i]:
-		#
-		# we know the next token is the ethernet MAC
-		#
-				hwaddr = tokens[i+1]
-				break
-
-		if interface and hwaddr:
-			curlcmd.append('--header')
-			curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
-				% (interface_number, interface, hwaddr))
-			interface_number += 1
+for interface, hwaddr in get_interfaces():
+	if interface and hwaddr:
+		curlcmd.append('--header')
+		curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s' % (interface_number, interface, hwaddr))
+		interface_number += 1
 	curlcmd.append('-k')
 
 #

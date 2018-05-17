@@ -21,3 +21,6 @@
 
   - name: Barnacle the frontend
     shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"
+
+  - name: Set the interface up correctly
+    shell: /opt/stack/bin/stack add network vagrant address=10.0.2.0 mask=255.255.255.0 gateway=10.0.2.2 mtu=1500 zone=localdomain dns=False pxe=false; /opt/stack/bin/stack set host interface default localhost interface=eth0; /opt/stack/bin/stack set host interface network localhost interface=eth0 network=vagrant; /opt/stack/bin/stack set host interface options localhost interface=eth0 options="dhcp"; /opt/stack/bin/stack sync host network localhost

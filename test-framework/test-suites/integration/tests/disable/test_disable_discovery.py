@@ -29,6 +29,13 @@ class TestDisableDiscovery:
 		Test the discovery daemon enable command works when the
 		daemon is running
 		"""
+		result = host.run("stack list host")
+		print(result.stdout)
+		print(result.stderr)
+
+		result = host.run("stack list attr")
+		print(result.stdout)
+		print(result.stderr)
 
 		# Start the daemon
 		result = host.run("stack enable discovery")

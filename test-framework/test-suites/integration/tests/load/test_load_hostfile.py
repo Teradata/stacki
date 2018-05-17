@@ -15,15 +15,20 @@ class TestLoadHostfile:
 	@staticmethod
 	def update_csv_variables(host, csvfile):
 		"""Edit the file as needed to match particular environment."""
+		private_network = None
+		vagrant_network = None
 		dirn = '/export/test-files/load/hostfile_'
 		input_file = dirn + csvfile + '_input' + '.csv'
 		output_file = dirn + csvfile + '_output' + '.csv'
 
-		result = host.run('stack list host interface a:frontend output-format=json')
-		my_json = json.loads(result.stdout)
-		mac = my_json[0]["mac"]
-		ip = my_json[0]["ip"]
-		eth = my_json[0]["interface"]
+		result = host.run('stack report hostfile a:frontend')
+		# Cleaning up the hostfile, there is an extra return, so strip()
+		# Remove the header, so split on new line and drop first [1:]
+		# join them back together, so '\n'.join
+		# make sure we didn't get an extra line in there, so strip() again
+
+		frontend_ifaces = '\n'.join(result.stdout.strip().split('\n')[1:]).strip()
+		print(frontend_ifaces)
 		# Read in the input and output file's current state
 		with open(input_file, 'r') as in_file:
 			in_file_data = in_file.read()
@@ -31,12 +36,8 @@ class TestLoadHostfile:
 			out_file_data = out_file.read()
 
 		# Replace the target string
-		in_file_data = in_file_data.replace('FRONT_VARIABLE_IP_ADDRESS', ip)
-		in_file_data = in_file_data.replace('FRONT_VARIABLE_MAC_ADDRESS', mac)
-		in_file_data = in_file_data.replace('FRONT_VARIABLE_ETH', eth)
-		out_file_data = out_file_data.replace('FRONT_VARIABLE_IP_ADDRESS', ip)
-		out_file_data = out_file_data.replace('FRONT_VARIABLE_MAC_ADDRESS', mac)
-		out_file_data = out_file_data.replace('FRONT_VARIABLE_ETH', eth)
+		in_file_data = in_file_data.replace('REPLACE', str(frontend_ifaces))
+		out_file_data = out_file_data.replace('REPLACE', str(frontend_ifaces))
 
 		# Write the files out to temporary files that have the variables
 		input_tmp_file = tempfile.NamedTemporaryFile(delete=True)
@@ -59,7 +60,15 @@ class TestLoadHostfile:
 
 		host.run('stack load hostfile')
 		# Load the hostfile input
-		host.run('stack load hostfile file=%s' % input_tmp_file.name)
+		print(csvfile)
+		result = host.run('cat %s' % input_tmp_file.name)
+		print(result.stdout)
+		print(result.rc)
+		print(result.stderr)
+		result = host.run('stack load hostfile file=%s' % input_tmp_file.name)
+		print(result.stdout)
+		print(result.rc)
+		print(result.stderr)
 		# Get the new stack hostfile back out
 		stack_output_file = tempfile.NamedTemporaryFile(delete=True)
 		host.run('stack report hostfile > %s' % stack_output_file.name)
@@ -69,6 +78,10 @@ class TestLoadHostfile:
 			test_lines = test_file.readlines()
 		with open(stack_output_file.name) as stack_file:
 			stack_lines = stack_file.readlines()
+		print("Expected:")
+		print(test_lines)
+		print("What we got:")
+		print(stack_lines)
 		assert len(test_lines) == len(stack_lines)
 		for i in range(len(test_lines)):
 			assert test_lines[i].strip() == stack_lines[i].strip()

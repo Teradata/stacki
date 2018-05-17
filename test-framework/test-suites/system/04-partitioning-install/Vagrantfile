@@ -94,6 +94,7 @@ Vagrant.configure("2") do |config|
         vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
         vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
         vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
+        vb.customize ['modifyvm', :id, "--macaddress1", sprintf("08002781E8%02X", i+3)]
 
         config.vm.network "private_network", 
           mac: sprintf("5254000000%02X", i+3),

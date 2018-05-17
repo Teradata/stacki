@@ -186,6 +186,7 @@ def usage():
 	print("Optional arguments:")
 	print("\t--extra-iso=iso1,iso2,iso3.. : list of pallets to add")
 	print("\t--use-existing : use the existing system settings and root password")
+	print("\t--ignore-nics : only add the nics used for the private network")
 
 ##
 ## MAIN
@@ -219,12 +220,13 @@ else:
 opts, args = getopt.getopt(
 	sys.argv[1:],
 	'',
-	['stacki-iso=', 'extra-iso=', 'use-existing']
+	['stacki-iso=', 'extra-iso=', 'use-existing', 'ignore-nics']
 ) 
 
 stacki_iso = None
 extra_isos = []
 use_existing = False
+ignore_nics = False
 
 for opt, arg in opts:
 	if opt == '--stacki-iso':
@@ -233,6 +235,8 @@ for opt, arg in opts:
 		extra_isos = arg.split(',')
 	elif opt == '--use-existing':
 		use_existing = True
+	elif opt == '--ignore-nics':
+		ignore_nics = True
 
 if not stacki_iso:
 	print('--stacki-iso is not specified\n')
@@ -271,7 +275,7 @@ pkgs = [
 	'net-tools',
 	'foundation-newt', 
 	'stack-wizard',
-        'rsync',
+	'rsync',
 ]
 
 if osname == 'redhat':
@@ -310,7 +314,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			interface = re.match(r'\d+:\s+(\S+)\s+', line).group(1)
 			if interface != 'lo':
 				interfaces.append((interface, line))
-		
+
 		if len(interfaces) == 0:
 			print("Error: No interfaces found.")
 			sys.exit(1)
@@ -481,18 +485,18 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		umount('/mnt/cdrom')
 	
 	# add missing attrs to site.attrs
-	f = open("/tmp/site.attrs", "a")
-	str= "Kickstart_Multicast:"+generate_multicast()+"\n"
-	str+= "Server_Partitioning:force-default-root-disk-only\n"
-	f.write(str)
-	f.close()
+	with open("/tmp/site.attrs", "a") as f:
+		my_str = "Kickstart_Multicast:" + generate_multicast() + "\n"
+		my_str += "Server_Partitioning:force-default-root-disk-only\n"
+		my_str += "Ignore_Nics:" + str(ignore_nics) + "\n"
+		f.write(my_str)
 
 # convert site.attrs to python dict
-f = [line.strip() for line in open("/tmp/site.attrs","r")]
+f = [line.strip() for line in open("/tmp/site.attrs", "r")]
 attributes = {}
 for line in f:
-        split = line.split(":",1)
-        attributes[split[0]]=split[1]
+		split = line.split(":", 1)
+		attributes[split[0]] = split[1]
 
 # Reject frontend and backend as hostnames
 hostname = attributes['Kickstart_PrivateHostname'].lower()
@@ -527,15 +531,14 @@ subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
 f = open("/tmp/stack.xml", "w")
-cmd = [ stackpath, 'list', 'node', 'xml', 'server',
-	'attrs={0}'.format(repr(attributes))]
+cmd = [stackpath, 'list', 'node', 'xml', 'server', 'attrs={0}'.format(repr(attributes))]
 print('cmd: %s' % ' '.join(cmd))
 p = subprocess.Popen(cmd, stdout=f, stderr=None)
 rc = p.wait()
 f.close()
 
 if rc:
-	print ("Could not generate XML")
+	print("Could not generate XML")
 	sys.exit(rc)
 
 banner("Process XML")
@@ -543,22 +546,21 @@ banner("Process XML")
 infile = open("/tmp/stack.xml", "r")
 outfile = open("/tmp/run.sh", "w")
 cmd = [stackpath, 'list', 'host', 'profile', 'chapter=main', 'profile=bash']
-p = subprocess.Popen(cmd, stdin=infile,
-	stdout=outfile)
+p = subprocess.Popen(cmd, stdin=infile, stdout=outfile)
 rc = p.wait()
 infile.close()
 outfile.close()
 
 if rc:
-	print ("Could not process XML")
+	print("Could not process XML")
 	sys.exit(rc)
 
 banner("Run Setup Script")
 # run run.sh
-p = subprocess.Popen(['sh','/tmp/run.sh'])
+p = subprocess.Popen(['sh', '/tmp/run.sh'])
 rc = p.wait()
 if rc:
-	print ("Setup Script Failed")
+	print("Setup Script Failed")
 	sys.exit(rc)
 
 banner("Adding Pallets")
@@ -571,5 +573,5 @@ subprocess.call([stackpath, 'enable', 'pallet', '%'])
 # all done
 banner("Done")
 
+print("Check that your interfaces are setup in Stacki as expected: '/opt/stack/bin/stack list host interface'")
 print("Reboot to complete process.")
-

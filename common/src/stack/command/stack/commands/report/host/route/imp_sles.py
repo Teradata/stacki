@@ -54,19 +54,17 @@ class Implementation(stack.commands.Implementation):
 		result = self.owner.call('list.host.interface', [ host ])
 		for o in result:
 			if o['default']:
-				network = o['network']
+				# Sometimes network is None, in that case, make it an empty string
+				network = str(o['network'] or '')
 				device = o['interface'].split(':')[0]
 				destination = 'default'
 				netmask = '0.0.0.0'
-
-				output = self.owner.call('list.network',
-					[ network ])
+				output = self.owner.call('list.network', [ network ])
 				for n in output:
 					gateway = n['gateway']
 
 					self.owner.addOutput(host, '%s\t%s\t%s\t%s' % (destination, gateway, netmask, device))
 					break
-
 				break
 
 		self.owner.addOutput(host, '</stack:file>')

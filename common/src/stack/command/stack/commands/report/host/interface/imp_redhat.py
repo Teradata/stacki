@@ -127,7 +127,14 @@ class Implementation(stack.commands.Implementation):
 		if dhcp:
 			self.owner.addOutput(host, 'BOOTPROTO=dhcp')
 			configured = 1
-			if default:
+
+			# Determine if we want to utilize DHCP provided DNS hostname:
+			if 'no_dhclient_set_hostname' in options:
+				self.owner.addOutput(host, 'HOSTNAME=%s' % self.owner.getAttr('Info_FQDN'))
+			# Determine if we want to utilize DHCP provided default route:
+			if 'no_dhclient_set_default_route' in options:
+				self.owner.addOutput(host, 'DEFROUTE=no')
+			elif default:
 				self.owner.addOutput(host, 'DEFROUTE=yes')
 		else:
 			if ip and netmask:

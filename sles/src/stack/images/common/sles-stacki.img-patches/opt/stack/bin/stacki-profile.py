@@ -12,22 +12,8 @@ import random
 import time
 import os
 import json
+from stack.util import get_interfaces
 
-def get_ipmi_mac():
-	# Get IPMI mac
-	mac = None
-	p = subprocess.Popen(["/usr/bin/ipmitool", "lan","print","1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	o, e = p.communicate()
-
-	if not o:
-		return None
-
-	for line in o.decode().split('\n'):
-		if line.startswith("MAC Address"):
-			k, v = line.split(":",1)
-			mac = v.strip()
-
-	return mac
 
 debug = open('/tmp/stacki-profile.debug', 'w')
 
@@ -44,56 +30,25 @@ try:
 except:
 	pass
 
-ipmi_mac = get_ipmi_mac()
 
 # to include IB information, load ib_ipoib driver
 subprocess.call(["/sbin/modprobe","ib_ipoib"])
 #
 # get the interfaces
 #
-linkcmd = [ 'ip', '-oneline', 'link', 'show' ]
-
-p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
 
 interface_number = 0
 
 curlcmd = [ '/usr/bin/curl', '-s', '-w', '%{http_code}', '--local-port', '1-100',
 	'--output', '/tmp/stacki-profile.xml', '--insecure' ]
 
-o, e = p.communicate()
-output = o.decode()
-for line in output.split('\n'):
-	interface = None
-	hwaddr = None
 
-	tokens = line.split()
-	if len(tokens) > 13:
-		# print 'tokens: %s' % tokens
-		#
-		# strip off last ':'
-		#
-		interface = tokens[1].strip()[0:-1]
+for interface, hwaddr in get_interfaces():
+	if interface and hwaddr:
+		curlcmd.append('--header')
+		curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s' % (interface_number, interface, hwaddr))
+		interface_number += 1
 
-		for i in range(2, len(tokens)):
-			if str(tokens[i]).startswith('link/') and \
-					'loopback' not in tokens[i]:
-				#
-				# we know the next token is the ethernet MAC
-				#
-				hwaddr = tokens[i+1]
-				break
-
-		if interface and hwaddr:
-			curlcmd.append('--header')
-			curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
-				% (interface_number, interface, hwaddr))
-
-			interface_number += 1
-
-if ipmi_mac:
-	curlcmd.append('--header')
-	curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
-			% (interface_number, "ipmi", ipmi_mac))
 #
 # get the number of CPUs
 #

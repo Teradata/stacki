@@ -68,6 +68,19 @@ rm /tmp/my.cnf
 </stack:script>
 
 
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:cond="not Ignore_Nics">
+import subprocess
+from stack.util import get_interfaces
+
+for interface, hwaddr in get_interfaces(["&Kickstart_PrivateInterface;"]):
+	# To avoid blanking out frontend interfaces we set noreport so the pre-Stacki settings exist.
+	cmd = ["/opt/stack/bin/stack", "add", "host", "interface", "&Kickstart_PrivateHostname;", "interface=" + interface,
+		   "mac=" + hwaddr, "options=dhcp no_dhclient_set_hostname"]
+	subprocess.run(cmd)
+
+
+</stack:script>
+
 <stack:script cond="platform == 'aws'" stack:stage="install-post">
 <!-- Frontend DHCPs in AWS -->
 /opt/stack/bin/stack set host interface options &Kickstart_PrivateHostname; interface=&Kickstart_PrivateInterface; options=dhcp

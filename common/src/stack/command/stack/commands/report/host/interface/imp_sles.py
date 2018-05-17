@@ -122,11 +122,22 @@ class Implementation(stack.commands.Implementation):
 
 				if dhcp:
 					bootproto = 'dhcp'
-					if default:
+					# Determine if we want to utilize DHCP provided DNS hostname:
+					if 'no_dhclient_set_hostname' in options:
+						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="no"')
+					elif default:
+						# If interface is default route in stacki:
 						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="yes"')
-						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="yes"')
 					else:
 						self.owner.addOutput(host, 'DHCLIENT_SET_HOSTNAME="no"')
+
+					# Determine if we want to utilize DHCP provided default route:
+					if 'no_dhclient_set_default_route' in options:
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="no"')
+					elif default:
+						# If interface is default route in stacki:
+						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="yes"')
+					else:
 						self.owner.addOutput(host, 'DHCLIENT_SET_DEFAULT_ROUTE="no"')
 
 				if 'onboot=no' in options:
