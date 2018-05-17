@@ -4,7 +4,9 @@ A test framework for running unit, integration, and system test suites against a
 
 ## Installation
 
-You need to have [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/) installed. Then clone this project on your computer and run `make`. This will build a Python virtualenv that contains all the Python modules needed to run the tests.
+You need to have [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/) installed.
+
+Then change into the `test-framework` folder in the `stacki` codebase on your computer and run `make`. This will build a Python virtualenv that contains all the Python modules needed to run the tests.
 
 ## Usage
 
