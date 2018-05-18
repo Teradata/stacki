@@ -28,19 +28,19 @@ class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumen
 				self.owner.call('remove.storage.partition', [])
 			else:
 				try:
-					oses = self.getOSNames([host])
+					_ = self.getOSNames([host])
 					self.owner.call('remove.os.storage.partition', [host])
 				except:
 					pass
 
 				try:
-					appliances = self.getApplianceNames([host])
+					_ = self.getApplianceNames([host])
 					self.owner.call('remove.appliance.storage.partition', [host])
 				except:
 					pass
 
 				try:
-					hosts = self.getHostnames([host])
+					_ = self.getHostnames([host])
 					self.owner.call('remove.host.storage.partition', [host])
 				except:
 					pass
