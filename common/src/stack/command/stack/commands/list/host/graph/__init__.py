@@ -83,8 +83,8 @@ class Command(stack.commands.list.host.command):
 				boxes = row['boxes'].split(' ')
 				if box in boxes:
 					dirs.append(os.path.join(os.sep, 'export', 'stack', 'pallets', 
-								 row['name'], row['version'], row['os'], 
-								 row['arch'], 'graph'))
+						 row['name'], row['version'], row['release'], row['os'],
+						 row['arch'], 'graph'))
 
 			for row in self.call('list.cart'):
 				boxes = row['boxes'].split(' ')
@@ -96,7 +96,6 @@ class Command(stack.commands.list.host.command):
 			for row in self.call('list.host.attr', [ host ]):
 				attrs[row['attr']] = row['value']
 
-			parser = make_parser()
 			handler = stack.profile.GraphHandler(attrs, prune=False)
 
 			for dir in dirs:
@@ -108,10 +107,14 @@ class Command(stack.commands.list.host.command):
 						path = os.path.join(dir, file)
 						if not os.path.isfile(path):
 							continue
-						fin = open(path, 'r')
+						parser = make_parser(['stack.expatreader'])
 						parser.setContentHandler(handler)
-						parser.parse(fin)
-						fin.close()
+						parser.feed(handler.getXMLHeader())
+						with open(path, 'r') as xml:
+							for line in xml.readlines():
+								if line.find('<?xml') != -1:
+									continue
+								parser.feed(line)
 			
 			if 'type' in params and params['type'] == 'json':
 				dot = self.createJSONGraph(handler)
@@ -122,7 +125,7 @@ class Command(stack.commands.list.host.command):
 				for line in dot:
 					self.addOutput(host, line)
 
-		self.endOutput(padChar='')
+		self.endOutput(padChar='', trimOwner=True)
 
 	def createJSONGraph(self, handler):
 		"Output JSON format for D3 graph"
@@ -164,7 +167,6 @@ class Command(stack.commands.list.host.command):
 
 		for node in handler.getOrderGraph().getNodes():
 			color = 'white'
-			node.setFillColor(color)
 			dot.append(node.getDot('\t\t', 'order'))
 
 		iter = stack.profile.OrderIterator(handler.getOrderGraph())
@@ -173,8 +175,6 @@ class Command(stack.commands.list.host.command):
 		for e in handler.getOrderGraph().getEdges():
 			color = 'black'
 			style = 'bold'
-			e.setColor(color)
-			e.setStyle(style)
 			dot.append(e.getDot('\t\t', 'order'))
 		dot.append('\t}')
 
@@ -186,12 +186,9 @@ class Command(stack.commands.list.host.command):
 		dot.append('\t\tcolor=black;')
 		for node in handler.getMainGraph().getNodes():
 			color = 'white'
-			node.setFillColor(color)
 			dot.append(node.getDot('\t\t'))
 		for e in handler.getMainGraph().getEdges():
 			color = 'black'
-			e.setColor(color)
-			e.setStyle('bold')
 			dot.append(e.getDot('\t\t'))
 		dot.append('\t}')
 
@@ -216,7 +213,7 @@ class Command(stack.commands.list.host.command):
 				continue
 			name = tokens[0]
 			ext  = tokens[1]
-			tokens = string.split(name, '-')
+			tokens = name.split('-')
 			if len(tokens) < 2:
 				continue
 			prefix = tokens[0]
@@ -234,4 +231,3 @@ class Command(stack.commands.list.host.command):
 				map[r].nodeShape = 'ellipse'
 
 		return map
-

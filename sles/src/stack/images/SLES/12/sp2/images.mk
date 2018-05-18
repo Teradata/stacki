@@ -22,5 +22,4 @@ YUMLIST = MegaCLI storcli \
 
 
 getextrapackages:
-	echo
-
+	zypper --pkg-cache-dir cache download ipmitool

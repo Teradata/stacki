@@ -86,17 +86,9 @@ if os.path.exists('/tmp/site.attrs'):
 <!-- manage firewall rules by default -->
 /opt/stack/bin/stack set attr attr=firewall value=true
 
-<!--	Set managed attribute for appliances.
-	This determines whether the appliances
-	can be ssh'ed into for running management
-	commands
--->
+<!-- Set managed attribute to false for frontend-->
 
-/opt/stack/bin/stack set attr attr=managed value=false
-
-/opt/stack/bin/stack set appliance attr frontend attr=managed value=false
-/opt/stack/bin/stack set appliance attr backend	 attr=managed value=true
-/opt/stack/bin/stack set appliance attr switch	 attr=managed value=false
+/opt/stack/bin/stack set appliance attr frontend attr=managed value=False
 
 <!-- ensure replicant appliances *don't* get 'const' attributes -->
 /opt/stack/bin/stack set appliance attr replicant attr=const_overwrite value=false

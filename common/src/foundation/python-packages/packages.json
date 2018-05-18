@@ -27,5 +27,6 @@
 	"testinfra":		{ "fe": true, "bootstrap": true },
 	"Django":		{ "fe": true, "version": "1.11.6" },
 	"mod-wsgi":		{ "fe": true },
-	"netifaces":		{ "fe": true, "be":"true"}
+	"netifaces":		{ "fe": true, "be":"true"},
+	"jmespath":		{ "fe": true }
 }

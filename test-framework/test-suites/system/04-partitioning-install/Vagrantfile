@@ -1,0 +1,107 @@
+require 'json'
+
+# Load the state from the state.json file, if possible.
+if File.file?("#{ENV['PWD']}/.cache/state.json")
+  state = JSON.parse(File.read("#{ENV['PWD']}/.cache/state.json"))
+  
+  # ENV can override the state variables
+  STACKI_ISO = ENV.fetch('STACKI_ISO', state['STACKI_ISO'])
+  SLES_11_STACKI_ISO = ENV.fetch('SLES_11_STACKI_ISO', state['SLES_11_STACKI_ISO'])
+  PLAYBOOK = ENV.fetch('PLAYBOOK', state['PLAYBOOK'])
+  NAME = ENV.fetch('NAME', state['NAME'])
+  TESTS = ENV.fetch('NAME', state['TESTS'])
+else
+  STACKI_ISO = ENV['STACKI_ISO']
+  SLES_11_STACKI_ISO = ENV['SLES_11_STACKI_ISO']
+  PLAYBOOK = ENV['PLAYBOOK']
+  NAME = ENV['NAME']
+  TESTS = ENV['TESTS']
+end
+
+# Make sure Ansible can find our roles
+ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
+
+# Ansible also needs the path to our STACKI ISO in the ENV
+ENV['STACKI_ISO'] = STACKI_ISO
+ENV['SLES_11_STACKI_ISO'] = SLES_11_STACKI_ISO
+
+Vagrant.configure("2") do |config|
+  config.vm.define "frontend", autostart: false do |config|
+    if STACKI_ISO =~  /-sles12\./
+      config.vm.box = "stacki/sles-12.3"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+    elsif STACKI_ISO =~  /-redhat7\./
+      config.vm.box = "stacki/centos-7.4"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+    end
+
+    config.vm.provider "virtualbox" do |provider, config|
+      provider.name = NAME + "_frontend"
+      provider.gui = false
+      
+      provider.memory = "1024"
+      provider.cpus = 1
+    end
+    
+    config.vm.synced_folder '.', '/vagrant', disabled: true
+    config.vm.synced_folder '.cache', "/export/isos"
+    config.vm.synced_folder TESTS, "/export/tests"
+    config.vm.synced_folder "reports", "/export/reports"
+
+    config.vm.hostname = "frontend-0-0.localdomain"
+    config.vm.network "private_network",
+      ip: "192.168.0.2",
+      virtualbox__intnet: NAME
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = PLAYBOOK
+      ansible.become = true
+      ansible.compatibility_mode = "2.0"
+    end
+  end
+
+  (0..5).each do |i|
+    config.vm.define "backend-0-#{i}", autostart: false do |config|
+      config.vm.box = "stacki/pxe-boot"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+      config.vm.boot_timeout = 30
+
+      config.vm.provider "virtualbox" do |vb, config|
+        vb.name = NAME + "_backend-0-#{i}"
+        vb.gui = false
+
+        vb.memory = "1024"
+        vb.cpus = 1
+
+        vb.customize ["storagectl", :id, "--remove", "--name", "IDE"]
+        vb.customize ["closemedium", "disk", "/Users/ts186032/VirtualBox VMs/" + vb.name.to_s + "/box-disk001.vmdk", "--delete"]
+        vb.customize ["storagectl", :id, "--add", "sas", "--name", "SAS"]
+        vb.customize ["createhd", "--filename", "/Users/ts186032/VirtualBox VMs/" + vb.name.to_s + "/box-disk001.vmdk", "--size", "102400"]
+        vb.customize ["storageattach", :id, "--storagectl", "SAS", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "/Users/ts186032/VirtualBox VMs/" + vb.name.to_s + "/box-disk001.vmdk"]
+
+        vb.customize ["createhd", "--filename", "/Users/ts186032/VirtualBox VMs/" + vb.name.to_s + "/box-disk002.vmdk", "--size", "102400"]
+        vb.customize ["storageattach", :id, "--storagectl", "SAS", "--port", "1", "--device", "0", "--type", "hdd", "--medium", "/Users/ts186032/VirtualBox VMs/" + vb.name.to_s + "/box-disk002.vmdk"]
+
+
+        vb.check_guest_additions = false
+        vb.functional_vboxsf = false
+
+        vb.customize ['modifyvm', :id, '--boot1', 'net']
+        vb.customize ['modifyvm', :id, '--boot2', 'disk']
+        vb.customize ['modifyvm', :id, '--biospxedebug', 'on']
+        vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
+        vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
+        vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
+
+        config.vm.network "private_network", 
+          mac: sprintf("5254000000%02X", i+3),
+          type: "dhcp",
+          virtualbox__intnet: NAME,
+          auto_config: false
+      end
+
+      config.vm.synced_folder '.', '/vagrant', disabled: true
+    end
+  end
+
+end

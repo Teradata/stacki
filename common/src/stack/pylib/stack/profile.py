@@ -34,7 +34,7 @@ class RollHandler(handler.ContentHandler,
 		self.rollName  = ''
 		self.edgeColor = None
 		self.nodeColor = None
-		self.nodeShape = 'ellipse'
+		self.nodeShape = 'box'
 
 	def getRollName(self):
 		return self.rollName
@@ -940,7 +940,7 @@ class Node(stack.graph.Node):
 
 	def getDot(self, prefix='', namespace=''):
 		attrs = 'style=filled '
-		attrs = attrs + 'shape=ellipse '
+		attrs = attrs + 'shape=box'
 		if namespace:
 			name = '%s-%s' % (namespace, self.name)
 		else:

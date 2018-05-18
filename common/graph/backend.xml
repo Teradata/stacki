@@ -21,6 +21,7 @@
 	<edge from="client" cond="appliance not in [ 'barnacle', 'replicant' ]">
 		<to>foundation-python-client</to>
 		<to>mq-client</to>
+		<to>hash-client</to>
 	</edge>
 	<edge from="client">
 		<to>peerdone</to>

@@ -1,0 +1,105 @@
+require 'json'
+
+# Load the state from the state.json file, if possible.
+if File.file?("#{ENV['PWD']}/.cache/state.json")
+  state = JSON.parse(File.read("#{ENV['PWD']}/.cache/state.json"))
+  
+  # ENV can override the state variables
+  STACKI_ISO = ENV.fetch('STACKI_ISO', state['STACKI_ISO'])
+  PLAYBOOK = ENV.fetch('PLAYBOOK', state['PLAYBOOK'])
+  NAME = ENV.fetch('NAME', state['NAME'])
+  TESTS = ENV.fetch('TESTS', state['TESTS'])
+  TEST_FILES = ENV.fetch('TEST_FILES', state['TEST_FILES'])
+else
+  STACKI_ISO = ENV['STACKI_ISO']
+  PLAYBOOK = ENV['PLAYBOOK']
+  NAME = ENV['NAME']
+  TESTS = ENV['TESTS']
+  TEST_FILES = ENV['TEST_FILES']
+end
+
+# Make sure Ansible can find our roles
+ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
+
+# Ansible also needs the path to our STACKI ISO in the ENV
+ENV['STACKI_ISO'] = STACKI_ISO
+
+# Pass the TEST_FILES to ENV, so Ansible can tell if we need to mount it
+ENV['TEST_FILES'] = TEST_FILES
+
+Vagrant.configure("2") do |config|
+  config.vm.define "frontend", autostart: false do |config|
+    if STACKI_ISO =~  /-sles12\./
+      config.vm.box = "stacki/sles-12.3"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+    elsif STACKI_ISO =~  /-redhat7\./
+      config.vm.box = "stacki/centos-7.4"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+    end
+
+    config.vm.provider "virtualbox" do |provider, config|
+      provider.name = NAME + "_frontend"
+      provider.gui = false
+      provider.linked_clone = true
+
+      provider.memory = "2048"
+      provider.cpus = 2
+    end
+    
+    config.vm.synced_folder '.', '/vagrant', disabled: true
+    config.vm.synced_folder '.cache', "/export/isos"
+    config.vm.synced_folder TESTS, "/export/tests"
+    config.vm.synced_folder "reports", "/export/reports"
+
+    unless TEST_FILES.nil?
+      config.vm.synced_folder TEST_FILES, "/export/test-files"
+    end
+    
+    config.vm.hostname = "frontend-0-0.localdomain"
+    config.vm.network "private_network",
+      ip: "192.168.0.2",
+      virtualbox__intnet: NAME
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = PLAYBOOK
+      ansible.become = true
+      ansible.compatibility_mode = "2.0"
+    end
+  end
+
+  (0..1).each do |i|
+    config.vm.define "backend-0-#{i}", autostart: false do |config|
+      config.vm.box = "stacki/pxe-boot"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+      config.vm.boot_timeout = 3600
+
+      config.vm.provider "virtualbox" do |vb, config|
+        vb.name = NAME + "_backend-0-#{i}"
+        vb.gui = false
+        vb.linked_clone = true
+        
+        vb.memory = "2048"
+        vb.cpus = 2
+
+        vb.check_guest_additions = false
+        vb.functional_vboxsf = false
+
+        vb.customize ['modifyvm', :id, '--boot1', 'net']
+        vb.customize ['modifyvm', :id, '--boot2', 'disk']
+        vb.customize ['modifyvm', :id, '--biospxedebug', 'on']
+        vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
+        vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
+        vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
+
+        config.vm.network "private_network", 
+          mac: sprintf("5254000000%02X", i+3),
+          type: "dhcp",
+          virtualbox__intnet: NAME,
+          auto_config: false
+      end
+
+      config.vm.synced_folder '.', '/vagrant', disabled: true
+    end
+  end
+
+end

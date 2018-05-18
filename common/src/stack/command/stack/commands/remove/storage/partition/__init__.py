@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgError, ParamValue
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.command,
@@ -15,10 +15,14 @@ class Command(stack.commands.remove.command,
 	"""
 	Remove a storage partition configuration from the database.
 
-	<arg type='string' name='scope'>
-	Zero or one argument. The argument is the scope: a valid os (e.g.,
+	<param type='string' name='scope' optional='0'>
+	Scope of partition definition: a valid os (e.g.,
 	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). No argument means the scope is 'global'.
+	(e.g., 'backend-0-0). Default scope is 'global'.
+	</param>
+
+	<arg type='string' name='name'>
+	Zero or one argument of host, appliance or os name
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -46,63 +50,37 @@ class Command(stack.commands.remove.command,
 	"""
 
 	def run(self, params, args):
-		scope = None
+		(scope, device, mountpoint) = self.fillParams([
+			('scope', 'global'), ('device', None), ('mountpoint', None)])
 		oses = []
 		appliances = []
 		hosts = []
+		name = None
 
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
+		if scope != 'global' and len(args) < 1:
+			raise ArgRequired(self, '% name' % scope)
 
-			try:
-				appliances = self.getApplianceNames(args)
-			except:
-				appliances = []
+		if scope == "os":
+			oses = self.getOSNames(args)
+		elif scope == "appliance":
+			appliances = self.getApplianceNames(args)
+		elif scope == "host":
+			hosts = self.getHostnames(args)
 
-			try:
-				hosts = self.getHostnames(args)
-			except:
-				hosts = []
-		else:
-			raise ArgError(self, 'scope', 'must be unique or missing')
+		if scope != 'global' and len(args) < 1:
+			raise ArgRequired(self, '%s name' % scope)
 
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-
-		if not scope:
-			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
-
-		if scope == 'global':
-			name = None
-		else:
+		if scope != 'global':
 			name = args[0]
-
-		device, mountpoint = self.fillParams([ ('device', None),
-				('mountpoint', None) ])
 
 		#
 		# look up the id in the appropriate 'scope' table
 		#
-		tableid = None
-		if scope == 'global':
-			tableid = -1
-		elif scope == 'appliance':
-			self.db.execute("""select id from appliances where
-				name = '%s' """ % name)
-			tableid, = self.db.fetchone()
-		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = '%s' """ % name)
+		tableid = -1
+		tablename = {"os":"oses", "appliance":"appliances", "host":"nodes"}
+		if scope != 'global':
+			self.db.execute("""select id from %s where
+				name = '%s' """ % (tablename[scope], name))
 			tableid, = self.db.fetchone()
 
 		deletesql = """delete from storage_partition where

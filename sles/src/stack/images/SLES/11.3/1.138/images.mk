@@ -6,4 +6,4 @@ YUMLIST = MegaCLI storcli \
 
 getextrapackages:
 	cp RPMS/*rpm cache/
-
+	zypper --pkg-cache-dir cache download ipmitool

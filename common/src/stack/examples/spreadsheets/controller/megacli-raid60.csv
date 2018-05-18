@@ -1,5 +1,5 @@
 NAME,SLOT,RAID LEVEL,ARRAY ID,OPTIONS
-node219,0,60,1,
+global,0,60,1,
 ,1,60,1,
 ,2,60,1,
 ,3,60,1,

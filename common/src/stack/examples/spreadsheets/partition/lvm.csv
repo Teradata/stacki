@@ -1,5 +1,5 @@
 NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
-node207,sda,swap,8192,swap,
+backend,sda,swap,8192,swap,
 ,sda,biosboot,1,biosboot,
 ,sda,/,0,ext4,
 ,sdb,pv.01,1,lvm,--grow

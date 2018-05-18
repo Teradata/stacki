@@ -78,7 +78,7 @@ class Command(command):
 
 	def addHost(self, host):
 
-		if self.db.select("select name from nodes where name like '%s'" % host):
+		if self.db.select("name from nodes where name like '%s'" % host):
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank

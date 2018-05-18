@@ -57,6 +57,8 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 #
 /opt/stack/bin/configure-controllers.py
 
+udevadm settle --timeout=60
+
 #
 # then configure the partitions
 #

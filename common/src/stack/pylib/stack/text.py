@@ -13,7 +13,7 @@ def DoNotEdit(prefix='# '):
 	t = [ '',
               'WARNING: This file is generated do not edit.',
               '',
-	      'Contents last written on %s by Stacki.' % time.strftime('%D %T %p'),
+	      'Contents written by Stacki.',
 	      '' ]
 
 	s = ''

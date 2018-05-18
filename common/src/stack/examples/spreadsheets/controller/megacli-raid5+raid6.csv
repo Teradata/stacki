@@ -1,5 +1,5 @@
 NAME,SLOT,RAID LEVEL,ARRAY ID,OPTIONS
-node219,0,1,1,
+backend-0-0,0,1,1,
 ,1,1,1,
 ,2,Hotspare,1,
 ,3,0,2,

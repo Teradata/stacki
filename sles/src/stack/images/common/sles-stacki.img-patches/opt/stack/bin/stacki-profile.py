@@ -13,6 +13,22 @@ import time
 import os
 import json
 
+def get_ipmi_mac():
+	# Get IPMI mac
+	mac = None
+	p = subprocess.Popen(["/usr/bin/ipmitool", "lan","print","1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	o, e = p.communicate()
+
+	if not o:
+		return None
+
+	for line in o.decode().split('\n'):
+		if line.startswith("MAC Address"):
+			k, v = line.split(":",1)
+			mac = v.strip()
+
+	return mac
+
 debug = open('/tmp/stacki-profile.debug', 'w')
 
 for i in os.environ:
@@ -28,6 +44,10 @@ try:
 except:
 	pass
 
+ipmi_mac = get_ipmi_mac()
+
+# to include IB information, load ib_ipoib driver
+subprocess.call(["/sbin/modprobe","ib_ipoib"])
 #
 # get the interfaces
 #
@@ -70,6 +90,10 @@ for line in output.split('\n'):
 
 			interface_number += 1
 
+if ipmi_mac:
+	curlcmd.append('--header')
+	curlcmd.append('X-RHN-Provisioning-MAC-%d: %s %s'
+			% (interface_number, "ipmi", ipmi_mac))
 #
 # get the number of CPUs
 #

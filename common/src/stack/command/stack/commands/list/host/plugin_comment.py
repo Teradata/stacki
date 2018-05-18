@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'comment'
 
 	def requires(self):
-		return ['basic', 'redis_status']
+		return ['basic', 'redis_status', 'hash_status']
 
 	def run(self, hosts):
 		host_info = dict.fromkeys(hosts)

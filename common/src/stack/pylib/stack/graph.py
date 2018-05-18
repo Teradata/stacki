@@ -228,7 +228,7 @@ class Graph:
 		for key, val in self.adjList.items():
 			for e in val:
 				list.append(e.__repr__())
-		return string.join(list, '\n')
+		return '\n'.join(list)
 	
 
 class GraphIterator:

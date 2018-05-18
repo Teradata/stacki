@@ -1,4 +1,5 @@
 YUMLIST = MegaCLI storcli \
+	ipmitool	\
 	stack-command \
 	stack-pylib	\
 	stack-storage-config \
@@ -22,5 +23,4 @@ YUMLIST = MegaCLI storcli \
 
 
 getextrapackages:
-	echo
-
+	zypper --pkg-cache-dir cache download ipmitool
