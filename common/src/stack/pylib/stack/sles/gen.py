@@ -16,10 +16,23 @@ zypp_template = """zypper install -f -y %s
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
-		if enabled:
-			return  zypp_template % ' '.join(enabled)
+		script   = []
+		rpms     = []
+		patterns = []
+		for package in enabled:
+			if package.find('@') == 0:
+				patterns.append(package[1:])
+			else:
+				rpms.append(package)
 
-		return None
+		if patterns:
+			script.append('zypper install -f -y -t pattern %s' % ' '.join(patterns))
+			script.append('[ $? -ne 0 ] && echo "Pattern Installation Failed. Cannot Continue" && exit -1')
+		if rpms:
+			script.append('zypper install -f -y %s' % ' '.join(rpms))
+			script.append('[ $? -ne 0 ] && echo "Package Installation Failed. Cannot Continue" && exit -1')
+
+		return '\n'.join(script)
 		
 
 class ExpandingTraversor(stack.gen.Traversor):
