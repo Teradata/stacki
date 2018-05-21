@@ -1,4 +1,4 @@
-MegaCLI
+foundation-ansible
 foundation-comps
 foundation-fbtftpd
 foundation-fio
@@ -11,6 +11,7 @@ foundation-sc-im
 foundation-stream
 foundation-zeromq
 ludicrous-speed
+MegaCLI
 stack-admin
 stack-aws-client
 stack-aws-server
@@ -26,6 +27,7 @@ stack-kickstart
 stack-mq
 stack-pxeboot
 stack-pylib
+stack-releasenotes
 stack-sql
 stack-storage-config
 stack-switch
@@ -34,4 +36,3 @@ stack-ws
 stack-ws-client
 storcli
 uefi-boot-method
-foundation-ansible
