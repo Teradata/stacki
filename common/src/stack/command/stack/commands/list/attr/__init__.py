@@ -136,9 +136,9 @@ class Command(stack.commands.Command,
 					       'os.name'    : name, 
 					       'os.version' : version }
 
-		for (name, environment, rack, rank) in self.db.select(
+		for (name, environment, rack, rank, metadata) in self.db.select(
 				"""
-				n.name, e.name, n.rack, n.rank 
+				n.name, e.name, n.rack, n.rank, n.metadata 
 				from nodes n
 				left join environments e on n.environment=e.id
 				"""):
@@ -147,6 +147,8 @@ class Command(stack.commands.Command,
 			readonly[name]['rank'] = rank
 			if environment:
 				readonly[name]['environment'] = environment
+			if metadata:
+				readonly[name]['metadata'] = metadata
 
 		for (name, box, appliance, longname) in self.db.select(
 				""" 
