@@ -130,7 +130,6 @@ CREATE TABLE bootactions (
 CREATE UNIQUE INDEX BootnameOS ON bootactions(BootName,OS);
 
 <!-- Nodes -->
-
 DROP TABLE IF EXISTS nodes;
 CREATE TABLE nodes (
   ID		int(11) NOT NULL auto_increment,
@@ -143,6 +142,7 @@ CREATE TABLE nodes (
   OSAction	int(11) default NULL references bootactions,
   InstallAction	int(11) default NULL references bootactions,
   Comment	varchar(140) default NULL,
+  MetaData	text default NULL,
   PRIMARY KEY  (ID)
 );
 
