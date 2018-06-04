@@ -299,6 +299,11 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		attrs['HOSTNAME'] = fqdn.pop(0)
 		attrs['DOMAIN'] = '.'.join(fqdn)
 		
+                # Reject frontend and backend as hostnames
+                if attrs['HOSTNAME'].lower() in ['frontend', 'backend']:
+			print('Cannot have an appliance name as a hostname')
+			sys.exit(1)
+
 		# Figure out which interface to use
 		interfaces = []
 		for line in subprocess.check_output("ip -o -4 address", shell=True).splitlines():
@@ -488,6 +493,12 @@ attributes = {}
 for line in f:
         split = line.split(":",1)
         attributes[split[0]]=split[1]
+
+# Reject frontend and backend as hostnames
+hostname = attributes['Kickstart_PrivateHostname'].lower()
+if hostname in ['frontend', 'backend']:
+	print('Cannot have an appliance name as a hostname')
+	sys.exit(1)
 
 if not use_existing:
 	# fix hostfile
