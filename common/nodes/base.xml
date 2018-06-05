@@ -4,7 +4,7 @@
 Base class for all nodes.
 </stack:description>
 
-<stack:package>stack-releasenotes</stack:package>
+<stack:package stack:cond="not (os == 'sles' and os.version == '11.x')">stack-releasenotes</stack:package>
 
 <stack:package>vim</stack:package>
 <stack:package>pciutils</stack:package>
