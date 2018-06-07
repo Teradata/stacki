@@ -1,0 +1,4 @@
+NAME,INTERFACE HOSTNAME,DEFAULT,APPLIANCE,RACK,RANK,IP,MAC,INTERFACE,NETWORK,CHANNEL,OPTIONS,VLAN,INSTALLACTION,OSACTION,GROUPS,BOX,COMMENT
+sd-stacki-163,sd-stacki-163,True,backend,1,163,192.168.0.45,52:54:00:14:27:fe,eth1,private,,,,,,,,
+sd-stacki-016,sd-stacki-016,True,frontend,0,0,192.168.0.2,08:00:27:45:67:d2,eth1,private,,,,default,default,,default,
+sd-stacki-016,sd-stacki-016,,,0,0,192.168.0.21,52:54:00:14:27:fd,eth3,private,,,,default,default,,default,
