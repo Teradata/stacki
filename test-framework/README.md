@@ -4,7 +4,7 @@ A test framework for running unit, integration, and system test suites against a
 
 ## Installation
 
-You need to have [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/) installed.
+You need to have [Vagrant](https://www.vagrantup.com/) and either [VirtualBox](https://www.virtualbox.org/) or KVM installed. If using KVM, you also need to [install the vagrant-libvirt plugin](https://github.com/vagrant-libvirt/vagrant-libvirt#installation) and NFS server on the host, with the NFS firewall ports opened.
 
 Then change into the `test-framework` folder in the `stacki` codebase on your computer and run `make`. This will build a Python virtualenv that contains all the Python modules needed to run the tests.
 
