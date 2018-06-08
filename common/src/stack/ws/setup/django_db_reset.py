@@ -12,9 +12,12 @@ import os, sys
 import string, random
 import subprocess
 import pwd, grp
+import warnings
 
 import pymysql
 
+# pymysql throws drop database warning despite using 'if exists'; ignore it
+warnings.filterwarnings('ignore', '.*drop database.*')
 
 # Get root credentials
 conf_file = open('/etc/root.my.cnf')

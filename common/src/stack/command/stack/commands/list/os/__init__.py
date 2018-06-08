@@ -33,5 +33,5 @@ class Command(command):
 		for x in self.getOSNames(args):
 			self.addOutput(x, None)
 			
-		self.endOutput(header=['os'])
+		self.endOutput(header=['os', None])
 	

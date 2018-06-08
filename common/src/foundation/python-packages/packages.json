@@ -14,19 +14,20 @@
 // dependency, this is considered a feature.
 
 {
-	"configparser":		{ "fe": true, "be": true }, 
+	"Django":		{ "fe": true, "version": "1.11.6" },
 	"Flask":		{ "fe": true }, 
-	"PyYAML":		{ "fe": true }, 
-	"flake8":		{ "fe": true, "bootstrap": true }, 
-	"pexpect":		{ "fe": true },
+	"GitPython":            { "fe": true, "bootstrap": true },
 	"PyMySQL":		{ "fe": true, "bootstrap": true }, 
+	"PyYAML":		{ "fe": true }, 
+	"configparser":		{ "fe": true, "be": true }, 
+	"flake8":		{ "fe": true, "bootstrap": true }, 
+	"jmespath":		{ "fe": true },
+	"mod-wsgi":		{ "fe": true },
+	"netifaces":		{ "fe": true, "be":"true"},
+	"pexpect":		{ "fe": true },
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
-	"testinfra":		{ "fe": true, "bootstrap": true },
-	"Django":		{ "fe": true, "version": "1.11.6" },
-	"mod-wsgi":		{ "fe": true },
-	"netifaces":		{ "fe": true, "be":"true"},
-	"jmespath":		{ "fe": true }
+	"testinfra":		{ "fe": true, "bootstrap": true }
 }

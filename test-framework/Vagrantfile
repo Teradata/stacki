@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
       provider.gui = false
       provider.linked_clone = true
 
-      provider.memory = "2048"
+      provider.memory = "1024"
       provider.cpus = 2
     end
     

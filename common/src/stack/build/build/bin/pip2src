@@ -57,7 +57,7 @@ class Scanner:
 			meta = {}
 			with open(os.path.join(path, 'METADATA'), 'r') as text:
 				for line in text:
-					if 'Name' in line or 'Version' in line:
+					if 'Name:' in line or 'Version:' in line:
 						key, value = line.strip().split(':')
 						meta[key.strip().lower()] = value.strip()
 

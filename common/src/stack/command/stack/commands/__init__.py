@@ -486,6 +486,34 @@ class RollArgumentProcessor:
 
 class HostArgumentProcessor:
 	"""An Interface class to add the ability to process host arguments."""
+
+	def sortHosts(self, hosts):
+		def racksort(a):
+			try:
+				retval = int(a['rack'])
+			except:
+				retval = a['rack']
+			return retval
+
+		def ranksort(a):
+			try:
+				retval = int(a['rank'])
+			except:
+				retval = a['rank']
+			return retval
+
+		rank = sorted((h for h in hosts if h['rank'].isnumeric()), key = ranksort)
+		rank += sorted((h for h in hosts if not h['rank'].isnumeric()), key = ranksort)
+
+		rack = sorted((h for h in rank if h['rack'].isnumeric()), key = racksort)
+		rack += sorted((h for h in rank if not h['rack'].isnumeric()), key = racksort)
+
+		hosts = []
+		for r in rack:
+			hosts.append((r['host'],))
+
+		return hosts
+
 	
 	def getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
 		"""Expands the given list of names to valid cluster hostnames.	A name
@@ -533,21 +561,24 @@ class HostArgumentProcessor:
 			nodes n, appliances a where a.name = "frontend"
 			and a.id = n.appliance order by rack, rank %s
 			""" % order)
-				
+
 		#
 		# now get the backend appliances
 		#
-		backends = self.db.select(
-			"""
-			n.name from
+		rows = self.db.select("""n.name, n.rack, n.rank from
 			nodes n, appliances a where a.name != "frontend"
-			and a.id = n.appliance order by rack, rank %s
-			""" % order)
+			and a.id = n.appliance""")
 
 		hosts = []
-
 		if frontends:
 			hosts.extend(frontends)
+
+		sortem = []
+		for host, rack, rank in rows:
+			sortem.append({ 'host' : host, 'rack' : rack, 'rank' : rank })
+
+		backends = self.sortHosts(sortem)
+
 		if backends:
 			hosts.extend(backends)
 
@@ -573,7 +604,6 @@ class HostArgumentProcessor:
 			else:
 				hostDict[host] = self.db.getNodeName(host, 
 								     subnet)
-				
 
 		l = []
 		if names:
