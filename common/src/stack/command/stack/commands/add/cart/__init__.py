@@ -90,23 +90,28 @@ class Command(stack.commands.CartArgumentProcessor,
 			except:
 				pass
 
-			perms = os.stat(dirpath)[stat.ST_MODE]
-			perms = perms | stat.S_IRGRP | stat.S_IXGRP
 
 			#
 			# apache needs to be able to write in the cart directory
 			# when carts are compiled on the fly
 			#
-			if dirpath == cartpath:
-				perms |= stat.S_IWGRP
 
+			perms = os.stat(dirpath)[stat.ST_MODE]
 			try:
-				os.chmod(dirpath, perms)
+				os.chmod(dirpath, perms | stat.S_IRWXG)
 			except:
 				pass
 
-			for file in cartfiles:
-				filepath = os.path.join(dirpath, file)
+			for d in dirnames:
+				p = os.path.join(dirpath, d)
+				perms = os.stat(p)[stat.ST_MODE]
+				try:
+					os.chmod(dirpath, perms | stat.S_IRWXG)
+				except:
+					pass
+
+			for f in cartfiles:
+				filepath = os.path.join(dirpath, f)
 
 				try:
 					os.chown(filepath, -1, gr_gid)
