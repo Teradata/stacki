@@ -29,7 +29,7 @@ class Command(command):
 		for switch in self.call('list.switch', args):
 			
 			switch_name = switch['switch']
-			model = self.getHostAttr(switch_name, 'switch_model')
+			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
 		self.endOutput(padChar='', trimOwner=True)

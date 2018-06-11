@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 
 			if row[0] in host_info:
 				host_info[row[0]] = row[1:]
-				host_info[row[0]] += tuple([self.owner.getHostAttr(row[0], 'switch_model')])
+				host_info[row[0]] += tuple([self.owner.getHostAttr(row[0], 'component.model')])
 
 		for host in dict(host_info):
 			if host_info[host] == None:
