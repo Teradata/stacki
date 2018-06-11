@@ -4,38 +4,6 @@
     - name: Barnacle the frontend
       import_role:
         name: barnacle
-
-    - name: Reboot the frontend
-      shell: sleep 2 && shutdown -r now
-      async: 1
-      poll: 0
-      ignore_errors: true
-
-    - name: Wait for the frontend to boot
-      wait_for_connection:
-        delay: 30
-        timeout: 300
-
-    - name: Re-mount the cache folder
-      command: mount -t vboxsf export_isos /export/isos
-      args:
-        warn: false
-    
-    - name: Re-mount the tests folder
-      command: mount -t vboxsf export_tests /export/tests
-      args:
-        warn: false
-    
-    - name: Re-mount the test-files folder
-      command: mount -t vboxsf export_test-files /export/test-files
-      args:
-        warn: false
-      when: lookup('env','TEST_FILES')
-    
-    - name: Re-mount the reports folder
-      command: mount -t vboxsf export_reports /export/reports
-      args:
-        warn: false
     
     - name: Set up the OS pallet
       import_role:

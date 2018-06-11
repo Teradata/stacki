@@ -13,18 +13,5 @@
         name: os
         repo: iso:/?iso=/export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
         state: present
-
-    - name: Download SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso
-      get_url:
-        url: http://stacki-builds.labs.teradata.com/installer-isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso
-        dest: /export/isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso
-        checksum: "sha1:f22a3fae48751c8c2a915866d5235d84454709b4"
-        mode: 0644
-
-    - name: Add SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso to zypper
-      zypper_repository:
-        name: sdk
-        repo: iso:/?iso=/export/isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso
-        state: present
         runrefresh: true
   when: ansible_distribution == "SLES"
