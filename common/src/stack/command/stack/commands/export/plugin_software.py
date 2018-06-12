@@ -21,13 +21,13 @@ class Plugin(stack.commands.Plugin):
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
-		pallet_data = self.owner.command('list.pallet', [ 'output-format=json' ])
+		pallet_data = self.owner.command('list.pallet', [ 'output-format=json', 'display-url=true' ])
 		if pallet_data:
 			pallet_data = json.loads(pallet_data)
 			pallet_prep = []
 			for item in pallet_data:
 				boxes = item['boxes'].split()
-				pallet_prep.append({'name':item['name'], 'version':item['version'], 'release':item['release'], 'boxes':boxes})
+				pallet_prep.append({'name':item['name'], 'version':item['version'], 'release':item['release'], 'URL':item['URL'], 'boxes':boxes})
 		else:
 			pallet_prep = []
 		
