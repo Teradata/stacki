@@ -103,7 +103,7 @@ class Plugin(stack.commands.Plugin):
 				partition_prep = []
 				if partition_data:
 					for partition in partition_data:
-						if partition['name'] == hostname:
+						if partition['scope'] == hostname:
 							partition_prep.append(partition)
 			
 				controller_prep = []
