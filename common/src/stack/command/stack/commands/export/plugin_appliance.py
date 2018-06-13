@@ -35,7 +35,7 @@ class Plugin(stack.commands.Plugin):
 				else:
 					attr_data = []
 	
-				route_data = self.owner.command('list.appliance.attr', [ f'{appliance_name}', 'output-format=json' ])
+				route_data = self.owner.command('list.appliance.route', [ f'{appliance_name}', 'output-format=json' ])
 				if route_data:
 					route_data = json.loads(route_data)
 				else:
