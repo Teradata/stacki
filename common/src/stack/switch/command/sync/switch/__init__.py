@@ -43,8 +43,12 @@ class Command(command):
 
 	def run(self, params, args):
 
-		persistent, = self.fillParams([ ('persistent', 'yes') ])
+		persistent, nukeswitch = self.fillParams([
+			('persistent', 'yes'),
+			('nukeswitch', 'no'),
+		])
 		self.persistent = self.str2bool(persistent)
+		self.nukeswitch = self.str2bool(nukeswitch)
 
 		switches = self.getSwitchNames(args)
 
