@@ -15,17 +15,17 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 
 		#check if the user would like to import bootaction data
-		if args:
-			if 'bootaction' not in args:
-				return
+		#if there are no args, assume the user would like to import everthing
+		if args and 'bootaction' not in args:
+			return
 
 		#self.owner.data contains the data from the json file defined in init
-		for item in self.owner.data:
-			if item == 'bootaction':
-				import_data = self.owner.data[item]
-			else:
-				print('error no bootaction data in json file')
-				return
+		#check if there is any bootaction data before we go getting all kinds of key errors
+		if 'bootaction' in self.owner.data:
+			import_data = self.owner.data['bootaction']
+		else:
+			print('no bootaction data in json file')
+			return
 
 
 		for profile in import_data:
@@ -39,11 +39,7 @@ class Plugin(stack.commands.Plugin):
 			
 			#Need to make a more specific try catch
 			try:
-				print('add.bootaction', f'"{action}"', f'args={args}', f'kernel="{kernel}"',
-                                                                f'os={os}', f'ramdisk={ramdisk}', f'type={boot_action_type}')
-		
-		
-
+				#if there is no os, leaving it blank will make the scope global
 				if os == None:		
 					results = self.owner.command('add.bootaction', [f'"{action}"', f'args="{args}"', f'kernel="{kernel}"',
 							f'ramdisk={ramdisk}', f'type={boot_action_type}'])
@@ -51,5 +47,5 @@ class Plugin(stack.commands.Plugin):
 					results = self.owner.command('add.bootaction', [f'"{action}"', f'args="{args}"', f'kernel="{kernel}"',
 							f'os={os}', f'ramdisk={ramdisk}', f'type={boot_action_type}'])
 		
-			except:
-				print(f'error importing {action}')
+			except Exception as e:
+				print(f'error importing bootaction {action}: {e}')
