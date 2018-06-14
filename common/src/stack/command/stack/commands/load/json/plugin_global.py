@@ -17,18 +17,16 @@ class Plugin(stack.commands.Plugin):
 		
 	
 		#check if the user would like to import global data
-		if args:
-			if 'global' not in args:
-				return
+		if args and 'global' not in args:
+			return
 
 		#self.owner.data contains the data from the json file defined in init
-		for item in self.owner.data:
-			if item == 'global':
-				import_data = self.owner.data[item]
-			else:
-				print('error no global data in json file')
-
-
+		if 'global' in self.owner.data:
+			import_data = self.owner.data['global']
+		else:
+			print('no global data in json file')
+			return
+			
 		for scope in import_data:
 			#check to make sure the scope is valid
 			if scope == 'attrs':
@@ -64,21 +62,14 @@ class Plugin(stack.commands.Plugin):
 			elif scope == 'firewall':
 				for rule in import_data[scope]:
 					rule_name = rule['name']
-					rule_table = rule['table']
-					rule_service = rule['service']
-					rule_protocol = rule['protocol']
-					rule_chain = rule['chain']
-					rule_action = rule['action']
-					rule_network = rule['network']
-					rule_output_network = rule['output-network']
 					rule_flags = rule['flags']
 					rule_comment = rule['comment']
 					rule_source = rule['source']
 					rule_type = rule['type']
 					try:
-						self.owner.command('add.firewall', [ f'action={rule_action}', f'chain={rule_chain}', f'protocol={rule_protocol}', f'service={rule_service}', f'network={rule_network}', f'output-network={rule_output_network}', f'rulename={rule_name}', f'table={rule_table}' ])
+						self.owner.command('add.firewall', [ f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output_network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 					except Exception as e:
-						print(f'error adding firewall rule {rule_name}: {e}')
+						print(f'error adding global firewall rule {rule_name}: {e}')
 
 
 			elif scope == 'partition':

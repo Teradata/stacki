@@ -14,13 +14,15 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-	#check if the user would like to load appliance data
-		for item in self.owner.data:
-			if item == 'appliance':
-				import_data = self.owner.data[item]
-			else:
-				print('error no appliance data in json file')
-				return
+		if args and 'appliance' not in args:
+			return
+
+		#check if the user would like to load appliance data
+		if 'appliance' in self.owner.data:
+			import_data = self.owner.data['appliance']
+		else:
+			print('no appliance data in json file')
+			return
 	
 		#add each appliance then assign its various values to it
 		for appliance in import_data:
@@ -49,22 +51,22 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.appliance.firewall', [ appliance_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'netowrk={rule["network"]}', f'output-network={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 				except Exception as e:
-					print(f'error adding firewall rule {rule["name"]}: {e}')
+					print(f'error adding appliance firewall rule {rule["name"]}: {e}')
 
 
 			for partition in appliance['partition']:
 				try:
-					print('adding partition...')
+					print('adding appliance partition...')
 					self.owner.command('add.storage.partition', [ appliance_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
 				except Exception as e:
-					print(f'error adding partition: {e}')
+					print(f'error adding appliance partition: {e}')
 
 			for controller in appliance['controller']:
 				try:
-					print('adding controller...')
+					print('adding appliance controller...')
 					self.owner.command('add.storage.controller', [ appliance_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
 				except Exception as e:
-					print(f'error adding controller: {e}')
+					print(f'error adding appliance ontroller: {e}')
 
 
 
