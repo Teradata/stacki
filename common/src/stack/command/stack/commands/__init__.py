@@ -29,6 +29,8 @@ from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
 from functools import partial
 from collections import OrderedDict
+from operator import itemgetter
+from itertools import groupby
 
 import stack.graph
 import stack
@@ -260,6 +262,7 @@ class SwitchArgumentProcessor:
 
 		return switches
 
+
 	def delSwitchEntries(self, args=None):
 		"""Delete foreign key references from switchports"""
 		if not args:
@@ -270,6 +273,7 @@ class SwitchArgumentProcessor:
 			delete from switchports
 			where switch=(select id from nodes where name='%s')
 			""" % arg)
+
 
 	def getSwitchNetwork(self, switch):
 		"""Returns the network the switch's management interface is on.
@@ -344,6 +348,7 @@ class SwitchArgumentProcessor:
 		and switch=(select id from nodes where name='%s')
 		""" % (vlan, host, switch))
 
+
 	def getSwitchesForHosts(self, hosts):
 		"""Return switches name for hosts"""
 		_switches = []
@@ -359,6 +364,7 @@ class SwitchArgumentProcessor:
 				_switches.append(row)
 
 		return set(_switches)
+
 
 	def getHostsForSwitch(self, switch):
 		"""Return a dictionary of hosts that are connected to the switch.
@@ -1898,7 +1904,7 @@ class Command:
 		# the return code.  The actual text is what we return.
 
 		self.rc = o.runWrapper(name, args, self.level + 1)
-		#print ('- ', command)
+
 		return o.getText()
 
 
@@ -2518,6 +2524,23 @@ class Command:
 			return row['value']
 		return None
 
+	def getHostAttrDict(self, host, attr=None):
+		"""
+		for `host` return all of its attrs in a dictionary
+		return {'host1': {'rack': '0', 'rank': '1', ...}, 'host2': {...}, ...}
+		This works because multiple attr's cannot have the same name.
+		"""
+		if type(host) == type([]):
+			params = host
+		else:
+			params = [host]
+		if attr:
+			params.append(f'attr={attr}')
+
+		return {k: {i['attr']: i['value'] for i in v}
+			for k, v in groupby(
+				self.call('list.host.attr', params),
+				itemgetter('host'))}
 
 
 
