@@ -41,14 +41,29 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(frontend, '!')
 
 
-		# Set blank vlan from 2-max_vlan
 		#
-		# The reason we are creating blank vlan ids is so we 
-		# don't accidentally try to assign a nonexistent vlanid
+		# calculate the highest VLAN value
 		#
-		#
-		max_vlan = self.owner.getHostAttr(switch_name, 'switch_max_vlan')
-		self.owner.addOutput(frontend, 'vlan 2-%s' % max_vlan)
+		max_vlan = None
+		for o in self.owner.call('list.host.interface', [ 'a:backend' ]):
+			if o['network'] != switch_interface['network']:
+				continue
+
+			try:
+				x = int(o['vlan'])
+				if not max_vlan or x > max_vlan:
+					max_vlan = x
+			except:
+				pass
+
+		if max_vlan:
+			# Set blank vlan from 2-max_vlan
+			#
+			# The reason we are creating blank vlan ids is so we 
+			# don't accidentally try to assign a nonexistent vlanid
+			#
+			self.owner.addOutput(frontend, 'vlan 2-%s' % max_vlan)
+
 		for (host, port, vlan) in hosts:
 			attr = self.owner.getHostAttr(host, 'appliance')
 

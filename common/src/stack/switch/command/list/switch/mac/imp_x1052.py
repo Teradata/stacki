@@ -44,13 +44,18 @@ class Implementation(stack.commands.Implementation):
 
 				hosts = switch.parse_mac_address_table()
 				for _vlan, _mac, _port, _ in hosts:
-					_hostname, _interface = self.owner.db.select("""
+					row = self.owner.db.select("""
 					  n.name, nt.device from
 					  nodes n, networks nt
 					  where nt.node=n.id
 					  and nt.mac='%s'
-					""" % _mac)[0]
-					self.owner.addOutput(switch_name, [_port, _mac, _hostname, _interface,  _vlan])
+					""" % _mac)
+
+					if row:
+						_hostname, _interface = row[0]
+						self.owner.addOutput(switch_name,
+							[_port, _mac, _hostname, _interface, _vlan])
+
 			except SwitchException as switch_error:
 				raise CommandError(self, switch_error)
 			except:

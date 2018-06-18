@@ -96,7 +96,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			'2 link=on ipmi=on callin=on privilege=4')
 
 
-	def host_based_routing(self, host):
+	def host_based_routing(self, host, interface, vlan):
 		"""Checks to see if host should be using host based routing or 
 		switch based routing.
 		"""
@@ -105,9 +105,11 @@ class Command(stack.commands.HostArgumentProcessor,
 		if self.db.getHostAppliance(host) == 'frontend':
 			return True
 
-		# Use Switch based routing if host has a switch associated to it
-		if self.getSwitchesForHosts([host]):
-			return False
+		# Use switch-based VLAN tagging if there is an entry in the switchports table
+		# that matches this host/interface/vlan
+		for o in self.call('list.host.switch', [ host ]):
+			if o['interface'] == interface and o['vlan'] == vlan:
+				return False
 
 		return True
 
