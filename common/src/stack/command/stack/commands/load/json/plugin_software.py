@@ -37,7 +37,7 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.box', [ f'{box_name}', f'os={os_name}' ])
 				except Exception as e:
-					print(f'error importing box {box}: {e}')	
+					print(f'warning importing box {box}: {e}')	
 
 		if import_data['pallet']:
 			for pallet in import_data['pallet']:
@@ -55,7 +55,7 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.pallet', [ pallet_dir, f'name={pallet_name}', f'release={pallet_release}', f'version={pallet_version}'])
 				except Exception as e:
-					print(f'error importing pallet {pallet}: {e}')
+					print(f'warning importing pallet {pallet}: {e}')
 			
 
 		if import_data['cart']:
@@ -67,6 +67,8 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.command.run('add.cart', [ cart_name ])
 				except Exception as e:
-					print(f'error importing cart {cart}: {e}')
-
+					if 'exists' in str(e):
+						print(f'warning importing cart {cart}: {e}')
+					else:
+						print(f'error importing cart {cart}: {e}')
 RollName = "stacki"

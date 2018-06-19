@@ -37,14 +37,23 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('add.host', [ host_name, f'box={host["box"]}', f'rack={host["rack"]}', f'rank={host["rank"]}' ])
 
 			except Exception as e:
-				print(f'error adding host {host["name"]}: {e}')
+				if 'exists' in str(e):
+					print(f'warning adding host {host["name"]}: {e}')
+				else:
+					print(f'error adding host {host["name"]}: {e}')
+
 
 			#iterate through each interface for the host and add it
 			for interface in host['interface']:
 				try:
 					self.owner.command('add.host.interface', [ host_name, f'interface={interface["name"]}', f'ip={interface["ip"]}', f'mac={interface["mac"]}', f'network={interface["network"]}' ]) 
 				except Exception as e:
-					print(f'error adding interface {interface["name"]}: {e}')
+					if 'exists' in str(e):
+						print(f'warning adding interface {interface["name"]}: {e}')
+					else:
+						print(f'error adding interface {interface["name"]}: {e}')
+
+
 
 			#iterate through each attr for the host and add it
 			#this is broken come back ad fix it
@@ -55,8 +64,10 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.host.attr', [ host_name, f'attr={attr_name}', f'value={attr_value}', f'shadow={attr_shadow}' ])
 				except Exception as e:
-					print(f'error adding attr {attr_name}: {e}')
-
+					if 'exists' in str(e):
+						print(f'warning adding attr {attr_name}: {e}')
+					else:
+						print(f'error adding attr {attr_name}: {e}')
 
 			#iterate through each firewall rule and add it
 			for rule in host['firewall']:
@@ -67,13 +78,21 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('add.host.firewall', [ host_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'coment={rule["comment"]}', f'flags={rule["flags"]}',  f'network={rule["network"]}', f'output-netork={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 
 				except Exception as e:
-					print (f'error adding host firewall rule {rule["name"]}: {e}')
+					if 'exists' in str(e):
+						print (f'warning adding host firewall rule {rule["name"]}: {e}')
+					else:
+						print (f'error adding host firewall rule {rule["name"]}: {e}')
+
+
 
 			for route in host['route']:
 				try:
 					self.owner.command('add.host.route', [ host_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ]) 
 				except Exception as e:
-					print(f'error adding route {route["network"]}: {e}')
+					if 'exists' in str(e):
+						print(f'warning adding route {route["network"]}: {e}')
+					else:
+						print(f'error adding route {route["network"]}: {e}')
 
 
 			for group in host['group']:
@@ -94,7 +113,11 @@ class Plugin(stack.commands.Plugin):
 					else:
 						self.owner.command('add.host.partition', [ host_name, f'device={partition["device"]}', f'mountpoint={partition["mountpoint"]}', f'size={partition["size"]}' ])
 				except Exception as e:
-					print (f'error adding partition: {e}')
+					if 'exists' in str(e):
+						print (f'warning adding partition: {e}')
+					else:
+						print (f'error adding partition: {e}')
+
 
 	
 			for controller in host['controller']:

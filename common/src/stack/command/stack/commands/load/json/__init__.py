@@ -13,8 +13,10 @@
 import stack.commands
 import json
 import sys
+import os
+from stack.exception import CommandError
 
-class command(stack.commands.Command):
+class command(stack.commands.load.command, stack.commands.Command):
 
 	MustBeRoot = 0
 	
@@ -25,8 +27,14 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
+		filename, = self.fillParams([
+		('file', None, True),
+		])
 
-		with open ('export.json', 'r') as file:
+		if not os.path.exists(filename):
+			raise CommandError(self, f'file {filename} does not exist')
+
+		with open (os.path.abspath(filename), 'r') as file:
 			try:
 				self.data = json.load(file)
 			except ValueError:
@@ -36,8 +44,3 @@ class Command(command):
 
 
 		self.runPlugins(args)
-
-
-		
-
-RollName = "stacki"

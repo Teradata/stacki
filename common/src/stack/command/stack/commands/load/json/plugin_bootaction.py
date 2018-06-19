@@ -48,4 +48,7 @@ class Plugin(stack.commands.Plugin):
 							f'os={os}', f'ramdisk={ramdisk}', f'type={boot_action_type}'])
 		
 			except Exception as e:
-				print(f'error importing bootaction {action}: {e}')
+				if 'exists' in str(e):
+					print(f'warning importing bootaction {action}: {e}')
+				else:
+					print(f'error importing bootaction {action}: {e}')

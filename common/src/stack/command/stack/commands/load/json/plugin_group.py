@@ -21,10 +21,21 @@ class Plugin(stack.commands.Plugin):
 
 		#self.owner.data contains the data from the json file defined in init
 		#check if there is any group data before we go getting all kinds of key errors
-		#if 'group' in self.owner:
+		if 'group' in self.owner.data:
+			import_data = self.owner.data['group']
+		else:
+			print('no group data in json file')
+			return
 
 
+		for group in import_data:
+			try:
+				self.owner.command('add.group', [ group['name'] ])
+			except Exception as e:
+				if 'exists' in str(e):
+					print(f'warning adding group {group["name"]}: {e}')
+				else:
+					print(f'error adding group {group["name"]}: {e}')
 
 
-
-
+RollName="Stacki"
