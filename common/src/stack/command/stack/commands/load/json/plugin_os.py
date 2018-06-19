@@ -39,21 +39,29 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.os.attr', [ os_name, f'attr={attr["attr"]}', f'value={attr["value"]}', f'shadow={attr_shadow}' ])
 				except Exception as e:
-					print(f'error adding os attr {attr}: {e}')
-
+					if 'exists' in str(e):
+						print(f'warning adding os attr {attr}: {e}')
+					else:
+						print(f'error adding os attr {attr}: {e}')
 
 			for route in os['route']:
 				try:
 					self.owner.command('add.os.route', [ os_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ])
 				except Exception as e:
-					print(f'error adding os route {route}: {e}')
+					if 'exists' in str(e):
+						print(f'warning adding os route {route}: {e}')
+					else:
+						print(f'error adding os route {route}: {e}')
 
 
 			for rule in os['firewall']:
 				try:
 					self.owner.command('add.os.firewall', [ os_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output_network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 				except Exception as e:
-					print(f'error adding os firewall rule {rule}: {e}')
+					if 'exists' in str(e):
+						print(f'warning adding os firewall rule {rule}: {e}')
+					else:
+						print(f'error adding os firewall rule {rule}: {e}')
 
 
 			for partition in os['partition']:
@@ -61,7 +69,10 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.storage.partition', [ os_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
 				except Exception as e:
-					print(f'error adding partition {partition}: {e}')
+					if 'exists' in str(e):
+						print(f'warning adding partition {partition}: {e}')
+					else:
+						print(f'error adding partition {partition}: {e}')
 
 
 			for controller in os['controller']:
@@ -72,7 +83,9 @@ class Plugin(stack.commands.Plugin):
 					#f'hotspare={controller["hotspare"]}'
 					self.owner.command('add.storage.controller', [ os_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
 				except Exception as e:
-					print(f'error adding os controller {controller}: {e}')
-
+					if 'exists' in str(e):
+						print(f'warning adding os controller {controller}: {e}')
+					else:
+						print(f'error adding os controller {controller}: {e}')
 
 RollName = "stacki"
