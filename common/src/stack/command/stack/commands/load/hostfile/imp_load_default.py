@@ -129,9 +129,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					rank = field
 				elif header[i] == 'ip':
 					try:
-						if ipaddress.IPv4Address(field):
-							ip = field
-						elif ipaddress.IPv4Address(field):
+						if field == "auto" or ipaddress.IPv4Address(field):
 							ip = field
 					except:
 						msg = 'invalid IP %s in the input file' % ip
@@ -221,7 +219,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				raise CommandError(self.owner, msg)
 
 			self.owner.interfaces[name][interface] = {}
-
+			
 			if default:
 				self.owner.interfaces[name][interface]['default'] = default
 			if ip:
@@ -356,7 +354,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if ip:
 #					self.checkIP(ip)
 					if vlan in ips:
-						if ip in ips[vlan]:
+						if ip != 'auto' and ip in ips[vlan]:
 							msg = 'duplicate IP "%s" in the input file' % ip
 							raise CommandError(self.owner, msg)
 					else:
@@ -387,8 +385,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						# check if 'ip' could exist in 'network'
 						network_ip, netmask = itemgetter('address', 'mask')(self.networks[network])
 						ipnetwork = ipaddress.IPv4Network(network_ip + '/' + netmask)
-						if ipaddress.IPv4Address(ip) not in ipnetwork:
-							msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % (ip, network, network_ip, ipnetwork.prefixlen)
+
+						# Handle cases where ipaddr = "auto"
+						if ip != "auto" and \
+							ipaddress.IPv4Address(ip) not in ipnetwork:
+							msg = 'IP "%s" is not in the "%s" IP space (%s/%s)' % \
+								(ip, network, network_ip, ipnetwork.prefixlen)
 							raise CommandError(self.owner, msg)
 
 				#

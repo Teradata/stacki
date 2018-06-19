@@ -25,7 +25,6 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				self.owner.call('remove.host.interface',
 					[ host, 'interface=%s' % v['interface'] ])
 
-
 	def run(self, args):
 		hosts, interfaces = args
 		existinghosts = self.getHostnames()
@@ -144,6 +143,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			self.owner.call('remove.host.interface', argv)
 
 		sys.stderr.write('\tAdd Host Interface\n')
+		autoip_list = []
 
 		for host in hosts:
 
@@ -199,25 +199,20 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 					cmdparams.append('name=%s' % host)
 				if 'bond' == interface[:4]:
 					cmdparams.append('module=bonding')
-
-				self.owner.call('add.host.interface', cmdparams)
-
 				if channel:
-					cmdparams = [ host,
-						'interface=%s' % interface,
-						'channel=%s' % channel ]
-					self.owner.call(
-						'set.host.interface.channel',
-						cmdparams)
-
+					cmdparams.append('channel=%s' % channel)
 				if options:
-					cmdparams = [ host,
-						'interface=%s' % interface,
-						'options=%s' % options ]
-					self.owner.call(
-						'set.host.interface.options',
-						cmdparams)
+					cmdparams.append('options=%s' % options)
+
+				if ip != 'auto':
+					self.owner.call('add.host.interface', cmdparams)
+				else:
+					autoip_list.append(cmdparams)
 
 			sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
+
+		# Add interfaces with ip=AUTO at the end.
+		for t in autoip_list:
+			self.owner.call('add.host.interface', t)
 
 
