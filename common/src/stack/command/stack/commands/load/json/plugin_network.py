@@ -41,6 +41,10 @@ class Plugin(stack.commands.Plugin):
 			try:
 				self.owner.command('add.network', [ name, f'address={address}', f'mask={mask}', f'dns={dns}', f'gateway={gateway}', f'mtu={mtu}', f'pxe={pxe}', f'zone={zone}' ])
 			except Exception as e:
-				print(f'error adding network {network}: {e}')
+				if 'exists' in str(e):
+					print(f'warning adding network {network}: {e}')
+				else:
+					print(f'error adding network {network}: {e}')
+
 
 RollName = "stacki"
