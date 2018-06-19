@@ -10,8 +10,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import ipaddress
 import stack.commands
-from stack.exception import ParamRequired, ArgUnique
+from stack.exception import ParamRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.set.host.command):
@@ -39,8 +40,64 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 	
-	def run(self, params, args):
+	def populateIPAddrDict(self, hostname, iface, mac):
 		
+		# Get network name for this interface
+		op = self.call('list.host.interface', [])
+		netName = None
+		assignedIp = {}
+
+		for o in op:
+			interface   = o['interface']
+			networkName = o['network']
+			macAddr     = o['mac']
+
+			if (interface == iface or macAddr == mac) and \
+				hostname == o['host']:
+				netName =  o['network']
+				#
+				# Do not add this host's ip address to the
+				# assignIp dictionary
+				#
+				continue
+			
+			if networkName not in assignedIp:
+				assignedIp[networkName] = [o['ip']]
+			else:
+				assignedHostIps = assignedIp[networkName]
+				assignedHostIps.append(o['ip'])
+				assignedIp[networkName] = assignedHostIps
+
+		netAddr = None
+		netMask = None
+
+		# Get network address, mask for this network name
+		if netName:
+			op = self.call('list.network', [ netName ])
+			for o in op:
+				netAddr = o['address']
+				netMask = o['mask']
+				break
+
+		# Get list of host addresses for this network
+		ipnetwork = ipaddress.IPv4Network(netAddr + '/' + netMask)
+		hosts = []
+
+		for h in ipnetwork.hosts():
+			hosts.append(str(h))
+
+		# Remove the assigned ip addresses from this list
+		for o in assignedIp[netName]:
+			if o in hosts:
+				hosts.remove(o)
+		
+		# Return an ip addr from the available addr list
+		if len(hosts) > 0:
+			return hosts.pop()
+
+		return None
+
+	def run(self, params, args):
 		hosts = self.getHostnames(args)
 		(ip, interface, mac) = self.fillParams([
 			('ip',        None, True),
@@ -54,7 +111,13 @@ class Command(stack.commands.set.host.command):
 			raise ArgUnique(self, 'host')
 
 		ip   = ip.upper() # null -> NULL
-		host = hosts[0]		
+		host = hosts[0]
+
+		if ip == "AUTO":
+			ip = self.populateIPAddrDict(host, interface, mac)
+
+			if not ip:
+				raise CommandError(self, 'No free ip host addresses left in network')
 
 		if interface:
 			self.db.execute("""
@@ -70,4 +133,3 @@ class Command(stack.commands.set.host.command):
 				nodes.name='%s' and networks.node=nodes.id and
 				networks.mac like '%s'
 				""" % (ip, host, mac))
-

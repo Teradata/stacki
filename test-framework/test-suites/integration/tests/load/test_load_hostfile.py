@@ -10,7 +10,7 @@ class TestLoadHostfile:
 
 	# add other csv's here after they are fixed, or better yet make this a glob
 	HOSTFILE_SPREADHSEETS = ['multi_frontend', 'single_backend', 'frontend_add_eth', 'frontend_replace_ip',
-							 'single_backend_and_multi_frontend']
+					'single_backend_and_multi_frontend', 'autoip']
 
 	@staticmethod
 	def update_csv_variables(host, csvfile):
@@ -54,6 +54,10 @@ class TestLoadHostfile:
 		# get filename
 		input_tmp_file, output_tmp_file = self.update_csv_variables(host, csvfile)
 
+		# Add a network address with 2 hosts
+		result = host.run('stack add network autoip address=10.1.1.4 mask=255.255.255.252')
+
+		host.run('stack load hostfile')
 		# Load the hostfile input
 		host.run('stack load hostfile file=%s' % input_tmp_file.name)
 		# Get the new stack hostfile back out
@@ -68,7 +72,7 @@ class TestLoadHostfile:
 		assert len(test_lines) == len(stack_lines)
 		for i in range(len(test_lines)):
 			assert test_lines[i].strip() == stack_lines[i].strip()
-
+	
 	def test_load_hostfile_ip_no_network(self, host):
 		# load hostfile containing an interface with an IP but no network (invalid)
 		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_ip_no_network.csv')
