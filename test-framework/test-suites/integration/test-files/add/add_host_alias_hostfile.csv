@@ -1,0 +1,7 @@
+NAME,INTERFACE HOSTNAME,DEFAULT,APPLIANCE,RACK,RANK,IP,MAC,INTERFACE,NETWORK,CHANNEL,OPTIONS,VLAN,INSTALLACTION,OSACTION,GROUPS,BOX,COMMENT
+frontend-0-0,frontend-0-0,True,frontend,0,0,192.168.0.2,52:54:00:15:6a:1c,eth0,private,,,,default,default,,default,
+frontend-0-0,frontend-0-0,,frontend,0,0,192.168.0.20,52:54:00:15:6a:1d,eth1,private,,,,default,default,,default,
+backend-0-0,backend-0-0,True,backend,0,1,192.168.0.3,52:54:00:16:6a:1c,eth0,private,,,,default,default,,default,
+backend-0-0,backend-0-0,,backend,0,1,192.168.0.30,52:54:00:16:6a:1d,eth1,private,,,,default,default,,default,
+backend-0-1,backend-0-1,True,backend,0,2,192.168.0.4,52:54:00:17:6a:1c,eth0,private,,,,default,default,,default,
+backend-0-1,backend-0-1,,backend,0,2,192.168.0.40,52:54:00:17:6a:1d,eth1,private,,,,default,default,,default,

@@ -134,3 +134,18 @@ def add_host(hostname='backend-0-0', rack='1', rank='1', appliance='backend'):
 		pytest.fail('unable to add a dummy host')
 
 	yield
+
+@pytest.fixture
+def add_host_with_interface(hostname='backend-0-0', rack='1', rank='1', appliance='backend', interface='eth0'):
+	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy host')
+
+	cmd = f'stack add host interface {hostname} interface={interface}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy interface')
+
+	yield
+
