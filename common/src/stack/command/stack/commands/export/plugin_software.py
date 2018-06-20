@@ -27,7 +27,7 @@ class Plugin(stack.commands.Plugin):
 			pallet_prep = []
 			for item in pallet_data:
 				boxes = item['boxes'].split()
-				pallet_prep.append({'name':item['name'], 'version':item['version'], 'release':item['release'], 'url':item['url'], 'boxes':boxes})
+				pallet_prep.append({'name':item['name'], 'version':item['version'], 'release':item['release'], 'url':item['url'], 'urlauthUser':item['urlauthUser'], 'urlauthPass':item['urlauthPass'], 'boxes':boxes})
 		else:
 			pallet_prep = []
 		
