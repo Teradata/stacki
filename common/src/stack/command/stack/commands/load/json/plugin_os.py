@@ -56,7 +56,7 @@ class Plugin(stack.commands.Plugin):
 
 			for rule in os['firewall']:
 				try:
-					self.owner.command('add.os.firewall', [ os_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output_network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
+					self.owner.command('add.os.firewall', [ os_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding os firewall rule {rule}: {e}')
