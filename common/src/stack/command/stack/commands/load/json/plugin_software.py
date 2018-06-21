@@ -33,11 +33,14 @@ class Plugin(stack.commands.Plugin):
 			for box in import_data['box']:
 				box_name = box['name']
 				os_name = box['os']
-				#consider implementing a more specific try except
 				try:
 					self.owner.command('add.box', [ f'{box_name}', f'os={os_name}' ])
 				except Exception as e:
-					print(f'warning importing box {box}: {e}')	
+					if 'exists' in str(e):
+						print(f'warning importing box {box}: {e}')	
+					else:
+						print(f'error adding box {box}: {e}')
+
 
 		if import_data['pallet']:
 			for pallet in import_data['pallet']:
@@ -46,16 +49,34 @@ class Plugin(stack.commands.Plugin):
 					#if we have no url to fetch the pallet from we cannot add it, so skip to the next one
 					print(f'error adding pallet {pallet}: no url found')
 					continue
-				pallet_name = pallet['name']
-				pallet_version = pallet['version']
-				pallet_release = pallet['release']
+				#allow for multiple boxes or no boxes at all
 				boxes = []
 				for box in pallet['boxes']:
 					boxes.append(box)
-				try:
-					self.owner.command('add.pallet', [ pallet_dir, f'name={pallet_name}', f'release={pallet_release}', f'version={pallet_version}'])
-				except Exception as e:
-					print(f'warning importing pallet {pallet}: {e}')
+				
+				if pallet['urlauthUser'] and pallet['urlauthPass']:
+					try:
+						self.owner.command('add.pallet', [ pallet_dir, f'username={pallet["urlauthUser"]}', 
+												f'password={pallet["urlauthPass"]}', 
+												f'name={pallet["name"]}', 
+												f'release={pallet["release"]}', 
+												f'version={pallet["version"]}'])
+					except Exception as e:
+						if 'exists' in str(e):
+							print(f'warning importing pallet {pallet}: {e}')
+						else:
+							print(f'error importing pallet {pallet}: {e}')
+				else:
+
+					try:
+						self.owner.command('add.pallet', [ pallet_dir, f'name={pallet["name"]}', 
+												f'release={pallet["release"]}', 
+												f'version={pallet["version"]}'])
+					except Exception as e:
+						if 'exists' in str(e):
+							print(f'warning importing pallet {pallet}: {e}')
+						else:
+							print(f'error importing pallet {pallet}: {e}')
 			
 
 		if import_data['cart']:
@@ -65,7 +86,7 @@ class Plugin(stack.commands.Plugin):
 				for box in cart['boxes']:
 					boxes.appned(box)
 				try:
-					self.command.run('add.cart', [ cart_name ])
+					self.owner.command('add.cart', [ cart_name ])
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning importing cart {cart}: {e}')
