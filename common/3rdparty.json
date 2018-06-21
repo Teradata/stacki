@@ -8,7 +8,7 @@
 		        "rcs-5.7.tar.gz", 
 		        "sc-im-0.4.0-20161021.tgz", 
 			"storcli-007.0409.0000.0000-1.noarch.rpm",
-		        "redis-4.0.2.tar.gz", 
+			"redis-4.0.11.tar.gz",
 		        "zeromq-4.2.2.tar.gz"
 		]
 	}

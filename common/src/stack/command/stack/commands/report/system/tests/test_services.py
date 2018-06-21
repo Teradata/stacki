@@ -35,17 +35,17 @@ def test_dhcp_enabled_and_running(host):
 	assert dhcp.is_enabled
 	assert dhcp.is_running
 
-def test_rmq_processor_enabled_and_running(host):
-	rmq_processor = host.service('rmq-processor')
-	assert rmq_processor.is_enabled
-	assert rmq_processor.is_running
+def test_smq_processor_enabled_and_running(host):
+	smq_processor = host.service('smq-processor')
+	assert smq_processor.is_enabled
+	assert smq_processor.is_running
 
-def test_rmq_producer_enabled_and_running(host):
-	rmq_producer = host.service('rmq-producer')
-	assert rmq_producer.is_enabled
-	assert rmq_producer.is_running
+def test_smq_producer_enabled_and_running(host):
+	smq_producer = host.service('smq-producer')
+	assert smq_producer.is_enabled
+	assert smq_producer.is_running
 
-def test_rmq_publisher_enabled_and_running(host):
-	rmq_publisher = host.service('rmq-publisher')
-	assert rmq_publisher.is_enabled
-	assert rmq_publisher.is_running
+def test_smq_publisher_enabled_and_running(host):
+	smq_publisher = host.service('smq-publisher')
+	assert smq_publisher.is_enabled
+	assert smq_publisher.is_running

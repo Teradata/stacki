@@ -4,28 +4,40 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import json
 import stack.mq
-import socket
+import psutil
 
 
 class Producer(stack.mq.producers.ProducerBase):
 	"""
 	Produces an alive message of the "health" channel
-	once every 60 seconds.  The alive message is just
-	the hostname of the machine.
+	once every 60 seconds.
 	"""
-
-	def __init__(self, scheduler, sock):
-		self.hostname = socket.gethostname()
-		stack.mq.producers.ProducerBase.__init__(self, scheduler, sock)
 
 	def schedule(self):
 		return 60
 
 	def produce(self):
-		return 'up'
 
-	def channel(self):
-		return 'health'
+		payload = { 'state': 'online' }
+
+		# TODO
+		#
+		# Should we add some simple ganglia like metrics here (psutil
+		# can do this)
+		#
+		# - load
+		# - temp
+		# - diskspace (this sucks because it's an array)
+
+		for p in psutil.process_iter(attrs=['name']):
+			if p.info['name'] == 'sshd':
+				payload['ssh'] = 'up'
+
+		return stack.mq.Message(json.dumps(payload),
+					channel='health', 
+					ttl=self.schedule() * 2)
+
 
 

@@ -11,6 +11,7 @@ import sys
 import daemon
 import lockfile.pidlockfile
 import signal
+import time
 import zmq
 import stack.mq
 
@@ -29,8 +30,7 @@ class Publisher(stack.mq.Receiver):
 		"""
 		Process incomming messages from the UDP receiver.
 		"""
-
-		chan = message.getChannel()
+		channel = message.getChannel()
 
 		# For each channel keep track of the last message
 		# ID and timestamp.
@@ -38,29 +38,28 @@ class Publisher(stack.mq.Receiver):
 		# Clients can ask the controller for this info
 		# so they know what to subscribe to.
 
-		if chan in self.channels:
-			num  = self.channels[chan]['id'] + 1
+		if channel in self.channels:
+			num = self.channels[channel]['id'] + 1
 		else:
-			self.channels[chan] = {}
+			self.channels[channel] = {}
 			num = 0
 		message.setID(num)
-		self.channels[chan]['id']   = message.getID()
-		self.channels[chan]['time'] = message.getTime()
+		self.channels[channel]['id']   = message.getID()
+		self.channels[channel]['time'] = message.getTime()
 
 		# Publish the message:
 		#
 		# <channel> stack.mq.Message
 		#   text	json
 
-		message.addHop()
+		message.addHop().setChannel(None)
 
 		if 'STACKDEBUG' in os.environ:
-			print ("%s" % message.dumps())
-		self.pub.send_multipart((message.getChannel().encode(),
-			message.dumps(channel=False).encode()))
+			print(channel, message)
+		self.pub.send_multipart((channel.encode(), str(message).encode()))
 
 		# If this is the first message for the given channel 
-		# send the list of channels over the rmq channel to
+		# send the list of channels over the smq channel to
 		# subscribers.
 		#
 		# Actually we send the status on every 12th message
@@ -70,11 +69,9 @@ class Publisher(stack.mq.Receiver):
 		# TODO: Think about how to be smarter here
 
 		if (num % 12) == 0:
-			message = stack.mq.Message('rmq', 
-					{'type'    : 'status',
-					'channels': self.channels})
-			self.pub.send_multipart((message.getChannel().encode(),
-						 message.dumps(channel=False).encode()))
+			message = stack.mq.Message({'type':'status', 'channels':self.channels},
+						   time=time.asctime())
+			self.pub.send_multipart(('smq'.encode(), str(message).encode()))
 
 
 def Handler(signal, frame):
@@ -83,7 +80,7 @@ def Handler(signal, frame):
 
 if 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
-				('rmq-publisher', 'rmq-publisher'))
+						('smq-publisher', 'smq-publisher'))
 	daemon.DaemonContext(pidfile=lock).open()
 
 context   = zmq.Context()

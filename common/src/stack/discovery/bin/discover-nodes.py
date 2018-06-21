@@ -8,7 +8,6 @@
 
 import argparse
 from collections import OrderedDict
-import json
 import snack
 from stack.mq import Subscriber
 import subprocess
@@ -57,15 +56,17 @@ class TUI(Subscriber):
 		self._screen.finish()
 	
 	def callback(self, message):
-		if message.message.get('type') == "add":
-			ip_address = message.message.get('ip_address', "Unknown")
-			mac_address = message.message.get('mac_address', "Unknown")
-			hostname = message.message.get('hostname', "Unknown")
+		payload = message.getPayload()
+
+		if payload.get('type') == "add":
+			ip_address = payload.get('ip_address', "Unknown")
+			mac_address = payload.get('mac_address', "Unknown")
+			hostname = payload.get('hostname', "Unknown")
 
 			self._callback_data[ip_address] = [mac_address, hostname, ""]
-		elif message.message.get('type') == "kickstart":
-			ip_address = message.message.get('ip_address', "Unknown")
-			status_code = message.message.get('status_code')
+		elif payload.get('type') == "kickstart":
+			ip_address = payload.get('ip_address', "Unknown")
+			status_code = payload.get('status_code')
 
 			# In case we see a kickstart of a node already in the db
 			if ip_address not in self._callback_data:

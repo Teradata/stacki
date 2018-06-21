@@ -4,7 +4,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import redis
 import stack.mq.processors
 
 
@@ -14,28 +13,18 @@ class Processor(stack.mq.processors.ProcessorBase):
         redis database.
 	"""
 
-	def __init__(self, context, sock):
-		self.redis = redis.StrictRedis()
-		stack.mq.processors.ProcessorBase.__init__(self, context, sock)
-
 	def isActive(self):
-		return self.isMaster()
+		return self.redis
 
 	def channel(self):
 		return 'alert'
 
 	def process(self, message):
-
 		if not message.getSource():
 			message.setSource('127.0.0.1')
 
-		# Lookup the hostname of the source, if we don't find it
-		# just drop the alert since we don't know about the machine.
-
-		host = self.redis.get('host:%s:name' % message.getSource()).decode()
-		if host:
-			message.setSource(host)
-			self.redis.rpush('alert:%s' % host, message.getMessage())
+		self.redis.rpush('alert:%s' % message.getSource(), 
+				 message.getPayload())
 
 		return None
 

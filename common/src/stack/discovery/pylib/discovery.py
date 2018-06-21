@@ -16,7 +16,6 @@ import signal
 import socket
 import subprocess
 import sys
-import time
 
 from stack.api.get import GetAttr
 from stack.commands import Command
@@ -259,7 +258,7 @@ class Discovery:
             # Post the host added message
             message = json.dumps({
                 'channel': "discovery",
-                'message': {
+                'payload': {
                     'type': "add",
                     'interface': interface,
                     'mac_address': mac_address,
@@ -315,7 +314,7 @@ class Discovery:
                 # Post the host kickstart message
                 message = json.dumps({
                     'channel': "discovery",
-                    'message': {
+                    'payload': {
                         'type': "kickstart",
                         'ip_address': str(ip_address),
                         'status_code': status_code

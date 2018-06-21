@@ -5,7 +5,6 @@
 # @copyright@
 
 import json
-import redis
 import stack.api
 import stack.mq.processors
 
@@ -17,29 +16,8 @@ class ProcessorBase(stack.mq.processors.ProcessorBase):
 	This is used to cache host information.
 	"""
 
-	def __init__(self, context, sock):
-		self.redis = redis.StrictRedis()
-		stack.mq.processors.ProcessorBase.__init__(self, context, sock)
-
 	def isActive(self):
-		return self.isMaster()
-
-	def updateKey(self, key, value, timeout=None):
-		"""
-		Create an new *key* and *value* in the local Redis
-		database with an optional *timeout*.  
-		If the *key* already exist the value is blindly updated, and
-		the *timeout* is reset if it is specified.
-
-		:param key: redis key
-		:type key: string
-		:param value: key value
-		:type value: string
-		:param timeout: key timeout in seconds
-		:type timeout: int
-		"""
-		self.redis.set(key, value)
-		self.redis.expire(key, timeout)
+		return self.redis
 
 	def updateHostKeys(self, client):
 		"""
@@ -49,43 +27,43 @@ class ProcessorBase(stack.mq.processors.ProcessorBase):
 		If Redis already contains the keys the timeout is reset.
 		The following Redis keys are defined for the host::
 
-			host:HOSTNAME:rack
-			host:HOSTNAME:rank
-			host:HOSTNAME:addr
-			host:IPADDRESS:name
+			host:ID:rack
+			host:ID:rank
+			host:ID:addr
+			host:IPADDRESS:id
 
 		:param addr: IP address
 		:type addr: string
-		:returns: dictionary with *name*, *addr*, *rack*, and *rank*
+		:returns: dictionary with *id*, *addr*, *rack*, and *rank*
 		"""
+		keys = None
+
 		if not client:
 			client = '127.0.0.1'
 
-		host = self.redis.get('host:%s:name' % client)
-		if host:
-			host = host.decode()
-			rack = self.redis.get('host:%s:rack' % host).decode()
-			rank = self.redis.get('host:%s:rank' % host).decode()
-			addr = self.redis.get('host:%s:addr' % host).decode()
+		id = self.getKey('host:%s:id' % client)
+		if id:
+			rack = self.getKey('host:%s:rack' % id)
+			rank = self.getKey('host:%s:rank' % id)
+			addr = self.getKey('host:%s:addr' % id)
 
-		if not host or not rack or not rank or not addr:
-			for row in stack.api.Call('list.host', [ client ]):
-				host = row['host']
+		if not id or not rack or not rank or not addr:
+			for row in stack.api.Call('list.host', [ client, 'expanded=true' ]):
+				id   = row['id']
 				rack = row['rack']
 				rank = row['rank']
 
-			if host: 
-				self.updateKey('host:%s:name' % client, host,	60 * 60)
-				self.updateKey('host:%s:addr' % host,	client, 60 * 60)
-				self.updateKey('host:%s:rack' % host,	rack,	60 * 60)
-				self.updateKey('host:%s:rank' % host,	rank,	60 * 60)
-		if host:
-			return { 'name': host,
+				self.setKey('host:%s:id'   % client, id,     60 * 60)
+				self.setKey('host:%s:addr' % id,     client, 60 * 60)
+				self.setKey('host:%s:rack' % id,     rack,   60 * 60)
+				self.setKey('host:%s:rank' % id,     rank,   60 * 60)
+		if id:
+			keys = { 'id'  : id,
 				 'addr': client,
 				 'rack': rack,
 				 'rank': rank }
 
-		return None
+		return keys
 
 
 
@@ -99,12 +77,35 @@ class Processor(ProcessorBase):
 		return 'health'
 
 	def process(self, msg):
-		keys = self.updateHostKeys(msg.getSource())
+		keys    = self.updateHostKeys(msg.getSource())
+		payload = msg.getPayload()
+		ttl     = msg.getTTL()
 
-		if keys:
-			self.updateKey('host:%s:status' % keys['name'],
-				       msg.getMessage(),
-				       60 * 2)
+		if keys and payload:
+
+			# health payloads were originally just strings, but
+			# this channel is going to be used to monitor more
+			# stuff (e.g. is the Teradata Database up?). But for
+			# now support both old style strings and a new json
+			# format for the payload.
+			#
+			# The new format is a dictionary of component X health
+			# with the following builtin components (others come
+			# from pluggins).
+			#
+			# basic: this is the current health string
+			# ssh  : is sshd running?
+
+			try:
+				health = json.loads(payload)
+			except ValueError:
+				health = { 'state': payload }
+
+			for component, state in health.items():
+				self.setKey('host:%s:status:%s' % 
+					    (keys['id'], component), state, ttl)
+
+
 		return None
 
 

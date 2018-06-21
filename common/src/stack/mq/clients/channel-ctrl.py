@@ -18,7 +18,7 @@ except getopt.GetoptError:
 	print('usage: [ -c enable | disable | status ] [ -H host ] {channel}')
 	sys.exit(-1)
 
-control = 'rmq'
+control = 'smq'
 command = 'enable'
 host = 'localhost'
 

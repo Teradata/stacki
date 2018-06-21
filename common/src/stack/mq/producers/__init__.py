@@ -25,7 +25,7 @@ class ProducerBase:
 
 	def run(self):
 		"""
-		Produce the next message(s) and send it to the rmq-publisher UDP
+		Produce the next message(s) and send it to the smq-publisher UDP
 		socket.  Then schedule() the next production.
 		"""
 
@@ -39,17 +39,17 @@ class ProducerBase:
 			o = self.produce()
 
 		if isinstance(o, list):
-			msgs = o
+			messages = o
 		else:
-			msgs = [ o ]
+			messages = [ o ]
 
-		for msg in msgs:
-			if msg and self.channel():
-				m = { "channel": self.channel(), 
-					"message": msg }
+		for message in messages:
+			if message:
 				if 'STACKDEBUG' in os.environ:
-					print(m)
-				self.sock.sendto(json.dumps(m).encode(), self.addr)
+					print(message)
+				self.sock.sendto(str(message).encode(),
+						 self.addr)
+
 		self.scheduler.enter(self.schedule(), 0, self.run, ())
 		
 		
@@ -62,18 +62,11 @@ class ProducerBase:
 
 	def produce(self):
 		"""
-		Produce another metric, the result must be a single
-		string, or a list.  In the former a single message
-		is produced, in the latter multiple messages are
-		produced.
+		Produce another metric, the result must be Message
+		or list of Messages.
 
 		:returns: Message(s)
 		"""
 		return None
 
-	def channel(self):
-		"""
-		:returns: publisher channel name
-		"""
-		return None
 

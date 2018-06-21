@@ -1,7 +1,9 @@
-YUMLIST = MegaCLI storcli \
-	ipmitool	\
+YUMLIST = \
+	MegaCLI storcli \
+	ipmitool \
 	stack-command \
-	stack-pylib	\
+	stack-mq \
+	stack-pylib \
 	stack-storage-config \
 	ludicrous-speed \
 	foundation-python \
