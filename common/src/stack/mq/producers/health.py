@@ -11,21 +11,16 @@ import socket
 class Producer(stack.mq.producers.ProducerBase):
 	"""
 	Produces an alive message of the "health" channel
-	once every 60 seconds.  The alive message is just
-	the hostname of the machine.
+	once every 60 seconds.
 	"""
-
-	def __init__(self, scheduler, sock):
-		self.hostname = socket.gethostname()
-		stack.mq.producers.ProducerBase.__init__(self, scheduler, sock)
 
 	def schedule(self):
 		return 60
 
 	def produce(self):
-		return 'up'
+		return stack.mq.Message('up', 
+					channel='health', 
+					ttl=self.schedule()*2)
 
-	def channel(self):
-		return 'health'
 
 

@@ -16,10 +16,13 @@ import os
 import re
 import sys
 import cgi
+import socket
+import json
 import syslog
 import stack.lock
 import stack.api
 import stack.bool
+import stack.mq
 
 
 class Client:
@@ -50,7 +53,7 @@ class Client:
 				print("Content-type: text/html")
 				print("Status: 500 Internal Error\n")
 				print("<h1>Invalid arch field</h1>")
-				self.status('install profile.cgi error (Invalid arch field)')
+				self.status('install profile error (Invalid arch field)')
 				sys.exit(1)
 
 		if not self.np:
@@ -62,7 +65,7 @@ class Client:
 				print("Content-type: text/html")
 				print("Status: 500 Internal Error\n")
 				print("<h1>Invalid np field</h1>")
-				self.status('install profile.cgi error (Invalid np field)')
+				self.status('install profile error (Invalid np field)')
 				sys.exit(1)
 
 		if not self.os:
@@ -74,7 +77,7 @@ class Client:
 				print("Content-type: text/html")
 				print("Status: 500 Internal Error\n")
 				print("<h1>Invalid os field</h1>")
-				self.status('install profile.cgi error (Invalid os field)')
+				self.status('install profile error (Invalid os field)')
 				sys.exit(1)
 
 		try:
@@ -114,15 +117,13 @@ class Client:
 		if self.interactive == 1:
 			return
 			
-		import socket
-		import json
-
-		msg = { 'source' : self.addr, 'channel' : 'health',
-			'message' : message }
-		m = json.dumps(msg)
+		msg = { 'source' : self.addr, 
+			'channel': 'health', 
+			'payload': message }
 
 		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		tx.sendto(m.encode(), ('127.0.0.1', 5000))
+		tx.sendto(json.dumps(msg).encode(), 
+			  ('127.0.0.1', stack.mq.ports.publish))
 		tx.close()
 	
 ##
@@ -153,7 +154,7 @@ else:
 	client = Client()
 	client.interactive = 0
 
-client.status('install profile.cgi started')
+client.status('install profile request')
 
 syslog.openlog('profile', syslog.LOG_PID, syslog.LOG_LOCAL0)
 syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (client.addr, client.port))
@@ -184,7 +185,7 @@ if count == 0:
 	print()
 	print("<h1>Service is Busy</h1>")
 	empty = True
-	client.status('install profile.cgi retry')
+	client.status('install profile retry')
 else:
 	count -= 1
 	semaphore.write(count)
@@ -271,4 +272,4 @@ semaphore.write(count)
 mutex.release()
 syslog.syslog(syslog.LOG_DEBUG, 'semaphore pop %d' % count)
 client.post()
-client.status('install profile.cgi profile sent')
+client.status('install profile sent')

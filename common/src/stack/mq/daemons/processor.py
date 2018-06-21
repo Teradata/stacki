@@ -23,7 +23,7 @@ def Handler(signal, frame):
 
 if 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
-			('rmq-processor', 'rmq-processor'))
+						('smq-processor', 'smq-processor'))
 	daemon.DaemonContext(pidfile=lock).open()
 
 

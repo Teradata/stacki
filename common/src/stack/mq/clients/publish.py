@@ -7,31 +7,49 @@
 # @copyright@
 
 import sys
-import string
 import socket
 import getopt
-import stack.mq
 import json
+import stack.mq
 
 try:
-	opt, args = getopt.getopt(sys.argv[1:], 'c:h:')
+	opt, args = getopt.getopt(sys.argv[1:], 'c:h:t:')
 except getopt.GetoptError as err:
-	print('usage: [-c channel] [-h host] message')
+	print('usage: [-c channel] [-h host] [-t ttl] message')
 	sys.exit(-1)
 
 channel = 'alert'
-host = 'localhost'
+host    = None
+ttl     = None
 for o, a in opt:
 	if o == '-c':
 		channel = a
 	if o == '-h':
 		host = a
+	if o == '-t':
+		ttl = int(a)
+			
+
+if host is None:
+
+	# Crazy case for when we are in the installer and need to automatically
+	# figure out where to send the message.  Just make sure to call this
+	# *after* the profile.xml has been processed.
+
+	try:
+		sys.path.append('/tmp')
+		from stack_site import attributes
+	except ImportError:
+		host = 'localhost'
+	host = attributes['Kickstart_PrivateAddress']
 
 
 tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-pkt = { "channel": channel,
-	"message": ' '.join(args) }
+pkt = { 'channel': channel,
+	'payload': ' '.join(args) }
+if ttl:
+	pkt['ttl'] = ttl
 
 tx.sendto(json.dumps(pkt).encode(), (host, stack.mq.ports.publish))
-
+tx.close()
 

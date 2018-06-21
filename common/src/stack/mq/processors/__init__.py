@@ -6,6 +6,11 @@
 
 import os
 import stack.mq
+try:
+	import redis
+except ModuleNotFoundError:
+	pass
+
 
 
 class ProcessorBase(stack.mq.Subscriber):
@@ -18,6 +23,24 @@ class ProcessorBase(stack.mq.Subscriber):
 		self.sock	= sock
 		self.addr	= ('localhost', stack.mq.ports.publish)
 		self.context	= context
+
+		try:
+			self.redis = redis.StrictRedis()
+		except NameError:
+			self.redis = None
+
+
+	def getKey(self, key):
+		value = self.redis.get(key)
+		if value is not None:
+			return value.decode()
+		return None
+
+	def setKey(self, key, value, ttl=None):
+		self.redis.set(key, value)
+		if ttl is not None:
+			self.redis.expire(key, ttl)
+
 
 	def run(self):
 		if self.isActive():
@@ -41,7 +64,7 @@ class ProcessorBase(stack.mq.Subscriber):
 
 		for msg in msgs:
 			if msg:
-				self.sock.sendto(msg.dumps(), self.addr)
+				self.sock.sendto(str(msg), self.addr)
 		
 
 	def process(self, message):

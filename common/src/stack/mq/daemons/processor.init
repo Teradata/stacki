@@ -1,10 +1,10 @@
 #!/bin/bash
-# rmq-processor		Init script for Stack Message Queue Processor
+# smq-processor		Init script for Stack Message Queue Processor
 #
 # chkconfig: - 90 85
-# description:  Enabled the RMQ Processor daemon
-# processname:  rmq-processor
-# pidfile: /var/run/rmq-processor/rmq-processor.pid
+# description:  Enabled the SMQ Processor daemon
+# processname:  smq-processor
+# pidfile: /var/run/smq-processor/smq-processor.pid
 #
 # @copyright@
 # Copyright (c) 2006 - 2018 Teradata
@@ -14,12 +14,12 @@
 #
 
 ### BEGIN INIT INFO
-# Provides: rmq-processor
+# Provides: smq-processor
 # Required-Start: $local_fs $network
 # Required-Stop: $local_fs $network
 # Default-Start:
 # Default-Stop: 0 1 6
-# Short-Description: start or stop rmq-processor
+# Short-Description: start or stop smq-processor
 # Description: Stack Message Queue Processor
 ### END INIT INFO
 
@@ -27,7 +27,7 @@
 # source function library
 . /etc/rc.d/init.d/functions
 
-name=rmq-processor
+name=smq-processor
 prog=/opt/stack/sbin/${name}
 pidfile=/var/run/${name}/${name}.pid
 

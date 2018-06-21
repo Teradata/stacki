@@ -19,30 +19,31 @@ class Subscriber(stack.mq.Subscriber):
 		self.subscribe(channel)
 
 	def callback(self, message):
-		c = message.getChannel()
-		i = message.getID()
-		h = message.getHops()
-		s = message.getSource()
 
-		print()
-		msg_info = '%s: publisher=%s' % (message.getTime(), self.host) 
-		if s:
-			msg_info = msg_info + ' source=%s' % s
-		if c:
-			msg_info = msg_info + ' channel=%s' % c
-		if i:
-			msg_info = msg_info + ' id=%d' % i
-		if h:
-			msg_info = msg_info + ' hops=%d' % h
+		header = [ message.getTime(), 'publisher=%s' % self.host ]
+		if message.getSource():
+			header.append('source=%s'  % message.getSource())
+		if message.getChannel():
+			header.append('channel=%s' % message.getChannel())
+		if message.getID():
+			header.append('id=%d'      % message.getID())
+		if message.getHops():
+			header.append('hops=%d'    % message.getHops())
+		if message.getTTL():
+			header.append('ttl=%d'     % message.getTTL())
+		print(' '.join(header))
 
-		print(msg_info)
-		p = pprint.PrettyPrinter()
-		m = message.getMessage()
+		pp      = pprint.PrettyPrinter()
+		payload = message.getPayload()
 		try:
-			o = json.loads(m)
+			# payload could be json or free form text
+			# try both
+			o = json.loads(payload)
 		except:
-			o = m
-		p.pprint(o)
+			o = payload
+
+		pp.pprint(o)
+		print()
 
 
 

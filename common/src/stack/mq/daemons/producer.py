@@ -30,7 +30,7 @@ for file in os.listdir(stack.mq.producers.__path__[0]):
 
 if 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
-			('rmq-producer', 'rmq-producer'))
+						('smq-producer', 'smq-producer'))
 	daemon.DaemonContext(pidfile=lock).open()
 
 

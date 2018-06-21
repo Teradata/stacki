@@ -62,16 +62,16 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
-		cmd, debug = self.fillParams([ ('command', None, True), ('debug', 'n') ])
+		cmd, debug = self.fillParams([ ('command', None, True), ('debug', False) ])
 
 		if cmd == 'status':
 			#
 			# used by "stack list host power" -- this is an easy way in which to
 			# share code between the two commands
 			#
-			# set 'debug' to 'y' in order to get output from the status command
+			# set 'debug' to True in order to get output from the status command
 			#
-			debug = 'y'
+			debug = True
 		elif cmd not in [ 'on', 'off', 'reset' ]:
 			raise ParamError(self, 'command', 'must be "on", "off" or "reset"')
 		

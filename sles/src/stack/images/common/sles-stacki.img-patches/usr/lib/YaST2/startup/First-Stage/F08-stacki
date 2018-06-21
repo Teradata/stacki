@@ -35,8 +35,6 @@ cat /tmp/stacki-profile.xml \
 	| /opt/stack/bin/stack list host profile chapter=stacki \
 	> /tmp/stack_site/__init__.py
 
-/opt/stack/bin/stacki-status.py install profile parsed
-
 # Setup SSH config
 /opt/stack/bin/gen_ssh_config.py
 
@@ -47,6 +45,8 @@ cat /tmp/stacki-profile.xml \
 
 FRONTEND=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "from stack_site import *; print(attributes['Kickstart_PrivateAddress']);")
 YUMSERVER=$(PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\nif 'yumserver' in attributes: print(attributes['yumserver'])\")")
+
+/opt/stack/bin/smq-publish -chealth -t300 install profile
 
 echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
@@ -77,7 +77,7 @@ then
 	while [ -f /tmp/wait ]
 	do
 		sleep 1
-		/opt/stack/bin/stacki-status.py install wait 1
+		/opt/stack/bin/smq-publish -chealth install wait
 	done
 fi
 

@@ -6,11 +6,21 @@
 
 import time
 import threading
-import zmq
 import json
 import socket
 import sys
 import os
+
+# We need the "ports" class when we are inside the installer, but don't need to
+# setup and zmq based services. The alternative is to add zmq and dependencies
+# to the installer. Both solutions are ugly, but this on follows who we treat
+# the command line and allow it to be in the installer without the database.
+
+try:
+	import zmq
+except ImportError:
+	pass
+
 
 
 class ports:
@@ -21,9 +31,9 @@ class ports:
 	:var subscribe: zmq.SUB socket for subscribing to a channel
 	:var control: TCP socket service for enabling/disabling channel propagation
 	"""
-	publish		= 5000
-	subscribe	= 5001
-	control		= 5002
+	publish	  = 5000
+	subscribe = 5001
+	control	  = 5002
 
 
 class Message():
@@ -38,19 +48,25 @@ class Message():
 	the body should be a json encoded python dictionary.
 	"""
 
-	def __init__(self, channel=None, message=None, hops=0, source=None, time=None, id=None):
+	def __init__(self, payload=None, *, message=None, channel=None, hops=None, ttl=None, source=None, time=None, id=None):
 		"""
 		Constructor will create a new empty :class:`Message` add set any of the fields
 		provided in the parameter list.
 
+		:param payload: body of message
+		:type payload: string
+
+		:param message: json representation of a Message
+		:type message: string
+
 		:param channel: channel source or destination
 		:type channel: string
 
-		:param message: body of message
-		:type message: string
-
 		:param hops: number software hops traversed
 		:type hops: int
+
+		:param ttl: time to live for message
+		:type ttl: int
 
 		:param source: source host (usually an IP address)
 		:type source: string
@@ -63,12 +79,61 @@ class Message():
 
 		:returns: a new :class:`Message`
 		"""
-		self.channel = channel
-		self.message = message
-		self.hops    = hops
-		self.source  = source
-		self.time    = time
-		self.id	     = id
+
+		if message:
+			msg = json.loads(message)
+		else:
+			msg = {}
+
+		# JSON does not override parameters, this allows loading an
+		# existing Message and overwriting some of the fields
+		
+		self.channel = channel if channel else msg.get('channel')
+		self.id      = id      if id      else msg.get('id')
+		self.payload = payload if payload else msg.get('payload')
+		self.hops    = hops    if hops    else msg.get('hops')
+		self.ttl     = ttl     if ttl     else msg.get('ttl')
+		self.source  = source  if source  else msg.get('source')
+		self.time    = time    if time    else msg.get('time')
+
+		# Set default values for hops and ttl
+
+		if self.hops is None:
+			self.hops = 0
+		if self.ttl is None:
+			self.ttl  = 30
+
+	def __str__(self):
+		"""
+		Returns a dictionary of all the :class:`Message` fields.
+		By default this will include the name of the message
+		channel which is correct for most uses.
+		However, when the message is going to be published on a
+		zeromq pub/sub socket the channel name is already prepended to
+		the string containing the message.
+		For this case set the *channel* parameter to False.
+
+		:param channel: include channel field
+		:type channel: bool
+		:returns: python dictionary
+		"""
+		d = {}
+		if self.channel is not None:
+			d['channel'] = self.channel
+		if self.id is not None:
+			d['id'] = self.id
+		if self.payload:
+			d['payload'] = self.payload
+		if self.hops:
+			d['hops'] = self.hops
+		if self.ttl:
+			d['ttl'] = self.ttl
+		if self.source:
+			d['source'] = self.source
+		if self.time:
+			d['time'] = self.time
+		return json.dumps(d)
+
 
 	def getChannel(self):
 		"""
@@ -84,27 +149,35 @@ class Message():
 		:param channel: string
 		"""
 		self.channel = channel
+		return self
 
-	def getMessage(self):
+	def getPayload(self):
 		"""
-		:returns: message text
+		:returns: payload text
 		"""
-		return self.message
+		return self.payload
 
-	def setMessage(self, message):
+	def setPayload(self, payload):
 		"""
-		Sets the message text
+		Sets the payload text
 		
-		:param message: text
-		:type message: string
+		:param payload: text
+		:type payload: string
 		"""
-		self.message = message
+		self.payload = payload
+		return self
 
 	def getHops(self):
 		"""
 		:returns: number of software hops 
 		"""
 		return self.hops
+
+	def getTTL(self):
+		"""
+		:returns: time to live
+		"""
+		return self.ttl
 
 	def getSource(self):
 		"""
@@ -121,6 +194,7 @@ class Message():
 		:type addr: string
 		"""
 		self.source = addr
+		return self
 
 	def getTime(self):
 		"""
@@ -138,6 +212,7 @@ class Message():
 		:type t: string
 		"""
 		self.time = t
+		return self
 
 	def getID(self):
 		"""
@@ -154,6 +229,7 @@ class Message():
 		:type id: int
 		"""
 		self.id = id
+		return self
 
 	def addHop(self):
 		"""
@@ -164,72 +240,8 @@ class Message():
 		This value is used to debugging.
 		"""
 		self.hops += 1
+		return self
 
-	def getDict(self, channel=True):
-		"""
-		Returns a dictionary of all the :class:`Message` fields.
-		By default this will include the name of the message
-		channel which is correct for most uses.
-		However, when the message is going to be published on a
-		zeromq pub/sub socket the channel name is already prepended to
-		the string containing the message.
-		For this case set the *channel* parameter to False.
-
-		:param channel: include channel field
-		:type channel: bool
-		:returns: python dictionary
-		"""
-		d = {}
-		if channel:
-			if self.channel:
-				d['channel'] = self.channel
-		if self.id is not None:
-			d['id'] = self.id
-		if self.message:
-			d['message'] = self.message
-		if self.hops:
-			d['hops'] = self.hops
-		if self.source:
-			d['source'] = self.source
-		if self.time:
-			d['time'] = self.time
-		return d
-
-	def dumps(self, channel=True):
-		"""
-		Creates a dictionary of all the :class:`Message` fields and returns
-		it as a json string. 
-		Just as with :func:`getDict` the name of the message channel
-		can by excluded from the resulting dictionary.
-
-		:param channel: include channel field
-		:type channel: bool
-		:returns: json representation of the message
-		"""
-		d = self.getDict(channel)
-		return json.dumps(d)
-
-	def loads(self, packet):
-		"""
-		Parses the *packet* and update all the included
-		message fields for this :class:`Message`.
-
-		:param packet: json representation of a message
-		:type packet: string
-		"""
-		d = json.loads(packet.decode())
-		if 'channel' in d:
-			self.channel = d['channel']
-		if 'id' in d:
-			self.id      = d['id']
-		if 'message' in d:
-			self.message = d['message']
-		if 'hops' in d:
-			self.hops    = d['hops']
-		if 'source' in d:
-			self.source  = d['source']
-		if 'time' in d:
-			self.time    = d['time']
 
 
 class Subscriber(threading.Thread):
@@ -281,13 +293,13 @@ class Subscriber(threading.Thread):
 	def run(self):
 		while True:
 			try:
-				channel, pkt = self.sub.recv_multipart()
-				msg = Message(channel.decode())
-				msg.loads(pkt)
+				channel, payload = self.sub.recv_multipart()
+				msg = Message(message=payload.decode(), 
+					      channel=channel.decode())
 			except:
 				continue
 			if 'STACKDEBUG' in os.environ:
-				print (msg.getDict())
+				print(msg)
 			self.callback(msg)
 
 
@@ -322,7 +334,7 @@ class Receiver(threading.Thread):
 		while True:
 			pkt, addr = self.rx.recvfrom(65565)
 
-			# All clients send text (<channel> <message>)
+			# All clients send text (<channel> <payload>)
 			# But, internally all messages are json.  To allow
 			# arbitrary wiring of daemons we need to accept
 			# json as input also.
@@ -337,17 +349,17 @@ class Receiver(threading.Thread):
 			# the message queue.
 
 			msg = None
-			tm  = time.asctime()
-			try:
-				msg = Message(time=tm)
-				msg.loads(pkt)
+			try:		      # try json first
+				msg = Message(message=pkt.decode())
 			except:
 				try:
-					(c, m) = pkt.split(' ', 1)
-					msg = Message(c, m, time=tm)
+					(channel, payload) = pkt.decode().split(' ', 1)
+					msg = Message(payload, channel=channel)
 				except:
-					pass # drop bad message
+					pass   # drop bad message
 			if msg:
+				if not msg.getTime():
+					msg.setTime(time.asctime())
 				if not msg.getSource() and addr[0] != '127.0.0.1':
 					msg.setSource(addr[0])
 				self.callback(msg)

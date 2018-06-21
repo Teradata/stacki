@@ -1,10 +1,10 @@
 #!/bin/bash
-# rmq-producer		Init script for Stack Message Queue Producer
+# smq-producer		Init script for Stack Message Queue Producer
 #
 # chkconfig: - 90 85
-# description:  Enabled the RMQ Producer daemon
-# processname:  rmq-producer
-# pidfile: /var/run/rmq-producer/rmq-producer.pid
+# description:  Enabled the SMQ Producer daemon
+# processname:  smq-producer
+# pidfile: /var/run/smq-producer/smq-producer.pid
 #
 # @copyright@
 # Copyright (c) 2006 - 2018 Teradata
@@ -14,12 +14,12 @@
 #
 
 ### BEGIN INIT INFO
-# Provides: rmq-producer
+# Provides: smq-producer
 # Required-Start: $local_fs $network
 # Required-Stop: $local_fs $network
 # Default-Start:
 # Default-Stop: 0 1 6
-# Short-Description: start or stop rmq-producer
+# Short-Description: start or stop smq-producer
 # Description: Stack Message Queue Producer
 ### END INIT INFO
 
@@ -27,7 +27,7 @@
 # source function library
 . /etc/rc.d/init.d/functions
 
-name=rmq-producer
+name=smq-producer
 prog=/opt/stack/sbin/${name}
 pidfile=/var/run/${name}/${name}.pid
 

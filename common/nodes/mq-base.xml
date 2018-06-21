@@ -10,11 +10,11 @@
 	<stack:package>foundation-zeromq</stack:package>
 
 <stack:script stack:stage="install-post">
-systemctl enable rmq-publisher
-chkconfig --add rmq-publisher
+systemctl enable smq-publisher
+chkconfig --add  smq-publisher
 
-systemctl enable rmq-producer
-chkconfig --add rmq-producer
+systemctl enable smq-producer
+chkconfig --add  smq-producer
 </stack:script>
 
 </stack:stack>

@@ -15,7 +15,9 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'redis_status'
 
-	def run(self, hosts):
+	def run(self, args):
+		(hosts, expanded, hashit) = args
+
 		host_status = dict.fromkeys(hosts)
 		
 		frontend_list = []
@@ -42,9 +44,13 @@ class Plugin(stack.commands.Plugin):
 		if not validRedisConnection:
 			return ret_val
 
+		ids = {}
+		for name, id in self.db.select('name, id from nodes'):
+			ids[name] = id
+
 		for host in hosts:
 			try:
-				status = r.get('host:%s:status' % host) 
+				status = r.get('host:%d:status' % ids[host])
 			except:
 				status = None
 			if status:
