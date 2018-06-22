@@ -29,7 +29,7 @@ DJANGO_SETTINGS_MODULE=stack.restapi.settings \
 
 # Create an admin user, and write the credentials
 #     to a webservice credential file
-/opt/stack/bin/stack add api user admin admin=true > /root/stacki-ws.cred
+/opt/stack/bin/stack add api user admin admin=true output-format=json > /root/stacki-ws.cred
 
 # Allow "nobody" to run stack list commands. These will
 # be run with minimal privileges, and no write access
