@@ -22,16 +22,16 @@ class Command(stack.commands.Command,
 	</param>
 
 	<example cmd='report ansible'>
-	Create an inventory file of the managed hosts, rack, and 
+	Create an inventory file of the managed hosts, rack, and
 	appliances currently available.
 	</example>
 
 	<example cmd='report ansible attribute=kube_master,kube_worker'>
-	Create an inventory file of the managed hosts, rack, and 
+	Create an inventory file of the managed hosts, rack, and
 	appliances and nodes that have kube_master or kube_minion set to
 	"True". The attribute name is the group target.
 
-	..snip..	
+	..snip..
 
 	[kube_master]
 	backend-0-0
@@ -69,12 +69,12 @@ class Command(stack.commands.Command,
 			if attr == 'managed':
 				if str2bool(val) == True:
 					host_bucket['managed']['hosts'].append(host)
-#			if len(prms) > 0:
+			# if len(prms) > 0:
 			if prms:
 				k = list(prms.keys())
 				if 'attribute' in k:
 					for i in prms['attribute'].split(','):
-						if attr == i: 
+						if attr == i:
 							if attr not in host_bucket:
 								host_bucket[attr] = { 'hosts': []}
 							host_bucket[attr]['hosts'].append(host)
