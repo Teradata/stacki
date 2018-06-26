@@ -18,3 +18,13 @@ def test_frontend_ssh_to_backends(host, backend):
 	
 	assert cmd.rc == 0
 	assert cmd.stdout.strip().split('.')[0] == backend
+
+def test_default_appliances_have_sane_attributes(host):
+	"Test that default appliances are created with expected attrs"
+
+	expected_output = host.run("cat /export/test-files/default_appliance_attrs_output.json")
+
+	cmd = host.run("sudo -i stack list appliance attr output-format=json")
+
+	assert cmd.rc == 0
+	assert cmd.stdout.strip() == expected_output.stdout.strip()

@@ -1,0 +1,1 @@
+[{"appliance": "new_appliance_node_is_any_str", "scope": "appliance", "type": "var", "attr": "kickstartable", "value": "True"}, {"appliance": "new_appliance_node_is_any_str", "scope": "appliance", "type": "var", "attr": "managed", "value": "True"}, {"appliance": "new_appliance_node_is_any_str", "scope": "appliance", "type": "var", "attr": "node", "value": "anystr"}]

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import pytest
 
@@ -41,6 +42,9 @@ class TestDisableDiscovery:
 		result = host.run("stack disable discovery")
 		assert result.rc == 0
 		assert result.stdout == "Discovery daemon has stopped\n"
+
+		# Give the OS a second to fully teardown the process
+		time.sleep(1)
 
 		# Confirm the daemon isn't running
 		assert len(host.process.filter(comm="stack")) == 0

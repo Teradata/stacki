@@ -69,7 +69,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				for key in default.keys():
 					if not attrs[key]:
 						attrs[key] = default[key]
-			print(attrs)
 			if target not in reserved:
 				host = self.db.getHostname(target)
 				if not host:

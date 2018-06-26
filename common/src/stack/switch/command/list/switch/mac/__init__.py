@@ -48,7 +48,7 @@ class Command(command):
 		for switch in self.call('list.host.interface', _switches):
 
 			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'switch_model')
+			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
 		self.endOutput(header=['switch', 'port',  'mac', 'host', 'interface', 'vlan'])

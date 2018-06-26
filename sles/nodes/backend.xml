@@ -27,6 +27,12 @@ mkdir -p /mnt/tmp/stack_site
 cp /tmp/stack_site/__init__.py /mnt/tmp/stack_site/
 </stack:script>
 
+<stack:script stack:stage="install-post" stack:chroot="false">
+unset PYTHONPATH
+export LD_LIBRARY_PATH=/opt/stack/lib
+/opt/stack/bin/fix_fstab.py
+</stack:script>
+
 <stack:script stack:stage="install-post">
 
 echo "&hostname;.&domainname;" > /etc/HOSTNAME

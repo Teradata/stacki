@@ -28,28 +28,36 @@ class Command(command):
 	all the known switchs is listed.
 	</arg>
 
-	<example cmd='list host switch-0-0'>
+	<example cmd='list switch host switch-0-0'>
 	List hosts connected to switch-0-0.
 	</example>
 
-	<example cmd='list switch'>
+	<example cmd='list switch host'>
 	List any hosts on all known switches.
 	</example>
 	"""
 	def run(self, params, args):
+		switches = self.getSwitchNames(args)
 	    
-		hosts = self.getSwitchNames(args)
-	    
-		header = []
-		values = {}
-			
-		for (provides, result) in self.runPlugins(hosts):
-			header.extend(result['keys'])
-			for h, v in result['values'].items():
-				values[h] = v
-
 		self.beginOutput()
-		for host in values:
-			self.addOutput(host, values[host])
-		self.endOutput(header=header, trimOwner=False)
 
+		header = [ 'switch', 'port', 'host', 'mac', 'interface', 'vlan' ]
+
+		for switch in switches:
+			for row in self.db.select(""" s.port, s.interface
+					from switchports s, nodes n
+					where s.switch = n.id and n.name = '%s'
+					order by s.port """ % switch):
+
+				port, ifaceid = row
+
+				o = self.db.select(""" n.name, net.mac, net.device, net.vlanid
+						from nodes n, networks net
+						where n.id = net.node and net.id = %s """ % ifaceid)
+				if len(o) != 1:
+					continue
+
+				host, mac, interface, vlan = o[0]
+				self.addOutput(switch, [ port, host, mac, interface, vlan ])
+
+		self.endOutput(header = header, trimOwner=False)

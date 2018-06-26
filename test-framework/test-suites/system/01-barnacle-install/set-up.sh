@@ -60,7 +60,8 @@ cat > ".cache/state.json" <<EOF
     "STACKI_ISO": "$STACKI_ISO",
     "PLAYBOOK": "provisioning/barnacled-frontend.yml",
     "NAME": "test-framework-$(printf '%04x%04x' $RANDOM $RANDOM)",
-    "TESTS": "$PWD/tests"
+    "TESTS": "$PWD/tests",
+    "TEST_FILES": "$PWD/test-files"
 }
 EOF
 

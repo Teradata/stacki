@@ -1,5 +1,11 @@
 require 'json'
 
+# We need the vagrant-reload plugin
+unless Vagrant.has_plugin?("vagrant-reload")
+  system "vagrant plugin install vagrant-reload"
+  exec "vagrant #{ARGV.join' '}"
+end
+
 # Load the state from the state.json file, if possible.
 if File.file?("#{ENV['PWD']}/.cache/state.json")
   state = JSON.parse(File.read("#{ENV['PWD']}/.cache/state.json"))
@@ -24,9 +30,6 @@ ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
 # Ansible also needs the path to our STACKI ISO in the ENV
 ENV['STACKI_ISO'] = STACKI_ISO
 
-# Pass the TEST_FILES to ENV, so Ansible can tell if we need to mount it
-ENV['TEST_FILES'] = TEST_FILES
-
 Vagrant.configure("2") do |config|
   config.vm.define "frontend", autostart: false do |config|
     if STACKI_ISO =~  /-sles12\./
@@ -44,27 +47,53 @@ Vagrant.configure("2") do |config|
 
       provider.memory = "1024"
       provider.cpus = 2
+
+      config.vm.synced_folder '.cache', "/export/isos", type: "virtualbox"
+      config.vm.synced_folder TESTS, "/export/tests", type: "virtualbox"
+      config.vm.synced_folder "reports", "/export/reports", type: "virtualbox"
+
+      unless TEST_FILES.nil?
+        config.vm.synced_folder TEST_FILES, "/export/test-files", type: "virtualbox"
+      end
     end
     
-    config.vm.synced_folder '.', '/vagrant', disabled: true
-    config.vm.synced_folder '.cache', "/export/isos"
-    config.vm.synced_folder TESTS, "/export/tests"
-    config.vm.synced_folder "reports", "/export/reports"
+    config.vm.provider "libvirt" do |provider, config|
+      provider.default_prefix = NAME
+      provider.driver = "kvm"
+      provider.connect_via_ssh = false
 
-    unless TEST_FILES.nil?
-      config.vm.synced_folder TEST_FILES, "/export/test-files"
+      provider.memory = "1024"
+      provider.cpus = 2
+      provider.nic_model_type = "e1000"
+      provider.random :model => "random"
+      
+      config.vm.synced_folder '.cache', "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
+      config.vm.synced_folder TESTS, "/export/tests", nfs: true, nfs_version: 4, nfs_udp: false
+      config.vm.synced_folder "reports", "/export/reports", nfs: true, nfs_version: 4, nfs_udp: false
+
+      unless TEST_FILES.nil?
+        config.vm.synced_folder TEST_FILES, "/export/test-files", nfs: true, nfs_version: 4, nfs_udp: false
+      end
     end
+
+    config.vm.synced_folder '.', '/vagrant', disabled: true
     
     config.vm.hostname = "frontend-0-0.localdomain"
     config.vm.network "private_network",
       ip: "192.168.0.2",
-      virtualbox__intnet: NAME
+      virtualbox__intnet: NAME,
+      libvirt__network_name: NAME,
+      libvirt__dhcp_enabled: false,
+      libvirt__forward_mode: "veryisolated",
+      libvirt__adapter: 1
 
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = PLAYBOOK
       ansible.become = true
       ansible.compatibility_mode = "2.0"
     end
+
+    config.vm.provision :reload
   end
 
   (0..1).each do |i|
@@ -95,6 +124,31 @@ Vagrant.configure("2") do |config|
           mac: sprintf("5254000000%02X", i+3),
           type: "dhcp",
           virtualbox__intnet: NAME,
+          auto_config: false
+      end
+
+      config.vm.provider "libvirt" do |provider, config|
+        provider.default_prefix = NAME
+        provider.driver = "kvm"
+        provider.connect_via_ssh = false
+
+        provider.memory = "2048"
+        provider.cpus = 2
+        provider.nic_model_type = "e1000"
+        provider.random :model => "random"
+
+        boot_network = {'network' => NAME}
+        provider.boot boot_network
+        provider.boot 'hd'
+        provider.qemuargs :value => "-boot"
+        provider.qemuargs :value => "reboot-timeout=10"
+
+        config.vm.network "private_network", 
+          mac: sprintf("5254000000%02X", i+3),
+          libvirt__network_name: NAME,
+          libvirt__dhcp_enabled: false,
+          libvirt__forward_mode: "veryisolated",
+          libvirt__adapter: 1,
           auto_config: false
       end
 
