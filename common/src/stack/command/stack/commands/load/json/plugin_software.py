@@ -78,7 +78,7 @@ class Plugin(stack.commands.Plugin):
 				#allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
 					try:
-						self.owner.command('enable.pallet', [ pallet['name'], f'release={pallet["release"]}', f'box={box}' ]
+						self.owner.command('enable.pallet', [ pallet['name'], f'release={pallet["release"]}', f'box={box}' ])
 					except Exception as e:
 						print(f'error adding pallet {pallet["name"]} to box {box}: {e}')
 
