@@ -49,10 +49,6 @@ class Plugin(stack.commands.Plugin):
 					#if we have no url to fetch the pallet from we cannot add it, so skip to the next one
 					print(f'error adding pallet {pallet}: no url found')
 					continue
-				#allow for multiple boxes or no boxes at all
-				boxes = []
-				for box in pallet['boxes']:
-					boxes.append(box)
 				
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					try:
@@ -77,7 +73,15 @@ class Plugin(stack.commands.Plugin):
 							print(f'warning importing pallet {pallet}: {e}')
 						else:
 							print(f'error importing pallet {pallet}: {e}')
-			
+
+
+				#allow for multiple boxes or no boxes at all
+				for box in pallet['boxes']:
+					try:
+						self.owner.command('enable.pallet', [ pallet['name'], f'release={pallet["release"]}', f'box={box}' ]
+					except Exception as e:
+						print(f'error adding pallet {pallet["name"]} to box {box}: {e}')
+
 
 		if import_data['cart']:
 			for cart in import_data['cart']:
