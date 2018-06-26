@@ -282,9 +282,9 @@ CREATE TABLE rolls (
   Rel		varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default '&os;',
-  URL		text	    NOT NULL default '',
-  URLAUTHUSER	text	    NOT NULL default '',
-  URLAUTHPASS	text	    NOT NULL default '',
+  URL		text	    NULL default '',
+  URLAUTHUSER	text    NULL default '',
+  URLAUTHPASS	text	NULL default '',
   PRIMARY KEY (ID) 
 );
 

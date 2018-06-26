@@ -19,8 +19,7 @@ from stack.exception import CommandError
 from urllib.parse import urlparse
 import requests
 from requests.auth import HTTPBasicAuth
-import shutil
-from urllib.request import urlopen
+
 
 class Command(stack.commands.add.command):
 	"""
