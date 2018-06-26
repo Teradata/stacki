@@ -257,12 +257,14 @@ class Command(stack.commands.add.command):
 
 				progress = 0
 				chunk_size = 1000000
+				#determine how many digits long the size of the iso is so we can display a clean progress indicator
+				content_digits = len(str(content_length))
 				with open(local_path, 'wb') as f:
 					for chunk in (item for item in r.iter_content(chunk_size=chunk_size) if item):
 						f.write(chunk)
 						f.flush()
 						progress += 1
-						print(f'MB remaining: {int(content_length-progress)}', end='\r')
+						print(f'MB remaining: {int(content_length-progress):{content_digits}}', end='\r')
 					#watch out for premature connection closures by the download server
 					#if the entire file has not been downloaded, don't pass an incomplete iso
 					if progress < content_length:
