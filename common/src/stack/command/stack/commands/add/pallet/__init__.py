@@ -241,7 +241,7 @@ class Command(stack.commands.add.command):
 					print(f'error downloading iso: {e}')
 					continue
 
-				content_length = int(r.headers.get('content-length'))
+				content_length = int(r.headers.get('content-length')) / 1000000
 
 
 				#verify that there are no http errors
@@ -258,13 +258,19 @@ class Command(stack.commands.add.command):
 				progress = 0
 				chunk_size = 1000000
 				with open(local_path, 'wb') as f:
-					for chunk in r.iter_content(chunk_size=chunk_size):
-						if chunk:
-							f.write(chunk)
-							f.flush()
-							progress += chunk_size
-							print(f'bytes remaining:{content_length-progress}', end='\r')
-
+					for chunk in (item for item in r.iter_content(chunk_size=chunk_size) if item):
+						f.write(chunk)
+						f.flush()
+						progress += 1
+						print(f'MB remaining: {int(content_length-progress)}', end='\r')
+					#watch out for premature connection closures by the download server
+					#if the entire file has not been downloaded, don't pass an incomplete iso
+					if progress < content_length:
+						print(f'error downloading {iso}\ndownload unable to complete. the connection may have been prematurely closed by the server.')
+						print(f'failed at {progress} MB out of {int(content_length)} MB')
+						print('cleaning up ...')
+						p = subprocess.run(['rm', filename])
+						continue
 
 				cwd = os.getcwd()
 				os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))
