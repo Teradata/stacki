@@ -86,3 +86,5 @@ class Implementation(stack.commands.Implementation):
 		if not self.owner.dryrun:
 			os.system('find %s -type d -exec chmod a+rx {} \;' % roll_dir)
 
+
+RollName = "stacki"

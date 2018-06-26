@@ -93,6 +93,8 @@ class Implementation(stack.commands.Implementation):
 			shutil.rmtree(tempdir)
 
 		if self.owner.dryrun:
-			self.owner.addOutput(name, [vers, release, arch, OS])
+			self.owner.addOutput(name, [vers, release, arch, OS, loc])
 		if updatedb:
-			self.owner.insert(name, vers, release, arch, OS)
+			self.owner.insert(name, vers, release, arch, OS, loc)
+
+RollName = "stacki"

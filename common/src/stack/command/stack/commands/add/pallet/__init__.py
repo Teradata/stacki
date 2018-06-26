@@ -16,7 +16,11 @@ import subprocess
 import stack.file
 import stack.commands
 from stack.exception import CommandError
-
+from urllib.parse import urlparse
+import requests
+from requests.auth import HTTPBasicAuth
+import shutil
+from urllib.request import urlopen
 
 class Command(stack.commands.add.command):
 	"""
@@ -66,7 +70,14 @@ class Command(stack.commands.add.command):
 	<related>create pallet</related>
 	"""
 
-	def copy(self, clean, prefix, updatedb):
+	def copy(self, clean, prefix, updatedb, path, urlauth=None):
+		#if this is a network iso and authentication is needed prep the username and password for the database
+		if urlauth:
+			urlauthUser = urlauth[0]
+			urlauthPass = urlauth[1]
+		else:
+			urlauthUser = None
+			urlauthPass = None
 		"""Copy all the pallets from the CD to Disk"""
 
 		# Populate the info hash. This hash contains pallet
@@ -74,7 +85,6 @@ class Command(stack.commands.add.command):
 
 		p = subprocess.run(['find', '%s' % self.mountPoint, '-type', 'f', '-name', 'roll-*.xml'],
 				   stdout=subprocess.PIPE)
-
 		dict = {}
 		for filename in p.stdout.decode().split('\n'):
 			if filename:
@@ -103,9 +113,9 @@ class Command(stack.commands.add.command):
 
 			if res:
 				if updatedb:
-					self.insert(res[0], res[1], res[2], res[3], res[4])
+					self.insert(res[0], res[1], res[2], res[3], res[4], res[5], urlauthUser, urlauthPass)
 				if self.dryrun:
-					self.addOutput(res[0], [res[1], res[2], res[3], res[4]])
+					self.addOutput(res[0], [res[1], res[2], res[3], res[4],res[5], urlauthUser, urlauthPath])
 
 		#
 		# Keep going even if a foreign pallet.  Safe to loop over an
@@ -121,27 +131,27 @@ class Command(stack.commands.add.command):
 			release	= info.getRollRelease()
 			arch	= info.getRollArch()
 			osname	= info.getRollOS()
+			URL = path
 			if updatedb:
-				self.insert(name, version, release, arch, osname)
+				self.insert(name, version, release, arch, osname, URL, urlauthUser, urlauthPass)
 			if self.dryrun:
-				self.addOutput(name, [version, release, arch, osname])
+				self.addOutput(name, [version, release, arch, osname, URL, urlauthUser, urlauthPass])
 
 
-	def insert(self, name, version, release, arch, OS):
+	def insert(self, name, version, release, arch, OS, URL, urlauthUser, urlauthPass):
 		"""
 		Insert the pallet information into the database if
 		not already present.
 		"""
-
 		rows = self.db.execute("""
 			select * from rolls where
 			name='%s' and version='%s' and rel='%s' and arch='%s' and os='%s'
 			""" % (name, version, release, arch, OS))
 		if not rows:
 			self.db.execute("""insert into rolls
-				(name, version, rel, arch, os) values
-				('%s', '%s', '%s', '%s', '%s')
-				""" % (name, version, release, arch, OS))
+				(name, version, rel, arch, os, URL, urlauthUser, urlauthPass) values
+				('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')
+				""" % (name, version, release, arch, OS, URL, urlauthUser, urlauthPass))
 
 	# Call the sevice ludicrous-cleaner
 	def clean_ludicrous_packages(self):
@@ -150,13 +160,14 @@ class Command(stack.commands.add.command):
 
 
 	def run(self, params, args):
-		(clean, dir, updatedb, dryrun) = self.fillParams([
+		(clean, dir, updatedb, dryrun, username, password) = self.fillParams([
 			('clean', 'n'),
 			('dir', '/export/stack/pallets'),
 			('updatedb', 'y'),
 			('dryrun', 'n'),
+			('username', None),
+			('password', None),
 			])
-
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
 		self.dryrun = self.str2bool(dryrun)
@@ -177,7 +188,11 @@ class Command(stack.commands.add.command):
 		isolist = []
 		network_pallets = []
 		disk_pallets    = []
+		network_isolist = []
 		for arg in args:
+			if arg.startswith(('http', 'ftp')) and arg.endswith('.iso'):
+				network_isolist.append(arg)
+				continue
 			if arg.startswith(('http', 'ftp')):
 				network_pallets.append(arg)
 				continue
@@ -192,16 +207,73 @@ class Command(stack.commands.add.command):
 
 		if self.dryrun:
 			self.beginOutput()
-		if not isolist and not network_pallets and not disk_pallets:
+		if not isolist and not network_pallets and not disk_pallets and not network_isolist:
 			#
 			# no files specified look for a cdrom
 			#
 			rc = os.system('mount | grep %s' % self.mountPoint)
 			if rc == 0:
-				self.copy(clean, dir, updatedb)
+				self.copy(clean, dir, updatedb, self.mountpoint)
 			else:
 				raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
-		
+
+		if network_isolist:
+			for iso in network_isolist:
+				#determine the name of the iso file and get the destined path
+				filename = os.path.basename(urlparse(iso).path)
+				local_path = '/'.join([os.getcwd(),filename])
+
+				print(f'beginning download of {iso}\nthis may take awhile...')
+				try:
+					if username and password:
+						urlauth = [username, password]
+
+						#results = subprocess.run(['wget', '--user', username, '--password', password, iso])
+
+						s = requests.Session()
+						s.auth = HTTPBasicAuth(username, password)
+						r = s.get(iso, stream=True)
+					else:
+						urlauth=None
+						r = requests.get(iso, stream=True)
+
+				except Exception as e:
+					print(f'error downloading iso: {e}')
+					continue
+
+				content_length = int(r.headers.get('content-length'))
+
+
+				#verify that there are no http errors
+				if r.status_code == 401:
+					print ('error 401 invalid credentials or invalid url. aborting.')
+					continue
+				if r.status_code == 404:
+					print ('error 404 this is a dead url. aborting')
+					continue
+				elif not r.ok:
+					print ('error downloading file. requests not "ok". aborting.')
+
+
+				progress = 0
+				chunk_size = 1000000
+				with open(local_path, 'wb') as f:
+					for chunk in r.iter_content(chunk_size=chunk_size):
+						if chunk:
+							f.write(chunk)
+							f.flush()
+							progress += chunk_size
+							print(f'bytes remaining:{content_length-progress}', end='\r')
+
+
+				cwd = os.getcwd()
+				os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))
+				self.copy(clean, dir, updatedb, iso, urlauth)
+				os.chdir(cwd)
+				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
+				print('cleaning up temporary files ...')
+				p = subprocess.run(['rm', filename])
+
 		if isolist:
 			#
 			# before we mount the ISO, make sure there are no active
@@ -219,7 +291,7 @@ class Command(stack.commands.add.command):
 			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()
 				os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
-				self.copy(clean, dir, updatedb)
+				self.copy(clean, dir, updatedb, iso)
 				os.chdir(cwd)
 				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
 			
@@ -230,8 +302,10 @@ class Command(stack.commands.add.command):
 		if disk_pallets:
 			for pallet in disk_pallets:
 				self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
-
+					
 		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
 
 		# Clear the old packages
 		self.clean_ludicrous_packages()
+
+RollName = "stacki"

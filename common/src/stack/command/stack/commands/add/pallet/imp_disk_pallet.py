@@ -32,6 +32,8 @@ class Implementation(stack.commands.Implementation):
 		arch    = os.listdir(os.path.join(loc, version, release, osname))[0]
 
 		if self.owner.dryrun:
-			self.owner.addOutput(name, [version, release, arch, osname])
+			self.owner.addOutput(name, [version, release, arch, osname, loc])
 		if updatedb:
-			self.owner.insert(name, version, release, arch, osname)
+			self.owner.insert(name, version, release, arch, osname, loc)
+
+RollName = "stacki"
