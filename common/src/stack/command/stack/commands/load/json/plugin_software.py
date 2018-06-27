@@ -34,7 +34,10 @@ class Plugin(stack.commands.Plugin):
 				box_name = box['name']
 				os_name = box['os']
 				try:
-					self.owner.command('add.box', [ f'{box_name}', f'os={os_name}' ])
+					self.owner.command('add.box', [ 
+								f'{box_name}', 
+								f'os={os_name}' ])
+					print(f'success adding box {box}')
 					self.owner.successes += 1
 
 				except Exception as e:
@@ -57,40 +60,46 @@ class Plugin(stack.commands.Plugin):
 				
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					try:
-						self.owner.command('add.pallet', [ pallet_dir, f'username={pallet["urlauthUser"]}', 
-												f'password={pallet["urlauthPass"]}' ])
+						self.owner.command('add.pallet', [ pallet_dir, 
+									f'username={pallet["urlauthUser"]}', 
+									f'password={pallet["urlauthPass"]}' ])
+						print(f'success adding pallet {pallet}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning importing pallet {pallet}: {e}')
+							print(f'warning adding pallet {pallet}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error importing pallet {pallet}: {e}')
+							print(f'error adding pallet {pallet}: {e}')
 							self.owner.errors += 1
 				else:
 
 					try:
 						self.owner.command('add.pallet', [ pallet_dir ])
+						print(f'success adding pallet {pallet}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning importing pallet {pallet}: {e}')
+							print(f'warning adding pallet {pallet}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error importing pallet {pallet}: {e}')
+							print(f'error adding pallet {pallet}: {e}')
 							self.owner.errors += 1
 
 
 				#allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
 					try:
-						self.owner.command('enable.pallet', [ pallet['name'], f'release={pallet["release"]}', f'box={box}' ])
+						self.owner.command('enable.pallet', [ pallet['name'], 
+									f'release={pallet["release"]}', 
+									f'box={box}' ])
+						print(f'success enabling {pallet} in {box}')
 						self.owner.successes += 1
 
 					except Exception as e:
-						print(f'error adding pallet {pallet["name"]} to box {box}: {e}')
+						print(f'error enabling {pallet["name"]} in {box}: {e}')
 						self.owner.errors += 1
 
 
@@ -102,6 +111,7 @@ class Plugin(stack.commands.Plugin):
 					boxes.appned(box)
 				try:
 					self.owner.command('add.cart', [ cart_name ])
+					print(f'success adding cart {cart}')
 					self.owner.successes += 1
 
 				except Exception as e:

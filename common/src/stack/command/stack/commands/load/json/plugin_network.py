@@ -31,15 +31,16 @@ class Plugin(stack.commands.Plugin):
 		#TODO: sanitize validate
 		for network in import_data:
 			name = network['name'].strip()
-			address = network['address']
-			mask = network['netmask']
-			dns = network['dns']
-			gateway = network['gateway']
-			mtu = network['mtu']
-			pxe = network['pxe']
-			zone = network['zone']
 			try:
-				self.owner.command('add.network', [ name, f'address={address}', f'mask={mask}', f'dns={dns}', f'gateway={gateway}', f'mtu={mtu}', f'pxe={pxe}', f'zone={zone}' ])
+				self.owner.command('add.network', [ name, 
+							f'address={network["address"]}', 
+							f'mask={network["netmask"]}', 
+							f'dns={network["dns"]}', 
+							f'gateway={network["gateway"]}', 
+							f'mtu={network["mtu"]}', 
+							f'pxe={network["pxe"]}', 
+							f'zone={network["zone"]}' ])
+				print(f'success adding network {network}')
 				self.owner.successes += 1
 
 			except Exception as e:
