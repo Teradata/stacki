@@ -41,11 +41,21 @@ class Plugin(stack.commands.Plugin):
 			try:
 				#if there is no os, leaving it blank will make the scope global
 				if os == None:		
-					results = self.owner.command('add.bootaction', [f'"{action}"', f'args="{args}"', f'kernel="{kernel}"',
-							f'ramdisk={ramdisk}', f'type={boot_action_type}'])
+					results = self.owner.command('add.bootaction', [
+									f'"{action}"', #this is not a misuse of an fstring
+									f'args="{args}"', 
+									f'kernel="{kernel}"',
+									f'ramdisk={ramdisk}', 
+									f'type={boot_action_type}'])
 				else: 
-					results = self.owner.command('add.bootaction', [f'"{action}"', f'args="{args}"', f'kernel="{kernel}"',
-							f'os={os}', f'ramdisk={ramdisk}', f'type={boot_action_type}'])
+					results = self.owner.command('add.bootaction', [
+									f'"{action}"', 
+									f'args="{args}"', 
+									f'kernel="{kernel}"',
+									f'os={os}', 
+									f'ramdisk={ramdisk}', 
+									f'type={boot_action_type}'])
+				print(f'success importing bootaction {action}')
 				self.owner.successes += 1
 		
 			except Exception as e:

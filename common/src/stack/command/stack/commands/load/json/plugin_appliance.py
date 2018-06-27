@@ -29,6 +29,7 @@ class Plugin(stack.commands.Plugin):
 			appliance_name = appliance['name']
 			try:
 				self.owner.command('add.appliance', [ appliance_name ])
+				print(f'success adding appliance {appliance_name}')
 				self.owner.successes += 1
 
 			except Exception as e:
@@ -42,9 +43,15 @@ class Plugin(stack.commands.Plugin):
 			for attr in appliance['attrs']:
 				try:
 					if attr['type'] == 'shadow':
-						self.owner.command('add.appliance.attr', [ appliance_name, f'attr={attr["attr"]}', f'value={attr["value"]}', 'shadow=True' ])
+						self.owner.command('add.appliance.attr', [ appliance_name, 
+									f'attr={attr["attr"]}', 
+									f'value={attr["value"]}', 
+									'shadow=True' ])
 					else:
-						self.owner.command('add.appliance.attr', [ appliance_name, f'attr={attr["attr"]}', f'value={attr["value"]}' ])
+						self.owner.command('add.appliance.attr', [ appliance_name, 
+									f'attr={attr["attr"]}', 
+									f'value={attr["value"]}' ])
+					print(f'success adding appliance attr {attr["attr"]}')
 					self.owner.successes += 1
 
 				except Exception as e:
@@ -57,7 +64,11 @@ class Plugin(stack.commands.Plugin):
 	
 			for route in appliance['route']:
 				try:
-					self.owner.command('add.appliance.route', [ appliance_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ])
+					self.owner.command('add.appliance.route', [ appliance_name, 
+								f'address={route["network"]}', 
+								f'gateway={route["gateway"]}', 
+								f'netmask={route["netmask"]}' ])
+					print(f'success adding appliance route {route}')
 					self.owner.successes += 1
 
 				except Exception as e:
@@ -70,7 +81,16 @@ class Plugin(stack.commands.Plugin):
 
 			for rule in appliance['firewall']:
 				try:
-					self.owner.command('add.appliance.firewall', [ appliance_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'netowrk={rule["network"]}', f'output-network={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
+					self.owner.command('add.appliance.firewall', [ appliance_name, 
+								f'action={rule["action"]}', 
+								f'chain={rule["chain"]}', 
+								f'protocol={rule["protocol"]}', 
+								f'service={rule["service"]}', 
+								f'network={rule["network"]}', 
+								f'output-network={rule["output-network"]}', 
+								f'rulename={rule["name"]}', 
+								f'table={rule["table"]}' ])
+					print(f'success adding appliance firewall rule {rule}')
 					self.owner.successes += 1
 
 				except Exception as e:
@@ -85,7 +105,14 @@ class Plugin(stack.commands.Plugin):
 			for partition in appliance['partition']:
 				try:
 					print('adding appliance partition...')
-					self.owner.command('add.storage.partition', [ appliance_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
+					self.owner.command('add.storage.partition', [ appliance_name, 
+								f'device={partition["device"]}', 
+								f'options={partition["options"]}', 
+								f'mountpoint={partition["mountpoint"]}', 
+								f'partid={partition["partid"]}', 
+								f'size={partition["size"]}', 
+								f'type={partition["fstype"]}' ])
+					print(f'success adding appliance partition {partition}')
 					self.owner.successes += 1
 
 				except Exception as e:
@@ -100,7 +127,13 @@ class Plugin(stack.commands.Plugin):
 			for controller in appliance['controller']:
 				try:
 					print('adding appliance controller...')
-					self.owner.command('add.storage.controller', [ appliance_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
+					self.owner.command('add.storage.controller', [ appliance_name, 
+								f'adapter={controller["adapter"]}', 
+								f'arrayid={controller["arrayid"]}', 
+								f'enclosure={controller["enclosure"]}', 
+								f'raidlevel={controller["raidlevel"]}', 
+								f'slot={controller["slot"]}' ])
+					print(f'success adding appliance controller {controller}')
 					self.owner.successes += 1
 
 				except Exception as e:
