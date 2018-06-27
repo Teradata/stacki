@@ -40,11 +40,13 @@ class Plugin(stack.commands.Plugin):
 			zone = network['zone']
 			try:
 				self.owner.command('add.network', [ name, f'address={address}', f'mask={mask}', f'dns={dns}', f'gateway={gateway}', f'mtu={mtu}', f'pxe={pxe}', f'zone={zone}' ])
+				self.owner.successes += 1
+
 			except Exception as e:
 				if 'exists' in str(e):
 					print(f'warning adding network {network}: {e}')
+					self.owner.warnings += 1
 				else:
 					print(f'error adding network {network}: {e}')
+					self.owner.errors += 1
 
-
-RollName = "stacki"

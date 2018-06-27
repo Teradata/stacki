@@ -42,5 +42,10 @@ class Command(command):
 				sys.exit(1)
 			
 
+		self.successes = 0
+		self.warnings = 0
+		self.errors = 0
 
 		self.runPlugins(args)
+
+		print(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors')

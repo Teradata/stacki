@@ -35,23 +35,30 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('add.host', [ host_name, f'box={host["box"]}', f'environment={host["environment"]}', f'rack={host["rack"]}', f'rank={host["rank"]}' ])
 				else:
 					self.owner.command('add.host', [ host_name, f'box={host["box"]}', f'rack={host["rack"]}', f'rank={host["rank"]}' ])
+				self.owner.successes += 1
 
 			except Exception as e:
 				if 'exists' in str(e):
 					print(f'warning adding host {host["name"]}: {e}')
+					self.owner.warnings += 1
 				else:
 					print(f'error adding host {host["name"]}: {e}')
+					self.owner.errors += 1
 
 
 			#iterate through each interface for the host and add it
 			for interface in host['interface']:
 				try:
 					self.owner.command('add.host.interface', [ host_name, f'interface={interface["name"]}', f'ip={interface["ip"]}', f'mac={interface["mac"]}', f'network={interface["network"]}' ]) 
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding interface {interface["name"]}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding interface {interface["name"]}: {e}')
+						self.owner.errors += 1
 
 
 
@@ -63,11 +70,15 @@ class Plugin(stack.commands.Plugin):
 				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
 				try:
 					self.owner.command('add.host.attr', [ host_name, f'attr={attr_name}', f'value={attr_value}', f'shadow={attr_shadow}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding attr {attr_name}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding attr {attr_name}: {e}')
+						self.owner.errors += 1
 
 			#iterate through each firewall rule and add it
 			for rule in host['firewall']:
@@ -76,23 +87,30 @@ class Plugin(stack.commands.Plugin):
 					#need to come back and fix this
 					#same thing with flags
 					self.owner.command('add.host.firewall', [ host_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'coment={rule["comment"]}', f'flags={rule["flags"]}',  f'network={rule["network"]}', f'output-netork={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
+					self.owner.successes += 1
 
 				except Exception as e:
 					if 'exists' in str(e):
 						print (f'warning adding host firewall rule {rule["name"]}: {e}')
+						self.owner.warnings += 1
 					else:
 						print (f'error adding host firewall rule {rule["name"]}: {e}')
+						self.owner.errors += 1
 
 
 
 			for route in host['route']:
 				try:
 					self.owner.command('add.host.route', [ host_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ]) 
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding route {route["network"]}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding route {route["network"]}: {e}')
+						self.owner.errors += 1
 
 
 			for group in host['group']:
@@ -112,16 +130,20 @@ class Plugin(stack.commands.Plugin):
 						self.owner.command('add.host.partition', [ host_name, f'device={partition["device"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}' ])
 					else:
 						self.owner.command('add.host.partition', [ host_name, f'device={partition["device"]}', f'mountpoint={partition["mountpoint"]}', f'size={partition["size"]}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print (f'warning adding partition: {e}')
+						self.owner.warnings += 1
 					else:
 						print (f'error adding partition: {e}')
+						self.owner.errors += 1
 
 
 	
 			for controller in host['controller']:
 				#this will end up being the same thing 
+				self.owner.errors += 1
 				print('todo')
-RollName='Stacki'
 		

@@ -38,11 +38,15 @@ class Plugin(stack.commands.Plugin):
 					attr_shadow = False 
 				try:
 					self.owner.command('add.environment.attr', [ environment_name, f'attr={attr["attr"]}', f'value={attr["value"]}', f'shadow={attr_shadow}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding environment attr {attr}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding environment attr {attr}: {e}')
+						self.owner.errors += 1
 
 #			for route in environment['route']:
 #				try:
@@ -88,4 +92,3 @@ class Plugin(stack.commands.Plugin):
 #					else:
 #						print(f'error adding environemnt controller {controller}: {e}')
 
-RollName = "stacki"
