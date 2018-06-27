@@ -31,11 +31,13 @@ class Plugin(stack.commands.Plugin):
 		for group in import_data:
 			try:
 				self.owner.command('add.group', [ group['name'] ])
+				self.owner.successes += 1
+
 			except Exception as e:
 				if 'exists' in str(e):
 					print(f'warning adding group {group["name"]}: {e}')
+					self.owner.warnings += 1
 				else:
 					print(f'error adding group {group["name"]}: {e}')
+					self.owner.errors += 1
 
-
-RollName="Stacki"

@@ -46,9 +46,13 @@ class Plugin(stack.commands.Plugin):
 				else: 
 					results = self.owner.command('add.bootaction', [f'"{action}"', f'args="{args}"', f'kernel="{kernel}"',
 							f'os={os}', f'ramdisk={ramdisk}', f'type={boot_action_type}'])
+				self.owner.successes += 1
 		
 			except Exception as e:
 				if 'exists' in str(e):
 					print(f'warning importing bootaction {action}: {e}')
+					self.owner.warnings += 1
 				else:
 					print(f'error importing bootaction {action}: {e}')
+					self.owner.errors += 1
+
