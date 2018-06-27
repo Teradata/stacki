@@ -18,7 +18,6 @@ class Plugin(stack.commands.Plugin):
 		#if there are no args, assume the user would like to import everthing
 		if args and 'os' not in args:
 			return
-
 		#self.owner.data contains the data from the json file defined in init
 		#check if there is any os data in the import file
 		if 'os' in self.owner.data:
@@ -29,7 +28,6 @@ class Plugin(stack.commands.Plugin):
 
 		for os in import_data:
 			os_name= os['name']
-			
 			for attr in os['attrs']:
 				#determine if this is a shadow attr by looking at the type
 				if attr['type'] == 'shadow':
@@ -38,41 +36,57 @@ class Plugin(stack.commands.Plugin):
 					attr_shadow = False 
 				try:
 					self.owner.command('add.os.attr', [ os_name, f'attr={attr["attr"]}', f'value={attr["value"]}', f'shadow={attr_shadow}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding os attr {attr}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding os attr {attr}: {e}')
+						self.owner.errors += 1
 
 			for route in os['route']:
 				try:
 					self.owner.command('add.os.route', [ os_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding os route {route}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding os route {route}: {e}')
+						self.owner.errors += 1
 
 
 			for rule in os['firewall']:
 				try:
 					self.owner.command('add.os.firewall', [ os_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output-network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding os firewall rule {rule}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding os firewall rule {rule}: {e}')
+						self.owner.errors += 1
 
 
 			for partition in os['partition']:
 				print('adding partition...')
 				try:
 					self.owner.command('add.storage.partition', [ os_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding partition {partition}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding partition {partition}: {e}')
+						self.owner.errors += 1
 
 
 			for controller in os['controller']:
@@ -82,10 +96,13 @@ class Plugin(stack.commands.Plugin):
 					#for it in storage_controller and it is not listed in stack list storage controller
 					#f'hotspare={controller["hotspare"]}'
 					self.owner.command('add.storage.controller', [ os_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning adding os controller {controller}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding os controller {controller}: {e}')
+						self.owner.errors += 1
 
-RollName = "stacki"

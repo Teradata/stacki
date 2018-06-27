@@ -35,11 +35,15 @@ class Plugin(stack.commands.Plugin):
 				os_name = box['os']
 				try:
 					self.owner.command('add.box', [ f'{box_name}', f'os={os_name}' ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning importing box {box}: {e}')	
+						print(f'warning importing box {box}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error adding box {box}: {e}')
+						self.owner.errors += 1
 
 
 		if import_data['pallet']:
@@ -48,39 +52,46 @@ class Plugin(stack.commands.Plugin):
 				if pallet_dir == None:
 					#if we have no url to fetch the pallet from we cannot add it, so skip to the next one
 					print(f'error adding pallet {pallet}: no url found')
+					self.owner.errors += 1
 					continue
 				
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					try:
 						self.owner.command('add.pallet', [ pallet_dir, f'username={pallet["urlauthUser"]}', 
-												f'password={pallet["urlauthPass"]}', 
-												f'name={pallet["name"]}', 
-												f'release={pallet["release"]}', 
-												f'version={pallet["version"]}'])
+												f'password={pallet["urlauthPass"]}' ])
+						self.owner.successes += 1
+
 					except Exception as e:
 						if 'exists' in str(e):
 							print(f'warning importing pallet {pallet}: {e}')
+							self.owner.warnings += 1
 						else:
 							print(f'error importing pallet {pallet}: {e}')
+							self.owner.errors += 1
 				else:
 
 					try:
-						self.owner.command('add.pallet', [ pallet_dir, f'name={pallet["name"]}', 
-												f'release={pallet["release"]}', 
-												f'version={pallet["version"]}'])
+						self.owner.command('add.pallet', [ pallet_dir ])
+						self.owner.successes += 1
+
 					except Exception as e:
 						if 'exists' in str(e):
 							print(f'warning importing pallet {pallet}: {e}')
+							self.owner.warnings += 1
 						else:
 							print(f'error importing pallet {pallet}: {e}')
+							self.owner.errors += 1
 
 
 				#allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
 					try:
 						self.owner.command('enable.pallet', [ pallet['name'], f'release={pallet["release"]}', f'box={box}' ])
+						self.owner.successes += 1
+
 					except Exception as e:
 						print(f'error adding pallet {pallet["name"]} to box {box}: {e}')
+						self.owner.errors += 1
 
 
 		if import_data['cart']:
@@ -91,9 +102,13 @@ class Plugin(stack.commands.Plugin):
 					boxes.appned(box)
 				try:
 					self.owner.command('add.cart', [ cart_name ])
+					self.owner.successes += 1
+
 				except Exception as e:
 					if 'exists' in str(e):
 						print(f'warning importing cart {cart}: {e}')
+						self.owner.warnings += 1
 					else:
 						print(f'error importing cart {cart}: {e}')
-RollName = "stacki"
+						self.owner.errors += 1
+
