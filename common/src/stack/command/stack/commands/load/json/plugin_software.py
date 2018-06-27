@@ -53,11 +53,37 @@ class Plugin(stack.commands.Plugin):
 			for pallet in import_data['pallet']:
 				pallet_dir =  pallet['url']
 				if pallet_dir == None:
-					#if we have no url to fetch the pallet from we cannot add it, so skip to the next one
+					#if we have no url to fetch the pallet from we cannot add it
 					print(f'error adding pallet {pallet}: no url found')
 					self.owner.errors += 1
-					continue
+
+					#in the rare case that this pallet has no url but also currently exists in the database
+					#we need to check to see if it needs to be added to any boxes
+					if not pallet['boxes']:
+						continue
+					pallet_data = self.owner.command('list.pallet', [ 'output-format=json', 'expanded=true' ])
+					if pallet_data:
+						pallet_data = json.loads(pallet_data)
+						for item in pallet_data:
+							if pallet['name'] == item['name']:
+								#we have now deduced that the pallet both is currently in the database and that it has boxes that it needs to be added to
+								for box in pallet['boxes']:
+									try:
+										self.owner.command('enable.pallet', [ pallet['name'],
+												f'release={pallet["release"]}',
+												f'box={box}' ])
+										print(f'success enabling {pallet} in {box}')
+										self.owner.successes += 1
+
+									except Exception as e:
+										print(f'error enabling {pallet["name"]} in {box}: {e}')
+										self.owner.errors += 1
+						#we have finished with this pallet
+						continue
 				
+
+
+
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					try:
 						self.owner.command('add.pallet', [ pallet_dir, 
