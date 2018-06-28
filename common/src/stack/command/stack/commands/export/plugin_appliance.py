@@ -42,10 +42,12 @@ class Plugin(stack.commands.Plugin):
 					route_data = []
 	
 				firewall_data = self.owner.command('list.appliance.firewall', [ f'{appliance_name}', 'output-format=json' ])
+				firewall_prep = []
 				if firewall_data:
 					firewall_data = json.loads(firewall_data)
-				else:
-					firewall_data = []
+					for rule in firewall_data:
+						if rule['source'] == 'A':
+							firewall_prep.append(rule)
 
 				partition_data = self.owner.command('list.storage.partition', [ f'{appliance_name}', 'globalOnly=False', 'output-format=json' ])
 				if partition_data:
@@ -59,10 +61,9 @@ class Plugin(stack.commands.Plugin):
 				else:
 					controller_data = []
 
-				document_prep['appliance'].append({'name':appliance_name, 'attrs':attr_data, 'route':route_data, 'firewall':firewall_data, 'partition':partition_data, 'controller':controller_data})
+				document_prep['appliance'].append({'name':appliance_name, 'attrs':attr_data, 'route':route_data, 'firewall':firewall_prep, 'partition':partition_data, 'controller':controller_data})
 		
 
 
 		return(document_prep)
 
-RollName = "stacki"	
