@@ -31,15 +31,21 @@ class Plugin(stack.commands.Plugin):
 		for host in import_data:
 			host_name = host['name']
 			try:
+				#the add command asks for 'longname'
+				#the list command provides the 'appliance'
+				#the only difference is that the first letter is uppercase
+				longname = host['appliance'].title()
 				if host['environment']:
 					self.owner.command('add.host', [ host_name, 
 								f'box={host["box"]}', 
-								f'environment={host["environment"]}', 
+								f'environment={host["environment"]}',
+								f'longname={longname}', 
 								f'rack={host["rack"]}', 
 								f'rank={host["rank"]}' ])
 				else:
 					self.owner.command('add.host', [ host_name, 
 								f'box={host["box"]}', 
+								f'longname={longname}',
 								f'rack={host["rack"]}', 
 								f'rank={host["rank"]}' ])
 				print(f'success adding host {host["name"]}')
@@ -108,7 +114,7 @@ class Plugin(stack.commands.Plugin):
 								f'chain={rule["chain"]}', 
 								f'protocol={rule["protocol"]}', 
 								f'service={rule["service"]}', 
-								f'coment={rule["comment"]}', 
+								f'comment={rule["comment"]}', 
 								f'flags={rule["flags"]}',  
 								f'network={rule["network"]}', 
 								f'output-netork={rule["output-network"]}', 
@@ -200,4 +206,21 @@ class Plugin(stack.commands.Plugin):
 				#this will end up being the same thing 
 				self.owner.errors += 1
 				print('todo')
-		
+
+			#set the installaction of the host
+			try:
+				self.owner.command('set.host.installaction', [
+							host_name,
+							f'action={host["installaction"]}' ])
+
+				print(f'success setting installaction of {host_name} to {host["installaction"]}')
+				self.owner.successes += 1
+
+			except Exception as e:
+				if 'exists' in str(e):
+					print(f'warning setting installaction of {host_name} to "{host["installaction"]}": {e}')
+					self.owner.warnings += 1
+				else:
+					print(f'error setting installaction of {host_name} to "{host["installaction"]}": {e}')
+					self.owner.errors += 1
+
