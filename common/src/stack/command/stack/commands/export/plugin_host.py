@@ -84,7 +84,7 @@ class Plugin(stack.commands.Plugin):
 		
 				firewall_prep = []
 				for rule in firewall_data:
-					if rule['host'] == hostname:
+					if rule['host'] == hostname and rule['source'] == 'H':
 						firewall_prep.append(rule)
 	
 				route_prep = []
