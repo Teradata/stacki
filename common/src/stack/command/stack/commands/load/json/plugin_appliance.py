@@ -125,31 +125,20 @@ class Plugin(stack.commands.Plugin):
 
 
 			for controller in appliance['controller']:
+				command = [appliance_name, 
+						f'arrayid={controller["arrayid"]}',
+						f'raidlevel={controller["raidlevel"]}',
+						f'slot={controller["slot"]}' ]
+				if controller['adapter']:
+					command.append(f'adapter={controller["adapter"]}')
+				if controller['enclosure']:
+					command.append(f'enclosure={controller["enclosure"]}')
+				if controller['options']:
+					command.append(f'options={controller["options"]}')
 				try:
 					print('adding appliance controller...')
-					if controller['adapter'] and controller['enclosure']:
 
-						self.owner.command('add.storage.controller', [ appliance_name, 
-									f'adapter={controller["adapter"]}', 
-									f'arrayid={controller["arrayid"]}', 
-									f'enclosure={controller["enclosure"]}', 
-									f'raidlevel={controller["raidlevel"]}', 
-									f'slot={controller["slot"]}' ])
-					elif controller['adapter'] and not controller['enclosure']:
-
-						self.owner.command('add.storage.controller', [ appliance_name,
-									f'adapter={controller["adapter"]}',
-									f'arrayid={controller["arrayid"]}',
-									f'raidlevel={controller["raidlevel"]}',
-									f'slot={controller["slot"]}' ])
-
-					elif not controller['adapter'] and controller['enclosure']:
-
-						self.owner.command('add.storage.controller', [ appliance_name,
-									f'arrayid={controller["arrayid"]}',
-									f'enclosure={controller["enclosure"]}',
-									f'raidlevel={controller["raidlevel"]}',
-									f'slot={controller["slot"]}' ])
+					self.owner.command('add.storage.controller', command) 
 
 					print(f'success adding appliance controller {controller}')
 					self.owner.successes += 1
