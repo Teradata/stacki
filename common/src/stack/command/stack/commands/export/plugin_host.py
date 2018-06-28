@@ -64,8 +64,8 @@ class Plugin(stack.commands.Plugin):
 		
 
 
-			for host in host_data:
-				hostname = host['host']
+#			for host in host_data:
+#				hostname = host['host']
 			
 				interface_prep = []
 				for interface in interface_data:
@@ -114,13 +114,24 @@ class Plugin(stack.commands.Plugin):
 				
 
 
-			document_prep['host'].append({'name':hostname, 'rack':host['rack'], 'rank':host['rank'], 'interface':interface_prep, 'attrs':attr_prep, 
-									'firewall':firewall_prep, 'box':host['box'], 'appliance':host['appliance'], 'comment':host['comment'], 
-									'metadata':'metadata', 'environment':host['environment'], 'osaction':host['osaction'], 'route':route_prep, 
-									'group':group_prep, 'partition':partition_prep, 'controller':controller_prep})
+				document_prep['host'].append({'name':hostname, 'rack':host['rack'], 
+										'rank':host['rank'], 
+										'interface':interface_prep, 
+										'attrs':attr_prep, 
+										'firewall':firewall_prep, 
+										'box':host['box'], 
+										'appliance':host['appliance'], 
+										'comment':host['comment'], 
+										'metadata':'metadata', #TODO what is this field supposed to be?
+										'environment':host['environment'], 
+										'osaction':host['osaction'], 
+										'installaction':host['installaction'],
+										'route':route_prep, 
+										'group':group_prep, 
+										'partition':partition_prep, 
+										'controller':controller_prep})
 
 
 
 		return(document_prep)
 
-RollName = "stacki"
