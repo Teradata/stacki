@@ -30,31 +30,20 @@ class Plugin(stack.commands.Plugin):
 
 		for profile in import_data:
 			action = profile['name']
-			args = str(profile['args']).strip("['']")
-			kernel = profile['kernel'] 
-			os = profile['os']
-			ramdisk = profile['ramdisk']
-			boot_action_type = profile['type']
+			args = ' '.join(profile['args'])
 
-			
+			command = [action,
+					f'kernel={profile["kernel"]}', 
+					f'ramdisk={profile["ramdisk"]}', 
+					f'type={profile["type"]}']
+			if profile['os']:
+				command.append(f'os={profile["os"]}')
+			if args:
+				command.append(f'args={args}')
+
 			#Need to make a more specific try catch
 			try:
-				#if there is no os, leaving it blank will make the scope global
-				if os == None:		
-					results = self.owner.command('add.bootaction', [
-									f'"{action}"', #this is not a misuse of an fstring
-									f'args="{args}"', 
-									f'kernel="{kernel}"',
-									f'ramdisk={ramdisk}', 
-									f'type={boot_action_type}'])
-				else: 
-					results = self.owner.command('add.bootaction', [
-									f'"{action}"', 
-									f'args="{args}"', 
-									f'kernel="{kernel}"',
-									f'os={os}', 
-									f'ramdisk={ramdisk}', 
-									f'type={boot_action_type}'])
+				self.owner.command('add.bootaction', command )
 				print(f'success importing bootaction {action}')
 				self.owner.successes += 1
 		
