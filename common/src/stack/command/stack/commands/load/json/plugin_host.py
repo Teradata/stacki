@@ -63,7 +63,7 @@ class Plugin(stack.commands.Plugin):
 			#iterate through each interface for the host and add it
 			for interface in host['interface']:
 				try:
-					command = [host_name, f'interface={interface["name"]}']
+					command = [host_name, f'interface={interface["interface"]}']
 					if interface['default']:
 						command.append('default=True')
 					if interface['network']:
@@ -72,6 +72,8 @@ class Plugin(stack.commands.Plugin):
 						command.append(f'mac={interface["mac"]}')
 					if interface['ip']:
 						command.append(f'ip={interface["ip"]}')
+					if interface['name']:
+						command.append(f'name={interface["name"]}')
 					if interface['module']:
 						command.append(f'module={interface["module"]}')
 					if interface['vlan']:
