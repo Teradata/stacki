@@ -70,7 +70,16 @@ class Plugin(stack.commands.Plugin):
 				interface_prep = []
 				for interface in interface_data:
 					if interface['host'] == hostname:
-						interface_prep.append({'name':interface['interface'], 'mac':interface['mac'], 'ip':interface['ip'], 'network':interface['network'], 'alias':interface_alias_data})
+						interface_prep.append({'name':interface['interface'],
+									'default':interface['default'], 
+									'mac':interface['mac'], 
+									'ip':interface['ip'], 
+									'network':interface['network'],
+									'module':interface['module'],
+									'vlan':interface['vlan'],
+									'options':interface['options'],
+									'channel':interface['channel'], 
+									'alias':interface_alias_data})
 			
 				attr_prep = []
 				for attr in attr_data:
