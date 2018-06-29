@@ -15,16 +15,17 @@ def test_add_api_user_qdn(host):
 	host_json = json.loads(result.stdout)
 	hostname = host_json[0]['value']
 
-	result = host.run('stack add api user test0 admin=true')
+	result = host.run('stack add api user test25 admin=true')
 	assert result.rc == 0
 	assert hostname in result.stdout
 	assert "." in result.stdout
 	assert domainname in result.stdout
 
-	result = host.run('stack set host attr localhost attr=domainname value=""')
+	# Trying to remove all "localdomain" references
+	result = host.run('stack set network zone private zone=""')
 	assert result.rc == 0
 
-	result = host.run('stack add api user test1 admin=true')
+	result = host.run('stack add api user test26 admin=true')
 	assert result.rc == 0
 	assert hostname in result.stdout
 	assert "." not in result.stdout
