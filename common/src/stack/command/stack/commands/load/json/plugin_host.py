@@ -73,13 +73,13 @@ class Plugin(stack.commands.Plugin):
 					if interface['ip']:
 						command.append(f'ip={interface["ip"]}')
 					if interface['module']:
-						command.append(f'module={interface["moduke"]}')
+						command.append(f'module={interface["module"]}')
 					if interface['vlan']:
 						command.append(f'vlan={interface["vlan"]}')
 					if interface['options']:
 						command.append(f'options={interface["options"]}')
 					if interface['channel']:
-						command.append(f'options={interface["channel"]}')
+						command.append(f'channel={interface["channel"]}')
 
 
 					self.owner.command('add.host.interface', command)
