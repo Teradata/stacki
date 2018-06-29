@@ -99,7 +99,7 @@ class Plugin(stack.commands.Plugin):
 	
 				route_prep = []
 				for route in route_data:
-					if route['host'] == hostname:
+					if route['host'] == hostname and route['source'] == 'H':
 						route_prep.append(route)
 
 				group_prep = []
