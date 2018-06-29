@@ -32,14 +32,17 @@ class Plugin(stack.commands.Plugin):
 		for network in import_data:
 			name = network['name'].strip()
 			try:
-				self.owner.command('add.network', [ name, 
-							f'address={network["address"]}', 
-							f'mask={network["netmask"]}', 
-							f'dns={network["dns"]}', 
-							f'gateway={network["gateway"]}', 
-							f'mtu={network["mtu"]}', 
-							f'pxe={network["pxe"]}', 
-							f'zone={network["zone"]}' ])
+				command = [ name,
+						f'address={network["address"]}',
+						f'mask={network["netmask"]}',
+						f'dns={network["dns"]}',
+						f'mtu={network["mtu"]}',
+						f'pxe={network["pxe"]}' ]
+				if network['gateway']:
+					command.append(f'gateway={network["gateway"]}')
+				if network['zone']:
+					command.append(f'zone={network["zone"]}')
+				self.owner.command('add.network', command)
 				print(f'success adding network {network}')
 				self.owner.successes += 1
 
