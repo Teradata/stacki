@@ -63,11 +63,26 @@ class Plugin(stack.commands.Plugin):
 			#iterate through each interface for the host and add it
 			for interface in host['interface']:
 				try:
-					self.owner.command('add.host.interface', [ host_name, 
-								f'interface={interface["name"]}', 
-								f'ip={interface["ip"]}', 
-								f'mac={interface["mac"]}', 
-								f'network={interface["network"]}' ])
+					command = [host_name, f'interface={interface["name"]}']
+					if interface['default']:
+						command.append('default=True')
+					if interface['network']:
+						command.append(f'network={interface["network"]}')
+					if interface['mac']:
+						command.append(f'mac={interface["mac"]}')
+					if interface['ip']:
+						command.append(f'ip={interface["ip"]}')
+					if interface['module']:
+						command.append(f'module={interface["moduke"]}')
+					if interface['vlan']:
+						command.append(f'vlan={interface["vlan"]}')
+					if interface['options']:
+						command.append(f'options={interface["options"]}')
+					if interface['channel']:
+						command.append(f'options={interface["channel"]}')
+
+
+					self.owner.command('add.host.interface', command)
 					print(f'success adding interface {interface["name"]}')
 					self.owner.successes += 1
 
@@ -153,42 +168,23 @@ class Plugin(stack.commands.Plugin):
 
 			for group in host['group']:
 				#need to figure out how to deal with groups
-				slef.owner.errors += 1
-				print('todo')
+				self.owner.errors += 1
+				print('Error host group not yet supported')
 
 
 
 			#this may not work if fstype is missing, need to do some more research
 			for partition in host['partition']:
+				command = [host_name, 
+						f'device={partition["device"]}',
+						f'mountpoint={partition["mountpoint"]}',
+						f'size={partition["size"]}']
+				if partition['fstype']:
+					command.append(f'fs={partition["fstype"]}')
+				if partition['partid']:
+					command.append(f'partid={partition["partid"]}')
 				try:
-					if partition['fstype'] and partition['partid']:
-						self.owner.command('add.host.partition', [ 
-									host_name, 
-									f'device={partition["device"]}', 
-									f'fs={partition["fstype"]}', 
-									f'mountpoint={partition["mountpoint"]}', 
-									f'partid={partition["partid"]}', 
-									f'size={partition["size"]}' ])
-					elif partition['fstype'] and not partition['partid']:
-						self.owner.command('add.host.partition', [ 
-									host_name, 
-									f'device={partition["device"]}', 
-									f'fs={partition["fstype"]}', 
-									f'mountpoint={partition["mountpoint"]}', 
-									f'size={partition["size"]}' ])
-					elif not partition['fstype'] and partition['partid']:
-						self.owner.command('add.host.partition', [ 
-									host_name, 
-									f'device={partition["device"]}', 
-									f'mountpoint={partition["mountpoint"]}', 
-									f'partid={partition["partid"]}', 
-									f'size={partition["size"]}' ])
-					else:
-						self.owner.command('add.host.partition', [ 
-									host_name, 
-									f'device={partition["device"]}', 
-									f'mountpoint={partition["mountpoint"]}', 
-									f'size={partition["size"]}' ])
+					self.owner.command('add.host.partition', command)
 					print(f'success adding partition {partition}')
 					self.owner.successes += 1
 
@@ -203,9 +199,26 @@ class Plugin(stack.commands.Plugin):
 
 	
 			for controller in host['controller']:
-				#this will end up being the same thing 
-				self.owner.errors += 1
-				print('todo')
+				try:
+					print('adding host controller...')
+					self.owner.command('add.storage.controller', [ host_name,
+								f'adapter={controller["adapter"]}',
+								f'arrayid={controller["arrayid"]}',
+								f'enclosure={controller["enclosure"]}',
+								f'raidlevel={controller["raidlevel"]}',
+								f'slot={controller["slot"]}' ])
+					print(f'success adding host controller {controller}')
+					self.owner.successes += 1
+
+				except Exception as e:
+					if 'exists' in str(e):
+						print(f'warning adding host ontroller: {e}')
+						self.owner.warnings += 1
+					else:
+						print(f'error adding host controller: {e}')
+						self.owner.errors += 1
+
+
 
 			#set the installaction of the host
 			try:
