@@ -109,4 +109,4 @@ class Implementation(stack.commands.Implementation):
 
 			xmlfile.close()
 
-		return (name, vers, release, arch, OS)
+		return (name, vers, release, arch, OS, roll_dir)

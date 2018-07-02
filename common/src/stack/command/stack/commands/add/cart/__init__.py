@@ -9,7 +9,12 @@ import grp
 import json
 import stat
 import tarfile
-import requests
+#if requests is not available yet, 
+#attempting to barnacle will fail
+try:
+	import requests
+except:
+	pass
 import shutil
 import stack.file
 import stack.commands
@@ -347,3 +352,5 @@ class Command(stack.commands.CartArgumentProcessor,
 
 		# Fix all the perms all the time.
 		self.fix_perms()
+
+RollName = "stacki"

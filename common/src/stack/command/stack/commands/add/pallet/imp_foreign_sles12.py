@@ -124,5 +124,5 @@ class Implementation(stack.commands.Implementation):
 				subprocess.call(shlex.split(cmd))
 
 
-		return (self.name, self.vers, self.release, self.arch, OS)
+		return (self.name, self.vers, self.release, self.arch, OS, roll_dir)
 
