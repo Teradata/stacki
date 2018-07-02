@@ -12,7 +12,7 @@
 
 
 import stack.commands
-from stack.exception import ParamRequired, ParamType, ArgUnique, CommandError
+from stack.exception import ParamRequired, ParamType, ArgUnique, CommandError, ParamError
 
 
 class Command(stack.commands.add.host.command):
@@ -91,6 +91,8 @@ class Command(stack.commands.add.host.command):
 			raise ParamType(self, 'name', 'non-FQDN (base hostname)')
 		if len(hosts) != 1:
 			raise ArgUnique(self, 'host')
+		if ip and not network:
+			raise ParamError(self, 'ip', 'requires "network" parameter to be filled')
 
 		host = hosts[0]
 
