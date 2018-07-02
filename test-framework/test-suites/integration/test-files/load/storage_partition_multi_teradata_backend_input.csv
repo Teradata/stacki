@@ -1,0 +1,9 @@
+Name,Device,Mountpoint,Size,Type,Options
+backend-0-0,sda,,40,,--asprimary --partition_id=18
+,sda,/,30720,ext3,--asprimary --label=ROOT-BE1
+,sda,,30720,ext3,--asprimary --label=ROOT-BE2
+,sda,/var,5120,ext3,--label=VAR-BE1
+,sda,,5120,ext3,--label=VAR-BE2
+,sda,/var/opt/teradata,0,ext3,--label=TERADATA
+,sdb,/var/opt/data1,0,ext3,--label=data1
+,sdc,/var/opt/data2,0,ext3,--label=data2
