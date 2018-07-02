@@ -58,7 +58,7 @@ class Command(stack.commands.remove.command,
 		name = None
 
 		if scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '% name' % scope)
+			raise ArgRequired(self, '%s name' % scope)
 
 		if scope == "os":
 			oses = self.getOSNames(args)
