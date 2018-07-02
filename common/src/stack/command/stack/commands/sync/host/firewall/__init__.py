@@ -113,7 +113,10 @@ class Command(stack.commands.sync.host.command):
 
 		for host in host_output:
 			if host_output[host]["rc"]:
-				out[host] += host_output[host]['output'].decode()
+				if isinstance((host_output[host]['output']), bytes):
+					out[host] += host_output[host]['output'].decode()
+				else:
+					out[host] += str(host_output[host]['output'])
 
 		self.beginOutput()
 		for host in out:
