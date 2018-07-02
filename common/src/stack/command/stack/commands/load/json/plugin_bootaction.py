@@ -34,10 +34,11 @@ class Plugin(stack.commands.Plugin):
 
 			command = [action,
 					f'kernel={profile["kernel"]}', 
-					f'ramdisk={profile["ramdisk"]}', 
 					f'type={profile["type"]}']
 			if profile['os']:
 				command.append(f'os={profile["os"]}')
+			if profile['ramdisk']:
+				command.append(f'ramdisk={profile["ramdisk"]}')
 			if args:
 				command.append(f'args={args}')
 
