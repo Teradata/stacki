@@ -10,7 +10,7 @@ import stack.commands
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
 		stack.commands.add.command):
 	"""
@@ -126,7 +126,6 @@ class Command(stack.commands.HostArgumentProcessor,
 				scope = 'appliance'
 			elif args[0] in hosts:
 				scope = 'host'
-
 		if not scope:
 			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % args[0])
 
@@ -224,11 +223,17 @@ class Command(stack.commands.HostArgumentProcessor,
 			tableid = -1
 		elif scope == 'appliance':
 			self.db.execute("""select id from appliances where
-				name = '%s' """ % name)
+				name = %s """, name)
 			tableid, = self.db.fetchone()
+
+		elif scope == 'os':
+			self.db.execute("""select id from oses where
+				name = %s """, name)
+			tableid, = self.db.fetchone()
+
 		elif scope == 'host':
 			self.db.execute("""select id from nodes where
-				name = '%s' """ % name)
+				name = %s """, name)
 			tableid, = self.db.fetchone()
 
 		#
@@ -255,8 +260,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		for slot in slots:
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values ('%s', %s, %s, %s,
-				%s, %s, %s, '%s') """ % (scope, tableid, adapter,
+				raidlevel, arrayid, options) values (%s, %s, %s, %s,
+				%s, %s, %s, %s) """,(scope, tableid, adapter,
 				enclosure, slot, raidlevel, arrayid, options))
 
 		for hotspare in hotspares:
@@ -266,7 +271,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values ('%s', %s, %s, %s,
-				%s, %s, %s, '%s') """ % (scope, tableid, adapter,
+				raidlevel, arrayid, options) values (%s, %s, %s, %s,
+				%s, %s, %s, %s) """,(scope, tableid, adapter,
 				enclosure, hotspare, raidlevel, arrayid, options))
 

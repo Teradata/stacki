@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import CommandError, ArgRequired, ArgValue, ParamRequired, ParamType, ParamValue
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
 		stack.commands.ApplianceArgumentProcessor,
 		stack.commands.add.command):
 	"""
@@ -28,7 +28,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	Mountpoint to create
 	</param>
 
-	<param type='int' name='size' optional='1'>
+	<param type='int' name='size' optional='0'>
 	Size of the partition.
 	</param>
 
@@ -40,7 +40,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	Options that need to be supplied while adding partitions.
 	</param>
 
-	<param type='string' name='partid' optional='1'>
+	<param type='int' name='partid' optional='1'>
 	The relative partition id for this partition. Partitions will be
 	created in ascending partition id order.
 	</param>
@@ -75,8 +75,8 @@ class Command(stack.commands.HostArgumentProcessor,
 	def checkIt(self, device, scope, tableid, mountpt):
 		self.db.execute("""select Scope, TableID, Mountpoint,
 			device, Size, FsType from storage_partition where
-			Scope='%s' and TableID=%s and device= '%s'
-			and Mountpoint='%s'""" % (scope, tableid, device, mountpt))
+			Scope=%s and TableID=%s and device= %s
+			and Mountpoint=%s""",(scope, tableid, device, mountpt))
 
 		row = self.db.fetchone()
 
@@ -139,6 +139,9 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		if not device:
 			raise ParamRequired(self, 'device')
+		#if size is blank then the sql command will crash
+		if not size:
+			raise ParamRequired(self, 'size')
 
 		# Validate size
 		if size:
@@ -152,6 +155,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				if mountpt == 'swap' and \
 					size not in ['recommended', 'hibernation']:
 						raise ParamType(self, 'size', 'integer')
+				else:
+					raise ParamType(self, 'size', 'integer')
 			if s < 0:
 				raise ParamValue(self, 'size', '>= 0')
 
@@ -159,8 +164,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		if partid:
 			try:
 				p = int(partid)
-			except:
-				partid = None
+			except ValueError:
+				raise ParamValue(self, 'partid', 'an integer')
 
 			if p < 1:
 				raise ParamValue(self, 'partid', '>= 0')
@@ -177,6 +182,13 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.db.execute("""select id from appliances where
 				name = '%s' """ % name)
 			tableid, = self.db.fetchone()
+
+
+		elif scope == 'os':
+			self.db.execute("""select id from oses where name = %s """, name)
+			tableid, = self.db.fetchone()
+
+
 		elif scope == 'host':
 			self.db.execute("""select id from nodes where
 				name = '%s' """ % name)
@@ -194,6 +206,8 @@ class Command(stack.commands.HostArgumentProcessor,
 		#
 		# now add the specifications to the database
 		#
+
+
 		sqlvars = "Scope, TableID, device, Mountpoint, Size, FsType, Options"
 		sqldata = "'%s', %s, '%s', '%s', %s, '%s', '%s'" % \
 			(scope, tableid, device, mountpt, size, fstype, options)
@@ -202,5 +216,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			sqlvars += ", PartID"
 			sqldata += ", %s" % partid
 
+
 		self.db.execute("""insert into storage_partition
 			(%s) values (%s) """ % (sqlvars, sqldata))
+
