@@ -105,13 +105,18 @@ class Plugin(stack.commands.Plugin):
 			for partition in appliance['partition']:
 				try:
 					print('adding appliance partition...')
-					self.owner.command('add.storage.partition', [ appliance_name, 
-								f'device={partition["device"]}', 
-								f'options={partition["options"]}', 
-								f'mountpoint={partition["mountpoint"]}', 
-								f'partid={partition["partid"]}', 
-								f'size={partition["size"]}', 
-								f'type={partition["fstype"]}' ])
+					command = [appliance_name,
+							f'device={partition["device"]}',
+							f'partid={partition["partid"]}',
+							f'size={partition["size"]}' ]
+					if partition['options']:
+						command.append(f'options={partition["options"]}')
+					if partition['mountpoint']:
+						command.append(f'mountpoint={partition["mountpoint"]}')
+					if partition ['fstype']:
+						command.append(f'type={partition["fstype"]}')
+
+					self.owner.command('add.storage.partition', command)
 					print(f'success adding appliance partition {partition}')
 					self.owner.successes += 1
 
