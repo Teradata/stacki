@@ -85,7 +85,6 @@ class Command(stack.commands.list.command,
 				scope = 'appliance'
 			elif args[0] in hosts:
 				scope = 'host'
-
 		if not scope:
 			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
 		query = None
@@ -105,11 +104,14 @@ class Command(stack.commands.list.command,
 					p.fstype, p.options, p.partid from storage_partition as p inner join
 					appliances as a on p.tableid=a.id where
 					p.scope='appliance') order by scope,device,partid,size,fstype"""
+
+
+
+
 		elif scope == 'os':
-			#
-			# not currently supported
-			#
-			return
+			query = """select scope, device, mountpoint, size, fstype, options, partid
+				from storage_partition where scope = "os" and tableid = (select id
+				from oses where name = '%s') order by device,partid,fstype,size""" % args[0]
 		elif scope == 'appliance':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope = "appliance"
@@ -127,7 +129,6 @@ class Command(stack.commands.list.command,
 		self.beginOutput()
 
 		self.db.execute(query)
-
 		i = 0
 		for row in self.db.fetchall():
 			name, device, mountpoint, size, fstype, options, partid = row
@@ -135,8 +136,7 @@ class Command(stack.commands.list.command,
 				size = "recommended"
 			elif size == -2:
 				size = "hibernation"
-
-			if name == "host" or name == "appliance":
+			if name == "host" or name == "appliance" or name == "os":
 				name = args[0]	
 
 			if mountpoint == 'None':
@@ -154,3 +154,4 @@ class Command(stack.commands.list.command,
 			i += 1
 
 		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner=False)
+

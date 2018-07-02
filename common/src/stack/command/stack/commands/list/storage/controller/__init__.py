@@ -86,10 +86,11 @@ class Command(stack.commands.list.command,
 				where scope = 'global'
 				order by enclosure, adapter, slot"""
 		elif scope == 'os':
-			#
-			# not currently supported
-			#
-			return
+
+			query = """select adapter, enclosure, slot, raidlevel,
+                                arrayid, options from storage_controller where
+                                scope = "os" and tableid = (select id from oses
+                                where name = '%s') order by enclosure, adapter, slot""" % args[0]
 		elif scope == 'appliance':
 			query = """select adapter, enclosure, slot,
 				raidlevel, arrayid, options
@@ -112,7 +113,7 @@ class Command(stack.commands.list.command,
 		name = None
 		if scope == 'global':
 			name = 'global'
-		elif scope in [ 'appliance', 'host']:
+		elif scope in [ 'appliance', 'host', 'os']:
 			name = args[0]
 
 		self.beginOutput()
