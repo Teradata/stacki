@@ -13,11 +13,11 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self,args):
-	
+
 		if args:
 			if 'group' not in args:
 				return
-	
+
 		document_prep = {'group':[]}
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.

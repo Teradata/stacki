@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 		#if not, use an empty list as a placeholder.
 		host_data = self.owner.command('list.host', [ 'output-format=json' ])
 		if host_data:
-			host_data = json.loads(host_data)		
+			host_data = json.loads(host_data)
 
 			for host in host_data:
 				hostname = host['host']
@@ -61,27 +61,27 @@ class Plugin(stack.commands.Plugin):
 				controller_data = self.owner.command('list.storage.controller', [ f'{hostname}', 'output-format=json' ])
 				if controller_data:
 					controller_data = json.loads(controller_data)
-		
+
 
 
 #			for host in host_data:
 #				hostname = host['host']
-			
+
 				interface_prep = []
 				for interface in interface_data:
 					if interface['host'] == hostname:
 						interface_prep.append({'interface':interface['interface'],
-									'default':interface['default'], 
-									'mac':interface['mac'], 
-									'ip':interface['ip'], 
+									'default':interface['default'],
+									'mac':interface['mac'],
+									'ip':interface['ip'],
 									'network':interface['network'],
 									'name':interface['name'],
 									'module':interface['module'],
 									'vlan':interface['vlan'],
 									'options':interface['options'],
-									'channel':interface['channel'], 
+									'channel':interface['channel'],
 									'alias':interface_alias_data})
-			
+
 				attr_prep = []
 				for attr in attr_data:
 					if attr['host'] == hostname:
@@ -91,12 +91,12 @@ class Plugin(stack.commands.Plugin):
 							else:
 								shadow = False
 							attr_prep.append({'name':attr['attr'], 'value':attr['value'], 'shadow':shadow})
-		
+
 				firewall_prep = []
 				for rule in firewall_data:
 					if rule['host'] == hostname and rule['source'] == 'H':
 						firewall_prep.append(rule)
-	
+
 				route_prep = []
 				for route in route_data:
 					if route['host'] == hostname and route['source'] == 'H':
@@ -105,7 +105,7 @@ class Plugin(stack.commands.Plugin):
 				group_prep = []
 				for group in group_data:
 					if group['host'] == hostname:
-						
+
 						groups = group['groups'].split()
 						for item in groups:
 							group_prep.append(item)
@@ -115,30 +115,30 @@ class Plugin(stack.commands.Plugin):
 					for partition in partition_data:
 						if partition['scope'] == hostname:
 							partition_prep.append(partition)
-			
+
 				controller_prep = []
 				if controller_data:
 					for controller in controller_data:
 						if controller['name'] == hostname:
 							controller_prep.append(controller)
-				
 
 
-				document_prep['host'].append({'name':hostname, 'rack':host['rack'], 
-										'rank':host['rank'], 
-										'interface':interface_prep, 
-										'attrs':attr_prep, 
-										'firewall':firewall_prep, 
-										'box':host['box'], 
-										'appliance':host['appliance'], 
-										'comment':host['comment'], 
+
+				document_prep['host'].append({'name':hostname, 'rack':host['rack'],
+										'rank':host['rank'],
+										'interface':interface_prep,
+										'attrs':attr_prep,
+										'firewall':firewall_prep,
+										'box':host['box'],
+										'appliance':host['appliance'],
+										'comment':host['comment'],
 										'metadata':'metadata', #TODO what is this field supposed to be?
-										'environment':host['environment'], 
-										'osaction':host['osaction'], 
+										'environment':host['environment'],
+										'osaction':host['osaction'],
 										'installaction':host['installaction'],
-										'route':route_prep, 
-										'group':group_prep, 
-										'partition':partition_prep, 
+										'route':route_prep,
+										'group':group_prep,
+										'partition':partition_prep,
 										'controller':controller_prep})
 
 

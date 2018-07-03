@@ -8,7 +8,7 @@ import stack.commands
 import json
 
 class Plugin(stack.commands.Plugin):
-	
+
 	def provides(self):
 		return 'bootaction'
 

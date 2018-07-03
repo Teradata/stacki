@@ -29,6 +29,5 @@ class Command(stack.commands.Command):
 		self.beginOutput()
 		self.addOutput(None,json.dumps(document_prep))
 		self.endOutput(trimOwner=True)
-		
 
-RollName = "stacki"
+
