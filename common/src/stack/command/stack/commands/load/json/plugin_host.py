@@ -35,19 +35,15 @@ class Plugin(stack.commands.Plugin):
 				#the list command provides the 'appliance'
 				#the only difference is that the first letter is uppercase
 				longname = host['appliance'].title()
+				command = [ host_name,
+						f'box={host["box"]}',
+						f'longname={longname}',
+						f'rack={host["rack"]}',
+						f'rank={host["rank"]}' ]
 				if host['environment']:
-					self.owner.command('add.host', [ host_name,
-								f'box={host["box"]}',
-								f'environment={host["environment"]}',
-								f'longname={longname}',
-								f'rack={host["rack"]}',
-								f'rank={host["rank"]}' ])
-				else:
-					self.owner.command('add.host', [ host_name,
-								f'box={host["box"]}',
-								f'longname={longname}',
-								f'rack={host["rack"]}',
-								f'rank={host["rank"]}' ])
+					command.append(f'environment={host["environment"]}')
+				self.owner.command('add.host', command)
+
 				print(f'success adding host {host["name"]}')
 				self.owner.successes += 1
 
@@ -60,32 +56,67 @@ class Plugin(stack.commands.Plugin):
 					self.owner.errors += 1
 
 
-			#iterate through each interface for the host and add it
+			#iterate through each interface for the host and set it
 			for interface in host['interface']:
 				try:
-					command = [host_name, f'interface={interface["interface"]}']
+
 					if interface['default']:
-						command.append('default=True')
+						self.owner.command('set.host.interface.default', [ host_name,
+													'default=True',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface default')
+						self.owner.successes += 1
 					if interface['network']:
-						command.append(f'network={interface["network"]}')
+						self.owner.command('set.host.interface.network', [ host_name,
+													f'network={interface["network"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface network')
+						self.owner.successes += 1
 					if interface['mac']:
-						command.append(f'mac={interface["mac"]}')
+						self.owner.command('set.host.interface.mac', [ host_name,
+													f'mac={interface["mac"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface mac')
+						self.owner.successes += 1
 					if interface['ip']:
-						command.append(f'ip={interface["ip"]}')
+						self.owner.command('set.host.interface.ip', [ host_name,
+													f'ip={interface["ip"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface ip')
+						self.owner.successes += 1
 					if interface['name']:
-						command.append(f'name={interface["name"]}')
+						self.owner.command('set.host.interface.name', [ host_name,
+													f'name={interface["name"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface name')
+						self.owner.successes += 1
 					if interface['module']:
-						command.append(f'module={interface["module"]}')
+						self.owner.command('set.host.interface.module', [ host_name,
+													f'module={interface["module"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface module')
+						self.owner.successes += 1
 					if interface['vlan']:
-						command.append(f'vlan={interface["vlan"]}')
+						self.owner.command('set.host.interface.vlan', [ host_name,
+													f'vlan={interface["vlan"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface vlan')
+						self.owner.successes += 1
 					if interface['options']:
-						command.append(f'options={interface["options"]}')
+						self.owner.command('set.host.interface.options', [ host_name,
+													f'options={interface["options"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface options')
+						self.owner.successes += 1
 					if interface['channel']:
-						command.append(f'channel={interface["channel"]}')
+						self.owner.command('set.host.interface.channel', [ host_name,
+													f'channel={interface["channel"]}',
+													f'interface={interface["interface"]}' ])
+						print('success setting interface channel')
+						self.owner.successes += 1
 
 
-					self.owner.command('add.host.interface', command)
-					print(f'success adding interface {interface["name"]}')
+					print(f'success setting all interface attrs for {interface["name"]}')
 					self.owner.successes += 1
 
 				except Exception as e:
