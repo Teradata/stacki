@@ -8,11 +8,11 @@ import stack.commands
 import json
 
 class Plugin(stack.commands.Plugin):
-	
+
 	def provides(self):
 		return 'network'
 
-	
+
 	def run(self, args):
 
 		#check if the user would like to import software data

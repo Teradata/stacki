@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'environment'
 
 	def run(self, args):
-	
+
 		#check if the user would like to import environment data
 		#if there are no args, assume the user would like to import everthing
 		if args and 'environment' not in args:
@@ -29,13 +29,13 @@ class Plugin(stack.commands.Plugin):
 
 		for environment in import_data:
 			environment_name= environment['name']
-			
+
 			for attr in environment['attrs']:
 				#determine if this is a shadow attr by looking at the type
 				if attr['type'] == 'shadow':
 					attr_shadow = True
 				else:
-					attr_shadow = False 
+					attr_shadow = False
 				try:
 					self.owner.command('add.environment.attr', [ environment_name, f'attr={attr["attr"]}', f'value={attr["value"]}', f'shadow={attr_shadow}' ])
 					self.owner.successes += 1

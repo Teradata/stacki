@@ -19,7 +19,7 @@ from stack.exception import CommandError
 class command(stack.commands.load.command, stack.commands.Command):
 
 	MustBeRoot = 0
-	
+
 
 class Command(command):
 	"""
@@ -40,7 +40,7 @@ class Command(command):
 			except ValueError:
 				print('invalid json document')
 				sys.exit(1)
-			
+
 
 		self.successes = 0
 		self.warnings = 0
