@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'host'
 
 	def run(self, args):
-	
+
 		#check if the user would like to import host data
 		#if there are no args, assume the user would like to import everthing
 		if args and 'host' not in args:
@@ -36,17 +36,17 @@ class Plugin(stack.commands.Plugin):
 				#the only difference is that the first letter is uppercase
 				longname = host['appliance'].title()
 				if host['environment']:
-					self.owner.command('add.host', [ host_name, 
-								f'box={host["box"]}', 
+					self.owner.command('add.host', [ host_name,
+								f'box={host["box"]}',
 								f'environment={host["environment"]}',
-								f'longname={longname}', 
-								f'rack={host["rack"]}', 
+								f'longname={longname}',
+								f'rack={host["rack"]}',
 								f'rank={host["rank"]}' ])
 				else:
-					self.owner.command('add.host', [ host_name, 
-								f'box={host["box"]}', 
+					self.owner.command('add.host', [ host_name,
+								f'box={host["box"]}',
 								f'longname={longname}',
-								f'rack={host["rack"]}', 
+								f'rack={host["rack"]}',
 								f'rank={host["rank"]}' ])
 				print(f'success adding host {host["name"]}')
 				self.owner.successes += 1
@@ -105,9 +105,9 @@ class Plugin(stack.commands.Plugin):
 				attr_value = attr['value']  # this may pose a problem because the pallets and carts attrs have lists here. Need to investigate
 				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
 				try:
-					self.owner.command('add.host.attr', [ host_name, 
-										f'attr={attr_name}', 
-										f'value={attr_value}', 
+					self.owner.command('add.host.attr', [ host_name,
+										f'attr={attr_name}',
+										f'value={attr_value}',
 										f'shadow={attr_shadow}' ])
 					print(f'success adding host attr {attr_name}')
 					self.owner.successes += 1
@@ -126,16 +126,16 @@ class Plugin(stack.commands.Plugin):
 					#this will likely have an issue with service as it is a comma delimeted string that should be a list
 					#need to come back and fix this
 					#same thing with flags
-					self.owner.command('add.host.firewall', [ host_name, 
-								f'action={rule["action"]}', 
-								f'chain={rule["chain"]}', 
-								f'protocol={rule["protocol"]}', 
-								f'service={rule["service"]}', 
-								f'comment={rule["comment"]}', 
-								f'flags={rule["flags"]}',  
-								f'network={rule["network"]}', 
-								f'output-netork={rule["output-network"]}', 
-								f'rulename={rule["name"]}', 
+					self.owner.command('add.host.firewall', [ host_name,
+								f'action={rule["action"]}',
+								f'chain={rule["chain"]}',
+								f'protocol={rule["protocol"]}',
+								f'service={rule["service"]}',
+								f'comment={rule["comment"]}',
+								f'flags={rule["flags"]}',
+								f'network={rule["network"]}',
+								f'output-netork={rule["output-network"]}',
+								f'rulename={rule["name"]}',
 								f'table={rule["table"]}' ])
 					print(f'success adding host firewall rule {rule["name"]}')
 					self.owner.successes += 1
@@ -152,9 +152,9 @@ class Plugin(stack.commands.Plugin):
 
 			for route in host['route']:
 				try:
-					self.owner.command('add.host.route', [ host_name, 
-								f'address={route["network"]}', 
-								f'gateway={route["gateway"]}', 
+					self.owner.command('add.host.route', [ host_name,
+								f'address={route["network"]}',
+								f'gateway={route["gateway"]}',
 								f'netmask={route["netmask"]}' ])
 					print(f'success adding host route {route}')
 					self.owner.successes += 1
@@ -177,7 +177,7 @@ class Plugin(stack.commands.Plugin):
 
 			#this may not work if fstype is missing, need to do some more research
 			for partition in host['partition']:
-				command = [host_name, 
+				command = [host_name,
 						f'device={partition["device"]}',
 						f'mountpoint={partition["mountpoint"]}',
 						f'size={partition["size"]}']
@@ -199,7 +199,7 @@ class Plugin(stack.commands.Plugin):
 						self.owner.errors += 1
 
 
-	
+
 			for controller in host['controller']:
 				try:
 					print('adding host controller...')

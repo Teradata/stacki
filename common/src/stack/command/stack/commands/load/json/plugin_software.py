@@ -8,13 +8,13 @@ import stack.commands
 import json
 
 class Plugin(stack.commands.Plugin):
-	
+
 	def provides(self):
 		return 'software'
 
-	
+
 	def run(self, args):
-		
+
 		#check if the user would like to import software data
 		#if there are no args, assume the user would like to import everthing
 		if args and 'software' not in args:
@@ -34,8 +34,8 @@ class Plugin(stack.commands.Plugin):
 				box_name = box['name']
 				os_name = box['os']
 				try:
-					self.owner.command('add.box', [ 
-								f'{box_name}', 
+					self.owner.command('add.box', [
+								f'{box_name}',
 								f'os={os_name}' ])
 					print(f'success adding box {box}')
 					self.owner.successes += 1
@@ -80,14 +80,14 @@ class Plugin(stack.commands.Plugin):
 										self.owner.errors += 1
 						#we have finished with this pallet
 						continue
-				
+
 
 
 
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					try:
-						self.owner.command('add.pallet', [ pallet_dir, 
-									f'username={pallet["urlauthUser"]}', 
+						self.owner.command('add.pallet', [ pallet_dir,
+									f'username={pallet["urlauthUser"]}',
 									f'password={pallet["urlauthPass"]}' ])
 						print(f'success adding pallet {pallet}')
 						self.owner.successes += 1
@@ -118,8 +118,8 @@ class Plugin(stack.commands.Plugin):
 				#allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
 					try:
-						self.owner.command('enable.pallet', [ pallet['name'], 
-									f'release={pallet["release"]}', 
+						self.owner.command('enable.pallet', [ pallet['name'],
+									f'release={pallet["release"]}',
 									f'box={box}' ])
 						print(f'success enabling {pallet} in {box}')
 						self.owner.successes += 1
