@@ -8,11 +8,11 @@ import stack.commands
 import json
 
 class Plugin(stack.commands.Plugin):
-	
+
 	def provides(self):
 		return 'software'
 
-	
+
 	def run(self, args):
 
 		if args:
@@ -37,8 +37,8 @@ class Plugin(stack.commands.Plugin):
 							'boxes':boxes})
 		else:
 			pallet_prep = []
-		
-	
+
+
 		cart_data = self.owner.command('list.cart', [ 'output-format=json' ])
 		if cart_data:
 			cart_data = json.loads(cart_data)

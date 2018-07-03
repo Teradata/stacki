@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 				return
 
 		document_prep = {'appliance':[]}
-		
+
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
 		appliance_data = self.owner.command('list.appliance', [ 'output-format=json' ])
@@ -34,13 +34,13 @@ class Plugin(stack.commands.Plugin):
 					attr_data = json.loads(attr_data)
 				else:
 					attr_data = []
-	
+
 				route_data = self.owner.command('list.appliance.route', [ f'{appliance_name}', 'output-format=json' ])
 				if route_data:
 					route_data = json.loads(route_data)
 				else:
 					route_data = []
-	
+
 				firewall_data = self.owner.command('list.appliance.firewall', [ f'{appliance_name}', 'output-format=json' ])
 				firewall_prep = []
 				if firewall_data:
@@ -54,7 +54,7 @@ class Plugin(stack.commands.Plugin):
 					partition_data = json.loads(partition_data)
 				else:
 					partition_data = []
-	
+
 				controller_data = self.owner.command('list.storage.controller', [ f'{appliance_name}', 'output-format=json' ])
 				if controller_data:
 					controller_data = json.loads(controller_data)
@@ -62,7 +62,7 @@ class Plugin(stack.commands.Plugin):
 					controller_data = []
 
 				document_prep['appliance'].append({'name':appliance_name, 'attrs':attr_data, 'route':route_data, 'firewall':firewall_prep, 'partition':partition_data, 'controller':controller_data})
-		
+
 
 
 		return(document_prep)

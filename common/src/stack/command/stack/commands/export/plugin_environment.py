@@ -14,11 +14,11 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
-		
+
 		if args:
 			if 'environment' not in args:
 				return
-	
+
 		document_prep = {'environment':[]}
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
@@ -28,7 +28,7 @@ class Plugin(stack.commands.Plugin):
 			environment_data = json.loads(environment_data)
 			for item in environment_data:
 				environment_name = item['environment']
-	
+
 				attr_data = self.owner.command('list.environment.attr', [ f'{environment_name}', 'output-format=json' ])
 				if attr_data:
 					attr_data = json.loads(attr_data)
@@ -61,9 +61,9 @@ class Plugin(stack.commands.Plugin):
 				controller_prep = []
 				for item in controller_data:
 					options = item['options'].split()
-					controller_prep.append({'scope':item['scope'], 'enclosure':item['enclosure'], 'adapter':item['adapter'], 'slot':item['slot'], 
+					controller_prep.append({'scope':item['scope'], 'enclosure':item['enclosure'], 'adapter':item['adapter'], 'slot':item['slot'],
 								'raidlevel':item['raidlevel'], 'arrayid':item['arrayid'], 'options':options})
-			
+
 
 				document_prep['environment'].append({'name':environment_name, 'attrs':attr_data, 'route':route_data, 'firewall':firewall_data, 'partition':partition_data, 'controller':controller_prep})
 

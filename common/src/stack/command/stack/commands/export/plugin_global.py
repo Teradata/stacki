@@ -13,11 +13,11 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
-		
+
 		if args:
 			if 'global' not in args:
 				return
-		
+
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
 		attr_data = self.owner.command('list.attr', [ 'output-format=json' ])
@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 			attr_data = json.loads(attr_data)
 		else:
 			attr_data = []
-		
+
 		route_data = self.owner.command('list.route', [ 'output-format=json' ])
 		if route_data:
 			route_data = json.loads(route_data)
