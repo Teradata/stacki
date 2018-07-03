@@ -32,7 +32,7 @@ class Plugin(stack.commands.Plugin):
 			action = profile['name']
 
 			command = [action,
-					f'kernel={profile["kernel"]}', 
+					f'kernel={profile["kernel"]}',
 					f'type={profile["type"]}']
 			if profile['os']:
 				command.append(f'os={profile["os"]}')
@@ -44,7 +44,7 @@ class Plugin(stack.commands.Plugin):
 				self.owner.command('add.bootaction', command )
 				print(f'success importing bootaction {action}')
 				self.owner.successes += 1
-		
+
 			except Exception as e:
 				if 'exists' in str(e):
 					print(f'warning importing bootaction {action}: {e}')
