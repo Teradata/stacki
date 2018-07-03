@@ -30,7 +30,6 @@ class Plugin(stack.commands.Plugin):
 
 		for profile in import_data:
 			action = profile['name']
-			args = ' '.join(profile['args'])
 
 			command = [action,
 					f'kernel={profile["kernel"]}', 
@@ -39,8 +38,6 @@ class Plugin(stack.commands.Plugin):
 				command.append(f'os={profile["os"]}')
 			if profile['ramdisk']:
 				command.append(f'ramdisk={profile["ramdisk"]}')
-			if args:
-				command.append(f'args={args}')
 
 			#Need to make a more specific try catch
 			try:
@@ -56,3 +53,21 @@ class Plugin(stack.commands.Plugin):
 					print(f'error importing bootaction {action}: {e}')
 					self.owner.errors += 1
 
+			#on occasion, not all of the args will be added if they are included in the original command
+			#to remedy this we set the args after adding the bootaction profile
+			if profile['args']:
+				args = ' '.join(profile['args'])
+				command = [action, f'args={args}', f'type={profile["type"]}']
+				if profile['os']:
+					command.append(f'os={profile["os"]}')
+				try:
+					self.owner.command('set.bootaction.args', command)
+					print(f'success setting bootaction {action} args')
+					self.owner.successes += 1
+				except Exception as e:
+					if 'exists' in str(e):
+						print(f'warning setting bootaction {action} args: {e}')
+						self.owner.warnings += 1
+					else:
+						print(f'error setting bootaction {action} args: {e}')
+						self.owner.errors += 1
