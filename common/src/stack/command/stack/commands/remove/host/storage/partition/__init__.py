@@ -20,8 +20,8 @@ class Command(stack.commands.remove.command):
 	the database.
 	</param>
 
-	<example cmd='remove host storage partition backend-0-1'>
-	Removes the partition information for backend-0-1
+	<example cmd='remove host storage partition backend-0-1 device=sda'>
+	Removes the device sda partition information for the host 'backend-0-1'
 	</example>
 	"""
 

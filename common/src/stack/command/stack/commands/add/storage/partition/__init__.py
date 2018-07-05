@@ -5,19 +5,24 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import CommandError, ArgRequired, ArgValue, ParamRequired, ParamType, ParamValue
+from stack.exception import CommandError, ParamRequired, ParamType, ParamValue
 
 
-class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.add.command):
+class Command(stack.commands.add.command, stack.commands.ScopeParamProcessor):
 	"""
 	Add a partition configuration to the database.
 
-	<arg type='string' name='scope'>
-	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). No argument means the scope is 'global'.
+	<param type='string' name='scope'  optional='0'>
+	Zero or one parameter. The parameter is the scope for the provided name
+	(e.g., 'os', 'host', 'environment', 'appliance').
+	No scope means the scope is 'global', and no name will be accepted.
+	</param>
+
+	<arg type='string' name='name' optional='0'>
+	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
+	appliance (e.g., 'backend'), a valid environment (e.g., 'master_node'
+	or a host.
+	If nothing is supplied, then the configuration will be global.
 	</arg>
 
 	<param type='string' name='device' optional='0'>
@@ -44,7 +49,7 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 	The relative partition id for this partition. Partitions will be
 	created in ascending partition id order.
 	</param>
-	
+
 	<example cmd='add storage partition backend-0-0 device=sda mountpoint=/var
 		size=50 type=ext4'>
 	Creates a ext4 partition on device sda with mountpoints /var.
@@ -69,91 +74,62 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 	"""
 
 	#
-	# Checks if partition config already exists in DB for a device and 
-	# a mount point.
-	#
-	def checkIt(self, device, scope, tableid, mountpt):
-		self.db.execute("""select Scope, TableID, Mountpoint,
+	def check_mount_point(self, device, scope, tableid, mountpt):
+		""" Checks if partition config already exists in DB for a device and a mount point."""
+		if mountpt:
+			row = self.db.select("""Scope, TableID, Mountpoint,
+				device, Size, FsType from storage_partition where
+				Scope=%s and TableID=%s and device= %s
+				and Mountpoint=%s""", (scope, tableid, device, mountpt))
+			if row:
+				if scope == 'host':
+					# Give useful error with host name instead of just generic 'host'
+					scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
+				raise CommandError(self, 'partition specification for device "%s", mount point "%s" already exists in the '
+				                         'database for scope: "%s"' % (device, mountpt, scope))
+		return
+
+	def check_dev_and_partid(self, device, scope, tableid, partid):
+		""" Checks if partition config already exists in DB for a device and a partid."""
+		row = self.db.select("""Scope, TableID, PartID,
 			device, Size, FsType from storage_partition where
 			Scope=%s and TableID=%s and device= %s
-			and Mountpoint=%s""",(scope, tableid, device, mountpt))
-
-		row = self.db.fetchone()
-
+			and partid=%s""", (scope, tableid, device, partid))
 		if row:
-			raise CommandError(self, """partition specification for device %s,
-				mount point %s already exists in the 
-				database""" % (device, mountpt))
+			if scope == 'host':
+					# Give useful error with host name instead of just generic 'host'
+				scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
+			raise CommandError(self, 'partition specification for device "%s", partition id "%s" already exists in '
+			                         'the database for scope: "%s"' % (device, partid, scope))
 
-	def run(self, params, args):
-		scope = None
-		oses = []
-		appliances = []
-		hosts = []
+	def check_for_duplicates(self, device, scope, tableid, mountpt, partid):
 
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
+		row =  self.db.select(""" Scope, TableID, Mountpoint,
+			device, Size, FsType from storage_partition where
+			Scope=%s and TableID=%s and device= %s
+			and Mountpoint=%s and partid=%s""", (scope, tableid, device, mountpt, partid))
+		if row:
+			if scope == 'host':
+				# Give useful error with host name instead of just generic 'host'
+				scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
+			raise CommandError(self, 'partition specification for device "%s", mount point "%s" already exists in the '
+			                         'database for scope: "%s"' % (device, mountpt, scope))
 
-			try:
-				appliances = self.getApplianceNames(args)
-			except:
-				appliances = []
+		self.check_mount_point(device, scope, tableid, mountpt)
+		if partid:
+			self.check_dev_and_partid(device, scope, tableid, partid)
 
-			try:
-				hosts = self.getHostnames(args)
-			except:
-				hosts = []
-		else:
-			raise ArgRequired(self, 'scope')
-
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-
-		if not scope:
-			raise ArgValue(self, 'scope', 'valid os, appliance name or host name')
-
-		if scope == 'global':
-			name = 'global'
-		else:
-			name = args[0]
-
-		device, size, fstype, mountpt, options, partid = \
-			self.fillParams([
-				('device', None, True),
-				('size', None), 
-				('type', None), 
-				('mountpoint', None),
-				('options', None),
-				('partid', None),
-				])
-
-		if not device:
-			raise ParamRequired(self, 'device')
-		#if size is blank then the sql command will crash
-		if not size:
-			raise ParamRequired(self, 'size')
-
-		# Validate size
+	def validation(self, size, mountpt, partid):
+		"""Validate size and partid that were input."""
 		if size:
 			try:
 				s = int(size)
-			except:
+			except (ValueError, TypeError):
 				#
 				# If mountpoint is 'swap' then allow
 				# 'hibernate', 'recommended' as sizes.
 				#
-				if mountpt == 'swap' and \
-					size not in ['recommended', 'hibernation']:
+				if mountpt == 'swap' and size not in ['recommended', 'hibernation']:
 						raise ParamType(self, 'size', 'integer')
 				else:
 					raise ParamType(self, 'size', 'integer')
@@ -171,52 +147,47 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 				raise ParamValue(self, 'partid', '>= 0')
 
 			partid = p
+		return partid
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = None
-		if scope == 'global':
-			tableid = -1
-		elif scope == 'appliance':
-			self.db.execute("""select id from appliances where
-				name = '%s' """ % name)
-			tableid, = self.db.fetchone()
+	def run(self, params, args):
+		scope, device, size, fstype, mountpt, options, partid = self.fillParams([
+			('scope', 'global'),
+			('device', None, True),
+			('size', None),
+			('type', None),
+			('mountpoint', None),
+			('options', None),
+			('partid', None), ])
 
+		if not device:
+			raise ParamRequired(self, 'device')
+		# If size is blank then the sql command will crash
+		if not size:
+			raise ParamRequired(self, 'size')
 
-		elif scope == 'os':
-			self.db.execute("""select id from oses where name = %s """, name)
-			tableid, = self.db.fetchone()
-
-
-		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = '%s' """ % name)
-			tableid, = self.db.fetchone()
-
-		#
-		# make sure the specification for mountpt doesn't already exist
-		#
-		if mountpt:
-			self.checkIt(device, scope, tableid, mountpt)
-
+		self.validation(size, mountpt, partid)
+		# Also clean up the Nones to empty strings or 0.
 		if not options:
-			options = ""
-		
-		#
-		# now add the specifications to the database
-		#
+			options = ''
+		if not fstype:
+			fstype = ''
+		if not mountpt:
+			mountpt = ''
+		# Not certain this won't break something down the line. Load storage partition auto determines this...
+		if not partid:
+			partid = 0
+
+		tableids = self.get_scope_name_tableid(scope, params, args)
+		# if we get a:backend we want to check that all will go through instead of doing some then failing:
+		for each_tableid in tableids:
+			# make sure the specification for mountpt doesn't already exist
+			self.check_for_duplicates(device, scope, each_tableid, mountpt, partid)
 
 
-		sqlvars = "Scope, TableID, device, Mountpoint, Size, FsType, Options"
-		sqldata = "'%s', %s, '%s', '%s', %s, '%s', '%s'" % \
-			(scope, tableid, device, mountpt, size, fstype, options)
+		for each_tableid in tableids:
+			# now add the specifications to the database
+			sql_statement = "(Scope, TableID, device, Mountpoint,  Size, FsType, Options , PartID) values (%s, %s, " \
+			                "%s,  %s, %s, %s, %s, %s)"
+			sql_vars = (scope, each_tableid, device, mountpt, size, fstype, options, partid)
 
-		if partid:
-			sqlvars += ", PartID"
-			sqldata += ", %s" % partid
-
-
-		self.db.execute("""insert into storage_partition
-			(%s) values (%s) """ % (sqlvars, sqldata))
-
+			self.db.execute("insert into storage_partition " + sql_statement, sql_vars)

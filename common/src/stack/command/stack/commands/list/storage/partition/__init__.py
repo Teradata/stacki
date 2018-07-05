@@ -8,150 +8,103 @@ import stack.commands
 from stack.exception import ArgError, ParamValue
 
 
-class Command(stack.commands.list.command,
-		stack.commands.OSArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.HostArgumentProcessor):
+class Command(stack.commands.list.command, stack.commands.ScopeParamProcessor):
 
 	"""
 	List the storage partition configuration for one of the following:
-	global, os, appliance or host.
+	global, os, appliance, environment or host.
 
-	<arg optional='1' type='string' name='host'>
-	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
-	appliance (e.g., 'backend') or a host.
-	If nothing is supplied, then the global storage partition
-	configuration will be output.
-	</arg>
-
-	<param type="bool" name="globalOnly" optional="0" default="n">
-	Flag that specifies if only the 'global' partition entries should
-	be displayed.
+	<param type='string' name='scope'  optional='0'>
+	Zero or one parameter. The parameter is the scope for the provided name
+	(e.g., 'os', 'host', 'environment', 'appliance').
+	No scope means the scope is 'global', and no name will be accepted.
 	</param>
 
-	<example cmd='list storage partition backend-0-0'>
+	<arg type='string' name='name' optional='0'>
+	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
+	appliance (e.g., 'backend'), a valid environment (e.g., 'master_node'
+	or a host.
+	If nothing is supplied, then the list will be for global scope.
+	</arg>
+
+	<example cmd='list storage partition backend-0-0 scope=host'>
 	List host-specific storage partition configuration for backend-0-0.
 	</example>
 
-	<example cmd='list storage partition backend'>
+	<example cmd='list storage partition backend scope=appliance'>
 	List appliance-specific storage partition configuration for all
 	backend appliances.
 	</example>
 
 	<example cmd='list storage partition'>
-	List all storage partition configurations in the database.
-	</example>
-
-	<example cmd='list storage partition globalOnly=y'>
 	Lists only global storage partition configuration i.e. configuration
 	not associated with a specific host or appliance type.
 	</example>
+
 	"""
 
-	def run(self, params, args):
-		scope = None
-		oses = []
-		appliances = []
-		hosts = []
+	def scope_query(self, scope, tableid):
+		# If we get called recursively we will be provided a new scope
+		base_query = " select p.scope, a.name, p.device, p.mountpoint, p.size, p.fstype, p.options, p.partid from " \
+		             "storage_partition as p inner join %s as a on p.tableid=%s where p.scope='%s'"
+		order_by =  " order by scope,device,partid,size,fstype"
+		needs_id = " and tableid = %s "
 
-		globalOnly, = self.fillParams([('globalOnly', 'n')])
-		globalOnlyFlag = self.str2bool(globalOnly)
+		querys = {'global' : "select scope, device, mountpoint, size, fstype, options, partid from storage_partition "
+		                     "where scope = 'global'" + order_by,
+		          'os' : base_query % ('oses', 'a.id', 'os') + needs_id + order_by,
+		          'appliance' : base_query % ('appliances', 'a.id', 'appliance') + needs_id + order_by,
+		          'environment' : base_query % ('environments', 'a.id', 'environment') + needs_id + order_by,
+		          'host' : base_query % ('nodes', 'a.id', 'host') + needs_id + order_by}
 
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
-
-			try:
-				appliances = self.getApplianceNames()
-			except:
-				appliances = []
-
-			try:
-				hosts = self.getHostnames()
-			except:
-				hosts = []
-
+		if scope != 'global':
+			return self.db.execute(querys[scope], tableid)
 		else:
-			raise ArgError(self, 'scope', 'must be unique or missing')
-
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-		if not scope:
-			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
-		query = None
-		if scope == 'global':
-			if globalOnlyFlag:
-				query = """select scope, device, mountpoint, size, fstype, options, partid 
-					from storage_partition
-					where scope = 'global'
-					order by device,partid,fstype, size"""
-			else:
-				query = """(select scope, device, mountpoint, size, fstype, options, partid
-					from storage_partition where scope = 'global') UNION ALL
-					(select a.name, p.device, p.mountpoint, p.size,
-					p.fstype, p.options, p.partid from storage_partition as p inner join
-					nodes as a on p.tableid=a.id where p.scope='host') UNION ALL
-					(select a.name, p.device, p.mountpoint, p.size,
-					p.fstype, p.options, p.partid from storage_partition as p inner join
-					appliances as a on p.tableid=a.id where
-					p.scope='appliance') order by scope,device,partid,size,fstype"""
+			return self.db.execute(querys[scope])
 
 
-
-
-		elif scope == 'os':
-			query = """select scope, device, mountpoint, size, fstype, options, partid
-				from storage_partition where scope = "os" and tableid = (select id
-				from oses where name = '%s') order by device,partid,fstype,size""" % args[0]
-		elif scope == 'appliance':
-			query = """select scope, device, mountpoint, size, fstype, options, partid
-				from storage_partition where scope = "appliance"
-				and tableid = (select id from appliances
-				where name = '%s') order by device,partid,fstype, size""" % args[0]
-		elif scope == 'host':
-			query = """select scope, device, mountpoint, size, fstype, options, partid
-				from storage_partition where scope="host" and
-				tableid = (select id from nodes
-				where name = '%s') order by device,partid,fstype, size""" % args[0]
-
-		if not query:
-			return
-
+	def run(self, params, args):
+		scope, = self.fillParams([('scope', 'global')])
+		if args == []:
+			args = None
+		tableids = self.get_scope_name_tableid(scope, params, args, list_call=True)
 		self.beginOutput()
+		# If we are only looking for one table and If query doesn't have any contents exit
+		if len(tableids) == 1:
+			if self.scope_query(scope, tableids[0]) == 0:
+				return
+		# We may have a list of hosts (a:backend), so we need to find the data for all of them
+		for each_tableid in tableids:
+			self.scope_query(scope, each_tableid)
+			for row in self.db.fetchall():
+				name = ''
+				if scope == 'global':
+					sql_scope, device, mountpoint, size, fstype, options, partid = row
+				else:
+					sql_scope, name, device, mountpoint, size, fstype, options, partid = row
 
-		self.db.execute(query)
-		i = 0
-		for row in self.db.fetchall():
-			name, device, mountpoint, size, fstype, options, partid = row
-			if size == -1:
-				size = "recommended"
-			elif size == -2:
-				size = "hibernation"
-			if name == "host" or name == "appliance" or name == "os":
-				name = args[0]	
+				if size == -1:
+					size = 'recommended'
+				elif size == -2:
+					size = 'hibernation'
 
-			if mountpoint == 'None':
-				mountpoint = None
+				if mountpoint == 'None':
+					mountpoint = None
 
-			if fstype == 'None':
-				fstype = None
+				if fstype == 'None':
+					fstype = None
 
-			if partid == 0:
-				partid = None
+				if partid == 0:
+					partid = None
 
-			self.addOutput(name, [device, partid, mountpoint,
-				size, fstype, options])
+				if scope == 'global':
+					self.addOutput(sql_scope, [device, partid, mountpoint, size, fstype, options])
+				else:
+					self.addOutput(sql_scope, [name, device, partid, mountpoint, size, fstype, options])
 
-			i += 1
-
-		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner=False)
-
+		if scope == 'global':
+			self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'],
+				               trimOwner=False)
+		else:
+			self.endOutput(header=['scope', 'name', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'],
+			               trimOwner=False)

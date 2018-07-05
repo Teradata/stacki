@@ -127,7 +127,7 @@ def setup_partitioning(host, backend, test_scenario):
 		my_string += "\\n" + each
 	cmd = host.run('sudo -i echo -e "%s"' % my_string + " > /home/vagrant/%s_partition.csv" % backend)
 	assert cmd.rc == 0
-	cmd = host.run("sudo -i stack remove host storage partition %s" % backend)
+	cmd = host.run("sudo -i stack remove host storage partition %s device='*'" % backend)
 	assert cmd.rc == 0
 	cmd = host.run("sudo -i stack load storage partition file=/home/vagrant/%s_partition.csv" % backend)
 	if test_scenario[0] != "xfs":

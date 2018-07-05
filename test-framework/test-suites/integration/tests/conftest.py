@@ -106,6 +106,7 @@ def revert_filesystem():
 			path
 		], check=True)
 
+
 @pytest.fixture
 def revert_discovery():
 	# Nothing to do in set up
@@ -131,6 +132,7 @@ def revert_discovery():
 	# Blow away the log file
 	if os.path.exists("/var/log/stack-discovery.log"):
 		os.remove("/var/log/stack-discovery.log")
+
 
 @pytest.fixture
 def add_host():

@@ -41,7 +41,7 @@ class Plugin(stack.commands.Plugin):
 					if rule['source'] == 'A':
 						firewall_prep.append(rule)
 
-			partition_data = self.owner.call('list.storage.partition', [ appliance_name, 'globalOnly=False'])
+			partition_data = self.owner.call('list.storage.partition', [ appliance_name, 'scope=appliance'])
 			if not partition_data:
 				partition_data = []
 

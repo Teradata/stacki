@@ -6,7 +6,7 @@ class Command(stack.commands.remove.command):
 	"""
 	Remove storage partition configuration for an os type.
 
-	<arg type='string' name='host' optional='1'>
+	<arg type='string' name='os' optional='1'>
 	OS Name
 	</arg>
 
@@ -20,8 +20,8 @@ class Command(stack.commands.remove.command):
 	the database.
 	</param>
 
-	<example cmd='remove os storage partition redhat'>
-	Removes the partition information for redhat os type
+	<example cmd='remove os storage partition redhat device=sda'>
+	Removes the device sda partition information for the os 'redhat'
 	</example>
 	"""
 

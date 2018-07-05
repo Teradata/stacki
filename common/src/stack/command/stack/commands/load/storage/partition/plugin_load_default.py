@@ -5,10 +5,13 @@
 # @copyright@
 
 import stack.commands
+from stack.exception import ArgNotFound
 
-
-class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
+class Plugin(stack.commands.OSArgumentProcessor,
+             stack.commands.ApplianceArgumentProcessor,
+             stack.commands.HostArgumentProcessor,
+             stack.commands.Plugin,
+             stack.commands.EnvironmentArgumentProcessor):
 
 	"""
 	Plugin that invokes 'stack add storage partition' and adds
@@ -21,29 +24,37 @@ class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumen
 	def run(self, args):
 		hosts = args
 		for host in hosts.keys():
-			#
 			# first remove the entries for this host
-			#
+			scope = 'global'
 			if host == 'global':
 				self.owner.call('remove.storage.partition', ['scope=global','device=*'])
+			# Is there a cleaner way to put this into a for loop or something?
+			# I really need to loop over these functions and break when I find something.
 			else:
 				try:
-					_ = self.getOSNames([host])
-					self.owner.call('remove.os.storage.partition', [host])
-				except:
+					self.getOSNames([host])
+					scope = 'os'
+				except ArgNotFound:
 					pass
-
-				try:
-					_ = self.getApplianceNames([host])
-					self.owner.call('remove.appliance.storage.partition', [host])
-				except:
-					pass
-
-				try:
-					_ = self.getHostnames([host])
-					self.owner.call('remove.host.storage.partition', [host])
-				except:
-					pass
+				if scope == 'global':
+					try:
+						self.getApplianceNames([host])
+						scope = 'appliance'
+					except ArgNotFound:
+						pass
+				if scope == 'global':
+					try:
+						self.getEnvironmentNames([host])
+						scope = 'environment'
+					except ArgNotFound:
+						pass
+				if scope == 'global':
+					try:
+						self.getHostnames([host])
+						scope = 'host'
+					except ArgNotFound:
+						pass
+				self.owner.call('remove.' + scope + '.storage.partition', [host, 'device=*'])
 
 			# Get list of devices for this host
 			devices = []
@@ -79,5 +90,8 @@ class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumen
 					if partid:
 						cmdargs.append('partid=%s' % partid)
 
-					self.owner.call('add.storage.partition',
-						cmdargs)
+					if scope != 'global':
+						cmdargs.append('scope=global')
+						self.owner.call('add.' + scope + '.storage.partition', cmdargs)
+					else:
+						self.owner.call('add.storage.partition', cmdargs)

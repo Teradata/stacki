@@ -156,7 +156,8 @@
       "firewall": [],
       "partition": [
         {
-          "scope": "backend",
+          "name": "backend",
+          "scope": "appliance",
           "device": "sdb",
           "partid": 1,
           "mountpoint": "/var/lib/docker",

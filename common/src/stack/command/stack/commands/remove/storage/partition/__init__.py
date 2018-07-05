@@ -5,24 +5,24 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError, ParamValue, ParamRequired
+from stack.exception import ParamRequired
 
 
-class Command(stack.commands.remove.command,
-		stack.commands.OSArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor):
+class Command(stack.commands.remove.command, stack.commands.ScopeParamProcessor):
 	"""
 	Remove a storage partition configuration from the database.
 
-	<param type='string' name='scope' optional='0'>
-	Scope of partition definition: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). Default scope is 'global'.
+	<param type='string' name='scope'  optional='0'>
+	Zero or one parameter. The parameter is the scope for the provided name
+	(e.g., 'os', 'host', 'environment', 'appliance').
+	No scope means the scope is 'global', and no name will be accepted.
 	</param>
 
-	<arg type='string' name='name'>
-	Zero or one argument of host, appliance or os name
+	<arg type='string' name='name' optional='0'>
+	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
+	appliance (e.g., 'backend'), a valid environment (e.g., 'master_node'
+	or a host.
+	If nothing is supplied, then the removal will be from global.
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -50,51 +50,22 @@ class Command(stack.commands.remove.command,
 	"""
 
 	def run(self, params, args):
-		(scope, device, mountpoint) = self.fillParams([
-			('scope', 'global'), ('device', None), ('mountpoint', None)])
-		oses = []
-		appliances = []
-		hosts = []
-		name = None
-		accepted_scopes = ['global', 'os', 'appliance', 'host']
+		(scope, device, mountpoint) = self.fillParams([('scope', 'global'), ('device', None), ('mountpoint', None)])
+		if (device is None and mountpoint is None):
+			if not args or args[0] != '*':
+				raise ParamRequired(self, ('device', 'mountpoint'))
+		tableids = self.get_scope_name_tableid(scope, params, args)
+		for each_tableid in tableids:
 
-		# Some checking that we got usable input.:
-		if scope not in accepted_scopes:
-			raise ParamValue(self, '%s' % params, 'one of the following: %s' % accepted_scopes )
-		elif scope == 'global' and len(args) >= 1:
-			raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
-		elif scope == 'global' and (device is None and mountpoint is None):
-			raise ParamRequired(self, 'device OR mountpoint')
-		elif scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '%s name' % scope)
+			deletesql = "delete from storage_partition where scope = %s and tableid = %s "
+			delete_tuple = (scope, each_tableid)
 
-		if scope == "os":
-			oses = self.getOSNames(args)
-		elif scope == "appliance":
-			appliances = self.getApplianceNames(args)
-		elif scope == "host":
-			hosts = self.getHostnames(args)
+			if device and device != '*':
+				deletesql += " and device = %s"
+				delete_tuple += (device,)
 
-		if scope != 'global':
-			name = args[0]
+			if mountpoint and mountpoint != '*':
+				deletesql += " and mountpoint = %s"
+				delete_tuple += (mountpoint,)
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = -1
-		tablename = {"os":"oses", "appliance":"appliances", "host":"nodes"}
-		if scope != 'global':
-			self.db.execute("""select id from %s where
-				name = '%s' """ % (tablename[scope], name))
-			tableid, = self.db.fetchone()
-
-		deletesql = """delete from storage_partition where
-			scope = '%s' and tableid = %s """ % (scope, tableid)
-
-		if device and device != '*':
-			deletesql += """ and device = '%s'""" % device
-
-		if mountpoint and mountpoint != '*':
-			deletesql += """ and mountpoint = '%s'""" % mountpoint
-
-		self.db.execute(deletesql)
+			self.db.execute(deletesql, delete_tuple)

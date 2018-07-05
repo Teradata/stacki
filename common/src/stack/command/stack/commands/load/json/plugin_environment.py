@@ -49,3 +49,20 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					]
 
 				self.owner.try_command('add.environment.attr', parameters, f'adding environment attr {attr}', 'exists')
+
+			for partition in environment['partition']:
+				parameters = [
+					environment_name,
+					f'scope={partition["scope"]}',
+					f'device={partition["device"]}',
+					f'partid={partition["partid"]}',
+					f'size={partition["size"]}'
+				]
+				if partition['options']:
+					parameters.append(f'options={partition["options"]}')
+				if partition['mountpoint']:
+					parameters.append(f'mountpoint={partition["mountpoint"]}')
+				if partition['fstype']:
+					parameters.append(f'type={partition["fstype"]}')
+
+				self.owner.try_command('add.storage.partition', parameters, f'adding environment partition {partition}', 'exists')
