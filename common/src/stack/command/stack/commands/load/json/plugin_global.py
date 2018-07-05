@@ -40,19 +40,19 @@ class Plugin(stack.commands.Plugin):
 					attr_attr = attr['attr']
 					attr_value = attr['value']
 					try:
-						self.owner.command('add.attr', [
+						self.owner.command('set.attr', [
 									f'attr={attr_attr}',
 									f'value={attr_value}',
 									f'shadow={attr_shadow}' ])
-						print(f'success adding global attr {attr_attr}')
+						print(f'success setting global attr {attr_attr}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning adding global attr {attr_attr}: {e}')
+							print(f'warning setting global attr {attr_attr}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global attr {attr_attr}: {e}')
+							print(f'error setting global attr {attr_attr}: {e}')
 							self.owner.errors += 1
 
 

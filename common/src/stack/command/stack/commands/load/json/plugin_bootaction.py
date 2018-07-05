@@ -41,16 +41,16 @@ class Plugin(stack.commands.Plugin):
 
 			#Need to make a more specific try catch
 			try:
-				self.owner.command('add.bootaction', command )
-				print(f'success importing bootaction {action}')
+				self.owner.command('set.bootaction', command )
+				print(f'success adding bootaction {action}')
 				self.owner.successes += 1
 
 			except Exception as e:
 				if 'exists' in str(e):
-					print(f'warning importing bootaction {action}: {e}')
+					print(f'warning adding bootaction {action}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error importing bootaction {action}: {e}')
+					print(f'error adding bootaction {action}: {e}')
 					self.owner.errors += 1
 
 			#on occasion, not all of the args will be added if they are included in the original command

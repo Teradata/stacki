@@ -42,15 +42,15 @@ class Plugin(stack.commands.Plugin):
 					command.append(f'gateway={network["gateway"]}')
 				if network['zone']:
 					command.append(f'zone={network["zone"]}')
-				self.owner.command('add.network', command)
-				print(f'success adding network {network}')
+				self.owner.command('set.network', command)
+				print(f'success setting network {name}')
 				self.owner.successes += 1
 
 			except Exception as e:
 				if 'exists' in str(e):
-					print(f'warning adding network {network}: {e}')
+					print(f'warning setting network {name}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding network {network}: {e}')
+					print(f'error setting network {name}: {e}')
 					self.owner.errors += 1
 

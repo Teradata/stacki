@@ -35,19 +35,19 @@ class Plugin(stack.commands.Plugin):
 				else:
 					attr_shadow = False
 				try:
-					self.owner.command('add.os.attr', [ os_name,
+					self.owner.command('set.os.attr', [ os_name,
 								f'attr={attr["attr"]}',
 								f'value={attr["value"]}',
 								f'shadow={attr_shadow}' ])
-					print(f'success adding os attr {attr}')
+					print(f'success setting os attr {attr}')
 					self.owner.successes += 1
 
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning adding os attr {attr}: {e}')
+						print(f'warning setting os attr {attr}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding os attr {attr}: {e}')
+						print(f'error setting os attr {attr}: {e}')
 						self.owner.errors += 1
 
 			for route in os['route']:
