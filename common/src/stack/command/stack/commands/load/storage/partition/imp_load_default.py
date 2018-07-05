@@ -13,15 +13,15 @@ from stack.exception import CommandError
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
 	stack.commands.NetworkArgumentProcessor,
-	stack.commands.Implementation):	
+	stack.commands.EnvironmentArgumentProcessor,
+	stack.commands.Implementation):
 
 	"""
 	Put storage partition configuration into the database based on
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, device, partid, mountpoint, size, fstype,
-			options, line):
+	def doit(self, host, device, partid, mountpoint, size, fstype, options, line):
 
 		#
 		# error checking
@@ -88,6 +88,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			rowid += 1
 
 			device = None
+			scope = None
 			mountpoint = ''
 			size = None
 			type = ''
@@ -110,6 +111,9 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 				elif header[i] == 'device':
 					device = field.lower()
+
+				elif header[i] == 'scope':
+					scope = field.lower()
 
 				elif header[i] == 'mountpoint':
 					mountpoint = field.lower()
@@ -140,15 +144,18 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							raise CommandError(self.owner, msg)
 					except:
 						pass
-
-			#
 			# the first non-header line must have a host name
-			#
-			if line == 1 and not name:
+			if line == 2 and name is None:
 				msg = 'empty host name found in "name" column'
 				raise CommandError(self.owner, msg)
-
+			# If scope is global, no name is allowed, coerce to global
+			if scope == 'global':
+				name = 'global'
+			# leave the old logic before scope could be input:
 			if name in self.appliances or name == 'global':
+				hosts = [ name ]
+			# New logic for scope options
+			elif scope is not None and scope != 'host':
 				hosts = [ name ]
 			else:
 				hosts = self.getHostnames([ name ])

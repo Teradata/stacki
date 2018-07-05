@@ -140,22 +140,20 @@ class Command(stack.commands.remove.command,
 				name = '%s' """ % name)
 			tableid, = self.db.fetchone()
 		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = '%s' """ % name)
+			self.db.execute("""select id from nodes where name = %s """, name)
 			tableid, = self.db.fetchone()
 
-		deletesql = """delete from storage_controller where
-			scope = '%s' and tableid = %s """ % (scope, tableid)
+		deletesql = """delete from storage_controller where scope = %s and tableid = %s """, (scope, tableid)
 
 		if adapter != -1:
-			deletesql += ' and adapter = %s' % adapter
+			deletesql += ' and adapter = %s', adapter
 
 		if enclosure != -1:
-			deletesql += ' and enclosure = %s' % enclosure
+			deletesql += ' and enclosure = %s', enclosure
 
 		if slot != '*':
 			for slot in slots:
-				dsql = '%s and slot = %s' % (deletesql, slot)
+				dsql = '%s and slot = %s', (deletesql, slot)
 				self.db.execute(dsql)
 		else:
 			self.db.execute(deletesql)

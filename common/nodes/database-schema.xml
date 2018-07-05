@@ -379,7 +379,7 @@ CREATE TABLE public_keys (
 
 DROP TABLE IF EXISTS storage_controller;
 CREATE TABLE storage_controller (
- Scope		enum('global', 'os', 'appliance', 'host'),
+ Scope		enum('global', 'os', 'appliance', 'host', 'environment'),
  TableID	int(11) NOT NULL,
  Adapter	int(11) NOT NULL,
  Enclosure	int(11) NOT NULL,
@@ -391,7 +391,7 @@ CREATE TABLE storage_controller (
 
 DROP TABLE IF EXISTS storage_partition;
 CREATE TABLE storage_partition (
- Scope		enum('global', 'os', 'appliance', 'host'),
+ Scope		enum('global', 'os', 'appliance', 'host', 'environment'),
  TableID	int(11) NOT NULL,
  Device		varchar(128) NOT NULL default '',
  Mountpoint	varchar(128) NOT NULL default '',
