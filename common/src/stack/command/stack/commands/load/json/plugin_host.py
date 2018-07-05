@@ -31,13 +31,9 @@ class Plugin(stack.commands.Plugin):
 		for host in import_data:
 			host_name = host['name']
 			try:
-				#the add command asks for 'longname'
-				#the list command provides the 'appliance'
-				#the only difference is that the first letter is uppercase
-				longname = host['appliance'].title()
 				command = [ host_name,
 						f'box={host["box"]}',
-						f'longname={longname}',
+						f'longname={host["appliancelongname"]}',
 						f'rack={host["rack"]}',
 						f'rank={host["rank"]}' ]
 				if host['environment']:
@@ -64,67 +60,64 @@ class Plugin(stack.commands.Plugin):
 						self.owner.command('set.host.interface.default', [ host_name,
 													'default=True',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface default')
+						print(f'success setting {host["name"]} interface default')
 						self.owner.successes += 1
 					if interface['network']:
 						self.owner.command('set.host.interface.network', [ host_name,
 													f'network={interface["network"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface network')
+						print(f'success setting {host["name"]} interface network')
 						self.owner.successes += 1
 					if interface['mac']:
 						self.owner.command('set.host.interface.mac', [ host_name,
 													f'mac={interface["mac"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface mac')
+						print(f'success setting {host["name"]} interface mac')
 						self.owner.successes += 1
 					if interface['ip']:
 						self.owner.command('set.host.interface.ip', [ host_name,
 													f'ip={interface["ip"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface ip')
+						print(f'success setting {host["name"]} interface ip')
 						self.owner.successes += 1
 					if interface['name']:
 						self.owner.command('set.host.interface.name', [ host_name,
 													f'name={interface["name"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface name')
+						print(f'success setting {host["name"]} interface name')
 						self.owner.successes += 1
 					if interface['module']:
 						self.owner.command('set.host.interface.module', [ host_name,
 													f'module={interface["module"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface module')
+						print(f'success setting {host["name"]} interface module')
 						self.owner.successes += 1
 					if interface['vlan']:
 						self.owner.command('set.host.interface.vlan', [ host_name,
 													f'vlan={interface["vlan"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface vlan')
+						print(f'success setting {host["name"]} interface vlan')
 						self.owner.successes += 1
 					if interface['options']:
 						self.owner.command('set.host.interface.options', [ host_name,
 													f'options={interface["options"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface options')
+						print(f'success setting {host["name"]} interface options')
 						self.owner.successes += 1
 					if interface['channel']:
 						self.owner.command('set.host.interface.channel', [ host_name,
 													f'channel={interface["channel"]}',
 													f'interface={interface["interface"]}' ])
-						print('success setting interface channel')
+						print(f'success setting {host["name"]} interface channel')
 						self.owner.successes += 1
 
 
-					print(f'success setting all interface attrs for {interface["name"]}')
-					self.owner.successes += 1
-
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning adding host interface {interface["name"]}: {e}')
+						print(f'warning setting host interface {interface["name"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding host interface {interface["name"]}: {e}')
+						print(f'error setting host interface {interface["name"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -133,22 +126,22 @@ class Plugin(stack.commands.Plugin):
 			#this is broken come back ad fix it
 			for attr in host['attrs']:
 				attr_name = attr['name']
-				attr_value = attr['value']  # this may pose a problem because the pallets and carts attrs have lists here. Need to investigate
+				attr_value = ' '.join(attr['value'])  # this may pose a problem because the pallets and carts attrs have lists here. Need to investigate
 				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
 				try:
-					self.owner.command('add.host.attr', [ host_name,
+					self.owner.command('set.host.attr', [ host_name,
 										f'attr={attr_name}',
 										f'value={attr_value}',
 										f'shadow={attr_shadow}' ])
-					print(f'success adding host attr {attr_name}')
+					print(f'success setting {host["name"]} attr {attr_name}')
 					self.owner.successes += 1
 
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning adding host attr {attr_name}: {e}')
+						print(f'warning setting {host["name"]} attr {attr_name}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding host attr {attr_name}: {e}')
+						print(f'error setting {host["name"]} attr {attr_name}: {e}')
 						self.owner.errors += 1
 
 			#iterate through each firewall rule and add it
@@ -268,5 +261,16 @@ class Plugin(stack.commands.Plugin):
 					self.owner.warnings += 1
 				else:
 					print(f'error setting installaction of {host_name} to "{host["installaction"]}": {e}')
+					self.owner.errors += 1
+
+
+			#set metadata if there is any
+			if host['metadata']:
+				try:
+					self.owner.command('set.host.metadata', [ host_name, f'metadata={host["metadata"]}' ])
+					print(f'success setting metadata of {host_name}')
+					self.owner.successes += 1
+				except Exception as e:
+					print(f'error setting metadata of {host_name}')
 					self.owner.errors += 1
 
