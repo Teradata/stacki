@@ -61,8 +61,13 @@ class Plugin(stack.commands.Plugin):
 				else:
 					controller_data = []
 
-				document_prep['appliance'].append({'name':appliance_name, 'attrs':attr_data, 'route':route_data, 'firewall':firewall_prep, 'partition':partition_data, 'controller':controller_data})
-
+				document_prep['appliance'].append({'name':appliance_name,
+									'longname':item['long name'],
+									'attrs':attr_data,
+									'route':route_data,
+									'firewall':firewall_prep,
+									'partition':partition_data,
+									'controller':controller_data})
 
 
 		return(document_prep)

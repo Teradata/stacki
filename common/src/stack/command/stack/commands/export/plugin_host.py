@@ -83,9 +83,17 @@ class Plugin(stack.commands.Plugin):
 									'alias':interface_alias_data})
 
 				attr_prep = []
+				metadata = None
 				for attr in attr_data:
 					if attr['host'] == hostname:
 						if attr['scope'] == 'host':
+							#metadata is stored as an attr and we want to pull it to the side
+							#once we have it we dont want to keep it with the rest of the attrs
+							if attr['attr'] == 'metadata':
+								metadata = attr['value']
+								continue
+
+
 							if attr['type'] == 'shadow':
 								shadow = True
 							else:
@@ -122,6 +130,10 @@ class Plugin(stack.commands.Plugin):
 						if controller['name'] == hostname:
 							controller_prep.append(controller)
 
+				#find the longname of the appliance with list appliance
+				appliance_data = self.owner.command('list.appliance', [ host['appliance'], 'output-format=json' ])
+				appliance_data = json.loads(appliance_data)[0]
+				longname = appliance_data['long name']
 
 
 				document_prep['host'].append({'name':hostname, 'rack':host['rack'],
@@ -131,8 +143,9 @@ class Plugin(stack.commands.Plugin):
 										'firewall':firewall_prep,
 										'box':host['box'],
 										'appliance':host['appliance'],
+										'appliancelongname':longname,
 										'comment':host['comment'],
-										'metadata':'metadata', #TODO what is this field supposed to be?
+										'metadata':metadata,
 										'environment':host['environment'],
 										'osaction':host['osaction'],
 										'installaction':host['installaction'],
