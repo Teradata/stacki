@@ -42,24 +42,22 @@ class Plugin(stack.commands.Plugin):
 
 			for attr in appliance['attrs']:
 				try:
+					command = [appliance_name,
+							f'attr={attr["attr"]}',
+							f'value={attr["value"]}']
 					if attr['type'] == 'shadow':
-						self.owner.command('add.appliance.attr', [ appliance_name,
-									f'attr={attr["attr"]}',
-									f'value={attr["value"]}',
-									'shadow=True' ])
-					else:
-						self.owner.command('add.appliance.attr', [ appliance_name,
-									f'attr={attr["attr"]}',
-									f'value={attr["value"]}' ])
-					print(f'success adding appliance attr {attr["attr"]}')
+						command.append('shadow=True')
+
+					self.owner.command('set.appliance.attr', command)
+					print(f'success setting {appliance_name} attr {attr["attr"]}')
 					self.owner.successes += 1
 
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance attr {attr["attr"]}: {e}')
+						print(f'warning setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding appliance attr {attr["attr"]}: {e}')
+						print(f'error setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.errors += 1
 
 			for route in appliance['route']:

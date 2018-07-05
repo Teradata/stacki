@@ -49,3 +49,5 @@ class Command(command):
 		self.runPlugins(args)
 
 		print(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors')
+		if self.errors != 0:
+			raise CommandError(self, 'There was at least one error')

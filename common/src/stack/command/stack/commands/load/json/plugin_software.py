@@ -31,21 +31,19 @@ class Plugin(stack.commands.Plugin):
 		#check to make sure 'box' 'pallet' and 'cart' all exist first to avoid a key error
 		if import_data['box']:
 			for box in import_data['box']:
-				box_name = box['name']
-				os_name = box['os']
 				try:
 					self.owner.command('add.box', [
-								f'{box_name}',
-								f'os={os_name}' ])
-					print(f'success adding box {box}')
+								f'{box["name"]}',
+								f'os={box["os"]}' ])
+					print(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning importing box {box}: {e}')
+						print(f'warning importing box {box["name"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding box {box}: {e}')
+						print(f'error adding box {box["name"]}: {e}')
 						self.owner.errors += 1
 
 
