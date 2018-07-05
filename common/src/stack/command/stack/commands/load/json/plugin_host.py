@@ -55,6 +55,19 @@ class Plugin(stack.commands.Plugin):
 			#iterate through each interface for the host and set it
 			for interface in host['interface']:
 				try:
+					self.owner.command('add.host.interface', [host_name, f'interface={interface["interface"]}' ])
+					print(f'success adding interface {interface["interface"]}')
+					self.owner.successes += 1
+				except Exception as e:
+					if 'exists' in str(e):
+						print(f'warning adding interface {interface["interface"]}: {e}')
+						self.owner.warnings += 1
+					else:
+						print(f'error adding interface {interface["interface"]}: {e}')
+						self.owner.errors += 1
+
+
+				try:
 
 					if interface['default']:
 						self.owner.command('set.host.interface.default', [ host_name,
@@ -126,7 +139,9 @@ class Plugin(stack.commands.Plugin):
 			#this is broken come back ad fix it
 			for attr in host['attrs']:
 				attr_name = attr['name']
-				attr_value = ' '.join(attr['value'])  # this may pose a problem because the pallets and carts attrs have lists here. Need to investigate
+				attr_value = attr['value']
+				if not isinstance(attr_value, str):
+					attr_value = ' '.join(attr['value'])
 				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
 				try:
 					self.owner.command('set.host.attr', [ host_name,
