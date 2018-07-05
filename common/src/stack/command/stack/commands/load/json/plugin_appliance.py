@@ -99,6 +99,14 @@ class Plugin(stack.commands.Plugin):
 						print(f'error adding appliance firewall rule {rule["name"]}: {e}')
 						self.owner.errors += 1
 
+			#the add partition commmand does not check to see if the value is already in the database
+			#to remedy this we will blow away all the existing partition info and replace it with ours
+			device_list = []
+			for partition in appliance['partition']:
+				if partition['device'] not in device_list:
+					device_list.append(partition['device'])
+			for device in device_list:
+				self.owner.command('remove.storage.partition', [ appliance_name, 'scope=appliance', f'device={device}' ])
 
 			for partition in appliance['partition']:
 				try:
@@ -148,9 +156,9 @@ class Plugin(stack.commands.Plugin):
 
 				except Exception as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance ontroller: {e}')
+						print(f'warning adding appliance controller: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding appliance ontroller: {e}')
+						print(f'error adding appliance controller: {e}')
 						self.owner.errors += 1
 
