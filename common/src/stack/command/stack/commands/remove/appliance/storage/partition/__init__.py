@@ -16,12 +16,12 @@ class Command(stack.commands.remove.command):
 	</param>
 
 	<param type='string' name='mountpoint' optional='1'>
-	Mountpoint for the partition that needs to be removed from
+	Mountpoint whose partition configuration needs to be removed from
 	the database.
 	</param>
 
-	<example cmd='remove appliance storage partition backend'>
-	Removes the partition information for backend appliances
+	<example cmd='remove appliance storage partition backend device=sda'>
+	Removes the device sda partition information for the appliance 'backend'.
 	</example>
 	"""
 

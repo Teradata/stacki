@@ -1,0 +1,7 @@
+Name,Scope,Device,Mountpoint,Size,Type,Options
+backend-0-1,host,sda,,40,,--asprimary --partition_id=18
+backend-0-0,,sda,,40,,--asprimary --partition_id=18
+testglobal,global,sda,,40,,--asprimary --partition_id=18
+test,environment,sda,,40,,--asprimary --partition_id=18
+sles,os,sda,,40,,--asprimary --partition_id=18
+backend,appliance,sda,,40,,--asprimary --partition_id=18

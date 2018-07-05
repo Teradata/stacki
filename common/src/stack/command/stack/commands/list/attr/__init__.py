@@ -235,7 +235,7 @@ class Command(stack.commands.Command,
 					     'const'  : lambda x: x,
 					     'resolve': False,
 					     'table'  : 'oses' },
-			    'appliance'	 : { 'fn'     : self.getApplianceNames, 
+			    'appliance'	 : { 'fn'     : self.getApplianceNames,
 					     'const'  : lambda x: x,
 					     'resolve': False,
 					     'table'  : 'appliances' },
@@ -256,6 +256,7 @@ class Command(stack.commands.Command,
 		else:
 			resolve = self.str2bool(resolve)
 
+		# Grab ALL the attributes for global, os, appliance, environment and host:
 		attributes = {}
 		for s in lookup.keys():
 			attributes[s] = {}
@@ -304,6 +305,9 @@ class Command(stack.commands.Command,
 
 		targets = sorted(lookup[scope]['fn'](args))
 
+		# Find the attributes that apply to the target host.
+		# Add them in into the attributes dictionary if not already added by previous scope
+		# host level gets first priority, then environment, appliance, os, and last global scope.
 		if resolve and scope == 'host':
 			for o in targets:
 				env = self.db.getHostEnvironment(o)

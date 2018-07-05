@@ -46,7 +46,7 @@ class Plugin(stack.commands.Plugin):
 				if item['os'] == os_name and item['source'] == 'O':
 					firewall_prep.append(item)
 
-			partition_data = self.owner.call('list.storage.partition', [ f'{os_name}', 'globalOnly=False' ])
+			partition_data = self.owner.call('list.os.storage.partition', [ f'{os_name}'])
 			if not partition_data:
 				partition_data = []
 

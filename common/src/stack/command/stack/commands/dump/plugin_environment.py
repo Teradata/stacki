@@ -39,9 +39,10 @@ class Plugin(stack.commands.Plugin):
 #			if not firewall_data:
 #				firewall_data = []
 			firewall_data = []
-#			partition_data = self.owner.call('list.storage.partition', [ f'environment={environment_name}', 'globalOnly=False' ])
-#			if not partition_data:
-#				partition_data = []
+			partition_data = self.owner.call('list.storage.partition', [ f'environment={environment_name}',
+			                                                             'scope=environment' ])
+			if not partition_data:
+				partition_data = []
 			partition_data = []
 #			controller_data = self.owner.call('list.storage.controller', [ f'environment={environment_name}' ])
 #			if not controller_data:

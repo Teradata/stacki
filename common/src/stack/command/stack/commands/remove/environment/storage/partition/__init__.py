@@ -4,12 +4,12 @@ import stack.commands
 
 class Command(stack.commands.remove.command):
 	"""
-	Remove storage partition configuration for a host.
+	Remove storage partition information for an environment.
 
-	<arg type='string' name='host' optional='1'>
-	Hostname of the machine
+	<arg type='string' name='environment' optional='1'>
+	Appliance name
 	</arg>
-	
+
 	<param type='string' name='device' optional='1'>
 	Device whose partition configuration needs to be removed from
 	the database.
@@ -20,11 +20,11 @@ class Command(stack.commands.remove.command):
 	the database.
 	</param>
 
-	<example cmd='remove host storage partition backend-0-1 device=sda'>
-	Removes the device sda partition information for the host 'backend-0-1'
+	<example cmd='remove environment storage partition master_node device=sda'>
+	Removes the device sda partition information for the environment 'master_node'
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('remove.storage.partition', self._argv + [ 'scope=host' ]))
+		self.addText(self.command('remove.storage.partition', self._argv + [ 'scope=environment' ]))
 		return self.rc

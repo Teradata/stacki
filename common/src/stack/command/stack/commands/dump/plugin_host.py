@@ -115,14 +115,13 @@ class Plugin(stack.commands.Plugin):
 						group_prep.append(item)
 
 
-			partition_data = self.owner.call('list.storage.partition', [ hostname ])
+			partition_data = self.owner.call('list.host.storage.partition', [hostname])
 			if not partition_data:
 				partition_data = []
 			partition_prep = []
 			if partition_data:
 				for partition in partition_data:
-					if partition['scope'] == hostname:
-						partition_prep.append(partition)
+					partition_prep.append(partition)
 
 
 			controller_data = self.owner.call('list.storage.controller', [ hostname, 'scope=host'])

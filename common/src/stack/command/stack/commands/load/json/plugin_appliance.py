@@ -96,6 +96,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			for partition in appliance['partition']:
 				parameters = [
 					appliance_name,
+					f'scope={partition["scope"]}',
 					f'device={partition["device"]}',
 					f'partid={partition["partid"]}',
 					f'size={partition["size"]}'

@@ -79,13 +79,14 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'comment={rule["comment"]}')
 				# if the add command returns false, run the remove command then re-run the add command
 				if not self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists'):
-					self.owner.try_command('remove.os.firewall', [ os_name, f'rulename={rule["name"]}' ], 'removing os firewall rule {rule["action"]}', 'exists')
+					self.owner.try_command('remove.os.firewall', [os_name, f'rulename={rule["name"]}' ], 'removing os firewall rule {rule["action"]}', 'exists')
 					self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists')
 
 			# add os partitions
 			for partition in os['partition']:
 				parameters = [
 					os_name,
+					f'scope={partition["scope"]}',
 					f'device={partition["device"]}',
 					f'partid={partition["partid"]}',
 					f'size={partition["size"]}'
@@ -94,7 +95,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'options={partition["options"]}')
 				if partition['mountpoint']:
 					parameters.append(f'mountpoint={partition["mountpoint"]}')
-				if partition ['fstype']:
+				if partition['fstype']:
 					parameters.append(f'type={partition["fstype"]}')
 
 				self.owner.try_command('add.storage.partition', parameters, f'adding os partition {partition}', 'exists')

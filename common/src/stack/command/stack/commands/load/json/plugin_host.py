@@ -132,6 +132,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			for partition in host['partition']:
 				parameters = [
 					host_name,
+					f'scope={partition["scope"]}',
 					f'device={partition["device"]}',
 					f'mountpoint={partition["mountpoint"]}',
 					f'size={partition["size"]}',
