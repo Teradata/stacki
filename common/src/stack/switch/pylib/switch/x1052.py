@@ -5,9 +5,8 @@
 
 from . import Switch, SwitchException
 import os
-import time
 import pexpect
-
+import time
 
 class SwitchDellX1052(Switch):
 	"""Class for interfacing with a Dell x1052 switch.
@@ -23,7 +22,7 @@ class SwitchDellX1052(Switch):
 		"""Connect to the switch"""
 		try:
 			self.child = pexpect.spawn('ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt ' +
-									   self.switch_ip_address)
+			                           self.switch_ip_address)
 			self._expect('User Name:', 10)
 			self.child.sendline(self.username)
 			self._expect('Password:')
@@ -44,7 +43,6 @@ class SwitchDellX1052(Switch):
 			# Just give it a few seconds to exit gracefully before terminate.
 			time.sleep(3)
 			self.child.terminate()
-		
 
 	def _expect(self, look_for, custom_timeout=15):
 		try:
@@ -58,8 +56,8 @@ class SwitchDellX1052(Switch):
 			debug_info = str(str(self.child.before) + str(self.child.buffer) + str(self.child.after))
 			self.__exit__()
 			raise SwitchException(self.switch_ip_address + " expected output '" + look_for +
-							"' from SSH connection timed out after " +
-							str(custom_timeout) + " seconds.\nBuffer: " + debug_info)
+			                      "' from SSH connection timed out after " +
+			                      str(custom_timeout) + " seconds.\nBuffer: " + debug_info)
 		except pexpect.exceptions.EOF:
 			self.__exit__()
 			raise SwitchException("SSH connection to " + self.switch_ip_address + " not available.")
@@ -76,7 +74,7 @@ class SwitchDellX1052(Switch):
 			self.send_spacebar(4)
 			self.child.expect('console#', timeout=60)
 		self.child.logfile = None
-	
+
 	def parse_mac_address_table(self):
 		"""Parse the mac address table and return list of connected macs"""
 		_hosts = []
@@ -84,11 +82,11 @@ class SwitchDellX1052(Switch):
 			for line in f.readlines():
 				if 'dynamic' in line:
 					# appends line to list
-					# map just splits out the port 
+					# map just splits out the port
 					#   from the interface
 					_hosts.append(list(
-					  map(lambda x: x.split('/')[-1],
-					  line.split())
+						map(lambda x: x.split('/')[-1],
+						    line.split())
 					))
 
 		return sorted(_hosts, key=lambda x: x[2])
@@ -105,7 +103,7 @@ class SwitchDellX1052(Switch):
 			self.send_spacebar(4)
 			self.child.expect('console#', timeout=60)
 		self.child.logfile = None
-	
+
 	def parse_interface_status_table(self):
 		"""Parse the interface status and return list of port information"""
 		_hosts = []
@@ -113,11 +111,11 @@ class SwitchDellX1052(Switch):
 			for line in f.readlines():
 				if 'gi1/0/' in line:
 					# appends line to list
-					# map just splits out the port 
+					# map just splits out the port
 					#   from the interface
 					_hosts.append(list(
-					  map(lambda x: x.split('/')[-1],
-					  line.split())
+						map(lambda x: x.split('/')[-1],
+						    line.split())
 					))
 
 		return _hosts
@@ -189,7 +187,7 @@ class SwitchDellX1052(Switch):
 			self._expect('The copy operation was completed successfully')
 		except:
 			raise SwitchException('Could not apply configuration to startup-config')
-		
+
 	def _vlan_parser(self, vlan_string):
 		"""Takes input of a bunch of numbers in gives back a string containing all numbers once.
 		The format for all_vlans is expected to be 3-7,9-10,44,3
