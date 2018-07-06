@@ -24,8 +24,8 @@ class Command(command):
 	relationships being managed.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
-	Zero, one or more switch names. If no switch names are supplies, info about
-	all the known switchs is listed.
+	Zero, one or more switch names. If no switch names are supplied, info about
+	all the known switches is listed.
 	</arg>
 
 	<example cmd='list switch host switch-0-0'>

@@ -43,12 +43,12 @@ class Command(command):
 
 		self.pinghosts = self.str2bool(pinghosts)
 
-		_switches = self.getSwitchNames(args)
+		switches = self.getSwitchNames(args)
+
 		self.beginOutput()
-		for switch in self.call('list.host.interface', _switches):
+		for switch in self.call('list.switch', switches):
+			switch_name = switch['switch']
+			model = switch['model']
+			self.runImplementation(model, [switch_name])
 
-			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(model, [switch])
-
-		self.endOutput(header=['switch', 'port',  'mac', 'host', 'interface', 'vlan'])
+		self.endOutput(header=['switch', 'port', 'mac', 'host', 'interface', 'vlan'])
