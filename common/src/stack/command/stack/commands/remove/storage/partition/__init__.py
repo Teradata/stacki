@@ -56,7 +56,7 @@ class Command(stack.commands.remove.command,
 		appliances = []
 		hosts = []
 		name = None
-		accepted_scopes = ['global', 'os', 'appliances', 'host']
+		accepted_scopes = ['global', 'os', 'appliance', 'host']
 
 		# Some checking that we got usable input.:
 		if scope not in accepted_scopes:

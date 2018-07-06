@@ -217,13 +217,15 @@ class Plugin(stack.commands.Plugin):
 					comment, name, tabletype from appliance_firewall where
 					appliance = (select id from appliances where
 					name = '%s')""" % app)
+
+				self.empty_lists()
+
 				for i, o, s, p, c, a, f, cmt, n, tt in self.db.fetchall():
 					self.formatRule(n, tt, i, o, s, p, c, a, f,
 						cmt, 'A', 'var')
 
 				self.categorizeRules()
 				self.printOutput(app)
-				self.empty_lists()
 
 			self.owner.endOutput(header=['appliance', 'name', 'table',
 				'service', 'protocol', 'chain', 'action', 'network',
