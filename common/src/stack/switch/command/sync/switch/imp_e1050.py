@@ -13,39 +13,37 @@ from stack.switch.e1050 import SwitchCelesticaE1050
 
 
 class Implementation(stack.commands.Implementation):
-
-	# all netID/mask assumptions are possibly invalid
-
 	def run(self, args):
 		self.switch_name = args[0]
 		self.svis = self.owner.call('list.host.interface', [self.switch_name, 'expanded=True'])
-		access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary
-		# infer that no vlan value means vlan 1?
-		self.svis.remove(access_interface)  # how to modify access iface? Exclude for now
+		self.networks = [interface['network'] for interface in self.svis]
+		self.access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary?
+		self.svis.remove(self.access_interface)  # how to modify access iface? Exclude for now
 
 		# copied; better way?
 		# Get frontend ip
 		try:
 			(self.frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
-				if host['network'] == access_interface['network']]
+				if host['network'] == self.access_interface['network']]
 		except:
 			raise CommandError(self, f'{self.switch_name} and the frontend do not share a network')
 
 		# handle bad ip/creds?
-		self.switch_address = access_interface['ip']
+		self.switch_address = self.access_interface['ip']
 		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
 		self.switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
 		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, self.switch_password)
 
-		# self.ssh_copy_id()
-		# self.reset()
-		# self.vlans()
-		# self.vlan_members()
-		print('merp')
+		self.ssh_copy_id()
+		try:
+			self.reset()
+			self.vlans()
+			self.vlan_members()
 
-		# print(self.switch.rpc_req_text(cmd='pending'))
-		# self.switch.rpc_req_text(cmd='abort')
-		# self.switch.rpc_req_text(cmd='commit')
+			print(self.switch.rpc_req_text(cmd='pending'))
+			self.switch.rpc_req_text(cmd='commit')
+		except:
+			self.switch.rpc_req_text(cmd='abort')
 
 		# set switch host name?
 
@@ -62,6 +60,9 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(f'{self.switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
 
 	def reset(self):
+		interface = ipaddress.IPv4Interface(f"{self.access_interface['gateway']}/{self.access_interface['mask']}")
+
+		# no known better way to reset switch than deleting entire config and rebuilding
 		commands = ['del all',
 				'add routing defaults datacenter',
 				'add routing service integrated-vtysh-config',
@@ -86,7 +87,7 @@ class Implementation(stack.commands.Implementation):
 				'add dot1x radius authentication-port 1812',
 				'add dot1x mab-activation-delay 30',
 				'add bridge bridge ports swp21',  # not guaranteed; how to set?
-				'add vlan 1 ip address 10.2.232.32/24',  # could change if access iface changes; how to handle?
+				f'add vlan 1 ip address {interface.with_prefixlen}',  # assumes access iface never changes
 				'add vlan 1 vlan-id 1',
 				'add vlan 1 vlan-raw-device bridge',
 				]

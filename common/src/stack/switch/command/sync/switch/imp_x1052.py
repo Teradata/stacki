@@ -12,19 +12,20 @@ from stack.switch.x1052 import SwitchDellX1052
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
+		switch_name = args[0]
 
-		switch = args[0]
+		# Assume switch has only one entry in host interfaces
+		interface = self.owner.call('list.host.interface', [switch_name])[0]
 
 		# Get frontend ip for tftp address
 		try:
-			(frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost']) 
-				if host['network'] == switch['network']]	
+			(frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
+				if host['network'] == interface['network']]
 		except:
-			raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])	
+			raise CommandError(self, '"%s" and the frontend do not share a network' % switch_name)
 
 		frontend_tftp_address = frontend['ip']
-		switch_address = switch['ip']
-		switch_name = switch['host']
+		switch_address = interface['ip']
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 

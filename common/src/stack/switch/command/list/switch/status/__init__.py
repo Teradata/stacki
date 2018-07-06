@@ -15,11 +15,11 @@ class command(stack.commands.SwitchArgumentProcessor,
 
 class Command(command):
 	"""
-	List Port, Speed, State of the switch  and Mac, VLAN, Hostname, and interface
+	List Port, Speed, State of the switch and Mac, VLAN, Hostname, and interface
 	about each port on the switch.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
-	Zero, one or more switch names. If no switch names are supplies, info about
+	Zero, one or more switch names. If no switch names are supplied, info about
 	all the known switches is listed.
 	</arg>
 
@@ -41,4 +41,4 @@ class Command(command):
 			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
-		self.endOutput(header=['switch', 'port',  'speed', 'state', 'mac', 'vlan', 'host', 'interface'])
+		self.endOutput(header=['switch', 'port', 'speed', 'state', 'mac', 'vlan', 'host', 'interface'])
