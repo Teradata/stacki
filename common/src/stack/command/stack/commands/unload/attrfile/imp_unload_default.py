@@ -21,7 +21,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		filename, = args
 
 		reader = stack.csv.reader(open(filename, 'rU'))
-		header = reader.next()
+		header = next(reader)
 
 		appliances = self.getApplianceNames()
 

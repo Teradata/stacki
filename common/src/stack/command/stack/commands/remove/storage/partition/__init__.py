@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, ArgError, ParamValue, ParamRequired
 
 
 class Command(stack.commands.remove.command,
@@ -56,9 +56,17 @@ class Command(stack.commands.remove.command,
 		appliances = []
 		hosts = []
 		name = None
+		accepted_scopes = ['global', 'os', 'appliances', 'host']
 
-		if scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '% name' % scope)
+		# Some checking that we got usable input.:
+		if scope not in accepted_scopes:
+			raise ParamValue(self, '%s' % params, 'one of the following: %s' % accepted_scopes )
+		elif scope == 'global' and len(args) >= 1:
+			raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
+		elif scope == 'global' and (device is None and mountpoint is None):
+			raise ParamRequired(self, 'device OR mountpoint')
+		elif scope != 'global' and len(args) < 1:
+			raise ArgRequired(self, '%s name' % scope)
 
 		if scope == "os":
 			oses = self.getOSNames(args)
@@ -66,9 +74,6 @@ class Command(stack.commands.remove.command,
 			appliances = self.getApplianceNames(args)
 		elif scope == "host":
 			hosts = self.getHostnames(args)
-
-		if scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '%s name' % scope)
 
 		if scope != 'global':
 			name = args[0]
