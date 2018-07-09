@@ -97,10 +97,17 @@ class Command(stack.commands.Command,
 
 		hostname = self.getHostnames(['localhost'])[0]
 		domainname = self.getHostAttr('localhost','domainname')
-		j = {
-			"hostname":"%s.%s" % (hostname, domainname),
-			"username":username, "key":passwd
-		}
+		# Need to handle PQDN
+		if domainname is None or domainname == '':
+			j = {
+				"hostname":"%s" % (hostname),
+				"username":username, "key":passwd
+			}
+		else:
+			j = {
+				"hostname": "%s.%s" % (hostname, domainname),
+				"username": username, "key": passwd
+			}
 		#f = open("%s.api.cred" % username, 'w')
 		print(json.dumps(j, indent=2))
 		#f.close()

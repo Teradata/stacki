@@ -25,7 +25,7 @@ class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumen
 			# first remove the entries for this host
 			#
 			if host == 'global':
-				self.owner.call('remove.storage.partition', [])
+				self.owner.call('remove.storage.partition', ['scope=global','device=*'])
 			else:
 				try:
 					_ = self.getOSNames([host])
