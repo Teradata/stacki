@@ -282,6 +282,7 @@ CREATE TABLE rolls (
   Rel		varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default '&os;',
+  URL		text	    NULL default '',
   PRIMARY KEY (ID) 
 );
 

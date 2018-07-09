@@ -38,3 +38,15 @@ Here is the workflow I use when developing new tests:
 5. If you want to just run the specific test you are working on, you can SSH directly into the frontend with the command: `vagrant ssh frontend`. Switch to root user and then you can run `pytest` directly. The "tests" directory on the VM host (IE: your laptop running Vagrant) is mounted in the frontend at `/export/tests`.
 
 6. When you are done with the frontend, or need to rebuild it, run `./tear-down.sh` to destroy the VM.
+
+## Running Tests On An Existing Frontend
+
+While I feel that developing tests in a clean and known VM environment is safest, it is possible to run the tests on an existing frontend. 
+
+The tests will obviously be ran against the frontend code and database, so might fail if the data in the database doesn't match a freshly barnacled system. It may also completely light your server on fire; you get to keep the ashes.
+
+1. Copy the tests directory `stacki/test-framework/test-suites/integration/tests` to the frontend at `/export/tests`.
+
+2. Copy the test-files directory at `stacki/test-framework/test-suites/integration/test-files` to the frontend at `/export/test-files`
+
+3. Logged into the frontend as root, run `pytest /export/tests` to run all the integration tests. You can pass `pytest` a specific test file if you just want to run the tests within, or even a specific test in a given file. 
