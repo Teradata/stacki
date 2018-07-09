@@ -2,8 +2,8 @@ import pytest
 
 @pytest.mark.usefixtures('add_host')
 def test_sync_host_network_backend(host):
+	# create an unreachable host and check the command continues/succeeds even if we can't reach it
 	result = host.run('stack sync host firewall')
-	assert 'Could not resolve hostname' in result.stdout
 	assert result.rc == 0
 
 def test_sync_host_network_frontend_only(host):
