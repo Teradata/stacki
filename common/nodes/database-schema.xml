@@ -189,8 +189,7 @@ DROP TABLE IF EXISTS switchports;
 CREATE TABLE switchports (
 	interface	int(11)		NOT NULL references networks,
 	switch		int(11)		NOT NULL references nodes,
-	port		int(11)		NOT NULL,
-	PRIMARY KEY(switch, port)
+	port		int(11)		NOT NULL
 );
 
 <!-- Routes -->
