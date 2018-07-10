@@ -32,7 +32,13 @@ class Plugin(stack.commands.Plugin):
 					args = item['args'].split()
 				else:
 					args = []
-				bootaction_prep.append({'name':item['bootaction'], 'kernel':item['kernel'], 'ramdisk':item['ramdisk'], 'type':item['type'], 'args':args, 'os':item['os']})
+				bootaction_prep.append({'name':item['bootaction'],
+									'kernel':item['kernel'],
+									'ramdisk':item['ramdisk'],
+									'type':item['type'],
+									'args':args,
+									'os':item['os'],
+									})
 
 			document_prep['bootaction'] = bootaction_prep
 
