@@ -38,35 +38,6 @@ class Plugin(stack.commands.Plugin):
 				else:
 					interface_alias_data = []
 
-				attr_data = self.owner.command('list.host.attr', [ f'{hostname}', 'output-format=json' ])
-				if attr_data:
-					attr_data = json.loads(attr_data)
-
-				firewall_data = self.owner.command('list.host.firewall', [ f'{hostname}', 'output-format=json' ])
-				if firewall_data:
-					firewall_data = json.loads(firewall_data)
-
-				route_data = self.owner.command('list.host.route', [ f'{hostname}', 'output-format=json' ])
-				if route_data:
-					route_data = json.loads(route_data)
-
-				group_data = self.owner.command('list.host.group', [ f'{hostname}', 'output-format=json' ])
-				if group_data:
-					group_data = json.loads(group_data)
-
-				partition_data = self.owner.command('list.storage.partition', [ f'{hostname}', 'output-format=json' ])
-				if partition_data:
-					partition_data = json.loads(partition_data)
-
-				controller_data = self.owner.command('list.storage.controller', [ f'{hostname}', 'output-format=json' ])
-				if controller_data:
-					controller_data = json.loads(controller_data)
-
-
-
-#			for host in host_data:
-#				hostname = host['host']
-
 				interface_prep = []
 				for interface in interface_data:
 					if interface['host'] == hostname:
@@ -82,6 +53,10 @@ class Plugin(stack.commands.Plugin):
 									'channel':interface['channel'],
 									'alias':interface_alias_data})
 
+
+				attr_data = self.owner.command('list.host.attr', [ f'{hostname}', 'output-format=json' ])
+				if attr_data:
+					attr_data = json.loads(attr_data)
 				attr_prep = []
 				metadata = None
 				for attr in attr_data:
@@ -93,23 +68,34 @@ class Plugin(stack.commands.Plugin):
 								metadata = attr['value']
 								continue
 
-
 							if attr['type'] == 'shadow':
 								shadow = True
 							else:
 								shadow = False
 							attr_prep.append({'name':attr['attr'], 'value':attr['value'], 'shadow':shadow})
 
+
+				firewall_data = self.owner.command('list.host.firewall', [ f'{hostname}', 'output-format=json' ])
+				if firewall_data:
+					firewall_data = json.loads(firewall_data)
 				firewall_prep = []
 				for rule in firewall_data:
 					if rule['host'] == hostname and rule['source'] == 'H':
 						firewall_prep.append(rule)
 
+
+				route_data = self.owner.command('list.host.route', [ f'{hostname}', 'output-format=json' ])
+				if route_data:
+					route_data = json.loads(route_data)
 				route_prep = []
 				for route in route_data:
 					if route['host'] == hostname and route['source'] == 'H':
 						route_prep.append(route)
 
+
+				group_data = self.owner.command('list.host.group', [ f'{hostname}', 'output-format=json' ])
+				if group_data:
+					group_data = json.loads(group_data)
 				group_prep = []
 				for group in group_data:
 					if group['host'] == hostname:
@@ -118,19 +104,27 @@ class Plugin(stack.commands.Plugin):
 						for item in groups:
 							group_prep.append(item)
 
+
+				partition_data = self.owner.command('list.storage.partition', [ f'{hostname}', 'output-format=json' ])
+				if partition_data:
+					partition_data = json.loads(partition_data)
 				partition_prep = []
 				if partition_data:
 					for partition in partition_data:
 						if partition['scope'] == hostname:
 							partition_prep.append(partition)
 
+
+				controller_data = self.owner.command('list.storage.controller', [ f'{hostname}', 'output-format=json' ])
+				if controller_data:
+					controller_data = json.loads(controller_data)
 				controller_prep = []
 				if controller_data:
 					for controller in controller_data:
 						if controller['name'] == hostname:
 							controller_prep.append(controller)
 
-				#find the longname of the appliance with list appliance
+				#find the longname of the host's appliance with list appliance
 				appliance_data = self.owner.command('list.appliance', [ host['appliance'], 'output-format=json' ])
 				appliance_data = json.loads(appliance_data)[0]
 				longname = appliance_data['long name']
