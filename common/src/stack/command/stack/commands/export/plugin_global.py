@@ -53,7 +53,12 @@ class Plugin(stack.commands.Plugin):
 			controller_data = []
 
 		document_prep = {}
-		document_prep['global'] = {'attrs':attr_data, 'route':route_data, 'firewall':firewall_prep, 'partition':partition_data, 'controller':controller_data}
+		document_prep['global'] = {'attrs':attr_data,
+						'route':route_data,
+						'firewall':firewall_prep,
+						'partition':partition_data,
+						'controller':controller_data,
+						}
 
 		return(document_prep)
 

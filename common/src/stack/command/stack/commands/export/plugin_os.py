@@ -49,7 +49,7 @@ class Plugin(stack.commands.Plugin):
 					firewall_data = json.loads(firewall_data)
 					firewall_prep = []
 					for item in firewall_data:
-						if item['os'] == os_name:
+						if item['os'] == os_name and item['source'] == 'O':
 							firewall_prep.append(item)
 				else:
 					firewall_prep = []
@@ -68,11 +68,23 @@ class Plugin(stack.commands.Plugin):
 				controller_prep = []
 				for item in controller_data:
 					options = item['options'].split()
-					controller_prep.append({'scope':item['scope'], 'enclosure':item['enclosure'], 'adapter':item['adapter'], 
-								'slot':item['slot'], 'raidlevel':item['raidlevel'], 'arrayid':item['arrayid'], 'options':options})
+					controller_prep.append({'scope':item['scope'],
+								'enclosure':item['enclosure'],
+								'adapter':item['adapter'],
+								'slot':item['slot'],
+								'raidlevel':item['raidlevel'],
+								'arrayid':item['arrayid'],
+								'options':options,
+								})
 
 
-				document_prep['os'].append({'name':os_name, 'attrs':attr_prep, 'route':route_data, 'firewall':firewall_prep, 'partition':partition_data, 'controller':controller_prep})
+				document_prep['os'].append({'name':os_name,
+								'attrs':attr_prep,
+								'route':route_data,
+								'firewall':firewall_prep,
+								'partition':partition_data,
+								'controller':controller_prep,
+								})
 
 
 		return(document_prep)

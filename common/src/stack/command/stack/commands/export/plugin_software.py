@@ -34,7 +34,8 @@ class Plugin(stack.commands.Plugin):
 							'url':item['url'],
 							'urlauthUser':None,
 							'urlauthPass':None,
-							'boxes':boxes})
+							'boxes':boxes,
+							})
 		else:
 			pallet_prep = []
 
@@ -59,7 +60,10 @@ class Plugin(stack.commands.Plugin):
 			box_prep = []
 
 		document_prep = {}
-		document_prep['software'] = {'pallet':pallet_prep, 'cart':cart_prep, 'box':box_prep}
+		document_prep['software'] = {'pallet':pallet_prep,
+						'cart':cart_prep,
+						'box':box_prep,
+						}
 
 
 		return(document_prep)
