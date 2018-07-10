@@ -86,7 +86,7 @@ class Implementation(stack.commands.Implementation):
 				'add dot1x eap-reauth-period 0',
 				'add dot1x radius authentication-port 1812',
 				'add dot1x mab-activation-delay 30',
-				'add bridge bridge ports swp21',  # not guaranteed; how to set?
+				'add bridge bridge ports swp21',  # not guaranteed; find dynamically
 				f'add vlan 1 ip address {interface.with_prefixlen}',  # assumes access iface never changes
 				'add vlan 1 vlan-id 1',
 				'add vlan 1 vlan-raw-device bridge',
@@ -100,9 +100,10 @@ class Implementation(stack.commands.Implementation):
 			vlan = interface['vlan']
 			interface = ipaddress.IPv4Interface(f"{interface['gateway']}/{interface['mask']}")  # different name?
 
-			self.switch.rpc_req_text(cmd=f"add vlan {vlan} ip address {interface.ip}")
 			self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-id {vlan}')
 			self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-raw-device bridge')
+
+			self.switch.rpc_req_text(cmd=f'add routing route {interface.network} vlan{vlan}')
 
 			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {interface.network}')
 			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {self.frontend["ip"]}/32 dest-ip {interface.network}')
