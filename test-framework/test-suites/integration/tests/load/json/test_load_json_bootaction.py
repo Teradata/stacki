@@ -24,4 +24,5 @@ class TestLoadJsonBootaction:
 		exported_bootaction_data = results.stdout.strip()
 
 		# make sure that they are the same
-		assert exported_bootaction_data == imported_bootaction_data
+		value = set(exported_bootaction_data) - set(imported_bootaction_data)
+		assert not value

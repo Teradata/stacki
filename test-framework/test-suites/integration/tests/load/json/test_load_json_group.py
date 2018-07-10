@@ -26,4 +26,6 @@ class TestLoadJsonGroup:
 		assert results.rc == 0
 		final_group_data = results.stdout
 
-		assert initial_group_data == final_group_data
+		# make sure that they are the same
+		value = set(initial_group_data) - set(final_group_data)
+		assert not value

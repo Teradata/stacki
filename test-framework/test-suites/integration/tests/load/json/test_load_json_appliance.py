@@ -24,4 +24,5 @@ class TestLoadJsonAppliance:
 		exported_appliance_data = results.stdout.strip()
 
 		# make sure that they are the same
-		assert exported_appliance_data == imported_appliance_data
+		value = set(exported_appliance_data) - set(imported_appliance_data)
+		assert not value

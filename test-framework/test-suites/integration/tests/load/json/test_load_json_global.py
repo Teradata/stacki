@@ -26,4 +26,6 @@ class TestLoadJsonGlobal:
 		assert results.rc == 0
 		final_global_data = results.stdout
 
-		assert initial_global_data == final_global_data
+		# make sure that they are the same
+		value = set(initial_global_data) - set(final_global_data)
+		assert not value

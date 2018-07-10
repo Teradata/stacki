@@ -26,4 +26,6 @@ class TestLoadJsonHost:
 		assert results.rc == 0
 		final_host_data = results.stdout
 
-		assert initial_host_data == final_host_data
+		# make sure that they are the same
+		value = set(initial_host_data) - set(final_host_data)
+		assert not value

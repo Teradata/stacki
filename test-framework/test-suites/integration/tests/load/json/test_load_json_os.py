@@ -26,4 +26,6 @@ class TestLoadJsonOs:
 		assert results.rc == 0
 		final_os_data = results.stdout.strip()
 
-		assert initial_os_data == final_os_data
+		# make sure that they are the same
+		value = set(initial_os_data) - set(final_os_data)
+		assert not value
