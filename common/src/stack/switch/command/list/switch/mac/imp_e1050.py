@@ -13,10 +13,7 @@ from stack.switch.e1050 import SwitchCelesticaE1050
 # similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		switch_name = args[0]
-
-		self.svis = self.owner.call('list.host.interface', [switch_name])
-		access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary
+		access_interface = args[0]
 
 		self.switch_address = access_interface['ip']
 		self.switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
@@ -45,7 +42,7 @@ class Implementation(stack.commands.Implementation):
 	def ping_hosts(self):
 		child = pexpect.spawn(f'ssh {self.switch_username}@{self.switch_address}')
 		hosts = self.owner.call('list.host.interface', ['where appliance != "frontend" and appliance != "switch"'])
-		networks = [interface['network'] for interface in self.svis]
+		networks = [interface['network'] for interface in self.svis]  # self.svis no longer exists
 		try:
 			for host in (host for host in hosts if host['network'] in networks):
 				child.expect('#')
