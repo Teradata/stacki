@@ -18,18 +18,34 @@ class SwitchException(Exception):
 	pass
 
 class Switch():
-	def __init__(self, switch_ip_address, switchname='switch', username='admin', password='admin'):
+	def __init__(self, switch_ip_address, switchname=None, username=None, password=None):
 		# Grab the user supplied info, in case there is a difference (PATCH)
 		self.switch_ip_address = switch_ip_address
-		self.username = username
-		self.password = password
-
 		self.stacki_server_ip = None
-		self.path = '/tftpboot/pxelinux'
-		self.switchname = switchname
-		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
-		self.download_filename = "%s/%s_running_config" % (self.path, self.switchname)
-		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
+
+		if switchname:
+			self.switchname = switchname
+		else:
+			self.switchname = 'switch'
+
+		if username:
+			self.username = username
+		else:
+			self.username = 'admin'
+
+		if password:
+			self.password = password
+		else:
+			self.password = 'admin'
+
+		self.tftpdir = '/tftpboot/pxelinux'
+
+		switchdir = '%s/%s' % (self.tftpdir, self.switchname)
+		if not os.path.exists(switchdir):
+			os.makedirs(switchdir)
+
+		self.current_config = '%s/current_config' % self.switchname
+		self.new_config = '%s/new_config' % self.switchname
 
 	def __enter__(self):
 		# Entry point of the context manager
@@ -150,7 +166,6 @@ class SwitchDellX1052(Switch):
 
 		return _hosts
 
-
 	def get_vlan_table(self):
 		"""Download the vlan table"""
 		time.sleep(1)
@@ -172,54 +187,41 @@ class SwitchDellX1052(Switch):
 			self.child.send(command)
 			time.sleep(1)
 
-	def download(self, check=False):  # , source, destination):
+	def download(self):
 		"""Download the running-config from the switch to the server"""
-		time.sleep(1)
-		if not check:
-			_output_file = open(self.download_filename, 'w')
-		else:
-			_output_file = open(self.check_filename, 'w')
-		os.chmod(_output_file.name, 0o777)
-		_output_file.close()
-
-		download_config = "copy running-config tftp://%s/%s" % (
-			self.stacki_server_ip, 
-			_output_file.name.split("/")[-1]
-			)
 
 		self.child.expect('console#', timeout=60)
-		self.child.sendline(download_config)
+
+		#
+		# tftp requires the destination file to already exist and to be writable by all
+		#
+		filename = os.path.join(self.tftpdir, self.current_config)
+		f = open(filename, 'w')
+		f.close()
+		os.chmod(filename, mode=0o777)
+
+		cmd = "copy running-config tftp://%s/%s" % (self.stacki_server_ip,
+			self.current_config)
+		self.child.sendline(cmd)
 		self._expect('The copy operation was completed successfully')
 
 	def upload(self):
 		"""Upload the file from the switch to the server"""
 
-		upload_name = self.upload_filename.split("/")[-1]
-		upload_config = "copy tftp://%s/%s temp" % (
-				self.stacki_server_ip, 
-				upload_name
-				)
-		apply_config = "copy temp running-config"
 		self.child.expect('console#', timeout=60)
-		self.child.sendline(upload_config)
-		# Not going to look for "Overwrite file" prompt as it doesn't always show up.
-		# self.child.expect('Overwrite file .temp.*\?')
+
+		cmd = "copy tftp://%s/%s temp" % (self.stacki_server_ip, self.new_config)
+		self.child.sendline(cmd)
+
 		time.sleep(2)
 		self.child.sendline('Y')  # A quick Y will fix the overwrite prompt if it exists.
 		self._expect('The copy operation was completed successfully')
-		self.child.sendline(apply_config)
-		self._expect('The copy operation was completed successfully')
 
-		self.download(True)
-		# for debugging the temp files created:
-		copied_file = open(self.check_filename).read()
-		with open("/tftpboot/checker_file", "w") as f:
-			f.write(copied_file)
-
-		copied_file = open(self.upload_filename).read()
-		with open("/tftpboot/upload_file", "w") as f:
-			f.write(copied_file)
-
+		#
+		# we remove all VLANs (2-4094) which is time consuming, so up the timeout to 30
+		#
+		self.child.sendline("copy temp running-config")
+		self._expect('The copy operation was completed successfully', custom_timeout=30)
 
 	def apply_configuration(self):
 		"""Apply running-config to startup-config"""
@@ -259,39 +261,6 @@ class SwitchDellX1052(Switch):
 		port = line.split('/')[-1]
 		return port
 
-	def parse_config(self, config_filename):
-		"""Parse the given configuration file and return a list of lists describing the vlan assignments per port."""
-		my_list = []
-		with open(config_filename) as filename:
-			lines = filename.readlines()
-		for line in lines:
-			if "gigabitethernet" not in line and not parse_port:
-				pass
-			elif "interface gigabitethernet" in line:
-				parse_port = int(line.strip().split("/")[-1:][0])
-			elif "interface tengigabitethernet" in line:
-				parse_port = int(line.strip().split("/")[-1:][0]) + 48
-			elif "!" in line:
-				parse_port = None
-			elif parse_port:
-				parse_vlan = None
-				parse_mode = None
-				parse_tagged = None
-				current_port_properties = [parse_port, parse_mode, parse_vlan, parse_tagged]
-				if "switchport" in line:
-					current_port_properties = self._parse_switchport(current_port_properties, line)
-				my_list[parse_port - 1] = current_port_properties
-		return my_list
-
-	def set_filenames(self, filename):
-		"""
-		Sets filenames for download, upload, and check files in /tftpboot/pxelinux
-		"""
-		self.switchname = filename
-		self.download_filename = "%s/%s_running_config" % (self.path, self.switchname)
-		self.upload_filename = "%s/%s_upload" % (self.path, self.switchname)
-		self.check_filename = "%s/%s_check" % (self.path, self.switchname)
-
-
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
+

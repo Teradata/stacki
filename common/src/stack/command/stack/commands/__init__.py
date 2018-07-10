@@ -280,91 +280,53 @@ class SwitchArgumentProcessor:
 
 		return network
 
-	def addSwitchHost(self, switch, host, port, interface):
-		"""
-		Add a host to switch.
-		Check if host has an interface on the same network as
-		the switch
-		"""
+	def doSwitchHost(self, switch, port, host, interface, action):
+		rows = self.db.select(""" id from networks
+			where node=(select id from nodes where name='%s')
+			and device='%s' """ % (host, interface))
 
-		# Get the switch's network
-		switch_network = self.db.select("""
-			subnet from networks where node=(
-				select id from nodes where name='%s'
-				)
-			""" % switch)
+		try:
+			host_interface = rows[0][0]
+		except:
+			host_interface = None
 
-		if not switch_network:
+		if not host_interface:
 			raise CommandError(self,
-				"switch '%s' doesn't have an interface" % switch)
-
-		# Get the interface of the host that is on the same
-		# network as the switch
-
-		# If the user entered an interface
-		if interface:
-			host_interface = self.db.select("""
-				id from networks
-				where subnet='%s'
-				and node=(select id from nodes where name='%s')
-				and device='%s'
-				""" % (switch_network[0][0],  host, interface))
-
-			if not host_interface:
-				raise CommandError(self,
-					"Interface '%s' isn't on a network with '%s'"
-					% ( interface, switch ))
-
-		# Grab the interface, if there is one, that is on the same network
-		# as the switch
-		else:
-			host_interface = self.db.select("""
-				id from networks where subnet='%s' and
-				node=(select id from nodes where name='%s')
-				""" % (switch_network[0][0],  host))
-
-			if not host_interface:
-				raise CommandError(self,
-					"host '%s' is not on a network with switch '%s'"
-					% ( host, switch ))
+				"Interface '%s' isn't defined for host '%s'"
+				% (interface, switch))
 
 		# Check if the port is already managed by the switch
-		rows = self.db.select("""
-			* from switchports
-			where port='%s'
-			and switch=(select id from nodes where name='%s')
-			""" % (port, switch))
+		rows = self.db.select(""" * from switchports
+			where interface='%s' and port='%s'
+			and switch=(select id from nodes where name='%s')"""
+			% (host_interface, port, switch))
 
-		if rows:
-			raise CommandError(self,
-				"Switch '%s' is alredy managing a host on port '%s'"
-				% (switch, port))
+		if action == 'remove' and rows:
+			# delete it
+			self.db.execute(""" delete from switchports
+				where interface='%s'
+				and switch=(select id from nodes where name = '%s')
+				and port='%s' """  % (host_interface, switch, port))
 
-		# if we got here, add the host to be managed switch
-		query = """
-		insert into switchports
-		(interface, switch, port)
-		values ('%s',
-			(select id from nodes where name = '%s'),
-			'%s')
-		""" % (host_interface[0][0], switch, port)
+		elif action == 'add' and not rows:
+			# add it
+			self.db.execute(""" insert into switchports
+				(interface, switch, port)
+				values ('%s', (select id from nodes where name = '%s'),
+				'%s') """ % (host_interface, switch, port))
 
-		self.db.execute(' '.join(query.split()))
+	def addSwitchHost(self, switch, port, host, interface):
+		"""
+		Add a host/interface to a switch/port
+		"""
+		self.doSwitchHost(switch, port, host, interface, 'add')
 
-	def delSwitchHost(self, switch, host):
-		"""Add a host to switch"""
-		query = """
-		delete from switchports
-		where interface in (
-			select id from networks where
-			node=(select id from nodes where name='%s') and
-			subnet=(select subnet from networks where
-				node=(select id from nodes where name='%s'))
-			)
-		and switch=(select id from nodes where name='%s')
-		""" % (host, switch, switch)
-		#print(query)
-		self.db.execute(' '.join(query.split()))
+	def delSwitchHost(self, switch, port, host, interface):
+		"""
+		Remove a host/interface from a switch/port
+		"""
+		self.doSwitchHost(switch, port, host, interface, 'remove')
+
 	def setSwitchHostVlan(self, switch, host, vlan):
 		self.db.execute("""
 		update switchports
@@ -1367,7 +1329,17 @@ class DatabaseConnection:
 		routes = {}
 
 		# if needed, add default routes to support multitenancy
-		if _frontend == host:
+		# if _frontend == host:
+		if 0:
+			print(
+			"""
+			n.ip, n.device, np.ip 
+			from networks n
+			left join networks np
+			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
+			where n.node=(select id from nodes where name='%s')
+			""" % (_frontend, _frontend))
+
 			_networks = self.select(
 			"""
 			n.ip, n.device, np.ip 
