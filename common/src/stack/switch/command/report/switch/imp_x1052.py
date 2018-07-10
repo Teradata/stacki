@@ -8,80 +8,133 @@ import stack.commands
 from stack.exception import CommandError
 from stack.switch import SwitchDellX1052
 
+#
+# IMPORTANT!!!
+#
+# this is NOT a configuration file -- it is a list of instructions the switch
+# should execute. so you'll see "setting the port into default mode", then you'll
+# see the actual port configuration. this is because commands sent to the switch
+# are "additive", for example, if a port is set to accept VLAN 8 and then later
+# you tell it to accept VLAN 13, it will now be configured to accept *both*
+# VLAN 8 and 13. if you just want it to accept VLAN 13, you need to first put
+# the port in its default state (no VLANs), then add the VLAN you want.
+#
+# we must do this because there are no "remove" or "delete" commands for this 
+# switch.
+#
 
 class Implementation(stack.commands.Implementation):
-	def run(self, args):
+	def clearPort(self):
+		self.owner.addOutput('localhost', ' switchport mode general')
+		self.owner.addOutput('localhost', ' switchport general allowed vlan remove 2-4094')
 
+
+	def doPort(self, switch, host, port):
+		self.owner.addOutput('localhost', '!')
+		self.owner.addOutput('localhost', 'interface gigabitethernet1/0/%s' % port)
+
+		attr = self.owner.getHostAttr(host, 'appliance')
+		if attr == 'frontend':
+			#
+			# special case for the frontend -- we need to make this
+			# a 'trunk' port which allows all VLAN traffic to pass,
+			# that is, the frontend needs to concurrently talk to
+			# hosts in *all* VLANs.
+			#
+			self.owner.addOutput('localhost', ' switchport mode trunk')
+			return
+
+		#
+		# first put the port into the default state. this clears
+		# all previous port config
+		#
+		self.clearPort()
+
+		#
+		# configure the port
+		#
+		native = False
+
+		for s in self.owner.call('list.switch.host', [ switch ]):
+			if s['host'] == host and s['port'] == port:
+				if not s['vlan']:
+					continue
+
+				vlan = s['vlan']
+
+				if s['interface'] == 'ipmi':
+					self.owner.addOutput('localhost',
+						' switchport general allowed vlan add %s tagged' % vlan)
+				else:
+					#
+					# the "native" vlan
+					#
+					self.owner.addOutput('localhost',
+						' switchport general allowed vlan add %s untagged' % vlan)
+					self.owner.addOutput('localhost',
+						' switchport general pvid %s' % vlan)
+
+					native = True
+
+		if not native:
+			#
+			# there is no "native untagged" configuration for this port, so let's
+			# enable the default VLAN (e.g., VLAN 1).
+			#
+			self.owner.addOutput('localhost',
+				' switchport general allowed vlan add 1 untagged')
+			self.owner.addOutput('localhost',
+				' switchport general pvid 1')
+
+
+	def run(self, args):
 		switch = args[0]
+
 		switch_name = switch['switch']
 		switch_interface, *xargs = self.owner.call('list.host.interface', [switch_name])
 		switch_network, *xargs = self.owner.call('list.network', [switch_interface['network']])
-		# Get the frontend since it requires a different
-		# config block
-		frontend = self.owner.db.getHostname('localhost')
-
-		hosts = self.owner.db.select("""
-		n.name, s.port, i.vlanid
-		from switchports s, nodes n, nodes sw, subnets sub, networks i
-		where i.node = n.id
-		and s.switch = sw.id
-		and i.subnet = sub.id
-		and s.interface = i.id
-		and s.switch = (select id from nodes where name='%s')
-		""" % switch_name)
-
 		# Start of configuration file
-		self.owner.addOutput(frontend, '<stack:file stack:name="/tftpboot/pxelinux/%s_upload">' % switch_name)
+		self.owner.addOutput('localhost',
+			'<stack:file stack:name="/tftpboot/pxelinux/%s/new_config">' % switch_name)
 
 		# Write the static ip block
-		self.owner.addOutput(frontend, '!')
-		self.owner.addOutput(frontend, 'interface vlan 1')
-		self.owner.addOutput(frontend,'  ip address %s %s' % (switch_interface['ip'], switch_network['mask']))
-		self.owner.addOutput(frontend,'  no ip address dhcp')
-		self.owner.addOutput(frontend, '!')
-
+		self.owner.addOutput('localhost', '!')
+		self.owner.addOutput('localhost', 'interface vlan 1')
+		self.owner.addOutput('localhost',
+			' ip address %s %s' % (switch_interface['ip'], switch_network['mask']))
+		self.owner.addOutput('localhost',' no ip address dhcp')
+		self.owner.addOutput('localhost', '!')
 
 		#
-		# calculate the highest VLAN value
+		# find all the VLAN ids
 		#
-		max_vlan = None
+		vlans = []
 		for o in self.owner.call('list.host.interface', [ 'a:backend' ]):
-			if o['network'] != switch_interface['network']:
-				continue
+			if o['vlan']:
+				vlan = str(o['vlan'])
+				if vlan not in vlans:
+					vlans.append(vlan)
 
-			try:
-				x = int(o['vlan'])
-				if not max_vlan or x > max_vlan:
-					max_vlan = x
-			except:
-				pass
+		self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
 
-		if max_vlan:
-			# Set blank vlan from 2-max_vlan
-			#
-			# The reason we are creating blank vlan ids is so we 
-			# don't accidentally try to assign a nonexistent vlanid
-			#
-			self.owner.addOutput(frontend, 'vlan 2-%s' % max_vlan)
+		#
+		# turn off global spanning tree
+		#
+		self.owner.addOutput('localhost', 'no spanning-tree')
 
-		for (host, port, vlan) in hosts:
-			attr = self.owner.getHostAttr(host, 'appliance')
+		#
+		# create a list of host/port 
+		#
+		hostport = []
+		for s in self.owner.call('list.switch.host', [ switch_name ]):
+			host = s['host']
+			port = s['port']
 
-			# if vlan isn't set, set vlan to '1'
-			if not vlan:
-				vlan = '1'
+			hp = (host, port)
+			if hp not in hostport:
+				self.doPort(switch_name, host, port)
+				hostport.append(hp)
 
-			# if frontend, write difference block
-			if attr == 'frontend':
-				self.owner.addOutput(frontend, '!')
-				self.owner.addOutput(frontend, 'interface gigabitethernet1/0/%s' % port)
-				self.owner.addOutput(frontend,'  switchport mode general')
-				self.owner.addOutput(frontend,'  switchport general allowed vlan add 2-%s tagged' % max_vlan)
-				self.owner.addOutput(frontend,'  switchport general allowed vlan add 1 untagged')
-			else:
-				self.owner.addOutput(frontend, '!')
-				self.owner.addOutput(frontend, 'interface gigabitethernet1/0/%s' % port)
-				self.owner.addOutput(frontend, ' switchport access vlan %s' % vlan)
+		self.owner.addOutput('localhost', '!')
+		self.owner.addOutput('localhost', '</stack:file>')
 
-		self.owner.addOutput(frontend, '!')
-		self.owner.addOutput(frontend, '</stack:file>')
