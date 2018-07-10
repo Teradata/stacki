@@ -6,7 +6,6 @@
 
 import stack.commands
 import stack.util
-import stack.switch
 from stack.exception import CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,

@@ -7,7 +7,8 @@
 import stack.commands
 import subprocess
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052, SwitchException
+from stack.switch import SwitchException
+from stack.switch.x1052 import SwitchDellX1052
 
 
 class Implementation(stack.commands.Implementation):

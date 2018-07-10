@@ -6,7 +6,6 @@
 
 import stack.commands
 import stack.util
-import stack.switch
 import subprocess
 from stack.exception import CommandError
 

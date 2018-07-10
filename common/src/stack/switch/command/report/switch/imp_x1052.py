@@ -6,7 +6,7 @@
 
 import stack.commands
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052
+from stack.switch.x1052 import SwitchDellX1052
 
 #
 # IMPORTANT!!!
