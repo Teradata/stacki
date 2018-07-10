@@ -24,4 +24,10 @@ class TestLoadJsonNetwork:
 		exported_network_data = results.stdout.strip()
 
 		# make sure that they are the same
-		assert exported_network_data == imported_network_data
+		#assert exported_network_data == imported_network_data
+
+		for item in imported_network_data:
+			assert item in exported_network_data
+
+		for item in exported_network_data:
+			assert item in imported_network_data

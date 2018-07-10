@@ -11,7 +11,7 @@ class TestLoadJsonOs:
 		# export the os data
 		results = host.run('stack export os')
 		assert results.rc == 0
-		initial_os_data = results.stdout
+		initial_os_data = results.stdout.strip()
 
 		#write the output to a file
 		with open ('os.json', 'w+') as file:
@@ -24,6 +24,6 @@ class TestLoadJsonOs:
 		# re-export the data and check that nothing has changed
 		results = host.run('stack export os')
 		assert results.rc == 0
-		final_os_data = results.stdout
+		final_os_data = results.stdout.strip()
 
 		assert initial_os_data == final_os_data
