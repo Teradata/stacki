@@ -13,15 +13,13 @@ from stack.switch.e1050 import SwitchCelesticaE1050
 # similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		switch_name = args[0]
-
-		self.svis = self.owner.call('list.host.interface', [switch_name])
-		access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary
+		access_interface = args[0]
 
 		self.switch_address = access_interface['ip']
-		self.switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
-		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
-		self.switch = SwitchCelesticaE1050(self.switch_address, switch_name, self.switch_username, switch_password)
+		self.switch_name = access_interface['host']
+		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
+		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, switch_password)
 
 		if self.owner.pinghosts:
 			self.ping_hosts()
@@ -32,22 +30,32 @@ class Implementation(stack.commands.Implementation):
 		for iface_obj in sorted(self.switch.json_loads(cmd='show bridge macs dynamic json'), key=lambda d: d['dev']):  # why did they call iface 'dev'?
 			mac = iface_obj['mac']
 			port = re.search(r'\d+', iface_obj['dev']).group()
-			vlan = iface_obj['vlan']  # should VLAN come from FE or switch?
+			vlan = iface_obj['vlan']
+			if vlan == 1:
+				vlan = None
 
 			matching_hosts = (host_obj for host_obj in hosts if host_obj['mac'] == mac)
 			for host_obj in matching_hosts:
 				host = host_obj['host']
 				interface = host_obj['interface']
 
-				self.owner.addOutput(switch_name, [port, mac, host, interface, vlan])
+				self.owner.addOutput(self.switch_name, [port, mac, host, interface, vlan])
 				break
 
 	def ping_hosts(self):
 		child = pexpect.spawn(f'ssh {self.switch_username}@{self.switch_address}')
-		hosts = self.owner.call('list.host.interface', ['where appliance != "frontend" and appliance != "switch"'])
-		networks = [interface['network'] for interface in self.svis]
+		hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
+
+		if self.owner.pinghosts == 'init':
+			network = self.owner.call('list.host.interface', [self.switch_name])[0]['network']
+			hosts = (host for host in hosts if host['network'] == network)
+		else:
+			switch_hosts = self.owner.call('list.switch.host', [self.switch_name])
+			macs = [host['mac'] for host in switch_hosts]
+			hosts = (host for host in hosts if host['mac'] in macs)
+
 		try:
-			for host in (host for host in hosts if host['network'] in networks):
+			for host in hosts:
 				child.expect('#')
 				child.sendline(f'ping -c 1 {host["ip"]}')
 		except pexpect.EOF as e:

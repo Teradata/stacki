@@ -12,7 +12,7 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		(switch, hosts) = args
 
-		list_switch_mac = self.owner.call('list.switch.mac', [ switch ])
+		list_switch_mac = self.owner.call('list.switch.mac', [ switch, 'pinghosts=init' ])
 
 		for h in self.owner.call('list.host.interface', hosts):
 			if h['interface'] == 'ipmi':

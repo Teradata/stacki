@@ -13,27 +13,26 @@ from stack.switch.x1052 import SwitchDellX1052
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		switch_name = args[0]
 
-		# Assume switch has only one entry in host interfaces
-		interface = self.owner.call('list.host.interface', [switch_name])[0]
+		switch = args[0]
 
 		# Get frontend ip for tftp address
 		try:
 			(_frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
-					if host['network'] == interface['network']]
+					if host['network'] == switch['network']]
 		except:
 			raise CommandError(self, '"%s" and the frontend do not share a network' % switch_name)
 
 		# Send traffic through the switch first before requesting mac table
 		if self.owner.pinghosts:
 			_host_interfaces = [host for host in self.owner.call('list.host.interface')
-					if host['network'] == interface['network']]
+					if host['network'] == switch['network']]
 			for host in _host_interfaces:
 				x = subprocess.Popen(['ping', '-c', '1', host['ip']], stdout=subprocess.PIPE)
 
 		frontend_tftp_address = _frontend['ip']
-		switch_address = interface['ip']
+		switch_address = switch['ip']
+		switch_name = switch['host']
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 

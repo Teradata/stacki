@@ -14,7 +14,9 @@ from stack.switch.e1050 import SwitchCelesticaE1050
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		self.switch_name = args[0]
+		self.switch = args[0]
+		return
+		# old starts here -----
 		self.svis = self.owner.call('list.host.interface', [self.switch_name, 'expanded=True'])
 		self.networks = [interface['network'] for interface in self.svis]
 		self.access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary?
@@ -30,6 +32,7 @@ class Implementation(stack.commands.Implementation):
 
 		# handle bad ip/creds?
 		self.switch_address = self.access_interface['ip']
+		self.switch_name = self.access_interface['host']
 		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
 		self.switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
 		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, self.switch_password)
@@ -55,9 +58,9 @@ class Implementation(stack.commands.Implementation):
 			child.sendline(self.switch_password)
 			child.expect(pexpect.EOF)
 
-			self.owner.addOutput(f'{self.switch_name}:', re.search(r'Number of (.+)', child.before.decode('utf-8')).group())
+			print(f'{self.switch_name}:', re.search(r'Number of (.+)', child.before.decode('utf-8')).group())
 		except pexpect.EOF:
-			self.owner.addOutput(f'{self.switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
+			print(f'{self.switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
 
 	def reset(self):
 		interface = ipaddress.IPv4Interface(f"{self.access_interface['gateway']}/{self.access_interface['mask']}")

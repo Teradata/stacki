@@ -7,7 +7,7 @@
 import stack.commands
 from stack.exception import ArgRequired
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.create.command):
+class command(stack.commands.HostArgumentProcessor, stack.commands.SwitchArgumentProcessor, stack.commands.create.command):
 	pass
 
 class Command(command):
@@ -26,10 +26,12 @@ class Command(command):
 	def run(self, params, args):
 		switch, = self.fillParams([ ('switch', None) ])
 
-		switches = self.getHostnames(switch)
+		switches = self.getSwitchNames(switch)
 		hosts = self.getHostnames(args)
 
 		for s in switches:
 			model = self.getHostAttr(s, 'component.model')
+			if model in ['e1050', 'x1052']:
+				model = 'default'
 			self.runImplementation(model, (s, hosts))
 
