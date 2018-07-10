@@ -16,7 +16,7 @@ class Command(command):
 	"""
 	Stop managing a host connected to a switch.
 
-	<arg type='string' name='switch'>
+	<arg optional='1' type='string' name='switch' repeat='1'>
 	The switch you are going to remove the host from.
 	</arg>
 
