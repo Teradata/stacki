@@ -46,8 +46,12 @@ class Command(command):
 			('interface', None, True)
 			])
 
-		# Check if host exists
-		hosts = self.getHostnames([host])
+		if host == '*':
+			hosts = self.getHostnames(None)
+		else:
+			# Check if host exists
+			hosts = self.getHostnames([host])
 
-		self.delSwitchHost(switch, port, host, interface)
+		for host in hosts:
+			self.delSwitchHost(switch, port, host, interface)
 

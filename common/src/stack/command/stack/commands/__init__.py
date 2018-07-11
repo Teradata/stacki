@@ -281,34 +281,50 @@ class SwitchArgumentProcessor:
 		return network
 
 	def doSwitchHost(self, switch, port, host, interface, action):
-		rows = self.db.select(""" id from networks
-			where node=(select id from nodes where name='%s')
-			and device='%s' """ % (host, interface))
+		select_cmd = """ id from networks
+			where node=(select id from nodes where name=%s)"""
+		# remove action allows wildcard interface
+		if action == 'remove' and interface == '*':
+			select_cmd += """ and device like %s"""
+			interface = '%%'
+		else:
+			select_cmd += """ and device=%s"""
 
-		try:
-			host_interface = rows[0][0]
-		except:
-			host_interface = None
-
-		if not host_interface:
+		network_rows = self.db.select(select_cmd, (host, interface))
+		if not network_rows:
 			raise CommandError(self,
 				"Interface '%s' isn't defined for host '%s'"
 				% (interface, switch))
 
-		# Check if the port is already managed by the switch
-		rows = self.db.select(""" * from switchports
-			where interface='%s' and port='%s'
-			and switch=(select id from nodes where name='%s')"""
-			% (host_interface, port, switch))
+		select_cmd = """ * from switchports where interface=%s"""
+		# remove action allows wildcard port
+		if action == 'remove' and port == '*':
+			select_cmd += """ and port like %s"""
+			port = '%%'
+		else:
+			select_cmd += """ and port=%s"""
+		select_cmd += """ and switch=(select id from nodes where name=%s)"""
 
-		if action == 'remove' and rows:
-			# delete it
-			self.db.execute(""" delete from switchports
-				where interface='%s'
-				and switch=(select id from nodes where name = '%s')
-				and port='%s' """  % (host_interface, switch, port))
+		switchport_rows = ()
+		for host_interface, in network_rows:
+			# Check if the port is already managed by the switch
+			switchport_rows += self.db.select(select_cmd, (host_interface, port, switch))
 
-		elif action == 'add' and not rows:
+		if action == 'remove' and switchport_rows:
+			execute_cmd = """ delete from switchports
+				where interface=%s
+				and switch=(select id from nodes where name=%s)"""
+			# remove action allows wildcard port (set to '%%' earlier)
+			if port == '%%':
+				execute_cmd += """ and port like %s"""
+			else:
+				execute_cmd += """ and port=%s"""
+
+			for host_interface in switchport_rows[0]:
+				# delete it
+				self.db.execute(execute_cmd, (host_interface, switch, port))
+
+		elif action == 'add' and not switchport_rows:
 			# add it
 			self.db.execute(""" insert into switchports
 				(interface, switch, port)
