@@ -121,7 +121,7 @@ class Plugin(stack.commands.Plugin):
 				controller_prep = []
 				if controller_data:
 					for controller in controller_data:
-						if controller['name'] == hostname:
+						if controller['scope'] == hostname:
 							controller_prep.append(controller)
 
 				#find the longname of the host's appliance with list appliance
