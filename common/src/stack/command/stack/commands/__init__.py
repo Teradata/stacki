@@ -1257,7 +1257,7 @@ class DatabaseConnection:
 		m = hashlib.md5()
 		m.update(command.strip().encode('utf-8'))
 		if args:
-			m.update(' '.join(arg for arg in args).encode('utf-8'))
+			m.update(' '.join(str(arg) for arg in args).encode('utf-8'))
 		k = m.hexdigest()
 
 #		 print 'select', k, command
