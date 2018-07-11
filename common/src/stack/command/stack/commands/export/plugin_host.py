@@ -32,26 +32,26 @@ class Plugin(stack.commands.Plugin):
 				interface_data = self.owner.command('list.host.interface', [ f'{hostname}', 'output-format=json' ])
 				if interface_data:
 					interface_data = json.loads(interface_data)
-				interface_alias_data = self.owner.command('list.host.alias', [ f'{hostname}', 'output-format=json' ])
-				if interface_alias_data:
-					interface_alias_data = json.loads(interface_alias_data)
-				else:
-					interface_alias_data = []
+					interface_alias_data = self.owner.command('list.host.alias', [ f'{hostname}', 'output-format=json' ])
+					if interface_alias_data:
+						interface_alias_data = json.loads(interface_alias_data)
+					else:
+						interface_alias_data = []
 
-				interface_prep = []
-				for interface in interface_data:
-					if interface['host'] == hostname:
-						interface_prep.append({'interface':interface['interface'],
-									'default':interface['default'],
-									'mac':interface['mac'],
-									'ip':interface['ip'],
-									'network':interface['network'],
-									'name':interface['name'],
-									'module':interface['module'],
-									'vlan':interface['vlan'],
-									'options':interface['options'],
-									'channel':interface['channel'],
-									'alias':interface_alias_data})
+					interface_prep = []
+					for interface in interface_data:
+						if interface['host'] == hostname:
+							interface_prep.append({'interface':interface['interface'],
+										'default':interface['default'],
+										'mac':interface['mac'],
+										'ip':interface['ip'],
+										'network':interface['network'],
+										'name':interface['name'],
+										'module':interface['module'],
+										'vlan':interface['vlan'],
+										'options':interface['options'],
+										'channel':interface['channel'],
+										'alias':interface_alias_data})
 
 
 				attr_data = self.owner.command('list.host.attr', [ f'{hostname}', 'output-format=json' ])
