@@ -17,6 +17,8 @@ class TestExportHost:
 		assert results.rc == 0
 		results = host.run('stack set host metadata backend-test metadata=test')
 		assert results.rc == 0
+		results = host.run('stack add host attr backend-test attr=test value=test shadow=False')
+		assert results.rc == 0
 		results = host.run('stack add host interface backend-test channel=test default=False interface=eth1 ip=192.168.0.1 mac=00.11.22.33.44.55 module=test name=test network=public vlan=1')
 		assert results.rc == 0
 		results = host.run('stack set host interface options backend-test interface=eth1 options="test option"')
@@ -52,6 +54,10 @@ class TestExportHost:
 				assert host['interface'][0]['vlan'] == 1
 				assert host['interface'][0]['options'] == 'test option'
 				assert host['interface'][0]['channel'] == 'test'
+				for attr in host['attrs']:
+					if attr['name'] == 'test':
+						assert attr['value'] == 'test'
+						assert attr['shadow'] == False
 				assert host['firewall'][0]['name'] == 'test'
 				assert host['firewall'][0]['table'] == 'filter'
 				assert host['firewall'][0]['service'] == 'www'
