@@ -16,7 +16,7 @@ class Command(command):
 	"""
 	Stop managing a host connected to a switch.
 
-	<arg optional='1' type='string' name='switch' repeat='1'>
+	<arg type='string' name='switch'>
 	The switch you are going to remove the host from.
 	</arg>
 
@@ -46,12 +46,8 @@ class Command(command):
 			('interface', None, True)
 			])
 
-		if host == '*':
-			hosts = self.getHostnames(None)
-		else:
-			# Check if host exists
-			hosts = self.getHostnames([host])
+		# Check if host exists
+		hosts = self.getHostnames([host])
 
-		for host in hosts:
-			self.delSwitchHost(switch, port, host, interface)
+		self.delSwitchHost(switch, port, host, interface)
 
