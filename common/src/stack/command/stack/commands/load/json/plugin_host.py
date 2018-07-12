@@ -173,7 +173,7 @@ class Plugin(stack.commands.Plugin):
 								f'comment={rule["comment"]}',
 								f'flags={rule["flags"]}',
 								f'network={rule["network"]}',
-								f'output-netork={rule["output-network"]}',
+								f'output-network={rule["output-network"]}',
 								f'rulename={rule["name"]}',
 								f'table={rule["table"]}' ])
 					print(f'success adding host firewall rule {rule["name"]}')
@@ -224,8 +224,10 @@ class Plugin(stack.commands.Plugin):
 					command.append(f'fs={partition["fstype"]}')
 				if partition['partid']:
 					command.append(f'partid={partition["partid"]}')
+				if partition['options']:
+					command.append(f'options={partition["options"]}')
 				try:
-					self.owner.command('add.host.partition', command)
+					self.owner.command('add.storage.partition', command)
 					print(f'success adding partition {partition}')
 					self.owner.successes += 1
 
@@ -287,5 +289,14 @@ class Plugin(stack.commands.Plugin):
 					self.owner.successes += 1
 				except Exception as e:
 					print(f'error setting metadata of {host_name}')
+					self.owner.errors += 1
+			#set the comment if there is one
+			if host['comment']:
+				try:
+					self.owner.command('set.host.comment', [ host_name, f'comment={host["comment"]}' ])
+					print(f'success setting comment of {host_name}')
+					self.owner.successes += 1
+				except Exception as e:
+					print(f'error setting comment of {host_name}')
 					self.owner.errors += 1
 
