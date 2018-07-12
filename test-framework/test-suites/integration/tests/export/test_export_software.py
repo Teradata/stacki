@@ -3,8 +3,9 @@ import os
 from os import listdir
 from os.path import isfile, join
 import json
+import re
 
-@pytest.mark.usefixtures("revert_database")
+@pytest.mark.usefixtures("revert_filesystem")
 class TestExportSoftware:
 
 	"""
@@ -17,18 +18,22 @@ class TestExportSoftware:
 		dirn = '/export/test-files/export/'
 		file = dirn + 'roll-minimal.xml'
 
-		# get a list of the files in the cwd so we can get the name of our newly created pallet
-		cwd = os.getcwd()
-		initial_list_of_files = [f for f in listdir(cwd) if isfile(join(cwd, f))]
+		#do an initial rm of the files that are about to be created just in case the test has been run recently
+		results = host.run('rm -rf disk1')
+		results = host.run('rm -f minimal*.iso')
 
 		# create a minimal pallet using the xml in test-files
 		results = host.run(f'stack create pallet {file}')
 		assert results.rc == 0
 
 		# determine the name of the new pallet iso
-		second_list_of_files = [f for f in listdir(cwd) if isfile(join(cwd, f))]
-		pallet_iso_name = set(second_list_of_files) - set(initial_list_of_files)
-		pallet_iso_name = pallet_iso_name.pop()
+		cwd = os.getcwd()
+		files = os.listdir(cwd)
+		pattern = re.compile('minimal-.+\.iso')
+		try:
+			pallet_iso_name = list(filter(pattern.match,files))[0]
+		except IndexError:
+			raise FileNotFoundError('pallet iso')
 
 		# add the pallet that we have just created
 		results = host.run(f'stack add pallet {pallet_iso_name}')
