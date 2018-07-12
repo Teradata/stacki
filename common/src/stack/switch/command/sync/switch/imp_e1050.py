@@ -32,6 +32,7 @@ class Implementation(stack.commands.Implementation):
 
 		# handle bad ip/creds?
 		self.switch_address = self.access_interface['ip']
+		self.switch_name = self.access_interface['host']
 		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
 		self.switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
 		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, self.switch_password)

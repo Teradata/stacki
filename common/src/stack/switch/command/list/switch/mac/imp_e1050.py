@@ -30,7 +30,9 @@ class Implementation(stack.commands.Implementation):
 		for iface_obj in sorted(self.switch.json_loads(cmd='show bridge macs dynamic json'), key=lambda d: d['dev']):  # why did they call iface 'dev'?
 			mac = iface_obj['mac']
 			port = re.search(r'\d+', iface_obj['dev']).group()
-			vlan = iface_obj['vlan']  # should VLAN come from FE or switch?
+			vlan = iface_obj['vlan']
+			if vlan == 1:
+				vlan = None
 
 			matching_hosts = (host_obj for host_obj in hosts if host_obj['mac'] == mac)
 			for host_obj in matching_hosts:

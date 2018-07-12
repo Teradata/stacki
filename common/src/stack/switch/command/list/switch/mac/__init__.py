@@ -43,6 +43,8 @@ class Command(command):
 
 		if pinghosts:
 			self.pinghosts = pinghosts.lower()
+		else:
+			self.pinghosts = pinghosts
 
 		_switches = self.getSwitchNames(args)
 		self.beginOutput()
