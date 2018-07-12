@@ -22,7 +22,7 @@ class Command(command):
 	all the known switches is listed.
 	</arg>
 
-	<param optional='1' type='bool' name='pinghosts'>
+	<param optional='1' type='string' name='pinghosts'>
 	Send a ping to each host connected to the switch. Hosts do not show up in the
 	mac address table if there is no traffic.
 	</param>
@@ -38,10 +38,11 @@ class Command(command):
 	def run(self, params, args):
 
 		(pinghosts,) = self.fillParams([
-		('pinghosts', False),
+		('pinghosts', None),
 		])
 
-		self.pinghosts = self.str2bool(pinghosts)
+		if pinghosts:
+			self.pinghosts = pinghosts.lower()
 
 		_switches = self.getSwitchNames(args)
 		self.beginOutput()

@@ -16,9 +16,10 @@ class Implementation(stack.commands.Implementation):
 		access_interface = args[0]
 
 		self.switch_address = access_interface['ip']
-		self.switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
-		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
-		self.switch = SwitchCelesticaE1050(self.switch_address, switch_name, self.switch_username, switch_password)
+		self.switch_name = access_interface['host']
+		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
+		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, switch_password)
 
 		if self.owner.pinghosts:
 			self.ping_hosts()
@@ -36,15 +37,23 @@ class Implementation(stack.commands.Implementation):
 				host = host_obj['host']
 				interface = host_obj['interface']
 
-				self.owner.addOutput(switch_name, [port, mac, host, interface, vlan])
+				self.owner.addOutput(self.switch_name, [port, mac, host, interface, vlan])
 				break
 
 	def ping_hosts(self):
 		child = pexpect.spawn(f'ssh {self.switch_username}@{self.switch_address}')
-		hosts = self.owner.call('list.host.interface', ['where appliance != "frontend" and appliance != "switch"'])
-		networks = [interface['network'] for interface in self.svis]  # self.svis no longer exists
+		hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
+
+		if self.owner.pinghosts == 'init':
+			network = self.owner.call('list.host.interface', [self.switch_name])[0]['network']
+			hosts = (host for host in hosts if host['network'] == network)
+		else:
+			switch_hosts = self.owner.call('list.switch.host', [self.switch_name])
+			macs = [host['mac'] for host in switch_hosts]
+			hosts = (host for host in hosts if host['mac'] in macs)
+
 		try:
-			for host in (host for host in hosts if host['network'] in networks):
+			for host in hosts:
 				child.expect('#')
 				child.sendline(f'ping -c 1 {host["ip"]}')
 		except pexpect.EOF as e:
