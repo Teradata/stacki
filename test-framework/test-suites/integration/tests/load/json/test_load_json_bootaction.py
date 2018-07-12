@@ -1,6 +1,6 @@
 import pytest
 
-
+@pytest.mark.usefixtures("revert_database")
 class TestLoadJsonBootaction:
 
 	"""

@@ -1,6 +1,7 @@
 import pytest
 import json
 
+@pytest.mark.usefixtures("revert_database")
 class TestExportNetwork:
 
 	"""
