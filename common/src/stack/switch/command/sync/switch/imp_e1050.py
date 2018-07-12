@@ -14,13 +14,11 @@ from stack.switch.e1050 import SwitchCelesticaE1050
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		self.switch = args[0]
-		return
-		# old starts here -----
-		self.svis = self.owner.call('list.host.interface', [self.switch_name, 'expanded=True'])
-		self.networks = [interface['network'] for interface in self.svis]
-		self.access_interface = [svi for svi in self.svis if not svi['vlan']][0]  # temporary?
-		self.svis.remove(self.access_interface)  # how to modify access iface? Exclude for now
+		self.access_interface = args[0]
+		self.access_network = self.access_interface['network']
+
+		self.networks = {}
+		self.networks[self.access_network] = self.owner.call('list.network', [self.access_network])[0]
 
 		# copied; better way?
 		# Get frontend ip
@@ -40,8 +38,7 @@ class Implementation(stack.commands.Implementation):
 		self.ssh_copy_id()
 		try:
 			self.reset()
-			self.vlans()
-			self.vlan_members()
+			self.sync_config()
 
 			print(self.switch.rpc_req_text(cmd='pending'))
 			self.switch.rpc_req_text(cmd='commit')
@@ -63,70 +60,72 @@ class Implementation(stack.commands.Implementation):
 			print(f'{self.switch_name}:', re.findall(r'WARNING: (.+)', child.before.decode('utf-8'))[0])
 
 	def reset(self):
-		interface = ipaddress.IPv4Interface(f"{self.access_interface['gateway']}/{self.access_interface['mask']}")
+		interface = ipaddress.IPv4Interface(f"{self.networks[self.access_network]['gateway']}/{self.networks[self.access_network]['mask']}")
 
 		# no known better way to reset switch than deleting entire config and rebuilding
-		commands = ['del all',
-				'add routing defaults datacenter',
-				'add routing service integrated-vtysh-config',
-				'add routing log syslog informational',
-				'add snmp-server listening-address localhost',
-				'add bridge bridge pvid 1',
-				'add bridge bridge vids 1',
-				'add bridge bridge vlan-aware',
-				'add bridge pre-up sysctl -w net.ipv4.conf.all.proxy_arp=1',
-				'add bridge pre-up sysctl -w net.ipv4.conf.default.proxy_arp=1',
-				'add interface eth0',  # keep eth0?
-				'add interface swp21 bridge pvid 1',
-				'add loopback lo ip address 127.0.0.1/32',
-				'add time zone Etc/UTC',
-				'add time ntp server 0.cumulusnetworks.pool.ntp.org iburst',
-				'add time ntp server 1.cumulusnetworks.pool.ntp.org iburst',
-				'add time ntp server 2.cumulusnetworks.pool.ntp.org iburst',
-				'add time ntp server 3.cumulusnetworks.pool.ntp.org iburst',
-				'add time ntp source eth0',  # keep eth0?
-				'add dot1x radius accounting-port 1813',
-				'add dot1x eap-reauth-period 0',
-				'add dot1x radius authentication-port 1812',
-				'add dot1x mab-activation-delay 30',
-				'add bridge bridge ports swp21',  # not guaranteed; find dynamically
-				f'add vlan 1 ip address {interface.with_prefixlen}',  # assumes access iface never changes
-				'add vlan 1 vlan-id 1',
-				'add vlan 1 vlan-raw-device bridge',
-				]
+		# make eth0 dhcp?
+		# adding frontend swp currently in sync_config; ok?
+		commands = [
+			'del all',
+			'add routing defaults datacenter',
+			'add routing service integrated-vtysh-config',
+			'add routing log syslog informational',
+			'add snmp-server listening-address localhost',
+			'add bridge bridge pvid 1',
+			'add bridge bridge vids 1',
+			'add bridge bridge vlan-aware',
+			'add bridge pre-up sysctl -w net.ipv4.conf.all.proxy_arp=1',
+			'add bridge pre-up sysctl -w net.ipv4.conf.default.proxy_arp=1',
+			'add interface eth0',
+			'add interface swp21 bridge pvid 1',
+			'add loopback lo ip address 127.0.0.1/32',
+			'add time zone Etc/UTC',
+			'add time ntp server 0.cumulusnetworks.pool.ntp.org iburst',
+			'add time ntp server 1.cumulusnetworks.pool.ntp.org iburst',
+			'add time ntp server 2.cumulusnetworks.pool.ntp.org iburst',
+			'add time ntp server 3.cumulusnetworks.pool.ntp.org iburst',
+			'add time ntp source eth0',
+			'add dot1x radius accounting-port 1813',
+			'add dot1x eap-reauth-period 0',
+			'add dot1x radius authentication-port 1812',
+			'add dot1x mab-activation-delay 30',
+			f'add vlan 1 ip address {interface.with_prefixlen}',
+			'add vlan 1 vlan-id 1',
+			'add vlan 1 vlan-raw-device bridge',
+			]
 
 		for command in commands:
 			self.switch.rpc_req_text(cmd=command)
 
-	def vlans(self):
-		for interface in self.svis:
-			vlan = interface['vlan']
-			interface = ipaddress.IPv4Interface(f"{interface['gateway']}/{interface['mask']}")  # different name?
-
-			self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-id {vlan}')
-			self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-raw-device bridge')
-
-			self.switch.rpc_req_text(cmd=f'add routing route {interface.network} vlan{vlan}')
-
-			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {interface.network}')
-			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {self.frontend["ip"]}/32 dest-ip {interface.network}')
-			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {self.frontend["ip"]}/32')
-			self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} drop source-ip any dest-ip any')
-			self.switch.rpc_req_text(cmd=f'add vlan {vlan} acl ipv4 acl{vlan} inbound')
-
-	def vlan_members(self):
-		# better names
-		mac_ifaces = {}
-		for item in self.owner.call('list.switch.mac'):  # pinghost=True (broken)
-			mac_ifaces[item['mac']] = {'iface': 'swp' + item['port'], 'vlan': item['vlan']}  # add vlan at this point or not?
-			# if so, why not just rpc_req_text here? all the info is here
-			# but might 'list switch mac' include non-vlan ports in the future?
-
-		host_ifaces = self.owner.call('list.host.interface', ["where appliance != 'switch'"])
+	def sync_config(self):
+		mac_ifaces = {mac_iface['mac']: mac_iface for mac_iface in self.owner.call('list.switch.mac')}#, ['pinghosts=full'])}
+		hosts, macs = zip(*[(iface['host'], iface['mac']) for iface in mac_ifaces.values()])
+		host_ifaces = [host_iface for host_iface in self.owner.call('list.host.interface', list(hosts)) if host_iface['mac'] in macs]
 		for host_iface in host_ifaces:
 			iface = mac_ifaces[host_iface['mac']]
+			vlan = host_iface['vlan'] if host_iface['vlan'] else '1'
 
-			self.switch.rpc_req_text(cmd=f'add bridge bridge ports {iface["iface"]}')
-			self.switch.rpc_req_text(cmd=f"add interface {iface['iface']} bridge vids {host_iface['vlan']}, 4000")  # unsure what bmc vid will be (4000)
-			self.switch.rpc_req_text(cmd=f"add interface {iface['iface']} bridge pvid {host_iface['vlan']}")
+			if host_iface['network'] not in self.networks:
+				self.add_vlan(host_iface['network'], vlan)
+
+			self.switch.rpc_req_text(cmd=f"add bridge bridge ports swp{iface['port']}")
+			if host_iface != self.frontend:
+				self.switch.rpc_req_text(cmd=f"add interface swp{iface['port']} bridge vids {vlan},4000")  # unsure what bmc vid will be (4000)
+				self.switch.rpc_req_text(cmd=f"add interface swp{iface['port']} bridge pvid {vlan}")
+
+	def add_vlan(self, network, vlan):
+		self.networks[network] = self.owner.call('list.network', [network])[0]
+		network = self.networks[network]
+
+		interface = ipaddress.IPv4Interface(f"{network['gateway']}/{network['mask']}")
+
+		self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-id {vlan}')
+		self.switch.rpc_req_text(cmd=f'add vlan {vlan} vlan-raw-device bridge')
+		self.switch.rpc_req_text(cmd=f'add routing route {interface.network} vlan{vlan}')
+
+		self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {interface.network}')
+		self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {self.frontend["ip"]}/32 dest-ip {interface.network}')
+		self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {self.frontend["ip"]}/32')
+		self.switch.rpc_req_text(cmd=f'add acl ipv4 acl{vlan} drop source-ip any dest-ip any')
+		self.switch.rpc_req_text(cmd=f'add vlan {vlan} acl ipv4 acl{vlan} inbound')
 
