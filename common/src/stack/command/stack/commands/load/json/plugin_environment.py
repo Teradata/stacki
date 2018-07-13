@@ -11,6 +11,8 @@ class Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'environment'
+	def requires(self):
+		return [ 'software', 'host', 'network', 'group', 'appliance', 'os' ]
 
 	def run(self, args):
 

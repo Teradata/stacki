@@ -12,6 +12,8 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'network'
 
+	def requires(self):
+		return [ 'software', 'host' ]
 
 	def run(self, args):
 

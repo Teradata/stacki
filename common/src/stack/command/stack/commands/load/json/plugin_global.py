@@ -11,7 +11,8 @@ class Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'global'
-
+	def requires(self):
+		return [ 'software', 'host', 'network', 'group', 'appliance', 'os', 'environment', 'bootaction' ]
 
 	def run(self, args):
 
@@ -37,53 +38,43 @@ class Plugin(stack.commands.Plugin):
 					else:
 						attr_shadow = False
 
-					attr_attr = attr['attr']
-					attr_value = attr['value']
 					try:
 						self.owner.command('set.attr', [
-									f'attr={attr_attr}',
-									f'value={attr_value}',
+									f'attr={attr["attr"]}',
+									f'value={attr["value"]}',
 									f'shadow={attr_shadow}' ])
-						print(f'success setting global attr {attr_attr}')
+						print(f'success setting global attr {attr["attr"]}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning setting global attr {attr_attr}: {e}')
+							print(f'warning setting global attr {attr["attr"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error setting global attr {attr_attr}: {e}')
+							print(f'error setting global attr {attr["attr"]}: {e}')
 							self.owner.errors += 1
 
 
 			elif scope == 'route':
 				for route in import_data[scope]:
-					route_network = route['network']
-					route_netmask = route['netmask']
-					route_gateway = route['gateway']
 					try:
 						self.owner.command('add.route', [
-									f'address={route_network}',
-									f'gateway={route_gateway}',
-									f'netmask={route_netmask}'])
-						print(f'success adding global route {route_network}')
+									f'address={route["network"]}',
+									f'gateway={route["gateway"]}',
+									f'netmask={route["netmask"]}'])
+						print(f'success adding global route {route["network"]}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning adding global route {route_network}: {e}')
+							print(f'warning adding global route {route["network"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global route {route_network}: {e}')
+							print(f'error adding global route {route["network"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'firewall':
 				for rule in import_data[scope]:
-					rule_name = rule['name']
-					rule_flags = rule['flags']
-					rule_comment = rule['comment']
-					rule_source = rule['source']
-					rule_type = rule['type']
 					try:
 						self.owner.command('add.firewall', [
 									f'action={rule["action"]}',
@@ -94,80 +85,56 @@ class Plugin(stack.commands.Plugin):
 									f'output-network={rule["output-network"]}',
 									f'rulename={rule["name"]}',
 									f'table={rule["table"]}' ])
-						print(f'success adding global firewall fule {rule_name}')
+						print(f'success adding global firewall fule {rule["name"]}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning adding global firewall rule {rule_name}: {e}')
+							print(f'warning adding global firewall rule {rule["name"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global firewall rule {rule_name}: {e}')
+							print(f'error adding global firewall rule {rule["name"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'partition':
 				for partition in import_data[scope]:
-					partition_device = partition['device']
-					partition_options = partition['options']
-					partition_mountpoint = partition['mountpoint']
-					partition_partid = partition['partid']
-					partition_size = partition['size']
-					partition_type = partition['fstype']
 					try:
 						# normally the scope would be the first argument but since we are in the global plugin we need to leave it blank. Stacki defaults to global
 						self.owner.command('add.storage.partition', [
-									f'device={partition_device}',
-									f'options={partition_options}',
-									f'mountpoint={partition_mountpoint}',
-									f'partid={partition_partid}',
-									f'size={partition_size}',
-									f'type={partition_size}' ])
-						print(f'success adding global partition {partition_device}')
+									f'device={partition["device"]}',
+									f'options={partition["options"]}',
+									f'mountpoint={partition["mountpoint"]}',
+									f'partid={partition["partid"]}',
+									f'size={partition["size"]}',
+									f'type={partition["fstype"]}',
+									])
+						print(f'success adding global partition {partition["device"]}')
 						self.owner.successes += 1
 
 					except Exception as e:
 						if 'exists' in str(e):
-							print(f'warning adding global partition {partition_device} {partition_mountpoint}: {e}')
+							print(f'warning adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global partition {partition_device} {partition_mountpoint}: {e}')
+							print(f'error adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'controller':
 				for controller in import_data[scope]:
-					controller_scope = controller['scope']
-					controller_enclosure = controller['enclosure']
-					controller_adapter = controller['adapter']
-					controller_slot = controller['slot']
-					controller_raidlevel = controller['raidlevel']
-					controller_arrayid = controller['arrayid']
-					controller_options = controller['options']
+					command = [f'arrayid={controller["arrayid"]}',
+							f'raidlevel={controller["raidlevel"]}',
+							f'slot={controller["slot"]}',
+							]
+					if controller['adapter']:
+						command.append(controller['adapter'])
+					if controller['enclosure']:
+						command.append(controller['enclosure'])
+
+					# is controller['scope'] unused in the add?
+					# is controller['options'] unused in the add?
 					try:
-						if controller_adapter and controller_enlosure:
-							self.owner.command('add.storage.controller', [
-										f'adapter={controller_adapter}',
-										f'arrayid={controller_arrayid}',
-										f'enclosure={controller_enclosure}',
-										f'raidlevel={controller_raidlevel}',
-										f'slot={controller_slot}' ])
-						elif not controller_adapter and controller_enclosure:
-							self.owner.command('add.storage.controller', [
-										f'arrayid={controller_arrayid}',
-										f'enclosure={controller_enclosure}',
-										f'raidlevel={controller_raidlevel}',
-										f'slot={controller_slot}' ])
-						elif controller_adapter and not controller_enclosure:
-							self.owner.command('add.storage.controller', [
-										f'adapter={controller_adapter}',
-										f'arrayid={controller_arrayid}',
-										f'raidlevel={controller_raidlevel}',
-										f'slot={controller_slot}' ])
-						else:
-							self.owner.command('add.storage.controller', [
-										f'arrayid={controller_arrayid}',
-										f'raidlevel={controller_raidlevel}',
-										f'slot={controller_slot}' ])
-						print(f'success adding global controller {controller_arrayid}')
+						self.owner.command('add.storage.controller', command)
+						print(f'success adding global controller {controller["arrayid"]}')
 						self.owner.successes += 1
 
 					except Exception as e:

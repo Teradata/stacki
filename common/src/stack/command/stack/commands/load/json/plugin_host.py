@@ -11,6 +11,8 @@ class Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'host'
+	def requires(self):
+		return [ 'software' ]
 
 	def run(self, args):
 

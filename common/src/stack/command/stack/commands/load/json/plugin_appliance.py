@@ -12,19 +12,22 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'appliance'
 
-	def run(self, args):
+	def requires(self):
+		return [ 'software', 'host', 'network', 'group' ]
 
+	def run(self, args):
+		# check if the user would like to load appliance data
 		if args and 'appliance' not in args:
 			return
 
-		#check if the user would like to load appliance data
+		#check if there is any appliance data to load
 		if 'appliance' in self.owner.data:
 			import_data = self.owner.data['appliance']
 		else:
 			print('no appliance data in json file')
 			return
 
-		#add each appliance then assign its various values to it
+		#add each appliance then set it's various data
 		for appliance in import_data:
 			appliance_name = appliance['name']
 			try:
@@ -39,6 +42,7 @@ class Plugin(stack.commands.Plugin):
 				else:
 					print(f'error adding appliance {appliance_name}: {e}')
 					self.owner.errors += 1
+
 
 			for attr in appliance['attrs']:
 				try:
@@ -60,6 +64,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'error setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.errors += 1
 
+
 			for route in appliance['route']:
 				try:
 					self.owner.command('add.appliance.route', [ appliance_name,
@@ -76,6 +81,7 @@ class Plugin(stack.commands.Plugin):
 					else:
 						print(f'error adding appliance route: {e}')
 						self.owner.errors += 1
+
 
 			for rule in appliance['firewall']:
 				try:
@@ -99,8 +105,8 @@ class Plugin(stack.commands.Plugin):
 						print(f'error adding appliance firewall rule {rule["name"]}: {e}')
 						self.owner.errors += 1
 
-			#the add partition commmand does not check to see if the value is already in the database
-			#to remedy this we will blow away all the existing partition info and replace it with ours
+			# the add partition commmand does not check to see if the value is already in the database
+			# to remedy this we will blow away all the existing partition info and replace it with ours
 			device_list = []
 			for partition in appliance['partition']:
 				if partition['device'] not in device_list:

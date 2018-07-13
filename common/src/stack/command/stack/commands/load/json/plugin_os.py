@@ -12,6 +12,9 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'os'
 
+	def requires(self):
+		return [ 'software', 'host', 'network', 'group', 'appliance' ]
+
 	def run(self, args):
 
 		#check if the user would like to import os data

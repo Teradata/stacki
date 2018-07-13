@@ -12,10 +12,12 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'bootaction'
 
-	def run(self, args):
+	def requires(self):
+		return [ 'software', 'host', 'network', 'group', 'appliance', 'os', 'environment' ]
 
-		#check if the user would like to import bootaction data
-		#if there are no args, assume the user would like to import everthing
+	def run(self, args):
+		# check if the user would like to import bootaction data
+		# if there are no args, assume the user would like to import everthing
 		if args and 'bootaction' not in args:
 			return
 
@@ -39,7 +41,6 @@ class Plugin(stack.commands.Plugin):
 			if profile['ramdisk']:
 				command.append(f'ramdisk={profile["ramdisk"]}')
 
-			#Need to make a more specific try catch
 			try:
 				self.owner.command('set.bootaction', command )
 				print(f'success adding bootaction {action}')
@@ -53,8 +54,8 @@ class Plugin(stack.commands.Plugin):
 					print(f'error adding bootaction {action}: {e}')
 					self.owner.errors += 1
 
-			#on occasion, not all of the args will be added if they are included in the original command
-			#to remedy this we set the args after adding the bootaction profile
+			# in the event that the bootaction already exists but with different args,
+			# we replace the old args with the new by setting them
 			if profile['args']:
 				args = ' '.join(profile['args'])
 				command = [action, f'args={args}', f'type={profile["type"]}']

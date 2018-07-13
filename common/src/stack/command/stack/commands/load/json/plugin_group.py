@@ -12,6 +12,9 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'group'
 
+	def requires(self):
+		return [ 'software', 'host', 'network' ]
+
 	def run(self, args):
 
 		#check if the user would like to import group data
