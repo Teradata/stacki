@@ -11,7 +11,7 @@ class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
 
 	def verifyInterface(self, host, interface):
 		"""
-		Returns True IFF the host has the specificied interface.
+		Returns True IFF the host has the specified interface.
 		"""
 		exists = False
 		for row in self.db.select("""
