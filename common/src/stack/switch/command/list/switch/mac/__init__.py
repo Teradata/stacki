@@ -38,8 +38,8 @@ class Command(command):
 	def run(self, params, args):
 
 		(pinghosts,) = self.fillParams([
-		('pinghosts', None),
-		])
+			('pinghosts', None),
+			])
 
 		if pinghosts:
 			self.pinghosts = pinghosts.lower()

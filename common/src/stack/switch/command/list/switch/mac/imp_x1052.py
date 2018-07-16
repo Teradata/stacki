@@ -21,7 +21,7 @@ class Implementation(stack.commands.Implementation):
 			(_frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
 					if host['network'] == switch['network']]
 		except:
-			raise CommandError(self, '"%s" and the frontend do not share a network' % switch_name)
+			raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])
 
 		# Send traffic through the switch first before requesting mac table
 		if self.owner.pinghosts:
