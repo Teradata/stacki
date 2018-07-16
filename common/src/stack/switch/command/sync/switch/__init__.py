@@ -43,6 +43,8 @@ class Command(command):
 
 	def run(self, params, args):
 
+		self.notify('Sync Switch\n')
+
 		persistent, = self.fillParams([ ('persistent', 'yes') ])
 		self.persistent = self.str2bool(persistent)
 

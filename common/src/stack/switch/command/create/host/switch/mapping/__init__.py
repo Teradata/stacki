@@ -33,5 +33,6 @@ class Command(command):
 			model = self.getHostAttr(s, 'component.model')
 			if model in ['e1050', 'x1052']:
 				model = 'default'
+
 			self.runImplementation(model, (s, hosts))
 

@@ -61,6 +61,9 @@ class Command(stack.commands.load.command,
 		args = self.hosts
 		self.runPlugins(args)
 
+		sys.stderr.write('\tSyncing Host\n')
+		self.call('sync.host.network', [*self.hosts.keys()])
+
 		sys.stderr.write('\tSyncing Switch\n')
 		self.call('sync.switch')
 		

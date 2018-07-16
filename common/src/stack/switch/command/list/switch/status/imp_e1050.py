@@ -21,7 +21,7 @@ class Implementation(stack.commands.Implementation):
 		switch_hosts = self.owner.call('list.switch.host')
 
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
-			interfaces = switch.json_loads(cmd="show interface json")
+			interfaces = switch.run("show interface json", json_loads=True)
 			for switch_host in switch_hosts:
 				interface = interfaces[f'swp{switch_host["port"]}']
 				port = switch_host['port']
