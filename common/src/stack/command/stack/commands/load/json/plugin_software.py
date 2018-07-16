@@ -35,7 +35,8 @@ class Plugin(stack.commands.Plugin):
 				try:
 					self.owner.command('add.box', [
 								f'{box["name"]}',
-								f'os={box["os"]}' ])
+								f'os={box["os"]}'
+					])
 					print(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 
@@ -86,8 +87,10 @@ class Plugin(stack.commands.Plugin):
 				try:
 					command = [pallet_dir]
 					if pallet['urlauthUser'] and pallet['urlauthPass']:
-						command.append(f'username={pallet["urlauthUser"]}',
-								f'password={pallet["urlauthPass"]}' )
+						command.append(
+							f'username={pallet["urlauthUser"]}',
+							f'password={pallet["urlauthPass"]}'
+							)
 					self.owner.command('add.pallet', command)
 
 					print(f'success adding pallet {pallet}')
@@ -104,9 +107,11 @@ class Plugin(stack.commands.Plugin):
 				# allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
 					try:
-						self.owner.command('enable.pallet', [ pallet['name'],
-									f'release={pallet["release"]}',
-									f'box={box}' ])
+						self.owner.command('enable.pallet', [
+										pallet['name'],
+										f'release={pallet["release"]}',
+										f'box={box}'
+										])
 						print(f'success enabling {pallet} in {box}')
 						self.owner.successes += 1
 

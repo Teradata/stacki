@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'network'
 
 	def requires(self):
-		return [ 'software', 'host' ]
+		return [ 'software', 'environment', 'group' ]
 
 	def run(self, args):
 
@@ -37,9 +37,11 @@ class Plugin(stack.commands.Plugin):
 				#the add network command requires at least name address and mask
 				#if the network exists already we want to overwrite its information
 				#so we first add the network then set everything
-				self.owner.command('add.network', [ name,
-									f'address={network["address"]}',
-									f'mask={network["netmask"]}' ])
+				self.owner.command('add.network', [
+								name,
+								f'address={network["address"]}',
+								f'mask={network["netmask"]}'
+				])
 				print(f'success adding network {name}')
 				self.owner.successes += 1
 			except Exception as e:

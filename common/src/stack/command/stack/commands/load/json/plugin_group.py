@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'group'
 
 	def requires(self):
-		return [ 'software', 'host', 'network' ]
+		return [ 'software', 'environment' ]
 
 	def run(self, args):
 

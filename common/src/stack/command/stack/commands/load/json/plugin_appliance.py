@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'appliance'
 
 	def requires(self):
-		return [ 'software', 'host', 'network', 'group' ]
+		return [ 'software', 'environment', 'group', 'network' ]
 
 	def run(self, args):
 		# check if the user would like to load appliance data
@@ -46,9 +46,11 @@ class Plugin(stack.commands.Plugin):
 
 			for attr in appliance['attrs']:
 				try:
-					command = [appliance_name,
-							f'attr={attr["attr"]}',
-							f'value={attr["value"]}']
+					command = [
+						appliance_name,
+						f'attr={attr["attr"]}',
+						f'value={attr["value"]}'
+					]
 					if attr['type'] == 'shadow':
 						command.append('shadow=True')
 
@@ -67,10 +69,12 @@ class Plugin(stack.commands.Plugin):
 
 			for route in appliance['route']:
 				try:
-					self.owner.command('add.appliance.route', [ appliance_name,
-								f'address={route["network"]}',
-								f'gateway={route["gateway"]}',
-								f'netmask={route["netmask"]}' ])
+					self.owner.command('add.appliance.route', [
+							appliance_name,
+							f'address={route["network"]}',
+							f'gateway={route["gateway"]}',
+							f'netmask={route["netmask"]}'
+					])
 					print(f'success adding appliance route {route}')
 					self.owner.successes += 1
 
@@ -85,15 +89,17 @@ class Plugin(stack.commands.Plugin):
 
 			for rule in appliance['firewall']:
 				try:
-					self.owner.command('add.appliance.firewall', [ appliance_name,
-								f'action={rule["action"]}',
-								f'chain={rule["chain"]}',
-								f'protocol={rule["protocol"]}',
-								f'service={rule["service"]}',
-								f'network={rule["network"]}',
-								f'output-network={rule["output-network"]}',
-								f'rulename={rule["name"]}',
-								f'table={rule["table"]}' ])
+					self.owner.command('add.appliance.firewall', [
+							appliance_name,
+							f'action={rule["action"]}',
+							f'chain={rule["chain"]}',
+							f'protocol={rule["protocol"]}',
+							f'service={rule["service"]}',
+							f'network={rule["network"]}',
+							f'output-network={rule["output-network"]}',
+							f'rulename={rule["name"]}',
+							f'table={rule["table"]}'
+					])
 					print(f'success adding appliance firewall rule {rule}')
 					self.owner.successes += 1
 
@@ -112,15 +118,21 @@ class Plugin(stack.commands.Plugin):
 				if partition['device'] not in device_list:
 					device_list.append(partition['device'])
 			for device in device_list:
-				self.owner.command('remove.storage.partition', [ appliance_name, 'scope=appliance', f'device={device}' ])
+				self.owner.command('remove.storage.partition', [
+						appliance_name,
+						'scope=appliance',
+						f'device={device}'
+				])
 
 			for partition in appliance['partition']:
 				try:
 					print('adding appliance partition...')
-					command = [appliance_name,
-							f'device={partition["device"]}',
-							f'partid={partition["partid"]}',
-							f'size={partition["size"]}' ]
+					command = [
+						appliance_name,
+						f'device={partition["device"]}',
+						f'partid={partition["partid"]}',
+						f'size={partition["size"]}'
+					]
 					if partition['options']:
 						command.append(f'options={partition["options"]}')
 					if partition['mountpoint']:
@@ -142,10 +154,12 @@ class Plugin(stack.commands.Plugin):
 
 
 			for controller in appliance['controller']:
-				command = [appliance_name,
-						f'arrayid={controller["arrayid"]}',
-						f'raidlevel={controller["raidlevel"]}',
-						f'slot={controller["slot"]}' ]
+				command = [
+					appliance_name,
+					f'arrayid={controller["arrayid"]}',
+					f'raidlevel={controller["raidlevel"]}',
+					f'slot={controller["slot"]}'
+				]
 				if controller['adapter']:
 					command.append(f'adapter={controller["adapter"]}')
 				if controller['enclosure']:

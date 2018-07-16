@@ -12,7 +12,7 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'global'
 	def requires(self):
-		return [ 'software', 'host', 'network', 'group', 'appliance', 'os', 'environment', 'bootaction' ]
+		return [ 'software', 'environment', 'group', 'network', 'appliance', 'os' ]
 
 	def run(self, args):
 
@@ -40,9 +40,10 @@ class Plugin(stack.commands.Plugin):
 
 					try:
 						self.owner.command('set.attr', [
-									f'attr={attr["attr"]}',
-									f'value={attr["value"]}',
-									f'shadow={attr_shadow}' ])
+								f'attr={attr["attr"]}',
+								f'value={attr["value"]}',
+								f'shadow={attr_shadow}'
+						])
 						print(f'success setting global attr {attr["attr"]}')
 						self.owner.successes += 1
 
@@ -59,9 +60,10 @@ class Plugin(stack.commands.Plugin):
 				for route in import_data[scope]:
 					try:
 						self.owner.command('add.route', [
-									f'address={route["network"]}',
-									f'gateway={route["gateway"]}',
-									f'netmask={route["netmask"]}'])
+								f'address={route["network"]}',
+								f'gateway={route["gateway"]}',
+								f'netmask={route["netmask"]}'
+						])
 						print(f'success adding global route {route["network"]}')
 						self.owner.successes += 1
 
@@ -77,14 +79,15 @@ class Plugin(stack.commands.Plugin):
 				for rule in import_data[scope]:
 					try:
 						self.owner.command('add.firewall', [
-									f'action={rule["action"]}',
-									f'chain={rule["chain"]}',
-									f'protocol={rule["protocol"]}',
-									f'service={rule["service"]}',
-									f'network={rule["network"]}',
-									f'output-network={rule["output-network"]}',
-									f'rulename={rule["name"]}',
-									f'table={rule["table"]}' ])
+								f'action={rule["action"]}',
+								f'chain={rule["chain"]}',
+								f'protocol={rule["protocol"]}',
+								f'service={rule["service"]}',
+								f'network={rule["network"]}',
+								f'output-network={rule["output-network"]}',
+								f'rulename={rule["name"]}',
+								f'table={rule["table"]}'
+						])
 						print(f'success adding global firewall fule {rule["name"]}')
 						self.owner.successes += 1
 
@@ -101,13 +104,13 @@ class Plugin(stack.commands.Plugin):
 					try:
 						# normally the scope would be the first argument but since we are in the global plugin we need to leave it blank. Stacki defaults to global
 						self.owner.command('add.storage.partition', [
-									f'device={partition["device"]}',
-									f'options={partition["options"]}',
-									f'mountpoint={partition["mountpoint"]}',
-									f'partid={partition["partid"]}',
-									f'size={partition["size"]}',
-									f'type={partition["fstype"]}',
-									])
+								f'device={partition["device"]}',
+								f'options={partition["options"]}',
+								f'mountpoint={partition["mountpoint"]}',
+								f'partid={partition["partid"]}',
+								f'size={partition["size"]}',
+								f'type={partition["fstype"]}',
+						])
 						print(f'success adding global partition {partition["device"]}')
 						self.owner.successes += 1
 
@@ -122,9 +125,9 @@ class Plugin(stack.commands.Plugin):
 			elif scope == 'controller':
 				for controller in import_data[scope]:
 					command = [f'arrayid={controller["arrayid"]}',
-							f'raidlevel={controller["raidlevel"]}',
-							f'slot={controller["slot"]}',
-							]
+						f'raidlevel={controller["raidlevel"]}',
+						f'slot={controller["slot"]}',
+					]
 					if controller['adapter']:
 						command.append(controller['adapter'])
 					if controller['enclosure']:

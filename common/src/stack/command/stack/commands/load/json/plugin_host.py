@@ -12,7 +12,7 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'host'
 	def requires(self):
-		return [ 'software' ]
+		return [ 'software', 'environment', 'group', 'network', 'appliance', 'os', 'global' ]
 
 	def run(self, args):
 
@@ -33,11 +33,13 @@ class Plugin(stack.commands.Plugin):
 		for host in import_data:
 			host_name = host['name']
 			try:
-				command = [ host_name,
-						f'box={host["box"]}',
-						f'longname={host["appliancelongname"]}',
-						f'rack={host["rack"]}',
-						f'rank={host["rank"]}' ]
+				command = [
+					host_name,
+					f'box={host["box"]}',
+					f'longname={host["appliancelongname"]}',
+					f'rack={host["rack"]}',
+					f'rank={host["rank"]}'
+				]
 				if host['environment']:
 					command.append(f'environment={host["environment"]}')
 				self.owner.command('add.host', command)
@@ -81,51 +83,67 @@ class Plugin(stack.commands.Plugin):
 						print(f'success setting {host["name"]} interface default')
 						self.owner.successes += 1
 					if interface['network']:
-						self.owner.command('set.host.interface.network', [ host_name,
-													f'network={interface["network"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.network', [
+												host_name,
+												f'network={interface["network"]}',
+												f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface network')
 						self.owner.successes += 1
 					if interface['mac']:
-						self.owner.command('set.host.interface.mac', [ host_name,
-													f'mac={interface["mac"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.mac', [
+											host_name,
+											f'mac={interface["mac"]}',
+											f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface mac')
 						self.owner.successes += 1
 					if interface['ip']:
-						self.owner.command('set.host.interface.ip', [ host_name,
-													f'ip={interface["ip"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.ip', [
+											host_name,
+											f'ip={interface["ip"]}',
+											f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface ip')
 						self.owner.successes += 1
 					if interface['name']:
-						self.owner.command('set.host.interface.name', [ host_name,
-													f'name={interface["name"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.name', [
+											host_name,
+											f'name={interface["name"]}',
+											f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface name')
 						self.owner.successes += 1
 					if interface['module']:
-						self.owner.command('set.host.interface.module', [ host_name,
-													f'module={interface["module"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.module', [
+											host_name,
+											f'module={interface["module"]}',
+											f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface module')
 						self.owner.successes += 1
 					if interface['vlan']:
-						self.owner.command('set.host.interface.vlan', [ host_name,
-													f'vlan={interface["vlan"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.vlan', [
+											host_name,
+											f'vlan={interface["vlan"]}',
+											f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface vlan')
 						self.owner.successes += 1
 					if interface['options']:
-						self.owner.command('set.host.interface.options', [ host_name,
-													f'options={interface["options"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.options', [
+												host_name,
+												f'options={interface["options"]}',
+												f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface options')
 						self.owner.successes += 1
 					if interface['channel']:
-						self.owner.command('set.host.interface.channel', [ host_name,
-													f'channel={interface["channel"]}',
-													f'interface={interface["interface"]}' ])
+						self.owner.command('set.host.interface.channel', [
+												host_name,
+												f'channel={interface["channel"]}',
+												f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface channel')
 						self.owner.successes += 1
 
@@ -149,10 +167,12 @@ class Plugin(stack.commands.Plugin):
 					attr_value = ' '.join(attr['value'])
 				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
 				try:
-					self.owner.command('set.host.attr', [ host_name,
-										f'attr={attr_name}',
-										f'value={attr_value}',
-										f'shadow={attr_shadow}' ])
+					self.owner.command('set.host.attr', [
+									host_name,
+									f'attr={attr_name}',
+									f'value={attr_value}',
+									f'shadow={attr_shadow}'
+					])
 					print(f'success setting {host["name"]} attr {attr_name}')
 					self.owner.successes += 1
 
@@ -170,17 +190,19 @@ class Plugin(stack.commands.Plugin):
 					#this will likely have an issue with service as it is a comma delimeted string that should be a list
 					#need to come back and fix this
 					#same thing with flags
-					self.owner.command('add.host.firewall', [ host_name,
-								f'action={rule["action"]}',
-								f'chain={rule["chain"]}',
-								f'protocol={rule["protocol"]}',
-								f'service={rule["service"]}',
-								f'comment={rule["comment"]}',
-								f'flags={rule["flags"]}',
-								f'network={rule["network"]}',
-								f'output-network={rule["output-network"]}',
-								f'rulename={rule["name"]}',
-								f'table={rule["table"]}' ])
+					self.owner.command('add.host.firewall', [
+									host_name,
+									f'action={rule["action"]}',
+									f'chain={rule["chain"]}',
+									f'protocol={rule["protocol"]}',
+									f'service={rule["service"]}',
+									f'comment={rule["comment"]}',
+									f'flags={rule["flags"]}',
+									f'network={rule["network"]}',
+									f'output-network={rule["output-network"]}',
+									f'rulename={rule["name"]}',
+									f'table={rule["table"]}'
+					])
 					print(f'success adding host firewall rule {rule["name"]}')
 					self.owner.successes += 1
 
@@ -196,10 +218,12 @@ class Plugin(stack.commands.Plugin):
 
 			for route in host['route']:
 				try:
-					self.owner.command('add.host.route', [ host_name,
-								f'address={route["network"]}',
-								f'gateway={route["gateway"]}',
-								f'netmask={route["netmask"]}' ])
+					self.owner.command('add.host.route', [
+									host_name,
+									f'address={route["network"]}',
+									f'gateway={route["gateway"]}',
+									f'netmask={route["netmask"]}'
+					])
 					print(f'success adding host route {route}')
 					self.owner.successes += 1
 
@@ -220,10 +244,12 @@ class Plugin(stack.commands.Plugin):
 
 
 			for partition in host['partition']:
-				command = [host_name,
-						f'device={partition["device"]}',
-						f'mountpoint={partition["mountpoint"]}',
-						f'size={partition["size"]}']
+				command = [
+					host_name,
+					f'device={partition["device"]}',
+					f'mountpoint={partition["mountpoint"]}',
+					f'size={partition["size"]}'
+					]
 				if partition['fstype']:
 					command.append(f'fs={partition["fstype"]}')
 				if partition['partid']:
@@ -248,12 +274,14 @@ class Plugin(stack.commands.Plugin):
 			for controller in host['controller']:
 				try:
 					print('adding host controller...')
-					self.owner.command('add.storage.controller', [ host_name,
-								f'adapter={controller["adapter"]}',
-								f'arrayid={controller["arrayid"]}',
-								f'enclosure={controller["enclosure"]}',
-								f'raidlevel={controller["raidlevel"]}',
-								f'slot={controller["slot"]}' ])
+					self.owner.command('add.storage.controller', [
+										host_name,
+									f'adapter={controller["adapter"]}',
+									f'arrayid={controller["arrayid"]}',
+									f'enclosure={controller["enclosure"]}',
+									f'raidlevel={controller["raidlevel"]}',
+									f'slot={controller["slot"]}'
+					])
 					print(f'success adding host controller {controller}')
 					self.owner.successes += 1
 
@@ -302,5 +330,14 @@ class Plugin(stack.commands.Plugin):
 					self.owner.successes += 1
 				except Exception as e:
 					print(f'error setting comment of {host_name}')
+					self.owner.errors += 1
+			# set the environment if there is one
+			if host['environment']:
+				try:
+					self.owner.command('set.host.environment', [ host_name, f'environment={host["environment"]}' ])
+					print(f'success setting environment of {host_name}')
+					self.owner.successes += 1
+				except Exception as e:
+					print(f'error setting environment of {host_name} {e}')
 					self.owner.errors += 1
 

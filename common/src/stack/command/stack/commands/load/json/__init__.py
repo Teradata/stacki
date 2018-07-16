@@ -15,6 +15,7 @@ import json
 import sys
 import os
 from stack.exception import CommandError
+import subprocess
 
 class command(stack.commands.load.command, stack.commands.Command):
 	MustBeRoot = 0
@@ -72,12 +73,18 @@ class Command(command):
 	"""
 	def checks(self, args):
 
-		# check to make sure that the user is not attepting to add more than one frontend
+		# Make sure that the user is not attepting to add more than one frontend
 		if ('host' in args or not args) and 'host' in self.data:
 			current_frontend = json.loads(self.command('list.host', [ 'a:frontend', 'output-format=json' ]))[0]['host']
 			for host in self.data['host']:
-				if host['appliancelongname'] == 'Frontend' and host['name'] != current_frontend:
+				if host['appliance'] == 'frontend' and host['name'] != current_frontend:
 					raise CommandError(self, 'frontend name in the json document does not match the current frontend name')
+
+		# Make sure that all of the pallets at least have URLs
+		if ('software' in args or not args) and 'software' in self.data and 'pallet' in self.data['software']:
+			for pallet in self.data['software']['pallet']:
+				if pallet['url'] == None:
+					raise CommandError(self, f'pallet {pallet["name"]} {pallet["version"]} has no url')
 
 
 	def run(self, params, args):
@@ -95,7 +102,13 @@ class Command(command):
 			except ValueError:
 				raise CommandError(self, 'Invalid json document')
 
+		#run a few pre checks
 		self.checks(args)
+
+		#make a backup of the database in its current state in the event of any errors
+		s = subprocess.run(['mysqldump', 'cluster'], stdout=subprocess.PIPE)
+		with open ('cluster_backup.sql', 'wb+') as f:
+			f.write(s.stdout)
 
 		self.successes = 0
 		self.warnings = 0
@@ -103,7 +116,20 @@ class Command(command):
 
 		self.runPlugins(args)
 
+		with open('cluster_backup.sql', 'rb') as f:
+			cluster_backup = f.read()
+		s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		s.communicate(cluster_backup)
+
 		print(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors')
 		if self.errors != 0:
-			raise CommandError(self, 'There was at least one error')
+			# since there were errors we want to revert any changes that we made
+			with open('cluster_backup.sql', 'rb') as f:
+				cluster_backup = f.read()
+			s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+			s.communicate(cluster_backup)
 
+			raise CommandError(self, 'There was at least one error, database has been reverted. No changes have been made.')
+		else:
+			# our load was successful so we can remove our temporary backup
+			s = subprocess.call(['rm', '-f', 'cluster_backup.sql'], stdout=subprocess.PIPE)

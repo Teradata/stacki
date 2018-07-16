@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'bootaction'
 
 	def requires(self):
-		return [ 'software', 'host', 'network', 'group', 'appliance', 'os', 'environment' ]
+		return [ 'software', 'environment', 'group', 'network', 'appliance', 'os', 'global', 'host' ]
 
 	def run(self, args):
 		# check if the user would like to import bootaction data
@@ -33,9 +33,11 @@ class Plugin(stack.commands.Plugin):
 		for profile in import_data:
 			action = profile['name']
 
-			command = [action,
-					f'kernel={profile["kernel"]}',
-					f'type={profile["type"]}']
+			command = [
+				action,
+				f'kernel={profile["kernel"]}',
+				f'type={profile["type"]}'
+			]
 			if profile['os']:
 				command.append(f'os={profile["os"]}')
 			if profile['ramdisk']:

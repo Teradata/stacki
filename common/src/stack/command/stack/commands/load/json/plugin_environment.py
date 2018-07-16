@@ -12,7 +12,7 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'environment'
 	def requires(self):
-		return [ 'software', 'host', 'network', 'group', 'appliance', 'os' ]
+		return [ 'software' ]
 
 	def run(self, args):
 
@@ -31,6 +31,15 @@ class Plugin(stack.commands.Plugin):
 
 		for environment in import_data:
 			environment_name= environment['name']
+			try:
+				self.owner.command('add.environment', [ environment_name ])
+			except Exception as e:
+				if 'exists' in str(e):
+					print(f'warning adding environment {environment_name}: {e}')
+					self.owner.warnings += 1
+				else:
+					print(f'error adding environment {environment}: {e}')
+					self.owner.errors += 1
 
 			for attr in environment['attrs']:
 				#determine if this is a shadow attr by looking at the type
@@ -39,7 +48,12 @@ class Plugin(stack.commands.Plugin):
 				else:
 					attr_shadow = False
 				try:
-					self.owner.command('add.environment.attr', [ environment_name, f'attr={attr["attr"]}', f'value={attr["value"]}', f'shadow={attr_shadow}' ])
+					self.owner.command('add.environment.attr', [
+							environment_name,
+							f'attr={attr["attr"]}',
+							f'value={attr["value"]}',
+							f'shadow={attr_shadow}'
+					])
 					self.owner.successes += 1
 
 				except Exception as e:
