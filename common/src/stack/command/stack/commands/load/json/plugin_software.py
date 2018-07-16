@@ -40,7 +40,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning importing box {box["name"]}: {e}')
 						self.owner.warnings += 1
@@ -77,7 +77,7 @@ class Plugin(stack.commands.Plugin):
 #										print(f'success enabling {pallet} in {box}')
 #										self.owner.successes += 1
 #
-#									except Exception as e:
+#									except CommandError as e:
 #										print(f'error enabling {pallet["name"]} in {box}: {e}')
 #										self.owner.errors += 1
 #						# we have finished with this pallet
@@ -96,7 +96,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding pallet {pallet}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding pallet {pallet}: {e}')
 						self.owner.warnings += 1
@@ -115,7 +115,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success enabling {pallet} in {box}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						print(f'error enabling {pallet["name"]} in {box}: {e}')
 						self.owner.errors += 1
 
@@ -131,7 +131,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding cart {cart}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning importing cart {cart}: {e}')
 						self.owner.warnings += 1

@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -47,7 +48,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success setting global attr {attr["attr"]}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						if 'exists' in str(e):
 							print(f'warning setting global attr {attr["attr"]}: {e}')
 							self.owner.warnings += 1
@@ -67,7 +68,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success adding global route {route["network"]}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						if 'exists' in str(e):
 							print(f'warning adding global route {route["network"]}: {e}')
 							self.owner.warnings += 1
@@ -91,7 +92,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success adding global firewall fule {rule["name"]}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						if 'exists' in str(e):
 							print(f'warning adding global firewall rule {rule["name"]}: {e}')
 							self.owner.warnings += 1
@@ -114,7 +115,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success adding global partition {partition["device"]}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						if 'exists' in str(e):
 							print(f'warning adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
 							self.owner.warnings += 1
@@ -140,7 +141,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'success adding global controller {controller["arrayid"]}')
 						self.owner.successes += 1
 
-					except Exception as e:
+					except CommandError as e:
 						if 'exists' in str(e):
 							print(f'warning adding global controller: {e}')
 							self.owner.warnings += 1

@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -47,7 +48,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success setting os attr {attr}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning setting os attr {attr}: {e}')
 						self.owner.warnings += 1
@@ -66,7 +67,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding os route {route}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding os route {route}: {e}')
 						self.owner.warnings += 1
@@ -91,7 +92,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding os firewall rule {rule}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding os firewall rule {rule}: {e}')
 						self.owner.warnings += 1
@@ -115,7 +116,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding os partition {partition}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding partition {partition}: {e}')
 						self.owner.warnings += 1
@@ -141,7 +142,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding os controller {controller}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding os controller {controller}: {e}')
 						self.owner.warnings += 1

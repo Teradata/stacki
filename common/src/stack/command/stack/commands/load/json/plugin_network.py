@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -44,7 +45,7 @@ class Plugin(stack.commands.Plugin):
 				])
 				print(f'success adding network {name}')
 				self.owner.successes += 1
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding network {name}: {e}')
 					self.owner.warnings += 1
@@ -84,7 +85,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding {name} zone')
 					self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning setting network {name}: {e}')
 					self.owner.warnings += 1

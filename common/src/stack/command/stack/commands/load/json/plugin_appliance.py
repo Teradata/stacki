@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -35,7 +36,7 @@ class Plugin(stack.commands.Plugin):
 				print(f'success adding appliance {appliance_name}')
 				self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding appliance {appliance_name}: {e}')
 					self.owner.warnings += 1
@@ -58,7 +59,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success setting {appliance_name} attr {attr["attr"]}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.warnings += 1
@@ -78,7 +79,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding appliance route {route}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding appliance route: {e}')
 						self.owner.warnings += 1
@@ -103,7 +104,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding appliance firewall rule {rule}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding appliance firewall rule {rule["name"]}: {e}')
 						self.owner.warnings += 1
@@ -144,7 +145,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding appliance partition {partition}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding appliance partition: {e}')
 						self.owner.warnings += 1
@@ -174,7 +175,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding appliance controller {controller}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding appliance controller: {e}')
 						self.owner.warnings += 1

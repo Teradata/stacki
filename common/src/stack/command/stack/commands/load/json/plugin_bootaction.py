@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -48,7 +49,7 @@ class Plugin(stack.commands.Plugin):
 				print(f'success adding bootaction {action}')
 				self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding bootaction {action}: {e}')
 					self.owner.warnings += 1
@@ -67,7 +68,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('set.bootaction.args', command)
 					print(f'success setting bootaction {action} args')
 					self.owner.successes += 1
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning setting bootaction {action} args: {e}')
 						self.owner.warnings += 1

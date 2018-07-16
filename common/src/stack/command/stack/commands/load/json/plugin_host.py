@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -47,7 +48,7 @@ class Plugin(stack.commands.Plugin):
 				print(f'success adding host {host["name"]}')
 				self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding host {host["name"]}: {e}')
 					self.owner.warnings += 1
@@ -62,7 +63,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('add.host.interface', [host_name, f'interface={interface["interface"]}' ])
 					print(f'success adding interface {interface["interface"]}')
 					self.owner.successes += 1
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding interface {interface["interface"]}: {e}')
 						self.owner.warnings += 1
@@ -148,7 +149,7 @@ class Plugin(stack.commands.Plugin):
 						self.owner.successes += 1
 
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning setting host interface {interface["name"]}: {e}')
 						self.owner.warnings += 1
@@ -176,7 +177,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success setting {host["name"]} attr {attr_name}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning setting {host["name"]} attr {attr_name}: {e}')
 						self.owner.warnings += 1
@@ -206,7 +207,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding host firewall rule {rule["name"]}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print (f'warning adding host firewall rule {rule["name"]}: {e}')
 						self.owner.warnings += 1
@@ -227,7 +228,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding host route {route}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding route {route["network"]}: {e}')
 						self.owner.warnings += 1
@@ -261,7 +262,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding partition {partition}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print (f'warning adding partition: {e}')
 						self.owner.warnings += 1
@@ -285,7 +286,7 @@ class Plugin(stack.commands.Plugin):
 					print(f'success adding host controller {controller}')
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding host ontroller: {e}')
 						self.owner.warnings += 1
@@ -304,7 +305,7 @@ class Plugin(stack.commands.Plugin):
 				print(f'success setting installaction of {host_name} to {host["installaction"]}')
 				self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning setting installaction of {host_name} to "{host["installaction"]}": {e}')
 					self.owner.warnings += 1
@@ -319,7 +320,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('set.host.metadata', [ host_name, f'metadata={host["metadata"]}' ])
 					print(f'success setting metadata of {host_name}')
 					self.owner.successes += 1
-				except Exception as e:
+				except CommandError as e:
 					print(f'error setting metadata of {host_name}')
 					self.owner.errors += 1
 			#set the comment if there is one
@@ -328,7 +329,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('set.host.comment', [ host_name, f'comment={host["comment"]}' ])
 					print(f'success setting comment of {host_name}')
 					self.owner.successes += 1
-				except Exception as e:
+				except CommandError as e:
 					print(f'error setting comment of {host_name}')
 					self.owner.errors += 1
 			# set the environment if there is one
@@ -337,7 +338,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.command('set.host.environment', [ host_name, f'environment={host["environment"]}' ])
 					print(f'success setting environment of {host_name}')
 					self.owner.successes += 1
-				except Exception as e:
+				except CommandError as e:
 					print(f'error setting environment of {host_name} {e}')
 					self.owner.errors += 1
 

@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -37,7 +38,7 @@ class Plugin(stack.commands.Plugin):
 				print(f'success adding group {group["name"]}')
 				self.owner.successes += 1
 
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding group {group["name"]}: {e}')
 					self.owner.warnings += 1

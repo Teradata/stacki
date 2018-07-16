@@ -6,6 +6,7 @@
 
 import stack.commands
 import json
+from stack.exception import CommandError
 
 class Plugin(stack.commands.Plugin):
 
@@ -33,7 +34,7 @@ class Plugin(stack.commands.Plugin):
 			environment_name= environment['name']
 			try:
 				self.owner.command('add.environment', [ environment_name ])
-			except Exception as e:
+			except CommandError as e:
 				if 'exists' in str(e):
 					print(f'warning adding environment {environment_name}: {e}')
 					self.owner.warnings += 1
@@ -56,7 +57,7 @@ class Plugin(stack.commands.Plugin):
 					])
 					self.owner.successes += 1
 
-				except Exception as e:
+				except CommandError as e:
 					if 'exists' in str(e):
 						print(f'warning adding environment attr {attr}: {e}')
 						self.owner.warnings += 1
@@ -67,7 +68,7 @@ class Plugin(stack.commands.Plugin):
 #			for route in environment['route']:
 #				try:
 #					self.owner.command('add.environment.route', [ environment_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ])
-#				except Exception as e:
+#				except CommandError as e:
 #					if 'exists' in str(e):
 #						print(f'warning adding environment route {route}: {e}')
 #					else:
@@ -77,7 +78,7 @@ class Plugin(stack.commands.Plugin):
 #			for rule in environment['firewall']:
 #				try:
 #					self.owner.command('add.environment.firewall', [ environment_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output_network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
-#				except Exception as e:
+#				except CommandError as e:
 #					if 'exists' in str(e):
 #						print(f'warning adding environment firewall rule {rule}: {e}')
 #					else:
@@ -88,7 +89,7 @@ class Plugin(stack.commands.Plugin):
 #				print('adding environment partition...')
 #				try:
 #					self.owner.command('add.storage.partition', [ environemnt_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
-#				except Exception as e:
+#				except CommandError as e:
 #					if 'exists' in str(e):
 #						print(f'warning adding environment partition {partition}: {e}')
 #					else:
@@ -102,7 +103,7 @@ class Plugin(stack.commands.Plugin):
 					#for it in storage_controller and it is not listed in stack list storage controller
 					#f'hotspare={controller["hotspare"]}'
 #					self.owner.command('add.storage.controller', [ environment_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
-#				except Exception as e:
+#				except CommandError as e:
 #					if 'exists' in str(e):
 #						print(f'warning adding environment controller {controller}: {e}')
 #					else:
