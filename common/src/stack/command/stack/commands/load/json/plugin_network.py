@@ -18,13 +18,12 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		#check if the user would like to import software data
-		#if there are no args, assume the user would like to import everthing
+		# check if the user would like to import software data
+		# if there are no args, assume the user would like to import everthing
 		if args and 'network' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
-		#check if there is any software data before we go getting all kinds of key errors
+		# self.owner.data contains the data from the json file defined in init
 		if 'network' in self.owner.data:
 			import_data = self.owner.data['network']
 		else:
@@ -35,9 +34,9 @@ class Plugin(stack.commands.Plugin):
 		for network in import_data:
 			name = network['name'].strip()
 			try:
-				#the add network command requires at least name address and mask
-				#if the network exists already we want to overwrite its information
-				#so we first add the network then set everything
+				# the add network command requires at least name address and mask
+				# if the network exists already we want to overwrite its information
+				# so we first add the network then set everything
 				self.owner.command('add.network', [
 								name,
 								f'address={network["address"]}',
@@ -54,8 +53,8 @@ class Plugin(stack.commands.Plugin):
 					self.owner.errors += 1
 
 			try:
-				#now we set all of the attributes
-				#if the network existed already in the database we will overwrite everything about it
+				# now we set all of the attributes
+				# if the network existed already in the database we will overwrite everything about it
 				if network['address']:
 					self.owner.command('set.network.address', [ name, f'address={network["address"]}' ])
 					print(f'success adding {name} address')

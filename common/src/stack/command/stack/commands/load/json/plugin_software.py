@@ -54,7 +54,7 @@ class Plugin(stack.commands.Plugin):
 				pallet_dir =  pallet['url']
 				if pallet_dir == None:
 					# if we have no url to fetch the pallet from we cannot add it
-					raise CommandError(self, f'error adding pallet {pallet}: no url found')
+					raise CommandError(self, f'error adding pallet {pallet["name"]} {pallet["version"]}: no url found')
 					self.owner.errors += 1
 
 					# the following code is now unreachable, does it have any value?
@@ -85,15 +85,15 @@ class Plugin(stack.commands.Plugin):
 
 
 				try:
-					command = [pallet_dir]
+					parameters = [pallet_dir]
 					if pallet['urlauthUser'] and pallet['urlauthPass']:
-						command.append(
+						parameters.append(
 							f'username={pallet["urlauthUser"]}',
 							f'password={pallet["urlauthPass"]}'
 							)
-					self.owner.command('add.pallet', command)
+					self.owner.command('add.pallet', parameters)
 
-					print(f'success adding pallet {pallet}')
+					print(f'success adding pallet {pallet["name"]} {pallet["version"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
@@ -101,7 +101,7 @@ class Plugin(stack.commands.Plugin):
 						print(f'warning adding pallet {pallet}: {e}')
 						self.owner.warnings += 1
 					else:
-						raise CommandError(self, f'error adding pallet {pallet}: {e}')
+						raise CommandError(self, f'error adding pallet {pallet["name"]} {pallet["version"]}: {e}')
 
 
 				# allow for multiple boxes or no boxes at all
@@ -112,11 +112,11 @@ class Plugin(stack.commands.Plugin):
 										f'release={pallet["release"]}',
 										f'box={box}'
 										])
-						print(f'success enabling {pallet} in {box}')
+						print(f'success enabling {pallet["name"]} {pallet["version"]} in {box}')
 						self.owner.successes += 1
 
 					except CommandError as e:
-						print(f'error enabling {pallet["name"]} in {box}: {e}')
+						print(f'error enabling {pallet["name"]}, {pallet["version"]} in {box}: {e}')
 						self.owner.errors += 1
 
 

@@ -18,13 +18,12 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		#check if the user would like to import group data
-		#if there are no args, assume the user would like to import everthing
+		# check if the user would like to import group data
+		# if there are no args, assume the user would like to import everthing
 		if args and 'group' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
-		#check if there is any group data before we go getting all kinds of key errors
+		# self.owner.data contains the data from the json file defined in init
 		if 'group' in self.owner.data:
 			import_data = self.owner.data['group']
 		else:

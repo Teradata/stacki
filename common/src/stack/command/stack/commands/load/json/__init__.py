@@ -26,47 +26,47 @@ class Command(command):
 	Load configuration data from the provided json document. If no arguments
 	are provided then all plugins will be run.
 
-	<param optional='1' type='string' name='file'>
+	<param optional='0' type='string' name='file'>
 	The json document containing the configuration information.
 	</param>
 
-	<arg optional='0' type='string' name='software'>
+	<arg optional='1' type='string' name='software'>
 	Load pallet, cart, and box data. If the pallet exists on a remote
 	server that requires authentication, be sure to provide the username
 	and password in the corresponding json fields.
 	</arg>
 
-	<arg optional='0' type='string' name='host'>
+	<arg optional='1' type='string' name='host'>
 	Load name, rack, rank, interface, attr, firewall, box, appliance,
 	comment, metadata, environment, osaction, route, group, partition,
 	and controller data for each host.
 	</arg>
 
-	<arg optional='0' type='string' name='network'>
+	<arg optional='1' type='string' name='network'>
 	Load name, address, gateway, netmask, dsn, pxe, mtu, and zone
 	data for each network.
 	</arg>
 
-	<arg optional='0' type='string' name='global'>
+	<arg optional='1' type='string' name='global'>
 	Load attr, route, firewall, partition, and controller data for
 	the global scope.
 	</arg>
 
-	<arg optional='0' type='string' name='os'>
+	<arg optional='1' type='string' name='os'>
 	Load name, attr, route, firewall, partition, and controller
 	data for each os.
 	</arg>
 
-	<arg optional='0' type='string' name='appliance'>
+	<arg optional='1' type='string' name='appliance'>
 	Load name, attr, route, firewall, partition, and controller
 	data for each appliance.
 	</arg>
 
-	<arg optional='0' type='string' name='group'>
+	<arg optional='1' type='string' name='group'>
 	Load name data for each group.
 	</arg>
 
-	<arg optional='0' type='string' name='bootaction'>
+	<arg optional='1' type='string' name='bootaction'>
 	Load name, kernel, ramdisk, type, arg, and os data for each
 	bootaction.
 	</arg>
@@ -102,28 +102,25 @@ class Command(command):
 			except ValueError:
 				raise CommandError(self, 'Invalid json document')
 
-		#run a few pre checks
+		# run a few pre checks
 		self.checks(args)
 
-		#make a backup of the database in its current state in the event of any errors
+		# make a backup of the database in its current state in the event of any errors
 		s = subprocess.run(['mysqldump', 'cluster'], stdout=subprocess.PIPE)
 		with open ('cluster_backup.sql', 'wb+') as f:
 			f.write(s.stdout)
 
+		# so that we are able to report how successful the load was
 		self.successes = 0
 		self.warnings = 0
 		self.errors = 0
 
 		self.runPlugins(args)
 
-		with open('cluster_backup.sql', 'rb') as f:
-			cluster_backup = f.read()
-		s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-		s.communicate(cluster_backup)
-
 		print(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors')
+
+		# if there are errors, revert db changes and fail
 		if self.errors != 0:
-			# since there were errors we want to revert any changes that we made
 			with open('cluster_backup.sql', 'rb') as f:
 				cluster_backup = f.read()
 			s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -131,5 +128,5 @@ class Command(command):
 
 			raise CommandError(self, 'There was at least one error, database has been reverted. No changes have been made.')
 		else:
-			# our load was successful so we can remove our temporary backup
+			# our load was successful so we can delete our temporary backup
 			s = subprocess.call(['rm', '-f', 'cluster_backup.sql'], stdout=subprocess.PIPE)

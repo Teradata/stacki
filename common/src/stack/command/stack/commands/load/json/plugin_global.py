@@ -17,11 +17,11 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		#check if the user would like to import global data
+		# check if the user would like to import global data
 		if args and 'global' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
+		# self.owner.data contains the data from the json file defined in init
 		if 'global' in self.owner.data:
 			import_data = self.owner.data['global']
 		else:
@@ -29,7 +29,7 @@ class Plugin(stack.commands.Plugin):
 			return
 
 		for scope in import_data:
-			#check to make sure the scope is valid
+			# check to make sure the scope is valid
 			if scope == 'attrs':
 				for attr in import_data[scope]:
 					attr_type = attr['type']
@@ -79,23 +79,31 @@ class Plugin(stack.commands.Plugin):
 			elif scope == 'firewall':
 				for rule in import_data[scope]:
 					try:
-						self.owner.command('add.firewall', [
-								f'action={rule["action"]}',
-								f'chain={rule["chain"]}',
-								f'protocol={rule["protocol"]}',
-								f'service={rule["service"]}',
-								f'network={rule["network"]}',
-								f'output-network={rule["output-network"]}',
-								f'rulename={rule["name"]}',
-								f'table={rule["table"]}'
-						])
+						parameters = [
+						f'action={rule["action"]}',
+						f'chain={rule["chain"]}',
+						f'protocol={rule["protocol"]}',
+						f'service={rule["service"]}',
+						f'network={rule["network"]}',
+						f'output-network={rule["output-network"]}',
+						f'rulename={rule["name"]}',
+						f'table={rule["table"]}'
+					]
+						self.owner.command('add.firewall', parameters)
 						print(f'success adding global firewall fule {rule["name"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							print(f'warning adding global firewall rule {rule["name"]}: {e}')
-							self.owner.warnings += 1
+							# the firewall rule exists but we want to replace it
+							try:
+								self.owner.command('remove.firewall', [ f'rulename={rule["name"]}' ])
+								self.owner.command('add.firewall', parameters)
+								print(f'success replacing global firewall rule {rule["name"]}')
+								self.owner.successes += 1
+							except CommandError as e:
+								print(f'error adding global firewall rule {rule["name"]}: {e}')
+								self.owner.errors += 1
 						else:
 							print(f'error adding global firewall rule {rule["name"]}: {e}')
 							self.owner.errors += 1
@@ -125,19 +133,19 @@ class Plugin(stack.commands.Plugin):
 
 			elif scope == 'controller':
 				for controller in import_data[scope]:
-					command = [f'arrayid={controller["arrayid"]}',
+					parameters = [f'arrayid={controller["arrayid"]}',
 						f'raidlevel={controller["raidlevel"]}',
 						f'slot={controller["slot"]}',
 					]
 					if controller['adapter']:
-						command.append(controller['adapter'])
+						parameters.append(controller['adapter'])
 					if controller['enclosure']:
-						command.append(controller['enclosure'])
+						parameters.append(controller['enclosure'])
 
 					# is controller['scope'] unused in the add?
 					# is controller['options'] unused in the add?
 					try:
-						self.owner.command('add.storage.controller', command)
+						self.owner.command('add.storage.controller', parameters)
 						print(f'success adding global controller {controller["arrayid"]}')
 						self.owner.successes += 1
 

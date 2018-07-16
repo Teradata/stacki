@@ -17,18 +17,19 @@ class Plugin(stack.commands.Plugin):
 		return [ 'software', 'environment', 'group', 'network' ]
 
 	def run(self, args):
+
 		# check if the user would like to load appliance data
 		if args and 'appliance' not in args:
 			return
 
-		#check if there is any appliance data to load
+		# check if there is any appliance data to load
 		if 'appliance' in self.owner.data:
 			import_data = self.owner.data['appliance']
 		else:
 			print('no appliance data in json file')
 			return
 
-		#add each appliance then set it's various data
+		# add each appliance then set everything about it
 		for appliance in import_data:
 			appliance_name = appliance['name']
 			try:
@@ -47,15 +48,15 @@ class Plugin(stack.commands.Plugin):
 
 			for attr in appliance['attrs']:
 				try:
-					command = [
+					parameters = [
 						appliance_name,
 						f'attr={attr["attr"]}',
 						f'value={attr["value"]}'
 					]
 					if attr['type'] == 'shadow':
-						command.append('shadow=True')
+						parameters.append('shadow=True')
 
-					self.owner.command('set.appliance.attr', command)
+					self.owner.command('set.appliance.attr', parameters)
 					print(f'success setting {appliance_name} attr {attr["attr"]}')
 					self.owner.successes += 1
 
@@ -70,19 +71,27 @@ class Plugin(stack.commands.Plugin):
 
 			for route in appliance['route']:
 				try:
-					self.owner.command('add.appliance.route', [
-							appliance_name,
-							f'address={route["network"]}',
-							f'gateway={route["gateway"]}',
-							f'netmask={route["netmask"]}'
-					])
+					parameters = [
+						appliance_name,
+						f'address={route["network"]}',
+						f'gateway={route["gateway"]}',
+						f'netmask={route["netmask"]}'
+					]
+
+					self.owner.command('add.appliance.route', parameters)
 					print(f'success adding appliance route {route}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance route: {e}')
-						self.owner.warnings += 1
+						# the route exists so we want to remove it and add our own
+						try:
+							self.owner.command('remove.appliance.route', [ appliance_name, f'address={route["network"]}' ])
+							self.owner.command('add.appliance.route', parameters)
+							print(f'success replacing appliance route {route}')
+						except:
+							print(f'error adding appliance route: {e}')
+							self.owner.errors += 1
 					else:
 						print(f'error adding appliance route: {e}')
 						self.owner.errors += 1
@@ -90,7 +99,7 @@ class Plugin(stack.commands.Plugin):
 
 			for rule in appliance['firewall']:
 				try:
-					self.owner.command('add.appliance.firewall', [
+					parameters = [
 							appliance_name,
 							f'action={rule["action"]}',
 							f'chain={rule["chain"]}',
@@ -100,14 +109,25 @@ class Plugin(stack.commands.Plugin):
 							f'output-network={rule["output-network"]}',
 							f'rulename={rule["name"]}',
 							f'table={rule["table"]}'
-					])
-					print(f'success adding appliance firewall rule {rule}')
+					]
+
+					self.owner.command('add.appliance.firewall', parameters)
+					print(f'success adding appliance firewall rule {rule["name"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance firewall rule {rule["name"]}: {e}')
-						self.owner.warnings += 1
+						# the firewall rule already exists so we want to remove it and add the new one
+						try:
+
+							self.owner.command('remove.appliance.firewall', [ appliance_name, f'rulename={rule["name"]}' ])
+
+							self.owner.command('add.appliance.firewall', parameters)
+							print(f'success replacing appliance firewall rule {rule["name"]}')
+							self.owner.successes += 1
+						except CommandError as e:
+							print(f'error adding appliance firewall rule {rule["name"]}: {e}')
+							self.owner.errors += 1
 					else:
 						print(f'error adding appliance firewall rule {rule["name"]}: {e}')
 						self.owner.errors += 1
@@ -128,20 +148,20 @@ class Plugin(stack.commands.Plugin):
 			for partition in appliance['partition']:
 				try:
 					print('adding appliance partition...')
-					command = [
+					parameters = [
 						appliance_name,
 						f'device={partition["device"]}',
 						f'partid={partition["partid"]}',
 						f'size={partition["size"]}'
 					]
 					if partition['options']:
-						command.append(f'options={partition["options"]}')
+						parameters.append(f'options={partition["options"]}')
 					if partition['mountpoint']:
-						command.append(f'mountpoint={partition["mountpoint"]}')
+						parameters.append(f'mountpoint={partition["mountpoint"]}')
 					if partition ['fstype']:
-						command.append(f'type={partition["fstype"]}')
+						parameters.append(f'type={partition["fstype"]}')
 
-					self.owner.command('add.storage.partition', command)
+					self.owner.command('add.storage.partition', parameters)
 					print(f'success adding appliance partition {partition}')
 					self.owner.successes += 1
 
@@ -155,22 +175,22 @@ class Plugin(stack.commands.Plugin):
 
 
 			for controller in appliance['controller']:
-				command = [
+				parameters = [
 					appliance_name,
 					f'arrayid={controller["arrayid"]}',
 					f'raidlevel={controller["raidlevel"]}',
 					f'slot={controller["slot"]}'
 				]
 				if controller['adapter']:
-					command.append(f'adapter={controller["adapter"]}')
+					parameters.append(f'adapter={controller["adapter"]}')
 				if controller['enclosure']:
-					command.append(f'enclosure={controller["enclosure"]}')
+					parameters.append(f'enclosure={controller["enclosure"]}')
 				if controller['options']:
-					command.append(f'options={controller["options"]}')
+					parameters.append(f'options={controller["options"]}')
 				try:
 					print('adding appliance controller...')
 
-					self.owner.command('add.storage.controller', command)
+					self.owner.command('add.storage.controller', parameters)
 
 					print(f'success adding appliance controller {controller}')
 					self.owner.successes += 1

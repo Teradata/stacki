@@ -17,13 +17,12 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		#check if the user would like to import environment data
-		#if there are no args, assume the user would like to import everthing
+		# check if the user would like to import environment data
+		# if there are no args, assume the user would like to import everthing
 		if args and 'environment' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
-		#check if there is any environment data in the import file
+		# self.owner.data contains the data from the json file defined in init
 		if 'environment' in self.owner.data:
 			import_data = self.owner.data['environment']
 		else:
@@ -64,6 +63,8 @@ class Plugin(stack.commands.Plugin):
 					else:
 						print(f'error adding environment attr {attr}: {e}')
 						self.owner.errors += 1
+
+			# none of the following have corresponding stack commands
 
 #			for route in environment['route']:
 #				try:

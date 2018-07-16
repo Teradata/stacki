@@ -17,24 +17,23 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		#check if the user would like to import host data
-		#if there are no args, assume the user would like to import everthing
+		# check if the user would like to import host data
+		# if there are no args, assume the user would like to import everthing
 		if args and 'host' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
-		#check if there is any host data before we go getting all kinds of key errors
+		# self.owner.data contains the data from the json file defined in init
 		if 'host' in self.owner.data:
 			import_data = self.owner.data['host']
 		else:
 			print('no host data in json file')
 			return
 
-		#add each host then assign its various values to it
+		# add each host then assign its various values to it
 		for host in import_data:
 			host_name = host['name']
 			try:
-				command = [
+				parameters = [
 					host_name,
 					f'box={host["box"]}',
 					f'longname={host["appliancelongname"]}',
@@ -42,8 +41,8 @@ class Plugin(stack.commands.Plugin):
 					f'rank={host["rank"]}'
 				]
 				if host['environment']:
-					command.append(f'environment={host["environment"]}')
-				self.owner.command('add.host', command)
+					parameters.append(f'environment={host["environment"]}')
+				self.owner.command('add.host', parameters)
 
 				print(f'success adding host {host["name"]}')
 				self.owner.successes += 1
@@ -57,7 +56,7 @@ class Plugin(stack.commands.Plugin):
 					self.owner.errors += 1
 
 
-			#iterate through each interface for the host and set it
+			# iterate through each interface for the host and set it
 			for interface in host['interface']:
 				try:
 					self.owner.command('add.host.interface', [host_name, f'interface={interface["interface"]}' ])
@@ -159,14 +158,13 @@ class Plugin(stack.commands.Plugin):
 
 
 
-			#iterate through each attr for the host and add it
-			#this is broken come back ad fix it
+			# iterate through each attr for the host and add it
 			for attr in host['attrs']:
 				attr_name = attr['name']
 				attr_value = attr['value']
 				if not isinstance(attr_value, str):
 					attr_value = ' '.join(attr['value'])
-				attr_shadow = attr['shadow']  # this will cause a problem if it is pasing a string rather than a bool. may need to resolve
+				attr_shadow = attr['shadow']
 				try:
 					self.owner.command('set.host.attr', [
 									host_name,
@@ -188,9 +186,6 @@ class Plugin(stack.commands.Plugin):
 			#iterate through each firewall rule and add it
 			for rule in host['firewall']:
 				try:
-					#this will likely have an issue with service as it is a comma delimeted string that should be a list
-					#need to come back and fix this
-					#same thing with flags
 					self.owner.command('add.host.firewall', [
 									host_name,
 									f'action={rule["action"]}',
@@ -245,20 +240,20 @@ class Plugin(stack.commands.Plugin):
 
 
 			for partition in host['partition']:
-				command = [
+				parameters = [
 					host_name,
 					f'device={partition["device"]}',
 					f'mountpoint={partition["mountpoint"]}',
 					f'size={partition["size"]}'
 					]
 				if partition['fstype']:
-					command.append(f'fs={partition["fstype"]}')
+					parameters.append(f'fs={partition["fstype"]}')
 				if partition['partid']:
-					command.append(f'partid={partition["partid"]}')
+					parameters.append(f'partid={partition["partid"]}')
 				if partition['options']:
-					command.append(f'options={partition["options"]}')
+					parameters.append(f'options={partition["options"]}')
 				try:
-					self.owner.command('add.storage.partition', command)
+					self.owner.command('add.storage.partition', parameters)
 					print(f'success adding partition {partition}')
 					self.owner.successes += 1
 
@@ -323,6 +318,7 @@ class Plugin(stack.commands.Plugin):
 				except CommandError as e:
 					print(f'error setting metadata of {host_name}')
 					self.owner.errors += 1
+
 			#set the comment if there is one
 			if host['comment']:
 				try:
@@ -332,6 +328,7 @@ class Plugin(stack.commands.Plugin):
 				except CommandError as e:
 					print(f'error setting comment of {host_name}')
 					self.owner.errors += 1
+
 			# set the environment if there is one
 			if host['environment']:
 				try:

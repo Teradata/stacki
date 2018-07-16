@@ -17,35 +17,34 @@ class Plugin(stack.commands.Plugin):
 		return [ 'software', 'environment', 'group', 'network', 'appliance', 'os', 'global', 'host' ]
 
 	def run(self, args):
+
 		# check if the user would like to import bootaction data
 		# if there are no args, assume the user would like to import everthing
 		if args and 'bootaction' not in args:
 			return
 
-		#self.owner.data contains the data from the json file defined in init
-		#check if there is any bootaction data before we go getting all kinds of key errors
+		# self.owner.data contains the data from the json file defined in init
 		if 'bootaction' in self.owner.data:
 			import_data = self.owner.data['bootaction']
 		else:
 			print('no bootaction data in json file')
 			return
 
-
 		for profile in import_data:
 			action = profile['name']
 
-			command = [
+			parameters = [
 				action,
 				f'kernel={profile["kernel"]}',
 				f'type={profile["type"]}'
 			]
 			if profile['os']:
-				command.append(f'os={profile["os"]}')
+				parameters.append(f'os={profile["os"]}')
 			if profile['ramdisk']:
-				command.append(f'ramdisk={profile["ramdisk"]}')
+				parameters.append(f'ramdisk={profile["ramdisk"]}')
 
 			try:
-				self.owner.command('set.bootaction', command )
+				self.owner.command('set.bootaction', parameters)
 				print(f'success adding bootaction {action}')
 				self.owner.successes += 1
 
@@ -61,11 +60,11 @@ class Plugin(stack.commands.Plugin):
 			# we replace the old args with the new by setting them
 			if profile['args']:
 				args = ' '.join(profile['args'])
-				command = [action, f'args={args}', f'type={profile["type"]}']
+				parameters = [action, f'args={args}', f'type={profile["type"]}']
 				if profile['os']:
-					command.append(f'os={profile["os"]}')
+					parameters.append(f'os={profile["os"]}')
 				try:
-					self.owner.command('set.bootaction.args', command)
+					self.owner.command('set.bootaction.args', parameters)
 					print(f'success setting bootaction {action} args')
 					self.owner.successes += 1
 				except CommandError as e:
