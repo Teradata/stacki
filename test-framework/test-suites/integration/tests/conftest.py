@@ -149,3 +149,21 @@ def add_host_with_interface(hostname='backend-0-0', rack='1', rank='1', applianc
 
 	yield
 
+@pytest.fixture
+def add_switch(hostname='switch-0-0', rack='0', rank='0', appliance='switch', make='fake', model='unrl'):
+	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy host')
+
+	cmd = f'stack set host attr {hostname} attr=component.make value={make}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to set make')
+
+	cmd = f'stack set host attr {hostname} attr=component.model value={model}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to set model')
+
+	yield

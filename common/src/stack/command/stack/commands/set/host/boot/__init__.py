@@ -67,6 +67,9 @@ class Command(stack.commands.set.host.command):
 			boot[h] = a
 
 		hosts = self.getHostnames(args)
+		if not hosts:
+			return
+
 		for host in hosts:
 			if host in boot.keys():
 				self.db.execute(
