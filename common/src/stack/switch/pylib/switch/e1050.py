@@ -1,6 +1,7 @@
 from . import Switch
-from itertools import groupby
+import itertools
 import json
+import pexpect
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -8,22 +9,26 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 class SwitchCelesticaE1050(Switch):
-	"""Class for interfacing with a Celestica e1050 switch running Cumulus Linux.
+	"""Class for interfacing with a Celestica Pebble E1050 switch running Cumulus Linux.
 	"""
 
-	def natural_sort(self, s):
-		return [int(''.join(g)) if k else ''.join(g) for k, g in groupby('\0' + s, str.isdigit)]
-
-	def rpc_req_text(self, cmd):
+	def run(self, cmd, json_loads=False):
 		url = f'https://{self.switch_ip_address}:8080/nclu/v1/rpc'
 		payload = {"cmd": cmd}
 		auth = (self.username, self.password)
 		headers = {'Content-Type': 'application/json'}
 
-		return requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text
+		text = requests.post(url, headers=headers, json=payload, auth=auth, verify=False).text
+		return json.loads(text) if json_loads else text
 
-	def sorted_keys(self, dct):
-		return sorted(dct, key=self.natural_sort)
+	def ssh_copy_id(self):
+		child = pexpect.spawn(f'ssh-copy-id -i /root/.ssh/id_rsa.pub {self.username}@{self.switch_ip_address}')
+		try:
+			child.expect('password')
+			child.sendline(self.password)
+			child.expect(pexpect.EOF)
 
-	def json_loads(self, cmd):
-		return json.loads(self.rpc_req_text(cmd))
+		except pexpect.EOF:
+			# if ssh key is already copied to switch, expect('password') will fail (ok)
+			pass
+

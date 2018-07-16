@@ -17,7 +17,7 @@ class Implementation(stack.commands.Implementation):
 
 		# Get frontend ip for tftp address
 		try:
-			(_frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost'])
+			_frontend, *_ = [host for host in self.owner.call('list.host.interface', ['localhost'])
 					if host['network'] == switch['network']]
 		except:
 			raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])

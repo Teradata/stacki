@@ -4,65 +4,57 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import pexpect
 import re
 import stack.commands
 from stack.switch.e1050 import SwitchCelesticaE1050
+import subprocess
 
 
-# similar to 'list switch status'; intentional? reusable?
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-		access_interface = args[0]
+		switch_interface = args[0]
 
-		self.switch_address = access_interface['ip']
-		self.switch_name = access_interface['host']
+		self.switch_address = switch_interface['ip']
+		self.switch_name = switch_interface['host']
 		self.switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
 		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, switch_password)
 
-		if self.owner.pinghosts == self.owner._NETWORK or self.owner.pinghosts == self.owner._MAPPED:
-			hosts = self.ping_hosts()
+		if self.owner.pinghosts in [self.owner._NETWORK, self.owner._MAPPED]:
+			host_ifaces = self.ping_hosts()
 		else:
-			hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
+			host_ifaces = self.owner.call('list.host.interface', ['where appliance != "switch"'])
 
-		# better name(s)?
-		for iface_obj in sorted(self.switch.json_loads(cmd='show bridge macs dynamic json'), key=lambda d: d['dev']):  # why did they call iface 'dev'?
-			mac = iface_obj['mac']
-			port = re.search(r'\d+', iface_obj['dev']).group()
-			vlan = iface_obj['vlan']
-			if vlan == 1:
-				vlan = None
+		bridge_macs = self.switch.run('show bridge macs dynamic json', json_loads=True)
+		for bridge_mac in sorted(bridge_macs, key=lambda d: d['dev']):
+			mac = bridge_mac['mac']
+			port = re.search(r'\d+', bridge_mac['dev']).group()
+			vlan = bridge_mac['vlan'] if bridge_mac['vlan'] != 1 else None
 
-			matching_hosts = (host_obj for host_obj in hosts if host_obj['mac'] == mac)
-			for host_obj in matching_hosts:
-				host = host_obj['host']
-				interface = host_obj['interface']
+			for iface in (iface for iface in host_ifaces if iface['mac'] == mac):
+				host = iface['host']
+				interface = iface['interface']
 
 				self.owner.addOutput(self.switch_name, [port, mac, host, interface, vlan])
 				break
 
 	def ping_hosts(self):
-		# use subprocess.run('ssh + cmd')
-		child = pexpect.spawn(f'ssh {self.switch_username}@{self.switch_address}')
-		hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
+		host_ifaces = self.owner.call('list.host.interface', ['where appliance != "switch"'])
 
 		if self.owner.pinghosts == self.owner._NETWORK:
 			network = self.owner.call('list.host.interface', [self.switch_name])[0]['network']
-			hosts = (host for host in hosts if host['network'] == network)
-		else if self.owner.pinghosts == self.owner._MAPPED:
+			host_ifaces = [iface for iface in host_ifaces if iface['network'] == network]
+		elif self.owner.pinghosts == self.owner._MAPPED:
 			switch_hosts = self.owner.call('list.switch.host', [self.switch_name])
 			macs = [host['mac'] for host in switch_hosts]
-			hosts = (host for host in hosts if host['mac'] in macs)
+			host_ifaces = [iface for iface in host_ifaces if iface['mac'] in macs]
 
-		try:
-			for host in hosts:
-				child.expect('#')
-				child.sendline(f'ping -c 1 {host["ip"]}')
-		except pexpect.EOF as e:
-			# handle no SSH keys
-			print('shit')
-			raise e
+		# ensure ssh key is copied to switch before running ping commands over ssh
+		self.switch.ssh_copy_id()
 
-		return hosts
+		for iface in host_ifaces:
+			subprocess.Popen(f'ssh {self.switch_username}@{self.switch_address} ping -c 1 {iface["ip"]}'.split(),
+					stdout=subprocess.PIPE)
+
+		return host_ifaces
 

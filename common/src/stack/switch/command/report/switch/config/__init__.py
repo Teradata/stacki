@@ -32,12 +32,11 @@ class Command(command):
 	"""
 	def run(self, params, args):
 
-		_switches = self.getSwitchNames(args)
+		switches = self.getSwitchNames(args)
 
 		self.beginOutput()
 
-		for switch in self.call('list.host.interface', _switches):
-
+		for switch in self.call('list.host.interface', switches):
 			switch_name = switch['host']
 			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
