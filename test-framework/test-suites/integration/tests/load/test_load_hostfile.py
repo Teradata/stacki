@@ -68,3 +68,9 @@ class TestLoadHostfile:
 		for i in range(len(test_lines)):
 			assert test_lines[i].strip() == stack_lines[i].strip()
 
+	def test_load_hostfile_ip_no_network(self, host):
+		# load hostfile containing an interface with an IP but no network (invalid)
+		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_ip_no_network.csv')
+		assert result.rc != 0
+		assert 'inclusion of IP requires inclusion of network' in result.stderr
+
