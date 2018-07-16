@@ -72,9 +72,12 @@ class Plugin(stack.commands.Plugin):
 				try:
 
 					if interface['default']:
-						self.owner.command('set.host.interface.default', [ host_name,
-													'default=True',
-													f'interface={interface["interface"]}' ])
+						self.owner.command(
+							'set.host.interface.default',
+							[ host_name,
+							'default=True',
+							f'interface={interface["interface"]}'
+						])
 						print(f'success setting {host["name"]} interface default')
 						self.owner.successes += 1
 					if interface['network']:
@@ -216,7 +219,6 @@ class Plugin(stack.commands.Plugin):
 
 
 
-			#this may not work if fstype is missing, need to do some more research
 			for partition in host['partition']:
 				command = [host_name,
 						f'device={partition["device"]}',

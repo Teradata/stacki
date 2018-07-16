@@ -83,15 +83,15 @@ class Command(command):
 	def run(self, params, args):
 
 		filename, = self.fillParams([
-		('file', None, True),
+			('file', None, True),
 		])
 
 		if not os.path.exists(filename):
 			raise CommandError(self, f'file {filename} does not exist')
 
-		with open (os.path.abspath(filename), 'r') as file:
+		with open (os.path.abspath(filename), 'r') as f:
 			try:
-				self.data = json.load(file)
+				self.data = json.load(f)
 			except ValueError:
 				raise CommandError(self, 'Invalid json document')
 
