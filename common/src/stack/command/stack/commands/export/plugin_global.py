@@ -21,10 +21,14 @@ class Plugin(stack.commands.Plugin):
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
 		attr_data = self.owner.command('list.attr', [ 'output-format=json' ])
+		attr_prep = []
 		if attr_data:
 			attr_data = json.loads(attr_data)
-		else:
-			attr_data = []
+			for attr in attr_data:
+				if attr['type'] == 'const':
+					continue
+				else:
+					attr_prep.append(attr)
 
 		route_data = self.owner.command('list.route', [ 'output-format=json' ])
 		if route_data:
@@ -37,6 +41,9 @@ class Plugin(stack.commands.Plugin):
 		if firewall_data:
 			firewall_data = json.loads(firewall_data)
 			for rule in firewall_data:
+				# if the rule is a const, we do not need to bother exporting it
+				if rule['type'] == 'const':
+					continue
 				if rule['source'] == 'G':
 					firewall_prep.append(rule)
 
@@ -53,7 +60,7 @@ class Plugin(stack.commands.Plugin):
 			controller_data = []
 
 		document_prep = {}
-		document_prep['global'] = {'attrs':attr_data,
+		document_prep['global'] = {'attrs':attr_prep,
 						'route':route_data,
 						'firewall':firewall_prep,
 						'partition':partition_data,

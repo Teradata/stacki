@@ -20,8 +20,8 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'appliance':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		# json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
+		# if not, use an empty list as a placeholder.
 		appliance_data = self.owner.command('list.appliance', [ 'output-format=json' ])
 		if appliance_data:
 			appliance_data = json.loads(appliance_data)

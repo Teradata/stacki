@@ -58,16 +58,17 @@ class Command(stack.commands.Command):
 	</arg>
 	"""
 	def run(self,params, args):
-		#runPlugins() returns a list of tuples where tuple[0] is the plugin name and
-		#tuple[1] is the return value
-		#each plugin examins 'args' to determine if it runs or not
+		# runPlugins() returns a list of tuples where tuple[0] is the plugin name and
+		# tuple[1] is the return value
+		# each plugin examins 'args' to determine if it runs or not
 		data = self.runPlugins(args)
 		document_prep = {}
 		for plugin in data:
 			document_prep.update(plugin[1])
 
 		self.beginOutput()
-		self.addOutput(None,json.dumps(document_prep))
+#		self.addOutput(None,json.dumps(document_prep, indent=2))
+		self.addOutput(None, json.dumps(document_prep))
 		self.endOutput(trimOwner=True)
 
 
