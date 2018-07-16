@@ -24,7 +24,10 @@ class Command(command):
 
 	<param optional='1' type='string' name='pinghosts'>
 	Send a ping to each host connected to the switch. Hosts do not show up in the
-	mac address table if there is no traffic.
+	mac address table if there is no traffic. Accepts one of the following:
+
+	'network': Ping hosts with interfaces listed on the same network as the switch.
+	'mapped': Ping hosts with interfaces that are mapped to the switch.
 	</param>
 
 	<example cmd='list host mac switch-0-0'>
@@ -41,17 +44,17 @@ class Command(command):
 			('pinghosts', None),
 			])
 
-		if pinghosts:
-			self.pinghosts = pinghosts.lower()
-		else:
-			self.pinghosts = pinghosts
+		self._NETWORK = 'network'
+		self._MAPPED = 'mapped'
+		self.pinghosts = pinghosts.lower() if pinghosts else pinghosts
 
-		_switches = self.getSwitchNames(args)
+		switches = self.getSwitchNames(args)
 		self.beginOutput()
-		for switch in self.call('list.host.interface', _switches):
+		for switch in self.call('list.host.interface', switches):
 
 			switch_name = switch['host']
 			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
 
 		self.endOutput(header=['switch', 'port', 'mac', 'host', 'interface', 'vlan'])
+

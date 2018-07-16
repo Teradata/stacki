@@ -21,11 +21,11 @@ class Implementation(stack.commands.Implementation):
 		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
 		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, self.switch_username, switch_password)
 
-		if self.owner.pinghosts:
-			self.ping_hosts()
+		if self.owner.pinghosts == self.owner._NETWORK or self.owner.pinghosts == self.owner._MAPPED:
+			hosts = self.ping_hosts()
+		else:
+			hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
 
-		# better to get hosts from switch hostfile? also, 'net show bridge macs <ip>' suggests switch knows host IP
-		hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
 		# better name(s)?
 		for iface_obj in sorted(self.switch.json_loads(cmd='show bridge macs dynamic json'), key=lambda d: d['dev']):  # why did they call iface 'dev'?
 			mac = iface_obj['mac']
@@ -43,13 +43,14 @@ class Implementation(stack.commands.Implementation):
 				break
 
 	def ping_hosts(self):
+		# use subprocess.run('ssh + cmd')
 		child = pexpect.spawn(f'ssh {self.switch_username}@{self.switch_address}')
 		hosts = self.owner.call('list.host.interface', ['where appliance != "switch"'])
 
-		if self.owner.pinghosts == 'init':
+		if self.owner.pinghosts == self.owner._NETWORK:
 			network = self.owner.call('list.host.interface', [self.switch_name])[0]['network']
 			hosts = (host for host in hosts if host['network'] == network)
-		else:
+		else if self.owner.pinghosts == self.owner._MAPPED:
 			switch_hosts = self.owner.call('list.switch.host', [self.switch_name])
 			macs = [host['mac'] for host in switch_hosts]
 			hosts = (host for host in hosts if host['mac'] in macs)
@@ -59,6 +60,9 @@ class Implementation(stack.commands.Implementation):
 				child.expect('#')
 				child.sendline(f'ping -c 1 {host["ip"]}')
 		except pexpect.EOF as e:
+			# handle no SSH keys
 			print('shit')
 			raise e
+
+		return hosts
 
