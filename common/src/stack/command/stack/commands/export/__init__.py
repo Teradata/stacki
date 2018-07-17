@@ -18,41 +18,41 @@ class Command(stack.commands.Command):
 	Export data into a single json document. If no arguments are given
 	then all scopes will be exported.
 
-	<arg optional='0' type='string' name='software'>
+	<arg optional='1' type='string' name='software'>
 	Export pallet, cart, and box data
 	</arg>
 
-	<arg optional='0' type='string' name='host'>
+	<arg optional='1' type='string' name='host'>
 	Export name, rack, rank, interface, attr, firewall, box, appliance,
 	comment, metadata, environment, osaction, route, group, partition,
 	and controller data for each host.
 	</arg>
 
-	<arg optional='0' type='string' name='network'>
+	<arg optional='1' type='string' name='network'>
 	Export name, address, gateway, netmask, dsn, pxe, mtu, and zone
 	data for each network.
 	</arg>
 
-	<arg optional='0' type='string' name='global'>
+	<arg optional='1' type='string' name='global'>
 	Export attr, route, firewall, partition, and controller data for
 	the global scope.
 	</arg>
 
-	<arg optional='0' type='string' name='os'>
+	<arg optional='1' type='string' name='os'>
 	Export name, attr, route, firewall, partition, and controller
 	data for each os.
 	</arg>
 
-	<arg optional='0' type='string' name='appliance'>
+	<arg optional='1' type='string' name='appliance'>
 	Export name, attr, route, firewall, partition, and controller
 	data for each appliance.
 	</arg>
 
-	<arg optional='0' type='string' name='group'>
+	<arg optional='1' type='string' name='group'>
 	Export name data for each group.
 	</arg>
 
-	<arg optional='0' type='string' name='bootaction'>
+	<arg optional='1' type='string' name='bootaction'>
 	Export name, kernel, ramdisk, type, arg, and os data for each
 	bootaction.
 	</arg>

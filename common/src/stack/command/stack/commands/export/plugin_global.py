@@ -14,9 +14,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args:
-			if 'global' not in args:
-				return
+		if args and 'global' not in args:
+			return
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
@@ -60,12 +59,13 @@ class Plugin(stack.commands.Plugin):
 			controller_data = []
 
 		document_prep = {}
-		document_prep['global'] = {'attrs':attr_prep,
-						'route':route_data,
-						'firewall':firewall_prep,
-						'partition':partition_data,
-						'controller':controller_data,
-						}
+		document_prep['global'] = {
+					'attrs':attr_prep,
+					'route':route_data,
+					'firewall':firewall_prep,
+					'partition':partition_data,
+					'controller':controller_data,
+					}
 
 		return(document_prep)
 

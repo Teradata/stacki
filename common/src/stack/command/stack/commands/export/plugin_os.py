@@ -15,9 +15,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args:
-			if 'os' not in args:
-				return
+		if args and 'os' not in args:
+			return
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.

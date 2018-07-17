@@ -14,9 +14,8 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
-		if args:
-			if 'bootaction' not in args:
-				return
+		if args and 'bootaction' not in args:
+			return
 
 		document_prep = {'bootaction':[]}
 
@@ -32,13 +31,14 @@ class Plugin(stack.commands.Plugin):
 					args = item['args'].split()
 				else:
 					args = []
-				bootaction_prep.append({'name':item['bootaction'],
-									'kernel':item['kernel'],
-									'ramdisk':item['ramdisk'],
-									'type':item['type'],
-									'args':args,
-									'os':item['os'],
-									})
+				bootaction_prep.append({
+						'name':item['bootaction'],
+						'kernel':item['kernel'],
+						'ramdisk':item['ramdisk'],
+						'type':item['type'],
+						'args':args,
+						'os':item['os'],
+						})
 
 			document_prep['bootaction'] = bootaction_prep
 

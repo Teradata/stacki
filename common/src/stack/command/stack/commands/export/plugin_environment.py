@@ -15,9 +15,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args:
-			if 'environment' not in args:
-				return
+		if args and 'environment' not in args:
+			return
 
 		document_prep = {'environment':[]}
 
@@ -61,23 +60,25 @@ class Plugin(stack.commands.Plugin):
 				controller_prep = []
 				for item in controller_data:
 					options = item['options'].split()
-					controller_prep.append({'scope':item['scope'],
-								'enclosure':item['enclosure'],
-								'adapter':item['adapter'],
-								'slot':item['slot'],
-								'raidlevel':item['raidlevel'],
-								'arrayid':item['arrayid'],
-								'options':options,
+					controller_prep.append({
+							'scope':item['scope'],
+							'enclosure':item['enclosure'],
+							'adapter':item['adapter'],
+							'slot':item['slot'],
+							'raidlevel':item['raidlevel'],
+							'arrayid':item['arrayid'],
+							'options':options,
+							})
+
+
+				document_prep['environment'].append({
+								'name':environment_name,
+								'attrs':attr_data,
+								'route':route_data,
+								'firewall':firewall_data,
+								'partition':partition_data,
+								'controller':controller_prep,
 								})
-
-
-				document_prep['environment'].append({'name':environment_name,
-									'attrs':attr_data,
-									'route':route_data,
-									'firewall':firewall_data,
-									'partition':partition_data,
-									'controller':controller_prep,
-									})
 
 
 		return(document_prep)

@@ -14,9 +14,8 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
-		if args:
-			if 'appliance' not in args:
-				return
+		if args and 'appliance' not in args:
+			return
 
 		document_prep = {'appliance':[]}
 
@@ -61,14 +60,14 @@ class Plugin(stack.commands.Plugin):
 				else:
 					controller_data = []
 
-				document_prep['appliance'].append({'name':appliance_name,
-									'longname':item['long name'],
-									'attrs':attr_data,
-									'route':route_data,
-									'firewall':firewall_prep,
-									'partition':partition_data,
-									'controller':controller_data})
-
-
+				document_prep['appliance'].append({
+								'name':appliance_name,
+								'longname':item['long name'],
+								'attrs':attr_data,
+								'route':route_data,
+								'firewall':firewall_prep,
+								'partition':partition_data,
+								'controller':controller_data
+								})
 		return(document_prep)
 

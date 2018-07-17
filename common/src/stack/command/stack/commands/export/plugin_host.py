@@ -15,9 +15,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args:
-			if 'host' not in args:
-				return
+		if args 'host' not in args:
+			return
 
 		document_prep = {'host':[]}
 
@@ -41,19 +40,19 @@ class Plugin(stack.commands.Plugin):
 				interface_prep = []
 				for interface in interface_data:
 					if interface['host'] == hostname:
-						interface_prep.append({'interface':interface['interface'],
-									'default':interface['default'],
-									'mac':interface['mac'],
-									'ip':interface['ip'],
-									'network':interface['network'],
-									'name':interface['name'],
-									'module':interface['module'],
-									'vlan':interface['vlan'],
-									'options':interface['options'],
-									'channel':interface['channel'],
-									'alias':interface_alias_data})
-
-
+						interface_prep.append({
+								'interface':interface['interface'],
+								'default':interface['default'],
+								'mac':interface['mac'],
+								'ip':interface['ip'],
+								'network':interface['network'],
+								'name':interface['name'],
+								'module':interface['module'],
+								'vlan':interface['vlan'],
+								'options':interface['options'],
+								'channel':interface['channel'],
+								'alias':interface_alias_data
+						})
 				attr_data = self.owner.command('list.host.attr', [ f'{hostname}', 'output-format=json' ])
 				if attr_data:
 					attr_data = json.loads(attr_data)
@@ -72,9 +71,11 @@ class Plugin(stack.commands.Plugin):
 								shadow = True
 							else:
 								shadow = False
-							attr_prep.append({'name':attr['attr'], 'value':attr['value'], 'shadow':shadow})
-
-
+							attr_prep.append({
+								'name':attr['attr'],
+								'value':attr['value'],
+								'shadow':shadow
+								})
 				firewall_data = self.owner.command('list.host.firewall', [ f'{hostname}', 'output-format=json' ])
 				if firewall_data:
 					firewall_data = json.loads(firewall_data)
@@ -130,25 +131,25 @@ class Plugin(stack.commands.Plugin):
 				longname = appliance_data['long name']
 
 
-				document_prep['host'].append({'name':hostname, 'rack':host['rack'],
-										'rank':host['rank'],
-										'interface':interface_prep,
-										'attrs':attr_prep,
-										'firewall':firewall_prep,
-										'box':host['box'],
-										'appliance':host['appliance'],
-										'appliancelongname':longname,
-										'comment':host['comment'],
-										'metadata':metadata,
-										'environment':host['environment'],
-										'osaction':host['osaction'],
-										'installaction':host['installaction'],
-										'route':route_prep,
-										'group':group_prep,
-										'partition':partition_prep,
-										'controller':controller_prep})
-
-
-
+				document_prep['host'].append({
+							'name':hostname,
+							'rack':host['rack'],
+							'rank':host['rank'],
+							'interface':interface_prep,
+							'attrs':attr_prep,
+							'firewall':firewall_prep,
+							'box':host['box'],
+							'appliance':host['appliance'],
+							'appliancelongname':longname,
+							'comment':host['comment'],
+							'metadata':metadata,
+							'environment':host['environment'],
+							'osaction':host['osaction'],
+							'installaction':host['installaction'],
+							'route':route_prep,
+							'group':group_prep,
+							'partition':partition_prep,
+							'controller':controller_prep
+							})
 		return(document_prep)
 

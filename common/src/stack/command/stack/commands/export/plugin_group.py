@@ -14,9 +14,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self,args):
 
-		if args:
-			if 'group' not in args:
-				return
+		if args and 'group' not in args:
+			return
 
 		document_prep = {'group':[]}
 

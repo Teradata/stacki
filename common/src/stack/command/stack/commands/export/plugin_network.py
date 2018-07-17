@@ -15,9 +15,8 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args:
-			if 'network' not in args:
-				return
+		if args 'network' not in args:
+			return
 
 		document_prep = {'network':[]}
 
@@ -28,15 +27,16 @@ class Plugin(stack.commands.Plugin):
 			network_prep = []
 			network_data = json.loads(network_data)
 			for network in network_data:
-				network_prep.append({'name':network['network'],
-							'address':network['address'],
-							'gateway':network['gateway'],
-							'netmask':network['mask'],
-							'dns':network['dns'],
-							'pxe':network['pxe'],
-							'mtu':network['mtu'],
-							'zone':network['zone'],
-							})
+				network_prep.append({
+						'name':network['network'],
+						'address':network['address'],
+						'gateway':network['gateway'],
+						'netmask':network['mask'],
+						'dns':network['dns'],
+						'pxe':network['pxe'],
+						'mtu':network['mtu'],
+						'zone':network['zone'],
+						})
 
 			document_prep['network'] = network_prep
 
