@@ -109,8 +109,8 @@ class Command(stack.commands.config.host.command):
 		# First, assign the correct names to the mac addresses
 		#
 		for (mac, interface, module, ks) in discovered_macs:
-			rows = self.db.execute("""select mac from networks
-				where mac = '%s' """ % (mac))
+			rows = self.db.select("""mac from networks
+				where mac = %s """,mac)
 			if rows:
 				self.command('set.host.interface.interface',
 					[host, 'interface=%s' % interface, 'mac=%s' % mac])
@@ -125,11 +125,20 @@ class Command(stack.commands.config.host.command):
 		# Add any missing/new interfaces to the database
 		#
 		for (mac, interface, module, ks) in discovered_macs:
-			rows = self.db.execute("""select mac from networks
-				where mac = '%s' """ % (mac))
+			rows = self.db.select("""mac from networks
+				where mac = %s """, mac)
 			if not rows:
-				self.command('add.host.interface',
-					[host, 'interface=%s' % interface, 'mac=%s' % mac, ])
+				# Check if the interface exists without a MAC.
+				r = self.db.select("""device from networks, nodes
+					where device = %s and networks.node = nodes.id
+					and nodes.name=%s""", (interface, host))
+				if not r:
+					# If it does not, add the interface before setting MAC addresses
+					self.command('add.host.interface',
+						[host, 'interface=%s' % interface])
+				# Update the MAC address of the interface
+				self.command('set.host.interface.mac', [host, 'interface=%s' % interface, 'mac=%s' % mac ])
+			# Update the kernel module if that information is sent back
 			if module:
 				self.command('set.host.interface.module',
 					[host, 'interface=%s' % interface, 'module=%s' % module])
@@ -138,5 +147,4 @@ class Command(stack.commands.config.host.command):
 		post_config = self.command('list.host.interface', [host])
 
 		if pre_config != post_config:
-			self.command('sync.config')	
-
+			self.command('sync.config')
