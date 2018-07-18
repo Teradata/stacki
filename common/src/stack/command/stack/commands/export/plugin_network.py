@@ -15,7 +15,7 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args 'network' not in args:
+		if args  and 'network' not in args:
 			return
 
 		document_prep = {'network':[]}

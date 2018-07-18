@@ -15,7 +15,7 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 
-		if args 'host' not in args:
+		if args and 'host' not in args:
 			return
 
 		document_prep = {'host':[]}

@@ -67,8 +67,8 @@ class Command(stack.commands.Command):
 			document_prep.update(plugin[1])
 
 		self.beginOutput()
-#		self.addOutput(None,json.dumps(document_prep, indent=2))
-		self.addOutput(None, json.dumps(document_prep))
+		self.addOutput(None,json.dumps(document_prep, indent=2))
+#		self.addOutput(None, json.dumps(document_prep))
 		self.endOutput(trimOwner=True)
 
 
