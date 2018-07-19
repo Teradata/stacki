@@ -11,6 +11,12 @@ class SwitchException(Exception):
 	pass
 
 class Switch():
+
+	# you must overload the following function
+	@classmethod
+	def supported(cls):
+		raise NotImplementedError("supported() should return a list of (Make, Model)'s supported by this class")
+
 	def __init__(self, switch_ip_address, switchname=None, username=None, password=None):
 		# Grab the user supplied info, in case there is a difference (PATCH)
 		self.switch_ip_address = switch_ip_address
