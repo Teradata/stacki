@@ -24,12 +24,20 @@ class Command(stack.commands.RollArgumentProcessor,
 	listed.
 	</arg>
 
+	<param type='bool' name='expanded' optional='0'>
+	Displays an additional column containing the url of the pallet.
+	</param>
+
 	<example cmd='list pallet kernel'>		
 	List the status of the kernel pallet.
 	</example>
 	
 	<example cmd='list pallet'>
 	List the status of all the available pallets.
+	</example>
+
+	<example cmd='list pallet expanded=true'>
+	List the status of all the available pallets and their urls.
 	</example>
 
 	<related>add pallet</related>
@@ -42,30 +50,26 @@ class Command(stack.commands.RollArgumentProcessor,
 	def run(self, params, args):
 		self.beginOutput()
 
+		expanded, = self.fillParams([ ('expanded', 'false') ])
+		expanded = self.str2bool(expanded)
 		for (roll, version, release) in self.getRollNames(args, params):
-			self.db.execute("""select r.arch, r.os from rolls r
-				where r.name='%s' and r.version='%s' and
-				r.rel='%s' """
-				% (roll, version, release))
-			
-			# For each pallet determine it is enabled
-			# in any boxes.
-			
-			for arch, osname in self.db.fetchall():
-				self.db.execute("""select b.name from
-					stacks s, rolls r, boxes b where
-					r.name='%s' and r.arch='%s' and
-					r.version='%s' and r.rel='%s' and
-					s.roll=r.id and s.box=b.id """
-					% (roll, arch, version, release))
+			rows = self.db.select("""r.arch, r.os, r.url from rolls r where r.name=%s and r.version=%s and r.rel=%s """, (roll, version, release))
+
+			for arch, osname, url, in rows:
+				self.db.execute("""select b.name from stacks s, rolls r, boxes b where r.name=%s and r.arch=%s and r.version=%s and r.rel=%s and s.roll=r.id and s.box=b.id """, (roll, arch, version, release))
+
 
 				boxes = []
 				for box, in self.db.fetchall():
 					boxes.append(box)
 
-				self.addOutput(roll, (version, release, arch,
-						      osname, ' '.join(boxes)))
+				targets = [version, release, arch, osname, ' '.join(boxes)]
+				if expanded:
+					targets.append(url)
+				self.addOutput(roll, targets)
 
-		self.endOutput(header=['name', 'version', 'release', 'arch',
-			'os', 'boxes'], trimOwner=False)
-		
+		header = ['name', 'version', 'release', 'arch', 'os', 'boxes']
+		if expanded:
+			header.append('url')
+		self.endOutput(header, trimOwner=False)
+

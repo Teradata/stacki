@@ -225,6 +225,8 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			if default:
 				self.owner.interfaces[name][interface]['default'] = default
 			if ip:
+				if not network:
+					raise CommandError(self.owner, 'inclusion of IP requires inclusion of network')
 				self.owner.interfaces[name][interface]['ip'] = ip
 			if mac:
 				self.owner.interfaces[name][interface]['mac'] = mac

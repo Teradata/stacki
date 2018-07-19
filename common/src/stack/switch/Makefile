@@ -13,7 +13,12 @@ build:
 install::
 	# Install pylib
 	mkdir -p $(ROOT)/$(PY.STACK)/stack/
-	$(INSTALL) -m0644 pylib/*.py $(ROOT)/$(PY.STACK)/stack/
+
+	(								\
+		cd pylib;						\
+		find . -name "*.py" |					\
+			cpio -pduv $(ROOT)/$(PY.STACK)/stack;		\
+	)
 
 	# Install command
 	(					\

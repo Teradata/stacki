@@ -6,7 +6,6 @@
 
 import stack.commands
 import stack.util
-import stack.switch
 import subprocess
 from stack.exception import CommandError
 
@@ -41,21 +40,18 @@ class Command(command):
 	Reconfigure and set startup configuration on all switches.
 	</example>
 	"""
+
 	def run(self, params, args):
 
-		persistent, = self.fillParams([
-			('persistent', False)
-			])
-
+		persistent, = self.fillParams([ ('persistent', 'yes') ])
 		self.persistent = self.str2bool(persistent)
 
 		switches = self.getSwitchNames(args)
 
-		# Run report switch
-		self.report('report.switch')
-
 		for switch in self.call('list.host.interface', switches):
-
 			switch_name = switch['host']
+
+			self.report('report.switch', [ switch_name ])
 			model = self.getHostAttr(switch_name, 'component.model')
 			self.runImplementation(model, [switch])
+

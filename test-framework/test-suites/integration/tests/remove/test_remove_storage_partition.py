@@ -81,7 +81,7 @@ def test_negative_remove_storage_partition(host):
 		elif scope != 'global' and len(args) < 1:
 			raise ArgRequired(self, '%s name' % scope)
 	"""
-	accepted_scopes = ['global', 'os', 'appliances', 'host']
+	accepted_scopes = ['global', 'os', 'appliance', 'host']
 
 	# Provide extra data on global scope
 	result = host.run('stack remove storage partition scope=global backend-0-0')
