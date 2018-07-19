@@ -29,8 +29,8 @@ class Implementation(stack.commands.Implementation):
 
 				# nclu *does* support adding routes
 				if line.startswith("sudo printf 'vrf Default-IP-Routing-Table"):
-					network = re.search(r'\d+\.\d+\.\d+\.\d+/\d+', line).group(0)
-					vlan = re.search(r'vlan\d+', line).group(0)
+					network = re.search(r'\d+\.\d+\.\d+\.\d+/\d+', line).group()
+					vlan = re.search(r'vlan\d+', line).group()
 
 					line = f'net add routing route {network} {vlan}'
 

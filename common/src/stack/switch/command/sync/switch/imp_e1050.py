@@ -28,8 +28,9 @@ class Implementation(stack.commands.Implementation):
 				self.switch.run(command.strip())
 
 			#print(self.switch.run('pending'))
-			self.switch.run('abort')  # commit
+			self.switch.run('commit')
 		except:
+			print('shit')
 			self.switch.run('abort')
 		finally:
 			subprocess.run(f'rm -rf /tmp/{self.switch_name}'.split(), stdout=subprocess.PIPE)
