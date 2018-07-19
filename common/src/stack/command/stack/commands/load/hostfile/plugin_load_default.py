@@ -17,7 +17,7 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 	def provides(self):
 		return 'default'
 
-
+	# defunct?
 	def removeInterfaces(self, host):
 		output = self.owner.call('list.host.interface', [ host ])
 		for v in output:
@@ -47,7 +47,18 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			for group in existing_memberships[host]:
 				self.owner.call('remove.host.group', [host, 'group=%s' % group])
 
-
+		# remove affected switch-host mappings
+		# better names
+		switch_hosts = self.owner.call('list.switch.host')
+		real_switch_hosts = [sh['host'] for sh in switch_hosts if sh['host'] in existinghosts]
+		for host, ifaces in ((host, ifaces) for (host, ifaces) in interfaces.items() if host in real_switch_hosts):
+			for switch_host in switch_hosts:
+				if switch_host['interface'] in ifaces and host == switch_host['host']:
+					self.owner.call('remove.switch.host', [switch_host['switch'],
+									f'host={switch_host["host"]}',
+									f'interface={switch_host["interface"]}',
+									f'port={switch_host["port"]}',
+									])
 
 		sys.stderr.write('\tAdd Host\n')
 		for host in hosts.keys():

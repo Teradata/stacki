@@ -16,12 +16,6 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 	def provides(self):
 		return 'default'
 
-
-	def removeHosts(self, switch, host):
-		self.owner.call('remove.switch.host',
-			[ switch, 'host=%s' % host ])
-
-
 	def run(self, args):
 		hosts = args
 		existinghosts = self.getHostnames()
@@ -45,6 +39,8 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 				self.owner.call('remove.switch.host', [
 						switch,
 						"host=%s" % name,
+						f'interface={interface}',
+						f'port={port}',
 						])
 
 				# add switch host
