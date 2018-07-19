@@ -263,12 +263,12 @@ if profile_update_macs:
 if 'HTTP_X_STACKI_MAKE' in os.environ:
 	make = os.environ['HTTP_X_STACKI_MAKE']
 	stack.api.Call('set host attr', [ client.addr, 'attr=component.make',
-		'value="%s"' % make ])
+		'value=%s' % make ])
 
 if 'HTTP_X_STACKI_MODEL' in os.environ:
 	model = os.environ['HTTP_X_STACKI_MODEL']
 	stack.api.Call('set host attr', [ client.addr, 'attr=component.model',
-		'value="%s"' % model ])
+		'value=%s' % model ])
 
 #
 # Generate the system profile

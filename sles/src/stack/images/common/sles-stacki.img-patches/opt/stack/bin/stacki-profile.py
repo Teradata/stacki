@@ -101,8 +101,9 @@ p = subprocess.Popen([ '/usr/sbin/dmidecode', '-s', 'system-manufacturer' ],
 	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 o, e = p.communicate()
 try:
+	value = o.strip()
 	curlcmd.append('--header')
-	curlcmd.append('X-STACKI-MAKE: %s' % o.strip())
+	curlcmd.append('X-STACKI-MAKE: %s' % value.decode())
 except:
 	pass
 
@@ -110,8 +111,9 @@ p = subprocess.Popen([ '/usr/sbin/dmidecode', '-s', 'system-product-name' ],
 	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 o, e = p.communicate()
 try:
+	value = o.strip()
 	curlcmd.append('--header')
-	curlcmd.append('X-STACKI-MODEL: %s' % o.strip())
+	curlcmd.append('X-STACKI-MODEL: %s' % value.decode())
 except:
 	pass
 
