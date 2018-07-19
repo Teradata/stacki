@@ -13,6 +13,12 @@ class SwitchDellX1052(Switch):
 	"""Class for interfacing with a Dell x1052 switch.
 	"""
 
+	def supported(*cls):
+		return [
+			('Dell', 'x1052'),
+		]
+
+
 	def connect(self):
 		"""Connect to the switch"""
 		try:
