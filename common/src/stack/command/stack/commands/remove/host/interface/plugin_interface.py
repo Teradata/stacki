@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 		return 'interface'
 
 	def requires(self):
-		return [ 'boot', 'TAIL']
+		return [ 'boot', 'cleanup', 'TAIL']
 		
 	def run(self, networks):
 		for network in networks:

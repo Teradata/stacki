@@ -67,7 +67,6 @@ class Command(stack.commands.remove.host.command):
 					""" %  (host))
 				networks = self.db.fetchall()
 			elif interface:
-				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
 					select id from networks where
 					node=(select id from nodes where name='%s')
@@ -78,7 +77,6 @@ class Command(stack.commands.remove.host.command):
 					raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
 				networks = self.db.fetchall()
 			else:
-				self.runPlugins(networks)
 				rows_affected = self.db.execute("""
 					select id from networks where
 					node=(select id from nodes where name='%s')
