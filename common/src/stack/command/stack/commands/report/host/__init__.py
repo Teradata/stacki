@@ -55,7 +55,7 @@ class Command(command):
 
 		hosts = {}
 
-		# Get a list of all interface, and populate the host map
+		# Get a list of all interfaces and populate the host map
 		# host -> interfaces.
 		# {"hostname":[
 		#	{"ip":"1.2.3.4", "interface":"eth0", "zone":"domain.com","default":True/None, "shortname":True/False},
@@ -65,8 +65,9 @@ class Command(command):
 		for row in interfaces:
 			if not row['ip']:
 				continue
+
 			# Each interface dict contains interface name,
-			# zone,whether the interface is the default one,
+			# zone, whether the interface is the default one,
 			# and whether the shortname should be assigned
 			# to that interface
 			host = row['host']
@@ -85,6 +86,7 @@ class Command(command):
 						h['shortname']= True
 			hosts[host].append(h)
 
+		processed = {}
 
 		for host in hosts:
 			# Check if any interface for the host has
@@ -120,9 +122,18 @@ class Command(command):
 					if interface in aliases[host]:
 						for alias in aliases[host].get(interface):
 							names.append(alias)
+
+				# check if this is duplicate entry:
+				if ip in processed:
+					if processed[ip]['names'] == ' '.join(names):
+						continue
+
 				# Write it all
 				self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
 
+				if ip not in processed:
+					processed[ip] = {}
+				processed[ip]['names'] = ' '.join(names)
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
