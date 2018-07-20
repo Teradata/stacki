@@ -39,13 +39,19 @@ class Plugin(stack.commands.Plugin):
 			pallet_prep = []
 
 
-		cart_data = self.owner.command('list.cart', [ 'output-format=json' ])
+		cart_data = self.owner.command('list.cart', [ 'expanded=true', 'output-format=json' ])
 		if cart_data:
 			cart_data = json.loads(cart_data)
 			cart_prep = []
 			for item in cart_data:
 				boxes = item['boxes'].split()
-				cart_prep.append({'name':item['name'], 'boxes':boxes})
+				cart_prep.append({
+						'name':item['name'],
+						'boxes':boxes,
+						'url':item['url'],
+						'urlauthUser':None,
+						'urlauthPass':None,
+						})
 		else:
 			cart_prep = []
 
