@@ -12,6 +12,7 @@
 
 import stack
 import ipaddress
+from   stack.exception import CommandError
 import stack.commands
 import stack.text
 
@@ -136,17 +137,24 @@ class Command(stack.commands.HostArgumentProcessor,
 						self.addOutput('', '\t}\n')
 					self.addOutput('', '}\n')
 
-		data = { }
-		for row in self.db.select("name from nodes order by rack, rank"):
-			data[row[0]] = []
-			
-		for row in self.db.select("""
-			nodes.name, n.mac, n.ip, n.device
-			from networks n, nodes where
-			n.node = nodes.id and
-			n.mac is not NULL
-			"""):
-			data[row[0]].append(row[1:])
+		data = {}
+		for host in self.call('list.host'):
+			data[host['host']] = []
+
+		devices = []
+		for interface in self.call('list.host.interface'):
+			host = interface['host']
+			mac = interface['mac']
+			ip = interface['ip']
+			device = interface['interface']
+
+			if device in devices:
+				raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
+			else:
+				devices.append(device)
+
+			if host and mac:
+				data[host].append((mac, ip, device))
 
 		for name in data.keys():
 			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
@@ -196,10 +204,13 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
-		(ip, channel), = self.db.select("""nt.ip,
-			nt.channel from networks nt, nodes n
-			where n.name='%s' and nt.device='%s' and
-			nt.node=n.id""" % (host, device))
+		try:
+			(ip, channel), = self.db.select("""nt.ip,
+				nt.channel from networks nt, nodes n
+				where n.name='%s' and nt.device='%s' and
+				nt.node=n.id""" % (host, device))
+		except ValueError:
+			raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
 		if channel:
 			return self.resolve_ip(host, channel)
 		return ip
