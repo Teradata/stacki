@@ -47,11 +47,23 @@ class Plugin(stack.commands.Plugin):
 			
 		self.removerow(interfaceid)
 
-		self.owner.call('sync.host.network', [ 'localhost', 'restart=n' ])
+		#
+		# since we are removing interfaces from the frontend, there are instances in
+		# which the interface that contains the name of the frontend is removed, therefore
+		# 'getHostname("localhost")' lookup will fail because there is no name in the
+		# database.
+		#
+		try:
+			localhost = self.owner.db.getHostname('localhost')
+		except:
+			localhost = None
 
-		if os.path.exists(ifcfg):
-			subprocess.call([ 'ifup', physif ], stdout=open('/dev/null'),
-				stderr=open('/dev/null'))
+		if localhost:
+			self.owner.call('sync.host.network', [ 'localhost', 'restart=n' ])
+
+			if os.path.exists(ifcfg):
+				subprocess.call([ 'ifup', physif ], stdout=open('/dev/null'),
+					stderr=open('/dev/null'))
 
 	def run(self, networks):
 		for interfaceid in networks:
@@ -61,7 +73,17 @@ class Plugin(stack.commands.Plugin):
 
 			host, interface = self.owner.db.fetchone()
 
-			if self.owner.db.getHostname(host) == self.owner.db.getHostname('localhost'):
+			try:
+				host = self.owner.db.getHostname(host)
+			except:
+				host = None
+
+			try:
+				localhost = self.owner.db.getHostname('localhost')
+			except:
+				localhost = None
+
+			if host and localhost and host == localhost:
 				#
 				# if this is the frontend, so some local cleanup
 				#
