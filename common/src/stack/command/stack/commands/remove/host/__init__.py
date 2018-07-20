@@ -45,14 +45,10 @@ class Command(command):
 		# the Frontend, but checked this way will allow for
 		# future multiple Frontend's where you may still want 
 		# to remove some but not all of them.
-
 		if me in hosts:
 			raise CommandError(self, 'cannot remove "%s"' % me)
-
-		self.runPlugins(hosts)
-
-		#	
-		# sync the config when done
-		#	
-		self.command('sync.config')
+		# Don't run unless we actually got hosts back
+		if hosts:
+			self.runPlugins(hosts)
+			self.command('sync.config')
 
