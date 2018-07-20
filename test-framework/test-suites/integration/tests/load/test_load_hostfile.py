@@ -1,5 +1,6 @@
 import json
 import pytest
+import re
 import tempfile
 
 
@@ -73,4 +74,10 @@ class TestLoadHostfile:
 		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_ip_no_network.csv')
 		assert result.rc != 0
 		assert 'inclusion of IP requires inclusion of network' in result.stderr
+
+	def test_load_hostfile_duplicate_interface(self, host):
+		# load hostfile containing duplicate interface names (invalid)
+		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_duplicate_interface.csv')
+		assert result.rc != 0
+		assert re.search(r'interface ".+" already specified for host', result.stderr) is not None
 
