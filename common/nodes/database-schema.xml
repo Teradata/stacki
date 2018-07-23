@@ -268,7 +268,8 @@ DROP TABLE IF EXISTS carts;
 CREATE TABLE carts (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
-  PRIMARY KEY (ID) 
+  URL		text	    NULL default '',
+  PRIMARY KEY (ID)
 );
 
 <!-- Roll.  What Rolls are installed and used by default. -->

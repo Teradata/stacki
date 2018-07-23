@@ -15,6 +15,7 @@ import sys
 import subprocess
 import stack.file
 import stack.commands
+from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
 #if requests is not available,
 #attempting to barnacle will fail
@@ -235,44 +236,11 @@ class Command(stack.commands.add.command):
 			filename = os.path.basename(urlparse(iso).path)
 			local_path = '/'.join([os.getcwd(),filename])
 
-			print(f'beginning download of {iso}\nthis may take awhile ...')
-			if username and password:
-				urlauth = [username, password]
-
-				s = requests.Session()
-				s.auth = HTTPBasicAuth(username, password)
-				r = s.get(iso, stream=True)
-			else:
-				r = requests.get(iso, stream=True)
-
-			#verify that there are no http errors
-			if r.status_code == 401:
-				raise CommandError(self, 'unable to download pallet: http error 401')
-			if r.status_code == 404:
-				raise CommandError(self, 'unable to download pallet: http error 404')
-			elif not r.ok:
-				raise CommandError(self, 'unable to download pallet: not r.ok')
-
-
-			#content length and progress will be used to provide a download progress indicator
-			content_length = int(r.headers.get('content-length')) / 1000000
-			progress = 0
-			chunk_size = 1000000
-			#determine how many digits long the size of the iso is so we can display a clean progress indicator
-			content_digits = len(str(content_length))
-			with open(local_path, 'wb') as f:
-				for chunk in (item for item in r.iter_content(chunk_size=chunk_size) if item):
-					f.write(chunk)
-					f.flush()
-					progress += 1
-					print(f'MB remaining: {int(content_length-progress):{content_digits}}', end='\r')
-				#watch out for premature connection closures by the download server
-				#if the entire file has not been downloaded, don't pass an incomplete iso
-				if progress < content_length:
-					p = subprocess.run(['rm', filename])
-					raise CommandError(self, f'unable to download pallet: the connection may have been prematurely closed by the server.\nFailed at {progress} MB out of {int(content_length)} MB')
-
-			print(f'success. downloaded {int(content_length)} MB.')
+			try:
+				# passing True will display a % progress indicator in stdout
+				local_path = fetch(iso, username, password, True)
+			except FetchError as e:
+				raise CommandError(self, e)
 
 			cwd = os.getcwd()
 			os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))

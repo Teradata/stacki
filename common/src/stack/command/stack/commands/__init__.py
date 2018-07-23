@@ -2043,7 +2043,6 @@ class Command:
 
 	def bool2str(self, b):
 		return bool2str(b)
-
 	
 	def strWordWrap(self, line, indent=''):
 		if 'COLUMNS' in os.environ:
