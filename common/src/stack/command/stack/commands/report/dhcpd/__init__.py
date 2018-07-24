@@ -14,7 +14,9 @@ import stack
 import ipaddress
 from   stack.exception import CommandError
 import stack.commands
+from stack.commands import Log
 import stack.text
+import syslog
 
 header = """
 ddns-update-style none;
@@ -142,15 +144,32 @@ class Command(stack.commands.HostArgumentProcessor,
 			data[host['host']] = []
 
 		host_devices = {}
-		for interface in self.call('list.host.interface'):
+		interfaces = self.call('list.host.interface')
+		for interface in interfaces:
 			host = interface['host']
 			mac = interface['mac']
 			ip = interface['ip']
 			device = interface['interface']
+			channel = interface['channel']
 
+			other_interfaces = [iface['interface'] for iface in interfaces
+					    if iface['host'] == host and iface['interface'] != device]
+
+			if channel:
+				if device == 'ipmi' and not ip:
+					Log(f'WARNING: skipping IPMI interface on host "{host}" - interface has a channel but no IP',
+					    level=syslog.LOG_WARNING)
+					continue
+				elif device != 'ipmi' and channel not in other_interfaces:
+					Log(f'WARNING: skipping interface "{device}" on host "{host}" - '
+					    f'interface has channel "{channel}" that does not match any other interface on the host',
+					    level=syslog.LOG_WARNING)
+					continue
 			if host in host_devices:
 				if device in host_devices[host]:
-					raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
+					Log(f'WARNING: skipping interface "{device}" on host "{host}" - duplicate interface detected',
+					    level=syslog.LOG_WARNING)
+					continue
 				else:
 					host_devices[host].append(device)
 			elif host:
@@ -172,7 +191,12 @@ class Command(stack.commands.HostArgumentProcessor,
 			#
 			for (mac, ip, dev) in data[name]:
 				if not ip:
-					ip = self.resolve_ip(name, dev)
+					try:
+						ip = self.resolve_ip(name, dev)
+					except ValueError:
+						Log(f'WARNING: skipping interface "{device}" on host "{host}" - duplicate interface detected',
+						    level=syslog.LOG_WARNING)
+						continue
 				netname = None
 				if ip:
 					r = self.db.select("""
@@ -207,13 +231,16 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
-		try:
-			(ip, channel), = self.db.select("""nt.ip,
-				nt.channel from networks nt, nodes n
-				where n.name='%s' and nt.device='%s' and
-				nt.node=n.id""" % (host, device))
-		except ValueError:
-			raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
+		"""
+		Attempts to resolve the IP address of a host interface that lacks an address
+		(for example, if the interface is part of a bond).
+		"""
+
+		(ip, channel), = self.db.select("""nt.ip,
+			nt.channel from networks nt, nodes n
+			where n.name=%s and nt.device=%s and
+			nt.node=n.id""", (host, device))
+
 		if channel:
 			return self.resolve_ip(host, channel)
 		return ip
@@ -223,7 +250,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '<stack:file stack:name="/etc/sysconfig/dhcpd">')
 		self.addOutput('', stack.text.DoNotEdit())
 
-		devices = ''
+		devices = set()
 		for device, in self.db.select("""
 			device from
 			networks n, subnets s
@@ -237,14 +264,16 @@ class Command(stack.commands.HostArgumentProcessor,
 			# interfaces, we only add the actual interface to devices
 			if self.os == 'sles':
 				if ':' not in device:
-					devices += '%s ' % device
+					devices.add(device)
 			else:
-				devices += '%s ' % device
+				devices.add(device)
+
+		devices = ' '.join(devices)
 
 		if self.os == 'redhat':
-			self.addOutput('', 'DHCPDARGS="%s"' % devices.strip())
+			self.addOutput('', f'DHCPDARGS="{devices}"')
 		if self.os == 'sles':
-			self.addOutput('', 'DHCPD_INTERFACE="%s"' % devices.strip())
+			self.addOutput('', f'DHCPD_INTERFACE="{devices}"')
 
 		self.addOutput('', '</stack:file>')
 		
