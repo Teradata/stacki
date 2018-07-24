@@ -126,7 +126,7 @@ class Command(command):
 
 		self.runPlugins(args)
 
-		print(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors')
+		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\n')
 
 		# if there are errors, revert db changes and fail
 		if self.errors != 0:

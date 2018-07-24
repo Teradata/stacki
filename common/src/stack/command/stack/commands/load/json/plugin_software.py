@@ -16,8 +16,6 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 	def run(self, args):
-		# Start a logger
-#		log = logging.getLogger("stack-ws")
 
 		# check if the user would like to import software data
 		# if there are no args, assume the user would like to import everthing
@@ -42,7 +40,6 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 								f'os={box["os"]}'
 					])
 					self.owner.log.info(f'success adding box {box["name"]}')
-#					self.owner.log.info(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
@@ -55,7 +52,26 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 		if import_data['pallet']:
+			# create a list of pallets to add, excluding ones already present on the system
+			pallets_to_add = []
+			existing_pallet_data = json.loads(self.owner.command('list.pallet', [ 'output-format=json', 'expanded=true' ]))
+
+
+			# iterate through each pallet, and only add it if not aleady on the system
 			for pallet in import_data['pallet']:
+				for existing_pallet in existing_pallet_data:
+					if (pallet['name'] == existing_pallet['name'] and
+					    pallet['version'] == existing_pallet['version'] and
+					    pallet['release'] == existing_pallet['release'] and
+					    ' '.join(pallet['boxes']) == existing_pallet['boxes']):
+						self.owner.log.info(f'The pallet {pallet["name"]} already exists on the system. skipping.')
+						break
+				else:
+					pallets_to_add.append(pallet)
+
+
+			# now we can go ahead adding the pallets without wasting time downloading duplicate pallets
+			for pallet in pallets_to_add:
 				pallet_dir =  pallet['url']
 				if pallet_dir == None:
 					# if we have no url to fetch the pallet from we cannot add it
@@ -63,6 +79,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					self.owner.errors += 1
 
 					# the following code is now unreachable, does it have any value?
+					# now that it is impossible for there to be a pallet added to the database that down not have a url
 
 					# in the rare case that this pallet has no url but also currently exists in the database
 					# we need to check to see if it needs to be added to any boxes
