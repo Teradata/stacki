@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'group'
@@ -30,7 +31,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no group data in json file')
 			return
 
-
+		self.notify('\n\tLoading group\n')
 		for group in import_data:
 			try:
 				self.owner.command('add.group', [ group['name'] ])

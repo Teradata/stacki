@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'environment'
@@ -29,6 +30,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no environment data in json file')
 			return
 
+		self.notify('\n\tLoading environment\n')
 		for environment in import_data:
 			environment_name= environment['name']
 			try:

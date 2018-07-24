@@ -7,9 +7,9 @@
 import stack.commands
 import json
 from stack.exception import CommandError
-import logging
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'software'
@@ -32,6 +32,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no software data in json file')
 			return
 
+		self.notify('\n\tLoading Software\n')
 		# check to make sure 'box' 'pallet' and 'cart' all exist first to avoid a key error
 		if import_data['box']:
 			for box in import_data['box']:
@@ -40,7 +41,7 @@ class Plugin(stack.commands.Plugin):
 								f'{box["name"]}',
 								f'os={box["os"]}'
 					])
-					self._logger.info(f'success adding box {box["name"]}')
+					self.owner.log.info(f'success adding box {box["name"]}')
 #					self.owner.log.info(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 

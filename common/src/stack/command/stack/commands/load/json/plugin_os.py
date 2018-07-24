@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'os'
@@ -30,6 +31,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no os data in json file')
 			return
 
+		self.notify('\n\tLoading os\n')
 		for os in import_data:
 			os_name= os['name']
 			for attr in os['attrs']:

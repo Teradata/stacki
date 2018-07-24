@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'global'
@@ -28,6 +29,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no global data in json file')
 			return
 
+		self.notify('\n\tLoading global\n')
 		for scope in import_data:
 			# check to make sure the scope is valid
 			if scope == 'attrs':

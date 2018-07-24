@@ -18,9 +18,11 @@ from stack.exception import CommandError
 import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
+import stack.commands
 
 class command(stack.commands.load.command, stack.commands.Command):
 	MustBeRoot = 0
+	notifications = True
 
 
 class Command(command):
@@ -120,6 +122,7 @@ class Command(command):
 
 		# start a logger
 		self.log = logging.getLogger("load-json")
+		logging.basicConfig(filename='/var/log/load-json.log', filemode='w+', level=logging.INFO)
 
 		self.runPlugins(args)
 

@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'host'
@@ -29,6 +30,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no host data in json file')
 			return
 
+		self.notify('\n\tLoading host\n')
 		# add each host then assign its various values to it
 		for host in import_data:
 			host_name = host['name']

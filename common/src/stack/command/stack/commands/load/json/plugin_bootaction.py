@@ -8,7 +8,8 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, stack.commands.Command):
+	notifications = True
 
 	def provides(self):
 		return 'bootaction'
@@ -30,6 +31,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.log.info('no bootaction data in json file')
 			return
 
+		self.notify('\n\tLoading bootaction\n')
 		for profile in import_data:
 			action = profile['name']
 
