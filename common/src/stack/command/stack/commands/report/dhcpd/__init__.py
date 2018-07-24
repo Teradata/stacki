@@ -141,17 +141,20 @@ class Command(stack.commands.HostArgumentProcessor,
 		for host in self.call('list.host'):
 			data[host['host']] = []
 
-		devices = []
+		host_devices = {}
 		for interface in self.call('list.host.interface'):
 			host = interface['host']
 			mac = interface['mac']
 			ip = interface['ip']
 			device = interface['interface']
 
-			if device in devices:
-				raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
-			else:
-				devices.append(device)
+			if host in host_devices:
+				if device in host_devices[host]:
+					raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
+				else:
+					host_devices[host].append(device)
+			elif host:
+				host_devices[host] = [device]
 
 			if host and mac:
 				data[host].append((mac, ip, device))
