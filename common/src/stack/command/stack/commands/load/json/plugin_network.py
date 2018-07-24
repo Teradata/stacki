@@ -32,13 +32,13 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			return
 
 		self.notify('\n\tLoading network\n')
-		#TODO: sanitize validate
+		# TODO: sanitize validate
 		for network in import_data:
 			name = network['name'].strip()
 			try:
 				# the add network command requires at least name address and mask
 				# if the network exists already we want to overwrite its information
-				# so we first add the network then set everything
+				# so we first add the network then set everything else
 				self.owner.command('add.network', [
 								name,
 								f'address={network["address"]}',

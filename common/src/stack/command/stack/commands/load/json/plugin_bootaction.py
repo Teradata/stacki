@@ -32,6 +32,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			return
 
 		self.notify('\n\tLoading bootaction\n')
+
 		for profile in import_data:
 			action = profile['name']
 

@@ -233,12 +233,21 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						self.owner.log.info(f'error adding route {route["network"]}: {e}')
 						self.owner.errors += 1
 
-
+			# this has issues if some of the groups are already added but not all of them
+			# however it works if the host has no existing groups
 			for group in host['group']:
-				#need to figure out how to deal with groups
-				self.owner.errors += 1
-				print('Error host group not yet supported')
-
+				try:
+					self.owner.command('add.host.group', [
+									host_name,
+									f'group={group}'
+					])
+				except CommandError as e:
+					if 'already' in str(e):
+						self.owner.log.info(f'warning adding host {host_name} to group {group}')
+						self.owner.warnings += 1
+					else:
+						self.owner.log.info(f'error adding host {host_name} to group {group}')
+						self.owner.errors += 1
 
 
 			for partition in host['partition']:

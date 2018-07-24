@@ -31,6 +31,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			return
 
 		self.notify('\n\tLoading appliance\n')
+
 		# add each appliance then set everything about it
 		for appliance in import_data:
 			appliance_name = appliance['name']
