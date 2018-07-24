@@ -31,6 +31,8 @@ class Plugin(stack.commands.Plugin):
 				interface_data = self.owner.command('list.host.interface', [ f'{hostname}', 'output-format=json' ])
 				if interface_data:
 					interface_data = json.loads(interface_data)
+				else:
+					interface_data = []
 				interface_alias_data = self.owner.command('list.host.alias', [ f'{hostname}', 'output-format=json' ])
 				if interface_alias_data:
 					interface_alias_data = json.loads(interface_alias_data)
