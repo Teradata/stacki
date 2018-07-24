@@ -11,7 +11,7 @@
 # @rocks@
 
 ROLLROOT	= ../../../..
-DEPENDS.DIRS	= etc init.d
+DEPENDS.DIRS	= etc init.d opt
 
 include $(STACKBUILD)/etc/CCRules.mk
 
@@ -20,12 +20,13 @@ bootstrap: install-rpm
 build:
 
 install::
-	mkdir -p $(ROOT)/etc/profile.d/
-	$(INSTALL) -m755 etc/profile.d/*sh	$(ROOT)/etc/profile.d/
-	mkdir -p $(ROOT)/etc/ld.so.conf.d/
-	$(INSTALL) -m0644 etc/ld.so.conf.d/stack.conf $(ROOT)/etc/ld.so.conf.d/stack.conf
+	mkdir -p $(ROOT)/etc/profile.d
+	mkdir -p $(ROOT)/etc/ld.so.conf.d
 	mkdir -p $(ROOT)/etc/rc.d/init.d
+	$(INSTALL) -m755 etc/profile.d/*sh	$(ROOT)/etc/profile.d/
+	$(INSTALL) -m0644 etc/ld.so.conf.d/stack.conf $(ROOT)/etc/ld.so.conf.d/stack.conf
 	$(INSTALL) -m755 init.d/stack-dmesg	$(ROOT)/etc/rc.d/init.d/
 	$(INSTALL) -m755 init.d/stack-pre	$(ROOT)/etc/rc.d/init.d/
 	$(INSTALL) -m755 init.d/stack-post	$(ROOT)/etc/rc.d/init.d/
+	$(INSTALL) -m755 init.d/stack-shutdown	$(ROOT)/etc/rc.d/init.d/
 
