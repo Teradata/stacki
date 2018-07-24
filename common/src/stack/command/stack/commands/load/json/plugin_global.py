@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 		if 'global' in self.owner.data:
 			import_data = self.owner.data['global']
 		else:
-			print('no global data in json file')
+			self.owner.log.info('no global data in json file')
 			return
 
 		for scope in import_data:
@@ -45,15 +45,15 @@ class Plugin(stack.commands.Plugin):
 								f'value={attr["value"]}',
 								f'shadow={attr_shadow}'
 						])
-						print(f'success setting global attr {attr["attr"]}')
+						self.owner.log.info(f'success setting global attr {attr["attr"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							print(f'warning setting global attr {attr["attr"]}: {e}')
+							self.owner.log.info(f'warning setting global attr {attr["attr"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error setting global attr {attr["attr"]}: {e}')
+							self.owner.log.info(f'error setting global attr {attr["attr"]}: {e}')
 							self.owner.errors += 1
 
 
@@ -65,15 +65,15 @@ class Plugin(stack.commands.Plugin):
 								f'gateway={route["gateway"]}',
 								f'netmask={route["netmask"]}'
 						])
-						print(f'success adding global route {route["network"]}')
+						self.owner.log.info(f'success adding global route {route["network"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							print(f'warning adding global route {route["network"]}: {e}')
+							self.owner.log.info(f'warning adding global route {route["network"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global route {route["network"]}: {e}')
+							self.owner.log.info(f'error adding global route {route["network"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'firewall':
@@ -90,7 +90,7 @@ class Plugin(stack.commands.Plugin):
 						f'table={rule["table"]}'
 					]
 						self.owner.command('add.firewall', parameters)
-						print(f'success adding global firewall fule {rule["name"]}')
+						self.owner.log.info(f'success adding global firewall fule {rule["name"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
@@ -99,13 +99,13 @@ class Plugin(stack.commands.Plugin):
 							try:
 								self.owner.command('remove.firewall', [ f'rulename={rule["name"]}' ])
 								self.owner.command('add.firewall', parameters)
-								print(f'success replacing global firewall rule {rule["name"]}')
+								self.owner.log.info(f'success replacing global firewall rule {rule["name"]}')
 								self.owner.successes += 1
 							except CommandError as e:
-								print(f'error adding global firewall rule {rule["name"]}: {e}')
+								self.owner.log.info(f'error adding global firewall rule {rule["name"]}: {e}')
 								self.owner.errors += 1
 						else:
-							print(f'error adding global firewall rule {rule["name"]}: {e}')
+							self.owner.log.info(f'error adding global firewall rule {rule["name"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'partition':
@@ -120,15 +120,15 @@ class Plugin(stack.commands.Plugin):
 								f'size={partition["size"]}',
 								f'type={partition["fstype"]}',
 						])
-						print(f'success adding global partition {partition["device"]}')
+						self.owner.log.info(f'success adding global partition {partition["device"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							print(f'warning adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
+							self.owner.log.info(f'warning adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
+							self.owner.log.info(f'error adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
 							self.owner.errors += 1
 
 			elif scope == 'controller':
@@ -146,17 +146,17 @@ class Plugin(stack.commands.Plugin):
 					# is controller['options'] unused in the add?
 					try:
 						self.owner.command('add.storage.controller', parameters)
-						print(f'success adding global controller {controller["arrayid"]}')
+						self.owner.log.info(f'success adding global controller {controller["arrayid"]}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							print(f'warning adding global controller: {e}')
+							self.owner.log.info(f'warning adding global controller: {e}')
 							self.owner.warnings += 1
 						else:
-							print(f'error adding global controller: {e}')
+							self.owner.log.info(f'error adding global controller: {e}')
 							self.owner.errors += 1
 
 			else:
-				print(f'error potentially invalid entry in json. {scope} is not a valid gloabl scope')
+				self.owner.log.info(f'error potentially invalid entry in json. {scope} is not a valid gloabl scope')
 

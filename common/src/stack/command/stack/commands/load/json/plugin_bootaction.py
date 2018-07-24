@@ -27,7 +27,7 @@ class Plugin(stack.commands.Plugin):
 		if 'bootaction' in self.owner.data:
 			import_data = self.owner.data['bootaction']
 		else:
-			print('no bootaction data in json file')
+			self.owner.log.info('no bootaction data in json file')
 			return
 
 		for profile in import_data:
@@ -45,15 +45,15 @@ class Plugin(stack.commands.Plugin):
 
 			try:
 				self.owner.command('set.bootaction', parameters)
-				print(f'success adding bootaction {action}')
+				self.owner.log.info(f'success adding bootaction {action}')
 				self.owner.successes += 1
 
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning adding bootaction {action}: {e}')
+					self.owner.log.info(f'warning adding bootaction {action}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding bootaction {action}: {e}')
+					self.owner.log.info(f'error adding bootaction {action}: {e}')
 					self.owner.errors += 1
 
 			# in the event that the bootaction already exists but with different args,
@@ -65,12 +65,12 @@ class Plugin(stack.commands.Plugin):
 					parameters.append(f'os={profile["os"]}')
 				try:
 					self.owner.command('set.bootaction.args', parameters)
-					print(f'success setting bootaction {action} args')
+					self.owner.log.info(f'success setting bootaction {action} args')
 					self.owner.successes += 1
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning setting bootaction {action} args: {e}')
+						self.owner.log.info(f'warning setting bootaction {action} args: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error setting bootaction {action} args: {e}')
+						self.owner.log.info(f'error setting bootaction {action} args: {e}')
 						self.owner.errors += 1

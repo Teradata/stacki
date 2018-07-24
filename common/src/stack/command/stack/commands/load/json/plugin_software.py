@@ -7,6 +7,7 @@
 import stack.commands
 import json
 from stack.exception import CommandError
+import logging
 
 class Plugin(stack.commands.Plugin):
 
@@ -15,6 +16,8 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
+		# Start a logger
+#		log = logging.getLogger("stack-ws")
 
 		# check if the user would like to import software data
 		# if there are no args, assume the user would like to import everthing
@@ -26,7 +29,7 @@ class Plugin(stack.commands.Plugin):
 		if 'software' in self.owner.data:
 			import_data = self.owner.data['software']
 		else:
-			print('no software data in json file')
+			self.owner.log.info('no software data in json file')
 			return
 
 		# check to make sure 'box' 'pallet' and 'cart' all exist first to avoid a key error
@@ -37,15 +40,16 @@ class Plugin(stack.commands.Plugin):
 								f'{box["name"]}',
 								f'os={box["os"]}'
 					])
-					print(f'success adding box {box["name"]}')
+					self._logger.info(f'success adding box {box["name"]}')
+#					self.owner.log.info(f'success adding box {box["name"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning importing box {box["name"]}: {e}')
+						self.owner.log.info(f'warning importing box {box["name"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding box {box["name"]}: {e}')
+						self.owner.log.info(f'error adding box {box["name"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -74,11 +78,11 @@ class Plugin(stack.commands.Plugin):
 #										self.owner.command('enable.pallet', [ pallet['name'],
 #												f'release={pallet["release"]}',
 #												f'box={box}' ])
-#										print(f'success enabling {pallet} in {box}')
+#										self.owner.log.info(f'success enabling {pallet} in {box}')
 #										self.owner.successes += 1
 #
 #									except CommandError as e:
-#										print(f'error enabling {pallet["name"]} in {box}: {e}')
+#										self.owner.log.info(f'error enabling {pallet["name"]} in {box}: {e}')
 #										self.owner.errors += 1
 #						# we have finished with this pallet
 #						continue
@@ -87,18 +91,16 @@ class Plugin(stack.commands.Plugin):
 				try:
 					parameters = [pallet_dir]
 					if pallet['urlauthUser'] and pallet['urlauthPass']:
-						parameters.append(
-							f'username={pallet["urlauthUser"]}',
-							f'password={pallet["urlauthPass"]}'
-							)
+						parameters.append(f'username={pallet["urlauthUser"]}')
+						parameters.append(f'password={pallet["urlauthPass"]}')
 					self.owner.command('add.pallet', parameters)
 
-					print(f'success adding pallet {pallet["name"]} {pallet["version"]}')
+					self.owner.log.info(f'success adding pallet {pallet["name"]} {pallet["version"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding pallet {pallet}: {e}')
+						self.owner.log.info(f'warning adding pallet {pallet}: {e}')
 						self.owner.warnings += 1
 					else:
 						raise CommandError(self, f'error adding pallet {pallet["name"]} {pallet["version"]}: {e}')
@@ -112,11 +114,11 @@ class Plugin(stack.commands.Plugin):
 										f'release={pallet["release"]}',
 										f'box={box}'
 										])
-						print(f'success enabling {pallet["name"]} {pallet["version"]} in {box}')
+						self.owner.log.info(f'success enabling {pallet["name"]} {pallet["version"]} in {box}')
 						self.owner.successes += 1
 
 					except CommandError as e:
-						print(f'error enabling {pallet["name"]}, {pallet["version"]} in {box}: {e}')
+						self.owner.log.info(f'error enabling {pallet["name"]}, {pallet["version"]} in {box}: {e}')
 						self.owner.errors += 1
 
 
@@ -125,17 +127,35 @@ class Plugin(stack.commands.Plugin):
 				cart_name = ['name']
 				boxes = []
 				for box in cart['boxes']:
-					boxes.appned(box)
-				try:
-					self.owner.command('add.cart', [ cart_name ])
-					print(f'success adding cart {cart}')
-					self.owner.successes += 1
+					boxes.append(box)
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						print(f'warning importing cart {cart}: {e}')
-						self.owner.warnings += 1
-					else:
-						print(f'error importing cart {cart}: {e}')
-						self.owner.errors += 1
+				# if the cart has a url then attempt to reach out and get it
+				if cart['url']:
+					parameters = [ cart['url'] ]
+					# if the url starts with a / then we know that it is a local file
+					# local carts need to be added with the file= parameter
+					if cart['url'].startswith('/'):
+						self.owner.command('add.cart', [ f'file={cart["url"]}' ])
+						continue
+					# check if the file is local or not
+					if cart['urlauthUser']:
+						parameters.append(f'username={cart["urlauthUser"]}')
+					if cart['urlauthPass']:
+						parameters.append(f'password={cart["urlauthPass"]}')
+					self.owner.command('add.cart', parameters)
+
+				else:
+
+					try:
+						self.owner.command('add.cart', [ cart['name'] ])
+						self.owner.log.info(f'success adding cart {cart}')
+						self.owner.successes += 1
+
+					except CommandError as e:
+						if 'exists' in str(e):
+							self.owner.log.info(f'warning importing cart {cart}: {e}')
+							self.owner.warnings += 1
+						else:
+							self.owner.log.info(f'error importing cart {cart}: {e}')
+							self.owner.errors += 1
 

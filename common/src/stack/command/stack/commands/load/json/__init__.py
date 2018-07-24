@@ -16,6 +16,8 @@ import sys
 import os
 from stack.exception import CommandError
 import subprocess
+import logging
+from logging.handlers import RotatingFileHandler
 
 class command(stack.commands.load.command, stack.commands.Command):
 	MustBeRoot = 0
@@ -71,6 +73,7 @@ class Command(command):
 	bootaction.
 	</arg>
 	"""
+
 	def checks(self, args):
 
 		# Make sure that the user is not attepting to add more than one frontend
@@ -114,6 +117,9 @@ class Command(command):
 		self.successes = 0
 		self.warnings = 0
 		self.errors = 0
+
+		# start a logger
+		self.log = logging.getLogger("load-json")
 
 		self.runPlugins(args)
 

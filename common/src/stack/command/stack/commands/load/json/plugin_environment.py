@@ -26,7 +26,7 @@ class Plugin(stack.commands.Plugin):
 		if 'environment' in self.owner.data:
 			import_data = self.owner.data['environment']
 		else:
-			print('no environment data in json file')
+			self.owner.log.info('no environment data in json file')
 			return
 
 		for environment in import_data:
@@ -35,10 +35,10 @@ class Plugin(stack.commands.Plugin):
 				self.owner.command('add.environment', [ environment_name ])
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning adding environment {environment_name}: {e}')
+					self.owner.log.info(f'warning adding environment {environment_name}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding environment {environment}: {e}')
+					self.owner.log.info(f'error adding environment {environment}: {e}')
 					self.owner.errors += 1
 
 			for attr in environment['attrs']:
@@ -58,10 +58,10 @@ class Plugin(stack.commands.Plugin):
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding environment attr {attr}: {e}')
+						self.owner.log.info(f'warning adding environment attr {attr}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding environment attr {attr}: {e}')
+						self.owner.log.info(f'error adding environment attr {attr}: {e}')
 						self.owner.errors += 1
 
 			# none of the following have corresponding stack commands
@@ -71,9 +71,9 @@ class Plugin(stack.commands.Plugin):
 #					self.owner.command('add.environment.route', [ environment_name, f'address={route["network"]}', f'gateway={route["gateway"]}', f'netmask={route["netmask"]}' ])
 #				except CommandError as e:
 #					if 'exists' in str(e):
-#						print(f'warning adding environment route {route}: {e}')
+#						self.owner.log.info(f'warning adding environment route {route}: {e}')
 #					else:
-#						print(f'error adding environment route {route}: {e}')
+#						self.owner.log.info(f'error adding environment route {route}: {e}')
 
 
 #			for rule in environment['firewall']:
@@ -81,24 +81,24 @@ class Plugin(stack.commands.Plugin):
 #					self.owner.command('add.environment.firewall', [ environment_name, f'action={rule["action"]}', f'chain={rule["chain"]}', f'protocol={rule["protocol"]}', f'service={rule["service"]}', f'network={rule["network"]}', f'output-network={rule["output_network"]}', f'rulename={rule["name"]}', f'table={rule["table"]}' ])
 #				except CommandError as e:
 #					if 'exists' in str(e):
-#						print(f'warning adding environment firewall rule {rule}: {e}')
+#						self.owner.log.info(f'warning adding environment firewall rule {rule}: {e}')
 #					else:
-#						print(f'error adding environment firewall rule {rule}: {e}')
+#						self.owner.log.info(f'error adding environment firewall rule {rule}: {e}')
 
 
 #			for partition in environment['partition']:
-#				print('adding environment partition...')
+#				self.owner.log.info('adding environment partition...')
 #				try:
 #					self.owner.command('add.storage.partition', [ environemnt_name, f'device={partition["device"]}', f'options={partition["options"]}', f'mountpoint={partition["mountpoint"]}', f'partid={partition["partid"]}', f'size={partition["size"]}', f'type={partition["fstype"]}' ])
 #				except CommandError as e:
 #					if 'exists' in str(e):
-#						print(f'warning adding environment partition {partition}: {e}')
+#						self.owner.log.info(f'warning adding environment partition {partition}: {e}')
 #					else:
-#						print(f'error adding environment partition {partition}: {e}')
+#						self.owner.log.info(f'error adding environment partition {partition}: {e}')
 
 
 #			for controller in environment['controller']:
-#				print ('adding environment controller...')
+#				self.owner.log.info ('adding environment controller...')
 #				try:
 					#hotspare is an option in stack add storage controller, however there is no database column
 					#for it in storage_controller and it is not listed in stack list storage controller
@@ -106,7 +106,7 @@ class Plugin(stack.commands.Plugin):
 #					self.owner.command('add.storage.controller', [ environment_name, f'adapter={controller["adapter"]}', f'arrayid={controller["arrayid"]}', f'enclosure={controller["enclosure"]}', f'raidlevel={controller["raidlevel"]}', f'slot={controller["slot"]}' ])
 #				except CommandError as e:
 #					if 'exists' in str(e):
-#						print(f'warning adding environment controller {controller}: {e}')
+#						self.owner.log.info(f'warning adding environment controller {controller}: {e}')
 #					else:
-#						print(f'error adding environemnt controller {controller}: {e}')
+#						self.owner.log.info(f'error adding environemnt controller {controller}: {e}')
 

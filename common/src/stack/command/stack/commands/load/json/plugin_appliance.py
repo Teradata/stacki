@@ -26,7 +26,7 @@ class Plugin(stack.commands.Plugin):
 		if 'appliance' in self.owner.data:
 			import_data = self.owner.data['appliance']
 		else:
-			print('no appliance data in json file')
+			self.owner.log.info('no appliance data in json file')
 			return
 
 		# add each appliance then set everything about it
@@ -34,15 +34,15 @@ class Plugin(stack.commands.Plugin):
 			appliance_name = appliance['name']
 			try:
 				self.owner.command('add.appliance', [ appliance_name ])
-				print(f'success adding appliance {appliance_name}')
+				self.owner.log.info(f'success adding appliance {appliance_name}')
 				self.owner.successes += 1
 
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning adding appliance {appliance_name}: {e}')
+					self.owner.log.info(f'warning adding appliance {appliance_name}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding appliance {appliance_name}: {e}')
+					self.owner.log.info(f'error adding appliance {appliance_name}: {e}')
 					self.owner.errors += 1
 
 
@@ -57,15 +57,15 @@ class Plugin(stack.commands.Plugin):
 						parameters.append('shadow=True')
 
 					self.owner.command('set.appliance.attr', parameters)
-					print(f'success setting {appliance_name} attr {attr["attr"]}')
+					self.owner.log.info(f'success setting {appliance_name} attr {attr["attr"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning setting {appliance_name} attr {attr["attr"]}: {e}')
+						self.owner.log.info(f'warning setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error setting {appliance_name} attr {attr["attr"]}: {e}')
+						self.owner.log.info(f'error setting {appliance_name} attr {attr["attr"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -79,7 +79,7 @@ class Plugin(stack.commands.Plugin):
 					]
 
 					self.owner.command('add.appliance.route', parameters)
-					print(f'success adding appliance route {route}')
+					self.owner.log.info(f'success adding appliance route {route}')
 					self.owner.successes += 1
 
 				except CommandError as e:
@@ -88,12 +88,12 @@ class Plugin(stack.commands.Plugin):
 						try:
 							self.owner.command('remove.appliance.route', [ appliance_name, f'address={route["network"]}' ])
 							self.owner.command('add.appliance.route', parameters)
-							print(f'success replacing appliance route {route}')
+							self.owner.log.info(f'success replacing appliance route {route}')
 						except:
-							print(f'error adding appliance route: {e}')
+							self.owner.log.info(f'error adding appliance route: {e}')
 							self.owner.errors += 1
 					else:
-						print(f'error adding appliance route: {e}')
+						self.owner.log.info(f'error adding appliance route: {e}')
 						self.owner.errors += 1
 
 
@@ -112,7 +112,7 @@ class Plugin(stack.commands.Plugin):
 					]
 
 					self.owner.command('add.appliance.firewall', parameters)
-					print(f'success adding appliance firewall rule {rule["name"]}')
+					self.owner.log.info(f'success adding appliance firewall rule {rule["name"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
@@ -123,13 +123,13 @@ class Plugin(stack.commands.Plugin):
 							self.owner.command('remove.appliance.firewall', [ appliance_name, f'rulename={rule["name"]}' ])
 
 							self.owner.command('add.appliance.firewall', parameters)
-							print(f'success replacing appliance firewall rule {rule["name"]}')
+							self.owner.log.info(f'success replacing appliance firewall rule {rule["name"]}')
 							self.owner.successes += 1
 						except CommandError as e:
-							print(f'error adding appliance firewall rule {rule["name"]}: {e}')
+							self.owner.log.info(f'error adding appliance firewall rule {rule["name"]}: {e}')
 							self.owner.errors += 1
 					else:
-						print(f'error adding appliance firewall rule {rule["name"]}: {e}')
+						self.owner.log.info(f'error adding appliance firewall rule {rule["name"]}: {e}')
 						self.owner.errors += 1
 
 			# the add partition commmand does not check to see if the value is already in the database
@@ -147,7 +147,7 @@ class Plugin(stack.commands.Plugin):
 
 			for partition in appliance['partition']:
 				try:
-					print('adding appliance partition...')
+					self.owner.log.info('adding appliance partition...')
 					parameters = [
 						appliance_name,
 						f'device={partition["device"]}',
@@ -162,15 +162,15 @@ class Plugin(stack.commands.Plugin):
 						parameters.append(f'type={partition["fstype"]}')
 
 					self.owner.command('add.storage.partition', parameters)
-					print(f'success adding appliance partition {partition}')
+					self.owner.log.info(f'success adding appliance partition {partition}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance partition: {e}')
+						self.owner.log.info(f'warning adding appliance partition: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding appliance partition: {e}')
+						self.owner.log.info(f'error adding appliance partition: {e}')
 						self.owner.errors += 1
 
 
@@ -188,18 +188,18 @@ class Plugin(stack.commands.Plugin):
 				if controller['options']:
 					parameters.append(f'options={controller["options"]}')
 				try:
-					print('adding appliance controller...')
+					self.owner.log.info('adding appliance controller...')
 
 					self.owner.command('add.storage.controller', parameters)
 
-					print(f'success adding appliance controller {controller}')
+					self.owner.log.info(f'success adding appliance controller {controller}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding appliance controller: {e}')
+						self.owner.log.info(f'warning adding appliance controller: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding appliance controller: {e}')
+						self.owner.log.info(f'error adding appliance controller: {e}')
 						self.owner.errors += 1
 

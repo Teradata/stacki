@@ -27,7 +27,7 @@ class Plugin(stack.commands.Plugin):
 		if 'os' in self.owner.data:
 			import_data = self.owner.data['os']
 		else:
-			print('no os data in json file')
+			self.owner.log.info('no os data in json file')
 			return
 
 		for os in import_data:
@@ -45,15 +45,15 @@ class Plugin(stack.commands.Plugin):
 									f'value={attr["value"]}',
 									f'shadow={attr_shadow}'
 					])
-					print(f'success setting os attr {attr}')
+					self.owner.log.info(f'success setting os attr {attr}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning setting os attr {attr}: {e}')
+						self.owner.log.info(f'warning setting os attr {attr}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error setting os attr {attr}: {e}')
+						self.owner.log.info(f'error setting os attr {attr}: {e}')
 						self.owner.errors += 1
 
 			for route in os['route']:
@@ -64,15 +64,15 @@ class Plugin(stack.commands.Plugin):
 									f'gateway={route["gateway"]}',
 									f'netmask={route["netmask"]}'
 					])
-					print(f'success adding os route {route}')
+					self.owner.log.info(f'success adding os route {route}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding os route {route}: {e}')
+						self.owner.log.info(f'warning adding os route {route}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding os route {route}: {e}')
+						self.owner.log.info(f'error adding os route {route}: {e}')
 						self.owner.errors += 1
 
 
@@ -89,20 +89,20 @@ class Plugin(stack.commands.Plugin):
 									f'rulename={rule["name"]}',
 									f'table={rule["table"]}'
 					])
-					print(f'success adding os firewall rule {rule}')
+					self.owner.log.info(f'success adding os firewall rule {rule}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding os firewall rule {rule}: {e}')
+						self.owner.log.info(f'warning adding os firewall rule {rule}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding os firewall rule {rule}: {e}')
+						self.owner.log.info(f'error adding os firewall rule {rule}: {e}')
 						self.owner.errors += 1
 
 
 			for partition in os['partition']:
-				print('adding partition...')
+				self.owner.log.info('adding partition...')
 				try:
 					self.owner.command('add.storage.partition', [
 										os_name,
@@ -113,20 +113,20 @@ class Plugin(stack.commands.Plugin):
 										f'size={partition["size"]}',
 										f'type={partition["fstype"]}'
 					])
-					print(f'success adding os partition {partition}')
+					self.owner.log.info(f'success adding os partition {partition}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding partition {partition}: {e}')
+						self.owner.log.info(f'warning adding partition {partition}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding partition {partition}: {e}')
+						self.owner.log.info(f'error adding partition {partition}: {e}')
 						self.owner.errors += 1
 
 
 			for controller in os['controller']:
-				print ('adding controller...')
+				self.owner.log.info ('adding controller...')
 				try:
 					#hotspare is an option in stack add storage controller, however there is no database column
 					#for it in storage_controller and it is not listed in stack list storage controller
@@ -139,14 +139,14 @@ class Plugin(stack.commands.Plugin):
 										f'raidlevel={controller["raidlevel"]}',
 										f'slot={controller["slot"]}'
 					])
-					print(f'success adding os controller {controller}')
+					self.owner.log.info(f'success adding os controller {controller}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding os controller {controller}: {e}')
+						self.owner.log.info(f'warning adding os controller {controller}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding os controller {controller}: {e}')
+						self.owner.log.info(f'error adding os controller {controller}: {e}')
 						self.owner.errors += 1
 

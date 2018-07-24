@@ -27,21 +27,21 @@ class Plugin(stack.commands.Plugin):
 		if 'group' in self.owner.data:
 			import_data = self.owner.data['group']
 		else:
-			print('no group data in json file')
+			self.owner.log.info('no group data in json file')
 			return
 
 
 		for group in import_data:
 			try:
 				self.owner.command('add.group', [ group['name'] ])
-				print(f'success adding group {group["name"]}')
+				self.owner.log.info(f'success adding group {group["name"]}')
 				self.owner.successes += 1
 
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning adding group {group["name"]}: {e}')
+					self.owner.log.info(f'warning adding group {group["name"]}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding group {group["name"]}: {e}')
+					self.owner.log.info(f'error adding group {group["name"]}: {e}')
 					self.owner.errors += 1
 

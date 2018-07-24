@@ -26,7 +26,7 @@ class Plugin(stack.commands.Plugin):
 		if 'host' in self.owner.data:
 			import_data = self.owner.data['host']
 		else:
-			print('no host data in json file')
+			self.owner.log.info('no host data in json file')
 			return
 
 		# add each host then assign its various values to it
@@ -44,15 +44,15 @@ class Plugin(stack.commands.Plugin):
 					parameters.append(f'environment={host["environment"]}')
 				self.owner.command('add.host', parameters)
 
-				print(f'success adding host {host["name"]}')
+				self.owner.log.info(f'success adding host {host["name"]}')
 				self.owner.successes += 1
 
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning adding host {host["name"]}: {e}')
+					self.owner.log.info(f'warning adding host {host["name"]}: {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error adding host {host["name"]}: {e}')
+					self.owner.log.info(f'error adding host {host["name"]}: {e}')
 					self.owner.errors += 1
 
 
@@ -60,14 +60,14 @@ class Plugin(stack.commands.Plugin):
 			for interface in host['interface']:
 				try:
 					self.owner.command('add.host.interface', [host_name, f'interface={interface["interface"]}' ])
-					print(f'success adding interface {interface["interface"]}')
+					self.owner.log.info(f'success adding interface {interface["interface"]}')
 					self.owner.successes += 1
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding interface {interface["interface"]}: {e}')
+						self.owner.log.info(f'warning adding interface {interface["interface"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding interface {interface["interface"]}: {e}')
+						self.owner.log.info(f'error adding interface {interface["interface"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -80,7 +80,7 @@ class Plugin(stack.commands.Plugin):
 							'default=True',
 							f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface default')
+						self.owner.log.info(f'success setting {host["name"]} interface default')
 						self.owner.successes += 1
 					if interface['network']:
 						self.owner.command('set.host.interface.network', [
@@ -88,7 +88,7 @@ class Plugin(stack.commands.Plugin):
 												f'network={interface["network"]}',
 												f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface network')
+						self.owner.log.info(f'success setting {host["name"]} interface network')
 						self.owner.successes += 1
 					if interface['mac']:
 						self.owner.command('set.host.interface.mac', [
@@ -96,7 +96,7 @@ class Plugin(stack.commands.Plugin):
 											f'mac={interface["mac"]}',
 											f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface mac')
+						self.owner.log.info(f'success setting {host["name"]} interface mac')
 						self.owner.successes += 1
 					if interface['ip']:
 						self.owner.command('set.host.interface.ip', [
@@ -104,7 +104,7 @@ class Plugin(stack.commands.Plugin):
 											f'ip={interface["ip"]}',
 											f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface ip')
+						self.owner.log.info(f'success setting {host["name"]} interface ip')
 						self.owner.successes += 1
 					if interface['name']:
 						self.owner.command('set.host.interface.name', [
@@ -112,7 +112,7 @@ class Plugin(stack.commands.Plugin):
 											f'name={interface["name"]}',
 											f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface name')
+						self.owner.log.info(f'success setting {host["name"]} interface name')
 						self.owner.successes += 1
 					if interface['module']:
 						self.owner.command('set.host.interface.module', [
@@ -120,7 +120,7 @@ class Plugin(stack.commands.Plugin):
 											f'module={interface["module"]}',
 											f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface module')
+						self.owner.log.info(f'success setting {host["name"]} interface module')
 						self.owner.successes += 1
 					if interface['vlan']:
 						self.owner.command('set.host.interface.vlan', [
@@ -128,7 +128,7 @@ class Plugin(stack.commands.Plugin):
 											f'vlan={interface["vlan"]}',
 											f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface vlan')
+						self.owner.log.info(f'success setting {host["name"]} interface vlan')
 						self.owner.successes += 1
 					if interface['options']:
 						self.owner.command('set.host.interface.options', [
@@ -136,7 +136,7 @@ class Plugin(stack.commands.Plugin):
 												f'options={interface["options"]}',
 												f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface options')
+						self.owner.log.info(f'success setting {host["name"]} interface options')
 						self.owner.successes += 1
 					if interface['channel']:
 						self.owner.command('set.host.interface.channel', [
@@ -144,16 +144,16 @@ class Plugin(stack.commands.Plugin):
 												f'channel={interface["channel"]}',
 												f'interface={interface["interface"]}'
 						])
-						print(f'success setting {host["name"]} interface channel')
+						self.owner.log.info(f'success setting {host["name"]} interface channel')
 						self.owner.successes += 1
 
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning setting host interface {interface["name"]}: {e}')
+						self.owner.log.info(f'warning setting host interface {interface["name"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error setting host interface {interface["name"]}: {e}')
+						self.owner.log.info(f'error setting host interface {interface["name"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -172,15 +172,15 @@ class Plugin(stack.commands.Plugin):
 									f'value={attr_value}',
 									f'shadow={attr_shadow}'
 					])
-					print(f'success setting {host["name"]} attr {attr_name}')
+					self.owner.log.info(f'success setting {host["name"]} attr {attr_name}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning setting {host["name"]} attr {attr_name}: {e}')
+						self.owner.log.info(f'warning setting {host["name"]} attr {attr_name}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error setting {host["name"]} attr {attr_name}: {e}')
+						self.owner.log.info(f'error setting {host["name"]} attr {attr_name}: {e}')
 						self.owner.errors += 1
 
 			#iterate through each firewall rule and add it
@@ -199,15 +199,15 @@ class Plugin(stack.commands.Plugin):
 									f'rulename={rule["name"]}',
 									f'table={rule["table"]}'
 					])
-					print(f'success adding host firewall rule {rule["name"]}')
+					self.owner.log.info(f'success adding host firewall rule {rule["name"]}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print (f'warning adding host firewall rule {rule["name"]}: {e}')
+						self.owner.log.info (f'warning adding host firewall rule {rule["name"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print (f'error adding host firewall rule {rule["name"]}: {e}')
+						self.owner.log.info (f'error adding host firewall rule {rule["name"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -220,15 +220,15 @@ class Plugin(stack.commands.Plugin):
 									f'gateway={route["gateway"]}',
 									f'netmask={route["netmask"]}'
 					])
-					print(f'success adding host route {route}')
+					self.owner.log.info(f'success adding host route {route}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding route {route["network"]}: {e}')
+						self.owner.log.info(f'warning adding route {route["network"]}: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding route {route["network"]}: {e}')
+						self.owner.log.info(f'error adding route {route["network"]}: {e}')
 						self.owner.errors += 1
 
 
@@ -254,22 +254,22 @@ class Plugin(stack.commands.Plugin):
 					parameters.append(f'options={partition["options"]}')
 				try:
 					self.owner.command('add.storage.partition', parameters)
-					print(f'success adding partition {partition}')
+					self.owner.log.info(f'success adding partition {partition}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print (f'warning adding partition: {e}')
+						self.owner.log.info (f'warning adding partition: {e}')
 						self.owner.warnings += 1
 					else:
-						print (f'error adding partition: {e}')
+						self.owner.log.info (f'error adding partition: {e}')
 						self.owner.errors += 1
 
 
 
 			for controller in host['controller']:
 				try:
-					print('adding host controller...')
+					self.owner.log.info('adding host controller...')
 					self.owner.command('add.storage.controller', [
 										host_name,
 									f'adapter={controller["adapter"]}',
@@ -278,15 +278,15 @@ class Plugin(stack.commands.Plugin):
 									f'raidlevel={controller["raidlevel"]}',
 									f'slot={controller["slot"]}'
 					])
-					print(f'success adding host controller {controller}')
+					self.owner.log.info(f'success adding host controller {controller}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						print(f'warning adding host ontroller: {e}')
+						self.owner.log.info(f'warning adding host ontroller: {e}')
 						self.owner.warnings += 1
 					else:
-						print(f'error adding host controller: {e}')
+						self.owner.log.info(f'error adding host controller: {e}')
 						self.owner.errors += 1
 
 
@@ -297,15 +297,15 @@ class Plugin(stack.commands.Plugin):
 							host_name,
 							f'action={host["installaction"]}' ])
 
-				print(f'success setting installaction of {host_name} to {host["installaction"]}')
+				self.owner.log.info(f'success setting installaction of {host_name} to {host["installaction"]}')
 				self.owner.successes += 1
 
 			except CommandError as e:
 				if 'exists' in str(e):
-					print(f'warning setting installaction of {host_name} to "{host["installaction"]}": {e}')
+					self.owner.log.info(f'warning setting installaction of {host_name} to "{host["installaction"]}": {e}')
 					self.owner.warnings += 1
 				else:
-					print(f'error setting installaction of {host_name} to "{host["installaction"]}": {e}')
+					self.owner.log.info(f'error setting installaction of {host_name} to "{host["installaction"]}": {e}')
 					self.owner.errors += 1
 
 
@@ -313,29 +313,29 @@ class Plugin(stack.commands.Plugin):
 			if host['metadata']:
 				try:
 					self.owner.command('set.host.metadata', [ host_name, f'metadata={host["metadata"]}' ])
-					print(f'success setting metadata of {host_name}')
+					self.owner.log.info(f'success setting metadata of {host_name}')
 					self.owner.successes += 1
 				except CommandError as e:
-					print(f'error setting metadata of {host_name}')
+					self.owner.log.info(f'error setting metadata of {host_name}')
 					self.owner.errors += 1
 
 			#set the comment if there is one
 			if host['comment']:
 				try:
 					self.owner.command('set.host.comment', [ host_name, f'comment={host["comment"]}' ])
-					print(f'success setting comment of {host_name}')
+					self.owner.log.info(f'success setting comment of {host_name}')
 					self.owner.successes += 1
 				except CommandError as e:
-					print(f'error setting comment of {host_name}')
+					self.owner.log.info(f'error setting comment of {host_name}')
 					self.owner.errors += 1
 
 			# set the environment if there is one
 			if host['environment']:
 				try:
 					self.owner.command('set.host.environment', [ host_name, f'environment={host["environment"]}' ])
-					print(f'success setting environment of {host_name}')
+					self.owner.log.info(f'success setting environment of {host_name}')
 					self.owner.successes += 1
 				except CommandError as e:
-					print(f'error setting environment of {host_name} {e}')
+					self.owner.log.info(f'error setting environment of {host_name} {e}')
 					self.owner.errors += 1
 
