@@ -142,11 +142,22 @@ class Command(stack.commands.HostArgumentProcessor,
 			data[host['host']] = []
 
 		host_devices = {}
-		for interface in self.call('list.host.interface'):
+		interfaces = self.call('list.host.interface')
+		for interface in interfaces:
 			host = interface['host']
 			mac = interface['mac']
 			ip = interface['ip']
 			device = interface['interface']
+			channel = interface['channel']
+
+			other_interfaces = [iface['interface'] for iface in interfaces if iface['host'] == host and iface['interface'] != device]
+
+			if channel:
+				if device == 'ipmi' and not ip:
+					raise CommandError(self, f'IPMI interface on host {host} has a channel but no IP')
+				elif device != 'ipmi' and channel not in other_interfaces:
+					msg = f'Interface "{device}" on host "{host}" has channel "{channel}" that does not match any other interface on the host'
+					raise CommandError(self, msg)
 
 			if host in host_devices:
 				if device in host_devices[host]:
@@ -207,13 +218,16 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput('', '</stack:file>')
 
 	def resolve_ip(self, host, device):
-		try:
-			(ip, channel), = self.db.select("""nt.ip,
-				nt.channel from networks nt, nodes n
-				where n.name='%s' and nt.device='%s' and
-				nt.node=n.id""" % (host, device))
-		except ValueError:
-			raise CommandError(self, f'Duplicate interface "{device}" on host "{host}"')
+		"""
+		Attempts to resolve the IP address of a host interface that lacks an address
+		(for example, if the interface is part of a bond).
+		"""
+
+		(ip, channel), = self.db.select("""nt.ip,
+			nt.channel from networks nt, nodes n
+			where n.name='%s' and nt.device='%s' and
+			nt.node=n.id""" % (host, device))
+
 		if channel:
 			return self.resolve_ip(host, channel)
 		return ip
