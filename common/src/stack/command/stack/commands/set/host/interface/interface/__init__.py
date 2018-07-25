@@ -10,8 +10,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from collections import defaultdict
 import stack.commands
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.set.host.command):
@@ -49,11 +50,22 @@ class Command(stack.commands.set.host.command):
 		if not len(args):
 			raise ArgRequired(self, 'host')
 
+		interfaces = defaultdict(list)
+		for iface in self.call('list.host.interface'):
+			interfaces[iface['host']].append({'interface': iface['interface'], 'mac': iface['mac']})
+
 		for host in self.getHostnames(args):
+			for iface in interfaces[host]:
+				if interface == iface['interface'] and mac != iface['mac']:
+					raise CommandError(self, f'Interface "{interface}" already exists on host "{host}"')
+				# update data structure info
+				elif mac == iface['mac']:
+					iface['interface'] = interface
+
 			self.db.execute("""
 				update networks,nodes set 
-				networks.device='%s' where
-				nodes.name='%s' and networks.node=nodes.id and
-				networks.mac like '%s'
-				""" % (interface, host, mac))
+				networks.device=%s where
+				nodes.name=%s and networks.node=nodes.id and
+				networks.mac like %s
+				""", (interface, host, mac))
 
