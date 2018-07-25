@@ -1,0 +1,13 @@
+[Unit]
+Description=stack-shutdown
+Requires=network.target
+DefaultDependencies=no
+Before=shutdown.target reboot.target
+
+[Service]
+Type=oneshot
+ExecStop=/opt/stack/sbin/stack_shutdown
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

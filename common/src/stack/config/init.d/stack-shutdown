@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# chkconfig: 3 99 00
+#
+# description: stacki shutdown
+#
+# @copyright@
+# @copyright@
+
+. /etc/rc.d/init.d/functions
+
+case "$1" in
+start)
+	;;
+
+stop)
+	/opt/stack/bin/smq-publish -t120 shutdown
+	;;
+
+*)
+	echo "Usage: $0 {start|stop}"
+	exit 1
+esac
+
+exit 0
+
