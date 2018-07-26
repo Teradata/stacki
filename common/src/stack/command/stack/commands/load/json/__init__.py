@@ -113,6 +113,9 @@ class Command(command):
 		s = subprocess.run(['mysqldump', 'cluster'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		with open ('cluster_backup.sql', 'wb+') as f:
 			f.write(s.stdout)
+		s = subprocess.run(['mysqldump', 'django'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		with open ('django_backup.sql', 'wb+') as f:
+			f.write(s.stdout)
 
 		# so that we are able to report how successful the load was
 		self.successes = 0
@@ -133,6 +136,10 @@ class Command(command):
 			with open('cluster_backup.sql', 'rb') as f:
 				cluster_backup = f.read()
 			s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+			s.communicate(cluster_backup)
+			with open('django_backup.sql', 'rb') as f:
+				cluster_backup = f.read()
+			s = subprocess.Popen(['mysql', 'django'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 			s.communicate(cluster_backup)
 
 			raise CommandError(self, 'There was at least one error, database has been reverted. No changes have been made.')
