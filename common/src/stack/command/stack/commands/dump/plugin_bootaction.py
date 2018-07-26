@@ -21,26 +21,27 @@ class Plugin(stack.commands.Plugin):
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
-		bootaction_data = self.owner.command('list.bootaction', [ 'output-format=json' ])
-		if bootaction_data:
-			bootaction_data = json.loads(bootaction_data)
+		bootaction_data = self.owner.call('list.bootaction')
+		if not bootaction_data:
+			return document_prep
 
-			bootaction_prep = []
-			for item in bootaction_data:
-				if item['args']:
-					args = item['args'].split()
-				else:
-					args = []
-				bootaction_prep.append({
-						'name':item['bootaction'],
-						'kernel':item['kernel'],
-						'ramdisk':item['ramdisk'],
-						'type':item['type'],
-						'args':args,
-						'os':item['os'],
-						})
+		bootaction_data = json.loads(bootaction_data)
+		bootaction_prep = []
+		for item in bootaction_data:
+			if item['args']:
+				args = item['args'].split()
+			else:
+				args = []
+			bootaction_prep.append({
+					'name':item['bootaction'],
+					'kernel':item['kernel'],
+					'ramdisk':item['ramdisk'],
+					'type':item['type'],
+					'args':args,
+					'os':item['os'],
+					})
 
-			document_prep['bootaction'] = bootaction_prep
+		document_prep['bootaction'] = bootaction_prep
 
 
 		return(document_prep)

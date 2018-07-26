@@ -68,7 +68,6 @@ class Command(stack.commands.Command):
 
 		self.beginOutput()
 		self.addOutput(None,json.dumps(document_prep, indent=2))
-#		self.addOutput(None, json.dumps(document_prep))
 		self.endOutput(trimOwner=True)
 
 

@@ -21,7 +21,7 @@ class Plugin(stack.commands.Plugin):
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
-		group_data = self.owner.command('list.group', [ 'output-format=json' ])
+		group_data = self.owner.call('list.group')
 		if group_data:
 			group_data = json.loads(group_data)
 			group_prep = []
