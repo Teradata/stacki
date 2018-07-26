@@ -2598,7 +2598,7 @@ class ScopeParamProcessor(OSArgumentProcessor,
 		elif scope == 'global' and args and len(args) >= 1:
 			if args != '*':
 				raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
-		elif not list_call and scope != 'global' and (args and len(args) < 1):
+		elif not list_call and scope != 'global' and not args:
 			raise ArgRequired(self, '%s name' % scope)
 
 		if scope != 'global':

@@ -86,11 +86,9 @@ class Command(stack.commands.add.command, stack.commands.ScopeParamProcessor):
 				if scope == 'host':
 					# Give useful error with host name instead of just generic 'host'
 					scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
-				raise CommandError(self, "partition specification for device %s, mount point %s already exists in the "
-				                         "database for scope: %s" % (device, mountpt, scope))
-			return mountpt
-		else:
-			return ''
+				raise CommandError(self, 'partition specification for device "%s", mount point "%s" already exists in the '
+				                         'database for scope: "%s"' % (device, mountpt, scope))
+		return
 
 	def check_dev_and_partid(self, device, scope, tableid, partid):
 		""" Checks if partition config already exists in DB for a device and a partid."""
@@ -103,8 +101,26 @@ class Command(stack.commands.add.command, stack.commands.ScopeParamProcessor):
 			if scope == 'host':
 					# Give useful error with host name instead of just generic 'host'
 				scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
-			raise CommandError(self, "partition specification for device %s, partition id %s already exists in the "
-			                         "database for scope: %s" % (device, partid, scope))
+			raise CommandError(self, 'partition specification for device "%s", partition id "%s" already exists in '
+			                         'the database for scope: "%s"' % (device, partid, scope))
+
+	def check_for_duplicates(self, device, scope, tableid, mountpt, partid):
+
+		self.db.execute("""select Scope, TableID, Mountpoint,
+			device, Size, FsType from storage_partition where
+			Scope=%s and TableID=%s and device= %s
+			and Mountpoint=%s and partid=%s""", (scope, tableid, device, mountpt, partid))
+		row = self.db.fetchone()
+		if row:
+			if scope == 'host':
+				# Give useful error with host name instead of just generic 'host'
+				scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
+			raise CommandError(self, 'partition specification for device "%s", mount point "%s" already exists in the '
+			                         'database for scope: "%s"' % (device, mountpt, scope))
+
+		self.check_mount_point(device, scope, tableid, mountpt)
+		if partid:
+			self.check_dev_and_partid(device, scope, tableid, partid)
 
 	def validation(self, size, mountpt, partid):
 		"""Validate size and partid that were input."""
@@ -153,29 +169,28 @@ class Command(stack.commands.add.command, stack.commands.ScopeParamProcessor):
 			raise ParamRequired(self, 'size')
 
 		self.validation(size, mountpt, partid)
-		# Also clean up the Nones to empty strings.
+		# Also clean up the Nones to empty strings or 0.
 		if not options:
 			options = ''
 		if not fstype:
 			fstype = ''
+		if not mountpt:
+			mountpt = ''
+		# Not certain this won't break something down the line. Load storage partition auto determines this...
+		if not partid:
+			partid = 0
 
 		tableids = self.get_scope_name_tableid(scope, params, args)
 		# if we get a:backend we want to check that all will go through instead of doing some then failing:
 		for each_tableid in tableids:
 			# make sure the specification for mountpt doesn't already exist
-			mountpt = self.check_mount_point(device, scope, each_tableid, mountpt)
-			if partid:
-				self.check_dev_and_partid(device, scope, each_tableid, partid)
+			self.check_for_duplicates(device, scope, each_tableid, mountpt, partid)
+
 
 		for each_tableid in tableids:
 			# now add the specifications to the database
-			sqlvars = "(Scope, TableID, device, Mountpoint,  Size, FsType, Options"
-			sqldata = (scope, each_tableid, device, mountpt, size, fstype, options)
+			sql_statement = "(Scope, TableID, device, Mountpoint,  Size, FsType, Options , PartID) values (%s, %s, " \
+			                "%s,  %s, %s, %s, %s, %s)"
+			sql_vars = (scope, each_tableid, device, mountpt, size, fstype, options, partid)
 
-			if partid:
-				sqlvars += ", PartID) values (%s, %s, %s, %s, %s, %s, %s, %s)"
-				sqldata += (partid,)
-			else:
-				sqlvars += ") values (%s, %s, %s, %s, %s, %s, %s)"
-
-			self.db.execute("insert into storage_partition " + sqlvars, sqldata)
+			self.db.execute("insert into storage_partition " + sql_statement, sql_vars)

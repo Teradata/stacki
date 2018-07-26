@@ -142,13 +142,9 @@ class TestAddStoragePartitionScopes():
 	@pytest.mark.usefixtures("revert_database")
 	def test_list_storage_partition_scopes_negative(self, host):
 		#these shouldn't work
-		accepted_scopes = ['global', 'os', 'appliance', 'host']
+		accepted_scopes = ['os', 'appliance', 'host']
 		for scope in accepted_scopes:
 			if scope != 'global':
-				result = host.run('stack list storage partition scope=%s' % scope)
-				assert result.rc == 255
-				assert '"%s name" argument is required' % scope in result.stderr
-
 				result = host.run('stack list storage partition scope=%s test' % scope)
 				assert result.rc == 255
 				if scope == 'host':
