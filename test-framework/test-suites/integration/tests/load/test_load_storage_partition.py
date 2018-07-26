@@ -28,6 +28,7 @@ class TestLoadStoragePartition:
 		assert result.rc == 0
 		assert result.stdout != ''
 
+
 STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend', 'scopes']
 
 @pytest.mark.usefixtures("revert_database")
@@ -64,3 +65,17 @@ def test_load_files_storage_partition(host, csvfile):
 			assert '%s' % scope in result.stdout
 	assert result.stderr == ''
 
+	# load the partition file again, this should be repeatable
+	result = host.run('stack load storage partition file=%s' % input_file)
+	assert result.rc == 0
+
+	# check that it has partition info
+	result = host.run('stack list storage partition %s' % hostname)
+	assert result.rc == 0
+	assert 'sda' in result.stdout
+	if 'scopes' in input_file:
+		for scope in ['os', 'host', 'appliance', 'environment']:
+			result = host.run('stack list %s storage partition' % scope)
+			assert result.rc == 0
+			assert '%s' % scope in result.stdout
+	assert result.stderr == ''

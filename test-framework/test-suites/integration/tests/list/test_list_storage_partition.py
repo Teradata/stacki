@@ -133,7 +133,7 @@ class TestAddStoragePartitionScopes():
 		result = host.run('stack add environment storage partition test device=test0 size=1 partid=1')
 		assert result.rc == 0
 		assert '' == result.stdout
-		result = host.run('stack list environment storage partition backend')
+		result = host.run('stack list environment storage partition test')
 		assert result.rc == 0
 		assert 'environment' in result.stdout
 		assert 'test ' in result.stdout

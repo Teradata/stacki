@@ -16,6 +16,7 @@ do
             ;;
         --vvv)
             pytest="pytest -vvv"
+            shift 1
             ;;
         *)
             # Only run specific tests
