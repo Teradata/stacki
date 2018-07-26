@@ -39,7 +39,7 @@ class Command(stack.commands.Command):
 		except Group.DoesNotExist:
 			g = None
 		if g:
-			raise CommandError("Group %s is already in use" % g)
+			raise CommandError(self, "Group %s is already in use" % g)
 
 		# Create group
 		g = Group()
