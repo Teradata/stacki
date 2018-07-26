@@ -20,7 +20,7 @@ class Plugin(stack.commands.Plugin):
 
 		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
 		#if not, use an empty list as a placeholder.
-		pallet_data = self.owner.command('list.pallet', [ 'output-format=json', 'expanded=true' ])
+		pallet_data = self.owner.call('list.pallet', [ 'expanded=true' ])
 		if pallet_data:
 			pallet_data = json.loads(pallet_data)
 			pallet_prep = []
@@ -39,7 +39,7 @@ class Plugin(stack.commands.Plugin):
 			pallet_prep = []
 
 
-		cart_data = self.owner.command('list.cart', [ 'expanded=true', 'output-format=json' ])
+		cart_data = self.owner.call('list.cart', [ 'expanded=true' ])
 		if cart_data:
 			cart_data = json.loads(cart_data)
 			cart_prep = []
@@ -55,7 +55,7 @@ class Plugin(stack.commands.Plugin):
 		else:
 			cart_prep = []
 
-		box_data = self.owner.command('list.box', [ 'output-format=json' ])
+		box_data = self.owner.call('list.box')
 		if box_data:
 			box_data = json.loads(box_data)
 			box_prep = []
