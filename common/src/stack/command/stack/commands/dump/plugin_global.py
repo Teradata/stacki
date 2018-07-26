@@ -40,7 +40,7 @@ class Plugin(stack.commands.Plugin):
 		if firewall_data:
 			firewall_data = json.loads(firewall_data)
 			for rule in firewall_data:
-				# if the rule is a const, we do not need to bother dumping it
+				# if the rule is a const it was created by Stacki, so don't bother dumping it
 				if rule['type'] == 'const':
 					continue
 				if rule['source'] == 'G':
