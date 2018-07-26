@@ -1,0 +1,472 @@
+{
+  "appliance": [
+    {
+      "name": "frontend",
+      "longname": "Frontend",
+      "attrs": [
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "False"
+        },
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "server"
+        }
+      ],
+      "route": [],
+      "firewall": [
+        {
+          "appliance": "frontend",
+          "name": "9561ea34-83ae-11e8-b09e-0800279bee6a",
+          "table": "filter",
+          "service": "all",
+          "protocol": "all",
+          "chain": "FORWARD",
+          "action": "ACCEPT",
+          "network": "private",
+          "output-network": "",
+          "flags": null,
+          "comment": null,
+          "source": "A",
+          "type": "var"
+        }
+      ],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "builder",
+      "longname": "Builder",
+      "attrs": [
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "builder"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "barnacle",
+      "longname": "Barnacle",
+      "attrs": [
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "barnacle"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "backend",
+      "longname": "Backend",
+      "attrs": [
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "bynet",
+          "value": "true"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "install.final_reboot",
+          "value": "true"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "backend"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "sync.hosts",
+          "value": "true"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [
+        {
+          "scope": "backend",
+          "device": "sdb",
+          "partid": 1,
+          "mountpoint": "/var/lib/docker",
+          "size": 0,
+          "fstype": "ext4",
+          "options": "--label=DOCKER"
+        }
+      ],
+      "controller": [
+        {
+          "scope": "backend",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 0,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 1,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 2,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 3,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 4,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 5,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 6,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 7,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 8,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 9,
+          "raidlevel": "10",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 10,
+          "raidlevel": "hotspare",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 11,
+          "raidlevel": "hotspare",
+          "arrayid": 1,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 12,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 13,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 14,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 15,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 16,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 17,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 18,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 19,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 20,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 21,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 22,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 23,
+          "raidlevel": "10",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 24,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": "wt nora"
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 25,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": "wt nora"
+        }
+      ]
+    },
+    {
+      "name": "replicant",
+      "longname": "Replicant",
+      "attrs": [
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "const_overwrite",
+          "value": "false"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "replicant"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "switch",
+      "longname": "Switch",
+      "attrs": [
+        {
+          "appliance": "switch",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "False"
+        },
+        {
+          "appliance": "switch",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "False"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    }
+  ]
+}
