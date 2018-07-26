@@ -13,4 +13,4 @@ fi
 # Run the tests
 #pytest --hosts=frontend --ssh-config=".cache/ssh-config" tests/
 # To run in parallel:
-pytest -n 6 --hosts=frontend --ssh-config=".cache/ssh-config" tests/ -vvv
+pytest -vvv -n 6 --hosts=frontend --ssh-config=".cache/ssh-config" tests/

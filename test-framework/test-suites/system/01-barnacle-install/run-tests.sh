@@ -13,4 +13,4 @@ then
 fi
 
 # Run the tests
-pytest --hosts=frontend --ssh-config=".cache/ssh-config" tests/
+pytest -vvv --hosts=frontend --ssh-config=".cache/ssh-config" tests/
