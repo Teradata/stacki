@@ -5,7 +5,6 @@
 # @copyright@
 
 import stack.commands
-import json
 
 class Plugin(stack.commands.Plugin):
 
@@ -20,25 +19,19 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'host':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		#if there is no data use an empty list as a placeholder.
 		host_data = self.owner.call('list.host')
 		if not host_data:
 			return document_prep
 
-		host_data = json.loads(host_data)
-
 		for host in host_data:
 			hostname = host['host']
 			interface_data = self.owner.call('list.host.interface', [ hostname ])
-			if interface_data:
-				interface_data = json.loads(interface_data)
-			else:
+			if not interface_data:
 				interface_data = []
+
 			interface_alias_data = self.owner.call('list.host.alias', [ hostname ])
-			if interface_alias_data:
-				interface_alias_data = json.loads(interface_alias_data)
-			else:
+			if not interface_alias_data:
 				interface_alias_data = []
 
 			interface_prep = []
@@ -58,8 +51,8 @@ class Plugin(stack.commands.Plugin):
 							'alias':interface_alias_data
 					})
 			attr_data = self.owner.call('list.host.attr', [ hostname ])
-			if attr_data:
-				attr_data = json.loads(attr_data)
+			if not attr_data:
+				attr_data = []
 			attr_prep = []
 			metadata = None
 			for attr in attr_data:
@@ -80,9 +73,10 @@ class Plugin(stack.commands.Plugin):
 							'value':attr['value'],
 							'shadow':shadow
 							})
+
 			firewall_data = self.owner.call('list.host.firewall', [ hostname ])
-			if firewall_data:
-				firewall_data = json.loads(firewall_data)
+			if not firewall_data:
+				firewall_data = []
 			firewall_prep = []
 			for rule in firewall_data:
 				if rule['host'] == hostname and rule['source'] == 'H':
@@ -90,8 +84,8 @@ class Plugin(stack.commands.Plugin):
 
 
 			route_data = self.owner.call('list.host.route', [ hostname ])
-			if route_data:
-				route_data = json.loads(route_data)
+			if not route_data:
+				route_data = []
 			route_prep = []
 			for route in route_data:
 				if route['host'] == hostname and route['source'] == 'H':
@@ -99,8 +93,8 @@ class Plugin(stack.commands.Plugin):
 
 
 			group_data = self.owner.call('list.host.group', [ hostname ])
-			if group_data:
-				group_data = json.loads(group_data)
+			if not group_data:
+				group_data = []
 			group_prep = []
 			for group in group_data:
 				if group['host'] == hostname:
@@ -111,8 +105,8 @@ class Plugin(stack.commands.Plugin):
 
 
 			partition_data = self.owner.call('list.storage.partition', [ hostname ])
-			if partition_data:
-				partition_data = json.loads(partition_data)
+			if not partition_data:
+				partition_data = []
 			partition_prep = []
 			if partition_data:
 				for partition in partition_data:
@@ -121,8 +115,8 @@ class Plugin(stack.commands.Plugin):
 
 
 			controller_data = self.owner.call('list.storage.controller', [ hostname ])
-			if controller_data:
-				controller_data = json.loads(controller_data)
+			if not controller_data:
+				controller_data = []
 			controller_prep = []
 			if controller_data:
 				for controller in controller_data:
@@ -131,8 +125,7 @@ class Plugin(stack.commands.Plugin):
 
 			#find the longname of the host's appliance with list appliance
 			appliance_data = self.owner.call('list.appliance', [ host['appliance'] ])
-			appliance_data = json.loads(appliance_data)[0]
-			longname = appliance_data['long name']
+			longname = appliance_data[0]['long name']
 
 
 			document_prep['host'].append({

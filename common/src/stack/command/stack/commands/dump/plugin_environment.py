@@ -5,7 +5,6 @@
 # @copyright@
 
 import stack.commands
-import json
 
 class Plugin(stack.commands.Plugin):
 
@@ -26,39 +25,29 @@ class Plugin(stack.commands.Plugin):
 		if not environment_data:
 			return document_prep
 
-		environment_data = json.loads(environment_data)
 		for item in environment_data:
 			environment_name = item['environment']
 
 			attr_data = self.owner.call('list.environment.attr', [ environment_name ])
-			if attr_data:
-				attr_data = json.loads(attr_data)
-			else:
+			if not attr_data:
 				attr_data = []
 
 			route_data = self.owner.call('list.route', [ f'environment={environment_name}' ])
-			if route_data:
-				route_data = json.loads(route_data)
-			else:
+			if not route_data:
 				route_data = []
 
 			firewall_data = self.owner.call('list.firewall', [ f'environment={environment_name}' ])
-			if firewall_data:
-				firewall_data = json.loads(firewall_data)
-			else:
+			if not firewall_data:
 				firewall_data = []
 
 			partition_data = self.owner.call('list.storage.partition', [ f'environment={environment_name}', 'globalOnly=False' ])
-			if partition_data:
-				partition_data = json.loads(partition_data)
-			else:
+			if not partition_data:
 				partition_data = []
 
 			controller_data = self.owner.call('list.storage.controller', [ f'environment={environment_name}' ])
-			if controller_data:
-				controller_data = json.loads(controller_data)
-			else:
+			if not controller_data:
 				controller_data = []
+
 			controller_prep = []
 			for item in controller_data:
 				options = item['options'].split()

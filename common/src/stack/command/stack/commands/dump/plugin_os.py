@@ -5,7 +5,6 @@
 # @copyright@
 
 import stack.commands
-import json
 
 class Plugin(stack.commands.Plugin):
 
@@ -25,14 +24,11 @@ class Plugin(stack.commands.Plugin):
 		if not os_data:
 			return document_prep
 
-		os_data = json.loads(os_data)
 		for item in os_data:
 			os_name = item['os']
 
 			attr_data = self.owner.call('list.os.attr', [ f'os={os_name}' ])
-			if attr_data:
-				attr_data = json.loads(attr_data)
-			else:
+			if not attr_data:
 				attr_data = []
 			attr_prep = []
 			for item in attr_data:
@@ -40,32 +36,25 @@ class Plugin(stack.commands.Plugin):
 					attr_prep.append(item)
 
 			route_data = self.owner.call('list.os.route', [ f'os={os_name}' ])
-			if route_data:
-				route_data = json.loads(route_data)
-			else:
+			if not route_data:
 				route_data = []
 
 			firewall_data = self.owner.call('list.os.firewall', [ f'os={os_name}' ])
-			if firewall_data:
-				firewall_data = json.loads(firewall_data)
-				firewall_prep = []
-				for item in firewall_data:
-					if item['os'] == os_name and item['source'] == 'O':
-						firewall_prep.append(item)
-			else:
-				firewall_prep = []
+			if not firewall_data:
+				firewall_data = []
+			firewall_prep = []
+			for item in firewall_data:
+				if item['os'] == os_name and item['source'] == 'O':
+					firewall_prep.append(item)
 
 			partition_data = self.owner.call('list.storage.partition', [ f'{os_name}', 'globalOnly=False' ])
-			if partition_data:
-				partition_data = json.loads(partition_data)
-			else:
+			if not partition_data:
 				partition_data = []
 
 			controller_data = self.owner.call('list.storage.controller', [ f'{os_name}' ])
-			if controller_data:
-				controller_data = json.loads(controller_data)
-			else:
+			if not controller_data:
 				controller_data = []
+
 			controller_prep = []
 			for item in controller_data:
 				options = item['options'].split()
