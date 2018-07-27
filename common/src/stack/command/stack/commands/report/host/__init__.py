@@ -11,6 +11,7 @@
 # @rocks@
 
 import stack.commands
+from stack.exception import CommandError
 import stack.text
 import os.path
 import shlex
@@ -65,6 +66,8 @@ class Command(command):
 		for row in interfaces:
 			if not row['ip']:
 				continue
+			if not row['network']:
+				raise CommandError(self, f'interface "{row["interface"]}" on host "{row["host"]}" has an IP but no network')
 
 			# Each interface dict contains interface name,
 			# zone, whether the interface is the default one,

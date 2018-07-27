@@ -9,6 +9,7 @@ import shlex
 import ipaddress
 from stack.bool import str2bool
 import stack.commands
+from stack.exception import CommandError
 
 
 class Implementation(stack.commands.Implementation):
@@ -36,6 +37,9 @@ class Implementation(stack.commands.Implementation):
 
 			startmode = None
 			bootproto = 'static'
+
+			if ip and not netname:
+				raise CommandError(self, f'interface "{interface}" on host "{o["host"]}" has an IP but no network')
 
 			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)

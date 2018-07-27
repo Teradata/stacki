@@ -7,6 +7,7 @@
 import re
 import shlex
 import stack.commands
+from stack.exception import CommandError
 
 
 class Implementation(stack.commands.Implementation):
@@ -32,6 +33,9 @@ class Implementation(stack.commands.Implementation):
 			gateway = row['gateway']
 			vlanid	= row['vlan']
 			default = row['default']
+
+			if ip and not netname:
+				raise CommandError(self, f'interface "{interface}" on host "{row["host"]}" has an IP but no network')
 
 			mtu = None
 			if subnet:
