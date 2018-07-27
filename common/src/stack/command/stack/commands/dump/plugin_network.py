@@ -5,7 +5,6 @@
 # @copyright@
 
 import stack.commands
-import json
 
 class Plugin(stack.commands.Plugin):
 
@@ -20,13 +19,11 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'network':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		#if there is no data use an empty list as a placeholder.
 		network_data = self.owner.call('list.network')
 		if not network_data:
 			return document_prep
 		network_prep = []
-		network_data = json.loads(network_data)
 		for network in network_data:
 			network_prep.append({
 					'name':network['network'],

@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-import json
+
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
@@ -19,11 +19,9 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'group':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		#if there is no data use an empty list as a placeholder.
 		group_data = self.owner.call('list.group')
 		if group_data:
-			group_data = json.loads(group_data)
 			group_prep = []
 			for group in group_data:
 				group_prep.append({'name':group['group']})

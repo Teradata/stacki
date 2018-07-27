@@ -5,7 +5,6 @@
 # @copyright@
 
 import stack.commands
-import json
 
 class Plugin(stack.commands.Plugin):
 
@@ -19,13 +18,11 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'bootaction':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		#if there is no data use an empty list as a placeholder.
 		bootaction_data = self.owner.call('list.bootaction')
 		if not bootaction_data:
 			return document_prep
 
-		bootaction_data = json.loads(bootaction_data)
 		bootaction_prep = []
 		for item in bootaction_data:
 			if item['args']:
