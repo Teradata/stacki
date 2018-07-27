@@ -78,21 +78,20 @@ class Command(command):
 	def checks(self, args):
 
 		# Make sure that the user is not attepting to add more than one frontend
-		if ('host' in args or not args) and 'host' in self.data:
+		if (not args or 'host' in args) and 'host' in self.data:
 			current_frontend = json.loads(self.command('list.host', [ 'a:frontend', 'output-format=json' ]))[0]['host']
 			for host in self.data['host']:
 				if host['appliance'] == 'frontend' and host['name'] != current_frontend:
 					raise CommandError(self, 'frontend name in the json document does not match the current frontend name')
 
 		# Make sure that all of the pallets at least have URLs
-		if ('software' in args or not args) and 'software' in self.data and 'pallet' in self.data['software']:
+		if (not args or 'software' in args) and 'software' in self.data and 'pallet' in self.data['software']:
 			for pallet in self.data['software']['pallet']:
 				if pallet['url'] == None:
 					raise CommandError(self, f'pallet {pallet["name"]} {pallet["version"]} has no url')
 
 
 	def run(self, params, args):
-
 		filename, = self.fillParams([
 			('file', None, True),
 		])
@@ -110,9 +109,9 @@ class Command(command):
 		self.checks(args)
 
 		# make a backup of the database in its current state in the event of any errors
-		s = subprocess.run(['mysqldump', 'cluster'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		with open ('cluster_backup.sql', 'wb+') as f:
-			f.write(s.stdout)
+		s = subprocess.run(['/etc/cron.daily/backup-cluster-db'])
+		if s.returncode != 0:
+			raise CommandError(self, 'unable to backup the cluster database, aborting')
 
 		# so that we are able to report how successful the load was
 		self.successes = 0
@@ -130,12 +129,9 @@ class Command(command):
 
 		# if there are errors, revert db changes and raise a CommandError
 		if self.errors != 0:
-			with open('cluster_backup.sql', 'rb') as f:
-				cluster_backup = f.read()
-			s = subprocess.Popen(['mysql', 'cluster'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-			s.communicate(cluster_backup)
+			self.notify('\nThere were errors during the load, restoring the database. Check /var/log/load-json.log for details.\n')
+			s = subprocess.run(['bash', '/var/db/restore-stacki-database.sh'])
+			if s.returncode != 0:
+				raise CommandError(self, 'There were errors and the database could not be restored. Check /var/log/load-json.log for details')
 
-			raise CommandError(self, 'There was at least one error, database has been reverted. No changes have been made.')
-		else:
-			# our load was successful so we can delete our temporary backup
-			s = subprocess.call(['rm', '-f', 'cluster_backup.sql'], stdout=subprocess.PIPE)
+			raise CommandError(self, 'The database has been restored. No changes have been made.')
