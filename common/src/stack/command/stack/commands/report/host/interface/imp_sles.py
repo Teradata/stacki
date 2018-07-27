@@ -9,6 +9,7 @@ import shlex
 import ipaddress
 from stack.bool import str2bool
 import stack.commands
+from stack.commands import Warn
 
 
 class Implementation(stack.commands.Implementation):
@@ -36,6 +37,11 @@ class Implementation(stack.commands.Implementation):
 
 			startmode = None
 			bootproto = 'static'
+
+			if ip and not netname:
+				Warn(f'WARNING: skipping interface "{interface}" on host "{o["host"]}" - '
+				      'interface has an IP but no network')
+				continue
 
 			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
