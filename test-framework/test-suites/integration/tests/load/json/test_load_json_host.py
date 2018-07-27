@@ -25,7 +25,7 @@ class TestLoadJsonHost:
 		assert results.rc == 0
 		results = host.run('stack add host route backend-test address=192.168.0.2 gateway=192.168.0.3 netmask=255.255.255.0 syncnow=true')
 		assert results.rc == 0
-		results = host.run('stack add storage controller backend-test adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
+		results = host.run('stack add host storage controller backend-test adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
 		assert results.rc == 0
 		results = host.run('stack add storage partition backend-test device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0

@@ -125,7 +125,7 @@ class Plugin(stack.commands.Plugin):
 						partition_prep.append(partition)
 
 
-			controller_data = self.owner.call('list.storage.controller', [ hostname ])
+			controller_data = self.owner.call('list.storage.controller', [ hostname, 'scope=host'])
 			if not controller_data:
 				controller_data = []
 

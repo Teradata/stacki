@@ -9,17 +9,21 @@
 import stack.commands
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
 
-
-class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.add.command):
+class Command(stack.commands.add.command, stack.commands.ScopeParamProcessor):
 	"""
 	Add a storage controller configuration to the database.
 
-	<arg type='string' name='scope'>
-	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). No argument means the scope is 'global'.
+	<param type='string' name='scope'  optional='0'>
+	Zero or one parameter. The parameter is the scope for the provided name
+	(e.g., 'os', 'host', 'environment', 'appliance').
+	No scope means the scope is 'global', and no name will be accepted.
+	</param>
+
+	<arg type='string' name='name' optional='0'>
+	This argument can be nothing, a valid 'os' (e.g., 'redhat'), a valid
+	appliance (e.g., 'backend'), a valid environment (e.g., 'master_node'
+	or a host.
+	If nothing is supplied, then the configuration will be global.
 	</arg>
 
 	<param type='int' name='adapter' optional='1'>
@@ -57,96 +61,37 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 	equal to 2 will be created second, etc.
 	</param>
 
-	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1'>
-	The disk in slot 1 on backend-0-0 should be a RAID 0 disk.
+	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1 scope=host'>
+	The disk in slot 1 on backend-0-0 should be a RAID 0 disk, for the host 'backend-0-0'
 	</example>
 
-	<example cmd='add storage controller backend-0-0 slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2'>
+	<example cmd='add storage controller backend-0-0 slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2 scope=host'>
 	The disks in slots 2-6 on backend-0-0 should be a RAID 6 with two
-	hotspares associated with the array in slots 7 and 8.
+	hotspares associated with the array in slots 7 and 8, for the host 'backend-0-0'
 	</example>
 	"""
 
-	def checkIt(self, name, scope, tableid, adapter, enclosure, slot):
-		self.db.execute("""select scope, tableid, adapter, enclosure,
-			slot from storage_controller where
-			scope = '%s' and tableid = %s and adapter = %s and
-			enclosure = %s and slot = %s""" % (scope, tableid,
-			adapter, enclosure, slot))
-
-		row = self.db.fetchone()
+	def check_for_duplicates(self, scope, tableid, enclosure, slot):
+		# Intentionally not looking for adapter, as regardless of the adapter a disk can't be used twice
+		row = self.db.select("""scope, tableid, adapter, enclosure, slot from storage_controller 
+			where scope = '%s' and tableid = %s and enclosure = %s and slot = %s""" %
+		                (scope, tableid, enclosure, slot))
 
 		if row:
-			label = [ 'scope', 'name' ]
-			value = [ scope, name ]
-
-			if adapter > -1:
-				label.append('adapter')
-				value.append('%s' % adapter)
-			if enclosure > -1:
-				label.append('enclosure')
-				value.append('%s' % enclosure)
-
-			label.append('slot')
-			value.append('%s' % slot)
-
-			raise CommandError(self, 'disk specification %s %s already exists in the database' % ('/'.join(label), '/'.join(value)))
+			if scope == 'host':
+				# Give useful error with host name instead of just generic 'host'
+				scope = self.db.select('name from nodes where id = %s', str(tableid))[0][0]
+			raise CommandError(self, 'controller specification for enclosure "%s", slot "%s" already '
+			                         'exists in the database for scope: "%s"'  % (enclosure, slot, scope))
 
 
-	def run(self, params, args):
-		scope = None
-		oses = []
-		appliances = []
-		hosts = []
-
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
-
-			try:
-				appliances = self.getApplianceNames(args)
-			except:
-				appliances = []
-
-			try:
-				hosts = self.getHostnames(args)
-			except:
-				hosts = []
-		else:
-			raise CommandError(self, 'must supply zero or one argument')
-
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-		if not scope:
-			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % args[0])
-
-		if scope == 'global':
-			name = 'global'
-		else:
-			name = args[0]
-
-		adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
-			('adapter', None),
-			('enclosure', None),
-			('slot', None),
-			('hotspare', None),
-			('raidlevel', None),
-			('arrayid', None, True),
-			('options', ''),
-			('force', 'n')
-			])
-
+	def validation(self, adapter, enclosure, slot, hotspare, raidlevel, arrayid):
+		"""
+		Validate the data input matches the requirements to be usable.
+		Also I wanted to be able to call self.validation
+		"""
 		if not hotspare and not slot:
-			raise ParamRequired(self, [ 'slot', 'hotspare' ])
+			raise ParamRequired(self, ['slot', 'hotspare'])
 		if arrayid != 'global' and not raidlevel:
 			raise ParamRequired(self, 'raidlevel')
 
@@ -174,9 +119,7 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 		if slot:
 			for s in slot.split(','):
 				if s == '*':
-					#
 					# represent '*' in the database as '-1'
-					#
 					s = -1
 				else:
 					try:
@@ -194,7 +137,7 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 			for h in hotspare.split(','):
 				try:
 					h = int(h)
-				except:	
+				except:
 					raise ParamType(self, 'hotspare', 'integer')
 				if h < 0:
 					raise ParamValue(self, 'hostspare', '>= 0')
@@ -215,63 +158,58 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 		if arrayid == 'global' and len(hotspares) == 0:
 			raise ParamError(self, 'arrayid', 'is "global" with no hotspares. Please supply at least one hotspare')
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = None
-		if scope == 'global':
-			tableid = -1
-		elif scope == 'appliance':
-			self.db.execute("""select id from appliances where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
+		# Some may have been modified to be -1/*, turned into a list, etc.
+		return adapter, enclosure, slots, hotspares, arrayid
 
-		elif scope == 'os':
-			self.db.execute("""select id from oses where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
 
-		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
+	def run(self, params, args):
 
-		#
+		scope, adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
+			('scope', 'global'),
+			('adapter', None),
+			('enclosure', None),
+			('slot', None),
+			('hotspare', None),
+			('raidlevel', None),
+			('arrayid', None, True),
+			('options', ''),
+			('force', 'n')
+			])
+
+		tableids = self.get_scope_name_tableid(scope, params, args)
 		# make sure the specification doesn't already exist
-		#
+		adapter, enclosure, slots, hotspares, arrayid = self.validation(adapter, enclosure, slot, hotspare,
+		                                                                raidlevel, arrayid)
+
 		force = self.str2bool(force)
-		for slot in slots:
-			if not force:
-				self.checkIt(name, scope, tableid, adapter, enclosure,
-					slot)
-		for hotspare in hotspares:
-			if not force:
-				self.checkIt(name, scope, tableid, adapter, enclosure,
-					hotspare)
+		for tableid in tableids:
+			for slot in slots:
+				if not force:
+					self.check_for_duplicates(scope, tableid, enclosure, slot)
+			for hotspare in hotspares:
+				if not force:
+					self.check_for_duplicates(scope, tableid, enclosure, hotspare)
 
-		if arrayid == 'global':
-			arrayid = -1
-		elif arrayid == '*':
-			arrayid = -2
-
-		#
-		# now add the specifications to the database
-		#
-		for slot in slots:
-			self.db.execute("""insert into storage_controller
-				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
-				enclosure, slot, raidlevel, arrayid, options))
-
-		for hotspare in hotspares:
-			raidlevel = -1
 			if arrayid == 'global':
 				arrayid = -1
+			elif arrayid == '*':
+				arrayid = -2
 
-			self.db.execute("""insert into storage_controller
-				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
-				enclosure, hotspare, raidlevel, arrayid, options))
+			# now add the specifications to the database
+			for slot in slots:
+				self.db.execute("""insert into storage_controller
+					(scope, tableid, adapter, enclosure, slot,
+					raidlevel, arrayid, options) values (%s, %s, %s, %s,
+					%s, %s, %s, %s) """, (scope, tableid, adapter,
+					enclosure, slot, raidlevel, arrayid, options))
 
+			for hotspare in hotspares:
+				raidlevel = -1
+				if arrayid == 'global':
+					arrayid = -1
+
+				self.db.execute("""insert into storage_controller
+					(scope, tableid, adapter, enclosure, slot,
+					raidlevel, arrayid, options) values (%s, %s, %s, %s,
+					%s, %s, %s, %s) """, (scope, tableid, adapter,
+					enclosure, hotspare, raidlevel, arrayid, options))

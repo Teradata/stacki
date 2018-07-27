@@ -114,6 +114,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			for controller in appliance['controller']:
 				parameters = [
 					appliance_name,
+					f'scope={controller["scope"]}',
 					f'arrayid={controller["arrayid"]}',
 					f'raidlevel={controller["raidlevel"]}',
 					f'slot={controller["slot"]}'
