@@ -24,6 +24,16 @@ class Plugin(stack.commands.Plugin):
 		if not host_data:
 			return document_prep
 
+		# since list host attr is relatively expensive call it once for all hosts up here
+		grouped_hosts = {}
+		for line in self.owner.call('list.host.attr'):
+			if line['host'] in grouped_hosts:
+				grouped_hosts[line['host']].append(line)
+			else:
+				grouped_hosts[line['host']] = [line]
+
+		all_host_attr_data = self.owner.call('list.host.attr')
+
 		for host in host_data:
 			hostname = host['host']
 			interface_data = self.owner.call('list.host.interface', [ hostname ])
@@ -50,7 +60,7 @@ class Plugin(stack.commands.Plugin):
 							'channel':interface['channel'],
 							'alias':interface_alias_data
 					})
-			attr_data = self.owner.call('list.host.attr', [ hostname ])
+			attr_data = grouped_hosts[hostname]
 			if not attr_data:
 				attr_data = []
 			attr_prep = []
@@ -149,4 +159,6 @@ class Plugin(stack.commands.Plugin):
 						'controller':controller_prep
 						})
 		return(document_prep)
+
+
 
