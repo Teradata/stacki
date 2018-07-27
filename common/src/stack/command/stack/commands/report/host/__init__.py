@@ -11,6 +11,7 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import Warn
 import stack.text
 import os.path
 import shlex
@@ -64,6 +65,10 @@ class Command(command):
 		interfaces = self.call('list.host.interface')
 		for row in interfaces:
 			if not row['ip']:
+				continue
+			if not row['network']:
+				Warn(f'WARNING: skipping interface "{row["interface"]}" on host "{row["host"]}" - '
+				      'interface has an IP but no network')
 				continue
 
 			# Each interface dict contains interface name,

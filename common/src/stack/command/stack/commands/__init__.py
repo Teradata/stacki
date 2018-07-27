@@ -47,6 +47,13 @@ def Log(message, level=syslog.LOG_INFO):
 	syslog.syslog(level, '%s%s' % (_logPrefix, message))
 
 
+def Warn(message):
+	"""
+	Send a warning to syslog
+	"""
+	syslog.syslog(syslog.LOG_WARNING, f'{_logPrefix}{message}')
+
+
 def Debug(message, level=syslog.LOG_DEBUG):
 	"""If the environment variable STACKDEBUG is set,
 	send a message to syslog and stderr."""
