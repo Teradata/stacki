@@ -64,13 +64,12 @@ class Command(stack.commands.load.command,
 			os.makedirs(RCSdir)
 
 		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not \
-			os.path.samefile(filename, sheetsfile):
+		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
 			shutil.copyfile(filename, '%s' % sheetsfile)
-		
+
+		# This causes: 'date: write error: Broken pipe' output sometimes
 		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
 		os.system(cmd)
-
 		cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
 		os.system(cmd)
 

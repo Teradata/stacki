@@ -100,6 +100,7 @@ def revert_filesystem():
 			path
 		], check=True)
 
+
 @pytest.fixture
 def revert_discovery():
 	# Nothing to do in set up
@@ -126,8 +127,10 @@ def revert_discovery():
 	if os.path.exists("/var/log/stack-discovery.log"):
 		os.remove("/var/log/stack-discovery.log")
 
+
 @pytest.fixture
 def add_host(hostname='backend-0-0', rack='1', rank='1', appliance='backend'):
+	"""Adds a basic backend or backends if count is provided."""
 	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
 	result = subprocess.run(cmd.split())
 	if result.returncode != 0:

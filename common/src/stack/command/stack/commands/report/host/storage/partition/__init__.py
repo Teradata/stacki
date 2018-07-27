@@ -9,7 +9,10 @@ from stack.exception import ArgUnique
 
 
 class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+              stack.commands.OSArgumentProcessor,
+              stack.commands.ApplianceArgumentProcessor,
+              stack.commands.EnvironmentArgumentProcessor,
+              stack.commands.report.command):
 	"""
 	Output the storage partition configuration for a specific host
 
@@ -21,6 +24,14 @@ class Command(stack.commands.HostArgumentProcessor,
 	Output the storage partition configuration for backend-0-0.
 	</example>
 	"""
+
+	def list_partition_scope(self, scope=[]):
+		output = self.call('list.storage.partition', scope)
+		if output:
+			self.addOutput('', '%s' % output)
+			self.endOutput(padChar='')
+		return output
+
 
 	def run(self, params, args):
 		hosts = self.getHostnames(args)
@@ -37,40 +48,23 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		host = hosts[0]
 
-		#
-		# first see if there is a storage partition configuration for
-		# this specific host
-		#
-		output = self.call('list.storage.partition', [ host ])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
+		# host level gets first priority, then environment, appliance, os, and last global scope.
+		for each_scope in ['host', 'environment', 'appliance', 'os', 'global']:
+			# Setup the input for each scope correctly:
+			if each_scope == 'host':
+				# first see if there is a storage partition configuration for this specific host
+				current_scope = [host, 'scope=%s' % each_scope]
+			elif each_scope != 'global':
+				# next check the attribute for environment, appliance, then os
+				current_scope = [self.getHostAttr(host, each_scope), 'scope=%s' % each_scope]
+				if current_scope[0] is None:
+					continue
+			else:
+				# finally check the global level
+				current_scope = ['globalOnly=y']
 
-		# 
-		# now check at the appliance level
-		# 
-		appliance = self.getHostAttr(host, 'appliance')
-
-		output = self.call('list.storage.partition', [ appliance ])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
-
-		#
-		# finally check the global level
-		#
-		output = self.call('list.storage.partition', ['globalOnly=y'])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
-
-		#
-		# if we made it here, there is no storage partition
-		# configuration for this host
-		#
-		output = []
-		self.addOutput('', '%s' % output)
-		self.endOutput(padChar='')
+			output = self.list_partition_scope(current_scope)
+			if output:
+				# break out of here if we got output
+				break
+		return

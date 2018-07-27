@@ -261,7 +261,7 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
 				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
+				%s, %s, %s, %s) """, (scope, tableid, adapter,
 				enclosure, slot, raidlevel, arrayid, options))
 
 		for hotspare in hotspares:
@@ -272,6 +272,6 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 			self.db.execute("""insert into storage_controller
 				(scope, tableid, adapter, enclosure, slot,
 				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
+				%s, %s, %s, %s) """, (scope, tableid, adapter,
 				enclosure, hotspare, raidlevel, arrayid, options))
 

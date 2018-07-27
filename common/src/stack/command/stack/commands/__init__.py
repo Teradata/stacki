@@ -32,7 +32,7 @@ from functools import partial
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
-from stack.exception import CommandError, ParamRequired, ArgNotFound
+from stack.exception import CommandError, ParamRequired, ParamValue, ArgRequired, ArgError, ArgNotFound
 from stack.bool import str2bool, bool2str
 
 _logPrefix = ''
@@ -2581,3 +2581,43 @@ class PluginOrderIterator(stack.graph.GraphIterator):
 		self.time = self.time + 1
 		self.nodes.append((self.time, node))
 
+
+class ScopeParamProcessor(OSArgumentProcessor,
+		HostArgumentProcessor,
+		ApplianceArgumentProcessor,
+        EnvironmentArgumentProcessor):
+
+	def get_scope_name_tableid(self, scope, params=None, args=None, list_call=False):
+		'''Check that the given name and scope are legit, if so return the tableid.'''
+		accepted_scopes = ['global', 'os', 'appliance', 'host', 'environment']
+
+		# Some checking that we got usable input.:
+		if scope not in accepted_scopes:
+			raise ParamValue(self, 'scope', 'one of the following: %s' % accepted_scopes )
+		# This might be doing more checking than is necessary before args came as an empty list, but None
+		elif scope == 'global' and args and len(args) >= 1:
+			if args != '*':
+				raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
+		elif not list_call and scope != 'global' and not args:
+			raise ArgRequired(self, '%s name' % scope)
+
+		if scope != 'global':
+			# look up the id in the appropriate 'scope' table
+			tablename = {'os': 'oses', 'appliance': 'appliances', 'host': 'nodes', 'environment': 'environments'}
+			if scope == 'os':
+				hosts = self.getOSNames(args)
+			elif scope == 'appliance':
+				hosts = self.getApplianceNames(args)
+			elif scope == 'environment':
+				hosts = self.getEnvironmentNames(args)
+			else:
+				hosts = self.getHostnames(args)
+
+			tableid = []
+			# Need to handle more than just single input.
+			for each_host in hosts:
+				tableid.append(self.db.select('id from ' + tablename[scope] + ' where name = %s ', each_host)[0][0])
+		else:
+			tableid = [-1]
+
+		return tableid

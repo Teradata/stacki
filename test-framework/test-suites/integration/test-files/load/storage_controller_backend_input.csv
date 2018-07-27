@@ -1,0 +1,7 @@
+name,slot,raid level,array id,Options
+global,0,1,1
+,1,1,1
+,*,0,*
+backend-0-0,0,1,1
+,1,1,1
+,*,0,*

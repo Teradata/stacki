@@ -29,7 +29,7 @@ class Command(command):
 		
 		self.beginOutput()
 		for env in self.getEnvironmentNames(args):
-			self.addOutput(env, None)
+			self.addOutput(env, [])
 			
 		self.endOutput(header=['environment'])
 	

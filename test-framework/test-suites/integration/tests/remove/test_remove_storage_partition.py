@@ -1,5 +1,3 @@
-import os
-import subprocess
 import pytest
 
 STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend']
@@ -66,6 +64,26 @@ def test_remove_storage_partition(host, csvfile):
 	assert result.stdout == ''
 	assert result.stderr == ''
 
+
+def test_remove_scope_storage_partition_blank_argument(host):
+	"""Test all the scopes error out on blank argument input."""
+	result = host.run('stack remove host storage partition device="*"')
+	assert result.rc != 0
+	assert result.stdout == ''
+	assert 'argument is required' in result.stderr
+	assert '"host name" argument is required' in result.stderr
+
+	result = host.run('stack remove os storage partition device="*"')
+	assert result.rc != 0
+	assert result.stdout == ''
+	assert '"os name" argument is required' in result.stderr
+
+	result = host.run('stack remove appliance storage partition device="*"')
+	assert result.rc != 0
+	assert result.stdout == ''
+	assert '"appliance name" argument is required' in result.stderr
+
+
 @pytest.mark.usefixtures("revert_database")
 @pytest.mark.usefixtures("add_host")
 def test_negative_remove_storage_partition(host):
@@ -84,20 +102,15 @@ def test_negative_remove_storage_partition(host):
 	accepted_scopes = ['global', 'os', 'appliance', 'host']
 
 	# Provide extra data on global scope
-	result = host.run('stack remove storage partition scope=global backend-0-0')
+	result = host.run('stack remove storage partition scope=global backend-0-0 device=sda')
 	assert result.rc == 255
-	assert 'argument unexpected' in result.stderr
+	assert 'argument unexpected, please provide a scope:' in result.stderr
 
-	result = host.run('stack remove storage partition scope=garbage backend-0-0')
+	result = host.run('stack remove storage partition scope=garbage backend-0-0 device=sda')
 	assert result.rc == 255
-	assert "{'scope': 'garbage'}" in result.stderr
+	assert '"scope" parameter must be one of the following:' in result.stderr
 
 	for scope in accepted_scopes:
-		if scope != 'global':
-			result = host.run('stack remove storage partition scope=%s' % scope)
-			assert result.rc == 255
-			assert '"%s name" argument is required' % scope in result.stderr
-		else:
-			result = host.run('stack remove storage partition scope=%s' % scope)
-			assert result.rc == 255
-			assert '"device OR mountpoint" parameter is required' in result.stderr
+		result = host.run('stack remove storage partition scope=%s' % scope)
+		assert result.rc == 255
+		assert 'error - "device" or "mountpoint" parameter is required' in result.stderr
