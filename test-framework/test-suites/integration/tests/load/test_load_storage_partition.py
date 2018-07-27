@@ -29,7 +29,7 @@ class TestLoadStoragePartition:
 		assert result.stdout != ''
 
 
-STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend', 'scopes', 'scopes_negative']
+STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend', 'scopes', 'scopes_2', 'scopes_negative']
 
 @pytest.mark.usefixtures("revert_database")
 @pytest.mark.usefixtures("add_host")
