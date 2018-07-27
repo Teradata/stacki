@@ -19,7 +19,7 @@ class TestDumpAppliance:
 		assert results.rc == 0
 		results = host.run('stack add storage partition backend device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0
-		results = host.run('stack add storage controller backend adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
+		results = host.run('stack add appliance storage controller backend adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
 		assert results.rc == 0
 
 		# dump our appliance information

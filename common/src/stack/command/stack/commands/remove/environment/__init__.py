@@ -38,6 +38,8 @@ class Command(command):
 		for env in self.getEnvironmentNames(args):
 			if env in active:
 				raise CommandError(self, 'environment %s in use' % env)
+			# good to go
+			self.runPlugins(env)
 			self.db.execute('delete from environments where name="%s"' % env)
 
 

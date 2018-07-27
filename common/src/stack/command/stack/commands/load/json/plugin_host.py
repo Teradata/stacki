@@ -148,6 +148,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			for controller in host['controller']:
 				parameters = [
 					host_name,
+					f'scope={controller["scope"]}',
 					f'arrayid={controller["arrayid"]}',
 				]
 				if controller['adapter']:

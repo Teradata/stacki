@@ -24,5 +24,5 @@ class Plugin(stack.commands.Plugin):
 		return 'attr'
 
 	def run(self, os):
-		self.owner.command('remove.os.attr', [ os ])
+		self.owner.command('remove.os.attr', [ os, 'attr=*' ])
 

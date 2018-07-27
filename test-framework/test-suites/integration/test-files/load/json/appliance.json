@@ -167,7 +167,8 @@
       ],
       "controller": [
         {
-          "scope": "backend",
+          "scope" : "appliance",
+          "name": "backend",
           "enclosure": null,
           "adapter": null,
           "slot": 0,
@@ -176,7 +177,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 1,
@@ -185,7 +187,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 2,
@@ -194,7 +197,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 3,
@@ -203,7 +207,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 4,
@@ -212,7 +217,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 5,
@@ -221,7 +227,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 6,
@@ -230,7 +237,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 7,
@@ -239,7 +247,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 8,
@@ -248,7 +257,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 9,
@@ -257,7 +267,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 10,
@@ -266,7 +277,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 11,
@@ -275,7 +287,7 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
           "enclosure": null,
           "adapter": null,
           "slot": 12,
@@ -284,7 +296,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 13,
@@ -293,7 +306,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 14,
@@ -302,7 +316,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 15,
@@ -311,7 +326,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 16,
@@ -320,7 +336,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 17,
@@ -329,7 +346,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 18,
@@ -338,7 +356,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 19,
@@ -347,7 +366,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 20,
@@ -356,7 +376,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 21,
@@ -365,7 +386,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 22,
@@ -374,7 +396,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 23,
@@ -383,7 +406,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 24,
@@ -392,7 +416,8 @@
           "options": "wt nora"
         },
         {
-          "scope": "None",
+          "scope": "appliance",
+          "name" : "None",
           "enclosure": null,
           "adapter": null,
           "slot": 25,

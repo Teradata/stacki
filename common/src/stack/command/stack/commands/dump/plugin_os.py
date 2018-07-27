@@ -50,7 +50,7 @@ class Plugin(stack.commands.Plugin):
 			if not partition_data:
 				partition_data = []
 
-			controller_data = self.owner.call('list.storage.controller', [ f'{os_name}' ])
+			controller_data = self.owner.call('list.storage.controller', [ f'{os_name}', 'scope=os' ])
 			if not controller_data:
 				controller_data = []
 

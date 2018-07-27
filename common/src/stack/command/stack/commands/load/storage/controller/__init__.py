@@ -44,18 +44,14 @@ class Command(stack.commands.load.command,
 			raise CommandError(self, 'file "%s" does not exist' % filename)
 
 		self.force = self.str2bool(force)
-		#
 		# implementations can't return values
-		#
 		self.hosts = {}
 		self.runImplementation('load_%s' % processor, (filename, ))
 
 		args = self.hosts
 		self.runPlugins(args)
 
-		#
-		# checkin the spreadsheet
-		#
+		# checking the spreadsheet
 		sheetsdir = '/export/stack/spreadsheets'
 		if not os.path.exists(sheetsdir):
 			os.makedirs(sheetsdir)
@@ -65,8 +61,7 @@ class Command(stack.commands.load.command,
 			os.makedirs(RCSdir)
 
 		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not \
-			os.path.samefile(filename, sheetsfile):
+		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
 			shutil.copyfile(filename, '%s' % sheetsfile)
 		
 		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
