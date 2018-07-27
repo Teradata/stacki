@@ -7,6 +7,8 @@
 import re
 import shlex
 import stack.commands
+from stack.commands import Log
+import syslog
 
 
 class Implementation(stack.commands.Implementation):
@@ -32,6 +34,11 @@ class Implementation(stack.commands.Implementation):
 			gateway = row['gateway']
 			vlanid	= row['vlan']
 			default = row['default']
+
+			if ip and not netname:
+				Log(f'WARNING: skipping interface "{device}" on host "{host}" - '
+				     'interface has an IP but no network', level=syslog.LOG_WARNING)
+				continue
 
 			mtu = None
 			if subnet:

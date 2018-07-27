@@ -11,9 +11,11 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import Log
 import stack.text
 import os.path
 import shlex
+import syslog
 
 
 class command(stack.commands.HostArgumentProcessor,
@@ -64,6 +66,10 @@ class Command(command):
 		interfaces = self.call('list.host.interface')
 		for row in interfaces:
 			if not row['ip']:
+				continue
+			if not row['network']:
+				Log(f'WARNING: skipping interface "{row["interface"]}" on host "{row["host"]}" - '
+				     'interface has an IP but no network', level=syslog.LOG_WARNING)
 				continue
 
 			# Each interface dict contains interface name,
