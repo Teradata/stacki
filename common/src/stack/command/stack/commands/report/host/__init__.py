@@ -84,7 +84,9 @@ class Command(command):
 				for option in options:
 					if option.strip() == 'shortname':
 						h['shortname']= True
-			hosts[host].append(h)
+						
+			if self.validateHostInterface(host, h, aliases):
+				hosts[host].append(h)
 
 		processed = {}
 
@@ -145,3 +147,25 @@ class Command(command):
 			f.close()
 
 		self.endOutput(padChar='', trimOwner=True)
+
+
+
+	def validateHostInterface(self, hostname, hostinfo ,aliases):
+	# Checks if a host interface has atleast one of the following:
+		#       has an aliases
+		if hostname in aliases and hostinfo['interface'] in aliases[hostname]:
+			return True
+		
+		#       is on a network with a zone
+		if hostinfo['zone']:
+			return True
+		
+		#       has a shortname option
+		if hostinfo['shortname']:
+			return True
+
+		#       is the default interface for that host
+		if hostinfo['default']:
+			return True
+		return False
+                
