@@ -438,7 +438,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 /usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/cluster-grants.sql
 
 /usr/bin/mysql --defaults-file=/opt/stack/etc/django.my.cnf django &lt; /var/db/mysql-backup-django
-/usr/bin/mysql --defaults-file=/opt/stack/etc/django.my.cnf django &lt; /var/db/django-grants.sql
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/django-grants.sql
 
 /opt/stack/bin/stack sync config
 </stack:file>
