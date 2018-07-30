@@ -62,6 +62,8 @@ def test_daily_db_backup_cronjob_script(host):
 	# now restore the database and verify existance of removed host and api user
 	cmd = host.run("sudo -i bash /var/db/restore-stacki-database.sh")
 	assert cmd.rc == 0
+	assert 'error' not in cmd.stdout.lower()
+	assert 'error' not in cmd.stderr.lower()
 	cmd = host.run("sudo -i stack list host backend-0-0")
 	assert cmd.rc == 0
 	cmd = host.run('sudo -i stack list api user output-format=json')
