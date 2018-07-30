@@ -87,7 +87,7 @@ class StackWS(View):
 		log.info("Session Starting")
 
 		# filter out all the params
-		params = [p for p in filter(lambda x: len(x.split('=')) == 2, args)]
+		params = [p for p in filter(lambda x: len(x.split('=')) >= 2, args)]
 
 		# Filter out all the args
 		args = [a for a in filter(lambda x: len(x.split('=')) == 1, args)]
@@ -105,7 +105,7 @@ class StackWS(View):
 		# Get the command module to execute
 		mod_name = '.'.join(args)
 
-		log.info("Webservice user %s called %s" % (request.user.username, mod_name))
+		log.info('user %s called "%s" %s' % (request.user.username, mod_name, params))
 
 		# Check if command is blacklisted
 		if self._blacklisted(mod_name):
