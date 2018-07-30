@@ -39,13 +39,16 @@ class Plugin(stack.commands.Plugin):
 			interface_data = self.owner.call('list.host.interface', [ hostname ])
 			if not interface_data:
 				interface_data = []
-
-			interface_alias_data = self.owner.call('list.host.alias', [ hostname ])
-			if not interface_alias_data:
-				interface_alias_data = []
-
 			interface_prep = []
 			for interface in interface_data:
+				# grab the alias data for this interface
+				interface_alias_data = self.owner.call('list.host.alias', [
+											hostname,
+											f'interface={interface["interface"]}'
+				])
+				if not interface_alias_data:
+					interface_alias_data = []
+
 				if interface['host'] == hostname:
 					interface_prep.append({
 							'interface':interface['interface'],
@@ -159,6 +162,3 @@ class Plugin(stack.commands.Plugin):
 						'controller':controller_prep
 						})
 		return(document_prep)
-
-
-
