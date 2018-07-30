@@ -75,7 +75,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				pallet_dir =  pallet['url']
 				if pallet_dir == None:
 					# if we have no url to fetch the pallet from we cannot add it
-					raise CommandError(self, f'error adding pallet {pallet["name"]} {pallet["version"]}: no url found')
+					raise CommandError(self.owner, f'error adding pallet {pallet["name"]} {pallet["version"]}: no url found')
 					self.owner.errors += 1
 
 					# the following code is now unreachable, does it have any value?
@@ -121,7 +121,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						self.owner.log.info(f'warning adding pallet {pallet}: {e}')
 						self.owner.warnings += 1
 					else:
-						raise CommandError(self, f'error adding pallet {pallet["name"]} {pallet["version"]}: {e}')
+						raise CommandError(self.owner, f'error adding pallet {pallet["name"]} {pallet["version"]}: {e}')
 
 
 				# allow for multiple boxes or no boxes at all
