@@ -102,53 +102,61 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						self.owner.log.info(f'error adding os firewall rule {rule}: {e}')
 						self.owner.errors += 1
 
-
 			for partition in os['partition']:
-				self.owner.log.info('adding partition...')
 				try:
-					self.owner.command('add.storage.partition', [
-										os_name,
-										f'device={partition["device"]}',
-										f'options={partition["options"]}',
-										f'mountpoint={partition["mountpoint"]}',
-										f'partid={partition["partid"]}',
-										f'size={partition["size"]}',
-										f'type={partition["fstype"]}'
-					])
+					self.owner.log.info('adding os partition...')
+					parameters = [
+						os_name,
+						f'device={partition["device"]}',
+						f'partid={partition["partid"]}',
+						f'size={partition["size"]}'
+					]
+					if partition['options']:
+						parameters.append(f'options={partition["options"]}')
+					if partition['mountpoint']:
+						parameters.append(f'mountpoint={partition["mountpoint"]}')
+					if partition ['fstype']:
+						parameters.append(f'type={partition["fstype"]}')
+
+					self.owner.command('add.storage.partition', parameters)
 					self.owner.log.info(f'success adding os partition {partition}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding partition {partition}: {e}')
+						self.owner.log.info(f'warning adding os partition: {e}')
 						self.owner.warnings += 1
 					else:
-						self.owner.log.info(f'error adding partition {partition}: {e}')
+						self.owner.log.info(f'error adding os partition: {e}')
 						self.owner.errors += 1
 
 
 			for controller in os['controller']:
-				self.owner.log.info ('adding controller...')
+				parameters = [
+					os_name,
+					f'arrayid={controller["arrayid"]}',
+				]
+				if controller['adapter']:
+					parameters.append(f'adapter={controller["adapter"]}')
+				if controller['enclosure']:
+					parameters.append(f'enclosure={controller["enclosure"]}')
+				if controller['raidlevel']:
+					parameters.append(f'raidlevel={controller["raidlevel"]}')
+				if controller['slot']:
+					parameters.append(f'slot={controller["slot"]}')
+
+
 				try:
-					#hotspare is an option in stack add storage controller, however there is no database column
-					#for it in storage_controller and it is not listed in stack list storage controller
-					#f'hotspare={controller["hotspare"]}'
-					self.owner.command('add.storage.controller', [
-										os_name,
-										f'adapter={controller["adapter"]}',
-										f'arrayid={controller["arrayid"]}',
-										f'enclosure={controller["enclosure"]}',
-										f'raidlevel={controller["raidlevel"]}',
-										f'slot={controller["slot"]}'
-					])
+					self.owner.log.info('adding os controller...')
+					self.owner.command('add.storage.controller', parameters)
 					self.owner.log.info(f'success adding os controller {controller}')
 					self.owner.successes += 1
 
 				except CommandError as e:
 					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding os controller {controller}: {e}')
+						self.owner.log.info(f'warning adding os ontroller: {e}')
 						self.owner.warnings += 1
 					else:
-						self.owner.log.info(f'error adding os controller {controller}: {e}')
+						self.owner.log.info(f'error adding os controller: {e}')
 						self.owner.errors += 1
 

@@ -205,4 +205,3 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					else:
 						self.owner.log.info(f'error adding appliance controller: {e}')
 						self.owner.errors += 1
-

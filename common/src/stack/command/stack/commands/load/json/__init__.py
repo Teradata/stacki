@@ -125,7 +125,7 @@ class Command(command):
 		self.runPlugins(args)
 
 		# report how well the load went
-		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\n')
+		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\nCheck /var/log/load-json.log for details.\n')
 
 		# if there are errors, revert db changes and raise a CommandError
 		if self.errors != 0:

@@ -176,4 +176,16 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						else:
 							self.owner.log.info(f'error importing cart {cart}: {e}')
 							self.owner.errors += 1
+				# allow for multiple boxes or no boxes at all
+				for box in cart['boxes']:
+					try:
+						self.owner.command('enable.cart', [
+										cart['name'],
+										f'box={box}'
+										])
+						self.owner.log.info(f'success enabling {cart["name"]} in {box}')
+						self.owner.successes += 1
 
+					except CommandError as e:
+						self.owner.log.info(f'error enabling {cart["name"]} in {box}: {e}')
+						self.owner.errors += 1

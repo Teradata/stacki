@@ -48,15 +48,24 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				self.owner.successes += 1
 			except CommandError as e:
 				if 'exists' in str(e):
-					self.owner.log.info(f'warning adding network {name}: {e}')
-					self.owner.warnings += 1
+					self.owner.log.info(f'network {name} already exists. replacing it with the network defined in the json')
+					# TODO: if the json has the network but has fields missing, need to iterate through and remove those fields
+#					try:
+#						self.owner.command('remove.network', [ name ])
+#						self.owner.command('add.network', [
+#								name,
+#								f'address={network["address"]}',
+#								f'mask={network["netmask"]}'
+#						])
+#					except CommandError as e:
+#						self.owner.log.info(f'unable to replace network{name}: {e}')
+#						self.owner.errors += 1
 				else:
 					self.owner.log.info(f'error adding network {name}: {e}')
 					self.owner.errors += 1
 
 			try:
 				# now we set all of the attributes
-				# if the network existed already in the database we will overwrite everything about it
 				if network['address']:
 					self.owner.command('set.network.address', [ name, f'address={network["address"]}' ])
 					self.owner.log.info(f'success adding {name} address')
@@ -93,4 +102,3 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				else:
 					self.owner.log.info(f'error setting network {name}: {e}')
 					self.owner.errors += 1
-

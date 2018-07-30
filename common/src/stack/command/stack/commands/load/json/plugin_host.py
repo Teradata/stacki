@@ -73,91 +73,38 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						self.owner.errors += 1
 
 
-				try:
-
-					if interface['default']:
-						self.owner.command(
-							'set.host.interface.default',
-							[ host_name,
-							'default=True',
-							f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface default')
-						self.owner.successes += 1
-					if interface['network']:
-						self.owner.command('set.host.interface.network', [
-												host_name,
-												f'network={interface["network"]}',
-												f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface network')
-						self.owner.successes += 1
-					if interface['mac']:
-						self.owner.command('set.host.interface.mac', [
+				# iterate over each key in interface, ignoring 'already exists' warnings
+				for interface in host['interface']:
+					for k, v in interface.items():
+						if v and k != 'interface' and k!= 'alias':
+							try:
+								self.owner.command(f'set.host.interface.{k}', [
+													host_name,
+													f'{k}={v}',
+													f'interface={interface["interface"]}',
+								])
+							except CommandError as e:
+								if 'exists' in str(e):
+									self.owner.log.info(f'warning setting {host_name} interface {k}')
+									self.owner.warnings += 1
+								else:
+									self.owner.log.info(f'error setting {host_name} interface {k}: {e}')
+									self.owner.errors += 1
+					# the alias cannot be set, so add it here. There can be multiple
+					for alias in interface['alias']:
+						try:
+							self.owner.command('add.host.alias', [
 											host_name,
-											f'mac={interface["mac"]}',
-											f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface mac')
-						self.owner.successes += 1
-					if interface['ip']:
-						self.owner.command('set.host.interface.ip', [
-											host_name,
-											f'ip={interface["ip"]}',
-											f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface ip')
-						self.owner.successes += 1
-					if interface['name']:
-						self.owner.command('set.host.interface.name', [
-											host_name,
-											f'name={interface["name"]}',
-											f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface name')
-						self.owner.successes += 1
-					if interface['module']:
-						self.owner.command('set.host.interface.module', [
-											host_name,
-											f'module={interface["module"]}',
-											f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface module')
-						self.owner.successes += 1
-					if interface['vlan']:
-						self.owner.command('set.host.interface.vlan', [
-											host_name,
-											f'vlan={interface["vlan"]}',
-											f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface vlan')
-						self.owner.successes += 1
-					if interface['options']:
-						self.owner.command('set.host.interface.options', [
-												host_name,
-												f'options={interface["options"]}',
-												f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface options')
-						self.owner.successes += 1
-					if interface['channel']:
-						self.owner.command('set.host.interface.channel', [
-												host_name,
-												f'channel={interface["channel"]}',
-												f'interface={interface["interface"]}'
-						])
-						self.owner.log.info(f'success setting {host["name"]} interface channel')
-						self.owner.successes += 1
-
-
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning setting host interface {interface["name"]}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error setting host interface {interface["name"]}: {e}')
-						self.owner.errors += 1
-
+											f'alias={alias["alias"]}',
+											f'interface={interface["interface"]}',
+							])
+						except CommandError as e:
+							if 'exists' in str(e):
+								self.owner.log.info(f'warning adding {host_name} alias {alias}')
+								self.owner.warnings += 1
+							else:
+								self.owner.log.info(f'error adding {host_name} alias {alias}: {e}')
+								self.owner.errors += 1
 
 
 			# iterate through each attr for the host and add it
@@ -233,8 +180,6 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						self.owner.log.info(f'error adding route {route["network"]}: {e}')
 						self.owner.errors += 1
 
-			# this has issues if some of the groups are already added but not all of them
-			# however it works if the host has no existing groups
 			for group in host['group']:
 				try:
 					self.owner.command('add.host.group', [
@@ -255,7 +200,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					host_name,
 					f'device={partition["device"]}',
 					f'mountpoint={partition["mountpoint"]}',
-					f'size={partition["size"]}'
+					f'size={partition["size"]}',
 					]
 				if partition['fstype']:
 					parameters.append(f'fs={partition["fstype"]}')
@@ -268,6 +213,18 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					self.owner.log.info(f'success adding partition {partition}')
 					self.owner.successes += 1
 
+
+#def something(func, params, logger, msg):
+#def something(cmd_string, params, message):
+#	try:
+#		func(params)
+#		logger.info
+#	except:
+#		if exists:
+#			logger.warnings
+#		else
+#			logger.error
+
 				except CommandError as e:
 					if 'exists' in str(e):
 						self.owner.log.info (f'warning adding partition: {e}')
@@ -279,16 +236,23 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 			for controller in host['controller']:
+				parameters = [
+					host_name,
+					f'arrayid={controller["arrayid"]}',
+				]
+				if controller['adapter']:
+					parameters.append(f'adapter={controller["adapter"]}')
+				if controller['enclosure']:
+					parameters.append(f'enclosure={controller["enclosure"]}')
+				if controller['raidlevel']:
+					parameters.append(f'raidlevel={controller["raidlevel"]}')
+				if controller['slot']:
+					parameters.append(f'slot={controller["slot"]}')
+
+
 				try:
 					self.owner.log.info('adding host controller...')
-					self.owner.command('add.storage.controller', [
-										host_name,
-									f'adapter={controller["adapter"]}',
-									f'arrayid={controller["arrayid"]}',
-									f'enclosure={controller["enclosure"]}',
-									f'raidlevel={controller["raidlevel"]}',
-									f'slot={controller["slot"]}'
-					])
+					self.owner.command('add.storage.controller', parameters)
 					self.owner.log.info(f'success adding host controller {controller}')
 					self.owner.successes += 1
 
@@ -302,7 +266,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 
-			#set the installaction of the host
+			# set the installaction of the host
 			try:
 				self.owner.command('set.host.installaction', [
 							host_name,
@@ -349,4 +313,3 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				except CommandError as e:
 					self.owner.log.info(f'error setting environment of {host_name} {e}')
 					self.owner.errors += 1
-

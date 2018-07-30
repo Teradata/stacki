@@ -113,25 +113,31 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			elif scope == 'partition':
 				for partition in import_data[scope]:
 					try:
-						# normally the scope would be the first argument but since we are in the global plugin we need to leave it blank. Stacki defaults to global
-						self.owner.command('add.storage.partition', [
-								f'device={partition["device"]}',
-								f'options={partition["options"]}',
-								f'mountpoint={partition["mountpoint"]}',
-								f'partid={partition["partid"]}',
-								f'size={partition["size"]}',
-								f'type={partition["fstype"]}',
-						])
-						self.owner.log.info(f'success adding global partition {partition["device"]}')
+						self.owner.log.info('adding global partition...')
+						parameters = [
+							f'device={partition["device"]}',
+							f'partid={partition["partid"]}',
+							f'size={partition["size"]}',
+						]
+						if partition['options']:
+							parameters.append(f'options={partition["options"]}')
+						if partition['mountpoint']:
+							parameters.append(f'mountpoint={partition["mountpoint"]}')
+						if partition ['fstype']:
+							parameters.append(f'type={partition["fstype"]}')
+
+						self.owner.command('add.storage.partition', parameters)
+						self.owner.log.info(f'success adding global partition {partition}')
 						self.owner.successes += 1
 
 					except CommandError as e:
 						if 'exists' in str(e):
-							self.owner.log.info(f'warning adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
+							self.owner.log.info(f'warning adding global partition: {e}')
 							self.owner.warnings += 1
 						else:
-							self.owner.log.info(f'error adding global partition {partition["device"]} {partition["mountpoint"]}: {e}')
+							self.owner.log.info(f'error adding global partition: {e}')
 							self.owner.errors += 1
+
 
 			elif scope == 'controller':
 				for controller in import_data[scope]:
@@ -161,4 +167,3 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 			else:
 				self.owner.log.info(f'error potentially invalid entry in json. {scope} is not a valid gloabl scope')
-
