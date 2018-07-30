@@ -3,5 +3,5 @@
 #
 
 $EscapeControlCharactersOnReceive off
-local2.*    /var/log/local2
-if $programname == 'stacki-ws' then ~
+local1.*    /var/log/local1
+if $programname == 'SWS' then ~
