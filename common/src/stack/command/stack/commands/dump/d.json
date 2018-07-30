@@ -1,0 +1,2121 @@
+{
+  "host": [
+    {
+      "name": "sd-stacki-001",
+      "rack": "0",
+      "rank": "0",
+      "interface": [
+        {
+          "interface": "eth0",
+          "default": true,
+          "mac": "08:00:27:9b:ee:6a",
+          "ip": "10.0.2.15",
+          "network": "private",
+          "name": "sd-stacki-001",
+          "module": "None",
+          "vlan": null,
+          "options": "None",
+          "channel": "None",
+          "alias": [
+            {
+              "host": "sd-stacki-001",
+              "alias": "yada",
+              "interface": "eth0"
+            },
+            {
+              "host": "sd-stacki-001",
+              "alias": "yada2",
+              "interface": "eth0"
+            }
+          ]
+        },
+        {
+          "interface": "eth1",
+          "default": null,
+          "mac": null,
+          "ip": "192.168.1.2",
+          "network": "private",
+          "name": "fast-0-0",
+          "module": null,
+          "vlan": null,
+          "options": null,
+          "channel": null,
+          "alias": []
+        }
+      ],
+      "attrs": [
+        {
+          "name": "appliance",
+          "value": "frontend",
+          "shadow": false
+        },
+        {
+          "name": "appliance.longname",
+          "value": "Frontend",
+          "shadow": false
+        },
+        {
+          "name": "box",
+          "value": "default",
+          "shadow": false
+        },
+        {
+          "name": "carts",
+          "value": [],
+          "shadow": false
+        },
+        {
+          "name": "domainname",
+          "value": "",
+          "shadow": false
+        },
+        {
+          "name": "groups",
+          "value": "",
+          "shadow": false
+        },
+        {
+          "name": "hostaddr",
+          "value": "10.0.2.15",
+          "shadow": false
+        },
+        {
+          "name": "hostname",
+          "value": "sd-stacki-001",
+          "shadow": false
+        },
+        {
+          "name": "os",
+          "value": "sles",
+          "shadow": false
+        },
+        {
+          "name": "os.version",
+          "value": "12.x",
+          "shadow": false
+        },
+        {
+          "name": "pallets",
+          "value": [
+            "stacki-5.1rc5_20180727_c078958-sles12",
+            "SLES-12-sp3"
+          ],
+          "shadow": false
+        },
+        {
+          "name": "rack",
+          "value": "0",
+          "shadow": false
+        },
+        {
+          "name": "rank",
+          "value": "0",
+          "shadow": false
+        }
+      ],
+      "firewall": [],
+      "box": "default",
+      "appliance": "frontend",
+      "appliancelongname": "Frontend",
+      "comment": null,
+      "metadata": null,
+      "environment": null,
+      "osaction": "default",
+      "installaction": "default",
+      "route": [],
+      "group": [],
+      "partition": [],
+      "controller": [
+        {
+          "scope": "sd-stacki-001",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 2,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 3,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 4,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 5,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 6,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 7,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 8,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": ""
+        }
+      ]
+    },
+    {
+      "name": "backend-0-1",
+      "rack": "0",
+      "rank": "1",
+      "interface": [],
+      "attrs": [
+        {
+          "name": "appliance",
+          "value": "backend",
+          "shadow": false
+        },
+        {
+          "name": "appliance.longname",
+          "value": "Backend",
+          "shadow": false
+        },
+        {
+          "name": "box",
+          "value": "default",
+          "shadow": false
+        },
+        {
+          "name": "carts",
+          "value": [],
+          "shadow": false
+        },
+        {
+          "name": "groups",
+          "value": "",
+          "shadow": false
+        },
+        {
+          "name": "hostname",
+          "value": "backend-0-1",
+          "shadow": false
+        },
+        {
+          "name": "os",
+          "value": "sles",
+          "shadow": false
+        },
+        {
+          "name": "os.version",
+          "value": "12.x",
+          "shadow": false
+        },
+        {
+          "name": "pallets",
+          "value": [
+            "stacki-5.1rc5_20180727_c078958-sles12",
+            "SLES-12-sp3"
+          ],
+          "shadow": false
+        },
+        {
+          "name": "rack",
+          "value": "0",
+          "shadow": false
+        },
+        {
+          "name": "rank",
+          "value": "1",
+          "shadow": false
+        }
+      ],
+      "firewall": [],
+      "box": "default",
+      "appliance": "backend",
+      "appliancelongname": "Backend",
+      "comment": null,
+      "metadata": null,
+      "environment": null,
+      "osaction": "default",
+      "installaction": "default",
+      "route": [],
+      "group": [],
+      "partition": [],
+      "controller": [
+        {
+          "scope": "backend-0-1",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 2,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 3,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 4,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 5,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 6,
+          "raidlevel": "6",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 7,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": ""
+        },
+        {
+          "scope": "None",
+          "enclosure": null,
+          "adapter": null,
+          "slot": 8,
+          "raidlevel": "hotspare",
+          "arrayid": 2,
+          "options": ""
+        }
+      ]
+    }
+  ],
+  "software": {
+    "pallet": [
+      {
+        "name": "stacki",
+        "version": "5.1rc5_20180727_c078958",
+        "release": "sles12",
+        "url": "/export/stacki-5.1rc5_20180727_c078958-sles12.x86_64.disk1.iso",
+        "urlauthUser": null,
+        "urlauthPass": null,
+        "boxes": [
+          "default"
+        ]
+      },
+      {
+        "name": "SLES",
+        "version": "12",
+        "release": "sp3",
+        "url": "/export/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso",
+        "urlauthUser": null,
+        "urlauthPass": null,
+        "boxes": [
+          "default"
+        ]
+      }
+    ],
+    "cart": [],
+    "box": [
+      {
+        "name": "default",
+        "os": "sles"
+      }
+    ]
+  },
+  "os": [
+    {
+      "name": "redhat",
+      "attrs": [],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "sles",
+      "attrs": [],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "ubuntu",
+      "attrs": [],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "vmware",
+      "attrs": [],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "xenserver",
+      "attrs": [],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    }
+  ],
+  "network": [
+    {
+      "name": "private",
+      "address": "10.0.2.0",
+      "gateway": "10.0.2.15",
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": true,
+      "mtu": 1500,
+      "zone": ""
+    }
+  ],
+  "group": [],
+  "global": {
+    "attrs": [
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_CertificateCountry",
+        "value": "US"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_CertificateLocality",
+        "value": "Solana Beach"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_CertificateOrganization",
+        "value": "StackIQ"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_CertificateState",
+        "value": "California"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_ClusterLatlong",
+        "value": "N32.87 W117.22"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Info_FQDN",
+        "value": "sd-stacki-001"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_Keyboard",
+        "value": "us"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_Lang",
+        "value": "en_US"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_Langsupport",
+        "value": "en_US"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_Multicast",
+        "value": "236.12.160.140"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PrivateDNSServers",
+        "value": "153.64.251.200"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PrivateEthernet",
+        "value": "08:00:27:9b:ee:6a"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PrivateGateway",
+        "value": "10.0.2.15"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PrivateInterface",
+        "value": "eth0"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PrivateNTPHost",
+        "value": "10.0.2.15"
+      },
+      {
+        "scope": "global",
+        "type": "shadow",
+        "attr": "Kickstart_PrivateRootPassword",
+        "value": "$6$.egZIGAZpqawiqA5$py.1dSDGAkNNsObKGrO9DITOvzyWuxATO32p8e5yaH4NCLFCvAlC26pL7iwz6/E7AQNYS.JjXUzoTxKvDvASd1"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_PublicNTPHost",
+        "value": "pool.ntp.org"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Kickstart_Timezone",
+        "value": "America/Los_Angeles"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "Server_Partitioning",
+        "value": "force-default-root-disk-only"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "discovery.base.rack",
+        "value": "0"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "discovery.base.rank",
+        "value": "0"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "firewall",
+        "value": "true"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "install.confirm",
+        "value": "false"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "install.final_reboot",
+        "value": "false"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "os",
+        "value": "sles"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "ssh.use_dns",
+        "value": "true"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "sync.ssh.authkey",
+        "value": "true"
+      },
+      {
+        "scope": "global",
+        "type": "var",
+        "attr": "time.protocol",
+        "value": "chrony"
+      }
+    ],
+    "route": [
+      {
+        "network": "224.0.0.0",
+        "netmask": "255.255.255.0",
+        "gateway": "private"
+      },
+      {
+        "network": "255.255.255.255",
+        "netmask": "255.255.255.255",
+        "gateway": "private"
+      }
+    ],
+    "firewall": [
+      {
+        "name": "LOOPBACK-NET",
+        "table": "filter",
+        "service": "all",
+        "protocol": "all",
+        "chain": "INPUT",
+        "action": "ACCEPT",
+        "network": "all",
+        "output-network": "",
+        "flags": null,
+        "comment": null,
+        "source": "G",
+        "type": "var"
+      },
+      {
+        "name": "SSH",
+        "table": "filter",
+        "service": "ssh",
+        "protocol": "tcp",
+        "chain": "INPUT",
+        "action": "ACCEPT",
+        "network": "all",
+        "output-network": "",
+        "flags": null,
+        "comment": null,
+        "source": "G",
+        "type": "var"
+      },
+      {
+        "name": "PRIVATE-RELATED",
+        "table": "filter",
+        "service": "all",
+        "protocol": "all",
+        "chain": "INPUT",
+        "action": "ACCEPT",
+        "network": "all",
+        "output-network": "",
+        "flags": null,
+        "comment": null,
+        "source": "G",
+        "type": "var"
+      },
+      {
+        "name": "PRIVATE-NET",
+        "table": "filter",
+        "service": "all",
+        "protocol": "all",
+        "chain": "INPUT",
+        "action": "ACCEPT",
+        "network": "private",
+        "output-network": "",
+        "flags": null,
+        "comment": null,
+        "source": "G",
+        "type": "var"
+      },
+      {
+        "name": "REJECT-ALL",
+        "table": "filter",
+        "service": "all",
+        "protocol": "all",
+        "chain": "INPUT",
+        "action": "REJECT",
+        "network": "all",
+        "output-network": "",
+        "flags": null,
+        "comment": null,
+        "source": "G",
+        "type": "var"
+      }
+    ],
+    "partition": [
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      },
+      {
+        "scope": "global",
+        "device": "mon0",
+        "partid": 3,
+        "mountpoint": null,
+        "size": 2,
+        "fstype": null,
+        "options": ""
+      }
+    ],
+    "controller": [
+      {
+        "scope": "global",
+        "enclosure": null,
+        "adapter": null,
+        "slot": "*",
+        "raidlevel": "0",
+        "arrayid": "*",
+        "options": ""
+      }
+    ]
+  },
+  "environment": [],
+  "bootaction": [
+    {
+      "name": "default",
+      "kernel": "com32 chain.c32",
+      "ramdisk": null,
+      "type": "os",
+      "args": [
+        "hd0"
+      ],
+      "os": null
+    },
+    {
+      "name": "pxeflash",
+      "kernel": "kernel memdisk bigraw",
+      "ramdisk": "pxeflash.img",
+      "type": "os",
+      "args": [
+        "keeppxe"
+      ],
+      "os": null
+    },
+    {
+      "name": "localboot",
+      "kernel": "localboot 0",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "hplocalboot",
+      "kernel": "localboot -1",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "memtest",
+      "kernel": "kernel memtest",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "default",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/12/sp3/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.0.2.15"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "console",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/12/sp3/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.0.2.15",
+        "console=ttyS0,115200n8",
+        "nomodeset=1",
+        "textmode=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 12.2",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/12/sp2/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.0.2.15"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 12.2 console",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/12/sp2/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.0.2.15",
+        "console=ttyS0,115200n8",
+        "nomodeset=1",
+        "textmode=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue sles 12.2",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 11.3",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/11.3/1.138/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.0.2.15",
+        "insmod=ixgbe",
+        "insmod=i40e",
+        "forceinsmod=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 11.3 console",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.0.2.15/install/pallets/SLES/11.3/1.138/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "console=ttyS0,115200n8",
+        "Server=10.0.2.15",
+        "nomodeset=1",
+        "textmode=1",
+        "insmod=ixgbe",
+        "insmod=i40e",
+        "forceinsmod=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue sles 11.3",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+      ],
+      "os": "sles"
+    }
+  ],
+  "appliance": [
+    {
+      "name": "frontend",
+      "longname": "Frontend",
+      "attrs": [
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "False"
+        },
+        {
+          "appliance": "frontend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "server"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "builder",
+      "longname": "Builder",
+      "attrs": [
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "builder",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "builder"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "barnacle",
+      "longname": "Barnacle",
+      "attrs": [
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "barnacle",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "barnacle"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "backend",
+      "longname": "Backend",
+      "attrs": [
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "backend"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "replicant",
+      "longname": "Replicant",
+      "attrs": [
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "const_overwrite",
+          "value": "false"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "True"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "True"
+        },
+        {
+          "appliance": "replicant",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "node",
+          "value": "replicant"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    },
+    {
+      "name": "switch",
+      "longname": "Switch",
+      "attrs": [
+        {
+          "appliance": "switch",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "kickstartable",
+          "value": "False"
+        },
+        {
+          "appliance": "switch",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "managed",
+          "value": "False"
+        }
+      ],
+      "route": [],
+      "firewall": [],
+      "partition": [],
+      "controller": []
+    }
+  ]
+}

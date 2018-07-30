@@ -73,4 +73,3 @@ class Plugin(stack.commands.Plugin):
 
 
 		return(document_prep)
-

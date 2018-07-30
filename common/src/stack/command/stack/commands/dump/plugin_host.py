@@ -130,11 +130,6 @@ class Plugin(stack.commands.Plugin):
 			controller_data = self.owner.call('list.storage.controller', [ hostname ])
 			if not controller_data:
 				controller_data = []
-			controller_prep = []
-			if controller_data:
-				for controller in controller_data:
-					if controller['scope'] == hostname:
-						controller_prep.append(controller)
 
 			#find the longname of the host's appliance with list appliance
 			appliance_data = self.owner.call('list.appliance', [ host['appliance'] ])
@@ -159,6 +154,6 @@ class Plugin(stack.commands.Plugin):
 						'route':route_prep,
 						'group':group_prep,
 						'partition':partition_prep,
-						'controller':controller_prep
+						'controller':controller_data
 						})
 		return(document_prep)
