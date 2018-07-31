@@ -144,13 +144,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					try:
 						# we need to run subprocess here to get the output because both call and command return [] and None respectively
 						s = subprocess.run(['stack', 'run', 'pallet', pallet['name']], encoding='utf-8', stdout=subprocess.PIPE)
-						# in order to avoid running subprocess shell=true, write the script to a file then run it
-						with open (f'{pallet["name"]}_run_script', 'w') as f:
-							f.write(s.stdout.strip())
-						subprocess.run(['chmod', '777', f'{pallet["name"]}_run_script'])
-						subprocess.run(f'./{pallet["name"]}_run_script', stdout=subprocess.PIPE)
-						# remove temp file
-						subprocess.run(['rm', f'{pallet["name"]}_run_script'])
+						subprocess.run(s.stdout.strip(), shell=True, stdout=subprocess.PIPE)
 						self.owner.log.info(f'success running pallet {pallet["name"]}')
 						self.owner.successes += 1
 					except Exception as e:

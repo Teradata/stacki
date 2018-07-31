@@ -122,7 +122,11 @@ class Command(command):
 		self.log = logging.getLogger("load-json")
 		logging.basicConfig(filename='/var/log/load-json.log', filemode='w+', level=logging.INFO)
 
-		self.runPlugins(args)
+		try:
+			self.runPlugins(args)
+		except CommandError as e:
+			self.log.info(f'Load terminated early: {e}')
+			self.errors += 1
 
 		# report how well the load went
 		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\nCheck /var/log/load-json.log for details.\n')
