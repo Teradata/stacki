@@ -32,9 +32,7 @@ class Implementation(stack.commands.Implementation):
 		except:
 			print('shit')
 			self.switch.run('abort')
+			# raise stack error
 		finally:
 			subprocess.run(f'rm -rf /tmp/{self.switch_name}'.split(), stdout=subprocess.PIPE)
-
-		subprocess.run(f'ssh {self.switch_username}@{self.switch_address} hostnamectl set-hostname {self.switch_name}'.split(),
-				stdout=subprocess.PIPE)
 
