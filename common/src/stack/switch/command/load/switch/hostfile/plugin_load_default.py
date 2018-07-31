@@ -29,29 +29,29 @@ class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
 			# add the host if it does exist
 			#
 			if host in existinghosts:
-				switch		= hosts[host].get('switch')
-				name		= hosts[host].get('host')
-				port		= hosts[host].get('port')
-				interface	= hosts[host].get('interface')
+				for switch_host in hosts[host]:
+					switch		= switch_host.get('switch')
+					name		= switch_host.get('host')
+					port		= switch_host.get('port')
+					interface	= switch_host.get('interface')
 
-				# delete the previous entry in case the interface 
-				# has changed
-				self.owner.call('remove.switch.host', [
-						switch,
-						"host=%s" % name,
-						f'interface={interface}',
-						f'port={port}',
-						])
+					# delete the previous entry in case the interface has changed
+					self.owner.call('remove.switch.host', [
+							switch,
+							"host=%s" % name,
+							f'interface={interface}',
+							f'port={port}',
+							])
 
-				# add switch host
+					# add switch host
 
-				switch_args = [switch, "host=%s" % name, "port=%s" % port]
+					switch_args = [switch, "host=%s" % name, "port=%s" % port]
 
-				# if interface column is not null, add it to switch args
-				if interface:
-					switch_args.append("interface=%s" % interface)
+					# if interface column is not null, add it to switch args
+					if interface:
+						switch_args.append("interface=%s" % interface)
 
-				self.owner.call('add.switch.host', switch_args)
+					self.owner.call('add.switch.host', switch_args)
 
 			sys.stderr.write('\t\t%s\r' % (' ' * len(host)))
 
