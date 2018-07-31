@@ -94,10 +94,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 
 			# If the host hasn't been assigned values, assign them
+			switch_host = {'host': name, 'switch': switch, 'port': port, 'interface': interface}
+
 			if name not in self.owner.hosts.keys():
-				self.owner.hosts[name] = {}
-				self.owner.hosts[name]['host'] = name
-				self.owner.hosts[name]['switch'] = switch
-				self.owner.hosts[name]['port'] = port
-				self.owner.hosts[name]['interface'] = interface
+				self.owner.hosts[name] = []
+			if switch_host not in self.owner.hosts[name]:
+				self.owner.hosts[name].append(switch_host)
 

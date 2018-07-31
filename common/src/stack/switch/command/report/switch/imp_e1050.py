@@ -16,25 +16,25 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		switch = args[0]
 
-		switch_name = switch['switch']
-		switch_interface = self.owner.call('list.host.interface', [switch_name])[0]
+		self.switch_name = switch['switch']
+		switch_interface = self.owner.call('list.host.interface', [self.switch_name])[0]
 		self.switch_address = switch_interface['ip']
-		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
-		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
-		self.switch = SwitchCelesticaE1050(self.switch_address, switch_name, switch_username, switch_password)
+		switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
+		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
+		self.switch = SwitchCelesticaE1050(self.switch_address, self.switch_name, switch_username, switch_password)
 
 		self.switch_network = self.owner.call('list.network', [switch_interface['network']])[0]
 		self.networks = {self.switch_network['network']: self.switch_network}
-		self.mac_ifaces = {iface['mac']: iface for iface in self.owner.call('list.switch.host')}
+		self.mac_ifaces = {iface['mac']: iface for iface in self.owner.call('list.switch.host', [self.switch_name])}
 
 		# Get frontend ip
 		try:
 			self.frontend, *_ = [iface for iface in self.owner.call('list.host.interface', ['localhost'])
 				if iface['network'] == switch_interface['network']]
 		except:
-			raise CommandError(self, f'{self.switch_name} and the frontend do not share a network')
+			raise CommandError(self, f'{self.self.switch_name} and the frontend do not share a network')
 
-		self.owner.addOutput('localhost', f'<stack:file stack:name="/tmp/{switch_name}/new_config">')
+		self.owner.addOutput('localhost', f'<stack:file stack:name="/tmp/{self.switch_name}/new_config">')
 		self.reset()
 		self.sync_config()
 		self.owner.addOutput('localhost', '</stack:file>')
@@ -45,8 +45,6 @@ class Implementation(stack.commands.Implementation):
 
 		commands = [
 			'del all',
-			'add routing defaults datacenter',
-			'add routing service integrated-vtysh-config',
 			'add routing log syslog informational',
 			'add snmp-server listening-address localhost',
 			f'add bridge bridge ports swp{swps}',
@@ -55,8 +53,8 @@ class Implementation(stack.commands.Implementation):
 			'add bridge bridge vlan-aware',
 			'add bridge pre-up sysctl -w net.ipv4.conf.all.proxy_arp=1',
 			'add bridge pre-up sysctl -w net.ipv4.conf.default.proxy_arp=1',
-			'add interface eth0',# ip address dhcp',
-			'add loopback lo ip address 127.0.0.1/32',
+			'add interface eth0 ip address dhcp',
+			'add loopback lo',# ip address 127.0.0.1/32',
 			'add time zone Etc/UTC',
 			'add time ntp server 0.cumulusnetworks.pool.ntp.org iburst',
 			'add time ntp server 1.cumulusnetworks.pool.ntp.org iburst',
@@ -70,26 +68,30 @@ class Implementation(stack.commands.Implementation):
 			f'add vlan 1 ip address {switch_interface.with_prefixlen}',
 			'add vlan 1 vlan-id 1',
 			'add vlan 1 vlan-raw-device bridge',
+			f'add hostname {self.switch_name}',
 			]
 
 		for command in commands:
 			self.owner.addOutput('localhost', command)
 
 	def sync_config(self):
-		hosts, macs = zip(*[(iface['host'], iface['mac']) for iface in self.mac_ifaces.values()])
+		hosts = [iface['host'] for iface in self.mac_ifaces.values()]
 		bmc_vlan = self.get_bmc_vlan()
 
-		host_ifaces = self.owner.call('list.host.interface', list(hosts))
-		host_ifaces = [iface for iface in host_ifaces if iface['mac'] in macs and iface != self.frontend]
-		for iface in host_ifaces:
-			interface = self.mac_ifaces[iface['mac']]
-			vlan = iface['vlan'] if iface['vlan'] else '1'
+		host_ifaces = {iface['mac']: iface for iface in self.owner.call('list.host.interface', hosts)}
+#		host_ifaces = self.owner.call('list.host.interface', hosts)
+#		host_ifaces = [iface for iface in host_ifaces if iface['mac'] in self.mac_ifaces and iface != self.frontend]
+#		for iface in host_ifaces:
+		for mac, iface in self.mac_ifaces.items():
+			interface = host_ifaces[mac]
+#			interface = self.mac_ifaces[iface['mac']]
+			vlan = interface['vlan'] if interface['vlan'] else '1'
 
-			if iface['network'] not in self.networks:
-				self.add_vlan(iface['network'], vlan)
+			if interface['network'] not in self.networks:
+				self.add_vlan(interface['network'], vlan)
 
-			self.owner.addOutput('localhost', f"add interface swp{interface['port']} bridge vids {vlan},{bmc_vlan}")
-			self.owner.addOutput('localhost', f"add interface swp{interface['port']} bridge pvid {vlan}")
+			self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge vids {vlan},{bmc_vlan}")
+			self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge pvid {vlan}")
 
 	def add_vlan(self, network, vlan):
 		self.networks[network] = self.owner.call('list.network', [network])[0]
