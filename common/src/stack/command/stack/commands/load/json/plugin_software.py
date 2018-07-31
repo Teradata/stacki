@@ -7,6 +7,7 @@
 import stack.commands
 import json
 from stack.exception import CommandError
+import subprocess
 
 class Plugin(stack.commands.Plugin, stack.commands.Command):
 	notifications = True
@@ -138,7 +139,22 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					except CommandError as e:
 						self.owner.log.info(f'error enabling {pallet["name"]}, {pallet["version"]} in {box}: {e}')
 						self.owner.errors += 1
-
+				# unless it is a stacki pallet, let's run it
+				if pallet['name'] != 'stacki':
+					try:
+						# we need to run subprocess here to get the output because both call and command return [] and None respectively
+						s = subprocess.run(['stack', 'run', 'pallet', pallet['name']], encoding='utf-8', stdout=subprocess.PIPE)
+						# in order to avoid running subprocess shell=true, write the script to a file then run it
+						with open (f'{pallet["name"]}_run_script', 'w') as f:
+							f.write(s.stdout.strip())
+						subprocess.run(['chmod', '777', f'{pallet["name"]}_run_script'])
+						subprocess.run(f'./{pallet["name"]}_run_script', stdout=subprocess.PIPE)
+						# remove temp file
+						subprocess.run(['rm', f'{pallet["name"]}_run_script'])
+						self.owner.log.info(f'success running pallet {pallet["name"]}')
+						self.owner.successes += 1
+					except Exception as e:
+						raise CommandError(self.owner, f'error running {pallet["name"]}: {e}')
 
 		if import_data['cart']:
 			for cart in import_data['cart']:
