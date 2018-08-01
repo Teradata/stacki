@@ -90,6 +90,23 @@ class Command(command):
 				if pallet['url'] == None:
 					raise CommandError(self, f'pallet {pallet["name"]} {pallet["version"]} has no url')
 
+	def try_command(self, command, parameters, verb, scope, target_name):
+		try:
+			self.command(command, parameters)
+			self.log.info(f'success {verb}ing {scope} {target_name}')
+			self.successes += 1
+			return 0
+
+		except CommandError as e:
+			if 'exists' in str(e):
+				self.log.info(f'warning {verb}ing {scope} {target_name}: {e}')
+				self.warnings += 1
+				return 1
+			else:
+				self.log.info(f'error {verb}ing {scope} {target_name}: {e}')
+				self.errors += 1
+				return 3
+
 
 	def run(self, params, args):
 		filename, = self.fillParams([
