@@ -7,6 +7,7 @@ import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
 
+
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
 	"""
@@ -45,47 +46,53 @@ class Command(stack.commands.Command,
 	</example>
 	"""
 	def run(self, params, args):
-		prms = self._params
-		# Get Host Attributes
-		s = self.call('list.host.attr')
 
-		host_bucket = {'managed': {'hosts': []}}
-		for i in s:
-			host = i['host']
-			attr = i['attr']
-			val = i['value']
-			# Categorize by appliances
+		attrs, = self.fillParams([ ('attribute', None) ])
+
+		if attrs is not None:
+			attrs = attrs.split(',')
+		else:
+			attrs = []
+
+		groups = {}
+		for row in self.call('list.host.attr'):
+
+			host = row['host']
+			attr = row['attr']
+			val  = row['value']
+
+			# TODO - Update to use the qualifier to scope these
+			# groups (e.g. a:backend)
+
 			if attr == 'appliance':
-				if val not in host_bucket:
-					host_bucket[val] = { 'hosts':[] }
-				host_bucket[val]['hosts'].append(host)
-			# Categorize by rack
-			if attr == 'rack':
+				if val not in groups:
+					groups[val] = { 'hosts': [] }
+				groups[val]['hosts'].append(host)
+
+			elif attr == 'rack':
 				rack = 'rack%s' % val
-				if rack not in host_bucket:
-					host_bucket[rack] = { 'hosts': []}
-				host_bucket[rack]['hosts'].append(host)
-			# Managed Hosts
-			if attr == 'managed':
-				if str2bool(val) == True:
-					host_bucket['managed']['hosts'].append(host)
-			# if len(prms) > 0:
-			if prms:
-				k = list(prms.keys())
-				if 'attribute' in k:
-					for i in prms['attribute'].split(','):
-						if attr == i:
-							if attr not in host_bucket:
-								host_bucket[attr] = { 'hosts': []}
-							host_bucket[attr]['hosts'].append(host)
-				else:
-					raise CommandError(self,'argument "%s" not recognized' % k[0])
+				if rack not in groups:
+					groups[rack] = { 'hosts': []}
+				groups[rack]['hosts'].append(host)
+
+			elif attr == 'managed':
+				if str2bool(val) is True:
+					if attr not in groups:
+						groups[attr] = { 'hosts': [] }
+					groups['managed']['hosts'].append(host)
+
+			elif attr in attrs:
+				if attr not in groups:
+					groups[attr] = { 'hosts': []}
+				groups[attr]['hosts'].append(host)
+
+
 		self.beginOutput()
-		self.addOutput('','<stack:file stack:name="/etc/ansible/hosts">')
-		for cat in host_bucket:
-			self.addOutput('','[%s]' % cat)
-			hostlist = '\n'.join(host_bucket[cat]['hosts'])
-			self.addOutput('',hostlist)
-			self.addOutput('','')
-		self.addOutput('','</stack:file>')
-		self.endOutput()
+		self.addOutput('', '<stack:file stack:name="/etc/ansible/hosts">')
+		for cat in groups:
+			self.addOutput('', '[%s]' % cat)
+			hostlist = '\n'.join(groups[cat]['hosts'])
+			self.addOutput('', hostlist)
+			self.addOutput('', '')
+		self.addOutput('', '</stack:file>')
+		self.endOutput(padChar='')
