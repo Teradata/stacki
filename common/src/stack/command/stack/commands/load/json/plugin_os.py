@@ -34,103 +34,67 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 		self.notify('\n\tLoading os\n')
 		for os in import_data:
 			os_name= os['name']
+
+			# set os attrs
 			for attr in os['attrs']:
 				# determine if this is a shadow attr by looking at the type
 				if attr['type'] == 'shadow':
 					attr_shadow = True
 				else:
 					attr_shadow = False
-				try:
-					self.owner.command('set.os.attr', [
-									os_name,
-									f'attr={attr["attr"]}',
-									f'value={attr["value"]}',
-									f'shadow={attr_shadow}'
-					])
-					self.owner.log.info(f'success setting os attr {attr}')
-					self.owner.successes += 1
+				parameters = [
+					os_name,
+					f'attr={attr["attr"]}',
+					f'value={attr["value"]}',
+					f'shadow={attr_shadow}',
+				]
+				self.owner.try_command('set.os.attr', parameters, f'setting os attr {attr}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning setting os attr {attr}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error setting os attr {attr}: {e}')
-						self.owner.errors += 1
-
+			# set os routes
 			for route in os['route']:
-				try:
-					self.owner.command('add.os.route', [
-									os_name,
-									f'address={route["network"]}',
-									f'gateway={route["gateway"]}',
-									f'netmask={route["netmask"]}'
-					])
-					self.owner.log.info(f'success adding os route {route}')
-					self.owner.successes += 1
+				parameters = [
+					os_name,
+					f'address={route["network"]}',
+					f'gateway={route["gateway"]}',
+					f'netmask={route["netmask"]}',
+				]
+				self.owner.try_command('add.os.route', parameters, f'adding os route {route}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding os route {route}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding os route {route}: {e}')
-						self.owner.errors += 1
-
-
+			# add os firewall rules. If the rule exists, remove it and replace it with the one in the json
 			for rule in os['firewall']:
-				try:
-					self.owner.command('add.os.firewall', [
-									os_name,
-									f'action={rule["action"]}',
-									f'chain={rule["chain"]}',
-									f'protocol={rule["protocol"]}',
-									f'service={rule["service"]}',
-									f'network={rule["network"]}',
-									f'output-network={rule["output-network"]}',
-									f'rulename={rule["name"]}',
-									f'table={rule["table"]}'
-					])
-					self.owner.log.info(f'success adding os firewall rule {rule}')
-					self.owner.successes += 1
+				parameters = [
+					os_name,
+					f'action={rule["action"]}',
+					f'chain={rule["chain"]}',
+					f'protocol={rule["protocol"]}',
+					f'service={rule["service"]}',
+					f'network={rule["network"]}',
+					f'output-network={rule["output-network"]}',
+					f'rulename={rule["name"]}',
+					f'table={rule["table"]}'
+				]
+				if self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists') == 1:
+					self.owner.try_command('remove.os.firewall', [ os_name, f'rulename={rule["name"]}' ], 'removing os firewall rule {rule["action"]}', 'exists')
+					self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding os firewall rule {rule}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding os firewall rule {rule}: {e}')
-						self.owner.errors += 1
-
+			# add os partitions
 			for partition in os['partition']:
-				try:
-					self.owner.log.info('adding os partition...')
-					parameters = [
-						os_name,
-						f'device={partition["device"]}',
-						f'partid={partition["partid"]}',
-						f'size={partition["size"]}'
-					]
-					if partition['options']:
-						parameters.append(f'options={partition["options"]}')
-					if partition['mountpoint']:
-						parameters.append(f'mountpoint={partition["mountpoint"]}')
-					if partition ['fstype']:
-						parameters.append(f'type={partition["fstype"]}')
+				parameters = [
+					os_name,
+					f'device={partition["device"]}',
+					f'partid={partition["partid"]}',
+					f'size={partition["size"]}'
+				]
+				if partition['options']:
+					parameters.append(f'options={partition["options"]}')
+				if partition['mountpoint']:
+					parameters.append(f'mountpoint={partition["mountpoint"]}')
+				if partition ['fstype']:
+					parameters.append(f'type={partition["fstype"]}')
 
-					self.owner.command('add.storage.partition', parameters)
-					self.owner.log.info(f'success adding os partition {partition}')
-					self.owner.successes += 1
+				self.owner.try_command('add.storage.partition', parameters, f'adding os partition {partition}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding os partition: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding os partition: {e}')
-						self.owner.errors += 1
-
-
+			# add os controllers
 			for controller in os['controller']:
 				parameters = [
 					os_name,
@@ -144,18 +108,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'raidlevel={controller["raidlevel"]}')
 				if controller['slot']:
 					parameters.append(f'slot={controller["slot"]}')
-
-
-				try:
-					self.owner.log.info('adding os controller...')
-					self.owner.command('add.storage.controller', parameters)
-					self.owner.log.info(f'success adding os controller {controller}')
-					self.owner.successes += 1
-
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding os ontroller: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding os controller: {e}')
-						self.owner.errors += 1
+				self.owner.try_command('add.storage.controller', parameters, f'adding os controller {controller}', 'exists')

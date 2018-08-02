@@ -102,7 +102,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'type={partition["fstype"]}')
 
 
-				self.owner.try_command('add.storage.partition', parameters, f'adding appliance partition {decive} to {appliance_name}', 'exists')
+				self.owner.try_command('add.storage.partition', parameters, f'adding appliance partition {device} to {appliance_name}', 'exists')
 
 			# add all the controller information
 			for controller in appliance['controller']:

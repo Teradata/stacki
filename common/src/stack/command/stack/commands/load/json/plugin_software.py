@@ -31,27 +31,18 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no software data in json file')
 			return
 
-		self.notify('\n\tLoading Software\n')
+		self.notify('\n\tLoading software\n')
 		# check to make sure 'box' 'pallet' and 'cart' all exist first to avoid a key error
+		# add boxes
 		if import_data['box']:
 			for box in import_data['box']:
-				try:
-					self.owner.command('add.box', [
-								f'{box["name"]}',
-								f'os={box["os"]}'
-					])
-					self.owner.log.info(f'success adding box {box["name"]}')
-					self.owner.successes += 1
+				parameters = [
+					f'{box["name"]}',
+					f'os={box["os"]}',
+				]
+				self.owner.try_command('add.box', parameters, f'adding box {box["name"]}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning importing box {box["name"]}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding box {box["name"]}: {e}')
-						self.owner.errors += 1
-
-
+		# add pallets
 		if import_data['pallet']:
 			# create a list of pallets to add, excluding ones already present on the system
 			pallets_to_add = []
@@ -77,7 +68,6 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				if pallet_dir == None:
 					# if we have no url to fetch the pallet from we cannot add it
 					raise CommandError(self.owner, f'error adding pallet {pallet["name"]} {pallet["version"]}: no url found')
-					self.owner.errors += 1
 
 					# the following code is now unreachable, does it have any value?
 					# now that it is impossible for there to be a pallet added to the database that down not have a url
@@ -93,52 +83,31 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 #							if pallet['name'] == item['name']:
 #								# we have now deduced that the pallet both is currently in the database and that it has boxes that it needs to be added to
 #								for box in pallet['boxes']:
-#									try:
-#										self.owner.command('enable.pallet', [ pallet['name'],
-#												f'release={pallet["release"]}',
-#												f'box={box}' ])
-#										self.owner.log.info(f'success enabling {pallet} in {box}')
-#										self.owner.successes += 1
-#
-#									except CommandError as e:
-#										self.owner.log.info(f'error enabling {pallet["name"]} in {box}: {e}')
-#										self.owner.errors += 1
+#								parameters = [
+#									pallet['name'],
+#									f'release={pallet["release"]}',
+#									f'box={box}',
+#								]
+#								self.owner.try_command('enable.pallet', parameters, f'enabling {pallet} in {box}', 'exists')
 #						# we have finished with this pallet
 #						continue
 
 
-				try:
-					parameters = [pallet_dir]
-					if pallet['urlauthUser'] and pallet['urlauthPass']:
-						parameters.append(f'username={pallet["urlauthUser"]}')
-						parameters.append(f'password={pallet["urlauthPass"]}')
-					self.owner.command('add.pallet', parameters)
-
-					self.owner.log.info(f'success adding pallet {pallet["name"]} {pallet["version"]}')
-					self.owner.successes += 1
-
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding pallet {pallet}: {e}')
-						self.owner.warnings += 1
-					else:
-						raise CommandError(self.owner, f'error adding pallet {pallet["name"]} {pallet["version"]}: {e}')
-
+				parameters = [pallet_dir]
+				if pallet['urlauthUser'] and pallet['urlauthPass']:
+					parameters.append(f'username={pallet["urlauthUser"]}')
+					parameters.append(f'password={pallet["urlauthPass"]}')
+					self.owner.try_command('add.pallet', parameters, f'adding pallet {pallet["name"]} {pallet["version"]}', 'exists')
 
 				# allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
-					try:
-						self.owner.command('enable.pallet', [
-										pallet['name'],
-										f'release={pallet["release"]}',
-										f'box={box}'
-										])
-						self.owner.log.info(f'success enabling {pallet["name"]} {pallet["version"]} in {box}')
-						self.owner.successes += 1
+					parameters = [
+						pallet['name'],
+						f'release={pallet["release"]}',
+						f'box={box}',
+					]
+					self.owner.try_command('enable.pallet', parameters, f'enabling {pallet["name"]} {pallet["version"]} in {box}', 'exists')
 
-					except CommandError as e:
-						self.owner.log.info(f'error enabling {pallet["name"]}, {pallet["version"]} in {box}: {e}')
-						self.owner.errors += 1
 				# unless it is a stacki pallet, let's run it
 				if pallet['name'] != 'stacki':
 					try:
@@ -163,7 +132,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					# if the url starts with a / then we know that it is a local file
 					# local carts need to be added with the file= parameter
 					if cart['url'].startswith('/'):
-						self.owner.command('add.cart', [ f'file={cart["url"]}' ])
+						self.owner.try_command('add.cart', [ f'file={cart["url"]}' ], f'downloading cart {cart["url"]}', 'exists')
 						continue
 					# check if the file is local or not
 					if cart['urlauthUser']:
@@ -173,29 +142,12 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					self.owner.command('add.cart', parameters)
 
 				else:
+					self.owner.try_command('add.cart', [ cart['name'] ], f'adding cart {cart}', 'exists')
 
-					try:
-						self.owner.command('add.cart', [ cart['name'] ])
-						self.owner.log.info(f'success adding cart {cart}')
-						self.owner.successes += 1
-
-					except CommandError as e:
-						if 'exists' in str(e):
-							self.owner.log.info(f'warning importing cart {cart}: {e}')
-							self.owner.warnings += 1
-						else:
-							self.owner.log.info(f'error importing cart {cart}: {e}')
-							self.owner.errors += 1
 				# allow for multiple boxes or no boxes at all
 				for box in cart['boxes']:
-					try:
-						self.owner.command('enable.cart', [
-										cart['name'],
-										f'box={box}'
-										])
-						self.owner.log.info(f'success enabling {cart["name"]} in {box}')
-						self.owner.successes += 1
-
-					except CommandError as e:
-						self.owner.log.info(f'error enabling {cart["name"]} in {box}: {e}')
-						self.owner.errors += 1
+					parameters = [
+						cart['name'],
+						f'box={box}',
+					]
+					self.owner.try_command('enable.cart', parameters, f'enabling {cart["name"]} in {box}', 'exists')

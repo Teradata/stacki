@@ -35,95 +35,50 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 		# TODO: sanitize validate
 		for network in import_data:
 			name = network['name'].strip()
-			try:
-				# the add network command requires at least name address and mask
-				# if the network exists already we want to overwrite its information
-				# so we first add the network then set everything else
-				self.owner.command('add.network', [
-								name,
-								f'address={network["address"]}',
-								f'mask={network["netmask"]}'
-				])
-				self.owner.log.info(f'success adding network {name}')
-				self.owner.successes += 1
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'network {name} already exists. replacing it with the network defined in the json')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error adding network {name}: {e}')
-					self.owner.errors += 1
+			# the add network command requires at least name address and mask
+			# if the network exists already we want to overwrite its information
+			# so we first add the network then set everything else
+			parameters = [
+				name,
+				f'address={network["address"]}',
+				f'mask={network["netmask"]}',
+			]
+			self.owner.try_command('add.network', parameters, f'adding network {name}', 'exists')
 
-			try:
-				# now we set all of the attributes
-				# if the field is empty in the json then remove the value
-				if network['address']:
-					self.owner.command('set.network.address', [ name, f'address={network["address"]}' ])
-					self.owner.log.info(f'success adding {name} address')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.address', [ name, 'address=' ])
-					self.owner.log.info(f'success adding {name} address')
-					self.owner.successes += 1
 
-				if network['dns']:
-					self.owner.command('set.network.dns', [ name, f'dns={network["dns"]}' ])
-					self.owner.log.info(f'success adding {name} dns')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.dns', [ name, 'dns=' ])
-					self.owner.log.info(f'success adding {name} dns')
-					self.owner.successes += 1
+			# now we set all of the attributes
+			# if the field is empty in the json then remove the value
+			if network['address']:
+				self.owner.try_command('set.network.address', [ name, f'address={network["address"]}' ], f'adding {name} address', 'exists')
+			else:
+				self.owner.try_command('set.network.address', [ name, 'address=' ], f'adding {name} address', 'exists')
 
-				if network['gateway']:
-					self.owner.command('set.network.gateway', [ name, f'gateway={network["gateway"]}' ])
-					self.owner.log.info(f'success adding {name} gateway')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.gateway', [ name, 'gateway=' ])
-					self.owner.log.info(f'success adding {name} gateway')
-					self.owner.successes += 1
+			if network['dns']:
+				self.owner.try_command('set.network.dns', [ name, f'dns={network["dns"]}' ], f'adding {name} dns', 'exists')
+			else:
+				self.owner.try_command('set.network.dns', [ name, 'dns=' ], f'adding {name} dns', 'exists')
 
-				if network['netmask']:
-					self.owner.command('set.network.mask', [ name, f'mask={network["netmask"]}' ])
-					self.owner.log.info(f'success adding {name} mask')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.mask', [ name, 'mask=' ])
-					self.owner.log.info(f'success adding {name} mask')
-					self.owner.successes += 1
+			if network['gateway']:
+				self.owner.try_command('set.network.gateway', [ name, f'gateway={network["gateway"]}' ], f'adding {name} gateway', 'exists')
+			else:
+				self.owner.try_command('set.network.gateway', [ name, 'gateway=' ], f'adding {name} gateway', 'exists')
 
-				if network['mtu']:
-					self.owner.command('set.network.mtu', [ name, f'mtu={network["mtu"]}' ])
-					self.owner.log.info(f'success adding {name} mtu')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.mtu', [ name, 'mtu=' ])
-					self.owner.log.info(f'success adding {name} mtu')
-					self.owner.successes += 1
+			if network['netmask']:
+				self.owner.try_command('set.network.mask', [ name, f'mask={network["netmask"]}' ], f'adding {name} mask', 'exists')
+			else:
+				self.owner.try_command('set.network.mask', [ name, 'mask=' ], f'adding {name} mask', 'exists')
 
-				if network['pxe']:
-					self.owner.command('set.network.pxe', [ name, f'pxe={network["pxe"]}' ])
-					self.owner.log.info(f'success adding {name} pxe')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.pxe', [ name, 'pxe=' ])
-					self.owner.log.info(f'success adding {name} pxe')
-					self.owner.successes += 1
+			if network['mtu']:
+				self.owner.try_command('set.network.mtu', [ name, f'mtu={network["mtu"]}' ], f'adding {name} mtu', 'exists')
+			else:
+				self.owner.try_command('set.network.mtu', [ name, 'mtu=' ], f'adding {name} mtu', 'exists')
 
-				if network['zone']:
-					self.owner.command('set.network.zone', [ name, f'zone={network["zone"]}' ])
-					self.owner.log.info(f'success adding {name} zone')
-					self.owner.successes += 1
-				else:
-					self.owner.command('set.network.zone', [ name, 'zone=' ])
-					self.owner.log.info(f'success adding {name} zone')
-					self.owner.successes += 1
+			if network['pxe']:
+				self.owner.try_command('set.network.pxe', [ name, f'pxe={network["pxe"]}' ], f'adding {name} pxe', 'exists')
+			else:
+				self.owner.try_command('set.network.pxe', [ name, 'pxe=' ], f'adding {name} pxe', 'exists')
 
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning setting network {name}: {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error setting network {name}: {e}')
-					self.owner.errors += 1
+			if network['zone']:
+				self.owner.try_command('set.network.zone', [ name, f'zone={network["zone"]}' ], f'adding {name} zone', 'exists')
+			else:
+				self.owner.try_command('set.network.zone', [ name, 'zone=' ], f'adding {name} zone', 'exists')

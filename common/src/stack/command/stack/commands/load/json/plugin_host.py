@@ -86,12 +86,8 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				]
 				self.owner.try_command('set.host.attr', parameters, f'setting {host["name"]} attr {attr_name}', 'exists')
 
-
-			#iterate through each firewall rule and add it
+			# add firewall rules. If the firewall rule already exists, then remove it and add the one in the json
 			for rule in host['firewall']:
-#				try:
-
-#					self.owner.command('add.host.firewall', [
 				parameters = [
 					host_name,
 					f'action={rule["action"]}',
@@ -105,56 +101,29 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					f'rulename={rule["name"]}',
 					f'table={rule["table"]}',
 				]
-				
-				self.owner.try_command('add.host.firewall', parameters, f'adding host firewall rule {rule["name"]}', 'exists')
-#					])
-#					self.owner.log.info(f'success adding host firewall rule {rule["name"]}')
-#					self.owner.successes += 1
+				if self.owner.try_command('add.host.firewall', parameters, f'adding host firewall rule {rule["name"]}', 'exists') == 1:
+					self.owner.try_command('remove.host.firewall', [ host_name, f'rulename={rule["name"]}' ], 'removing host firewall rule {rule["action"]}', 'exists')
+					self.owner.try_command('add.host.firewall', parameters, f'adding host firewall rule {rule["name"]}', 'exists')
 
-#				except CommandError as e:
-#					if 'exists' in str(e):
-#						self.owner.log.info (f'warning adding host firewall rule {rule["name"]}: {e}')
-#						self.owner.warnings += 1
-#					else:
-#						self.owner.log.info (f'error adding host firewall rule {rule["name"]}: {e}')
-#						self.owner.errors += 1
-
-
-
+			# add host routes
 			for route in host['route']:
-				try:
-					self.owner.command('add.host.route', [
-									host_name,
-									f'address={route["network"]}',
-									f'gateway={route["gateway"]}',
-									f'netmask={route["netmask"]}'
-					])
-					self.owner.log.info(f'success adding host route {route}')
-					self.owner.successes += 1
+				parameters = [
+					host_name,
+					f'address={route["network"]}',
+					f'gateway={route["gateway"]}',
+					f'netmask={route["netmask"]}',
+				]
+				self.owner.try_command('add.host.route', parameters, f'adding host route {route}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding route {route["network"]}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding route {route["network"]}: {e}')
-						self.owner.errors += 1
-
+			# add host groups
 			for group in host['group']:
-				try:
-					self.owner.command('add.host.group', [
-									host_name,
-									f'group={group}'
-					])
-				except CommandError as e:
-					if 'already' in str(e):
-						self.owner.log.info(f'warning adding host {host_name} to group {group}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding host {host_name} to group {group}')
-						self.owner.errors += 1
+				parameters = [
+					host_name,
+					f'group={group}',
+				]
+				self.owner.try_command('add.host.group', parameters, f'adding host {host_name} to group {group}', 'exists')
 
-
+			# add host partitions
 			for partition in host['partition']:
 				parameters = [
 					host_name,
@@ -168,33 +137,9 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'partid={partition["partid"]}')
 				if partition['options']:
 					parameters.append(f'options={partition["options"]}')
-				try:
-					self.owner.command('add.storage.partition', parameters)
-					self.owner.log.info(f'success adding partition {partition}')
-					self.owner.successes += 1
+				self.owner.try_command('add.storage.partition', parameters, f'adding partition {partition}', 'exists')
 
-
-#def something(func, params, logger, msg):
-#def something(cmd_string, params, message):
-#	try:
-#		func(params)
-#		logger.info
-#	except:
-#		if exists:
-#			logger.warnings
-#		else
-#			logger.error
-
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info (f'warning adding partition: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info (f'error adding partition: {e}')
-						self.owner.errors += 1
-
-
-
+			# add host controllers
 			for controller in host['controller']:
 				parameters = [
 					host_name,
@@ -208,68 +153,36 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'raidlevel={controller["raidlevel"]}')
 				if controller['slot']:
 					parameters.append(f'slot={controller["slot"]}')
-
-
-				try:
-					self.owner.log.info('adding host controller...')
-					self.owner.command('add.storage.controller', parameters)
-					self.owner.log.info(f'success adding host controller {controller}')
-					self.owner.successes += 1
-
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding host ontroller: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding host controller: {e}')
-						self.owner.errors += 1
-
+				self.owner.try_command('add.storage.controller', parameters, f'adding host controller {controller}', 'exists')
 
 
 			# set the installaction of the host
-			try:
-				self.owner.command('set.host.installaction', [
-							host_name,
-							f'action={host["installaction"]}' ])
-
-				self.owner.log.info(f'success setting installaction of {host_name} to {host["installaction"]}')
-				self.owner.successes += 1
-
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning setting installaction of {host_name} to "{host["installaction"]}": {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error setting installaction of {host_name} to "{host["installaction"]}": {e}')
-					self.owner.errors += 1
-
+			parameters = [
+				host_name,
+				f'action={host["installaction"]}',
+			]
+			self.owner.try_command('set.host.installaction', parameters, f'setting installaction of {host_name} to {host["installaction"]}', 'exists')
 
 			#set metadata if there is any
 			if host['metadata']:
-				try:
-					self.owner.command('set.host.metadata', [ host_name, f'metadata={host["metadata"]}' ])
-					self.owner.log.info(f'success setting metadata of {host_name}')
-					self.owner.successes += 1
-				except CommandError as e:
-					self.owner.log.info(f'error setting metadata of {host_name}')
-					self.owner.errors += 1
+				parameters = [
+					host_name,
+					f'metadata={host["metadata"]}',
+				]
+				self.owner.try_command('set host metadata', parameters, f'setting metadata of {host_name}', 'exists')
 
 			#set the comment if there is one
 			if host['comment']:
-				try:
-					self.owner.command('set.host.comment', [ host_name, f'comment={host["comment"]}' ])
-					self.owner.log.info(f'success setting comment of {host_name}')
-					self.owner.successes += 1
-				except CommandError as e:
-					self.owner.log.info(f'error setting comment of {host_name}')
-					self.owner.errors += 1
+				parameters = [
+					host_name,
+					f'comment={host["comment"]}',
+				]
+				self.owner.try_command('set host comment', parameters, f'setting comment of {host_name}', 'exists')
 
 			# set the environment if there is one
 			if host['environment']:
-				try:
-					self.owner.command('set.host.environment', [ host_name, f'environment={host["environment"]}' ])
-					self.owner.log.info(f'success setting environment of {host_name}')
-					self.owner.successes += 1
-				except CommandError as e:
-					self.owner.log.info(f'error setting environment of {host_name} {e}')
-					self.owner.errors += 1
+				parameters = [
+					host_name,
+					f'environment={host["environment"]}',
+				]
+				self.owner.try_command('set.host.environment', parameters, f'setting environment of {host_name}', 'exists')
