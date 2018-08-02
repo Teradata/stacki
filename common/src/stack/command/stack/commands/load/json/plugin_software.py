@@ -94,10 +94,11 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 				parameters = [pallet_dir]
+				# if there are credentials, add them to parameters
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					parameters.append(f'username={pallet["urlauthUser"]}')
 					parameters.append(f'password={pallet["urlauthPass"]}')
-					self.owner.try_command('add.pallet', parameters, f'adding pallet {pallet["name"]} {pallet["version"]}', 'exists')
+				self.owner.try_command('add.pallet', parameters, f'adding pallet {pallet["name"]} {pallet["version"]}', 'exists')
 
 				# allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
