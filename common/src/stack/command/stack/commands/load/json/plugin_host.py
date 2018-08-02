@@ -52,24 +52,24 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 
 				# iterate over each key in interface, ignoring 'already exists' warnings
-				for interface in host['interface']:
-					for k, v in interface.items():
-						if v and k != 'interface' and k!= 'alias':
-							parameters = [
-								host_name,
-								f'{k}={v}',
-								f'interface={interface["interface"]}',
-								]
-							self.owner.try_command(f'set.host.interface.{k}', parameters, f'setting {host_name} interface {k}', 'exists')
-
-					# the alias cannot be set, so add it here. There can be multiple
-					for alias in interface['alias']:
+			for interface in host['interface']:
+				for k, v in interface.items():
+					if v and k != 'interface' and k!= 'alias':
 						parameters = [
 							host_name,
-							f'alias={alias["alias"]}',
+							f'{k}={v}',
 							f'interface={interface["interface"]}',
 							]
-						self.owner.try_command('add.host.alias', parameters, f'adding {host_name} alias {alias}', 'exists')
+						self.owner.try_command(f'set.host.interface.{k}', parameters, f'setting {host_name} interface {k}', 'exists')
+
+				# the alias cannot be set, so add it here. There can be multiple
+				for alias in interface['alias']:
+					parameters = [
+						host_name,
+						f'alias={alias["alias"]}',
+						f'interface={interface["interface"]}',
+						]
+					self.owner.try_command('add.host.alias', parameters, f'adding {host_name} alias {alias}', 'exists')
 
 			# iterate through each attr for the host and add it
 			for attr in host['attrs']:
