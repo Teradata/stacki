@@ -40,103 +40,57 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						attr_shadow = True
 					else:
 						attr_shadow = False
-
-					try:
-						self.owner.command('set.attr', [
-								f'attr={attr["attr"]}',
-								f'value={attr["value"]}',
-								f'shadow={attr_shadow}'
-						])
-						self.owner.log.info(f'success setting global attr {attr["attr"]}')
-						self.owner.successes += 1
-
-					except CommandError as e:
-						if 'exists' in str(e):
-							self.owner.log.info(f'warning setting global attr {attr["attr"]}: {e}')
-							self.owner.warnings += 1
-						else:
-							self.owner.log.info(f'error setting global attr {attr["attr"]}: {e}')
-							self.owner.errors += 1
+					parameters = [
+						f'attr={attr["attr"]}',
+						f'value={attr["value"]}',
+						f'shadow={attr_shadow}',
+						]
+					self.owner.try_command('set.attr', parameters, f'setting global attr {attr["attr"]}', 'exists')
 
 
 			elif scope == 'route':
 				for route in import_data[scope]:
-					try:
-						self.owner.command('add.route', [
-								f'address={route["network"]}',
-								f'gateway={route["gateway"]}',
-								f'netmask={route["netmask"]}'
-						])
-						self.owner.log.info(f'success adding global route {route["network"]}')
-						self.owner.successes += 1
+					parameters = [
+						f'address={route["network"]}',
+						f'gateway={route["gateway"]}',
+						f'netmask={route["netmask"]}',
+						]
+					self.owner.try_command('add.route', parameters, f'adding global route {route["network"]}', 'exists')
 
-					except CommandError as e:
-						if 'exists' in str(e):
-							self.owner.log.info(f'warning adding global route {route["network"]}: {e}')
-							self.owner.warnings += 1
-						else:
-							self.owner.log.info(f'error adding global route {route["network"]}: {e}')
-							self.owner.errors += 1
 
 			elif scope == 'firewall':
 				for rule in import_data[scope]:
-					try:
-						parameters = [
-						f'action={rule["action"]}',
-						f'chain={rule["chain"]}',
-						f'protocol={rule["protocol"]}',
-						f'service={rule["service"]}',
-						f'network={rule["network"]}',
-						f'output-network={rule["output-network"]}',
-						f'rulename={rule["name"]}',
-						f'table={rule["table"]}'
+					parameters = [
+					f'action={rule["action"]}',
+					f'chain={rule["chain"]}',
+					f'protocol={rule["protocol"]}',
+					f'service={rule["service"]}',
+					f'network={rule["network"]}',
+					f'output-network={rule["output-network"]}',
+					f'rulename={rule["name"]}',
+					f'table={rule["table"]}'
 					]
-						self.owner.command('add.firewall', parameters)
-						self.owner.log.info(f'success adding global firewall fule {rule["name"]}')
-						self.owner.successes += 1
+					# if the firewall rule already exists, we want to remove it and add the one in the json
+					# currently firewall has no set commands
+					if self.owner.try_command('add.firewall', parameters, f'adding global firewall fule {rule["name"]}', 'exists') == 1:
+						self.owner.try_command('remove.firewall', [ f'rulename={rule["name"]}' ], f'removing pre-existing global firewall fule {rule["name"]}', 'exists')
+						self.owner.try_command('add.firewall', parameters, f'adding global firewall fule {rule["name"]}', 'exists')
 
-					except CommandError as e:
-						if 'exists' in str(e):
-							# the firewall rule exists but we want to replace it
-							try:
-								self.owner.command('remove.firewall', [ f'rulename={rule["name"]}' ])
-								self.owner.command('add.firewall', parameters)
-								self.owner.log.info(f'success replacing global firewall rule {rule["name"]}')
-								self.owner.successes += 1
-							except CommandError as e:
-								self.owner.log.info(f'error adding global firewall rule {rule["name"]}: {e}')
-								self.owner.errors += 1
-						else:
-							self.owner.log.info(f'error adding global firewall rule {rule["name"]}: {e}')
-							self.owner.errors += 1
 
 			elif scope == 'partition':
 				for partition in import_data[scope]:
-					try:
-						self.owner.log.info('adding global partition...')
-						parameters = [
-							f'device={partition["device"]}',
-							f'partid={partition["partid"]}',
-							f'size={partition["size"]}',
-						]
-						if partition['options']:
-							parameters.append(f'options={partition["options"]}')
-						if partition['mountpoint']:
-							parameters.append(f'mountpoint={partition["mountpoint"]}')
-						if partition ['fstype']:
-							parameters.append(f'type={partition["fstype"]}')
-
-						self.owner.command('add.storage.partition', parameters)
-						self.owner.log.info(f'success adding global partition {partition}')
-						self.owner.successes += 1
-
-					except CommandError as e:
-						if 'exists' in str(e):
-							self.owner.log.info(f'warning adding global partition: {e}')
-							self.owner.warnings += 1
-						else:
-							self.owner.log.info(f'error adding global partition: {e}')
-							self.owner.errors += 1
+					parameters = [
+						f'device={partition["device"]}',
+						f'partid={partition["partid"]}',
+						f'size={partition["size"]}',
+					]
+					if partition['options']:
+						parameters.append(f'options={partition["options"]}')
+					if partition['mountpoint']:
+						parameters.append(f'mountpoint={partition["mountpoint"]}')
+					if partition ['fstype']:
+						parameters.append(f'type={partition["fstype"]}')
+					self.owner.try_command('add.storage.partition', parameters, f'adding global partition {partition}', 'exists')
 
 
 			elif scope == 'controller':
@@ -152,18 +106,8 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 					# is controller['scope'] unused in the add?
 					# is controller['options'] unused in the add?
-					try:
-						self.owner.command('add.storage.controller', parameters)
-						self.owner.log.info(f'success adding global controller {controller["arrayid"]}')
-						self.owner.successes += 1
-
-					except CommandError as e:
-						if 'exists' in str(e):
-							self.owner.log.info(f'warning adding global controller: {e}')
-							self.owner.warnings += 1
-						else:
-							self.owner.log.info(f'error adding global controller: {e}')
-							self.owner.errors += 1
+					self.owner.try_command('add.storage.controller', parameters, f'adding global controller {controller["arrayid"]}', 'exists')
 
 			else:
 				self.owner.log.info(f'error potentially invalid entry in json. {scope} is not a valid gloabl scope')
+

@@ -90,22 +90,22 @@ class Command(command):
 				if pallet['url'] == None:
 					raise CommandError(self, f'pallet {pallet["name"]} {pallet["version"]} has no url')
 
-	def try_command(self, command, parameters, verb, scope, target_name):
+	def try_command(self, command, parameters, action_description, warning_string):
 		try:
 			self.command(command, parameters)
-			self.log.info(f'success {verb}ing {scope} {target_name}')
+			self.log.info(f'success {action_description}')
 			self.successes += 1
 			return 0
 
 		except CommandError as e:
-			if 'exists' in str(e):
-				self.log.info(f'warning {verb}ing {scope} {target_name}: {e}')
+			if warning_string in str(e):
+				self.log.info(f'warning {action_description}: {e}')
 				self.warnings += 1
 				return 1
 			else:
-				self.log.info(f'error {verb}ing {scope} {target_name}: {e}')
+				self.log.info(f'error {action_description}: {e}')
 				self.errors += 1
-				return 3
+				return 2
 
 
 	def run(self, params, args):

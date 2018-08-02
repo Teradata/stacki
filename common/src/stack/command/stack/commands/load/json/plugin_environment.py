@@ -33,15 +33,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 		self.notify('\n\tLoading environment\n')
 		for environment in import_data:
 			environment_name= environment['name']
-			try:
-				self.owner.command('add.environment', [ environment_name ])
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning adding environment {environment_name}: {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error adding environment {environment}: {e}')
-					self.owner.errors += 1
+			self.owner.try_command('add.environment', [ environment_name ] , f'adding environment {environment_name}', 'exists')
 
 			for attr in environment['attrs']:
 				#determine if this is a shadow attr by looking at the type
@@ -49,19 +41,11 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					attr_shadow = True
 				else:
 					attr_shadow = False
-				try:
-					self.owner.command('add.environment.attr', [
-							environment_name,
-							f'attr={attr["attr"]}',
-							f'value={attr["value"]}',
-							f'shadow={attr_shadow}'
-					])
-					self.owner.successes += 1
+				parameters = [
+					environment_name,
+					f'attr={attr["attr"]}',
+					f'value={attr["value"]}',
+					f'shadow={attr_shadow}'
+					]
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding environment attr {attr}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding environment attr {attr}: {e}')
-						self.owner.errors += 1
+				self.owner.try_command('add.environment.attr', parameters, f'adding environment attr {attr}', 'exists')

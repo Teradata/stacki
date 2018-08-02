@@ -33,15 +33,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 
 		self.notify('\n\tLoading group\n')
 		for group in import_data:
-			try:
-				self.owner.command('add.group', [ group['name'] ])
-				self.owner.log.info(f'success adding group {group["name"]}')
-				self.owner.successes += 1
-
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning adding group {group["name"]}: {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error adding group {group["name"]}: {e}')
-					self.owner.errors += 1
+			self.owner.try_command('add.group', [ group['name'] ], f'adding group {group["name"]}', 'exists')

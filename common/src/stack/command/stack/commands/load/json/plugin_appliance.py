@@ -35,7 +35,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 		# add each appliance then set everything about it
 		for appliance in import_data:
 			appliance_name = appliance['name']
-			self.owner.try_command('add.appliance', [ appliance_name ],'add', 'appliance', appliance_name)
+			self.owner.try_command('add.appliance', [ appliance_name ],f'adding appliance {appliance_name}', 'exists')
 
 			# set all the atributes
 			for attr in appliance['attrs']:
@@ -47,7 +47,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				if attr['type'] == 'shadow':
 					parameters.append('shadow=True')
 
-				self.owner.try_command('set.appliance.attr', parameters, 'set', 'appliance attr', appliance_name)
+				self.owner.try_command('set.appliance.attr', parameters, f'setting appliance attr {attr["attr"]} for {appliance_name}', 'exists')
 
 			# add all the routes
 			for route in appliance['route']:
@@ -57,9 +57,9 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					f'gateway={route["gateway"]}',
 					f'netmask={route["netmask"]}'
 				]
-				if self.owner.try_command('add.appliance.route', parameters, 'add', 'appliance route', appliance_name) == 1:
-					self.owner.try_command('remove.appliance.route', [ appliance_name, f'address={route["network"]}' ], 'remove', 'appliance route', appliance_name)
-					self.owner.try_command('add.appliance.route', parameters, 'add', 'appliance route', appliance_name)
+				if self.owner.try_command('add.appliance.route', parameters, f'adding appliance route {route["network"]} to {appliance_name}', 'exists') == 1:
+					self.owner.try_command('remove.appliance.route', [ appliance_name, f'address={route["network"]}' ], f'removing appliance route {route["network"]} from {appliance_name}', 'exists')
+					self.owner.try_command('add.appliance.route', parameters, f'adding appliance route {route["network"]} to {appliance_name}', 'exists')
 
 			# add all of the rules, replacing them if they already exist
 			for rule in appliance['firewall']:
@@ -74,9 +74,9 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 						f'rulename={rule["name"]}',
 						f'table={rule["table"]}'
 				]
-				if self.owner.try_command('add.appliance.firewall', parameters, 'add', 'appliance firewall', appliance_name) == 1:
-					self.owner.try_command('remove.appliance.firewall', [ appliance_name, f'rulename={rule["name"]}' ], 'remove', 'appliance firewall', appliance_name)
-					self.owner.try_command('add.appliance.firewall', parameters, 'add', 'appliance firewall', appliance_name)
+				if self.owner.try_command('add.appliance.firewall', parameters, f'adding appliance firewall rule {rule["action"]}', 'exists') == 1:
+					self.owner.try_command('remove.appliance.firewall', [ appliance_name, f'rulename={rule["name"]}' ], 'removing appliance firewall rule {rule["action"]}', 'exists')
+					self.owner.try_command('add.appliance.firewall', parameters, f'adding appliance firewall rule {rule["action"]}', 'exists')
 
 			# add all of the partition infromation
 			# because add partition does not first check if it already exists, we remove all existing partitions then add the new ones
@@ -85,7 +85,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				if partition['device'] not in device_list:
 					device_list.append(partition['device'])
 			for device in device_list:
-				self.owner.try_command('remove.storage.partition', [ appliance_name, 'scope=appliance', f'device={device}' ], 'remove', 'appliance partition', appliance_name)
+				self.owner.try_command('remove.storage.partition', [ appliance_name, 'scope=appliance', f'device={device}' ], f'removing appliance partition {device} from {appliance_name}', 'exists')
 
 			for partition in appliance['partition']:
 				parameters = [
@@ -102,7 +102,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'type={partition["fstype"]}')
 
 
-				self.owner.try_command('add.storage.partition', parameters, 'add', 'appliance partition', appliance_name)
+				self.owner.try_command('add.storage.partition', parameters, f'adding appliance partition {decive} to {appliance_name}', 'exists')
 
 			# add all the controller information
 			for controller in appliance['controller']:
@@ -118,4 +118,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'enclosure={controller["enclosure"]}')
 				if controller['options']:
 					parameters.append(f'options={controller["options"]}')
-				self.owner.try_command('add.storage.controller', parameters, 'add', 'appliance controller', appliance_name)
+				self.owner.try_command('add.storage.controller', parameters, f'adding appliance controller to {appliance_name}', 'exists')

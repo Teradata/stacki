@@ -159,4 +159,3 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					else:
 						self.owner.log.info(f'error adding os controller: {e}')
 						self.owner.errors += 1
-

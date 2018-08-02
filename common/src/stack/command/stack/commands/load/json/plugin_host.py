@@ -34,78 +34,42 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 		# add each host then assign its various values to it
 		for host in import_data:
 			host_name = host['name']
-			try:
-				parameters = [
-					host_name,
-					f'box={host["box"]}',
-					f'longname={host["appliancelongname"]}',
-					f'rack={host["rack"]}',
-					f'rank={host["rank"]}'
-				]
-				if host['environment']:
-					parameters.append(f'environment={host["environment"]}')
-				self.owner.command('add.host', parameters)
-
-				self.owner.log.info(f'success adding host {host["name"]}')
-				self.owner.successes += 1
-
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning adding host {host["name"]}: {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error adding host {host["name"]}: {e}')
-					self.owner.errors += 1
+			parameters = [
+				host_name,
+				f'box={host["box"]}',
+				f'longname={host["appliancelongname"]}',
+				f'rack={host["rack"]}',
+				f'rank={host["rank"]}'
+			]
+			if host['environment']:
+				parameters.append(f'environment={host["environment"]}')
+			self.owner.try_command('add.host',parameters , f'adding host {host["name"]}', 'exists')
 
 
 			# iterate through each interface for the host and set it
 			for interface in host['interface']:
-				try:
-					self.owner.command('add.host.interface', [host_name, f'interface={interface["interface"]}' ])
-					self.owner.log.info(f'success adding interface {interface["interface"]}')
-					self.owner.successes += 1
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning adding interface {interface["interface"]}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error adding interface {interface["interface"]}: {e}')
-						self.owner.errors += 1
+				self.owner.try_command('add.host.interface',[ host_name, f'interface={interface["interface"]}'], f'adding interface {interface["interface"]}', 'exists')
 
 
 				# iterate over each key in interface, ignoring 'already exists' warnings
 				for interface in host['interface']:
 					for k, v in interface.items():
 						if v and k != 'interface' and k!= 'alias':
-							try:
-								self.owner.command(f'set.host.interface.{k}', [
-													host_name,
-													f'{k}={v}',
-													f'interface={interface["interface"]}',
-								])
-							except CommandError as e:
-								if 'exists' in str(e):
-									self.owner.log.info(f'warning setting {host_name} interface {k}')
-									self.owner.warnings += 1
-								else:
-									self.owner.log.info(f'error setting {host_name} interface {k}: {e}')
-									self.owner.errors += 1
+							parameters = [
+								host_name,
+								f'{k}={v}',
+								f'interface={interface["interface"]}',
+								]
+							self.owner.try_command(f'set.host.interface.{k}', parameters, f'setting {host_name} interface {k}', 'exists')
+
 					# the alias cannot be set, so add it here. There can be multiple
 					for alias in interface['alias']:
-						try:
-							self.owner.command('add.host.alias', [
-											host_name,
-											f'alias={alias["alias"]}',
-											f'interface={interface["interface"]}',
-							])
-						except CommandError as e:
-							if 'exists' in str(e):
-								self.owner.log.info(f'warning adding {host_name} alias {alias}')
-								self.owner.warnings += 1
-							else:
-								self.owner.log.info(f'error adding {host_name} alias {alias}: {e}')
-								self.owner.errors += 1
-
+						parameters = [
+							host_name,
+							f'alias={alias["alias"]}',
+							f'interface={interface["interface"]}',
+							]
+						self.owner.try_command('add.host.alias', parameters, f'adding {host_name} alias {alias}', 'exists')
 
 			# iterate through each attr for the host and add it
 			for attr in host['attrs']:
@@ -114,50 +78,46 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				if not isinstance(attr_value, str):
 					attr_value = ' '.join(attr['value'])
 				attr_shadow = attr['shadow']
-				try:
-					self.owner.command('set.host.attr', [
-									host_name,
-									f'attr={attr_name}',
-									f'value={attr_value}',
-									f'shadow={attr_shadow}'
-					])
-					self.owner.log.info(f'success setting {host["name"]} attr {attr_name}')
-					self.owner.successes += 1
+				parameters = [
+					host_name,
+					f'attr={attr_name}',
+					f'value={attr_value}',
+					f'shadow={attr_shadow}'
+				]
+				self.owner.try_command('set.host.attr', parameters, f'setting {host["name"]} attr {attr_name}', 'exists')
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning setting {host["name"]} attr {attr_name}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error setting {host["name"]} attr {attr_name}: {e}')
-						self.owner.errors += 1
 
 			#iterate through each firewall rule and add it
 			for rule in host['firewall']:
-				try:
-					self.owner.command('add.host.firewall', [
-									host_name,
-									f'action={rule["action"]}',
-									f'chain={rule["chain"]}',
-									f'protocol={rule["protocol"]}',
-									f'service={rule["service"]}',
-									f'comment={rule["comment"]}',
-									f'flags={rule["flags"]}',
-									f'network={rule["network"]}',
-									f'output-network={rule["output-network"]}',
-									f'rulename={rule["name"]}',
-									f'table={rule["table"]}'
-					])
-					self.owner.log.info(f'success adding host firewall rule {rule["name"]}')
-					self.owner.successes += 1
+#				try:
 
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info (f'warning adding host firewall rule {rule["name"]}: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info (f'error adding host firewall rule {rule["name"]}: {e}')
-						self.owner.errors += 1
+#					self.owner.command('add.host.firewall', [
+				parameters = [
+					host_name,
+					f'action={rule["action"]}',
+					f'chain={rule["chain"]}',
+					f'protocol={rule["protocol"]}',
+					f'service={rule["service"]}',
+					f'comment={rule["comment"]}',
+					f'flags={rule["flags"]}',
+					f'network={rule["network"]}',
+					f'output-network={rule["output-network"]}',
+					f'rulename={rule["name"]}',
+					f'table={rule["table"]}',
+				]
+				
+				self.owner.try_command('add.host.firewall', parameters, f'adding host firewall rule {rule["name"]}', 'exists')
+#					])
+#					self.owner.log.info(f'success adding host firewall rule {rule["name"]}')
+#					self.owner.successes += 1
+
+#				except CommandError as e:
+#					if 'exists' in str(e):
+#						self.owner.log.info (f'warning adding host firewall rule {rule["name"]}: {e}')
+#						self.owner.warnings += 1
+#					else:
+#						self.owner.log.info (f'error adding host firewall rule {rule["name"]}: {e}')
+#						self.owner.errors += 1
 
 
 

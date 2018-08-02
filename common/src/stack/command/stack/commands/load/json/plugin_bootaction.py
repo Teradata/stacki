@@ -46,19 +46,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			if profile['ramdisk']:
 				parameters.append(f'ramdisk={profile["ramdisk"]}')
 
-			try:
-				self.owner.command('set.bootaction', parameters)
-				self.owner.log.info(f'success adding bootaction {action}')
-				self.owner.successes += 1
-
-			except CommandError as e:
-				if 'exists' in str(e):
-					self.owner.log.info(f'warning adding bootaction {action}: {e}')
-					self.owner.warnings += 1
-				else:
-					self.owner.log.info(f'error adding bootaction {action}: {e}')
-					self.owner.errors += 1
-
+			self.owner.try_command('set.bootaction',parameters , f'adding bootaction {action}', 'exists')
 			# in the event that the bootaction already exists but with different args,
 			# we replace the old args with the new by setting them
 			if profile['args']:
@@ -66,14 +54,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				parameters = [action, f'args={args}', f'type={profile["type"]}']
 				if profile['os']:
 					parameters.append(f'os={profile["os"]}')
-				try:
-					self.owner.command('set.bootaction.args', parameters)
-					self.owner.log.info(f'success setting bootaction {action} args')
-					self.owner.successes += 1
-				except CommandError as e:
-					if 'exists' in str(e):
-						self.owner.log.info(f'warning setting bootaction {action} args: {e}')
-						self.owner.warnings += 1
-					else:
-						self.owner.log.info(f'error setting bootaction {action} args: {e}')
-						self.owner.errors += 1
+				self.owner.try_command('set.bootaction.args', parameters , f'adding bootaction {action} args', 'exists')
