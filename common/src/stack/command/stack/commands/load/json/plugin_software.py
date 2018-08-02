@@ -109,8 +109,8 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					]
 					self.owner.try_command('enable.pallet', parameters, f'enabling {pallet["name"]} {pallet["version"]} in {box}', 'exists')
 
-				# unless it is a stacki pallet, let's run it
-				if pallet['name'] != 'stacki':
+				# unless it is a stacki pallet, let's run it. (only pallets in box 'default' should be run)
+				if pallet['name'] != 'stacki' and 'default' in pallet['boxes']:
 					try:
 						# we need to run subprocess here to get the output because both call and command return [] and None respectively
 						s = subprocess.run(['stack', 'run', 'pallet', pallet['name']], encoding='utf-8', stdout=subprocess.PIPE)
