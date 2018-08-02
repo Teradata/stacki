@@ -169,7 +169,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					host_name,
 					f'metadata={host["metadata"]}',
 				]
-				self.owner.try_command('set host metadata', parameters, f'setting metadata of {host_name}', 'exists')
+				self.owner.try_command('set.host.metadata', parameters, f'setting metadata of {host_name}', 'exists')
 
 			#set the comment if there is one
 			if host['comment']:
@@ -177,7 +177,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					host_name,
 					f'comment={host["comment"]}',
 				]
-				self.owner.try_command('set host comment', parameters, f'setting comment of {host_name}', 'exists')
+				self.owner.try_command('set.host.comment', parameters, f'setting comment of {host_name}', 'exists')
 
 			# set the environment if there is one
 			if host['environment']:
