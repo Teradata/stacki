@@ -70,6 +70,10 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					f'rulename={rule["name"]}',
 					f'table={rule["table"]}'
 					]
+					if rule['flags']:
+						parameters.append(f'flags={rule["flags"]}')
+					if rule['comment']:
+						parameters.append(f'comment={rule["comment"]}')
 					# if the firewall rule already exists, we want to remove it and add the one in the json
 					# currently firewall has no set commands
 					if self.owner.try_command('add.firewall', parameters, f'adding global firewall fule {rule["name"]}', 'exists') == 1:

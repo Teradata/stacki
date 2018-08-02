@@ -73,6 +73,10 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					f'rulename={rule["name"]}',
 					f'table={rule["table"]}'
 				]
+				if rule['flags']:
+					parameters.append(f'flags={rule["flags"]}')
+				if rule['comment']:
+					parameters.append(f'comment={rule["comment"]}')
 				if self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists') == 1:
 					self.owner.try_command('remove.os.firewall', [ os_name, f'rulename={rule["name"]}' ], 'removing os firewall rule {rule["action"]}', 'exists')
 					self.owner.try_command('add.os.firewall', parameters, f' adding os firewall rule {rule}', 'exists')
