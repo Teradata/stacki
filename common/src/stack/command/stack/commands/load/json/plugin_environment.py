@@ -36,7 +36,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.try_command('add.environment', [ environment_name ] , f'adding environment {environment_name}', 'exists')
 
 			for attr in environment['attrs']:
-				#determine if this is a shadow attr by looking at the type
+				# determine if this is a shadow attr by looking at the type
 				if attr['type'] == 'shadow':
 					attr_shadow = True
 				else:

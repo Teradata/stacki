@@ -19,8 +19,7 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'environment':[]}
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		# if there is no data, just return an empty list
 		environment_data = self.owner.call('list.environment')
 		if not environment_data:
 			return document_prep

@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'network':[]}
 
-		#if there is no data use an empty list as a placeholder.
+		# if there is no data use an empty list as a placeholder.
 		network_data = self.owner.call('list.network')
 		if not network_data:
 			return document_prep

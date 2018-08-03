@@ -17,8 +17,7 @@ class Plugin(stack.commands.Plugin):
 		if args and 'os' not in args:
 			return
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		# if there is no data return an empty list
 		os_data = self.owner.call('list.os')
 		document_prep = {'os':[]}
 		if not os_data:

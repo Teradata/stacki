@@ -16,7 +16,7 @@ class Plugin(stack.commands.Plugin):
 		if args and 'global' not in args:
 			return
 
-		#if not, use an empty list as a placeholder.
+		# if there is no data just return an empty list
 		attr_data = self.owner.call('list.attr')
 		attr_prep = []
 		if attr_data:

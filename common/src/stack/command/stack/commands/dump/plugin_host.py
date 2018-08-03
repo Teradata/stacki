@@ -19,12 +19,12 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'host':[]}
 
-		#if there is no data use an empty list as a placeholder.
+		# if there is no data use an empty list as a placeholder.
 		host_data = self.owner.call('list.host')
 		if not host_data:
 			return document_prep
 
-		# since list host attr is relatively expensive call it once for all hosts up here
+		# since list host attr is relatively expensive, call it once for all hosts up here
 		grouped_hosts = {}
 		for line in self.owner.call('list.host.attr'):
 			if line['host'] in grouped_hosts:
@@ -71,8 +71,8 @@ class Plugin(stack.commands.Plugin):
 			for attr in attr_data:
 				if attr['host'] == hostname:
 					if attr['scope'] == 'host':
-						#metadata is stored as an attr and we want to pull it to the side
-						#once we have it we dont want to keep it with the rest of the attrs
+						# metadata is stored as an attr and we want to pull it to the side
+						# once we have it we dont want to keep it with the rest of the attrs
 						if attr['attr'] == 'metadata':
 							metadata = attr['value']
 							continue
@@ -131,7 +131,7 @@ class Plugin(stack.commands.Plugin):
 			if not controller_data:
 				controller_data = []
 
-			#find the longname of the host's appliance with list appliance
+			# find the longname of the host's appliance with list appliance
 			appliance_data = self.owner.call('list.appliance', [ host['appliance'] ])
 			longname = appliance_data[0]['long name']
 

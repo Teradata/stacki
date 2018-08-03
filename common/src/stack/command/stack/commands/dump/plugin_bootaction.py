@@ -18,7 +18,7 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'bootaction':[]}
 
-		#if there is no data use an empty list as a placeholder.
+		# if there is no data use an empty list as a placeholder.
 		bootaction_data = self.owner.call('list.bootaction')
 		if not bootaction_data:
 			return document_prep

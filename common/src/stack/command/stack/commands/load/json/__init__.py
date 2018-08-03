@@ -91,7 +91,7 @@ class Command(command):
 					raise CommandError(self, f'pallet {pallet["name"]} {pallet["version"]} has no url')
 
 
-	# command and parameters are the same as usual
+	# 'command' and 'parameters' are the same as a usual self.command call
 	# command_description is the string that will be printed in the logs, for example: f'adding host {hostname}'
 	# warning_string is used to filter CommandErrors, checking to see if the error is simply that the item already exists in the database
 	# the two warning_strings that are being used curently are 'already' and 'exists'

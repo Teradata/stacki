@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 
 		document_prep = {'group':[]}
 
-		#if there is no data use an empty list as a placeholder.
+		# if there is no data use an empty list as a placeholder.
 		group_data = self.owner.call('list.group')
 		if group_data:
 			group_prep = []

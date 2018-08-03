@@ -17,14 +17,13 @@ class Plugin(stack.commands.Plugin):
 		if args and 'software' not in args:
 			return
 
-		#json.loads(Nonetype) fails, so first check that our 'stack list' command returned something.
-		#if not, use an empty list as a placeholder.
+		# if there is no data return an empty list
 		pallet_data = self.owner.call('list.pallet', [ 'expanded=true' ])
 		pallet_prep = []
 		if pallet_data:
 			for item in pallet_data:
 				boxes = item['boxes'].split()
-				#we will set username and password to None to act as a placeholder
+				# set username and password to None to act as a placeholder
 				pallet_prep.append({'name':item['name'],
 							'version':item['version'],
 							'release':item['release'],

@@ -167,7 +167,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			]
 			self.owner.try_command('set.host.installaction', parameters, f'setting installaction of {host_name} to {host["installaction"]}', 'exists')
 
-			#set metadata if there is any
+			# set metadata if there is any
 			if host['metadata']:
 				parameters = [
 					host_name,
@@ -175,7 +175,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				]
 				self.owner.try_command('set.host.metadata', parameters, f'setting metadata of {host_name}', 'exists')
 
-			#set the comment if there is one
+			# set the comment if there is one
 			if host['comment']:
 				parameters = [
 					host_name,
