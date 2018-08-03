@@ -110,8 +110,7 @@ class Command(command):
 				return 1
 			else:
 				self.log.info(f'error {action_description}: {e}')
-				self.errors += 1
-				return 2
+				raise CommandError(self, f'error {action_description}: {e}')
 
 
 	def run(self, params, args):
