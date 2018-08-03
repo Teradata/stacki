@@ -98,7 +98,11 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 				if pallet['urlauthUser'] and pallet['urlauthPass']:
 					parameters.append(f'username={pallet["urlauthUser"]}')
 					parameters.append(f'password={pallet["urlauthPass"]}')
-				self.owner.try_command('add.pallet', parameters, f'adding pallet {pallet["name"]} {pallet["version"]}', 'exists')
+
+
+				# we do not want to add the stacki pallet, but we want to put it in the necessary boxes
+				if pallet['name'] != 'stacki':
+					self.owner.try_command('add.pallet', parameters, f'adding pallet {pallet["name"]} {pallet["version"]}', 'exists')
 
 				# allow for multiple boxes or no boxes at all
 				for box in pallet['boxes']:
