@@ -18,6 +18,10 @@ class Command(stack.commands.CartArgumentProcessor,
 	listed.
 	</arg>
 
+	<param optional='0' type='string' name='expanded'>
+	Include the source url of the cart.
+	</param>
+
 	<example cmd='list cart kernel'>		
 	List the status of the kernel cart.
 	</example>
@@ -25,13 +29,38 @@ class Command(stack.commands.CartArgumentProcessor,
 	<example cmd='list cart'>
 	List the status of all the available carts.
 	</example>
+
+	<example cmd='list cart expanded=True'>
+	List the status of all the available carts and their source urls.
+	</example>
 	"""		
 
+
+	def getCartInfo(self, args, params):
+		carts = []
+		if not args:
+			args = [ '%' ]	   # find all cart info
+		for arg in args:
+			found = False
+			for (cartName, url, ) in self.db.select("""
+				name, url from carts where
+				name like binary %s
+				""", arg):
+				found = True
+				carts.append({'name':cartName, 'url':url})
+			if not found and arg != '%':
+				raise ArgNotFound(self, arg, 'cart')
+
+		return carts
+
+
 	def run(self, params, args):
+		expanded, = self.fillParams([ ('expanded', 'false') ])
+		expanded = self.str2bool(expanded)
 		self.beginOutput()
 
 		try:
-			carts = self.getCartNames(args, params)
+			carts = self.getCartInfo(args, params)
 		except:
 			carts = []
 
@@ -44,13 +73,20 @@ class Command(stack.commands.CartArgumentProcessor,
 
 			for row in self.db.select("""b.name from
 				cart_stacks s, carts c, boxes b where
-				c.name='%s' and
+				c.name=%s and
 				s.cart=c.id and s.box=b.id """
-				% cart):
+				, cart['name']):
 
 				boxes.append(row[0])
-			
-			self.addOutput(cart, ' '.join(boxes))
 
-		self.endOutput(header=['name', 'boxes'], trimOwner=False)
+			output = [' '.join(boxes)]
+			if expanded:
+				output.append(cart['url'])
+
+			self.addOutput(cart['name'], output)
+
+		header = ['name', 'boxes']
+		if expanded:
+			header.append('url')
+		self.endOutput(header=header, trimOwner=False)
 

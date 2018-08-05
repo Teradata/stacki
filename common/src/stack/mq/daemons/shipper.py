@@ -30,10 +30,10 @@ class Subscriber(stack.mq.Subscriber):
 		self.dst = (addr, stack.mq.ports.publish)
 
 	def callback(self, message):
-		if message.getChannel() == 'rmq':
-			rmq = message.getMessage()
+		if message.getChannel() == 'smq':
+			smq = message.getPayload()
 			try:
-				r = json.loads(rmq)
+				r = json.loads(smq)
 				if r['type'] == 'status':
 					self.channels = r['channels']
 			except:
@@ -41,7 +41,7 @@ class Subscriber(stack.mq.Subscriber):
 		else:
 			message.addHop()
 			try:
-				self.tx.sendto(message.dumps().encode(), self.dst)
+				self.tx.sendto(str(message).encode(), self.dst)
 			except: # ignore failed sends
 				pass
 
@@ -65,7 +65,7 @@ class Controller(threading.Thread):
 		# does not go into the self.channels list
 		# to hide from the user.
 
-		subscriber.subscribe('rmq')
+		subscriber.subscribe('smq')
 
 		while True:
 
@@ -87,7 +87,7 @@ class Controller(threading.Thread):
 			elif c == 'disable':
 				chan = str(msg['channel'])
 				if chan in self.channels:
-					if not chan == 'rmq':
+					if not chan == 'smq':
 						subscriber.unsubscribe(chan)
 					self.channels.remove(chan)
 				self.rep.send_string('Disabled channel: %s' % chan)
@@ -127,7 +127,7 @@ except:
 
 if 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' %
-					('rmq-shipper', 'rmq-shipper'))
+						('smq-shipper', 'smq-shipper'))
 	daemon.DaemonContext(pidfile=lock).open()
 
 

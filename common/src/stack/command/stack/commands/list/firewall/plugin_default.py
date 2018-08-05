@@ -1,34 +1,17 @@
-# $Id$
+# @copyright@
+# @copyright@
 #
 # @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
-#
-# $Log$
-# Revision 1.5  2010/09/07 23:52:55  bruno
-# star power for gb
-#
-# Revision 1.4  2010/05/11 22:28:16  bruno
-# more tweaks
-#
-# Revision 1.3  2010/05/07 23:13:32  bruno
-# clean up the help info for the firewall commands
-#
-# Revision 1.2  2010/05/04 22:04:15  bruno
-# more firewall commands
-#
-# Revision 1.1  2010/04/30 22:07:16  bruno
-# first pass at the firewall commands. we can do global and host level
-# rules, that is, we can add, remove, open (calls add), close (also calls add),
-# list and dump the global rules and the host-specific rules.
-#
-#
+
 
 import json
 import stack.commands
-from stack.mq import ports as rmqports
+import stack.mq
+
 
 class Plugin(stack.commands.Plugin):
 	"""
@@ -55,8 +38,8 @@ class Plugin(stack.commands.Plugin):
 	# Add firewall rules for pxe=True networks.
 	# The intrinsic rules are as follows
 	# Frontend allows Ingress traffic on HTTP, HTTPS,
-	# TFTP, LUDICROUS, RMQ traffic, and DNS traffic 
-	# Backends allow Ingress traffic on SSH and RMQ ports
+	# TFTP, LUDICROUS, SMQ traffic, and DNS traffic 
+	# Backends allow Ingress traffic on SSH and SMQ ports
 	# from frontend.
 	def addIntrinsicRules(self, host):
 		frontend = False
@@ -80,7 +63,7 @@ class Plugin(stack.commands.Plugin):
 			if frontend:
 				if pxe:
 					service_list = ['http', 'https', str(LUDICROUS_PORT),
-						str(rmqports.subscribe), str(rmqports.control) ]
+						str(stack.mq.ports.subscribe), str(stack.mq.ports.control) ]
 					comment = 'Accept Stacki traffic on %s network - Intrinsic rule' % ( net_name)
 					flags = '-m multiport'
 					self.intrinsic_rules.append(('STACKI-INSTALLATION-%s' % net_name.upper(), 'filter', ','.join(service_list),
@@ -92,9 +75,9 @@ class Plugin(stack.commands.Plugin):
 					self.intrinsic_rules.append(('STACKI-TFTP-%s' % net_name.upper(), 'filter', ','.join(service_list),
 						'udp', 'INPUT', 'ACCEPT', net_name, output_network,
 						flags, comment, 'G', 'const'))
-					comment = "Accept UDP traffic for RMQ publisher over %s network - Intrinsic Rule" % (net_name)
+					comment = "Accept UDP traffic for SMQ publisher over %s network - Intrinsic Rule" % (net_name)
 					flags = ''
-					self.intrinsic_rules.append(('STACKI-MQ-PUBLISH-PORT-%s' % net_name.upper(), 'filter', str(rmqports.publish),
+					self.intrinsic_rules.append(('STACKI-MQ-PUBLISH-PORT-%s' % net_name.upper(), 'filter', str(stack.mq.ports.publish),
 						'udp', 'INPUT', 'ACCEPT', net_name, output_network,
 						flags, comment , 'G', 'const'))
 				if dns:
@@ -112,7 +95,7 @@ class Plugin(stack.commands.Plugin):
 					else:
 						frontend_ip_flag = ''
 					flags = '%s' % frontend_ip_flag
-					service_list = ['ssh', str(rmqports.control)]
+					service_list = ['ssh', str(stack.mq.ports.control)]
 					comment = 'Accept all frontend traffic on %s network - Intrinsic rule' % ( net_name)
 					self.intrinsic_rules.append(('STACKI-FRONTEND-INGRESS', 'filter', 'all',
 						'all', 'INPUT', 'ACCEPT', net_name, output_network,
@@ -217,13 +200,15 @@ class Plugin(stack.commands.Plugin):
 					comment, name, tabletype from appliance_firewall where
 					appliance = (select id from appliances where
 					name = '%s')""" % app)
+
+				self.empty_lists()
+
 				for i, o, s, p, c, a, f, cmt, n, tt in self.db.fetchall():
 					self.formatRule(n, tt, i, o, s, p, c, a, f,
 						cmt, 'A', 'var')
 
 				self.categorizeRules()
 				self.printOutput(app)
-				self.empty_lists()
 
 			self.owner.endOutput(header=['appliance', 'name', 'table',
 				'service', 'protocol', 'chain', 'action', 'network',

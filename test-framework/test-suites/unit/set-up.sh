@@ -31,6 +31,17 @@ then
     mkdir .cache
 fi
 
+# Make sure a few folders needed by Vagrantfile exist
+if [[ ! -d "../../reports" ]]
+then
+    mkdir "../../reports"
+fi
+
+if [[ ! -d "../../.cache" ]]
+then
+    mkdir "../../.cache"
+fi
+
 # Write out the Vagrant state info
 cat > ".cache/state.json" <<EOF
 {

@@ -56,7 +56,8 @@ class Command(command):
 		for switch in switches:
 			# Make sure switch has an interface
 			if self.getSwitchNetwork(switch):
-				self.addSwitchHost(switch, host, port, interface)
+				self.addSwitchHost(switch, port, host, interface)
 			else:
 				raise CommandError(self,
-					"switch '%s' doesn't have an interface" % switch)
+					"switch '%s' doesn't have a management interface" % switch)
+

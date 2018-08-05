@@ -1,0 +1,1 @@
+[{"host": "backend-0-0", "alias": "test0-eth0", "interface": "eth0"}, {"host": "backend-0-0", "alias": "test0-eth1", "interface": "eth1"}, {"host": "backend-0-1", "alias": "test1-eth0", "interface": "eth0"}, {"host": "backend-0-1", "alias": "test1-eth1", "interface": "eth1"}]

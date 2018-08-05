@@ -1,10 +1,10 @@
 #!/bin/bash
-# rmq-publisher		Init script for Stack Message Queue Publisher
+# smq-publisher		Init script for Stack Message Queue Publisher
 #
 # chkconfig: - 90 85
-# description:  Enabled the RMQ Publisher daemon
-# processname:  rmq-publisher
-# pidfile: /var/run/rmq-publisher/rmq-publisher.pid
+# description:  Enabled the SMQ Publisher daemon
+# processname:  smq-publisher
+# pidfile: /var/run/smq-publisher/smq-publisher.pid
 #
 # @copyright@
 # Copyright (c) 2006 - 2018 Teradata
@@ -14,12 +14,12 @@
 #
 
 ### BEGIN INIT INFO
-# Provides: rmq-publisher
+# Provides: smq-publisher
 # Required-Start: $local_fs $network
 # Required-Stop: $local_fs $network
 # Default-Start:
 # Default-Stop: 0 1 6
-# Short-Description: start or stop rmq-publisher
+# Short-Description: start or stop smq-publisher
 # Description: Stack Message Queue Publisher
 ### END INIT INFO
 
@@ -27,7 +27,7 @@
 # source function library
 . /etc/rc.d/init.d/functions
 
-name=rmq-publisher
+name=smq-publisher
 prog=/opt/stack/sbin/${name}
 pidfile=/var/run/${name}/${name}.pid
 

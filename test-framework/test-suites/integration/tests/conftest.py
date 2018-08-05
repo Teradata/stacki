@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import subprocess
@@ -134,3 +135,87 @@ def add_host(hostname='backend-0-0', rack='1', rank='1', appliance='backend'):
 		pytest.fail('unable to add a dummy host')
 
 	yield
+
+@pytest.fixture
+def add_host_with_interface(hostname='backend-0-0', rack='1', rank='1', appliance='backend', interface='eth0'):
+	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy host')
+
+	cmd = f'stack add host interface {hostname} interface={interface}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy interface')
+
+	yield
+
+@pytest.fixture
+def add_switch(hostname='switch-0-0', rack='0', rank='0', appliance='switch', make='fake', model='unrl'):
+	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to add a dummy host')
+
+	cmd = f'stack set host attr {hostname} attr=component.make value={make}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to set make')
+
+	cmd = f'stack set host attr {hostname} attr=component.model value={model}'
+	result = subprocess.run(cmd.split())
+	if result.returncode != 0:
+		pytest.fail('unable to set model')
+
+	yield
+
+@pytest.fixture
+def set_host_interface(add_host_with_interface):
+	result = subprocess.run(
+		["stack", "list", "network", "private", "output-format=json"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+
+	o = json.loads(result.stdout)
+	addr = o[0]["address"]
+	mask = o[0]["mask"]
+
+	result = subprocess.run(
+		["stack", "list", "host", "a:backend", "output-format=json"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	o = json.loads(result.stdout)
+	hostname = o[0]["host"]
+
+	result = subprocess.run(
+		["stack", "list", "host", "interface", "output-format=json"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	
+	o = json.loads(result.stdout)
+	ip_list = []
+	interface = None
+
+	for line in o:
+		if line['host'] == hostname:
+			interface = line['interface']
+		
+		# Make list of IP addresses
+		if line['ip']:
+			ip_list.append(line['ip'])
+	
+	result = {
+		'hostname' : hostname,
+		'net_addr' : addr,
+		'net_mask' : mask,
+		'interface': interface,
+		'ip_list'  : ip_list
+	}
+
+	return result

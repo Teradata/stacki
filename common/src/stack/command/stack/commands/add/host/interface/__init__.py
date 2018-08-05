@@ -137,7 +137,7 @@ class Command(stack.commands.add.host.command):
 				fields.remove('network')
 				keys.append('subnet')
 				vals.append('(select id from subnets s where s.name="%s")' % network)
-			if ip:
+			if ip and ip != 'auto':
 				fields.remove('ip')
 				keys.append('ip')
 				vals.append('NULLIF("%s","NULL")' % ip.upper())
@@ -171,7 +171,7 @@ class Command(stack.commands.add.host.command):
 				""" % (host, interface)) 
 
 		for key in fields:
-			if key in params:
+			if key in params:	
 				self.command('set.host.interface.%s' % key,
 					(host, handle, "%s=%s" % (key, params[key])))
 

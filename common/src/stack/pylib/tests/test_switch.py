@@ -1,6 +1,6 @@
 #!/opt/stack/bin/python3.6
 
-import stack.switch as ethernet_switch
+from stack.switch.x1052 import SwitchDellX1052
 from stack.api import Call
 
 
@@ -8,7 +8,7 @@ from stack.api import Call
 switch_ip = '192.168.2.1'
 
 
-switch = ethernet_switch.SwitchDellX1052(switch_ip, 'admin', 'admin')
+switch = SwitchDellX1052(switch_ip, 'admin', 'admin')
 
 def test_tftp_ip():
 	switch.set_tftp_ip('1.1.1.1')

@@ -15,7 +15,9 @@ import stack.file
 import stack.commands
 from stack.bool import str2bool
 from pathlib import Path
-from stack.exception import ArgRequired, ArgUnique, CommandError
+from stack.exception import ArgRequired, ArgUnique, CommandError, UsageError
+import subprocess
+from stack.download import fetch, FetchError
 
 
 class Command(stack.commands.CartArgumentProcessor,
@@ -27,7 +29,16 @@ class Command(stack.commands.CartArgumentProcessor,
 	
 	<arg type='string' name='cart' optional='1'>
 	The name of the cart to be created.
+	Can also be a URL to a cart that we would like to download and add.
 	</arg>
+
+	<param type='string' name='username'>
+	If the remote cart download server requires authentication.
+	</param>
+
+	<param type='string' name='password'>
+	If the remote cart download server requires authentication.
+	</param>
 
 	<param type='string' name='file'>
 	Add a local cart from a compressed file.
@@ -180,7 +191,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		node.write('</stack:stack>\n')
 		node.close()
 
-	def add_cart(self,cart):
+	def add_cart(self,cart, cart_url=None):
 		# if the cart doesn't exist,
 		# add it to the database.
 		rows = self.db.select("""
@@ -190,8 +201,8 @@ class Command(stack.commands.CartArgumentProcessor,
 		# Add the cart to the database so we can enable it for a box
 		if not rows:
 			self.db.execute("""
-				insert into carts(name) values ('%s')
-				""" % cart)
+				insert into carts (Name, url) values (%s, %s)
+				""", (cart, cart_url))
 
 		# If the directory does not exist create it along with
 		# a skeleton template.
@@ -207,7 +218,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 
 
-	def add_cart_file(self,cartfile):
+	def add_cart_file(self,cartfile, cart_url=None):
 		cartsdir = '/export/stack/carts/'
 		# if multiple suffixes, increment to remove
 		# the right number to create the correct cart.
@@ -238,8 +249,10 @@ class Command(stack.commands.CartArgumentProcessor,
 			cartsdir = cartsdir + '%s' % fbase
 		else:
 			cart = tardir
-
-		self.add_cart(cart)
+		if cart_url:
+			self.add_cart(cart, cart_url)
+		else:
+			self.add_cart(cart, cartfile)
 		self.unpack_cart(cart, cartfile, cartsdir)
 
 	def get_auth_info(self,authfile):
@@ -296,23 +309,45 @@ class Command(stack.commands.CartArgumentProcessor,
 			raise CommandError(self, "Could not connect to server.")
 
 	def run(self, params, args):
-		cartfile, url, urlfile, dldir, authfile, donly = \
+		cartfile, url, urlfile, dldir, authfile, donly, username, password = \
 			self.fillParams([('file', None),
 					('url', None),
 					('urlfile', None),
 					('downloaddir', '/tmp'),
 					('authfile', None),
-					('downloadonly', False)
+					('downloadonly', False),
+					('username', None),
+					('password', None),
 					])
 
+		#Validate username and password
+		#need to provide either both or none
+		if username and not password:
+			raise UsageError(self, 'must supply a password with the username')
+		if password and not username:
+			raise UsageError(self, 'must supply a username with the password')
+
 		carts = args
+		cart_url = None
 		# check if we are creating a new cart
 		if url == urlfile == cartfile == authfile == None:
 			if not len(carts):
 				raise ArgRequired(self, 'cart')
 			else:
 				for cart in carts:
-					self.add_cart(cart)
+					# check if the cartfile is actally a url that we should download
+					# if it is, we download it then set the cartfile to the local file
+					if cart.startswith(('http://', 'ftp://', 'https://')):
+						print(f'downloading {cart} ...')
+						try:
+							# passing True will display a % progress indicator in stdout
+							cartfile = fetch(cart, username, password, True)
+						except FetchError as e:
+							raise CommandError(self, e)
+						print('adding cart...')
+						cart_url = cart
+					else:
+						self.add_cart(cart)
 
 		# If there's a filename, check it.
 		if cartfile == None:
@@ -321,7 +356,14 @@ class Command(stack.commands.CartArgumentProcessor,
 			and Path(cartfile).is_file() == True:
 		# If there is a filename, make sure it's a tar gz file.
 			if self.check_cart(cartfile) == True:
-				self.add_cart_file(cartfile)
+				# if the file has not been downloaded from the internet
+				# pass along the local path
+				if not cart_url:
+					cart_url = os.path.abspath(cartfile)
+				self.add_cart_file(cartfile, cart_url)
+				# now we cleanup the cart file if we donwloaded it
+				if cart_url.startswith(('http', 'ftp')):
+					p = subprocess.run(['rm', cartfile])
 			else:
 				msg = '%s is not a cart.' % cartfile
 				raise CommandError(self,msg)
@@ -347,3 +389,4 @@ class Command(stack.commands.CartArgumentProcessor,
 
 		# Fix all the perms all the time.
 		self.fix_perms()
+

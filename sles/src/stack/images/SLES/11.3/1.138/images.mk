@@ -1,8 +1,10 @@
-YUMLIST = MegaCLI storcli \
-		stack-command \
-		stack-pylib	\
-		stack-storage-config \
-		ludicrous-speed
+YUMLIST = \
+	MegaCLI storcli \
+	ludicrous-speed \
+	stack-command \
+	stack-mq \
+	stack-pylib \
+	stack-storage-config 
 
 getextrapackages:
 	cp RPMS/*rpm cache/

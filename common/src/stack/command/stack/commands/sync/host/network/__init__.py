@@ -50,9 +50,10 @@ class Command(stack.commands.sync.host.command):
 			host = h['host']
 			hostname = h['name']
 
-			c = self.command('report.host.interface',[host]) + \
-				self.command('report.host.network',[host]) + \
-				self.command('report.host.route',[host])
+			# Sometimes these return None, in that case, make them an empty string
+			c = str(self.command('report.host.interface',[host]) or '') + \
+				str(self.command('report.host.network',[host]) or '') + \
+				str(self.command('report.host.route',[host]) or '')
 
 			s = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
 				stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

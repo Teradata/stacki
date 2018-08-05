@@ -55,7 +55,7 @@ class Command(command):
 
 		hosts = {}
 
-		# Get a list of all interface, and populate the host map
+		# Get a list of all interfaces and populate the host map
 		# host -> interfaces.
 		# {"hostname":[
 		#	{"ip":"1.2.3.4", "interface":"eth0", "zone":"domain.com","default":True/None, "shortname":True/False},
@@ -65,8 +65,9 @@ class Command(command):
 		for row in interfaces:
 			if not row['ip']:
 				continue
+
 			# Each interface dict contains interface name,
-			# zone,whether the interface is the default one,
+			# zone, whether the interface is the default one,
 			# and whether the shortname should be assigned
 			# to that interface
 			host = row['host']
@@ -83,8 +84,11 @@ class Command(command):
 				for option in options:
 					if option.strip() == 'shortname':
 						h['shortname']= True
-			hosts[host].append(h)
+						
+			if self.validateHostInterface(host, h, aliases):
+				hosts[host].append(h)
 
+		processed = {}
 
 		for host in hosts:
 			# Check if any interface for the host has
@@ -120,9 +124,18 @@ class Command(command):
 					if interface in aliases[host]:
 						for alias in aliases[host].get(interface):
 							names.append(alias)
+
+				# check if this is duplicate entry:
+				if ip in processed:
+					if processed[ip]['names'] == ' '.join(names):
+						continue
+
 				# Write it all
 				self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
 
+				if ip not in processed:
+					processed[ip] = {}
+				processed[ip]['names'] = ' '.join(names)
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
@@ -134,3 +147,25 @@ class Command(command):
 			f.close()
 
 		self.endOutput(padChar='', trimOwner=True)
+
+
+
+	def validateHostInterface(self, hostname, hostinfo ,aliases):
+	# Checks if a host interface has atleast one of the following:
+		#       has an aliases
+		if hostname in aliases and hostinfo['interface'] in aliases[hostname]:
+			return True
+		
+		#       is on a network with a zone
+		if hostinfo['zone']:
+			return True
+		
+		#       has a shortname option
+		if hostinfo['shortname']:
+			return True
+
+		#       is the default interface for that host
+		if hostinfo['default']:
+			return True
+		return False
+                

@@ -36,4 +36,4 @@ class Command(stack.commands.Command):
 				grouplist.append(g.name)
 			groupstring = " ".join(grouplist)
 			self.addOutput(user.username, [user.is_superuser, groupstring])
-		self.endOutput(header=["USER", "ADMIN", "GROUPS"], trimOwner=False)
+		self.endOutput(header=["username", "admin", "groups"], trimOwner=False)

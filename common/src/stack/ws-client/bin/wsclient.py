@@ -34,6 +34,8 @@ def getCredentialsFile(args):
 def parseCredentials(cred_file):
 	cred = open(cred_file, 'r')
 	j = json.load(cred)
+	if type(j) == type([]):
+		j = j[0]
 	hostname = j['hostname']
 	username = j['username']
 	key	 = j['key']

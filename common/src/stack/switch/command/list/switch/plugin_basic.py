@@ -15,17 +15,19 @@ class Plugin(stack.commands.Plugin):
 	def run(self, hosts):
 		host_info = dict.fromkeys(hosts)
 
-		for row in self.db.select(
+		stmt = """
+		n.name, rack, rank, a.name
+		FROM nodes n, appliances a
+		WHERE n.appliance = a.id
+		AND a.name = 'switch'
 		"""
-                n.name, rack, rank, a.name
-                from nodes n, appliances a
-                where n.appliance = a.id
-                and a.name = 'switch'
-                """):
 
-			if row[0] in host_info:
-				host_info[row[0]] = row[1:]
-				host_info[row[0]] += tuple([self.owner.getHostAttr(row[0], 'component.model')])
+		for row in self.db.select(stmt):
+			sw_name = row[0]
+			if sw_name in host_info:
+				host_info[sw_name] = (*row[1:],
+							self.owner.getHostAttr(sw_name, 'component.make'),
+							self.owner.getHostAttr(sw_name, 'component.model'))
 
 		for host in dict(host_info):
 			if host_info[host] == None:
@@ -34,6 +36,7 @@ class Plugin(stack.commands.Plugin):
 		return { 'keys' : [ 'rack',
 				    'rank',
 				    'appliance',
+				    'make',
 				    'model',
 				    ],
 			'values': host_info }

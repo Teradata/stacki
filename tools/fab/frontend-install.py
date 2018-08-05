@@ -513,6 +513,15 @@ if not use_existing:
 	print('Setting hostname to %s' % attributes['Info_FQDN'])
 	subprocess.call(['hostname', attributes['Info_FQDN']])
 
+	# Set the root password to what the user entered
+	print("Setting root password")
+	subprocess.call([
+		'usermod',
+		'-p',
+		attributes['Kickstart_PrivateRootPassword'],
+		'root'
+	])
+
 stackpath = '/opt/stack/bin/stack'
 subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
 banner("Generate XML")

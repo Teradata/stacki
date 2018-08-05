@@ -7,8 +7,8 @@
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
-systemctl enable rmq-shipper
-chkconfig --add rmq-shipper
+systemctl enable smq-shipper
+chkconfig --add  smq-shipper
 
 <stack:report stack:name="host.mq">&hostname;</stack:report>
 <!-- the following channels are shipped by default -->
@@ -18,7 +18,27 @@ alert
 health
 installhash
 </stack:file>
+</stack:script>
 
+
+<stack:script stack:stage="install-pre">
+/opt/stack/bin/smq-publish -h&Kickstart_PrivateAddress; -chealth -t3600 '{"state": "install stage=pre"}'
+</stack:script>
+
+<stack:script stack:stage="install-pre-package">
+/opt/stack/bin/smq-publish -h&Kickstart_PrivateAddress; -chealth -t3600 '{"state": "install stage=pre-package"}'
+</stack:script>
+
+<stack:script stack:stage="install-post">
+/opt/stack/bin/smq-publish -h&Kickstart_PrivateAddress; -chealth -t3600 '{"state": "install stage=post"}'
+</stack:script>
+
+<stack:script stack:stage="boot-pre">
+/opt/stack/bin/smq-publish -h&Kickstart_PrivateAddress; -chealth -t3600 '{"state": "install stage=boot-pre"}'
+</stack:script>
+
+<stack:script stack:stage="boot-post">
+/opt/stack/bin/smq-publish -h&Kickstart_PrivateAddress; -chealth -t3600 '{"state": "install stage=boot-post"}'
 </stack:script>
 
 </stack:stack>

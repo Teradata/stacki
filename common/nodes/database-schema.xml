@@ -189,8 +189,7 @@ DROP TABLE IF EXISTS switchports;
 CREATE TABLE switchports (
 	interface	int(11)		NOT NULL references networks,
 	switch		int(11)		NOT NULL references nodes,
-	port		int(11)		NOT NULL,
-	PRIMARY KEY(switch, port)
+	port		int(11)		NOT NULL
 );
 
 <!-- Routes -->
@@ -269,7 +268,8 @@ DROP TABLE IF EXISTS carts;
 CREATE TABLE carts (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
-  PRIMARY KEY (ID) 
+  URL		text	    NULL default '',
+  PRIMARY KEY (ID)
 );
 
 <!-- Roll.  What Rolls are installed and used by default. -->
@@ -282,6 +282,7 @@ CREATE TABLE rolls (
   Rel		varchar(32) NOT NULL default '',
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default '&os;',
+  URL		text	    NULL default '',
   PRIMARY KEY (ID) 
 );
 
@@ -414,7 +415,7 @@ CREATE TABLE storage_partition (
 database	= cluster
 </stack:file>
 
-<stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
+<stack:file stack:name="/var/db/cluster-grants.sql" stack:perms="0400">
 grant select on cluster.* to ''@'localhost';
 grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
 grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
@@ -423,7 +424,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 </stack:file>
 
 /usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /var/db/grants.sql
+	--user=root cluster &lt; /var/db/cluster-grants.sql
 
 
 <!--
@@ -433,11 +434,11 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 -->
 <stack:file stack:name="/var/db/restore-stacki-database.sh" stack:perms="0400">#!/bin/sh
 
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /var/db/mysql-backup-cluster
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/mysql-backup-cluster
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/cluster-grants.sql
 
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /var/db/grants.sql
+/usr/bin/mysql --defaults-file=/opt/stack/etc/django.my.cnf django &lt; /var/db/mysql-backup-django
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/django-grants.sql
 
 /opt/stack/bin/stack sync config
 </stack:file>

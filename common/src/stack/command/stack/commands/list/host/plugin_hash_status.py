@@ -16,18 +16,24 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'hash_status'
 
-	def run(self, hosts):
+	def run(self, args):
+		(hosts, expanded, hashit) = args
+
 		ret_val = {'keys': [], 'values': {}}
 
-		if not self.owner.hashit:
+		if not hashit:
 			return ret_val
 
 		hash_status = dict.fromkeys(hosts)
-		
+
+		ids = {}
+		for name, id in self.db.select('name, id from nodes'):
+			ids[name] = id
+
 		for host in hosts:
 			try:
 				r = redis.StrictRedis()
-				status = r.get('host:%s:installhash' % host) 
+				status = r.get('host:%d:installhash' % ids[host])
 			except:
 				status = None
 

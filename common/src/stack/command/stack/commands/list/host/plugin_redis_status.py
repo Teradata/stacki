@@ -15,41 +15,13 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'redis_status'
 
-	def run(self, hosts):
+	def run(self, args):
+		(hosts, expanded, hashit) = args
+
+		# stack list host status replaces this
+
 		host_status = dict.fromkeys(hosts)
-		
-		frontend_list = []
-		frontend_list.append('localhost')
-
-		# If we have the redis module try to find the frontend
-		# on which the Redis server is running.
-
-		validRedisConnection = False
-		ret_val = {'keys': [], 'values': {}}
-		try:
-			import redis
-		except:
-			return ret_val
-		
-		for frontend in frontend_list:
-			try:
-				r = redis.StrictRedis(host=frontend)
-				validRedisConnection = True
-				break
-			except:
-				pass
-
-		if not validRedisConnection:
-			return ret_val
-
 		for host in hosts:
-			try:
-				status = r.get('host:%s:status' % host) 
-			except:
-				status = None
-			if status:
-				status = status.decode()
-			host_status[host] = ( status, )
+			host_status[host] = ( 'deprecated', )
 
-		r = { 'keys' : [ 'status' ], 'values': host_status }
-		return r
+		return { 'keys' : [ 'status' ], 'values': host_status }

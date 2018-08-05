@@ -23,7 +23,7 @@ def Handler(signal, frame):
 
 if 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
-			('rmq-processor', 'rmq-processor'))
+						('smq-processor', 'smq-processor'))
 	daemon.DaemonContext(pidfile=lock).open()
 
 
@@ -40,7 +40,6 @@ for file in os.listdir(stack.mq.processors.__path__[0]):
 	if module not in modules:
 		modules.append(module)
 
-
 tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 context = zmq.Context()
 for module in modules:
@@ -48,7 +47,7 @@ for module in modules:
 		__import__(module)
 		m = eval(module)
 		processor = getattr(m, 'Processor')(context, tx)
-	except:
+	except ValueError:
 		continue
 	processor.setDaemon(True)
 	processor.start()

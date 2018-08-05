@@ -49,6 +49,8 @@ class Implementation(stack.commands.Implementation):
 							self.name = 'SLES'
 						elif v[3] == 'sle-sdk':
 							self.name = v[3].upper()
+						elif v[3] == 'ses':
+							self.name = 'SUSE-Enterprise-Storage'
 
 						if self.name:
 							self.vers = v[4]
@@ -124,5 +126,5 @@ class Implementation(stack.commands.Implementation):
 				subprocess.call(shlex.split(cmd))
 
 
-		return (self.name, self.vers, self.release, self.arch, OS)
+		return (self.name, self.vers, self.release, self.arch, OS, roll_dir)
 

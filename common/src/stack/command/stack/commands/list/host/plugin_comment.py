@@ -15,7 +15,9 @@ class Plugin(stack.commands.Plugin):
 	def requires(self):
 		return ['basic', 'redis_status', 'hash_status']
 
-	def run(self, hosts):
+	def run(self, args):
+		(hosts, expanded, hashit) = args
+
 		host_info = dict.fromkeys(hosts)
 
 		for row in self.db.select(

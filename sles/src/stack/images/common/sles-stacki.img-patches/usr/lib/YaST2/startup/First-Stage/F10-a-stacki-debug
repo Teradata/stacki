@@ -21,8 +21,9 @@ then
 	while [ -f /tmp/wait ]
 	do
 		sleep 1
-		/opt/stack/bin/stacki-status.py install wait 2
+		/opt/stack/bin/smq-publish -chealth '{"state": "install wait"}'
 	done
 fi
 
-/opt/stack/bin/stacki-status.py install complete rebooting
+/opt/stack/bin/smq-publish -chealth -t300 '{"state": "install reboot"}'
+

@@ -60,7 +60,8 @@ cmd_set.append('create user "django"@"localhost" identified by "%s"' % django_pa
 cmd_set.append('create database django')
 
 # Grant django user access to the Django database
-cmd_set.append('grant all on django.* to "django"@"localhost";')
+grant_cmd = 'grant all on django.* to "django"@"localhost";'
+cmd_set.append(grant_cmd)
 
 for cmd in cmd_set:
 	try:
@@ -68,3 +69,6 @@ for cmd in cmd_set:
 	except:
 		sys.stderr.write("Could not execute %s\n" % cmd)
 
+# Create grants file for restore
+with open('/var/db/django-grants.sql', 'w') as fh:
+	fh.write(grant_cmd)

@@ -6,7 +6,8 @@
 
 import stack.commands
 from stack.exception import CommandError
-from stack.switch import SwitchDellX1052, SwitchException
+from stack.switch import SwitchException
+from stack.switch.x1052 import SwitchDellX1052
 
 
 class Implementation(stack.commands.Implementation):
@@ -24,8 +25,8 @@ class Implementation(stack.commands.Implementation):
 		frontend_tftp_address	= _frontend['ip']
 		switch_address		= switch['ip']
 		switch_name		= switch['host']
-		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
-		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
+		switch_username		= self.owner.getHostAttr(switch_name, 'switch_username')
+		switch_password		= self.owner.getHostAttr(switch_name, 'switch_password')
 
 		# Connect to the switch
 		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
@@ -33,8 +34,9 @@ class Implementation(stack.commands.Implementation):
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
 				switch.download()
-			
-				with open('/tftpboot/pxelinux/%s_running_config' % switch_name, 'r') as f:
+
+				filename = '%s/%s' % (switch.tftpdir, switch.current_config)
+				with open(filename, 'r') as f:
 					lines = f.readlines()
 					_printline = True
 					_block = {}
@@ -71,3 +73,4 @@ class Implementation(stack.commands.Implementation):
 				raise CommandError(self, switch_error)
 			except Exception:
 				raise CommandError(self, "There was an error downloading the running config from the switch")
+

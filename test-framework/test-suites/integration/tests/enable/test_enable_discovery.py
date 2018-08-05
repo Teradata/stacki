@@ -1,6 +1,5 @@
 import json
 import os
-import subprocess
 import time
 
 import pytest
@@ -19,7 +18,7 @@ class DiscoveryListener:
 
 	def listen(self, count, timeout):
 		messages = []
-		
+
 		for _ in range(timeout):
 			try:
 				# Read messages up to 'count'
@@ -27,9 +26,11 @@ class DiscoveryListener:
 					channel, data = self._socket.recv_multipart(
 						flags=zmq.NOBLOCK
 					)
-					message = Message(channel.decode())
-					message.loads(data)
 
+					message = Message(
+						message=data.decode(),
+						channel=channel.decode()
+					)
 					messages.append(message)
 			except zmq.ZMQError:
 				# No more messages, wait a second
@@ -130,7 +131,6 @@ class TestEnableDiscovery:
 		# Confirm a single daemon is running
 		process_list = host.process.filter(comm="stack")
 		assert len(process_list) == 1
-		pid = process_list[0].pid
 
 		# Set up a listener to capture discovery messages
 		listener = DiscoveryListener()
@@ -158,14 +158,14 @@ class TestEnableDiscovery:
 		
 		# Make sure we got 2 add messages and they are what we expect
 		assert len(messages) == 2
-		assert messages[0].message == {
+		assert messages[0].getPayload() == {
 			'type': "add", 
 			'interface': "eth1",
 			'mac_address': "52:54:00:00:00:03",
 			'ip_address': "192.168.0.1",
 			'hostname': "backend-0-0"
 		}
-		assert messages[1].message == {
+		assert messages[1].getPayload() == {
 			'type': "add",
 			'interface': "eth1",
 			'mac_address': "52:54:00:00:00:04",
@@ -191,16 +191,16 @@ class TestEnableDiscovery:
 
 		# Listen for the kickstart messages on the queue
 		messages = listener.listen(2, 60)
-		
+
 		# Make sure we got 2 kickstart messages and they are 
 		# what we expect
 		assert len(messages) == 2
-		assert messages[0].message == {
+		assert messages[0].getPayload() == {
 			'type': "kickstart",
 			'ip_address': "192.168.0.1",
 			'status_code': 200
 		}
-		assert messages[1].message == {
+		assert messages[1].getPayload() == {
 			'type': "kickstart",
 			'ip_address': "192.168.0.3",
 			'status_code': 200
@@ -254,7 +254,7 @@ class TestEnableDiscovery:
 			"environment": None,
 			"osaction": "default",
 			"installaction": "default",
-			"status": None,
+			"status": "deprecated",
 			"comment": None
 		}
 	   
@@ -268,6 +268,6 @@ class TestEnableDiscovery:
 			"environment": None,
 			"osaction": "default",
 			"installaction": "default",
-			"status": None,
+			"status": "deprecated",
 			"comment": None
 		}

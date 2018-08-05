@@ -34,7 +34,7 @@ class Implementation(stack.commands.Implementation):
 			netmask   = o['mask']
 			gateway   = o['gateway']
 
-			startmode = 'off'
+			startmode = None
 			bootproto = 'static'
 
 			if netname and ip and netmask:
@@ -103,6 +103,7 @@ class Implementation(stack.commands.Implementation):
 					parent_device = interface.strip().split('.')[0]
 					self.owner.addOutput(host, 'ETHERDEVICE=%s' % parent_device)
 					self.owner.addOutput(host, 'VLAN=yes')
+					startmode = 'auto'
 				else:
 					self.owner.addOutput(host, 'USERCONTROL=no')
 
@@ -119,18 +120,15 @@ class Implementation(stack.commands.Implementation):
 
 				if 'onboot=no' in options:
 					startmode = 'manual'
-				else:
-					if ip or dhcp or channel or 'bridge' in options:
-						#
-						# if there is an IP address, or this
-						# interface should DHCP, or anything in
-						# the 'channel' field (e.g., this is a
-						# bridged or bonded interface), or if 'bridge'
-						# is in the options, then turn this interface on
-						#
-						startmode = 'auto'
-					else:
-						startmode = 'off'
+				elif ip or dhcp or channel or 'bridge' in options:
+					#
+					# if there is an IP address, or this
+					# interface should DHCP, or anything in
+					# the 'channel' field (e.g., this is a
+					# bridged or bonded interface), or if 'bridge'
+					# is in the options, then turn this interface on
+					#
+					startmode = 'auto'
 				
 				if not dhcp:
 					if ip:
@@ -185,6 +183,9 @@ class Implementation(stack.commands.Implementation):
 				if channel and bond_reg.match(channel):
 					startmode = 'auto'
 					bootproto = 'none'
+
+				if not startmode:
+					startmode = 'off'
 
 				self.owner.addOutput(host, 'STARTMODE=%s' % startmode)
 				self.owner.addOutput(host, 'BOOTPROTO=%s' % bootproto)
