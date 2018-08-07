@@ -1,4 +1,5 @@
 import pytest
+import json
 
 def test_frontend_stack_report_system(host):
 	"Simple sanity test that a frontend is up and running"
@@ -87,3 +88,28 @@ def test_default_appliances_have_sane_attributes(host):
 
 	assert cmd.rc == 0
 	assert cmd.stdout.strip() == expected_output.stdout.strip()
+
+def test_record_storage_partition(host):
+	"Test that partitions were reported back correctly"
+
+	cmd = host.run("sudo -i stack list host partition output-format=json")
+	print(cmd.stdout)
+	backend_partitions = json.loads(cmd.stdout)
+	assert cmd.rc == 0
+	assert '"vda"' in cmd.stdout or '"sda"' in cmd.stdout
+	assert '"vda1"' in cmd.stdout or '"sda1"' in cmd.stdout
+	for each_partition in backend_partitions:
+		assert int(each_partition['size']) > 0
+		# full Disks don't have a uuid, partitions do.
+		if each_partition['uuid'] == '':
+			assert int(each_partition['start']) == 0
+		else:
+			assert int(each_partition['start']) > 0
+		# sda1 should be mounted to /
+		if each_partition['device'] == 'vda1' or each_partition['device'] == 'sda1':
+			assert each_partition['mountpoint'] == '/'
+			assert each_partition['uuid'] != ''
+		# sda shouldn't be mounted anywhere
+		if each_partition['device'] == 'vda' or each_partition['device'] == 'sda':
+			assert each_partition['mountpoint'] == ''
+			assert each_partition['uuid'] == ''

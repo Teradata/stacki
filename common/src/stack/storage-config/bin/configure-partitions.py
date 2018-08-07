@@ -14,34 +14,34 @@ import os
 import re
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes, csv_partitions
 
 sys.path.append('/opt/stack/lib')
-from stacki_storage import *
+from stacki_storage import getHostDisks, getDeviceList, getHostFstab, getHostPartitions
 from stacki_default_part import rhel 
 import stack
 
-##
-## globals
-##
+#
+# globals
+#
 host_partitions = []
 md_re = re.compile("^md[0-9]+$")
 FNULL = open(os.devnull, 'w')
 
 
-##
-## Manual Partitioning
-##
+#
+# Manual Partitioning
+#
 manual = False
 if os.path.exists('/tmp/user_partition_info'):
 	with open('/tmp/user_partition_info', 'r') as f:
 		manual = 'manual' in f.read().split()
 if manual:
 	sys.exit(0)
+#
+# functions
+#
 
-##
-## functions
-##
 
 def outputPartition(p, initialize):
 	#
@@ -79,17 +79,17 @@ def outputPartition(p, initialize):
 	# special case for '/', '/var' and '/boot', 'biosboot'
 	#
 	format = 0
-	if initialize or mnt in [ '/', '/var', '/boot', 'biosboot' ]:
+	if initialize or mnt in ['/', '/var', '/boot', 'biosboot']:
 		format = 1
 
-	line = [ 'part', mnt ]
+	line = ['part', mnt]
 
 	#
 	# physical software RAID or LVM partitions, (e.g., 'raid', 'lvm')
 	# don't have 'fstype' definitions
 	#
-	if p['fstype'] not in [ 'raid', 'lvm']:
-		line += [ '--fstype=%s' % p['fstype'] ]
+	if p['fstype'] not in ['raid', 'lvm']:
+		line += ['--fstype=%s' % p['fstype']]
 
 	if initialize:
 		#
@@ -97,28 +97,28 @@ def outputPartition(p, initialize):
 		# and optionally 'asprimary'
 		#
 		if p['size'] == 0 or grow:
-			line += [ '--size=1', '--grow' ]
+			line += ['--size=1', '--grow']
 		else:
-			line += [ '--size=%d' % p['size'] ]
+			line += ['--size=%d' % p['size']]
 
-		line += [ '--ondisk=%s' % p['device'] ]
+		line += ['--ondisk=%s' % p['device']]
 
 		if primary:
-			line += [ '--asprimary' ]
+			line += ['--asprimary']
 	else:
 		#
 		# we are reusing partitions, so we only need 'onpart'
 		#
 		if 'uuid' in p:
-			line += [ '--onpart=/dev/disk/by-uuid/%s' % p['uuid'] ]
+			line += ['--onpart=/dev/disk/by-uuid/%s' % p['uuid']]
 		elif 'diskpart' in p:
-			line += [ '--onpart=%s' % p['diskpart'] ]
+			line += ['--onpart=%s' % p['diskpart']]
 
 	if not format:
-		line += [ '--noformat' ]
+		line += ['--noformat']
 
 	if label:
-		line += [ '--label=%s' % label ]
+		line += ['--label=%s' % label]
 
 	print('%s' % ' '.join(line))
 
@@ -174,7 +174,7 @@ def doPartitions(disk, initialize):
 
 def doOutputExistingLVM(name, fstab):
 
-	p = subprocess.run([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path', '--noheadings', '--separator=:' ], 
+	p = subprocess.run([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path', '--noheadings', '--separator=:'], 
 			   stdin=subprocess.PIPE, 
 			   stdout=subprocess.PIPE,
 			   stderr=subprocess.PIPE)
@@ -189,16 +189,16 @@ def doOutputExistingLVM(name, fstab):
 
 				for p in fstab:
 					if p['device'] == dmpath:
-						line = [ 'logvol' ]
-						line += [ '%s' %
-							p['mountpoint'] ]
-						line += [ '--name=%s' %
-							lvname ]
-						line += [ '--vgname=%s' %
-							vgname ]
-						line += [ '--useexisting' ]
-						if p['mountpoint'] not in [ '/', '/var', '/boot' ]:
-							line += [ '--noformat' ]
+						line = ['logvol']
+						line += ['%s' %
+							p['mountpoint']]
+						line += ['--name=%s' %
+							lvname]
+						line += ['--vgname=%s' %
+							vgname]
+						line += ['--useexisting']
+						if p['mountpoint'] not in ['/', '/var', '/boot']:
+							line += ['--noformat']
 
 						print('%s' % ' '.join(line))
 		
@@ -206,16 +206,16 @@ def doOutputExistingLVM(name, fstab):
 def doOutputLVM(device, partitions):
 	for p in partitions:
 		if p['device'] == device:
-			line = [ 'logvol' ]
-			line += [ '%s' % p['mountpoint'] ]
-			line += [ '--vgname=%s' % p['device'] ]
-			line += [ '--fstype=%s' % p['fstype'] ]
-			line += [ '%s' % p['options'] ]
+			line = ['logvol']
+			line += ['%s' % p['mountpoint']]
+			line += ['--vgname=%s' % p['device']]
+			line += ['--fstype=%s' % p['fstype']]
+			line += ['%s' % p['options']]
 
 			if p['size'] == 0:
-				line += [ '--size=1', '--grow' ]
+				line += ['--size=1', '--grow']
 			else:
-				line += [ '--size=%d' % p['size'] ]
+				line += ['--size=%d' % p['size']]
 
 			print('%s' % ' '.join(line))
 
@@ -258,32 +258,32 @@ def doLVM(disks, partitions, fstab):
 	#
 	# an LVM definition is three lines in the 'partitions' dictionary:
 	#
-	#	1) a physical partition
-	#	2) a volume group on the physical partition
-	#	3) a file system on the volume group
+	#   1) a physical partition
+	#   2) a volume group on the physical partition
+	#   3) a file system on the volume group
 	#
 	# which look like:
 	#
-	#	1) physical partition:
+	#   1) physical partition:
 	#
-	#		'fstype': 'lvm',
-	#		'device': 'sdb',
-	#		'mountpoint': 'pv.01',
-	#		'options': '--grow',
-	#		'size': 1L
+	#       'fstype': 'lvm',
+	#       'device': 'sdb',
+	#       'mountpoint': 'pv.01',
+	#       'options': '--grow',
+	#       'size': 1L
 	#
-	#	2) volume group:
+	#   2) volume group:
 	#
-	#		'fstype': 'volgroup',
-	#		'device': 'pv.01',
-	#		'mountpoint': 'volgrp01',
-	#		'size': 0L
+	#       'fstype': 'volgroup',
+	#       'device': 'pv.01',
+	#       'mountpoint': 'volgrp01',
+	#       'size': 0L
 	#
-	#	3) file system (a.k.a. volume):
-	#		'fstype': 'xfs',
-	#		'device': 'volgrp01',
-	#		'mountpoint': '/var/lib/mysql',
-	#		'options': '--name=mysql_libs',
+	#   3) file system (a.k.a. volume):
+	#       'fstype': 'xfs',
+	#       'device': 'volgrp01',
+	#       'mountpoint': '/var/lib/mysql',
+	#       'options': '--name=mysql_libs',
 	#
 
 	for p in partitions:
@@ -311,7 +311,7 @@ def doLVM(disks, partitions, fstab):
 
 def getMDInfo(device):
 
-	p = subprocess.run([ 'mdadm', '--detail', '--export', '/dev/%s' % device ],
+	p = subprocess.run([ 'mdadm', '--detail', '--export', '/dev/%s' % device],
 			   stdin=subprocess.PIPE, 
 			   stdout=subprocess.PIPE,
 			   stderr=subprocess.PIPE)
@@ -371,39 +371,39 @@ def doRAID(csv_partitions, host_partitions):
 
 			mdname = getMDInfo(p['diskpart'])
 
-			line = [ 'raid' ]
-			line += [ '%s' % p['mountpoint'] ]
+			line = ['raid']
+			line += ['%s' % p['mountpoint']]
 
 			#
 			# make sure the '=' is not present -- it causes a
 			# failure in Anaconda
 			#
 			if mdname:
-				line += [ '--device=%s' % mdname ]
+				line += ['--device=%s' % mdname]
 			else:
-				line += [ '--device=%s' % p['device'] ]
+				line += ['--device=%s' % p['device']]
 
-			if p['mountpoint'] not in [ '/', '/var', '/boot' ]:
-				line += [ '--noformat' ]
+			if p['mountpoint'] not in ['/', '/var', '/boot']:
+				line += ['--noformat']
 
-			line += [ '--useexisting' ]
+			line += ['--useexisting']
 
 			print('%s' % ' '.join(line))
 
 	for p in csv_partitions:
 		if md_re.match(p['device']) and p['device'] not in existing:
-			line = [ 'raid' ]
-			line += [ '%s' % p['mountpoint'] ]
+			line = ['raid']
+			line += ['%s' % p['mountpoint']]
 
 			#
 			# make sure the '=' is not present -- it causes a
 			# failure in Anaconda
 			#
 			if p['fstype'] != 'lvm':
-				line += [ '--fstype %s' % p['fstype'] ]
+				line += ['--fstype %s' % p['fstype']]
 
-			line += [ '--device %s' % p['device'] ]
-			line += [ '%s' % p['options'] ]
+			line += ['--device %s' % p['device']]
+			line += ['%s' % p['options']]
 
 			print('%s' % ' '.join(line))
 
@@ -421,8 +421,8 @@ if 'nukedisks' in attributes:
 	#
 	# if 'nukedisks' is a boolean, convert it to list with the '*' entry
 	#
-	if n and n.upper() in [ 'ALL', 'YES', 'Y', 'TRUE', '1' ]:
-		nukedisks = [ '*' ]
+	if n and n.upper() in ['ALL', 'YES', 'Y', 'TRUE', '1']:
+		nukedisks = ['*']
 	else:
 		nukedisks = n.split()
 else:

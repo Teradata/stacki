@@ -7,21 +7,21 @@
 # @copyright@
 #
 
-import subprocess
 import sys
-import os
 import http.client
 import random
 import time
 import json
-import string
 import ssl
 
 sys.path.append('/tmp')
-from stack_site import *
+try:
+	from stack_site import attributes
+except:
+	attributes={}
 
 sys.path.append('/opt/stack/lib')
-from stacki_storage import *
+from stacki_storage import getHostDisks, getHostFstab, getHostPartitions
 
 #
 # functions
@@ -30,10 +30,12 @@ from stacki_storage import *
 context = ssl.SSLContext()
 context.verify_mode = ssl.CERT_NONE
 
+
 def sendit(server, partinfo):
+	"""Send the discovered partition back to the stacki frontend."""
 	status = 0
 
-	h = http.client.HTTPSConnection(server, context = context)
+	h = http.client.HTTPSConnection(server, context=context)
 	h.putrequest('GET', '/install/sbin/public/setDbPartitions.cgi')
 
 	h.putheader('X-Stack-PartitionInfo', json.dumps(partinfo))
@@ -44,19 +46,31 @@ def sendit(server, partinfo):
 		status = response.status
 	except:
 		sys.stderr.write('%s\n' % response)
-		sys.stderr.write('%\n' % status)
+		sys.stderr.write('%s\n' % status)
 
 	h.close()
 	return status
 
-##
-## MAIN
-##
+def prepare_partition_info(partinfo, part):
+	if part['device'] not in partinfo.keys():
+		partinfo[part['device']] = []
+
+	part_list = (part['diskpart'], part['start'], part['size'], None, part['fstype'], None, None, part['mountpoint'],
+	             part['uuid'])
+
+	partinfo[part['device']].append(part_list)
+	return partinfo
+
+#
+# MAIN
+#
+
 
 nukedisks = []
 disks = getHostDisks(nukedisks)
 
 devices = []
+partinfo = {}
 for disk in disks:
 	for part in disk['part']:
 		device = '/dev/%s' % part
@@ -72,32 +86,30 @@ for disk in disks:
 		device = '/dev/mapper/%s' % lvm
 		if device not in devices:
 			devices.append(device)
+	if disk['part'] == [] and disk['raid'] == [] and disk['lvm'] == []:
+			partinfo = prepare_partition_info(partinfo, disk)
+
 
 host_fstab = getHostFstab(devices)
 partitions = getHostPartitions(disks, host_fstab)
 
-partinfo = {}
-for p in partitions:
-	if p['device'] not in partinfo.keys():
-		partinfo[p['device']] = []
-
-	part = (p['diskpart'], None, p['size'], None,
-		p['fstype'], None, None, p['mountpoint'], p['uuid'])
-
-	partinfo[p['device']].append(part)
+for part in partitions:
+	partinfo = prepare_partition_info(partinfo, part)
 
 random.seed(int(time.time()))
 
 if 'Kickstart_PrivateKickstartHost' in attributes:
 	host = attributes['Kickstart_PrivateKickstartHost']
+else:
+	# Attempt to send it to ourself, in case we are actually the frontend.
+	host = 'localhost'
 
-	retries = 0
-	while retries < 3:
-		status = sendit(host, partinfo)
+retries = 0
+while retries < 3:
+	status = sendit(host, partinfo)
 
-		if status == 200:
-			break
-		else:
-			time.sleep(random.randint(0, 30))
-			retries += 1
-
+	if status == 200:
+		break
+	else:
+		time.sleep(random.randint(0, 30))
+		retries += 1
