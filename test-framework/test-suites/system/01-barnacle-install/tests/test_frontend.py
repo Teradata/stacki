@@ -1,12 +1,11 @@
 import pytest
 
-
 def test_frontend_stack_report_system(host):
 	"Simple sanity test that a frontend is up and running"
 
 	# We have to run sudo ourselves because stack report system needs to be ran
 	# as an login shell for its tests to pass
-	cmd = host.run("sudo -i stack report system")
+	cmd = host.run("sudo -i stack report system pretty=false")
 
 	assert cmd.rc == 0
 
