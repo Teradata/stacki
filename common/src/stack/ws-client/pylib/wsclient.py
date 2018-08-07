@@ -95,11 +95,15 @@ class StackWSClient:
 
 	def upload(self, filename):
 		if not os.path.exists(filename) or not os.path.isfile(filename):
-			raise IOError("File %s does not exist" % filename)
-		basename = os.path.basename(filename)
-		f = { "csvFile": (basename, open(filename, 'rb'), 'text/csv')}
-		upload_url = "%s/upload/" % self.url
-		resp = self.session.post(upload_url, files = f)
-		out = resp.json()
-		if out:
-			return out['dir']
+			raise IOError(f'File {filename} does not exist')
+		
+		if 'Content-Type' in self.session.headers:
+			del self.session.headers['Content-Type']
+		
+		response = self.session.post(f'{self.url}/upload', files={
+			'csvFile': (os.path.basename(filename), open(filename, 'rb'), 'text/csv')
+		})
+
+		output = response.json()
+		if output:
+			return output['dir']

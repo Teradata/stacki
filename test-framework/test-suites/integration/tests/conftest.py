@@ -1,9 +1,14 @@
 import json
+import multiprocessing
 import os
 import shutil
+import signal
 import subprocess
 import tempfile
+import time
 
+from django.core.servers import basehttp
+from django.core.wsgi import get_wsgi_application
 import pytest
 
 
@@ -128,46 +133,58 @@ def revert_discovery():
 		os.remove("/var/log/stack-discovery.log")
 
 @pytest.fixture
-def add_host(hostname='backend-0-0', rack='1', rank='1', appliance='backend'):
-	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to add a dummy host')
+def add_host():
+	def _inner(hostname, rack, rank, appliance):
+		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy host')
 
-	yield
+	# First use of the fixture adds backend-0-0
+	_inner('backend-0-0', '0', '0', 'backend')
 
-@pytest.fixture
-def add_host_with_interface(hostname='backend-0-0', rack='1', rank='1', appliance='backend', interface='eth0'):
-	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to add a dummy host')
-
-	cmd = f'stack add host interface {hostname} interface={interface}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to add a dummy interface')
-
-	yield
+	# Then return the inner function, so we can call it inside the test 
+	# to get more hosts added
+	return _inner
 
 @pytest.fixture
-def add_switch(hostname='switch-0-0', rack='0', rank='0', appliance='switch', make='fake', model='unrl'):
-	cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to add a dummy host')
+def add_host_with_interface():
+	def _inner(hostname, rack, rank, appliance, interface):
+		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy host')
 
-	cmd = f'stack set host attr {hostname} attr=component.make value={make}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to set make')
+		cmd = f'stack add host interface {hostname} interface={interface}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy interface')
 
-	cmd = f'stack set host attr {hostname} attr=component.model value={model}'
-	result = subprocess.run(cmd.split())
-	if result.returncode != 0:
-		pytest.fail('unable to set model')
+	_inner('backend-0-0', '0', '1', 'backend', 'eth0')
 
-	yield
+	return _inner
+
+@pytest.fixture
+def add_switch():
+	def _inner(hostname, rack, rank, appliance, make, model):
+		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy host')
+
+		cmd = f'stack set host attr {hostname} attr=component.make value={make}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set make')
+
+		cmd = f'stack set host attr {hostname} attr=component.model value={model}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set model')
+
+	_inner('switch-0-0', '0', '0', 'switch', 'fake', 'unrl')
+
+	return _inner
 
 @pytest.fixture
 def set_host_interface(add_host_with_interface):
@@ -219,3 +236,27 @@ def set_host_interface(add_host_with_interface):
 	}
 
 	return result
+
+@pytest.fixture
+def run_django_server():
+	# Run a Django server in a process
+	def runner():		
+		try:
+			os.environ['DJANGO_SETTINGS_MODULE'] = 'stack.restapi.settings'
+			basehttp.run('127.0.0.1', 8000, get_wsgi_application())
+		except KeyboardInterrupt:
+			# The signal to exit
+			pass
+	
+	process = multiprocessing.Process(target=runner)
+	process.daemon = True
+	process.start()
+	
+	# Give the server a few seconds to get ready
+	time.sleep(2)
+
+	yield
+
+	# Tell the server it is time to clean up
+	os.kill(process.pid, signal.SIGINT)
+	process.join()
