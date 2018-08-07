@@ -11,8 +11,19 @@ if [[ $1 == "--no-cov" ]]
 then
     vagrant ssh frontend -c "sudo -i pytest -vvv /export/tests/"
 else
+    # Figure out which .coveragerc to pass
+    STACKI_ISO=$(cat .cache/state.json | python -c 'import sys, json; print json.load(sys.stdin)["STACKI_ISO"]')
+    if [[ $(basename $STACKI_ISO) =~ sles12\.x86_64\.disk1\.iso ]]
+    then
+        COVERAGERC="sles.coveragerc"
+    else
+        COVERAGERC="redhat.coveragerc"
+    fi
+
     vagrant ssh frontend -c "sudo -i pytest -vvv \
-        --cov=/opt/stack/lib/python3.6/site-packages/stack \
+        --cov-config=/export/tests/$COVERAGERC \
+        --cov=wsclient \
+        --cov=stack \
         --cov-report term \
         --cov-report html:/export/reports/integration \
         /export/tests/"
