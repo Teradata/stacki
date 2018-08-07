@@ -70,8 +70,7 @@ class Command(stack.commands.Command,
 			self.db.execute(sql_cmd)
 			r = self.db.fetchall()
 			if len(r) > 0:
-				self.command("remove.host.partition",
-					[host, "device=%s" % device])
+				self.command("remove.host.partition", [host, "device=%s" % device])
 			sql_cmd = """insert into partitions
 				(node, device, mountpoint, uuid, sectorstart,
 				PartitionSize, PartitionID, FsType,
