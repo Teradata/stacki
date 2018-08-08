@@ -1,0 +1,198 @@
+{
+  "bootaction": [
+    {
+      "name": "default",
+      "kernel": "com32 chain.c32",
+      "ramdisk": null,
+      "type": "os",
+      "args": [
+        "hd0"
+      ],
+      "os": null
+    },
+    {
+      "name": "pxeflash",
+      "kernel": "kernel memdisk bigraw",
+      "ramdisk": "pxeflash.img",
+      "type": "os",
+      "args": [
+        "keeppxe"
+      ],
+      "os": null
+    },
+    {
+      "name": "localboot",
+      "kernel": "localboot 0",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "hplocalboot",
+      "kernel": "localboot -1",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "memtest",
+      "kernel": "kernel memtest",
+      "ramdisk": null,
+      "type": "os",
+      "args": [],
+      "os": null
+    },
+    {
+      "name": "default",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/12/sp3/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.1.1.1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "console",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/12/sp3/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.1.1.1",
+        "console=ttyS0,115200n8",
+        "nomodeset=1",
+        "textmode=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 12.2",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/12/sp2/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.1.1.1",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles12-sp2.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 12.2 console",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/12/sp2/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.1.1.1",
+        "console=ttyS0,115200n8",
+        "nomodeset=1",
+        "textmode=1",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles12-sp2.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue sles 12.2",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles12-sp2.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 11.3",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/11.3/1.138/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "Server=10.1.1.1",
+        "insmod=ixgbe",
+        "insmod=i40e",
+        "forceinsmod=1",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles11-sp3.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "install sles 11.3 console",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "install=http://10.1.1.1/install/pallets/SLES/11.3/1.138/sles/x86_64",
+        "autoyast=file:///tmp/profile/autoinst.xml",
+        "ramdisk_size=300000",
+        "biosdevname=0",
+        "console=ttyS0,115200n8",
+        "Server=10.1.1.1",
+        "nomodeset=1",
+        "textmode=1",
+        "insmod=ixgbe",
+        "insmod=i40e",
+        "forceinsmod=1",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles11-sp3.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    },
+    {
+      "name": "rescue sles 11.3",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "type": "install",
+      "args": [
+        "splash=silent",
+        "rescue=1",
+        "showopts",
+        "brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib",
+        "dud=http://10.0.2.15/install/drivers/megaraid_sas-07.704.04.00-1-sles11-sp3.x86_64.iso",
+        "insecure=1"
+      ],
+      "os": "sles"
+    }
+  ]
+}
