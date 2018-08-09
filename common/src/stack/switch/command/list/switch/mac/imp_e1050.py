@@ -31,12 +31,13 @@ class Implementation(stack.commands.Implementation):
 			port = re.search(r'\d+', bridge_mac['dev']).group()
 			vlan = bridge_mac['vlan'] if bridge_mac['vlan'] != 1 else None
 
-			for iface in (iface for iface in host_ifaces if iface['mac'] == mac):
-				host = iface['host']
-				interface = iface['interface']
+			for iface in host_ifaces:
+				if iface['mac'] == mac:
+					host = iface['host']
+					interface = iface['interface']
 
-				self.owner.addOutput(self.switch_name, [port, mac, host, interface, vlan])
-				break
+					self.owner.addOutput(self.switch_name, [port, mac, host, interface, vlan])
+					break
 
 	def ping_hosts(self):
 		host_ifaces = self.owner.call('list.host.interface', ['where appliance != "switch"'])
@@ -54,7 +55,7 @@ class Implementation(stack.commands.Implementation):
 
 		for iface in host_ifaces:
 			subprocess.Popen(f'ssh {self.switch_username}@{self.switch_address} ping -c 1 {iface["ip"]}'.split(),
-					stdout=subprocess.PIPE)
+					 stdout=subprocess.PIPE)
 
 		return host_ifaces
 

@@ -18,7 +18,7 @@ class Implementation(stack.commands.Implementation):
 		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
 
-		switch_hosts = self.owner.call('list.switch.host')
+		switch_hosts = self.owner.call('list.switch.host', [switch_name])
 
 		with SwitchCelesticaE1050(switch_address, switch_name, switch_username, switch_password) as switch:
 			interfaces = switch.run("show interface json", json_loads=True)

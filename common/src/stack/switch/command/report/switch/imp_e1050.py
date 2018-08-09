@@ -25,7 +25,6 @@ class Implementation(stack.commands.Implementation):
 
 		self.switch_network = self.owner.call('list.network', [switch_interface['network']])[0]
 		self.networks = {self.switch_network['network']: self.switch_network}
-		self.mac_ifaces = {iface['mac']: iface for iface in self.owner.call('list.switch.host', [self.switch_name])}
 
 		# Get frontend ip
 		try:
@@ -75,22 +74,21 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput('localhost', command)
 
 	def sync_config(self):
-		hosts = [iface['host'] for iface in self.mac_ifaces.values()]
+		mac_ifaces = {iface['mac']: iface for iface in self.owner.call('list.switch.host', [self.switch_name])}
+		hosts = [iface['host'] for iface in mac_ifaces.values()]
 		bmc_vlan = self.get_bmc_vlan()
-
 		host_ifaces = {iface['mac']: iface for iface in self.owner.call('list.host.interface', hosts)}
-#		host_ifaces = self.owner.call('list.host.interface', hosts)
-#		host_ifaces = [iface for iface in host_ifaces if iface['mac'] in self.mac_ifaces and iface != self.frontend]
-#		for iface in host_ifaces:
-		for mac, iface in self.mac_ifaces.items():
+
+		for mac, iface in mac_ifaces.items():
 			interface = host_ifaces[mac]
-#			interface = self.mac_ifaces[iface['mac']]
+
 			vlan = interface['vlan'] if interface['vlan'] else '1'
 
 			if interface['network'] not in self.networks:
 				self.add_vlan(interface['network'], vlan)
 
-			self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge vids {vlan},{bmc_vlan}")
+			if interface != self.frontend:
+				self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge vids {vlan},{bmc_vlan}")
 			self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge pvid {vlan}")
 
 	def add_vlan(self, network, vlan):
@@ -120,6 +118,6 @@ class Implementation(stack.commands.Implementation):
 
 	def get_swp_range(self):
 		interfaces = self.switch.run('show interface all json', json_loads=True)
-		ports = [int(interface[3:]) for interface in interfaces if 'swp' in interface]
+		ports = [int(re.search('\d+', interface).group()) for interface in interfaces if interface.startswith('swp')]
 		return f'{min(ports)}-{max(ports)}'
 
