@@ -11,7 +11,7 @@ class TestDumpHost:
 	def test_dump_host(self, host):
 
 		# first lets add a host so we know what to look for in the dump
-		results = host.run('stack add host backend-test box=default longname=Backend rack=1 rank=1')
+		results = host.run('stack add host backend-test appliance=backend box=default rack=1 rank=1')
 		assert results.rc == 0
 		results = host.run('stack set host comment backend-test comment=test')
 		assert results.rc == 0
@@ -72,7 +72,6 @@ class TestDumpHost:
 				assert host['firewall'][0]['type'] == 'var'
 				assert host['box'] == 'default'
 				assert host['appliance'] == 'backend'
-				assert host['appliancelongname'] == 'Backend'
 				assert host['comment'] == 'test'
 				assert host['metadata'] == 'test'
 				assert host['osaction'] == 'default'

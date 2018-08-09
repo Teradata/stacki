@@ -9,7 +9,7 @@ class TestLoadJsonHost:
 	def test_load_json_host(self, host):
 
 		# lets first add some dummy host data that we can later remove to make sure load works
-		results = host.run('stack add host backend-test box=default longname=Backend rack=1 rank=1')
+		results = host.run('stack add host backend-test appliance=backend box=default rack=1 rank=1')
 		assert results.rc == 0
 		results = host.run('stack set host comment backend-test comment=test')
 		assert results.rc == 0

@@ -129,10 +129,6 @@ class Plugin(stack.commands.Plugin):
 			if not controller_data:
 				controller_data = []
 
-			# find the longname of the host's appliance with list appliance
-			appliance_data = self.owner.call('list.appliance', [ host['appliance'] ])
-			longname = appliance_data[0]['long name']
-
 
 			document_prep['host'].append({
 						'name':hostname,
@@ -143,7 +139,6 @@ class Plugin(stack.commands.Plugin):
 						'firewall':firewall_prep,
 						'box':host['box'],
 						'appliance':host['appliance'],
-						'appliancelongname':longname,
 						'comment':host['comment'],
 						'metadata':metadata,
 						'environment':host['environment'],

@@ -36,10 +36,10 @@ class Command(command):
 		self.beginOutput()
 		for app in self.getApplianceNames(args):
 			self.db.execute("""
-				select longname, public from
+				select public from
 				appliances where name='%s'
 				""" % app)
 			row = self.db.fetchone()
 			self.addOutput(app, row)
 			
-		self.endOutput(header=['appliance', 'long name', 'public'])
+		self.endOutput(header=['appliance', 'public'])

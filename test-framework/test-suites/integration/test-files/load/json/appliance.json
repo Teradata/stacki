@@ -2,7 +2,6 @@
   "appliance": [
     {
       "name": "frontend",
-      "longname": "Frontend",
       "attrs": [
         {
           "appliance": "frontend",
@@ -49,7 +48,6 @@
     },
     {
       "name": "builder",
-      "longname": "Builder",
       "attrs": [
         {
           "appliance": "builder",
@@ -80,7 +78,6 @@
     },
     {
       "name": "barnacle",
-      "longname": "Barnacle",
       "attrs": [
         {
           "appliance": "barnacle",
@@ -111,7 +108,6 @@
     },
     {
       "name": "backend",
-      "longname": "Backend",
       "attrs": [
         {
           "appliance": "backend",
@@ -408,7 +404,6 @@
     },
     {
       "name": "replicant",
-      "longname": "Replicant",
       "attrs": [
         {
           "appliance": "replicant",
@@ -446,7 +441,6 @@
     },
     {
       "name": "switch",
-      "longname": "Switch",
       "attrs": [
         {
           "appliance": "switch",

@@ -274,37 +274,13 @@ class InsertEthers(GUI):
 			app_string.append(self.appliance_name)
 			index = 0
 
-		else:
-			#
-			# display all longnames to the user -- let them choose
-			# which type of machine they want to integrate
-			#
-			query = """
-				select longname from appliances where
-				public = 'yes' order by longname
-				"""
-
-			if self.sql.execute(query) == 0:
-				self.errorGUI(_("No appliance names in database"))
-				raise InsertError(msg)
-
-			app_string = []
-			for row in self.sql.fetchall():
-				(name, ) = row
-				app_string.append(name)
-
-			(button, index) = \
-			snack.ListboxChoiceWindow(self.screen,
-			_("Choose Appliance Type"), 
-			_("Select An Appliance Type:"),
-			app_string, buttons=(_("OK"), ), default=0)
 
 		#
 		# Now try do sanity checking that appliance is OK
 		#
 		query = """
 			select a.id, a.name from appliances a where
-			a.longname = '%s'
+			a.name = '%s'
 			""" % app_string[index]
 
 		if self.sql.execute(query) == 0:
@@ -512,7 +488,6 @@ class InsertEthers(GUI):
 			return
 
 		cmd = '/opt/stack/bin/stack add host %s ' % nodename +\
-			'longname="%s" '% self.appliance_name +\
 			'rack=%d rank=%d box="%s"' % \
 			(self.cabinet , self.rank, self.box)
 

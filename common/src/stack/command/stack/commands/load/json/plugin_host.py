@@ -37,9 +37,9 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			parameters = [
 				host_name,
 				f'box={host["box"]}',
-				f'longname={host["appliancelongname"]}',
 				f'rack={host["rack"]}',
-				f'rank={host["rank"]}'
+				f'rank={host["rank"]}',
+				f'appliance={host["appliance"]}'
 			]
 			if host['environment']:
 				parameters.append(f'environment={host["environment"]}')

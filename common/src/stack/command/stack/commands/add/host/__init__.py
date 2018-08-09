@@ -33,12 +33,6 @@ class Command(command):
 	and rank parameters are taken from the hostname.
 	</arg>
 
-	<param type='string' name='longname'>
-	Long appliance name.  If not provided and the host name is of
-	the standard form the long name is taken from the basename of 
-	the host.
-	</param>
-
 	<param type='string' name='rack'>
 	The number of the rack where the machine is located. The convention
 	in Stacki is to start numbering at 0. If not provided and the host
@@ -67,9 +61,9 @@ class Command(command):
 	name of "backend", a rack number of 0, and rank of 1.
 	</example>
 
-	<example cmd='add host backend rack=0 rank=1 longname=Backend'>
-	Adds the host "backend" to the database with 1 CPU, a long appliance name
-	of "Backend", a rack number of 0, and rank of 1.
+	<example cmd='add host backend appliance=backend rack=0 rank=1'>
+	Adds the host "backend" to the database with 1 CPU, appliance type 'backend', a rack number
+	of 0, and rank of 1.
 	</example>
 
 	<related>add host interface</related>
@@ -106,10 +100,9 @@ class Command(command):
 			rank      = None
 				
 		# fillParams with the above default values
-		(appliance, longname, rack, rank, box, environment,
+		(appliance, rack, rank, box, environment,
 		 osaction, installaction) = self.fillParams( [
 			 ('appliance',     appliance),
-			 ('longname',      None),
 			 ('rack',          rack),
 			 ('rank',          rank),
 			 ('box',           'default'),
@@ -117,25 +110,13 @@ class Command(command):
 			 ('osaction',      'default'),
 			 ('installaction', 'default') ])
 
-		if not longname and not appliance:
-			raise ParamRequired(self, ('longname', 'appliance'))
+		if not appliance:
+			raise ParamRequired(self, 'appliance')
 
 		if rack is None:
 			raise ParamRequired(self, 'rack')
 		if rank is None:
 			raise ParamRequired(self, 'rank')
-
-		if longname and not appliance:
-			#
-			# look up the appliance name
-			#
-			for o in self.call('list.appliance'):
-				if o['long name'] == longname:
-					appliance = o['appliance']
-					break
-
-			if not appliance:
-				raise CommandError(self, 'longname "%s" is not in the database' % longname)
 
 		if appliance not in appliances:
 			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)

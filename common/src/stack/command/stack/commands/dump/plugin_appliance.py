@@ -51,7 +51,6 @@ class Plugin(stack.commands.Plugin):
 
 			document_prep['appliance'].append({
 							'name':appliance_name,
-							'longname':item['long name'],
 							'attrs':attr_data,
 							'route':route_data,
 							'firewall':firewall_prep,

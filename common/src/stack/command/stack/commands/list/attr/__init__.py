@@ -150,10 +150,10 @@ class Command(stack.commands.Command,
 			if metadata:
 				readonly[name]['metadata'] = metadata
 
-		for (name, box, appliance, longname) in self.db.select(
+		for (name, box, appliance) in self.db.select(
 				""" 
 				n.name, b.name,
-				a.name, a.longname from
+				a.name from
 				nodes n, boxes b, appliances a where
 				n.appliance=a.id and n.box=b.id
 				"""):
@@ -163,7 +163,6 @@ class Command(stack.commands.Command,
 #			readonly[name]['os.name']            = boxes[box]['os.name']
 			readonly[name]['os.version']         = boxes[box]['os.version']
 			readonly[name]['appliance']	     = appliance
-			readonly[name]['appliance.longname'] = longname
 
 				
 		for (name, zone, address) in self.db.select(
