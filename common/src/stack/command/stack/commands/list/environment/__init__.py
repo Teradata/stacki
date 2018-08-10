@@ -31,5 +31,5 @@ class Command(command):
 		for env in self.getEnvironmentNames(args):
 			self.addOutput(env, None)
 			
-		self.endOutput(header=['environment'])
-	
+		self.endOutput(header=['environment', None])
+
