@@ -3,12 +3,6 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
 
 
 import stack.commands
@@ -89,8 +83,6 @@ class Command(stack.commands.add.environment.command):
 				WHERE node = 1 AND device = %s""", interface)
 			if not rows:
 				raise CommandError(self, 'interface does not exist')
-		else:
-			interface = None
 
 		# Now that we know things will work insert the route for
 		# all the environments
