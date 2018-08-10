@@ -22,17 +22,17 @@ class Command(stack.commands.add.host.command):
 	<arg type='string' name='host' repeat='1'>
 	Host name of machine
 	</arg>
-	
+
 	<param type='string' name='address'>
 	Host or network address
 	</param>
-	
+
 	<param type='string' name='gateway'>
 	Network or device gateway
 	</param>
 
 	<param type='string' name='interface'>
-	The interface to send the bits over. Useful if 
+	The interface to send the bits over. Useful if
 	you want to tag a packet.
 	</param>
 
@@ -56,7 +56,7 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-		
+
 		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
@@ -64,7 +64,7 @@ class Command(stack.commands.add.host.command):
 			('interface', None),
 			('syncnow', None),
 			])
-		
+
 		syncnow = self.str2bool(syncnow)
 
 		# check if the user has put a subnet name in the gateway field
@@ -119,16 +119,16 @@ class Command(stack.commands.add.host.command):
 				raise CommandError(self, 'interface does not exist')
 		else:
 			interface = None
-		
+
 		# Now that we know things will work insert the route for
 		# all the hosts
-		
-		for host in hosts:	
-			self.db.execute("""insert into node_routes values 
+
+		for host in hosts:
+			self.db.execute("""insert into node_routes values
 				((select id from nodes where name=%s),
 				%s, %s, %s, %s, %s)""",
 				(host, address, netmask, gateway, subnet, interface))
-			
+
 			#
 			# if host is frontend and sync now, add route to routing table
 			#
@@ -146,7 +146,7 @@ class Command(stack.commands.add.host.command):
 
 					# add route to routing table
 					p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
-					
+
 					# add route to routes file
 					cmd = '/opt/stack/bin/stack report host route localhost | '
 					cmd += '/opt/stack/bin/stack report script | '

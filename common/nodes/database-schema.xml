@@ -233,6 +233,16 @@ CREATE TABLE node_routes (
   Interface	varchar(32) default NULL
 );
 
+DROP TABLE IF EXISTS environment_routes;
+CREATE TABLE environment_routes (
+  Environment	int(11) NOT NULL default '0',
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL
+);
+
 <!-- Stacks -->
 
 DROP TABLE IF EXISTS stacks;
@@ -368,6 +378,24 @@ CREATE TABLE node_firewall (
   Flags         varchar(256) default NULL,
   Comment       varchar(256) default NULL
 );
+
+DROP TABLE IF EXISTS environment_firewall;
+CREATE TABLE environment_firewall (
+  Environment	int(11) NOT NULL default '0',
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL
+);
+
+<!-- Miscellaneous -->
 
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (

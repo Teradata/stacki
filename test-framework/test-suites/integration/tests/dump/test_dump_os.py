@@ -13,7 +13,7 @@ class TestDumpOs:
 		# first lets add some os info so we know what to look for in the dump
 		results = host.run('stack add os attr redhat attr=test value=test shadow=False')
 		assert results.rc == 0
-		results = host.run('stack add os route redhat address=192.168.0.0 gateway=192.168.0.1 netmask=255.255.255.0 interface=eth0')
+		results = host.run('stack add os route redhat address=192.168.0.0 gateway=192.168.0.1 netmask=255.255.255.0 interface=eth1')
 		assert results.rc == 0
 		results = host.run('stack add os firewall redhat action=accept chain=input protocol=udp service=www network=private output-network=private rulename=ostest table=filter comment="test" flags="-m set"')
 		assert results.rc == 0
@@ -49,7 +49,7 @@ class TestDumpOs:
 							'netmask': '255.255.255.0',
 							'gateway': '192.168.0.1',
 							'subnet': None,
-							'interface': 'eth0'
+							'interface': 'eth1'
 						}
 
 				for firewall in os['firewall']:
