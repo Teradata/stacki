@@ -1,0 +1,74 @@
+{
+  "network": [
+    {
+      "name": "bynet0",
+      "address": "10.35.100.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 65492,
+      "zone": "byn0"
+    },
+    {
+      "name": "bynet1",
+      "address": "10.35.200.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 65492,
+      "zone": "byn1"
+    },
+    {
+      "name": "ibnet0",
+      "address": "10.35.10.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 1500,
+      "zone": "ib0"
+    },
+    {
+      "name": "ibnet1",
+      "address": "10.35.20.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 1500,
+      "zone": "ib1"
+    },
+    {
+      "name": "ipmi",
+      "address": "10.25.248.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 1500,
+      "zone": "ipmi"
+    },
+    {
+      "name": "primary",
+      "address": "10.25.241.0",
+      "gateway": "10.25.241.146",
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": true,
+      "mtu": 1500,
+      "zone": "localdomain"
+    },
+    {
+      "name": "private",
+      "address": "10.1.1.0",
+      "gateway": "10.1.1.1",
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": true,
+      "mtu": 1500,
+      "zone": "localdomain"
+    }
+  ]
+}
