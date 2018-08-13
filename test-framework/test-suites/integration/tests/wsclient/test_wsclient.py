@@ -27,7 +27,6 @@ class TestWSClient:
 				"environment": None,
 				"osaction": "default",
 				"installaction": "default",
-				"status": "deprecated",
 				"comment": None
 			}
 		]
