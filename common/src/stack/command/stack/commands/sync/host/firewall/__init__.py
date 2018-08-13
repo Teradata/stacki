@@ -91,12 +91,15 @@ class Command(stack.commands.sync.host.command):
 			for h in run_hosts:
 				host = h['host']
 				hostname = h['name']
-				if stack.release in [ 'redhat7' ]:
+				os_version = host_attrs[host]['os.version']
+				os_name = host_attrs[host]['os']
+				if os_name == 'rhel':
 					cmd = 'systemctl restart iptables'
-				elif stack.release in [ 'sles12' ]:
-					cmd = 'systemctl restart stacki-iptables'
 				else:
-					cmd = '/sbin/service iptables restart'
+					if os_version == '11.x':
+						cmd = '/sbin/service stacki-iptables restart'
+					else:
+						cmd = 'systemctl restart stacki-iptables'
 
 				if me != host:
 					cmd = 'ssh -T -x %s "%s"' % (hostname, cmd)
