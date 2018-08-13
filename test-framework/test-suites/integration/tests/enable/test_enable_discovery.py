@@ -254,7 +254,6 @@ class TestEnableDiscovery:
 			"environment": None,
 			"osaction": "default",
 			"installaction": "default",
-			"status": "deprecated",
 			"comment": None
 		}
 	   
@@ -268,6 +267,5 @@ class TestEnableDiscovery:
 			"environment": None,
 			"osaction": "default",
 			"installaction": "default",
-			"status": "deprecated",
 			"comment": None
 		}
