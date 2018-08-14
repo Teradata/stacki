@@ -26,6 +26,11 @@
       args:
         warn: false
     
+    - name: Re-mount the reports folder
+      command: mount -t vboxsf export_reports /export/reports
+      args:
+        warn: false
+    
     - name: Set up the OS pallet
       import_role:
         name: os-pallet
