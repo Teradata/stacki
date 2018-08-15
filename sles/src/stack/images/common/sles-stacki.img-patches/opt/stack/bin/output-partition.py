@@ -66,15 +66,13 @@ def nuke_it(disk):
 	""" Clear out the master boot record of the drive."""
 	dev_null = open(os.devnull, 'w')
 
-	if 'disklabel' in attributes:
-		disklabel = attributes['disklabel']
-	else:
-		disklabel = 'gpt'
+	if 'disklabel' not in attributes:
+		attributes['disklabel'] = 'gpt'
 
 	cmd = 'dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
 	subprocess.call(shlex.split(cmd), stdout=dev_null, stderr=subprocess.STDOUT)
 
-	cmd = 'parted -s /dev/%s mklabel %s' % (disk, disklabel)
+	cmd = 'parted -s /dev/%s mklabel %s' % (disk, attributes['disklabel'])
 	subprocess.call(shlex.split(cmd), stdout=dev_null, stderr=subprocess.STDOUT)
 
 	dev_null.close()
@@ -94,7 +92,18 @@ def partition_init_path(element_partition, initialize, partition, partition_id):
 			ElementTree.SubElement(element_partition, 'size').text = 'max'
 		else:
 			ElementTree.SubElement(element_partition, 'size').text = '%dM' % partition['size']
-
+		# SLES11 needs to have exact partition_nr or it will not necessarily use the order in the XML.
+		# But SLES12 will error out with a vague message due the the unnecessary data.
+		# "You can force AutoYaST to only create primary partitions by assigning numbers below 5."
+		if attributes['os.version'] == "11.x" and attributes['os'] == "sles" and \
+				int(partition['partid']) < 5 and partition['type'] != 'logical':
+			element_partition_nr = ElementTree.SubElement(element_partition, 'partition_nr')
+			element_partition_nr.text = '%s' % partition['partid']
+			element_partition_nr.set('config:type', 'integer')
+	# The partition_id and part_id are NOT the same.
+	# partition_id is a specific identifier for Linux, The default is 131 for Linux partition and 130 for swap.
+	# The 'partid' key should really be 'part_num' or similar, but it is referenced in other code and the database,
+	# so I don't want to go about changing it just for this one if statement.
 	if initialize and partition_id:
 		element_partition_id = ElementTree.SubElement(element_partition, 'partition_id')
 		element_partition_id.text = '%s' % partition_id
@@ -114,7 +123,7 @@ def partition_mount_label(element_partition, initialize, partition, mnt, label):
 		ElementTree.SubElement(element_partition, 'label').text = '%s' % label
 	else:
 		element_partition_nr = ElementTree.SubElement(element_partition, 'partition_nr')
-		element_partition_nr.text = '%s' % partition['partnumber']
+		element_partition_nr.text = '%s' % partition['partid']
 		element_partition_nr.set('config:type', 'integer')
 
 
@@ -131,7 +140,7 @@ def partition_mount_uuid(element_partition, initialize, partition, mnt, format_p
 
 	if not format_partition and 'uuid' in partition:
 		ElementTree.SubElement(element_partition, 'uuid').text = '%s' % partition['uuid']
-	elif format_partition and not initialize and 'partnumber' in partition:
+	elif format_partition and not initialize and 'partid' in partition:
 		#
 		# we are reusing a partition, and we are reformatting
 		# it which will create a new UUID, so we need to tell
@@ -139,13 +148,13 @@ def partition_mount_uuid(element_partition, initialize, partition, mnt, format_p
 		# is associated with
 		#
 		element_partition_nr = ElementTree.SubElement(element_partition, 'partition_nr')
-		element_partition_nr.text = '%s' % partition['partnumber']
+		element_partition_nr.text = '%s' % partition['partid']
 		element_partition_nr.set('config:type', 'integer')
 
 
 def partition_fs_type(element_partition, partition, format_partition):
 	"""Determine XML filesystem type to format the partition to."""
-	if format_partition:
+	if format_partition and partition['fstype']:
 		element_filesystem = ElementTree.SubElement(element_partition, 'filesystem')
 		element_filesystem.text = '%s' % partition['fstype']
 		element_filesystem.set('config:type', 'symbol')
@@ -162,52 +171,50 @@ def output_partition(partition, initialize, element_partition_list):
 	# if there is no mountpoint and we are not creating this partition,
 	# then there is nothing to do
 	#
-	mnt = partition['mountpoint']
-	if not mnt or mnt == 'None':
-		mnt = None
+	if not partition['mountpoint'] or partition['mountpoint'] == 'None':
+		partition['mountpoint'] = None
 
-	if not initialize and not mnt:
+	if not initialize and not partition['mountpoint']:
 		return False
 	#
 	# see if there is a label or 'asprimary' associated with this partition
 	#
 	label = None
-	primary = False
 	partition_id = None
+	partition['type'] = 'logical'
 
 	fsargs = shlex.split(partition['options'])
 	for arg in fsargs:
 		if '--label=' in arg:
 			label = arg.split('=')[1]
-		elif '--asprimary' in arg:
-			primary = True
+		elif '--asprimary' in arg or (partition['mountpoint'] in ['/', '/boot', '/boot/efi'] and initialize):
+			partition['type'] = 'primary'
 		elif '--partition_id=' in arg:
 			partition_id = arg.split('=')[1]
 
-	if mnt == '/':
+	if partition['mountpoint'] == '/':
 		if not label:
 			label = "rootfs"
 	#
 	# special case for '/', '/var' and '/boot'
 	#
-	if mnt in ['/', '/var', '/boot', '/boot/efi']:
+	if partition['mountpoint'] in ['/', '/var', '/boot', '/boot/efi']:
 		format_partition = True
 	else:
 		format_partition = initialize
 	element_partition = ElementTree.SubElement(element_partition_list, 'partition')
 	partition_init_path(element_partition, initialize, partition, partition_id)
-	if mnt:
-		ElementTree.SubElement(element_partition, 'mount').text = '%s' % mnt
-	if partition['fstype']:
-		partition_fs_type(element_partition, partition, format_partition)
-	if primary or (mnt in ['/', '/boot', '/boot/efi'] and initialize):
-		ElementTree.SubElement(element_partition, 'partition_type').text = 'primary'
+	if partition['mountpoint']:
+		ElementTree.SubElement(element_partition, 'mount').text = '%s' % partition['mountpoint']
+	partition_fs_type(element_partition, partition, format_partition)
+	if partition['type'] == 'primary':
+		ElementTree.SubElement(element_partition, 'partition_type').text = partition['type']
 	# If we are formatting the partition, and not initializing the whole drive, use UUID instead of label.
 	# Autoyast tries to use the old label for bootloader, after it already formatted and removed the label.
 	if label and not (format_partition and not initialize):
-		partition_mount_label(element_partition, initialize, partition, mnt, label)
+		partition_mount_label(element_partition, initialize, partition, partition['mountpoint'], label)
 	else:
-		partition_mount_uuid(element_partition, initialize, partition, mnt, format_partition)
+		partition_mount_uuid(element_partition, initialize, partition, partition['mountpoint'], format_partition)
 	return len(element_partition) > 0
 
 
@@ -223,6 +230,44 @@ def sort_part_id(entry):
 	return key
 
 
+def fix_msdos_partitioning(partitions):
+	"""
+	Need to do some sanity checking for msdos partitioning.
+	It would be better if we trusted the partid that the database provided.
+	"""
+	must_be_primary = ['/', '/boot', '/boot/efi']
+	# We should only run if this is msdos and we have more than 4 partitions for the disk in question
+	# Also we should only bother on sles11, sles12 figures this out on its own.
+	if attributes['disklabel'] == 'msdos' and len(partitions) > 4 and  \
+			attributes['os.version'] == "11.x" and attributes['os'] == "sles":
+		check_partid = []
+		for each_partition in partitions:
+			check_partid.append(int(each_partition['partid']))
+		# There needs to be 1 extra partition for the extended partition to exist
+		# Meaning we shouldn't have this: [1,2,3,4,5,6],
+		# Instead we should have something like: [1,2,3, 5,6,7] (example is missing part 4 for use as an extended
+		# partition)
+		if len(check_partid) + 1 != check_partid.pop():
+			# At this point we can assume someone didn't set up proper partid's so we will do so now.
+			increment = False
+			for each_partition in partitions:
+				# We have to hope someone wasn't dumb enough to set too many asprimary's + must_be_primary's
+				# Otherwise this logic can't save them.
+
+				# These can't be logical partitions. We we may go back to a primary partition after having an extended
+				if each_partition['mountpoint'] in must_be_primary or '--asprimary' in each_partition['options']:
+					increment = False
+				# If there is no --asprimary specified we will extend the first partition
+				# Otherwise we will wait until --asprimary is no longer specified or we get above 3 partitions
+				elif int(each_partition['partid']) > 3:
+					increment = True
+				if increment:
+					each_partition['partid'] = int(each_partition['partid'] + 1)
+					each_partition['type'] = 'logical'
+				else:
+					each_partition['type'] = 'primary'
+
+
 def do_partitions(disk, initialize, element_partition_list):
 	"""Determine how to output the partition xml for the disk provided.
 	If any partitions can be created for the disk, return True"""
@@ -235,6 +280,7 @@ def do_partitions(disk, initialize, element_partition_list):
 		#
 		csv_partitions.sort(key=sort_part_id)
 		partitions = csv_partitions
+		fix_msdos_partitioning(partitions)
 	else:
 		#
 		# we are going to keep this disk intact, so just reconnect the
@@ -253,13 +299,11 @@ def do_partitions(disk, initialize, element_partition_list):
 
 def output_disk(disk, initialize):
 	"""Output the disk and partition xml for the disk provided."""
-	if 'disklabel' in attributes:
-		disklabel = attributes['disklabel']
-	else:
-		disklabel = 'gpt'
+	if 'disklabel' not in attributes:
+		attributes['disklabel'] = 'gpt'
 	element_drive = ElementTree.SubElement(partitioning_config, 'drive')
 	ElementTree.SubElement(element_drive, 'device').text = '/dev/%s' % disk
-	ElementTree.SubElement(element_drive, 'disklabel').text = '%s' % disklabel
+	ElementTree.SubElement(element_drive, 'disklabel').text = '%s' % attributes['disklabel']
 	element_init = ElementTree.SubElement(element_drive, 'initialize')
 	element_init.text = '%s' % str(initialize).lower()
 	element_init.set('config:type', 'boolean')
@@ -405,7 +449,7 @@ def get_host_partitions(host_disks, host_fstab):
 			disk_partitions['uuid'] = uuid
 
 			if partnumber:
-				disk_partitions['partnumber'] = partnumber
+				disk_partitions['partid'] = partnumber
 
 			if label:
 				disk_partitions['options'] = \
@@ -536,7 +580,6 @@ def main():
 					'fstype': f,
 					'options': ''
 				})
-
 			partid += 1
 
 	#

@@ -162,6 +162,46 @@ def touch_touchy(host, backend, test_file):
 	assert cmd.rc == 0
 
 
+def check_list_host_partition(host, backend, test_scenario):
+	"""Double check that the partitions are in the expected order."""
+	cmd = host.run("sudo -i stack list host partition %s output-format=json" % (backend))
+	if cmd.stdout == '':
+		return
+	assert cmd.rc == 0
+	backend_partitions = json.loads(cmd.stdout)
+	if "tdc_" in test_scenario[0] and test_scenario[2] == 'gpt':
+		for each in backend_partitions:
+			if each['device'] == 'sda1':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda2':
+				assert each['mountpoint'] == "/"
+			if each['device'] == 'sda3':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda4':
+				assert each['mountpoint'] == "/var"
+			if each['device'] == 'sda5':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda6':
+				assert each['mountpoint'] == "/var/opt/teradata"
+	elif "tdc_" in test_scenario[0] and test_scenario[2] == 'msdos':
+		for each in backend_partitions:
+			if each['device'] == 'sda1':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda2':
+				assert each['mountpoint'] == "/"
+			if each['device'] == 'sda3':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda4':
+				assert each['mountpoint'] == ""
+				# Not sure how 'extended shows up'
+			if each['device'] == 'sda5':
+				assert each['mountpoint'] == "/var"
+			if each['device'] == 'sda6':
+				assert each['mountpoint'] == ""
+			if each['device'] == 'sda7':
+				assert each['mountpoint'] == "/var/opt/teradata"
+
+
 def check_ls(host, backend, test_file, should_exist=True):
 	"""Make sure the files are either gone or still there depending on should_exist"""
 	cmd = host.run("sudo -i ssh %s ls %s" % (backend, test_file))
@@ -265,6 +305,8 @@ def check_if_backend_stuck(host, backend):
 
 def wait_for_install(host, backend):
 	"""Reboot and wait for the reinstall"""
+	import datetime
+	now = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
 	i = 0
 	cmd = host.run("sudo -i stack list host boot %s" % backend)
 	assert cmd.rc == 0
@@ -272,6 +314,8 @@ def wait_for_install(host, backend):
 	# assert nukedisk is True
 	host.run("sudo -i ssh %s sync" % backend)
 	while "install" in cmd.stdout:
+		now = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
+		host.run("sudo -i scp -P 2200 %s:/tmp/partition.xml /home/vagrant/%s_part_%s.xml;" % (backend, backend, now))
 		host.run("sudo -i stack list host %s" % backend)
 		if "installing packages" not in cmd.stdout.lower():
 			subprocess.call(str("VBoxManage controlvm %s_%s reset" % (NAME, backend)).split())
@@ -304,6 +348,9 @@ def wait_for_install(host, backend):
 
 	cmd = host.run("date")
 	print(cmd.stdout)
+	host.run("sudo -i ssh -t %s 'yast2 clone_system" % backend)
+	now = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
+	host.run("sudo -i scp %s:/root/autoinst.xml /home/vagrant/%s_autoinst_%s.xml;" % (backend, backend, now))
 
 
 def powered_on(backend):
@@ -344,8 +391,8 @@ def check_backend_reinstall(host, backend, nukedisk=True, first_install=True, no
 			print("Didn't Touch ")
 			subprocess.call(str("VBoxManage startvm %s_%s --type headless" % (NAME, backend)).split())
 		print(partitions)
-		# print("sudo -i stack list host boot %s" % (backend))
-		# print(cmd.stdout)
+		cmd = host.run("sudo -i stack list storage partition %s" % (backend))
+		print(cmd.stdout)
 		print("nukedisk: %s" % nukedisk)
 		cmd = host.run("date")
 		print(cmd.stdout)
@@ -370,6 +417,7 @@ def check_backend_reinstall(host, backend, nukedisk=True, first_install=True, no
 															  partitions)
 			blkid = get_block_id(host, backend, each, i)
 			assert check_fstab_and_blkid(fstab, each, blkid) is True
+			check_list_host_partition(host, backend, test_scenario)
 			i += 1
 		if not partitions:
 			# need to handle the blank partitions defaults, so hardcoded:
