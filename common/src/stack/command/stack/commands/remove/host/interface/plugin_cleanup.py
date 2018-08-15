@@ -12,6 +12,10 @@
 
 import stack.commands
 
+#
+# on a frontend, cleanup networking configuration files and remove the interface from a live
+# system
+#
 
 class Plugin(stack.commands.Plugin):
 
