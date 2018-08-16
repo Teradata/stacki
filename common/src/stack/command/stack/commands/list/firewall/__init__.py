@@ -32,6 +32,7 @@ import stack.commands
 class command(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.NetworkArgumentProcessor,
 	stack.commands.OSArgumentProcessor,
+	stack.commands.EnvironmentArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass

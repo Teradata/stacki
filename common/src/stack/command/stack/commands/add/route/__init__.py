@@ -46,23 +46,22 @@ class Command(stack.commands.add.command):
 			('netmask', '255.255.255.255'),
 			('interface', None)
 			])
-
-		#
-		# determine if this is a subnet identifier
-		#
-		subnet = 0
-		rows = self.db.execute("""select id from subnets where
-			name = '%s' """ % gateway)
-
-		if rows == 1:
-			subnet, = self.db.fetchone()
-			gateway = "''"
+		# check if the user has put a subnet name in the gateway field
+		subnet = self.db.select("""id from subnets where name=%s """, [gateway])
+		if subnet:
+			# if they have, set the gateway to '' and pull the subnet name
+			# out of the returned tuple
+			gateway = ''
+			subnet = subnet[0][0]
 		else:
-			subnet = 'NULL'
-			gateway = "'%s'" % gateway
+			# if they haven't, set the subnet to None and leave the user
+			# specified gateway in the gateway field
+			subnet = None
+
+		# check if the route already exists
+		rows = self.db.select("""* from global_routes
+			where Network=%s""", address)
 		
-		rows = self.db.execute("""select * from global_routes
-			where network='%s'""" % address)
 		if rows:
 			raise CommandError(self, 'route exists')
 
@@ -70,9 +69,8 @@ class Command(stack.commands.add.command):
 		# if interface is being set, check if it exists first
 		#
 		if not interface:
-			interface='NULL'
+			interface = None
 		
 		self.db.execute("""insert into global_routes
-				values ('%s', '%s', %s, %s, '%s')""" %
+				values (%s, %s, %s, %s, %s)""",
 				(address, netmask, gateway, subnet, interface))
-

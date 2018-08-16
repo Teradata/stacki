@@ -35,11 +35,16 @@ class Command(stack.commands.list.host.command):
 			routes = self.db.getHostRoutes(host, 1)
 
 			for network in sorted(routes.keys()):
-				(netmask, gateway, interface, source) = routes[network]
+				(netmask, gateway, interface, subnet_id, source) = routes[network]
+
+				if subnet_id:
+					# resolve the subnet id
+					subnet_name = self.db.select("""name from subnets where id=%s""", [subnet_id])[0][0]
+				else:
+					subnet_name = None
+
 				self.addOutput(host,
-					(network, netmask, gateway,	source))
+					(network, netmask, gateway, subnet_name, interface, source))
 
-		self.endOutput(header=['host', 
-			'network', 'netmask', 'gateway', 'source' ],
-			trimOwner=0)
-
+		self.endOutput(header=['host', 'network', 'netmask', 'gateway',
+					'subnet', 'interface', 'source' ],trimOwner=0)
