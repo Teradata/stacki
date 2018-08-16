@@ -31,7 +31,7 @@ class Command(stack.commands.remove.environment.command):
 
 	def run(self, params, args):
 
-		(address, ) = self.fillParams([ ('address', None, True) ])
+		(address, ) = self.fillParams([('address', None, True)])
 
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
