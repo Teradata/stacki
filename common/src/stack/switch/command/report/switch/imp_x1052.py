@@ -115,7 +115,8 @@ class Implementation(stack.commands.Implementation):
 				if vlan not in vlans:
 					vlans.append(vlan)
 
-		self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
+		if len(vlans):
+			self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
 
 		#
 		# turn off global spanning tree
