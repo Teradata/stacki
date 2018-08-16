@@ -120,9 +120,9 @@ class Command(command):
 		if not longname and not appliance:
 			raise ParamRequired(self, ('longname', 'appliance'))
 
-		if rack is None:
+		if rack is None or rack is "":
 			raise ParamRequired(self, 'rack')
-		if rank is None:
+		if rank is None or rank is "":
 			raise ParamRequired(self, 'rank')
 
 		if longname and not appliance:
