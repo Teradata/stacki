@@ -54,28 +54,30 @@ class Command(stack.commands.add.environment.command):
 			raise ArgRequired(self, 'environment')
 
 		environments = self.getEnvironmentNames(args)
+		env_ids = []
+
+		for environment in self.getEnvironmentNames(args):
+			env_ids.append(self.db.select("""id FROM environments
+						WHERE name = %s""", environment)[0][0])
 
 		#
 		# determine if this is a subnet identifier
 		#
-		subnet = 0
-		rows = self.db.execute("""select id from subnets where
-			name = %s """, gateway)
+		rows = self.db.select("""id FROM subnets WHERE name = %s""", gateway)
 
-		if rows == 1:
-			subnet, = self.db.fetchone()
-			gateway = "''"  # NULL?
+		if rows:
+			subnet = rows[0][0]
+			gateway = ''
 		else:
 			subnet = None
 
 		# Verify the route doesn't already exist. If it does
 		# for any of the environments, raise a CommandError.
 
-		for environment in environments:
-			rows = self.db.execute("""select * from
-				environment_routes where
-				network=%s and environment=%s""",
-				(address, environment))
+		for env_id in env_ids:
+			rows = self.db.select("""* FROM environment_routes
+				WHERE network = %s AND environment = %s""",
+				(address, env_id))
 			if rows:
 				raise CommandError(self, 'route exists')
 
@@ -83,20 +85,18 @@ class Command(stack.commands.add.environment.command):
 		# if interface is being set, check if it exists first
 		#
 		if interface:
-			rows = self.db.execute("""select * from networks
-				where node=1 and device=%s""", interface)
+			rows = self.db.select("""* FROM networks
+				WHERE node = 1 AND device = %s""", interface)
 			if not rows:
 				raise CommandError(self, 'interface does not exist')
 		else:
-			interface='NULL'
+			interface = None
 
 		# Now that we know things will work insert the route for
 		# all the environments
 
-		((env, ), ) = self.db.select("""id FROM environments WHERE name=%s""", environment)
-
-		for environment in environments:
-			self.db.execute("""insert into environment_routes values
+		for env_id in env_ids:
+			self.db.execute("""INSERT INTO environment_routes VALUES
 				(%s, %s, %s, %s, %s, %s)""",
-				(env, address, netmask, gateway, subnet, interface))
+				(env_id, address, netmask, gateway, subnet, interface))
 
