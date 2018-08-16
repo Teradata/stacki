@@ -20,17 +20,17 @@ class Command(stack.commands.list.command):
 
 		self.beginOutput()
 		
-		self.db.execute("""select network, netmask, gateway, subnet
-			from global_routes""")
-		for network, netmask, gateway, subnet in self.db.fetchall():
-			if subnet:
-				rows = self.db.execute("""select name from
-					subnets where id = %s""" % subnet)
-				if rows == 1:
-					gateway, = self.db.fetchone()
+		routes = self.db.select("""network, netmask, gateway, subnet, interface from global_routes""")
+		for network, netmask, gateway, subnet_id, interface in routes:
+			if subnet_id:
+				subnet_name = self.db.select("""name from
+					subnets where id = %s""", [subnet_id])[0][0]
+			else:
+				subnet_name = None
+			# list this as a None rather than a string that says NULL
+			if interface == 'NULL':
+				interface = None
+			self.addOutput(network, (netmask, gateway, subnet_name, interface))
 
-			self.addOutput(network, (netmask, gateway))
-
-		self.endOutput(header=['network', 'netmask', 'gateway' ],
+		self.endOutput(header=['network', 'netmask', 'gateway', 'subnet', 'interface' ],
 			trimOwner=0)
-

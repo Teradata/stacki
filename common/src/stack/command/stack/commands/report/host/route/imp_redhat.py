@@ -44,7 +44,7 @@ class Implementation(stack.commands.Implementation):
 			'<stack:file stack:name="/etc/sysconfig/static-routes">')
 		routes = self.owner.db.getHostRoutes(host)
 		for network in sorted(routes.keys()):
-			(netmask, gateway, interface) = routes[network]
+			(netmask, gateway, interface, subnet) = routes[network]
 
 			s = self.getRoute(network, netmask, gateway, interface)
 			if s:

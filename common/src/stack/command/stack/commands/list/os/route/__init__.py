@@ -45,20 +45,19 @@ class Command(stack.commands.list.os.command):
 		self.beginOutput()
 
 		for os in self.getOSNames(args):
-			self.db.execute("""select network, netmask, gateway,
-				subnet from os_routes r where os='%s'""" % os)
+			routes = self.db.select("""network, netmask, gateway,
+					subnet, interface from os_routes r where os=%s """, os)
 
-			for (network, netmask, gateway, subnet) in \
-				self.db.fetchall():
-				if subnet:
-					rows = self.db.execute("""select name
-						from subnets where id = %s"""
-						% subnet)
-					if rows == 1:
-						gateway, = self.db.fetchone()
+			for network, netmask, gateway, subnet_id, interface in routes:
+				if subnet_id:
+					subnet_name = self.db.select("""name from
+								subnets where id = %s""", [subnet_id])[0][0]
+				else:
+					subnet_name = None
+				if interface == 'NULL':
+					interface = None
 
-				self.addOutput(os, (network, netmask, gateway))
+				self.addOutput(os, (network, netmask, gateway, subnet_name, interface))
 
 		self.endOutput(header=['os', 'network', 
-			'netmask', 'gateway' ], trimOwner=0)
-
+			'netmask', 'gateway', 'subnet', 'interface' ], trimOwner=0)

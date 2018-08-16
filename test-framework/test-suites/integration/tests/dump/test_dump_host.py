@@ -27,7 +27,7 @@ class TestDumpHost:
 		assert results.rc == 0
 		results = host.run('stack set host interface network backend-test interface=eth1 network=private')
 		assert results.rc == 0
-		results = host.run('stack add host route backend-test address=192.168.0.2 gateway=192.168.0.3 netmask=255.255.255.0 syncnow=true')
+		results = host.run('stack add host route backend-test address=192.168.0.2 gateway=192.168.0.3 netmask=255.255.255.0 syncnow=true interfac=eth0')
 		assert results.rc == 0
 		results = host.run('stack add storage controller backend-test adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
 		assert results.rc == 0
@@ -80,6 +80,8 @@ class TestDumpHost:
 				assert host['route'][0]['network'] == '192.168.0.2'
 				assert host['route'][0]['netmask'] == '255.255.255.0'
 				assert host['route'][0]['gateway'] == '192.168.0.3'
+				assert host['route'][0]['subnet'] == None
+				assert host['route'][0]['interface'] == 'eth0'
 				assert host['route'][0]['source'] == 'H'
 				assert host['partition'][0]['device'] == 'test'
 				assert host['partition'][0]['partid'] == 1

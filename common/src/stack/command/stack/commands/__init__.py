@@ -1391,35 +1391,35 @@ class DatabaseConnection:
 					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
+					net.node = n.id and n.name = %s
 					and net.device not like 'vlan%%' 
-					""" % (s, host)):
+					""", (s, host)):
 					i = dev
 			if showsource:
-				routes[n] = (m, g, i, 'G')
+				routes[n] = (m, g, i, s, 'G')
 			else:
-				routes[n] = (m, g, i)
+				routes[n] = (m, g, i, s)
 
 		# os
 				
 		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
 			r.subnet, r.interface from os_routes r, nodes n where
-			r.os='%s' and n.name='%s'
-			"""  % (self.getHostOS(host), host)):
+			r.os=%s and n.name=%s
+			""", (self.getHostOS(host), host)):
 			if s:
 				for dev, in self.select("""
 					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
+					net.node = n.id and n.name = %s
 					and net.device not like 'vlan%%'
-					""" % (s, host)):
+					""", (s, host)):
 					i = dev
 			if showsource:
-				routes[n] = (m, g, i, 'O')
+				routes[n] = (m, g, i, s, 'O')
 			else:
-				routes[n] = (m, g, i)
+				routes[n] = (m, g, i, s)
 
 		# appliance
 
@@ -1430,42 +1430,42 @@ class DatabaseConnection:
 			nodes n,
 			appliances app where
 			n.appliance=app.id and 
-			r.appliance=app.id and n.name='%s'
-			""" % host):
+			r.appliance=app.id and n.name=%s
+			""", host):
 			if s:
 				for dev, in self.select("""
 					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
+					net.node = n.id and n.name = %s
 					and net.device not like 'vlan%%'
-					""" % (s, host)):
+					""", (s, host)):
 					i = dev
 			if showsource:
-				routes[n] = (m, g, i, 'A')
+				routes[n] = (m, g, i, s, 'A')
 			else:
-				routes[n] = (m, g, i)
+				routes[n] = (m, g, i, s)
 
 		# host
 		
 		for (n, m, g, s, i) in self.select("""
 			r.network, r.netmask, r.gateway,
 			r.subnet, r.interface from node_routes r, nodes n where
-			n.name='%s' and n.id=r.node
-			""" % host):
+			n.name=%s and n.id=r.node
+			""", host):
 			if s:
 				for dev, in self.select("""
 					net.device from
 					subnets s, networks net, nodes n where
 					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
+					net.node = n.id and n.name = %s
 					and net.device not like 'vlan%%'
-					""" % (s, host)):
+					""", (s, host)):
 					i = dev
 			if showsource:
-				routes[n] = (m, g, i, 'H')
+				routes[n] = (m, g, i, s, 'H')
 			else:
-				routes[n] = (m, g, i)
+				routes[n] = (m, g, i, s)
 
 		return routes
 
@@ -2587,4 +2587,3 @@ class PluginOrderIterator(stack.graph.GraphIterator):
 		stack.graph.GraphIterator.finishHandler(self, node, edge)
 		self.time = self.time + 1
 		self.nodes.append((self.time, node))
-
