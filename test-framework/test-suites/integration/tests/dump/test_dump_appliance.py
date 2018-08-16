@@ -13,7 +13,7 @@ class TestDumpAppliance:
 		# first lets add some appliance info so we know what to look for in the dump
 		results = host.run('stack add appliance attr backend attr=test value=test shadow=False')
 		assert results.rc == 0
-		results = host.run('stack add appliance route backend address=192.168.0.0 gateway=192.168.0.1 netmask=255.255.255.0')
+		results = host.run('stack add appliance route backend address=192.168.0.0 gateway=192.168.0.1 netmask=255.255.255.0 interface=eth0')
 		assert results.rc == 0
 		results = host.run('stack add appliance firewall backend action=accept chain=input protocol=udp service=www network=private output-network=private rulename=appliancetest table=filter comment="test" flags="-m set"')
 		assert results.rc == 0
@@ -42,6 +42,8 @@ class TestDumpAppliance:
 						assert route['appliance'] == 'backend'
 						assert route['netmask'] == '255.255.255.0'
 						assert route['gateway'] == '192.168.0.1'
+						assert route['subnet'] == None
+						assert route['interface'] == 'eth0'
 
 				for firewall in appliance['firewall']:
 					if firewall['name'] == 'ostest':

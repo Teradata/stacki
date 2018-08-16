@@ -13,7 +13,7 @@ class TestDumpGlobal:
 		# first lets add some data so we have something to check for
 		results = host.run('stack add attr attr=test value=testvalue shadow=false')
 		assert results.rc == 0
-		results = host.run('stack add route address=192.168.0.0 gateway=192.168.0.1 interface=eth1 netmask=255.255.255.0')
+		results = host.run('stack add route address=192.168.0.0 gateway=192.168.0.1 interface=eth0 netmask=255.255.255.0')
 		assert results.rc == 0
 		results = host.run('stack add firewall action=accept chain=input protocol=udp service=www network=private output-network=private rulename=test table=filter comment="test" flags="-m set"')
 		assert results.rc == 0
@@ -38,6 +38,8 @@ class TestDumpGlobal:
 			if route['network'] == '192.168.0.0':
 				assert route['netmask'] == '255.255.255.0'
 				assert route['gateway'] == '192.168.0.1'
+				assert route['subnet'] == None
+				assert route['interface'] == 'eth0'
 
 		for firewall in dumped_data['global']['firewall']:
 			if firewall['name'] == 'test':

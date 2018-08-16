@@ -51,27 +51,25 @@ class Command(stack.commands.add.os.command):
 
 		oses = self.getOSNames(args)
 
-		#
-		# determine if this is a subnet identifier
-		#
-		subnet = 0
-		rows = self.db.execute("""select id from subnets where
-			name = '%s' """ % gateway)
-
-		if rows == 1:
-			subnet, = self.db.fetchone()
-			gateway = "''"
+		# check if the user has put a subnet name in the gateway field
+		subnet = self.db.select("""id from subnets where name=%s """, [gateway])
+		if subnet:
+			# if they have, set the gateway to '' and pull the subnet name
+			# out of the returned tuple
+			gateway = ''
+			subnet = subnet[0][0]
 		else:
-			subnet = 'NULL'
-			gateway = "'%s'" % gateway
+			# if they haven't, set the subnet to None and leave the user
+			# specified gateway in the gateway field
+			subnet = None
 		
 		# Verify the route doesn't already exist.  If it does
-		# for any of the OSes raise a CommandError.
+		# for any of the given OSes raise a CommandError.
 		
 		for os in oses:
-			rows = self.db.execute("""select * from 
+			rows = self.db.select("""* from
 				os_routes where 
-				network='%s' and os='%s'""" % 
+				network=%s and os=%s""" ,
 				(address, os))
 			if rows:
 				raise CommandError(self, 'route exists')
@@ -79,18 +77,17 @@ class Command(stack.commands.add.os.command):
 		# if interface is being set, check if it exists first
 		#
 		if interface:
-			rows = self.db.execute("""select * from networks
-				where node=1 and device='%s'""" % interface)
+			rows = self.db.select("""* from networks
+				where node=1 and device=%s""", interface)
 			if not rows:
 				raise CommandError(self, 'interface does not exist')
 		else:
-			interface='NULL'	
+			interface= None
 		
 		# Now that we know things will work insert the route for
 		# all the OSes
 		
 		for os in oses:	
 			self.db.execute("""insert into os_routes values 
-				('%s', '%s', '%s', %s, '%s', '%s')""" %
+				(%s, %s, %s, %s, %s, %s)""" ,
 				(os, address, netmask, gateway, subnet, interface))
-
