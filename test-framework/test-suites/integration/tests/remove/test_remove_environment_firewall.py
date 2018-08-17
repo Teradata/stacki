@@ -8,6 +8,11 @@ class TestRemoveEnvironmentFirewall:
 		result = host.run('stack add environment firewall test action=ACCEPT chain=INPUT protocol=all service=all network=private rulename=test')
 		assert result.rc == 0
 
+		result = host.run('stack list environment firewall output-format=json')
+		assert result.rc == 0
+		with open('/export/test-files/remove/remove_environment_firewall.json') as f:
+			assert result.stdout == f.read()
+
 		result = host.run('stack remove environment firewall test rulename=test')
 		assert result.rc == 0
 
