@@ -113,9 +113,9 @@ class Command(command):
 		if not appliance:
 			raise ParamRequired(self, 'appliance')
 
-		if rack is None:
+		if rack is None or rack is "":
 			raise ParamRequired(self, 'rack')
-		if rank is None:
+		if rank is None or rank is "":
 			raise ParamRequired(self, 'rank')
 
 		if appliance not in appliances:
