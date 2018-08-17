@@ -51,6 +51,9 @@ class Command(command):
 		switches = self.getSwitchNames(args)
 
 		for switch in self.call('list.host.interface', switches):
+			if not switch['default']:
+				continue
+
 			switch_name = switch['host']
 
 			self.report('report.switch', [ switch_name ])

@@ -17,7 +17,8 @@ class Implementation(stack.commands.Implementation):
 		switch = args[0]
 
 		self.switch_name = switch['switch']
-		switch_interface = self.owner.call('list.host.interface', [self.switch_name])[0]
+		switch_interface = [interface for interface in self.owner.call('list.host.interface', [self.switch_name])
+				    if interface['default']][0]
 		self.switch_address = switch_interface['ip']
 		switch_username = self.owner.getHostAttr(self.switch_name, 'switch_username')
 		switch_password = self.owner.getHostAttr(self.switch_name, 'switch_password')
@@ -52,7 +53,7 @@ class Implementation(stack.commands.Implementation):
 			'add bridge bridge vlan-aware',
 			'add bridge pre-up sysctl -w net.ipv4.conf.all.proxy_arp=1',
 			'add bridge pre-up sysctl -w net.ipv4.conf.default.proxy_arp=1',
-			'add interface eth0 ip address dhcp',
+			'add interface eth0',# ip address dhcp',
 			'add loopback lo',# ip address 127.0.0.1/32',
 			'add time zone Etc/UTC',
 			'add time ntp server 0.cumulusnetworks.pool.ntp.org iburst',
@@ -65,8 +66,6 @@ class Implementation(stack.commands.Implementation):
 			'add dot1x radius authentication-port 1812',
 			'add dot1x mab-activation-delay 30',
 			f'add vlan 1 ip address {switch_interface.with_prefixlen}',
-			'add vlan 1 vlan-id 1',
-			'add vlan 1 vlan-raw-device bridge',
 			f'add hostname {self.switch_name}',
 			]
 
@@ -83,28 +82,31 @@ class Implementation(stack.commands.Implementation):
 			interface = host_ifaces[mac]
 
 			vlan = interface['vlan'] if interface['vlan'] else '1'
+			port = iface['port']
 
 			if interface['network'] not in self.networks:
 				self.add_vlan(interface['network'], vlan)
 
 			if interface != self.frontend:
-				self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge vids {vlan},{bmc_vlan}")
-			self.owner.addOutput('localhost', f"add interface swp{iface['port']} bridge pvid {vlan}")
+				self.owner.addOutput('localhost', f'add interface swp{port} bridge vids {vlan},{bmc_vlan}')
+			self.owner.addOutput('localhost', f'add interface swp{port} bridge pvid {vlan}')
+			self.owner.addOutput('localhost', f'add interface swp{port} stp bpduguard')
+			self.owner.addOutput('localhost', f'add interface swp{port} stp portadminedge')
 
 	def add_vlan(self, network, vlan):
 		self.networks[network] = self.owner.call('list.network', [network])[0]
 		network = self.networks[network]
-		interface = ipaddress.IPv4Interface(f"{network['address']}/{network['mask']}")
+		interface = ipaddress.IPv4Interface(f"{network['gateway']}/{network['mask']}")
 
-		self.owner.addOutput('localhost', f'add vlan {vlan} vlan-id {vlan}')
-		self.owner.addOutput('localhost', f'add vlan {vlan} vlan-raw-device bridge')
-		self.owner.addOutput('localhost', f'add routing route {interface.network} vlan{vlan}')
+		self.owner.addOutput('localhost', f'add vlan {vlan} ip address {interface.with_prefixlen}')
 
-		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {interface.network}')
-		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan} accept source-ip {self.frontend["ip"]}/32 dest-ip {interface.network}')
-		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan} accept source-ip {interface.network} dest-ip {self.frontend["ip"]}/32')
-		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan} drop source-ip any dest-ip any')
-		self.owner.addOutput('localhost', f'add vlan {vlan} acl ipv4 acl{vlan} inbound')
+		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan}in accept source-ip {interface.network} dest-ip {interface.network}')
+		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan}out accept source-ip {self.frontend["ip"]}/32 dest-ip {interface.network}')
+		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan}in accept source-ip {interface.network} dest-ip {self.frontend["ip"]}/32')
+		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan}in drop source-ip any dest-ip any')
+		self.owner.addOutput('localhost', f'add acl ipv4 acl{vlan}out drop source-ip any dest-ip any')
+		self.owner.addOutput('localhost', f'add vlan {vlan} acl ipv4 acl{vlan}in inbound')
+		self.owner.addOutput('localhost', f'add vlan {vlan} acl ipv4 acl{vlan}out inbound')
 
 	def get_bmc_vlan(self):
 		result = subprocess.run('ipmitool lan print'.split(), encoding='utf-8', stdout=subprocess.PIPE)
