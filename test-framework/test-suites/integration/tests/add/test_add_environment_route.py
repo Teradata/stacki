@@ -10,6 +10,6 @@ class TestAddEnvironmentRoute:
 
 		result = host.run('stack list environment route output-format=json')
 		assert result.rc == 0
-		with open('/export/test-files/add/add_environment_route.json') as f:
+		with open('/export/test-files/add/add_environment_route_output.json') as f:
 			assert result.stdout == f.read()
 
