@@ -102,7 +102,6 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput('localhost', 'interface vlan 1')
 		self.owner.addOutput('localhost',
 			' ip address %s %s' % (switch_interface['ip'], switch_network['mask']))
-		self.owner.addOutput('localhost',' no ip address dhcp')
 		self.owner.addOutput('localhost', '!')
 
 		#
@@ -115,7 +114,8 @@ class Implementation(stack.commands.Implementation):
 				if vlan not in vlans:
 					vlans.append(vlan)
 
-		self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
+		if len(vlans):
+			self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
 
 		#
 		# turn off global spanning tree
