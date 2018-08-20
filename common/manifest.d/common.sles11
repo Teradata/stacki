@@ -10,7 +10,6 @@
 -stack-examples
 -stack-kickstart
 -stack-pxeboot
--stack-sql
 -stack-switch
 -stack-wizard
 -stack-ws

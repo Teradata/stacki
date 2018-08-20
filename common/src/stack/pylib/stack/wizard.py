@@ -9,7 +9,6 @@
 import os
 import subprocess
 import traceback
-import stack.sql
 import stack.password
 import stack.media
 import stack.file

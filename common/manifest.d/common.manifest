@@ -27,7 +27,6 @@ stack-mq
 stack-pxeboot
 stack-pylib
 stack-releasenotes
-stack-sql
 stack-storage-config
 stack-switch
 stack-wizard
