@@ -12,7 +12,6 @@
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </stack:rocks>
 
-	<stack:package>stack-sql</stack:package>
 	<stack:package>mariadb</stack:package>
 	<stack:package stack:cond="os == 'redhat'">mariadb-server</stack:package>
 
