@@ -30,6 +30,10 @@ class Command(stack.commands.Command,
 			('action', None)
 		])
 
+		# If there are no host appliances there is no need to proceed
+		if len(hosts) == 0:
+			return
+
 		ha = {}
 		for host in hosts:
 			ha[host] = {
@@ -47,14 +51,27 @@ class Command(stack.commands.Command,
 			for row in self.call('list.host.boot', hosts):
 				ha[row['host']]['type'] = row['action']
 
+		hosts_with_no_action = []
 		for row in self.call('list.host', hosts):
 			h = ha[row['host']]
 			if h['type'] == 'install':
 				h['action'] = row['installaction']
 			elif h['type'] == 'os':
 				h['action'] = row['osaction']
+			# If there is no bootaction set for this host it is added to the list of hosts to be skipped
+			if h['action'] == None:
+				hosts_with_no_action.append(row['host'])
 			h['os']        = row['os']
 			h['appliance'] = row['appliance']
+
+		# Removing all the hosts which do not have any bootaction
+		for blacklist_host in hosts_with_no_action:
+			ha.pop(blacklist_host)
+			hosts.remove(blacklist_host)
+
+		# This condition is checked again because the previous block updates the list of hosts
+		if len(hosts) == 0:
+			return
 
 		ba = {}
 		for row in self.call('list.bootaction'):
