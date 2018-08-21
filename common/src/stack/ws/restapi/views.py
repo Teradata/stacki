@@ -38,19 +38,6 @@ log = logging.getLogger("stack-ws")
 # from: https://mariadb.com/kb/en/mariadb/mariadb-error-codes/
 MYSQL_EX = [1044, 1045, 1142, 1143, 1227]
 
-# The modules list.host.profile, list.host.xml, and
-# list.node.xml, when called through the command line,
-# use the correct xml parser. However, when the module
-# is called directly, the system XML parser is used. 
-# This causes problems when parsing undefined attributes.
-# So separate out the xml commands and run them directly
-
-xml_cmds = [
-	'list.host.profile',
-	'list.host.xml',
-	'list.node.xml',
-]
-
 
 class StackWS(View):
 
@@ -171,45 +158,12 @@ class StackWS(View):
 			return HttpResponseForbidden("'run host' command is not permitted",
 						     content_type="text/plain")
 
-		# Any command that runs an "import xml.*"
-		# is required to shell out. See top of file
-		# for explanation
-		elif cmd_module in xml_cmds:
-			c = []
-			# If the user is not an admin, lower
-			# privileges before running the command
-			if not request.user.is_superuser:
-				c.extend(['/usr/bin/sudo', '-u', 'nobody'])
-			c.append("/opt/stack/bin/stack")
-			c.extend(cmd_module.split('.'))
-			c.extend(cmd_arg_list)
-			p = subprocess.Popen(c, 
-					     stdin=None,
-					     stdout=subprocess.PIPE,
-					     stderr=subprocess.PIPE)
-			o, e = p.communicate()
-			rc = p.wait()
-			if rc:
-				j = {"API Error": e, "Output": o}
-				return HttpResponse(str(json.dumps(j)),
-						    content_type="application/json",
-						    status=500)
-			else:
-				if not o:
-					o = {}
-				return HttpResponse(str(json.dumps(o)),
-						    content_type="application/json",
-						    status=200)
 		# If command is a sync/load command, run
 		# it with sudo, as the command will require
 		# some root privileges. However, if the user
 		# isn't a django superuser (with admin privileges)
 		# don't allow command to run.
-		elif cmd_module.startswith("sync.") or \
-			cmd_module.startswith("load.") or \
-			cmd_module.startswith("unload.") or \
-			cmd_module.startswith("run.host.test") or \
-			cmd_module == 'remove.host':
+		elif cmd_module.startswith(("sync.", "load.", "unload.")) or cmd_module == 'remove.host':
 			if not request.user.is_superuser:
 				verb = cmd_module.split('.')[0]
 				return HttpResponseForbidden("All '%s' commands require Admin Privileges" % verb,
@@ -222,9 +176,11 @@ class StackWS(View):
 				]
 				c.extend(cmd_module.split('.'))
 				c.extend(cmd_arg_list)
+				log.info(f'{c}')
 				p = subprocess.Popen(c, 
 						     stdout=subprocess.PIPE,
-						     stderr=subprocess.PIPE)
+						     stderr=subprocess.PIPE,
+						     encoding='utf-8')
 				o, e = p.communicate()
 				rc = p.wait()
 				if rc:
