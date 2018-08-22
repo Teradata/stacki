@@ -55,18 +55,14 @@ class Command(command):
 
 		public  = self.bool2str(self.str2bool(public))
 
-		#
 		# check for duplicates
-		#
-		rows = self.db.execute('''
-			select * from appliances where name=(%s)
-			''', (appliance))
-		if rows > 0:
+		if self.db.select(
+			'count(ID) from appliances where name=%s',
+			(appliance,)
+		)[0][0] > 0:
 			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
-		#
 		# ok, we're good to go
-		#
 		self.db.execute('''
 			insert into appliances (name, public) values
 			(%s, %s)
@@ -88,4 +84,3 @@ class Command(command):
 				'attr=%s' % attr,
 				'value=%s' % value
 				])
-

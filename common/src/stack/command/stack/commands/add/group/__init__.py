@@ -30,12 +30,13 @@ class Command(stack.commands.add.command):
 
 		group = args[0]
 
-		for row in self.db.select("""
-			* from groups where name = '%s'
-			""" % group):
-			raise CommandError(self, '"%s" group exists' % group)
+		if self.db.select(
+			'count(ID) from groups where name=%s',
+			(group,)
+		)[0][0] > 0:
+			raise CommandError(self, '"%s" group already exists' % group)
 
-		self.db.execute("""
-			insert into groups(name) values ('%s')
-			""" % group)
-
+		self.db.execute(
+			'insert into groups(name) values (%s)',
+			(group,)
+		)

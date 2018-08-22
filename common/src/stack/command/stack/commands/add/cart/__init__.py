@@ -191,15 +191,12 @@ class Command(stack.commands.CartArgumentProcessor,
 		node.write('</stack:stack>\n')
 		node.close()
 
-	def add_cart(self,cart, cart_url=None):
-		# if the cart doesn't exist,
-		# add it to the database.
-		rows = self.db.select("""
-			* from carts where name = '%s'
-			""" % cart)
-
-		# Add the cart to the database so we can enable it for a box
-		if not rows:
+	def add_cart(self, cart, cart_url=None):
+		# if the cart doesn't exist, add it to the database.
+		if self.db.select(
+			'count(ID) from carts where name=%s',
+			(cart,)
+		)[0][0] == 0:
 			self.db.execute("""
 				insert into carts (Name, url) values (%s, %s)
 				""", (cart, cart_url))

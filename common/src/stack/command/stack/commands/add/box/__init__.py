@@ -12,10 +12,11 @@
 
 import stack
 import stack.commands
-from stack.exception import ArgUnique, CommandError
+from stack.exception import ArgUnique, CommandError, ArgNotFound
 
 
 class Command(stack.commands.BoxArgumentProcessor,
+	stack.commands.OSArgumentProcessor,
 	stack.commands.add.command):
 	"""
 	Add a box specification to the database.
@@ -44,6 +45,8 @@ class Command(stack.commands.BoxArgumentProcessor,
 
 		OS, = self.fillParams([ ('os', self.os) ])
 
-		self.db.execute("""insert into boxes (name, os) values
-			('%s', (select id from oses where name='%s'))""" % (box, OS))
+		if OS not in self.getOSNames():
+			raise ArgNotFound(self, OS, 'OS')
 
+		self.db.execute("""insert into boxes (name, os) values
+			(%s, (select id from oses where name=%s))""", (box, OS))
