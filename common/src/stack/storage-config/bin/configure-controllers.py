@@ -10,21 +10,21 @@
 import sys
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes, csv_controller
 
 sys.path.append('/opt/stack/lib')
-from stacki_storage import *
 
 from stack.bool import str2bool
 
-##
-## functions
-##
+#
+# functions
+#
+
 
 def sortids(entry):
 	try:
 		v = int(entry)
-	except:
+	except (ValueError, TypeError):
 		v = sys.maxsize
 
 	return v
@@ -40,7 +40,7 @@ def getController():
 	# the only possible choice. Otherwise, list
 	# all controllers supported by StackI.
 	if controller_type:
-		ctrl_list = [ controller_type ]
+		ctrl_list = [controller_type]
 	else:
 		ctrl_list = ['storcli', 'megacli', 'hpssacli']
 
@@ -55,7 +55,7 @@ def getController():
 			modulename = 'controller_%s' % c
 			controller = __import__(modulename)
 		except ImportError:
-			return (None, None)
+			return None, None
 
 
 		# Once we import, get the CLI, adapter
@@ -65,7 +65,7 @@ def getController():
 		if adapter != None:
 			return (ctrl, adapter)
 
-	return(None, None)
+	return None, None
 
 ##
 ## MAIN
@@ -155,7 +155,7 @@ for arrayid in arrayids:
 			raidlevel = o['raidlevel']
 
 		if 'options' in o.keys():
-			options	 = o['options']
+			options = o['options']
 
 	if not adapter:
 		adapter = ctrl.getAdapter()
@@ -208,25 +208,25 @@ for o in csv_controller:
 		if 'adapter' in o.keys():
 			try:
 				adapter = int(o['adapter'])
-			except:
+			except (KeyError, ValueError):
 				adapter = None
 
 		if 'enclosure' in o.keys():
 			try:
 				enclosure = o['enclosure']
-			except:
+			except KeyError:
 				enclosure = None
 
 		if 'raidlevel' in o.keys():
 			try:
 				raidlevel = o['raidlevel']
-			except:
+			except KeyError:
 				raidlevel = 0
 
 		if 'options' in o.keys():
 			try:
 				options = o['options']
-			except:
+			except KeyError:
 				options = ''
 
 		if not adapter:

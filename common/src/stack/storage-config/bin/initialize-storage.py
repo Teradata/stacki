@@ -14,10 +14,10 @@ import os
 import time
 
 sys.path.append('/tmp')
-from stack_site import *
+from stack_site import attributes
 
 sys.path.append('/opt/stack/lib')
-from stacki_storage import *
+from stacki_storage import attr2bool, getHostDisks, getDeviceList, getHostFstab, getHostPartitions
 
 ##
 ## globals
@@ -82,9 +82,9 @@ def nukeDisk(disk):
 
 	return
 
-##
-## MAIN
-##
+#
+# MAIN
+#
 
 if 'nukecontroller' in attributes:
 	nukecontroller = attributes['nukecontroller']
@@ -142,7 +142,7 @@ count = 10
 while count > 0:
 	if len(disks) == 0:
 		time.sleep(2)
-		count = count - 1
+		count -= 1
 		disks = getHostDisks(nukedisks)
 	else:
 		break
