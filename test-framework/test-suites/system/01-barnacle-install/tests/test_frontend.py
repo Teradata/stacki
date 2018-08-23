@@ -109,7 +109,7 @@ def test_record_storage_partition(host):
 			assert int(each_partition['start']) > 0
 		# if platform.linux_distribution()[0]
 		distribution = host.run("sudo -i head -n 1 /etc/os-release")
-		if 'sles' in distribution or 'suse' in distribution:
+		if 'sles' in distribution or 'suse' in str(distribution.stdout).strip().lower():
 			# sda1 should be mounted to /
 			if each_partition['device'] == 'vda1' or each_partition['device'] == 'sda1':
 				assert each_partition['mountpoint'] == '/'
