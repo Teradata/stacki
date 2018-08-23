@@ -163,7 +163,8 @@ class StackWS(View):
 		# some root privileges. However, if the user
 		# isn't a django superuser (with admin privileges)
 		# don't allow command to run.
-		elif cmd_module.startswith(("sync.", "load.", "unload.")) or cmd_module == 'remove.host':
+		elif cmd_module.startswith(("sync.", "load.", "unload.")) or \
+			cmd_module in ['add.pallet', 'remove.host']:
 			if not request.user.is_superuser:
 				verb = cmd_module.split('.')[0]
 				return HttpResponseForbidden("All '%s' commands require Admin Privileges" % verb,
