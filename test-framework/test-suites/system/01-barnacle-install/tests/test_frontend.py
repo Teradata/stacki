@@ -1,5 +1,6 @@
 import pytest
 import json
+import platform
 
 def test_frontend_stack_report_system(host):
 	"Simple sanity test that a frontend is up and running"
@@ -103,12 +104,16 @@ def test_record_storage_partition(host):
 		# full Disks don't have a uuid, partitions do.
 		if each_partition['uuid'] == '':
 			assert int(each_partition['start']) == 0
-		else:
+		# It seems vda1/sda1 may exist with a size 1 and no uuid.
+		elif int(each_partition['size']) > 1:
 			assert int(each_partition['start']) > 0
-		# sda1 should be mounted to /
-		if each_partition['device'] == 'vda1' or each_partition['device'] == 'sda1':
-			assert each_partition['mountpoint'] == '/'
-			assert each_partition['uuid'] != ''
+		# if platform.linux_distribution()[0]
+		distribution = host.run("sudo -i head -n 1 /etc/os-release")
+		if 'sles' in distribution or 'suse' in distribution:
+			# sda1 should be mounted to /
+			if each_partition['device'] == 'vda1' or each_partition['device'] == 'sda1':
+				assert each_partition['mountpoint'] == '/'
+				assert each_partition['uuid'] != ''
 		# sda shouldn't be mounted anywhere
 		if each_partition['device'] == 'vda' or each_partition['device'] == 'sda':
 			assert each_partition['mountpoint'] == ''

@@ -404,6 +404,8 @@ def get_block_info():
 			hidden_loops = get_hidden_loops('/sys/block/' + major_block_dev + '/holders', hidden_loops)
 			hidden_loops = get_hidden_loops(class_block + major_block_dev + '/holders', hidden_loops)
 			continue
+		if 'zram' in major_block_dev:
+			continue
 
 		# Read through uevent for some details on the block device and add them to our dictionary
 		# eg: 'major' : 8, 'minor' : 0, 'devname' : sda, 'devtype' : disk
