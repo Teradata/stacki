@@ -1,4 +1,6 @@
 import json
+import os
+import re
 
 import wsclient
 
@@ -8,9 +10,9 @@ class TestWSClient:
 		"Test the output of wsclient list host"
 
 		if host.system_info.distribution == "centos":
-			os = "redhat"
+			host_os = "redhat"
 		else:
-			os = "sles"
+			host_os = "sles"
 		
 		result = host.run("wsclient list host")
 		assert result.rc == 0
@@ -20,7 +22,7 @@ class TestWSClient:
 				"rack": "0",
 				"rank": "0",
 				"appliance": "frontend",
-				"os": os,
+				"os": host_os,
 				"box": "default",
 				"environment": None,
 				"osaction": "default",
@@ -29,6 +31,15 @@ class TestWSClient:
 				"comment": None
 			}
 		]
+
+	def test_wsclient_remove_host_no_500(self, host):
+		"test a string encoding bugfix, API should return API Error, not 500"
+		result = host.run("wsclient remove host fakehost")
+		assert result.rc == 0 # I guess...
+		assert json.loads(result.stdout) == {
+				"API Error": "error - cannot resolve host \"fakehost\"\n",
+				"Output": ""
+			}
 
 	def test_wsclient_pylib_against_django(self, host, run_django_server):
 		"Test the wsclient pylib code against our own Django instance"
