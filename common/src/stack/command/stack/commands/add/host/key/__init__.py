@@ -31,41 +31,24 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
+		host = self._get_single_host(args)
+
 		key, = self.fillParams([ ('key', None, True) ])
 
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
-		hosts = self.getHostnames(args)
-		if len(hosts) > 1:
-			raise ArgUnique(self, 'host')
-
-		host = hosts[0]
-
-		#
-		# see if the key is a file name
-		#
+		# See if the key is a file name
 		if os.path.exists(key):
-			file = open(key, 'r')
-			public_key = file.read()
-			file.close()
-		else:
-			public_key = key
+			with open(key, 'r') as f:
+				key = f.read()
 
-		#
-		# check if the key already exists
-		#
-		rows = self.db.execute("""select * from public_keys where
-			node = (select id from nodes where name = '%s') and
-			public_key = '%s' """ % (host, public_key))
+		# Check if the key already exists
+		if self.db.select("""count(ID) from public_keys where
+			node = (select id from nodes where name = %s) and
+			public_key = %s """, (host, key)
+		)[0][0] != 0:
+			raise CommandError(self, f'the public key already exists for host {host}')
 
-		if rows == 1:
-			raise CommandError(self, 'the public key already exists for host %s'
-				% host)
-
-		#
-		# add the key
-		#
-		self.db.execute("""insert into public_keys (node, public_key)
-			values ((select id from nodes where name = '%s'),
-			'%s') """ % (host, public_key))
-
+		# Add the key
+		self.db.execute("""insert into public_keys(node, public_key)
+			values ((select id from nodes where name = %s), %s)""",
+			(host, key)
+		)

@@ -11,12 +11,7 @@ class TestAddBox:
 			{box} [os=string]
 		''')
 
-	def test_add_box_no_os(self, host):
-		if host.file('/etc/SuSE-release').exists:
-			os = 'sles'
-		else:
-			os = 'redhat'
-		
+	def test_add_box_no_os(self, host, host_os):
 		# Add the box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -27,7 +22,7 @@ class TestAddBox:
 		assert json.loads(result.stdout) == [
 			{
 				"name": "test",
-				"os": os,
+				"os": host_os,
 				"pallets": "",
 				"carts": ""
 			}

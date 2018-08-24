@@ -311,17 +311,17 @@ CREATE TABLE rolls (
 
 DROP TABLE IF EXISTS partitions;
 CREATE TABLE partitions (
-	ID		int(11) NOT NULL auto_increment,
-	Node		int(11) NOT NULL default '0',
-	Device		varchar(128) NOT NULL default '',
-	Mountpoint	varchar(128) NOT NULL default '',
-	UUID		varchar(128) NOT NULL default '',
-	SectorStart	varchar(128) NOT NULL default '',
+	ID				int(11) NOT NULL auto_increment,
+	Node			int(11) NOT NULL references nodes,
+	Device			varchar(128) NOT NULL default '',
+	Mountpoint		varchar(128) NOT NULL default '',
+	UUID			varchar(128) NOT NULL default '',
+	SectorStart		varchar(128) NOT NULL default '',
 	PartitionSize	varchar(128) NOT NULL default '',
-	PartitionID	varchar(128) NOT NULL default '',
-	FsType		varchar(128) NOT NULL default '',
+	PartitionID		varchar(128) NOT NULL default '',
+	FsType			varchar(128) NOT NULL default '',
 	PartitionFlags	varchar(128) NOT NULL default '',
-	FormatFlags	varchar(128) NOT NULL default '',
+	FormatFlags		varchar(128) NOT NULL default '',
 	PRIMARY KEY (ID)
 );
 

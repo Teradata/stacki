@@ -54,17 +54,16 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-
-		hosts = self.getHostnames(args)
-
+		hosts = self._get_hosts(args)
+		
 		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
 			('netmask', '255.255.255.255'),
 			('interface', None),
 			('syncnow', None),
-			])
-
+		])
+		
 		syncnow = self.str2bool(syncnow)
 
 		# check if the user has put a subnet name in the gateway field

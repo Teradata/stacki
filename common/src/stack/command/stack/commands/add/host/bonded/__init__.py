@@ -63,80 +63,54 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
+		host = self._get_single_host(args)
+
 		(channel, ifaces, ip, network, name, opts) = self.fillParams([
 			('channel', None, True),
 			('interfaces', None, True),
 			('ip', None, True),
 			('network', None, True),
 			('name', ),
-			('options',) ])
-		
-		hosts = self.getHostnames(args)
+			('options',) 
+		])
 
-		if len(hosts) == 0:
-			raise ArgRequired(self, 'host')
-		if len(hosts) > 1:
-			raise ArgUnique(self, 'host')
-	
-		host = hosts[0]
-
+		# if name is not supplied, then give it the host name
 		if not name:
-			#
-			# if name is not supplied, then give it the host name
-			#
 			name = host
 		
-		#
 		# check if the network exists
-		#
-		rows = self.db.execute("""select name from subnets where
-			name = '%s'""" % (network))
+		if self.db.select(
+			'count(ID) from subnets where name = %s',
+			(network,)
+		)[0][0] == 0:
+			raise CommandError(self, f'network "{network}" does not exist')
 
-		if rows == 0:
-			raise CommandError(self, 'network "%s" not in the database.\n' +
-				'Run "rocks list network" to get a list\n' +
-				'of valid networks.')
-
-		interfaces = []
+		# If there is a comma, assume comma seperated. Else, assume whitespace.
 		if ',' in ifaces:
-			#
-			# comma-separated list
-			#
-			for i in ifaces.split(','):
-				interfaces.append(i.strip())
+			interfaces = [i.strip() for i in ifaces.split(',')]
 		else:
-			#
-			# assume it is a space-separated list
-			#
-			for i in ifaces.split():
-				interfaces.append(i.strip())
+			interfaces = [i.strip() for i in ifaces.split()]
 			
-		#
-		# check if the physical interfaces exist.
-		# Also check if one of them is a default
-		# interface. If it is, then the bond becomes
-		# the default interface for the machine
-		#
+		# Check if the physical interfaces exist. Also check if one of them 
+		# is a default interface. If it is, then the bond becomes the default
+		# interface for the machine.
 		default_if = False
-		for i in interfaces:
-			rows = self.db.execute("""
-				select net.device, net.main
-				from networks net, nodes n where
-				net.device = '%s' and n.name = '%s'
-				and net.node = n.id""" % (i, host))
+		for interface in interfaces:
+			rows = self.db.select("""
+				net.main from networks net, nodes n where
+				net.device = %s and n.name = %s	and net.node = n.id
+			""", (interface, host))
 
-			if rows == 0:
-				raise CommandError(self, 'interface "%s" does not exist for host "%s"' % (i, host))
-			for (dev, default) in self.db.fetchall():
-				if default == 1:
+			if len(rows) == 0:
+				raise CommandError(self,
+					f'interface "{interface}" does not exist for host "{host}"'
+				)
+
+			for row in rows:
+				if row[0] == 1:
 					default_if = True
 
-
-		#
-		# ok, we're good to go
-		#
 		# add the bonded interface
-		#
 		cmd_args = [
 			host,
 			'interface=%s' % channel,
@@ -144,9 +118,11 @@ class Command(stack.commands.add.host.command):
 			'module=bonding',
 			'name=%s' % name,
 			'network=%s' % network
-			]
+		]
+
 		if default_if:
 			cmd_args.append("default=True")
+		
 		self.command('add.host.interface', cmd_args)
 
 		# Set the options for the interface
@@ -155,11 +131,10 @@ class Command(stack.commands.add.host.command):
 				host,
 				'interface=%s' % channel,
 				'options=bonding-opts="%s"' % opts
-				])
-		#
+			])
+		
 		# clear out all networking info from the physical interfaces and
 		# then associate the interfaces with the bonded channel
-		#
 		for i in interfaces:
 			self.command('set.host.interface.network',
 				(host, 'interface=%s' % i, 'network=NULL'))
@@ -169,4 +144,3 @@ class Command(stack.commands.add.host.command):
 				(host, 'interface=%s' % i, 'name=NULL'))
 			self.command('set.host.interface.channel',
 				(host, 'interface=%s' % i, 'channel=%s' % channel))
-
