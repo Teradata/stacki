@@ -11,6 +11,7 @@
 -stack-kickstart
 -stack-pxeboot
 -stack-switch
+-stack-report-system
 -stack-wizard
 -stack-ws
 -stack-ws-client
