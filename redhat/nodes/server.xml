@@ -84,6 +84,9 @@ for pallet in g.rolls:
 <!-- stacki switch package -->
 <stack:package>stack-switch</stack:package>
 
+<!-- stacki report system package -->
+<stack:package>stack-report-system</stack:package>
+
 <!-- node discovery feature -->
 <stack:package>stack-discovery</stack:package>
 
