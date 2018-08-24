@@ -37,20 +37,15 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		hosts = self.getHostnames(args)
-		
-		(alias, interface, ) = self.fillParams([
+		host = self._get_single_host(args)
+
+		(alias, interface) = self.fillParams([
 			('alias', None, True),
 			('interface', None, True)
-			])
-
-		if not hosts:
-			raise ArgRequired(self, 'host')
-		if not len(hosts) == 1:
-			raise ArgUnique(self, 'host')
+		])
 
 		if any(alias in hostnames for hostnames in self.getHostnames()):
-			raise CommandError(self, 'Hostname already in use.')
+			raise CommandError(self, 'hostname already in use')
 
 		if alias.isdigit():
 			raise CommandError(self, 'aliases cannot be only numbers')
@@ -61,25 +56,27 @@ class Command(stack.commands.add.host.command):
 		except socket.error:
 			pass
 
-		host = hosts[0]
 		for dict in self.call('list.host.alias'):
-			if alias == dict['alias'] and\
-			 interface == dict['interface'] and\
-			 hosts[0] == dict['host']:
+			if (
+				alias == dict['alias'] and
+				interface == dict['interface'] and
+			 	host == dict['host']
+			):
 				raise CommandError(self, 'alias "%s" exists' % alias)
-			if alias == dict['alias'] and hosts[0] != dict['host']:
+			
+			if alias == dict['alias'] and host != dict['host']:
 				raise CommandError(self, 'alias "%s" exists' % alias)
 
-		self.db.execute("""select id from networks where
-				node = (select id from nodes where name='%s')
-				and device='%s'""" % (host, interface))
-		if (self.db.fetchall()) == ():
-			raise CommandError(self, 'Interface does not exist')
+		rows = self.db.select("""
+			id from networks where
+			node = (select id from nodes where name=%s)
+			and device=%s
+		""", (host, interface))
+		
+		if len(rows) == 0:
+			raise CommandError(self, 'interface does not exist')
 
-		self.db.execute("""
-			insert into aliases (network, name)
-			values ((select id from networks where
-			node = (select id from nodes where name = '%s')
-			and device='%s'),'%s')
-			""" % (host, interface, alias))
-
+		self.db.execute(
+			'insert into aliases (network, name) values (%s, %s)',
+			(rows[0][0], alias)
+		)

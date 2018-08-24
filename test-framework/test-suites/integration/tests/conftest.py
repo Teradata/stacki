@@ -260,3 +260,10 @@ def run_django_server():
 	# Tell the server it is time to clean up
 	os.kill(process.pid, signal.SIGINT)
 	process.join()
+
+@pytest.fixture
+def host_os(host):
+	if host.file('/etc/SuSE-release').exists:
+		return 'sles'
+	
+	return 'redhat'

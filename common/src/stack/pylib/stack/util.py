@@ -224,3 +224,8 @@ def prettyNumber(x):
 
 	return size
 
+def blank_str_to_None(string):
+	if isinstance(string, str) and string.strip() == '':
+		return None
+	
+	return string

@@ -99,11 +99,8 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
-
-		hosts = self.getHostnames(args)
-
+		hosts = self._get_hosts(args)
+		
 		(service, network, outnetwork, chain, action, protocol, flags,
 			comment, table, rulename) = self.doParams()
 

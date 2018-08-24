@@ -1,6 +1,8 @@
+from textwrap import dedent
+
 import pytest
 
-@pytest.mark.usefixtures('revert_database')
+
 class TestAddHostAlias:
 	list_host_alias_json_cmd = 'stack list host alias output-format=json'
 	dirn = '/export/test-files/add/'
@@ -100,3 +102,41 @@ class TestAddHostAlias:
 		expected_output = open(self.dirn + 'add_host_alias_multiple_aliases_same_host_interface.json').read()
 		assert result.stdout.strip() == expected_output.strip()
 
+	def test_add_host_alias_no_host(self, host):
+		result = host.run('stack add host alias')
+		assert result.rc == 255
+		assert result.stderr == dedent('''\
+			error - "host" argument is required
+			{host} {alias=string} {interface=string}
+		''')
+
+	def test_add_host_alias_no_matching_hosts(self, host):
+		result = host.run('stack add host alias a:test')
+		assert result.rc == 255
+		assert result.stderr == dedent('''\
+			error - "host" argument is required
+			{host} {alias=string} {interface=string}
+		''')
+	
+	def test_add_host_alias_multiple_hosts(self, host, add_host):
+		result = host.run('stack add host alias frontend-0-0 backend-0-0')
+		assert result.rc == 255
+		assert result.stderr == dedent('''\
+			error - "host" argument must be unique
+			{host} {alias=string} {interface=string}
+		''')
+	
+	def test_add_host_alias_hostname_in_use(self, host, add_host):
+		result = host.run('stack add host alias frontend-0-0 alias=backend-0-0 interface=eth0')
+		assert result.rc == 255
+		assert result.stderr == 'error - hostname already in use\n'
+
+	def test_add_host_alias_invalid_alias(self, host, add_host):
+		result = host.run('stack add host alias frontend-0-0 alias=127.0.0.1 interface=eth0')
+		assert result.rc == 255
+		assert result.stderr == 'error - aliases cannot be an IP address\n'
+	
+	def test_add_host_alias_invalid_interface(self, host, add_host):
+		result = host.run('stack add host alias frontend-0-0 alias=foo interface=eth7')
+		assert result.rc == 255
+		assert result.stderr == 'error - interface does not exist\n'

@@ -12,7 +12,7 @@
 
 
 import stack.commands
-from stack.exception import CommandError, ParamRequired, ArgUnique
+from stack.exception import CommandError, ParamRequired, ArgUnique, ArgRequired
 
 
 class command(stack.commands.HostArgumentProcessor,
@@ -20,7 +20,25 @@ class command(stack.commands.HostArgumentProcessor,
 	      stack.commands.BoxArgumentProcessor,
 	      stack.commands.EnvironmentArgumentProcessor,
 	      stack.commands.add.command):
-	pass
+	
+	def _get_hosts(self, args):
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+
+		hosts = self.getHostnames(args)
+		
+		if not hosts:
+			raise ArgRequired(self, 'host')
+		
+		return hosts
+	
+	def _get_single_host(self, args):
+		hosts = self._get_hosts(args)
+		
+		if len(hosts) != 1:
+			raise ArgUnique(self, 'host')
+
+		return hosts[0]
 	
 
 class Command(command):
@@ -70,9 +88,19 @@ class Command(command):
 
 	"""
 
-	def addHost(self, host):
+	def run(self, params, args):
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+		
+		if len(args) != 1:
+			raise ArgUnique(self, 'host')
 
-		if self.db.select("name from nodes where name like '%s'" % host):
+		host = args[0].lower()
+
+		if self.db.select(
+			'count(ID) from nodes where name=%s',
+			(host,)
+		)[0][0] > 0:
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank
@@ -92,8 +120,7 @@ class Command(command):
 			basename, rack, rank = host.split('-')
 			if basename in appliances:
 				appliance = basename
-				rack      = (rack)   # wtf
-				rank      = (rank)   # wtf
+
 		except:
 			appliance = None
 			rack      = None
@@ -101,21 +128,22 @@ class Command(command):
 				
 		# fillParams with the above default values
 		(appliance, rack, rank, box, environment,
-		 osaction, installaction) = self.fillParams( [
+		 osaction, installaction) = self.fillParams([
 			 ('appliance',     appliance),
 			 ('rack',          rack),
 			 ('rank',          rank),
 			 ('box',           'default'),
 			 ('environment',   ''),
 			 ('osaction',      'default'),
-			 ('installaction', 'default') ])
+			 ('installaction', 'default')
+		])
 
 		if not appliance:
 			raise ParamRequired(self, 'appliance')
 
-		if rack is None or rack is "":
+		if not rack:
 			raise ParamRequired(self, 'rack')
-		if rank is None or rank is "":
+		if not rank:
 			raise ParamRequired(self, 'rank')
 
 		if appliance not in appliances:
@@ -128,9 +156,7 @@ class Command(command):
 		for row in self.call('list.box', [ box ]):
 			osname = row['os']
 
-
 		# Make sure the installaction and osaction both exist
-
 		if not self.call('list.bootaction', [ installaction, 
 						      'type=install', 
 						      'os=%s' % osname 
@@ -151,13 +177,12 @@ class Command(command):
 			insert into nodes
 			(name, appliance, box, rack, rank)
 			values (
-				'%s', 
-			 	(select id from appliances where name='%s'),
-			 	(select id from boxes      where name='%s'),
-				'%s', '%s'
+				%s, 
+			 	(select id from appliances where name=%s),
+			 	(select id from boxes      where name=%s),
+				%s, %s
 			) 
-			""" % (host, appliance, box, rack, rank))
-
+			""", (host, appliance, box, rack, rank))
 
 		self.command('set.host.bootaction', 
 			     [ host, 'type=install', 'sync=false', 
@@ -170,11 +195,3 @@ class Command(command):
 		if environment:
 			self.command('set.host.environment', 
 				     [ host, "environment=%s" % environment ])
-			
-
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgUnique(self, 'host')
-
-		host = args[0].lower()
-		self.addHost(host)

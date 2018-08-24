@@ -5,11 +5,10 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import ParamRequired, CommandError, ArgRequired
 
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+class Command(stack.commands.add.host.command):
 	"""
 	Add a bridge interface to a given host.
 	<arg name="host">
@@ -33,36 +32,39 @@ class Command(stack.commands.Command,
 	</example>
 	"""
 	def run(self, params, args):
+		hosts = self._get_hosts(args)
+		
 		(bridge, interface, network) = self.fillParams([
 			('name', None, True),
 			('interface', ''),
 			('network', ''),
-			])
-
-		hosts = self.getHostnames(args)
+		])
 
 		if not interface and not network:
 			raise ParamRequired(self, ('interface', 'network'))
 
 		for host in hosts:
-			sql = 'select nt.ip, nt.name, s.name, nt.device, nt.main, nt.options ' +\
-				'from networks nt, nodes n, subnets s where ' +\
-				'nt.node=n.id and nt.subnet=s.id and ' +\
-				'n.name="%s"' % host
+			sql = """nt.ip, nt.name, s.name, nt.device, nt.main, nt.options
+				from networks nt, nodes n, subnets s where 
+				nt.node=n.id and nt.subnet=s.id and n.name=%s"""
+			values = [host]
 			
 			if network:
-				sql = sql + ' and s.name="%s"' % network
+				sql += ' and s.name=%s'
+				values.append(network)
+			
 			if interface:
-				sql = sql + ' and nt.device="%s"' % interface
+				sql += ' and nt.device=%s'
+				values.append(interface)
 
-			r = self.db.execute(sql)
-			if r == 0:
+			rows = self.db.select(sql, values)
+			if len(rows) == 0:
 				raise CommandError(self, 'Could not find ' +
 				("interface %s configured on " % interface if interface else '') +
 				("network %s on " % network if network else '') +
 				"host %s" % host)
 			else:
-				(ip, netname, net, dev, default_if, opts) = self.db.fetchone()
+				(ip, netname, net, dev, default_if, opts) = rows[0]
 
 			# Set ip and subnet to NULL for original device
 			self.command('set.host.interface.ip',
@@ -79,6 +81,7 @@ class Command(stack.commands.Command,
 				a_h_i_args)
 			self.command('set.host.interface.options',
 				[host, 'interface=%s' % bridge, 'options=bridge'])
+			
 			# Set the original device to point to the bridge
 			self.command('set.host.interface.channel',
 				[host, 'interface=%s' % dev, 'channel=%s' % bridge])
