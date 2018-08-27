@@ -31,11 +31,7 @@ class Plugin(stack.commands.Plugin):
 		#
 		# use the system to change the password
 		#
-		p = subprocess.Popen(['/usr/sbin/chpasswd'],
-			stdin=subprocess.PIPE,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
-		o, e = p.communicate('root:%s' % new_password)
+		self._exec('/usr/sbin/chpasswd', input=f'root:{new_password}')
 
 		#
 		# get the new crypted password
