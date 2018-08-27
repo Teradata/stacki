@@ -7,7 +7,7 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.add.firewall.command,
@@ -68,31 +68,35 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-
-		(service, network, outnetwork, chain, action, protocol, flags,
-		 comment, table, rulename) = self.doParams()
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
 
 		envs = self.getEnvironmentNames(args)
 
+		(service, network, outnetwork, chain, action, protocol, flags,
+		 comment, table, rulename) = self.doParams()
+
+		# Make sure we have a new rule
 		for env in envs:
-			sql = """environment = (select id from environments where
-				name = '%s') and""" % env
+			if self.db.select("""count(*) from environment_firewall where
+				environment = (select id from environments where name = %s) and
+				service = %s and action = %s and chain = %s and
+				if (%s is NULL, insubnet is NULL, insubnet = %s) and
+				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
+				if (%s is NULL, protocol is NULL, protocol = %s) and
+				if (%s is NULL, flags is NULL, flags = %s)""",
+				(env, service, action, chain, network, network, outnetwork,
+				outnetwork, protocol, protocol, flags, flags)
+			)[0][0] > 0:
+				raise CommandError(self, 'firewall rule already exists')
 
-			self.checkRule('environment_firewall', sql, service,
-				network, outnetwork, chain, action, protocol,
-				flags, comment, table, rulename)
-
-		#
-		# all the rules are valid, now let's add them
-		#
+		# Now let's add them
 		for env in envs:
-			sql = """(select id from environments where
-				name='%s'), """ % env
-
-			self.insertRule('environment_firewall', 'environment, ',
-				sql, service, network, outnetwork, chain,
-				action, protocol, flags, comment, table, rulename)
-
+			self.db.execute("""insert into environment_firewall
+				(environment, insubnet, outsubnet, service, protocol,
+				action, chain, flags, comment, tabletype, name)
+				values ((select id from environments where name = %s),
+				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+				(env, network, outnetwork, service, protocol, action,
+				chain, flags, comment, table, rulename)
+			)

@@ -412,7 +412,9 @@ CREATE TABLE environment_firewall (
   Action        varchar(256) default NULL,
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL
+  Comment       varchar(256) default NULL,
+  INDEX (Name),
+  INDEX (Service)
 );
 
 <!-- Miscellaneous -->
