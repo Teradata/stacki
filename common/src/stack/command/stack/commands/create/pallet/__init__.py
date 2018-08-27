@@ -58,14 +58,13 @@ class Builder:
 			(volname, extraflags, os.path.join(cwd, isoName))
 
 #		print('mkisofs: cmd %s' % cmd)
-		os.chdir(rollDir)
-		subprocess.call(shlex.split(cmd), stdin=None, stdout=None,
-			stderr=None)
+		stack.util._exec(cmd, shlexsplit=True, cwd=rollDir)
 
 		if self.config.isBootable():
-			subprocess.call([ 'isohybrid',
-				os.path.join(cwd, isoName) ])
-		os.chdir(cwd)
+			stack.util._exec(['isohybrid', os.path.join(cwd, isoName)], cwd=rollDir)
+#			subprocess.call([ 'isohybrid',
+#				os.path.join(cwd, isoName) ])
+#		os.chdir(cwd)
 
 		
 	def writerepo(self, name, version, release, OS, arch):

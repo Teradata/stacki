@@ -38,6 +38,7 @@ from stack.cond import EvalCondExpr
 from stack.exception import CommandError, ParamRequired, ArgNotFound
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
+import stack.util
 
 _logPrefix = ''
 _debug     = False
@@ -1657,6 +1658,7 @@ class Command:
 		self.text  = ''
 		self.bytes = b''
 
+		self._exec = stack.util._exec
 		
 		self.output = []
 	
