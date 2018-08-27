@@ -236,7 +236,7 @@ then
     echo
     echo -e "\033[34mRunning system test suite ...\033[0m"
 
-    for TEST_CASE in $(find "test-suites/system" -type d -depth 1 -print | sort)
+    for TEST_CASE in $(find "test-suites/system" -type d -mindepth 1 -maxdepth 1 -print | sort)
     do
         # Make sure the test case has guts
         if [[ -f "$TEST_CASE/set-up.sh" ]]
