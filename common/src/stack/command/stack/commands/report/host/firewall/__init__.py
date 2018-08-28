@@ -32,6 +32,117 @@ class Command(stack.commands.HostArgumentProcessor,
 		self.addOutput(host, ':FORWARD DROP [0:0]')
 		self.addOutput(host, ':OUTPUT ACCEPT [0:0]')
 
+	def expandRules(self, lines, parameter, items):
+		newlines = []
+
+		for line in lines:
+			for item in items:
+				newlines.append('%s %s %s' % (line, parameter, item))
+
+		if newlines:
+			return newlines
+		else:
+			return lines
+
+	def printRules(self, host, table, rules):
+		if len(rules) == 0 and table != 'filter':
+			return
+		self.addOutput(host, '*%s' % table)
+		if table == 'filter':
+			self.getPreamble(host)
+
+		for rule in rules:
+			if rule['comment']:
+				comment = '# %s' % rule['comment']
+			else:
+				comment = "# %s rule" % (rule['action'])
+				if rule['network'] == 'all':
+					comment =  comment + " for all networks"
+				elif rule['network']:
+					comment =  comment + " for %s network" % (rule['network'])
+
+			self.addOutput(host, comment)
+
+			#
+			# a single rule can map to multiple interfaces, each which require
+			# their own line in /etc/sysconfig/iptables
+			#
+			interfaces = set()
+			if rule['network'] != 'all' and rule['network']:
+				query = "select nt.device from networks nt," +\
+					"nodes n, subnets s where " +\
+					"s.name='%s' and " % (rule['network']) +\
+					"n.name='%s' and " % host +\
+					"nt.node=n.id and nt.subnet=s.id"
+				rows = self.db.execute(query)
+				if rows:
+					for i, in self.db.fetchall():
+						interfaces.add(i)
+				else:
+					continue
+
+			if rule['output-network'] != 'all' and rule['output-network']:
+				query = "select nt.device from networks nt," +\
+					"nodes n, subnets s where " +\
+					"s.name='%s' and " % (rule['output-network']) +\
+					"n.name='%s' and " % host +\
+					"nt.node=n.id and nt.subnet=s.id"
+				rows = self.db.execute(query)
+				if rows:
+					for i, in self.db.fetchall():
+						interfaces.add(i)
+
+			service = None
+			if rule['service'] != 'all' and rule['service']:
+				service = rule['service']
+
+			#
+			# a single rule can map to multiple protocols, each which require
+			# their own line in /etc/sysconfig/iptables
+			#
+			# in this case, if the 'protocol' is 'all' and if there is a 'service'
+			# defined, then we need two rules: one with '-p tcp' and
+			# one with '-p udp'
+			#
+			protocols = set()
+			if rule['protocol']:
+				if rule['protocol'] == 'all':
+					if service:
+						protocols.add('tcp')
+						protocols.add('udp')
+				elif rule['protocol']:
+					protocols.add(rule['protocol'])
+
+			#
+			# build the base rule
+			#
+			line = '-A %s -j %s' % (rule['chain'], rule['action'])
+
+			if rule['flags']:
+				line += ' %s' % (rule['flags'])
+
+			lines = [ line ]
+			lines = self.expandRules(lines, '-p', protocols)
+
+			#
+			# order is important here: '--dport' must come immediately after '-p'
+			#
+			if service:
+				lines = self.expandRules(lines, '--dport', [ service ])
+
+			lines = self.expandRules(lines, '-i', interfaces)
+
+			for line in lines:
+				self.addOutput(host, line)
+
+			self.addOutput(host, '')
+
+		self.addOutput(host, 'COMMIT')
+
+
+
+
+
 	def printRules(self, host, table, rules):
 		if len(rules) == 0 and table != 'filter':
 			return
