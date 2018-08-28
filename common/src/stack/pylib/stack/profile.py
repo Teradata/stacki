@@ -213,9 +213,9 @@ class GraphHandler(handler.ContentHandler,
 					i += 1
 				try:
 					parser.feed(line)
-				except:
-					print('XML parse error in file %s on line %d\n' % 
-					      (xmlFile, linenumber))
+				except Exception as e:
+					print('XML parse error in node file - %s in file %s on line %d\n' % 
+					      (e.args[-1], xmlFile, linenumber))
 					raise
 				
 			if 'STACKDEBUG' in os.environ:
