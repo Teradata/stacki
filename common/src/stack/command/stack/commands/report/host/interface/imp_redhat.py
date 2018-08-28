@@ -84,6 +84,7 @@ class Implementation(stack.commands.Implementation):
 				s += '%s">' % (device)
 
 				self.owner.addOutput(host, s)
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
 				self.writeConfig(host, mac, ip, device,
 					netmask, vlanid, mtu, optionlist, channel, default)
 				self.owner.addOutput(host, '</stack:file>')

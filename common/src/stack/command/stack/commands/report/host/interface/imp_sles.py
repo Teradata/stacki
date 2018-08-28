@@ -88,6 +88,9 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 
 						     '<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 						     % interface.split(':')[0])
+
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
+
 				vnum = interface.split(':')[1]
 				if ip:
 					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip))
@@ -104,6 +107,8 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 
 				     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 				     % interface)
+
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
 
 				if vlanid and self.owner.host_based_routing(host, interface, vlanid):
 					parent_device = interface.strip().split('.')[0]
