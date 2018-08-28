@@ -1,3 +1,4 @@
+import gc
 import json
 import multiprocessing
 import os
@@ -6,6 +7,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import warnings
 
 from django.core.servers import basehttp
 from django.core.wsgi import get_wsgi_application
@@ -71,21 +73,60 @@ def revert_filesystem():
 		"/tftpboot"
 	)
 
-	# Unmount any existing overlay directories
-	with open("/proc/mounts", "r") as mounts:
-		# Create a tuple of lines because /proc/mounts will change
-		# as we unmount things
-		for mount in tuple(mounts):
-			if mount.startswith("overlay_"):
-				subprocess.run(
-					["umount", mount.split()[0]],
-					check=True
-				)
-	
-	# Make sure the overlay root is clean
-	if os.path.exists("/overlay"):
-		shutil.rmtree("/overlay")
+	def clean_up():
+		# Unmount any existing overlay directories
+		with open("/proc/mounts", "r") as mounts:
+			# Create a tuple of lines because /proc/mounts will change
+			# as we unmount things
+			for mount in tuple(mounts):
+				if mount.startswith("overlay_"):
+					# Try three times to unmount the overlay
+					for attempt in range(1, 4):
+						try:
+							subprocess.run(
+								["umount", mount.split()[0]],
+								check=True
+							)
 
+							# It succeeded
+							break
+						except subprocess.CalledProcessError:
+							# Let's run sync to see if it helps
+							subprocess.run(["sync"])
+							
+							# Run the garbase collector, just in case it releases
+							# some opened file handles
+							gc.collect()
+
+							if attempt < 3:
+								# Sleep for a few seconds to give the open file
+								# handles a chance to clean themselves up
+								time.sleep(3)
+					else:
+						# Let's dump out any suspects.
+						result = subprocess.run(
+							["lsof", "-x", "+D", mount.split()[1]],
+							stdout=subprocess.PIPE,
+							encoding='utf-8'
+						)
+
+						warnings.warn('Unable to unmount {} mounted on {}\n\n{}'.format(
+							mount.split()[0], 
+							mount.split()[1],
+							result.stdout
+						))
+
+						# We couldn't unmount the overlay, abort the tests
+						pytest.exit("Couldn't unmount overlay on {}".format(mount.split()[1]))
+
+		# Make sure the overlay root is clean
+		if os.path.exists("/overlay"):
+			shutil.rmtree("/overlay")
+
+	# Make sure we are clean
+	clean_up()
+
+	# Now set up the overlays
 	for ndx, path in enumerate(paths):
 		# Make the overlay directories
 		overlay_dirs = {
@@ -105,6 +146,11 @@ def revert_filesystem():
 			"-o", ",".join(f"{k}={v}" for k, v in overlay_dirs.items()),
 			path
 		], check=True)
+	
+	yield
+
+	# Clean up after the test
+	clean_up()
 
 @pytest.fixture
 def revert_discovery():
