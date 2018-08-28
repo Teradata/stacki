@@ -225,11 +225,18 @@ class Command(stack.commands.list.command,
 					parser = make_parser(["stack.expatreader"])
 					parser.setContentHandler(handler)
 					parser.feed(handler.getXMLHeader())
+					linenumber = 0
+
 					with open(os.path.join(graph, file), 'r') as xml:
 						for line in xml.readlines():
+							linenumber = linenumber + 1
 							if line.find('<?xml') != -1:
 								continue
-							parser.feed(line)
+							try:
+								parser.feed(line)
+							except Exception as e:
+								print('XML parse error in graph file - %s in file %s on line %d\n' % (e.args[-1], xml.name, linenumber))
+								raise
 
 
 		graph = handler.getMainGraph()
