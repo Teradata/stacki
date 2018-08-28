@@ -1,0 +1,1 @@
+[{"environment": "test", "name": "test", "table": "filter", "service": "all", "protocol": "all", "chain": "INPUT", "action": "ACCEPT", "network": "private", "output-network": "", "flags": null, "comment": null, "source": "E", "type": "var"}]

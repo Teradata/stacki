@@ -135,11 +135,11 @@ class Plugin(stack.commands.Plugin):
 		self.resolved_rules = {}
 
 	def global_firewall(self, args, host=''):
-		self.owner.db.execute("""select insubnet, outsubnet, service,
+		rules = self.owner.db.select("""insubnet, outsubnet, service,
 			protocol, chain, action, flags, comment, tabletype,
 			name from global_firewall""")
 
-		for i, o, s, p, c, a, f, cmt, tt, n in self.db.fetchall():
+		for i, o, s, p, c, a, f, cmt, tt, n in rules:
 			self.formatRule(n, tt, i, o, s, p, c, a, f, cmt, 
 				'G', 'var')
 		if not host:
@@ -152,23 +152,22 @@ class Plugin(stack.commands.Plugin):
 
 	def os_firewall(self, args, host=''):
 		if host:
-			self.db.execute("""select name, tabletype, insubnet,
+			rules = self.db.select("""name, tabletype, insubnet,
 				outsubnet, service, protocol, chain, action,
 				flags, comment from os_firewall where os =
-				(select os from nodes where name = '%s')"""
-				% (host))
+				(select os from nodes where name = %s)""", host)
 
-			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
+			for n, tt, i, o, s, p, c, a, f, cmt in rules:
 				self.formatRule(n, tt, i, o, s, p, c, a, f,
 					cmt, 'O', 'var')
 		else:
 			for os in self.owner.getOSNames(args):
-				self.db.execute("""select name, tabletype, insubnet,
+				rules = self.db.select("""name, tabletype, insubnet,
 					outsubnet, service, protocol, chain, action,
 					flags, comment from os_firewall
-					where os = '%s' """ % os)
+					where os = %s""", os)
 
-				for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
+				for n, tt, i, o, s, p, c, a, f, cmt in rules:
 					self.formatRule(n, tt, i, o, s, p, c, a, f,
 						cmt, 'O', 'var')
 
@@ -183,27 +182,27 @@ class Plugin(stack.commands.Plugin):
 
 	def appliance_firewall(self, args, host=''):
 		if host:
-			self.db.execute("""select name, tabletype, insubnet,
+			rules = self.db.select("""name, tabletype, insubnet,
 				outsubnet, service, protocol, chain, action,
 				flags, comment from appliance_firewall where
 				appliance =
-				(select appliance from nodes where name = '%s')
-				""" % host)
+				(select appliance from nodes where name = %s)
+				""", host)
 
-			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
+			for n, tt, i, o, s, p, c, a, f, cmt in rules:
 				self.formatRule(n, tt, i, o, s, p, c, a, f,
 					cmt, 'A', 'var')
 		else:
 			for app in self.owner.getApplianceNames(args):
-				self.db.execute("""select insubnet, outsubnet,
+				rules = self.db.select("""insubnet, outsubnet,
 					service, protocol, chain, action, flags,
 					comment, name, tabletype from appliance_firewall where
 					appliance = (select id from appliances where
-					name = '%s')""" % app)
+					name = %s)""", app)
 
 				self.empty_lists()
 
-				for i, o, s, p, c, a, f, cmt, n, tt in self.db.fetchall():
+				for i, o, s, p, c, a, f, cmt, n, tt in rules:
 					self.formatRule(n, tt, i, o, s, p, c, a, f,
 						cmt, 'A', 'var')
 
@@ -211,6 +210,40 @@ class Plugin(stack.commands.Plugin):
 				self.printOutput(app)
 
 			self.owner.endOutput(header=['appliance', 'name', 'table',
+				'service', 'protocol', 'chain', 'action', 'network',
+				'output-network', 'flags', 'comment', 'source',
+				'type'], trimOwner=0)
+
+	def environment_firewall(self, args, host=''):
+		if host:
+			rules = self.db.select("""name, tabletype, insubnet,
+				outsubnet, service, protocol, chain, action,
+				flags, comment from environment_firewall where
+				environment =
+				(select environment from nodes where name = %s)
+				""", host)
+
+			for n, tt, i, o, s, p, c, a, f, cmt in rules:
+				self.formatRule(n, tt, i, o, s, p, c, a, f,
+					cmt, 'E', 'var')
+		else:
+			for env in self.owner.getEnvironmentNames(args):
+				rules = self.db.select("""insubnet, outsubnet,
+					service, protocol, chain, action, flags,
+					comment, name, tabletype from environment_firewall where
+					environment = (select id from environments where
+					name = %s)""", env)
+
+				self.empty_lists()
+
+				for i, o, s, p, c, a, f, cmt, n, tt in rules:
+					self.formatRule(n, tt, i, o, s, p, c, a, f,
+						cmt, 'E', 'var')
+
+				self.categorizeRules()
+				self.printOutput(env)
+
+			self.owner.endOutput(header=['environment', 'name', 'table',
 				'service', 'protocol', 'chain', 'action', 'network',
 				'output-network', 'flags', 'comment', 'source',
 				'type'], trimOwner=0)
@@ -228,13 +261,12 @@ class Plugin(stack.commands.Plugin):
 			self.appliance_firewall(args, host)
 
 			# host
-			self.db.execute("""select name, tabletype, insubnet,
+			rules = self.db.select("""name, tabletype, insubnet,
 				outsubnet, service, protocol, chain, action,
 				flags, comment from node_firewall where node =
-				(select id from nodes where name = '%s')"""
-				% (host))
+				(select id from nodes where name = %s)""", host)
 
-			for n, tt, i, o, s, p, c, a, f, cmt in self.db.fetchall():
+			for n, tt, i, o, s, p, c, a, f, cmt in rules:
 				self.formatRule(n, tt, i, o, s, p, c, a, f,
 					cmt, 'H', 'var')
 
@@ -250,10 +282,11 @@ class Plugin(stack.commands.Plugin):
 			'protocol', 'chain', 'action', 'network',
 			'output-network', 'flags', 'comment', 'source', 'type' ])
 
-	lookup = {      'global'    : global_firewall,
-			'os'        : os_firewall,
-			'appliance' : appliance_firewall,
-			'host'      : host_firewall
+	lookup = {      'global'      : global_firewall,
+			'os'          : os_firewall,
+			'appliance'   : appliance_firewall,
+			'environment' : environment_firewall,
+			'host'        : host_firewall
 		}
 
 	accept_rules = []

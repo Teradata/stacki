@@ -28,9 +28,9 @@ from xml.sax import handler
 from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
 from functools import partial
-from collections import OrderedDict
 from operator import itemgetter
 from itertools import groupby
+from collections import OrderedDict, namedtuple
 
 import stack.graph
 import stack
@@ -1341,137 +1341,55 @@ class DatabaseConnection:
 		host = self.getHostname(host)
 		routes = {}
 
-		# if needed, add default routes to support multitenancy
-		# if _frontend == host:
-		if 0:
-			print(
-			"""
-			n.ip, n.device, np.ip 
-			from networks n
-			left join networks np
-			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
-			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend, _frontend))
+		Scope = namedtuple('Scope', ['sql', 'args', 'label'])
 
-			_networks = self.select(
-			"""
-			n.ip, n.device, np.ip 
-			from networks n
-			left join networks np
-			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
-			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend, _frontend))
+		_global = Scope(
+			sql="""network, netmask, gateway, subnet, interface FROM global_routes""",
+			args=(),
+			label='G'
+		)
+		_os = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM os_routes r, nodes n WHERE r.os=%s AND n.name=%s""",
+			args=(self.getHostOS(host), host),
+			label='O'
+		)
+		_appliance = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM appliance_routes r, nodes n, appliances app
+				WHERE n.appliance=app.id AND r.appliance=app.id AND n.name=%s""",
+			args=host,
+			label='A'
+		)
+		_environment = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM environment_routes r, nodes n, environments env
+				WHERE n.environment=env.id AND r.environment=env.id AND n.name=%s""",
+			args=host,
+			label='E'
+		)
+		_host = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM node_routes r, nodes n WHERE n.name=%s AND n.id=r.node""",
+			args=host,
+			label='H'
+		)
 
-			_network_dict = {}
-			for _network in _networks:
-				if None in _network:
-					continue
-				(gateway, interface, destination) = _network
-				interface = interface.split('.')[0].split(':')[0]
-				
-				if destination in _network_dict:
-					routes[destination] = _network_dict[destination]
+		for scope in [_global, _os, _appliance, _environment, _host]:
+			for (network, netmask, gateway, subnet, interface) in self.select(scope.sql, scope.args):
+				if subnet:
+					for dev, in self.select("""net.device from
+						subnets s, networks net, nodes n where
+						s.id = %s and s.id = net.subnet and
+						net.node = n.id and n.name = %s
+						and net.device not like 'vlan%%'
+						""", (subnet, host)):
+						interface = dev
+
+				if showsource:
+					routes[network] = (netmask, gateway, interface, subnet, scope.label)
 				else:
-					if showsource:
-						_network_dict[destination] = (
-							'255.255.255.255', 
-							gateway, 
-							interface, 
-							'H')
-					else:
-						_network_dict[destination] = (
-							'255.255.255.255', 
-							gateway, 
-							interface,)
-
-				
-		
-		# global
-		
-		for (n, m, g, s, i) in self.select("""
-			network, netmask, gateway, subnet, interface from
-			global_routes
-			"""):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
-					and net.device not like 'vlan%%' 
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'G')
-			else:
-				routes[n] = (m, g, i)
-
-		# os
-				
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from os_routes r, nodes n where
-			r.os='%s' and n.name='%s'
-			"""  % (self.getHostOS(host), host)):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'O')
-			else:
-				routes[n] = (m, g, i)
-
-		# appliance
-
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from
-			appliance_routes r,
-			nodes n,
-			appliances app where
-			n.appliance=app.id and 
-			r.appliance=app.id and n.name='%s'
-			""" % host):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'A')
-			else:
-				routes[n] = (m, g, i)
-
-		# host
-		
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from node_routes r, nodes n where
-			n.name='%s' and n.id=r.node
-			""" % host):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'H')
-			else:
-				routes[n] = (m, g, i)
+					routes[network] = (netmask, gateway, interface, subnet)
 
 		return routes
 
@@ -2610,4 +2528,3 @@ class PluginOrderIterator(stack.graph.GraphIterator):
 		stack.graph.GraphIterator.finishHandler(self, node, edge)
 		self.time = self.time + 1
 		self.nodes.append((self.time, node))
-
