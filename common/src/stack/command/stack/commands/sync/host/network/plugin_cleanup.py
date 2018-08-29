@@ -21,7 +21,7 @@ class Plugin(stack.commands.Plugin):
 		for line in f.readlines():
 			if '# AUTHENTIC STACKI' in line:
 				retval = True
-				break	
+				break
 		f.close()
 
 		return retval
@@ -39,9 +39,15 @@ class Plugin(stack.commands.Plugin):
 		# open all the ifcfg-* files and remove the ones that were not written by Stacki
 		#
 		ifcfg = re.compile('ifcfg-*')
-		for fname in os.listdir('/etc/sysconfig/network'):
+		if self.owner.os == 'sles':
+			ifcfg_dir = '/etc/sysconfig/network'
+		else:
+			#TODO Ubuntu?
+			ifcfg_dir = '/etc/sysconfig/network-scripts'
+
+		for fname in os.listdir(ifcfg_dir):
 			if fname != 'ifcfg-lo' and ifcfg.match(fname):
-				filename = '/etc/sysconfig/network/%s' % fname
+				filename = f'{ifcfg_dir}/{fname}'
 				if not self.isStacki(filename):
 					os.remove(filename)
 
