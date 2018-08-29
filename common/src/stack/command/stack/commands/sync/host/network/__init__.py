@@ -48,7 +48,7 @@ class Command(stack.commands.sync.host.command):
 		#
 		# the code in the 'run' function will rebuild all the Stacki files
 		#
-		if self.owner.os == 'sles':
+		if self.os == 'sles':
 			ifcfg_dir = '/etc/sysconfig/network'
 		else:
 			#TODO Ubuntu?
