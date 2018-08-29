@@ -13,6 +13,20 @@
         192.168.0.2     frontend-0-0  frontend-0-0.localdomain
       mode: 0644
 
+  - name: Bless ifcfg-eth0 so Stacki doesn't blow it away (SLES)
+    lineinfile:
+      path: /etc/sysconfig/network/ifcfg-eth0
+      line: "# AUTHENTIC STACKI"
+      state: present
+    when: ansible_distribution == "SLES"
+  
+  - name: Bless ifcfg-eth0 so Stacki doesn't blow it away (CentOS)
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth0
+      line: "# AUTHENTIC STACKI"
+      state: present
+    when: ansible_distribution == "CentOS"
+  
   - name: Download frontend-install.py
     get_url:
       url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
