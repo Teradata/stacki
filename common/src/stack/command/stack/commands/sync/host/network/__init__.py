@@ -48,9 +48,15 @@ class Command(stack.commands.sync.host.command):
 		#
 		# the code in the 'run' function will rebuild all the Stacki files
 		#
-		for fname in os.listdir('/etc/sysconfig/network'):
+		if self.owner.os == 'sles':
+			ifcfg_dir = '/etc/sysconfig/network'
+		else:
+			#TODO Ubuntu?
+			ifcfg_dir = '/etc/sysconfig/network-scripts'
+
+		for fname in os.listdir(ifcfg_dir):
 			if fname != 'ifcfg-lo' and fname.startswith('ifcfg-'):
-				filename = '/etc/sysconfig/network/%s' % fname
+				filename = f'{ifcfg_dir}/{fname}'
 				if self.isStacki(filename):
 					os.remove(filename)
 
