@@ -34,6 +34,33 @@ class Command(stack.commands.sync.host.command):
 	</example>
 	"""
 
+	def isStacki(self, filename):
+		with open(filename, 'r') as f:
+			for line in f:
+				if '# AUTHENTIC STACKI' in line:
+					return True
+		return False
+
+
+	def cleanup(self):
+		#
+		# open all the ifcfg-* files and remove the ones that were written by Stacki
+		#
+		# the code in the 'run' function will rebuild all the Stacki files
+		#
+		if self.os == 'sles':
+			ifcfg_dir = '/etc/sysconfig/network'
+		else:
+			#TODO Ubuntu?
+			ifcfg_dir = '/etc/sysconfig/network-scripts'
+
+		for fname in os.listdir(ifcfg_dir):
+			if fname != 'ifcfg-lo' and fname.startswith('ifcfg-'):
+				filename = f'{ifcfg_dir}/{fname}'
+				if self.isStacki(filename):
+					os.remove(filename)
+
+
 	def run(self, params, args):
 		restart, = self.fillParams([ ('restart', 'yes') ])
 
@@ -49,6 +76,9 @@ class Command(stack.commands.sync.host.command):
 		for h in run_hosts:
 			host = h['host']
 			hostname = h['name']
+
+			if host == me:
+				self.cleanup()
 
 			# Sometimes these return None, in that case, make them an empty string
 			c = str(self.command('report.host.interface',[host]) or '') + \
