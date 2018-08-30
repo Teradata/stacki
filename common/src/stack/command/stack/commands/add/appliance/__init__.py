@@ -28,12 +28,6 @@ class Command(command):
 	The appliance name (e.g., 'backend', 'frontend', 'nas').
 	</arg>
 
-	<param type='string' name='longname'>
-	The full name of the appliance. This name will be displayed
-	in the appliances menu by insert-ethers (e.g., 'backend'). If
-	not supplied, the long name is set to the appliance name.
-	</param>
-
 	<param type='string' name='node'>
 	The name of the root XML node (e.g., 'backend', 'nas'). If
 	not supplied, the node name is set to the appliance name.
@@ -44,7 +38,7 @@ class Command(command):
 	the Appliance menu. The default is 'yes'.
 	</param>
 
-	<example cmd='add appliance nas longname="NAS Appliance" node=nas public=yes'>
+	<example cmd='add appliance nas node=nas public=yes'>
 	</example>
 	"""
 
@@ -54,33 +48,25 @@ class Command(command):
 			raise ArgUnique(self, 'appliance')
 		appliance = args[0]
 
-		(longname, node, public) = self.fillParams([
-			('longname', None),
+		(node, public) = self.fillParams([
 			('node', ''),
 			('public', 'y')
 			])
 
 		public  = self.bool2str(self.str2bool(public))
 
-		if not longname:
-			longname = str.capitalize(appliance)
-
-		#
 		# check for duplicates
-		#
-		rows = self.db.execute("""
-			select * from appliances where name='%s'
-			""" % appliance)
-		if rows > 0:
+		if self.db.select(
+			'count(ID) from appliances where name=%s',
+			(appliance,)
+		)[0][0] > 0:
 			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
-		#
 		# ok, we're good to go
-		#
-		self.db.execute("""
-			insert into appliances (name, longname, public) values
-			('%s', '%s', '%s')
-			""" % (appliance, longname, public))
+		self.db.execute('''
+			insert into appliances (name, public) values
+			(%s, %s)
+			''', (appliance, public))
 
 		# by default, appliances shouldn't be managed or kickstartable...
 		implied_attrs = {'kickstartable': False, 'managed': False}
@@ -98,4 +84,3 @@ class Command(command):
 				'attr=%s' % attr,
 				'value=%s' % value
 				])
-

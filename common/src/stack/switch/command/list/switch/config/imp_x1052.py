@@ -28,6 +28,8 @@ class Implementation(stack.commands.Implementation):
 		switch_username		= self.owner.getHostAttr(switch_name, 'switch_username')
 		switch_password		= self.owner.getHostAttr(switch_name, 'switch_password')
 
+		list_switch_host = self.owner.call('list.switch.host', [ switch_name ])
+
 		# Connect to the switch
 		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as switch:
 			try:
@@ -39,31 +41,42 @@ class Implementation(stack.commands.Implementation):
 				with open(filename, 'r') as f:
 					lines = f.readlines()
 					_printline = True
-					_block = {}
+					port = None
+					porttype = None
+					vlan = 'untagged'
 					for line in lines:
 						if not self.owner.raw:
 							if 'crypto' in line:
 								break
 
 							if 'gigabitethernet' in line:
-								_block['port'] = line.split('/')[-1].strip()
+								port = line.split('/')[-1].strip()
 
-							if 'switchport' in line and 'access' in line:
-								_, _type, _, _vlan = line.split()
-								_block['type'] = _type
-								_block['vlan'] = _vlan
+							l = line.split()
+							if len(l) == 3 and l[0] == 'switchport' and l[1] == 'mode':
+								porttype = l[2].strip()
 
-							if '!' in line and _block:
-								try:
-									self.owner.addOutput(
-										switch_name,[
-										_block['port'],
-										_block['vlan'],
-										_block['type'],]
-										)
-								except:
-									pass
-								_block = {}
+							if len(l) == 4 and l[0] == 'switchport' \
+									and l[1] == porttype:
+								vlan = l[3].strip()
+								
+							if '!' in line and port and porttype:
+								host = None
+								interface = None
+								for o in list_switch_host:
+									oport = '%s' % o['port']
+									if oport == port:
+										host = o['host']
+										interface = o['interface']
+										break
+
+								self.owner.addOutput(switch_name,
+									[ port, vlan, porttype,
+									host, interface ])
+
+								port = None
+								porttype = None
+								vlan = 'untagged'
 
 						# This is the line that gets hit if raw=true
 						else:

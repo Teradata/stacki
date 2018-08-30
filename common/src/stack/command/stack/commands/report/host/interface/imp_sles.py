@@ -9,6 +9,7 @@ import shlex
 import ipaddress
 from stack.bool import str2bool
 import stack.commands
+from stack.commands import Warn
 
 
 class Implementation(stack.commands.Implementation):
@@ -36,6 +37,11 @@ class Implementation(stack.commands.Implementation):
 
 			startmode = None
 			bootproto = 'static'
+
+			if ip and not netname:
+				Warn(f'WARNING: skipping interface "{interface}" on host "{o["host"]}" - '
+				      'interface has an IP but no network')
+				continue
 
 			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
@@ -82,6 +88,9 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 
 						     '<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 						     % interface.split(':')[0])
+
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
+
 				vnum = interface.split(':')[1]
 				if ip:
 					self.owner.addOutput(host, 'IPADDR%s=%s' % (vnum, ip))
@@ -98,6 +107,8 @@ class Implementation(stack.commands.Implementation):
 				self.owner.addOutput(host, 
 				     '<stack:file stack:name="/etc/sysconfig/network/ifcfg-%s">' 
 				     % interface)
+
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
 
 				if vlanid and self.owner.host_based_routing(host, interface, vlanid):
 					parent_device = interface.strip().split('.')[0]

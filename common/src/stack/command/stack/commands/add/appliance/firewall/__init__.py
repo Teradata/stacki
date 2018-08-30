@@ -13,8 +13,7 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
-from stack.exception import ArgRequired
-
+from stack.exception import ArgRequired, CommandError
 
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.appliance.command):
@@ -61,6 +60,16 @@ class Command(stack.commands.add.firewall.command,
 	The iptables 'action' this rule (e.g., ACCEPT, REJECT, DROP).
 	</param>
 
+	<param type='string' name='flags'>
+	Optional flags associated with this rule. An example flag is:
+	"-m state --state RELATED,ESTABLISHED".
+	</param>
+
+	<param type='string' name='comment'>
+	A comment associated with this rule. The comment will be printed
+	directly above the rule in the firewall configuration file.
+	</param>
+
 	<param type='string' name='table'>
 	The table to add the rule to. Valid values are 'filter',
 	'nat', 'mangle', and 'raw'. If this parameter is not
@@ -90,31 +99,35 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		
-		(service, network, outnetwork, chain, action, protocol, flags,
-		 comment, table, rulename) = self.doParams()
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
 		apps = self.getApplianceNames(args)
-
+		
+		(service, network, outnetwork, chain, action, protocol, flags,
+		 comment, table, rulename) = self.doParams()
+		
+		# Make sure we have a new rule
 		for app in apps:
-			sql = """appliance = (select id from appliances where
-				name = '%s') and""" % app
+			if self.db.select("""count(*) from appliance_firewall where
+				appliance = (select id from appliances where name = %s) and
+				service = %s and action = %s and chain = %s and
+				if (%s is NULL, insubnet is NULL, insubnet = %s) and
+				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
+				if (%s is NULL, protocol is NULL, protocol = %s) and
+				if (%s is NULL, flags is NULL, flags = %s)""",
+				(app, service, action, chain, network, network, outnetwork,
+				outnetwork, protocol, protocol, flags, flags)
+			)[0][0] > 0:
+				raise CommandError(self, 'firewall rule already exists')
 
-			self.checkRule('appliance_firewall', sql, service,
-				network, outnetwork, chain, action, protocol,
-				flags, comment, table, rulename)
-
-		#
-		# all the rules are valid, now let's add them
-		#
+		# Now let's add them
 		for app in apps:
-			sql = """(select id from appliances where
-				name='%s'), """ % app
-
-			self.insertRule('appliance_firewall', 'appliance, ',
-				sql, service, network, outnetwork, chain,
-				action, protocol, flags, comment, table, rulename)
-
+			self.db.execute("""insert into appliance_firewall
+				(appliance, insubnet, outsubnet, service, protocol,
+				action, chain, flags, comment, tabletype, name)
+				values ((select id from appliances where name=%s),
+				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+				(app, network, outnetwork,	service, protocol, action,
+				chain, flags, comment, table, rulename)
+			)

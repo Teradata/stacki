@@ -30,17 +30,13 @@ class Command(command):
 			raise ArgUnique(self, 'environment')
 		environment = args[0]
 
-		dup = False
-		for row in self.db.select(
-			"""
-			* from environments where name='%s'
-			""" % environment):
-			dup = True
-		if dup:
+		if self.db.select(
+			'count(ID) from environments where name=%s',
+			(environment,)
+		)[0][0] > 0:
 			raise CommandError(self, 'environment "%s" already exists' % environment)
 
 		self.db.execute(
-			"""
-			insert into environments (name) values ('%s')
-			""" % environment)
-		
+			'insert into environments(name) values (%s)',
+			(environment,)
+		)

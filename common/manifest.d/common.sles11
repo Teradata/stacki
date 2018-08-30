@@ -10,8 +10,8 @@
 -stack-examples
 -stack-kickstart
 -stack-pxeboot
--stack-sql
 -stack-switch
+-stack-report-system
 -stack-wizard
 -stack-ws
 -stack-ws-client

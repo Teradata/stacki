@@ -51,45 +51,30 @@ class Command(stack.commands.add.appliance.command):
 		if len(args) == 0:
 			raise ParamRequired(self, 'appliance')
 
-
-		#
 		# determine if this is a subnet identifier
-		#
-		subnet = 0
-		rows = self.db.execute("""
-			select id from subnets where
-			name = '%s' """ % gateway)
+		rows = self.db.select('id from subnets where name = %s',(gateway,))
 
-		if rows == 1:
-			subnet, = self.db.fetchone()
-			gateway = "''"
+		if len(rows) == 1:
+			subnet = rows[0][0]
+			gateway = ''
 		else:
-			subnet = 'NULL'
-			gateway = "'%s'" % gateway
+			subnet = None
 		
 		# Verify the route doesn't already exist.  If it does
 		# for any of the appliances raise a CommandError.
-		
 		for app in apps:
-			rows = self.db.execute("""select * from 
+			if self.db.select("""count(*) from 
 				appliance_routes r, appliances a where
-				r.appliance=a.id and r.network='%s' 
-				and a.name='%s'""" %	
-				(address, app)) 
-			if rows:
+				r.appliance=a.id and r.network=%s
+				and a.name=%s""", (address, app)
+			)[0][0] > 0:
 				raise CommandError(self, 'route exists')
-
-		#
-		# if interface is being set, check if it exists first
-		#
-		if not interface:
-			interface='NULL'	
 
 		# Now that we know things will work insert the route for
 		# all the appliances
-		
 		for app in apps:	
 			self.db.execute("""insert into appliance_routes values 
-				((select id from appliances where name='%s'),
-				'%s', '%s', %s, %s, '%s')""" %
-				(app, address, netmask, gateway, subnet, interface))
+				((select id from appliances where name=%s),
+				%s, %s, %s, %s, %s)""",
+				(app, address, netmask, gateway, subnet, interface)
+			)

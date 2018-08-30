@@ -30,7 +30,7 @@ class Implementation(stack.commands.Implementation):
 
 		routes = self.db.getHostRoutes(host)
 		for network in sorted(routes.keys()):
-			(netmask, gateway, interface) = routes[network]
+			(netmask, gateway, interface, subnet) = routes[network]
 			destination = network
 
 

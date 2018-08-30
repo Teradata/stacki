@@ -28,12 +28,16 @@ from xml.sax import handler
 from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
 from functools import partial
+from operator import itemgetter
+from itertools import groupby
+from collections import OrderedDict, namedtuple
 
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
 from stack.exception import CommandError, ParamRequired, ArgNotFound
 from stack.bool import str2bool, bool2str
+from stack.util import flatten
 
 _logPrefix = ''
 _debug     = False
@@ -45,6 +49,13 @@ def Log(message, level=syslog.LOG_INFO):
 	Send a message to syslog
 	"""
 	syslog.syslog(level, '%s%s' % (_logPrefix, message))
+
+
+def Warn(message):
+	"""
+	Send a warning to syslog
+	"""
+	syslog.syslog(syslog.LOG_WARNING, f'{_logPrefix}{message}')
 
 
 def Debug(message, level=syslog.LOG_DEBUG):
@@ -67,27 +78,29 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		
 Debug('__init__:commands')
 
+
 class OSArgumentProcessor:
 	"""An Interface class to add the ability to process os arguments."""
 
 	def getOSNames(self, args=None):
-		list = []
+		oses = []
 		if not args:
-			args = ['%']		# find all appliances
+			args = ['%']		# find everything in table
 		for arg in args:
 			if arg == 'centos':
+				if 'redhat' in oses:
+					continue
 				arg = 'redhat'
-			for name, in self.db.select(
-					"""
-					name from oses 
-					where name like %s order by name
-					""", arg):
-				list.append(name)
-			if len(list) == 0 and arg == '%':  # empty table is OK
+
+			query = 'name from oses where name like %s order by name'
+			results = flatten(self.db.select(query, [arg]))
+			if len(results) == 0 and arg == '%':  # empty table OK
 				continue
-			if len(list)  < 1:
+			elif len(results) < 1:
 				raise ArgNotFound(self, arg, 'OS')
-		return list
+			oses.extend(results)
+
+		return sorted(OrderedDict.fromkeys(oses))
 
 	
 class EnvironmentArgumentProcessor:
@@ -97,16 +110,17 @@ class EnvironmentArgumentProcessor:
 	def getEnvironmentNames(self, args=None):
 		environments = []
 		if not args:
-			args = [ '%' ]		 # find all appliances
+			args = ['%']		# find everything in table
 		for arg in args:
-			found = False
-			for (envName, ) in self.db.select("name from environments where name like '%s'" % arg):
-				found = True
-				environments.append(envName)
-			if not found and arg != '%':
+			query = 'name from environments where name like %s'
+			results = flatten(self.db.select(query, [arg]))
+			if len(results) == 0 and arg == '%':  # empty table OK
+				continue
+			elif len(results) < 1:
 				raise ArgNotFound(self, arg, 'environment')
+			environments.extend(results)
 
-		return environments
+		return sorted(OrderedDict.fromkeys(environments))
 
 
 class ApplianceArgumentProcessor:
@@ -149,11 +163,9 @@ class BoxArgumentProcessor:
 			args = [ '%' ]		      # find all boxes
 
 		for arg in args:
-			found = False
-			for (boxName, ) in self.db.select("name from boxes where name like '%s'" % arg):
-				found = True
-				boxes.append(boxName)
-			if not found and arg != '%':
+			query = 'name from boxes where name like %s'
+			boxes = flatten(self.db.select(query, [arg]))
+			if not boxes and arg != '%':
 				raise ArgNotFound(self, arg, 'box')
 
 		return boxes
@@ -198,12 +210,8 @@ class NetworkArgumentProcessor:
 			for (netName, ) in self.db.select("name from subnets where name like '%s'" % arg):
 				found = True
 				networks.append(netName)
-# TODO - Release code actually doesn't do this, we should be there might
-# be code that relies on this bug. Needs testing before using the below
-# code.
-#
-#			if not found and arg != '%':
-#				raise ArgNotFound(self, arg, 'network')
+			if not found and arg != '%':
+				raise ArgNotFound(self, arg, 'network')
 
 		return networks
 
@@ -238,18 +246,22 @@ class SwitchArgumentProcessor:
 		if not args:
 			args = ['%'] # find all switches
 		for arg in args:
-			rows = self.db.execute("""
-			select name from nodes
-			where name like '%s' and
-			appliance=(select id from appliances where name='switch')
-			""" % arg)
-
-			if rows == 0 and arg == '%': # empty table is OK
-				continue
-			for name, in self.db.fetchall():
+			found = False
+			for (name, ) in self.db.select("""
+				n.name from
+				nodes n, appliances a where
+				n.appliance = a.id and
+				a.name = 'switch'  and
+				n.name like %s
+				order by rack, rank
+				""", (arg)):
+				found = True
 				switches.append(name)
+			if not found and arg != '%':
+				raise ArgNotFound(self, arg, 'switch')
 
 		return switches
+
 
 	def delSwitchEntries(self, args=None):
 		"""Delete foreign key references from switchports"""
@@ -261,6 +273,7 @@ class SwitchArgumentProcessor:
 			delete from switchports
 			where switch=(select id from nodes where name='%s')
 			""" % arg)
+
 
 	def getSwitchNetwork(self, switch):
 		"""Returns the network the switch's management interface is on.
@@ -335,6 +348,7 @@ class SwitchArgumentProcessor:
 		and switch=(select id from nodes where name='%s')
 		""" % (vlan, host, switch))
 
+
 	def getSwitchesForHosts(self, hosts):
 		"""Return switches name for hosts"""
 		_switches = []
@@ -350,6 +364,7 @@ class SwitchArgumentProcessor:
 				_switches.append(row)
 
 		return set(_switches)
+
 
 	def getHostsForSwitch(self, switch):
 		"""Return a dictionary of hosts that are connected to the switch.
@@ -380,7 +395,7 @@ class SwitchArgumentProcessor:
 class CartArgumentProcessor:
 	"""An Interface class to add the ability to process cart arguments."""
 
-	def getCartNames(self, args, params):
+	def getCartNames(self, args):
 	
 		carts = []
 		if not args:
@@ -1222,11 +1237,9 @@ class DatabaseConnection:
 			m.update(' '.join(str(arg) for arg in args).encode('utf-8'))
 		k = m.hexdigest()
 
-#		 print 'select', k, command
 		if k in DatabaseConnection.cache:
 			Debug('select %s' % k)
 			rows = DatabaseConnection.cache[k]
-#			 print >> sys.stderr, '-\n%s\n%s\n' % (command, rows)
 		else:
 			try:
 				self.execute('select %s' % command, args)
@@ -1328,137 +1341,55 @@ class DatabaseConnection:
 		host = self.getHostname(host)
 		routes = {}
 
-		# if needed, add default routes to support multitenancy
-		# if _frontend == host:
-		if 0:
-			print(
-			"""
-			n.ip, n.device, np.ip 
-			from networks n
-			left join networks np
-			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
-			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend, _frontend))
+		Scope = namedtuple('Scope', ['sql', 'args', 'label'])
 
-			_networks = self.select(
-			"""
-			n.ip, n.device, np.ip 
-			from networks n
-			left join networks np
-			on np.node != (select id from nodes where name='%s') and n.subnet = np.subnet
-			where n.node=(select id from nodes where name='%s')
-			""" % (_frontend, _frontend))
+		_global = Scope(
+			sql="""network, netmask, gateway, subnet, interface FROM global_routes""",
+			args=(),
+			label='G'
+		)
+		_os = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM os_routes r, nodes n WHERE r.os=%s AND n.name=%s""",
+			args=(self.getHostOS(host), host),
+			label='O'
+		)
+		_appliance = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM appliance_routes r, nodes n, appliances app
+				WHERE n.appliance=app.id AND r.appliance=app.id AND n.name=%s""",
+			args=host,
+			label='A'
+		)
+		_environment = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM environment_routes r, nodes n, environments env
+				WHERE n.environment=env.id AND r.environment=env.id AND n.name=%s""",
+			args=host,
+			label='E'
+		)
+		_host = Scope(
+			sql="""r.network, r.netmask, r.gateway, r.subnet, r.interface
+				FROM node_routes r, nodes n WHERE n.name=%s AND n.id=r.node""",
+			args=host,
+			label='H'
+		)
 
-			_network_dict = {}
-			for _network in _networks:
-				if None in _network:
-					continue
-				(gateway, interface, destination) = _network
-				interface = interface.split('.')[0].split(':')[0]
-				
-				if destination in _network_dict:
-					routes[destination] = _network_dict[destination]
+		for scope in [_global, _os, _appliance, _environment, _host]:
+			for (network, netmask, gateway, subnet, interface) in self.select(scope.sql, scope.args):
+				if subnet:
+					for dev, in self.select("""net.device from
+						subnets s, networks net, nodes n where
+						s.id = %s and s.id = net.subnet and
+						net.node = n.id and n.name = %s
+						and net.device not like 'vlan%%'
+						""", (subnet, host)):
+						interface = dev
+
+				if showsource:
+					routes[network] = (netmask, gateway, interface, subnet, scope.label)
 				else:
-					if showsource:
-						_network_dict[destination] = (
-							'255.255.255.255', 
-							gateway, 
-							interface, 
-							'H')
-					else:
-						_network_dict[destination] = (
-							'255.255.255.255', 
-							gateway, 
-							interface,)
-
-				
-		
-		# global
-		
-		for (n, m, g, s, i) in self.select("""
-			network, netmask, gateway, subnet, interface from
-			global_routes
-			"""):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
-					and net.device not like 'vlan%%' 
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'G')
-			else:
-				routes[n] = (m, g, i)
-
-		# os
-				
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from os_routes r, nodes n where
-			r.os='%s' and n.name='%s'
-			"""  % (self.getHostOS(host), host)):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'O')
-			else:
-				routes[n] = (m, g, i)
-
-		# appliance
-
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from
-			appliance_routes r,
-			nodes n,
-			appliances app where
-			n.appliance=app.id and 
-			r.appliance=app.id and n.name='%s'
-			""" % host):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s' 
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'A')
-			else:
-				routes[n] = (m, g, i)
-
-		# host
-		
-		for (n, m, g, s, i) in self.select("""
-			r.network, r.netmask, r.gateway,
-			r.subnet, r.interface from node_routes r, nodes n where
-			n.name='%s' and n.id=r.node
-			""" % host):
-			if s:
-				for dev, in self.select("""
-					net.device from
-					subnets s, networks net, nodes n where
-					s.id = %s and s.id = net.subnet and
-					net.node = n.id and n.name = '%s'
-					and net.device not like 'vlan%%'
-					""" % (s, host)):
-					i = dev
-			if showsource:
-				routes[n] = (m, g, i, 'H')
-			else:
-				routes[n] = (m, g, i)
+					routes[network] = (netmask, gateway, interface, subnet)
 
 		return routes
 
@@ -1891,7 +1822,7 @@ class Command:
 		# the return code.  The actual text is what we return.
 
 		self.rc = o.runWrapper(name, args, self.level + 1)
-		#print ('- ', command)
+
 		return o.getText()
 
 
@@ -2511,6 +2442,23 @@ class Command:
 			return row['value']
 		return None
 
+	def getHostAttrDict(self, host, attr=None):
+		"""
+		for `host` return all of its attrs in a dictionary
+		return {'host1': {'rack': '0', 'rank': '1', ...}, 'host2': {...}, ...}
+		This works because multiple attr's cannot have the same name.
+		"""
+		if type(host) == type([]):
+			params = host
+		else:
+			params = [host]
+		if attr:
+			params.append(f'attr={attr}')
+
+		return {k: {i['attr']: i['value'] for i in v}
+			for k, v in groupby(
+				self.call('list.host.attr', params),
+				itemgetter('host'))}
 
 
 
@@ -2580,4 +2528,3 @@ class PluginOrderIterator(stack.graph.GraphIterator):
 		stack.graph.GraphIterator.finishHandler(self, node, edge)
 		self.time = self.time + 1
 		self.nodes.append((self.time, node))
-

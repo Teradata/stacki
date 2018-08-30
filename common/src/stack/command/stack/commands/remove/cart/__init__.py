@@ -35,7 +35,7 @@ class Command(stack.commands.CartArgumentProcessor,
 			raise ArgRequired(self, 'cart')
 
 		cartpath = '/export/stack/carts'
-		for cart in self.getCartNames(args, params):
+		for cart in self.getCartNames(args):
 			os.system('/bin/rm -rf %s' % os.path.join(cartpath, cart))
 
 			#

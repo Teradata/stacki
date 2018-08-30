@@ -185,7 +185,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 
 	def run(self, params, args):
-		for cart in self.getCartNames(args, params):
+		for cart in self.getCartNames(args):
 			#
 			# ensure only one process can update the cart at a time
 			#

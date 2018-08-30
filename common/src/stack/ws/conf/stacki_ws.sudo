@@ -8,6 +8,7 @@ Cmnd_Alias STACK_RUN = /opt/stack/bin/stack run host test *
 Cmnd_Alias STACK_LIST = /opt/stack/bin/stack list host profile *, \
 			/opt/stack/bin/stack list host xml *, \
 			/opt/stack/bin/stack list node xml *
+Cmnd_Alias STACK_ADD = /opt/stack/bin/stack add pallet *
 Defaults!STACK_SYNC !requiretty
 Defaults!STACK_LIST !requiretty
-apache ALL = (root) NOPASSWD:STACK_SYNC, (nobody) NOPASSWD:STACK_LIST, (root) NOPASSWD:STACK_RUN
+apache ALL = (root) NOPASSWD:STACK_SYNC, (nobody) NOPASSWD:STACK_LIST, (root) NOPASSWD:STACK_RUN, (root) NOPASSWD:STACK_ADD

@@ -29,8 +29,8 @@ class Command(stack.commands.Command,
 
 	<example cmd='report ansible attribute=kube_master,kube_worker'>
 	Create an inventory file of the managed hosts, rack, and
-	appliances and nodes that have kube_master or kube_minion set to
-	"True". The attribute name is the group target.
+	appliances and nodes that have kube_master or kube_minion set. The 
+	attribute name is the group target.
 
 	..snip..
 

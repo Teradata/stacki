@@ -42,23 +42,18 @@ class Command(stack.commands.list.appliance.command):
 		self.beginOutput()
 
 		for app in self.getApplianceNames(args):
-			self.db.execute("""
-				select r.network, r.netmask, r.gateway,
-				r.subnet from appliance_routes r, appliances a
-				where r.appliance=a.id and a.name='%s'""" % app)
-
-			for network, netmask, gateway, subnet in \
-				self.db.fetchall():
-
+			routes = self.db.select("""r.network, r.netmask, r.gateway,
+				r.subnet, r.interface from appliance_routes r, appliances a
+				where r.appliance=a.id and a.name=%s""", app)
+			for network, netmask, gateway, subnet, interface in routes:
 				if subnet:
-					rows = self.db.execute("""select name
-						from subnets where id = %s"""
-						% subnet)
-					if rows == 1:
-						gateway, = self.db.fetchone()
+					subnet_name = self.db.select("""name from subnets where id=%s""",
+								[subnet])[0][0]
+				else:
+					subnet_name = None
+				if interface == 'NULL':
+					interface = None
+				self.addOutput(app, (network, netmask, gateway, subnet_name, interface))
 
-				self.addOutput(app, (network, netmask, gateway))
-
-		self.endOutput(header=['appliance', 'network', 
-			'netmask', 'gateway' ], trimOwner=0)
-
+		self.endOutput(header=['appliance', 'network', 'netmask', 'gateway',
+				'subnet', 'interface' ], trimOwner=0)

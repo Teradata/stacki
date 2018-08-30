@@ -45,7 +45,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		if not rows:
 			raise CommandError(self, 'unknown box "%s"' % box)
 			
-		for cart in self.getCartNames(args, params):
+		for cart in self.getCartNames(args):
 			enabled = False
 			for row in self.db.select("""
 				b.name from

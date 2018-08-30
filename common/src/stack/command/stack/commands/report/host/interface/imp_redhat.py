@@ -7,6 +7,7 @@
 import re
 import shlex
 import stack.commands
+from stack.commands import Warn
 
 
 class Implementation(stack.commands.Implementation):
@@ -32,6 +33,11 @@ class Implementation(stack.commands.Implementation):
 			gateway = row['gateway']
 			vlanid	= row['vlan']
 			default = row['default']
+
+			if ip and not netname:
+				Warn(f'WARNING: skipping interface "{device}" on host "{host}" - '
+				      'interface has an IP but no network')
+				continue
 
 			mtu = None
 			if subnet:
@@ -78,6 +84,7 @@ class Implementation(stack.commands.Implementation):
 				s += '%s">' % (device)
 
 				self.owner.addOutput(host, s)
+				self.owner.addOutput(host, '# AUTHENTIC STACKI')
 				self.writeConfig(host, mac, ip, device,
 					netmask, vlanid, mtu, optionlist, channel, default)
 				self.owner.addOutput(host, '</stack:file>')

@@ -42,5 +42,3 @@ class Command(command):
 		header = ['make', 'model']
 		self.endOutput(header=header, trimOwner=True)
 
-
-RollName = "stacki"

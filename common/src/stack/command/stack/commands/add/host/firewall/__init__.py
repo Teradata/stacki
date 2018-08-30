@@ -12,6 +12,7 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
+from stack.exception import ArgRequired, CommandError
 
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.host.command):
@@ -98,28 +99,35 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.doParams()
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
 		hosts = self.getHostnames(args)
 
+		(service, network, outnetwork, chain, action, protocol, flags,
+			comment, table, rulename) = self.doParams()
+
+		# Make sure we have a new rule
 		for host in hosts:
-			sql = """node = (select id from nodes where
-				name = '%s') and""" % host
+			if self.db.select("""count(*) from node_firewall where
+				node = (select id from nodes where name = %s) and
+				service = %s and action = %s and chain = %s and
+				if (%s is NULL, insubnet is NULL, insubnet = %s) and
+				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
+				if (%s is NULL, protocol is NULL, protocol = %s) and
+				if (%s is NULL, flags is NULL, flags = %s)""",
+				(host, service, action, chain, network, network, outnetwork,
+				outnetwork, protocol, protocol, flags, flags)
+			)[0][0] > 0:
+				raise CommandError(self, 'firewall rule already exists')
 
-			self.checkRule('node_firewall', sql, service, network,
-				outnetwork, chain, action, protocol, flags,
-				comment, table, rulename)
-
-		#
-		# all the rules are valid, now let's add them
-		#
+		# Now let's add them
 		for host in hosts:
-			sql = "(select id from nodes where name='%s'), " % host
-
-			self.insertRule('node_firewall', 'node, ', sql, service,
-				network, outnetwork, chain, action, protocol,
-				flags, comment, table, rulename)
+			self.db.execute("""insert into node_firewall
+				(node, insubnet, outsubnet, service, protocol,
+				action, chain, flags, comment, tabletype, name)
+				values ((select id from nodes where name=%s),
+				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+				(host, network, outnetwork,	service, protocol, action,
+				chain, flags, comment, table, rulename)
+			)

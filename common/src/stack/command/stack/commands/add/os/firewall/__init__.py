@@ -13,6 +13,7 @@
 import stack.commands
 import stack.commands.add
 import stack.commands.add.firewall
+from stack.exception import CommandError, ArgRequired
 
 class Command(stack.commands.add.firewall.command,
 	stack.commands.add.os.command):
@@ -61,6 +62,16 @@ class Command(stack.commands.add.firewall.command,
 	ACCEPT, REJECT, DROP).
 	</param>
 
+	<param type='string' name='flags'>
+	Optional flags associated with this rule. An example flag is:
+	"-m state --state RELATED,ESTABLISHED".
+	</param>
+
+	<param type='string' name='comment'>
+	A comment associated with this rule. The comment will be printed
+	directly above the rule in the firewall configuration file.
+	</param>
+	
 	<param type='string' name='table'>
 	The table to add the rule to. Valid values are 'filter',
 	'nat', 'mangle', and 'raw'. If this parameter is not
@@ -82,23 +93,33 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.doParams()
-
+		if len(args) == 0:
+			raise ArgRequired(self, 'os')
+		
 		oses = self.getOSNames(args)
 
+		(service, network, outnetwork, chain, action, protocol, flags,
+			comment, table, rulename) = self.doParams()
+		
+		# Make sure we have a new rule
 		for os in oses:
-			sql = "os = '%s' and" % os
+			if self.db.select("""count(*) from os_firewall where os = %s and
+				service = %s and action = %s and chain = %s and
+				if (%s is NULL, insubnet is NULL, insubnet = %s) and
+				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
+				if (%s is NULL, protocol is NULL, protocol = %s) and
+				if (%s is NULL, flags is NULL, flags = %s)""",
+				(os, service, action, chain, network, network, outnetwork,
+				outnetwork, protocol, protocol, flags, flags)
+			)[0][0] > 0:
+				raise CommandError(self, 'firewall rule already exists')
 
-			self.checkRule('os_firewall', sql, service,
-				network, outnetwork, chain, action, protocol,
-				flags, comment, table, rulename)
-
-		#
-		# all the rules are valid, now let's add them
-		#
+		# Now let's add them
 		for os in oses:
-			self.insertRule('os_firewall', 'os, ', '"%s", ' % os,
-				service, network, outnetwork, chain, action,
-				protocol, flags, comment, table, rulename)
-
+			self.db.execute("""insert into os_firewall
+				(os, insubnet, outsubnet, service, protocol,
+				action, chain, flags, comment, tabletype, name)
+				values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+				(os, network, outnetwork,	service, protocol, action,
+				chain, flags, comment, table, rulename)
+			)

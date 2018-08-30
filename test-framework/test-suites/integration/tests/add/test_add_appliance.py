@@ -1,6 +1,6 @@
 import pytest
 
-@pytest.mark.usefixtures("revert_database")
+
 class TestAddAppliance:
 
 	APPLIANCE_TEST_DATA = [
@@ -8,7 +8,7 @@ class TestAddAppliance:
 		('new_appliance_node_is_backend', 'node=backend', 'add_new_appliance_created_with_node_as_backend_output.json',),
 		('new_appliance_node_is_empty_str', 'node=', 'add_new_appliance_created_with_node_as_empty_str_output.json'),
 		('new_appliance_node_is_any_str', 'node=anystr', 'add_new_appliance_created_with_node_as_any_str_output.json'),
-		]
+	]
 
 	@pytest.mark.parametrize("appliance_name,add_params,output_file", APPLIANCE_TEST_DATA)
 	def test_add_appliance_behavior(self, host, appliance_name, add_params, output_file):
@@ -22,3 +22,12 @@ class TestAddAppliance:
 		assert result.rc == 0
 		assert result.stdout.strip() == expected_output.strip()
 
+	def test_add_appliance_duplicate(self, host):
+		result = host.run('stack add appliance backend')
+		assert result.rc == 255
+		assert result.stderr == 'error - appliance "backend" already exists\n'
+
+	def test_add_appliance_two_args(self, host):
+		result = host.run('stack add appliance foo foo')
+		assert result.rc == 255
+		assert result.stderr == 'error - "appliance" argument must be unique\n{appliance} [node=string] [public=bool]\n'

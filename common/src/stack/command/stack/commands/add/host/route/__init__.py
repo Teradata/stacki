@@ -22,17 +22,17 @@ class Command(stack.commands.add.host.command):
 	<arg type='string' name='host' repeat='1'>
 	Host name of machine
 	</arg>
-	
+
 	<param type='string' name='address'>
 	Host or network address
 	</param>
-	
+
 	<param type='string' name='gateway'>
 	Network or device gateway
 	</param>
 
 	<param type='string' name='interface'>
-	The interface to send the bits over. Useful if 
+	The interface to send the bits over. Useful if
 	you want to tag a packet.
 	</param>
 
@@ -56,7 +56,7 @@ class Command(stack.commands.add.host.command):
 	def run(self, params, args):
 
 		hosts = self.getHostnames(args)
-		
+
 		(address, gateway, netmask, interface, syncnow) = self.fillParams([
 			('address', None, True),
 			('gateway', None, True),
@@ -64,34 +64,31 @@ class Command(stack.commands.add.host.command):
 			('interface', None),
 			('syncnow', None),
 			])
-		
+
 		syncnow = self.str2bool(syncnow)
 
-		#
-		# determine if this is a subnet identifier
-		#
-		subnet = 0
-		rows = self.db.execute("""select id from subnets where
-			name = '%s' """ % gateway)
-
-		if rows == 1:
-			subnet, = self.db.fetchone()
-			gateway = ""
+		# check if the user has put a subnet name in the gateway field
+		subnet = self.db.select("""id from subnets where name=%s """, [gateway])
+		if subnet:
+			# if they have, set the gateway to '' and pull the subnet name
+			# out of the returned tuple
+			gateway = ''
+			subnet = subnet[0][0]
 		else:
-			subnet = 'NULL'
-			gateway = "%s" % gateway
-		
+			# if they haven't, set the subnet to None and leave the user
+			# specified gateway in the gateway field
+			subnet = None
+
 		# Verify the route doesn't already exist.  If it does
-		# for any of the hosts raise a CommandError.
-		
+		# for any of the given hosts raise a CommandError.
 		for host in hosts:
 			_rows = self.db.select("""
 				r.network, r.interface, r.gateway from
 				node_routes r, nodes n where
 				r.node=n.id and
-				r.network='%s' and
-				n.name='%s'
-				""" % (address, host))
+				r.network=%s and
+				n.name=%s
+				""", (address, host))
 			if _rows:
 				if host != self.db.getHostname('localhost'):
 					raise CommandError(self, 'route exists')
@@ -116,22 +113,22 @@ class Command(stack.commands.add.host.command):
 		# if interface is being set, check if it exists first
 		#
 		if interface:
-			rows = self.db.execute("""select * from networks
-				where node=1 and device='%s'""" % interface)
+			rows = self.db.select("""* from networks
+				where node=1 and device=%s""", interface)
 			if not rows:
 				raise CommandError(self, 'interface does not exist')
 		else:
-			interface='NULL'
-		
+			interface = None
+
 		# Now that we know things will work insert the route for
 		# all the hosts
-		
-		for host in hosts:	
-			self.db.execute("""insert into node_routes values 
-				((select id from nodes where name='%s'),
-				'%s', '%s', '%s', %s, '%s')""" %
+
+		for host in hosts:
+			self.db.execute("""insert into node_routes values
+				((select id from nodes where name=%s),
+				%s, %s, %s, %s, %s)""",
 				(host, address, netmask, gateway, subnet, interface))
-			
+
 			#
 			# if host is frontend and sync now, add route to routing table
 			#
@@ -149,7 +146,7 @@ class Command(stack.commands.add.host.command):
 
 					# add route to routing table
 					p = subprocess.Popen(add_route, stdout=subprocess.PIPE)
-					
+
 					# add route to routes file
 					cmd = '/opt/stack/bin/stack report host route localhost | '
 					cmd += '/opt/stack/bin/stack report script | '

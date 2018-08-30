@@ -50,6 +50,8 @@ class Command(stack.commands.remove.host.command):
 
 		syncnow = self.str2bool(syncnow)
 
+		devnull = open('/dev/null', 'w')
+
 		for host in self.getHostnames(args):
 			res = self.db.execute("""
 			delete from node_routes where 
@@ -62,4 +64,6 @@ class Command(stack.commands.remove.host.command):
 					del_route = ['route', 'del', '-host', address]
 
 					# remove route from routing table
-					p = subprocess.Popen(del_route, stdout=subprocess.PIPE)
+					p = subprocess.Popen(del_route, stdout=subprocess.PIPE,
+						stderr=devnull)
+

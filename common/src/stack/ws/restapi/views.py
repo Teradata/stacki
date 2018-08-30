@@ -38,19 +38,6 @@ log = logging.getLogger("stack-ws")
 # from: https://mariadb.com/kb/en/mariadb/mariadb-error-codes/
 MYSQL_EX = [1044, 1045, 1142, 1143, 1227]
 
-# The modules list.host.profile, list.host.xml, and
-# list.node.xml, when called through the command line,
-# use the correct xml parser. However, when the module
-# is called directly, the system XML parser is used. 
-# This causes problems when parsing undefined attributes.
-# So separate out the xml commands and run them directly
-
-xml_cmds = [
-	'list.host.profile',
-	'list.host.xml',
-	'list.node.xml',
-]
-
 
 class StackWS(View):
 
@@ -87,7 +74,7 @@ class StackWS(View):
 		log.info("Session Starting")
 
 		# filter out all the params
-		params = [p for p in filter(lambda x: len(x.split('=')) == 2, args)]
+		params = [p for p in filter(lambda x: len(x.split('=')) >= 2, args)]
 
 		# Filter out all the args
 		args = [a for a in filter(lambda x: len(x.split('=')) == 1, args)]
@@ -105,7 +92,7 @@ class StackWS(View):
 		# Get the command module to execute
 		mod_name = '.'.join(args)
 
-		log.info("Webservice user %s called %s" % (request.user.username, mod_name))
+		log.info('user %s called "%s" %s' % (request.user.username, mod_name, params))
 
 		# Check if command is blacklisted
 		if self._blacklisted(mod_name):
@@ -171,45 +158,13 @@ class StackWS(View):
 			return HttpResponseForbidden("'run host' command is not permitted",
 						     content_type="text/plain")
 
-		# Any command that runs an "import xml.*"
-		# is required to shell out. See top of file
-		# for explanation
-		elif cmd_module in xml_cmds:
-			c = []
-			# If the user is not an admin, lower
-			# privileges before running the command
-			if not request.user.is_superuser:
-				c.extend(['/usr/bin/sudo', '-u', 'nobody'])
-			c.append("/opt/stack/bin/stack")
-			c.extend(cmd_module.split('.'))
-			c.extend(cmd_arg_list)
-			p = subprocess.Popen(c, 
-					     stdin=None,
-					     stdout=subprocess.PIPE,
-					     stderr=subprocess.PIPE)
-			o, e = p.communicate()
-			rc = p.wait()
-			if rc:
-				j = {"API Error": e, "Output": o}
-				return HttpResponse(str(json.dumps(j)),
-						    content_type="application/json",
-						    status=500)
-			else:
-				if not o:
-					o = {}
-				return HttpResponse(str(json.dumps(o)),
-						    content_type="application/json",
-						    status=200)
 		# If command is a sync/load command, run
 		# it with sudo, as the command will require
 		# some root privileges. However, if the user
 		# isn't a django superuser (with admin privileges)
 		# don't allow command to run.
-		elif cmd_module.startswith("sync.") or \
-			cmd_module.startswith("load.") or \
-			cmd_module.startswith("unload.") or \
-			cmd_module.startswith("run.host.test") or \
-			cmd_module == 'remove.host':
+		elif cmd_module.startswith(("sync.", "load.", "unload.")) or \
+			cmd_module in ['add.pallet', 'remove.host']:
 			if not request.user.is_superuser:
 				verb = cmd_module.split('.')[0]
 				return HttpResponseForbidden("All '%s' commands require Admin Privileges" % verb,
@@ -222,9 +177,11 @@ class StackWS(View):
 				]
 				c.extend(cmd_module.split('.'))
 				c.extend(cmd_arg_list)
+				log.info(f'{c}')
 				p = subprocess.Popen(c, 
 						     stdout=subprocess.PIPE,
-						     stderr=subprocess.PIPE)
+						     stderr=subprocess.PIPE,
+						     encoding='utf-8')
 				o, e = p.communicate()
 				rc = p.wait()
 				if rc:
@@ -390,61 +347,3 @@ def upload(request):
 	return HttpResponse(str(json.dumps(s)),
 			    content_type="application/json")
 
-
-def list_dir(request, file):
-	"""
-	REST response for listing files and folders for a given directory on the frontend
-	Location determined by URI, return a list of all directories and files in JSON
-	In GUI, this is used for browsing which files to add to the /srv/salt/stack/xfiles
-	share folder
-	"""
-
-	#determine the parent location to list files and folders
-	if file is None:
-		file = '/'
-	else:
-		file = '/' + file
-
-	parent = file
-
-	#create dictionary to be returned
-	data = {}
-	data["id"] = file
-	data["label"] = 'name'
-	data["children"] = []
-	data["name"] = parent
-
-	F = []
-	D = []
-
-	#attempt to list, unless permissions prohibit then return no children
-	try:
-		#insert names of files and directories into respective arrays
-		for file in os.listdir(parent):
-			filepath = parent + file
-			if os.path.isfile(filepath):
-				if not file.startswith('.'):
-					F.append(file)
-			elif os.path.isdir(filepath):
-				D.append(file)
-
-		#sort files and directories arrays
-		F.sort()
-		D.sort()
-
-		#insert new item for each file and directory into children
-		for name in F:
-			data["children"].append({ "type": "file",
-						  "id": parent + name,
-						  "name": name })
-
-		for name in D:
-			data["children"].append({ "type": "folder",
-						  "id": parent + name,
-						  "name": name,
-						  "children": True })
-	except:
-		data["children"] = []
-
-	return HttpResponse(str(json.dumps(data)),
-			    content_type="application/json")

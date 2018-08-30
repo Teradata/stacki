@@ -46,13 +46,17 @@ CREATE TABLE attributes (
   Attr          varchar(128) NOT NULL,
   Value         text,
   Shadow        text default NULL,
-  ScopeID	int(11)
+  ScopeID	int(11),
+  INDEX (Scope),
+  INDEX (Attr),
+  INDEX (ScopeID)
 );
 
 DROP TABLE IF EXISTS attributes_doc;
 CREATE TABLE attributes_doc (
   Attr          varchar(128) NOT NULL,
-  Doc           text
+  Doc           text,
+  INDEX (Attr)
 );
 
 <!-- OSes -->
@@ -61,7 +65,8 @@ DROP TABLE IF EXISTS oses;
 CREATE TABLE oses (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default '',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 insert into oses (name) values ("redhat");
@@ -76,7 +81,8 @@ DROP TABLE IF EXISTS environments;
 CREATE TABLE environments (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default '',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Appliances -->
@@ -85,9 +91,9 @@ DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default '',
-  LongName	varchar(64) NOT NULL default '',
   Public	enum('yes','no') NOT NULL default 'no',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Boxes -->
@@ -97,7 +103,8 @@ CREATE TABLE boxes (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default 'default',
   OS		int(11) NOT NULL references oses,
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Boot/Action Tables -->
@@ -143,7 +150,8 @@ CREATE TABLE nodes (
   InstallAction	int(11) default NULL references bootactions,
   Comment	varchar(140) default NULL,
   MetaData	text default NULL,
-  PRIMARY KEY  (ID)
+  PRIMARY KEY  (ID),
+  INDEX (Name)
 );
 
 <!-- Networks -->
@@ -215,7 +223,18 @@ CREATE TABLE os_routes (
 
 DROP TABLE IF EXISTS appliance_routes;
 CREATE TABLE appliance_routes (
-  Appliance     int(11) NOT NULL default '0',
+  Appliance int(11) NOT NULL default '0' references appliances,
+  Network	varchar(32) NOT NULL default '',
+  Netmask	varchar(32) NOT NULL default '',
+  Gateway	varchar(32) NOT NULL default '',
+  Subnet	int(11)	default NULL references subnets,
+  Interface	varchar(32) default NULL,
+  INDEX (Network)
+);
+
+DROP TABLE IF EXISTS node_routes;
+CREATE TABLE node_routes (
+  Node		int(11) NOT NULL default '0',
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
@@ -223,9 +242,9 @@ CREATE TABLE appliance_routes (
   Interface	varchar(32) default NULL
 );
 
-DROP TABLE IF EXISTS node_routes;
-CREATE TABLE node_routes (
-  Node		int(11) NOT NULL default '0',
+DROP TABLE IF EXISTS environment_routes;
+CREATE TABLE environment_routes (
+  Environment	int(11) NOT NULL default '0',
   Network	varchar(32) NOT NULL default '',
   Netmask	varchar(32) NOT NULL default '',
   Gateway	varchar(32) NOT NULL default '',
@@ -253,7 +272,8 @@ DROP TABLE IF EXISTS groups;
 CREATE TABLE groups (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
-  PRIMARY KEY (ID) 
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 DROP TABLE IF EXISTS memberships;
@@ -269,7 +289,8 @@ CREATE TABLE carts (
   ID 		int(11) NOT NULL auto_increment,
   Name		varchar(128) NOT NULL default '',
   URL		text	    NULL default '',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Roll.  What Rolls are installed and used by default. -->
@@ -318,7 +339,9 @@ CREATE TABLE global_firewall (
   Action        varchar(256) default NULL,
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL
+  Comment       varchar(256) default NULL,
+  INDEX (Name),
+  INDEX (Service)
 );
 
 DROP TABLE IF EXISTS os_firewall;
@@ -334,12 +357,15 @@ CREATE TABLE os_firewall (
   Action        varchar(256) default NULL,
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL
+  Comment       varchar(256) default NULL,
+  INDEX (OS),
+  INDEX (Name),
+  INDEX (Service)
 );
 
 DROP TABLE IF EXISTS appliance_firewall;
 CREATE TABLE appliance_firewall (
-  Appliance     int(11) NOT NULL default '0',
+  Appliance     int(11) NOT NULL default '0' references appliances,
   Tabletype	enum('nat','filter','mangle','raw') NOT NULL
   		default 'filter',
   Name		varchar(256) default NULL,
@@ -350,12 +376,14 @@ CREATE TABLE appliance_firewall (
   Action        varchar(256) default NULL,
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL
+  Comment       varchar(256) default NULL,
+  INDEX (Name),
+  INDEX (Service)
 );
 
 DROP TABLE IF EXISTS node_firewall;
 CREATE TABLE node_firewall (
-  Node		int(11) NOT NULL default '0',
+  Node		int(11) NOT NULL default '0' references nodes,
   Tabletype	enum('nat','filter','mangle','raw') NOT NULL
   		default 'filter',
   Name		varchar(256) default NULL,
@@ -366,8 +394,30 @@ CREATE TABLE node_firewall (
   Action        varchar(256) default NULL,
   Chain         varchar(256) default NULL,
   Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL
+  Comment       varchar(256) default NULL,
+  INDEX (Name),
+  INDEX (Service)
 );
+
+DROP TABLE IF EXISTS environment_firewall;
+CREATE TABLE environment_firewall (
+  Environment	int(11) NOT NULL default '0',
+  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
+  		default 'filter',
+  Name		varchar(256) default NULL,
+  InSubnet	int(11)	default NULL references subnets,
+  OutSubnet	int(11)	default NULL references subnets,
+  Service       varchar(256) default NULL,
+  Protocol      varchar(256) default NULL,
+  Action        varchar(256) default NULL,
+  Chain         varchar(256) default NULL,
+  Flags         varchar(256) default NULL,
+  Comment       varchar(256) default NULL,
+  INDEX (Name),
+  INDEX (Service)
+);
+
+<!-- Miscellaneous -->
 
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (

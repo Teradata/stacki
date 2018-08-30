@@ -19,6 +19,8 @@ class Plugin(stack.commands.Plugin):
 	def run(self, ha):
 
 		for host in ha:
+			if 'interfaces' not in ha[host]:
+				continue
 			for interface in ha[host]['interfaces']:
 				filename = os.path.join(os.path.sep,
 							'tftpboot', 

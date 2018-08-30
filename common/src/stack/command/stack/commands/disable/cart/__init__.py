@@ -46,7 +46,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		if not rows:
 			raise CommandError(self, 'unknown box "%s"' % box)
 		
-		for cart in self.getCartNames(args, params):
+		for cart in self.getCartNames(args):
 			self.db.execute("""
 				delete from cart_stacks where
 				box = (select id from boxes where name='%s')

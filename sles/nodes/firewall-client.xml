@@ -28,18 +28,46 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 ### END INIT INFO
 #
 
+. /etc/rc.status
+
+start(){
+	cat /etc/sysconfig/iptables | /usr/sbin/iptables-restore
+}
+
+stop(){
+	/usr/sbin/iptables -F
+}
+
+status(){
+	/usr/sbin/iptables -L
+}
+
 case "$1" in
 start)
-	echo "Applying iptables rules"
-	cat /etc/sysconfig/iptables | /usr/sbin/iptables-restore
-;;
+	echo -n "Applying iptables rules"
+	start
+	rc_status -v
+	;;
 
 stop)
-	/usr/sbin/iptables -F
+	echo -n "Flushing iptables rules"
+	stop
+	rc_status -v
+	;;
+
+restart)
+	echo -n "Refreshing iptables rules"
+	stop
+	start
+	rc_status -v
+	;;
+
+status)
+	status
 	;;
 
 *)
-	echo "Usage: $0 {start|stop}"
+	echo "Usage: $0 {start|stop|restart|status}"
 	exit 1
 esac
 

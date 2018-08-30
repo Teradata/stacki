@@ -64,5 +64,7 @@ class Command(command):
 				'port',
 				'vlan',
 				'type',
+				'host',
+				'interface',
 				])
 
