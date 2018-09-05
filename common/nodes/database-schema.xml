@@ -188,7 +188,8 @@ CREATE TABLE subnets (
 	mtu		int(11)		default '1500',
 	dns		boolean		default false,
 	pxe		boolean		default false,
-	PRIMARY KEY(ID)
+	PRIMARY KEY(ID),
+	INDEX (name)
 );
 
 <!-- Node/Switch Table -->
@@ -304,7 +305,8 @@ CREATE TABLE rolls (
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default '&os;',
   URL		text	    NULL default '',
-  PRIMARY KEY (ID) 
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Partitions. stores all the partitions for all the appliances -->

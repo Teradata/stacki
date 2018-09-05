@@ -30,10 +30,10 @@ class Command(command):
 			raise ArgUnique(self, 'environment')
 		environment = args[0]
 
-		if self.db.select(
-			'count(ID) from environments where name=%s',
+		if self.db.count(
+			'(ID) from environments where name=%s',
 			(environment,)
-		)[0][0] > 0:
+		) > 0:
 			raise CommandError(self, 'environment "%s" already exists' % environment)
 
 		self.db.execute(

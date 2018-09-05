@@ -103,7 +103,7 @@ class Command(stack.commands.add.firewall.command,
 		
 		# Make sure we have a new rule
 		for os in oses:
-			if self.db.select("""count(*) from os_firewall where os = %s and
+			if self.db.count("""(*) from os_firewall where os = %s and
 				service = %s and action = %s and chain = %s and
 				if (%s is NULL, insubnet is NULL, insubnet = %s) and
 				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
@@ -111,7 +111,7 @@ class Command(stack.commands.add.firewall.command,
 				if (%s is NULL, flags is NULL, flags = %s)""",
 				(os, service, action, chain, network, network, outnetwork,
 				outnetwork, protocol, protocol, flags, flags)
-			)[0][0] > 0:
+			) > 0:
 				raise CommandError(self, 'firewall rule already exists')
 
 		# Now let's add them

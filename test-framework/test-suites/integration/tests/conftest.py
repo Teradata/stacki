@@ -1,4 +1,5 @@
 import gc
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import multiprocessing
 import os
@@ -308,8 +309,67 @@ def run_django_server():
 	process.join()
 
 @pytest.fixture
+def run_file_server():
+	# Run an HTTP server in a process
+	def runner():		
+		try:
+			# Change to our test-files directory
+			os.chdir('/export/test-files')
+
+			# Serve them up
+			with HTTPServer(
+				('127.0.0.1', 8000),
+				SimpleHTTPRequestHandler
+			) as httpd:
+				httpd.serve_forever()
+		except KeyboardInterrupt:
+			# The signal to exit
+			pass
+	
+	process = multiprocessing.Process(target=runner)
+	process.daemon = True
+	process.start()
+
+	# Give us a second to get going
+	time.sleep(1)
+	
+	yield
+
+	# Tell the server it is time to clean up
+	os.kill(process.pid, signal.SIGINT)
+	process.join()
+
+@pytest.fixture
 def host_os(host):
 	if host.file('/etc/SuSE-release').exists:
 		return 'sles'
 	
 	return 'redhat'
+
+@pytest.fixture
+def rmtree(tmpdir):
+	"""
+	This fixture lets you call rmtree(path) in a test, which simulates
+	deleting a directory and all it's files. It really moves it to
+	a temperary location and restores it when the test finishes.
+	"""
+
+	restore = []
+	def _inner(path):
+		result = subprocess.run(['mv', path, tmpdir.join(str(len(restore)))])
+		if result.returncode != 0:
+			pytest.fail(f'Unable to move {path}')
+		restore.append(path)
+	
+	yield _inner
+
+	# For each directory to restore
+	for ndx, path in enumerate(restore):
+		# Delete any existing stuff
+		if os.path.exists(path):
+			shutil.rmtree(path)
+		
+		# Move back the original data
+		result = subprocess.run(['mv', tmpdir.join(str(ndx)), path])
+		if result.returncode != 0:
+			pytest.fail(f'Unable to restory {path}')

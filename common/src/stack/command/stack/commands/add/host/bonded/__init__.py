@@ -79,10 +79,7 @@ class Command(stack.commands.add.host.command):
 			name = host
 		
 		# check if the network exists
-		if self.db.select(
-			'count(ID) from subnets where name = %s',
-			(network,)
-		)[0][0] == 0:
+		if self.db.count('(ID) from subnets where name=%s', (network,)) == 0:
 			raise CommandError(self, f'network "{network}" does not exist')
 
 		# If there is a comma, assume comma seperated. Else, assume whitespace.

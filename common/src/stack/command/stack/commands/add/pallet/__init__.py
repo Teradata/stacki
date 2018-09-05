@@ -17,14 +17,7 @@ import stack.file
 import stack.commands
 from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
-#if requests is not available,
-#attempting to barnacle will fail
-try:
-	from urllib.parse import urlparse
-	import requests
-	from requests.auth import HTTPBasicAuth
-except:
-	pass
+from urllib.parse import urlparse
 
 
 class Command(stack.commands.add.command):
@@ -149,15 +142,16 @@ class Command(stack.commands.add.command):
 		Insert the pallet information into the database if
 		not already present.
 		"""
-		rows = self.db.execute("""
-			select * from rolls where
-			name='%s' and version='%s' and rel='%s' and arch='%s' and os='%s'
-			""" % (name, version, release, arch, OS))
-		if not rows:
-			self.db.execute("""insert into rolls
-				(name, version, rel, arch, os, URL) values
-				('%s', '%s', '%s', '%s', '%s', '%s')
-				""" % (name, version, release, arch, OS, URL))
+
+		if self.db.count(
+			'(ID) from rolls where name=%s and version=%s and rel=%s and arch=%s and os=%s',
+			(name, version, release, arch, OS)
+		) == 0:
+			self.db.execute("""
+				insert into rolls(name, version, rel, arch, os, URL)
+				values (%s, %s, %s, %s, %s, %s)
+				""", (name, version, release, arch, OS, URL)
+			)
 
 	# Call the sevice ludicrous-cleaner
 	def clean_ludicrous_packages(self):
@@ -227,7 +221,7 @@ class Command(stack.commands.add.command):
 			#
 			rc = os.system('mount | grep %s' % self.mountPoint)
 			if rc == 0:
-				self.copy(clean, dir, updatedb, self.mountpoint)
+				self.copy(clean, dir, updatedb, self.mountPoint)
 			else:
 				raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
 

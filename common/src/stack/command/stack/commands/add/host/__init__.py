@@ -97,10 +97,7 @@ class Command(command):
 
 		host = args[0].lower()
 
-		if self.db.select(
-			'count(ID) from nodes where name=%s',
-			(host,)
-		)[0][0] > 0:
+		if self.db.count('(ID) from nodes where name=%s', (host,)) > 0:
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
 	
 		# If the name is of the form appliancename-rack-rank
