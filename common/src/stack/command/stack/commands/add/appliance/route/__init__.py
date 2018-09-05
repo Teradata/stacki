@@ -63,11 +63,11 @@ class Command(stack.commands.add.appliance.command):
 		# Verify the route doesn't already exist.  If it does
 		# for any of the appliances raise a CommandError.
 		for app in apps:
-			if self.db.select("""count(*) from 
+			if self.db.count("""(*) from 
 				appliance_routes r, appliances a where
 				r.appliance=a.id and r.network=%s
 				and a.name=%s""", (address, app)
-			)[0][0] > 0:
+			) > 0:
 				raise CommandError(self, 'route exists')
 
 		# Now that we know things will work insert the route for

@@ -30,10 +30,7 @@ class Command(stack.commands.add.command):
 
 		group = args[0]
 
-		if self.db.select(
-			'count(ID) from groups where name=%s',
-			(group,)
-		)[0][0] > 0:
+		if self.db.count('(ID) from groups where name=%s', (group,)) > 0:
 			raise CommandError(self, '"%s" group already exists' % group)
 
 		self.db.execute(

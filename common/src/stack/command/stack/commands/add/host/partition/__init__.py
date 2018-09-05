@@ -72,10 +72,10 @@ class Command(stack.commands.add.host.command):
 
 		for host in hosts:
 			# If we already have partition info, remove it for this host
-			if self.db.select("""count(p.ID) from partitions p, nodes n
+			if self.db.count("""(p.ID) from partitions p, nodes n
 				where p.node=n.id and n.name=%s and p.device=%s""",
 				(host, device)
-			)[0][0] != 0:
+			) != 0:
 				self.command("remove.host.partition", (host, f"device={device}"))
 			
 			# Insert the new partition info

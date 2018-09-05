@@ -1226,6 +1226,27 @@ class DatabaseConnection:
 		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
 		DatabaseConnection.cache = {}
 
+	def count(self, command, args=None ):
+		"""
+		Return a count of the number of matching items in the database.
+		The command query should start with the column in parentheses you
+		wish to count.
+
+		The return value will either be an int or None if something
+		unexpected happened.
+
+		Example: count('(ID) from subnets where name=%s', (name,))
+		"""
+
+		# Run our select count
+		rows = self.select(f'count{command.strip()}', args)
+		
+		# We should always get a single row back
+		if len(rows) != 1:
+			return None
+		
+		return rows[0][0]
+	
 	def select(self, command, args=None):
 		if not self.link:
 			return []
