@@ -1,5 +1,6 @@
 import re
 import syslog
+import requests
 
 from stack.expectmore import ExpectMore
 from stack.bool import str2bool
@@ -66,6 +67,78 @@ class SwitchMellanoxM7800(Switch):
 		self.proc.conversation(login_seq)
 
 		self._api_connection = mellanoknok.Mellanoknok(self.switch_ip_address, password=self.password)
+
+	def reload(self):
+		self.proc.ask('reload noconfirm')
+
+
+	def image_boot_next(self):
+		self.proc.ask('image boot next')
+
+
+	def install_firmware(self, image):
+		self.proc.ask(f'image install {image}', timeout=1800)
+
+
+	def image_fetch(self, url):
+		request = requests.get(url)
+		if request.status_code == 200:
+			self.proc.ask(f'image fetch {url}', timeout=900)
+		return request.status_code
+
+
+	def image_delete(self, image):
+		self.proc.ask(f'image delete {image}')
+
+
+	def show_images(self):
+		images_text = self.proc.ask('show images')
+		data = {}
+		data['Installed images']=[]
+		data['Last boot partition']=None
+		data['Next boot partition']=None
+		data['Available images']=[]
+		extraction1 = False
+		extraction2 = False
+		i = 0
+		while i < len(images_text):
+			string = images_text[i]
+			if(len(string)==0 or len(string)==1):
+				i = i + 1
+				continue
+			if('Installed images' in string):
+				extraction1 = True
+				i = i + 1
+				continue
+			if('Last boot partition' in string):
+				extraction1 = False
+				data['Last boot partition'] = int(string.split(':')[-1])
+				data['Next boot partition'] = int(images_text[i+1].split(':')[-1])
+				i = i + 1
+				continue
+			if('available to be installed' in string):
+				if('No image files are available to be installed' in string):
+					i = i + 1
+					continue
+				extraction2 = True
+				i = i + 1
+				continue
+			if('Serve image files via HTTP/HTTPS' in string):
+				extraction2 = False
+				break
+
+			if(extraction1):
+				partition = string.strip(': ')
+				image = images_text[i+1].strip()
+				d = {}
+				d[partition]=image
+				data['Installed images'].append(d)
+				i = i + 1
+			if(extraction2):
+				data['Available images'].append(images_text[i].strip())
+				i = i + 1
+			i = i + 1
+		return data
 
 
 	def disconnect(self):
