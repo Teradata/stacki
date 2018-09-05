@@ -105,7 +105,6 @@ class TestAddHost:
 				'os': host_os,
 				'osaction': 'default',
 				'rack': '0',
-				'rank': '0',
-				'status': 'deprecated'
+				'rank': '0'
 			}
 		]
