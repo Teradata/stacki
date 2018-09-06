@@ -26,7 +26,7 @@
 	"netifaces":		{ "fe": true, "be":"true"},
 	"pexpect":		{ "fe": true },
 	"psutil":		{ "fe": true, "be": true, "bootstrap": true },
-	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
+	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true, "version": "2.1.2" }, 
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 

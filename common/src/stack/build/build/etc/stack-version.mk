@@ -20,7 +20,6 @@ VERSION	= $(ROLLVERSION)
 endif
 
 STACK_VERSION = $(VERSION)
-
 # A name, not a RPM release id. Added for flair. First releases named
 # after well-known mountains.
 

@@ -26,19 +26,12 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
-	
-		hosts = self.getHostnames(args)
+		hosts = self._get_hosts(args)
 		
 		(group, ) = self.fillParams([
 			('group', None, True)
-			])
+		])
 		
-		if not hosts:
-			raise ArgRequired(self, 'host')
-
 		exists = False
 		for row in self.call('list.group'):
 			if group == row['group']:
@@ -57,13 +50,10 @@ class Command(stack.commands.add.host.command):
 				raise CommandError(self, '%s already member of %s' % (host, group))
 
 		for host in hosts:
-			self.db.execute(
-				"""
-				insert into memberships 
-				(nodeid, groupid)
+			self.db.execute("""
+				insert into memberships(nodeid, groupid)
 				values (
-				(select id from nodes where name='%s'),
-				(select id from groups where name='%s'))
-				""" % (host, group))
-		
-
+					(select id from nodes where name=%s),
+					(select id from groups where name=%s)
+				)
+			""", (host, group))

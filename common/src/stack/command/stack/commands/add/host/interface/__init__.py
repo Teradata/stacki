@@ -13,6 +13,7 @@
 
 import stack.commands
 from stack.exception import ParamRequired, ParamType, ArgUnique, CommandError
+from stack.util import blank_str_to_None
 
 
 class Command(stack.commands.add.host.command):
@@ -67,33 +68,54 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
+		host = self._get_single_host(args)
 
-		hosts = self.getHostnames(args)
 		(interface, mac, network, ip, module, 
 		 name, vlan, default, options, channel, unsafe) = self.fillParams([
-			 ('interface', None),
-			 ('mac',       None),
-			 ('network',   None),
-			 ('ip',	       None),
-			 ('module',    None),
-			 ('name',      None),
-			 ('vlan',      None),
-			 ('default',   None),
-			 ('options',   None),
-			 ('channel',   None),
-			 ('unsafe',    False)
-			 ])
+			('interface', None),
+			('mac',       None),
+			('network',   None),
+			('ip',	      None),
+			('module',    None),
+			('name',      None),
+			('vlan',      None),
+			('default',   None),
+			('options',   None),
+			('channel',   None),
+			('unsafe',    False)
+		])
 
+		# Make sure empty strings are converted to None
+		(interface, mac, network, ip, module, 
+		name, vlan, default, options, channel) = map(blank_str_to_None, (
+			interface, mac, network, ip, module, 
+		 	name, vlan, default, options, channel
+		))
 		
+		# Gotta have an interface or mac
 		if not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
-		if name and len(name.split('.')) > 1:
+		
+		# Name can't be a FQDN (IE: have dots)
+		if name and '.' in name:
 			raise ParamType(self, 'name', 'non-FQDN (base hostname)')
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
 
-		host = hosts[0]
+		# Check if the network exists
+		subnet_id = None
+		if network:
+			rows = self.db.select('ID from subnets where name = %s', (network,))
+			if len(rows) == 0:
+				raise CommandError(self, f'network "{network}" does not exist')
+			else:
+				subnet_id = rows[0][0]
 
+		# The vlan parameter needs to be an int
+		if vlan:
+			try:
+				vlan = int(vlan)
+			except:
+				raise ParamType(self, 'vlan', 'integer')
+		
 		# Stacki can use the usafe parameter to disable the check if the
 		# interface already exists.  The spreadsheet loading uses this
 		# since before add.host.interface is called all the interfaces
@@ -107,71 +129,58 @@ class Command(stack.commands.add.host.command):
 				if mac and mac == dict['mac']:
 					raise CommandError(self, 'mac exists')
 
-
-		fields = [ 'network', 'ip', 'module', 'name', 'vlan', 'default', 'options', 'channel' ]
-
-		# Insert the mac or interface into the database and then use
-		# that to key off of for all the subsequent fields.
-		# Give the MAC preferrence (need to pick one) but still do the
-		# right thing when MAC and Interface are both specified.
-		#
-		# The MAC handle includes some optimization to include more
-		# information on the initial insert, in order to reduce the
-		# updates for each extra field.
+		# Some parameters accept the string 'NULL' to mean put a NULL in the db
+		if ip and ip.upper() == 'NULL':
+			ip = None
 		
-		if mac:
-			handle = 'mac=%s' % mac
-			fields.append('interface')
+		if module and module.upper() == 'NULL':
+			module = None
+		
+		if channel and channel.upper() == 'NULL':
+			channel = None
+		
+		# If name is set to 'NULL' it gets the host name, but confusingly
+		# if name is None it gets a NULL in the db. Not sure the history
+		# of this unique behavior.
+		if name and name.upper() == 'NULL':
+			name = host
+		
+		# If vlan is 0 then it should be NULL in the db
+		if vlan == 0:
+			vlan = None
+		
+		# Default is a boolean
+		default = self.str2bool(default)
 
-			keys = [ 'node', 'mac' ]
-			vals = [
-				'(select id from nodes where name="%s")' % host,
-				'"%s"' % mac
-				]
+		# If ip is set to "auto" we let the 'set' command handle it
+		ip_is_auto = False
+		if ip and ip.upper() == "AUTO":
+			ip_is_auto = True
+			ip = None
 
-			if interface:
-				fields.remove('interface')
-				keys.append('device')
-				vals.append('"%s"' % interface)
-			if network:
-				fields.remove('network')
-				keys.append('subnet')
-				vals.append('(select id from subnets s where s.name="%s")' % network)
-			if ip and ip != 'auto':
-				fields.remove('ip')
-				keys.append('ip')
-				vals.append('NULLIF("%s","NULL")' % ip.upper())
-			if name:
-				if name.upper() == "NULL":
-					name = host
-				fields.remove('name')
-				keys.append('name')
-				vals.append('"%s"' % name)
-			if default:
-				fields.remove('default')
-				keys.append('main')
-				vals.append('%d' % self.str2bool(default))
-			if options:
-				fields.remove('options')
-				keys.append('options')
-				vals.append('"%s"' % options)
-			
-			self.db.execute("""
-				insert into networks(%s) values (%s)
-				""" % (','.join(keys), ','.join(vals)))
+			# The auto ip feature requires a network parameter
+			if subnet_id is None:
+				raise ParamRequired(self, 'network')
+		
+		# Insert all our data
+		self.db.execute("""
+			insert into networks(
+				node, mac, ip, name, device, subnet, 
+				module, vlanid, options, channel, main
+			)
+			values (
+				(select id from nodes where name=%s),
+				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+			)
+		""",(
+			host, mac, ip, name, interface, subnet_id,
+			module,	vlan, options, channel, default
+		))
 
-			
-		else:
-			handle = 'interface=%s' % interface
-			fields.append('mac')
-			
-			self.db.execute("""
-				insert into networks(node, device)
-				values ((select id from nodes where name='%s'), '%s')
-				""" % (host, interface)) 
-
-		for key in fields:
-			if key in params:	
-				self.command('set.host.interface.%s' % key,
-					(host, handle, "%s=%s" % (key, params[key])))
-
+		# Handle auto ip if needed
+		if ip_is_auto:
+			self.command('set.host.interface.ip', (
+				host,
+				f'mac={mac}' if mac else f'interface={interface}',
+				'ip=auto'
+			))

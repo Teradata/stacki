@@ -87,3 +87,10 @@ def test_default_appliances_have_sane_attributes(host):
 
 	assert cmd.rc == 0
 	assert cmd.stdout.strip() == expected_output.stdout.strip()
+
+def test_packages_have_hashes(host):
+	results = host.run('rpm -qa stack-* --queryformat "%{VENDOR} %{NAME} %{VCS}\n"')
+	assert results.rc == 0
+	assert results.stdout.strip() != ''
+	for pkgline in results.stdout.splitlines():
+		assert pkgline.split()[-1] != '(none)'

@@ -428,6 +428,9 @@ endif
 	fi
 	@$(PF) "Vendor: $(VENDOR)\n" >> $@
 	@$(PF) "Group: System Environment/Base\n" >> $@
+	@if [ "$(RELEASE)" != 'sles11' ]; then		\
+		$(PF) "VCS: $(shell git rev-parse --short HEAD)\n" >> $@; \
+	fi
 	@$(PF) "Source: $(NAME)-$(VERSION).tar.gz\n" >> $@
 	@$(PF) "$(rpm.prefix)\n" >> $@
 	@$(PF) "$(rpm.arch)\n" >> $@

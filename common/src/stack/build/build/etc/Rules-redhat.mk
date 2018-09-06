@@ -427,6 +427,7 @@ endif
 	fi
 	@$(PF) "Vendor: $(VENDOR)\n" >> $@
 	@$(PF) "Group: System Environment/Base\n" >> $@
+	@$(PF) "VCS: $(shell git rev-parse --short HEAD)\n" >> $@
 	@$(PF) "Source: $(NAME)-$(VERSION).tar.gz\n" >> $@
 	@$(PF) "$(rpm.prefix)\n" >> $@
 	@$(PF) "$(rpm.arch)\n" >> $@

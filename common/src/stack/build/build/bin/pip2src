@@ -19,7 +19,9 @@ class Package:
 		self.name         = name
 		self.master       = master
 		self.bootstrap    = False
-		self.version      = None
+		self.version      = ''
+		self.license      = ''
+		self.url          = ''
 		self.appliances   = [ ]
 		self.dependencies = [ ]
 
@@ -52,33 +54,75 @@ class Scanner:
 			# Try the normal metadata file first
 			with open(os.path.join(path, 'metadata.json'), 'r') as text:
 				meta = json.load(text)
+			print('\t\tmetadata.json')
 		except FileNotFoundError:
 			# If the normal file doesn't exist, try the old version
 			meta = {}
 			with open(os.path.join(path, 'METADATA'), 'r') as text:
+				print('\t\tMETADATA')
 				for line in text:
-					if 'Name:' in line or 'Version:' in line:
-						key, value = line.strip().split(':')
-						meta[key.strip().lower()] = value.strip()
+					try:
+						key, value = line.split(':', 1)
+					except ValueError:
+						continue
+					key   = key.strip().lower()
+					value = value.strip()
+					if key in [ 'name', 'version' ]:
+						meta[key] = value
+					elif key == 'home-page':
+						meta['url'] = value
+					elif key == 'license':
+						meta['license'] = value.strip()
+					elif key == 'classifier' and value.startswith('License'):
+						_, value = value.split('::', 1)
+						meta['license'] = value.strip()
 
+		try:
+			meta['url'] = meta['extensions']['python.details']['project_urls']['Home']
+		except:
+			pass
+
+		if 'classifiers' in meta:
+			for c in meta['classifiers']:
+				k, v = c.split('::', 1)
+				if k.strip() == 'License':
+					meta['license'] = v.strip()
+
+		print(f'\t\t{meta}')
 		package = Package(meta['name'])
 		package.version = meta['version']
+		package.license = meta['license']
+		package.url     = meta['url']
 		self.packages.append(package)
 
 
 	def readEgg(self, path):
 		print('\tfound egg %s' % os.path.split(path)[-1])
-		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
+#		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
+		meta = {}
 		with open(os.path.join(path, 'PKG-INFO'), 'r', encoding='utf-8') as text:
 			for line in text:
-				tokens = line.split(':', 1)
-				if len(tokens) == 2:
-					if tokens[0] == 'Name':
-						name = tokens[1].strip()
-					elif tokens[0] == 'Version':
-						version = tokens[1].strip()
-		package = Package(name)
-		package.version = version
+				try:
+					key, value = line.split(':', 1)
+				except ValueError:
+					continue
+				key   = key.strip().lower()
+				value = value.strip()
+				if key in [ 'name', 'version' ]:
+					meta[key] = value
+				elif key == 'home-page':
+					meta['url'] = value
+				elif key == 'license':
+					meta['license'] = value.strip()
+				elif key == 'classifier' and value.startswith('License'):
+					_, value = value.split('::', 1)
+					meta['license'] = value.strip()
+
+		print(f'\t\t{meta}')
+		package = Package(meta['name'])
+		package.version = meta['version']
+		package.license = meta['license']
+		package.url     = meta['url']
 		self.packages.append(package)
 		
 
@@ -138,21 +182,42 @@ for pkgname in pkgnames:
 		for package in Scanner(tmp).packages:
 			if package.name == pkgname:
 				PackageSet[pkgname].version = package.version
+				PackageSet[pkgname].url     = package.url
+				PackageSet[pkgname].license = package.license
 			else:
 				package.bootstrap = PackageSet[pkgname].bootstrap
 				PackageSet[pkgname].dependencies.append(package)
 				PackageSet[package.name] = package
+#		print(tmp)
+#		import time
+#		while True:
+#			time.sleep(10)
 				
 
 # Write out the computed version
 
-version = {}
+version = {} # just the master packages
+nosat   = {} # all the packages (help us audit 3rd party crap)
 for package in PackageSet.values():
 	if package.master:
 		version[package.name] = package.version
+	nosat[package.name] = package
+		
 with open('versions.json', 'w') as text:
 	text.write(json.dumps(version))
 
+rows   = []
+widths = [ 0, 0, 0, 0 ]
+for name in sorted(nosat.keys()):
+	rows.append([name, nosat[name].version, nosat[name].url, nosat[name].license])
+for row in rows:
+	for i in range(0, 4):
+		if len(row[i]) > widths[i]:
+			widths[i] = len(row[i])
+		
+with open('nosat.txt', 'w') as text:
+	for row in rows:
+		text.write(f'{row[0].ljust(widths[0])} {row[1].ljust(widths[1])} {row[2].ljust(widths[2])} {row[3]}\n')
 
 # Build the src/ directories
 

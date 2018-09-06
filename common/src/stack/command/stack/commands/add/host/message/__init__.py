@@ -34,13 +34,14 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
+		hosts = self._get_hosts(args)
 
 		(channel, ttl, message, source) = self.fillParams([
 			('channel', 'debug', False),
 			('ttl', None, False),
 			('message', None, True),
 			('source', None, False)
-			])
+		])
 
 		try:
 			ttl = int(ttl)
@@ -49,7 +50,7 @@ class Command(stack.commands.add.host.command):
 		except ValueError:
 			ttl = None
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			msg = stack.mq.Message(message, channel=channel, ttl=ttl, source=source)
 
