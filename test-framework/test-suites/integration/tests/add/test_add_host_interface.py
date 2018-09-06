@@ -243,3 +243,64 @@ class TestAddHostInterface:
 				'vlan': None
 			}
 		]
+
+
+	def test_add_host_interface_duplicate_default_interface(self, host):
+		# Add a default host interface
+		result = host.run('stack add host interface backend-0-0 interface=eth0 default=true')
+		assert result.rc == 0
+
+		# Check data
+		result = host.run('stack list host interface backend-0-0 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'channel': None,
+				'default': True,
+				'host': 'backend-0-0',
+				'interface': 'eth0',
+				'ip': None,
+				'mac': None,
+				'module': None,
+				'name': None,
+				'network': None,
+				'options': None,
+				'vlan': None
+			}
+		]
+
+		# Add a new default host inteface to the same host
+		result = host.run('stack add host interface backend-0-0 interface=eth1 default=true')
+		assert result.rc == 0
+
+		# Check data for duplicate default interface for the same host
+		result = host.run('stack list host interface backend-0-0 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'channel': None,
+				'default': None,
+				'host': 'backend-0-0',
+				'interface': 'eth0',
+				'ip': None,
+				'mac': None,
+				'module': None,
+				'name': None,
+				'network': None,
+				'options': None,
+				'vlan': None
+			},
+			{
+				'channel': None,
+				'default': True,
+				'host': 'backend-0-0',
+				'interface': 'eth1',
+				'ip': None,
+				'mac': None,
+				'module': None,
+				'name': None,
+				'network': None,
+				'options': None,
+				'vlan': None
+			}
+		]
