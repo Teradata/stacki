@@ -48,46 +48,6 @@ SSLCACertificateFile /etc/httpd/conf/ssl.ca/ca-bundle
 
 mkdir -p /export/stack/pallets
 
-<stack:file stack:name="/export/stack/pallets/index.cgi" stack:perms="755"><![CDATA[#!/opt/stack/bin/python3
-
-import os
-
-try:
-	dir = os.environ['DOCUMENT_ROOT'] + os.environ['REQUEST_URI']
-except:
-	dir = '.'
-	pass
-
-out = ''
-
-out += '<html>'
-out += '<body>'
-out += '<table>'
-
-listing = os.listdir(dir)
-for file in sorted(listing, key=str.lower):
-	if file not in [ 'index.cgi' ]:
-		out += '<tr><td>\n'
-
-		if os.path.isdir(os.path.join(dir, file)):
-			out += '<a href="%s/">%s/</a>\n' % (file, file)
-		else:
-			out += '<a href="%s">%s</a>\n' % (file, file)
-
-		out += '</td></tr>'
-		out += '\n'
-
-out += '</table>'
-out += '</body>'
-out += '</html>'
-
-print('Content-type: text/html')
-print('Content-length: %d' % (len(out)))
-print('')
-print(out)
-]]>
-</stack:file>
-
 mkdir -p /etc/httpd/conf/ssl.ca
 
 cp /etc/security/ca/ca.crt /etc/httpd/conf/ssl.ca/
