@@ -26,7 +26,7 @@ CREATE TABLE access (
 
 <!-- enable root to run all commands -->
 
-insert into access (command, groupid) values ("*", 0); 
+insert into access (command, groupid) values ("*", 0);
 
 <!-- Aliases -->
 
@@ -35,7 +35,7 @@ CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL default '0',
   Network		int(11) NOT NULL default '0',
-  PRIMARY KEY (ID) 
+  PRIMARY KEY (ID)
 );
 
 <!-- Attributes -->
@@ -257,14 +257,14 @@ CREATE TABLE environment_routes (
 
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
-  Box		int(11) NOT NULL default '1',
-  Roll		int(11) NOT NULL 
+  Box		int(11) NOT NULL default '1' references boxes,
+  Roll		int(11) NOT NULL references rolls
 );
 
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
-  Box		int(11) NOT NULL default '1',
-  Cart		int(11) NOT NULL 
+  Box		int(11) NOT NULL default '1' references boxes,
+  Cart		int(11) NOT NULL references carts
 );
 
 <!-- Groups -->
