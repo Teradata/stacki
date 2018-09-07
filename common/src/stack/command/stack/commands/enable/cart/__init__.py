@@ -19,7 +19,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	List of carts to enable. This should be the cart base name (e.g.,
 	stacki, boss, os).
 	</arg>
-	
+
 	<param type='string' name='box'>
 	The name of the box in which to enable the cart. If no box is
 	specified the cart is enabled for the default box.
@@ -32,7 +32,7 @@ class Command(stack.commands.CartArgumentProcessor,
 	<related>add cart</related>
 	<related>disable cart</related>
 	<related>list cart</related>
-	"""		
+	"""
 
 	def run(self, params, args):
 		if len(args) < 1:
@@ -40,34 +40,30 @@ class Command(stack.commands.CartArgumentProcessor,
 
 		(box, ) = self.fillParams([ ('box', 'default') ])
 
-		rows = self.db.execute("""
-			select * from boxes where name='%s' """ % box)
-		if not rows:
+		# Make sure our box exists
+		rows = self.db.select('ID from boxes where name=%s', (box,))
+		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
-			
-		for cart in self.getCartNames(args):
-			enabled = False
-			for row in self.db.select("""
-				b.name from
-				cart_stacks s, carts c, boxes b where
-				c.name = '%s' and b.name = '%s' and
-				s.box = b.id and s.cart = c.id
-				""" % (cart, box)):
 
-				enabled = True
-				
-			if not enabled:
+		# Remember the box ID to simply queries down below
+		box_id = rows[0][0]
+
+		for cart in self.getCartNames(args):
+			# If this cart isn't already in the box, add it
+			if self.db.count("""
+				(*) from cart_stacks s, carts c
+				where c.name=%s and s.box=%s and s.cart = c.id
+				""", (cart, box_id)
+			) == 0:
 				self.db.execute("""
-					insert into cart_stacks(box, cart)
-					values (
-					(select id from boxes where name='%s'),
-					(select id from carts where name='%s')
-					)""" % (box, cart))
+					insert into cart_stacks(cart, box)
+					values ((select id from carts where name=%s), %s)
+					""", (cart, box_id)
+				)
 
 		# Regenerate stacki.repo
 		os.system("""
-			/opt/stack/bin/stack report host repo localhost | 
-			/opt/stack/bin/stack report script | 
+			/opt/stack/bin/stack report host repo localhost |
+			/opt/stack/bin/stack report script |
 			/bin/sh
 			""")
-

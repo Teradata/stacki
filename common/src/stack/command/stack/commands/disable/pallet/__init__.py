@@ -21,17 +21,22 @@ class Command(stack.commands.RollArgumentProcessor,
 	"""
 	Disable an available pallet. The pallet must already be copied on the
 	system using the command "stack add pallet".
-	
+
 	<arg type='string' name='pallet' repeat='1'>
 	List of pallets to disable. This should be the pallet base name (e.g.,
 	base, hpc, kernel).
 	</arg>
-	
+
 	<param type='string' name='version'>
 	The version number of the pallet to be disabled. If no version number is
 	supplied, then all versions of a pallet will be disabled.
 	</param>
-	
+
+	<param type='string' name='release'>
+	The release number of the pallet to be disabled. If no release number is
+	supplied, then all releases of a pallet will be disabled.
+	</param>
+
 	<param type='string' name='arch'>
 	If specified disables the pallet for the given architecture. The default
 	value is the native architecture of the host.
@@ -45,17 +50,17 @@ class Command(stack.commands.RollArgumentProcessor,
 	<example cmd='disable pallet kernel'>
 	Disable the kernel pallet.
 	</example>
-	
+
 	<example cmd='disable pallet ganglia version=5.0 arch=i386'>
 	Disable version 5.0 the Ganglia pallet for i386 nodes
 	</example>
-	
+
 	<related>add pallet</related>
 	<related>remove pallet</related>
 	<related>enable pallet</related>
 	<related>list pallet</related>
 	<related>create pallet</related>
-	"""		
+	"""
 
 	def run(self, params, args):
 		if len(args) < 1:
@@ -64,31 +69,28 @@ class Command(stack.commands.RollArgumentProcessor,
 		(arch, box) = self.fillParams([
 			('arch', self.arch),
 			('box', 'default')
-			])
+		])
 
-		rows = self.db.execute("""
-			select * from boxes where name = '%s'
-			""" % box)
-		if not rows:
+		# Make sure our box exists
+		rows = self.db.select('ID from boxes where name=%s', (box,))
+		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
-		
-		for (roll, version, release) in self.getRollNames(args, params):
-			if release:
-				rel = "rel='%s'" % release
-			else:
-				rel = 'rel=""'
 
+		# Remember the box ID to simply queries down below
+		box_id = rows[0][0]
+
+		for (roll, version, release) in self.getRollNames(args, params):
 			self.db.execute("""
 				delete from stacks where
-				box = (select id from boxes where name='%s')
-				and
-				roll = (select id from rolls where name='%s'
-				and version='%s' and %s and arch='%s') """
-				% (box, roll, version, rel, arch))
+				box=%s and roll=(
+					select id from rolls where name=%s
+					and version=%s and rel=%s and arch=%s
+				)""", (box_id, roll, version, release, arch)
+			)
 
 		# Regenerate stacki.repo
 		os.system("""
-			/opt/stack/bin/stack report host repo localhost | 
-			/opt/stack/bin/stack report script | 
+			/opt/stack/bin/stack report host repo localhost |
+			/opt/stack/bin/stack report script |
 			/bin/sh
 			""")
