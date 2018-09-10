@@ -28,6 +28,12 @@ class Command(command):
 	The default is: yes.
 	</param>
 
+	<param type='boolean' name='nukeswitch' optional='1'>
+	If 'yes', then put the switch into a default state (e.g., no vlans, no partitions),
+	Just a "flat" switch.
+	Default: no
+	</param>
+
 	<example cmd="sync switch switch-0-0">
 	Reconfigure and set startup configuration on switch-0-0.
 	</example>
