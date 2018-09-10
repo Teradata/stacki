@@ -92,7 +92,7 @@ class ExpectMore():
 		return results
 
 
-	def ask(self, cmd):
+	def ask(self, cmd, seek_to=None):
 		"""
 		Send `cmd` to the process, waiting for a prompt back.  Return the results.
 		"""
@@ -100,7 +100,13 @@ class ExpectMore():
 			(None, cmd),
 			(self.PROMPTS, None)
 		])
-#		print(results[0])
+
+		if seek_to:
+			for idx, line in enumerate(results[0]):
+				if seek_to in line:
+					break
+			return results[0][idx:]
+
 		return results[0]
 
 

@@ -24,7 +24,8 @@ class Implementation(stack.commands.Implementation):
 		for part in switch_handle.partitions:
 			switch_handle.del_partition(part)
 
-		# other stuff goes here, but that's the big deal
+		switch_handle.wipe_ssh_keys()
+
 
 	def run(self, args):
 		switch = args[0]['host']
@@ -44,6 +45,12 @@ class Implementation(stack.commands.Implementation):
 		if self.owner.nukeswitch:
 			self.nuke(s)
 			return
+
+		try:
+			pubkey = open('/root/.ssh/id_rsa.pub').read()
+			s.ssh_copy_id(pubkey.strip())
+		except FileNotFoundError:
+			pass
 
 		if not s.subnet_manager:
 			return
