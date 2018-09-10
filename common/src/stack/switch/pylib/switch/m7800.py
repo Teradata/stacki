@@ -97,6 +97,30 @@ class SwitchMellanoxM7800(Switch):
 		self.proc.say(f'ssh client user admin authorized-key sshv2 "{pubkey}"')
 
 
+	def wipe_ssh_keys(self):
+		""" remove all authorized keys from the switch """
+
+		info('wiping ssh keys from switch')
+		key_section = False
+		sshkeys = {}
+		username = ''
+		for line in self.proc.ask('show ssh client', seek_to='SSH authorized keys:'):
+			line = line.strip()
+			if line.startswith('User'):
+				username = line.split()[1].rstrip(':')
+				sshkeys[username] = []
+				continue
+			if line.startswith('Key'):
+				key_id = line.split()[1].rstrip(':')
+				sshkeys[username].append(key_id)
+				continue
+
+		for user, key_ids in sshkeys.items():
+			for key in key_ids:
+				info(f'removing key {key}')
+				self.proc.say(f'no ssh client user {user} authorized-key sshv2 {key}')
+
+
 	@property
 	def partitions(self):
 		"""
