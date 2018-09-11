@@ -21,11 +21,11 @@ class command(stack.commands.list.command,
 class Command(command):
 	"""
 	Lists the pallets and carts that are associated with boxes.
-	
+
 	<arg optional='1' type='string' name='box' repeat='1'>
 	Optional list of box names.
 	</arg>
-		
+
 	<example cmd='list box'>
 	List all known box definitions.
 	</example>
@@ -44,7 +44,7 @@ class Command(command):
 				if box not in pallets:
 					pallets[box] = []
 				pallets[box].append(fullname)
-			
+
 		for row in self.call('list.cart'):
 			if row['boxes']:
 				for box in row['boxes'].split():
@@ -55,9 +55,11 @@ class Command(command):
 		self.beginOutput()
 
 		for box in self.getBoxNames(args):
-			id, os = self.db.select("""b.id, o.name from
-				boxes b, oses o where b.name='%s'
-				and b.os=o.id""" % box)[0]
+			id, os = self.db.select("""
+				b.id, o.name from boxes b, oses o
+				where b.name=%s	and b.os=o.id
+				""", (box,)
+			)[0]
 
 			if box not in carts:
 				carts[box] = []
@@ -65,9 +67,11 @@ class Command(command):
 			if box not in pallets:
 				pallets[box] = []
 
-			self.addOutput(box, (os, ' '.join(pallets[box]),
-					     ' '.join(carts[box])))
-			
-		self.endOutput(header=['name', 'os', 'pallets', 'carts'],
-			trimOwner=False)
+			self.addOutput(box, (
+				os, ' '.join(pallets[box]), ' '.join(carts[box])
+			))
 
+		self.endOutput(
+			header=['name', 'os', 'pallets', 'carts'],
+			trimOwner=False
+		)

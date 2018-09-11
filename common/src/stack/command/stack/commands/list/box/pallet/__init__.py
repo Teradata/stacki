@@ -17,7 +17,7 @@ class Command(stack.commands.list.box.command,
 	      stack.commands.RollArgumentProcessor):
 	"""
 	List the pallets enabled in each box.
-	
+
 	<arg optional='1' type='string' name='box' repeat='1'>
 	List of boxes.
 	</arg>
@@ -25,7 +25,7 @@ class Command(stack.commands.list.box.command,
 	<example cmd='list box pallet default'>
 	List the pallets used in the "default" box.
 	</example>
-	"""		
+	"""
 
 	def run(self, params, args):
 		self.beginOutput()
@@ -33,14 +33,17 @@ class Command(stack.commands.list.box.command,
 		boxes = self.getBoxNames(args)
 
 		for box in boxes:
-			self.db.execute("""select r.name, r.arch, r.version, r.rel, r.os from
-				stacks s, rolls r, boxes b where
-				s.roll = r.id and s.box = b.id and
-				b.name = '%s' """ % box)
-			
-			for (roll, arch, version, release, osname) in self.db.fetchall():
+			rows = self.db.select("""
+				r.name, r.arch, r.version, r.rel, r.os
+				from stacks s, rolls r, boxes b
+				where s.roll=r.id and s.box=b.id and b.name=%s
+				""", (box,)
+			)
+
+			for (roll, arch, version, release, osname) in rows:
 				self.addOutput(box, (roll, arch, version, release, osname))
 
-		self.endOutput(header=['box', 'pallet', 'arch', 'version', 'release', 'os'],
-			trimOwner=False)
-
+		self.endOutput(
+			header=['box', 'pallet', 'arch', 'version', 'release', 'os'],
+			trimOwner=False
+		)
