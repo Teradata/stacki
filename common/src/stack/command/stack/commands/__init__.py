@@ -151,7 +151,7 @@ class ApplianceArgumentProcessor:
 
 class BoxArgumentProcessor:
 	"""An Interface class to add the ability to process box arguments."""
-		
+
 	def getBoxNames(self, args=None):
 		"""Returns a list of box names from the database.
 		For each arg in the ARGS list find all the box
@@ -164,10 +164,14 @@ class BoxArgumentProcessor:
 			args = [ '%' ]		      # find all boxes
 
 		for arg in args:
-			query = 'name from boxes where name like %s'
-			boxes = flatten(self.db.select(query, [arg]))
-			if not boxes and arg != '%':
+			names = flatten(
+				self.db.select('name from boxes where name like %s', [arg])
+			)
+
+			if not names and arg != '%':
 				raise ArgNotFound(self, arg, 'box')
+
+			boxes.extend(names)
 
 		return boxes
 

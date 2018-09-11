@@ -21,25 +21,24 @@ class command(stack.commands.ApplianceArgumentProcessor,
 class Command(command):
 	"""
 	Lists the appliances defined in the cluster database.
-	
+
 	<arg optional='1' type='string' name='appliance' repeat='1'>
 	Optional list of appliance names.
 	</arg>
-		
+
 	<example cmd='list appliance'>
 	List all known appliances.
 	</example>
 	"""
 
 	def run(self, params, args):
-		
+
 		self.beginOutput()
 		for app in self.getApplianceNames(args):
-			self.db.execute("""
-				select public from
-				appliances where name='%s'
-				""" % app)
-			row = self.db.fetchone()
-			self.addOutput(app, row)
-			
+			rows = self.db.select(
+				'public from appliances where name=%s',
+				(app,)
+			)
+			self.addOutput(app, rows[0])
+
 		self.endOutput(header=['appliance', 'public'])

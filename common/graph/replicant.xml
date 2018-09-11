@@ -11,14 +11,17 @@
 	</copyright>
 
 	<edge from="replicant">
-		<to>general</to>
-		<to>users</to>
 		<to>server</to>
 		<to>ssh-client</to>
-		<to>add-on</to>
-		<to>partitioning</to>
 		<to>backend</to>
 		<to>mq-server</to>
+	</edge>
+
+	<edge from="replicant" cond="os == 'sles'">
+		<to>general</to>
+		<to>users</to>
+		<to>add-on</to>
+		<to>partitioning</to>
 	</edge>
 
 	<order head="foundation-python">
