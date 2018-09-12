@@ -102,6 +102,8 @@ class Processor(ProcessorBase):
 				health = { 'state': payload }
 
 			for component, state in health.items():
+				if ttl == -1:
+					ttl = None
 				self.setKey('host:%s:status:%s' % 
 					    (keys['id'], component), state, ttl)
 

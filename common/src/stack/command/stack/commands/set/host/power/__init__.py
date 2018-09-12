@@ -5,6 +5,7 @@
 # @copyright@
 
 import stack.commands
+import stack.mq
 from stack.exception import ArgRequired, ParamError
 
 
@@ -56,7 +57,22 @@ class Command(stack.commands.set.host.command):
 			self.beginOutput()
 			self.addOutput(host, out.decode())
 			self.endOutput(padChar='', trimOwner=True)
-		
+
+		ttl = 60*10
+		if cmd == 'off':
+			ttl = -1
+
+		msg = { 'source' : host, 
+			'channel': 'health', 
+			'ttl'    : ttl,
+			'payload': '{"state": "power %s"}' % cmd }
+
+		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		tx.sendto(json.dumps(msg).encode(), 
+			  ('127.0.0.1', stack.mq.ports.publish))
+		tx.close()
+
+
 
 	def run(self, params, args):
 		if not len(args):
