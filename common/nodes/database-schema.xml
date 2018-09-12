@@ -33,9 +33,10 @@ insert into access (command, groupid) values ("*", 0);
 DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '0',
-  Network		int(11) NOT NULL default '0',
-  PRIMARY KEY (ID)
+  Name		varchar(32) NOT NULL,
+  Network		int(11) NOT NULL references networks,
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Attributes -->
@@ -424,7 +425,7 @@ CREATE TABLE environment_firewall (
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (
  ID		int(11) NOT NULL auto_increment,
- Node		int(11) NOT NULL default '0',
+ Node		int(11) NOT NULL references nodes,
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
 );
