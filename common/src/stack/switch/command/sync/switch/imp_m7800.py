@@ -175,10 +175,10 @@ class Implementation(stack.commands.Implementation):
 
 				s.add_partition_member(partition, iface.mac[-23:], membership='full')
 
-		# if the only partition is 'Default', everyone should be a full member
-		membership = 'limited'
-		if list(s.partitions.keys()) == ['Default']:
-			membership = 'full'
+		# if we have multiple partitions, don't put everyone in Default
+		if list(s.partitions.keys()) != ['Default']:
+			return
 
+		# if the only partition is 'Default', everyone should be a full member
 		for mac in macs_for_default:
-			s.add_partition_member('Default', mac[-23:], membership=membership)
+			s.add_partition_member('Default', mac[-23:], membership='full')

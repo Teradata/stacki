@@ -205,7 +205,6 @@ class SwitchMellanoxM7800(Switch):
 			self.proc.conversation(add_part_seq)
 		else:
 			self.proc.say(f'ib partition {partition} pkey {pkey} force')
-			self.proc.say(f'ib partition {partition} ipoib force')
 
 
 	def del_partition(self, partition):
