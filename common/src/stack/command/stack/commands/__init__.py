@@ -579,7 +579,7 @@ class HostArgumentProcessor:
 			# stored in the hostDict will be the name of that
 			# interface rather than the name in the nodes table
 			
-			hostList.append(host)
+			hostList.append(host.lower())
 			
 			if names:
 				hostDict[host] = None
