@@ -25,5 +25,5 @@ then
 	done
 fi
 
-/opt/stack/bin/smq-publish -chealth -t300 '{"state": "install reboot"}'
+/opt/stack/bin/smq-publish -chealth -t3600 '{"state": "install stage=post-reboot"}'
 
