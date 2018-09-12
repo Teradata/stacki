@@ -12,7 +12,7 @@
 
 import stack.commands
 from stack.exception import UsageError, ArgUnique, CommandError
-
+from stack.util import flatten
 
 class Command(stack.commands.list.host.command):
 	"""
@@ -33,31 +33,33 @@ class Command(stack.commands.list.host.command):
 	"""
 
 	def run(self, params, args):
-		
 		if 'host' in params or 'hosts' in params:
 			raise UsageError(self, "Incorrect usage.")
 
-				
 		(interface, ) = self.fillParams([
 			('interface', None)
-			])
+		])
 
 		self.beginOutput()
 		for host in self.getHostnames(args):
 			if interface == None:
-				self.db.execute("""select device from networks where
-						node = (select id from nodes where name = '%s')
-						""" % host)
-				devices = self.db.fetchall()
+				devices = flatten(self.db.select("""
+					device from networks
+					where node = (select id from nodes where name = %s)
+					""", (host,)
+				))
 			else:
-				devices = ((interface,),)
-			for device, in devices:
-				self.db.execute("""
-						select name from aliases where
-						network = (select id from networks where 
-						node = (select id from nodes where name = '%s')
-						and device='%s')""" % (host, device))
-				for alias, in self.db.fetchall():
+				devices = (interface,)
+
+			for device in devices:
+				for alias, in self.db.select("""
+					name from aliases
+					where network = (
+						select id from networks
+						where node = (select id from nodes where name = %s)
+						and device = %s
+					)""", (host, device)
+				):
 					self.addOutput(host, (alias, device))
 
 		self.endOutput(header=['host', 'alias', 'interface'], trimOwner=False)
