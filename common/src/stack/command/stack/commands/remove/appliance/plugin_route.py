@@ -35,6 +35,7 @@ class Plugin(stack.commands.Plugin):
 		return 'route'
 
 	def run(self, appliance):
-		self.owner.db.execute('delete from appliance_routes where ' +
-			'appliance_routes.appliance=(select id from appliances ' +
-			'where name="%s")' % appliance)
+		self.owner.db.execute("""
+			delete from appliance_routes
+			where appliance=(select id from appliances where name=%s)
+		""", (appliance,))

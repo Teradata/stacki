@@ -54,12 +54,19 @@ class Command(stack.commands.HostArgumentProcessor,
 
 	def run(self, params, args):
 		(b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
+
 		if not self.actionExists(b_action, b_type, b_os):
 			raise CommandError(self, 'action/type/os "%s/%s/%s" does not exists' % (b_action, b_type, b_os))
 
-		self.db.execute("""delete from bootactions where
-			os in (select id from oses where name = "%s") and
-			bootname in (select id from bootnames where
-			name = "%s" and type = "%s") """ %
-			(b_os, b_action, b_type))
-
+		if not b_os:
+			self.db.execute("""
+				delete from bootactions
+				where os is NULL
+				and bootname=(select id from bootnames where name=%s and type=%s)
+			""", (b_action, b_type))
+		else:
+			self.db.execute("""
+				delete from bootactions
+				where os=(select id from oses where name=%s)
+				and bootname=(select id from bootnames where name=%s and type=%s)
+			""", (b_os, b_action, b_type))

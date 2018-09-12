@@ -234,6 +234,62 @@ def add_switch():
 	return _inner
 
 @pytest.fixture
+def add_appliance(host):
+	def _inner(name):
+		result = host.run(f'stack add appliance {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy appliance "{name}"')
+
+	# First use of the fixture adds appliance "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more appliances added
+	return _inner
+
+@pytest.fixture
+def add_box(host):
+	def _inner(name):
+		result = host.run(f'stack add box {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy box "{name}"')
+
+	# First use of the fixture adds box "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more boxes added
+	return _inner
+
+@pytest.fixture
+def add_cart(host):
+	def _inner(name):
+		result = host.run(f'stack add cart {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add cart box "{name}"')
+
+	# First use of the fixture adds cart "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more carts added
+	return _inner
+
+@pytest.fixture
+def add_environment(host):
+	def _inner(name):
+		result = host.run(f'stack add environment {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy environment "{name}"')
+
+	# First use of the fixture adds environment "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more environments added
+	return _inner
+
+@pytest.fixture
 def set_host_interface(add_host_with_interface):
 	result = subprocess.run(
 		["stack", "list", "network", "private", "output-format=json"],

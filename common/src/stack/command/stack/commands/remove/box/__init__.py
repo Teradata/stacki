@@ -30,23 +30,24 @@ class Command(stack.commands.BoxArgumentProcessor,
 
 	def run(self, params, args):
 		if len(args) < 1:
-                        raise ArgRequired(self, 'box')
+			raise ArgRequired(self, 'box')
 
 		boxes = self.getBoxNames(args)
 
 		# Prevent user from removing the default box.
-		
 		if 'default' in boxes:
 			raise CommandError(self, 'cannot remove default box')
 
-		# first check if the box is associated with any hosts
-
+		# Check if the box is associated with any hosts
 		for box in boxes:
 			for row in self.call('list.host'):
 				if row['box'] == box:
-					raise CommandError(self, 'cannot remove box "%s"\nbecause host "%s" is assigned to this box' % (box, row['host']))
+					raise CommandError(
+						self,
+						f'cannot remove box "{box}" because '
+						f'host "{row["host"]}" is assigned to it'
+					)
 
+		# Safe to delete the boxes
 		for box in boxes:
-			self.db.execute("""delete from boxes
-				where name = '%s' """ % box)
-
+			self.db.execute('delete from boxes where name=%s', (box,))

@@ -10,19 +10,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-import stack.commands.remove.firewall
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.remove.host.command,
-	stack.commands.remove.firewall.command):
-
+class Command(stack.commands.remove.host.command):
 	"""
 	Remove a firewall rule for a host. To remove a rule,
-	you must supply the name of the rule. The Rule names may
-	be obtained by running "rocks list host firewall"
+	you must supply the name of the rule.
 
 	<arg type='string' name='host' repeat='1'>
 	Name of a host machine.
@@ -35,14 +30,29 @@ class Command(stack.commands.remove.host.command,
 	"""
 
 	def run(self, params, args):
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
+
 		for host in self.getHostnames(args):
-			sql = """node = (select id from nodes where
-				name = '%s')""" % (host)
+			# Make sure our rule exists
+			if self.db.count("""
+				(*) from node_firewall
+				where name=%s and node=(
+					select id from nodes where name=%s
+				)""", (rulename, host)
+			) == 0:
+				raise CommandError(
+					self,
+					f'firewall rule {rulename} does not '
+					f'exist for host {host}'
+				)
 
-			self.deleteRule('node_firewall', rulename, sql)
-
+			# It exists, so delete it
+			self.db.execute("""
+				delete from node_firewall
+				where name=%s and node=(
+					select id from nodes where name=%s
+				)
+			""", (rulename, host))

@@ -121,7 +121,8 @@ CREATE TABLE bootnames (
 	ID		int(11) NOT NULL auto_increment,
 	Name		varchar(128) NOT NULL,
 	Type		enum ('install', 'os') NOT NULL,
-	PRIMARY KEY (ID)
+	PRIMARY KEY (ID),
+	INDEX (Name)
 );
 
 DROP TABLE IF EXISTS bootactions;
