@@ -14,39 +14,28 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class command(stack.commands.remove.command):
-	def deleteRule(self, table, rulename, extrasql=None):
-
-		assert table
-		assert rulename
-
-		query = 'select * from %s where name="%s"' % (table, rulename)
-		if extrasql:
-			query = "%s and %s" % (query, extrasql)
-		rows = self.db.execute(query)
-
-		if rows == 0:
-			raise CommandError(self, 'Could not find rule %s in %s' % (rulename, table))
-
-		query = 'delete from %s where name="%s"' % (table, rulename)
-		if extrasql:
-			query = "%s and %s" % (query, extrasql)
-		self.db.execute(query)
-
-
-class Command(command):
+class Command(stack.commands.remove.command):
 	"""
 	Remove a global firewall rule. To remove a rule, you must supply
 	the name of the rule.
-	
+
 	<param type='string' name='rulename' optional='0'>
 	Name of the rule
 	</param>
 	"""
 
 	def run(self, params, args):
-		
 		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-		
-		self.deleteRule('global_firewall', rulename)
 
+		# Make sure our rule exists
+		if self.db.count(
+			'(*) from global_firewall where name=%s',
+			(rulename,)
+		) == 0:
+			raise CommandError(self, f'firewall rule {rulename} does not exist')
+
+		# It exists, so delete it
+		self.db.execute(
+			'delete from global_firewall where name=%s',
+			(rulename,)
+		)

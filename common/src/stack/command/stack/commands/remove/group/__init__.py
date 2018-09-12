@@ -27,6 +27,7 @@ class Command(stack.commands.remove.command):
 	def run(self, params, args):
 		if not len(args):
 			raise ArgRequired(self, 'group')
+
 		if len(args) > 1:
 			raise ArgUnique(self, 'group')
 
@@ -37,15 +38,11 @@ class Command(stack.commands.remove.command):
 			if group == row['group']:
 				hosts = row['hosts']
 				break
+
 		if hosts is None:
 			raise CommandError(self, 'group %s does not exist' % group)
+
 		if len(hosts) > 0:
 			raise CommandError(self, 'group %s is in use' % group)
-		
-		self.db.execute(
-			"""
-			delete from groups
-			where
-			name = '%s'
-			""" % group)
 
+		self.db.execute('delete from groups where name=%s', (group,))

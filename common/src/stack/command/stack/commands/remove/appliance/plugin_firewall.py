@@ -27,11 +27,7 @@ class Plugin(stack.commands.Plugin):
 		return 'firewall'
 
 	def run(self, appliance):
-		#
-		# since we are not setting any parameters, we just need to
-		# remove all rows in the database that have this appliance
-		# type
-		#
-		self.db.execute("""delete from appliance_firewall where
-			appliance = (select id from appliances where
-			name = '%s')""" % appliance)	
+		self.db.execute("""
+			delete from appliance_firewall
+			where appliance=(select id from appliances where name=%s)
+		""", (appliance,))

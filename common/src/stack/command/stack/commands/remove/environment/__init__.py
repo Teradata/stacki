@@ -13,7 +13,6 @@ class command(stack.commands.EnvironmentArgumentProcessor,
 	pass
 
 
-
 class Command(command):
 	"""
 	Remove an Envirornment.  If the environment is currently
@@ -25,20 +24,17 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-
-		active = {}
-		for row in self.call('list.host'):
-			active[row['environment']] = True
-		for row in self.call('list.environment.attr'):
-			active[row['environment']] = True
-			
-		if not args:
+		if len(args) < 1:
 			raise ArgRequired(self, 'environment')
 
-		for env in self.getEnvironmentNames(args):
-			if env in active:
-				raise CommandError(self, 'environment %s in use' % env)
-			self.db.execute('delete from environments where name="%s"' % env)
+		enviroments = self.getEnvironmentNames(args)
 
+		# Figure out if any of the environments are in use
+		in_use = {host['environment'] for host in self.call('list.host')}
+		for environment in enviroments:
+			if environment in in_use:
+				raise CommandError(self, 'environment %s in use' % environment)
 
-
+		# Free to remove them
+		for environment in enviroments:
+			self.runPlugins(environment)

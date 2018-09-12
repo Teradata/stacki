@@ -10,15 +10,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-import stack.commands.remove.firewall
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.remove.appliance.command,
-	stack.commands.remove.firewall.command):
-
+class Command(stack.commands.remove.appliance.command):
 	"""
 	Remove a firewall service rule for an appliance type.
 	To remove the rule, you must supply the name of the rule.
@@ -30,18 +26,32 @@ class Command(stack.commands.remove.appliance.command,
 	<param type='string' name='rulename' optional='0'>
 	Name of the Appliance-specific rule
 	</param>
-
 	"""
 
 	def run(self, params, args):
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		for app in self.getApplianceNames(args):
-			sql = """appliance = (select id from appliances where
-				name = '%s')""" % (app)
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
 
-			self.deleteRule('appliance_firewall', rulename, sql)
+		for appliance in self.getApplianceNames(args):
+			# Make sure our rule exists
+			if self.db.count("""
+				(*) from appliance_firewall
+				where name=%s and appliance=(
+					select id from appliances where name=%s
+				)""", (rulename, appliance)
+			) == 0:
+				raise CommandError(
+					self,
+					f'firewall rule {rulename} does not '
+					f'exist for appliance {appliance}'
+				)
 
+			# It exists, so delete it
+			self.db.execute("""
+				delete from appliance_firewall
+				where name=%s and appliance=(
+					select id from appliances where name=%s
+				)
+			""", (rulename, appliance))
