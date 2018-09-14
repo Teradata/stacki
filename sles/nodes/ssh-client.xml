@@ -27,27 +27,18 @@
 		</services>
 	</services-manager>
 	
-	<files config:type="list">
-		<file>
-			<file_path>/etc/ssh/ssh_host_rsa_key</file_path>
-			<file_permissions>0400</file_permissions>
-			<file_contents><stack:eval>/opt/stack/sbin/read-ssh-private-key RSA 2> /dev/null</stack:eval></file_contents>
-		</file>
-		<file>
-			<file_path>/etc/ssh/ssh_host_rsa_key.pub</file_path>
-			<file_permissions>0444</file_permissions>
-			<file_contents><stack:eval>cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null</stack:eval></file_contents>
-		</file>
-		<file>
-			<file_path>/etc/ssh/ssh_host_ecdsa_key</file_path>
-			<file_permissions>0400</file_permissions>
-			<file_contents><stack:eval>/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null</stack:eval></file_contents>
-		</file>
-		<file>
-			<file_path>/etc/ssh/ssh_host_ecdsa_key.pub</file_path>
-			<file_permissions>0444</file_permissions>
-			<file_contents><stack:eval>cat /etc/ssh/ssh_host_ecdsa_key.pub 2> /dev/null</stack:eval></file_contents>
-		</file>
-	</files>
-	
+<stack:script stack:stage="install-post">
+	<stack:file stack:name="/etc/ssh/ssh_host_rsa_key" stack:perms="0400"><stack:eval>
+/opt/stack/sbin/read-ssh-private-key RSA 2> /dev/null
+	</stack:eval></stack:file>
+	<stack:file stack:name="/etc/ssh/ssh_host_rsa_key.pub" stack:perms="0400"><stack:eval>
+cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null
+	</stack:eval></stack:file>
+	<stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400"><stack:eval>
+/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
+	</stack:eval></stack:file>
+	<stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key.pub" stack:perms="0400"><stack:eval>
+cat /etc/ssh/ssh_host_ecdsa_key.pub 2> /dev/null
+	</stack:eval></stack:file>
+</stack:script>
 </stack:stack>
