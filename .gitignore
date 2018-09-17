@@ -13,3 +13,5 @@ build-*-*/
 */3rdparty/
 menu.cfg
 .idea/
+*.ipynb
+*.ipynb_checkpoints/
