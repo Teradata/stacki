@@ -181,6 +181,38 @@ def revert_discovery():
 		os.remove("/var/log/stack-discovery.log")
 
 @pytest.fixture
+def revert_routing_table():
+	# Get a snapshot of the existing routes
+	result = subprocess.run(
+		["ip", "route", "list"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	old_routes = { line.strip() for line in result.stdout.split('\n') if line }
+
+	yield
+
+	# Get a new view of the routing table
+	result = subprocess.run(
+		["ip", "route", "list"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	new_routes = { line.strip() for line in result.stdout.split('\n') if line }
+
+	# Remove any new routes
+	for route in new_routes:
+		if route not in old_routes:
+			result = subprocess.run(f"ip route del {route}", shell=True)
+
+	# Add in any missing old routes
+	for route in old_routes:
+		if route not in new_routes:
+			result = subprocess.run(f"ip route add {route}", shell=True)
+
+@pytest.fixture
 def add_host():
 	def _inner(hostname, rack, rank, appliance):
 		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
@@ -288,6 +320,20 @@ def add_environment(host):
 
 	# Then return the inner function, so we can call it inside the test
 	# to get more environments added
+	return _inner
+
+@pytest.fixture
+def add_group(host):
+	def _inner(name):
+		result = host.run(f'stack add group {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy group "{name}"')
+
+	# First use of the fixture adds group "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more groups added
 	return _inner
 
 @pytest.fixture
