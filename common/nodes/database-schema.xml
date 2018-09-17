@@ -112,8 +112,8 @@ CREATE TABLE boxes (
 
 DROP TABLE IF EXISTS boot;
 CREATE TABLE boot (
-	Node		int(11) NOT NULL default '0',
-	Action		enum ('install', 'os')
+  Node  	int(11) NOT NULL default '0' references nodes on delete cascade,
+  Action	enum ('install', 'os')
 );
 
 DROP TABLE IF EXISTS bootnames;

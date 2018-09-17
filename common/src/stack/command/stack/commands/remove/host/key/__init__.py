@@ -17,38 +17,41 @@ from stack.exception import ArgRequired, ArgUnique, CommandError
 class Command(stack.commands.remove.host.command):
 	"""
 	Remove a public key for a host.
-	
+
 	<arg optional='0' type='string' name='host'>
 	A host name.
 	</arg>
 
 	<param type='string' name='id'>
 	The ID of the key you wish to remove. To get the key id, execute:
-	"rocks list host key"
+	"stack list host key"
 	</param>
 	"""
 
 	def run(self, params, args):
-		id, = self.fillParams([ ('id', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
+
 		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
 		if len(hosts) > 1:
 			raise ArgUnique(self, 'host')
 
+		(key_id,) = self.fillParams([ ('id', None, True) ])
+
 		host = hosts[0]
 
-		rows = self.db.execute("""select * from public_keys where
-			id = %s and node = (select id from
-			nodes where name = '%s') """ % (id, host))
+		if self.db.count("""
+			(ID) from public_keys
+			where id=%s and node=(
+				select id from nodes where name=%s
+			)""", (key_id, host)
+		) == 0:
+			raise CommandError(
+				self,
+				f"public key with id {key_id} doesn't exist for host {host}"
+			)
 
-		if rows == 0:
-			msg = "public key with id %s " % id
-			msg += "doesn't exist for host %s" % host
-			raise CommandError(self, msg)
-		
-		self.db.execute("""delete from public_keys where
-			id = %s and node = (select id from
-			nodes where name = '%s') """ % (id, host))
-
+		self.db.execute('delete from public_keys where id=%s', (key_id,))

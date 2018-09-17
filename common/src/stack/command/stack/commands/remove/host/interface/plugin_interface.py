@@ -20,9 +20,7 @@ class Plugin(stack.commands.Plugin):
 
 	def requires(self):
 		return [ 'boot', 'TAIL']
-		
+
 	def run(self, networks):
 		for network in networks:
-			self.owner.db.execute("""delete from networks where 
-				id = '%s'""" % network)
-
+			self.owner.db.execute('delete from networks where id=%s', (network,))

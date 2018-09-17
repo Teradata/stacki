@@ -37,18 +37,18 @@ class Command(command):
 		if len(args) < 1:
 			raise ArgRequired(self, 'host')
 
-		me    = self.db.getHostname()
 		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
 
 		# Don't allow the user to remove the host the command
 		# is running on.  Right now that means cannot remove
 		# the Frontend, but checked this way will allow for
 		# future multiple Frontend's where you may still want 
 		# to remove some but not all of them.
+		me = self.db.getHostname()
 		if me in hosts:
 			raise CommandError(self, 'cannot remove "%s"' % me)
-		# Don't run unless we actually got hosts back
-		if hosts:
-			self.runPlugins(hosts)
-			self.command('sync.config')
 
+		self.runPlugins(hosts)
+		self.command('sync.config')

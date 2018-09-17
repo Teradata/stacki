@@ -49,28 +49,36 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		
 		if not len(args):
 			raise ArgRequired(self, 'host')
-			
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
 		(partition, device, uuid) = self.fillParams([
 			('partition', None),
 			('device', None),
-			('uuid', None)])
-			
-		for host in self.getHostnames(args):
-			conditions = []
-			sql_cmd = """delete from partitions where
-				node=(select id from nodes
-				where name='%s')""" % host
-			if uuid:
-				conditions.append("uuid='%s'" % uuid)
-			if partition:
-				conditions.append("mountpoint='%s'" % partition)
-			if device:
-				conditions.append("device='%s'" % device)
-			c = ' and '.join(conditions)
-			if c:
-				sql_cmd = "%s and %s" % (sql_cmd, c)
+			('uuid', None)
+		])
 
-			self.db.execute(sql_cmd)
+		for host in hosts:
+			sql = """
+				delete from partitions
+				where node=(select id from nodes where name=%s)
+			"""
+			values = [host]
+
+			if uuid:
+				sql += ' and uuid=%s'
+				values.append(uuid)
+
+			if partition:
+				sql += ' and mountpoint=%s'
+				values.append(partition)
+
+			if device:
+				sql += ' and device=%s'
+				values.append(device)
+
+			self.db.execute(sql, values)

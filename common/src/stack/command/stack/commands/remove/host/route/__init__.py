@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-import subprocess
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
@@ -27,7 +27,7 @@ class Command(stack.commands.remove.host.command):
 	</param>
 
 	<param type='string' name='syncnow' optional='1'>
-	if set to true, the routing table will be updated as well as the db.
+	If set to true, the routing table will be updated as well as the db.
 	</param>
 
 	<example cmd='remove host route backend-0-0 address=1.2.3.4'>
@@ -42,28 +42,27 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		
-		(address, syncnow, ) = self.fillParams([ 
+		if len(args) < 1:
+			raise ArgRequired(self, 'host')
+
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
+		(address, syncnow, ) = self.fillParams([
 			('address', None, True),
 			('syncnow', None)
-			])
+		])
 
 		syncnow = self.str2bool(syncnow)
+		me = self.db.getHostname()
 
-		devnull = open('/dev/null', 'w')
+		for host in hosts:
+			result = self.db.execute("""
+				delete from node_routes
+				where node=(select id from nodes where name=%s) and network=%s
+			""", (host, address))
 
-		for host in self.getHostnames(args):
-			res = self.db.execute("""
-			delete from node_routes where 
-			node = (select id from nodes where name='%s')
-			and network = '%s'
-			""" % (host, address))
-
-			if res and host in self.getHostnames(['localhost']):
-				if syncnow:
-					del_route = ['route', 'del', '-host', address]
-
-					# remove route from routing table
-					p = subprocess.Popen(del_route, stdout=subprocess.PIPE,
-						stderr=devnull)
-
+			# Remove the route from the frontend, if needed
+			if syncnow and result and host == me:
+				self._exec(f'route del -host {address}', shlexsplit=True)
