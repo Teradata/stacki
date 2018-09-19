@@ -89,8 +89,8 @@ class Command(stack.commands.RollArgumentProcessor,
 			)
 
 		# Regenerate stacki.repo
-		os.system("""
+		self._exec("""
 			/opt/stack/bin/stack report host repo localhost |
 			/opt/stack/bin/stack report script |
 			/bin/sh
-			""")
+			""", shell=True)

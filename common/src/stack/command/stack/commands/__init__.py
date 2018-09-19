@@ -450,17 +450,18 @@ class RollArgumentProcessor:
 		pallets = []
 		if not args:
 			args = [ '%' ]	       # find all pallet names
+
 		for arg in args:
 			found = False
-			for (name, ver, rel) in self.db.select("""
+			for (name, ver, release) in self.db.select("""
 				distinct name, version, rel from rolls where
-				name like binary '%s' and 
-				version like binary '%s' and 
-				rel like binary '%s' and
-				arch like binary '%s' 
-				""" % (arg, version, rel, arch)):
+				name like binary %s and 
+				version like binary %s and 
+				rel like binary %s and
+				arch like binary %s 
+				""", (arg, version, rel, arch)):
 				found = True
-				pallets.append((name, ver, rel))
+				pallets.append((name, ver, release))
 			if not found and arg != '%':
 				raise ArgNotFound(self, arg, 'pallet')
 		return pallets
