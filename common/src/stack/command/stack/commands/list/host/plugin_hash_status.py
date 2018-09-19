@@ -41,8 +41,7 @@ class Plugin(stack.commands.Plugin):
 				hashinfo = status.decode()
 				onhost = json.loads(hashinfo.replace("'", '"'))
 
-				computed = {}
-				computed['hashes'] = []
+				computed = []
 
 				output = self.owner.command('list.host.hash', [ host, 'profile=y' ])
 				for o in output.split('\n'):
@@ -51,7 +50,7 @@ class Plugin(stack.commands.Plugin):
 						hashline = {}
 						hashline['name'] = line[1]
 						hashline['hash'] = line[0]
-						computed['hashes'].append(hashline)
+						computed.append(hashline)
 
 				if computed == onhost:
 					status = 'synced'
