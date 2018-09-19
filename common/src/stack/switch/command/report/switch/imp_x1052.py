@@ -33,14 +33,11 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput('localhost', '!')
 		self.owner.addOutput('localhost', 'interface gi1/0/%s' % port)
 
-		attr = self.owner.getHostAttr(host, 'appliance')
-		if attr == 'frontend':
-			#
-			# special case for the frontend -- we need to make this
-			# a 'trunk' port which allows all VLAN traffic to pass,
-			# that is, the frontend needs to concurrently talk to
-			# hosts in *all* VLANs.
-			#
+		#
+		# find out if we need to set the port as a 'trunk' port. a trunk port 
+		# allows all VLAN traffic to pass.
+		#
+		if self.owner.getHostAttr(host, 'switch_port_mode') == 'trunk':
 			self.owner.addOutput('localhost', ' switchport mode trunk')
 			return
 
