@@ -434,3 +434,64 @@ def rmtree(tmpdir):
 @pytest.fixture
 def invalid_host():
 	return 'invalid-{:04x}'.format(random.randint(0, 65535))
+
+@pytest.fixture(scope="session")
+def create_minimal_iso(tmpdir_factory):
+	"""
+	This fixture runs at the beginning of the testing session to build
+	the pallet minimal-1.0-sles12.x86_64.disk1.iso and copies it to the
+	/export/test-files/pallets/ folder.
+
+	All tests will share the same ISO, so don't do anything to it. At
+	the end of the session the ISO file is deleted.
+	"""
+
+	temp_dir = tmpdir_factory.mktemp("minimal", False)
+
+	# Change to the temp directory
+	with temp_dir.as_cwd():
+		# Create our pallet ISO
+		subprocess.run([
+			'stack', 'create', 'pallet',
+			'/export/test-files/pallets/roll-minimal.xml'
+		], check=True)
+
+		# Move our new ISO where the tests expect it
+		shutil.move(
+			temp_dir.join('minimal-1.0-sles12.x86_64.disk1.iso'),
+			'/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso'
+		)
+
+	yield
+
+	# Clean up the ISO file
+	os.remove('/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+
+@pytest.fixture(scope="session")
+def create_blank_iso(tmpdir_factory):
+	"""
+	This fixture runs at the beginning of the testing session to build
+	the blank iso file (containing nothing) and copies it to the
+	/export/test-files/pallets/ folder.
+
+	All tests will share the same ISO, so don't do anything to it. At
+	the end of the session the ISO file is deleted.
+	"""
+
+	temp_dir = tmpdir_factory.mktemp("blank", False)
+
+	# Change to the temp directory
+	with temp_dir.as_cwd():
+		# Create our blank ISO
+		subprocess.run(['genisoimage', '-o', 'blank.iso', '.'], check=True)
+
+		# Move our new ISO where the tests expect it
+		shutil.move(
+			temp_dir.join('blank.iso'),
+			'/export/test-files/pallets/blank.iso'
+		)
+
+	yield
+
+	# Clean up the ISO file
+	os.remove('/export/test-files/pallets/blank.iso')
