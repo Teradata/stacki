@@ -1,0 +1,12 @@
+<roll name="minimal" interface="6.0.2">
+<timestamp time="19:00:48" date="July 10 2018" tz="UTC"/>
+<color edge="chocolate" node="chocolate"/>
+<info version="1.0" release="sles12" arch="x86_64" os="sles"/>
+<iso maxsize="0" addcomps="0" bootable="0" mkisofs="-b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table"/>
+<rpm rolls="0" bin="1" src="0"/>
+<author name="root" host="frontend-0-0"/>
+<gitstatus><![CDATA[
+]]></gitstatus>
+<gitlog>
+</gitlog>
+</roll>
