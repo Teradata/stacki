@@ -263,3 +263,72 @@ class SwitchMellanoxM7800(Switch):
 			del_member_seq.append(("Type 'yes' to continue:", 'yes'))
 		info(f'{del_member_seq[0]}')
 		self.proc.conversation(del_member_seq + [(self.proc.PROMPTS, None)])
+
+
+	def reload(self):
+		self.proc.say('reload noconfirm')
+
+
+	def image_boot_next(self):
+		self.proc.say('image boot next')
+
+
+	def install_firmware(self, image):
+		self.proc.say(f'image install {image}', timeout=1800)
+
+
+	def image_delete(self, image):
+		self.proc.say(f'image delete {image}')
+
+
+	def show_images(self):
+		images_text = self.proc.ask('show images')
+		data = {}
+		data['installed_images'] = []
+		data['last_boot_partition'] = None
+		data['next_boot_partition'] = None
+		data['images_fetched_and_available'] = []
+
+		extraction1 = False
+		extraction2 = False
+		i = 0
+		while i < len(images_text):
+			line = images_text[i]
+			if len(line) == 0 or len(line) == 1:
+				i = i + 1
+				continue
+			if('Installed images' in line):
+				extraction1 = True
+				i = i + 1
+				continue
+			if('Last boot partition' in line):
+				extraction1 = False
+				data['last_boot_partition'] = int(line.split(':')[-1])
+				data['next_boot_partition'] = int(images_text[i+1].split(':')[-1])
+				i = i + 1
+				continue
+			if('available to be installed' in line):
+				if('No image files are available to be installed' in line):
+					i = i + 1
+					continue
+				extraction2 = True
+				i = i + 1
+				continue
+			if('Serve image files via HTTP/HTTPS' in line):
+				extraction2 = False
+				break
+
+			if(extraction1):
+				partition = line.strip(': ')
+				image = images_text[i+1].strip()
+				d = {}
+				d[partition] = image
+				data['installed_images'].append(d)
+				i = i + 1
+			if(extraction2):
+				data['images_fetched_and_available'].append(images_text[i].strip())
+				i = i + 1
+			i = i + 1
+		return data
+
+
