@@ -106,6 +106,13 @@ class Implementation(stack.commands.Implementation):
 		#
 		self.owner.addOutput('localhost', 'no spanning-tree')
 
+		#
+		# user-defined global configuration (e.g., SNMP)
+		#
+		attr = self.owner.getHostAttr(switch_name, 'switch_global_config')
+		if attr:
+			self.owner.addOutput('localhost', attr)
+
 		if self.owner.nukeswitch:
 			#
 			# put the switch in a default state:
