@@ -33,13 +33,13 @@ class Command(stack.commands.remove.os.command):
 	"""
 
 	def run(self, params, args):
-
-		(address, ) = self.fillParams([ ('address', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		for os in self.getOSNames(args):
-			self.db.execute("""delete from os_routes where 
-			os = '%s' and network = '%s'""" % (os, address))
+		(address, ) = self.fillParams([ ('address', None, True) ])
 
+		for os in self.getOSNames(args):
+			self.db.execute(
+				'delete from os_routes where os=%s and network=%s',
+				(os, address)
+			)

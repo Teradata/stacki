@@ -10,7 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
 
 
@@ -27,11 +26,11 @@ class Command(stack.commands.remove.command):
 	</example>
 	"""
 
-
 	def run(self, params, args):
 
 		(address, ) = self.fillParams([ ('address', None, True) ])
 
-		self.db.execute("""delete from global_routes where 
-			network = '%s'""" % address)
-
+		self.db.execute(
+			'delete from global_routes where network=%s',
+			(address,)
+		)
