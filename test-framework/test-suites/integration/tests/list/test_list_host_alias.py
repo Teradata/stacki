@@ -3,10 +3,10 @@ from textwrap import dedent
 
 
 class TestListHostAlias:
-	def test_list_host_alias_invalid(self, host):
-		result = host.run('stack list host alias test')
+	def test_list_host_alias_invalid(self, host, invalid_host):
+		result = host.run(f'stack list host alias {invalid_host}')
 		assert result.rc == 255
-		assert result.stderr == 'error - cannot resolve host "test"\n'
+		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
 	def test_list_host_alias_usage_error(self, host):
 		result = host.run('stack list host alias host=frontend-0-0')

@@ -31,12 +31,12 @@ class TestWSClient:
 			}
 		]
 
-	def test_wsclient_remove_host_no_500(self, host):
+	def test_wsclient_remove_host_no_500(self, host, invalid_host):
 		"test a string encoding bugfix, API should return API Error, not 500"
-		result = host.run("wsclient remove host fakehost")
+		result = host.run(f"wsclient remove host {invalid_host}")
 		assert result.rc == 0 # I guess...
 		assert json.loads(result.stdout) == {
-				"API Error": "error - cannot resolve host \"fakehost\"\n",
+				"API Error": f"error - cannot resolve host \"{invalid_host}\"\n",
 				"Output": ""
 			}
 

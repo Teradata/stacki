@@ -2,10 +2,10 @@ import json
 
 
 class TestListHostKey:
-	def test_list_host_key_invalid(self, host):
-		result = host.run('stack list host key test')
+	def test_list_host_key_invalid(self, host, invalid_host):
+		result = host.run(f'stack list host key {invalid_host}')
 		assert result.rc == 255
-		assert result.stderr == 'error - cannot resolve host "test"\n'
+		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
 	def test_list_host_key_no_args(self, host, add_host):
 		# Add a few keys

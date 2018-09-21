@@ -11,10 +11,12 @@ class TestRemoveHostFirewall:
 			{host ...} {rulename=string}
 		''')
 
-	def test_remove_host_firewall_invalid(self, host):
-		result = host.run('stack remove host firewall backend-0-0 rulename=test')
+	def test_remove_host_firewall_invalid(self, host, invalid_host):
+		result = host.run(
+			f'stack remove host firewall {invalid_host} rulename=test'
+		)
 		assert result.rc == 255
-		assert result.stderr == 'error - host "backend-0-0" is not in cluster\n'
+		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
 	def test_remove_host_firewall_no_rulename(self, host, add_host):
 		result = host.run('stack remove host firewall backend-0-0')

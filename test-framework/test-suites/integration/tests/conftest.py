@@ -3,6 +3,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import multiprocessing
 import os
+import random
 import shutil
 import signal
 import subprocess
@@ -429,3 +430,7 @@ def rmtree(tmpdir):
 		result = subprocess.run(['mv', tmpdir.join(str(ndx)), path])
 		if result.returncode != 0:
 			pytest.fail(f'Unable to restory {path}')
+
+@pytest.fixture
+def invalid_host():
+	return 'invalid-{:04x}'.format(random.randint(0, 65535))
