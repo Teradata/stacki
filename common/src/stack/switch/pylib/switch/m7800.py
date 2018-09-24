@@ -1,7 +1,8 @@
 import re
 import syslog
+import time
 
-from stack.expectmore import ExpectMore
+from stack.expectmore import ExpectMore, remove_control_characters
 from stack.bool import str2bool
 from . import Switch, SwitchException
 from . import mellanoknok
@@ -123,6 +124,32 @@ class SwitchMellanoxM7800(Switch):
 			for key in key_ids:
 				info(f'removing key {key}')
 				self.proc.say(f'no ssh client user {user} authorized-key sshv2 {key}')
+
+	def set_hostname(self, hostname):
+		self.subnet_manager = False
+		# this doesn't happen immediately..
+		time.sleep(.5)
+		self.proc.say(f'hostname {hostname}')
+
+		for host in self._get_smnodes():
+			if host != hostname:
+				self.proc.say(f'no ib smnode {host}')
+
+		self.subnet_manager = True
+		time.sleep(.5)
+
+
+	def _get_smnodes(self):
+		nodes = self.proc.ask('no ib smnode ?', sanitizer=expectmore.remove_control_characters(l.strip()))
+		# hack.
+		# the issue here is that the '?' above is similar to a tab-completion.
+		# however, the string 'no ib smnode' gets put back on the buffer,
+		# meaning every command after is garbage
+		# ctrl-c on the CLI makes this go away, but sending the ctrl-c via pexpect doesn't seem to.
+		# reconnecting fixes this.
+		self.disconnect()
+		self.connect()
+		return nodes[1:-1]
 
 
 	@property
