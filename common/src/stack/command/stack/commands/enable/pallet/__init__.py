@@ -16,7 +16,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.RollArgumentProcessor,
+class Command(stack.commands.PalletArgumentProcessor,
 	stack.commands.enable.command):
 	"""
 	Enable an available pallet. The pallet must already be copied on the
@@ -40,6 +40,11 @@ class Command(stack.commands.RollArgumentProcessor,
 	<param type='string' name='arch'>
 	If specified enables the pallet for the given architecture.  The default
 	value is the native architecture of the host.
+	</param>
+
+	<param type='string' name='os'>
+	The OS of the pallet to be enabled. If no OS is supplied, then all OS
+	versions of a pallet will be enabled.
 	</param>
 
 	<param type='string' name='box'>
@@ -71,28 +76,36 @@ class Command(stack.commands.RollArgumentProcessor,
 			('box', 'default')
 		])
 
+		# We need to write the default arch back to the params list
+		params['arch'] = arch
+
 		# Make sure our box exists
-		rows = self.db.select('ID from boxes where name=%s', (box,))
+		rows = self.db.select("""
+			boxes.id, oses.name from boxes, oses
+			where boxes.name=%s and boxes.os=oses.id
+		""", (box,))
+
 		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
 
-		# Remember the box ID to simply queries down below
-		box_id = rows[0][0]
+		# Remember the box info to simplify queries down below
+		box_id, box_os = rows[0]
 
-		for (roll, version, release) in self.getRollNames(args, params):
+		for pallet in self.getPallets(args, params):
+			# Make sure this pallet's OS is valid for the box
+			if box_os != pallet.os:
+				raise CommandError(self,
+					f'incompatible pallet "{pallet.name}" with OS "{pallet.os}"'
+				)
+
 			# If this pallet isn't already in the box, add it
-			if self.db.count("""
-				(*) from stacks s, rolls r
-				where r.name=%s and r.version=%s and r.rel=%s
-				and r.arch=%s and s.box=%s and s.roll=r.id
-				""", (roll, version, release, arch, box_id)
+			if self.db.count(
+				'(*) from stacks where stacks.box=%s and stacks.roll=%s',
+				(box_id, pallet.id)
 			) == 0:
-				self.db.execute("""
-					insert into stacks(roll, box)
-					values ((
-						select id from rolls where name=%s
-						and version=%s and rel=%s and arch=%s
-					), %s)""", (roll, version, release, arch, box_id)
+				self.db.execute(
+					'insert into stacks(box, roll) values (%s, %s)',
+					(box_id, pallet.id)
 				)
 
 		# Regenerate stacki.repo

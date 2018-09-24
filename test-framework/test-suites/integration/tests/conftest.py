@@ -1,4 +1,5 @@
 import gc
+import glob
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import multiprocessing
@@ -501,36 +502,35 @@ def invalid_host():
 	return 'invalid-{:04x}'.format(random.randint(0, 65535))
 
 @pytest.fixture(scope="session")
-def create_minimal_iso(tmpdir_factory):
+def create_pallet_isos(tmpdir_factory):
 	"""
 	This fixture runs at the beginning of the testing session to build
-	the pallet minimal-1.0-sles12.x86_64.disk1.iso and copies it to the
-	/export/test-files/pallets/ folder.
+	the pallet ISOs for each roll-*.xml file found and copies them to
+	the /export/test-files/pallets/ folder.
 
 	All tests will share the same ISO, so don't do anything to it. At
 	the end of the session the ISO file is deleted.
 	"""
 
-	temp_dir = tmpdir_factory.mktemp("minimal", False)
+	clean_up = []
 
 	# Change to the temp directory
+	temp_dir = tmpdir_factory.mktemp("pallets", False)
 	with temp_dir.as_cwd():
-		# Create our pallet ISO
-		subprocess.run([
-			'stack', 'create', 'pallet',
-			'/export/test-files/pallets/roll-minimal.xml'
-		], check=True)
+		# Create our pallet ISOs
+		for path in glob.glob('/export/test-files/pallets/roll-*.xml'):
+			subprocess.run(['stack', 'create', 'pallet', path], check=True)
+			shutil.rmtree('disk1')
 
-		# Move our new ISO where the tests expect it
-		shutil.move(
-			temp_dir.join('minimal-1.0-sles12.x86_64.disk1.iso'),
-			'/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso'
-		)
-
+		# Move our new ISOs where the tests expect them
+		for path in glob.glob('*.iso'):
+			shutil.move(path, '/export/test-files/pallets/')
+			clean_up.append(path)
 	yield
 
-	# Clean up the ISO file
-	os.remove('/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+	# Clean up the ISO files
+	for filename in clean_up:
+		os.remove(os.path.join('/export/test-files/pallets/', filename))
 
 @pytest.fixture(scope="session")
 def create_blank_iso(tmpdir_factory):

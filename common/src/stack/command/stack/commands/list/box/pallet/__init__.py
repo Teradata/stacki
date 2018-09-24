@@ -13,8 +13,7 @@
 import stack.commands
 
 
-class Command(stack.commands.list.box.command,
-	      stack.commands.RollArgumentProcessor):
+class Command(stack.commands.list.box.command):
 	"""
 	List the pallets enabled in each box.
 

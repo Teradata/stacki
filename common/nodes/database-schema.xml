@@ -262,14 +262,14 @@ CREATE TABLE environment_routes (
 
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
-  Box		int(11) NOT NULL default '1' references boxes,
-  Roll		int(11) NOT NULL references rolls
+  Box		int(11) NOT NULL default '1' references boxes on delete cascade,
+  Roll		int(11) NOT NULL references rolls on delete cascade
 );
 
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
-  Box		int(11) NOT NULL default '1' references boxes,
-  Cart		int(11) NOT NULL references carts
+  Box		int(11) NOT NULL default '1' references boxes on delete cascade,
+  Cart		int(11) NOT NULL references carts on delete cascade
 );
 
 <!-- Groups -->
