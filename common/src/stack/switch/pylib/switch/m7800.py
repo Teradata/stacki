@@ -332,35 +332,35 @@ class SwitchMellanoxM7800(Switch):
 			if len(line) == 0 or len(line) == 1:
 				i = i + 1
 				continue
-			if('Installed images' in line):
+			if 'Installed images' in line:
 				extraction1 = True
 				i = i + 1
 				continue
-			if('Last boot partition' in line):
+			if 'Last boot partition' in line:
 				extraction1 = False
 				data['last_boot_partition'] = int(line.split(':')[-1])
 				data['next_boot_partition'] = int(images_text[i+1].split(':')[-1])
 				i = i + 1
 				continue
-			if('available to be installed' in line):
-				if('No image files are available to be installed' in line):
+			if 'available to be installed' in line:
+				if 'No image files are available to be installed' in line:
 					i = i + 1
 					continue
 				extraction2 = True
 				i = i + 1
 				continue
-			if('Serve image files via HTTP/HTTPS' in line):
+			if 'Serve image files via HTTP/HTTPS' in line:
 				extraction2 = False
 				break
 
-			if(extraction1):
+			if extraction1:
 				partition = line.strip(': ')
 				image = images_text[i+1].strip()
 				d = {}
 				d[partition] = image
 				data['installed_images'].append(d)
 				i = i + 1
-			if(extraction2):
+			if extraction2:
 				data['images_fetched_and_available'].append(images_text[i].strip())
 				i = i + 1
 			i = i + 1
