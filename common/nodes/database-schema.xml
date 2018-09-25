@@ -161,7 +161,7 @@ CREATE TABLE nodes (
 DROP TABLE IF EXISTS networks;
 CREATE TABLE networks (
   ID		int(11) NOT NULL auto_increment,
-  Node		int(11) default NULL,
+  Node		int(11) default NULL references nodes,
   MAC		varchar(64) default NULL,
   IP		varchar(32) default NULL,
   Netmask	varchar(32) default NULL,
@@ -174,7 +174,10 @@ CREATE TABLE networks (
   Options	varchar(128) default NULL,
   Channel	varchar(128) default NULL,
   Main		boolean	default false,
-  PRIMARY KEY(ID)
+  PRIMARY KEY(ID),
+  INDEX (Name),
+  INDEX (MAC),
+  INDEX (Device)
 );
 
 <!-- Subnets Table -->

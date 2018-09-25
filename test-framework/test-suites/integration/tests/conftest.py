@@ -334,6 +334,25 @@ def add_group(host):
 
 	# Then return the inner function, so we can call it inside the test
 	# to get more groups added
+
+	return _inner
+
+
+@pytest.fixture
+def add_network(host):
+	def _inner(name, address):
+		result = host.run(
+			f'stack add network {name} address={address} mask=255.255.255.0'
+		)
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy network "{name}"')
+
+	# First use of the fixture adds network "test"
+	_inner('test', '192.168.0.0')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more networks added
+
 	return _inner
 
 @pytest.fixture
