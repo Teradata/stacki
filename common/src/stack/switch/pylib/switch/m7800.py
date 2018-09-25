@@ -44,6 +44,9 @@ class SwitchMellanoxM7800(Switch):
 		"""
 		Connect to the switch and get a configuration prompt
 		"""
+		if self.proc.isalive():
+			return
+
 		ssh_options = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt'
 		self.proc.start(f'ssh {ssh_options} {self.username}@{self.switch_ip_address}')
 		info(f'ssh {ssh_options} {self.username}@{self.switch_ip_address}')
@@ -69,7 +72,8 @@ class SwitchMellanoxM7800(Switch):
 
 
 	def disconnect(self):
-		self.proc.end('quit')
+		if self.proc.isalive():
+			self.proc.end('quit')
 
 
 	@property
@@ -104,7 +108,7 @@ class SwitchMellanoxM7800(Switch):
 		key_section = False
 		sshkeys = {}
 		username = ''
-		for line in self.proc.ask('show ssh client', seek_to='SSH authorized keys:'):
+		for line in self.proc.ask('show ssh client', seek='SSH authorized keys:'):
 			line = line.strip()
 			if line.startswith('User'):
 				username = line.split()[1].rstrip(':')
