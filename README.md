@@ -1,7 +1,7 @@
 ![alt tag](logo.png)
 
 
-# There's a new release!
+# There's an old release!
 
 Stacki 5.0 was released on 11/30/2017. Go [here](https://github.com/Teradata/stacki/releases/latest) for more details and downloads. Installing is similar to previous versions; however, documents are lagging, just so's you know.
 
