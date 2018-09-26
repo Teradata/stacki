@@ -127,14 +127,13 @@ class Implementation(stack.commands.Implementation):
 			s.add_partition('Default')
 
 		# by default, all compute hosts should be added to the Default partition as limited members
-		# in the absence of an actual partitions hosts should be added as full members to Default
 		macs_for_default = []
 		# for backend nodes, we're looking for 'ibpartition' specified in the 'options' field of ibN ifaces
 		for row in lst_host_iface:
 			iface = IfInfo(*iface_getter(row))
 
 			if lst_host_appliances[iface.host]['appliance'] == 'switch':
-				# ib switches don't have their own interfaces listed
+				# ib switches don't have their own ib interfaces listed
 				# so this is probably the ethernet mgmt port
 				continue
 
@@ -145,11 +144,7 @@ class Implementation(stack.commands.Implementation):
 				# no guid
 				continue
 
-			# all netapp arrays should be added as Full members to the default
-			if lst_host_appliances[iface.host]['appliance'] == 'netapp_array':
-				s.add_partition_member('Default', iface.mac[-23:], membership='full')
-			else:
-				macs_for_default.append(iface.mac)
+			macs_for_default.append(iface.mac)
 
 			if iface.options is None:
 				# no partition info set
@@ -159,9 +154,15 @@ class Implementation(stack.commands.Implementation):
 				continue
 
 			opts = shlex.split(iface.options)
+
+			# no membership info set for a node, default to limited
+			membership = 'limited'
+			if 'ibmember=' in iface.options:
+				_, membership = next(opt.split('=') for opt in opts if opt.startswith('ibmember='))
+
+			# we already know 'ibpartition=' is present
 			_, partitions = next(opt.split('=') for opt in opts if opt.startswith('ibpartition='))
 
-			# we know there's an '=', so this is safe
 			for part in partitions.split(','):
 				try:
 					# error or ignore?
@@ -173,12 +174,9 @@ class Implementation(stack.commands.Implementation):
 					# skip adding members for non-existant partitions
 					continue
 
-				s.add_partition_member(partition, iface.mac[-23:], membership='full')
-
-		# if we have multiple partitions, don't put everyone in Default
-		if list(s.partitions.keys()) != ['Default']:
-			return
+				s.add_partition_member(partition, iface.mac[-23:], membership=membership)
 
 		# if the only partition is 'Default', everyone should be a full member
-		for mac in macs_for_default:
-			s.add_partition_member('Default', mac[-23:], membership='full')
+		if list(s.partitions.keys()) == ['Default']:
+			for mac in macs_for_default:
+				s.add_partition_member('Default', mac[-23:], membership='limited')
