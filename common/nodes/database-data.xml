@@ -54,6 +54,12 @@ rm /tmp/my.cnf
 
 <stack:script stack:cond="platform != 'docker'">
 /opt/stack/bin/stack report host > /etc/hosts
+
+<!-- Firmware support -->
+<!-- Mellanox -->
+/opt/stack/bin/stack add firmware model m7800 m6036 make=Mellanox
+/opt/stack/bin/stack add firmware version_regex '(?:\d+\.){2}\d+' name=mellanox_version description='This turns X86_64 3.6.5009 2018-01-02 07:42:21 x86_64 into 3.6.5009' make=Mellanox
+/opt/stack/bin/stack add firmware imp Mellanox_m7800 make=Mellanox models=m6036
 </stack:script>
 
 </stack:stack>

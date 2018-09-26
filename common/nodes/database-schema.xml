@@ -407,6 +407,65 @@ CREATE TABLE ib_memberships (
   INDEX (switch, part_name, interface)
 );
 
+<!-- Firmware -->
+<!-- need to drop in reverse order of creation because of FK constraints -->
+DROP TABLE IF EXISTS firmware;
+DROP TABLE IF EXISTS firmware_model;
+DROP TABLE IF EXISTS firmware_make;
+DROP TABLE IF EXISTS firmware_imp;
+DROP TABLE IF EXISTS firmware_version_regex;
+
+CREATE TABLE firmware_version_regex (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	regex VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	description VARCHAR(2048) NOT NULL,
+	INDEX (name),
+	CONSTRAINT unique_name UNIQUE (name)
+);
+
+CREATE TABLE firmware_imp (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	INDEX (name),
+	CONSTRAINT unique_name UNIQUE (name)
+);
+
+CREATE TABLE firmware_make (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	imp_id INT DEFAULT NULL,
+	version_regex_id INT DEFAULT NULL,
+	FOREIGN KEY (version_regex_id) REFERENCES firmware_version_regex(id) ON DELETE SET NULL,
+	INDEX (name),
+	CONSTRAINT unique_name UNIQUE (name)
+);
+
+CREATE TABLE firmware_model (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	make_id INT NOT NULL,
+	imp_id INT DEFAULT NULL,
+	version_regex_id INT DEFAULT NULL,
+	FOREIGN KEY (make_id) REFERENCES firmware_make(id),
+	FOREIGN KEY (imp_id) REFERENCES firmware_imp(id) ON DELETE SET NULL,
+	FOREIGN KEY (version_regex_id) REFERENCES firmware_version_regex(id) ON DELETE SET NULL,
+	INDEX (name),
+	CONSTRAINT unique_make_model UNIQUE (make_id, name)
+);
+
+CREATE TABLE firmware (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	model_id INT NOT NULL,
+	source VARCHAR(2048) NOT NULL,
+	version VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+	hash_alg VARCHAR(255) NOT NULL default 'md5',
+	hash VARCHAR(2048) NOT NULL,
+	file VARCHAR(2048) NOT NULL,
+	FOREIGN KEY (model_id) REFERENCES firmware_model(id),
+	INDEX (version),
+	CONSTRAINT unique_model_version UNIQUE (model_id, version)
+);
 
 </stack:file>
 
