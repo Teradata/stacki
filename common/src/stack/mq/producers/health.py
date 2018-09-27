@@ -7,6 +7,7 @@
 import json
 import stack.mq
 import psutil
+from pathlib import Path
 
 
 class Producer(stack.mq.producers.ProducerBase):
@@ -16,6 +17,10 @@ class Producer(stack.mq.producers.ProducerBase):
 	"""
 
 	def schedule(self):
+		# The second stage of YaST brings up the MQ but
+		# isn't really ready to start reporting infomation.
+		if Path('/var/lib/YaST2/reboot').is_file():
+			return 0
 		return 60
 
 	def produce(self):
