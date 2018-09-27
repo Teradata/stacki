@@ -39,6 +39,19 @@ CREATE TABLE aliases (
   INDEX (Name)
 );
 
+<!-- Tags -->
+
+DROP TABLE IF EXISTS tags;
+CREATE TABLE tags (
+	Scope		enum ('box', 'cart', 'network', 'pallet'),
+	Tag		varchar(128) NOT NULL,
+	Value		text,
+	ScopeID		int(11),
+	INDEX (Scope),
+	INDEX (Tag),
+	INDEX (ScopeID)
+);
+
 <!-- Attributes -->
 
 DROP TABLE IF EXISTS attributes;

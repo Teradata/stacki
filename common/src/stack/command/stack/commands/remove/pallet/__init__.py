@@ -21,9 +21,11 @@ import shutil
 import stack.commands
 from stack.exception import ArgRequired
 
+class command(stack.commands.PalletArgumentProcessor,
+	      stack.commands.remove.command):
+	pass
 
-class Command(stack.commands.PalletArgumentProcessor,
-	stack.commands.remove.command):
+class Command(command):
 	"""
 	Remove a pallet from both the database and filesystem.
 

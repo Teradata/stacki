@@ -10,12 +10,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+
 import stack.commands
 from stack.util import flatten
 
+class command(stack.commands.list.command,
+	      stack.commands.PalletArgumentProcessor):
+	pass
 
-class Command(stack.commands.PalletArgumentProcessor,
-	stack.commands.list.command):
+class Command(command):
 	"""
 	List the status of available pallets.
 
@@ -75,14 +78,12 @@ class Command(stack.commands.PalletArgumentProcessor,
 		expanded = self.str2bool(expanded)
 
 		for pallet in self.getPallets(args, params):
-			# Get a list of boxes for this pallet
-			boxes = ' '.join(flatten(
-				self.db.select("""
+
+			boxes = ' '.join(flatten(self.db.select("""
 					boxes.name from stacks, boxes
 					where stacks.roll=%s and stacks.box=boxes.id
-				""", (pallet.id,))
-			))
-
+					""", (pallet.id,))))
+			
 			# Constuct our data to output
 			output = [
 				pallet.version, pallet.rel, pallet.arch, pallet.os, boxes
