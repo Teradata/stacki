@@ -53,7 +53,7 @@ class Command(command):
 		for appliance in appliances:
 			for row in self.call('list.host'):
 				if row['appliance'] == appliance:
-					raise CommandError(self, 'cannot remove appliance "%s"\nbecause host "%s" is assigned to this appliance' % (appliance, row['host']))
+					raise CommandError(self, 'cannot remove appliance "%s" because host "%s" is assigned to it' % (appliance, row['host']))
 
 		#
 		# good to go

@@ -34,27 +34,20 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	def run(self, params, args):
 		if not len(args):
 			raise ArgRequired(self, 'network')
-			
-		# use the default argument handling but protect the user
-		# from ever deleting networks (subnets table) that are
-		# in use.  More general than just protecting the 'public'
-		# and 'private' networks.
-		
+
 		networks = self.getNetworkNames(args)
-		
-		for network in networks:
-			rows = self.db.execute("""select * from 
-				networks net, subnets sub where
-				net.subnet=sub.id and 
-				sub.name='%s'""" % network)
 
-			if rows > 0:
-				raise CommandError(self, 'cannot remove ' +
-					'"%s" ' % (network) +
-					'network. There are nodes still ' +
-					'associated with it.')
-					
-		for network in networks:
-			self.db.execute("""delete from subnets where 
-				name='%s'""" % network)
+		# Get a list of networks currently attached to host interfaces
+		in_use = {
+			interface['network']
+			for interface in self.call('list.host.interface')
+		}
 
+		# See if any are in use
+		for network in networks:
+			if network in in_use:
+				raise CommandError(self, f'network "{network}" in use')
+
+		# Safe to delete them
+		for network in networks:
+			self.db.execute('delete from subnets where name=%s', (network,))

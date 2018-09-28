@@ -13,10 +13,10 @@ class TestAddHostFirewall:
 			{host ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 
-	def test_add_host_firewall_invalid_host(self, host):
-		result = host.run('stack add host firewall foo')
+	def test_add_host_firewall_invalid_host(self, host, invalid_host):
+		result = host.run(f'stack add host firewall {invalid_host}')
 		assert result.rc == 255
-		assert result.stderr == 'error - cannot resolve host "foo"\n'
+		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 	
 	def test_add_host_firewall_no_service(self, host):
 		result = host.run(

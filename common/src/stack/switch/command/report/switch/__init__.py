@@ -17,12 +17,25 @@ class Command(command):
 	"""
 	Output the switch configuration file.
 
+	<arg type='string' name='switch'>
+	Name of the switch. If no switches are supplied, then output the report for all switches.
+	</arg>
+
+	<param type='boolean' name='nukeswitch' optional='1'>
+	If 'yes', then put the switch into a default state (e.g., no vlans, no partitions),
+	Just a "flat" switch.
+	Default: no
+	</param>
+
 	<example cmd='report switch ethernet-1-1'>
 	Output the configation file for ethernet-1-1.
 	</example>
 	"""
 
 	def run(self, params, args):
+		nukeswitch, = self.fillParams([ ('nukeswitch', 'n') ])
+
+		self.nukeswitch = self.str2bool(nukeswitch)
 
 		self.beginOutput()
 

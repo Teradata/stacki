@@ -151,7 +151,7 @@ class ApplianceArgumentProcessor:
 
 class BoxArgumentProcessor:
 	"""An Interface class to add the ability to process box arguments."""
-		
+
 	def getBoxNames(self, args=None):
 		"""Returns a list of box names from the database.
 		For each arg in the ARGS list find all the box
@@ -164,10 +164,14 @@ class BoxArgumentProcessor:
 			args = [ '%' ]		      # find all boxes
 
 		for arg in args:
-			query = 'name from boxes where name like %s'
-			boxes = flatten(self.db.select(query, [arg]))
-			if not boxes and arg != '%':
+			names = flatten(
+				self.db.select('name from boxes where name like %s', [arg])
+			)
+
+			if not names and arg != '%':
 				raise ArgNotFound(self, arg, 'box')
+
+			boxes.extend(names)
 
 		return boxes
 
@@ -446,17 +450,18 @@ class RollArgumentProcessor:
 		pallets = []
 		if not args:
 			args = [ '%' ]	       # find all pallet names
+
 		for arg in args:
 			found = False
-			for (name, ver, rel) in self.db.select("""
+			for (name, ver, release) in self.db.select("""
 				distinct name, version, rel from rolls where
-				name like binary '%s' and 
-				version like binary '%s' and 
-				rel like binary '%s' and
-				arch like binary '%s' 
-				""" % (arg, version, rel, arch)):
+				name like binary %s and 
+				version like binary %s and 
+				rel like binary %s and
+				arch like binary %s 
+				""", (arg, version, rel, arch)):
 				found = True
-				pallets.append((name, ver, rel))
+				pallets.append((name, ver, release))
 			if not found and arg != '%':
 				raise ArgNotFound(self, arg, 'pallet')
 		return pallets
@@ -575,7 +580,7 @@ class HostArgumentProcessor:
 			# stored in the hostDict will be the name of that
 			# interface rather than the name in the nodes table
 			
-			hostList.append(host)
+			hostList.append(host.lower())
 			
 			if names:
 				hostDict[host] = None
@@ -1226,6 +1231,27 @@ class DatabaseConnection:
 		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
 		DatabaseConnection.cache = {}
 
+	def count(self, command, args=None ):
+		"""
+		Return a count of the number of matching items in the database.
+		The command query should start with the column in parentheses you
+		wish to count.
+
+		The return value will either be an int or None if something
+		unexpected happened.
+
+		Example: count('(ID) from subnets where name=%s', (name,))
+		"""
+
+		# Run our select count
+		rows = self.select(f'count{command.strip()}', args)
+		
+		# We should always get a single row back
+		if len(rows) != 1:
+			return None
+		
+		return rows[0][0]
+	
 	def select(self, command, args=None):
 		if not self.link:
 			return []

@@ -24,7 +24,8 @@ class Implementation(stack.commands.Implementation):
 		for part in switch_handle.partitions:
 			switch_handle.del_partition(part)
 
-		# other stuff goes here, but that's the big deal
+		switch_handle.wipe_ssh_keys()
+
 
 	def run(self, args):
 		switch = args[0]['host']
@@ -44,6 +45,12 @@ class Implementation(stack.commands.Implementation):
 		if self.owner.nukeswitch:
 			self.nuke(s)
 			return
+
+		try:
+			pubkey = open('/root/.ssh/id_rsa.pub').read()
+			s.ssh_copy_id(pubkey.strip())
+		except FileNotFoundError:
+			pass
 
 		if not s.subnet_manager:
 			return
@@ -168,10 +175,10 @@ class Implementation(stack.commands.Implementation):
 
 				s.add_partition_member(partition, iface.mac[-23:], membership='full')
 
-		# if the only partition is 'Default', everyone should be a full member
-		membership = 'limited'
-		if list(s.partitions.keys()) == ['Default']:
-			membership = 'full'
+		# if we have multiple partitions, don't put everyone in Default
+		if list(s.partitions.keys()) != ['Default']:
+			return
 
+		# if the only partition is 'Default', everyone should be a full member
 		for mac in macs_for_default:
-			s.add_partition_member('Default', mac[-23:], membership=membership)
+			s.add_partition_member('Default', mac[-23:], membership='full')

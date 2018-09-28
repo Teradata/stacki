@@ -237,7 +237,7 @@ class TestAddHostBonded:
 			},
 			{
 				'channel': 'bond0',
-				'default': True,
+				'default': None,
 				'host': 'backend-0-0',
 				'interface': 'eth1',
 				'ip': None,

@@ -1,7 +1,9 @@
 import gc
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import multiprocessing
 import os
+import random
 import shutil
 import signal
 import subprocess
@@ -179,6 +181,38 @@ def revert_discovery():
 		os.remove("/var/log/stack-discovery.log")
 
 @pytest.fixture
+def revert_routing_table():
+	# Get a snapshot of the existing routes
+	result = subprocess.run(
+		["ip", "route", "list"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	old_routes = { line.strip() for line in result.stdout.split('\n') if line }
+
+	yield
+
+	# Get a new view of the routing table
+	result = subprocess.run(
+		["ip", "route", "list"],
+		stdout=subprocess.PIPE,
+		encoding="utf-8",
+		check=True
+	)
+	new_routes = { line.strip() for line in result.stdout.split('\n') if line }
+
+	# Remove any new routes
+	for route in new_routes:
+		if route not in old_routes:
+			result = subprocess.run(f"ip route del {route}", shell=True)
+
+	# Add in any missing old routes
+	for route in old_routes:
+		if route not in new_routes:
+			result = subprocess.run(f"ip route add {route}", shell=True)
+
+@pytest.fixture
 def add_host():
 	def _inner(hostname, rack, rank, appliance):
 		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
@@ -229,6 +263,95 @@ def add_switch():
 			pytest.fail('unable to set model')
 
 	_inner('switch-0-0', '0', '0', 'switch', 'fake', 'unrl')
+
+	return _inner
+
+@pytest.fixture
+def add_appliance(host):
+	def _inner(name):
+		result = host.run(f'stack add appliance {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy appliance "{name}"')
+
+	# First use of the fixture adds appliance "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more appliances added
+	return _inner
+
+@pytest.fixture
+def add_box(host):
+	def _inner(name):
+		result = host.run(f'stack add box {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy box "{name}"')
+
+	# First use of the fixture adds box "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more boxes added
+	return _inner
+
+@pytest.fixture
+def add_cart(host):
+	def _inner(name):
+		result = host.run(f'stack add cart {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add cart box "{name}"')
+
+	# First use of the fixture adds cart "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more carts added
+	return _inner
+
+@pytest.fixture
+def add_environment(host):
+	def _inner(name):
+		result = host.run(f'stack add environment {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy environment "{name}"')
+
+	# First use of the fixture adds environment "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more environments added
+	return _inner
+
+@pytest.fixture
+def add_group(host):
+	def _inner(name):
+		result = host.run(f'stack add group {name}')
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy group "{name}"')
+
+	# First use of the fixture adds group "test"
+	_inner('test')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more groups added
+
+	return _inner
+
+
+@pytest.fixture
+def add_network(host):
+	def _inner(name, address):
+		result = host.run(
+			f'stack add network {name} address={address} mask=255.255.255.0'
+		)
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy network "{name}"')
+
+	# First use of the fixture adds network "test"
+	_inner('test', '192.168.0.0')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more networks added
 
 	return _inner
 
@@ -308,8 +431,132 @@ def run_django_server():
 	process.join()
 
 @pytest.fixture
+def run_file_server():
+	# Run an HTTP server in a process
+	def runner():		
+		try:
+			# Change to our test-files directory
+			os.chdir('/export/test-files')
+
+			# Serve them up
+			with HTTPServer(
+				('127.0.0.1', 8000),
+				SimpleHTTPRequestHandler
+			) as httpd:
+				httpd.serve_forever()
+		except KeyboardInterrupt:
+			# The signal to exit
+			pass
+	
+	process = multiprocessing.Process(target=runner)
+	process.daemon = True
+	process.start()
+
+	# Give us a second to get going
+	time.sleep(1)
+	
+	yield
+
+	# Tell the server it is time to clean up
+	os.kill(process.pid, signal.SIGINT)
+	process.join()
+
+@pytest.fixture
 def host_os(host):
 	if host.file('/etc/SuSE-release').exists:
 		return 'sles'
 	
 	return 'redhat'
+
+@pytest.fixture
+def rmtree(tmpdir):
+	"""
+	This fixture lets you call rmtree(path) in a test, which simulates
+	deleting a directory and all it's files. It really moves it to
+	a temperary location and restores it when the test finishes.
+	"""
+
+	restore = []
+	def _inner(path):
+		result = subprocess.run(['mv', path, tmpdir.join(str(len(restore)))])
+		if result.returncode != 0:
+			pytest.fail(f'Unable to move {path}')
+		restore.append(path)
+	
+	yield _inner
+
+	# For each directory to restore
+	for ndx, path in enumerate(restore):
+		# Delete any existing stuff
+		if os.path.exists(path):
+			shutil.rmtree(path)
+		
+		# Move back the original data
+		result = subprocess.run(['mv', tmpdir.join(str(ndx)), path])
+		if result.returncode != 0:
+			pytest.fail(f'Unable to restory {path}')
+
+@pytest.fixture
+def invalid_host():
+	return 'invalid-{:04x}'.format(random.randint(0, 65535))
+
+@pytest.fixture(scope="session")
+def create_minimal_iso(tmpdir_factory):
+	"""
+	This fixture runs at the beginning of the testing session to build
+	the pallet minimal-1.0-sles12.x86_64.disk1.iso and copies it to the
+	/export/test-files/pallets/ folder.
+
+	All tests will share the same ISO, so don't do anything to it. At
+	the end of the session the ISO file is deleted.
+	"""
+
+	temp_dir = tmpdir_factory.mktemp("minimal", False)
+
+	# Change to the temp directory
+	with temp_dir.as_cwd():
+		# Create our pallet ISO
+		subprocess.run([
+			'stack', 'create', 'pallet',
+			'/export/test-files/pallets/roll-minimal.xml'
+		], check=True)
+
+		# Move our new ISO where the tests expect it
+		shutil.move(
+			temp_dir.join('minimal-1.0-sles12.x86_64.disk1.iso'),
+			'/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso'
+		)
+
+	yield
+
+	# Clean up the ISO file
+	os.remove('/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+
+@pytest.fixture(scope="session")
+def create_blank_iso(tmpdir_factory):
+	"""
+	This fixture runs at the beginning of the testing session to build
+	the blank iso file (containing nothing) and copies it to the
+	/export/test-files/pallets/ folder.
+
+	All tests will share the same ISO, so don't do anything to it. At
+	the end of the session the ISO file is deleted.
+	"""
+
+	temp_dir = tmpdir_factory.mktemp("blank", False)
+
+	# Change to the temp directory
+	with temp_dir.as_cwd():
+		# Create our blank ISO
+		subprocess.run(['genisoimage', '-o', 'blank.iso', '.'], check=True)
+
+		# Move our new ISO where the tests expect it
+		shutil.move(
+			temp_dir.join('blank.iso'),
+			'/export/test-files/pallets/blank.iso'
+		)
+
+	yield
+
+	# Clean up the ISO file
+	os.remove('/export/test-files/pallets/blank.iso')

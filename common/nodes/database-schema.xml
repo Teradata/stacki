@@ -26,16 +26,17 @@ CREATE TABLE access (
 
 <!-- enable root to run all commands -->
 
-insert into access (command, groupid) values ("*", 0); 
+insert into access (command, groupid) values ("*", 0);
 
 <!-- Aliases -->
 
 DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '0',
-  Network		int(11) NOT NULL default '0',
-  PRIMARY KEY (ID) 
+  Name		varchar(32) NOT NULL,
+  Network		int(11) NOT NULL references networks,
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Attributes -->
@@ -111,8 +112,8 @@ CREATE TABLE boxes (
 
 DROP TABLE IF EXISTS boot;
 CREATE TABLE boot (
-	Node		int(11) NOT NULL default '0',
-	Action		enum ('install', 'os')
+  Node  	int(11) NOT NULL default '0' references nodes on delete cascade,
+  Action	enum ('install', 'os')
 );
 
 DROP TABLE IF EXISTS bootnames;
@@ -120,7 +121,8 @@ CREATE TABLE bootnames (
 	ID		int(11) NOT NULL auto_increment,
 	Name		varchar(128) NOT NULL,
 	Type		enum ('install', 'os') NOT NULL,
-	PRIMARY KEY (ID)
+	PRIMARY KEY (ID),
+	INDEX (Name)
 );
 
 DROP TABLE IF EXISTS bootactions;
@@ -159,7 +161,7 @@ CREATE TABLE nodes (
 DROP TABLE IF EXISTS networks;
 CREATE TABLE networks (
   ID		int(11) NOT NULL auto_increment,
-  Node		int(11) default NULL,
+  Node		int(11) default NULL references nodes,
   MAC		varchar(64) default NULL,
   IP		varchar(32) default NULL,
   Netmask	varchar(32) default NULL,
@@ -172,7 +174,10 @@ CREATE TABLE networks (
   Options	varchar(128) default NULL,
   Channel	varchar(128) default NULL,
   Main		boolean	default false,
-  PRIMARY KEY(ID)
+  PRIMARY KEY(ID),
+  INDEX (Name),
+  INDEX (MAC),
+  INDEX (Device)
 );
 
 <!-- Subnets Table -->
@@ -188,7 +193,8 @@ CREATE TABLE subnets (
 	mtu		int(11)		default '1500',
 	dns		boolean		default false,
 	pxe		boolean		default false,
-	PRIMARY KEY(ID)
+	PRIMARY KEY(ID),
+	INDEX (name)
 );
 
 <!-- Node/Switch Table -->
@@ -256,14 +262,14 @@ CREATE TABLE environment_routes (
 
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
-  Box		int(11) NOT NULL default '1',
-  Roll		int(11) NOT NULL 
+  Box		int(11) NOT NULL default '1' references boxes,
+  Roll		int(11) NOT NULL references rolls
 );
 
 DROP TABLE IF EXISTS cart_stacks;
 CREATE TABLE cart_stacks (
-  Box		int(11) NOT NULL default '1',
-  Cart		int(11) NOT NULL 
+  Box		int(11) NOT NULL default '1' references boxes,
+  Cart		int(11) NOT NULL references carts
 );
 
 <!-- Groups -->
@@ -304,7 +310,8 @@ CREATE TABLE rolls (
   Arch		varchar(32) NOT NULL default '',
   OS		varchar(32) NOT NULL default '&os;',
   URL		text	    NULL default '',
-  PRIMARY KEY (ID) 
+  PRIMARY KEY (ID),
+  INDEX (Name)
 );
 
 <!-- Partitions. stores all the partitions for all the appliances -->
@@ -422,7 +429,7 @@ CREATE TABLE environment_firewall (
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (
  ID		int(11) NOT NULL auto_increment,
- Node		int(11) NOT NULL default '0',
+ Node		int(11) NOT NULL references nodes,
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
 );

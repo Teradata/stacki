@@ -1,7 +1,8 @@
 import re
 import syslog
+import time
 
-from stack.expectmore import ExpectMore
+from stack.expectmore import ExpectMore, remove_control_characters
 from stack.bool import str2bool
 from . import Switch, SwitchException
 from . import mellanoknok
@@ -44,6 +45,9 @@ class SwitchMellanoxM7800(Switch):
 		"""
 		Connect to the switch and get a configuration prompt
 		"""
+		if self.proc.isalive():
+			return
+
 		ssh_options = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -tt'
 		self.proc.start(f'ssh {ssh_options} {self.username}@{self.switch_ip_address}')
 		info(f'ssh {ssh_options} {self.username}@{self.switch_ip_address}')
@@ -69,7 +73,8 @@ class SwitchMellanoxM7800(Switch):
 
 
 	def disconnect(self):
-		self.proc.end('quit')
+		if self.proc.isalive():
+			self.proc.end('quit')
 
 
 	@property
@@ -95,6 +100,56 @@ class SwitchMellanoxM7800(Switch):
 		""" relies on pubkey being a string whose format is exactly that of "id_rsa.pub" """
 
 		self.proc.say(f'ssh client user admin authorized-key sshv2 "{pubkey}"')
+
+
+	def wipe_ssh_keys(self):
+		""" remove all authorized keys from the switch """
+
+		info('wiping ssh keys from switch')
+		key_section = False
+		sshkeys = {}
+		username = ''
+		for line in self.proc.ask('show ssh client', seek='SSH authorized keys:'):
+			line = line.strip()
+			if line.startswith('User'):
+				username = line.split()[1].rstrip(':')
+				sshkeys[username] = []
+				continue
+			if line.startswith('Key'):
+				key_id = line.split()[1].rstrip(':')
+				sshkeys[username].append(key_id)
+				continue
+
+		for user, key_ids in sshkeys.items():
+			for key in key_ids:
+				info(f'removing key {key}')
+				self.proc.say(f'no ssh client user {user} authorized-key sshv2 {key}')
+
+	def set_hostname(self, hostname):
+		self.subnet_manager = False
+		# this doesn't happen immediately..
+		time.sleep(.5)
+		self.proc.say(f'hostname {hostname}')
+
+		for host in self._get_smnodes():
+			if host != hostname:
+				self.proc.say(f'no ib smnode {host}')
+
+		self.subnet_manager = True
+		time.sleep(.5)
+
+
+	def _get_smnodes(self):
+		nodes = self.proc.ask('no ib smnode ?', sanitizer=expectmore.remove_control_characters(l.strip()))
+		# hack.
+		# the issue here is that the '?' above is similar to a tab-completion.
+		# however, the string 'no ib smnode' gets put back on the buffer,
+		# meaning every command after is garbage
+		# ctrl-c on the CLI makes this go away, but sending the ctrl-c via pexpect doesn't seem to.
+		# reconnecting fixes this.
+		self.disconnect()
+		self.connect()
+		return nodes[1:-1]
 
 
 	@property
@@ -181,7 +236,6 @@ class SwitchMellanoxM7800(Switch):
 			self.proc.conversation(add_part_seq)
 		else:
 			self.proc.say(f'ib partition {partition} pkey {pkey} force')
-			self.proc.say(f'ib partition {partition} ipoib force')
 
 
 	def del_partition(self, partition):
@@ -240,3 +294,75 @@ class SwitchMellanoxM7800(Switch):
 			del_member_seq.append(("Type 'yes' to continue:", 'yes'))
 		info(f'{del_member_seq[0]}')
 		self.proc.conversation(del_member_seq + [(self.proc.PROMPTS, None)])
+
+
+	def reload(self):
+		self.proc.end('reload noconfirm')
+
+
+	def image_boot_next(self):
+		self.proc.say('image boot next')
+
+
+	def install_firmware(self, image):
+		self.proc.ask(f'image install {image}', timeout=1800)
+
+
+	def image_delete(self, image):
+		self.proc.say(f'image delete {image}')
+
+
+	def image_fetch(self, url):
+		self.proc.ask(f'image fetch {url}', timeout=900)
+
+
+	def show_images(self):
+		images_text = self.proc.ask('show images')
+		data = {}
+		data['installed_images'] = []
+		data['last_boot_partition'] = None
+		data['next_boot_partition'] = None
+		data['images_fetched_and_available'] = []
+
+		extraction1 = False
+		extraction2 = False
+		i = 0
+		while i < len(images_text):
+			line = images_text[i]
+			if len(line) == 0 or len(line) == 1:
+				i = i + 1
+				continue
+			if('Installed images' in line):
+				extraction1 = True
+				i = i + 1
+				continue
+			if('Last boot partition' in line):
+				extraction1 = False
+				data['last_boot_partition'] = int(line.split(':')[-1])
+				data['next_boot_partition'] = int(images_text[i+1].split(':')[-1])
+				i = i + 1
+				continue
+			if('available to be installed' in line):
+				if('No image files are available to be installed' in line):
+					i = i + 1
+					continue
+				extraction2 = True
+				i = i + 1
+				continue
+			if('Serve image files via HTTP/HTTPS' in line):
+				extraction2 = False
+				break
+
+			if(extraction1):
+				partition = line.strip(': ')
+				image = images_text[i+1].strip()
+				d = {}
+				d[partition] = image
+				data['installed_images'].append(d)
+				i = i + 1
+			if(extraction2):
+				data['images_fetched_and_available'].append(images_text[i].strip())
+				i = i + 1
+			i = i + 1
+		return data
+

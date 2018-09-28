@@ -23,10 +23,10 @@ class Command(command):
 	"""
 	Remove an OS definition from the system.
 
-	<arg type='string' name='os'>
+	<arg type='string' name='os' repeat='1'>
 	The OS type (e.g., "linux", "sunos").
 	</arg>
-	
+
 	<example cmd='remove os sunos'>
 	Removes the OS type "sunos" from the database.
 	</example>
@@ -36,7 +36,6 @@ class Command(command):
 
 		if len(args) < 1:
 			raise ArgRequired(self, 'os')
-			
+
 		for os in self.getOSNames(args):
 			self.runPlugins(os)
-

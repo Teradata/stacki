@@ -224,10 +224,10 @@ table="filter" rulename="accept_public_ssh"'>
 		 comment, table, rulename) = self.doParams()
 
 		# Make sure we have a new rule
-		if self.db.select(
-			'count(*) from global_firewall where name=%s',
+		if self.db.count(
+			'(*) from global_firewall where name=%s',
 			(rulename,)
-		)[0][0] > 0:
+		) > 0:
 			raise CommandError(self, f'Rule with rulename "{rulename}" already exists')
 		
 		# Now let's add them

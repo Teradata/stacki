@@ -38,11 +38,7 @@ class Command(stack.commands.CartArgumentProcessor,
 		for cart in self.getCartNames(args):
 			os.system('/bin/rm -rf %s' % os.path.join(cartpath, cart))
 
-			#
-			# Remove cart from database
-			#
-			self.db.execute("delete from carts where name = '%s'"
-				% cart)
+			self.db.execute('delete from carts where name=%s', (cart,))
 
 		os.system("""
 			/opt/stack/bin/stack report host repo localhost | 

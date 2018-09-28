@@ -27,11 +27,4 @@ class Plugin(stack.commands.Plugin):
 		return 'firewall'
 
 	def run(self, os):
-		#
-		# since we are not setting any command line parameters, we
-		# just need to remove all rows in the database that match this
-		# os type
-		#
-		self.db.execute("""delete from os_firewall where
-			os = '%s' """  % os)
-
+		self.db.execute('delete from os_firewall where os=%s', (os,))

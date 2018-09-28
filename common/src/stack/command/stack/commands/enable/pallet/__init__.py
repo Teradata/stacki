@@ -26,7 +26,7 @@ class Command(stack.commands.RollArgumentProcessor,
 	List of pallets to enable. This should be the pallet base name (e.g.,
 	stacki, boss, os).
 	</arg>
-	
+
 	<param type='string' name='version'>
 	The version number of the pallet to be enabled. If no version number is
 	supplied, then all versions of a pallet will be enabled.
@@ -60,7 +60,7 @@ class Command(stack.commands.RollArgumentProcessor,
 	<related>disable pallet</related>
 	<related>list pallet</related>
 	<related>create pallet</related>
-	"""		
+	"""
 
 	def run(self, params, args):
 		if len(args) < 1:
@@ -69,42 +69,35 @@ class Command(stack.commands.RollArgumentProcessor,
 		(arch, box) = self.fillParams([
 			('arch', self.arch),
 			('box', 'default')
-			])
+		])
 
-		rows = self.db.execute("""
-			select * from boxes where name='%s'
-			""" % box)
-		if not rows:
+		# Make sure our box exists
+		rows = self.db.select('ID from boxes where name=%s', (box,))
+		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
-		
+
+		# Remember the box ID to simply queries down below
+		box_id = rows[0][0]
+
 		for (roll, version, release) in self.getRollNames(args, params):
-			if release:
-				rel = "rel='%s'" % release
-			else:
-				rel = 'rel=""'
-
-			rows = self.db.execute("""
-				select b.name from
-				stacks s, rolls r, boxes b where
-				r.name = '%s' and
-				r.version = '%s' and %s and
-				r.arch = '%s' and
-				b.name = '%s' and
-				s.box = b.id and s.roll=r.id
-				""" % (roll, version, rel, arch, box))
-
-			if not rows:
+			# If this pallet isn't already in the box, add it
+			if self.db.count("""
+				(*) from stacks s, rolls r
+				where r.name=%s and r.version=%s and r.rel=%s
+				and r.arch=%s and s.box=%s and s.roll=r.id
+				""", (roll, version, release, arch, box_id)
+			) == 0:
 				self.db.execute("""
-					insert into stacks(box, roll)
-					values (
-					(select id from boxes where name='%s'),
-					(select id from rolls where name='%s'
-					and version='%s' and %s and arch='%s')
-					)""" % (box, roll, version, rel, arch))
+					insert into stacks(roll, box)
+					values ((
+						select id from rolls where name=%s
+						and version=%s and rel=%s and arch=%s
+					), %s)""", (roll, version, release, arch, box_id)
+				)
 
 		# Regenerate stacki.repo
-		os.system("""
-			/opt/stack/bin/stack report host repo localhost | 
-			/opt/stack/bin/stack report script | 
+		self._exec("""
+			/opt/stack/bin/stack report host repo localhost |
+			/opt/stack/bin/stack report script |
 			/bin/sh
-			""")
+			""", shell=True)

@@ -33,16 +33,15 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 
 	def run(self, params, args):
-		
-		(address, ) = self.fillParams([ ('address', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
+		(address, ) = self.fillParams([ ('address', None, True) ])
+
 		for appliance in self.getApplianceNames(args):
 			self.db.execute("""
-			delete from appliance_routes where 
-			appliance = (select id from appliances where name='%s')
-			and network = '%s'
-			""" % (appliance, address))
-
+				delete from appliance_routes
+				where appliance=(
+					select id from appliances where name=%s
+				) and network=%s
+			""", (appliance, address))

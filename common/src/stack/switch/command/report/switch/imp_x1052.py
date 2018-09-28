@@ -31,16 +31,13 @@ class Implementation(stack.commands.Implementation):
 
 	def doPort(self, switch, host, port):
 		self.owner.addOutput('localhost', '!')
-		self.owner.addOutput('localhost', 'interface gigabitethernet1/0/%s' % port)
+		self.owner.addOutput('localhost', 'interface gi1/0/%s' % port)
 
-		attr = self.owner.getHostAttr(host, 'appliance')
-		if attr == 'frontend':
-			#
-			# special case for the frontend -- we need to make this
-			# a 'trunk' port which allows all VLAN traffic to pass,
-			# that is, the frontend needs to concurrently talk to
-			# hosts in *all* VLANs.
-			#
+		#
+		# find out if we need to set the port as a 'trunk' port. a trunk port 
+		# allows all VLAN traffic to pass.
+		#
+		if self.owner.getHostAttr(host, 'switch_port_mode') == 'trunk':
 			self.owner.addOutput('localhost', ' switchport mode trunk')
 			return
 
@@ -105,35 +102,61 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput('localhost', '!')
 
 		#
-		# find all the VLAN ids
-		#
-		vlans = []
-		for o in self.owner.call('list.host.interface', [ 'a:backend' ]):
-			if o['vlan']:
-				vlan = str(o['vlan'])
-				if vlan not in vlans:
-					vlans.append(vlan)
-
-		if len(vlans):
-			self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
-
-		#
 		# turn off global spanning tree
 		#
 		self.owner.addOutput('localhost', 'no spanning-tree')
 
 		#
-		# create a list of host/port 
+		# user-defined global configuration (e.g., SNMP)
 		#
-		hostport = []
-		for s in self.owner.call('list.switch.host', [ switch_name ]):
-			host = s['host']
-			port = s['port']
+		attr = self.owner.getHostAttr(switch_name, 'switch_global_config')
+		if attr:
+			self.owner.addOutput('localhost', attr)
 
-			hp = (host, port)
-			if hp not in hostport:
-				self.doPort(switch_name, host, port)
-				hostport.append(hp)
+		if self.owner.nukeswitch:
+			#
+			# put the switch in a default state:
+			#
+			#	- remove all vlan info
+			#	- set all ports to the default vlan of 1
+			#
+			self.owner.addOutput('localhost', 'no vlan 2-4094')
+			self.owner.addOutput('localhost', '!')
+			self.owner.addOutput('localhost', 'interface range gi1/0/1-48')
+			self.owner.addOutput('localhost', ' switchport mode general') 
+			self.owner.addOutput('localhost',
+				' switchport general allowed vlan add 1 untagged')
+			self.owner.addOutput('localhost', '!')
+			self.owner.addOutput('localhost', 'interface range te1/0/1-4')
+			self.owner.addOutput('localhost', ' switchport mode general') 
+			self.owner.addOutput('localhost',
+				' switchport general allowed vlan add 1 untagged')
+		else:
+			#
+			# find all the VLAN ids
+			#
+			vlans = []
+			for o in self.owner.call('list.host.interface', [ 'a:backend' ]):
+				if o['vlan']:
+					vlan = str(o['vlan'])
+					if vlan not in vlans:
+						vlans.append(vlan)
+
+			if len(vlans):
+				self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
+
+			#
+			# create a list of host/port 
+			#
+			hostport = []
+			for s in self.owner.call('list.switch.host', [ switch_name ]):
+				host = s['host']
+				port = s['port']
+
+				hp = (host, port)
+				if hp not in hostport:
+					self.doPort(switch_name, host, port)
+					hostport.append(hp)
 
 		self.owner.addOutput('localhost', '!')
 		self.owner.addOutput('localhost', '</stack:file>')

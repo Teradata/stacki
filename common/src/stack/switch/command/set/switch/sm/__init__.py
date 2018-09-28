@@ -65,7 +65,7 @@ class Command(stack.commands.SwitchArgumentProcessor,
 		ib_switch_names = [sw['switch'] for sw in ibswitches]
 
 		if sm_switch not in ib_switch_names:
-			msg = f'host {sm_switch} is not a support infiniband switch\n'
+			msg = f'host {sm_switch} is not a supported infiniband switch\n'
 			msg += 'Please verify the make and model attributes for this host.'
 			raise CommandError(self, msg)
 

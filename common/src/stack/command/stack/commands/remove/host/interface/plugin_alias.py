@@ -20,5 +20,4 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, networks):
 		for network in networks:
-			self.db.execute("""delete from aliases where 
-					network = '%s'""" % (network))
+			self.db.execute('delete from aliases where network=%s', (network,))

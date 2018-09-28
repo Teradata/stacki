@@ -12,7 +12,8 @@
 
 
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import ParamRequired, CommandError, ArgRequired
+from stack.util import flatten
 
 
 class Command(stack.commands.remove.host.command):
@@ -47,46 +48,45 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
 
-		(interface, mac, all) = self.fillParams([
+		hosts = self.getHostnames(args)
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
+		(interface, mac, all_interfaces) = self.fillParams([
 			('interface', None),
 			('mac',       None),
 			('all',     'false')
-			])
+		])
 
-		all = self.str2bool(all)
-		if not all and not interface and not mac:
+		all_interfaces = self.str2bool(all_interfaces)
+		if not all_interfaces and not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 
 		networks = ()
-		for host in self.getHostnames(args):
-			if all:
-				self.db.execute("""
-					select id from networks where
-					node=(select id from nodes where name='%s')
-					""" %  (host))
-				networks = self.db.fetchall()
+		for host in hosts:
+			if all_interfaces:
+				networks = flatten(self.db.select("""
+					id from networks where
+					node=(select id from nodes where name=%s)
+				""", (host,)))
 			elif interface:
-				self.runPlugins(networks)
-				rows_affected = self.db.execute("""
-					select id from networks where
-					node=(select id from nodes where name='%s')
-					and device like '%s'
-					""" %  (host, interface))
+				networks = flatten(self.db.select("""
+					id from networks where
+					node=(select id from nodes where name=%s) and device=%s
+				""",  (host, interface)))
 
-				if not rows_affected:
-					raise CommandError(self, "No interface '%s' exists on %s." % (interface, host))
-				networks = self.db.fetchall()
+				if not networks:
+					raise CommandError(self, 'no interface "%s" exists on %s' % (interface, host))
 			else:
-				self.runPlugins(networks)
-				rows_affected = self.db.execute("""
-					select id from networks where
-					node=(select id from nodes where name='%s')
-					and mac like '%s'
-					""" %  (host, mac))
+				networks = flatten(self.db.select("""
+					id from networks where
+					node=(select id from nodes where name=%s) and mac=%s
+				""", (host, mac)))
 
-				if not rows_affected:
-					raise CommandError(self, "No mac address '%s' exists on %s." % (mac, host))
-				networks = self.db.fetchall()
-			
+				if not networks:
+					raise CommandError(self, 'no mac address "%s" exists on %s' % (mac, host))
+
 			self.runPlugins(networks)

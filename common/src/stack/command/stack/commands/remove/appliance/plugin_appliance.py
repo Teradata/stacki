@@ -32,8 +32,9 @@ class Plugin(stack.commands.Plugin):
 		# make sure this plugin runs last
 		#
 		return [ 'TAIL' ]
-		
-	def run(self, appliance):
-		self.owner.db.execute("""delete from appliances where
-			name='%s'""" % appliance)
 
+	def run(self, appliance):
+		self.owner.db.execute(
+			'delete from appliances where name=%s',
+			(appliance,)
+		)

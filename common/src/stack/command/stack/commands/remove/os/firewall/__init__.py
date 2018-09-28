@@ -11,13 +11,10 @@
 # @rocks@
 
 import stack.commands
-import stack.commands.remove.firewall
-from stack.exception import ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.remove.os.command,
-	stack.commands.remove.firewall.command):
-
+class Command(stack.commands.remove.os.command):
 	"""
 	Remove a firewall rule for an OS type. To remove
 	a rule, one must supply the name of the rule.
@@ -32,12 +29,24 @@ class Command(stack.commands.remove.os.command,
 	"""
 
 	def run(self, params, args):
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
-		
-		for os in self.getOSNames(args):
-			sql = """os='%s'""" % (os)
 
-			self.deleteRule('os_firewall', rulename, sql)
+		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
+
+		for os in self.getOSNames(args):
+			# Make sure our rule exists
+			if self.db.count(
+				'(*) from os_firewall where name=%s and os=%s',
+				(rulename, os)
+			) == 0:
+				raise CommandError(
+					self,
+					f'firewall rule {rulename} does not exist for OS {os}'
+				)
+
+			# It exists, so delete it
+			self.db.execute(
+				'delete from os_firewall where name=%s and os=%s',
+				(rulename, os)
+			)

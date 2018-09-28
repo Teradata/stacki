@@ -21,11 +21,11 @@ class Command(stack.commands.list.appliance.command):
 	for high level debugging but will be missing any host specific
 	variables. It cannot be used to pass into 'rocks list host profile'
 	to create a complete Kickstart/Jumpstart profile.
-	
+
 	<arg optional='1' type='string' name='appliance' repeat='1'>
 	Optional list of appliance names.
 	</arg>
-		
+
 	<example cmd='list appliance xml backend'>
 	Lists the XML profile for a backend appliance.
 	</example>
@@ -36,18 +36,21 @@ class Command(stack.commands.list.appliance.command):
 	"""
 
 	def run(self, params, args):
-
 		self.beginOutput()
+
 		for app in self.getApplianceNames(args):
-			self.db.execute("""select name from appliances
-				where name='%s'""" % app)
-			try:
-				(name, ) = self.db.fetchone()
-			except TypeError:
-				raise CommandError(self, 'no such appliance "%s"' % app)
-			if name:
-				xml = self.command('list.node.xml', [name])
+			# Get the appliance attributes
+			attrs = {
+				row['attr']: row['value']
+				for row in self.call('list.appliance.attr', [app])
+			}
+			kickstartable = attrs.get('kickstartable', 'False')
+
+			# Only generate XML for appliances with a node attribute
+			# and kickstartable set to True
+			if 'node' in attrs and self.str2bool(kickstartable):
+				xml = self.command('list.node.xml', [attrs['node']])
 				for line in xml.split('\n'):
 					self.addOutput(app, line)
-		self.endOutput(padChar='')
 
+		self.endOutput(padChar='')

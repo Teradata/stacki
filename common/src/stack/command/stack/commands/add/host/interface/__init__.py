@@ -161,7 +161,16 @@ class Command(stack.commands.add.host.command):
 			# The auto ip feature requires a network parameter
 			if subnet_id is None:
 				raise ParamRequired(self, 'network')
-		
+
+		# Unset other default interface if the added one is the default interface
+		if default:
+			self.db.execute("""
+				update networks set main=0
+				where node=(select id from nodes where name=%s)
+				""", (host,)
+				)
+
+
 		# Insert all our data
 		self.db.execute("""
 			insert into networks(

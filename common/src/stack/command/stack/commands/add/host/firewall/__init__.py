@@ -106,7 +106,7 @@ class Command(stack.commands.add.firewall.command,
 
 		# Make sure we have a new rule
 		for host in hosts:
-			if self.db.select("""count(*) from node_firewall where
+			if self.db.count("""(*) from node_firewall where
 				node = (select id from nodes where name = %s) and
 				service = %s and action = %s and chain = %s and
 				if (%s is NULL, insubnet is NULL, insubnet = %s) and
@@ -115,7 +115,7 @@ class Command(stack.commands.add.firewall.command,
 				if (%s is NULL, flags is NULL, flags = %s)""",
 				(host, service, action, chain, network, network, outnetwork,
 				outnetwork, protocol, protocol, flags, flags)
-			)[0][0] > 0:
+			) > 0:
 				raise CommandError(self, 'firewall rule already exists')
 
 		# Now let's add them

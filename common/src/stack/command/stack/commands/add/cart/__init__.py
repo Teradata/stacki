@@ -193,10 +193,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 	def add_cart(self, cart, cart_url=None):
 		# if the cart doesn't exist, add it to the database.
-		if self.db.select(
-			'count(ID) from carts where name=%s',
-			(cart,)
-		)[0][0] == 0:
+		if self.db.count('(ID) from carts where name=%s', (cart,)) == 0:
 			self.db.execute("""
 				insert into carts (Name, url) values (%s, %s)
 				""", (cart, cart_url))
@@ -386,4 +383,3 @@ class Command(stack.commands.CartArgumentProcessor,
 
 		# Fix all the perms all the time.
 		self.fix_perms()
-

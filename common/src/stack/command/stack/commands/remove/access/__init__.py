@@ -35,8 +35,8 @@ class Command(stack.commands.Command):
 		(cmd, group) = self.fillParams([
 			('command', None, True),
 			('group',   None, True)
-			])
-		 
+		])
+
 		groupid = None
 		try:
 			groupid = int(group)
@@ -49,9 +49,7 @@ class Command(stack.commands.Command):
 			except KeyError:
 				raise CommandError(self, 'cannot find group %s' % group)
 
-		if groupid is None:
-			raise CommandError(self, 'cannot find group %s' % group)
-
-		self.db.execute("""delete from access where
-			command="%s" and groupid=%d""" 
-			% (cmd, groupid))
+		self.db.execute(
+			'delete from access where command=%s and groupid=%s',
+			(cmd, groupid)
+		)

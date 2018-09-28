@@ -24,5 +24,9 @@ class Plugin(stack.commands.Plugin):
 		return 'attr'
 
 	def run(self, os):
-		self.owner.command('remove.os.attr', [ os ])
-
+		self.owner.db.execute("""
+			delete from attributes
+			where scope='os' and scopeid=(
+				select id from oses where name=%s
+			)
+		""", (os,))

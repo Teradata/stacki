@@ -41,10 +41,10 @@ class Command(stack.commands.add.host.command):
 				key = f.read()
 
 		# Check if the key already exists
-		if self.db.select("""count(ID) from public_keys where
+		if self.db.count("""(ID) from public_keys where
 			node = (select id from nodes where name = %s) and
 			public_key = %s """, (host, key)
-		)[0][0] != 0:
+		) != 0:
 			raise CommandError(self, f'the public key already exists for host {host}')
 
 		# Add the key

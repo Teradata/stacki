@@ -56,10 +56,7 @@ class Command(command):
 		public  = self.bool2str(self.str2bool(public))
 
 		# check for duplicates
-		if self.db.select(
-			'count(ID) from appliances where name=%s',
-			(appliance,)
-		)[0][0] > 0:
+		if self.db.count('(ID) from appliances where name=%s', (appliance,)) > 0:
 			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
 		# ok, we're good to go
