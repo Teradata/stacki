@@ -77,8 +77,10 @@ for filename in manifests:
 		if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
 			continue
 		if l[0] == '-': # use '-package' to turn off the check
+			print(f'\tdisable {l[1:]}')
 			packages[l[1:]] = False
 		elif l not in packages:
+			print(f'\tenable  {l}')
 			packages[l] = True
 	file.close()
 

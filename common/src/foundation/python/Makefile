@@ -11,8 +11,10 @@ DEPENDS.FILES	= Python-$(VERSION).tgz
 include $(STACKBUILD)/etc/CCRules.mk
 
 BOOTSTRAP        = readline-devel xz-devel
-BOOTSTRAP.redhat = openssl-devel bzip2-libs bzip2-devel
-BOOTSTRAP.sles   = libopenssl-devel bzip2 libzip2 
+BOOTSTRAP.redhat = openssl-devel bzip2-libs bzip2-devel libffi-devel
+BOOTSTRAP.sles11 = libffi-devel
+BOOTSTRAP.sles12 = libffi48-devel
+BOOTSTRAP.sles   = libopenssl-devel bzip2 libzip2 $(BOOTSTRAP.$(RELEASE))
 
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))

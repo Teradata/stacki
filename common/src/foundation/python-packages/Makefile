@@ -10,6 +10,11 @@ RPM.STRATEGY    = custom
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+#BOOTSTRAP        = 
+#BOOTSTRAP.redhat = 
+#BOOTSTRAP.sles   = 
+#	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
+
 bootstrap rpm: src
 	-for x in src/*; do $(MAKE) -C $$x $@; done
 	cp manifest.d/*.manifest $(ROLLROOT)/common/manifest.d/
@@ -17,9 +22,12 @@ bootstrap rpm: src
 	cp graph/*.xml $(ROLLROOT)/common/graph/
 
 refresh:
-	-rm versions.json
+	-rm -f versions.json
 
 src: packages.json
+ifeq ($(RELEASE),sles11)
+	-ln -s /usr/include/apache2-worker/mpm.h /usr/include/apache2/
+endif
 	$(MAKE) clean
 	ROLLROOT=$(ROLLROOT) ../../stack/build/build/bin/pip2src
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d

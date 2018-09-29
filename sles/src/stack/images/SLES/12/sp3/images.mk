@@ -10,9 +10,9 @@ YUMLIST = \
 	foundation-python-Flask \
 		foundation-python-ItsDangerous \
 		foundation-python-Werkzeug \
-		foundation-python-Click \
 		foundation-python-MarkupSafe \
 		foundation-python-Jinja2 \
+		foundation-python-Click \
 	foundation-python-PyMySQL \
 	foundation-python-configparser \
 	foundation-python-python-daemon \
