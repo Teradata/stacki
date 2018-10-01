@@ -582,10 +582,10 @@ class HostArgumentProcessor:
 			hostList.append(host.lower())
 			
 			if names:
-				hostDict[host] = None
+				hostDict[host.lower()] = None
 			else:
-				hostDict[host] = self.db.getNodeName(host, 
-								     subnet)
+				hostDict[host.lower()] = self.db.getNodeName(host, 
+									     subnet)
 
 		l = []
 		if names:
