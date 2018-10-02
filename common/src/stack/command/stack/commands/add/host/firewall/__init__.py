@@ -99,7 +99,7 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		hosts = self._get_hosts(args)
+		hosts = self.getHosts(args)
 		
 		(service, network, outnetwork, chain, action, protocol, flags,
 			comment, table, rulename) = self.doParams()
