@@ -185,7 +185,7 @@ class SwitchMellanoxM7800(Switch):
 				partitions[cur_partition]['ipoib'] = str2bool(ipoib.strip())
 			elif line.startswith('GUID'):
 				m = re.search(guid_member_format, line)
-				partitions[cur_partition]['guids'].append((m.group(0), m.group(2))
+				partitions[cur_partition]['guids'].append((m.group(0), m.group(2)))
 
 		info(partitions.keys())
 		return partitions
