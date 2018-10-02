@@ -63,7 +63,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		host = self._get_single_host(args)
+		host = self.getSingleHost(args)
 
 		(channel, ifaces, ip, network, name, opts) = self.fillParams([
 			('channel', None, True),
