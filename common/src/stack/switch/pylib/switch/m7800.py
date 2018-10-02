@@ -17,6 +17,7 @@ members_header = re.compile('  members', re.IGNORECASE)
 guid_format = re.compile("([0-9a-f]{2}:){7}[0-9a-f]{2}|ALL", re.IGNORECASE)
 # a GID is like an ipv6? 20 pairs
 gid_format = re.compile("([0-9a-f]{2}:){19}[0-9a-f]{2}|ALL", re.IGNORECASE)
+guid_member_format = re.compile("([0-9a-f]{2}:){7}[0-9a-f]{2}.*(full|both|limited)|ALL", re.IGNORECASE)
 
 
 class SwitchMellanoxM7800(Switch):
@@ -183,8 +184,8 @@ class SwitchMellanoxM7800(Switch):
 				_, ipoib = line.split('=')
 				partitions[cur_partition]['ipoib'] = str2bool(ipoib.strip())
 			elif line.startswith('GUID'):
-				m = re.search(guid_format, line)
-				partitions[cur_partition]['guids'].append(m.group(0))
+				m = re.search(guid_member_format, line)
+				partitions[cur_partition]['guids'].append((m.group(0), m.group(2))
 
 		info(partitions.keys())
 		return partitions
