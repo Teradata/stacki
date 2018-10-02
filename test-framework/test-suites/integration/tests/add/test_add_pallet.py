@@ -1,7 +1,10 @@
 import json
 from textwrap import dedent
 
+import pytest
 
+
+@pytest.mark.usefixtures('create_pallet_isos', 'create_blank_iso')
 class TestAddPallet:
 	def test_add_pallet_no_pallet(self, host):
 		# Call add pallet with nothign mounted and no pallets passed in
@@ -139,7 +142,7 @@ class TestAddPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "minimal" argument is not a valid pallet
-			[pallet ...] {expanded=bool}
+			[pallet ...] {expanded=bool} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
 	def test_add_pallet_duplicate(self, host):

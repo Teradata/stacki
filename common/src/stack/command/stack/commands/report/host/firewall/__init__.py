@@ -29,7 +29,7 @@ class Command(stack.commands.HostArgumentProcessor,
 
 	def getPreamble(self, host):
 		self.addOutput(host, ':INPUT ACCEPT [0:0]')
-		self.addOutput(host, ':FORWARD DROP [0:0]')
+		self.addOutput(host, ':FORWARD ACCEPT [0:0]')
 		self.addOutput(host, ':OUTPUT ACCEPT [0:0]')
 
 	def expandRules(self, lines, parameter, items):

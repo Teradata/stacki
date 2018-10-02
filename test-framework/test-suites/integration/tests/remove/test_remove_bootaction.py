@@ -19,7 +19,7 @@ class TestRemoveBootaction:
 			{action} [os=string] [type=string]
 		''')
 
-	def test_remove_appliance_no_type(self, host):
+	def test_remove_bootaction_no_type(self, host):
 		result = host.run('stack remove bootaction test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestRemoveBootaction:
 			{action} [os=string] [type=string]
 		''')
 
-	def test_remove_appliance_invalid_action(self, host):
+	def test_remove_bootaction_invalid_action(self, host):
 		result = host.run('stack remove bootaction test type=os')
 		assert result.rc == 255
 		assert result.stderr == 'error - action/type/os "test/os/" does not exists\n'
 
-	def test_remove_appliance_default_os(self, host, host_os):
+	def test_remove_bootaction_default_os(self, host, host_os):
 		# Add an install bootaction that will get the default os
 		result = host.run('stack add bootaction test type=install kernel=""')
 		assert result.rc == 0
@@ -60,7 +60,7 @@ class TestRemoveBootaction:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_remove_appliance_with_os(self, host):
+	def test_remove_bootaction_with_os(self, host):
 		# Add an os bootaction with a specified os
 		result = host.run('stack add bootaction test type=os os=ubuntu kernel=""')
 		assert result.rc == 0
@@ -88,7 +88,7 @@ class TestRemoveBootaction:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_remove_appliance_os_is_null(self, host):
+	def test_remove_bootaction_os_is_null(self, host):
 		# Add an os bootaction with a null os
 		result = host.run('stack add bootaction test type=os kernel=""')
 		assert result.rc == 0

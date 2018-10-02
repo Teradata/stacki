@@ -11,27 +11,48 @@
 # @rocks@
 
 import stack.commands
+from stack.util import flatten
 
 
-class Command(stack.commands.RollArgumentProcessor,
+class Command(stack.commands.PalletArgumentProcessor,
 	stack.commands.list.command):
 	"""
 	List the status of available pallets.
-	
+
 	<arg optional='1' type='string' name='pallet' repeat='1'>
 	List of pallets. This should be the pallet base name (e.g., base, hpc,
 	kernel). If no pallets are listed, then status for all the pallets are
 	listed.
 	</arg>
 
+	<param type='string' name='version'>
+	The version number of the pallets to list. If no version number is
+	supplied, then all versions of a pallet will be listed.
+	</param>
+
+	<param type='string' name='release'>
+	The release number of the pallet to be listed. If no release number is
+	supplied, then all releases of a pallet will be listed.
+	</param>
+
+	<param type='string' name='arch'>
+	The architecture of the pallet to be listed. If no architecture is
+	supplied, then all architectures of a pallet will be listed.
+	</param>
+
+	<param type='string' name='os'>
+	The OS of the pallet to be listed. If no OS is supplied, then all OS
+	versions of a pallet will be listed.
+	</param>
+
 	<param type='bool' name='expanded' optional='0'>
 	Displays an additional column containing the url of the pallet.
 	</param>
 
-	<example cmd='list pallet kernel'>		
+	<example cmd='list pallet kernel'>
 	List the status of the kernel pallet.
 	</example>
-	
+
 	<example cmd='list pallet'>
 	List the status of all the available pallets.
 	</example>
@@ -45,31 +66,35 @@ class Command(stack.commands.RollArgumentProcessor,
 	<related>enable pallet</related>
 	<related>disable pallet</related>
 	<related>create pallet</related>
-	"""		
+	"""
 
 	def run(self, params, args):
 		self.beginOutput()
 
 		expanded, = self.fillParams([ ('expanded', 'false') ])
 		expanded = self.str2bool(expanded)
-		for (roll, version, release) in self.getRollNames(args, params):
-			rows = self.db.select("""r.arch, r.os, r.url from rolls r where r.name=%s and r.version=%s and r.rel=%s """, (roll, version, release))
 
-			for arch, osname, url, in rows:
-				self.db.execute("""select b.name from stacks s, rolls r, boxes b where r.name=%s and r.arch=%s and r.version=%s and r.rel=%s and s.roll=r.id and s.box=b.id """, (roll, arch, version, release))
+		for pallet in self.getPallets(args, params):
+			# Get a list of boxes for this pallet
+			boxes = ' '.join(flatten(
+				self.db.select("""
+					boxes.name from stacks, boxes
+					where stacks.roll=%s and stacks.box=boxes.id
+				""", (pallet.id,))
+			))
 
+			# Constuct our data to output
+			output = [
+				pallet.version, pallet.rel, pallet.arch, pallet.os, boxes
+			]
 
-				boxes = []
-				for box, in self.db.fetchall():
-					boxes.append(box)
+			if expanded:
+				output.append(pallet.url)
 
-				targets = [version, release, arch, osname, ' '.join(boxes)]
-				if expanded:
-					targets.append(url)
-				self.addOutput(roll, targets)
+			self.addOutput(pallet.name, output)
 
 		header = ['name', 'version', 'release', 'arch', 'os', 'boxes']
 		if expanded:
 			header.append('url')
-		self.endOutput(header, trimOwner=False)
 
+		self.endOutput(header, trimOwner=False)

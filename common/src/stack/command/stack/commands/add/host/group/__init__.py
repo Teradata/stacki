@@ -26,7 +26,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		hosts = self._get_hosts(args)
+		hosts = self.getHosts(args)
 		
 		(group, ) = self.fillParams([
 			('group', None, True)

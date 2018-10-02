@@ -1,0 +1,12 @@
+<roll name="test_2-redhat" interface="6.0.2">
+<timestamp time="20:44:00" date="September 24 2018" tz="UTC"/>
+<color edge="chocolate" node="chocolate"/>
+<info version="1.0" release="prod" arch="x86_64" os="redhat"/>
+<iso maxsize="0" addcomps="0" bootable="0" mkisofs="-b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table"/>
+<rpm rolls="0" bin="1" src="0"/>
+<author name="root" host="frontend-0-0"/>
+<gitstatus><![CDATA[
+]]></gitstatus>
+<gitlog>
+</gitlog>
+</roll>
