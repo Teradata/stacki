@@ -31,7 +31,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		host = self._get_single_host(args)
+		host = self.getSingleHost(args)
 
 		key, = self.fillParams([ ('key', None, True) ])
 

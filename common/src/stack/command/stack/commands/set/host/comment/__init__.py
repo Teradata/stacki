@@ -11,13 +11,13 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import CommandError
 
 
 class Command(stack.commands.set.host.command):
 	"""
 	Set the comment field for a list of hosts.
-	
+
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
@@ -32,18 +32,19 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
-		
+		hosts = self.getHosts(args)
+
 		(comment, ) = self.fillParams([
 			('comment', None, True)
-			])
-		
-		if not len(args):
-			raise ArgRequired(self, 'host')
+		])
 
 		if len(comment) > 140:
-			raise CommandError(self, 'comments must be no longer than 140 characters')
+			raise CommandError(
+				self, 'comments must be no longer than 140 characters'
+			)
 
-		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set comment="%s" where
-				name='%s'""" % (comment, host))
-		
+		for host in hosts:
+			self.db.execute(
+				'update nodes set comment=%s where name=%s',
+				(comment, host)
+			)

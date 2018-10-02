@@ -191,8 +191,10 @@ class Discovery:
                 "/opt/stack/bin/stack",
                 "set",
                 "host",
-                "installaction",
+                "bootaction",
                 self.hostname,
+				"type=install",
+				"sync=false",
                 f"action={self._install_action}"
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
             

@@ -11,13 +11,12 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired
 
 
 class Command(stack.commands.set.host.command):
 	"""
 	Set the rack number for a list of hosts.
-	
+
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
@@ -32,17 +31,14 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
 		(rack, ) = self.fillParams([
 			('rack', None, True)
-			])
-		
-		if not len(args):
-			raise ArgRequired(self, 'host')
+		])
 
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update nodes set rack='%s' where
-				name='%s'
-				""" % (rack, host))
-
+		for host in hosts:
+			self.db.execute(
+				'update nodes set rack=%s where name=%s',
+				(rack, host)
+			)

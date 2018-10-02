@@ -5,15 +5,15 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ParamValue, CommandError
 
 
 class Command(stack.commands.set.host.command):
 	"""
 	Update bootaction for a host.
 
-	<arg type='string' name='bootaction' repeat='1' optional='1'>
-	Host name of machine
+	<arg type='string' name='host' repeat='1'>
+	One or more host names.
 	</arg>
 
 	<param type='string' name='action' optional='0'>
@@ -35,6 +35,7 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
 		(req_action, req_type, req_sync) = self.fillParams([
 			('action', None, True),
@@ -42,34 +43,29 @@ class Command(stack.commands.set.host.command):
 			('sync', True)
 		])
 
-		if not len(args):
-			raise ArgRequired(self, 'host')
-
-		req_sync   = self.str2bool(req_sync)
-		req_type   = req_type.lower()
+		req_sync = self.str2bool(req_sync)
+		req_type = req_type.lower()
 		req_action = req_action.lower()
-		types      = { 'os'     : 'osaction',
-			       'install': 'installaction' }
 
-		if req_type not in types.keys():
-			raise ParamValue(self, 'type', 'one of: %s' % ', '.join(types.keys()))
+		if req_type not in ('os', 'install'):
+			raise ParamValue(self, 'type', 'one of: os, install')
 
-		exists = False
-		for row in self.call('list.bootaction', [ req_action, 
-							  'type=%s' % req_type ]):
-			exists = True
-		if not exists:
-			raise CommandError(self, 'bootaction %s does not exist' % req_action)
+		# Make sure our bootaction exists
+		if len(self.call(
+			'list.bootaction',
+			[req_action, 'type=%s' % req_type ]
+		)) == 0:
+			raise CommandError(
+				self, f'bootaction "{req_action}" does not exist'
+			)
 
-		hosts = self.getHostnames(args)
 		for host in hosts:
-			self.db.execute(
-				"""
-				update nodes
-				set 
-				%s = (select id from bootnames where name='%s' and type='%s')
-				where nodes.name = '%s'
-				""" % (types[req_type], req_action, req_type, host))
+			self.db.execute(f"""
+				update nodes set {req_type}action=(
+					select id from bootnames where name=%s and type=%s
+				)
+				where nodes.name=%s
+			""", (req_action, req_type, host))
 
 		if req_sync:
 			self.command('sync.host.boot', hosts)

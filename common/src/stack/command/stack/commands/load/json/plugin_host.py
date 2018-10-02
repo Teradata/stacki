@@ -160,13 +160,23 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'slot={controller["slot"]}')
 				self.owner.try_command('add.storage.controller', parameters, f'adding host controller {controller}', 'exists')
 
+			# set the osaction of the host
+			if host["osaction"]:
+				parameters = [
+					host_name,
+					'type=os',
+					f'action={host["osaction"]}',
+				]
+				self.owner.try_command('set.host.bootaction', parameters, f'setting osaction of {host_name} to {host["osaction"]}', 'exists')
 
 			# set the installaction of the host
-			parameters = [
-				host_name,
-				f'action={host["installaction"]}',
-			]
-			self.owner.try_command('set.host.installaction', parameters, f'setting installaction of {host_name} to {host["installaction"]}', 'exists')
+			if host["installaction"]:
+				parameters = [
+					host_name,
+					'type=install',
+					f'action={host["installaction"]}',
+				]
+				self.owner.try_command('set.host.bootaction', parameters, f'setting installaction of {host_name} to {host["installaction"]}', 'exists')
 
 			# set metadata if there is any
 			if host['metadata']:
