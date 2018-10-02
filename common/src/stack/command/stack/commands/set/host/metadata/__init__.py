@@ -20,7 +20,7 @@ class Command(stack.commands.set.host.command):
 	structure of the data.
 
 	Metadata should be accessed using the "metadata" read-only attribute.
-	
+
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
@@ -31,17 +31,14 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
-		
+		hosts = self.getHosts(args)
+
 		(metadata, ) = self.fillParams([
 			('metadata', None, True)
-			])
-		
-		if not len(args):
-			raise ArgRequired(self, 'host')
+		])
 
-		for host in self.getHostnames(args):
-			self.db.execute("""
-				update nodes set metadata=%s where
-				name=%s""",
-				(metadata, host))
-		
+		for host in hosts:
+			self.db.execute(
+				'update nodes set metadata=%s where name=%s',
+				(metadata, host)
+			)

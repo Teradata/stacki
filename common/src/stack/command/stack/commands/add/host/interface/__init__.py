@@ -68,7 +68,7 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		host = self._get_single_host(args)
+		host = self.getSingleHost(args)
 
 		(interface, mac, network, ip, module, 
 		 name, vlan, default, options, channel, unsafe) = self.fillParams([

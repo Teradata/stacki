@@ -12,13 +12,13 @@
 
 
 import stack.commands
-from stack.exception import ArgUnique, CommandError
+from stack.exception import CommandError
 
 
 class Command(stack.commands.set.host.command):
 	"""
 	Rename a host.
-	
+
 	<arg type='string' name='host' repeat='0'>
 	The current name of the host.
 	</arg>
@@ -33,23 +33,13 @@ class Command(stack.commands.set.host.command):
 	"""
 
 	def run(self, params, args):
-		
-		hosts = self.getHostnames(args)
+		host = self.getSingleHost(args)
+
 		(name, ) = self.fillParams([
 			('name', None, True)
-			])
-		
-		if not len(hosts) == 1:
-			raise ArgUnique(self, 'host')
+		])
+
 		if name in self.getHostnames():
 			raise CommandError(self, 'name already exists')
-			
-		host = hosts[0]
-		
-		self.db.execute("""
-			update nodes set name='%s' where
-			name='%s'
-			""" % (name, host))
-		
-			
 
+		self.db.execute('update nodes set name=%s where name=%s', (name, host))

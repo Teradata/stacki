@@ -13,6 +13,10 @@ class TestLoadJsonHost:
 		assert results.rc == 0
 		results = host.run('stack set host comment backend-test comment=test')
 		assert results.rc == 0
+		results = host.run('stack set host bootaction backend-test type=os action=memtest sync=false')
+		assert results.rc == 0
+		results = host.run('stack set host bootaction backend-test type=install action=console sync=false')
+		assert results.rc == 0
 		results = host.run('stack set host metadata backend-test metadata=test')
 		assert results.rc == 0
 		results = host.run('stack add host interface backend-test channel=test default=False interface=eth1 ip=192.168.0.1 mac=00.11.22.33.44.55 module=test name=test network=private vlan=1')

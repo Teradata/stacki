@@ -11,38 +11,45 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, ParamValue
+from stack.exception import ParamValue
 
 
 class Command(stack.commands.set.host.command):
 	"""
-	Set a bootaction for a host. A hosts action can be set to 'install' 
-	or to 'os' (also, 'run' is a synonym for 'os').
+	Set a bootaction for a host. A hosts action can be set to 'install'
+	or to 'os'.
 
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
 
-	<param type='string' name='action'>
+	<param type='string' name='action' optional='0'>
 	The label name for the bootaction. This must be one of: 'os',
-	'install', or 'run'.
-
-	If no action is supplied, then only the configuration file for the
-	list of hosts will be rewritten.
+	'install'.
 	</param>
-		
+
+	<param type='boolean' name='nukedisks' optional='1'>
+	Set the host to erase all disks on next install. Default: False
+	</param>
+
+	<param type='boolean' name='nukecontroller' optional='1'>
+	Set the host to overwrite the controller configuration on next
+	install. Default: False
+	</param>
+
+	<param type='boolean' name='sync' optional='1'>
+	Controls if 'sync host boot' needs to be run after setting the
+	bootaction. Default: True
+	</param>
+
 	<example cmd='set host boot backend-0-0 action=os'>
 	On the next boot, backend-0-0 will boot the profile based on its
-	"run action". To see the node's "run action", execute:
-	"rocks list host backend-0-0" and examine the value in the
-	"RUNACTION" column.
+	"run action".
 	</example>
 	"""
 
 	def run(self, params, args):
-
-		if not len(args):
-			raise ArgRequired(self, 'host')
+		hosts = self.getHosts(args)
 
 		(action, nukedisks, nukecontroller, sync) = self.fillParams([
 			('action', None, True),
@@ -50,56 +57,44 @@ class Command(stack.commands.set.host.command):
 			('nukecontroller', None, False),
 			('sync', True)
 		])
-		
-		sync    = self.str2bool(sync)
-		actions = [ 'os', 'install' ]
-		if action not in actions:
-			raise ParamValue(self, 'action', 'one of: %s' % ', '.join(actions))
 
+		sync = self.str2bool(sync)
+		if action not in ['os', 'install']:
+			raise ParamValue(self, 'action', 'one of: os, install')
 
-		boot = {}
-		for h, a in self.db.select(
-				"""
-				n.name, b.action from 
-				nodes n, boot b where
-				n.id = b.node
-				"""):
-			boot[h] = a
-
-		hosts = self.getHostnames(args)
-		if not hosts:
-			return
+		# Get the mapping of hosts with boot actions and thier PK
+		hosts_with_boot = {row[0]: row[1] for row in self.db.select(
+			'nodes.name, nodes.id from nodes, boot where nodes.id=boot.node'
+		)}
 
 		for host in hosts:
-			if host in boot.keys():
+			if host in hosts_with_boot:
 				self.db.execute(
-					"""
-					update boot set action = '%s'
-					where node = (select id from nodes where name = '%s')
-					""" % (action, host))
+					'update boot set action=%s where node=%s',
+					(action, hosts_with_boot[host])
+				)
 			else:
-				self.db.execute(
-					"""
-					insert into boot (action, node) values 
-					(
-					'%s',
-					(select id from nodes where name = '%s')
-					) 
-					""" % (action, host))
+				self.db.execute("""
+					insert into boot(action, node) values (
+						%s, (select id from nodes where name=%s)
+					)
+				""", (action, host))
 
-		args = hosts.copy()
-		if len(args) > 0:
-			if nukedisks is not None:
-				nukedisks = self.str2bool(nukedisks)
-				args.extend(['attr=nukedisks', 'value=%s' % nukedisks])
-				self.command('set.host.attr',args)
-			if nukecontroller is not None:
-				nukecontroller = self.str2bool(nukecontroller)
-				args.extend(['attr=nukecontroller', 'value=%s' % nukecontroller])
-				self.command('set.host.attr',args)
+		if nukedisks is not None:
+			args = hosts.copy()
+			args.extend([
+				'attr=nukedisks', 'value=%s' % self.str2bool(nukedisks)
+			])
+
+			self.command('set.host.attr', args)
+
+		if nukecontroller is not None:
+			args = hosts.copy()
+			args.extend([
+				'attr=nukecontroller', 'value=%s' % self.str2bool(nukecontroller)
+			])
+
+			self.command('set.host.attr', args)
 
 		if sync:
 			self.command('sync.host.boot', hosts)
-
-
-RollName = "stacki"

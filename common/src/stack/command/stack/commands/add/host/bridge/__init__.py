@@ -32,7 +32,7 @@ class Command(stack.commands.add.host.command):
 	</example>
 	"""
 	def run(self, params, args):
-		hosts = self._get_hosts(args)
+		hosts = self.getHosts(args)
 		
 		(bridge, interface, network) = self.fillParams([
 			('name', None, True),

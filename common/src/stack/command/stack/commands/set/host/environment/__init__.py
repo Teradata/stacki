@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import CommandError
 
 
 class Command(stack.commands.EnvironmentArgumentProcessor,
@@ -29,23 +29,18 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
 		(environment, ) = self.fillParams([
 			('environment', None, True)
-			])
+		])
 
-		print('set host environment', environment)
-		
-		if not len(args):
-			raise ArgRequired(self, 'host')
-
-		if environment and environment not in self.getEnvironmentNames():
+		if environment not in self.getEnvironmentNames():
 			raise CommandError(self, 'environment parameter not valid')
 
-		for host in self.getHostnames(args):
+		for host in hosts:
 			self.db.execute("""
-				update nodes set environment=
-				(select id from environments where name='%s')
-				where name='%s'
-				""" % (environment, host))
-
+				update nodes set environment=(
+					select id from environments where name=%s
+				) where name=%s
+			""", (environment, host))

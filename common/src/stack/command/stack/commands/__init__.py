@@ -35,7 +35,9 @@ from collections import OrderedDict, namedtuple
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
-from stack.exception import CommandError, ParamRequired, ArgNotFound
+from stack.exception import (
+	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique
+)
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
@@ -705,6 +707,36 @@ class HostArgumentProcessor:
 			list = filter(part_func, list)
 			
 		return list
+
+	def getHosts(self, args):
+		"""
+		Return the host names for the hosts or patterns specified in args,
+		and raise an ArgRequired if no hosts are found.
+		"""
+
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+
+		hosts = self.getHostnames(args)
+
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
+		return hosts
+
+	def getSingleHost(self, args):
+		"""
+		Return the host name for the host or pattern specified in args.
+		Raise an ArgRequired if no hosts are found, and a ArgUnique if
+		more than a single host is found.
+		"""
+
+		hosts = self.getHosts(args)
+
+		if len(hosts) != 1:
+			raise ArgUnique(self, 'host')
+
+		return hosts[0]
 
 
 class PartitionArgumentProcessor:
