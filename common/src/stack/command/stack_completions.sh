@@ -12,11 +12,14 @@ _stack_completion() {
 	# excluding the first word (stack)
 	loc=${BASE_DIR}"$(tr -s ' ' '/' <<< ${COMP_WORDS[@]:1})"
 
-	# Make sure that loc id actually path to a directory
-	while [[ ! -d ${loc} ]]; do
-		loc=$(echo ${loc} | rev | cut -d/ -f2- | rev)
-	done
-
+	# Make sure that loc is actually path to a directory
+	if [[ ! -d ${loc} ]]; then
+		if [[ -n ${cur} ]]; then
+			loc=$(echo ${loc} | rev | cut -d/ -f2- | rev)
+		else
+			return
+		fi
+	fi
 	# Generate options, depending on loc
 	opts=$(find ${loc} -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;)
 	opts+=" --debug --version --help"
