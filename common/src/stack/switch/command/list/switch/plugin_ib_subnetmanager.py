@@ -12,7 +12,7 @@ from stack.switch.m7800 import SwitchMellanoxM7800
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
-		return 'ib_subnetmanager'
+		return 'infiniband'
 
 	def requires(self):
 		return ['basic']
@@ -28,7 +28,7 @@ class Plugin(stack.commands.Plugin):
 			make, model = (switch_attrs[host].get('component.make'), switch_attrs[host].get('component.model'))
 			if (make, model) != ('Mellanox', 'm7800'):
 				# ... but set other hosts to an empty value instead of False
-				host_info[host] = (None,)
+				host_info[host] = (None, None)
 				continue
 
 			kwargs = {
@@ -41,8 +41,8 @@ class Plugin(stack.commands.Plugin):
 
 			s = SwitchMellanoxM7800(host, **kwargs)
 			s.connect()
-			host_info[host] = (s.subnet_manager,)
+			host_info[host] = (s.subnet_manager, switch_attrs[host].get('ibfabric', None))
 
-		return { 'keys' : [ 'ib subnet manager', ],
+		return { 'keys' : ['ib subnet manager', 'ib fabric'],
 			'values': host_info }
 
