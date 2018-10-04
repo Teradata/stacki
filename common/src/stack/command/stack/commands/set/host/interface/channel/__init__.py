@@ -14,11 +14,11 @@ import stack.commands
 from stack.exception import ParamRequired
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.host.interface.command):
 	"""
 	Sets the channel for a named interface.
 
-	<arg type='string' name='host' repeat='1' optional='1'>
+	<arg type='string' name='host' repeat='1' optional='0'>
 	One or more hosts.
 	</arg>
 	
@@ -45,32 +45,34 @@ class Command(stack.commands.set.host.command):
 	"""
 	
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
 		(channel, interface, mac) = self.fillParams([
 			('channel',   None, True),
 			('interface', None),
 			('mac',       None)
-			])
+		])
 
 		if not interface and not mac:
 			raise ParamRequired(self, ('interface', 'mac'))
 
-		if channel.upper() == 'NULL':
-			channel = 'NULL'
+		# Make sure interface and/or mac exist on our hosts
+		self.validate(hosts, interface, mac)
 
-		for host in self.getHostnames(args):
+		# Channel set to the string "NULL" is a null in the DB
+		if channel.upper() == 'NULL':
+			channel = None
+
+		for host in hosts:
 			if interface:
 				self.db.execute("""
-					update networks, nodes set 
-					networks.channel=NULLIF('%s','NULL') where
-					nodes.name='%s' and networks.node=nodes.id and
-					networks.device like '%s'
-					""" % (channel, host, interface))
+					update networks,nodes set networks.channel=%s
+					where nodes.name=%s and networks.node=nodes.id
+					and networks.device=%s
+				""", (channel, host, interface))
 			else:
 				self.db.execute("""
-					update networks, nodes set 
-					networks.channel=NULLIF('%s','NULL') where
-					nodes.name='%s' and networks.node=nodes.id and
-					networks.mac like '%s'
-					""" % (channel, host, mac))
-
+					update networks, nodes set networks.channel=%s
+					where nodes.name=%s'and networks.node=nodes.id
+					and networks.mac=%s
+				""" % (channel, host, mac))
