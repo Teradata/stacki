@@ -11,18 +11,19 @@
 # @rocks@
 
 import ipaddress
+
 import stack.commands
-from stack.exception import ParamRequired, ArgUnique, CommandError
+from stack.exception import ParamRequired, CommandError
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.host.interface.command):
 	"""
 	Sets the IP address for the named interface for one host.
 
-	<arg type='string' name='host' required='1'>
-	Host name.
+	<arg type='string' name='host' optional='0'>
+	A single host.
 	</arg>
-	
+
 	<param type='string' name='interface'>
 	Name of the interface.
 	</param>
@@ -31,105 +32,104 @@ class Command(stack.commands.set.host.command):
 	MAC address of the interface.
 	</param>
 
+	<param type='string' name='network'>
+	Network name of the interface.
+	</param>
+
 	<param type='string' name='ip' optional='0'>
-	IP address
+	The IP address to set. Use ip=AUTO to let the system pick one for
+	you or ip=NULL to clear the IP address.
 	</param>
 
 	<example cmd='set host interface ip backend-0-0 interface=eth1 ip=192.168.0.10'>
 	Sets the IP Address for the eth1 device on host backend-0-0.
 	</example>
 	"""
-	
-	def populateIPAddrDict(self, hostname, iface, mac):
-		
-		# Get network name for this interface
-		op = self.call('list.host.interface', [])
-		netName = None
-		assignedIp = {}
-
-		for o in op:
-			interface   = o['interface']
-			networkName = o['network']
-			macAddr     = o['mac']
-
-			if (interface == iface or macAddr == mac) and \
-				hostname == o['host']:
-				netName =  o['network']
-				#
-				# Do not add this host's ip address to the
-				# assignIp dictionary
-				#
-				continue
-			
-			if networkName not in assignedIp:
-				assignedIp[networkName] = [o['ip']]
-			else:
-				assignedHostIps = assignedIp[networkName]
-				assignedHostIps.append(o['ip'])
-				assignedIp[networkName] = assignedHostIps
-
-		netAddr = None
-		netMask = None
-
-		# Get network address, mask for this network name
-		if netName:
-			op = self.call('list.network', [ netName ])
-			for o in op:
-				netAddr = o['address']
-				netMask = o['mask']
-				break
-
-		# Get list of host addresses for this network
-		ipnetwork = ipaddress.IPv4Network(netAddr + '/' + netMask)
-		hosts = []
-
-		for h in ipnetwork.hosts():
-			hosts.append(str(h))
-
-		# Remove the assigned ip addresses from this list
-		for o in assignedIp[netName]:
-			if o in hosts:
-				hosts.remove(o)
-		
-		# Return an ip addr from the available addr list
-		if len(hosts) > 0:
-			return hosts.pop()
-
-		return None
 
 	def run(self, params, args):
-		hosts = self.getHostnames(args)
-		(ip, interface, mac) = self.fillParams([
-			('ip',        None, True),
+		host = self.getSingleHost(args)
+
+		(ip, interface, mac, network) = self.fillParams([
+			('ip', None, True),
 			('interface', None),
-			('mac',       None)
-			])
+			('mac', None),
+			('network', None)
+		])
 
-		if not interface and not mac:
-			raise ParamRequired(self, ('interface', 'mac'))
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
+		# Gotta have one of these
+		if not any([interface, mac, network]):
+			raise ParamRequired(self, ('interface', 'mac', 'network'))
 
-		ip   = ip.upper() # null -> NULL
-		host = hosts[0]
+		# Make sure interface, mac, and/or network exist on our host
+		self.validate([host], interface, mac, network)
 
-		if ip == "AUTO":
-			ip = self.populateIPAddrDict(host, interface, mac)
+		# If ip is an empty sting or NULL, we are clearing it
+		if not ip or ip.upper() == 'NULL':
+			ip = None
 
+		# See if we are picking the next IP address
+		if ip and ip.upper() == 'AUTO':
+			# We gotta have a network to get the IP space
+			if not network:
+				for row in self.call('list.host.interface', []):
+					if (
+						(interface and row['interface'] == interface) or
+						(mac and row['mac'] == mac)
+					):
+						network = row['network']
+						break
+
+				# Make sure we were successful at getting a network
+				if not network:
+					raise CommandError(self, 'unknown network for interface')
+
+			# Now get our IP space
+			data = self.call('list.network', [network])[0]
+			ip_space = ipaddress.IPv4Network(f"{data['address']}/{data['mask']}")
+
+			# And a set of all IPs already in use on this network
+			existing = {
+				row['ip']
+				for row in self.call('list.host.interface', [])
+				if row['network'] == network
+			}
+
+			# It would be bad to trample the gateway
+			if data['gateway']:
+				existing.add(data['gateway'])
+
+			# Now run through the IP space and find the first unused IP
+			ip = None
+			for address in ip_space.hosts():
+				if str(address) not in existing:
+					ip = str(address)
+					break
+
+			# Error out if we couldn't find a free IP
 			if not ip:
-				raise CommandError(self, 'No free ip host addresses left in network')
+				raise CommandError(self, 'no free ip addresses left in the network')
+
+		# Make the change in the DB
+		if network:
+			sql = """
+				update networks,nodes,subnets set networks.ip=%s
+				where nodes.name=%s and subnets.name=%s
+				and networks.node=nodes.id and networks.subnet=subnets.id
+			"""
+			values = [ip, host, network]
+		else:
+			sql = """
+				update networks,nodes set networks.ip=%s
+				where nodes.name=%s and networks.node=nodes.id
+			"""
+			values = [ip, host]
 
 		if interface:
-			self.db.execute("""
-				update networks, nodes set 
-				networks.ip=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
-				networks.device like '%s'
-				""" % (ip, host, interface))
-		else:
-			self.db.execute("""
-				update networks, nodes set 
-				networks.ip=NULLIF('%s','NULL') where
-				nodes.name='%s' and networks.node=nodes.id and
-				networks.mac like '%s'
-				""" % (ip, host, mac))
+			sql += " and networks.device=%s"
+			values.append(interface)
+
+		if mac:
+			sql += " and networks.mac=%s"
+			values.append(mac)
+
+		self.db.execute(sql, values)

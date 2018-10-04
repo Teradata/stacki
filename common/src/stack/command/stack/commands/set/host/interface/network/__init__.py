@@ -14,14 +14,14 @@ import stack.commands
 from stack.exception import ParamRequired
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.host.interface.command):
 	"""
-	Sets the network for named interface on one of more hosts. 
+	Sets the network for named interface on one of more hosts.
 
 	<arg type='string' name='host' repeat='1' optional='0'>
-	One or more named hosts.
+	One or more hosts.
 	</arg>
-	
+
 	<param type='string' name='interface'>
 	Name of the interface.
 	</param>
@@ -30,43 +30,46 @@ class Command(stack.commands.set.host.command):
 	MAC address of the interface.
 	</param>
 
-	<param type='string' name='network' optional='1'>
-	The network address of the interface. This is a named network and must be
-	listable by the command 'rocks list network'.
+	<param type='string' name='network' optional='0'>
+	Network name of the interface.
 	</param>
 
-	<example cmd='set host interface mac backend-0-0 interface=eth1 network=public'>
+	<example cmd='set host interface network backend-0-0 interface=eth1 network=public'>
 	Sets eth1 to be on the public network.
 	</example>
 	"""
-	
+
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
-		(network, interface, mac) = self.fillParams([
-			('network',   None, True),
+		(interface, mac, network) = self.fillParams([
 			('interface', None),
-			('mac',       None)
-			])
+			('mac', None),
+			('network', None, True)
+		])
 
-		if not interface and not mac:
+		# Gotta have one of these
+		if not any([interface, mac]):
 			raise ParamRequired(self, ('interface', 'mac'))
 
-		for host in self.getHostnames(args):
+		# Make sure interface and/or mac exist on our hosts
+		self.validate(hosts, interface, mac, None)
+
+		for host in hosts:
+			sql = """
+				update networks,nodes set networks.subnet=(
+					select id from subnets where subnets.name=%s
+				)
+				where nodes.name=%s and networks.node=nodes.id
+			"""
+			values = [network, host]
+
 			if interface:
-				self.db.execute("""
-					update networks net, nodes n 
-					set net.subnet=
-					(select id from subnets s where s.name='%s')
-					where
-					n.name='%s' and net.node=n.id and
-					net.device like '%s'
-					""" % (network, host, interface))
-			else:
-				self.db.execute("""
-					update networks net, nodes n 
-					set net.subnet=
-					(select id from subnets s where s.name='%s')
-					where
-					n.name='%s' and net.node=n.id and
-					net.mac like '%s'
-					""" % (network, host, mac))
+				sql += " and networks.device=%s"
+				values.append(interface)
+
+			if mac:
+				sql += " and networks.mac=%s"
+				values.append(mac)
+
+			self.db.execute(sql, values)
