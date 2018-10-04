@@ -234,7 +234,7 @@ class TestAddHostInterface:
 				'default': None,
 				'host': 'backend-0-0',
 				'interface': 'eth0',
-				'ip': '192.168.0.254',
+				'ip': '192.168.0.1',
 				'mac': None,
 				'module': None,
 				'name': None,

@@ -14,14 +14,14 @@ import stack.commands
 from stack.exception import ParamRequired, ParamType
 
 
-class Command(stack.commands.set.host.command):
+class Command(stack.commands.set.host.interface.command):
 	"""
-	Sets the VLAN ID for an interface on one of more hosts. 
+	Sets the VLAN ID for an interface on one of more hosts.
 
-	<arg type='string' name='host' repeat='1' optional='1'>
-	One or more named hosts.
+	<arg type='string' name='host' repeat='1' optional='0'>
+	One or more hosts.
 	</arg>
-	
+
 	<param type='string' name='interface'>
 	Name of the interface.
 	</param>
@@ -30,44 +30,68 @@ class Command(stack.commands.set.host.command):
 	MAC address of the interface.
 	</param>
 
-	<param type='string' name='vlan' optional='0'>
+	<param type='string' name='network'>
+	Network name of the interface.
+	</param>
+
+	<param type='integer' name='vlan' optional='0'>
 	The VLAN ID that should be updated. This must be an integer and the
 	pair 'subnet/vlan' must be defined in the VLANs table.
 	</param>
-	
+
 	<example cmd='set host interface vlan backend-0-0-0 interface=eth0 vlan=3'>
 	Sets backend-0-0-0's private interface to VLAN ID 3.
 	</example>
 	"""
-	
+
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
-		(vlan, interface, mac) = self.fillParams([
-			('vlan',      None, True),
+		(vlan, interface, mac, network) = self.fillParams([
+			('vlan', None, True),
 			('interface', None),
-			('mac',       None)
-			])
+			('mac', None),
+			('network', None)
+		])
 
-		if not interface and not mac:
-			raise ParamRequired(self, ('interface', 'mac'))
+		# Gotta have one of these
+		if not any([interface, mac, network]):
+			raise ParamRequired(self, ('interface', 'mac', 'network'))
+
+		# Make sure interface, mac, and/or network exist on our hosts
+		self.validate(hosts, interface, mac, network)
+
+		# vlan has to be an integer
 		try:
-			vlanid = int(vlan)
+			vlan = int(vlan)
 		except:
 			raise ParamType(self, 'vlan', 'integer')
 
-		for host in self.getHostnames(args):
-			if interface:
-				self.db.execute("""
-					update networks net, nodes n
-					set net.vlanid = IF(%d = 0, NULL, %d)
-					where net.device like '%s' and
-					n.name = '%s' and net.node = n.id
-					""" % (vlanid, vlanid, interface, host))
-			else:
-				self.db.execute("""
-					update networks net, nodes n
-					set net.vlanid = IF(%d = 0, NULL, %d)
-					where net.mac like'%s' and
-					n.name = '%s' and net.node = n.id
-					""" % (vlanid, vlanid, mac, host))
+		# If vlan is 0 then it should be NULL in the db
+		if vlan == 0:
+			vlan = None
 
+		for host in hosts:
+			if network:
+				sql = """
+					update networks,nodes,subnets set networks.vlanid=%s
+					where nodes.name=%s and subnets.name=%s
+					and networks.node=nodes.id and networks.subnet=subnets.id
+				"""
+				values = [vlan, host, network]
+			else:
+				sql = """
+					update networks,nodes set networks.vlanid=%s
+					where nodes.name=%s and networks.node=nodes.id
+				"""
+				values = [vlan, host]
+
+			if interface:
+				sql += " and networks.device=%s"
+				values.append(interface)
+
+			if mac:
+				sql += " and networks.mac=%s"
+				values.append(mac)
+
+			self.db.execute(sql, values)
