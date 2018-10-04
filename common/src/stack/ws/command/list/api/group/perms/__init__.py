@@ -38,5 +38,5 @@ class Command(stack.commands.Command):
 			ga = GroupAccess.objects.filter(group=g)
 			for group in ga:
 				self.addOutput(group.group.name, group.command)
-		self.endOutput(header=['Group', 'Command'], trimOwner=False)
+		self.endOutput(header=['group', 'command'], trimOwner=False)
 				

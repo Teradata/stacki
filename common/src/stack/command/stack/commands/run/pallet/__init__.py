@@ -12,64 +12,84 @@
 
 import sys
 import subprocess
+
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
+class Command(
+	stack.commands.run.command,
+	stack.commands.PalletArgumentProcessor,
+	stack.commands.BoxArgumentProcessor
+):
 	"""
 	Installs a pallet on the fly
-	
+
 	<arg optional='0' type='string' name='pallet' repeat='1'>
 	List of pallets. This should be the pallet base name (e.g., base, hpc,
 	kernel).
 	</arg>
 
-	<example cmd='run pallet ubuntu'>		
+	<param type='string' name='version'>
+	The version number of the pallets to be ran. If no version number is
+	supplied, then all versions of a pallet will be ran.
+	</param>
+
+	<param type='string' name='release'>
+	The release number of the pallet to be ran. If no release number is
+	supplied, then all releases of a pallet will be ran.
+	</param>
+
+	<param type='string' name='arch'>
+	The architecture of the pallet to be ran. If no architecture is
+	supplied, then all architectures of a pallet will be ran.
+	</param>
+
+	<param type='string' name='os'>
+	The OS of the pallet to be ran. If no OS is supplied, then all OS
+	versions of a pallet will be ran.
+	</param>
+
+	<example cmd='run pallet ubuntu'>
 	Installs the Ubuntu pallet onto the current system.
 	</example>
 	"""
 
 	def run(self, params, args):
-
 		(database,) = self.fillParams([ ('database', 'true') ])
 		database = self.str2bool(database)
 
 		if database:
+			# If we have a database then you have to specify a pallet
 			if not args:
 				raise ArgRequired(self, 'pallet')
 
-			#
-			# calling getRollNames will throw an exception if pallet
-			# isn't in the DB
-			#
-			try:
-				self.getRollNames(args, params)
-			except CommandError:
-				raise
+			# Make sure the pallets exist and are enabled for the frontend box
+			box = self.call("list.host",["localhost"])[0]["box"]
+			# List of all pallets enabled for the frontend
+			fe_pallets = self.getBoxPallets(box)
+			# List of all pallets specified on the command line
+			arg_pallets = self.getPallets(args, params)
+			# Find the intersection of the 2 list of pallets
+			pallets = [ pallet.name for pallet in arg_pallets if pallet in fe_pallets ]
+			# If there aren't any, raise a command error and exit out.
+			if not pallets:
+				for pallet in arg_pallets:
+					raise CommandError(self, f"{pallet.name} is not enabled for the frontend")
+		else:
+			# No DB so we use the pallet names from the args
+			pallets = args
 
-			fe_box = self.call("list.host",["localhost"])[0]["box"]
-			for arg in args:
-				# if a roll/pallet isn't in the stacks table it isn't enabled.
-				cmd = """stacks.* from stacks, boxes, rolls where
-					rolls.name="%s" and boxes.name="%s" and
-					stacks.box=boxes.id and stacks.roll=rolls.id""" % (arg, fe_box)
-				rows = self.db.select(cmd)
-				if not rows:
-					msg = 'Cannot run a pallet that is not enabled: %s' % arg
-					raise CommandError(self, msg)
-
+		# Generate the scripts
 		script = []
 		script.append('#!/bin/sh')
 
-		rolls = []
-		for roll in args:
-			rolls.append(roll)
 		if sys.stdin.isatty():
-			cmdparams = [ 'localhost' ]
-			if rolls:
-				cmdparams.append('pallet=%s' % ','.join(rolls))
-			xml = self.command('list.host.xml', cmdparams)
+			cmd_params = ['localhost']
+			if pallets:
+				cmd_params.append('pallet=%s' % ','.join(pallets))
+
+			xml = self.command('list.host.xml', cmd_params)
 		else:
 			xml = sys.stdin.read()
 
@@ -83,4 +103,3 @@ class Command(stack.commands.run.command, stack.commands.RollArgumentProcessor):
 			sys.stdout.write(o.decode())
 		else:
 			sys.stderr.write(e.decode())
-

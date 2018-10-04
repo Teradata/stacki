@@ -5,14 +5,13 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired
 
 
 class Command(stack.commands.set.host.command,
 	      stack.commands.BoxArgumentProcessor):
 	"""
 	Sets the box for a list of hosts.
-	
+
 	<arg type='string' name='host' repeat='1'>
 	One or more host names.
 	</arg>
@@ -27,17 +26,18 @@ class Command(stack.commands.set.host.command,
 	"""
 
 	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'host')
+		hosts = self.getHosts(args)
 
-		box, = self.fillParams([ ('box', None, True) ])
-		
+		box, = self.fillParams([
+			('box', None, True)
+		])
+
 		# Check to make sure this is a valid box name
-
 		self.getBoxNames([ box ])
 
-		for host in self.getHostnames(args):
-			self.db.execute("""update nodes set box=
-				(select id from boxes where name='%s')
-				where name='%s' """
-				% (box, host))
+		for host in hosts:
+			self.db.execute("""
+				update nodes set box=(
+					select id from boxes where name=%s
+				) where name=%s
+			""", (box, host))

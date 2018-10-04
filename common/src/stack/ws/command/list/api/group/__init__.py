@@ -30,4 +30,4 @@ class Command(stack.commands.Command):
 				userlist.append(u.username)
 			userstring = " ".join(userlist)
 			self.addOutput(group.name, userstring)
-		self.endOutput(header=["GROUP","USERS"], trimOwner=False)
+		self.endOutput(header=["group","users"], trimOwner=False)

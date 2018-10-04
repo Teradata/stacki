@@ -64,9 +64,8 @@ class Command(stack.commands.list.host.command,
 			#
 			box = self.getHostAttr(host, 'box')
 			for pallet in self.getBoxPallets(box):
-				name, version, release, arch, os = pallet
 				path = '/export/stack/pallets/%s/%s/%s/%s/%s' % \
-					(name, version, release, os, arch)
+					(pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch)
 
 				dirhash = self.directoryhash(path)
 				self.addOutput(host, '%s  %s' % (dirhash, name))

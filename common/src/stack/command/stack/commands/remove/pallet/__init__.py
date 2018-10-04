@@ -16,25 +16,29 @@
 
 
 import os
+import shutil
+
 import stack.commands
 from stack.exception import ArgRequired
 
+class command(stack.commands.PalletArgumentProcessor,
+	      stack.commands.remove.command):
+	pass
 
-class Command(stack.commands.RollArgumentProcessor,
-	stack.commands.remove.command):
+class Command(command):
 	"""
-	Remove a pallet from both the database and filesystem.	
+	Remove a pallet from both the database and filesystem.
 
 	<arg type='string' name='pallet' repeat='1'>
 	List of pallets. This should be the pallet base name (e.g., base, hpc,
 	kernel).
 	</arg>
-	
+
 	<param type='string' name='version'>
 	The version number of the pallet to be removed. If no version number is
 	supplied, then all versions of a pallet will be removed.
 	</param>
-	
+
 	<param type='string' name='release'>
 	The release id of the pallet to be removed. If no release id is
 	supplied, then all releases of a pallet will be removed.
@@ -45,111 +49,78 @@ class Command(stack.commands.RollArgumentProcessor,
 	supplied, then all architectures will be removed.
 	</param>
 
+	<param type='string' name='os'>
+	The OS of the pallet to be removed. If no OS is
+	supplied, then all OSes will be removed.
+	</param>
+
 	<example cmd='remove pallet kernel'>
 	Remove all versions and architectures of the kernel pallet.
 	</example>
-	
+
 	<example cmd='remove pallet ganglia version=5.0 arch=i386'>
 	Remove version 5.0 of the Ganglia pallet for i386 nodes.
 	</example>
-	
+
 	<related>add pallet</related>
 	<related>enable pallet</related>
 	<related>disable pallet</related>
 	<related>list pallet</related>
 	<related>create pallet</related>
-	"""		
+	"""
 
 	def run(self, params, args):
-		self.beginOutput()
-
-		(arch, OS) = self.fillParams([
-			('arch', '%'),
-			('os', '%')
-			])
-
 		if len(args) < 1:
 			raise ArgRequired(self, 'pallet')
 
-		for (roll, version, release) in self.getRollNames(args, params):
-			rows = self.db.execute("""
-				select os, arch from rolls where
-				name = '%s' and version = '%s' and
-				arch like '%s' and os like '%s'
-				""" % (roll, version, arch, OS))
+		self.beginOutput()
 
-			if rows == 0: # empty table is OK
-				continue
+		regenerate = False
+		for pallet in self.getPallets(args, params):
+			self.clean_pallet(pallet)
+			regenerate = True
 
-			# Remove each arch's instance of this pallet version
-			for (thisos, thisarch,) in self.db.fetchall():
-				self.clean_pallet(roll, version, release, thisos,
-					thisarch)
+		# Regenerate the stacki.repo if needed
+		if regenerate:
+			self._exec("""
+				/opt/stack/bin/stack report host repo localhost |
+				/opt/stack/bin/stack report script |
+				/bin/sh
+			""", shell=True)
 
 		self.endOutput(padChar='')
 
+	def clean_pallet(self, pallet):
+		"""
+		Remove pallet files and database entry for this arch and OS.
+		"""
 
-	def clean_pallet(self, roll, version, release, OS, arch):
-		""" Remove pallet files and database entry for this arch. Calls 
-		the Host OS specific function for proper filesystem cleanup. """
+		self.addOutput('',
+			f'Removing {pallet.name} {pallet.version}-{pallet.rel}-'
+			f'{pallet.os}-{pallet.arch} pallet ...'
+		)
 
-		self.addOutput('', 'Removing %s %s-%s-%s-%s pallet ...' %
-			(roll, version, release, OS, arch))
+		# Remove the pallet files and as much as the tree as possible
+		tree = [
+			'/export/stack/pallets', pallet.name, pallet.version,
+			pallet.rel, pallet.os, pallet.arch
+		]
 
-		prefix = '/export/stack/pallets'
-
-		os.system('/bin/rm -rf %s' %
-			os.path.join(prefix, roll, version, release, OS, arch))
-
-		f = [ prefix, roll, version, release, OS ]
-		i = len(f) - 1
-
-		while f != [ prefix ]:
-			d = '/'.join(f)
-
-			try:
-				if os.listdir(d):
-					#
-					# this directory has at least one element in
-					# it, so let's keep it (that is, let's exit
-					# this loop).
-					#
+		# Walk up the tree to clean it up, but stop at the top directory
+		while len(tree) > 1:
+			# The arch is the bottom of the tree, we remove everything
+			if tree[-1] == pallet.arch:
+				shutil.rmtree(os.path.join(*tree))
+			else:
+				# Just remove the directory if possible
+				try:
+					os.rmdir(os.path.join(*tree))
+				except OSError:
+					# Directory wasn't empty, we are done
 					break
-			except:
-				break
 
-			os.system('/bin/rm -rf %s' % d)
+			# Move up a level in the tree
+			tree.pop()
 
-			f.remove(f[i])
-
-			i -= 1
-			if i <= 0:
-				break
-
-		# Remove pallet from database as well
-		# we need the id before deleting, as it's a fkey
-		self.db.execute("""
-			select id from rolls where
-			name = '%s' and version = '%s' and rel = '%s' and
-			arch = '%s' and os = '%s'
-			""" % (roll, version, release, arch, OS))
-
-		doomed_pallet_id = self.db.fetchone()
-
-		# remove from the list of pallets and stacks
-		self.db.execute("""
-			delete from rolls where
-			id = '%s'
-			""" % doomed_pallet_id)
-		self.db.execute("""
-			delete from stacks where
-			roll = '%s'
-			""" % doomed_pallet_id)
-
-		# Regenerate stacki.repo
-		os.system("""
-			/opt/stack/bin/stack report host repo localhost | 
-			/opt/stack/bin/stack report script | 
-			/bin/sh
-			""")
-
+		# Remove the pallet from the database
+		self.db.execute('delete from rolls where id=%s', (pallet.id,))

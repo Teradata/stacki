@@ -4,6 +4,7 @@ import stack.django_env
 from stack.exception import *
 
 from stack.restapi.models import BlackList
+from stack.commands.add.api import checkCommand
 
 import re
 
@@ -30,19 +31,9 @@ class Command(stack.commands.Command):
 			])
 		if not command:
 			raise ParamRequired(self, "Command")
-		# Check if the command exists
-		cmd = re.sub('[ \t]+','.',command)
-		mod = "stack.commands.%s" % cmd
-		cmd_found = False
-		try:
-			__import__(mod)
-			m = eval(mod)
-			if hasattr(m, "Command"):
-				cmd_found = True
-		except:
-			pass
-		if not cmd_found:
-			raise CommandError(self, "Command %s not found" % command)
+
+		checkCommand(self, command)
+
 		try:
 			b = BlackList.objects.get(command=command)
 			if b:

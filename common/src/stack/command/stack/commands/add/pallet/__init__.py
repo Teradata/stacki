@@ -19,8 +19,10 @@ from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
 from urllib.parse import urlparse
 
+class command(stack.commands.add.command):
+	pass
 
-class Command(stack.commands.add.command):
+class Command(command):
 	"""
 	Add pallet ISO images to this machine's pallet directory. This command
 	copies all files in the ISOs to the local machine. The default location

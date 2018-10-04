@@ -51,5 +51,5 @@ class Command(stack.commands.Command):
 				
 			for command in perms:
 				self.addOutput(u.username, [command, perms[command]] )
-		self.endOutput(header=['User', 'Command', 'Source'], trimOwner=False)
+		self.endOutput(header=['user', 'command', 'source'], trimOwner=False)
 				

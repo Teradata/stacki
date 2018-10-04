@@ -16,7 +16,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.RollArgumentProcessor,
+class Command(stack.commands.PalletArgumentProcessor,
 	stack.commands.disable.command):
 	"""
 	Disable an available pallet. The pallet must already be copied on the
@@ -40,6 +40,11 @@ class Command(stack.commands.RollArgumentProcessor,
 	<param type='string' name='arch'>
 	If specified disables the pallet for the given architecture. The default
 	value is the native architecture of the host.
+	</param>
+
+	<param type='string' name='os'>
+	The OS of the pallet to be disabled. If no OS is supplied, then all OS
+	versions of a pallet will be disabled.
 	</param>
 
 	<param type='string' name='box'>
@@ -71,6 +76,9 @@ class Command(stack.commands.RollArgumentProcessor,
 			('box', 'default')
 		])
 
+		# We need to write the default arch back to the params list
+		params['arch'] = arch
+
 		# Make sure our box exists
 		rows = self.db.select('ID from boxes where name=%s', (box,))
 		if len(rows) == 0:
@@ -79,13 +87,10 @@ class Command(stack.commands.RollArgumentProcessor,
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
 
-		for (roll, version, release) in self.getRollNames(args, params):
-			self.db.execute("""
-				delete from stacks where
-				box=%s and roll=(
-					select id from rolls where name=%s
-					and version=%s and rel=%s and arch=%s
-				)""", (box_id, roll, version, release, arch)
+		for pallet in self.getPallets(args, params):
+			self.db.execute(
+				'delete from stacks where box=%s and roll=%s',
+				(box_id, pallet.id)
 			)
 
 		# Regenerate stacki.repo

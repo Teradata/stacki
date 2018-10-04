@@ -5,6 +5,7 @@
 # @copyright@
 
 import grp
+
 import stack.commands
 from stack.exception import CommandError
 
@@ -31,13 +32,11 @@ class Command(stack.commands.set.command):
 	"""
 
 	def run(self, params, args):
-
-		
 		(cmd, group) = self.fillParams([
 			('command', None, True),
 			('group',   None, True)
-			])
-		 
+		])
+
 		groupid = None
 		try:
 			groupid = int(group)
@@ -50,10 +49,7 @@ class Command(stack.commands.set.command):
 			except KeyError:
 				raise CommandError(self, 'cannot find group %s' % group)
 
-		if groupid is None:
-			raise CommandError(self, 'cannot find group %s' % group)
-
-		self.db.execute("""
-			insert into access (command, groupid)
-			values ('%s', %d)
-			""" % (cmd, groupid))
+		self.db.execute(
+			'insert into access(command, groupid) values (%s, %s)',
+			(cmd, groupid)
+		)

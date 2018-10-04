@@ -39,10 +39,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			osname = self.db.getHostOS(host)
 			server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
 			
-			if osname in [ 'redhat', 'sles' ]:
-				self.runImplementation('repo', (host, server, osname))
-			else:
-				self.runImplementation(osname, (host, server))
+			self.runImplementation(osname, (host, server))
 
 		self.endOutput(padChar='', trimOwner=True)
 

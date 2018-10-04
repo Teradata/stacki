@@ -35,10 +35,13 @@ from collections import OrderedDict, namedtuple
 import stack.graph
 import stack
 from stack.cond import EvalCondExpr
-from stack.exception import CommandError, ParamRequired, ArgNotFound
+from stack.exception import (
+	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique
+)
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
+
 
 _logPrefix = ''
 _debug     = False
@@ -185,13 +188,14 @@ class BoxArgumentProcessor:
 
 		pallets = []
 
-		rows = self.db.select("""r.name, r.version, r.rel,
-			r.arch, o.name from rolls r, boxes b,
+		Pallet = namedtuple("Pallet",[ 'id', 'name', 'version', 'rel', 'arch', 'os', 'url' ])
+
+		rows = self.db.select("""r.id, r.name, r.version, r.rel,
+			r.arch, o.name, r.url from rolls r, boxes b,
 			stacks s, oses o where b.name = '%s' and
 			b.id = s.box and s.roll = r.id and b.os=o.id""" % box)
 
-		for name, version, rel, arch, osname in rows:
-			pallets.append((name, version, rel, arch, osname))
+		pallets.extend([Pallet(*row) for row in rows])
 
 		return pallets
 		
@@ -418,52 +422,49 @@ class CartArgumentProcessor:
 
 		return carts
 
-	
-class RollArgumentProcessor:
-	"""An Interface class to add the ability to process pallet arguments."""
-	
-	def getRollNames(self, args, params):
-		"""Returns a list of (name, version, release) tuples from the pallet
-		table in the database.	If the PARAMS['version'] is provided
-		only pallets of that version are included otherwise no filtering
-		on version number is performed.	 If the ARGS list is empty then
-		all pallet names are returned.	SQL regexp can be used in 
-		both the version parameter and arg list, but must expand to 
-		something.
+
+class PalletArgumentProcessor:
+
+	def getPallets(self, args, params):
+		"""
+		Returns a Pallet namedtuple with the fields:
+			name, version, rel, arch, os, url
+
+		If args is None or empty then all pallets are returned.
+
+		SQL regexp can be used in both the parameter and arg lists, but
+		must expand to something.
 		"""
 
-		if 'version' in params:
-			version = params['version']
-		else:
-			version = '%' # SQL wildcard
+		# Load the params but default to SQL wildcards
+		version = params.get('version', '%')
+		rel = params.get('release', '%')
+		arch = params.get('arch', '%')
+		os = params.get('os', '%')
 
-		if 'release' in params:
-			rel = params['release']
-		else:
-			rel = '%' # SQL wildcard
-
-		if 'arch' in params:
-			arch = params['arch']
-		else:
-			arch = "%" # SQL wildcard
-	
-		pallets = []
+		# Find all pallet names if we weren't given one
 		if not args:
-			args = [ '%' ]	       # find all pallet names
+			args = ['%']
 
+		Pallet = namedtuple('Pallet', [
+			'id', 'name', 'version', 'rel', 'arch', 'os', 'url'
+		])
+
+		pallets = []
 		for arg in args:
-			found = False
-			for (name, ver, release) in self.db.select("""
-				distinct name, version, rel from rolls where
-				name like binary %s and 
-				version like binary %s and 
-				rel like binary %s and
-				arch like binary %s 
-				""", (arg, version, rel, arch)):
-				found = True
-				pallets.append((name, ver, release))
-			if not found and arg != '%':
+			rows = self.db.select("""
+				id, name, version, rel, arch, os, url from rolls
+				where name like binary %s and version like binary %s
+				and rel like binary %s and arch like binary %s
+				and os like binary %s
+			""", (arg, version, rel, arch, os))
+
+			if not rows and arg != '%':
 				raise ArgNotFound(self, arg, 'pallet')
+
+			# Add our pallet models to the list
+			pallets.extend([Pallet(*row) for row in rows])
+
 		return pallets
 
 
@@ -583,10 +584,10 @@ class HostArgumentProcessor:
 			hostList.append(host.lower())
 			
 			if names:
-				hostDict[host] = None
+				hostDict[host.lower()] = None
 			else:
-				hostDict[host] = self.db.getNodeName(host, 
-								     subnet)
+				hostDict[host.lower()] = self.db.getNodeName(host, 
+									     subnet)
 
 		l = []
 		if names:
@@ -708,6 +709,36 @@ class HostArgumentProcessor:
 			list = filter(part_func, list)
 			
 		return list
+
+	def getHosts(self, args):
+		"""
+		Return the host names for the hosts or patterns specified in args,
+		and raise an ArgRequired if no hosts are found.
+		"""
+
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
+
+		hosts = self.getHostnames(args)
+
+		if not hosts:
+			raise ArgRequired(self, 'host')
+
+		return hosts
+
+	def getSingleHost(self, args):
+		"""
+		Return the host name for the host or pattern specified in args.
+		Raise an ArgRequired if no hosts are found, and a ArgUnique if
+		more than a single host is found.
+		"""
+
+		hosts = self.getHosts(args)
+
+		if len(hosts) != 1:
+			raise ArgUnique(self, 'host')
+
+		return hosts[0]
 
 
 class PartitionArgumentProcessor:

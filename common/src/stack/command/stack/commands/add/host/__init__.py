@@ -15,31 +15,15 @@ import stack.commands
 from stack.exception import CommandError, ParamRequired, ArgUnique, ArgRequired
 
 
-class command(stack.commands.HostArgumentProcessor,
-	      stack.commands.ApplianceArgumentProcessor,
-	      stack.commands.BoxArgumentProcessor,
-	      stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.add.command):
-	
-	def _get_hosts(self, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+class command(
+	stack.commands.HostArgumentProcessor,
+	stack.commands.ApplianceArgumentProcessor,
+	stack.commands.BoxArgumentProcessor,
+	stack.commands.EnvironmentArgumentProcessor,
+	stack.commands.add.command
+):
+	pass
 
-		hosts = self.getHostnames(args)
-		
-		if not hosts:
-			raise ArgRequired(self, 'host')
-		
-		return hosts
-	
-	def _get_single_host(self, args):
-		hosts = self._get_hosts(args)
-		
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
-
-		return hosts[0]
-	
 
 class Command(command):
 	"""

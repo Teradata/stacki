@@ -19,11 +19,11 @@ class Implementation(stack.commands.Implementation):
 		repo.append('<stack:file stack:name="%s">' % filename)
 
 		for pallet in self.owner.getBoxPallets(box):
-			pname, pversion, prel, parch, pos = pallet
 
-			repo.append('[%s-%s-%s]' % (pname, pversion, prel))
-			repo.append('name=%s %s %s' % (pname, pversion, prel))
-			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
+			repo.append('[%s-%s-%s]' % (pallet.name, pallet.version, pallet.rel))
+			repo.append('name=%s %s %s' % (pallet.name, pallet.version, pallet.rel))
+			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % \
+				(server, pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch))
 			repo.append('gpgcheck=0')
 
 		for o in self.owner.call('list.cart'):
