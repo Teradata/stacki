@@ -581,13 +581,13 @@ class HostArgumentProcessor:
 			# stored in the hostDict will be the name of that
 			# interface rather than the name in the nodes table
 			
-			hostList.append(host.lower())
+			hostList.append(host)
 			
 			if names:
-				hostDict[host.lower()] = None
+				hostDict[host] = None
 			else:
-				hostDict[host.lower()] = self.db.getNodeName(host, 
-									     subnet)
+				hostDict[host] = self.db.getNodeName(host, 
+								     subnet)
 
 		l = []
 		if names:
@@ -659,9 +659,16 @@ class HostArgumentProcessor:
 					# 	(exp, res, host))
 
 			# glob regex hostname
+			#
+			# Do extra work to make globbing case insensitve for
+			# people that use uppercase hostname (don't be that
+			# guy). 
 
 			elif '*' in name or '?' in name or '[' in name:
-				for host in fnmatch.filter(hostList, name):
+				for lower in fnmatch.filter(
+						[ h.lower() for h in hostList ],
+						name):
+					host = self.db.getHostname(lower) # fix case
 					s = self.db.getHostname(host, subnet)
 					hostDict[host] = s
 					if host not in explicit:
