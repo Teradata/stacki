@@ -27,6 +27,22 @@ DJANGO_SETTINGS_MODULE=stack.restapi.settings \
 # Blacklist commands that must not be run
 /opt/stack/bin/stack add api blacklist command command="list host message"
 
+# Commands that require "sudo" to be run
+STACK_CMDS=( "sync *"	\
+	"load *" 	\
+	"unload *"	\
+	"remove host"	\
+	"add pallet" 	\
+	"list host switch" \
+	)
+	
+
+for i in "${STACK_CMDS[@]}"; do \
+	/opt/stack/bin/stack add api sudo command command="${i}" sync=False
+done
+
+/opt/stack/bin/stack sync api sudo command
+
 # Create an admin user, and write the credentials
 #     to a webservice credential file
 /opt/stack/bin/stack add api user admin admin=true output-format=json > /root/stacki-ws.cred

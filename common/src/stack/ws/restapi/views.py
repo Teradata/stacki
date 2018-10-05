@@ -13,6 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth import authenticate, login, logout
 
 from stack.restapi.models import BlackList
+from stack.restapi.models import SudoList
 from stack.exception import CommandError
 import stack.commands
 
@@ -28,8 +29,6 @@ import shlex
 import re
 
 import traceback
-
-
 
 # Start a logger
 log = logging.getLogger("stack-ws")
@@ -92,12 +91,11 @@ class StackWS(View):
 		# Get the command module to execute
 		mod_name = '.'.join(args)
 
-		log.info('user %s called "%s" %s' % (request.user.username, mod_name, params))
+		log.info(f'user {request.user.username} called "{mod_name}" {params}')
 
 		# Check if command is blacklisted
 		if self._blacklisted(mod_name):
-			return HttpResponseForbidden('Blacklisted Command: Command %s is not permitted' % 
-						     mod_name,
+			return HttpResponseForbidden(f'Blacklisted Command: Command {mod_name} is not permitted',
 						     content_type="text/plain")
 
 		# Check if user has permission to run
@@ -163,11 +161,10 @@ class StackWS(View):
 		# some root privileges. However, if the user
 		# isn't a django superuser (with admin privileges)
 		# don't allow command to run.
-		elif cmd_module.startswith(("sync.", "load.", "unload.")) or \
-			cmd_module in ['add.pallet', 'remove.host']:
+		elif self._isSudoCommand(cmd_module):
 			if not request.user.is_superuser:
-				verb = cmd_module.split('.')[0]
-				return HttpResponseForbidden("All '%s' commands require Admin Privileges" % verb,
+				cmd_str = cmd_module.replace('.', ' ')
+				return HttpResponseForbidden(f"Command \"{cmd_str}\" requires Admin Privileges" ,
 							     content_type="text/plain")
 			# Run the sync command using sudo
 			else:
@@ -257,6 +254,19 @@ class StackWS(View):
 				# Match the exact blacklisted command
 				if m.group() == mod:
 					return True
+		return False
+
+	def _isSudoCommand(self, mod):
+		# Get a list of all sudo commands
+		c = SudoList.objects.values("command")
+		sl = [ i['command'] for i in c ]
+		for cmd in sl:
+			cmd = re.sub('[ \t]+', '.', cmd)
+			r = re.compile(str(cmd))
+			m = r.match(mod)
+			if m and m.group() == mod:
+				return True
+
 		return False
 	
 # Create Connections to the database, and return

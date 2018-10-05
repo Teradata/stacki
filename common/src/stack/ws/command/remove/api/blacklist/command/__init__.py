@@ -14,7 +14,7 @@ class Command(stack.commands.Command):
 	<param type="string" name="command">
 	Command to remove from blacklist
 	</param>
-	<example cmd="remove blacklist command command='list host message'">
+	<example cmd="remove api blacklist command command='list host message'">
 	Remove "list host message" command from the blacklist.
 	</example>
 	"""

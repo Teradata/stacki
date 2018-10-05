@@ -37,12 +37,12 @@ class Command(stack.commands.Command):
 			u = User.objects.get(username=username)
 		except User.DoesNotExist:
 			raise CommandError(self,
-				"User '%s' does not exist" % (username))
+				"User %s does not exist" % (username))
 
 		try:
 			ua = UserAccess.objects.get(user=u, command=perm)
 		except UserAccess.DoesNotExist:
 			raise CommandError(self,
-				"User '%s' does not has perm '%s'"
+				"User %s does not have perm \"%s\""
 				% (username, perm))
 		ua.delete()

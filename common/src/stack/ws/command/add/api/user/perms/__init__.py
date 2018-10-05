@@ -14,6 +14,7 @@ from stack.exception import *
 
 from django.contrib.auth.models import User
 from stack.restapi.models import UserAccess
+from stack.commands.add.api import checkCommand
 
 class Command(stack.commands.Command):
 	"""
@@ -44,6 +45,7 @@ class Command(stack.commands.Command):
 		except User.DoesNotExist:
 			raise CommandError('User %s does not exist' % username)
 
+		checkCommand(self, perm)
 		try:
 			ua = UserAccess.objects.get(user = u, command=perm)
 		except UserAccess.DoesNotExist:

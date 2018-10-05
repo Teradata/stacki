@@ -12,6 +12,7 @@ import stack.django_env
 
 from django.contrib.auth.models import Group
 from stack.restapi.models import GroupAccess
+from stack.commands.add.api import checkCommand
 
 from stack.exception import *
 
@@ -37,6 +38,7 @@ class Command(stack.commands.Command):
 			])
 
 		# Check if group exists
+		checkCommand(self, perm)
 		try:
 			g = Group.objects.get(name=groupname)
 		except Group.DoesNotExist:

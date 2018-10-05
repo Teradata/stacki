@@ -21,4 +21,4 @@ class Command(stack.commands.Command):
 		self.beginOutput()
 		for b in BlackList.objects.all():
 			self.addOutput(None,[b.command])
-		self.endOutput(header=['Owner','Command'], trimOwner = True)
+		self.endOutput(header=['owner','command'], trimOwner = True)

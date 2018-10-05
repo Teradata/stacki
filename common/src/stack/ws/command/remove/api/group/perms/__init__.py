@@ -37,12 +37,12 @@ class Command(stack.commands.Command):
 			g = Group.objects.get(name=groupname)
 		except Group.DoesNotExist:
 			raise CommandError(self,
-				"Group '%s' does not exist" % (groupname))
+				"Group %s does not exist" % (groupname))
 
 		try:
 			ga = GroupAccess.objects.get(group=g, command=perm)
 		except GroupAccess.DoesNotExist:
 			raise CommandError(self,
-				"Group '%s' does not has perm '%s'"
+				"Group %s does not have perm \"%s\""
 				% (groupname, perm))
 		ga.delete()

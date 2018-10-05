@@ -29,4 +29,4 @@ class Command(stack.commands.Command):
 				g = Group.objects.get(name=arg)
 				g.delete()
 			except:
-				pass
+				raise CommandError(self, "Cannot find group %s" % arg)

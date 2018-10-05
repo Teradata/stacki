@@ -24,12 +24,12 @@ class Plugin(stack.commands.Plugin):
 		api_group_prep = []
 		if api_group_data:
 			# group['USERS'] is a ' ' delimeted string we need to turn into a list
-			api_group_prep = {group['GROUP']: {'users': [user for user in group['USERS'].split()]} for group in api_group_data}
+			api_group_prep = {group['group']: {'users': [user for user in group['users'].split()]} for group in api_group_data}
 			# now that we have all of the groups, get each groups permission data
 			for group, data in api_group_prep.items():
 				api_group_perm_data = self.owner.call('list.api.group.perms', [ group ])
 				if api_group_perm_data:
-					data['permissions'] = [item['Command'] for item in api_group_perm_data]
+					data['permissions'] = [item['command'] for item in api_group_perm_data]
 				else:
 					data['permissions'] = []
 
@@ -46,7 +46,7 @@ class Plugin(stack.commands.Plugin):
 				if api_user_perm_data:
 					# we don't want to include group inherited permissions in this section, we already have them above
 					# the only other permission scope is user, so we don't need to bother listing each source either
-					user['permissions'] = [item['Command'] for item in api_user_perm_data if item['Source'] != 'G']
+					user['permissions'] = [item['command'] for item in api_user_perm_data if item['source'] != 'G']
 				else:
 					user['permissions'] = []
 
@@ -54,13 +54,19 @@ class Plugin(stack.commands.Plugin):
 		blacklist_command_data = self.owner.call('list.api.blacklist.command')
 		blacklist_command_prep = []
 		if blacklist_command_data:
-			blacklist_command_prep = [command['Command'] for command in blacklist_command_data]
+			blacklist_command_prep = [command['command'] for command in blacklist_command_data]
 
+		# get all the sudo commands
+		sudo_commands = self.owner.call('list.api.sudo.command')
+		sudo_command_list = []
+		if sudo_commands:
+			sudo_command_list = [ c['command'] for c in sudo_commands ]
 
 		document_prep['api'] = {
 					'group':api_group_prep,
 					'user':api_user_prep,
-					'blacklist commands':blacklist_command_prep
+					'blacklist commands':blacklist_command_prep,
+					'sudo': sudo_command_list
 					}
 
 		return(document_prep)

@@ -31,3 +31,10 @@ class BlackList(models.Model):
 	allowed to run
 	"""
 	command = models.CharField(max_length=1024)
+
+class SudoList(models.Model):
+	"""
+	Models that stores the commands for which sudo
+	is required when run.
+	"""
+	command = models.CharField(max_length=1024)
