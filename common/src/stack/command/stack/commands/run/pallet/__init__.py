@@ -19,7 +19,8 @@ from stack.exception import ArgRequired, CommandError
 
 class Command(
 	stack.commands.run.command,
-	stack.commands.PalletArgumentProcessor
+	stack.commands.PalletArgumentProcessor,
+	stack.commands.BoxArgumentProcessor
 ):
 	"""
 	Installs a pallet on the fly
@@ -65,20 +66,16 @@ class Command(
 
 			# Make sure the pallets exist and are enabled for the frontend box
 			box = self.call("list.host",["localhost"])[0]["box"]
-			pallets = self.getPallets(args, params)
-			for pallet in pallets:
-				if self.db.count("""
-					(*) from stacks, boxes
-					where stacks.roll=%s and boxes.name=%s
-					and stacks.box=boxes.id
-					""", (pallet.id, box)
-				) == 0:
-					raise CommandError(self,
-						f'pallet "{pallet.name}" is not enabled'
-					)
-
-			# We just want the names of the pallets to process
-			pallets = [pallet.name for pallet in pallets]
+			# List of all pallets enabled for the frontend
+			fe_pallets = self.getBoxPallets(box)
+			# List of all pallets specified on the command line
+			arg_pallets = self.getPallets(args, params)
+			# Find the intersection of the 2 list of pallets
+			pallets = [ pallet.name for pallet in arg_pallets if pallet in fe_pallets ]
+			# If there aren't any, raise a command error and exit out.
+			if not pallets:
+				for pallet in arg_pallets:
+					raise CommandError(self, f"{pallet.name} is not enabled for the frontend")
 		else:
 			# No DB so we use the pallet names from the args
 			pallets = args

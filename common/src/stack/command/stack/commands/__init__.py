@@ -188,13 +188,14 @@ class BoxArgumentProcessor:
 
 		pallets = []
 
-		rows = self.db.select("""r.name, r.version, r.rel,
-			r.arch, o.name from rolls r, boxes b,
+		Pallet = namedtuple("Pallet",[ 'id', 'name', 'version', 'rel', 'arch', 'os', 'url' ])
+
+		rows = self.db.select("""r.id, r.name, r.version, r.rel,
+			r.arch, o.name, r.url from rolls r, boxes b,
 			stacks s, oses o where b.name = '%s' and
 			b.id = s.box and s.roll = r.id and b.os=o.id""" % box)
 
-		for name, version, rel, arch, osname in rows:
-			pallets.append((name, version, rel, arch, osname))
+		pallets.extend([Pallet(*row) for row in rows])
 
 		return pallets
 		

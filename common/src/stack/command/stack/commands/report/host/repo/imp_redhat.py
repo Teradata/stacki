@@ -12,23 +12,18 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 		host	= args[0]
 		server	= args[1]
-		osname	= args[2]
 		box	= self.owner.getHostAttr(host, 'box')
 		repo	= []
 
-		if osname == 'redhat':
-			filename = '/etc/yum.repos.d/stacki.repo'
-		elif osname == 'sles':
-			filename = '/etc/zypp/repos.d/stacki.repo'
+		filename = '/etc/yum.repos.d/stacki.repo'
 
 		repo.append('<stack:file stack:name="%s">' % filename)
 
 		for pallet in self.owner.getBoxPallets(box):
-			pname, pversion, prel, parch, pos = pallet
-
-			repo.append('[%s-%s-%s]' % (pname, pversion, prel))
-			repo.append('name=%s %s %s' % (pname, pversion, prel))
-			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % (server, pname, pversion, prel, pos, parch))
+			repo.append('[%s-%s-%s]' % (pallet.name, pallet.version, pallet.rel))
+			repo.append('name=%s %s %s' % (pallet.name, pallet.version, pallet.rel))
+			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % \
+				(server, pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch))
 			repo.append('assumeyes=1')
 			repo.append('gpgcheck=0')
 
@@ -42,10 +37,7 @@ class Implementation(stack.commands.Implementation):
 
 		repo.append('</stack:file>')
 
-		if osname == 'redhat':
-			repo.append('yum clean all')
-		elif osname == 'sles':
-			repo.append('zypper clean --all')
+		repo.append('yum clean all')
 
 		for line in repo:
 			self.owner.addOutput(host, line)

@@ -36,10 +36,10 @@ class Command(command):
 		carts	= {}
 
 		for box in self.getBoxNames(args):
-			for name, version, rel, arch, osname in self.getBoxPallets(box):
-				fullname = '%s-%s' % (name, version)
-				if rel:
-					fullname += '-%s' % rel
+			for pallet in self.getBoxPallets(box):
+				fullname = '%s-%s' % (pallet.name, pallet.version)
+				if pallet.rel:
+					fullname += '-%s' % pallet.rel
 
 				if box not in pallets:
 					pallets[box] = []

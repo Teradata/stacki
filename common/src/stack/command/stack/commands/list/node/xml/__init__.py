@@ -156,9 +156,9 @@ class Command(stack.commands.list.command,
 		#	
 		items = []
 		try:
-			for name, version, rel, arch, osname in self.getBoxPallets(attrs['box']):
-				items.append(os.path.join('/export', 'stack',
-					'pallets', name, version, rel, osname, arch))
+			for pallet in self.getBoxPallets(attrs['box']):
+				items.append(os.path.join('/export', 'stack', 'pallets',
+					pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch))
 		except:
 			#
 			# there is no output from 'getBoxPallets()'.
