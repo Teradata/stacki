@@ -34,6 +34,8 @@ class Command(stack.commands.set.host.command):
 	def doPower(self, host, ipmi_ip, cmd):
 		import subprocess
 		import shlex
+		import socket
+		import json
 
 		if not ipmi_ip:
 			return
