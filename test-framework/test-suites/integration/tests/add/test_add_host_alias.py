@@ -8,7 +8,7 @@ class TestAddHostAlias:
 	dirn = '/export/test-files/add/'
 
 	# split possible?
-	def test_add_host_alias_to_multiple_interfaces_across_multiple_hosts(self, host):
+	def test_to_multiple_interfaces_across_multiple_hosts(self, host):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
 		assert result.rc == 0
 		result = host.run('stack add host alias backend-0-0 alias=test0-eth0 interface=eth0')
@@ -102,7 +102,7 @@ class TestAddHostAlias:
 		expected_output = open(self.dirn + 'add_host_alias_multiple_aliases_same_host_interface.json').read()
 		assert result.stdout.strip() == expected_output.strip()
 
-	def test_add_host_alias_no_host(self, host):
+	def test_no_host(self, host):
 		result = host.run('stack add host alias')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -110,7 +110,7 @@ class TestAddHostAlias:
 			{host} {alias=string} {interface=string}
 		''')
 
-	def test_add_host_alias_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host alias a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -118,7 +118,7 @@ class TestAddHostAlias:
 			{host} {alias=string} {interface=string}
 		''')
 	
-	def test_add_host_alias_multiple_hosts(self, host, add_host):
+	def test_multiple_hosts(self, host, add_host):
 		result = host.run('stack add host alias frontend-0-0 backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -126,17 +126,17 @@ class TestAddHostAlias:
 			{host} {alias=string} {interface=string}
 		''')
 	
-	def test_add_host_alias_hostname_in_use(self, host, add_host):
+	def test_hostname_in_use(self, host, add_host):
 		result = host.run('stack add host alias frontend-0-0 alias=backend-0-0 interface=eth0')
 		assert result.rc == 255
 		assert result.stderr == 'error - hostname already in use\n'
 
-	def test_add_host_alias_invalid_alias(self, host, add_host):
+	def test_invalid_alias(self, host, add_host):
 		result = host.run('stack add host alias frontend-0-0 alias=127.0.0.1 interface=eth0')
 		assert result.rc == 255
 		assert result.stderr == 'error - aliases cannot be an IP address\n'
 	
-	def test_add_host_alias_invalid_interface(self, host, add_host):
+	def test_invalid_interface(self, host, add_host):
 		result = host.run('stack add host alias frontend-0-0 alias=foo interface=eth7')
 		assert result.rc == 255
 		assert result.stderr == 'error - interface does not exist\n'

@@ -3,8 +3,7 @@ import json
 
 class TestAddHostRoute:
 
-	def test_add_host_route(self, host):
-
+	def test_single_arg(self, host):
 		result = host.run(f'stack add host route frontend-0-0 address=0.0.0.0 gateway=private netmask=255.255.255.0 interface=eth1')
 		assert result.rc == 0
 

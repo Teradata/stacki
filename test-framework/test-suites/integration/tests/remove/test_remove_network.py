@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveNetwork:
-	def test_remove_network_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove network')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveNetwork:
 			{network ...}
 		''')
 
-	def test_remove_network_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove network test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,13 +19,13 @@ class TestRemoveNetwork:
 			{network ...}
 		''')
 
-	def test_remove_network_in_use(self, host, add_host, add_environment):
+	def test_in_use(self, host, add_host, add_environment):
 		# Try to remove the private network, which is in use
 		result = host.run('stack remove network private')
 		assert result.rc == 255
 		assert result.stderr == 'error - network "private" in use\n'
 
-	def test_remove_network_one_arg(self, host, add_network):
+	def test_one_arg(self, host, add_network):
 		# Remove our test network
 		result = host.run('stack remove network test')
 		assert result.rc == 0
@@ -38,7 +38,7 @@ class TestRemoveNetwork:
 			[network ...]
 		''')
 
-	def test_remove_network_multiple_args(self, host, add_network):
+	def test_multiple_args(self, host, add_network):
 		# Add a second test network
 		add_network('foo', '192.168.1.0')
 

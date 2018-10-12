@@ -2,12 +2,12 @@ import json
 
 
 class TestListHostPartition:
-	def test_list_host_partition_invalid(self, host, invalid_host):
+	def test_invalid(self, host, invalid_host):
 		result = host.run(f'stack list host partition {invalid_host}')
 		assert result.rc == 255
 		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
-	def test_list_host_partition_no_args(self, host, add_host):
+	def test_no_args(self, host, add_host):
 		# Add some partition info to the frontend
 		result = host.run('stack add host partition frontend-0-0 device=sda '
 			'mountpoint=/ uuid=test_uuid sectorstart=1234 size=5678 partid=1 '
@@ -63,7 +63,7 @@ class TestListHostPartition:
 			}
 		]
 
-	def test_list_host_partition_one_arg(self, host, add_host):
+	def test_one_arg(self, host, add_host):
 		# Add some partition info to the frontend
 		result = host.run('stack add host partition frontend-0-0 device=sda1 '
 			'mountpoint=/ uuid=test_uuid sectorstart=1234 size=5678 partid=1 '
@@ -110,7 +110,7 @@ class TestListHostPartition:
 			}
 		]
 
-	def test_list_host_partition_multiple_args(self, host, add_host):
+	def test_multiple_args(self, host, add_host):
 		# Add some partition info to the frontend
 		result = host.run('stack add host partition frontend-0-0 device=sda1 '
 			'mountpoint=/ uuid=test_uuid sectorstart=1234 size=5678 partid=1 '

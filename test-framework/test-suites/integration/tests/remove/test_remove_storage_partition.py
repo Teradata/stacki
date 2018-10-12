@@ -1,10 +1,11 @@
 import os
 import subprocess
+
 import pytest
+
 
 STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend']
 
-@pytest.mark.usefixtures("revert_database")
 @pytest.mark.usefixtures("add_host")
 @pytest.mark.parametrize("csvfile", STORAGE_SPREADSHEETS)
 def test_remove_storage_partition(host, csvfile):
@@ -66,7 +67,6 @@ def test_remove_storage_partition(host, csvfile):
 	assert result.stdout == ''
 	assert result.stderr == ''
 
-@pytest.mark.usefixtures("revert_database")
 @pytest.mark.usefixtures("add_host")
 def test_negative_remove_storage_partition(host):
 	"""

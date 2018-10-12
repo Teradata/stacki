@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostEnvironment:
-	def test_set_host_environment_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host environment')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostEnvironment:
 			{host ...} {environment=string}
 		''')
 
-	def test_set_host_environment_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host environment a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostEnvironment:
 			{host ...} {environment=string}
 		''')
 
-	def test_set_host_environment_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host environment frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestSetHostEnvironment:
 			{host ...} {environment=string}
 		''')
 
-	def test_set_host_environment_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack set host environment frontend-0-0 environment=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - environment parameter not valid\n'
 
-	def test_set_host_environment_single_host(self, host, add_host, add_environment, host_os):
+	def test_single_host(self, host, add_host, add_environment, host_os):
 		# Set the host environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -53,7 +53,7 @@ class TestSetHostEnvironment:
 			'rank': '0'
 		}]
 
-	def test_set_host_environment_multiple_hosts(self, host, add_host, add_environment, host_os):
+	def test_multiple_hosts(self, host, add_host, add_environment, host_os):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

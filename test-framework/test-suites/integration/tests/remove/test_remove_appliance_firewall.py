@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveApplianceFirewall:
-	def test_remove_appliance_firewall_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove appliance firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveApplianceFirewall:
 			{appliance ...} {rulename=string}
 		''')
 
-	def test_remove_appliance_firewall_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove appliance firewall test rulename=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveApplianceFirewall:
 			{appliance ...} {rulename=string}
 		''')
 
-	def test_remove_appliance_firewall_no_rulename(self, host, add_appliance):
+	def test_no_rulename(self, host, add_appliance):
 		result = host.run('stack remove appliance firewall test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestRemoveApplianceFirewall:
 			{appliance ...} {rulename=string}
 		''')
 
-	def test_remove_appliance_firewall_invalid_rulename(self, host, add_appliance):
+	def test_invalid_rulename(self, host, add_appliance):
 		result = host.run('stack remove appliance firewall test rulename=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule test does not exist for appliance test\n'
 
-	def test_remove_appliance_firewall_one_arg(self, host, add_appliance):
+	def test_one_arg(self, host, add_appliance):
 		# Add a firewall rule
 		result = host.run(
 			'stack add appliance firewall test service=1234 chain=INPUT '
@@ -68,7 +68,7 @@ class TestRemoveApplianceFirewall:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_remove_appliance_firewall_multiple_args(self, host, add_appliance):
+	def test_multiple_args(self, host, add_appliance):
 		# Add a firewall rule for our first appliance
 		result = host.run(
 			'stack add appliance firewall test service=1234 chain=INPUT '

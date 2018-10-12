@@ -13,7 +13,7 @@ class TestAddHost:
 	]
 
 	@pytest.mark.parametrize("host_name, add_params, output_file", HOST_POSITIVE_TEST_DATA)
-	def test_add_host_positive_behaviour(self, host, host_name, add_params, output_file):
+	def test_positive_behaviour(self, host, host_name, add_params, output_file):
 		dirn = '/export/test-files/add/'
 		expected_output = open(dirn + output_file).read()
 
@@ -40,11 +40,11 @@ class TestAddHost:
 	]
 
 	@pytest.mark.parametrize("host_name, add_params, output_file", HOST_NEGATIVE_TEST_DATA)
-	def test_add_host_negative_behaviour(self, host, host_name, add_params, output_file):
+	def test_negative_behaviour(self, host, host_name, add_params, output_file):
 		result = host.run(f'stack add host {host_name} {add_params}')
 		assert result.rc != 0
 
-	def test_add_host_multiple_hosts(self, host):
+	def test_multiple_hosts(self, host):
 		result = host.run('stack add host test test2 appliance=test rack=0 rank=0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -52,7 +52,7 @@ class TestAddHost:
 			{host} [box=string] [environment=string] [rack=string] [rank=string]
 		''')
 
-	def test_add_host_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add the host
 		result = host.run('stack add host test appliance=backend rack=0 rank=0')
 		assert result.rc == 0
@@ -62,27 +62,27 @@ class TestAddHost:
 		assert result.rc == 255
 		assert result.stderr == 'error - host "test" already exists in the database\n'
 
-	def test_add_host_invalid_appliance(self, host):
+	def test_invalid_appliance(self, host):
 		result = host.run('stack add host test appliance=test rack=0 rank=0')
 		assert result.rc == 255
 		assert result.stderr == 'error - appliance "test" is not in the database\n'
 
-	def test_add_host_invalid_box(self, host):
+	def test_invalid_box(self, host):
 		result = host.run('stack add host test appliance=backend rack=0 rank=0 box=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - box "test" is not in the database\n'
 
-	def test_add_host_invalid_installaction(self, host, host_os):
+	def test_invalid_installaction(self, host, host_os):
 		result = host.run('stack add host test appliance=backend rack=0 rank=0 installaction=test')
 		assert result.rc == 255
 		assert result.stderr == f'error - "test" install boot action for "{host_os}" is missing\n'
 
-	def test_add_host_invalid_osaction(self, host, host_os):
+	def test_invalid_osaction(self, host, host_os):
 		result = host.run('stack add host test appliance=backend rack=0 rank=0 osaction=test')
 		assert result.rc == 255
 		assert result.stderr == f'error - "test" os boot action for "{host_os}" is missing\n'
 
-	def test_add_host_with_environment(self, host, host_os):
+	def test_with_environment(self, host, host_os):
 		# Create our environment
 		result = host.run('stack add environment test')
 		assert result.rc == 0

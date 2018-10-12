@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures("add_host_with_interface")
 class TestAddHostBonded:
-	def test_add_host_bonded_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host bonded')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -14,7 +14,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host bonded a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -22,7 +22,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_multiple_hosts(self, host):
+	def test_multiple_hosts(self, host):
 		result = host.run('stack add host bonded frontend-0-0 backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -30,7 +30,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_no_channel(self, host):
+	def test_no_channel(self, host):
 		result = host.run('stack add host bonded backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -38,7 +38,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_no_interfaces(self, host):
+	def test_no_interfaces(self, host):
 		result = host.run('stack add host bonded backend-0-0 channel=bond0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -46,7 +46,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_no_ip(self, host):
+	def test_no_ip(self, host):
 		result = host.run('stack add host bonded backend-0-0 channel=bond0 '
 		'interfaces=eth0,eth1')
 
@@ -56,7 +56,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_no_network(self, host):
+	def test_no_network(self, host):
 		result = host.run('stack add host bonded backend-0-0 channel=bond0 '
 		'interfaces=eth0,eth1 ip=192.168.0.1')
 
@@ -66,7 +66,7 @@ class TestAddHostBonded:
 			{host} [channel=string] [interfaces=string] [ip=string] [name=string] [network=string] [options=string]
 		''')
 	
-	def test_add_host_bonded_invalid_network(self, host):
+	def test_invalid_network(self, host):
 		# Add a second interface to our backend
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0
@@ -78,14 +78,14 @@ class TestAddHostBonded:
 		assert result.rc == 255
 		assert result.stderr == 'error - network "test" does not exist\n'
 
-	def test_add_host_bonded_missing_interface(self, host):
+	def test_missing_interface(self, host):
 		result = host.run('stack add host bonded backend-0-0 channel=bond0 '
 		'interfaces=eth0,eth1 ip=192.168.0.1 network=private')
 		
 		assert result.rc == 255
 		assert result.stderr == 'error - interface "eth1" does not exist for host "backend-0-0"\n'
 
-	def test_add_host_bonded_comma_seperated_interfaces(self, host):
+	def test_comma_seperated_interfaces(self, host):
 		# Add a second interface to our backend
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0
@@ -140,7 +140,7 @@ class TestAddHostBonded:
 			}
 		]
 
-	def test_add_host_bonded_space_seperated_interfaces(self, host):
+	def test_space_seperated_interfaces(self, host):
 		# Add a second interface to our backend
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0
@@ -195,7 +195,7 @@ class TestAddHostBonded:
 			}
 		]
 
-	def test_add_host_bonded_default_with_options(self, host):
+	def test_default_with_options(self, host):
 		# Add a second interface to our backend
 		result = host.run('stack add host interface backend-0-0 interface=eth1 default=true')
 		assert result.rc == 0

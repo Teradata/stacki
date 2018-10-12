@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostMetadata:
-	def test_set_host_metadata_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host metadata')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostMetadata:
 			{host ...} {metadata=string}
 		''')
 
-	def test_set_host_metadata_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host metadata a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostMetadata:
 			{host ...} {metadata=string}
 		''')
 
-	def test_set_host_metadata_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host metadata frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestSetHostMetadata:
 			{host ...} {metadata=string}
 		''')
 
-	def test_set_host_metadata_single_host(self, host, add_host):
+	def test_single_host(self, host, add_host):
 		# Set the host metadata
 		result = host.run('stack set host metadata backend-0-0 metadata=test')
 		assert result.rc == 0
@@ -43,7 +43,7 @@ class TestSetHostMetadata:
 			'value': 'test'
 		}]
 
-	def test_set_host_metadata_multiple_hosts(self, host, add_host, host_os):
+	def test_multiple_hosts(self, host, add_host, host_os):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

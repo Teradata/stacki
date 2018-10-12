@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostAppliance:
-	def test_set_host_appliance_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host appliance')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostAppliance:
 			{host ...} {appliance=string}
 		''')
 
-	def test_set_host_appliance_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host appliance a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostAppliance:
 			{host ...} {appliance=string}
 		''')
 
-	def test_set_host_appliance_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host appliance frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestSetHostAppliance:
 			{host ...} {appliance=string}
 		''')
 
-	def test_set_host_appliance_invalid_appliance(self, host):
+	def test_invalid_appliance(self, host):
 		result = host.run('stack set host appliance frontend-0-0 appliance=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - appliance parameter not valid\n'
 
-	def test_set_host_appliance_single_host(self, host, add_appliance, add_host):
+	def test_single_host(self, host, add_appliance, add_host):
 		# Set the host appliance
 		result = host.run('stack set host appliance backend-0-0 appliance=test')
 		assert result.rc == 0
@@ -42,7 +42,7 @@ class TestSetHostAppliance:
 		assert result.rc == 0
 		assert json.loads(result.stdout)[0]['appliance'] == 'test'
 
-	def test_set_host_appliance_multiple_hosts(self, host, add_appliance, add_host):
+	def test_multiple_hosts(self, host, add_appliance, add_host):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

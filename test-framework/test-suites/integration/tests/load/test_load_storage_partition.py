@@ -1,6 +1,6 @@
 import pytest
 
-@pytest.mark.usefixtures("revert_database")
+
 class TestLoadStoragePartition:
 
 	# add other csv's here after they are fixed, or better yet make this a glob

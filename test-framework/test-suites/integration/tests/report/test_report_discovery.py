@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures("revert_discovery")
 class TestReportDiscovery:
-	def test_report_daemon_not_running(self, host):
+	def test_daemon_not_running(self, host):
 		"Test the output when the discovery daemon is not running"
 
 		# Make sure discovery isn't running
@@ -19,7 +19,7 @@ class TestReportDiscovery:
 		assert result.rc == 0
 		assert result.stdout == "Discovery daemon is stopped\n"
 
-	def test_report_daemon_running(self, host):
+	def test_daemon_running(self, host):
 		"Test the output when the discovery daemon is running"
 
 		# We gotta start discovery

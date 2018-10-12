@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostBox:
-	def test_set_host_box_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host box')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostBox:
 			{host ...} {box=string}
 		''')
 
-	def test_set_host_box_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host box a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostBox:
 			{host ...} {box=string}
 		''')
 
-	def test_set_host_box_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host box frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestSetHostBox:
 			{host ...} {box=string}
 		''')
 
-	def test_set_host_box_invalid_box(self, host):
+	def test_invalid_box(self, host):
 		result = host.run('stack set host box frontend-0-0 box=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -35,7 +35,7 @@ class TestSetHostBox:
 			{host ...} {box=string}
 		''')
 
-	def test_set_host_box_single_host(self, host, add_host, add_box, host_os):
+	def test_single_host(self, host, add_host, add_box, host_os):
 		# Set the host box
 		result = host.run('stack set host box backend-0-0 box=test')
 		assert result.rc == 0
@@ -56,7 +56,7 @@ class TestSetHostBox:
 			'rank': '0'
 		}]
 
-	def test_set_host_box_multiple_hosts(self, host, add_host, add_box, host_os):
+	def test_multiple_hosts(self, host, add_host, add_box, host_os):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

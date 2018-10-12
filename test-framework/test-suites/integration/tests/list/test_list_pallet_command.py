@@ -7,7 +7,7 @@ import pytest
 
 @pytest.mark.usefixtures('create_pallet_isos')
 class TestListPalletCommand:
-	def test_list_pallet_command_invalid_pallet(self, host):
+	def test_invalid_pallet(self, host):
 		result = host.run('stack list pallet command test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -15,7 +15,7 @@ class TestListPalletCommand:
 			[pallet ...] [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_list_pallet_command_no_args(self, host, host_os):
+	def test_no_args(self, host, host_os):
 		# List out the commands for all pallets
 		result = host.run('stack list pallet command output-format=json')
 		assert result.rc == 0
@@ -37,7 +37,7 @@ class TestListPalletCommand:
 		else:
 			assert commands['CentOS'] == ['']
 
-	def test_list_pallet_command_one_arg(self, host):
+	def test_one_arg(self, host):
 		# List out the commands for just the stacki pallet
 		result = host.run('stack list pallet command stacki output-format=json')
 		assert result.rc == 0
@@ -53,7 +53,7 @@ class TestListPalletCommand:
 		# That stacki pallet should have a ton of commands
 		assert len(commands['stacki']) > 200
 
-	def test_list_pallet_command_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		# Add two of the test pallets
 		result = host.run(f'stack add pallet /export/test-files/pallets/test_1-sles-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -80,7 +80,7 @@ class TestListPalletCommand:
 		assert commands['test_1-sles'] == ['']
 		assert commands['test_1-redhat'] == ['']
 
-	def test_list_pallet_command_missing_rollname(self, host):
+	def test_missing_rollname(self, host):
 		# Comment out the 'RollName' from the `list pallet command`
 		result = host.run(
 			"sed -i 's/^RollName/#RollName/' "

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestListBoxPallet:
-	def test_list_box_pallet_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack list box pallet test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestListBoxPallet:
 			[box ...]
 		''')
 
-	def test_list_box_pallet_no_args(self, host):
+	def test_no_args(self, host):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -28,7 +28,7 @@ class TestListBoxPallet:
 		boxes = [item['box'] for item in json.loads(result.stdout)]
 		assert boxes == ['default', 'default', 'test']
 
-	def test_list_box_pallet_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -45,7 +45,7 @@ class TestListBoxPallet:
 		boxes = [item['box'] for item in json.loads(result.stdout)]
 		assert boxes == ['test']
 
-	def test_list_box_pallet_multiple_args(self, host, host_os):
+	def test_multiple_args(self, host, host_os):
 		# Add a second box to be included
 		result = host.run('stack add box test')
 		assert result.rc == 0

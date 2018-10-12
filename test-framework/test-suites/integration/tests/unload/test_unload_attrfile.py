@@ -1,8 +1,4 @@
-import pytest
-
-
 class TestUnloadAttrfile:
-
 	"""
 	Test that unload does not fail
 	"""

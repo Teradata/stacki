@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures('create_pallet_isos')
 class TestEnablePallet:
-	def test_enable_pallet_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack enable pallet')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -14,7 +14,7 @@ class TestEnablePallet:
 			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_enable_pallet_invalid_pallet(self, host):
+	def test_invalid_pallet(self, host):
 		result = host.run('stack enable pallet test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -22,12 +22,12 @@ class TestEnablePallet:
 			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_enable_pallet_invalid_box(self, host):
+	def test_invalid_box(self, host):
 		result = host.run('stack enable pallet test box=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_enable_pallet_incompatable_os(self, host):
+	def test_incompatable_os(self, host):
 		# Add the pallet that is ubuntu
 		result = host.run('stack add pallet /export/test-files/pallets/test-different-os-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -37,7 +37,7 @@ class TestEnablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - incompatible pallet "test-different-os" with OS "ubuntu"\n'
 
-	def test_enable_pallet_default_box(self, host, host_os):
+	def test_default_box(self, host, host_os):
 		# Add our test pallet
 		result = host.run(f'stack add pallet /export/test-files/pallets/test_1-{host_os}-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -60,7 +60,7 @@ class TestEnablePallet:
 			}
 		]
 
-	def test_enable_pallet_with_box(self, host, host_os):
+	def test_with_box(self, host, host_os):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -87,7 +87,7 @@ class TestEnablePallet:
 			}
 		]
 
-	def test_enable_pallet_already_enabled(self, host, host_os):
+	def test_already_enabled(self, host, host_os):
 		# Add our test pallet
 		result = host.run(f'stack add pallet /export/test-files/pallets/test_1-{host_os}-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0

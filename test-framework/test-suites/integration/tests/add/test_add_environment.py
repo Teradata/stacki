@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddEnvironment:
-	def test_add_environment_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack add environment')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddEnvironment:
 			{environment}
 		''')
 
-	def test_add_environment_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		result = host.run('stack add environment test test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddEnvironment:
 			{environment}
 		''')
 
-	def test_add_environment(self, host):
+	def test_single_arg(self, host):
 		# Add the environment
 		result = host.run('stack add environment test')
 		assert result.rc == 0
@@ -32,8 +32,8 @@ class TestAddEnvironment:
 				"environment": "test"
 			}
 		]
-	
-	def test_add_environment_duplicate(self, host):
+
+	def test_duplicate(self, host):
 		# Add the environment
 		result = host.run('stack add environment test')
 		assert result.rc == 0

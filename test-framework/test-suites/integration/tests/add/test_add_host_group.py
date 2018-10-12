@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddHostGroup:
-	def test_add_host_group_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host group')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddHostGroup:
 			{host ...} {group=string}
 		''')
 	
-	def test_add_host_group_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host group a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddHostGroup:
 			{host ...} {group=string}
 		''')
 	
-	def test_add_host_group_no_group(self, host):
+	def test_no_group(self, host):
 		result = host.run('stack add host group frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestAddHostGroup:
 			{host ...} {group=string}
 		''')
 	
-	def test_add_host_group_invalid_group(self, host):
+	def test_invalid_group(self, host):
 		result = host.run('stack add host group frontend-0-0 group=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - group test does not exist\n'
 	
-	def test_add_host_group(self, host):
+	def test_single_arg(self, host):
 		# Create a few groups
 		result = host.run('stack add group test')
 		assert result.rc == 0
@@ -58,7 +58,7 @@ class TestAddHostGroup:
 			}
 		]
 	
-	def test_add_host_group_already_in_group(self, host):
+	def test_already_in_group(self, host):
 		# Create a test group
 		result = host.run('stack add group test')
 		assert result.rc == 0

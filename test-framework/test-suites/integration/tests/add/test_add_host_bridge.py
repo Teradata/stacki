@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures("add_host_with_interface")
 class TestAddHostBridge:
-	def test_add_host_bridge_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host bridge')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -14,7 +14,7 @@ class TestAddHostBridge:
 			{host} [interface=string] [name=string] [network=string]
 		''')
 	
-	def test_add_host_bridge_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host bridge a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -22,7 +22,7 @@ class TestAddHostBridge:
 			{host} [interface=string] [name=string] [network=string]
 		''')
 	
-	def test_add_host_bridge_no_name(self, host):
+	def test_no_name(self, host):
 		result = host.run('stack add host bridge backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -30,7 +30,7 @@ class TestAddHostBridge:
 			{host} [interface=string] [name=string] [network=string]
 		''')
 	
-	def test_add_host_bridge_no_interface_or_network(self, host):
+	def test_no_interface_or_network(self, host):
 		result = host.run('stack add host bridge backend-0-0 name=br0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -38,17 +38,17 @@ class TestAddHostBridge:
 			{host} [interface=string] [name=string] [network=string]
 		''')
 	
-	def test_add_host_bridge_invalid_interface(self, host):
+	def test_invalid_interface(self, host):
 		result = host.run('stack add host bridge backend-0-0 name=br0 interface=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - Could not find interface test configured on host backend-0-0\n'
 	
-	def test_add_host_bridge_invalid_network(self, host):
+	def test_invalid_network(self, host):
 		result = host.run('stack add host bridge backend-0-0 name=br0 network=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - Could not find network test on host backend-0-0\n'
 	
-	def test_add_host_bridge_only_interface(self, host):
+	def test_only_interface(self, host):
 		# Set the network for the eth0 interface on backend-0-0
 		result = host.run('stack set host interface network backend-0-0 interface=eth0 network=private')
 		assert result.rc == 0
@@ -89,7 +89,7 @@ class TestAddHostBridge:
 			}
 		]
 	
-	def test_add_host_bridge_only_network(self, host):
+	def test_only_network(self, host):
 		# Set the network for the eth0 interface on backend-0-0
 		result = host.run('stack set host interface network backend-0-0 interface=eth0 network=private')
 		assert result.rc == 0
@@ -130,7 +130,7 @@ class TestAddHostBridge:
 			}
 		]
 	
-	def test_add_host_bridge_interface_and_network(self, host):
+	def test_interface_and_network(self, host):
 		# Set the network for the eth0 interface on backend-0-0
 		result = host.run('stack set host interface network backend-0-0 interface=eth0 network=private')
 		assert result.rc == 0
@@ -171,7 +171,7 @@ class TestAddHostBridge:
 			}
 		]
 	
-	def test_add_host_bridge_default_with_ip(self, host):
+	def test_default_with_ip(self, host):
 		# Set the network for the eth0 interface on backend-0-0
 		result = host.run('stack set host interface network backend-0-0 interface=eth0 network=private')
 		assert result.rc == 0

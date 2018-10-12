@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostBootaction:
-	def test_set_host_bootaction_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host bootaction')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostBootaction:
 			{host ...} {action=string} {type=string} [sync=boolean]
 		''')
 
-	def test_set_host_bootaction_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host bootaction a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostBootaction:
 			{host ...} {action=string} {type=string} [sync=boolean]
 		''')
 
-	def test_set_host_bootaction_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host bootaction frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestSetHostBootaction:
 			{host ...} {action=string} {type=string} [sync=boolean]
 		''')
 
-	def test_set_host_bootaction_invalid_type(self, host):
+	def test_invalid_type(self, host):
 		result = host.run(
 			'stack set host bootaction frontend-0-0 action=memtest type=test'
 		)
@@ -37,14 +37,14 @@ class TestSetHostBootaction:
 			{host ...} {action=string} {type=string} [sync=boolean]
 		''')
 
-	def test_set_host_bootaction_invalid_action(self, host):
+	def test_invalid_action(self, host):
 		result = host.run(
 			'stack set host bootaction frontend-0-0 action=test type=os'
 		)
 		assert result.rc == 255
 		assert result.stderr == 'error - bootaction "test" does not exist\n'
 
-	def test_set_host_bootaction_single_host(self, host, add_host, host_os):
+	def test_single_host(self, host, add_host, host_os):
 		# Set the host install bootaction
 		result = host.run(
 			'stack set host bootaction backend-0-0 action=console type=install'
@@ -73,7 +73,7 @@ class TestSetHostBootaction:
 			'rank': '0'
 		}]
 
-	def test_set_host_bootaction_multiple_hosts(self, host, add_host, host_os):
+	def test_multiple_hosts(self, host, add_host, host_os):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

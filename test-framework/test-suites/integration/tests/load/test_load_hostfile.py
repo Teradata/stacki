@@ -4,7 +4,6 @@ import re
 import tempfile
 
 
-@pytest.mark.usefixtures("revert_database")
 class TestLoadHostfile:
 	"""Uses the listed test files within test-files/load and runs them through stack load hostfile."""
 
@@ -84,4 +83,3 @@ class TestLoadHostfile:
 		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_duplicate_interface.csv')
 		assert result.rc != 0
 		assert re.search(r'interface ".+" already specified for host', result.stderr) is not None
-

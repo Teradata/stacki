@@ -1,7 +1,7 @@
 import pytest
 
 class TestAddEnvironmentRoute:
-	def test_add_environment_route(self, host):
+	def test_single_arg(self, host):
 		result = host.run('stack add environment test')
 		assert result.rc == 0
 

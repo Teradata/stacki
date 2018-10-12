@@ -6,14 +6,14 @@ import wsclient
 
 
 class TestWSClient:
-	def test_wsclient_list_host(self, host):
+	def test_list_host(self, host):
 		"Test the output of wsclient list host"
 
 		if host.system_info.distribution == "centos":
 			host_os = "redhat"
 		else:
 			host_os = "sles"
-		
+
 		result = host.run("wsclient list host")
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
@@ -31,7 +31,7 @@ class TestWSClient:
 			}
 		]
 
-	def test_wsclient_remove_host_no_500(self, host, invalid_host):
+	def test_remove_host_no_500(self, host, invalid_host):
 		"test a string encoding bugfix, API should return API Error, not 500"
 		result = host.run(f"wsclient remove host {invalid_host}")
 		assert result.rc == 0 # I guess...
@@ -40,13 +40,13 @@ class TestWSClient:
 				"Output": ""
 			}
 
-	def test_wsclient_pylib_against_django(self, host, run_django_server):
+	def test_pylib_against_django(self, host, run_django_server):
 		"Test the wsclient pylib code against our own Django instance"
-		
+
 		# Pull in the credentials
 		with open('/root/stacki-ws.cred', 'r') as f:
 			credentials = json.load(f)
-		
+
 		# Create our client
 		client = wsclient.StackWSClient(
 			'127.0.0.1',
@@ -64,7 +64,7 @@ class TestWSClient:
 		# Get the expected output directly from the CLI
 		result = host.run("stack list network output-format=json")
 		assert result.rc == 0
-		
+
 		# Make sure we got the data we were expecting
 		assert networks == json.loads(result.stdout)
 
