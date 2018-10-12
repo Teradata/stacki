@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveOSFirewall:
-	def test_remove_os_firewall_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove os firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveOSFirewall:
 			{os ...} {rulename=string}
 		''')
 
-	def test_remove_os_firewall_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove os firewall test rulename=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveOSFirewall:
 			{os ...} {rulename=string}
 		''')
 
-	def test_remove_os_firewall_no_rulename(self, host):
+	def test_no_rulename(self, host):
 		result = host.run('stack remove os firewall sles')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,12 +27,12 @@ class TestRemoveOSFirewall:
 			{os ...} {rulename=string}
 		''')
 
-	def test_remove_os_firewall_invalid_rulename(self, host):
+	def test_invalid_rulename(self, host):
 		result = host.run('stack remove os firewall sles rulename=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule test does not exist for OS sles\n'
 
-	def test_remove_os_firewall_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Add a firewall rule
 		result = host.run(
 			'stack add os firewall sles service=1234 chain=INPUT '
@@ -68,7 +68,7 @@ class TestRemoveOSFirewall:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_remove_os_firewall_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		# Add a firewall rule for our first OS
 		result = host.run(
 			'stack add os firewall sles service=1234 chain=INPUT '

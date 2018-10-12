@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestListAppliance:
-	def test_list_appliance_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack list appliance test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestListAppliance:
 			[appliance ...]
 		''')
 
-	def test_list_appliance_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack list appliance output-format=json')
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
@@ -41,7 +41,7 @@ class TestListAppliance:
 			}
 		]
 
-	def test_list_appliance_one_arg(self, host):
+	def test_one_arg(self, host):
 		result = host.run('stack list appliance backend output-format=json')
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
@@ -51,7 +51,7 @@ class TestListAppliance:
 			}
 		]
 
-	def test_list_appliance_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		result = host.run('stack list appliance frontend backend output-format=json')
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [

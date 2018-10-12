@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveRoute:
-	def test_remove_route_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove route')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveRoute:
 			{address=string}
 		''')
 
-	def test_remove_route(self, host):
+	def test_one_arg(self, host):
 		# Add a global route
 		result = host.run('stack add route address=127.0.0.3 gateway=127.0.0.3')
 		assert result.rc == 0

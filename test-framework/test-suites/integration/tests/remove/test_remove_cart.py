@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveCart:
-	def test_remove_cart_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove cart')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveCart:
 			{cart ...}
 		''')
 
-	def test_remove_cart_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove cart test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveCart:
 			{cart ...}
 		''')
 
-	def test_remove_cart_single_arg(self, host, add_cart):
+	def test_single_arg(self, host, add_cart):
 		# Confirm the test cart is there
 		result = host.run('stack list cart test output-format=json')
 		assert result.rc == 0
@@ -48,7 +48,7 @@ class TestRemoveCart:
 		# Files should be gone too
 		assert not host.file('/export/stack/carts/test').exists
 
-	def test_remove_cart_multiple_args(self, host, add_cart):
+	def test_multiple_args(self, host, add_cart):
 		# Create a second cart
 		add_cart('foo')
 

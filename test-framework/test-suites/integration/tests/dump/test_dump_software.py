@@ -1,17 +1,16 @@
-import pytest
 import os
 from os import listdir
 from os.path import isfile, join
 import json
 import re
 
-class TestDumpSoftware:
 
+class TestDumpSoftware:
 	"""
 	Test that dumping the software data works properly
 	"""
 
-	def test_dump_software_pallet(self, host):
+	def test_pallet(self, host):
 
 		# test that dump software provides accurate pallet information
 		dirn = '/export/test-files/dump/'
@@ -28,7 +27,7 @@ class TestDumpSoftware:
 		# determine the name of the new pallet iso
 		cwd = os.getcwd()
 		files = os.listdir(cwd)
-		pattern = re.compile('minimal-.+\.iso')
+		pattern = re.compile(r'minimal-.+\.iso')
 		try:
 			pallet_iso_name = list(filter(pattern.match,files))[0]
 		except IndexError:
@@ -51,7 +50,7 @@ class TestDumpSoftware:
 				check = True
 		assert check == True
 
-	def test_dump_software_box(self, host):
+	def test_box(self, host):
 
 		# test that dump software provides accurate box information
 		# add a test box to the database
@@ -70,7 +69,7 @@ class TestDumpSoftware:
 				check = True
 		assert check == True
 
-	def test_dump_software_cart(self, host):
+	def test_cart(self, host):
 
 		# test that dump software provides accurate cart information
 		# add a test cart to the database

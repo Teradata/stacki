@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddGroup:
-	def test_add_group_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack add group')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddGroup:
 			{group}
 		''')
 
-	def test_add_group_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		result = host.run('stack add group test test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddGroup:
 			{group}
 		''')
 
-	def test_add_group(self, host):
+	def test_single_arg(self, host):
 		# Add the group
 		result = host.run('stack add group test')
 		assert result.rc == 0
@@ -33,12 +33,12 @@ class TestAddGroup:
 				"hosts": ""
 			}
 		]
-	
-	def test_add_group_duplicate(self, host):
+
+	def test_duplicate(self, host):
 		# Add the group
 		result = host.run('stack add group test')
 		assert result.rc == 0
-		
+
 		# Add the group again
 		result = host.run('stack add group test')
 		assert result.rc == 255

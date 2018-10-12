@@ -7,7 +7,7 @@ import pytest
 
 @pytest.mark.usefixtures("revert_discovery")
 class TestDisableDiscovery:
-	def test_disable_daemon_not_running(self, host):
+	def test_daemon_not_running(self, host):
 		"Test the discovery daemon is not started when not running"
 
 		# Confirm the daemon isn't running
@@ -24,7 +24,7 @@ class TestDisableDiscovery:
 		# Confirm no log messages got written out
 		assert host.file("/var/log/stack-discovery.log").content_string == ""
 
-	def test_disable_daemon_running(self, host):
+	def test_daemon_running(self, host):
 		"""
 		Test the discovery daemon enable command works when the
 		daemon is running

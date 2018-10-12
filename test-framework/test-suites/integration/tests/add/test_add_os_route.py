@@ -2,9 +2,7 @@ import pytest
 import json
 
 class TestAddOsRoute:
-
-	def test_add_os_route(self, host):
-
+	def test_single_arg(self, host):
 		result = host.run(f'stack add os route redhat address=0.0.0.0 gateway=private netmask=255.255.255.0 interface=eth1')
 		assert result.rc == 0
 

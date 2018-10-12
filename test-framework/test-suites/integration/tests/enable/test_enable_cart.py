@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestEnableCart:
-	def test_enable_cart_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack enable cart')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestEnableCart:
 			{cart ...} [box=string]
 		''')
 
-	def test_enable_cart_invalid_cart(self, host):
+	def test_invalid_cart(self, host):
 		result = host.run('stack enable cart test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,12 +19,12 @@ class TestEnableCart:
 			{cart ...} [box=string]
 		''')
 
-	def test_enable_cart_invalid_box(self, host):
+	def test_invalid_box(self, host):
 		result = host.run('stack enable cart test box=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_enable_cart_default_box(self, host):
+	def test_default_box(self, host):
 		# Add our test cart
 		result = host.run('stack add cart test')
 		assert result.rc == 0
@@ -43,7 +43,7 @@ class TestEnableCart:
 			}
 		]
 
-	def test_enable_cart_with_box(self, host):
+	def test_with_box(self, host):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -66,7 +66,7 @@ class TestEnableCart:
 			}
 		]
 
-	def test_enable_cart_already_enabled(self, host):
+	def test_already_enabled(self, host):
 		# Add our test cart
 		result = host.run('stack add cart test')
 		assert result.rc == 0

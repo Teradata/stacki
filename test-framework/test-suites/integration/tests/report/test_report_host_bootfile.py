@@ -1,6 +1,3 @@
-import pytest
-
-@pytest.mark.usefixtures('revert_database')
 class TestReportHostBootfile:
 	def test_on_fresh_install(self, host):
 		result = host.run('stack report host bootfile')
@@ -46,7 +43,6 @@ class TestReportHostBootfile:
 		# Output of Bootaction OS and Intall are different
 		assert result_action_os != result_action_install
 
-
 	def test_for_host_with_no_interface(self, host):
 		# Setup for a host without a interface (host)
 		result = host.run('stack add host backend-1-1')
@@ -79,7 +75,6 @@ class TestReportHostBootfile:
 		assert result_specific.rc == 0
 		assert result.stdout == result_specific.stdout
 		assert result.stdout == ""
-
 
 	def test_for_host_with_interface_but_no_IP_or_network(self, host):
 		# Setup for a host with an interface but no IP or network (host, interface)
@@ -116,7 +111,6 @@ class TestReportHostBootfile:
 		assert result.stdout == result_specific.stdout
 		assert result.stdout == ""
 
-
 	def test_for_combination_of_no_host_interface_and_full_config(self, host):
 		# Setup for a host without a interface (host) and Bootaction set to OS
 		result = host.run('stack add host backend-2-2')
@@ -140,7 +134,6 @@ class TestReportHostBootfile:
 		result_specific = host.run('stack report host bootfile backend-1-1')
 		assert result_specific.rc == 0
 		assert result.stdout == result_specific.stdout
-
 
 	def test_for_combination_of_host_with__no_IP_or_network_and_full_config(self, host):
 		# Setup for a host with an interface but no IP or network (host, interface) and Bootaction set to Install
@@ -167,5 +160,3 @@ class TestReportHostBootfile:
 		result_specific = host.run('stack report host bootfile backend-1-1')
 		assert result_specific.rc == 0
 		assert result.stdout == result_specific.stdout
-
-

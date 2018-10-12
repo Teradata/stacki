@@ -38,10 +38,10 @@ class DiscoveryListener:
 
 		return messages
 
-		
+
 @pytest.mark.usefixtures("revert_discovery")
 class TestEnableDiscovery:
-	def test_enable_daemon_not_running(self, host):
+	def test_daemon_not_running(self, host):
 		"Test the discovery daemon is started when not running"
 
 		# Confirm the daemon isn't running
@@ -54,7 +54,7 @@ class TestEnableDiscovery:
 
 		# Confirm it is running now
 		assert len(host.process.filter(comm="stack")) == 1
-		
+
 		# Stop discovery to put the system back to the initial state
 		result = host.run("stack disable discovery")
 		assert result.rc == 0
@@ -68,8 +68,8 @@ class TestEnableDiscovery:
 		assert len(lines) == 2
 		assert "INFO: discovery daemon started" in lines[0]
 		assert "INFO: discovery daemon stopped" in lines[1]
-		
-	def test_enable_daemon_already_running(self, host):
+
+	def test_daemon_already_running(self, host):
 		"""
 		Test the discovery daemon enable command works when the
 		daemon is already running
@@ -118,7 +118,7 @@ class TestEnableDiscovery:
 		# Confirm only the frontend is in the database
 		result = host.run("stack list host output-format=json")
 		assert result.rc == 0
-		
+
 		host_data = json.loads(result.stdout)
 		assert len(host_data) == 1
 		assert host_data[0]['appliance'] == "frontend"
@@ -134,7 +134,7 @@ class TestEnableDiscovery:
 
 		# Set up a listener to capture discovery messages
 		listener = DiscoveryListener()
-		
+
 		# Simulate some DHCP requests
 		with open("/var/log/messages", "a") as f:
 			# The first node's initial DHCP request
@@ -152,14 +152,14 @@ class TestEnableDiscovery:
 			# A few more DHCP requests, because why not?
 			f.write("DHCPDISCOVER from 52:54:00:00:00:03 via eth1\n")
 			f.write("DHCPDISCOVER from 52:54:00:00:00:04 via eth1\n")
-		
+
 		# Listen for the add messages on the queue
 		messages = listener.listen(2, 60)
-		
+
 		# Make sure we got 2 add messages and they are what we expect
 		assert len(messages) == 2
 		assert messages[0].getPayload() == {
-			'type': "add", 
+			'type': "add",
 			'interface': "eth1",
 			'mac_address': "52:54:00:00:00:03",
 			'ip_address': "192.168.0.1",
@@ -180,7 +180,7 @@ class TestEnableDiscovery:
 		else:
 			kickstart_log = "/var/log/apache2/ssl_access_log"
 			os_type = "sles"
-		
+
 		with open(kickstart_log, "a") as f:
 			for ip in ("192.168.0.1", "192.168.0.3"):
 				f.write(
@@ -192,7 +192,7 @@ class TestEnableDiscovery:
 		# Listen for the kickstart messages on the queue
 		messages = listener.listen(2, 60)
 
-		# Make sure we got 2 kickstart messages and they are 
+		# Make sure we got 2 kickstart messages and they are
 		# what we expect
 		assert len(messages) == 2
 		assert messages[0].getPayload() == {
@@ -205,12 +205,12 @@ class TestEnableDiscovery:
 			'ip_address': "192.168.0.3",
 			'status_code': 200
 		}
-		
+
 		# Stop discovery to put the system back to the initial state
 		result = host.run("stack disable discovery")
 		assert result.rc == 0
 		assert result.stdout == "Discovery daemon has stopped\n"
-	
+
 		# Confirm the log messages got written out
 		log_file = host.file("/var/log/stack-discovery.log")
 		assert log_file.exists
@@ -220,7 +220,7 @@ class TestEnableDiscovery:
 			line[20:]
 			for line in log_file.content_string.strip().split('\n')
 		]
-		
+
 		assert lines == [
 			"INFO: discovery daemon started",
 			"INFO: detected a dhcp request: 52:54:00:00:00:03 eth1",
@@ -239,11 +239,11 @@ class TestEnableDiscovery:
 		# Check that the two backends were added correctly
 		result = host.run("stack list host output-format=json")
 		assert result.rc == 0
-		
+
 		host_data = json.loads(result.stdout)
 		assert len(host_data) == 3
 		assert host_data[0]['appliance'] == "frontend"
-		
+
 		assert host_data[1] == {
 			"host": "backend-0-0",
 			"rack": "0",
@@ -256,7 +256,7 @@ class TestEnableDiscovery:
 			"installaction": "default",
 			"comment": None
 		}
-	   
+
 		assert host_data[2] == {
 			"host": "backend-0-1",
 			"rack": "0",

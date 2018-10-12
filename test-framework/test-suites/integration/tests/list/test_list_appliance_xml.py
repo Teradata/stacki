@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestListApplianceXML:
-	def test_list_appliance__xml_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack list appliance xml test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestListApplianceXML:
 			[appliance ...]
 		''')
 
-	def test_list_appliance_xml_no_args(self, host):
+	def test_no_args(self, host):
 		# Check the command works and returned a bunch of lines
 		result = host.run('stack list appliance xml')
 		assert result.rc == 0
@@ -27,7 +27,7 @@ class TestListApplianceXML:
 		assert 'backend' in appliances
 		assert 'frontend' in appliances
 
-	def test_list_appliance_xml_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Check the command works and returned a bunch of lines
 		result = host.run('stack list appliance xml backend')
 		assert result.rc == 0
@@ -42,7 +42,7 @@ class TestListApplianceXML:
 		# Make sure only the backend appliance had output
 		assert appliances == {'backend'}
 
-	def test_list_appliance_xml_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		# Check the command works and returned a bunch of lines
 		result = host.run('stack list appliance xml frontend backend')
 		assert result.rc == 0

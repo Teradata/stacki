@@ -1,13 +1,9 @@
-import pytest
-
-
 class TestAddStorageController:
-
 	"""
 	Test that we can successfully add an os level storage controller
 	"""
 
-	def test_add_storage_controller(self, host):
+	def test_single_arg(self, host):
 		#this should work and have no errors
 		results = host.run('stack add storage controller redhat adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
 		assert results.rc == 0

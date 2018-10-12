@@ -5,7 +5,7 @@ In the test framework, integration tests are for testing our code at the level o
 In between tests, the following clean up is performed:
 1. The MySQL database is rolled back to the state before tests were run.
 2. Any file system changes in the "/etc", "/export/stack", and
-"/tftpboot" directories are reverted. 
+"/tftpboot" directories are reverted.
 
 These actions are performed by the `revert_database` and `revert_filesystem` fixtures, defined in `test/conftest.py`. These fixures are set up to automatically run via the `tests/pytest.ini` file, so you do not need to include them in your testing code.
 
@@ -13,11 +13,27 @@ These actions are performed by the `revert_database` and `revert_filesystem` fix
 
 ## Test Organization and Structure
 
-The tests themselves live in the `tests` directory, and are organized in subfolders based on the stack "verb" (EX: list, load, etc). The PyTest files are named ofter the the command run, for example `stack list host` would be in file `test_list_host.py`. 
+The tests themselves live in the `tests` directory, and are organized in subfolders based on the stack "verb" (EX: add, list, remove, etc). The PyTest files are named after the command run, for example `stack add group` would be in file `test_add_group.py`.
 
 There are empty test files for all the stack commands, at the time I ran `generate-test-stubs.sh`. You can re-run that script safely to generate blank test file stubs, if new stack commands are added.
 
-The tests themselves should be organized in a class named after the command, for example `stack list host` should have a class named "TestListHost". The test functions exist in that class and began with "test_". See [tests/report/test_report_discovery.py](tests/report/test_report_discovery.py) for an example of the test class structure.
+The tests themselves should be organized in a class named after the command, for example `stack add group` should have a class named "TestAddGroup". The test functions exist in that class and began with "test_".
+
+An example test class structure would look like (function bodies excluded):
+```
+class TestAddGroup:
+	def test_no_args(self, host):
+		...
+
+	def test_single_arg(self, host):
+		...
+
+	def test_multiple_args(self, host):
+		...
+
+	def test_duplicate(self, host):
+		...
+```
 
 As you develop tests, if you find yourself doing the same set up or tear down code repeatedly, you can consolidate that code into a PyTest fixture. Place your new fixture in [tests/conftest.py](tests/conftest.py) and it will be automatically loaded into PyTest.
 
@@ -41,7 +57,7 @@ Here is the workflow I use when developing new tests:
 
 ## Running Tests On An Existing Frontend
 
-While I feel that developing tests in a clean and known VM environment is safest, it is possible to run the tests on an existing frontend. 
+While I feel that developing tests in a clean and known VM environment is safest, it is possible to run the tests on an existing frontend.
 
 The tests will obviously be ran against the frontend code and database, so might fail if the data in the database doesn't match a freshly barnacled system. It may also completely light your server on fire; you get to keep the ashes.
 
@@ -49,4 +65,4 @@ The tests will obviously be ran against the frontend code and database, so might
 
 2. Copy the test-files directory at `stacki/test-framework/test-suites/integration/test-files` to the frontend at `/export/test-files`
 
-3. Logged into the frontend as root, run `pytest /export/tests` to run all the integration tests. You can pass `pytest` a specific test file if you just want to run the tests within, or even a specific test in a given file. 
+3. Logged into the frontend as root, run `pytest /export/tests` to run all the integration tests. You can pass `pytest` a specific test file if you just want to run the tests within, or even a specific test in a given file.

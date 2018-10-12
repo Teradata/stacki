@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddApplianceRoute:
-	def test_add_appliance_route_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack add appliance route')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddApplianceRoute:
 			{appliance} {address=string} {gateway=string} [netmask=string]
 		''')
 	
-	def test_add_appliance_route_no_appliance(self, host):
+	def test_no_appliance(self, host):
 		result = host.run('stack add appliance route address=192.168.0.2 gateway=192.168.0.1')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddApplianceRoute:
 			{appliance} {address=string} {gateway=string} [netmask=string]
 		''')
 	
-	def test_add_appliance_route_with_subnet(self, host):
+	def test_with_subnet(self, host):
 		# Add the route
 		result = host.run('stack add appliance route backend address=192.168.0.2 gateway=private')
 		assert result.rc == 0
@@ -38,7 +38,7 @@ class TestAddApplianceRoute:
 			}
 		]
 
-	def test_add_appliance_route_with_gateway(self, host):
+	def test_with_gateway(self, host):
 		# Add the route
 		result = host.run('stack add appliance route backend address=192.168.0.2 gateway=192.168.0.1 netmask=255.255.255.0')
 		assert result.rc == 0
@@ -57,7 +57,7 @@ class TestAddApplianceRoute:
 			}
 		]
 	
-	def test_add_appliance_route_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add the route
 		result = host.run('stack add appliance route backend address=192.168.0.2 gateway=192.168.0.1 netmask=255.255.255.0')
 		assert result.rc == 0

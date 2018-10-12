@@ -5,7 +5,7 @@ from textwrap import dedent
 import jmespath
 
 class TestAddFirewall:
-	def test_add_firewall_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack add firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -13,7 +13,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 
-	def test_add_firewall_no_service(self, host):
+	def test_no_service(self, host):
 		result = host.run(
 			'stack add firewall chain=INPUT action=ACCEPT protocol=TCP '
 			'network=private'
@@ -24,7 +24,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall_invalid_service_range(self, host):
+	def test_invalid_service_range(self, host):
 		result = host.run(
 			'stack add firewall service=1:2:3 chain=INPUT action=ACCEPT '
 			'protocol=TCP network=private'
@@ -32,7 +32,7 @@ class TestAddFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - port range "1:2:3" is invalid. it must be "integer:integer"\n'
 	
-	def test_add_firewall_invalid_service_port(self, host):
+	def test_invalid_service_port(self, host):
 		result = host.run(
 			'stack add firewall service=0foo chain=INPUT action=ACCEPT '
 			'protocol=TCP network=private'
@@ -40,7 +40,7 @@ class TestAddFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - port specification "0foo" is invalid. it must be "integer" or "integer:integer"\n'
 	
-	def test_add_firewall_no_chain(self, host):
+	def test_no_chain(self, host):
 		result = host.run(
 			'stack add firewall service=1234 action=ACCEPT protocol=TCP '
 			'network=private'
@@ -51,7 +51,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall_no_action(self, host):
+	def test_no_action(self, host):
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT protocol=TCP '
 			'network=private'
@@ -62,7 +62,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall_no_protocol(self, host):
+	def test_no_protocol(self, host):
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT action=ACCEPT '
 			'network=private'
@@ -73,7 +73,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall_no_networks(self, host):
+	def test_no_networks(self, host):
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT action=ACCEPT '
 			'protocol=TCP'
@@ -84,7 +84,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall_invalid_table(self, host):
+	def test_invalid_table(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall table=foo service=1234 chain=INPUT '
@@ -96,7 +96,7 @@ class TestAddFirewall:
 			{action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_firewall(self, host):
+	def test_single_arg(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -124,7 +124,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_firewall_network_all(self, host):
+	def test_network_all(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -152,7 +152,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_firewall_invalid_network(self, host):
+	def test_invalid_network(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -161,7 +161,7 @@ class TestAddFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
 
-	def test_add_firewall_network_empty_string(self, host):
+	def test_network_empty_string(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT action=ACCEPT '
@@ -189,7 +189,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_firewall_output_network_all(self, host):
+	def test_output_network_all(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -217,7 +217,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_firewall_output_network_existing(self, host):
+	def test_output_network_existing(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -245,7 +245,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_firewall_invalid_output_network(self, host):
+	def test_invalid_output_network(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -254,7 +254,7 @@ class TestAddFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - output-network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
 
-	def test_add_firewall_output_network_empty_string(self, host):
+	def test_output_network_empty_string(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT action=ACCEPT '
@@ -282,7 +282,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 		
-	def test_add_firewall_all_parameters(self, host):
+	def test_all_parameters(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall table=nat service=1234 '
@@ -312,7 +312,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_firewall_empty_parameters(self, host):
+	def test_empty_parameters(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall table=nat service=1234 '
@@ -342,7 +342,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_firewall_no_rulename(self, host):
+	def test_no_rulename(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -377,7 +377,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_firewall_empty_rulename(self, host):
+	def test_empty_rulename(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '
@@ -412,7 +412,7 @@ class TestAddFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_firewall_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '

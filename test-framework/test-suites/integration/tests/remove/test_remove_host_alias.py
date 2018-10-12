@@ -3,12 +3,12 @@ from textwrap import dedent
 
 
 class TestRemoveHostAlias:
-	def test_remove_host_alias_invalid_host(self, host):
+	def test_invalid_host(self, host):
 		result = host.run('stack remove host alias test')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot resolve host "test"\n'
 
-	def test_remove_host_alias_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove host alias')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -16,7 +16,7 @@ class TestRemoveHostAlias:
 			{host} [alias=string] [interface=string]
 		''')
 
-	def test_remove_host_alias_no_host_matches(self, host):
+	def test_no_host_matches(self, host):
 		result = host.run('stack remove host alias a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -24,7 +24,7 @@ class TestRemoveHostAlias:
 			{host} [alias=string] [interface=string]
 		''')
 
-	def test_remove_host_alias_multiple_args(self, host, add_host_with_interface):
+	def test_multiple_args(self, host, add_host_with_interface):
 		result = host.run('stack remove host alias frontend-0-0 backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -32,7 +32,7 @@ class TestRemoveHostAlias:
 			{host} [alias=string] [interface=string]
 		''')
 
-	def test_remove_host_alias_no_parameters(self, host, add_host_with_interface):
+	def test_no_parameters(self, host, add_host_with_interface):
 		# Add a few aliases for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -80,7 +80,7 @@ class TestRemoveHostAlias:
 			}
 		]
 
-	def test_remove_host_alias_with_alias(self, host, add_host_with_interface):
+	def test_with_alias(self, host, add_host_with_interface):
 		# Add a few aliases for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -133,7 +133,7 @@ class TestRemoveHostAlias:
 			}
 		]
 
-	def test_remove_host_alias_with_interface(self, host, add_host_with_interface):
+	def test_with_interface(self, host, add_host_with_interface):
 		# Add an alias for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -191,7 +191,7 @@ class TestRemoveHostAlias:
 			}
 		]
 
-	def test_remove_host_alias_with_alias_and_interface(self, host, add_host_with_interface):
+	def test_with_alias_and_interface(self, host, add_host_with_interface):
 		# Add an alias for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0

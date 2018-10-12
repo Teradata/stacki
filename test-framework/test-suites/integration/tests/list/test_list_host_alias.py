@@ -3,12 +3,12 @@ from textwrap import dedent
 
 
 class TestListHostAlias:
-	def test_list_host_alias_invalid(self, host, invalid_host):
+	def test_invalid(self, host, invalid_host):
 		result = host.run(f'stack list host alias {invalid_host}')
 		assert result.rc == 255
 		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
-	def test_list_host_alias_usage_error(self, host):
+	def test_usage_error(self, host):
 		result = host.run('stack list host alias host=frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -16,7 +16,7 @@ class TestListHostAlias:
 			[host ...] [interface=string]
 		''')
 
-	def test_list_host_alias_no_args(self, host, add_host_with_interface):
+	def test_no_args(self, host, add_host_with_interface):
 		# Add a few aliases
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -40,7 +40,7 @@ class TestListHostAlias:
 			}
 		]
 
-	def test_list_host_alias_one_arg(self, host, add_host_with_interface):
+	def test_one_arg(self, host, add_host_with_interface):
 		# Add a few aliases for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -68,7 +68,7 @@ class TestListHostAlias:
 			}
 		]
 
-	def test_list_host_alias_multiple_args(self, host, add_host_with_interface):
+	def test_multiple_args(self, host, add_host_with_interface):
 		# Add a few aliases for the frontend
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0
@@ -119,7 +119,7 @@ class TestListHostAlias:
 			}
 		]
 
-	def test_list_host_alias_with_interface(self, host, add_host_with_interface):
+	def test_with_interface(self, host, add_host_with_interface):
 		# Add an alias for the frontend, which should be skipped
 		result = host.run('stack add host alias frontend-0-0 alias=test-0 interface=eth1')
 		assert result.rc == 0

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestListBox:
-	def test_list_box_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack list box test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestListBox:
 			[box ...]
 		''')
 
-	def test_list_box_no_args(self, host, host_os):
+	def test_no_args(self, host, host_os):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -27,7 +27,7 @@ class TestListBox:
 			'test': host_os
 		}
 
-	def test_list_box_one_arg(self, host, host_os):
+	def test_one_arg(self, host, host_os):
 		# Add a second box so we can make sure it is skipped
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -42,7 +42,7 @@ class TestListBox:
 			'test': host_os
 		}
 
-	def test_list_box_multiple_args(self, host, host_os):
+	def test_multiple_args(self, host, host_os):
 		# Add a second box to be included
 		result = host.run('stack add box test')
 		assert result.rc == 0

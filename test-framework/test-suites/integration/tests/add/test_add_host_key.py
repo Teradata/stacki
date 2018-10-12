@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddHostKey:
-	def test_add_host_key_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host key')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddHostKey:
 			{host} [key=string]
 		''')
 	
-	def test_add_host_key_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host key a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddHostKey:
 			{host} [key=string]
 		''')
 	
-	def test_add_host_key_multiple_hosts(self, host, add_host):
+	def test_multiple_hosts(self, host, add_host):
 		result = host.run('stack add host key frontend-0-0 backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestAddHostKey:
 			{host} [key=string]
 		''')
 	
-	def test_add_host_key_no_key(self, host):
+	def test_no_key(self, host):
 		result = host.run('stack add host key frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -35,7 +35,7 @@ class TestAddHostKey:
 			{host} [key=string]
 		''')
 	
-	def test_add_host_key_direct(self, host):
+	def test_direct(self, host):
 		# Add the key
 		result = host.run('stack add host key frontend-0-0 key=test_key')
 		assert result.rc == 0
@@ -51,7 +51,7 @@ class TestAddHostKey:
 			}
 		]
 	
-	def test_add_host_key_from_file(self, host):
+	def test_from_file(self, host):
 		# Add the key
 		result = host.run('stack add host key frontend-0-0 '
 			'key=/export/test-files/add/add_host_key.txt')
@@ -68,7 +68,7 @@ class TestAddHostKey:
 			}
 		]
 	
-	def test_add_host_key_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add the key
 		result = host.run('stack add host key frontend-0-0 key=test_key')
 		assert result.rc == 0

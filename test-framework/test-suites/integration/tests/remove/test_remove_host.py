@@ -3,12 +3,12 @@ from textwrap import dedent
 
 
 class TestRemoveHost:
-	def test_remove_host_invalid_host(self, host):
+	def test_invalid_host(self, host):
 		result = host.run('stack remove host test')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot resolve host "test"\n'
 
-	def test_remove_host_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove host')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -16,7 +16,7 @@ class TestRemoveHost:
 			{host ...}
 		''')
 
-	def test_remove_host_no_host_matches(self, host):
+	def test_no_host_matches(self, host):
 		result = host.run('stack remove host a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -24,12 +24,12 @@ class TestRemoveHost:
 			{host ...}
 		''')
 
-	def test_remove_host_self(self, host):
+	def test_remove_self(self, host):
 		result = host.run('stack remove host frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove "frontend-0-0"\n'
 
-	def test_remove_host_single_arg(self, host, add_host_with_interface, add_group, host_os):
+	def test_single_arg(self, host, add_host_with_interface, add_group, host_os):
 		# Attach a bunch of data to the backend
 		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
@@ -74,7 +74,7 @@ class TestRemoveHost:
 			}
 		]
 
-	def test_remove_host_multiple_args(self, host, add_host_with_interface, add_group, host_os):
+	def test_multiple_args(self, host, add_host_with_interface, add_group, host_os):
 		# Attach a bunch of data to the backend
 		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
