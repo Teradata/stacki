@@ -6,6 +6,8 @@
 
 import stack.commands
 import stack.mq
+import socket
+import json
 from stack.exception import ArgRequired, ParamError
 
 
