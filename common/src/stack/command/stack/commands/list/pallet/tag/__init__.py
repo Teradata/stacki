@@ -65,10 +65,11 @@ class Command(stack.commands.list.command,
 			if pallet.id not in tags:
 				continue
 			for key in sorted(tags[pallet.id].keys()):
+				value = tags[pallet.id][key]
 				self.addOutput(pallet.name, 
 					       (pallet.version, pallet.rel, 
 						pallet.arch, pallet.os, 
-					        tname, tvalue))
+					        key, value))
 
 		self.endOutput(('pallet', 'version', 'release', 'arch', 'os', 
 				'tag', 'value'))
