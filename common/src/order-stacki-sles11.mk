@@ -14,4 +14,5 @@ SRCDIRS=stack/build  \
 	stack/mq  \
 	stack/storage-config  \
 	stack/uefi-boot-method  \
-	foundation/zeromq 
+	foundation/zeromq \
+	stack/checklist
