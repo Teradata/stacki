@@ -1,0 +1,60 @@
+<stack:file stack:name="/etc/dhcp/dhcpd.conf">
+# 
+# WARNING: This file is generated do not edit.
+# 
+# Contents written by Stacki.
+# 
+
+
+ddns-update-style none;
+
+option space PXE;
+option PXE.mtftp-ip    code 1 = ip-address;
+option PXE.mtftp-cport code 2 = unsigned integer 16;
+option PXE.mtftp-sport code 3 = unsigned integer 16;
+option PXE.mtftp-tmout code 4 = unsigned integer 8;
+option PXE.mtftp-delay code 5 = unsigned integer 8;
+
+option client-arch code 93 = unsigned integer 16;
+
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+	default-lease-time		1200;
+	max-lease-time			1200;
+	option routers			192.168.0.1;
+	option subnet-mask		255.255.255.0;
+	option broadcast-address	192.168.0.255;
+}
+
+
+subnet 10.0.0.0 netmask 255.255.255.0 {
+	default-lease-time		1200;
+	max-lease-time			1200;
+	option routers			10.0.0.1;
+	option subnet-mask		255.255.255.0;
+	option broadcast-address	10.0.0.255;
+}
+
+
+host frontend-0-0.private.eth1 {
+	option host-name	"frontend-0-0";
+	hardware ethernet	00:11:22:33:44:55;
+	fixed-address		192.168.0.2;
+	if option client-arch = 00:07 {
+		filename "uefi/shim.efi";
+	} else {
+		filename "pxelinux.0";
+	}
+	server-name		"192.168.0.2";
+	next-server		192.168.0.2;
+}
+</stack:file>
+<stack:file stack:name="/etc/sysconfig/dhcpd">
+# 
+# WARNING: This file is generated do not edit.
+# 
+# Contents written by Stacki.
+# 
+
+DHCPD_INTERFACE="eth1"
+</stack:file>

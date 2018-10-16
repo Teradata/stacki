@@ -43,6 +43,10 @@ class Implementation(stack.commands.Implementation):
 				      'interface has an IP but no network')
 				continue
 
+			# If we don't have an interface, we don't need a config file
+			if not interface:
+				continue
+
 			if netname and ip and netmask:
 				net       = ipaddress.IPv4Network('%s/%s' % (ip, netmask), strict=False)
 				broadcast = str(net.broadcast_address)
@@ -69,9 +73,6 @@ class Implementation(stack.commands.Implementation):
 					udev_output += 'ATTR{type}=="1", '
 					udev_output += 'KERNEL=="eth*", '
 					udev_output += 'NAME="%s"\n\n' % interface
-
-			if not interface:
-				continue
 
 			if interface == 'ipmi':
 				ipmisetup = '/tmp/ipmisetup'

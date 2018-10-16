@@ -466,8 +466,52 @@ def run_file_server():
 def host_os(host):
 	if host.file('/etc/SuSE-release').exists:
 		return 'sles'
-	
+
 	return 'redhat'
+
+@pytest.fixture
+def fake_os_sles(host):
+	"""
+	Trick Stacki into always seeing the OS (self.os) as SLES
+	"""
+
+	already_sles = host.file('/etc/SuSE-release').exists
+
+	# Move the release file if needed
+	if not already_sles:
+		result = host.run('mv /etc/centos-release /etc/SuSE-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake SLES OS')
+
+	yield
+
+	# Put things back the way they were
+	if not already_sles:
+		result = host.run('mv /etc/SuSE-release /etc/centos-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake SLES OS')
+
+@pytest.fixture
+def fake_os_redhat(host):
+	"""
+	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
+	"""
+
+	already_redhat = host.file('/etc/centos-release').exists
+
+	# Move the release file if needed
+	if not already_redhat:
+		result = host.run('mv /etc/SuSE-release /etc/centos-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake Redhat OS')
+
+	yield
+
+	# Put things back the way they were
+	if not already_redhat:
+		result = host.run('mv /etc/centos-release /etc/SuSE-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake Redhat OS')
 
 @pytest.fixture
 def rmtree(tmpdir):

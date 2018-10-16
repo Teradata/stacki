@@ -1,0 +1,35 @@
+<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Accept all frontend traffic on private network - Intrinsic rule
+-A INPUT -j ACCEPT -s 192.168.0.2 -i eth0
+
+# Accept all traffic over loopback interface
+-A INPUT -j ACCEPT -i lo
+
+# Accept all ssh traffic on all networks
+-A INPUT -j ACCEPT -m state --state NEW -p tcp --dport ssh
+
+# Accept related and established connections
+-A INPUT -j ACCEPT -m state --state RELATED,ESTABLISHED
+
+# Accept all traffic on private network
+-A INPUT -j ACCEPT -i eth0
+
+# ACCEPT rule for test network
+-A FORWARD -j ACCEPT -i eth1
+
+# Block all traffic
+-A INPUT -j REJECT
+
+COMMIT
+
+*nat
+# MASQUERADE rule
+-A POSTROUTING -j MASQUERADE -o eth0
+
+COMMIT
+</stack:file>

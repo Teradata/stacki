@@ -24,7 +24,6 @@ class Implementation(stack.commands.Implementation):
 			mac = row['mac']
 			ip  = row['ip']
 			device = row['interface']
-			netname = row['name']
 			netmask = row['mask']
 			subnet = row['network']
 			module = row['module']
@@ -34,9 +33,13 @@ class Implementation(stack.commands.Implementation):
 			vlanid	= row['vlan']
 			default = row['default']
 
-			if ip and not netname:
+			if ip and not subnet:
 				Warn(f'WARNING: skipping interface "{device}" on host "{host}" - '
 				      'interface has an IP but no network')
+				continue
+
+			# If we don't have a device, we don't need a config file
+			if not device:
 				continue
 
 			mtu = None
@@ -47,7 +50,7 @@ class Implementation(stack.commands.Implementation):
 			# Host attributes can override the subnets tables
 			# definition of the netmask.
 
-			x = self.owner.getHostAttr(host, 'network.%s.netmask' % netname)
+			x = self.owner.getHostAttr(host, 'network.%s.netmask' % subnet)
 			if x:
 				netmask = x
 			
@@ -187,16 +190,15 @@ class Implementation(stack.commands.Implementation):
 			configured = 1
 
 		# If device is part of a bridge
-
 		if channel:
-			sql = """select net.options from
-				networks net, nodes n, subnets s where
-				net.device='%s' and n.name='%s' and
-				net.node=n.id""" % (channel, host)
-			rows = self.db.execute(sql)
+			rows = self.db.select("""
+				networks.options from networks, nodes
+				where networks.device=%s and nodes.name=%s
+				and networks.node=nodes.id
+			""", (channel, host))
+
 			if rows:
-				options = self.db.fetchone()
-				if "bridge" in options:
+				if "bridge" in rows[0][0]:
 					self.owner.addOutput(host, 'BOOTPROTO=none')
 					self.owner.addOutput(host, 'BRIDGE=%s' % channel)
 					configured = 1

@@ -1,0 +1,20 @@
+<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+IPADDR0=192.168.0.2
+NETMASK0=255.255.255.0
+NETWORK0=192.168.0.0
+BROADCAST0=192.168.0.255
+LABEL0=0
+
+
+</stack:file>
+<stack:file stack:mode="append" stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+IPADDR1=192.168.0.3
+NETMASK1=255.255.255.0
+NETWORK1=192.168.0.0
+BROADCAST1=192.168.0.255
+LABEL1=1
+
+
+</stack:file>

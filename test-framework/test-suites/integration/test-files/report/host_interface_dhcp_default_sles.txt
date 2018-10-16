@@ -1,0 +1,10 @@
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+DHCLIENT_SET_HOSTNAME="yes"
+DHCLIENT_SET_DEFAULT_ROUTE="yes"
+STARTMODE=auto
+BOOTPROTO=dhcp
+
+
+</stack:file>

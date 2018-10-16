@@ -1,0 +1,13 @@
+<stack:file stack:name="/etc/sysconfig/network-scripts/ifcfg-eth0">
+# AUTHENTIC STACKI
+DEVICE=eth0
+BOOTPROTO=dhcp
+DEFROUTE=yes
+ONBOOT=yes
+MTU=1500
+</stack:file>
+<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="None", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+
+
+</stack:file>

@@ -1,0 +1,30 @@
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-br0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+IPADDR=192.168.0.2
+NETMASK=255.255.255.0
+NETWORK=192.168.0.0
+BROADCAST=192.168.0.255
+STARTMODE=auto
+BOOTPROTO=static
+BRIDGE=yes
+BRIDGE_FORWARDDELAY=0
+BRIDGE_STP=off
+BRIDGE_PORTS=eth0
+
+
+</stack:file>
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+HWADDR=00:11:22:33:44:55
+STARTMODE=auto
+BOOTPROTO=static
+
+
+</stack:file>
+<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:11:22:33:44:55", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+
+
+</stack:file>
