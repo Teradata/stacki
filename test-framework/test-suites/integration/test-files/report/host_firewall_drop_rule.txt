@@ -1,0 +1,24 @@
+<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Accept all traffic over loopback interface
+-A INPUT -j ACCEPT -i lo
+
+# Accept all ssh traffic on all networks
+-A INPUT -j ACCEPT -m state --state NEW -p tcp --dport ssh
+
+# Accept related and established connections
+-A INPUT -j ACCEPT -m state --state RELATED,ESTABLISHED
+
+# DROP rule for all networks
+-A INPUT -j DROP -p tcp --dport 23
+-A INPUT -j DROP -p udp --dport 23
+
+# Block all traffic
+-A INPUT -j REJECT
+
+COMMIT
+</stack:file>

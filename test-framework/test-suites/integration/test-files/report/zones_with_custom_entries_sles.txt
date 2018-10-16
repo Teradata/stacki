@@ -1,0 +1,42 @@
+<stack:file stack:name="/var/lib/named/test.domain" stack:perms="0644">
+$TTL 3D
+@ IN SOA ns.test. root.ns.test. (
+	0000000000 ; Serial
+	8H ; Refresh
+	2H ; Retry
+	4W ; Expire
+	1D ) ; Min TTL
+;
+	NS ns.test.
+	MX 10 mail.test.
+
+ns A 127.0.0.1
+
+backend-0-0 A 192.168.0.2
+foo CNAME backend-0-0
+
+;Imported from /var/lib/named/test.domain.local
+
+custom	A	192.168.0.3
+</stack:file>
+
+<stack:file stack:name="/var/lib/named/reverse.test.domain.0.168.192" stack:perms="0644">
+$TTL 3D
+@ IN SOA ns.test. root.ns.test. (
+	0000000000 ; Serial
+	8H ; Refresh
+	2H ; Retry
+	4W ; Expire
+	1D ) ; Min TTL
+;
+	NS ns.test.
+	MX 10 mail.test.
+
+2 PTR backend-0-0.test.
+
+;Imported from /var/lib/named/reverse.test.domain.0.168.192.local
+
+3 PTR custom.test.
+
+</stack:file>
+
