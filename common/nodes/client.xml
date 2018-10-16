@@ -41,6 +41,13 @@ touch /tmp/stack-skip-welcome
 	Disable this repo. If it is enabled, it can cause a 10 minute delay
 	during an installation
 -->
+	
+<stack:package stack:cond="os.version == '12.x'">
+</stack:package>
+	
+<stack:package stack:cond="os.version == '11.x'">
+</stack:package>
+	
 <stack:file stack:name="/tmp/anaconda-yum.conf" stack:mode="append">
 enabled=0
 gpgcheck=0
