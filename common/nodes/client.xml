@@ -56,4 +56,5 @@ gpgcheck=0
 systemctl enable ipmi
 </stack:script>
 
+	
 </stack:stack> 
