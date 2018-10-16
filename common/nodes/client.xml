@@ -1,0 +1,59 @@
+<stack:stack>
+
+<stack:description>
+The 'client node' in the graph.
+
+This file is used as a connection point for other XML configuration nodes.
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2018 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:rocks>
+Copyright (c) 2000 - 2010 The Regents of the University of California
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+</stack:rocks>
+
+
+<stack:native stack:lang="kickstart">
+reboot
+</stack:native>
+
+
+<stack:script stack:stage="install-pre">
+cp /run/install/tmp/stack.conf /tmp/stack.conf
+</stack:script>
+
+<stack:script stack:stage="install-pre">
+
+<!--
+	this is used to skip by the browser popup during a client install.
+	we only want the browser (firefox) to popup on server installs
+	because the browser prompts the user for configuration info
+-->
+touch /tmp/stack-skip-welcome
+
+<!--
+	Disable this repo. If it is enabled, it can cause a 10 minute delay
+	during an installation
+-->
+<stack:file stack:name="/tmp/anaconda-yum.conf" stack:mode="append">
+enabled=0
+gpgcheck=0
+</stack:file>
+</stack:script>
+
+
+<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
+/sbin/chkconfig ipmi on
+</stack:script>
+
+<stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
+systemctl enable ipmi
+</stack:script>
+
+</stack:stack> 
