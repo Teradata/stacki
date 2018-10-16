@@ -1,0 +1,101 @@
+#!/bin/bash
+# checklist		Init script for Stack System Install Checklist
+#
+# chkconfig: - 90 85
+# description:  Enabled the System Installation Checklist
+# processname:  checklist
+# pidfile: /var/run/checklist/checklist.pid
+#
+# @copyright@
+# Copyright (c) 2006 - 2018 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+#
+
+### BEGIN INIT INFO
+# Provides: checklist
+# Required-Start: $local_fs $network
+# Required-Stop: $local_fs $network
+# Default-Start:
+# Default-Stop: 0 1 6
+# Short-Description: start or stop checklist
+# Description: Stack System Installation Checklist
+### END INIT INFO
+
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+name=checklist
+prog=/opt/stack/bin/${name}
+pidfile=/var/run/${name}/${name}.pid
+
+RETVAL=0
+
+start() {
+    echo -n $"Starting $name: "
+    checkproc -p ${pidfile} $prog
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        echo "$name is already running: $PID"
+        exit 2;
+    fi
+
+    if [ ! -d `dirname $pidfile` ]; then
+        mkdir -p `dirname $pidfile`
+    fi
+
+    $prog
+    RETVAL=$?
+    echo
+
+    if [ $RETVAL -eq 0 ]; then
+        success
+    else
+        failure
+    fi
+}
+
+stop() {
+    echo -n $"Stopping $name: "
+    killproc -p ${pidfile} $prog
+    RETVAL=$?
+    echo
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop) 
+    stop
+    ;;
+  restart|force-reload)
+    restart
+    ;;
+  reload)
+    ;;
+  condrestart)
+    [ -f "$pidfile" ] && restart
+    ;;
+  status)
+    checkproc -p ${pidfile} $prog
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        echo $"$name is running."
+    else
+        echo $"$name is not running."
+    fi
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+    exit 1
+esac
+
+exit $RETVAL

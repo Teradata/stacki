@@ -1,0 +1,26 @@
+<stack:stack>
+
+<stack:description>
+System Installation Checklist Configuration
+</stack:description>
+
+
+<stack:copyright>
+Copyright (c) 2006 - 2018 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>checklist</stack:package>
+
+<stack:script stack:stage="install-post"
+	      stack:cond="not (os == 'sles' and os.version == '11.x')">
+/usr/bin/systemctl enable checklist
+</stack:script>
+
+<stack:script stack:stage="install-post"
+	      stack:cond="os == 'sles' and os.version == '11.x'">
+chkconfig --add checklist
+</stack:script>
+
+</stack:stack> 
