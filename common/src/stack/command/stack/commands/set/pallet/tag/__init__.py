@@ -69,12 +69,12 @@ class Command(stack.commands.set.pallet.command):
 		# 	set := force=true
 		if not force:
 			for p in pallets:
-				name = f'{p.name}-{p.version}-{p.release}-{p.arch}-{p.os}'
+				name = f'{p.name}-{p.version}-{p.rel}-{p.arch}-{p.os}'
 				for row in self.call('list.pallet.tag', [
 					p.name,
 					f'version={p.version}',
-					f'release={p.release}',
-					f'arch={p.arg}',
+					f'release={p.rel}',
+					f'arch={p.arch}',
 					f'os={p.os}',
 					f'tag={tag}'
 					]):
