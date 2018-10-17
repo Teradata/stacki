@@ -42,5 +42,9 @@ Include /etc/apache2/stacki-conf.d/ws.conf
 
 /opt/stack/share/stack/bin/ws_setup.sh
 
+<!-- enable commands because they require 'sudo' -->
+/opt/stack/bin/stack add api sudo command command="list switch *"
+/opt/stack/bin/stack add api sudo command command="create host switch mapping"
+
 </stack:script>
 </stack:stack> 
