@@ -9,7 +9,7 @@ from stack.exception import ArgUnique, CommandError
 
 class command(stack.commands.SwitchArgumentProcessor,
 	      stack.commands.HostArgumentProcessor,
-	      stack.commands.add.switch.command):
+	      stack.commands.Command):
 	pass
 
 class Command(command):
