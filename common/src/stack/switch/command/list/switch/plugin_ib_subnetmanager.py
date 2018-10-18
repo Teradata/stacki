@@ -34,8 +34,8 @@ class Plugin(stack.commands.Plugin):
 				continue
 
 			kwargs = {
-				'username': switch_attrs[host].get('username'),
-				'password': switch_attrs[host].get('password'),
+				'username': switch_attrs[host].get('switch_username'),
+				'password': switch_attrs[host].get('switch_password'),
 			}
 
 			# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs

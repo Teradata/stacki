@@ -36,8 +36,8 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	def get_sw_handle(self, hostname):
 
 		kwargs = {
-			'username': self.switch_attrs[hostname].get('username'),
-			'password': self.switch_attrs[hostname].get('password'),
+			'username': self.switch_attrs[hostname].get('switch_username'),
+			'password': self.switch_attrs[hostname].get('switch_password'),
 		}
 
 		# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs
