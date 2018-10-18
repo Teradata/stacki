@@ -10,7 +10,7 @@ OVERLAY.UPDATE.PKGS	= \
 	stack-pylib \
 	foundation-newt \
 	foundation-python-Flask \
-	foundation-python-itsdangerous \
+	foundation-python-ItsDangerous \
 	foundation-python-Werkzeug \
 	foundation-python-Click \
 	foundation-python-MarkupSafe \
