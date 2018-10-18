@@ -87,8 +87,8 @@ class Implementation(stack.commands.Implementation):
 		switch_attrs = self.owner.getHostAttrDict(switch)
 
 		kwargs = {
-			'username': switch_attrs[switch].get('username'),
-			'password': switch_attrs[switch].get('password'),
+			'username': switch_attrs[switch].get('switch_username'),
+			'password': switch_attrs[switch].get('switch_password'),
 		}
 
 		# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs
