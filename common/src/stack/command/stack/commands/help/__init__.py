@@ -10,16 +10,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import string
 import stack.commands
 
 
 class command(stack.commands.Command):
-
 	MustBeRoot = 0
 
-	
+
 class Command(command):
 	"""
 	List help for the command line client.  With no arguments it lists
@@ -31,7 +29,7 @@ class Command(command):
 	</arg>
 
 	<example cmd='help'>
-	Alias for 'rocks list help'
+	Lists all the available commands.
 	</example>
 
 	<example cmd='help viz'>
@@ -44,15 +42,12 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-
-		help = self.command('list.help', [ 'cols=0' ])
-		sub  = ''.join(args)
+		command_list = self.command('list.help', [ 'cols=0' ])
+		substring = ' '.join(args)
 
 		if not args:
-			self.addText(help)
+			self.addText(command_list)
 		else:
-			for line in help.split('\n'):
-				if line:
-					if string.find(line, sub) >= 0:
-						self.addText('%s\n' % line)
-		
+			for line in command_list.split('\n'):
+				if line and substring in line:
+					self.addText('%s\n' % line)
