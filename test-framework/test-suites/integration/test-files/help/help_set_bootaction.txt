@@ -1,0 +1,4 @@
+set bootaction {action} [args=string] [kernel=string] [os=string] [ramdisk=string] [type=string] 
+set bootaction args {action} {args=string} [os=string] [type=string] 
+set bootaction kernel {action} {kernel=string} [os=string] [type=string] 
+set bootaction ramdisk {action} {ramdisk=string} [os=string] [type=string] 
