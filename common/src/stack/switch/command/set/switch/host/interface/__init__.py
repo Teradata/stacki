@@ -5,7 +5,10 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ParamRequired, ParamType, CommandError, ArgUnique, ArgRequired, ArgError
+from stack.exception import (
+	ParamRequired, ParamUnique, ParamType, CommandError, ArgUnique, ArgRequired, ArgError
+)
+
 
 class Command(stack.commands.SwitchArgumentProcessor,
 		stack.commands.HostArgumentProcessor,
@@ -22,7 +25,7 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	<param type='string' name='host' repeat='0' optional='0'>
 	One host name.
 	</param>
-	
+
 	<param type='string' name='interface' optional='0'>
 	Name of the interface.
 	</param>
@@ -35,60 +38,52 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	Associates "eth0" on host "stacki-231-3" with port "12" on switch "ethernet-231-1".
 	</example>
 	"""
-	
+
 	def run(self, params, args):
+		switches = self.getSwitchNames(args)
+		if not switches:
+			raise ArgRequired(self, 'switch')
+		elif len(switches) > 1:
+			raise ArgUnique(self, 'switch')
+		switch = switches[0]
+
 		(host, interface, port) = self.fillParams([
 			('host', None),
 			('interface', None),
 			('port', None)
-			])
-
-		switches = self.getSwitchNames(args)
-		if len(switches) == 0:
-			raise ArgRequired(self, 'switch')
-		if len(switches) > 1:
-			raise ArgUnique(self, 'switch')
-		switch = switches[0]
+		])
 
 		hosts = self.getHostnames([host])
-		host = hosts[0]
-
-		if not host:
+		if not hosts:
 			raise ParamRequired(self, ('host'))
-		if not interface:
-			raise ParamRequired(self, ('interface'))
-		if not port:
-			raise ParamRequired(self, ('port'))
+		elif len(hosts) > 1:
+			raise ParamUnique(self, 'host')
+		host = hosts[0]
 
 		try:
 			port = int(port)
 		except:
 			raise ParamType(self, 'port', 'integer')
 
-		#
-		# check if the host/port is defined for this switch
-		#
-		found = False
-		for o in self.call('list.switch.host', [ switch ]):
-			if o['host'] == host and o['port'] == port:
-				found = True
-		if not found:
-			raise ArgError(self, 'host/port', '"%s/%s" not found' % (host, port))
+		# Check if the host/port is defined for this switch
+		for row in self.call('list.switch.host', [switch]):
+			if row['host'] == host and row['port'] == port:
+				break
+		else:
+			raise ArgError(self, 'host/port', f'"{host}/{port}" not found')
 
-		#
-		# see if the interface exists for this host
-		#
-		row = self.db.select("""net.id from networks net, nodes n
-			where n.name='%s' and net.device='%s'
-			and net.node = n.id""" % (host, interface)) 
+		# See if the interface exists for this host
+		row = self.db.select("""
+			networks.id FROM networks, nodes
+			WHERE nodes.name=%s AND networks.device=%s AND networks.node=nodes.id
+		""", (host, interface))
 
 		if not row:
-			raise CommandError(self,
-				'interface "%s" does not exist for host "%s"' % (interface, host))
+			raise CommandError(
+				self, f'interface "{interface}" does not exist for host "{host}"'
+			)
 
-		interfaceid, = row[0]
-
-		self.db.execute("""update switchports set interface=%s
-			where port=%s and switch=(select id from nodes where name='%s')
-			""" % (interfaceid, port, switch))
-
+		self.db.execute("""
+			UPDATE switchports SET interface=%s
+			WHERE port=%s AND switch=(SELECT id FROM nodes WHERE name=%s)
+		""", (row[0][0], port, switch))

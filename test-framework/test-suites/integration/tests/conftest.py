@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import gc
 import glob
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -631,3 +632,27 @@ def create_blank_iso(tmpdir_factory):
 
 	# Clean up the ISO file
 	os.remove('/export/test-files/pallets/blank.iso')
+
+@pytest.fixture
+def inject_code(host):
+	"""
+	This returns a context manager used to inject code into the python
+	runtime environment. This is currently used to inject Mock code for
+	intergration tests.
+	"""
+
+	@contextmanager
+	def _inner(code_file):
+		result = host.run(
+			f'cp "{code_file}" /opt/stack/lib/python3.6/site-packages/sitecustomize.py'
+		)
+
+		if result.rc != 0:
+			pytest.fail(f'unable to inject code file "{code_file}"')
+
+		try:
+			yield
+		finally:
+			os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
+
+	return _inner
