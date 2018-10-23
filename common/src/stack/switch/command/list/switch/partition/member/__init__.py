@@ -58,6 +58,11 @@ class Command(
 
 
 		switches = self.getSwitchNames(args)
+		switch_attrs = self.getHostAttrDict(switches)
+		for switch in switches:
+			if switch_attrs[switch].get('switch_type') != 'infiniband':
+				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+
 		if self.str2bool(enforce_sm):
 			enforce_subnet_manager(self, switches)
 

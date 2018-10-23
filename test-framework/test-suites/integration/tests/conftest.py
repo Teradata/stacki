@@ -273,6 +273,21 @@ def add_ib_switch():
 	return _inner
 
 @pytest.fixture
+def add_ib_switch_partition():
+	def _inner(switch_name, partition_name, options):
+		cmd = f'stack add switch partition {switch_name} name={partition_name} '
+		if options is not None:
+			cmd += f'options={options}'
+
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy switch partition')
+
+	_inner('switch-0-0', 'Default', '')
+
+	return _inner
+
+@pytest.fixture
 def add_switch():
 	def _inner(hostname, rack, rank, appliance, make, model):
 		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'

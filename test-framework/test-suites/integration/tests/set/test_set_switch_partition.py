@@ -82,6 +82,9 @@ class TestSetSwitchPartition:
 
 		result = host.run(f'stack set switch partition options switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
+		result = host.run('stack list switch partition switch-0-0 output-format=json')
+		assert result.rc == 0
+		assert result.stdout.strip() == expected_output.strip()
 
 	def test_can_duplicate_names_that_resolve_same(self, host, add_ib_switch):
 		output_file = 'add_nondefault_partition_output.json'
@@ -100,7 +103,7 @@ class TestSetSwitchPartition:
 			assert result.stdout.strip() == expected_output.strip()
 
 	def test_cannot_add_via_set_to_non_ib(self, host, add_switch):
-		result = host.run(f'stack add switch partition switch-0-0 name=Default')
+		result = host.run(f'stack set switch partition options switch-0-0 name=Default')
 		assert result.rc != 0
 
 	def test_cannot_add_with_enforce_sm(self, host, add_ib_switch):
