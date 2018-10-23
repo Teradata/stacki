@@ -246,6 +246,33 @@ def add_host_with_interface():
 	return _inner
 
 @pytest.fixture
+def add_ib_switch():
+	def _inner(hostname, rack, rank, appliance, make, model, sw_type):
+		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy host')
+
+		cmd = f'stack set host attr {hostname} attr=component.make value={make}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set make')
+
+		cmd = f'stack set host attr {hostname} attr=component.model value={model}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set model')
+
+		cmd = f'stack set host attr {hostname} attr=switch_type value={sw_type}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set switch type')
+
+	_inner('switch-0-0', '0', '0', 'switch', 'Mellanox', 'm7800', 'infiniband')
+
+	return _inner
+
+@pytest.fixture
 def add_switch():
 	def _inner(hostname, rack, rank, appliance, make, model):
 		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
