@@ -6,7 +6,7 @@
 
 import stack.commands
 from stack.commands.sync.switch.ib import enforce_subnet_manager
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ArgUnique, ParamValue, CommandError
 
 
 class Command(
@@ -28,7 +28,7 @@ class Command(
 	The GUID of the host's infiniband interface to use.
 	</param>
 
-	<param type='string' name='guid' optional='1'>
+	<param type='string' name='member' optional='1'>
 	The hostname with an infiniband interface to remove membership for.  Must be
 	specified with the name of the interface to use.
 	</param>
@@ -51,7 +51,7 @@ class Command(
 		name, guid, hostname, interface, enforce_sm = self.fillParams([
 			('name', None),
 			('guid', None),
-			('hostname', None),
+			('member', None),
 			('interface', None),
 			('enforce_sm', False),
 		])
@@ -59,7 +59,7 @@ class Command(
 		if guid:
 			guid = guid.lower()
 		if hostname and not interface or interface and not hostname:
-			raise CommandError(self, 'hostname and interface must both be specified')
+			raise CommandError(self, 'member and interface must both be specified')
 		elif hostname and interface:
 			ifaces = self.call('list.host.interface', [hostname])
 			for row in ifaces:
@@ -67,7 +67,7 @@ class Command(
 					guid = row['mac']
 					break
 			else: #nobreak
-				raise CommandError(self, f'hostname has no interface named "{interface}"')
+				raise CommandError(self, f'member has no interface named "{interface}"')
 
 		if name:
 			name = name.lower()
@@ -80,6 +80,11 @@ class Command(
 				raise ParamValue(self, 'name', 'a hex value between 0x0001 and 0x7ffe, or "default"')
 
 		switches = self.getSwitchNames(args)
+		switch_attrs = self.getHostAttrDict(switches)
+		for switch in switches:
+			if switch_attrs[switch].get('switch_type') != 'infiniband':
+				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+
 		if self.str2bool(enforce_sm):
 			enforce_subnet_manager(self, switches)
 

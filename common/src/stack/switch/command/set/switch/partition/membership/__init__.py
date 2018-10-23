@@ -29,7 +29,7 @@ class Command(
 	The GUID of the host's infiniband interface to use.
 	</param>
 
-	<param type='string' name='guid' optional='1'>
+	<param type='string' name='member' optional='1'>
 	The hostname with an infiniband interface to add as a member.  Must be
 	specified with the name of the interface to use.
 	</param>
@@ -56,27 +56,27 @@ class Command(
 		name, guid, hostname, interface, membership, enforce_sm = self.fillParams([
 			('name', None, True),
 			('guid', None),
-			('hostname', None),
+			('member', None),
 			('interface', None),
 			('membership', 'limited'),
 			('enforce_sm', False),
 		])
 
 		if not guid and not hostname:
-			raise CommandError(self, 'either guid or hostname and interface must be specified')
+			raise CommandError(self, 'either guid or member and interface must be specified')
 
 		if guid:
 			guid = guid.lower()
 		if hostname and not interface or interface and not hostname:
-			raise CommandError(self, 'hostname and interface must both be specified')
-		else:
+			raise CommandError(self, 'member and interface must both be specified')
+		elif hostname and interface:
 			ifaces = self.call('list.host.interface', [hostname])
 			for row in ifaces:
 				if row['interface'] == interface:
 					guid = row['mac']
 					break
 			else: #nobreak
-				raise CommandError(self, f'hostname has no interface named "{interface}"')
+				raise CommandError(self, f'member has no interface named "{interface}"')
 
 		name = name.lower()
 		if name == 'default':
@@ -101,7 +101,14 @@ class Command(
 			enforce_subnet_manager(self, switches)
 
 		switch, = switches
-		switch_id = self.db.select('id FROM nodes WHERE name=%s', switch)
+		switch_id = self.db.select('id FROM nodes WHERE name=%s', switch)[0][0]
+
+		# ensure the guid actually exists - guid should be unique across table
+		guid_id = self.db.select('id FROM networks WHERE mac=%s', guid)
+		try:
+			guid_id = guid_id[0][0]
+		except IndexError:
+			raise CommandError(self, f'guid "{guid}" was not found in the interfaces table')
 
 		# lookups using sql instead of api calls because all 'list switch partition' calls are expensive.
 		# Ensure this partition exists on the switch
@@ -120,14 +127,14 @@ class Command(
 				networks.id=ib_m.interface AND
 				ib_m.part_name=ib_p.id AND
 				ib_p.part_name=%s AND
-				networks.mac=%s ''',
-				(switch, name, guid)) > 0:
+				networks.id=%s ''',
+				(switch, name, guid_id)) > 0:
 			existing = True
 
 		insert_sql = '''
 				INSERT INTO ib_memberships (switch, interface, part_name, member_type)
 				VALUES (%s,
-						(SELECT id FROM networks WHERE mac=%s),
+						%s,
 						(SELECT id FROM ib_partitions WHERE part_name=%s AND switch=%s),
 						%s)
 				'''
@@ -135,15 +142,15 @@ class Command(
 		update_sql = '''
 				UPDATE ib_memberships
 				SET switch=%s,
-					interface=(SELECT id FROM networks WHERE mac=%s),
+					interface=%s,
 					part_name=(SELECT id FROM ib_partitions WHERE part_name=%s AND switch=%s),
 					member_type=%s
 				WHERE switch=%s AND
 					part_name=(SELECT id FROM ib_partitions WHERE part_name=%s AND switch=%s) AND
-					interface=(SELECT id FROM networks WHERE mac=%s)
+					interface=%s
 				'''
 
 		if existing:
-			self.db.execute(update_sql, (switch_id, guid, name, switch_id, membership, switch_id, name, switch_id, guid))
+			self.db.execute(update_sql, (switch_id, guid_id, name, switch_id, membership, switch_id, name, switch_id, guid_id))
 		else:
-			self.db.execute(insert_sql, (switch_id, guid, name, switch_id, membership))
+			self.db.execute(insert_sql, (switch_id, guid_id, name, switch_id, membership))
