@@ -38,26 +38,29 @@ class Command(command):
 	"""
 	def run(self, params, args):
 		switches = self.getSwitchNames(args)
-	    
+
 		self.beginOutput()
 
-		header = [ 'switch', 'port', 'host', 'mac', 'interface', 'vlan' ]
+		header = ['switch', 'port', 'host', 'mac', 'interface', 'vlan']
 
 		for switch in switches:
-			for row in self.db.select(""" s.port, s.interface
-					from switchports s, nodes n
-					where s.switch = n.id and n.name = '%s'
-					order by s.port """ % switch):
+			for row in self.db.select("""
+				switchports.port, switchports.interface
+				FROM switchports, nodes
+				WHERE switchports.switch=nodes.id AND nodes.name=%s
+				ORDER BY switchports.port
+			""", (switch,)):
+				port, iface_id = row
 
-				port, ifaceid = row
+				rows = self.db.select("""
+					nodes.name, networks.mac, networks.device, networks.vlanid
+					FROM nodes, networks
+					WHERE nodes.id=networks.node AND networks.id=%s
+				""", (iface_id,))
 
-				o = self.db.select(""" n.name, net.mac, net.device, net.vlanid
-						from nodes n, networks net
-						where n.id = net.node and net.id = %s """ % ifaceid)
-				if len(o) != 1:
+				if len(rows) != 1:
 					continue
 
-				host, mac, interface, vlan = o[0]
-				self.addOutput(switch, [ port, host, mac, interface, vlan ])
+				self.addOutput(switch, [port, *rows[0]])
 
-		self.endOutput(header = header, trimOwner=False)
+		self.endOutput(header=header, trimOwner=False)

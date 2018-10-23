@@ -46,11 +46,9 @@ class Implementation(stack.commands.Implementation):
 				hosts = switch.parse_mac_address_table()
 				for _vlan, _mac, _port, _ in hosts:
 					row = self.owner.db.select("""
-					  n.name, nt.device from
-					  nodes n, networks nt
-					  where nt.node=n.id
-					  and nt.mac='%s'
-					""" % _mac)
+						nodes.name, networks.device FROM nodes, networks
+						WHERE networks.node=nodes.id AND networks.mac=%s
+					""", (_mac,))
 
 					if row:
 						_hostname, _interface = row[0]
