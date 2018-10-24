@@ -10,25 +10,53 @@ then
     exit 1
 fi
 
-# Make sure that the ISO actually exists
-if [[ ! -f "$1" ]]
+# See if we need to download the ISO
+if [[ $1 =~ https?:// ]]
 then
-    echo
-    echo -e "\033[31mError: $1 doesn't exist\033[0m"
-    echo
-    exit 1
-fi
+    # Make sure we are in the project directory
+    cd "$(dirname "${BASH_SOURCE[0]}")"
 
-# Get the full path to the ISO
-STACKI_ISO="$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+	# Create the local test's .cache folder, if needed
+	if [[ ! -d .cache ]]
+	then
+		mkdir .cache
+	fi
 
-# Make sure we are in the same directory as this script
-cd "$(dirname "${BASH_SOURCE[0]}")"
+    # Download the ISO if needed
+    cd .cache
+    if [[ ! -f "$(basename "$1")" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading $(basename "$1") ...\033[0m"
+        curl -f --progress-bar -O "$1"
+    fi
 
-# Create the local test's .cache folder, if needed
-if [[ ! -d .cache ]]
-then
-    mkdir .cache
+	# Get the full path to the ISO
+	STACKI_ISO="$(pwd)/$(basename "$1")"
+
+    # Move back up to the project root
+    cd ..
+else
+	# Make sure that the ISO actually exists
+	if [[ ! -f "$1" ]]
+	then
+		echo
+		echo -e "\033[31mError: $1 doesn't exist\033[0m"
+		echo
+		exit 1
+	fi
+
+	# Get the full path to the ISO
+	STACKI_ISO="$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+
+	# Make sure we are in the same directory as this script
+	cd "$(dirname "${BASH_SOURCE[0]}")"
+
+	# Create the local test's .cache folder, if needed
+	if [[ ! -d .cache ]]
+	then
+		mkdir .cache
+	fi
 fi
 
 # Make sure a few folders needed by Vagrantfile exist

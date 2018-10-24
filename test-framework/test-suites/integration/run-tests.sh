@@ -24,7 +24,6 @@ else
         --cov-config=/export/tests/$COVERAGERC \
         --cov=wsclient \
         --cov=stack \
-        --cov-report term \
         --cov-report html:/export/reports/integration \
         /export/tests/"
 fi

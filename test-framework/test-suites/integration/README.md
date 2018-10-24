@@ -47,7 +47,7 @@ Here is the workflow I use when developing new tests:
 
 2. Change into the `test-suites/integration/` directory.
 
-3. Run `./set-up.sh STACKI_ISO`, where STACKI_ISO is the path to the Stacki ISO you want to use while developing tests. This will bring up a Stacki frontend into a Vagrant VM, which the tests will be run in.
+3. Run `./set-up.sh STACKI_ISO`, where STACKI_ISO is the path to the Stacki ISO you want to use while developing tests. STACKI_ISO can also be a URL, which will cause the ISO to be downloaded and used. This will bring up a Stacki frontend into a Vagrant VM, which the tests will be run in.
 
 4. You can now run `./run-tests.sh` to run the tests stored in the `tests` directory. You can run this as many time as you need to as you develop your new tests. You can pass the `--no-cov` flag to disable generating the code coverage output.
 
