@@ -15,7 +15,7 @@
 
 <stack:script stack:stage="install-post">
 
-<stack:file stack:name="/tmp/tables.sql">
+<stack:file stack:name="/tmp/cluster.sql">
 <!-- Access -->
 
 DROP TABLE IF EXISTS access;
@@ -34,7 +34,7 @@ DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL,
-  Network		int(11) NOT NULL references networks,
+  Network	int(11) NOT NULL references networks,
   PRIMARY KEY (ID),
   INDEX (Name)
 );
@@ -447,28 +447,30 @@ CREATE TABLE ib_memberships (
 
 </stack:file>
 
-/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf \
-	--user=root create cluster
-
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /tmp/tables.sql
-
-<!-- Append the default database -->
-<stack:file stack:mode="append"
-        stack:name="/etc/root.my.cnf">
-database	= cluster
+<stack:file stack:name="/tmp/shadow.sql">
+DROP TABLE IF EXISTS attributes;
+CREATE TABLE attributes (
+	Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
+	Attr		varchar(128) NOT NULL,
+	Value		text,
+	ScopeID		int(11)
+);
 </stack:file>
 
-<stack:file stack:name="/var/db/cluster-grants.sql" stack:perms="0400">
+/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf --user=root create cluster
+/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf --user=root create shadow
+/usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root cluster &lt; /tmp/cluster.sql
+/usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root shadow &lt; /tmp/shadow.sql
+
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
 grant select on cluster.* to ''@'localhost';
-grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
-grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
 grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
+grant select,update,insert,delete,lock tables on shadow.*  to apache@localhost;
+grant select,update,insert,delete,lock tables on shadow.*  to apache@"&hostname;";
 </stack:file>
 
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /var/db/cluster-grants.sql
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf --user=root &lt; /var/db/grants.sql
 
 
 <!--
@@ -479,7 +481,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 <stack:file stack:name="/var/db/restore-stacki-database.sh" stack:perms="0400">#!/bin/sh
 
 /usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/mysql-backup-cluster
-/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/cluster-grants.sql
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/grants.sql
 
 /usr/bin/mysql --defaults-file=/opt/stack/etc/django.my.cnf django &lt; /var/db/mysql-backup-django
 /usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/django-grants.sql

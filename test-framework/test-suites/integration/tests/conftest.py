@@ -27,7 +27,7 @@ def dump_mysql():
 	# Dump the initial Stacki DB into an SQL file, to restore from
 	# after each test
 	subprocess.run([
-		"mysqldump", "--opt", "--add-drop-database", "--databases", "cluster"
+		"mysqldump", "--opt", "--add-drop-database", "--databases", "cluster", "shadow"
 	], stdout=file_obj, check=True)
 
 	# Close the file

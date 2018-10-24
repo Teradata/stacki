@@ -110,7 +110,6 @@ def EvalCondExpr(cond, attrs):
 	is created, this allows the COND expression to directly refer to
 	all the attributes as variables.
 	"""
-
 	if not cond:
 		return True
 
@@ -118,6 +117,8 @@ def EvalCondExpr(cond, attrs):
 
 	env = _CondEnv()
 	for (k, v) in attrs.items():
+		if v is None:
+			continue
 
 		# FIXME
 		#

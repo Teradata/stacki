@@ -22,6 +22,7 @@ bootstrap:
 	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
 	ldconfig
 	$(PY.PATH) -mensurepip
+	$(PY.PATH) -mpip install --upgrade pip
 
 
 build:
