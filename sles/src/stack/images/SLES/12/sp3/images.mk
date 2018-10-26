@@ -8,7 +8,7 @@ YUMLIST = \
 	ludicrous-speed \
 	foundation-python \
 	foundation-python-Flask \
-		foundation-python-ItsDangerous \
+		foundation-python-itsdangerous \
 		foundation-python-Werkzeug \
 		foundation-python-MarkupSafe \
 		foundation-python-Jinja2 \

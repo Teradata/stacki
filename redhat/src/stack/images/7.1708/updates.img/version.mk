@@ -9,7 +9,7 @@ OVERLAY.PKGS	= \
 	yum \
 	foundation-newt \
 	foundation-python-Flask \
-		foundation-python-ItsDangerous \
+		foundation-python-itsdangerous \
 		foundation-python-Werkzeug \
 		foundation-python-Click \
 		foundation-python-MarkupSafe \
