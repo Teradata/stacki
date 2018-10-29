@@ -41,10 +41,7 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'host'
 
-	def requires(self):
-		return [ 'appliance' ]
-		
 	def run(self, args):
-		self.owner.addText(self.owner.command('dump.host', []))
-		
+		return self.owner.command('dump.host')
+
 

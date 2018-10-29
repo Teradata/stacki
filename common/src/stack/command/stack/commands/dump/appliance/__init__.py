@@ -3,51 +3,32 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
 
+import stack
 import stack.commands
+from collections import OrderedDict
+import json
 
 
-class command(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.dump.command):
-	pass
-
-
-class Command(command):
-	"""
-	Outputs info (as rocks commands) about the appliances defined in the
-	cluster database.
-	
-	<arg optional='1' type='string' name='appliance' repeat='1'>
-	Optional list of appliance names. If no appliance names are supplied,
-	then info about all appliances is output.
-	</arg>
-		
-	<example cmd='dump appliance'>
-	Dump all known appliances.
-	</example>
-	"""
+class Command(stack.commands.dump.command):
 
 	def run(self, params, args):
-		for app in self.getApplianceNames(args):
-			self.db.execute("""
-				select longname, public
-				from appliances where name='%s'
-				""" % app)
 
-			(longname, pub) = self.db.fetchone()
+		self.set_scope('appliance')
 
-			str = "add appliance %s " % app
+		dump = []
+		for row in self.call('list.appliance', args):
+			name = row['appliance']
 
-			if longname:
-				str += "longname=%s " % self.quote(longname)
-			if pub:
-				str += "public=%s" % pub
-				
-			self.dump(str)
+			dump.append(OrderedDict(
+				name       = name,
+				public     = self.str2bool(row['public']),
+				attr       = self.dump_attr(name),
+				controller = self.dump_controller(name),
+				partition  = self.dump_partition(name),
+				firewall   = self.dump_firewall(name),
+				route      = self.dump_route(name)))
+
+		self.addText(json.dumps(OrderedDict(version   = stack.version,
+						    appliance = dump), indent=8))
 

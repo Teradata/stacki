@@ -1,26 +1,33 @@
-# $Id$
-#
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
-#
-# $Log$
-# Revision 1.3  2010/09/07 23:52:53  bruno
-# star power for gb
-#
-# Revision 1.2  2009/05/01 19:06:57  mjk
-# chimi con queso
-#
-# Revision 1.1  2009/02/10 20:11:20  mjk
-# os attr stuff for anoop
-#
+# @copyright@
+# Copyright (c) 2006 - 2018 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
 
+import stack
 import stack.commands
+from collections import OrderedDict
+import json
 
 
-class command(stack.commands.OSArgumentProcessor,
-	stack.commands.dump.command):
-	pass
-	
+class Command(stack.commands.dump.command,
+	      stack.commands.OSArgumentProcessor):
+
+	def run(self, params, args):
+
+		self.set_scope('os')
+
+		dump = []
+		for name in self.getOSNames():
+			dump.append(OrderedDict(
+				name          = name,
+				attr          = self.dump_attr(name),
+				controller    = self.dump_controller(name),
+				partition     = self.dump_partition(name),
+				firewall      = self.dump_firewall(name),
+				route         = self.dump_route(name)))
+
+		self.addText(json.dumps(OrderedDict(version  = stack.version,
+						    os       = dump), indent=8))
+
+

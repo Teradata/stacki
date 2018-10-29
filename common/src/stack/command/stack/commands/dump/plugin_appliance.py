@@ -33,6 +33,4 @@ class Plugin(stack.commands.Plugin):
 		return 'appliance'
 
 	def run(self, args):
-		self.owner.addText(self.owner.command('dump.appliance', []))
-		
-
+		return self.owner.command('dump.appliance')

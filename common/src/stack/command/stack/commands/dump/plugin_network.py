@@ -33,6 +33,4 @@ class Plugin(stack.commands.Plugin):
 		return 'network'
 		
 	def run(self, args):
-		self.owner.addText(self.owner.command('dump.network', []))
-		
-
+		return self.owner.command('dump.network')

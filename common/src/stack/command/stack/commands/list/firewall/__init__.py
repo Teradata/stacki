@@ -55,3 +55,4 @@ class Command(command):
 		(scope,) = self.fillParams([('scope', 'global')])
 		self.scope = scope
 		self.runPlugins(args=args)
+
