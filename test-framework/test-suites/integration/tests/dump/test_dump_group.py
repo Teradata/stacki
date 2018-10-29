@@ -21,10 +21,6 @@ class TestDumpGroup:
 		dumped_data = json.loads(results.stdout)
 
 		# check to make sure that the information we just added is in the dump data
-		assert dumped_data['group'][0]['name'] == 'test'
-		check = False
-		for group in dumped_data['group']:
-			if group['name'] == 'test':
-				check = True
-		assert check == True
+		assert dumped_data['group'][0] == 'test'
+
 

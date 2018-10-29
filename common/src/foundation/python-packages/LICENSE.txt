@@ -22,7 +22,7 @@ docutils       0.14       OSI Approved :: GNU General Public License (GPL)      
 flake8         3.6.0      OSI Approved :: MIT License                                         https://gitlab.com/pycqa/flake8
 gitdb2         2.0.5      OSI Approved :: BSD License                                         https://github.com/gitpython-developers/gitdb
 idna           2.7        OSI Approved :: BSD License                                         https://github.com/kjd/idna
-itsdangerous   0.24       OSI Approved :: BSD License                                         http://github.com/mitsuhiko/itsdangerous
+itsdangerous   0.24       OSI Approved :: BSD License                                         https://palletsprojects.com/p/itsdangerous/
 jmespath       0.9.3      OSI Approved :: MIT License                                         https://github.com/jmespath/jmespath.py
 lockfile       0.12.2     OSI Approved :: MIT License                                         http://launchpad.net/pylockfile
 mccabe         0.6.1      OSI Approved :: MIT License                                         https://github.com/pycqa/mccabe

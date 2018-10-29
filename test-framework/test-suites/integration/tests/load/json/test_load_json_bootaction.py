@@ -6,7 +6,7 @@ class TestLoadJsonBootaction:
 	Test that loading bootaction data works properly
 	"""
 
-	def test_load_json_bootaction(self, host):
+	def skip_test_load_json_bootaction(self, host):
 		dirn = '/export/test-files/load/json/'
 		file = dirn + 'bootaction.json'
 

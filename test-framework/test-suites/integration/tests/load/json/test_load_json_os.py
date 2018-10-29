@@ -6,7 +6,7 @@ class TestLoadJsonOs:
 	Test that the load json os is able to load what dump os dumps
 	"""
 
-	def test_load_json_os(self, host):
+	def skip_test_load_json_os(self, host):
 
 		# add some os information so we have something to dump and load
 		results = host.run('stack add os attr redhat attr=test value=test shadow=False')

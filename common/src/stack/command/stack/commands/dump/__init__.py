@@ -3,69 +3,169 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
 
+from collections import OrderedDict
 import stack.commands
 import json
 
-class Command(stack.commands.Command):
+
+class command(stack.commands.Command):
+
+
+	def get_scope(self):
+		scope = self.__dump_scope
+		if not scope:
+			scope = 'global'
+		return scope
+
+		
+	def set_scope(self, scope):
+		self.__dump_scope = scope
+
+
+	def dump_attr(self, name=None):
+		dump  = []
+		scope = self.get_scope()
+
+		if scope == 'global':
+			arg = []
+		else:
+			arg = [name]
+			
+		for row in self.call('list.attr', [f'scope={scope}',
+						   'resolve=false',
+						   'const=false'] + arg):
+			if row['type'] == 'var':
+				dump.append(OrderedDict(name  = row['attr'],
+							value = row['value']))
+			else:
+				dump.append(OrderedDict(name   = row['attr'],
+							value  = row['value'],
+							shadow = True))
+		return dump
+
+
+	def dump_firewall(self, name=None):
+		dump  = []
+		scope = self.get_scope()
+
+		arg = [name]
+		if scope == 'global':
+			arg    = []
+			source = 'G'
+		elif scope == 'environment':
+			source = 'E'
+		elif scope == 'os':
+			source = 'O'
+		elif scope == 'appliance':
+			source = 'A'
+		elif scope == 'host':
+			source = 'H'
+		else:
+			assert(False) # barf
+			
+		for row in self.call('list.firewall', [f'scope={scope}'] + arg):
+			if row['type'] != 'var' or row['source'] != source:
+				continue
+			dump.append(OrderedDict(
+				service        = row['service'],
+				network        = row['network'],
+				output_network = row['output-network'],
+				chain          = row['chain'],
+				action         = row['action'],
+				protocol       = row['protocol'],
+				flags          = row['flags'],
+				comment        = row['comment'],
+				table          = row['table'],
+				name           = row['name']))
+		return dump
+
+	def dump_route(self, name=None):
+		dump  = []
+		scope = self.get_scope()
+
+		if scope == 'global':
+			data = self.call('list.route')
+		else:
+			data = self.call(f'list.{scope}.route', [name])
+
+		if scope == 'host':
+			check_source = lambda row: row['source'] == 'H'
+		else:
+			check_source = lambda row: True
+
+		for row in data:
+			if not check_source(row):
+				continue
+			dump.append(OrderedDict(
+				address   = row['network'],
+				gateway   = row['gateway'],
+				netmask   = row['netmask'],
+				interface = row['interface']))
+		return dump
+
+
+	def dump_controller(self, name=None):
+		dump  = []
+		scope = self.get_scope()
+
+		if scope == 'global':
+			data = self.call('list.storage.controller')
+		else:
+			data = self.call('list.storage.controller', [name])
+
+		for row in data:
+			dump.append(OrderedDict(
+				enclosure = row['enclosure'],
+				adapter   = row['adapter'],
+				slot      = row['slot'],
+				raidlevel = row['raidlevel'],
+				arrayid   = row['arrayid'],
+				options   = row['options']))
+		return dump
+
+
+	def dump_partition(self, name=None):
+		dump  = []
+		scope = self.get_scope()
+
+		if scope == 'global':
+			data = self.call('list.storage.partition')
+		else:
+			data = self.call('list.storage.partition', [name])
+
+		for row in data:
+			dump.append(OrderedDict(
+				device     = row['device'],
+				partid     = row['partid'],
+				mountpoint = row['mountpoint'],
+				size       = row['size'],
+				fstype     = row['fstype'],
+				options    = row['options']))
+		return dump
+
+
+
+
+
+class Command(command):
 	"""
-	Dump data into a single json document. If no arguments are given
-	then all scopes will be dumped.
-
-	<arg optional='1' type='string' name='software'>
-	Dump pallet, cart, and box data
-	</arg>
-
-	<arg optional='1' type='string' name='host'>
-	Dump name, rack, rank, interface, attr, firewall, box, appliance,
-	comment, metadata, environment, osaction, route, group, partition,
-	and controller data for each host.
-	</arg>
-
-	<arg optional='1' type='string' name='network'>
-	Dump name, address, gateway, netmask, dsn, pxe, mtu, and zone
-	data for each network.
-	</arg>
-
-	<arg optional='1' type='string' name='global'>
-	Dump attr, route, firewall, partition, and controller data for
-	the global scope.
-	</arg>
-
-	<arg optional='1' type='string' name='os'>
-	Dump name, attr, route, firewall, partition, and controller
-	data for each os.
-	</arg>
-
-	<arg optional='1' type='string' name='appliance'>
-	Dump name, attr, route, firewall, partition, and controller
-	data for each appliance.
-	</arg>
-
-	<arg optional='1' type='string' name='group'>
-	Dump name data for each group.
-	</arg>
-
-	<arg optional='1' type='string' name='bootaction'>
-	Dump name, kernel, ramdisk, type, arg, and os data for each
-	bootaction.
-	</arg>
+	Dumps the entire state of the Stacki database as a JSON document.
 	"""
-	def run(self,params, args):
-		# runPlugins() returns a list of tuples where tuple[0] is the plugin name and
-		# tuple[1] is the return value
-		# each plugin examins 'args' to determine if it runs or not
-		data = self.runPlugins(args)
-		document_prep = {}
-		for plugin in data:
-			document_prep.update(plugin[1])
+	def run(self, params, args):
+		dump = {}
+		
+		self.set_scope('global')
 
-		self.beginOutput()
-		self.addOutput(None,json.dumps(document_prep, indent=2))
-		self.endOutput(trimOwner=True)
+		dump = OrderedDict(version    = stack.version,
+				   attr       = self.dump_attr(),
+				   controller = self.dump_controller(),
+				   partition  = self.dump_partition(),
+				   firewall   = self.dump_firewall(),
+				   route      = self.dump_route())
+
+
+		for (_, doc) in self.runPlugins():
+			dump.update(json.loads(doc))
+		
+		self.addText(json.dumps(dump, indent=8))

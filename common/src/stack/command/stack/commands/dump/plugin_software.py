@@ -4,7 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import stack
 import stack.commands
+import json
+from collections import OrderedDict
 
 class Plugin(stack.commands.Plugin):
 
@@ -13,50 +16,17 @@ class Plugin(stack.commands.Plugin):
 
 
 	def run(self, args):
+		box    = json.loads(self.owner.command('dump.box'),
+				    object_pairs_hook=OrderedDict)
+		cart   = json.loads(self.owner.command('dump.cart'),
+				    object_pairs_hook=OrderedDict)
+		pallet = json.loads(self.owner.command('dump.pallet'),
+				    object_pairs_hook=OrderedDict)
 
-		if args and 'software' not in args:
-			return
+		return json.dumps(OrderedDict(
+			version  = stack.version,
+			software = OrderedDict(
+				box    = box['software']['box'],
+				cart   = cart['software']['cart'],
+				pallet = pallet['software']['pallet'])), indent=8)
 
-		# if there is no data return an empty list
-		pallet_data = self.owner.call('list.pallet', [ 'expanded=true' ])
-		pallet_prep = []
-		if pallet_data:
-			for item in pallet_data:
-				boxes = item['boxes'].split()
-				# set username and password to None to act as a placeholder
-				pallet_prep.append({'name':item['name'],
-							'version':item['version'],
-							'release':item['release'],
-							'url':item['url'],
-							'urlauthUser':None,
-							'urlauthPass':None,
-							'boxes':boxes,
-							})
-
-		cart_data = self.owner.call('list.cart', [ 'expanded=true' ])
-		cart_prep = []
-		if cart_data:
-			for item in cart_data:
-				boxes = item['boxes'].split()
-				cart_prep.append({
-						'name':item['name'],
-						'boxes':boxes,
-						'url':item['url'],
-						'urlauthUser':None,
-						'urlauthPass':None,
-						})
-
-		box_data = self.owner.call('list.box')
-		box_prep = []
-		if box_data:
-			for item in box_data:
-				box_prep.append({'name':item['name'], 'os':item['os']})
-
-		document_prep = {}
-		document_prep['software'] = {'pallet':pallet_prep,
-						'cart':cart_prep,
-						'box':box_prep,
-						}
-
-
-		return(document_prep)

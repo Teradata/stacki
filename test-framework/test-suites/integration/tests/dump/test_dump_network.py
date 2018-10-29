@@ -27,7 +27,7 @@ class TestDumpNetwork:
 					'name': 'test',
 					'address': '192.168.0.0',
 					'gateway': '192.168.0.1',
-					'netmask': '255.255.255.0',
+					'mask': '255.255.255.0',
 					'dns': False,
 					'pxe': False,
 					'mtu': 1500,

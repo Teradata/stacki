@@ -5,12 +5,11 @@
 # @copyright@
 
 import stack.commands
-
 class Plugin(stack.commands.Plugin):
 
 	def provides(self):
-		return 'host'
+		return 'api'
 
 	def run(self, args):
-		return self.owner.command('dump.host')
+		return self.owner.command('dump.api')
 

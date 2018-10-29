@@ -17,7 +17,7 @@ class TestDumpHost:
 		assert results.rc == 0
 		results = host.run('stack set host metadata backend-test metadata=test')
 		assert results.rc == 0
-		results = host.run('stack add host attr backend-test attr=test value=test shadow=False')
+		results = host.run('stack add host attr backend-test attr=test value=test shadow=True')
 		assert results.rc == 0
 		results = host.run('stack add host interface backend-test channel=test default=False interface=eth1 ip=192.168.0.1 mac=00.11.22.33.44.55 module=test name=test network=private vlan=1')
 		assert results.rc == 0
@@ -54,10 +54,10 @@ class TestDumpHost:
 				assert host['interface'][0]['vlan'] == 1
 				assert host['interface'][0]['options'] == 'test option'
 				assert host['interface'][0]['channel'] == 'test'
-				for attr in host['attrs']:
+				for attr in host['attr']:
 					if attr['name'] == 'test':
 						assert attr['value'] == 'test'
-						assert attr['shadow'] == False
+						assert attr['shadow'] is True
 				assert host['firewall'][0]['name'] == 'test'
 				assert host['firewall'][0]['table'] == 'filter'
 				assert host['firewall'][0]['service'] == 'www'
@@ -65,23 +65,19 @@ class TestDumpHost:
 				assert host['firewall'][0]['chain'] == 'INPUT'
 				assert host['firewall'][0]['action'] == 'ACCEPT'
 				assert host['firewall'][0]['network'] == 'private'
-				assert host['firewall'][0]['output-network'] == 'private'
+				assert host['firewall'][0]['output_network'] == 'private'
 				assert host['firewall'][0]['flags'] == '-m state'
 				assert host['firewall'][0]['comment'] == 'test'
-				assert host['firewall'][0]['source'] == 'H'
-				assert host['firewall'][0]['type'] == 'var'
 				assert host['box'] == 'default'
 				assert host['appliance'] == 'backend'
 				assert host['comment'] == 'test'
 				assert host['metadata'] == 'test'
 				assert host['osaction'] == 'default'
 				assert host['installaction'] == 'default'
-				assert host['route'][0]['network'] == '192.168.0.2'
+				assert host['route'][0]['address'] == '192.168.0.2'
 				assert host['route'][0]['netmask'] == '255.255.255.0'
 				assert host['route'][0]['gateway'] == '192.168.0.3'
-				assert host['route'][0]['subnet'] == None
 				assert host['route'][0]['interface'] == 'eth1'
-				assert host['route'][0]['source'] == 'H'
 				assert host['partition'][0]['device'] == 'test'
 				assert host['partition'][0]['partid'] == 1
 				assert host['partition'][0]['mountpoint'] == 'test'

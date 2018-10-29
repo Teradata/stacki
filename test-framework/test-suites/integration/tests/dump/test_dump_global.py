@@ -28,20 +28,17 @@ class TestDumpGlobal:
 		dumped_data = json.loads(results.stdout)
 
 		# check to make sure that the information we just added is in the dump data
-		for attr in dumped_data['global']['attrs']:
-			if attr['attr'] == 'test':
-				assert attr['scope'] == 'global'
-				assert attr['type'] == 'var'
+		for attr in dumped_data['attr']:
+			if attr['name'] == 'test':
 				assert attr['value'] == 'testvalue'
 
-		for route in dumped_data['global']['route']:
-			if route['network'] == '192.168.0.0':
+		for route in dumped_data['route']:
+			if route['address'] == '192.168.0.0':
 				assert route['netmask'] == '255.255.255.0'
 				assert route['gateway'] == '192.168.0.1'
-				assert route['subnet'] == None
 				assert route['interface'] == 'eth0'
 
-		for firewall in dumped_data['global']['firewall']:
+		for firewall in dumped_data['firewall']:
 			if firewall['name'] == 'test':
 				assert firewall['table'] == 'filter'
 				assert firewall['service'] == 'www'
@@ -49,13 +46,11 @@ class TestDumpGlobal:
 				assert firewall['chain'] == 'INPUT'
 				assert firewall['action'] == 'ACCEPT'
 				assert firewall['network'] == 'private'
-				assert firewall['output-network'] == 'private'
+				assert firewall['output_network'] == 'private'
 				assert firewall['flags'] == '-m set'
 				assert firewall['comment'] == 'test'
-				assert firewall['source'] == 'G'
-				assert firewall['type'] == 'var'
 
-		for partition in dumped_data['global']['partition']:
+		for partition in dumped_data['partition']:
 			if partition['device'] == 'test':
 				assert partition['partid'] == 1
 				assert partition['mountpoint'] == 'test'
@@ -63,7 +58,7 @@ class TestDumpGlobal:
 				assert partition['fstype'] == 'ext4'
 				assert partition['options'] == 'test option'
 
-		for controller in dumped_data['global']['controller']:
+		for controller in dumped_data['controller']:
 			if controller['options'] == 'test':
 				assert controller['enclosure'] == 3
 				assert controller['adapter'] == 1

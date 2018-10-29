@@ -25,5 +25,5 @@ class TestDumpBootaction:
 				assert profile['kernel'] == 'test kernel'
 				assert profile['ramdisk'] == 'test ramdisk'
 				assert profile['type'] == 'os'
-				assert profile['args'] == ['test', 'arg']
+				assert profile['args'] == 'test arg'
 				assert profile['os'] == 'redhat'
