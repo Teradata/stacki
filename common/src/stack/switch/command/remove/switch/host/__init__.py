@@ -31,23 +31,21 @@ class Command(command):
 	<param type='string' name='interface' optional='0'>
 	Name of the host's interface that is connected to the switch (e.g., 'eth0').
 	</param>
-
 	"""
 
 	def run(self, params, args):
 		if len(args) < 1:
 			raise ArgRequired(self, 'switch')
-		
+
 		switch, = self.getSwitchNames(args)
 
 		host, port, interface = self.fillParams([
 			('host', None, True),
 			('port', None, True),
 			('interface', None, True)
-			])
+		])
 
 		# Check if host exists
-		hosts = self.getHostnames([host])
+		self.getHostnames([host])
 
 		self.delSwitchHost(switch, port, host, interface)
-
