@@ -6,19 +6,19 @@ import pytest
 
 @pytest.mark.usefixtures('create_pallet_isos', 'create_blank_iso')
 class TestAddPallet:
-	def test_add_pallet_no_pallet(self, host):
+	def test_no_pallet(self, host):
 		# Call add pallet with nothign mounted and no pallets passed in
 		result = host.run('stack add pallet')
 		assert result.rc == 255
 		assert result.stderr == 'error - no pallets provided and /mnt/cdrom is unmounted\n'
 
-	def test_add_pallet_invalid(self, host):
+	def test_invalid(self, host):
 		# Add something that doesn't exist
 		result = host.run('stack add pallet /export/test.iso')
 		assert result.rc == 255
 		assert result.stderr == 'error - Cannot find /export/test.iso or /export/test.iso is not an ISO image\n'
 
-	def test_add_pallet_username_no_password(self, host):
+	def test_username_no_password(self, host):
 		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso username=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -26,7 +26,7 @@ class TestAddPallet:
 			[pallet ...] [clean=bool] [dir=string] [password=string] [updatedb=string] [username=string]
 		''')
 
-	def test_add_pallet_password_no_username(self, host):
+	def test_password_no_username(self, host):
 		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso password=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -34,7 +34,7 @@ class TestAddPallet:
 			[pallet ...] [clean=bool] [dir=string] [password=string] [updatedb=string] [username=string]
 		''')
 
-	def test_add_pallet_minimal(self, host):
+	def test_minimal(self, host):
 		# Add our minimal pallet
 		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -54,7 +54,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_no_mountpoint(self, host, rmtree):
+	def test_no_mountpoint(self, host, rmtree):
 		# Remove our mountpoint
 		rmtree('/mnt/cdrom')
 
@@ -77,7 +77,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_mountpoint_in_use(self, host):
+	def test_mountpoint_in_use(self, host):
 		# Mount an ISO to simulate something left mounted
 		result = host.run('mount /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso /mnt/cdrom')
 		assert result.rc == 0
@@ -101,7 +101,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_mounted_cdrom(self, host):
+	def test_mounted_cdrom(self, host):
 		# Mount our pallet
 		result = host.run('mount /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso /mnt/cdrom')
 		assert result.rc == 0
@@ -128,7 +128,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_minimal_dryrun(self, host):
+	def test_minimal_dryrun(self, host):
 		# Add our minimal pallet as a dryrun
 		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso dryrun=true')
 		assert result.rc == 0
@@ -145,7 +145,7 @@ class TestAddPallet:
 			[pallet ...] {expanded=bool} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_add_pallet_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add our minimal pallet
 		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -171,7 +171,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_add_OS_pallet_again(self, host, host_os):
+	def test_add_OS_pallet_again(self, host, host_os):
 		# Add our OS pallet, which is already added so it should be quick
 		if host_os == 'sles':
 			result = host.run('stack add pallet /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso')
@@ -182,7 +182,7 @@ class TestAddPallet:
 			assert result.rc == 0
 			assert result.stdout == 'Copying CentOS 7-redhat7 pallet ...\n'
 
-	def test_add_pallet_add_OS_pallet_dryrun(self, host, host_os):
+	def test_add_OS_pallet_dryrun(self, host, host_os):
 		# Add our OS pallet as a dryrun
 		if host_os == 'sles':
 			result = host.run('stack add pallet /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso dryrun=true')
@@ -199,7 +199,7 @@ class TestAddPallet:
 				CentOS 7       redhat7 x86_64 redhat /export/isos/CentOS-7-x86_64-Everything-1708.iso
 			''')
 
-	def test_add_pallet_disk_pallet(self, host):
+	def test_disk_pallet(self, host):
 		# Add the minimal pallet from the disk
 		result = host.run('stack add pallet /export/test-files/pallets/minimal')
 		assert result.rc == 0
@@ -218,7 +218,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_network_iso(self, host, run_file_server):
+	def test_network_iso(self, host, run_file_server):
 		# Add the minimal pallet ISO from the network
 		result = host.run('stack add pallet http://127.0.0.1:8000/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -237,7 +237,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_network_directory(self, host, run_file_server):
+	def test_network_directory(self, host, run_file_server):
 		# Add the minimal pallet directory from the network
 		result = host.run('stack add pallet http://127.0.0.1:8000/pallets/minimal/1.0/sles12/sles/x86_64')
 		assert result.rc == 0
@@ -256,12 +256,12 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_failed_download(self, host, run_file_server):
+	def test_failed_download(self, host, run_file_server):
 		result = host.run('stack add pallet http://127.0.0.1:8000/test.iso')
 		assert result.rc == 255
 		assert result.stderr == 'error - unable to download test.iso: http error 404\n'
 
-	def test_add_pallet_invalid_iso(self, host):
+	def test_invalid_iso(self, host):
 		result = host.run('stack add pallet /export/test-files/pallets/blank.iso')
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown pallet on /mnt/cdrom\n'

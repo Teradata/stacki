@@ -7,7 +7,9 @@
 from operator import itemgetter
 
 import stack.commands
+from stack.exception import CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
+from stack.switch import SwitchException
 
 class Plugin(stack.commands.Plugin):
 
@@ -32,15 +34,20 @@ class Plugin(stack.commands.Plugin):
 				continue
 
 			kwargs = {
-				'username': switch_attrs[host].get('username'),
-				'password': switch_attrs[host].get('password'),
+				'username': switch_attrs[host].get('switch_username'),
+				'password': switch_attrs[host].get('switch_password'),
 			}
 
 			# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs
 			kwargs = {k:v for k, v in kwargs.items() if v is not None}
 
 			s = SwitchMellanoxM7800(host, **kwargs)
-			s.connect()
+			try:
+				s.connect()
+			except SwitchException as e:
+				host_info[host] = (None, switch_attrs[host].get('ibfabric', None))
+				continue
+
 			host_info[host] = (s.subnet_manager, switch_attrs[host].get('ibfabric', None))
 
 		return { 'keys' : ['ib subnet manager', 'ib fabric'],

@@ -10,8 +10,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import stack
 import ipaddress
+
 import stack.commands
 from stack.commands import Warn
 import stack.text
@@ -40,11 +40,11 @@ class Command(stack.commands.HostArgumentProcessor,
 	stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.
+
 	<example cmd='report dhcpd'>
 	Output the DHCP server configuration file.
 	</example>
 	"""
-
 
 	def writeDhcpDotConf(self):
 		self.addOutput('', '<stack:file stack:name="/etc/dhcp/dhcpd.conf">')
@@ -57,26 +57,23 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		servers = {}
 		for row in self.db.select("""
-			s.name, n.ip from
-			nodes nd, subnets s, networks n where 
-			s.id	   = n.subnet and 
-			s.pxe	   = TRUE     and 
-			n.node	   = nd.id    and 
-			nd.name	   = '%s'
-			""" % self.db.getHostname()):
+			s.name, n.ip from nodes nd, subnets s, networks n
+			where s.pxe=TRUE and nd.name=%s
+			and n.node=nd.id and s.id=n.subnet
+		""", (self.db.getHostname(),)):
 			servers[row[0]]	   = row[1]
 			servers['default'] = row[1]
+
 		if len(servers) > 2:
 			del servers['default']
 
 		shared_networks = {}
 		for (netname, network, netmask, gateway, zone, device) in self.db.select("""
-			s.name, s.address, s.mask, s.gateway, s.zone, n.device from 
-			subnets s, networks n where
-			pxe	= TRUE and
-			node	= (select id from nodes where name='%s') and
-			subnet	= s.id
-			""" % self.db.getHostname()):
+			s.name, s.address, s.mask, s.gateway, s.zone, n.device
+			from subnets s, networks n
+			where pxe=TRUE and node=(select id from nodes where name=%s)
+			and subnet=s.id
+		""", (self.db.getHostname(),)):
 
 			if self.os == 'sles':
 				device = device.split('.')[0].split(':')[0]
@@ -179,7 +176,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			mac = None
 			ip  = None
 			dev = None
-			
+
 			#
 			# look for a physical private interface that has an
 			# IP address assigned to it.
@@ -188,16 +185,17 @@ class Command(stack.commands.HostArgumentProcessor,
 				if not ip:
 					try:
 						ip = self.resolve_ip(name, dev)
-					except ValueError:
+					except IndexError:
 						Warn(f'WARNING: skipping interface "{device}" on host "{host}" - duplicate interface detected')
 						continue
 				netname = None
 				if ip:
 					r = self.db.select("""
-					s.name from subnets s, networks nt,
-					nodes n where nt.node=n.id and
-					n.name='%s' and nt.subnet=s.id and
-					s.pxe = TRUE and nt.ip = '%s'""" % (name, ip))
+						s.name from subnets s, networks nt, nodes n
+						where nt.node=n.id and n.name=%s
+						and nt.subnet=s.id and s.pxe=TRUE and nt.ip=%s
+					""", (name, ip))
+
 					if r:
 						(netname, ) = r[0]
 				if ip and mac and dev and netname and not aws:
@@ -219,7 +217,7 @@ class Command(stack.commands.HostArgumentProcessor,
 							% server)
 						self.addOutput('','\tnext-server\t\t%s;'
 							% server)
-				
+
 					self.addOutput('', '}')
 
 		self.addOutput('', '</stack:file>')
@@ -230,15 +228,14 @@ class Command(stack.commands.HostArgumentProcessor,
 		(for example, if the interface is part of a bond).
 		"""
 
-		(ip, channel), = self.db.select("""nt.ip,
-			nt.channel from networks nt, nodes n
-			where n.name=%s and nt.device=%s and
-			nt.node=n.id""", (host, device))
+		(ip, channel) = self.db.select("""
+			nt.ip, nt.channel from networks nt, nodes n
+			where n.name=%s and nt.device=%s and nt.node=n.id
+		""", (host, device))[0]
 
 		if channel:
 			return self.resolve_ip(host, channel)
 		return ip
-
 
 	def writeDhcpSysconfig(self):
 		self.addOutput('', '<stack:file stack:name="/etc/sysconfig/dhcpd">')
@@ -246,13 +243,10 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		devices = set()
 		for device, in self.db.select("""
-			device from
-			networks n, subnets s
-			where n.node = (select id from nodes where name = '%s') and
-			s.pxe = TRUE and
-			n.subnet = s.id and
-			n.ip is not NULL
-			""" % self.db.getHostname()):
+			device from networks n, subnets s
+			where n.node=(select id from nodes where name=%s)
+			and s.pxe=TRUE and n.ip is not NULL and n.subnet=s.id
+		""", (self.db.getHostname(),)):
 
 			# since sles doesn't use seperate config files for virtual 
 			# interfaces, we only add the actual interface to devices
@@ -262,7 +256,7 @@ class Command(stack.commands.HostArgumentProcessor,
 			else:
 				devices.add(device)
 
-		devices = ' '.join(devices)
+		devices = ' '.join(sorted(devices))
 
 		if self.os == 'redhat':
 			self.addOutput('', f'DHCPDARGS="{devices}"')
@@ -270,11 +264,9 @@ class Command(stack.commands.HostArgumentProcessor,
 			self.addOutput('', f'DHCPD_INTERFACE="{devices}"')
 
 		self.addOutput('', '</stack:file>')
-		
 
 	def run(self, params, args):
 		self.beginOutput()
 		self.writeDhcpDotConf()
 		self.writeDhcpSysconfig()
 		self.endOutput(padChar='')
-

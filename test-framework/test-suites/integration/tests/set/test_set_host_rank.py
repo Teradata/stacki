@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostRank:
-	def test_set_host_rank_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host rank')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostRank:
 			{host ...} {rank=string}
 		''')
 
-	def test_set_host_rank_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host rank a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostRank:
 			{host ...} {rank=string}
 		''')
 
-	def test_set_host_rank_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host rank frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestSetHostRank:
 			{host ...} {rank=string}
 		''')
 
-	def test_set_host_rank_single_host(self, host, add_host, host_os):
+	def test_single_host(self, host, add_host, host_os):
 		# Set the host rank
 		result = host.run('stack set host rank backend-0-0 rank=1')
 		assert result.rc == 0
@@ -48,7 +48,7 @@ class TestSetHostRank:
 			'rank': '1'
 		}]
 
-	def test_set_host_rank_multiple_hosts(self, host, add_host, host_os):
+	def test_multiple_hosts(self, host, add_host, host_os):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 

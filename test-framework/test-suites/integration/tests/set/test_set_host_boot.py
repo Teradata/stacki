@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestSetHostBoot:
-	def test_set_host_boot_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack set host boot')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestSetHostBoot:
 			{host ...} {action=string} [nukecontroller=boolean] [nukedisks=boolean] [sync=boolean]
 		''')
 
-	def test_set_host_boot_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack set host boot a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestSetHostBoot:
 			{host ...} {action=string} [nukecontroller=boolean] [nukedisks=boolean] [sync=boolean]
 		''')
 
-	def test_set_host_boot_no_parameters(self, host):
+	def test_no_parameters(self, host):
 		result = host.run('stack set host boot frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestSetHostBoot:
 			{host ...} {action=string} [nukecontroller=boolean] [nukedisks=boolean] [sync=boolean]
 		''')
 
-	def test_set_host_boot_invalid_action(self, host):
+	def test_invalid_action(self, host):
 		result = host.run('stack set host boot frontend-0-0 action=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -35,7 +35,7 @@ class TestSetHostBoot:
 			{host ...} {action=string} [nukecontroller=boolean] [nukedisks=boolean] [sync=boolean]
 		''')
 
-	def test_set_host_boot_single_host(self, host, add_host):
+	def test_single_host(self, host, add_host):
 		# Set the host boot action
 		result = host.run('stack set host boot backend-0-0 action=install')
 		assert result.rc == 0
@@ -50,7 +50,7 @@ class TestSetHostBoot:
 			'nukecontroller': False
 		}]
 
-	def test_set_host_boot_multiple_hosts(self, host, add_host):
+	def test_multiple_hosts(self, host, add_host):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
 
@@ -78,7 +78,7 @@ class TestSetHostBoot:
 			}
 		]
 
-	def test_set_host_boot_all_parameters(self, host, add_host):
+	def test_all_parameters(self, host, add_host):
 		# Set the host boot action
 		result = host.run(
 			'stack set host boot backend-0-0 action=install '
@@ -96,7 +96,7 @@ class TestSetHostBoot:
 			'nukecontroller': True
 		}]
 
-	def test_set_host_boot_existing(self, host, add_host):
+	def test_existing(self, host, add_host):
 		# Set the host boot action
 		result = host.run('stack set host boot backend-0-0 action=install')
 		assert result.rc == 0

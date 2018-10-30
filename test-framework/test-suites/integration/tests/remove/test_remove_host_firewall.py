@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveHostFirewall:
-	def test_remove_host_firewall_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove host firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,14 +11,14 @@ class TestRemoveHostFirewall:
 			{host ...} {rulename=string}
 		''')
 
-	def test_remove_host_firewall_invalid(self, host, invalid_host):
+	def test_invalid(self, host, invalid_host):
 		result = host.run(
 			f'stack remove host firewall {invalid_host} rulename=test'
 		)
 		assert result.rc == 255
 		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
-	def test_remove_host_firewall_no_rulename(self, host, add_host):
+	def test_no_rulename(self, host, add_host):
 		result = host.run('stack remove host firewall backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -26,12 +26,12 @@ class TestRemoveHostFirewall:
 			{host ...} {rulename=string}
 		''')
 
-	def test_remove_host_firewall_invalid_rulename(self, host, add_host):
+	def test_invalid_rulename(self, host, add_host):
 		result = host.run('stack remove host firewall backend-0-0 rulename=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule test does not exist for host backend-0-0\n'
 
-	def test_remove_host_firewall_one_arg(self, host, add_host):
+	def test_one_arg(self, host, add_host):
 		# Add a firewall rule
 		result = host.run(
 			'stack add host firewall backend-0-0 service=1234 chain=INPUT '
@@ -77,7 +77,7 @@ class TestRemoveHostFirewall:
 		]
 		assert rules == []
 
-	def test_remove_host_firewall_multiple_args(self, host, add_host):
+	def test_multiple_args(self, host, add_host):
 		# Add a firewall rule for our first host
 		result = host.run(
 			'stack add host firewall backend-0-0 service=1234 chain=INPUT '

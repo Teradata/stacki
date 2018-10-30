@@ -124,4 +124,6 @@ class ParamValue(ParamError):
 	def __init__(self, cmd, param, value):
 		super(ParamValue, self).__init__(cmd, param, 'must be %s' % value)
 
-	
+class ParamUnique(ParamError):
+	def __init__(self, cmd, arg=None):
+		super().__init__(cmd, arg, 'must be unique')

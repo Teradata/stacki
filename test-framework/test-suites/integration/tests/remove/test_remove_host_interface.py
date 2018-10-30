@@ -3,12 +3,12 @@ from textwrap import dedent
 
 
 class TestRemoveHostInterface:
-	def test_remove_host_interface_invalid_host(self, host):
+	def test_invalid_host(self, host):
 		result = host.run('stack remove host interface test')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot resolve host "test"\n'
 
-	def test_remove_host_interface_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove host interface')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -16,7 +16,7 @@ class TestRemoveHostInterface:
 			[host ...] [all=bool] [interface=string] [mac=string]
 		''')
 
-	def test_remove_host_interface_no_host_matches(self, host):
+	def test_no_host_matches(self, host):
 		result = host.run('stack remove host interface a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -24,7 +24,7 @@ class TestRemoveHostInterface:
 			[host ...] [all=bool] [interface=string] [mac=string]
 		''')
 
-	def test_remove_host_interface_no_parameters(self, host, add_host_with_interface):
+	def test_no_parameters(self, host, add_host_with_interface):
 		result = host.run('stack remove host interface backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -32,17 +32,17 @@ class TestRemoveHostInterface:
 			[host ...] [all=bool] [interface=string] [mac=string]
 		''')
 
-	def test_remove_host_interface_invalid_interface(self, host, add_host):
+	def test_invalid_interface(self, host, add_host):
 		result = host.run('stack remove host interface backend-0-0 interface=eth0')
 		assert result.rc == 255
 		assert result.stderr == 'error - no interface "eth0" exists on backend-0-0\n'
 
-	def test_remove_host_interface_invalid_mac(self, host, add_host):
+	def test_invalid_mac(self, host, add_host):
 		result = host.run('stack remove host interface backend-0-0 mac=00:11:22:33:44:55')
 		assert result.rc == 255
 		assert result.stderr == 'error - no mac address "00:11:22:33:44:55" exists on backend-0-0\n'
 
-	def test_remove_host_interface_single_arg(self, host, add_host_with_interface):
+	def test_single_arg(self, host, add_host_with_interface):
 		# Add a second interface which shouldn't get removed
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0
@@ -70,7 +70,7 @@ class TestRemoveHostInterface:
 			}
 		]
 
-	def test_remove_host_interface_multiple_args(self, host, add_host_with_interface):
+	def test_multiple_args(self, host, add_host_with_interface):
 		# Add a second interface which shouldn't get removed
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0
@@ -118,7 +118,7 @@ class TestRemoveHostInterface:
 			}
 		]
 
-	def test_remove_host_interface_with_mac(self, host, add_host_with_interface):
+	def test_with_mac(self, host, add_host_with_interface):
 		# Add a second interface which shouldn't get removed
 		result = host.run('stack add host interface backend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -146,7 +146,7 @@ class TestRemoveHostInterface:
 			}
 		]
 
-	def test_remove_host_interface_with_all(self, host, add_host_with_interface):
+	def test_with_all(self, host, add_host_with_interface):
 		# Add a second interface which should get removed as well
 		result = host.run('stack add host interface backend-0-0 interface=eth1')
 		assert result.rc == 0

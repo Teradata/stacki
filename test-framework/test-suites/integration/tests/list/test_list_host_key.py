@@ -2,12 +2,12 @@ import json
 
 
 class TestListHostKey:
-	def test_list_host_key_invalid(self, host, invalid_host):
+	def test_invalid(self, host, invalid_host):
 		result = host.run(f'stack list host key {invalid_host}')
 		assert result.rc == 255
 		assert result.stderr == f'error - cannot resolve host "{invalid_host}"\n'
 
-	def test_list_host_key_no_args(self, host, add_host):
+	def test_no_args(self, host, add_host):
 		# Add a few keys
 		result = host.run('stack add host key frontend-0-0 key=frontend_key')
 		assert result.rc == 0
@@ -31,7 +31,7 @@ class TestListHostKey:
 			}
 		]
 
-	def test_list_host_key_one_arg(self, host, add_host):
+	def test_one_arg(self, host, add_host):
 		# Add a few keys for the frontend
 		result = host.run('stack add host key frontend-0-0 key=frontend_key_1')
 		assert result.rc == 0
@@ -59,7 +59,7 @@ class TestListHostKey:
 			}
 		]
 
-	def test_list_host_key_multiple_args(self, host, add_host):
+	def test_multiple_args(self, host, add_host):
 		# Add a few keys for the frontend
 		result = host.run('stack add host key frontend-0-0 key=frontend_key_1')
 		assert result.rc == 0
@@ -110,7 +110,7 @@ class TestListHostKey:
 			}
 		]
 
-	def test_list_host_key_with_multiple_lines(self, host):
+	def test_with_multiple_lines(self, host):
 		# Add a key for the frontend with a newline
 		result = host.run('stack add host key frontend-0-0 key="frontend_key_1\nfrontend_key_2"')
 		assert result.rc == 0

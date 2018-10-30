@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveHostPartition:
-	def test_remove_host_partition_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack remove host partition')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveHostPartition:
 			{host ...} [device=string] [partition=string] [uuid=string]
 		''')
 
-	def test_remove_host_partition_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack remove host partition a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveHostPartition:
 			{host ...} [device=string] [partition=string] [uuid=string]
 		''')
 
-	def test_remove_host_partition_no_parameters(self, host, add_host):
+	def test_no_parameters(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1')
 		assert result.rc == 0
@@ -94,7 +94,7 @@ class TestRemoveHostPartition:
 			}
 		]
 
-	def test_remove_host_partition_with_uuid(self, host, add_host):
+	def test_with_uuid(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1 uuid=test')
 		assert result.rc == 0
@@ -181,7 +181,7 @@ class TestRemoveHostPartition:
 			}
 		]
 
-	def test_remove_host_partition_with_parition(self, host, add_host):
+	def test_with_parition(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1 mountpoint=/')
 		assert result.rc == 0
@@ -268,7 +268,7 @@ class TestRemoveHostPartition:
 			}
 		]
 
-	def test_remove_host_partition_with_device(self, host, add_host):
+	def test_with_device(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1')
 		assert result.rc == 0
@@ -355,7 +355,7 @@ class TestRemoveHostPartition:
 			}
 		]
 
-	def test_remove_host_partition_with_all_parameters(self, host, add_host):
+	def test_with_all_parameters(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1 mountpoint=/ uuid=test')
 		assert result.rc == 0
@@ -442,7 +442,7 @@ class TestRemoveHostPartition:
 			}
 		]
 
-	def test_remove_host_partition_multiple_hosts(self, host, add_host):
+	def test_multiple_hosts(self, host, add_host):
 		# Add the same partition info to both hosts
 		result = host.run('stack add host partition frontend-0-0 device=sda1 mountpoint=/ uuid=test')
 		assert result.rc == 0

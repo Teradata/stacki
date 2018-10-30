@@ -43,7 +43,7 @@ for line in f.readlines():
 #
 # add net.ipv4.ip_forward
 #
-output = output + 'net.ipv4.ip_forward = 1\n'
+output = output + '\nnet.ipv4.ip_forward = 1\n'
 
 #
 # rewrite /etc/sysctl.conf

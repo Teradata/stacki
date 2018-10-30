@@ -471,6 +471,32 @@ CREATE TABLE storage_partition (
  Options        varchar(512) NOT NULL default ''
 );
 
+
+<!-- Infiniband stuff -->
+
+DROP TABLE IF EXISTS ib_partitions;
+CREATE TABLE ib_partitions (
+  id		int(11) NOT NULL auto_increment,
+  switch	int(11) NOT NULL references nodes on delete cascade,
+  part_key	int(11) NOT NULL,
+  part_name	varchar(128) NOT NULL,
+  options	varchar(128) NOT NULL default '',
+  PRIMARY KEY (id),
+  INDEX (part_name)
+);
+
+DROP TABLE IF EXISTS ib_memberships;
+CREATE TABLE ib_memberships (
+  id		int(11) NOT NULL auto_increment,
+  switch	int(11) NOT NULL references nodes on delete cascade,
+  interface	int(11) NOT NULL references networks on delete cascade,
+  part_name	int(11) NOT NULL references ib_partitions on delete cascade,
+  member_type	varchar(32) NOT NULL default 'limited',
+  PRIMARY KEY (id),
+  INDEX (switch, part_name, interface)
+);
+
+
 </stack:file>
 
 /usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf \

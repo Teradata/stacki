@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveGroup:
-	def test_remove_group_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove group')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,12 +11,12 @@ class TestRemoveGroup:
 			{group}
 		''')
 
-	def test_remove_group_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove group test')
 		assert result.rc == 255
 		assert result.stderr == 'error - group test does not exist\n'
 
-	def test_remove_group_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		result = host.run('stack remove group test test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -24,7 +24,7 @@ class TestRemoveGroup:
 			{group}
 		''')
 
-	def test_remove_group_in_use(self, host, add_host):
+	def test_in_use(self, host, add_host):
 		# Add the group
 		result = host.run('stack add group test')
 		assert result.rc == 0
@@ -48,7 +48,7 @@ class TestRemoveGroup:
 		assert result.rc == 255
 		assert result.stderr == 'error - group test is in use\n'
 
-	def test_remove_group(self, host, add_host):
+	def test_one_arg(self, host, add_host):
 		# Add the group
 		result = host.run('stack add group test')
 		assert result.rc == 0

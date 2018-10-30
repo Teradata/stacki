@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveBox:
-	def test_remove_box_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove box')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveBox:
 			{box}
 		''')
 
-	def test_remove_box_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove box test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,12 +19,12 @@ class TestRemoveBox:
 			{box}
 		''')
 
-	def test_remove_box_default(self, host):
+	def test_default(self, host):
 		result = host.run('stack remove box default')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove default box\n'
 
-	def test_remove_box_in_use(self, host, add_box, add_host):
+	def test_in_use(self, host, add_box, add_host):
 		# Add our backend-0-0 to the new test box
 		result = host.run('stack set host box backend-0-0 box=test')
 		assert result.rc == 0
@@ -34,7 +34,7 @@ class TestRemoveBox:
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove box "test" because host "backend-0-0" is assigned to it\n'
 
-	def test_remove_box_single_arg(self, host, add_box, host_os):
+	def test_single_arg(self, host, add_box, host_os):
 		# Confirm the test box is there
 		result = host.run('stack list box test output-format=json')
 		assert result.rc == 0
@@ -59,7 +59,7 @@ class TestRemoveBox:
 			[box ...]
 		''')
 
-	def test_remove_box_multiple_args(self, host, add_box, host_os):
+	def test_multiple_args(self, host, add_box, host_os):
 		# Create a second box
 		add_box('foo')
 

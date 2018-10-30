@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveAppliance:
-	def test_remove_appliance_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove appliance')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveAppliance:
 			{name}
 		''')
 
-	def test_remove_appliance_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove appliance test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,19 +19,19 @@ class TestRemoveAppliance:
 			{name}
 		''')
 
-	def test_remove_appliance_backend(self, host):
+	def test_backend(self, host):
 		# Try to remove the "backend" appliance, which isn't allowed
 		result = host.run('stack remove appliance backend')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove default appliance\n'
 
-	def test_remove_appliance_in_use(self, host):
+	def test_in_use(self, host):
 		# Try to remove the "frontend" appliance, which is in use
 		result = host.run('stack remove appliance frontend')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove appliance "frontend" because host "frontend-0-0" is assigned to it\n'
 
-	def test_remove_appliance_one_arg(self, host, add_appliance):
+	def test_one_arg(self, host, add_appliance):
 		# Add some appliance scoped data to exercise the plugins
 		result = host.run('stack add appliance attr test attr=test value=true')
 		assert result.rc == 0
@@ -57,7 +57,7 @@ class TestRemoveAppliance:
 			[appliance ...]
 		''')
 
-	def test_remove_appliance_multiple_args(self, host, add_appliance):
+	def test_multiple_args(self, host, add_appliance):
 		# Add a second test appliance
 		add_appliance('foo')
 

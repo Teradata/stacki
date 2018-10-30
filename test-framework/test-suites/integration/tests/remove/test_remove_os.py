@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveOS:
-	def test_remove_os_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove os')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveOS:
 			{os ...}
 		''')
 
-	def test_remove_os_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove os test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveOS:
 			{os ...}
 		''')
 
-	def test_remove_os_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Add some child data to the OS scope, to exercise the plugins
 		result = host.run('stack add os attr ubuntu attr=test value=True')
 		assert result.rc == 0
@@ -47,7 +47,7 @@ class TestRemoveOS:
 			[os ...]
 		''')
 
-	def test_remove_os_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		# Add some child data to the os scope, to exercise the plugins
 		result = host.run(
 			'stack add os attr ubuntu vmware attr=test value=True'

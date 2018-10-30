@@ -3,12 +3,12 @@ from textwrap import dedent
 
 
 class TestRemoveHostRoute:
-	def test_remove_host_route_invalid_host(self, host):
+	def test_invalid_host(self, host):
 		result = host.run('stack remove host route test')
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot resolve host "test"\n'
 
-	def test_remove_host_route_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove host route')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -16,7 +16,7 @@ class TestRemoveHostRoute:
 			{host ...} {address=string} [syncnow=string]
 		''')
 
-	def test_remove_host_route_no_host_matches(self, host):
+	def test_no_host_matches(self, host):
 		result = host.run('stack remove host route a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -24,7 +24,7 @@ class TestRemoveHostRoute:
 			{host ...} {address=string} [syncnow=string]
 		''')
 
-	def test_remove_host_route_no_address(self, host):
+	def test_no_address(self, host):
 		result = host.run('stack remove host route frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -32,7 +32,7 @@ class TestRemoveHostRoute:
 			{host ...} {address=string} [syncnow=string]
 		''')
 
-	def test_remove_host_route_no_syncnow(self, host, revert_routing_table):
+	def test_no_syncnow(self, host, revert_routing_table):
 		# Add a route with sync now so it is added to the routing table
 		result = host.run(
 			'stack add host route frontend-0-0 '
@@ -74,7 +74,7 @@ class TestRemoveHostRoute:
 		assert result.rc == 0
 		assert '127.0.0.3' in result.stdout
 
-	def test_remove_host_route_with_syncnow(self, host, revert_routing_table):
+	def test_with_syncnow(self, host, revert_routing_table):
 		# Add a route with sync now so it is added to the routing table
 		result = host.run(
 			'stack add host route frontend-0-0 '

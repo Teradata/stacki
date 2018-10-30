@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures("add_host")
 class TestAddHostInterface:
-	def test_add_host_interface_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host interface')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -14,7 +14,7 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 	
-	def test_add_host_interface_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host interface a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -22,7 +22,7 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 	
-	def test_add_host_interface_no_interface_or_mac(self, host):
+	def test_no_interface_or_mac(self, host):
 		result = host.run('stack add host interface backend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -30,7 +30,7 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 
-	def test_add_host_interface_duplicate_interface(self, host):
+	def test_duplicate_interface(self, host):
 		# Add the interface
 		result = host.run('stack add host interface backend-0-0 interface=eth0')
 		assert result.rc == 0
@@ -40,7 +40,7 @@ class TestAddHostInterface:
 		assert result.rc == 255
 		assert result.stderr == 'error - interface exists\n'
 
-	def test_add_host_interface_duplicate_mac(self, host):
+	def test_duplicate_mac(self, host):
 		# Add the interface
 		result = host.run('stack add host interface backend-0-0 interface=eth0 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -50,7 +50,7 @@ class TestAddHostInterface:
 		assert result.rc == 255
 		assert result.stderr == 'error - mac exists\n'
 
-	def test_add_host_interface_invalid_name(self, host):
+	def test_invalid_name(self, host):
 		result = host.run('stack add host interface backend-0-0 interface=eth0 name=test.example.com')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -58,12 +58,12 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 	
-	def test_add_host_interface_invalid_network(self, host):
+	def test_invalid_network(self, host):
 		result = host.run('stack add host interface backend-0-0 interface=eth0 network=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - network "test" does not exist\n'
 	
-	def test_add_host_interface_invalid_vlan(self, host):
+	def test_invalid_vlan(self, host):
 		result = host.run('stack add host interface backend-0-0 interface=eth0 vlan=test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -71,7 +71,7 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 	
-	def test_add_host_interface_only_interface(self, host):
+	def test_only_interface(self, host):
 		# Add the interface
 		result = host.run('stack add host interface backend-0-0 interface=eth0')
 		assert result.rc == 0
@@ -95,7 +95,7 @@ class TestAddHostInterface:
 			}
 		]
 	
-	def test_add_host_interface_only_mac(self, host):
+	def test_only_mac(self, host):
 		# Add the interface
 		result = host.run('stack add host interface backend-0-0 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -119,7 +119,7 @@ class TestAddHostInterface:
 			}
 		]
 
-	def test_add_host_interface_all_parameters(self, host):
+	def test_all_parameters(self, host):
 		# Add the interface
 		result = host.run(
 			'stack add host interface backend-0-0 '
@@ -148,7 +148,7 @@ class TestAddHostInterface:
 			}
 		]
 	
-	def test_add_host_interface_empty_parameters(self, host):
+	def test_empty_parameters(self, host):
 		# Add the interface
 		result = host.run(
 			'stack add host interface backend-0-0 '
@@ -177,7 +177,7 @@ class TestAddHostInterface:
 			}
 		]
 	
-	def test_add_host_interface_NULL_parameters(self, host):
+	def test_NULL_parameters(self, host):
 		# Add the interface
 		result = host.run(
 			'stack add host interface backend-0-0 '
@@ -205,7 +205,7 @@ class TestAddHostInterface:
 			}
 		]
 
-	def test_add_host_interface_ip_auto_no_network(self, host):
+	def test_ip_auto_no_network(self, host):
 		# Add the interface
 		result = host.run(
 			'stack add host interface backend-0-0 '
@@ -217,7 +217,7 @@ class TestAddHostInterface:
 			{host} [channel=string] [default=boolean] [interface=string] [ip=string] [mac=string] [module=string] [name=string] [network=string] [vlan=string]
 		''')
 
-	def test_add_host_interface_ip_auto(self, host):
+	def test_ip_auto(self, host):
 		# Add the interface
 		result = host.run(
 			'stack add host interface backend-0-0 '
@@ -234,7 +234,7 @@ class TestAddHostInterface:
 				'default': None,
 				'host': 'backend-0-0',
 				'interface': 'eth0',
-				'ip': '192.168.0.254',
+				'ip': '192.168.0.1',
 				'mac': None,
 				'module': None,
 				'name': None,
@@ -245,7 +245,7 @@ class TestAddHostInterface:
 		]
 
 
-	def test_add_host_interface_duplicate_default_interface(self, host):
+	def test_duplicate_default_interface(self, host):
 		# Add a default host interface
 		result = host.run('stack add host interface backend-0-0 interface=eth0 default=true')
 		assert result.rc == 0

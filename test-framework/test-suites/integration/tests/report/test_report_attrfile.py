@@ -1,14 +1,10 @@
-import pytest
-
-
 class TestReportAttrfile:
-
 	"""
 	Test that the report function reports a csv that both loadable and consistent
 	consistent meaning that report -> load -> report should yield the same result
 	"""
 
-	def test_report_attrfile(self, host):
+	def test_roundtrip(self, host):
 		results = host.run(f'stack report attrfile')
 		assert results.rc == 0
 		output1 = results.stdout

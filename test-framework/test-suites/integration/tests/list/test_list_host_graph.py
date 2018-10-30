@@ -2,7 +2,7 @@ import re
 
 
 class TestListHostGraph:
-	def test_list_host_graph_no_hosts(self, host, add_host):
+	def test_no_hosts(self, host, add_host):
 		"Test when no hosts are specified"
 
 		result = host.run('stack list host graph')
@@ -52,7 +52,7 @@ class TestListHostGraph:
 			backend-0-0\s+ }
 		""", result.stdout, re.VERBOSE)
 
-	def test_list_host_graph_with_specific_host(self, host, add_host):
+	def test_with_specific_host(self, host, add_host):
 		"Test when a host is specified"
 		
 		result = host.run('stack list host graph backend-0-0')

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestDisableCart:
-	def test_disable_cart_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack disable cart')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestDisableCart:
 			{cart ...} [box=string]
 		''')
 
-	def test_disable_cart_invalid_cart(self, host):
+	def test_invalid_cart(self, host):
 		result = host.run('stack disable cart test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,12 +19,12 @@ class TestDisableCart:
 			{cart ...} [box=string]
 		''')
 
-	def test_disable_cart_invalid_box(self, host):
+	def test_invalid_box(self, host):
 		result = host.run('stack disable cart test box=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_disable_cart_default_box(self, host):
+	def test_default_box(self, host):
 		# Add our test cart
 		result = host.run('stack add cart test')
 		assert result.rc == 0
@@ -57,7 +57,7 @@ class TestDisableCart:
 			}
 		]
 
-	def test_disable_cart_with_box(self, host):
+	def test_with_box(self, host):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0

@@ -1,0 +1,23 @@
+<stack:file stack:name="/tmp/ipmisetup">
+IPMI_SI=yes
+DEV_IPMI=yes
+IPMI_WATCHDOG=no
+IPMI_WATCHDOG_OPTIONS="timeout=60"
+IPMI_POWEROFF=no
+IPMI_POWERCYCLE=no
+IPMI_IMB=no
+ipmitool lan set 1 ipsrc static
+ipmitool lan set 1 ipaddr 10.10.10.2
+ipmitool lan set 1 netmask 255.255.255.0
+ipmitool lan set 1 defgw ipaddr 10.10.10.1
+ipmitool lan set 1 arp respond on
+ipmitool lan set 1 vlan id off
+ipmitool lan set 1 access on
+ipmitool lan set 1 user
+ipmitool lan set 1 auth ADMIN PASSWORD
+ipmitool user set name 2 root
+ipmitool user set password 2 admin
+ipmitool user enable 2
+ipmitool channel setaccess 1 2 link=on ipmi=on callin=on privilege=4
+</stack:file>
+chmod 500 /tmp/ipmisetup

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveFirewall:
-	def test_remove_firewall_no_rulename(self, host):
+	def test_no_rulename(self, host):
 		result = host.run('stack remove firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,12 +11,12 @@ class TestRemoveFirewall:
 			{rulename=string}
 		''')
 
-	def test_remove_firewall_invalid_rulename(self, host):
+	def test_invalid_rulename(self, host):
 		result = host.run('stack remove firewall rulename=test')
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule test does not exist\n'
 
-	def test_remove_firewall(self, host):
+	def test_one_arg(self, host):
 		# Add a firewall rule
 		result = host.run(
 			'stack add firewall service=1234 chain=INPUT '

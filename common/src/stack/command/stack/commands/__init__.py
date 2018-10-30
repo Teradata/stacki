@@ -917,116 +917,8 @@ class DocStringHandler(handler.ContentHandler,
 		self.parser.setContentHandler(self)
 
 	def getDocbookText(self):
-		print('Docbook is no longer a viable format.')
-		raise(CommandError(self, 'Use "markdown"'))
-		s  = ''
-		s += '<section id="stack-%s" xreflabel="%s">\n' % \
-			('-'.join(self.name.split(' ')), self.name)
-		s += '<title>%s</title>\n' % self.name
-		s += '<cmdsynopsis>\n'
-		s += '\t<command>stack %s</command>\n' % self.name
-		for ((name, type, opt, rep), txt) in self.section['arg']:
-			if opt:
-				choice = 'opt'
-			else:
-				choice = 'req'
-			if rep:
-				repeat = 'repeat'
-			else:
-				repeat = 'norepeat'
-			s += '\t<arg rep="%s" choice="%s">%s</arg>\n' % \
-				(repeat, choice, name)
-		for ((name, type, opt, rep), txt) in self.section['param']:
-			if opt:
-				choice = 'opt'
-			else:
-				choice = 'req'
-			if rep:
-				repeat = 'repeat'
-			else:
-				repeat = 'norepeat'
-			s += '\t<arg rep="%s" choice="%s">' % (repeat, choice)
-			s += '%s=<replaceable>%s</replaceable>' % (name, type)
-			s += '</arg>\n'
-		s += '</cmdsynopsis>\n'
-		s += '<para>\n'
-		s += saxutils.escape(self.section['description'])
-		s += '\n</para>\n'
-		if self.section['arg']:
-			s += '<variablelist><title>arguments</title>\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['arg']:
-				s += '\t<varlistentry>\n'
-				if opt:
-					term = '<optional>%s</optional>' % name
-				else:
-					term = name
-				s += '\t<term>%s</term>\n' % term
-				s += '\t<listitem>\n'
-				s += '\t<para>\n'
-				s += saxutils.escape(txt)
-				s += '\n\t</para>\n'
-				s += '\t</listitem>\n'
-				s += '\t</varlistentry>\n'
-			s += '</variablelist>\n'
-		if self.section['param']:
-			s += '<variablelist><title>parameters</title>\n'
-			for ((name, type, opt, rep), txt) in \
-				self.section['param']:
-				s += '\t<varlistentry>\n'
-				if opt:
-					optStart = '<optional>'
-					optEnd	 = '</optional>'
-				else:
-					optStart = ''
-					optEnd	 = ''
-				key = '%s=' % name
-				val = '<replaceable>%s</replaceable>' % type
-				s += '\t<term>%s%s%s%s</term>\n' % \
-					(optStart, key, val, optEnd)
-				s += '\t<listitem>\n'
-				s += '\t<para>\n'
-				s += saxutils.escape(txt)
-				s += '\n\t</para>\n'
-				s += '\t</listitem>\n'
-				s += '\t</varlistentry>\n'
-			s += '</variablelist>\n'
-		if self.section['example']:
-			s += '<variablelist><title>examples</title>\n'
-			for (cmd, txt) in self.section['example']:
-				s += '\t<varlistentry>\n'
-				s += '\t<term>\n'
-				if 'root' in self.users:
-					s += '# '
-				else:
-					s += '$ '
-				s += 'stack %s' % cmd
-				s += '\n\t</term>\n'
-				s += '\t<listitem>\n'
-				s += '\t<para>\n'
-				s += saxutils.escape(txt)
-				s += '\n\t</para>\n'
-				s += '\t</listitem>\n'
-				s += '\t</varlistentry>\n'
-			s += '</variablelist>\n'
-		if self.section['related']:
-			s += '<variablelist><title>related commands</title>\n'
-			for related in self.section['related']:
-				s += '\t<varlistentry>\n'
-				s += '\t<term>'
-				s += '<xref linkend="stack-%s">' % \
-					'-'.join(related.split(' '))
-				s += '</term>\n'
-				s += '\t<listitem>\n'
-				s += '\t<para>\n'
-				s += '\n\t</para>\n'
-				s += '\t</listitem>\n'
-				s += '\t</varlistentry>\n'
-			s += '</variablelist>\n'
-		s += '</section>'
-		return s
+		raise CommandError(self, '"docbook" no longer supported - use "markdown"')
 
-	
 	def getUsageText(self, colors=None):
 		if colors:
 			bold   = colors['bold']['code']
@@ -1034,7 +926,7 @@ class DocStringHandler(handler.ContentHandler,
 		else:
 			bold   = ''
 			unbold = ''
-		
+
 		s = ''
 		for (name, type, rep, txt) in self.section['reqarg']:
 			if rep:

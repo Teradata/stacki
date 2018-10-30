@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.usefixtures('create_pallet_isos')
 class TestRunPallet:
-	def test_run_pallet_invalid_pallet(self, host):
+	def test_invalid_pallet(self, host):
 		result = host.run('stack run pallet test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -14,7 +14,7 @@ class TestRunPallet:
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_run_pallet_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack run pallet')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -22,7 +22,7 @@ class TestRunPallet:
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_run_pallet_not_enabled(self, host, host_os):
+	def test_not_enabled(self, host, host_os):
 		# Add our test pallet
 		result = host.run(
 			'stack add pallet '
@@ -35,7 +35,7 @@ class TestRunPallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - minimal is not enabled for the frontend\n'
 
-	def test_run_pallet_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Make sure the top of the output matches what we expect
 		result = host.run('script -qfec "stack run pallet stacki" - | tr -d "\r" | head -n 6')
 		assert result.rc == 0
@@ -49,7 +49,7 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_run_pallet_multiple_args(self, host, host_os):
+	def test_multiple_args(self, host, host_os):
 		# Add our test pallet
 		result = host.run(
 			f'stack add pallet '
@@ -74,7 +74,7 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_run_pallet_database_false(self, host, host_os):
+	def test_database_false(self, host, host_os):
 		# Add our test pallet
 		result = host.run(
 			f'stack add pallet '
@@ -99,7 +99,7 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_run_pallet_no_tty_xml_error(self, host, host_os):
+	def test_no_tty_xml_error(self, host, host_os):
 		# Run the command, passing false for database to skip the pallet
 		# check and feed it bad XML
 		result = host.run('echo "test" | stack run pallet database=false')

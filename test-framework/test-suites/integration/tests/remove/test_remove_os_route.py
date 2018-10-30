@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveOSRoute:
-	def test_remove_os_route_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove os route')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveOSRoute:
 			{os ...} {address=string}
 		''')
 
-	def test_remove_os_route_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove os route test address=192.168.0.1')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveOSRoute:
 			{os ...} {address=string}
 		''')
 
-	def test_remove_os_route_no_address(self, host):
+	def test_no_address(self, host):
 		result = host.run('stack remove os route sles')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestRemoveOSRoute:
 			{os ...} {address=string}
 		''')
 
-	def test_remove_os_route_one_arg(self, host):
+	def test_one_arg(self, host):
 		# Add an os route
 		result = host.run(
 			'stack add os route sles address=127.0.0.3 gateway=127.0.0.3'
@@ -55,7 +55,7 @@ class TestRemoveOSRoute:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_remove_os_route_multiple_args(self, host):
+	def test_multiple_args(self, host):
 		# Add an os route to sles
 		result = host.run(
 			'stack add os route sles address=127.0.0.3 gateway=127.0.0.3'

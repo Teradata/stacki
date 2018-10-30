@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddBox:
-	def test_add_box_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack add box')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddBox:
 			{box} [os=string]
 		''')
 
-	def test_add_box_no_os(self, host, host_os):
+	def test_no_os(self, host, host_os):
 		# Add the box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -28,7 +28,7 @@ class TestAddBox:
 			}
 		]
 
-	def test_add_box_with_os(self, host):
+	def test_with_os(self, host):
 		# Add the box (with an OS we won't be testing under)
 		result = host.run('stack add box test os=ubuntu')
 		assert result.rc == 0
@@ -45,7 +45,7 @@ class TestAddBox:
 			}
 		]
 	
-	def test_add_box_with_invalid_os(self, host):
+	def test_with_invalid_os(self, host):
 		result = host.run('stack add box test os=foo')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -53,7 +53,7 @@ class TestAddBox:
 			{box} [os=string]
 		''')
 	
-	def test_add_box_duplicate(self, host):
+	def test_duplicate(self, host):
 		result = host.run('stack add box default')
 		assert result.rc == 255
 		assert result.stderr == 'error - box "default" exists\n'

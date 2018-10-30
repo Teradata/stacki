@@ -1,0 +1,41 @@
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-bond0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+IPADDR=192.168.0.2
+NETMASK=255.255.255.0
+NETWORK=192.168.0.0
+BROADCAST=192.168.0.255
+BONDING_MASTER=yes
+BONDING_SLAVE0="eth0"
+BONDING_SLAVE1="eth1"
+BONDING_MODULE_OPTS="mode=1"
+STARTMODE=auto
+BOOTPROTO=static
+
+
+</stack:file>
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+HWADDR=00:00:00:00:00:01
+STARTMODE=auto
+BOOTPROTO=none
+
+
+</stack:file>
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-eth1">
+# AUTHENTIC STACKI
+USERCONTROL=no
+HWADDR=00:00:00:00:00:02
+STARTMODE=auto
+BOOTPROTO=none
+
+
+</stack:file>
+<stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:00:00:00:00:01", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:00:00:00:00:02", ATTR{type}=="1", KERNEL=="eth*", NAME="eth1"
+
+
+</stack:file>

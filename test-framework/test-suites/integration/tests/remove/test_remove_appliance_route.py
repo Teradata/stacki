@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveApplianceRoute:
-	def test_remove_appliance_route_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove appliance route')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveApplianceRoute:
 			{appliance} {address=string}
 		''')
 
-	def test_remove_appliance_route_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove appliance route test address=127.0.0.1')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveApplianceRoute:
 			{appliance} {address=string}
 		''')
 
-	def test_remove_appliance_route_no_address(self, host, add_appliance):
+	def test_no_address(self, host, add_appliance):
 		result = host.run('stack remove appliance route test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestRemoveApplianceRoute:
 			{appliance} {address=string}
 		''')
 
-	def test_remove_appliance_route_one_arg(self, host, add_appliance):
+	def test_one_arg(self, host, add_appliance):
 		# Add a couple appliance routes
 		result = host.run('stack add appliance route test address=192.168.0.2 gateway=private')
 		assert result.rc == 0
@@ -75,7 +75,7 @@ class TestRemoveApplianceRoute:
 			}
 		]
 
-	def test_remove_appliance_route_multiple_args(self, host, add_appliance):
+	def test_multiple_args(self, host, add_appliance):
 		# Add a couple appliance routes to the "test" appliance
 		result = host.run('stack add appliance route test address=192.168.0.2 gateway=private')
 		assert result.rc == 0

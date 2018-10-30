@@ -50,7 +50,8 @@ class ProducerBase:
 				self.sock.sendto(str(message).encode(),
 						 self.addr)
 
-		self.scheduler.enter(self.schedule(), 0, self.run, ())
+		if self.schedule():
+			self.scheduler.enter(self.schedule(), 0, self.run, ())
 		
 		
 	def schedule(self):

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestAddHostPartition:
-	def test_add_host_partition_no_hosts(self, host):
+	def test_no_hosts(self, host):
 		result = host.run('stack add host partition')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddHostPartition:
 			{host ...} [device=string] [formatflags=string] [fs=string] [mountpoint=string] [partid=string] [partitionflags=string] [sectorstart=string] [size=string] [uuid=string]
 		''')
 	
-	def test_add_host_partition_no_matching_hosts(self, host):
+	def test_no_matching_hosts(self, host):
 		result = host.run('stack add host partition a:test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddHostPartition:
 			{host ...} [device=string] [formatflags=string] [fs=string] [mountpoint=string] [partid=string] [partitionflags=string] [sectorstart=string] [size=string] [uuid=string]
 		''')
 	
-	def test_add_host_partition_no_device(self, host):
+	def test_no_device(self, host):
 		result = host.run('stack add host partition frontend-0-0')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -27,7 +27,7 @@ class TestAddHostPartition:
 			{host ...} [device=string] [formatflags=string] [fs=string] [mountpoint=string] [partid=string] [partitionflags=string] [sectorstart=string] [size=string] [uuid=string]
 		''')
 	
-	def test_add_host_partition_no_existing_info(self, host, add_host):
+	def test_no_existing_info(self, host, add_host):
 		# Add the partition info
 		result = host.run('stack add host partition backend-0-0 device=sda')
 		assert result.rc == 0
@@ -50,7 +50,7 @@ class TestAddHostPartition:
 			}
 		]
 	
-	def test_add_host_partition_with_existing_info(self, host, add_host):
+	def test_with_existing_info(self, host, add_host):
 		# Add some existing partition info
 		result = host.run('stack add host partition backend-0-0 device=sda mountpoint=/delete_me')
 		assert result.rc == 0
@@ -80,7 +80,7 @@ class TestAddHostPartition:
 			}
 		]
 	
-	def test_add_host_partition_all_parameters(self, host, add_host):
+	def test_all_parameters(self, host, add_host):
 		# Add the partition info
 		result = host.run('stack add host partition backend-0-0 device=sda '
 			'mountpoint=/ uuid=test_uuid sectorstart=1234 size=5678 partid=1 '

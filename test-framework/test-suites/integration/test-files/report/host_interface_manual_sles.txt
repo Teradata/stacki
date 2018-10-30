@@ -1,0 +1,9 @@
+<stack:file stack:name="/etc/sysconfig/network/ifcfg-eth0">
+# AUTHENTIC STACKI
+USERCONTROL=no
+NETMASK=255.255.255.0
+STARTMODE=manual
+BOOTPROTO=static
+
+
+</stack:file>

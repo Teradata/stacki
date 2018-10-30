@@ -4,8 +4,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import shlex
-
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import ArgUnique, CommandError
@@ -21,7 +19,8 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	<arg type='string' name='switch'>
 	Exactly one infiniband switch name which will become the subnet manager for
 	the fabric it is on.  All other infiniband switches on the same fabric will
-	have their subnet manager status disabled.
+	have their subnet manager status disabled.  Fabric is determined soley based
+	on the 'ibfabric' attribute.
 	</arg>
 
 	<param type='boolean' name='disable' optional='1'>
@@ -37,8 +36,8 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	def get_sw_handle(self, hostname):
 
 		kwargs = {
-			'username': self.switch_attrs[hostname].get('username'),
-			'password': self.switch_attrs[hostname].get('password'),
+			'username': self.switch_attrs[hostname].get('switch_username'),
+			'password': self.switch_attrs[hostname].get('switch_password'),
 		}
 
 		# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs
@@ -69,11 +68,13 @@ class Command(stack.commands.SwitchArgumentProcessor,
 			msg += 'Please verify the make and model attributes for this host.'
 			raise CommandError(self, msg)
 
-		ib_sw_nets = self.call('list.host.interface', ib_switch_names)
+		if switch_attrs[switch].get('switch_type') != 'infiniband':
+			msg = f'{switch} is not an infiniband switch, please verify "stack list host attr {switch} attr=switch_type"'
 
 		self.switch_attrs = self.getHostAttrDict(ib_switch_names)
 
 		if disable:
+			# explicit disable only affects this switch
 			switch = self.get_sw_handle(sm_switch)
 			switch.subnet_manager = False
 			switch.disconnect()
@@ -81,40 +82,21 @@ class Command(stack.commands.SwitchArgumentProcessor,
 
 		# NOTE assumes a single management port with options set.
 		# this obviously breaks if a switch can someday be on multiple fabrics
-
-		opts = next(sw['options'] for sw in ib_sw_nets if sw['host'] == sm_switch)
-		if not opts:
-			raise CommandError(self, f'switch {sm_switch} does not have its ibfabric set')
-
-		for opt in shlex.split(opts):
-			if opt.startswith('ibfabric='):
-				_, fabric = opt.split('=')
-				break
-
+		fabric = self.switch_attrs[sm_switch].get('ibfabric')
 		if not fabric:
 			raise CommandError(self, f'switch {sm_switch} does not have its ibfabric set')
 
 		switches_to_disable = []
-		for ib_sw in ib_sw_nets:
-			if ib_sw['host'] == sm_switch:
-				# this is the sm
+		for ib_sw in ib_switch_names:
+			if ib_sw == sm_switch:
+				# this one is the sm
 				continue
 
-			if not ib_sw['options']:
+			sw_fabric = self.switch_attrs[ib_sw].get('ibfabric')
+			if not sw_fabric or sw_fabric == fabric:
 				# switches with no fabric specified should be disabled
-				switches_to_disable.append(ib_sw['host'])
-				continue
-
-			opts = [opt for opt in shlex.split(ib_sw['options']) if opt.startswith('ibfabric=')]
-			if not opts:
-				# switches with no fabric specified should be disabled
-				switches_to_disable.append(ib_sw['host'])
-				continue
-
-			_, sw_fabric = opts[0].split('=')
-			if sw_fabric == fabric:
 				# other switches on the same fabric should be disabled
-				switches_to_disable.append(ib_sw['host'])
+				switches_to_disable.append(ib_sw)
 				continue
 
 		for switch in switches_to_disable:

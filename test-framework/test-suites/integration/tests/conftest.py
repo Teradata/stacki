@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import gc
 import glob
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -246,6 +247,48 @@ def add_host_with_interface():
 	return _inner
 
 @pytest.fixture
+def add_ib_switch():
+	def _inner(hostname, rack, rank, appliance, make, model, sw_type):
+		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy host')
+
+		cmd = f'stack set host attr {hostname} attr=component.make value={make}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set make')
+
+		cmd = f'stack set host attr {hostname} attr=component.model value={model}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set model')
+
+		cmd = f'stack set host attr {hostname} attr=switch_type value={sw_type}'
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to set switch type')
+
+	_inner('switch-0-0', '0', '0', 'switch', 'Mellanox', 'm7800', 'infiniband')
+
+	return _inner
+
+@pytest.fixture
+def add_ib_switch_partition():
+	def _inner(switch_name, partition_name, options):
+		cmd = f'stack add switch partition {switch_name} name={partition_name} '
+		if options is not None:
+			cmd += f'options={options}'
+
+		result = subprocess.run(cmd.split())
+		if result.returncode != 0:
+			pytest.fail('unable to add a dummy switch partition')
+
+	_inner('switch-0-0', 'Default', '')
+
+	return _inner
+
+@pytest.fixture
 def add_switch():
 	def _inner(hostname, rack, rank, appliance, make, model):
 		cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
@@ -466,8 +509,52 @@ def run_file_server():
 def host_os(host):
 	if host.file('/etc/SuSE-release').exists:
 		return 'sles'
-	
+
 	return 'redhat'
+
+@pytest.fixture
+def fake_os_sles(host):
+	"""
+	Trick Stacki into always seeing the OS (self.os) as SLES
+	"""
+
+	already_sles = host.file('/etc/SuSE-release').exists
+
+	# Move the release file if needed
+	if not already_sles:
+		result = host.run('mv /etc/centos-release /etc/SuSE-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake SLES OS')
+
+	yield
+
+	# Put things back the way they were
+	if not already_sles:
+		result = host.run('mv /etc/SuSE-release /etc/centos-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake SLES OS')
+
+@pytest.fixture
+def fake_os_redhat(host):
+	"""
+	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
+	"""
+
+	already_redhat = host.file('/etc/centos-release').exists
+
+	# Move the release file if needed
+	if not already_redhat:
+		result = host.run('mv /etc/SuSE-release /etc/centos-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake Redhat OS')
+
+	yield
+
+	# Put things back the way they were
+	if not already_redhat:
+		result = host.run('mv /etc/centos-release /etc/SuSE-release')
+		if result.rc != 0:
+			pytest.fail('unable to fake Redhat OS')
 
 @pytest.fixture
 def rmtree(tmpdir):
@@ -560,3 +647,27 @@ def create_blank_iso(tmpdir_factory):
 
 	# Clean up the ISO file
 	os.remove('/export/test-files/pallets/blank.iso')
+
+@pytest.fixture
+def inject_code(host):
+	"""
+	This returns a context manager used to inject code into the python
+	runtime environment. This is currently used to inject Mock code for
+	intergration tests.
+	"""
+
+	@contextmanager
+	def _inner(code_file):
+		result = host.run(
+			f'cp "{code_file}" /opt/stack/lib/python3.6/site-packages/sitecustomize.py'
+		)
+
+		if result.rc != 0:
+			pytest.fail(f'unable to inject code file "{code_file}"')
+
+		try:
+			yield
+		finally:
+			os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
+
+	return _inner

@@ -1,14 +1,9 @@
-import pytest
-
-
 class TestAddStorageController:
-
 	"""
 	Test that we can successfully add an os level storage partition
 	"""
 
-	def test_add_storage_partition(self, host):
-
+	def test_single_arg(self, host):
 		#this should work and have no errors
 		results = host.run('stack add storage partition redhat device=test0 size=1 partid=1')
 		assert results.rc == 0

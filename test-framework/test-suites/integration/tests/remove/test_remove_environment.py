@@ -3,7 +3,7 @@ from textwrap import dedent
 
 
 class TestRemoveEnvironment:
-	def test_remove_environment_no_args(self, host):
+	def test_no_args(self, host):
 		result = host.run('stack remove environment')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestRemoveEnvironment:
 			{environment ...}
 		''')
 
-	def test_remove_environment_invalid(self, host):
+	def test_invalid(self, host):
 		result = host.run('stack remove environment test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestRemoveEnvironment:
 			{environment ...}
 		''')
 
-	def test_remove_environment_in_use(self, host, add_host, add_environment):
+	def test_in_use(self, host, add_host, add_environment):
 		# Add our test backend to the test environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -29,7 +29,7 @@ class TestRemoveEnvironment:
 		assert result.rc == 255
 		assert result.stderr == 'error - environment test in use\n'
 
-	def test_remove_environment_one_arg(self, host, add_environment):
+	def test_one_arg(self, host, add_environment):
 		# Add some environment scoped data to exercise the plugins
 		result = host.run('stack add environment attr test attr=test value=true')
 		assert result.rc == 0
@@ -55,7 +55,7 @@ class TestRemoveEnvironment:
 			[environment ...]
 		''')
 
-	def test_remove_environment_multiple_args(self, host, add_environment):
+	def test_multiple_args(self, host, add_environment):
 		# Add a second test environment
 		add_environment('foo')
 

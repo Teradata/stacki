@@ -3,7 +3,7 @@ import re
 from textwrap import dedent
 
 class TestAddApplianceFirewall:
-	def test_add_appliance_firewall_no_appliances(self, host):
+	def test_no_appliances(self, host):
 		result = host.run('stack add appliance firewall')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -11,7 +11,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 
-	def test_add_appliance_firewall_invalid_appliance(self, host):
+	def test_invalid_appliance(self, host):
 		result = host.run('stack add appliance firewall foo')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
@@ -19,7 +19,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 
-	def test_add_appliance_firewall_no_service(self, host):
+	def test_no_service(self, host):
 		result = host.run(
 			'stack add appliance firewall frontend chain=INPUT '
 			'action=ACCEPT protocol=TCP network=private'
@@ -30,7 +30,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_appliance_firewall_no_chain(self, host):
+	def test_no_chain(self, host):
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 '
 			'action=ACCEPT protocol=TCP network=private'
@@ -41,7 +41,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_appliance_firewall_no_action(self, host):
+	def test_no_action(self, host):
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 '
 			'chain=INPUT protocol=TCP network=private'
@@ -52,7 +52,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_appliance_firewall_no_protocol(self, host):
+	def test_no_protocol(self, host):
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 '
 			'chain=INPUT action=ACCEPT network=private'
@@ -63,7 +63,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_appliance_firewall_no_networks(self, host):
+	def test_no_networks(self, host):
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 '
 			'chain=INPUT action=ACCEPT protocol=TCP'
@@ -74,7 +74,7 @@ class TestAddApplianceFirewall:
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
 	
-	def test_add_appliance_firewall_one_appliance(self, host):
+	def test_one_appliance(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -101,7 +101,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_appliance_firewall_multiple_appliances(self, host, add_host):
+	def test_multiple_appliances(self, host, add_host):
 		# Add the rules
 		result = host.run(
 			'stack add appliance firewall frontend backend service=1234 '
@@ -129,7 +129,7 @@ class TestAddApplianceFirewall:
 				'type': 'var'
 			}]
 
-	def test_add_appliance_firewall_network_all(self, host):
+	def test_network_all(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -156,7 +156,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_appliance_firewall_invalid_network(self, host):
+	def test_invalid_network(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -165,7 +165,7 @@ class TestAddApplianceFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
 
-	def test_add_appliance_firewall_output_network_all(self, host):
+	def test_output_network_all(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -192,7 +192,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 	
-	def test_add_appliance_firewall_output_network_existing(self, host):
+	def test_output_network_existing(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -219,7 +219,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_appliance_firewall_invalid_output_network(self, host):
+	def test_invalid_output_network(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -228,7 +228,7 @@ class TestAddApplianceFirewall:
 		assert result.rc == 255
 		assert result.stderr == 'error - output-network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
 
-	def test_add_appliance_firewall_all_parameters(self, host):
+	def test_all_parameters(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend table=nat service=1234 '
@@ -257,7 +257,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_appliance_firewall_no_rulename(self, host):
+	def test_no_rulename(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -292,7 +292,7 @@ class TestAddApplianceFirewall:
 			'type': 'var'
 		}]
 
-	def test_add_appliance_firewall_duplicate(self, host):
+	def test_duplicate(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '

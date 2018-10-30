@@ -5,93 +5,83 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import ParamRequired
 
 
 class Command(stack.commands.set.host.interface.command):
 	"""
 	Designates one network as the default route for a set of hosts.
-	Either the interface or network paramater is required.
+	Either the interface, mac, or network paramater is required.
 
-	<arg optional='1' repeat='1' type='string' name='host'>
-	Host name.
+	<arg type='string' name='host' repeat='1' optional='0'>
+	One or more hosts.
 	</arg>
-	
-	<param optional='0' type='string' name='interface'>
-	Device name of the default interface.
+
+	<param type='string' name='interface'>
+	Name of the interface.
 	</param>
 
-	<param optional='0' type='string' name='network'>
-	Network name of the default interface.
+	<param type='string' name='mac'>
+	MAC address of the interface.
 	</param>
 
-	<param optional='0' type='string' name='mac'>
-	MAC address name of the default interface.
+	<param type='string' name='network'>
+	Network name of the interface.
 	</param>
 
-	<param optional='0' type='bool' name='default'>
+	<param type='boolean' name='default' optional='1'>
 	Can be used to set the value of default to False.
 	</param>
 	"""
 
 	def run(self, params, args):
+		hosts = self.getHosts(args)
 
-		(default, interface, network, mac) = self.fillParams([
+		(default, interface, mac, network) = self.fillParams([
 			('default', 'true'),
 			('interface', None),
-			('network', None),
 			('mac', None),
-			])
+			('network', None)
+		])
 
 		default = self.str2bool(default)
 
-		if not interface and not network and not mac:
-			raise ParamRequired(self, ('interface', 'network', 'mac'))
+		# Gotta have one of these
+		if not any([interface, mac, network]):
+			raise ParamRequired(self, ('interface', 'mac', 'network'))
 
-		for host in self.getHostnames(args):
-			valid = False
-			# Check validity of params. Match them against the
-			# values in the database to check params.
-			for dict in self.call('list.host.interface', [host]):
-				if network and network == dict['network']:
-					valid = True
-					sql_set_cmd = """update networks net,
-					nodes n, subnets s set net.main = %d
-					where n.name = '%s' and s.name='%s'
-					and net.node = n.id and net.subnet=s.id""" % \
-					(default, host, network)
-					break
-				if interface and interface == dict['interface']:
-					valid = True
-					sql_set_cmd = """update networks net,
-					nodes n set net.main = %d where
-					n.name = '%s' and net.node = n.id
-					and net.device ='%s'""" % \
-					(default, host, interface)
-					break
-				if mac and mac == dict['mac']:
-					valid = True
-					sql_set_cmd = """update networks net,
-					nodes n set net.main = %d where
-					n.name = '%s' and net.node = n.id
-					and net.mac ='%s'""" % \
-					(default, host, mac)
-					break
-			if valid:
-				if default:
-					sql_clear_cmd = """update networks net,
-						nodes n set net.main = 0
-						where n.name = '%s' and
-						net.node = n.id """ % (host)
-					self.db.execute(sql_clear_cmd)
-				self.db.execute(sql_set_cmd)
+		# Make sure interface, mac, and/or network exist on our hosts
+		self.validate(hosts, interface, mac, network)
+
+		for host in hosts:
+			if default:
+				# Clear the old default
+				self.db.execute("""
+					update networks,nodes set networks.main=0
+					where nodes.name=%s and networks.node=nodes.id
+				""", (host,))
+
+			# Set the new default value (might be 0 or 1)
+			if network:
+				sql = """
+					update networks,nodes,subnets set networks.main=%s
+					where nodes.name=%s and subnets.name=%s
+					and networks.node=nodes.id and networks.subnet=subnets.id
+				"""
+				values = [default, host, network]
 			else:
-				if network:
-					raise CommandError(self, "Network '%s' for '%s' not found" % 
-						(network, host))
-				elif interface:
-					raise CommandError(self, "Interface '%s' for '%s' not found" % 
-						(interface, host))
-				elif mac:
-					raise CommandError(self, "MAC Address '%s' for '%s' not found" % 
-						(mac, host))
+				sql = """
+					update networks,nodes set networks.main=%s
+					where nodes.name=%s and networks.node=nodes.id
+				"""
+				values = [default, host]
+
+			if interface:
+				sql += " and networks.device=%s"
+				values.append(interface)
+
+			if mac:
+				sql += " and networks.mac=%s"
+				values.append(mac)
+
+			self.db.execute(sql, values)

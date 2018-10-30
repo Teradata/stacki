@@ -15,15 +15,16 @@ import tempfile
 
 class Package:
 
-	def __init__(self, name, *, master=False):
+	def __init__(self, name, *, master=False, version=None):
 		self.name         = name
 		self.master       = master
 		self.bootstrap    = False
-		self.version      = ''
 		self.license      = ''
 		self.url          = ''
 		self.appliances   = [ ]
 		self.dependencies = [ ]
+		if version is not None:
+			self.version = version
 
 
 class Scanner:
@@ -88,7 +89,7 @@ class Scanner:
 				if k.strip() == 'License':
 					meta['license'] = v.strip()
 
-		print(f'\t\t{meta}')
+#		print(f'\t\t{meta}')
 		package = Package(meta['name'])
 		package.version = meta['version']
 		package.license = meta['license']
@@ -98,7 +99,6 @@ class Scanner:
 
 	def readEgg(self, path):
 		print('\tfound egg %s' % os.path.split(path)[-1])
-#		os.system('cat %s' % os.path.join(path, 'PKG-INFO'))
 		meta = {}
 		with open(os.path.join(path, 'PKG-INFO'), 'r', encoding='utf-8') as text:
 			for line in text:
@@ -118,7 +118,7 @@ class Scanner:
 					_, value = value.split('::', 1)
 					meta['license'] = value.strip()
 
-		print(f'\t\t{meta}')
+#		print(f'\t\t{meta}')
 		package = Package(meta['name'])
 		package.version = meta['version']
 		package.license = meta['license']
@@ -148,16 +148,26 @@ with open('packages.json', 'r') as text:
 			package.appliances.append('client')
 		PackageSet[name] = package
 
+pkgmasters = sorted(PackageSet.keys()) # before implicits get mixed in
 
-# If we have versions.json file populate any missing version with the previously
-# computed values.
+# If we have versions.json file force the versions with the previously computed
+# values.
 
 if os.path.exists('versions.json'):
+	print(f'Processing versions.json')
 	with open('versions.json', 'r') as text:
 		versions = json.loads(text.read())
-	for package in PackageSet.values():
-		if not package.version:
-			package.version = versions[package.name]
+	for name in versions.keys():
+		if name not in PackageSet:
+			print(f'\timplicit {name} {versions[name]}')
+			PackageSet[name] = Package(name, version=versions[name])
+		else:
+			v = PackageSet[name].version
+			if v and v != versions[name]:
+				print(f'\twarning - explicit {name} {v} was {versions[name]}')
+			if not v:
+				print(f'\texplicit {name} {versions[name]}')
+				PackageSet[name].version = versions[name]
 
 # Compute dependencies and versions
 #
@@ -166,58 +176,70 @@ if os.path.exists('versions.json'):
 # out what got installed. Yes this means we build things twice when all
 # packages get refreshed.
 
-pkgnames = sorted(PackageSet.keys())
-for pkgname in pkgnames:
+for master in pkgmasters:
 	with tempfile.TemporaryDirectory() as tmp:
-		version = PackageSet[pkgname].version
+		version = PackageSet[master].version
 		if version:
-			target = '%s==%s' % (pkgname, version)
+			target = '%s==%s' % (master, version)
 		else:
-			target = pkgname
+			target = master
 		print('Unpacking %s' % target)
-		subprocess.run(['/opt/stack/bin/python3', '-mpip', 
-				 'install', '-I', '--root=%s' % tmp, target],
-			       stdout=subprocess.PIPE)
-		print('Scanning  %s' % pkgname)
+		os.environ['PKG_CONFIG_PATH'] = ':'.join(['/opt/stack/lib/pkgconfig',
+							  '/usr/lib/pkgconfig',
+							  '/usr/lib64/pkgconfig'])
+
+		p = subprocess.run(['/opt/stack/bin/python3', 
+				    '-mpip', 
+				    'install', 
+				    '-I', 
+				    f'--root={tmp}', 
+				    target],
+				   stdout=subprocess.PIPE)
+		print(p.stdout.decode())
+		print('Scanning  %s' % master)
 		for package in Scanner(tmp).packages:
-			if package.name == pkgname:
-				PackageSet[pkgname].version = package.version
-				PackageSet[pkgname].url     = package.url
-				PackageSet[pkgname].license = package.license
+			print(f'\tscanned {package.name} {package.version}')
+			if package.name == master:
+				if version is not None and version != package.version:
+					print(f'\t\tusing {version}')
+					package.version = version
+				PackageSet[master].version = package.version
+				PackageSet[master].url     = package.url
+				PackageSet[master].license = package.license
 			else:
-				package.bootstrap = PackageSet[pkgname].bootstrap
-				PackageSet[pkgname].dependencies.append(package)
+				if package.name in PackageSet:
+					_version = PackageSet[package.name].version
+					if _version is not None and _version != package.version:
+						print(f'\t\tusing {_version}')
+						package.version = _version
+				package.bootstrap = PackageSet[master].bootstrap
+				PackageSet[master].dependencies.append(package)
 				PackageSet[package.name] = package
-#		print(tmp)
-#		import time
-#		while True:
-#			time.sleep(10)
 				
 
-# Write out the computed version
+# Write out the computed versions and license information
 
-version = {} # just the master packages
-nosat   = {} # all the packages (help us audit 3rd party crap)
+version = {}
+license = {}
 for package in PackageSet.values():
-	if package.master:
-		version[package.name] = package.version
-	nosat[package.name] = package
-		
+	version[package.name] = package.version
+	license[package.name] = (package.version, package.license, package.url)
 with open('versions.json', 'w') as text:
 	text.write(json.dumps(version))
 
 rows   = []
 widths = [ 0, 0, 0, 0 ]
-for name in sorted(nosat.keys()):
-	rows.append([name, nosat[name].version, nosat[name].url, nosat[name].license])
+for name in sorted(license.keys()):
+	rows.append([name, license[name][0], license[name][1], license[name][2]])
 for row in rows:
 	for i in range(0, 4):
 		if len(row[i]) > widths[i]:
 			widths[i] = len(row[i])
 		
-with open('nosat.txt', 'w') as text:
+with open('LICENSE.txt', 'w') as text:
 	for row in rows:
 		text.write(f'{row[0].ljust(widths[0])} {row[1].ljust(widths[1])} {row[2].ljust(widths[2])} {row[3]}\n')
+
 
 # Build the src/ directories
 
@@ -252,7 +274,7 @@ install::
 xmldir = os.path.join('nodes')
 if not os.path.exists(xmldir):
 	os.makedirs(xmldir)
-for pkgname in pkgnames:
+for pkgname in pkgmasters:
 	with open(os.path.join(xmldir, '%s-pip2src-%s.xml' % (Prefix, pkgname)), 'w') as node:
 		node.write('<stack:stack><stack:package>\n')
 		node.write('%s-%s\n' % (Prefix, pkgname))
@@ -265,7 +287,7 @@ if not os.path.exists(xmldir):
 	os.makedirs(xmldir)
 with open(os.path.join(xmldir, '%s-pip2src.xml' % Prefix), 'w') as graph:
 	graph.write('<graph>\n')
-	for pkgname in pkgnames:
+	for pkgname in pkgmasters:
 		for appliance in PackageSet[pkgname].appliances:
 			graph.write('\t<edge from="%s-%s" to="%s-pip2src-%s"/>\n' % (Prefix, appliance, Prefix, pkgname))
 		if PackageSet[pkgname].appliances:
@@ -278,7 +300,7 @@ with open(os.path.join(xmldir, '%s-pip2src.xml' % Prefix), 'w') as graph:
 manifestdir = os.path.join('manifest.d')
 if not os.path.exists(manifestdir):
 	os.makedirs(manifestdir)
-for pkgname in pkgnames:
+for pkgname in pkgmasters:
 	with open(os.path.join(manifestdir, '%s-%s.manifest' % (Prefix, pkgname)), 'w') as manifest:
 		manifest.write('%s-%s\n' % (Prefix, pkgname))
 		for dep in PackageSet[pkgname].dependencies:
