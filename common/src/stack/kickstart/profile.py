@@ -201,22 +201,17 @@ syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
 stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.arch ])
 stack.api.Call('set host attr', [ client.addr, 'attr=cpus', 'value=%s' % client.np ])
 
-#
 # update the MAC info in the database
 #
-# but there are certain cases in which you don't want the MACs updated -- in
-# that case, set the attribute 'profile.update_macs' to 'false'.
-#
-profile_update_macs = 1
+# flipping the logic here; default to not updating them - this is likely the more common case
+
+profile_update_macs = False
 
 output = stack.api.Call('list host attr',
 	[ client.addr, 'attr=profile.update_macs' ])
 
 if output:
-	row = output[0]
-
-	if not stack.bool.str2bool(row['value']):
-		profile_update_macs = 0
+	profile_update_macs = stack.bool.str2bool(output[0]['value'])
 
 if profile_update_macs:
 	#
@@ -257,6 +252,12 @@ if profile_update_macs:
 
 		stack.api.Call('config host interface',
 			[ client.addr ] + params)
+
+	# remove the attribute.
+	# User will have to add new ifaces manually, or set this attr back to True
+	# this prevents weird bugs where different OSes report the ifaces differently
+	# screwing up the database
+	stack.api.Call('remove host attr', [ client.addr, 'attr=profile.update_macs'])
 
 #
 # Generate the system profile
