@@ -70,7 +70,11 @@ class Command(stack.commands.PalletArgumentProcessor,
 		for directory in sorted(directories):
 			# Load our module
 			modpath = 'stack.commands.%s' % '.'.join(directory.split(os.sep))
-			module = importlib.import_module(modpath)
+
+			try:
+				module = importlib.import_module(modpath)
+			except SyntaxError:
+				pass
 
 			# Make sure it is a Command
 			if not hasattr(module, 'Command'):
