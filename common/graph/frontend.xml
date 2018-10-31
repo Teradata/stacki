@@ -28,6 +28,7 @@
 		<to>database</to>
 		<to>database-schema</to>
 		<to>database-data-init</to>
+		<to>attr-docs</to>
 		<to>&os;-bootaction</to>
 		<to>database-data</to>
 		<to>foundation-python-server</to>

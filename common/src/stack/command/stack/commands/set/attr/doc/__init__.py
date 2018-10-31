@@ -37,20 +37,20 @@ class Command(stack.commands.Command):
 			])
 
 		rows = self.db.execute("""
-			select attr from attributes where attr='%s'
-			""" % (attr))
+			select attr from attributes where attr=%s
+			""", (attr))
 
 		if not rows:
 			raise CommandError(self, 'Cannot set documentation for a non-existant attribute')
 
 		self.db.execute("""
-			delete from attributes_doc where attr='%s'
-			""" % (attr))
+			delete from attributes_doc where attr=%s
+			""", (attr))
 
 		if doc:
 			self.db.execute(
 				"""
 				insert into attributes_doc
 				(attr, doc)
-				values ('%s', '%s')
-				""" % (attr, doc))
+				values (%s, %s)
+				""", (attr, doc))

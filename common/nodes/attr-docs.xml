@@ -1,0 +1,76 @@
+<stack:stack>
+
+        <stack:copyright>
+        Copyright (c) 2018 Teradata
+        All rights reserved. Stacki(r) v5.x stacki.com
+        https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+        </stack:copyright>
+
+<stack:script stack:stage="install-post">
+
+/opt/stack/bin/stack set attr doc \
+	attr=kickstartable \
+	doc="hosts with 'kickstartable == True' will be offered a kickstart file, and more specifically their entry in dhcpd.conf will have PXE settings enabled.  This defaults to 'True'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=managed \
+	doc="hosts with 'managed == True' will have 'stack run host' commands run against them.  They will also be the target of several 'stack sync' commands.  Defaults to 'False' for Frontends, 'True' for all other appliances."
+
+/opt/stack/bin/stack set attr doc \
+	attr=node \
+	doc="the 'node' attribute dictates which xml file in the graph to use as the starting point.  The default setting for this attribute is typically inherited from the appliance.  The backend appliance defaults to 'backend'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=nukedisks \
+	doc="hosts with 'nukedisks == True' will have all partitions on all disks wiped as part of their next install.  This defaults to 'False' and is automatically set back to 'False' at the end of the install."
+
+/opt/stack/bin/stack set attr doc \
+	attr=nukecontroller  \
+	doc="hosts with 'nukecontroller == True' will have their internal storage controller disk layout erased as part of their next install.  This defaults to 'False' and is automatically set back to 'False' at the end of the install."
+
+/opt/stack/bin/stack set attr doc \
+	attr=secureerase  \
+	doc="hosts with 'secureerase == True' will have their disks cryptographically erased (where hardware-supported) as part of their next install.  This implies 'nukecontroller == True' and 'nukedisks == True'.  This defaults to 'False' and is automatically set back to 'False' at the end of the install.  Stacki > 5.0"
+
+/opt/stack/bin/stack set attr doc \
+	attr=ssh.use_dns \
+	doc="hosts with 'ssh.use_dns == True' will enable DNS lookups in sshd config.  This defaults to 'True'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=boot_device \
+	doc="hosts with 'boot_device' set will have their bootloader installed to the boot sector of the device referred to (eg. 'sdb')"
+
+/opt/stack/bin/stack set attr doc \
+	attr=authorized_keys \
+	doc="'authorized_keys' may be set to a single public key, or a (http/https/ftp/file) URL containing one or more keys, in the format of the '~/.ssh/authorized_keys' file.  Regardless, the contents will be populated in '/root/.ssh/authorized_keys' on the host.  Any URL specified must be available to the frontend if pxebooting, or the installing node if booting from dvd/flash.  Stacki > 5.0"
+
+/opt/stack/bin/stack set attr doc \
+	attr=firewall \
+	doc="'firewall' controls whether or not Stacki will keep the firewall on a given host in sync after the initial install.  This defaults to 'True'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=sync.ssh.authkey \
+	doc="hosts with 'sync.ssh.authkey == True' will have a copy of the frontend's public key placed in their '/root/.ssh/authorized_keys' file.  This defaults to 'True'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=time.protocol \
+	doc="'time.protocol' must be set to either 'ntp' or 'chrony'.  Installed nodes will be configured to run the specified time service.  Either time service will be configured to point to 'time.server', if it is defined, or 'Kickstart_PublicNTPHost' in the case of frontends, and 'Kickstart_PrivateNTPHost' in the case of other hosts."
+
+/opt/stack/bin/stack set attr doc \
+	attr=time.server \
+	doc="'time.server' is the server what the time service will attempt to contact, overriding the 'Kickstart_PrivateNTPHost' and 'Kickstart_PublicNTPHost' attributes."
+
+/opt/stack/bin/stack set attr doc \
+	attr=disklabel  \
+	doc="'disklabel' controls whether Stacki will create GPT or MSDOS-based partitions.  The input is passed to parted's mklabel command, but has only been tested with 'gpt' and 'msdos'.  This defaults to 'gpt'."
+
+/opt/stack/bin/stack set attr doc \
+	attr=run.host.impl \
+	doc="this controls the method for running commands against hosts when using 'stack run host'.  Currently the default and only supported implementation is ssh."
+
+/opt/stack/bin/stack set attr doc \
+	attr=run.host.threads \
+	doc="the number of threads/processes to concurrently run commands against hosts."
+
+</stack:script>
+</stack:stack>
