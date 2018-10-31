@@ -62,7 +62,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 		# Filter it to remove any blanks and __pycache__
 		directories = [
 			path for path in tree.getDirs()
-			if path and '__pycache__' not in path
+			if path and '__pycache__' not in path and '.' not in path
 		]
 
 		# Create a mapping of pallet names to Commands
