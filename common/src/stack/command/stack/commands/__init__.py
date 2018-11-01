@@ -1143,12 +1143,11 @@ class DatabaseConnection:
 		# to override the optional CACHING arg.
 		#
 		# Note the cache is shared but the decision to cache is not.
-		
+
 		if os.environ.get('STACKCACHE'):
 			self.caching = str2bool(os.environ.get('STACKCACHE'))
 		else:
 			self.caching = caching
-
 
 	def enableCache(self):
 		self.caching = True
@@ -1215,9 +1214,9 @@ class DatabaseConnection:
 	def execute(self, command, args=None):
 		command = command.strip()
 
-		if command.find('select') != 0:
+		if not command.lower().startswith('select'):
 			self.clearCache()
-						
+
 		if self.link:
 			t0 = time.time()
 			result = self.link.execute(command, args)
