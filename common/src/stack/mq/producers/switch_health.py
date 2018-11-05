@@ -5,9 +5,12 @@
 # @copyright@
 
 import json
+import subprocess
 import stack.mq
 import stack.api
 import stack.api.get
+from stack.switch.m7800 import SwitchMellanoxM7800
+from stack.switch.x1052 import SwitchDellX1052
 
 class Producer(stack.mq.producers.ProducerBase):
 	"""
@@ -21,8 +24,6 @@ class Producer(stack.mq.producers.ProducerBase):
 		return 60
 
 	def ping(self, ip):
-		import subprocess
-
 		r = subprocess.Popen(['ping', '-c 1', '-W 1', ip], stdout=subprocess.PIPE)
 		r.communicate()
 
@@ -42,23 +43,13 @@ class Producer(stack.mq.producers.ProducerBase):
 	def getStatus(self, switch, make, model):
 		s = None
 		status = None
+		u = stack.api.get.GetHostAttr(switch, 'switch_username')
+		p = stack.api.get.GetHostAttr(switch, 'switch_password')
 
-		if make == 'Mellanox':
-			if model == 'm7800':
-				from stack.switch.m7800 import SwitchMellanoxM7800
-
-				u = stack.api.get.GetHostAttr(switch, 'username')
-				p = stack.api.get.GetHostAttr(switch, 'password')
-
-				s = SwitchMellanoxM7800(switch, username = u, password = p)
-		elif make == 'DELL':
-			if model == 'x1052':
-				from stack.switch.x1052 import SwitchDellX1052
-
-				u = stack.api.get.GetHostAttr(switch, 'switch_username')
-				p = stack.api.get.GetHostAttr(switch, 'switch_password')
-
-				s = SwitchDellX1052(switch, username = u, password = p)
+		if (make, model) == ('Mellanox', 'm7800'):
+			s = SwitchMellanoxM7800(switch, username = u, password = p)
+		elif (make, model) == ('DELL', 'x1052'):
+			s = SwitchDellX1052(switch, username = u, password = p)
 
 		if s:
 			try:
