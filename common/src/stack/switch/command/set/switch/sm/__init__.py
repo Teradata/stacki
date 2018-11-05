@@ -68,10 +68,10 @@ class Command(stack.commands.SwitchArgumentProcessor,
 			msg += 'Please verify the make and model attributes for this host.'
 			raise CommandError(self, msg)
 
-		if switch_attrs[switch].get('switch_type') != 'infiniband':
-			msg = f'{switch} is not an infiniband switch, please verify "stack list host attr {switch} attr=switch_type"'
-
 		self.switch_attrs = self.getHostAttrDict(ib_switch_names)
+
+		if self.switch_attrs[sm_switch].get('switch_type') != 'infiniband':
+			msg = f'{sm_switch} is not an infiniband switch, please verify "stack list host attr {sm_switch} attr=switch_type"'
 
 		if disable:
 			# explicit disable only affects this switch
