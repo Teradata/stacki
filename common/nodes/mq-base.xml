@@ -9,12 +9,14 @@
 	<stack:package>stack-mq</stack:package>
 	<stack:package>foundation-zeromq</stack:package>
 
-<stack:script stack:stage="install-post">
+<stack:script stack:stage="install-post" stack:cond="release == 'sles12' or release == 'redhat7'">
 systemctl enable smq-publisher
-chkconfig --add  smq-publisher
-
 systemctl enable smq-producer
-chkconfig --add  smq-producer
+</stack:script>
+
+<stack:script stack:stage="install-post" stack:cond="release == 'sles11'">
+chkconfig --add smq-publisher
+chkconfig --add smq-producer
 </stack:script>
 
 </stack:stack>

@@ -6,10 +6,15 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-<stack:script stack:stage="install-post">
+<stack:script stack:stage="install-post" stack:cond="release == 'sles12' or release == 'redhat7'">
 systemctl enable smq-shipper
-chkconfig --add  smq-shipper
+</stack:script>
 
+<stack:script stack:stage="install-post" stack:cond="release == 'sles11'">
+chkconfig --add smq-shipper
+</stack:script>
+
+<stack:script stack:stage="install-post">
 <stack:report stack:name="host.mq">&hostname;</stack:report>
 <!-- the following channels are shipped by default -->
 

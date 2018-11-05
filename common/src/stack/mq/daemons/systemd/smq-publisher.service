@@ -1,0 +1,12 @@
+[Unit]
+Description=Stacki Message Queue Publisher
+After=last.target
+
+[Service]
+Type=idle
+PIDFile=/var/run/smq-publisher/smq-publisher.pid
+ExecStartPre=/usr/bin/mkdir -p /var/run/smq-publisher
+ExecStart=/opt/stack/sbin/smq-publisher
+
+[Install]
+WantedBy=last.target

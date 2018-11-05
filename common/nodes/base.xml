@@ -4,17 +4,23 @@
 Base class for all nodes.
 </stack:description>
 
-<stack:package stack:cond="not (os == 'sles' and os.version == '11.x')">stack-releasenotes</stack:package>
 
-<stack:package>vim</stack:package>
-<stack:package>pciutils</stack:package>
+<stack:package stack:cond="not (os == 'sles' and os.version == '11.x')">
+	stack-releasenotes
+</stack:package>
 
-<stack:package>ipmitool</stack:package>
-<stack:package>OpenIPMI</stack:package>
-<stack:package>wget</stack:package>
-<stack:package>bridge-utils</stack:package>
+<stack:package>
+	vim
+	pciutils
+	ipmitool
+	OpenIPMI
+	wget
+	bridge-utils
+</stack:package>
+
 
 <stack:script stack:stage="install-post">
+
 <!-- Rsyslog Configuration file -->
 <stack:file stack:name="/etc/rsyslog.d/stacki.conf">
 /*
@@ -40,6 +46,16 @@ stacki release &version; (&release;)
 <stack:file stack:name="/etc/hosts" stack:cond="sync.hosts" >
 <stack:report stack:name="host" />
 </stack:file>
+
+</stack:script>
+
+<!--
+	install a systemd target so we can reliably run services "last", that is, after all other
+	systemd services have started
+-->
+
+<stack:script stack:stage="install-post" stack:cond="release == 'sles12' or release == 'redhat7'">
+systemctl enable last.target
 </stack:script>
 
 </stack:stack>

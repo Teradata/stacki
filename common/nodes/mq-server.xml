@@ -10,9 +10,7 @@
 
 <stack:script stack:stage="install-post">
 systemctl enable redis
-
 systemctl enable smq-processor
-chkconfig --add  smq-processor
 </stack:script>
 
 </stack:stack>
