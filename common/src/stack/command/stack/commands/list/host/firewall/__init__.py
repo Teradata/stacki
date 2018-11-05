@@ -10,7 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
 
 
@@ -20,11 +19,11 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	List the current firewall rules for the named hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no host names are supplied, the 
+	Zero, one or more host names. If no host names are supplied, the
 	firewall rules for all the known hosts are listed.
 	</arg>
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.firewall', self._argv + [ 'scope=host' ]))
+		self.addText(self.command('list.firewall', self._argv + ['scope=host']))
 		return self.rc

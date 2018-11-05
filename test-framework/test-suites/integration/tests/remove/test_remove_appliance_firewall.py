@@ -30,7 +30,7 @@ class TestRemoveApplianceFirewall:
 	def test_invalid_rulename(self, host, add_appliance):
 		result = host.run('stack remove appliance firewall test rulename=test')
 		assert result.rc == 255
-		assert result.stderr == 'error - firewall rule test does not exist for appliance test\n'
+		assert result.stderr == 'error - rule named "test" does not exist\n'
 
 	def test_one_arg(self, host, add_appliance):
 		# Add a firewall rule
@@ -52,7 +52,7 @@ class TestRemoveApplianceFirewall:
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
 			'network': 'private',
-			'output-network': '',
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'A',
@@ -91,21 +91,6 @@ class TestRemoveApplianceFirewall:
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
 			{
-				'appliance': 'test',
-				'name': 'test',
-				'table': 'filter',
-				'service': '1234',
-				'protocol': 'TCP',
-				'chain': 'INPUT',
-				'action': 'ACCEPT',
-				'network': 'private',
-				'output-network': '',
-				'flags': None,
-				'comment': None,
-				'source': 'A',
-				'type': 'var'
-			},
-			{
 				'appliance': 'foo',
 				'name': 'test',
 				'table': 'filter',
@@ -114,7 +99,22 @@ class TestRemoveApplianceFirewall:
 				'chain': 'INPUT',
 				'action': 'ACCEPT',
 				'network': 'private',
-				'output-network': '',
+				'output-network': None,
+				'flags': None,
+				'comment': None,
+				'source': 'A',
+				'type': 'var'
+			},
+			{
+				'appliance': 'test',
+				'name': 'test',
+				'table': 'filter',
+				'service': '1234',
+				'protocol': 'TCP',
+				'chain': 'INPUT',
+				'action': 'ACCEPT',
+				'network': 'private',
+				'output-network': None,
 				'flags': None,
 				'comment': None,
 				'source': 'A',

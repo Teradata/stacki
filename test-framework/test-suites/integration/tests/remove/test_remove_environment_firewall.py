@@ -30,7 +30,7 @@ class TestRemoveEnvironmentFirewall:
 	def test_invalid_rulename(self, host, add_environment):
 		result = host.run('stack remove environment firewall test rulename=test')
 		assert result.rc == 255
-		assert result.stderr == 'error - firewall rule test does not exist for environment test\n'
+		assert result.stderr == 'error - rule named "test" does not exist\n'
 
 	def test_one_arg(self, host, add_environment):
 		# Add a firewall rule
@@ -52,7 +52,7 @@ class TestRemoveEnvironmentFirewall:
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
 			'network': 'private',
-			'output-network': '',
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'E',
@@ -99,7 +99,7 @@ class TestRemoveEnvironmentFirewall:
 				'chain': 'INPUT',
 				'action': 'ACCEPT',
 				'network': 'private',
-				'output-network': '',
+				'output-network': None,
 				'flags': None,
 				'comment': None,
 				'source': 'E',
@@ -114,7 +114,7 @@ class TestRemoveEnvironmentFirewall:
 				'chain': 'INPUT',
 				'action': 'ACCEPT',
 				'network': 'private',
-				'output-network': '',
+				'output-network': None,
 				'flags': None,
 				'comment': None,
 				'source': 'E',

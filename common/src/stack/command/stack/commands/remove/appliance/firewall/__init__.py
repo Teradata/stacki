@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.appliance.command):
@@ -32,26 +32,5 @@ class Command(stack.commands.remove.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
-		for appliance in self.getApplianceNames(args):
-			# Make sure our rule exists
-			if self.db.count("""
-				(*) from appliance_firewall
-				where name=%s and appliance=(
-					select id from appliances where name=%s
-				)""", (rulename, appliance)
-			) == 0:
-				raise CommandError(
-					self,
-					f'firewall rule {rulename} does not '
-					f'exist for appliance {appliance}'
-				)
-
-			# It exists, so delete it
-			self.db.execute("""
-				delete from appliance_firewall
-				where name=%s and appliance=(
-					select id from appliances where name=%s
-				)
-			""", (rulename, appliance))
+		self.command('remove.firewall', self._argv + ['scope=appliance'])
+		return self.rc

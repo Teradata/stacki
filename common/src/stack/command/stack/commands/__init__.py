@@ -36,7 +36,7 @@ import stack.graph
 import stack
 from stack.cond import EvalCondExpr
 from stack.exception import (
-	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique
+	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique, ParamError
 )
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
@@ -741,6 +741,81 @@ class HostArgumentProcessor:
 			raise ArgUnique(self, 'host')
 
 		return hosts[0]
+
+
+class ScopeArgumentProcessor(
+	ApplianceArgumentProcessor,
+	OSArgumentProcessor,
+	EnvironmentArgumentProcessor,
+	HostArgumentProcessor
+):
+	def getScopeMappings(self, args=None, scope=None):
+		# We will return a list of these
+		ScopeMapping = namedtuple(
+			'ScopeMapping',
+			['scope', 'appliance_id', 'os_id', 'environment_id', 'node_id']
+		)
+		scope_mappings = []
+
+		# Validate the different scopes and get the keys to the targets
+		if scope == 'global':
+			# Global scope has no friends
+			scope_mappings.append(
+				ScopeMapping(scope, None, None, None, None)
+			)
+
+		elif scope == 'appliance':
+			# Piggy-back to resolve the appliance names
+			names = self.getApplianceNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for appliance_id in flatten(self.db.select(
+				'id from appliances where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, appliance_id, None, None, None)
+				)
+
+		elif scope == 'os':
+			# Piggy-back to resolve the os names
+			names = self.getOSNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for os_id in flatten(self.db.select(
+				'id from oses where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, os_id, None, None)
+				)
+
+		elif scope == 'environment':
+			# Piggy-back to resolve the environment names
+			names = self.getEnvironmentNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for environment_id in flatten(self.db.select(
+				'id from environments where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, None, environment_id, None)
+				)
+
+		elif scope == 'host':
+			# Piggy-back to resolve the host names
+			names = self.getHostnames(args)
+
+			# Now we have to convert the names to the primary keys
+			for node_id in flatten(self.db.select(
+				'id from nodes where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, None, None, node_id)
+				)
+
+		else:
+			raise ParamError(self, 'scope', 'is not valid')
+
+		return scope_mappings
 
 
 class DocStringHandler(handler.ContentHandler,
@@ -1626,7 +1701,13 @@ class Command:
 		# class member self.rc so the caller can check
 		# the return code.  The actual text is what we return.
 
-		self.rc = o.runWrapper(name, args, self.level + 1)
+		try:
+			self.rc = o.runWrapper(name, args, self.level + 1)
+		except CommandError as e:
+			# We need to catch any CommandError, point it to the calling cmd,
+			# and then re-raise it so it will have the correct usage message
+			e.cmd = self
+			raise e
 
 		return o.getText()
 

@@ -2,6 +2,7 @@ import json
 import re
 from textwrap import dedent
 
+
 class TestAddOSFirewall:
 	def test_no_oses(self, host):
 		result = host.run('stack add os firewall')
@@ -10,7 +11,7 @@ class TestAddOSFirewall:
 			error - "os" argument is required
 			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_invalid_os(self, host):
 		result = host.run('stack add os firewall foo')
 		assert result.rc == 255
@@ -20,61 +21,93 @@ class TestAddOSFirewall:
 		''')
 
 	def test_no_service(self, host):
-		result = host.run(
-			'stack add os firewall ubuntu chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu chain=INPUT action=ACCEPT protocol=TCP')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "service" parameter is required
 			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_chain(self, host):
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 '
-			'action=ACCEPT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 action=ACCEPT protocol=TCP')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "chain" parameter is required
 			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_action(self, host):
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 '
-			'chain=INPUT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 chain=INPUT protocol=TCP')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "action" parameter is required
 			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_protocol(self, host):
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 '
-			'chain=INPUT action=ACCEPT network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 chain=INPUT action=ACCEPT')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "protocol" parameter is required
 			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
-	def test_no_networks(self, host):
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 '
-			'chain=INPUT action=ACCEPT protocol=TCP'
-		)
-		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "network" or "output-network" parameter is required
-			{os ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
-		''')
-	
+
 	def test_one_os(self, host):
+		# Add the rule
+		result = host.run(
+			'stack add os firewall ubuntu service=1234 chain=INPUT '
+			'action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		# Make sure it is in the DB now
+		result = host.run('stack list os firewall ubuntu output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'os': 'ubuntu',
+			'name': 'test',
+			'table': 'filter',
+			'service': '1234',
+			'protocol': 'TCP',
+			'chain': 'INPUT',
+			'action': 'ACCEPT',
+			'network': None,
+			'output-network': None,
+			'flags': None,
+			'comment': None,
+			'source': 'O',
+			'type': 'var'
+		}]
+
+	def test_multiple_oses(self, host, add_host):
+		# Add the rules
+		result = host.run(
+			'stack add os firewall ubuntu vmware service=1234 '
+			'chain=INPUT action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		# Make sure they are in the DB now
+		for osname in ('ubuntu', 'vmware'):
+			result = host.run(f'stack list os firewall {osname} output-format=json')
+			assert result.rc == 0
+			assert json.loads(result.stdout) == [{
+				'os': osname,
+				'name': 'test',
+				'table': 'filter',
+				'service': '1234',
+				'protocol': 'TCP',
+				'chain': 'INPUT',
+				'action': 'ACCEPT',
+				'network': None,
+				'output-network': None,
+				'flags': None,
+				'comment': None,
+				'source': 'O',
+				'type': 'var'
+			}]
+
+	def test_network_existing(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add os firewall ubuntu service=1234 chain=INPUT '
@@ -94,62 +127,7 @@ class TestAddOSFirewall:
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
 			'network': 'private',
-			'output-network': '',
-			'flags': None,
-			'comment': None,
-			'source': 'O',
-			'type': 'var'
-		}]
-	
-	def test_multiple_oses(self, host, add_host):
-		# Add the rules
-		result = host.run(
-			'stack add os firewall ubuntu vmware service=1234 '
-			'chain=INPUT action=ACCEPT protocol=TCP network=private rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure they are in the DB now
-		for osname in ('ubuntu', 'vmware'):
-			result = host.run(f'stack list os firewall {osname} output-format=json')
-			assert result.rc == 0
-			assert json.loads(result.stdout) == [{
-				'os': osname,
-				'name': 'test',
-				'table': 'filter',
-				'service': '1234',
-				'protocol': 'TCP',
-				'chain': 'INPUT',
-				'action': 'ACCEPT',
-				'network': 'private',
-				'output-network': '',
-				'flags': None,
-				'comment': None,
-				'source': 'O',
-				'type': 'var'
-			}]
-
-	def test_network_all(self, host):
-		# Add the rule
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=all rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure it is in the DB now
-		result = host.run('stack list os firewall ubuntu output-format=json')
-		assert result.rc == 0
-		assert json.loads(result.stdout) == [{
-			'os': 'ubuntu',
-			'name': 'test',
-			'table': 'filter',
-			'service': '1234',
-			'protocol': 'TCP',
-			'chain': 'INPUT',
-			'action': 'ACCEPT',
-			'network': 'all',
-			'output-network': '',
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'O',
@@ -163,35 +141,8 @@ class TestAddOSFirewall:
 			'action=ACCEPT protocol=TCP network=test rulename=test'
 		)
 		assert result.rc == 255
-		assert result.stderr == 'error - network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
+		assert result.stderr == 'error - "test" is not a valid network\n'
 
-	def test_output_network_all(self, host):
-		# Add the rule
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP output-network=all rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure it is in the DB now
-		result = host.run('stack list os firewall ubuntu output-format=json')
-		assert result.rc == 0
-		assert json.loads(result.stdout) == [{
-			'os': 'ubuntu',
-			'name': 'test',
-			'table': 'filter',
-			'service': '1234',
-			'protocol': 'TCP',
-			'chain': 'INPUT',
-			'action': 'ACCEPT',
-			'network': '',
-			'output-network': 'all',
-			'flags': None,
-			'comment': None,
-			'source': 'O',
-			'type': 'var'
-		}]
-	
 	def test_output_network_existing(self, host):
 		# Add the rule
 		result = host.run(
@@ -211,7 +162,7 @@ class TestAddOSFirewall:
 			'protocol': 'TCP',
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
-			'network': '',
+			'network': None,
 			'output-network': 'private',
 			'flags': None,
 			'comment': None,
@@ -226,7 +177,7 @@ class TestAddOSFirewall:
 			'action=ACCEPT protocol=TCP output-network=test rulename=test'
 		)
 		assert result.rc == 255
-		assert result.stderr == 'error - output-network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
+		assert result.stderr == 'error - "test" is not a valid network\n'
 
 	def test_all_parameters(self, host):
 		# Add the rule
@@ -259,10 +210,7 @@ class TestAddOSFirewall:
 
 	def test_no_rulename(self, host):
 		# Add the rule
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 chain=INPUT action=ACCEPT protocol=TCP')
 		assert result.rc == 0
 
 		# Make sure it is in the DB now
@@ -284,8 +232,8 @@ class TestAddOSFirewall:
 			'protocol': 'TCP',
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
-			'network': 'private',
-			'output-network': '',
+			'network': None,
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'O',
@@ -294,16 +242,10 @@ class TestAddOSFirewall:
 
 	def test_duplicate(self, host):
 		# Add the rule
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 chain=INPUT action=ACCEPT protocol=TCP')
 		assert result.rc == 0
 
 		# Now add it again and make sure it fails
-		result = host.run(
-			'stack add os firewall ubuntu service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
-		)
+		result = host.run('stack add os firewall ubuntu service=1234 chain=INPUT action=ACCEPT protocol=TCP')
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule already exists\n'

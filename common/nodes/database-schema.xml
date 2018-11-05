@@ -347,94 +347,42 @@ CREATE TABLE partitions (
 
 <!-- Firewall Tables -->
 
-DROP TABLE IF EXISTS global_firewall;
-CREATE TABLE global_firewall (
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
+<!-- Gotta drop the referenced tables last -->
+DROP TABLE IF EXISTS firewall_rules;
+DROP TABLE IF EXISTS scope_map;
+
+CREATE TABLE scope_map (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope		ENUM('global','appliance','os','environment', 'host') NOT NULL,
+	appliance_id	INT DEFAULT NULL,
+	os_id		INT DEFAULT NULL,
+	environment_id	INT DEFAULT NULL,
+	node_id		INT DEFAULT NULL,
+	INDEX (scope),
+	FOREIGN KEY (appliance_id) REFERENCES appliances(id) ON DELETE CASCADE,
+	FOREIGN KEY (os_id) REFERENCES oses(id) ON DELETE CASCADE,
+	FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE,
+	FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS os_firewall;
-CREATE TABLE os_firewall (
-  OS		varchar(32) NOT NULL default '&os;',
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (OS),
-  INDEX (Name),
-  INDEX (Service)
-);
-
-DROP TABLE IF EXISTS appliance_firewall;
-CREATE TABLE appliance_firewall (
-  Appliance     int(11) NOT NULL default '0' references appliances,
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
-);
-
-DROP TABLE IF EXISTS node_firewall;
-CREATE TABLE node_firewall (
-  Node		int(11) NOT NULL default '0' references nodes,
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
-);
-
-DROP TABLE IF EXISTS environment_firewall;
-CREATE TABLE environment_firewall (
-  Environment	int(11) NOT NULL default '0',
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
+CREATE TABLE firewall_rules (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	name		VARCHAR(256) NOT NULL,
+	table_type	ENUM('nat','filter','mangle','raw') NOT NULL,
+	chain		VARCHAR(256) NOT NULL,
+	action		VARCHAR(256) NOT NULL,
+	service		VARCHAR(256) NOT NULL,
+	protocol	VARCHAR(256) NOT NULL,
+	in_subnet_id	INT DEFAULT NULL,
+	out_subnet_id	INT DEFAULT NULL,
+	flags		VARCHAR(256) DEFAULT NULL,
+	comment		VARCHAR(256) DEFAULT NULL,
+	INDEX (name),
+	INDEX (table_type),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE,
+	FOREIGN KEY (in_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE,
+	FOREIGN KEY (out_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE
 );
 
 <!-- Miscellaneous -->

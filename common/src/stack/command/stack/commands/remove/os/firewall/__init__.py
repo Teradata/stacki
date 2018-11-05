@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.os.command):
@@ -32,21 +32,5 @@ class Command(stack.commands.remove.os.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
-		for os in self.getOSNames(args):
-			# Make sure our rule exists
-			if self.db.count(
-				'(*) from os_firewall where name=%s and os=%s',
-				(rulename, os)
-			) == 0:
-				raise CommandError(
-					self,
-					f'firewall rule {rulename} does not exist for OS {os}'
-				)
-
-			# It exists, so delete it
-			self.db.execute(
-				'delete from os_firewall where name=%s and os=%s',
-				(rulename, os)
-			)
+		self.command('remove.firewall', self._argv + ['scope=os'])
+		return self.rc
