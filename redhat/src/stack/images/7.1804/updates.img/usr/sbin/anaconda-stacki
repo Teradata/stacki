@@ -1,0 +1,238 @@
+#!/opt/stack/bin/python3
+
+import subprocess
+import shutil
+import shlex
+import os
+import time
+import re
+import urllib
+import sys
+import signal
+
+# Start logging
+import logging
+log = logging.getLogger("stack-anaconda")
+log.setLevel(logging.DEBUG)
+log.addHandler(logging.StreamHandler(stream=sys.stdout))
+log.addHandler(logging.FileHandler('/tmp/stack-anaconda.log'))
+
+# Check to see if we're running as boss
+file = open('/proc/cmdline', 'r')
+args = file.readline().split()
+file.close()
+
+devnull = open(os.devnull, 'w')
+
+def stack_debug():
+	#
+	# debug development code
+	#
+	if 'stack-debug' in args:
+		log.warn('STACKDEBUG PAUSE - remove /tmp/wait to resume')
+		file = open('/tmp/wait', 'w')
+		file.close()
+		while os.path.exists('/tmp/wait'):
+			time.sleep(5)
+
+
+stack_debug()
+
+#
+# restart lighttpd 
+#
+if os.path.exists('/run/install/tmp/stack.conf'):
+	shutil.copyfile('/run/install/tmp/stack.conf',
+		'/tmp/stack.conf')
+else:
+	#
+	# create a dummy stack.conf
+	#
+	file = open('/tmp/stack.conf', 'w')
+	file.write('var.trackers = ""\n')
+	file.write('var.pkgservers = ""\n')
+	file.close()
+
+# Kill an existing instance of lighttpd if it's running
+l = subprocess.Popen(['pgrep','-a', 'ludicrous'],
+	stdout=subprocess.PIPE, stderr=None)
+
+p = subprocess.Popen(['awk','{print $1}'],
+	stdin=l.stdout, stdout=subprocess.PIPE, stderr=None)
+
+for pid in p.stdout.read().decode('utf-8').split('\n'):
+	if pid.strip():
+		log.debug('Stopping ludicrous (pid %d)' % int(pid.strip()))
+		os.kill(int(pid.strip()), signal.SIGTERM)
+
+log.info('Starting ludicrous tracking service')
+
+environ = os.environ.copy()
+environ['LD_LIBRARY_PATH'] = '/opt/stack/lib'
+
+ludicrous_proc = subprocess.Popen(['/opt/stack/bin/ludicrous-client.py'], env=environ)
+# give ludicrous a chance to start
+time.sleep(5)
+
+if 'frontend' in args:
+	# We are a frontend
+
+	# Check to see if there's a user-specified
+	# site.attrs / rolls.xml on the kernel command line
+	for arg in args:
+		match = re.search('^stacki.(attrfile|palletfile)=(.+)$', arg)
+		if not match:
+			continue
+		uri = match.group(2)
+		log.info("{0}\t{1}".format(arg, uri))
+		
+		# fetch the url on a privileged port, put it in /tmp, and send the http status code to STDOUT
+		curl_cmd = '/bin/curl --silent --write-out "%{{http_code}}\\n" --output /tmp/{0} --insecure --local-port 1-100 --retry 3 {1}'
+
+		if 'stacki.attrfile' in arg:
+			filename = 'site.attrs'
+		elif 'stacki.palletfile' in arg:
+			filename = 'rolls.xml'
+
+		log.info("writing /tmp/{0}".format(filename))
+		curl_proc = subprocess.Popen(
+			shlex.split(curl_cmd.format(filename, uri)),
+			stdout=subprocess.PIPE, stderr=None)
+
+		output, _ = curl_proc.communicate()
+		output = output.strip()
+		err_msg = "Error retrieving {0}. curl returned {1}\n"
+
+		try:
+			http_code = int(output)
+		# if there are any issues, just log it and continue launching the installer
+		except ValueError:
+			log.error(err_msg.format(uri, output))
+			break
+		if curl_proc.returncode != 0 or http_code >= 400:
+			log.error(err_msg.format(uri, output))
+			break
+
+	#
+	# if this is a USB install, then we'll see a kernel command line
+	# parameter that looks like:
+	#
+	#       inst.ks=hd:LABEL=stacki:<path>
+	#
+	# and we want to parse out the disk device (e.g., 'LABEL=stacki')
+	#
+	mount_args = ""
+	for cmdarg in args:
+		if cmdarg.startswith('inst.ks='):
+			b = cmdarg.split('=',1)
+			c = b[1].split(':')
+			if len(c) > 1 and c[0] == 'hd':
+				mount_args = "-o loop %s" % c[1]
+				break
+
+		if len(mount_args) == 0:
+			mount_args = '/dev/cdrom'
+
+	cmd = 'mkdir -p /mnt/cdrom ; mount %s /mnt/cdrom' % mount_args
+	os.system(cmd)
+
+	# Turn off Network Manager
+#	cmd = 'systemctl stop NetworkManager.service'
+#	os.system(cmd)
+
+	import shutil
+
+	#
+	# determine if this is a light's out install
+	#
+	if os.path.exists('/mnt/cdrom/tmp/rolls.xml'):
+		shutil.copyfile('/mnt/cdrom/tmp/rolls.xml', '/tmp/rolls.xml')
+	if os.path.exists('/mnt/cdrom/tmp/pallets.xml'):
+		shutil.copyfile('/mnt/cdrom/tmp/pallets.xml', '/tmp/pallets.xml')
+	if os.path.exists('/mnt/cdrom/tmp/site.attrs'):
+		shutil.copyfile('/mnt/cdrom/tmp/site.attrs', '/tmp/site.attrs')
+
+	if not os.path.exists('/tmp/rolls.xml') or \
+		    not os.path.exists('/tmp/site.attrs'):
+
+		# Start boss
+		log.debug('Starting Stacki Configuration')
+		s = subprocess.Popen('/opt/stack/bin/boss_config_snack.py', env = environ)
+		s.wait()	
+		log.debug('Stacki Configuration Complete')
+
+
+	if not os.path.exists('/tmp/boss.ks.cfg.done'):
+		#
+		# build kickstart file for the boss
+		#
+		bossenv = os.environ.copy()
+		if 'LD_LIBRARY_PATH' in bossenv:
+		    bossenv['LD_LIBRARY_PATH'] = \
+		        '%s:/opt/stack/lib:/tmp/updates/lib64' \
+		         % bossenv['LD_LIBRARY_PATH']
+		else:
+		    bossenv['LD_LIBRARY_PATH'] = \
+		        '/opt/stack/lib:/tmp/updates/lib64'
+
+		log.debug('Building Stacki Kickstart File.')
+		file = open('boss_ks_file.debug', 'w')
+		s = subprocess.Popen('/opt/stack/bin/boss_ks_file.py',
+		    env = bossenv,
+		    stdout = file, stderr = subprocess.STDOUT)
+		s.wait()	
+		file.close()
+  
+		# 
+		# RHEL 7.x wants the kickstart file in /run/install
+		# 
+		shutil.copyfile('/tmp/ks.cfg', '/run/install/ks.cfg')
+
+		file = open('/tmp/boss.ks.cfg.done', 'w')
+		file.close()
+		log.debug('Building Stacki Kickstart File Complete.')
+
+	#
+	# get the repos configured
+	#
+	# first move all the existing repo files out of the way
+	#
+	os.system('mv /etc/anaconda.repos.d/*.repo /tmp/')
+
+	#
+	# now build a new repo file with all the selected pallets
+	#
+	import stack.roll
+
+	g = stack.roll.Generator()
+
+	if os.path.exists('/tmp/rolls.xml'):
+		g.parse('/tmp/rolls.xml')
+	elif os.path.exists('/tmp/pallets.xml'):
+		g.parse('/tmp/pallets.xml')
+
+	repo_file = open('/etc/anaconda.repos.d/stacki.repo', 'w')
+
+	baserepo = None
+	for pallet in g.rolls:
+		(pname, pver, prel, parch, purl, pdiskid) = pallet
+
+		repo_file.write('[%s-%s]\n' % (pname, pver))
+		repo_file.write('name=%s %s\n' % (pname, pver))
+		repo_file.write('baseurl=%s/%s/%s/%s/redhat/x86_64\n' % (purl, pname, pver, prel))
+		repo_file.write('assumeyes=1\n')
+		repo_file.write('enabled=1\n')
+
+		#
+		# need to make a "base" repo address
+		#
+		if pname in [ 'CentOS', 'RHEL', 'os', 'OLE', 'SL' ]:
+			baserepo = '%s/%s/%s/%s/redhat/x86_64' % (purl, pname, pver, prel)
+			
+	repo_file.close()
+	rfile = open('/tmp/baserepo', 'w')
+	rfile.write(baserepo)
+	rfile.close()
+
+# STACKI
+stack_debug()

@@ -9,7 +9,7 @@ ROLLROOT	= ../../../..
 include $(STACKBUILD)/etc/CCRules.mk
 include $(RELEASE).mk
 
-SRCDIRS = 7.1708
+SRCDIRS = 7.1708 7.1804
 
 BOOTSTRAP = NetworkManager-devel	\
 	NetworkManager-glib-devel	\
