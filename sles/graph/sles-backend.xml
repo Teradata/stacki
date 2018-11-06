@@ -15,7 +15,6 @@
 		<to>client</to>
 		<to>base</to>
 		<to>general</to>
-		<to>kdump</to>
 		<to>bootloader</to>
 		<to>partitioning</to>
 		<to>storage</to>
