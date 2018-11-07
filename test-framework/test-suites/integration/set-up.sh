@@ -3,15 +3,32 @@
 # Bail on script errors
 set -e
 
+# Parse the command line
+USE_SRC=0
+ISO=""
+while [[ "$#" -gt 0 ]]
+do
+    case "$1" in
+        --use-src)
+            USE_SRC=1
+            shift 1
+            ;;
+        *)
+            ISO="$1"
+            shift 1
+            ;;
+    esac
+done
+
 # Make sure we are passed an ISO to test
-if [[ -z "$1" ]]
+if [[ -z "$ISO" ]]
 then
-    echo "Usage: ./set-up.sh STACKI_ISO"
+    echo "Usage: ./set-up.sh [--use-src] STACKI_ISO"
     exit 1
 fi
 
 # See if we need to download the ISO
-if [[ $1 =~ https?:// ]]
+if [[ $ISO =~ https?:// ]]
 then
     # Make sure we are in the project directory
     cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -24,30 +41,30 @@ then
 
     # Download the ISO if needed
     cd .cache
-    if [[ ! -f "$(basename "$1")" ]]
+    if [[ ! -f "$(basename "$ISO")" ]]
     then
         echo
-        echo -e "\033[34mDownloading $(basename "$1") ...\033[0m"
-        curl -f --progress-bar -O "$1"
+        echo -e "\033[34mDownloading $(basename "$ISO") ...\033[0m"
+        curl -f --progress-bar -O "$ISO"
     fi
 
 	# Get the full path to the ISO
-	STACKI_ISO="$(pwd)/$(basename "$1")"
+	STACKI_ISO="$(pwd)/$(basename "$ISO")"
 
     # Move back up to the project root
     cd ..
 else
 	# Make sure that the ISO actually exists
-	if [[ ! -f "$1" ]]
+	if [[ ! -f "$ISO" ]]
 	then
 		echo
-		echo -e "\033[31mError: $1 doesn't exist\033[0m"
+		echo -e "\033[31mError: $ISO doesn't exist\033[0m"
 		echo
 		exit 1
 	fi
 
 	# Get the full path to the ISO
-	STACKI_ISO="$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+	STACKI_ISO="$(cd "$(dirname "$ISO")"; pwd)/$(basename "$ISO")"
 
 	# Make sure we are in the same directory as this script
 	cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -77,7 +94,8 @@ cat > ".cache/state.json" <<EOF
     "PLAYBOOK": "provisioning/barnacled-frontend.yml",
     "NAME": "test-framework-$(printf '%04x%04x' $RANDOM $RANDOM)",
     "TESTS": "$PWD/tests",
-    "TEST_FILES": "$PWD/test-files"
+    "TEST_FILES": "$PWD/test-files",
+	"USE_SRC": "$USE_SRC"
 }
 EOF
 

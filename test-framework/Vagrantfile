@@ -9,19 +9,21 @@ end
 # Load the state from the state.json file, if possible.
 if File.file?("#{ENV['PWD']}/.cache/state.json")
   state = JSON.parse(File.read("#{ENV['PWD']}/.cache/state.json"))
-  
+
   # ENV can override the state variables
   STACKI_ISO = ENV.fetch('STACKI_ISO', state['STACKI_ISO'])
   PLAYBOOK = ENV.fetch('PLAYBOOK', state['PLAYBOOK'])
   NAME = ENV.fetch('NAME', state['NAME'])
   TESTS = ENV.fetch('TESTS', state['TESTS'])
   TEST_FILES = ENV.fetch('TEST_FILES', state['TEST_FILES'])
+  USE_SRC = ENV.fetch('USE_SRC', state['USE_SRC'])
 else
   STACKI_ISO = ENV['STACKI_ISO']
   PLAYBOOK = ENV['PLAYBOOK']
   NAME = ENV['NAME']
   TESTS = ENV['TESTS']
   TEST_FILES = ENV['TEST_FILES']
+  USE_SRC = ENV['USE_SRC']
 end
 
 # Make sure Ansible can find our roles
@@ -55,8 +57,12 @@ Vagrant.configure("2") do |config|
       unless TEST_FILES.nil?
         config.vm.synced_folder TEST_FILES, "/export/test-files", type: "virtualbox"
       end
+
+	  if USE_SRC == "1"
+		config.vm.synced_folder "../common/src", "/export/src", type: "virtualbox"
+	  end
     end
-    
+
     config.vm.provider "libvirt" do |provider, config|
       provider.default_prefix = NAME
       provider.driver = "kvm"
@@ -66,7 +72,7 @@ Vagrant.configure("2") do |config|
       provider.cpus = 2
       provider.nic_model_type = "e1000"
       provider.random :model => "random"
-      
+
       config.vm.synced_folder '.cache', "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
       config.vm.synced_folder TESTS, "/export/tests", nfs: true, nfs_version: 4, nfs_udp: false
       config.vm.synced_folder "reports", "/export/reports", nfs: true, nfs_version: 4, nfs_udp: false
@@ -74,10 +80,14 @@ Vagrant.configure("2") do |config|
       unless TEST_FILES.nil?
         config.vm.synced_folder TEST_FILES, "/export/test-files", nfs: true, nfs_version: 4, nfs_udp: false
       end
+
+	  if USE_SRC == "1"
+		config.vm.synced_folder "../common/src", "/export/src", nfs: true, nfs_version: 4, nfs_udp: false
+	  end
     end
 
     config.vm.synced_folder '.', '/vagrant', disabled: true
-    
+
     config.vm.hostname = "frontend-0-0.localdomain"
     config.vm.network "private_network",
       ip: "192.168.0.2",
@@ -106,7 +116,7 @@ Vagrant.configure("2") do |config|
         vb.name = NAME + "_backend-0-#{i}"
         vb.gui = false
         vb.linked_clone = true
-        
+
         vb.memory = "2048"
         vb.cpus = 2
 
@@ -120,7 +130,7 @@ Vagrant.configure("2") do |config|
         vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
         vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
 
-        config.vm.network "private_network", 
+        config.vm.network "private_network",
           mac: sprintf("5254000000%02X", i+3),
           type: "dhcp",
           virtualbox__intnet: NAME,
@@ -143,7 +153,7 @@ Vagrant.configure("2") do |config|
         provider.qemuargs :value => "-boot"
         provider.qemuargs :value => "reboot-timeout=10"
 
-        config.vm.network "private_network", 
+        config.vm.network "private_network",
           mac: sprintf("5254000000%02X", i+3),
           libvirt__network_name: NAME,
           libvirt__dhcp_enabled: false,

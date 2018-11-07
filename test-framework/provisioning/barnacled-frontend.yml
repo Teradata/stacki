@@ -4,7 +4,7 @@
     - name: Barnacle the frontend
       import_role:
         name: barnacle
-    
+
     - name: Set up the OS pallet
       import_role:
         name: os-pallet
@@ -12,3 +12,13 @@
     - name: Set up the Vagrant cart
       import_role:
         name: vagrant-cart
+
+    - name: See if /export/src exists
+      stat:
+        path: /export/src
+      register: result
+
+    - name: Set up the src files if they exist
+      import_role:
+        name: use-src
+      when: result.stat.exists

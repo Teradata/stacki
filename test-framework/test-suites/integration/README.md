@@ -49,11 +49,22 @@ Here is the workflow I use when developing new tests:
 
 3. Run `./set-up.sh STACKI_ISO`, where STACKI_ISO is the path to the Stacki ISO you want to use while developing tests. STACKI_ISO can also be a URL, which will cause the ISO to be downloaded and used. This will bring up a Stacki frontend into a Vagrant VM, which the tests will be run in.
 
-4. You can now run `./run-tests.sh` to run the tests stored in the `tests` directory. You can run this as many time as you need to as you develop your new tests. You can pass the `--no-cov` flag to disable generating the code coverage output.
+4. OPTIONAL - You can pass a `--use-src` flag to the `set-up.sh` script, which will mount the Stacki source files into
+the VM and replace all the installed Stacki files with symlinks to your source versions.
 
-5. If you want to just run the specific test you are working on, you can SSH directly into the frontend with the command: `vagrant ssh frontend`. Switch to root user and then you can run `pytest` directly. The "tests" directory on the VM host (IE: your laptop running Vagrant) is mounted in the frontend at `/export/tests`.
+For example, to set up a clean development environment, I'll run:
+```
+./set-up.sh --use-src http://stacki-builds.labs.teradata.com/<LATEST_URL_HERE>
+```
 
-6. When you are done with the frontend, or need to rebuild it, run `./tear-down.sh` to destroy the VM.
+Then I can edit my local copy of the source files, and the changes will be reflected in the VM. I'll log in to the VM
+to test out my changes on the command line, as I make them (see step 6).
+
+5. You can now run `./run-tests.sh` to run the tests stored in the `tests` directory. You can run this as many time as you need to as you develop your new tests. You can pass the `--no-cov` flag to disable generating the code coverage output.
+
+6. If you want to just run the specific test you are working on, you can SSH directly into the frontend with the command: `vagrant ssh frontend`. Switch to root user and then you can run `pytest` directly. The "tests" directory on the VM host (IE: your laptop running Vagrant) is mounted in the frontend at `/export/tests`.
+
+7. When you are done with the frontend, or need to rebuild it, run `./tear-down.sh` to destroy the VM.
 
 ## Running Tests On An Existing Frontend
 
