@@ -1,0 +1,26 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Net configuration for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+	<main>
+		<anna>choose_modules string network-console</anna>
+		<netcfg>choose_interface select auto</netcfg>
+		<netcfg>get_nameservers string &Kickstart_PrivateAddress;</netcfg>
+		<netcfg>get_hostname string unassigned-hostname</netcfg>
+		<netcfg>get_domain string unassigned-domain</netcfg>
+	</main>
+	<main cond="network_console">
+		<network-console>password password bob</network-console>
+		<network-console>password-again password bob</network-console>
+		<network-console>start select continue</network-console>
+	</main>
+
+</stack:ubuntu> 

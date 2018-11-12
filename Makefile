@@ -20,6 +20,7 @@ endif
 	cd common && $(ROLLSBUILD)/bin/get3rdparty.py
 	cd redhat && $(ROLLSBUILD)/bin/get3rdparty.py
 	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
+	cd ubuntu && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
 	$(MAKE) -C $(OS) -f bootstrap.mk RELEASE=$(RELEASE) bootstrap

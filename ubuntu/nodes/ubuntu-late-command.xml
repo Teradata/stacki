@@ -1,0 +1,22 @@
+<stack:ubuntu>
+
+	<stack:description>
+	User setup for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+<late_command>
+<stack:eval shell="/bin/sh">
+/opt/stack/bin/stack report host partition &hostname; bootDisk=False nukedisks=&nukedisks;
+</stack:eval>
+in-target sed -i 's/PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config;
+in-target sed -i 's/#AuthorizedKeysFile.*/AuthorizedKeysFile %h\/\.ssh\/authorized_keys/g' /etc/ssh/sshd_config;
+in-target /usr/bin/curl -s -k -o /target/dev/null/ https://&Kickstart_PrivateAddress;/install/sbin/public/setPxeboot.cgi?params='\{"action":"os"\}';
+in-target /usr/bin/curl -s -k -o /target/dev/null/ https://&Kickstart_PrivateAddress;/install/sbin/public/setDbPartitions.cgi;
+/opt/stack/bin/stacki-post.sh;
+</late_command>
+</stack:ubuntu> 

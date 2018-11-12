@@ -1,0 +1,15 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Finish setup for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+	<finish_install>keep-consoles boolean true</finish_install>
+	<finish_install>reboot_in_progress note</finish_install>
+
+</stack:ubuntu> 

@@ -1,0 +1,48 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Partition config for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+	<main>
+	<!--
+		<partman-early_command cond="not nukedisks">
+		</partman-early_command>
+		<partman-early_command cond="not nukedisks">/opt/stack/bin/get_etc_fstab.py</partman-early_command>
+	-->
+		<preseed>early_command string anna-install openssh-client-udeb\
+		network-console partman-xfs parted-udeb xfsprogs-udeb \
+		openssh-server-udeb strace-udeb; /opt/stack/bin/stacki-pre.sh</preseed>
+		<partman-early_command>/opt/stack/bin/get_etc_fstab.py</partman-early_command>
+		<partman-auto>init_automatically_partition select entire_disk</partman-auto>
+		<partman-auto>disk string &ubuntu.grub_dev;</partman-auto>
+		<partman-auto>method string regular</partman-auto>
+		<partman-auto>purge_lvm_from_device boolean true</partman-auto>
+		<partman-lvm>device_remove_lvm boolean true</partman-lvm>
+		<partman-lvm>device_remove_lvm_span boolean true</partman-lvm>
+		<partman-lvm>confirm boolean true</partman-lvm>
+		<partman-md>device_remove_md boolean true</partman-md>
+		<partman-auto>expert_recipe string	\
+		<stack:eval shell="/bin/sh">
+		/opt/stack/bin/stack report host partition &hostname; bootDisk=True nukedisks=&nukedisks;
+		</stack:eval>
+		</partman-auto>
+		<partman>choose_partition select finish</partman>
+		<partman-lvm>menu/finish select finish</partman-lvm>
+		<partman-auto-lvm>guided_size string max</partman-auto-lvm>
+		<partman>default_filesystem string xfs</partman>
+		<partman>confirm_write_new_label boolean true</partman>
+		<partman>confirm boolean true</partman>
+		<partman-lvm>confirm boolean true</partman-lvm>
+		<partman>confirm_nooverwrite boolean true</partman>
+		<partman-md>confirm_nooverwrite boolean true</partman-md>
+		<partman-lvm>confirm_nooverwrite boolean true</partman-lvm>
+	</main>
+
+</stack:ubuntu> 

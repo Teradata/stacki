@@ -1,0 +1,22 @@
+<stack:ubuntu>
+
+	<stack:description>
+	User setup for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+<late_command cond="ubuntu.serial">
+/bin/echo "GRUB_TIMEOUT=5" &gt; /target/etc/default/grub;
+/bin/echo "GRUB_DEFAULT=0" &gt;&gt; /target/etc/default/grub;
+/bin/echo 'GRUB_TERMINAL="console serial"' &gt;&gt; /target/etc/default/grub;
+/bin/echo 'GRUB_CMDLINE_LINUX="crashkernel=auto &ubuntu.kernel_opts;"' &gt;&gt; /target/etc/default/grub;
+/bin/echo 'GRUB_SERIAL_COMMAND="serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1"' &gt;&gt; /target/etc/default/grub;
+in-target bash -c 'update-grub';
+</late_command>
+
+</stack:ubuntu> 

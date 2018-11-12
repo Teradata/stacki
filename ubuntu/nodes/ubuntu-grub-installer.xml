@@ -1,0 +1,16 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Finish setup for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+	<grub_installer>only_debian boolean true</grub_installer>
+	<grub_installer>bootdev string &ubuntu.grub_dev;</grub_installer>
+
+</stack:ubuntu> 

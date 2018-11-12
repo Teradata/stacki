@@ -1,0 +1,17 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Packages that need to be installed for setup for Ubuntu nodes.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+	<main>
+		<pkgsel>include string curl mlocate man parted xfsprogs util-linux</pkgsel>
+	</main>
+
+</stack:ubuntu> 

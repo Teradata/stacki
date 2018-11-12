@@ -1,0 +1,22 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Passwd setup for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+	<main>
+		<passwd>root-login boolean true</passwd>
+		<passwd>root-password-crypted password &Kickstart_PrivateRootPassword;</passwd>
+		<passwd>make-user boolean true</passwd>
+		<passwd>user-fullname string Ubuntu User</passwd>
+		<passwd>username string ubuntu</passwd>
+		<passwd>user-password-crypted password &Kickstart_PrivateRootPassword;</passwd>
+		<passwd>user-uid string</passwd>
+	</main>
+
+</stack:ubuntu> 

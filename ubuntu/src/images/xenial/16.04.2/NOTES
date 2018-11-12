@@ -1,0 +1,10 @@
+These files are extracted from the the Ubuntu-Server pallet from iso:
+
+	ubuntu-16.04.1-server-amd64.iso
+
+in this manner:
+
+cp /state/partition1/stack/pallets/Ubuntu-Server/16.04.2/xenial/ubuntu/x86_64/install/hwe-netboot/ubuntu-installer/amd64/initrd.gz initrd
+cp /state/partition1/stack/pallets/Ubuntu-Server/16.04.2/xenial/ubuntu/x86_64/install/hwe-vmlinuz linux
+
+The HWE kernels contain later kernels for the Ubuntu LTS releases.

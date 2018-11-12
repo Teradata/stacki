@@ -1,0 +1,20 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Net configuration for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:copyright>
+
+
+	<main>
+		<apt-setup>security-updates boolean false</apt-setup>
+		<apt-setup>security_host string &Kickstart_PrivateAddress;</apt-setup>
+		<apt-setup>security_path string &UbuntuAptSecurityPath;</apt-setup>
+		<apt-setup>security_protocol string &UbuntuAptSetupProtocol;</apt-setup>
+	</main>
+
+</stack:ubuntu> 

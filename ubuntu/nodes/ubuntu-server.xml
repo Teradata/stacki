@@ -1,0 +1,145 @@
+<?xml version="1.0" standalone="no"?>
+<kickstart>
+
+	<si_copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</si_copyright>
+
+<package>stacki-ubuntu-frontend-command</package>
+<package>stacki-ubuntu-frontend-files</package>
+<package>stacki-ubuntu-frontend-profile</package>
+<package>stacki-ubuntu-frontend-pylib</package>
+<package>stacki-ubuntu-frontend-images</package>
+
+<post interpreter="/opt/stack/bin/python">
+import stack.api
+import sys
+from shutil import copyfile
+import os
+from stack.bool import str2bool
+
+res = stack.api.Call('list pallet')
+found = False
+
+def doit(name,version,boxos,release,arch):
+
+	rootdir = '/export/stack/pallets'
+	baseubuntu = "/".join([rootdir, name, version, release, boxos, arch])
+	httpubuntu = "/install/%s" % '/'.join(baseubuntu.split('/')[3:])
+
+	kern = 'vmlinuz-%s-%s-%s-%s' % (boxos,release,version,arch)
+	ramdisk = 'initrd-%s-%s-%s-%s' % (boxos,release,version,arch)
+
+	ubuntu_args='install auto=true \
+url=http://&Kickstart_PrivateAddress;/install/sbin/profile.cgi?os=ubuntu&amp;arch=x86_64&amp;np=2 \
+ksdevice=bootif biosdevname=0 hostname=unassigned \
+locale=en_US.UTF-8 keyboard-configuration/layout=us \
+live-installer/net-image=http://&Kickstart_PrivateAddress;%s\
+/install/filesystem.squashfs ramdisk_size=150000 nousb interface=auto \
+netcfg/get_nameservers=&Kickstart_PrivateDNSServers; \
+priority=critical' % httpubuntu
+
+# these change according to distro
+	stack.api.Call("set attr", ['attr=UbuntuHttpDir', 
+			'value=%s' % httpubuntu])
+	stack.api.Call("set attr", ['attr=UbuntuNetImagePath',
+			'value=http://&Kickstart_PrivateAddress;%s/install/filesystem.squashfs' 
+			% httpubuntu])
+	stack.api.Call("set attr", ['attr=UbuntAptSetupProtocol',
+			'value=http'])
+	stack.api.Call("set attr", ['attr=UbuntuAptSecurityPath',
+			'value=%s' % httpubuntu])
+	stack.api.Call("set attr", ['attr=UbuntuDistroName',
+			'value=%s' % release])
+
+# these should remain if they exist and have been set already.
+	try:	
+		x = stack.api.Call("list attr", ['attr=ubuntu.netcfg'])
+		if x == []:
+			stack.api.Call("set attr", ['attr=ubuntu.netcfg',
+				'value=static'])
+	except:
+		stack.api.Call("set attr", ['attr=ubuntu.netcfg',
+			'value=static'])
+
+	try:	
+		x = stack.api.Call("list attr", ['attr=ubuntu.serial'])
+		if x == []:
+			stack.api.Call("set attr", ['attr=ubuntu.serial',
+				'value=false'])
+	except:
+		stack.api.Call("set attr", ['attr=ubuntu.serial', 'value=false'])
+	
+	try:
+		x = stack.api.Call("list attr", ['attr=ubuntu.grub_dev'])
+		if x == []:
+			stack.api.Call("set attr", ['attr=ubuntu.grub_dev',
+				'value=/dev/sda'])
+	except:
+		stack.api.Call("set attr", ['attr=ubuntu.grub_dev',
+			'value=/dev/sda'])
+
+
+	if release != 'trusty':
+		val = "net.ifnames=0 splash"
+		stack.api.Call("set attr", ['attr=ubuntu.kernel_opts', 
+				'value=%s' % val])
+		ubuntu_args += ' net.ifnames=0'
+	else:
+		stack.api.Call("set attr", ['attr=ubuntu.kernel_opts', 
+				'value=splash'])
+# reread the attrs here
+	val = ''
+	uattrs = stack.api.Call("list attr", ['attr=ubuntu*'])
+	for ua in uattrs:
+		if ua['attr'] == 'ubuntu.serial':
+			if str2bool(ua['value']) == True:
+				try:
+					pattr = stack.api.Call("list attr",
+					['attr=ubuntu.kernel_opts'])[0]['value']
+					val += pattr.strip('"')
+				except:
+					continue
+				val += ' serial console=tty0 console=ttyS0,115200n8'
+				stack.api.Call("set attr", 
+					['attr=ubuntu.kernel_opts', 
+					'value=%s' % val])
+				ubuntu_args += \
+					' console=tty0 console=ttyS0,115200n8'
+
+	stack.api.Call("add bootaction", [ 'action=ubuntu.%s.%s' % (release,version),
+			'kernel=%s' % kern, 'ramdisk=%s' % ramdisk,
+			'args=%s' % ubuntu_args])
+	# fix the installaction
+	hosts = stack.api.Call("list host")
+
+	for h in hosts:
+        	s = stack.api.Call("list host attr attr=os",
+                        	[h['host'],'attr=os'])[0]
+        	if s['value'] == 'ubuntu' and h['appliance'] != 'frontend':
+			stack.api.Call("set host installaction",
+				[h['host'], "action=ubuntu.%s.%s" % (release,version)])
+
+boxes = stack.api.Call('list box')
+for b in boxes:
+	if b['os'] == 'ubuntu':
+		for i in res:
+			if 'Ubuntu' in i['name'] and i['boxes'] != '':
+				found = True
+				doit(i['name'],i['version'],i['os'], 
+					i['release'].lower(),i['arch'])
+
+if found == False:
+	msg = '\nUbuntu distribution not found \n' 
+	msg += '\nor Ubuntu-Server pallet not enabled.\n'
+	sys.exit(msg)
+</post>
+
+<post>
+cp /opt/stack/images/initrd-ubuntu* /tftpboot/pxelinux/
+cp /opt/stack/images/vmlinuz-ubuntu* /tftpboot/pxelinux/
+systemctl restart httpd
+</post>
+
+</kickstart>

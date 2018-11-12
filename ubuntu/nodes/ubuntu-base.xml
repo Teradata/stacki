@@ -1,0 +1,27 @@
+<stack:ubuntu>
+
+	<stack:description>
+	Base class for all nodes installed with Ubuntu.
+	</stack:description>
+
+	<stack:si_copyright>
+	(c) 2006 - 2016 StackIQ Inc.
+	All rights reserved. stacki(r) v3.0 www.stacki.com
+	</stack:si_copyright>
+
+	<main>
+		<stack:eval>
+		/usr/bin/ssh-keygen -R &hostname; -f /root/.ssh/known_hosts &gt; /dev/null 2&gt;&amp;1
+		</stack:eval>
+		<debian-installer>locale string &Kickstart_Lang;</debian-installer>
+		<debian-installer>add-kernel-opts string &ubuntu.kernel_opts;</debian-installer>
+		<debconf>priority select critical</debconf>
+		<auto-install>enabled boolean true</auto-install>
+		<keyboard-configuration>layoutcode string &Kickstart_Keyboard;</keyboard-configuration>
+		<console-setup>ask_detect boolean false</console-setup>
+		<time>zone string &Kickstart_Timezone;</time>
+		<pkgsel>update-policy select none</pkgsel>
+		<live-installer>net-image string &UbuntuNetImagePath;</live-installer>
+	</main>
+
+</stack:ubuntu> 
