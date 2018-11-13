@@ -494,7 +494,15 @@ def main():
 		else:
 			break
 
-	host_fstab = get_host_fstab(host_disks)
+	#
+	# if fstab is corrupted, get_host_fstab() will throw and exception.
+	# catch it and just report an empty fstab
+	#
+	try:
+		host_fstab = get_host_fstab(host_disks)
+	except:
+		host_fstab = []
+
 	host_partitions = get_host_partitions(host_disks, host_fstab)
 
 	if not csv_partitions:
