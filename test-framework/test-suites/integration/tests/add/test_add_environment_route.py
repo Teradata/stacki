@@ -1,4 +1,5 @@
 import pytest
+import json
 
 class TestAddEnvironmentRoute:
 	def test_single_arg(self, host):
@@ -11,5 +12,4 @@ class TestAddEnvironmentRoute:
 		result = host.run('stack list environment route output-format=json')
 		assert result.rc == 0
 		with open('/export/test-files/add/add_environment_route_output.json') as f:
-			assert result.stdout == f.read()
-
+			assert json.loads(result.stdout) == json.loads(f.read())

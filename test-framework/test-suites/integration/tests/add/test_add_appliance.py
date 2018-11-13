@@ -1,4 +1,5 @@
 import pytest
+import json
 
 
 class TestAddAppliance:
@@ -20,7 +21,7 @@ class TestAddAppliance:
 
 		result = host.run(f'stack list appliance attr {appliance_name} output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_duplicate(self, host):
 		result = host.run('stack add appliance backend')

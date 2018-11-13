@@ -2013,7 +2013,7 @@ class Command:
 			elif format == 'binary':
 				self.addText(marshal.dumps(list))
 			else:
-				self.addText(json.dumps(list))
+				self.addText(json.dumps(list, indent=8))
 			return
 
 		if format == 'null':

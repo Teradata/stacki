@@ -25,7 +25,7 @@ class TestRemoveSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		result = host.run(f'stack remove switch partition switch-0-0 name={partition_name}')
 		assert result.rc == 0
@@ -49,7 +49,7 @@ class TestRemoveSwitchPartition:
 		# bad remove should leave db same
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# should not error on valid but non-existing name
 		result = host.run(f'stack remove switch partition switch-0-0 name=bbb')
@@ -60,7 +60,7 @@ class TestRemoveSwitchPartition:
 		# ... but it also shouldn't do anything.
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_passed_no_args(self, host, add_ib_switch):
 		result = host.run(f'stack remove switch partition name=default')
@@ -76,7 +76,7 @@ class TestRemoveSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# should be able to remove all day long
 		for i in range(2):
@@ -101,7 +101,7 @@ class TestRemoveSwitchPartition:
 
 			result = host.run('stack list switch partition switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 			result = host.run(f'stack remove switch partition switch-0-0 name={partition_name}')
 			assert result.rc == 0
@@ -136,12 +136,12 @@ class TestRemoveSwitchPartition:
 
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition switch-0-1 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip().replace('switch-0-1', 'switch-0-0') == expected_output.strip()
+		assert json.loads(result.stdout.strip().replace('switch-0-1', 'switch-0-0')) == json.loads(expected_output)
 
 		result = host.run('stack remove switch partition switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0

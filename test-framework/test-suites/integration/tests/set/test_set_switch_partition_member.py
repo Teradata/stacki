@@ -52,7 +52,7 @@ class TestSetSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership,output_file", SWITCH_PARTITION_MEMBER_TEST_DATA)
 	def test_set_for_membership_behavior(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
@@ -81,7 +81,7 @@ class TestSetSwitchPartitionMember:
 
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		for row in TestSetSwitchPartitionMember.SWITCH_PARTITION_MEMBER_TEST_DATA:
 			if partition_name.lower() != row[0]:
@@ -101,7 +101,7 @@ class TestSetSwitchPartitionMember:
 			assert result.rc == 0
 			result = host.run('stack list switch partition member switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == open(dirn + new_output_file).read().strip()
+			assert json.loads(result.stdout) == json.loads(open(dirn + new_output_file).read())
 
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership", SWITCH_PARTITION_MEMBER_NEGATIVE_TEST_DATA)
@@ -159,7 +159,7 @@ class TestSetSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# make the add a set command
 		result = host.run(' '.join(cmd).replace('add', 'set').replace('member ', 'membership '))
@@ -168,7 +168,7 @@ class TestSetSwitchPartitionMember:
 		# should be the same
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_can_duplicate_names_that_resolve_same(self, host, add_ib_switch, add_host_with_interface):
 		output_file = 'add_nondefault_member_output.json'
@@ -191,7 +191,7 @@ class TestSetSwitchPartitionMember:
 			assert result.rc == 0
 			result = host.run('stack list switch partition member switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_cannot_add_to_non_ib(self, host, add_switch):
 		result = host.run(f'stack set switch partition membership switch-0-0 name=default guid=fake')
@@ -223,7 +223,7 @@ class TestSetSwitchPartitionMember:
 
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition member switch-0-1 output-format=json')
@@ -232,7 +232,7 @@ class TestSetSwitchPartitionMember:
 		output = output.replace('switch-0-1', 'switch-0-0')
 		output = output.replace('backend-0-1', 'backend-0-0')
 		output = output.replace('00:00:00:00:00:00:00:01', '00:00:00:00:00:00:00:00')
-		assert output == expected_output.strip()
+		assert json.loads(output) == json.loads(expected_output)
 
 		result = host.run('stack list switch partition member switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0

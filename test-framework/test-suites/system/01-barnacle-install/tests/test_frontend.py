@@ -1,4 +1,5 @@
 import pytest
+import json
 
 def test_frontend_stack_report_system(host):
 	"Simple sanity test that a frontend is up and running"
@@ -82,11 +83,13 @@ def test_default_appliances_have_sane_attributes(host):
 	"Test that default appliances are created with expected attrs"
 
 	expected_output = host.run("cat /export/test-files/default_appliance_attrs_output.json")
+	expected_result = json.loads(expected_output.stdout)
 
 	cmd = host.run("sudo -i stack list appliance attr output-format=json")
+	actual_result = json.loads(cmd.stdout)
 
 	assert cmd.rc == 0
-	assert cmd.stdout.strip() == expected_output.stdout.strip()
+	assert actual_result == expected_result
 
 def test_packages_have_hashes(host):
 	results = host.run('rpm -qa stack-* --queryformat "%{VENDOR} %{NAME} %{VCS}\n"')

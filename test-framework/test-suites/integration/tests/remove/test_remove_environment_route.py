@@ -1,4 +1,5 @@
 import pytest
+import json
 
 class TestRemoveEnvironmentRoute:
 	def test_remove_environment_route(self, host):
@@ -11,7 +12,7 @@ class TestRemoveEnvironmentRoute:
 		result = host.run('stack list environment route output-format=json')
 		assert result.rc == 0
 		with open('/export/test-files/remove/remove_environment_route_output.json') as f:
-			assert result.stdout == f.read()
+			assert json.loads(result.stdout) == json.loads(f.read())
 
 		result = host.run('stack remove environment route test address=test')
 		assert result.rc == 0

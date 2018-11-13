@@ -50,7 +50,7 @@ class TestListSwitchPartitionMember:
 
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_list_by_name(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface):
 		dirn = '/export/test-files/add/'
@@ -70,7 +70,7 @@ class TestListSwitchPartitionMember:
 		assert result.rc == 0
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == open(dirn + output_file).read().strip()
+		assert json.loads(result.stdout) == json.loads(open(dirn + output_file).read())
 
 		partition_name = 'aaa'
 		output_file = 'add_nondefault_member_output.json'
@@ -82,7 +82,7 @@ class TestListSwitchPartitionMember:
 
 		result = host.run(f'stack list switch partition member switch-0-0 name={partition_name} output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == open(dirn + output_file).read().strip()
+		assert json.loads(result.stdout) == json.loads(open(dirn + output_file).read())
 
 		# valid names should return nothing, and not error
 		partition_name = 'bbb'

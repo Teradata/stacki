@@ -51,7 +51,7 @@ class TestRemoveSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# command can be called with guid or with hostname+iface
 		cmd = [f'stack remove switch partition member switch-0-0 name={partition_name}']
@@ -91,7 +91,7 @@ class TestRemoveSwitchPartitionMember:
 		# bad remove should leave db same
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# should not error on valid, existing name with non-existing guid
 		result = host.run(f'stack remove switch partition member switch-0-0 name=default guid=5')
@@ -102,7 +102,7 @@ class TestRemoveSwitchPartitionMember:
 		# ... but it also shouldn't do anything.
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface", SWITCH_PARTITION_MEMBER_NEGATIVE_TEST_DATA)
 	def test_bad_input(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
@@ -136,7 +136,7 @@ class TestRemoveSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_passed_no_args(self, host, add_ib_switch):
 		result = host.run(f'stack remove switch partition member name=default')
@@ -157,7 +157,7 @@ class TestRemoveSwitchPartitionMember:
 		assert result.rc == 0
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# should be able to remove all day long
 		for i in range(2):
@@ -183,7 +183,7 @@ class TestRemoveSwitchPartitionMember:
 
 			result = host.run('stack list switch partition switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 			result = host.run(f'stack remove switch partition switch-0-0 name={partition_name}')
 			assert result.rc == 0
@@ -220,12 +220,12 @@ class TestRemoveSwitchPartitionMember:
 
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition switch-0-1 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip().replace('switch-0-1', 'switch-0-0') == expected_output.strip()
+		assert json.loads(result.stdout.strip().replace('switch-0-1', 'switch-0-0')) == json.loads(expected_output)
 
 		result = host.run('stack remove switch partition switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0
