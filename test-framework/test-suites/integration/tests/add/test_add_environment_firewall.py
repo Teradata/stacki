@@ -1,4 +1,5 @@
 import pytest
+import json
 
 class TestAddEnvironmentFirewall:
 	def test_single_arg(self, host):
@@ -11,5 +12,5 @@ class TestAddEnvironmentFirewall:
 		result = host.run('stack list environment firewall output-format=json')
 		assert result.rc == 0
 		with open('/export/test-files/add/add_environment_firewall_output.json') as f:
-			assert result.stdout == f.read()
+			assert json.loads(result.stdout) == json.loads(f.read())
 

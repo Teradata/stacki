@@ -32,7 +32,7 @@ class TestSetSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
 	def test_set_for_options_behavior(self, host, add_ib_switch, partition_name, options, output_file):
@@ -44,7 +44,7 @@ class TestSetSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		for row in TestSetSwitchPartition.SWITCH_PARTITION_TEST_DATA:
 			if partition_name.lower() != row[0]:
@@ -55,7 +55,7 @@ class TestSetSwitchPartition:
 			assert result.rc == 0
 			result = host.run('stack list switch partition switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == open(dirn + new_output_file).read().strip()
+			assert json.loads(result.stdout) == json.loads(open(dirn + new_output_file).read())
 
 	@pytest.mark.parametrize("partition_name,options", SWITCH_PARTITION_NEGATIVE_TEST_DATA)
 	def test_set_negative_behavior(self, host, add_ib_switch, partition_name, options):
@@ -78,13 +78,13 @@ class TestSetSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		result = host.run(f'stack set switch partition options switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_can_duplicate_names_that_resolve_same(self, host, add_ib_switch):
 		output_file = 'add_nondefault_partition_output.json'
@@ -100,7 +100,7 @@ class TestSetSwitchPartition:
 			assert result.rc == 0
 			result = host.run('stack list switch partition switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_cannot_add_via_set_to_non_ib(self, host, add_switch):
 		result = host.run(f'stack set switch partition options switch-0-0 name=Default')
@@ -129,12 +129,12 @@ class TestSetSwitchPartition:
 
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition switch-0-1 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip().replace('switch-0-1', 'switch-0-0') == expected_output.strip()
+		assert json.loads(result.stdout.strip().replace('switch-0-1', 'switch-0-0')) == json.loads(expected_output)
 
 		result = host.run('stack list switch partition switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0
