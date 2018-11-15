@@ -1,7 +1,7 @@
 #!/opt/stack/bin/python3
+import sys
 from pathlib import Path
 
-src_base = Path("/export/src/stack")
 dest_base = Path("/opt/stack/lib/python3.6/site-packages")
 
 grafts_to_site_packages = (
@@ -20,21 +20,6 @@ grafts_to_site_packages = (
 	("ws-client/pylib", "")
 )
 
-for src, dest in grafts_to_site_packages:
-	src_directory = src_base / src
-	dest_directory = dest_base / dest
-
-	# Find all our Python files
-	for src_filename in src_directory.glob("**/*.py"):
-		dest_filename = dest_directory / src_filename.relative_to(src_directory)
-
-		# First blow away the old one, if it exists
-		if dest_filename.exists():
-			dest_filename.unlink()
-
-		# Now symlink over our src version
-		dest_filename.symlink_to(src_filename)
-
 bin_file_grafts = (
 	("command/stack.py", "/opt/stack/bin/stack"),
 	("discovery/bin/discover-nodes.py", "/opt/stack/sbin/discover-nodes"),
@@ -51,13 +36,36 @@ bin_file_grafts = (
 	("ws-client/bin/wsclient.py", "/opt/stack/bin/wsclient")
 )
 
-for src, dest in bin_file_grafts:
-	src_filename = src_base / src
-	dest_filename = Path(dest)
+if __name__ == '__main__':
+	if len(sys.argv) != 2:
+		print(f'{Path(__file__).name} <path_to_stacki_source_tree>')
+		sys.exit(1)
 
-	# Blow away the old one, if it exists
-	if dest_filename.exists():
-		dest_filename.unlink()
+	# get the absolute path, expanding shell stuff
+	src_base = Path(sys.argv[1]).expanduser().resolve() / 'common/src/stack/'
 
-	# Now symlink over our src version
-	dest_filename.symlink_to(src_filename)
+	for src, dest in grafts_to_site_packages:
+		src_directory = src_base / src
+		dest_directory = dest_base / dest
+
+		# Find all our Python files
+		for src_filename in src_directory.glob("**/*.py"):
+			dest_filename = dest_directory / src_filename.relative_to(src_directory)
+
+			# First blow away the old one, if it exists
+			if dest_filename.exists() or dest_filename.is_symlink():
+				dest_filename.unlink()
+
+			# Now symlink over our src version
+			dest_filename.symlink_to(src_filename)
+
+	for src, dest in bin_file_grafts:
+		src_filename = src_base / src
+		dest_filename = Path(dest)
+
+		# Blow away the old one, if it exists
+		if dest_filename.exists() or dest_filename.is_symlink():
+			dest_filename.unlink()
+
+		# Now symlink over our src version
+		dest_filename.symlink_to(src_filename)
