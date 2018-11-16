@@ -84,6 +84,6 @@ class TestDumpSoftware:
 		# check to make sure that our dump contains accurate cart information
 		check = False
 		for cart in dumped_data['software']['cart']:
-			if cart['name'] == 'test':
+			if cart == 'test':
 				check = True
 		assert check == True

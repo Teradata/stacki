@@ -1,0 +1,9 @@
+---
+  - name: Copy over setup-src.py script
+    copy:
+      src: files/setup-src.py
+      dest: /root/
+      mode: 0744
+
+  - name: Run the setup-src.py script
+    command: /root/setup-src.py

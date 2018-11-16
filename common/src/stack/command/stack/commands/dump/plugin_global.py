@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-class Plugin(stack.commands.Plugin):
+class __Plugin(stack.commands.Plugin):
 
 	def provides(self):
 		return 'global'

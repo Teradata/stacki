@@ -31,24 +31,16 @@ class TestDumpOs:
 		for os in dumped_data['os']:
 			if os['name'] == 'redhat':
 
-				for attr in os['attrs']:
-					if attr['attr'] == 'test':
-						assert attr == {
-							'attr': 'test',
-							'os': 'redhat',
-							'scope': 'os',
-							'type': 'var',
-							'value': 'test'
-						}
+				for attr in os['attr']:
+					if attr['name'] == 'test':
+						assert attr['value'] == 'test'
 
 				for route in os['route']:
-					if route['network'] == '192.168.0.0':
+					if route['address'] == '192.168.0.0':
 						assert route == {
-							'network': '192.168.0.0',
-							'os': 'redhat',
+							'address': '192.168.0.0',
 							'netmask': '255.255.255.0',
 							'gateway': '192.168.0.1',
-							'subnet': None,
 							'interface': 'eth1'
 						}
 
@@ -62,12 +54,9 @@ class TestDumpOs:
 								'chain':'INPUT',
 								'action':'ACCEPT',
 								'network':'private',
-								'os': 'redhat',
-								'output-network':'private',
+								'output_network':'private',
 								'flags':'-m set',
 								'comment':'test',
-								'source':'O',
-								'type':'var'
 						}
 
 				for partition in os['partition']:
@@ -75,7 +64,6 @@ class TestDumpOs:
 						assert partition == {
 								'device': 'test',
 								'partid': 1,
-								'scope': 'redhat',
 								'mountpoint': 'test',
 								'size': 1,
 								'fstype': 'ext4',
@@ -87,7 +75,6 @@ class TestDumpOs:
 								'options': 'test',
 								'enclosure': 3,
 								'adapter': 1,
-								'scope': 'redhat',
 								'slot': 5,
 								'raidlevel': '4',
 								'arrayid': 2

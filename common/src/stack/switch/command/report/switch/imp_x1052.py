@@ -133,14 +133,19 @@ class Implementation(stack.commands.Implementation):
 				' switchport general allowed vlan add 1 untagged')
 		else:
 			#
-			# find all the VLAN ids
+			# find all the VLAN ids for all non-frontend components
 			#
 			vlans = []
-			for o in self.owner.call('list.host.interface', [ 'a:backend' ]):
-				if o['vlan']:
-					vlan = str(o['vlan'])
-					if vlan not in vlans:
-						vlans.append(vlan)
+
+			for o in self.owner.call('list.host'):
+				if o['appliance'] == 'frontend':
+					continue
+
+				for p in self.owner.call('list.host.interface', [ o['host'] ]):
+					if p['vlan']:
+						vlan = str(p['vlan'])
+						if vlan not in vlans:
+							vlans.append(vlan)
 
 			if len(vlans):
 				self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))

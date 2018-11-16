@@ -26,27 +26,13 @@ def dump_mysql():
 
 	# Dump the initial Stacki DB into an SQL file, to restore from
 	# after each test
-	if os.path.exists("/opt/stack/etc/root.my.cnf"):
-		subprocess.run([
-			"mysqldump",
-			"--defaults-file=/opt/stack/etc/root.my.cnf",
-			"--lock-all-tables",
-			"--add-drop-database",
-			"--databases",
-			"cluster"
-		], stdout=file_obj, check=True)
-	else:
-		subprocess.run([
-			"mysqldump",
-			"--lock-all-tables",
-			"--add-drop-database",
-			"--databases",
-			"cluster"
-		], stdout=file_obj, check=True)
-	
+	subprocess.run([
+		"mysqldump", "--opt", "--add-drop-database", "--databases", "cluster"
+	], stdout=file_obj, check=True)
+
 	# Close the file
 	file_obj.close()
-	
+
 	# Done with the set up, yield our SQL file path
 	yield file_path
 
@@ -57,16 +43,10 @@ def dump_mysql():
 def revert_database(dump_mysql):
 	# Don't need to do anything in the set up
 	yield
-
+	
 	# Load a fresh database after each test
 	with open(dump_mysql) as sql:
-		if os.path.exists("/opt/stack/etc/root.my.cnf"):
-			subprocess.run([
-				"mysql",
-				"--defaults-file=/opt/stack/etc/root.my.cnf"
-			], stdin=sql, check=True)
-		else:
-			subprocess.run("mysql", stdin=sql, check=True)
+		subprocess.run("mysql", stdin=sql, check=True)
 
 @pytest.fixture
 def revert_filesystem():

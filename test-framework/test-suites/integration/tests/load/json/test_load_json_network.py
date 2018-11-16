@@ -6,7 +6,7 @@ class TestLoadJsonNetwork:
 	Test that loading network data works properly
 	"""
 
-	def test_load_json_network(self, host):
+	def skip_test_load_json_network(self, host):
 		dirn = '/export/test-files/load/json/'
 		file = dirn + 'network.json'
 

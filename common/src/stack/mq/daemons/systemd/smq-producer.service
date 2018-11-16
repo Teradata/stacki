@@ -1,0 +1,12 @@
+[Unit]
+Description=Stacki Message Queue Producer
+After=last.target
+
+[Service]
+Type=idle
+PIDFile=/var/run/smq-producer/smq-producer.pid
+ExecStartPre=/usr/bin/mkdir -p /var/run/smq-producer
+ExecStart=/opt/stack/sbin/smq-producer
+
+[Install]
+WantedBy=last.target

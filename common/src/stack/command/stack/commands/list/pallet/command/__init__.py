@@ -62,7 +62,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 		# Filter it to remove any blanks and __pycache__
 		directories = [
 			path for path in tree.getDirs()
-			if path and '__pycache__' not in path
+			if path and '__pycache__' not in path and '.' not in path
 		]
 
 		# Create a mapping of pallet names to Commands
@@ -70,7 +70,11 @@ class Command(stack.commands.PalletArgumentProcessor,
 		for directory in sorted(directories):
 			# Load our module
 			modpath = 'stack.commands.%s' % '.'.join(directory.split(os.sep))
-			module = importlib.import_module(modpath)
+
+			try:
+				module = importlib.import_module(modpath)
+			except SyntaxError:
+				continue
 
 			# Make sure it is a Command
 			if not hasattr(module, 'Command'):

@@ -12,7 +12,7 @@
 
 PKGROOT		= /
 ROLLROOT	= ../../../..
-DEPENDS.DIRS	= init.d profile.d cgi
+DEPENDS.DIRS	= init.d profile.d cgi mq
 
 include $(ROCKSBUILD)/etc/CCRules.mk
 
@@ -22,8 +22,11 @@ install::
 	mkdir -p $(ROOT)/etc/profile.d/
 	mkdir -p $(ROOT)/etc/init.d/
 	mkdir -p $(ROOT)/export/stack/pallets
+	mkdir -p $(ROOT)/$(PY.STACK)/stack/mq/producers
 	$(INSTALL) -m755 profile.d/ssh-key.csh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 profile.d/ssh-key.sh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 init.d/stack-num-cpus $(ROOT)/etc/init.d/
 	$(INSTALL) -m755 cgi/index.cgi $(ROOT)/export/stack/pallets/index.cgi
 	$(INSTALL) -m755 cgi/pallets.cgi $(ROOT)/export/stack/pallets/pallets.cgi
+	$(INSTALL) -m644 mq/producers/switch_health.py $(ROOT)/$(PY.STACK)/stack/mq/producers/
+

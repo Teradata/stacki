@@ -23,10 +23,11 @@ install::
 	mkdir -p $(ROOT)/etc/profile.d
 	mkdir -p $(ROOT)/etc/ld.so.conf.d
 	mkdir -p $(ROOT)/etc/rc.d/init.d
+	mkdir -p $(ROOT)/etc/systemd/system
 	$(INSTALL) -m755 etc/profile.d/*sh	$(ROOT)/etc/profile.d/
 	$(INSTALL) -m0644 etc/ld.so.conf.d/stack.conf $(ROOT)/etc/ld.so.conf.d/stack.conf
 	$(INSTALL) -m755 init.d/stack-dmesg	$(ROOT)/etc/rc.d/init.d/
 	$(INSTALL) -m755 init.d/stack-pre	$(ROOT)/etc/rc.d/init.d/
 	$(INSTALL) -m755 init.d/stack-post	$(ROOT)/etc/rc.d/init.d/
-	$(INSTALL) -m755 init.d/stack-shutdown	$(ROOT)/etc/rc.d/init.d/
+	$(INSTALL) -m644 etc/systemd/system/last.target $(ROOT)/etc/systemd/system/
 

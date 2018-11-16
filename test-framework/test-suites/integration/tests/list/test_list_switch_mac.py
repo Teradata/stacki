@@ -18,7 +18,7 @@ class TestListSwitchMac:
 		assert result.rc == 0
 
 		# Inject our Mock code to replace the communication with actual hardware
-		with inject_code('/export/test-files/list/mock_test_x1052.py'):
+		with inject_code('/export/test-files/list/mock_switch_mac_test_x1052.py'):
 			# List the switch hosts
 			result = host.run('stack list switch mac pinghosts=true output-format=json')
 

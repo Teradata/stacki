@@ -31,18 +31,14 @@ class TestDumpAppliance:
 		for appliance in dumped_data['appliance']:
 			if appliance['name'] == 'backend':
 
-				for attr in appliance['attrs']:
-					if attr['attr'] == 'test':
-						assert attr['scope'] == 'appliance'
-						assert attr['type'] == 'var'
+				for attr in appliance['attr']:
+					if attr['name'] == 'test':
 						assert attr['value'] == 'test'
 
 				for route in appliance['route']:
-					if route['network'] == '192.168.0.0':
-						assert route['appliance'] == 'backend'
+					if route['address'] == '192.168.0.0':
 						assert route['netmask'] == '255.255.255.0'
 						assert route['gateway'] == '192.168.0.1'
-						assert route['subnet'] == None
 						assert route['interface'] == 'eth0'
 
 				for firewall in appliance['firewall']:
@@ -56,8 +52,6 @@ class TestDumpAppliance:
 						assert firewall['output-network'] == 'private'
 						assert firewall['flags'] == '-m set'
 						assert firewall['comment'] == 'test'
-						assert firewall['source'] == 'A'
-						assert firewall['type'] == 'var'
 
 				for partition in appliance['partition']:
 					if partition['device'] == 'test':

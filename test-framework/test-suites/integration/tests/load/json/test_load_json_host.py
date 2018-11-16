@@ -6,7 +6,7 @@ class TestLoadJsonHost:
 	Test that the load json host is able to load what dump host dumps
 	"""
 
-	def test_load_json_host(self, host):
+	def skip_test_load_json_host(self, host):
 
 		# lets first add some dummy host data that we can later remove to make sure load works
 		results = host.run('stack add host backend-test appliance=backend box=default rack=1 rank=1')

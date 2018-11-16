@@ -10,14 +10,14 @@ import pexpect
 
 
 class SwitchDellX1052(Switch):
-	"""Class for interfacing with a Dell x1052 switch.
+	"""
+	Class for interfacing with a Dell x1052 switch.
 	"""
 
 	def supported(*cls):
 		return [
 			('Dell', 'x1052'),
 		]
-
 
 	def connect(self):
 		"""Connect to the switch"""
@@ -122,20 +122,6 @@ class SwitchDellX1052(Switch):
 
 		return _hosts
 
-	def get_vlan_table(self):
-		"""Download the vlan table"""
-		time.sleep(1)
-		command = 'show vlan'
-		self.child.expect('console#', timeout=60)
-		with open('/tmp/%s_vlan_table' % self.switchname, 'wb') as macout:
-			print("opening vlan table file")
-			self.child.logfile = macout
-			self.child.sendline(command)
-			time.sleep(1)
-			self.send_spacebar(4)
-			self.child.expect('console#', timeout=60)
-		self.child.logfile = None
-
 	def send_spacebar(self, times=1):
 		"""Send Spacebar; Used to read more of the output"""
 		command = "\x20"
@@ -189,34 +175,6 @@ class SwitchDellX1052(Switch):
 			self._expect('The copy operation was completed successfully')
 		except:
 			raise SwitchException('Could not apply configuration to startup-config')
-		
-	def _vlan_parser(self, vlan_string):
-		"""Takes input of a bunch of numbers in gives back a string containing all numbers once.
-		The format for all_vlans is expected to be 3-7,9-10,44,3
-		Which would be broken into a list like so: 3,4,5,6,7,9,10,44
-		This if for inputing to the interface for the general port's vlan settings
-		It could also be used to QA the vlans set afterwards. Which is not currently a feature."""
-		clean_vlans = set()
-		for each_vlan_str in vlan_string.split(","):
-			if "-" in each_vlan_str:
-				start, end = each_vlan_str.split("-")
-				for each_number in range(int(start), int(end) + 1):
-					clean_vlans.add(int(each_number))
-			else:
-				if each_vlan_str:
-					clean_vlans.add(int(each_vlan_str))
-
-		all_vlans = ','.join([str(vlan) for vlan in sorted(clean_vlans)])
-
-		return all_vlans
-
-	def get_port_from_interface(self, line):
-		""" Get Port from gigabitethernet interface
-		interface gigabitethernet1/0/20 returns 20
-		"""
-		port = line.split('/')[-1]
-		return port
 
 	def set_tftp_ip(self, ip):
 		self.stacki_server_ip = ip
-

@@ -1,0 +1,12 @@
+[Unit]
+Description=Stacki Message Queue Processor
+After=last.target
+
+[Service]
+Type=idle
+PIDFile=/var/run/smq-processor/smq-processor.pid
+ExecStartPre=/usr/bin/mkdir -p /var/run/smq-processor
+ExecStart=/opt/stack/sbin/smq-processor
+
+[Install]
+WantedBy=last.target
