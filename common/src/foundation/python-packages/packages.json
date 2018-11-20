@@ -18,7 +18,7 @@
 	"Flask":		{ "fe": true }, 
 	"GitPython":            { "fe": true, "bootstrap": true },
 	"PyMySQL":		{ "fe": true, "bootstrap": true, "version": "0.8.1" }, 
-	"ansible":		{ "fe": true, "version": "2.4.2.0" },
+	"ansible":		{ "fe": true },
 	"configparser":		{ "fe": true, "be": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
 	"jmespath":		{ "fe": true },
@@ -26,9 +26,9 @@
 	"netifaces":		{ "fe": true, "be":"true"},
 	"pexpect":		{ "fe": true },
 	"psutil":		{ "fe": true, "be": true, "bootstrap": true },
-	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true, "version": "2.1.2" }, 
+	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
-	"testinfra":		{ "fe": true, "bootstrap": true }
+	"testinfra":		{ "fe": true, "bootstrap": true, "version": "1.16.0" }
 }

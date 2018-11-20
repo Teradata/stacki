@@ -1,9 +1,3 @@
 ---
-  - name: Copy over setup-src.py script
-    copy:
-      src: files/setup-src.py
-      dest: /root/
-      mode: 0744
-
-  - name: Run the setup-src.py script
-    command: /root/setup-src.py
+  - name: Run the use_the_source.py script
+    command: /opt/stack/bin/python3 /export/src/stacki/tools/use_the_source/use_the_source.py /export/src/stacki

@@ -37,7 +37,24 @@ class Implementation(stack.commands.Implementation):
 		# find out if we need to set the port as a 'trunk' port. a trunk port 
 		# allows all VLAN traffic to pass.
 		#
+		istrunk = False
+
 		if self.owner.getHostAttr(host, 'switch_port_mode') == 'trunk':
+			istrunk = True
+		else:
+			#
+			# if more that one host is mapped to this port, then it must
+			# be configured as a trunk port
+			#
+			x = 0
+			for s in self.owner.call('list.switch.host', [ switch ]):
+				if s['port'] == port:
+					x = x + 1
+					if x > 1:
+						istrunk = True
+						break
+
+		if istrunk:
 			self.owner.addOutput('localhost', ' switchport mode trunk')
 			return
 
@@ -150,18 +167,14 @@ class Implementation(stack.commands.Implementation):
 			if len(vlans):
 				self.owner.addOutput('localhost', 'vlan %s' % ','.join(vlans))
 
-			#
-			# create a list of host/port 
-			#
-			hostport = []
+			configured = []
 			for s in self.owner.call('list.switch.host', [ switch_name ]):
 				host = s['host']
 				port = s['port']
 
-				hp = (host, port)
-				if hp not in hostport:
+				if port not in configured:
 					self.doPort(switch_name, host, port)
-					hostport.append(hp)
+					configured.append(port)
 
 		self.owner.addOutput('localhost', '!')
 		self.owner.addOutput('localhost', '</stack:file>')
