@@ -1,0 +1,8 @@
+M7800-1-370-370-12 [standalone: master] (config) # show ib partition
+  Default
+    PKey      = 0x7FFF
+    ipoib     = yes
+  members
+    GUID='ALL' member='full'
+    GUID='e4:1d:2d:03:00:15:6e:80' member='limited'
+M7800-1-370-370-12 [standalone: master] (config) #
