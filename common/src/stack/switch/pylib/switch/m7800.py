@@ -17,8 +17,7 @@ members_header = re.compile('  members', re.IGNORECASE)
 guid_format = re.compile("([0-9a-f]{2}:){7}[0-9a-f]{2}|ALL", re.IGNORECASE)
 # a GID is like an ipv6? 20 pairs
 gid_format = re.compile("([0-9a-f]{2}:){19}[0-9a-f]{2}|ALL", re.IGNORECASE)
-guid_member_format = re.compile("(([0-9a-f]{2}:){7}[0-9a-f]{2}).*(full|both|limited)|ALL", re.IGNORECASE)
-
+guid_member_format = re.compile("(ALL|([0-9a-f]{2}:){7}[0-9a-f]{2}).*(full|both|limited)", re.IGNORECASE)
 
 class SwitchMellanoxM7800(Switch):
 	"""
