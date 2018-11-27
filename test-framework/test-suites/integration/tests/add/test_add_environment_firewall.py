@@ -259,9 +259,6 @@ class TestAddEnvironmentFirewall:
 		)
 		assert result.rc == 0
 
-		with open('/export/test-files/add/add_environment_firewall_output.json') as f:
-			assert json.loads(result.stdout) == json.loads(f.read())
-
 		# Now add it again and make sure it fails
 		result = host.run(
 			'stack add environment firewall test service=1234 chain=INPUT action=ACCEPT protocol=TCP'
