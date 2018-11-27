@@ -33,7 +33,7 @@ class Command(stack.commands.Command,
 
 	<param type='boolean' name='shadow'>
 	Specifies is shadow attributes are listed, the default
-	is False.
+	is True.
 	</param>
 
 	<example cmd='list attr'>
@@ -96,7 +96,7 @@ class Command(stack.commands.Command,
 		readonly['version'] = stack.version
 
 		for key in readonly:
-			attributes['global'][key] = (readonly[key], None, 'const', 'global')
+			attributes['global'][key] = (readonly[key], 'const', 'global')
 
 		return attributes
 
@@ -202,11 +202,11 @@ class Command(stack.commands.Command,
 
 			if ro:
 				for key in r: # slam consts on top of attrs
-					a[key] = (r[key], None, 'const', 'host')
+					a[key] = (r[key], 'const', 'host')
 			else:
 				for key in r: # only add new consts to attrs
 					if key not in a:
-						a[key] = (r[key], None, 'const', 'host')
+						a[key] = (r[key], 'const', 'host')
 
 		return attributes
 
@@ -262,40 +262,66 @@ class Command(stack.commands.Command,
 			for target in lookup[s]['fn']():
 				attributes[s][target] = {}
 
+			# Do a UNION select for the attributes in the cluster
+			# and shadow database. This is done to minimize the
+			# calls/context switches to the database. If the user
+			# doesn't have permission to access the shadow
+			# database, we fallback to just selecting out of the
+			# cluster database.
+
 			if var:
 				table = lookup[s]['table']
 				if table:
-					rows = self.db.select("""
-						t.name, a.attr, a.value, a.shadow 
-						from attributes a, %s t where
-						a.scope = '%s' and a.scopeid = t.id
-						""" % (table, s))
-					if rows:
-						for (o, a, v, x) in rows:
-							attributes[s][o][a] = (v, x, 'var', s)
-					else:
-						for (o, a, v) in self.db.select("""
-							t.name, a.attr, a.value
-							from attributes a, %s t where
-							a.scope = '%s' and a.scopeid = t.id
-							""" % (table, s)):
-							attributes[s][o][a] = (v, None, 'var', s)
+					rows = self.db.select(
+						"""
+						t.name, true, a.attr, a.value from
+						shadow.attributes a, %s t where
+						a.scope = %%s and a.scopeid = t.id
+						union select
+						t.name, false, a.attr, a.value from 
+						attributes a, %s t where
+						a.scope = %%s and a.scopeid = t.id
+						""" % (table, table), (s, s))
+					if not rows:
+						rows = self.db.select(
+							"""
+							t.name, false, a.attr, a.value from 
+							attributes a, %s t where
+							a.scope = %%s and a.scopeid = t.id
+							""" % table, s)
 
+					for (o, x, a, v) in rows:
+						if not x:
+							attributes[s][o][a] = (v, 'var', s)
+					if shadow:
+						for (o, x, a, v) in rows:
+							if x:
+								attributes[s][o][a] = (v, 'shadow', s)
 				else:
 					o = target
-					rows = self.db.select("""
-						attr, value, shadow from attributes
-						where scope = '%s'
-						""" % s)
-					if rows:
-						for (a, v, x) in rows:
-							attributes[s][o][a] = (v, x, 'var', s)
-					else:
-						for (a, v) in self.db.select("""
-							attr, value from attributes
-							where scope = '%s'
-							""" % s):
-							attributes[s][o][a] = (v, None, 'var', s)
+
+					rows = self.db.select(
+						"""
+						true, attr, value from shadow.attributes
+						where scope = %s
+						union select 
+						false, attr, value from attributes
+						where scope = %s
+						""", (s, s))
+					if not rows:
+						rows = self.db.select(
+							"""
+							false, attr, value from attributes
+							where scope = %s
+							""", s)
+
+					for (x, a, v) in rows:
+						if not x:
+							attributes[s][o][a] = (v, 'var', s)
+					if shadow:
+						for (x, a, v) in rows:
+							if x:
+								attributes[s][o][a] = (v, 'shadow', s)
 
 			if const:
 				# Mix in any const attributes
@@ -309,25 +335,25 @@ class Command(stack.commands.Command,
 				env = self.db.getHostEnvironment(o)
 				if env:
 					parent = attributes['environment'][env]
-					for (a, (v, x, t, s)) in parent.items():
+					for (a, (v, t, s)) in parent.items():
 						if a not in attributes[scope][o]:
-							attributes[scope][o][a] = (v, x, t, s)
+							attributes[scope][o][a] = (v, t, s)
 
 				parent = attributes['appliance'][self.db.getHostAppliance(o)]
-				for (a, (v, x, t, s)) in parent.items():
+				for (a, (v, t, s)) in parent.items():
 					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, x, t, s)
+						attributes[scope][o][a] = (v, t, s)
 
 				parent = attributes['os'][self.db.getHostOS(o)]
-				for (a, (v, x, t, s)) in parent.items():
+				for (a, (v, t, s)) in parent.items():
 					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, x, t, s)
+						attributes[scope][o][a] = (v, t, s)
 
 		if resolve and scope != 'global':
 			for o in targets:
-				for (a, (v, x, t, s)) in attributes['global']['global'].items():
+				for (a, (v, t, s)) in attributes['global']['global'].items():
 					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, x, t, s)
+						attributes[scope][o][a] = (v, t, s)
 
 		if glob:
 			for o in targets:
@@ -343,11 +369,7 @@ class Command(stack.commands.Command,
 		for o in targets:
 			attrs = attributes[scope][o]
 			for a in sorted(attrs.keys()):
-				(v, x, t, s) = attrs[a]
-				if x:
-					t = 'shadow'
-					if shadow:
-						v = x
+				(v, t, s) = attrs[a]
 				if scope == 'global':
 					self.addOutput(s, (t, a, v))
 				else:
