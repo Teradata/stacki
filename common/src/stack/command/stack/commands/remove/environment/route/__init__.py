@@ -13,7 +13,7 @@ class Command(stack.commands.remove.environment.command):
 	"""
 	Remove an environment static route.
 
-	<arg type='string' name='environment' optional='0'>
+	<arg type='string' name='environment' optional='0' repeat='1'>
 	Environment name
 	</arg>
 
@@ -22,17 +22,9 @@ class Command(stack.commands.remove.environment.command):
 	</param>
 	"""
 
-
 	def run(self, params, args):
-
-		(address, ) = self.fillParams([('address', None, True)])
-
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
 
-		for environment in self.getEnvironmentNames(args):
-			env = self.db.select("""id FROM environments WHERE name=%s""", environment)[0][0]
-
-			self.db.execute("""DELETE FROM environment_routes WHERE
-					environment=%s AND network=%s""", (env, address))
-
+		self.command('remove.route', self._argv + ['scope=environment'])
+		return self.rc

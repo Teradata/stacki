@@ -19,9 +19,29 @@ class TestRemoveRoute:
 		# Make sure it is in the DB now
 		result = host.run('stack list route output-format=json')
 		assert result.rc == 0
-		assert '127.0.0.3' in {
-			route['network'] for route in json.loads(result.stdout)
-		}
+		assert json.loads(result.stdout) == [
+			{
+				'gateway': '127.0.0.3',
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '127.0.0.3',
+				'subnet': None
+			},
+			{
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.0',
+				'network': '224.0.0.0',
+				'subnet': 'private'
+			},
+			{
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '255.255.255.255',
+				'subnet': 'private'
+			}
+		]
 
 		# Delete the route
 		result = host.run('stack remove route address=127.0.0.3')
@@ -30,6 +50,19 @@ class TestRemoveRoute:
 		# Make sure it is gone now
 		result = host.run('stack list route output-format=json')
 		assert result.rc == 0
-		assert '127.0.0.3' not in {
-			route['network'] for route in json.loads(result.stdout)
-		}
+		assert json.loads(result.stdout) == [
+			{
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.0',
+				'network': '224.0.0.0',
+				'subnet': 'private'
+			},
+			{
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '255.255.255.255',
+				'subnet': 'private'
+			}
+		]

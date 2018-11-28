@@ -1,0 +1,74 @@
+[
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.3",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "G"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.4",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "A"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.5",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "O"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.6",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "E"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.7",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "H"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.8",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "H"
+	},
+	{
+		"gateway": null,
+		"host": "backend-0-0",
+		"interface": null,
+		"netmask": "255.255.255.0",
+		"network": "224.0.0.0",
+		"source": "G",
+		"subnet": "private"
+	},
+	{
+		"gateway": null,
+		"host": "backend-0-0",
+		"interface": null,
+		"netmask": "255.255.255.255",
+		"network": "255.255.255.255",
+		"source": "G",
+		"subnet": "private"
+	}
+]
