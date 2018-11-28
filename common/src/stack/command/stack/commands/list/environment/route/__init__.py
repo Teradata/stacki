@@ -19,24 +19,5 @@ class Command(stack.commands.list.environment.command):
 	"""
 
 	def run(self, params, args):
-
-		self.beginOutput()
-
-		for environment in self.getEnvironmentNames(args):
-			env_id = self.db.select("""id FROM environments WHERE name = %s""", environment)[0][0]
-
-			rows = self.db.select("""network, netmask, gateway, subnet, interface
-					FROM environment_routes WHERE environment = %s""", [env_id])
-
-			for (network, netmask, gateway, subnet, interface) in rows:
-				if subnet:
-					rows = self.db.select("""name FROM subnets WHERE id = %s""", [subnet])
-					if rows:
-						subnet = rows[0][0]
-						gateway = None
-
-				self.addOutput(environment, (network, netmask, gateway, subnet, interface))
-
-		self.endOutput(header=['environment', 'network', 'netmask', 'gateway',
-				       'subnet', 'interface'], trimOwner=0)
-
+		self.addText(self.command('list.route', self._argv + ['scope=environment']))
+		return self.rc

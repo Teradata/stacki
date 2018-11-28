@@ -21,22 +21,5 @@ class Command(stack.commands.list.appliance.command):
 	"""
 
 	def run(self, params, args):
-
-		self.beginOutput()
-
-		for app in self.getApplianceNames(args):
-			routes = self.db.select("""r.network, r.netmask, r.gateway,
-				r.subnet, r.interface from appliance_routes r, appliances a
-				where r.appliance=a.id and a.name=%s""", app)
-			for network, netmask, gateway, subnet, interface in routes:
-				if subnet:
-					subnet_name = self.db.select("""name from subnets where id=%s""",
-								[subnet])[0][0]
-				else:
-					subnet_name = None
-				if interface == 'NULL':
-					interface = None
-				self.addOutput(app, (network, netmask, gateway, subnet_name, interface))
-
-		self.endOutput(header=['appliance', 'network', 'netmask', 'gateway',
-				'subnet', 'interface' ], trimOwner=0)
+		self.addText(self.command('list.route', self._argv + ['scope=appliance']))
+		return self.rc

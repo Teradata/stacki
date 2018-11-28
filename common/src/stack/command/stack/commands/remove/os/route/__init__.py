@@ -18,7 +18,7 @@ class Command(stack.commands.remove.os.command):
 	"""
 	Remove a static route for an OS type.
 
-	<arg type='string' name='os' repeat='1'>
+	<arg type='string' name='os' optional='0' repeat='1'>
 	The OS type (e.g., 'linux', 'sunos', etc.).
 	</arg>
 
@@ -36,10 +36,5 @@ class Command(stack.commands.remove.os.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		(address, ) = self.fillParams([ ('address', None, True) ])
-
-		for os in self.getOSNames(args):
-			self.db.execute(
-				'delete from os_routes where os=%s and network=%s',
-				(os, address)
-			)
+		self.command('remove.route', self._argv + ['scope=os'])
+		return self.rc

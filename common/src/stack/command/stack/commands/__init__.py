@@ -803,6 +803,8 @@ class ScopeArgumentProcessor(
 		elif scope == 'host':
 			# Piggy-back to resolve the host names
 			names = self.getHostnames(args)
+			if not names:
+				raise ArgRequired(self, 'host')
 
 			# Now we have to convert the names to the primary keys
 			for node_id in flatten(self.db.select(
@@ -1228,74 +1230,6 @@ class DatabaseConnection:
 				return environment
 		return None
 
-	def getHostRoutes(self, host, showsource=0):
-		_frontend = self.getHostname('localhost')
-		host = self.getHostname(host)
-		routes = {}
-
-		Scope = namedtuple('Scope', ['sql', 'args', 'label'])
-
-		_global = Scope(
-			sql='network, netmask, gateway, subnet, interface FROM global_routes',
-			args=(),
-			label='G'
-		)
-
-		_os = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM os_routes r, nodes n WHERE r.os=%s AND n.name=%s
-			""",
-			args=(self.getHostOS(host), host),
-			label='O'
-		)
-
-		_appliance = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM appliance_routes r, nodes n, appliances app
-				WHERE n.appliance=app.id AND r.appliance=app.id AND n.name=%s
-			""",
-			args=host,
-			label='A'
-		)
-
-		_environment = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM environment_routes r, nodes n, environments env
-				WHERE n.environment=env.id AND r.environment=env.id AND n.name=%s
-			""",
-			args=host,
-			label='E'
-		)
-
-		_host = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM node_routes r, nodes n WHERE n.name=%s AND n.id=r.node
-			""",
-			args=host,
-			label='H'
-		)
-
-		for scope in [_global, _os, _appliance, _environment, _host]:
-			for (network, netmask, gateway, subnet, interface) in self.select(scope.sql, scope.args):
-				if subnet:
-					for dev, in self.select("""
-						net.device from subnets s, networks net, nodes n
-						where s.id=%s and s.id=net.subnet and net.node=n.id
-						and n.name=%s and net.device not like 'vlan%%'
-					""", (subnet, host)):
-						interface = dev
-
-				if showsource:
-					routes[network] = (netmask, gateway, interface, subnet, scope.label)
-				else:
-					routes[network] = (netmask, gateway, interface, subnet)
-
-		return routes
-
 	def getNodeName(self, hostname, subnet=None):
 		if not subnet:
 			rows = self.select('name from nodes where name like %s', (hostname,))
@@ -1327,7 +1261,7 @@ class DatabaseConnection:
 		###
 		# End possible dead code chunk
 		###
-		
+
 		return result
 
 	def getHostname(self, hostname=None, subnet=None):

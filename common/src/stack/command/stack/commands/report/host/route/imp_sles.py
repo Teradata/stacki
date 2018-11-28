@@ -6,65 +6,43 @@
 
 import stack.commands
 
-#
-# all global routes go in:
-#
-#	/etc/sysconfig/network/routes
-#
-# all interface-specific routes go in:
-#
-#	/etc/sysconfig/network/ifroute-<interface name>
-#
-
 
 class Implementation(stack.commands.Implementation):
 	def run(self, args):
-
 		host = args[0]
 
-		#
-		# global routes for the host
-		#
-		self.owner.addOutput(host, '<stack:file stack:name="/etc/sysconfig/network/routes">')
+		self.owner.addOutput(
+			host, '<stack:file stack:name="/etc/sysconfig/network/routes">'
+		)
 
+		for route in self.owner.call('list.host.route', [host]):
+			network = route['network']
+			netmask = route['netmask']
 
-		routes = self.db.getHostRoutes(host)
-		for network in sorted(routes.keys()):
-			(netmask, gateway, interface, subnet) = routes[network]
-			destination = network
-
-
-			# if interface is not set, use the default behavior
-			if not interface or interface == 'NULL':
+			# If interface is not set, use the default behavior
+			interface = route['interface']
+			if not interface:
 				interface = '-'
 
-			if not gateway or gateway == 'NULL':
+			gateway = route['gateway']
+			if not gateway:
 				gateway = '-'
 
-			device = interface
-			self.owner.addOutput(host, '%s\t%s\t%s\t%s' %
-				(destination, gateway, netmask, device))
+			self.owner.addOutput(host, f'{network}\t{gateway}\t{netmask}\t{interface}')
 
-
-		#
-		# the interface that is designated as the default interface,
+		# The interface that is designated as the default interface,
 		# will be specified as the default route
-		#
-		gateway = '0.0.0.0'
-		result = self.owner.call('list.host.interface', [ host ])
-		for o in result:
+		for o in self.owner.call('list.host.interface', [host]):
 			if o['default']:
 				network = o['network']
 				device = o['interface'].split(':')[0]
-				destination = 'default'
-				netmask = '0.0.0.0'
 
-				output = self.owner.call('list.network',
-					[ network ])
-				for n in output:
+				for n in self.owner.call('list.network', [network]):
 					gateway = n['gateway']
 
-					self.owner.addOutput(host, '%s\t%s\t%s\t%s' % (destination, gateway, netmask, device))
+					self.owner.addOutput(
+						host, f'default\t{gateway}\t0.0.0.0\t{device}'
+					)
 					break
 
 				break

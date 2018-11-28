@@ -219,58 +219,6 @@ CREATE TABLE switchports (
 	port		int(11)		NOT NULL
 );
 
-<!-- Routes -->
-
-DROP TABLE IF EXISTS global_routes;
-CREATE TABLE global_routes (
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS os_routes;
-CREATE TABLE os_routes (
-  OS		varchar(32) NOT NULL default '&os;',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS appliance_routes;
-CREATE TABLE appliance_routes (
-  Appliance int(11) NOT NULL default '0' references appliances,
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL,
-  INDEX (Network)
-);
-
-DROP TABLE IF EXISTS node_routes;
-CREATE TABLE node_routes (
-  Node		int(11) NOT NULL default '0',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS environment_routes;
-CREATE TABLE environment_routes (
-  Environment	int(11) NOT NULL default '0',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
 <!-- Stacks -->
 
 DROP TABLE IF EXISTS stacks;
@@ -345,10 +293,9 @@ CREATE TABLE partitions (
 	PRIMARY KEY (ID)
 );
 
-<!-- Firewall Tables -->
-
-<!-- Gotta drop the referenced tables last -->
+<!-- Gotta drop the tables that use scope_map first -->
 DROP TABLE IF EXISTS firewall_rules;
+DROP TABLE IF EXISTS routes;
 DROP TABLE IF EXISTS scope_map;
 
 CREATE TABLE scope_map (
@@ -383,6 +330,20 @@ CREATE TABLE firewall_rules (
 	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE,
 	FOREIGN KEY (in_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE,
 	FOREIGN KEY (out_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE
+);
+
+CREATE TABLE routes (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	address		VARCHAR(32) NOT NULL,
+	netmask		VARCHAR(32) NOT NULL,
+	gateway		VARCHAR(32) DEFAULT NULL,
+	subnet_id	INT DEFAULT NULL,
+	interface	VARCHAR(32) DEFAULT NULL,
+	INDEX (address),
+	INDEX (interface),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE,
+	FOREIGN KEY (subnet_id) REFERENCES subnets(id) ON DELETE CASCADE
 );
 
 <!-- Miscellaneous -->

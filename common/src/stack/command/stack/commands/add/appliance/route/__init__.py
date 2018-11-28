@@ -10,71 +10,41 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.appliance.command):
 	"""
 	Add a route for an appliance type in the cluster
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' repeat='1' optional='0'>
 	The appliance type (e.g., 'backend').
 	</arg>
-	
+
 	<param type='string' name='address' optional='0'>
 	Host or network address
 	</param>
-	
+
 	<param type='string' name='gateway' optional='0'>
-	Network or device gateway
+	Network (e.g., IP address), subnet name (e.g., 'private', 'public'), or
+	a device gateway (e.g., 'eth0').
 	</param>
 
 	<param type='string' name='netmask'>
 	Specifies the netmask for a network route.  For a host route
 	this is not required and assumed to be 255.255.255.255
 	</param>
+
+	<param type='string' name='interface'>
+	Specific interface to send traffic through. Should only be used if
+	you need traffic to go through a VLAN interface (e.g., 'eth0.1').
+	</param>
 	"""
 
 	def run(self, params, args):
-
-		apps = self.getApplianceNames(args)
-
-		(address, gateway, netmask, interface) = self.fillParams([
-			('address', None, True),
-			('gateway', None, True),
-			('netmask', '255.255.255.255'),
-			('interface', None),
-			])
-		
 		if len(args) == 0:
-			raise ParamRequired(self, 'appliance')
+			raise ArgRequired(self, 'appliance')
 
-		# determine if this is a subnet identifier
-		rows = self.db.select('id from subnets where name = %s',(gateway,))
-
-		if len(rows) == 1:
-			subnet = rows[0][0]
-			gateway = ''
-		else:
-			subnet = None
-		
-		# Verify the route doesn't already exist.  If it does
-		# for any of the appliances raise a CommandError.
-		for app in apps:
-			if self.db.count("""(*) from 
-				appliance_routes r, appliances a where
-				r.appliance=a.id and r.network=%s
-				and a.name=%s""", (address, app)
-			) > 0:
-				raise CommandError(self, 'route exists')
-
-		# Now that we know things will work insert the route for
-		# all the appliances
-		for app in apps:	
-			self.db.execute("""insert into appliance_routes values 
-				((select id from appliances where name=%s),
-				%s, %s, %s, %s, %s)""",
-				(app, address, netmask, gateway, subnet, interface)
-			)
+		self.command('add.route', self._argv + ['scope=appliance'])
+		return self.rc

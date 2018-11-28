@@ -18,7 +18,7 @@ class Command(stack.commands.remove.appliance.command):
 	"""
 	Remove a static route for an appliance type.
 
-	<arg type='string' name='appliance'>
+	<arg type='string' name='appliance' optional='0' repeat='1'>
 	Appliance name. This argument is required.
 	</arg>
 
@@ -36,12 +36,5 @@ class Command(stack.commands.remove.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		(address, ) = self.fillParams([ ('address', None, True) ])
-
-		for appliance in self.getApplianceNames(args):
-			self.db.execute("""
-				delete from appliance_routes
-				where appliance=(
-					select id from appliances where name=%s
-				) and network=%s
-			""", (appliance, address))
+		self.command('remove.route', self._argv + ['scope=appliance'])
+		return self.rc

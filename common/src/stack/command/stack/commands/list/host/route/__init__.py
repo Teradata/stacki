@@ -21,30 +21,12 @@ class Command(stack.commands.list.host.command):
 	<arg optional='1' type='string' name='host'>
 	Host name of machine
 	</arg>
-	
+
 	<example cmd='list host route backend-0-0'>
 	List the static routes assigned to backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-
-		self.beginOutput()
-		
-		for host in self.getHostnames(args):
-			routes = self.db.getHostRoutes(host, 1)
-
-			for network in sorted(routes.keys()):
-				(netmask, gateway, interface, subnet_id, source) = routes[network]
-
-				if subnet_id:
-					# resolve the subnet id
-					subnet_name = self.db.select("""name from subnets where id=%s""", [subnet_id])[0][0]
-				else:
-					subnet_name = None
-
-				self.addOutput(host,
-					(network, netmask, gateway, subnet_name, interface, source))
-
-		self.endOutput(header=['host', 'network', 'netmask', 'gateway',
-					'subnet', 'interface', 'source' ],trimOwner=0)
+		self.addText(self.command('list.route', self._argv + ['scope=host']))
+		return self.rc
