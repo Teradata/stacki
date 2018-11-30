@@ -1,0 +1,39 @@
+Installed images:
+
+  Partition 1:
+  X86_64 3.6.4006 2017-07-03 16:17:39 x86_64
+
+  Partition 2:
+  X86_64 3.6.4006 2017-07-03 16:17:39 x86_64
+
+Last boot partition: 1
+Next boot partition: 1
+
+Images available to be installed:
+
+  image-X86_64-3.6.2002.img
+  X86_64 3.6.2002 2016-09-28 21:00:15 x86_64
+
+  image-X86_64-3.6.3004.img
+  X86_64 3.6.3004 2017-02-05 17:31:53 x86_64
+
+  image-X86_64-3.6.4006.img
+  X86_64 3.6.4006 2017-07-03 16:17:39 x86_64
+
+  image-X86_64-3.6.5009.img
+  X86_64 3.6.5009 2018-01-02 07:42:21 x86_64
+
+  image-X86_64-3.6.8010.img
+  X86_64 3.6.8010 2018-08-20 18:04:19 x86_64
+
+Serve image files via HTTP/HTTPS: no
+
+No image install currently in progress.
+
+Boot manager password is set.
+
+Image signing: trusted signature always required
+Admin require signed images: yes
+
+Settings for next boot only:
+   Fallback reboot on configuration failure: yes (default)
