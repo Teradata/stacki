@@ -85,6 +85,14 @@ then
         echo -e "\033[34mDownloading SLES-11-SP3-DVD-x86_64-GM-DVD1.iso ...\033[0m"
         curl -f --progress-bar -O "http://stacki-builds.labs.teradata.com/installer-isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso"
     fi
+
+    # We need the SDK ISO For SLES11 as well
+    if [[ ! -f "SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso ...\033[0m"
+        curl -f --progress-bar -O "http://stacki-builds.labs.teradata.com/installer-isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso"
+    fi
     cd - >/dev/null
 
     # Make the sles11sp3 box on the frontend
@@ -93,6 +101,10 @@ then
     # Add the SLES11 pallet to the box
     vagrant ssh frontend -c "sudo -i stack add pallet /export/isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet SLES version=11.3 box=sles11sp3"
+
+    # Add the SLES11 SDK pallet to the box
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend -c "sudo -i stack enable pallet SLE-SDK version=11.3 box=sles11sp3"
 
     # Add the SLES11 Stacki ISO to the box
     vagrant ssh frontend -c "sudo -i stack add pallet /export/isos/$(basename $STACKI_SLES11_ISO)"
