@@ -6,7 +6,7 @@ Installed images:
   Partition 2:
   X86_64 3.6.4006 2017-07-03 16:17:39 x86_64
 
-Last boot partition: 1
+Last boot partition: 2
 Next boot partition: 1
 
 Images available to be installed:
