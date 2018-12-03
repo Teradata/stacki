@@ -124,4 +124,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'enclosure={controller["enclosure"]}')
 				if controller['options']:
 					parameters.append(f'options={controller["options"]}')
-				self.owner.try_command('add.storage.controller', parameters, f'adding appliance controller to {appliance_name}', 'exists')
+				self.owner.try_command('add.appliance.storage.controller', parameters, f'adding appliance controller to {appliance_name}', 'exists')

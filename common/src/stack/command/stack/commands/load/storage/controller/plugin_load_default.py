@@ -7,87 +7,76 @@
 # @rocks@
 
 import stack.commands
+from stack.exception import CommandError
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
+class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'
 
-
 	def run(self, args):
-		hosts = args
+		appliances = self.getApplianceNames()
 
-		for host in hosts.keys():
-			#
-			# first remove all existing entries
-			#
+		for target, data in args.items():
+			# Remove all existing entries
 			cmdargs = []
 
-			if host != 'global':
-				cmdargs.append(host)
-			cmdargs += [ 'adapter=*', 'enclosure=*', 'slot=*' ]
+			if target != 'global':
+				cmdargs.append(target)
 
-			self.owner.call('remove.storage.controller', cmdargs)
+			cmdargs += ['adapter=*', 'enclosure=*', 'slot=*']
 
-			arrayids = []
-			extra = []
-			for a in hosts[host].keys():
-				if type(a) == int:
-					arrayids.append(a)
+			try:
+				if target == 'global':
+					self.owner.call('remove.storage.controller', cmdargs)
+				elif target in appliances:
+					self.owner.call('remove.appliance.storage.controller', cmdargs)
 				else:
-					extra.append(a)
-			arrayids.sort()
-			arrayids.extend(extra)
+					self.owner.call('remove.host.storage.controller', cmdargs)
+			except CommandError:
+				# Nothing existed to remove
+				pass
 
-			for array in arrayids:
+			# Add the new ones
+			for array in sorted(data):
 				cmdargs = []
-				if host != 'global':
-					cmdargs.append(host)
-				cmdargs += [ 'arrayid=%s' % array ]
+				if target != 'global':
+					cmdargs.append(target)
 
-				if 'raid' in hosts[host][array].keys():
-					raidlevel = hosts[host][array]['raid']
-					cmdargs.append('raidlevel=%s'
-						% raidlevel)
+				cmdargs += [f'arrayid={array}']
 
-				if 'slot' in hosts[host][array].keys():
-					slots = []
-					for slot in hosts[host][array]['slot']:
-						if type(slot) == type(0):
-							slots.append(
-								'%d' % slot)
-						else:
-							slots.append(slot)
+				if 'raid' in data[array]:
+					raidlevel = data[array]['raid']
+					cmdargs.append(f'raidlevel={raidlevel}')
 
-					cmdargs.append('slot=%s'
-						% ','.join(slots))
+				if 'slot' in data[array]:
+					slots = ','.join(str(s) for s in data[array]['slot'])
 
-				if 'enclosure' in hosts[host][array].keys():
-					enclosure = hosts[host][array]['enclosure'].strip()
-					cmdargs.append('enclosure=%s' % enclosure)
+					if slots:
+						cmdargs.append(f'slot={slots}')
 
-				if 'adapter' in hosts[host][array].keys():
-					adapter = hosts[host][array]['adapter'].strip()
-					cmdargs.append('adapter=%s' % adapter)
+				if 'enclosure' in data[array]:
+					enclosure = data[array]['enclosure'].strip()
+					cmdargs.append(f'enclosure={enclosure}')
 
-				if 'options' in hosts[host][array].keys():
-					options = hosts[host][array]['options']
-					cmdargs.append('options="%s"' % options)
+				if 'adapter' in data[array]:
+					adapter = data[array]['adapter'].strip()
+					cmdargs.append(f'adapter={adapter}')
 
-				if 'hotspare' in hosts[host][array].keys():
-					hotspares = []
-					for hotspare in hosts[host][array]['hotspare']:
-						hotspares.append('%d'
-							% hotspare)
+				if 'options' in data[array]:
+					options = data[array]['options']
+					cmdargs.append(f'options="{options}"')
 
-					cmdargs.append('hotspare=%s'
-						% ','.join(hotspares))
+				if 'hotspare' in data[array]:
+					hotspares = ','.join(str(h) for h in data[array]['hotspare'])
 
-				if self.owner.force:
-					cmdargs.append('force=y')
-			
-				self.owner.call('add.storage.controller',
-					cmdargs)
+					if hotspares:
+						cmdargs.append(f'hotspare={hotspares}')
 
+				if target == 'global':
+					self.owner.call('add.storage.controller', cmdargs)
+				elif target in appliances:
+					self.owner.call('add.appliance.storage.controller', cmdargs)
+				else:
+					self.owner.call('add.host.storage.controller', cmdargs)

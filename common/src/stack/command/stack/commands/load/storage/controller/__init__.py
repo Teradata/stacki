@@ -3,8 +3,6 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-
 
 import os
 import os.path
@@ -13,13 +11,12 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command,
-	       stack.commands.HostArgumentProcessor):
+class Command(stack.commands.load.command, stack.commands.HostArgumentProcessor):
 	"""
 	Take rows from a spreadsheet that describe how a host's disk controller
 	should be configured and then place those values into the database.
-	
-	<param type='string' name='file'>
+
+	<param type='string' name='file' optional='0'>
 	The file that contains the storage disk controller configuration.
 	</param>
 
@@ -27,51 +24,41 @@ class Command(stack.commands.load.command,
 	The processor used to parse the file.
 	Default: default.
 	</param>
-	
+
 	<example cmd='load storage controller file=controller.csv'>
 	Read disk controller configuration from controller.csv and use the
 	default processor to parse the data.
 	</example>
-	"""		
+	"""
 
 	def run(self, params, args):
-		filename, processor, force = self.fillParams([
+		filename, processor = self.fillParams([
 			('file', None, True),
-			('processor', 'default'),
-			('force', 'n') ])
+			('processor', 'default')
+		])
 
 		if not os.path.exists(filename):
 			raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		self.force = self.str2bool(force)
-		#
-		# implementations can't return values
-		#
+		# Implementations can't return values
 		self.hosts = {}
 		self.runImplementation('load_%s' % processor, (filename, ))
 
-		args = self.hosts
-		self.runPlugins(args)
+		self.runPlugins(self.hosts)
 
-		#
-		# checkin the spreadsheet
-		#
+		# Check-in the spreadsheet
 		sheetsdir = '/export/stack/spreadsheets'
 		if not os.path.exists(sheetsdir):
 			os.makedirs(sheetsdir)
-			
+
 		RCSdir = '%s/RCS' % sheetsdir
 		if not os.path.exists(RCSdir):
 			os.makedirs(RCSdir)
 
 		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not \
-			os.path.samefile(filename, sheetsfile):
+		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
 			shutil.copyfile(filename, '%s' % sheetsfile)
-		
-		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
-		os.system(cmd)
 
-		cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
-		os.system(cmd)
+		os.system('date | /opt/stack/bin/ci "%s"' % sheetsfile)
 
+		os.system('/opt/stack/bin/co -f -l "%s"' % sheetsfile)
