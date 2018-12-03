@@ -10,6 +10,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
+from textwrap import dedent
 import time
 import warnings
 
@@ -33,20 +34,47 @@ def dump_mysql():
 	# Close the file
 	file_obj.close()
 
+	# Patch pymysql Cursor.execute to detect if we need to revert the DB
+	with open('/opt/stack/lib/python3.6/site-packages/sitecustomize.py', 'w') as f:
+		f.write(dedent("""\
+			### START revert_db
+			from pathlib import Path
+			from unittest.mock import Mock, patch
+
+			from pymysql.cursors import Cursor
+
+
+			original_execute = Cursor.execute
+
+			def execute(self, query, args=None):
+				if not query.strip().lower().startswith('select'):
+					Path('/tmp/revert_db').touch()
+
+				return original_execute(self, query, args)
+
+			patch('pymysql.cursors.Cursor.execute', new=execute).start()
+			### END revert_db
+		"""))
+
 	# Done with the set up, yield our SQL file path
 	yield file_path
 
 	# Remove the SQL file
 	os.remove(file_path)
 
+	# Remove our sitecustomize.py file
+	os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
+
 @pytest.fixture
 def revert_database(dump_mysql):
 	# Don't need to do anything in the set up
 	yield
-	
-	# Load a fresh database after each test
-	with open(dump_mysql) as sql:
-		subprocess.run("mysql", stdin=sql, check=True)
+
+	# Load a fresh database after each test, if needed
+	if os.path.exists('/tmp/revert_db'):
+		with open(dump_mysql) as sql:
+			subprocess.run("mysql", stdin=sql, check=True)
+		os.remove('/tmp/revert_db')
 
 @pytest.fixture
 def revert_filesystem():
@@ -638,16 +666,30 @@ def inject_code(host):
 
 	@contextmanager
 	def _inner(code_file):
-		result = host.run(
-			f'cp "{code_file}" /opt/stack/lib/python3.6/site-packages/sitecustomize.py'
-		)
+		with open('/opt/stack/lib/python3.6/site-packages/sitecustomize.py', 'a') as f:
+			f.write(f'\n### START {code_file}\n')
 
-		if result.rc != 0:
-			pytest.fail(f'unable to inject code file "{code_file}"')
+			with open(code_file, 'r') as code:
+				f.write(code.read())
+
+			f.write(f'\n### END {code_file}\n')
 
 		try:
 			yield
 		finally:
-			os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
+			with open('/opt/stack/lib/python3.6/site-packages/sitecustomize.py', 'r') as f:
+				lines = f.readlines()
+
+			with open('/opt/stack/lib/python3.6/site-packages/sitecustomize.py', 'w') as f:
+				write = True
+				for line in lines:
+					if line.startswith(f'### START {code_file}'):
+						write = False
+
+					if write:
+						f.write(line)
+
+					if line.startswith(f'### END {code_file}'):
+						write = True
 
 	return _inner
