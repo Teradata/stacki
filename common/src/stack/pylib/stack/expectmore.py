@@ -62,6 +62,9 @@ class ExpectMore():
 		"""
 		if not self._proc.exitstatus:
 			self._proc.sendline(quit_cmd)
+			# give some time for the process to send the quit_cmd before terminating,
+			# otherwise the quit_cmd might not be run by the process.
+			time.sleep(1)
 			self._proc.terminate()
 
 
