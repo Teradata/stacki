@@ -72,7 +72,12 @@ class SwitchMellanoxM7800(Switch):
 
 		self.proc.conversation(login_seq)
 
-		self._api_connection = mellanoknok.Mellanoknok(self.switch_ip_address, password=self.password)
+		# don't worry if we can't connect -- too many connection attempts breaks the api
+		# the library will auto try again if there's a method that actually needs it
+		try:
+			self._api_connection = mellanoknok.Mellanoknok(self.switch_ip_address, password=self.password)
+		except:
+			pass
 
 
 	def disconnect(self):
@@ -83,20 +88,29 @@ class SwitchMellanoxM7800(Switch):
 	@property
 	def subnet_manager(self):
 		""" get the subnet manager status for this switch """
+		info('determining sm status')
+
 		for line in self.proc.ask('show ib sm'):
+			info(line)
 			if 'enable' == line.strip():
 				return True
-		return False
+			elif 'disable' == line.strip():
+				return False
+
+		raise SwitchException('unable to determine subnetmanager status')
 
 
 	@subnet_manager.setter
 	def subnet_manager(self, value):
 		""" set the subnet manager status for this switch """
 		cmd = 'ib sm'
+		info(f'set {cmd}')
 		if value:
 			self.proc.say(cmd)
 		else:
 			self.proc.say('no ' + cmd)
+
+		self.proc.say('configuration write')
 
 
 	def ssh_copy_id(self, pubkey):
@@ -131,7 +145,14 @@ class SwitchMellanoxM7800(Switch):
 	def set_hostname(self, hostname):
 		self.subnet_manager = False
 		# this doesn't happen immediately..
-		time.sleep(.5)
+		i = 1
+		while self.subnet_manager:
+			time.sleep(i)
+			self.subnet_manager = False
+			i = i + 2
+			if i > 11:
+				raise SwitchException('waited over 30 seconds for subnet manager state to change')
+
 		self.proc.say(f'hostname {hostname}')
 
 		for host in self._get_smnodes():
@@ -139,11 +160,17 @@ class SwitchMellanoxM7800(Switch):
 				self.proc.say(f'no ib smnode {host}')
 
 		self.subnet_manager = True
-		time.sleep(.5)
+		i = 1
+		while not self.subnet_manager:
+			time.sleep(i)
+			self.subnet_manager = True
+			i = i + 2
+			if i > 11:
+				raise SwitchException('waited over 30 seconds for subnet manager state to change')
 
 
 	def _get_smnodes(self):
-		nodes = self.proc.ask('no ib smnode ?', sanitizer=expectmore.remove_control_characters(l.strip()))
+		nodes = self.proc.ask('no ib smnode ?', sanitizer=remove_control_characters)
 		# hack.
 		# the issue here is that the '?' above is similar to a tab-completion.
 		# however, the string 'no ib smnode' gets put back on the buffer,
