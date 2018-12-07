@@ -11,6 +11,7 @@ import sys
 import json
 import subprocess
 import time
+import getopt
 
 # JSON Structure
 # 3rdparty.json
@@ -54,10 +55,11 @@ import time
 #	"key": "<apikey>"
 # }
 
+
 def download_url(source, target, curl_args):
 	# Retry the curl command 3 times, in case of error
 	retry = 3
-	curl_cmd = [ 'curl','--retry','2','-w','%{http_code}']
+	curl_cmd = [ 'curl', '--retry', '2', '-w', '%{http_code}']
 
 	# Append any extra curl arguments specified
 	if len(curl_args):
@@ -83,29 +85,30 @@ def download_url(source, target, curl_args):
 				os.unlink(target)
 				time.sleep(1)
 
+
 def get_auth_info(authfile, url):
 	curl_args = []
 	if not os.path.exists(authfile):
-		sys.stderr.write("Cannot find auth file %s for %s\n" % \
+		sys.stderr.write("Cannot find auth file %s for %s\n" % 
 			(authfile, url))
 	auth = None
 	with open(authfile, 'r') as a:
 		auth = json.load(a)
 
 	if not auth:
-		sys.stderr.write("Cannot read auth file %s for %s\n" % \
+		sys.stderr.write("Cannot read auth file %s for %s\n" % 
 			(authfile, url))
 
 	if auth['type'].lower() == 'basic':
-		if not 'username' in auth:
+		if 'username' not in auth:
 			sys.stderr.write("'username' for %s not found in authfile\n" % url)
-		if not 'password' in auth:
+		if 'password' not in auth:
 			sys.stderr.write("'password' for %s not found in authfile\n" % url)
 		curl_args = ['-u', '%s:%s' % (auth['username'], auth['password'])]
 	elif auth['type'].lower() == 'artifactory':
-		if not 'key' in auth:
+		if 'key' not in auth:
 			sys.stderr.write("Artifactory API key for %s not found in authfile\n" % url)
-		curl_args = ['-H','X-JFrog-Art-Api: %s' % auth['key']]
+		curl_args = ['-H', 'X-JFrog-Art-Api: %s' % auth['key']]
 
 	return curl_args
 
@@ -122,12 +125,34 @@ def create_manifest(manifestd, filename):
 		mfestfi.write(pkgname)
 
 
+try:
+	opts, args = getopt.getopt(sys.argv[1:], '', ['inplace', 'nomarkdown'])
+except getopt.GetoptError as err:
+	print(err)
+	sys.exit(-1)
+
+inplace  = False
+markdown = True
+for o, a in opts:
+	if o == '--inplace':
+		inplace = True
+	elif o == '--nomarkdown':
+		markdown = False
+	else:
+		assert False, 'unknown option'
+
+
 manifest_dir = './manifest.d'
-if len(sys.argv) > 1:
-	manifest_dir = os.path.join(sys.argv[1], 'manifest.d')
+
+if len(args) > 0:
+	manifest_dir = os.path.join(args[0], 'manifest.d')
+
+if inplace is False:
+	cachedir = '3rdparty'
+else:
+	cachedir = '.'
 
 filename  = '3rdparty.json'
-cachedir  = '3rdparty'
 docfile	  = '3rdparty.md'
 
 if not os.path.exists(filename):
@@ -138,7 +163,7 @@ if not os.path.exists(cachedir):
 	os.mkdir(cachedir)
 
 if not os.path.exists(manifest_dir):
-	os.mkdir(manifest_dir)
+	os.makedirs(manifest_dir)
 
 with open(filename, 'r') as text:
 	code = []
@@ -147,9 +172,10 @@ with open(filename, 'r') as text:
 			code.append(line)
 	pkglist = json.loads(''.join(code))
 
-fout = open(docfile, 'w')
-fout.write('# Third Party Blobs\n\n')
-fout.write('This repository includes the following code from other projects.\n\n')
+if markdown:
+	fout = open(docfile, 'w')
+	fout.write('# Third Party Blobs\n\n')
+	fout.write('This repository includes the following code from other projects.\n\n')
 
 blobs = {}
 for section in pkglist:
@@ -162,13 +188,13 @@ for section in pkglist:
 		curl_args = []
 
 	do_manifest = False
-	if 'manifest' in section and section['manifest'] == True:
+	if 'manifest' in section and section['manifest'] is True:
 		do_manifest = True
 
 	for blob in section['files']:
 		blobs[blob] = {
 			'source' : os.path.join(section['urlbase'], blob),
-			'target' : os.path.join(cachedir, blob)
+			'target' : os.path.join(cachedir, os.path.split(blob)[-1])
 		}
 
 	for blob in blobs:
@@ -180,7 +206,8 @@ for section in pkglist:
 		if do_manifest:
 			create_manifest(manifest_dir, blobs[blob]['target'])
 
-	for blob in sorted(blobs.keys()):
-		fout.write('* %s [%s]\n' % (blob, blobs[blob]['source']))
-
-fout.close()
+	if markdown:
+		for blob in sorted(blobs.keys()):
+			fout.write('* %s [%s]\n' % (blob, blobs[blob]['source']))
+if markdown:
+	fout.close()

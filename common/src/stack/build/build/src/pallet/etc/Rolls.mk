@@ -66,9 +66,9 @@ endif
 
 .PHONY: roll
 preroll::
-roll: preroll $(TARGET_PKG)s roll-$(ROLL).xml rpm-mkdirs
+roll: rpm-mkdirs preroll $(TARGET_PKG)s roll-$(ROLL).xml 
 	(								\
-		cd $(ROLLROOT)/build-$(ROLL)-$(STACK);			\
+		cd $(REDHAT.ROOT);					\
 		rm -rf disk*;						\
 		env GNUPGHOME=$(STACKBUILD.ABSOLUTE)/../.gnupg		\
 			Kickstart_Lang=$(KICKSTART_LANG)		\
