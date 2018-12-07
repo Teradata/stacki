@@ -17,8 +17,8 @@
 
 import os
 import sys
-import stack.file
 import stack.util
+from stack.file import RPMFile
 
 if len(sys.argv) < 3:
 	print('error - use make manifest-check')
@@ -37,18 +37,17 @@ try:
 except:
 	release = None
 
-tree = stack.file.Tree(os.getcwd())
-
 builtfiles = []
 for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
-	path = os.path.join(buildpath, 'RPMS', arch)
-#	print('searching %s' % path)
-	found = tree.getFiles(path)
-#	print('found %d files' % len(found))
-	builtfiles += found
+	try:
+		with os.scandir(os.path.join(buildpath, 'RPMS', arch)) as d:
+			for pkg in d:
+				builtfiles.append(RPMFile(pkg.path))
+	except FileNotFoundError:
+		pass
 
 manifests = [ ]
-search    = [ 'common', '.' ]
+search    = [ 'common', '.', buildpath ]
 if secondary:
 	search.append(secondary)
 

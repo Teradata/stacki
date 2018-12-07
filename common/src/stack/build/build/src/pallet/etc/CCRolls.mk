@@ -14,17 +14,16 @@ include $(ROLLSBUILD)/etc/Rolls.mk
 
 .PHONY: clean.all nuke.all
 clean.all:: clean
-	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src clean.order
-	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src clean
-	-$(MAKE) -C $(ROLLROOT)/common/src clean.order
-	-$(MAKE) -C $(ROLLROOT)/common/src clean
+	-cd $(ROLLROOT)/$(BUILDOS)/src && $(MAKE) -i clean.order clean
+	-cd $(ROLLROOT)/common/src && $(MAKE) -i clean.order clean
+
 
 nuke.all:: nuke
-	-$(MAKE) -C $(ROLLROOT)/$(BUILDOS)/src nuke
-	-$(MAKE) -C $(ROLLROOT)/common/src nuke
+	-cd $(ROLLROOT)/$(BUILDOS)/src && $(MAKE) nuke
+	-cd $(ROLLROOT)/common/src && $(MAKE) nuke
 
 .PHONY: manifest-check
 manifest-check:
-	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) build-$(ROLL)-$(STACK) $(OS) $(RELEASE)
+	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) $(REDHAT.ROOT) $(OS) $(RELEASE)
 
 endif # __CCROLLS_MK
