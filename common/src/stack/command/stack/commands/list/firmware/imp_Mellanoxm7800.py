@@ -14,17 +14,15 @@ class Implementation(stack.commands.Implementation):
 		switch_attrs = self.owner.getHostAttrDict(host)
 
 		kwargs = {
-			'username' : switch_attrs[host].get('username'),
-			'password' : switch_attrs[host].get('password')
+			'username' : switch_attrs[host].get('switch_username'),
+			'password' : switch_attrs[host].get('switch_password')
 		}
 
 		kwargs = {k:v for k, v in kwargs.items() if v is not None}
 
-		s = SwitchMellanoxM7800(host, **kwargs)
-		s.connect()
-		show_images = s.show_images()
-		next_boot_partition = show_images['next_boot_partition']
-		partition_key = 'Partition '+str(next_boot_partition)
-		installed_image = show_images['installed_images'][next_boot_partition-1][partition_key]
-		s.disconnect()
+		m7800_switch = SwitchMellanoxM7800(host, **kwargs)
+		m7800_switch.connect()
+		image_listing = m7800_switch.show_images()
+		installed_image = image_listing.installed_images[image_listing.next_boot_partition]
+		m7800_switch.disconnect()
 		return installed_image
