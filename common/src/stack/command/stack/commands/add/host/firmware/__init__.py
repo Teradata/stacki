@@ -25,18 +25,18 @@ class Command(stack.commands.add.host.command):
 	<arg type='string' name='host'>
 	Host name of machine
 	</arg>
-	
+
 	<param type='string' name='imagepath'>
 	The image that needs to be put in the correct folder structure
 	</param>
 
-	<example cmd='add host firmware infiniband-10-12 imagepath='/foo/bar/firm.img'>
+	<example cmd="add host firmware infiniband-10-12 imagepath='/foo/bar/firm.img'">
 	MOVES the firmware image from foo/bar/firm.img to the appropriate directory structure for list and sync firmware commands. Directory Structure: /export/stack/firmware/appliance/make/model
 	</example>
 	"""
 
 	def run(self, params, args):
-		host = self._get_single_host(args)
+		host, = self.getHostnames(args)
 
 		(imagepath, ) = self.fillParams([
 			('imagepath',    False),
@@ -44,7 +44,7 @@ class Command(stack.commands.add.host.command):
 
 		# Make sure empty strings are converted to None
 		(imagepath, ) = map(blank_str_to_None, ( imagepath,))
-		
+
 		# Gotta have an image
 		if not imagepath:
 			raise ParamRequired(self, ('imagepath'))
