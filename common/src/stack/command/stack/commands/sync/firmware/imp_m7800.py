@@ -11,31 +11,29 @@ class Implementation(stack.commands.Implementation):
 		switch_name = args[0]
 		make = args[1]
 		model = args[2]
-		version = args[3]	
+		version = args[3]
 		install_image = firm.getImageName(self.appliance, make, model, version)
 
 		switch_attrs = self.owner.getHostAttrDict(switch_name)
 
 		kwargs = {
-			'username': switch_attrs[switch_name].get('username'),
-			'password': switch_attrs[switch_name].get('password')
+			'username': switch_attrs[switch_name].get('switch_username'),
+			'password': switch_attrs[switch_name].get('switch_password')
 		}
 
 		kwargs = {k:v for k, v in kwargs.items() if v is not None}
 
-		s = SwitchMellanoxM7800(switch_name, **kwargs)
-		s.connect()
+		m7800_switch = SwitchMellanoxM7800(switch_name, **kwargs)
+		m7800_switch.connect()
 
-		show_images = s.show_images()
-		images_to_delete = show_images['images_fetched_and_available']
-		for image in images_to_delete:
-			s.image_delete(image)
+		for image in m7800_switch.show_images().images_fetched_and_available:
+			m7800_switch.image_delete(image = image.filename)
 
 		url = self.getURLtoFirmwares(switch_name, make, model, install_image)
-		status = s.image_fetch(url)
-		s.install_firmware(install_image)
-		s.image_boot_next()
-		s.reload()
+		m7800_switch.image_fetch(url = url)
+		m7800_switch.install_firmware(image = install_image)
+		m7800_switch.image_boot_next()
+		m7800_switch.reload()
 
 
 	def getURLtoFirmwares(self, switch_name, make, model, image):
