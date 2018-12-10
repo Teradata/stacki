@@ -22,7 +22,7 @@ def bool2str(b):
 	"""Converts an 1/0 to a yes/no"""
 	if type(b) in [ bool, int ]:
                 if b:
-                        return 'yes'
+                        return 'true'
                 else:
-                        return 'no'
+                        return 'false'
 	return None

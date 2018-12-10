@@ -16,30 +16,69 @@ import stack.attr
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
+from stack.opt import opt
 
+@opt.desc("""
+Lists attributes for any scope. Attributes are scoped at the
+following levels:
 
+- global
+- os
+- appliance
+- environment
+- host
+
+By default this command operates at the *global* scope, so it
+reports the global attributes.
+""")
+@opt.arg('args', required=False, description="""
+If the *scope* parameter is set the optional args are used to lookup
+the objects the report on. For example: if `scope=host` then the args
+is a list of hostnames. For the following scopes the args are optionally
+used:
+
+- os
+- appliance
+- environment
+- host
+""")
+@opt.param('attr', type=str, description="""
+A shell syntax glob pattern to specify to attributes to be listed.
+""")
+@opt.param('shadow', default=True, type=bool, description="""
+If set to *false* shadow attributes are not listed.
+""")
+@opt.param('var', default=True, type=bool, description="""
+If set to *false* normal read-write attributes will not be listed.
+""")
+@opt.param('const', default=True, type=bool, description="""
+If set to *false* the calculated read-only attributes will not be listed.
+""")
+@opt.param('scope', default='global', type=str, description="""
+- global
+- os
+- appliance
+- environment
+- host
+""")
+@opt.param('resolve', type=bool, description="""
+When set this will override the default attribute resolving for a given scope.
+Currently, this is only usefull for `scope=host` and will disable the mixing in
+of *global*, *os*, *appliance*, and *environment* attributes.
+""")
+@opt.eg('list attr attr=version', description="""
+Lists the value of the *global* `version` attribute, which happens to also be
+result of `stack --version`
+""")
+@opt.eg('list attr backend-0-0 scope=host resolve=false const=false', description="""
+Lists only the read-write attributes for *backend-0-0*. This command is identical 
+to `stack list host attr backend-0-0 resolve=false const=false`.
+""")
 class Command(stack.commands.Command,
 	      stack.commands.OSArgumentProcessor,
 	      stack.commands.ApplianceArgumentProcessor,
 	      stack.commands.EnvironmentArgumentProcessor,
 	      stack.commands.HostArgumentProcessor):
-	"""
-	Lists the set of global attributes.
-
-	<param type='string' name='attr'>
-	A shell syntax glob pattern to specify to attributes to
-	be listed.
-	</param>
-
-	<param type='boolean' name='shadow'>
-	Specifies is shadow attributes are listed, the default
-	is True.
-	</param>
-
-	<example cmd='list attr'>
-	List the global attributes.
-	</example>
-	"""
 
 	def addGlobalAttrs(self, attributes):
 		readonly = {}
@@ -213,20 +252,16 @@ class Command(stack.commands.Command,
 
 
 
+	@opt.parse
 	def run(self, params, args):
 
-		(glob, shadow, scope, resolve, var, const) = self.fillParams([ 
-			('attr',   None),
-			('shadow', True),
-			('scope',  'global'),
-			('resolve', None),
-			('var', True),
-			('const', True)
-		])
+		glob    = params['attr']
+		shadow  = params['shadow']
+		scope   = params['scope']
+		resolve = params['resolve']
+		var     = params['var']
+		const   = params['const']
 
-		shadow	= self.str2bool(shadow)
-		var	= self.str2bool(var)
-		const	= self.str2bool(const)
 		lookup	= { 'global'	 : { 'fn'     : lambda x=None: [ 'global' ],
 					     'const'  : self.addGlobalAttrs,
 					     'resolve': False,

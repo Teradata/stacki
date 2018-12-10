@@ -11,10 +11,11 @@
 	</stack:copyright>
 
 
-<stack:package>
-	stack-command
-	stack-pylib
-</stack:package>
+	<stack:package>
+		foundation-consolemd
+		stack-command
+		stack-pylib
+	</stack:package>
 
 
 <stack:script stack:stage="install-post">

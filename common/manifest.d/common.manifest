@@ -1,4 +1,7 @@
+MegaCLI
+foundation-ansible
 foundation-comps
+foundation-consolemd
 foundation-fbtftpd
 foundation-fio
 foundation-iperf
@@ -10,7 +13,6 @@ foundation-sc-im
 foundation-stream
 foundation-zeromq
 ludicrous-speed
-MegaCLI
 stack-admin
 stack-aws-client
 stack-aws-server

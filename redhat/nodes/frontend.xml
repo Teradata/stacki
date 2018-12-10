@@ -13,7 +13,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 
 
-<stack:package>stack-command</stack:package>
+<stack:package>
+	foundation-consolemd
+	stack-command
+</stack:package>
 
 
 </stack:stack> 

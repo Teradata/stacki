@@ -114,7 +114,6 @@ def run_command(args, debug=False):
 		sys.stderr.write('%s\n' % error)
 		syslog.syslog(syslog.LOG_ERR, error)
 		return -1
-
 	text = command.getText()
 
 	# set the SIGPIPE to the system default (instead of python default)

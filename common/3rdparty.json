@@ -2,6 +2,8 @@
 	{
 		"urlbase": "https://teradata-stacki.s3.amazonaws.com/3rdparty",
 		"files": [
+			"consolemd.tar.gz",
+			"storcli-007.0409.0000.0000-1.noarch.rpm",
 		        "MegaCli-8.07.07-1.noarch.rpm", 
 		        "newt-0.52.20.tar.gz", 
 		        "Python-3.6.6.tgz", 

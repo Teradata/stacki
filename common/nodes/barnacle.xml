@@ -12,6 +12,7 @@
 	</stack:copyright>
 
 	<stack:package>
+		foundation-consolemd
 		stack-pylib
 		stack-command
 		stack-barnacle

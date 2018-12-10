@@ -11,50 +11,46 @@
 # @rocks@
 
 import stack.commands
-
+from stack.opt import opt
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass
 	
 
+@opt.desc("""
+Lists the following information for one or more hosts:
+
+- host : hostname
+- rack : cabinet name
+- rank : ID within cabinent
+- appliance : name of appliance (e.g. *backend*)
+- os : operating system (e.g. *sles*)
+- box : package and configuration repository
+- environment : optional extra attribute level
+- osaction : bootaction to boot from local disk
+- installaction : bootaction start os installer
+- status : current status (e.g. *up*)
+- comment : optional comment
+- hash : see `hash` option
+""")
+@opt.arg('host', required=False, description="""
+Zero or more host names. If no hostnames are supplied, information about all 
+known hosts is listed.
+""")
+@opt.param('hash', default=False, type=bool, description="""
+If true then output *synced* or *outdated* which indicates if the host is in 
+sync with the box for the host (pallets and carts) and if the current 
+installation file (profile) is the same as the installation file that was used
+when the host was last installed.
+""")
 class Command(command):
-	"""
-	List the Appliance, and physical position info for a list of hosts.
 
-	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no host names are supplied, info about
-	all the known hosts is listed.
-	</arg>
-
-	<param type='boolean' name='hash'>
-	If 'yes', output "synced" or "outdated" which indicates if the host is "in sync"
-	with the box for the host (pallets and carts) and if the current installation file
-	(profile) is the same as the installation file that was used when the host was last
-	installed.
-	Default is 'no'.
-	</param>
-
-	<example cmd='list host backend-0-0'>
-	List info for backend-0-0.
-	</example>
-
-	<example cmd='list host'>
-	List info for all known hosts.
-	</example>
-
-	"""
+	@opt.parse
 	def run(self, params, args):
-	    
-		(order, expanded, hashit) = self.fillParams([
-			('order',    'asc'), 
-			('expanded', False),
-			('hash',     False) 
-		])
-		
-		hosts    = self.getHostnames(args, order=order)
-		expanded = self.str2bool(expanded)
-		hashit   = self.str2bool(hashit)
+
+		hosts = self.getHostnames(args)
+		self.hashit = params['hash']
 	    
 		header = [ 'host' ]
 		values = { }

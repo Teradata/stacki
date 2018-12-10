@@ -123,6 +123,7 @@ class Scanner:
 		package.version = meta['version']
 		package.license = meta['license']
 		package.url     = meta['url']
+
 		self.packages.append(package)
 		
 
