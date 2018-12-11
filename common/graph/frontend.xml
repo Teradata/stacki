@@ -30,6 +30,7 @@
 		<to>database-data-init</to>
 		<to>&os;-bootaction</to>
 		<to>database-data</to>
+		<to>database-migration</to>
 		<to>foundation-python-server</to>
 		<to>dns-server</to>
 		<to>mq-server</to>

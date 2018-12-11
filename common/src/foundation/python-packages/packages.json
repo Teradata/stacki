@@ -30,5 +30,6 @@
 	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true }, 
-	"testinfra":		{ "fe": true, "bootstrap": true, "version": "1.16.0" }
+	"testinfra":		{ "fe": true, "bootstrap": true, "version": "1.16.0" },
+	"yoyo-migrations":	{ "fe": true }
 }

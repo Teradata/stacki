@@ -1,0 +1,26 @@
+<stack:stack>
+
+	<stack:copyright>
+	Copyright (c) 2018 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+<stack:script stack:stage="install-post">
+
+# get the mysql root password
+root_pw=$(awk -F "=" '/^password/ {print $2}' /root/.my.cnf | tr -d [:space:])
+
+<stack:file stack:name="/root/.yoyo.ini" stack:perms="0400"
+		stack:owner="root:root" stack:vars="expanded">
+[DEFAULT]
+migration_table = _yoyo_migration
+batch_mode = off
+verbosity = 0
+database = mysql://root:${root_pw}@/cluster?unix_socket=/var/run/mysql/mysql.sock
+
+</stack:file>
+
+</stack:script>
+
+</stack:stack>
