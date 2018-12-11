@@ -56,12 +56,12 @@ class ExpectMore():
 			return False
 
 
-	def end(self, quit_cmd):
+	def end(self, quit_cmd, prompt = pexpect.EOF, **kwargs):
 		"""
 		Terminate the process (if necessary)
 		"""
 		if not self._proc.exitstatus:
-			self._proc.sendline(quit_cmd)
+			self.say(cmd = quit_cmd, prompt = prompt, **kwargs)
 			self._proc.terminate()
 
 
