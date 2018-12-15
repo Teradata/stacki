@@ -10,10 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-from stack.exception import ArgRequired, CommandError
-
 
 class Command(stack.commands.add.firmware.command):
 	"""
@@ -29,15 +26,4 @@ class Command(stack.commands.add.firmware.command):
 	"""
 
 	def run(self, params, args):
-		# Require at least one family name
-		if not args:
-			raise ArgRequired(self, 'family')
-
-		# get rid of any duplicate names
-		families = set(args)
-		# ensure the family name doesn't already exist
-		for family in families:
-			if self.db.count('(id) FROM firmware_family WHERE name=%s', family) > 0:
-				raise CommandError(cmd = self, msg = f'Firmware family with name {family} already exists.')
-
-		self.runPlugins(args = families)
+		self.runPlugins(args = args)

@@ -10,10 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-from stack.exception import ArgRequired, CommandError
-
 
 class Command(stack.commands.add.firmware.command):
 	"""
@@ -29,15 +26,4 @@ class Command(stack.commands.add.firmware.command):
 	"""
 
 	def run(self, params, args):
-		# Require at least one make name
-		if not args:
-			raise ArgRequired(self, 'make')
-
-		# get rid of any duplicate names
-		makes = set(args)
-		# ensure the make name doesn't already exist
-		for make in makes:
-			if self.db.count('(id) FROM firmware_make WHERE name=%s', make) > 0:
-				raise CommandError(cmd = self, msg = f'Firmware make with name {make} already exists.')
-
-		self.runPlugins(args = makes)
+		self.runPlugins(args = args)
