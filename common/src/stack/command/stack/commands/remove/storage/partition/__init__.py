@@ -51,14 +51,18 @@ class Command(stack.commands.remove.command,
 
 	def run(self, params, args):
 		(scope, device, mountpoint) = self.fillParams([
-			('scope', 'global'), ('device', None), ('mountpoint', None)])
+			('scope', 'global'),
+			('device', None),
+			('mountpoint', None)
+		])
+
 		oses = []
 		appliances = []
 		hosts = []
 		name = None
 		accepted_scopes = ['global', 'os', 'appliance', 'host']
 
-		# Some checking that we got usable input.:
+		# Some checking that we got usable input
 		if scope not in accepted_scopes:
 			raise ParamValue(self, '%s' % params, 'one of the following: %s' % accepted_scopes )
 		elif scope == 'global' and len(args) >= 1:
@@ -78,23 +82,25 @@ class Command(stack.commands.remove.command,
 		if scope != 'global':
 			name = args[0]
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = -1
-		tablename = {"os":"oses", "appliance":"appliances", "host":"nodes"}
-		if scope != 'global':
-			self.db.execute("""select id from %s where
-				name = '%s' """ % (tablename[scope], name))
-			tableid, = self.db.fetchone()
+		# Look up the id in the appropriate 'scope' table
+		if scope == 'appliance':
+			tableid = self.db.select('id from appliances where name=%s', [name])[0][0]
+		elif scope == 'os':
+			tableid = self.db.select('id from oses where name=%s', [name])[0][0]
+		elif scope == 'host':
+			tableid = self.db.select('id from nodes where name=%s', [name])[0][0]
+		else:
+			tableid = -1
 
-		deletesql = """delete from storage_partition where
-			scope = '%s' and tableid = %s """ % (scope, tableid)
+		query = 'delete from storage_partition where scope = %s and tableid = %s'
+		values = [scope, tableid]
 
 		if device and device != '*':
-			deletesql += """ and device = '%s'""" % device
+			query += ' and device = %s'
+			values.append(device)
 
 		if mountpoint and mountpoint != '*':
-			deletesql += """ and mountpoint = '%s'""" % mountpoint
+			query += ' and mountpoint = %s'
+			values.append(mountpoint)
 
-		self.db.execute(deletesql)
+		self.db.execute(query, values)
