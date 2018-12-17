@@ -127,38 +127,33 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 		else:
 			name = args[0]
 
-		device, size, fstype, mountpt, options, partid = \
-			self.fillParams([
-				('device', None, True),
-				('size', None), 
-				('type', None), 
-				('mountpoint', None),
-				('options', None),
-				('partid', None),
-				])
+		device, size, fstype, mountpt, options, partid = self.fillParams([
+			('device', None, True),
+			('size', None, True),
+			('type', None),
+			('mountpoint', None),
+			('options', None),
+			('partid', None),
+		])
 
 		if not device:
 			raise ParamRequired(self, 'device')
-		#if size is blank then the sql command will crash
+
 		if not size:
 			raise ParamRequired(self, 'size')
 
 		# Validate size
-		if size:
-			try:
-				s = int(size)
-			except:
-				#
-				# If mountpoint is 'swap' then allow
-				# 'hibernate', 'recommended' as sizes.
-				#
-				if mountpt == 'swap' and \
-					size not in ['recommended', 'hibernation']:
-						raise ParamType(self, 'size', 'integer')
-				else:
-					raise ParamType(self, 'size', 'integer')
+		try:
+			s = int(size)
 			if s < 0:
 				raise ParamValue(self, 'size', '>= 0')
+		except:
+			# If mountpoint is 'swap' then allow
+			# 'hibernate', 'recommended' as sizes
+			if mountpt == 'swap' and size not in ['recommended', 'hibernation']:
+				raise ParamType(self, 'size', 'integer')
+			else:
+				raise ParamType(self, 'size', 'integer')
 
 		# Validate partid
 		if partid:
@@ -171,52 +166,38 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 				raise ParamValue(self, 'partid', '>= 0')
 
 			partid = p
+		else:
+			partid = 0
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = None
-		if scope == 'global':
-			tableid = -1
-		elif scope == 'appliance':
-			self.db.execute("""select id from appliances where
-				name = '%s' """ % name)
-			tableid, = self.db.fetchone()
-
-
+		# Look up the id in the appropriate 'scope' table
+		if scope == 'appliance':
+			tableid = self.db.select('id from appliances where name=%s', [name])[0][0]
 		elif scope == 'os':
-			self.db.execute("""select id from oses where name = %s """, name)
-			tableid, = self.db.fetchone()
-
-
+			tableid = self.db.select('id from oses where name=%s', [name])[0][0]
 		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = '%s' """ % name)
-			tableid, = self.db.fetchone()
+			tableid = self.db.select('id from nodes where name=%s', [name])[0][0]
+		else:
+			tableid = -1
 
-		#
-		# make sure the specification for mountpt doesn't already exist
-		#
+		# Make sure the specification for mountpt doesn't already exist
 		if mountpt:
 			self.checkIt(device, scope, tableid, mountpt)
+		else:
+			# Preserve the existing behavior (sad panda)
+			mountpt = 'None'
+
+		# Preserve the existing behavior (sad panda)
+		if not fstype:
+			fstype = 'None'
 
 		if not options:
 			options = ""
-		
-		#
-		# now add the specifications to the database
-		#
 
-
-		sqlvars = "Scope, TableID, device, Mountpoint, Size, FsType, Options"
-		sqldata = "'%s', %s, '%s', '%s', %s, '%s', '%s'" % \
-			(scope, tableid, device, mountpt, size, fstype, options)
-
-		if partid:
-			sqlvars += ", PartID"
-			sqldata += ", %s" % partid
-
-
-		self.db.execute("""insert into storage_partition
-			(%s) values (%s) """ % (sqlvars, sqldata))
-
+		# Now add the specifications to the database
+		self.db.execute("""
+			INSERT INTO storage_partition(
+				Scope, TableID, device, Mountpoint,
+				Size, FsType, Options, PartID
+			)
+			VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+		""", (scope, tableid, device, mountpt, size, fstype, options, partid))
