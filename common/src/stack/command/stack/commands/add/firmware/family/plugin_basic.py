@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired, ArgError
 
 class Plugin(stack.commands.Plugin):
 	"""Attempts to add all provided family names to the database."""
@@ -22,7 +22,7 @@ class Plugin(stack.commands.Plugin):
 	def run(self, args):
 		# Require at least one family name
 		if not args:
-			raise ArgRequired(self.owner, 'family')
+			raise ArgRequired(cmd = self.owner, arg = 'family')
 
 		# get rid of any duplicate names
 		families = set(args)
@@ -35,7 +35,7 @@ class Plugin(stack.commands.Plugin):
 			if count > 0
 		]
 		if existing_families:
-			raise CommandError(cmd = self.owner, msg = f'The following firmware families already exist: {existing_families}.')
+			raise ArgError(cmd = self.owner, arg = 'family', msg = f'The following firmware families already exist: {existing_families}.')
 
 		for family in families:
 			self.owner.db.execute(
