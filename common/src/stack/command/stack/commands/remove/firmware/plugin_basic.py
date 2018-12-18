@@ -31,10 +31,10 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(cmd = self.owner, arg = 'version')
 
 		if family is None:
-			ParamRequired(cmd = self.owner, arg = 'family')
+			raise ParamRequired(cmd = self.owner, param = 'family')
 
 		# get rid of any duplicate names
-		versions = set(args)
+		versions = tuple(set(args))
 		# ensure the family name already exists
 		if not self.owner.db.count('(id) FROM firmware_family WHERE name=%s', family):
 			raise ParamError(cmd = self.owner, param = 'family', msg = f"The firmware family {family} doesn't exist.")
@@ -86,7 +86,7 @@ class Plugin(stack.commands.Plugin):
 			Path(file_path).resolve(strict = True).unlink()
 			self.owner.db.execute(
 				'''
-				DELETE FROM firmware_family WHERE id=%s
+				DELETE FROM firmware WHERE id=%s
 				''',
 				firmware_id
 			)

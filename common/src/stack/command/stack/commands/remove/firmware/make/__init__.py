@@ -12,7 +12,7 @@
 
 import stack.commands
 
-class Command(stack.commands.add.firmware.command):
+class Command(stack.commands.remove.firmware.command):
 	"""
 	Removes a firmware make from the stacki database.
 

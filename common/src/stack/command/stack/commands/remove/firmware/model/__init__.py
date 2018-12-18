@@ -31,4 +31,4 @@ class Command(stack.commands.remove.firmware.command):
 	"""
 
 	def run(self, params, args):
-		self.runPlugins(args = args)
+		self.runPlugins(args = (params, args))
