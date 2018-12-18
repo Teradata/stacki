@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(cmd = self.owner, arg = 'make')
 
 		# get rid of any duplicate names
-		makes = set(args)
+		makes = tuple(set(args))
 		# ensure the make name doesn't already exist
 		existing_makes = [
 			make

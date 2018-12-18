@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ArgRequired, ArgError
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to remove all provided family names from the database."""
+	"""Attempts to remove all provided families and any associated firmware from the database."""
 
 	def provides(self):
 		return 'basic'
@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(self.owner, 'family')
 
 		# get rid of any duplicate names
-		families = set(args)
+		families = tuple(set(args))
 		# ensure the family names already exist
 		missing_families = [
 			family
@@ -52,14 +52,14 @@ class Plugin(stack.commands.Plugin):
 					''',
 					family
 				)
+				if row
 			]
-			# and remove it
-			self.owner.call('remove.firmware', args = [" ".join(firmware_to_remove), f'family={family}'])
+			# and remove them if we found any
+			if firmware_to_remove:
+				self.owner.call('remove.firmware', args = [" ".join(firmware_to_remove), f'family={family}'])
 
 		# now delete the families
 		self.owner.db.execute(
-			'''
-			DELETE FROM firmware_family WHERE name in (%s)
-			''',
-			", ".join(families)
+			'DELETE FROM firmware_family WHERE name IN %s',
+			(families, )
 		)
