@@ -430,7 +430,7 @@ CREATE TABLE firmware_model (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(255) NOT NULL,
 	make_id INT NOT NULL,
-	FOREIGN KEY (make_id) REFERENCES firmware_make(id) ON DELETE CASCADE,
+	FOREIGN KEY (make_id) REFERENCES firmware_make(id) ON DELETE RESTRICT,
 	INDEX (name),
 	CONSTRAINT unique_make_model UNIQUE (make_id, name)
 );
@@ -444,7 +444,7 @@ CREATE TABLE firmware (
 	hash_alg VARCHAR(255) NOT NULL default 'md5',
 	hash VARCHAR(2048) NOT NULL,
 	file VARCHAR(2048) NOT NULL,
-	FOREIGN KEY (family_id) REFERENCES firmware_family(id) ON DELETE CASCADE,
+	FOREIGN KEY (family_id) REFERENCES firmware_family(id) ON DELETE RESTRICT,
 	FOREIGN KEY (model_id) REFERENCES firmware_model(id) ON DELETE SET NULL,
 	INDEX (version),
 	CONSTRAINT unique_family_version UNIQUE (family_id, version)

@@ -27,14 +27,17 @@ class Plugin(stack.commands.Plugin):
 		return 'basic'
 
 	def validate_arguments(self, version, params):
-		"""Validates that the expected arguments are present and that the optional arguments are specified correctly (if at all)."""
+		"""Validates that the expected arguments are present and that the optional arguments are specified correctly (if at all).
+
+		Returns the validated arguments if all checks are successful
+		"""
 		source, family, make, model, hash_value, hash_alg = params
 		# Require a version name
 		if not version:
-			raise ArgRequired(self.owner, 'version')
+			raise ArgRequired(cmd = self.owner, arg = 'version')
 		# should only be one version name
 		if len(version) != 1:
-			raise ArgUnique(self.owner, 'version')
+			raise ArgUnique(cmd = self.owner, arg = 'version')
 
 		# require a source
 		if source is None:
@@ -55,6 +58,8 @@ class Plugin(stack.commands.Plugin):
 				param = 'hash_alg',
 				msg = f'hash_alg must be one of the following: {hashlib.algorithms_guaranteed}'
 			)
+
+		return (version[0], source, family, make, model, hash_value, hash_alg)
 
 	def fetch_firmware(self, source, family, cleanup, make = None, model = None):
 		"""Fetches the firmware file from the provided source and copies it into a stacki managed file."""
@@ -106,17 +111,17 @@ class Plugin(stack.commands.Plugin):
 		# create the family if it doesn't already exist
 		if not self.owner.db.count('(id) FROM firmware_family WHERE name=%s', family):
 			self.owner.call(command = 'add.firmware.family', args = [family])
-			# cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.family', args = [family]))
+			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.family', args = [family]))
 
 		# create the make if it doesn't already exist
 		if make is not None and not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
 			self.owner.call(command = 'add.firmware.make', args = [make])
-			# cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.make', args = [make]))
+			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.make', args = [make]))
 
 		# create the model if it doesn't already exist
 		if model is not None and not self.owner.db.count(
 			'''
-			(firmware_model.id), firmware_model.make_id, firmware_make.id
+			(firmware_model.id)
 			FROM firmware_model
 				INNER JOIN firmware_make
 					ON firmware_model.make_id=firmware_make.id
@@ -125,7 +130,7 @@ class Plugin(stack.commands.Plugin):
 			(model, make)
 		):
 			self.owner.call(command = 'add.firmware.model', args = [model, f'make={make}'])
-			# cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.model', args = [model, f'make={make}']))
+			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.model', args = [model, f'make={make}']))
 
 	def run(self, args):
 		params, version = args
@@ -141,13 +146,15 @@ class Plugin(stack.commands.Plugin):
 			params = params
 		)
 		# validate the args before use
-		self.validate_arguments(version = version, params = params)
-		source, family, make, model, hash_value, hash_alg = params
+		version, source, family, make, model, hash_value, hash_alg = self.validate_arguments(
+			version = version,
+			params = params
+		)
 
 		# ensure the firmware version doesn't already exist for the given family
 		if self.owner.db.count(
 			'''
-			(firmware.id), firmware.family_id, firmware_family.id
+			(firmware.id)
 			FROM firmware
 				INNER JOIN firmware_family
 					ON firmware.family_id=firmware_family.id
@@ -178,14 +185,14 @@ class Plugin(stack.commands.Plugin):
 			if make is not None and model is not None:
 				model_id = self.owner.db.select(
 					'''
-					(firmware_model.id), firmware_model.id, firmware_make.id
+					firmware_model.id
 					FROM firmware_model
 						INNER JOIN firmware_make
 							ON firmware_model.make_id=firmware_make.id
 					WHERE firmware_make.name=%s AND firmware_model.name=%s
 					''',
 					(make, model)
-				)
+				)[0][0]
 				# insert into DB associated with family and make + model
 				self.owner.db.execute(
 					'''

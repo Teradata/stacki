@@ -11,10 +11,6 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ParamRequired, ArgUnique, CommandError, ParamValue
-from stack.util import blank_str_to_None
-import os
-import shutil
 
 class command(stack.commands.add.command):
 	pass
