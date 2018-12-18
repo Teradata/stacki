@@ -35,7 +35,7 @@ class Plugin(stack.commands.Plugin):
 			raise ParamRequired(cmd = self.owner, param = 'make')
 
 		# get rid of any duplicate names
-		models = set(args)
+		models = tuple(set(args))
 		# ensure the model name doesn't already exist for the given make
 		existing_makes_models = [
 			(make, model)
