@@ -166,7 +166,7 @@ class Plugin(stack.commands.Plugin):
 
 		# we use ExitStack to hold our cleanup operations and roll back should something fail.
 		with ExitStack() as cleanup:
-			# fetch the firmware from the source
+			# fetch the firmware from the source and copy the firmware into a stacki managed file
 			file_path = self.fetch_firmware(
 				source = source,
 				family = family,

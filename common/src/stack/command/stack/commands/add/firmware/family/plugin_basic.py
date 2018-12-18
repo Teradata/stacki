@@ -25,7 +25,7 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(cmd = self.owner, arg = 'family')
 
 		# get rid of any duplicate names
-		families = set(args)
+		families = tuple(set(args))
 		# ensure the family name doesn't already exist
 		existing_families = [
 			family
