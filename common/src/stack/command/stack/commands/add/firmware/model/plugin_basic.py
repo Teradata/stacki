@@ -23,7 +23,7 @@ class Plugin(stack.commands.Plugin):
 		params, args = args
 		# Require at least one model name
 		if not args:
-			raise ArgRequired(self.owner, 'model')
+			raise ArgRequired(cmd = self.owner, arg = 'model')
 
 		make, = self.owner.fillParams(
 			names = [('make', None)],
@@ -45,7 +45,7 @@ class Plugin(stack.commands.Plugin):
 					model,
 					self.owner.db.count(
 						'''
-						(firmware_model.id), firmware_model.make_id, firmware_make.id
+						(firmware_model.id)
 						FROM firmware_model
 							INNER JOIN firmware_make
 								ON firmware_model.make_id=firmware_make.id
@@ -66,7 +66,7 @@ class Plugin(stack.commands.Plugin):
 			self.owner.call(command = 'add.firmware.make', args = [make])
 
 		# get the ID of the make to associate with
-		make_id = self.owner.db.select('(id) FROM firmware_make WHERE name=%s', make)[0][0]
+		make_id = self.owner.db.select('id FROM firmware_make WHERE name=%s', make)[0][0]
 
 		for model in models:
 			self.owner.db.execute(
