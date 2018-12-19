@@ -21,7 +21,7 @@ class Plugin(stack.commands.Plugin):
 		return 'basic'
 
 	def run(self, args):
-		# Require at least one family name
+		# Require at least one model name
 		params, args = args
 		make, = self.owner.fillParams(
 			names = [('make', None),],
@@ -65,6 +65,29 @@ class Plugin(stack.commands.Plugin):
 				arg = 'model',
 				msg = f"The following firmware models don't exist for make {make}: {missing_models}."
 			)
+
+		# remove associated firmware
+		for model in models:
+			# get all the models associated with this make
+			firmware_to_remove = [
+				row[0] for row in
+				self.owner.db.select(
+					'''
+					firmware.version
+					FROM firmware
+						INNER JOIN firmware_model
+							ON firmware.model_id=firmware_model.id
+						INNER JOIN firmware_make
+							ON firmware_model.make_id=firmware_make.id
+					WHERE firmware_make.name=%s AND firmware_model.name=%s
+					''',
+					(make, model)
+				)
+				if row
+			]
+			# and remove them if we found any
+			if firmware_to_remove:
+				self.owner.call('remove.firmware', args = [" ".join(firmware_to_remove), f'make={make}', f'model={model}'])
 
 		# now delete the models
 		self.owner.db.execute(
