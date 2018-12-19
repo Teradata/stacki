@@ -61,12 +61,6 @@ class Plugin(stack.commands.Plugin):
 		"""Fetches the firmware file from the provided source and copies it into a stacki managed file."""
 		# parse the URL to figure out how we're going to fetch it
 		url = urlparse(url = source)
-		if url.scheme not in self.SUPPORTED_SCHEMES:
-			raise ParamError(
-				cmd = self.owner,
-				param = 'source',
-				msg = f'source must use one of the following supported schemes: {self.SUPPORTED_SCHEMES}'
-			)
 
 		# build file path to write out to
 		dest_dir = self.BASE_PATH / make / model
@@ -77,7 +71,8 @@ class Plugin(stack.commands.Plugin):
 		final_file.touch()
 		cleanup.callback(final_file.unlink)
 
-		if url.scheme == 'file':
+		# copy from local file
+		if url.scheme == self.SUPPORTED_SCHEMES[0]:
 			# grab the source file and copy it into the destination file
 			try:
 				source_file = Path(url.path).resolve(strict = True)
@@ -86,7 +81,13 @@ class Plugin(stack.commands.Plugin):
 
 			final_file.write_bytes(source_file.read_bytes())
 		# add more supported schemes here
-		# elif url.scheme == 'some_other_supported_scheme':
+		# elif url.scheme == self.SUPPORTED_SCHEMES[N]:
+		else:
+			raise ParamError(
+				cmd = self.owner,
+				param = 'source',
+				msg = f'source must use one of the following supported schemes: {self.SUPPORTED_SCHEMES}'
+			)
 
 		return final_file
 
