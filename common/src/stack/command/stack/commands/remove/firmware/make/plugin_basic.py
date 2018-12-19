@@ -60,6 +60,6 @@ class Plugin(stack.commands.Plugin):
 
 		# now delete the makes
 		self.owner.db.execute(
-			'DELETE FROM firmware_family WHERE name IN %s',
+			'DELETE FROM firmware_make WHERE name IN %s',
 			(makes, )
 		)

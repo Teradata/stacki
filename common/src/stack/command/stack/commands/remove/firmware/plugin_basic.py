@@ -15,29 +15,42 @@ from stack.exception import ArgRequired, ArgError, ParamError, ParamRequired
 from pathlib import Path
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to remove all provided firmware versions for the given family from the database and the file system."""
+	"""Attempts to remove all provided firmware versions for the given make and model from the database and the file system."""
 
 	def provides(self):
 		return 'basic'
 
 	def run(self, args):
-		# Require at least one family name
 		params, args = args
-		family, = self.owner.fillParams(
-			names = [('family', None),],
+		make, model = self.owner.fillParams(
+			names = [('make', None), ('model', None)],
 			params = params
 		)
+		# Require at least one version
 		if not args:
 			raise ArgRequired(cmd = self.owner, arg = 'version')
-
-		if family is None:
-			raise ParamRequired(cmd = self.owner, param = 'family')
+		# make and model are required
+		if make is None:
+			raise ParamRequired(cmd = self.owner, param = 'make')
+		if model is None:
+			raise ParamRequired(cmd = self.owner, param = 'model')
 
 		# get rid of any duplicate names
 		versions = tuple(set(args))
-		# ensure the family name already exists
-		if not self.owner.db.count('(id) FROM firmware_family WHERE name=%s', family):
-			raise ParamError(cmd = self.owner, param = 'family', msg = f"The firmware family {family} doesn't exist.")
+		# ensure the make and model already exist
+		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
+			raise ParamError(cmd = self.owner, param = 'make', msg = f"The firmware make {make} doesn't exist.")
+		if not self.owner.db.count(
+			'''
+			(firmware_model.id)
+			FROM firmware_model
+				INNER JOIN firmware_make
+					ON firmware_model.make_id=firmware_make.id
+			WHERE firmware_make.name=%s AND firmware_model.name=%s
+			''',
+			(make, model)
+		):
+			raise ParamError(cmd = self.owner, param = 'model', msg = f"The firmware model {model} for make {make} doesn't exist.")
 		# ensure the versions exist
 		missing_versions = [
 			version
@@ -48,11 +61,13 @@ class Plugin(stack.commands.Plugin):
 						'''
 						(firmware.id)
 						FROM firmware
-							INNER JOIN firmware_family
-								ON firmware.family_id=firmware_family.id
-						WHERE firmware.version=%s AND firmware_family.name=%s
+							INNER JOIN firmware_model
+								ON firmware.model_id=firmware_model.id
+							INNER JOIN firmware_make
+								ON firmware_model.make_id=firmware_make.id
+						WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
 						''',
-						(version, family)
+						(version, make, model)
 					)
 				)
 				for version in versions
@@ -63,7 +78,7 @@ class Plugin(stack.commands.Plugin):
 			raise ArgError(
 				cmd = self.owner,
 				arg = 'version',
-				msg = f"The following firmware versions don't exist for family {family}: {missing_versions}."
+				msg = f"The following firmware versions don't exist for make {make} and model {model}: {missing_versions}."
 			)
 
 		# get the firmware to remove
@@ -73,11 +88,13 @@ class Plugin(stack.commands.Plugin):
 				'''
 				firmware.id, firmware.file
 				FROM firmware
-					INNER JOIN firmware_family
-						ON firmware.family_id=firmware_family.id
-				WHERE firmware.version=%s AND firmware_family.name=%s
+					INNER JOIN firmware_model
+						ON firmware.model_id=firmware_model.id
+					INNER JOIN firmware_make
+						ON firmware_model.make_id=firmware_make.id
+				WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
 				''',
-				(version, family)
+				(version, make, model)
 			)[0]
 			firmware_to_remove.append((row[0], row[1]))
 
