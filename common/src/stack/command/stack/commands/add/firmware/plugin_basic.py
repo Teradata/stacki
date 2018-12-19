@@ -72,7 +72,6 @@ class Plugin(stack.commands.Plugin):
 		dest_dir = self.BASE_PATH / make / model
 		dest_dir = dest_dir.resolve()
 		dest_dir.mkdir(parents = True, exist_ok = True)
-		cleanup.callback(dest_dir.rmdir)
 		# get a random file name and touch it to create the file
 		final_file = dest_dir / uuid.uuid4().hex
 		final_file.touch()
@@ -80,7 +79,11 @@ class Plugin(stack.commands.Plugin):
 
 		if url.scheme == 'file':
 			# grab the source file and copy it into the destination file
-			source_file = Path(url.path).resolve(strict = True)
+			try:
+				source_file = Path(url.path).resolve(strict = True)
+			except FileNotFoundError as ex:
+				raise ParamError(cmd = self.owner, param = 'source', msg = f'{ex}')
+
 			final_file.write_bytes(source_file.read_bytes())
 		# add more supported schemes here
 		# elif url.scheme == 'some_other_supported_scheme':
