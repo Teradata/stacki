@@ -23,12 +23,16 @@ class Command(command):
 	One or more firmware versions to be removed.
 	</arg>
 
-	<param type='string' name='family'>
-	The firmware family to remove this firmware image from.
+	<param type='string' name='make'>
+	The firmware make to remove this firmware image from.
 	</param>
 
-	<example cmd="remove firmware 3.6.5002 family=mellanox_78xx">
-	Removes the firmware with version 3.6.5002 from the family mellanox_78xx.
+	<param type='string' name='model'>
+	The firmware model to remove this firmware image from.
+	</param>
+
+	<example cmd="remove firmware 3.6.5002 make=mellanox model=7800">
+	Removes the firmware with version 3.6.5002 for the mellanox 7800 make and model.
 	</example>
 	"""
 

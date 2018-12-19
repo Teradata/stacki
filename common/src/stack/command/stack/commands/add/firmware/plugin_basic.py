@@ -31,7 +31,7 @@ class Plugin(stack.commands.Plugin):
 
 		Returns the validated arguments if all checks are successful
 		"""
-		source, family, make, model, hash_value, hash_alg = params
+		source, make, model, hash_value, hash_alg = params
 		# Require a version name
 		if not version:
 			raise ArgRequired(cmd = self.owner, arg = 'version')
@@ -42,15 +42,11 @@ class Plugin(stack.commands.Plugin):
 		# require a source
 		if source is None:
 			raise ParamRequired(cmd = self.owner, param = 'source')
-		# require a family
-		if family is None:
-			raise ParamRequired(cmd = self.owner, param = 'family')
-		# require both make and model if either is set
-		if make is not None or model is not None:
-			if make is None:
-				raise ParamRequired(cmd = self.owner, param = 'make')
-			if model is None:
-				raise ParamRequired(cmd = self.owner, param = 'model')
+		# require both make and model
+		if make is None:
+			raise ParamRequired(cmd = self.owner, param = 'make')
+		if model is None:
+			raise ParamRequired(cmd = self.owner, param = 'model')
 		# require hash_alg to be one of the always present ones
 		if hash_alg not in hashlib.algorithms_guaranteed:
 			raise ParamError(
@@ -59,9 +55,9 @@ class Plugin(stack.commands.Plugin):
 				msg = f'hash_alg must be one of the following: {hashlib.algorithms_guaranteed}'
 			)
 
-		return (version[0], source, family, make, model, hash_value, hash_alg)
+		return (version[0], source, make, model, hash_value, hash_alg)
 
-	def fetch_firmware(self, source, family, cleanup, make = None, model = None):
+	def fetch_firmware(self, source, make, model, cleanup):
 		"""Fetches the firmware file from the provided source and copies it into a stacki managed file."""
 		# parse the URL to figure out how we're going to fetch it
 		url = urlparse(url = source)
@@ -73,7 +69,7 @@ class Plugin(stack.commands.Plugin):
 			)
 
 		# build file path to write out to
-		dest_dir = self.BASE_PATH / family / (f'{make}_{model}' if make is not None and model is not None else '')
+		dest_dir = self.BASE_PATH / make / model
 		dest_dir = dest_dir.resolve()
 		dest_dir.mkdir(parents = True, exist_ok = True)
 		cleanup.callback(dest_dir.rmdir)
@@ -106,20 +102,16 @@ class Plugin(stack.commands.Plugin):
 
 		return calculated_hash
 
-	def add_related_entries(self, family, cleanup, make = None, model = None):
+	def add_related_entries(self, make, model, cleanup):
 		"""Adds the related database entries if they do not exist."""
-		# create the family if it doesn't already exist
-		if not self.owner.db.count('(id) FROM firmware_family WHERE name=%s', family):
-			self.owner.call(command = 'add.firmware.family', args = [family])
-			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.family', args = [family]))
 
 		# create the make if it doesn't already exist
-		if make is not None and not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
+		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
 			self.owner.call(command = 'add.firmware.make', args = [make])
 			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.make', args = [make]))
 
 		# create the model if it doesn't already exist
-		if model is not None and not self.owner.db.count(
+		if not self.owner.db.count(
 			'''
 			(firmware_model.id)
 			FROM firmware_model
@@ -137,7 +129,6 @@ class Plugin(stack.commands.Plugin):
 		params = self.owner.fillParams(
 			names = [
 				('source', None),
-				('family', None),
 				('make', None),
 				('model', None),
 				('hash', None),
@@ -146,85 +137,68 @@ class Plugin(stack.commands.Plugin):
 			params = params
 		)
 		# validate the args before use
-		version, source, family, make, model, hash_value, hash_alg = self.validate_arguments(
+		version, source, make, model, hash_value, hash_alg = self.validate_arguments(
 			version = version,
 			params = params
 		)
 
-		# ensure the firmware version doesn't already exist for the given family
+		# ensure the firmware version doesn't already exist for the given model
 		if self.owner.db.count(
 			'''
 			(firmware.id)
 			FROM firmware
-				INNER JOIN firmware_family
-					ON firmware.family_id=firmware_family.id
-			WHERE firmware.version=%s AND firmware_family.name=%s
+				INNER JOIN firmware_model
+					ON firmware.model_id=firmware_model.id
+				INNER JOIN firmware_make
+					ON firmware_model.make_id=firmware_make.id
+			WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
 			''',
-			(version, family)
+			(version, make, model)
 		):
-			raise ArgError(cmd = self.owner, arg = 'version', msg = f'The firmware version {version} for family {family} already exists.')
+			raise ArgError(cmd = self.owner, arg = 'version', msg = f'The firmware version {version} for make {make} and model {model} already exists.')
 
 		# we use ExitStack to hold our cleanup operations and roll back should something fail.
 		with ExitStack() as cleanup:
 			# fetch the firmware from the source and copy the firmware into a stacki managed file
 			file_path = self.fetch_firmware(
 				source = source,
-				family = family,
 				make = make,
 				model = model,
 				cleanup = cleanup
 			)
 			# calculate the file hash and compare it with the user provided value if present.
 			file_hash = self.calculate_hash(file_path = file_path, hash_alg = hash_alg, hash_value = hash_value)
-			# add family, make, and model database entries if needed.
-			self.add_related_entries(family = family, cleanup = cleanup, make = make, model = model)
+			# add make and model database entries if needed.
+			self.add_related_entries(make = make, model = model, cleanup = cleanup)
 
-			# get the ID of the family to associate with
-			family_id = self.owner.db.select('(id) FROM firmware_family WHERE name=%s', family)[0][0]
-			# get the ID of the model to associate with (if necessary) and add to the DB
-			if make is not None and model is not None:
-				model_id = self.owner.db.select(
-					'''
-					firmware_model.id
-					FROM firmware_model
-						INNER JOIN firmware_make
-							ON firmware_model.make_id=firmware_make.id
-					WHERE firmware_make.name=%s AND firmware_model.name=%s
-					''',
-					(make, model)
-				)[0][0]
-				# insert into DB associated with family and make + model
-				self.owner.db.execute(
-					'''
-					INSERT INTO firmware (
-						family_id,
-						model_id,
-						source,
-						version,
-						hash_alg,
-						hash,
-						file
-					)
-					VALUES (%s, %s, %s, %s, %s, %s, %s)
-					''',
-					(family_id, model_id, source, version, hash_alg, file_hash, str(file_path))
+			# get the ID of the model to associate with
+			model_id = self.owner.db.select('(id) FROM firmware_model WHERE name=%s', model)[0][0]
+			# get the ID of the model to associate with
+			model_id = self.owner.db.select(
+				'''
+				firmware_model.id
+				FROM firmware_model
+					INNER JOIN firmware_make
+						ON firmware_model.make_id=firmware_make.id
+				WHERE firmware_make.name=%s AND firmware_model.name=%s
+				''',
+				(make, model)
+			)[0][0]
+			# insert into DB associated with make + model
+			self.owner.db.execute(
+				'''
+				INSERT INTO firmware (
+					model_id,
+					source,
+					version,
+					hash_alg,
+					hash,
+					file
 				)
-			else:
-				# insert into DB associated with family
-				self.owner.db.execute(
-					'''
-					INSERT INTO firmware (
-						family_id,
-						source,
-						version,
-						hash_alg,
-						hash,
-						file
-					)
-					VALUES (%s, %s, %s, %s, %s, %s)
-					''',
-					(family_id, source, version, hash_alg, file_hash, str(file_path))
-				)
+				VALUES (%s, %s, %s, %s, %s, %s)
+				''',
+				(model_id, source, version, hash_alg, file_hash, str(file_path))
+			)
 
 			# everything went down without a problem, dismiss the cleanup
 			cleanup.pop_all()

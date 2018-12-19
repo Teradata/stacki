@@ -412,14 +412,6 @@ CREATE TABLE ib_memberships (
 DROP TABLE IF EXISTS firmware;
 DROP TABLE IF EXISTS firmware_model;
 DROP TABLE IF EXISTS firmware_make;
-DROP TABLE IF EXISTS firmware_family;
-
-CREATE TABLE firmware_family (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	INDEX (name),
-	CONSTRAINT unique_name UNIQUE (name)
-);
 
 CREATE TABLE firmware_make (
 	id INT AUTO_INCREMENT PRIMARY KEY,
@@ -439,17 +431,15 @@ CREATE TABLE firmware_model (
 
 CREATE TABLE firmware (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-	family_id INT NOT NULL,
-	model_id INT DEFAULT NULL,
+	model_id INT NOT NULL,
 	source VARCHAR(2048) NOT NULL,
 	version VARCHAR(255) NOT NULL,
 	hash_alg VARCHAR(255) NOT NULL default 'md5',
 	hash VARCHAR(2048) NOT NULL,
 	file VARCHAR(2048) NOT NULL,
-	FOREIGN KEY (family_id) REFERENCES firmware_family(id) ON DELETE RESTRICT,
-	FOREIGN KEY (model_id) REFERENCES firmware_model(id) ON DELETE SET NULL,
+	FOREIGN KEY (model_id) REFERENCES firmware_model(id) ON DELETE RESTRICT,
 	INDEX (version),
-	CONSTRAINT unique_family_version UNIQUE (family_id, version)
+	CONSTRAINT unique_model_version UNIQUE (model_id, version)
 );
 
 </stack:file>
