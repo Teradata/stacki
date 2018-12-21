@@ -16,17 +16,18 @@ class Plugin(stack.commands.Plugin):
 		return ['basic']
 
 	def run(self, args):
-		(hosts, expanded, hashit) = args
+		pass
+		# (hosts, expanded, hashit) = args
 
-		host_info = dict.fromkeys(hosts)
+		# host_info = dict.fromkeys(hosts)
 
-		for host in hosts:
-			appliance = self.owner.call('list.host', [host])[0]['appliance']
-			host_info[host] = self.owner.runImplementation(appliance,[host])
-			if not host_info[host]:
-				host_info[host] = [None, None]
+		# for host in hosts:
+		# 	appliance = self.owner.call('list.host', [host])[0]['appliance']
+		# 	host_info[host] = self.owner.runImplementation(appliance,[host])
+		# 	if not host_info[host]:
+		# 		host_info[host] = [None, None]
 
-		return {'keys'  : ['Current Version','Available Version'],
-			'values': host_info }
+		# return {'keys'  : ['Current Version','Available Version'],
+		# 	'values': host_info }
 
 RollName = "stacki"
