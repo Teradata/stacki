@@ -13,11 +13,12 @@
 import stack.commands
 import os
 import re
+from collections import OrderedDict
 
 class command(stack.commands.HostArgumentProcessor,
 	stack.commands.list.command):
 	pass
-	
+
 
 class Command(command):
 	"""
@@ -39,31 +40,31 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-	    
-		(order, expanded, hashit) = self.fillParams([
-			('order',    'asc'), 
-			('expanded', False),
-			('hash',     False) 
-		])
-		
-		hosts    = self.getHostnames(args, order=order)
+		order, expanded, hashit = self.fillParams(
+			names = [
+				('order', 'asc'),
+				('expanded', False),
+				('hash', False)
+			],
+			params = params
+		)
+
+		hosts = self.getHostnames(names = args, order = order)
 		expanded = self.str2bool(expanded)
-		hashit   = self.str2bool(hashit)
-	    
-		header = [ 'host' ]
-		values = { }
-		for host in hosts:
-			values[host] = [ ]
-			
-		for (provides, result) in self.runPlugins((hosts, expanded, hashit)):
+		hashit = self.str2bool(hashit)
+
+		header = ['host']
+		values = {host: [] for host in hosts}
+
+		for provides, result in self.runPlugins((hosts, expanded, hashit)):
 			header.extend(result['keys'])
-			for h, v in result['values'].items():
-				values[h].extend(v)
+			for host, items in result['values'].items():
+				values[host].extend(items)
 
 		self.beginOutput()
 		for host in hosts:
 			self.addOutput(host, values[host])
-		self.endOutput(header=header, trimOwner=False)
+		self.endOutput(header = header)
 
 
 def getFirmwarePath():
