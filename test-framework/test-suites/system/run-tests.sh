@@ -16,4 +16,6 @@ then
 fi
 
 # Run the tests
-vagrant ssh frontend -c "sudo -i pytest -vvv /export/test-suites/system/tests/"
+vagrant ssh frontend -c "sudo -i pytest -vvv \
+	--junit-xml=/export/reports/system-junit.xml \
+	/export/test-suites/system/tests/"

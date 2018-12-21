@@ -21,15 +21,24 @@ then
         COVERAGERC="redhat.coveragerc"
     fi
 
+    # Capture the test status but continue after failure
+    set +e
     vagrant ssh frontend -c "sudo -i pytest -vvv \
         --dist=loadfile -n 4 \
         --reruns=2 --reruns-delay=60 \
         --timeout=300 --timeout_method=signal \
+        --junit-xml=/export/reports/integration-junit.xml \
         --cov-config=/export/test-suites/_common/$COVERAGERC \
         --cov=wsclient \
         --cov=stack \
         --cov-report html:/export/reports/integration \
         /export/test-suites/integration/tests/"
+    STATUS=$?
+
+    # Move the coverage data
+    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/integration.coverage"
+
+    exit $STATUS
 elif [[ $1 == "--audit" ]]
 then
     vagrant ssh frontend -c "sudo -i pytest -vvv \
@@ -40,5 +49,6 @@ else
         --dist=loadfile -n 4 \
         --reruns=2 --reruns-delay=60 \
         --timeout=300 --timeout_method=signal \
+        --junit-xml=/export/reports/integration-junit.xml \
         /export/test-suites/integration/tests/"
 fi
