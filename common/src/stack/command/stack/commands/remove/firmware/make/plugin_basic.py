@@ -56,7 +56,7 @@ class Plugin(stack.commands.Plugin):
 			]
 			# and remove them if we found any
 			if models_to_remove:
-				self.owner.call('remove.firmware.model', args = [" ".join(models_to_remove), f'make={make}'])
+				self.owner.call('remove.firmware.model', args = [*models_to_remove, f'make={make}'])
 
 		# now delete the makes
 		self.owner.db.execute(
