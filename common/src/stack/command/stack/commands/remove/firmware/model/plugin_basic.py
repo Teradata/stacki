@@ -87,7 +87,7 @@ class Plugin(stack.commands.Plugin):
 			]
 			# and remove them if we found any
 			if firmware_to_remove:
-				self.owner.call('remove.firmware', args = [" ".join(firmware_to_remove), f'make={make}', f'model={model}'])
+				self.owner.call('remove.firmware', args = [*firmware_to_remove, f'make={make}', f'model={model}'])
 
 		# now delete the models
 		self.owner.db.execute(
