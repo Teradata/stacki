@@ -24,7 +24,7 @@ class Plugin(stack.commands.Plugin):
 			# break the status in 'list host'.
 			keys.append('id')
 			for name, node_id in self.db.select('name, id FROM nodes WHERE name in %s', (hosts, )):
-				host_info[name] = [node_id]
+				host_info[name].append(node_id)
 
 		for row in self.db.select(
 			"""
@@ -102,6 +102,3 @@ class Plugin(stack.commands.Plugin):
 		keys.append('desired firmware version')
 
 		return { 'keys' : keys, 'values': host_info }
-
-
-RollName = "stacki"
