@@ -21,13 +21,23 @@ then
         COVERAGERC="redhat.coveragerc"
     fi
 
+    # Capture the test status but continue after failure
+    set +e
     vagrant ssh frontend -c "sudo -i pytest -vvv \
+        --junitxml=/export/reports/unit-junit.xml \
         --cov-config=/export/test-suites/_common/$COVERAGERC \
         --cov=wsclient \
         --cov=stack \
         --cov-report html:/export/reports/unit \
         /export/test-suites/unit/tests/"
+    STATUS=$?
+
+    # Move the coverage data
+    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/unit.coverage"
+
+    exit $STATUS
 else
     vagrant ssh frontend -c "sudo -i pytest -vvv \
+        --junitxml=/export/reports/unit-junit.xml \
         /export/test-suites/unit/tests/"
 fi
