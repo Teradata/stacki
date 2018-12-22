@@ -5,59 +5,38 @@
 # @copyright@
 
 import stack.commands
-import stack.commands.list.firmware as firm
-import os
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.sync.command):
+class command(stack.commands.sync.command):
 	pass
 
 
 class Command(command):
 	"""
-	Updates the firmware of different appliances based on whether a updated version is available in /export/stack/drivers/make/model/
+	Syncs the firmware files on the frontend with what the expected firmware is in the stacki database
 
-	<arg optional='1' type='string' name='host' repeat='1'>
-	Zero, one or more host names. If no host names are supplied, info about
-	all the known hosts is listed.
+	<arg optional='1' type='string' name='version' repeat='1'>
+	Zero or more firmware versions to sync. If none are specified, all firmware files tracked by stacki will be synced.
 	</arg>
 
-	<example cmd='sync firmware backend-0-0'>
-	Updates backend-0-0.
+	<param type='string' name='make'>
+	The make of the firmware versions to be synced. This is required if version arguments are specified.
+	</param>
+
+	<param type='string' name='model'>
+	The model of the firmware versions to be synced. This is required if version arguments are specified.
+	</param>
+
+	<example cmd='sync firmware 3.6.8010 make=Mellanox model=m7800'>
+	Makes sure the firmware file with version 3.6.8010 for Mellanox m7800 devices exists on the filesystem
+	and has the correct hash. It will be re-fetched from the source if necessary.
 	</example>
 
 	<example cmd='sync firmware'>
-	Updates all known hosts(firmwares).
+	Syncs all known firmware files, checking that they exist on the filesystem and have the correct hash.
+	They will be re-fetched from the source if necessary.
 	</example>
 	"""
-	
+
 	def run(self, params, args):
 		self.notify('Sync Firmware\n')
-
-		firmwares = self.getHostnames(args)
-
-		for firmware in firmwares:
-			make = self.getHostAttr(firmware, 'component.make')
-			model = self.getHostAttr(firmware, 'component.model')
-			firmware_info = self.call('list.firmware',[firmware])[0]
-			curr_version = firmware_info['Current Version']
-			avail_version = firmware_info['Available Version']
-			if not avail_version:
-				continue
-			if not curr_version:
-				continue
-			if firm.compareVersion(curr_version, avail_version) >= 0:
-				continue
-
-			self.runImplementation(model, [firmware, make, model, avail_version])
-
-
-def getImageName(appliance, make, model, version):
-	if not make or make == 'None':
-		make = ""
-	if not model or model == 'None':
-		model = ""
-	files = os.listdir(os.path.join(firm.getFirmwarePath(), appliance, make, model))
-	for filename in files:
-		if firm.extractVersionNumber(filename) == version:
-			return filename
-	return None
+		self.runPlugins(args = (params, args))
