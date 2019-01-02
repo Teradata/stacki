@@ -1,8 +1,0 @@
-<graph>
-	<description>
-	Set up the standard vagrant user, sudo, and nic settings
-	</description>
-
-	<order head="backend" tail="cart-vagrant-backend"/>
-	<edge  from="backend"   to="cart-vagrant-backend"/>
-</graph>

@@ -24,10 +24,6 @@ The following flags are available to just run the specified test suite types. Wi
     --integration
     --system
 
-There is also a flag that currently just runs the first system test, which installs Stacki on a frontend node and then provisions two backend nodes:
-
-    --system-quick
-
 So, if you want to just run the unit and integration test suites, you could do so like this:
 
     ./run-tests.sh --unit --integration http://example.com/stacki-5.0_20180214_b19821a-redhat7.x86_64.disk1.iso
@@ -36,8 +32,8 @@ You can also supply extra ISOs to the framework as a comma seperated list, which
 
     --extra-isos=FIRST_ISO,SECOND_ISO...
 
-For example, Stacki SLES11 can't be a frontend, but the 01-barnacle-install is aware of Stacki SLES11 ISOs, and will use it to test provisioning SLES11 backends, like so:
-    
+For example, Stacki SLES11 can't be a frontend, but the system test-suite is aware of Stacki SLES11 ISOs, and will use it to test provisioning SLES11 backends, like so:
+
     ./run-tests.sh --system stacki-5.1rc2-sles12.x86_64.disk1.iso --extra-isos=stacki-5.1rc2-sles11.x86_64.disk1.iso
 
 By default, code coverage reports will be generated in the `reports` directory, in `unit` and `integration` subdirectories for those types of tests. To turn off this report generation, you can use the flag:
