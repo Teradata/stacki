@@ -14,9 +14,9 @@ bin/pip:
 
 environment: bin/pip
 	source ./bin/activate && pip install -r requirements.txt
-	
+
 clean:
-	rm -rf bin venv .cache .vagrant
+	rm -rf bin venv .cache .vagrant test-suites/*/.cache
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -type d -print0 | xargs -0 rm -rf --
 	find . -name '.pytest_cache' -type d -print0 | xargs -0 rm -rf --

@@ -9,8 +9,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # Make sure we have the virtualenv activated
 if [[ -z $VIRTUAL_ENV ]]
 then
-    source ../../../bin/activate
+    source ../../bin/activate
 fi
 
 # Run the tests
-pytest -vvv --hosts=frontend --ssh-config=".cache/ssh-config" tests/
+vagrant ssh frontend -c "sudo -i pytest -vvv /export/tests/"
