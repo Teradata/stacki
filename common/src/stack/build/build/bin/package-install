@@ -26,6 +26,17 @@ yum() {
 	done
 }
 
+apt() {
+	for p in "$@"; do
+		if [ $meta == 1 ]; then
+			/usr/bin/apt -y install "$p"
+		else
+			/usr/bin/apt -y install "$p"
+		fi
+	done
+
+}
+
 meta=0
 while getopts "m" opt; do
 	case $opt in
@@ -46,6 +57,9 @@ sles)
 	zypper "$@"
 	;;
 redhat)
+	yum "$@"
+	;;
+apt)
 	yum "$@"
 	;;
 esac

@@ -10,6 +10,8 @@ if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`
 elif [ -f /etc/SuSE-release ]; then
 	RELEASE=`head -1 /etc/SuSE-release`
+elif [ -f /etc/lsb-release ]; then
+	RELEASE=`head -1 /etc/lsb-release`
 else
 	RELEASE='unknown'
 fi
@@ -26,6 +28,9 @@ case $RELEASE in
 	;;
     *SUSE*12*)
 	echo sles12
+	;;
+    *Ubuntu*)
+	echo ubuntu
 	;;
     *)
         echo unknown

@@ -335,7 +335,7 @@ nuke:: clean
 
 
 # pkg is an alias for rpm
-pkg: fpm
+pkg: rpm
 
 clean::
 	@rm -f $(REDHAT.SOURCES)/$(TARBALL)
