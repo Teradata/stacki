@@ -10,7 +10,9 @@ from stack.switch import SwitchException
 
 INPUT_DATA = [
 	['m7800_parse_partitions_input.txt', 'm7800_parse_partitions_output.json'],
+	['m7800_parse_partitions_input_new_format.txt', 'm7800_parse_partitions_output.json'],
 	['m7800_parse_partitions_with_member_named_all_input.txt', 'm7800_parse_partitions_with_member_named_all_output.json'],
+	['m7800_parse_partitions_with_member_named_all_input_new_format.txt', 'm7800_parse_partitions_with_member_named_all_output.json'],
 ]
 
 class TestUtil:
