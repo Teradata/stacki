@@ -16,7 +16,8 @@ def remove_blank_lines(lines):
 	return [line for line in lines if line.strip()]
 
 
-partition_name = re.compile('  [a-z0-9]', re.IGNORECASE)
+# Needs to handle the old (< 3.6.8010) and new (>= 3.6.8010) formatting
+partition_name = re.compile(r'(?P<format_1>  [a-z0-9]+\s*$)|(?P<format_2>[a-z0-9]+:\s*$)', re.IGNORECASE)
 members_header = re.compile('  members', re.IGNORECASE)
 # a GUID is a like a MAC, but 8 pairs
 guid_format = re.compile("([0-9a-f]{2}:){7}[0-9a-f]{2}|ALL", re.IGNORECASE)
@@ -197,13 +198,28 @@ class SwitchMellanoxM7800(Switch):
 
 		partitions = {}
 		cur_partition = None
-		for line in self.proc.ask('show ib partition'):
+		new_console_format = None
+		for line in remove_blank_lines(lines = self.proc.ask('show ib partition')):
 			if re.match(members_header, line):
 				# drop the 'members' line, because it can look like partition names
 				# lord help us if someone names their partition 'members'
 				continue
-			if re.match(partition_name, line):
-				cur_partition = line.strip()
+
+			header_match = re.match(partition_name, line)
+			if header_match:
+				# This should be the first thing we encounter when looping through the console
+				# response, so we use it to set the format for the rest of the loop
+				if new_console_format is None:
+					if header_match.group("format_1"):
+						new_console_format = False
+					elif header_match.group("format_2"):
+						new_console_format = True
+				elif new_console_format and not header_match.group("format_2"):
+					continue
+				elif not new_console_format and not header_match.group("format_1"):
+					continue
+
+				cur_partition = line.strip().strip(":")
 				partitions[cur_partition] = {
 					'pkey': '',
 					'ipoib': False,
@@ -213,10 +229,10 @@ class SwitchMellanoxM7800(Switch):
 
 			line = line.strip()
 			if line.startswith('PKey'):
-				_, key = line.split('=')
+				_, key = line.split(':' if new_console_format else '=')
 				partitions[cur_partition]['pkey'] = int(key, 16)
 			elif line.startswith('ipoib'):
-				_, ipoib = line.split('=')
+				_, ipoib = line.split(':' if new_console_format else '=')
 				partitions[cur_partition]['ipoib'] = str2bool(ipoib.strip())
 			elif line.startswith('GUID'):
 				m = re.search(guid_member_format, line)

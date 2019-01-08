@@ -1,0 +1,11 @@
+0x0123:
+  PKey : 0x0123
+  ipoib: yes
+
+  members:
+    GUID='e4:1d:2d:03:00:15:6e:80' member='limited'
+    GUID='e4:aa:2d:bb:cd:cd:ee:80' member='full'
+    GUID='e4:1d:b1:26:99:34:aa:80' member='limited'
+    GUID='e4:1d:aa:00:00:11:22:80' member='limited'
+
+M7800-1-1-3-12 [standalone: master] (config) #
