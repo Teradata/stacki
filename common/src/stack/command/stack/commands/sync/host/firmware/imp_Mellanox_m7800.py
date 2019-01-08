@@ -12,6 +12,7 @@
 
 from pathlib import Path
 import stack.commands
+from stack.exception import CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
 
 class Implementation(stack.commands.Implementation):
@@ -33,7 +34,7 @@ class Implementation(stack.commands.Implementation):
 		self.owner.notify(f'Syncing firmware for {switch_name}\n')
 
 		# calculate the URL the switch can pull this image file from
-		url = self.getURLtoFirmwares(switch_name = switch_name, firmware_file = firmware_file)
+		url = self.get_frontend_url(switch_name = switch_name, firmware_file = firmware_file)
 		# connect to the switch and run the firmware upgrade procedure
 		m7800_switch = SwitchMellanoxM7800(switch_name, **kwargs)
 		m7800_switch.connect()
@@ -50,22 +51,32 @@ class Implementation(stack.commands.Implementation):
 		m7800_switch.image_boot_next()
 		m7800_switch.reload()
 
-	def getURLtoFirmwares(self, switch_name, firmware_file):
-		host_interface_switch = self.owner.call('list.host.interface', [ switch_name ])
-		host_interface_frontend = self.owner.call('list.host.interface', [ 'a:frontend' ])
+	def get_frontend_url(self, switch_name, firmware_file):
+		host_interface_frontend = self.owner.call('list.host.interface', ['a:frontend'])
 
-		switch_networks = set(switch['network'] for switch in host_interface_switch)
+		switch_networks = set(switch['network'] for switch in self.owner.call('list.host.interface', [switch_name]))
 		frontend_networks = set(frontend['network'] for frontend in host_interface_frontend)
 		common_networks = list(switch_networks & frontend_networks)
 
 		if not common_networks:
-			return None
+			raise CommandError(
+				cmd = self.owner,
+				msg = (f'{switch_name} does not share a network with the frontend, and thus cannot fetch firmware'
+					   f' from it. Please configure {switch_name} to share a common network with the frontend.')
+			)
 
-		common_network = common_networks[0]
-		ip_addr = [ frontend['ip'] for frontend in host_interface_frontend if frontend['network'] in common_network ]
+		ip_addr = [
+			frontend['ip'] for frontend in host_interface_frontend
+			if frontend['network'] in common_networks and frontend['ip']
+		]
 
 		if not ip_addr:
-			return None
+			raise CommandError(
+				cmd = self.owner,
+				msg = (f'None of the network interfaces on the frontend attached to the following common networks'
+					   f'have an IP address. Please configure at least one interface to have an IP address on one'
+					   f'of the following networks: {common_networks}')
+			)
 
 		ip_addr = ip_addr[0]
 		# remove the /export/stack prefix from the file path, as /install points to /export/stack
