@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 from unittest.mock import patch
 from unittest.mock import ANY, DEFAULT
 from collections import namedtuple
@@ -14,6 +15,11 @@ INPUT_DATA = [
 	['m7800_parse_partitions_input_new_format.txt', 'm7800_parse_partitions_output.json'],
 	['m7800_parse_partitions_with_member_named_all_input.txt', 'm7800_parse_partitions_with_member_named_all_output.json'],
 	['m7800_parse_partitions_with_member_named_all_input_new_format.txt', 'm7800_parse_partitions_with_member_named_all_output.json'],
+]
+
+FIRMWARE_INPUT_DATA = [
+	'/export/test-files/switch/m7800_show_images_console.txt',
+	'/export/test-files/switch/m7800_show_images_console_new.txt',
 ]
 
 class TestUtil:
@@ -217,8 +223,9 @@ class TestSwitchMellanoxM7800:
 
 	def test_install_firmware(self, mock_expectmore):
 		"""Expect this to try to install the user requested firmware."""
-		with open('/export/test-files/switch/m7800_install_image_console.txt') as test_file:
-			mock_expectmore.return_value.ask.return_value = test_file.read().splitlines()
+		mock_expectmore.return_value.ask.return_value = Path(
+			'/export/test-files/switch/m7800_install_image_console.txt'
+		).read_text().splitlines()
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		firmware_name = 'my_amazing_firmware'
 		test_switch.install_firmware(image = firmware_name)
@@ -310,11 +317,11 @@ class TestSwitchMellanoxM7800:
 			test_switch.image_fetch(url = firmware_url)
 		assert(not any((output in str(exception) for output in irrelevant_output)))
 
-	def test_show_images(self, mock_expectmore):
+	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
+	def test_show_images(self, mock_expectmore, input_file):
 		"""Expect this to try to list the current and available firmware images."""
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
-		with open('/export/test-files/switch/m7800_show_images_console.txt') as test_file:
-			test_console_response = test_file.read().splitlines()
+		test_console_response = Path(input_file).read_text().splitlines()
 
 		expected_data = (
 			{
@@ -411,10 +418,10 @@ class TestSwitchMellanoxM7800:
 				end_marker = test_driver.end,
 			)
 
-	def test__get_installed_images(self, mock_expectmore):
+	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
+	def test__get_installed_images(self, mock_expectmore, input_file):
 		"""Test that images are found when present."""
-		with open('/export/test-files/switch/m7800_show_images_console.txt') as test_file:
-			test_console_response = test_file.read().splitlines()
+		test_console_response = Path(input_file).read_text().splitlines()
 
 		expected_data = {
 			1: 'X86_64 3.6.4006 2017-07-03 16:17:39 x86_64',
@@ -450,10 +457,10 @@ class TestSwitchMellanoxM7800:
 		with pytest.raises(SwitchException):
 			test_switch._get_installed_images(command_response = test_response)
 
-	def test__get_boot_partitions(self, mock_expectmore):
+	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
+	def test__get_boot_partitions(self, mock_expectmore, input_file):
 		"""Test that partitions are found when present."""
-		with open('/export/test-files/switch/m7800_show_images_console.txt') as test_file:
-			test_console_response = test_file.read().splitlines()
+		test_console_response = Path(input_file).read_text().splitlines()
 
 		expected_data = (2, 1)
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
@@ -488,10 +495,10 @@ class TestSwitchMellanoxM7800:
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		assert(test_switch._get_boot_partitions(command_response = test_console_response) == expected_data)
 
-	def test__get_available_images(self, mock_expectmore):
+	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
+	def test__get_available_images(self, mock_expectmore, input_file):
 		"""Test that the available images are found when present."""
-		with open('/export/test-files/switch/m7800_show_images_console.txt') as test_file:
-			test_console_response = test_file.read().splitlines()
+		test_console_response = Path(input_file).read_text().splitlines()
 
 		expected_data = [
 			('image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64'),
@@ -505,7 +512,11 @@ class TestSwitchMellanoxM7800:
 
 	def test__get_available_images_no_images(self, mock_expectmore):
 		"""Test that an empty list is returned when no images are available."""
-		test_console_response = ['No image files are available to be installed.', 'Serve image files via HTTP/HTTPS: no']
+		test_console_response = [
+			'Next boot partition: 2',
+			'No image files are available to be installed.',
+			'Serve image files via HTTP/HTTPS: no'
+		]
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		assert(test_switch._get_available_images(command_response = test_console_response) == [])
 
@@ -513,17 +524,51 @@ class TestSwitchMellanoxM7800:
 		'test_response',
 		[
 			# multiple available image block start markers
-			['Images available to be installed:', 'Images available to be installed:', 'image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64', 'Serve image files via HTTP/HTTPS: no',],
+			[
+				'Next boot partition: 2',
+				'Next boot partition: 2',
+				'Images available to be installed:',
+				'image-X86_64-3.6.2002.img',
+				'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',
+				'Serve image files via HTTP/HTTPS: no',
+			],
 			# no installed image block start markers
-			['image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64', 'Serve image files via HTTP/HTTPS: no',],
+			[
+				'image-X86_64-3.6.2002.img',
+				'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',
+				'Serve image files via HTTP/HTTPS: no',
+			],
 			# multiple installed image block end markers
-			['Images available to be installed:', 'image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64', 'Serve image files via HTTP/HTTPS: no', 'Serve image files via HTTP/HTTPS: no',],
+			[
+				'Next boot partition: 2',
+				'Images available to be installed:',
+				'image-X86_64-3.6.2002.img',
+				'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',
+				'Serve image files via HTTP/HTTPS: no',
+				'Serve image files via HTTP/HTTPS: no',
+			],
 			# no installed image block end markers
-			['Images available to be installed:', 'image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',],
+			[
+				'Next boot partition: 2',
+				'Images available to be installed:',
+				'image-X86_64-3.6.2002.img',
+				'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',
+			],
 			# reversed image block start and end markers
-			['Serve image files via HTTP/HTTPS: no', 'image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64', 'Images available to be installed:',],
+			[
+				'Serve image files via HTTP/HTTPS: no',
+				'Images available to be installed:',
+				'image-X86_64-3.6.2002.img',
+				'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64',
+				'Next boot partition: 2',
+			],
 			# no image version listed
-			['Images available to be installed:', 'image-X86_64-3.6.2002.img', 'Serve image files via HTTP/HTTPS: no',],
+			[
+				'Next boot partition: 2',
+				'Images available to be installed:',
+				'image-X86_64-3.6.2002.img',
+				'Serve image files via HTTP/HTTPS: no',
+			],
 		]
 	)
 	def test__get_available_images_errors(self, mock_expectmore, test_response):

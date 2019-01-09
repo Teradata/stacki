@@ -1,3 +1,4 @@
+M7800-1-350-350-9 [standalone: master] (config) # show images
 Installed images:
 
   Partition 1:
@@ -37,3 +38,4 @@ Admin require signed images: yes
 
 Settings for next boot only:
    Fallback reboot on configuration failure: yes (default)
+M7800-1-350-350-9 [standalone: master] (config) #

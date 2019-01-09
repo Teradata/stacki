@@ -506,7 +506,7 @@ class SwitchMellanoxM7800(Switch):
 				key = int(partition_header_match.group('partition_number'))
 				# the image versions are supposed to be the line after the partition headers.
 				try:
-					value = relevant_responses[index + 1].strip()
+					value = re.sub(r'\s*version\s*:', '', relevant_responses[index + 1], re.IGNORECASE).strip()
 				except IndexError:
 					raise SwitchException(f'No installed image listed for partition {key} when one was expected.')
 
@@ -575,19 +575,36 @@ class SwitchMellanoxM7800(Switch):
 		available_images = []
 		relevant_responses = self._get_relevant_responses(
 			command_response = remove_blank_lines(lines = command_response),
-			start_marker = r'image.*available to be installed',
+			start_marker = r'next boot partition:',
 			end_marker = 'Serve image files via'
 		)
+		# Firmware version 3.6.8010 changed the format to be:
+		#	1:
+		#		Image  : image_filename_1
+		#		Version: image_version_1
+		#	2:
+		#		Image  : image_filename_2
+		#		Version: image_version_2
+		# and to always contain the 'Images available to be installed:' header even when
+		# no images are available. So we drop the images header and the message that
+		# images aren't available and drop the lines enumerating the image numbers if present.
+		relevant_responses = [
+			response for response in relevant_responses
+			if not re.search(r'image.*available to be installed', response, re.IGNORECASE)
+			and not re.search(r'\s*\d+:\s*$', response, re.IGNORECASE)
+		]
 		for index, message in enumerate(relevant_responses):
 			# skip each odd index since it will be the "value" of the pair we are extracting
 			if index % 2:
 				continue
 			# add an available image to the list
 			try:
+				filename = re.sub(r'\s*Image\s*:', '', message, flags = re.IGNORECASE).strip()
+				version = re.sub(r'\s*Version\s*:', '', relevant_responses[index + 1], flags = re.IGNORECASE).strip()
 				available_images.append(
 					AvailableImage(
-						filename = message.strip(),
-						version = relevant_responses[index + 1].strip()
+						filename = filename,
+						version = version
 					)
 				)
 			except IndexError:
