@@ -8,7 +8,7 @@ class TestRemoveApplianceRoute:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "appliance" argument is required
-			{appliance} {address=string}
+			{appliance ...} {address=string}
 		''')
 
 	def test_invalid(self, host):
@@ -16,7 +16,7 @@ class TestRemoveApplianceRoute:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid appliance
-			{appliance} {address=string}
+			{appliance ...} {address=string}
 		''')
 
 	def test_no_address(self, host, add_appliance):
@@ -24,7 +24,7 @@ class TestRemoveApplianceRoute:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "address" parameter is required
-			{appliance} {address=string}
+			{appliance ...} {address=string}
 		''')
 
 	def test_one_arg(self, host, add_appliance):
@@ -43,7 +43,7 @@ class TestRemoveApplianceRoute:
 				"appliance": "test",
 				"network": "192.168.0.2",
 				"netmask": "255.255.255.255",
-				"gateway": "",
+				"gateway": None,
 				"subnet": "private",
 				"interface": None
 			},
@@ -51,7 +51,7 @@ class TestRemoveApplianceRoute:
 				"appliance": "test",
 				"network": "192.168.0.3",
 				"netmask": "255.255.255.255",
-				"gateway": "",
+				"gateway": None,
 				"subnet": "private",
 				"interface": None
 			}
@@ -69,7 +69,7 @@ class TestRemoveApplianceRoute:
 				"appliance": "test",
 				"network": "192.168.0.3",
 				"netmask": "255.255.255.255",
-				"gateway": "",
+				"gateway": None,
 				"subnet": "private",
 				"interface": None
 			}
@@ -98,24 +98,8 @@ class TestRemoveApplianceRoute:
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
 			{
-				'appliance': 'test',
-				'gateway': '',
-				'interface': None,
-				'netmask': '255.255.255.255',
-				'network': '192.168.0.2',
-				'subnet': 'private'
-			},
-			{
-				'appliance': 'test',
-				'gateway': '',
-				'interface': None,
-				'netmask': '255.255.255.255',
-				'network': '192.168.0.3',
-				'subnet': 'private'
-			},
-			{
 				'appliance': 'foo',
-				'gateway': '',
+				'gateway': None,
 				'interface': None,
 				'netmask': '255.255.255.255',
 				'network': '192.168.0.4',
@@ -123,10 +107,26 @@ class TestRemoveApplianceRoute:
 			},
 			{
 				'appliance': 'foo',
-				'gateway': '',
+				'gateway': None,
 				'interface': None,
 				'netmask': '255.255.255.255',
 				'network': '192.168.0.5',
+				'subnet': 'private'
+			},
+			{
+				'appliance': 'test',
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '192.168.0.2',
+				'subnet': 'private'
+			},
+			{
+				'appliance': 'test',
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '192.168.0.3',
 				'subnet': 'private'
 			}
 		]
@@ -144,19 +144,19 @@ class TestRemoveApplianceRoute:
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
 			{
-				'appliance': 'test',
-				'gateway': '',
-				'interface': None,
-				'netmask': '255.255.255.255',
-				'network': '192.168.0.2',
-				'subnet': 'private'
-			},
-			{
 				'appliance': 'foo',
-				'gateway': '',
+				'gateway': None,
 				'interface': None,
 				'netmask': '255.255.255.255',
 				'network': '192.168.0.5',
+				'subnet': 'private'
+			},
+			{
+				'appliance': 'test',
+				'gateway': None,
+				'interface': None,
+				'netmask': '255.255.255.255',
+				'network': '192.168.0.2',
 				'subnet': 'private'
 			}
 		]

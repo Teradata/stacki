@@ -1,0 +1,10 @@
+<graph>
+
+	<description>
+	Test 'stack verify xml' cart
+	</desscription>
+
+	<order head="backend" tail="cart-verifyxmltest-backend"/>
+	<edge  from="backend"   to="cart-verifyxmltest-backend"/>
+
+</graph>

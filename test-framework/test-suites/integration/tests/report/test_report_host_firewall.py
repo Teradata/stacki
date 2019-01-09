@@ -42,7 +42,7 @@ class TestReportHostFirewall:
 		# Add rules to drop all traffic to port 21
 		result = host.run(
 			'stack add host firewall backend-0-0 chain=INPUT '
-			'action=DROP network=all service=23 protocol=all'
+			'action=DROP service=23 protocol=all'
 		)
 		assert result.rc == 0
 

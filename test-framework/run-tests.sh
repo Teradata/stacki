@@ -8,7 +8,6 @@ ALL=1
 UNIT=0
 INTEGRATION=0
 SYSTEM=0
-SYSTEM_QUICK=0
 ISO=""
 TEMP_EXTRA_ISOS=()
 EXTRA_ISOS=()
@@ -32,7 +31,7 @@ do
             shift 1
             ;;
         --system-quick)
-            SYSTEM_QUICK=1
+            SYSTEM=1
             ALL=0
             shift 1
             ;;
@@ -49,7 +48,7 @@ do
             shift 1
             ;;
     esac
-done    
+done
 
 # Create the .cache directory and get a full path to it
 CACHE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)/.cache"
@@ -61,10 +60,10 @@ fi
 # If extra ISOs were passed in, have to do some post-processing
 if [[ ${#TEMP_EXTRA_ISOS[@]} -gt 0 ]]
 then
-    # Check that the extra isos exist, copy them to .cache, and 
+    # Check that the extra isos exist, copy them to .cache, and
     # get the full paths to them
     for EXTRA_ISO in "${TEMP_EXTRA_ISOS[@]}"
-    do    
+    do
         # Make sure that the EXTRA_ISO actually exists
         if [[ ! -f "$EXTRA_ISO" ]]
         then
@@ -80,23 +79,6 @@ then
         # Add the full path to the EXTRA_ISOS array
         EXTRA_ISOS+=("$CACHE_DIR/$(basename "$EXTRA_ISO")")
     done
-
-    # we need to turn off unit and integration test suites, and turn on
-    # either system-quick or system
-    if [[ $SYSTEM -eq 0 && $SYSTEM_QUICK -eq 0 ]]
-    then
-        # If neither system flag was passed in, default to system
-        ALL=0
-        UNIT=0
-        INTEGRATION=0
-        SYSTEM=1
-        SYSTEM_QUICK=0
-    else
-        # Just turn off the other test suites if we have a system test suite 
-        ALL=0
-        UNIT=0
-        INTEGRATION=0
-    fi
 fi
 
 # Make sure we are passed an ISO to test
@@ -108,7 +90,6 @@ then
     echo "  --unit"
     echo "  --integration"
     echo "  --system"
-    echo "  --system-quick"
     echo
     echo "Extra ISOs can be passed to the system test suite:"
     echo "  --extra-isos=ISO1,ISO2"
@@ -192,7 +173,7 @@ then
         ./test-suites/unit/run-tests.sh
     fi
     RETURN_CODE=$?
-    
+
     ./test-suites/unit/tear-down.sh
 
     if [[ $RETURN_CODE -ne 0 ]]
@@ -218,7 +199,7 @@ then
         ./test-suites/integration/run-tests.sh
     fi
     RETURN_CODE=$?
-    
+
     ./test-suites/integration/tear-down.sh
 
     if [[ $RETURN_CODE -ne 0 ]]
@@ -235,48 +216,12 @@ if [[ $ALL -eq 1 || $SYSTEM -eq 1 ]]
 then
     echo
     echo -e "\033[34mRunning system test suite ...\033[0m"
+    ./test-suites/system/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
-    for TEST_CASE in $(find "test-suites/system" -type d -depth 1 -print | sort)
-    do
-        # Make sure the test case has guts
-        if [[ -f "$TEST_CASE/set-up.sh" ]]
-        then
-            echo
-            echo -e "\033[34mRunning $TEST_CASE ...\033[0m"
-
-            ./$TEST_CASE/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
-            
-            ./$TEST_CASE/run-tests.sh
-            RETURN_CODE=$?
-
-            ./$TEST_CASE/tear-down.sh
-
-            if [[ $RETURN_CODE -ne 0 ]]
-            then
-                echo
-                echo -e "\033[31mError: one or more system tests failed\033[0m"
-                echo
-                exit 1
-            fi
-        fi
-    done
-fi
-
-# Run the quick system test suite, if requested
-if [[ $ALL -eq 0 && $SYSTEM_QUICK -eq 1 ]]
-then
-    echo
-    echo -e "\033[34mRunning quick system test suite ...\033[0m"
-
-    echo
-    echo -e "\033[34mRunning 01-barnacle-install ...\033[0m"
-
-    ./test-suites/system/01-barnacle-install/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
-    
-    ./test-suites/system/01-barnacle-install/run-tests.sh
+    ./test-suites/system/run-tests.sh
     RETURN_CODE=$?
 
-    ./test-suites/system/01-barnacle-install/tear-down.sh
+    ./test-suites/system/tear-down.sh
 
     if [[ $RETURN_CODE -ne 0 ]]
     then

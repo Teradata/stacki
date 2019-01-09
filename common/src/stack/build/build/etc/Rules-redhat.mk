@@ -77,12 +77,9 @@ endif
 # Build Package 
 # --------------------------------------------------------------------- #
 
-ifeq ($(REDHAT.ROOT),)
-REDHAT.ROOT	= $(CURDIR)/$(ROLLROOT)/build-$(ROLL)-$(STACK)
-endif
-ifeq ($(REDHAT.VAR),)
-REDHAT.VAR	= /var
-endif
+BUILD.PREFIX ?= build
+REDHAT.ROOT  ?= $(CURDIR)/$(ROLLROOT)/$(BUILD.PREFIX)-$(ROLL)-$(STACK)
+REDHAT.VAR   ?= /var
 
 REDHAT.SOURCES	= $(REDHAT.ROOT)/SOURCES
 REDHAT.SPECS	= $(REDHAT.ROOT)/SPECS

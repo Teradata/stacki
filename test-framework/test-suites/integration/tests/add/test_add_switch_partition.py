@@ -31,7 +31,7 @@ class TestAddSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.parametrize("partition_name,options", SWITCH_PARTITION_NEGATIVE_TEST_DATA)
 	def test_add_negative_behavior(self, host, add_ib_switch, partition_name, options):
@@ -54,7 +54,7 @@ class TestAddSwitchPartition:
 		assert result.rc == 0
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc != 0
@@ -73,7 +73,7 @@ class TestAddSwitchPartition:
 			assert result.rc != 0
 			result = host.run('stack list switch partition switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_cannot_add_to_non_ib(self, host, add_switch):
 		result = host.run(f'stack add switch partition switch-0-0 name=Default')
@@ -99,12 +99,12 @@ class TestAddSwitchPartition:
 
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition switch-0-1 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip().replace('switch-0-1', 'switch-0-0') == expected_output.strip()
+		assert json.loads(result.stdout.strip().replace('switch-0-1', 'switch-0-0')) == json.loads(expected_output.strip())
 
 		result = host.run('stack list switch partition switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0

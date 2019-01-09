@@ -19,5 +19,5 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.firewall', self._argv + [ 'scope=environment' ]))
+		self.addText(self.command('list.firewall', self._argv + ['scope=environment']))
 		return self.rc

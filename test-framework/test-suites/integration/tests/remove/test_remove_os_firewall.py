@@ -30,7 +30,7 @@ class TestRemoveOSFirewall:
 	def test_invalid_rulename(self, host):
 		result = host.run('stack remove os firewall sles rulename=test')
 		assert result.rc == 255
-		assert result.stderr == 'error - firewall rule test does not exist for OS sles\n'
+		assert result.stderr == 'error - rule named "test" does not exist\n'
 
 	def test_one_arg(self, host):
 		# Add a firewall rule
@@ -52,7 +52,7 @@ class TestRemoveOSFirewall:
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
 			'network': 'private',
-			'output-network': '',
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'O',
@@ -96,7 +96,7 @@ class TestRemoveOSFirewall:
 				'chain': 'INPUT',
 				'action': 'ACCEPT',
 				'network': 'private',
-				'output-network': '',
+				'output-network': None,
 				'flags': None,
 				'comment': None,
 				'source': 'O',
@@ -111,7 +111,7 @@ class TestRemoveOSFirewall:
 				'chain': 'INPUT',
 				'action': 'ACCEPT',
 				'network': 'private',
-				'output-network': '',
+				'output-network': None,
 				'flags': None,
 				'comment': None,
 				'source': 'O',

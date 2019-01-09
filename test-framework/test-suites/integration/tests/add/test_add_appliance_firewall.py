@@ -2,6 +2,7 @@ import json
 import re
 from textwrap import dedent
 
+
 class TestAddApplianceFirewall:
 	def test_no_appliances(self, host):
 		result = host.run('stack add appliance firewall')
@@ -21,60 +22,100 @@ class TestAddApplianceFirewall:
 
 	def test_no_service(self, host):
 		result = host.run(
-			'stack add appliance firewall frontend chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
+			'stack add appliance firewall frontend chain=INPUT action=ACCEPT protocol=TCP'
 		)
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "service" parameter is required
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_chain(self, host):
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 '
-			'action=ACCEPT protocol=TCP network=private'
+			'stack add appliance firewall frontend service=1234 action=ACCEPT protocol=TCP'
 		)
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "chain" parameter is required
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_action(self, host):
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 '
-			'chain=INPUT protocol=TCP network=private'
+			'stack add appliance firewall frontend service=1234 chain=INPUT protocol=TCP'
 		)
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "action" parameter is required
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
+
 	def test_no_protocol(self, host):
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 '
-			'chain=INPUT action=ACCEPT network=private'
+			'stack add appliance firewall frontend service=1234 chain=INPUT action=ACCEPT'
 		)
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "protocol" parameter is required
 			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
 		''')
-	
-	def test_no_networks(self, host):
-		result = host.run(
-			'stack add appliance firewall frontend service=1234 '
-			'chain=INPUT action=ACCEPT protocol=TCP'
-		)
-		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "network" or "output-network" parameter is required
-			{appliance ...} {action=string} {chain=string} {protocol=string} {service=string} [comment=string] [flags=string] [network=string] [output-network=string] [rulename=string] [table=string]
-		''')
-	
+
 	def test_one_appliance(self, host):
+		# Add the rule
+		result = host.run(
+			'stack add appliance firewall frontend service=1234 chain=INPUT '
+			'action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		# Make sure it is in the DB now
+		result = host.run('stack list appliance firewall frontend output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'appliance': 'frontend',
+			'name': 'test',
+			'table': 'filter',
+			'service': '1234',
+			'protocol': 'TCP',
+			'chain': 'INPUT',
+			'action': 'ACCEPT',
+			'network': None,
+			'output-network': None,
+			'flags': None,
+			'comment': None,
+			'source': 'A',
+			'type': 'var'
+		}]
+
+	def test_multiple_appliances(self, host, add_host):
+		# Add the rules
+		result = host.run(
+			'stack add appliance firewall frontend backend service=1234 '
+			'chain=INPUT action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		# Make sure they are in the DB now
+		for appliancename in ('frontend', 'backend'):
+			result = host.run(f'stack list appliance firewall {appliancename} output-format=json')
+			assert result.rc == 0
+			assert json.loads(result.stdout) == [{
+				'appliance': appliancename,
+				'name': 'test',
+				'table': 'filter',
+				'service': '1234',
+				'protocol': 'TCP',
+				'chain': 'INPUT',
+				'action': 'ACCEPT',
+				'network': None,
+				'output-network': None,
+				'flags': None,
+				'comment': None,
+				'source': 'A',
+				'type': 'var'
+			}]
+
+	def test_network_existing(self, host):
 		# Add the rule
 		result = host.run(
 			'stack add appliance firewall frontend service=1234 chain=INPUT '
@@ -94,62 +135,7 @@ class TestAddApplianceFirewall:
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
 			'network': 'private',
-			'output-network': '',
-			'flags': None,
-			'comment': None,
-			'source': 'A',
-			'type': 'var'
-		}]
-	
-	def test_multiple_appliances(self, host, add_host):
-		# Add the rules
-		result = host.run(
-			'stack add appliance firewall frontend backend service=1234 '
-			'chain=INPUT action=ACCEPT protocol=TCP network=private rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure they are in the DB now
-		for appliancename in ('frontend', 'backend'):
-			result = host.run(f'stack list appliance firewall {appliancename} output-format=json')
-			assert result.rc == 0
-			assert json.loads(result.stdout) == [{
-				'appliance': appliancename,
-				'name': 'test',
-				'table': 'filter',
-				'service': '1234',
-				'protocol': 'TCP',
-				'chain': 'INPUT',
-				'action': 'ACCEPT',
-				'network': 'private',
-				'output-network': '',
-				'flags': None,
-				'comment': None,
-				'source': 'A',
-				'type': 'var'
-			}]
-
-	def test_network_all(self, host):
-		# Add the rule
-		result = host.run(
-			'stack add appliance firewall frontend service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=all rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure it is in the DB now
-		result = host.run('stack list appliance firewall frontend output-format=json')
-		assert result.rc == 0
-		assert json.loads(result.stdout) == [{
-			'appliance': 'frontend',
-			'name': 'test',
-			'table': 'filter',
-			'service': '1234',
-			'protocol': 'TCP',
-			'chain': 'INPUT',
-			'action': 'ACCEPT',
-			'network': 'all',
-			'output-network': '',
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'A',
@@ -163,35 +149,8 @@ class TestAddApplianceFirewall:
 			'action=ACCEPT protocol=TCP network=test rulename=test'
 		)
 		assert result.rc == 255
-		assert result.stderr == 'error - network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
+		assert result.stderr == 'error - "test" is not a valid network\n'
 
-	def test_output_network_all(self, host):
-		# Add the rule
-		result = host.run(
-			'stack add appliance firewall frontend service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP output-network=all rulename=test'
-		)
-		assert result.rc == 0
-
-		# Make sure it is in the DB now
-		result = host.run('stack list appliance firewall frontend output-format=json')
-		assert result.rc == 0
-		assert json.loads(result.stdout) == [{
-			'appliance': 'frontend',
-			'name': 'test',
-			'table': 'filter',
-			'service': '1234',
-			'protocol': 'TCP',
-			'chain': 'INPUT',
-			'action': 'ACCEPT',
-			'network': '',
-			'output-network': 'all',
-			'flags': None,
-			'comment': None,
-			'source': 'A',
-			'type': 'var'
-		}]
-	
 	def test_output_network_existing(self, host):
 		# Add the rule
 		result = host.run(
@@ -211,7 +170,7 @@ class TestAddApplianceFirewall:
 			'protocol': 'TCP',
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
-			'network': '',
+			'network': None,
 			'output-network': 'private',
 			'flags': None,
 			'comment': None,
@@ -226,7 +185,7 @@ class TestAddApplianceFirewall:
 			'action=ACCEPT protocol=TCP output-network=test rulename=test'
 		)
 		assert result.rc == 255
-		assert result.stderr == 'error - output-network "test" not in the database. Run "stack list network" to get a list of valid networks.\n'
+		assert result.stderr == 'error - "test" is not a valid network\n'
 
 	def test_all_parameters(self, host):
 		# Add the rule
@@ -260,8 +219,7 @@ class TestAddApplianceFirewall:
 	def test_no_rulename(self, host):
 		# Add the rule
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
+			'stack add appliance firewall frontend service=1234 chain=INPUT action=ACCEPT protocol=TCP'
 		)
 		assert result.rc == 0
 
@@ -284,8 +242,8 @@ class TestAddApplianceFirewall:
 			'protocol': 'TCP',
 			'chain': 'INPUT',
 			'action': 'ACCEPT',
-			'network': 'private',
-			'output-network': '',
+			'network': None,
+			'output-network': None,
 			'flags': None,
 			'comment': None,
 			'source': 'A',
@@ -295,15 +253,13 @@ class TestAddApplianceFirewall:
 	def test_duplicate(self, host):
 		# Add the rule
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
+			'stack add appliance firewall frontend service=1234 chain=INPUT action=ACCEPT protocol=TCP'
 		)
 		assert result.rc == 0
 
 		# Now add it again and make sure it fails
 		result = host.run(
-			'stack add appliance firewall frontend service=1234 chain=INPUT '
-			'action=ACCEPT protocol=TCP network=private'
+			'stack add appliance firewall frontend service=1234 chain=INPUT action=ACCEPT protocol=TCP'
 		)
 		assert result.rc == 255
 		assert result.stderr == 'error - firewall rule already exists\n'

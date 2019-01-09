@@ -113,4 +113,4 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'raidlevel={controller["raidlevel"]}')
 				if controller['slot']:
 					parameters.append(f'slot={controller["slot"]}')
-				self.owner.try_command('add.storage.controller', parameters, f'adding os controller {controller}', 'exists')
+				self.owner.try_command('add.os.storage.controller', parameters, f'adding os controller {controller}', 'exists')

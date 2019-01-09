@@ -19,7 +19,7 @@ class TestDumpOs:
 		assert results.rc == 0
 		results = host.run('stack add storage partition redhat device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0
-		results = host.run('stack add storage controller redhat adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
+		results = host.run('stack add os storage controller redhat adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5 options=test')
 		assert results.rc == 0
 
 		# dump our os information
@@ -71,7 +71,7 @@ class TestDumpOs:
 						}
 				for controller in os['controller']:
 					if controller['options'] == 'test':
-						assert conttroller == {
+						assert controller == {
 								'options': 'test',
 								'enclosure': 3,
 								'adapter': 1,

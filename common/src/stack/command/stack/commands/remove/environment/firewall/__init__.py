@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.environment.command):
@@ -26,26 +26,5 @@ class Command(stack.commands.remove.environment.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
 
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
-		for environment in self.getEnvironmentNames(args):
-			# Make sure our rule exists
-			if self.db.count("""
-				(*) from environment_firewall
-				where name=%s and environment=(
-					select id from environments where name=%s
-				)""", (rulename, environment)
-			) == 0:
-				raise CommandError(
-					self,
-					f'firewall rule {rulename} does not '
-					f'exist for environment {environment}'
-				)
-
-			# It exists, so delete it
-			self.db.execute("""
-				delete from environment_firewall
-				where name=%s and environment=(
-					select id from environments where name=%s
-				)
-			""", (rulename, environment))
+		self.command('remove.firewall', self._argv + ['scope=environment'])
+		return self.rc

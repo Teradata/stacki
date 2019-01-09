@@ -36,7 +36,7 @@ import stack.graph
 import stack
 from stack.cond import EvalCondExpr
 from stack.exception import (
-	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique
+	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique, ParamError
 )
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
@@ -81,8 +81,6 @@ def Debug(message, level=syslog.LOG_DEBUG):
 			p = c
 		Log(message, level)
 		sys.__stderr__.write('%s\n' % m)
-
-Debug('__init__:commands')
 
 
 class OSArgumentProcessor:
@@ -501,11 +499,11 @@ class HostArgumentProcessor:
 				retval = a['rank']
 			return retval
 
-		rank = sorted((h for h in hosts if h['rank'].isnumeric()), key = ranksort)
-		rank += sorted((h for h in hosts if not h['rank'].isnumeric()), key = ranksort)
+		rank = sorted((h for h in hosts if h['rank'].isnumeric()), key=ranksort)
+		rank += sorted((h for h in hosts if not h['rank'].isnumeric()), key=ranksort)
 
-		rack = sorted((h for h in rank if h['rack'].isnumeric()), key = racksort)
-		rack += sorted((h for h in rank if not h['rack'].isnumeric()), key = racksort)
+		rack = sorted((h for h in rank if h['rack'].isnumeric()), key=racksort)
+		rack += sorted((h for h in rank if not h['rack'].isnumeric()), key=racksort)
 
 		hosts = []
 		for r in rack:
@@ -741,6 +739,83 @@ class HostArgumentProcessor:
 			raise ArgUnique(self, 'host')
 
 		return hosts[0]
+
+
+class ScopeArgumentProcessor(
+	ApplianceArgumentProcessor,
+	OSArgumentProcessor,
+	EnvironmentArgumentProcessor,
+	HostArgumentProcessor
+):
+	def getScopeMappings(self, args=None, scope=None):
+		# We will return a list of these
+		ScopeMapping = namedtuple(
+			'ScopeMapping',
+			['scope', 'appliance_id', 'os_id', 'environment_id', 'node_id']
+		)
+		scope_mappings = []
+
+		# Validate the different scopes and get the keys to the targets
+		if scope == 'global':
+			# Global scope has no friends
+			scope_mappings.append(
+				ScopeMapping(scope, None, None, None, None)
+			)
+
+		elif scope == 'appliance':
+			# Piggy-back to resolve the appliance names
+			names = self.getApplianceNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for appliance_id in flatten(self.db.select(
+				'id from appliances where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, appliance_id, None, None, None)
+				)
+
+		elif scope == 'os':
+			# Piggy-back to resolve the os names
+			names = self.getOSNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for os_id in flatten(self.db.select(
+				'id from oses where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, os_id, None, None)
+				)
+
+		elif scope == 'environment':
+			# Piggy-back to resolve the environment names
+			names = self.getEnvironmentNames(args)
+
+			# Now we have to convert the names to the primary keys
+			for environment_id in flatten(self.db.select(
+				'id from environments where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, None, environment_id, None)
+				)
+
+		elif scope == 'host':
+			# Piggy-back to resolve the host names
+			names = self.getHostnames(args)
+			if not names:
+				raise ArgRequired(self, 'host')
+
+			# Now we have to convert the names to the primary keys
+			for node_id in flatten(self.db.select(
+				'id from nodes where name in %s', (names,)
+			)):
+				scope_mappings.append(
+					ScopeMapping(scope, None, None, None, node_id)
+				)
+
+		else:
+			raise ParamError(self, 'scope', 'is not valid')
+
+		return scope_mappings
 
 
 class DocStringHandler(handler.ContentHandler,
@@ -1000,16 +1075,18 @@ class DatabaseConnection:
 	this object (self.db).
 	"""
 
-	cache   = {}
+	cache = {}
 
 	def __init__(self, db, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
 		if db:
 			self.database = db
+			self.name     = db.db.decode() # name of the database
 			self.link     = db.cursor()
 		else:
 			self.database = None
+			self.name     = None
 			self.link     = None
 
 		# Setup the global cache, new DatabaseConnections will all use
@@ -1017,6 +1094,14 @@ class DatabaseConnection:
 		# to override the optional CACHING arg.
 		#
 		# Note the cache is shared but the decision to cache is not.
+		#
+		# Each database has a unique cache, this way table names don't
+		# need to be unique. Currently we use only one connection, but
+		# that may change (thought about it for the shadow database)
+		# hence the code.
+
+		if self.name not in DatabaseConnection.cache:
+			DatabaseConnection.cache[self.name] = {}
 
 		if os.environ.get('STACKCACHE'):
 			self.caching = str2bool(os.environ.get('STACKCACHE'))
@@ -1031,8 +1116,8 @@ class DatabaseConnection:
 		self.clearCache()
 
 	def clearCache(self):
-		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache))
-		DatabaseConnection.cache = {}
+		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache[self.name]))
+		DatabaseConnection.cache[self.name] = {}
 
 	def count(self, command, args=None ):
 		"""
@@ -1067,21 +1152,21 @@ class DatabaseConnection:
 			m.update(' '.join(str(arg) for arg in args).encode('utf-8'))
 		k = m.hexdigest()
 
-		if k in DatabaseConnection.cache:
+		if k in DatabaseConnection.cache[self.name]:
 			Debug('select %s' % k)
-			rows = DatabaseConnection.cache[k]
+			rows = DatabaseConnection.cache[self.name][k]
 		else:
 			try:
 				self.execute('select %s' % command, args)
 				rows = self.fetchall()
-			except (OperationalError, ProgrammingError):
+			except OperationalError:
+				Debug('SQL ERROR: %s' % self.link.mogrify('select %s' % command, args))
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
 				rows = []
 
 			if self.caching:
-				DatabaseConnection.cache[k] = rows
-
+				DatabaseConnection.cache[self.name][k] = rows
 		return rows
 
 	def execute(self, command, args=None):
@@ -1091,10 +1176,14 @@ class DatabaseConnection:
 			self.clearCache()
 
 		if self.link:
-			t0 = time.time()
-			result = self.link.execute(command, args)
-			t1 = time.time()
-			Debug('SQL EX: %.3f %s' % ((t1 - t0), command))
+			try:
+				t0 = time.time()
+				result = self.link.execute(command, args)
+				t1 = time.time()
+			except ProgrammingError:
+				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
+				raise ProgrammingError
+			Debug(f'SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
 			return result
 
 		return None
@@ -1153,74 +1242,6 @@ class DatabaseConnection:
 				return environment
 		return None
 
-	def getHostRoutes(self, host, showsource=0):
-		_frontend = self.getHostname('localhost')
-		host = self.getHostname(host)
-		routes = {}
-
-		Scope = namedtuple('Scope', ['sql', 'args', 'label'])
-
-		_global = Scope(
-			sql='network, netmask, gateway, subnet, interface FROM global_routes',
-			args=(),
-			label='G'
-		)
-
-		_os = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM os_routes r, nodes n WHERE r.os=%s AND n.name=%s
-			""",
-			args=(self.getHostOS(host), host),
-			label='O'
-		)
-
-		_appliance = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM appliance_routes r, nodes n, appliances app
-				WHERE n.appliance=app.id AND r.appliance=app.id AND n.name=%s
-			""",
-			args=host,
-			label='A'
-		)
-
-		_environment = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM environment_routes r, nodes n, environments env
-				WHERE n.environment=env.id AND r.environment=env.id AND n.name=%s
-			""",
-			args=host,
-			label='E'
-		)
-
-		_host = Scope(
-			sql="""
-				r.network, r.netmask, r.gateway, r.subnet, r.interface
-				FROM node_routes r, nodes n WHERE n.name=%s AND n.id=r.node
-			""",
-			args=host,
-			label='H'
-		)
-
-		for scope in [_global, _os, _appliance, _environment, _host]:
-			for (network, netmask, gateway, subnet, interface) in self.select(scope.sql, scope.args):
-				if subnet:
-					for dev, in self.select("""
-						net.device from subnets s, networks net, nodes n
-						where s.id=%s and s.id=net.subnet and net.node=n.id
-						and n.name=%s and net.device not like 'vlan%%'
-					""", (subnet, host)):
-						interface = dev
-
-				if showsource:
-					routes[network] = (netmask, gateway, interface, subnet, scope.label)
-				else:
-					routes[network] = (netmask, gateway, interface, subnet)
-
-		return routes
-
 	def getNodeName(self, hostname, subnet=None):
 		if not subnet:
 			rows = self.select('name from nodes where name like %s', (hostname,))
@@ -1252,7 +1273,7 @@ class DatabaseConnection:
 		###
 		# End possible dead code chunk
 		###
-		
+
 		return result
 
 	def getHostname(self, hostname=None, subnet=None):
@@ -1626,7 +1647,13 @@ class Command:
 		# class member self.rc so the caller can check
 		# the return code.  The actual text is what we return.
 
-		self.rc = o.runWrapper(name, args, self.level + 1)
+		try:
+			self.rc = o.runWrapper(name, args, self.level + 1)
+		except CommandError as e:
+			# We need to catch any CommandError, point it to the calling cmd,
+			# and then re-raise it so it will have the correct usage message
+			e.cmd = self
+			raise e
 
 		return o.getText()
 
@@ -1932,7 +1959,7 @@ class Command:
 			elif format == 'binary':
 				self.addText(marshal.dumps(list))
 			else:
-				self.addText(json.dumps(list))
+				self.addText(json.dumps(list, indent=8))
 			return
 
 		if format == 'null':

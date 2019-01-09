@@ -19,7 +19,7 @@
       dest: /root/
       mode: 0744
     register: get_url_result
-    until: get_url_result | succeeded
+    until: get_url_result is succeeded
     retries: 6
     delay: 10
 

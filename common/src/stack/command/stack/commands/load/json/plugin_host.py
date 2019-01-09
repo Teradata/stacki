@@ -158,7 +158,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 					parameters.append(f'raidlevel={controller["raidlevel"]}')
 				if controller['slot']:
 					parameters.append(f'slot={controller["slot"]}')
-				self.owner.try_command('add.storage.controller', parameters, f'adding host controller {controller}', 'exists')
+				self.owner.try_command('add.host.storage.controller', parameters, f'adding host controller {controller}', 'exists')
 
 			# set the osaction of the host
 			if host["osaction"]:

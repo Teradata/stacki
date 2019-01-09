@@ -19,7 +19,7 @@ class TestDumpGlobal:
 		assert results.rc == 0
 		results = host.run('stack add storage partition device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0
-		results = host.run('stack add storage controller adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5 options="test" scope=global')
+		results = host.run('stack add storage controller adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5 options="test"')
 		assert results.rc == 0
 
 		# dump our global information

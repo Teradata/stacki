@@ -4,6 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from collections import namedtuple
+from operator import itemgetter
+
 import stack.commands
 from stack.exception import CommandError
 from stack.switch import SwitchException
@@ -70,6 +73,18 @@ class Implementation(stack.commands.Implementation):
 			s.ssh_copy_id(pubkey.strip())
 		except FileNotFoundError:
 			pass
+
+		iface_data = ('host', 'interface', 'name')
+		iface_getter = itemgetter(*iface_data)
+		Iface = namedtuple('Iface', iface_data)
+		for row in self.owner.call('list.host.interface', [switch]):
+			iface = Iface(*iface_getter(row))
+			if iface.interface == 'mgmt0':
+				if iface.name:
+					s.set_hostname(iface.name)
+				else:
+					s.set_hostname(iface.host)
+				break
 
 		if not s.subnet_manager:
 			raise CommandError(self.owner, f'{switch} is not a subnet manager')

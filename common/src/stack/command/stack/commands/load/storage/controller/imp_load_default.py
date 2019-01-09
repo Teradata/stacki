@@ -3,43 +3,41 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-
 
 import stack.csv
 import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
-	stack.commands.Implementation):	
-
+class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.Implementation):
 	"""
 	Put storage controller configuration into the database based on
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, slot, enclosure, adapter, raid, array, options,
-			line):
-		#
-		# error checking
-		#
+	def process_target(self, host, slot, enclosure, adapter, raid, array, options, line):
 		if slot is None:
-			msg = 'empty value found for "slot" column at line %d' % line
-			CommandError(self.owner, msg)
-		if raid is None:
-			msg = 'empty value found for "raid level" column at line %d' % line
-			CommandError(self.owner, msg)
-		if array is None:
-			msg = 'empty value found for "array id" column at line %d' % line
-			CommandError(self.owner, msg)
+			raise CommandError(
+				self.owner,
+				f'empty value found for "slot" column at line {line}'
+			)
 
-		if host not in self.owner.hosts.keys():
+		if raid is None:
+			raise CommandError(
+				self.owner,
+				f'empty value found for "raid level" column at line {line}'
+			)
+
+		if array is None:
+			raise CommandError(
+				self.owner,
+				f'empty value found for "array id" column at line {line}'
+			)
+
+		if host not in self.owner.hosts:
 			self.owner.hosts[host] = {}
 
-		if array not in self.owner.hosts[host].keys():
+		if array not in self.owner.hosts[host]:
 			self.owner.hosts[host][array] = {}
 
 		if options:
@@ -52,71 +50,59 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			self.owner.hosts[host][array]['adapter'] = adapter
 
 		if slot == '*' and raid != 0:
-			msg = 'raid level must be "0" when slot is "*". See line %d' % (line)
-			CommandError(self.owner, msg)
+			raise CommandError(
+				self.owner,
+				f'raid level must be "0" when slot is "*". See line {line}'
+			)
 
-		if 'slot' not in self.owner.hosts[host][array].keys():
+		if 'slot' not in self.owner.hosts[host][array]:
 			self.owner.hosts[host][array]['slot'] = []
 
-		if raid == 'hotspare' and array == 'global':
-			if 'global' not in self.owner.hosts[host].keys():
-				self.owner.hosts[host][array] = []
+		if slot in self.owner.hosts[host][array]['slot']:
+			raise CommandError(
+				self.owner,
+				f'duplicate slot "{slot}" found in the '
+				f'spreadsheet at line {line}'
+			)
 
-			if 'hotspare' not in self.owner.hosts[host][array].keys():
+		if raid == 'hotspare':
+			if 'hotspare' not in self.owner.hosts[host][array]:
 				self.owner.hosts[host][array]['hotspare'] = []
 
 			self.owner.hosts[host][array]['hotspare'].append(slot)
-			
 		else:
-			if slot in self.owner.hosts[host][array]['slot']:
-				msg = 'duplicate slot "%s" found in the spreadsheet at line %d' % (slot, line)
-				CommandError(self.owner, msg)
+			self.owner.hosts[host][array]['slot'].append(slot)
 
-			if raid == 'hotspare':
-				if 'hotspare' not in self.owner.hosts[host][array].keys():
-					self.owner.hosts[host][array]['hotspare'] = []
-				self.owner.hosts[host][array]['hotspare'].append(slot)
-			else:
-				self.owner.hosts[host][array]['slot'].append(slot)
+			if 'raid' not in self.owner.hosts[host][array]:
+				self.owner.hosts[host][array]['raid'] = raid
 
-				if 'raid' not in self.owner.hosts[host][array].keys():
-					self.owner.hosts[host][array]['raid'] = raid
-
-				if raid != self.owner.hosts[host][array]['raid']:
-					msg = 'RAID level mismatch "%s" found in the spreadsheet at line %d' % (raid, line)
-					CommandError(self.owner, msg)
-
+			if raid != self.owner.hosts[host][array]['raid']:
+				raise CommandError(
+					self.owner,
+					f'RAID level mismatch "{raid}" found in the '
+					f'spreadsheet at line {line}'
+				)
 
 	def run(self, args):
 		filename, = args
 
-		self.appliances = self.getApplianceNames()
-
+		appliances = self.getApplianceNames()
 		reader = stack.csv.reader(open(filename, 'rU'))
-		header = None
-		line = 0
 
+		header = None
 		name = None
 
-		for row in reader:
-			line += 1
+		for line, row in enumerate(reader, 1):
+			if line == 1:
+				missing = {'name', 'slot', 'raid level', 'array id'}.difference(row)
+				if missing:
+					raise CommandError(
+						self.owner,
+						f'the following required fields are not present in '
+						f'the input file: {", ".join(sorted(missing))}'
+					)
 
-			if not header:
 				header = row
-
-				#
-				# make checking the header easier
-				#
-				required = [ 'name', 'slot', 'raid level', 'array id' ]
-
-				for i in range(0, len(row)):
-					if header[i] in required:
-						required.remove(header[i])
-
-				if len(required) > 0:
-					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					CommandError(self.owner, msg)
-
 				continue
 
 			slot = None
@@ -126,86 +112,80 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			enclosure = None
 			adapter = None
 
-			for i in range(0, len(row)):
-				field = row[i]
+			for ndx, field in enumerate(row):
 				if not field:
 					continue
 
-				if header[i] == 'name':
+				if header[ndx] == 'name':
 					name = field.lower()
 
-				elif header[i] == 'slot':
+				elif header[ndx] == 'slot':
 					if field == '*':
-						slot = field
+						slot = '*'
 					else:
 						try:
 							slot = int(field)
 						except:
-							msg = 'slot "%s" must be an integer' % field
-							CommandError(self.owner, msg)
+							raise CommandError(
+								self.owner,
+								f'slot "{field}" must be an integer'
+							)
 
 						if slot < 0:
-							msg = 'slot "%d" must be 0 or greater' % slot
-							CommandError(self.owner, msg)
+							raise CommandError(
+								self.owner,
+								f'slot "{slot}" must be >= 0'
+							)
 
-				elif header[i] == 'raid level':
+				elif header[ndx] == 'raid level':
 					raid = field.lower()
 
-				elif header[i] == 'array id':
+				elif header[ndx] == 'array id':
 					if field.lower() == 'global':
-						array = field.lower()
+						array = 'global'
 					elif field == '*':
 						array = '*'
 					else:
 						try:
 							array = int(field)
 						except:
-							msg = 'array "%s" must be an integer' % field
-							CommandError(self.owner, msg)
+							raise CommandError(
+								self.owner,
+								f'array id "{field}" must '
+								f'be an integer'
+							)
 
 						if array < 0:
-							msg = 'array "%d" must be 0 or greater' % array
-							CommandError(self.owner, msg)
+							raise CommandError(
+								self.owner,
+								f'array id "{array}" must be >= 0'
+							)
 
-				elif header[i] == 'options':
-					if field:
-						options = field
+				elif header[ndx] == 'options':
+					options = field
 
-				elif header[i] == 'enclosure':
-					if field:
-						enclosure = field
+				elif header[ndx] == 'enclosure':
+					enclosure = field
 
-				elif header[i] == 'adapter':
-					if field:
-						adapter = field
+				elif header[ndx] == 'adapter':
+					adapter = field
 
-			#
-			# the first non-header line must have a host name
-			#
-			if line == 1 and not name:
-				msg = 'empty host name found in "name" column'
-				CommandError(self.owner, msg)
+			if not name:
+				raise CommandError(
+					self.owner,
+					'empty host name found in "name" column'
+				)
 
-			if name in self.appliances or name == 'global':
-				hosts = [ name ]
+			if name in appliances or name == 'global':
+				targets = [name]
 			else:
-				hosts = self.getHostnames([ name ])
+				targets = self.owner.getHostnames([name])
 
-			if not hosts:
-				msg = 'Cannot find "%s"' % name
-				CommandError(self.owner, msg)
+			if not targets:
+				raise CommandError(self.owner, f'Cannot find host "{name}"')
 
-			for host in hosts:
-				self.doit(host, slot, enclosure, adapter,
-					raid, array, options, line)
-
-		#
-		# do final validation
-		#
-		for host in self.owner.hosts.keys():
-			for array in self.owner.hosts[host].keys():
-				if array != 'global' and len(self.owner.hosts[host][array]['slot']) == 0:
-
-					msg = 'hotspare for "%s" for array "%s" is not associated with a disk array' % (host, array)
-					CommandError(self.owner, msg)
-
+			for target in targets:
+				self.process_target(
+					target, slot, enclosure, adapter,
+					raid, array, options, line
+				)

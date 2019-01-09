@@ -8,9 +8,11 @@
 # @copyright@
 
 import os
+import sys
 import json
 import subprocess
 import tempfile
+import getopt
 
 
 class Package:
@@ -125,12 +127,21 @@ class Scanner:
 		package.url     = meta['url']
 		self.packages.append(package)
 		
+try:
+	opts, args = getopt.getopt(sys.argv[1:], '', ['bootstrap'])
+except getopt.GetoptError as msg:
+	sys.stderr.write("error - %s\n" % msg)
+	sys.exit(1)
+
+bootstrap = False
+for o, a in opts:
+	if o == '--bootstrap':
+		bootstrap = True
 
 
 Prefix = 'foundation-python'
 
-# Build the PackageSet
-
+print('\nBuild the PackageSet')
 PackageSet = {}
 with open('packages.json', 'r') as text:
 	code = []
@@ -146,7 +157,11 @@ with open('packages.json', 'r') as text:
 			package.appliances.append('server')
 		if manifest[name].get('be'):
 			package.appliances.append('client')
+		if bootstrap and not package.bootstrap:
+			continue
 		PackageSet[name] = package
+for key in PackageSet:
+	print(f'\t{key} {PackageSet[key].version}')
 
 pkgmasters = sorted(PackageSet.keys()) # before implicits get mixed in
 
@@ -184,6 +199,7 @@ for master in pkgmasters:
 		else:
 			target = master
 		print('Unpacking %s' % target)
+
 		os.environ['PKG_CONFIG_PATH'] = ':'.join(['/opt/stack/lib/pkgconfig',
 							  '/usr/lib/pkgconfig',
 							  '/usr/lib64/pkgconfig'])
@@ -191,12 +207,14 @@ for master in pkgmasters:
 		p = subprocess.run(['/opt/stack/bin/python3', 
 				    '-mpip', 
 				    'install', 
+				    '--no-warn-script-location',
 				    '-I', 
 				    f'--root={tmp}', 
 				    target],
 				   stdout=subprocess.PIPE)
 		print(p.stdout.decode())
 		print('Scanning  %s' % master)
+
 		for package in Scanner(tmp).packages:
 			print(f'\tscanned {package.name} {package.version}')
 			if package.name == master:
@@ -259,7 +277,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 build:
 
 install::
-	$(PY.PATH) -mpip install -I --no-deps --root=$(ROOT) %s==$(VERSION)
+	$(PY.PATH) -mpip install --no-warn-script-location -I --no-deps --root=$(ROOT) %s==$(VERSION)
 """ % (os.environ['ROLLROOT'], package.name))
 		if package.bootstrap:
 			makefile.write('\nbootstrap: install-rpm\n')
@@ -307,3 +325,4 @@ for pkgname in pkgmasters:
 			manifest.write('\t%s-%s\n' % (Prefix, dep.name))
 
 
+print('\n\n')

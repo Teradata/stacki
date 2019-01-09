@@ -112,7 +112,7 @@ class command(stack.commands.Command):
 		if scope == 'global':
 			data = self.call('list.storage.controller')
 		else:
-			data = self.call('list.storage.controller', [name])
+			data = self.call(f'list.{scope}.storage.controller', [name])
 
 		for row in data:
 			dump.append(OrderedDict(

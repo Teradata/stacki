@@ -1,0 +1,10 @@
+<stack:file stack:name="/etc/sysconfig/static-routes">
+any host 192.168.0.3 dev eth0
+any host 192.168.0.4 gw 192.168.0.1 dev eth0
+any host 192.168.0.5 gw 192.168.0.1
+any host 192.168.0.6 dev eth0
+any host 192.168.0.7 dev eth0
+any host 192.168.0.8 dev eth0
+any net 224.0.0.0 netmask 255.255.255.0 dev eth0
+any host 255.255.255.255 dev eth0
+</stack:file>

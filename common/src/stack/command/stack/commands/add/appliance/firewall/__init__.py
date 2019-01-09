@@ -11,53 +11,56 @@
 # @rocks@
 
 import stack.commands
-import stack.commands.add
-import stack.commands.add.firewall
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired
 
-class Command(stack.commands.add.firewall.command,
-	stack.commands.add.appliance.command):
 
+class Command(stack.commands.add.appliance.command):
 	"""
 	Add a firewall rule for an appliance type.
 
-	<arg type='string' name='appliance' repeat='1'>
+	<arg type='string' name='appliance' repeat='1' optional='0'>
 	Appliance type (e.g., "backend").
 	</arg>
 
 	<param type='string' name='service' optional='0'>
-	The service identifier, port number or port range. For example
-	"www", 8080 or 0:1024.
-	To have this firewall rule apply to all services, specify the
-	keyword 'all'.
+	A comma seperated list of service identifier, port number or port range.
+
+	For example "www", 8080, 0:1024, or "1:1024,8080".
+
+	To have this firewall rule apply to all services, specify the keyword 'all'.
 	</param>
 
 	<param type='string' name='protocol' optional='0'>
-	The protocol associated with the service. For example, "tcp" or "udp".
+	The protocol associated with the rule. For example, "tcp" or "udp".
+
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
 	</param>
-	
+
 	<param type='string' name='network'>
-	The network for this rule. This is a named network
+	The network this rule should be applied to. This is a named network
 	(e.g., 'private') and must be one listed by the command
 	'stack list network'.
-	To have this firewall rule apply to all networks, specify the
-	keyword 'all'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
-	<param type='string' name='output-network'>
-	The output network for this rule. This is a named
+	<param type='string' name='output-network' optional='1'>
+	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
 	'stack list network'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
 	<param type='string' name='chain' optional='0'>
-	The iptables 'chain' for this this rule (e.g., INPUT, OUTPUT, FORWARD).
+	The iptables 'chain' this rule should be applied to (e.g.,
+	INPUT, OUTPUT, FORWARD).
 	</param>
 
 	<param type='string' name='action' optional='0'>
-	The iptables 'action' this rule (e.g., ACCEPT, REJECT, DROP).
+	The iptables 'action' this rule should be applied to (e.g.,
+	ACCEPT, REJECT, DROP).
 	</param>
 
 	<param type='string' name='flags'>
@@ -89,7 +92,7 @@ class Command(stack.commands.add.firewall.command,
 	"-A FORWARD -i eth0 -j ACCEPT"
 	</example>
 
-	<example cmd='add appliance firewall login network=all service="8649" protocol="udp" action="REJECT" chain="INPUT"'>
+	<example cmd='add appliance firewall login service="8649" protocol="udp" action="REJECT" chain="INPUT"'>
 	Reject UDP packets with a destination port of 8649 on all networks for
 	the INPUT chain.
 	On login appliances, this will be translated into the following
@@ -102,32 +105,5 @@ class Command(stack.commands.add.firewall.command,
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		apps = self.getApplianceNames(args)
-		
-		(service, network, outnetwork, chain, action, protocol, flags,
-		 comment, table, rulename) = self.doParams()
-		
-		# Make sure we have a new rule
-		for app in apps:
-			if self.db.count("""(*) from appliance_firewall where
-				appliance = (select id from appliances where name = %s) and
-				service = %s and action = %s and chain = %s and
-				if (%s is NULL, insubnet is NULL, insubnet = %s) and
-				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
-				if (%s is NULL, protocol is NULL, protocol = %s) and
-				if (%s is NULL, flags is NULL, flags = %s)""",
-				(app, service, action, chain, network, network, outnetwork,
-				outnetwork, protocol, protocol, flags, flags)
-			) > 0:
-				raise CommandError(self, 'firewall rule already exists')
-
-		# Now let's add them
-		for app in apps:
-			self.db.execute("""insert into appliance_firewall
-				(appliance, insubnet, outsubnet, service, protocol,
-				action, chain, flags, comment, tabletype, name)
-				values ((select id from appliances where name=%s),
-				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-				(app, network, outnetwork,	service, protocol, action,
-				chain, flags, comment, table, rulename)
-			)
+		self.command('add.firewall', self._argv + ['scope=appliance'])
+		return self.rc

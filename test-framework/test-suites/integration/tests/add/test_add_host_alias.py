@@ -1,6 +1,7 @@
 from textwrap import dedent
 
 import pytest
+import json
 
 
 class TestAddHostAlias:
@@ -18,7 +19,7 @@ class TestAddHostAlias:
 		result = host.run(self.list_host_alias_json_cmd)
 		assert result.rc == 0
 		expected_output = open(self.dirn + 'add_host_alias_one_alias.json').read()
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		result = host.run('stack add host alias backend-0-0 alias=test0-eth1 interface=eth1')
 		assert result.rc == 0
@@ -31,7 +32,7 @@ class TestAddHostAlias:
 		result = host.run(self.list_host_alias_json_cmd)
 		assert result.rc == 0
 		expected_output = open(self.dirn + 'add_host_alias_four_aliases.json').read()
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.usefixtures('add_host_with_interface')
 	def test_add_numeric_alias(self, host):
@@ -56,7 +57,7 @@ class TestAddHostAlias:
 		result = host.run(self.list_host_alias_json_cmd)
 		assert result.rc == 0
 		expected_output = open(self.dirn + 'add_host_alias_one_alias.json').read()
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_add_duplicate_alias_same_host(self, host):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
@@ -72,7 +73,7 @@ class TestAddHostAlias:
 		expected_output = open(self.dirn + 'add_host_alias_two_aliases_same_name.json').read()
 		print(result.stdout.strip())
 		print(expected_output.strip())
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_add_duplicate_alias_different_host(self, host):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
@@ -87,7 +88,7 @@ class TestAddHostAlias:
 		result = host.run(self.list_host_alias_json_cmd)
 		assert result.rc == 0
 		expected_output = open(self.dirn + 'add_host_alias_one_alias.json').read()
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.usefixtures('add_host_with_interface')
 	def test_add_multiple_aliases_same_host_interface(self, host):
@@ -100,7 +101,7 @@ class TestAddHostAlias:
 		result = host.run(self.list_host_alias_json_cmd)
 		assert result.rc == 0
 		expected_output = open(self.dirn + 'add_host_alias_multiple_aliases_same_host_interface.json').read()
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_no_host(self, host):
 		result = host.run('stack add host alias')

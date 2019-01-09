@@ -1,0 +1,4 @@
+NAME,ENCLOSURE,ADAPTER,SLOT,RAID LEVEL,ARRAY ID,OPTIONS
+global,5,6,2,1,7,test_options
+,,,3,1,7,
+,,,4,hotspare,7

@@ -56,12 +56,12 @@ class ExpectMore():
 			return False
 
 
-	def end(self, quit_cmd):
+	def end(self, quit_cmd, prompt = pexpect.EOF, **kwargs):
 		"""
 		Terminate the process (if necessary)
 		"""
 		if not self._proc.exitstatus:
-			self._proc.sendline(quit_cmd)
+			self.say(cmd = quit_cmd, prompt = prompt, **kwargs)
 			self._proc.terminate()
 
 
@@ -123,13 +123,16 @@ class ExpectMore():
 		`santizer` is a callable which takes a string and outputs a string to transform or remove garbage.  Results will have empty strings removed.
 		`prompt` is a string or regex or tuple of these which is the prompt to expect next.  If not set, defaults to self.PROMPTS.
 		"""
-		if prompt == None:
+		if prompt is None:
 			prompt = self.PROMPTS
 
-		results = self.conversation([
+		results = self.conversation(
+			[
 				(None, cmd),
 				(prompt, None)
-		])
+			],
+			**kwargs
+		)
 
 		# we only care about the first result
 		results = results[0]

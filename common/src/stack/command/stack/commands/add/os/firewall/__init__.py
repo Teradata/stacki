@@ -11,45 +11,46 @@
 # @rocks@
 
 import stack.commands
-import stack.commands.add
-import stack.commands.add.firewall
-from stack.exception import CommandError, ArgRequired
+from stack.exception import ArgRequired
 
-class Command(stack.commands.add.firewall.command,
-	stack.commands.add.os.command):
 
+class Command(stack.commands.add.os.command):
 	"""
 	Add a firewall rule for an OS type.
 
-	<arg type='string' name='os' repeat='1'>
+	<arg type='string' name='os' repeat='1' optional='0'>
 	OS type (e.g., 'linux', 'sunos').
 	</arg>
 
 	<param type='string' name='service' optional='0'>
-	The service identifier, port number or port range. For example
-	"www", 8080 or 0:1024.
-	To have this firewall rule apply to all services, specify the
-	keyword 'all'.
+	A comma seperated list of service identifier, port number or port range.
+
+	For example "www", 8080, 0:1024, or "1:1024,8080".
+
+	To have this firewall rule apply to all services, specify the keyword 'all'.
 	</param>
 
 	<param type='string' name='protocol' optional='0'>
-	The protocol associated with the service. For example, "tcp" or "udp".
+	The protocol associated with the rule. For example, "tcp" or "udp".
+
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
 	</param>
-	
+
 	<param type='string' name='network'>
 	The network this rule should be applied to. This is a named network
 	(e.g., 'private') and must be one listed by the command
-	'rocks list network'.
-	To have this firewall rule apply to all networks, specify the
-	keyword 'all'.
+	'stack list network'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
 	<param type='string' name='output-network' optional='1'>
 	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-	'rocks list network'.
+	'stack list network'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
 	<param type='string' name='chain' optional='0'>
@@ -71,7 +72,7 @@ class Command(stack.commands.add.firewall.command,
 	A comment associated with this rule. The comment will be printed
 	directly above the rule in the firewall configuration file.
 	</param>
-	
+
 	<param type='string' name='table'>
 	The table to add the rule to. Valid values are 'filter',
 	'nat', 'mangle', and 'raw'. If this parameter is not
@@ -95,31 +96,6 @@ class Command(stack.commands.add.firewall.command,
 	def run(self, params, args):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
-		
-		oses = self.getOSNames(args)
 
-		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.doParams()
-		
-		# Make sure we have a new rule
-		for os in oses:
-			if self.db.count("""(*) from os_firewall where os = %s and
-				service = %s and action = %s and chain = %s and
-				if (%s is NULL, insubnet is NULL, insubnet = %s) and
-				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
-				if (%s is NULL, protocol is NULL, protocol = %s) and
-				if (%s is NULL, flags is NULL, flags = %s)""",
-				(os, service, action, chain, network, network, outnetwork,
-				outnetwork, protocol, protocol, flags, flags)
-			) > 0:
-				raise CommandError(self, 'firewall rule already exists')
-
-		# Now let's add them
-		for os in oses:
-			self.db.execute("""insert into os_firewall
-				(os, insubnet, outsubnet, service, protocol,
-				action, chain, flags, comment, tabletype, name)
-				values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-				(os, network, outnetwork,	service, protocol, action,
-				chain, flags, comment, table, rulename)
-			)
+		self.command('add.firewall', self._argv + ['scope=os'])
+		return self.rc

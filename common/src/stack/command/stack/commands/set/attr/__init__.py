@@ -123,21 +123,32 @@ class Command(stack.commands.Command,
 			for attr in attrs:
 				self.db.execute(
 					"""
+					delete from shadow.attributes where
+					scope = %s and attr = binary %s
+					""", (scope, attr))
+				self.db.execute(
+					"""
 					delete from attributes where
-					scope = '%s' and
-					attr  = binary '%s'
-					""" % (scope, attr))
+					scope = %s and attr = binary %s
+					""", (scope, attr))
 		else:
 			table = lookup[scope]['table']
 			for target in targets:
 				for attr in attrs[target]:
 					self.db.execute(
 						"""
+						delete from shadow.attributes where
+						scope    = %%s and 
+						scopeid  = (select id from %s where name=%%s) and
+						attr     = %%s
+						""" % table, (scope, target, attr))
+					self.db.execute(
+						"""
 						delete from attributes where
-						scope    = '%s' and 
-						scopeid  = (select id from %s where name='%s') and
-						attr     = '%s'
-						""" % (scope, table, target, attr))
+						scope    = %%s and 
+						scopeid  = (select id from %s where name=%%s) and
+						attr     = %%s
+						""" % table, (scope, target, attr))
 
 		# If the command was called with "value=" stop here and treat the
 		# command as a remove command.
@@ -146,33 +157,41 @@ class Command(stack.commands.Command,
 			return
 		
 		
-		# Figure out if this a shadow attribute and then insert into the
-		# correct table.
-
-		if shadow:
-			s = "'%s'" % value
-			v = 'NULL'
-		else:
-			s = 'NULL'
-			v = "'%s'" % value
-			
-
 		if scope == 'global':
-			self.db.execute(
-				"""
-				insert into attributes
-				(scope, attr, value, shadow)
-				values ('%s', '%s', %s, %s)
-				""" % (scope, glob, v, s))
-		else:
-			table = lookup[scope]['table']
-			for target in targets:
+			if shadow is True:
+				self.db.execute(
+					"""
+					insert into shadow.attributes
+					(scope, attr, value)
+					values (%s, %s, %s)
+					""", (scope, glob, value))
+			else:
 				self.db.execute(
 					"""
 					insert into attributes
-					(scope, attr, value, shadow, scopeid)
-					values (
-						'%s', '%s', %s, %s,
-						(select id from %s where name='%s')
-					)
-					""" % (scope, glob, v, s, table, target))
+					(scope, attr, value)
+					values (%s, %s, %s)
+					""", (scope, glob, value))
+		else:
+			table = lookup[scope]['table']
+			for target in targets:
+				if shadow is True:
+					self.db.execute(
+						"""
+						insert into shadow.attributes
+						(scope, attr, value, scopeid)
+						values (
+							%%s, %%s, %%s, 
+							(select id from %s where name=%%s)
+						)
+						""" % table, (scope, glob, value, target))
+				else:
+					self.db.execute(
+						"""
+						insert into attributes
+						(scope, attr, value, scopeid)
+						values (
+							%%s, %%s, %%s, 
+							(select id from %s where name=%%s)
+						)
+						""" % table, (scope, glob, value, target))

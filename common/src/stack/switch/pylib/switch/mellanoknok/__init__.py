@@ -60,6 +60,7 @@ class Mellanoknok():
 		self._base_url = f'http://{switch}/admin/'
 		self._cmd_url = self._base_url + 'launch?script=json'
 		self._credentials = f'f_user_id={username}&f_password={password}'
+		self._connected = False
 
 		self._connection_attempts = 0
 		self._connect_to_api_server()
@@ -93,10 +94,16 @@ class Mellanoknok():
 			raise ConnectionError('{0} - {1}\n'.format(resp.status_code, resp.reason))
 		self._connection_attempts -= 1
 
+		self._connected = True
+
 
 	def _post(self, cmd):
 		''' shorthand to POST to the rest API, attempt to reconnect if our session died '''
 		self._info('POST', self._cmd_url, cmd)
+
+		if not self._connected:
+			self._connect_to_api_server()
+
 		kwargs = {'headers': self._headers, 'json': {'cmd': cmd}}
 		resp = self._session.post(self._cmd_url, **kwargs)
 

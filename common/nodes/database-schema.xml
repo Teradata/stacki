@@ -15,7 +15,7 @@
 
 <stack:script stack:stage="install-post">
 
-<stack:file stack:name="/tmp/tables.sql">
+<stack:file stack:name="/tmp/cluster.sql">
 <!-- Access -->
 
 DROP TABLE IF EXISTS access;
@@ -34,7 +34,7 @@ DROP TABLE IF EXISTS aliases;
 CREATE TABLE aliases (
   ID		int(11) NOT NULL auto_increment,
   Name		varchar(32) NOT NULL,
-  Network		int(11) NOT NULL references networks,
+  Network	int(11) NOT NULL references networks,
   PRIMARY KEY (ID),
   INDEX (Name)
 );
@@ -219,58 +219,6 @@ CREATE TABLE switchports (
 	port		int(11)		NOT NULL
 );
 
-<!-- Routes -->
-
-DROP TABLE IF EXISTS global_routes;
-CREATE TABLE global_routes (
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS os_routes;
-CREATE TABLE os_routes (
-  OS		varchar(32) NOT NULL default '&os;',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS appliance_routes;
-CREATE TABLE appliance_routes (
-  Appliance int(11) NOT NULL default '0' references appliances,
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL,
-  INDEX (Network)
-);
-
-DROP TABLE IF EXISTS node_routes;
-CREATE TABLE node_routes (
-  Node		int(11) NOT NULL default '0',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
-DROP TABLE IF EXISTS environment_routes;
-CREATE TABLE environment_routes (
-  Environment	int(11) NOT NULL default '0',
-  Network	varchar(32) NOT NULL default '',
-  Netmask	varchar(32) NOT NULL default '',
-  Gateway	varchar(32) NOT NULL default '',
-  Subnet	int(11)	default NULL references subnets,
-  Interface	varchar(32) default NULL
-);
-
 <!-- Stacks -->
 
 DROP TABLE IF EXISTS stacks;
@@ -345,96 +293,71 @@ CREATE TABLE partitions (
 	PRIMARY KEY (ID)
 );
 
-<!-- Firewall Tables -->
+<!-- Gotta drop the tables that use scope_map first -->
+DROP TABLE IF EXISTS firewall_rules;
+DROP TABLE IF EXISTS routes;
+DROP TABLE IF EXISTS storage_controller;
+DROP TABLE IF EXISTS scope_map;
 
-DROP TABLE IF EXISTS global_firewall;
-CREATE TABLE global_firewall (
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
+CREATE TABLE scope_map (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope		ENUM('global','appliance','os','environment', 'host') NOT NULL,
+	appliance_id	INT DEFAULT NULL,
+	os_id		INT DEFAULT NULL,
+	environment_id	INT DEFAULT NULL,
+	node_id		INT DEFAULT NULL,
+	INDEX (scope),
+	FOREIGN KEY (appliance_id) REFERENCES appliances(id) ON DELETE CASCADE,
+	FOREIGN KEY (os_id) REFERENCES oses(id) ON DELETE CASCADE,
+	FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE,
+	FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS os_firewall;
-CREATE TABLE os_firewall (
-  OS		varchar(32) NOT NULL default '&os;',
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (OS),
-  INDEX (Name),
-  INDEX (Service)
+CREATE TABLE firewall_rules (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	name		VARCHAR(256) NOT NULL,
+	table_type	ENUM('nat','filter','mangle','raw') NOT NULL,
+	chain		VARCHAR(256) NOT NULL,
+	action		VARCHAR(256) NOT NULL,
+	service		VARCHAR(256) NOT NULL,
+	protocol	VARCHAR(256) NOT NULL,
+	in_subnet_id	INT DEFAULT NULL,
+	out_subnet_id	INT DEFAULT NULL,
+	flags		VARCHAR(256) DEFAULT NULL,
+	comment		VARCHAR(256) DEFAULT NULL,
+	INDEX (name),
+	INDEX (table_type),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE,
+	FOREIGN KEY (in_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE,
+	FOREIGN KEY (out_subnet_id) REFERENCES subnets(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS appliance_firewall;
-CREATE TABLE appliance_firewall (
-  Appliance     int(11) NOT NULL default '0' references appliances,
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
+CREATE TABLE routes (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	address		VARCHAR(32) NOT NULL,
+	netmask		VARCHAR(32) NOT NULL,
+	gateway		VARCHAR(32) DEFAULT NULL,
+	subnet_id	INT DEFAULT NULL,
+	interface	VARCHAR(32) DEFAULT NULL,
+	INDEX (address),
+	INDEX (interface),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE,
+	FOREIGN KEY (subnet_id) REFERENCES subnets(id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS node_firewall;
-CREATE TABLE node_firewall (
-  Node		int(11) NOT NULL default '0' references nodes,
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
-);
-
-DROP TABLE IF EXISTS environment_firewall;
-CREATE TABLE environment_firewall (
-  Environment	int(11) NOT NULL default '0',
-  Tabletype	enum('nat','filter','mangle','raw') NOT NULL
-  		default 'filter',
-  Name		varchar(256) default NULL,
-  InSubnet	int(11)	default NULL references subnets,
-  OutSubnet	int(11)	default NULL references subnets,
-  Service       varchar(256) default NULL,
-  Protocol      varchar(256) default NULL,
-  Action        varchar(256) default NULL,
-  Chain         varchar(256) default NULL,
-  Flags         varchar(256) default NULL,
-  Comment       varchar(256) default NULL,
-  INDEX (Name),
-  INDEX (Service)
+CREATE TABLE storage_controller (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	enclosure	INT NOT NULL,
+	adapter		INT NOT NULL,
+	slot		INT NOT NULL,
+	raidlevel	VARCHAR(16) NOT NULL,
+	arrayid		INT NOT NULL,
+	options		VARCHAR(512) NOT NULL,
+	INDEX (enclosure, adapter, slot),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE
 );
 
 <!-- Miscellaneous -->
@@ -445,18 +368,6 @@ CREATE TABLE public_keys (
  Node		int(11) NOT NULL references nodes,
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
-);
-
-DROP TABLE IF EXISTS storage_controller;
-CREATE TABLE storage_controller (
- Scope		enum('global', 'os', 'appliance', 'host'),
- TableID	int(11) NOT NULL,
- Adapter	int(11) NOT NULL,
- Enclosure	int(11) NOT NULL,
- Slot		int(11) NOT NULL,
- RaidLevel	varchar(16) NOT NULL,
- ArrayID	int(11) NOT NULL,
- Options	varchar(512) NOT NULL default ''
 );
 
 DROP TABLE IF EXISTS storage_partition;
@@ -499,28 +410,30 @@ CREATE TABLE ib_memberships (
 
 </stack:file>
 
-/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf \
-	--user=root create cluster
-
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /tmp/tables.sql
-
-<!-- Append the default database -->
-<stack:file stack:mode="append"
-        stack:name="/etc/root.my.cnf">
-database	= cluster
+<stack:file stack:name="/tmp/shadow.sql">
+DROP TABLE IF EXISTS attributes;
+CREATE TABLE attributes (
+	Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
+	Attr		varchar(128) NOT NULL,
+	Value		text,
+	ScopeID		int(11)
+);
 </stack:file>
 
-<stack:file stack:name="/var/db/cluster-grants.sql" stack:perms="0400">
+/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf --user=root create cluster
+/usr/bin/mysqladmin --defaults-extra-file=/etc/root.my.cnf --user=root create shadow
+/usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root cluster &lt; /tmp/cluster.sql
+/usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root shadow &lt; /tmp/shadow.sql
+
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
 grant select on cluster.* to ''@'localhost';
-grant select (scope, attr, value, scopeid) on cluster.attributes to ''@'localhost';
-grant select (attr, doc) on cluster.attributes_doc to ''@'localhost';
 grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
+grant select,update,insert,delete,lock tables on shadow.*  to apache@localhost;
+grant select,update,insert,delete,lock tables on shadow.*  to apache@"&hostname;";
 </stack:file>
 
-/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf \
-	--user=root cluster &lt; /var/db/cluster-grants.sql
+/usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf --user=root &lt; /var/db/grants.sql
 
 
 <!--
@@ -531,7 +444,7 @@ grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;
 <stack:file stack:name="/var/db/restore-stacki-database.sh" stack:perms="0400">#!/bin/sh
 
 /usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/mysql-backup-cluster
-/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/cluster-grants.sql
+/usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/grants.sql
 
 /usr/bin/mysql --defaults-file=/opt/stack/etc/django.my.cnf django &lt; /var/db/mysql-backup-django
 /usr/bin/mysql --defaults-file=/etc/root.my.cnf &lt; /var/db/django-grants.sql

@@ -9,45 +9,48 @@
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
-import stack.commands
-import stack.commands.add
-import stack.commands.add.firewall
-from stack.exception import ArgRequired, CommandError
 
-class Command(stack.commands.add.firewall.command,
-	stack.commands.add.host.command):
+import stack.commands
+from stack.exception import ArgRequired
+
+
+class Command(stack.commands.add.host.command):
 	"""
 	Add a firewall rule for the specified hosts.
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='0'>
 	Host name of machine
 	</arg>
 
 	<param type='string' name='service' optional='0'>
-	The service identifier, port number or port range. For example
-	"www", 8080 or 0:1024.
-	To have this firewall rule apply to all services, specify the
-	keyword 'all'.
+	A comma seperated list of service identifier, port number or port range.
+
+	For example "www", 8080, 0:1024, or "1:1024,8080".
+
+	To have this firewall rule apply to all services, specify the keyword 'all'.
 	</param>
 
 	<param type='string' name='protocol' optional='0'>
-	The protocol associated with the service. For example, "tcp" or "udp".
+	The protocol associated with the rule. For example, "tcp" or "udp".
+
 	To have this firewall rule apply to all protocols, specify the
 	keyword 'all'.
 	</param>
-	
+
 	<param type='string' name='network'>
-	The network this rule service should be applied to. This is a named
-	network (e.g., 'private') and must be one listed by the command
-	'rocks list network'.
-	To have this firewall rule apply to all networks, specify the
-	keyword 'all'.
+	The network this rule should be applied to. This is a named network
+	(e.g., 'private') and must be one listed by the command
+	'stack list network'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
 	<param type='string' name='output-network' optional='1'>
 	The output network this rule should be applied to. This is a named
 	network (e.g., 'private') and must be one listed by the command
-	'rocks list network'.
+	'stack list network'.
+
+	By default, the rule will apply to all networks.
 	</param>
 
 	<param type='string' name='chain' optional='0'>
@@ -89,7 +92,7 @@ class Command(stack.commands.add.firewall.command,
 	"-A FORWARD -i eth0 -j ACCEPT".
 	</example>
 
-	<example cmd='add host firewall localhost network=all service="40000"
+	<example cmd='add host firewall localhost service="40000"
 	protocol="tcp" action="REJECT" chain="INPUT"'>
 	Reject TCP packets that are destined for port 40000 on all networks
 	on the INPUT chain.
@@ -99,32 +102,8 @@ class Command(stack.commands.add.firewall.command,
 	"""
 
 	def run(self, params, args):
-		hosts = self.getHosts(args)
-		
-		(service, network, outnetwork, chain, action, protocol, flags,
-			comment, table, rulename) = self.doParams()
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
 
-		# Make sure we have a new rule
-		for host in hosts:
-			if self.db.count("""(*) from node_firewall where
-				node = (select id from nodes where name = %s) and
-				service = %s and action = %s and chain = %s and
-				if (%s is NULL, insubnet is NULL, insubnet = %s) and
-				if (%s is NULL, outsubnet is NULL, outsubnet = %s) and
-				if (%s is NULL, protocol is NULL, protocol = %s) and
-				if (%s is NULL, flags is NULL, flags = %s)""",
-				(host, service, action, chain, network, network, outnetwork,
-				outnetwork, protocol, protocol, flags, flags)
-			) > 0:
-				raise CommandError(self, 'firewall rule already exists')
-
-		# Now let's add them
-		for host in hosts:
-			self.db.execute("""insert into node_firewall
-				(node, insubnet, outsubnet, service, protocol,
-				action, chain, flags, comment, tabletype, name)
-				values ((select id from nodes where name=%s),
-				%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-				(host, network, outnetwork,	service, protocol, action,
-				chain, flags, comment, table, rulename)
-			)
+		self.command('add.firewall', self._argv + ['scope=host'])
+		return self.rc

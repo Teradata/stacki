@@ -19,7 +19,7 @@ import syslog
 import getopt
 import traceback
 import signal
-import stack        # need this so we can load the stack.commands.* modules
+import stack
 from stack.exception import CommandError
 
 
@@ -28,70 +28,18 @@ def sigint_handler(signal, frame):
 	sys.exit(0)
 
 
-# attach a prettier interrupt handler to SIGINT (ctrl-c)
-signal.signal(signal.SIGINT, sigint_handler)
-
-# Open syslog
-
-syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
-
-
-# Several Commands are run in the installation environment before the
-# cluster database is created.	To enable this we only attempt to establish
-# a database connection, if it fails it is not considered an error.
-
-
-# First try to read the cluster password (for apache)
-
-passwd = ''
-
-try:
-	file = open('/etc/apache.my.cnf', 'r')
-	for line in file.readlines():
-		if line.startswith('password'):
-			passwd = line.split('=')[1].strip()
-			break
-	file.close()
-except:
-	pass
-
-try:
-	host = stack.DatabaseHost
-except:
-	host = 'localhost'
-
-# Now make the connection to the DB
-
-try:
-	import pymysql
-
-	if os.geteuid() == 0:
-		username = 'apache'
-	else:
-		username = pwd.getpwuid(os.geteuid())[0]
-
-	# Connect over UNIX socket if it exists, otherwise go over the
-	# network.
-
+def connect_db(username, passwd):
 	if os.path.exists('/var/run/mysql/mysql.sock'):
-		Database = pymysql.connect(db='cluster',
-				host='localhost',
-				user=username,
-				passwd='%s' % passwd,
-				unix_socket='/var/run/mysql/mysql.sock',
-				autocommit=True)
+		db = pymysql.connect(db='cluster',
+				     user=username, passwd=passwd,
+				     host='localhost', unix_socket='/var/run/mysql/mysql.sock',
+				     autocommit=True)
 	else:
-		Database = pymysql.connect(db='cluster',
-				host='%s' % host,
-				user=username,
-				passwd='%s' % passwd,
-				port=40000,
-				autocommit=True)
-
-except ImportError:
-	Database = None
-except pymysql.err.OperationalError:
-	Database = None
+		db = pymysql.connect(db='cluster',
+				     host='localhost', port=40000,
+				     user=username, passwd=passwd,
+				     autocommit=True)
+	return db
 
 
 def run_command(args, debug=False):
@@ -138,7 +86,7 @@ def run_command(args, debug=False):
 
 	if not hasattr(module, 'Command'):
 		import stack.commands.list.help
-		help = stack.commands.list.help.Command(Database)
+		help = stack.commands.list.help.Command(db)
 		fullmodpath = s.split('.')
 		submodpath = '/'.join(fullmodpath[2:])
 		try:
@@ -150,10 +98,8 @@ def run_command(args, debug=False):
 		return -1
 
 	try:
-		command = getattr(module, 'Command')(Database, debug=debug)
-#		 t0 = time.time()
+		command = getattr(module, 'Command')(db, debug=debug)
 		rc = command.runWrapper(name, args[i:])
-#		syslog.syslog(syslog.LOG_INFO, 'runtime %.3f' % (time.time() - t0))
 	except CommandError as e:
 		sys.stderr.write('%s\n' % e)
 		syslog.syslog(syslog.LOG_ERR, '%s' % e)
@@ -185,14 +131,56 @@ def run_command(args, debug=False):
 	return -1
 
 
+
+# attach a prettier interrupt handler to SIGINT (ctrl-c)
+signal.signal(signal.SIGINT, sigint_handler)
+
+# Open syslog
+
+syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
+
+
+# First try to read the cluster password (for apache)
+
+passwd = ''
+try:
+	file = open('/etc/apache.my.cnf', 'r')
+	for line in file.readlines():
+		if line.startswith('password'):
+			passwd = line.split('=')[1].strip()
+			break
+	file.close()
+except:
+	pass
+
+if os.geteuid() == 0:
+	username = 'apache'
+else:
+	username = pwd.getpwuid(os.geteuid())[0]
+
+
+# Connect over UNIX socket if it exists, otherwise go over the network. In the
+# past (and maybe in the future the command line could run remote from the
+# database.
+
+sql = True
+db  = None
+try:
+	import pymysql
+except ImportError:
+	sql = False
+if sql:
+	try:
+		db = connect_db(username, passwd)
+	except pymysql.err.OperationalError:
+		pass
+
 try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
-
-	if Database is not None:
-		Database.close()
-	
+	if db is not None:
+		db.close()
 	sys.exit(1)
 
 debug = False
@@ -211,7 +199,7 @@ if rc is None:
 	else:
 		rc = run_command(args, debug)
 
-if Database is not None:
-	Database.close()
+if db is not None:
+	db.close()
 
 sys.exit(rc)

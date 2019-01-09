@@ -87,10 +87,11 @@ class Command(stack.commands.list.command,
 				scope = 'host'
 		if not scope:
 			raise ParamValue(self, 'scope', 'valid os, appliance name or host name')
+
 		query = None
 		if scope == 'global':
 			if globalOnlyFlag:
-				query = """select scope, device, mountpoint, size, fstype, options, partid 
+				query = """select scope, device, mountpoint, size, fstype, options, partid
 					from storage_partition
 					where scope = 'global'
 					order by device,partid,fstype, size"""
@@ -104,40 +105,39 @@ class Command(stack.commands.list.command,
 					p.fstype, p.options, p.partid from storage_partition as p inner join
 					appliances as a on p.tableid=a.id where
 					p.scope='appliance') order by scope,device,partid,size,fstype"""
-
-
-
-
 		elif scope == 'os':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope = "os" and tableid = (select id
-				from oses where name = '%s') order by device,partid,fstype,size""" % args[0]
+				from oses where name = %s) order by device,partid,fstype,size"""
 		elif scope == 'appliance':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope = "appliance"
 				and tableid = (select id from appliances
-				where name = '%s') order by device,partid,fstype, size""" % args[0]
+				where name = %s) order by device,partid,fstype, size"""
 		elif scope == 'host':
 			query = """select scope, device, mountpoint, size, fstype, options, partid
 				from storage_partition where scope="host" and
 				tableid = (select id from nodes
-				where name = '%s') order by device,partid,fstype, size""" % args[0]
+				where name = %s) order by device,partid,fstype, size"""
 
 		if not query:
 			return
 
 		self.beginOutput()
 
-		self.db.execute(query)
-		i = 0
-		for row in self.db.fetchall():
-			name, device, mountpoint, size, fstype, options, partid = row
+		if scope == 'global':
+			self.db.execute(query)
+		else:
+			self.db.execute(query, [args[0]])
+
+		for name, device, mountpoint, size, fstype, options, partid in self.db.fetchall():
 			if size == -1:
 				size = "recommended"
 			elif size == -2:
 				size = "hibernation"
+
 			if name == "host" or name == "appliance" or name == "os":
-				name = args[0]	
+				name = args[0]
 
 			if mountpoint == 'None':
 				mountpoint = None
@@ -148,10 +148,8 @@ class Command(stack.commands.list.command,
 			if partid == 0:
 				partid = None
 
-			self.addOutput(name, [device, partid, mountpoint,
-				size, fstype, options])
+			self.addOutput(name, [device, partid, mountpoint, size, fstype, options])
 
-			i += 1
-
-		self.endOutput(header=['scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'], trimOwner=False)
-
+		self.endOutput(header=[
+			'scope', 'device', 'partid', 'mountpoint', 'size', 'fstype', 'options'
+		], trimOwner=False)

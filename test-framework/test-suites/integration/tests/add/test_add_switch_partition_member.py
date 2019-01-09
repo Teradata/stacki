@@ -52,7 +52,7 @@ class TestAddSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership", SWITCH_PARTITION_MEMBER_NEGATIVE_TEST_DATA)
 	def test_negative_behavior(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
@@ -109,7 +109,7 @@ class TestAddSwitchPartitionMember:
 		# list switch partition member does not list partitions which have no members
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		result = host.run(' '.join(cmd))
 		assert result.rc != 0
@@ -135,7 +135,7 @@ class TestAddSwitchPartitionMember:
 			assert result.rc != 0
 			result = host.run('stack list switch partition member switch-0-0 output-format=json')
 			assert result.rc == 0
-			assert result.stdout.strip() == expected_output.strip()
+			assert json.loads(result.stdout) == json.loads(expected_output)
 
 	def test_cannot_add_to_non_ib(self, host, add_switch):
 		result = host.run(f'stack add switch partition member switch-0-0 name=default guid=fake')
@@ -167,7 +167,7 @@ class TestAddSwitchPartitionMember:
 
 		result = host.run('stack list switch partition member switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert result.stdout.strip() == expected_output.strip()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# output here should be same as the output for switch-0-0, except for the name of the switch
 		result = host.run('stack list switch partition member switch-0-1 output-format=json')
@@ -176,7 +176,7 @@ class TestAddSwitchPartitionMember:
 		output = output.replace('switch-0-1', 'switch-0-0')
 		output = output.replace('backend-0-1', 'backend-0-0')
 		output = output.replace('00:00:00:00:00:00:00:01', '00:00:00:00:00:00:00:00')
-		assert output == expected_output.strip()
+		assert json.loads(output) == json.loads(expected_output)
 
 		result = host.run('stack list switch partition member switch-0-0 switch-0-1 output-format=json')
 		assert result.rc == 0

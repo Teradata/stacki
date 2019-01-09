@@ -29,12 +29,6 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def getPreamble(self, host):
-		self.addOutput(host, ':INPUT ACCEPT [0:0]')
-		self.addOutput(host, ':FORWARD ACCEPT [0:0]')
-		self.addOutput(host, ':OUTPUT ACCEPT [0:0]')
-		self.addOutput(host, '')
-
 	def expandRules(self, lines, parameter, items):
 		return [
 			f'{line} {parameter} {item}'
@@ -53,7 +47,10 @@ class Command(stack.commands.HostArgumentProcessor,
 		# Output the table type and the filter preamble
 		self.addOutput(host, f'*{table}')
 		if table == 'filter':
-			self.getPreamble(host)
+			self.addOutput(host, ':INPUT ACCEPT [0:0]')
+			self.addOutput(host, ':FORWARD ACCEPT [0:0]')
+			self.addOutput(host, ':OUTPUT ACCEPT [0:0]')
+			self.addOutput(host, '')
 
 		# Create a mapping of networks to interfaces for this host
 		network_to_interfaces = defaultdict(list)
@@ -66,10 +63,10 @@ class Command(stack.commands.HostArgumentProcessor,
 			else:
 				comment = f"# {rule['action']} rule"
 
-				if rule['network'] == 'all':
-					comment += ' for all networks'
-				elif rule['network']:
+				if rule['network']:
 					comment += f" for {rule['network']} network"
+				else:
+					comment += ' for all networks'
 
 			# Base of the rule
 			line = f"-A {rule['chain']} -j {rule['action']}"
@@ -125,21 +122,6 @@ class Command(stack.commands.HostArgumentProcessor,
 
 		self.addOutput(host, 'COMMIT')
 
-	def _rule_sorter(self, rule):
-		# Sort the rules by: Intrinsic, Accept, Other, Drop, and Reject
-		if rule['type'] == 'const':
-			# Intrinsic
-			return 0
-		elif rule['action'] == 'ACCEPT':
-			return 1
-		elif rule['action'] == 'DROP':
-			return 3
-		elif rule['action'] == 'REJECT':
-			return 4
-
-		# Other
-		return 2
-
 	def run(self, params, args):
 		self.beginOutput()
 
@@ -153,10 +135,10 @@ class Command(stack.commands.HostArgumentProcessor,
 			# Get the rules for our host
 			rules = self.call('list.host.firewall', [host])
 
-			# Run through the rules in sorted order and seperate them by
-			# table type: filter, nat, raw, and mangle tables
+			# Run through the rules (they are listed in sorted order) and
+			# seperate them by table type: filter, nat, raw, and mangle tables
 			tables = defaultdict(list)
-			for rule in sorted(rules, key=self._rule_sorter):
+			for rule in rules:
 				tables[rule['table']].append(rule)
 
 			# Generate rules for each of the table types

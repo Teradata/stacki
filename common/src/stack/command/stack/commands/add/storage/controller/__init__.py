@@ -3,275 +3,260 @@
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-#
-# @rocks@
 
 import stack.commands
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
 
 
-class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.add.command):
+class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
 	"""
-	Add a storage controller configuration to the database.
+	Add a global storage controller configuration for the all hosts in the cluster.
 
-	<arg type='string' name='scope'>
-	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). No argument means the scope is 'global'.
-	</arg>
-
-	<param type='int' name='adapter' optional='1'>
+	<param type='integer' name='adapter' optional='1'>
 	Adapter address.
 	</param>
 
-	<param type='int' name='enclosure' optional='1'>
+	<param type='integer' name='enclosure' optional='1'>
 	Enclosure address.
 	</param>
 
-	<param type='int' name='slot'>
+	<param type='integer' name='slot'>
 	Slot address(es). This can be a comma-separated list meaning all disks
 	in the specified slots will be associated with the same array
 	</param>
 
-	<param type='int' name='raidlevel'>
-	RAID level. Raid 0, 1, 5, 6 and 10 are currently supported.
+	<param type='integer' name='raidlevel'>
+	RAID level. Raid 0, 1, 5, 6, 10, 50, 60 are currently supported.
 	</param>
 
-	<param type='int' name='hotspare' optional='1'>
+	<param type='integer' name='hotspare' optional='1'>
 	Slot address(es) of the hotspares associated with this array id. This
 	can be a comma-separated list (like the 'slot' parameter). If the
 	'arrayid' is 'global', then the specified slots are global hotspares.
 	</param>
 
-	<param type='string' name='arrayid'>
+	<param type='string' name='arrayid' optional='0'>
 	The 'arrayid' is used to determine which disks are grouped as part
 	of the same array. For example, all the disks with arrayid of '1' will
-	be part of the same array. Arrayids must be integers starting at 1
-	or greater. If the arrayid is 'global', then 'hotspare' must
-	have at least one slot definition (this is how one specifies a global
-	hotspare).
+	be part of the same array.
+
+	Arrayids must be integers starting at 1 or greater. If the arrayid is
+	'global', then 'hotspare' must have at least one slot definition (this
+	is how one specifies a global hotspare).
+
 	In addition, the arrays will be created in arrayid order, that is,
 	the array with arrayid equal to 1 will be created first, arrayid
 	equal to 2 will be created second, etc.
 	</param>
 
-	<example cmd='add storage controller backend-0-0 slot=1 raidlevel=0 arrayid=1'>
-	The disk in slot 1 on backend-0-0 should be a RAID 0 disk.
+	<example cmd='add storage controller slot=1 raidlevel=0 arrayid=1'>
+	The disk in slot 1 should be a RAID 0 disk.
 	</example>
 
-	<example cmd='add storage controller backend-0-0 slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2'>
-	The disks in slots 2-6 on backend-0-0 should be a RAID 6 with two
-	hotspares associated with the array in slots 7 and 8.
+	<example cmd='add storage controller slot=2,3,4,5,6 raidlevel=6 hotspare=7,8 arrayid=2'>
+	The disks in slots 2-6 should be a RAID 6 with two hotspares associated
+	with the array in slots 7 and 8.
 	</example>
 	"""
 
-	def checkIt(self, name, scope, tableid, adapter, enclosure, slot):
-		self.db.execute("""select scope, tableid, adapter, enclosure,
-			slot from storage_controller where
-			scope = '%s' and tableid = %s and adapter = %s and
-			enclosure = %s and slot = %s""" % (scope, tableid,
-			adapter, enclosure, slot))
-
-		row = self.db.fetchone()
-
-		if row:
-			label = [ 'scope', 'name' ]
-			value = [ scope, name ]
-
-			if adapter > -1:
-				label.append('adapter')
-				value.append('%s' % adapter)
-			if enclosure > -1:
-				label.append('enclosure')
-				value.append('%s' % enclosure)
-
-			label.append('slot')
-			value.append('%s' % slot)
-
-			raise CommandError(self, 'disk specification %s %s already exists in the database' % ('/'.join(label), '/'.join(value)))
-
-
 	def run(self, params, args):
-		scope = None
-		oses = []
-		appliances = []
-		hosts = []
+		# Get the scope and make sure the args are valid
+		scope, = self.fillParams([('scope', 'global')])
+		scope_mappings = self.getScopeMappings(args, scope)
 
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
-
-			try:
-				appliances = self.getApplianceNames(args)
-			except:
-				appliances = []
-
-			try:
-				hosts = self.getHostnames(args)
-			except:
-				hosts = []
-		else:
-			raise CommandError(self, 'must supply zero or one argument')
-
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-		if not scope:
-			raise CommandError(self, 'argument "%s" must be a valid os, appliance name or host name' % args[0])
-
-		if scope == 'global':
-			name = 'global'
-		else:
-			name = args[0]
-
-		adapter, enclosure, slot, hotspare, raidlevel, arrayid, options, force = self.fillParams([
+		# Now validate the params
+		adapter, enclosure, slot, hotspare, raidlevel, arrayid, options = self.fillParams([
 			('adapter', None),
 			('enclosure', None),
 			('slot', None),
 			('hotspare', None),
 			('raidlevel', None),
 			('arrayid', None, True),
-			('options', ''),
-			('force', 'n')
-			])
+			('options', '')
+		])
 
+		# Gotta have either a hotspare list or a slot list
 		if not hotspare and not slot:
-			raise ParamRequired(self, [ 'slot', 'hotspare' ])
+			raise ParamRequired(self, ['slot', 'hotspare'])
+
+		# Non-global arrays need a raid level
 		if arrayid != 'global' and not raidlevel:
 			raise ParamRequired(self, 'raidlevel')
 
+		# Make sure the adapter is an integer greater than 0, if it exists
 		if adapter:
 			try:
 				adapter = int(adapter)
 			except:
 				raise ParamType(self, 'adapter', 'integer')
+
 			if adapter < 0:
 				raise ParamValue(self, 'adapter', '>= 0')
 		else:
 			adapter = -1
 
+		# Make sure the enclosure is an integer greater than 0, if it exists
 		if enclosure:
 			try:
 				enclosure = int(enclosure)
 			except:
 				raise ParamType(self, 'enclosure', 'integer')
+
 			if enclosure < 0:
 				raise ParamValue(self, 'enclosure', '>= 0')
 		else:
 			enclosure = -1
 
+		# Parse the slots
 		slots = []
 		if slot:
 			for s in slot.split(','):
+				# Make sure the slot is valid
 				if s == '*':
-					#
-					# represent '*' in the database as '-1'
-					#
+					# Represent '*' in the database as '-1'
 					s = -1
 				else:
 					try:
 						s = int(s)
 					except:
 						raise ParamType(self, 'slot', 'integer')
+
 					if s < 0:
 						raise ParamValue(self, 'slot', '>= 0')
+
 					if s in slots:
-						raise ParamError(self, 'slot', ' "%s" is listed twice' % s)
+						raise ParamError(
+							self, 'slot', f'"{s}" is listed twice'
+						)
+
+				# Needs to be unique in the scope
+				for scope_mapping in scope_mappings:
+					# Check that the route is unique for the scope
+					if self.db.count("""
+						(storage_controller.id)
+						FROM storage_controller,scope_map
+						WHERE storage_controller.scope_map_id = scope_map.id
+						AND storage_controller.adapter = %s
+						AND storage_controller.enclosure = %s
+						AND storage_controller.slot = %s
+						AND scope_map.scope = %s
+						AND scope_map.appliance_id <=> %s
+						AND scope_map.os_id <=> %s
+						AND scope_map.environment_id <=> %s
+						AND scope_map.node_id <=> %s
+					""", (adapter, enclosure, s, *scope_mapping)) != 0:
+		 				raise CommandError(
+							self,
+							f'disk specification for "{adapter}/'
+							f'{enclosure}/{s}" already exists'
+						)
+
+				# Looks good
 				slots.append(s)
 
+		# Parse the hotspares
 		hotspares = []
 		if hotspare:
 			for h in hotspare.split(','):
+				# Make sure the hotspare is valid
 				try:
 					h = int(h)
-				except:	
+				except:
 					raise ParamType(self, 'hotspare', 'integer')
+
 				if h < 0:
-					raise ParamValue(self, 'hostspare', '>= 0')
+					raise ParamValue(self, 'hotspare', '>= 0')
+
 				if h in hotspares:
-					raise ParamError(self, 'hostspare', ' "%s" is listed twice' % h)
+					raise ParamError(
+						self, 'hotspare', f'"{h}" is listed twice'
+					)
+
+				if h in slots:
+					raise ParamError(
+						self, 'hotspare', f'"{h}" is listed in slots'
+					)
+
+				# Needs to be unique in the scope
+				for scope_mapping in scope_mappings:
+					# Check that the route is unique for the scope
+					if self.db.count("""
+						(storage_controller.id)
+						FROM storage_controller,scope_map
+						WHERE storage_controller.scope_map_id = scope_map.id
+						AND storage_controller.adapter = %s
+						AND storage_controller.enclosure = %s
+						AND storage_controller.slot = %s
+						AND scope_map.scope = %s
+						AND scope_map.appliance_id <=> %s
+						AND scope_map.os_id <=> %s
+						AND scope_map.environment_id <=> %s
+						AND scope_map.node_id <=> %s
+					""", (adapter, enclosure, h, *scope_mapping)) != 0:
+		 				raise CommandError(
+							self,
+							f'disk specification for "{adapter}/'
+							f'{enclosure}/{h}" already exists'
+						)
+
+				# Looks good
 				hotspares.append(h)
 
-		if arrayid in [ 'global', '*' ]:
-			pass
-		else:
+		# Check the arrayid
+		if arrayid not in {'global', '*'}:
 			try:
 				arrayid = int(arrayid)
 			except:
 				raise ParamType(self, 'arrayid', 'integer')
+
 			if arrayid < 1:
-				raise ParamValue(self, 'arrayid', '>= 0')
+				raise ParamValue(self, 'arrayid', '>= 1')
 
 		if arrayid == 'global' and len(hotspares) == 0:
-			raise ParamError(self, 'arrayid', 'is "global" with no hotspares. Please supply at least one hotspare')
+			raise ParamError(self, 'arrayid', 'is "global" with no hotspares')
 
-		#
-		# look up the id in the appropriate 'scope' table
-		#
-		tableid = None
-		if scope == 'global':
-			tableid = -1
-		elif scope == 'appliance':
-			self.db.execute("""select id from appliances where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
-
-		elif scope == 'os':
-			self.db.execute("""select id from oses where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
-
-		elif scope == 'host':
-			self.db.execute("""select id from nodes where
-				name = %s """, name)
-			tableid, = self.db.fetchone()
-
-		#
-		# make sure the specification doesn't already exist
-		#
-		force = self.str2bool(force)
-		for slot in slots:
-			if not force:
-				self.checkIt(name, scope, tableid, adapter, enclosure,
-					slot)
-		for hotspare in hotspares:
-			if not force:
-				self.checkIt(name, scope, tableid, adapter, enclosure,
-					hotspare)
-
+		# Special encodings for arrayid
 		if arrayid == 'global':
 			arrayid = -1
 		elif arrayid == '*':
 			arrayid = -2
 
-		#
-		# now add the specifications to the database
-		#
-		for slot in slots:
-			self.db.execute("""insert into storage_controller
-				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
-				enclosure, slot, raidlevel, arrayid, options))
+		# Everything is valid, add the data for each scope_mapping
+		for scope_mapping in scope_mappings:
+			# Add the slots
+			for slot in slots:
+				# First add the scope mapping
+				self.db.execute("""
+					INSERT INTO scope_map(
+						scope, appliance_id, os_id, environment_id, node_id
+					)
+					VALUES (%s, %s, %s, %s, %s)
+				""", scope_mapping)
 
-		for hotspare in hotspares:
-			raidlevel = -1
-			if arrayid == 'global':
-				arrayid = -1
+				# Then add the slot controller entry
+				self.db.execute("""
+					INSERT INTO storage_controller(
+						scope_map_id, adapter, enclosure, slot,
+						raidlevel, arrayid, options
+					)
+					VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s, %s)
+				""", (adapter, enclosure, slot, raidlevel, arrayid, options))
 
-			self.db.execute("""insert into storage_controller
-				(scope, tableid, adapter, enclosure, slot,
-				raidlevel, arrayid, options) values (%s, %s, %s, %s,
-				%s, %s, %s, %s) """,(scope, tableid, adapter,
-				enclosure, hotspare, raidlevel, arrayid, options))
+			# And add the hotspares
+			for hotspare in hotspares:
+				# First add the scope mapping
+				self.db.execute("""
+					INSERT INTO scope_map(
+						scope, appliance_id, os_id, environment_id, node_id
+					)
+					VALUES (%s, %s, %s, %s, %s)
+				""", scope_mapping)
 
+				# Then add the hotspare controller entry
+				self.db.execute("""
+					INSERT INTO storage_controller(
+						scope_map_id, adapter, enclosure, slot,
+						raidlevel, arrayid, options
+					)
+					VALUES (LAST_INSERT_ID(), %s, %s, %s, '-1', %s, %s)
+				""", (adapter, enclosure, hotspare, arrayid, options))

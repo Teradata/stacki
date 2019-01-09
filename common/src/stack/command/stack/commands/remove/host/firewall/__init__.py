@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
@@ -26,33 +26,11 @@ class Command(stack.commands.remove.host.command):
 	<param type='string' name='rulename' optional='0'>
 	Name of host-specific rule
 	</param>
-
 	"""
 
 	def run(self, params, args):
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		(rulename, ) = self.fillParams([ ('rulename', None, True) ])
-
-		for host in self.getHostnames(args):
-			# Make sure our rule exists
-			if self.db.count("""
-				(*) from node_firewall
-				where name=%s and node=(
-					select id from nodes where name=%s
-				)""", (rulename, host)
-			) == 0:
-				raise CommandError(
-					self,
-					f'firewall rule {rulename} does not '
-					f'exist for host {host}'
-				)
-
-			# It exists, so delete it
-			self.db.execute("""
-				delete from node_firewall
-				where name=%s and node=(
-					select id from nodes where name=%s
-				)
-			""", (rulename, host))
+		self.command('remove.firewall', self._argv + ['scope=host'])
+		return self.rc

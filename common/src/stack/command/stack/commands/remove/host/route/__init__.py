@@ -18,7 +18,7 @@ class Command(stack.commands.remove.host.command):
 	"""
 	Remove a static route for a host.
 
-	<arg type='string' name='host' repeat='1'>
+	<arg type='string' name='host' repeat='1' optional='0'>
 	Name of a host machine.
 	</arg>
 
@@ -42,27 +42,8 @@ class Command(stack.commands.remove.host.command):
 	"""
 
 	def run(self, params, args):
-		if len(args) < 1:
+		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		hosts = self.getHostnames(args)
-		if not hosts:
-			raise ArgRequired(self, 'host')
-
-		(address, syncnow, ) = self.fillParams([
-			('address', None, True),
-			('syncnow', None)
-		])
-
-		syncnow = self.str2bool(syncnow)
-		me = self.db.getHostname()
-
-		for host in hosts:
-			result = self.db.execute("""
-				delete from node_routes
-				where node=(select id from nodes where name=%s) and network=%s
-			""", (host, address))
-
-			# Remove the route from the frontend, if needed
-			if syncnow and result and host == me:
-				self._exec(f'route del -host {address}', shlexsplit=True)
+		self.command('remove.route', self._argv + ['scope=host'])
+		return self.rc
