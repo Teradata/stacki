@@ -51,11 +51,13 @@ class Command(command):
 
 	def run(self, params, args):
 
-		nukeswitch, = self.fillParams([
+		nukeswitch, factory_reset, = self.fillParams([
 			('nukeswitch', False),
+			('factory_reset', False),
 		])
 
 		self.nukeswitch = self.str2bool(nukeswitch)
+		self.factory_reset = self.str2bool(factory_reset)
 
 		switches = self.getSwitchNames(args)
 
