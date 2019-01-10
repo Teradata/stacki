@@ -33,5 +33,5 @@ class Plugin(stack.commands.Plugin):
 		for host, values_dict in args.items():
 			self.owner.runImplementation(
 				name = f"{values_dict['firmware_attrs'][make_attr]}_{values_dict['firmware_attrs'][model_attr]}",
-				args = (host, values_dict['file'])
+				args = (host, values_dict['current_firmware_version'], values_dict['file'], values_dict['version'])
 			)
