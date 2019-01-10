@@ -144,6 +144,7 @@ Vagrant.configure("2") do |config|
 
         provider.memory = "2048"
         provider.cpus = 2
+        provider.disk_bus = "sata"
         provider.nic_model_type = "e1000"
         provider.random :model => "random"
 
