@@ -15,6 +15,10 @@ class Command(stack.commands.sync.host.command):
 	Zero or more hosts to sync. If none are specified, all hosts will have their firmware synced.
 	</arg>
 
+	<param type='bool' name='force'>
+	Force the firmware update process to run for hosts that are already in sync.
+	</param>
+
 	<example cmd='sync host firmware switch-18-11>
 	If a compatible firmware version is tracked by stacki, the firmware will be synced to switch-18-11.
 	</example>
@@ -24,13 +28,10 @@ class Command(stack.commands.sync.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.notify('Sync Host Firmware\n')
-		hosts = self.getHostnames(names = args)
-
-		# sync all firmware first to ensure consistency with the DB
-		self.call(command = 'sync.firmware')
-
+	def get_hosts_to_sync(self, hosts):
+		"""Returns a dictionary keyed off of the hosts that are able to be synced based on their attributes
+		and the firmware data in the database.
+		"""
 		make_attr = 'component.make'
 		model_attr = 'component.model'
 		version_attr = 'component.firmware_version'
@@ -50,7 +51,7 @@ class Command(stack.commands.sync.host.command):
 			if version_attr in host_firmware_attrs:
 				row = self.db.select(
 					'''
-					firmware.file
+					firmware.file, firmware.version
 					FROM firmware
 						INNER JOIN firmware_model
 							ON firmware.model_id=firmware_model.id
@@ -69,13 +70,14 @@ class Command(stack.commands.sync.host.command):
 				else:
 					hosts_to_sync[host] = {
 						'file': Path(row[0][0]).resolve(strict = True),
-						'firmware_attrs': host_firmware_attrs
+						'version': row[0][1],
+						'firmware_attrs': host_firmware_attrs,
 					}
 
 			else:
 				rows = self.db.select(
 					'''
-					firmware.file
+					firmware.file, firmware.version
 					FROM firmware
 						INNER JOIN firmware_model
 							ON firmware.model_id=firmware_model.id
@@ -99,10 +101,50 @@ class Command(stack.commands.sync.host.command):
 					)
 				# else there's only one firmware for the make and model, so that is assumed to be the desired one
 				else:
-					hosts_to_sync[host] = hosts_to_sync[host] = {
+					hosts_to_sync[host] = {
 						'file': Path(rows[0][0]).resolve(strict = True),
+						'version': rows[0][1],
 						'firmware_attrs': host_firmware_attrs
 					}
 
+		return hosts_to_sync
+
+	def run(self, params, args):
+		self.notify('Sync Host Firmware\n')
+		hosts = self.getHostnames(names = args)
+		force, = self.fillParams(
+			names = [('force', False)],
+			params = params
+		)
+		force = self.str2bool(force)
+
+		# sync all firmware first to ensure consistency with the DB
+		self.call(command = 'sync.firmware')
+		# reduce to the hosts we can sync and process them.
+		hosts_to_sync = self.get_hosts_to_sync(hosts = hosts)
 		if hosts_to_sync:
+			# grab all the current firmware versions
+			current_firmware_versions = {
+				result['host']: result['current firmware version']
+				for result in self.call(command = 'list.host.firmware', args = list(hosts_to_sync.keys()))
+			}
+			# we need to check for hosts that already have the current version if force is not specified
+			if not force:
+				# get the hosts to skip
+				hosts_to_skip = []
+				for host, value in hosts_to_sync.items():
+					desired = value['version']
+					current = current_firmware_versions[host]
+					if desired == current:
+						self.notify(f"Skipping {host} because the current version {current} matches the desired version {desired}\n")
+						hosts_to_skip.append(host)
+
+				# remove them from the hosts to sync
+				for host in hosts_to_skip:
+					hosts_to_sync.pop(host)
+
+			# add the current version information
+			for host, value in hosts_to_sync.items():
+				value['current_firmware_version'] = current_firmware_versions[host]
+
 			self.runPlugins(args = hosts_to_sync)
