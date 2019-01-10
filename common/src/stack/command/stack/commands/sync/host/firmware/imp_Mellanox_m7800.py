@@ -11,6 +11,7 @@
 # @rocks@
 
 from pathlib import Path
+import re
 import stack.commands
 from stack.exception import CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
@@ -20,7 +21,7 @@ class Implementation(stack.commands.Implementation):
 	appliance = 'switch'
 
 	def run(self, args):
-		switch_name, firmware_file = args
+		switch_name, current_firmware_version, firmware_file, firmware_file_version = args
 
 		switch_attrs = self.owner.getHostAttrDict(switch_name)
 
@@ -31,7 +32,14 @@ class Implementation(stack.commands.Implementation):
 
 		kwargs = {key: value for key, value in kwargs.items() if value is not None}
 
-		self.owner.notify(f'Syncing firmware for {switch_name}\n')
+		notice = f'Syncing firmware {firmware_file_version} for {switch_name}.'
+		# check for downgrade as we have to do extra steps
+		downgrade = current_firmware_version > firmware_file_version
+		if downgrade:
+			# TODO: temporary skip
+			self.owner.notify(f'Mellanox firmware downgrade not yet supported. Skipping {switch_name}.\n')
+			return
+		self.owner.notify(notice + '\n')
 
 		# calculate the URL the switch can pull this image file from
 		url = self.get_frontend_url(switch_name = switch_name, firmware_file = firmware_file)
@@ -45,10 +53,14 @@ class Implementation(stack.commands.Implementation):
 		m7800_switch.image_fetch(url = url)
 		# install the firmware we just sent to the switch
 		m7800_switch.install_firmware(
+			# grab the filename from the switch on purpose in case it does something funky with it
 			image = m7800_switch.show_images().images_fetched_and_available[0].filename
 		)
 		# set the switch to boot from our installed image
 		m7800_switch.image_boot_next()
+		# perform extra downgrade steps if necessary
+		if downgrade:
+			pass
 		m7800_switch.reload()
 
 	def get_frontend_url(self, switch_name, firmware_file):
