@@ -30,7 +30,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no host data in json file')
 			return
 
-		self.notify('\n\tLoading host\n')
+		self.notify('\n\tLoading host')
 		# add each host then assign its various values to it
 		for host in import_data:
 			host_name = host['name']

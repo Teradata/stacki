@@ -15,10 +15,10 @@ from stack.commands.sync.host import timeout
 class Command(stack.commands.sync.host.command):
 	"""
 	Sync a repository configuration file to backend nodes.
-	
-	When a cart or pallet is added to the 
+
+	When a cart or pallet is added to the
 	frontend, to use the resulting repo but not
-	reinstall machines, sync the new repo to the 
+	reinstall machines, sync the new repo to the
 	backends for immediate use.
 
 	<example cmd='sync host repo'>
@@ -29,7 +29,7 @@ class Command(stack.commands.sync.host.command):
 	<example cmd='sync host repo backend-0-0'>
 	Sync the repository inventory file on backend-0-0
 	</example>
-	
+
 	<example cmd='sync repo backend-0-[0-2]'>
 	Using regex, sync repository inventory file on backend-0-0
 	backend-0-1, and backend-0-2.
@@ -38,7 +38,7 @@ class Command(stack.commands.sync.host.command):
 
 	def run(self, params, args):
 
-		self.notify('Sync Host Repo\n')
+		self.notify('Sync Host Repo')
 
 
 		hosts = self.getHostnames(args, managed_only=1)

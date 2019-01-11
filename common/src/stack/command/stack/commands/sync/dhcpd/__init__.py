@@ -25,9 +25,9 @@ t the
 
 	def run(self, params, args):
 
-		self.notify('Sync DHCP\n')
+		self.notify('Sync DHCP')
 
 		self.report('report.dhcpd')
-		
+
 		subprocess.call(['/sbin/service', 'dhcpd', 'restart'],
 				stdout=open('/dev/null'), stderr=open('/dev/null'))

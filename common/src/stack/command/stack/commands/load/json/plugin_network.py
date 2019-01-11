@@ -31,7 +31,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no network data in the json document')
 			return
 
-		self.notify('\n\tLoading network\n')
+		self.notify('\n\tLoading network')
 		# TODO: sanitize validate
 		for network in import_data:
 			name = network['name'].strip()

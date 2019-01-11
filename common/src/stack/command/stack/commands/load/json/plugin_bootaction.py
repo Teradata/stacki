@@ -31,7 +31,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no bootaction data in json file')
 			return
 
-		self.notify('\n\tLoading bootaction\n')
+		self.notify('\n\tLoading bootaction')
 
 		for profile in import_data:
 			action = profile['name']

@@ -20,7 +20,7 @@ class Command(stack.commands.sync.host.command,
 	"""
 	def run(self, params, args):
 
-		self.notify('Sync Host Config\n')
+		self.notify('Sync Host Config')
 
 		hosts = self.getHostnames(args)
 		attrs = {}
