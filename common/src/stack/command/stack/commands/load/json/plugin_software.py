@@ -31,7 +31,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no software data in json file')
 			return
 
-		self.notify('\n\tLoading software\n')
+		self.notify('\n\tLoading software')
 		# check to make sure 'box' 'pallet' and 'cart' all exist first to avoid a key error
 		# add boxes
 		if import_data['box']:

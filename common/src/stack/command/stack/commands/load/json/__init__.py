@@ -167,10 +167,10 @@ class Command(command):
 
 			# the usual load commands sync their configs after the load
 			if str2bool(sync):
-				self.notify('\tSyncing config\n')
+				self.notify('\tSyncing config')
 				self.command('sync.config')
 				self.log.info('config synced')
-				self.notify('\n\tSyncing host network localhost\n')
+				self.notify('\n\tSyncing host network localhost')
 				self.command('sync.host.network', [ 'localhost' ])
 				self.log.info('config synced')
 
@@ -179,11 +179,11 @@ class Command(command):
 			self.errors += 1
 
 		# report how well the load went
-		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\nCheck /var/log/load-json.log for details.\n')
+		self.notify(f'\nload finished with:\n{self.successes} successes\n{self.warnings} warnings\n{self.errors} errors\nCheck /var/log/load-json.log for details.')
 
 		# if there are errors, revert db changes and raise a CommandError
 		if self.errors != 0:
-			self.notify('\nThere were errors during the load, restoring the database. Check /var/log/load-json.log for details.\n')
+			self.notify('\nThere were errors during the load, restoring the database. Check /var/log/load-json.log for details.')
 			s = subprocess.run(['bash', '/var/db/restore-stacki-database.sh'])
 			if s.returncode != 0:
 				raise CommandError(self, 'There were errors and the database could not be restored. Check /var/log/load-json.log for details')

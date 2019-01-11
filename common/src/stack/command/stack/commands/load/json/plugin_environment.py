@@ -30,7 +30,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no environment data in json file')
 			return
 
-		self.notify('\n\tLoading environment\n')
+		self.notify('\n\tLoading environment')
 		for environment in import_data:
 			environment_name= environment['name']
 			self.owner.try_command('add.environment', [ environment_name ] , f'adding environment {environment_name}', 'exists')

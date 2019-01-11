@@ -15,14 +15,14 @@ from stack.commands.sync.host import timeout
 class Command(stack.commands.sync.host.command):
 	"""
 	Sync a an ansible inventory to nodes.
-	
+
 	Syncs the same file to every node in
 	/etc/ansible/hosts.
 
 	<param type='string' name='attribute'>
 	A shell syntax glob pattern to specify attributes to
-	be sent to the report generator. 
-	
+	be sent to the report generator.
+
 	Create group targets in the ini file.
 	</param>
 
@@ -51,7 +51,7 @@ class Command(stack.commands.sync.host.command):
 			pkeys = list(prms.keys())[0]
 			pvalues = list(prms.values())[0]
 
-		self.notify('Sync Host Ansible Inventory\n')
+		self.notify('Sync Host Ansible Inventory')
 
 
 		hosts = self.getHostnames(args, managed_only=0)
@@ -68,7 +68,7 @@ class Command(stack.commands.sync.host.command):
 		threads = []
 		ha = self.call('list.host.attr', hosts)
 		g = lambda x: (x['attr'], x['value'])
-		
+
 		host_attrs = {}
 		for host in hosts:
 			if host not in host_attrs:

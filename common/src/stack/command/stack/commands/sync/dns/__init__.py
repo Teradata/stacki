@@ -26,6 +26,6 @@ class Command(stack.commands.sync.command):
 
 	def run(self, params, args):
 
-		self.notify('Sync DNS\n')
+		self.notify('Sync DNS')
 		self.runPlugins()
 		subprocess.call(['systemctl','restart','named'])
