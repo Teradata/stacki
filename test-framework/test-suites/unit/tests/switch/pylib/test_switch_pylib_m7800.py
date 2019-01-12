@@ -532,3 +532,43 @@ class TestSwitchMellanoxM7800:
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		with pytest.raises(SwitchException):
 			test_switch._get_available_images(command_response = test_console_response)
+
+	@patch.object(SwitchMellanoxM7800, '_get_errors')
+	def test_disable_fallback_reboot(self, mock__get_errors, mock_expectmore):
+		"""Expect that a fallback reboot command is asked and that the response is checked for any errors."""
+		mock_expectmore.return_value.ask.return_value = 'testresults'
+		mock__get_errors.return_value = []
+		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
+		test_switch.disable_fallback_reboot()
+
+		mock_expectmore.return_value.ask.assert_called_with('no boot next fallback-reboot enable')
+		mock__get_errors.assert_called_with(command_response = mock_expectmore.return_value.ask.return_value)
+
+	@patch.object(SwitchMellanoxM7800, '_get_errors')
+	def test_disable_fallback_reboot_errors(self, mock__get_errors, mock_expectmore):
+		"""Expect that a fallback reboot command raises an exception on errors."""
+		mock__get_errors.return_value = ['a returned error message']
+
+		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
+		with pytest.raises(SwitchException):
+			test_switch.disable_fallback_reboot()
+
+	@patch.object(SwitchMellanoxM7800, '_get_errors')
+	def test_write_configuration(self, mock__get_errors, mock_expectmore):
+		"""Expect that a write configuration command is asked and that the response is checked for any errors."""
+		mock_expectmore.return_value.ask.return_value = 'testresults'
+		mock__get_errors.return_value = []
+		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
+		test_switch.write_configuration()
+
+		mock_expectmore.return_value.ask.assert_called_with('configuration write')
+		mock__get_errors.assert_called_with(command_response = mock_expectmore.return_value.ask.return_value)
+
+	@patch.object(SwitchMellanoxM7800, '_get_errors')
+	def test_write_configuration_errors(self, mock__get_errors, mock_expectmore):
+		"""Expect that a fallback reboot command raises an exception on errors."""
+		mock__get_errors.return_value = ['a returned error message']
+
+		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
+		with pytest.raises(SwitchException):
+			test_switch.write_configuration()
