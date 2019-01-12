@@ -651,3 +651,17 @@ class SwitchMellanoxM7800(Switch):
 		"""
 		errors = self._get_errors(command_response = command_response)
 		return errors if errors else 'unknown error'
+
+	def disable_fallback_reboot(self):
+		"""Command the switch to disable fallback reboot for the next reboot."""
+		results = self.proc.ask(cmd = 'no boot next fallback-reboot enable')
+		errors = self._get_errors(command_response = results)
+		if any(errors):
+			raise SwitchException(f'Disabling fallback reboot failed with error: {errors}')
+
+	def write_configuration(self):
+		"""Command the switch to write it's current configuration to non-volatile storage."""
+		results = self.proc.ask(cmd = 'configuration write')
+		errors = self._get_errors(command_response = results)
+		if any(errors):
+			raise SwitchException(f'Writing configuration failed with error: {errors}')
