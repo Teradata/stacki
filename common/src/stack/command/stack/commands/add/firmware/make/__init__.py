@@ -20,6 +20,12 @@ class Command(stack.commands.add.firmware.command):
 	One or more make names to add. Make names are required to be unique, and any duplicates will be ignored.
 	</arg>
 
+	<param type='string' name='version_regex'>
+	An optional regex to use to parse version results from the target hardware.
+	The model regex, if set, will be preferred over this one.
+	This needs to be a valid Python regex.
+	</param>
+
 	<example cmd="add firmware make chevrolet mercedes">
 	Adds two makes with the names 'chevrolet' and 'mercedes' to the set of available firmware makes.
 	</example>
