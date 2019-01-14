@@ -82,7 +82,7 @@ sg
 </stack:script>
 
 
-<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
+<stack:script stack:cond="boot_device and release == 'redhat6'" stack:stage="install-post">
 
 # Only proceed if boot_device is defined on this node
 if [ "x&boot_device;" == "x" ]; then

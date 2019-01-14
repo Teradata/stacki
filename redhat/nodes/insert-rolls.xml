@@ -19,12 +19,6 @@
         </stack:rocks>
 
 
-<stack:script stack:stage="install-post">
-<!-- Clean out pallets and carts directories before adding pallets -->
-find /export/stack/pallets/* -type d -prune -exec rm  -rf {} \;
-find /export/stack/carts/* -type d -prune -exec rm  -rf {} \;
-</stack:script>
-
 <stack:script stack:shell='/opt/stack/bin/python3' stack:stage="install-post">
 import os
 import os.path

@@ -17,4 +17,5 @@ class Plugin(stack.commands.Plugin):
 		return []
 
 	def run(self, args):
-		self.owner.command('sync.host')
+		if self.owner.getAttr('platform') not in [ 'docker', 'aws' ]:
+			self.owner.command('sync.host')

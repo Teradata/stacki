@@ -20,6 +20,7 @@ stack-command
 stack-config
 stack-config-server
 stack-discovery
+stack-docker
 stack-ekv
 stack-examples
 stack-kickstart

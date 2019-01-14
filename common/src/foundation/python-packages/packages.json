@@ -23,7 +23,7 @@
 	"flake8":		{ "fe": true, "bootstrap": true }, 
 	"jmespath":		{ "fe": true },
 	"mod-wsgi":		{ "fe": true },
-	"netifaces":		{ "fe": true, "be":"true"},
+	"netifaces":		{ "fe": true, "be":"true", "bootstrap": true },
 	"pexpect":		{ "fe": true },
 	"psutil":		{ "fe": true, "be": true, "bootstrap": true },
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 

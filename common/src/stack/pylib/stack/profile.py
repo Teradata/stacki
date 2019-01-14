@@ -1054,7 +1054,7 @@ class OrderIterator(stack.graph.GraphIterator):
 		# We do this by reversing all edges in the graph, and
 		# marking all nodes in HEAD's subtree.	Then for all
 		# the unmarked nodes create an edge from HEAD to the
-		# node.	 This will force the HEAD node to be as close
+    		# node.	 This will force the HEAD node to be as close
 		# as possible to the front of the topological order.
 
 		self.nodes = []		# We don't really use these but we

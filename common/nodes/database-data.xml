@@ -68,8 +68,8 @@ rm /tmp/my.cnf
 </stack:script>
 
 
-<stack:script cond="platform == 'aws'" stack:stage="install-post">
-<!-- Frontend DHCPs in AWS -->
+<stack:script cond="platform in ['aws', 'docker']" stack:stage="install-post">
+<!-- Frontend DHCPs -->
 /opt/stack/bin/stack set host interface options &Kickstart_PrivateHostname; interface=&Kickstart_PrivateInterface; options=dhcp
 </stack:script>
 

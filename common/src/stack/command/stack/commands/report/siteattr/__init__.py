@@ -39,7 +39,11 @@ class Command(stack.commands.report.command):
 		net       = ipaddress.IPv4Network('%s/%s' % (ip, mask), strict=False)
 
 		(gateway, dev) = netifaces.gateways()['default'][netifaces.AF_INET]
-		(hostname, domainname) = fqdn.split('.', 1)
+		try:
+			(hostname, domainname) = fqdn.split('.', 1)
+		except ValueError:
+			hostname = fqdn
+			domainname = ''
 
 		nameserver = ''
 		with open('/etc/resolv.conf', 'r') as fin:

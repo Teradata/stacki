@@ -1,0 +1,14 @@
+<stack:stack>
+
+	<stack:copyright>
+	</stack:copyright>
+
+	<stack:package>stack-docker</stack:package>
+
+<stack:script stack:stage="boot-post">
+
+systemctl enable stack-docker-barnacle
+
+</stack:script>
+
+</stack:stack>
