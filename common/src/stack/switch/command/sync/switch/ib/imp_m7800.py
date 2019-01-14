@@ -64,9 +64,17 @@ class Implementation(stack.commands.Implementation):
 
 		s = SwitchMellanoxM7800(switch, **kwargs)
 		s.connect()
+		if self.owner.factory_reset:
+			s.factory_reset()
+			return
+
 		if self.owner.nukeswitch:
 			self.nuke(s)
 			return
+
+		# set the password if provided
+		if 'password' in kwargs:
+			s.set_password()
 
 		try:
 			pubkey = open('/root/.ssh/id_rsa.pub').read()
@@ -101,7 +109,7 @@ class Implementation(stack.commands.Implementation):
 		for part in unused_partitions:
 			s.del_partition(part)
 
-		# for each partition in the database, add if it doesn't exist, 
+		# for each partition in the database, add if it doesn't exist,
 		live_partitions = s.partitions
 		for part in db_partitions:
 			if part not in live_partitions:

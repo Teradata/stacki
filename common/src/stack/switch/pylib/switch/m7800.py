@@ -42,10 +42,9 @@ class SwitchMellanoxM7800(Switch):
 		self.username = username
 		self.password = password
 
-		self.stacki_server_ip = None
 		self.switchname = switchname
 		self.proc = ExpectMore()
-		self.proc.PROMPTS = (['.config. #', ' >', ' #'])
+		self.proc.PROMPTS = (['.config. #', ' >', ' #', 'initial configuration?'])
 
 
 	def connect(self):
@@ -64,18 +63,25 @@ class SwitchMellanoxM7800(Switch):
 		except ExpectMoreException:
 			raise SwitchException(f'Connection to switch at "{self.username}@{self.switch_ip_address}" unavailable')
 
-		if self.proc.match_index == 0:
-			info('password-based auth')
-			# password-based auth
-			self.proc.say(self.password)
-		# otherwise, key-based auth is already setup
-
 		login_seq = [
 			([' >', ''], 'terminal length 999'),
 			(' >', 'enable'),
 			(' #', 'configure terminal'),
 			('.config. #', ''),
 		]
+
+		if self.proc.match_index == 0:
+			info('password-based auth')
+			# password-based auth
+			try:
+				self.proc.say(self.password)
+			except ExpectMoreException:
+				# try again with a factory default password
+				self.proc.say('admin')
+				# insert the conversation to disable the setup wizard
+				# we are assuming this is a factory defaulted box
+				login_seq.insert(0, ('', 'no'))
+		# otherwise, key-based auth is already setup
 
 		self.proc.conversation(login_seq)
 
@@ -91,6 +97,19 @@ class SwitchMellanoxM7800(Switch):
 		if self.proc.isalive():
 			self.proc.end('quit')
 
+	def set_password(self):
+		"""Set the password on the switch to what we were initialized with."""
+		# set the password for the given user
+		self.proc.conversation(
+			[
+				('', f'username {self.username} password'),
+				('Password:', self.password),
+				('Confirm:', self.password),
+			]
+		)
+		# disconnect and reconnect using the new password.
+		self.disconnect()
+		self.connect()
 
 	@property
 	def subnet_manager(self):
@@ -372,6 +391,18 @@ class SwitchMellanoxM7800(Switch):
 		"""
 		self.proc.end(quit_cmd = 'reload noconfirm')
 
+	def factory_reset(self):
+		"""Comands the switch to perform a factory reset.
+
+		This will clear all configuration and reboot the switch. connect() must be
+		called again after it reboots to perform any further commands.
+		"""
+		self.proc.conversation(
+			[
+				('', 'reset factory'),
+				('reset:', 'YES'),
+			]
+		)
 
 	def image_boot_next(self):
 		"""Commands the switch to toggle which partition to boot from next.
