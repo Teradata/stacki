@@ -30,7 +30,7 @@ class Command(stack.commands.add.host.command):
 	Sends "hello world" over the debug channel using the Message
 	Queue on backend-0-0.
 	</example>
-	
+
 	"""
 
 	def run(self, params, args):
