@@ -198,8 +198,8 @@ CREATE TABLE networks (
 DROP TABLE IF EXISTS subnets;
 CREATE TABLE subnets (
 	ID		int(11)	NOT NULL AUTO_INCREMENT,
-	name		varchar(32)	UNIQUE NOT NULL,
-	zone		varchar(64)	NOT NULL ,
+	name		varchar(128)	UNIQUE NOT NULL,
+	zone		varchar(255)	NOT NULL ,
 	address		varchar(32)	NOT NULL,
 	mask		varchar(32)	NOT NULL,
 	gateway		varchar(32),
