@@ -37,9 +37,9 @@ class Implementation(stack.commands.Implementation):
 		downgrade = current_firmware_version > firmware_file_version
 		if downgrade:
 			# TODO: temporary skip
-			self.owner.notify(f'Mellanox firmware downgrade not yet supported. Skipping {switch_name}.\n')
+			self.owner.notify(f'Mellanox firmware downgrade not yet supported. Skipping {switch_name}.')
 			return
-		self.owner.notify(notice + '\n')
+		self.owner.notify(notice)
 
 		# calculate the URL the switch can pull this image file from
 		url = self.get_frontend_url(switch_name = switch_name, firmware_file = firmware_file)

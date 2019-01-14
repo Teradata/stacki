@@ -38,5 +38,5 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		self.notify('Sync Firmware\n')
+		self.notify('Sync Firmware')
 		self.runPlugins(args = (params, args))

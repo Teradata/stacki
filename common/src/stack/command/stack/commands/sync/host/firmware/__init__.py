@@ -44,7 +44,7 @@ class Command(stack.commands.sync.host.command):
 			}
 			# if make and model are not set, there's nothing to do for this host.
 			if not host_firmware_attrs or not all(key in host_firmware_attrs for key in (make_attr, model_attr)):
-				self.notify(f'Skipping {host} because {make_attr} and {model_attr} attributes are not both set.\n')
+				self.notify(f'Skipping {host} because {make_attr} and {model_attr} attributes are not both set.')
 				continue
 
 			# get the desired firmware version
@@ -110,7 +110,7 @@ class Command(stack.commands.sync.host.command):
 		return hosts_to_sync
 
 	def run(self, params, args):
-		self.notify('Sync Host Firmware\n')
+		self.notify('Sync Host Firmware')
 		hosts = self.getHostnames(names = args)
 		force, = self.fillParams(
 			names = [('force', False)],
@@ -136,7 +136,7 @@ class Command(stack.commands.sync.host.command):
 					desired = value['version']
 					current = current_firmware_versions[host]
 					if desired == current:
-						self.notify(f"Skipping {host} because the current version {current} matches the desired version {desired}\n")
+						self.notify(f"Skipping {host} because the current version {current} matches the desired version {desired}")
 						hosts_to_skip.append(host)
 
 				# remove them from the hosts to sync
