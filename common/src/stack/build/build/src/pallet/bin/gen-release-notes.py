@@ -4,20 +4,20 @@
 # @copyright@
 
 import sys
+import optparse
 import re
 from collections import OrderedDict
 from git import Repo
-
 
 class CommitProcessor():
 
 	tag = re.compile('tags/stacki\-([a-z0-9.]+)\^0$')
 	cat = re.compile('^([A-Z]+[A-Z ]+[A-Z]+):\s*(.*)$')
 	
-	def __init__(self, commits):
+	def __init__(self, commits, release):
 		self.commits = OrderedDict()
 		
-		release = ''
+		release = release
 		for commit in commits:
 			release = self.process(release, commit)
 
@@ -88,14 +88,29 @@ class CommitProcessor():
 
 		
 try:
-	repo = Repo('../../../..')
+	repo = Repo(search_parent_directories=True)
 except: # when rpm is building this is correct
-	repo = Repo('../../..')
-assert not repo.bare
+	repo = None
 
-release = '%s' % repo.active_branch
+assert repo != None, "No Git Repo found"
 
-cp = CommitProcessor(repo.iter_commits('stacki-5.0.1-rhel7..'))
+parser = optparse.OptionParser()
+parser.add_option("-s", "--starttag",action="store",dest="starttag", help="git hash/tag/commit to start reading from", default="")
+parser.add_option("-e", "--endtag",action="store",dest="endtag", help="git hash/tag/commit to end. Defaults to last commit", default="HEAD")
+parser.add_option("-r", "--release",action="store",dest="release", help="Release to target. Defaults to currently active branch", default=str(repo.active_branch))
+
+(options, args) = parser.parse_args()
+
+starttag = options.starttag
+endtag = options.endtag
+release = options.release
+
+commitrange = ""
+if starttag != "":
+	commitrange = f"{starttag}.."
+commitrange = f"{commitrange}{endtag}"
+
+cp = CommitProcessor(repo.iter_commits(commitrange), release=release)
 for release in cp.commits.keys():
 	print('# %s' % release)
 	for category in [ 'feature', 'bugfix', 'docs', 'breaking change', 'git' ]:
@@ -108,9 +123,4 @@ for release in cp.commits.keys():
 					for line in message.split('\n'):
 						print('  %s' % line)
 	print('\n')
-		
-
-
-
-
 

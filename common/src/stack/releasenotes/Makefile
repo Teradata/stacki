@@ -6,14 +6,15 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
-DEPENDS.FILES   = gen.py
+
+COMMIT_START	= stacki-5.0.1-rhel7
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 bootstrap: install-rpm
 
 ReleaseNotes.txt:
-	/opt/stack/bin/python3 ./gen.py > $@
+	/opt/stack/bin/python3 $(PALLETBUILD)/bin/gen-release-notes.py -s $(COMMIT_START) > $@
 
 build: ReleaseNotes.txt
 
