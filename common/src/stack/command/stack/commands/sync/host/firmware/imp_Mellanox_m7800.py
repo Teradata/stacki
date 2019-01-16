@@ -11,7 +11,6 @@
 # @rocks@
 
 from pathlib import Path
-import re
 import stack.commands
 from stack.exception import CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800

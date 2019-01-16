@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError
+from stack.exception import ArgRequired, ArgError, CommandError
 
 class Plugin(stack.commands.Plugin):
 	"""Attempts to add all provided make names to the database."""
@@ -25,17 +25,12 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(cmd = self.owner, arg = 'make')
 
 		# get rid of any duplicate names
-		makes = tuple(set(args))
-		# ensure the make name doesn't already exist
-		existing_makes = [
-			make
-			for make, count in (
-				(make, self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make)) for make in makes
-			)
-			if count > 0
-		]
-		if existing_makes:
-			raise ArgError(cmd = self.owner, arg = 'make', msg = f'The following firmware makes already exist: {existing_makes}.')
+		makes = self.owner.remove_duplicates(args = args)
+		# ensure the make names don't already exist
+		try:
+			self.owner.validate_unique_makes(makes = makes)
+		except CommandError as exception:
+			raise ArgError(cmd = self.owner, arg = 'make', msg = exception.message())
 
 		for make in args:
 			self.owner.db.execute(

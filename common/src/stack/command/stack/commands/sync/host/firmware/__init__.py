@@ -6,8 +6,9 @@
 
 from pathlib import Path
 import stack.commands
+from stack.commands.argument_processors import FirmwareArgumentProcessor
 
-class Command(stack.commands.sync.host.command):
+class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
 	"""
 	Syncs firmware to hosts that are compatible with the firmware
 

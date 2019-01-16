@@ -10,13 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-from pathlib import Path
-from urllib.parse import urlparse
-import hashlib
-import uuid
 import stack.commands
-from stack.exception import ArgError, ParamRequired, ParamError
-from stack.util import flatten
 
 class Plugin(stack.commands.Plugin):
 	"""Attempts to sync firmware to hosts"""
