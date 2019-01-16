@@ -35,38 +35,16 @@ class Plugin(stack.commands.Plugin):
 			raise ParamRequired(cmd = self.owner, param = 'make')
 
 		# get rid of any duplicate names
-		models = tuple(set(args))
+		models = self.owner.remove_duplicates(args = args)
 		# ensure the model name doesn't already exist for the given make
-		existing_makes_models = [
-			(make, model)
-			for make, model, count in (
-				(
-					make,
-					model,
-					self.owner.db.count(
-						'''
-						(firmware_model.id)
-						FROM firmware_model
-							INNER JOIN firmware_make
-								ON firmware_model.make_id=firmware_make.id
-						WHERE firmware_model.name=%s AND firmware_make.name=%s
-						''',
-						(model, make)
-					)
-				)
-				for model in models
-			)
-			if count > 0
-		]
-		if existing_makes_models:
-			raise CommandError(cmd = self.owner, msg = f'The following make and model combinations already exist {existing_makes_models}.')
+		self.owner.validate_unique_models(make = make, models = models)
 
 		# create the make if it doesn't already exist
-		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
+		if not self.owner.make_exists(make = make):
 			self.owner.call(command = 'add.firmware.make', args = [make])
 
 		# get the ID of the make to associate with
-		make_id = self.owner.db.select('id FROM firmware_make WHERE name=%s', make)[0][0]
+		make_id = self.owner.get_make_id(make = make)
 
 		for model in models:
 			self.owner.db.execute(

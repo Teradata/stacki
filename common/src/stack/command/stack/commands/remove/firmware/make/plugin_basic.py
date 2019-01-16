@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError
+from stack.exception import ArgRequired, ArgError, CommandError
 
 class Plugin(stack.commands.Plugin):
 	"""Attempts to remove all provided makes and any associated models from the database."""
@@ -25,17 +25,12 @@ class Plugin(stack.commands.Plugin):
 			raise ArgRequired(self.owner, 'make')
 
 		# get rid of any duplicate names
-		makes = tuple(set(args))
+		makes = self.owner.remove_duplicates(args)
 		# ensure the family names already exist
-		missing_makes = [
-			make
-			for make, count in (
-				(make, self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make)) for make in makes
-			)
-			if count == 0
-		]
-		if missing_makes:
-			raise ArgError(cmd = self.owner, arg = 'make', msg = f"The following firmware makes don't exist: {missing_makes}.")
+		try:
+			self.owner.validate_makes_exist(makes = makes)
+		except CommandError as exception:
+			raise ArgError(cmd = self.owner, arg = 'make', msg = exception.message())
 
 		# remove associated models
 		for make in makes:

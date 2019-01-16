@@ -76,8 +76,8 @@ class Plugin(stack.commands.Plugin):
 			# grab the source file and copy it into the destination file
 			try:
 				source_file = Path(url.path).resolve(strict = True)
-			except FileNotFoundError as ex:
-				raise ParamError(cmd = self.owner, param = 'source', msg = f'{ex}')
+			except FileNotFoundError as exception:
+				raise ParamError(cmd = self.owner, param = 'source', msg = f'{exception}')
 
 			final_file.write_bytes(source_file.read_bytes())
 		# add more supported schemes here
@@ -108,23 +108,13 @@ class Plugin(stack.commands.Plugin):
 
 	def add_related_entries(self, make, model, cleanup):
 		"""Adds the related database entries if they do not exist."""
-
 		# create the make if it doesn't already exist
-		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
+		if not self.owner.make_exists(make = make):
 			self.owner.call(command = 'add.firmware.make', args = [make])
 			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.make', args = [make]))
 
 		# create the model if it doesn't already exist
-		if not self.owner.db.count(
-			'''
-			(firmware_model.id)
-			FROM firmware_model
-				INNER JOIN firmware_make
-					ON firmware_model.make_id=firmware_make.id
-			WHERE firmware_model.name=%s AND firmware_make.name=%s
-			''',
-			(model, make)
-		):
+		if not self.owner.model_exists(make = make, model = model):
 			self.owner.call(command = 'add.firmware.model', args = [model, f'make={make}'])
 			cleanup.callback(lambda: self.owner.call(command = 'remove.firmware.model', args = [model, f'make={make}']))
 
@@ -147,19 +137,12 @@ class Plugin(stack.commands.Plugin):
 		)
 
 		# ensure the firmware version doesn't already exist for the given model
-		if self.owner.db.count(
-			'''
-			(firmware.id)
-			FROM firmware
-				INNER JOIN firmware_model
-					ON firmware.model_id=firmware_model.id
-				INNER JOIN firmware_make
-					ON firmware_model.make_id=firmware_make.id
-			WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
-			''',
-			(version, make, model)
-		):
-			raise ArgError(cmd = self.owner, arg = 'version', msg = f'The firmware version {version} for make {make} and model {model} already exists.')
+		if self.owner.firmware_exists(make, model, version):
+			raise ArgError(
+				cmd = self.owner,
+				arg = 'version',
+				msg = f'The firmware version {version} for make {make} and model {model} already exists.'
+			)
 
 		# we use ExitStack to hold our cleanup operations and roll back should something fail.
 		with ExitStack() as cleanup:
@@ -176,18 +159,7 @@ class Plugin(stack.commands.Plugin):
 			self.add_related_entries(make = make, model = model, cleanup = cleanup)
 
 			# get the ID of the model to associate with
-			model_id = self.owner.db.select('(id) FROM firmware_model WHERE name=%s', model)[0][0]
-			# get the ID of the model to associate with
-			model_id = self.owner.db.select(
-				'''
-				firmware_model.id
-				FROM firmware_model
-					INNER JOIN firmware_make
-						ON firmware_model.make_id=firmware_make.id
-				WHERE firmware_make.name=%s AND firmware_model.name=%s
-				''',
-				(make, model)
-			)[0][0]
+			model_id = self.owner.get_model_id(make, model)
 			# insert into DB associated with make + model
 			self.owner.db.execute(
 				'''

@@ -39,11 +39,11 @@ class Plugin(stack.commands.Plugin):
 		version_regex = args[0]
 		try:
 			re.compile(version_regex)
-		except re.error as ex:
+		except re.error as exception:
 			raise ParamError(
 				cmd = self.owner,
 				param = 'version_regex',
-				msg = f'Invalid regex supplied: {ex}.'
+				msg = f'Invalid regex supplied: {exception}.'
 			)
 
 		self.owner.db.execute(
