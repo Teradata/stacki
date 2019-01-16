@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError, ParamError, ParamRequired
+from stack.exception import ArgRequired, ArgError, ParamError, ParamRequired, CommandError
 from pathlib import Path
 
 class Plugin(stack.commands.Plugin):
@@ -36,49 +36,28 @@ class Plugin(stack.commands.Plugin):
 			raise ParamRequired(cmd = self.owner, param = 'model')
 
 		# get rid of any duplicate names
-		versions = tuple(set(args))
+		versions = self.owner.remove_duplicates(args)
 		# ensure the make and model already exist
-		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
-			raise ParamError(cmd = self.owner, param = 'make', msg = f"The firmware make {make} doesn't exist.")
-		if not self.owner.db.count(
-			'''
-			(firmware_model.id)
-			FROM firmware_model
-				INNER JOIN firmware_make
-					ON firmware_model.make_id=firmware_make.id
-			WHERE firmware_make.name=%s AND firmware_model.name=%s
-			''',
-			(make, model)
-		):
-			raise ParamError(cmd = self.owner, param = 'model', msg = f"The firmware model {model} for make {make} doesn't exist.")
-		# ensure the versions exist
-		missing_versions = [
-			version
-			for version, count in (
-				(
-					version,
-					self.owner.db.count(
-						'''
-						(firmware.id)
-						FROM firmware
-							INNER JOIN firmware_model
-								ON firmware.model_id=firmware_model.id
-							INNER JOIN firmware_make
-								ON firmware_model.make_id=firmware_make.id
-						WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
-						''',
-						(version, make, model)
-					)
-				)
-				for version in versions
+		if not self.owner.make_exists(make):
+			raise ParamError(
+				cmd = self.owner,
+				param = 'make',
+				msg = f"The firmware make {make} doesn't exist."
 			)
-			if count == 0
-		]
-		if missing_versions:
+		if not self.owner.model_exists(make, model):
+			raise ParamError(
+				cmd = self.owner,
+				param = 'model',
+				msg = f"The firmware model {model} for make {make} doesn't exist."
+			)
+		# ensure the versions exist
+		try:
+			self.owner.validate_firmwares_exist(make = make, model = model, versions = versions)
+		except CommandError as exception:
 			raise ArgError(
 				cmd = self.owner,
 				arg = 'version',
-				msg = f"The following firmware versions don't exist for make {make} and model {model}: {missing_versions}."
+				msg = exception.message()
 			)
 
 		# get the firmware to remove

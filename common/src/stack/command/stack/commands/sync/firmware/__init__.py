@@ -5,8 +5,9 @@
 # @copyright@
 
 import stack.commands
+from stack.commands.argument_processors import FirmwareArgumentProcessor
 
-class command(stack.commands.sync.command):
+class command(stack.commands.sync.command, FirmwareArgumentProcessor):
 	pass
 
 

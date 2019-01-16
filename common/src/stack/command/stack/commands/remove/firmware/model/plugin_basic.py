@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError, ParamError, ParamRequired
+from stack.exception import ArgRequired, ArgError, ParamError, ParamRequired, CommandError
 from pathlib import Path
 
 class Plugin(stack.commands.Plugin):
@@ -34,41 +34,23 @@ class Plugin(stack.commands.Plugin):
 			raise ParamRequired(cmd = self.owner, param = 'make')
 
 		# get rid of any duplicate names
-		models = tuple(set(args))
+		models = self.owner.remove_duplicates(args)
 		# ensure the make name already exists
-		if not self.owner.db.count('(id) FROM firmware_make WHERE name=%s', make):
+		if not self.owner.make_exists(make = make):
 			raise ParamError(cmd = self.owner, param = 'make', msg = f"The firmware make {make} doesn't exist.")
 		# ensure the models exist
-		missing_models = [
-			model
-			for model, count in (
-				(
-					model,
-					self.owner.db.count(
-						'''
-						(firmware_model.id)
-						FROM firmware_model
-							INNER JOIN firmware_make
-								ON firmware_model.make_id=firmware_make.id
-						WHERE firmware_make.name=%s AND firmware_model.name=%s
-						''',
-						(make, model)
-					)
-				)
-				for model in models
-			)
-			if count == 0
-		]
-		if missing_models:
+		try:
+			self.owner.validate_models_exist(make, models)
+		except CommandError as exception:
 			raise ArgError(
 				cmd = self.owner,
 				arg = 'model',
-				msg = f"The following firmware models don't exist for make {make}: {missing_models}."
+				msg = exception.message()
 			)
 
 		# remove associated firmware
 		for model in models:
-			# get all the models associated with this make
+			# get all the firmware associated with this make and model
 			firmware_to_remove = [
 				row[0] for row in
 				self.owner.db.select(
