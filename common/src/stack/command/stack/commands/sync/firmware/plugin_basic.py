@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import hashlib
 import uuid
 import stack.commands
-from stack.exception import ArgError, ParamRequired, ParamError
+from stack.exception import ArgError, ParamRequired, ParamError, CommandError
 from stack.util import flatten
 
 class Plugin(stack.commands.Plugin):
@@ -43,8 +43,8 @@ class Plugin(stack.commands.Plugin):
 			# grab the source file and copy it into the destination file
 			try:
 				source_file = Path(url.path).resolve(strict = True)
-			except FileNotFoundError as ex:
-				raise ParamError(cmd = self.owner, param = 'source', msg = f'{ex}')
+			except FileNotFoundError as exception:
+				raise ParamError(cmd = self.owner, param = 'source', msg = f'{exception}')
 
 			final_file.write_bytes(source_file.read_bytes())
 		# add more supported schemes here
@@ -86,7 +86,7 @@ class Plugin(stack.commands.Plugin):
 			params = params
 		)
 		# get rid of any duplicate names
-		versions = tuple(set(args))
+		versions = self.owner.remove_duplicates(args)
 
 		if versions:
 			# if versions were provided, require a make and model
@@ -95,38 +95,18 @@ class Plugin(stack.commands.Plugin):
 			if model is None:
 				raise ParamRequired(cmd = self.owner, param = 'model')
 			# ensure the versions exist in the DB
-			missing_versions = [
-				version
-				for version, count in (
-					(
-						version,
-						self.owner.db.count(
-							'''
-							(firmware.id)
-							FROM firmware
-								INNER JOIN firmware_model
-									ON firmware.model_id=firmware_model.id
-								INNER JOIN firmware_make
-									ON firmware_model.make_id=firmware_make.id
-							WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
-							''',
-							(version, make, model)
-						)
-					)
-					for version in versions
-				)
-				if count == 0
-			]
-			if missing_versions:
+			try:
+				self.owner.validate_firmwares_exist(make = make, model = model, versions = versions)
+			except CommandError as exception:
 				raise ArgError(
 					cmd = self.owner,
 					arg = 'version',
-					msg = f"The following firmware versions don't exist for make {make} and model {model}: {missing_versions}."
+					msg = exception.message()
 				)
 			# check the files for the versions specified
 			for row in self.owner.db.select(
 				'''
-				firmware.source, firmware.version, firmware.hash_alg, firmware.hash, firmware.file
+				firmware.source, firmware.hash_alg, firmware.hash, firmware.file
 				FROM firmware
 					INNER JOIN firmware_model
 						ON firmware.model_id=firmware_model.id
@@ -136,7 +116,7 @@ class Plugin(stack.commands.Plugin):
 				''',
 				(versions, make, model)
 			):
-				source, version, hash_alg, hash_value, local_file = row
+				source, hash_alg, hash_value, local_file = row
 				# check that the local file exists, and fetch it if not
 				if not Path(local_file).exists():
 					local_file = self.fetch_firmware(source = source, make = make, model = model, filename = local_file.name)
@@ -146,7 +126,7 @@ class Plugin(stack.commands.Plugin):
 		else:
 			for row in self.owner.db.select(
 				'''
-				firmware.source, firmware.version, firmware.hash_alg, firmware.hash, firmware.file, firmware_make.name, firmware_model.name
+				firmware.source, firmware.hash_alg, firmware.hash, firmware.file, firmware_make.name, firmware_model.name
 				FROM firmware
 					INNER JOIN firmware_model
 						ON firmware.model_id=firmware_model.id
@@ -154,7 +134,7 @@ class Plugin(stack.commands.Plugin):
 						ON firmware_model.make_id=firmware_make.id
 				'''
 			):
-				source, version, hash_alg, hash_value, local_file, make, model = row
+				source, hash_alg, hash_value, local_file, make, model = row
 				local_file = Path(local_file)
 				# check that the local file exists, and fetch it if not
 				if not local_file.exists():
