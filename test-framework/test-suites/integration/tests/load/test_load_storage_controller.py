@@ -211,3 +211,23 @@ class TestLoadStorageController:
 			'slot': 3,
 			'source': 'H'
 		}]
+
+	def test_raid0_slot_wildcard(self, host):
+		result = host.run(
+			'stack load storage controller '
+			'file=/export/test-files/load/storage_controller_handle_raid0_all_slots.csv'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack list storage controller output-format=json'
+		)
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'adapter': None,
+			'arrayid': '*',
+			'enclosure': None,
+			'options': '',
+			'raidlevel': '0',
+			'slot': '*'
+		}]
