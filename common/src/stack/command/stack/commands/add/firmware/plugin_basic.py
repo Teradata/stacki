@@ -12,10 +12,8 @@
 
 import stack.commands
 from stack.exception import ArgRequired, ArgUnique, ArgError, ParamRequired, ParamError
-import hashlib
+import stack.firmware
 from pathlib import Path
-import uuid
-from urllib.parse import urlparse
 from contextlib import ExitStack
 
 class Plugin(stack.commands.Plugin):
@@ -48,63 +46,14 @@ class Plugin(stack.commands.Plugin):
 		if model is None:
 			raise ParamRequired(cmd = self.owner, param = 'model')
 		# require hash_alg to be one of the always present ones
-		if hash_alg not in hashlib.algorithms_guaranteed:
+		if hash_alg not in stack.firmware.SUPPORTED_HASH_ALGS:
 			raise ParamError(
 				cmd = self.owner,
 				param = 'hash_alg',
-				msg = f'hash_alg must be one of the following: {hashlib.algorithms_guaranteed}'
+				msg = f'hash_alg must be one of the following: {stack.firmware.SUPPORTED_HASH_ALGS}'
 			)
 
 		return (version[0], source, make, model, hash_value, hash_alg)
-
-	def fetch_firmware(self, source, make, model, cleanup):
-		"""Fetches the firmware file from the provided source and copies it into a stacki managed file."""
-		# parse the URL to figure out how we're going to fetch it
-		url = urlparse(url = source)
-
-		# build file path to write out to
-		dest_dir = self.BASE_PATH / make / model
-		dest_dir = dest_dir.resolve()
-		dest_dir.mkdir(parents = True, exist_ok = True)
-		# get a random file name and touch it to create the file
-		final_file = dest_dir / uuid.uuid4().hex
-		final_file.touch()
-		cleanup.callback(final_file.unlink)
-
-		# copy from local file
-		if url.scheme == self.SUPPORTED_SCHEMES[0]:
-			# grab the source file and copy it into the destination file
-			try:
-				source_file = Path(url.path).resolve(strict = True)
-			except FileNotFoundError as exception:
-				raise ParamError(cmd = self.owner, param = 'source', msg = f'{exception}')
-
-			final_file.write_bytes(source_file.read_bytes())
-		# add more supported schemes here
-		# elif url.scheme == self.SUPPORTED_SCHEMES[N]:
-		else:
-			raise ParamError(
-				cmd = self.owner,
-				param = 'source',
-				msg = f'source must use one of the following supported schemes: {self.SUPPORTED_SCHEMES}'
-			)
-
-		return final_file
-
-	def calculate_hash(self, file_path, hash_alg, hash_value = None):
-		"""Calculates the hash of the provided file using the provided algorithm and returns it as a hex string.
-
-		If a hash value is provided, this checks the calculated hash against the provided hash.
-		"""
-		calculated_hash = hashlib.new(name = hash_alg, data = file_path.read_bytes()).hexdigest()
-		if hash_value is not None and hash_value != calculated_hash:
-			raise ParamError(
-				cmd = self.owner,
-				param = 'hash',
-				msg = f'Calculated hash {calculated_hash} does not match provided hash {hash_value}. Algorithm was {hash_alg}.'
-			)
-
-		return calculated_hash
 
 	def add_related_entries(self, make, model, cleanup):
 		"""Adds the related database entries if they do not exist."""
@@ -147,14 +96,29 @@ class Plugin(stack.commands.Plugin):
 		# we use ExitStack to hold our cleanup operations and roll back should something fail.
 		with ExitStack() as cleanup:
 			# fetch the firmware from the source and copy the firmware into a stacki managed file
-			file_path = self.fetch_firmware(
-				source = source,
-				make = make,
-				model = model,
-				cleanup = cleanup
-			)
+			try:
+				file_path = stack.firmware.fetch_firmware(
+					source = source,
+					make = make,
+					model = model
+				)
+				cleanup.callback(file_path.unlink)
+			except stack.firmware.FirmwareError as exception:
+				raise ParamError(
+					cmd = self.owner,
+					param = 'source',
+					msg = f'{exception}'
+				)
 			# calculate the file hash and compare it with the user provided value if present.
-			file_hash = self.calculate_hash(file_path = file_path, hash_alg = hash_alg, hash_value = hash_value)
+			try:
+				file_hash = stack.firmware.calculate_hash(file_path = file_path, hash_alg = hash_alg, hash_value = hash_value)
+			except stack.firmware.FirmwareError as exception:
+				raise ParamError(
+					cmd = self.owner,
+					param = 'hash',
+					msg = f'{exception}'
+				)
+
 			# add make and model database entries if needed.
 			self.add_related_entries(make = make, model = model, cleanup = cleanup)
 
