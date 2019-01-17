@@ -1,0 +1,68 @@
+import hashlib
+from pathlib import Path
+import uuid
+from urllib.parse import urlparse
+
+BASE_PATH = Path('/export/stack/firmware/')
+SUPPORTED_SCHEMES = ('file',)
+# Require the supported hash algorithms to be the always present ones
+SUPPORTED_HASH_ALGS = hashlib.algorithms_guaranteed
+
+class FirmwareError(Exception):
+	"""The exception type raised by the firmware utilities in this module."""
+	pass
+
+def calculate_hash(file_path, hash_alg, hash_value = None):
+	"""Calculates the hash of the provided file using the provided algorithm and returns it as a hex string.
+
+	hash_alg is required to be one of the SUPPORTED_HASH_ALGS and a FirmwareError will be raised if it is not.
+
+	If a hash value is provided, this checks the calculated hash against the provided hash. The hash_value should
+	be a string of the form provided by hash.hexdigest(). A FirmwareError is raised if the hashes do not match.
+	"""
+	if hash_alg not in SUPPORTED_HASH_ALGS:
+		raise FirmwareError(
+			f'hash_alg must be one of the following: {SUPPORTED_HASH_ALGS}'
+		)
+
+	calculated_hash = hashlib.new(name = hash_alg, data = Path(file_path).read_bytes()).hexdigest()
+	# check the hash if one was provided to check against
+	if hash_value is not None and hash_value != calculated_hash:
+		raise FirmwareError(
+			f'Calculated hash {calculated_hash} does not match expected hash {hash_value}. Algorithm was {hash_alg}.'
+		)
+
+	return calculated_hash
+
+def fetch_firmware(source, make, model, filename = None):
+	"""Fetches the firmware file from the provided source and copies it into a stacki managed file.
+
+	A FirmwareError is raised if fetching the file from the source fails.
+	"""
+	# parse the URL to figure out how we're going to fetch it
+	url = urlparse(url = source)
+
+	# build file path to write out to
+	dest_dir = BASE_PATH / make / model
+	dest_dir = dest_dir.resolve()
+	dest_dir.mkdir(parents = True, exist_ok = True)
+	# set a random file name if the name is not set
+	final_file = dest_dir / (uuid.uuid4().hex if filename is None else filename)
+
+	# copy from local file
+	if url.scheme == SUPPORTED_SCHEMES[0]:
+		# grab the source file and copy it into the destination file
+		try:
+			source_file = Path(url.path).resolve(strict = True)
+		except FileNotFoundError as exception:
+			raise FirmwareError(f'{exception}')
+
+		final_file.write_bytes(source_file.read_bytes())
+	# add more supported schemes here
+	# elif url.scheme == self.SUPPORTED_SCHEMES[N]:
+	else:
+		raise FirmwareError(
+			f'source must use one of the following supported schemes: {SUPPORTED_SCHEMES}'
+		)
+
+	return final_file
