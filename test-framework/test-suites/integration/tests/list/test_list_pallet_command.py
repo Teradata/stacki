@@ -109,8 +109,20 @@ class TestListPalletCommand:
 
 		# Undo the 'RollName' change
 		result = host.run(
-			"sed -i 's/^#RollName/RollName/' "
-			"/opt/stack/lib/python3.6/site-packages/"
-			"stack/commands/list/pallet/command/__init__.py"
+			'rpm -iv --replacepkgs '
+			'`find /export/stack/pallets/stacki/ -name stack-command*rpm`'
 		)
 		assert result.rc == 0
+
+		# now check again
+		# List out the commands for just the stacki pallet
+		result = host.run('stack list pallet command stacki output-format=json')
+		assert result.rc == 0
+
+		# Group the commands by pallet
+		commands = defaultdict(list)
+		for item in json.loads(result.stdout):
+			commands[item['pallet']].append(item['command'])
+
+		# `list pallet command` should be back in the list
+		assert 'list pallet command' in commands['stacki']
