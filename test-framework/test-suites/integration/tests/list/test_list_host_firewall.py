@@ -102,3 +102,34 @@ class TestListHostFirewall:
 
 		with open(f'/export/test-files/list/host_firewall_scope_overriding.json') as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
+
+	def test_scope_no_enviroment(self, host, add_host):
+		# Create some more hosts
+		add_host('backend-0-1', '0', '1', 'backend')
+		add_host('backend-0-2', '0', '2', 'backend')
+
+		# Some host firewall rules for each host
+		result = host.run(
+			'stack add host firewall backend-0-0 service=1 chain=INPUT '
+			'action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host firewall backend-0-1 service=2 chain=INPUT '
+			'action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host firewall backend-0-2 service=3 chain=INPUT '
+			'action=ACCEPT protocol=TCP rulename=test'
+		)
+		assert result.rc == 0
+
+		# Now list all the host rules and see if they match what we expect
+		result = host.run('stack list host firewall backend-0-0 output-format=json')
+		assert result.rc == 0
+
+		with open('/export/test-files/list/host_firewall_scope_no_enviroment.json') as output:
+			assert json.loads(result.stdout) == json.loads(output.read())

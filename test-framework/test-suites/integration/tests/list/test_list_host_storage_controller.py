@@ -44,3 +44,31 @@ class TestListHostStorageController:
 
 		with open('/export/test-files/list/host_storage_controller_scope_resolving.json') as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
+
+	def test_scope_no_enviroment(self, host, add_host):
+		# Create some more hosts
+		add_host('backend-0-1', '0', '1', 'backend')
+		add_host('backend-0-2', '0', '2', 'backend')
+
+		# Some host storage controller entries for each host
+		result = host.run(
+			'stack add host storage controller backend-0-0 raidlevel=0 arrayid=1 slot=1'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host storage controller backend-0-1 raidlevel=0 arrayid=1 slot=2'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host storage controller backend-0-2 raidlevel=0 arrayid=1 slot=3'
+		)
+		assert result.rc == 0
+
+		# Now list all the host controller entries and see if they match what we expect
+		result = host.run('stack list host storage controller backend-0-0 output-format=json')
+		assert result.rc == 0
+
+		with open('/export/test-files/list/host_storage_controller_scope_no_enviroment.json') as output:
+			assert json.loads(result.stdout) == json.loads(output.read())

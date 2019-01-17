@@ -1,0 +1,12 @@
+[
+        {
+                "host": "backend-0-0",
+                "enclosure": null,
+                "adapter": null,
+                "slot": 1,
+                "raidlevel": "0",
+                "arrayid": 1,
+                "options": "",
+                "source": "H"
+        }
+]

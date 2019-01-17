@@ -50,10 +50,10 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 					INNER JOIN scope_map
 						ON routes.scope_map_id = scope_map.id
 					WHERE scope_map.scope = 'global'
-					OR scope_map.appliance_id <=> %s
-					OR scope_map.os_id <=> %s
-					OR scope_map.environment_id <=> %s
-					OR scope_map.node_id <=> %s
+					OR (scope_map.scope = 'appliance' AND scope_map.appliance_id <=> %s)
+					OR (scope_map.scope = 'os' AND scope_map.os_id <=> %s)
+					OR (scope_map.scope = 'environment' AND scope_map.environment_id <=> %s)
+					OR (scope_map.scope = 'host' AND scope_map.node_id <=> %s)
 					ORDER BY scope_map.scope DESC, routes.address, routes.id
 				""", (appliance_id, os_id, environment_id, scope_mapping.node_id))
 
