@@ -11,9 +11,13 @@
 # @rocks@
 
 from pathlib import Path
+from threading import Timer
+from contextlib import suppress
 import stack.commands
 from stack.exception import CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
+from stack.switch import SwitchException
+from stack.expectmore import ExpectMoreException
 
 class Implementation(stack.commands.Implementation):
 
@@ -35,9 +39,7 @@ class Implementation(stack.commands.Implementation):
 		# check for downgrade as we have to do extra steps
 		downgrade = current_firmware_version > firmware_file_version
 		if downgrade:
-			# TODO: temporary skip
-			self.owner.notify(f'Mellanox firmware downgrade not yet supported. Skipping {switch_name}.')
-			return
+			notice += f' This is a downgrade from {current_firmware_version} and will perform a factory reset.'
 		self.owner.notify(notice)
 
 		# calculate the URL the switch can pull this image file from
@@ -59,8 +61,36 @@ class Implementation(stack.commands.Implementation):
 		m7800_switch.image_boot_next()
 		# perform extra downgrade steps if necessary
 		if downgrade:
-			pass
-		m7800_switch.reload()
+			# need to force a boot, even if the old code parsing the new configuration fails.
+			m7800_switch.disable_fallback_reboot()
+			m7800_switch.write_configuration()
+			m7800_switch.reload()
+			# now wait for the switch to come back.
+			reconnected = False
+			# timeout after 10 minutes. We use a no-op lambda because we just want to know when the timer expired.
+			timer = Timer(600, lambda: ())
+			timer.start()
+			while timer.is_alive():
+				# swallow the expected exceptions while trying to connect to a switch that isn't ready yet.
+				with suppress(SwitchException, ExpectMoreException):
+					# use the switch as a context manager so every time the connect or factory reset fails,
+					# we disconnect from the switch.
+					with m7800_switch:
+						m7800_switch.connect()
+						# now factory reset the switch, which will reboot it again.
+						# The successful connect above doesn't seem to guarantee that we can fire a factory reset command,
+						# so we try in this loop. The connect is a no-op if we are already connected.
+						m7800_switch.factory_reset()
+						timer.cancel()
+						reconnected = True
+
+			if not reconnected:
+				raise CommandError(
+					cmd = self.owner,
+					msg = f'Unable to reconnect {switch_name} to switch while performing downgrade procedure.'
+				)
+		else:
+			m7800_switch.reload()
 
 	def get_frontend_url(self, switch_name, firmware_file):
 		host_interface_frontend = self.owner.call('list.host.interface', ['a:frontend'])
