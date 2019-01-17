@@ -1,0 +1,29 @@
+[
+        {
+                "host": "backend-0-0",
+                "network": "192.168.0.10",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "H"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "224.0.0.0",
+                "netmask": "255.255.255.0",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "G"
+        },
+        {
+                "host": "backend-0-0",
+                "network": "255.255.255.255",
+                "netmask": "255.255.255.255",
+                "gateway": null,
+                "subnet": "private",
+                "interface": null,
+                "source": "G"
+        }
+]

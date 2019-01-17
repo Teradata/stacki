@@ -65,3 +65,31 @@ class TestListHostRoute:
 
 		with open('/export/test-files/list/host_route_scope_resolving.json') as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
+
+	def test_scope_no_enviroment(self, host, add_host):
+		# Create some more hosts
+		add_host('backend-0-1', '0', '1', 'backend')
+		add_host('backend-0-2', '0', '2', 'backend')
+
+		# Add a route to each host
+		result = host.run(
+			'stack add host route backend-0-0 address=192.168.0.10 gateway=private'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host route backend-0-1 address=192.168.0.11 gateway=private'
+		)
+		assert result.rc == 0
+
+		result = host.run(
+			'stack add host route backend-0-2 address=192.168.0.12 gateway=private'
+		)
+		assert result.rc == 0
+
+		# Now list all the host routes and see if they match what we expect
+		result = host.run('stack list host route backend-0-0 output-format=json')
+		assert result.rc == 0
+
+		with open('/export/test-files/list/host_route_scope_no_enviroment.json') as output:
+			assert json.loads(result.stdout) == json.loads(output.read())
