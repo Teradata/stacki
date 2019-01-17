@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from concurrent.futures import ThreadPoolExecutor
 import stack.commands
 
 class Plugin(stack.commands.Plugin):
@@ -21,11 +22,15 @@ class Plugin(stack.commands.Plugin):
 	def requires(self):
 		return ['make']
 
-	def run(self, args):
+	def _run_implementation(self, item):
 		make_attr = 'component.make'
 		model_attr = 'component.model'
-		for host, values_dict in args.items():
-			self.owner.runImplementation(
-				name = f"{values_dict['firmware_attrs'][make_attr]}_{values_dict['firmware_attrs'][model_attr]}",
-				args = (host, values_dict['current_firmware_version'], values_dict['file'], values_dict['version'])
-			)
+		host, values_dict = item
+		self.owner.runImplementation(
+			name = f"{values_dict['firmware_attrs'][make_attr]}_{values_dict['firmware_attrs'][model_attr]}",
+			args = (host, values_dict['current_firmware_version'], values_dict['file'], values_dict['version'])
+		)
+
+	def run(self, args):
+		with ThreadPoolExecutor(thread_name_prefix = 'sync_firmware_model_plugin') as executor:
+			executor.map(self._run_implementation, args.items())
