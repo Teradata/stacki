@@ -5,6 +5,7 @@
 # @copyright@
 
 import stack.commands
+import stack.firmware
 
 class Plugin(stack.commands.Plugin):
 
@@ -19,29 +20,29 @@ class Plugin(stack.commands.Plugin):
 
 		host_info = {host: [] for host in hosts}
 
-		make_attr = 'component.make'
-		model_attr = 'component.model'
 		for host in hosts:
 			host_firmware_attrs = {
 				key: value
 				for key, value in self.owner.getHostAttrDict(host = host)[host].items()
-				if key in (make_attr, model_attr)
+				if key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR)
 			}
 			# if make and model are not set, there's nothing to look up.
-			if not host_firmware_attrs or not all(key in host_firmware_attrs for key in (make_attr, model_attr)):
+			if not host_firmware_attrs or not all(
+				key in host_firmware_attrs for key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR)
+			):
 				host_info[host].append(None)
 				continue
 
 			# store the current version information. Prefer the more specific make + model implementation results to the
 			# make implementation results.
 			current_version = self.owner.runImplementation(
-				name = f'{host_firmware_attrs[make_attr]}_{host_firmware_attrs[model_attr]}',
+				name = f'{host_firmware_attrs[stack.firmware.MAKE_ATTR]}_{host_firmware_attrs[stack.firmware.MODEL_ATTR]}',
 				args = host
 			)
 			# if we didn't get any results, run the more generic implementation
 			if current_version is None:
 				current_version = self.owner.runImplementation(
-					name = host_firmware_attrs[make_attr],
+					name = host_firmware_attrs[stack.firmware.MAKE_ATTR],
 					args = host
 				)
 
