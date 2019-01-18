@@ -5,6 +5,7 @@
 # @copyright@
 
 import stack.commands
+import stack.firmware
 
 class Plugin(stack.commands.Plugin):
 
@@ -42,22 +43,22 @@ class Plugin(stack.commands.Plugin):
 
 		keys.extend(['appliance', 'os', 'box'])
 
-		make_attr = 'component.make'
-		model_attr = 'component.model'
-		version_attr = 'component.firmware_version'
 		for host in hosts:
 			host_firmware_attrs = {
 				key: value
 				for (key, value) in self.owner.getHostAttrDict(host = host)[host].items()
-				if key in (make_attr, model_attr, version_attr)
+				if key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR, stack.firmware.FIRMWARE_ATTR)
 			}
 			# if make and model are not set, there's nothing to look up.
-			if not host_firmware_attrs or not all(key in host_firmware_attrs for key in (make_attr, model_attr)):
+			if not host_firmware_attrs or not all(
+				key in host_firmware_attrs
+				for key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR)
+			):
 				host_info[host].append(None)
 				continue
 
 			# get the desired firmware version
-			if version_attr in host_firmware_attrs:
+			if stack.firmware.FIRMWARE_ATTR in host_firmware_attrs:
 				row = self.owner.db.select(
 					'''
 					firmware.version
@@ -68,11 +69,17 @@ class Plugin(stack.commands.Plugin):
 							ON firmware_model.make_id=firmware_make.id
 					WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
 					''',
-					(host_firmware_attrs[version_attr], host_firmware_attrs[make_attr], host_firmware_attrs[model_attr])
+					(
+						host_firmware_attrs[stack.firmware.FIRMWARE_ATTR],
+						host_firmware_attrs[stack.firmware.MAKE_ATTR],
+						host_firmware_attrs[stack.firmware.MODEL_ATTR],
+					)
 				)
 				# if there were no results, there's no firmware file that exists for the pinned version number
 				if not row:
-					host_info[host].append(f"{host_firmware_attrs[version_attr]}(doesn't exist, did you forget to add it?)")
+					host_info[host].append(
+						f"{host_firmware_attrs[stack.firmware.FIRMWARE_ATTR]}(doesn't exist, did you forget to add it?)"
+					)
 				else:
 					host_info[host].append(row[0][0])
 
@@ -87,14 +94,14 @@ class Plugin(stack.commands.Plugin):
 							ON firmware_model.make_id=firmware_make.id
 					WHERE firmware_make.name=%s AND firmware_model.name=%s
 					''',
-					(host_firmware_attrs[make_attr], host_firmware_attrs[model_attr])
+					(host_firmware_attrs[stack.firmware.MAKE_ATTR], host_firmware_attrs[stack.firmware.MODEL_ATTR])
 				)
 				# there's no firmware available
 				if not rows:
 					host_info[host].append(None)
 				# there's more than one result, thus the desired version is ambiguous
 				elif len(rows) > 1:
-					host_info[host].append("ambiguous, set component.firmware_version to pin a version")
+					host_info[host].append(f'ambiguous, set {stack.firmware.FIRMWARE_ATTR} to pin a version')
 				# else there's only one firmware for the make and model, so that is assumed to be the desired one
 				else:
 					host_info[host].append(rows[0][0])
