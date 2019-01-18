@@ -1,3 +1,4 @@
+from pathlib import Path
 from stack.exception import CommandError
 
 class FirmwareArgumentProcessor:
@@ -143,3 +144,46 @@ class FirmwareArgumentProcessor:
 				cmd = self.owner,
 				msg = f"The following firmware versions don't exist for make {make} and model {model}: {missing_versions}."
 			)
+
+	def get_firmware_url(self, hostname, firmware_file):
+		"""Attempts to get a url to allow a backend to download the provided firmware file from the front end.
+
+		If the frontend and the backend have no common networks, a CommandError is raised.
+		If none of the interfaces on the common network have IP addresses, a CommandError is raised.
+		"""
+		host_interface_frontend = self.call('list.host.interface', ['a:frontend'])
+		# try to get the set of all common networks between the front end and the target host
+		switch_networks = set(switch['network'] for switch in self.call('list.host.interface', [hostname]))
+		frontend_networks = set(frontend['network'] for frontend in host_interface_frontend)
+		common_networks = list(switch_networks & frontend_networks)
+
+		if not common_networks:
+			raise CommandError(
+				cmd = self,
+				msg = (
+					f'{hostname} does not share a network with the frontend, and thus cannot fetch firmware'
+					f' from it. Please configure {hostname} to share a common network with the frontend.'
+				)
+			)
+
+		# try to get the IP addresses of frontend interfaces on the common networks
+		ip_addr = [
+			frontend['ip'] for frontend in host_interface_frontend
+			if frontend['network'] in common_networks and frontend['ip']
+		]
+
+		if not ip_addr:
+			raise CommandError(
+				cmd = self,
+				msg = (
+					f'None of the network interfaces on the frontend attached to the following common networks'
+					f'have an IP address. Please configure at least one interface to have an IP address on one'
+					f'of the following networks: {common_networks}'
+				)
+			)
+		# pick the first one and use it
+		ip_addr = ip_addr[0]
+		# remove the /export/stack prefix from the file path, as /install points to /export/stack
+		firmware_file = Path().joinpath(*(part for part in firmware_file.parts if part not in ('export', 'stack')))
+
+		return f'http://{ip_addr}/install{firmware_file}'
