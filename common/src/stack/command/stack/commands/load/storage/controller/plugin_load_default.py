@@ -39,7 +39,11 @@ class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
 				pass
 
 			# Add the new ones
-			for array in sorted(data):
+			# arrayid can be int, 'global', or '*'
+			# this key function works by offering a tuple of (is_string, value) for sorting
+			# this will sort by bool first, falling back to value if the bools are equal
+			# this puts non-strings first (False<True), then ascending order
+			for array in sorted(data, key=lambda i: (isinstance(i, str), i)):
 				cmdargs = []
 				if target != 'global':
 					cmdargs.append(target)

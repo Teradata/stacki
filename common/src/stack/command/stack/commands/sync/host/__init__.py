@@ -82,7 +82,7 @@ class Parallel(threading.Thread):
 				stderr=subprocess.STDOUT,
 				shell=True)
 			(o, e) = p.communicate(self.stdin.encode())
-		
+
 		rc = p.wait()
 		if o:
 			self.out['output'] = o.decode()
@@ -98,7 +98,7 @@ class Command(command):
 
 	def run(self, params, args):
 
-		self.notify('Sync Host\n')
+		self.notify('Sync Host')
 
 		output = self.command('report.host')
 		f = open('/etc/hosts', 'w')

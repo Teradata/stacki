@@ -31,6 +31,6 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no group data in json file')
 			return
 
-		self.notify('\n\tLoading group\n')
+		self.notify('\n\tLoading group')
 		for group in import_data:
 			self.owner.try_command('add.group', [ group['name'] ], f'adding group {group["name"]}', 'exists')

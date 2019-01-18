@@ -30,7 +30,7 @@ class Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no appliance data in json file')
 			return
 
-		self.notify('\n\tLoading appliance\n')
+		self.notify('\n\tLoading appliance')
 
 		# add each appliance then set everything about it
 		for appliance in import_data:
