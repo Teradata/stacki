@@ -6,6 +6,7 @@
 
 from pathlib import Path
 import stack.commands
+import stack.firmware
 from stack.commands.argument_processors import FirmwareArgumentProcessor
 
 class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
@@ -33,23 +34,26 @@ class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
 		"""Returns a dictionary keyed off of the hosts that are able to be synced based on their attributes
 		and the firmware data in the database.
 		"""
-		make_attr = 'component.make'
-		model_attr = 'component.model'
-		version_attr = 'component.firmware_version'
 		hosts_to_sync = {}
 		for host in hosts:
 			host_firmware_attrs = {
 				key: value
 				for (key, value) in self.getHostAttrDict(host = host)[host].items()
-				if key in (make_attr, model_attr, version_attr)
+				if key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR, stack.firmware.FIRMWARE_ATTR)
 			}
 			# if make and model are not set, there's nothing to do for this host.
-			if not host_firmware_attrs or not all(key in host_firmware_attrs for key in (make_attr, model_attr)):
-				self.notify(f'Skipping {host} because {make_attr} and {model_attr} attributes are not both set.')
+			if not host_firmware_attrs or not all(
+				key in host_firmware_attrs
+				for key in (stack.firmware.MAKE_ATTR, stack.firmware.MODEL_ATTR)
+			):
+				self.notify(
+					f'Skipping {host} because {stack.firmware.MAKE_ATTR} and'
+					f' {stack.firmware.MODEL_ATTR} attributes are not both set.'
+				)
 				continue
 
 			# get the desired firmware version
-			if version_attr in host_firmware_attrs:
+			if stack.firmware.FIRMWARE_ATTR in host_firmware_attrs:
 				row = self.db.select(
 					'''
 					firmware.file, firmware.version
@@ -60,13 +64,19 @@ class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
 							ON firmware_model.make_id=firmware_make.id
 					WHERE firmware.version=%s AND firmware_make.name=%s AND firmware_model.name=%s
 					''',
-					(host_firmware_attrs[version_attr], host_firmware_attrs[make_attr], host_firmware_attrs[model_attr])
+					(
+						host_firmware_attrs[stack.firmware.FIRMWARE_ATTR],
+						host_firmware_attrs[stack.firmware.MAKE_ATTR],
+						host_firmware_attrs[stack.firmware.MODEL_ATTR],
+					)
 				)
 				# if there were no results, there's no firmware file that exists for the pinned version number
 				if not row:
 					self.notify(
-						f'Skipping {host} because pinned firmware version {host_firmware_attrs[version_attr]} for make'
-						f' {host_firmware_attrs[make_attr]} and model {host_firmware_attrs[model_attr]} does not exist.\n'
+						f'Skipping {host} because pinned firmware version'
+						f' {host_firmware_attrs[stack.firmware.FIRMWARE_ATTR]} for make'
+						f' {host_firmware_attrs[stack.firmware.MAKE_ATTR]} and model'
+						f' {host_firmware_attrs[stack.firmware.MODEL_ATTR]} does not exist.'
 					)
 				else:
 					hosts_to_sync[host] = {
@@ -86,19 +96,22 @@ class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
 							ON firmware_model.make_id=firmware_make.id
 					WHERE firmware_make.name=%s AND firmware_model.name=%s
 					''',
-					(host_firmware_attrs[make_attr], host_firmware_attrs[model_attr])
+					(host_firmware_attrs[stack.firmware.MAKE_ATTR], host_firmware_attrs[stack.firmware.MODEL_ATTR])
 				)
 				# there's no firmware available
 				if not rows:
 					self.notify(
-						f'Skipping {host} because no firmware exists for make {host_firmware_attrs[make_attr]}'
-						f' and model {host_firmware_attrs[model_attr]}.\n'
+						f'Skipping {host} because no firmware exists for make'
+						f' {host_firmware_attrs[stack.firmware.MAKE_ATTR]}'
+						f' and model {host_firmware_attrs[stack.firmware.MODEL_ATTR]}.'
 					)
 				# there's more than one result, thus the desired version is ambiguous
 				elif len(rows) > 1:
 					self.notify(
-						f'Skipping {host} because multiple firmware files exist for make {host_firmware_attrs[make_attr]}'
-						f' and model {host_firmware_attrs[model_attr]}. Please set {version_attr} to pin a desired firmware version.\n'
+						f'Skipping {host} because multiple firmware files exist'
+						f' for make {host_firmware_attrs[stack.firmware.MAKE_ATTR]} and model'
+						f' {host_firmware_attrs[stack.firmware.MODEL_ATTR]}. Please set'
+						f' {stack.firmware.FIRMWARE_ATTR} to pin a desired firmware version.'
 					)
 				# else there's only one firmware for the make and model, so that is assumed to be the desired one
 				else:

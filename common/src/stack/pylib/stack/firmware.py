@@ -3,10 +3,16 @@ from pathlib import Path
 import uuid
 from urllib.parse import urlparse
 
+# Base path to store managed firmware files under
 BASE_PATH = Path('/export/stack/firmware/')
+# Supported schemes to fetch firmware from a source to be managed by stacki
 SUPPORTED_SCHEMES = ('file',)
 # Require the supported hash algorithms to be the always present ones
 SUPPORTED_HASH_ALGS = hashlib.algorithms_guaranteed
+# Attribute names used by the firmware commands to determine actions
+MAKE_ATTR = 'component.make'
+MODEL_ATTR = 'component.model'
+FIRMWARE_ATTR = 'component.firmware'
 
 class FirmwareError(Exception):
 	"""The exception type raised by the firmware utilities in this module."""

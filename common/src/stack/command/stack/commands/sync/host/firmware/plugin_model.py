@@ -11,6 +11,7 @@
 # @rocks@
 
 import stack.commands
+import stack.firmware
 
 class Plugin(stack.commands.Plugin):
 	"""Attempts to sync firmware to hosts"""
@@ -22,10 +23,11 @@ class Plugin(stack.commands.Plugin):
 		return ['make']
 
 	def run(self, args):
-		make_attr = 'component.make'
-		model_attr = 'component.model'
 		for host, values_dict in args.items():
 			self.owner.runImplementation(
-				name = f"{values_dict['firmware_attrs'][make_attr]}_{values_dict['firmware_attrs'][model_attr]}",
+				name = (
+					f"{values_dict['firmware_attrs'][stack.firmware.MAKE_ATTR]}"
+					f"_{values_dict['firmware_attrs'][stack.firmware.MODEL_ATTR]}"
+				),
 				args = (host, values_dict['current_firmware_version'], values_dict['file'], values_dict['version'])
 			)
