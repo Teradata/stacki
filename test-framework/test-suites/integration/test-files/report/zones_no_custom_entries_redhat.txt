@@ -1,16 +1,14 @@
 <stack:file stack:name="/var/named/test.domain" stack:perms="0644">
 $TTL 3D
-@ IN SOA ns.test. root.ns.test. (
+@ IN SOA frontend-0-0. root.frontend-0-0. (
 	0000000000 ; Serial
 	8H ; Refresh
 	2H ; Retry
 	4W ; Expire
 	1D ) ; Min TTL
 ;
-	NS ns.test.
-	MX 10 mail.test.
-
-ns A 127.0.0.1
+	NS frontend-0-0.
+	MX 10 frontend-0-0.
 
 backend-0-0 A 192.168.0.2
 foo CNAME backend-0-0
@@ -20,22 +18,24 @@ foo CNAME backend-0-0
 ;myhost	A	10.1.1.1
 </stack:file>
 
-<stack:file stack:name="/var/named/reverse.test.domain.0.168.192" stack:perms="0644">
+<stack:file stack:name="/var/named/reverse.test.domain" stack:perms="0644">
 $TTL 3D
-@ IN SOA ns.test. root.ns.test. (
+@ IN SOA frontend-0-0. root.frontend-0-0. (
 	0000000000 ; Serial
 	8H ; Refresh
 	2H ; Retry
 	4W ; Expire
 	1D ) ; Min TTL
 ;
-	NS ns.test.
-	MX 10 mail.test.
+	NS frontend-0-0.
+	MX 10 frontend-0-0.
 
-2 PTR backend-0-0.test.
+2 IN PTR backend-0-0.test.
 
-; Custom entries for network test
-; can be placed in /var/named/reverse.test.domain.0.168.192.local
+; Custom entries for the "test" network
+; can be placed in /var/named/reverse.test.domain.local
 ; These entries will be sourced on sync
+
+
 </stack:file>
 

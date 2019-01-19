@@ -11,12 +11,30 @@
 # @rocks@
 
 
+#####
+	## Design for address spaces with non-octet boundary netmasks
+	## Read RFC 2317 for more details about requirements.
+	##
+	## If we have 2 networks, 39.80/12, and 39.96/12, generating
+	## zone files for these is very tricky. To do this we club the
+	## 2 zones into a single file with 39 as the reverse prefix,
+	## and enter the last 3 octets of all IP addresses in both
+	## networks into the file.
+	##
+	## We also need a name for this file. To get a unique name,
+	## we put the names of all the networks together - joined by
+	## a ".", get the CRC32 string of the new name, and then get
+	## the hex value of the CRC32 code.
+#####
+
 import os
 
 import ipaddress
 
 import stack.commands
+import stack.commands.report
 import stack.text
+import zlib
 
 config_preamble_redhat = """options {
 	directory "/var/named";
@@ -78,17 +96,20 @@ zone "0.0.127.in-addr.arpa" IN {
 };
 """
 # zone mapping
-zone_template = """
+fw_zone_template = """
+# Zone Mapping for %s
 zone "%s" {
 	type master;
 	notify no;
 	file "%s.domain";
 };
-
+"""
+rev_zone_template = """
+# Reverse Zone mapping for %s
 zone "%s.in-addr.arpa" {
 	type master;
 	notify no;
-	file "reverse.%s.domain.%s";
+	file "reverse.%s.domain";
 };
 """
 
@@ -104,11 +125,11 @@ class Command(stack.commands.report.command):
 	"""
 
 	def run(self, params, args):
-		
+
 		networks = []
 		for row in self.call('list.network', [ 'dns=true' ]):
 			networks.append(row)
-					
+
 		s = '<stack:file stack:name="/etc/named.conf" stack:perms="0644">\n'
 		s += stack.text.DoNotEdit()
 		s += '# Site additions go in /etc/named.conf.local\n\n'
@@ -141,19 +162,32 @@ class Command(stack.commands.report.command):
 		if self.getHostAttr('localhost','os') == 'sles':
 			s += config_preamble_sles % (forwarders)
 
-		# For every network, get the base subnet,
-		# and reverse it. This is basically the
-		# format that named understands
+		# Generate the Forward Lookups
+		for network in networks:
+			s += fw_zone_template % ("%s network" % network["network"],
+				network['zone'], network['network'])
 
+		# Generate the reverse lookups
+		# For every network, get the base subnet,
+		# and reverse it. This is the format
+		# that named understands
+		z = {}
 		for network in networks:
 			sn = self.getSubnet(network['address'], network['mask'])
 			sn.reverse()
 			r_sn = '.'.join(sn)
-			s += zone_template % (network['zone'],
-					      network['network'],
-					      r_sn,
-					      network['network'],
-					      r_sn)
+			if not r_sn in z:
+				z[r_sn] = []
+			z[r_sn].append(network)
+		for zone in z:
+			if len(z[zone]) == 1:
+				name = z[zone][0]["network"]
+				comment_name = name
+			else:
+				n = '.'.join(list(map(lambda x: x["network"], z[zone]))).encode()
+				name = hex(zlib.crc32(n) & 0xffffffff)[2:]
+				comment_name = "networks - %s" % ','.join(list(map(lambda x: x["network"], z[zone])))
+			s += rev_zone_template % ("%s" % comment_name, zone, name)
 
 		# Check if there are local modifications to named.conf
 		if os.path.exists('/etc/named.conf.local'):
@@ -162,7 +196,7 @@ class Command(stack.commands.report.command):
 			s += f.read()
 			f.close()
 			s += '\n'
-			
+
 		s += '\ninclude "/etc/rndc.key";\n'
 		s += '</stack:file>\n'
 

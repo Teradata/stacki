@@ -15,7 +15,7 @@ class TestReportZones:
 			base_dir = '/var/named'
 
 		# Copy over our custom zone files
-		for name in ('reverse.test.domain.0.168.192.local', 'test.domain.local'):
+		for name in ('reverse.test.domain.local', 'test.domain.local'):
 			shutil.copyfile(
 				f'/export/test-files/report/zones_{name}',
 				os.path.join(base_dir, name)
@@ -24,7 +24,7 @@ class TestReportZones:
 		yield
 
 		# Clean up our custom zone files
-		for name in ('reverse.test.domain.0.168.192.local', 'test.domain.local'):
+		for name in ('reverse.test.domain.local', 'test.domain.local'):
 			os.remove(os.path.join(base_dir, name))
 
 	def test_no_custom_entries_sles(self, host, add_host, add_network, fake_os_sles):
