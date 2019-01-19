@@ -31,6 +31,7 @@ from functools import partial
 from operator import itemgetter
 from itertools import groupby
 from collections import OrderedDict, namedtuple
+from concurrent.futures import ThreadPoolExecutor
 
 import stack.graph
 import stack
@@ -1777,6 +1778,50 @@ class Command:
 		# from running the implementation.
 		if name in self.impl_list:
 			return self.impl_list[name].run(args)
+
+	def run_implementations_parallel(self, implementation_mapping):
+		"""Runs each implementation in its own thread passing it the mapped arguments.
+
+		The implementation_mapping parameter is expected to be a dictionary where the keys are
+		implementation names and the values are the list arguments to call the implementation
+		with.
+
+		The results are returned as a dictionary where the keys are the implementation names
+		and the values are a dictionary of result and exception. If an exception was raised in
+		the thread, result will be None and the exception will be set to the exception raised.
+		Otherwise, exception will be none and the result will be set to the result that was
+		returned.
+		"""
+		# load all the implementations if they aren't already loaded
+		for imp_name in implementation_mapping.keys():
+			if imp_name not in self.impl_list:
+				self.loadImplementation(imp_name)
+
+		# only run the ones that are loaded
+		imps_to_run = {
+			imp_name: args for imp_name, args in implementation_mapping.items()
+			if imp_name in self.impl_list
+		}
+		with ThreadPoolExecutor(thread_name_prefix = 'run_imp_parallel') as executor:
+			# submit each implementation to be run in a thread
+			futures_by_imp = {
+				imp: executor.submit(
+					lambda name, args: self.impl_list[name].run(args),
+					name = imp,
+					args = args,
+				)
+				for imp, args in imps_to_run.items()
+			}
+			# gather the results from each implementation run collect them by name
+			# this will also save the exception if one was raised.
+			results_by_imp = {}
+			for imp, future in futures_by_imp.items():
+				results_by_imp[imp] = {
+					'result': future.result() if future.exception() is None else None,
+					'exception': future.exception(),
+				}
+
+		return results_by_imp
 
 	def isRootUser(self):
 		"""
