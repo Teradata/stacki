@@ -11,7 +11,11 @@ class TestDisableDiscovery:
 		"Test the discovery daemon is not started when not running"
 
 		# Confirm the daemon isn't running
-		assert len(host.process.filter(comm="stack")) == 0
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
+		assert len(process_list) == 0
 
 		# Run the disable discovery command
 		result = host.run("stack disable discovery")
@@ -19,7 +23,11 @@ class TestDisableDiscovery:
 		assert result.stdout == "Discovery daemon has stopped\n"
 
 		# Confirm the daemon still isn't running
-		assert len(host.process.filter(comm="stack")) == 0
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
+		assert len(process_list) == 0
 
 		# Confirm no log messages got written out
 		assert host.file("/var/log/stack-discovery.log").content_string == ""
@@ -36,8 +44,12 @@ class TestDisableDiscovery:
 		assert result.stdout == "Discovery daemon has started\n"
 
 		# Confirm a single daemon is running
-		assert len(host.process.filter(comm="stack")) == 1
-		
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
+		assert len(process_list) == 1
+
 		# Run the disable discovery command
 		result = host.run("stack disable discovery")
 		assert result.rc == 0
@@ -47,7 +59,7 @@ class TestDisableDiscovery:
 		time.sleep(1)
 
 		# Confirm the daemon isn't running
-		assert len(host.process.filter(comm="stack")) == 0
+		assert len(host.process.filter(pid=process_list[0].pid)) == 0
 
 		# Confirm the log messages got written out
 		log_file = host.file("/var/log/stack-discovery.log")
