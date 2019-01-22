@@ -123,11 +123,11 @@ class Command(stack.commands.add.host.command):
 		
 		unsafe = self.str2bool(unsafe)
 		if not unsafe:
-			for dict in self.call('list.host.interface', [ host ]):
-				if interface == dict['interface']:
-					raise CommandError(self, 'interface exists')
-				if mac and mac == dict['mac']:
-					raise CommandError(self, 'mac exists')
+			for row in self.call('list.host.interface', [ host ]):
+				if interface == row['interface']:
+					raise CommandError(self, f'interface {interface} exists on {host}')
+				if mac and mac == row['mac']:
+					raise CommandError(self, f'mac {mac} exists on {host}')
 
 		# Some parameters accept the string 'NULL' to mean put a NULL in the db
 		if ip and ip.upper() == 'NULL':
