@@ -25,11 +25,15 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 		mapped_by_imp_name = {
-			f"{values_dict['attrs'][stack.firmware.MAKE_ATTR]}_{values_dict['attrs'][stack.firmware.MODEL_ATTR]}": {
-				host: values_dict
-			}
-			for host, values_dict in args.items()
+			f"{values_dict['attrs'][stack.firmware.MAKE_ATTR]}_{values_dict['attrs'][stack.firmware.MODEL_ATTR]}": {}
+			for values_dict in args.values()
 		}
+		for host, values_dict in args.items():
+			mapped_by_imp_name[
+				f"{values_dict['attrs'][stack.firmware.MAKE_ATTR]}_{values_dict['attrs'][stack.firmware.MODEL_ATTR]}"
+			].update(
+				{host: values_dict}
+			)
 
 		# we don't expect return values, but the implementations might raise exceptions, so gather them here
 		results = self.owner.run_implementations_parallel(implementation_mapping = mapped_by_imp_name)
