@@ -26,6 +26,20 @@ class Command(stack.commands.list.host.command):
 	be listed.
 	</param>
 
+	<param type='string' name='display'>
+	Control which attributes are displayed for the provided
+	hosts.
+
+	'all' will display all attributes for each host, grouped
+	by host.  This is the default.
+
+	'common' will display only attributes which are identical
+	for every host.
+
+	'distinct' will display only attributes which are not
+	identical for every host.
+	</param>
+
 	<example cmd='list host attr backend-0-0'>
 	List the attributes for backend-0-0.
 	</example>
