@@ -215,13 +215,14 @@ class Command(stack.commands.Command,
 
 	def run(self, params, args):
 
-		(glob, shadow, scope, resolve, var, const) = self.fillParams([ 
+		(glob, shadow, scope, resolve, var, const, display) = self.fillParams([ 
 			('attr',   None),
 			('shadow', True),
 			('scope',  'global'),
 			('resolve', None),
 			('var', True),
-			('const', True)
+			('const', True),
+			('display', 'all'),
 		])
 
 		shadow	= self.str2bool(shadow)
@@ -327,7 +328,6 @@ class Command(stack.commands.Command,
 				# Mix in any const attributes
 				lookup[s]['const'](attributes[s])
 
-
 		targets = sorted(lookup[scope]['fn'](args))
 
 		if resolve and scope == 'host':
@@ -362,7 +362,24 @@ class Command(stack.commands.Command,
 					matches[key] = attributes[scope][o][key]
 				attributes[scope][o] = matches
 
-			
+		if display != 'all' and scope == 'host':
+			host_attrs = {
+				host: {k: str(v[0]) for k,v in attributes['host'][host].items()}
+				for host in attributes['host'] if host in targets
+			}
+
+			common_attrs = set.intersection(*(set(d.items()) for d in host_attrs.values()))
+			filtered_attrs = {}
+
+			if display == 'common':
+				filtered_attrs['_common_'] = dict((k,(v, None, None)) for k,v in common_attrs)
+				targets = ['_common_']
+			elif display == 'distinct':
+				for host in host_attrs:
+					host_pairs = set(d for d in host_attrs[host].items())
+					filtered_attrs[host] = dict((k,attributes['host'][host][k]) for k,v in host_pairs.difference(common_attrs))
+
+			attributes['host'] = filtered_attrs
 
 		self.beginOutput()
 
