@@ -42,7 +42,10 @@ class Plugin(stack.commands.Plugin):
 		)
 		# drop any results that didn't have any errors and aggregate the rest into one exception
 		error_messages = []
-		for error in [value['exception'] for value in results.values() if value['exception'] is not None]:
+		for error in [
+			value['exception'] for value in results.values()
+			if value is not None and value['exception'] is not None
+		]:
 			# if this looks like a stacki exception type, grab the message from it.
 			if hasattr(error, 'message') and callable(getattr(error, 'message')):
 				error_messages.append(error.message())
