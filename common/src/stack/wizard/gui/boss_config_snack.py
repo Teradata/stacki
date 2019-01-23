@@ -16,6 +16,9 @@ def render_timezone(screen):
 			city = tokens[0].strip()
 		cities.append((city, city))
 
+	# add UTC
+	cities.append(('UTC', 'UTC'))
+
 	#render window to choose a timezone
 	result = ListboxChoiceWindow(screen, "Stacki Installation", \
 		"Cluster Timezone", cities, width=40, buttons=('Continue', 'Cancel'), \
