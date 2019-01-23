@@ -50,8 +50,8 @@ class Implementation(stack.commands.Implementation):
 				m7800_switch.reload()
 				# now wait for the switch to come back.
 				reconnected = False
-				# timeout after 10 minutes. We use a no-op lambda because we just want to know when the timer expired.
-				timer = Timer(600, lambda: ())
+				# timeout after 30 minutes. We use a no-op lambda because we just want to know when the timer expired.
+				timer = Timer(1800, lambda: ())
 				timer.start()
 				while timer.is_alive():
 					# swallow the expected exceptions while trying to connect to a switch that isn't ready yet.
@@ -106,7 +106,7 @@ class Implementation(stack.commands.Implementation):
 			if downgrade:
 				notice += f' This is a downgrade from {current_firmware_version} and will perform a factory reset.'
 			self.owner.notify(notice)
-			# calculate the URL the switch can pull this image file from
+			# build the args
 			switch_upgrade_args[switch_name] = {
 				'firmware_url': values_dict['url'],
 				'downgrade': downgrade,
@@ -116,23 +116,13 @@ class Implementation(stack.commands.Implementation):
 		errors = []
 		# now run each switch upgrade in parallel
 		with ThreadPoolExecutor(thread_name_prefix = 'm7800_firmware_update') as executor:
-			futures = {
-				switch_name: executor.submit(self.update_firmware, switch_name = switch_name, **switch_args)
+			futures = [
+				executor.submit(self.update_firmware, switch_name = switch_name, **switch_args)
 				for switch_name, switch_args in switch_upgrade_args.items()
-			}
+			]
 			# Collect any errors, we don't expect there to be any return values.
-			# Time out after 20 minutes.
-			for switch_name, future in futures.items():
-				try:
-					errors.append(future.exception(timeout = 1200))
-				except TimeoutError:
-					errors.append(
-						f'Timed out waiting for the firmware update to complete for {switch_name}.'
-					)
-				except CancelledError:
-					errors.append(
-						f'Firmware update for {switch_name} was cancelled.'
-					)
+			for future in futures:
+				errors.append(future.exception())
 
 		# drop any Nones returned because of no exceptions and aggregate all remaining errors into one
 		error_messages = []

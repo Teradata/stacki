@@ -31,7 +31,10 @@ class Plugin(stack.commands.Plugin):
 			)
 
 		# we don't expect return values, but the implementations might raise exceptions, so gather them here
-		results = self.owner.run_implementations_parallel(implementation_mapping = mapped_by_imp_name)
+		results = self.owner.run_implementations_parallel(
+			implementation_mapping = mapped_by_imp_name,
+			display_progress = True,
+		)
 		# drop any results that didn't have any errors and aggregate the rest into one exception
 		error_messages = []
 		for error in [value['exception'] for value in results.values() if value['exception'] is not None]:
