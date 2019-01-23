@@ -60,6 +60,7 @@ Vagrant.configure("2") do |config|
 
 	  if USE_SRC == "1"
 		config.vm.synced_folder "../", "/export/src/stacki", type: "virtualbox"
+		config.vm.synced_folder "../../tdc-infrastructure", "/export/src/tdc-infrastructure", type: "virtualbox"
 	  end
     end
 

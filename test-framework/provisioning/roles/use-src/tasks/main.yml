@@ -1,3 +1,5 @@
 ---
   - name: Run the use_the_source.py script
     command: /opt/stack/bin/python3 /export/src/stacki/tools/use_the_source/use_the_source.py /export/src/stacki
+  - name: Run the use_the_source.py script for tdc infra
+    command: /opt/stack/bin/python3 /export/src/stacki/tools/use_the_source/use_the_source.py /export/src/tdc-infrastructure

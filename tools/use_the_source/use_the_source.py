@@ -42,7 +42,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	# get the absolute path, expanding shell stuff
-	src_base = Path(sys.argv[1]).expanduser().resolve() / 'common/src/stack/'
+	src_base = Path(sys.argv[1]).expanduser().resolve() / 'src/'
 
 	for src, dest in grafts_to_site_packages:
 		src_directory = src_base / src
@@ -50,11 +50,12 @@ if __name__ == '__main__':
 
 		# Find all our Python files
 		for src_filename in src_directory.glob("**/*.py"):
-			dest_filename = dest_directory / src_filename.relative_to(src_directory)
+			dd = src_filename.relative_to(src_directory)
+			dest_filename = dest_directory / dd
 
 			# First blow away the old one, if it exists
-			if dest_filename.exists() or dest_filename.is_symlink():
-				dest_filename.unlink()
+			#if dest_filename.exists() or dest_filename.is_symlink():
+			#	dest_filename.unlink()
 
 			# Now symlink over our src version
 			dest_filename.symlink_to(src_filename)
