@@ -2,11 +2,12 @@ import hashlib
 from pathlib import Path
 import uuid
 from urllib.parse import urlparse
+import stack.download
 
 # Base path to store managed firmware files under
 BASE_PATH = Path('/export/stack/firmware/')
 # Supported schemes to fetch firmware from a source to be managed by stacki
-SUPPORTED_SCHEMES = ('file',)
+SUPPORTED_SCHEMES = ('file', 'http')
 # Require the supported hash algorithms to be the always present ones
 SUPPORTED_HASH_ALGS = hashlib.algorithms_guaranteed
 # Attribute names used by the firmware commands to determine actions
@@ -40,7 +41,7 @@ def calculate_hash(file_path, hash_alg, hash_value = None):
 
 	return calculated_hash
 
-def fetch_firmware(source, make, model, filename = None):
+def fetch_firmware(source, make, model, filename = None, **kwargs):
 	"""Fetches the firmware file from the provided source and copies it into a stacki managed file.
 
 	A FirmwareError is raised if fetching the file from the source fails.
@@ -64,6 +65,11 @@ def fetch_firmware(source, make, model, filename = None):
 			raise FirmwareError(f'{exception}')
 
 		final_file.write_bytes(source_file.read_bytes())
+	elif url.scheme == SUPPORTED_SCHEMES[1]:
+		try:
+			stack.download.fetch(url = source, file_path = final_file, verbose = True, **kwargs)
+		except stack.download.FetchError as exception:
+			raise FirmwareError(f'{exception}')
 	# add more supported schemes here
 	# elif url.scheme == self.SUPPORTED_SCHEMES[N]:
 	else:
