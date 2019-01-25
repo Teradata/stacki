@@ -21,12 +21,11 @@ class Command(command):
 	Adds a firmware image to stacki.
 
 	<arg type='string' name='version'>
-	The firmware version being added. This must be unique within a given firmware family.
+	The firmware version being added. This must be unique for make + model.
 	</arg>
 
-	<!-- TODO: update this to work with more than just local files -->
 	<param type='string' name='source'>
-	The URL pointing to where to retrieve the firmware image. TODO: Currently only supports fetching from local files. Example: file:///export/firmware/my_sweet_image.img
+	The URL pointing to where to retrieve the firmware image.
 	</param>
 
 	<param type='string' name='make'>
@@ -45,8 +44,13 @@ class Command(command):
 	The optional hash algorithm to use to verify the integrity of the fetched image. If not specified this defaults to MD5.
 	</param>
 
-	<example cmd="add firmware 3.6.5002 source=http://your-sweet-artifactory-builds.labs.teradata.com/firmware/mellanox/img-3.6.5002.img make=mellanox model=7800">
-	Fetches the firmware file from the source, associates it with the mellanox make and 7800 model, sets the version to 3.6.5002, and adds it to be tracked in the stacki database.
+	<example cmd="add firmware 3.6.5002 source=file:///export/some/path/img-3.6.5002.img make=Mellanox model=7800">
+	Fetches the firmware file from the source (a local file on the front end in /export/some/path), associates it with the
+	Mellanox make and 7800 model, sets the version to 3.6.5002, and adds it to be tracked in the stacki database.
+	</example>
+
+	<example cmd="add firmware 3.6.5002 source=http://www.your-sweet-site.com/firmware/mellanox/img-3.6.5002.img make=Mellanox model=7800">
+	This performs the same steps as the previous example except the image is fetched via HTTP.
 	</example>
 	"""
 

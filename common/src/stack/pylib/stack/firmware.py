@@ -44,6 +44,18 @@ def calculate_hash(file_path, hash_alg, hash_value = None):
 def fetch_firmware(source, make, model, filename = None, **kwargs):
 	"""Fetches the firmware file from the provided source and copies it into a stacki managed file.
 
+	source should be the URL from which to pull the firmware image from. If this is not one of the
+	supported schemes, a FirmwareError is raised.
+
+	make and model must be set to the make and model the firmware image applies to.
+
+	filename is the optional file name to write the image out to locally. This does not change the
+	destination folder, only the file name.
+
+	The remaining kwargs will be captured and passed through as necessary to the underlying mechanism
+	used to fetch the file from the source. For example, fetching via HTTP might need a username and
+	a password for authentication.
+
 	A FirmwareError is raised if fetching the file from the source fails.
 	"""
 	# parse the URL to figure out how we're going to fetch it
@@ -65,6 +77,7 @@ def fetch_firmware(source, make, model, filename = None, **kwargs):
 			raise FirmwareError(f'{exception}')
 
 		final_file.write_bytes(source_file.read_bytes())
+	# download via HTTP
 	elif url.scheme == SUPPORTED_SCHEMES[1]:
 		try:
 			stack.download.fetch(url = source, file_path = final_file, verbose = True, **kwargs)
