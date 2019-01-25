@@ -31,9 +31,9 @@ class FetchError(Exception):
 		return self.message
 
 
-def fetch(url, username=None, password=None, verbose=False):
+def fetch(url, username=None, password=None, verbose=False, file_path=None):
 	filename = os.path.basename(urlparse(url).path)
-	local_path = '/'.join([os.getcwd(), filename])
+	local_path = '/'.join([os.getcwd(), filename]) if file_path is None else file_path
 
 	if username and password:
 		s = requests.Session()
