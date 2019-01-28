@@ -19,7 +19,7 @@
 	</stack:copyright>
 	
 	<services-manager stack:cond="os.version == '12.x'">
-		<default_target>multi-user</default_target>
+		<default_target>&systemd.default.target;</default_target>
 		<services>
 			<enable config:type="list">
 				<service>sshd</service>
