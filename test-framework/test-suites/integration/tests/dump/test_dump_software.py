@@ -10,8 +10,7 @@ class TestDumpSoftware:
 	Test that dumping the software data works properly
 	"""
 
-	def test_pallet(self, host):
-
+	def test_pallet(self, host, revert_export_stack):
 		# test that dump software provides accurate pallet information
 		dirn = '/export/test-files/dump/'
 		file = dirn + 'roll-minimal.xml'
@@ -69,7 +68,7 @@ class TestDumpSoftware:
 				check = True
 		assert check == True
 
-	def test_cart(self, host):
+	def test_cart(self, host, revert_export_stack):
 
 		# test that dump software provides accurate cart information
 		# add a test cart to the database
