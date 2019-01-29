@@ -19,7 +19,7 @@ class TestRemoveSwitch:
 			{switch}
 		''')
 
-	def test_x1052(self, host, add_switch):
+	def test_x1052(self, host, add_switch, revert_etc):
 		# Confirm our switch exists
 		result = host.run('stack list switch switch-0-0 output-format=json')
 		assert result.rc == 0

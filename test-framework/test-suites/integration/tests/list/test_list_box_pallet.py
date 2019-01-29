@@ -11,7 +11,7 @@ class TestListBoxPallet:
 			[box ...]
 		''')
 
-	def test_no_args(self, host):
+	def test_no_args(self, host, revert_etc):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -28,7 +28,7 @@ class TestListBoxPallet:
 		boxes = [item['box'] for item in json.loads(result.stdout)]
 		assert boxes == ['default', 'default', 'test']
 
-	def test_one_arg(self, host):
+	def test_one_arg(self, host, revert_etc):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -45,7 +45,7 @@ class TestListBoxPallet:
 		boxes = [item['box'] for item in json.loads(result.stdout)]
 		assert boxes == ['test']
 
-	def test_multiple_args(self, host, host_os):
+	def test_multiple_args(self, host, host_os, revert_etc):
 		# Add a second box to be included
 		result = host.run('stack add box test')
 		assert result.rc == 0

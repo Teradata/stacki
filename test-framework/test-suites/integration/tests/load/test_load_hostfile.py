@@ -48,7 +48,7 @@ class TestLoadHostfile:
 		return input_tmp_file, output_tmp_file
 
 	@pytest.mark.parametrize("csvfile", HOSTFILE_SPREADHSEETS)
-	def test_load_hostfile(self, host, csvfile):
+	def test_load_hostfile(self, host, csvfile, revert_etc):
 		"""Goes through and loads each individual csv then compares report matches expected output."""
 		# get filename
 		input_tmp_file, output_tmp_file = self.update_csv_variables(host, csvfile)

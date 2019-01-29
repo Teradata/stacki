@@ -123,7 +123,7 @@ class TestEnableDiscovery:
 		assert "INFO: discovery daemon started" in lines[0]
 		assert "INFO: discovery daemon stopped" in lines[1]
 
-	def test_daemon_detecting_two_nodes(self, host):
+	def test_daemon_detecting_two_nodes(self, host, revert_etc):
 		"""
 		Test that the node discovery process works with two nodes,
 		properly ignoring duplicate DHCP requests in the process.

@@ -2,7 +2,7 @@ import re
 
 
 class TestReportHost:
-	def test_with_default_network_behaviour(self,host):
+	def test_with_default_network_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.10.0.0 mask=255.255.255.0 zone=')
 		assert result.rc == 0
 
@@ -35,7 +35,7 @@ class TestReportHost:
 
 		hostsFile.close()
 
-	def test_with_shortname_behaviour(self,host):
+	def test_with_shortname_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.10.0.0 mask=255.255.255.0 zone=')
 		assert result.rc == 0
 
@@ -71,7 +71,7 @@ class TestReportHost:
 
 		hostsFile.close()
 
-	def test_with_network_zone_behaviour(self,host):
+	def test_with_network_zone_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.20.0.0 mask=255.255.255.0 zone=')
 
 		result = host.run('stack add host backend-3-0')
@@ -106,7 +106,7 @@ class TestReportHost:
 
 		hostsFile.close()
 
-	def test_with_alias_behaviour(self,host):
+	def test_with_alias_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.10.0.0 mask=255.255.255.0 zone=')
 		assert result.rc == 0
 

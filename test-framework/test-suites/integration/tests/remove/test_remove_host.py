@@ -29,7 +29,7 @@ class TestRemoveHost:
 		assert result.rc == 255
 		assert result.stderr == 'error - cannot remove "frontend-0-0"\n'
 
-	def test_single_arg(self, host, add_host_with_interface, add_group, host_os):
+	def test_single_arg(self, host, add_host_with_interface, add_group, host_os, revert_etc):
 		# Attach a bunch of data to the backend
 		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
@@ -74,7 +74,7 @@ class TestRemoveHost:
 			}
 		]
 
-	def test_multiple_args(self, host, add_host_with_interface, add_group, host_os):
+	def test_multiple_args(self, host, add_host_with_interface, add_group, host_os, revert_etc):
 		# Attach a bunch of data to the backend
 		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
