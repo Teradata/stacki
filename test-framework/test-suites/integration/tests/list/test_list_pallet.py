@@ -1,7 +1,10 @@
 import json
 from textwrap import dedent
 
+import pytest
 
+
+@pytest.mark.usefixtures('create_pallet_isos')
 class TestListPallet:
 	def test_invalid_pallet(self, host):
 		result = host.run('stack list pallet test')
@@ -11,9 +14,9 @@ class TestListPallet:
 			[pallet ...] {expanded=bool} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_with_arch(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_arch(self, host):
 		# Add our pallet with a unique arch
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-arch-1.0-prod.arm.disk1.iso')
+		result = host.run('stack add pallet /export/test-files/pallets/test-different-arch-1.0-prod.arm.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by arch
@@ -30,9 +33,9 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_os(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_os(self, host):
 		# Add our pallet with a unique os
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-os-1.0-prod.x86_64.disk1.iso')
+		result = host.run('stack add pallet /export/test-files/pallets/test-different-os-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by OS
@@ -49,9 +52,9 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_release(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_release(self, host):
 		# Add our pallet with a unique release
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-test.x86_64.disk1.iso')
+		result = host.run('stack add pallet /export/test-files/pallets/test-different-release-1.0-test.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by release
@@ -68,9 +71,9 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_version(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_version(self, host):
 		# Add our pallet with a unique version
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
+		result = host.run('stack add pallet /export/test-files/pallets/test-different-version-2.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by arch
@@ -87,9 +90,9 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_expanded(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_expanded(self, host):
 		# Add our pallet with a unique version
-		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by arch
@@ -102,7 +105,7 @@ class TestListPallet:
 				'name': 'minimal',
 				'os': 'sles',
 				'release': 'sles12',
-				'url': f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso',
+				'url': '/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso',
 				'version': '1.0'
 			}
 		]

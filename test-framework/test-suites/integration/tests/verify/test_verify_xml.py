@@ -3,7 +3,7 @@ import pytest
 
 class TestVerifyXml:
 
-	def test_verify_xml_cart(self, host, revert_export_stack):
+	def test_verify_xml_cart(self, host):
 		'''Test if stack verify xml if able to identify errors
 		in XML files present in carts.'''
 
