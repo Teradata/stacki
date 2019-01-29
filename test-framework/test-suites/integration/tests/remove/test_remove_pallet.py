@@ -1,10 +1,7 @@
 import json
 from textwrap import dedent
 
-import pytest
 
-
-@pytest.mark.usefixtures('create_pallet_isos')
 class TestRemovePallet:
 	def test_no_pallet(self, host):
 		result = host.run('stack remove pallet')
@@ -22,9 +19,9 @@ class TestRemovePallet:
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_no_parameters(self, host):
+	def test_no_parameters(self, host, create_pallet_isos, revert_export_stack):
 		# Add our minimal pallet
-		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure it made it to the DB
@@ -59,9 +56,9 @@ class TestRemovePallet:
 		# Directory should be gone as well
 		assert not host.file('/export/stack/pallets/minimal/').exists
 
-	def test_all_parameters(self, host):
+	def test_all_parameters(self, host, create_pallet_isos, revert_export_stack):
 		# Add our minimal pallet
-		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure it made it to the DB
@@ -96,9 +93,9 @@ class TestRemovePallet:
 		# Directory should be gone as well
 		assert not host.file('/export/stack/pallets/minimal/').exists
 
-	def test_no_arch_match(self, host):
+	def test_no_arch_match(self, host, create_pallet_isos, revert_export_stack):
 		# Add our minimal pallet
-		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure it made it to the DB
@@ -143,9 +140,9 @@ class TestRemovePallet:
 		# Pallet files should still exist as well
 		assert host.file('/export/stack/pallets/minimal/1.0/sles12/sles/x86_64/roll-minimal.xml').exists
 
-	def test_no_os_match(self, host):
+	def test_no_os_match(self, host, create_pallet_isos, revert_export_stack):
 		# Add our minimal pallet
-		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure it made it to the DB
@@ -190,9 +187,9 @@ class TestRemovePallet:
 		# Pallet files should still exist as well
 		assert host.file('/export/stack/pallets/minimal/1.0/sles12/sles/x86_64/roll-minimal.xml').exists
 
-	def test_multiple_versions(self, host):
+	def test_multiple_versions(self, host, create_pallet_isos, revert_export_stack):
 		# Add our minimal pallet
-		result = host.run('stack add pallet /export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure it made it to the DB

@@ -24,7 +24,7 @@ class TestEnableCart:
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_default_box(self, host):
+	def test_default_box(self, host, revert_export_stack):
 		# Add our test cart
 		result = host.run('stack add cart test')
 		assert result.rc == 0
@@ -43,7 +43,7 @@ class TestEnableCart:
 			}
 		]
 
-	def test_with_box(self, host):
+	def test_with_box(self, host, revert_export_stack):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -66,7 +66,7 @@ class TestEnableCart:
 			}
 		]
 
-	def test_already_enabled(self, host):
+	def test_already_enabled(self, host, revert_export_stack):
 		# Add our test cart
 		result = host.run('stack add cart test')
 		assert result.rc == 0
