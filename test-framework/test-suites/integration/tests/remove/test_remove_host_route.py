@@ -32,7 +32,7 @@ class TestRemoveHostRoute:
 			{host ...} {address=string} [syncnow=string]
 		''')
 
-	def test_no_syncnow(self, host, revert_routing_table):
+	def test_no_syncnow(self, host, revert_routing_table, revert_etc):
 		# Add a route with sync now so it is added to the routing table
 		result = host.run(
 			'stack add host route frontend-0-0 '
@@ -111,7 +111,7 @@ class TestRemoveHostRoute:
 		assert result.rc == 0
 		assert '127.0.0.3 via 127.0.0.3' in result.stdout
 
-	def test_with_syncnow(self, host, revert_routing_table):
+	def test_with_syncnow(self, host, revert_routing_table, revert_etc):
 		# Add a route with sync now so it is added to the routing table
 		result = host.run(
 			'stack add host route frontend-0-0 '

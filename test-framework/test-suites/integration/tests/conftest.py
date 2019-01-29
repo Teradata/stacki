@@ -16,6 +16,7 @@ import warnings
 from django.core.servers import basehttp
 from django.core.wsgi import get_wsgi_application
 import pytest
+from redis import StrictRedis
 
 
 @pytest.fixture(scope="session")
@@ -48,93 +49,98 @@ def revert_database(dump_mysql):
 	with open(dump_mysql) as sql:
 		subprocess.run("mysql", stdin=sql, check=True)
 
+@pytest.fixture(scope="session")
+def redis():
+	yield StrictRedis(host='localhost')
+
+def _add_overlay(target):
+	name = target[1:].replace("/", "_")
+
+	# Make an overlay directories
+	overlay_dirs = {
+		"lowerdir": target,
+		"upperdir": f"/overlay/{name}/upper",
+		"workdir": f"/overlay/{name}/work"
+	}
+
+	if os.path.exists(f"/overlay/{name}"):
+		shutil.rmtree(f"/overlay/{name}")
+
+	os.makedirs(overlay_dirs["upperdir"])
+	os.makedirs(overlay_dirs["workdir"])
+
+	# Mount the overlays
+	subprocess.run([
+		"mount",
+		"-t", "overlay",
+		f"overlay_{name}",
+		"-o", ",".join(f"{k}={v}" for k, v in overlay_dirs.items()),
+		target
+	], check=True)
+
+def _remove_overlay(target):
+	name = target[1:].replace("/", "_")
+
+	# Try three times to unmount the overlay
+	for attempt in range(1, 4):
+		try:
+			# Run the garbase collector, just in case it releases
+			# some opened file handles
+			gc.collect()
+
+			# Do a sync also, just in case
+			subprocess.run(["sync"], check=True)
+
+			# Then try to unmount the overlay
+			subprocess.run(["umount", f"overlay_{name}"], check=True)
+
+			# It succeeded
+			break
+		except subprocess.CalledProcessError:
+			if attempt < 3:
+				# Sleep for a few seconds to give the open file
+				# handles a chance to clean themselves up
+				time.sleep(3)
+	else:
+		# We couldn't unmount the overlay, abort the tests
+		pytest.exit(f"Unable to unmount overlay_{name}")
+
+	# Clean up the overlay directories
+	shutil.rmtree(f"/overlay/{name}")
+
 @pytest.fixture
-def revert_filesystem():
-	# The paths to capture and revert changes to
-	paths = (
-		"/etc",
-		"/export/stack",
-		"/tftpboot"
-	)
+def revert_export_stack(redis):
+	# Get a lock so only one process can modify /export/stack
+	with redis.lock('revert_export_stack_lock'):
+		_add_overlay('/export/stack')
 
-	def clean_up():
-		# Unmount any existing overlay directories
-		with open("/proc/mounts", "r") as mounts:
-			# Create a tuple of lines because /proc/mounts will change
-			# as we unmount things
-			for mount in tuple(mounts):
-				if mount.startswith("overlay_"):
-					# Try three times to unmount the overlay
-					for attempt in range(1, 4):
-						try:
-							subprocess.run(
-								["umount", mount.split()[0]],
-								check=True
-							)
+		yield
 
-							# It succeeded
-							break
-						except subprocess.CalledProcessError:
-							# Let's run sync to see if it helps
-							subprocess.run(["sync"])
-							
-							# Run the garbase collector, just in case it releases
-							# some opened file handles
-							gc.collect()
+		_remove_overlay('/export/stack')
 
-							if attempt < 3:
-								# Sleep for a few seconds to give the open file
-								# handles a chance to clean themselves up
-								time.sleep(3)
-					else:
-						# Let's dump out any suspects.
-						result = subprocess.run(
-							["lsof", "-x", "+D", mount.split()[1]],
-							stdout=subprocess.PIPE,
-							encoding='utf-8'
-						)
+@pytest.fixture
+def revert_etc(redis, request):
+	# Get a lock so only one process can modify /etc
+	with redis.lock('revert_etc_lock'):
+		_add_overlay('/etc')
 
-						warnings.warn('Unable to unmount {} mounted on {}\n\n{}'.format(
-							mount.split()[0], 
-							mount.split()[1],
-							result.stdout
-						))
+		yield
 
-						# We couldn't unmount the overlay, abort the tests
-						pytest.exit("Couldn't unmount overlay on {}".format(mount.split()[1]))
+		# CAL 1/30/19 - This block of code can be uncommented, and
+		# the revert_etc fixture added to pytest.ini, to capture a
+		# log of all modifications to the /etc directory.
+		# with open('/tmp/etc_write.log', 'a') as f:
+		# 	cwd = os.getcwd()
+		# 	os.chdir('/overlay/etc/upper')
 
-		# Make sure the overlay root is clean
-		if os.path.exists("/overlay"):
-			shutil.rmtree("/overlay")
+		# 	mods = glob.glob('**/*', recursive=True)
+		# 	if mods:
+		# 		f.write('TEST: {}\n'.format(request.node.nodeid))
+		# 		f.write('{}\n\n'.format('\n'.join(sorted(mods))))
 
-	# Make sure we are clean
-	clean_up()
+		# 	os.chdir(cwd)
 
-	# Now set up the overlays
-	for ndx, path in enumerate(paths):
-		# Make the overlay directories
-		overlay_dirs = {
-			"lowerdir": path,
-			"upperdir": os.path.join("/overlay", path[1:], "upper"),
-			"workdir": os.path.join("/overlay", path[1:], "work")
-		}
-
-		os.makedirs(overlay_dirs['upperdir'])
-		os.makedirs(overlay_dirs['workdir'])
-	
-		# Mount the overlays
-		subprocess.run([
-			"mount",
-			"-t", "overlay",
-			f"overlay_{ndx}",
-			"-o", ",".join(f"{k}={v}" for k, v in overlay_dirs.items()),
-			path
-		], check=True)
-	
-	yield
-
-	# Clean up after the test
-	clean_up()
+		_remove_overlay('/etc')
 
 @pytest.fixture
 def revert_discovery():
@@ -319,7 +325,7 @@ def add_box(host):
 	return _inner
 
 @pytest.fixture
-def add_cart(host):
+def add_cart(host, revert_export_stack):
 	def _inner(name):
 		result = host.run(f'stack add cart {name}')
 		if result.rc != 0:
@@ -486,14 +492,45 @@ def run_file_server():
 	process.join()
 
 @pytest.fixture
-def host_os(host):
-	if host.file('/etc/SuSE-release').exists:
+def run_pallet_isos_server(create_pallet_isos):
+	# Run an HTTP server in a process
+	def runner():
+		try:
+			# Change to our test-files directory
+			os.chdir(create_pallet_isos)
+
+			# Serve them up
+			with HTTPServer(
+				('127.0.0.1', 8000),
+				SimpleHTTPRequestHandler
+			) as httpd:
+				httpd.serve_forever()
+		except KeyboardInterrupt:
+			# The signal to exit
+			pass
+
+	process = multiprocessing.Process(target=runner)
+	process.daemon = True
+	process.start()
+
+	# Give us a second to get going
+	time.sleep(1)
+
+	yield
+
+	# Tell the server it is time to clean up
+	os.kill(process.pid, signal.SIGINT)
+	process.join()
+
+@pytest.fixture(scope="session")
+def host_os():
+	if os.path.exists('/etc/SuSE-release'):
 		return 'sles'
 
 	return 'redhat'
 
 @pytest.fixture
-def fake_os_sles(host):
+def fake_os_sles(host, revert_etc):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as SLES
 	"""
@@ -515,7 +552,7 @@ def fake_os_sles(host):
 			pytest.fail('unable to fake SLES OS')
 
 @pytest.fixture
-def fake_os_redhat(host):
+def fake_os_redhat(host, revert_etc):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
 	"""
@@ -572,14 +609,11 @@ def invalid_host():
 def create_pallet_isos(tmpdir_factory):
 	"""
 	This fixture runs at the beginning of the testing session to build
-	the pallet ISOs for each roll-*.xml file found and copies them to
-	the /export/test-files/pallets/ folder.
+	the pallet ISOs for each roll-*.xml file found and yields their location.
 
 	All tests will share the same ISO, so don't do anything to it. At
 	the end of the session the ISO file is deleted.
 	"""
-
-	clean_up = []
 
 	# Change to the temp directory
 	temp_dir = tmpdir_factory.mktemp("pallets", False)
@@ -589,15 +623,10 @@ def create_pallet_isos(tmpdir_factory):
 			subprocess.run(['stack', 'create', 'pallet', path], check=True)
 			shutil.rmtree('disk1')
 
-		# Move our new ISOs where the tests expect them
-		for path in glob.glob('*.iso'):
-			shutil.move(path, '/export/test-files/pallets/')
-			clean_up.append(path)
-	yield
+	yield str(temp_dir)
 
-	# Clean up the ISO files
-	for filename in clean_up:
-		os.remove(os.path.join('/export/test-files/pallets/', filename))
+	# clean up temp directory
+	temp_dir.remove(1, True)
 
 @pytest.fixture(scope="session")
 def create_blank_iso(tmpdir_factory):
@@ -617,16 +646,10 @@ def create_blank_iso(tmpdir_factory):
 		# Create our blank ISO
 		subprocess.run(['genisoimage', '-o', 'blank.iso', '.'], check=True)
 
-		# Move our new ISO where the tests expect it
-		shutil.move(
-			temp_dir.join('blank.iso'),
-			'/export/test-files/pallets/blank.iso'
-		)
+	yield str(temp_dir)
 
-	yield
-
-	# Clean up the ISO file
-	os.remove('/export/test-files/pallets/blank.iso')
+	# clean up temp directory
+	temp_dir.remove(1, True)
 
 @pytest.fixture
 def inject_code(host):
