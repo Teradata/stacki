@@ -14,63 +14,45 @@
 
 
 <stack:script stack:stage="install-post">
+<stack:file stack:name="/tmp/dump-host.json">
+{
+        "host": [
+                {
+                        "name": "&Kickstart_PrivateHostname;",
+                        "rack": "0",
+                        "rank": "0",
+                        "appliance": "frontend",
+                        "interface": [
+                                {
+</stack:file>
+<stack:file stack:name="/tmp/dump-host.json" stack:mode="append" cond="platform in ['aws', 'docker']">
+					"options":   "dhcp",
+</stack:file>
+<stack:file stack:name="/tmp/dump-host.json" stack:mode="append">
+					"interface": "&Kickstart_PrivateInterface;",
+                                        "default":   true,
+                                        "network":   "private",
+					"mac":       "&Kickstart_PrivateEthernet;",
+					"ip":        "&Kickstart_PrivateAddress;",
+                                        "name":      "&Kickstart_PrivateHostname;"
+                                }
+			]
+		}
+	]                        
+}
+</stack:file>
 
-<!-- frontend host -->
+/opt/stack/bin/stack load /tmp/dump-bootaction.json | sh
+/opt/stack/bin/stack load /tmp/dump-host.json | sh
 
-/opt/stack/bin/stack "add host" &Kickstart_PrivateHostname; \
-	appliance=frontend rack=0 rank=0
 
-<!-- routes
-	multicast (bottom 255 addresses only)
-	broadcast
-	default gateway (frontend)
-	default gateway (backend nodes)
--->
-/opt/stack/bin/stack add route address=224.0.0.0 gateway=private netmask=255.255.255.0
-
-/opt/stack/bin/stack add route address=255.255.255.255 gateway=private netmask=255.255.255.255
-
-<!-- frontend private network -->
-
-/opt/stack/bin/stack add host interface &Kickstart_PrivateHostname;	\
-	network=private 						\
-	interface=&Kickstart_PrivateInterface;				\
-	mac=&Kickstart_PrivateEthernet;					\
-	ip=&Kickstart_PrivateAddress;					\
-	name=&Kickstart_PrivateHostname;
-
-/opt/stack/bin/stack set host interface default &Kickstart_PrivateHostname; \
-	interface=&Kickstart_PrivateInterface;				\
-	default=true
-
-<!-- SSH settings -->
-
-/opt/stack/bin/stack set attr attr=ssh.use_dns value=true
-/opt/stack/bin/stack set attr attr=sync.ssh.authkey value=true
-
-<!-- insert-ethers base numbers -->
-
-/opt/stack/bin/stack set attr attr=discovery.base.rank value=0
-/opt/stack/bin/stack set attr attr=discovery.base.rack value=0
-
-<!-- use long passwords in the database -->
 <stack:file stack:name="/tmp/my.cnf" stack:expr="grep -v '^old_passwords' /etc/my.cnf"/>
 <stack:file stack:name="/etc/my.cnf" stack:perms="644" stack:expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-<!--
-	now that all the host data is in the database, let's write /etc/hosts.
-	this will make the stack commands execute much faster because we won't
-	be waiting for DNS timeouts.
--->
 
 /opt/stack/bin/stack report host > /etc/hosts
 </stack:script>
 
-
-<stack:script cond="platform in ['aws', 'docker']" stack:stage="install-post">
-<!-- Frontend DHCPs -->
-/opt/stack/bin/stack set host interface options &Kickstart_PrivateHostname; interface=&Kickstart_PrivateInterface; options=dhcp
-</stack:script>
 
 </stack:stack>

@@ -8,7 +8,7 @@ import stack.commands
 import json
 from stack.exception import CommandError
 
-class Plugin(stack.commands.Plugin, stack.commands.Command):
+class __Plugin(stack.commands.Plugin, stack.commands.Command):
 	notifications = True
 
 	def provides(self):

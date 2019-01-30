@@ -17,6 +17,7 @@ OVERLAY.UPDATE.PKGS	= \
 		foundation-python-Jinja2 \
 	foundation-python-PyMySQL \
 	foundation-python-configparser \
+	foundation-python-jsoncomment \
 	foundation-python-python-daemon \
 	foundation-python-lockfile \
 	foundation-python-requests \

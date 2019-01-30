@@ -76,6 +76,12 @@ class ArgRequired(ArgError):
 		super(ArgRequired, self).__init__(cmd, arg, 'is required')
 
 
+class ArgNotAllowed(ArgError):
+
+	def __init__(self, cmd, arg=None):
+		super(ArgNotAllowed, self).__init__(cmd, arg, 'is not allowed')
+
+
 class ArgValue(ArgError):
 
 	def __init__(self, cmd, arg, value):

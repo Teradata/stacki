@@ -28,19 +28,18 @@ class Command(stack.commands.dump.command):
 		for row in self.call('list.host.interface'):
 			host      = row['host']
 			interface = row['interface']
-			interfaces[host].append({ 
-				'interface': interface,
-				'default'  : row['default'],
-				'network'  : row['network'],
-				'mac'      : row['mac'],
-				'ip'       : row['ip'],
-				'name'     : row['name'],
-				'module'   : row['module'],
-				'vlan'     : row['vlan'],
-				'options'  : row['options'],
-				'channel'  : row['channel'],
-				'alias'    : aliases[host][interface]
-				})
+			interfaces[host].append(OrderedDict(
+				interface = interface,
+				default   = row['default'],
+				network   = row['network'],
+				mac       = row['mac'],
+				ip        = row['ip'],
+				name      = row['name'],
+				module    = row['module'],
+				vlan      = row['vlan'],
+				options   = row['options'],
+				channel   = row['channel'],
+				alias     = aliases[host][interface]))
 
 		self.set_scope('host')
 
