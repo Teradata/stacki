@@ -21,6 +21,7 @@ clean.all:: clean
 nuke.all:: nuke
 	-cd $(ROLLROOT)/$(BUILDOS)/src && $(MAKE) nuke
 	-cd $(ROLLROOT)/common/src && $(MAKE) nuke
+	-cd $(ROLLROOT)/ && find $(ROLLROOT) -name order-$(ROLL)*.mk -delete
 
 .PHONY: manifest-check
 manifest-check:
