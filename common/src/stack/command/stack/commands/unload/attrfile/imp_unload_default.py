@@ -20,27 +20,30 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 	def run(self, args):
 		filename, = args
 
-		reader = stack.csv.reader(open(filename, 'rU'))
-		header = next(reader)
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
+			header = next(reader)
 
-		appliances = self.getApplianceNames()
+			appliances = self.getApplianceNames()
 
-		for row in reader:
-			target = None
-			attrs = {}
-			for i in range(0, len(row)):
-				field = row[i]
-				if header[i] == 'target':
-					target = field
-				elif field:
-					attrs[header[i]] = field
+			for row in reader:
+				target = None
+				attrs = {}
+				for i in range(0, len(row)):
+					field = row[i]
+					if header[i] == 'target':
+						target = field
+					elif field:
+						attrs[header[i]] = field
 
-			if target != 'global' and target not in appliances:
-				host = self.db.getHostname(target)
-				if not host:
-					raise CommandError(self.owner, 'target "%s" is not an known appliance or host name' % host)
+				if target != 'global' and target not in appliances:
+					host = self.db.getHostname(target)
+					if not host:
+						raise CommandError(self.owner, 'target "%s" is not an known appliance or host name' % host)
 
-			if target not in self.owner.attrs.keys():
-				self.owner.attrs[target] = {}
+				if target not in self.owner.attrs.keys():
+					self.owner.attrs[target] = {}
 
-			self.owner.attrs[target].update(attrs)
+				self.owner.attrs[target].update(attrs)
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')

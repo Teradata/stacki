@@ -87,105 +87,109 @@ class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.I
 		filename, = args
 
 		appliances = self.getApplianceNames()
-		reader = stack.csv.reader(open(filename, 'rU'))
 
-		header = None
-		name = None
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
 
-		for line, row in enumerate(reader, 1):
-			if line == 1:
-				missing = {'name', 'slot', 'raid level', 'array id'}.difference(row)
-				if missing:
-					raise CommandError(
-						self.owner,
-						f'the following required fields are not present in '
-						f'the input file: {", ".join(sorted(missing))}'
-					)
+			header = None
+			name = None
 
-				header = row
-				continue
+			for line, row in enumerate(reader, 1):
+				if line == 1:
+					missing = {'name', 'slot', 'raid level', 'array id'}.difference(row)
+					if missing:
+						raise CommandError(
+							self.owner,
+							f'the following required fields are not present in '
+							f'the input file: {", ".join(sorted(missing))}'
+						)
 
-			slot = None
-			raid = None
-			array = None
-			options = None
-			enclosure = None
-			adapter = None
-
-			for ndx, field in enumerate(row):
-				if not field:
+					header = row
 					continue
 
-				if header[ndx] == 'name':
-					name = field.lower()
+				slot = None
+				raid = None
+				array = None
+				options = None
+				enclosure = None
+				adapter = None
 
-				elif header[ndx] == 'slot':
-					if field == '*':
-						slot = '*'
-					else:
-						try:
-							slot = int(field)
-						except:
-							raise CommandError(
-								self.owner,
-								f'slot "{field}" must be an integer'
-							)
+				for ndx, field in enumerate(row):
+					if not field:
+						continue
 
-						if slot < 0:
-							raise CommandError(
-								self.owner,
-								f'slot "{slot}" must be >= 0'
-							)
+					if header[ndx] == 'name':
+						name = field.lower()
 
-				elif header[ndx] == 'raid level':
-					raid = field.lower()
+					elif header[ndx] == 'slot':
+						if field == '*':
+							slot = '*'
+						else:
+							try:
+								slot = int(field)
+							except:
+								raise CommandError(
+									self.owner,
+									f'slot "{field}" must be an integer'
+								)
 
-				elif header[ndx] == 'array id':
-					if field.lower() == 'global':
-						array = 'global'
-					elif field == '*':
-						array = '*'
-					else:
-						try:
-							array = int(field)
-						except:
-							raise CommandError(
-								self.owner,
-								f'array id "{field}" must '
-								f'be an integer'
-							)
+							if slot < 0:
+								raise CommandError(
+									self.owner,
+									f'slot "{slot}" must be >= 0'
+								)
 
-						if array < 0:
-							raise CommandError(
-								self.owner,
-								f'array id "{array}" must be >= 0'
-							)
+					elif header[ndx] == 'raid level':
+						raid = field.lower()
 
-				elif header[ndx] == 'options':
-					options = field
+					elif header[ndx] == 'array id':
+						if field.lower() == 'global':
+							array = 'global'
+						elif field == '*':
+							array = '*'
+						else:
+							try:
+								array = int(field)
+							except:
+								raise CommandError(
+									self.owner,
+									f'array id "{field}" must '
+									f'be an integer'
+								)
 
-				elif header[ndx] == 'enclosure':
-					enclosure = field
+							if array < 0:
+								raise CommandError(
+									self.owner,
+									f'array id "{array}" must be >= 0'
+								)
 
-				elif header[ndx] == 'adapter':
-					adapter = field
+					elif header[ndx] == 'options':
+						options = field
 
-			if not name:
-				raise CommandError(
-					self.owner,
-					'empty host name found in "name" column'
-				)
+					elif header[ndx] == 'enclosure':
+						enclosure = field
 
-			if name in appliances or name == 'global':
-				targets = [name]
-			else:
-				targets = self.owner.getHostnames([name])
+					elif header[ndx] == 'adapter':
+						adapter = field
 
-			if not targets:
-				raise CommandError(self.owner, f'Cannot find host "{name}"')
+				if not name:
+					raise CommandError(
+						self.owner,
+						'empty host name found in "name" column'
+					)
 
-			for target in targets:
-				self.process_target(
-					target, slot, enclosure, adapter,
-					raid, array, options, line
-				)
+				if name in appliances or name == 'global':
+					targets = [name]
+				else:
+					targets = self.owner.getHostnames([name])
+
+				if not targets:
+					raise CommandError(self.owner, f'Cannot find host "{name}"')
+
+				for target in targets:
+					self.process_target(
+						target, slot, enclosure, adapter,
+						raid, array, options, line
+					)
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')

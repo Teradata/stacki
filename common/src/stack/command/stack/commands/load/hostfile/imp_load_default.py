@@ -68,201 +68,204 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.boxes = self.getBoxNames()
 		self.actions = [entry['bootaction'] for entry in self.owner.call('list.bootaction')]
 
-		reader = stack.csv.reader(open(filename, 'rU'))
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
 
-		header = None
-		for row in reader:
+			header = None
+			for row in reader:
 
-			if not header:
-				header = row
+				if not header:
+					header = row
 
-				#
-				# make checking the header easier
-				#
-				required = [ 'name', 'appliance', 'ip', 'mac',
-					'interface', 'rack', 'rank', 'network' ]
+					#
+					# make checking the header easier
+					#
+					required = [ 'name', 'appliance', 'ip', 'mac',
+						'interface', 'rack', 'rank', 'network' ]
 
-				for i in range(0, len(row)):
-					if header[i] in required:
-						required.remove(header[i])
+					for i in range(0, len(row)):
+						if header[i] in required:
+							required.remove(header[i])
 
-				if len(required) > 0:
-					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					raise CommandError(self.owner, msg)
+					if len(required) > 0:
+						msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
+						raise CommandError(self.owner, msg)
 
-				continue
-
-			name = None
-			box = None
-			appliance = None
-			rack = None
-			rank = None
-			ip = None
-			mac = None
-			interface = None
-			network = None
-			ifhostname = None
-			channel = None
-			options = None
-			vlan = None
-			boss = None
-			default = None
-			comment = None
-			installaction = None
-			osaction = None
-			groups = None
-
-			for i in range(0, len(row)):
-				field = row[i]
-				if not field:
 					continue
 
-				if header[i] == 'name':
-					name = field.lower()
-				if header[i] == 'box':
-					box = field
-				if header[i] == 'appliance':
-					appliance = field
-				elif header[i] == 'rack':
-					rack = field
-				elif header[i] == 'rank':
-					rank = field
-				elif header[i] == 'ip':
-					try:
-						if field == "auto" or ipaddress.IPv4Address(field):
-							ip = field
-					except:
-						msg = 'invalid IP %s in the input file' % ip
+				name = None
+				box = None
+				appliance = None
+				rack = None
+				rank = None
+				ip = None
+				mac = None
+				interface = None
+				network = None
+				ifhostname = None
+				channel = None
+				options = None
+				vlan = None
+				boss = None
+				default = None
+				comment = None
+				installaction = None
+				osaction = None
+				groups = None
+
+				for i in range(0, len(row)):
+					field = row[i]
+					if not field:
+						continue
+
+					if header[i] == 'name':
+						name = field.lower()
+					if header[i] == 'box':
+						box = field
+					if header[i] == 'appliance':
+						appliance = field
+					elif header[i] == 'rack':
+						rack = field
+					elif header[i] == 'rank':
+						rank = field
+					elif header[i] == 'ip':
+						try:
+							if field == "auto" or ipaddress.IPv4Address(field):
+								ip = field
+						except:
+							msg = 'invalid IP %s in the input file' % ip
+							raise CommandError(self.owner, msg)
+					elif header[i] == 'mac':
+						#
+						# make sure the MAC has lowercase
+						# letters
+						#
+						mac = field.lower()
+					elif header[i] == 'interface':
+						interface = field.lower()
+					elif header[i] == 'network':
+						network = field.lower()
+					elif header[i] == 'interface hostname':
+						ifhostname = field.lower()
+					elif header[i] == 'channel':
+						channel = field
+					elif header[i] == 'options':
+						options = field
+					elif header[i] == 'vlan':
+						try:
+							vlan = int(field)
+						except:
+							msg = 'VLAN "%s" must be an integer' % field
+							raise CommandError(self.owner, msg)
+
+						if vlan < 1:
+							msg = 'VLAN "%s" must be greater than 0' % vlan
+							raise CommandError(self.owner, msg)
+					elif header[i] == 'boss':
+						boss = field
+					elif header[i] == 'default':
+						default = field
+					elif header[i] == 'comment':
+						comment = field
+					elif header[i] == 'installaction':
+						installaction = field
+					elif header[i] in [ 'osaction', 'runaction' ]:
+						osaction = field
+					elif header[i] == 'groups':
+						groups = field
+							
+				if not name:
+					msg = 'empty host name found in "name" column'
+					raise CommandError(self.owner, msg)
+
+				if name not in self.owner.hosts.keys():
+					self.owner.hosts[name] = {}
+
+				if box:
+					self.checkBox(box)
+					self.owner.hosts[name]['box'] = box
+
+				if appliance:
+					if 'appliance' in self.owner.hosts[name].keys() and \
+							self.owner.hosts[name]['appliance'] != appliance:
+						msg = 'two different appliance types specified for host "%s"' % name
 						raise CommandError(self.owner, msg)
-				elif header[i] == 'mac':
-					#
-					# make sure the MAC has lowercase
-					# letters
-					#
-					mac = field.lower()
-				elif header[i] == 'interface':
-					interface = field.lower()
-				elif header[i] == 'network':
-					network = field.lower()
-				elif header[i] == 'interface hostname':
-					ifhostname = field.lower()
-				elif header[i] == 'channel':
-					channel = field
-				elif header[i] == 'options':
-					options = field
-				elif header[i] == 'vlan':
-					try:
-						vlan = int(field)
-					except:
-						msg = 'VLAN "%s" must be an integer' % field
+
+					self.owner.hosts[name]['appliance'] = appliance
+
+				if rack:
+					if 'rack' in self.owner.hosts[name].keys() and \
+							self.owner.hosts[name]['rack'] != rack:
+						msg = 'two different rack numbers specified for host "%s"' % name
 						raise CommandError(self.owner, msg)
 
-					if vlan < 1:
-						msg = 'VLAN "%s" must be greater than 0' % vlan
+					self.owner.hosts[name]['rack'] = rack
+
+				if rank:
+					if 'rank' in self.owner.hosts[name].keys() and \
+							self.owner.hosts[name]['rank'] != rank:
+						msg = 'two different rank numbers specified for host "%s"' % name
 						raise CommandError(self.owner, msg)
-				elif header[i] == 'boss':
-					boss = field
-				elif header[i] == 'default':
-					default = field
-				elif header[i] == 'comment':
-					comment = field
-				elif header[i] == 'installaction':
-					installaction = field
-				elif header[i] in [ 'osaction', 'runaction' ]:
-					osaction = field
-				elif header[i] == 'groups':
-					groups = field
-						
-			if not name:
-				msg = 'empty host name found in "name" column'
-				raise CommandError(self.owner, msg)
 
-			if name not in self.owner.hosts.keys():
-				self.owner.hosts[name] = {}
+					self.owner.hosts[name]['rank'] = rank
 
-			if box:
-				self.checkBox(box)
-				self.owner.hosts[name]['box'] = box
+				if not interface:
+					continue
 
-			if appliance:
-				if 'appliance' in self.owner.hosts[name].keys() and \
-						self.owner.hosts[name]['appliance'] != appliance:
-					msg = 'two different appliance types specified for host "%s"' % name
+				if name not in self.owner.interfaces.keys():
+					self.owner.interfaces[name] = {}
+
+				if interface in self.owner.interfaces[name].keys():
+					msg = 'interface "%s" already specified for host "%s"' % (interface, name)
 					raise CommandError(self.owner, msg)
 
-				self.owner.hosts[name]['appliance'] = appliance
+				self.owner.interfaces[name][interface] = {}
+				
+				if default:
+					self.owner.interfaces[name][interface]['default'] = default
+				if ip:
+					if not network:
+						raise CommandError(self.owner, 'inclusion of IP requires inclusion of network')
+					self.owner.interfaces[name][interface]['ip'] = ip
+				if mac:
+					self.owner.interfaces[name][interface]['mac'] = mac
+				if network:
+					self.owner.interfaces[name][interface]['network'] = network
+				if ifhostname:
+					self.owner.interfaces[name][interface]['ifhostname'] = ifhostname
+				if channel:
+					self.owner.interfaces[name][interface]['channel'] = channel
+				if options:
+					self.owner.interfaces[name][interface]['options'] = options
+				if vlan:
+					self.owner.interfaces[name][interface]['vlan'] = vlan
+				if boss:
+					self.owner.hosts[name]['boss'] = boss
 
-			if rack:
-				if 'rack' in self.owner.hosts[name].keys() and \
-						self.owner.hosts[name]['rack'] != rack:
-					msg = 'two different rack numbers specified for host "%s"' % name
-					raise CommandError(self.owner, msg)
+				if comment:
+					if 'comment' not in self.owner.hosts[name].keys():
+						self.owner.hosts[name]['comment'] = comment
+					else:
+						self.owner.hosts[name]['comment'] += \
+							', %s' % comment
+				if installaction:
+					if installaction not in self.actions:
+						msg = 'installaction "%s" does not exist in the database' % installaction
+						raise CommandError(self.owner, msg)
+					else:
+						self.owner.hosts[name]['installaction'] = installaction
 
-				self.owner.hosts[name]['rack'] = rack
+				if osaction:
+					if osaction not in self.actions:
+						msg = 'bootaction "%s" does not exist in the database' % osaction
+						raise CommandError(self.owner, msg)
+					else:
+						self.owner.hosts[name]['osaction'] = osaction
 
-			if rank:
-				if 'rank' in self.owner.hosts[name].keys() and \
-						self.owner.hosts[name]['rank'] != rank:
-					msg = 'two different rank numbers specified for host "%s"' % name
-					raise CommandError(self.owner, msg)
-
-				self.owner.hosts[name]['rank'] = rank
-
-			if not interface:
-				continue
-
-			if name not in self.owner.interfaces.keys():
-				self.owner.interfaces[name] = {}
-
-			if interface in self.owner.interfaces[name].keys():
-				msg = 'interface "%s" already specified for host "%s"' % (interface, name)
-				raise CommandError(self.owner, msg)
-
-			self.owner.interfaces[name][interface] = {}
-			
-			if default:
-				self.owner.interfaces[name][interface]['default'] = default
-			if ip:
-				if not network:
-					raise CommandError(self.owner, 'inclusion of IP requires inclusion of network')
-				self.owner.interfaces[name][interface]['ip'] = ip
-			if mac:
-				self.owner.interfaces[name][interface]['mac'] = mac
-			if network:
-				self.owner.interfaces[name][interface]['network'] = network
-			if ifhostname:
-				self.owner.interfaces[name][interface]['ifhostname'] = ifhostname
-			if channel:
-				self.owner.interfaces[name][interface]['channel'] = channel
-			if options:
-				self.owner.interfaces[name][interface]['options'] = options
-			if vlan:
-				self.owner.interfaces[name][interface]['vlan'] = vlan
-			if boss:
-				self.owner.hosts[name]['boss'] = boss
-
-			if comment:
-				if 'comment' not in self.owner.hosts[name].keys():
-					self.owner.hosts[name]['comment'] = comment
-				else:
-					self.owner.hosts[name]['comment'] += \
-						', %s' % comment
-			if installaction:
-				if installaction not in self.actions:
-					msg = 'installaction "%s" does not exist in the database' % installaction
-					raise CommandError(self.owner, msg)
-				else:
-					self.owner.hosts[name]['installaction'] = installaction
-
-			if osaction:
-				if osaction not in self.actions:
-					msg = 'bootaction "%s" does not exist in the database' % osaction
-					raise CommandError(self.owner, msg)
-				else:
-					self.owner.hosts[name]['osaction'] = osaction
-
-			if groups:
-				self.owner.hosts[name]['groups'] = groups.split(',')
+				if groups:
+					self.owner.hosts[name]['groups'] = groups.split(',')
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')
 
 		#
 		# check if the 'Boss' column was set

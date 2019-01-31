@@ -83,3 +83,8 @@ class TestLoadHostfile:
 		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_duplicate_interface.csv')
 		assert result.rc != 0
 		assert re.search(r'interface ".+" already specified for host', result.stderr) is not None
+
+	def test_load_hostfile_with_unicode(self, host):
+		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_with_unicode.csv')
+		assert result.rc != 0
+		assert 'error - non-ascii character in file' in result.stderr
