@@ -1,2 +1,2 @@
-NAME	= @template@
-VERSION	= @version@
+NAME	= {{ pallet_name }}
+VERSION	= {{ version }}

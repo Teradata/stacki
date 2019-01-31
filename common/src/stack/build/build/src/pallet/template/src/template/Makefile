@@ -4,7 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-PKGROOT         = /opt/@template@
+PKGROOT         = /opt/{{ pallet_name }}
 TARBALL_POSTFIX = tgz
 ROLLROOT	= ../..
 

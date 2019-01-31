@@ -1,9 +1,8 @@
 <stack:stack>
 
 	<stack:description>
-	@template@ pallet description here.
-	This node file will run on both frontend
-	and backend nodes
+	{{ pallet_name }} pallet description here.
+	This node file will run only on backend nodes
 	</stack:description>
 
 	<stack:copyright>
@@ -13,16 +12,16 @@
 	</stack:copyright>
 
 <!--
-     List packages that will be installed
-     on both frontends, and backends
+     List packages that will only be
+     installed on backends
 	<stack:package>package1</stack:package>
 	<stack:package>package2</stack:package>
 -->
 
 
 
-<!-- Post section that will be run on
-     both frontends, and backends
+<!-- Post section that will be run
+     only on backends
 <stack:script stack:stage="install-post">
 </stack:script>
 -->
