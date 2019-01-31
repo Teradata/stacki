@@ -111,6 +111,7 @@ if os.path.exists('/tmp/site.attrs'):
                         "address": "&Kickstart_PrivateNetwork;",
                         "mask":    "&Kickstart_PrivateNetmask;",
                         "gateway": "&Kickstart_PrivateGateway;",
+			"zone":    "&Kickstart_PrivateDNSDomain;",
                         "dns":     false,
                         "pxe":     true
                 }

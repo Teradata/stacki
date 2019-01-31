@@ -63,7 +63,9 @@ class command(stack.commands.Command):
 		for key in [key for key in params if params[key] is None]:
 			del params[key]	  # nuke *=None params
 		c = ' '.join(cmd.split('.'))
-		a = shlex.quote(' '.join(args))
+		a = ''
+		if args:
+			a = shlex.quote(' '.join(args))
 		p = ' '.join([f'{k}={shlex.quote(str(v))}' for k, v in params.items()])
 		print(f'/opt/stack/bin/stack "{c}" {a} {p}')
 
