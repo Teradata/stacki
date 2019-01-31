@@ -4,7 +4,7 @@
 
 	<description>
 
-	The @template@ Pallet
+	The {{ pallet_name }} Pallet
 
 	</description>
 
@@ -15,17 +15,17 @@
 	</copyright>
 
 
-	<edge from="base" to="@template@-base" />
-	<edge from="server" to="@template@-server" />
-	<edge from="client" to="@template@-client" />
+	<edge from="base" to="{{ pallet_name }}-base" />
+	<edge from="server" to="{{ pallet_name }}-server" />
+	<edge from="client" to="{{ pallet_name }}-client" />
 
 	<!-- Add ordering of edges here. This defines
 	     the order in which the node XML files
 	     are run -->
 	<!--
-	     For example, to run the post section in @template@-base
+	     For example, to run the post section in {{ pallet_name }}-base
 	     after the resolv.xml from the stacki pallet, use the
 	     following directive
-	     <order head="resolv" tail="@template@-base" />
+	     <order head="resolv" tail="{{ pallet_name }}-base" />
 	-->
 </graph>
