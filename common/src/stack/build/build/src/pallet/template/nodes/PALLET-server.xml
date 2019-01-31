@@ -1,7 +1,7 @@
 <stack:stack>
 
 	<stack:description>
-	@template@ pallet description here.
+	{{ pallet_name }} pallet description here.
 	This node file will run only on frontend nodes
 	</stack:description>
 
