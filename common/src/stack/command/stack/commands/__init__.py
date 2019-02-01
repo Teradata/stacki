@@ -1624,8 +1624,7 @@ class Command:
 		return []
 
 	def notify(self, message):
-		if self.notifications:
-			print(f'{_logPrefix}{message}', file = sys.stderr, flush = True)
+		print(f'{_logPrefix}{message}', file = sys.stderr, flush = True)
 
 	def command(self, command, args=[]):
 		"""

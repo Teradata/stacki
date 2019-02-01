@@ -9,8 +9,6 @@ import json
 from stack.exception import CommandError
 
 class __Plugin(stack.commands.Plugin, stack.commands.Command):
-	notifications = True
-
 	def provides(self):
 		return 'global'
 	def requires(self):
