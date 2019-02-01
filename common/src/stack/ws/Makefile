@@ -35,10 +35,6 @@ install::
 	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | gawk	\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
 
-	# Install Sudoers file
-	mkdir -p $(ROOT)/etc/sudoers.d
-	$(INSTALL) -m0400 conf/stacki_ws.sudo $(ROOT)/etc/sudoers.d/stacki_ws
-
 	# Install Apache Config file
 	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d
 	$(INSTALL) -m0644 conf/stacki_ws.httpd $(ROOT)/etc/apache2/stacki-conf.d/ws.conf

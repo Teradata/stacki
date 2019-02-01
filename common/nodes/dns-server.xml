@@ -49,7 +49,12 @@ $TTL	86400
 </stack:file>
 
 <!-- create /etc/rndc.key -->
-/usr/sbin/rndc-confgen -a 
+
+if [ -f /vagrant/randomfile ]; then
+	<!-- if we have an existing randomfile, use that -->
+	RANDOMFILE="-r /vagrant/randomfile"
+fi
+/usr/sbin/rndc-confgen -a $RANDOMFILE
 
 chmod 640 /etc/rndc.key
 chown root.named /etc/rndc.key

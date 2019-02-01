@@ -5,6 +5,7 @@
 # @copyright@
 
 from collections import OrderedDict
+from stack.exception import ArgNotAllowed
 import stack.commands
 import json
 
@@ -22,6 +23,14 @@ class command(stack.commands.Command):
 	def set_scope(self, scope):
 		self.__dump_scope = scope
 
+
+	def dump_access(self):
+		dump = []
+
+		for row in self.call('list.access'):
+			dump.append(OrderedDict(command = row['command'],
+						group   = row['group']))
+		return dump
 
 	def dump_attr(self, name=None):
 		dump  = []
@@ -100,6 +109,7 @@ class command(stack.commands.Command):
 			dump.append(OrderedDict(
 				address   = row['network'],
 				gateway   = row['gateway'],
+				subnet    = row['subnet'],
 				netmask   = row['netmask'],
 				interface = row['interface']))
 		return dump
@@ -153,11 +163,16 @@ class Command(command):
 	Dumps the entire state of the Stacki database as a JSON document.
 	"""
 	def run(self, params, args):
+
+		if len(args):
+			raise ArgNotAllowed(self, args[0])
+
 		dump = {}
 		
 		self.set_scope('global')
 
 		dump = OrderedDict(version    = stack.version,
+				   access     = self.dump_access(),
 				   attr       = self.dump_attr(),
 				   controller = self.dump_controller(),
 				   partition  = self.dump_partition(),

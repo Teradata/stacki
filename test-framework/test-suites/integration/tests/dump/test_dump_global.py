@@ -23,7 +23,7 @@ class TestDumpGlobal:
 		assert results.rc == 0
 
 		# dump our global information
-		results = host.run('stack dump global')
+		results = host.run('stack dump')
 		assert results.rc == 0
 		dumped_data = json.loads(results.stdout)
 

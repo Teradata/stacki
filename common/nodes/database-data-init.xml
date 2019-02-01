@@ -67,53 +67,166 @@ if os.path.exists('/tmp/site.attrs'):
 
 <stack:script stack:stage="install-post">
 
-<!-- access control -->
-/opt/stack/bin/stack set access command='*'     group='apache'
-/opt/stack/bin/stack set access command='list*' group='wheel'
+<stack:file stack:name="/tmp/dump-core.json">
+{
+        "access": [
+                {
+                        "command": "*",
+                        "group": "apache"
+                },
+                {
+                        "command": "list*",
+                        "group": "wheel"
+                },
+        ],
+        "attr": [
+                {
+                        "name": "sync.ssh.authkey",
+                        "value": true
+                },
+                {
+                        "name": "ssh.use_dns",
+                        "value": true
+                },
+                {
+                        "name": "discovery.base.rack",
+                        "value": "0"
+                },
+                {
+                        "name": "discovery.base.rank",
+                        "value": 0
+                },
+                {
+                        "name": "os",
+                        "value": "&os;"
+                },
+                {
+                        "name": "firewall",
+                        "value": true
+                }
+	],
+        "network": [
+                {
+                        "name":    "private",
+                        "address": "&Kickstart_PrivateNetwork;",
+                        "mask":    "&Kickstart_PrivateNetmask;",
+                        "gateway": "&Kickstart_PrivateGateway;",
+			"zone":    "&Kickstart_PrivateDNSDomain;",
+                        "dns":     false,
+                        "pxe":     true
+                }
+        ],
+        "route": [
+                {
+                        "address": "224.0.0.0",
+                        "netmask": "255.255.255.0",
+                        "subnet":  "private"
+                },
+                {
+                        "address": "255.255.255.255",
+                        "netmask": "255.255.255.255",
+                        "subnet":  "private"
+                }
+        ],
+        "bootaction": [
+                {
+                        "name":   "default",
+                        "type":   "os",
+                        "kernel": "com32 chain.c32",
+                        "args":   "hd0"
+                },
+                {
+                        "name":    "pxeflash",
+                        "type":    "os",
+                        "kernel":  "kernel memdisk bigraw",
+                        "ramdisk": "pxeflash.img",
+                        "args":    "keeppxe"
+                },
+                {
+                        "name":   "localboot",
+                        "type":   "os",
+                        "kernel": "localboot 0"
+                },
+                {
+                        "name":   "hplocalboot",
+                        "type":   "os",
+                        "kernel": "localboot -1"
+                },
+                {
+                        "name":   "memtest",
+                        "type":   "os",
+                        "kernel": "kernel memtest"
+                }
 
-<!-- insert the base box into the database -->
-/opt/stack/bin/stack add box default
+        ],
+	"software": {
+                "box": [ 
+			{
+				"name": "default"
+                        }
+                ]
+	},
+        "appliance": [
+                {
+                        "name": "frontend",
+                        "public": false,
+                        "attr": [ 
+                                { "name": "node",          "value": "server" },
+				{ "name": "kickstartable", "value": true },
+				{ "name": "managed",       "value": false }
+			]
+                },
+                {
+                        "name": "builder",
+                        "public": false,
+                        "attr": [ 
+                                { "name": "node",          "value": "builder" },
+				{ "name": "kickstartable", "value": true },
+				{ "name": "managed",       "value": true }
+			]
+                },
+                {
+                        "name": "barnacle",
+                        "public": false,
+                        "attr": [ 
+                                { "name": "node",          "value": "barnacle" },
+				{ "name": "kickstartable", "value": true },
+				{ "name": "managed",       "value": true }
+			]
+                },
+                {
+                        "name": "switch",
+                        "public": false,
+                        "attr": [ 
+				{ "name": "kickstartable", "value": false },
+				{ "name": "managed",       "value": false }
+			]
+		},
+                {
+                        "name": "backend",
+                        "public": true,
+                        "attr": [ 
+                                { "name": "node",          "value": "backend" },
+				{ "name": "kickstartable", "value": true },
+				{ "name": "managed",       "value": true }
+			]
+                },
+                {
+                        "name": "replicant",
+                        "public": true,
+                        "attr": [ 
+                                { "name": "node",            "value": "replicant" },
+				{ "name": "kickstartable",   "value": true },
+				{ "name": "managed",         "value": true },
+                                { "name": "const_overwrite", "value": false }
+			]
+                }
+        ]
+}
+</stack:file>
 
-<!-- insert the base appliances into the database -->
+/opt/stack/bin/stack load /tmp/dump-core.json | sh
 
-/opt/stack/bin/stack add appliance frontend  node=server   public=false
-/opt/stack/bin/stack add appliance builder   node=builder  public=false
-/opt/stack/bin/stack add appliance barnacle  node=barnacle public=false
-/opt/stack/bin/stack add appliance backend   node=backend
-/opt/stack/bin/stack add appliance replicant node=replicant
-/opt/stack/bin/stack add appliance switch    public=false
-
-<!-- manage firewall rules by default -->
-/opt/stack/bin/stack set attr attr=firewall value=true
-
-<!-- Set managed attribute to false for frontend-->
-
-/opt/stack/bin/stack set appliance attr frontend attr=managed value=False
-
-<!-- ensure replicant appliances *don't* get 'const' attributes -->
-/opt/stack/bin/stack set appliance attr replicant attr=const_overwrite value=false
-
-<!-- networks -->
-
-/opt/stack/bin/stack add network private	\
-	address=&Kickstart_PrivateNetwork;	\
-	mask=&Kickstart_PrivateNetmask;	        \
-	zone=&Kickstart_PrivateDNSDomain;	\
-	gateway=&Kickstart_PrivateGateway;	\
-	dns=false pxe=true
-
-<!-- set default os to whatever the frontend is -->
-
-/opt/stack/bin/stack set attr attr=os value=&os;
-
-</stack:script>
-
-<stack:script stack:stage="install-post">
-/opt/stack/bin/stack add bootaction default     type=os kernel="com32 chain.c32" args=hd0
-/opt/stack/bin/stack add bootaction pxeflash    type=os kernel="kernel memdisk bigraw" ramdisk=pxeflash.img args=keeppxe
-/opt/stack/bin/stack add bootaction localboot   type=os kernel="localboot 0"
-/opt/stack/bin/stack add bootaction hplocalboot type=os kernel="localboot -1"
-/opt/stack/bin/stack add bootaction memtest     type=os kernel="kernel memtest"
 </stack:script>
 
 

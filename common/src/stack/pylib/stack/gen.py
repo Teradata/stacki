@@ -517,13 +517,33 @@ class MainTraversor(Traversor):
 		disabled = [ ]
 		for (nodefile, pkgs) in packages['disabled'].items():
 			disabled.extend(pkgs)
-	
-		section.append('DO_PACKAGES=1')
-		section.append('DO_INSTALL_POST=1')
-		section.append('DO_BOOT_PRE=0')
-		section.append('DO_BOOT_POST=1')
-		section.append('\t ')
-		section.append('')
+
+		section.append('''
+DO_PACKAGES=1
+DO_INSTALL_POST=1
+DO_BOOT_PRE=0
+DO_BOOT_POST=1
+
+while getopts ":s:" opt; do
+	case $opt in
+		s)
+			DO_PACKAGES=0
+			DO_INSTALL_POST=0
+			DO_BOOT_PRE=0
+			DO_BOOT_POST=0
+			case $OPTARG in
+				packages)  DO_PACKAGES=1;;
+				post)      DO_INSTALL_POST=1;;
+				boot-pre)  DO_BOOT_PRE=1;;
+				boot-post) DO_BOOT_POST=1;;
+				*)         ;;
+			esac
+			;;
+		*)
+			;;
+	esac
+done
+''')
 
 		for stage in self.scripts: # write the functions
 			for label in self.scripts[stage]:

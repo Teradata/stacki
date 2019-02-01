@@ -14,6 +14,7 @@ YUMLIST = \
 		foundation-python-Click \
 	foundation-python-PyMySQL \
 	foundation-python-configparser \
+	foundation-python-jsoncomment \
 	foundation-python-python-daemon \
 		foundation-python-lockfile \
 	foundation-python-requests \

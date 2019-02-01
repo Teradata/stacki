@@ -38,7 +38,7 @@ class TestDumpSoftware:
 		assert results.rc == 0
 
 		# dump our software information
-		results = host.run('stack dump software')
+		results = host.run('stack dump pallet')
 		assert results.rc == 0
 		dumped_data = json.loads(results.stdout)
 
@@ -58,7 +58,7 @@ class TestDumpSoftware:
 		assert results.rc == 0
 
 		# dump our software information
-		results = host.run('stack dump software')
+		results = host.run('stack dump box')
 		assert results.rc == 0
 		dumped_data = json.loads(results.stdout)
 
@@ -77,7 +77,7 @@ class TestDumpSoftware:
 		assert results.rc == 0
 
 		# dump our software information
-		results = host.run('stack dump software')
+		results = host.run('stack dump cart')
 		assert results.rc == 0
 		dumped_data = json.loads(results.stdout)
 

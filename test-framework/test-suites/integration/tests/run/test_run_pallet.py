@@ -37,9 +37,9 @@ class TestRunPallet:
 
 	def test_one_arg(self, host):
 		# Make sure the top of the output matches what we expect
-		result = host.run('script -qfec "stack run pallet stacki" - | tr -d "\r" | head -n 6')
+		result = host.run('script -qfec "stack run pallet stacki" - | tr -d "\r" | head -n 1')
 		assert result.rc == 0
-		assert result.stdout == '#! /bin/bash\n\t\nDO_PACKAGES=1\nDO_INSTALL_POST=1\nDO_BOOT_PRE=0\nDO_BOOT_POST=1\n'
+		assert result.stdout == '#! /bin/bash\n'
 
 		# Note: The code has a test for isatty so we have to trick the
 		# run pallet command to think it has a tty
@@ -65,9 +65,9 @@ class TestRunPallet:
 		# run pallet command to think it has a tty
 
 		# Make sure the top of the output matches what we expect
-		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os}" - | tr -d "\r" | head -n 6')
+		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os}" - | tr -d "\r" | head -n 1')
 		assert result.rc == 0
-		assert result.stdout == '#! /bin/bash\n\t\nDO_PACKAGES=1\nDO_INSTALL_POST=1\nDO_BOOT_PRE=0\nDO_BOOT_POST=1\n'
+		assert result.stdout == '#! /bin/bash\n'
 
 		# Run it through "bash -n" to do a syntax sanity check
 		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os}" - | tr -d "\r" | bash -n')
@@ -90,9 +90,9 @@ class TestRunPallet:
 		# run pallet command to think it has a tty
 
 		# Make sure the top of the output matches what we expect
-		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os} database=false" - | tr -d "\r" | head -n 6')
+		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os} database=false" - | tr -d "\r" | head -n 1')
 		assert result.rc == 0
-		assert result.stdout == '#! /bin/bash\n\t\nDO_PACKAGES=1\nDO_INSTALL_POST=1\nDO_BOOT_PRE=0\nDO_BOOT_POST=1\n'
+		assert result.stdout == '#! /bin/bash\n'
 
 		# Run it through "bash -n" to do a syntax sanity check
 		result = host.run(f'script -qfec "stack run pallet stacki test_1-{host_os} database=false" - | tr -d "\r" | bash -n')

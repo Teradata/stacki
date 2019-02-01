@@ -10,28 +10,40 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+##
+## Code in this command generates multiple Zone files, one for each network.
+## The exception to this is when addressing multiple adjecent networks on
+## on non-octet boundaries. For example 39.80/12 and 39.96/12. These are
+## distinct, adjecent networks on non-octet boundaries.
+## For explanation of how this is designed, look at the Design comment in
+## the "stack.report.named" command file.
+##
+
 import os
 import time
+import zlib
 
 import stack.commands
+import stack.commands.report
 from stack.util import flatten
 
 
 preamble_template = """$TTL 3D
-@ IN SOA ns.%s. root.ns.%s. (
+@ IN SOA %s. root.%s. (
 	%s ; Serial
 	8H ; Refresh
 	2H ; Retry
 	4W ; Expire
 	1D ) ; Min TTL
 ;
-	NS ns.%s.
-	MX 10 mail.%s.
+	NS %s.
+	MX 10 %s.
 
 """
 
 
-class Command(stack.commands.report.command):
+class Command(stack.commands.report.command,
+	stack.commands.HostArgumentProcessor):
 	"""
 	Prints out all the named zone.conf and reverse-zone.conf files in XML.
 	To actually create these files, run the output of the command through
@@ -48,32 +60,49 @@ class Command(stack.commands.report.command):
 	<related>sync dns</related>
 	"""
 
-	def host_lines(self, name, zone):
-		"Lists the name->IP mappings for all hosts"
+	def run(self, params, args):
 
-		s = ""
-		for (host_name, ip, device, network_name) in self.db.select("""
-			nodes.name, networks.ip, networks.device, networks.name
-			from subnets, nodes, networks
-			where subnets.zone=%s
-			and networks.subnet=subnets.id and networks.node=nodes.id
-		""", (zone,)):
-			if ip is None:
-				continue
+		self.frontend = self.getHostnames(["a:frontend"])[0]
+		if self.os == 'sles':
+			self.named = '/var/lib/named'
+		elif self.os == 'redhat':
+			self.named = '/var/named'
 
-			if not network_name:
-				network_name = host_name
+		networks = self.call('list.network', [ 'dns=true' ])
+		hosts = self.call("list.host.interface", ["expanded=true"])
+		aliases = self.call("list.host.alias")
 
-			s += '%s A %s\n' % (network_name, ip)
+		zones = []
+		for network in networks:
+			n = dict.copy(network)
+			sn = self.getSubnet(network["address"],network["mask"])
+			sn.reverse()
+			r_sn = '.'.join(sn)
 
-			# Now record the aliases as CNAMEs
-			for alias in flatten(self.db.select("""
-				aliases.name from aliases, networks
-				where networks.device=%s and networks.id=aliases.network
-			""", (device,))):
-				s += '%s CNAME %s\n' % (alias, network_name)
+			n["hosts"] = self.getHosts(network, hosts, aliases)
+			n["reverse_subnet"] = r_sn
+			zones.append(n)
 
-		return s
+		self.beginOutput()
+		self.getForwardZones(zones)
+		self.getReverseZones(zones)
+		self.endOutput()
+
+	def getHosts(self, network, hosts, aliases):
+		h = []
+		for host in hosts:
+			if host["network"] == network["network"]:
+				host_record = {
+					"name"	: host["host"],
+					"ip"	: host["ip"],
+					"aliases":[]
+					}
+				for alias in aliases:
+					if alias["host"] == host["host"] and \
+						alias["interface"] == host["interface"]:
+						host_record["aliases"].append(alias["alias"])
+				h.append(host_record)
+		return h
 
 	def host_local(self, name, zone):
 		"Appends any manually defined hosts to domain file"
@@ -96,97 +125,78 @@ class Command(stack.commands.report.command):
 
 		return s
 
-	def reverse_host_lines(self, r_sn, s_name):
-		"""
-		Lists the IP -> name mappings for all hosts.
-		Handles only IPv4 addresses.
-		"""
-
-		s = ''
-		subnet_len = len(r_sn.split('.'))
-
-		# Remove all elements of the IP address that are present in
-		# the subnet. This is done by counting the number of elements
-		# in the subnet, and popping that many from the IP address.
-		for (network_name, host_name, ip, zone) in self.db.select("""
-			networks.name, nodes.name, networks.ip, subnets.zone
-			from networks, subnets, nodes
-			where subnets.name=%s
-			and networks.subnet=subnets.id and networks.node=nodes.id
-		""", (s_name,)):
-			if not network_name:
-				network_name = host_name
-
-			if ip is None:
-				continue
-
-			t_ip = ip.split('.')[subnet_len:]
-			t_ip.reverse()
-
-			s += '%s PTR %s.%s.\n' % ('.'.join(t_ip), network_name, zone)
-
-		# Handle reverse local additions
-		filename = '%s/reverse.%s.domain.%s.local' % (self.named, s_name, r_sn)
-		if os.path.exists(filename):
-			s += '\n;Imported from %s\n\n' % filename
-			f = open(filename, 'r')
-			s += f.read()
-			f.close()
-			s += '\n'
-		else:
-			s += '\n'
-			s += '; Custom entries for network %s\n' % s_name
-			s += '; can be placed in %s\n' % filename
-			s += '; These entries will be sourced on sync\n'
-
-		return s
-
-	def run(self, params, args):
+	def getForwardZones(self, zones):
 		serial = int(time.time())
-
-		networks = []
-		for row in self.call('list.network', [ 'dns=true' ]):
-			networks.append(row)
-
-		if self.os == 'sles':
-			self.named = '/var/lib/named'
-		elif self.os == 'redhat':
-			self.named = '/var/named'
-
-		self.beginOutput()
-
-		# Forward Lookups
-		for network in networks:
+		for network in zones:
 			name = network['network']
 			zone = network['zone']
 			filename = '%s/%s.domain' % (self.named, name)
 
 			s = '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
-			s += preamble_template % (zone, zone, serial, zone, zone)
-			s += 'ns A 127.0.0.1\n\n'
-			s += self.host_lines(name, zone)
+			s += preamble_template % (self.frontend, self.frontend, serial, self.frontend, self.frontend)
+			#s += 'ns A 127.0.0.1\n\n'
+			for host in network["hosts"]:
+				if host["ip"]:
+					s += "%s A %s\n" % (host["name"], host["ip"])
+				for alias in host["aliases"]:
+					s += "%s CNAME %s\n" % (alias, host["name"])
 			s += self.host_local(name, zone)
 			s += '</stack:file>\n'
 
 			self.addOutput('', s)
 
-		# Reverse Lookups
-		s = ''
-		for network in networks:
-			address = network['address']
-			mask = network['mask']
-			zone = network['zone']
-			name = network['network']
 
-			sn = self.getSubnet(address, mask)
-			sn.reverse()
-			r_sn = '.'.join(sn)
-			filename = '%s/reverse.%s.domain.%s' % (self.named, name, r_sn)
+	def getReverseZones(self, zones):
+		# Group by reverse zones
+		serial = int(time.time())
+		z = {}
+		for x in zones:
+			r_sn = x["reverse_subnet"]
+			if not r_sn in z:
+				z[r_sn] = []
+			z[r_sn].append(x)
+
+		s = ''
+		for zone in z:
+			if len(z[zone]) == 1:
+				name = z[zone][0]["network"]
+			else:
+				# Generate a CRC32 HEX String from the network names.
+				# First, Join the network names using "."
+				# Then generate the CRC32 number, and convert it to a
+				# positive integer. The convert that integer to HEX
+				# Use the HEX String as a Unique key.
+				# Given that the this key is used as the name of network,
+				# hash collisions are a low probability
+				n = '.'.join(list(map(lambda x: x["network"], z[zone]))).encode()
+				name = hex(zlib.crc32(n) & 0xffffffff)[2:]
+			filename = '%s/reverse.%s.domain' % (self.named, name)
 
 			s += '<stack:file stack:name="%s" stack:perms="0644">\n' % filename
-			s += preamble_template % (name, name, serial, name, name)
-			s += self.reverse_host_lines(r_sn, name)
-			s += '</stack:file>\n'
+			s += preamble_template % (self.frontend, self.frontend, serial, self.frontend, self.frontend)
+			sn_len = len(zone.split("."))
+			for l in z[zone]:
+				for host in l["hosts"]:
+					if not host["ip"]:
+						continue
+					ip = host["ip"].split(".")
+					trunc_ip = ip[sn_len:]
+					trunc_ip.reverse()
+					s += '%s IN PTR %s.%s.\n' % ('.'.join(trunc_ip), host["name"], l["zone"])
 
+				# Handle reverse local additions
+				filename = '%s/reverse.%s.domain.local' % (self.named, l["network"])
+				if os.path.exists(filename):
+					s += '\n;Imported from %s\n\n' % filename
+					f = open(filename, 'r')
+					s += f.read()
+					f.close()
+					s += '\n'
+				else:
+					s += '\n'
+					s += '; Custom entries for the "%s" network\n' % l["network"]
+					s += '; can be placed in %s\n' % filename
+					s += '; These entries will be sourced on sync\n\n\n'
+
+			s += '</stack:file>\n'
 		self.addOutput('', s)
-		self.endOutput(padChar='')

@@ -1,0 +1,8 @@
+[Unit]
+After=last.target
+
+[Service]
+ExecStart=/opt/stack/sbin/docker-barnacle
+
+[Install]
+WantedBy=default.target

@@ -45,7 +45,11 @@ class TestEnableDiscovery:
 		"Test the discovery daemon is started when not running"
 
 		# Confirm the daemon isn't running
-		assert len(host.process.filter(comm="stack")) == 0
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
+		assert len(process_list) == 0
 
 		# Start the daemon
 		result = host.run("stack enable discovery")
@@ -53,7 +57,11 @@ class TestEnableDiscovery:
 		assert result.stdout == "Discovery daemon has started\n"
 
 		# Confirm it is running now
-		assert len(host.process.filter(comm="stack")) == 1
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
+		assert len(process_list) == 1
 
 		# Stop discovery to put the system back to the initial state
 		result = host.run("stack disable discovery")
@@ -81,7 +89,10 @@ class TestEnableDiscovery:
 		assert result.stdout == "Discovery daemon has started\n"
 
 		# Confirm a single daemon is running
-		process_list = host.process.filter(comm="stack")
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
 		assert len(process_list) == 1
 		pid = process_list[0].pid
 
@@ -91,7 +102,10 @@ class TestEnableDiscovery:
 		assert result.stdout == "Discovery daemon has started\n"
 
 		# Confirm it is still running and has the initial PID
-		process_list = host.process.filter(comm="stack")
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
 		assert len(process_list) == 1
 		assert process_list[0].pid == pid
 
@@ -129,7 +143,10 @@ class TestEnableDiscovery:
 		assert result.stdout == "Discovery daemon has started\n"
 
 		# Confirm a single daemon is running
-		process_list = host.process.filter(comm="stack")
+		process_list = [
+			process for process in host.process.filter(comm="stack")
+			if "discovery" in process.args
+		]
 		assert len(process_list) == 1
 
 		# Set up a listener to capture discovery messages

@@ -22,9 +22,11 @@ class command(stack.commands.Command):
 		CIDR netmask that is not a multiple of
 		8. This means subnets smaller than /24 (25-32)
 		will result in the correct subnet being
-		backendd for named.conf.
+		backend for named.conf. It also needs to
+		return a subnet on the octet boundary for
+		netmasks that are in the 23..8 range. For
+		more info read RFC2317
 		"""
-		
 		s_list = list(map(int, subnet.split('.')))
 		n_list = list(map(int, netmask.split('.')))
 		
@@ -43,6 +45,4 @@ class command(stack.commands.Command):
 					b = (b << 1 ) - 256
 					s = s + 1
 				s = cidr + s
-				net_list.append("%d-%d" % (s_list[i], s))
-
 		return net_list

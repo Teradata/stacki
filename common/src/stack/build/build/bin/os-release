@@ -15,19 +15,22 @@ else
 fi
 
 case $RELEASE in
-    *6.*)
-	echo redhat6
-	;;
-    *7.*)
-	echo redhat7
-	;;
-    *SUSE*11*)
-	echo sles11
-	;;
-    *SUSE*12*)
-	echo sles12
-	;;
-    *)
-        echo unknown
-        ;;
+	*release?6.*)
+		echo redhat6
+		;;
+	*release?7.*)
+		echo redhat7
+		;;
+	*SUSE*11*)
+		echo sles11
+		;;
+	*SUSE*12*)
+		echo sles12
+		;;
+	*SUSE*15*)
+		echo sles15
+		;;
+	*)
+		echo unknown
+		;;
 esac

@@ -29,8 +29,10 @@ from xml.sax import make_parser
 from pymysql import OperationalError, ProgrammingError
 from functools import partial
 from operator import itemgetter
-from itertools import groupby
+from itertools import groupby, cycle
 from collections import OrderedDict, namedtuple
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 import stack.graph
 import stack
@@ -1777,6 +1779,88 @@ class Command:
 		# from running the implementation.
 		if name in self.impl_list:
 			return self.impl_list[name].run(args)
+
+	def run_implementations_parallel(self, implementation_mapping, display_progress = False):
+		"""Runs each implementation in its own thread, passing it the mapped arguments.
+
+		The implementation_mapping parameter is expected to be a dictionary where the keys are
+		implementation names and the values are the arguments to call the implementation with.
+
+		The display_progress parameter controls whether a spinner is displayed to keep a concerned
+		observer assured that the process isn't dead. This defaults to False.
+
+		The results are returned as a dictionary where the keys are the implementation names
+		and the values are either namedtuples with the attributes "result" and "exception", or
+		None if the implementation could not be loaded. If an exception was raised in the
+		implementation thread, result will be None and the exception will be set to the
+		exception raised. Otherwise, exception will be None and result will be set to the
+		result that was returned.
+		"""
+		# load all the implementations if they aren't already loaded
+		for imp_name in implementation_mapping:
+			if imp_name not in self.impl_list:
+				self.loadImplementation(imp_name)
+
+		# only run the ones that are loaded
+		imps_to_run = {
+			imp_name: args for imp_name, args in implementation_mapping.items()
+			if imp_name in self.impl_list
+		}
+		# set results to None for the implementations we couldn't load
+		results_by_imp = {
+			imp_name: None for imp_name in implementation_mapping
+			if imp_name not in self.impl_list
+		}
+		with ThreadPoolExecutor(thread_name_prefix = 'run_imp_parallel') as executor:
+			# submit each implementation to be run in a thread
+			futures_by_imp = {
+				imp: executor.submit(
+					lambda name, args: self.impl_list[name].run(args),
+					name = imp,
+					args = args,
+				)
+				for imp, args in imps_to_run.items()
+			}
+			if display_progress and futures_by_imp:
+				# setup a output spinner
+				spinner = cycle('\\|/-')
+				# try to evenly divide the progress over 100-ish characters, or
+				# just print out one character per future completed if the division
+				# rounds to 0.
+				chunk_size = round(100 / len(futures_by_imp)) + 1
+				futures_done = 0
+				# use a 3 second timer to decide if we need to start the spinner
+				# we use a no op lambda because we only care about timer expiration
+				timer = threading.Timer(3, lambda: ())
+				timer.start()
+				while not all(future.done() for future in futures_by_imp.values()):
+					if not timer.is_alive():
+						new_futures_done = len([future for future in futures_by_imp.values() if future.done()])
+						# print out a number of chunks of *s equal to the number of new futures done.
+						if new_futures_done > futures_done:
+							sys.stdout.write('*' * chunk_size * (new_futures_done - futures_done))
+							futures_done = new_futures_done
+
+						sys.stdout.write(next(spinner))
+						sys.stdout.flush()
+						sys.stdout.write('\b')
+
+					# don't peg the cpu you fool
+					time.sleep(0.25)
+
+				# finalize the output with a newline and flush the stream.
+				timer.cancel()
+				print(flush = True)
+
+		# Gather the results from each implementation run and collect them by name.
+		# This will also save the exception if one was raised.
+		for imp, future in futures_by_imp.items():
+			results_by_imp[imp] = namedtuple('ParallelImpResults', ('result', 'exception'))(
+				result = future.result() if future.exception() is None else None,
+				exception = future.exception(),
+			)
+
+		return results_by_imp
 
 	def isRootUser(self):
 		"""

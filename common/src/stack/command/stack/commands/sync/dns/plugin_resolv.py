@@ -20,4 +20,5 @@ class Plugin(stack.commands.Plugin):
 		return 'resolv'
 
 	def run(self, args):
-		self.owner.report('report.host.resolv', [ 'localhost' ])
+		if self.owner.getAttr('platform') not in [ 'docker', 'aws' ]:
+			self.owner.report('report.host.resolv', [ 'localhost' ])

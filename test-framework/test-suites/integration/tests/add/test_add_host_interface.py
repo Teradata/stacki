@@ -38,7 +38,7 @@ class TestAddHostInterface:
 		# Add it again
 		result = host.run('stack add host interface backend-0-0 interface=eth0')
 		assert result.rc == 255
-		assert result.stderr == 'error - interface exists\n'
+		assert 'exists' in result.stderr
 
 	def test_duplicate_mac(self, host):
 		# Add the interface
@@ -48,7 +48,7 @@ class TestAddHostInterface:
 		# Add it again
 		result = host.run('stack add host interface backend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 255
-		assert result.stderr == 'error - mac exists\n'
+		assert 'exists' in result.stderr
 
 	def test_invalid_name(self, host):
 		result = host.run('stack add host interface backend-0-0 interface=eth0 name=test.example.com')

@@ -6,6 +6,7 @@
 -foundation-sc-im
 -stack-admin
 -stack-config-server
+-stack-docker
 -stack-ekv
 -stack-examples
 -stack-kickstart

@@ -42,4 +42,8 @@
 		<to>aws-ssh-key</to>
 	</edge>
 
+	<edge from="server" cond="platform == 'docker'">
+		<to>docker-server</to>
+	</edge>
+
 </graph>
