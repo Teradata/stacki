@@ -23,14 +23,14 @@
 	script can run after the above 'stack:chroot="true"' in order to append the profile
 	hash to /opt/stack/etc/install.hash.
 -->
-<stack:script stack:chroot="false" stack:stage="install-post" cond="os == 'sles'">
+<stack:script stack:chroot="false" stack:stage="install-post" stack:cond="os == 'sles'">
 cat /tmp/stacki-profile.xml | \
 	PYTHONPATH= LD_LIBRARY_PATH=/opt/stack/lib /opt/stack/bin/stack list host profile hash=y \
 	2>> /mnt/tmp/install.hash \
 	> /dev/null
 </stack:script>
 
-<stack:script stack:stage="install-post" cond="os == 'sles'">
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
 cat /tmp/install.hash >> /opt/stack/etc/install.hash
 </stack:script>
 

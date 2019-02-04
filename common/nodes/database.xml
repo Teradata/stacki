@@ -40,7 +40,7 @@
 -->
 /bin/hostname &hostname;
 
-<stack:file stack:name="/etc/hostname" cond="os == 'sles'">
+<stack:file stack:name="/etc/hostname" stack:cond="os == 'sles'">
 &Info_FQDN;
 </stack:file>
 

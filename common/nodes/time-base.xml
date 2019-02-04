@@ -17,7 +17,7 @@
 	</stack:rocks>
 
 
-	<stack:package cond="os == 'redhat'">
+	<stack:package stack:cond="os == 'redhat'">
 		ntp
 		rdate
 		libcap

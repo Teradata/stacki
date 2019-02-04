@@ -22,7 +22,7 @@
 		openssh-askpass
 	</stack:package>
 
-	<stack:package cond="os == 'redhat'">
+	<stack:package stack:cond="os == 'redhat'">
 		openssh-clients
 		openssh-server
 		xorg-x11-xauth

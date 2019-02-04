@@ -13,56 +13,45 @@
 	</stack:rocks>
 
 
-<stack:script stack:chroot="false" stack:stage="install-post" cond="os == 'redhat'">
+<stack:script stack:chroot="false" stack:stage="install-post" stack:cond="os == 'redhat'">
 cp /tmp/site.attrs /mnt/sysimage/tmp
 chmod 400 /mnt/sysimage/tmp/site.attrs
 cp /tmp/rolls.xml /mnt/sysimage/tmp
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
+import json
 import os.path
 
+attrs = []
 if os.path.exists('/tmp/site.attrs'):
-	file = open('/tmp/site.attrs', 'r')
-	for line in file.readlines():
-		l = line.split(':', 1)
-		if len(l) == 2:
-			#
-			# key/value pairs
-			#
-
-			#
-			# there are some attributes that don't belong in the
-			# database
-			#
-			key = l[0].strip()
-
-			if key in [ 'hostname', 'rack', 'rank', 'os', 'nukedisks', 'nukecontroller' ]:
+	with open('/tmp/site.attrs', 'r') as file:
+		for line in file.readlines():
+			try:
+				key, value = line.split(':', 1)
+			except:
 				continue
 
-			v = l[1].strip()
-			value = ''
-			for i in v:
-				if i == "'":
-					value += "'"
-					value += '"'
-					value += "\\'"
-					value += '"'
-					value += "'"
-				else:
-					value += i
-			
-			if key in [ 'Kickstart_PrivatePortableRootPassword', \
-					'Kickstart_PrivateRootPassword', \
-					'Kickstart_PrivateDjangoRootPassword' ]:
-				extra = 'shadow=y'
+			key   = key.strip()
+			value = value.strip()
+
+			if key in ['hostname', 'rack', 'rank', 'os', 
+				   'nukedisks', 'nukecontroller']:
+				continue
+
+			if key in ['Kickstart_PrivatePortableRootPassword',
+				   'Kickstart_PrivateRootPassword',
+				   'Kickstart_PrivateDjangoRootPassword']:
+				shadow = True
 			else:
-				extra = ''
+				shadow = False
 
-			os.system("/opt/stack/bin/stack set attr %s attr='%s' value='%s'"
-				% (extra, key, value))
+			attrs.append({'name': key,
+				      'value': value,
+				      'shadow': shadow})
 
-	file.close()
+with open('/tmp/site.json', 'w') as file:
+	file.write(json.dumps({"attr": attrs}))
 </stack:script>
 
 <stack:script stack:stage="install-post">
@@ -225,6 +214,7 @@ if os.path.exists('/tmp/site.attrs'):
 }
 </stack:file>
 
+/opt/stack/bin/stack load /tmp/site.json | sh
 /opt/stack/bin/stack load /tmp/dump-core.json | sh
 
 </stack:script>
