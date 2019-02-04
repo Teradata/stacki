@@ -1171,21 +1171,44 @@ class DatabaseConnection:
 				DatabaseConnection.cache[self.name][k] = rows
 		return rows
 
-	def execute(self, command, args=None):
+	def execute(self, command, args=None, many=False):
+		"""Executes the provided SQL command with the provided args.
+
+		If many is True, this will use executemany instead of execute to perform the command.
+		"""
 		command = command.strip()
 
 		if not command.lower().startswith('select'):
 			self.clearCache()
 
 		if self.link:
+			# pick the executor to use
+			if many:
+				executor = self.link.executemany
+			else:
+				executor = self.link.execute
+
 			try:
 				t0 = time.time()
-				result = self.link.execute(command, args)
+				result = executor(command, args)
 				t1 = time.time()
 			except ProgrammingError:
-				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
+				# mogrify doesn't understand the executemany args, so we have to do some more work.
+				if many:
+					error = '\n'.join((self.link.mogrify(command, arg) for arg in args))
+					Debug(f'SQL ERROR: {error}')
+				else:
+					Debug(f'SQL ERROR: {self.link.mogrify(command, args)}')
+
 				raise ProgrammingError
-			Debug(f'SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
+
+			# mogrify doesn't understand the executemany args, so we have to do some more work.
+			if many:
+				commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
+				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), commands))
+			else:
+				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
+
 			return result
 
 		return None
