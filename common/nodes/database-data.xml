@@ -25,7 +25,7 @@
                         "interface": [
                                 {
 </stack:file>
-<stack:file stack:name="/tmp/dump-host.json" stack:mode="append" cond="platform in ['aws', 'docker']">
+<stack:file stack:name="/tmp/dump-host.json" stack:mode="append" stack:cond="platform in ['aws', 'docker']">
 					"options":   "dhcp",
 </stack:file>
 <stack:file stack:name="/tmp/dump-host.json" stack:mode="append">
@@ -50,9 +50,10 @@
 <stack:file stack:name="/etc/my.cnf" stack:perms="644" stack:expr="cat /tmp/my.cnf"/>
 rm /tmp/my.cnf
 
-
-/opt/stack/bin/stack report host > /etc/hosts
 </stack:script>
 
+<stack:script stack:cond="platform != 'docker'">
+/opt/stack/bin/stack report host > /etc/hosts
+</stack:script>
 
 </stack:stack>
