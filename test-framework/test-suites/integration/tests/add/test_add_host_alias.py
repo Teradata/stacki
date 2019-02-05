@@ -9,7 +9,7 @@ class TestAddHostAlias:
 	dirn = '/export/test-files/add/'
 
 	# split possible?
-	def test_to_multiple_interfaces_across_multiple_hosts(self, host):
+	def test_to_multiple_interfaces_across_multiple_hosts(self, host, revert_etc):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
 		assert result.rc == 0
 		result = host.run('stack add host alias backend-0-0 alias=test0-eth0 interface=eth0')
@@ -59,7 +59,7 @@ class TestAddHostAlias:
 		expected_output = open(self.dirn + 'add_host_alias_one_alias.json').read()
 		assert json.loads(result.stdout) == json.loads(expected_output)
 
-	def test_add_duplicate_alias_same_host(self, host):
+	def test_add_duplicate_alias_same_host(self, host, revert_etc):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
 		assert result.rc == 0
 		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
@@ -75,7 +75,7 @@ class TestAddHostAlias:
 		print(expected_output.strip())
 		assert json.loads(result.stdout) == json.loads(expected_output)
 
-	def test_add_duplicate_alias_different_host(self, host):
+	def test_add_duplicate_alias_different_host(self, host, revert_etc):
 		result = host.run(f'stack load hostfile file={self.dirn}add_host_alias_hostfile.csv')
 		assert result.rc == 0
 		result = host.run('stack add host alias backend-0-0 alias=test0-eth0 interface=eth0')

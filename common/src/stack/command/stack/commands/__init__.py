@@ -1383,29 +1383,26 @@ class DatabaseConnection:
 				# a FQDN that does not really exist. Still a common case.
 
 				try:
-					fin = open('/etc/resolv.conf', 'r')
-				except:
-					fin = None
-				if fin:
-					domains = []
-					for line in fin.readlines():
-						tokens = line[:-1].split()
-						if len(tokens) == 0:
-							continue
-						if tokens[0] == 'search':
-							domains = tokens[1:]
+					with open('/etc/resolv.conf', 'r') as f:
+						domains = []
+						for line in f.readlines():
+							tokens = line[:-1].split()
+							if len(tokens) == 0:
+								continue
+
+							if tokens[0] == 'search':
+								domains = tokens[1:]
+
 					for domain in domains:
 						try:
 							name = '%s.%s' % (hostname, domain)
 							addr = socket.gethostbyname(name)
-							hostname = name
-							break
+							if addr:
+								return self.getHostname(name)
 						except:
 							pass
-					if addr:
-						return self.getHostname(hostname)
-
-					fin.close()
+				except (OSError, IOError):
+					pass
 
 				# HostArgumentProcessor has changed handling of
 				# appliances (and others) as hostnames. So do some work
@@ -1627,8 +1624,7 @@ class Command:
 		return []
 
 	def notify(self, message):
-		if self.notifications:
-			print(f'{_logPrefix}{message}', file = sys.stderr, flush = True)
+		print(f'{_logPrefix}{message}', file = sys.stderr, flush = True)
 
 	def command(self, command, args=[]):
 		"""

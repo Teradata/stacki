@@ -2,10 +2,7 @@ from collections import defaultdict
 import json
 from textwrap import dedent
 
-import pytest
 
-
-@pytest.mark.usefixtures('create_pallet_isos')
 class TestListPalletCommand:
 	def test_invalid_pallet(self, host):
 		result = host.run('stack list pallet command test')
@@ -53,12 +50,12 @@ class TestListPalletCommand:
 		# That stacki pallet should have a ton of commands
 		assert len(commands['stacki']) > 200
 
-	def test_multiple_args(self, host):
+	def test_multiple_args(self, host, create_pallet_isos, revert_export_stack):
 		# Add two of the test pallets
-		result = host.run(f'stack add pallet /export/test-files/pallets/test_1-sles-1.0-prod.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-sles-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
 
-		result = host.run(f'stack add pallet /export/test-files/pallets/test_1-redhat-1.0-prod.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-redhat-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# List out the commands for the stacki pallet and our two test ones

@@ -42,7 +42,7 @@ class TestSwapHostInterface:
 		assert result.rc == 255
 		assert result.stderr == 'error - one or more of the interfaces are missing\n'
 
-	def test_minimal_parameters(self, host, add_host):
+	def test_minimal_parameters(self, host, add_host, revert_etc):
 		# Add two minimal interfaces
 		result = host.run('stack add host interface backend-0-0 mac=00:00:00:00:00:00 interface=eth0')
 		assert result.rc == 0
@@ -86,7 +86,7 @@ class TestSwapHostInterface:
 			}
 		]
 
-	def test_all_parameters(self, host, add_host, add_network):
+	def test_all_parameters(self, host, add_host, add_network, revert_etc):
 		# Add two interfaces with all the fixins
 		result = host.run(
 			'stack add host interface backend-0-0 interface=eth1 '

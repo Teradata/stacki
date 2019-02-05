@@ -68,119 +68,122 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 		for i in subnets:
 			self.owner.current_networks[i['network']] = i
 
-		reader = stack.csv.reader(open(filename, 'rU'))
-		header = None
-		line = 0
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
+			header = None
+			line = 0
 
-		for row in reader:
-			line += 1
+			for row in reader:
+				line += 1
 
-			if not header:
-				header = row
+				if not header:
+					header = row
 
-				#
-				# make checking the header easier
-				#
-				required = ['network', 'zone', 'address', 'mask', 'gateway', 'mtu', 'dns', 'pxe']
+					#
+					# make checking the header easier
+					#
+					required = ['network', 'zone', 'address', 'mask', 'gateway', 'mtu', 'dns', 'pxe']
 
-				for i in range(0, len(row)):
-					header[i] = header[i].lower()
+					for i in range(0, len(row)):
+						header[i] = header[i].lower()
 
-					if header[i] in required:
-						required.remove(header[i])
+						if header[i] in required:
+							required.remove(header[i])
 
-				if len(required) > 0:
-					msg = 'the following required fields are not present in the input file: '
-					msg += '"%s"' % ', '.join(required)	
-					CommandError(self.owner, msg)
+					if len(required) > 0:
+						msg = 'the following required fields are not present in the input file: '
+						msg += '"%s"' % ', '.join(required)	
+						CommandError(self.owner, msg)
 
-				continue
-
-			name = None
-			address = None
-			mask = None
-			mtu = None
-			zone = None
-			dns = None
-			pxe = None
-			gateway = None
-
-			for i in range(0, len(row)):
-				field = row[i]
-				if not field:
 					continue
 
-				if header[i] == 'network':
-					if field:
-						name = field.lower()
+				name = None
+				address = None
+				mask = None
+				mtu = None
+				zone = None
+				dns = None
+				pxe = None
+				gateway = None
 
-				elif header[i] == 'address':
-					if field:
-						address = field
+				for i in range(0, len(row)):
+					field = row[i]
+					if not field:
+						continue
 
-				elif header[i] == 'zone':
-					if field:
-						zone = field
+					if header[i] == 'network':
+						if field:
+							name = field.lower()
 
-				elif header[i] == 'mask':
-					if field:
-						mask = field
+					elif header[i] == 'address':
+						if field:
+							address = field
 
-				elif header[i] == 'mtu':
-					if field:
-						mtu = field
+					elif header[i] == 'zone':
+						if field:
+							zone = field
 
-				elif header[i] == 'dns':
-					if field:
-						dns = field
+					elif header[i] == 'mask':
+						if field:
+							mask = field
 
-				elif header[i] == 'pxe':
-					if field:
-						pxe = field
+					elif header[i] == 'mtu':
+						if field:
+							mtu = field
 
-				elif header[i] == 'gateway':
-					if field:
-						gateway = field
+					elif header[i] == 'dns':
+						if field:
+							dns = field
 
-			self.owner.networks[name] = {}
+					elif header[i] == 'pxe':
+						if field:
+							pxe = field
 
-			if not name:
-				msg = 'Hey! I need a network name in line '
-				msg += '%s' % line
-				raise CommandError(self.owner, msg)
-			else:
-				self.owner.networks[name]['network'] = name 
+					elif header[i] == 'gateway':
+						if field:
+							gateway = field
 
-			# Validated addresses and netmask.
-			self.checkValidIP(name, 'address', address)
-			self.checkValidNetwork(name, 'mask', mask)
-			if gateway is not None:
-				self.checkValidIP(name, 'gateway', gateway)
+				self.owner.networks[name] = {}
 
-			# You have an address and a mask check if they're valid together.
-			# You probably don't need this since a bad netmask and a bad
-			# IP will both be caught.
-			try:
-				if IPv4Network(u"%s/%s" % (address, mask)):
-					pass
-				elif IPv6Network(u"%s/%s" % (address, mask)):
-					pass
-			except:
-				msg = 'Hey! I need valid address/netmask for the '
-				msg += '"%s" network.' % name
-				raise CommandError(self.owner, msg)
+				if not name:
+					msg = 'Hey! I need a network name in line '
+					msg += '%s' % line
+					raise CommandError(self.owner, msg)
+				else:
+					self.owner.networks[name]['network'] = name 
 
-			# I'm going to do myself a favor and clean the zone here.
-			# Otherwise I have to check if it's None or False or some
-			# other such boolean in the plugin file.
-			if zone in [None, 'False', 'True']:
-				self.owner.networks[name]['zone'] = ''
-			else:
-				self.owner.networks[name]['zone'] = zone
-			# add all the rest that we don't care if you screwed up.
-			self.owner.networks[name]['mtu'] = mtu
-			self.owner.networks[name]['dns'] = dns
-			self.owner.networks[name]['pxe'] = pxe
+				# Validated addresses and netmask.
+				self.checkValidIP(name, 'address', address)
+				self.checkValidNetwork(name, 'mask', mask)
+				if gateway is not None:
+					self.checkValidIP(name, 'gateway', gateway)
+
+				# You have an address and a mask check if they're valid together.
+				# You probably don't need this since a bad netmask and a bad
+				# IP will both be caught.
+				try:
+					if IPv4Network(u"%s/%s" % (address, mask)):
+						pass
+					elif IPv6Network(u"%s/%s" % (address, mask)):
+						pass
+				except:
+					msg = 'Hey! I need valid address/netmask for the '
+					msg += '"%s" network.' % name
+					raise CommandError(self.owner, msg)
+
+				# I'm going to do myself a favor and clean the zone here.
+				# Otherwise I have to check if it's None or False or some
+				# other such boolean in the plugin file.
+				if zone in [None, 'False', 'True']:
+					self.owner.networks[name]['zone'] = ''
+				else:
+					self.owner.networks[name]['zone'] = zone
+				# add all the rest that we don't care if you screwed up.
+				self.owner.networks[name]['mtu'] = mtu
+				self.owner.networks[name]['dns'] = dns
+				self.owner.networks[name]['pxe'] = pxe
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')
 
 		# bail if there are apparent duplicates.
 		if len(self.owner.networks.keys()) < line - 1:

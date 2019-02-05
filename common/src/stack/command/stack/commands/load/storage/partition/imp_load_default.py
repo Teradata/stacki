@@ -56,127 +56,130 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		self.appliances = self.getApplianceNames()
 
-		reader = stack.csv.reader(open(filename, 'rU'))
-		header = None
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
+			header = None
 
-		name = None
-		type_dict = {}
+			name = None
+			type_dict = {}
 
-		rowid = 1
-		line = 0
-		for row in reader:
-			line += 1
+			rowid = 1
+			line = 0
+			for row in reader:
+				line += 1
 
-			if not header:
-				header = row
+				if not header:
+					header = row
 
-				#
-				# make checking the header easier
-				#
-				required = ['name', 'device', 'size' ]
+					#
+					# make checking the header easier
+					#
+					required = ['name', 'device', 'size' ]
 
-				for i in range(0, len(row)):
-					if header[i] in required:
-						required.remove(header[i])
+					for i in range(0, len(row)):
+						if header[i] in required:
+							required.remove(header[i])
 
-				if len(required) > 0:
-					msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-					raise CommandError(self.owner, msg)
+					if len(required) > 0:
+						msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
+						raise CommandError(self.owner, msg)
 
-				continue
-
-			rowid += 1
-
-			device = None
-			mountpoint = ''
-			size = None
-			type = ''
-			options = None
-			partid = None
-
-			for i in range(0, len(row)):
-				field = row[i]
-				if not field:
 					continue
 
-				if header[i] == 'name':
-					name = field.lower()
+				rowid += 1
 
-					#
-					# every time the name changes, reset
-					# the rowid
-					#
-					rowid = 1
+				device = None
+				mountpoint = ''
+				size = None
+				type = ''
+				options = None
+				partid = None
 
-				elif header[i] == 'device':
-					device = field.lower()
+				for i in range(0, len(row)):
+					field = row[i]
+					if not field:
+						continue
 
-				elif header[i] == 'mountpoint':
-					mountpoint = field.lower()
+					if header[i] == 'name':
+						name = field.lower()
 
-				elif header[i] == 'size':
-					try:
-						size = int(field)
-						if size < 0:
-							msg = 'size "%d" must be 0 or greater' % size
-							raise CommandError(self.owner, msg)
-					except:
-						if field.lower() == 'recommended':
-							size = -1
-						elif field.lower() == 'hibernation':
-							size =  -2
-						else:
-							msg = 'size "%s" must be an integer' % field
-							raise CommandError(self.owner, msg)
-				elif header[i] == 'type':
-					type = field.lower()
-				elif header[i] == 'options':
-					options = field
-				elif header[i] == 'partid':
-					try:
-						partid = int(field)
-						if partid < 1:
-							msg = 'partid "%d" must be 1 or greater' % partid
-							raise CommandError(self.owner, msg)
-					except:
-						pass
+						#
+						# every time the name changes, reset
+						# the rowid
+						#
+						rowid = 1
 
-			#
-			# the first non-header line must have a host name
-			#
-			if line == 1 and not name:
-				msg = 'empty host name found in "name" column'
-				raise CommandError(self.owner, msg)
+					elif header[i] == 'device':
+						device = field.lower()
 
-			if name in self.appliances or name == 'global':
-				hosts = [ name ]
-			else:
-				hosts = self.getHostnames([ name ])
+					elif header[i] == 'mountpoint':
+						mountpoint = field.lower()
 
-			if not hosts:
-				msg = '"%s" is not host nor is it an appliance in the database' % name
-				raise CommandError(self.owner, msg)
+					elif header[i] == 'size':
+						try:
+							size = int(field)
+							if size < 0:
+								msg = 'size "%d" must be 0 or greater' % size
+								raise CommandError(self.owner, msg)
+						except:
+							if field.lower() == 'recommended':
+								size = -1
+							elif field.lower() == 'hibernation':
+								size =  -2
+							else:
+								msg = 'size "%s" must be an integer' % field
+								raise CommandError(self.owner, msg)
+					elif header[i] == 'type':
+						type = field.lower()
+					elif header[i] == 'options':
+						options = field
+					elif header[i] == 'partid':
+						try:
+							partid = int(field)
+							if partid < 1:
+								msg = 'partid "%d" must be 1 or greater' % partid
+								raise CommandError(self.owner, msg)
+						except:
+							pass
 
-			if not partid:
-				partid = rowid
-
-			for host in hosts:
-				self.doit(host, device, partid, mountpoint, 
-					size, type, options, line)
 				#
-				# Create type_dict with the {fstype : mountpoints}
-				#  to validate lvm definitions.
-				# E.g. {'node204-volgroup': ['volgrp01'], 
-				#       'node204-lvm': ['pv.01', 'pv.02', 'pv.03']} 
+				# the first non-header line must have a host name
 				#
-				device_arr = []
-				type_key = host + '-' + type
-				if type_key not in type_dict:
-					device_arr = []
+				if line == 1 and not name:
+					msg = 'empty host name found in "name" column'
+					raise CommandError(self.owner, msg)
+
+				if name in self.appliances or name == 'global':
+					hosts = [ name ]
 				else:
-					device_arr = type_dict[type_key]
-				device_arr.append(mountpoint)
-				type_dict[type_key] = device_arr
+					hosts = self.getHostnames([ name ])
+
+				if not hosts:
+					msg = '"%s" is not host nor is it an appliance in the database' % name
+					raise CommandError(self.owner, msg)
+
+				if not partid:
+					partid = rowid
+
+				for host in hosts:
+					self.doit(host, device, partid, mountpoint, 
+						size, type, options, line)
+					#
+					# Create type_dict with the {fstype : mountpoints}
+					#  to validate lvm definitions.
+					# E.g. {'node204-volgroup': ['volgrp01'], 
+					#       'node204-lvm': ['pv.01', 'pv.02', 'pv.03']} 
+					#
+					device_arr = []
+					type_key = host + '-' + type
+					if type_key not in type_dict:
+						device_arr = []
+					else:
+						device_arr = type_dict[type_key]
+					device_arr.append(mountpoint)
+					type_dict[type_key] = device_arr
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')
 
 		# Regexp to match Hard disk labels
 		hd_label_regexp = '(xvd[a-z]+)|([shv]d[a-z]+)|(md[0-9]+)|(nvme[0-9]+n[0-9]+)'

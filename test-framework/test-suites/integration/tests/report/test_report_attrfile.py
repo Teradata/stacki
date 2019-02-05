@@ -4,7 +4,7 @@ class TestReportAttrfile:
 	consistent meaning that report -> load -> report should yield the same result
 	"""
 
-	def test_roundtrip(self, host):
+	def test_roundtrip(self, host, revert_etc):
 		results = host.run(f'stack report attrfile')
 		assert results.rc == 0
 		output1 = results.stdout

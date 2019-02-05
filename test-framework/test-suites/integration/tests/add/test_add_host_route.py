@@ -177,7 +177,7 @@ class TestAddHostRoute:
 		assert result.rc == 255
 		assert result.stderr == 'error - route for "192.168.0.2" already exists\n'
 
-	def test_with_syncnow(self, host, revert_routing_table):
+	def test_with_syncnow(self, host, revert_routing_table, revert_etc):
 		# Add a route with sync now so it is added to the routing table
 		result = host.run(
 			'stack add host route frontend-0-0 address=192.168.0.3 '

@@ -23,33 +23,35 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		hosts = self.getHostnames()
 
-		reader = stack.csv.reader(open(filename, 'rU'))
-		header = None
-		dict   = {}
-		for row in reader:
-			if not header:
-				header = row
+		try:
+			reader = stack.csv.reader(open(filename, encoding='ascii'))
+			header = None
+			dict   = {}
+			for row in reader:
+				if not header:
+					header = row
 
-				#
-				# make checking the header easier
-				#
-				required = [ 'name' ] 
+					#
+					# make checking the header easier
+					#
+					required = [ 'name' ] 
+
+					for i in range(0, len(row)):
+						if header[i] in required:
+							required.remove(header[i])
+
+					if len(required) > 0:
+						raise CommandError(self.owner, 'csv file is missing column(s) "%s"' % ', '.join(required))
+
+					continue
 
 				for i in range(0, len(row)):
-					if header[i] in required:
-						required.remove(header[i])
+					field = row[i]
 
-				if len(required) > 0:
-					raise CommandError(self.owner, 'csv file is missing column(s) "%s"' % ', '.join(required))
-
-				continue
-
-			for i in range(0, len(row)):
-				field = row[i]
-
-				if header[i] == 'name' and field in hosts:
-					dict[field] = True
-
+					if header[i] == 'name' and field in hosts:
+						dict[field] = True
+		except UnicodeDecodeError:
+			raise CommandError(self.owner, 'non-ascii character in file')
 
 		for host in dict.keys():
 			self.owner.call('remove.host', [ host ])

@@ -16,8 +16,6 @@ import stack.commands
 
 
 class command(stack.commands.Command):
-	notifications = True
-
 	def report(self, cmd, args=[]):
 		"""
 		For report commands that output XML, this method runs the command

@@ -1,10 +1,7 @@
 import json
 from textwrap import dedent
 
-import pytest
 
-
-@pytest.mark.usefixtures('create_pallet_isos')
 class TestRunPallet:
 	def test_invalid_pallet(self, host):
 		result = host.run('stack run pallet test')
@@ -22,11 +19,10 @@ class TestRunPallet:
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_not_enabled(self, host, host_os):
+	def test_not_enabled(self, host, host_os, create_pallet_isos, revert_export_stack):
 		# Add our test pallet
 		result = host.run(
-			'stack add pallet '
-			'/export/test-files/pallets/minimal-1.0-sles12.x86_64.disk1.iso'
+			f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
 		)
 		assert result.rc == 0
 
@@ -49,11 +45,10 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_multiple_args(self, host, host_os):
+	def test_multiple_args(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
 		# Add our test pallet
 		result = host.run(
-			f'stack add pallet '
-			f'/export/test-files/pallets/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'
+			f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'
 		)
 		assert result.rc == 0
 
@@ -74,11 +69,10 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_database_false(self, host, host_os):
+	def test_database_false(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
 		# Add our test pallet
 		result = host.run(
-			f'stack add pallet '
-			f'/export/test-files/pallets/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'
+			f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'
 		)
 		assert result.rc == 0
 
