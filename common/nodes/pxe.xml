@@ -53,10 +53,8 @@ service tftp
         disable                 = no
 }
 </stack:file>
-</stack:script>
+/usr/bin/systemctl enable xinetd
 
-
-<stack:script stack:stage="install-post">
 mkdir -p /tftpboot/pxelinux
 cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux/
 cp /opt/stack/images/initrd*  /tftpboot/pxelinux/
@@ -67,11 +65,6 @@ cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 mkdir -p /tftpboot/pxelinux/pxelinux.cfg
 chown root.apache /tftpboot/pxelinux/pxelinux.cfg
 chmod 775 /tftpboot/pxelinux/pxelinux.cfg
-</stack:script>
-
-
-<stack:script stack:cond="os == 'sles'" stack:stage="install-post">
-/usr/bin/systemctl enable xinetd
 </stack:script>
 
 
