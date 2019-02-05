@@ -1,0 +1,69 @@
+<stack:stack>
+
+	<stack:description>
+	Django Configuration
+	</stack:description>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2018 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+
+	<stack:package>
+		stack-ws
+		stack-ws-client
+	</stack:package>
+
+
+<stack:script stack:stage="install-post">
+<!--
+	Create Symlink to point to pymysqldb. This
+	is required for django to work correctly, since
+	django requires MySQLdb which we cannot distribute
+-->
+ln -s /opt/stack/lib/python3.6/site-packages/pymysql \
+	/opt/stack/lib/python3.6/site-packages/MySQLdb
+</stack:script>
+
+
+<stack:script stack:cond="os == 'redhat'" stack:stage="install-post">
+<!--
+	Create symlink for mod_wsgi in apache modules
+	directory
+-->
+ln -s /opt/stack/lib/python3.6/site-packages/mod_wsgi/server/mod_wsgi-py36.cpython-36-x86_64-linux-gnu.so \
+	/usr/lib64/httpd/modules/mod_wsgi.so
+
+<!-- Add restapi apache configuration -->
+cp /etc/apache2/stacki-conf.d/ws.conf /etc/httpd/conf.d
+</stack:script>
+
+
+<stack:script stack:cond="os == 'sles'" stack:stage="install-post">
+<!--
+	Create symlink for mod_wsgi in apache modules
+	directory
+-->
+ln -s /opt/stack/lib/python3.6/site-packages/mod_wsgi/server/mod_wsgi-py36.cpython-36-x86_64-linux-gnu.so \
+	/usr/lib64/apache2/mod_wsgi.so
+
+<!-- Enable WSGI Module -->
+a2enmod wsgi
+
+<!-- Append restapi apache configuration -->
+<stack:file stack:mode="append"	stack:name="/etc/apache2/conf.d/httpd.conf">
+Include /etc/apache2/stacki-conf.d/ws.conf
+</stack:file>
+</stack:script>
+
+
+<stack:script stack:stage="install-post">
+/opt/stack/share/stack/bin/ws_setup.sh
+
+/opt/stack/bin/stack add api sudo command command="list switch *"
+/opt/stack/bin/stack add api sudo command command="create host switch mapping"
+</stack:script>
+
+</stack:stack> 

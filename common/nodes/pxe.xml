@@ -1,8 +1,8 @@
 <stack:stack>
 
-<stack:description>
-Provides pre-execution environment (PXE) support for frontend machines.
-</stack:description>
+	<stack:description>
+	Provides pre-execution environment (PXE) support for frontend machines.
+	</stack:description>
 
 	<stack:copyright>
 	Copyright (c) 2006 - 2018 Teradata
@@ -16,16 +16,27 @@ Provides pre-execution environment (PXE) support for frontend machines.
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </stack:rocks>
 
-<stack:package>tftp-server</stack:package>
-<stack:package>syslinux</stack:package>
-<stack:package>xinetd</stack:package>
-<stack:package>memtest86+</stack:package>
-<stack:package>stack-images</stack:package>
-<stack:package>stack-pxeboot</stack:package>
+
+	<stack:package>
+		stack-pxeboot
+		syslinux
+		xinetd
+	</stack:package>
+
+	<stack:package stack:cond="os == 'redhat'">
+		memtest86+
+		stack-images
+		tftp-server
+	</stack:package>
+
+	<stack:package stack:cond="os == 'sles'">
+		stack-pxeboot
+		stack-sles-images
+		tftp
+	</stack:package>
+
 
 <stack:script stack:stage="install-post">
-
-<!-- pxe needs a tftp server -->
 <stack:file stack:name="/etc/xinetd.d/tftp">
 service tftp
 {
@@ -42,31 +53,25 @@ service tftp
         disable                 = no
 }
 </stack:file>
-
-
-<!--	
-	copy vmlinuz and initrd.img that pxelinux will grab from
-	this server
--->
-mkdir -p /tftpboot/pxelinux
-
-cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux
-cp /opt/stack/images/initrd.img* /tftpboot/pxelinux/
-
-cp /boot/memtest86* /tftpboot/pxelinux/memtest
-
 </stack:script>
 
-<stack:script stack:stage="install-post">
 
-mkdir -p /tftpboot/pxelinux/pxelinux.cfg
-chown root.apache /tftpboot/pxelinux/pxelinux.cfg
-chmod 775 /tftpboot/pxelinux/pxelinux.cfg
+<stack:script stack:stage="install-post">
+mkdir -p /tftpboot/pxelinux
+cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux/
+cp /opt/stack/images/initrd*  /tftpboot/pxelinux/
 
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 
+mkdir -p /tftpboot/pxelinux/pxelinux.cfg
+chown root.apache /tftpboot/pxelinux/pxelinux.cfg
+chmod 775 /tftpboot/pxelinux/pxelinux.cfg
 </stack:script>
 
+
+<stack:script stack:cond="os == 'redhat'" stack:stage="install-post">
+cp /boot/memtest86* /tftpboot/pxelinux/memtest
+</stack:script>
 
 </stack:stack> 

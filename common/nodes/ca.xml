@@ -1,10 +1,11 @@
 <stack:stack>
 
-  <stack:description>
+	<stack:description>
+	Sets up keys for the frontend Certificate Authority
+	</stack:description>
 
-Sets up keys for the frontend Certificate Authority
-
-  </stack:description>
+	<stack:copyright>
+	</stack:copyright>
 
         <stack:rocks>
         Copyright (c) 2000 - 2010 The Regents of the University of California
@@ -14,10 +15,7 @@ Sets up keys for the frontend Certificate Authority
 
 
 <stack:script stack:stage="install-post">
-
-mkdir -p /etc/security/ca
 mkdir -p /etc/security/ca/new-certs
-
 <stack:file stack:name="/etc/security/ca/ca.cfg" stack:perms="0640" stack:owner="root.apache">
 [ req ]
 default_bits		= 2048
@@ -47,40 +45,27 @@ localityName_default		= &Info_CertificateLocality;
 stateOrProvinceName_default	= &Info_CertificateState;
 countryName_default		= &Info_CertificateCountry;
 </stack:file>
-
 </stack:script>
 
-<stack:script stack:chroot="false" stack:stage="install-post">
 
-<!-- Place certificates and keys. -->
-
-<!-- CA -->
-if [ -f /tmp/security/ca.key ]
-then
+<stack:script stack:cond="os == 'redhat'" stack:chroot="false" stack:stage="install-post">
+if [ -f /tmp/security/ca.key ]; then
 	mv /tmp/security/ca.key /mnt/sysimage/etc/security/ca/
 	mv /tmp/security/ca.crt /mnt/sysimage/etc/security/ca/
 	mv /tmp/security/ca.serial /mnt/sysimage/etc/security/ca/
 fi
-
 </stack:script>
 
-<stack:script stack:stage="install-post">
 
-<!-- Our Certificate Authority -->
-if [ ! -f /etc/security/ca/ca.key ]
-then
-(
-cd /etc/security/ca; \
-/usr/bin/openssl req -new -x509 -extensions v3_ca -nodes \
-	-keyout ca.key -days 5000 -batch -config ca.cfg > ca.crt; \
-chmod 0400 ca.key; \
-chmod 0444 ca.crt; \
-echo "01" > ca.serial 
-)
+<stack:script stack:stage="install-post">
+if [ ! -f /etc/security/ca/ca.key ]; then
+	cd /etc/security/ca
+	/usr/bin/openssl req \
+		-new -x509 -extensions v3_ca -nodes -keyout ca.key -days 5000 \
+		-batch -config ca.cfg > ca.crt
+	echo "01" > ca.serial 
 fi
 
-
-<!-- Set perms so Apache can issue certs -->
 chmod 0750 /etc/security/ca
 chmod 0770 /etc/security/ca/new-certs
 chmod 0664 /etc/security/ca/ca.serial
@@ -88,7 +73,6 @@ chmod 0440 /etc/security/ca/ca.key
 chmod 0640 /etc/security/ca/ca.cfg
 
 chgrp -R apache /etc/security/ca
-
 </stack:script>
 
 </stack:stack>
