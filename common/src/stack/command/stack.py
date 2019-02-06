@@ -29,13 +29,19 @@ def sigint_handler(signal, frame):
 
 
 def connect_db(username, passwd):
+	# Connect to a copy of the database if we are running pytest-xdist
+	if 'PYTEST_XDIST_WORKER' in os.environ:
+		db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+	else:
+		db_name = 'cluster'
+
 	if os.path.exists('/var/run/mysql/mysql.sock'):
-		db = pymysql.connect(db='cluster',
+		db = pymysql.connect(db=db_name,
 				     user=username, passwd=passwd,
 				     host='localhost', unix_socket='/var/run/mysql/mysql.sock',
 				     autocommit=True)
 	else:
-		db = pymysql.connect(db='cluster',
+		db = pymysql.connect(db=db_name,
 				     host='localhost', port=40000,
 				     user=username, passwd=passwd,
 				     autocommit=True)

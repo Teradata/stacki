@@ -1,4 +1,8 @@
 [run]
+disable_warnings =
+	no-data-collected
+	module-not-imported
+
 omit =
 	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_foreign_redhat.py
 	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_native_redhat.py

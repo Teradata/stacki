@@ -2,6 +2,7 @@ from contextlib import contextmanager
 import gc
 import glob
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import inspect
 import json
 import multiprocessing
 import os
@@ -19,14 +20,52 @@ import pytest
 from redis import StrictRedis
 
 
+def pytest_addoption(parser):
+	parser.addoption(
+		"--audit", action="store_true", help="audit filesystem changes"
+	)
+
+def pytest_configure(config):
+	# Are we auditing filesystem changes?
+	if config.getoption("--audit"):
+		filesystem_revert_fixtures = [
+			"revert_etc",
+			"revert_export_stack_carts",
+			"revert_export_stack_pallets"
+		]
+
+		for fixture in filesystem_revert_fixtures:
+			# Enable the revert filesystem fixture for every test
+			config.addinivalue_line("usefixtures", fixture)
+
+			# Make sure the log file doesn't exist
+			if os.path.exists(f"/export/reports/{fixture}.log"):
+				os.remove(f"/export/reports/{fixture}.log")
+
+	# Make sure the debug log doesn't exist
+	if os.path.exists("/export/reports/debug.log"):
+		os.remove("/export/reports/debug.log")
+
 @pytest.fixture(scope="session")
-def dump_mysql():
+def redis():
+	yield StrictRedis(host='localhost')
+
+@pytest.fixture
+def debug_log(redis, request, worker_id):
+	def _inner(message):
+		with redis.lock("pytest_debug_log"):
+			with open("/export/reports/debug.log", "a") as f:
+				f.write(f"[{worker_id}] {request.node.nodeid} {message}\n")
+
+	return _inner
+
+@pytest.fixture(scope="session")
+def dump_mysql(worker_id):
 	# Create a temp file and open it for the subprocess command
 	file_fd, file_path = tempfile.mkstemp(suffix=".sql")
 	file_obj = os.fdopen(file_fd, mode="w")
 
-	# Dump the initial Stacki DB into an SQL file, to restore from
-	# after each test
+	# Dump the initial Stacki DB into an SQL file, to restore from after each test
 	subprocess.run([
 		"mysqldump", "--opt", "--add-drop-database", "--databases", "cluster", "shadow"
 	], stdout=file_obj, check=True)
@@ -34,24 +73,67 @@ def dump_mysql():
 	# Close the file
 	file_obj.close()
 
+	# Now replace the database names with our process specific ones
+	subprocess.run(['sed', '-i', f's|`cluster`|`cluster{worker_id}`|g', file_path], check=True)
+	subprocess.run(['sed', '-i', f's|`shadow`|`shadow{worker_id}`|g', file_path], check=True)
+
+	# Load up the new process specific dbs
+	with open(file_path) as sql:
+		subprocess.run("mysql", stdin=sql, check=True)
+
+	subprocess.run([
+		'mysql', '-e', f'GRANT ALL ON `cluster{worker_id}`.* to apache@localhost'
+	], check=True)
+
+	subprocess.run([
+		'mysql', '-e', f'GRANT ALL ON `shadow{worker_id}`.* to apache@localhost'
+	], check=True)
+
 	# Done with the set up, yield our SQL file path
 	yield file_path
 
 	# Remove the SQL file
 	os.remove(file_path)
 
+	# Drop our process specific dbs
+	subprocess.run(['mysql', '-e', f'DROP DATABASE `cluster{worker_id}`'], check=True)
+	subprocess.run(['mysql', '-e', f'DROP DATABASE `shadow{worker_id}`'], check=True)
+
 @pytest.fixture
-def revert_database(dump_mysql):
+def revert_database(dump_mysql, redis):
 	# Don't need to do anything in the set up
 	yield
-	
-	# Load a fresh database after each test
-	with open(dump_mysql) as sql:
-		subprocess.run("mysql", stdin=sql, check=True)
 
-@pytest.fixture(scope="session")
-def redis():
-	yield StrictRedis(host='localhost')
+	# Load a fresh database after each test
+	with redis.lock("pytest_revert_database"):
+		with open(dump_mysql) as sql:
+			subprocess.run("mysql", stdin=sql, check=True)
+
+@pytest.fixture
+def process_count(redis, request):
+	# Pause this worker process if the exclusive lock is taken
+	with redis.lock("pytest_exclusive_lock"):
+		pass
+
+	# We only increment the count if we aren't an exclusive process
+	if "exclusive_lock" not in request.fixturenames:
+		redis.incr("pytest_process_count")
+
+	yield
+
+	redis.decr("pytest_process_count")
+
+@pytest.fixture
+def exclusive_lock(redis):
+	with redis.lock("pytest_exclusive_lock"):
+		# Safe to increment the process count, now that we have the lock
+		redis.incr("pytest_process_count")
+
+		# Wait for all the other worker processes to run
+		while(int(redis.get("pytest_process_count")) != 1):
+			time.sleep(0.2)
+
+		yield
 
 def _add_overlay(target):
 	name = target[1:].replace("/", "_")
@@ -78,8 +160,36 @@ def _add_overlay(target):
 		target
 	], check=True)
 
-def _remove_overlay(target):
+def _remove_overlay(target, request):
 	name = target[1:].replace("/", "_")
+
+	# Log any file changes, if requested
+	if request.config.getoption('--audit'):
+		# Run the garbase collector, just in case it releases
+		# some opened file handles
+		gc.collect()
+
+		# Do a sync also, just in case
+		subprocess.run(["sync"], check=True)
+
+		with open(f'/export/reports/revert_{name}.log', 'a') as f:
+			cwd = os.getcwd()
+			os.chdir(f'/overlay/{name}/upper')
+
+			mods = glob.glob('**/*', recursive=True)
+			if mods:
+				# Write out what was modified
+				f.write('TEST: {}\n'.format(request.node.nodeid))
+				f.write('{}\n\n'.format('\n'.join(sorted(mods))))
+
+				# Check if the fixture is part of the function parameters
+				parameters = inspect.signature(request.function).parameters
+				if request.fixturename not in parameters:
+					request.node.warn(pytest.PytestWarning(
+						f"'{request.fixturename}' fixture is missing"
+					))
+
+			os.chdir(cwd)
 
 	# Try three times to unmount the overlay
 	for attempt in range(1, 4):
@@ -102,48 +212,38 @@ def _remove_overlay(target):
 				# handles a chance to clean themselves up
 				time.sleep(3)
 	else:
-		# We couldn't unmount the overlay, abort the tests
-		pytest.exit(f"Unable to unmount overlay_{name}")
+		# We couldn't unmount the overlay
+		pytest.fail(f"Unable to unmount overlay_{name}")
 
 	# Clean up the overlay directories
 	shutil.rmtree(f"/overlay/{name}")
 
 @pytest.fixture
-def revert_export_stack(redis):
-	# Get a lock so only one process can modify /export/stack
-	with redis.lock('revert_export_stack_lock'):
-		_add_overlay('/export/stack')
+def revert_export_stack_pallets(exclusive_lock, request):
+	_add_overlay('/export/stack/pallets')
 
-		yield
+	yield
 
-		_remove_overlay('/export/stack')
+	_remove_overlay('/export/stack/pallets', request)
 
 @pytest.fixture
-def revert_etc(redis, request):
-	# Get a lock so only one process can modify /etc
-	with redis.lock('revert_etc_lock'):
-		_add_overlay('/etc')
+def revert_export_stack_carts(exclusive_lock, request):
+	_add_overlay('/export/stack/carts')
 
-		yield
+	yield
 
-		# CAL 1/30/19 - This block of code can be uncommented, and
-		# the revert_etc fixture added to pytest.ini, to capture a
-		# log of all modifications to the /etc directory.
-		# with open('/tmp/etc_write.log', 'a') as f:
-		# 	cwd = os.getcwd()
-		# 	os.chdir('/overlay/etc/upper')
-
-		# 	mods = glob.glob('**/*', recursive=True)
-		# 	if mods:
-		# 		f.write('TEST: {}\n'.format(request.node.nodeid))
-		# 		f.write('{}\n\n'.format('\n'.join(sorted(mods))))
-
-		# 	os.chdir(cwd)
-
-		_remove_overlay('/etc')
+	_remove_overlay('/export/stack/carts', request)
 
 @pytest.fixture
-def revert_discovery():
+def revert_etc(exclusive_lock, request):
+	_add_overlay('/etc')
+
+	yield
+
+	_remove_overlay('/etc', request)
+
+@pytest.fixture
+def revert_discovery(exclusive_lock):
 	# Nothing to do in set up
 	yield
 
@@ -169,7 +269,7 @@ def revert_discovery():
 		os.remove("/var/log/stack-discovery.log")
 
 @pytest.fixture
-def revert_routing_table():
+def revert_routing_table(exclusive_lock):
 	# Get a snapshot of the existing routes
 	result = subprocess.run(
 		["ip", "route", "list"],
@@ -211,7 +311,7 @@ def add_host():
 	# First use of the fixture adds backend-0-0
 	_inner('backend-0-0', '0', '0', 'backend')
 
-	# Then return the inner function, so we can call it inside the test 
+	# Then return the inner function, so we can call it inside the test
 	# to get more hosts added
 	return _inner
 
@@ -325,11 +425,11 @@ def add_box(host):
 	return _inner
 
 @pytest.fixture
-def add_cart(host, revert_export_stack):
+def add_cart(host):
 	def _inner(name):
 		result = host.run(f'stack add cart {name}')
 		if result.rc != 0:
-			pytest.fail(f'unable to add cart box "{name}"')
+			pytest.fail(f'unable to add dummy cart "{name}"')
 
 	# First use of the fixture adds cart "test"
 	_inner('test')
@@ -413,7 +513,7 @@ def set_host_interface(add_host_with_interface):
 		encoding="utf-8",
 		check=True
 	)
-	
+
 	o = json.loads(result.stdout)
 	ip_list = []
 	interface = None
@@ -421,11 +521,11 @@ def set_host_interface(add_host_with_interface):
 	for line in o:
 		if line['host'] == hostname:
 			interface = line['interface']
-		
+
 		# Make list of IP addresses
 		if line['ip']:
 			ip_list.append(line['ip'])
-	
+
 	result = {
 		'hostname' : hostname,
 		'net_addr' : addr,
@@ -437,20 +537,20 @@ def set_host_interface(add_host_with_interface):
 	return result
 
 @pytest.fixture
-def run_django_server():
+def run_django_server(exclusive_lock):
 	# Run a Django server in a process
-	def runner():		
+	def runner():
 		try:
 			os.environ['DJANGO_SETTINGS_MODULE'] = 'stack.restapi.settings'
 			basehttp.run('127.0.0.1', 8000, get_wsgi_application())
 		except KeyboardInterrupt:
 			# The signal to exit
 			pass
-	
+
 	process = multiprocessing.Process(target=runner)
 	process.daemon = True
 	process.start()
-	
+
 	# Give the server a few seconds to get ready
 	time.sleep(2)
 
@@ -461,9 +561,9 @@ def run_django_server():
 	process.join()
 
 @pytest.fixture
-def run_file_server():
+def run_file_server(exclusive_lock):
 	# Run an HTTP server in a process
-	def runner():		
+	def runner():
 		try:
 			# Change to our test-files directory
 			os.chdir('/export/test-files')
@@ -477,14 +577,14 @@ def run_file_server():
 		except KeyboardInterrupt:
 			# The signal to exit
 			pass
-	
+
 	process = multiprocessing.Process(target=runner)
 	process.daemon = True
 	process.start()
 
 	# Give us a second to get going
 	time.sleep(1)
-	
+
 	yield
 
 	# Tell the server it is time to clean up
@@ -492,7 +592,7 @@ def run_file_server():
 	process.join()
 
 @pytest.fixture
-def run_pallet_isos_server(create_pallet_isos):
+def run_pallet_isos_server(exclusive_lock, create_pallet_isos):
 	# Run an HTTP server in a process
 	def runner():
 		try:
@@ -530,7 +630,7 @@ def host_os():
 	return 'redhat'
 
 @pytest.fixture
-def fake_os_sles(host, revert_etc):
+def fake_os_sles(exclusive_lock, host):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as SLES
 	"""
@@ -552,7 +652,7 @@ def fake_os_sles(host, revert_etc):
 			pytest.fail('unable to fake SLES OS')
 
 @pytest.fixture
-def fake_os_redhat(host, revert_etc):
+def fake_os_redhat(exclusive_lock, host):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
 	"""
@@ -574,7 +674,7 @@ def fake_os_redhat(host, revert_etc):
 			pytest.fail('unable to fake Redhat OS')
 
 @pytest.fixture
-def rmtree(tmpdir):
+def rmtree(exclusive_lock, tmpdir):
 	"""
 	This fixture lets you call rmtree(path) in a test, which simulates
 	deleting a directory and all it's files. It really moves it to
@@ -587,7 +687,7 @@ def rmtree(tmpdir):
 		if result.returncode != 0:
 			pytest.fail(f'Unable to move {path}')
 		restore.append(path)
-	
+
 	yield _inner
 
 	# For each directory to restore
@@ -595,7 +695,7 @@ def rmtree(tmpdir):
 		# Delete any existing stuff
 		if os.path.exists(path):
 			shutil.rmtree(path)
-		
+
 		# Move back the original data
 		result = subprocess.run(['mv', tmpdir.join(str(ndx)), path])
 		if result.returncode != 0:
@@ -652,7 +752,7 @@ def create_blank_iso(tmpdir_factory):
 	temp_dir.remove(1, True)
 
 @pytest.fixture
-def inject_code(host):
+def inject_code(exclusive_lock, host):
 	"""
 	This returns a context manager used to inject code into the python
 	runtime environment. This is currently used to inject Mock code for

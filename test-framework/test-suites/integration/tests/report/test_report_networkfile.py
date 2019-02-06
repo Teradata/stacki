@@ -6,7 +6,7 @@ import textwrap
 class TestReportNetworkfile:
 	def test_report_networkfile(self, host):
 		"Test that we can report the network file CSV and load it back in"
-		
+
 		# Grab the network info from CLI
 		result = host.run("stack list network output-format=json")
 		assert result.rc == 0

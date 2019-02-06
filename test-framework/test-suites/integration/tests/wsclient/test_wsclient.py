@@ -6,14 +6,13 @@ import wsclient
 
 
 class TestWSClient:
-	def test_list_host(self, host):
+	def test_list_host(self, host, host_os):
 		"Test the output of wsclient list host"
 
-		if host.system_info.distribution == "centos":
-			host_os = "redhat"
-		else:
-			host_os = "sles"
+		# Run once... we seem to get the sudo warning which fails
+		host.run("wsclient list host")
 
+		# Now the API call should work
 		result = host.run("wsclient list host")
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [

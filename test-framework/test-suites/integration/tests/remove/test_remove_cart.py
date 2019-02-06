@@ -19,7 +19,7 @@ class TestRemoveCart:
 			{cart ...}
 		''')
 
-	def test_single_arg(self, host, add_cart, revert_etc):
+	def test_single_arg(self, host, add_cart, revert_etc, revert_export_stack_carts):
 		# Confirm the test cart is there
 		result = host.run('stack list cart test output-format=json')
 		assert result.rc == 0
@@ -48,7 +48,7 @@ class TestRemoveCart:
 		# Files should be gone too
 		assert not host.file('/export/stack/carts/test').exists
 
-	def test_multiple_args(self, host, add_cart, revert_etc):
+	def test_multiple_args(self, host, add_cart, revert_etc, revert_export_stack_carts):
 		# Create a second cart
 		add_cart('foo')
 

@@ -27,7 +27,7 @@ class TestReportZones:
 		for name in ('reverse.test.domain.local', 'test.domain.local'):
 			os.remove(os.path.join(base_dir, name))
 
-	def test_no_custom_entries_sles(self, host, add_host, add_network, fake_os_sles):
+	def test_no_custom_entries_sles(self, host, add_host, add_network, fake_os_sles, revert_etc):
 		# Set DNS on our test network
 		result = host.run('stack set network dns test dns=true')
 		assert result.rc == 0
@@ -55,7 +55,7 @@ class TestReportZones:
 
 			assert zones == output.read()
 
-	def test_no_custom_entries_redhat(self, host, add_host, add_network, fake_os_redhat):
+	def test_no_custom_entries_redhat(self, host, add_host, add_network, fake_os_redhat, revert_etc):
 		# Set DNS on our test network
 		result = host.run('stack set network dns test dns=true')
 		assert result.rc == 0

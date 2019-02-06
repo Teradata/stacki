@@ -24,7 +24,7 @@ class TestEnablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_incompatable_os(self, host, create_pallet_isos, revert_export_stack):
+	def test_incompatable_os(self, host, create_pallet_isos):
 		# Add the pallet that is ubuntu
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-os-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -34,7 +34,7 @@ class TestEnablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - incompatible pallet "test-different-os" with OS "ubuntu"\n'
 
-	def test_default_box(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
+	def test_default_box(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -57,7 +57,7 @@ class TestEnablePallet:
 			}
 		]
 
-	def test_with_box(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
+	def test_with_box(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -84,7 +84,7 @@ class TestEnablePallet:
 			}
 		]
 
-	def test_already_enabled(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
+	def test_already_enabled(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0

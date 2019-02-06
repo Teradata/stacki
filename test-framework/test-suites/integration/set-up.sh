@@ -110,7 +110,4 @@ vagrant up frontend
 
 # Install pytest-cov on the frontend
 vagrant ssh frontend -c "sudo -i python3 -m ensurepip"
-vagrant ssh frontend -c "sudo -i pip3 install pytest-cov"
-
-# Output the ssh configuration from Vagrant for py.test to use
-vagrant ssh-config frontend > ".cache/ssh-config"
+vagrant ssh frontend -c "sudo -i pip3 install pytest-cov pytest-xdist pytest-rerunfailures"

@@ -172,6 +172,12 @@ class StackWS(View):
 					"/usr/bin/sudo",
 					"/opt/stack/bin/stack",
 				]
+
+				# If we are running pytest-xdist, we need to pass the
+				# environment variable into the sudo call
+				if 'PYTEST_XDIST_WORKER' in os.environ:
+					c.insert(1, 'PYTEST_XDIST_WORKER='+os.environ['PYTEST_XDIST_WORKER'])
+
 				c.extend(cmd_module.split('.'))
 				c.extend(cmd_arg_list)
 				log.info(f'{c}')
@@ -293,10 +299,16 @@ def _get_db_conn_(admin=False):
 		username = 'nobody'
 		password = ''
 
+	# Connect to a copy of the database if we are running pytest-xdist
+	if 'PYTEST_XDIST_WORKER' in os.environ:
+		db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+	else:
+		db_name = 'cluster'
+
 	link = pymysql.connect(user=username,
 			       passwd=password,
 			       unix_socket='/var/run/mysql/mysql.sock',
-			       db='cluster', 
+			       db=db_name,
 			       autocommit=True)
 	return link
 
