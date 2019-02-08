@@ -31,7 +31,7 @@ import re
 import traceback
 
 # Start a logger
-log = logging.getLogger("stack-ws")
+log = logging.getLogger("SWS")
 
 # MySQL Access Denied Error Codes.
 # from: https://mariadb.com/kb/en/mariadb/mariadb-error-codes/
