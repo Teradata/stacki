@@ -26,6 +26,7 @@ DJANGO_SETTINGS_MODULE=stack.restapi.settings \
 
 # Blacklist commands that must not be run
 /opt/stack/bin/stack add api blacklist command command="list host message"
+/opt/stack/bin/stack add api blacklist command command="add api sudo command"
 
 # Commands that require "sudo" to be run
 STACK_CMDS=( "sync *"	\
@@ -33,9 +34,10 @@ STACK_CMDS=( "sync *"	\
 	"unload *"	\
 	"remove host"	\
 	"add pallet" 	\
+	"remove pallet"	\
 	"list host switch" \
 	)
-	
+
 
 for i in "${STACK_CMDS[@]}"; do \
 	/opt/stack/bin/stack add api sudo command command="${i}" sync=False
