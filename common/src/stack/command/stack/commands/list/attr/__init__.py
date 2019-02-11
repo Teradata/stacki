@@ -12,6 +12,8 @@
 
 import fnmatch
 import ipaddress
+import os
+
 import stack.attr
 import stack.commands
 from stack.bool import str2bool
@@ -257,6 +259,12 @@ class Command(stack.commands.Command,
 		else:
 			resolve = self.str2bool(resolve)
 
+		# Connect to a copy of the database if we are running pytest-xdist
+		if 'PYTEST_XDIST_WORKER' in os.environ:
+			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
+		else:
+			db_name = 'shadow'
+
 		attributes = {}
 		for s in lookup.keys():
 			attributes[s] = {}
@@ -276,13 +284,13 @@ class Command(stack.commands.Command,
 					rows = self.db.select(
 						"""
 						t.name, true, a.attr, a.value from
-						shadow.attributes a, %s t where
+						%s.attributes a, %s t where
 						a.scope = %%s and a.scopeid = t.id
 						union select
 						t.name, false, a.attr, a.value from 
 						attributes a, %s t where
 						a.scope = %%s and a.scopeid = t.id
-						""" % (table, table), (s, s))
+						""" % (db_name, table, table), (s, s))
 					if not rows:
 						rows = self.db.select(
 							"""
@@ -303,12 +311,12 @@ class Command(stack.commands.Command,
 
 					rows = self.db.select(
 						"""
-						true, attr, value from shadow.attributes
-						where scope = %s
-						union select 
+						true, attr, value from %s.attributes
+						where scope = %%s
+						union select
 						false, attr, value from attributes
-						where scope = %s
-						""", (s, s))
+						where scope = %%s
+						""" % db_name, (s, s))
 					if not rows:
 						rows = self.db.select(
 							"""

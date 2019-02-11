@@ -4,6 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import os
 import re
 from copy import copy
 import stack.commands
@@ -116,6 +117,12 @@ class Command(stack.commands.Command,
 		if not force and scope == 'global' and len(attrs):
 			raise CommandError(self, 'attr "%s" exists for %s' % (glob, 'global'))
 
+		# Connect to a copy of the database if we are running pytest-xdist
+		if 'PYTEST_XDIST_WORKER' in os.environ:
+			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
+		else:
+			db_name = 'shadow'
+
 		# Before we do the insert remove any existing values, otherwise
 		# we need to mess around with 'update' vs 'insert' commands.
 
@@ -123,9 +130,9 @@ class Command(stack.commands.Command,
 			for attr in attrs:
 				self.db.execute(
 					"""
-					delete from shadow.attributes where
-					scope = %s and attr = binary %s
-					""", (scope, attr))
+					delete from %s.attributes where
+					scope = %%s and attr = binary %%s
+					""" % db_name, (scope, attr))
 				self.db.execute(
 					"""
 					delete from attributes where
@@ -137,11 +144,11 @@ class Command(stack.commands.Command,
 				for attr in attrs[target]:
 					self.db.execute(
 						"""
-						delete from shadow.attributes where
+						delete from %s.attributes where
 						scope    = %%s and 
 						scopeid  = (select id from %s where name=%%s) and
 						attr     = %%s
-						""" % table, (scope, target, attr))
+						""" % (db_name, table), (scope, target, attr))
 					self.db.execute(
 						"""
 						delete from attributes where
@@ -161,10 +168,10 @@ class Command(stack.commands.Command,
 			if shadow is True:
 				self.db.execute(
 					"""
-					insert into shadow.attributes
+					insert into %s.attributes
 					(scope, attr, value)
-					values (%s, %s, %s)
-					""", (scope, glob, value))
+					values (%%s, %%s, %%s)
+					""" % db_name, (scope, glob, value))
 			else:
 				self.db.execute(
 					"""
@@ -178,13 +185,13 @@ class Command(stack.commands.Command,
 				if shadow is True:
 					self.db.execute(
 						"""
-						insert into shadow.attributes
+						insert into %s.attributes
 						(scope, attr, value, scopeid)
 						values (
 							%%s, %%s, %%s, 
 							(select id from %s where name=%%s)
 						)
-						""" % table, (scope, glob, value, target))
+						""" % (db_name, table), (scope, glob, value, target))
 				else:
 					self.db.execute(
 						"""

@@ -88,10 +88,11 @@ def test_default_appliances_have_sane_attributes(host):
 		expected_result = json.load(f)
 
 	cmd = host.run("stack list appliance attr output-format=json")
-	actual_result = json.loads(cmd.stdout)
-
 	assert cmd.rc == 0
-	assert actual_result == expected_result
+
+	actual_result = json.loads(cmd.stdout)
+	for attribute in expected_result:
+		assert attribute in actual_result
 
 def test_packages_have_hashes(host):
 	results = host.run('rpm -qa stack-* --queryformat "%{VENDOR} %{NAME} %{VCS}\n"')

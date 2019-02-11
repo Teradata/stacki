@@ -1,3 +1,3 @@
 ARCHIVENAME	= zeromq
-VERSION		= 4.2.2
+VERSION		= 4.3.1
 ORDER		= 51

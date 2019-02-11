@@ -1933,6 +1933,25 @@ class Command:
 			return self.bytes
 		return None
 
+
+	def reportFile(self, file, contents, *, perms=None, host=None):
+		if file[0] == os.sep:
+			file = file[1:]
+		attr = '_'.join(os.path.split(file))
+
+		if host:
+			override = self.getHostAttr(host, attr)
+		else:
+			override = self.getAttr(attr)
+		if override is not None:
+			contents = override
+
+		text = []
+		text.append('<stack:file stack:name="/etc/resolv.conf">')
+		text.append(contents)
+		text.append('</stack:file>')
+		return '\n'.join(text)
+
 	def beginOutput(self):
 		"""
 		Reset the output list buffer.

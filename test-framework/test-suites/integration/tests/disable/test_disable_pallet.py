@@ -26,7 +26,7 @@ class TestDisablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_default_box(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
+	def test_default_box(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -67,7 +67,7 @@ class TestDisablePallet:
 			}
 		]
 
-	def test_with_box(self, host, host_os, create_pallet_isos, revert_export_stack, revert_etc):
+	def test_with_box(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test box
 		result = host.run('stack add box test')
 		assert result.rc == 0

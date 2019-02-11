@@ -11,7 +11,7 @@ class TestListPallet:
 			[pallet ...] {expanded=bool} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_with_arch(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_arch(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique arch
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-arch-1.0-prod.arm.disk1.iso')
 		assert result.rc == 0
@@ -30,7 +30,7 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_os(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_os(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique os
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-os-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -49,7 +49,7 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_release(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_release(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique release
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-test.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -68,7 +68,7 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_version(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_version(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique version
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -87,7 +87,7 @@ class TestListPallet:
 			}
 		]
 
-	def test_with_expanded(self, host, create_pallet_isos, revert_export_stack):
+	def test_with_expanded(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique version
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0

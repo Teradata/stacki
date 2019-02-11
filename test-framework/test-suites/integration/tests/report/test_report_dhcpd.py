@@ -30,7 +30,7 @@ class TestReportDhcpd:
 		assert result.rc == 0
 		assert 'eth0' not in result.stdout
 
-	def test_single_pxe_network_sles(self, host, fake_os_sles):
+	def test_single_pxe_network_sles(self, host, fake_os_sles, revert_etc):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -46,7 +46,7 @@ class TestReportDhcpd:
 		with open('/export/test-files/report/dhcpd_single_pxe_network_sles.txt') as output:
 			assert result.stdout == output.read()
 
-	def test_single_pxe_network_redhat(self, host, fake_os_redhat):
+	def test_single_pxe_network_redhat(self, host, fake_os_redhat, revert_etc):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -86,7 +86,7 @@ class TestReportDhcpd:
 		with open(f'/export/test-files/report/dhcpd_multiple_pxe_networks_{host_os}.txt') as output:
 			assert result.stdout == output.read()
 
-	def test_shared_network_sles(self, host, fake_os_sles):
+	def test_shared_network_sles(self, host, fake_os_sles, revert_etc):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -117,7 +117,7 @@ class TestReportDhcpd:
 		with open('/export/test-files/report/dhcpd_shared_network_sles.txt') as output:
 			assert result.stdout == output.read()
 
-	def test_shared_network_redhat(self, host, fake_os_redhat):
+	def test_shared_network_redhat(self, host, fake_os_redhat, revert_etc):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
