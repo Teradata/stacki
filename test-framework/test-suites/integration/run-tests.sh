@@ -11,7 +11,8 @@ if [[ $1 == "--no-cov" ]]
 then
     vagrant ssh frontend -c "sudo -i pytest -vvv \
         --dist=loadfile -n 4 \
-        --reruns 2 --reruns-delay 5 \
+        --reruns=2 --reruns-delay=60 \
+        --timeout=300 --timeout_method=signal \
         /export/tests/"
 
 elif [[ $1 == "--audit" ]]
@@ -29,7 +30,8 @@ else
 
     vagrant ssh frontend -c "sudo -i pytest -vvv \
         --dist=loadfile -n 4 \
-        --reruns 2 --reruns-delay 5 \
+        --reruns=2 --reruns-delay=60 \
+        --timeout=300 --timeout_method=signal \
         --cov-config=/export/tests/$COVERAGERC \
         --cov=wsclient \
         --cov=stack \
