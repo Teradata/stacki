@@ -20,7 +20,7 @@ install::
 
 	# Install ludicrous server
 	$(INSTALL) -m 0755 ludicrousServer.py $(ROOT)/$(PKGROOT)
-	$(INSTALL) -m 0755 ludicrous-client.py $(ROOT)/$(PKGROOT)
+	$(INSTALL) -m 0755 ludicrous_client.py $(ROOT)/$(PKGROOT)
 	$(INSTALL) -m 0644 ludicrous-client.service $(ROOT)/usr/lib/systemd/system
 	$(INSTALL) -m 0644 ludicrous-cleaner.service $(ROOT)/usr/lib/systemd/system
 

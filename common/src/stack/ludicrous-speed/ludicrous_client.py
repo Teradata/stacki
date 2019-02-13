@@ -66,7 +66,7 @@ def file_exists(local_file):
 # Returns the tracking server's ip and port as a string to be used
 # in a request
 def tracker():
-	return "%s:%s" % (tracker_settings['TRACKER'], tracker_settings['PORT'])
+	return f"{tracker_settings['TRACKER']}:{tracker_settings['PORT']}"
 
 # Lookup a file to see if any hosts have it
 # Input is the md5 of the filename
@@ -74,7 +74,7 @@ def tracker():
 def lookup_file(hashcode):
 	try:
 		# timeout=(connect timeout, read timeout).
-		res = requests.get('http://%s/ludicrous/lookup/%s' % (tracker(), hashcode), timeout=(0.1, 5))
+		res = requests.get(f'http://{tracker()}/ludicrous/lookup/{hashcode}', timeout=(0.1, 5))
 		return res
 	except:
 		raise
