@@ -26,11 +26,11 @@ import logging
 import logging.handlers
 
 # Set logging
-log = logging.getLogger("stack-ws")
+log = logging.getLogger("SWS")
 log.setLevel(logging.DEBUG)
 
 handler = logging.handlers.SysLogHandler(address='/dev/log',
-		facility=logging.handlers.SysLogHandler.LOG_LOCAL2)
+		facility=logging.handlers.SysLogHandler.LOG_LOCAL1)
 
 formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
