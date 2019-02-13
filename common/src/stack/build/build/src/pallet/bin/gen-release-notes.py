@@ -11,27 +11,34 @@ from git import Repo
 
 class CommitProcessor():
 
-	tag = re.compile('tags/stacki\-([a-z0-9.]+)\^0$')
+	tag = re.compile('^stacki\-([a-z0-9.]+)$')
 	cat = re.compile('^([A-Z]+[A-Z ]+[A-Z]+):\s*(.*)$')
 	
 	def __init__(self, commits, release):
+		self.tags    = {}
 		self.commits = OrderedDict()
-		
-		release = release
+
+		for tag in reversed(sorted(repo.tags, 
+					   key=lambda t: t.commit.committed_date)):
+			self.tags[tag.commit.hexsha] = tag.name
+
 		for commit in commits:
 			release = self.process(release, commit)
 
 
 	def process(self, release, commit):
 
-		# check if this is the end of a release
-		m = re.search(CommitProcessor.tag, commit.name_rev)
-		if m:
-			release, = m.groups()
+		name = self.tags.get(commit.hexsha)
+		if name is None:
+			name = commit.hexsha
+		else: # found a tag
+			m = re.search(CommitProcessor.tag, name)
+			if m:
+				release, = m.groups()
 
 		# skip merge commits
-		if commit.summary.find('Merge ') == 0:
-			return release
+#		if commit.summary.find('Merge ') == 0:
+#			return release
 		
 		if release not in self.commits:
 			self.commits[release] = {}
@@ -110,7 +117,9 @@ if starttag != "":
 	commitrange = f"{starttag}.."
 commitrange = f"{commitrange}{endtag}"
 
+
 cp = CommitProcessor(repo.iter_commits(commitrange), release=release)
+
 for release in cp.commits.keys():
 	print('# %s' % release)
 	for category in [ 'feature', 'bugfix', 'docs', 'breaking change', 'git' ]:
