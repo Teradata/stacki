@@ -14,7 +14,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 bootstrap: install-rpm
 
 ReleaseNotes.txt:
-	/opt/stack/bin/python3 ../build/build/src/pallet/bin/gen-release-notes.py -s $(COMMIT_START) > $@
+	/opt/stack/bin/python3 $(PALLETBUILD)/bin/gen-release-notes.py -s $(COMMIT_START) > $@
 
 build: ReleaseNotes.txt
 
