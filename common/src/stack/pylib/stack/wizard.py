@@ -186,12 +186,12 @@ class Data:
 		self.data.devices = devices
 		return devices
 
-	def validateDomain(self, value):
-		s = value.split(".")[0]
-		if s.lower() == "frontend" or s.lower() == "backend":
-			return (False, "Cannot have an appliance name as a hostname", "Hostname Error")
+	def validateDomain(self, fqdn):
+		hostname = fqdn.split(".")[0]
+		if hostname.lower() in ["frontend","backend"]:
+			return False, "Cannot have an appliance name as a hostname", "Hostname Error"
 		else:
-			return (True, "", "")
+			return True, "", ""
 
 	def validateNetwork(self, tup, config_net=False):
 
@@ -247,6 +247,7 @@ class Data:
 					self.data.Kickstart_PrivateAddress + '/' +
 					self.data.Kickstart_PrivateNetmask,
 					strict=False)
+				self.data.Kickstart_PrivateGateway = str(ipaddress.ip_address(str(self.data.Kickstart_PrivateGateway)))
 				self.data.Kickstart_PrivateNetwork = str(ipnetwork.network_address)
 				self.data.Kickstart_PrivateBroadcast = str(ipnetwork.broadcast_address)
 				self.data.Kickstart_PrivateNetmaskCIDR = str(ipnetwork.prefixlen)
