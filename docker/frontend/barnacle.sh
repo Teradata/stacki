@@ -84,6 +84,8 @@ $STACK list node xml server attrs=site.attrs > profile.xml
 cat profile.xml | $STACK list host profile chapter=main profile=bash > profile.sh
 bash profile.sh -spackages
 
+systemctl disable firewalld # this breaks docker-compose
+
 # finish the barnacle when container is run
 systemctl enable stack-docker-barnacle
 

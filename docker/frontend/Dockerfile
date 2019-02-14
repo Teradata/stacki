@@ -17,10 +17,10 @@ WORKDIR /tmp
 EXPOSE 22
 
 RUN yum group install -y "Infrastructure Server"
-RUN yum install -y emacs git
+RUN yum install -y git
 
 COPY --from=builder /tmp/stacki.tar .
-COPY docker/barnacle.sh .
+COPY docker/frontend/barnacle.sh .
 
 RUN sh -x barnacle.sh
 

@@ -7,9 +7,10 @@ import os
 import logging
 from logging import FileHandler
 import redis
+from stack.topo import Redis
 import stack.api
 
-ludicredis = redis.StrictRedis()
+ludicredis = redis.StrictRedis(host=Redis.server)
 
 app = Flask(__name__)
 

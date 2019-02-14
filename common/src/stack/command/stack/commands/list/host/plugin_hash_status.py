@@ -4,6 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.topo import Redis
 import stack.commands
 import redis
 import json
@@ -32,7 +33,7 @@ class Plugin(stack.commands.Plugin):
 
 		for host in hosts:
 			try:
-				r = redis.StrictRedis()
+				r = redis.StrictRedis(host=Redis.server)
 				status = r.get('host:%d:installhash' % ids[host])
 			except:
 				status = None
