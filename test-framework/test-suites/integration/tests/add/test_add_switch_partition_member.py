@@ -28,9 +28,10 @@ class TestAddSwitchPartitionMember:
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership,output_file", SWITCH_PARTITION_MEMBER_TEST_DATA)
 	def test_behavior(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
-				partition_name, guid, hostname, interface, membership, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+				partition_name, guid, hostname, interface, membership, output_file, test_file):
+
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add host interface backend-0-0 interface=ib0 mac=00:00:00:00:00:00:00:00')
 		assert result.rc == 0
@@ -84,9 +85,10 @@ class TestAddSwitchPartitionMember:
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership,output_file", SWITCH_PARTITION_MEMBER_TEST_DATA)
 	def test_cannot_add_twice(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
-				partition_name, guid, hostname, interface, membership, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+				partition_name, guid, hostname, interface, membership, output_file, test_file):
+
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add host interface backend-0-0 interface=ib0 mac=00:00:00:00:00:00:00:00')
 		assert result.rc == 0
@@ -114,10 +116,9 @@ class TestAddSwitchPartitionMember:
 		result = host.run(' '.join(cmd))
 		assert result.rc != 0
 
-	def test_cannot_duplicate_names_that_resolve_same(self, host, add_ib_switch, add_host_with_interface):
-		output_file = 'add_nondefault_member_output.json'
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_cannot_duplicate_names_that_resolve_same(self, host, add_ib_switch, add_host_with_interface, test_file):
+		with open(test_file(f'add/add_nondefault_member_output.json')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add host interface backend-0-0 interface=ib0 mac=00:00:00:00:00:00:00:00')
 		assert result.rc == 0
@@ -146,9 +147,9 @@ class TestAddSwitchPartitionMember:
 		result = host.run(f'stack add switch partition member switch-0-0 name=Default guid=fake enforce_sm=true')
 		assert result.rc != 0
 
-	def test_two_switches_same_partition_name(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_member_output.json').read()
+	def test_two_switches_same_partition_name(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface, test_file):
+		with open(test_file('add/add_default_member_output.json')) as output:
+			expected_output = output.read()
 
 		add_host_with_interface('backend-0-1', '0', '1', 'backend', 'eth0')
 		# add hosts with ib interfaces

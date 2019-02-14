@@ -18,8 +18,8 @@ INPUT_DATA = [
 ]
 
 FIRMWARE_INPUT_DATA = [
-	'/export/test-files/switch/m7800_show_images_console.txt',
-	'/export/test-files/switch/m7800_show_images_console_new.txt',
+	'switch/m7800_show_images_console.txt',
+	'switch/m7800_show_images_console_new.txt',
 ]
 
 class TestUtil:
@@ -177,10 +177,11 @@ class TestSwitchMellanoxM7800:
 		mock_disconnect.assert_called()
 
 	@pytest.mark.parametrize('input_file,output_file', INPUT_DATA)
-	def test_partitions_can_parse_guid_members(self, mock_expectmore, input_file, output_file):
-		dirn = '/export/test-files/switch/'
-		expected_output = json.load(open(dirn + output_file))
-		with open(dirn + input_file) as test_file:
+	def test_partitions_can_parse_guid_members(self, mock_expectmore, input_file, output_file, test_file):
+		with open(test_file(f'switch/{output_file}')) as output:
+			expected_output = json.load(output)
+
+		with open(test_file(f'switch/{input_file}')) as test_file:
 			input_data = test_file.read().splitlines()
 
 		mock_expectmore.return_value.isalive.return_value = True
@@ -221,11 +222,12 @@ class TestSwitchMellanoxM7800:
 			test_switch.image_boot_next()
 		assert(error_message in str(exception))
 
-	def test_install_firmware(self, mock_expectmore):
+	def test_install_firmware(self, mock_expectmore, test_file):
 		"""Expect this to try to install the user requested firmware."""
 		mock_expectmore.return_value.ask.return_value = Path(
-			'/export/test-files/switch/m7800_install_image_console.txt'
+			test_file('switch/m7800_install_image_console.txt')
 		).read_text().splitlines()
+
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		firmware_name = 'my_amazing_firmware'
 		test_switch.install_firmware(image = firmware_name)
@@ -318,10 +320,10 @@ class TestSwitchMellanoxM7800:
 		assert(not any((output in str(exception) for output in irrelevant_output)))
 
 	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
-	def test_show_images(self, mock_expectmore, input_file):
+	def test_show_images(self, mock_expectmore, input_file, test_file):
 		"""Expect this to try to list the current and available firmware images."""
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
-		test_console_response = Path(input_file).read_text().splitlines()
+		test_console_response = Path(test_file(input_file)).read_text().splitlines()
 
 		expected_data = (
 			{
@@ -419,9 +421,9 @@ class TestSwitchMellanoxM7800:
 			)
 
 	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
-	def test__get_installed_images(self, mock_expectmore, input_file):
+	def test__get_installed_images(self, mock_expectmore, input_file, test_file):
 		"""Test that images are found when present."""
-		test_console_response = Path(input_file).read_text().splitlines()
+		test_console_response = Path(test_file(input_file)).read_text().splitlines()
 
 		expected_data = {
 			1: 'X86_64 3.6.4006 2017-07-03 16:17:39 x86_64',
@@ -458,9 +460,9 @@ class TestSwitchMellanoxM7800:
 			test_switch._get_installed_images(command_response = test_response)
 
 	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
-	def test__get_boot_partitions(self, mock_expectmore, input_file):
+	def test__get_boot_partitions(self, mock_expectmore, input_file, test_file):
 		"""Test that partitions are found when present."""
-		test_console_response = Path(input_file).read_text().splitlines()
+		test_console_response = Path(test_file(input_file)).read_text().splitlines()
 
 		expected_data = (2, 1)
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
@@ -496,9 +498,9 @@ class TestSwitchMellanoxM7800:
 		assert(test_switch._get_boot_partitions(command_response = test_console_response) == expected_data)
 
 	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
-	def test__get_available_images(self, mock_expectmore, input_file):
+	def test__get_available_images(self, mock_expectmore, input_file, test_file):
 		"""Test that the available images are found when present."""
-		test_console_response = Path(input_file).read_text().splitlines()
+		test_console_response = Path(test_file(input_file)).read_text().splitlines()
 
 		expected_data = [
 			('image-X86_64-3.6.2002.img', 'X86_64 3.6.2002 2016-09-28 21:00:15 x86_64'),

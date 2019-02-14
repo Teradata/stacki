@@ -2,7 +2,7 @@ import json
 
 
 class TestReportHostRoute:
-	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os):
+	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os, test_file):
 		# Add our host to the test environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -71,5 +71,5 @@ class TestReportHostRoute:
 		result = host.run('stack report host route backend-0-0')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/report/host_route_scope_resolving_{host_os}.txt') as output:
+		with open(test_file(f'report/host_route_scope_resolving_{host_os}.txt')) as output:
 			assert result.stdout == output.read()

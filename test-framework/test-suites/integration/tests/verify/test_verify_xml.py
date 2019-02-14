@@ -1,13 +1,13 @@
 import json
 
 class TestVerifyXml:
-	def test_verify_xml_cart(self, host, revert_etc, revert_export_stack_carts):
+	def test_verify_xml_cart(self, host, revert_etc, revert_export_stack_carts, test_file):
 		'''Test if stack verify xml if able to identify errors
 		in XML files present in carts.'''
 
-		CART_XML = '/export/test-files/verify/xml/cart-verifyxmltest.xml'
+		path = test_file('verify/xml/cart-verifyxmltest.xml')
 		host.run("stack add cart verifyxmltest")
-		host.run("cp %s /export/stack/carts/verifyxmltest/graph/", CART_XML)
+		host.run(f"cp {path} /export/stack/carts/verifyxmltest/graph/")
 
 		op = host.run("stack verify xml output-format=json")
 		assert op.rc == 0

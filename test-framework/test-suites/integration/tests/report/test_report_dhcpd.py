@@ -30,7 +30,7 @@ class TestReportDhcpd:
 		assert result.rc == 0
 		assert 'eth0' not in result.stdout
 
-	def test_single_pxe_network_sles(self, host, fake_os_sles, revert_etc):
+	def test_single_pxe_network_sles(self, host, fake_os_sles, revert_etc, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -43,10 +43,10 @@ class TestReportDhcpd:
 		result = host.run('stack report dhcpd')
 		assert result.rc == 0
 
-		with open('/export/test-files/report/dhcpd_single_pxe_network_sles.txt') as output:
+		with open(test_file('report/dhcpd_single_pxe_network_sles.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_single_pxe_network_redhat(self, host, fake_os_redhat, revert_etc):
+	def test_single_pxe_network_redhat(self, host, fake_os_redhat, revert_etc, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -59,10 +59,10 @@ class TestReportDhcpd:
 		result = host.run('stack report dhcpd')
 		assert result.rc == 0
 
-		with open('/export/test-files/report/dhcpd_single_pxe_network_redhat.txt') as output:
+		with open(test_file('report/dhcpd_single_pxe_network_redhat.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_multiple_pxe_networks(self, host, host_os):
+	def test_multiple_pxe_networks(self, host, host_os, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -83,10 +83,10 @@ class TestReportDhcpd:
 		result = host.run('stack report dhcpd')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/report/dhcpd_multiple_pxe_networks_{host_os}.txt') as output:
+		with open(test_file(f'report/dhcpd_multiple_pxe_networks_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_shared_network_sles(self, host, fake_os_sles, revert_etc):
+	def test_shared_network_sles(self, host, fake_os_sles, revert_etc, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -114,10 +114,10 @@ class TestReportDhcpd:
 		assert result.rc == 0
 
 		# Make sure we get the expected output
-		with open('/export/test-files/report/dhcpd_shared_network_sles.txt') as output:
+		with open(test_file('report/dhcpd_shared_network_sles.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_shared_network_redhat(self, host, fake_os_redhat, revert_etc):
+	def test_shared_network_redhat(self, host, fake_os_redhat, revert_etc, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -145,10 +145,10 @@ class TestReportDhcpd:
 		assert result.rc == 0
 
 		# Make sure we get the expected output
-		with open('/export/test-files/report/dhcpd_shared_network_redhat.txt') as output:
+		with open(test_file('report/dhcpd_shared_network_redhat.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_resolve_ip_exception(self, host, host_os):
+	def test_resolve_ip_exception(self, host, host_os, test_file):
 		# Change the mac on eth1 so it will match our expected outputs
 		result = host.run('stack set host interface mac frontend-0-0 interface=eth1 mac=00:11:22:33:44:55')
 		assert result.rc == 0
@@ -179,5 +179,5 @@ class TestReportDhcpd:
 		assert result.rc == 0
 
 		# Make sure we get the expected output
-		with open(f'/export/test-files/report/dhcpd_multiple_pxe_networks_{host_os}.txt') as output:
+		with open(test_file(f'report/dhcpd_multiple_pxe_networks_{host_os}.txt')) as output:
 			assert result.stdout == output.read()

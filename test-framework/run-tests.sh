@@ -8,6 +8,8 @@ ALL=1
 UNIT=0
 INTEGRATION=0
 SYSTEM=0
+COVERAGE=0
+
 ISO=""
 TEMP_EXTRA_ISOS=()
 EXTRA_ISOS=()
@@ -30,17 +32,12 @@ do
             ALL=0
             shift 1
             ;;
-        --system-quick)
-            SYSTEM=1
-            ALL=0
+        --coverage)
+            COVERAGE=1
             shift 1
             ;;
         --extra-isos=*)
             TEMP_EXTRA_ISOS=($(echo "${1#*=}" | tr ',' '\n'))
-            shift 1
-            ;;
-        --no-cov)
-            NO_COV=1
             shift 1
             ;;
         *)
@@ -94,8 +91,8 @@ then
     echo "Extra ISOs can be passed to the system test suite:"
     echo "  --extra-isos=ISO1,ISO2"
     echo
-    echo "To disable code coverage report generation, use the flag:"
-    echo "  --no-cov"
+    echo "To enable code coverage report generation, use the flag:"
+    echo "  --coverage"
     exit 1
 fi
 
@@ -166,9 +163,9 @@ then
     echo -e "\033[34mRunning unit test suite ...\033[0m"
     ./test-suites/unit/set-up.sh $STACKI_ISO
 
-    if [[ $NO_COV -eq 1 ]]
+    if [[ $COVERAGE -eq 1 ]]
     then
-        ./test-suites/unit/run-tests.sh --no-cov
+        ./test-suites/unit/run-tests.sh --coverage
     else
         ./test-suites/unit/run-tests.sh
     fi
@@ -192,9 +189,9 @@ then
     echo -e "\033[34mRunning integration test suite ...\033[0m"
     ./test-suites/integration/set-up.sh $STACKI_ISO
 
-    if [[ $NO_COV -eq 1 ]]
+    if [[ $COVERAGE -eq 1 ]]
     then
-        ./test-suites/integration/run-tests.sh --no-cov
+        ./test-suites/integration/run-tests.sh --coverage
     else
         ./test-suites/integration/run-tests.sh
     fi

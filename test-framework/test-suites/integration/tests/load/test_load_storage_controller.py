@@ -16,128 +16,100 @@ class TestLoadStorageController:
 		assert result.rc == 255
 		assert result.stderr == 'error - file "/tmp/foo" does not exist\n'
 
-	def test_missing_headers(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_missing_headers.csv'
-		)
+	def test_missing_headers(self, host, test_file):
+		path = test_file('load/storage_controller_missing_headers.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - the following required fields are not present in the input file: '
 			'array id, name, raid level, slot\n'
 		)
 
-	def test_invalid_slot(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_invalid_slot.csv'
-		)
+	def test_invalid_slot(self, host, test_file):
+		path = test_file('load/storage_controller_invalid_slot.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - slot "test" must be an integer\n'
 
-	def test_negative_slot(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_negative_slot.csv'
-		)
+	def test_negative_slot(self, host, test_file):
+		path = test_file('load/storage_controller_negative_slot.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - slot "-1" must be >= 0\n'
 
-	def test_invalid_array_id(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_invalid_array_id.csv'
-		)
+	def test_invalid_array_id(self, host, test_file):
+		path = test_file('load/storage_controller_invalid_array_id.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - array id "test" must be an integer\n'
 
-	def test_negative_array_id(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_negative_array_id.csv'
-		)
+	def test_negative_array_id(self, host, test_file):
+		path = test_file('load/storage_controller_negative_array_id.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - array id "-1" must be >= 0\n'
 
-	def test_missing_name(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_missing_name.csv'
-		)
+	def test_missing_name(self, host, test_file):
+		path = test_file('load/storage_controller_missing_name.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - empty host name found in "name" column\n'
 
-	def test_invalid_name(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_invalid_name.csv'
-		)
+	def test_invalid_name(self, host, test_file):
+		path = test_file('load/storage_controller_invalid_name.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - Cannot find host "a:backend"\n'
 
-	def test_missing_slot(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_missing_slot.csv'
-		)
+	def test_missing_slot(self, host, test_file):
+		path = test_file('load/storage_controller_missing_slot.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == 'error - empty value found for "slot" column at line 2\n'
 
-	def test_missing_raid(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_missing_raid.csv'
-		)
+	def test_missing_raid(self, host, test_file):
+		path = test_file('load/storage_controller_missing_raid.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - empty value found for "raid level" column at line 2\n'
 		)
 
-	def test_missing_array_id(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_missing_array_id.csv'
-		)
+	def test_missing_array_id(self, host, test_file):
+		path = test_file('load/storage_controller_missing_array_id.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - empty value found for "array id" column at line 2\n'
 		)
 
-	def test_slot_raid_invalid(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_slot_raid_invalid.csv'
-		)
+	def test_slot_raid_invalid(self, host, test_file):
+		path = test_file('load/storage_controller_slot_raid_invalid.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - raid level must be "0" when slot is "*". See line 2\n'
 		)
 
-	def test_duplicate_slot(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_duplicate_slot.csv'
-		)
+	def test_duplicate_slot(self, host, test_file):
+		path = test_file('load/storage_controller_duplicate_slot.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - duplicate slot "1" found in the spreadsheet at line 3\n'
 		)
 
-	def test_mismatch_raid(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_mismatch_raid.csv'
-		)
+	def test_mismatch_raid(self, host, test_file):
+		path = test_file('load/storage_controller_mismatch_raid.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
 			'error - RAID level mismatch "1" found in the spreadsheet at line 3\n'
 		)
 
-	def test_global_scope(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_global_scope.csv'
-		)
+	def test_global_scope(self, host, test_file):
+		path = test_file('load/storage_controller_global_scope.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 0
 
 		result = host.run('stack list storage controller output-format=json')
@@ -169,11 +141,9 @@ class TestLoadStorageController:
 			}
 		]
 
-	def test_appliance_scope(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_appliance_scope.csv'
-		)
+	def test_appliance_scope(self, host, test_file):
+		path = test_file('load/storage_controller_appliance_scope.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 0
 
 		result = host.run(
@@ -190,11 +160,9 @@ class TestLoadStorageController:
 			'slot': 3
 		}]
 
-	def test_host_scope(self, host, add_host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_host_scope.csv'
-		)
+	def test_host_scope(self, host, add_host, test_file):
+		path = test_file('load/storage_controller_host_scope.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 0
 
 		result = host.run(
@@ -212,11 +180,9 @@ class TestLoadStorageController:
 			'source': 'H'
 		}]
 
-	def test_raid0_slot_wildcard(self, host):
-		result = host.run(
-			'stack load storage controller '
-			'file=/export/test-files/load/storage_controller_handle_raid0_all_slots.csv'
-		)
+	def test_raid0_slot_wildcard(self, host, test_file):
+		path = test_file('load/storage_controller_handle_raid0_all_slots.csv')
+		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 0
 
 		result = host.run(
