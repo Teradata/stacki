@@ -55,6 +55,10 @@ class ExpandingTraversor(stack.gen.Traversor):
 
 	def traverse_stack_script(self, node):
 		nodeid	 = self.getAttr(node, 'stack:id')
+		try:
+			nodeid   = "%04d" % int(nodeid)
+		except:
+			pass
 		nodefile = self.getAttr(node, 'stack:file')
 		stage	 = self.getAttr(node, 'stack:stage',  default='install-post')
 		chroot	 = self.getAttr(node, 'stack:chroot', default='true')
