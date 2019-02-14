@@ -12,9 +12,9 @@ class TestAddAppliance:
 	]
 
 	@pytest.mark.parametrize("appliance_name,add_params,output_file", APPLIANCE_TEST_DATA)
-	def test_behavior(self, host, appliance_name, add_params, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_behavior(self, host, appliance_name, add_params, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add appliance {appliance_name} {add_params}')
 		assert result.rc == 0

@@ -1,20 +1,16 @@
-import pytest
-
 class TestLoadJsonNetwork:
-
 	"""
 	Test that loading network data works properly
 	"""
 
-	def skip_test_load_json_network(self, host):
-		dirn = '/export/test-files/load/json/'
-		file = dirn + 'network.json'
-
+	def skip_test_load_json_network(self, host, test_file):
 		# open the file containing the network data, stripping the trailing new line
-		with open(file) as f: imported_network_data = f.read().strip()
+		path = test_file('load/json/network.json')
+		with open(path) as f:
+			imported_network_data = f.read().strip()
 
 		# load the data with stack load json
-		results = host.run(f'stack load json network file={file}')
+		results = host.run(f'stack load json network file={path}')
 		assert results.rc == 0
 
 		# dump the data

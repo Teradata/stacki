@@ -2,13 +2,11 @@ import pytest
 
 
 class TestLoadStoragePartition:
-
 	# add other csv's here after they are fixed, or better yet make this a glob
 	STORAGE_SPREADSHEETS = ['lvm-complex']
 
-	@pytest.mark.usefixtures("add_host")
 	@pytest.mark.parametrize("csvfile", STORAGE_SPREADSHEETS)
-	def test_load_storage_partition(self, host, csvfile):
+	def test_load_storage_partition(self, host, add_host, csvfile, test_file):
 		# get filename
 		out = host.run('stack report version').stdout
 		dirn = '/opt/stack/share/examples/spreadsheets/'

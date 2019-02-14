@@ -51,12 +51,12 @@ class TestAddHostKey:
 			}
 		]
 	
-	def test_from_file(self, host):
+	def test_from_file(self, host, test_file):
 		# Add the key
-		result = host.run('stack add host key frontend-0-0 '
-			'key=/export/test-files/add/add_host_key.txt')
+		path = test_file('add/add_host_key.txt')
+		result = host.run(f'stack add host key frontend-0-0 key={path}')
 		assert result.rc == 0
-		
+
 		# Check that it made it into the database
 		result = host.run('stack list host key frontend-0-0 output-format=json')
 		assert result.rc == 0

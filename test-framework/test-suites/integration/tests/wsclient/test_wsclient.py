@@ -6,8 +6,8 @@ import wsclient
 
 
 class TestWSClient:
-	def test_list_host(self, host, host_os):
-		"Test the output of wsclient list host"
+	def test_bin_wsclient(self, host, host_os):
+		"Test the output of /opt/stack/bin/wsclient"
 
 		# Run once... we seem to get the sudo warning which fails
 		host.run("wsclient list host")
@@ -30,16 +30,33 @@ class TestWSClient:
 			}
 		]
 
-	def test_remove_host_no_500(self, host, invalid_host):
-		"test a string encoding bugfix, API should return API Error, not 500"
-		result = host.run(f"wsclient remove host {invalid_host}")
-		assert result.rc == 0 # I guess...
-		assert json.loads(result.stdout) == {
-				"API Error": f"error - cannot resolve host \"{invalid_host}\"\n",
-				"Output": ""
-			}
+	def test_remove_host_no_500(self, host, invalid_host, run_django_server):
+		"Test a string encoding bugfix, API should return API Error, not 500"
 
-	def test_pylib_against_django(self, host, run_django_server):
+		# Pull in the credentials
+		with open('/root/stacki-ws.cred', 'r') as f:
+			credentials = json.load(f)
+
+		# Create our client
+		client = wsclient.StackWSClient(
+			'127.0.0.1',
+			'admin',
+			credentials[0]['key']
+		)
+
+		# Point our client at our own Django instance
+		client.url = 'http://127.0.0.1:8000'
+
+		# Login and run a simple command
+		client.login()
+		result = json.loads(client.run(f'remove host {invalid_host}'))
+
+		assert result == {
+			"API Error": f"error - cannot resolve host \"{invalid_host}\"\n",
+			"Output": ""
+		}
+
+	def test_pylib_against_django(self, host, run_django_server, test_file):
 		"Test the wsclient pylib code against our own Django instance"
 
 		# Pull in the credentials
@@ -71,7 +88,7 @@ class TestWSClient:
 		assert len(networks) == 1
 
 		# Now load in the test network
-		client.run("load networkfile file=/export/test-files/wsclient/test_network.csv")
+		client.run(f"load networkfile file={test_file('wsclient/test_network.csv')}")
 
 		# Add in the new network info to the old, for our check
 		networks.append({

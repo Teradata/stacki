@@ -1,15 +1,16 @@
 import json
 
+
 class TestListHostFirewall:
-	def test_frontend_intrinsic_no_dns(self, host):
+	def test_frontend_intrinsic_no_dns(self, host, test_file):
 		# Make sure the intrinsic rules match what we expect
 		result = host.run('stack list host firewall frontend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/list/host_firewall_frontend_intrinsic_no_dns.json') as output:
+		with open(test_file('list/host_firewall_frontend_intrinsic_no_dns.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_frontend_intrinsic_with_dns(self, host):
+	def test_frontend_intrinsic_with_dns(self, host, test_file):
 		# Toggle on DNS for the private network
 		result = host.run('stack set network dns private dns=true')
 		assert result.rc == 0
@@ -18,18 +19,18 @@ class TestListHostFirewall:
 		result = host.run('stack list host firewall frontend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/list/host_firewall_frontend_intrinsic_with_dns.json') as output:
+		with open(test_file('list/host_firewall_frontend_intrinsic_with_dns.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_backend_intrinsic(self, host, add_host_with_interface):
+	def test_backend_intrinsic(self, host, add_host_with_interface, test_file):
 		# Make sure the intrinsic rules match what we expect
 		result = host.run('stack list host firewall backend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/list/host_firewall_backend_intrinsic.json') as output:
+		with open(test_file('list/host_firewall_backend_intrinsic.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_scope_overriding(self, host, add_host_with_interface, add_environment, host_os):
+	def test_scope_overriding(self, host, add_host_with_interface, add_environment, host_os, test_file):
 		# Add our host to the test environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -100,10 +101,10 @@ class TestListHostFirewall:
 		result = host.run('stack list host firewall backend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open(f'/export/test-files/list/host_firewall_scope_overriding.json') as output:
+		with open(test_file('list/host_firewall_scope_overriding.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_scope_no_enviroment(self, host, add_host):
+	def test_scope_no_enviroment(self, host, add_host, test_file):
 		# Create some more hosts
 		add_host('backend-0-1', '0', '1', 'backend')
 		add_host('backend-0-2', '0', '2', 'backend')
@@ -131,5 +132,5 @@ class TestListHostFirewall:
 		result = host.run('stack list host firewall backend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open('/export/test-files/list/host_firewall_scope_no_enviroment.json') as output:
+		with open(test_file('list/host_firewall_scope_no_enviroment.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())

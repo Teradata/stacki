@@ -10,10 +10,13 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # Make sure we have the virtualenv activated
-if [[ -z $VIRTUAL_ENV ]]
+if [[ -z VIRTUAL_ENV ]]
 then
     source ../../bin/activate
 fi
 
-# Run the tests
-vagrant ssh frontend -c "sudo -i pytest -vvv /export/test-suites/system/tests/"
+# Destroy the vagrant machines
+vagrant destroy -f
+
+# Remove the .cache folder
+rm -rf .cache

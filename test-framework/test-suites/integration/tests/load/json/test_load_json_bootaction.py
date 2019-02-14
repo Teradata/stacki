@@ -1,20 +1,16 @@
-import pytest
-
 class TestLoadJsonBootaction:
-
 	"""
 	Test that loading bootaction data works properly
 	"""
 
-	def skip_test_load_json_bootaction(self, host):
-		dirn = '/export/test-files/load/json/'
-		file = dirn + 'bootaction.json'
-
+	def skip_test_load_json_bootaction(self, host, test_file):
 		# open the file containing the bootaction data, stripping the trailing new line
-		with open(file) as f: imported_bootaction_data = f.read().strip()
+		path = test_file('load/json/bootaction.json')
+		with open(path) as f:
+			imported_bootaction_data = f.read().strip()
 
 		# load the data with stack load json
-		results = host.run(f'stack load json bootaction file={file}')
+		results = host.run(f'stack load json bootaction file={path}')
 		assert results.rc == 0
 
 		# dump the data

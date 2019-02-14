@@ -17,40 +17,44 @@ class TestListSwitchPartition:
 	]
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_add_behavior(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_add_behavior(self, host, add_ib_switch, partition_name, options, output_file, test_file):
 
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
+
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
+
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 		assert json.loads(result.stdout) == json.loads(expected_output)
 
-	def test_list_by_name(self, host, add_ib_switch):
-		dirn = '/export/test-files/add/'
-
+	def test_list_by_name(self, host, add_ib_switch, test_file):
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
 		assert result.stdout.strip() == ''
 
 		partition_name = 'default'
-		output_file = 'add_default_partition_output.json'
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name}')
 		assert result.rc == 0
 
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
-		assert json.loads(result.stdout) == json.loads(open(dirn + output_file).read())
+
+		with open(test_file('add/add_default_partition_output.json')) as output:
+			expected_output = output.read()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		partition_name = 'aaa'
-		output_file = 'add_nondefault_partition_output.json'
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name}')
 		assert result.rc == 0
 
 		result = host.run(f'stack list switch partition switch-0-0 name={partition_name} output-format=json')
 		assert result.rc == 0
-		assert json.loads(result.stdout) == json.loads(open(dirn + output_file).read())
+
+		with open(test_file('add/add_nondefault_partition_output.json')) as output:
+			expected_output = output.read()
+		assert json.loads(result.stdout) == json.loads(expected_output)
 
 		# valid names should return nothing, and not error
 		partition_name = 'bbb'
@@ -66,10 +70,7 @@ class TestListSwitchPartition:
 		assert result.stdout.strip() == ''
 		assert result.stderr.strip() != ''
 
-	def test_list_everything(self, host, add_ib_switch):
-		dirn = '/export/test-files/add/'
-		output_file = 'add_multiple_partitions_output.json'
-
+	def test_list_everything(self, host, add_ib_switch, test_file):
 		for partition_name in ['default', 'aaa']:
 			result = host.run(f'stack add switch partition switch-0-0 name={partition_name}')
 			assert result.rc == 0
@@ -77,8 +78,10 @@ class TestListSwitchPartition:
 		result = host.run('stack list switch partition switch-0-0 output-format=json')
 		assert result.rc == 0
 
+		with open(test_file('add/add_multiple_partitions_output.json')) as output:
+			expected_output = output.read()
 		sort_key = lambda d: d['partition']
-		assert json.loads(result.stdout).sort(key=sort_key) == json.loads(open(dirn + output_file).read()).sort(key=sort_key)
+		assert json.loads(result.stdout).sort(key=sort_key) == json.loads(expected_output).sort(key=sort_key)
 
 	def test_passed_no_args(self, host, add_ib_switch):
 		result = host.run(f'stack list switch partition name=fake')

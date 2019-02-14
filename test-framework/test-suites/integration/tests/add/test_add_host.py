@@ -13,9 +13,9 @@ class TestAddHost:
 	]
 
 	@pytest.mark.parametrize("host_name, add_params, output_file", HOST_POSITIVE_TEST_DATA)
-	def test_positive_behaviour(self, host, host_name, add_params, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_positive_behaviour(self, host, host_name, add_params, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add host {host_name} {add_params}')
 		assert result.rc == 0

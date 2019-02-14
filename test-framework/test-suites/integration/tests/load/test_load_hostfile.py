@@ -5,18 +5,18 @@ import tempfile
 
 
 class TestLoadHostfile:
-	"""Uses the listed test files within test-files/load and runs them through stack load hostfile."""
+	"""Uses the listed test files and runs them through stack load hostfile."""
 
 	# add other csv's here after they are fixed, or better yet make this a glob
 	HOSTFILE_SPREADHSEETS = ['multi_frontend', 'single_backend', 'frontend_add_eth', 'frontend_replace_ip',
 					'single_backend_and_multi_frontend', 'autoip']
 
 	@staticmethod
-	def update_csv_variables(host, csvfile):
+	def update_csv_variables(host, csvfile, test_file):
 		"""Edit the file as needed to match particular environment."""
-		dirn = '/export/test-files/load/hostfile_'
-		input_file = dirn + csvfile + '_input' + '.csv'
-		output_file = dirn + csvfile + '_output' + '.csv'
+
+		input_file = test_file(f'load/hostfile_{csvfile}_input.csv')
+		output_file = test_file(f'load/hostfile_{csvfile}_output.csv')
 
 		result = host.run('stack list host interface a:frontend output-format=json')
 		my_json = json.loads(result.stdout)
@@ -48,10 +48,10 @@ class TestLoadHostfile:
 		return input_tmp_file, output_tmp_file
 
 	@pytest.mark.parametrize("csvfile", HOSTFILE_SPREADHSEETS)
-	def test_load_hostfile(self, host, csvfile, revert_etc):
+	def test_load_hostfile(self, host, csvfile, revert_etc, test_file):
 		"""Goes through and loads each individual csv then compares report matches expected output."""
 		# get filename
-		input_tmp_file, output_tmp_file = self.update_csv_variables(host, csvfile)
+		input_tmp_file, output_tmp_file = self.update_csv_variables(host, csvfile, test_file)
 
 		# Add a network address with 2 hosts
 		result = host.run('stack add network autoip address=10.1.1.4 mask=255.255.255.252')
@@ -71,20 +71,20 @@ class TestLoadHostfile:
 		assert len(test_lines) == len(stack_lines)
 		for i in range(len(test_lines)):
 			assert test_lines[i].strip() == stack_lines[i].strip()
-	
-	def test_load_hostfile_ip_no_network(self, host):
+
+	def test_load_hostfile_ip_no_network(self, host, test_file):
 		# load hostfile containing an interface with an IP but no network (invalid)
-		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_ip_no_network.csv')
+		result = host.run(f'stack load hostfile file={test_file("load/load_hostfile_ip_no_network.csv")}')
 		assert result.rc != 0
 		assert 'inclusion of IP requires inclusion of network' in result.stderr
 
-	def test_load_hostfile_duplicate_interface(self, host):
+	def test_load_hostfile_duplicate_interface(self, host, test_file):
 		# load hostfile containing duplicate interface names (invalid)
-		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_duplicate_interface.csv')
+		result = host.run(f'stack load hostfile file={test_file("load/load_hostfile_duplicate_interface.csv")}')
 		assert result.rc != 0
 		assert re.search(r'interface ".+" already specified for host', result.stderr) is not None
 
-	def test_load_hostfile_with_unicode(self, host):
-		result = host.run('stack load hostfile file=/export/test-files/load/load_hostfile_with_unicode.csv')
+	def test_load_hostfile_with_unicode(self, host, test_file):
+		result = host.run(f'stack load hostfile file={test_file("load/load_hostfile_with_unicode.csv")}')
 		assert result.rc != 0
 		assert 'error - non-ascii character in file' in result.stderr
