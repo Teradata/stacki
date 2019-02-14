@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  redis:
+    build:
+      context: .
+    image: stacki/redis
+    hostname: redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis}
+
+

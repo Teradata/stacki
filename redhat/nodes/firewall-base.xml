@@ -26,11 +26,14 @@
 /usr/bin/systemctl disable ip6tables
 </stack:script>
 
-
 <stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
 /sbin/chkconfig iptables on
 </stack:script>
 
+
+<stack:script stack:cond="platform in [ 'docker', 'aws' ]">
+/usr/bin/systemctl disable iptables
+</stack:script>
 
 </stack:stack> 
 
