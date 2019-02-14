@@ -4,6 +4,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.topo import Redis
 from stack.exception import CommandError
 import stack.commands
 
@@ -25,7 +26,7 @@ class Command(command):
 
 		import redis # not part of the installer but command line is
 		try:
-			r = redis.StrictRedis(host='localhost')
+			r = redis.StrictRedis(host=Redis.server)
 		except:
 			raise CommandError(self, 'cannot connect to redis')
 
