@@ -10,17 +10,15 @@ class TestDumpSoftware:
 	Test that dumping the software data works properly
 	"""
 
-	def test_pallet(self, host, revert_export_stack_pallets):
-		# test that dump software provides accurate pallet information
-		dirn = '/export/test-files/dump/'
-		file = dirn + 'roll-minimal.xml'
+	def test_pallet(self, host, revert_export_stack_pallets, test_file):
+		"test that dump software provides accurate pallet information"
 
-		#do an initial rm of the files that are about to be created just in case the test has been run recently
+		# do an initial rm of the files that are about to be created just in case the test has been run recently
 		results = host.run('rm -rf disk1')
 		results = host.run('rm -f minimal*.iso')
 
-		# create a minimal pallet using the xml in test-files
-		results = host.run(f'stack create pallet {file}')
+		# create a minimal pallet using the xml
+		results = host.run(f'stack create pallet {test_file("dump/roll-minimal.xml")}')
 		assert results.rc == 0
 
 		# determine the name of the new pallet iso

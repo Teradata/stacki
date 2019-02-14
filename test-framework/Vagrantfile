@@ -14,15 +14,11 @@ if File.file?("#{ENV['PWD']}/.cache/state.json")
   STACKI_ISO = ENV.fetch('STACKI_ISO', state['STACKI_ISO'])
   PLAYBOOK = ENV.fetch('PLAYBOOK', state['PLAYBOOK'])
   NAME = ENV.fetch('NAME', state['NAME'])
-  TESTS = ENV.fetch('TESTS', state['TESTS'])
-  TEST_FILES = ENV.fetch('TEST_FILES', state['TEST_FILES'])
   USE_SRC = ENV.fetch('USE_SRC', state['USE_SRC'])
 else
   STACKI_ISO = ENV['STACKI_ISO']
   PLAYBOOK = ENV['PLAYBOOK']
   NAME = ENV['NAME']
-  TESTS = ENV['TESTS']
-  TEST_FILES = ENV['TEST_FILES']
   USE_SRC = ENV['USE_SRC']
 end
 
@@ -50,13 +46,9 @@ Vagrant.configure("2") do |config|
       provider.memory = "4098"
       provider.cpus = 4
 
-      config.vm.synced_folder '.cache', "/export/isos", type: "virtualbox"
-      config.vm.synced_folder TESTS, "/export/tests", type: "virtualbox"
+      config.vm.synced_folder ".cache", "/export/isos", type: "virtualbox"
       config.vm.synced_folder "reports", "/export/reports", type: "virtualbox"
-
-      unless TEST_FILES.nil?
-        config.vm.synced_folder TEST_FILES, "/export/test-files", type: "virtualbox"
-      end
+      config.vm.synced_folder "test-suites", "/export/test-suites", type: "virtualbox"
 
       if USE_SRC == "1"
         config.vm.synced_folder "../", "/export/src/stacki", type: "virtualbox"
@@ -73,13 +65,9 @@ Vagrant.configure("2") do |config|
       provider.nic_model_type = "e1000"
       provider.random :model => "random"
 
-      config.vm.synced_folder '.cache', "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
-      config.vm.synced_folder TESTS, "/export/tests", nfs: true, nfs_version: 4, nfs_udp: false
+      config.vm.synced_folder ".cache", "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
       config.vm.synced_folder "reports", "/export/reports", nfs: true, nfs_version: 4, nfs_udp: false
-
-      unless TEST_FILES.nil?
-        config.vm.synced_folder TEST_FILES, "/export/test-files", nfs: true, nfs_version: 4, nfs_udp: false
-      end
+      config.vm.synced_folder "test-suites", "/export/test-suites", nfs: true, nfs_version: 4, nfs_udp: false
 
       if USE_SRC == "1"
         config.vm.synced_folder "../", "/export/src/stacki", nfs: true, nfs_version: 4, nfs_udp: false

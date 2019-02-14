@@ -198,9 +198,9 @@ class TestAddPallet:
 				CentOS 7       redhat7 x86_64 redhat /export/isos/CentOS-7-x86_64-Everything-1708.iso
 			''')
 
-	def test_disk_pallet(self, host):
+	def test_disk_pallet(self, host, test_file):
 		# Add the minimal pallet from the disk
-		result = host.run('stack add pallet /export/test-files/pallets/minimal')
+		result = host.run(f'stack add pallet {test_file("pallets/minimal")}')
 		assert result.rc == 0
 
 		# Check it made it in as expected

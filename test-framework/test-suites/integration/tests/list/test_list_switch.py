@@ -1,9 +1,7 @@
-import pytest
 import json
 
 
-@pytest.mark.usefixtures("add_switch")
-def test_list_switch(host):
+def test_list_switch(host, add_switch):
 	result = host.run('stack list switch expanded=true output-format=json')
 	assert result.rc == 0
 

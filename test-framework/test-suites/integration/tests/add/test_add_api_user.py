@@ -1,7 +1,6 @@
 import pytest
 import json
 
-@pytest.mark.usefixtures("revert_database")
 def test_add_api_user(host):
 	"""Runs adding user"""
 	result = host.run('stack list api user output-format=json')

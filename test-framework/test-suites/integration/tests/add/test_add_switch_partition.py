@@ -23,9 +23,9 @@ class TestAddSwitchPartition:
 	]
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_add_behavior(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_add_behavior(self, host, add_ib_switch, partition_name, options, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
@@ -46,9 +46,9 @@ class TestAddSwitchPartition:
 		assert result.rc != 0
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_cannot_add_twice(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_cannot_add_twice(self, host, add_ib_switch, partition_name, options, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
@@ -59,10 +59,9 @@ class TestAddSwitchPartition:
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc != 0
 
-	def test_cannot_duplicate_names_that_resolve_same(self, host, add_ib_switch):
-		output_file = 'add_nondefault_partition_output.json'
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_cannot_duplicate_names_that_resolve_same(self, host, add_ib_switch, test_file):
+		with open(test_file(f'add/add_nondefault_partition_output.json')) as output:
+			expected_output = output.read()
 
 		same_parts = ['aaa', '0xaaa', '0x0aaa', 'AAA']
 
@@ -85,9 +84,9 @@ class TestAddSwitchPartition:
 		assert result.rc != 0
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_two_switches_same_partition_name(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_two_switches_same_partition_name(self, host, add_ib_switch, partition_name, options, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as output:
+			expected_output = output.read()
 
 		# add second switch
 		add_ib_switch('switch-0-1', '0', '1', 'switch', 'Mellanox', 'm7800', 'infiniband')

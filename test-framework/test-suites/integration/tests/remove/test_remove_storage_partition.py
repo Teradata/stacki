@@ -6,12 +6,10 @@ import pytest
 
 STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend']
 
-@pytest.mark.usefixtures("add_host")
 @pytest.mark.parametrize("csvfile", STORAGE_SPREADSHEETS)
-def test_remove_storage_partition(host, csvfile):
+def test_remove_storage_partition(host, add_host, csvfile, test_file):
 	# get filename
-	dirn = '/export/test-files/load/storage_partition_'
-	input_file = dirn + csvfile + '_input' + '.csv'
+	input_file = test_file(f'load/storage_partition_{csvfile}_input.csv')
 
 	if 'global' in input_file:
 		hostname = ''
@@ -67,8 +65,7 @@ def test_remove_storage_partition(host, csvfile):
 	assert result.stdout == ''
 	assert result.stderr == ''
 
-@pytest.mark.usefixtures("add_host")
-def test_negative_remove_storage_partition(host):
+def test_negative_remove_storage_partition(host, add_host):
 	"""
 	Trying to hit the below exceptions. The order is important as it is contextual to the attempted input.
 

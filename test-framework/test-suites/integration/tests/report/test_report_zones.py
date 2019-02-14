@@ -7,7 +7,7 @@ import pytest
 
 class TestReportZones:
 	@pytest.fixture()
-	def custom_entries(self, host, host_os):
+	def custom_entries(self, host, host_os, test_file):
 		# Figure out our base directroy
 		if host_os == "sles":
 			base_dir = '/var/lib/named'
@@ -17,7 +17,7 @@ class TestReportZones:
 		# Copy over our custom zone files
 		for name in ('reverse.test.domain.local', 'test.domain.local'):
 			shutil.copyfile(
-				f'/export/test-files/report/zones_{name}',
+				test_file(f'report/zones_{name}'),
 				os.path.join(base_dir, name)
 			)
 
@@ -27,7 +27,7 @@ class TestReportZones:
 		for name in ('reverse.test.domain.local', 'test.domain.local'):
 			os.remove(os.path.join(base_dir, name))
 
-	def test_no_custom_entries_sles(self, host, add_host, add_network, fake_os_sles, revert_etc):
+	def test_no_custom_entries_sles(self, host, add_host, add_network, fake_os_sles, revert_etc, test_file):
 		# Set DNS on our test network
 		result = host.run('stack set network dns test dns=true')
 		assert result.rc == 0
@@ -49,13 +49,13 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/zones_no_custom_entries_sles.txt') as output:
+		with open(test_file('report/zones_no_custom_entries_sles.txt')) as output:
 			# The serial will change between runs, so we have to replace them with something known
 			zones = re.sub(r'\d+ ; Serial', '0000000000 ; Serial', result.stdout)
 
 			assert zones == output.read()
 
-	def test_no_custom_entries_redhat(self, host, add_host, add_network, fake_os_redhat, revert_etc):
+	def test_no_custom_entries_redhat(self, host, add_host, add_network, fake_os_redhat, revert_etc, test_file):
 		# Set DNS on our test network
 		result = host.run('stack set network dns test dns=true')
 		assert result.rc == 0
@@ -77,13 +77,13 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/zones_no_custom_entries_redhat.txt') as output:
+		with open(test_file('report/zones_no_custom_entries_redhat.txt')) as output:
 			# The serial will change between runs, so we have to replace them with something known
 			zones = re.sub(r'\d+ ; Serial', '0000000000 ; Serial', result.stdout)
 
 			assert zones == output.read()
 
-	def test_with_custom_entries(self, host, add_host, add_network, host_os, custom_entries):
+	def test_with_custom_entries(self, host, add_host, add_network, host_os, custom_entries, test_file):
 		# Set DNS on our test network
 		result = host.run('stack set network dns test dns=true')
 		assert result.rc == 0
@@ -101,7 +101,7 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/zones_with_custom_entries_{host_os}.txt') as output:
+		with open(test_file(f'report/zones_with_custom_entries_{host_os}.txt')) as output:
 			# The serial will change between runs, so we have to replace them with something known
 			zones = re.sub(r'\d+ ; Serial', '0000000000 ; Serial', result.stdout)
 

@@ -37,7 +37,7 @@ class TestAddGroup:
 
 As you develop tests, if you find yourself doing the same set up or tear down code repeatedly, you can consolidate that code into a PyTest fixture. Place your new fixture in [tests/conftest.py](tests/conftest.py) and it will be automatically loaded into PyTest.
 
-If your test required some static files, you can place them in the `test-files` directory. This directory will be mounted inside of the frontend at `/export/test-files`.
+If your test required some static files, you can place them in the `files` directory. This directory will be mounted inside of the frontend at `/export/test-suites/integration/files`. You can use the `integration_file` fixture in your tests to get the directory easily.
 
 ## Test Development Workflow
 
@@ -60,9 +60,9 @@ For example, to set up a clean development environment, I'll run:
 Then I can edit my local copy of the source files, and the changes will be reflected in the VM. I'll log in to the VM
 to test out my changes on the command line, as I make them (see step 6).
 
-5. You can now run `./run-tests.sh` to run the tests stored in the `tests` directory. You can run this as many time as you need to as you develop your new tests. You can pass the `--no-cov` flag to disable generating the code coverage output.
+5. You can now run `./run-tests.sh` to run the tests stored in the `tests` directory. You can run this as many time as you need to as you develop your new tests.
 
-6. If you want to just run the specific test you are working on, you can SSH directly into the frontend with the command: `vagrant ssh frontend`. Switch to root user and then you can run `pytest` directly. The "tests" directory on the VM host (IE: your laptop running Vagrant) is mounted in the frontend at `/export/tests`.
+6. If you want to just run the specific test you are working on, you can SSH directly into the frontend with the command: `vagrant ssh frontend`. Switch to root user and then you can run `pytest` directly. The "tests" directory on the VM host (IE: your laptop running Vagrant) is mounted in the frontend at `/export/test-suites/integration/tests`.
 
 7. When you are done with the frontend, or need to rebuild it, run `./tear-down.sh` to destroy the VM.
 
@@ -72,8 +72,6 @@ While I feel that developing tests in a clean and known VM environment is safest
 
 The tests will obviously be ran against the frontend code and database, so might fail if the data in the database doesn't match a freshly barnacled system. It may also completely light your server on fire; you get to keep the ashes.
 
-1. Copy the tests directory `stacki/test-framework/test-suites/integration/tests` to the frontend at `/export/tests`.
+1. Copy the test-suites directory `stacki/test-framework/test-suites` to the frontend at `/export/test-suites`.
 
-2. Copy the test-files directory at `stacki/test-framework/test-suites/integration/test-files` to the frontend at `/export/test-files`
-
-3. Logged into the frontend as root, run `pytest /export/tests` to run all the integration tests. You can pass `pytest` a specific test file if you just want to run the tests within, or even a specific test in a given file.
+2. Logged into the frontend as root, run `pytest /export/test-suites/integration/tests` to run all the integration tests. You can pass `pytest` a specific test file if you just want to run the tests within, or even a specific test in a given file.

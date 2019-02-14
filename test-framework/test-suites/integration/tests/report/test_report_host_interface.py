@@ -9,7 +9,7 @@ class TestReportHostInterface:
 		assert result.rc == 0
 		assert 'backend-0-0' not in result.stdout
 
-	def test_single(self, host, add_host, add_network, host_os):
+	def test_single(self, host, add_host, add_network, host_os, test_file):
 		# Add an interface to our backend with some simple case parameters
 		result = host.run(
 			'stack add host interface backend-0-0 interface=eth0 mac=00:11:22:33:44:55 network=test ip=192.168.0.2'
@@ -33,10 +33,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_single_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_single_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_bridged(self, host, add_host, add_network, host_os):
+	def test_bridged(self, host, add_host, add_network, host_os, test_file):
 		# Add the bridge interface to the backend
 		result = host.run(
 			'stack add host interface backend-0-0 interface=br0 network=test ip=192.168.0.2 options=bridge'
@@ -54,10 +54,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_bridged_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_bridged_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_bonded(self, host, add_host, add_network, host_os):
+	def test_bonded(self, host, add_host, add_network, host_os, test_file):
 		# Add the bond interface to the backend
 		result = host.run(
 			'stack add host interface backend-0-0 interface=bond0 network=test '
@@ -77,10 +77,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_bonded_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_bonded_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_vlan(self, host, add_host, add_network, host_os):
+	def test_vlan(self, host, add_host, add_network, host_os, test_file):
 		# Add a second network to act as our VLAN
 		add_network('vlan', '10.10.10.0')
 
@@ -99,10 +99,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_vlan_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_vlan_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_ipmi(self, host, add_host, host_os):
+	def test_ipmi(self, host, add_host, host_os, test_file):
 		# Add our ipmi network
 		result = host.run('stack add network ipmi address=10.10.10.0 mask=255.255.255.0 gateway=10.10.10.1')
 		assert result.rc == 0
@@ -116,10 +116,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_ipmi_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_ipmi_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_virtual(self, host, add_host, add_network, host_os):
+	def test_virtual(self, host, add_host, add_network, host_os, test_file):
 		# Add two virtual interfaces on the test backend
 		result = host.run('stack add host interface backend-0-0 interface=eth0:0 network=test ip=192.168.0.2')
 		assert result.rc == 0
@@ -132,10 +132,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_virtual_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_virtual_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_dhcp(self, host, add_host, add_network, host_os):
+	def test_dhcp(self, host, add_host, add_network, host_os, test_file):
 		# Add a dhcp interface on the test backend
 		result = host.run('stack add host interface backend-0-0 interface=eth0 network=test options=dhcp')
 		assert result.rc == 0
@@ -145,10 +145,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_dhcp_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_dhcp_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_dhcp_default(self, host, add_host, add_network, host_os):
+	def test_dhcp_default(self, host, add_host, add_network, host_os, test_file):
 		# Add a dhcp interface on the test backend
 		result = host.run('stack add host interface backend-0-0 interface=eth0 network=test options=dhcp default=true')
 		assert result.rc == 0
@@ -158,10 +158,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_dhcp_default_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_dhcp_default_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_manual(self, host, add_host, add_network, host_os):
+	def test_manual(self, host, add_host, add_network, host_os, test_file):
 		# Add an interface with "onboot=no" option
 		result = host.run('stack add host interface backend-0-0 interface=eth0 network=test options="onboot=no"')
 		assert result.rc == 0
@@ -171,10 +171,10 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_manual_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_manual_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_only_device(self, host, add_host, add_network, host_os):
+	def test_only_device(self, host, add_host, add_network, host_os, test_file):
 		# Add an interface with only a device
 		result = host.run('stack add host interface backend-0-0 interface=eth0')
 		assert result.rc == 0
@@ -184,5 +184,5 @@ class TestReportHostInterface:
 		assert result.rc == 0
 
 		# Does the output match what we expect?
-		with open(f'/export/test-files/report/host_interface_only_device_{host_os}.txt') as output:
+		with open(test_file(f'report/host_interface_only_device_{host_os}.txt')) as output:
 			assert result.stdout == output.read()
