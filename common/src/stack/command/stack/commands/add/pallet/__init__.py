@@ -15,6 +15,7 @@ import sys
 import subprocess
 import stack.file
 import stack.commands
+import tempfile
 from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
 from urllib.parse import urlparse
@@ -188,8 +189,12 @@ class Command(command):
 			self.out = sys.stdout
 
 		self.mountPoint = '/mnt/cdrom'
+		tempMountPoint = tempfile.TemporaryDirectory()
 		if not os.path.exists(self.mountPoint):
-			os.makedirs(self.mountPoint)
+			try:
+				os.makedirs(self.mountPoint)
+			except OSError:
+				self.mountPoint = tempMountPoint.name
 
 		# Get a list of all the iso files mentioned in
 		# the command line. Make sure we get the complete 
