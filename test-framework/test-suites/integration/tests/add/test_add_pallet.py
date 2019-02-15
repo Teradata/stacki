@@ -1,4 +1,5 @@
 import json
+from contextlib import ExitStack
 from textwrap import dedent
 
 import pytest
@@ -99,6 +100,38 @@ class TestAddPallet:
 				'boxes': ''
 			}
 		]
+
+	def test_mountpoint_in_use_mnt(self, host, create_blank_iso, create_pallet_isos, revert_export_stack_pallets):
+		with ExitStack() as cleanup:
+			# Mount an ISO to simulate another iso left mounted in /mnt
+			result = host.run(f'mount {create_blank_iso}/blank.iso /mnt')
+			assert result.rc == 0
+
+			#Unmount the iso no matter what happens after test exits
+			cleanup.callback(host.run, 'umount /mnt')
+
+			# Add our minimal pallet
+			result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
+			assert result.rc == 0
+			assert result.stdout == 'Copying minimal 1.0-sles12 to pallets ...\n'
+
+			# Check it made it in as expected
+			result = host.run('stack list pallet minimal output-format=json')
+			assert result.rc == 0
+			assert json.loads(result.stdout) == [
+				{
+					'name': 'minimal',
+					'version': '1.0',
+					'release': 'sles12',
+					'arch': 'x86_64',
+					'os': 'sles',
+					'boxes': ''
+				}
+			]
+		
+			# Unmount ISO  
+			result = host.run(f'umount /mnt')
+			assert result.rc == 0
 
 	def test_mounted_cdrom(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Mount our pallet
@@ -261,6 +294,9 @@ class TestAddPallet:
 		assert result.stderr == 'error - unable to download test.iso: http error 404\n'
 
 	def test_invalid_iso(self, host, create_blank_iso):
-		result = host.run(f'stack add pallet {create_blank_iso}/blank.iso')
-		assert result.rc == 255
-		assert result.stderr == 'error - unknown pallet on /mnt/cdrom\n'
+		with ExitStack() as cleanup:
+			result = host.run(f'stack add pallet {create_blank_iso}/blank.iso')
+			#Make ISO unmounted, not just deleted
+			cleanup.callback(host.run,'umount /mnt/cdrom')
+			assert result.rc == 255
+			assert result.stderr == 'error - unknown pallet on /mnt/cdrom\n'
