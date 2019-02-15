@@ -5,7 +5,7 @@
 	  "table": "filter",
 	  "service": "http,https,3825,5001,5002",
 	  "protocol": "tcp",
-	  "chain": "all",
+	  "chain": "INPUT",
 	  "action": "ACCEPT",
 	  "network": "private",
 	  "output-network": null,
