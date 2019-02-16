@@ -774,3 +774,12 @@ def inject_code(exclusive_lock, host):
 			os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
 
 	return _inner
+
+@pytest.fixture
+def clean_dir():
+	temp_dir = tmpdir_factory.mktemp("clean"))
+	os.chdir(temp_dir)
+
+	yield str(temp_dir)
+
+	temp_dir.remove(1, True)
