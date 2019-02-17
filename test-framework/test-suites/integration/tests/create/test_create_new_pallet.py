@@ -49,7 +49,7 @@ class TestCreateNewPallet:
 		with open(f'./{pallet_name}/version.mk', 'r') as fi:
 			assert ' '.join(fi.read().split()) == rendered_fi
 
-	def test_files_created(self, host):
+	def test_files_created(self, host, clean_dir):
 		pallet_name = 'mypal'
 		result = host.run(f'stack create new pallet name={pallet_name}')
 		assert result.rc == 0
