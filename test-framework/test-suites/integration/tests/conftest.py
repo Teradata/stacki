@@ -777,7 +777,7 @@ def inject_code(exclusive_lock, host):
 
 @pytest.fixture
 def clean_dir():
-	temp_dir = tmpdir_factory.mktemp("clean"))
+	temp_dir = tmpdir_factory.mktemp("clean")
 	os.chdir(temp_dir)
 
 	yield str(temp_dir)
