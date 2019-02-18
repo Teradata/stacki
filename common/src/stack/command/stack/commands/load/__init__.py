@@ -145,12 +145,12 @@ class command(stack.commands.Command):
 		assert not (scope != 'global' and target is None)
 
 		for p in partitions:
-			params = {'device'    : c.get('device'),
-				  'partid'    : c.get('partid'),
-				  'mountpoint': c.get('mountpoint'),
-				  'size'      : c.get('size'),
-				  'fstype'    : c.get('fstype'),
-				  'options'   : c.get('options')}
+			params = {'device'    : p.get('device'),
+				  'partid'    : p.get('partid'),
+				  'mountpoint': p.get('mountpoint'),
+				  'size'      : p.get('size'),
+				  'fstype'    : p.get('fstype'),
+				  'options'   : p.get('options')}
 
 			self.stack('add.storage.partition', target, **params)
 

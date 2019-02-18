@@ -2,7 +2,7 @@ import json
 
 
 class TestListHostStorageController:
-	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os):
+	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os, test_file):
 		# Add our host to the test environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -42,10 +42,10 @@ class TestListHostStorageController:
 		result = host.run('stack list host storage controller backend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open('/export/test-files/list/host_storage_controller_scope_resolving.json') as output:
+		with open(test_file('list/host_storage_controller_scope_resolving.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_scope_no_enviroment(self, host, add_host):
+	def test_scope_no_enviroment(self, host, add_host, test_file):
 		# Create some more hosts
 		add_host('backend-0-1', '0', '1', 'backend')
 		add_host('backend-0-2', '0', '2', 'backend')
@@ -70,5 +70,5 @@ class TestListHostStorageController:
 		result = host.run('stack list host storage controller backend-0-0 output-format=json')
 		assert result.rc == 0
 
-		with open('/export/test-files/list/host_storage_controller_scope_no_enviroment.json') as output:
+		with open(test_file('list/host_storage_controller_scope_no_enviroment.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())

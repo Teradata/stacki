@@ -1,7 +1,6 @@
-export ROLL	= @template@
-export VERSION	= @version@
-export ROLLVERSION = @version@
+export ROLL	= {{ pallet_name }}
+export VERSION	= {{ version }}
+export ROLLVERSION = {{ version }}
 export RELEASE	= $(shell $(STACKBUILD.ABSOLUTE)/bin/os-release)
-COLOR		= @color@
-ROLLS.OS	= @os@
+ROLLS.OS	= {{ os }}
 ISOSIZE		= 0

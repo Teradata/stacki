@@ -1,6 +1,7 @@
 import pytest
 import json
 
+
 class TestRemoveSwitchPartition:
 
 	SWITCH_PARTITION_TEST_DATA = [
@@ -17,9 +18,9 @@ class TestRemoveSwitchPartition:
 	]
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_behavior(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_behavior(self, host, add_ib_switch, partition_name, options, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as f:
+			expected_output = f.read()
 
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name} options="{options}"')
 		assert result.rc == 0
@@ -33,9 +34,9 @@ class TestRemoveSwitchPartition:
 		assert result.rc == 0
 		assert result.stdout.strip() == ''
 
-	def test_negative_behavior(self, host, add_ib_switch):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_partition_output.json').read()
+	def test_negative_behavior(self, host, add_ib_switch, test_file):
+		with open(test_file('add/add_default_partition_output.json')) as f:
+			expected_output = f.read()
 
 		# should be able to add 
 		result = host.run(f'stack add switch partition switch-0-0 name=Default')
@@ -67,9 +68,9 @@ class TestRemoveSwitchPartition:
 		assert result.rc != 0
 		assert result.stderr.strip() != ''
 
-	def test_can_remove_twice(self, host, add_ib_switch):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_partition_output.json').read()
+	def test_can_remove_twice(self, host, add_ib_switch, test_file):
+		with open(test_file('add/add_default_partition_output.json')) as f:
+			expected_output = f.read()
 
 		partition_name = 'default'
 		result = host.run(f'stack add switch partition switch-0-0 name={partition_name}')
@@ -88,10 +89,9 @@ class TestRemoveSwitchPartition:
 			assert result.stdout.strip() == ''
 			assert result.stderr.strip() == ''
 
-	def test_can_remove_names_that_resolve_same(self, host, add_ib_switch):
-		output_file = 'add_nondefault_partition_output.json'
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_can_remove_names_that_resolve_same(self, host, add_ib_switch, test_file):
+		with open(test_file('add/add_nondefault_partition_output.json')) as f:
+			expected_output = f.read()
 
 		same_parts = ['aaa', '0xaaa', '0x0aaa', 'AAA']
 
@@ -122,9 +122,9 @@ class TestRemoveSwitchPartition:
 		assert result.stderr.strip() != ''
 
 	@pytest.mark.parametrize("partition_name,options,output_file", SWITCH_PARTITION_TEST_DATA)
-	def test_two_switches_same_partition_name(self, host, add_ib_switch, partition_name, options, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_two_switches_same_partition_name(self, host, add_ib_switch, partition_name, options, output_file, test_file):
+		with open(test_file(f'add/{output_file}')) as f:
+			expected_output = f.read()
 
 		# add second switch
 		add_ib_switch('switch-0-1', '0', '1', 'switch', 'Mellanox', 'm7800', 'infiniband')

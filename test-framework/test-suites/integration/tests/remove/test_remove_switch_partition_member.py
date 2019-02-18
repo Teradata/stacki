@@ -25,9 +25,10 @@ class TestRemoveSwitchPartitionMember:
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership,output_file", SWITCH_PARTITION_MEMBER_TEST_DATA)
 	def test_behavior(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
-				partition_name, guid, hostname, interface, membership, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+				partition_name, guid, hostname, interface, membership, output_file, test_file):
+
+		with open(test_file(f'add/{output_file}')) as f:
+			expected_output = f.read()
 
 		result = host.run(f'stack add host interface backend-0-0 interface=ib0 mac=00:00:00:00:00:00:00:00')
 		assert result.rc == 0
@@ -63,9 +64,9 @@ class TestRemoveSwitchPartitionMember:
 		assert result.rc == 0
 		assert result.stdout.strip() == ''
 
-	def test_negative_behavior(self, host, add_host_with_interface, add_ib_switch, add_ib_switch_partition):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_member_output.json').read()
+	def test_negative_behavior(self, host, add_host_with_interface, add_ib_switch, add_ib_switch_partition, test_file):
+		with open(test_file('add/add_default_member_output.json')) as f:
+			expected_output = f.read()
 
 		# add a host...
 		partition_name = 'default'
@@ -106,9 +107,10 @@ class TestRemoveSwitchPartitionMember:
 
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface", SWITCH_PARTITION_MEMBER_NEGATIVE_TEST_DATA)
 	def test_bad_input(self, host, add_ib_switch, add_ib_switch_partition, add_host_with_interface,
-				partition_name, guid, hostname, interface):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_member_output.json').read()
+				partition_name, guid, hostname, interface, test_file):
+
+		with open(test_file('add/add_default_member_output.json')) as f:
+			expected_output = f.read()
 
 		# add a host...
 		host_guid = '00:00:00:00:00:00:00:00'
@@ -143,9 +145,9 @@ class TestRemoveSwitchPartitionMember:
 		assert result.rc != 0
 		assert result.stderr.strip() != ''
 
-	def test_can_remove_twice(self, host, add_host_with_interface, add_ib_switch, add_ib_switch_partition):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + 'add_default_member_output.json').read()
+	def test_can_remove_twice(self, host, add_host_with_interface, add_ib_switch, add_ib_switch_partition, test_file):
+		with open(test_file('add/add_default_member_output.json')) as f:
+			expected_output = f.read()
 
 		partition_name = 'default'
 		guid = '00:00:00:00:00:00:00:00'
@@ -170,10 +172,9 @@ class TestRemoveSwitchPartitionMember:
 			assert result.stderr.strip() == ''
 
 	@pytest.mark.skip()
-	def test_can_remove_names_that_resolve_same(self, host, add_ib_switch):
-		output_file = 'add_nondefault_partition_output.json'
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+	def test_can_remove_names_that_resolve_same(self, host, add_ib_switch, test_file):
+		with open(test_file('add/add_nondefault_partition_output.json')) as f:
+			expected_output = f.read()
 
 		same_parts = ['aaa', '0xaaa', '0x0aaa', 'AAA']
 
@@ -206,9 +207,10 @@ class TestRemoveSwitchPartitionMember:
 	@pytest.mark.skip()
 	@pytest.mark.parametrize("partition_name,guid,hostname,interface,membership,output_file", SWITCH_PARTITION_MEMBER_TEST_DATA)
 	def test_two_switches_same_partition_name(self, host, add_ib_switch,
-				partition_name, guid, hostname, interface, membership, output_file):
-		dirn = '/export/test-files/add/'
-		expected_output = open(dirn + output_file).read()
+				partition_name, guid, hostname, interface, membership, output_file, test_file):
+
+		with open(test_file(f'add/{output_file}')) as f:
+			expected_output = f.read()
 
 		# add second switch
 		add_ib_switch('switch-0-1', '0', '1', 'switch', 'Mellanox', 'm7800', 'infiniband')

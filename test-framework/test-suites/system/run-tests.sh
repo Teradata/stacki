@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Echo out the commands to the console
+set -x
+
 # Bail on script errors
 set -e
 
@@ -13,4 +16,6 @@ then
 fi
 
 # Run the tests
-vagrant ssh frontend -c "sudo -i pytest -vvv /export/tests/"
+vagrant ssh frontend -c "sudo -i pytest -vvv \
+	--junit-xml=/export/reports/system-junit.xml \
+	/export/test-suites/system/tests/"

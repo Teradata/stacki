@@ -1,14 +1,14 @@
 class TestReportHostFirewall:
-	def test_no_rules_added(self, host, add_host_with_interface):
+	def test_no_rules_added(self, host, add_host_with_interface, test_file):
 		# Generate the firewall rules
 		result = host.run('stack report host firewall backend-0-0')
 		assert result.rc == 0
 
 		# Do they match what we expect?
-		with open('/export/test-files/report/host_firewall_no_rules_added.txt') as output:
+		with open(test_file('report/host_firewall_no_rules_added.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_nat_rules(self, host, add_host_with_interface, add_network):
+	def test_nat_rules(self, host, add_host_with_interface, add_network, test_file):
 		# Add the eth0 interface to our private network
 		result = host.run('stack set host interface network backend-0-0 interface=eth0 network=private')
 		assert result.rc == 0
@@ -35,10 +35,10 @@ class TestReportHostFirewall:
 		assert result.rc == 0
 
 		# Do they match what we expect?
-		with open('/export/test-files/report/host_firewall_nat_rules.txt') as output:
+		with open(test_file('report/host_firewall_nat_rules.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_drop_rule(self, host, add_host_with_interface):
+	def test_drop_rule(self, host, add_host_with_interface, test_file):
 		# Add rules to drop all traffic to port 21
 		result = host.run(
 			'stack add host firewall backend-0-0 chain=INPUT '
@@ -51,10 +51,10 @@ class TestReportHostFirewall:
 		assert result.rc == 0
 
 		# Do they match what we expect?
-		with open('/export/test-files/report/host_firewall_drop_rule.txt') as output:
+		with open(test_file('report/host_firewall_drop_rule.txt')) as output:
 			assert result.stdout == output.read()
 
-	def test_skip_output_network(self, host, add_host_with_interface):
+	def test_skip_output_network(self, host, add_host_with_interface, test_file):
 		# Add a NAT rule, which should get skipped because the
 		# host isn't in the private network
 		result = host.run(
@@ -68,5 +68,5 @@ class TestReportHostFirewall:
 		assert result.rc == 0
 
 		# Do they match what we expect?
-		with open('/export/test-files/report/host_firewall_skip_output_network.txt') as output:
+		with open(test_file('report/host_firewall_skip_output_network.txt')) as output:
 			assert result.stdout == output.read()

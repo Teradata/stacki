@@ -29,7 +29,7 @@ class Plugin(stack.commands.Plugin):
 						f'STACKI-INSTALLATION-{network["network"]}',
 						'filter',
 						f'http,https,3825,{stack.mq.ports.subscribe}'
-						f',{stack.mq.ports.control}', 'tcp', 'all',
+						f',{stack.mq.ports.control}', 'tcp', 'INPUT',
 						'ACCEPT', network['network'], None, '-m multiport',
 						f'Accept Stacki traffic on {network["network"]}'
 						' network - Intrinsic rule', 'G', 'const'

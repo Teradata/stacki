@@ -11,7 +11,7 @@ class TestReportHostStorageController:
 			{host}
 		''')
 
-	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os):
+	def test_scope_resolving(self, host, add_host_with_interface, add_environment, host_os, test_file):
 		# Add our host to the test environment
 		result = host.run('stack set host environment backend-0-0 environment=test')
 		assert result.rc == 0
@@ -51,5 +51,5 @@ class TestReportHostStorageController:
 		result = host.run('stack report host storage controller backend-0-0')
 		assert result.rc == 0
 
-		with open('/export/test-files/report/host_storage_controller_scope_resolving.txt') as output:
+		with open(test_file('report/host_storage_controller_scope_resolving.txt')) as output:
 			assert result.stdout == output.read()
