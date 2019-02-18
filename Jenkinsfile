@@ -810,12 +810,7 @@ pipeline {
 
                         // Now do the scan
                         dir ('stacki-blackduck-scanner') {
-                            withEnv([
-                                'ART_USER=$ARTIFACTORY_USR',
-                                'ART_PASS=$ARTIFACTORY_PSW'
-                            ]) {
-                                sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../stacki'
-                            }
+                            sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../stacki'
                         }
                     }
 
@@ -851,7 +846,7 @@ pipeline {
 
                         // Build the KVM image
                         dir ('stacki-kvm-builder') {
-                            sh './do-build.sh ../$ISO_PATH'
+                            sh './do-build.sh ../$ISO_FILENAME'
                             sh 'mv stacki-*.qcow2 ../'
                         }
 
