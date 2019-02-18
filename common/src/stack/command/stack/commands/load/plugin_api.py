@@ -26,7 +26,7 @@ class __Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no api data in json file')
 			return
 
-		self.notify('\n\tLoading api')
+		self.owner.notify('\n\tLoading api')
 
 		# load the api group information
 		for group, data in import_data['group'].items():

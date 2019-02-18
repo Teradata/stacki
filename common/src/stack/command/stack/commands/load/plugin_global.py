@@ -27,7 +27,7 @@ class __Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no global data in json file')
 			return
 
-		self.notify('\n\tLoading global')
+		self.owner.notify('\n\tLoading global')
 		for scope in import_data:
 			# check to make sure the scope is valid
 			if scope == 'attrs':

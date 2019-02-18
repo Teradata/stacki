@@ -29,7 +29,7 @@ class __Plugin(stack.commands.Plugin, stack.commands.Command):
 			self.owner.log.info('no os data in json file')
 			return
 
-		self.notify('\n\tLoading os')
+		self.owner.notify('\n\tLoading os')
 		for os in import_data:
 			os_name= os['name']
 
