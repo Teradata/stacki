@@ -81,7 +81,7 @@ class TestListPalletCommand:
 		# Comment out the 'RollName' from the `list pallet command`
 		result = host.run(
 			"sed -i 's/^RollName/#RollName/' "
-			"/opt/stack/lib/python3.6/site-packages/"
+			"/opt/stack/lib/python3.7/site-packages/"
 			"stack/commands/list/pallet/command/__init__.py"
 		)
 		assert result.rc == 0

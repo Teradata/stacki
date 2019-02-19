@@ -4,15 +4,15 @@ disable_warnings =
 	module-not-imported
 
 omit =
-	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_foreign_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_foreign_sles12.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_native_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/list/host/profile/imp_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/bootfile/imp_sles_pxe.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/bootfile/imp_sles_uefi.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/interface/imp_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/repo/imp_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/resolv/imp_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/route/imp_sles.py
-	/opt/stack/lib/python3.6/site-packages/stack/sles/__init__.py
-	/opt/stack/lib/python3.6/site-packages/stack/sles/gen.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/add/pallet/imp_foreign_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/add/pallet/imp_foreign_sles12.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/add/pallet/imp_native_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/list/host/profile/imp_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/bootfile/imp_sles_pxe.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/bootfile/imp_sles_uefi.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/interface/imp_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/repo/imp_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/resolv/imp_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/route/imp_sles.py
+	/opt/stack/lib/python3.7/site-packages/stack/sles/__init__.py
+	/opt/stack/lib/python3.7/site-packages/stack/sles/gen.py

@@ -54,7 +54,7 @@ class Command(stack.commands.Command,
 		pretty = self.str2bool(pretty)
 
 		current_dir = os.getcwd()
-		os.chdir('/opt/stack/lib/python3.6/site-packages/stack/commands/report/system')
+		os.chdir('/opt/stack/lib/python3.7/site-packages/stack/commands/report/system')
 		tests = glob('tests/*')
 
 		# make it real ugly.

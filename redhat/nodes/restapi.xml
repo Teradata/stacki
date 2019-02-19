@@ -21,14 +21,14 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	is required for django to work correctly, since
 	django requires MySQLdb which we cannot distribute
 -->
-ln -s /opt/stack/lib/python3.6/site-packages/pymysql \
-	/opt/stack/lib/python3.6/site-packages/MySQLdb
+ln -s /opt/stack/lib/python3.7/site-packages/pymysql \
+	/opt/stack/lib/python3.7/site-packages/MySQLdb
 
 <!--
 	Create symlink for mod_wsgi in apache modules
 	directory
 -->
-ln -s /opt/stack/lib/python3.6/site-packages/mod_wsgi/server/mod_wsgi-py36.cpython-36-x86_64-linux-gnu.so \
+ln -s /opt/stack/lib/python3.7/site-packages/mod_wsgi/server/mod_wsgi-py37.cpython-37-x86_64-linux-gnu.so \
 	/usr/lib64/httpd/modules/mod_wsgi.so
 
 <!-- Add restapi apache configuration -->
