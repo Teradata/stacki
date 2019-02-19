@@ -15,7 +15,7 @@ class TestEnablePallet:
 		result = host.run('stack enable pallet test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
-			error - "test" argument is not a valid pallet
+			error - "test" argument is not a valid pallet with parameters arch=x86_64
 			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
 		''')
 
@@ -33,6 +33,19 @@ class TestEnablePallet:
 		result = host.run(f'stack enable pallet test-different-os')
 		assert result.rc == 255
 		assert result.stderr == 'error - incompatible pallet "test-different-os" with OS "ubuntu"\n'
+	
+	def test_wrong_version(self, host, create_pallet_isos):
+		# Add our test pallet
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
+		assert result.rc == 0 
+
+		# Try to enable it with the version parameter being wrong
+		result = host.run(f'stack enable pallet test-different-version version=1.0')
+		assert result.rc == 255
+		assert result.stderr == dedent('''\
+			error - "test-different-version" argument is not a valid pallet with parameters version=1.0, arch=x86_64
+			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
+		''')
 
 	def test_default_box(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets):
 		# Add our test pallet

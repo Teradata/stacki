@@ -119,7 +119,7 @@ class TestRemovePallet:
 		result = host.run('stack remove pallet minimal arch=x86')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
-			error - "minimal" argument is not a valid pallet
+			error - "minimal" argument is not a valid pallet with parameters arch=x86
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
@@ -166,7 +166,7 @@ class TestRemovePallet:
 		result = host.run('stack remove pallet minimal os=redhat')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
-			error - "minimal" argument is not a valid pallet
+			error - "minimal" argument is not a valid pallet with parameters os=redhat
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
