@@ -325,7 +325,7 @@ def inject_code(exclusive_lock, host):
 	@contextmanager
 	def _inner(code_file):
 		result = host.run(
-			f'cp "{code_file}" /opt/stack/lib/python3.6/site-packages/sitecustomize.py'
+			f'cp "{code_file}" /opt/stack/lib/python3.7/site-packages/sitecustomize.py'
 		)
 
 		if result.rc != 0:
@@ -334,7 +334,7 @@ def inject_code(exclusive_lock, host):
 		try:
 			yield
 		finally:
-			os.remove('/opt/stack/lib/python3.6/site-packages/sitecustomize.py')
+			os.remove('/opt/stack/lib/python3.7/site-packages/sitecustomize.py')
 
 	return _inner
 

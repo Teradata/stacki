@@ -80,7 +80,7 @@ pipeline {
                                 // Check the number of commits on the branch
                                 def status = sh(
                                     returnStatus: true,
-                                    script: "python3.6 ../stacki-git-tests/verify-branch-base.py"
+                                    script: "python3.7 ../stacki-git-tests/verify-branch-base.py"
                                 )
 
                                 // Report the status to github.com
@@ -110,7 +110,7 @@ pipeline {
                                 // Check the commit message formatting
                                 def status = sh(
                                     returnStatus: true,
-                                    script: 'python3.6 ../stacki-git-tests/validate-commit-message.py'
+                                    script: 'python3.7 ../stacki-git-tests/validate-commit-message.py'
                                 )
 
                                 // Report the status to github.com

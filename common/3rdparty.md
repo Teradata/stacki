@@ -3,7 +3,7 @@
 This repository includes the following code from other projects.
 
 * MegaCli-8.07.07-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/MegaCli-8.07.07-1.noarch.rpm]
-* Python-3.6.6.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/Python-3.6.6.tgz]
+* Python-3.7.2.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/Python-3.7.2.tgz]
 * fbtftp.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/fbtftp.tar.gz]
 * fio-2.1.2.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/fio-2.1.2.tar.gz]
 * newt-0.52.20.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/newt-0.52.20.tar.gz]
