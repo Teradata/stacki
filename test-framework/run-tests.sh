@@ -161,7 +161,7 @@ if [[ $ALL -eq 1 || $UNIT -eq 1 ]]
 then
     echo
     echo -e "\033[34mRunning unit test suite ...\033[0m"
-    ./test-suites/unit/set-up.sh $STACKI_ISO
+    ./test-suites/unit/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
     if [[ $COVERAGE -eq 1 ]]
     then
@@ -187,7 +187,7 @@ if [[ $ALL -eq 1 || $INTEGRATION -eq 1 ]]
 then
     echo
     echo -e "\033[34mRunning integration test suite ...\033[0m"
-    ./test-suites/integration/set-up.sh $STACKI_ISO
+    ./test-suites/integration/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
     if [[ $COVERAGE -eq 1 ]]
     then

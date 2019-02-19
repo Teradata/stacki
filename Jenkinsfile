@@ -27,7 +27,7 @@ pipeline {
 
     triggers {
         // Nightly build of develop (at 3am)
-        cron(env.BRANCH_NAME == 'develop' ? 'H 3 * * *' : '')
+        cron(env.BRANCH_NAME == 'develop' ? 'H 11 * * *' : '')
     }
 
     stages {
@@ -748,7 +748,7 @@ pipeline {
                             s3Upload(
                                 file: env.ISO_FILENAME,
                                 bucket: 'teradata-stacki',
-                                path: '/release/stacki/5.x/',
+                                path: 'release/stacki/5.x/',
                                 acl: 'PublicRead'
                             )
 
@@ -756,7 +756,7 @@ pipeline {
                             s3Upload(
                                 file: env.STACKIOS_FILENAME,
                                 bucket: 'teradata-stacki',
-                                path: '/release/stacki/5.x/',
+                                path: 'release/stacki/5.x/',
                                 acl: 'PublicRead'
                             )
                         }
@@ -875,7 +875,7 @@ pipeline {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
                                         bucket: 'teradata-stacki',
-                                        path: '/release/stacki/5.x/',
+                                        path: 'release/stacki/5.x/',
                                         acl: 'PublicRead'
                                     )
                                 }
@@ -954,7 +954,7 @@ pipeline {
     }
 
     post {
-        // Clean up afte ourselves
+        // Clean up after ourselves
         always {
             cleanWs()
         }
