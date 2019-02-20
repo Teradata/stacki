@@ -16,6 +16,7 @@ import subprocess
 import stack.file
 import stack.commands
 import tempfile
+from contextlib import ExitStack
 from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
 from urllib.parse import urlparse
@@ -93,7 +94,7 @@ class Command(command):
 			if filename:
 				roll = stack.file.RollInfoFile(filename.strip())
 				dict[roll.getRollName()] = roll
-			
+
 		if len(dict) == 0:
 			
 			# If the roll_info hash is empty, that means there are
@@ -163,124 +164,130 @@ class Command(command):
 
 
 	def run(self, params, args):
-		(clean, dir, updatedb, dryrun, username, password) = self.fillParams([
-			('clean', 'n'),
-			('dir', '/export/stack/pallets'),
-			('updatedb', 'y'),
-			('dryrun', 'n'),
-			('username', None),
-			('password', None),
+		with ExitStack() as cleanup:
+			(clean, dir, updatedb, dryrun, username, password) = self.fillParams([
+				('clean', 'n'),
+				('dir', '/export/stack/pallets'),
+				('updatedb', 'y'),
+				('dryrun', 'n'),
+				('username', None),
+				('password', None),
 			])
 
-		#Validate username and password
-		#need to provide either both or none
-		if username and not password:
-			raise UsageError(self, 'must supply a password with the username')
-		if password and not username:
-			raise UsageError(self, 'must supply a username with the password')
+			#Validate username and password
+			#need to provide either both or none
+			if username and not password:
+				raise UsageError(self, 'must supply a password with the username')
+			if password and not username:
+				raise UsageError(self, 'must supply a username with the password')
 
-		clean = self.str2bool(clean)
-		updatedb = self.str2bool(updatedb)
-		self.dryrun = self.str2bool(dryrun)
-		if self.dryrun:
-			updatedb = False
-			self.out = sys.stderr
-		else:
-			self.out = sys.stdout
-
-		self.mountPoint = '/mnt/cdrom'
-		tempMountPoint = tempfile.TemporaryDirectory()
-		if not os.path.exists(self.mountPoint):
-			try:
-				os.makedirs(self.mountPoint)
-			except OSError:
-				self.mountPoint = tempMountPoint.name
-
-		# Get a list of all the iso files mentioned in
-		# the command line. Make sure we get the complete 
-		# path for each file.
-			
-		isolist = []
-		network_pallets = []
-		disk_pallets    = []
-		network_isolist = []
-		for arg in args:
-			if arg.startswith(('http', 'ftp')) and arg.endswith('.iso'):
-				network_isolist.append(arg)
-				continue
-			elif arg.startswith(('http', 'ftp')):
-				network_pallets.append(arg)
-				continue
-			arg = os.path.join(os.getcwd(), arg)
-			if os.path.exists(arg) and arg.endswith('.iso'):
-				isolist.append(arg)
-			elif os.path.isdir(arg):
-				disk_pallets.append(arg)
+			clean = self.str2bool(clean)
+			updatedb = self.str2bool(updatedb)
+			self.dryrun = self.str2bool(dryrun)
+			if self.dryrun:
+				updatedb = False
+				self.out = sys.stderr
 			else:
-				msg = "Cannot find %s or %s is not an ISO image"
-				raise CommandError(self, msg % (arg, arg))
+				self.out = sys.stdout
 
-		if self.dryrun:
-			self.beginOutput()
-		if not isolist and not network_pallets and not disk_pallets and not network_isolist:
-			#
-			# no files specified look for a cdrom
-			#
-			rc = os.system('mount | grep %s' % self.mountPoint)
-			if rc == 0:
-				self.copy(clean, dir, updatedb, self.mountPoint)
+			tempMount = tempfile.TemporaryDirectory()
+
+			# Get a list of all the iso files mentioned in
+			# the command line. Make sure we get the complete 
+			# path for each file.
+				
+			isolist = []
+			network_pallets = []
+			disk_pallets    = []
+			network_isolist = []
+			for arg in args:
+				if arg.startswith(('http', 'ftp')) and arg.endswith('.iso'):
+					network_isolist.append(arg)
+					continue
+				elif arg.startswith(('http', 'ftp')):
+					network_pallets.append(arg)
+					continue
+				arg = os.path.join(os.getcwd(), arg)
+				if os.path.exists(arg) and arg.endswith('.iso'):
+					isolist.append(arg)
+				elif os.path.isdir(arg):
+					disk_pallets.append(arg)
+				else:
+					msg = "Cannot find %s or %s is not an ISO image"
+					raise CommandError(self, msg % (arg, arg))
+
+			if self.dryrun:
+				self.beginOutput()
+			if not isolist and not network_pallets and not disk_pallets and not network_isolist:
+				#
+				# no files specified look for a cdrom
+				#
+				self.mountPoint = '/mnt/cdrom'
+				rc = os.system('mount | grep %s' % self.mountPoint)
+				if rc == 0:
+					self.copy(clean, dir, updatedb, self.mountPoint)
+				else:
+					raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
 			else:
-				raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
+				self.mountPoint = tempMount.name
 
-		for iso in network_isolist:
-			#determine the name of the iso file and get the destined path
-			filename = os.path.basename(urlparse(iso).path)
-			local_path = '/'.join([os.getcwd(),filename])
+			for iso in network_isolist:
+				#determine the name of the iso file and get the destined path
+				filename = os.path.basename(urlparse(iso).path)
+				local_path = '/'.join([os.getcwd(),filename])
 
-			try:
-				# passing True will display a % progress indicator in stdout
-				local_path = fetch(iso, username, password, True)
-			except FetchError as e:
-				raise CommandError(self, e)
+				try:
+					# passing True will display a % progress indicator in stdout
+					local_path = fetch(iso, username, password, True)
+				except FetchError as e:
+					raise CommandError(self, e)
 
-			cwd = os.getcwd()
-			os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))
-			self.copy(clean, dir, updatedb, iso)
-			os.chdir(cwd)
-			os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
-			print('cleaning up temporary files ...')
-			p = subprocess.run(['rm', filename])
-
-		if isolist:
-			#
-			# before we mount the ISO, make sure there are no active
-			# mounts on the mountpoint
-			#
-			file = open('/proc/mounts')
-
-			for line in file.readlines():
-				l = line.split()
-				if l[1].strip() == self.mountPoint:
-					cmd = 'umount %s' % self.mountPoint
-					cmd += ' > /dev/null 2>&1'
-					subprocess.run([ cmd ], shell=True)
-
-			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()
-				os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
+				os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))
 				self.copy(clean, dir, updatedb, iso)
 				os.chdir(cwd)
 				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
+				print('cleaning up temporary files ...')
+				p = subprocess.run(['rm', filename])
+
+			if isolist:
+				#
+				# before we mount the ISO, make sure there are no active
+				# mounts on the mountpoint
+				#
+				file = open('/proc/mounts')
+
+				for line in file.readlines():
+					l = line.split()
+					if l[1].strip() == self.mountPoint:
+						cmd = 'umount %s' % self.mountPoint
+						cmd += ' > /dev/null 2>&1'
+						subprocess.run([ cmd ], shell=True)
+
+				for iso in isolist:	# have a set of iso files
+					cwd = os.getcwd()
+					os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
+					self.copy(clean, dir, updatedb, iso)
+					os.chdir(cwd)
+					os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
 			
-		if network_pallets:
-			for pallet in network_pallets:
-				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
-		
-		if disk_pallets:
-			for pallet in disk_pallets:
-				self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
+			if network_pallets:
+				for pallet in network_pallets:
+					self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
+			
+			if disk_pallets:
+				for pallet in disk_pallets:
+					self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
 
-		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
+			self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
 
-		# Clear the old packages
-		self.clean_ludicrous_packages()
+			# Clear the old packages
+			self.clean_ludicrous_packages()
+
+RollName = "tdc-infrastructure"
+
+RollName = "tdc-infrastructure"
+
+RollName = "tdc-infrastructure"
+
+RollName = "tdc-infrastructure"
