@@ -90,7 +90,7 @@ for pkg in packages:
 
 if not found:
 	print('Cannot find any manifest files')
-	sys.exit(0)
+	sys.exit(1)
 
 built = []
 notmanifest = []
@@ -118,13 +118,13 @@ if len(manifest) != len(built):
 	for pkg in manifest:
 		if pkg not in built:
 			print('\t%s' % pkg)
-	exit_code += 1
+	exit_code = 2
 
 if len(notmanifest) > 0:
 	print('\nERROR - the following packages were built but not in manifest:')
 	for pkg in notmanifest:
 		print('\t%s' % pkg)
-	exit_code += 1
+	exit_code = 3
 
 if exit_code == 0:
 	print('passed')

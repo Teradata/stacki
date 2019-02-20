@@ -66,6 +66,7 @@ def download_url(source, target, curl_args):
 		curl_cmd.extend(curl_args)
 	curl_cmd.extend(['-sSo%s' % target, source])
 	print('download %s\n\t%s' % (source, target))
+	success = False
 	while retry:
 		p = subprocess.Popen(curl_cmd,
 			stdout=subprocess.PIPE,
@@ -79,24 +80,29 @@ def download_url(source, target, curl_args):
 		else:
 			if o.strip() == '200':
 				retry = 0
+				success = True
 			else:
 				retry = retry - 1
 				print("Error: Cannot download. HTTP STATUS: %s" % o)
 				os.unlink(target)
 				time.sleep(1)
 
+	if not success:
+		print("Failed to fetch {}".format(source))
+		sys.exit(-1)
+
 
 def get_auth_info(authfile, url):
 	curl_args = []
 	if not os.path.exists(authfile):
-		sys.stderr.write("Cannot find auth file %s for %s\n" % 
+		sys.stderr.write("Cannot find auth file %s for %s\n" %
 			(authfile, url))
 	auth = None
 	with open(authfile, 'r') as a:
 		auth = json.load(a)
 
 	if not auth:
-		sys.stderr.write("Cannot read auth file %s for %s\n" % 
+		sys.stderr.write("Cannot read auth file %s for %s\n" %
 			(authfile, url))
 
 	if auth['type'].lower() == 'basic':
