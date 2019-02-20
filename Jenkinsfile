@@ -906,8 +906,8 @@ pipeline {
                                             color: 'good',
                                             message: """\
                                                 New Stacki QCow2 uploaded to Amazon S3.
-                                                *URL* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
-                                                *StackiOS:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.STACKIOS_FILENAME}
+                                                *QCow2:* ${env.QCOW_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
                                             """.stripIndent(),
                                             tokenCredentialId: 'slack_jenkins_integration_token'
                                         )
