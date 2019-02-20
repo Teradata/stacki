@@ -1,5 +1,6 @@
 -foundation-ansible
 -foundation-fbtftpd
+-foundation-golang
 -foundation-newt
 -foundation-redis
 -foundation-sc-im

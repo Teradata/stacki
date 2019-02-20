@@ -8,6 +8,7 @@
 
 
 	<stack:package>foundation-python</stack:package>
+	<stack:package>foundation-golang</stack:package>
 
 
 <stack:script stack:stage="install-post">
