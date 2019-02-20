@@ -17,6 +17,7 @@
 
 import os
 import sys
+from pathlib import Path
 import stack.util
 from stack.file import RPMFile
 
@@ -38,13 +39,10 @@ except:
 	release = None
 
 builtfiles = []
-for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
-	try:
-		with os.scandir(os.path.join(buildpath, 'RPMS', arch)) as d:
-			for pkg in d:
-				builtfiles.append(RPMFile(pkg.path))
-	except FileNotFoundError:
-		pass
+# Gather all .rpm files under the RPMS folder in the buildpath.
+# If the path doesn't exist, glob will return an empty list.
+for pkg in Path(buildpath).joinpath("RPMS").resolve().glob("**/*.rpm"):
+	builtfiles.append(RPMFile(str(pkg)))
 
 manifests = [ ]
 search    = [ 'common', '.', buildpath ]
