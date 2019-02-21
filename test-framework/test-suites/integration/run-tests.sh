@@ -25,7 +25,7 @@ then
     set +e
     vagrant ssh frontend -c "sudo -i pytest -vvv \
         --dist=loadfile -n 4 \
-        --reruns=2 --reruns-delay=60 \
+        --reruns=1 --reruns-delay=10 \
         --timeout=300 --timeout_method=signal \
         --junit-xml=/export/reports/integration-junit.xml \
         --cov-config=/export/test-suites/_common/$COVERAGERC \
@@ -47,7 +47,7 @@ then
 else
     vagrant ssh frontend -c "sudo -i pytest -vvv \
         --dist=loadfile -n 4 \
-        --reruns=2 --reruns-delay=60 \
+        --reruns=1 --reruns-delay=10 \
         --timeout=300 --timeout_method=signal \
         --junit-xml=/export/reports/integration-junit.xml \
         /export/test-suites/integration/tests/"
