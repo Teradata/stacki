@@ -1,0 +1,155 @@
+require 'json'
+
+
+if File.file?('.vagrant/cluster-up.json')
+  json_data = File.read('.vagrant/cluster-up.json')
+  settings = JSON.parse(json_data)
+
+  OS = settings['OS']
+  ISO_PATH = settings['ISO_PATH']
+  ISO_FILENAME = settings['ISO_FILENAME']
+  BACKENDS = settings['BACKENDS']
+  NAME = settings['NAME']
+  DOWNLOAD_DIR = settings['DOWNLOAD_DIR']
+  SRC_DIR = settings['SRC_DIR']
+  FQDN = settings['FQDN']
+  BRIDGE = settings['BRIDGE']
+  IP = settings['IP']
+  NETMASK = settings['NETMASK']
+  GATEWAY = settings['GATEWAY']
+  DNS = settings['DNS']
+  INTERNAL = settings['INTERNAL']
+
+  Vagrant.configure("2") do |config|
+    config.vm.define "frontend", autostart: false do |config|
+      if OS == 'sles12'
+        config.vm.box = "stacki/sles-12.3"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+      elsif OS == 'redhat7'
+        config.vm.box = "stacki/centos-7.4"
+        if INTERNAL
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+        end
+      end
+
+      config.vm.provider "virtualbox" do |provider, config|
+        provider.name = NAME + "_frontend"
+        provider.gui = false
+
+        provider.memory = "2048"
+        provider.cpus = 1
+
+        config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+        config.vm.synced_folder DOWNLOAD_DIR, "/export/installer-iso/", type: "virtualbox"
+        config.vm.synced_folder ISO_PATH, "/export/stacki-iso/", type: "virtualbox"
+        config.vm.synced_folder SRC_DIR, "/export/src/", type: "virtualbox"
+      end
+
+      config.vm.provider "libvirt" do |provider, config|
+        provider.default_prefix = NAME
+        provider.driver = "kvm"
+        provider.connect_via_ssh = false
+
+        provider.memory = "2048"
+        provider.cpus = 1
+        provider.nic_model_type = "e1000"
+        provider.random :model => "random"
+
+        config.vm.synced_folder ".", "/vagrant", nfs: true, nfs_version: 3, nfs_udp: false
+        config.vm.synced_folder DOWNLOAD_DIR, "/export/installer-iso/", nfs: true, nfs_version: 3, nfs_udp: false
+        config.vm.synced_folder ISO_PATH, "/export/stacki-iso/", nfs: true, nfs_version: 3, nfs_udp: false
+        config.vm.synced_folder SRC_DIR, "/export/src/", nfs: true, nfs_version: 3, nfs_udp: false
+      end
+
+      config.vm.hostname = FQDN
+
+      if BRIDGE == ''
+        config.vm.network "private_network",
+          ip: "192.168.0.2",
+          virtualbox__intnet: NAME,
+          libvirt__network_name: NAME,
+          libvirt__dhcp_enabled: false,
+          libvirt__forward_mode: "veryisolated",
+          libvirt__adapter: 1
+      else
+        if IP == ''
+          config.vm.network "public_network",
+            bridge: BRIDGE,
+            dev: BRIDGE,
+            libvirt__adapter: 1
+        else
+          config.vm.network "public_network",
+            ip: IP,
+            netmask: NETMASK,
+            bridge: BRIDGE,
+            dev: BRIDGE,
+            libvirt__adapter: 1
+        end
+      end
+
+      config.vm.provision "shell", path: "provision-frontend.sh", env: settings
+    end
+
+    (0..BACKENDS-1).each do |i|
+      config.vm.define "backend-0-#{i}", autostart: false do |config|
+        config.vm.box = "stacki/pxe-boot"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        config.vm.boot_timeout = 3600
+
+        config.vm.provider "virtualbox" do |vb, config|
+          vb.name = NAME + "_backend-0-#{i}"
+          vb.gui = false
+
+          vb.memory = "2048"
+          vb.cpus = 1
+
+          vb.check_guest_additions = false
+          vb.functional_vboxsf = false
+
+          vb.customize ['modifyvm', :id, '--boot1', 'net']
+          vb.customize ['modifyvm', :id, '--boot2', 'disk']
+          vb.customize ['modifyvm', :id, '--biospxedebug', 'on']
+          vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
+          vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
+          vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
+
+          config.vm.network "private_network",
+            mac: sprintf("5254000000%02X", i+3),
+            type: "dhcp",
+            virtualbox__intnet: NAME,
+            auto_config: false
+        end
+
+        config.vm.provider "libvirt" do |provider, config|
+          provider.default_prefix = NAME
+          provider.driver = "kvm"
+          provider.connect_via_ssh = false
+
+          provider.memory = "2048"
+          provider.cpus = 1
+          provider.nic_model_type = "e1000"
+          provider.random :model => "random"
+
+          boot_network = {'network' => NAME}
+          provider.boot boot_network
+          provider.boot 'hd'
+          provider.qemuargs :value => "-boot"
+          provider.qemuargs :value => "reboot-timeout=10"
+
+          config.vm.network "private_network",
+            mac: sprintf("5254000000%02X", i+3),
+            libvirt__network_name: NAME,
+            libvirt__dhcp_enabled: false,
+            libvirt__forward_mode: "veryisolated",
+            libvirt__adapter: 1,
+            auto_config: false
+        end
+
+        config.vm.synced_folder '.', '/vagrant', disabled: true
+      end
+    end
+
+  end
+else
+  abort("\033[31mError: you need to run cluster-up.sh first\033[0m")
+end
