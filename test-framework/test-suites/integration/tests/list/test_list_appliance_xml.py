@@ -1,6 +1,8 @@
 import json
 from textwrap import dedent
 
+import pytest
+
 
 class TestListApplianceXML:
 	def test_invalid(self, host):
@@ -11,6 +13,7 @@ class TestListApplianceXML:
 			[appliance ...]
 		''')
 
+	@pytest.mark.skip()
 	def test_no_args(self, host, revert_export_stack_carts):
 		# Check the command works and returned a bunch of lines
 		result = host.run('stack list appliance xml')
