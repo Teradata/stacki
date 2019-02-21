@@ -22,8 +22,8 @@ class TestListPalletCommand:
 		for item in json.loads(result.stdout):
 			commands[item['pallet']].append(item['command'])
 
-		# We should have two pallets
-		assert len(commands) == 2
+		# We should have at least two pallets
+		assert len(commands) >= 2
 
 		# That stacki pallet should have a ton of commands
 		assert len(commands['stacki']) > 200

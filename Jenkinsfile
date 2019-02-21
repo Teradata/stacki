@@ -27,7 +27,7 @@ pipeline {
 
     triggers {
         // Nightly build of develop (at 3am)
-        cron(env.BRANCH_NAME == 'develop' ? 'H 11 * * *' : '')
+        cron(env.BRANCH_NAME == 'develop' ? '0 11 * * *' : '')
     }
 
     stages {

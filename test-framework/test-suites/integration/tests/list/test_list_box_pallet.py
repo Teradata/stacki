@@ -25,8 +25,10 @@ class TestListBoxPallet:
 		assert result.rc == 0
 
 		# Make sure we got data for both our boxes
-		boxes = [item['box'] for item in json.loads(result.stdout)]
-		assert boxes == ['default', 'default', 'test']
+		boxes = set(item['box'] for item in json.loads(result.stdout))
+		assert len(boxes) == 2
+		assert 'default' in boxes
+		assert 'test' in boxes
 
 	def test_one_arg(self, host, revert_etc):
 		# Add a second box
@@ -67,5 +69,7 @@ class TestListBoxPallet:
 		assert result.rc == 0
 
 		# Make sure we got data only for the two boxes
-		boxes = [item['box'] for item in json.loads(result.stdout)]
-		assert boxes == ['default', 'default', 'test']
+		boxes = set(item['box'] for item in json.loads(result.stdout))
+		assert len(boxes) == 2
+		assert 'default' in boxes
+		assert 'test' in boxes
