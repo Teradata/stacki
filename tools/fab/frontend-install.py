@@ -60,6 +60,7 @@ def banner(message):
 	print(message)
 	print('#######################################')	
 
+
 def copy(source, dest):
 	isodir = tempfile.tempdir()
 	banner("Copying %s to local disk" % source)
@@ -68,12 +69,15 @@ def copy(source, dest):
 	subprocess.call(['cp', '-r', isodir, dest])
 	umount(isodir)
 
+
 def mount(source, dest):
 	subprocess.call(['mkdir', '-p', dest])
 	subprocess.call(['mount', '-o', 'loop,ro', source, dest])
 
+
 def umount(dest):
 	subprocess.call(['umount', dest])
+
 
 def installrpms(pkgs):
 	if osname == 'redhat':
@@ -83,17 +87,19 @@ def installrpms(pkgs):
 	cmd += pkgs
 	return subprocess.call(cmd)
 
+
 def generate_multicast():
-	a = random.randrange(225,240)
+	a = random.randrange(225, 240)
 	# Exclude 232
 	while a == 232:
-		a = random.randrange(225,240)
-	b = random.randrange(1,255)
-	c = random.randrange(1,255)
-	d = random.randrange(1,255)
-	return str(a)+'.'+str(b)+'.'+str(c)+'.'+str(d)
+		a = random.randrange(225, 240)
+	b = random.randrange(1, 255)
+	c = random.randrange(1, 255)
+	d = random.randrange(1, 255)
+	return str(a) + '.' + str(b) + '.' + str(c) + '.' + str(d)
 
-def find_repos(iso, stacki_only = False):
+
+def find_repos(iso, stacki_only=False):
 	''' supports jumbo pallets as well as not blowing up on stackios '''
 
 	mountdir = os.path.join('/run', os.path.basename(iso))
@@ -115,6 +121,7 @@ def find_repos(iso, stacki_only = False):
 
 #	umount(mountdir)
 	return repodirs
+
 
 def repoconfig(stacki_iso, extra_isos):
 	# we only want to pull stacki from 'stacki_iso'
@@ -173,12 +180,14 @@ def repoconfig(stacki_iso, extra_isos):
 		cmd = [ 'zypper', 'clean', '--all' ]
 	return subprocess.call(cmd)
 
+
 def ldconf():
 	file = open('/etc/ld.so.conf.d/foundation.conf', 'w')
 	file.write('/opt/stack/lib\n')
 	file.close()
 
 	subprocess.call(['ldconfig'])
+
 
 def usage():
 	print("Required arguments:")
@@ -187,9 +196,9 @@ def usage():
 	print("\t--extra-iso=iso1,iso2,iso3.. : list of pallets to add")
 	print("\t--use-existing : use the existing system settings and root password")
 
-##
-## MAIN
-##
+#
+# MAIN
+#
 
 #
 # log all output to a file too
@@ -300,7 +309,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		attrs['DOMAIN'] = '.'.join(fqdn)
 		
                 # Reject frontend and backend as hostnames
-                if attrs['HOSTNAME'].lower() in ['frontend', 'backend']:
+		if attrs['HOSTNAME'].lower() in ['frontend', 'backend']:
 			print('Cannot have an appliance name as a hostname')
 			sys.exit(1)
 
@@ -320,7 +329,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			print("\nI found more than one interface, which one do you want to use?\n")
 			for ndx, interface in enumerate(interfaces):
 				print("  {}) {} {}".format(
-					ndx+1,
+					ndx + 1,
 					interface[0],
 					re.search(r'inet\s+([\d.]+)/', interface[1]).group(1)
 				))
@@ -388,7 +397,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			print("\nI found more than one default gateway, which one do you want to use?\n")
 			for ndx, gateway in enumerate(gateways):
 				print("  {}) {} {}".format(
-					ndx+1,
+					ndx + 1,
 					gateway[0],
 					gateway[1]
 				))
@@ -482,17 +491,17 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 	
 	# add missing attrs to site.attrs
 	f = open("/tmp/site.attrs", "a")
-	str= "Kickstart_Multicast:"+generate_multicast()+"\n"
-	str+= "Server_Partitioning:force-default-root-disk-only\n"
+	str = "Kickstart_Multicast:" + generate_multicast() + "\n"
+	str += "Server_Partitioning:force-default-root-disk-only\n"
 	f.write(str)
 	f.close()
 
 # convert site.attrs to python dict
-f = [line.strip() for line in open("/tmp/site.attrs","r")]
+f = [line.strip() for line in open("/tmp/site.attrs", "r")]
 attributes = {}
 for line in f:
-        split = line.split(":",1)
-        attributes[split[0]]=split[1]
+        split = line.split(":", 1)
+        attributes[split[0]] = split[1]
 
 # Reject frontend and backend as hostnames
 hostname = attributes['Kickstart_PrivateHostname'].lower()
@@ -535,7 +544,7 @@ rc = p.wait()
 f.close()
 
 if rc:
-	print ("Could not generate XML")
+	print("Could not generate XML")
 	sys.exit(rc)
 
 banner("Process XML")
@@ -550,15 +559,15 @@ infile.close()
 outfile.close()
 
 if rc:
-	print ("Could not process XML")
+	print("Could not process XML")
 	sys.exit(rc)
 
 banner("Run Setup Script")
 # run run.sh
-p = subprocess.Popen(['sh','/tmp/run.sh'])
+p = subprocess.Popen(['sh', '/tmp/run.sh'])
 rc = p.wait()
 if rc:
-	print ("Setup Script Failed")
+	print("Setup Script Failed")
 	sys.exit(rc)
 
 banner("Adding Pallets")
@@ -567,6 +576,7 @@ for iso in extra_isos:
 	iso = os.path.abspath(iso)
 	subprocess.call([stackpath, 'add', 'pallet', iso])
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
+subprocess.call([stackpath, 'enable', 'pallet', '%', 'box=frontend'])
 
 # all done
 banner("Done")

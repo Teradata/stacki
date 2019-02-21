@@ -23,6 +23,7 @@ class TestListBox:
 		# Make sure we got data for both our boxes
 		boxes = {box['name']: box['os'] for box in json.loads(result.stdout)}
 		assert boxes == {
+			'frontend': host_os,
 			'default': host_os,
 			'test': host_os
 		}
