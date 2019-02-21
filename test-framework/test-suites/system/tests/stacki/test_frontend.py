@@ -5,7 +5,8 @@ import json
 def test_frontend_stack_report_system(host):
 	"Simple sanity test that a frontend is up and running"
 
-	cmd = host.run("stack report system pretty=false")
+	# Use 'not tdc' to disable TDC specific tests for now.
+	cmd = host.run("stack report system 'not tdc' pretty=false")
 	assert cmd.rc == 0
 
 def test_stack_command_displays_usage_strings(host):
@@ -16,7 +17,7 @@ def test_stack_command_displays_usage_strings(host):
 
 	# A fix is in place to ignore files/directories that start with '.', such as those created by
 	# pytest (and thus stack report system), so test that too.
-	cmd = host.run("stack report system")
+	cmd = host.run("stack report system 'not tdc'")
 	assert cmd.rc == 0
 
 	# a .pytest_cache directory now exists in the command line path

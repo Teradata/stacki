@@ -17,22 +17,27 @@ import os
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
 	"""
+	<arg type='string' name='marks' repeat='1'>
+	Zero or more pytest marks to apply when running the tests. This follows the same semantics as pytest such that
+	passing my_cool_mark only runs tests marked as such and passing "not my_cool_mark" disables all tests with that mark.
+	</arg>
+
 	<param type='boolean' name='exitonfail' optional='0'>
 	Will exit on the first failure. Then
 	you have the chance to fix it and try
 	again.
-	
+
 	Maybe we'll give you advice on how to fix it. Maybe
 	we won't. Depends on our mood.
-	
+
 	Otherwise run all tests.
-	
+
 	Default is false and all tests are run.
 	</param>
 
 	<param type='boolean' name='pretty' optional='0'>
 	If you really, really want to see the tracebacks and confuse
-	the hell out of yourself, set this to False. 
+	the hell out of yourself, set this to False.
 
 	Otherwise it is true by default, so it will be pretty.
 
@@ -53,22 +58,24 @@ class Command(stack.commands.Command,
 		exitonfail = self.str2bool(exitonfail)
 		pretty = self.str2bool(pretty)
 
+		marks = [f'-m {mark}' for mark in args]
+
 		current_dir = os.getcwd()
 		os.chdir('/opt/stack/lib/python3.6/site-packages/stack/commands/report/system')
 		tests = glob('tests/*')
 
 		# make it real ugly.
-		if exitonfail == True and pretty == False:
-			_return_code = main(['-v', '-x', *tests])
+		if exitonfail and not pretty:
+			_return_code = main(['-v', '-x', *marks, *tests])
 		# exit with first failure
-		if exitonfail == True:
-			_return_code = main(['-v', '-s', '-x', *tests])
+		elif exitonfail:
+			_return_code = main(['-v', '-s', '-x', *marks, *tests])
 		# show tracebacks of failures but don't fail.
-		elif pretty == False:
-			_return_code = main(['-v', '-s', *tests])
+		elif not pretty:
+			_return_code = main(['-v', '-s', *marks, *tests])
 		# pretty and no tracebacks
 		else:
-			_return_code = main(['-v', '-s', '--tb=no', *tests])
+			_return_code = main(['-v', '-s', '--tb=no', *marks, *tests])
 
 		os.chdir(current_dir)
 
