@@ -52,6 +52,12 @@ pipeline {
                                     returnStdout: true,
                                     script: 'git log -1 --pretty=format:%s'
                                 )
+
+                                // Get the author's name of the latest commit
+                                env.GIT_AUTHOR = sh(
+                                    returnStdout: true,
+                                    script: 'git log -1 --pretty=format:%aN'
+                                )
                             }
                         }
                     }
@@ -134,6 +140,15 @@ pipeline {
                 }
 
                 stage('Auto PR') {
+                    when {
+                        not {
+                            anyOf {
+                                environment name: 'GIT_AUTHOR', value: 'Mason J. Katz'
+                                environment name: 'GIT_AUTHOR', value: 'Mason Katz'
+                            }
+                        }
+                    }
+
                     // Create the automatic pull request, if needed
                     steps {
                         sh '''
