@@ -132,25 +132,6 @@ pipeline {
                         }
                     }
                 }
-
-                stage('Auto PR') {
-                    // Create the automatic pull request, if needed
-                    steps {
-                        sh '''
-                            # Get the number of pull requests on this branch
-                            set +e
-                            PULL_REQUESTS=$(curl -s "https://api.github.com/repos/Teradata/stacki/pulls?access_token=$GITHUB_TOKEN" | grep -c "\\"ref\\": \\"$GIT_BRANCH\\"")
-                            set -e
-
-                            # Are there already any pull requests?
-                            if [[ $PULL_REQUESTS == "0" ]]
-                            then
-                                # Create the pull request
-                                curl -H "Content-Type: application/json" -d "{\\"title\\":\\"Auto PR: $GIT_BRANCH\\",\\"head\\":\\"$GIT_BRANCH\\",\\"base\\":\\"develop\\"}" "https://api.github.com/repos/Teradata/stacki/pulls?access_token=$GITHUB_TOKEN"
-                            fi
-                        '''
-                    }
-                }
             }
         }
 
