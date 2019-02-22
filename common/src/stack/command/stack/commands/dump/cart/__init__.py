@@ -18,7 +18,7 @@ class Command(stack.commands.dump.command):
 
 		dump = []
 		for row in self.call('list.cart'):
-			dump.append(row['name'])
+			dump.append(OrderedDict(name = row['name']))
 
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    software = {'cart' : dump}),
