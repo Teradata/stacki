@@ -24,9 +24,9 @@ class TestListBoxPallet:
 		result = host.run('stack list box pallet output-format=json')
 		assert result.rc == 0
 
-		# Make sure we got data for both our boxes
+		# Make sure we got data for more than a single box
 		boxes = set(item['box'] for item in json.loads(result.stdout))
-		assert len(boxes) == 2
+		assert len(boxes) > 1
 		assert 'default' in boxes
 		assert 'test' in boxes
 
