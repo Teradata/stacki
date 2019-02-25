@@ -17,9 +17,8 @@ import os
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
 	"""
-	<arg type='string' name='marks' repeat='1'>
-	Zero or more pytest marks to apply when running the tests. This follows the same semantics as pytest such that
-	passing my_cool_mark only runs tests marked as such and passing "not my_cool_mark" disables all tests with that mark.
+	<arg type='string' name='options' repeat='1'>
+	Zero or more options to pass to pytest.
 	</arg>
 
 	<param type='boolean' name='exitonfail' optional='0'>
@@ -58,24 +57,22 @@ class Command(stack.commands.Command,
 		exitonfail = self.str2bool(exitonfail)
 		pretty = self.str2bool(pretty)
 
-		marks = [f'-m {mark}' for mark in args]
-
 		current_dir = os.getcwd()
 		os.chdir('/opt/stack/lib/python3.6/site-packages/stack/commands/report/system')
 		tests = glob('tests/*')
 
 		# make it real ugly.
 		if exitonfail and not pretty:
-			_return_code = main(['-v', '-x', *marks, *tests])
+			_return_code = main(['-v', '-x', *args, *tests])
 		# exit with first failure
 		elif exitonfail:
-			_return_code = main(['-v', '-s', '-x', *marks, *tests])
+			_return_code = main(['-v', '-s', '-x', *args, *tests])
 		# show tracebacks of failures but don't fail.
 		elif not pretty:
-			_return_code = main(['-v', '-s', *marks, *tests])
+			_return_code = main(['-v', '-s', *args, *tests])
 		# pretty and no tracebacks
 		else:
-			_return_code = main(['-v', '-s', '--tb=no', *marks, *tests])
+			_return_code = main(['-v', '-s', '--tb=no', *args, *tests])
 
 		os.chdir(current_dir)
 
