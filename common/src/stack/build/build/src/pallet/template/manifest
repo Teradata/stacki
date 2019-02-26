@@ -1,0 +1,6 @@
+# Add any RPMs your pallet builds here, or any 3rd party packages
+# that don't ship as RPMs but get transformed into RPMs in the
+# final build.
+#
+# If your pallet does not create any RPMs, leave this file empty.
+# If this file is missing, make manifest-check will fail.

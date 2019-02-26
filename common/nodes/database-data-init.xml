@@ -1,7 +1,7 @@
 <stack:stack>
 
 	<stack:copyright>
-	Copyright (c) 2006 - 2018 Teradata
+	Copyright (c) 2006 - 2019 Teradata
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
@@ -151,6 +151,9 @@ with open('/tmp/site.json', 'w') as file:
 	"software": {
                 "box": [ 
 			{
+				"name": "frontend",
+                        },
+			{
 				"name": "default"
                         }
                 ]
@@ -158,6 +161,7 @@ with open('/tmp/site.json', 'w') as file:
         "appliance": [
                 {
                         "name": "frontend",
+			"box": "frontend",
                         "public": false,
                         "attr": [ 
                                 { "name": "node",          "value": "server" },

@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2018 Teradata
+# Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -473,7 +473,7 @@ class PalletArgumentProcessor:
 			""", (arg, version, rel, arch, os))
 
 			if not rows and arg != '%':
-				raise ArgNotFound(self, arg, 'pallet')
+				raise ArgNotFound(self, arg, 'pallet', params)
 
 			# Add our pallet models to the list
 			pallets.extend([Pallet(*row) for row in rows])

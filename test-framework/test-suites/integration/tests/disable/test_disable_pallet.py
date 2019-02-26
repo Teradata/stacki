@@ -17,7 +17,7 @@ class TestDisablePallet:
 		result = host.run('stack disable pallet test')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
-			error - "test" argument is not a valid pallet
+			error - "test" argument is not a valid pallet with parameters arch=x86_64
 			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
 		''')
 

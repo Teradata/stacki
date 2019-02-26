@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2018 Teradata
+# Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -18,7 +18,7 @@ class Command(stack.commands.dump.command):
 
 		dump = []
 		for row in self.call('list.cart'):
-			dump.append(row['name'])
+			dump.append(OrderedDict(name = row['name']))
 
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    software = {'cart' : dump}),

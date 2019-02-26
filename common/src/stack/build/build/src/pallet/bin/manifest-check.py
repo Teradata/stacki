@@ -4,7 +4,7 @@
 # when 'make roll' is run
 #
 # @copyright@
-# Copyright (c) 2006 - 2018 Teradata
+# Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -17,6 +17,7 @@
 
 import os
 import sys
+from pathlib import Path
 import stack.util
 from stack.file import RPMFile
 
@@ -37,14 +38,11 @@ try:
 except:
 	release = None
 
-builtfiles = []
-for arch in [ 'noarch', 'i386', 'x86_64', 'armv7hl' ]:
-	try:
-		with os.scandir(os.path.join(buildpath, 'RPMS', arch)) as d:
-			for pkg in d:
-				builtfiles.append(RPMFile(pkg.path))
-	except FileNotFoundError:
-		pass
+# Gather all .rpm files under the RPMS folder in the buildpath.
+# If the path doesn't exist, or no .rpm files exist, glob will return an empty list.
+builtfiles = [
+	RPMFile(str(pkg)) for pkg in Path(buildpath).joinpath("RPMS").resolve().glob("**/*.rpm")
+]
 
 manifests = [ ]
 search    = [ 'common', '.', buildpath ]
@@ -90,7 +88,7 @@ for pkg in packages:
 
 if not found:
 	print('Cannot find any manifest files')
-	sys.exit(0)
+	sys.exit(1)
 
 built = []
 notmanifest = []
@@ -118,13 +116,13 @@ if len(manifest) != len(built):
 	for pkg in manifest:
 		if pkg not in built:
 			print('\t%s' % pkg)
-	exit_code += 1
+	exit_code = 2
 
 if len(notmanifest) > 0:
 	print('\nERROR - the following packages were built but not in manifest:')
 	for pkg in notmanifest:
 		print('\t%s' % pkg)
-	exit_code += 1
+	exit_code = 3
 
 if exit_code == 0:
 	print('passed')

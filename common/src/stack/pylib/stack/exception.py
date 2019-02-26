@@ -1,5 +1,5 @@
 # @copyright@
-# Copyright (c) 2006 - 2018 Teradata
+# Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -96,9 +96,14 @@ class ArgUnique(ArgValue):
 
 class ArgNotFound(ArgError):
 
-	def __init__(self, cmd, arg, argtype):
-		super(ArgNotFound, self).__init__(cmd, arg, 'is not a valid %s' % argtype)
+	def __init__(self, cmd, arg, argtype, params = None):
+		if params is None or not params:
+			error_msg = f'is not a valid {argtype}'
+		else:			
+			param_errors = ','.join(f' {key}={value}' for key, value in params.items())
+			error_msg = f'is not a valid {argtype} with parameters{param_errors}'
 
+		super(ArgNotFound, self).__init__(cmd, arg, error_msg)
 
 class ParamError(ArgParamBaseError):
 	

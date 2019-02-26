@@ -27,7 +27,7 @@ pipeline {
 
     triggers {
         // Nightly build of develop (at 3am)
-        cron(env.BRANCH_NAME == 'develop' ? 'H 3 * * *' : '')
+        cron(env.BRANCH_NAME == 'develop' ? '0 11 * * *' : '')
     }
 
     stages {
@@ -130,25 +130,6 @@ pipeline {
                                 }
                             }
                         }
-                    }
-                }
-
-                stage('Auto PR') {
-                    // Create the automatic pull request, if needed
-                    steps {
-                        sh '''
-                            # Get the number of pull requests on this branch
-                            set +e
-                            PULL_REQUESTS=$(curl -s "https://api.github.com/repos/Teradata/stacki/pulls?access_token=$GITHUB_TOKEN" | grep -c "\\"ref\\": \\"$GIT_BRANCH\\"")
-                            set -e
-
-                            # Are there already any pull requests?
-                            if [[ $PULL_REQUESTS == "0" ]]
-                            then
-                                # Create the pull request
-                                curl -H "Content-Type: application/json" -d "{\\"title\\":\\"Auto PR: $GIT_BRANCH\\",\\"head\\":\\"$GIT_BRANCH\\",\\"base\\":\\"develop\\"}" "https://api.github.com/repos/Teradata/stacki/pulls?access_token=$GITHUB_TOKEN"
-                            fi
-                        '''
                     }
                 }
             }
@@ -748,7 +729,7 @@ pipeline {
                             s3Upload(
                                 file: env.ISO_FILENAME,
                                 bucket: 'teradata-stacki',
-                                path: '/release/stacki/5.x/',
+                                path: 'release/stacki/5.x/',
                                 acl: 'PublicRead'
                             )
 
@@ -756,7 +737,7 @@ pipeline {
                             s3Upload(
                                 file: env.STACKIOS_FILENAME,
                                 bucket: 'teradata-stacki',
-                                path: '/release/stacki/5.x/',
+                                path: 'release/stacki/5.x/',
                                 acl: 'PublicRead'
                             )
                         }
@@ -875,7 +856,7 @@ pipeline {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
                                         bucket: 'teradata-stacki',
-                                        path: '/release/stacki/5.x/',
+                                        path: 'release/stacki/5.x/',
                                         acl: 'PublicRead'
                                     )
                                 }
@@ -906,8 +887,8 @@ pipeline {
                                             color: 'good',
                                             message: """\
                                                 New Stacki QCow2 uploaded to Amazon S3.
-                                                *URL* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
-                                                *StackiOS:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.STACKIOS_FILENAME}
+                                                *QCow2:* ${env.QCOW_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
                                             """.stripIndent(),
                                             tokenCredentialId: 'slack_jenkins_integration_token'
                                         )
@@ -954,7 +935,7 @@ pipeline {
     }
 
     post {
-        // Clean up afte ourselves
+        // Clean up after ourselves
         always {
             cleanWs()
         }
