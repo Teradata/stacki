@@ -6,86 +6,94 @@
 # @copyright@
 #
 
-import ipaddress
 import stack.commands
-
+import stack.text
 
 class Implementation(stack.commands.Implementation):	
 	"""
 	Output /etc/chrony.conf
 	"""
 
-	def client(self, host, timeserver):
+	def client(self, host):
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
-		self.owner.addOutput(host, 'server %s' % timeserver)
-		self.owner.addOutput(host, 'allow %s' % timeserver)
-		self.owner.addOutput(host, 'local stratum 10')
-		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift')
+		self.owner.addOutput(host, stack.text.DoNotEdit())
+
+		self.owner.addOutput(host, "# NTP/Chrony Servers to Sync from.")
+		for server in self.owner.timeservers:
+			self.owner.addOutput(host, f'server {server} iburst')
+
+		self.owner.addOutput(host, "\n# Allow NTP client access")
+		for network in self.owner.getNTPNetworks(host):
+			self.owner.addOutput(host, f'allow {network}')
+
+		self.owner.addOutput(host, "\n# Allow this system to run in Orphan mode with a Stratum of 10")
+		self.owner.addOutput(host, 'local stratum 10 orphan\n')
+
+		# If NTP Orphan type is set to parent, allow this system to
+		# serve NTP information
+		orphantype = self.owner.attrs[host].get('time.orphantype')
+		if orphantype == 'parent':
+			self.owner.addOutput(host, '# NTP / Chrony Peers')
+			for peer in self.owner.getNTPPeers(host):
+				self.owner.addOutput(host, f'peer {peer}')
+		else:
+			# Get all the NTP peers in the cluster
+			self.owner.addOutput(host, '\n# Time Island NTP Parent Servers')
+			for peer in self.owner.getNTPPeers(host):
+				self.owner.addOutput(host, f"server {peer}")
+
+		self.owner.addOutput(host, "\n# Drift File")
+		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift\n')
+
+		self.owner.addOutput(host, "# Logging Information")
 		self.owner.addOutput(host, 'logdir /var/log/chrony')
 		self.owner.addOutput(host, 'log measurements statistics tracking')
 		self.owner.addOutput(host, '</stack:file>')
 
 
-	def server(self, host, timeserver):
-		network = None
-		output = self.owner.call('list.host.interface', [ host ])
-		for o in output:
-			if o['default']:
-				network = o['network']
-				break
-		if not network:
-			return
-
-		address = None
-		mask = None
-		output = self.owner.call('list.network', [ network ])
-		for o in output:
-			address = o['address']
-			mask = o['mask']
-		if not address or not mask:
-			return
-
-		ipnetwork = ipaddress.IPv4Network(str(address + '/' + mask))
+	def server(self, host):
 
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/chrony.conf">')
-		self.owner.addOutput(host, 'server %s iburst' % timeserver)
+		self.owner.addOutput(host, stack.text.DoNotEdit())
+
+		self.owner.addOutput(host, "# NTP/Chrony Servers to Sync from.")
+		for server in self.owner.timeservers:
+			self.owner.addOutput(host, f'server {server} iburst')
+
+		self.owner.addOutput(host, "\n# Set local Stratum to 10.")
 		self.owner.addOutput(host, 'local stratum 10')
-		self.owner.addOutput(host, 'stratumweight 0')
-		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift')
-		self.owner.addOutput(host, 'rtcsync')
-		self.owner.addOutput(host, 'allow %s/%s' % (address, ipnetwork.prefixlen))
+		self.owner.addOutput(host, 'stratumweight 0\n')
+
+		self.owner.addOutput(host, "# Drift File")
+		self.owner.addOutput(host, 'driftfile /var/lib/chrony/drift\n')
+
+		self.owner.addOutput(host, "# Periodically sync system time to Hardware RTC")
+		self.owner.addOutput(host, 'rtcsync\n')
+
+		self.owner.addOutput(host, "\n# Allow NTP client access")
+		for network in self.owner.getNTPNetworks(host):
+			self.owner.addOutput(host, f'allow {network}')
+
+		self.owner.addOutput(host, "\n# Allow Chronyd configuration from localhost only")
 		self.owner.addOutput(host, 'bindcmdaddress 127.0.0.1')
 		self.owner.addOutput(host, 'bindcmdaddress ::1')
+
+		self.owner.addOutput(host, "\n# Logging Information")
 		self.owner.addOutput(host, 'logchange 0.5')
 		self.owner.addOutput(host, 'logdir /var/log/chrony')
 		self.owner.addOutput(host, 'log measurements statistics tracking')
 		self.owner.addOutput(host, '</stack:file>')
 
 
-	def run(self, args):
-		(host, appliance, timeserver) = args
+	def run(self, host):
 
-		self.owner.addOutput(host, "kill `pidof chronyd`")
-
-		self.owner.addOutput(host, '/sbin/chkconfig chronyd on')
-		self.owner.addOutput(host, '/sbin/chkconfig ntp off')
-
-		if appliance == 'frontend':
-			self.server(host, timeserver)
+		self.owner.addOutput(host, "systemctl stop chronyd")
+		if self.owner.appliance == "frontend":
+			self.server(host)
 		else:
-			self.client(host, timeserver)
+			self.client(host)
 
-		#
-		# set the time right now
-		#
-		self.owner.addOutput(host, 'pidof chronyd')
-		self.owner.addOutput(host, 'while [ $? -eq 0 ]')
-		self.owner.addOutput(host, 'do')
-		self.owner.addOutput(host, '\tsleep 1')
-		self.owner.addOutput(host, '\tkill -9 `pidof chronyd`')
-		self.owner.addOutput(host, '\tpidof chronyd')
-		self.owner.addOutput(host, 'done')
+		self.owner.addOutput(host, "/usr/sbin/chronyd -q 'server %s iburst'" % self.owner.timeservers[0])
 
-		self.owner.addOutput(host,
-			"/usr/sbin/chronyd -q 'server %s iburst'" % timeserver)
-
+		self.owner.addOutput(host, "systemctl enable chronyd")
+		self.owner.addOutput(host, 'systemctl start chronyd')

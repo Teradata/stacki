@@ -8,6 +8,9 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 <stack:package stack:cond="os.version == '12.x'">chrony</stack:package>
-<stack:package stack:cond="os.version == '11.x'">ntp</stack:package>
+
+<stack:script stack:stage="install-post">
+<stack:report stack:name="host.time">&hostname;</stack:report>
+</stack:script>
 
 </stack:stack> 
