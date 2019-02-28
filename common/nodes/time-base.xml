@@ -17,17 +17,13 @@
 	</stack:rocks>
 
 
-	<stack:package stack:cond="os == 'redhat'">
+	<stack:package>
 		ntp
-		rdate
-		libcap
 	</stack:package>
-
 
 <stack:script stack:stage="install-post">
 /sbin/hwclock --systohc --utc
 </stack:script>
-
 
 </stack:stack> 
 

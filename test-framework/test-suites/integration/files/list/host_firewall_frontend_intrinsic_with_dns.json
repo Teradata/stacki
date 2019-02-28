@@ -15,6 +15,21 @@
 	  "type": "const"
 	},
 	{
+	"host": "frontend-0-0",
+	"name": "STACKI-NTP-private",
+	"table": "filter",
+	"service": "ntp",
+	"protocol": "udp",
+	"chain": "INPUT",
+	"action": "ACCEPT",
+	"network": "private",
+	"output-network": null,
+	"flags": "",
+	"comment": "Accept UDP traffic for NTP on private network - Intrinsic rule",
+	"source": "G",
+	"type": "const"
+	},
+	{
 	  "host": "frontend-0-0",
 	  "name": "STACKI-TFTP-private",
 	  "table": "filter",

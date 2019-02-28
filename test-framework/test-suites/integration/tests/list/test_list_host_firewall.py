@@ -2,13 +2,25 @@ import json
 
 
 class TestListHostFirewall:
+	def _json_compare(self, a, b):
+		if type(a) != type(b):
+			return False
+		if type(a) == list:
+			if len(a) != len(b):
+				return False
+			for i in a:
+				if i not in b:
+					return False
+			return True
+		return a == b
+
 	def test_frontend_intrinsic_no_dns(self, host, test_file):
 		# Make sure the intrinsic rules match what we expect
 		result = host.run('stack list host firewall frontend-0-0 output-format=json')
 		assert result.rc == 0
 
 		with open(test_file('list/host_firewall_frontend_intrinsic_no_dns.json')) as output:
-			assert json.loads(result.stdout) == json.loads(output.read())
+			assert self._json_compare(json.loads(result.stdout), json.loads(output.read()))
 
 	def test_frontend_intrinsic_with_dns(self, host, test_file):
 		# Toggle on DNS for the private network
@@ -20,7 +32,7 @@ class TestListHostFirewall:
 		assert result.rc == 0
 
 		with open(test_file('list/host_firewall_frontend_intrinsic_with_dns.json')) as output:
-			assert json.loads(result.stdout) == json.loads(output.read())
+			assert self._json_compare(json.loads(result.stdout), json.loads(output.read()))
 
 	def test_backend_intrinsic(self, host, add_host_with_interface, test_file):
 		# Make sure the intrinsic rules match what we expect
@@ -28,7 +40,7 @@ class TestListHostFirewall:
 		assert result.rc == 0
 
 		with open(test_file('list/host_firewall_backend_intrinsic.json')) as output:
-			assert json.loads(result.stdout) == json.loads(output.read())
+			assert self._json_compare(json.loads(result.stdout), json.loads(output.read()))
 
 	def test_scope_overriding(self, host, add_host_with_interface, add_environment, host_os, test_file):
 		# Add our host to the test environment
@@ -102,7 +114,7 @@ class TestListHostFirewall:
 		assert result.rc == 0
 
 		with open(test_file('list/host_firewall_scope_overriding.json')) as output:
-			assert json.loads(result.stdout) == json.loads(output.read())
+			assert self._json_compare(json.loads(result.stdout), json.loads(output.read()))
 
 	def test_scope_no_enviroment(self, host, add_host, test_file):
 		# Create some more hosts
@@ -133,4 +145,4 @@ class TestListHostFirewall:
 		assert result.rc == 0
 
 		with open(test_file('list/host_firewall_scope_no_enviroment.json')) as output:
-			assert json.loads(result.stdout) == json.loads(output.read())
+			assert self._json_compare(json.loads(result.stdout), json.loads(output.read()))

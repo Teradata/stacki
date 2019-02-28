@@ -54,6 +54,15 @@ class Plugin(stack.commands.Plugin):
 						f' {network["network"]} network - Intrinsic rule',
 						'G', 'const'
 					))
+					# UDP port for NTP service
+					self.owner.addOutput(host, (
+						f'STACKI-NTP-{network["network"]}',
+						'filter', 'ntp', 'udp',
+						'INPUT', 'ACCEPT', network['network'], None, '',
+						'Accept UDP traffic for NTP on'
+						f' {network["network"]} network - Intrinsic rule',
+						'G', 'const'
+					))
 
 				if network['dns']:
 					# DNS gets a special rule to let its traffic in
