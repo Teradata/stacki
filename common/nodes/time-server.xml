@@ -10,12 +10,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>chrony</stack:package>
 
 <stack:script stack:stage="install-post">
-/opt/stack/bin/stack set attr attr=time.protocol value=chrony
-
-/opt/stack/bin/stack report host time &Kickstart_PrivateHostname; | \
-	/opt/stack/bin/stack report script | sh
+stack set attr attr=time.protocol value=chrony
+stack report host time &hostname; | stack report script | sh
 </stack:script>
-
-
 </stack:stack> 
 
