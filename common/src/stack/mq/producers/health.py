@@ -7,6 +7,7 @@
 import json
 import stack.mq
 import psutil
+import subprocess
 from pathlib import Path
 
 
@@ -17,10 +18,30 @@ class Producer(stack.mq.producers.ProducerBase):
 	"""
 
 	def schedule(self):
-		# The second stage of YaST brings up the MQ but
-		# isn't really ready to start reporting infomation.
+
+		# For SLES the YaST installer has a second stage after a
+		# reboot. This means all services are running even though the
+		# installer is not complete. Inspect the system to see if we
+		# are in that state, if so do not start the health messages
+		# After this stage completes the system will reboot again and
+		# the message queue will behave normally.
+		#
+		# For RedHat don't do anything special.
+
+		# SLES15
+
+		# surprise me
+
+		# SLES12
 		if Path('/var/lib/YaST2/reboot').is_file():
 			return 0
+
+		# SLES11
+		out = subprocess.run(['chkconfig', 'autoyast'], 
+				     stdout=subprocess.PIPE).stdout.decode()
+		if out.split() == [ 'autoyast', 'on']:
+			return 0
+
 		return 60
 
 	def produce(self):
