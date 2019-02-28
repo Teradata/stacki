@@ -284,10 +284,3 @@ class Command(command):
 			# Clear the old packages
 			self.clean_ludicrous_packages()
 
-RollName = "tdc-infrastructure"
-
-RollName = "tdc-infrastructure"
-
-RollName = "tdc-infrastructure"
-
-RollName = "tdc-infrastructure"
