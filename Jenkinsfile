@@ -147,9 +147,11 @@ pipeline {
 
                 // Build our ISO
                 dir('stacki-iso-builder') {
-                    // Give the build up to 60 minutes to finish
-                    timeout(3600) {
-                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
+                    retry(1) {
+                        // Give the build up to 60 minutes to finish
+                        timeout(3600) {
+                            sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
+                        }
                     }
 
                     sh 'mv stacki-*.iso ../'
