@@ -2,12 +2,6 @@ import pytest
 import json
 
 
-def test_frontend_stack_report_system(host):
-	"Simple sanity test that a frontend is up and running"
-
-	cmd = host.run("stack report system pretty=false")
-	assert cmd.rc == 0
-
 def test_stack_command_displays_usage_strings(host):
 	"""
 	The command line attempts to recursively import the command directory to find code to run
