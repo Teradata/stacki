@@ -93,7 +93,9 @@ if File.file?('.vagrant/cluster-up.json')
     (0..BACKENDS-1).each do |i|
       config.vm.define "backend-0-#{i}", autostart: false do |config|
         config.vm.box = "stacki/pxe-boot"
-        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        if INTERNAL
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        end
         config.vm.boot_timeout = 3600
 
         config.vm.provider "virtualbox" do |vb, config|
@@ -134,7 +136,7 @@ if File.file?('.vagrant/cluster-up.json')
           provider.boot boot_network
           provider.boot 'hd'
           provider.qemuargs :value => "-boot"
-          provider.qemuargs :value => "reboot-timeout=10"
+          provider.qemuargs :value => "reboot-timeout=10000"
 
           config.vm.network "private_network",
             mac: sprintf("5254000000%02X", i+3),

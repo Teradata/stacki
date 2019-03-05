@@ -441,6 +441,6 @@ fi
 run_hooks "post-cluster-up"
 
 # Have vagrant ssh automatically sudo to root
-vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]]; then sudo -i && exit >/dev/null; fi" >> /home/vagrant/.bash_profile'
+vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then sudo -i && exit >/dev/null; fi" >> /home/vagrant/.bash_profile'
 
 exit 0
