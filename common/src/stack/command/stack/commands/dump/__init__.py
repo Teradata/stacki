@@ -7,6 +7,7 @@
 from collections import OrderedDict
 import stack.commands
 import json
+import yaml
 
 
 class command(stack.commands.Command):
@@ -31,17 +32,41 @@ class command(stack.commands.Command):
 			arg = []
 		else:
 			arg = [name]
-			
+
+		shadow = []
 		for row in self.call('list.attr', [f'scope={scope}',
 						   'resolve=false',
 						   'const=false'] + arg):
+			name  = row['attr']
+			value = row['value']
+
+			if name not in ['Kickstart_PrivateHostname',
+					'Kickstart_PrivateDNSDomain',
+					'Info_FQDN',
+					'Kickstart_PrivateAddress',
+					'Kickstart_PrivateNetwork',
+					'Kickstart_PrivateNetmask',
+					'Kickstart_PrivateNetmaskCIDR',
+					'Kickstart_PrivateBroadcast',
+					'Kickstart_PrivateKickstartHost',
+					'Kickstart_PrivateNTPHost',
+					'Kickstart_PrivateGateway',
+					'Kickstart_PrivateDNSServers',
+					'Kickstart_PrivateRootPassword' ]:
+				continue
+
+			if value.lower() == 'true':
+				value = True
+			elif value.lower() == 'false':
+				value = False
 			if row['type'] == 'var':
-				dump.append(OrderedDict(name  = row['attr'],
-							value = row['value']))
+				dump.append({ name : value })
 			else:
-				dump.append(OrderedDict(name   = row['attr'],
-							value  = row['value'],
-							shadow = True))
+				shadow.append({ name : value })
+
+		if shadow:
+			dump.append({ 'shadow': shadow })
+		
 		return dump
 
 
@@ -144,6 +169,24 @@ class command(stack.commands.Command):
 		return dump
 
 
+	def dumps(self, dump):
+
+		def dict_repr(dumper, dump):
+			return dumper.represent_dict(dump.items())
+
+		(format, ) = self.fillParams([('format', 'json')], self._params)
+					      
+		if format == 'json':
+			return json.dumps(dump, indent=8)
+		elif format == 'yaml':
+			dumper = yaml.Dumper
+			dumper.add_representer(OrderedDict, dict_repr)
+			return yaml.dump(dump, Dumper=dumper, 
+					 default_flow_style=False)
+		else:
+			return dump
+			
+
 
 
 
@@ -154,19 +197,23 @@ class Command(command):
 	def run(self, params, args):
 		dump = {}
 		
+#		params['format'] = 'yaml'
+
 		self.set_scope('global')
 
+
 		dump = OrderedDict(version    = stack.version,
-				   attr       = self.dump_attr(),
-				   controller = self.dump_controller(),
-				   partition  = self.dump_partition(),
-				   firewall   = self.dump_firewall(),
-				   route      = self.dump_route())
+				   attr       = self.dump_attr())
+#				   controller = self.dump_controller(),
+#				   partition  = self.dump_partition(),
+#				   firewall   = self.dump_firewall(),
+#				   route      = self.dump_route())
 
 
-		for (_, doc) in self.runPlugins():
+		for (name, doc) in self.runPlugins():
 			if doc:
-				dump.update(json.loads(doc))
+				if name in [ 'network', 'host' ]:
+					dump.update(json.loads(doc))
 		
-		self.addText(json.dumps(dump, indent=8))
+		self.addText(self.dumps(dump))
 
