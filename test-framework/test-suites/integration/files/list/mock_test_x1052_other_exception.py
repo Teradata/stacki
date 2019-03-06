@@ -1,11 +1,17 @@
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import patch, create_autospec, PropertyMock
+from stack.expectmore import ExpectMore
+from stack.switch.x1052 import SwitchDellX1052
 
-# Intercept pexpect calls
-patch('stack.switch.x1052.pexpect').start()
-
-# We also don't need to sleep
-patch('stack.switch.x1052.time').start()
-
-# Throw an exception when we try to write the switch mac address file
-mock_open = patch('stack.switch.x1052.open').start()
-mock_open.return_value = Mock(side_effect=Exception)
+# Intercept expectmore calls
+mock_expectmore = patch(target = "stack.switch.x1052.ExpectMore", autospec = True).start()
+# Need to set the instance mock returned from calling ExpectMore()
+mock_expectmore.return_value = create_autospec(
+	spec = ExpectMore,
+	spec_set = True,
+	instance = True,
+)
+# Need to set the match_index to the base console prompt so that the switch thinks it is at the
+# correct prompt, and wont try to page through output.
+type(mock_expectmore.return_value).match_index = PropertyMock(return_value = SwitchDellX1052.CONSOLE_PROMPTS.index(SwitchDellX1052.CONSOLE_PROMPT))
+# Throw an exception when we try to get the switch mac address infromation
+mock_expectmore.return_value.ask.side_effect = ValueError("Test error")

@@ -103,7 +103,6 @@ class TestListSwitchStatus:
 
 		# It should have failed
 		assert result.rc == 255
-		assert result.stderr == "error - Couldn't connect to the switch\n"
 
 	def test_x1052_other_exception(self, host, inject_code, test_file):
 		# Add our x1052 switch
@@ -122,4 +121,3 @@ class TestListSwitchStatus:
 
 		# It should have failed
 		assert result.rc == 255
-		assert result.stderr == "error - There was an error getting the status of the switch.\n"
