@@ -7,7 +7,6 @@
 import stack
 import stack.commands
 from collections import OrderedDict
-import json
 
 
 class Command(stack.commands.dump.command):
@@ -42,7 +41,6 @@ class Command(stack.commands.dump.command):
 						url     = row['url'],
 						tag     = tag))
 
-		self.addText(json.dumps(OrderedDict(version  = stack.version,
-						    software = {'pallet' : dump}),
-					indent=8))
+		self.addText(self.dumps(OrderedDict(version  = stack.version,
+						    software = {'pallet' : dump})))
 

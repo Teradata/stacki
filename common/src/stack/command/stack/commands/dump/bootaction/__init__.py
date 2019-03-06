@@ -7,7 +7,6 @@
 import stack
 import stack.commands
 from collections import OrderedDict
-import json
 
 
 class Command(stack.commands.dump.command):
@@ -24,6 +23,6 @@ class Command(stack.commands.dump.command):
 				ramdisk = row['ramdisk'],
 				args    = row['args']))
 
-		self.addText(json.dumps(OrderedDict(version    = stack.version,
-						    bootaction = dump), indent=8))
+		self.addText(self.dumps(OrderedDict(version    = stack.version,
+						    bootaction = dump)))
 

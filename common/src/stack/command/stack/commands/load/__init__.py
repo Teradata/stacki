@@ -7,6 +7,7 @@
 
 import stack.commands
 import json
+import yaml
 from jsoncomment import JsonComment
 import sys
 import os
@@ -21,27 +22,6 @@ import shlex
 
 class command(stack.commands.Command):
 	MustBeRoot = 0
-
-	def _load(self, text):
-		parser = JsonComment(json) # standard JSON is stupid
-		try:
-			data = parser.loads(text)
-		except ValueError as e:
-			# parse the error message and split the input at the
-			# syntax error
-			i = int(re.search(r'char (.*?)\)', str(e)).group(1))
-			b = text[:i]
-			a = text[i:]
-
-			# find the line with the error and report it
-			# 'blen' in honor of our intern
-
-			line1 = (b[b.rfind('\n'):] + a[:a.find('\n')]).strip()
-			blen  = len((b[b.rfind('\n'):]).strip())
-			line2 = ' ' * blen + '^'
-			raise CommandError(self,
-					   f'syntax error\n{line1}\n{line2}\n{e}')
-		return data
 
 	def get_scope(self):
 		try:
@@ -80,16 +60,27 @@ class command(stack.commands.Command):
 	def load_file(self, filename):
 		scope = self.get_scope()
 
-		try:
-			fin  = open(filename, 'r')
-			data = fin.read()
-		except IOError:
-			raise CommandError(self, f'cannot read {filename}')
-		document = self._load(data)
+		_, ext = os.path.splitext(filename)
+		if ext.lower() == 'json':
+			with open(filename, 'r') as fin:
+				data = fin.read()
+
+			parser = JsonComment(json) # standard JSON is stupid
+			try:
+				document = parser.loads(data)
+			except ValueError as e:
+				raise CommandError(self, f'syntax error\n{e}')
+
+		else: # yaml
+			with open(filename, 'r') as fin:
+				try:
+					document = yaml.load(fin)
+				except yaml.YAMLError as e:
+					raise CommandError(self, f'syntax error\n{e}')
+
 		if scope == 'global':
 			return document
-		else:
-			return document.get(scope)
+		return document.get(scope)
 			
 
 	def load_access(self, access):
@@ -111,10 +102,18 @@ class command(stack.commands.Command):
 		assert not (scope != 'global' and target is None)
 
 		for a in attrs:
-			params = {'scope' : scope,
-				  'attr'  : a.get('name'),
-				  'value' : a.get('value'),
-				  'shadow': a.get('shadow')}
+			((key, value), ) = a.items()
+			if key == 'shadow' and type(value) == list:
+				for a in value:
+					((key, value), ) = a.items()
+					params = {'scope' : scope,
+						  'attr'  : key,
+						  'value' : value,
+						  'shadow': True}
+			else:
+				params = {'scope' : scope,
+					  'attr'  : key,
+					  'value' : value}
 
 			self.stack('set.attr', target, **params)
 
@@ -207,7 +206,16 @@ class command(stack.commands.Command):
 				raise ArgRequired(self, 'filename')
 			if len(args) > 1:
 				raise ArgUnique(self, 'filename')
-			document = self.load_file(args[0])
+		
+		filename = args[0]
+		_, ext = os.path.splitext(filename)
+		if ext.lower() not in [ '.json', '.yaml', '.yml' ]:
+			raise CommandError(self, 'invalid file format')
+
+		try:
+			document = self.load_file(filename)
+		except IOError:
+			raise CommandError(self, f'cannot read {filename}')
 
 		self.main(document)
 

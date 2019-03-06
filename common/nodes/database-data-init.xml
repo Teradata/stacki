@@ -20,10 +20,10 @@ cp /tmp/rolls.xml /mnt/sysimage/tmp
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
-import json
 import os.path
 
-attrs = []
+attr   = []
+shadow = []
 if os.path.exists('/tmp/site.attrs'):
 	with open('/tmp/site.attrs', 'r') as file:
 		for line in file.readlines():
@@ -42,184 +42,114 @@ if os.path.exists('/tmp/site.attrs'):
 			if key in ['Kickstart_PrivatePortableRootPassword',
 				   'Kickstart_PrivateRootPassword',
 				   'Kickstart_PrivateDjangoRootPassword']:
-				shadow = True
+				shadow.append({key:value})
 			else:
-				shadow = False
+				attr.append({key:value})
 
-			attrs.append({'name': key,
-				      'value': value,
-				      'shadow': shadow})
-
-with open('/tmp/site.json', 'w') as file:
-	file.write(json.dumps({"attr": attrs}))
+with open('/tmp/site.yaml', 'w') as file:
+	file.write('attr:\n')
+	for k,v in attr:
+		file.write(f'- {k}:{v}\n')
+	file.write('- shadow\n')
+	for k,v in shadow:
+		file.write(f'- {k}:{v}\n')
 </stack:script>
 
 <stack:script stack:stage="install-post">
 
-<stack:file stack:name="/tmp/dump-core.json">
-{
-        "access": [
-                {
-                        "command": "*",
-                        "group": "apache"
-                },
-                {
-                        "command": "list*",
-                        "group": "wheel"
-                },
-        ],
-        "attr": [
-                {
-                        "name": "sync.ssh.authkey",
-                        "value": true
-                },
-                {
-                        "name": "ssh.use_dns",
-                        "value": true
-                },
-                {
-                        "name": "discovery.base.rack",
-                        "value": "0"
-                },
-                {
-                        "name": "discovery.base.rank",
-                        "value": 0
-                },
-                {
-                        "name": "os",
-                        "value": "&os;"
-                },
-                {
-                        "name": "firewall",
-                        "value": true
-                }
-	],
-        "network": [
-                {
-                        "name":    "private",
-                        "address": "&Kickstart_PrivateNetwork;",
-                        "mask":    "&Kickstart_PrivateNetmask;",
-                        "gateway": "&Kickstart_PrivateGateway;",
-			"zone":    "&Kickstart_PrivateDNSDomain;",
-                        "dns":     false,
-                        "pxe":     true
-                }
-        ],
-        "route": [
-                {
-                        "address": "224.0.0.0",
-                        "netmask": "255.255.255.0",
-                        "subnet":  "private"
-                },
-                {
-                        "address": "255.255.255.255",
-                        "netmask": "255.255.255.255",
-                        "subnet":  "private"
-                }
-        ],
-        "bootaction": [
-                {
-                        "name":   "default",
-                        "type":   "os",
-                        "kernel": "com32 chain.c32",
-                        "args":   "hd0"
-                },
-                {
-                        "name":    "pxeflash",
-                        "type":    "os",
-                        "kernel":  "kernel memdisk bigraw",
-                        "ramdisk": "pxeflash.img",
-                        "args":    "keeppxe"
-                },
-                {
-                        "name":   "localboot",
-                        "type":   "os",
-                        "kernel": "localboot 0"
-                },
-                {
-                        "name":   "hplocalboot",
-                        "type":   "os",
-                        "kernel": "localboot -1"
-                },
-                {
-                        "name":   "memtest",
-                        "type":   "os",
-                        "kernel": "kernel memtest"
-                }
-
-        ],
-	"software": {
-                "box": [ 
-			{
-				"name": "frontend",
-                        },
-			{
-				"name": "default"
-                        }
-                ]
-	},
-        "appliance": [
-                {
-                        "name": "frontend",
-			"box": "frontend",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "server" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": false }
-			]
-                },
-                {
-                        "name": "builder",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "builder" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
-                },
-                {
-                        "name": "barnacle",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "barnacle" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
-                },
-                {
-                        "name": "switch",
-                        "public": false,
-                        "attr": [ 
-				{ "name": "kickstartable", "value": false },
-				{ "name": "managed",       "value": false }
-			]
-		},
-                {
-                        "name": "backend",
-                        "public": true,
-                        "attr": [ 
-                                { "name": "node",          "value": "backend" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
-                },
-                {
-                        "name": "replicant",
-                        "public": true,
-                        "attr": [ 
-                                { "name": "node",            "value": "replicant" },
-				{ "name": "kickstartable",   "value": true },
-				{ "name": "managed",         "value": true },
-                                { "name": "const_overwrite", "value": false }
-			]
-                }
-        ]
-}
+<stack:file stack:name="/tmp/dump-core.yaml">
+access:
+- command: '*'
+  group: apache
+- command: list*
+  group: wheel
+attr:
+- sync.ssh.authkey: true
+- ssh.use_dns: true
+- discovery.base.rack: '0'
+- discovery.base.rank: '0'
+- os: &os;
+- firewall: true
+network:
+- name: private
+  address: &Kickstart_PrivateNetwork;
+  mask: &Kickstart_PrivateNetmask;
+  gateway: &Kickstart_PrivateGateway;
+  zone: &Kickstart_PrivateDNSDomain;
+  dns: false
+  pxe: true
+route:
+- address: 224.0.0.0
+  netmask: 255.255.255.0
+  subnet: private
+- address: 255.255.255.255
+  netmask: 255.255.255.255
+  subnet:  private
+bootaction:
+- name: default
+  type: os
+  kernel: com32 chain.c32
+  args: hd0
+- name: pxeflash
+  type: os
+  kernel: kernel memdisk bigraw
+  ramdisk: pxeflash.img
+  args: keeppxe
+- name: localboot
+  type: os
+  kernel: localboot 0
+- name: hplocalboot
+  type: os
+  kernel: localboot -1
+- name: memtest
+  type: os
+  kernel: kernel memtest
+software:
+  box:
+  - name: frontend
+  - name: default
+appliance
+- name: frontend
+  box: frontend
+  public: false
+  attr: 
+    - node: server
+    - kickstartable: true
+    - managed: false
+- name: builder
+  public: false
+  attr:
+    - node: builder
+    - kickstartable: true
+    - managed: true
+- name: barnacle
+  public: false
+  attr:
+    - node: barnacle
+    - kickstartable: true
+    - managed: true
+- name: switch
+  public: false
+  attr:
+    - kickstartable: false
+    - managed: false
+- name: backend
+  public: true
+  attr:
+    - node: backend
+    - kickstartable: true
+    - managed: true
+- name: replicant
+  public: true
+  attr:
+    - node: replicant
+    - kickstartable: true
+    - managed: true
+    - const_overwrite: false
 </stack:file>
 
-/opt/stack/bin/stack load /tmp/site.json | sh
-/opt/stack/bin/stack load /tmp/dump-core.json | sh
+/opt/stack/bin/stack load /tmp/site.yaml | sh
+/opt/stack/bin/stack load /tmp/dump-core.yaml | sh
 
 </stack:script>
 

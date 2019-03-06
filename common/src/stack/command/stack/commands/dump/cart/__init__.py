@@ -7,7 +7,6 @@
 import stack
 import stack.commands
 from collections import OrderedDict
-import json
 
 
 class Command(stack.commands.dump.command):
@@ -20,7 +19,6 @@ class Command(stack.commands.dump.command):
 		for row in self.call('list.cart'):
 			dump.append(OrderedDict(name = row['name']))
 
-		self.addText(json.dumps(OrderedDict(version  = stack.version,
-						    software = {'cart' : dump}),
-					indent=8))
+		self.addText(self.dumps(OrderedDict(version  = stack.version,
+						    software = {'cart' : dump})))
 

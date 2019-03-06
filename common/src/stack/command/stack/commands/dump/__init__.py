@@ -8,6 +8,7 @@ from collections import OrderedDict
 from stack.exception import ArgNotAllowed
 import stack.commands
 import json
+import yaml
 
 
 class command(stack.commands.Command):
@@ -40,17 +41,24 @@ class command(stack.commands.Command):
 			arg = []
 		else:
 			arg = [name]
-			
+
+		shadow = []
 		for row in self.call('list.attr', [f'scope={scope}',
 						   'resolve=false',
 						   'const=false'] + arg):
+			value = row['value']
+			if value.lower() == 'true':
+				value = True
+			elif value.lower() == 'false':
+				value = False
 			if row['type'] == 'var':
-				dump.append(OrderedDict(name  = row['attr'],
-							value = row['value']))
+				dump.append({ row['attr'] : value })
 			else:
-				dump.append(OrderedDict(name   = row['attr'],
-							value  = row['value'],
-							shadow = True))
+				shadow.append({ row['attr'] : value })
+
+		if shadow:
+			dump.append({ 'shadow': shadow })
+		
 		return dump
 
 
@@ -155,6 +163,24 @@ class command(stack.commands.Command):
 		return dump
 
 
+	def dumps(self, dump):
+
+		def dict_repr(dumper, dump):
+			return dumper.represent_dict(dump.items())
+
+		(format, ) = self.fillParams([('format', 'json')], self._params)
+					      
+		if format == 'json':
+			return json.dumps(dump, indent=8)
+		elif format == 'yaml':
+			dumper = yaml.Dumper
+			dumper.add_representer(OrderedDict, dict_repr)
+			return yaml.dump(dump, Dumper=dumper, 
+					 default_flow_style=False)
+		else:
+			return dump
+			
+
 
 
 
@@ -171,6 +197,7 @@ class Command(command):
 		
 		self.set_scope('global')
 
+
 		dump = OrderedDict(version    = stack.version,
 				   access     = self.dump_access(),
 				   attr       = self.dump_attr(),
@@ -183,4 +210,4 @@ class Command(command):
 		for (_, doc) in self.runPlugins():
 			dump.update(json.loads(doc))
 		
-		self.addText(json.dumps(dump, indent=8))
+		self.addText(self.dumps(dump))
