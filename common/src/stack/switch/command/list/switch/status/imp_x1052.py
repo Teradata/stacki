@@ -37,9 +37,8 @@ class Implementation(stack.commands.Implementation):
 			try:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
-				switch.get_interface_status_table()
 
-				ports = switch.parse_interface_status_table()
+				ports = switch.get_interface_status_table()
 				_hosts = self.owner.getHostsForSwitch(switch_name)
 				for _port,_ , _, _speed, _, _, _state, _, _ in ports:
 					# if there is a host we are managing on the port, show host information
