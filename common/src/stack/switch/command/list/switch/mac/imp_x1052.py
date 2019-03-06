@@ -41,9 +41,8 @@ class Implementation(stack.commands.Implementation):
 			try:
 				switch.set_tftp_ip(frontend_tftp_address)
 				switch.connect()
-				switch.get_mac_address_table()
 
-				hosts = switch.parse_mac_address_table()
+				hosts = switch.get_mac_address_table()
 				for _vlan, _mac, _port, _ in hosts:
 					row = self.owner.db.select("""
 						nodes.name, networks.device FROM nodes, networks
@@ -57,5 +56,5 @@ class Implementation(stack.commands.Implementation):
 
 			except SwitchException as switch_error:
 				raise CommandError(self, switch_error)
-			except:
-				raise CommandError(self, "There was an error getting the mac address table")
+			except Exception as exception:
+				raise CommandError(self, f"There was an error getting the mac address table. {exception}")
