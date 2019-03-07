@@ -32,8 +32,8 @@ class Implementation(stack.commands.Implementation):
 		self.arch = 'x86_64'
 
 		found_distro = False
-		if os.path.exists(self.owner.mountPoint+'/content'):
-			file = open(self.owner.mountPoint+'/content', 'r')
+		if os.path.exists(f'{self.owner.mountPoint}/content'):
+			file = open(f'{self.owner.mountPoint}/content', 'r')
 
 			for line in file.readlines():
 				l = line.split(None, 1)

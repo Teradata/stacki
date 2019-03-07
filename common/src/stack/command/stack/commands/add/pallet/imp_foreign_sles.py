@@ -23,8 +23,8 @@ class Implementation(stack.commands.Implementation):
 	arch = None
 
 	def check_impl(self):
-		if os.path.exists(self.owner.mountPoint+'/content'):
-			file = open(self.owner.mountPoint+'/content', 'r')
+		if os.path.exists(f'{self.owner.mountPoint}/content'):
+			file = open(f'{self.owner.mountPoint}/content', 'r')
 
 			for line in file.readlines():
 				l = line.split()
