@@ -19,9 +19,12 @@ import tempfile
 from stack.download import fetch, FetchError
 from stack.exception import CommandError, ParamRequired, UsageError
 from urllib.parse import urlparse
+from stack.util import _exec
+
 
 class command(stack.commands.add.command):
 	pass
+
 
 class Command(command):
 	"""
@@ -93,7 +96,7 @@ class Command(command):
 			if filename:
 				roll = stack.file.RollInfoFile(filename.strip())
 				dict[roll.getRollName()] = roll
-			
+
 		if len(dict) == 0:
 			
 			# If the roll_info hash is empty, that means there are
@@ -170,7 +173,7 @@ class Command(command):
 			('dryrun', 'n'),
 			('username', None),
 			('password', None),
-			])
+		])
 
 		#Validate username and password
 		#need to provide either both or none
@@ -188,13 +191,8 @@ class Command(command):
 		else:
 			self.out = sys.stdout
 
-		self.mountPoint = '/mnt/cdrom'
-		tempMountPoint = tempfile.TemporaryDirectory()
-		if not os.path.exists(self.mountPoint):
-			try:
-				os.makedirs(self.mountPoint)
-			except OSError:
-				self.mountPoint = tempMountPoint.name
+		temp_mount_dir = tempfile.TemporaryDirectory()
+		self.mountPoint = temp_mount_dir.name
 
 		# Get a list of all the iso files mentioned in
 		# the command line. Make sure we get the complete 
@@ -226,6 +224,7 @@ class Command(command):
 			#
 			# no files specified look for a cdrom
 			#
+			self.mountPoint = '/mnt/cdrom'
 			rc = os.system('mount | grep %s' % self.mountPoint)
 			if rc == 0:
 				self.copy(clean, dir, updatedb, self.mountPoint)
@@ -235,7 +234,17 @@ class Command(command):
 		for iso in network_isolist:
 			#determine the name of the iso file and get the destined path
 			filename = os.path.basename(urlparse(iso).path)
-			local_path = '/'.join([os.getcwd(),filename])
+			local_path = '/'.join([os.getcwd(), filename])
+
+			net_iso_mounted_somewhere = _exec(f'mount | grep {iso}', shell=True).stdout
+
+			if net_iso_mounted_somewhere:
+				other_mountpoint = net_iso_mounted_somewhere.split(' ')[2]
+				stack.commands.Log(f'ISO with same name as {iso} already mounted on filesystem at {other_mountpoint}: Attempting to unmount.') 
+				try_umount = _exec(f'umount {other_mountpoint}', shell=True)
+				iso_name = os.path.basename(iso)
+				if try_umount.stderr:			
+					raise CommandError(self, f'Failed to unmount {iso_name} at {other_mountpoint}, pallet could not be installed.') 
 
 			try:
 				# passing True will display a % progress indicator in stdout
@@ -249,7 +258,7 @@ class Command(command):
 			os.chdir(cwd)
 			os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
 			print('cleaning up temporary files ...')
-			p = subprocess.run(['rm', filename])
+			p = _exec(['rm', filename])
 
 		if isolist:
 			#
@@ -263,15 +272,25 @@ class Command(command):
 				if l[1].strip() == self.mountPoint:
 					cmd = 'umount %s' % self.mountPoint
 					cmd += ' > /dev/null 2>&1'
-					subprocess.run([ cmd ], shell=True)
+					_exec([ cmd ], shell=True)
 
 			for iso in isolist:	# have a set of iso files
 				cwd = os.getcwd()
+				iso_mounted_somewhere = _exec(f'mount | grep {iso}', shell=True).stdout
+
+				if iso_mounted_somewhere:
+					other_mountpoint = iso_mounted_somewhere.split(' ')[2]
+					stack.commands.Log(f'ISO with same name as {iso} already mounted on filesystem at {other_mountpoint}: Attempting to unmount.') 
+					try_umount = _exec(f'umount {other_mountpoint}', shell=True)
+					iso_name = os.path.basename(iso)
+					if try_umount.stderr:			
+						raise CommandError(self, f'Failed to unmount {iso_name} at {other_mountpoint}, pallet could not be installed.') 
+
 				os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
 				self.copy(clean, dir, updatedb, iso)
 				os.chdir(cwd)
 				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
-			
+		
 		if network_pallets:
 			for pallet in network_pallets:
 				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
@@ -284,3 +303,4 @@ class Command(command):
 
 		# Clear the old packages
 		self.clean_ludicrous_packages()
+

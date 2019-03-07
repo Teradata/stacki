@@ -23,8 +23,8 @@ class Implementation(stack.commands.Implementation):
 	arch = None
 
 	def check_impl(self):
-		if os.path.exists('/mnt/cdrom/content'):
-			file = open('/mnt/cdrom/content', 'r')
+		if os.path.exists(f'{self.owner.mountPoint}/content'):
+			file = open(f'{self.owner.mountPoint}/content', 'r')
 
 			for line in file.readlines():
 				l = line.split()

@@ -1,9 +1,7 @@
 import json
+import os
 from contextlib import ExitStack
 from textwrap import dedent
-
-import pytest
-
 
 class TestAddPallet:
 	def test_no_pallet(self, host):
@@ -81,8 +79,11 @@ class TestAddPallet:
 		# Mount an ISO to simulate something left mounted
 		result = host.run(f'mount {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso /mnt/cdrom')
 		assert result.rc == 0
-
+		
 		# Add our minimal pallet
+		# On SLES since add pallet is using a temporary directory to mount pallets, it complains about
+		# an iso with the same name being mounted twice, so add pallet attempts to unmount the iso elsewhere  
+		# but if it can't, an error is thrown
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 		assert result.stdout == 'Copying minimal 1.0-sles12 to pallets ...\n'
@@ -203,6 +204,35 @@ class TestAddPallet:
 			}
 		]
 
+	def test_pallet_already_mounted(self,host,create_pallet_isos):
+		with ExitStack() as cleanup: 
+			# Mount our pallet
+			result = host.run(f'mount {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso /mnt/cdrom')
+			assert result.rc == 0
+			
+			# Can't unmount duplicate pallet
+			current_dir = host.run('pwd').stdout.strip()
+			os.chdir('/mnt/cdrom/')
+
+			# Ensure we are in the directory we started the test in
+			# and iso is unmounted
+			cleanup.callback(os.chdir, current_dir)
+			cleanup.callback(host.run, 'umount /mnt/cdrom')
+
+			# SLES doesn't like isos with the same name mounted in two different places
+			# Add pallet handles this by unmounting duplicate named mounted isos, but should 
+			# also handle when that isn't possible
+			result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
+			assert result.rc == 255
+			assert 'error - Failed to unmount minimal-1.0-sles12.x86_64.disk1.iso at /mnt/cdrom' in result.stderr
+
+			# Change back to the directory we came from
+			os.chdir(current_dir)
+
+			# Unmount ISO  
+			result = host.run(f'umount /mnt/cdrom')
+			assert result.rc == 0
+
 	def test_add_OS_pallet_again(self, host, host_os, revert_export_stack_pallets):
 		# Add our OS pallet, which is already added so it should be quick
 		if host_os == 'sles':
@@ -296,7 +326,9 @@ class TestAddPallet:
 	def test_invalid_iso(self, host, create_blank_iso):
 		with ExitStack() as cleanup:
 			result = host.run(f'stack add pallet {create_blank_iso}/blank.iso')
+			leftover_iso = host.run('mount | grep /tmp/tmp').stdout.split(' ')[2]
+
 			#Make ISO unmounted, not just deleted
-			cleanup.callback(host.run,'umount /mnt/cdrom')
+			cleanup.callback(host.run, f'umount {leftover_iso}')
 			assert result.rc == 255
-			assert result.stderr == 'error - unknown pallet on /mnt/cdrom\n'
+			assert 'error - unknown pallet on /tmp' in result.stderr  
