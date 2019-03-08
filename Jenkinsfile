@@ -41,17 +41,25 @@ pipeline {
                 // and do it here with retries.
                 dir('stacki') {
                     retry(3) {
-                        timeout(300) {
-                            // Note: there is currently a bug in scm checkout where it doesn't
-                            // set environment variables, we we do by hand in a script
-                            script {
-                                checkout(scm).each { k,v -> env.setProperty(k, v) }
+                        script {
+                            // Note: There is a bug in Jenkins where a timeout causes the job to
+                            // abort unless you catch the FlowInterruptedException.
+                            // https://issues.jenkins-ci.org/browse/JENKINS-51454
+                            try {
+                                timeout(15) {
+                                    // Note: there is currently a bug in scm checkout where it doesn't
+                                    // set environment variables, we we do by hand in a script
+                                    checkout(scm).each { k,v -> env.setProperty(k, v) }
 
-                                // Add the last git log subject as the description in the GUI
-                                currentBuild.description = sh(
-                                    returnStdout: true,
-                                    script: 'git log -1 --pretty=format:%s'
-                                )
+                                    // Add the last git log subject as the description in the GUI
+                                    currentBuild.description = sh(
+                                        returnStdout: true,
+                                        script: 'git log -1 --pretty=format:%s'
+                                    )
+                                }
+                            }
+                            catch (err) {
+                                error 'Source checkout timed out'
                             }
                         }
                     }
@@ -80,7 +88,7 @@ pipeline {
                                 // Check the number of commits on the branch
                                 def status = sh(
                                     returnStatus: true,
-                                    script: "python3.6 ../stacki-git-tests/verify-branch-base.py"
+                                    script: "python3.7 ../stacki-git-tests/verify-branch-base.py"
                                 )
 
                                 // Report the status to github.com
@@ -110,7 +118,7 @@ pipeline {
                                 // Check the commit message formatting
                                 def status = sh(
                                     returnStatus: true,
-                                    script: 'python3.6 ../stacki-git-tests/validate-commit-message.py'
+                                    script: 'python3.7 ../stacki-git-tests/validate-commit-message.py'
                                 )
 
                                 // Report the status to github.com
@@ -147,9 +155,12 @@ pipeline {
 
                 // Build our ISO
                 dir('stacki-iso-builder') {
-                    // Give the build up to 60 minutes to finish
-                    timeout(3600) {
-                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
+                    // Retry a few times, because CentOS mirrors are flaky
+                    retry(2) {
+                        // Give the build up to 120 minutes to finish
+                        timeout(120) {
+                            sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
+                        }
                     }
 
                     sh 'mv stacki-*.iso ../'
@@ -402,8 +413,8 @@ pipeline {
                     steps {
                         // Run the unit tests
                         dir('unit') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
+                            // Give the tests up to 120 minutes to finish
+                            timeout(120) {
                                 // branches develop, master, and those ending in _cov get coverage reports
                                 script {
                                     if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
@@ -452,8 +463,8 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
+                            // Give the tests up to 120 minutes to finish
+                            timeout(120) {
                                 // branches develop, master, and those ending in _cov get coverage reports
                                 script {
                                     if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
@@ -492,8 +503,8 @@ pipeline {
 
                         // Run the system tests
                         dir('system') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
+                            // Give the tests up to 120 minutes to finish
+                            timeout(120) {
                                 script {
                                     if (env.PLATFORM == 'sles11') {
                                         // If we're SLES 11, use the latest SLES 12 release to be our frontend

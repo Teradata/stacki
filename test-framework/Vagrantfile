@@ -140,7 +140,7 @@ Vagrant.configure("2") do |config|
         provider.boot boot_network
         provider.boot 'hd'
         provider.qemuargs :value => "-boot"
-        provider.qemuargs :value => "reboot-timeout=10"
+        provider.qemuargs :value => "reboot-timeout=10000"
 
         config.vm.network "private_network",
           mac: sprintf("5254000000%02X", i+3),

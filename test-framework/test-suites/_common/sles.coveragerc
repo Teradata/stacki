@@ -4,14 +4,14 @@ disable_warnings =
 	module-not-imported
 
 omit =
-	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_foreign_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/add/pallet/imp_native_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/list/host/profile/imp_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/bootfile/imp_redhat_pxe.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/bootfile/imp_redhat_uefi.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/interface/imp_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/repo/imp_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/resolv/imp_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/commands/report/host/route/imp_redhat.py
-	/opt/stack/lib/python3.6/site-packages/stack/redhat/__init__.py
-	/opt/stack/lib/python3.6/site-packages/stack/redhat/gen.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/add/pallet/imp_foreign_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/add/pallet/imp_native_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/list/host/profile/imp_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/bootfile/imp_redhat_pxe.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/bootfile/imp_redhat_uefi.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/interface/imp_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/repo/imp_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/resolv/imp_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/commands/report/host/route/imp_redhat.py
+	/opt/stack/lib/python3.7/site-packages/stack/redhat/__init__.py
+	/opt/stack/lib/python3.7/site-packages/stack/redhat/gen.py

@@ -1,4 +1,4 @@
-#!/opt/stack/bin/python3.6
+#!/opt/stack/bin/python3.7
 
 from stack.switch.x1052 import SwitchDellX1052
 from stack.api import Call
