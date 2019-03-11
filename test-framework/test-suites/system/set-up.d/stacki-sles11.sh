@@ -43,18 +43,27 @@ then
     vagrant up backend-0-1 &
     wait
 
-    # NOTE: Enable this once SLES 11 status is reliable
-    # # Wait until the frontend sees that backend-0-0 is online
-    # while [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-0 output-format=json | grep online") ]]
-    # do
-    #     echo "Waiting for backend-0-0..."
-    #     sleep 60
-    # done
+    # Wait up to 5 minutes for the frontend to see that backend-0-0 is online (once Vagrant thinks they are up)
+    for ((i = 0 ; i < 5 ; i++))
+    do
+        if [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-0 output-format=json | grep online") ]]
+        then
+            echo "Waiting for backend-0-0..."
+            sleep 60
+        else
+            break
+        fi
+    done
 
-    # # And backend-0-1
-    # while [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-1 output-format=json | grep online") ]]
-    # do
-    #     echo "Waiting for backend-0-1..."
-    #     sleep 60
-    # done
+    # Wait up to 5 minutes for the frontend to see that backend-0-1 is online (once Vagrant thinks they are up)
+    for ((i = 0 ; i < 5 ; i++))
+    do
+        if [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-1 output-format=json | grep online") ]]
+        then
+            echo "Waiting for backend-0-1..."
+            sleep 60
+        else
+            break
+        fi
+    done
 fi
