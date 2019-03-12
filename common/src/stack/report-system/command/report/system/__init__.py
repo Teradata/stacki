@@ -62,17 +62,18 @@ class Command(stack.commands.Command,
 		tests = glob('tests/*')
 
 		# make it real ugly.
+		# Pytest -rs option is used to output message when a test is skipped
 		if exitonfail and not pretty:
-			_return_code = main(['--verbose', '--exitfirst', *args, *tests])
+			_return_code = main(['--verbose', '--exitfirst', '-rs', *args, *tests])
 		# exit with first failure
 		elif exitonfail:
-			_return_code = main(['--verbose', '--capture=no', '--exitfirst', *args, *tests])
+			_return_code = main(['--verbose', '--capture=no', '--exitfirst', '-rs', *args, *tests])
 		# show tracebacks of failures but don't fail.
 		elif not pretty:
-			_return_code = main(['--verbose', '--capture=no', *args, *tests])
+			_return_code = main(['--verbose', '--capture=no', '-rs', *args, *tests])
 		# pretty and no tracebacks
 		else:
-			_return_code = main(['--verbose', '--capture=no', '--tb=no', *args, *tests])
+			_return_code = main(['--verbose', '--capture=no', '--tb=no', '-rs', *args, *tests])
 
 		os.chdir(current_dir)
 
