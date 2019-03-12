@@ -507,8 +507,17 @@ pipeline {
                             timeout(120) {
                                 script {
                                     if (env.PLATFORM == 'sles11') {
-                                        // If we're SLES 11, use the latest SLES 12 release to be our frontend
-                                        sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME $(ls -1t /export/www/stacki-isos/sles12/stacki/master/stacki-*.iso | head -1)'
+                                        // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
+
+                                        // Give Jenkins 10 more minutes to finish the SLES 12 build
+                                        sleep 600
+
+                                        // Note: Give it 10 more minutes to show up
+                                        retry(10) {
+                                            sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                                        }
+
+                                        sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
                                     }
                                     else {
                                         sh './run-tests.sh --system ../$ISO_FILENAME'
