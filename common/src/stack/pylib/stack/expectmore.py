@@ -1,6 +1,6 @@
 import time
 import pexpect
-
+from contextlib import contextmanager
 from collections import namedtuple
 
 ResponsePair = namedtuple('ResponsePair', ['prompt', 'response'])
@@ -87,7 +87,7 @@ class ExpectMore():
 
 		self.match_index = self._proc.match_index
 
-		output = self._proc.before.decode('utf-8').splitlines()
+		output = self.before
 		self._session_script.extend(output)
 
 		return output
@@ -169,3 +169,69 @@ class ExpectMore():
 
 	def __repr__(self):
 		return f"{self.__class__.__name__}('{self.cmd}', {self.PROMPTS})"
+
+	@property
+	def logfile(self):
+		"""Returns the logfile used log both data read from and data sent to the child process."""
+		return self._proc.logfile
+
+	@logfile.setter
+	def logfile(self, logfile):
+		"""Set the logfile to log both data read from and data sent to the child process."""
+		self._proc.logfile = logfile
+
+	@property
+	def logfile_read(self):
+		"""Returns the logfile used log data read from the child process."""
+		return self._proc.logfile_read
+
+	@logfile_read.setter
+	def logfile_read(self, logfile):
+		"""Set the logfile to log data read from the child process."""
+		self._proc.logfile_read = logfile
+
+	@property
+	def logfile_send(self):
+		"""Returns the logfile used log data sent to the child process."""
+		return self._proc.logfile_send
+
+	@logfile_send.setter
+	def logfile_send(self, logfile):
+		"""Set the logfile to log data sent to the child process."""
+		self._proc.logfile_send = logfile
+
+	@contextmanager
+	def redirect_to_logfile(self, logfile, logfile_read = None, logfile_send = None):
+		"""A context manager to temporarily log data read from and data sent to the child process.
+
+		At the end of the context, the logfiles are reset to their previous values.
+
+		logfile, logfile_read, and logfile_send are used to set the pexpect.spawn members of the same name.
+		See the pexpect documentation for the differences between them.
+		"""
+		# save current state
+		current_logfile = self.logfile
+		current_logfile_read = self.logfile_read
+		current_logfile_send = self.logfile_send
+		try:
+			# overwrite based on passed in values
+			self.logfile = logfile
+			self.logfile_read = logfile_read
+			self.logfile_send = logfile_send
+			# yield ourself
+			yield self
+		finally:
+			# revert back to old state
+			self.logfile = current_logfile
+			self.logfile_read = current_logfile_read
+			self.logfile_send = current_logfile_send
+
+	@property
+	def before(self):
+		"""Returns the lines in the buffer before the most recently matched prompt."""
+		return self._proc.before.decode().splitlines()
+
+	@property
+	def after(self):
+		"""Returns the lines in the buffer after the most recently matched prompt."""
+		return self._proc.after.decode().splitlines()
