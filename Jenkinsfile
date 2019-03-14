@@ -55,6 +55,12 @@ pipeline {
                             }
                         }
                     }
+
+                    // See if we are a release on a support branch
+                    script {
+                        def tag = sh(returnStdout: true, script: 'git tag --points-at HEAD').trim()
+                        env.IS_RELEASE = tag ==~ /stacki-.*/ && env.GIT_BRANCH ==~ /support.*/
+                    }
                 }
 
                 // Get the repository testing scripts
@@ -637,6 +643,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'master'
+                    environment name: 'IS_RELEASE', value: 'true'
                 }
             }
 
@@ -677,7 +684,7 @@ pipeline {
                             // Notify Slack of a new stable release
                             script {
                                 // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master') {
+                                if (env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
                                         color: 'good',
@@ -729,7 +736,10 @@ pipeline {
                 stage('Amazon S3') {
                     when {
                         environment name: 'PLATFORM', value: 'redhat7'
-                        branch 'master'
+                        anyOf {
+                            branch 'master'
+                            environment name: 'IS_RELEASE', value: 'true'
+                        }
                     }
 
                     steps {
@@ -789,6 +799,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'master'
+                    environment name: 'IS_RELEASE', value: 'true'
                 }
             }
 
@@ -860,7 +871,7 @@ pipeline {
 
                         // Releases of the Redhat version goes to amazon S3 too
                         script {
-                            if (env.GIT_BRANCH == 'master' && env.PLATFORM == 'redhat7') {
+                            if ((env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
@@ -878,7 +889,7 @@ pipeline {
                             // Notify Slack of a new stable release
                             script {
                                 // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master') {
+                                if (env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
                                         color: 'good',
