@@ -90,9 +90,9 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host, '</stack:file>')
 
 
-	def server(self, host, timeservers):
+	def server(self, host):
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/ntp.conf">')
-		for server in timeservers:
+		for server in self.owner.timeservers:
 			self.owner.addOutput(host, f"server {server} iburst")
 		self.owner.addOutput(host, 'server 127.127.1.1 iburst')
 		self.owner.addOutput(host, 'fudge 127.127.1.1 stratum 10')
