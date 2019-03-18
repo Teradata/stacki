@@ -87,7 +87,7 @@ class ExpectMore():
 
 		self.match_index = self._proc.match_index
 
-		output = self._proc.before.decode('utf-8').splitlines()
+		output = self.before
 		self._session_script.extend(output)
 
 		return output
@@ -169,3 +169,13 @@ class ExpectMore():
 
 	def __repr__(self):
 		return f"{self.__class__.__name__}('{self.cmd}', {self.PROMPTS})"
+
+	@property
+	def before(self):
+		"""Returns the lines in the buffer before the most recently matched prompt."""
+		return self._proc.before.decode().splitlines()
+
+	@property
+	def after(self):
+		"""Returns the lines in the buffer after the most recently matched prompt."""
+		return self._proc.after.decode().splitlines()
