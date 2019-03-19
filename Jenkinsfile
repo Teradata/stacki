@@ -88,7 +88,7 @@ pipeline {
                                 // Check the number of commits on the branch
                                 def status = sh(
                                     returnStatus: true,
-                                    script: "python3.7 ../stacki-git-tests/verify-branch-base.py"
+                                    script: "python3 ../stacki-git-tests/verify-branch-base.py"
                                 )
 
                                 // Report the status to github.com
@@ -118,7 +118,7 @@ pipeline {
                                 // Check the commit message formatting
                                 def status = sh(
                                     returnStatus: true,
-                                    script: 'python3.7 ../stacki-git-tests/validate-commit-message.py'
+                                    script: 'python3 ../stacki-git-tests/validate-commit-message.py'
                                 )
 
                                 // Report the status to github.com
@@ -155,12 +155,9 @@ pipeline {
 
                 // Build our ISO
                 dir('stacki-iso-builder') {
-                    // Retry a few times, because CentOS mirrors are flaky
-                    retry(2) {
-                        // Give the build up to 120 minutes to finish
-                        timeout(120) {
-                            sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
-                        }
+                    // Give the build up to 120 minutes to finish
+                    timeout(120) {
+                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
                     }
 
                     sh 'mv stacki-*.iso ../'
@@ -415,8 +412,8 @@ pipeline {
                         dir('unit') {
                             // Give the tests up to 120 minutes to finish
                             timeout(120) {
-                                // branches develop, master, and those ending in _cov get coverage reports
                                 script {
+                                    // branches develop, master, and those ending in _cov get coverage reports
                                     if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
                                         sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
                                     }
@@ -430,11 +427,13 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'unit/reports/unit-junit.xml'
-
-                            // branches develop, master, and those ending in _cov get coverage reports
                             script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('unit/reports/unit-junit.xml')) {
+                                    junit 'unit/reports/unit-junit.xml'
+                                }
+
+                                // branches develop, master, and those ending in _cov get coverage reports
                                 if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
                                     // Move the coverage report to the common folder
                                     sh 'mv unit/reports/unit coverage/'
@@ -465,8 +464,8 @@ pipeline {
                         dir('integration') {
                             // Give the tests up to 120 minutes to finish
                             timeout(120) {
-                                // branches develop, master, and those ending in _cov get coverage reports
                                 script {
+                                    // branches develop, master, and those ending in _cov get coverage reports
                                     if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
                                         sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
                                     }
@@ -480,11 +479,13 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'integration/reports/integration-junit.xml'
-
-                            // branches develop, master, and those ending in _cov get coverage reports
                             script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('integration/reports/integration-junit.xml')) {
+                                    junit 'integration/reports/integration-junit.xml'
+                                }
+
+                                // branches develop, master, and those ending in _cov get coverage reports
                                 if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
                                     // Move the coverage report to the common folder
                                     sh 'mv integration/reports/integration coverage/'
@@ -525,8 +526,12 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'system/reports/system-junit.xml'
+                            script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('system/reports/system-junit.xml')) {
+                                    junit 'system/reports/system-junit.xml'
+                                }
+                            }
                         }
                     }
                 }
