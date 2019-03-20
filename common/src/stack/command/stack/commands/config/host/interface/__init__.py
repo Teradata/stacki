@@ -45,23 +45,28 @@ class Command(stack.commands.config.host.command):
 	Flags for the interfaces. If flags for multiple interfaces
 	are supplied, then they must be comma-separated.
 	</param>
+
+	<param type='bool' name='sync'>
+	When set to true, stack sync config is called. Defaults to true.
+	</param>
 	"""
 
 	def run(self, params, args):
-		(interface, mac, module, flag) = self.fillParams([
+		(interface, mac, module, flag, sync) = self.fillParams([
 			('interface', None),
 			('mac', None),
 			('module', None),
-			('flag', None) ])
+			('flag', None),
+			('sync', True) ])
 
 		hosts = self.getHostnames(args)
+
+		sync = self.str2bool(sync)
 
 		if len(hosts) != 1:
 			raise ArgUnique(self, 'host')
 
 		host = hosts[0]
-
-		sync_config = 0
 
 		discovered_macs = []
 
@@ -79,11 +84,12 @@ class Command(stack.commands.config.host.command):
 			modules = module.split(',')
 		else:
 			modules = []
+
 		if flag:
 			flags = flag.split(',')
 		else:
 			flags = []
-
+				
 		for i in range(0, len(macs)):
 			a = (macs[i], )
 
@@ -110,7 +116,7 @@ class Command(stack.commands.config.host.command):
 		#
 		for (mac, interface, module, ks) in discovered_macs:
 			rows = self.db.select("""mac from networks
-				where mac = %s """,mac)
+				where mac = %s """, mac)
 			if rows:
 				self.command('set.host.interface.interface',
 					[host, 'interface=%s' % interface, 'mac=%s' % mac])
@@ -146,5 +152,5 @@ class Command(stack.commands.config.host.command):
 
 		post_config = self.command('list.host.interface', [host])
 
-		if pre_config != post_config:
+		if pre_config != post_config and sync:
 			self.command('sync.config')
