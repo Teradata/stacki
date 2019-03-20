@@ -23,6 +23,7 @@ import stack.lock
 import stack.api
 import stack.bool
 import stack.mq
+import stack.commands
 
 
 class Client:
@@ -249,6 +250,7 @@ if profile_update_macs:
 	if len(ifaces) > 0 and len(macs) > 0:
 		params.append('interface=%s' % ','.join(ifaces))
 		params.append('mac=%s' % ','.join(macs))
+		params.append('sync=False')
 
 		if len(modules) > 0:
 			params.append('module=%s' % (','.join(modules)))
