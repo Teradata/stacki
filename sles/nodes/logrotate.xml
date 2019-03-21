@@ -10,64 +10,58 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:script stack:stage="install-post">
 
 <stack:file stack:name="/etc/logrotate.d/stack">
+size=100M
+missingok
+
 /var/log/auth {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/authpriv {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/daemon {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/lpr {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/mail {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/kern {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/syslog {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
 /var/log/user {
-	size=100M
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
 }
-/var/log/local[1-9] {
-	size=10M
+/var/log/local[0-9] {
 	postrotate
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
