@@ -45,8 +45,8 @@ pipeline {
                             // Note: There is a bug in Jenkins where a timeout causes the job to
                             // abort unless you catch the FlowInterruptedException.
                             // https://issues.jenkins-ci.org/browse/JENKINS-51454
-                            try {
-                                timeout(15) {
+                            timeout(15) {
+                                try {
                                     // Note: there is currently a bug in scm checkout where it doesn't
                                     // set environment variables, we we do by hand in a script
                                     checkout(scm).each { k,v -> env.setProperty(k, v) }
@@ -57,9 +57,9 @@ pipeline {
                                         script: 'git log -1 --pretty=format:%s'
                                     )
                                 }
-                            }
-                            catch (err) {
-                                error 'Source checkout timed out'
+                                catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                    error 'Source checkout timed out'
+                                }
                             }
                         }
                     }
@@ -145,28 +145,59 @@ pipeline {
 
         stage('Build') {
             environment {
-                BUILD_ISO_DIR = '/export/isos'
-                PYPI_CACHE = '1'
+                ISOS = '../../..'
+                PYPI_CACHE = 'true'
             }
 
             steps {
-                // Check out iso-builder
-                sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-iso-builder.git'
+                // Figure out if we are a release build
+                script {
+                    env.IS_RELEASE = env.BRANCH_NAME == 'master'
+                }
+
+                // Get some ISOs we'll need for build
+                script {
+                    switch(env.PLATFORM) {
+                        case 'redhat7':
+                            sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1708.iso .'
+                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.4_20171128-redhat7.x86_64.disk1.iso .'
+                            env.OS_PALLET = 'os-7.4_20171128-redhat7.x86_64.disk1.iso'
+                            break
+
+                        case 'sles12':
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+
+                        case 'sles11':
+                            sh 'cp /export/www/installer-isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+                    }
+                }
 
                 // Build our ISO
-                dir('stacki-iso-builder') {
-                    // Give the build up to 120 minutes to finish
-                    timeout(120) {
-                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
-                    }
-
-                    sh 'mv stacki-*.iso ../'
-
-                    // If we are Redhat, we will have a StackiOS ISO as well
-                    script {
-                        if (env.PLATFORM == 'redhat7') {
-                            sh 'mv stackios-*.iso ../'
+                dir('stacki/tools/iso-builder') {
+                    // Give the build up to 60 minutes to finish
+                    timeout(60) {
+                        script {
+                            try {
+                                sh 'vagrant up'
+                            }
+                            catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                error 'Build timed out'
+                            }
                         }
+                    }
+                }
+
+                // Move the ISO into the root of the workspace
+                sh 'mv stacki/stacki-*.iso .'
+
+                // If we are Redhat, we will have a StackiOS ISO as well
+                script {
+                    if (env.PLATFORM == 'redhat7') {
+                        sh 'mv stacki/stackios-*.iso .'
                     }
                 }
 
@@ -191,6 +222,11 @@ pipeline {
                 always {
                     // Update the Stacki Builds website
                     build job: 'rebuild_stacki-builds_website', wait: false
+
+                    // Remove the pallet builder VM
+                    dir('stacki/tools/iso-builder') {
+                        sh 'vagrant destroy -f || true'
+                    }
                 }
 
                 success {
@@ -410,15 +446,26 @@ pipeline {
                     steps {
                         // Run the unit tests
                         dir('unit') {
-                            // Give the tests up to 120 minutes to finish
-                            timeout(120) {
+                            // Give the tests up to 60 minutes to finish
+                            timeout(60) {
                                 script {
-                                    // branches develop, master, and those ending in _cov get coverage reports
-                                    if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
-                                        sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
+                                    try {
+                                        // branches develop, master, and those ending in _cov get coverage reports
+                                        if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                            sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --unit ../$ISO_FILENAME'
+                                        }
                                     }
-                                    else {
-                                        sh './run-tests.sh --unit ../$ISO_FILENAME'
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/unit') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Unit test-suite timed out'
                                     }
                                 }
                             }
@@ -462,15 +509,26 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration') {
-                            // Give the tests up to 120 minutes to finish
-                            timeout(120) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
-                                    // branches develop, master, and those ending in _cov get coverage reports
-                                    if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
-                                        sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
+                                    try {
+                                        // branches develop, master, and those ending in _cov get coverage reports
+                                        if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                            sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --integration ../$ISO_FILENAME'
+                                        }
                                     }
-                                    else {
-                                        sh './run-tests.sh --integration ../$ISO_FILENAME'
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/integration') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Integration test-suite timed out'
                                     }
                                 }
                             }
@@ -504,20 +562,31 @@ pipeline {
 
                         // Run the system tests
                         dir('system') {
-                            // Give the tests up to 120 minutes to finish
-                            timeout(120) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
-                                    if (env.PLATFORM == 'sles11') {
-                                        // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
-                                        // Note: Give it 20 minutes to show up (will usually take 10)
-                                        retry(20) {
-                                            sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                                    try {
+                                        if (env.PLATFORM == 'sles11') {
+                                            // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
+                                            // Note: Give it 20 minutes to show up (will usually take 10)
+                                            retry(20) {
+                                                sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                                            }
+
+                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --system ../$ISO_FILENAME'
+                                        }
+                                    }
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/system') {
+                                            sh 'vagrant destroy -f || true'
                                         }
 
-                                        sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
-                                    }
-                                    else {
-                                        sh './run-tests.sh --system ../$ISO_FILENAME'
+                                        // Raise an error
+                                        error 'System test-suite timed out'
                                     }
                                 }
                             }
