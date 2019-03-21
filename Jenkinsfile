@@ -145,28 +145,52 @@ pipeline {
 
         stage('Build') {
             environment {
-                BUILD_ISO_DIR = '/export/isos'
-                PYPI_CACHE = '1'
+                ISOS = '../../..'
+                PYPI_CACHE = 'true'
             }
 
             steps {
-                // Check out iso-builder
-                sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-iso-builder.git'
+                // Figure out if we are a release build
+                script {
+                    env.IS_RELEASE = env.BRANCH_NAME == 'master'
+                }
+
+                // Get some ISOs we'll need for build
+                script {
+                    switch(env.PLATFORM) {
+                        case 'redhat7':
+                            sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1708.iso .'
+                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.4_20171128-redhat7.x86_64.disk1.iso .'
+                            env.OS_PALLET = 'os-7.4_20171128-redhat7.x86_64.disk1.iso'
+                            break
+
+                        case 'sles12':
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+
+                        case 'sles11':
+                            sh 'cp /export/www/installer-isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+                    }
+                }
 
                 // Build our ISO
-                dir('stacki-iso-builder') {
+                dir('stacki/tools/iso-builder') {
                     // Give the build up to 120 minutes to finish
                     timeout(120) {
-                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
+                        sh 'vagrant up'
                     }
+                }
 
-                    sh 'mv stacki-*.iso ../'
+                // Move the ISO into the root of the workspace
+                sh 'mv stacki/stacki-*.iso .'
 
-                    // If we are Redhat, we will have a StackiOS ISO as well
-                    script {
-                        if (env.PLATFORM == 'redhat7') {
-                            sh 'mv stackios-*.iso ../'
-                        }
+                // If we are Redhat, we will have a StackiOS ISO as well
+                script {
+                    if (env.PLATFORM == 'redhat7') {
+                        sh 'mv stacki/stackios-*.iso .'
                     }
                 }
 
@@ -188,9 +212,18 @@ pipeline {
             }
 
             post {
+                aborted {
+                    error 'Build timed out'
+                }
+
                 always {
                     // Update the Stacki Builds website
                     build job: 'rebuild_stacki-builds_website', wait: false
+
+                    // Remove the pallet builder VM
+                    dir('stacki/tools/iso-builder') {
+                        sh 'vagrant destroy -f'
+                    }
                 }
 
                 success {
@@ -426,6 +459,16 @@ pipeline {
                     }
 
                     post {
+                        aborted {
+                            // Make sure we clean up the VM
+                            dir('test-suites/unit') {
+                                sh 'vagrant destroy -f'
+                            }
+
+                            // Raise an error
+                            error 'Unit test-suite timed out'
+                        }
+
                         always {
                             script {
                                 // Record the test statuses for Jenkins
@@ -478,6 +521,16 @@ pipeline {
                     }
 
                     post {
+                        aborted {
+                            // Make sure we clean up the VM
+                            dir('test-suites/integration') {
+                                sh 'vagrant destroy -f'
+                            }
+
+                            // Raise an error
+                            error 'Integration test-suite timed out'
+                        }
+
                         always {
                             script {
                                 // Record the test statuses for Jenkins
@@ -525,6 +578,16 @@ pipeline {
                     }
 
                     post {
+                        aborted {
+                            // Make sure we clean up the VM
+                            dir('test-suites/system') {
+                                sh 'vagrant destroy -f'
+                            }
+
+                            // Raise an error
+                            error 'System test-suite timed out'
+                        }
+
                         always {
                             script {
                                 // Record the test statuses for Jenkins
