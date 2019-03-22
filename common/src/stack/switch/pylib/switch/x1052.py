@@ -8,6 +8,8 @@ import re
 from pathlib import Path
 from functools import wraps
 from threading import Timer
+from collections import namedtuple
+import tempfile
 from stack.expectmore import ExpectMore, ExpectMoreException
 
 def _requires_regular_console(member_function):
@@ -59,6 +61,8 @@ class SwitchDellX1052(Switch):
 	CONSOLE_PROMPTS = [CONSOLE_PROMPT, CONFIGURE_CONSOLE_PROMPT,]
 	PAGING_PROMPT = r"^.*More:.*<return>"
 	OVERWRITE_PROMPT = r"^.*Overwrite file.*\?"
+	CONTINUE_PROMPT = r"^.*continue.*\?"
+	SHUTDOWN_PROMPT = r"^.*Shutting down"
 	COPY_SUCCESS = "The copy operation was completed successfully"
 
 	def __init__(self, *args, **kwargs):
@@ -178,7 +182,10 @@ class SwitchDellX1052(Switch):
 
 	@_requires_regular_console
 	def download(self):
-		"""Download the running-config from the switch to the server"""
+		"""Download the running-config from the switch to the server.
+
+		If downloading the config fails, a SwitchException is raised.
+		"""
 		#
 		# tftp requires the destination file to already exist and to be writable by all
 		#
@@ -196,7 +203,10 @@ class SwitchDellX1052(Switch):
 
 	@_requires_regular_console
 	def upload(self):
-		"""Upload the file from the switch to the server"""
+		"""Upload the file from the switch to the server.
+
+		If uploading the config fails, a SwitchException is raised.
+		"""
 		prompts = [*self.CONSOLE_PROMPTS, self.OVERWRITE_PROMPT]
 		# Copy the file
 		results = self.proc.ask(
@@ -225,7 +235,10 @@ class SwitchDellX1052(Switch):
 
 	@_requires_regular_console
 	def apply_configuration(self):
-		"""Apply running-config to startup-config"""
+		"""Apply running-config to startup-config.
+
+		If applying the config fails, a SwitchException is raised.
+		"""
 		prompts = [*self.CONSOLE_PROMPTS, self.OVERWRITE_PROMPT]
 
 		results = self.proc.ask(cmd = "write", prompt = prompts)
@@ -247,3 +260,176 @@ class SwitchDellX1052(Switch):
 				return True
 
 		return False
+
+	def _parse_versions(self, results):
+		"""Parses out the versions and returns a namedtuple of software, boot, and hardware versions found.
+
+		The results are returned as a namedtuple with the attributes software, boot, and hardware. Each is a list
+		containing the versions found in the provided results.
+		"""
+		# Parse out the firmware versions
+		software = []
+		boot = []
+		hardware = []
+		for line in results:
+			software_regex = r"SW version"
+			software_match = re.search(pattern = software_regex, string = line, flags = re.IGNORECASE)
+			# If we found the software version, add it to the results.
+			if software_match:
+				software.append(
+					# Drop the heading and strip leading and trailing whitespace.
+					re.sub(pattern = software_regex, repl = "", string = line, flags = re.IGNORECASE).strip()
+				)
+
+			boot_regex = r"Boot version"
+			boot_match = re.search(pattern = boot_regex, string = line, flags = re.IGNORECASE)
+			# If we found the boot version, add it to the results.
+			if boot_match:
+				boot.append(
+					# Drop the heading and strip leading and trailing whitespace.
+					re.sub(pattern = boot_regex, repl = "", string = line, flags = re.IGNORECASE).strip()
+				)
+
+			hardware_regex = r"HW version"
+			hardware_match = re.search(pattern = hardware_regex, string = line, flags = re.IGNORECASE)
+			# If we found the hardware version, add it to the results.
+			if hardware_match:
+				hardware.append(
+					# Drop the heading and strip leading and trailing whitespace.
+					re.sub(pattern = hardware_regex, repl = "", string = line, flags = re.IGNORECASE).strip()
+				)
+
+		return namedtuple("ParsedVersions", ("software", "boot", "hardware"))(
+			software = software,
+			boot = boot,
+			hardware = hardware,
+		)
+
+	def _check_parsed_versions(self, parsed_versions):
+		"""Validate that for software, boot, and hardware that exactly one version number was parsed.
+
+		If there were any parsing errors, a SwitchException is raised.
+		"""
+		# There must be only one version found for each. Yell loudly if we found multiple.
+		errors = []
+		if not parsed_versions.software:
+			errors.append(f"No software version reported for {self.switchname}.")
+		elif len(parsed_versions.software) > 1:
+			errors.append(f"Multiple software versions reported for {self.switchname}: {parsed_versions.software}.")
+		# Else we're good
+
+		if not parsed_versions.boot:
+			errors.append(f"No boot version reported for {self.switchname}.")
+		elif len(parsed_versions.boot) > 1:
+			errors.append(f"Multiple boot versions reported for {self.switchname}: {parsed_versions.boot}.")
+		# Else we're good
+
+		if not parsed_versions.hardware:
+			errors.append(f"No hardware version reported for {self.switchname}.")
+		elif len(parsed_versions.hardware) > 1:
+			errors.append(f"Multiple hardware versions reported for {self.switchname}: {parsed_versions.hardware}.")
+		# Else we're good
+
+		# Throw an exception if there were any parsing errors
+		if errors:
+			errors.append("Did the console output format change?")
+			errors = " ".join(errors)
+			raise SwitchException(errors)
+
+	@_requires_regular_console
+	def get_versions(self):
+		"""Returns the current software, boot, and hardware versions as a namedtuple.
+
+		The software attribute returns the software version, the boot attribute returns the boot version,
+		and the hardware attribute returns the hardware version.
+
+		If there was any error parsing the results, a SwitchException is raised.
+		"""
+		# Get the current version information from the switch
+		results = self.proc.ask(cmd = "show version")
+		parsed_versions = self._parse_versions(results = results)
+		self._check_parsed_versions(parsed_versions = parsed_versions)
+
+		return namedtuple("Versions", ("software", "boot", "hardware"))(
+			software = parsed_versions.software[0],
+			boot = parsed_versions.boot[0],
+			hardware = parsed_versions.hardware[0],
+		)
+
+	def _upload_tftp(self, source, destination, timeout):
+		"""Uploads the provided source file via TFTP to the destination on the switch.
+
+		This will return the resulting console output from the upload operation.
+
+		If the source file does not exist on disk, a FileNotFoundError is raised.
+		"""
+		source_file = Path(source).resolve(strict = True)
+		full_tftp_directory = Path(self.tftpdir) / self.switchname
+		full_tftp_directory = full_tftp_directory.resolve(strict = True)
+
+		# Copy into the TFTP directory so we can TFTP it to the switch.
+		# Use a temporary file so we don't litter the filesystem with files. It has to be named
+		# so that the switch can find it.
+		with tempfile.NamedTemporaryFile(dir = full_tftp_directory) as temp_file:
+			# Copy the data to the temporary file and flush it.
+			temp_file.write(source_file.read_bytes())
+			temp_file.flush()
+			# Need to chmod the file so that the switch can read it.
+			temp_file_path = Path(temp_file.name)
+			temp_file_path.chmod(mode = 0o777)
+
+			# TFTP the firmware file to the server
+			return self.proc.ask(
+				cmd = f"copy tftp://{self.stacki_server_ip}/{temp_file_path.parent.stem}/{temp_file_path.stem} {destination}",
+				timeout = timeout,
+			)
+
+	@_requires_regular_console
+	def upload_software(self, software_file):
+		"""Uploads the provided software file to the switch.
+
+		If the upload was not successful, a SwitchException is raised.
+
+		If the source file does not exist, a FileNotFoundError is raised.
+		"""
+		# Copy the software image to the switch. Give a long timeout (10 minutes) to allow for time to upload
+		# the potentially large software image.
+		results = self._upload_tftp(source = software_file, destination = "image", timeout = 600)
+
+		# ensure we copied successfully
+		if not self._check_success(results = results, success_string = self.COPY_SUCCESS):
+			raise SwitchException(f"Failed to upload new software file {software_file} to {self.switchname}")
+
+	@_requires_regular_console
+	def upload_boot(self, boot_file):
+		"""Uploads the provided boot file to the switch.
+
+		If the upload was not successful, a SwitchException is raised.
+
+		If the source file does not exist, a FileNotFoundError is raised.
+		"""
+		# Copy the boot image to the switch. Give a long timeout (10 minutes) to allow for time to upload
+		# the potentially large boot image.
+		results = self._upload_tftp(source = boot_file, destination = "boot", timeout = 600)
+
+		# ensure we copied successfully
+		if not self._check_success(results = results, success_string = self.COPY_SUCCESS):
+			raise SwitchException(f"Failed to upload new boot file {boot_file} to {self.switchname}")
+
+	@_requires_regular_console
+	def reload(self):
+		"""Reboots the switch.
+
+		This will disconnect from the switch. Connect will have to be called again once it reboots
+		before any other commands can be issued.
+		"""
+		prompts = [*self.CONSOLE_PROMPTS, self.CONTINUE_PROMPT, self.SHUTDOWN_PROMPT]
+
+		self.proc.say(cmd = "reload", prompt = prompts)
+		# If it's prompting to confirm reload, say yes
+		if self.proc.match_index == prompts.index(self.CONTINUE_PROMPT):
+			self.proc.say(cmd = "Y", prompt = [*self.CONSOLE_PROMPTS, self.SHUTDOWN_PROMPT])
+
+		# Now unconditionally terminate the process as we've hit one of the expected prompts and the switch
+		# doesn't appear to gracefully terminate the ssh session on reboot.
+		self.proc.end(quit_cmd = "", prompt = "")
