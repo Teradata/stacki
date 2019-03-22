@@ -69,9 +69,10 @@ class Command(stack.commands.report.host.command):
 		if not remotedns:
 			remotedns = self.getHostAttr(host, 'Kickstart_PrivateDNSServers')
 		if remotedns:
-			servers = remotedns.split(',')
+			servers = remotedns.strip().split(',')
 			for server in servers:
-				report.append(f'nameserver {server.strip()}')
+				if server:
+					report.append(f'nameserver {server.strip()}')
 
 		return'\n'.join(report)
 

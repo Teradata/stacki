@@ -40,8 +40,8 @@ config_preamble_redhat = """options {
 	directory "/var/named";
 	dump-file "/var/named/data/cache_dump.db";
 	statistics-file "/var/named/data/named_stats.txt";
-	forwarders { %s; };
 	allow-query { private; };
+	%s
 };
 
 controls {
@@ -70,8 +70,8 @@ config_preamble_sles = """options {
 	directory "/var/lib/named";
 	dump-file "/var/log/named_dump.db";
 	statistics-file "/var/log/named.stats";
-	forwarders { %s; };
 	allow-query { private; };
+	%s
 };
 
 controls {
@@ -144,7 +144,7 @@ class Command(stack.commands.report.command):
 
 
 		fwds = self.getAttr('Kickstart_PublicDNSServers')
-		if not fwds:
+		if fwds is None:
 			#
 			# in the case of only one interface on the frontend,
 			# then Kickstart_PublicDNSServers will not be
@@ -152,11 +152,14 @@ class Command(stack.commands.report.command):
 			# the correct DNS servers
 			#
 			fwds = self.getAttr('Kickstart_PrivateDNSServers')
+		if fwds is not None:
+			fwds = fwds.strip()
+	
+		if fwds:
+			forwarders = 'forwarders { %s; };' % ';'.join(fwds.split(','))
+		else:
+			forwarders = ''
 
-			if not fwds:
-				return
-
-		forwarders = ';'.join(fwds.split(','))
 		if self.getHostAttr('localhost','os') == 'redhat':
 			s += config_preamble_redhat % (forwarders)
 		if self.getHostAttr('localhost','os') == 'sles':
