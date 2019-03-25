@@ -134,6 +134,10 @@ class ExpectMore():
 			**kwargs
 		)
 
+		# Bail out if the results are empty.
+		if not results:
+			return results
+
 		# we only care about the first result
 		results = results[0]
 		if not sanitizer and not seek:
