@@ -41,25 +41,27 @@ pipeline {
                 // and do it here with retries.
                 dir('stacki') {
                     retry(3) {
-                        timeout(300) {
-                            // Note: there is currently a bug in scm checkout where it doesn't
-                            // set environment variables, we we do by hand in a script
-                            script {
-                                checkout(scm).each { k,v -> env.setProperty(k, v) }
+                        script {
+                            // Note: There is a bug in Jenkins where a timeout causes the job to
+                            // abort unless you catch the FlowInterruptedException.
+                            // https://issues.jenkins-ci.org/browse/JENKINS-51454
+                            timeout(15) {
+                                try {
+                                    // Note: there is currently a bug in scm checkout where it doesn't
+                                    // set environment variables, we we do by hand in a script
+                                    checkout(scm).each { k,v -> env.setProperty(k, v) }
 
-                                // Add the last git log subject as the description in the GUI
-                                currentBuild.description = sh(
-                                    returnStdout: true,
-                                    script: 'git log -1 --pretty=format:%s'
-                                )
+                                    // Add the last git log subject as the description in the GUI
+                                    currentBuild.description = sh(
+                                        returnStdout: true,
+                                        script: 'git log -1 --pretty=format:%s'
+                                    )
+                                }
+                                catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                    error 'Source checkout timed out'
+                                }
                             }
                         }
-                    }
-
-                    // See if we are a release on a support branch
-                    script {
-                        def tag = sh(returnStdout: true, script: 'git tag --points-at HEAD').trim()
-                        env.IS_RELEASE = tag ==~ /stacki-.*/ && env.GIT_BRANCH ==~ /support.*/
                     }
                 }
 
@@ -86,7 +88,7 @@ pipeline {
                                 // Check the number of commits on the branch
                                 def status = sh(
                                     returnStatus: true,
-                                    script: "python3.6 ../stacki-git-tests/verify-branch-base.py"
+                                    script: "python3 ../stacki-git-tests/verify-branch-base.py"
                                 )
 
                                 // Report the status to github.com
@@ -116,7 +118,7 @@ pipeline {
                                 // Check the commit message formatting
                                 def status = sh(
                                     returnStatus: true,
-                                    script: 'python3.6 ../stacki-git-tests/validate-commit-message.py'
+                                    script: 'python3 ../stacki-git-tests/validate-commit-message.py'
                                 )
 
                                 // Report the status to github.com
@@ -143,28 +145,64 @@ pipeline {
 
         stage('Build') {
             environment {
-                BUILD_ISO_DIR = '/export/isos'
-                PYPI_CACHE = '1'
+                ISOS = '../../..'
+                PYPI_CACHE = 'true'
             }
 
             steps {
-                // Check out iso-builder
-                sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-iso-builder.git'
+                // Figure out if we are a release build
+                script {
+                    if (env.TAG_NAME ==~ /stacki-.*/ && env.BRANCH_NAME ==~ /master|support\/.*/) {
+                        env.IS_RELEASE = 'true'
+                    }
+                    else {
+                        env.IS_RELEASE = 'false'
+                    }
+                }
+
+                // Get some ISOs we'll need for build
+                script {
+                    switch(env.PLATFORM) {
+                        case 'redhat7':
+                            sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1708.iso .'
+                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.4_20171128-redhat7.x86_64.disk1.iso .'
+                            env.OS_PALLET = 'os-7.4_20171128-redhat7.x86_64.disk1.iso'
+                            break
+
+                        case 'sles12':
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+
+                        case 'sles11':
+                            sh 'cp /export/www/installer-isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
+                            break
+                    }
+                }
 
                 // Build our ISO
-                dir('stacki-iso-builder') {
+                dir('stacki/tools/iso-builder') {
                     // Give the build up to 60 minutes to finish
-                    timeout(3600) {
-                        sh './do-build.sh $PLATFORM ../stacki $GIT_BRANCH'
-                    }
-
-                    sh 'mv stacki-*.iso ../'
-
-                    // If we are Redhat, we will have a StackiOS ISO as well
-                    script {
-                        if (env.PLATFORM == 'redhat7') {
-                            sh 'mv stackios-*.iso ../'
+                    timeout(60) {
+                        script {
+                            try {
+                                sh 'vagrant up'
+                            }
+                            catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                error 'Build timed out'
+                            }
                         }
+                    }
+                }
+
+                // Move the ISO into the root of the workspace
+                sh 'mv stacki/stacki-*.iso .'
+
+                // If we are Redhat, we will have a StackiOS ISO as well
+                script {
+                    if (env.PLATFORM == 'redhat7') {
+                        sh 'mv stacki/stackios-*.iso .'
                     }
                 }
 
@@ -189,6 +227,11 @@ pipeline {
                 always {
                     // Update the Stacki Builds website
                     build job: 'rebuild_stacki-builds_website', wait: false
+
+                    // Remove the pallet builder VM
+                    dir('stacki/tools/iso-builder') {
+                        sh 'vagrant destroy -f || true'
+                    }
                 }
 
                 success {
@@ -365,11 +408,22 @@ pipeline {
                 sh 'cp -al stacki/test-framework integration'
                 sh 'cp -al stacki/test-framework system'
 
-                // And one to combine all the coverage into a combined report
-                sh 'cp -al stacki/test-framework combine'
+                // Set up coverage reports, if needed
+                script {
+                    // releases, develop branch, and branches ending in _cov get coverage reports
+                    if (env.PLATFORM ==~ 'sles12|redhat7' && (env.IS_RELEASE == 'true' || env.GIT_BRANCH ==~ /develop|.*_cov/)) {
+                        env.COVERAGE_REPORTS = 'true'
 
-                // A folder for the coverage reports to land in
-                sh 'mkdir coverage'
+                        // A VM to combine all the coverage into a combined report
+                        sh 'cp -al stacki/test-framework combine'
+
+                        // A folder for the coverage reports to land in
+                        sh 'mkdir coverage'
+                    }
+                    else {
+                        env.COVERAGE_REPORTS = 'false'
+                    }
+                }
             }
 
             post {
@@ -409,14 +463,24 @@ pipeline {
                         // Run the unit tests
                         dir('unit') {
                             // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
-                                // branches develop, master, and those ending in _cov get coverage reports
+                            timeout(60) {
                                 script {
-                                    if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
-                                        sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
+                                    try {
+                                        if (env.COVERAGE_REPORTS == 'true') {
+                                            sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --unit ../$ISO_FILENAME'
+                                        }
                                     }
-                                    else {
-                                        sh './run-tests.sh --unit ../$ISO_FILENAME'
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/unit') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Unit test-suite timed out'
                                     }
                                 }
                             }
@@ -425,12 +489,13 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'unit/reports/unit-junit.xml'
-
-                            // branches develop, master, and those ending in _cov get coverage reports
                             script {
-                                if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('unit/reports/unit-junit.xml')) {
+                                    junit 'unit/reports/unit-junit.xml'
+                                }
+
+                                if (env.COVERAGE_REPORTS == 'true') {
                                     // Move the coverage report to the common folder
                                     sh 'mv unit/reports/unit coverage/'
 
@@ -458,15 +523,25 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
-                                // branches develop, master, and those ending in _cov get coverage reports
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
-                                    if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
-                                        sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
+                                    try {
+                                        if (env.COVERAGE_REPORTS == 'true') {
+                                            sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --integration ../$ISO_FILENAME'
+                                        }
                                     }
-                                    else {
-                                        sh './run-tests.sh --integration ../$ISO_FILENAME'
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/integration') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Integration test-suite timed out'
                                     }
                                 }
                             }
@@ -475,12 +550,13 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'integration/reports/integration-junit.xml'
-
-                            // branches develop, master, and those ending in _cov get coverage reports
                             script {
-                                if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('integration/reports/integration-junit.xml')) {
+                                    junit 'integration/reports/integration-junit.xml'
+                                }
+
+                                if (env.COVERAGE_REPORTS == 'true') {
                                     // Move the coverage report to the common folder
                                     sh 'mv integration/reports/integration coverage/'
 
@@ -498,24 +574,31 @@ pipeline {
 
                         // Run the system tests
                         dir('system') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(3600) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
-                                    if (env.PLATFORM == 'sles11') {
-                                        // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
+                                    try {
+                                        if (env.PLATFORM == 'sles11') {
+                                            // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
+                                            // Note: Give it 20 minutes to show up (will usually take 10)
+                                            retry(20) {
+                                                sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                                            }
 
-                                        // Give Jenkins 10 more minutes to finish the SLES 12 build
-                                        sleep 600
-
-                                        // Note: Give it 10 more minutes to show up
-                                        retry(10) {
-                                            sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --system ../$ISO_FILENAME'
+                                        }
+                                    }
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/system') {
+                                            sh 'vagrant destroy -f || true'
                                         }
 
-                                        sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
-                                    }
-                                    else {
-                                        sh './run-tests.sh --system ../$ISO_FILENAME'
+                                        // Raise an error
+                                        error 'System test-suite timed out'
                                     }
                                 }
                             }
@@ -524,23 +607,19 @@ pipeline {
 
                     post {
                         always {
-                            // Record the test statuses for Jenkins
-                            junit 'system/reports/system-junit.xml'
+                            script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('system/reports/system-junit.xml')) {
+                                    junit 'system/reports/system-junit.xml'
+                                }
+                            }
                         }
                     }
                 }
 
                 stage('Combine') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
-                        }
-                        anyOf {
-                            branch 'master'
-                            branch 'develop'
-                            branch '*_cov'
-                        }
+                        environment name: 'COVERAGE_REPORTS', value: 'true'
                     }
 
                     steps {
@@ -557,7 +636,7 @@ pipeline {
             post {
                 always {
                     script {
-                        if (env.PLATFORM != 'sles11' && env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                        if (env.COVERAGE_REPORTS == 'true') {
                             // Combine the coverage data
                             dir('combine/test-suites/unit') {
                                 sh '''
@@ -642,7 +721,6 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop'
-                    branch 'master'
                     environment name: 'IS_RELEASE', value: 'true'
                 }
             }
@@ -656,12 +734,7 @@ pipeline {
                                 env.ART_REPO = 'pkgs-external-qa-sd'
                             }
                             else {
-                                if (env.ISO_FILENAME ==~ /stacki-.+rc.+-.+\.x86_64\.disk1\.iso/) {
-                                    env.ART_REPO = 'pkgs-external-stable-sd'
-                                }
-                                else {
-                                    env.ART_REPO = 'pkgs-external-released-sd'
-                                }
+                                env.ART_REPO = 'pkgs-external-released-sd'
                             }
                         }
 
@@ -681,10 +754,9 @@ pipeline {
 
                     post {
                         success {
-                            // Notify Slack of a new stable release
+                            // Notify Slack of a new release
                             script {
-                                // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') {
+                                if (env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
                                         color: 'good',
@@ -695,10 +767,7 @@ pipeline {
                                         """.stripIndent(),
                                         tokenCredentialId: 'slack_jenkins_integration_token'
                                     )
-                                }
 
-                                // Full releases are announced on #stacki-announce
-                                if (env.ART_REPO == 'pkgs-external-released-sd') {
                                     slackSend(
                                         channel: '#stacki-announce',
                                         color: 'good',
@@ -736,10 +805,7 @@ pipeline {
                 stage('Amazon S3') {
                     when {
                         environment name: 'PLATFORM', value: 'redhat7'
-                        anyOf {
-                            branch 'master'
-                            environment name: 'IS_RELEASE', value: 'true'
-                        }
+                        environment name: 'IS_RELEASE', value: 'true'
                     }
 
                     steps {
@@ -798,7 +864,6 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop'
-                    branch 'master'
                     environment name: 'IS_RELEASE', value: 'true'
                 }
             }
@@ -871,7 +936,7 @@ pipeline {
 
                         // Releases of the Redhat version goes to amazon S3 too
                         script {
-                            if ((env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') && env.PLATFORM == 'redhat7') {
+                            if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
@@ -886,12 +951,22 @@ pipeline {
 
                     post {
                         success {
-                            // Notify Slack of a new stable release
+                            // Notify Slack of a new release
                             script {
-                                // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master' || env.IS_RELEASE == 'true') {
+                                if (env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
+                                        color: 'good',
+                                        message: """\
+                                            New Stacki QCow2 image uploaded to Artifactory.
+                                            *QCow2:* ${env.QCOW_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                        """.stripIndent(),
+                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                    )
+
+                                    slackSend(
+                                        channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
                                             New Stacki QCow2 image uploaded to Artifactory.
@@ -913,20 +988,6 @@ pipeline {
                                             tokenCredentialId: 'slack_jenkins_integration_token'
                                         )
                                     }
-                                }
-
-                                // Full releases are announced on #stacki-announce
-                                if (env.ART_REPO == 'pkgs-external-released-sd') {
-                                    slackSend(
-                                        channel: '#stacki-announce',
-                                        color: 'good',
-                                        message: """\
-                                            New Stacki QCow2 image uploaded to Artifactory.
-                                            *QCow2:* ${env.QCOW_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
-                                        """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
-                                    )
                                 }
                             }
 

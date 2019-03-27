@@ -1,0 +1,100 @@
+require "json"
+
+if ARGV[0] == "up"
+  # Make sure we have the needed ENV variables defined
+  if not ENV.has_key?("PLATFORM")
+    abort("Error: PLATFORM environment variable must be set")
+  end
+
+  if not ["redhat7", "sles12", "sles11"].include?(ENV["PLATFORM"])
+    abort("Error: PLATFORM must be one of 'redhat7', 'sles12', or 'sles11'")
+  end
+
+  if not ENV.has_key?("ISOS")
+    ENV["ISOS"] = "."
+  end
+
+  # Are we internal to TD?
+  ENV["INTERNAL"] = system("host stacki-builds.labs.teradata.com") ? "true" : "false"
+
+  # We can only build CentOS outside of TD
+  if not ENV["INTERNAL"] and ENV["PLATFORM"] != "redhat7"
+    abort("Error: Only redhat7 PLATFORM is buildable outside of the Teradata network")
+  end
+
+  # Write out the state for the other vagrant commands to use
+  state = {
+    "PLATFORM" => ENV["PLATFORM"],
+    "ISOS" => ENV["ISOS"],
+    "INTERNAL" => ENV["INTERNAL"]
+  }
+  File.write(".vagrant/state.json", state.to_json)
+
+else
+  if File.file?(".vagrant/state.json")
+    state = JSON.parse(File.read(".vagrant/state.json"))
+
+    ENV["PLATFORM"] = state["PLATFORM"]
+    ENV["ISOS"] = state["ISOS"]
+    ENV["INTERNAL"] = state["INTERNAL"]
+  end
+end
+
+Vagrant.configure("2") do |config|
+  config.ssh.sudo_command = "sudo -i %c"
+
+  config.vm.define "iso-builder" do |config|
+    case ENV["PLATFORM"]
+      when "redhat7"
+        config.vm.box = "stacki/centos-7.4"
+        if ENV["INTERNAL"]
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+        end
+      when "sles12"
+        config.vm.box = "stacki/sles-12.3"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+      when "sles11"
+        config.vm.box = "stacki/sles-11.3"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-11.3.json"
+    end
+
+    config.vm.provider "virtualbox" do |provider, config|
+      provider.name = "iso-builder-%08x" % rand(4294967295)
+
+      provider.memory = "4096"
+      provider.cpus = 2
+      provider.gui = false
+      provider.linked_clone = true
+
+      config.vm.synced_folder "../..", "/vagrant", type: "virtualbox"
+      config.vm.synced_folder ENV["ISOS"], "/export/isos/", type: "virtualbox"
+    end
+
+    config.vm.provider "libvirt" do |provider, config|
+      provider.default_prefix = "iso-builder-%08x" % rand(4294967295)
+
+      provider.driver = "kvm"
+      provider.connect_via_ssh = false
+
+      provider.memory = "4096"
+      provider.cpus = 2
+      provider.random :model => "random"
+
+      config.vm.synced_folder "../..", "/vagrant", nfs: true, nfs_version: 4, nfs_udp: false
+      config.vm.synced_folder ENV["ISOS"], "/export/isos/", nfs: true, nfs_version: 4, nfs_udp: false
+    end
+
+    config.vm.provision "shell", path: "provision.sh", name: "Provision", keep_color: true, env: {
+      "PLATFORM" => ENV["PLATFORM"],
+      "INTERNAL" => ENV["INTERNAL"]
+    }
+
+    config.vm.provision "shell", path: "build.sh", name: "Build", keep_color: true, env: {
+      "PLATFORM" => ENV["PLATFORM"],
+      "IS_RELEASE" => ENV["IS_RELEASE"],
+      "OS_PALLET" => ENV["OS_PALLET"],
+      "PYPI_CACHE" => ENV["PYPI_CACHE"]
+    }
+
+  end
+end

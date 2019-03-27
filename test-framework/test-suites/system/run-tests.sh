@@ -18,4 +18,5 @@ fi
 # Run the tests
 vagrant ssh frontend -c "sudo -i pytest -vvv \
 	--junit-xml=/export/reports/system-junit.xml \
+	/opt/stack/lib/python3*/site-packages/stack/commands/report/system/tests/ \
 	/export/test-suites/system/tests/"
