@@ -152,7 +152,12 @@ pipeline {
             steps {
                 // Figure out if we are a release build
                 script {
-                    env.IS_RELEASE = env.BRANCH_NAME == 'master'
+                    if (env.TAG_NAME ==~ /stacki-.*/ && env.BRANCH_NAME ==~ /master|support\/.*/) {
+                        env.IS_RELEASE = 'true'
+                    }
+                    else {
+                        env.IS_RELEASE = 'false'
+                    }
                 }
 
                 // Get some ISOs we'll need for build
@@ -403,11 +408,22 @@ pipeline {
                 sh 'cp -al stacki/test-framework integration'
                 sh 'cp -al stacki/test-framework system'
 
-                // And one to combine all the coverage into a combined report
-                sh 'cp -al stacki/test-framework combine'
+                // Set up coverage reports, if needed
+                script {
+                    // releases, develop branch, and branches ending in _cov get coverage reports
+                    if (env.PLATFORM ==~ 'sles12|redhat7' && (env.IS_RELEASE == 'true' || env.GIT_BRANCH ==~ /develop|.*_cov/)) {
+                        env.COVERAGE_REPORTS = 'true'
 
-                // A folder for the coverage reports to land in
-                sh 'mkdir coverage'
+                        // A VM to combine all the coverage into a combined report
+                        sh 'cp -al stacki/test-framework combine'
+
+                        // A folder for the coverage reports to land in
+                        sh 'mkdir coverage'
+                    }
+                    else {
+                        env.COVERAGE_REPORTS = 'false'
+                    }
+                }
             }
 
             post {
@@ -450,8 +466,7 @@ pipeline {
                             timeout(60) {
                                 script {
                                     try {
-                                        // branches develop, master, and those ending in _cov get coverage reports
-                                        if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                        if (env.COVERAGE_REPORTS == 'true') {
                                             sh './run-tests.sh --unit --coverage ../$ISO_FILENAME'
                                         }
                                         else {
@@ -480,8 +495,7 @@ pipeline {
                                     junit 'unit/reports/unit-junit.xml'
                                 }
 
-                                // branches develop, master, and those ending in _cov get coverage reports
-                                if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                if (env.COVERAGE_REPORTS == 'true') {
                                     // Move the coverage report to the common folder
                                     sh 'mv unit/reports/unit coverage/'
 
@@ -513,8 +527,7 @@ pipeline {
                             timeout(90) {
                                 script {
                                     try {
-                                        // branches develop, master, and those ending in _cov get coverage reports
-                                        if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                        if (env.COVERAGE_REPORTS == 'true') {
                                             sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
                                         }
                                         else {
@@ -543,8 +556,7 @@ pipeline {
                                     junit 'integration/reports/integration-junit.xml'
                                 }
 
-                                // branches develop, master, and those ending in _cov get coverage reports
-                                if (env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                                if (env.COVERAGE_REPORTS == 'true') {
                                     // Move the coverage report to the common folder
                                     sh 'mv integration/reports/integration coverage/'
 
@@ -607,15 +619,7 @@ pipeline {
 
                 stage('Combine') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
-                        }
-                        anyOf {
-                            branch 'master'
-                            branch 'develop'
-                            branch '*_cov'
-                        }
+                        environment name: 'COVERAGE_REPORTS', value: 'true'
                     }
 
                     steps {
@@ -632,7 +636,7 @@ pipeline {
             post {
                 always {
                     script {
-                        if (env.PLATFORM != 'sles11' && env.GIT_BRANCH ==~ /develop|master|.*_cov/) {
+                        if (env.COVERAGE_REPORTS == 'true') {
                             // Combine the coverage data
                             dir('combine/test-suites/unit') {
                                 sh '''
@@ -717,7 +721,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop'
-                    branch 'master'
+                    environment name: 'IS_RELEASE', value: 'true'
                 }
             }
 
@@ -730,12 +734,7 @@ pipeline {
                                 env.ART_REPO = 'pkgs-external-qa-sd'
                             }
                             else {
-                                if (env.ISO_FILENAME ==~ /stacki-.+rc.+-.+\.x86_64\.disk1\.iso/) {
-                                    env.ART_REPO = 'pkgs-external-stable-sd'
-                                }
-                                else {
-                                    env.ART_REPO = 'pkgs-external-released-sd'
-                                }
+                                env.ART_REPO = 'pkgs-external-released-sd'
                             }
                         }
 
@@ -755,10 +754,9 @@ pipeline {
 
                     post {
                         success {
-                            // Notify Slack of a new stable release
+                            // Notify Slack of a new release
                             script {
-                                // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master') {
+                                if (env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
                                         color: 'good',
@@ -769,10 +767,7 @@ pipeline {
                                         """.stripIndent(),
                                         tokenCredentialId: 'slack_jenkins_integration_token'
                                     )
-                                }
 
-                                // Full releases are announced on #stacki-announce
-                                if (env.ART_REPO == 'pkgs-external-released-sd') {
                                     slackSend(
                                         channel: '#stacki-announce',
                                         color: 'good',
@@ -810,7 +805,7 @@ pipeline {
                 stage('Amazon S3') {
                     when {
                         environment name: 'PLATFORM', value: 'redhat7'
-                        branch 'master'
+                        environment name: 'IS_RELEASE', value: 'true'
                     }
 
                     steps {
@@ -869,7 +864,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'develop'
-                    branch 'master'
+                    environment name: 'IS_RELEASE', value: 'true'
                 }
             }
 
@@ -941,7 +936,7 @@ pipeline {
 
                         // Releases of the Redhat version goes to amazon S3 too
                         script {
-                            if (env.GIT_BRANCH == 'master' && env.PLATFORM == 'redhat7') {
+                            if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
@@ -956,12 +951,22 @@ pipeline {
 
                     post {
                         success {
-                            // Notify Slack of a new stable release
+                            // Notify Slack of a new release
                             script {
-                                // Both 'rc' and full releases go to #tdc-pallets
-                                if (env.GIT_BRANCH == 'master') {
+                                if (env.IS_RELEASE == 'true') {
                                     slackSend(
                                         channel: '#tdc-pallets',
+                                        color: 'good',
+                                        message: """\
+                                            New Stacki QCow2 image uploaded to Artifactory.
+                                            *QCow2:* ${env.QCOW_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                        """.stripIndent(),
+                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                    )
+
+                                    slackSend(
+                                        channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
                                             New Stacki QCow2 image uploaded to Artifactory.
@@ -983,20 +988,6 @@ pipeline {
                                             tokenCredentialId: 'slack_jenkins_integration_token'
                                         )
                                     }
-                                }
-
-                                // Full releases are announced on #stacki-announce
-                                if (env.ART_REPO == 'pkgs-external-released-sd') {
-                                    slackSend(
-                                        channel: '#stacki-announce',
-                                        color: 'good',
-                                        message: """\
-                                            New Stacki QCow2 image uploaded to Artifactory.
-                                            *QCow2:* ${env.QCOW_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
-                                        """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
-                                    )
                                 }
                             }
 
