@@ -44,7 +44,7 @@ do
                 # Copy the EXTRA_ISO to the .cache directory, if needed
                 if [[ "$(cd "$(dirname "$1")"; pwd)" != "$CACHE_DIR" ]]
                 then
-                    $cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
+                    /bin/cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
                 fi
 
                 # Add the filename EXTRA_ISOS array, which will be accessible
