@@ -49,10 +49,10 @@ class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.I
 		if adapter:
 			self.owner.hosts[host][array]['adapter'] = adapter
 
-		if slot == '*' and raid != '0':
+		if slot == '*' and raid not in [ '0', '1' ]:
 			raise CommandError(
 				self.owner,
-				f'raid level must be "0" when slot is "*". See line {line}'
+				f'raid level must be "0" or "1" when slot is "*". See line {line}'
 			)
 
 		if 'slot' not in self.owner.hosts[host][array]:

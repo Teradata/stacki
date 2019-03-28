@@ -221,7 +221,7 @@ for o in csv_controller:
 			try:
 				raidlevel = o['raidlevel']
 			except:
-				raidlevel = 0
+				raidlevel = '0'
 
 		if 'options' in o.keys():
 			try:
@@ -235,11 +235,23 @@ for o in csv_controller:
 			enclosure = ctrl.getEnclosure(adapter)
 
 		if 'arrayid' in o.keys():
-			# JBOD Mode for the remainder
 			if o['arrayid'] == '*':
-				for slot in freeslots[adapter]:
-					ctrl.doRaid(0, adapter, enclosure, [ slot ],
-						hotspares, options)
+				if raidlevel == '1':
+					#
+					# special case for arrayid == '*' and raidlevel 1 -- put the remaining
+					# disks into RAID 1 pairs
+					#
+					while len(freeslots[adapter]) > 1:
+						disks = [ freeslots[adapter][0], freeslots[adapter][1] ]
+						ctrl.doRaid(1, adapter, enclosure, disks, [], options)
+
+						freeslots[adapter].remove(disks[0])
+						freeslots[adapter].remove(disks[1])
+				else:
+					# JBOD Mode for the remainder
+					for slot in freeslots[adapter]:
+						ctrl.doRaid(0, adapter, enclosure, [ slot ],
+							[], options)
 
 			# RAID mode - Single array for remaining disks
 			else:
