@@ -88,7 +88,7 @@ class TestLoadStorageController:
 		result = host.run(f'stack load storage controller file={path}')
 		assert result.rc == 255
 		assert result.stderr == (
-			'error - raid level must be "0" when slot is "*". See line 2\n'
+			'error - raid level must be "0" or "1" when slot is "*". See line 2\n'
 		)
 
 	def test_duplicate_slot(self, host, test_file):
