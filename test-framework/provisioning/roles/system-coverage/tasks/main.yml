@@ -1,0 +1,12 @@
+---
+- name: Make sure we have pip
+  command: /opt/stack/bin/python3 -m ensurepip
+
+- name: Install coverage package
+  command: /opt/stack/bin/pip3 install coverage
+
+- name: Hook the python interpreter
+  copy:
+    src: files/sitecustomize.py
+    dest: /opt/stack/lib/python3.7/site-packages/
+    mode: 0644

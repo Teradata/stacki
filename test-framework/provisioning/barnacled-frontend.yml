@@ -5,6 +5,11 @@
       import_role:
         name: barnacle
 
+    - name: Set up system test-suite coverage
+      import_role:
+        name: system-coverage
+      when: lookup('env','SYSTEM_COVERAGE') == '1'
+
     - name: Set up the OS pallet
       import_role:
         name: os-pallet
