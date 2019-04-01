@@ -213,9 +213,15 @@ if [[ $ALL -eq 1 || $SYSTEM -eq 1 ]]
 then
     echo
     echo -e "\033[34mRunning system test suite ...\033[0m"
-    ./test-suites/system/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
-    ./test-suites/system/run-tests.sh
+    if [[ $COVERAGE -eq 1 ]]
+    then
+        ./test-suites/system/set-up.sh --coverage $STACKI_ISO "${EXTRA_ISOS[@]}"
+        ./test-suites/system/run-tests.sh --coverage
+    else
+        ./test-suites/system/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
+        ./test-suites/system/run-tests.sh
+    fi
     RETURN_CODE=$?
 
     ./test-suites/system/tear-down.sh

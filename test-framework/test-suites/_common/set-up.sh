@@ -15,6 +15,7 @@ fi
 
 # Parse the command line
 USE_SRC=0
+COVERAGE=0
 ISO=""
 EXTRA_ISOS=()
 
@@ -23,6 +24,10 @@ do
     case "$1" in
         --use-src)
             USE_SRC=1
+            shift 1
+            ;;
+        --coverage)
+            COVERAGE=1
             shift 1
             ;;
         *)
@@ -44,7 +49,7 @@ do
                 # Copy the EXTRA_ISO to the .cache directory, if needed
                 if [[ "$(cd "$(dirname "$1")"; pwd)" != "$CACHE_DIR" ]]
                 then
-                    $cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
+                    cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
                 fi
 
                 # Add the filename EXTRA_ISOS array, which will be accessible
@@ -145,13 +150,19 @@ set +e
 vagrant box update
 set -e
 
+# Export the SYSTEM_COVERAGE environment variable if coverage was requested
+if [[ $COVERAGE -eq 1 ]]
+then
+    export SYSTEM_COVERAGE="1"
+fi
+
 # Bring up the frontend
 vagrant up frontend
 
 # Run the set-up.d scripts
 for SETUP_FILE in set-up.d/*
 do
-    if [[ -f $SETUP_FILE && -x $SETUP_FILE ]]
+    if [[ -f $SETUP_FILE && -x $SETUP_FILE && $(basename $SETUP_FILE) != _* ]]
     then
         ./$SETUP_FILE $STACKI_ISO "${EXTRA_ISOS[@]}"
     fi

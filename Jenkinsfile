@@ -408,7 +408,6 @@ pipeline {
                 sh 'cp -al stacki/test-framework integration'
                 sh 'cp -al stacki/test-framework system'
 
-                // Set up coverage reports, if needed
                 script {
                     // releases, develop branch, and branches ending in _cov get coverage reports
                     if (env.PLATFORM ==~ 'sles12|redhat7' && (env.IS_RELEASE == 'true' || env.GIT_BRANCH ==~ /develop|.*_cov/)) {
@@ -422,6 +421,14 @@ pipeline {
                     }
                     else {
                         env.COVERAGE_REPORTS = 'false'
+                    }
+
+                    // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
+                    // Note: Give it 20 minutes to show up (will usually take 10)
+                    if (env.PLATFORM == 'sles11') {
+                        retry(20) {
+                            sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                        }
                     }
                 }
             }
@@ -579,16 +586,15 @@ pipeline {
                                 script {
                                     try {
                                         if (env.PLATFORM == 'sles11') {
-                                            // If we're SLES 11, use a matching SLES 12 Stacki pallet to be our frontend
-                                            // Note: Give it 20 minutes to show up (will usually take 10)
-                                            retry(20) {
-                                                sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
-                                            }
-
-                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
+                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ../${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
                                         }
                                         else {
-                                            sh './run-tests.sh --system ../$ISO_FILENAME'
+                                            if (env.COVERAGE_REPORTS == 'true') {
+                                                sh './run-tests.sh --system --coverage ../$ISO_FILENAME'
+                                            }
+                                            else {
+                                                sh './run-tests.sh --system ../$ISO_FILENAME'
+                                            }
                                         }
                                     }
                                     catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -612,6 +618,14 @@ pipeline {
                                 if (fileExists('system/reports/system-junit.xml')) {
                                     junit 'system/reports/system-junit.xml'
                                 }
+
+                                if (env.COVERAGE_REPORTS == 'true') {
+                                    // Move the coverage report to the common folder
+                                    sh 'mv system/reports/system coverage/'
+
+                                    // Add the coverage data to the `combine` folder
+                                    sh 'mv system/reports/system.coverage combine/reports/'
+                                }
                             }
                         }
                     }
@@ -626,8 +640,10 @@ pipeline {
                         sleep 30
 
                         dir('combine/test-suites/unit') {
-                            // Create a VM to combine the coverage data
-                            sh './set-up.sh ../../../$ISO_FILENAME'
+                            script {
+                                // Create a VM to combine the coverage data
+                                sh './set-up.sh ../../../$ISO_FILENAME'
+                            }
                         }
                     }
                 }
@@ -661,9 +677,9 @@ pipeline {
                                 alwaysLinkToLastBuild: false,
                                 keepAll: true,
                                 reportDir: 'coverage',
-                                reportFiles: 'all/index.html,unit/index.html,integration/index.html',
+                                reportFiles: 'all/index.html,unit/index.html,integration/index.html,system/index.html',
                                 reportName: 'Code Coverage',
-                                reportTitles: 'All,Unit,Integration'
+                                reportTitles: 'All,Unit,Integration,System'
                             )
                         }
 
