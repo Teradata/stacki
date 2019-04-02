@@ -742,6 +742,57 @@ class HostArgumentProcessor:
 
 		return hosts[0]
 
+	def getRunHosts(self, hosts):
+		"""Return a mapping of hosts to their accessible network addresses.
+		The network addresses are either user defined using the "stack.network"
+		attribute, or defaults to the any pxe-enabled network, with the default
+		network being priority.
+		This function needs to be called for any command that connects to backends
+		over SSH to run commands - typically "sync host..." or "run host" commands
+		"""
+
+		# Get a list of all attributes for the hosts, and convert the output
+		# to a usable dictionary of host to attribute:value mapping
+		attrs = {}
+		for row in self.call('list.host.attr', hosts):
+			host = row['host']
+			attr = row['attr']
+			value= row['value']
+			if host not in attrs:
+				attrs[host] = {}
+			attrs[host][attr] = value
+
+		# Create a dictionary of hosts to the names by which they will be accessed.
+		# This defaults to the hostname known to Stacki will be used as the hostname
+		# used to access the node.
+		h = { host: host for host in hosts }
+
+		# Get a list of all the host interfaces for the hosts specified.
+		host_if = self.call('list.host.interface', hosts + ['expanded=True'])
+
+		for host in hosts:
+			# If "stack.network" attribute is specified and points to a valid network
+			# use the hostname of the host on THAT network.
+			if 'stack.network' in attrs[host]:
+				h[host] = self.getHostnames([host], subnet = attrs[host]['stack.network'])[0]
+			# If not get the list of all PXE-Enabled addresses for the host, with the "default"
+			# network being prioritized. If one of the PXE-Enabled networks isn't default, then
+			# just use the first one returned by the database.
+			else:
+				# List of PXE-enabled networks for host where default = True
+				net = [ f['network'] for f in host_if if f['pxe'] == True and f['host'] == host and f['default'] == True ]
+				if not net:
+					# List of PXE-enabled networks for host if no default is found
+					net = [ f['network'] for f in host_if if f['pxe'] == True and f['host'] == host ]
+				if not net:
+					# If no PXE-enabled networks are found, we still have the original hostname of the host
+					continue
+				else:
+					h[host] = self.getHostnames([host], subnet=net[0])[0]
+
+		run_hosts = [ {'host': host, 'name': h[host] } for host in h ]
+		return run_hosts
+
 
 class ScopeArgumentProcessor(
 	ApplianceArgumentProcessor,

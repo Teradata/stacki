@@ -107,39 +107,8 @@ class Parallel(threading.Thread):
 
 class command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
+	pass
 
-	def getRunHosts(self, hosts):
-		self.mgmt_networks = {}
-		run_hosts = []
-		self.attrs = self.call('list.host.attr',hosts)
-		f = lambda x: x['attr'] == 'stack.network'
-		network_attrs = list(filter(f, self.attrs))
-
-		self.mgmt_networks = {}
-		for host in hosts:
-			g = lambda x: x['host'] == host
-			s = list(filter(g, network_attrs))
-			if len(s):
-				network = s[0]['value']
-				if network not in self.mgmt_networks:
-					self.mgmt_networks[network] = []
-				self.mgmt_networks[network].append(host)
-
-		a = []
-		b = []
-		for net in self.mgmt_networks:
-			h = self.mgmt_networks[net]
-			a.extend(h)
-			b.extend(self.getHostnames(h, subnet=net))
-
-		for host in hosts:
-			if host in a:
-				idx = a.index(host)
-				run_hosts.append({'host':host, 'name':b[idx]})
-			else:
-				run_hosts.append({'host':host, 'name':host})
-
-		return run_hosts
 
 class Command(command):
 	"""
