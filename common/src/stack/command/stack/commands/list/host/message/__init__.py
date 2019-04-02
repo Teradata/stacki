@@ -9,7 +9,7 @@ import signal
 import zmq
 import pprint
 import stack.mq
-import stack.commands.sync.host
+import stack.commands.list.host
 
 
 class Subscriber(stack.mq.Subscriber):
@@ -47,7 +47,7 @@ class Subscriber(stack.mq.Subscriber):
 
 
 
-class Command(stack.commands.sync.host.command):
+class Command(stack.commands.list.host.command):
 	"""
 	Attaches to one or more hosts' Message Queue and displays
 	all messages on the provided channel(s).
