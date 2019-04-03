@@ -56,6 +56,9 @@ if __name__ == '__main__':
 			if dest_filename.exists() or dest_filename.is_symlink():
 				dest_filename.unlink()
 
+			# Create any missing directory structure in the destination.
+			dest_filename.parent.mkdir(parents = True, exist_ok = True)
+
 			# Now symlink over our src version
 			dest_filename.symlink_to(src_filename)
 
@@ -66,6 +69,9 @@ if __name__ == '__main__':
 		# Blow away the old one, if it exists
 		if dest_filename.exists() or dest_filename.is_symlink():
 			dest_filename.unlink()
+
+		# Create any missing directory structure in the destination.
+		dest_filename.parent.mkdir(parents = True, exist_ok = True)
 
 		# Now symlink over our src version
 		dest_filename.symlink_to(src_filename)
