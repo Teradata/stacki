@@ -1018,42 +1018,57 @@ class TestSwitchDellX1052:
 		with pytest.raises(SwitchException):
 			test_switch.upload_boot(boot_file = "foo/bar")
 
-	def test_reload(self):
+	@patch(target = "stack.switch.x1052.Timer", autospec = True)
+	def test_reload(self, mock_timer):
 		"""Test that reload works in the good case."""
-		# Make sure we first return the console prompt, then the continue prompt.
-		expected_prompts = [*SwitchDellX1052.CONSOLE_PROMPTS, SwitchDellX1052.CONTINUE_PROMPT, SwitchDellX1052.SHUTDOWN_PROMPT]
+		# Make sure we first return the console prompt, then the continue prompt twice, and finally the console prompt.
+		expected_prompts = [SwitchDellX1052.CONTINUE_PROMPT, SwitchDellX1052.SHUTDOWN_PROMPT]
 		test_switch = self.SwitchDellX1052UnderTest(
 			match_index_kwargs = {
 				"side_effect": [
-					expected_prompts.index(SwitchDellX1052.CONSOLE_PROMPT),
+					SwitchDellX1052.CONSOLE_PROMPTS.index(SwitchDellX1052.CONSOLE_PROMPT),
 					expected_prompts.index(SwitchDellX1052.CONTINUE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.CONTINUE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.SHUTDOWN_PROMPT),
 				]
 			},
 		)
+		# Use side-effect to ensure we only return True as many times as necessary to prevent a borked test/implementation
+		# from getting into an infinite loop.
+		mock_timer.return_value.is_alive.side_effect = (True, True, False)
 
 		test_switch.reload()
 
-		# Expect that reboot was asked for and confirmed
-		test_switch.proc.say.assert_any_call(
-			cmd = "reload",
-			prompt = expected_prompts,
-		)
-		test_switch.proc.say.assert_any_call(
-			cmd = "Y",
-			prompt = [*SwitchDellX1052.CONSOLE_PROMPTS, SwitchDellX1052.SHUTDOWN_PROMPT],
-		)
+		# Expect that reboot was asked for and confirmed twice. We must also include the decorator's ask
+		# call to get to the correct prompt for completeness.
+		assert [
+			call(cmd = "q"),
+			call(cmd = "reload", prompt = expected_prompts),
+			call(cmd = "Y", prompt = expected_prompts, sendline = False),
+			call(cmd = "Y", prompt = expected_prompts, sendline = False),
+		] == test_switch.proc.say.call_args_list
 		# Expect that the process was terminated without any prompts or quit commands
 		test_switch.proc.end.assert_called_once_with(quit_cmd = "", prompt = "")
+		# Expect that the timer was started, checked twice, and stopped
+		mock_timer.return_value.start.assert_called_once_with()
+		assert mock_timer.return_value.is_alive.call_count == 2
+		mock_timer.return_value.cancel.assert_called_once_with()
 
-	def test_reload_no_confirm_prompt(self):
-		"""Test that reload works in the good case."""
+	@patch(target = "stack.switch.x1052.Timer", autospec = True)
+	def test_reload_no_confirm_prompt(self, mock_timer):
+		"""Test that reload works in the case where there are no reload prompts."""
 		# Make sure we alway return the console prompt.
-		expected_prompts = [*SwitchDellX1052.CONSOLE_PROMPTS, SwitchDellX1052.CONTINUE_PROMPT, SwitchDellX1052.SHUTDOWN_PROMPT]
+		expected_prompts = [SwitchDellX1052.CONTINUE_PROMPT, SwitchDellX1052.SHUTDOWN_PROMPT]
 		test_switch = self.SwitchDellX1052UnderTest(
 			match_index_kwargs = {
-				"return_value": expected_prompts.index(SwitchDellX1052.CONSOLE_PROMPT),
+				"side_effect": (
+					SwitchDellX1052.CONSOLE_PROMPTS.index(SwitchDellX1052.CONSOLE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.SHUTDOWN_PROMPT),
+				)
 			},
 		)
+		# Should never need to call is alive so return False.
+		mock_timer.return_value.is_alive.return_value = False
 
 		test_switch.reload()
 
@@ -1064,3 +1079,26 @@ class TestSwitchDellX1052:
 		)
 		# Expect that the process was terminated without any prompts or quit commands
 		test_switch.proc.end.assert_called_once_with(quit_cmd = "", prompt = "")
+		# Expect that the timer was started and stopped
+		mock_timer.return_value.start.assert_called_once_with()
+		mock_timer.return_value.cancel.assert_called_once_with()
+
+	@patch(target = "stack.switch.x1052.Timer", autospec = True)
+	def test_reload_timeout(self, mock_timer):
+		"""Test that reload raises an exception if it times out."""
+		# Make sure we first return the console prompt, then the continue prompt twice, and finally the console prompt.
+		expected_prompts = [SwitchDellX1052.CONTINUE_PROMPT, SwitchDellX1052.SHUTDOWN_PROMPT]
+		test_switch = self.SwitchDellX1052UnderTest(
+			match_index_kwargs = {
+				"side_effect": [
+					SwitchDellX1052.CONSOLE_PROMPTS.index(SwitchDellX1052.CONSOLE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.CONTINUE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.CONTINUE_PROMPT),
+					expected_prompts.index(SwitchDellX1052.SHUTDOWN_PROMPT),
+				]
+			},
+		)
+		mock_timer.return_value.is_alive.return_value = False
+
+		with pytest.raises(SwitchException):
+			test_switch.reload()

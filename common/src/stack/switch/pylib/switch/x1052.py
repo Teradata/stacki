@@ -423,13 +423,27 @@ class SwitchDellX1052(Switch):
 		This will disconnect from the switch. Connect will have to be called again once it reboots
 		before any other commands can be issued.
 		"""
-		prompts = [*self.CONSOLE_PROMPTS, self.CONTINUE_PROMPT, self.SHUTDOWN_PROMPT]
+		prompts = [self.CONTINUE_PROMPT, self.SHUTDOWN_PROMPT]
 
 		self.proc.say(cmd = "reload", prompt = prompts)
-		# If it's prompting to confirm reload, say yes
-		if self.proc.match_index == prompts.index(self.CONTINUE_PROMPT):
-			self.proc.say(cmd = "Y", prompt = [*self.CONSOLE_PROMPTS, self.SHUTDOWN_PROMPT])
+		# If it's prompting to confirm reload, say yes. It may prompt multiple times in a downgrade scenario.
+		# Timeout after 1 minute of attempting to confirm all the prompts.
+		# We use a no-op lambda because we just want to know when the timer expired.
+		timer = Timer(60, lambda: ())
+		timer.start()
+		while self.proc.match_index == prompts.index(self.CONTINUE_PROMPT):
+			# Check for timeout condition and raise a SwitchException if we timed out.
+			if not timer.is_alive():
+				raise SwitchException(
+					f"Timed out trying to confirm reload on {self.switchname}."
+					" Did the console output format change?"
+				)
 
+			# We must use pexpect.spawn.send instead of pexpect.spawn.sendline as the switch appears to treat the
+			# os.linesep that pexpect sends as auto cancelling the second confirmation prompt.
+			self.proc.say(cmd = "Y", prompt = prompts, sendline = False)
+
+		timer.cancel()
 		# Now unconditionally terminate the process as we've hit one of the expected prompts and the switch
 		# doesn't appear to gracefully terminate the ssh session on reboot.
 		self.proc.end(quit_cmd = "", prompt = "")
