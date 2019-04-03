@@ -97,13 +97,18 @@ class ExpectMore():
 		return self._session_script
 
 
-	def conversation(self, response_pairs, **kwargs):
+	def conversation(self, response_pairs, sendline = True, **kwargs):
 		"""
 		iterate over response_pairs, calling self._wait() and self._proc.sendline()
-		'response_pairs' is a sequence of calls and reposnses which must be of the form ((expected_output, response),)
+		'response_pairs' is a sequence of calls and responses which must be of the form ((expected_output, response),)
 		kwargs are passed to self._wait()
 
+		sendline controls whether pexpect.spawn.sendline is used instead of pexpect.spawn.send. This defaults to True.
 		"""
+		if sendline:
+			sender = self._proc.sendline
+		else:
+			sender = self._proc.send
 
 		results = []
 		for pair in response_pairs:
@@ -111,7 +116,7 @@ class ExpectMore():
 			if r.prompt:
 				results.append(self.wait(r.prompt, **kwargs))
 			if r.response:
-				self._proc.sendline(r.response)
+				sender(r.response)
 				self._session_script.append(r.response)
 		return results
 
