@@ -5,6 +5,7 @@ from pathlib import Path
 dest_base = Path("/opt/stack/lib/python3.7/site-packages")
 
 grafts_to_site_packages = (
+	("command/stack/argument_processors", "stack/argument_processors"),
 	("command/stack/commands", "stack/commands"),
 	("discovery/command", "stack/commands"),
 	("discovery/pylib", "stack"),
