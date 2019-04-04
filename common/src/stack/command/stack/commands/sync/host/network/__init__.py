@@ -88,7 +88,7 @@ class Command(stack.commands.sync.host.command):
 			s = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
 				stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			o, e = s.communicate(input=c.encode())
-			
+
 			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
 			cmd += '/opt/stack/bin/stack report host network %s && ' % host
 			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
