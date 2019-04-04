@@ -33,6 +33,7 @@
 		<to>storage</to>
 		<to>foundation-python</to>
 		<to>uefi-base</to>
+		<to>nsswitch</to>
 	</edge>
 
 

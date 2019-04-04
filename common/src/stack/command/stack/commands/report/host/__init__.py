@@ -80,6 +80,7 @@ class Command(command):
 				hosts[host] = []
 			h = {}
 			h['ip'] = row['ip']
+			h['name'] = row['name']
 			h['interface'] = row['interface']
 			h['zone'] = zones[row['network']]
 			h['default'] = row['default']
@@ -89,7 +90,7 @@ class Command(command):
 				for option in options:
 					if option.strip() == 'shortname':
 						h['shortname']= True
-						
+
 			if self.validateHostInterface(host, h, aliases):
 				hosts[host].append(h)
 
@@ -112,17 +113,31 @@ class Command(command):
 				interface = row['interface']
 				shortname = row['shortname']
 				names = []
+
 				# Get the FQDN
 				if zone:
 					names.append('%s.%s' % (host, zone))
+
+					if row['name']:
+						name_fqdn = f"{row['name']}.{zone}"
+						if name_fqdn not in names:
+							names.append(name_fqdn)
+
 				# If shortname for an interface is set to true,
 				# set this interface to have the shortname
 				if shortname_exists and shortname:
 					names.append(host)
+
+					if row['name'] and row['name'] not in names:
+						names.append(row['name'])
+
 				# If shortname is not set for any interface
 				# set the default interface to have the shortname
 				if default and not shortname_exists:
 					names.append(host)
+
+					if row['name'] and row['name'] not in names:
+						names.append(row['name'])
 
 				# Add any interface specific aliases
 				if host in aliases:
@@ -140,7 +155,7 @@ class Command(command):
 
 				if ip not in processed:
 					processed[ip] = {}
-				processed[ip]['names'] = ' '.join(names)
+				processed[ip]['names'] = '\t'.join(names)
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
