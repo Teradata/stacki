@@ -77,4 +77,17 @@ class TestUtil:
 		with pytest.raises(FileNotFoundError):
 			_exec('whodis')
 
-
+	@pytest.mark.parametrize(
+		"key, test_input, expected",
+		(
+			(None, ("a", "a", "b", "a", "c"), ("a", "b", "c")),
+			(None, ("b", "a", "a", "a", "c"), ("b", "a", "c")),
+			(None, ("b", "c", "a", "a", "a"), ("b", "c", "a")),
+			(str.lower, ("a", "A", "b", "A", "c"), ("a", "b", "c")),
+			(str.lower, ("b", "a", "A", "A", "c"), ("b", "a", "c")),
+			(str.lower, ("b", "c", "a", "A", "a"), ("b", "c", "a")),
+		)
+	)
+	def test_unique_everseen(self, key, test_input, expected):
+		"""Test that duplicates are removed and order is preserved."""
+		assert expected == tuple(stack.util.unique_everseen(test_input, key = key))
