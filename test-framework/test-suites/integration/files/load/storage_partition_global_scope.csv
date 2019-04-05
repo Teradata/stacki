@@ -1,0 +1,4 @@
+NAME,DEVICE,PARTID,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,sda,1,,40,,--asprimary --partition_id=18
+,sda,2,/,30720,ext4,--asprimary --label=ROOT-BE1
+,sda,3,,30720,ext4,--asprimary --label=ROOT-BE2

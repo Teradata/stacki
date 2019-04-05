@@ -1,13 +1,19 @@
 # @copyright@
+# Copyright (c) 2006 - 2019 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+
 import stack.commands
+from stack.exception import ArgRequired
 
 
-class Command(stack.commands.remove.command):
+class Command(stack.commands.remove.os.command):
 	"""
-	Remove storage partition configuration for an os type.
+	Remove storage partition configuration for an OS type.
 
-	<arg type='string' name='host' optional='1'>
-	OS Name
+	<arg type='string' name='os' repeat='1' optional='0'>
+	OS type (e.g., 'redhat', 'sles').
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -26,5 +32,8 @@ class Command(stack.commands.remove.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('remove.storage.partition', self._argv + [ 'scope=os' ]))
+		if len(args) == 0:
+			raise ArgRequired(self, 'os')
+
+		self.command('remove.storage.partition', self._argv + ['scope=os'])
 		return self.rc

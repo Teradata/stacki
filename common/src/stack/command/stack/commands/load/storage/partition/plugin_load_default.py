@@ -5,79 +5,76 @@
 # @copyright@
 
 import stack.commands
+from stack.exception import CommandError
 
 
-class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
-
+class Plugin(
+	stack.commands.OSArgumentProcessor,
+	stack.commands.ApplianceArgumentProcessor,
+	stack.commands.Plugin
+):
 	"""
 	Plugin that invokes 'stack add storage partition' and adds
 	the partitions to the database.
 	"""
+
 	def provides(self):
 		return 'default'
 
-
 	def run(self, args):
-		hosts = args
-		for host in hosts.keys():
-			#
-			# first remove the entries for this host
-			#
-			if host == 'global':
-				self.owner.call('remove.storage.partition', ['scope=global','device=*'])
-			else:
-				try:
-					_ = self.getOSNames([host])
-					self.owner.call('remove.os.storage.partition', [host])
-				except:
-					pass
+		appliances = self.getApplianceNames()
+		oses = self.getOSNames()
 
-				try:
-					_ = self.getApplianceNames([host])
-					self.owner.call('remove.appliance.storage.partition', [host])
-				except:
-					pass
+		for target, data in args.items():
+			# Remove all existing entries
+			cmdargs = []
 
-				try:
-					_ = self.getHostnames([host])
-					self.owner.call('remove.host.storage.partition', [host])
-				except:
-					pass
+			if target != 'global':
+				cmdargs.append(target)
 
-			# Get list of devices for this host
-			devices = []
-			for d in hosts[host].keys():
-				devices.append(d)
-			devices.sort()
+			cmdargs.append('device=*')
 
-			# Loop through all devices in the list
-			for device in devices:
-				partition_list = hosts[host][device]
+			try:
+				if target == 'global':
+					self.owner.call('remove.storage.partition', cmdargs)
+				elif target in appliances:
+					self.owner.call('remove.appliance.storage.partition', cmdargs)
+				elif target in oses:
+					self.owner.call('remove.os.storage.partition', cmdargs)
+				else:
+					self.owner.call('remove.host.storage.partition', cmdargs)
+			except CommandError:
+				# Nothing existed to remove
+				pass
 
-				# Add storage partitions for this device
-				for partition in partition_list:
+			# Loop through the devices in sorted order
+			for device in sorted(data.keys()):
+				for partition in data[device]:
 					cmdargs = []
-					if host != 'global':
-						cmdargs.append(host)
-					cmdargs += [ 'device=%s' % device ]
+					if target != 'global':
+						cmdargs.append(target)
 
-					mountpt = partition['mountpoint']
-					size = partition['size']
-					parttype = partition['type']
-					options = partition['options']
-					partid = partition['partid']
+					cmdargs.append(f'device={device}')
 
-					if mountpt:
-						cmdargs.append('mountpoint=%s' % mountpt)
-					if parttype:
-						cmdargs.append('type=%s' % parttype)
+					if partition['mountpoint']:
+						cmdargs.append(f"mountpoint={partition['mountpoint']}")
 
-					cmdargs.append('size=%s' % size)
-					if options:
-						cmdargs.append('options=%s' % options)
-					if partid:
-						cmdargs.append('partid=%s' % partid)
+					if partition['type']:
+						cmdargs.append(f"type={partition['type']}")
 
-					self.owner.call('add.storage.partition',
-						cmdargs)
+					cmdargs.append(f"size={partition['size']}")
+
+					if partition['options']:
+						cmdargs.append(f"options={partition['options']}")
+
+					if partition['partid']:
+						cmdargs.append(f"partid={partition['partid']}")
+
+					if target == 'global':
+						self.owner.call('add.storage.partition', cmdargs)
+					elif target in appliances:
+						self.owner.call('add.appliance.storage.partition', cmdargs)
+					elif target in oses:
+						self.owner.call('add.os.storage.partition', cmdargs)
+					else:
+						self.owner.call('add.host.storage.partition', cmdargs)

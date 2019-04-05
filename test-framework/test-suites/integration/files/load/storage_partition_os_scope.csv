@@ -1,0 +1,3 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+sles,sda,/,0,ext4,
+,sdb,/home,0,ext4,--label=HOME

@@ -142,7 +142,7 @@ class command(stack.commands.Command):
 		if scope == 'global':
 			data = self.call('list.storage.partition')
 		else:
-			data = self.call('list.storage.partition', [name])
+			data = self.call(f'list.{scope}.storage.partition', [name])
 
 		for row in data:
 			dump.append(OrderedDict(

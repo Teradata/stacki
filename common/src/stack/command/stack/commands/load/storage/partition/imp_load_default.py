@@ -5,221 +5,250 @@
 # @copyright@
 
 import re
+
 import stack.csv
 import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
-	stack.commands.Implementation):	
-
+class Implementation(
+	stack.commands.OSArgumentProcessor,
+	stack.commands.ApplianceArgumentProcessor,
+	stack.commands.Implementation
+):
 	"""
 	Put storage partition configuration into the database based on
 	a comma-separated formatted file.
 	"""
 
-	def doit(self, host, device, partid, mountpoint, size, fstype,
-			options, line):
-
-		#
-		# error checking
-		#
+	def process_target(self, target, device, partid, mountpoint, size, fstype, options, line):
 		if device is None:
-			msg = 'empty value found for "device" column at line %d' % line
-			raise CommandError(self.owner, msg)
-		if size is None:
-			msg = 'empty value found for "size" column at line %d' % line
-			raise CommandError(self.owner, msg)
-		if host not in self.owner.hosts.keys():
-			self.owner.hosts[host] = {}
-		
-		# List of partition maps for a device
-		partitions_list = []
-		if device in self.owner.hosts[host].keys():
-			partitions_list = self.owner.hosts[host][device]
-		
-		partition_detail_map = {}
-		partition_detail_map['mountpoint'] = mountpoint
-		partition_detail_map['size'] = size
-		partition_detail_map['type'] = fstype
-		partition_detail_map['options'] = options
-		partition_detail_map['partid'] = partid
+			raise CommandError(
+				self.owner,
+				f'empty value found for "device" column at line {line}'
+			)
 
-		# Append partition info to the map
-		partitions_list.append(partition_detail_map)
-		self.owner.hosts[host][device] = partitions_list
+		if size is None:
+			raise CommandError(
+				self.owner,
+				f'empty value found for "size" column at line {line}'
+			)
+
+		if target not in self.owner.hosts:
+			self.owner.hosts[target] = {}
+
+		if device not in self.owner.hosts[target]:
+			self.owner.hosts[target][device] = []
+
+		self.owner.hosts[target][device].append({
+			'mountpoint': mountpoint,
+			'size': size,
+			'type': fstype,
+			'options': options,
+			'partid': partid
+		})
 
 	def run(self, args):
 		filename, = args
 
-		self.appliances = self.getApplianceNames()
+		appliances = self.getApplianceNames()
+		oses = self.getOSNames()
 
 		try:
 			reader = stack.csv.reader(open(filename, encoding='ascii'))
+
 			header = None
-
 			name = None
-			type_dict = {}
+			auto_partid = 0
 
-			rowid = 1
-			line = 0
-			for row in reader:
-				line += 1
+			for line, row in enumerate(reader, 1):
+				if line == 1:
+					missing = {'name', 'device', 'size'}.difference(row)
+					if missing:
+						raise CommandError(
+							self.owner,
+							f'the following required fields are not present in '
+							f'the input file: {", ".join(sorted(missing))}'
+						)
 
-				if not header:
 					header = row
-
-					#
-					# make checking the header easier
-					#
-					required = ['name', 'device', 'size' ]
-
-					for i in range(0, len(row)):
-						if header[i] in required:
-							required.remove(header[i])
-
-					if len(required) > 0:
-						msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
-						raise CommandError(self.owner, msg)
-
 					continue
 
-				rowid += 1
+				auto_partid += 1
 
 				device = None
-				mountpoint = ''
+				mountpoint = None
 				size = None
-				type = ''
+				fstype = None
 				options = None
 				partid = None
 
-				for i in range(0, len(row)):
-					field = row[i]
+				for ndx, field in enumerate(row):
 					if not field:
 						continue
 
-					if header[i] == 'name':
-						name = field.lower()
+					if header[ndx] == 'name':
+						new_name = field.lower()
 
-						#
-						# every time the name changes, reset
-						# the rowid
-						#
-						rowid = 1
+						# When the name changes we reset the auto_partid
+						if new_name != name:
+							auto_partid = 1
 
-					elif header[i] == 'device':
+						name = new_name
+
+					elif header[ndx] == 'device':
 						device = field.lower()
 
-					elif header[i] == 'mountpoint':
+					elif header[ndx] == 'mountpoint':
 						mountpoint = field.lower()
 
-					elif header[i] == 'size':
-						try:
-							size = int(field)
+					elif header[ndx] == 'size':
+						if field.lower() in ['recommended', 'hibernation']:
+							size = field.lower()
+						else:
+							try:
+								size = int(field)
+							except:
+								raise CommandError(
+									self.owner,
+									f'size "{field}" must be an integer'
+								)
+
 							if size < 0:
-								msg = 'size "%d" must be 0 or greater' % size
-								raise CommandError(self.owner, msg)
-						except:
-							if field.lower() == 'recommended':
-								size = -1
-							elif field.lower() == 'hibernation':
-								size =  -2
-							else:
-								msg = 'size "%s" must be an integer' % field
-								raise CommandError(self.owner, msg)
-					elif header[i] == 'type':
-						type = field.lower()
-					elif header[i] == 'options':
+								raise CommandError(
+									self.owner,
+									f'size "{size}" must be >= 0'
+								)
+
+					elif header[ndx] == 'type':
+						fstype = field.lower()
+
+					elif header[ndx] == 'options':
 						options = field
-					elif header[i] == 'partid':
+
+					elif header[ndx] == 'partid':
 						try:
 							partid = int(field)
-							if partid < 1:
-								msg = 'partid "%d" must be 1 or greater' % partid
-								raise CommandError(self.owner, msg)
 						except:
-							pass
+							raise CommandError(
+								self.owner,
+								f'partid "{field}" must be an integer'
+							)
 
-				#
-				# the first non-header line must have a host name
-				#
-				if line == 1 and not name:
-					msg = 'empty host name found in "name" column'
-					raise CommandError(self.owner, msg)
+						if partid < 0:
+							raise CommandError(
+								self.owner,
+								f'partid "{partid}" must be >= 0'
+							)
 
-				if name in self.appliances or name == 'global':
-					hosts = [ name ]
+				# The first non-header line must have a host name
+				if line == 2 and not name:
+					raise CommandError(
+						self.owner,
+						'empty host name found in "name" column'
+					)
+
+				# Figure out our targets
+				if name in appliances or name in oses or name == 'global':
+					targets = [name]
 				else:
-					hosts = self.getHostnames([ name ])
+					targets = self.owner.getHostnames([name])
 
-				if not hosts:
-					msg = '"%s" is not host nor is it an appliance in the database' % name
-					raise CommandError(self.owner, msg)
+				if not targets:
+					raise CommandError(self.owner, f'Cannot find host "{name}"')
 
+				# If we weren't given a partid use the auto-generated one
 				if not partid:
-					partid = rowid
+					partid = auto_partid
 
-				for host in hosts:
-					self.doit(host, device, partid, mountpoint, 
-						size, type, options, line)
-					#
-					# Create type_dict with the {fstype : mountpoints}
-					#  to validate lvm definitions.
-					# E.g. {'node204-volgroup': ['volgrp01'], 
-					#       'node204-lvm': ['pv.01', 'pv.02', 'pv.03']} 
-					#
-					device_arr = []
-					type_key = host + '-' + type
-					if type_key not in type_dict:
-						device_arr = []
-					else:
-						device_arr = type_dict[type_key]
-					device_arr.append(mountpoint)
-					type_dict[type_key] = device_arr
+				for target in targets:
+					self.process_target(
+						target, device, partid, mountpoint,
+						size, fstype, options, line
+					)
+
 		except UnicodeDecodeError:
 			raise CommandError(self.owner, 'non-ascii character in file')
 
-		# Regexp to match Hard disk labels
-		hd_label_regexp = '(xvd[a-z]+)|([shv]d[a-z]+)|(md[0-9]+)|(nvme[0-9]+n[0-9]+)'
-		hd_regexp = re.compile(hd_label_regexp)
+		# Now that we've processed the spreadsheet, do some sanity checks
+		md_regex = re.compile(r'md[0-9]+')
+		hd_regex = re.compile(r'xvd[a-z]+|[shv]d[a-z]+|nvme[0-9]+n[0-9]+')
 
-		# Revalidate the spreadsheet to check if pv's, volgroups have been defined
-		for host in hosts:
-			# Get device map for a host
-			device_map = self.owner.hosts[host]
-			for d in device_map.keys():
-				d_map = device_map[d][0]
-				# Check if raids have already been defined	
-				if d_map['options'] and 'raid.' in d_map['options'].lower():
-					options = d_map['options'].split()
-					for o in options:
-						if 'raid.' in o and o not in type_dict[host + '-raid']:
-							msg = "raid %s not defined" % o
-							raise CommandError(self.owner, msg)
-				# Check if volgroups have an already defined physical volume
-				elif d_map['type'] == 'volgroup':
-					device_arr = d.split(' ')
-					for da in device_arr:
-						#
-						# If pv's have not been defined before 
-						# then throw an error
-						#
-						if da not in type_dict[host + '-lvm']: 
-							msg = 'pv "%s" not defined' % da
-							raise CommandError(self.owner, msg)
-				elif not hd_regexp.match(d):
-					if d not in type_dict[host + '-volgroup']:
-						msg = 'unrecgonized block device label or undefined volgroup "%s"' % d
-						raise CommandError(self.owner, msg)
-					else:
-						# If its a volgroup, a --name option is required
-						try:
-							name_opt = d_map['options'].index("--name=")
-						except:
-							msg = 'Volgroup "%s" for host "%s" ' + \
-								'needs "--name=<volname>" ' + \
-								'in the OPTIONS field'
-							raise CommandError(self.owner, msg % (d, host))
+		for target, devices in self.owner.hosts.items():
+			# Construct some loopup tables based on mount point
+			raid_devices = set()
+			lvm_devices = set()
+			volgroup_devices = set()
 
+			for partitions in devices.values():
+				for partition in partitions:
+					if partition.get('type') == 'raid':
+						raid_devices.add(partition['mountpoint'])
+					elif partition.get('type') == 'lvm':
+						lvm_devices.add(partition['mountpoint'])
+					elif partition.get('type') == 'volgroup':
+						volgroup_devices.add(partition['mountpoint'])
+
+			# Check the devices for this target
+			valid_devices = set()
+			for device, partitions in devices.items():
+				# Make sure software raid devices have valid options
+				if md_regex.fullmatch(device):
+					for partition in partitions:
+						# Gotta have options
+						if not partition.get('options'):
+							raise CommandError(
+								self.owner,
+								f'missing options for software raid device "{device}"'
+							)
+
+						# First part of options needs to define the RAID level
+						parts = partition['options'].split()
+						if not parts[0].startswith("--level=RAID"):
+							raise CommandError(
+								self.owner,
+								f'missing "--level=RAID" option for software raid device "{device}"'
+							)
+
+						# The other parts need to be valid RAID devices
+						for part in parts[1:]:
+							if part not in raid_devices:
+								raise CommandError(
+									self.owner,
+									f'device "{part}" not defined for software raid device "{device}"'
+								)
+
+					valid_devices.add(device)
+
+				# Physical devices are valid
+				elif hd_regex.fullmatch(device):
+					valid_devices.add(device)
+
+				# Partitions inside an LVM volume groups need names
+				elif device in volgroup_devices:
+					for partition in partitions:
+						options = partition.get('options')
+						if not options or "--name=" not in options:
+							raise CommandError(
+								self.owner,
+								f'missing "--name" option for LVM partition "{partition["mountpoint"]}"'
+							)
+
+					valid_devices.add(device)
+
+				else:
+					for partition in partitions:
+						# LVM volume groups need LVM devices
+						if partition['type'] == 'volgroup':
+							if device not in lvm_devices:
+								raise CommandError(
+									self.owner,
+									f'device "{device}" not defined for volgroup "{partition["mountpoint"]}"'
+								)
+
+							valid_devices.add(device)
+
+			# Make sure all the devices for this host have been validated
+			unknown_devices = set(devices.keys()).difference(valid_devices)
+			if unknown_devices:
+				raise CommandError(self.owner, f"unknown device(s) detected: {','.join(unknown_devices)}")

@@ -1,0 +1,3 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,sda,swap,recommended,swap,
+,sda,/,0,xfs,
