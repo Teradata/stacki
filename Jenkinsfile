@@ -152,7 +152,7 @@ pipeline {
             steps {
                 // Figure out if we are a release build
                 script {
-                    if (env.TAG_NAME ==~ /stacki-.*/ && env.BRANCH_NAME ==~ /master|support\/.*/) {
+                    if (env.TAG_NAME ==~ /stacki-.*/ && env.BRANCH_NAME == env.TAG_NAME) {
                         env.IS_RELEASE = 'true'
                     }
                     else {
