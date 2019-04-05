@@ -1,0 +1,17 @@
+<stack:stack>
+
+<stack:description>
+Remove myhostname from Redhat's default nsswitch.conf file.
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:script stack:stage="install-post">
+sed -i 's/myhostname//g' /etc/nsswitch.conf
+</stack:script>
+
+</stack:stack>
