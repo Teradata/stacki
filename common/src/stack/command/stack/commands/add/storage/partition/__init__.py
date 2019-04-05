@@ -5,20 +5,12 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import CommandError, ArgRequired, ArgValue, ParamRequired, ParamType, ParamValue
+from stack.exception import CommandError, ParamRequired, ParamType, ParamValue
 
 
-class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor,
-		stack.commands.add.command):
+class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
 	"""
-	Add a partition configuration to the database.
-
-	<arg type='string' name='scope'>
-	Zero or one argument. The argument is the scope: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). No argument means the scope is 'global'.
-	</arg>
+	Add a global storage partition configuration for the all hosts in the cluster.
 
 	<param type='string' name='device' optional='0'>
 	Disk device on which we are creating partitions
@@ -28,7 +20,7 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 	Mountpoint to create
 	</param>
 
-	<param type='int' name='size' optional='0'>
+	<param type='integer' name='size' optional='0'>
 	Size of the partition.
 	</param>
 
@@ -36,98 +28,36 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 	Type of partition E.g: ext4, ext3, xfs, raid, etc.
 	</param>
 
-	<param type='string' name='options' optional='0'>
+	<param type='string' name='options' optional='1'>
 	Options that need to be supplied while adding partitions.
 	</param>
 
-	<param type='int' name='partid' optional='1'>
+	<param type='integer' name='partid' optional='1'>
 	The relative partition id for this partition. Partitions will be
 	created in ascending partition id order.
 	</param>
-	
-	<example cmd='add storage partition backend-0-0 device=sda mountpoint=/var
-		size=50 type=ext4'>
+
+	<example cmd='add storage partition device=sda mountpoint=/var size=50 type=ext4'>
 	Creates a ext4 partition on device sda with mountpoints /var.
 	</example>
 
-	<example cmd='add storage partition backend-0-2 device=sdc mountpoint=pv.01
-		 size=0 type=lvm'>
+	<example cmd='add storage partition device=sdc mountpoint=pv.01 size=0 type=lvm'>
 	Creates a physical volume named pv.01 for lvm.
 	</example>
 
-	<example cmd='add storage partition backend-0-2 mountpoint=volgrp01 device=pv.01 pv.02 pv.03
-		size=32768 type=volgroup'>
-	Creates a volume group from 3 physical volumes i.e. pv.01, pv.02, pv.03. All these 3
-	physical volumes need to be created with the previous example. PV's need to be space
-	separated.
-	</example>
-	<example cmd='add storage partition backend-0-2 device=volgrp01 mountpoint=/banktools
-		size=8192 type=xfs options=--name=banktools'>
+	<example cmd='add storage partition device=volgrp01 mountpoint=/banktools size=8192 type=xfs options=--name=banktools'>
 	Created an xfs lvm partition of size 8192 on volgrp01. volgrp01 needs to be created
 	with the previous example.
 	</example>
 	"""
 
-	#
-	# Checks if partition config already exists in DB for a device and 
-	# a mount point.
-	#
-	def checkIt(self, device, scope, tableid, mountpt):
-		self.db.execute("""select Scope, TableID, Mountpoint,
-			device, Size, FsType from storage_partition where
-			Scope=%s and TableID=%s and device= %s
-			and Mountpoint=%s""",(scope, tableid, device, mountpt))
-
-		row = self.db.fetchone()
-
-		if row:
-			raise CommandError(self, """partition specification for device %s,
-				mount point %s already exists in the 
-				database""" % (device, mountpt))
-
 	def run(self, params, args):
-		scope = None
-		oses = []
-		appliances = []
-		hosts = []
+		# Get the scope and make sure the args are valid
+		scope, = self.fillParams([('scope', 'global')])
+		scope_mappings = self.getScopeMappings(args, scope)
 
-		if len(args) == 0:
-			scope = 'global'
-		elif len(args) == 1:
-			try:
-				oses = self.getOSNames(args)
-			except:
-				oses = []
-
-			try:
-				appliances = self.getApplianceNames(args)
-			except:
-				appliances = []
-
-			try:
-				hosts = self.getHostnames(args)
-			except:
-				hosts = []
-		else:
-			raise ArgRequired(self, 'scope')
-
-		if not scope:
-			if args[0] in oses:
-				scope = 'os'
-			elif args[0] in appliances:
-				scope = 'appliance'
-			elif args[0] in hosts:
-				scope = 'host'
-
-		if not scope:
-			raise ArgValue(self, 'scope', 'valid os, appliance name or host name')
-
-		if scope == 'global':
-			name = 'global'
-		else:
-			name = args[0]
-
-		device, size, fstype, mountpt, options, partid = self.fillParams([
+		# Now validate the params
+		device, size, fstype, mountpoint, options, partid = self.fillParams([
 			('device', None, True),
 			('size', None, True),
 			('type', None),
@@ -143,61 +73,78 @@ class Command(stack.commands.OSArgumentProcessor, stack.commands.HostArgumentPro
 			raise ParamRequired(self, 'size')
 
 		# Validate size
-		try:
-			s = int(size)
-			if s < 0:
-				raise ParamValue(self, 'size', '>= 0')
-		except:
-			# If mountpoint is 'swap' then allow
-			# 'hibernate', 'recommended' as sizes
-			if mountpt == 'swap' and size not in ['recommended', 'hibernation']:
-				raise ParamType(self, 'size', 'integer')
+		if mountpoint == 'swap' and size in ['recommended', 'hibernation']:
+			if size == 'recommended':
+				size = -1
 			else:
+				size = -2
+		else:
+			try:
+				size = int(size)
+			except:
 				raise ParamType(self, 'size', 'integer')
+
+			if size < 0:
+				raise ParamValue(self, 'size', '>= 0')
 
 		# Validate partid
 		if partid:
 			try:
-				p = int(partid)
+				partid = int(partid)
 			except ValueError:
-				raise ParamValue(self, 'partid', 'an integer')
+				raise ParamType(self, 'partid', 'integer')
 
-			if p < 1:
+			if partid < 1:
 				raise ParamValue(self, 'partid', '>= 0')
-
-			partid = p
 		else:
 			partid = 0
 
-		# Look up the id in the appropriate 'scope' table
-		if scope == 'appliance':
-			tableid = self.db.select('id from appliances where name=%s', [name])[0][0]
-		elif scope == 'os':
-			tableid = self.db.select('id from oses where name=%s', [name])[0][0]
-		elif scope == 'host':
-			tableid = self.db.select('id from nodes where name=%s', [name])[0][0]
+		# Make sure the specification for mountpoint doesn't already exist
+		if mountpoint:
+			# Needs to be unique in the scope
+			for scope_mapping in scope_mappings:
+				# Check that the route is unique for the scope
+				if self.db.count("""
+					(storage_partition.id)
+					FROM storage_partition,scope_map
+					WHERE storage_partition.scope_map_id = scope_map.id
+					AND storage_partition.device = %s
+					AND storage_partition.mountpoint = %s
+					AND scope_map.scope = %s
+					AND scope_map.appliance_id <=> %s
+					AND scope_map.os_id <=> %s
+					AND scope_map.environment_id <=> %s
+					AND scope_map.node_id <=> %s
+				""", (device, mountpoint, *scope_mapping)) != 0:
+					raise CommandError(
+						self,
+						f'partition specification for device "{device}" '
+						f'and mount point "{mountpoint}" already exists'
+					)
 		else:
-			tableid = -1
+			mountpoint = None
 
-		# Make sure the specification for mountpt doesn't already exist
-		if mountpt:
-			self.checkIt(device, scope, tableid, mountpt)
-		else:
-			# Preserve the existing behavior (sad panda)
-			mountpt = 'None'
-
-		# Preserve the existing behavior (sad panda)
 		if not fstype:
-			fstype = 'None'
+			fstype = None
 
 		if not options:
 			options = ""
 
-		# Now add the specifications to the database
-		self.db.execute("""
-			INSERT INTO storage_partition(
-				Scope, TableID, device, Mountpoint,
-				Size, FsType, Options, PartID
-			)
-			VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
-		""", (scope, tableid, device, mountpt, size, fstype, options, partid))
+		# Everything is valid, add the data for each scope_mapping
+		for scope_mapping in scope_mappings:
+			# First add the scope mapping
+			self.db.execute("""
+				INSERT INTO scope_map(
+					scope, appliance_id, os_id, environment_id, node_id
+				)
+				VALUES (%s, %s, %s, %s, %s)
+			""", scope_mapping)
+
+			# Then add the storage partition entry
+			self.db.execute("""
+				INSERT INTO storage_partition(
+					scope_map_id, device, mountpoint,
+					size, fstype, options, partid
+				)
+				VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s, %s)
+			""", (device, mountpoint, size, fstype, options, partid))

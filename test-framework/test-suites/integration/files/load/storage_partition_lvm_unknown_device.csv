@@ -1,0 +1,4 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,sda,pv.01,0,lvm,
+,pv.01,volgrp01,0,volgroup,
+,volgrp02,/,0,xfs,--name=root

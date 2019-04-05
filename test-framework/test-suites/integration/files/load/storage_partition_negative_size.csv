@@ -1,0 +1,2 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+backend-0-0,sda,/,-1,xfs,

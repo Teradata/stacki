@@ -8,12 +8,12 @@ import stack.commands
 from stack.exception import ArgRequired
 
 
-class Command(stack.commands.remove.host.command):
+class Command(stack.commands.remove.environment.command):
 	"""
-	Remove storage partition configuration for a host.
+	Remove storage partition information for an environment.
 
-	<arg type='string' name='host' repeat='1' optional='0'>
-	Hostname of the machine
+	<arg type='string' name='environment' repeat='1' optional='0'>
+	An environment name.
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -26,14 +26,14 @@ class Command(stack.commands.remove.host.command):
 	the database.
 	</param>
 
-	<example cmd='remove host storage partition backend-0-1'>
-	Removes the partition information for backend-0-1
+	<example cmd='remove environment storage partition test'>
+	Removes the partition information for test environment scope.
 	</example>
 	"""
 
 	def run(self, params, args):
 		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+			raise ArgRequired(self, 'environment')
 
-		self.command('remove.storage.partition', self._argv + ['scope=host'])
+		self.command('remove.storage.partition', self._argv + ['scope=environment'])
 		return self.rc

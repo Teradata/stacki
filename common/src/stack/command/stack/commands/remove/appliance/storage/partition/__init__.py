@@ -1,13 +1,19 @@
 # @copyright@
+# Copyright (c) 2006 - 2019 Teradata
+# All rights reserved. Stacki(r) v5.x stacki.com
+# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+# @copyright@
+
 import stack.commands
+from stack.exception import ArgRequired
 
 
-class Command(stack.commands.remove.command):
+class Command(stack.commands.remove.appliance.command):
 	"""
 	Remove storage partition information for an appliance.
 
-	<arg type='string' name='appliance' optional='1'>
-	Appliance name
+	<arg type='string' name='appliance' repeat='1' optional='0'>
+	Appliance type (e.g., "backend").
 	</arg>
 
 	<param type='string' name='device' optional='1'>
@@ -26,5 +32,8 @@ class Command(stack.commands.remove.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('remove.storage.partition', self._argv + [ 'scope=appliance' ]))
+		if len(args) == 0:
+			raise ArgRequired(self, 'appliance')
+
+		self.command('remove.storage.partition', self._argv + ['scope=appliance'])
 		return self.rc

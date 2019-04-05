@@ -297,6 +297,7 @@ CREATE TABLE partitions (
 DROP TABLE IF EXISTS firewall_rules;
 DROP TABLE IF EXISTS routes;
 DROP TABLE IF EXISTS storage_controller;
+DROP TABLE IF EXISTS storage_partition;
 DROP TABLE IF EXISTS scope_map;
 
 CREATE TABLE scope_map (
@@ -360,6 +361,21 @@ CREATE TABLE storage_controller (
 	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE
 );
 
+CREATE TABLE storage_partition (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	device		VARCHAR(128) NOT NULL,
+	mountpoint	VARCHAR(128) DEFAULT NULL,
+	size		INT NOT NULL,
+	fstype		VARCHAR(128) DEFAULT NULL,
+	partid		INT NOT NULL,
+	options		VARCHAR(512) NOT NULL,
+	INDEX (device),
+	INDEX (mountpoint),
+	INDEX (device, mountpoint),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE
+);
+
 <!-- Miscellaneous -->
 
 DROP TABLE IF EXISTS public_keys;
@@ -369,19 +385,6 @@ CREATE TABLE public_keys (
  Public_Key	varchar(4096) default NULL,
  PRIMARY KEY (ID)
 );
-
-DROP TABLE IF EXISTS storage_partition;
-CREATE TABLE storage_partition (
- Scope		enum('global', 'os', 'appliance', 'host'),
- TableID	int(11) NOT NULL,
- Device		varchar(128) NOT NULL default '',
- Mountpoint	varchar(128) NOT NULL default '',
- Size		int(11) NOT NULL,
- FsType		varchar(128) NOT NULL default '',
- PartID		int(11) NOT NULL,
- Options        varchar(512) NOT NULL default ''
-);
-
 
 <!-- Infiniband stuff -->
 
