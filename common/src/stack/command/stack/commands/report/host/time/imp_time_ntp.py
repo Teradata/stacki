@@ -106,9 +106,9 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host, f'/sbin/chkconfig ntp on')
 			self.owner.addOutput(host, 'service ntp stop')
 		else:
-			self.owner.addOutput(host, 'systemd enable ntpd')
-			self.owner.addOutput(host, 'systemd disable chronyd')
-			self.owner.addOutput(host, 'systemd stop ntpd')
+			self.owner.addOutput(host, 'systemctl enable ntpd')
+			self.owner.addOutput(host, 'systemctl disable chronyd')
+			self.owner.addOutput(host, 'systemctl stop ntpd')
 
 		self.owner.addOutput(host, NTP_CRON)
 
@@ -130,4 +130,4 @@ class Implementation(stack.commands.Implementation):
 		if self.owner.osversion == '11.x':
 			self.owner.addOutput(host, 'service ntp start')
 		else:
-			self.owner.addOutput(host, 'systemd start ntpd')
+			self.owner.addOutput(host, 'systemctl start ntpd')
