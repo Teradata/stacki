@@ -22,8 +22,19 @@ class TestFirmware:
 	"""A test case to hold the tests for the firmware utilities."""
 
 	@pytest.mark.parametrize("hash_alg", stack.firmware.SUPPORTED_HASH_ALGS)
+	def test_ensure_hash_alg_supported(self, hash_alg):
+		"""Test that ensure_hash_alg_supported works with all supported hash algs."""
+		stack.firmware.ensure_hash_alg_supported(hash_alg = hash_alg)
+
+	def test_ensure_hash_alg_supported_error(self):
+		"""Test that ensure_hash_alg_supported fails with an unsupported hash algorithm."""
+		with pytest.raises(stack.firmware.FirmwareError):
+			stack.firmware.ensure_hash_alg_supported(hash_alg = "foo")
+
+	@pytest.mark.parametrize("hash_alg", stack.firmware.SUPPORTED_HASH_ALGS)
+	@patch(target = "stack.firmware.ensure_hash_alg_supported", autospec = True)
 	@patch(target = "stack.firmware.Path", autospec = True)
-	def test_calculate_hash(self, mock_path, hash_alg):
+	def test_calculate_hash(self, mock_path, mock_ensure_hash_alg_supported, hash_alg):
 		"""Test that calculate_hash works for all supported hash types."""
 		mock_path.return_value.read_bytes.return_value = b"bar"
 
@@ -46,6 +57,8 @@ class TestFirmware:
 			hash_alg = hash_alg,
 			hash_value = expected_hash,
 		)
+		# Expect the hash to be validated
+		mock_ensure_hash_alg_supported.assert_called_once_with(hash_alg = hash_alg)
 		# Expect the path to be used to read the file
 		mock_path.assert_called_once_with(mock_file)
 		mock_path.return_value.read_bytes.assert_called_once_with()
@@ -62,8 +75,9 @@ class TestFirmware:
 		mock_path.return_value.read_bytes.assert_called_once_with()
 
 	@pytest.mark.parametrize("hash_alg", stack.firmware.SUPPORTED_HASH_ALGS)
+	@patch(target = "stack.firmware.ensure_hash_alg_supported", autospec = True)
 	@patch(target = "stack.firmware.Path", autospec = True)
-	def test_calculate_hash_mismatched_provided_hash(self, mock_path, hash_alg):
+	def test_calculate_hash_mismatched_provided_hash(self, mock_path, mock_ensure_hash_alg_supported, hash_alg):
 		"""Test that calculate_hash fails if the provided hash doesn't match the calculated one."""
 		mock_path.return_value.read_bytes.return_value = b"bar"
 
@@ -74,10 +88,12 @@ class TestFirmware:
 				hash_value = "foo",
 			)
 
+	@patch(target = "stack.firmware.ensure_hash_alg_supported", autospec = True)
 	@patch(target = "stack.firmware.Path", autospec = True)
-	def test_calculate_hash_unsupported_hash(self, mock_path):
+	def test_calculate_hash_unsupported_hash(self, mock_path, mock_ensure_hash_alg_supported):
 		"""Test that calculate_hash fails if the provided hash_alg isn't supported."""
 		mock_path.return_value.read_bytes.return_value = b"bar"
+		mock_ensure_hash_alg_supported.side_effect = stack.firmware.FirmwareError("Test error")
 
 		with pytest.raises(stack.firmware.FirmwareError):
 			stack.firmware.calculate_hash(
@@ -193,3 +209,30 @@ class TestFirmware:
 				make = mock_make,
 				model = mock_model,
 			)
+
+	@patch(target = "uuid.uuid4", autospec = True)
+	@patch(target = "stack.firmware.Path", autospec = True)
+	@patch(target = "stack.firmware.BASE_PATH", autospec = True)
+	@patch(target = "stack.download.fetch", autospec = True)
+	def test_fetch_firmware_local_path(self, mock_fetch, mock_base_path, mock_path, mock_uuid4):
+		"""Test that fetch_firmware works as expected when just a local path is provided."""
+		mock_url = f"/foo/bar"
+		mock_make = "foo"
+		mock_model = "bar"
+		mock_username = "baz"
+		mock_final_file = mock_base_path.__truediv__.return_value.__truediv__.return_value.resolve.return_value.__truediv__.return_value
+
+		stack.firmware.fetch_firmware(
+			source = mock_url,
+			make = mock_make,
+			model = mock_model,
+			username = mock_username,
+		)
+
+		# Ensure the file was constructed using the local path.
+		mock_path.assert_called_once_with("/foo/bar")
+		mock_path.return_value.resolve.assert_called_once_with(strict = True)
+		# Make sure the final file is written
+		mock_final_file.write_bytes.assert_called_once_with(
+			mock_path.return_value.resolve.return_value.read_bytes.return_value
+		)

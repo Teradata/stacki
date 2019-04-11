@@ -91,3 +91,7 @@ class TestUtil:
 	def test_unique_everseen(self, key, test_input, expected):
 		"""Test that duplicates are removed and order is preserved."""
 		assert expected == tuple(stack.util.unique_everseen(test_input, key = key))
+
+	def test_lowered(self):
+		"""Expect lowered to lowercase all strings in an interable."""
+		assert ["foo", "bar", "baz"] == list(stack.util.lowered(["FOO", "BAR", "BAZ"]))

@@ -20,8 +20,34 @@ class FirmwareArgumentProcessor:
 		"""Returns whether the given make exists in the database."""
 		return self.db.count("(id) FROM firmware_make WHERE name=%s", make)
 
+	def ensure_make_exists(self, make):
+		"""Ensures that the provided make exists.
+
+		If the make does not exist in the database, a CommandError is raised.
+
+		If an empty string is provided, a CommandError is raised.
+		"""
+		if not make:
+			raise CommandError(cmd = self, msg = "A make is required.")
+
+		if not self.make_exists(make = make):
+			raise CommandError(cmd = self, msg = f"The make {make} does not exist.")
+
 	def ensure_unique_makes(self, makes):
-		"""Validates that none of the names in the list of makes provided already exist in the database."""
+		"""Ensures that none of the names in the list of makes provided already exist in the database.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If any make name is blank, a CommandError is raised.
+		"""
+		makes = tuple(makes)
+		if not makes:
+			raise CommandError(cmd = self, msg = "Makes are required.")
+
+		# No empty strings allowed.
+		if not all(makes):
+			raise CommandError(cmd = self, msg = "A make cannot be an empty string.")
+
 		# ensure the make names don't already exist
 		existing_makes = [
 			make
@@ -34,7 +60,20 @@ class FirmwareArgumentProcessor:
 			raise CommandError(cmd = self, msg = f"The following firmware makes already exist: {existing_makes}.")
 
 	def ensure_makes_exist(self, makes):
-		"""Validates that all of the names in the list of makes provided already exist in the datbase."""
+		"""Ensures that all of the names in the list of makes provided already exist in the datbase.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If any make name is blank, a CommandError is raised.
+		"""
+		makes = tuple(makes)
+		if not makes:
+			raise CommandError(cmd = self, msg = "Makes are required.")
+
+		# No empty strings allowed.
+		if not all(makes):
+			raise CommandError(cmd = self, msg = "A make cannot be an empty string.")
+
 		# ensure the make names already exist
 		missing_makes = [
 			make
@@ -79,8 +118,38 @@ class FirmwareArgumentProcessor:
 			(make, model),
 		)
 
+	def ensure_model_exists(self, make, model):
+		"""Ensures that a given model exists for a given make.
+
+		If the make does not exist in the database, a CommandError is raised.
+
+		If an empty string is provided for either make or model, a CommandError is raised.
+		"""
+		self.ensure_make_exists(make = make)
+
+		if not model:
+			raise CommandError(cmd = self, msg = "A model is required.")
+
+		if not self.model_exists(make = make, model = model):
+			raise CommandError(cmd = self, msg = f"Make {make} does not exist for model {model}.")
+
 	def ensure_unique_models(self, make, models):
-		"""Validates that none of the given model names already exist in the database for the given make."""
+		"""Ensures that none of the given model names already exist in the database for the given make.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If any model name is blank, a CommandError is raised.
+		"""
+		# We don't require that the make exists because a set of models for a non-existent make would be
+		# entirely new in that they are going to be added under a make that doesn't already exist.
+		models = tuple(models)
+		if not models:
+			raise CommandError(cmd = self, msg = "Models are required.")
+
+		# No empty strings allowed.
+		if not all(models):
+			raise CommandError(cmd = self, msg = "A model cannot be an empty string.")
+
 		# ensure the model name doesn't already exist for the given make
 		existing_makes_models = [
 			(make, model)
@@ -93,7 +162,26 @@ class FirmwareArgumentProcessor:
 			raise CommandError(cmd = self, msg = f"The following make and model combinations already exist {existing_makes_models}.")
 
 	def ensure_models_exist(self, make, models):
-		"""Validates that all of the given model names already exist in the database for the given make."""
+		"""Ensures that all of the given model names already exist in the database for the given make.
+
+		If the make does not exist, a CommandError is raised.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If an empty string is provided for either make or one of the models, a CommandError is raised.
+
+		If any model name is blank, a CommandError is raised.
+		"""
+		self.ensure_make_exists(make = make)
+
+		models = tuple(models)
+		if not models:
+			raise CommandError(cmd = self, msg = "Models are required.")
+
+		# No empty strings allowed.
+		if not all(models):
+			raise CommandError(cmd = self, msg = "A model cannot be an empty string.")
+
 		# ensure the models exist
 		missing_models = [
 			model
@@ -123,8 +211,47 @@ class FirmwareArgumentProcessor:
 			(make, model, version)
 		)
 
+	def ensure_firmware_exists(self, make, model, version):
+		"""Ensure that the provided firmware version for the make and model exists.
+
+		If the make does not exist, a CommandError is raised.
+
+		If the model does not exist, a CommandError is raised.
+
+		If an empty string is provided for make, model, or version, a CommandError is raised.
+		"""
+		self.ensure_model_exists(make = make, model = model)
+
+		if not version:
+			raise CommandError(cmd = self, msg = "A version is required.")
+
+		if not self.firmware_exists(make = make, model = model, version = version):
+			raise CommandError(
+				cmd = self,
+				msg = f"The firmware version {version} does not exist for make {make} and model {model}.",
+			)
+
 	def ensure_firmwares_exist(self, make, model, versions):
-		"""Validates that all the firmware versions provided exist for the given make and model."""
+		"""Ensures that all the firmware versions provided exist for the given make and model.
+
+		If the make does not exist, a CommandError is raised.
+
+		If the model does not exist, a CommandError is raised.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If an empty string is provided for make, model, or version, a CommandError is raised.
+		"""
+		self.ensure_model_exists(make = make, model = model)
+
+		versions = tuple(versions)
+		if not versions:
+			raise CommandError(cmd = self, msg = "Versions are required.")
+
+		# No empty strings allowed.
+		if not all(versions):
+			raise CommandError(cmd = self, msg = "A version cannot be an empty string.")
+
 		# ensure the versions exist in the DB
 		missing_versions = [
 			version
@@ -225,8 +352,34 @@ class FirmwareArgumentProcessor:
 		"""Returns whether the given implementation name exists in the database."""
 		return self.db.count("(id) FROM firmware_imp WHERE name=%s", imp)
 
+	def ensure_imp_exists(self, imp):
+		"""Ensures that the provided implementation exists in the database.
+
+		If the provided name is an empty string, a CommandError is raised.
+
+		If the imp name does not exist in the database, a CommandError is raised.
+		"""
+		if not imp:
+			raise CommandError(cmd = self, msg = "Imp is required.")
+
+		if not self.imp_exists(imp = imp):
+			raise CommandError(cmd = self, msg = f"Imp {imp} does not exist in the database.")
+
 	def ensure_imps_exist(self, imps):
-		"""Validates that all of the given imp names already exist in the database."""
+		"""Ensures that all of the given imp names already exist in the database.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If an empty string is provided for any imp name, a CommandError is raised.
+		"""
+		imps = tuple(imps)
+		if not imps:
+			raise CommandError(cmd = self, msg = "Imps are required.")
+
+		# No empty strings allowed.
+		if not all(imps):
+			raise CommandError(cmd = self, msg = "A imp cannot be an empty string.")
+
 		# ensure the imps exist
 		missing_imps = [
 			imp
@@ -256,8 +409,34 @@ class FirmwareArgumentProcessor:
 		"""Returns whether the given version_regex name exists in the database."""
 		return self.db.count("(id) FROM firmware_version_regex WHERE name=%s", name)
 
-	def ensure_regexes_exist(self, names):
-		"""Validates that all of the given version_regex names already exist in the database."""
+	def ensure_version_regex_exists(self, name):
+		"""Ensures that a version_regex with the provided name exists in the database.
+
+		If the name is an empty string, a CommandError is raised.
+
+		If the version_regex does not exist, a CommandError is raised.
+		"""
+		if not name:
+			raise CommandError(cmd = self, msg = "A version regex name is required.")
+
+		if not self.version_regex_exists(name = name):
+			raise CommandError(cmd = self, msg = f"A version regex named {name} does not exist.")
+
+	def ensure_version_regexes_exist(self, names):
+		"""Ensures that all of the given version_regex names already exist in the database.
+
+		If an empty iterable is provided, a CommandError is raised.
+
+		If an empty string is provided for any version_regex name, a CommandError is raised.
+		"""
+		names = tuple(names)
+		if not names:
+			raise CommandError(cmd = self, msg = "Version regex names are required.")
+
+		# No empty strings allowed.
+		if not all(names):
+			raise CommandError(cmd = self, msg = "A version regex name cannot be an empty string.")
+
 		# ensure the version_regexes exist
 		missing_version_regexes = [
 			name
