@@ -100,8 +100,7 @@ class command(stack.commands.Command):
 			dump.append(OrderedDict(
 				address   = row['network'],
 				gateway   = row['gateway'],
-				netmask   = row['netmask'],
-				interface = row['interface']))
+				netmask   = row['netmask']))
 		return dump
 
 
@@ -166,7 +165,8 @@ class Command(command):
 
 
 		for (_, doc) in self.runPlugins():
-			dump.update(json.loads(doc))
+			if doc:
+				dump.update(json.loads(doc))
 		
 		self.addText(json.dumps(dump, indent=8))
 
