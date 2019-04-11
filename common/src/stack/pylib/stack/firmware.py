@@ -32,7 +32,17 @@ class FirmwareError(Exception):
 	"""The exception type raised by the firmware utilities in this module."""
 	pass
 
-def calculate_hash(file_path, hash_alg, hash_value = None, digest_length = 256):
+def ensure_hash_alg_supported(hash_alg):
+	"""Ensures that the provided hash algorithm is supported.
+
+	If it is not supported, a FirmwareError is raised.
+	"""
+	if hash_alg not in SUPPORTED_HASH_ALGS:
+		raise FirmwareError(
+			f"hash_alg must be one of the following: {SUPPORTED_HASH_ALGS}"
+		)
+
+def calculate_hash(file_path, hash_alg, hash_value = "", digest_length = 256):
 	"""Calculates the hash of the provided file using the provided algorithm and returns it as a hex string.
 
 	hash_alg is required to be one of the SUPPORTED_HASH_ALGS and a FirmwareError will be raised if it is not.
@@ -44,10 +54,7 @@ def calculate_hash(file_path, hash_alg, hash_value = None, digest_length = 256):
 	parameter allows the overriding of the default length used. This parameter is ignored if the algorithm does not
 	allow specifying the digest length.
 	"""
-	if hash_alg not in SUPPORTED_HASH_ALGS:
-		raise FirmwareError(
-			f"hash_alg must be one of the following: {SUPPORTED_HASH_ALGS}"
-		)
+	ensure_hash_alg_supported(hash_alg = hash_alg)
 
 	hasher = hashlib.new(name = hash_alg, data = Path(file_path).read_bytes())
 	# Handle case where the hash algorithm requires a digest length.
@@ -57,7 +64,7 @@ def calculate_hash(file_path, hash_alg, hash_value = None, digest_length = 256):
 		calculated_hash = hasher.hexdigest(digest_length)
 
 	# check the hash if one was provided to check against
-	if hash_value is not None and hash_value != calculated_hash:
+	if hash_value and hash_value != calculated_hash:
 		raise FirmwareError(
 			f"Calculated hash {calculated_hash} does not match expected hash {hash_value}. Algorithm was {hash_alg}."
 		)
@@ -93,18 +100,23 @@ def fetch_firmware(source, make, model, filename = None, **kwargs):
 
 	try:
 		scheme = SUPPORTED_SCHEMES[url.scheme]
-	except KeyError:
-		raise FirmwareError(
-			f"Scheme {url.scheme} is not supported. The source must use one of the following supported"
-			f" schemes: {SUPPORTED_SCHEMES.pretty_string()}."
-		)
+	except KeyError as exception:
+		# Assume if there is no scheme but there is a path,
+		# assume that we were passed a local file path.
+		if not url.scheme and url.path:
+			scheme = SUPPORTED_SCHEMES.file
+		else:
+			raise FirmwareError(
+				f"Scheme {url.scheme} is not supported. The source must use one of the following supported"
+				f" schemes: {SUPPORTED_SCHEMES.pretty_string()}."
+			) from exception
 
 	if scheme == SUPPORTED_SCHEMES.file:
 		# grab the source file and copy it into the destination file
 		try:
 			source_file = Path(url.path).resolve(strict = True)
 		except FileNotFoundError as exception:
-			raise FirmwareError(f"{exception}")
+			raise FirmwareError(f"{exception}") from exception
 
 		final_file.write_bytes(source_file.read_bytes())
 
@@ -112,7 +124,7 @@ def fetch_firmware(source, make, model, filename = None, **kwargs):
 		try:
 			stack.download.fetch(url = source, file_path = final_file, verbose = True, **kwargs)
 		except stack.download.FetchError as exception:
-			raise FirmwareError(f"{exception}")
+			raise FirmwareError(f"{exception}") from exception
 
 	# add more supported schemes here
 	# elif scheme == SUPPORTED_SCHEMES.foo:

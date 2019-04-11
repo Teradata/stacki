@@ -38,7 +38,7 @@
                                 }
 			]
 		}
-	]                        
+	]
 }
 </stack:file>
 
@@ -54,6 +54,18 @@ rm /tmp/my.cnf
 
 <stack:script stack:cond="platform != 'docker'">
 /opt/stack/bin/stack report host > /etc/hosts
+
+<!-- Firmware support -->
+<!-- Mellanox m7800 and m6036 -->
+/opt/stack/bin/stack add firmware make mellanox
+/opt/stack/bin/stack add firmware model m7800 make=mellanox imp=mellanox
+/opt/stack/bin/stack add firmware model m6036 make=mellanox imp=mellanox
+/opt/stack/bin/stack add firmware version_regex "(?:\d+\.){2}\d+" description="This turns X86_64 3.6.5009 2018-01-02 07:42:21 x86_64 into 3.6.5009" make=mellanox name=mellanox-version-regex
+<!-- Dell x1052 -->
+/opt/stack/bin/stack add firmware make dell
+/opt/stack/bin/stack add firmware model x1052-software make=dell imp=dell_x1052
+/opt/stack/bin/stack add firmware model x1052-boot make=dell imp=dell_x1052
+/opt/stack/bin/stack add firmware version_regex "(?:\d+\.){3}\d+" description="This turns 3.0.0.94 ( date  10-Sep-2017 time  22:31:38 ) into 3.0.0.94." make=dell name=x1052-version-regex
 </stack:script>
 
 </stack:stack>

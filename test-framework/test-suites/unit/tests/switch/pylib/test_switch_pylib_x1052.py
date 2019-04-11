@@ -10,7 +10,7 @@ from stack.switch.x1052 import SwitchDellX1052, _requires_regular_console, _requ
 def powerset(iterable):
 	"""powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
-	Blatantly stolen from itertools recipes.
+	Sourced from: https://docs.python.org/3/library/itertools.html#itertools-recipes.
 	"""
 	combinations_list = list(iterable)
 	return itertools.chain.from_iterable(

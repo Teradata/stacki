@@ -167,3 +167,7 @@ def unique_everseen(iterable, key=None):
 			if k not in seen:
 				seen_add(k)
 				yield element
+
+def lowered(iterable):
+	"""Return a generator that lowercases all strings in the provided iterable."""
+	return (string.lower() for string in iterable)

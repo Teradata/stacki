@@ -41,6 +41,25 @@ class TestFirmwareArgumentProcessor:
 		argument_processor.db.count.assert_called_once_with(ANY, "foo")
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
+	def test_ensure_make_exists(self, mock_make_exists, argument_processor):
+		"""Test that ensure make exists works when the input is valid and the make exists in the database."""
+		mock_make_exists.return_value = True
+		mock_make = "foo"
+
+		argument_processor.ensure_make_exists(make = mock_make)
+
+		mock_make_exists.assert_called_once_with(argument_processor, make = mock_make)
+
+	@pytest.mark.parametrize("test_input, return_value", (("", True), ("foo", False)))
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
+	def test_ensure_make_exists_errors(self, mock_make_exists, test_input, return_value, argument_processor):
+		"""Test that ensure make exists fails when the input is bad or the make doesn't exist in the database."""
+		mock_make_exists.return_value = return_value
+
+		with pytest.raises(CommandError):
+			argument_processor.ensure_make_exists(make = test_input)
+
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
 	def test_ensure_unique_makes(self, mock_make_exists, argument_processor):
 		"""Test that ensure_unique_makes works as expected in the case where the makes don't already exist."""
 		mock_make_exists.return_value = False
@@ -50,14 +69,14 @@ class TestFirmwareArgumentProcessor:
 
 		assert [call(argument_processor, mock_make) for mock_make in mock_makes] == mock_make_exists.mock_calls
 
+	@pytest.mark.parametrize("test_input, return_value", (([], False), (["", "", ""], False), (["foo", "bar", "baz"], True)))
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
-	def test_ensure_unique_makes_error(self, mock_make_exists, argument_processor):
-		"""Test that ensure_unique_makes raises an error when one or more makes already exist."""
-		mock_make_exists.side_effect = (False, True, False)
-		mock_makes = ("foo", "bar", "baz")
+	def test_ensure_unique_makes_error(self, mock_make_exists, test_input, return_value, argument_processor):
+		"""Test that ensure_unique_makes raises an error if the input is invalid or the makes already exist."""
+		mock_make_exists.return_value = return_value
 
 		with pytest.raises(CommandError):
-			argument_processor.ensure_unique_makes(makes = mock_makes)
+			argument_processor.ensure_unique_makes(makes = test_input)
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
 	def test_ensure_makes_exist(self, mock_make_exists, argument_processor):
@@ -69,14 +88,14 @@ class TestFirmwareArgumentProcessor:
 
 		assert [call(argument_processor, mock_make) for mock_make in mock_makes] == mock_make_exists.mock_calls
 
+	@pytest.mark.parametrize("test_input, return_value", (([], True), (["", "", ""], True), (["foo", "bar", "baz"], False)))
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "make_exists", autospec = True)
-	def test_ensure_makes_exist_error(self, mock_make_exists, argument_processor):
-		"""Test that ensure_makes_exist raises an error when one or more makes don't already exist."""
-		mock_make_exists.side_effect = (False, True, False)
-		mock_makes = ("foo", "bar", "baz")
+	def test_ensure_makes_exist_error(self, mock_make_exists, test_input, return_value, argument_processor):
+		"""Test that ensure_makes_exist raises an error if the input is invalid or one or more makes don't already exist."""
+		mock_make_exists.return_value = return_value
 
 		with pytest.raises(CommandError):
-			argument_processor.ensure_makes_exist(makes = mock_makes)
+			argument_processor.ensure_makes_exist(makes = test_input)
 
 	def test_get_model_id(self, argument_processor):
 		"""Test that get model ID works as expected when the make + model exist in the database."""
@@ -110,6 +129,45 @@ class TestFirmwareArgumentProcessor:
 		argument_processor.db.count.assert_called_once_with(ANY, (mock_make, mock_model))
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_make_exists", autospec = True)
+	def test_ensure_model_exists(self, mock_ensure_make_exists, mock_model_exists, argument_processor):
+		"""Test that ensure_model_exists works when the make + model both exist."""
+		mock_make = "bar"
+		mock_model = "foo"
+
+		argument_processor.ensure_model_exists(model = mock_model, make = mock_make)
+
+		mock_ensure_make_exists.assert_called_once_with(argument_processor, make = mock_make)
+		mock_model_exists.assert_called_once_with(argument_processor, make = mock_make, model = mock_model)
+
+	@pytest.mark.parametrize(
+		"mock_model, side_effect, return_value",
+		(
+			("", None, True),
+			("foo", CommandError(cmd = None, msg = "Test error"), True),
+			("foo", None, False),
+		)
+	)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_make_exists", autospec = True)
+	def test_ensure_model_exists_errors(
+		self,
+		mock_ensure_make_exists,
+		mock_model_exists,
+		mock_model,
+		side_effect,
+		return_value,
+		argument_processor,
+	):
+		"""Test that ensure_model_exists fails if the input is invalid or when the make + model don't both exist."""
+		mock_make = "bar"
+		mock_ensure_make_exists.side_effect = side_effect
+		mock_model_exists.return_value = return_value
+
+		with pytest.raises(CommandError):
+			argument_processor.ensure_model_exists(model = mock_model, make = mock_make)
+
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
 	def test_ensure_unique_models(self, mock_model_exists, argument_processor):
 		"""Test that ensure_unique_models works as expected when the make + model combinations do not already exist."""
 		mock_model_exists.return_value = False
@@ -123,18 +181,19 @@ class TestFirmwareArgumentProcessor:
 			for mock_model in mock_models
 		] == mock_model_exists.mock_calls
 
+	@pytest.mark.parametrize("test_input, return_value", (([], False), (["", "", ""], False), (["foo", "bar", "baz"], True)))
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
-	def test_ensure_unique_models_error(self, mock_model_exists, argument_processor):
-		"""Test that ensure_unique_models fails as expected when the make + model combinations already exist."""
-		mock_model_exists.side_effect = (False, True, False)
+	def test_ensure_unique_models_error(self, mock_model_exists, test_input, return_value, argument_processor):
+		"""Test that ensure_unique_models fails as expected when the inputs are invalid or the make + model combinations already exist."""
+		mock_model_exists.return_value = return_value
 		mock_make = "foo"
-		mock_models = ("bar", "baz", "bag")
 
 		with pytest.raises(CommandError):
-			argument_processor.ensure_unique_models(make = mock_make, models = mock_models)
+			argument_processor.ensure_unique_models(make = mock_make, models = test_input)
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
-	def test_ensure_models_exist(self, mock_model_exists, argument_processor):
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_make_exists", autospec = True)
+	def test_ensure_models_exist(self, mock_ensure_make_exists, mock_model_exists, argument_processor):
 		"""Test that ensure_models_exist works as expected when the make + model combinations already exist."""
 		mock_model_exists.return_value = True
 		mock_make = "foo"
@@ -142,17 +201,36 @@ class TestFirmwareArgumentProcessor:
 
 		argument_processor.ensure_models_exist(make = mock_make, models = mock_models)
 
+		mock_ensure_make_exists.assert_called_once_with(argument_processor, make = mock_make)
 		assert [
 			call(argument_processor, mock_make, mock_model)
 			for mock_model in mock_models
 		] == mock_model_exists.mock_calls
 
+	@pytest.mark.parametrize(
+		"mock_models, side_effect, return_value",
+		(
+			([], None, True),
+			(["", "", ""], None, True),
+			(["bar", "baz", "bag"], CommandError(cmd = None, msg = "Test error"), True),
+			(["bar", "baz", "bag"], None, False),
+		)
+	)
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "model_exists", autospec = True)
-	def test_ensure_models_exist_error(self, mock_model_exists, argument_processor):
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_make_exists", autospec = True)
+	def test_ensure_models_exist_error(
+		self,
+		mock_ensure_make_exists,
+		mock_model_exists,
+		mock_models,
+		side_effect,
+		return_value,
+		argument_processor,
+	):
 		"""Test that ensure_models_exist fails as expected when the make + model combinations do not already exist."""
-		mock_model_exists.side_effect = (False, True, False)
+		mock_ensure_make_exists.side_effect = side_effect
+		mock_model_exists.return_value = return_value
 		mock_make = "foo"
-		mock_models = ("bar", "baz", "bag")
 
 		with pytest.raises(CommandError):
 			argument_processor.ensure_models_exist(make = mock_make, models = mock_models)
@@ -173,7 +251,60 @@ class TestFirmwareArgumentProcessor:
 		argument_processor.db.count.assert_called_once_with(ANY, (mock_make, mock_model, mock_version))
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "firmware_exists", autospec = True)
-	def test_ensure_firmwares_exist(self, mock_firmware_exists, argument_processor):
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_model_exists", autospec = True)
+	def test_ensure_firmware_exists(self, mock_ensure_model_exists, mock_firmware_exists, argument_processor):
+		"""Test that ensure_firmware_exists works when the firmware + make + model all exist in the database."""
+		mock_firmware_exists.return_value = True
+		mock_make = "foo"
+		mock_model = "bar"
+		mock_version = "baz"
+
+		argument_processor.ensure_firmware_exists(make = mock_make, model = mock_model, version = mock_version)
+
+		mock_ensure_model_exists.assert_called_once_with(
+			argument_processor,
+			make = mock_make,
+			model = mock_model,
+		)
+		mock_firmware_exists.assert_called_once_with(
+			argument_processor,
+			make = mock_make,
+			model = mock_model,
+			version = mock_version,
+		)
+
+	@pytest.mark.parametrize(
+		"mock_version, side_effect, return_value",
+		(
+			("", None, True),
+			("foo", CommandError(cmd = None, msg = "Test message"), True),
+			("foo", None, False),
+		)
+	)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "firmware_exists", autospec = True)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_model_exists", autospec = True)
+	def test_ensure_firmware_exists_errors(
+		self,
+		mock_ensure_model_exists,
+		mock_firmware_exists,
+		mock_version,
+		side_effect,
+		return_value,
+		argument_processor,
+	):
+		"""Test that ensure_firmware_exists fails when given invalid input or the firmware + make + model do not all exist in the database."""
+		mock_firmware_exists.return_value = True
+		mock_make = "foo"
+		mock_model = "bar"
+		mock_ensure_model_exists.side_effect = side_effect
+		mock_firmware_exists.return_value = return_value
+
+		with pytest.raises(CommandError):
+			argument_processor.ensure_firmware_exists(make = mock_make, model = mock_model, version = mock_version)
+
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "firmware_exists", autospec = True)
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_model_exists", autospec = True)
+	def test_ensure_firmwares_exist(self, mock_ensure_model_exists, mock_firmware_exists, argument_processor):
 		"""Test that ensure_firmwares_exist works as expected when the firmware files exist for the given make + model."""
 		mock_firmware_exists.return_value = True
 		mock_make = "foo"
@@ -186,18 +317,37 @@ class TestFirmwareArgumentProcessor:
 			versions = mock_versions,
 		)
 
+		mock_ensure_model_exists.assert_called_once_with(argument_processor, make = mock_make, model = mock_model)
 		assert [
 			call(argument_processor, mock_make, mock_model, mock_version)
 			for mock_version in mock_versions
 		] == mock_firmware_exists.mock_calls
 
+	@pytest.mark.parametrize(
+		"mock_versions, side_effect, return_value",
+		(
+			([], None, True),
+			(["", "", ""], None, True),
+			(["bar", "baz", "bag"], CommandError(cmd = None, msg = "Test error"), True),
+			(["bar", "baz", "bag"], None, False),
+		)
+	)
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "firmware_exists", autospec = True)
-	def test_ensure_firmwares_exist_errors(self, mock_firmware_exists, argument_processor):
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "ensure_model_exists", autospec = True)
+	def test_ensure_firmwares_exist_errors(
+		self,
+		mock_ensure_model_exists,
+		mock_firmware_exists,
+		mock_versions,
+		side_effect,
+		return_value,
+		argument_processor,
+	):
 		"""Test that ensure_firmwares_exist fails as expected when the firmware files don't exist for the given make + model."""
-		mock_firmware_exists.side_effect = (False, True, False)
+		mock_ensure_model_exists.side_effect = side_effect
+		mock_firmware_exists.return_value = return_value
 		mock_make = "foo"
 		mock_model = "bar"
-		mock_versions = ("baz", "bag", "boo")
 
 		with pytest.raises(CommandError):
 			argument_processor.ensure_firmwares_exist(
@@ -369,6 +519,25 @@ class TestFirmwareArgumentProcessor:
 		argument_processor.db.count.assert_called_once_with(ANY, mock_imp)
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "imp_exists", autospec = True)
+	def test_ensure_imp_exists(self, mock_imp_exists, argument_processor):
+		"""Test that ensure_imp_exists works when the input is valid and the imp exists in the database."""
+		mock_imp = "foo"
+		mock_imp_exists.return_value = True
+
+		argument_processor.ensure_imp_exists(imp = mock_imp)
+
+		mock_imp_exists.assert_called_once_with(argument_processor, imp = mock_imp)
+
+	@pytest.mark.parametrize("mock_imp, return_value", (("", True), ("foo", False)))
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "imp_exists", autospec = True)
+	def test_ensure_imp_exists_errors(self, mock_imp_exists, mock_imp, return_value, argument_processor):
+		"""Test that ensure_imp_exists fails when the input is invalid or the imp does not exist in the database."""
+		mock_imp_exists.return_value = return_value
+
+		with pytest.raises(CommandError):
+			argument_processor.ensure_imp_exists(imp = mock_imp)
+
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "imp_exists", autospec = True)
 	def test_ensure_imps_exist(self, mock_imp_exists, argument_processor):
 		"""Test that ensure_imps_exist works as expected when all implementations exist in the database."""
 		mock_imp_exists.return_value = True
@@ -378,11 +547,24 @@ class TestFirmwareArgumentProcessor:
 
 		assert [call(argument_processor, mock_imp) for mock_imp in mock_imps] == mock_imp_exists.mock_calls
 
+	@pytest.mark.parametrize(
+		"mock_imps, return_value",
+		(
+			([], True),
+			(["", "", ""], True),
+			(["bar", "baz", "bag"], False),
+		)
+	)
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "imp_exists", autospec = True)
-	def test_ensure_imps_exist_error(self, mock_imp_exists, argument_processor):
+	def test_ensure_imps_exist_error(
+		self,
+		mock_imp_exists,
+		mock_imps,
+		return_value,
+		argument_processor,
+	):
 		"""Test that ensure_imps_exist fails when at least one implementation doesn't exist in the database."""
-		mock_imp_exists.side_effect = (False, True, False)
-		mock_imps = ("foo", "bar", "baz")
+		mock_imp_exists.return_value = return_value
 
 		with pytest.raises(CommandError):
 			argument_processor.ensure_imps_exist(imps = mock_imps)
@@ -415,23 +597,49 @@ class TestFirmwareArgumentProcessor:
 		argument_processor.db.count.assert_called_once_with(ANY, mock_name)
 
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "version_regex_exists", autospec = True)
-	def test_ensure_regexes_exist(self, mock_version_regex_exists, argument_processor):
-		"""Test that ensure_regexes_exist works in the case where all the version regexes exist in the database."""
+	def test_ensure_version_regex_exists(self, mock_version_regex_exists, argument_processor):
+		"""Test that ensure_version_regex_exists works in the case where the input is valid and the version regex exists in the database."""
+		mock_version_regex_exists.return_value = True
+		mock_name = "foo"
+
+		argument_processor.ensure_version_regex_exists(name = mock_name)
+
+		mock_version_regex_exists.assert_called_once_with(argument_processor, name = mock_name)
+
+	@pytest.mark.parametrize("mock_name, return_value", (("", True), ("foo", False)))
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "version_regex_exists", autospec = True)
+	def test_ensure_version_regex_exists_errors(self, mock_version_regex_exists, mock_name, return_value, argument_processor):
+		"""Test that ensure_version_regex_exists works in the case where the input is valid and the version regex exists in the database."""
+		mock_version_regex_exists.return_value = return_value
+
+		with pytest.raises(CommandError):
+			argument_processor.ensure_version_regex_exists(name = mock_name)
+
+	@patch.object(target = FirmwareArgumentProcessor, attribute = "version_regex_exists", autospec = True)
+	def test_ensure_version_regexes_exist(self, mock_version_regex_exists, argument_processor):
+		"""Test that ensure_version_regexes_exist works in the case where all the version regexes exist in the database."""
 		mock_version_regex_exists.return_value = True
 		mock_names = ("foo", "bar", "baz")
 
-		argument_processor.ensure_regexes_exist(names = mock_names)
+		argument_processor.ensure_version_regexes_exist(names = mock_names)
 
 		assert [call(argument_processor, mock_name) for mock_name in mock_names] == mock_version_regex_exists.mock_calls
 
+	@pytest.mark.parametrize(
+		"mock_names, return_value",
+		(
+			([], True),
+			(["", "", ""], True),
+			(["bar", "baz", "bag"], False),
+		)
+	)
 	@patch.object(target = FirmwareArgumentProcessor, attribute = "version_regex_exists", autospec = True)
-	def test_ensure_regexes_exist_error(self, mock_version_regex_exists, argument_processor):
-		"""Test that ensure_regexes_exist fails in the case where at least one of the version regexes does not exist in the database."""
-		mock_version_regex_exists.side_effect = (False, True, False)
-		mock_names = ("foo", "bar", "baz")
+	def test_ensure_version_regexes_exist_error(self, mock_version_regex_exists, mock_names, return_value, argument_processor):
+		"""Test that ensure_version_regexes_exist fails in the case where at least one of the version regexes does not exist in the database."""
+		mock_version_regex_exists.return_value = return_value
 
 		with pytest.raises(CommandError):
-			argument_processor.ensure_regexes_exist(names = mock_names)
+			argument_processor.ensure_version_regexes_exist(names = mock_names)
 
 	def test_get_version_regex_id(self, argument_processor):
 		"""Test that get_version_regex_id works as expected when the version_regex exists in the database."""
