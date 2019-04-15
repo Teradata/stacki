@@ -153,7 +153,7 @@ def unique_everseen(iterable, key=None):
 	unique_everseen('AAAABBBCCDAABBB') --> A B C D
 	unique_everseen('ABBCcAD', str.lower) --> A B C D
 
-	Blatantly stolen from itertools recipes.
+	Source: https://docs.python.org/3/library/itertools.html#itertools-recipes
 	"""
 	seen = set()
 	seen_add = seen.add
