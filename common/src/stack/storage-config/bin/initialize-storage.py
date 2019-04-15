@@ -147,6 +147,9 @@ while count > 0:
 	else:
 		break
 
+notify_cmd = """/opt/stack/bin/smq-publish -chealth '{"state": "install initializing storage"}'"""
+subprocess.run(notify_cmd, shell=True)
+
 #
 # nuke LVM first
 #
