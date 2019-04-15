@@ -1,3 +1,5 @@
+# Based on https://github.com/ActiveState/code/tree/master/recipes/Python/577649_dhcp_query
+# With MIT license
 import struct
 import socket
 import pytest
