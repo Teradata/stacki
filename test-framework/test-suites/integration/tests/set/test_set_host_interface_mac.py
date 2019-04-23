@@ -159,6 +159,35 @@ class TestSetHostInterfaceMac:
 			'vlan': None
 		}]
 
+	def test_all_parameters_insensitive(self, host, add_host, add_network):
+		# Add an interface with a interface device and network to our test host
+		result = host.run('stack add host interface backend-0-0 interface=eth0 network=test')
+		assert result.rc == 0
+
+		# Set the host interface mac
+		result = host.run(
+			'stack set host interface mac backend-0-0 interface=ETH0 '
+			'mac=aa:bb:cc:dd:ee:ff network=TEST'
+		)
+		assert result.rc == 0
+
+		# Check that it made it into the database
+		result = host.run('stack list host interface backend-0-0 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'channel': None,
+			'default': None,
+			'host': 'backend-0-0',
+			'interface': 'eth0',
+			'ip': None,
+			'mac': 'aa:bb:cc:dd:ee:ff',
+			'module': None,
+			'name': None,
+			'network': 'test',
+			'options': None,
+			'vlan': None
+		}]
+
 	def test_multiple_hosts(self, host, add_host):
 		# Add a second test backend
 		add_host('backend-0-1', '0', '1', 'backend')
