@@ -17,7 +17,11 @@ import threading
 import zmq
 
 class Checklist(threading.Thread):
-
+	"""
+	Monitors & Reports about backend installation as it progresses through the 
+	various stages.
+	https://github.com/Teradata/stacki/wiki/Stacki-System-Installation-Checklist
+	"""
 	TIMEOUT_STR = 'Installation Stage Timeout'
 	REFRESH_STATE = 1
 	SUCCESS_TFTP = 0
@@ -390,7 +394,7 @@ class Checklist(threading.Thread):
 		self.dhcpLog.setDaemon(True)
 		self.dhcpLog.start()
 
-		self.frontendOS = stack.api.Call('list.host.attr', ['localhost', 'attr=os'])['value']
+		self.frontendOS = stack.api.Call('list.host.attr', ['localhost', 'attr=os'])[0]['value']
 		self.ipThreadMap = {}
 		self.backendScript = None
 
