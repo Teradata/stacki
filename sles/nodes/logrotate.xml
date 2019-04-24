@@ -67,8 +67,31 @@ missingok
 			2&gt; /dev/null || true
 	endscript
 }
+/var/log/checklist.log {
+        postrotate
+		/usr/bin/systemctl restart checklist
+        endscript
+}
 </stack:file>
 </stack:script>
 
+<stack:script stack:cond="'&release;' == '12.x'" stack:stage="install-post">
+<stack:file stack:name="/etc/logrotate.d/stack" stack:mode="append">
+/var/log/checklist.log {
+	postrotate
+		/usr/bin/systemctl restart checklist
+	endscript
+}
+</stack:file>
+</stack:script>
+<stack:script stack:cond="'&release;' == '11.x'" stack:stage="install-post">
+<stack:file stack:name="/etc/logrotate.d/stack" stack:mode="append">
+/var/log/checklist.log {
+	postrotate
+		service restart checklist
+	endscript
+}
+</stack:file>
+</stack:script>
 </stack:stack> 
 
