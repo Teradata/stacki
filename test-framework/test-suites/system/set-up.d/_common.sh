@@ -8,28 +8,7 @@ set -e
 vagrant up backend-0-0 &
 sleep 10
 vagrant up backend-0-1 &
-wait
+sleep 10
 
-# Wait up to 5 minutes for the frontend to see that backend-0-0 is online (once Vagrant thinks they are up)
-for ((i = 0 ; i < 5 ; i++))
-do
-    if [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-0 output-format=json | grep online") ]]
-    then
-        echo "Waiting for backend-0-0..."
-        sleep 60
-    else
-        break
-    fi
-done
-
-# Wait up to 5 minutes for the frontend to see that backend-0-1 is online (once Vagrant thinks they are up)
-for ((i = 0 ; i < 5 ; i++))
-do
-    if [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-1 output-format=json | grep online") ]]
-    then
-        echo "Waiting for backend-0-1..."
-        sleep 60
-    else
-        break
-    fi
-done
+# Monitor the backend installs
+vagrant ssh frontend -c "sudo -i /export/test-suites/system/files/monitor-backends.py --timeout=$1"
