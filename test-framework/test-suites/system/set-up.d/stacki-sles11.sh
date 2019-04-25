@@ -36,6 +36,6 @@ then
     # Start discovery
     vagrant ssh frontend -c "sudo -i stack enable discovery box=sles11sp3 installaction='install sles 11.3'"
 
-    # Bring up the backends
-    ./set-up.d/_common.sh
+    # Bring up the backends (30 minute timeout)
+    ./set-up.d/_common.sh 30
 fi
