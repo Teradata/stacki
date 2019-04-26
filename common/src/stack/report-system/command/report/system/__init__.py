@@ -48,7 +48,6 @@ class Command(stack.commands.Command,
 	"""
 
 	def run(self, params, args):
-
 		(exitonfail, pretty) = self.fillParams([
 			('exitonfail', False),
 			('pretty', True)
