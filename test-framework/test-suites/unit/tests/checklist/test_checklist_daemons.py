@@ -3,7 +3,7 @@ import pytest
 import queue
 import socket
 from stack.checklist import Backend, State, StateMessage
-from stack.checklist.threads import MQProcessor, LogParser, BackendExec, CheckTimeouts, GlobalQueueAdder
+from stack.checklist.threads import MQProcessor, LogParser, CheckTimeouts, GlobalQueueAdder
 import stack.util
 from subprocess import Popen
 import threading

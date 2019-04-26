@@ -13,8 +13,8 @@ build:
 
 install::
 	# Copy BackendTest.py to /opt/stack/bin
-	mkdir -p $(ROOT)/$(PKGROOT)/share
-	$(INSTALL) -m 755 BackendTest.py $(ROOT)/$(PKGROOT)/share
+	mkdir -p $(ROOT)/$(PKGROOT)/bin
+	$(INSTALL) -m 755 BackendTest.py $(ROOT)/$(PKGROOT)/bin
 
 	# Copy checklist file to /opt/stack/bin
 	mkdir -p $(ROOT)/$(PKGROOT)/bin

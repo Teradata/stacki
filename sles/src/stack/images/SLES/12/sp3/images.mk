@@ -1,4 +1,5 @@
 YUMLIST = \
+	checklist \
 	MegaCLI storcli \
 	ipmitool \
 	stack-command \
