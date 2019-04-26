@@ -7,10 +7,11 @@ import lockfile.pidlockfile
 import logging
 import os
 import queue
+import redis
 import signal
 import socket
 from stack.checklist import Backend, State, StateMessage, StateSequence
-from stack.checklist.threads import MQProcessor, LogParser, BackendExec, CheckTimeouts
+from stack.checklist.threads import MQProcessor, LogParser, CheckTimeouts
 import stack.api
 import sys
 import threading
@@ -27,14 +28,14 @@ class Checklist(threading.Thread):
 	SUCCESS_TFTP = 0
 	IGNORE_TFTP_MSG = 2
 
-	#
-	# Refresh Backend State information from database
-	# and update internal State
-	#
+	"""
+	Refresh Backend State information from database
+	and update internal State
+	"""
 	def refreshBackendInfo(self):
 		hnameBackendMap = self.getHosts()
 		self.log.debug('List of hostnames = %s' % ','.join(hnameBackendMap.keys()))
-		self.getHostAttr(hnameBackendMap)
+		self.getOSVersionAttr(hnameBackendMap)
 		newIpBackendMap = self.getHostInterfaces(hnameBackendMap)
 
 		# Build a bootaction dictionary for ease of access
@@ -59,10 +60,10 @@ class Checklist(threading.Thread):
 			if ip not in newIpBackendMap:
 				del self.ipBackendMap[ip]
 
-	#
-	# Get list of hosts from the database and return
-	# dictionary of {'hostname':backend object}
-	#
+	"""
+	Get list of hosts from the database and return
+	dictionary of {'hostname':backend object}
+	"""
 	def getHosts(self):
 		hnameBackendMap = {}
 		op = stack.api.Call('list.host')
@@ -72,7 +73,10 @@ class Checklist(threading.Thread):
 
 		return hnameBackendMap
 
-	def getHostAttr(self, hnameBackendMap):
+	"""
+	Get OS version attribute for backends
+	"""
+	def getOSVersionAttr(self, hnameBackendMap):
 		op = stack.api.Call('list.host.attr', ['attr=os.version'])
 		for o in op:
 			host = o['host']
@@ -80,7 +84,9 @@ class Checklist(threading.Thread):
 				b = hnameBackendMap[host]
 				b.osversion = o['value']
 
-	# Get list of host interfaces
+	"""
+	Get list of host interfaces
+	"""
 	def getHostInterfaces(self, hnameBackendMap):
 		ipBackendMap = {}
 
@@ -103,7 +109,9 @@ class Checklist(threading.Thread):
 					ipBackendMap[o['ip']] = b
 		return ipBackendMap
 
-	# Get bootactions from database
+	"""
+	Get bootactions from database
+	"""
 	def getBootactions(self):
 		bootactionMap = {}
 		op = stack.api.Call('list.bootaction')
@@ -112,10 +120,10 @@ class Checklist(threading.Thread):
 			bootactionMap[key] = o
 		return bootactionMap
 
-	#
-	# Get Kernel, Ramdisk, Args associated with bootaction
-	# for a backend
-	#
+	"""
+	Get Kernel, Ramdisk, Args associated with bootaction
+	for a backend
+	"""
 	def populateBootActionInfo(self, backendList, bootactionMap):
 		for b in backendList:
 			key = b.installaction + '-install'
@@ -132,13 +140,13 @@ class Checklist(threading.Thread):
 				b.osRamdisk = o['ramdisk']
 				b.osArgs    = o['args']
 
-	#
-	# Gather all information relevant to monitor Backend installation
-	# and store it in a dictionary for ease of access
-	#
+	"""
+	Gather all information relevant to monitor Backend installation
+	and store it in a dictionary for ease of access
+	"""
 	def getBackendInfo(self):
 		hnameBackendMap = self.getHosts()
-		self.getHostAttr(hnameBackendMap)
+		self.getOSVersionAttr(hnameBackendMap)
 		ipBackendMap = self.getHostInterfaces(hnameBackendMap)
 
 		# Build a bootaction dictionary for ease of access
@@ -147,7 +155,9 @@ class Checklist(threading.Thread):
 		self.populateBootActionInfo(ipBackendMap.values(), bootactionMap)
 		self.ipBackendMap = ipBackendMap
 
-	# Find Backend object based on MAC address
+	"""
+	Find Backend object based on MAC address
+	"""
 	def getBackendByMac(self, mac):
 		backendList = self.ipBackendMap.values()
 		for b in backendList:
@@ -155,7 +165,9 @@ class Checklist(threading.Thread):
 				return b
 		return None
 
-	# Process TFTP messages based on internal state information
+	"""
+	Process TFTP messages based on internal state information
+	"""
 	def processTftp(self, sm):
 		pxeFile = sm.msg.strip()
 		backend = self.ipBackendMap[sm.ipAddr]
@@ -187,10 +199,10 @@ class Checklist(threading.Thread):
 
 		return retVal
 
-	#
-	# Look through DHCP State arr and restore messages that arrived
-	# within 60 seconds before TFTP messages.
-	#
+	"""
+	Look through DHCP State arr and restore messages that arrived
+	within 60 seconds before TFTP messages.
+	"""
 	def restoreDhcpMsgs(self, sm):
 		backend = self.ipBackendMap[sm.ipAddr]
 		clearFlag = False
@@ -217,9 +229,9 @@ class Checklist(threading.Thread):
 				del backend.stateArr[0:index]
 			backend.dhcpStateArr.clear()
 
-	#
-	# Process messages from the shared Queue
-	#
+	"""
+	Process messages from the shared Queue
+	"""
 	def processQueueMsgs(self):
 		while not self.shutdownFlag.is_set():
 			sm = self.queue.get()
@@ -280,14 +292,14 @@ class Checklist(threading.Thread):
 				if currState:
 					nextState = StateSequence.nextExpectedState(currState.state, os, osver)
 				#
-				# If State same as last state ignore this msg
+				# If State same as previously seen message ignore this
 				# OR
 				# If this is a timeout message but it was successful
 				# earlier then drop the timeout message
 				#
-				if (len(stateList) > 0 and sm == stateList[-1]) or \
+				if (backend.hasStateMessage(sm) or \
 					(Checklist.TIMEOUT_STR in sm.msg and \
-					backend.isKnownState(sm.state)):
+					backend.isKnownState(sm.state))):
 					self.log.debug('Ignoring timeout message %s' % sm)
 					continue
 				#
@@ -302,25 +314,21 @@ class Checklist(threading.Thread):
 
 				stateList.append(sm)
 
-			#
-			# Lazy init BackendExec thread only after
-			# Profile_XML_Sent StateMessage is received.
-			#
-			if sm.state == State.Profile_XML_Sent and not sm.isError and self.frontendOS == 'sles':
-				# If BackendExec already exists shut it down
-				if sm.ipAddr in self.ipThreadMap:
-					t = self.ipThreadMap[sm.ipAddr]
-					if t.isAlive():
-						t.shutdownFlag.set()
-
-				backendThread = BackendExec(sm.ipAddr, self.queue,self.backendScript)
-				self.ipThreadMap[sm.ipAddr] = backendThread
-				backendThread.setDaemon(True)
-				backendThread.start()
-
 			with self.lock:
 				# Sort messages based on  time
-				stateList.sort(key=lambda x: x.time)
+				expectedStateList = StateSequence.getStateListByOS(os, osver)
+
+				if expectedStateList:
+					installWaitIdx    = backend.findStateMsgIndex(State.Install_Wait)
+					installStalledIdx = backend.findStateMsgIndex(State.Installation_Stalled)
+
+					#
+					# Sort StateMessages based on expected order in State Sequence list
+					# except for Install_Wait, Installation_Stalled messages
+					#
+					stateList.sort(key = lambda x: self.sortStateMessage(x,
+						installWaitIdx, installStalledIdx,
+						expectedStateList))
 
 				# Add current state to Redis
 				currState = backend.lastSuccessfulState()
@@ -343,6 +351,19 @@ class Checklist(threading.Thread):
 					stateList.clear()
 					backend.dhcpStateArr.clear()
 
+	"""
+	Sort State Message based on the index in the expectedStateList
+	"""
+	def sortStateMessage(self, stateMsg, installWaitIdx, installStalledIdx,
+		expectedStateList):
+		if stateMsg.state == State.Install_Wait:
+			return installWaitIdx
+		elif stateMsg.state == State.Installation_Stalled:
+			return installStalledIdx
+		else:
+			return expectedStateList.index(stateMsg.state)
+
+	""" Main function """
 	def run(self):
 		self.shutdownFlag = threading.Event()
 
@@ -369,7 +390,6 @@ class Checklist(threading.Thread):
 			self.log.setLevel(logging.INFO)
 
 		self.log.info('Starting chklist...')
-		import redis
 		self.r = None
 		try:
 			self.r = redis.StrictRedis(host='localhost')
@@ -395,8 +415,6 @@ class Checklist(threading.Thread):
 		self.dhcpLog.start()
 
 		self.frontendOS = stack.api.Call('list.host.attr', ['localhost', 'attr=os'])[0]['value']
-		self.ipThreadMap = {}
-		self.backendScript = None
 
 		if self.frontendOS == 'redhat':
 			self.run_redhat()
@@ -415,36 +433,27 @@ class Checklist(threading.Thread):
 
 		self.processQueueMsgs()
 
+	""" Redhat specific edits go here """
 	def run_redhat(self):
 		self.apacheLog = LogParser(r'/var/log/httpd/ssl_access_log', \
 			self.queue)
 		self.accessLog = LogParser(r'/var/log/httpd/access_log', \
 			self.queue)
 
+	""" SLES specific edits go here """
 	def run_sles(self):
 		self.apacheLog = LogParser(r'/var/log/apache2/ssl_access_log', \
 			self.queue)
 		self.accessLog = LogParser(r'/var/log/apache2/access_log', \
 			self.queue)
-		self.backendScript = '/opt/stack/share/BackendTest.py'
 
-		for ip, b in self.ipBackendMap.items():
-			backendThread = BackendExec(ip, self.queue, self.backendScript, False)
-			backendThread.setDaemon(True)
-			backendThread.start()
-			self.ipThreadMap[ip] = backendThread
-
+""" Signal handler for a clean shutdown """
 def signalHandler(t, sig, frame):
 	# Send Signal to threads
 	t.dhcpLog.shutdownFlag.set()
 	t.apacheLog.shutdownFlag.set()
 	t.accessLog.shutdownFlag.set()
 	t.timeoutThread.shutdownFlag.set()
-
-	for ip, th in t.ipThreadMap.items():
-		if th.is_alive():
-			th.shutdownFlag.set()
-
 	t.log.info('Exiting....')
 	t.shutdownFlag.set()
 	sys.exit(0)

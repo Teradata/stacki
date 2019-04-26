@@ -34,6 +34,28 @@ class TestBackend:
 		b.stateArr.append(sm4)
 		assert b.isPostPkgInstallStage() == True
 
+	def test_hasStateMessage(self):
+		b = Backend('sd-stacki-111', 'default', 'default', 'sles')
+		sm1 = StateMessage('10.25.241.111', State.DHCPDISCOVER, False, time.time())
+		sm2 = StateMessage('10.25.241.111', State.Profile_XML_Sent, False, time.time())
+		b.stateArr.append(sm1)
+		b.stateArr.append(sm2)
+		sm3 = StateMessage('10.25.241.111', State.Ludicrous_Populated, False, time.time())
+		assert b.hasStateMessage(sm3) == False
+		sm4 = StateMessage('10.25.241.111', State.Profile_XML_Sent, False, time.time())
+		assert b.hasStateMessage(sm4) == True
+
+	def test_findStateMsgIndex(self):
+		b = Backend('sd-stacki-111', 'default', 'default', 'sles')
+		sm1 = StateMessage('10.25.241.111', State.DHCPDISCOVER, False, time.time())
+		sm2 = StateMessage('10.25.241.111', State.Profile_XML_Sent, False, time.time())
+		b.stateArr.append(sm1)
+		b.stateArr.append(sm2)
+
+		assert b.findStateMsgIndex(State.Profile_XML_Sent) == 1
+		assert b.findStateMsgIndex(State.Set_Bootaction_OS) > 1000
+		assert b.findStateMsgIndex(State.DHCPDISCOVER) != 1
+
 	def test_lastSuccessfulState(self):
 		b = Backend('sd-stacki-111', 'default', 'default', 'sles')
 		assert b.lastSuccessfulState() == None

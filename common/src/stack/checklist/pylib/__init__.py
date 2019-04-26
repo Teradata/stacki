@@ -5,6 +5,7 @@
 # @copyright@
 from datetime import datetime
 from enum import Enum
+import sys
 
 class Backend:
 	"""
@@ -59,11 +60,32 @@ class Backend:
 	# through the State st.
 	#
 	def isKnownState(self, st):
-		arr = self.stateArr
-		for a in arr:
+		for a in self.stateArr:
 			if a.state == st and not a.isError:
 				return True
 
+		return False
+
+	#
+	# Find index of State  in Backend StateMessage array
+	# and return max int value if it does not exist
+	#
+	def findStateMsgIndex(self, st):
+		for idx, a in enumerate(self.stateArr):
+			if a.state == st:
+				return idx
+		return sys.maxsize
+
+	#
+	# Check if this message has been seen before and returns
+	# True if this is the case.
+	#
+	def hasStateMessage(self, sm):
+		for a in self.stateArr:
+			if (a.state == sm.state and
+				a.isError == sm.isError and
+				a.msg == sm.msg):
+				return True
 		return False
 
 	# Return the last successful StateMessage object
@@ -149,7 +171,7 @@ class StateSequence:
 		{'state': State.AUTOINST_Present, 'time': 160},
 		{'state': State.Partition_XML_Present, 'time': 170},
 		{'state': State.Ludicrous_Started, 'time': 180},
-		{'state': State.Ludicrous_Populated, 'time': 190},
+		{'state': State.Ludicrous_Populated, 'time': 600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
 		{'state': State.Set_Bootaction_OS, 'time': 210},
 		{'state': State.Rebooting_HDD, 'time': 220},
@@ -175,7 +197,7 @@ class StateSequence:
 		{'state': State.AUTOINST_Present, 'time': 160},
 		{'state': State.Partition_XML_Present, 'time': 170},
 		{'state': State.Ludicrous_Started, 'time': 180},
-		{'state': State.Ludicrous_Populated, 'time': 190},
+		{'state': State.Ludicrous_Populated, 'time': 600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
 		{'state': State.Set_Bootaction_OS, 'time': 210},
 		{'state': State.Rebooting_HDD, 'time': 220},
@@ -189,7 +211,8 @@ class StateSequence:
 		{'state': State.DHCPACK, 'time': 40},
 		{'state': State.TFTP_RRQ, 'time': 50},
 		{'state': State.VMLinuz_RRQ_Install, 'time': 60},
-		{'state': State.Profile_XML_Sent, 'time': 140},
+		{'state': State.Initrd_RRQ, 'time': 70},
+		{'state': State.Profile_XML_Sent, 'time': 1600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
 		{'state': State.Set_Bootaction_OS, 'time': 210},
 		{'state': State.Rebooting_HDD, 'time': 220},
@@ -228,6 +251,20 @@ class StateSequence:
 				return seqList[idx]['time']
 
 		return None
+
+	@staticmethod
+	def getStateListByOS(os, osversion):
+		key = os + '-' + osversion
+		if key not in StateSequence.OS_STATE_MAP:
+			return None
+
+		stateList = StateSequence.OS_STATE_MAP[key]
+		opList = []
+
+		for s in stateList:
+			opList.append(s['state'])
+
+		return opList
 
 class StateMessage:
 	"""
