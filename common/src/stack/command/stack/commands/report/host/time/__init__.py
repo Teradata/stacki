@@ -167,6 +167,8 @@ class Command(stack.commands.HostArgumentProcessor,
 				protocol = 'ntp'
 
 			self.timeservers = self.getNTPServers(host)
+			if len(self.timeservers) == 0:
+				raise CommandError(self, f'No time servers specified for host {host}. Check network interface assignments')
 
 			self.runImplementation('time_%s' % protocol, (host))
 
