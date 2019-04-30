@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-
+import stack.api
 
 # Everything in "fixures" gets loaded as a plugin
 pytest_plugins = [
@@ -26,3 +26,20 @@ def report_output():
 		_SUMMARY_LOG.append((title, output))
 
 	return _inner
+
+@pytest.fixture(scope="session")
+def backend_ips():
+	"""
+	Returns a dictionary where the key is the backend hostname and
+	the value is a set of IPs assigned to the backend.
+	"""
+
+	results = {}
+	for hostname in [host["host"] for host in stack.api.Call("list host", args=["a:backend"])]:
+		results[hostname] = set([
+			interface["ip"]
+			for interface in stack.api.Call(f"list host interface", args=[hostname])
+			if interface["ip"]
+		])
+
+	return results
