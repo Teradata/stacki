@@ -10,6 +10,7 @@ SERVICES = [
 	'smq-producer',
 	'smq-publisher',
 	'sshd',
+	'chronyd',
 ]
 
 SKIP_SVCS = {}
