@@ -188,3 +188,10 @@ def add_network(host):
 	# to get more networks added
 
 	return _inner
+
+@pytest.fixture
+def add_host_with_net(host):
+	host.run("stack add network test pxe=true address=192.168.0.0 mask=255.255.255.0")
+	host.run("stack add host interface a:frontend interface=eth2 network=test ip=192.168.0.2")
+	host.run("stack add host backend-0-0 appliance=backend rack=0 rank=0")
+	host.run("stack add host interface backend-0-0 interface=eth0 network=test ip=192.168.0.3")
