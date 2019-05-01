@@ -59,6 +59,17 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 # configure the hardware disk array controller first
 #
 /opt/stack/bin/configure-controllers.py
+if [ $? -ne 0 ]
+then
+	touch /tmp/wait
+	echo "Unable to complete storage controller configuration."
+	while [ -f /tmp/wait ]
+	do
+		sleep 1
+		/opt/stack/bin/smq-publish -chealth '{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
+	done
+fi
+
 
 udevadm settle --timeout=60
 

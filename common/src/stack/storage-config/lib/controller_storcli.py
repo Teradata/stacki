@@ -7,7 +7,13 @@ from stack.bool import str2bool
 
 class CLI:
 
-	def run(self, args, json_out = False):
+	def run(self, args, json_out=False, check=False):
+		'''
+		check=False was added to allow this subprocess wrapper to halt the install on error.
+		currently, only commands related to creating RAID volumes will ever have check=True
+		other commands may be expected to fail
+		'''
+
 		cmd = [ '/opt/stack/sbin/storcli' ]
 		cmd.extend(args)
 		try:
@@ -19,12 +25,12 @@ class CLI:
 		if json_out:
 			cmd.append('J')
 
-		f = open('/tmp/MegaSAS.log','a')
-		f.write('cmd: %s\n\n'  % ' '.join(cmd))
-		p = subprocess.run(cmd, stdout=subprocess.PIPE)
-		o = p.stdout.decode()
-		f.write('%s\n\n' % o)
-		f.close()
+		with open('/tmp/MegaSAS.log','a') as fi:
+			fi.write('cmd: %s\n\n'  % ' '.join(cmd))
+			p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', check=check)
+			o = p.stdout
+			fi.write('%s\n\n' % o)
+
 		if json_out:
 			j = json.loads(o)
 			result = j['Controllers'][0]
@@ -115,8 +121,7 @@ class CLI:
 
 		return slots
 
-	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
-			flags):
+	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares, flags, check):
 		args = ['/c%d' % adapter, 'add','vd',
 			'type=r%s' % raidlevel]
 
@@ -174,9 +179,9 @@ class CLI:
 			args.append('spares=%s' % ','.join(hs))
 
 		args.append('force')
-		self.run(args)
+		self.run(args, check=check)
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares, options):
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, options, check):
 		if enclosure:
 			loc = '/c%d/e%d' % (adapter, enclosure)
 		else:
@@ -187,11 +192,11 @@ class CLI:
 			if options:
 				f = options.split()
 				args.extend(f)
-			self.run(args)
+			self.run(args, check=check)
 
 
 if __name__ == '__main__':
-	s = StorCLI()
+	s = CLI()
 	a = s.getAdapter()
 	if a is not None:
 		print(s.getEnclosure(a))
