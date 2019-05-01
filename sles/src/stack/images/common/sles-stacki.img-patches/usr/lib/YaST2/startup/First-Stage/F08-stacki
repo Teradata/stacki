@@ -52,12 +52,23 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
 /opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
+# nuke the disks, if appropriate
+/opt/stack/bin/initialize-storage.py
+
 #
 # configure the hardware disk array controller first
 #
 /opt/stack/bin/configure-controllers.py
 
 udevadm settle --timeout=60
+
+# NOTE: we initialize storage twice in RHEL, so do the same thing here, too
+
+# need to call 'initialize-storage.py' again after reconfiguring the
+# hardware disk controller because it may have created new LUNs and the
+# master boot record on a LUN may be corrupted and require initialization.
+
+/opt/stack/bin/initialize-storage.py
 
 #
 # then configure the partitions
