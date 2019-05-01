@@ -12,13 +12,12 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
-DEPENDS.FILES	= gen_random_pw.py stack-console.py yumresolver.py backup-cluster-db.sh
+DEPENDS.FILES	= gen_random_pw.py yumresolver.py backup-cluster-db.sh
 
 include $(ROCKSBUILD)/etc/CCRules.mk
 
 ROOTONLY	= gen_random_pw yumresolver
-ANYONE		= stack-console 
-SCRIPTS		= $(ANYONE) $(ROOTONLY)
+SCRIPTS		= $(ROOTONLY)
 
 build:
 
@@ -27,7 +26,6 @@ install:: $(SCRIPTS)
 	mkdir -p $(ROOT)/$(PKGROOT)/etc/
 	mkdir -p $(ROOT)/var/db/RCS
 	mkdir -p $(ROOT)/etc/cron.daily
-	$(INSTALL) -m0555 $(ANYONE) $(ROOT)/$(PKGROOT)/sbin/
 	$(INSTALL) -m0500 $(ROOTONLY) $(ROOT)/$(PKGROOT)/sbin/
 	$(INSTALL) -m0700 backup-cluster-db.sh $(ROOT)/etc/cron.daily/backup-cluster-db
 
