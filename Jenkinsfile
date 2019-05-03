@@ -892,7 +892,7 @@ pipeline {
 
                         // Now do the scan
                         dir ('stacki-blackduck-scanner') {
-                            sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                            sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
                         }
                     }
 
