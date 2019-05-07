@@ -11,7 +11,7 @@ Then change into the `test-framework` folder in the `stacki` codebase on your co
 ## Usage
 
 After running `make` to build the test framework, you can run all the tests with this script:
-    
+
     ./run-tests.sh [flags...] STACKI_ISO
 
 where STACKI_ISO is the ISO you want to use to provision a frontend for running tests against. Besides passing a local path as the STACKI_ISO argument, you can also pass a URL, like so:
@@ -36,9 +36,11 @@ For example, Stacki SLES11 can't be a frontend, but the system test-suite is awa
 
     ./run-tests.sh --system stacki-5.1rc2-sles12.x86_64.disk1.iso --extra-isos=stacki-5.1rc2-sles11.x86_64.disk1.iso
 
-By default, code coverage reports will be generated in the `reports` directory, in `unit` and `integration` subdirectories for those types of tests. To turn off this report generation, you can use the flag:
+By default, code coverage reports will not be generated. To turn on report generation, you can use the flag:
 
-    --no-cov
+    --coverage
+
+The reports can be found in the `reports` directory, in `unit` and `integration` subdirectories for those types of tests.
 
 You can destroy the Python virtualenv and clean up the project by running:
 
