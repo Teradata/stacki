@@ -48,10 +48,10 @@ class TestPackageInstall:
 		else:
 			pytest.skip('Unrecongized distribution')
 
-
 		output = _exec(f'stack list host profile {hostname} chapter=main profile=bash | grep "{installer}"', shell=True).stdout
 
 		if output:
+			output = _exec(f'stack list host profile {hostname} chapter=main profile=bash | grep "{installer}"', shell=True).stdout
 
 			# Format the package list to be just the packages without the package manager arguments
 			config_packages = output.replace(installer, '').strip().split(' ')
@@ -69,8 +69,12 @@ class TestPackageInstall:
 				try:
 					host.check_output(f'rpm -q --whatprovides {conf_package}')
 
-				# If an rpm doesn't provide the package, it raises an error code which
-				# triggers an exception by testinfra
+				# If a package isn't installed, use rpm to see if another installed package
+				# provides it instead
+				try:
+					provide_package = host.check_output(f'rpm -q --whatprovides {conf_package}')
+
+				# If an rpm doesn't provide the package, an assertion is rasied by testinfra
 				except AssertionError:
 					missing_packages.append(conf_package)
 
