@@ -25,7 +25,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <stack:package>keyutils-libs-devel</stack:package>
 <stack:package>iscsi-initiator-utils</stack:package>
 <stack:package>iscsi-initiator-utils-devel</stack:package>
-<stack:package>fcgi</stack:package>
 <stack:package>ludicrous-speed</stack:package>
 <stack:package>libblkid-devel</stack:package>
 <stack:package>isomd5sum-devel</stack:package>

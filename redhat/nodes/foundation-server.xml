@@ -17,20 +17,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </stack:rocks>
 
 
-<stack:package>foundation-py-pygobject</stack:package>
-<stack:package>foundation-py-pygtk</stack:package>
-<stack:package>foundation-py-PyMySQL</stack:package>
-<stack:package>foundation-py-pycairo</stack:package>
-<stack:package>foundation-py-libxml2dom</stack:package>
 <stack:package>foundation-rcs</stack:package>
-<stack:package>foundation-readline</stack:package>
-<stack:package>foundation-libxml2</stack:package>
-<stack:package>foundation-wget</stack:package>
-<stack:package>foundation-py-ipaddress</stack:package>
 <stack:package>foundation-redhat</stack:package>
-<stack:package>foundation-fbftpd</stack:package>
 <stack:package>libdnet</stack:package>
 <stack:package>rsync</stack:package>
 
 
-</stack:stack> 
+</stack:stack>
