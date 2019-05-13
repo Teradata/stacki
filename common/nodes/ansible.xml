@@ -16,4 +16,8 @@ mkdir -p /etc/ansible
 ln -s --force /opt/stack/etc/ansible.cfg /etc/ansible/ansible.cfg
 </stack:script>
 
+<stack:package>stack-command</stack:package>
+
+
 </stack:stack>
+
