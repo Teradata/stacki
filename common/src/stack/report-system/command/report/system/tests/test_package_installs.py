@@ -27,19 +27,18 @@ class TestPackageInstall:
 
 		# Different package managers depending on OS
 		if host_os == 'sles':
-			installer = 'zypper'
+			installer = 'zypper install -f -y'
 
-		elif host_os == 'redhat':
-			installer = 'yum'
+		elif host_os == 'centos':
+			installer = 'yum install -y'
 
 		if installer:
 
-			# Get the list of packages stacki originally installed on the host:
-			output = _exec(f'stack list host profile {hostname} chapter=main profile=bash | grep "{installer} install"', shell=True).stdout
+			output = _exec(f'stack list host profile {hostname} chapter=main profile=bash | grep "{installer}"', shell=True).stdout
 			if output:
 
 				# Format the package list to be just the packages without the package manager arguments
-				config_packages = output.replace(f'{installer} install -f -y ', '').strip().split(' ')
+				config_packages = output.replace(installer, '').strip().split(' ')
 
 			else:
 				pytest.skip('No stacki installed packages found')
@@ -49,6 +48,15 @@ class TestPackageInstall:
 		# still installed on the host
 		for conf_package in config_packages:
 			if not host.package(conf_package).is_installed:
-				missing_packages.append(conf_package)
 
-		assert not missing_packages, f'On host {hostname} the following packages were not found on the installed system: {" ,".join(missing_packages)}'
+				# If a package isn't installed, use rpm to see if another installed package
+				# provides it instead
+				try:
+					provide_package = host.check_output(f'rpm -q --whatprovides {conf_package}')
+
+				# If an rpm doesn't provide the package, an assertion is rasied by testinfra
+				except AssertionError:
+					missing_packages.append(conf_package)
+
+
+		assert not missing_packages, f'On host {hostname} the following packages were not found on the installed system: {", ".join(missing_packages)}'
