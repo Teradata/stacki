@@ -27,7 +27,7 @@ pipeline {
 
     triggers {
         // Nightly build of develop (at 3am)
-        cron(env.BRANCH_NAME == 'develop' ? '0 11 * * *' : '')
+        cron(env.BRANCH_NAME == 'develop' ? 'TZ=America/Los_Angeles\n0 3 * * *' : '')
     }
 
     stages {
@@ -253,7 +253,7 @@ pipeline {
 
                     // And the Slack #stacki-bot channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki build has failed.
@@ -261,7 +261,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <${env.RUN_DISPLAY_URL}|View the pipeline job>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -311,7 +311,7 @@ pipeline {
                         failure {
                             // Notify the Slack #stacki-bot channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to upload to Artifactory.
@@ -319,7 +319,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -357,7 +357,7 @@ pipeline {
                         failure {
                             // Notify the Slack #stacki-bot channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to copy to Stacki Builds website.
@@ -365,7 +365,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -442,7 +442,7 @@ pipeline {
                 failure {
                     // Notify the Slack #stacki-bot channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki failed to setup tests.
@@ -450,7 +450,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <${env.RUN_DISPLAY_URL}|View the pipeline job>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -598,6 +598,19 @@ pipeline {
                                         }
                                     }
                                     catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Take a screenshots of the machine screens
+                                        sh 'virsh screenshot $(cat .vagrant/machines/frontend/libvirt/id) screenshot-frontend.ppm'
+                                        sh 'convert screenshot-frontend.ppm screenshot-frontend.png'
+                                        archiveArtifacts 'screenshot-frontend.png'
+
+                                        sh 'virsh screenshot $(cat .vagrant/machines/backend-0-0/libvirt/id) screenshot-backend-0-0.ppm'
+                                        sh 'convert screenshot-backend-0-0.ppm screenshot-backend-0-0.png'
+                                        archiveArtifacts 'screenshot-backend-0-0.png'
+
+                                        sh 'virsh screenshot $(cat .vagrant/machines/backend-0-1/libvirt/id) screenshot-backend-0-1.ppm'
+                                        sh 'convert screenshot-backend-0-1.ppm screenshot-backend-0-1.png'
+                                        archiveArtifacts 'screenshot-backend-0-1.png'
+
                                         // Make sure we clean up the VM
                                         dir('test-suites/system') {
                                             sh 'vagrant destroy -f || true'
@@ -696,17 +709,23 @@ pipeline {
                         status: 'SUCCESS'
                     )
 
-                    // And the Slack #stacki-bot channel
-                    slackSend(
-                        channel: '#stacki-bot',
-                        color: 'good',
-                        message: """\
-                            Stacki build and test has succeeded.
-                            *Branch:* ${env.GIT_BRANCH}
-                            *OS:* ${env.PLATFORM}
-                        """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
-                    )
+                    script {
+                        if (env.GIT_BRANCH != 'develop' && env.IS_RELEASE != 'true') {
+                            // And the Slack #stacki-builds channel
+                            slackSend(
+                                channel: '#stacki-builds',
+                                color: 'good',
+                                message: """\
+                                    Stacki build and test has succeeded.
+                                    *Branch:* ${env.GIT_BRANCH}
+                                    *OS:* ${env.PLATFORM}
+                                    *ISO:* ${env.ISO_FILENAME}
+                                    *URL:* ${env.ART_URL}/pkgs-external-snapshot-sd/${env.ART_ISO_PATH}/${env.ART_OS}/${env.GIT_BRANCH}/${env.ISO_FILENAME}
+                                """.stripIndent(),
+                                tokenCredentialId: 'slack-token-stacki'
+                            )
+                        }
+                    }
                 }
 
                 failure {
@@ -717,9 +736,9 @@ pipeline {
                         status: 'FAILURE'
                     )
 
-                    // And the Slack #stacki-bot channel
+                    // And the Slack #stacki-builds channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki tests have failed.
@@ -727,7 +746,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <https://sdvl3jenk015.td.teradata.com/blue/organizations/jenkins/stacki - ${env.PLATFORM}/detail/${env.JOB_BASE_NAME}/${env.BUILD_ID}/tests/|View the test results>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -770,18 +789,32 @@ pipeline {
 
                     post {
                         success {
+                            // Tell #stacki-builds we succeeded
+                            slackSend(
+                                channel: '#stacki-builds',
+                                color: 'good',
+                                message: """\
+                                    Stacki build and test has succeeded.
+                                    *Branch:* ${env.GIT_BRANCH}
+                                    *OS:* ${env.PLATFORM}
+                                    *ISO:* ${env.ISO_FILENAME}
+                                    *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
+                                """.stripIndent(),
+                                tokenCredentialId: 'slack-token-stacki'
+                            )
+
                             // Notify Slack of a new release
                             script {
                                 if (env.IS_RELEASE == 'true') {
                                     slackSend(
-                                        channel: '#tdc-pallets',
+                                        channel: '#stacki-builds',
                                         color: 'good',
                                         message: """\
                                             New Stacki ISO uploaded to Artifactory.
                                             *ISO:* ${env.ISO_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     slackSend(
@@ -792,7 +825,7 @@ pipeline {
                                             *ISO:* ${env.ISO_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
                                 }
                             }
@@ -804,7 +837,7 @@ pipeline {
                         failure {
                             // Notify the Slack #stacki-bot channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to upload to Artifactory.
@@ -812,7 +845,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -847,20 +880,20 @@ pipeline {
                     post {
                         success {
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'good',
                                 message: """\
                                     New Stacki ISOs uploaded to Amazon S3.
                                     *Stacki:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.ISO_FILENAME}
                                     *StackiOS:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.STACKIOS_FILENAME}
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
 
                         failure {
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki ISOs failed to upload to Amazon s3.
@@ -868,7 +901,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -900,7 +933,7 @@ pipeline {
                         failure {
                             // Notify the Slack #stacki-bot channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki Blackduck scan has failed.
@@ -908,7 +941,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -971,14 +1004,14 @@ pipeline {
                             script {
                                 if (env.IS_RELEASE == 'true') {
                                     slackSend(
-                                        channel: '#tdc-pallets',
+                                        channel: '#stacki-builds',
                                         color: 'good',
                                         message: """\
                                             New Stacki QCow2 image uploaded to Artifactory.
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     slackSend(
@@ -989,19 +1022,19 @@ pipeline {
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     if (env.PLATFORM == 'redhat7') {
                                         slackSend(
-                                            channel: '#stacki-bot',
+                                            channel: '#stacki-builds',
                                             color: 'good',
                                             message: """\
                                                 New Stacki QCow2 uploaded to Amazon S3.
                                                 *QCow2:* ${env.QCOW_FILENAME}
                                                 *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
                                             """.stripIndent(),
-                                            tokenCredentialId: 'slack_jenkins_integration_token'
+                                            tokenCredentialId: 'slack-token-stacki'
                                         )
                                     }
                                 }
@@ -1014,7 +1047,7 @@ pipeline {
                         failure {
                             // Notify the Slack #stacki-bot channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki KVM build has failed.
@@ -1022,7 +1055,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
