@@ -320,12 +320,12 @@ def get_sles11_media_type(dev_name):
 		arr = l.strip().split()
 
 		# line 0
-		if len(arr) == 1 and arr[0] == 'partition':
+		if len(arr) == 1 and arr[0] == 'partition:':
 			blk_type = 'part'
 			continue
 
 		# line 0
-		if len(arr) == 1 and arr[0] == 'disk':
+		if len(arr) == 1 and arr[0] == 'disk:':
 			blk_type = 'disk'
 			continue
 

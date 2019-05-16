@@ -13,6 +13,20 @@
 unset PYTHONPATH
 export LD_LIBRARY_PATH=/opt/stack/lib
 
+# util func to pause the install, alert the console user, alert the MQ
+function halt_install {
+	console_err_msg=$1
+	mq_health_msg=$2
+
+	touch /tmp/wait
+	echo $console_err_msg
+	while [ -f /tmp/wait ]
+	do
+		sleep 1
+		/opt/stack/bin/smq-publish -chealth $mq_health_msg
+	done
+}
+
 /opt/stack/bin/stacki-profile.py
 
 #
@@ -54,6 +68,11 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
 # nuke the disks, if appropriate
 /opt/stack/bin/initialize-storage.py
+if [ $? -ne 0 ]
+then
+	halt_install "Unable to initialize internal storage configuration." \
+		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+fi
 
 #
 # configure the hardware disk array controller first
@@ -61,15 +80,9 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 /opt/stack/bin/configure-controllers.py
 if [ $? -ne 0 ]
 then
-	touch /tmp/wait
-	echo "Unable to complete storage controller configuration."
-	while [ -f /tmp/wait ]
-	do
-		sleep 1
-		/opt/stack/bin/smq-publish -chealth '{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
-	done
+	halt_install "Unable to complete storage controller configuration." \
+		'{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
 fi
-
 
 udevadm settle --timeout=60
 
@@ -80,6 +93,11 @@ udevadm settle --timeout=60
 # master boot record on a LUN may be corrupted and require initialization.
 
 /opt/stack/bin/initialize-storage.py
+if [ $? -ne 0 ]
+then
+	halt_install "Unable to initialize internal storage configuration after storage controller config." \
+		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+fi
 
 #
 # then configure the partitions
@@ -90,17 +108,11 @@ udevadm settle --timeout=60
 /opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml
 
 # give ourselves the ability to hold the installation prior to the start of yast
-#
 grep stack-debug /proc/cmdline 2>&1 > /dev/null
 if [ $? -eq 0 ]
 then
-	touch /tmp/wait
-	echo "Stacki debug wait loop - remove /tmp/wait to continue"
-	while [ -f /tmp/wait ]
-	do
-		sleep 1
-		/opt/stack/bin/smq-publish -chealth '{"state": "install wait"}'
-	done
+	halt_install "Stacki debug wait loop - remove /tmp/wait to continue" \
+		'{"state": "install wait"}'
 fi
 
 if [[ -n $YUMSERVER ]]
