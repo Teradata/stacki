@@ -28,6 +28,28 @@ FNULL = open(os.devnull, 'w')
 ## functions
 ##
 
+# util wrapper around subprocess
+def _exec(cmd, *args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8', shlexsplit=False, **kwargs):
+	'''
+	wrapper around subprocess to default common arguments while allowing overriding.
+	'''
+	if shlexsplit:
+		cmd = shlex.split(cmd)
+	return subprocess.run(cmd, **kwargs, stdout=stdout, stderr=stderr, encoding=encoding)
+
+
+# util to try to guess the truthiness of a string
+def str2bool(s):
+	"""Converts an on/off, yes/no, true/false string to
+	True/False."""
+	if type(s) == bool:
+		return s
+	if s and s.upper() in [ 'ON', 'YES', 'Y', 'TRUE', '1' ]:
+		return True
+	else:
+		return False
+
+
 def nukeLVM(volumegroup):
 	for (display, remove) in [
 			('lvdisplay --all -c', 'lvremove --force'),
@@ -48,6 +70,7 @@ def nukeLVM(volumegroup):
 					stdout = FNULL,
 					stderr = subprocess.STDOUT)
 
+
 def stopMD():
 	#
 	# we need to stop all MDs before we can remove them
@@ -63,33 +86,50 @@ def nukeMD(part):
 		stderr = subprocess.STDOUT)
 
 
-def nukeDisk(disk):
-	if 'disklabel' in attributes:
-		disklabel = attributes['disklabel']
-	else:
-		disklabel = 'gpt'
+def nukeDisk(disk, disklabel, halt_on_error):
+	'''
+	destroy the master boot record (via dd),
+	create a new partition label (msdos/gpt) based on the 'disklabel' attribute
+	attempts to unmount any partitions on that disk that may be mounted
+	'''
 
-	#
+	# unmount everything on the disk first.
+	# NOTE: sles11 does not have the version of umount that allows recursive `umount -A /dev/some/`
+	# so instead, iterate over partitions per disk, umounting parts only if mounted.
+
+	subproc_args = {'stdout': subprocess.PIPE, 'stderr': subprocess.STDOUT, 'check': halt_on_error}
+
+	cmd = f'lsblk --raw --noheadings -o name,mountpoint /dev/{disk}'
+	proc = _exec(cmd, shlexsplit=True, **subproc_args)
+
+	cmd = 'umount -f /dev/{}'
+	for line in proc.stdout.splitlines():
+		line = line.split()
+
+		if len(line) == 2:
+			_exec(cmd.format(f'{line[0]}'), shlexsplit=True, **subproc_args)
+
 	# Clear out the master boot record of the drive
-	#
 	cmd = 'dd if=/dev/zero of=/dev/%s count=512 bs=1' % disk
-	subprocess.call(shlex.split(cmd),
-		stdout = FNULL, stderr = subprocess.STDOUT)
+	_exec(cmd, shlexsplit=True, **subproc_args)
 
+	# install new partition table
 	cmd = 'parted -s /dev/%s mklabel %s' % (disk, disklabel)
-	subprocess.call(shlex.split(cmd),
-		stdout = FNULL, stderr = subprocess.STDOUT)
-
-	return
+	_exec(cmd, shlexsplit=True, **subproc_args)
 
 ##
 ## MAIN
 ##
 
+# get info about attributes
+
 if 'nukecontroller' in attributes:
 	nukecontroller = attributes['nukecontroller']
 else:
 	nukecontroller = 'false'
+
+halt_on_error = str2bool(attributes.get('halt_install_on_error', True))
+disklabel = attributes.get('disklabel', 'gpt')
 
 if 'nukedisks' in attributes:
 	n = attributes['nukedisks']
@@ -199,5 +239,9 @@ for disk in disks:
 #
 for disk in disks:
 	if disk['nuke']:
-		nukeDisk(disk['device'])
-
+		try:
+			nukeDisk(disk['device'], disklabel, halt_on_error)
+		except subprocess.CalledProcessError as e:
+			print(' '.join(e.cmd))
+			print(f'output: {e.stdout}')
+			sys.exit(1)
