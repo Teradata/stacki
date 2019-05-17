@@ -1,0 +1,13 @@
+type Pallet {
+  id: Int
+  name: String
+  version: String
+  release: String
+  arch: String
+  os: String
+  url: String
+}
+
+extend type Query {
+  allPallets: [Pallet]
+}

@@ -1,0 +1,13 @@
+[Unit]
+Description=GraphQL Server
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/opt/stack/bin/uvicorn stack.graph_ql:app --port 8081 --host 0.0.0.0 --ws auto
+StandardOutput=syslog
+StandardError=syslog
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

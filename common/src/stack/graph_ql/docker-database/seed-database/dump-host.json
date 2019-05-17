@@ -1,0 +1,20 @@
+{
+  "host": [
+    {
+      "name": "frontend-0-0",
+      "rack": "0",
+      "rank": "0",
+      "appliance": "frontend",
+      "interface": [
+        {
+          "interface": "eth1",
+          "default": true,
+          "network": "private",
+          "mac": "08:00:27:3d:16:1f",
+          "ip": "192.168.0.2",
+          "name": "frontend-0-0"
+        }
+      ]
+    }
+  ]
+}

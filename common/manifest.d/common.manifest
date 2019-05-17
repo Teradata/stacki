@@ -20,9 +20,11 @@ stack-checklist
 stack-command
 stack-config
 stack-config-server
+stack-db
 stack-discovery
 stack-docker
 stack-examples
+stack-graph_ql
 stack-kickstart
 stack-mq
 stack-pxeboot

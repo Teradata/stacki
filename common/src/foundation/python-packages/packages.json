@@ -33,5 +33,6 @@
 	"redis":		{ "fe": true, "bootstrap": true }, 
 	"requests":		{ "fe": true },
 	"testinfra":		{ "fe": true, "bootstrap": true, "version": "1.16.0" },
-	"yoyo-migrations":	{ "fe": true }
+	"yoyo-migrations":	{ "fe": true },
+	"ariadne":	{ "fe": true }
 }

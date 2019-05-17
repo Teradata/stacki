@@ -1,0 +1,15 @@
+type Box {
+  id: Int
+  name: String
+  os_id: String
+  os: Os
+}
+
+extend type Query {
+  boxes: [Box]
+}
+
+extend type Mutation {
+  addBox(name: String!, os: String): Box
+  deleteBox(id: Int!): Boolean!
+}

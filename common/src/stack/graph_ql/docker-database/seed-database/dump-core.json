@@ -1,0 +1,166 @@
+{
+  "access": [
+    {
+      "command": "*",
+      "group": "apache"
+    },
+    {
+      "command": "list*",
+      "group": "wheel"
+    }
+  ],
+  "attr": [
+    {
+      "name": "sync.ssh.authkey",
+      "value": true
+    },
+    {
+      "name": "ssh.use_dns",
+      "value": true
+    },
+    {
+      "name": "discovery.base.rack",
+      "value": "0"
+    },
+    {
+      "name": "discovery.base.rank",
+      "value": 0
+    },
+    {
+      "name": "os",
+      "value": "sles"
+    },
+    {
+      "name": "firewall",
+      "value": true
+    }
+  ],
+  "network": [
+    {
+      "name": "private",
+      "address": "192.168.0.0",
+      "mask": "255.255.255.0",
+      "gateway": "10.0.2.2",
+      "zone": "",
+      "dns": false,
+      "pxe": true
+    }
+  ],
+  "route": [
+    {
+      "address": "224.0.0.0",
+      "netmask": "255.255.255.0",
+      "subnet": "private"
+    },
+    {
+      "address": "255.255.255.255",
+      "netmask": "255.255.255.255",
+      "subnet": "private"
+    }
+  ],
+  "bootaction": [
+    {
+      "name": "default",
+      "type": "os",
+      "kernel": "com32 chain.c32",
+      "args": "hd0"
+    },
+    {
+      "name": "pxeflash",
+      "type": "os",
+      "kernel": "kernel memdisk bigraw",
+      "ramdisk": "pxeflash.img",
+      "args": "keeppxe"
+    },
+    {
+      "name": "localboot",
+      "type": "os",
+      "kernel": "localboot 0"
+    },
+    {
+      "name": "hplocalboot",
+      "type": "os",
+      "kernel": "localboot -1"
+    },
+    {
+      "name": "memtest",
+      "type": "os",
+      "kernel": "kernel memtest"
+    }
+  ],
+  "software": {
+    "box": [
+      {
+        "name": "frontend"
+      },
+      {
+        "name": "default"
+      }
+    ]
+  },
+  "appliance": [
+    {
+      "name": "frontend",
+      "box": "frontend",
+      "public": false,
+      "attr": [
+        { "name": "node", "value": "server" },
+        { "name": "kickstartable", "value": true },
+        { "name": "managed", "value": false }
+      ]
+    },
+    {
+      "name": "builder",
+      "public": false,
+      "attr": [
+        { "name": "node", "value": "builder" },
+        { "name": "kickstartable", "value": true },
+        { "name": "managed", "value": true }
+      ]
+    },
+    {
+      "name": "barnacle",
+      "public": false,
+      "attr": [
+        { "name": "node", "value": "barnacle" },
+        { "name": "kickstartable", "value": true },
+        { "name": "managed", "value": true }
+      ]
+    },
+    {
+      "name": "switch",
+      "public": false,
+      "attr": [
+        { "name": "kickstartable", "value": false },
+        { "name": "managed", "value": false }
+      ]
+    },
+    {
+      "name": "backend",
+      "public": true,
+      "attr": [
+        { "name": "node", "value": "backend" },
+        { "name": "kickstartable", "value": true },
+        { "name": "managed", "value": true }
+      ]
+    },
+    {
+      "name": "replicant",
+      "public": true,
+      "attr": [
+        { "name": "node", "value": "replicant" },
+        { "name": "kickstartable", "value": true },
+        { "name": "managed", "value": true },
+        { "name": "const_overwrite", "value": false }
+      ]
+    },
+    {
+      "name": "external",
+      "public": false,
+      "attr": [
+        { "name": "kickstartable", "value": false },
+        { "name": "managed", "value": false }
+      ]
+    }
+  ]
+}

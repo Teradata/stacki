@@ -15,14 +15,18 @@ grafts_to_site_packages = (
 	("pylib/stack", "stack"),
 	("report-system/command", "stack/commands"),
 	("switch/command", "stack/commands"),
+	("graph_ql/command", "stack/commands"),
 	("switch/pylib", "stack"),
 	("ws/command", "stack/commands"),
 	("ws/pylib", "stack"),
+	("graph_ql", "stack/graph_ql"),
+	("graph_ql/pylib", "stack"),
+	("db", "stack/db"),
+	("db/pylib", "stack"),
 	("ws-client/pylib", "")
 )
 
 bin_file_grafts = (
-	("command/stack.py", "/opt/stack/bin/stack"),
 	("discovery/bin/discover-nodes.py", "/opt/stack/sbin/discover-nodes"),
 	("mq/clients/publish.py", "/opt/stack/bin/smq-publish"),
 	("mq/clients/channel-ctrl.py", "/opt/stack/bin/channel-ctrl"),
@@ -62,6 +66,21 @@ if __name__ == '__main__':
 
 			# Now symlink over our src version
 			dest_filename.symlink_to(src_filename)
+
+		# Find all our GrrapQL files
+		for src_filename in src_directory.glob("**/*.graphql"):
+			dest_filename = dest_directory / src_filename.relative_to(src_directory)
+
+			# First blow away the old one, if it exists
+			if dest_filename.exists() or dest_filename.is_symlink():
+				dest_filename.unlink()
+
+			# Create any missing directory structure in the destination.
+			dest_filename.parent.mkdir(parents = True, exist_ok = True)
+
+			# Now symlink over our src version
+			dest_filename.symlink_to(src_filename)
+
 
 	for src, dest in bin_file_grafts:
 		src_filename = src_base / src

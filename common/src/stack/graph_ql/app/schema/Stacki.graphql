@@ -1,0 +1,287 @@
+type Access {
+  command: String!
+  groupid: Int!
+}
+
+type Aliases {
+  id: Int!
+  name: String!
+  network: Int!
+}
+
+type Appliances {
+  id: Int!
+  name: String!
+  public: String!
+}
+
+type Attributes {
+  scope: String
+  attr: String!
+  value: String
+  shadow: String
+  scopeid: Int
+}
+
+type AttributesDoc {
+  attr: String!
+  doc: String
+}
+
+type Boot {
+  node: Int!
+  action: String
+}
+
+type Bootactions {
+  id: Int!
+  bootname: Int!
+  os: Int
+  kernel: String
+  ramdisk: String
+  args: String
+}
+
+type Bootnames {
+  id: Int!
+  name: String!
+  type: String!
+}
+
+
+
+type Carts {
+  id: Int!
+  name: String!
+  url: String
+}
+
+type CartStacks {
+  box: Int!
+  cart: Int!
+}
+
+type Environments {
+  id: Int!
+  name: String!
+}
+
+type FirewallRules {
+  id: Int!
+  scopeMapId: ScopeMap
+  name: String!
+  tableType: String!
+  chain: String!
+  action: String!
+  service: String!
+  protocol: String!
+  inSubnetId: Subnets
+  outSubnetId: Subnets
+  flags: String
+  comment: String
+}
+
+type Firmware {
+  id: Int!
+  modelId: FirmwareModel
+  source: String!
+  version: String!
+  hashAlg: String!
+  hash: String!
+  file: String!
+}
+
+type FirmwareImp {
+  id: Int!
+  name: String!
+}
+
+type FirmwareMake {
+  id: Int!
+  name: String!
+  versionRegexId: FirmwareVersionRegex
+}
+
+type FirmwareMapping {
+  id: Int!
+  nodeId: Nodes
+  firmwareId: Firmware
+}
+
+type FirmwareModel {
+  id: Int!
+  name: String!
+  makeId: FirmwareMake
+  impId: FirmwareImp
+  versionRegexId: FirmwareVersionRegex
+}
+
+type FirmwareVersionRegex {
+  id: Int!
+  name: String!
+  regex: String!
+  description: String!
+}
+
+type Groups {
+  id: Int!
+  name: String!
+}
+
+type IbMemberships {
+  id: Int!
+  switch: Nodes
+  interface: Networks
+  partName: IbPartitions
+  memberType: String!
+}
+
+type IbPartitions {
+  id: Int!
+  switch: Nodes
+  partKey: Int!
+  partName: String!
+  options: String!
+}
+
+type Memberships {
+  nodeid: Int!
+  groupid: Int!
+}
+
+type Networks {
+  id: Int!
+  node: Int
+  mac: String
+  ip: String
+  netmask: String
+  gateway: String
+  name: String
+  device: String
+  subnet: Int
+  module: String
+  vlanid: Int
+  options: String
+  channel: String
+  main: Int
+}
+
+type Nodes {
+  id: Int!
+  name: String
+  appliance: Appliances
+  box: Int
+  environment: Int
+  rack: String
+  rank: String
+  osaction: Int
+  installaction: Int
+  comment: String
+  metadata: String
+}
+
+type Oses {
+  id: Int!
+  name: String!
+}
+
+type Partitions {
+  id: Int!
+  node: Int!
+  device: String!
+  mountpoint: String!
+  uuid: String!
+  sectorstart: String!
+  partitionsize: String!
+  partitionid: String!
+  fstype: String!
+  partitionflags: String!
+  formatflags: String!
+}
+
+type PublicKeys {
+  id: Int!
+  node: Int!
+  publicKey: String
+}
+
+type Rolls {
+  id: Int!
+  name: String!
+  version: String!
+  rel: String!
+  arch: String!
+  os: String!
+  url: String
+}
+
+type Routes {
+  id: Int!
+  scopeMapId: ScopeMap
+  address: String!
+  netmask: String!
+  gateway: String
+  subnetId: Subnets
+  interface: String
+}
+
+type ScopeMap {
+  id: Int!
+  scope: String!
+  applianceId: Appliances
+  osId: Oses
+  environmentId: Environments
+  nodeId: Nodes
+}
+
+type Stacks {
+  box: Int!
+  roll: Int!
+}
+
+type StorageController {
+  id: Int!
+  scopeMapId: ScopeMap
+  enclosure: Int!
+  adapter: Int!
+  slot: Int!
+  raidlevel: String!
+  arrayid: Int!
+  options: String!
+}
+
+type StoragePartition {
+  id: Int!
+  scopeMapId: ScopeMap
+  device: String!
+  mountpoint: String
+  size: Int!
+  fstype: String
+  partid: Int!
+  options: String!
+}
+
+type Subnets {
+  id: Int!
+  name: String!
+  zone: String!
+  address: String!
+  mask: String!
+  gateway: String
+  mtu: Int
+  dns: Int
+  pxe: Int
+}
+
+type Switchports {
+  interface: Int!
+  switch: Int!
+  port: Int!
+}
+
+type Tags {
+  scope: String
+  tag: String!
+  value: String
+  scopeid: Int
+}

@@ -44,7 +44,6 @@ from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
 
-
 _logPrefix = ''
 _debug     = False
 
@@ -1666,6 +1665,25 @@ class Command:
 				(o, e) = p.communicate()
 				if p.returncode == 0:
 					self.colors[key]['code'] = o
+
+	def graphql(self, query_string, variables = None):
+		"""
+		"""
+		# TODO:  Clean this up
+		import requests
+		headers = { "x-hasura-admin-secret": "myadminsecretkey"}
+		# Requires the http server to be running
+		url = 'http://localhost:8081/v1/graphql'
+
+		if not variables:
+			variables = {}
+
+		response = requests.post(url, headers=headers, json={"query":query_string,"variables":variables}).json()
+
+		if "errors" in response:
+			raise Exception(response['errors'][0]['message'])
+
+		return response['data']
 
 	def fillParams(self, names, params=None):
 		"""

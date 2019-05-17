@@ -3,6 +3,7 @@ YUMLIST = \
 	stack-command \
 	stack-mq \
 	stack-pylib \
+	stack-graph_ql \
 	stack-storage-config \
 	ludicrous-speed \
 	foundation-python \

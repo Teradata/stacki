@@ -1,0 +1,15 @@
+type Network {
+  id: Int
+  name: String
+  address: String
+  mask: String
+  gateway: String
+  mtu: String
+  zone: String
+  dns: String
+  pxe: String
+}
+
+extend type Query {
+  allNetworks: [Network]
+}

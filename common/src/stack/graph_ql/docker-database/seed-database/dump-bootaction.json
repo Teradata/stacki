@@ -1,0 +1,67 @@
+{
+  "bootaction": [
+    {
+      "name": "default",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/12/sp3/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=192.168.0.2"
+    },
+    {
+      "name": "console",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/12/sp3/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=192.168.0.2 console=ttyS0,115200n8 nomodeset=1 textmode=1"
+    },
+    {
+      "name": "rescue",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp3-x86_64",
+      "ramdisk": "initrd-sles-12-sp3-x86_64",
+      "args": "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+    },
+    {
+      "name": "install sles 12.2",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=192.168.0.2"
+    },
+    {
+      "name": "install sles 12.2 console",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/12/sp2/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=192.168.0.2 console=ttyS0,115200n8 nomodeset=1 textmode=1"
+    },
+    {
+      "name": "rescue sles 12.2",
+      "type": "install",
+      "kernel": "vmlinuz-sles-12-sp2-x86_64",
+      "ramdisk": "initrd-sles-12-sp2-x86_64",
+      "args": "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+    },
+    {
+      "name": "install sles 11.3",
+      "type": "install",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=192.168.0.2 insmod=ixgbe insmod=i40e forceinsmod=1"
+    },
+    {
+      "name": "install sles 11.3 console",
+      "type": "install",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "args": "install=http://192.168.0.2/install/pallets/SLES/11.3/1.138/sles/x86_64 autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS0,115200n8 Server=192.168.0.2 nomodeset=1 textmode=1 insmod=ixgbe insmod=i40e forceinsmod=1"
+    },
+    {
+      "name": "rescue sles 11.3",
+      "type": "install",
+      "kernel": "vmlinuz-sles-11.3-1.138-x86_64",
+      "ramdisk": "initrd-sles-11.3-1.138-x86_64",
+      "args": "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+    }
+  ]
+}

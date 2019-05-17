@@ -1,0 +1,27 @@
+version: "3.6"
+services:
+  stacki-db:
+    build:
+      context: "./docker-database"
+      dockerfile: "Dockerfile"
+    restart: always
+    volumes:
+      - db_data:/var/lib/stacki/data
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=cluster
+  stacki-api:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "stacki-db"
+    volumes:
+      - ./app:/app/app
+    environment:
+      - DATABASE_URL=stacki-db
+    restart: always
+volumes:
+  db_data:

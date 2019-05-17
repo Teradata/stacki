@@ -1,0 +1,16 @@
+enum Choice {
+	YES
+	NO
+}
+
+type Mutation {
+	_empty: String
+}
+
+type Query {
+  _empty: String
+}
+
+type Subscription {
+	_empty: String
+}

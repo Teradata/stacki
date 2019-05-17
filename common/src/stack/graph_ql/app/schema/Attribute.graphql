@@ -1,0 +1,37 @@
+interface Attribute {
+  type: String
+  scope: String
+  attr: String
+  value: String
+}
+
+type GlobalAttribute implements Attribute {
+  type: String
+  scope: String
+  attr: String
+  value: String
+  shadow: String
+}
+
+type HostAttribute implements Attribute {
+  type: String
+  scope: String
+  attr: String
+  value: String
+  name: String
+  shadow: String
+}
+
+type ApplianceAttribute implements Attribute {
+  type: String
+  scope: String
+  attr: String
+  value: String
+  appliance: String
+}
+
+extend type Query {
+	allAttributes: [GlobalAttribute]
+  hostAttributes: [HostAttribute]
+  applianceAttributes: [ApplianceAttribute]
+}

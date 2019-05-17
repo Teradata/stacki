@@ -1,0 +1,4 @@
+ariadne
+uvicorn
+requests
+pymysql

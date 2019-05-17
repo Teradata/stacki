@@ -1,0 +1,18 @@
+<stack:stack>
+
+<stack:package>
+stack-db
+stack-graph_ql
+</stack:package>
+
+<stack:script stack:stage="install-post">
+<!-- TODO: Remove this once the pip install is figured for these packages -->
+/opt/stack/bin/python3 -m ensurepip
+/opt/stack/bin/python3 -m pip install uvicorn
+systemctl enable graphql-server
+
+wait_for_mysql_up
+systemctl start graphql-server
+</stack:script>
+
+</stack:stack>

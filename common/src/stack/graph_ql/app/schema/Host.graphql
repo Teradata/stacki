@@ -1,0 +1,41 @@
+type Host {
+  id: Int
+  name: String
+  rack: String
+  rank: String
+  appliance: String
+  os: String
+  box: String
+  environment: String
+  osaction: String
+  installaction: String
+  comment: String
+  metadata: String
+  interfaces: [Interface]
+}
+
+type AddHost {
+  ok: Boolean
+}
+
+extend type Query {
+  allHosts: [Host]
+  list_host: [Host]
+}
+
+extend type Mutation {
+  addHost(
+    appliance: String!
+    box: String = "default"
+    environment: String = false
+    installaction: String = "default"
+    name: String!
+    osaction: String = "default"
+    rack: String!
+    rank: String!
+  ): AddHost
+}
+
+extend type Subscription {
+  allHosts: [Host]
+}

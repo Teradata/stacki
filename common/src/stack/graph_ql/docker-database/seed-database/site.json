@@ -1,0 +1,99 @@
+{
+  "attr": [
+    { "name": "Info_CertificateCountry", "value": "US", "shadow": false },
+    {
+      "name": "Info_CertificateLocality",
+      "value": "Solana Beach",
+      "shadow": false
+    },
+    {
+      "name": "Info_CertificateOrganization",
+      "value": "StackIQ",
+      "shadow": false
+    },
+    { "name": "Info_CertificateState", "value": "California", "shadow": false },
+    {
+      "name": "Info_ClusterLatlong",
+      "value": "N32.87 W117.22",
+      "shadow": false
+    },
+    { "name": "Info_FQDN", "value": "frontend-0-0", "shadow": false },
+    { "name": "Kickstart_Keyboard", "value": "us", "shadow": false },
+    { "name": "Kickstart_Lang", "value": "en_US", "shadow": false },
+    { "name": "Kickstart_Langsupport", "value": "en_US", "shadow": false },
+    {
+      "name": "Kickstart_PrivateAddress",
+      "value": "192.168.0.2",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateBroadcast",
+      "value": "192.168.0.255",
+      "shadow": false
+    },
+    { "name": "Kickstart_PrivateDNSDomain", "value": "", "shadow": false },
+    {
+      "name": "Kickstart_PrivateDNSServers",
+      "value": "10.0.2.3",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateEthernet",
+      "value": "08:00:27:3d:16:1f",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateGateway",
+      "value": "10.0.2.2",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateHostname",
+      "value": "frontend-0-0",
+      "shadow": false
+    },
+    { "name": "Kickstart_PrivateInterface", "value": "eth1", "shadow": false },
+    {
+      "name": "Kickstart_PrivateKickstartHost",
+      "value": "192.168.0.2",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateNTPHost",
+      "value": "192.168.0.2",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateNetmask",
+      "value": "255.255.255.0",
+      "shadow": false
+    },
+    { "name": "Kickstart_PrivateNetmaskCIDR", "value": "24", "shadow": false },
+    {
+      "name": "Kickstart_PrivateNetwork",
+      "value": "192.168.0.0",
+      "shadow": false
+    },
+    {
+      "name": "Kickstart_PrivateRootPassword",
+      "value": ".",
+      "shadow": true
+    },
+    {
+      "name": "Kickstart_PublicNTPHost",
+      "value": "pool.ntp.org",
+      "shadow": false
+    },
+    { "name": "Kickstart_Timezone", "value": "UTC", "shadow": false },
+    {
+      "name": "Kickstart_Multicast",
+      "value": "238.55.186.175",
+      "shadow": false
+    },
+    {
+      "name": "Server_Partitioning",
+      "value": "force-default-root-disk-only",
+      "shadow": false
+    }
+  ]
+}
