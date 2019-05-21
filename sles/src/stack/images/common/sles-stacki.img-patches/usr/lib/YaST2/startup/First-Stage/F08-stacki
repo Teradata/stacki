@@ -99,10 +99,13 @@ then
 		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
 fi
 
-#
 # then configure the partitions
-#
 /opt/stack/bin/output-partition.py > /tmp/partition.xml
+if [ $? -eq 1 ]
+then
+	halt_install "Unable to find disks to create partitioning scheme on." \
+		'{"state": "partition config failed - no disks found"}'
+fi
 
 # Configure the bootloader
 /opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml

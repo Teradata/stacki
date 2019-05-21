@@ -494,6 +494,11 @@ def main():
 		else:
 			break
 
+	# TODO: right now, this is the only place that exit()'s.
+	# F08-stacki looks specifically for '1' for the case of 'no disks found'
+	if not host_disks:
+		sys.exit(1)
+
 	#
 	# if fstab is corrupted, get_host_fstab() will throw and exception.
 	# catch it and just report an empty fstab
