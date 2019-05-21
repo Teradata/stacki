@@ -9,6 +9,6 @@ then
     # Start discovery
     vagrant ssh frontend -c "sudo -i stack enable discovery"
 
-    # Bring up the backends (30 minute timeout)
-    ./set-up.d/_common.sh 30
+    # Bring up the backends (120 minute timeout)
+    ./set-up.d/_common.sh 120
 fi
