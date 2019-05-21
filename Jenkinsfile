@@ -40,7 +40,7 @@ pipeline {
                 // Note: github.com checkout is flaky, so we disable the default checkout
                 // and do it here with retries.
                 dir('stacki') {
-                    retry(3) {
+                    retry(20) {
                         script {
                             // Note: There is a bug in Jenkins where a timeout causes the job to
                             // abort unless you catch the FlowInterruptedException.
