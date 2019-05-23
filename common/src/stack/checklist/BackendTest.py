@@ -90,8 +90,9 @@ class CheckWait:
 	def run(self):
 		while True:
 			if os.path.isfile(CheckWait.WAIT_FILE):
-				time.sleep(CheckWait.SLEEP_TIME)
 				sendStateToMsgQ('Install_Wait', False, 'Install Paused')
+
+			time.sleep(CheckWait.SLEEP_TIME)
 
 class BackendTest:
 	"""
@@ -227,22 +228,29 @@ class BackendTest:
 		# Parent process creates 2 child processes
 		# Child 1 - Checks for /tmp/wait file to detect INSTALL_WAIT state
 		# Child 2 - Reads y2log file to detect INSTALLATION_STALLED state
+		# Child 3 - Runs all the tests defined in test_list list.
 		#
 		child1pid = os.fork()
 		if child1pid == 0:
 			chkWait = CheckWait()
 			chkWait.run()
-			return
+			os._exit(os.EX_OK)
 
 		child2pid = os.fork()
 		if child2pid == 0:
 			yastLogReader = YastLogReader()
 			yastLogReader.run()
-			return
+			os._exit(os.EX_OK)
 
-		# Parent proc continues with other tests
-		for test in test_list:
-			test()
+		#
+		# Spawn child process to handle other tests so parent does nt
+		# block the install
+		#
+		child3pid = os.fork()
+		if child3pid == 0:
+			for test in test_list:
+				test()
+			os._exit(os.EX_OK)
 
 if __name__ == "__main__":
 	b = BackendTest()

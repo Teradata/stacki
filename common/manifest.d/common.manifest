@@ -1,4 +1,3 @@
-checklist
 foundation-comps
 foundation-fbtftpd
 foundation-fio
@@ -17,6 +16,7 @@ stack-aws-client
 stack-aws-server
 stack-barnacle
 stack-build
+stack-checklist
 stack-command
 stack-config
 stack-config-server
