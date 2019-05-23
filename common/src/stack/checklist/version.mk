@@ -1,1 +1,1 @@
-NAME=checklist
+NAME=stack-checklist
