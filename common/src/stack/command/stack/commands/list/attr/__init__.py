@@ -48,12 +48,12 @@ class Command(stack.commands.Command,
 
 		for (ip, host, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if (n.name <> NULL, n.name, nd.name), 
-				s.address, s.mask from 
-				networks n, appliances a, subnets s, nodes nd 
-				where 
-				n.node=nd.id and nd.appliance=a.id and 
-				a.name='frontend' and n.subnet=s.id and 
+				n.ip, if (n.name IS NOT NULL, n.name, nd.name),
+				s.address, s.mask from
+				networks n, appliances a, subnets s, nodes nd
+				where
+				n.node=nd.id and nd.appliance=a.id and
+				a.name='frontend' and n.subnet=s.id and
 				s.name='private'
 				"""):
 			readonly['Kickstart_PrivateKickstartHost'] = ip
@@ -64,12 +64,12 @@ class Command(stack.commands.Command,
 
 		for (ip, host, zone, subnet, netmask) in self.db.select(
 				"""
-				n.ip, if (n.name <> NULL, n.name, nd.name), 
-				s.zone, s.address, s.mask from 
-				networks n, appliances a, subnets s, nodes nd 
-				where 
+				n.ip, if (n.name IS NOT NULL, n.name, nd.name),
+				s.zone, s.address, s.mask from
+				networks n, appliances a, subnets s, nodes nd
+				where
 				n.node=nd.id and nd.appliance=a.id and
-				a.name='frontend' and n.subnet=s.id and 
+				a.name='frontend' and n.subnet=s.id and
 				s.name='public'
 				"""):
 			readonly['Kickstart_PublicAddress'] = ip
