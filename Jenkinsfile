@@ -40,7 +40,7 @@ pipeline {
                 // Note: github.com checkout is flaky, so we disable the default checkout
                 // and do it here with retries.
                 dir('stacki') {
-                    retry(3) {
+                    retry(20) {
                         script {
                             // Note: There is a bug in Jenkins where a timeout causes the job to
                             // abort unless you catch the FlowInterruptedException.
@@ -261,7 +261,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <${env.RUN_DISPLAY_URL}|View the pipeline job>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -319,7 +319,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -365,7 +365,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -450,7 +450,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <${env.RUN_DISPLAY_URL}|View the pipeline job>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -598,6 +598,19 @@ pipeline {
                                         }
                                     }
                                     catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Take a screenshots of the machine screens
+                                        sh 'virsh screenshot $(cat .vagrant/machines/frontend/libvirt/id) screenshot-frontend.ppm'
+                                        sh 'convert screenshot-frontend.ppm screenshot-frontend.png'
+                                        archiveArtifacts 'screenshot-frontend.png'
+
+                                        sh 'virsh screenshot $(cat .vagrant/machines/backend-0-0/libvirt/id) screenshot-backend-0-0.ppm'
+                                        sh 'convert screenshot-backend-0-0.ppm screenshot-backend-0-0.png'
+                                        archiveArtifacts 'screenshot-backend-0-0.png'
+
+                                        sh 'virsh screenshot $(cat .vagrant/machines/backend-0-1/libvirt/id) screenshot-backend-0-1.ppm'
+                                        sh 'convert screenshot-backend-0-1.ppm screenshot-backend-0-1.png'
+                                        archiveArtifacts 'screenshot-backend-0-1.png'
+
                                         // Make sure we clean up the VM
                                         dir('test-suites/system') {
                                             sh 'vagrant destroy -f || true'
@@ -705,7 +718,7 @@ pipeline {
                             *Branch:* ${env.GIT_BRANCH}
                             *OS:* ${env.PLATFORM}
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
 
@@ -727,7 +740,7 @@ pipeline {
                             *OS:* ${env.PLATFORM}
                             <https://sdvl3jenk015.td.teradata.com/blue/organizations/jenkins/stacki - ${env.PLATFORM}/detail/${env.JOB_BASE_NAME}/${env.BUILD_ID}/tests/|View the test results>
                         """.stripIndent(),
-                        tokenCredentialId: 'slack_jenkins_integration_token'
+                        tokenCredentialId: 'slack-token-stacki'
                     )
                 }
             }
@@ -781,7 +794,7 @@ pipeline {
                                             *ISO:* ${env.ISO_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     slackSend(
@@ -792,7 +805,7 @@ pipeline {
                                             *ISO:* ${env.ISO_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
                                 }
                             }
@@ -812,7 +825,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -854,7 +867,7 @@ pipeline {
                                     *Stacki:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.ISO_FILENAME}
                                     *StackiOS:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.STACKIOS_FILENAME}
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
 
@@ -868,7 +881,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -892,7 +905,14 @@ pipeline {
 
                         // Now do the scan
                         dir ('stacki-blackduck-scanner') {
-                            sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                            script {
+                                if (env.IS_RELEASE == 'true') {
+                                    sh './do-scan.sh master $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                                }
+                                else {
+                                    sh './do-scan.sh develop $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                                }
+                            }
                         }
                     }
 
@@ -908,7 +928,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
@@ -978,7 +998,7 @@ pipeline {
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     slackSend(
@@ -989,7 +1009,7 @@ pipeline {
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
                                         """.stripIndent(),
-                                        tokenCredentialId: 'slack_jenkins_integration_token'
+                                        tokenCredentialId: 'slack-token-stacki'
                                     )
 
                                     if (env.PLATFORM == 'redhat7') {
@@ -1001,7 +1021,7 @@ pipeline {
                                                 *QCow2:* ${env.QCOW_FILENAME}
                                                 *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
                                             """.stripIndent(),
-                                            tokenCredentialId: 'slack_jenkins_integration_token'
+                                            tokenCredentialId: 'slack-token-stacki'
                                         )
                                     }
                                 }
@@ -1022,7 +1042,7 @@ pipeline {
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
-                                tokenCredentialId: 'slack_jenkins_integration_token'
+                                tokenCredentialId: 'slack-token-stacki'
                             )
                         }
                     }
