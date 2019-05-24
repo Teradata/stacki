@@ -925,7 +925,14 @@ pipeline {
 
                         // Now do the scan
                         dir ('stacki-blackduck-scanner') {
-                            sh './do-scan.sh $GIT_BRANCH $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
+                            script {
+                                if (env.IS_RELEASE == 'true') {
+                                    sh './do-scan.sh master $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
+                                }
+                                else {
+                                    sh './do-scan.sh develop $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
+                                }
+                            }
                         }
                     }
 
