@@ -907,10 +907,10 @@ pipeline {
                         dir ('stacki-blackduck-scanner') {
                             script {
                                 if (env.IS_RELEASE == 'true') {
-                                    sh './do-scan.sh master $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                                    sh './do-scan.sh master $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
                                 }
                                 else {
-                                    sh './do-scan.sh develop $PLATFORM $BLACKDUCK_TOKEN ../stacki'
+                                    sh './do-scan.sh develop $PLATFORM $BLACKDUCK_TOKEN ../$ISO_FILENAME'
                                 }
                             }
                         }
