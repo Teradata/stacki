@@ -14,7 +14,7 @@
 // dependency, this is considered a feature.
 
 {
-	"Django":		{ "fe": true, "version": "1.11.6" },
+	"Django":		{ "fe": true, "version": "1.11.20" },
 	"Flask":		{ "fe": true }, 
 	"GitPython":            { "fe": true, "bootstrap": true },
 	"PyMySQL":		{ "fe": true, "bootstrap": true, "version": "0.8.1" }, 
