@@ -2,9 +2,11 @@
 
 from collections import deque
 import os
+from functools import partial
 import re
 import socket
 import subprocess
+import sys
 import time
 
 """
@@ -21,8 +23,8 @@ def sendStateToMsgQ(state, isErr, msg=''):
 	cmd = ['/opt/stack/bin/smq-publish', 
 		'-chealth', 
 		'-t300',
-		'{"systest":"%s","flag":"%s","msg":"%s"}' % (state, str(isErr), msg)]
-
+		'{"systest":"%s","flag":"%s","msg":"%s"}' \
+		% (state, str(isErr), msg)]
 	subprocess.run(cmd, env=pyenv)
 
 	#
@@ -30,7 +32,7 @@ def sendStateToMsgQ(state, isErr, msg=''):
 	# wait mode, so it can be processed by MQ health processor
 	#
 	if state.lower() in ['stalled', 'wait']:
-		cmd = ['/opt/stack/bin/smq-publish', '-chealth', \
+		cmd = ['/opt/stack/bin/smq-publish', '-chealth',
 			'{"state":"%s %s"}' % (state, msg)]
 		subprocess.run(cmd, env=pyenv)
 
@@ -99,10 +101,11 @@ class BackendTest:
 	Main class that runs a sequence of tests that indicate the progress
 	of installation
 	"""
-	PARTITION_XML = '/tmp/partition.xml'
-	LUDICROUS_LOG = '/var/log/ludicrous-client-debug.log'
-	NUM_RETRIES   = 100
-	SLEEP_TIME    = 10
+	PARTITION_FILE_SLES   = '/tmp/partition.xml'
+	PARTITION_FILE_REDHAT = '/tmp/partition-info'
+	LUDICROUS_LOG         = '/var/log/ludicrous-client-debug.log'
+	NUM_RETRIES           = 100
+	SLEEP_TIME            = 10
 
 	"""
 	Checks if a file size is 0
@@ -178,13 +181,13 @@ class BackendTest:
 	"""
 	Checks if partition file is present
 	"""
-	def checkPartition(self):
-		if self.checkFileExists(BackendTest.PARTITION_XML):
-			msg = 'Backend - %s - Present' % BackendTest.PARTITION_XML
-			sendStateToMsgQ("Partition_XML_Present", False, msg)
+	def checkPartitionFile(self, partitionFileName):
+		if self.checkFileExists(partitionFileName):
+			msg = 'Backend - %s - Present' % partitionFileName
+			sendStateToMsgQ("Partition_File_Present", False, msg)
 		else:
-			msg = 'Backend - %s - Not Present' % BackendTest.PARTITION_XML
-			sendStateToMsgQ("Partition_XML_Present", True, msg)
+			msg = 'Backend - %s - Not Present' % partitionFileName
+			sendStateToMsgQ("Partition_File_Present", True, msg)
 
 	"""
 	Checks if SSH port 2200 is open
@@ -214,14 +217,14 @@ class BackendTest:
 	Main function that runs a series of tests which validates various
 	states of a backend installation.
 	"""
-	def run(self):
+	def run_sles(self):
 		#
 		# Sequence of tests (in the same order) that need to be run on
 		# the installing node
 		#
 		test_list = [self.checkSSHOpen, self.checkAutoyastFiles,
 				self.checkLudicrousStarted,
-				self.checkPartition,
+				partial(self.checkPartitionFile, BackendTest.PARTITION_FILE_SLES),
 				self.checkPkgInstall]
 
 		#
@@ -252,6 +255,24 @@ class BackendTest:
 				test()
 			os._exit(os.EX_OK)
 
+	def run_redhat(self):
+		test_list = [self.checkSSHOpen, self.checkLudicrousStarted,
+			partial(self.checkPartitionFile, BackendTest.PARTITION_FILE_REDHAT),
+			self.checkPkgInstall]
+
+		child3pid = os.fork()
+		if child3pid == 0:
+			for test in test_list:
+				test()
+			os._exit(os.EX_OK)
+
 if __name__ == "__main__":
 	b = BackendTest()
-	b.run()
+
+	sys.path.append('/tmp')
+	from stack_site import attributes
+
+	if attributes['os'] == 'sles':
+		b.run_sles()
+	elif attributes['os'] == 'redhat':
+		b.run_redhat()

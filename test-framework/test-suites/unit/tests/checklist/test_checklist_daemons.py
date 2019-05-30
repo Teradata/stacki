@@ -150,7 +150,7 @@ class TestChecklistDaemons:
 		mq.start()
 		sm = None
 		payload = {}
-		payload['systest'] = "Partition_XML_Present"
+		payload['systest'] = "Partition_File_Present"
 		payload['flag'] = "False"
 		payload['msg'] = "Backend - /tmp/partition.xml - Present"
 		msg = stack.mq.Message(json.dumps(payload), channel='health', ttl=120)
@@ -165,7 +165,7 @@ class TestChecklistDaemons:
 		while not sm and not q.empty():
 			sm = q.get()
 
-		expectedSm = StateMessage('8.8.8.8', State.Partition_XML_Present,
+		expectedSm = StateMessage('8.8.8.8', State.Partition_File_Present,
 			False, time.time(),
 			msg='Backend - /tmp/partition.xml - Present')
 		matchedFlag = False

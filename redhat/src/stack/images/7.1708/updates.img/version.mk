@@ -3,6 +3,8 @@ OVERLAY.PKGS	= \
 	MegaCLI \
 	foundation-redhat \
 	ludicrous-speed \
+	stack-checklist \
+	stack-mq \
 	stack-storage-config \
 	stack-wizard \
 	storcli \

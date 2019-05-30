@@ -50,4 +50,5 @@ fi
 
 export LANG=en_US.UTF-8
 /usr/sbin/build-locale-archive > /dev/null 2>&1
+
 /opt/stack/bin/ludicrous-client.py --environment=initrd --trackerfile='/tmp/stack.conf' --nosavefile

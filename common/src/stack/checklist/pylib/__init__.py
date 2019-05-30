@@ -136,7 +136,7 @@ class State(Enum):
 	Profile_XML_Sent = 140
 	SSH_Open = 150
 	AUTOINST_Present = 160
-	Partition_XML_Present = 170
+	Partition_File_Present = 170
 	Ludicrous_Started = 180
 	Ludicrous_Populated = 190
 	Set_DB_Partitions = 200
@@ -169,7 +169,7 @@ class StateSequence:
 		{'state': State.Profile_XML_Sent, 'time': 140},
 		{'state': State.SSH_Open, 'time': 150},
 		{'state': State.AUTOINST_Present, 'time': 160},
-		{'state': State.Partition_XML_Present, 'time': 170},
+		{'state': State.Partition_File_Present, 'time': 170},
 		{'state': State.Ludicrous_Started, 'time': 180},
 		{'state': State.Ludicrous_Populated, 'time': 600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
@@ -195,7 +195,7 @@ class StateSequence:
 		{'state': State.Profile_XML_Sent, 'time': 140},
 		{'state': State.SSH_Open, 'time': 150},
 		{'state': State.AUTOINST_Present, 'time': 160},
-		{'state': State.Partition_XML_Present, 'time': 170},
+		{'state': State.Partition_File_Present, 'time': 170},
 		{'state': State.Ludicrous_Started, 'time': 180},
 		{'state': State.Ludicrous_Populated, 'time': 600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
@@ -211,8 +211,12 @@ class StateSequence:
 		{'state': State.DHCPACK, 'time': 40},
 		{'state': State.TFTP_RRQ, 'time': 50},
 		{'state': State.VMLinuz_RRQ_Install, 'time': 60},
-		{'state': State.Initrd_RRQ, 'time': 70},
-		{'state': State.Profile_XML_Sent, 'time': 1600},
+		{'state': State.Initrd_RRQ, 'time': 300},
+		{'state': State.Profile_XML_Sent, 'time': 300},
+		{'state': State.SSH_Open, 'time': 300},
+		{'state': State.Partition_File_Present, 'time': 170},
+		{'state': State.Ludicrous_Started, 'time': 180},
+		{'state': State.Ludicrous_Populated, 'time': 600},
 		{'state': State.Set_DB_Partitions, 'time': 200},
 		{'state': State.Set_Bootaction_OS, 'time': 210},
 		{'state': State.Rebooting_HDD, 'time': 220},
