@@ -16,6 +16,7 @@ import os
 import cgi
 import syslog
 import json
+import sys
 import stack.api
 
 syslog.openlog('setPxeBoot.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)
@@ -28,7 +29,7 @@ if 'REMOTE_ADDR' in os.environ:
 	ipaddr = os.environ['REMOTE_ADDR']
 if not ipaddr:
 	sys.exit(-1)
-	
+
 syslog.syslog(syslog.LOG_INFO, 'remote addr %s' % ipaddr)
 
 # 'params' field should be a python dictionary of the form:
@@ -54,7 +55,7 @@ try:
 except:
 	syslog.syslog(syslog.LOG_ERR, 'missing params')
 
-	
+
 # The above let's us set the boot action to anything (e.g. 'install') but
 # here we lock thing down to only allow a reset to 'os'.
 
@@ -66,7 +67,7 @@ if action == 'os':
 		'value=false'])
 	stack.api.Call('set host attr', [ ipaddr, 'attr=secureerase',
 		'value=false'])
-	
+
 print('Content-type: application/octet-stream')
 print('Content-length: %d' % (len('')))
 print('')
