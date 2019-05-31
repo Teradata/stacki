@@ -12,7 +12,7 @@ from jsoncomment import JsonComment
 
 
 def _load_topology():
-	topo = { 'redis':    'redis',
+	topo = { 'redis':    'localhost',
 		 'database': 'localhost' }
 
 	try:
