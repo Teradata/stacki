@@ -349,6 +349,12 @@ class Data:
 		for w in members:
 			v = getattr(self.data, w)
 			f.write(str(w) + ":" + str(v) + os.linesep)
+
+		#
+		# need to add an 'os.version' attribute so configure-partitions.py will work
+		#
+		f.write('os.version:7.x\n')
+
 		f.close()
 
 		#create xml elements and write rolls.xml

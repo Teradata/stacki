@@ -54,10 +54,12 @@ os.chdir(cwd)
 # now generate the kickstart file with the command line
 #
 cmd = '/opt/stack/bin/stack list node xml frontend '
-cmd += 'attrs="/tmp/site.attrs" 2> /dev/null'
-cmd += '| /opt/stack/bin/stack list host profile chapter=main '
-cmd += '> /tmp/ks.cfg 2> /tmp/ks.cfg.debug'
+cmd += 'attrs="/tmp/site.attrs" > /tmp/ks.xml 2> /tmp/ks.xml.debug'
+os.system(cmd)
 
+cmd = 'cat /tmp/ks.xml | '
+cmd += '/opt/stack/bin/stack list host profile chapter=main '
+cmd += '> /tmp/ks.cfg 2> /tmp/ks.cfg.debug'
 os.system(cmd)
 
 #

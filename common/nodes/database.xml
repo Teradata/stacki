@@ -179,6 +179,23 @@ systemctl enable $MARIA_OR_MYSQL
 systemctl start  $MARIA_OR_MYSQL
 
 <!--
+	if the database doesn't come up, then try to manually start it.
+
+	one use case where the above line will not start the database is for a bare-metal
+	install. this is because systemd cannot start services in a chrooted environment.
+-->
+
+mysqladmin -s ping > /dev/null
+if [ $? -ne 0 ]
+then
+	mkdir -p /var/run/mysql
+	chown mysql.mysql /var/run/mysql
+	nohup /usr/bin/mysqld_safe --defaults-file=/etc/my.cnf --user=root &amp;
+fi
+
+wait_for_mysql_up
+
+<!--
 	set the password for the apache user, root user at localhost
 -->
 

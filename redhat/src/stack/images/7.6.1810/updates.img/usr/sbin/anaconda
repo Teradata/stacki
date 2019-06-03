@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "/opt/stack/lib" > /etc/ld.so.conf
+
+ldconfig
+
+/usr/sbin/anaconda-stacki
+
+if [ -f /tmp/baserepo ]; then 
+	/usr/sbin/anaconda.real --repo `cat /tmp/baserepo`
+else
+	/usr/sbin/anaconda.real
+fi

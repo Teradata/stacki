@@ -325,22 +325,9 @@ class Command(stack.commands.list.command,
 		self.addText(' %s' % handler.nsAttrs())
 		self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
 
-
-		## Q: Do we still use this?
-
-#		if attrs['os'] == 'redhat':
-#			self.addText('<stack:loader>\n')
-#			self.addText('%s\n' % saxutils.escape(kstext))
-#			self.addText('%kgen\n')
-#			self.addText('</stack:loader>\n')
-
-		# Run plugins if not the Frontend
-
-		if 'appliance' in attrs and not attrs['appliance'] == 'frontend':
-			self.runPlugins(attrs)
+		self.runPlugins(attrs)
 
 		for node in parsed:
-
 			# If we are only expanding a pallet subgraph
 			# then do not ouput the XML for other nodes
 

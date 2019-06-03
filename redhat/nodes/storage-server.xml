@@ -13,6 +13,12 @@
 	</stack:rocks>
 
 
+<stack:stacki>
+csv_partitions = []
+csv_controller = []
+</stack:stacki>
+
+
 <stack:script stack:stage="install-post">
 
 <!-- add a global default that configures all backend nodes as JBODs -->

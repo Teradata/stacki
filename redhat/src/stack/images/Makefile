@@ -9,7 +9,7 @@ ROLLROOT	= ../../../..
 include $(STACKBUILD)/etc/CCRules.mk
 include $(RELEASE).mk
 
-SRCDIRS = 7.1708
+SRCDIRS = $(ANACONDA_VERSION)
 
 BOOTSTRAP = NetworkManager-devel	\
 	NetworkManager-glib-devel	\
