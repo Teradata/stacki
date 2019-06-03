@@ -1,11 +1,11 @@
 ---
 - name: Set up yum
   block:
-    - name: Download CentOS-7-x86_64-Everything-1708.iso
+    - name: Download CentOS-7-x86_64-Everything-1810.iso
       get_url:
-        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1708.iso
-        dest: /export/isos/CentOS-7-x86_64-Everything-1708.iso
-        checksum: "sha1:b9d9feace8d3b01527114f15eda5b29c64a7a60c"
+        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
+        dest: /export/isos/CentOS-7-x86_64-Everything-1810.iso
+        checksum: "sha1:d3a42e49e41b9b3dc71aaeab125215fee3a19516"
         mode: 0644
 
     - name: Create /media/cdrom
@@ -14,8 +14,8 @@
         state: directory
 
     # Don't use `mount` because we don't want an entry in /etc/fstab
-    - name: Mount the CentOS-7-x86_64-Everything-1708.iso
-      command: mount -o loop /export/isos/CentOS-7-x86_64-Everything-1708.iso /media/cdrom
+    - name: Mount the CentOS-7-x86_64-Everything-1810.iso
+      command: mount -o loop /export/isos/CentOS-7-x86_64-Everything-1810.iso /media/cdrom
       args:
         warn: no
 
@@ -35,7 +35,7 @@
     - name: Add the DVD repo to yum
       yum_repository:
         name: dvd
-        description: CentOS-7-x86_64-Everything-1708.iso
+        description: CentOS-7-x86_64-Everything-1810.iso
         baseurl: file:///media/cdrom/
         enabled: yes
         gpgcheck: no

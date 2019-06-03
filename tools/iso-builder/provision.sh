@@ -71,28 +71,28 @@ then
     zypper install -y git-core
 
 else
-    if [[ ! -f CentOS-7-x86_64-Everything-1708.iso ]]
+    if [[ ! -f CentOS-7-x86_64-Everything-1810.iso ]]
     then
         if [[ $INTERNAL == "true" ]]
         then
-            curl -sfSLO --retry 3 $INSTALLER_ISOS/CentOS-7-x86_64-Everything-1708.iso
+            curl -sfSLO --retry 3 $INSTALLER_ISOS/CentOS-7-x86_64-Everything-1810.iso
         else
-            curl -sfSLO --retry 3  http://archive.kernel.org/centos-vault/7.5.1804/isos/x86_64/CentOS-7-x86_64-Everything-1708.iso
+            curl -sfSLO --retry 3  http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
 
-    if [[ $(md5sum CentOS-7-x86_64-Everything-1708.iso | cut -c 1-32) != "d23eab94eaa22e3bd34ac13caf923801" ]]
+    if [[ $(md5sum CentOS-7-x86_64-Everything-1810.iso | cut -c 1-32) != "41e58360e224b49e96e44b94e1563c1f" ]]
     then
-        echo "Error: CentOS-7-x86_64-Everything-1708.iso is corrupt"
+        echo "Error: CentOS-7-x86_64-Everything-1810.iso is corrupt"
         exit 1
     fi
 
     mkdir -p /media/cdrom
-    mount -o loop /export/isos/CentOS-7-x86_64-Everything-1708.iso /media/cdrom
+    mount -o loop /export/isos/CentOS-7-x86_64-Everything-1810.iso /media/cdrom
     rm /etc/yum.repos.d/*.repo
     cat > "/etc/yum.repos.d/dvd.repo" <<EOF
 [dvd]
-name=CentOS-7-x86_64-Everything-1708.iso
+name=CentOS-7-x86_64-Everything-1810.iso
 baseurl=file:///media/cdrom/
 gpgcheck=0
 enabled=1

@@ -38,7 +38,7 @@ class TestBossConfigSnack:
 		if os.path.exists("/tmp/rolls.xml.bak"):
 			os.rename("/tmp/rolls.xml.bak", "/tmp/rolls.xml")
 
-	def test_minimal(self, host, mount_cdrom, no_site_attrs, no_rolls_xml, test_file):
+	def test_minimal(self, host, host_os, mount_cdrom, no_site_attrs, no_rolls_xml, test_file):
 		# Launch the wizard and walk through it
 		env = os.environ.copy()
 		env["TERM"] = "linux"
@@ -97,7 +97,7 @@ class TestBossConfigSnack:
 		assert cnt == 1
 
 		# Get the expected site.attrs
-		with open(test_file("wizard/boss_config_snack_minimal_site.attrs")) as f:
+		with open(test_file(f"wizard/boss_config_snack_minimal_site.attrs")) as f:
 			site_attrs_expected = f.read()
 
 		assert site_attrs_generated == site_attrs_expected

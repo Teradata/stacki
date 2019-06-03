@@ -46,9 +46,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "iso-builder" do |config|
     case ENV["PLATFORM"]
       when "redhat7"
-        config.vm.box = "stacki/centos-7.4"
+        config.vm.box = "stacki/centos-7.6"
         if ENV["INTERNAL"]
-          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
       when "sles12"
         config.vm.box = "stacki/sles-12.3"
