@@ -210,7 +210,7 @@ class TestAddPallet:
 			assert result.rc == 0
 			assert result.stdout == 'Copying "SLES" (12,x86_64) pallet ...\nPatching SLES pallet\n'
 		else:
-			result = host.run('stack add pallet /export/isos/CentOS-7-x86_64-Everything-1708.iso')
+			result = host.run('stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso')
 			assert result.rc == 0
 			assert result.stdout == 'Copying CentOS 7-redhat7 pallet ...\n'
 
@@ -224,11 +224,11 @@ class TestAddPallet:
 				SLES 12      sp3     x86_64 sles /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
 			''')
 		else:
-			result = host.run('stack add pallet /export/isos/CentOS-7-x86_64-Everything-1708.iso dryrun=true')
+			result = host.run('stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso dryrun=true')
 			assert result.rc == 0
 			assert result.stdout == dedent('''\
 				NAME   VERSION RELEASE ARCH   OS
-				CentOS 7       redhat7 x86_64 redhat /export/isos/CentOS-7-x86_64-Everything-1708.iso
+				CentOS 7       redhat7 x86_64 redhat /export/isos/CentOS-7-x86_64-Everything-1810.iso
 			''')
 
 	def test_disk_pallet(self, host, test_file):

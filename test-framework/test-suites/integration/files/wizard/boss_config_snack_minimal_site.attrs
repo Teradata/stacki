@@ -24,3 +24,4 @@ Kickstart_PrivateRootPassword:
 Kickstart_PublicNTPHost:pool.ntp.org
 Kickstart_Timezone:America/Denver
 nukedisks:False
+os.version:7.x

@@ -164,9 +164,9 @@ pipeline {
                 script {
                     switch(env.PLATFORM) {
                         case 'redhat7':
-                            sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1708.iso .'
-                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.4_20171128-redhat7.x86_64.disk1.iso .'
-                            env.OS_PALLET = 'os-7.4_20171128-redhat7.x86_64.disk1.iso'
+                            sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1810.iso .'
+                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.6_20190604-redhat7.x86_64.disk1.iso .'
+                            env.OS_PALLET = 'os-7.6_20190604-redhat7.x86_64.disk1.iso'
                             break
 
                         case 'sles12':
@@ -385,7 +385,7 @@ pipeline {
                     script {
                         switch(env.PLATFORM) {
                             case 'redhat7':
-                                sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1708.iso .'
+                                sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1810.iso .'
                                 break
 
                             case 'sles12':

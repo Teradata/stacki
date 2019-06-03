@@ -241,16 +241,16 @@ then
     fi
 elif [[ $OS == "redhat7" ]]
 then
-    if [[ ! -f "$DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso" ]]
+    if [[ ! -f "$DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso" ]]
     then
         echo
-        echo -e "\033[34mDownloading CentOS-7-x86_64-Everything-1708.iso ...\033[0m"
+        echo -e "\033[34mDownloading CentOS-7-x86_64-Everything-1810.iso ...\033[0m"
 
         if [[ $INTERNAL == "true" ]]
         then
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1708.iso
+            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
         else
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso http://archive.kernel.org/centos-vault/7.5.1804/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso
+            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
 fi
@@ -283,7 +283,7 @@ then
     vagrant ssh frontend -c "sudo -i stack enable pallet SLES"
 elif [[ $OS == "redhat7" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1708.iso"
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1810.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet CentOS"
 fi
 
