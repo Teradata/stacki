@@ -171,14 +171,14 @@ class CLI:
 		# global hot spares with this.
 		# 
 		self.doGlobalHotSpare(adapter, enclosure, hotspares,
-			' '.join(options))
+			' '.join(options), check)
 
 
 	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares, flags, check):
 
 		if raidlevel in [ '10', '50', '60' ]:
 			self.doStrippedRaid(raidlevel, adapter, enclosure,
-				slots, hotspares, flags)
+				slots, hotspares, flags, check)
 		else:
 			cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
 
