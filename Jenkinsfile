@@ -251,9 +251,9 @@ pipeline {
                         status: 'FAILURE'
                     )
 
-                    // And the Slack #stacki-bot channel
+                    // And the Slack #stacki-builds channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki build has failed.
@@ -309,9 +309,9 @@ pipeline {
 
                     post {
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to upload to Artifactory.
@@ -355,9 +355,9 @@ pipeline {
 
                     post {
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to copy to Stacki Builds website.
@@ -440,9 +440,9 @@ pipeline {
                 }
 
                 failure {
-                    // Notify the Slack #stacki-bot channel
+                    // Notify the Slack #stacki-builds channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki failed to setup tests.
@@ -709,9 +709,9 @@ pipeline {
                         status: 'SUCCESS'
                     )
 
-                    // And the Slack #stacki-bot channel
+                    // And the Slack #stacki-builds channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'good',
                         message: """\
                             Stacki build and test has succeeded.
@@ -730,9 +730,9 @@ pipeline {
                         status: 'FAILURE'
                     )
 
-                    // And the Slack #stacki-bot channel
+                    // And the Slack #stacki-builds channel
                     slackSend(
-                        channel: '#stacki-bot',
+                        channel: '#stacki-builds',
                         color: 'danger',
                         message: """\
                             Stacki tests have failed.
@@ -815,9 +815,9 @@ pipeline {
                         }
 
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki failed to upload to Artifactory.
@@ -860,7 +860,7 @@ pipeline {
                     post {
                         success {
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'good',
                                 message: """\
                                     New Stacki ISOs uploaded to Amazon S3.
@@ -873,7 +873,7 @@ pipeline {
 
                         failure {
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki ISOs failed to upload to Amazon s3.
@@ -918,9 +918,9 @@ pipeline {
 
                     post {
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki Blackduck scan has failed.
@@ -1014,7 +1014,7 @@ pipeline {
 
                                     if (env.PLATFORM == 'redhat7') {
                                         slackSend(
-                                            channel: '#stacki-bot',
+                                            channel: '#stacki-builds',
                                             color: 'good',
                                             message: """\
                                                 New Stacki QCow2 uploaded to Amazon S3.
@@ -1032,9 +1032,9 @@ pipeline {
                         }
 
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
-                                channel: '#stacki-bot',
+                                channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
                                     Stacki KVM build has failed.
