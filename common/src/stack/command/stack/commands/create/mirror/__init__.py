@@ -56,6 +56,10 @@ class Command(stack.commands.create.command):
 	of the OS running on this machine).
 	</param>
 
+	<param type='string' name='os'>
+	OS of the mirror. (default = the OS running on this machine).
+	</param>
+
 	<param type='string' name='repoid'>
 	The repoid to mirror. Repoid's are found by executing: "yum repolist".
 	Default: None.
@@ -190,7 +194,7 @@ class Command(stack.commands.create.command):
 			os.chdir(cwd)
 
 
-	def makeRollXML(self, name, version, release, arch, xmlfilename):
+	def makeRollXML(self, name, version, release, arch, OS, xmlfilename):
 		file = open(xmlfilename, 'w')
 		file.write('<roll name="%s" interface="3.1">\n' % name)
 
@@ -201,8 +205,8 @@ class Command(stack.commands.create.command):
 			(rolltime, rolldate, rollzone))
 
 		file.write('\t<color edge="lawngreen" node="lawngreen"/>\n')
-		file.write('\t<info version="%s" release="%s" arch="%s"/>\n' %
-			(version, release, arch))
+		file.write('\t<info version="%s" release="%s" arch="%s" os="%s"/>\n' %
+			(version, release, arch, OS))
 
 		file.write('\t<iso maxsize="0" addcomps="0" bootable="0" mkisofs=""/>\n')
 		file.write('\t<rpm rolls="0" bin="1" src="0"/>/\n')
@@ -227,13 +231,14 @@ class Command(stack.commands.create.command):
 		except AttributeError:
 			release = 0
 			
-		(url, name, version, release, arch, repoid, 
+		(url, name, version, release, arch, OS, repoid, 
 		repoconfig, newest, urlonly, quiet) = self.fillParams([
 			('url', None),
 			('name', None),
 			('version', version),
 			('release', release),
 			('arch', self.arch), 
+			('os', self.os), 
 			('repoid', None),
 			('repoconfig', None),
 			('newest', True),
@@ -296,7 +301,7 @@ class Command(stack.commands.create.command):
 			pass
 		else:
 			xmlfilename = 'roll-%s.xml' % name
-			self.makeRollXML(name, version, release, arch, xmlfilename)
+			self.makeRollXML(name, version, release, arch, OS, xmlfilename)
 			self.command('create.pallet', [ '%s' % (xmlfilename), 'newest=%s' % newest] )
 		
 		self.clean()
