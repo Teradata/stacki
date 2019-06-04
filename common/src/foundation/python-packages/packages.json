@@ -22,7 +22,7 @@
 	"configparser":		{ "fe": true, "be": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
 	"jmespath":		{ "fe": true },
-	"jsoncomment":		{ "fe": true },
+	"jsoncomment":		{ "fe": true, "bootstrap": true },
 	"mod-wsgi":		{ "fe": true },
 	"netifaces":		{ "fe": true, "be":"true", "bootstrap": true },
 	"pexpect":		{ "fe": true },
