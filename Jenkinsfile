@@ -268,12 +268,6 @@ pipeline {
         }
 
         stage('Upload') {
-            when {
-                not {
-                    branch 'external/*'
-                }
-            }
-
             parallel {
                 stage('Artifactory') {
                     steps {
