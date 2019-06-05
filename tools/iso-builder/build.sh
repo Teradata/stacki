@@ -49,6 +49,9 @@ then
     # Barnacle with the non-bootable ISO
     python ./tools/fab/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
 
+    # Restart httpd, it seems to be in a crashed state after barnacle
+    systemctl restart httpd
+
     # Add the CentOS pallet
     source /etc/profile.d/stack-binaries.sh
     stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
