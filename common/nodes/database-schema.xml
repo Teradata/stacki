@@ -396,7 +396,8 @@ CREATE TABLE ib_partitions (
   part_name	varchar(128) NOT NULL,
   options	varchar(128) NOT NULL default '',
   PRIMARY KEY (id),
-  INDEX (part_name)
+  INDEX (part_name),
+  FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS ib_memberships;
@@ -407,7 +408,10 @@ CREATE TABLE ib_memberships (
   part_name	int(11) NOT NULL references ib_partitions on delete cascade,
   member_type	varchar(32) NOT NULL default 'limited',
   PRIMARY KEY (id),
-  INDEX (switch, part_name, interface)
+  INDEX (switch, part_name, interface),
+  FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE,
+  FOREIGN KEY (interface) REFERENCES networks(id) ON DELETE CASCADE,
+  FOREIGN KEY (part_name) REFERENCES ib_partitions(id) ON DELETE CASCADE
 );
 
 <!-- Firmware -->
