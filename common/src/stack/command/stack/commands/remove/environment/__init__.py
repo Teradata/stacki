@@ -37,4 +37,4 @@ class Command(command):
 
 		# Free to remove them
 		for environment in enviroments:
-			self.runPlugins(environment)
+			self.db.execute('delete from environments where name=%s', (environment,))

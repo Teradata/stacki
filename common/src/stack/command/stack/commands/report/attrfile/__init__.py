@@ -9,7 +9,6 @@ import csv
 import re
 from io import StringIO
 import stack.commands
-import stack.attr
 
 
 class Command(stack.commands.Command,
@@ -46,9 +45,6 @@ class Command(stack.commands.Command,
 				attr   = row['attr']
 				value  = row['value']
 
-				#ignore attrs with empty values
-				if value is None:
-					continue
 				if regex and not regex.match(attr):
 					continue
 

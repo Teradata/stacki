@@ -20,7 +20,7 @@ class Command(stack.commands.load.command,
 	1. Add 'attrName', 'attrVal' columns  with attribute name and value respectively.
 	2. The attribute name can also be a column in the spreadsheet and the cell at the
 	intersection of a hostname row can contain the attribute value.
-	
+
 	<param type='string' name='file' optional='1'>
 	The file that contains the attribute data to be loaded into the
 	database.
@@ -30,23 +30,15 @@ class Command(stack.commands.load.command,
 	The processor used to parse the file and to load the data into the
 	database. Default: default.
 	</param>
-	
+
 	<example cmd='load attrfile file=attrs.csv'>
 	Load all the attributes in file named attrs.csv and use the default
 	processor.
 	</example>
-	
-	<related>unload attrfile</related>
-	"""		
 
-	def checkValue(self, value):
-		#
-		# make sure the value:
-		#
-		#	0) is on a single line
-		for c in value:
-			if c in [ '\n' ]:
-				raise CommandError(self, 'value "%s" cannot be multi-line' % value)
+	<related>unload attrfile</related>
+	"""
+
 
 	def checkAttr(self, attr):
 		#
@@ -73,7 +65,6 @@ class Command(stack.commands.load.command,
 					raise CommandError(self, 'attribute "%s" contains an invalid character.\n"%s" must be a valid ctoken' % (attr, token))
 
 		return
-			
 
 	def run(self, params, args):
 		filename, processor = self.fillParams([
@@ -99,7 +90,6 @@ class Command(stack.commands.load.command,
 		for host in self.attrs.keys():
 			if host in hosts:
 				self.call('sync.host.config', [ host ])
-	
 
 		#
 		# checkin the attribute spreadsheet
@@ -107,7 +97,7 @@ class Command(stack.commands.load.command,
 		sheetsdir = '/export/stack/spreadsheets'
 		if not os.path.exists(sheetsdir):
 			os.makedirs(sheetsdir)
-			
+
 		RCSdir = '%s/RCS' % sheetsdir
 		if not os.path.exists(RCSdir):
 			os.makedirs(RCSdir)
@@ -116,10 +106,9 @@ class Command(stack.commands.load.command,
 		if not os.path.exists(sheetsfile) or not \
 			os.path.samefile(filename, sheetsfile):
 			shutil.copyfile(filename, '%s' % sheetsfile)
-		
+
 		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
 		os.system(cmd)
 
 		cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
 		os.system(cmd)
-

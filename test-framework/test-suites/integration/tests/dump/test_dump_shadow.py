@@ -6,7 +6,7 @@ def test_dump_shadow(host):
 
 	results = host.run('stack add attr attr=test value=shadowvalue shadow=true')
 	assert results.rc == 0
-	results = host.run('stack add attr host attr=test2 value=shadowvalue shadow=true')
+	results = host.run('stack add host attr a:frontend attr=test2 value=shadowvalue shadow=true')
 	assert results.rc == 0
 
 	tempfi = NamedTemporaryFile()

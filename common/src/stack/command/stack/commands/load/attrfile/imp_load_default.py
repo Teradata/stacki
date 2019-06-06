@@ -10,8 +10,7 @@ from stack.exception import CommandError
 
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
-
+	stack.commands.HostArgumentProcessor, stack.commands.Implementation):
 	"""
 	Create a dictionary of attributes based on comma-separated formatted
 	file.
@@ -24,7 +23,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			reader = stack.csv.reader(open(filename, encoding='ascii'), False)
 
 			# Skip all header line until col[0] == 'target'
-
 			for header in reader:
 				if header[0].lower() == 'target':
 					break
@@ -44,12 +42,12 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			attrName = None
 
 			for row in reader:
-
 				target = None
 				attrs = {}
+
 				for i in range(0, len(row)):
 					field = row[i]
-					self.owner.checkValue(field)
+
 					if header[i] == 'target':
 						target = field
 					elif header[i] == 'attrName':
@@ -72,9 +70,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							attrs[key] = default[key]
 				if target not in reserved:
 					host = self.db.getHostname(target)
-					if not host:
-						raise CommandError(self.owner, 'target "%s" is not an known appliance or host name' % host)
-
+					
 				if target not in self.owner.attrs.keys():
 					self.owner.attrs[target] = {}
 
@@ -84,7 +80,6 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 
 		# If there is a global environment specified make
 		# sure each host is in that environment.
-
 		try:
 			env = self.owner.attrs['global']['environment']
 		except:
@@ -92,4 +87,3 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		if env:
 			self.owner.call('set.host.environment',
 				[ target, 'environment=%s' % env ])
-

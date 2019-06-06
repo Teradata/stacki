@@ -1,0 +1,9 @@
+[
+        {
+                "host": "backend-0-0",
+                "scope": "host",
+                "type": "var",
+                "attr": "test.backend_0",
+                "value": "test_0"
+        }
+]

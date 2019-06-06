@@ -4,18 +4,16 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import fnmatch
+from functools import lru_cache
 import os
 import re
-from copy import copy
+
 import stack.commands
 from stack.exception import CommandError, ArgRequired
 
 
-class Command(stack.commands.Command,
-	      stack.commands.OSArgumentProcessor,
-	      stack.commands.ApplianceArgumentProcessor,
-	      stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.HostArgumentProcessor):
+class Command(stack.commands.ScopeArgumentProcessor, stack.commands.set.command):
 	"""
 	Sets a global attribute for all nodes
 
@@ -26,7 +24,7 @@ class Command(stack.commands.Command,
 	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-	
+
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
@@ -40,165 +38,112 @@ class Command(stack.commands.Command,
 	<related>remove attr</related>
 	"""
 
+	# Cache the expensive calls to fnmatchcase for when there are multiple targets
+	@lru_cache(maxsize=None)
+	def _fnmatchcase(self, name, pattern):
+		return fnmatch.fnmatchcase(name, pattern)
 
 	def run(self, params, args):
+		# Get the scope and make sure the args are valid
+		scope, = self.fillParams([('scope', 'global')])
+		scope_mappings = self.getScopeMappings(args, scope)
 
-		(glob, value, shadow, force, scope) = self.fillParams([
+		# Now validate the params
+		attr, value, shadow, force = self.fillParams([
 			('attr',   None, True),
 			('value',  None, True),
 			('shadow', False),
-			('force',  True),
-			('scope',  'global'),
-			])
+			('force',  True)
+		])
 
-		shadow = self.str2bool(shadow)  
+		shadow = self.str2bool(shadow)
 		force  = self.str2bool(force)
-
-		# All the set|add|remove attribute commands for every scope
-		# go through this code and just have stubbed out code to
-		# get the right arguments passed down to here.
-		#
-		# This keeps all the attribute stuff in one place.
-
-		lookup = { 'global'     : { 'fn'   : lambda x=None : [],
-					    'table': None },
-			   'os'         : { 'fn'   : self.getOSNames, 
-					    'table': 'oses' },
-			   'appliance'  : { 'fn'   : self.getApplianceNames, 
-					    'table': 'appliances' },
-			   'environment': { 'fn'   : self.getEnvironmentNames,
-					    'table': 'environments' },
-			   'host'       : { 'fn'   : self.getHostnames,
-					    'table': 'nodes' }}
-
-		if scope not in lookup.keys():
-			raise CommandError(self, 'invalid scope "%s"' % scope)
 
 		if not scope == 'global' and not args:
 			raise ArgRequired(self)
 
+		is_glob = re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', attr) is None
+
 		# If the value is set (we are not removing attributes) do not
-		# allow the attr argument to be a glob.
-
-		if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', glob):
-			raise CommandError(self, 'invalid attr name "%s"'  % glob)
-
-		# Assume that attrs is a glob and get a list of
-		# matching attributes for the scope.
-
-
-		targets = lookup[scope]['fn'](args)
-		if scope == 'global':
-			attrs = []
-		else:
-			attrs = {}
-			for target in targets:
-				attrs[target] = []
-
-		for row in self.call('list.attr', 
-				     copy(targets) + [ 'resolve=false', 
-						       'scope=%s' % scope, 
-						       'attr=%s'  % glob ]):
-			if scope == 'global':
-				attrs.append(row['attr'])
-			else:
-				attrs[row[scope]].append(row['attr'])
-
-		# If the attribute is already defined and force=False
-		# complain
-		#
-		# 	add := force=false
-		# 	set := force=true
-
-		if not force and scope != 'global':
-			for target in attrs:
-				if len(attrs[target]):
-					raise CommandError(self, 'attr "%s" exists for %s' % (glob, target))
-		if not force and scope == 'global' and len(attrs):
-			raise CommandError(self, 'attr "%s" exists for %s' % (glob, 'global'))
+		# allow the attr argument to be a glob
+		if value and is_glob:
+			raise CommandError(self, f'invalid attr name "{attr}"')
 
 		# Connect to a copy of the database if we are running pytest-xdist
 		if 'PYTEST_XDIST_WORKER' in os.environ:
 			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
 		else:
-			db_name = 'shadow'
+			db_name = 'shadow'  # pragma: no cover
 
-		# Before we do the insert remove any existing values, otherwise
-		# we need to mess around with 'update' vs 'insert' commands.
+		# Get a list of all matching attrs in the scope, for both normal and shadow
+		scope_map_ids = []
+		for table in ('attributes', f'{db_name}.attributes'):
+			query = """
+				attributes.name, scope_map.id
+				FROM %s, scope_map
+				WHERE attributes.scope_map_id = scope_map.id
+				AND scope_map.scope = %%s
+			""" % table
+			values = [scope]
 
-		if scope == 'global':
-			for attr in attrs:
-				self.db.execute(
-					"""
-					delete from %s.attributes where
-					scope = %%s and attr = binary %%s
-					""" % db_name, (scope, attr))
-				self.db.execute(
-					"""
-					delete from attributes where
-					scope = %s and attr = binary %s
-					""", (scope, attr))
-		else:
-			table = lookup[scope]['table']
-			for target in targets:
-				for attr in attrs[target]:
-					self.db.execute(
-						"""
-						delete from %s.attributes where
-						scope    = %%s and 
-						scopeid  = (select id from %s where name=%%s) and
-						attr     = %%s
-						""" % (db_name, table), (scope, target, attr))
-					self.db.execute(
-						"""
-						delete from attributes where
-						scope    = %%s and 
-						scopeid  = (select id from %s where name=%%s) and
-						attr     = %%s
-						""" % table, (scope, target, attr))
+			if scope == 'appliance':
+				query += "AND scope_map.appliance_id IN %s"
+				values.append([s.appliance_id for s in scope_mappings])
 
-		# If the command was called with "value=" stop here and treat the
-		# command as a remove command.
+			if scope == 'os':
+				query += "AND scope_map.os_id IN %s"
+				values.append([s.os_id for s in scope_mappings])
 
+			if scope == 'environment':
+				query += "AND scope_map.environment_id IN %s"
+				values.append([s.environment_id for s in scope_mappings])
+
+			if scope == 'host':
+				query += "AND scope_map.node_id IN %s"
+				values.append([s.node_id for s in scope_mappings])
+
+			# If we aren't a glob, we can let the DB filter by case-insensitive name
+			if not is_glob:
+				query += "AND attributes.name = %s"
+				values.append(attr)
+
+			# Filter to what matches the glob pattern. This will also take care
+			# of the case-sensitive matching of the attr name.
+			for name, scope_map_id in self.db.select(query, values):
+				if self._fnmatchcase(name, attr):
+					scope_map_ids.append(scope_map_id)
+
+		# If we aren't forcing, we throw an error if the attr already exists in this scope
+		if not force and len(scope_map_ids):
+			raise CommandError(self, f'attr "{attr}" already exists')
+
+		# We got here, so delete any existing matching attrs
+		if len(scope_map_ids):
+			self.db.execute('delete from scope_map where id in %s', (scope_map_ids,))
+
+		# Calls without a value are a remove, so we're done
 		if not value:
 			return
-		
-		
-		if scope == 'global':
-			if shadow is True:
-				self.db.execute(
-					"""
-					insert into %s.attributes
-					(scope, attr, value)
-					values (%%s, %%s, %%s)
-					""" % db_name, (scope, glob, value))
+
+		# Set the attr in the correct database for each scope_mapping
+		for scope_mapping in scope_mappings:
+			# First add the scope mapping
+			self.db.execute("""
+				INSERT INTO scope_map(
+					scope, appliance_id, os_id, environment_id, node_id
+				)
+				VALUES (%s, %s, %s, %s, %s)
+			""", scope_mapping)
+
+			# Then add the attr entry
+			if shadow:
+				self.db.execute("""
+					INSERT INTO %s.attributes(scope_map_id, name, value)
+					VALUES (LAST_INSERT_ID(), %%s, %%s)
+				""" % db_name, (attr, value))
+
 			else:
-				self.db.execute(
-					"""
-					insert into attributes
-					(scope, attr, value)
-					values (%s, %s, %s)
-					""", (scope, glob, value))
-		else:
-			table = lookup[scope]['table']
-			for target in targets:
-				if shadow is True:
-					self.db.execute(
-						"""
-						insert into %s.attributes
-						(scope, attr, value, scopeid)
-						values (
-							%%s, %%s, %%s, 
-							(select id from %s where name=%%s)
-						)
-						""" % (db_name, table), (scope, glob, value, target))
-				else:
-					self.db.execute(
-						"""
-						insert into attributes
-						(scope, attr, value, scopeid)
-						values (
-							%%s, %%s, %%s, 
-							(select id from %s where name=%%s)
-						)
-						""" % table, (scope, glob, value, target))
+				self.db.execute("""
+					INSERT INTO attributes(scope_map_id, name, value)
+					VALUES (LAST_INSERT_ID(), %s, %s)
+				""", (attr, value))

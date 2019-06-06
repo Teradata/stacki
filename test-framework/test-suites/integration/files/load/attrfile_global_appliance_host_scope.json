@@ -1,0 +1,23 @@
+[
+        {
+                "host": "backend-0-0",
+                "scope": "appliance",
+                "type": "var",
+                "attr": "test.appliance",
+                "value": "test_2"
+        },
+        {
+                "host": "backend-0-0",
+                "scope": "global",
+                "type": "var",
+                "attr": "test.global",
+                "value": "test_1"
+        },
+        {
+                "host": "backend-0-0",
+                "scope": "host",
+                "type": "var",
+                "attr": "test.host",
+                "value": "test_3"
+        }
+]
