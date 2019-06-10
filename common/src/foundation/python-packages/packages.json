@@ -25,12 +25,13 @@
 	"jsoncomment":		{ "fe": true, "bootstrap": true },
 	"mod-wsgi":		{ "fe": true },
 	"netifaces":		{ "fe": true, "be":"true", "bootstrap": true },
+	"paramiko":		{ "fe": true },
 	"pexpect":		{ "fe": true },
 	"psutil":		{ "fe": true, "be": true, "bootstrap": true },
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
-	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true },
+	"pyzmq":		{ "fe": true, "be": true, "bootstrap": true, "version": "17.1.2" },
 	"redis":		{ "fe": true, "bootstrap": true }, 
-	"requests":		{ "fe": true }, 
+	"requests":		{ "fe": true },
 	"testinfra":		{ "fe": true, "bootstrap": true, "version": "1.16.0" },
 	"yoyo-migrations":	{ "fe": true }
 }
