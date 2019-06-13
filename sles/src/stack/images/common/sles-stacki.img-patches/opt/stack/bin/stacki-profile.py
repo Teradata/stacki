@@ -29,23 +29,27 @@ def get_ipmi_mac():
 
 	return mac
 
+print("Writing debug profile...")
 debug = open('/tmp/stacki-profile.debug', 'w')
 
 for i in os.environ:
-	debug.write('%s %s\n' % (i, os.environ[i]))	
+	debug.write('%s %s\n' % (i, os.environ[i]))
 
 debug.close()
 
 #
 # make sure the target directory is there
 #
+print("Creating profile directory...")
 try:
 	os.makedirs('/tmp/profile')
 except:
 	pass
 
+print("Getting IPMI MAC...")
 ipmi_mac = get_ipmi_mac()
 
+print("Probing IPMI...")
 # to include IB information, load ib_ipoib driver
 subprocess.call(["/sbin/modprobe","ib_ipoib"])
 #
@@ -53,6 +57,7 @@ subprocess.call(["/sbin/modprobe","ib_ipoib"])
 #
 linkcmd = [ 'ip', '-oneline', 'link', 'show' ]
 
+print("Getting interfaces...")
 p = subprocess.Popen(linkcmd, stdout = subprocess.PIPE)
 
 interface_number = 0
@@ -97,6 +102,7 @@ if ipmi_mac:
 #
 # get the number of CPUs
 #
+print("Getting CPU count...")
 numcpus = 0
 f = open('/proc/cpuinfo', 'r')
 for line in f.readlines():
@@ -105,8 +111,10 @@ for line in f.readlines():
 		numcpus += 1
 f.close()
 
+print("Getting server...")
 server = os.environ.get('Server', None)
 if not server:
+	print("Reading commandline...")
 	cmdline = open('/proc/cmdline', 'r')
 	cmdargs = cmdline.readline()
 	cmdline.close()
@@ -119,6 +127,7 @@ if not server:
 if not server:
 	# No server found on boot line, so maybe we are in AWS and can find
 	# it from the user-data json.
+	print("We think we're in AWS...")
 	p = subprocess.Popen([ '/usr/bin/curl', 'http://169.254.169.254/latest/user-data' ],
 			     stdout=subprocess.PIPE,
 			     stderr=subprocess.PIPE)
@@ -140,6 +149,7 @@ curlcmd.append(request)
 #
 http_code = 0
 while http_code != 200:
+	print("Fetching profile...")
 	p = subprocess.Popen(curlcmd, stdout=subprocess.PIPE, stderr=open('/dev/null'))
 
 	try:
@@ -148,5 +158,6 @@ while http_code != 200:
 		http_code = 0
 
 	if http_code != 200:
+		print(f"Failed to fetch profile with error code {http_code}")
 		time.sleep(random.randint(3, 10))
 

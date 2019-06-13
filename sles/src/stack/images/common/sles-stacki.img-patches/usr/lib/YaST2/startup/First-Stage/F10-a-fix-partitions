@@ -9,4 +9,4 @@
 unset PYTHONPATH
 export LD_LIBRARY_PATH=/opt/stack/lib
 
-/opt/stack/bin/fix_partition.py
+# /opt/stack/bin/fix_partition.py

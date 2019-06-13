@@ -67,24 +67,24 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 /opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
 # nuke the disks, if appropriate
-/opt/stack/bin/initialize-storage.py
-if [ $? -ne 0 ]
-then
-	halt_install "Unable to initialize internal storage configuration." \
-		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
-fi
+# /opt/stack/bin/initialize-storage.py
+# if [ $? -ne 0 ]
+# then
+# 	halt_install "Unable to initialize internal storage configuration." \
+# 		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+# fi
 
 #
 # configure the hardware disk array controller first
 #
-/opt/stack/bin/configure-controllers.py
-if [ $? -ne 0 ]
-then
-	halt_install "Unable to complete storage controller configuration." \
-		'{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
-fi
+# /opt/stack/bin/configure-controllers.py
+# if [ $? -ne 0 ]
+# then
+# 	halt_install "Unable to complete storage controller configuration." \
+# 		'{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
+# fi
 
-udevadm settle --timeout=60
+# udevadm settle --timeout=60
 
 # NOTE: we initialize storage twice in RHEL, so do the same thing here, too
 
@@ -92,12 +92,12 @@ udevadm settle --timeout=60
 # hardware disk controller because it may have created new LUNs and the
 # master boot record on a LUN may be corrupted and require initialization.
 
-/opt/stack/bin/initialize-storage.py
-if [ $? -ne 0 ]
-then
-	halt_install "Unable to initialize internal storage configuration after storage controller config." \
-		'{"state": "post-controller config initialization failed - check console or reinstall with halt_install_on_error=False"}'
-fi
+# /opt/stack/bin/initialize-storage.py
+# if [ $? -ne 0 ]
+# then
+# 	halt_install "Unable to initialize internal storage configuration after storage controller config." \
+# 		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+# fi
 
 # then configure the partitions
 /opt/stack/bin/output-partition.py > /tmp/partition.xml
@@ -128,6 +128,6 @@ else
 fi
 
 #
-# execute code that runs just prior to the autoyast gui 
+# execute code that runs just prior to the autoyast gui
 #
 PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
