@@ -114,11 +114,11 @@ fi
 
 # give ourselves the ability to hold the installation prior to the start of yast
 grep stack-debug /proc/cmdline 2>&1 > /dev/null
-if [ $? -eq 0 ]
-then
-	halt_install "Stacki debug wait loop - remove /tmp/wait to continue" \
-		'{"state": "install wait"}'
-fi
+# if [ $? -eq 0 ]
+# then
+halt_install "Stacki debug wait loop - remove /tmp/wait to continue" \
+	'{"state": "install wait"}'
+# fi
 
 if [[ -n $YUMSERVER ]]
 then

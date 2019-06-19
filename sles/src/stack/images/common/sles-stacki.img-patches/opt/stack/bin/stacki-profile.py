@@ -149,15 +149,13 @@ request = 'https://%s/install/sbin/profile.cgi?os=sles&arch=x86_64&np=%d' % \
 	(server, numcpus)
 curlcmd.append(request)
 
-logging.debug("Curl request: %s", request)
-
 #
 # retry until we get an installation file. if the HTTP request fails, then sleep
 # for a random amount of time (between 3 and 10 seconds) before we retry.
 #
 http_code = 0
 while http_code != 200:
-	logging.debug("Fetching profile...")
+	logging.debug("Fetching profile using command: %s", curlcmd)
 	p = subprocess.Popen(curlcmd, stdout=subprocess.PIPE, stderr=open('/dev/null'))
 
 	try:

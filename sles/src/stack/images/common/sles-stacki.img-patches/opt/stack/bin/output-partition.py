@@ -86,7 +86,7 @@ def partition_init_path(element_partition, initialize, partition, partition_id):
 
 	If not being formatted, it still adds the create false tag."""
 	element_create = ElementTree.SubElement(element_partition, 'create')
-	element_create.text = '%s' % str(initialize).lower()
+	element_create.text = '%s' % str(False).lower()
 	element_create.set('config:type', 'boolean')
 
 	if initialize:
@@ -151,7 +151,7 @@ def partition_fs_type(element_partition, partition, format_partition):
 		element_filesystem.set('config:type', 'symbol')
 
 	element_format = ElementTree.SubElement(element_partition, 'format')
-	element_format.text = '%s' % str(format_partition).lower()
+	element_format.text = '%s' % str(False).lower()
 	element_format.set('config:type', 'boolean')
 
 
@@ -261,7 +261,7 @@ def output_disk(disk, initialize):
 	ElementTree.SubElement(element_drive, 'device').text = '/dev/%s' % disk
 	ElementTree.SubElement(element_drive, 'disklabel').text = '%s' % disklabel
 	element_init = ElementTree.SubElement(element_drive, 'initialize')
-	element_init.text = '%s' % str(initialize).lower()
+	element_init.text = '%s' % str(False).lower()
 	element_init.set('config:type', 'boolean')
 	element_partition_list = ElementTree.SubElement(element_drive, 'partitions')
 	element_partition_list.set('config:type', 'list')
@@ -282,7 +282,7 @@ def get_host_disks():
 	p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	o = p.communicate()[0]
 	out = o.decode()
-	
+
 	for l in out.split('\n'):
 		# Ignore empty lines
 		if not l.strip():
@@ -317,7 +317,7 @@ def get_host_partition_devices(disk):
 	p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	o = p.communicate()[0]
 	out = o.decode()
-	
+
 	for l in out.split('\n'):
 		# Ignore empty lines
 		if not l.strip():
@@ -368,7 +368,7 @@ def get_host_partitions(host_disks, host_fstab):
 		p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		o = p.communicate()[0]
 		out = o.decode()
-		
+
 		for l in out.split('\n'):
 			# Ignore empty lines
 			if not l.strip():
