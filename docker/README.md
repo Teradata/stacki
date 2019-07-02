@@ -14,7 +14,18 @@ You must have docker installed and configured on your host. If you are
 using Docker on the Mac go into the advanced/disk settings and
 allocation at least 8GBs RAM, 2 CPUs, and 64GB of Disk.
 
-## Building
+## Grab the Stacki image
+
+You can grab an image from the Stacki Docker repository, or just build
+it yourself.
+
+### From Docker
+
+```
+# docker pull stacki/frontend-centos:latest
+```
+
+### Build Source
 
 ```
 # cd stacki/docker
