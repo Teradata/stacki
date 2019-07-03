@@ -29,10 +29,10 @@ it yourself.
 
 ```
 # cd stacki/docker
-# make
+# docker-compose build
 ```
 
-This will create an image called `stacki/frontend-centos:<version>`.
+
 
 ## Running
 
@@ -41,7 +41,7 @@ Start the contianer using a persistent volume for `/root`. If the
 you.
 
 ```
-docker run --mount source=develop,target=/root -P --privileged stacki/frontend-centos:<version>
+# docker-compose up -d
 ```
 
 On first boot the container start the final stages of a *barnacle*
