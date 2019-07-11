@@ -1,5 +1,6 @@
 #! /bin/bash
 set -x
+set -e
 build=""
 declare -a nodes
 while true
@@ -21,20 +22,20 @@ fi
 # Build the stacki initrd and squashfs if the build flag is passed.
 if [ $build ]
 	then
-		pushd /export/src/stacki/sles/src/stack/images/
+		pushd /export/development/stacki/sles/src/stack/images/
 		make clean && make nuke && make
 		popd
 fi
 
 # Collect built files
 mkdir -p /export/move-op/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/sles-stacki.img /export/move-op/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/sles-stacki.img /export/stack/pallets/SLES/12/sp3/sles/x86_64/boot/x86_64/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/stacki-initrd.img /export/move-op/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/content /export/move-op/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/content /export/stack/pallets/SLES/12/sp3/sles/x86_64/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/boot/x86_64/config /export/move-op/
-cp /export/src/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/boot/x86_64/config /export/stack/pallets/SLES/12/sp3/sles/x86_64/boot/x86_64/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/sles-stacki.img /export/move-op/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/sles-stacki.img /export/stack/pallets/SLES/12/sp3/sles/x86_64/boot/x86_64/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/stacki-initrd.img /export/move-op/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/content /export/move-op/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/content /export/stack/pallets/SLES/12/sp3/sles/x86_64/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/boot/x86_64/config /export/move-op/
+cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/stack-sles-images-05.02.06.09/SLES/12/sp3/SLES-pallet-patches/boot/x86_64/config /export/stack/pallets/SLES/12/sp3/sles/x86_64/boot/x86_64/
 # Switch to the move-op partition scheme
 /opt/stack/bin/stack load storage partition file=/export/csv/td-part-sles11-be2.csv
 
