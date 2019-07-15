@@ -42,7 +42,7 @@ cp /export/development/stacki/build-stacki-nomerge_move_op_shenanigans/BUILD/sta
 # Setup move op for each node.
 /opt/stack/bin/stack set host bootaction "${nodes[@]}" action=console type=install
 /opt/stack/bin/stack set host box "${nodes[@]}" box=sles12
-/opt/stack/bin/stack set host boot "${nodes[@]}" action=install nukedisks=true nukecontroller=true
+/opt/stack/bin/stack set host boot "${nodes[@]}" action=install nukedisks=false nukecontroller=false
 for node in "${nodes[@]}"
 	do
 		ssh "$node" "mkdir -p /var/opt/teradata/move-op/"
