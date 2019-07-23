@@ -80,24 +80,17 @@ class Command(stack.commands.sync.host.command):
 			if host == me:
 				self.cleanup()
 
-			# Sometimes these return None, in that case, make them an empty string
-			c = str(self.command('report.host.interface',[host]) or '') + \
-				str(self.command('report.host.network',[host]) or '') + \
-				str(self.command('report.host.route',[host]) or '')
 
-			s = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
-				stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			o, e = s.communicate(input=c.encode())
-			
 			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
 			cmd += '/opt/stack/bin/stack report host network %s && ' % host
+			cmd += '/opt/stack/bin/stack report host resolv %s && ' % host
 			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
 			if host != me:
 				cmd += 'ssh -T -x %s ' % hostname
 			cmd += 'bash > /dev/null 2>&1'
 
-			p = Parallel(cmd, stdin=o.decode())
+			p = Parallel(cmd)
 			threads.append(p)
 			p.start()
 
@@ -149,4 +142,3 @@ class Command(stack.commands.sync.host.command):
 		#
 		if me in hosts and os.path.exists('/etc/ganglia/gmond.conf'):
 			os.system('service gmond restart > /dev/null 2>&1')
-
