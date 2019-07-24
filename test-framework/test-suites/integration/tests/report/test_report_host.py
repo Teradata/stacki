@@ -122,7 +122,7 @@ class TestReportHost:
 		result = host.run('stack add host interface backend-4-4 interface=eth4 ip=10.10.11.15 network=test')
 		assert result.rc == 0
 
-		result = host.run('stack add host alias backend-4-4 alias=BACKEND4 interface=eth4')
+		result = host.run('stack add host interface alias backend-4-4 alias=BACKEND4 interface=eth4')
 		assert result.rc == 0
 
 		result = host.run('stack report host')

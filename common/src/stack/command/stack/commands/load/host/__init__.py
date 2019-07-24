@@ -43,7 +43,7 @@ class Command(stack.commands.load.command):
 			self.stack('add.host.interface', name, **params)
 			
 			for alias in interface.get('alias'):
-				self.stack('add.host.alias', name, 
+				self.stack('add.host.interface.alias', name, 
 					   {'alias': alias},
 					   {'interface': interface['interface']})
 

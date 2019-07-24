@@ -14,9 +14,10 @@ import stack.commands
 from stack.exception import UsageError, ArgUnique, CommandError
 from stack.util import flatten
 
+
 class Command(stack.commands.list.host.command):
 	"""
-	Lists the aliases for a host.
+	Lists the aliases for a host interface.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
 	Zero, one or more host names. If no host names are supplied, aliases
@@ -27,7 +28,7 @@ class Command(stack.commands.list.host.command):
 	Interface of host.
 	</param>
 
-	<example cmd='list host alias backend-0-0 interface=eth0'>
+	<example cmd='list host interface alias backend-0-0 interface=eth0'>
 	List the aliases for backend-0-0 on interface "eth0".
 	</example>
 	"""
@@ -36,30 +37,36 @@ class Command(stack.commands.list.host.command):
 		if 'host' in params or 'hosts' in params:
 			raise UsageError(self, "Incorrect usage.")
 
-		(interface, ) = self.fillParams([
+		interface, = self.fillParams([
 			('interface', None)
 		])
 
 		self.beginOutput()
 		for host in self.getHostnames(args):
-			if interface == None:
+			if not interface:
 				devices = flatten(self.db.select("""
-					device from networks
-					where node = (select id from nodes where name = %s)
-					""", (host,)
-				))
+					networks.device
+					FROM networks
+					LEFT JOIN nodes ON networks.node = nodes.id
+					WHERE nodes.name = %s
+				""", (host,)))
 			else:
-				devices = (interface,)
+				devices = [interface]
 
-			for device in devices:
-				for alias, in self.db.select("""
-					name from aliases
-					where network = (
-						select id from networks
-						where node = (select id from nodes where name = %s)
-						and device = %s
-					)""", (host, device)
-				):
-					self.addOutput(host, (alias, device))
+			query = """
+				networks.device, aliases.name
+				FROM aliases
+				LEFT JOIN networks ON aliases.network = networks.id
+				LEFT JOIN nodes ON networks.node = nodes.id
+				WHERE nodes.name = %s
+			"""
+			values = [host]
+
+			if len(devices):
+				query += " AND networks.device IN %s"
+				values.append(devices)
+
+			for device, alias in self.db.select(query, values):
+				self.addOutput(host, (alias, device))
 
 		self.endOutput(header=['host', 'alias', 'interface'], trimOwner=False)

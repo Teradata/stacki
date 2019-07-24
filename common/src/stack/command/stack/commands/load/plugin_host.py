@@ -60,7 +60,7 @@ class Plugin(stack.commands.Plugin):
 				for a in aliases:
 					params = {'interface': i.get('interface'),
 						  'alias'    : a}
-					self.owner.stack('add.host.alias', host, **params)
+					self.owner.stack('add.host.interface.alias', host, **params)
 
 			self.owner.load_attr(h.get('attr'), host)
 			self.owner.load_controller(h.get('controller'), host)
