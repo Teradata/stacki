@@ -69,6 +69,7 @@ class Command(stack.commands.sync.host.command):
 		hosts = self.getHostnames(args, managed_only=1)
 		run_hosts = self.getRunHosts(hosts)
 
+		host_attrs = self.getHostAttrDict(hosts)
 		me = self.db.getHostname('localhost')
 
 		threads = []
@@ -80,9 +81,13 @@ class Command(stack.commands.sync.host.command):
 			if host == me:
 				self.cleanup()
 
+			sync_hosts = self.str2bool(host_attrs[host].get('sync.hosts', False))
 
 			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
 			cmd += '/opt/stack/bin/stack report host network %s && ' % host
+			if sync_hosts:
+				# we only conditionally sync /etc/hosts
+				cmd += '/opt/stack/bin/stack report host && '
 			cmd += '/opt/stack/bin/stack report host resolv %s && ' % host
 			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
