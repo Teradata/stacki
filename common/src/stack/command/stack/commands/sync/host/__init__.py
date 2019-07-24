@@ -65,20 +65,7 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-
-		self.notify('Sync Host')
-
-		output = self.command('report.host')
-		f = open('/etc/hosts', 'w')
-		f.write("%s\n" % output)
-		f.close()
-
-		if os.path.exists('/srv/salt/rocks'):
-			f = open('/srv/salt/rocks/hosts', 'w')
-			f.write("%s\n" % output)
-			f.close()
-
-
-
-
-
+		synchosts = self.str2bool(self.getHostAttr('localhost', 'sync.hosts'))
+		if synchosts:
+			self.notify('Sync Host')
+			self.report('report.host')
