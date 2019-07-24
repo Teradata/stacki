@@ -45,7 +45,7 @@ class Command(command):
 			zones[row['network']] = row['zone']
 
 		# Populate the host -> interface -> aliases map
-		for row in self.call('list.host.alias'):
+		for row in self.call('list.host.interface.alias'):
 			host = row['host']
 			interface = row['interface']
 			if host not in aliases:

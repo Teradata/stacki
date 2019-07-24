@@ -31,7 +31,7 @@ class TestRemoveHost:
 
 	def test_single_arg(self, host, add_host_with_interface, add_group, host_os, revert_etc):
 		# Attach a bunch of data to the backend
-		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
+		result = host.run('stack add host interface alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
 
 		result = host.run('stack add host attr backend-0-0 attr=test value=true')
@@ -76,7 +76,7 @@ class TestRemoveHost:
 
 	def test_multiple_args(self, host, add_host_with_interface, add_group, host_os, revert_etc):
 		# Attach a bunch of data to the backend
-		result = host.run('stack add host alias backend-0-0 alias=test interface=eth0')
+		result = host.run('stack add host interface alias backend-0-0 alias=test interface=eth0')
 		assert result.rc == 0
 
 		result = host.run('stack add host attr backend-0-0 attr=test value=true')

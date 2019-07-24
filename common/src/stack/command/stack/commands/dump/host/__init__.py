@@ -21,7 +21,7 @@ class Command(stack.commands.dump.command):
 				groups[row['host']] = row['groups'].split()
 
 		aliases = defaultdict(lambda: defaultdict(list))
-		for row in self.call('list.host.alias'):
+		for row in self.call('list.host.interface.alias'):
 			aliases[row['host']][row['interface']].append(row['alias'])
 
 		interfaces = defaultdict(list)

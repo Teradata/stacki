@@ -70,7 +70,7 @@ class Command(stack.commands.report.command,
 
 		networks = self.call('list.network', [ 'dns=true' ])
 		hosts = self.call("list.host.interface", ["expanded=true"])
-		aliases = self.call("list.host.alias")
+		aliases = self.call("list.host.interface.alias")
 
 		zones = []
 		for network in networks:
