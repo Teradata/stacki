@@ -212,7 +212,7 @@ class SwitchMellanoxM7800(Switch):
 	def partitions(self):
 		"""
 		Return a dictionary of the partitions.
-		partition['partition_name'] = {'pkey': int, 'ipoib': bool, 'guids': [list, of, member, guids]}
+		partition['partition_name'] = {'pkey': int, 'ipoib': bool, 'guids': [list, of, member, guids], 'defmember': str}
 		"""
 
 		partitions = {}
@@ -243,6 +243,7 @@ class SwitchMellanoxM7800(Switch):
 					'pkey': '',
 					'ipoib': False,
 					'guids': {},
+					'defmember': ''
 				}
 				continue
 
@@ -253,6 +254,9 @@ class SwitchMellanoxM7800(Switch):
 			elif line.startswith('ipoib'):
 				_, ipoib = line.split(':' if new_console_format else '=')
 				partitions[cur_partition]['ipoib'] = str2bool(ipoib.strip())
+			elif line.startswith('defmember'):
+				_, defmember = line.split(':' if new_console_format else '=')
+				partitions[cur_partition]['defmember'] = defmember.strip()
 			elif line.startswith('GUID'):
 				m = re.search(guid_member_format, line)
 				guid, membership = m.groups()[0].lower(), m.groups()[2]
