@@ -29,6 +29,11 @@ class Command(
 	List additional output from the partitions table.
 	</param>
 
+	<param type='string' name='source' optional='1'>
+	Specify the source to pull information from.  Must be 'database' or 'switch'.
+	Defaults to 'database'.
+	</param>
+
 	<param type='boolean' name='enforce_sm' optional='1'>
 	If a switch is not an infiniband subnet manager an error will be raised.
 	</param>
@@ -39,10 +44,11 @@ class Command(
 		if not len(args):
 			raise ArgRequired(self, 'switch')
 
-		name, expanded, enforce_sm = self.fillParams([
+		name, expanded, source, enforce_sm = self.fillParams([
 			('name', None),
 			('expanded', False),
-			('enforce_sm', False),
+			('source', 'database'),
+			('enforce_sm', False)
 		])
 		expanded = self.str2bool(expanded)
 
@@ -67,7 +73,7 @@ class Command(
 			enforce_subnet_manager(self, switches)
 
 		sql_columns = 'swnodes.name AS switch, nodes.name AS host, networks.device, networks.mac, ib_p.part_name, ib_m.member_type'
-		
+
 		table_headers = ['switch', 'host', 'device', 'guid', 'partition', 'membership']
 		if expanded:
 			sql_columns += ', ib_p.part_key, ib_p.options'
@@ -93,9 +99,18 @@ class Command(
 		member_select += ' ORDER BY switch, host, part_name'
 
 		self.beginOutput()
-		for line in self.db.select(member_select, vals):
-			if expanded:
-				line = list(line)
-				line[6] = '0x{0:04x}'.format(line[6])
-			self.addOutput(line[0], (line[1:]))
+
+		# Get the information from Stacki's database
+		if source == 'database':
+			for line in self.db.select(member_select, vals):
+				if expanded:
+					line = list(line)
+					line[6] = '0x{0:04x}'.format(line[6])
+				self.addOutput(line[0], (line[1:]))
+
+		# Get the information from the switch itself if source is set to switch
+		elif source == 'switch':
+			for switch_name in switches:
+				model = self.getHostAttr(switch_name, 'component.model')
+				self.runImplementation(model, [switch_name, expanded])
 		self.endOutput(header=table_headers)

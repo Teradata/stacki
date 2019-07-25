@@ -29,15 +29,21 @@ class Command(
 	If a switch is not an infiniband subnet manager an error will be raised.
 	</param>
 
+	<param type='boolean' name='expanded' optional='1'>
+	All partitions currently defined on the infiniband switch
+	</param>
+
+
 	"""
 
 	def run(self, params, args):
 		if not len(args):
 			raise ArgRequired(self, 'switch')
 
-		name, enforce_sm = self.fillParams([
+		name, enforce_sm, expanded = self.fillParams([
 			('name', None),
 			('enforce_sm', False),
+			('expanded', False)
 		])
 
 		if name:
@@ -75,6 +81,11 @@ class Command(
 		sw_select += ' ORDER BY nodes.name'
 
 		self.beginOutput()
-		for line in self.db.select(sw_select, vals):
-			self.addOutput(line[0], (line[1], '0x{0:04x}'.format(line[2]), line[3]))
+		if self.str2bool(expanded):
+			for switch_name in switches:
+				model = self.getHostAttr(switch_name, 'component.model')
+				self.runImplementation(model, [switch_name])
+		else:
+			for line in self.db.select(sw_select, vals):
+				self.addOutput(line[0], (line[1], '0x{0:04x}'.format(line[2]), line[3]))
 		self.endOutput(header=['switch', 'partition', 'partition key', 'options'])
