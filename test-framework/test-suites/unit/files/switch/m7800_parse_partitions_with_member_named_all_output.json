@@ -1,1 +1,1 @@
-{"0x0123": {"guids": {"e4:1d:2d:03:00:15:6e:80": "limited", "e4:1d:aa:00:00:11:22:80": "limited", "e4:1d:b1:26:99:34:aa:80": "limited", "e4:aa:2d:bb:cd:cd:ee:80": "full"}, "ipoib": true, "pkey": 291}}
+{"0x0123": {"guids": {"e4:1d:2d:03:00:15:6e:80": "limited", "e4:1d:aa:00:00:11:22:80": "limited", "e4:1d:b1:26:99:34:aa:80": "limited", "e4:aa:2d:bb:cd:cd:ee:80": "full"}, "ipoib": true, "pkey": 291, "defmember": ""}}
