@@ -22,9 +22,9 @@ class TestLoad:
 		# get the file path to use in load.
 		file_path = Path(test_file(dump_json)).resolve(strict = True)
 
-		# Load all of the test data into the database. We use -e to ensure we fail if a command output by load fails.
+		# Load all of the test data into the database. Some commands output have the potential to fail,
+		# such as removing existing storage partitions before loading new ones, and that is OK.
 		result = stack_load(file_path)
-		assert result.rc == 0
 
 		# Now ensure the objects were added as expected at each scope.
 		expected_results_per_scope = json.loads(Path(test_file(expected_results_json)).read_text())

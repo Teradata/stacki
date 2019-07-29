@@ -35,17 +35,15 @@ class Implementation(
 			)
 
 		if target not in self.owner.hosts:
-			self.owner.hosts[target] = {}
+			self.owner.hosts[target] = []
 
-		if device not in self.owner.hosts[target]:
-			self.owner.hosts[target][device] = []
-
-		self.owner.hosts[target][device].append({
+		self.owner.hosts[target].append({
+			'device': device,
 			'mountpoint': mountpoint,
 			'size': size,
-			'type': fstype,
+			'fstype': fstype,
 			'options': options,
-			'partid': partid
+			'partid': partid,
 		})
 
 	def run(self, args):
@@ -169,86 +167,3 @@ class Implementation(
 
 		except UnicodeDecodeError:
 			raise CommandError(self.owner, 'non-ascii character in file')
-
-		# Now that we've processed the spreadsheet, do some sanity checks
-		md_regex = re.compile(r'md[0-9]+')
-		hd_regex = re.compile(r'xvd[a-z]+|[shv]d[a-z]+|nvme[0-9]+n[0-9]+')
-
-		for target, devices in self.owner.hosts.items():
-			# Construct some loopup tables based on mount point
-			raid_devices = set()
-			lvm_devices = set()
-			volgroup_devices = set()
-
-			for partitions in devices.values():
-				for partition in partitions:
-					if partition.get('type') == 'raid':
-						raid_devices.add(partition['mountpoint'])
-					elif partition.get('type') == 'lvm':
-						lvm_devices.add(partition['mountpoint'])
-					elif partition.get('type') == 'volgroup':
-						volgroup_devices.add(partition['mountpoint'])
-
-			# Check the devices for this target
-			valid_devices = set()
-			for device, partitions in devices.items():
-				# Make sure software raid devices have valid options
-				if md_regex.fullmatch(device):
-					for partition in partitions:
-						# Gotta have options
-						if not partition.get('options'):
-							raise CommandError(
-								self.owner,
-								f'missing options for software raid device "{device}"'
-							)
-
-						# First part of options needs to define the RAID level
-						parts = partition['options'].split()
-						if not parts[0].startswith("--level=RAID"):
-							raise CommandError(
-								self.owner,
-								f'missing "--level=RAID" option for software raid device "{device}"'
-							)
-
-						# The other parts need to be valid RAID devices
-						for part in parts[1:]:
-							if part not in raid_devices:
-								raise CommandError(
-									self.owner,
-									f'device "{part}" not defined for software raid device "{device}"'
-								)
-
-					valid_devices.add(device)
-
-				# Physical devices are valid
-				elif hd_regex.fullmatch(device):
-					valid_devices.add(device)
-
-				# Partitions inside an LVM volume groups need names
-				elif device in volgroup_devices:
-					for partition in partitions:
-						options = partition.get('options')
-						if not options or "--name=" not in options:
-							raise CommandError(
-								self.owner,
-								f'missing "--name" option for LVM partition "{partition["mountpoint"]}"'
-							)
-
-					valid_devices.add(device)
-
-				else:
-					for partition in partitions:
-						# LVM volume groups need LVM devices
-						if partition['type'] == 'volgroup':
-							if device not in lvm_devices:
-								raise CommandError(
-									self.owner,
-									f'device "{device}" not defined for volgroup "{partition["mountpoint"]}"'
-								)
-
-							valid_devices.add(device)
-
-			# Make sure all the devices for this host have been validated
-			unknown_devices = set(devices.keys()).difference(valid_devices)
-			if unknown_devices:
-				raise CommandError(self.owner, f"unknown device(s) detected: {','.join(unknown_devices)}")

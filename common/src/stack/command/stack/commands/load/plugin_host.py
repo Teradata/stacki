@@ -39,18 +39,18 @@ class Plugin(stack.commands.Plugin):
 
 			# group
 
-			for i in h.get('interface'):
-				params = {'interface': i.get('interface'),
-					  'default'  : i.get('default'),
-					  'network'  : i.get('network'),
-					  'mac'      : i.get('mac'),
-					  'ip'       : i.get('ip'),
-					  'name'     : i.get('name'),
-					  'module'   : i.get('module'),
-					  'vlan'     : i.get('vlan'),
-					  'options'  : i.get('options'),
-					  'channel'  : i.get('channel')}
-				
+			for i in h.get('interface', []):
+				params    = {'interface': i.get('interface'),
+					     'default'  : i.get('default'),
+					     'network'  : i.get('network'),
+					     'mac'      : i.get('mac'),
+					     'ip'       : i.get('ip'),
+					     'name'     : i.get('name'),
+					     'module'   : i.get('module'),
+					     'vlan'     : i.get('vlan'),
+					     'options'  : i.get('options'),
+					     'channel'  : i.get('channel')}
+
 				self.owner.stack('add.host.interface', host, **params)
 
 				for a in i.get('alias', []):
