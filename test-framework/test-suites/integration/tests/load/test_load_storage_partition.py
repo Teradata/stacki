@@ -322,37 +322,37 @@ class TestLoadStoragePartition:
 		path = test_file('load/storage_partition_raid_missing_options.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - missing options for software raid device "md0"\n'
+		assert 'error - missing options for software raid device "md0"' in result.stderr
 
 	def test_raid_missing_level(self, host, test_file):
 		path = test_file('load/storage_partition_raid_missing_level.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - missing "--level=RAID" option for software raid device "md0"\n'
+		assert 'error - missing "--level=RAID" option for software raid device "md0"' in result.stderr
 
 	def test_raid_missing_device(self, host, test_file):
 		path = test_file('load/storage_partition_raid_missing_device.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - device "raid.02" not defined for software raid device "md0"\n'
+		assert 'error - device "raid.02" not defined for software raid device "md0"' in result.stderr
 
 	def test_lvm_missing_name(self, host, test_file):
 		path = test_file('load/storage_partition_lvm_missing_name.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - missing "--name" option for LVM partition "/"\n'
+		assert 'error - missing "--name" option for LVM partition "/"' in result.stderr
 
 	def test_lvm_invalid_device(self, host, test_file):
 		path = test_file('load/storage_partition_lvm_invalid_device.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - device "pv.02" not defined for volgroup "volgrp01"\n'
+		assert 'error - device "pv.02" not defined for volgroups' in result.stderr
 
 	def test_lvm_unknown_device(self, host, test_file):
 		path = test_file('load/storage_partition_lvm_unknown_device.csv')
 		result = host.run(f'stack load storage partition file={path}')
 		assert result.rc == 255
-		assert result.stderr == 'error - unknown device(s) detected: volgrp02\n'
+		assert 'error - unknown device(s) detected: volgrp02' in result.stderr
 
 	def test_create_spreadsheet_dirs(self, host, test_file, rmtree):
 		# Remove the existing spreadsheets directory

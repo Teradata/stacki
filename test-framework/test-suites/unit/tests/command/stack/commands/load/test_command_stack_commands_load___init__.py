@@ -7,7 +7,9 @@ class CommandUnderTest(command):
 	"""A subclass of the stack load command that replaces __init__ to remove the database dependency."""
 
 	def __init__(self, *args, **kwargs):
-		pass
+		self.document = None
+		self.exec = False
+		self.force = False
 
 @pytest.fixture
 def partitions():
@@ -33,6 +35,7 @@ def partitions():
 class TestLoadCommand:
 	"""A test case for testing the stack load command."""
 
+	@pytest.mark.parametrize("force", (False, True))
 	@pytest.mark.parametrize(
 		"scope, target, expected_cmd",
 		(
@@ -43,9 +46,20 @@ class TestLoadCommand:
 			("host", ["backend-0-0", "backend-0-1"], "add.host.storage.partition"),
 		)
 	)
+	@patch.object(target = CommandUnderTest, attribute = "validate_partition", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "stack", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "get_scope", autospec = True)
-	def test_load_partition(self, mock_get_scope, mock_stack, scope, target, expected_cmd, partitions):
+	def test_load_partition(
+		self,
+		mock_get_scope,
+		mock_stack,
+		mock_validate_partition,
+		force,
+		scope,
+		target,
+		expected_cmd,
+		partitions,
+	):
 		# Some parameter names differ from the keys in the json, so we set up a mapping of
 		# add storage partition parameter names to json key names.
 		partition_keys = {
@@ -60,6 +74,7 @@ class TestLoadCommand:
 
 		# Run the command
 		test_command = CommandUnderTest()
+		test_command.force = force
 		test_command.load_partition(partitions = partitions, target = target)
 
 		mock_get_scope.assert_called_once_with(test_command)
@@ -75,19 +90,33 @@ class TestLoadCommand:
 				},
 			)
 
+		if not force:
+			mock_validate_partition.assert_called_once_with(test_command, partitions = partitions)
+		else:
+			mock_validate_partition.assert_not_called()
+
 	@pytest.mark.parametrize("test_input", (None, []))
+	@patch.object(target = CommandUnderTest, attribute = "validate_partition", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "stack", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "get_scope", autospec = True)
-	def test_load_partition_no_partitions(self, mock_get_scope, mock_stack, test_input):
+	def test_load_partition_no_partitions(self, mock_get_scope, mock_stack, mock_validate_partition, test_input):
 		"""Test that load_partition early exits when there are no partitions to load."""
 		CommandUnderTest().load_partition(partitions = test_input)
 
 		mock_get_scope.assert_not_called()
 		mock_stack.assert_not_called()
+		mock_validate_partition.assert_not_called()
 
+	@patch.object(target = CommandUnderTest, attribute = "validate_partition", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "stack", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "get_scope", autospec = True)
-	def test_load_partition_non_global_scope_with_no_target(self, mock_get_scope, mock_stack, partitions):
+	def test_load_partition_non_global_scope_with_no_target(
+		self,
+		mock_get_scope,
+		mock_stack,
+		mock_validate_partition,
+		partitions,
+	):
 		"""Test that load_partition raises an exception when a non-global scope is used and no target is passed."""
 		mock_get_scope.return_value = "appliance"
 
@@ -95,6 +124,7 @@ class TestLoadCommand:
 			CommandUnderTest().load_partition(partitions = partitions)
 
 		mock_stack.assert_not_called()
+		mock_validate_partition.assert_not_called()
 
 	@patch.object(target = CommandUnderTest, attribute = "call", autospec = True)
 	def test__exec_commands(self, mock_call):

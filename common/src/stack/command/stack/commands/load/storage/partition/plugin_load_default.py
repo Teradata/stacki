@@ -4,6 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import tempfile
+import json
 import stack.commands
 from stack.exception import CommandError
 
@@ -21,60 +23,74 @@ class Plugin(
 	def provides(self):
 		return 'default'
 
+	def _add_dump_data(self, scope, target, data, dump_data):
+		"""Add dump data for partition objects nested under the given scope."""
+		# If the scope already has data, be sure to append it appropriately.
+		if scope in dump_data:
+			existing_scope_data = None
+			# See if the data with the target name already exists at the scope
+			for scope_data in dump_data[scope]:
+				if scope_data["name"] == target:
+					existing_scope_data = scope_data
+					break
+
+			# If it does, append the new data to the existing named entry.
+			if existing_scope_data is not None:
+				existing_scope_data["partition"].extend(data)
+			# Otherwise, add a new named entry to the scope.
+			else:
+				dump_data[scope].append(
+					{
+						"name": target,
+						"partition": data,
+					},
+				)
+		# Otherwise, initialize a new list of named data within the scope.
+		else:
+			dump_data[scope] = [
+				{
+					"name": target,
+					"partition": data,
+				},
+			]
+
+		return dump_data
+
 	def run(self, args):
 		appliances = self.getApplianceNames()
 		oses = self.getOSNames()
 
+		# Build a dump.json like dictionary object to pass into `stack load`
+		dump_data = {}
+
 		for target, data in args.items():
-			# Remove all existing entries
-			cmdargs = []
-
-			if target != 'global':
-				cmdargs.append(target)
-
-			cmdargs.append('device=*')
-
-			try:
-				if target == 'global':
-					self.owner.call('remove.storage.partition', cmdargs)
-				elif target in appliances:
-					self.owner.call('remove.appliance.storage.partition', cmdargs)
-				elif target in oses:
-					self.owner.call('remove.os.storage.partition', cmdargs)
+			# Global just goes at the top level of the dict as a list of partition dictionaries
+			if target == 'global':
+				if "partition" in dump_data:
+					dump_data["partition"].extend(data)
 				else:
-					self.owner.call('remove.host.storage.partition', cmdargs)
-			except CommandError:
-				# Nothing existed to remove
-				pass
+					dump_data["partition"] = data
 
-			# Loop through the devices in sorted order
-			for device in sorted(data.keys()):
-				for partition in data[device]:
-					cmdargs = []
-					if target != 'global':
-						cmdargs.append(target)
+				continue
 
-					cmdargs.append(f'device={device}')
+			# Otherwise, figure out which scope the target is in.
+			if target in appliances:
+				scope = "appliance"
+			elif target in oses:
+				scope = "os"
+			else:
+				scope = "host"
 
-					if partition['mountpoint']:
-						cmdargs.append(f"mountpoint={partition['mountpoint']}")
+			# Appliances, Oses, and Hosts are nested objects, with the partition list inside the appliance.
+			dump_data = self._add_dump_data(
+				scope = scope,
+				target = target,
+				data = data,
+				dump_data = dump_data,
+			)
 
-					if partition['type']:
-						cmdargs.append(f"type={partition['type']}")
-
-					cmdargs.append(f"size={partition['size']}")
-
-					if partition['options']:
-						cmdargs.append(f"options={partition['options']}")
-
-					if partition['partid']:
-						cmdargs.append(f"partid={partition['partid']}")
-
-					if target == 'global':
-						self.owner.call('add.storage.partition', cmdargs)
-					elif target in appliances:
-						self.owner.call('add.appliance.storage.partition', cmdargs)
-					elif target in oses:
-						self.owner.call('add.os.storage.partition', cmdargs)
-					else:
-						self.owner.call('add.host.storage.partition', cmdargs)
+		# Write to a temporary file that stack load can read
+		with tempfile.NamedTemporaryFile(mode = "w") as temp_file:
+			json.dump(dump_data, temp_file)
+			temp_file.flush()
+			self.owner.call(command = "load", args = [temp_file.name, "exec=True"])

@@ -166,6 +166,111 @@ class command(stack.commands.Command):
 
 			self.stack(cmd, target, **params)
 
+	def _validate_raid_device(self, device, partitions_list, raid_devices):
+		"""Validate software raid is set up correctly."""
+		for partition in partitions_list:
+			# Gotta have options
+			if not partition.get('options'):
+				raise CommandError(
+					self,
+					f'missing options for software raid device "{device}"'
+				)
+
+			# First part of options needs to define the RAID level
+			parts = partition['options'].split()
+			if not parts[0].startswith("--level=RAID"):
+				raise CommandError(
+					self,
+					f'missing "--level=RAID" option for software raid device "{device}"'
+				)
+
+			# The other parts need to be valid RAID devices
+			for part in parts[1:]:
+				if part not in raid_devices:
+					raise CommandError(
+						self,
+						f'device "{part}" not defined for software raid device "{device}"'
+					)
+
+	def _validate_lvm_partition(self, partitions_list):
+		"""Make sure that LVM partitions have names."""
+		for partition in partitions_list:
+			options = partition.get('options')
+			if not options or "--name=" not in options:
+				raise CommandError(
+					self,
+					f'missing "--name" option for LVM partition "{partition["mountpoint"]}"'
+				)
+
+	def validate_partition(self, partitions):
+		"""Validates that the partitions provided are valid as a whole."""
+		# Now that we've processed the spreadsheet, do some sanity checks
+		md_regex = re.compile(r'md[0-9]+')
+		hd_regex = re.compile(r'xvd[a-z]+|[shv]d[a-z]+|nvme[0-9]+n[0-9]+')
+
+		# Construct some lookup tables based on mount point
+		raid_devices = set()
+		lvm_devices = set()
+		volgroup_devices = set()
+
+		# map partitions by device for validation
+		devices = {
+			partition.get("device"): []
+			for partition in partitions
+		}
+		for partition in partitions:
+			devices[partition.get("device")].append(partition)
+
+		for partitions_list in devices.values():
+			for partition in partitions_list:
+				if partition.get('fstype') == 'raid':
+					raid_devices.add(partition['mountpoint'])
+				elif partition.get('fstype') == 'lvm':
+					lvm_devices.add(partition['mountpoint'])
+				elif partition.get('fstype') == 'volgroup':
+					volgroup_devices.add(partition['mountpoint'])
+
+		# Check the devices for this target
+		valid_devices = set()
+		for device, partitions_list in devices.items():
+			# Make sure software raid devices have valid options
+			if md_regex.fullmatch(device):
+				self._validate_raid_device(
+					device = device,
+					partitions_list = partitions_list,
+					raid_devices = raid_devices,
+				)
+				valid_devices.add(device)
+
+			# Physical devices are valid
+			elif hd_regex.fullmatch(device):
+				valid_devices.add(device)
+
+			# Partitions inside an LVM volume groups need names
+			elif device in volgroup_devices:
+				self._validate_lvm_partition(partitions_list = partitions_list)
+				valid_devices.add(device)
+
+			else:
+				# LVM volume groups need LVM devices
+				volgroups = [
+					partition for partition in partitions_list
+					if partition['fstype'] == 'volgroup'
+				]
+				if volgroups:
+					if device not in lvm_devices:
+						raise CommandError(
+							self,
+							f'device "{device}" not defined for volgroups: {", ".join(volgroup["mountpoint"] for volgroup in volgroups)}'
+						)
+
+					valid_devices.add(device)
+
+		# Make sure all the devices for this host have been validated
+		unknown_devices = set(devices.keys()).difference(valid_devices)
+		if unknown_devices:
+			raise CommandError(self, f"unknown device(s) detected: {', '.join(unknown_devices)}")
+
 	def load_partition(self, partitions, target=None):
 		"""Loads partition information provided into the current scope."""
 		if not partitions:
@@ -173,6 +278,13 @@ class command(stack.commands.Command):
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
+
+		# Validate partitions if not being forced.
+		if not self.force:
+			self.validate_partition(partitions = partitions)
+
+		# Remove all existing entries based on which scope we are operating in.
+		self.stack(f'remove.{scope}.storage.partition' if scope != 'global' else 'remove.storage.partition', device='*')
 
 		cmd = f'add.{scope}.storage.partition' if scope != 'global' else 'add.storage.partition'
 
@@ -243,11 +355,13 @@ class command(stack.commands.Command):
 
 	def run(self, params, args):
 
-		document, self.exec_commands = self.fillParams([
+		document, self.exec_commands, self.force = self.fillParams([
 			('document', None),
-			('exec', False)
+			('exec', False),
+			('force', False),
 		])
 		self.exec_commands = str2bool(self.exec_commands)
+		self.force = str2bool(self.force)
 
 		if not document:
 			if not args:
