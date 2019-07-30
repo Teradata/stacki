@@ -843,13 +843,15 @@ class ScopeArgumentProcessor(
 			# Piggy-back to resolve the environment names
 			names = self.getEnvironmentNames(args)
 
-			# Now we have to convert the names to the primary keys
-			for environment_id in flatten(self.db.select(
-				'id from environments where name in %s', (names,)
-			)):
-				scope_mappings.append(
-					ScopeMapping(scope, None, None, environment_id, None)
-				)
+			if names:
+
+				# Now we have to convert the names to the primary keys
+				for environment_id in flatten(self.db.select(
+					'id from environments where name in %s', (names,)
+				)):
+					scope_mappings.append(
+						ScopeMapping(scope, None, None, environment_id, None)
+					)
 
 		elif scope == 'host':
 			# Piggy-back to resolve the host names
