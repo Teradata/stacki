@@ -76,7 +76,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.synced_folder '.', '/vagrant', disabled: true
 
-    config.vm.hostname = "frontend-0-0.localdomain"
+    config.vm.hostname = "frontend-0-0"
     config.vm.network "private_network",
       ip: "192.168.0.2",
       virtualbox__intnet: NAME,

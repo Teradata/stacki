@@ -1335,13 +1335,6 @@ class DatabaseConnection:
 
 		result = None
 
-		###
-		# CLADD (11/5/2018): I'm 99% sure this code below is unreachable
-		# in our current code base. Tracing though the code, I couldn't
-		# find a path to get coverage on this chunk of code, where subnet
-		# would be anything besides None. However, I'm hesitent to delete
-		# the chunk of code until test coverage is higher.
-		###
 		for (netname, zone) in self.select("""
 			net.name, s.zone from nodes n, networks net, subnets s
 			where n.name like %s and s.name like %s
@@ -1352,11 +1345,10 @@ class DatabaseConnection:
 			# dns zone
 			if not netname:
 				netname = hostname
-
-			result = '%s.%s' % (netname, zone)
-		###
-		# End possible dead code chunk
-		###
+			if zone:
+				result = '%s.%s' % (netname, zone)
+			else:
+				result = netname
 
 		return result
 
