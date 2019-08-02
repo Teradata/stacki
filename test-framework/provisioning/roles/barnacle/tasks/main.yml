@@ -25,8 +25,8 @@
     copy:
       dest: /etc/hosts
       content: |
-        127.0.0.1       localhost     localhost.localdomain
-        192.168.0.2     frontend-0-0  frontend-0-0.localdomain
+        127.0.0.1       localhost
+        192.168.0.2     frontend-0-0  frontend-0-0
       mode: 0644
 
   - name: "Report frontend-install.py URL"

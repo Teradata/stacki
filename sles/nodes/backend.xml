@@ -35,7 +35,11 @@ export LD_LIBRARY_PATH=/opt/stack/lib
 
 <stack:script stack:stage="install-post">
 
-echo "&hostname;.&domainname;" > /etc/HOSTNAME
+echo "&hostname;" > /etc/HOSTNAME
+if [ x"" == x&domainname; ]
+then
+	echo -n ".&domainname;" >> /etc/HOSTNAME
+fi
 
 SERVER=&yumserver;
 if [ x"" == x$SERVER ]
