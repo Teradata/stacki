@@ -2,6 +2,7 @@
 # With MIT license
 import struct
 import socket
+import pathlib
 import pytest
 import binascii
 from stack import api
@@ -57,7 +58,25 @@ def test_other_dhcp_server(interface):
 	# Set up socket with passed in interface
 	send_dhcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	send_dhcp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-	send_dhcp.setsockopt(socket.SOL_SOCKET, 25, str(interface + '\0').encode('utf-8'))
+
+	# Bail if we can't setup a socket on the current interface
+	# for instance if it's a virtual interface
+	try:
+		send_dhcp.setsockopt(socket.SOL_SOCKET, 25, str(interface + '\0').encode('utf-8'))
+
+	except OSError:
+		pytest.skip(f'Could not setup socket for {interface}')
+
+	mac_addr = pxe_interfaces[interface]
+
+	# If the MAC address isn't in the Stacki database, try elsewhere
+	if not mac_addr:
+		try:
+			mac_addr = pathlib.Path(f'/sys/class/net/{interface}/address').read_text().strip()
+
+		except OSError:
+			# If we can't get the address from /sys/class/net, skip this interface
+			pytest.skip(f'Could not find MAC address for {interface}')
 
 	# Abort if port 68 is in use
 	try:
@@ -69,7 +88,7 @@ def test_other_dhcp_server(interface):
 		dhcp_process_name = dhcp_port_process.split()[-1].split('/')[-1]
 		pytest.skip(f'Port 68 needs to be not in use for test, it is currently bound to process {dhcp_process_name}.')
 
-	dhcp_discover_packet, trans_id = build_dhcp_packet(pxe_interfaces[interface].replace(':', ''))
+	dhcp_discover_packet, trans_id = build_dhcp_packet(mac_addr.replace(':', ''))
 
 	# Flatten packet info so it can be sent via socket
 	packet = b''
