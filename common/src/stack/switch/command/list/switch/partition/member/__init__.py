@@ -112,5 +112,25 @@ class Command(
 		elif source == 'switch':
 			for switch_name in switches:
 				model = self.getHostAttr(switch_name, 'component.model')
-				self.runImplementation(model, [switch_name, expanded])
+				partitions = self.runImplementation(model, [switch_name])
+				for partition, members in partitions.items():
+					for member in members:
+						output = []
+						if expanded:
+							output = [
+								member.host,
+								member.interface,
+								member.guid,
+								member.partition,
+								member.pkey,
+								member.options
+							]
+						else:
+							output = [
+								member.host,
+								member.interface,
+								member.guid,
+								member.partition
+							]
+						self.addOutput(switch_name, options)
 		self.endOutput(header=table_headers)

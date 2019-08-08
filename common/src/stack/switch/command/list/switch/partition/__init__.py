@@ -84,7 +84,9 @@ class Command(
 		if self.str2bool(expanded):
 			for switch_name in switches:
 				model = self.getHostAttr(switch_name, 'component.model')
-				self.runImplementation(model, [switch_name])
+				partitions = self.runImplementation(model, [switch_name])
+				for part in partitions:
+					self.addOutput(switch_name, [part.partition, part.pkey, part.options])
 		else:
 			for line in self.db.select(sw_select, vals):
 				self.addOutput(line[0], (line[1], '0x{0:04x}'.format(line[2]), line[3]))
