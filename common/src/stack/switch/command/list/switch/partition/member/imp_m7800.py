@@ -28,7 +28,7 @@ class Implementation(stack.commands.Implementation):
 	def run(self, args):
 
 		# switch hostname
-		switch = args
+		switch, = args
 
 		switch_attrs = self.owner.getHostAttrDict(switch)
 
@@ -71,7 +71,7 @@ class Implementation(stack.commands.Implementation):
 				if defmember:
 					options.append(f'defmember={defmember}')
 
-				member = part_member(host['host_name'], host['interface_name'], guid, partition, membership, pkey, options)
+				member = part_member(host['host_name'], host['interface_name'], guid, partition, membership, pkey, ','.join(options))
 				member_list.append(member)
 
 			partition_info[partition] = member_list
