@@ -122,6 +122,7 @@ class Command(
 								member.interface,
 								member.guid,
 								member.partition,
+								member.membership,
 								member.pkey,
 								member.options
 							]
@@ -130,7 +131,8 @@ class Command(
 								member.host,
 								member.interface,
 								member.guid,
-								member.partition
+								member.partition,
+								member.membership
 							]
-						self.addOutput(switch_name, options)
+						self.addOutput(switch_name, output)
 		self.endOutput(header=table_headers)

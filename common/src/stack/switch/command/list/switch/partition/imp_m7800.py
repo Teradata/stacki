@@ -17,7 +17,7 @@ class Implementation(stack.commands.Implementation):
 			'username': switch_attrs[switch].get('switch_username'),
 			'password': switch_attrs[switch].get('switch_password'),
 		}
-		part_info = namedtuple('ib_part', 'part pkey options')
+		part_info = namedtuple('ib_part', 'partition pkey options')
 		part_list = []
 
 		# remove username and pass attrs (aka use any pylib defaults) if they aren't host attrs
@@ -30,11 +30,11 @@ class Implementation(stack.commands.Implementation):
 		partitions = ib_switch.partitions
 
 		for partition, part_values in partitions.items():
-			options = [f'ipoib=part_values["ipoib"]']
+			options = [f'ipoib={part_values["ipoib"]}']
 			pkey = part_values['pkey']
 
-			if defmember:
-				options.append(f'defmember=part_values["defmember"]')
+			if part_values['defmember']:
+				options.append(f'defmember={part_values["defmember"]}')
 
 			if pkey:
 				pkey = '0x{0:04x}'.format(pkey)
