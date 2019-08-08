@@ -125,7 +125,8 @@ class Implementation(stack.commands.Implementation):
 		#
 		# set the clock right now
 		#
-		self.owner.addOutput(host, '/usr/sbin/ntpdate %s' % self.owner.timeservers[0])
+		if self.owner.timeservers:
+			self.owner.addOutput(host, '/usr/sbin/ntpdate %s' % self.owner.timeservers[0])
 		# Restart the NTPD service
 		if self.owner.osversion == '11.x':
 			self.owner.addOutput(host, 'service ntp start')

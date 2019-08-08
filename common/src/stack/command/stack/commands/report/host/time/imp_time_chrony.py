@@ -93,7 +93,8 @@ class Implementation(stack.commands.Implementation):
 		else:
 			self.client(host)
 
-		self.owner.addOutput(host, "/usr/sbin/chronyd -q 'server %s iburst'" % self.owner.timeservers[0])
+		if self.owner.timeservers:
+			self.owner.addOutput(host, "/usr/sbin/chronyd -q 'server %s iburst'" % self.owner.timeservers[0])
 
 		self.owner.addOutput(host, "systemctl enable chronyd")
 		self.owner.addOutput(host, 'systemctl start chronyd')
