@@ -57,7 +57,8 @@ class Command(stack.commands.config.host.command):
 			('mac', None),
 			('module', None),
 			('flag', None),
-			('sync', True) ])
+			('sync', True),
+		])
 
 		hosts = self.getHostnames(args)
 
@@ -70,45 +71,19 @@ class Command(stack.commands.config.host.command):
 
 		discovered_macs = []
 
-		if mac:
-			macs = mac.split(',')
-		else:
-			macs = []
+		macs = mac.split(',') if mac else []
+		interfaces = interface.split(',') if interface else []
+		modules = module.split(',') if module else []
+		flags = flag.split(',') if flag else []
 
-		if interface:
-			interfaces = interface.split(',')
-		else:
-			interfaces = []
-
-		if module:
-			modules = module.split(',')
-		else:
-			modules = []
-
-		if flag:
-			flags = flag.split(',')
-		else:
-			flags = []
-				
-		for i in range(0, len(macs)):
-			a = (macs[i], )
-
-			if len(interfaces) > i:
-				a += (interfaces[i], )
-			else:
-				a += ('', )
-
-			if len(modules) > i:
-				a += (modules[i], )
-			else:
-				a += ('', )
-			
-			if len(flags) > i:
-				a += (flags[i], )
-			else:
-				a += ('', )
-			
-			discovered_macs.append(a)
+		discovered_macs = []
+		for i, this_mac in enumerate(macs):
+			discovered_macs.append([
+				this_mac,
+				interfaces[i] or '',
+				modules[i] or '',
+				flags[i] or '',
+			])
 
 		pre_config = self.command('list.host.interface', [host])
 		#
