@@ -31,7 +31,7 @@ class TestDumpHost:
 		assert results.rc == 0
 		results = host.run('stack add host storage controller backend-test adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5')
 		assert results.rc == 0
-		results = host.run('stack add storage partition backend-test device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
+		results = host.run('stack add host storage partition backend-test device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0
 		results = host.run('stack add host firewall backend-test action=accept chain=input protocol=udp service=www comment=test flags="-m state" network=private output-network=private rulename=test table=filter')
 		assert results.rc == 0

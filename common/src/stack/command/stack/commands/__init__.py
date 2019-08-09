@@ -811,6 +811,12 @@ class ScopeArgumentProcessor(
 		# Validate the different scopes and get the keys to the targets
 		if scope == 'global':
 			# Global scope has no friends
+			if args:
+				raise CommandError(
+					cmd = self,
+					msg = "Arguments are not allowed at the global scope.",
+				)
+
 			scope_mappings.append(
 				ScopeMapping(scope, None, None, None, None)
 			)

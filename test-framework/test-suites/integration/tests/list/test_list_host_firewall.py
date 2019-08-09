@@ -49,7 +49,7 @@ class TestListHostFirewall:
 
 		# Add a bunch of rules to get applied to the host
 		result = host.run(
-			'stack add firewall backend service=1 chain=INPUT '
+			'stack add firewall service=1 chain=INPUT '
 			'action=ACCEPT protocol=TCP rulename=global_rule'
 		)
 		assert result.rc == 0
