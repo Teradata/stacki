@@ -1,5 +1,6 @@
 import pytest
 from stack import api
+from collections import defaultdict
 
 
 class TestIbPartitions:
@@ -27,9 +28,11 @@ class TestIbPartitions:
 		actual_ib_part = {}
 
 		for part in api.Call(f'{cmd} {switch}'):
+			# Filter out values used for keys
 			part_val = {k: v for k, v in part.items() if v != part['partition']}
 			stacki_ib_part[part['partition']] = part_val
 
+		# Same as above but for values actually on the ib switch
 		for part in api.Call(f'{cmd} {switch}', args = ['expanded=true']):
 			part_val = {k: v for k, v in part.items() if v != part['partition']}
 			actual_ib_part[part['partition']] = part_val
@@ -80,16 +83,23 @@ class TestIbPartitions:
 		member_errors = []
 		errors = []
 		cmd = 'list switch partition member'
-		stacki_ib_mem = {}
-		actual_ib_mem = {}
+		stacki_ib_mem = defaultdict(dict)
+		actual_ib_mem = defaultdict(dict)
 
 		for mem in api.Call(f'{cmd} {switch}', args = ['expanded=true']):
+
+			# Filter out the values we are using for keys
 			mem_val = {k: v for k, v in mem.items() if v != mem['host'] or v != mem['device']}
-			stacki_ib_mem.setdefault(mem['host'], {})[mem['device']] = mem_val
+
+			# Assign per ib interface values as a host might have more than one
+			# ib interface on a switch
+			stacki_ib_mem[mem['host']][mem['device']] = mem_val
 
 		for mem in api.Call(f'{cmd} {switch}', args = ['expanded=true', 'source=switch']):
+
+			# Same but for the values being reported by the switch itself
 			mem_val = {k: v for k, v in mem.items() if v != mem['host'] or v != mem['device']}
-			actual_ib_mem.setdefault(mem['host'], {})[mem['device']] = mem_val
+			actual_ib_mem[mem['host']][mem['device']] = mem_val
 
 		member_diff = [mem for mem in actual_ib_mem if mem not in stacki_ib_mem]
 		if member_diff:
@@ -101,8 +111,7 @@ class TestIbPartitions:
 			if stacki_member not in actual_ib_mem:
 				member_errors.append(f'Could not find partition member for host {stacki_member} on switch {switch}')
 				continue
-			else:
-				actual_member = actual_ib_mem[stacki_member]
+			actual_member = actual_ib_mem[stacki_member]
 
 			# Check every device of the host
 			for device, mem_val in mem_devices.items():
@@ -113,8 +122,6 @@ class TestIbPartitions:
 				# a member not in the database
 				actual_member.pop('guid', None)
 				mem_val.pop('guid', None)
-				if not mem_val['options']:
-					mem_val['options'] = 'ipoib=False'
 
 				# Check if the key is present on the switch and in the database
 				if device not in actual_member:
@@ -132,16 +139,15 @@ class TestIbPartitions:
 						]
 						member_errors.append(''.join(msg))
 						continue
-					else:
 
-						# Check the values are the same
-						actual_value = actual_member[device][stacki_key]
-						if stacki_value != actual_value:
-							msg = [
-								f'Host {stacki_member} found with {stacki_key} value ',
-								f'{actual_value} but should be {stacki_value}'
-							]
-							member_errors.append(''.join(msg))
+					# Check the values are the same
+					actual_value = actual_member[device][stacki_key]
+					if stacki_value != actual_value:
+						msg = [
+							f'Host {stacki_member} found with {stacki_key} value ',
+							f'{actual_value} but should be {stacki_value}'
+						]
+						member_errors.append(''.join(msg))
 		if member_errors:
 			errors.append(f'Infiniband switch {switch} found with partition members info different from Stacki:')
 			errors.append('\n'.join(member_errors))
