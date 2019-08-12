@@ -50,7 +50,7 @@ class command(stack.commands.Command):
 			scope = 'global'
 		return scope
 
-		
+
 	def set_scope(self, scope):
 		self.__dump_scope = scope
 
@@ -76,7 +76,7 @@ class command(stack.commands.Command):
 				raise CommandError(self,
 						   f'{section} section missing "{key}"')
 
-			
+
 	def load_file(self, filename):
 		scope = self.get_scope()
 
@@ -90,7 +90,7 @@ class command(stack.commands.Command):
 			return document
 		else:
 			return document.get(scope)
-			
+
 
 	def load_access(self, access):
 		if not access:
@@ -118,11 +118,11 @@ class command(stack.commands.Command):
 
 			self.stack('set.attr', target, **params)
 
-			
+
 	def load_controller(self, controllers, target=None):
 		if not controllers:
 			return
-		
+
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
@@ -140,9 +140,25 @@ class command(stack.commands.Command):
 	def load_partition(self, partitions, target=None):
 		if not partitions:
 			return
-		
+
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
+
+		if scope == 'global':
+			cmd = 'add.storage.partition'
+		elif scope == 'appliance':
+			cmd = 'add.appliance.storage.partition'
+		elif scope == 'os':
+			cmd = 'add.os.storage.partition'
+		elif scope == 'environment':
+			cmd = 'add.environment.storage.partition'
+		elif scope == 'host':
+			cmd = 'add.host.storage.partition'
+		else:
+			raise CommandError(
+				cmd = self,
+				msg = f"Unsupported scope {scope} encountered while loading partition information.",
+			)
 
 		for p in partitions:
 			params = {'device'    : p.get('device'),
@@ -152,13 +168,13 @@ class command(stack.commands.Command):
 				  'type'    : p.get('fstype'),
 				  'options'   : p.get('options')}
 
-			self.stack('add.storage.partition', target, **params)
+			self.stack(cmd, target, **params)
 
 
 	def load_firewall(self, firewalls, target=None):
 		if not firewalls:
 			return
-		
+
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
@@ -174,14 +190,14 @@ class command(stack.commands.Command):
 				  'comment'       : f.get('comment'),
 				  'table'         : f.get('table'),
 				  'name'          : f.get('name')}
-				
+
 			self.stack('add.firewall', target, **params)
 
 
 	def load_route(self, routes, target=None):
 		if not routes:
 			return
-		
+
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
@@ -195,7 +211,7 @@ class command(stack.commands.Command):
 
 			self.stack('add.route', target, **params)
 
-			
+
 	def run(self, params, args):
 
 		(document, ) = self.fillParams([
@@ -213,7 +229,7 @@ class command(stack.commands.Command):
 
 
 
-			
+
 class Command(command):
 	"""
 	Load configuration data from the provided json document. If no arguments
@@ -234,5 +250,3 @@ class Command(command):
 			section = document.get(plugin.provides())
 			if section:
 				plugin.run(section)
-
-		
