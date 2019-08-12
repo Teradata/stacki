@@ -213,7 +213,15 @@ with open('/tmp/site.json', 'w') as file:
 				{ "name": "managed",         "value": true },
                                 { "name": "const_overwrite", "value": false }
 			]
-                }
+                },
+                {
+                        "name": "external",
+                        "public": false,
+                        "attr": [ 
+				{ "name": "kickstartable", "value": false },
+				{ "name": "managed",       "value": false }
+			]
+		}
         ]
 }
 </stack:file>
