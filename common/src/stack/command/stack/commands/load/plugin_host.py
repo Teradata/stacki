@@ -53,11 +53,7 @@ class Plugin(stack.commands.Plugin):
 				
 				self.owner.stack('add.host.interface', host, **params)
 
-				try:
-					aliases = i['alias']
-				except:
-					aliases = []
-				for a in aliases:
+				for a in i.get('alias', []):
 					params = {'interface': i.get('interface'),
 						  'alias'    : a}
 					self.owner.stack('add.host.alias', host, **params)
