@@ -140,7 +140,7 @@ class command(stack.commands.Command):
 		scope = self.get_scope()
 
 		if scope == 'global':
-			data = self.call('list.storage.partition')
+			data = self.call('list.storage.partition', [ 'globalOnly=true' ])
 		else:
 			data = self.call('list.storage.partition', [name])
 
