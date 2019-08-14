@@ -222,7 +222,10 @@ if output:
 if profile_update_macs:
 	#
 	# add all the detected network interfaces to the database
-	#
+	# For ib interfaces there is a known bug where ifconfig will
+	# wrongly output the GID. The man page for newer ifconfigs
+	# lists it as a bug, this will probably never be fixed as
+	# ifconfig was deprecated.
 	ifaces = []
 	macs = []
 	modules = []
