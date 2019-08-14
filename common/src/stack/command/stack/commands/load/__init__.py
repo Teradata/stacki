@@ -149,7 +149,7 @@ class command(stack.commands.Command):
 				  'partid'    : p.get('partid'),
 				  'mountpoint': p.get('mountpoint'),
 				  'size'      : p.get('size'),
-				  'fstype'    : p.get('fstype'),
+				  'type'    : p.get('fstype'),
 				  'options'   : p.get('options')}
 
 			self.stack('add.storage.partition', target, **params)
