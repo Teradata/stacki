@@ -22,11 +22,10 @@ class Command(stack.commands.dump.command,
 			dump.append(OrderedDict(
 				name          = name,
 				attr          = self.dump_attr(name),
-#				controller    = self.dump_controller(name),
-#				partition     = self.dump_partition(name),
+				controller    = self.dump_controller(name),
+				partition     = self.dump_partition(name),
 				firewall      = self.dump_firewall(name),
 				route         = self.dump_route(name)))
 
 		self.addText(json.dumps(OrderedDict(version     = stack.version,
 						    environment = dump), indent=8))
-

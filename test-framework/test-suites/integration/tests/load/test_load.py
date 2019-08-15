@@ -13,7 +13,9 @@ class TestLoad:
 			("load/json/partition.json", "load/json/expected_partition.json", "stack list {} storage partition output-format=json", "storage partition"),
 			("load/json/firewall.json", "load/json/expected_firewall.json", "stack list {} firewall output-format=json", "firewall"),
 			("load/json/controller.json", "load/json/expected_controller.json", "stack list {} storage controller output-format=json", "storage controller"),
-		)
+			("load/json/attr.json", "load/json/expected_attr.json", "stack list {} attr output-format=json", "attr"),
+			("load/json/route.json", "load/json/expected_route.json", "stack list {} route output-format=json", "route"),
+		),
 	)
 	def test_load_processing(self, host, test_file, dump_json, expected_results_json, list_command_template, object_name):
 		"""Test that loading information at the various scopes works as expected."""

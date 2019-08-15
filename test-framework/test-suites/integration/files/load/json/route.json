@@ -1,0 +1,94 @@
+{
+	"version": "05.03.00.00",
+	"route": [
+		{
+			"address": "250.254.0.0",
+			"gateway": null,
+			"subnet": "private",
+			"netmask": "255.255.255.0",
+			"interface": null
+		}
+	],
+	"host": [
+		{
+			"name": "test_host",
+			"rack": "0",
+			"rank": "0",
+			"appliance": "test_appliance",
+			"box": "default",
+			"environment": null,
+			"osaction": "default",
+			"installaction": "default",
+			"comment": null,
+			"metadata": null,
+			"group": [],
+			"interface": [
+				{
+					"interface": "eth0",
+					"default": null,
+					"network": "private",
+					"mac": "52:54:00:ad:a7:c5",
+					"ip": "10.1.1.1",
+					"name": "test_host",
+					"module": null,
+					"vlan": null,
+					"options": null,
+					"channel": null,
+					"alias": []
+				}
+			],
+			"route": [
+				{
+					"address": "250.254.1.0",
+					"gateway": "250.254.1.1",
+					"subnet": null,
+					"netmask": "255.255.255.0",
+					"interface": null
+				}
+			]
+		}
+	],
+	"environment": [
+		{
+			"name": "test_environment",
+			"route": [
+				{
+					"address": "250.254.2.0",
+					"gateway": null,
+					"subnet": "private",
+					"netmask": "255.255.255.0",
+					"interface": "eth0"
+				}
+			]
+		}
+	],
+	"os": [
+		{
+			"name": "redhat",
+			"route": [
+				{
+					"address": "250.254.3.0",
+					"gateway": "250.254.3.1",
+					"subnet": null,
+					"netmask": "255.255.255.0",
+					"interface": "eht0"
+				}
+			]
+		}
+	],
+	"appliance": [
+		{
+			"name": "test_appliance",
+			"public": true,
+			"route": [
+				{
+					"address": "250.254.4.0",
+					"gateway": null,
+					"subnet": "private",
+					"netmask": "255.255.255.0",
+					"interface": null
+				}
+			]
+		}
+	]
+}

@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'host'
 
 	def requires(self):
-		return [ 'software', 'network', 'appliance', 'bootaction' ]
+		return [ 'software', 'network', 'appliance', 'bootaction', 'environment' ]
 
 	def run(self, section):
 
@@ -34,7 +34,7 @@ class Plugin(stack.commands.Plugin):
 
 			metadata = h.get('metadata')
 			if metadata:
-				self.owner.stack('set.host.metadata', 
+				self.owner.stack('set.host.metadata',
 						 host, [f'metadata={metadata}'])
 
 			# group
@@ -50,7 +50,7 @@ class Plugin(stack.commands.Plugin):
 					     'vlan'     : i.get('vlan'),
 					     'options'  : i.get('options'),
 					     'channel'  : i.get('channel')}
-				
+
 				self.owner.stack('add.host.interface', host, **params)
 
 				try:

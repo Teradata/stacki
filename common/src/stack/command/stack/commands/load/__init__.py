@@ -104,19 +104,23 @@ class command(stack.commands.Command):
 
 
 	def load_attr(self, attrs, target=None):
+		"""Loads attr information provided into the current scope."""
 		if not attrs:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for a in attrs:
-			params = {'scope' : scope,
-				  'attr'  : a.get('name'),
-				  'value' : a.get('value'),
-				  'shadow': a.get('shadow')}
+		cmd = f'set.{scope}.attr' if scope != 'global' else 'set.attr'
 
-			self.stack('set.attr', target, **params)
+		for attr in attrs:
+			params = {
+				'attr': attr.get('name'),
+				'value': attr.get('value'),
+				'shadow': attr.get('shadow'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def load_controller(self, controllers, target=None):
@@ -165,6 +169,7 @@ class command(stack.commands.Command):
 
 
 	def load_firewall(self, firewalls, target=None):
+		"""Loads firewall information provided into the current scope."""
 		if not firewalls:
 			return
 
@@ -191,21 +196,28 @@ class command(stack.commands.Command):
 
 
 	def load_route(self, routes, target=None):
+		"""Loads route information provided into the current scope."""
 		if not routes:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for r in routes:
-			params = {'scope'    : scope,
-				  'address'  : r.get('address'),
-				  'gateway'  : r.get('gateway'),
-				  'gateway'  : r.get('subnet'),
-				  'netmask'  : r.get('netmask'),
-				  'interface': r.get('interface')}
+		cmd = f'add.{scope}.route' if scope != 'global' else 'add.route'
 
-			self.stack('add.route', target, **params)
+		for route in routes:
+			# In `add route` the gateway parameter is overloaded to either be a subnet(network) name or a gateway.
+			# We need to chose whichever one is set in the dump.
+			gateway = route.get('gateway')
+			params = {
+				'address': route.get('address'),
+				# Specifically not using `is not None` because we also want to reject the empty string.
+				'gateway': gateway if gateway else route.get('subnet'),
+				'netmask': route.get('netmask'),
+				'interface': route.get('interface'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def run(self, params, args):

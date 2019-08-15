@@ -21,6 +21,28 @@
 			"source": "H"
 		}
 	],
+	"environment": [
+		{
+			"environment": "test_environment",
+			"device": "sdc",
+			"partid": null,
+			"mountpoint": "/environment",
+			"size": 34567,
+			"fstype": "ext4",
+			"options": ""
+		}
+	],
+	"os": [
+		{
+			"os": "redhat",
+			"device": "sdd",
+			"partid": null,
+			"mountpoint": "/os",
+			"size": 23456,
+			"fstype": "ext4",
+			"options": ""
+		}
+	],
 	"appliance": [
 		{
 			"appliance": "test_appliance",

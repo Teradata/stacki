@@ -1,0 +1,104 @@
+[
+	{
+		"name": "test_env_1",
+		"partition": [
+			{
+				"device": "sdd",
+				"mountpoint": "/test_env_1",
+				"size": 23456,
+				"fstype": "ext4",
+				"options": ""
+			}
+		],
+		"route": [
+			{
+				"address": "250.254.3.0",
+				"gateway": "250.254.3.1",
+				"subnet": null,
+				"netmask": "255.255.255.0",
+				"interface": "test_env_1"
+			}
+		],
+		"firewall": [
+			{
+				"service": "test_env_1",
+				"network": null,
+				"output_network": null,
+				"chain": "INPUT",
+				"action": "ACCEPT",
+				"protocol": "all",
+				"flags": null,
+				"comment": "OS test firewall rule",
+				"table": "filter",
+				"name": "ACCEPT-OS"
+			}
+		],
+		"controller": [
+			{
+				"enclosure": "1",
+				"adapter": "1",
+				"slot": "2",
+				"raidlevel": "1",
+				"arrayid": "2",
+				"options": "test_env_1"
+			}
+		],
+		"attr": [
+			{
+				"name": "test_env_1_attr",
+				"value": "test_env_1_attr"
+			}
+		]
+	},
+	{
+		"name": "test_env_2",
+		"partition": [
+			{
+				"device": "sdd",
+				"mountpoint": "/test_env_2",
+				"size": 23456,
+				"fstype": "ext4",
+				"options": ""
+			}
+		],
+		"route": [
+			{
+				"address": "250.254.3.0",
+				"gateway": "250.254.3.1",
+				"subnet": null,
+				"netmask": "255.255.255.0",
+				"interface": "test_env_2"
+			}
+		],
+		"firewall": [
+			{
+				"service": "test_env_2",
+				"network": null,
+				"output_network": null,
+				"chain": "INPUT",
+				"action": "ACCEPT",
+				"protocol": "all",
+				"flags": null,
+				"comment": "OS test firewall rule",
+				"table": "filter",
+				"name": "ACCEPT-OS"
+			}
+		],
+		"controller": [
+			{
+				"enclosure": "1",
+				"adapter": "1",
+				"slot": "2",
+				"raidlevel": "1",
+				"arrayid": "2",
+				"options": "test_env_2"
+			}
+		],
+		"attr": [
+			{
+				"name": "test_env_2_attr",
+				"value": "test_env_2_attr"
+			}
+		]
+	}
+]

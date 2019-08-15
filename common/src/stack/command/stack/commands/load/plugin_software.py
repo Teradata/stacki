@@ -12,6 +12,9 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'software'
 
+	def requires(self):
+		return ['os']
+
 	def run(self, section):
 
 		try:
