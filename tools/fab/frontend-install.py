@@ -578,6 +578,7 @@ for iso in extra_isos:
 subprocess.call([stackpath, 'enable', 'pallet', '%'])
 subprocess.call([stackpath, 'enable', 'pallet', '%', 'box=frontend'])
 
+subprocess.call([stackpath, 'sync', 'config'])
 # all done
 banner("Done")
 
