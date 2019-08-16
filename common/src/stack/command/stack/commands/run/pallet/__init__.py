@@ -75,7 +75,7 @@ class Command(
 			# If there aren't any, raise a command error and exit out.
 			if not pallets:
 				for pallet in arg_pallets:
-					raise CommandError(self, f"{pallet.name} is not enabled for the frontend")
+					raise CommandError(self, f"{pallet.name} is not in box {box}")
 		else:
 			# No DB so we use the pallet names from the args
 			pallets = args

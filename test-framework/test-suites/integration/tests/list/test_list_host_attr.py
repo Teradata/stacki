@@ -123,7 +123,7 @@ class TestListHostAttr:
 		# only two hosts, no common attrs here
 		assert len({row['host'] for row in attr_obj}) == 2
 
-		result = host.run('stack list host attr display=common attr=box output-format=json')
+		result = host.run('stack list host attr display=common attr=rank output-format=json')
 		assert result.rc == 0
 		attr_obj = json.loads(result.stdout)
 
