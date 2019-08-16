@@ -68,7 +68,7 @@ class Command(stack.commands.list.host.command,
 					(pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch)
 
 				dirhash = self.directoryhash(path)
-				self.addOutput(host, '%s  %s' % (dirhash, name))
+				self.addOutput(host, '%s  %s' % (dirhash, pallet.name))
 
 			#
 			# calculate MD5s for the carts associated with the host
@@ -95,7 +95,7 @@ class Command(stack.commands.list.host.command,
 				#
 				# strip off the last carriage return
 				#
-				if line[-1] == '\n': 
+				if line[-1] == '\n':
 					hashline = line[:-1]
 				else:
 					hashline = line

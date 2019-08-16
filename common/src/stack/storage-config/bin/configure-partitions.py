@@ -18,7 +18,7 @@ from stack_site import *
 
 sys.path.append('/opt/stack/lib')
 from stacki_storage import *
-from stacki_default_part import rhel 
+from stacki_default_part import rhel
 import stack
 
 ##
@@ -174,8 +174,8 @@ def doPartitions(disk, initialize):
 
 def doOutputExistingLVM(name, fstab):
 
-	p = subprocess.run([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path', '--noheadings', '--separator=:' ], 
-			   stdin=subprocess.PIPE, 
+	p = subprocess.run([ '/sbin/lvs', '-o', 'vg_name,lv_name,dm_path', '--noheadings', '--separator=:' ],
+			   stdin=subprocess.PIPE,
 			   stdout=subprocess.PIPE,
 			   stderr=subprocess.PIPE)
 
@@ -201,7 +201,7 @@ def doOutputExistingLVM(name, fstab):
 							line += [ '--noformat' ]
 
 						print('%s' % ' '.join(line))
-		
+
 
 def doOutputLVM(device, partitions):
 	for p in partitions:
@@ -230,7 +230,7 @@ def isNewRaid(disks, partitions, options):
 					return 1
 
 	return 0
-				
+
 
 def isNewLVM(disks, partitions, mountpoint):
 	for p in partitions:
@@ -246,13 +246,13 @@ def isNewLVM(disks, partitions, mountpoint):
 					return 1
 
 			else:
-				for disk in disks: 
+				for disk in disks:
 					if disk['device'] == p['device'] and \
-							disk['nuke']:	
+							disk['nuke']:
 						return 1
 
 	return 0
-	
+
 
 def doLVM(disks, partitions, fstab):
 	#
@@ -312,7 +312,7 @@ def doLVM(disks, partitions, fstab):
 def getMDInfo(device):
 
 	p = subprocess.run([ 'mdadm', '--detail', '--export', '/dev/%s' % device ],
-			   stdin=subprocess.PIPE, 
+			   stdin=subprocess.PIPE,
 			   stdout=subprocess.PIPE,
 			   stderr=subprocess.PIPE)
 
@@ -331,7 +331,7 @@ def doRAID(csv_partitions, host_partitions):
 	# dictionary:
 	#
 	#	1) two or more physical partitions
-	#	2) a 'device' field with the format 'md*' 
+	#	2) a 'device' field with the format 'md*'
 	#
 	# which look like:
 	#
@@ -363,7 +363,7 @@ def doRAID(csv_partitions, host_partitions):
 
 			#
 			# don't reconnect this software RAID if there is
-			# no mountpoint -- that is case when the software RAID 
+			# no mountpoint -- that is case when the software RAID
 			# is used by an LVM volume
 			#
 			if not p['mountpoint']:
@@ -439,7 +439,7 @@ disks = getHostDisks(nukedisks)
 #
 
 #
-# first try to find /etc/fstab on all the physical partitions 
+# first try to find /etc/fstab on all the physical partitions
 #
 devices = getDeviceList(disks)
 
@@ -466,8 +466,6 @@ if not csv_partitions:
 		default = 'default'
 
 	ostype = 'rhel7'
-	if release == 'redhat6':
-		ostype = 'rhel6'
 
 	var = '%s_%s' % (ostype, default)
 	if hasattr(rhel, var):
@@ -500,7 +498,7 @@ if not csv_partitions:
 				'device': bootdisk,
 				'mountpoint': m,
 				'size': s,
-				'fstype': f, 
+				'fstype': f,
 				'options': ''
 			})
 

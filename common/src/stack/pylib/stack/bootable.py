@@ -1,5 +1,5 @@
 #! /opt/stack/bin/python
-# 
+#
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
@@ -48,7 +48,7 @@ class Bootable:
 
 			self.filetree[name] = stack.file.Tree(palletpath)
 
-		
+
 	def applyRPM(self, rpm, root, flags=''):
 		print('applyRPM', rpm.getBaseName(), root)
 
@@ -152,16 +152,6 @@ class Bootable:
 
 		if not os.path.exists(imagesdir):
 			os.makedirs(imagesdir)
-
-		if stack.release == 'redhat6':
-			#
-			# install.img
-			#
-			fileold = os.path.join(os.path.join(images,
-				'install.img'))
-			filenew = os.path.join(imagesdir, 'install.img')
-			os.rename(fileold, filenew)
-			os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		if stack.release == 'redhat7':
 			#

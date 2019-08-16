@@ -7,40 +7,6 @@
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
-<stack:file stack:name="/tmp/dump-bootaction.json" stack:cond="release == 'redhat6'">
-{
-        "bootaction": [
-                {
-                        "name":    "default",
-                        "type":    "install",
-                        "kernel":  "vmlinuz-&version;-&release;-&arch;",
-                        "ramdisk": "initrd.img-&version;-&release;-&arch;",
-			"args":    "ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm inst.text"
-                },
-                {
-                        "name":    "no-parallel-format",
-                        "type":    "install",
-                        "kernel":  "vmlinuz-&version;-&release;-&arch;",
-                        "ramdisk": "initrd.img-&version;-&release;-&arch;",
-			"args":    "ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 ksdevice=bootif nonm no-parallel-format inst.text"
-		},
-                {
-                        "name":    "headless",
-                        "type":    "install",
-                        "kernel":  "vmlinuz-&version;-&release;-&arch;",
-                        "ramdisk": "initrd.img-&version;-&release;-&arch;",
-			"args":    "ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 headless vnc ksdevice=bootif nonm inst.text"
-                },
-                {
-                        "name":    "rescue",
-                        "type":    "install",
-                        "kernel":  "vmlinuz-&version;-&release;-&arch;",
-                        "ramdisk": "initrd.img-&version;-&release;-&arch;",
-			"args":    "ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi ramdisk_size=150000 stack:lang= devfs=nomount pxe kssendmac selinux=0 noipv6 rescue ksdevice=bootif nonm inst.text"
-                }
-	]
-}
-</stack:file>
 <stack:file stack:name="/tmp/dump-bootaction.json" stack:cond="release == 'redhat7'">
 {
         "bootaction": [
