@@ -151,7 +151,7 @@ with open('/tmp/site.json', 'w') as file:
 	"software": {
                 "box": [ 
 			{
-				"name": "frontend",
+				"name": "frontend"
                         },
 			{
 				"name": "default"
@@ -161,7 +161,6 @@ with open('/tmp/site.json', 'w') as file:
         "appliance": [
                 {
                         "name": "frontend",
-			"box": "frontend",
                         "public": false,
                         "attr": [ 
                                 { "name": "node",          "value": "server" },

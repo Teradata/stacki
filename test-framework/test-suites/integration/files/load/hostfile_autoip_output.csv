@@ -1,4 +1,4 @@
 NAME,INTERFACE HOSTNAME,DEFAULT,APPLIANCE,RACK,RANK,IP,MAC,INTERFACE,NETWORK,CHANNEL,OPTIONS,VLAN,INSTALLACTION,OSACTION,GROUPS,BOX,COMMENT
-frontend-0-0,frontend-0-0,True,frontend,0,0,FRONT_VARIABLE_IP_ADDRESS,FRONT_VARIABLE_MAC_ADDRESS,FRONT_VARIABLE_ETH,private,,,,default,default,,default,
+frontend-0-0,frontend-0-0,True,frontend,0,0,FRONT_VARIABLE_IP_ADDRESS,FRONT_VARIABLE_MAC_ADDRESS,FRONT_VARIABLE_ETH,private,,,,default,default,,frontend,
 sd-stacki-300,sd-stacki-300,True,backend,1,300,10.1.1.6,52:54:00:14:27:fd,eth1,autoip,,,,default,default,,default,
 sd-stacki-301,sd-stacki-301,True,backend,1,301,10.1.1.5,52:54:00:14:27:fe,eth1,autoip,,,,default,default,,default,

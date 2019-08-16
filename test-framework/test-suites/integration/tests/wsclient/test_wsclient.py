@@ -22,7 +22,7 @@ class TestWSClient:
 				"rank": "0",
 				"appliance": "frontend",
 				"os": host_os,
-				"box": "default",
+				"box": "frontend",
 				"environment": None,
 				"osaction": "default",
 				"installaction": "default",
