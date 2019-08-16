@@ -175,7 +175,7 @@ class RPMBaseFile(File):
 		if rc == 0:
 			self.list = o.decode().split()
 		else:
-			print ("Skipping %s - %s" % (file, e.decode()))
+			print("Skipping %s - %s" % (file, e.decode()))
 
 	def getBaseName(self):
 		return self.list[0]
