@@ -31,11 +31,11 @@ timezone --utc &Kickstart_Timezone;
 
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 if '&boot_device;' != '' and '&release;' == 'redhat6':
-	print "bootloader --location=none"
+	print("bootloader --location=none")
 elif '&boot_device;' != '' and '&release;' == 'redhat7':
-	print "bootloader --location=mbr --boot-drive=&boot_device;"
+	print("bootloader --location=mbr --boot-drive=&boot_device;")
 else:
-	print "bootloader --location=mbr"
+	print("bootloader --location=mbr")
 </stack:eval>
 
 </stack:native>
