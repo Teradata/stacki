@@ -1,11 +1,11 @@
 #! /bin/sh
-# 
+#
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-  
+
 if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`
 elif [ -f /etc/SuSE-release ]; then
@@ -15,9 +15,6 @@ else
 fi
 
 case $RELEASE in
-	*release?6.*)
-		echo redhat6
-		;;
 	*release?7.*)
 		echo redhat7
 		;;

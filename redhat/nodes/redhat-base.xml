@@ -30,9 +30,7 @@ keyboard &Kickstart_Keyboard;
 timezone --utc &Kickstart_Timezone;
 
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
-if '&boot_device;' != '' and '&release;' == 'redhat6':
-	print("bootloader --location=none")
-elif '&boot_device;' != '' and '&release;' == 'redhat7':
+if '&boot_device;' != '' and '&release;' == 'redhat7':
 	print("bootloader --location=mbr --boot-drive=&boot_device;")
 else:
 	print("bootloader --location=mbr")
@@ -86,4 +84,4 @@ mv /tmp/ks-script* /var/log/stacki/ks
 updatedb
 </stack:script>
 
-</stack:stack> 
+</stack:stack>

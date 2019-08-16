@@ -53,13 +53,6 @@ f.write(output)
 f.close()
 </stack:script>
 
-<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
-<stack:file stack:name="/etc/man.config" stack:mode="append">
-MANPATH /opt/stack/man
-MANPATH /opt/stack/share/man
-</stack:file>
-</stack:script>
-
 <stack:script stack:cond="release == 'redhat7' or os == 'sles'" stack:stage="install-post">
 <stack:file stack:name="/etc/man_db.conf" stack:mode="append">
 MANDATORY_MANPATH /opt/stack/man
@@ -68,5 +61,5 @@ MANDATORY_MANPATH /opt/stack/share/man
 
 </stack:script>
 
-</stack:stack> 
+</stack:stack>
 

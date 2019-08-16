@@ -19,8 +19,12 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:script stack:cond="sync.ssh.authkey" stack:stage="install-post">
 <!-- propagate root's public ssh key -->
 <stack:file stack:name="/root/.ssh/authorized_keys">
+<!-- only output the public key if the file exists -->
 <stack:eval>
-cat /root/.ssh/id_rsa.pub
+file=/root/.ssh/id_rsa.pub
+if [ -f "$file" ]; then
+	cat "$file"
+fi
 </stack:eval>
 </stack:file>
 
@@ -57,4 +61,4 @@ EOF
 </stack:script>
 
 
-</stack:stack> 
+</stack:stack>

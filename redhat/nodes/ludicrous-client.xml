@@ -1,7 +1,7 @@
 <stack:stack>
 
 	<stack:description>
-	 Ludicrous client service for tracking packages  
+	 Ludicrous client service for tracking packages
 	</stack:description>
 
 	<stack:copyright>
@@ -13,16 +13,13 @@
 <stack:package>ludicrous-speed</stack:package>
 
 <stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
-/usr/bin/systemctl enable ludicrous-client 
+/usr/bin/systemctl enable ludicrous-client
 </stack:script>
 
-<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
-/sbin/chkconfig ludicrous-client on
-</stack:script>
 <!-- Change Stacki.repo to localhost -->
 <stack:script stack:stage="install-post">
 <stack:file stack:name="/tmp/stack.conf">
 tracker = &Kickstart_PrivateAddress;:3825
 </stack:file>
 </stack:script>
-</stack:stack> 
+</stack:stack>

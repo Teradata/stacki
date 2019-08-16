@@ -26,7 +26,6 @@ text
 
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 import os
-import urlparse
 import stack.roll
 
 g = stack.roll.Generator()
@@ -146,5 +145,5 @@ git init /export/site-pallet/restore
 touch /root/.gitconfig
 </stack:script>
 
-</stack:stack> 
+</stack:stack>
 

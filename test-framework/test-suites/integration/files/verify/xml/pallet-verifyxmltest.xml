@@ -50,45 +50,6 @@ UseDNS no
 
 </stack:script>
 
-
-<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
-
-key="
-<stack:eval>
-/opt/stack/sbin/read-ssh-private-key RSA1 2> /dev/null | python -c '
-import base64 
-import sys 
-base64.encode(sys.stdin, sys.stdout)'
-</stack:eval>"
-
-echo $key | python -c '
-import base64
-import sys
-base64.decode(sys.stdin, sys.stdout)' > /etc/ssh/ssh_host_key
-
-chmod 0400 /etc/ssh/ssh_host_key
-
-<stack:file stack:name="/etc/ssh/ssh_host_key.pub" stack:perms="0444">
-<stack:eval>
-cat /etc/ssh/ssh_host_key.pub 2> /dev/null
-</stack:eval>
-</stack:file>
-
-<stack:file stack:name="/etc/ssh/ssh_host_dsa_key" stack:perms="0400">
-<stack:eval>
-/opt/stack/sbin/read-ssh-private-key DSA 2> /dev/null
-</stack:eval>
-</stack:file>
-
-<stack:file stack:name="/etc/ssh/ssh_host_dsa_key.pub" stack:perms="0444">
-<stack:eval>
-cat /etc/ssh/ssh_host_dsa_key.pub 2> /dev/null
-</stack:eval>
-</stack:file>
-
-</stack:script>
-
-
 <stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 
 <stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400">

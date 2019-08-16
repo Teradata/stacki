@@ -47,13 +47,8 @@ gpgcheck=0
 </stack:file>
 </stack:script>
 
-
-<stack:script stack:cond="release == 'redhat6'" stack:stage="install-post">
-/sbin/chkconfig ipmi on
-</stack:script>
-
 <stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 systemctl enable ipmi
 </stack:script>
 
-</stack:stack> 
+</stack:stack>
