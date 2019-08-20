@@ -58,7 +58,6 @@ class Plugin(stack.commands.Plugin):
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateKickstartHost', ip])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateAddress', ip])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateHostname', hostname])
-						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateBroadcast', str(network.broadcast_address)])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateDNSDomain', zone])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateNetwork', address])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PrivateNetmask', netmask])
@@ -67,7 +66,6 @@ class Plugin(stack.commands.Plugin):
 					for target in targets:
 						output_rows.append([target, 'global', 'const', 'Kickstart_PublicAddress', ip])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PublicHostname', f'{hostname}.{zone}'])
-						output_rows.append([target, 'global', 'const', 'Kickstart_PublicBroadcast', str(network.broadcast_address)])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PublicDNSDomain', zone])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PublicNetwork', address])
 						output_rows.append([target, 'global', 'const', 'Kickstart_PublicNetmask', netmask])

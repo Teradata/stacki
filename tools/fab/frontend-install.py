@@ -30,7 +30,6 @@ Kickstart_Keyboard:us
 Kickstart_Lang:en_US
 Kickstart_Langsupport:en_US
 Kickstart_PrivateAddress:{NETWORK_ADDRESS}
-Kickstart_PrivateBroadcast:{BROADCAST_ADDRESS}
 Kickstart_PrivateDNSDomain:{DOMAIN}
 Kickstart_PrivateDNSServers:{DNS_SERVERS}
 Kickstart_PrivateEthernet:{MAC_ADDRESS}
@@ -38,7 +37,6 @@ Kickstart_PrivateGateway:{GATEWAY}
 Kickstart_PrivateHostname:{HOSTNAME}
 Kickstart_PrivateInterface:{NETWORK_INTERFACE}
 Kickstart_PrivateKickstartHost:{NETWORK_ADDRESS}
-Kickstart_PrivateNTPHost:{NETWORK_ADDRESS}
 Kickstart_PrivateNetmask:{NETMASK}
 Kickstart_PrivateNetmaskCIDR:{NETMASK_CIDR}
 Kickstart_PrivateNetwork:{NETWORK}
