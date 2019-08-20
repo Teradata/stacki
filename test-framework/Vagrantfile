@@ -23,7 +23,8 @@ else
 end
 
 # Make sure Ansible can find our roles
-ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
+ENV['TEST_FRAMEWORK_ROOT'] = File.dirname(__FILE__)
+ENV['ANSIBLE_ROLES_PATH'] = ENV['TEST_FRAMEWORK_ROOT'] + "/provisioning/roles"
 
 # Ansible also needs the path to our STACKI ISO in the ENV
 ENV['STACKI_ISO'] = STACKI_ISO
