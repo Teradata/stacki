@@ -33,7 +33,6 @@ class Attr:
 	Kickstart_PublicNTPHost = "pool.ntp.org"
 
 	Kickstart_PrivateAddress = ""
-	Kickstart_PrivateBroadcast = ""
 	Kickstart_PrivateDNSDomain = "local"
 	Kickstart_PrivateDNSServers = ""
 	Kickstart_PrivateEthernet = ""
@@ -41,11 +40,9 @@ class Attr:
 	Kickstart_PrivateHostname = ""
 	Kickstart_PrivateInterface = ""
 	Kickstart_PrivateKickstartHost = ""
-	Kickstart_PrivateNTPHost = ""
 	Kickstart_PrivateNetmask = ""
 	Kickstart_PrivateNetmaskCIDR = ""
 	Kickstart_PrivateNetwork = ""
-	Kickstart_PrivateNTPHost = ""
 
 	Kickstart_PrivateRootPassword = ""
 
@@ -239,10 +236,6 @@ class Data:
 			#calculate other attributes
 			self.data.Kickstart_PrivateKickstartHost = \
 				self.data.Kickstart_PrivateAddress
-			self.data.Kickstart_PrivateNTPHost = \
-				self.data.Kickstart_PrivateAddress
-			#self.data.Kickstart_PrivateHostname =
-			#	self.data.Kickstart_PrivateHostname.split(".")[0]
 
 			#calculate public dns domain
 			n = self.data.Info_FQDN
@@ -263,7 +256,6 @@ class Data:
 					strict=False)
 				self.data.Kickstart_PrivateGateway = str(ipaddress.ip_address(str(self.data.Kickstart_PrivateGateway)))
 				self.data.Kickstart_PrivateNetwork = str(ipnetwork.network_address)
-				self.data.Kickstart_PrivateBroadcast = str(ipnetwork.broadcast_address)
 				self.data.Kickstart_PrivateNetmaskCIDR = str(ipnetwork.prefixlen)
 				self.data.Kickstart_PrivateEthernet = self.data.devices[
 					self.data.Kickstart_PrivateInterface]

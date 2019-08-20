@@ -8,12 +8,6 @@
         {
                 "scope": "global",
                 "type": "const",
-                "attr": "Kickstart_PrivateBroadcast",
-                "value": "192.168.0.255"
-        },
-        {
-                "scope": "global",
-                "type": "const",
                 "attr": "Kickstart_PrivateDNSDomain",
                 "value": ""
         },
@@ -52,12 +46,6 @@
                 "type": "const",
                 "attr": "Kickstart_PublicAddress",
                 "value": "192.168.100.2"
-        },
-        {
-                "scope": "global",
-                "type": "const",
-                "attr": "Kickstart_PublicBroadcast",
-                "value": "192.168.100.255"
         },
         {
                 "scope": "global",

@@ -8,7 +8,6 @@ Kickstart_Keyboard:us
 Kickstart_Lang:en_US
 Kickstart_Langsupport:en_US
 Kickstart_PrivateAddress:192.0.2.2
-Kickstart_PrivateBroadcast:192.0.2.255
 Kickstart_PrivateDNSDomain:example.com
 Kickstart_PrivateDNSServers:1.1.1.1
 Kickstart_PrivateEthernet:
@@ -16,7 +15,6 @@ Kickstart_PrivateGateway:192.0.2.1
 Kickstart_PrivateHostname:test
 Kickstart_PrivateInterface:eth1
 Kickstart_PrivateKickstartHost:192.0.2.2
-Kickstart_PrivateNTPHost:192.0.2.2
 Kickstart_PrivateNetmask:255.255.255.0
 Kickstart_PrivateNetmaskCIDR:24
 Kickstart_PrivateNetwork:192.0.2.0
