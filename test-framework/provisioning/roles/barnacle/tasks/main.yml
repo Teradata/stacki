@@ -10,15 +10,14 @@
       path: /vagrant
       state: directory
 
-  - name: Fetch a random file to use during rndc-confgen
-    get_url:
-      url: https://raw.githubusercontent.com/Teradata/stacki/develop/logo.png
+  - name: Copy logo.png to use during rndc-confgen
+    copy:
+      src: "{{ item }}"
       dest: /vagrant/randomfile
       mode: 0644
-    register: get_url_result
-    until: get_url_result is succeeded
-    retries: 6
-    delay: 10
+    with_first_found:
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../logo.png"
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../../logo.png" # For Jenkins
     when: lookup('env','GIT_BRANCH') is match("(feature|bugfix)/.*")
 
   - name: Setup /etc/host to a known good state
@@ -29,15 +28,14 @@
         192.168.0.2     frontend-0-0  frontend-0-0
       mode: 0644
 
-  - name: Download frontend-install.py
-    get_url:
-      url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
+  - name: Copy frontend-install.py
+    copy:
+      src: "{{ item }}"
       dest: /root/
       mode: 0744
-    register: get_url_result
-    until: get_url_result is succeeded
-    retries: 6
-    delay: 10
+    with_first_found:
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../tools/fab/frontend-install.py"
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../../tools/fab/frontend-install.py" # For Jenkins
 
   - name: Barnacle the frontend
     shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"
