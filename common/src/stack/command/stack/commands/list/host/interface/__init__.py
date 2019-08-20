@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from collections import defaultdict
 import stack.commands
 import re
 
@@ -36,13 +37,16 @@ class Command(stack.commands.list.host.command):
 
 	def run(self, params, args):
 
-		expanded, = self.fillParams([ ('expanded', 'false') ])
+		expanded, = self.fillParams([ ('expanded', False) ])
 		expanded = self.str2bool(expanded)
 
 		networks = {}
+		aliases  = defaultdict(lambda: defaultdict(list)) # host->interface->[alias ...]
 		if expanded:
 			for row in self.call('list.network'):
 				networks[row['network']] = row
+			for row in self.call('list.host.interface.alias'):
+				aliases[row['host']][row['interface']].append(row['alias'])
 			
 		reg = re.compile('vlan.*')
 
@@ -79,6 +83,11 @@ class Command(stack.commands.list.host.command):
 			     vlan,
 			     options,
 			     channel) in data[host]:
+
+				try:
+					alias_list = aliases[host][interface]
+				except KeyError:
+					alias_list = []
 
 				if interface and reg.match(interface):
 					# If device name matches vlan*
@@ -134,7 +143,8 @@ class Command(stack.commands.list.host.command):
 						module,
 						vlan,
 						options,
-						channel
+						channel,
+						' '.join(alias_list)
 					))
 
 		if not expanded:
@@ -166,6 +176,7 @@ class Command(stack.commands.list.host.command):
 						'module',
 						'vlan',
 						'options',
-						'channel'
+						'channel',
+					        'aliases'
 					])
 

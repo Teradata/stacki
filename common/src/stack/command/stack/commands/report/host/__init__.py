@@ -10,12 +10,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from collections import defaultdict
+from collections import OrderedDict
 import stack.commands
 from stack.commands import Warn
 import stack.text
 import os.path
 import shlex
-
 
 class command(stack.commands.HostArgumentProcessor,
 	      stack.commands.report.command):
@@ -33,133 +34,107 @@ class Command(command):
 	"""
 
 	def run(self, param, args):
-		text = []
-		self.beginOutput()
-		text.append('<stack:file stack:name="/etc/hosts">')
-		text.append(stack.text.DoNotEdit())
-		text.append('#  Site additions go in /etc/hosts.local\n')
-		text.append('127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
-		zones = {}
-		aliases = {}
+		text = ['<stack:file stack:name="/etc/hosts">',
+			stack.text.DoNotEdit(),
+			'# Site additions go in /etc/hosts.local\n']
 
-		# Populate the zone map : network->zone
-		for row in self.call('list.network'):
-			zones[row['network']] = row['zone']
+		hosts    = defaultdict(list) # hosts->[interface ...]
+		networks = defaultdict(list) # network->[interface ...]
 
-		# Populate the host -> interface -> aliases map
-		for row in self.call('list.host.interface.alias'):
-			host = row['host']
-			interface = row['interface']
-			if host not in aliases:
-				aliases[host] = {}
-			if interface not in aliases[host]:
-				aliases[host][interface] = []
-			aliases[host][interface].append(row['alias'])
+		for interface in self.call('list.host.interface', [ 'expanded=true'] ):
+			host    = interface['host']
+			ip      = interface['ip']
+			iface   = interface['interface']
+			network = interface['network']
 
-		hosts = {}
-
-		# Get a list of all interfaces and populate the host map
-		# host -> interfaces.
-		# {"hostname":[
-		#	{"ip":"1.2.3.4", "interface":"eth0", "zone":"domain.com","default":True/None, "shortname":True/False},
-		#	{"ip":"2.3.4.5", "interface":"eth1", "zone":"domain2.com","default":True/None, "shortname":True/False},
-		#	]}
-		interfaces = self.call('list.host.interface')
-		for row in interfaces:
-			if not row['ip']:
-				continue
-			if not row['network']:
-				Warn(f'WARNING: skipping interface "{row["interface"]}" on host "{row["host"]}" - '
-				      'interface has an IP but no network')
+			if ip is None:
+				Warn(f'{host} interface {iface} missing IP address')
 				continue
 
-			# Each interface dict contains interface name,
-			# zone, whether the interface is the default one,
-			# and whether the shortname should be assigned
-			# to that interface
-			host = row['host']
-			if host not in hosts:
-				hosts[host] = []
-			h = {}
-			h['ip'] = row['ip']
-			h['name'] = row['name']
-			h['interface'] = row['interface']
-			h['zone'] = zones[row['network']]
-			h['default'] = row['default']
-			h['shortname'] = False
-			if 'options' in row and row['options']:
-				options = shlex.split(row['options'])
-				for option in options:
-					if option.strip() == 'shortname':
-						h['shortname']= True
+			if network is None:
+				Warn(f'{host} interface {iface} not on a network')
+				continue
 
-			if self.validateHostInterface(host, h, aliases):
-				hosts[host].append(h)
+			if interface['aliases']:
+				interface['aliases'] = interface['aliases'].split()
+			else:
+				interface['aliases'] = []
 
-		processed = {}
+			hosts[host].append(interface)
+			networks[network].append(interface)
 
-		for host in hosts:
-			# Check if any interface for the host has
-			# shortname set to true
-			shortname_exists = False
-			l = list(filter(lambda x: x['shortname'], hosts[host]))
-			if len(l):
-				shortname_exists = True
 
-			# For each interface in the host, get ip, zone, and names,
-			# default, and shortname info
-			for row in hosts[host]:
-				ip = row['ip']
-				zone = row['zone']
-				default = row['default']
-				interface = row['interface']
-				shortname = row['shortname']
-				names = []
+		# Q: Which host interface should get the hostname entry?
+		#
+		# default - The default interface gets both the default route
+		# and gets the hostname on its IP. Further if there is only one
+		# NIC it might not be set and has to be inferred.
+		#
+		# shortname - The shortname option overrides the default
+		# interface and grabs the hostname for its IP.
 
-				# Get the FQDN
+		for host, interfaces in hosts.items():
+			if len(interfaces) == 1: # might not be set
+				interfaces[0]['default'] = True
+			default   = None
+			shortname = None
+			for interface in interfaces:
+				if interface['default'] is True:
+					default = interface
+				if interface['options'] is not None:
+					for option in shlex.split(interface['options']):
+						if option.strip() == 'shortname':
+							shortname = interface
+			if shortname:	  # claim the default
+				if default:
+					default['default'] = False
+				shortname['default'] = True
+
+
+
+		networks[''] = [{
+			'ip'       : '127.0.0.1',
+			'zone'     : 'localdomain',
+			'default'  : True,
+			'interface': 'lo',
+			'host'     : 'localhost',
+			'name'     : None,
+			'aliases'  : []
+			}]
+
+		for network in sorted(networks):
+			text.append('')
+			for i in networks[network]:
+				ip        = i['ip']
+				zone      = i['zone']
+				default   = i['default']
+				interface = i['interface']
+				name      = i['name']
+				host      = i['host']
+				aliases   = i['aliases']
+
+				# Abusing this a bit to behave like an ordered
+				# set (which doesn't exist). The 'True'
+				# assignment means nothing, only tracking keys.
+				names = OrderedDict()
+
 				if zone:
-					names.append('%s.%s' % (host, zone))
+					names[f'{host}.{zone}'] = True
+					if name:
+						names[f'{name}.{zone}'] = True
 
-					if row['name']:
-						name_fqdn = f"{row['name']}.{zone}"
-						if name_fqdn not in names:
-							names.append(name_fqdn)
+				if default:
+					names[host] = True
 
-				# If shortname for an interface is set to true,
-				# set this interface to have the shortname
-				if shortname_exists and shortname:
-					names.append(host)
+				if name:
+					names[name] = True
 
-					if row['name'] and row['name'] not in names:
-						names.append(row['name'])
+				for alias in aliases:
+					names[alias] = True
 
-				# If shortname is not set for any interface
-				# set the default interface to have the shortname
-				if default and not shortname_exists:
-					names.append(host)
-
-					if row['name'] and row['name'] not in names:
-						names.append(row['name'])
-
-				# Add any interface specific aliases
-				if host in aliases:
-					if interface in aliases[host]:
-						for alias in aliases[host].get(interface):
-							names.append(alias)
-
-				# check if this is duplicate entry:
-				if ip in processed:
-					if processed[ip]['names'] == ' '.join(names):
-						continue
-
-				# Write it all
 				text.append('%s\t%s' % (ip, ' '.join(names)))
 
-				if ip not in processed:
-					processed[ip] = {}
-				processed[ip]['names'] = '\t'.join(names)
 
-		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
 		if os.path.exists(hostlocal):
 			f = open(hostlocal, 'r')
@@ -169,26 +144,7 @@ class Command(command):
 			f.close()
 
 		text.append('</stack:file>')
+		self.beginOutput()
 		self.addOutput(None, '\n'.join(text))
 		self.endOutput(padChar='', trimOwner=True)
 
-
-
-	def validateHostInterface(self, hostname, hostinfo ,aliases):
-	# Checks if a host interface has atleast one of the following:
-		#       has an aliases
-		if hostname in aliases and hostinfo['interface'] in aliases[hostname]:
-			return True
-		
-		#       is on a network with a zone
-		if hostinfo['zone']:
-			return True
-		
-		#       has a shortname option
-		if hostinfo['shortname']:
-			return True
-
-		#       is the default interface for that host
-		if hostinfo['default']:
-			return True
-		return False

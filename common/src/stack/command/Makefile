@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
