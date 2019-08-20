@@ -19,7 +19,7 @@
     until: get_url_result is succeeded
     retries: 6
     delay: 10
-    when: lookup('pipe','git symbolic-ref --short HEAD') is match("(feature|bugfix)/.*")
+    when: lookup('env','GIT_BRANCH') is match("(feature|bugfix)/.*")
 
   - name: Setup /etc/host to a known good state
     copy:
@@ -31,7 +31,7 @@
 
   - name: Download frontend-install.py
     get_url:
-      url: https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('pipe','git symbolic-ref --short HEAD') }}/tools/fab/frontend-install.py
+      url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
       dest: /root/
       mode: 0744
     register: get_url_result
