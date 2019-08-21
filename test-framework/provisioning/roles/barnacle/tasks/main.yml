@@ -17,7 +17,7 @@
       mode: 0644
     with_first_found:
         - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../logo.png"
-        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../../logo.png" # For Jenkins
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../stacki/logo.png" # For Jenkins
     when: lookup('env','GIT_BRANCH') is match("(feature|bugfix)/.*")
 
   - name: Setup /etc/host to a known good state
@@ -35,7 +35,7 @@
       mode: 0744
     with_first_found:
         - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../tools/fab/frontend-install.py"
-        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../../tools/fab/frontend-install.py" # For Jenkins
+        - "{{ lookup('env','TEST_FRAMEWORK_ROOT') }}/../stacki/tools/fab/frontend-install.py" # For Jenkins
 
   - name: Barnacle the frontend
     shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"

@@ -166,6 +166,12 @@ do
     fi
 
     vagrant destroy -f
+
+    if [[ $ATTEMPT -eq 3 ]]
+    then
+        echo "Error: failed to setup frontend"
+        exit 1
+    fi
 done
 
 # Run the set-up.d scripts

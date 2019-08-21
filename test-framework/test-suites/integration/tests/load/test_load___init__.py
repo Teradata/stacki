@@ -46,7 +46,7 @@ def get_partitions_by_scope(dump_json, scope = "global"):
 
 	return partitions_by_scope
 
-def test_load_partition_processing(host, test_file):
+def test_load_partition_processing(host, test_file, revert_etc):
 	"""Test that loading partition information at the various scopes works as expected."""
 	# load up the JSON so we can parse out what the partitioning should be
 	file_path = Path(test_file('load/json/partitions.json')).resolve(strict = True)
