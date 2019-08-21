@@ -29,6 +29,14 @@ ENV['ANSIBLE_ROLES_PATH'] = ENV['TEST_FRAMEWORK_ROOT'] + "/provisioning/roles"
 # Ansible also needs the path to our STACKI ISO in the ENV
 ENV['STACKI_ISO'] = STACKI_ISO
 
+# Try to set the GIT_BRANCH environment variable, if needed
+if ENV['GIT_BRANCH'].nil?
+  branch = `git symbolic-ref --short HEAD 2>/dev/null`.chomp
+  if $?.success?
+    ENV['GIT_BRANCH'] = branch
+  end
+end
+
 Vagrant.configure("2") do |config|
   config.vm.define "frontend", autostart: false do |config|
     if STACKI_ISO =~  /-sles12\./
