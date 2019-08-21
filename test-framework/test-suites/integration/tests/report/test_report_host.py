@@ -24,16 +24,14 @@ class TestReportHost:
 		result = host.run('stack sync host')
 		assert result.rc == 0
 
-		hostsFile = open('/etc/hosts','r')
-		contents = str(hostsFile.read())
+		with open('/etc/hosts','r') as hostsFile:
+			contents = str(hostsFile.read())
 
 		regexExp = re.compile(r'10\.10\.11\.11\s+backend-1-0')
 		assert bool(not regexExp.search(contents))
 
 		regexExp = re.compile(r'10\.10\.11\.15\s+backend-1-1')
 		assert bool(regexExp.search(contents))
-
-		hostsFile.close()
 
 	def test_with_shortname_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.10.0.0 mask=255.255.255.0 zone=')
@@ -60,16 +58,14 @@ class TestReportHost:
 		result = host.run('stack sync host')
 		assert result.rc == 0
 
-		hostsFile = open('/etc/hosts','r')
-		contents = str(hostsFile.read())
+		with open('/etc/hosts','r') as hostsFile:
+			contents = str(hostsFile.read())
 
 		regexExp = re.compile(r'10\.10\.11\.11\s+backend-2-0')
 		assert bool(not regexExp.search(contents))
 
 		regexExp = re.compile(r'10\.10\.11\.15\s+backend-2-2')
 		assert bool(regexExp.search(contents))
-
-		hostsFile.close()
 
 	def test_with_network_zone_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.20.0.0 mask=255.255.255.0 zone=')
@@ -95,16 +91,14 @@ class TestReportHost:
 		result = host.run('stack sync host')
 		assert result.rc == 0
 
-		hostsFile = open('/etc/hosts','r')
-		contents = str(hostsFile.read())
+		with open('/etc/hosts','r') as hostsFile:
+			contents = str(hostsFile.read())
 
 		regexExp = re.compile(r'10\.10\.11\.11\s+backend-3-0')
 		assert bool(not regexExp.search(contents))
 
 		regexExp = re.compile(r'10\.10\.11\.15\s+backend-3-3\.zone')
 		assert bool(regexExp.search(contents))
-
-		hostsFile.close()
 
 	def test_with_alias_behaviour(self, host, revert_etc):
 		result = host.run('stack add network test address=10.10.0.0 mask=255.255.255.0 zone=')
@@ -131,16 +125,14 @@ class TestReportHost:
 		result = host.run('stack sync host')
 		assert result.rc == 0
 
-		hostsFile = open('/etc/hosts','r')
-		contents = str(hostsFile.read())
+		with open('/etc/hosts','r') as hostsFile:
+			contents = str(hostsFile.read())
 
 		regexExp = re.compile(r'10\.10\.11\.11\s+backend-4-0')
 		assert bool(not regexExp.search(contents))
 
 		regexExp = re.compile(r'10\.10\.11\.15\s+BACKEND4')
 		assert bool(regexExp.search(contents))
-
-		hostsFile.close()
 
 	def test_exclude_interface_ip_no_network(self, host, add_host_with_interface):
 		# set interface IP, but not network
