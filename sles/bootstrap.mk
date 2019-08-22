@@ -8,7 +8,7 @@ PKGLIST = apache2 squashfs apache2-devel createrepo cdrkit-cdrtools-compat
 PATLIST = 32bit Basis-Devel
 
 ifeq ($(RELEASE),sles12)
-PKGLIST += rpm-build libzip2
+PKGLIST += rpm-build libzip2 libvirt-devel
 PATLIST += SDK-C-C++
 endif
 

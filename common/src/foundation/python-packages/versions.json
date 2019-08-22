@@ -29,6 +29,7 @@
 	"jmespath": "0.9.4",
 	"json-spec": "0.10.1",
 	"jsoncomment": "0.4.2",
+	"libvirt-python": "5.7.0",
 	"lockfile": "0.12.2",
 	"mccabe": "0.6.1",
 	"mod-wsgi": "4.6.8",
