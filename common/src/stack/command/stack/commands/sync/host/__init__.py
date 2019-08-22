@@ -65,7 +65,5 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-		synchosts = self.str2bool(self.getHostAttr('localhost', 'sync.hosts'))
-		if synchosts:
-			self.notify('Sync Host')
-			self.report('report.host')
+		self.notify('Sync Host')
+		self.report('report.host')

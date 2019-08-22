@@ -1,3 +1,5 @@
+import json
+
 def test_sync_dns(host, revert_etc):
 	named = host.service('named')
 
@@ -16,11 +18,23 @@ def test_sync_dns(host, revert_etc):
 	assert result.rc == 0
 	assert not named.is_running
 
-	# setting the network to dns=true, stopping named and re-syncing should start named
+	# set the network to dns=true, but zone is still empty so named is still won't run
 	result = host.run('stack set network dns private dns=true')
 	assert result.rc == 0
-
+	result = host.run('stack list network dns=True output-format=json')
+	assert result.rc == 0
+	assert result.stdout != ''
+	networks = json.loads(result.stdout)
+	assert len(networks) == 1
+	priv_net = networks[0]
+	assert priv_net['zone'] == ''
+	result = host.run('stack sync dns')
+	assert result.rc == 0
 	assert not named.is_running
+
+	# add the zone and try again
+	result = host.run('stack set network zone private zone=private')
+	assert result.rc == 0
 	result = host.run('stack sync dns')
 	assert result.rc == 0
 	assert named.is_running
