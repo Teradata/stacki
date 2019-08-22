@@ -36,6 +36,7 @@
 		<to>mq-server</to>
 		<to>routes-server</to>
 		<to>checklist</to>
+		<to>server-packages</to>
 	</edge>
 
 	<edge from="server" cond="platform == 'aws'">

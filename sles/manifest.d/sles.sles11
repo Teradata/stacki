@@ -2,3 +2,4 @@
 -stack-aws-client
 -stack-aws-server
 -stack-barnacle
+-libvirt-python
