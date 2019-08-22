@@ -1,0 +1,13 @@
+<stack:stack>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<!-- Common packages to install between OS's -->
+
+<stack:package>libvirt</stack:package>
+
+</stack:stack>
