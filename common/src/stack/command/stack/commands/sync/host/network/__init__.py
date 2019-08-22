@@ -23,6 +23,8 @@ class Command(stack.commands.sync.host.command):
 	"""
 	Reconfigure and optionally restart the network for the named hosts.
 
+	Note that this will always trigger a 'stack sync config' on the Frontend.
+
 	<param type='boolean' name='restart'>
 	If "yes", then restart the network after the configuration files are
 	applied on the host.
@@ -136,14 +138,24 @@ class Command(stack.commands.sync.host.command):
 			for thread in threads:
 				thread.join(timeout)
 
-		#
 		# if IP addresses change, we'll need to sync the config (e.g.,
 		# update /etc/hosts, /etc/dhcpd.conf, etc.).
-		#
-		self.command('sync.config')
 
+		# A note on /etc/hosts, since there's some commands that overlap
+		# in management for the FE
 		#
-		# hack for ganglia on the frontend
+		# • `sync host` will always overwrite /etc/hosts on the FE
+		# • `sync config` will always call `sync host`
+		# • `sync host network` will respect the `sync.hosts` attr and
+		#    conditionally re-write /etc/hosts on backends.
+		# • `sync host network` always calls `sync config`
+		# • `sync host network localhost` therefore does not respect
+		#    the attribute for the FE
+		# note: 'sync.hosts' implicitly defaults to `False`, meaning
+		#    don't rewrite /etc/hosts on backends
 		#
-		if me in hosts and os.path.exists('/etc/ganglia/gmond.conf'):
-			os.system('service gmond restart > /dev/null 2>&1')
+		# The net effect is that we always want to rewrite the hostfile
+		# for the FE (FE needs to know how to get ahold of hosts), but
+		# only do the backends if we're explicitly asked to do so.
+
+		self.command('sync.config')
