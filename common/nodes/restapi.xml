@@ -4,17 +4,16 @@
 Django Configuration
 </stack:description>
 
-
 <stack:copyright>
 Copyright (c) 2006 - 2019 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-
 <stack:package>stack-ws</stack:package>
 <stack:package>stack-ws-client</stack:package>
 
+<!-- COMMON -->
 <stack:script stack:stage="install-post">
 <!--
 	Create Symlink to point to pymysqldb. This
@@ -24,27 +23,26 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 ln -s /opt/stack/lib/python3.7/site-packages/pymysql \
 	/opt/stack/lib/python3.7/site-packages/MySQLdb
 
-<!--
-	Create symlink for mod_wsgi in apache modules
-	directory
--->
-ln -s /opt/stack/lib/python3.7/site-packages/mod_wsgi/server/mod_wsgi-py37.cpython-37-x86_64-linux-gnu.so \
-	/usr/lib64/apache2/mod_wsgi.so
-
-<!-- Enable WSGI Module -->
-a2enmod wsgi
-
-<!-- Append restapi apache configuration -->
-<stack:file stack:mode="append"
-	stack:name="/etc/apache2/conf.d/httpd.conf">
-Include /etc/apache2/stacki-conf.d/ws.conf
-</stack:file>
-
 /opt/stack/share/stack/bin/ws_setup.sh
 
 <!-- enable commands because they require 'sudo' -->
 /opt/stack/bin/stack add api sudo command command="list switch *"
 /opt/stack/bin/stack add api sudo command command="create host switch mapping"
 
+<stack:file stack:name="/opt/stack/etc/apache-ws.conf">
+WSGIDaemonProcess stacki-ws processes=2 threads=5 display-name=%{GROUP}
+WSGIScriptAlias /stack /var/www/wsgi/stacki-ws.wsgi process-group=stacki-ws
+</stack:file>
 </stack:script>
-</stack:stack> 
+
+<!-- REDHAT -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+ln -s /opt/stack/etc/apache-ws.conf /etc/httpd/conf.d/ws.conf
+</stack:script>
+
+<!-- SLES -->
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+ln -s /opt/stack/etc/apache-ws.conf /etc/apache2/conf.d/ws.conf
+</stack:script>
+
+</stack:stack>

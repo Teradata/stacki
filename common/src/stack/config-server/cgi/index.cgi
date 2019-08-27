@@ -1,12 +1,11 @@
 #!/opt/stack/bin/python3
 
-from __future__ import print_function
 import os
 
 try:
-	dir = os.environ['DOCUMENT_ROOT'] + os.environ['REQUEST_URI']
+	directory = os.environ['DOCUMENT_ROOT'] + os.environ['REQUEST_URI']
 except:
-	dir = '.'
+	directory = '.'
 	pass
 
 out = ''
@@ -15,16 +14,16 @@ out += '<html>'
 out += '<body>'
 out += '<table>'
 
-listing = os.listdir(dir)
+listing = os.listdir(directory)
 listing.sort(key=str.lower)
-for file in listing:
-	if file not in [ 'index.cgi' ]:
+for filename in listing:
+	if 'index.cgi' not in filename:
 		out += '<tr><td>\n'
 
-		if os.path.isdir(os.path.join(dir, file)):
-			out += '<a href="%s/">%s/</a>\n' % (file, file)
+		if os.path.isdir(os.path.join(directory, filename)):
+			out += '<a href="%s/">%s/</a>\n' % (filename, filename)
 		else:
-			out += '<a href="%s">%s</a>\n' % (file, file)
+			out += '<a href="%s">%s</a>\n' % (filename, filename)
 
 		out += '</td></tr>'
 		out += '\n'

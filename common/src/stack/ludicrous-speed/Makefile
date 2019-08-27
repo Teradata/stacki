@@ -26,8 +26,8 @@ install::
 
 
 	# Install WSGI File
-	mkdir -p $(ROOT)/var/www/cgi-bin
-	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/var/www/cgi-bin/ludicrous.py
+	mkdir -p $(ROOT)/var/www/wsgi
+	$(INSTALL) -m 0644 wsgi/ludicrous-server.wsgi $(ROOT)/var/www/wsgi/stacki-ludicrous.wsgi
 
 	# Install Apache Config file done in xml now
 
