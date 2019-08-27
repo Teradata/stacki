@@ -1,0 +1,49 @@
+<stack:stack>
+
+<!-- COMMON -->
+<stack:script stack:stage="install-post">
+mkdir -p /etc/pki/tls/private
+mkdir -p /etc/pki/tls/certs
+
+<!-- Make localhost.key -->
+/usr/bin/openssl genpkey -algorithm RSA \
+	-out /etc/pki/tls/private/localhost.key \
+	-pkeyopt rsa_keygen_bits:2048
+
+<!-- Make Certificate -->
+/usr/bin/openssl req -utf8 -new \
+	-key /etc/pki/tls/private/localhost.key \
+	-x509 -days 2000 -set_serial 0 \
+	-out /etc/pki/tls/certs/localhost.crt \
+	-config /etc/security/ca/ca.cfg -batch
+
+<stack:file stack:name="/opt/stack/etc/apache-https.conf">
+<![CDATA[
+# Force HTTPS access for serving kickstart files
+<Directory /var/www/html/install/sbin>
+	AllowOverride None
+	SSLRequireSSL
+	SSLVerifyClient None
+	Allow from all
+</Directory>
+
+SSLCACertificateFile /etc/security/ca/ca.crt
+]]>
+</stack:file>
+
+mkdir -p /export/stack/pallets
+chmod ao+rx /export/stack
+chmod ao+rx /export/stack/pallets
+</stack:script>
+
+<!-- REDHAT -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+ln -s /opt/stack/etc/apache-https.conf /etc/httpd/conf.d/https.conf
+</stack:script>
+
+<!-- SLES -->
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+ln -s /opt/stack/etc/apache-https.conf /etc/apache2/conf.d/https.conf
+</stack:script>
+
+</stack:stack>

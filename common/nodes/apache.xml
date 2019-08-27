@@ -1,0 +1,197 @@
+<stack:stack>
+<stack:description>
+Apache HTTP Server
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:rocks>
+Copyright (c) 2000 - 2010 The Regents of the University of California
+All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+</stack:rocks>
+
+<stack:package stack:cond="os == 'redhat'">
+httpd
+httpd-devel
+mod_ssl
+</stack:package>
+
+<stack:package stack:cond="os == 'sles'">
+apache2
+</stack:package>
+
+<stack:package>curl</stack:package>
+
+<!-- COMMON -->
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/opt/stack/etc/apache-stack.conf"><![CDATA[
+#
+# Stacki Specific Apache configuration.
+# Generated automatically by the apache.xml node.
+#
+<IfModule mod_mime.c>
+	AddHandler cgi-script .cgi
+</IfModule>
+
+# KeepAlive will use the same http session between the
+# client/server. This can use more memory/cpu than when
+# it is off. If you are memory and cpu starved, comment
+# out the following lines and restart the webserver.
+KeepAlive On
+KeepAliveTimeout 5
+
+UseCanonicalName Off
+ServerName ]]>&Info_FQDN;<![CDATA[
+
+# Only allow WSGI Daemon mode to save memory in the Apache children
+WSGIRestrictEmbedded On
+
+DirectoryIndex index.cgi
+DocumentRoot "/var/www/html"
+
+<Directory "/var/www">
+	Options FollowSymLinks Indexes ExecCGI
+	AllowOverride None
+	Order allow,deny
+	Allow from all
+</Directory>
+
+<Directory "/var/www/html">
+	Options FollowSymLinks Indexes ExecCGI
+	AllowOverride None
+	Order allow,deny
+	Allow from all
+</Directory>
+]]>
+</stack:file>
+
+<!-- Create Apache Profile.cgi mutex and semaphore -->
+mkdir -p /var/tmp
+touch /var/tmp/profile.mutex
+chown apache:root /var/tmp/profile.mutex
+cat /proc/cpuinfo  | awk -F: '/^processor/{print $2;}' | wc -l > /var/tmp/profile.semaphore
+chown apache:root /var/tmp/profile.semaphore
+</stack:script>
+
+<!-- REDHAT -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+ln -s /opt/stack/etc/apache-stack.conf /etc/httpd/conf.d/stack.conf
+
+<!-- Set up mod_wsgi -->
+ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/httpd/modules/mod_wsgi.so
+
+<stack:file stack:name="/etc/httpd/conf.modules.d/02-wsgi.conf">
+LoadModule wsgi_module modules/mod_wsgi.so
+</stack:file>
+
+<!-- Remove a bunch of unused modules, so the platform matches SLES -->
+rm -f /etc/httpd/conf.modules.d/00-dav.conf
+rm -f /etc/httpd/conf.modules.d/00-lua.conf
+rm -f /etc/httpd/conf.modules.d/00-proxy.conf
+
+<stack:file stack:name="/etc/httpd/conf.modules.d/00-base.conf">
+LoadModule access_compat_module modules/mod_access_compat.so
+LoadModule actions_module modules/mod_actions.so
+LoadModule alias_module modules/mod_alias.so
+LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule authn_core_module modules/mod_authn_core.so
+LoadModule authn_file_module modules/mod_authn_file.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule autoindex_module modules/mod_autoindex.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule env_module modules/mod_env.so
+LoadModule expires_module modules/mod_expires.so
+LoadModule include_module modules/mod_include.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule negotiation_module modules/mod_negotiation.so
+LoadModule reqtimeout_module modules/mod_reqtimeout.so
+LoadModule setenvif_module modules/mod_setenvif.so
+LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+LoadModule unixd_module modules/mod_unixd.so
+</stack:file>
+
+<!-- Enable Apache at boot -->
+/bin/systemctl enable httpd
+</stack:script>
+
+<!-- SLES -->
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+<!-- Make the user and group match Redhat -->
+usermod --login apache wwwrun
+groupmod --new-name apache www
+
+<stack:file stack:name="/etc/apache2/uid.conf">
+User apache
+Group apache
+</stack:file>
+
+<!-- Create the www root -->
+mkdir -p /var/www
+chmod 755 /var/www
+(cd /var/www ; ln -s /srv/www/htdocs html)
+
+<!-- SLES doesn't enable SSL by default, so we do it here -->
+<stack:file stack:name="/opt/stack/etc/apache-ssl.conf"><![CDATA[
+Listen 443 https
+
+SSLPassPhraseDialog exec:/usr/sbin/apache2-systemd-ask-pass
+
+SSLSessionCache         shmcb:/var/lib/apache2/ssl_scache(512000)
+SSLSessionCacheTimeout  300
+
+SSLRandomSeed startup file:/dev/urandom  256
+SSLRandomSeed connect builtin
+
+SSLCryptoDevice builtin
+
+<VirtualHost _default_:443>
+ErrorLog /var/log/apache2/ssl_error_log
+TransferLog /var/log/apache2/ssl_access_log
+LogLevel warn
+
+SSLEngine on
+
+SSLProtocol all -SSLv2
+
+SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA
+
+SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+<Files ~ "\.(cgi|shtml|phtml|php3?)$">
+	SSLOptions +StdEnvVars
+</Files>
+<Directory "/srv/www/cgi-bin">
+	SSLOptions +StdEnvVars
+</Directory>
+
+CustomLog ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+</VirtualHost>
+]]>
+</stack:file>
+
+ln -s /opt/stack/etc/apache-ssl.conf /etc/apache2/conf.d/ssl.conf
+ln -s /opt/stack/etc/apache-stack.conf /etc/apache2/conf.d/stack.conf
+
+<!-- Set up mod_wsgi -->
+ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/apache2/mod_wsgi.so
+/usr/sbin/a2enmod wsgi
+
+<!-- Twiddle some modules -->
+/usr/sbin/a2enmod access_compat
+/usr/sbin/a2dismod userdir
+
+<!-- Enable Apache at boot -->
+/usr/bin/systemctl enable apache2
+</stack:script>
+
+</stack:stack>
