@@ -24,10 +24,13 @@ class Command(stack.commands.sync.command):
 	def run(self, params, args):
 
 		self.notify('Sync DNS')
+		# named's files are re-written as a side-effect of runPlugins()
 		self.runPlugins()
 
-		# named's files are re-written as a side-effect of runPlugins()
-		if self.call('list.network', ['dns=true']):
+		# only start named if we have networks with dns=True and those nets have zones defined.
+		nets = [net for net in self.call('list.network', ['dns=true']) if net['zone']]
+
+		if nets:
 			self._exec('systemctl enable named'.split())
 			self._exec('systemctl restart named'.split())
 		else:

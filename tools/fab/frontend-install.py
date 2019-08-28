@@ -277,6 +277,7 @@ pkgs = [
 	'foundation-python-PyMySQL',
 	'stack-command',
 	'stack-pylib',
+	'stack-templates',
 	'net-tools',
 	'foundation-newt', 
 	'stack-wizard',

@@ -12,6 +12,7 @@
 -stack-pxeboot
 -stack-switch
 -stack-report-system
+-stack-templates
 -stack-wizard
 -stack-ws
 -stack-ws-client
