@@ -1,0 +1,119 @@
+{
+	"version": "05.03.00.00",
+	"firewall": [
+		{
+			"service": "global",
+			"network": null,
+			"output_network": null,
+			"chain": "INPUT",
+			"action": "REJECT",
+			"protocol": "all",
+			"flags": null,
+			"comment": "Global test firewall rule",
+			"table": "filter",
+			"name": "REJECT-GLOBAL"
+		}
+	],
+	"host": [
+		{
+				"name": "test_host",
+				"rack": "0",
+				"rank": "0",
+				"appliance": "test_appliance",
+				"box": "default",
+				"environment": null,
+				"osaction": "default",
+				"installaction": "default",
+				"comment": null,
+				"metadata": null,
+				"group": [],
+				"interface": [
+					{
+						"interface": "eth0",
+						"default": null,
+						"network": "private",
+						"mac": "52:54:00:ad:a7:c5",
+						"ip": "10.1.1.1",
+						"name": "test_host",
+						"module": null,
+						"vlan": null,
+						"options": null,
+						"channel": null,
+						"alias": []
+					}
+				],
+				"firewall": [
+					{
+						"service": "host",
+						"network": "private",
+						"output_network": null,
+						"chain": "INPUT",
+						"action": "ACCEPT",
+						"protocol": "TCP",
+						"flags": null,
+						"comment": "Host test firewall rule",
+						"table": "filter",
+						"name": "ACCEPT-HOST"
+					}
+				]
+		}
+	],
+	"environment": [
+		{
+			"name": "test_environment",
+			"firewall": [
+				{
+					"service": "environment",
+					"network": null,
+					"output_network": null,
+					"chain": "INPUT",
+					"action": "ACCEPT",
+					"protocol": "UDP",
+					"flags": null,
+					"comment": "Environment test firewall rule",
+					"table": "filter",
+					"name": "ACCEPT-ENVIRONMENT"
+				}
+			]
+		}
+	],
+	"os": [
+		{
+			"name": "redhat",
+			"firewall": [
+				{
+					"service": "os",
+					"network": null,
+					"output_network": null,
+					"chain": "INPUT",
+					"action": "ACCEPT",
+					"protocol": "all",
+					"flags": null,
+					"comment": "OS test firewall rule",
+					"table": "filter",
+					"name": "ACCEPT-OS"
+				}
+			]
+		}
+	],
+	"appliance": [
+		{
+			"name": "test_appliance",
+			"public": true,
+			"firewall": [
+				{
+					"service": "appliance",
+					"network": null,
+					"output_network": null,
+					"chain": "INPUT",
+					"action": "ACCEPT",
+					"protocol": "all",
+					"flags": null,
+					"comment": "Appliance test firewall rule",
+					"table": "filter",
+					"name": "ACCEPT-APPLIANCE"
+				}
+			]
+		}
+	]
+}

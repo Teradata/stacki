@@ -166,20 +166,23 @@ class command(stack.commands.Command):
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for f in firewalls:
-			params = {'scope'         : scope,
-				  'service'       : f.get('service'),
-				  'network'       : f.get('network'),
-				  'output_network': f.get('output-network'),
-				  'chain'         : f.get('chain'),
-				  'action'        : f.get('action'),
-				  'protocol'      : f.get('protocol'),
-				  'flags'         : f.get('flags'),
-				  'comment'       : f.get('comment'),
-				  'table'         : f.get('table'),
-				  'name'          : f.get('name')}
+		cmd = f'add.{scope}.firewall' if scope != 'global' else 'add.firewall'
 
-			self.stack('add.firewall', target, **params)
+		for firewall in firewalls:
+			params = {
+				'service': firewall.get('service'),
+				'network': firewall.get('network'),
+				'output_network': firewall.get('output-network'),
+				'chain': firewall.get('chain'),
+				'action': firewall.get('action'),
+				'protocol': firewall.get('protocol'),
+				'flags': firewall.get('flags'),
+				'comment': firewall.get('comment'),
+				'table': firewall.get('table'),
+				'rulename': firewall.get('name'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def load_route(self, routes, target=None):
