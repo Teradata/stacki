@@ -38,4 +38,4 @@ class Command(command):
 			raise ArgRequired(self, 'os')
 
 		for os in self.getOSNames(args):
-			self.runPlugins(os)
+			self.db.execute('delete from oses where name=%s', (os,))

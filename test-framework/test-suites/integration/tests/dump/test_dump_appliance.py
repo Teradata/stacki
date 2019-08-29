@@ -17,7 +17,7 @@ class TestDumpAppliance:
 		assert results.rc == 0
 		results = host.run('stack add appliance firewall backend action=accept chain=input protocol=udp service=www network=private output-network=private rulename=appliancetest table=filter comment="test" flags="-m set"')
 		assert results.rc == 0
-		results = host.run('stack add storage partition backend device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
+		results = host.run('stack add appliance storage partition backend device=test options="test option" size=1 mountpoint=test partid=1 type=ext4')
 		assert results.rc == 0
 		results = host.run('stack add appliance storage controller backend adapter=1 arrayid=2 enclosure=3 raidlevel=4 slot=5 options=test')
 		assert results.rc == 0

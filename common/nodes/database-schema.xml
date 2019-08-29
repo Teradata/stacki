@@ -54,18 +54,6 @@ CREATE TABLE tags (
 
 <!-- Attributes -->
 
-DROP TABLE IF EXISTS attributes;
-CREATE TABLE attributes (
-  Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
-  Attr          varchar(128) NOT NULL,
-  Value         text,
-  Shadow        text default NULL,
-  ScopeID	int(11),
-  INDEX (Scope),
-  INDEX (Attr),
-  INDEX (ScopeID)
-);
-
 DROP TABLE IF EXISTS attributes_doc;
 CREATE TABLE attributes_doc (
   Attr          varchar(128) NOT NULL,
@@ -151,63 +139,65 @@ CREATE TABLE bootactions (
 
 CREATE UNIQUE INDEX BootnameOS ON bootactions(BootName,OS);
 
+<!-- Subnets Table -->
+DROP TABLE IF EXISTS subnets;
+CREATE TABLE subnets (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) UNIQUE NOT NULL,
+	zone		VARCHAR(255) NOT NULL,
+	address		VARCHAR(32) NOT NULL,
+	mask		VARCHAR(32) NOT NULL,
+	gateway		VARCHAR(32),
+	mtu		INT DEFAULT '1500',
+	dns		BOOLEAN	DEFAULT FALSE,
+	pxe		BOOLEAN	DEFAULT FALSE,
+	INDEX (name)
+);
+
 <!-- Nodes -->
 DROP TABLE IF EXISTS nodes;
 CREATE TABLE nodes (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(128) default NULL,
-  Appliance	int(11) default NULL references appliances,
-  Box		int(11) default NULL references boxes,
-  Environment	int(11) default NULL references environments,
-  Rack		varchar(64) default NULL,
-  Rank		varchar(64) default NULL,
-  OSAction	int(11) default NULL references bootactions,
-  InstallAction	int(11) default NULL references bootactions,
-  Comment	varchar(140) default NULL,
-  MetaData	text default NULL,
-  PRIMARY KEY  (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL,
+	appliance	INT NOT NULL,
+	box		INT NOT NULL,
+	environment	INT DEFAULT NULL,
+	rack		VARCHAR(64) NOT NULL,
+	rank		VARCHAR(64) NOT NULL,
+	osaction	INT DEFAULT NULL,
+	installaction	INT DEFAULT NULL,
+	comment		VARCHAR(140) DEFAULT NULL,
+	metadata	TEXT DEFAULT NULL,
+	INDEX (name),
+	FOREIGN KEY (appliance) REFERENCES appliances(id) ON DELETE CASCADE,
+	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
+	FOREIGN KEY (environment) REFERENCES environments(id) ON DELETE SET NULL,
+	FOREIGN KEY (osaction) REFERENCES bootactions(id) ON DELETE SET NULL,
+	FOREIGN KEY (installaction) REFERENCES bootactions(id) ON DELETE SET NULL
 );
 
 <!-- Networks -->
-
 DROP TABLE IF EXISTS networks;
 CREATE TABLE networks (
-  ID		int(11) NOT NULL auto_increment,
-  Node		int(11) default NULL references nodes,
-  MAC		varchar(64) default NULL,
-  IP		varchar(32) default NULL,
-  Netmask	varchar(32) default NULL,
-  Gateway	varchar(32) default NULL,
-  Name		varchar(128) default NULL,
-  Device	varchar(32) default NULL,
-  Subnet	int(11)	default NULL references subnets,
-  Module	varchar(128) default NULL,
-  VlanID	int(11) default NULL,
-  Options	varchar(128) default NULL,
-  Channel	varchar(128) default NULL,
-  Main		boolean	default false,
-  PRIMARY KEY(ID),
-  INDEX (Name),
-  INDEX (MAC),
-  INDEX (Device)
-);
-
-<!-- Subnets Table -->
-
-DROP TABLE IF EXISTS subnets;
-CREATE TABLE subnets (
-	ID		int(11)	NOT NULL AUTO_INCREMENT,
-	name		varchar(128)	UNIQUE NOT NULL,
-	zone		varchar(255)	NOT NULL ,
-	address		varchar(32)	NOT NULL,
-	mask		varchar(32)	NOT NULL,
-	gateway		varchar(32),
-	mtu		int(11)		default '1500',
-	dns		boolean		default false,
-	pxe		boolean		default false,
-	PRIMARY KEY(ID),
-	INDEX (name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	node		INT NOT NULL,
+	mac		VARCHAR(64) DEFAULT NULL,
+	ip		VARCHAR(32) DEFAULT NULL,
+	netmask		VARCHAR(32) DEFAULT NULL,
+	gateway		VARCHAR(32) DEFAULT NULL,
+	name		VARCHAR(128) DEFAULT NULL,
+	device		VARCHAR(32) DEFAULT NULL,
+	subnet		INT DEFAULT NULL,
+	module		VARCHAR(128) DEFAULT NULL,
+	vlanid		INT DEFAULT NULL,
+	options		VARCHAR(128) DEFAULT NULL,
+	channel		VARCHAR(128) DEFAULT NULL,
+	main		BOOLEAN	DEFAULT FALSE,
+	INDEX (name),
+	INDEX (mac),
+	INDEX (device),
+	FOREIGN KEY (node) REFERENCES nodes(id) ON DELETE CASCADE,
+	FOREIGN KEY (subnet) REFERENCES subnets(id) ON DELETE SET NULL
 );
 
 <!-- Node/Switch Table -->
@@ -217,36 +207,6 @@ CREATE TABLE switchports (
 	interface	int(11)		NOT NULL references networks,
 	switch		int(11)		NOT NULL references nodes,
 	port		int(11)		NOT NULL
-);
-
-<!-- Stacks -->
-
-DROP TABLE IF EXISTS stacks;
-CREATE TABLE stacks (
-  Box		int(11) NOT NULL default '1' references boxes on delete cascade,
-  Roll		int(11) NOT NULL references rolls on delete cascade
-);
-
-DROP TABLE IF EXISTS cart_stacks;
-CREATE TABLE cart_stacks (
-  Box		int(11) NOT NULL default '1' references boxes on delete cascade,
-  Cart		int(11) NOT NULL references carts on delete cascade
-);
-
-<!-- Groups -->
-
-DROP TABLE IF EXISTS groups;
-CREATE TABLE groups (
-  ID 		int(11) NOT NULL auto_increment,
-  Name		varchar(128) NOT NULL default '',
-  PRIMARY KEY (ID),
-  INDEX (Name)
-);
-
-DROP TABLE IF EXISTS memberships;
-CREATE TABLE memberships (
-  NodeID	int(11) NOT NULL,
-  GroupID	int(11) NOT NULL
 );
 
 <!-- Carts -->
@@ -275,6 +235,40 @@ CREATE TABLE rolls (
   INDEX (Name)
 );
 
+<!-- Stacks -->
+DROP TABLE IF EXISTS stacks;
+CREATE TABLE stacks (
+	box		INT NOT NULL,
+	roll		INT NOT NULL,
+	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
+	FOREIGN KEY (roll) REFERENCES rolls(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS cart_stacks;
+CREATE TABLE cart_stacks (
+	box		INT NOT NULL,
+	cart		INT NOT NULL,
+	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
+	FOREIGN KEY (cart) REFERENCES carts(id) ON DELETE CASCADE
+);
+
+<!-- Groups -->
+
+DROP TABLE IF EXISTS groups;
+CREATE TABLE groups (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL,
+	INDEX (name)
+);
+
+DROP TABLE IF EXISTS memberships;
+CREATE TABLE memberships (
+	nodeid		INT NOT NULL,
+	groupid		INT NOT NULL,
+	FOREIGN KEY (nodeid) REFERENCES nodes(id) ON DELETE CASCADE,
+	FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE
+);
+
 <!-- Partitions. stores all the partitions for all the appliances -->
 
 DROP TABLE IF EXISTS partitions;
@@ -294,6 +288,7 @@ CREATE TABLE partitions (
 );
 
 <!-- Gotta drop the tables that use scope_map first -->
+DROP TABLE IF EXISTS attributes;
 DROP TABLE IF EXISTS firewall_rules;
 DROP TABLE IF EXISTS routes;
 DROP TABLE IF EXISTS storage_controller;
@@ -312,6 +307,15 @@ CREATE TABLE scope_map (
 	FOREIGN KEY (os_id) REFERENCES oses(id) ON DELETE CASCADE,
 	FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE,
 	FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE attributes (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	name		VARCHAR(128) NOT NULL,
+	value		TEXT NOT NULL,
+	INDEX (name),
+	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE
 );
 
 CREATE TABLE firewall_rules (
@@ -487,11 +491,14 @@ CREATE TABLE firmware_mapping (
 
 <stack:file stack:name="/tmp/shadow.sql">
 DROP TABLE IF EXISTS attributes;
+
 CREATE TABLE attributes (
-	Scope		enum ('global', 'os', 'environment', 'appliance', 'host'),
-	Attr		varchar(128) NOT NULL,
-	Value		text,
-	ScopeID		int(11)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	scope_map_id	INT NOT NULL,
+	name		VARCHAR(128) NOT NULL,
+	value		TEXT NOT NULL,
+	INDEX (name),
+	FOREIGN KEY (scope_map_id) REFERENCES cluster.scope_map(id) ON DELETE CASCADE
 );
 </stack:file>
 

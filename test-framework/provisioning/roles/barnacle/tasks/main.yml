@@ -25,13 +25,17 @@
     copy:
       dest: /etc/hosts
       content: |
-        127.0.0.1       localhost     localhost.localdomain
-        192.168.0.2     frontend-0-0  frontend-0-0.localdomain
+        127.0.0.1       localhost
+        192.168.0.2     frontend-0-0  frontend-0-0
       mode: 0644
+
+  - name: "Report frontend-install.py URL"
+    debug:
+      msg: "https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('env','GIT_BRANCH')|default('develop', True) }}/tools/fab/frontend-install.py"
 
   - name: Download frontend-install.py
     get_url:
-      url: https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
+      url: "https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('env','GIT_BRANCH')|default('develop', True) }}/tools/fab/frontend-install.py"
       dest: /root/
       mode: 0744
     register: get_url_result

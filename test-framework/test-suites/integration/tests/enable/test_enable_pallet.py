@@ -34,7 +34,7 @@ class TestEnablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - incompatible pallet "test-different-os" with OS "ubuntu"\n'
 	
-	def test_wrong_version(self, host, create_pallet_isos):
+	def test_wrong_version(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our test pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0 

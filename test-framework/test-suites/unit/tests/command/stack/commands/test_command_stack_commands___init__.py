@@ -1,8 +1,10 @@
-from stack.commands import Command, Implementation
+from stack.commands import Command, Implementation, ScopeArgumentProcessor
+from stack.exception import CommandError
 from unittest.mock import patch, create_autospec, ANY
 from concurrent.futures import Future
 from collections import namedtuple
 import time
+import pytest
 
 class CommandUnderTest(Command):
 	"""A subclass of Command that replaces __init__ to remove the database dependency."""
@@ -260,3 +262,20 @@ class TestCommand:
 			)
 			for key in test_implementation_mapping
 		}
+
+class TestScopeArgumentProcessor:
+	"""Test case for the ScopeArgumentProcessor"""
+
+	def test_getScopeMappings_global_scope(self):
+		"""Test that getting the scope mappings works as expected for the global scope."""
+		test_scope = "global"
+		result = ScopeArgumentProcessor().getScopeMappings(scope = test_scope)
+		assert [(test_scope, None, None, None, None)] == result
+
+	def test_getScopeMappings_global_scope_with_args(self):
+		"""Test that getting the scope mappings for the global scope fails when additional args are passed."""
+		test_scope = "global"
+		test_args = ["foo", "bar"]
+
+		with pytest.raises(CommandError):
+			ScopeArgumentProcessor().getScopeMappings(args = test_args, scope = test_scope)

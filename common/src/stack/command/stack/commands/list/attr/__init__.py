@@ -10,21 +10,19 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from collections import defaultdict
 import fnmatch
-import ipaddress
+from functools import lru_cache
 import os
+import re
 
-import stack.attr
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
+from stack.util import flatten
 
 
-class Command(stack.commands.Command,
-	      stack.commands.OSArgumentProcessor,
-	      stack.commands.ApplianceArgumentProcessor,
-	      stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.HostArgumentProcessor):
+class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
 	"""
 	Lists the set of global attributes.
 
@@ -43,367 +41,300 @@ class Command(stack.commands.Command,
 	</example>
 	"""
 
-	def addGlobalAttrs(self, attributes):
-		readonly = {}
+	# Cache the expensive calls to fnmatchcase for when there are multiple targets
+	@lru_cache(maxsize=None)
+	def _fnmatchcase(self, name, pattern):
+		return fnmatch.fnmatchcase(name, pattern)
 
-		for (ip, host, subnet, netmask) in self.db.select(
-				"""
-				n.ip, if (n.name IS NOT NULL, n.name, nd.name),
-				s.address, s.mask from
-				networks n, appliances a, subnets s, nodes nd
-				where
-				n.node=nd.id and nd.appliance=a.id and
-				a.name='frontend' and n.subnet=s.id and
-				s.name='private'
-				"""):
-			readonly['Kickstart_PrivateKickstartHost'] = ip
-			readonly['Kickstart_PrivateAddress'] = ip
-			readonly['Kickstart_PrivateHostname'] = host
-			ipnetwork = ipaddress.IPv4Network(subnet + '/' + netmask)
-			readonly['Kickstart_PrivateBroadcast'] = '%s' % ipnetwork.broadcast_address
+	def _construct_host_query(self, node_ids, table, attr_type, attr, is_glob):
+		joins = (
+			"INNER JOIN scope_map ON scope_map.node_id = nodes.id",
+			"INNER JOIN scope_map ON scope_map.environment_id = nodes.environment",
+			"""
+			INNER JOIN boxes ON nodes.box = boxes.id
+			INNER JOIN scope_map ON scope_map.os_id = boxes.os
+			""",
+			"INNER JOIN scope_map ON scope_map.appliance_id = nodes.appliance",
+		)
 
-		for (ip, host, zone, subnet, netmask) in self.db.select(
-				"""
-				n.ip, if (n.name IS NOT NULL, n.name, nd.name),
-				s.zone, s.address, s.mask from
-				networks n, appliances a, subnets s, nodes nd
-				where
-				n.node=nd.id and nd.appliance=a.id and
-				a.name='frontend' and n.subnet=s.id and
-				s.name='public'
-				"""):
-			readonly['Kickstart_PublicAddress'] = ip
-			readonly['Kickstart_PublicHostname'] = '%s.%s' % (host, zone)
-			ipnetwork = ipaddress.IPv4Network(u'%s/%s' % (subnet, netmask))
-			readonly['Kickstart_PublicBroadcast'] = '%s' % ipnetwork.broadcast_address
+		parts = []
+		values = []
+		for join in joins:
+			part = f"""
+			(
+				SELECT nodes.name, scope_map.scope, '{attr_type}', attributes.name, attributes.value
+				FROM nodes
+				{join}
+				INNER JOIN {table} ON attributes.scope_map_id = scope_map.id
+				WHERE nodes.id IN %s
+			"""
+			values.append(node_ids)
 
-		for (name, subnet, netmask, zone) in self.db.select(
-				"""
-				name, address, mask, zone from 
-				subnets
-				"""):
-			ipnetwork = ipaddress.IPv4Network(u'%s/%s' % (subnet, netmask))
-			if name == 'private':
-				readonly['Kickstart_PrivateDNSDomain'] = zone
-				readonly['Kickstart_PrivateNetwork'] = subnet
-				readonly['Kickstart_PrivateNetmask'] = netmask
-				readonly['Kickstart_PrivateNetmaskCIDR'] = '%s' % ipnetwork.prefixlen
-			elif name == 'public':
-				readonly['Kickstart_PublicDNSDomain'] = zone
-				readonly['Kickstart_PublicNetwork'] = subnet
-				readonly['Kickstart_PublicNetmask'] = netmask
-				readonly['Kickstart_PublicNetmaskCIDR'] = '%s' % ipnetwork.prefixlen
+			# If we aren't a glob, we can let the DB filter by case-insensitive name
+			if attr and not is_glob:
+				part += "AND attributes.name = %s "
+				values.append(attr)
 
-		readonly['release'] = stack.release
-		readonly['version'] = stack.version
+			part += ")"
+			parts.append(part)
 
-		for key in readonly:
-			attributes['global'][key] = (readonly[key], 'const', 'global')
+		query = " UNION ".join(parts)
 
-		return attributes
-
-
-	def addHostAttrs(self, attributes):
-		readonly = {}
-
-		versions = {}
-		for row in self.call('list.pallet'):
-			# Compute a version number for each os pallet
-			#
-			# If the pallet already has a '.' take everything
-			# before the '.' and add '.x'. If the version has no
-			# '.' add '.x'
-			name    = row['name']
-			version = row['version']
-			release = row['release']
-			key     = '%s-%s-%s' % (name, version, release)
-
-			if name in [ 'SLES', 'CentOS' ]: # FIXME: Ubuntu is missing
-				versions[key] = (name, '%s.x' % version.split('.')[0])
-
-		boxes = {}
-		for row in self.call('list.box'):
-			pallets = row['pallets'].split()
-			carts   = row['carts'].split()
-			
-			name    = 'unknown'
-			version = 'unknown'
-			for pallet in pallets:
-				if pallet in versions.keys():
-					(name, version) = versions[pallet]
-					break
-
-			boxes[row['name']] = { 'pallets'    : pallets,
-					       'carts'	    : carts,
-					       'os.name'    : name, 
-					       'os.version' : version }
-
-		for (name, environment, rack, rank, metadata) in self.db.select(
-				"""
-				n.name, e.name, n.rack, n.rank, n.metadata 
-				from nodes n
-				left join environments e on n.environment=e.id
-				"""):
-			readonly[name]	       = {}
-			readonly[name]['rack'] = rack
-			readonly[name]['rank'] = rank
-			if environment:
-				readonly[name]['environment'] = environment
-			if metadata:
-				readonly[name]['metadata'] = metadata
-
-		for (name, box, appliance) in self.db.select(
-				""" 
-				n.name, b.name,
-				a.name from
-				nodes n, boxes b, appliances a where
-				n.appliance=a.id and n.box=b.id
-				"""):
-			readonly[name]['box']		     = box
-			readonly[name]['pallets']	     = boxes[box]['pallets']
-			readonly[name]['carts']		     = boxes[box]['carts']
-#			readonly[name]['os.name']            = boxes[box]['os.name']
-			readonly[name]['os.version']         = boxes[box]['os.version']
-			readonly[name]['appliance']	     = appliance
-
-				
-		for (name, zone, address) in self.db.select(
-				"""
-				n.name, s.zone, nt.ip from
-				networks nt, nodes n, subnets s where
-				nt.main=true and nt.node=n.id and
-				nt.subnet=s.id
-				"""):
-			if address:
-				readonly[name]['hostaddr']   = address
-			readonly[name]['domainname'] = zone
-
-		for host in readonly:
-			readonly[host]['os']	   = self.db.getHostOS(host)
-			readonly[host]['hostname'] = host
-
-		for row in self.call('list.host.group'):
-			for group in row['groups'].split():
-				readonly[row['host']]['group.%s' % group] = 'true'
-			readonly[row['host']]['groups'] = row['groups']
-		
-
-		for host in attributes:
-			a  = attributes[host]
-			r  = readonly[host]
-			ro = True
-
-			if 'const_overwrite' in a:
-
-				# This attribute allows a host to overwrite
-				# constant attributes. This is crazy dangerous,
-				# do not use this attribute.
-
-				(n, v, t, s) = a['const_overwrite']
-				ro = str2bool(v)
-
-			if ro:
-				for key in r: # slam consts on top of attrs
-					a[key] = (r[key], 'const', 'host')
-			else:
-				for key in r: # only add new consts to attrs
-					if key not in a:
-						a[key] = (r[key], 'const', 'host')
-
-		return attributes
-
-
-
+		return query, values
 
 	def run(self, params, args):
+		# Get the scope and make sure the args are valid
+		scope, = self.fillParams([('scope', 'global')])
+		scope_mappings = self.getScopeMappings(args, scope)
 
-		(glob, shadow, scope, resolve, var, const, display) = self.fillParams([ 
+		# Now validate the params
+		attr, shadow, resolve, var, const, display = self.fillParams([
 			('attr',   None),
 			('shadow', True),
-			('scope',  'global'),
-			('resolve', None),
+			('resolve', True),
 			('var', True),
 			('const', True),
 			('display', 'all'),
 		])
 
-		shadow	= self.str2bool(shadow)
-		var	= self.str2bool(var)
-		const	= self.str2bool(const)
-		lookup	= { 'global'	 : { 'fn'     : lambda x=None: [ 'global' ],
-					     'const'  : self.addGlobalAttrs,
-					     'resolve': False,
-					     'table'  : None },
-			    'os'	 : { 'fn'     : self.getOSNames,
-					     'const'  : lambda x: x,
-					     'resolve': False,
-					     'table'  : 'oses' },
-			    'appliance'	 : { 'fn'     : self.getApplianceNames, 
-					     'const'  : lambda x: x,
-					     'resolve': False,
-					     'table'  : 'appliances' },
-			    'environment': { 'fn'     : self.getEnvironmentNames,
-					     'const'  : lambda x: x,
-					     'resolve': False,
-					     'table'  : 'environments' },
-			    'host'	 : { 'fn'     : self.getHostnames,
-					     'const'  : self.addHostAttrs,
-					     'resolve': True,
-					     'table'  : 'nodes' }}
+		# If there isn't any environments, scope_mappings could be
+		# an empty list, in which case we are done
+		if not scope_mappings:
+			return
 
-		if scope not in lookup.keys():
-			raise CommandError(self, 'invalid scope "%s"' % scope)
+		# Make sure bool params are bools
+		resolve = self.str2bool(resolve)
+		shadow = self.str2bool(shadow)
+		var = self.str2bool(var)
+		const = self.str2bool(const)
 
-		if resolve is None:
-			resolve = lookup[scope]['resolve']
-		else:
-			resolve = self.str2bool(resolve)
+		is_glob = attr is not None and re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', attr) is None
 
 		# Connect to a copy of the database if we are running pytest-xdist
 		if 'PYTEST_XDIST_WORKER' in os.environ:
 			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
 		else:
-			db_name = 'shadow'
+			db_name = 'shadow'  # pragma: no cover
 
-		attributes = {}
-		for s in lookup.keys():
-			attributes[s] = {}
-			for target in lookup[s]['fn']():
-				attributes[s][target] = {}
+		output = defaultdict(dict)
+		if var:
+			if resolve and scope == 'host':
+				node_ids = [s.node_id for s in scope_mappings]
 
-			# Do a UNION select for the attributes in the cluster
-			# and shadow database. This is done to minimize the
-			# calls/context switches to the database. If the user
-			# doesn't have permission to access the shadow
-			# database, we fallback to just selecting out of the
-			# cluster database.
+				hostnames = flatten(self.db.select(
+					"nodes.name FROM nodes WHERE nodes.id IN %s",
+					[node_ids]
+				))
 
-			if var:
-				table = lookup[s]['table']
-				if table:
-					rows = self.db.select(
+				# Get all the normal attributes for the host's scopes
+				query, values = self._construct_host_query(
+					node_ids, 'attributes', 'var', attr, is_glob
+				)
+
+				# The attributes come out of the DB with the higher weighted
+				# scopes first. Surprisingly, there is no simple way in SQL
+				# to squash these rules down by scope weight. So, we do it
+				# here instead. Also, filter by attr name, if provided.
+				seen = defaultdict(set)
+				for host, *row in self.db.select(query, values, prepend_select=False):
+					if row[2] not in seen[host]:
+						if attr is None or self._fnmatchcase(row[2], attr):
+							output[host][row[2]] = row
+						seen[host].add(row[2])
+
+				# Merge in any normal global attrs for each host
+				query = """
+					'global', 'var', attributes.name, attributes.value
+					FROM attributes, scope_map
+					WHERE attributes.scope_map_id = scope_map.id
+					AND scope_map.scope = 'global'
+				"""
+				values = []
+
+				# If we aren't a glob, we can let the DB filter by case-insensitive name
+				if attr and not is_glob:
+					query += "AND attributes.name = %s"
+					values.append(attr)
+
+				for row in self.db.select(query, values):
+					for host in hostnames:
+						if row[2] not in seen[host]:
+							if attr is None or self._fnmatchcase(row[2], attr):
+								output[host][row[2]] = row
+							seen[host].add(row[2])
+
+				# Now get the shadow attributes, if requested
+				if shadow:
+					query, values = self._construct_host_query(
+						node_ids, f'{db_name}.attributes', 'shadow', attr, is_glob
+					)
+
+					# Merge in the shadow attributes for the host's scopes
+					weights = {
+						'global': 0,
+						'appliance': 1,
+						'os': 2,
+						'environment': 3,
+						'host': 4
+					}
+
+					for host, *row in self.db.select(query, values, prepend_select=False):
+						if row[2] not in seen[host]:
+							# If we haven't seen it
+							if attr is None or self._fnmatchcase(row[2], attr):
+								output[host][row[2]] = row
+							seen[host].add(row[2])
+						else:
+							# Maybe the shadow attr is higher scope
+							if weights[row[0]] >= weights[output[host][row[2]][0]]:
+								output[host][row[2]] = row
+
+					# Merge in any shadow global attrs for each host
+					query = f"""
+						'global', 'shadow', attributes.name, attributes.value
+						FROM {db_name}.attributes, scope_map
+						WHERE attributes.scope_map_id = scope_map.id
+						AND scope_map.scope = 'global'
+					"""
+					values = []
+
+					# If we aren't a glob, we can let the DB filter by case-insensitive name
+					if attr and not is_glob:
+						query += "AND attributes.name = %s"
+						values.append(attr)
+
+					for row in self.db.select(query, values):
+						for host in hostnames:
+							if row[2] not in seen[host]:
+								if attr is None or self._fnmatchcase(row[2], attr):
+									output[host][row[2]] = row
+								seen[host].add(row[2])
+							else:
+								if output[host][row[2]][0] == 'global':
+									output[host][row[2]] = row
+
+			else:
+				query_data = [('attributes', 'var')]
+				if shadow:
+					query_data.append((f'{db_name}.attributes', 'shadow'))
+
+				for table, attr_type in query_data:
+					if scope == 'global':
+						query = f"""
+							'', 'global', '{attr_type}', attributes.name, attributes.value
+							FROM {table}
+							INNER JOIN scope_map ON attributes.scope_map_id = scope_map.id
+							WHERE scope_map.scope = 'global'
 						"""
-						t.name, true, a.attr, a.value from
-						%s.attributes a, %s t where
-						a.scope = %%s and a.scopeid = t.id
-						union select
-						t.name, false, a.attr, a.value from 
-						attributes a, %s t where
-						a.scope = %%s and a.scopeid = t.id
-						""" % (db_name, table, table), (s, s))
-					if not rows:
-						rows = self.db.select(
-							"""
-							t.name, false, a.attr, a.value from 
-							attributes a, %s t where
-							a.scope = %%s and a.scopeid = t.id
-							""" % table, s)
-
-					for (o, x, a, v) in rows:
-						if not x:
-							attributes[s][o][a] = (v, 'var', s)
-					if shadow:
-						for (o, x, a, v) in rows:
-							if x:
-								attributes[s][o][a] = (v, 'shadow', s)
-				else:
-					o = target
-
-					rows = self.db.select(
+					else:
+						query = f"""
+							target.name, scope_map.scope, '{attr_type}', attributes.name, attributes.value
+							FROM {table}
+							INNER JOIN scope_map ON attributes.scope_map_id = scope_map.id
 						"""
-						true, attr, value from %s.attributes
-						where scope = %%s
-						union select
-						false, attr, value from attributes
-						where scope = %%s
-						""" % db_name, (s, s))
-					if not rows:
-						rows = self.db.select(
-							"""
-							false, attr, value from attributes
-							where scope = %s
-							""", s)
+					values = []
 
-					for (x, a, v) in rows:
-						if not x:
-							attributes[s][o][a] = (v, 'var', s)
-					if shadow:
-						for (x, a, v) in rows:
-							if x:
-								attributes[s][o][a] = (v, 'shadow', s)
 
-			if const:
-				# Mix in any const attributes
-				lookup[s]['const'](attributes[s])
+					if scope == 'appliance':
+						query += """
+							INNER JOIN appliances AS target ON target.id = scope_map.appliance_id
+							WHERE scope_map.appliance_id IN %s
+						"""
+						values.append([s.appliance_id for s in scope_mappings])
 
-		targets = sorted(lookup[scope]['fn'](args))
+					elif scope == 'os':
+						query += """
+							INNER JOIN oses AS target ON target.id = scope_map.os_id
+							WHERE scope_map.os_id IN %s
+						"""
+						values.append([s.os_id for s in scope_mappings])
 
-		if resolve and scope == 'host':
-			for o in targets:
-				env = self.db.getHostEnvironment(o)
-				if env:
-					parent = attributes['environment'][env]
-					for (a, (v, t, s)) in parent.items():
-						if a not in attributes[scope][o]:
-							attributes[scope][o][a] = (v, t, s)
+					elif scope == 'environment':
+						query += """
+							INNER JOIN environments AS target ON target.id = scope_map.environment_id
+							WHERE scope_map.environment_id IN %s
+						"""
+						values.append([s.environment_id for s in scope_mappings])
 
-				parent = attributes['appliance'][self.db.getHostAppliance(o)]
-				for (a, (v, t, s)) in parent.items():
-					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, t, s)
+					elif scope == 'host':
+						query += """
+							INNER JOIN nodes AS target ON target.id = scope_map.node_id
+							WHERE scope_map.node_id IN %s
+						"""
+						values.append([s.node_id for s in scope_mappings])
 
-				parent = attributes['os'][self.db.getHostOS(o)]
-				for (a, (v, t, s)) in parent.items():
-					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, t, s)
+					# If we aren't a glob, we can let the DB filter by case-insensitive name
+					if attr and not is_glob:
+						query += "AND attributes.name = %s"
+						values.append(attr)
 
-		if resolve and scope != 'global':
-			for o in targets:
-				for (a, (v, t, s)) in attributes['global']['global'].items():
-					if a not in attributes[scope][o]:
-						attributes[scope][o][a] = (v, t, s)
+					# Filter by attr name, if provided.
+					for target, *row in self.db.select(query, values):
+						if attr is None or self._fnmatchcase(row[2], attr):
+							output[target][row[2]] = row
 
-		if glob:
-			for o in targets:
-				matches = {}
-				for key in fnmatch.filter(attributes[scope][o].keys(), glob):
-					matches[key] = attributes[scope][o][key]
-				attributes[scope][o] = matches
+		if const:
+			# For any host targets, figure out if they have a "const_overwrite" attr
+			node_ids = [s.node_id for s in scope_mappings if s.scope == 'host']
 
-		if display != 'all' and scope == 'host':
-			host_attrs = {
-				host: {k: str(v[0]) for k,v in attributes['host'][host].items()}
-				for host in attributes['host'] if host in targets
-			}
+			const_overwrite = defaultdict(lambda: True)
+			if node_ids:
+				for target, value in self.db.select("""
+					nodes.name, attributes.value
+					FROM attributes
+					INNER JOIN scope_map ON attributes.scope_map_id = scope_map.id
+					INNER JOIN nodes ON scope_map.node_id = nodes.id
+					WHERE attributes.name = BINARY 'const_overwrite'
+					AND scope_map.scope = 'host'
+					AND scope_map.node_id IN %s
+				""", (node_ids,)):
+					const_overwrite[target] = self.str2bool(value)
 
-			common_attrs = set.intersection(*(set(d.items()) for d in host_attrs.values()))
-			filtered_attrs = {}
+			# Now run the plugins and merge in the intrensic attrs
+			results = self.runPlugins(scope_mappings)
+			for result in results:
+				for target, *row in result[1]:
+					if attr is None or self._fnmatchcase(row[2], attr):
+						if const_overwrite[target]:
+							output[target][row[2]] = row
+						else:
+							if row[2] not in output[target]:
+								output[target][row[2]] = row
+
+		# Handle the display parameter if we are host scoped
+		self.beginOutput()
+		if scope == 'host' and display in {'common', 'distinct'}:
+			# Construct a set of attr (name, value) for each target
+			host_attrs = {}
+			for target in output:
+				host_attrs[target] = {
+					(row[2], str(row[3])) for row in output[target].values()
+				}
+
+			common_attrs = set.intersection(*host_attrs.values())
 
 			if display == 'common':
-				filtered_attrs['_common_'] = dict((k,(v, None, None)) for k,v in common_attrs)
-				targets = ['_common_']
+				for name, value in sorted(common_attrs):
+					self.addOutput('_common_', [None, None, name, value])
+
 			elif display == 'distinct':
-				for host in host_attrs:
-					host_pairs = set(d for d in host_attrs[host].items())
-					filtered_attrs[host] = dict((k,attributes['host'][host][k]) for k,v in host_pairs.difference(common_attrs))
+				common_attr_names = set(v[0] for v in common_attrs)
 
-			attributes['host'] = filtered_attrs
-
-		self.beginOutput()
-
-		for o in targets:
-			attrs = attributes[scope][o]
-			for a in sorted(attrs.keys()):
-				(v, t, s) = attrs[a]
-				if scope == 'global':
-					self.addOutput(s, (t, a, v))
-				else:
-					self.addOutput(o, (s, t, a, v))
-					
-		if scope == 'global':
-			self.endOutput(header=['scope', 'type', 'attr', 'value' ])
+				for target in sorted(output.keys()):
+					for key in sorted(output[target].keys()):
+						if key not in common_attr_names:
+							self.addOutput(target, output[target][key])
 		else:
-			self.endOutput(header=[scope, 'scope', 'type', 'attr', 'value' ])
+			# Output our combined attributes, sorting them by target then attr
+			for target in sorted(output.keys()):
+				for key in sorted(output[target].keys()):
+					self.addOutput(target, output[target][key])
 
+		if scope == 'global':
+			header = ''
+		else:
+			header = scope
 
-
+		self.endOutput(header=[
+			header, 'scope', 'type', 'attr', 'value'
+		])

@@ -65,20 +65,5 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-
 		self.notify('Sync Host')
-
-		output = self.command('report.host')
-		f = open('/etc/hosts', 'w')
-		f.write("%s\n" % output)
-		f.close()
-
-		if os.path.exists('/srv/salt/rocks'):
-			f = open('/srv/salt/rocks/hosts', 'w')
-			f.write("%s\n" % output)
-			f.close()
-
-
-
-
-
+		self.report('report.host')

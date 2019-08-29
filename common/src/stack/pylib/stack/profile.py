@@ -623,9 +623,13 @@ class Pass1NodeHandler(NodeHandler):
 		if not self.doEval or not self.rcl:
 			return
 		# still allow non-namespace xml attributes (deprecated)
+		prefix = self.getAttr(attrs, 'prefix')
 		command = self.getAttr(attrs, 'stack:name') or self.getAttr(attrs, 'name')
 
-		self.rclCommand = 'report.%s' % command
+		if prefix:
+			self.rclCommand = '%s.report.%s' % (prefix, command)
+		else:
+			self.rclCommand = 'report.%s' % command
 
 
 	def endTag_stack_report(self, ns, tag):

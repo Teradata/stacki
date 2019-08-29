@@ -18,7 +18,7 @@ function halt_install {
 	console_err_msg=$1
 	mq_health_msg=$2
 
-	touch /tmp/wait
+	echo $console_err_msg > /tmp/wait
 	echo $console_err_msg
 	while [ -f /tmp/wait ]
 	do
@@ -96,7 +96,7 @@ udevadm settle --timeout=60
 if [ $? -ne 0 ]
 then
 	halt_install "Unable to initialize internal storage configuration after storage controller config." \
-		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+		'{"state": "post-controller config initialization failed - check console or reinstall with halt_install_on_error=False"}'
 fi
 
 # then configure the partitions

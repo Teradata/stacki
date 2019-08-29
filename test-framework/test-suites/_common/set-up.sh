@@ -145,10 +145,11 @@ then
     source ../../bin/activate
 fi
 
-# Make sure the boxes are up-to-date (don't fail if we can't)
+# Don't bother catching errors from this point on
 set +e
+
+# Make sure the boxes are up-to-date
 vagrant box update
-set -e
 
 # Export the SYSTEM_COVERAGE environment variable if coverage was requested
 if [[ $COVERAGE -eq 1 ]]
@@ -156,8 +157,22 @@ then
     export SYSTEM_COVERAGE="1"
 fi
 
-# Bring up the frontend
-vagrant up frontend
+# Try three times to bring up the frontend
+for ATTEMPT in 1 2 3
+do
+    if vagrant up frontend
+    then
+        break
+    fi
+
+    vagrant destroy -f
+
+    if [[ $ATTEMPT -eq 3 ]]
+    then
+        echo "Error: failed to setup frontend"
+        exit 1
+    fi
+done
 
 # Run the set-up.d scripts
 for SETUP_FILE in set-up.d/*

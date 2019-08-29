@@ -53,7 +53,7 @@ rm /tmp/my.cnf
 </stack:script>
 
 <stack:script stack:cond="platform != 'docker'">
-/opt/stack/bin/stack report host > /etc/hosts
+<stack:report stack:name="host"></stack:report>
 
 <!-- Firmware support -->
 <!-- Mellanox m7800 and m6036 -->

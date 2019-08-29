@@ -5,16 +5,17 @@
 # @copyright@
 
 import stack.commands
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.environment.command):
 	"""
-	Sets an attribute to an environment and sets the associated values 
+	Sets an attribute to an environment and sets the associated values
 
-	<arg type='string' name='environment' repeat='1'>
+	<arg type='string' name='environment' optional='0' repeat='1'>
 	Name of environment
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
@@ -22,7 +23,7 @@ class Command(stack.commands.add.environment.command):
 	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-	
+
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
@@ -31,10 +32,11 @@ class Command(stack.commands.add.environment.command):
 	<example cmd='set environment attr test sge False'>
 	Sets the sge attribution to False for test nodes
 	</example>
-
 	"""
 
 	def run(self, params, args):
-		self.command('set.environment.attr', self._argv + [ 'force=no' ])
-		return self.rc
+		if len(args) == 0:
+			raise ArgRequired(self, 'environment')
 
+		self.command('set.environment.attr', self._argv + ['force=no'])
+		return self.rc

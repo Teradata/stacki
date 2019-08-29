@@ -33,10 +33,12 @@ class Command(command):
 	"""
 
 	def run(self, param, args):
+		text = []
 		self.beginOutput()
-		self.addOutput(None, stack.text.DoNotEdit())
-		self.addOutput(None, '#  Site additions go in /etc/hosts.local\n')
-		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
+		text.append('<stack:file stack:name="/etc/hosts">')
+		text.append(stack.text.DoNotEdit())
+		text.append('#  Site additions go in /etc/hosts.local\n')
+		text.append('127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 		zones = {}
 		aliases = {}
 
@@ -45,7 +47,7 @@ class Command(command):
 			zones[row['network']] = row['zone']
 
 		# Populate the host -> interface -> aliases map
-		for row in self.call('list.host.alias'):
+		for row in self.call('list.host.interface.alias'):
 			host = row['host']
 			interface = row['interface']
 			if host not in aliases:
@@ -151,7 +153,7 @@ class Command(command):
 						continue
 
 				# Write it all
-				self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
+				text.append('%s\t%s' % (ip, ' '.join(names)))
 
 				if ip not in processed:
 					processed[ip] = {}
@@ -161,11 +163,13 @@ class Command(command):
 		hostlocal = '/etc/hosts.local'
 		if os.path.exists(hostlocal):
 			f = open(hostlocal, 'r')
-			self.addOutput(None, '\n# Imported from /etc/hosts.local\n')
+			text.append('\n# Imported from /etc/hosts.local\n')
 			h = f.read()
-			self.addOutput(None, h)
+			text.append(h)
 			f.close()
 
+		text.append('</stack:file>')
+		self.addOutput(None, '\n'.join(text))
 		self.endOutput(padChar='', trimOwner=True)
 
 
@@ -188,4 +192,3 @@ class Command(command):
 		if hostinfo['default']:
 			return True
 		return False
-                

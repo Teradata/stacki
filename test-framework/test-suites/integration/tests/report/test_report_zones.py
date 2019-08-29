@@ -41,7 +41,7 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Add an alias th generate a CNAME
-		result = host.run('stack add host alias backend-0-0 alias=foo interface=eth0')
+		result = host.run('stack add host interface alias backend-0-0 alias=foo interface=eth0')
 		assert result.rc == 0
 
 		# Report our zones
@@ -69,7 +69,7 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Add an alias th generate a CNAME
-		result = host.run('stack add host alias backend-0-0 alias=foo interface=eth0')
+		result = host.run('stack add host interface alias backend-0-0 alias=foo interface=eth0')
 		assert result.rc == 0
 
 		# Report our zones
@@ -93,7 +93,7 @@ class TestReportZones:
 		assert result.rc == 0
 
 		# Add an alias while we're at it
-		result = host.run('stack add host alias backend-0-0 alias=foo interface=eth0')
+		result = host.run('stack add host interface alias backend-0-0 alias=foo interface=eth0')
 		assert result.rc == 0
 
 		# Report our zones

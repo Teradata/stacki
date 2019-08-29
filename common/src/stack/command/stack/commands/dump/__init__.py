@@ -42,6 +42,7 @@ class command(stack.commands.Command):
 			arg = [name]
 			
 		for row in self.call('list.attr', [f'scope={scope}',
+						   'shadow=false',
 						   'resolve=false',
 						   'const=false'] + arg):
 			if row['type'] == 'var':

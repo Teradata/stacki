@@ -5,16 +5,17 @@
 # @copyright@
 
 import stack.commands
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.host.command):
 	"""
-	Adds an attribute to a host and sets the associated values 
+	Adds an attribute to a host and sets the associated values
 
-	<arg type='string' name='host' optional='1' repeat='1'>
+	<arg type='string' name='host' optional='0' repeat='1'>
 	Host name of machine
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
@@ -34,6 +35,8 @@ class Command(stack.commands.add.host.command):
 	"""
 
 	def run(self, params, args):
-		self.command('set.host.attr', self._argv + [ 'force=no' ])
-		return self.rc
+		if len(args) == 0:
+			raise ArgRequired(self, 'host')
 
+		self.command('set.host.attr', self._argv + ['force=no'])
+		return self.rc

@@ -5,16 +5,17 @@
 # @copyright@
 
 import stack.commands
+from stack.exception import ArgRequired
 
 
 class Command(stack.commands.set.appliance.command):
 	"""
-	Sets an attribute to an appliance and sets the associated values 
+	Sets an attribute to an appliance and sets the associated values
 
-	<arg type='string' name='appliance' optional='1' repeat='1'>
+	<arg type='string' name='appliance' optional='0' repeat='1'>
 	Name of appliance
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	Name of the attribute
 	</param>
@@ -22,7 +23,7 @@ class Command(stack.commands.set.appliance.command):
 	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-	
+
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
@@ -34,11 +35,8 @@ class Command(stack.commands.set.appliance.command):
 	"""
 
 	def run(self, params, args):
+		if len(args) == 0:
+			raise ArgRequired(self, 'appliance')
 
-		argv = args
-		argv.append('scope=appliance')
-		for p in params:
-			argv.append('%s=%s' % (p, params[p]))
-
-		self.command('set.attr', argv)
-
+		self.command('set.attr', self._argv + ['scope=appliance'])
+		return self.rc

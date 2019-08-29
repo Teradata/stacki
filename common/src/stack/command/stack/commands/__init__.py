@@ -555,6 +555,15 @@ class HostArgumentProcessor:
 			where a.name='frontend' and a.id=n.appliance order by rack, rank %s
 		""" % order)
 
+		# Performance improvement for `list host profile`
+		if (
+			names==["a:frontend"]
+			and managed_only == False
+			and subnet == None
+			and host_filter == None
+		):
+                        return flatten(frontends)
+
 		# Now get the backend appliances
 		rows = self.db.select("""
 			n.name, n.rack, n.rank from nodes n, appliances a
@@ -811,6 +820,12 @@ class ScopeArgumentProcessor(
 		# Validate the different scopes and get the keys to the targets
 		if scope == 'global':
 			# Global scope has no friends
+			if args:
+				raise CommandError(
+					cmd = self,
+					msg = "Arguments are not allowed at the global scope.",
+				)
+
 			scope_mappings.append(
 				ScopeMapping(scope, None, None, None, None)
 			)
@@ -843,13 +858,15 @@ class ScopeArgumentProcessor(
 			# Piggy-back to resolve the environment names
 			names = self.getEnvironmentNames(args)
 
-			# Now we have to convert the names to the primary keys
-			for environment_id in flatten(self.db.select(
-				'id from environments where name in %s', (names,)
-			)):
-				scope_mappings.append(
-					ScopeMapping(scope, None, None, environment_id, None)
-				)
+			if names:
+
+				# Now we have to convert the names to the primary keys
+				for environment_id in flatten(self.db.select(
+					'id from environments where name in %s', (names,)
+				)):
+					scope_mappings.append(
+						ScopeMapping(scope, None, None, environment_id, None)
+					)
 
 		elif scope == 'host':
 			# Piggy-back to resolve the host names
@@ -1129,6 +1146,41 @@ class DatabaseConnection:
 	"""
 
 	cache = {}
+	_lookup_hostname_cache = {}
+
+	def _lookup_hostname(self, hostname):
+		"""
+		Looks up a hostname in a case-insenstive manner to get how it is
+		formarted in the DB, allowing MySQL LIKE patterns, and using the
+		DatabaseConnection cache when possible.
+
+		Returns None when the hostname doesn't exist.
+		"""
+
+		# See if we need to do MySQL LIKE
+		if '%' in hostname or '_' in hostname:
+			rows = self.select('name FROM nodes WHERE name LIKE %s', (hostname,))
+			if rows:
+				return rows[0][0]
+		elif not self.caching:
+			# If we aren't caching, just do a straight lookup
+			rows = self.select('name FROM nodes WHERE name = %s', (hostname,))
+			if rows:
+				return rows[0][0]
+		else:
+			# Build the cache if needed
+			if not DatabaseConnection._lookup_hostname_cache:
+				DatabaseConnection._lookup_hostname_cache = {
+					name.lower(): name
+					for name in flatten(self.select('name FROM nodes'))
+				}
+
+			# Return the hostname if it was in the database
+			if hostname.lower() in DatabaseConnection._lookup_hostname_cache:
+				return DatabaseConnection._lookup_hostname_cache[hostname.lower()]
+
+		# No match
+		return None
 
 	def __init__(self, db, *, caching=True):
 		# self.database : object returned from orginal connect call
@@ -1171,6 +1223,7 @@ class DatabaseConnection:
 	def clearCache(self):
 		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache[self.name]))
 		DatabaseConnection.cache[self.name] = {}
+		DatabaseConnection._lookup_hostname_cache = {}
 
 	def count(self, command, args=None ):
 		"""
@@ -1193,7 +1246,7 @@ class DatabaseConnection:
 
 		return rows[0][0]
 
-	def select(self, command, args=None):
+	def select(self, command, args=None, prepend_select=True):
 		if not self.link:
 			return []
 
@@ -1209,11 +1262,14 @@ class DatabaseConnection:
 			Debug('select %s' % k)
 			rows = DatabaseConnection.cache[self.name][k]
 		else:
+			if prepend_select:
+				command = f'select {command}'
+
 			try:
-				self.execute('select %s' % command, args)
+				self.execute(command, args)
 				rows = self.fetchall()
 			except OperationalError:
-				Debug('SQL ERROR: %s' % self.link.mogrify('select %s' % command, args))
+				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
 				rows = []
@@ -1253,12 +1309,14 @@ class DatabaseConnection:
 
 				raise ProgrammingError
 
-			# mogrify doesn't understand the executemany args, so we have to do some more work.
-			if many:
-				commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
-				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), commands))
-			else:
-				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
+			# Only spend cycles on mogrify if we are in debug mode
+			if stack.commands._debug:
+				# mogrify doesn't understand the executemany args, so we have to do some more work.
+				if many:
+					commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
+					Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), commands))
+				else:
+					Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
 
 			return result
 
@@ -1320,20 +1378,14 @@ class DatabaseConnection:
 
 	def getNodeName(self, hostname, subnet=None):
 		if not subnet:
-			rows = self.select('name from nodes where name like %s', (hostname,))
-			if rows:
-				(hostname, ) = rows[0]
+			lookup = self._lookup_hostname(hostname)
+			if lookup:
+				hostname = lookup
+
 			return hostname
 
 		result = None
 
-		###
-		# CLADD (11/5/2018): I'm 99% sure this code below is unreachable
-		# in our current code base. Tracing though the code, I couldn't
-		# find a path to get coverage on this chunk of code, where subnet
-		# would be anything besides None. However, I'm hesitent to delete
-		# the chunk of code until test coverage is higher.
-		###
 		for (netname, zone) in self.select("""
 			net.name, s.zone from nodes n, networks net, subnets s
 			where n.name like %s and s.name like %s
@@ -1344,11 +1396,10 @@ class DatabaseConnection:
 			# dns zone
 			if not netname:
 				netname = hostname
-
-			result = '%s.%s' % (netname, zone)
-		###
-		# End possible dead code chunk
-		###
+			if zone:
+				result = '%s.%s' % (netname, zone)
+			else:
+				result = netname
 
 		return result
 
@@ -1364,10 +1415,7 @@ class DatabaseConnection:
 		# table. This should speed up the installer w/ the restore pallet.
 
 		if hostname and self.link:
-			rows = self.link.execute(
-				'select * from nodes where name like %s', (hostname,)
-			)
-			if rows:
+			if self._lookup_hostname(hostname):
 				return self.getNodeName(hostname, subnet)
 
 		if not hostname:
@@ -1408,11 +1456,7 @@ class DatabaseConnection:
 
 		if not addr:
 			if self.link:
-				self.link.execute(
-					'select name from nodes where name=%s', (hostname,)
-				)
-
-				if self.link.fetchone():
+				if self._lookup_hostname(hostname):
 					return self.getNodeName(hostname, subnet)
 
 				# See if this is a MAC address
@@ -1561,8 +1605,8 @@ class Command:
 
 		self.db = DatabaseConnection(database)
 
-		self.text  = ''
-		self.bytes = b''
+		self.text  = []
+		self.bytes = []
 
 		self._exec = stack.util._exec
 
@@ -1982,8 +2026,8 @@ class Command:
 		Reset the output text buffer.
 		"""
 
-		self.text  = ''
-		self.bytes = b''
+		self.text  = []
+		self.bytes = []
 
 	def addText(self, s):
 		"""
@@ -1992,9 +2036,9 @@ class Command:
 
 		if s:
 			if isinstance(s, str):
-				self.text += s
+				self.text.append(s)
 			else:
-				self.bytes += s
+				self.bytes.append(s)
 
 	def getText(self):
 		"""
@@ -2002,9 +2046,11 @@ class Command:
 		"""
 
 		if self.text:
-			return self.text
+			return ''.join(self.text)
+
 		if self.bytes:
-			return self.bytes
+			return b''.join(self.bytes)
+
 		return None
 
 
