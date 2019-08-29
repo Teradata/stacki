@@ -136,37 +136,25 @@ class command(stack.commands.Command):
 
 			self.stack('add.storage.controller', target, **params)
 
-
 	def load_partition(self, partitions, target=None):
+		"""Loads partition information provided into the current scope."""
 		if not partitions:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		if scope == 'global':
-			cmd = 'add.storage.partition'
-		elif scope == 'appliance':
-			cmd = 'add.appliance.storage.partition'
-		elif scope == 'os':
-			cmd = 'add.os.storage.partition'
-		elif scope == 'environment':
-			cmd = 'add.environment.storage.partition'
-		elif scope == 'host':
-			cmd = 'add.host.storage.partition'
-		else:
-			raise CommandError(
-				cmd = self,
-				msg = f"Unsupported scope {scope} encountered while loading partition information.",
-			)
+		cmd = f'add.{scope}.storage.partition' if scope != 'global' else 'add.storage.partition'
 
-		for p in partitions:
-			params = {'device'    : p.get('device'),
-				  'partid'    : p.get('partid'),
-				  'mountpoint': p.get('mountpoint'),
-				  'size'      : p.get('size'),
-				  'type'    : p.get('fstype'),
-				  'options'   : p.get('options')}
+		for partition in partitions:
+			params = {
+				'device': partition.get('device'),
+				'partid': partition.get('partid'),
+				'mountpoint': partition.get('mountpoint'),
+				'size': partition.get('size'),
+				'type': partition.get('fstype'),
+				'options': partition.get('options'),
+			}
 
 			self.stack(cmd, target, **params)
 

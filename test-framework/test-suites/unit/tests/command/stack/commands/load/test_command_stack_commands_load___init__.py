@@ -87,17 +87,6 @@ class TestLoadCommand:
 
 	@patch.object(target = CommandUnderTest, attribute = "stack", autospec = True)
 	@patch.object(target = CommandUnderTest, attribute = "get_scope", autospec = True)
-	def test_load_partition_unknown_scope(self, mock_get_scope, mock_stack, partitions):
-		"""Test that load_partition raises an exception when an unknown scope is returned from get_scope."""
-		mock_get_scope.return_value = "foobaz"
-
-		with pytest.raises(CommandError):
-			CommandUnderTest().load_partition(partitions = partitions, target = ["backend-0-0"])
-
-		mock_stack.assert_not_called()
-
-	@patch.object(target = CommandUnderTest, attribute = "stack", autospec = True)
-	@patch.object(target = CommandUnderTest, attribute = "get_scope", autospec = True)
 	def test_load_partition_non_global_scope_with_no_target(self, mock_get_scope, mock_stack, partitions):
 		"""Test that load_partition raises an exception when a non-global scope is used and no target is passed."""
 		mock_get_scope.return_value = "appliance"
