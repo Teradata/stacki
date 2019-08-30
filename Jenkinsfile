@@ -40,7 +40,7 @@ pipeline {
                 // Note: github.com checkout is flaky, so we disable the default checkout
                 // and do it here with retries.
                 dir('stacki') {
-                    retry(20) {
+                    retry(3) {
                         script {
                             // Note: There is a bug in Jenkins where a timeout causes the job to
                             // abort unless you catch the FlowInterruptedException.
@@ -51,6 +51,10 @@ pipeline {
                                     // set environment variables, we we do by hand in a script
                                     checkout(scm).each { k,v -> env.setProperty(k, v) }
 
+                                    // Remove the git reference because it breaks stack-releasenotes
+                                    sh('git repack -a -d')
+                                    sh('rm -f .git/objects/info/alternates')
+                                    
                                     // Add the last git log subject as the description in the GUI
                                     currentBuild.description = sh(
                                         returnStdout: true,
