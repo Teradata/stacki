@@ -1,0 +1,35 @@
+{
+	"global": [
+		{
+			"enclosure": 0,
+			"adapter": 0,
+			"slot": 1,
+			"raidlevel": "0",
+			"arrayid": 1,
+			"options": "global"
+		}
+	],
+	"host": [
+		{
+			"host": "test_host",
+			"enclosure": 1,
+			"adapter": 1,
+			"slot": 2,
+			"raidlevel": "1",
+			"arrayid": 2,
+			"options": "host",
+			"source": "H"
+		}
+	],
+	"appliance": [
+		{
+			"appliance": "test_appliance",
+			"enclosure": 4,
+			"adapter": 4,
+			"slot": 5,
+			"raidlevel": "10",
+			"arrayid": 5,
+			"options": "appliance"
+		}
+	]
+}

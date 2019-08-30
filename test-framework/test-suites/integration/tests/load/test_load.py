@@ -12,6 +12,7 @@ class TestLoad:
 		(
 			("load/json/partition.json", "load/json/expected_partition.json", "stack list {} storage partition output-format=json", "storage partition"),
 			("load/json/firewall.json", "load/json/expected_firewall.json", "stack list {} firewall output-format=json", "firewall"),
+			("load/json/controller.json", "load/json/expected_controller.json", "stack list {} storage controller output-format=json", "storage controller"),
 		)
 	)
 	def test_load_processing(self, host, test_file, dump_json, expected_results_json, list_command_template, object_name):

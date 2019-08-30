@@ -120,21 +120,26 @@ class command(stack.commands.Command):
 
 
 	def load_controller(self, controllers, target=None):
+		"""Loads controller information provided into the current scope."""
 		if not controllers:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for c in controllers:
-			params = {'enclosure': c.get('enclosure'),
-				  'adapter'  : c.get('adapter'),
-				  'slot'     : c.get('slot'),
-				  'raidlevel': c.get('raidlevel'),
-				  'arrayid'  : c.get('arrayid'),
-				  'options'  : c.get('options')}
+		cmd = f'add.{scope}.storage.controller' if scope != 'global' else 'add.storage.controller'
 
-			self.stack('add.storage.controller', target, **params)
+		for controller in controllers:
+			params = {
+				'enclosure': controller.get('enclosure'),
+				'adapter': controller.get('adapter'),
+				'slot': controller.get('slot'),
+				'raidlevel': controller.get('raidlevel'),
+				'arrayid': controller.get('arrayid'),
+				'options': controller.get('options'),
+			}
+
+			self.stack(cmd, target, **params)
 
 	def load_partition(self, partitions, target=None):
 		"""Loads partition information provided into the current scope."""
