@@ -56,8 +56,8 @@ UseDNS no
 key="
 <stack:eval>
 /opt/stack/sbin/read-ssh-private-key RSA1 2> /dev/null | python -c '
-import base64 
-import sys 
+import base64
+import sys
 base64.encode(sys.stdin, sys.stdout)'
 </stack:eval>"
 
@@ -70,7 +70,7 @@ chmod 0400 /etc/ssh/ssh_host_key
 
 <stack:file stack:name="/etc/ssh/ssh_host_key.pub" stack:perms="0444">
 <stack:eval>
-cat /etc/ssh/ssh_host_key.pub 2> /dev/null
+cat /etc/ssh/ssh_host_key.pub
 </stack:eval>
 </stack:file>
 
