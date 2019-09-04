@@ -284,7 +284,14 @@ pkgs = [
 ]
 
 if osname == 'redhat':
-	pkgs.extend([ 'foundation-redhat' ])
+	pkgs.append('foundation-redhat')
+
+# workaround to add a new package but not break this script for older stacki releases
+proc = subprocess.Popen('find /export/stack/pallets/stacki/ -name stack-templates-*rpm'.split(),
+	stdout=subprocess.PIPE)
+stdout, _ = proc.communicate()
+if stdout:
+	pkgs.append('stack-templates')
 
 return_code = installrpms(pkgs)
 
