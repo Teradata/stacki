@@ -4,31 +4,78 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import graphene
-from stack.db import db
 
-class Appliance(graphene.ObjectType):
-	id = graphene.Int()
-	name = graphene.String()
-	public = graphene.String()
+from ariadne import ObjectType, QueryType, MutationType
+import app.db as db
 
-class Query(graphene.ObjectType):
-	all_appliances = graphene.List(Appliance)
-	get_appliance = graphene.Field(Appliance, name=graphene.String(required=True))
+query = QueryType()
+mutations = MutationType()
 
-	def resolve_all_appliances(self, info):
-		db.execute("""
-		select id, name, public
-		from appliances
-		""")
 
-		return [Appliance(**appliance) for appliance in db.fetchall()]
+@query.field("appliances")
+def resolve_appliances(*_):
+    results, _ = db.run_sql("SELECT id, name, public FROM appliances")
+    return results
 
-	def resolve_get_appliance(self, info, name):
-		db.execute(f'select id, name, public from appliances where name="{name}"')
-		
-		result = db.fetchall()
-		if not result:
-			raise Exception(f'appliance "{name}" is not in the database')
-		
-		return Appliance(**result.pop())
+
+@mutations.field("addAppliance")
+def resolve_add_appliance(_, info, name, public="no"):
+    # TODO: Maybe make the appliance names unique in the db
+    # TODO: Add kickstartable and managed attrs
+
+    cmd = "INSERT INTO appliances (name, public) VALUES (%s, %s)"
+    args = (name, public)
+    db.run_sql(cmd, args)
+
+    cmd = "SELECT id, name, public FROM appliances WHERE name=%s"
+    args = (name,)
+    result, _ = db.run_sql(cmd, args, fetchone=True)
+
+    return result
+
+
+@mutations.field("updateAppliance")
+def resolve_update_appliance(_, info, id, name=None, public=None):
+    # TODO: Maybe make the appliance names unique in the db
+    # TODO: Check if the name collides
+
+    cmd = "SELECT id, name, public FROM appliances WHERE id=%s"
+    args = (id,)
+    appliance, _ = db.run_sql(cmd, args, fetchone=True)
+    if not appliance:
+        raise Exception("No appliance found")
+
+    if not name and not public:
+        return appliance
+
+    update_params = []
+    args = ()
+    if name:
+        update_params.append('name="%s"')
+        args += (name,)
+
+    if public is not None:
+        update_params.append('public="%s"')
+        args += (public,)
+
+    cmd = f'UPDATE appliances SET {",".join(update_params)}' + " WHERE id=%s"
+    db.run_sql(cmd)
+
+    cmd = "SELECT id, name, public FROM appliances WHERE id=%s"
+    args = (id,)
+    result, _ = db.run_sql(cmd, fetchone=True)
+
+    return result
+
+
+@mutations.field("deleteAppliance")
+def resolve_delete_appliance(_, info, id):
+
+    cmd = "DELETE FROM appliances WHERE id=%s"
+    args = (id,)
+    _, affected_rows = db.run_sql(cmd, args)
+
+    if not affected_rows:
+        return False
+
+    return True

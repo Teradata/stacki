@@ -4,24 +4,57 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import graphene
-from stack.db import db
+from ariadne import ObjectType, QueryType, MutationType
 
-class Box(graphene.ObjectType):
-    id = graphene.Int()
-    name = graphene.String()
-    os = graphene.String()
-		# TODO: Pallets
-    # pallets = graphene.List(lambda: Pallet)
 
-class Query:
-	all_boxes = graphene.List(Box)
+import app.db as db
+from app.resolvers.OSResolver import resolve_oses
 
-	def resolve_all_boxes(self, info):
-		db.execute("""
-		select b.id as id, b.name as name, o.name as os
-		from boxes b, oses o
-		where b.os = o.id
-		""")
+query = QueryType()
+mutations = MutationType()
 
-		return [Box(**box) for box in db.fetchall()]
+
+@query.field("boxes")
+def resolve_boxes(*_):
+    results, _ = db.run_sql("SELECT id, name, os AS os_id FROM boxes")
+    return results
+
+
+@mutations.field("addBox")
+def resolve_add_box(_, info, name, os="sles"):
+    # TODO: get default os FROM frontend's os
+
+    if name in [box["name"] for box in resolve_boxes()]:
+        raise Exception(f"box {name} exists")
+
+    for os_record in resolve_oses():
+        if os == os_record.get("name"):
+            os_id = os_record.get("id")
+            break
+    else:
+        raise Exception(f"{os} not found in oses")
+
+    # Insert box
+    cmd = "INSERT INTO boxes (name, os) VALUES (%s, %s)"
+    args = (name, os_id)
+    results, _ = db.run_sql(cmd, args)
+
+    # Get the recently inserted value
+    cmd = "SELECT id, name, os AS os_id FROM boxes WHERE name=%s"
+    args = (name,)
+    results, _ = db.run_sql(cmd, args, fetchone=True)
+    return results
+
+
+@mutations.field("deleteBox")
+def resolve_delete_box(_, info, id):
+
+    cmd = "DELETE FROM boxes WHERE id=%s"
+    args = (id,)
+    _, affected_rows = db.run_sql(cmd, args)
+
+    if not affected_rows:
+        return False
+
+    return True
+

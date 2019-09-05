@@ -4,19 +4,24 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import graphene
-from stack.db import db
 
-class Os(graphene.ObjectType):
-    id = graphene.Int()
-    name = graphene.String()
+from ariadne import ObjectType, QueryType, MutationType
+import app.db as db
 
-class Query:
-	all_oses = graphene.List(Os)
+query = QueryType()
+mutations = MutationType()
+box = ObjectType("Box")
 
-	def resolve_all_oses(self, info):
-		db.execute("""
-		select id, name from oses
-		""")
 
-		return [Os(**os) for os in db.fetchall()]
+@query.field("oses")
+def resolve_oses(*_):
+    results, _ = db.run_sql("SELECT id, name FROM oses")
+    return results
+
+
+@box.field("os")
+def resolve_os_from_id(box, *_):
+    cmd = "SELECT id, name FROM oses WHERE id=%s"
+    args = (box.get("os_id"),)
+    result, _ = db.run_sql(cmd, args, fetchone=True)
+    return result
