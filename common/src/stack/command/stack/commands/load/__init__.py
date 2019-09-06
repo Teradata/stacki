@@ -17,6 +17,7 @@ import stack.commands
 from stack.bool import str2bool
 import re
 import shlex
+from contextlib import suppress
 
 
 class command(stack.commands.Command):
@@ -54,14 +55,34 @@ class command(stack.commands.Command):
 	def set_scope(self, scope):
 		self.__dump_scope = scope
 
+	def _exec_commands(self, cmd, args, params):
+		"""Helper to actually run the commands with the self.call machinery."""
+		assert self.exec_commands
+
+		call_args = []
+		call_args.extend(args)
+		call_args.extend(f"{key}={value}" for key, value in params.items())
+
+		# Suppress errors to mimic normal use case of piping through bash without -e.
+		# This is because some commands are expected to fail, but the failure doesn't matter.
+		# For example: trying to re-add the frontend host on a freshly installed frontend.
+		with suppress(CommandError):
+			self.call(command = cmd, args = call_args)
 
 	def stack(self, cmd, *args, **params):
 		if not args or args == (None,):
-			args = []
+			args = tuple()
 		if not params:
 			params = {}
-		for key in [key for key in params if params[key] is None]:
-			del params[key]	  # nuke *=None params
+
+		# nuke *=None params
+		params = {key: value for key, value in params.items() if value is not None}
+
+		# If they actually want us to run the commands, go ahead and run them.
+		if self.exec_commands:
+			self._exec_commands(cmd = cmd, args = args, params = params)
+			return
+
 		c = ' '.join(cmd.split('.'))
 		a = ''
 		if args:
@@ -222,9 +243,11 @@ class command(stack.commands.Command):
 
 	def run(self, params, args):
 
-		(document, ) = self.fillParams([
-			('document', None)
+		document, self.exec_commands = self.fillParams([
+			('document', None),
+			('exec', False)
 		])
+		self.exec_commands = str2bool(self.exec_commands)
 
 		if not document:
 			if not args:

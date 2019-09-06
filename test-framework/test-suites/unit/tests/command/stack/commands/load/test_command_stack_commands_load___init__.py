@@ -95,3 +95,65 @@ class TestLoadCommand:
 			CommandUnderTest().load_partition(partitions = partitions)
 
 		mock_stack.assert_not_called()
+
+	@patch.object(target = CommandUnderTest, attribute = "call", autospec = True)
+	def test__exec_commands(self, mock_call):
+		"""Test that exec commands calls the requested command correctly."""
+		# Set the exec_commands attribute to True
+		test_command = CommandUnderTest()
+		test_command.exec_commands = True
+
+		cmd = "stack list foo"
+		args = ["foo", "bar"]
+		params = {"baz": "bag"}
+
+		test_command._exec_commands(cmd = cmd, args = args, params = params)
+
+		# Make sure the call was made correctly
+		mock_call.assert_called_once_with(
+			test_command,
+			command = cmd,
+			args = [*args, *(f"{key}={value}" for key,value in params.items())],
+		)
+
+	@patch.object(target = CommandUnderTest, attribute = "call", autospec = True)
+	def test__exec_commands_suppresses_command_errors(self, mock_call):
+		"""Test that command errors are suppressed when calling the stack commands."""
+		# Set the exec_commands attribute to True
+		test_command = CommandUnderTest()
+		test_command.exec_commands = True
+
+		cmd = "stack list foo"
+		args = ["foo", "bar"]
+		params = {"baz": "bag"}
+		mock_call.side_effect = CommandError(msg = "foo", cmd = test_command)
+
+		test_command._exec_commands(cmd = cmd, args = args, params = params)
+
+	@pytest.mark.parametrize("args", (tuple(), ("foo",), ("foo", "bar")))
+	@pytest.mark.parametrize(
+		"params, expected_params",
+		(
+			({}, {}),
+			({"baz": "bag"}, {"baz": "bag"}),
+			({"baz": "bag", "booz": None}, {"baz": "bag"})
+		),
+	)
+	@patch.object(target = CommandUnderTest, attribute = "_exec_commands", autospec = True)
+	def test_stack(self, mock__exec_commands, args, params, expected_params):
+		"""Test that stack tries to run the command if exec_commands is True."""
+		# Set the exec_commands attribute to True
+		test_command = CommandUnderTest()
+		test_command.exec_commands = True
+
+		cmd = "stack list foo"
+
+		test_command.stack(cmd, *args, **params)
+
+		# Make sure the call was made correctly
+		mock__exec_commands.assert_called_once_with(
+			test_command,
+			cmd = cmd,
+			args = args,
+			params = expected_params,
+		)
