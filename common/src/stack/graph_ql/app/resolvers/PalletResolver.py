@@ -4,26 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import graphene
-from stack.db import db
 
-class Pallet(graphene.ObjectType):
-		id = graphene.Int()
-		name = graphene.String()
-		version = graphene.String()
-		release = graphene.String()
-		arch = graphene.String()
-		os = graphene.String()
-		url = graphene.String()
-		# boxes = graphene.Field(lambda: Box)
+from ariadne import ObjectType, QueryType, MutationType
+import app.db as db
 
-class Query:
-	all_pallets = graphene.List(Pallet)
+query = QueryType()
+mutation = MutationType()
 
-	def resolve_all_pallets(self, info):
-		db.execute("""
-		select id, name, version, rel as 'release', arch, os, url
-		from rolls
-		""")
-
-		return [Pallet(**pallet) for pallet in db.fetchall()]
+object_types = []

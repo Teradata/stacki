@@ -9,7 +9,7 @@ from ariadne import ObjectType, QueryType, MutationType
 import app.db as db
 
 query = QueryType()
-mutations = MutationType()
+mutation = MutationType()
 box = ObjectType("Box")
 
 
@@ -25,3 +25,5 @@ def resolve_os_from_id(box, *_):
     args = (box.get("os_id"),)
     result, _ = db.run_sql(cmd, args, fetchone=True)
     return result
+
+object_types = [box]

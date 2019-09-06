@@ -9,7 +9,7 @@ from ariadne import ObjectType, QueryType, MutationType
 import app.db as db
 
 query = QueryType()
-mutations = MutationType()
+mutation = MutationType()
 
 
 @query.field("appliances")
@@ -18,7 +18,7 @@ def resolve_appliances(*_):
     return results
 
 
-@mutations.field("addAppliance")
+@mutation.field("addAppliance")
 def resolve_add_appliance(_, info, name, public="no"):
     # TODO: Maybe make the appliance names unique in the db
     # TODO: Add kickstartable and managed attrs
@@ -34,7 +34,7 @@ def resolve_add_appliance(_, info, name, public="no"):
     return result
 
 
-@mutations.field("updateAppliance")
+@mutation.field("updateAppliance")
 def resolve_update_appliance(_, info, id, name=None, public=None):
     # TODO: Maybe make the appliance names unique in the db
     # TODO: Check if the name collides
@@ -68,7 +68,7 @@ def resolve_update_appliance(_, info, id, name=None, public=None):
     return result
 
 
-@mutations.field("deleteAppliance")
+@mutation.field("deleteAppliance")
 def resolve_delete_appliance(_, info, id):
 
     cmd = "DELETE FROM appliances WHERE id=%s"
@@ -79,3 +79,5 @@ def resolve_delete_appliance(_, info, id):
         return False
 
     return True
+
+object_types = []

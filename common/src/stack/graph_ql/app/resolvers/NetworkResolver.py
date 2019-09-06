@@ -4,27 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import graphene
-from stack.db import db
 
-class Network(graphene.ObjectType):
-    id = graphene.Int()
-    name = graphene.String()
-    address = graphene.String()
-    mask = graphene.String()
-    gateway = graphene.String()
-    mtu = graphene.String()
-    zone = graphene.String()
-    dns = graphene.String()
-    pxe = graphene.String()
+from ariadne import ObjectType, QueryType, MutationType
+import app.db as db
 
-class Query:
-	all_networks = graphene.List(Network)
+query = QueryType()
+mutation = MutationType()
 
-	def resolve_all_networks(self, info):
-		db.execute("""
-		select id, name, address, mask, gateway, mtu, zone, dns, pxe
-		from subnets
-		""")
-
-		return [Network(**network) for network in db.fetchall()]
+object_types = []

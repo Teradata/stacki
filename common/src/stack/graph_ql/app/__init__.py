@@ -15,27 +15,24 @@ from ariadne import (
     load_schema_from_path,
 )
 from ariadne.asgi import GraphQL
-import asyncio
-import requests
-import importlib
-import pathlib
 import pkgutil
 
 
 from . import db
-from .resolvers import BoxResolver, ApplianceResolver, OSResolver
 
-
+# TODO: Make this dynamic
 type_defs = load_schema_from_path("./app/schema/")
 
 
-query_fields = [] + [BoxResolver.query, ApplianceResolver.query, OSResolver.query]
-mutation_fields = [] + [
-    BoxResolver.mutations,
-    ApplianceResolver.mutations,
-    OSResolver.mutations,
-]
-object_fields = [] + [OSResolver.box]
+query_fields = []
+mutation_fields = []
+object_fields = []
+
+for finder, name, ispkg in pkgutil.walk_packages(["./app/resolvers"]):
+    _module = finder.find_module(name).load_module(name)
+    query_fields.append(_module.query)
+    mutation_fields.append(_module.mutation)
+    object_fields.extend(_module.object_types)
 
 schema = make_executable_schema(
     type_defs, query_fields + mutation_fields + object_fields

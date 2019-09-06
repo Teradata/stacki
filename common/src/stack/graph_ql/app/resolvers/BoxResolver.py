@@ -11,7 +11,7 @@ import app.db as db
 from app.resolvers.OSResolver import resolve_oses
 
 query = QueryType()
-mutations = MutationType()
+mutation = MutationType()
 
 
 @query.field("boxes")
@@ -20,7 +20,7 @@ def resolve_boxes(*_):
     return results
 
 
-@mutations.field("addBox")
+@mutation.field("addBox")
 def resolve_add_box(_, info, name, os="sles"):
     # TODO: get default os FROM frontend's os
 
@@ -46,7 +46,7 @@ def resolve_add_box(_, info, name, os="sles"):
     return results
 
 
-@mutations.field("deleteBox")
+@mutation.field("deleteBox")
 def resolve_delete_box(_, info, id):
 
     cmd = "DELETE FROM boxes WHERE id=%s"
@@ -58,3 +58,5 @@ def resolve_delete_box(_, info, id):
 
     return True
 
+
+object_types = []
