@@ -26,7 +26,9 @@
 			</enable>
 		</services>
 	</services-manager>
-	
+
+<!-- see comment in redhat version of this code
+
 	<files config:type="list">
 		<file>
 			<file_path>/etc/ssh/ssh_host_rsa_key</file_path>
@@ -50,4 +52,6 @@
 		</file>
 	</files>
 	
+-->
+
 </stack:stack>
