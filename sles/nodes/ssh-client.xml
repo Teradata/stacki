@@ -26,6 +26,8 @@
 			</enable>
 		</services>
 	</services-manager>
+
+<!-- see comment in redhat version of this code
 	
 <stack:script stack:stage="install-post">
 	<stack:file stack:name="/etc/ssh/ssh_host_rsa_key" stack:perms="0400"><stack:eval>
@@ -41,4 +43,5 @@ cat /etc/ssh/ssh_host_rsa_key.pub 2> /dev/null
 cat /etc/ssh/ssh_host_ecdsa_key.pub 2> /dev/null
 	</stack:eval></stack:file>
 </stack:script>
+-->
 </stack:stack>
