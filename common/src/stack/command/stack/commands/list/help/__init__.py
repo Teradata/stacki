@@ -79,7 +79,7 @@ class Command(stack.commands.list.command):
 			module = eval(module)
 
 			try:
-				o = getattr(module, 'Command')(None)
+				o = getattr(module, 'Command')()
 			except AttributeError:
 				continue
 

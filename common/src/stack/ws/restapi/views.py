@@ -82,12 +82,6 @@ class StackWS(View):
 		command = None
 		cmd_arg_list = []
 
-		# Check to see if the user is a superuser
-		admin = request.user.is_superuser
-
-		# Get the database connection
-		db_conn = _get_db_conn_(admin=admin)
-
 		# Get the command module to execute
 		mod_name = '.'.join(args)
 
@@ -118,7 +112,26 @@ class StackWS(View):
 					m = eval(mod)
 
 					if hasattr(m, 'Command'):
-						command = m.Command(db_conn)
+						command = m.Command()
+
+						# We have to replace the database connection
+						# if we aren't a superuser. There should be a
+						# cleaner way to do this without relying on the
+						# database security layer.
+						if not request.user.is_superuser:
+							# Connect to a copy of the database if we are running pytest-xdist
+							if 'PYTEST_XDIST_WORKER' in os.environ:
+								db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+							else:
+								db_name = 'cluster'
+
+							command.db.replace_database(pymysql.connect(
+								user='nobody',
+								passwd='',
+								unix_socket='/var/run/mysql/mysql.sock',
+								db=db_name,
+								autocommit=True
+							))
 
 						# Flush the cache, we do this
 						# since multiple threads may be
@@ -287,43 +300,6 @@ class StackWS(View):
 				return True
 
 		return False
-	
-# Create Connections to the database, and return
-# connection based on the administrative privilege.
-# Use this instead of Django's internal database
-# management. Django's internal DB management
-# creates a layer between the user and the DB
-# and wraps up certain functions. We need direct
-# access to the database layer.
-
-
-def _get_db_conn_(admin=False):
-	if admin is True:
-		username = 'apache'
-		# Get Cluster username and password
-		cluster_conf = open("/etc/apache.my.cnf", 'r')
-		password = ''
-		for line in cluster_conf:
-			l = line.split("=")
-			if len(l) == 2:
-				if l[0].strip() == 'password':
-					password = l[1].strip()
-	else:
-		username = 'nobody'
-		password = ''
-
-	# Connect to a copy of the database if we are running pytest-xdist
-	if 'PYTEST_XDIST_WORKER' in os.environ:
-		db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
-	else:
-		db_name = 'cluster'
-
-	link = pymysql.connect(user=username,
-			       passwd=password,
-			       unix_socket='/var/run/mysql/mysql.sock',
-			       db=db_name,
-			       autocommit=True)
-	return link
 
 
 # Function to log in the user

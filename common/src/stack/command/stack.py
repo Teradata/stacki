@@ -28,26 +28,6 @@ def sigint_handler(signal, frame):
 	sys.exit(0)
 
 
-def connect_db(username, passwd):
-	# Connect to a copy of the database if we are running pytest-xdist
-	if 'PYTEST_XDIST_WORKER' in os.environ:
-		db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
-	else:
-		db_name = 'cluster'
-
-	if os.path.exists('/var/run/mysql/mysql.sock'):
-		db = pymysql.connect(db=db_name,
-				     user=username, passwd=passwd,
-				     host='localhost', unix_socket='/var/run/mysql/mysql.sock',
-				     autocommit=True)
-	else:
-		db = pymysql.connect(db=db_name,
-				     host='localhost', port=40000,
-				     user=username, passwd=passwd,
-				     autocommit=True)
-	return db
-
-
 def run_command(args, debug=False):
 	# Check if the stack command has been quoted.
 
@@ -92,7 +72,7 @@ def run_command(args, debug=False):
 
 	if not hasattr(module, 'Command'):
 		import stack.commands.list.help
-		help = stack.commands.list.help.Command(db)
+		help = stack.commands.list.help.Command()
 		fullmodpath = s.split('.')
 		submodpath = '/'.join(fullmodpath[2:])
 		try:
@@ -104,7 +84,7 @@ def run_command(args, debug=False):
 		return -1
 
 	try:
-		command = getattr(module, 'Command')(db, debug=debug)
+		command = getattr(module, 'Command')(debug=debug)
 		rc = command.runWrapper(name, args[i:])
 	except CommandError as e:
 		sys.stderr.write('%s\n' % e)
@@ -146,47 +126,10 @@ signal.signal(signal.SIGINT, sigint_handler)
 syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
-# First try to read the cluster password (for apache)
-
-passwd = ''
-try:
-	file = open('/etc/apache.my.cnf', 'r')
-	for line in file.readlines():
-		if line.startswith('password'):
-			passwd = line.split('=')[1].strip()
-			break
-	file.close()
-except:
-	pass
-
-if os.geteuid() == 0:
-	username = 'apache'
-else:
-	username = pwd.getpwuid(os.geteuid())[0]
-
-
-# Connect over UNIX socket if it exists, otherwise go over the network. In the
-# past (and maybe in the future the command line could run remote from the
-# database.
-
-sql = True
-db  = None
-try:
-	import pymysql
-except ImportError:
-	sql = False
-if sql:
-	try:
-		db = connect_db(username, passwd)
-	except pymysql.err.OperationalError:
-		pass
-
 try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
-	if db is not None:
-		db.close()
 	sys.exit(1)
 
 debug = False
@@ -204,8 +147,5 @@ if rc is None:
 		rc = run_command(['help'])
 	else:
 		rc = run_command(args, debug)
-
-if db is not None:
-	db.close()
 
 sys.exit(rc)

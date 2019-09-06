@@ -12,7 +12,7 @@ class TestCommand:
 		mock_discovery.return_value.is_running.return_value = True
 		
 		# Create our command to test and call the 'run' command
-		command = Command(None)
+		command = Command()
 
 		# NOTE: This is probably a bug in Command, _params should default to
 		# {} instead of None
@@ -33,7 +33,7 @@ class TestCommand:
 		mock_discovery.return_value.is_running.return_value=False
 		
 		# Create our command to test and call the 'run' command
-		command = Command(None)
+		command = Command()
 
 		# NOTE: This is probably a bug in Command, _params should default to
 		# {} instead of None

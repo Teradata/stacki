@@ -8,9 +8,9 @@
 import re
 import stack.commands
 
+
 class command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command,
-	stack.commands.DatabaseConnection):
+	stack.commands.report.command):
 	pass
 
 class Command(command):

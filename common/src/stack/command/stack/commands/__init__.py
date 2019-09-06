@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import atexit
 import os
 import time
 import socket
@@ -26,13 +27,14 @@ import subprocess
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
-from pymysql import OperationalError, ProgrammingError
 from functools import partial
 from operator import itemgetter
 from itertools import groupby, cycle
 from collections import OrderedDict, namedtuple
 from concurrent.futures import ThreadPoolExecutor
 import threading
+
+import pymysql
 
 import stack.graph
 import stack
@@ -1137,7 +1139,79 @@ class DocStringHandler(handler.ContentHandler,
 		self.text += s
 
 
-class DatabaseConnection:
+def _connect_db():
+	db = None
+
+	try:
+		# Root connects as 'apache', everyone else as the user
+		# running the python command.
+		if os.geteuid() == 0:
+			user = 'apache'
+		else:
+			user = pwd.getpwuid(os.geteuid())[0]
+
+		# Try to read the apache user's password
+		passwd = ''
+		try:
+			with open('/etc/apache.my.cnf') as f:
+				for line in f:
+					if line.startswith('password'):
+						passwd = line.split('=')[1].strip()
+						break
+		except:
+			# Couldn't read the password, try connecting without one
+			pass
+
+		# Connect to a copy of the database if we are running pytest-xdist
+		if 'PYTEST_XDIST_WORKER' in os.environ:
+			db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+		else:
+			db_name = 'cluster'
+
+		if os.path.exists('/var/run/mysql/mysql.sock'):
+			db = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=passwd,
+				host='localhost',
+				unix_socket='/var/run/mysql/mysql.sock',
+				autocommit=True
+			)
+		else:
+			db = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=passwd,
+				host='localhost',
+				port=40000,
+				autocommit=True
+			)
+
+	except pymysql.OperationalError:
+		# No database
+		pass
+
+	return db
+
+
+class DatabaseConnectionMeta(type):
+	"""
+	This will create a shared database connection at import time
+	for all DatabaseConnections to share. It will also close the
+	database connection for you when the program exits.
+	"""
+
+	_db = None
+
+	def __init__(cls, name, bases, attrs, **kwargs):
+		if DatabaseConnectionMeta._db is None:
+			DatabaseConnectionMeta._db = _connect_db()
+			atexit.register(lambda: DatabaseConnectionMeta._db.close())
+
+		cls.database = property(lambda x: DatabaseConnectionMeta._db)
+
+
+class DatabaseConnection(metaclass=DatabaseConnectionMeta):
 	"""
 	Wrapper class for all database access.  The methods are based on
 	those provided from the pymysql library and some other Stack
@@ -1182,15 +1256,13 @@ class DatabaseConnection:
 		# No match
 		return None
 
-	def __init__(self, db, *, caching=True):
+	def __init__(self, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
-		if db:
-			self.database = db
-			self.name     = db.db.decode() # name of the database
-			self.link     = db.cursor()
+		if self.database:
+			self.name     = self.database.db.decode() # name of the database
+			self.link     = self.database.cursor()
 		else:
-			self.database = None
 			self.name     = None
 			self.link     = None
 
@@ -1212,6 +1284,21 @@ class DatabaseConnection:
 			self.caching = str2bool(os.environ.get('STACKCACHE'))
 		else:
 			self.caching = caching
+
+	def replace_database(self, database):
+		"""
+		This allows you to replace the low-level database connection
+		but the caller is responsible for closing the connection.
+		"""
+
+		if database:
+			self.database = database
+			self.name     = self.database.db.decode() # name of the database
+			self.link     = self.database.cursor()
+		else:
+			self.database = None
+			self.name     = None
+			self.link     = None
 
 	def enableCache(self):
 		self.caching = True
@@ -1268,7 +1355,7 @@ class DatabaseConnection:
 			try:
 				self.execute(command, args)
 				rows = self.fetchall()
-			except OperationalError:
+			except pymysql.OperationalError:
 				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
@@ -1299,7 +1386,7 @@ class DatabaseConnection:
 				t0 = time.time()
 				result = executor(command, args)
 				t1 = time.time()
-			except ProgrammingError:
+			except pymysql.ProgrammingError:
 				# mogrify doesn't understand the executemany args, so we have to do some more work.
 				if many:
 					error = '\n'.join((self.link.mogrify(command, arg) for arg in args))
@@ -1307,10 +1394,10 @@ class DatabaseConnection:
 				else:
 					Debug(f'SQL ERROR: {self.link.mogrify(command, args)}')
 
-				raise ProgrammingError
+				raise pymysql.ProgrammingError
 
 			# Only spend cycles on mogrify if we are in debug mode
-			if stack.commands._debug:
+			if _debug:
 				# mogrify doesn't understand the executemany args, so we have to do some more work.
 				if many:
 					commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
@@ -1593,7 +1680,7 @@ class Command:
 
 	MustBeRoot = 1
 
-	def __init__(self, database, *, debug=None):
+	def __init__(self, *, debug=None):
 		"""
 		Creates a DatabaseConnection for the StackCommand to use.
 		This is called for all commands, including those that do not
@@ -1603,7 +1690,7 @@ class Command:
 		if debug is not None:
 			stack.commands._debug = debug
 
-		self.db = DatabaseConnection(database)
+		self.db = DatabaseConnection()
 
 		self.text  = []
 		self.bytes = []
@@ -1754,7 +1841,7 @@ class Command:
 		mod = eval(modpath)
 
 		try:
-			o = getattr(mod, 'Command')(self.db.database)
+			o = getattr(mod, 'Command')()
 			name = ' '.join(command.split('.'))
 		except AttributeError:
 			return ''
