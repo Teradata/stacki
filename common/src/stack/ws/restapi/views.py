@@ -16,6 +16,7 @@ from stack.restapi.models import BlackList
 from stack.restapi.models import SudoList
 from stack.exception import CommandError
 import stack.commands
+from stack.commands import get_mysql_connection, DatabaseConnection
 
 import pymysql
 
@@ -114,33 +115,6 @@ class StackWS(View):
 					if hasattr(m, 'Command'):
 						command = m.Command()
 
-						# We have to replace the database connection
-						# if we aren't a superuser. There should be a
-						# cleaner way to do this without relying on the
-						# database security layer.
-						if not request.user.is_superuser:
-							# Connect to a copy of the database if we are running pytest-xdist
-							if 'PYTEST_XDIST_WORKER' in os.environ:
-								db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
-							else:
-								db_name = 'cluster'
-
-							command.db.replace_database(pymysql.connect(
-								user='nobody',
-								passwd='',
-								unix_socket='/var/run/mysql/mysql.sock',
-								db=db_name,
-								autocommit=True
-							))
-
-						# Flush the cache, we do this
-						# since multiple threads may be
-						# running and there is no
-						# mechanism for one thread to
-						# invalidate the cache of
-						# another thread.
-						command.db.clearCache()
-
 						done = True
 					else:
 						cmd_arg_list.append(args.pop())
@@ -221,7 +195,22 @@ class StackWS(View):
 		# If it's not the sync command, run the
 		# command module wrapper directly.
 		else:
+			connection = None
 			try:
+				# We have to replace the database connection
+				# if we aren't a superuser. There should be a
+				# cleaner way to do this without relying on the
+				# database security layer.
+				if not request.user.is_superuser:
+					connection = get_mysql_connection('nobody', '')
+					command.db = DatabaseConnection(connection)
+
+				# Flush the cache, we do this since multiple
+				# threads may be running and there is no
+				# mechanism for one thread to invalidate the
+				# cache of another thread.
+				command.db.clearCache()
+
 				rc = command.runWrapper(cmd_module, cmd_arg_list)
 			# If we hit a database error, check if it's an access
 			# denied error. If so, sanitize the error message, and
@@ -256,6 +245,9 @@ class StackWS(View):
 				return HttpResponse(json.dumps({'API Error': errortext}),
 						    content_type='application/json',
 						    status=500)
+			finally:
+				if connection:
+					connection.close()
 
 			# Get output from command
 			text = command.getText()
@@ -357,4 +349,3 @@ def upload(request):
 	s = {'csv': text, 'name': ufile.name, 'dir': csv_dir}
 	return HttpResponse(str(json.dumps(s)),
 			    content_type="application/json")
-

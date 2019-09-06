@@ -1139,28 +1139,35 @@ class DocStringHandler(handler.ContentHandler,
 		self.text += s
 
 
-def _connect_db():
-	db = None
+def get_mysql_connection(user=None, password=None):
+	"""
+	Creates a connection to MySQL and returns it, or returns None if
+	it can't connect. The caller must call `close` on the connection.
+	"""
+
+	connection = None
 
 	try:
-		# Root connects as 'apache', everyone else as the user
-		# running the python command.
-		if os.geteuid() == 0:
-			user = 'apache'
-		else:
-			user = pwd.getpwuid(os.geteuid())[0]
+		if user is None:
+			# Root connects as 'apache', everyone else as the user
+			# running the python command.
+			if os.geteuid() == 0:
+				user = 'apache'
+			else:
+				user = pwd.getpwuid(os.geteuid())[0]
 
-		# Try to read the apache user's password
-		passwd = ''
-		try:
-			with open('/etc/apache.my.cnf') as f:
-				for line in f:
-					if line.startswith('password'):
-						passwd = line.split('=')[1].strip()
-						break
-		except:
-			# Couldn't read the password, try connecting without one
-			pass
+		if password is None:
+			# Try to read the apache user's password
+			password = ''
+			try:
+				with open('/etc/apache.my.cnf') as f:
+					for line in f:
+						if line.startswith('password'):
+							password = line.split('=')[1].strip()
+							break
+			except:
+				# Couldn't read the password, try connecting without one
+				pass
 
 		# Connect to a copy of the database if we are running pytest-xdist
 		if 'PYTEST_XDIST_WORKER' in os.environ:
@@ -1169,19 +1176,19 @@ def _connect_db():
 			db_name = 'cluster'
 
 		if os.path.exists('/var/run/mysql/mysql.sock'):
-			db = pymysql.connect(
+			connection = pymysql.connect(
 				db=db_name,
 				user=user,
-				passwd=passwd,
+				passwd=password,
 				host='localhost',
 				unix_socket='/var/run/mysql/mysql.sock',
 				autocommit=True
 			)
 		else:
-			db = pymysql.connect(
+			connection = pymysql.connect(
 				db=db_name,
 				user=user,
-				passwd=passwd,
+				passwd=password,
 				host='localhost',
 				port=40000,
 				autocommit=True
@@ -1191,7 +1198,7 @@ def _connect_db():
 		# No database
 		pass
 
-	return db
+	return connection
 
 
 class DatabaseConnectionMeta(type):
@@ -1205,7 +1212,7 @@ class DatabaseConnectionMeta(type):
 
 	def __init__(cls, name, bases, attrs, **kwargs):
 		if DatabaseConnectionMeta._db is None:
-			DatabaseConnectionMeta._db = _connect_db()
+			DatabaseConnectionMeta._db = get_mysql_connection()
 			atexit.register(lambda: DatabaseConnectionMeta._db.close())
 
 		cls.database = property(lambda x: DatabaseConnectionMeta._db)
@@ -1256,9 +1263,13 @@ class DatabaseConnection(metaclass=DatabaseConnectionMeta):
 		# No match
 		return None
 
-	def __init__(self, *, caching=True):
-		# self.database : object returned from orginal connect call
-		# self.link	: database cursor used by everyone else
+	def __init__(self, connection=None, *, caching=True):
+		# If connection is passed in, use it instead of the
+		# automagical one. The caller must remember to close
+		# the connection themselves.
+		if connection:
+			self.database = connection
+
 		if self.database:
 			self.name     = self.database.db.decode() # name of the database
 			self.link     = self.database.cursor()
@@ -1284,21 +1295,6 @@ class DatabaseConnection(metaclass=DatabaseConnectionMeta):
 			self.caching = str2bool(os.environ.get('STACKCACHE'))
 		else:
 			self.caching = caching
-
-	def replace_database(self, database):
-		"""
-		This allows you to replace the low-level database connection
-		but the caller is responsible for closing the connection.
-		"""
-
-		if database:
-			self.database = database
-			self.name     = self.database.db.decode() # name of the database
-			self.link     = self.database.cursor()
-		else:
-			self.database = None
-			self.name     = None
-			self.link     = None
 
 	def enableCache(self):
 		self.caching = True
