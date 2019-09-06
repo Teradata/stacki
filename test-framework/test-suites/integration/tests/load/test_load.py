@@ -17,13 +17,13 @@ class TestLoad:
 			("load/json/route.json", "load/json/expected_route.json", "stack list {} route output-format=json", "route"),
 		),
 	)
-	def test_load_processing(self, host, test_file, dump_json, expected_results_json, list_command_template, object_name):
+	def test_load_processing(self, host, stack_load, test_file, dump_json, expected_results_json, list_command_template, object_name):
 		"""Test that loading information at the various scopes works as expected."""
 		# get the file path to use in load.
 		file_path = Path(test_file(dump_json)).resolve(strict = True)
 
 		# Load all of the test data into the database. We use -e to ensure we fail if a command output by load fails.
-		result = host.run(f"stack load {file_path} | bash -x -e")
+		result = stack_load(file_path)
 		assert result.rc == 0
 
 		# Now ensure the objects were added as expected at each scope.

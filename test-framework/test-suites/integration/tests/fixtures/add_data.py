@@ -195,3 +195,18 @@ def add_host_with_net(host):
 	host.run("stack add host interface a:frontend interface=eth2 network=test ip=192.168.0.2")
 	host.run("stack add host backend-0-0 appliance=backend rack=0 rank=0")
 	host.run("stack add host interface backend-0-0 interface=eth0 network=test ip=192.168.0.3")
+
+@pytest.fixture(params = (True, False))
+def stack_load(request, host):
+	if request.param:
+		def _load_using_exec(dump_file, **kwargs):
+			kwargs_string = " ".join(f"{key}={value}" for key, value in kwargs.items())
+			return host.run(f"stack load {dump_file} exec=True {kwargs_string}")
+
+		return _load_using_exec
+
+	def _load_using_bash(dump_file, **kwargs):
+		kwargs_string = " ".join(f"{key}={value}" for key, value in kwargs.items() if key != "exec")
+		return host.run(f"stack load {dump_file} {kwargs_string} | bash -x")
+
+	return _load_using_bash
