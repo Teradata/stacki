@@ -20,7 +20,7 @@ import pkgutil
 
 from . import db
 
-# TODO: Make this dynamic
+# TODO: Make the file path dynamic
 type_defs = load_schema_from_path("./app/schema/")
 
 
@@ -28,6 +28,18 @@ query_fields = []
 mutation_fields = []
 object_fields = []
 
+# TODO: Make the file path dynamic
+# If you want to make a new resolver file
+# use this as the starting point
+#
+# from ariadne import ObjectType, QueryType, MutationType
+# import app.db as db
+
+# query = QueryType()
+# mutation = MutationType()
+# object_types = []
+
+object_types = []
 for finder, name, ispkg in pkgutil.walk_packages(["./app/resolvers"]):
     _module = finder.find_module(name).load_module(name)
     query_fields.append(_module.query)
