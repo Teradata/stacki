@@ -12,11 +12,21 @@ from app.resolvers.OSResolver import resolve_oses
 
 query = QueryType()
 mutation = MutationType()
+box = ObjectType("box")
 
 
 @query.field("boxes")
 def resolve_boxes(*_):
     results, _ = db.run_sql("SELECT id, name, os AS os_id FROM boxes")
+    return results
+
+
+@box.field("os")
+def resolve_os(box, info):
+    args = (box.get("os_id"),)
+    results, _ = db.run_sql(
+        "SELECT id, name from oses where id=%s", args, fetchone=True
+    )
     return results
 
 

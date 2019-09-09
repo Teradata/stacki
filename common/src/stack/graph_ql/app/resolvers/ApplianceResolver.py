@@ -51,19 +51,20 @@ def resolve_update_appliance(_, info, id, name=None, public=None):
     update_params = []
     args = ()
     if name:
-        update_params.append('name="%s"')
+        update_params.append("name=%s")
         args += (name,)
 
     if public is not None:
-        update_params.append('public="%s"')
+        update_params.append("public=%s")
         args += (public,)
 
-    cmd = f'UPDATE appliances SET {",".join(update_params)}' + " WHERE id=%s"
-    db.run_sql(cmd)
+    args += (id,)
+    cmd = f'UPDATE appliances SET {", ".join(update_params)}' + " WHERE id=%s"
+    db.run_sql(cmd, args)
 
     cmd = "SELECT id, name, public FROM appliances WHERE id=%s"
     args = (id,)
-    result, _ = db.run_sql(cmd, fetchone=True)
+    result, _ = db.run_sql(cmd, args, fetchone=True)
 
     return result
 
@@ -79,5 +80,6 @@ def resolve_delete_appliance(_, info, id):
         return False
 
     return True
+
 
 object_types = []
