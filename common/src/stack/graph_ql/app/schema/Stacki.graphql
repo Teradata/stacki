@@ -225,14 +225,14 @@ type Routes {
   interface: String
 }
 
-type ScopeMap {
-  id: Int!
-  scope: String!
-  applianceId: Appliances
-  osId: Oses
-  environmentId: Environments
-  nodeId: Nodes
-}
+# type ScopeMap {
+#   id: Int!
+#   scope: String!
+#   applianceId: Appliances
+#   osId: Oses
+#   environmentId: Environments
+#   nodeId: Nodes
+# }
 
 type Stacks {
   box: Int!
