@@ -5,6 +5,7 @@
 # @copyright@
 
 import asyncio
+import atexit
 import ipaddress
 from itertools import filterfalse
 import json
@@ -17,7 +18,6 @@ import socket
 import subprocess
 import sys
 
-from stack.api.get import GetAttr
 from stack.commands import get_mysql_connection, DatabaseConnection
 from stack.exception import CommandError
 import stack.mq
@@ -420,14 +420,14 @@ class Discovery:
 
 			# Set up the rack
 			if rack is None:
-				self._rack = int(GetAttr("discovery.base.rack"))
+				self._rack = int(command.getAttr("discovery.base.rack"))
 			else:
 				self._rack = int(rack)
 
 			# Set up the rank
 			if rank is None:
 				# Start with with default
-				self._rank = int(GetAttr("discovery.base.rank"))
+				self._rank = int(command.getAttr("discovery.base.rank"))
 
 				# Try to pull the next rank based on the DB
 				for host in command.call("list.host"):
@@ -484,6 +484,10 @@ class Discovery:
 			os.close(1)
 			os.close(2)
 
+			# We also have to unschedule the `atexit` call so
+			# this daemon doesn't close the DB connection on the parent
+			atexit.unregister(DatabaseConnection.close)
+
 			# Seperate ourselves from the parent process
 			os.setsid()
 
@@ -493,8 +497,11 @@ class Discovery:
 				# path back up to the caller
 				sys.exit(0)
 
+			# Again, we need to unregister the cleanup function for the DB
+			atexit.unregister(DatabaseConnection.close)
+
 			# We need our own DB connection, so when the parent process closes
-		# theirs, we still have an open socket
+			# theirs, we still have an open socket
 			self._command = command
 			self._command.db = DatabaseConnection(get_mysql_connection())
 

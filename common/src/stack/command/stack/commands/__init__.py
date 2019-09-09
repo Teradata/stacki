@@ -1213,14 +1213,14 @@ class DatabaseConnectionMeta(type):
 	def __init__(cls, name, bases, attrs, **kwargs):
 		if DatabaseConnectionMeta._db is None:
 			DatabaseConnectionMeta._db = get_mysql_connection()
-			atexit.register(DatabaseConnectionMeta._close)
+			atexit.register(DatabaseConnectionMeta.close)
 
 		# Classes using this metaclass get readonly access to the
 		# shared database connection object.
 		cls._db = property(lambda _: DatabaseConnectionMeta._db)
 
 	@staticmethod
-	def _close():
+	def close():
 		if DatabaseConnectionMeta._db:
 			DatabaseConnectionMeta._db.close()
 			DatabaseConnectionMeta._db = None
