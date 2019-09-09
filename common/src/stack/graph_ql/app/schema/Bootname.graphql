@@ -1,0 +1,9 @@
+type Bootname {
+  id: Int
+  name: String
+  type: String
+}
+
+extend type Query {
+  bootname: [Bootname]
+}

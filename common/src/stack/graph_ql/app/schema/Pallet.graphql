@@ -2,12 +2,18 @@ type Pallet {
   id: Int
   name: String
   version: String
-  release: String
+  rel: String
   arch: String
   os: String
   url: String
 }
 
 extend type Query {
-  allPallets: [Pallet]
+  pallet: [Pallet]
+}
+
+extend type Mutation {
+  addPallet(name: String, verion: String, rel: String, arch: String, os: String, url: String): Pallet 
+	updatePallet(id: Int, name: String, verion: String, rel: String, arch: String, os: String, url: String): Pallet!
+  deletePallet(id: Int): Boolean!
 }
