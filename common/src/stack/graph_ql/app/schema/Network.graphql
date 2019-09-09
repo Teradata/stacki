@@ -11,5 +11,11 @@ type Network {
 }
 
 extend type Query {
-  allNetworks: [Network]
+  networks(id: Int, name: String): [Network]
+}
+
+extend type Mutation {
+  addNetwork(name: String!, zone: String, address: String!, mask: String!, gateway: String, mtu: Int, dns: Boolean, pxe: Boolean): Network
+  deleteNetwork(id: Int!): Boolean!
+  updateNetwork(id: Int!, name: String, zone: String, address: String, mask: String, gateway: String, mtu: Int, dns: Boolean, pxe: Boolean): Network
 }
