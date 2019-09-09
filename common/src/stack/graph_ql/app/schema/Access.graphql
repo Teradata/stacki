@@ -1,0 +1,13 @@
+type Access {
+  command: String
+  groupID: Int
+}
+
+extend type Query {
+  access: [Access]
+}
+
+extend type Mutation {
+  addAccess(groupID: Int!, command: String): Access
+  deleteAccess(groupID: Int!): Boolean!
+}
