@@ -1,37 +1,11 @@
-interface Attribute {
-  type: String
-  scope: String
-  attr: String
-  value: String
-}
-
-type GlobalAttribute implements Attribute {
-  type: String
-  scope: String
-  attr: String
-  value: String
-  shadow: String
-}
-
-type HostAttribute implements Attribute {
-  type: String
-  scope: String
-  attr: String
-  value: String
-  name: String
-  shadow: String
-}
-
-type ApplianceAttribute implements Attribute {
-  type: String
-  scope: String
-  attr: String
-  value: String
-  appliance: String
+type Attribute {
+	id: Int
+	scope_map_id: Int
+	scope_map: ScopeMap
+	name: String
+	value: String
 }
 
 extend type Query {
-	allAttributes: [GlobalAttribute]
-  hostAttributes: [HostAttribute]
-  applianceAttributes: [ApplianceAttribute]
+	attributes(id: Int, name: String, value: String, scope: String, scope_name: String): [Attribute]
 }

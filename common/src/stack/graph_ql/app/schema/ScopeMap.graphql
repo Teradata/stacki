@@ -1,0 +1,15 @@
+type ScopeMap {
+	id: Int
+	scope: String
+	appliance_id: Int
+	appliance: Appliance
+	os_id: Int
+	os: Os
+	environment_id: Int
+	node_id: Int
+}
+
+extend type Query {
+	scope_maps: [ScopeMap]
+	scope_map(id: Int, scope: String): ScopeMap
+}
