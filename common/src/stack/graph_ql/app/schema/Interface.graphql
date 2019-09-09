@@ -1,13 +1,13 @@
 type Interface {
   id: Int
-  host: String
+  host_id: Int
+  host: Host
   mac: String
   ip: String
-  netmask: String
-  gateway: String
   name: String
   device: String
-  subnet: String
+  network_id: Int
+  network: Network
   module: String
   vlanid: Int
   options: String
@@ -16,5 +16,9 @@ type Interface {
 }
 
 extend type Query {
-  allInterfaces: [Interface]
+  interfaces(id: Int): [Interface]
+}
+
+extend type Mutation {
+  addInterface(host_id: Int!, device: String!, network_id: Int!, name: String, mac: String, ip: String, module: String, vlanid: Int, options: String, channel: String, main: Int): Boolean!
 }
