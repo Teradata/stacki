@@ -29,17 +29,17 @@ This is a very loose list of what has been accomplished.
 | ib_memberships         |                    |                    |                    |                    |
 | ib_partitions          |                    |                    |                    |                    |
 | memberships            |                    |                    |                    |                    |
-| interfaces             |                    |                    |                    |                    |
-| hosts                  |                    |                    |                    |                    |
+| interfaces             | :heavy_check_mark: | :heavy_check_mark: |                    |                    |
+| hosts                  |                    | :heavy_check_mark: |                    |                    |
 | oses                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | partitions             |                    |                    |                    |                    |
 | public_keys            |                    |                    |                    |                    |
-| pallets                |                    |                    |                    |                    |
+| pallets                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | routes                 |                    |                    |                    |                    |
 | scope_map              |                    |                    |                    |                    |
 | stacks                 |                    |                    |                    |                    |
 | storage_controller     |                    |                    |                    |                    |
 | storage_partition      |                    |                    |                    |                    |
-| networks               |                    |                    |                    |                    |
+| networks               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | switchports            |                    |                    |                    |                    |
 | tags                   |                    |                    |                    |                    |
