@@ -11,23 +11,22 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 box = ObjectType("Box")
-
+bootaction = ObjectType("Bootaction")
 
 @query.field("oses")
 def resolve_oses(*_):
-    results, _ = db.run_sql("SELECT id, name FROM oses")
-    return results
+	results, _ = db.run_sql("SELECT id, name FROM oses")
+	return results
 
-
+@bootaction.field("os")
 @box.field("os")
-def resolve_os_from_id(parent, info):
-    if parent is None or not parent.get("os_id"):
-        return None
+def resolve_os_from_parent(parent, info):
+	if parent is None or not parent.get("os_id"):
+		return None
 
-    cmd = "SELECT id, name FROM oses WHERE id=%s"
-    args = [parent.get("os_id")]
-    result, _ = db.run_sql(cmd, args, fetchone=True)
-    return result
+	cmd = "SELECT id, name FROM oses WHERE id=%s"
+	args = [parent["os_id"]]
+	result, _ = db.run_sql(cmd, args, fetchone=True)
+	return result
 
-
-object_types = [box]
+object_types = [box, bootaction]

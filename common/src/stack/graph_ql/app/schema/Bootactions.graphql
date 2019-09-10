@@ -1,0 +1,21 @@
+type Bootaction {
+	id: String
+	boot_name_id: Int
+	boot_name: Bootname
+	os_id: Int
+	os: Os
+	kernel: String
+	ramdisk: String
+	args: String
+}
+
+extend type Query {
+	bootactions(
+		id: String
+		kernel: String
+		ramdisk: String
+		args: String
+		os_name: String
+		boot_name: String
+	): [Bootaction]
+}
