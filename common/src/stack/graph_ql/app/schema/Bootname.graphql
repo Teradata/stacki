@@ -5,5 +5,5 @@ type Bootname {
 }
 
 extend type Query {
-  bootname: [Bootname]
+  bootnames: [Bootname]
 }

@@ -27,7 +27,6 @@ def resolve_networks(_, info, id=None, name=None):
 
 @mutation.field("addNetwork")
 def resolve_add_network(obj, info, name, address, mask, gateway=None, zone="", mtu=None, dns=False, pxe=False):
-    # TODO: get default os FROM frontend's os
 
     if name in [network["name"] for network in resolve_networks(obj, info)]:
         raise Exception(f"network {name} exists")
@@ -52,7 +51,6 @@ def resolve_add_network(obj, info, name, address, mask, gateway=None, zone="", m
 
 @mutation.field("updateNetwork")
 def resolve_update_network(obj, info, id, name=None, address=None, mask=None, gateway=None, zone=None, mtu=None, dns=None, pxe=None):
-    # TODO: get default os FROM frontend's os
 
     network = resolve_networks(obj, info, id=id)
 
