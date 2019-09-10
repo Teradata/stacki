@@ -6,6 +6,14 @@ type Attribute {
 	value: String
 }
 
+# TODO HACKY
+type ReverseAttr {
+    scope: String
+    type: String
+    attr: String
+    value: String
+}
+
 extend type Query {
 	attributes(id: Int, name: String, value: String, scope: String, scope_name: String): [Attribute]
 }
