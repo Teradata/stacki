@@ -11,8 +11,8 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 
-@query.field("bootname")
-def resolve_bootname(*_):
+@query.field("bootnames")
+def resolve_bootnames(*_):
     results, _ = db.run_sql("SELECT id, name, type FROM bootnames")
     return results
 
