@@ -11,12 +11,14 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 scope_map = ObjectType("ScopeMap")
+host = ObjectType("Host")
 
 @query.field("appliances")
 def resolve_appliances(*_):
     results, _ = db.run_sql("SELECT id, name, public FROM appliances")
     return results
 
+@host.field('appliance')
 @scope_map.field("appliance")
 def resolve_from_parent_id(parent, info):
 	if parent is None or not parent.get("appliance_id"):
@@ -96,4 +98,4 @@ def resolve_delete_appliance(_, info, id):
 
     return True
 
-object_types = [scope_map]
+object_types = [scope_map, host]

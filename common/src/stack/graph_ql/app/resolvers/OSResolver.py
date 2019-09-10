@@ -20,10 +20,14 @@ def resolve_oses(*_):
 
 
 @box.field("os")
-def resolve_os_from_id(box, *_):
+def resolve_os_from_id(parent, info):
+    if parent is None or not parent.get("os_id"):
+        return None
+
     cmd = "SELECT id, name FROM oses WHERE id=%s"
-    args = (box.get("os_id"),)
+    args = [parent.get("os_id")]
     result, _ = db.run_sql(cmd, args, fetchone=True)
     return result
+
 
 object_types = [box]
