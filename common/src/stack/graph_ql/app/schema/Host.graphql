@@ -7,7 +7,9 @@ type Host {
   box_id: Int
   environment_id: Int
   osaction_id: Int
-  installaction_id: String
+  osaction: Bootaction
+  installaction_id: Int
+  installaction: Bootaction
   comment: String
   metadata: String
   appliance: Appliance
