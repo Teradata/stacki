@@ -11,6 +11,9 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 attribute = ObjectType("Attribute")
+storagePartition = ObjectType("StoragePartition")
+storageController = ObjectType("StorageController")
+
 
 @query.field("scope_maps")
 def resolve_scope_map(parent, info, **kwargs):
@@ -44,6 +47,9 @@ def resolve_scope_map(parent, info, **kwargs):
 
 	return result
 
+
+@storagePartition.field("scope_map")
+@storageController.field("scope_map")
 @attribute.field("scope_map")
 def resolve_scope_map_from_parent(parent, info):
 	if parent is None or not parent.get("scope_map_id"):
@@ -59,4 +65,5 @@ def resolve_scope_map_from_parent(parent, info):
 
 	return result
 
-object_types = [attribute]
+
+object_types = [attribute, storagePartition, storageController]

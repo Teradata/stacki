@@ -1,0 +1,20 @@
+type StorageController {
+    ID: Int
+    enclosure: Int
+    adapter: Int
+    slot: Int
+    raidlevel: String
+    arrayNumber: Int
+    options: String
+    scope_map: ScopeMap
+}
+
+extend type Query {
+    storageControllers(ID: Int): [StorageController]
+}
+
+extend type Mutation {
+    addStorageController(scopeMapId: Int!, enclosure: Int!, adapter: Int!, slot: Int!, raidlevel: String!, arrayNumber: Int!, options: String): StorageController
+    updateStorageController(ID: Int!, scopeMapId: Int, enclosure: Int, adapter: Int, slot: Int, raidlevel: String, arrayNumber: Int, options: String): StorageController
+    deleteStorageController(ID: Int!): Boolean
+}

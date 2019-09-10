@@ -1,0 +1,20 @@
+type StoragePartition {
+    ID: Int
+    device: String
+    mountpoint: String
+    size: Int
+    fstype: String
+    partNumber: Int
+    options: String
+    scope_map: ScopeMap
+}
+
+extend type Query {
+    storagePartitions(ID: Int): [StoragePartition]
+}
+
+extend type Mutation {
+    addStoragePartition(scopeMapId: Int!, device: String!, mountpoint: String, size: Int!, fstype: String, partNumber: Int!, options: String): StoragePartition
+    updateStoragePartition(ID: Int!, scopeMapId: Int, device: String, mountpoint: String, size: Int, fstype: String, partNumber: Int, options: String): StoragePartition
+    deleteStoragePartition(ID: Int!): Boolean
+}

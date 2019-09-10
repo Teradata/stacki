@@ -239,27 +239,27 @@ type Stacks {
   roll: Int!
 }
 
-type StorageController {
-  id: Int!
-  scopeMapId: ScopeMap
-  enclosure: Int!
-  adapter: Int!
-  slot: Int!
-  raidlevel: String!
-  arrayid: Int!
-  options: String!
-}
+# type StorageController {
+#   id: Int!
+#   scopeMapId: ScopeMap
+#   enclosure: Int!
+#   adapter: Int!
+#   slot: Int!
+#   raidlevel: String!
+#   arrayid: Int!
+#   options: String!
+# }
 
-type StoragePartition {
-  id: Int!
-  scopeMapId: ScopeMap
-  device: String!
-  mountpoint: String
-  size: Int!
-  fstype: String
-  partid: Int!
-  options: String!
-}
+# type StoragePartition {
+#   id: Int!
+#   scopeMapId: ScopeMap
+#   device: String!
+#   mountpoint: String
+#   size: Int!
+#   fstype: String
+#   partid: Int!
+#   options: String!
+# }
 
 type Subnets {
   id: Int!
