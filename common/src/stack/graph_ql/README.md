@@ -25,21 +25,21 @@ This is a very loose list of what has been accomplished.
 | firmware_mapping       |                    |                    |                    |                    |
 | firmware_model         |                    |                    |                    |                    |
 | firmware_version_regex |                    |                    |                    |                    |
-| groups                 |                    |                    |                    |                    |
+| groups                 | in progress        | in progress        | in progress        | in progress        |
 | ib_memberships         |                    |                    |                    |                    |
 | ib_partitions          |                    |                    |                    |                    |
-| memberships            |                    |                    |                    |                    |
+| memberships            | :x:                | :x:                | :x:                | :x:                |
 | interfaces             | :heavy_check_mark: | :heavy_check_mark: |                    |                    |
 | hosts                  |                    | :heavy_check_mark: |                    |                    |
 | oses                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| partitions             |                    |                    |                    |                    |
-| public_keys            |                    |                    |                    |                    |
+| partitions             | :x:                | :x:                | :x:                | :x:                |
+| public_keys            | :x:                | :x:                | :x:                | :x:                |
 | pallets                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | routes                 |                    |                    |                    |                    |
-| scope_map              |                    | :heavy_check_mark: |                    |                    |
+| scope_map              | :x:                | :heavy_check_mark: | :x:                | :x:                |
 | stacks                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| storage_controller     |                    |                    |                    |                    |
-| storage_partition      |                    |                    |                    |                    |
+| storage_controller     | in progress        | in progress        | in progress        | in progress        |
+| storage_partition      | in progress        | in progress        | in progress        | in progress        |
 | networks               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | switchports            |                    |                    |                    |                    |
 | tags                   |                    |                    |                    |                    |
