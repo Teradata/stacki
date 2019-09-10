@@ -13,6 +13,7 @@ from app.resolvers.OSResolver import resolve_oses
 query = QueryType()
 mutation = MutationType()
 host = ObjectType("Host")
+stack = ObjectType("Stack")
 
 
 @query.field("boxes")
@@ -21,6 +22,7 @@ def resolve_boxes(*_):
     return results
 
 
+@stack.field("box")
 @host.field("box")
 def resolve_from_parent_id(parent, info):
     if parent is None or not parent.get("box_id"):
@@ -76,4 +78,4 @@ def resolve_delete_box(_, info, id):
     return True
 
 
-object_types = [host]
+object_types = [host, stack]

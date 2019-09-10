@@ -1,0 +1,13 @@
+type Stack {
+    box: Box
+    pallet: Pallet
+}
+
+extend type Query {
+    stacks(boxId: Int, palletId: Int): [Stack]
+}
+
+extend type Mutation {
+    addStack(boxId: Int!, palletId: Int!): Boolean!
+    deleteStack(boxId: Int!, palletId: Int!): Boolean!
+}

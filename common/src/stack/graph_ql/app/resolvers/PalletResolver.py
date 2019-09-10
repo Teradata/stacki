@@ -10,7 +10,7 @@ import app.db as db
 
 query = QueryType()
 mutation = MutationType()
-
+stack = ObjectType("Stack")
 
 @query.field("pallets")
 def resolve_pallets(*_):
@@ -25,6 +25,14 @@ def resolve_pallet(_, info, id):
     result, _ = db.run_sql(cmd, args, fetchone=True)
     return result
 
+@stack.field("pallet")
+def resolve_pallet_from_parent(parent, info):
+    if parent is None or not parent.get("pallet_id"):
+        return None
+
+    pallet_id = parent["pallet_id"]
+    pallet = resolve_pallet(parent, info, pallet_id)
+    return pallet
 
 @mutation.field("addPallet")
 def resolve_add_pallet(_, info, name, version, release, arch, os, url=None):
@@ -109,4 +117,4 @@ def resolve_delete_pallet(_, info, id):
 
     return True
 
-object_types = []
+object_types = [stack]
