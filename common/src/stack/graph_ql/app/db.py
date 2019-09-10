@@ -14,7 +14,7 @@ def get_database_pw():
         return ""
 
 
-def connect_db(host="localhost", username="apache", passwd="", port=40000):
+def connect_db(host="localhost", username="apache", passwd="", port=40000, dict_cursor=True):
     if not passwd:
         passwd = get_database_pw()
 
@@ -42,15 +42,21 @@ def connect_db(host="localhost", username="apache", passwd="", port=40000):
             passwd=passwd,
             autocommit=True,
         )
-    return db.cursor(pymysql.cursors.DictCursor)
+
+    if dict_cursor:
+        return db.cursor(pymysql.cursors.DictCursor)
+
+    return db.cursor(pymysql.cursors.Cursor)
 
 
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
     db = connect_db(host=database_url, username="root", passwd="secret", port=3306)
+    db_rows = connect_db(host=database_url, username="root", passwd="secret", port=3306, dict_cursor=False)
 else:
     db = connect_db()
+    db_rows = connect_db(dict_cursor=False)
 
 
 def run_sql(cmd, args=None, fetchone=False):
@@ -71,3 +77,20 @@ def run_sql(cmd, args=None, fetchone=False):
 
     return (db.fetchall(), affected_rows)
 
+def run_sql_rows(cmd, args=None, fetchone=False):
+    """
+  Runs the SQL command
+
+  Returns:
+  results - either a list of results or a single result depending
+  on the fetchone arg
+
+  affected_rows - Number of rows affected
+  """
+    if not args:
+        args = ()
+    affected_rows = db_rows.execute(cmd, args)
+    if fetchone:
+        return db_rows.fetchone()
+
+    return db_rows.fetchall()

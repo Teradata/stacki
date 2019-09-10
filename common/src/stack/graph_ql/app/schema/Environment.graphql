@@ -1,6 +1,7 @@
 type Environment {
   id: Int
   name: String
+  attributes: [ReverseAttr]
 }
 
 extend type Query {

@@ -11,6 +11,7 @@ type Host {
   comment: String
   metadata: String
   appliance: Appliance
+  attributes: [ReverseAttr]
   box: Box
   environment: Environment
   interfaces: [Interface]

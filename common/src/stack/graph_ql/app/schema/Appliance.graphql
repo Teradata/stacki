@@ -2,7 +2,9 @@
 type Appliance {
   id: Int
   name: String
+  # TODO: Remove public field from schema
   public: String
+  attributes: [ReverseAttr]
 }
 
 extend type Query {
