@@ -6,4 +6,11 @@ type Bootname {
 
 extend type Query {
   bootnames: [Bootname]
+  bootname(id:Int!): Bootname
+}
+
+extend type Mutation {
+  deleteBootname(id: Int!): Boolean!
+  addBootname(name: String!, type: String!): Bootname
+  updateBootname(id: Int!, name: String, type: String): Bootname
 }
