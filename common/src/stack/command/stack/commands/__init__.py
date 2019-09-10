@@ -562,7 +562,7 @@ class HostArgumentProcessor:
 			and subnet == None
 			and host_filter == None
 		):
-                        return flatten(frontends)
+			return flatten(frontends)
 
 		# Now get the backend appliances
 		rows = self.db.select("""
