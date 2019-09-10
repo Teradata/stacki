@@ -36,8 +36,8 @@ This is a very loose list of what has been accomplished.
 | public_keys            |                    |                    |                    |                    |
 | pallets                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | routes                 |                    |                    |                    |                    |
-| scope_map              |                    |                    |                    |                    |
-| stacks                 |                    |                    |                    |                    |
+| scope_map              |                    | :heavy_check_mark: |                    |                    |
+| stacks                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | storage_controller     |                    |                    |                    |                    |
 | storage_partition      |                    |                    |                    |                    |
 | networks               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
