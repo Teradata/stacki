@@ -10,10 +10,26 @@ import app.db as db
 
 query = QueryType()
 mutation = MutationType()
+bootaction = ObjectType("Bootaction")
 
 @query.field("bootnames")
 def resolve_bootnames(*_):
     results, _ = db.run_sql("SELECT id, name, type FROM bootnames")
     return results
 
-object_types = []
+@bootaction.field("boot_name")
+def resolve_bootname_from_parent(parent, info):
+	if parent is None or not parent.get("boot_name_id"):
+		return None
+
+	cmd = """
+		SELECT id, name, type
+		FROM bootnames
+		WHERE id=%s
+	"""
+	args = [parent["boot_name_id"]]
+	result, _ = db.run_sql(cmd, args, fetchone=True)
+
+	return result
+
+object_types = [bootaction]

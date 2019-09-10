@@ -3,24 +3,21 @@ type Host {
   name: String
   rack: String
   rank: String
-  appliance: String
-  os: String
-  box: String
-  environment: String
-  osaction: String
-  installaction: String
+  appliance_id: Int
+  box_id: Int
+  environment_id: Int
+  osaction_id: Int
+  installaction_id: String
   comment: String
   metadata: String
+  appliance: Appliance
+  box: Box
+  environment: Environment
   interfaces: [Interface]
 }
 
-type AddHost {
-  ok: Boolean
-}
-
 extend type Query {
-  allHosts: [Host]
-  list_host: [Host]
+  hosts: [Host]
 }
 
 extend type Mutation {
@@ -33,9 +30,5 @@ extend type Mutation {
     osaction: String = "default"
     rack: String!
     rank: String!
-  ): AddHost
-}
-
-extend type Subscription {
-  allHosts: [Host]
+  ): Host
 }

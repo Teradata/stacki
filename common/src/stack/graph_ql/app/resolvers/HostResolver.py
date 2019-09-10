@@ -11,4 +11,27 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 
+
+@query.field("hosts")
+def resolve_hosts(*_):
+    # TODO: Add nested environment
+    # TODO: Add nested osaction
+    # TODO: Add nested installaction
+    # TODO: Add nested attributes
+
+    cmd = """
+        SELECT id, name, rack, rank, comment, metadata,
+        appliance AS appliance_id,
+        box AS box_id,
+        environment AS environment_id,
+        osaction AS osaction_id,
+        installaction AS installaction_id
+        from nodes
+        """
+    args = []
+
+    results, _ = db.run_sql(cmd, args)
+    return results
+
+
 object_types = []

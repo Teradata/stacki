@@ -1,7 +1,7 @@
-type Access {
-  command: String!
-  groupid: Int!
-}
+#type Access {
+#  command: String!
+#  groupid: Int!
+#}
 
 type Aliases {
   id: Int!

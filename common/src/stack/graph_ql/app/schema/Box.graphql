@@ -1,7 +1,7 @@
 type Box {
   id: Int
   name: String
-  os_id: String
+  os_id: Int
   os: Os
 }
 

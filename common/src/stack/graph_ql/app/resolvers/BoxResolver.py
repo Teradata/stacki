@@ -12,7 +12,7 @@ from app.resolvers.OSResolver import resolve_oses
 
 query = QueryType()
 mutation = MutationType()
-box = ObjectType("box")
+host = ObjectType("Host")
 
 
 @query.field("boxes")
@@ -21,23 +21,30 @@ def resolve_boxes(*_):
     return results
 
 
-@box.field("os")
-def resolve_os(box, info):
-    args = (box.get("os_id"),)
-    results, _ = db.run_sql(
-        "SELECT id, name from oses where id=%s", args, fetchone=True
-    )
-    return results
+@host.field("box")
+def resolve_from_parent_id(parent, info):
+    if parent is None or not parent.get("box_id"):
+        return None
+
+    cmd = """
+		SELECT id, name, os as os_id
+		FROM boxes
+		WHERE id=%s
+	"""
+    args = [parent["box_id"]]
+    result, _ = db.run_sql(cmd, args, fetchone=True)
+
+    return result
 
 
 @mutation.field("addBox")
-def resolve_add_box(_, info, name, os="sles"):
+def resolve_add_box(obj, info, name, os="sles"):
     # TODO: get default os FROM frontend's os
 
     if name in [box["name"] for box in resolve_boxes()]:
         raise Exception(f"box {name} exists")
 
-    for os_record in resolve_oses():
+    for os_record in resolve_oses(obj, info):
         if os == os_record.get("name"):
             os_id = os_record.get("id")
             break
@@ -69,4 +76,4 @@ def resolve_delete_box(_, info, id):
     return True
 
 
-object_types = []
+object_types = [host]
