@@ -1,56 +1,62 @@
-Click           7.0        OSI Approved :: BSD License                                         https://palletsprojects.com/p/click/
-Django          1.11.6     OSI Approved :: BSD License                                         https://www.djangoproject.com/
-Flask           1.0.2      OSI Approved :: BSD License                                         https://www.palletsprojects.com/p/flask/
-GitPython       2.1.11     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/GitPython
-Jinja2          2.10       OSI Approved :: BSD License                                         http://jinja.pocoo.org/
-MarkupSafe      1.1.0      OSI Approved :: BSD License                                         https://www.palletsprojects.com/p/markupsafe/
-PyMySQL         0.8.1      OSI Approved :: MIT License                                         https://github.com/PyMySQL/PyMySQL/
-PyNaCl          1.3.0      Apache License 2.0                                                  https://github.com/pyca/pynacl/
-PyYAML          3.13       OSI Approved :: MIT License                                         http://pyyaml.org/wiki/PyYAML
-Werkzeug        0.14.1     OSI Approved :: BSD License                                         https://www.palletsprojects.org/p/werkzeug/
-ansible         2.7.6      OSI Approved :: GNU General Public License v3 or later (GPLv3+)     https://ansible.com/
-asn1crypto      0.24.0     OSI Approved :: MIT License                                         https://github.com/wbond/asn1crypto
-atomicwrites    1.2.1      OSI Approved :: MIT License                                         https://github.com/untitaker/python-atomicwrites
-attrs           18.2.0     OSI Approved :: MIT License                                         https://www.attrs.org/
-bcrypt          3.1.6      OSI Approved :: Apache Software License                             https://github.com/pyca/bcrypt/
-certifi         2018.11.29 OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)                https://certifi.io/
-cffi            1.11.5     MIT                                                                 http://cffi.readthedocs.org
-chardet         3.0.4      OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/chardet/chardet
-configparser    3.7.1      OSI Approved :: MIT License                                         https://github.com/jaraco/configparser/
-cryptography    2.5        OSI Approved :: BSD License                                         https://github.com/pyca/cryptography
-docutils        0.14       OSI Approved :: GNU General Public License (GPL)                    http://docutils.sourceforge.net/
-flake8          3.6.0      OSI Approved :: MIT License                                         https://gitlab.com/pycqa/flake8
-gitdb2          2.0.5      OSI Approved :: BSD License                                         https://github.com/gitpython-developers/gitdb
-idna            2.8        OSI Approved :: BSD License                                         https://github.com/kjd/idna
-iniherit        0.3.9      Public Domain                                                       http://github.com/cadithealth/iniherit
-itsdangerous    1.1.0      OSI Approved :: BSD License                                         https://palletsprojects.com/p/itsdangerous/
-jmespath        0.9.3      OSI Approved :: MIT License                                         https://github.com/jmespath/jmespath.py
-jsoncomment     0.3.2      OSI Approved :: MIT License                                         https://bitbucket.org/Dando_Real_ITA/json-comment
-lockfile        0.12.2     OSI Approved :: MIT License                                         http://launchpad.net/pylockfile
-mccabe          0.6.1      OSI Approved :: MIT License                                         https://github.com/pycqa/mccabe
-mod-wsgi        4.6.5      OSI Approved :: Apache Software License                             http://www.modwsgi.org/
-more-itertools  5.0.0      OSI Approved :: MIT License                                         https://github.com/erikrose/more-itertools
-netifaces       0.10.9     OSI Approved :: MIT License                                         https://github.com/al45tair/netifaces
-paramiko        2.4.2      OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/paramiko/paramiko/
-pexpect         4.6.0      OSI Approved :: ISC License (ISCL)                                  https://pexpect.readthedocs.io/
-pluggy          0.8.1      OSI Approved :: MIT License                                         https://github.com/pytest-dev/pluggy
-psutil          5.5.0      OSI Approved :: BSD License                                         https://github.com/giampaolo/psutil
-ptyprocess      0.6.0      OSI Approved :: ISC License (ISCL)                                  https://github.com/pexpect/ptyprocess
-py              1.7.0      OSI Approved :: MIT License                                         http://py.readthedocs.io/
-pyasn1          0.4.5      OSI Approved :: BSD License                                         https://github.com/etingof/pyasn1
-pycodestyle     2.4.0      OSI Approved :: MIT License                                         https://pycodestyle.readthedocs.io/
-pycparser       2.19       OSI Approved :: BSD License                                         https://github.com/eliben/pycparser
-pyflakes        2.0.0      OSI Approved :: MIT License                                         https://github.com/PyCQA/pyflakes
-pytest          4.1.1      OSI Approved :: MIT License                                         https://docs.pytest.org/en/latest/
-python-daemon   2.2.3      OSI Approved :: Apache Software License                             https://pagure.io/python-daemon/
-pytz            2018.9     OSI Approved :: MIT License                                         http://pythonhosted.org/pytz
-pyzmq           17.1.2     OSI Approved :: BSD License                                         https://pyzmq.readthedocs.org
-redis           3.1.0      OSI Approved :: MIT License                                         https://github.com/andymccurdy/redis-py
-requests        2.21.0     OSI Approved :: Apache Software License                             http://python-requests.org
-setuptools      40.7.1     OSI Approved :: MIT License                                         https://github.com/pypa/setuptools
-six             1.12.0     OSI Approved :: MIT License                                         https://github.com/benjaminp/six
-smmap2          2.0.5      OSI Approved :: BSD License                                         https://github.com/gitpython-developers/smmap
-testinfra       1.16.0     OSI Approved :: Apache Software License                             https://github.com/philpep/testinfra
-text-unidecode  1.2        OSI Approved :: Artistic License                                    https://github.com/kmike/text-unidecode/
-urllib3         1.24.1     OSI Approved :: MIT License                                         https://urllib3.readthedocs.io/
-yoyo-migrations 6.0.0      OSI Approved :: Apache Software License                             https://ollycope.com/software/yoyo/latest/
+Click              7.0       OSI Approved :: BSD License                                         https://palletsprojects.com/p/click/
+Django             1.11.6    OSI Approved :: BSD License                                         https://www.djangoproject.com/
+Flask              1.0.2     OSI Approved :: BSD License                                         https://www.palletsprojects.com/p/flask/
+GitPython          2.1.11    OSI Approved :: BSD License                                         https://github.com/gitpython-developers/GitPython
+Jinja2             2.10.1    OSI Approved :: BSD License                                         http://jinja.pocoo.org/
+MarkupSafe         1.1.1     OSI Approved :: BSD License                                         https://palletsprojects.com/p/markupsafe/
+PyMySQL            0.8.1     OSI Approved :: MIT License                                         https://github.com/PyMySQL/PyMySQL/
+PyNaCl             1.3.0     Apache License 2.0                                                  https://github.com/pyca/pynacl/
+PyYAML             5.1.2     OSI Approved :: MIT License                                         https://github.com/yaml/pyyaml
+Werkzeug           0.15.6    OSI Approved :: BSD License                                         https://palletsprojects.com/p/werkzeug/
+ansible            2.8.4     OSI Approved :: GNU General Public License v3 or later (GPLv3+)     https://ansible.com/
+asn1crypto         0.24.0    OSI Approved :: MIT License                                         https://github.com/wbond/asn1crypto
+atomicwrites       1.3.0     OSI Approved :: MIT License                                         https://github.com/untitaker/python-atomicwrites
+attrs              19.1.0    OSI Approved :: MIT License                                         https://www.attrs.org/
+bcrypt             3.1.7     OSI Approved :: Apache Software License                             https://github.com/pyca/bcrypt/
+certifi            2019.6.16 OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)                https://certifi.io/
+cffi               1.12.3    MIT                                                                 http://cffi.readthedocs.org
+chardet            3.0.4     OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/chardet/chardet
+configparser       4.0.1     OSI Approved :: MIT License                                         https://github.com/jaraco/configparser/
+cryptography       2.7       OSI Approved :: BSD License                                         https://github.com/pyca/cryptography
+docutils           0.15.2    OSI Approved :: GNU General Public License (GPL)                    http://docutils.sourceforge.net/
+entrypoints        0.3       OSI Approved :: MIT License                                         https://github.com/takluyver/entrypoints
+flake8             3.7.8     OSI Approved :: MIT License                                         https://gitlab.com/pycqa/flake8
+gitdb2             2.0.5     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/gitdb
+idna               2.8       OSI Approved :: BSD License                                         https://github.com/kjd/idna
+importlib-metadata 0.21      OSI Approved :: Apache Software License                             http://importlib-metadata.readthedocs.io/
+iniherit           0.3.9     Public Domain                                                       http://github.com/cadithealth/iniherit
+itsdangerous       1.1.0     OSI Approved :: BSD License                                         https://palletsprojects.com/p/itsdangerous/
+jmespath           0.9.4     OSI Approved :: MIT License                                         https://github.com/jmespath/jmespath.py
+json-spec          0.10.1    OSI Approved :: Apache Software License                             http://py.errorist.io/json-spec
+jsoncomment        0.4.2     OSI Approved :: MIT License                                         https://bitbucket.org/Dando_Real_ITA/json-comment
+lockfile           0.12.2    OSI Approved :: MIT License                                         http://launchpad.net/pylockfile
+mccabe             0.6.1     OSI Approved :: MIT License                                         https://github.com/pycqa/mccabe
+mod-wsgi           4.6.7     OSI Approved :: Apache Software License                             http://www.modwsgi.org/
+more-itertools     7.2.0     OSI Approved :: MIT License                                         https://github.com/erikrose/more-itertools
+netifaces          0.10.9    OSI Approved :: MIT License                                         https://github.com/al45tair/netifaces
+packaging          19.1      OSI Approved :: BSD License                                         https://github.com/pypa/packaging
+paramiko           2.6.0     OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/paramiko/paramiko/
+pexpect            4.7.0     OSI Approved :: ISC License (ISCL)                                  https://pexpect.readthedocs.io/
+pluggy             0.13.0    OSI Approved :: MIT License                                         https://github.com/pytest-dev/pluggy
+psutil             5.6.3     OSI Approved :: BSD License                                         https://github.com/giampaolo/psutil
+ptyprocess         0.6.0     OSI Approved :: ISC License (ISCL)                                  https://github.com/pexpect/ptyprocess
+py                 1.8.0     OSI Approved :: MIT License                                         http://py.readthedocs.io/
+pycodestyle        2.5.0     OSI Approved :: MIT License                                         https://pycodestyle.readthedocs.io/
+pycparser          2.19      OSI Approved :: BSD License                                         https://github.com/eliben/pycparser
+pyflakes           2.1.1     OSI Approved :: MIT License                                         https://github.com/PyCQA/pyflakes
+pyparsing          2.4.2     OSI Approved :: MIT License                                         https://github.com/pyparsing/pyparsing/
+pytest             5.1.2     OSI Approved :: MIT License                                         https://docs.pytest.org/en/latest/
+python-daemon      2.2.3     OSI Approved :: Apache Software License                             https://pagure.io/python-daemon/
+pytz               2019.2    OSI Approved :: MIT License                                         http://pythonhosted.org/pytz
+pyzmq              18.1.0    OSI Approved :: BSD License                                         https://pyzmq.readthedocs.org
+redis              3.3.8     OSI Approved :: MIT License                                         https://github.com/andymccurdy/redis-py
+requests           2.22.0    OSI Approved :: Apache Software License                             http://python-requests.org
+setuptools         41.2.0    OSI Approved :: MIT License                                         https://github.com/pypa/setuptools
+six                1.12.0    OSI Approved :: MIT License                                         https://github.com/benjaminp/six
+smmap2             2.0.5     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/smmap
+testinfra          1.16.0    OSI Approved :: Apache Software License                             https://github.com/philpep/testinfra
+text-unidecode     1.3       OSI Approved :: GNU General Public License v2 or later (GPLv2+)     https://github.com/kmike/text-unidecode/
+urllib3            1.25.3    OSI Approved :: MIT License                                         https://urllib3.readthedocs.io/
+wcwidth            0.1.7     OSI Approved :: MIT License                                         https://github.com/jquast/wcwidth
+yoyo-migrations    6.1.0     OSI Approved :: Apache Software License                             https://ollycope.com/software/yoyo/latest/
+zipp               0.6.0     OSI Approved :: MIT License                                         https://github.com/jaraco/zipp

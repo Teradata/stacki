@@ -15,8 +15,8 @@
 
 {
 	"Django":		{ "fe": true, "version": "1.11.6" },
-	"Flask":		{ "fe": true }, 
-	"GitPython":            { "fe": true, "bootstrap": true },
+	"Flask":		{ "fe": true, "version": "1.0.2" }, 
+	"GitPython":            { "fe": true, "bootstrap": true, "version": "2.1.11" },
 	"PyMySQL":		{ "fe": true, "bootstrap": true, "version": "0.8.1" }, 
 	"ansible":		{ "fe": true },
 	"configparser":		{ "fe": true, "be": true }, 
@@ -25,6 +25,7 @@
 	"jsoncomment":		{ "fe": true },
 	"mod-wsgi":		{ "fe": true },
 	"netifaces":		{ "fe": true, "be":"true", "bootstrap": true },
+	"paramiko":             { "fe": true },
 	"pexpect":		{ "fe": true },
 	"psutil":		{ "fe": true, "be": true, "bootstrap": true },
 	"python-daemon":	{ "fe": true, "be": true, "bootstrap": true }, 
