@@ -218,9 +218,8 @@ class TestSwitchMellanoxM7800:
 		test_switch = SwitchMellanoxM7800(switch_ip_address = 'fakeip', password = 'fakepassword')
 		error_message = '% strange error'
 		mock_expectmore.return_value.ask.return_value = [error_message]
-		with pytest.raises(SwitchException) as exception:
+		with pytest.raises(SwitchException, match=error_message) as exception:
 			test_switch.image_boot_next()
-		assert(error_message in str(exception))
 
 	def test_install_firmware(self, mock_expectmore, test_file):
 		"""Expect this to try to install the user requested firmware."""
@@ -266,9 +265,8 @@ class TestSwitchMellanoxM7800:
 		error_message = '% file not found'
 		mock_expectmore.return_value.ask.return_value = [error_message]
 
-		with pytest.raises(SwitchException) as exception:
+		with pytest.raises(SwitchException, match=error_message) as exception:
 			test_switch.image_delete(image = firmware_name)
-		assert(error_message in str(exception))
 
 	@pytest.mark.parametrize('protocol', SwitchMellanoxM7800.SUPPORTED_IMAGE_FETCH_PROTOCOLS)
 	def test_image_fetch(self, mock_expectmore, protocol):
@@ -301,9 +299,8 @@ class TestSwitchMellanoxM7800:
 
 		error_message = '% unauthorized'
 		mock_expectmore.return_value.ask.return_value = ['other junk', error_message,]
-		with pytest.raises(SwitchException) as exception:
+		with pytest.raises(SwitchException, match=error_message) as exception:
 			test_switch.image_fetch(url = firmware_url)
-		assert(error_message in str(exception))
 
 	def test_image_fetch_error_without_message(self, mock_expectmore):
 		"""Expect an error to be raised due to a missing success indicator.
@@ -317,7 +314,7 @@ class TestSwitchMellanoxM7800:
 		mock_expectmore.return_value.ask.return_value = irrelevant_output
 		with pytest.raises(SwitchException) as exception:
 			test_switch.image_fetch(url = firmware_url)
-		assert(not any((output in str(exception) for output in irrelevant_output)))
+		assert not any((output in str(exception.value) for output in irrelevant_output))
 
 	@pytest.mark.parametrize('input_file', FIRMWARE_INPUT_DATA)
 	def test_show_images(self, mock_expectmore, input_file, test_file):
