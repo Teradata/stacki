@@ -23,7 +23,7 @@ entrypoints        0.3       OSI Approved :: MIT License                        
 flake8             3.7.8     OSI Approved :: MIT License                                         https://gitlab.com/pycqa/flake8
 gitdb2             2.0.5     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/gitdb
 idna               2.8       OSI Approved :: BSD License                                         https://github.com/kjd/idna
-importlib-metadata 0.21      OSI Approved :: Apache Software License                             http://importlib-metadata.readthedocs.io/
+importlib-metadata 0.22      OSI Approved :: Apache Software License                             http://importlib-metadata.readthedocs.io/
 iniherit           0.3.9     Public Domain                                                       http://github.com/cadithealth/iniherit
 itsdangerous       1.1.0     OSI Approved :: BSD License                                         https://palletsprojects.com/p/itsdangerous/
 jmespath           0.9.4     OSI Approved :: MIT License                                         https://github.com/jmespath/jmespath.py
@@ -48,7 +48,7 @@ pyparsing          2.4.2     OSI Approved :: MIT License                        
 pytest             5.1.2     OSI Approved :: MIT License                                         https://docs.pytest.org/en/latest/
 python-daemon      2.2.3     OSI Approved :: Apache Software License                             https://pagure.io/python-daemon/
 pytz               2019.2    OSI Approved :: MIT License                                         http://pythonhosted.org/pytz
-pyzmq              18.1.0    OSI Approved :: BSD License                                         https://pyzmq.readthedocs.org
+pyzmq              17.1.2    OSI Approved :: BSD License                                         https://pyzmq.readthedocs.org
 redis              3.3.8     OSI Approved :: MIT License                                         https://github.com/andymccurdy/redis-py
 requests           2.22.0    OSI Approved :: Apache Software License                             http://python-requests.org
 setuptools         41.2.0    OSI Approved :: MIT License                                         https://github.com/pypa/setuptools
