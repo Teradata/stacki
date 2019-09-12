@@ -30,7 +30,7 @@ ln -s /opt/stack/lib/python3.7/site-packages/pymysql \
 /opt/stack/bin/stack add api sudo command command="create host switch mapping"
 
 <stack:file stack:name="/opt/stack/etc/apache-ws.conf">
-WSGIDaemonProcess stacki-ws processes=2 threads=5 display-name=%{GROUP}
+WSGIDaemonProcess stacki-ws processes=5 threads=1 display-name=%{GROUP}
 WSGIScriptAlias /stack /var/www/wsgi/stacki-ws.wsgi process-group=stacki-ws
 </stack:file>
 </stack:script>
