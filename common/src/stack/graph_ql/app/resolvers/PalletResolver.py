@@ -12,27 +12,32 @@ query = QueryType()
 mutation = MutationType()
 stack = ObjectType("Stack")
 
+
 @query.field("pallets")
 def resolve_pallets(*_):
-    results, _ = db.run_sql("SELECT id, name, version, rel as 'release', arch, os, url FROM rolls")
+    results, _ = db.run_sql(
+        "SELECT id, name, version, rel as 'release', arch, os, url FROM rolls"
+    )
     return results
 
 
 @query.field("pallet")
-def resolve_pallet(_, info, id):
+def resolve_pallet(_, info, palletId):
     cmd = "SELECT id, name, version, rel as 'release', arch, os, url FROM rolls WHERE id=%s"
-    args = (id,)
+    args = (palletId,)
     result, _ = db.run_sql(cmd, args, fetchone=True)
     return result
 
+
 @stack.field("pallet")
 def resolve_pallet_from_parent(parent, info):
-    if parent is None or not parent.get("pallet_id"):
+    if parent is None or not parent.get("palletId"):
         return None
 
-    pallet_id = parent["pallet_id"]
+    pallet_id = parent["palletId"]
     pallet = resolve_pallet(parent, info, pallet_id)
     return pallet
+
 
 @mutation.field("addPallet")
 def resolve_add_pallet(_, info, name, version, release, arch, os, url=None):
@@ -53,10 +58,21 @@ def resolve_add_pallet(_, info, name, version, release, arch, os, url=None):
     result, _ = db.run_sql(pallet_cmd, pallet_args, fetchone=True)
     return result
 
+
 @mutation.field("updatePallet")
-def resolve_update_pallet(obj, info, id, name=None, version=None, release=None, arch=None, os=None, url=None):
-    pallet = resolve_pallet(obj, info, id)
-    #check if pallet with id exists
+def resolve_update_pallet(
+    obj,
+    info,
+    palletId,
+    name=None,
+    version=None,
+    release=None,
+    arch=None,
+    os=None,
+    url=None,
+):
+    pallet = resolve_pallet(obj, info, palletId)
+    # check if pallet with id exists
     if not pallet:
         raise Exception("No pallet found")
     else:
@@ -66,8 +82,8 @@ def resolve_update_pallet(obj, info, id, name=None, version=None, release=None, 
         release_new = release if release else pallet["release"]
         arch_new = arch if arch else pallet["arch"]
         os_new = os if os else pallet["os"]
-        pallet_cmd = "SELECT id FROM rolls WHERE name=%s AND version=%s AND arch=%s AND rel=%s AND os=%s AND id!=%s" 
-        pallet_args = (name_new, version_new, arch_new, release_new, os_new, id)
+        pallet_cmd = "SELECT id FROM rolls WHERE name=%s AND version=%s AND arch=%s AND rel=%s AND os=%s AND id!=%s"
+        pallet_args = (name_new, version_new, arch_new, release_new, os_new, palletId)
         _, affected_rows = db.run_sql(pallet_cmd, pallet_args)
         if affected_rows > 0:
             raise Exception("Pallet with new parameters already exists")
@@ -75,46 +91,48 @@ def resolve_update_pallet(obj, info, id, name=None, version=None, release=None, 
     update_params = []
     args = []
     if name:
-        update_params.append('name=%s')
+        update_params.append("name=%s")
         args.append(name)
 
     if version:
-        update_params.append('version=%s')
+        update_params.append("version=%s")
         args.append(version)
 
     if release:
-        update_params.append('rel=%s')
+        update_params.append("rel=%s")
         args.append(release)
 
     if arch:
-        update_params.append('arch=%s')
+        update_params.append("arch=%s")
         args.append(arch)
 
     if os:
-        update_params.append('os=%s')
+        update_params.append("os=%s")
         args.append(os)
 
     if url:
-        update_params.append('url=%s')
+        update_params.append("url=%s")
         args.append(url)
 
     cmd = f'UPDATE rolls SET {", ".join(update_params)} WHERE id=%s'
-    args.append(id)
+    args.append(palletId)
     db.run_sql(cmd, args)
 
-    result = resolve_pallet(obj, info, id)
+    result = resolve_pallet(obj, info, palletId)
     return result
 
+
 @mutation.field("deletePallet")
-def resolve_delete_pallet(_, info, id):
+def resolve_delete_pallet(_, info, palletId):
 
     cmd = "DELETE FROM rolls WHERE id=%s"
-    args = (id,)
+    args = [palletId]
     _, affected_rows = db.run_sql(cmd, args)
 
     if not affected_rows:
         return False
 
     return True
+
 
 object_types = [stack]

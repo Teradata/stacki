@@ -3,12 +3,12 @@ type Host {
   name: String
   rack: String
   rank: String
-  appliance_id: Int
-  box_id: Int
+  applianceId: Int
+  boxId: Int
   environment_id: Int
-  osaction_id: Int
+  osactionId: Int
   osaction: Bootaction
-  installaction_id: Int
+  installactionId: Int
   installaction: Bootaction
   comment: String
   metadata: String
@@ -21,6 +21,7 @@ type Host {
 
 extend type Query {
   hosts: [Host]
+  hostById(hostId: Int!): Host
 }
 
 extend type Mutation {

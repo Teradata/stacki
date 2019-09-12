@@ -23,7 +23,7 @@ def resolve_stacks(_, info, boxId=None, palletId=None):
     if palletId:
         params.append(" AND roll = %s ")
         args.append(palletId)
-    cmd = f"SELECT box as box_id, roll as pallet_id FROM stacks WHERE 1 = 1 {''.join(params)}"
+    cmd = f"SELECT box as box_id, roll as palletId FROM stacks WHERE 1 = 1 {''.join(params)}"
     results, _ = db.run_sql(cmd, args)
     return results
 

@@ -6,5 +6,5 @@ type Os {
 
 extend type Query {
   oses: [Os]
-	os(id: Int!): Os
+  os(osId: Int!): Os
 }

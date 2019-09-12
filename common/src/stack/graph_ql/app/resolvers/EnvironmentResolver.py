@@ -31,19 +31,20 @@ def resolve_add_environment(_, info, name):
     db.run_sql(cmd, args)
 
     cmd = "SELECT id, name FROM environments WHERE name=%s"
-    args = (name)
+    args = name
     result, _ = db.run_sql(cmd, args, fetchone=True)
 
     return result
 
+
 @mutation.field("updateEnvironment")
-def resolve_update_environment(_, info, id, name=None):
+def resolve_update_environment(_, info, environmentId, name=None):
 
     cmd = "SELECT id, name FROM environments WHERE id=%s"
-    args = (id,)
+    args = [environmentId]
     environment, _ = db.run_sql(cmd, args, fetchone=True)
     if not environment:
-        raise Exception(f"No environment found with id {id}")
+        raise Exception(f"No environment found with id {environmentId}")
 
     # if the mutation does not specify anything to update, simply return the env
     if not name:
@@ -60,29 +61,31 @@ def resolve_update_environment(_, info, id, name=None):
     update_params = []
     args = ()
     if name:
-        update_params.append('name=%s')
+        update_params.append("name=%s")
         args += (name,)
-    args += (id,)
+    args += (environmentId,)
     cmd = f'UPDATE environments SET {",".join(update_params)}' + " WHERE id=%s"
     db.run_sql(cmd, args)
 
-    args = (id,)
+    args = (environmentId,)
     cmd = "SELECT id, name FROM environments WHERE id=%s"
 
     result, _ = db.run_sql(cmd, args, fetchone=True)
 
     return result
 
+
 @mutation.field("deleteEnvironment")
-def resolve_delete_environment(_, info, id):
+def resolve_delete_environment(_, info, environmentId):
 
     cmd = "DELETE FROM environments WHERE id=%s"
-    args = (id,)
+    args = (environmentId,)
     _, affected_rows = db.run_sql(cmd, args)
 
     if not affected_rows:
         return False
 
     return True
+
 
 object_types = []

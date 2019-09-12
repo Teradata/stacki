@@ -1,7 +1,7 @@
 type Box {
   id: Int
   name: String
-  os_id: Int
+  osId: Int
   os: Os
 }
 
@@ -11,5 +11,5 @@ extend type Query {
 
 extend type Mutation {
   addBox(name: String!, os: String): Box
-  deleteBox(id: Int!): Boolean!
+  deleteBox(boxId: Int!): Boolean!
 }

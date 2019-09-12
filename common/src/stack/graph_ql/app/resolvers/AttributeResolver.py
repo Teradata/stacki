@@ -27,38 +27,39 @@ appliance = ObjectType("Appliance")
 object_types = [host, environment, os_graphql, appliance]
 
 @query.field("attributes")
-def resolve_attributes(parent, info, scope=None, scope_name=None, **kwargs):
+def resolve_attributes(parent, info, scope=None, scopeName=None, **kwargs):
     where_conditionals = {
         f"attributes.{key}": value
         for key, value in kwargs.items()
-        if key in ("id", "scope_map_id", "name", "value")
+        if key in ("attributeId", "scopeMapId", "name", "value")
     }
     ignored_kwargs = set(key.split(".")[-1] for key in where_conditionals.keys()).difference(set(kwargs))
     if ignored_kwargs:
         raise ValueError(f"Received unsupported kwargs {ignored_kwargs}")
 
     cmd = """
-        SELECT attributes.id, attributes.scope_map_id, attributes.name, attributes.value
+        SELECT attributes.id, attributes.scope_map_id as scopeMapId,
+        attributes.name, attributes.value
         FROM attributes
         {join}
         {where}
     """
     join_string = ""
-    if scope_name and not scope:
-        raise ValueError("Cannot specify scope_name without scope")
+    if scopeName and not scope:
+        raise ValueError("Cannot specify scopeName without scope")
 
-    if scope_name and scope == "global":
-        raise ValueError("Cannot specify scope_name at global scope")
+    if scopeName and scope == "global":
+        raise ValueError("Cannot specify scopeName at global scope")
 
     valid_scopes = ('global','appliance','os','environment', 'host')
     if scope:
         if scope not in valid_scopes:
             raise ValueError(f"{scope} is not one of the valid scopes {valid_scopes}")
 
-        join_string = "INNER JOIN scope_map ON attributes.scope_map_id=scope_map.id "
+        join_string = "INNER JOIN scope_map as scopeMap ON attributes.scope_map_id=scope_map.id "
         where_conditionals["scope_map.scope"] = scope
 
-    if scope_name:
+    if scopeName:
         if scope == 'appliance':
             table_name = "appliances"
         elif scope == 'os':
@@ -71,7 +72,7 @@ def resolve_attributes(parent, info, scope=None, scope_name=None, **kwargs):
             raise RuntimeError(f"Bad scope {scope}")
 
         join_string += f"INNER JOIN {table_name} on scope_map.{scope if scope != 'host' else 'node'}_id={table_name}.id"
-        where_conditionals[f"{table_name}.name"] = scope_name
+        where_conditionals[f"{table_name}.name"] = scopeName
 
     where_string = "WHERE"
     args = []

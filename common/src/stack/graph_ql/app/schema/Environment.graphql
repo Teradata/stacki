@@ -9,7 +9,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  addEnvironment(name: String!,): Environment
-  updateEnvironment(id: Int!, name: String): Environment!
-  deleteEnvironment(id: Int!): Boolean!
+  addEnvironment(name: String!): Environment
+  updateEnvironment(environmentId: Int!, name: String): Environment!
+  deleteEnvironment(environmentId: Int!): Boolean!
 }

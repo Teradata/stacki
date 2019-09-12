@@ -12,8 +12,9 @@ query = QueryType()
 mutation = MutationType()
 interface = ObjectType("Interface")
 
+
 @query.field("hosts")
-def resolve_hosts(_, info, id=None):
+def resolve_hosts(_, info):
     # TODO: Add nested environment
     # TODO: Add nested osaction
     # TODO: Add nested installaction
@@ -22,25 +23,46 @@ def resolve_hosts(_, info, id=None):
 
     cmd = """
         SELECT id, name, rack, rank, comment, metadata,
-        appliance AS appliance_id,
-        box AS box_id,
-        environment AS environment_id,
-        osaction AS osaction_id,
-        installaction AS installaction_id
+        appliance AS applianceId,
+        box AS boxId,
+        environment AS environmentId,
+        osaction AS osactionId,
+        installaction AS installactionId
         FROM nodes
         """
-    args = ()
-
-    if id:
-        cmd += " WHERE id=%s"
-        args += (id, )
+    args = []
 
     results, _ = db.run_sql(cmd, args)
     return results
 
+
+@query.field("hostById")
+def resolve_host_by_id(_, info, hostId):
+    # TODO: Add nested environment
+    # TODO: Add nested osaction
+    # TODO: Add nested installaction
+    # TODO: Add nested attributes
+    # TODO: Add nested appliance
+
+    cmd = """
+        SELECT id, name, rack, rank, comment, metadata,
+        appliance AS applianceId,
+        box AS boxId,
+        environment AS environmentId,
+        osaction AS osactionId,
+        installaction AS installactionId
+        FROM nodes
+        WHERE id=%s
+        """
+    args = [hostId]
+
+    results, _ = db.run_sql(cmd, args, fetchone=True)
+    return results
+
+
 @interface.field("host")
-def resolve_host_by_id(parent, info):
-    return resolve_hosts(parent, info, id=parent.get(id))[0]
+def resolve_host_byId_from_parent(parent, info):
+    return resolve_host_by_id(parent, info, hostId=parent.get("hostId"))
 
 
 object_types = [interface]

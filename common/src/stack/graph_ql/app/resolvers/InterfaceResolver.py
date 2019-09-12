@@ -12,6 +12,7 @@ query = QueryType()
 mutation = MutationType()
 host = ObjectType("Host")
 
+
 @host.field("interfaces")
 def resolve_interfaces_from_node_id(parent, info):
     if parent is None or not parent.get("id"):
@@ -29,16 +30,17 @@ def resolve_interfaces_from_node_id(parent, info):
 
     return results
 
+
 @query.field("interfaces")
-def resolve_interfaces(_, info, id=None, host_id=None, device=None):
-    cmd = '''SELECT
+def resolve_interfaces(_, info, interfaceId=None, hostId=None, device=None):
+    cmd = """SELECT
         id,
-        node AS host_id,
+        node AS hostId,
         mac,
         ip,
         name,
         device,
-        subnet AS network_id,
+        subnet AS networkId,
         module,
         vlanid,
         options,
@@ -46,26 +48,40 @@ def resolve_interfaces(_, info, id=None, host_id=None, device=None):
         main
         FROM networks
         WHERE 1=1
-'''
+"""
 
     args = ()
-    if id:
-        cmd += ' AND id=%s '
-        args += (id, )
+    if interfaceId:
+        cmd += " AND id=%s "
+        args += (interfaceId,)
     # TODO error check -- node id and device must go together?  or maybe that's ok here?
-    if host_id:
-        cmd += ' AND node=%s '
-        args += (host_id, )
+    if hostId:
+        cmd += " AND node=%s "
+        args += (hostId,)
     if device:
-        cmd += ' AND device=%s '
-        args += (device, )
+        cmd += " AND device=%s "
+        args += (device,)
 
     results, _ = db.run_sql(cmd, args)
     return results
 
 
 @mutation.field("addInterface")
-def resolve_add_interface(obj, info, host_id, device, network_id=None, name=None, mac=None, ip=None, module=None, vlanid=None, options=None, channel=None, main=None):
+def resolve_add_interface(
+    obj,
+    info,
+    hostId,
+    device,
+    networkId=None,
+    name=None,
+    mac=None,
+    ip=None,
+    module=None,
+    vlanid=None,
+    options=None,
+    channel=None,
+    main=None,
+):
     # TODO need to do actual error checking
     # TODO names, ip's need to be unique across table
     # TODO no reason for interfaces table to have mask and gateway
@@ -74,14 +90,27 @@ def resolve_add_interface(obj, info, host_id, device, network_id=None, name=None
         raise Exception(f"interface {device} exists")
 
     cmd = "INSERT INTO networks (node, mac, ip, name, device, subnet, module, vlanid, options, channel, main) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    args = (host_id, mac, ip, name, device, network_id, module, vlanid, options, channel, main)
+    args = (
+        hostId,
+        mac,
+        ip,
+        name,
+        device,
+        networkId,
+        module,
+        vlanid,
+        options,
+        channel,
+        main,
+    )
     results, _ = db.run_sql(cmd, args)
 
     # Get the recently inserted value
     # TODO should mutations return their own data?
-    results = resolve_interfaces(obj, info, host_id=host_id, device=device)
+    results = resolve_interfaces(obj, info, hostId=hostId, device=device)
     if results:
         return True
     return None
+
 
 object_types = [host]

@@ -11,13 +11,14 @@ import app.db as db
 query = QueryType()
 mutation = MutationType()
 
+
 @query.field("networks")
-def resolve_networks(_, info, id=None, name=None):
+def resolve_networks(_, info, networkId=None, name=None):
     args = []
     params = []
-    if id:
+    if networkId:
         params.append(" AND id = %s ")
-        args.append(id)
+        args.append(networkId)
     if name:
         params.append(" AND name = %s ")
         args.append(name)
@@ -25,17 +26,29 @@ def resolve_networks(_, info, id=None, name=None):
     results, _ = db.run_sql(cmd, args)
     return results
 
+
 @mutation.field("addNetwork")
-def resolve_add_network(obj, info, name, address, mask, gateway=None, zone="", mtu=None, dns=False, pxe=False):
+def resolve_add_network(
+    obj,
+    info,
+    name,
+    address,
+    mask,
+    gateway=None,
+    zone="",
+    mtu=None,
+    dns=False,
+    pxe=False,
+):
 
     if name in [network["name"] for network in resolve_networks(obj, info)]:
         raise Exception(f"network {name} exists")
 
-    #validate ip-address
+    # validate ip-address
     try:
-        ipaddress.IPv4Network(f'{address}/{mask}')
+        ipaddress.IPv4Network(f"{address}/{mask}")
     except:
-        msg = '%s/%s is not a valid network address and subnet mask combination'
+        msg = "%s/%s is not a valid network address and subnet mask combination"
         raise Exception(msg % (address, mask))
 
     # Insert network
@@ -49,13 +62,26 @@ def resolve_add_network(obj, info, name, address, mask, gateway=None, zone="", m
         return results[0]
     return None
 
-@mutation.field("updateNetwork")
-def resolve_update_network(obj, info, id, name=None, address=None, mask=None, gateway=None, zone=None, mtu=None, dns=None, pxe=None):
 
-    network = resolve_networks(obj, info, id=id)
+@mutation.field("updateNetwork")
+def resolve_update_network(
+    obj,
+    info,
+    networkId,
+    name=None,
+    address=None,
+    mask=None,
+    gateway=None,
+    zone=None,
+    mtu=None,
+    dns=None,
+    pxe=None,
+):
+
+    network = resolve_networks(obj, info, networkId=networkId)
 
     if not network:
-        raise Exception(f"network with {id} doesn't exist")
+        raise Exception(f"network with {networkId} doesn't exist")
 
     if name:
         if resolve_networks(obj, info, name=name):
@@ -64,11 +90,11 @@ def resolve_update_network(obj, info, id, name=None, address=None, mask=None, ga
     if address or mask:
         address1 = address if address else network[0]["address"]
         mask1 = mask if mask else network[0]["mask"]
-        #validate address and mask
+        # validate address and mask
         try:
-            ipaddress.IPv4Network(f'{address1}/{mask1}')
+            ipaddress.IPv4Network(f"{address1}/{mask1}")
         except:
-            msg = '%s/%s is not a valid network address and subnet mask combination'
+            msg = "%s/%s is not a valid network address and subnet mask combination"
             raise Exception(msg % (address1, mask1))
 
     params = []
@@ -99,7 +125,7 @@ def resolve_update_network(obj, info, id, name=None, address=None, mask=None, ga
         params.append("pxe=%s")
         args.append(pxe)
 
-    args.append(id)    
+    args.append(id)
 
     # Update network
     cmd = f"UPDATE subnets SET {', '.join(params)} WHERE id = %s"
@@ -111,11 +137,12 @@ def resolve_update_network(obj, info, id, name=None, address=None, mask=None, ga
         return results[0]
     return None
 
+
 @mutation.field("deleteNetwork")
-def resolve_delete_network(_, info, id):
+def resolve_delete_network(_, info, networkId):
 
     cmd = "DELETE FROM subnets WHERE id=%s"
-    args = (id,)
+    args = [networkId]
     _, affected_rows = db.run_sql(cmd, args)
 
     if not affected_rows:

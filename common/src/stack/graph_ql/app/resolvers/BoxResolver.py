@@ -18,22 +18,22 @@ stack = ObjectType("Stack")
 
 @query.field("boxes")
 def resolve_boxes(*_):
-    results, _ = db.run_sql("SELECT id, name, os AS os_id FROM boxes")
+    results, _ = db.run_sql("SELECT id, name, os AS osId FROM boxes")
     return results
 
 
 @stack.field("box")
 @host.field("box")
 def resolve_from_parent_id(parent, info):
-    if parent is None or not parent.get("box_id"):
+    if parent is None or not parent.get("boxId"):
         return None
 
     cmd = """
-		SELECT id, name, os as os_id
+		SELECT id, name, os as osId
 		FROM boxes
 		WHERE id=%s
 	"""
-    args = [parent["box_id"]]
+    args = [parent["boxId"]]
     result, _ = db.run_sql(cmd, args, fetchone=True)
 
     return result
@@ -59,17 +59,17 @@ def resolve_add_box(obj, info, name, os="sles"):
     results, _ = db.run_sql(cmd, args)
 
     # Get the recently inserted value
-    cmd = "SELECT id, name, os AS os_id FROM boxes WHERE name=%s"
+    cmd = "SELECT id, name, os AS osId FROM boxes WHERE name=%s"
     args = (name,)
     results, _ = db.run_sql(cmd, args, fetchone=True)
     return results
 
 
 @mutation.field("deleteBox")
-def resolve_delete_box(_, info, id):
+def resolve_delete_box(_, info, boxId):
 
     cmd = "DELETE FROM boxes WHERE id=%s"
-    args = (id,)
+    args = [boxId]
     _, affected_rows = db.run_sql(cmd, args)
 
     if not affected_rows:

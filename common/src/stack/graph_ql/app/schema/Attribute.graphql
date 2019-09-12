@@ -1,19 +1,25 @@
 type Attribute {
-	id: Int
-	scope_map_id: Int
-	scope_map: ScopeMap
-	name: String
-	value: String
+  id: Int
+  scopeMapId: Int
+  scopeMap: ScopeMap
+  name: String
+  value: String
 }
 
 # TODO HACKY
 type ReverseAttr {
-    scope: String
-    type: String
-    attr: String
-    value: String
+  scope: String
+  type: String
+  attr: String
+  value: String
 }
 
 extend type Query {
-	attributes(id: Int, name: String, value: String, scope: String, scope_name: String): [Attribute]
+  attributes(
+    attributeId: Int
+    name: String
+    value: String
+    scope: String
+    scopeName: String
+  ): [Attribute]
 }

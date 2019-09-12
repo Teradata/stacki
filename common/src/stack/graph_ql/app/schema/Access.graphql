@@ -1,6 +1,6 @@
 type Access {
   command: String
-  groupID: Int
+  groupId: Int
 }
 
 extend type Query {
@@ -8,6 +8,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  addAccess(groupID: Int!, command: String): Access
-  deleteAccess(groupID: Int!): Boolean!
+  addAccess(groupId: Int!, command: String): Access
+  deleteAccess(groupId: Int!): Boolean!
 }

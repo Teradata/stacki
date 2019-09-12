@@ -18,31 +18,31 @@ def resolve_access(*_):
 	# This is due to the original command depending on the unix groups
 	# present on the frontend which we can't guarantee are in the db
 	# container as well.
-	results, _ = db.run_sql("SELECT groupID, command FROM access")
+	results, _ = db.run_sql("SELECT groupId, command FROM access")
 	return results
 
 @mutation.field("addAccess")
-def resolve_add_access(_, info, groupID, command):
+def resolve_add_access(_, info, groupId, command):
 
 	# TODO: Add a primary key to access table
-	if groupID in [grp_access['groupID'] for grp_access in resolve_access()]:
-		raise Exception(f'User Group ID {groupID} already exists')
+	if groupId in [grp_access['groupId'] for grp_access in resolve_access()]:
+		raise Exception(f'User Group ID {groupId} already exists')
 
 	# Add a new group id with the commands it can use
-	cmd = 'INSERT INTO access (groupID, command) VALUES(%s, %s)'
-	args = (groupID, command)
+	cmd = 'INSERT INTO access (groupId, command) VALUES(%s, %s)'
+	args = (groupId, command)
 	results, _ = db.run_sql(cmd, args)
 
 	# Get the recently inserted value
-	cmd = "SELECT groupID, command FROM access WHERE groupID=%s"
-	args = (groupID, )
+	cmd = "SELECT groupId, command FROM access WHERE groupId=%s"
+	args = (groupId, )
 	results, _ = db.run_sql(cmd, args, fetchone=True)
 	return results
 
 @mutation.field("deleteAccess")
-def resolve_delete_access(_, info, groupID):
-	cmd = "DELETE FROM access WHERE groupID=%s"
-	args = (groupID,)
+def resolve_delete_access(_, info, groupId):
+	cmd = "DELETE FROM access WHERE groupId=%s"
+	args = (groupId,)
 	_, affected_rows = db.run_sql(cmd, args)
 
 	# Return false if the db can't find the row to delete

@@ -1,4 +1,6 @@
-"""Appliances"""
+"""
+Appliances
+"""
 type Appliance {
   id: Int
   name: String
@@ -8,12 +10,14 @@ type Appliance {
 }
 
 extend type Query {
-	"""List of all the appliances."""
-	appliances(id: Int, name: String): [Appliance]
+  """
+  List of all the appliances.
+  """
+  appliances(applianceId: Int, name: String): [Appliance]
 }
 
 extend type Mutation {
-	addAppliance(name: String!, public: Choice): Appliance!
-	updateAppliance(id: Int!, name: String, public: Choice): Appliance!
-	deleteAppliance(id: Int!): Boolean!
+  addAppliance(name: String!, public: Choice): Appliance!
+  updateAppliance(applianceId: Int!, name: String, public: Choice): Appliance!
+  deleteAppliance(applianceId: Int!): Boolean!
 }

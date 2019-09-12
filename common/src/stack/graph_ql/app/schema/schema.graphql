@@ -1,10 +1,18 @@
 enum Choice {
-	YES
-	NO
+  YES
+  NO
+}
+
+enum Scope {
+  GLOBAL
+  APPLIANCE
+  OS
+  ENVIRONMENT
+  HOST
 }
 
 type Mutation {
-	_empty: String
+  _empty: String
 }
 
 type Query {
@@ -12,5 +20,5 @@ type Query {
 }
 
 type Subscription {
-	_empty: String
+  _empty: String
 }

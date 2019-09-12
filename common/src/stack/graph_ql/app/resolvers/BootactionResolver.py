@@ -13,14 +13,17 @@ mutation = MutationType()
 host = ObjectType("Host")
 object_types = [host]
 
+
 @query.field("bootactions")
-def resolve_bootactions(parent, info, os_name=None, boot_name=None, **kwargs):
+def resolve_bootactions(parent, info, osName=None, boot_name=None, **kwargs):
     where_conditionals = {
         f"bootactions.{key}": value
         for key, value in kwargs.items()
         if key in ("id", "boot_name_id", "os_id", "kernel", "ramdisk", "args")
     }
-    ignored_kwargs = set(key.split(".")[-1] for key in where_conditionals.keys()).difference(set(kwargs))
+    ignored_kwargs = set(
+        key.split(".")[-1] for key in where_conditionals.keys()
+    ).difference(set(kwargs))
     if ignored_kwargs:
         raise ValueError(f"Received unsupported kwargs {ignored_kwargs}")
 
@@ -37,9 +40,9 @@ def resolve_bootactions(parent, info, os_name=None, boot_name=None, **kwargs):
         {where}
     """
     join_string = ""
-    if os_name:
+    if osName:
         join_string = "INNER JOIN oses ON bootactions.OS=oses.ID "
-        where_conditionals["oses.Name"] = os_name
+        where_conditionals["oses.Name"] = osName
 
     if boot_name:
         join_string += "INNER JOIN bootnames on bootactions.BootName=bootnames.ID"
@@ -61,6 +64,7 @@ def resolve_bootactions(parent, info, os_name=None, boot_name=None, **kwargs):
 
     return result
 
+
 @host.field("osaction")
 def resolve_osaction_from_host(host, info):
     osaction_id = host.get("osaction_id")
@@ -80,6 +84,7 @@ def resolve_osaction_from_host(host, info):
     """
     result, _ = db.run_sql(cmd, (osaction_id,), fetchone=True)
     return result
+
 
 @host.field("installaction")
 def resolve_installaction_from_host(host, info):
