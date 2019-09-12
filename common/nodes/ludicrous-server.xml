@@ -15,7 +15,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <!-- COMMON -->
 <stack:script stack:stage="install-post">
 <stack:file stack:name="/opt/stack/etc/apache-ludicrous.conf">
-WSGIDaemonProcess stacki-ludicrous processes=2 threads=10 display-name=%{GROUP}
+WSGIDaemonProcess stacki-ludicrous processes=5 threads=1 display-name=%{GROUP}
 WSGIScriptAlias /ludicrous /var/www/wsgi/stacki-ludicrous.wsgi  process-group=stacki-ludicrous
 </stack:file>
 </stack:script>
