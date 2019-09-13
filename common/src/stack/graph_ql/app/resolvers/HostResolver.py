@@ -7,13 +7,15 @@
 
 from ariadne import ObjectType, QueryType, MutationType
 import app.db as db
+from app.utils import map_kwargs
 
 query = QueryType()
 mutation = MutationType()
 interface = ObjectType("Interface")
 
 @query.field("hosts")
-def resolve_hosts(_, info, id=None):
+@map_kwargs({"id": "id_"})
+def resolve_hosts(_, info, id_=None):
     # TODO: Add nested environment
     # TODO: Add nested osaction
     # TODO: Add nested installaction
@@ -31,16 +33,16 @@ def resolve_hosts(_, info, id=None):
         """
     args = ()
 
-    if id:
+    if id_:
         cmd += " WHERE id=%s"
-        args += (id, )
+        args += (id_, )
 
     results, _ = db.run_sql(cmd, args)
     return results
 
 @interface.field("host")
 def resolve_host_by_id(parent, info):
-    return resolve_hosts(parent, info, id=parent.get(id))[0]
+    return resolve_hosts(parent, info, id_=parent.get("id"))[0]
 
 
 object_types = [interface]

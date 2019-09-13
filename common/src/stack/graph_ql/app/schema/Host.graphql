@@ -20,7 +20,7 @@ type Host {
 }
 
 extend type Query {
-  hosts: [Host]
+  hosts(id: Int): [Host]
 }
 
 extend type Mutation {

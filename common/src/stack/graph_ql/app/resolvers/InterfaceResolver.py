@@ -7,6 +7,8 @@
 
 from ariadne import ObjectType, QueryType, MutationType
 import app.db as db
+from app.utils import map_kwargs
+
 
 query = QueryType()
 mutation = MutationType()
@@ -30,7 +32,8 @@ def resolve_interfaces_from_node_id(parent, info):
     return results
 
 @query.field("interfaces")
-def resolve_interfaces(_, info, id=None, host_id=None, device=None):
+@map_kwargs({"id": "id_"})
+def resolve_interfaces(_, info, id_=None, host_id=None, device=None):
     cmd = '''SELECT
         id,
         node AS host_id,
@@ -49,9 +52,9 @@ def resolve_interfaces(_, info, id=None, host_id=None, device=None):
 '''
 
     args = ()
-    if id:
+    if id_:
         cmd += ' AND id=%s '
-        args += (id, )
+        args += (id_, )
     # TODO error check -- node id and device must go together?  or maybe that's ok here?
     if host_id:
         cmd += ' AND node=%s '
