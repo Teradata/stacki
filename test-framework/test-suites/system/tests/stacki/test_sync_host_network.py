@@ -33,7 +33,7 @@ def test_sync_host_network_hosts(host):
 	# verify files modified
 	assert_files_diff()
 
-	# run sync host network without sync.hosts (defaults to False)
+	# run sync host network without manage.hostsfile (defaults to False)
 	result = host.run('stack sync host network a:backend')
 	assert result.rc == 0
 
@@ -41,7 +41,9 @@ def test_sync_host_network_hosts(host):
 	assert_files_diff()
 
 	# enable syncing hostfile and call sync host network
-	result = host.run('stack set host attr a:backend attr=sync.hosts value=True')
+	result = host.run('stack set host attr a:backend attr=manage.hostsfile value=True')
+	assert result.rc == 0
+	result = host.run('stack set host attr a:backend attr=sync.hostsfile value=True')
 	assert result.rc == 0
 	result = host.run('stack sync host network a:backend')
 	assert result.rc == 0
@@ -59,5 +61,6 @@ def test_sync_host_network_hosts(host):
 	# cleanup
 	result = host.run("stack run host a:backend command='mv /etc/hosts.bak /etc/hosts'")
 	result = host.run("stack run host a:backend command='rm /etc/hosts.fe'")
-	result = host.run('stack remove host attr a:backend attr=sync.hosts')
+	result = host.run('stack remove host attr a:backend attr=manage.hostsfile')
+	result = host.run('stack remove host attr a:backend attr=sync.hostsfile')
 	assert result.rc == 0
