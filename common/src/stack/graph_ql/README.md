@@ -1,5 +1,46 @@
 # Stacki's first GraphQL API 🍼
 
+## Installation
+
+You will [Docker](https://www.docker.com/products/docker-desktop) and [Docker Compose](https://docs.docker.com/compose/) to get started without a Stacki frontend.
+
+## Getting Started
+
+Once you have Docker installed, just enter `docker-compose up` in this directory. Docker compose with build the images and seed the database with a frontend and two backends. Then just open your browser and go to `localhost:8000`.
+
+### Adding new types to the schema
+
+New schema files must be added to the `app/schema` directory. If you are defining Query, Mutation, or Subscription types they must be extended. A server restart is required when adding new schema files.
+
+```grapqhl
+extend type Query {
+  newQuery: ReturnType
+}
+
+extend type Mutation {
+  newMutation(newId: Int!): ReturnType
+}
+
+extend type Subsctiption {
+  newSubscription(subId: Int!): ReturnType
+}
+```
+
+### Adding new resolvers
+
+New resolvers must be added to the `app/resolvers` directory. All resolver must contain the following or the server will crash. We're working on this.
+
+```python
+from ariadne import ObjectType, QueryType, MutationType
+import app.db as db
+
+query = QueryType()
+mutation = MutationType()
+object_types = []
+```
+
+The server should restart by itself when updating resolver, but you may have to restart it yourself. ¯\\\_(ツ)_/¯
+
 ## Progress
 
 This is a very loose list of what has been accomplished.
