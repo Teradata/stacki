@@ -17,127 +17,98 @@
 
 <stack:file stack:name="/tmp/cluster.sql">
 <!-- Access -->
-
 DROP TABLE IF EXISTS access;
 CREATE TABLE access (
-  Command       varchar(128) NOT NULL,
-  GroupID       int(11) NOT NULL
+	command		VARCHAR(128) NOT NULL,
+	groupid		INT NOT NULL
 );
 
 <!-- enable root to run all commands -->
-
-insert into access (command, groupid) values ("*", 0);
-
-<!-- Aliases -->
-
-DROP TABLE IF EXISTS aliases;
-CREATE TABLE aliases (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL,
-  Network	int(11) NOT NULL references networks,
-  PRIMARY KEY (ID),
-  INDEX (Name)
-);
+INSERT INTO access(command, groupid) VALUES ("*", 0);
 
 <!-- Tags -->
-
 DROP TABLE IF EXISTS tags;
 CREATE TABLE tags (
-	Scope		enum ('box', 'cart', 'network', 'pallet'),
-	Tag		varchar(128) NOT NULL,
-	Value		text,
-	ScopeID		int(11),
-	INDEX (Scope),
-	INDEX (Tag),
-	INDEX (ScopeID)
+	scope		ENUM('box', 'cart', 'network', 'pallet') NOT NULL,
+	tag		VARCHAR(128) NOT NULL,
+	value		TEXT,
+	scopeid		INT NOT NULL,
+	INDEX (scope),
+	INDEX (tag),
+	INDEX (scopeid)
 );
 
 <!-- Attributes -->
-
 DROP TABLE IF EXISTS attributes_doc;
 CREATE TABLE attributes_doc (
-  Attr          varchar(128) NOT NULL,
-  Doc           text,
-  INDEX (Attr)
+	Attr		VARCHAR(128) NOT NULL,
+	doc		TEXT,
+	INDEX (attr)
 );
 
 <!-- OSes -->
-
 DROP TABLE IF EXISTS oses;
 CREATE TABLE oses (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '',
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(32) NOT NULL,
+	INDEX (name)
 );
 
-insert into oses (name) values ("redhat");
-insert into oses (name) values ("ubuntu");
-insert into oses (name) values ("sles");
-insert into oses (name) values ("vmware");
-insert into oses (name) values ("xenserver");
+INSERT INTO oses(name) VALUES ("redhat");
+INSERT INTO oses(name) VALUES ("ubuntu");
+INSERT INTO oses(name) VALUES ("sles");
+INSERT INTO oses(name) VALUES ("vmware");
+INSERT INTO oses(name) VALUES ("xenserver");
 
 <!-- Environments -->
-
 DROP TABLE IF EXISTS environments;
 CREATE TABLE environments (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '',
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(32) NOT NULL,
+	INDEX (name)
 );
 
 <!-- Appliances -->
-
 DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default '',
-  Public	enum('yes','no') NOT NULL default 'no',
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(32) NOT NULL,
+	public		ENUM('yes','no') NOT NULL,
+	INDEX (name)
 );
 
 <!-- Boxes -->
-
 DROP TABLE IF EXISTS boxes;
 CREATE TABLE boxes (
-  ID		int(11) NOT NULL auto_increment,
-  Name		varchar(32) NOT NULL default 'default',
-  OS		int(11) NOT NULL references oses,
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(32) NOT NULL,
+	os		INT NOT NULL,
+	INDEX (name),
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
 );
 
-<!-- Boot/Action Tables -->
-
-DROP TABLE IF EXISTS boot;
-CREATE TABLE boot (
-  Node  	int(11) NOT NULL default '0' references nodes on delete cascade,
-  Action	enum ('install', 'os')
-);
-
+<!-- Boot actions -->
 DROP TABLE IF EXISTS bootnames;
 CREATE TABLE bootnames (
-	ID		int(11) NOT NULL auto_increment,
-	Name		varchar(128) NOT NULL,
-	Type		enum ('install', 'os') NOT NULL,
-	PRIMARY KEY (ID),
-	INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL,
+	type		ENUM('install', 'os') NOT NULL,
+	INDEX (name)
 );
 
 DROP TABLE IF EXISTS bootactions;
 CREATE TABLE bootactions (
-	ID		int(11) NOT NULL auto_increment,
-	BootName	int(11) NOT NULL references bootnames,
-	OS		int(11) default NULL references oses,
-	Kernel		varchar(256) default NULL,
-	Ramdisk		varchar(256) default NULL,
-	Args		varchar(1024) default NULL,
-	PRIMARY KEY (ID)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	bootname	INT NOT NULL,
+	os		INT DEFAULT NULL,
+	Kernel		VARCHAR(256) DEFAULT NULL,
+	Ramdisk		VARCHAR(256) DEFAULT NULL,
+	Args		VARCHAR(1024) DEFAULT NULL,
+	FOREIGN KEY (bootname) REFERENCES bootnames(id) ON DELETE CASCADE,
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX BootnameOS ON bootactions(BootName,OS);
+CREATE UNIQUE INDEX BootnameOS ON bootactions(bootname, os);
 
 <!-- Subnets Table -->
 DROP TABLE IF EXISTS subnets;
@@ -176,6 +147,13 @@ CREATE TABLE nodes (
 	FOREIGN KEY (installaction) REFERENCES bootactions(id) ON DELETE SET NULL
 );
 
+DROP TABLE IF EXISTS boot;
+CREATE TABLE boot (
+	node		INT NOT NULL,
+	action		ENUM('install', 'os') NOT NULL,
+	FOREIGN KEY (node) REFERENCES nodes(id) ON DELETE CASCADE
+);
+
 <!-- Networks -->
 DROP TABLE IF EXISTS networks;
 CREATE TABLE networks (
@@ -200,39 +178,46 @@ CREATE TABLE networks (
 	FOREIGN KEY (subnet) REFERENCES subnets(id) ON DELETE SET NULL
 );
 
-<!-- Node/Switch Table -->
+<!-- Aliases -->
+DROP TABLE IF EXISTS aliases;
+CREATE TABLE aliases (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(32) NOT NULL,
+	network		INT NOT NULL,
+	INDEX (Name),
+	FOREIGN KEY (network) REFERENCES networks(id) ON DELETE CASCADE
+);
 
+<!-- Node/Switch Table -->
 DROP TABLE IF EXISTS switchports;
 CREATE TABLE switchports (
-	interface	int(11)		NOT NULL references networks,
-	switch		int(11)		NOT NULL references nodes,
-	port		int(11)		NOT NULL
+	interface	INT NOT NULL,
+	switch		INT NOT NULL,
+	port		INT NOT NULL,
+	FOREIGN KEY (interface) REFERENCES networks(id) ON DELETE CASCADE,
+	FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 <!-- Carts -->
-
 DROP TABLE IF EXISTS carts;
 CREATE TABLE carts (
-  ID 		int(11) NOT NULL auto_increment,
-  Name		varchar(128) NOT NULL default '',
-  URL		text	    NULL default '',
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL,
+	url		TEXT DEFAULT '',
+	INDEX (Name)
 );
 
-<!-- Roll.  What Rolls are installed and used by default. -->
-
+<!-- Rolls -->
 DROP TABLE IF EXISTS rolls;
 CREATE TABLE rolls (
-  ID 		int(11) NOT NULL auto_increment,
-  Name		varchar(128) NOT NULL default '',
-  Version	varchar(32) NOT NULL default '',
-  Rel		varchar(32) NOT NULL default '',
-  Arch		varchar(32) NOT NULL default '',
-  OS		varchar(32) NOT NULL default '&os;',
-  URL		text	    NULL default '',
-  PRIMARY KEY (ID),
-  INDEX (Name)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL,
+  	version		VARCHAR(32) NOT NULL DEFAULT '',
+	rel		VARCHAR(32) NOT NULL DEFAULT '',
+	arch		VARCHAR(32) NOT NULL DEFAULT '',
+	os		VARCHAR(32) NOT NULL DEFAULT '&os;',
+	url		TEXT DEFAULT '',
+	INDEX (Name)
 );
 
 <!-- Stacks -->
@@ -253,7 +238,6 @@ CREATE TABLE cart_stacks (
 );
 
 <!-- Groups -->
-
 DROP TABLE IF EXISTS groups;
 CREATE TABLE groups (
 	id		INT AUTO_INCREMENT PRIMARY KEY,
@@ -269,22 +253,21 @@ CREATE TABLE memberships (
 	FOREIGN KEY (groupid) REFERENCES groups(id) ON DELETE CASCADE
 );
 
-<!-- Partitions. stores all the partitions for all the appliances -->
-
+<!-- Partitions -->
 DROP TABLE IF EXISTS partitions;
 CREATE TABLE partitions (
-	ID				int(11) NOT NULL auto_increment,
-	Node			int(11) NOT NULL references nodes,
-	Device			varchar(128) NOT NULL default '',
-	Mountpoint		varchar(128) NOT NULL default '',
-	UUID			varchar(128) NOT NULL default '',
-	SectorStart		varchar(128) NOT NULL default '',
-	PartitionSize	varchar(128) NOT NULL default '',
-	PartitionID		varchar(128) NOT NULL default '',
-	FsType			varchar(128) NOT NULL default '',
-	PartitionFlags	varchar(128) NOT NULL default '',
-	FormatFlags		varchar(128) NOT NULL default '',
-	PRIMARY KEY (ID)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	node		INT NOT NULL,
+	device		VARCHAR(128) NOT NULL DEFAULT '',
+	mountpoint	VARCHAR(128) NOT NULL DEFAULT '',
+	uuid		VARCHAR(128) NOT NULL DEFAULT '',
+	sectorstart	VARCHAR(128) NOT NULL DEFAULT '',
+	partitionsize	VARCHAR(128) NOT NULL DEFAULT '',
+	partitionid	VARCHAR(128) NOT NULL DEFAULT '',
+	fstype		VARCHAR(128) NOT NULL DEFAULT '',
+	partitionflags	VARCHAR(128) NOT NULL DEFAULT '',
+	formatflags	VARCHAR(128) NOT NULL DEFAULT '',
+	FOREIGN KEY (node) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 <!-- Gotta drop the tables that use scope_map first -->
@@ -380,42 +363,38 @@ CREATE TABLE storage_partition (
 	FOREIGN KEY (scope_map_id) REFERENCES scope_map(id) ON DELETE CASCADE
 );
 
-<!-- Miscellaneous -->
-
+<!-- Public Keys -->
 DROP TABLE IF EXISTS public_keys;
 CREATE TABLE public_keys (
- ID		int(11) NOT NULL auto_increment,
- Node		int(11) NOT NULL references nodes,
- Public_Key	varchar(4096) default NULL,
- PRIMARY KEY (ID)
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	node		INT NOT NULL,
+	public_key	VARCHAR(4096) NOT NULL,
+ 	FOREIGN KEY (node) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 <!-- Infiniband stuff -->
-
 DROP TABLE IF EXISTS ib_partitions;
 CREATE TABLE ib_partitions (
-  id		int(11) NOT NULL auto_increment,
-  switch	int(11) NOT NULL references nodes on delete cascade,
-  part_key	int(11) NOT NULL,
-  part_name	varchar(128) NOT NULL,
-  options	varchar(128) NOT NULL default '',
-  PRIMARY KEY (id),
-  INDEX (part_name),
-  FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	switch		INT NOT NULL,
+	part_key	INT NOT NULL,
+	part_name	VARCHAR(128) NOT NULL,
+	options		VARCHAR(128) NOT NULL default '',
+	INDEX (part_name),
+	FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS ib_memberships;
 CREATE TABLE ib_memberships (
-  id		int(11) NOT NULL auto_increment,
-  switch	int(11) NOT NULL references nodes on delete cascade,
-  interface	int(11) NOT NULL references networks on delete cascade,
-  part_name	int(11) NOT NULL references ib_partitions on delete cascade,
-  member_type	varchar(32) NOT NULL default 'limited',
-  PRIMARY KEY (id),
-  INDEX (switch, part_name, interface),
-  FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE,
-  FOREIGN KEY (interface) REFERENCES networks(id) ON DELETE CASCADE,
-  FOREIGN KEY (part_name) REFERENCES ib_partitions(id) ON DELETE CASCADE
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	switch		INT NOT NULL,
+	interface	INT NOT NULL,
+	part_name	INT NOT NULL,
+	member_type	VARCHAR(32) NOT NULL DEFAULT 'limited',
+	INDEX (switch, part_name, interface),
+	FOREIGN KEY (switch) REFERENCES nodes(id) ON DELETE CASCADE,
+	FOREIGN KEY (interface) REFERENCES networks(id) ON DELETE CASCADE,
+	FOREIGN KEY (part_name) REFERENCES ib_partitions(id) ON DELETE CASCADE
 );
 
 <!-- Firmware -->
