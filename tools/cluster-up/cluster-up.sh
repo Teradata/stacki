@@ -195,19 +195,6 @@ fi
 ISO_PATH=`dirname "$ISO"`
 ISO_FILENAME=`basename "$ISO"`
 
-# Figure out if are on the Teradata network or not
-INTERNAL="false"
-if host stacki-builds.labs.teradata.com >/dev/null
-then
-    INTERNAL="true"
-fi
-
-if [[ OS == "sles12" && INTERNAL == "false" ]]
-then
-    echo -e "\033[31mError: Only CentOS Stacki is supported outside of the Teradata network\033[0m"
-    exit 1
-fi
-
 # Write out some settings for the Vagrantfile
 mkdir -p ".vagrant"
 cat > ".vagrant/cluster-up.json" <<-EOF
@@ -225,8 +212,7 @@ cat > ".vagrant/cluster-up.json" <<-EOF
     "IP": "$IP",
     "NETMASK": "$NETMASK",
     "GATEWAY": "$GATEWAY",
-    "DNS": "$DNS",
-    "INTERNAL": $INTERNAL
+    "DNS": "$DNS"
 }
 EOF
 
@@ -246,10 +232,17 @@ then
         echo
         echo -e "\033[34mDownloading CentOS-7-x86_64-Everything-1810.iso ...\033[0m"
 
-        if [[ $INTERNAL == "true" ]]
+        # Try to pull it from TD first
+        set +e
+        echo
+        echo -e "\033[37mTrying internal Teradata first ...\033[0m"
+        curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
+        set -e
+
+        if [[ ! -f $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso ]]
         then
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
-        else
+            echo
+            echo -e "\033[37mDownloading from the Internet ...\033[0m"
             curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
