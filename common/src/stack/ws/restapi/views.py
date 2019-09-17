@@ -23,6 +23,7 @@ import json
 import os
 import sys
 import subprocess
+import tempfile
 
 import logging
 import shlex
@@ -85,9 +86,6 @@ class StackWS(View):
 		# Check to see if the user is a superuser
 		admin = request.user.is_superuser
 
-		# Get the database connection
-		db_conn = _get_db_conn_(admin=admin)
-
 		# Get the command module to execute
 		mod_name = '.'.join(args)
 
@@ -101,149 +99,197 @@ class StackWS(View):
 		# Check if user has permission to run
 		# command module
 		if not request.user.has_perm(mod_name):
-			return HttpResponseForbidden('Unauthorized Command: User %s is not allowed to run %s' % 
+			return HttpResponseForbidden('Unauthorized Command: User %s is not allowed to run %s' %
 						     (request.user.username, mod_name),
 						     content_type="text/plain")
 
-		# Get command module class
-		while not done:
-			try:
-				if len(args) == 0:
-					done = True
-				else:
-					mod_name = '.'.join(args)
-					mod = 'stack.commands.%s' % mod_name
+		try:
+			# Get the database connection
+			db_conn = _get_db_conn_(admin=admin)
 
-					__import__(mod)
-					m = eval(mod)
-
-					if hasattr(m, 'Command'):
-						command = m.Command(db_conn)
-
-						# Flush the cache, we do this
-						# since multiple threads may be
-						# running and there is no
-						# mechanism for one thread to
-						# invalidate the cache of
-						# another thread.
-						command.db.clearCache()
-
+			# Get command module class
+			while not done:
+				try:
+					if len(args) == 0:
 						done = True
 					else:
-						cmd_arg_list.append(args.pop())
-			except ImportError:
-				cmd_arg_list.append(args.pop())
-			except:
-				log.error("%s" % sys.exc_info()[1])
+						mod_name = '.'.join(args)
+						mod = 'stack.commands.%s' % mod_name
 
-		# If command does not exist, return Not Found
-		if not command:
-			output = {"API Error": "Command Not Found"}
-			return HttpResponse(str(json.dumps(output)),
-					    content_type="application/json",
-					    status=404)
+						__import__(mod)
+						m = eval(mod)
 
-		# Parse the command out. A couple of special
-		# cases are called out.
-		cmd_arg_list.reverse()
-		cmd_arg_list.extend(params)
-		cmd_arg_list.append("output-format=json")
-		cmd_module = str('.'.join(mod.split('.')[2:]))
+						if hasattr(m, 'Command'):
+							command = m.Command(db_conn)
 
-		# Don't allow "run host" commands. This opens
-		# the door for arbitrary command executions
-		if cmd_module == "run.host":
-			return HttpResponseForbidden("'run host' command is not permitted",
-						     content_type="text/plain")
+							# Flush the cache, we do this
+							# since multiple threads may be
+							# running and there is no
+							# mechanism for one thread to
+							# invalidate the cache of
+							# another thread.
+							command.db.clearCache()
 
-		# If command is a sync/load command, run
-		# it with sudo, as the command will require
-		# some root privileges. However, if the user
-		# isn't a django superuser (with admin privileges)
-		# don't allow command to run.
-		elif self._isSudoCommand(cmd_module):
-			if not request.user.is_superuser:
-				cmd_str = cmd_module.replace('.', ' ')
-				return HttpResponseForbidden(f"Command \"{cmd_str}\" requires Admin Privileges" ,
-							     content_type="text/plain")
-			# Run the sync command using sudo
-			else:
-				c = [
-					"/usr/bin/sudo",
-					"/opt/stack/bin/stack",
-				]
+							done = True
+						else:
+							cmd_arg_list.append(args.pop())
+				except ImportError:
+					cmd_arg_list.append(args.pop())
+				except:
+					log.error("%s" % sys.exc_info()[1])
 
-				# If we are running pytest-xdist, we need to pass the
-				# environment variable into the sudo call
-				if 'PYTEST_XDIST_WORKER' in os.environ:
-					c.insert(1, 'PYTEST_XDIST_WORKER='+os.environ['PYTEST_XDIST_WORKER'])
+			# If command does not exist, return Not Found
+			if not command:
+				output = {"API Error": "Command Not Found"}
+				return HttpResponse(str(json.dumps(output)),
+						content_type="application/json",
+						status=404)
 
-				c.extend(cmd_module.split('.'))
-				c.extend(cmd_arg_list)
-				log.info(f'{c}')
-				p = subprocess.Popen(c, 
-						     stdout=subprocess.PIPE,
-						     stderr=subprocess.PIPE,
-						     encoding='utf-8')
-				o, e = p.communicate()
-				rc = p.wait()
-				if rc:
-					j = {"API Error": e, "Output": o}
-					return HttpResponse(str(json.dumps(j)),
-							    content_type="application/json",
-							    status=500)
+			# Handle case where json data is posted (currently only for `stack load`)
+			with tempfile.NamedTemporaryFile(mode='w') as json_file:
+				# Parse the command out. A couple of special
+				# cases are called out.
+				cmd_arg_list.reverse()
+
+				data = body.get('data')
+				if data:
+					json.dump(data, json_file)
+					json_file.flush()
+					cmd_arg_list.append(json_file.name)
+
+				cmd_arg_list.extend(params)
+				cmd_arg_list.append("output-format=json")
+				cmd_module = str('.'.join(mod.split('.')[2:]))
+
+				# Don't allow "run host" commands. This opens
+				# the door for arbitrary command executions
+				if cmd_module == "run.host":
+					return HttpResponseForbidden(
+						"'run host' command is not permitted",
+						content_type="text/plain",
+					)
+
+				# If command is a sync/load command, run
+				# it with sudo, as the command will require
+				# some root privileges. However, if the user
+				# isn't a django superuser (with admin privileges)
+				# don't allow command to run.
+				elif self._isSudoCommand(cmd_module):
+					if not request.user.is_superuser:
+						cmd_str = cmd_module.replace('.', ' ')
+						return HttpResponseForbidden(
+							f"Command \"{cmd_str}\" requires Admin Privileges" ,
+							content_type="text/plain",
+						)
+					# Run the sync command using sudo
+					else:
+						c = [
+							"/usr/bin/sudo",
+							"/opt/stack/bin/stack",
+						]
+
+						# If we are running pytest-xdist, we need to pass the
+						# environment variable into the sudo call
+						if 'PYTEST_XDIST_WORKER' in os.environ:
+							c.insert(1, 'PYTEST_XDIST_WORKER='+os.environ['PYTEST_XDIST_WORKER'])
+
+						c.extend(cmd_module.split('.'))
+						c.extend(cmd_arg_list)
+						log.info(f'{c}')
+						p = subprocess.Popen(
+							c,
+							stdout=subprocess.PIPE,
+							stderr=subprocess.PIPE,
+							encoding='utf-8',
+						)
+						output, error = p.communicate()
+						rc = p.wait()
+						if rc:
+							j = {"API Error": error, "Output": output}
+							return HttpResponse(
+								str(json.dumps(j)),
+								content_type="application/json",
+								status=500,
+							)
+						else:
+							if not output:
+								output = {}
+
+							# Check to see if text is json
+							try:
+								j = json.loads(output)
+							except:
+								j = {"Output": output}
+
+							return HttpResponse(
+								str(json.dumps(j)),
+								content_type="application/json",
+								status=200,
+							)
+				# If it's not the sync command, run the
+				# command module wrapper directly.
 				else:
-					if not o:
-						o = {}
-					return HttpResponse(str(json.dumps(o)),
-							    content_type="application/json",
-							    status=200)
-		# If it's not the sync command, run the
-		# command module wrapper directly.
-		else:
-			try:
-				rc = command.runWrapper(cmd_module, cmd_arg_list)
-			# If we hit a database error, check if it's an access
-			# denied error. If so, sanitize the error message, and
-			# don't expose database access.
-			except pymysql.OperationalError as e:
-				errortext = str(sys.exc_info()[1])
-				log.error(errortext)
-				if int(e.args[0]) in MYSQL_EX:
-					errortext = "Database Permission Denied. Admin privileges required"
-					status_code = 403
-				else:
-					status_code = 500
-				return HttpResponse(json.dumps({'API Error': errortext}),
-						    content_type='application/json',
-						    status=status_code)
-			except CommandError as e:
-				return HttpResponse(json.dumps({'API Error': '%s' % e}),
-						    content_type='application/json',
-						    status=500)
-			
-			# Any other type of error, simply forward it
-			# to the client
-			except:
-				errortext = str(traceback.format_exc())
-				log.error(errortext)
-				return HttpResponse(json.dumps({'API Error': errortext}),
-						    content_type='application/json',
-						    status=500)
+					try:
+						rc = command.runWrapper(cmd_module, cmd_arg_list)
+					# If we hit a database error, check if it's an access
+					# denied error. If so, sanitize the error message, and
+					# don't expose database access.
+					except pymysql.OperationalError as e:
+						errortext = str(sys.exc_info()[1])
+						log.error(errortext)
+						if int(e.args[0]) in MYSQL_EX:
+							errortext = "Database Permission Denied. Admin privileges required"
+							status_code = 403
+						else:
+							status_code = 500
+						return HttpResponse(
+							json.dumps({'API Error': errortext}),
+							content_type='application/json',
+							status=status_code,
+						)
+					except CommandError as e:
+						# Get output from command
+						text = command.getText()
 
-			# Get output from command
-			text = command.getText()
-			
-			if not text:
-				text = {}
+						if not text:
+							text = {}
 
-			# Check to see if text is json
-			try:
-				j = json.loads(text)
-			except:
-				j = {"Output": text}
-			return HttpResponse(str(json.dumps(j)),
-					    content_type="application/json")
+						return HttpResponse(
+							json.dumps({'API Error': '%s' % e, 'Output': text}),
+							content_type='application/json',
+							status=500,
+						)
+
+					# Any other type of error, simply forward it
+					# to the client
+					except:
+						errortext = str(traceback.format_exc())
+						log.error(errortext)
+						return HttpResponse(
+							json.dumps({'API Error': errortext}),
+							content_type='application/json',
+							status=500,
+						)
+
+					# Get output from command
+					text = command.getText()
+
+					if not text:
+						text = {}
+
+					# Check to see if text is json
+					try:
+						j = json.loads(text)
+					except:
+						j = {"Output": text}
+					return HttpResponse(
+						str(json.dumps(j)),
+						content_type="application/json",
+					)
+
+		finally:
+			if db_conn:
+				db_conn.close()
 
 	# Check if command is blacklisted
 	def _blacklisted(self, mod):
@@ -274,7 +320,7 @@ class StackWS(View):
 				return True
 
 		return False
-	
+
 # Create Connections to the database, and return
 # connection based on the administrative privilege.
 # Use this instead of Django's internal database

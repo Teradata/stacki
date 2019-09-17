@@ -10,6 +10,7 @@ import sys
 import requests
 
 import json
+import re
 from stack.bool import str2bool
 
 import http.client
@@ -39,7 +40,7 @@ class StackWSClient:
 
 			csrftoken = resp.cookies['csrftoken']
 			self.session.headers.update({
-				"csrftoken":csrftoken, 
+				"csrftoken":csrftoken,
 				"X-CSRFToken":csrftoken,
 				})
 			resp = self.session.post("%s/login" % self.url,
@@ -56,17 +57,24 @@ class StackWSClient:
 				"sessionid":self.sessionid,
 				})
 			self.logged_in = True
-		
+
 	def run(self, cmd):
+		data = None
 		if not self.logged_in:
 			self.login()
-		if cmd.startswith('load ') or \
-			cmd.startswith('unload '):
+		if (cmd.startswith('load ') or cmd.startswith('unload ')) and "json-file=" not in cmd:
 			new_cmd = self.loadFile(cmd)
 			cmd = new_cmd
+		elif cmd.startswith('load '):
+			regex = r"json-file=(?P<filename>\w+.\w+)"
+			file_match = re.search(regex, cmd)
+			if file_match:
+				cmd = re.sub(regex, "", cmd)
+				with open(file_match.group("filename")) as json_file:
+					data = json.load(json_file)
 
 		self.session.headers.update({"Content-Type": "application/json"})
-		js = json.dumps({"cmd":cmd})
+		js = json.dumps({"cmd":cmd, "data":data}) if data else json.dumps({"cmd":cmd})
 		resp = self.session.post(self.url, data = js)
 		try:
 			out = json.loads(resp.json())
@@ -96,10 +104,10 @@ class StackWSClient:
 	def upload(self, filename):
 		if not os.path.exists(filename) or not os.path.isfile(filename):
 			raise IOError(f'File {filename} does not exist')
-		
+
 		if 'Content-Type' in self.session.headers:
 			del self.session.headers['Content-Type']
-		
+
 		response = self.session.post(f'{self.url}/upload', files={
 			'csvFile': (os.path.basename(filename), open(filename, 'rb'), 'text/csv')
 		})
