@@ -2,7 +2,7 @@
 
 # Things the RPM will do:
 # Copy foundation.conf to /etc/ld.so.conf.d/
-# Copy boss-config files to /opt/stack/bin.  Boss_config.py 
+# Copy boss-config files to /opt/stack/bin.  Boss_config.py
 # has to be changed to accomodate lack of database
 # Copy wxpython RPM somewhere (it isnt included in 6.6)
 
@@ -58,7 +58,7 @@ ROLLS_XML_TEMPLATE = """\
 def banner(message):
 	print('#######################################')
 	print(message)
-	print('#######################################')	
+	print('#######################################')
 
 
 def copy(source, dest):
@@ -221,7 +221,7 @@ else:
 	print('Unrecognized operating system\n')
 	usage()
 	sys.exit(-1)
-	
+
 #
 # process the command line arguments
 #
@@ -229,7 +229,7 @@ opts, args = getopt.getopt(
 	sys.argv[1:],
 	'',
 	['stacki-iso=', 'extra-iso=', 'use-existing']
-) 
+)
 
 stacki_iso = None
 extra_isos = []
@@ -273,18 +273,27 @@ for iso in extra_isos:
 repoconfig(stacki_iso, extra_isos)
 
 pkgs = [
-	'foundation-python', 
+	'foundation-python',
 	'foundation-python-PyMySQL',
 	'stack-command',
 	'stack-pylib',
+	'stack-templates',
 	'net-tools',
-	'foundation-newt', 
+	'foundation-newt',
 	'stack-wizard',
-        'rsync',
+	'rsync',
+	'stack-kickstart',
 ]
 
 if osname == 'redhat':
-	pkgs.extend([ 'foundation-redhat' ])
+	pkgs.append('foundation-redhat')
+
+# workaround to add a new package but not break this script for older stacki releases
+proc = subprocess.Popen('find /export/stack/pallets/stacki/ -name stack-templates-*rpm'.split(),
+	stdout=subprocess.PIPE)
+stdout, _ = proc.communicate()
+if stdout:
+	pkgs.append('stack-templates')
 
 return_code = installrpms(pkgs)
 
@@ -301,13 +310,13 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		# Construct site.attrs and rolls.xml from the exising system
 		banner("Pulling existing info")
 		attrs = {}
-		
+
 		# Get our FQDN and split it into its parts
 		attrs['FQDN'] = socket.getfqdn()
 		fqdn = attrs['FQDN'].split('.')
 		attrs['HOSTNAME'] = fqdn.pop(0)
 		attrs['DOMAIN'] = '.'.join(fqdn)
-		
+
                 # Reject frontend and backend as hostnames
 		if attrs['HOSTNAME'].lower() in ['frontend', 'backend']:
 			print('Cannot have an appliance name as a hostname')
@@ -319,11 +328,11 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			interface = re.match(r'\d+:\s+(\S+)\s+', line).group(1)
 			if interface != 'lo':
 				interfaces.append((interface, line))
-		
+
 		if len(interfaces) == 0:
 			print("Error: No interfaces found.")
 			sys.exit(1)
-		
+
 		interface = interfaces[0]
 		if len(interfaces) > 1:
 			print("\nI found more than one interface, which one do you want to use?\n")
@@ -333,13 +342,13 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 					interface[0],
 					re.search(r'inet\s+([\d.]+)/', interface[1]).group(1)
 				))
-			
+
 			# Make input work on both python 2 and 3
 			try:
 				get_input = raw_input
 			except NameError:
 				get_input = input
-			
+
 			for _ in range(3):
 				try:
 					choice = int(get_input("\nType the interface number: ")) - 1
@@ -350,7 +359,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			else:
 				print("\nError: Failed after 3 tries.")
 				sys.exit(1)
-		
+
 		# Pull in the interface info
 		attrs['NETWORK_INTERFACE'] = interface[0]
 		match = re.match('\d+:\s+\S+\s+inet\s+([\d.]+)/(\d+)\s+brd\s+([\d.]+)', interface[1])
@@ -361,17 +370,17 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		else:
 			print("Error: Network info not found.")
 			sys.exit(1)
-		
+
 		# Calculate the NETMASK. Start with 32 bits on, shift zeros for the CIDR length,
 		# then slice it back to 32 bits
 		netmask = (0xFFFFFFFF << (32 - attrs['NETMASK_CIDR'])) & 0xFFFFFFFF
 		attrs['NETMASK'] = socket.inet_ntoa(struct.pack('!I', netmask))
-		
+
 		# Calculate the NETWORK address based on the netmask
 		inet_address = struct.unpack('!I', socket.inet_aton(attrs['NETWORK_ADDRESS']))[0]
 		network_address = inet_address & netmask
 		attrs['NETWORK'] = socket.inet_ntoa(struct.pack('!I', network_address))
-		
+
 		# Get the MAC_ADDRESS
 		for line in subprocess.check_output("ip -o link", shell=True).splitlines():
 			if line.split(':')[1].strip() == interface[0]:
@@ -380,18 +389,18 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		else:
 			print("Error: MAC address not found.")
 			sys.exit(1)
-		
+
 		# Get the GATEWAY
 		gateways = []
 		for line in subprocess.check_output("ip route", shell=True).splitlines():
 			parts = line.split()
 			if parts[0] == 'default':
 				gateways.append((parts[4], parts[2]))
-		
+
 		if len(gateways) == 0:
 			print("Error: Network gateway not found.")
 			sys.exit(1)
-		
+
 		gateway = gateways[0][1]
 		if len(gateways) > 1:
 			print("\nI found more than one default gateway, which one do you want to use?\n")
@@ -401,13 +410,13 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 					gateway[0],
 					gateway[1]
 				))
-			
+
 			# Make input work on both python 2 and 3
 			try:
 				get_input = raw_input
 			except NameError:
 				get_input = input
-			
+
 			for _ in range(3):
 				try:
 					choice = int(get_input("\nType the gateway number: ")) - 1
@@ -418,21 +427,21 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			else:
 				print("\nError: Failed after 3 tries.")
 				sys.exit(1)
-		
+
 		attrs['GATEWAY'] = gateway
-		
+
 		# Get the DNS_SERVERS
 		dns_servers = []
 		for line in open('/etc/resolv.conf'):
 			if 'nameserver' in line:
 				dns_servers.append(line.split()[1])
-		
+
 		if len(dns_servers):
 			attrs['DNS_SERVERS'] = ','.join(dns_servers)
 		else:
 			print("Error: DNS server not found.")
 			sys.exit(1)
-		
+
 		# Get the timezone from the /etc/localtime symlink
 		path = os.path.realpath('/etc/localtime')
 		if path.startswith('/usr/share/zoneinfo/'):
@@ -440,7 +449,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		else:
 			print("Error: Timezone not found.")
 			sys.exit(1)
-		
+
 		# Steal the root shadow password
 		for line in open('/etc/shadow'):
 			if line.startswith('root:'):
@@ -449,15 +458,15 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		else:
 			print("Error: Shadow password not found.")
 			sys.exit(1)
-		
+
 		# Write out site.attrs
 		with open('/tmp/site.attrs', 'w') as f:
 			f.write(SITE_ATTRS_TEMPLATE.format(**attrs))
-		
+
 		# Use the stacki version of python3 and run the wizard code
 		# to get the pallet info from the mounted ISO
 		mount(stacki_iso, '/mnt/cdrom')
-		
+
 		roll_info = json.loads(subprocess.check_output([
 			'/opt/stack/bin/python3',
 			'-c',
@@ -465,13 +474,13 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			'import json;'
 			'print(json.dumps(Data().getDVDPallets()[0]))'
 		]))
-		
+
 		umount('/mnt/cdrom')
-		
+
 		# Write out rolls.xml
 		with open('/tmp/rolls.xml', 'w') as f:
 			f.write(ROLLS_XML_TEMPLATE.format(*roll_info))
-		
+
 	else:
 		#
 		# execute boss_config.py. completing this wizard creates
@@ -479,16 +488,16 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		#
 		banner("Launch Boss-Config")
 		mount(stacki_iso, '/mnt/cdrom')
-		
+
 		subprocess.call([
 			'/opt/stack/bin/python3',
 			'/opt/stack/bin/boss_config_snack.py',
 			'--no-partition',
 			'--no-net-reconfig'
 		])
-		
+
 		umount('/mnt/cdrom')
-	
+
 	# add missing attrs to site.attrs
 	f = open("/tmp/site.attrs", "a")
 	str = "Kickstart_Multicast:" + generate_multicast() + "\n"
@@ -517,7 +526,7 @@ if not use_existing:
 			attributes['Kickstart_PrivateHostname'],
 			attributes['Info_FQDN']
 		))
-	
+
 	# set the hostname to the user-entered FQDN
 	print('Setting hostname to %s' % attributes['Info_FQDN'])
 	subprocess.call(['hostname', attributes['Info_FQDN']])

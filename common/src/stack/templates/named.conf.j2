@@ -1,0 +1,63 @@
+{{ edit_warning }}
+# Site additions go in /etc/named.conf.local
+
+acl private {
+	{{ acl_list|join(';') }};
+};
+
+options {
+	directory "{{ directory }}";
+	dump-file "{{ dumpfile }}";
+	statistics-file "{{ statfile }}";
+	allow-query { private; };
+	{% if forwarders is defined %}
+	forwarders { {{ forwarders }}; };
+	{% endif %}
+};
+
+controls {
+	inet 127.0.0.1 allow { localhost; } keys { rndc-key; };
+};
+
+zone "." IN {
+	type hint;
+	file "{{ hintfile }}";
+};
+
+zone "localhost" IN {
+	type master;
+	file "{{ localzone }}";
+	allow-update { none; };
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+	type master;
+	file "{{ loopzone }}";
+	allow-update { none; };
+};
+{% for zone in fwzones %}
+
+# Zone Mapping for {{ zone.name }} network
+zone "{{ zone.zone }}" {
+	type master;
+	notify no;
+	file "{{ zone.name }}.domain";
+};
+{% endfor %}
+{% for zone in revzones %}
+
+# Reverse Zone mapping for {{ zone.comment_name }}
+zone "{{ zone.zone }}.in-addr.arpa" {
+	type master;
+	notify no;
+	file "reverse.{{ zone.name }}.domain";
+};
+{% endfor %}
+{% if local_conf is defined %}
+
+# Imported from /etc/named.conf.local
+{{ local_conf }}
+{% endif %}
+
+include "/etc/rndc.key";
+

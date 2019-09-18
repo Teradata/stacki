@@ -26,11 +26,11 @@ cat /run/install/tmp/ks.xml | \
 
 /opt/stack/bin/configure-controllers.py
 
-# 
+#
 # need to call 'initialize-storage.py' again after reconfiguring the
-# hardware disk controller because it may have created new LUNs and the 
+# hardware disk controller because it may have created new LUNs and the
 # master boot record on a LUN may be corrupted and require initialization.
-# 
+#
 /opt/stack/bin/initialize-storage.py
 
 /opt/stack/bin/configure-partitions.py > /tmp/partition-info
@@ -63,76 +63,5 @@ sg
 </stack:script>
 
 
-<stack:script stack:cond="boot_device and release == 'redhat6'" stack:stage="install-post">
-
-# Only proceed if boot_device is defined on this node
-if [ "x&boot_device;" == "x" ]; then
-  exit
-fi
-
-# grub-install will create several files, but it won't create grub.conf/menu.lst
-
-<stack:file stack:name="/boot/grub/grub.conf">
-default=0
-timeout=0
-# commenting out splashimage because if drive isn't present at boottime,
-# grub crashes and the machine boot-loops
-#splashimage=(hd0,0)/boot/grub/splash.xpm.gz
-hiddenmenu
-title DISTRO RELEASE (KERNEL_VER)
-	root (hd0,0)
-	kernel VMLINUZ ro root=UUID= rd_NO_LUKS rd_NO_LVM LANG=en_US.UTF-8 rd_NO_MD SYSFONT=latarcyrheb-sun16  KEYBOARDTYPE=pc KEYTABLE=us rd_NO_DM rhgb quiet
-	initrd INITRAM
-</stack:file>
-
-GRUB_CONF=/boot/grub/grub.conf
-sed -i "s/KERNEL_VER/`uname -r`/g" $GRUB_CONF
-sed -i "s/DISTRO/`lsb_release --id`/g" $GRUB_CONF
-sed -i "s/RELEASE/`lsb_release --release`/g" $GRUB_CONF
-
-# Get paths to the newest compressed kernel and initrd
-vmlinuz=`ls -t /boot/vmlinuz-* | head -1`
-initram=`ls -t /boot/initramfs-* | head -1`
-
-# if /boot is on its own partition, that means grub's root is just /
-boot_part=`mount | grep ' /boot ' | cut --fields=1 --delimiter=' '`
-if [ ! -z "$boot_part" ]; then
-  vmlinuz=/`basename $vmlinuz`
-  initram=/`basename $initram`
-fi
-
-# use #'s as delimiters, as the var's will have /'s
-sed -i "s#VMLINUZ#$vmlinuz#g" $GRUB_CONF
-sed -i "s#INITRAM#$initram#g" $GRUB_CONF
-
-lnx_boot_drive='/dev/&boot_device;'
-
-# install boot images to the requested drive (defaults to /boot/grub/)
-/sbin/grub-install --no-floppy $lnx_boot_drive >> /tmp/stacki-grub.log 2>&amp;1
-
-# device.map doesn't exist until after grub-install
-desired_grub_boot_drive=`grep "${lnx_boot_drive}" /boot/grub/device.map | cut --fields=1  | tr --delete '()'`
-
-# swap out blank UUID field for actual UUID of wherever '/' is
-lnx_root_dev=`mount | grep ' / ' | cut --fields=1 --delimiter=' '`
-uuid=`blkid -s UUID -o value ${lnx_root_dev}`
-sed -i "s/root=UUID= /root=UUID=${uuid} /g" $GRUB_CONF
-echo "#Linux / is ${lnx_root_dev} is ${uuid}" >> $GRUB_CONF
-
-echo "" >> /tmp/stacki-grub.log
-
-# confirm we can actually find the boot configuration where we expect it
-#echo "root ${grub_boot_location}
-#find /boot/grub/grub.conf" | /sbin/grub --config-file=/boot/grub/grub.conf --device-map=/boot/grub/device.map >> /tmp/stacki-grub.log 2>&amp;1
-
-mv /tmp/stacki-grub.log /root/
-
-# swap grub.conf back to the first drive of the system
-# the theory here is that BIOS will tell grub this is the first disk
-sed -i "s/${desired_grub_boot_drive},0/hd0,0/g" $GRUB_CONF
-
-</stack:script>
-
-
-</stack:stack> 
+</stack:stack>
 

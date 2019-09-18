@@ -1,0 +1,104 @@
+[
+	{
+		"name": "redhat",
+		"partition": [
+			{
+				"device": "sdd",
+				"mountpoint": "/redhat",
+				"size": 23456,
+				"fstype": "ext4",
+				"options": ""
+			}
+		],
+		"route": [
+			{
+				"address": "250.254.3.0",
+				"gateway": "250.254.3.1",
+				"subnet": null,
+				"netmask": "255.255.255.0",
+				"interface": "redhat"
+			}
+		],
+		"firewall": [
+			{
+				"service": "redhat",
+				"network": null,
+				"output_network": null,
+				"chain": "INPUT",
+				"action": "ACCEPT",
+				"protocol": "all",
+				"flags": null,
+				"comment": "OS test firewall rule",
+				"table": "filter",
+				"name": "ACCEPT-OS"
+			}
+		],
+		"controller": [
+			{
+				"enclosure": "1",
+				"adapter": "1",
+				"slot": "2",
+				"raidlevel": "1",
+				"arrayid": "2",
+				"options": "redhat"
+			}
+		],
+		"attr": [
+			{
+				"name": "redhat_attr",
+				"value": "redhat_attr"
+			}
+		]
+	},
+	{
+		"name": "sles",
+		"partition": [
+			{
+				"device": "sdd",
+				"mountpoint": "/sles",
+				"size": 23456,
+				"fstype": "ext4",
+				"options": ""
+			}
+		],
+		"route": [
+			{
+				"address": "250.254.3.0",
+				"gateway": "250.254.3.1",
+				"subnet": null,
+				"netmask": "255.255.255.0",
+				"interface": "sles"
+			}
+		],
+		"firewall": [
+			{
+				"service": "sles",
+				"network": null,
+				"output_network": null,
+				"chain": "INPUT",
+				"action": "ACCEPT",
+				"protocol": "all",
+				"flags": null,
+				"comment": "OS test firewall rule",
+				"table": "filter",
+				"name": "ACCEPT-OS"
+			}
+		],
+		"controller": [
+			{
+				"enclosure": "1",
+				"adapter": "1",
+				"slot": "2",
+				"raidlevel": "1",
+				"arrayid": "2",
+				"options": "sles"
+			}
+		],
+		"attr": [
+			{
+				"name": "sles_attr",
+				"value": "sles_attr"
+			}
+		]
+	}
+]

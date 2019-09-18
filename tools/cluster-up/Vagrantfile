@@ -1,5 +1,12 @@
 require 'json'
+require 'net/http'
 
+# Are we internal to TD?
+begin
+  INTERNAL = Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+rescue
+  INTERNAL = "false"
+end
 
 if File.file?('.vagrant/cluster-up.json')
   json_data = File.read('.vagrant/cluster-up.json')
@@ -18,7 +25,6 @@ if File.file?('.vagrant/cluster-up.json')
   NETMASK = settings['NETMASK']
   GATEWAY = settings['GATEWAY']
   DNS = settings['DNS']
-  INTERNAL = settings['INTERNAL']
 
   Vagrant.configure("2") do |config|
     config.vm.define "frontend", autostart: false do |config|
@@ -27,7 +33,7 @@ if File.file?('.vagrant/cluster-up.json')
         config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
       elsif OS == 'redhat7'
         config.vm.box = "stacki/centos-7.6"
-        if INTERNAL
+        if INTERNAL == "true"
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
       end
@@ -93,7 +99,7 @@ if File.file?('.vagrant/cluster-up.json')
     (0..BACKENDS-1).each do |i|
       config.vm.define "backend-0-#{i}", autostart: false do |config|
         config.vm.box = "stacki/pxe-boot"
-        if INTERNAL
+        if INTERNAL == "true"
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
         end
         config.vm.boot_timeout = 3600

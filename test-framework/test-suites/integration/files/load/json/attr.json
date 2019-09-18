@@ -1,0 +1,79 @@
+{
+	"version": "05.03.00.00",
+	"attr": [
+		{
+			"name": "global_attr",
+			"value": "global_attr"
+		}
+	],
+	"host": [
+			{
+					"name": "test_host",
+					"rack": "0",
+					"rank": "0",
+					"appliance": "test_appliance",
+					"box": "default",
+					"environment": null,
+					"osaction": "default",
+					"installaction": "default",
+					"comment": null,
+					"metadata": null,
+					"group": [],
+					"interface": [
+							{
+									"interface": "eth0",
+									"default": null,
+									"network": "private",
+									"mac": "52:54:00:ad:a7:c5",
+									"ip": "10.1.1.1",
+									"name": "test_host",
+									"module": null,
+									"vlan": null,
+									"options": null,
+									"channel": null,
+									"alias": []
+							}
+					],
+					"attr": [
+							{
+								"name": "host_attr",
+								"value": "host_attr"
+							}
+					]
+			}
+	],
+	"environment": [
+		{
+			"name": "test_environment",
+			"attr": [
+				{
+					"name": "environment_attr",
+					"value": "environment_attr"
+				}
+			]
+		}
+	],
+	"os": [
+		{
+				"name": "redhat",
+				"attr": [
+					{
+						"name": "os_attr",
+						"value": "os_attr"
+					}
+				]
+		}
+	],
+	"appliance": [
+			{
+					"name": "test_appliance",
+					"public": true,
+					"attr": [
+						{
+							"name": "appliance_attr",
+							"value": "appliance_attr"
+						}
+					]
+			}
+	]
+}

@@ -13,8 +13,8 @@ build:
 
 install::
 	# Install WSGI File
-	mkdir -p $(ROOT)/var/www/cgi-bin
-	$(INSTALL) -m0644 cgi-bin/wsgi.py $(ROOT)/var/www/cgi-bin/
+	mkdir -p $(ROOT)/var/www/wsgi
+	$(INSTALL) -m0644 cgi-bin/wsgi.py $(ROOT)/var/www/wsgi/stacki-ws.wsgi
 
 	# Install Django Setup files
 	mkdir -p $(ROOT)/opt/stack/share/stack/bin
@@ -34,10 +34,6 @@ install::
 	)
 	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | gawk	\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
-
-	# Install Apache Config file
-	mkdir -p $(ROOT)/etc/apache2/stacki-conf.d
-	$(INSTALL) -m0644 conf/stacki_ws.httpd $(ROOT)/etc/apache2/stacki-conf.d/ws.conf
 
 	# Install syslog file
 	mkdir -p $(ROOT)/etc/rsyslog.d/

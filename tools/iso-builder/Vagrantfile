@@ -1,4 +1,12 @@
 require "json"
+require "net/http"
+
+# Are we internal to TD?
+begin
+  INTERNAL = Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+rescue
+  INTERNAL = "false"
+end
 
 if ARGV[0] == "up"
   # Make sure we have the needed ENV variables defined
@@ -14,11 +22,8 @@ if ARGV[0] == "up"
     ENV["ISOS"] = "."
   end
 
-  # Are we internal to TD?
-  ENV["INTERNAL"] = system("host stacki-builds.labs.teradata.com") ? "true" : "false"
-
   # We can only build CentOS outside of TD
-  if not ENV["INTERNAL"] and ENV["PLATFORM"] != "redhat7"
+  if INTERNAL == "false" and ENV["PLATFORM"] != "redhat7"
     abort("Error: Only redhat7 PLATFORM is buildable outside of the Teradata network")
   end
 
@@ -26,7 +31,6 @@ if ARGV[0] == "up"
   state = {
     "PLATFORM" => ENV["PLATFORM"],
     "ISOS" => ENV["ISOS"],
-    "INTERNAL" => ENV["INTERNAL"]
   }
   File.write(".vagrant/state.json", state.to_json)
 
@@ -36,7 +40,6 @@ else
 
     ENV["PLATFORM"] = state["PLATFORM"]
     ENV["ISOS"] = state["ISOS"]
-    ENV["INTERNAL"] = state["INTERNAL"]
   end
 end
 
@@ -47,7 +50,7 @@ Vagrant.configure("2") do |config|
     case ENV["PLATFORM"]
       when "redhat7"
         config.vm.box = "stacki/centos-7.6"
-        if ENV["INTERNAL"]
+        if INTERNAL == "true"
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
       when "sles12"
@@ -86,7 +89,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "shell", path: "provision.sh", name: "Provision", keep_color: true, env: {
       "PLATFORM" => ENV["PLATFORM"],
-      "INTERNAL" => ENV["INTERNAL"]
+      "INTERNAL" => INTERNAL
     }
 
     config.vm.provision "shell", path: "build.sh", name: "Build", keep_color: true, env: {

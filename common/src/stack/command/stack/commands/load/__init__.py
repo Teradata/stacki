@@ -17,6 +17,7 @@ import stack.commands
 from stack.bool import str2bool
 import re
 import shlex
+from contextlib import suppress
 
 
 class command(stack.commands.Command):
@@ -54,14 +55,34 @@ class command(stack.commands.Command):
 	def set_scope(self, scope):
 		self.__dump_scope = scope
 
+	def _exec_commands(self, cmd, args, params):
+		"""Helper to actually run the commands with the self.call machinery."""
+		assert self.exec_commands
+
+		call_args = []
+		call_args.extend(args)
+		call_args.extend(f"{key}={value}" for key, value in params.items())
+
+		# Suppress errors to mimic normal use case of piping through bash without -e.
+		# This is because some commands are expected to fail, but the failure doesn't matter.
+		# For example: trying to re-add the frontend host on a freshly installed frontend.
+		with suppress(CommandError):
+			self.call(command = cmd, args = call_args)
 
 	def stack(self, cmd, *args, **params):
 		if not args or args == (None,):
-			args = []
+			args = tuple()
 		if not params:
 			params = {}
-		for key in [key for key in params if params[key] is None]:
-			del params[key]	  # nuke *=None params
+
+		# nuke *=None params
+		params = {key: value for key, value in params.items() if value is not None}
+
+		# If they actually want us to run the commands, go ahead and run them.
+		if self.exec_commands:
+			self._exec_commands(cmd = cmd, args = args, params = params)
+			return
+
 		c = ' '.join(cmd.split('.'))
 		a = ''
 		if args:
@@ -104,119 +125,243 @@ class command(stack.commands.Command):
 
 
 	def load_attr(self, attrs, target=None):
+		"""Loads attr information provided into the current scope."""
 		if not attrs:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for a in attrs:
-			params = {'scope' : scope,
-				  'attr'  : a.get('name'),
-				  'value' : a.get('value'),
-				  'shadow': a.get('shadow')}
+		cmd = f'set.{scope}.attr' if scope != 'global' else 'set.attr'
 
-			self.stack('set.attr', target, **params)
+		for attr in attrs:
+			params = {
+				'attr': attr.get('name'),
+				'value': attr.get('value'),
+				'shadow': attr.get('shadow'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def load_controller(self, controllers, target=None):
+		"""Loads controller information provided into the current scope."""
 		if not controllers:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for c in controllers:
-			params = {'enclosure': c.get('enclosure'),
-				  'adapter'  : c.get('adapter'),
-				  'slot'     : c.get('slot'),
-				  'raidlevel': c.get('raidlevel'),
-				  'arrayid'  : c.get('arrayid'),
-				  'options'  : c.get('options')}
+		cmd = f'add.{scope}.storage.controller' if scope != 'global' else 'add.storage.controller'
 
-			self.stack('add.storage.controller', target, **params)
+		for controller in controllers:
+			params = {
+				'enclosure': controller.get('enclosure'),
+				'adapter': controller.get('adapter'),
+				'slot': controller.get('slot'),
+				'raidlevel': controller.get('raidlevel'),
+				'arrayid': controller.get('arrayid'),
+				'options': controller.get('options'),
+			}
 
+			self.stack(cmd, target, **params)
+
+	def _validate_raid_device(self, device, partitions_list, raid_devices):
+		"""Validate software raid is set up correctly."""
+		for partition in partitions_list:
+			# Gotta have options
+			if not partition.get('options'):
+				raise CommandError(
+					self,
+					f'missing options for software raid device "{device}"'
+				)
+
+			# First part of options needs to define the RAID level
+			parts = partition['options'].split()
+			if not parts[0].startswith("--level=RAID"):
+				raise CommandError(
+					self,
+					f'missing "--level=RAID" option for software raid device "{device}"'
+				)
+
+			# The other parts need to be valid RAID devices
+			for part in parts[1:]:
+				if part not in raid_devices:
+					raise CommandError(
+						self,
+						f'device "{part}" not defined for software raid device "{device}"'
+					)
+
+	def _validate_lvm_partition(self, partitions_list):
+		"""Make sure that LVM partitions have names."""
+		for partition in partitions_list:
+			options = partition.get('options')
+			if not options or "--name=" not in options:
+				raise CommandError(
+					self,
+					f'missing "--name" option for LVM partition "{partition["mountpoint"]}"'
+				)
+
+	def validate_partition(self, partitions):
+		"""Validates that the partitions provided are valid as a whole."""
+		# Now that we've processed the spreadsheet, do some sanity checks
+		md_regex = re.compile(r'md[0-9]+')
+		hd_regex = re.compile(r'xvd[a-z]+|[shv]d[a-z]+|nvme[0-9]+n[0-9]+')
+
+		# Construct some lookup tables based on mount point
+		raid_devices = set()
+		lvm_devices = set()
+		volgroup_devices = set()
+
+		# map partitions by device for validation
+		devices = {
+			partition.get("device"): []
+			for partition in partitions
+		}
+		for partition in partitions:
+			devices[partition.get("device")].append(partition)
+
+		for partitions_list in devices.values():
+			for partition in partitions_list:
+				if partition.get('fstype') == 'raid':
+					raid_devices.add(partition['mountpoint'])
+				elif partition.get('fstype') == 'lvm':
+					lvm_devices.add(partition['mountpoint'])
+				elif partition.get('fstype') == 'volgroup':
+					volgroup_devices.add(partition['mountpoint'])
+
+		# Check the devices for this target
+		valid_devices = set()
+		for device, partitions_list in devices.items():
+			# Make sure software raid devices have valid options
+			if md_regex.fullmatch(device):
+				self._validate_raid_device(
+					device = device,
+					partitions_list = partitions_list,
+					raid_devices = raid_devices,
+				)
+				valid_devices.add(device)
+
+			# Physical devices are valid
+			elif hd_regex.fullmatch(device):
+				valid_devices.add(device)
+
+			# Partitions inside an LVM volume groups need names
+			elif device in volgroup_devices:
+				self._validate_lvm_partition(partitions_list = partitions_list)
+				valid_devices.add(device)
+
+			else:
+				# LVM volume groups need LVM devices
+				volgroups = [
+					partition for partition in partitions_list
+					if partition['fstype'] == 'volgroup'
+				]
+				if volgroups:
+					if device not in lvm_devices:
+						raise CommandError(
+							self,
+							f'device "{device}" not defined for volgroups: {", ".join(volgroup["mountpoint"] for volgroup in volgroups)}'
+						)
+
+					valid_devices.add(device)
+
+		# Make sure all the devices for this host have been validated
+		unknown_devices = set(devices.keys()).difference(valid_devices)
+		if unknown_devices:
+			raise CommandError(self, f"unknown device(s) detected: {', '.join(unknown_devices)}")
 
 	def load_partition(self, partitions, target=None):
+		"""Loads partition information provided into the current scope."""
 		if not partitions:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		if scope == 'global':
-			cmd = 'add.storage.partition'
-		elif scope == 'appliance':
-			cmd = 'add.appliance.storage.partition'
-		elif scope == 'os':
-			cmd = 'add.os.storage.partition'
-		elif scope == 'environment':
-			cmd = 'add.environment.storage.partition'
-		elif scope == 'host':
-			cmd = 'add.host.storage.partition'
-		else:
-			raise CommandError(
-				cmd = self,
-				msg = f"Unsupported scope {scope} encountered while loading partition information.",
-			)
+		# Validate partitions if not being forced.
+		if not self.force:
+			self.validate_partition(partitions = partitions)
 
-		for p in partitions:
-			params = {'device'    : p.get('device'),
-				  'partid'    : p.get('partid'),
-				  'mountpoint': p.get('mountpoint'),
-				  'size'      : p.get('size'),
-				  'type'    : p.get('fstype'),
-				  'options'   : p.get('options')}
+		# Remove all existing entries based on which scope we are operating in.
+		self.stack(f'remove.{scope}.storage.partition' if scope != 'global' else 'remove.storage.partition', device='*')
+
+		cmd = f'add.{scope}.storage.partition' if scope != 'global' else 'add.storage.partition'
+
+		for partition in partitions:
+			params = {
+				'device': partition.get('device'),
+				'partid': partition.get('partid'),
+				'mountpoint': partition.get('mountpoint'),
+				'size': partition.get('size'),
+				'type': partition.get('fstype'),
+				'options': partition.get('options'),
+			}
 
 			self.stack(cmd, target, **params)
 
 
 	def load_firewall(self, firewalls, target=None):
+		"""Loads firewall information provided into the current scope."""
 		if not firewalls:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for f in firewalls:
-			params = {'scope'         : scope,
-				  'service'       : f.get('service'),
-				  'network'       : f.get('network'),
-				  'output_network': f.get('output-network'),
-				  'chain'         : f.get('chain'),
-				  'action'        : f.get('action'),
-				  'protocol'      : f.get('protocol'),
-				  'flags'         : f.get('flags'),
-				  'comment'       : f.get('comment'),
-				  'table'         : f.get('table'),
-				  'name'          : f.get('name')}
+		cmd = f'add.{scope}.firewall' if scope != 'global' else 'add.firewall'
 
-			self.stack('add.firewall', target, **params)
+		for firewall in firewalls:
+			params = {
+				'service': firewall.get('service'),
+				'network': firewall.get('network'),
+				'output_network': firewall.get('output-network'),
+				'chain': firewall.get('chain'),
+				'action': firewall.get('action'),
+				'protocol': firewall.get('protocol'),
+				'flags': firewall.get('flags'),
+				'comment': firewall.get('comment'),
+				'table': firewall.get('table'),
+				'rulename': firewall.get('name'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def load_route(self, routes, target=None):
+		"""Loads route information provided into the current scope."""
 		if not routes:
 			return
 
 		scope = self.get_scope()
 		assert not (scope != 'global' and target is None)
 
-		for r in routes:
-			params = {'scope'    : scope,
-				  'address'  : r.get('address'),
-				  'gateway'  : r.get('gateway'),
-				  'gateway'  : r.get('subnet'),
-				  'netmask'  : r.get('netmask'),
-				  'interface': r.get('interface')}
+		cmd = f'add.{scope}.route' if scope != 'global' else 'add.route'
 
-			self.stack('add.route', target, **params)
+		for route in routes:
+			# In `add route` the gateway parameter is overloaded to either be a subnet(network) name or a gateway.
+			# We need to chose whichever one is set in the dump.
+			gateway = route.get('gateway')
+			params = {
+				'address': route.get('address'),
+				# Specifically not using `is not None` because we also want to reject the empty string.
+				'gateway': gateway if gateway else route.get('subnet'),
+				'netmask': route.get('netmask'),
+				'interface': route.get('interface'),
+			}
+
+			self.stack(cmd, target, **params)
 
 
 	def run(self, params, args):
 
-		(document, ) = self.fillParams([
-			('document', None)
+		document, self.exec_commands, self.force = self.fillParams([
+			('document', None),
+			('exec', False),
+			('force', False),
 		])
+		self.exec_commands = str2bool(self.exec_commands)
+		self.force = str2bool(self.force)
 
 		if not document:
 			if not args:

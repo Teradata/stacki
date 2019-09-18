@@ -42,5 +42,4 @@ sock.connect("tcp://%s:%d" % (host, stack.mq.ports.control))
 
 sock.send_string(json.dumps(message))
 m = sock.recv().decode()
-print (m)
-
+print(m)

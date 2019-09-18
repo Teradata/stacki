@@ -22,6 +22,7 @@
                         "rack": "0",
                         "rank": "0",
                         "appliance": "frontend",
+			"box": "frontend",
                         "interface": [
                                 {
 </stack:file>

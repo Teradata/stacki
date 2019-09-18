@@ -26,13 +26,14 @@ import subprocess
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
-from pymysql import OperationalError, ProgrammingError
 from functools import partial
 from operator import itemgetter
 from itertools import groupby, cycle
 from collections import OrderedDict, namedtuple
 from concurrent.futures import ThreadPoolExecutor
 import threading
+
+import pymysql
 
 import stack.graph
 import stack
@@ -562,7 +563,7 @@ class HostArgumentProcessor:
 			and subnet == None
 			and host_filter == None
 		):
-                        return flatten(frontends)
+			return flatten(frontends)
 
 		# Now get the backend appliances
 		rows = self.db.select("""
@@ -1137,6 +1138,68 @@ class DocStringHandler(handler.ContentHandler,
 		self.text += s
 
 
+def get_mysql_connection(user=None, password=None):
+	"""
+	Creates a connection to MySQL and returns it, or returns None if
+	it can't connect. The caller must call `close` on the connection.
+	"""
+
+	connection = None
+
+	try:
+		if user is None:
+			# Root connects as 'apache', everyone else as the user
+			# running the python command.
+			if os.geteuid() == 0:
+				user = 'apache'
+			else:
+				user = pwd.getpwuid(os.geteuid())[0]
+
+		if password is None:
+			# Try to read the apache user's password
+			password = ''
+			try:
+				with open('/etc/apache.my.cnf') as f:
+					for line in f:
+						if line.startswith('password'):
+							password = line.split('=')[1].strip()
+							break
+			except:
+				# Couldn't read the password, try connecting without one
+				pass
+
+		# Connect to a copy of the database if we are running pytest-xdist
+		if 'PYTEST_XDIST_WORKER' in os.environ:
+			db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+		else:
+			db_name = 'cluster'
+
+		if os.path.exists('/var/run/mysql/mysql.sock'):
+			connection = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=password,
+				host='localhost',
+				unix_socket='/var/run/mysql/mysql.sock',
+				autocommit=True
+			)
+		else:
+			connection = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=password,
+				host='localhost',
+				port=40000,
+				autocommit=True
+			)
+
+	except pymysql.OperationalError:
+		# No database
+		pass
+
+	return connection
+
+
 class DatabaseConnection:
 	"""
 	Wrapper class for all database access.  The methods are based on
@@ -1182,13 +1245,13 @@ class DatabaseConnection:
 		# No match
 		return None
 
-	def __init__(self, db, *, caching=True):
+	def __init__(self, database, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
-		if db:
-			self.database = db
-			self.name     = db.db.decode() # name of the database
-			self.link     = db.cursor()
+		if database:
+			self.database = database
+			self.name     = database.db.decode() # name of the database
+			self.link     = database.cursor()
 		else:
 			self.database = None
 			self.name     = None
@@ -1268,7 +1331,7 @@ class DatabaseConnection:
 			try:
 				self.execute(command, args)
 				rows = self.fetchall()
-			except OperationalError:
+			except pymysql.OperationalError:
 				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
@@ -1299,7 +1362,7 @@ class DatabaseConnection:
 				t0 = time.time()
 				result = executor(command, args)
 				t1 = time.time()
-			except ProgrammingError:
+			except pymysql.ProgrammingError:
 				# mogrify doesn't understand the executemany args, so we have to do some more work.
 				if many:
 					error = '\n'.join((self.link.mogrify(command, arg) for arg in args))
@@ -1307,7 +1370,7 @@ class DatabaseConnection:
 				else:
 					Debug(f'SQL ERROR: {self.link.mogrify(command, args)}')
 
-				raise ProgrammingError
+				raise pymysql.ProgrammingError
 
 			# Only spend cycles on mogrify if we are in debug mode
 			if stack.commands._debug:

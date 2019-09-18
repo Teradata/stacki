@@ -38,7 +38,7 @@ class RollHandler(handler.ContentHandler,
 
 	def getRollName(self):
 		return self.rollName
-	
+
 	def getEdgeColor(self):
 		return self.edgeColor
 
@@ -47,15 +47,15 @@ class RollHandler(handler.ContentHandler,
 
 	def getNodeShape(self):
 		return self.nodeShape
-	
+
 	# <roll>
-	
+
 	def startElement_roll(self, name, attrs):
 		self.rollName = attrs.get('name')
-		
-	
+
+
 	# <color>
-	
+
 	def startElement_color(self, name, attrs):
 		if attrs.get('edge'):
 			self.edgeColor = attrs.get('edge')
@@ -90,7 +90,7 @@ class AttributeHandler:
 	def getXMLHeader(self):
 		return self.header
 
-	
+
 class GraphHandler(handler.ContentHandler,
 		   handler.DTDHandler,
 		   handler.EntityResolver,
@@ -117,7 +117,7 @@ class GraphHandler(handler.ContentHandler,
 		# Should we prune the graph while adding edges or not.
 		# Prune is the answer for most cases while traversing
 		# the graph. "Do Not Prune" is the answer when pictorial
-		# representation of graph is required. 
+		# representation of graph is required.
 		self.prune			= prune
 
 
@@ -168,7 +168,7 @@ class GraphHandler(handler.ContentHandler,
 		for xmlFile in xmlFiles:
 
 			xmlFileBasename = os.path.split(xmlFile)[1]
-		
+
 			# 1st Pass
 			#	- Expand XML Entities
 			#	- Expand EVAL tags
@@ -194,35 +194,35 @@ class GraphHandler(handler.ContentHandler,
 			linenumber = 0
 			for line in fin.readlines():
 				linenumber += 1
-			
+
 				# Some of the node files might have the <?xml
 				# document header.  Since we are replacing
 				# the XML header with our own (which includes
 				# the entities) we need to skip it.
-				
+
 				if line.find('<?xml') != -1:
 					continue
-					
+
 				# Send the XML to stderr for debugging before
 				# we parse it.
-				
+
 				if 'STACKDEBUG' in os.environ:
-					sys.stderr.write('[parse1 %4d %s]%s' % (i, 
-										xmlFileBasename, 
+					sys.stderr.write('[parse1 %4d %s]%s' % (i,
+										xmlFileBasename,
 										line))
 					i += 1
 				try:
 					parser.feed(line)
 				except Exception as e:
-					print('XML parse error in node file - %s in file %s on line %d\n' % 
+					print('XML parse error in node file - %s in file %s on line %d\n' %
 					      (e.args[-1], xmlFile, linenumber))
 					raise
-				
+
 			if 'STACKDEBUG' in os.environ:
 				sys.stderr.write('[parse1 %4d]</stack:ns>\n' % i)
 			parser.feed('</stack:ns>')
 			fin.close()
-			
+
 			# 2nd Pass
 			#	- Expand XML Entities
 			#	- Annotate all tags with FILE attribute
@@ -231,7 +231,7 @@ class GraphHandler(handler.ContentHandler,
 			# The second pass is required since EVAL tags can
 			# create their own XML, instead of requiring the
 			# user to annotate we do it for them.
-			
+
 			parser    = make_parser(["stack.expatreader"])
 			xml       = handler_1.getXML()
 			handler_2 = Pass2NodeHandler(node, self.attributes)
@@ -240,7 +240,7 @@ class GraphHandler(handler.ContentHandler,
 			if 'STACKDEBUG' in os.environ:
 				i = 1
 				for x in xml.split('\n'):
-					sys.stderr.write('[parse2 %4d %s]%s\n' % (i, 
+					sys.stderr.write('[parse2 %4d %s]%s\n' % (i,
 										  xmlFileBasename,
 										  x))
 					i += 1
@@ -282,7 +282,7 @@ class GraphHandler(handler.ContentHandler,
 		e = FrameworkEdge(tail, head)
 
 		e.setConditional(self.attrs.main.default.cond)
-				
+
 		self.graph.main.addEdge(e)
 
 
@@ -296,7 +296,7 @@ class GraphHandler(handler.ContentHandler,
 	def startElement_head(self, name, attrs):
 		self.text		= ''
 		self.attrs.order.gen	= self.attrs.order.default.gen
-		
+
 		if 'gen' in attrs:
 			self.attrs.order.gen = attrs['gen']
 
@@ -324,7 +324,7 @@ class GraphHandler(handler.ContentHandler,
 
 	# <to>
 
-	def startElement_to(self, name, attrs):	
+	def startElement_to(self, name, attrs):
 		self.text = ''
 
 		arch	= None
@@ -342,14 +342,14 @@ class GraphHandler(handler.ContentHandler,
 			release = attrs['release']
 		if 'cond' in attrs:
 			cond = "( %s and %s )" % (cond, attrs['cond'])
-			
+
 		self.attrs.main.cond = \
 			stack.cond.CreateCondExpr(arch, osname, release, cond)
 
 	def endElement_to(self, name):
 		if (not self.prune) or stack.cond.EvalCondExpr(self.attrs.main.cond, self.attributes):
 			self.attrs.main.parent = self.text
-			self.addEdge()	
+			self.addEdge()
 		self.attrs.main.parent = None
 
 	# <from>
@@ -372,7 +372,7 @@ class GraphHandler(handler.ContentHandler,
 			release = attrs['release']
 		if 'cond' in attrs:
 			cond = "( %s and %s )" % (cond, attrs['cond'])
-			
+
 		self.attrs.main.cond = \
 			stack.cond.CreateCondExpr(arch, osname, release, cond)
 
@@ -381,9 +381,9 @@ class GraphHandler(handler.ContentHandler,
 		if (not self.prune) or \
 			stack.cond.EvalCondExpr(self.attrs.main.cond, self.attributes):
 			self.attrs.main.child = self.text
-			self.addEdge()	
+			self.addEdge()
 		self.attrs.main.child = None
-		
+
 	# <order>
 
 	def startElement_order(self, name, attrs):
@@ -400,7 +400,7 @@ class GraphHandler(handler.ContentHandler,
 		else:
 			self.attrs.order.default.gen = None
 		self.attrs.order.gen = self.attrs.order.default.gen
-			
+
 	def endElement_order(self, name):
 		if self.attrs.order.head and self.attrs.order.tail:
 			self.addOrder()
@@ -408,7 +408,7 @@ class GraphHandler(handler.ContentHandler,
 
 
 	# <edge>
-	
+
 	def startElement_edge(self, name, attrs):
 		if 'arch' in attrs:
 			arch = attrs['arch']
@@ -431,7 +431,7 @@ class GraphHandler(handler.ContentHandler,
 
 		self.attrs.main.default.cond = \
 			stack.cond.CreateCondExpr(arch, osname, release, cond)
-		
+
 		if 'to' in attrs:
 			self.attrs.main.parent = attrs['to']
 		else:
@@ -464,14 +464,14 @@ class GraphHandler(handler.ContentHandler,
 			return
 		func(name)
 
-		
+
 	def endDocument(self):
 		pass
 
 
 	def characters(self, s):
 		self.text = self.text + s
-		
+
 
 class NodeHandler(handler.ContentHandler,
 		  handler.DTDHandler,
@@ -499,7 +499,7 @@ class NodeHandler(handler.ContentHandler,
 
 	def nsAttrs(self):
 		if self.os == 'redhat':
-			attrs = [ 
+			attrs = [
 				'xmlns="http://www.stacki.com"',
 			]
 		elif self.os == 'sles':
@@ -600,7 +600,7 @@ class Pass1NodeHandler(NodeHandler):
 
 	def endTag_stack_ns(self, ns, tag):
 		pass
-	
+
 
 	# <stack:stack>
 
@@ -645,9 +645,9 @@ class Pass1NodeHandler(NodeHandler):
 		self.rclCommand = None
 
 	# <stack:eval>
-	
+
 	def startTag_stack_eval(self, ns, tag, attrs):
-		
+
 		self.setEvalState = True
 		if not self.evalCond(attrs):
 			self.setEvalState = False
@@ -688,8 +688,8 @@ class Pass1NodeHandler(NodeHandler):
 			self.evalShell = os.path.join(os.sep,
 				'opt', 'stack', 'bin', 'python3')
 			self.evalText = ['import sys\nimport os\nsys.path.append(os.path.join("include", "applets"))\n']
-			
-		
+
+
 	def endTag_stack_eval(self, ns, tag):
 		if not self.setEvalState:
 			return
@@ -712,6 +712,11 @@ class Pass1NodeHandler(NodeHandler):
 
 		s = ''.join(self.evalText)
 		out, err = p.communicate(s.encode())
+
+		if p.returncode != 0:
+			raise stack.util.KickstartNodeError(
+				f"Failed to evaluate {self.evalText} using {self.evalShell} with error:\n\n{err}"
+			)
 
 		if self.evalMode == 'quote':
 			self.xml.append(saxutils.escape(out.decode()))
@@ -756,7 +761,7 @@ class Pass1NodeHandler(NodeHandler):
 				attrName = 'stack:%s' % attrName
 			s += ' %s="%s"' % (attrName, attrValue)
 		self.xml.append('<%s:%s%s>' % (ns, tag, s))
-		
+
 
 
 	# <*>
@@ -815,7 +820,7 @@ class Pass1NodeHandler(NodeHandler):
 			self.evalText.append(s)
 		else:
 			self.xml.append(saxutils.escape(s))
-			
+
 	def getXML(self):
 #		print('getXML:', self.filename)
 #		print(self.xml)
@@ -828,7 +833,7 @@ class Pass2NodeHandler(NodeHandler):
 	All generated XML is filtered through this to append the file and
 	roll attributes to all tags.  The includes tags generated from eval
 	and include sections."""
-		
+
 
 	def __init__(self, node, attrs):
 		NodeHandler.__init__(self, node, attrs)
@@ -846,33 +851,33 @@ class Pass2NodeHandler(NodeHandler):
 			if tag == 'stack':
 				return
 
-			# This is for the <loader></loader> section			
+			# This is for the <loader></loader> section
 			#
 			# This code is broken because of the stack:native tag.
 			# Q: Does it need to be fixed or removed?
 
-			if tag in [ 'url', 
-				    'lang', 
-				    'keyboard', 
-				    'text', 
-				    'reboot', 
+			if tag in [ 'url',
+				    'lang',
+				    'keyboard',
+				    'text',
+				    'reboot',
 				    'unsupported_hardware' ]:
 				self.kskey  = tag
 				self.kstext = []
-						
+
 		s = ''
 		for attrName in attrs.getQNames():
 			attrValue = attrs.getValueByQName(attrName)
 			s += ' %s="%s"' % (attrName, attrValue)
 		s += ' stack:file="%s"' % self.node.getFilename()
-		
+
 		if ns:
 			qname = '%s:%s' % (ns, tag)
 		else:
 			qname = tag
 		self.xml.append('<%s%s>' % (qname, s))
 
-		
+
 	def endTag(self, ns, tag):
 
 		if ns == 'stack':
@@ -895,20 +900,20 @@ class Pass2NodeHandler(NodeHandler):
 	def characters(self, s):
 		self.kstext.append(s)
 		self.xml.append(saxutils.escape(s))
-		
+
 	def getKSText(self):
 		text = ''
 		for key, val in self.kstags.items():
 			for v in val:
 				text += '%s %s\n' % (key, v)
 		return text
-		
+
 	def getXML(self):
 		return ''.join(self.xml)
 
-	
-				
-				
+
+
+
 class Node(stack.graph.Node):
 
 	def __init__(self, name):
@@ -920,19 +925,19 @@ class Node(stack.graph.Node):
 
 	def setFilename(self, filename):
 		self.filename = filename
-	
+
 	def addNamespaces(self, ns):
 		self.namespaces = ns
 
 	def addKSText(self, text):
 		self.kstext.append(text)
-			
+
 	def addXML(self, str):
 		self.xml.append(str)
-		
+
 	def getFilename(self):
 		return self.filename
-		
+
 	def getXML(self):
 		return ''.join(self.xml)
 
@@ -950,10 +955,10 @@ class Node(stack.graph.Node):
 		else:
 			name = self.name
 		return '%s"%s" [%s];' % (prefix, name, attrs)
-		
+
 	def drawDot(self, prefix=''):
 		print(self.getDot(prefix))
-		
+
 
 class Edge(stack.graph.Edge):
 	def __init__(self, a, b):
@@ -967,7 +972,7 @@ class FrameworkEdge(Edge):
 
 	def setConditional(self, cond):
 		self.cond = cond
-		
+
 	def getConditional(self):
 		return self.cond
 
@@ -979,7 +984,7 @@ class FrameworkEdge(Edge):
 				'[%s arrowsize=1.5];' % (prefix,
 				self.parent.name, self.child.name, attrs)
 
-		list = [] 
+		list = []
 		label = self.cond.replace('"', '\\"')
 		list.append('%s"%s_%s_%s" '
 			'[ shape=none label="%s" ];' %
@@ -994,11 +999,11 @@ class FrameworkEdge(Edge):
 			self.parent.name, self.child.name, label,
 			self.child.name, attrs))
 		return '\n'.join(list)
-					
-	
+
+
 	def drawDot(self, prefix=''):
 		print(self.getDot(prefix))
-		
+
 
 
 class OrderEdge(Edge):
@@ -1022,7 +1027,7 @@ class OrderEdge(Edge):
 
 	def drawDot(self, prefix=''):
 		print(self.getDot(prefix))
-		
+
 
 
 class FrameworkIterator(stack.graph.GraphIterator):
@@ -1036,7 +1041,7 @@ class FrameworkIterator(stack.graph.GraphIterator):
 		for key in sorted(self.nodes.keys()):
 			list.append(self.nodes[key])
 		return list
-	
+
 	def visitHandler(self, node, edge):
 		stack.graph.GraphIterator.visitHandler(self, node, edge)
 		if edge:
@@ -1074,7 +1079,7 @@ class OrderIterator(stack.graph.GraphIterator):
 			if not self.mark[node] and node.getInDegree() == 0:
 				self.graph.addEdge(OrderEdge(head, node))
 
-		
+
 		# Second pass: Mask all nodes reachable from TAIL.
 		# Then for all the unmarked nodes create an edge from
 		# TAIL to the node.  This will force TAIL to be as
@@ -1091,14 +1096,14 @@ class OrderIterator(stack.graph.GraphIterator):
 		for node in self.graph.getNodes():
 			if not self.mark[node] and node.getOutDegree() == 0:
 				self.graph.addEdge(OrderEdge(node, tail))
-		
+
 
 		# Third pass: Traverse the entire graph and compute
 		# the finishing times for each node.  The reverse sort
 		# of the finishing times produces the topological
 		# ordering of the graph.  This ordered list of nodes
 		# satisifies all of the dependency edges.
-		
+
 		self.nodes = []
 		self.time  = 0
 		stack.graph.GraphIterator.run(self)

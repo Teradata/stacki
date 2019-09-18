@@ -55,7 +55,7 @@ then
     # Add the CentOS pallet
     source /etc/profile.d/stack-binaries.sh
     stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
-    stack enable pallet CentOS
+    stack enable pallet CentOS box=frontend
 
     # Clean the build environment
     cd /export/src/stacki/redhat/src/

@@ -37,7 +37,7 @@ def readkeys(filename):
 		file = open(filename, 'r')
 		for key in file.readlines():
 			if len(key) > 0:
-				print '%s' % (key[:-1])
+				print('%s' % (key[:-1]))
 		file.close()
 	except:
 		pass
@@ -70,7 +70,7 @@ chmod 600 /tmp/authorized_keys
 
 <stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400" stack:rcs="off">
 <stack:eval>
-/opt/stack/sbin/read-ssh-private-key ECDSA 2> /dev/null
+/opt/stack/sbin/read-ssh-private-key ECDSA
 </stack:eval>
 </stack:file>
 
