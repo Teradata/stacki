@@ -90,25 +90,13 @@ class Command(stack.commands.sync.host.command):
 			# this command as well).
 			#
 			# manage.hostsfile : write /etc/hosts during
-			# installation and sync.host.network
+			# installation.
 			#
 			# sync.hostsfile : write /etc/hosts during
 			# sync.host.network IFF manage.hostsfile is also true.
-			#
-			# sync.hosts is going away (tdc-infrastructure sets to
-			# True) and will change to manage.hostsfile.
-			#
-			# TODO: cleanup and deprecate sync.hosts as soon as
-			# tdc-infrastructure gets updated.
-			#
-			# There is more code here than required, this is done
-			# to be more explicit on how these attributes work, and to
-			# encourage us to clean this up ASAP. Only doing this so
-			# we can spin stacki w/o tdc-infrastructure and get the
-			# requested behavior.
+
 			
-			sync_hosts       = self.str2bool(host_attrs[host].get('sync.hosts',       False))
-			manage_hostsfile = self.str2bool(host_attrs[host].get('manage.hostsfile', sync_hosts))
+			manage_hostsfile = self.str2bool(host_attrs[host].get('manage.hostsfile', False))
 			sync_hostsfile   = self.str2bool(host_attrs[host].get('sync.hostsfile',   False))
 
 			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
