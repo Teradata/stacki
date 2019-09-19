@@ -6,6 +6,8 @@ vagrant up backend-0-0 &
 sleep 10
 vagrant up backend-0-1 &
 sleep 10
+vagrant up backend-0-2 &
+sleep 10
 
 # Monitor the backend installs
 vagrant ssh frontend -c "sudo -i /export/test-suites/system/files/monitor-backends.py --timeout=$1"

@@ -103,7 +103,7 @@ Vagrant.configure("2") do |config|
     config.vm.provision :reload
   end
 
-  (0..1).each do |i|
+  (0..2).each do |i|
     config.vm.define "backend-0-#{i}", autostart: false do |config|
       config.vm.box = "stacki/pxe-boot"
       config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
