@@ -7,23 +7,23 @@ MarkupSafe         1.1.1     OSI Approved :: BSD License                        
 PyMySQL            0.8.1     OSI Approved :: MIT License                                         https://github.com/PyMySQL/PyMySQL/
 PyNaCl             1.3.0     Apache License 2.0                                                  https://github.com/pyca/pynacl/
 PyYAML             5.1.2     OSI Approved :: MIT License                                         https://github.com/yaml/pyyaml
-Werkzeug           0.15.6    OSI Approved :: BSD License                                         https://palletsprojects.com/p/werkzeug/
-ansible            2.8.4     OSI Approved :: GNU General Public License v3 or later (GPLv3+)     https://ansible.com/
+Werkzeug           0.16.0    OSI Approved :: BSD License                                         https://palletsprojects.com/p/werkzeug/
+ansible            2.8.5     OSI Approved :: GNU General Public License v3 or later (GPLv3+)     https://ansible.com/
 asn1crypto         0.24.0    OSI Approved :: MIT License                                         https://github.com/wbond/asn1crypto
 atomicwrites       1.3.0     OSI Approved :: MIT License                                         https://github.com/untitaker/python-atomicwrites
 attrs              19.1.0    OSI Approved :: MIT License                                         https://www.attrs.org/
 bcrypt             3.1.7     OSI Approved :: Apache Software License                             https://github.com/pyca/bcrypt/
-certifi            2019.6.16 OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)                https://certifi.io/
+certifi            2019.9.11 OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)                https://certifi.io/
 cffi               1.12.3    MIT                                                                 http://cffi.readthedocs.org
 chardet            3.0.4     OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/chardet/chardet
-configparser       4.0.1     OSI Approved :: MIT License                                         https://github.com/jaraco/configparser/
+configparser       4.0.2     OSI Approved :: MIT License                                         https://github.com/jaraco/configparser/
 cryptography       2.7       OSI Approved :: BSD License                                         https://github.com/pyca/cryptography
 docutils           0.15.2    OSI Approved :: GNU General Public License (GPL)                    http://docutils.sourceforge.net/
 entrypoints        0.3       OSI Approved :: MIT License                                         https://github.com/takluyver/entrypoints
 flake8             3.7.8     OSI Approved :: MIT License                                         https://gitlab.com/pycqa/flake8
 gitdb2             2.0.5     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/gitdb
 idna               2.8       OSI Approved :: BSD License                                         https://github.com/kjd/idna
-importlib-metadata 0.22      OSI Approved :: Apache Software License                             http://importlib-metadata.readthedocs.io/
+importlib-metadata 0.23      OSI Approved :: Apache Software License                             http://importlib-metadata.readthedocs.io/
 iniherit           0.3.9     Public Domain                                                       http://github.com/cadithealth/iniherit
 itsdangerous       1.1.0     OSI Approved :: BSD License                                         https://palletsprojects.com/p/itsdangerous/
 jmespath           0.9.4     OSI Approved :: MIT License                                         https://github.com/jmespath/jmespath.py
@@ -34,7 +34,7 @@ mccabe             0.6.1     OSI Approved :: MIT License                        
 mod-wsgi           4.6.7     OSI Approved :: Apache Software License                             http://www.modwsgi.org/
 more-itertools     7.2.0     OSI Approved :: MIT License                                         https://github.com/erikrose/more-itertools
 netifaces          0.10.9    OSI Approved :: MIT License                                         https://github.com/al45tair/netifaces
-packaging          19.1      OSI Approved :: BSD License                                         https://github.com/pypa/packaging
+packaging          19.2      OSI Approved :: BSD License                                         https://github.com/pypa/packaging
 paramiko           2.6.0     OSI Approved :: GNU Library or Lesser General Public License (LGPL) https://github.com/paramiko/paramiko/
 pexpect            4.7.0     OSI Approved :: ISC License (ISCL)                                  https://pexpect.readthedocs.io/
 pluggy             0.13.0    OSI Approved :: MIT License                                         https://github.com/pytest-dev/pluggy
@@ -56,7 +56,7 @@ six                1.12.0    OSI Approved :: MIT License                        
 smmap2             2.0.5     OSI Approved :: BSD License                                         https://github.com/gitpython-developers/smmap
 testinfra          1.16.0    OSI Approved :: Apache Software License                             https://github.com/philpep/testinfra
 text-unidecode     1.3       OSI Approved :: GNU General Public License v2 or later (GPLv2+)     https://github.com/kmike/text-unidecode/
-urllib3            1.25.3    OSI Approved :: MIT License                                         https://urllib3.readthedocs.io/
+urllib3            1.25.4    OSI Approved :: MIT License                                         https://urllib3.readthedocs.io/
 wcwidth            0.1.7     OSI Approved :: MIT License                                         https://github.com/jquast/wcwidth
 yoyo-migrations    6.1.0     OSI Approved :: Apache Software License                             https://ollycope.com/software/yoyo/latest/
 zipp               0.6.0     OSI Approved :: MIT License                                         https://github.com/jaraco/zipp
