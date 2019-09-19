@@ -150,15 +150,25 @@ class Command(stack.commands.create.command):
 		os.symlink(url, 'RPMS')
 
 	def repoquery(self, repoid, repoconfig):
-		cmd = 'repoquery -qa --repoid=%s' % repoid
+                #Check if running on sles and through error if using repoid
+                if self.os == "sles" and repoid != None :
+                    raise CommandError(
+                            cmd = self,
+                            msg = "sles does not have repoquery package available.\nPlease use URL for creating pallets",
+                            )
+                
+                elif self.os == "sles":
+                        return "None", "None"
 
-		if repoconfig:
-			cmd = cmd + ' --config=%s' % repoconfig
+                else:
+                        cmd = 'repoquery -qa --repoid=%s' % repoid
+                        if repoconfig:
+                                cmd = cmd + ' --config=%s' % repoconfig
 
-		proc = subprocess.Popen(shlex.split(cmd), stdin=None,
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		o, e = proc.communicate()
-		return o, e
+                        proc = subprocess.Popen(shlex.split(cmd), stdin=None,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        o, e = proc.communicate()
+                        return o, e
 
 	def reposync(self, repoid, repoconfig, newest, urlonly, quiet):
 		cmd = 'reposync --norepopath -r %s -p %s' % (repoid, repoid)
