@@ -8,12 +8,12 @@ mkdir -p /etc/pki/tls/certs
 <!-- Make localhost.key -->
 /usr/bin/openssl genpkey -algorithm RSA \
 	-out /etc/pki/tls/private/localhost.key \
-	-pkeyopt rsa_keygen_bits:2048
+	-pkeyopt rsa_keygen_bits:4096
 
 <!-- Make Certificate -->
 /usr/bin/openssl req -utf8 -new \
 	-key /etc/pki/tls/private/localhost.key \
-	-x509 -days 2000 -set_serial 0 \
+	-x509 -days 2000 -set_serial $(date +%s) \
 	-out /etc/pki/tls/certs/localhost.crt \
 	-config /etc/security/ca/ca.cfg -batch
 
