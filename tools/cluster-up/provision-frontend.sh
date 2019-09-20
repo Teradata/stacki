@@ -50,4 +50,23 @@ chmod u+x frontend-install.py
 # Barnacle myself, choosing the second interface
 ./frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
 
+# Allow port forwards to talk on eth0
+if [[ -n $FORWARD_PORTS ]]
+then
+    # Add the vagrant network to Stacki
+    /opt/stack/bin/stack add network vagrant zone= $(route -n | grep eth0 | tail -n 1 | awk '{print "address=" $1 " mask=" $3}')
+
+    # Add in the eth0 interface but tell Stacki not to manage it
+    /opt/stack/bin/stack add host interface localhost interface=eth0 network=vagrant options=noreport
+
+    # Open up the ports for each forward
+    for PAIR in ${FORWARD_PORTS//,/ }
+    do
+        /opt/stack/bin/stack add firewall network=vagrant service=${PAIR#*:} protocol=all action=ACCEPT chain=INPUT
+    done
+
+    # Apply the new firewall rules
+    /opt/stack/bin/stack sync host firewall localhost
+fi
+
 exit 0

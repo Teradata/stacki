@@ -31,6 +31,7 @@ IP=""
 NETMASK="255.255.255.0"
 GATEWAY=""
 DNS=""
+FORWARD_PORTS=""
 
 while [[ "$#" -gt 0 ]]
 do
@@ -79,6 +80,14 @@ do
             DNS="${1#*=}"
             shift 1
             ;;
+        --forward-ports=*)
+            FORWARD_PORTS="${1#*=}"
+            shift 1
+            ;;
+        --*)
+            echo -e "\033[31mError: unrecognized flag \"$1\"\033[0m"
+            exit 1
+            ;;
         *)
             ISO="$1"
             shift 1
@@ -90,17 +99,18 @@ if [[ -z "$ISO" ]]
 then
     echo "Usage: ./cluster-up.sh [options...] STACKI_ISO"
     echo "Options:"
-    echo -e "  --backends=[0-253]\t\tThe number backends to create. Default: 1"
+    echo -e "  --backends=[0-253]\t\tThe number backends to create. Default: 0"
     echo -e "  --fqdn=FQDN\t\t\tThe FQDN of the frontend. Default: cluster-up-frontend.localdomain"
     echo -e "  --name=NAME\t\t\tThe name to uniquely identify this cluster. Default: YYYYMMDD_HHMMSS_RRRR"
     echo -e "  --download-dir=DIRECTORY\tThe directory to store installer ISOs. Default: '.'"
     echo -e "  --use-the-src-dir=DIRECTORY\tThe directory will be mounted and symlinked into the frontend."
     echo -e "  --export-frontend\t\tExport the frontend as a vagrant box."
+    echo -e "  --forward-ports=SRC:DST[,...]\tComma separated list of ports to forward."
     echo -e "  --bridge=INTERFACE\t\tBridge interface on the host. Default: Use host only networking"
     echo -e "  --ip=IP_ADDRESS\t\tIP Address for the bridge network. Default: Use DHCP"
     echo -e "  --netmask=NETMASK\t\tThe netmask for the bridge network. Default: 255.255.255.0"
     echo -e "  --gateway=GATEWAY_ADDRESS\tGateway address for the bridged interface."
-    echo -e "  --dns=DNS_ADDRESS[,DNS2]\tComma seperated list of DNS servers."
+    echo -e "  --dns=DNS_ADDRESS[,DNS2]\tComma separated list of DNS servers."
     exit 1
 fi
 
@@ -212,7 +222,8 @@ cat > ".vagrant/cluster-up.json" <<-EOF
     "IP": "$IP",
     "NETMASK": "$NETMASK",
     "GATEWAY": "$GATEWAY",
-    "DNS": "$DNS"
+    "DNS": "$DNS",
+    "FORWARD_PORTS": "$FORWARD_PORTS"
 }
 EOF
 

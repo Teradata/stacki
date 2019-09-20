@@ -25,6 +25,7 @@ if File.file?('.vagrant/cluster-up.json')
   NETMASK = settings['NETMASK']
   GATEWAY = settings['GATEWAY']
   DNS = settings['DNS']
+  FORWARD_PORTS = settings['FORWARD_PORTS']
 
   Vagrant.configure("2") do |config|
     config.vm.define "frontend", autostart: false do |config|
@@ -91,6 +92,11 @@ if File.file?('.vagrant/cluster-up.json')
             dev: BRIDGE,
             libvirt__adapter: 1
         end
+      end
+
+      FORWARD_PORTS.split(",").each do |pair|
+        host, guest = pair.split(":")
+        config.vm.network "forwarded_port", host: host.to_i, guest: guest.to_i
       end
 
       config.vm.provision "shell", path: "provision-frontend.sh", env: settings
