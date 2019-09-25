@@ -74,8 +74,8 @@ class Command(stack.commands.list.command):
 
 			try:
 				__import__(module)
-			except ImportError:
-				raise CommandError(self, '%s import failed (missing or bad file)' % module)
+			except ImportError as e:
+				raise CommandError(self, '%s import failed (missing or bad file) - %s' % (module, e))
 			module = eval(module)
 
 			try:
