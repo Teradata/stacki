@@ -504,6 +504,11 @@ if not csv_partitions:
 
 		partid += 1
 
+# TODO: this only exits if no disks are found, in the future this should
+# be comparing to the user defined partitions and seeing if it is a subset
+if not host_partitions:
+	sys.exit(1)
+
 #
 # there are 2 scenarios:
 #
