@@ -47,6 +47,8 @@ for pallet in g.rolls:
 <stack:package>gd</stack:package>
 <stack:package>foundation-newt</stack:package>
 
+<stack:package>stack-templates</stack:package>
+
 <!-- to build anaconda -->
 <stack:package>device-mapper-devel</stack:package>
 <stack:package>isomd5sum-devel</stack:package>
