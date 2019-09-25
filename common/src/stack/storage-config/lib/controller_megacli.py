@@ -94,10 +94,10 @@ class CLI:
 			pdperarray = 2
 		elif raidlevel == '50':
 			cmd = [ '-CfgSpanAdd', '-r50' ]
-			pdperarray = 5
+			pdperarray = 3
 		elif raidlevel == '60':
 			cmd = [ '-CfgSpanAdd', '-r60' ]
-			pdperarray = 6
+			pdperarray = 4
 		else:
 			return
 
