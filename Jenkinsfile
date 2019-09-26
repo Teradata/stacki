@@ -16,6 +16,7 @@ pipeline {
         ART_URL = "https://sdartifact.td.teradata.com/artifactory"
         ART_ISO_PATH = "software-manufacturing/pallets/stacki"
         ART_QCOW_PATH = "software-manufacturing/kvm-images/stacki"
+        ART_OVA_PATH = "software-manufacturing/ova-images/stacki"
     }
 
     options {
@@ -54,7 +55,7 @@ pipeline {
                                     // Remove the git reference because it breaks stack-releasenotes
                                     sh('git repack -a -d')
                                     sh('rm -f .git/objects/info/alternates')
-                                    
+
                                     // Add the last git log subject as the description in the GUI
                                     currentBuild.description = sh(
                                         returnStdout: true,
@@ -952,7 +953,7 @@ pipeline {
                     }
                 }
 
-                stage('Build KVM QCow2') {
+                stage('Build VM Images') {
                     when {
                         anyOf {
                             environment name: 'PLATFORM', value: 'sles12'
@@ -970,7 +971,7 @@ pipeline {
                             sh 'mv stacki-*.qcow2 ../'
                         }
 
-                        // Set an environment variable with the ISO filename
+                        // Set an environment variable with the QCOW filename
                         script {
                             env.QCOW_FILENAME = findFiles(glob: 'stacki-*.qcow2')[0].name
                         }
@@ -988,12 +989,44 @@ pipeline {
                             """
                         )
 
+                        // Build the OVA image
+                        dir ('stacki-kvm-builder') {
+                            sh './qcow2-to-ova.sh ../stacki-*.qcow2'
+                        }
+
+                        // Set an environment variable with the OVA filename
+                        script {
+                            env.OVA_FILENAME = findFiles(glob: 'stacki-*.ova')[0].name
+                        }
+
+                        // Upload the Stacki OVA to artifactory
+                        rtUpload(
+                            serverId: "td-artifactory",
+                            spec: """
+                                {
+                                    "files": [{
+                                        "pattern": "${env.OVA_FILENAME}",
+                                        "target": "${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/"
+                                    }]
+                                }
+                            """
+                        )
+
                         // Releases of the Redhat version goes to amazon S3 too
                         script {
                             if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
                                         file: env.QCOW_FILENAME,
+                                        bucket: 'teradata-stacki',
+                                        path: 'release/stacki/5.x/',
+                                        acl: 'PublicRead'
+                                    )
+                                }
+
+                                withAWS(credentials:'amazon-s3-credentials') {
+                                    s3Upload(
+                                        file: env.OVA_FILENAME,
                                         bucket: 'teradata-stacki',
                                         path: 'release/stacki/5.x/',
                                         acl: 'PublicRead'
@@ -1012,9 +1045,11 @@ pipeline {
                                         channel: '#stacki-builds',
                                         color: 'good',
                                         message: """\
-                                            New Stacki QCow2 image uploaded to Artifactory.
+                                            New Stacki VM images uploaded to Artifactory.
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                            *OVA:* ${env.OVA_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.OVA_FILENAME}
                                         """.stripIndent(),
                                         tokenCredentialId: 'slack-token-stacki'
                                     )
@@ -1023,9 +1058,11 @@ pipeline {
                                         channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
-                                            New Stacki QCow2 image uploaded to Artifactory.
+                                            New Stacki VM images uploaded to Artifactory.
                                             *QCow2:* ${env.QCOW_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                            *OVA:* ${env.OVA_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.OVA_FILENAME}
                                         """.stripIndent(),
                                         tokenCredentialId: 'slack-token-stacki'
                                     )
@@ -1035,9 +1072,11 @@ pipeline {
                                             channel: '#stacki-builds',
                                             color: 'good',
                                             message: """\
-                                                New Stacki QCow2 uploaded to Amazon S3.
+                                                New Stacki VM images uploaded to Amazon S3.
                                                 *QCow2:* ${env.QCOW_FILENAME}
                                                 *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
+                                                *OVA:* ${env.OVA_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.OVA_FILENAME}
                                             """.stripIndent(),
                                             tokenCredentialId: 'slack-token-stacki'
                                         )
@@ -1055,7 +1094,7 @@ pipeline {
                                 channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
-                                    Stacki KVM build has failed.
+                                    Stacki VM images build has failed.
                                     *Branch:* ${env.GIT_BRANCH}
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
