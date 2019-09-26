@@ -6,7 +6,8 @@
 
 TEMPDIR := $(shell mktemp -d)
 
-PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(IMAGE_RELEASE)
+PALLET_PATCH_DIR = /opt/stack/pallet-patches/$(SUSE_PRODUCT)-$(IMAGE_VERSION)-$(IMAGE_RELEASE)-$(DISTRO_FAMILY)-$(ARCH)
+#PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(IMAGE_RELEASE)
 
 -include ../../../common/images-$(OS).mk
 
@@ -62,15 +63,16 @@ install:: keyring
 	$(INSTALL) -m0644 linux $(ROOT)/$(PKGROOT)/vmlinuz-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
 	$(INSTALL) -m0644 stacki-initrd.img $(ROOT)/$(PKGROOT)/initrd-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
 	# Copy over patch files
-	mkdir -p $(ROOT)/$(PALLET_PATCH_DIR)
-	cd $(SUSE_PRODUCT)-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR))
-	$(INSTALL) -m0644 sles-stacki.img $(ROOT)/$(PALLET_PATCH_DIR)/boot/x86_64/sles-stacki.img
+	mkdir -p $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs
+	cd SLES-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs)
+	$(INSTALL) -m0644 sles-stacki.img $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/boot/x86_64/sles-stacki.img
+	$(INSTALL) -m0755 010-add-stacki-squashfs.sh $(ROOT)/$(PALLET_PATCH_DIR)/010-add-stacki-squashfs.sh
 	# Add the SHA1 of the stacki image to content file
-	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/content
+	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
 	# Sign the content file
 	gpg --armor \
-		--output $(ROOT)/$(PALLET_PATCH_DIR)/content.asc \
-		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/content
+		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content.asc \
+		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
 
 clean::
 	rm -rf $(CURDIR)/localrepo
