@@ -114,7 +114,7 @@ if File.file?('.vagrant/cluster-up.json')
           vb.name = NAME + "_backend-0-#{i}"
           vb.gui = false
 
-          vb.memory = "2048"
+          vb.memory = "3072"
           vb.cpus = 1
 
           vb.check_guest_additions = false
@@ -139,7 +139,7 @@ if File.file?('.vagrant/cluster-up.json')
           provider.driver = "kvm"
           provider.connect_via_ssh = false
 
-          provider.memory = "2048"
+          provider.memory = "3072"
           provider.cpus = 1
           provider.nic_model_type = "e1000"
           provider.random :model => "random"
