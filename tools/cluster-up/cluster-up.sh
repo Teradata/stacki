@@ -259,6 +259,12 @@ then
     fi
 fi
 
+# Pull frontend-install.py from the local machine if we are running from a full repo checkout
+if [[ -f ../fab/frontend-install.py ]]
+then
+    cp ../fab/frontend-install.py .
+fi
+
 # Make sure the boxes are up-to-date
 echo
 echo -e "\033[34mChecking the vagrant boxes for updates ...\033[0m"
