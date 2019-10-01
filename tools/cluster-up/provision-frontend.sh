@@ -43,11 +43,16 @@ then
     echo "nameserver ${DNS//,/ /}" >> /etc/resolv.conf
 fi
 
-# Fetch the barnacle script
-curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
-chmod u+x frontend-install.py
+# Fetch the barnacle script, if needed
+if [[ -f /vagrant/frontend-install.py ]]
+then
+    mv /vagrant/frontend-install.py .
+else
+    curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/$(echo $ISO_FILENAME | cut -d '-' -f -2 | cut -d '_' -f 1)/tools/fab/frontend-install.py
+fi
 
 # Barnacle myself, choosing the second interface
+chmod u+x frontend-install.py
 ./frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
 
 # Allow port forwards to talk on eth0
