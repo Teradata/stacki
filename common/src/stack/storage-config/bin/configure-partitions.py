@@ -506,7 +506,7 @@ if not csv_partitions:
 
 # TODO: this only exits if no disks are found, in the future this should
 # be comparing to the user defined partitions and seeing if it is a subset
-if not devices:
+if not disks:
 	sys.exit(1)
 
 #
