@@ -23,7 +23,7 @@ class TestStoragePartition:
 			pytest.fail(f'Could not ssh into host')
 
 		# Get stacki storage config using proper scoping
-		storage_config = api.Call(f'list host storage partition {hostname}')
+		storage_config = api.Call('list host storage partition', [hostname])
 		check_config = defaultdict(dict)
 		partition_info = namedtuple('partition', ['name', 'mountpoint', 'label', 'fstype', 'size'])
 		errors = []
@@ -31,7 +31,7 @@ class TestStoragePartition:
 		# Otherwise if we are on an older version of stacki without proper scoping,
 		# use report host instead and convert the dict output as a string into an actual dict
 		if not storage_config:
-			report_storage = api.Call(f'report host storage partition {hostname}')
+			report_storage = api.Call('report host storage partition', [hostname])
 
 			# If we still cannot get stacki's storage config for the current host,
 			# skip the test

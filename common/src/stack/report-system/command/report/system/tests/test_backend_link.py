@@ -23,7 +23,7 @@ class TestLinkUp:
 
 		interfaces = [
 			interface_fields(name=backend['interface'], ip=backend['ip'], options=backend['options'])
-			for backend in api.Call(f'list host interface {hostname}')
+			for backend in api.Call('list host interface', [hostname])
 		]
 
 		for link in interfaces:
