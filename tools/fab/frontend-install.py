@@ -277,7 +277,6 @@ pkgs = [
 	'foundation-python-PyMySQL',
 	'stack-command',
 	'stack-pylib',
-	'stack-templates',
 	'net-tools',
 	'foundation-newt',
 	'stack-wizard',
@@ -288,12 +287,14 @@ pkgs = [
 if osname == 'redhat':
 	pkgs.append('foundation-redhat')
 
-# workaround to add a new package but not break this script for older stacki releases
-proc = subprocess.Popen('find /export/stack/pallets/stacki/ -name stack-templates-*rpm'.split(),
-	stdout=subprocess.PIPE)
-stdout, _ = proc.communicate()
-if stdout:
-	pkgs.append('stack-templates')
+# Workaround to add new packages but not break this script for older stacki releases
+new_pkgs = [
+	'stack-templates',
+]
+
+for new_pkg in new_pkgs:
+	if subprocess.call(['yum' if osname == 'redhat' else 'zypper', 'info', new_pkg]) == 0:
+		pkgs.append(new_pkg)
 
 return_code = installrpms(pkgs)
 
@@ -362,7 +363,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 
 		# Pull in the interface info
 		attrs['NETWORK_INTERFACE'] = interface[0]
-		match = re.match('\d+:\s+\S+\s+inet\s+([\d.]+)/(\d+)\s+brd\s+([\d.]+)', interface[1])
+		match = re.match(r'\d+:\s+\S+\s+inet\s+([\d.]+)/(\d+)\s+brd\s+([\d.]+)', interface[1])
 		if match:
 			attrs['NETWORK_ADDRESS'] = match.group(1)
 			attrs['NETMASK_CIDR'] = int(match.group(2))
