@@ -9,7 +9,6 @@ import grp
 import json
 import stat
 import tarfile
-import requests
 import shutil
 import stack.file
 import stack.commands
@@ -19,6 +18,12 @@ from stack.exception import ArgRequired, ArgUnique, CommandError, UsageError
 import subprocess
 from stack.download import fetch, FetchError
 
+#if requests is not available,
+#attempting to barnacle will fail
+try:
+        import requests
+except ImportError:
+        pass
 
 class Command(stack.commands.CartArgumentProcessor,
 	stack.commands.add.command):
