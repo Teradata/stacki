@@ -39,10 +39,9 @@ if host is None:
 	try:
 		sys.path.append('/tmp')
 		from stack_site import attributes
+		host = attributes['Kickstart_PrivateAddress']
 	except ImportError:
 		host = 'localhost'
-	host = attributes['Kickstart_PrivateAddress']
-
 
 tx  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 pkt = { 'channel': channel,
