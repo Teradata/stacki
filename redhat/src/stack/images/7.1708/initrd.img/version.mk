@@ -8,6 +8,7 @@ OVERLAY.UPDATE.PKGS	= \
 	ludicrous-speed \
 	stack-command \
 	stack-pylib \
+	stack-mq \
 	foundation-newt \
 	foundation-python-Flask \
 		foundation-python-itsdangerous \
