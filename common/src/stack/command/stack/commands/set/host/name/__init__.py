@@ -12,7 +12,8 @@
 
 
 import stack.commands
-from stack.exception import CommandError
+from stack.exception import CommandError, ParamValue
+from stack.util import is_hostname_label
 
 
 class Command(stack.commands.set.host.command):
@@ -38,6 +39,9 @@ class Command(stack.commands.set.host.command):
 		(name, ) = self.fillParams([
 			('name', None, True)
 		])
+
+		if not is_hostname_label(name):
+			raise ParamValue(self, 'name', 'a valid hostname label')
 
 		if name in self.getHostnames():
 			raise CommandError(self, 'name already exists')

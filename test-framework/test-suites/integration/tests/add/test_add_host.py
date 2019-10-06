@@ -82,6 +82,12 @@ class TestAddHost:
 		assert result.rc == 255
 		assert result.stderr == f'error - "test" os boot action for "{host_os}" is missing\n'
 
+	def test_invalid_hostname(self, host):
+		result = host.run('stack add host -bad-backend appliance=backend rack=0 rank=0')
+		assert result.rc == 255
+		errmsg = result.stderr.split('\n')[0]
+		assert errmsg == 'error - "host" argument must be a valid hostname label'
+
 	def test_with_environment(self, host, host_os):
 		# Create our environment
 		result = host.run('stack add environment test')

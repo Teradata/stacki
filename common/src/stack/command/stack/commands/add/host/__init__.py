@@ -12,7 +12,14 @@
 
 
 import stack.commands
-from stack.exception import CommandError, ParamRequired, ArgUnique, ArgRequired
+from stack.exception import (
+	CommandError,
+	ParamRequired,
+	ArgUnique,
+	ArgRequired,
+	ArgValue,
+)
+from stack.util import is_hostname_label
 
 
 class command(
@@ -80,6 +87,9 @@ class Command(command):
 			raise ArgUnique(self, 'host')
 
 		host = args[0].lower()
+
+		if not is_hostname_label(host):
+			raise ArgValue(self, 'host', 'a valid hostname label')
 
 		if self.db.count('(ID) from nodes where name=%s', (host,)) > 0:
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
