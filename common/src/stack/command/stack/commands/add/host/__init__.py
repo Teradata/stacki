@@ -19,7 +19,7 @@ from stack.exception import (
 	ArgRequired,
 	ArgValue,
 )
-from stack.util import is_hostname_label
+from stack.util import is_valid_hostname
 
 
 class command(
@@ -88,7 +88,7 @@ class Command(command):
 
 		host = args[0].lower()
 
-		if not is_hostname_label(host):
+		if not is_valid_hostname(host):
 			raise ArgValue(self, 'host', 'a valid hostname label')
 
 		if self.db.count('(ID) from nodes where name=%s', (host,)) > 0:
