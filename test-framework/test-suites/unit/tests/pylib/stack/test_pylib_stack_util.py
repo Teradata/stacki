@@ -96,8 +96,8 @@ class TestUtil:
 		"""Expect lowered to lowercase all strings in an interable."""
 		assert ["foo", "bar", "baz"] == list(stack.util.lowered(["FOO", "BAR", "BAZ"]))
 
-	def test_is_hostname_label(self):
-		assert stack.util.is_hostname_label("backend-0-0")
-		assert not stack.util.is_hostname_label("-no-leading-minus")
-		assert not stack.util.is_hostname_label("no-trailing-minus-")
-		assert not stack.util.is_hostname_label("no.other_chars")
+	def test_is_valid_hostname(self):
+		assert stack.util.is_valid_hostname("backend-0-0")
+		assert not stack.util.is_valid_hostname("-no-leading-minus")
+		assert not stack.util.is_valid_hostname("no-trailing-minus-")
+		assert not stack.util.is_valid_hostname("no.other_chars")

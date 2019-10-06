@@ -173,10 +173,11 @@ def lowered(iterable):
 	"""Return a generator that lowercases all strings in the provided iterable."""
 	return (string.lower() for string in iterable)
 
-def is_hostname_label(name):
-	"""Check if a given name is a valid hostname label.
+def is_valid_hostname(name):
+	"""Check if a given name is a valid hostname.
 
-	Validity is defined by RFCs 952 and 1123.
+	For our purposes, a valid hostname is a single hostname label (or "name")
+	as defined by RFCs 952 and 1123.
 	"""
 	pattern = r"^[a-zA-Z0-9]$|^[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]$"
 	return bool(re.match(pattern, name))
