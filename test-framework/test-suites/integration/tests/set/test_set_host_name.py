@@ -32,6 +32,12 @@ class TestSetHostName:
 		assert result.rc == 255
 		assert result.stderr == 'error - name already exists\n'
 
+	def test_invalid_name(self, host, add_host):
+		result = host.run('stack set host name backend-0-0 name=-bad-backend')
+		assert result.rc == 255
+		errmsg = result.stderr.split('\n')[0]
+		assert errmsg == 'error - "name" parameter must be a valid hostname label'
+
 	def test_single_host(self, host, add_host, host_os):
 		# Set the host name
 		result = host.run('stack set host name backend-0-0 name=test')
