@@ -5,34 +5,44 @@ def get_partitions(testinfra_host):
 
 	# For a given testinfra host, return a list of all partitions across disks
 	try:
-		return testinfra_host.check_output(f'lsblk -r -n -o name').split('\n')
+		return testinfra_host.check_output(
+			'lsblk --raw --noheadings --output name'
+		).splitlines()
 
 	# If we can't ssh, return a blank list
 	except paramiko.ssh_exception.NoValidConnectionsError:
 		return []
 
-def get_part_label(testinfra_host, partition):
+def get_part_label(testinfra_host, match_key):
+	"""Get the partition label based on mountpoint or partition name.
 
+	Returns None if no maching partition can be found.
+	"""
 	# For a given partition and testinfra host, return the partition label
-	# if it is has one, otherwise return 'no label'
 	try:
-		labels = testinfra_host.check_output(f'lsblk -r -n -o name,label').split('\n')
+		lines = testinfra_host.check_output(
+			'lsblk --raw --noheadings --output name,mountpoint,label'
+		).splitlines()
 
 	# If we can't ssh, return 'no label'
 	except paramiko.ssh_exception.NoValidConnectionsError:
 		return None
 
 	# Try all labels on the host
-	for label in labels:
+	for line in lines:
 		try:
-			curr_part = label.split(' ')[0]
-			curr_label = label.split(' ')[1]
+			# lsblk adds an extra space in between when a column is
+			# empty, so we explicitly split on a space so that the
+			# empty column comes out as an empty string in the list.
+			# I.E. 'sda  foolabel'.split(' ') becomes ['sda', '', 'foolabel']
+			curr_part, curr_mountpoint, curr_label = line.split(' ')
 
-		except IndexError:
-			return None
+		# Error when there are not enough values to unpack.
+		except ValueError:
+			continue
 
 		# If the partition matches the argument one, return the label
-		if curr_part == partition:
+		if match_key in (curr_part, curr_mountpoint):
 			return curr_label
 
 	# Otherwise return no label
@@ -43,7 +53,9 @@ def get_part_mountpoint(testinfra_host, partition):
 	# For a given partition and testinfra host, return the partition mountpoint
 	# if it is has one, otherwise return 'no mountpoint'
 	try:
-		mounts = testinfra_host.check_output(f'lsblk -r -n -o name,mountpoint').split('\n')
+		mounts = testinfra_host.check_output(
+			'lsblk --raw --noheadings --output name,mountpoint'
+		).splitlines()
 
 	# If we can't ssh, return there is no mountpoint
 	except paramiko.ssh_exception.NoValidConnectionsError:
@@ -52,11 +64,11 @@ def get_part_mountpoint(testinfra_host, partition):
 	# Try all mountpoints on the host
 	for mount in mounts:
 		try:
-			curr_part = mount.split(' ')[0]
-			curr_mount = mount.split(' ')[1]
+			curr_part, curr_mount = mount.split(' ')
 
-		except IndexError:
-			return None
+		# Error when there are not enough values to unpack.
+		except ValueError:
+			continue
 
 		# If the partition matches the argument one, return the mountpoint
 		if curr_part == partition:
@@ -66,24 +78,25 @@ def get_part_mountpoint(testinfra_host, partition):
 	return None
 
 def get_part_fs(testinfra_host, partition):
-
 	# For a testinfra host and partition, return the partition
 	# filesystem
 	try:
-		fstypes = testinfra_host.check_output(f'lsblk -r -n -o name,fstype').split('\n')
+		fstypes = testinfra_host.check_output(
+			'lsblk --raw --noheadings --output name,fstype'
+		).splitlines()
 
 	# Return blank if we can't ssh into the host
 	except paramiko.ssh_exception.NoValidConnectionsError:
-		return ''
+		return None
 
 	# Go through all found partitions on the host
 	for fs in fstypes:
 		try:
-			curr_part = fs.split(' ')[0]
-			curr_fs = fs.split(' ')[1]
+			curr_part, curr_fs = fs.split(' ')
 
-		except IndexError:
-			return None
+		# Error when there are not enough values to unpack.
+		except ValueError:
+			continue
 
 		# If the current partition matches the the input one
 		# return the file system
@@ -93,31 +106,40 @@ def get_part_fs(testinfra_host, partition):
 	# Otherwise return blank
 	return None
 
-def get_part_size(testinfra_host, partition):
+def get_part_size(testinfra_host, match_key):
+	"""Get the partition size based on mountpoint or partition name.
 
+	Returns -1 if no maching partition can be found.
+	"""
 	# For a testinfra host and partition, return the partition's
 	# size if it can be found
 	try:
-		sizes = testinfra_host.check_output(f'lsblk -b -r -n -o name,size').split('\n')
+		lines = testinfra_host.check_output(
+			'lsblk --bytes --raw --noheadings --output name,mountpoint,size'
+		).splitlines()
 
 	# If we can't ssh into the host, return an invalid size
 	except paramiko.ssh_exception.NoValidConnectionsError:
 		return -1
 
 	# Go through all the partitions
-	for size in sizes:
+	for line in lines:
 		try:
-			curr_part = size.split(' ')[0]
-			curr_size = size.split(' ')[1]
+			# lsblk adds an extra space in between when a column is
+			# empty, so we explicitly split on a space so that the
+			# empty column comes out as an empty string in the list.
+			# I.E. 'sda  536870912000'.split(' ') becomes ['sda', '', '536870912000']
+			curr_part, curr_mountpount, curr_size = line.split(' ')
 
-		except IndexError:
-			return None
+		# Error when there are not enough values to unpack.
+		except ValueError:
+			continue
 
 		# If the current partition matches the input one
 		# return the partition size in megabytes since
 		# lsblk can only do bytes precisely
-		if curr_part == partition:
+		if match_key in (curr_part, curr_mountpount):
 			return int(curr_size) / math.pow(2,20)
 
 	# Otherwise return an invalid size
-	return None
+	return -1
