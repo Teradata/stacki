@@ -15,7 +15,7 @@
 # @rocks@
 
 
-import os
+import pathlib
 import shutil
 
 import stack.commands
@@ -108,13 +108,19 @@ class Command(command):
 
 		# Walk up the tree to clean it up, but stop at the top directory
 		while len(tree) > 1:
+			path = pathlib.Path().joinpath(*tree)
+
+			# if for some reason the directory is already partially deleted
+			if not path.exists():
+				tree.pop()
+				continue
 			# The arch is the bottom of the tree, we remove everything
 			if tree[-1] == pallet.arch:
-				shutil.rmtree(os.path.join(*tree))
+				shutil.rmtree(path)
 			else:
 				# Just remove the directory if possible
 				try:
-					os.rmdir(os.path.join(*tree))
+					path.rmdir()
 				except OSError:
 					# Directory wasn't empty, we are done
 					break
