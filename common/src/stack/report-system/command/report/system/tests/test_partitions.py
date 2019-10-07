@@ -1,13 +1,14 @@
 import pytest
 import math
 import json
-import testinfra
 import paramiko
-from collections import namedtuple, defaultdict
+import re
 from stack import api
-from stack.commands.report.system.tests.stack_test_util import get_partitions, get_part_label, get_part_size, get_part_fs
+from stack.commands.report.system.tests.stack_test_util import get_part_label, get_part_size
 
-testinfra_hosts = list(set([host['host'] for host in api.Call('list host partition')]))
+# Test all backend appliances
+testinfra_hosts = [host['host'] for host in api.Call('list host a:backend')]
+
 class TestStoragePartition:
 
 	""" Test if the way stacki configured the disks is still how they are partitioned """
@@ -24,9 +25,6 @@ class TestStoragePartition:
 
 		# Get stacki storage config using proper scoping
 		storage_config = api.Call('list host storage partition', [hostname])
-		check_config = defaultdict(dict)
-		partition_info = namedtuple('partition', ['name', 'mountpoint', 'label', 'fstype', 'size'])
-		errors = []
 
 		# Otherwise if we are on an older version of stacki without proper scoping,
 		# use report host instead and convert the dict output as a string into an actual dict
@@ -40,95 +38,87 @@ class TestStoragePartition:
 			else:
 				storage_config = json.loads(report_storage[0].replace("'", '"').replace('None', '""'))
 
-		# Get a list of the partitions that are actually on the disk
-		host_partitions = get_partitions(host)
-
-		if not host_partitions:
-			pytest.fail(f'No partitions found on host {hostname}')
-
 		# Go through the stacki storage config and see
 		# if it matches what's actually on the disk/disks
+		errors = []
 		for partition in storage_config:
 			# Info needed for each partiton
-			disk = partition['device']
-			disk_num = str(partition['partid'])
-			partition_name = disk + disk_num
-			partition_size = get_part_size(host, partition_name)
 			conf_mntpt = partition['mountpoint']
-			part_label = ''
 
-			# If a partition cannot be found on the actual disk, return an error
-			if partition_name not in host_partitions:
-				errors.append(f'/dev/{partition_name} not found on host')
+			# Check based on mountpoint.
+			# TODO: Skip if there is no mountpoint until we better support
+			#       OSes that don't preserve partition ordering (like RedHat/CentOS).
+			if not conf_mntpt:
 				continue
 
-			# Because testinfra only has mountpoint based partition functions
-			# use them when we can but if there is a partition without a mountpoint
-			# check using a fixture that directly calls lsblk
-			if conf_mntpt:
+			# TODO: Exclude special swap, biosboot, and LVM partitions for now until
+			#       we add support for checking them.
+			if any(
+				excluded_mountpoint in conf_mntpt.lower()
+				for excluded_mountpoint in ("swap", "biosboot", "vg_sys", "pv")
+			):
+				continue
 
-				if not host.mount_point(conf_mntpt).exists:
-					errors.append(f'Could not find {conf_mntpt} on disk')
+			# If a mountpoint was configured, it better exist on disk.
+			if not host.mount_point(conf_mntpt).exists:
+				errors.append(f'Could not find {conf_mntpt} on disk')
+				continue
 
-				else:
-					curr_mnt_part = host.mount_point(conf_mntpt).device
-					curr_fs = host.mount_point(conf_mntpt).filesystem
-
-					if curr_mnt_part != f'/dev/{partition_name}':
-						msg = f'Mountpoint {conf_mntpt} found at {curr_mnt_part} but was configured to be at /dev/{partition_name}'
-						errors.append(msg)
-
-					if (curr_fs != partition['fstype']) and partition['fstype']:
-						errors.append(
-							f'/dev/{partition_name} found with file system {curr_fs} but was configured with {partition["fstype"]}'
-						)
-
-			else:
-
-				# Use fixture instead of testinfra since there isn't a mountpoint
-				curr_fs = get_part_fs(host, partition_name)
-				if curr_fs != partition['fstype'] and (partition['fstype'] != None):
-					errors.append(
-						f'/dev/{partition_name} found with file system {curr_fs} but was configured with {partition["fstype"]}'
-					)
-
-			# Check if the a label should be present for the current partition
-			# and check if it matches the actual partition
-			if 'label=' in partition['options']:
-				config_label = partition['options'].split('label=')[1]
-				curr_label = get_part_label(host, partition_name)
-
-				if not curr_label:
-					errors.append(f'/dev/{partition_name} configured with label {config_label} but no label found')
-
-				elif config_label != curr_label:
-					errors.append(f'/dev/{partition_name} configured with label {config_label} but found with {curr_label}')
+			# Check the FS type if it does exist on disk.
+			if host.mount_point(conf_mntpt).filesystem != partition['fstype']:
+				errors.append(
+					f'{conf_mntpt} found with file system {host.mount_point(conf_mntpt).filesystem} '
+					f'but was configured with {partition["fstype"]}'
+				)
 
 			# Check partition size within 100MB due to lsblk bytes conversion
-			# If a partition size is 0, we assume that means it fills the rest of the disk
-			# So check that as well
-			if not math.isclose(int(partition['size']), partition_size, abs_tol=100):
+			# TODO: If a partition size is 0, skip for now. We can't easily figure out
+			#       the expected size of `fill the rest of the disk` partitions due to some
+			#       supported OSes not preserving partition ordering, and not all partitions
+			#       will have mountpoints.
+			expected_size = int(partition['size'])
+			actual_size = get_part_size(host, conf_mntpt)
+			if expected_size != 0 and not math.isclose(expected_size, actual_size, abs_tol=100):
+				errors.append(f'{conf_mntpt} found with size {actual_size} but was configured to be of size {expected_size}')
 
-				# Initial check will not match if partition size as 0, as it fills the rest
-				# of the disk
-				if int(partition['size']) == 0:
-					disk_size = get_part_size(host, disk)
-					rest_of_disk = 0
+			# Check if the label should be present for the current partition
+			# and check if it matches the actual partition label. The regex captures
+			# all non whitespace characters after "--label=" to a named group, and uses
+			# that as the label to check against.
+			label = re.match(r"^.*--label=(?P<label>\S+)", partition['options'])
+			if label and label.groupdict():
+				config_label = label.groupdict()['label']
+				curr_label = get_part_label(host, conf_mntpt)
 
-					# Find the size of the disk for all the other partitions
-					for partition in storage_config:
-						curr_partition = partition['device'] + str(partition['partid'])
+				if not curr_label:
+					errors.append(f'{conf_mntpt} configured with label {config_label} but no label found')
 
-						# Don't include the current partition
-						if curr_partition != partition_name:
-							part_size = get_part_size(host, curr_partition)
-							if part_size:
-								rest_of_disk += part_size
+				elif config_label != curr_label:
+					errors.append(f'{conf_mntpt} configured with label {config_label} but found with {curr_label}')
 
-					# Check if the disk size matches all the partitions added up
-					if not math.isclose(partition_size+rest_of_disk, disk_size, abs_tol=100):
-						errors.append(f'/dev/{partition_name} size different from configuration')
-				else:
-					errors.append(f'/dev/{partition_name} size different from configuration')
+			# Check the options. The regex captures all non whitespace characters after "--fsoptions="
+			# to a named group, and uses that as the fsoptions to check against.
+			# TODO: We don't currently support the SUSE AutoYaST fsopt key, but this will need to be updated
+			#       when we do.
+			options = re.match(r"^.*--fsoptions=(?P<options>\S+)", partition["options"])
+			if options and options.groupdict():
+				# Get a list of options and remove the "defaults" option that doesn't appear to add anything.
+				options = [
+					option.strip() for option in options.groupdict()["options"].split(",")
+					if option.strip() and option != "defaults"
+				]
+				actual_options = host.mount_point(conf_mntpt).options
 
-		assert not errors, f'Host {hostname} found with partitioning mismatch from original config: {", ".join(errors)}'
+				# Since there might be more "default" options than were explicitly specified, just check that
+				# each explicitly specified option exists.
+				missing_options = [
+					option for option in options if option not in actual_options
+				]
+				if missing_options:
+					errors.append(
+						f'{conf_mntpt} missing options {missing_options} '
+						f'from configured options {actual_options}'
+					)
+
+		errors = "\n    ".join(errors)
+		assert not errors, f'Host {hostname} found with partitioning mismatch from original config:\n    {errors}'
