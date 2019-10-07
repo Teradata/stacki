@@ -12,6 +12,7 @@ grafts_to_site_packages = (
 	("mq/pylib", "stack"),
 	("mq/processors", "stack/mq/processors"),
 	("mq/producers", "stack/mq/producers"),
+	("probepal/pylib", "stack/probepal"),
 	("pylib/stack", "stack"),
 	("report-system/command", "stack/commands"),
 	("switch/command", "stack/commands"),
@@ -34,6 +35,7 @@ bin_file_grafts = (
 	("mq/daemons/publisher.init", "/etc/init.d/smq-publisher"),
 	("mq/daemons/shipper.init", "/etc/init.d/smq-shipper"),
 	("mq/daemons/processor.init", "/etc/init.d/smq-processor"),
+	("probepal/bin/probepal.py", "/opt/stack/sbin/probepal"),
 	("ws-client/bin/wsclient.py", "/opt/stack/bin/wsclient")
 )
 

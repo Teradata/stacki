@@ -48,6 +48,7 @@ for pallet in g.rolls:
 <stack:package>foundation-newt</stack:package>
 
 <stack:package>stack-templates</stack:package>
+<stack:package>stack-probepal</stack:package>
 
 <!-- to build anaconda -->
 <stack:package>device-mapper-devel</stack:package>

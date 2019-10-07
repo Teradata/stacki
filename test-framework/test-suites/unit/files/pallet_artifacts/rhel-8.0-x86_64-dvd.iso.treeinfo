@@ -1,0 +1,67 @@
+[checksums]
+images/efiboot.img = sha256:94d5500c4ba266ce77b06aa955d9041eea22129737badc6af56c283dcaec1c29
+images/install.img = sha256:46171146377610cfa0deae157bbcc4ea146b3995c9b0c58d9f261ce404468abe
+images/pxeboot/initrd.img = sha256:e0cd3966097c175d3aaf406a7f8c094374c69504c7be8f08d8084ab9a8812796
+images/pxeboot/vmlinuz = sha256:370db9a3943d4f46dc079dbaeb7e0cc3910dca069f7eede66d3d7d0d5177f684
+
+[general]
+; WARNING.0 = This section provides compatibility with pre-productmd treeinfos.
+; WARNING.1 = Read productmd documentation for details about new format.
+arch = x86_64
+family = Red Hat Enterprise Linux
+name = Red Hat Enterprise Linux 8.0.0
+packagedir = AppStream/Packages
+platforms = x86_64,xen
+repository = AppStream
+timestamp = 1554367044
+variant = AppStream
+variants = AppStream,BaseOS
+version = 8.0.0
+
+[header]
+type = productmd.treeinfo
+version = 1.2
+
+[images-x86_64]
+efiboot.img = images/efiboot.img
+initrd = images/pxeboot/initrd.img
+kernel = images/pxeboot/vmlinuz
+
+[images-xen]
+initrd = images/pxeboot/initrd.img
+kernel = images/pxeboot/vmlinuz
+
+[media]
+discnum = 1
+totaldiscs = 1
+
+[release]
+name = Red Hat Enterprise Linux
+short = RHEL
+version = 8.0.0
+
+[stage2]
+mainimage = images/install.img
+
+[tree]
+arch = x86_64
+build_timestamp = 1554367044
+platforms = x86_64,xen
+variants = AppStream,BaseOS
+
+[variant-AppStream]
+id = AppStream
+name = AppStream
+packages = AppStream/Packages
+repository = AppStream
+type = variant
+uid = AppStream
+
+[variant-BaseOS]
+id = BaseOS
+name = BaseOS
+packages = BaseOS/Packages
+repository = BaseOS
+type = variant
+uid = BaseOS
+
