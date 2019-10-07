@@ -10,38 +10,47 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import os
-import sys
-import subprocess
-import stack.file
-import stack.commands
+import pathlib
+import shutil
+from contextlib import ExitStack
+import atexit
 import tempfile
-from stack.download import fetch, FetchError
-from stack.exception import CommandError, ParamRequired, UsageError
-from urllib.parse import urlparse
+from operator import attrgetter
+from textwrap import dedent
+
+import stack.commands
+from stack import probepal
+from stack.util import flatten
+from stack.exception import CommandError, UsageError
+
+info_getter = attrgetter('name', 'version', 'release', 'distro_family', 'arch')
+
 
 class command(stack.commands.add.command):
 	pass
 
+
 class Command(command):
 	"""
-	Add pallet ISO images to this machine's pallet directory. This command
-	copies all files in the ISOs to the local machine. The default location
-	is a directory under /export/stack/pallets.
+	Add pallets to this machine's pallet directory. This command copies all
+	files in ISOs or paths recognized by stacki to be pallets to the local
+	machine. The default location is a directory under /export/stack/pallets.
+	See also the 'probepal' utility to ascertain how, if at all, stacki will
+	recognize it.
 
 	<arg optional='1' type='string' name='pallet' repeat='1'>
-	A list of pallet ISO images to add to the local machine. If no list is
-	supplied, then if a pallet is mounted on /mnt/cdrom, it will be copied
+	A list of pallets to add to the local machine. If no list is supplied
+	stacki will check if a pallet is mounted on /mnt/cdrom, and if so copy it
 	to the local machine. If the pallet is hosted on the internet, it will
-	be downloaded and stored on the local machine.
+	be downloaded to a temporary directory before being added.
 	</arg>
 
 	<param type='string' name='username'>
-	If the pallet's download server requires authentication.
+	A username that will be used for authenticating to any remote pallet locations
 	</param>
 
 	<param type='string' name='password'>
-	If the pallet's download server requires authentication.
+	A password that will be used for authenticating to any remote pallet locations
 	</param>
 		
 	<param type='bool' name='clean'>
@@ -80,207 +89,201 @@ class Command(command):
 	<related>create pallet</related>
 	"""
 
-	def copy(self, clean, prefix, updatedb, URL):
-		"""Copy all the pallets from the CD to Disk"""
+	def write_pallet_xml(self, stacki_pallet_root, pallet_info):
+		'''
+		Create a roll-*.xml file compatible with the rest of stacki's tooling
+		if we copied an existing roll-*.xml, don't overwrite it here as it may have
+		more metadata
+		'''
+		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
+		name, version, release, distro_family, arch = info_getter(pallet_info)
 
-		# Populate the info hash. This hash contains pallet
-		# information about all the pallets present on disc.
+		if destdir.joinpath(f'roll-{name}.xml').exists():
+			return
 
-		p = subprocess.run(['find', '%s' % self.mountPoint, '-type', 'f', '-name', 'roll-*.xml'],
-				   stdout=subprocess.PIPE)
-		dict = {}
-		for filename in p.stdout.decode().split('\n'):
-			if filename:
-				roll = stack.file.RollInfoFile(filename.strip())
-				dict[roll.getRollName()] = roll
-			
-		if len(dict) == 0:
-			
-			# If the roll_info hash is empty, that means there are
-			# no stacki recognizable rolls on the Disc. This mean
-			# it may just be a normal OS CD like CentOS, RHEL,
-			# Ubuntu, or SuSE. In any case it's a
-			# foreign CD, and should be treated as such.
-			#
-			self.loadImplementation()
-			impl_found = False
-			for i in self.impl_list:
-				if hasattr(self.impl_list[i], 'check_impl'):
-					if self.impl_list[i].check_impl():
-						impl_found = True
-						res = self.runImplementation(i, (clean, prefix))
-						break
-
-			if not impl_found:
-				raise CommandError(self, 'unknown pallet on %s' % self.mountPoint)
-
-			if res:
-				if updatedb:
-					self.insert(res[0], res[1], res[2], res[3], res[4], URL)
-				if self.dryrun:
-					self.addOutput(res[0], [res[1], res[2], res[3], res[4], URL])
-
-		#
-		# Keep going even if a foreign pallet.  Safe to loop over an
-		# empty list.
-		#
-		# For all pallets present, copy into the pallets directory.
-		
-		for key, info in dict.items():
-			self.runImplementation('native_%s' % info.getRollOS(),
-					       (clean, prefix, info))
-			name	= info.getRollName()
-			version	= info.getRollVersion()
-			release	= info.getRollRelease()
-			arch	= info.getRollArch()
-			osname	= info.getRollOS()
-			if updatedb:
-				self.insert(name, version, release, arch, osname, URL)
-			if self.dryrun:
-				self.addOutput(name, [version, release, arch, osname, URL])
+		with open(f'{destdir}/roll-{name}.xml', 'w') as xml:
+			xml.write(dedent(f'''\
+			<roll name="{name}" interface="6.0.2">
+			<info version="{version}" release="{release}" arch="{arch}" os="{distro_family}"/>
+			<iso maxsize="0" addcomps="0" bootable="0"/>
+			<rpm rolls="0" bin="1" src="0"/>
+			</roll>
+			'''))
 
 
-	def insert(self, name, version, release, arch, OS, URL):
+	def copy(self, stacki_pallet_root, pallet_info, clean):
+		'''
+		Copy a pallet to the local filesystem
+
+		Specifically, rsync from `pallet_info.pallet_root` to
+		`stacki_pallet_root`/name/version/release/os/arch/
+		'''
+		pallet_dir = pallet_info.pallet_root
+		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
+
+		if destdir.exists() and clean:
+			print(f'Cleaning {"-".join(info_getter(pallet_info))} from pallets directory')
+			shutil.rmtree(destdir)
+
+		print(f'Copying {"-".join(info_getter(pallet_info))} ...')
+
+		if not destdir.exists():
+			destdir.mkdir(parents=True, exist_ok=True)
+
+		cmd = f'rsync --archive --exclude "TRANS.TBL" {pallet_dir}/ {destdir}/'
+		result = self._exec(cmd, shlexsplit=True)
+		if result.returncode != 0:
+			raise CommandError(self, f'Unable to copy pallet:\n{result.stderr}')
+
+		return destdir
+
+
+	def update_db(self, pallet_info, URL):
 		"""
-		Insert the pallet information into the database if
-		not already present.
+		Insert the pallet information into the database if not already present.
 		"""
 
 		if self.db.count(
-			'(ID) from rolls where name=%s and version=%s and rel=%s and arch=%s and os=%s',
-			(name, version, release, arch, OS)
+			'(ID) from rolls where name=%s and version=%s and rel=%s and os=%s and arch=%s',
+			info_getter(pallet_info)
 		) == 0:
 			self.db.execute("""
-				insert into rolls(name, version, rel, arch, os, URL)
+				insert into rolls(name, version, rel, os, arch, URL)
 				values (%s, %s, %s, %s, %s, %s)
-				""", (name, version, release, arch, OS, URL)
+				""", (*info_getter(pallet_info), URL)
 			)
 
-	# Call the sevice ludicrous-cleaner
-	def clean_ludicrous_packages(self):
-		_command = 'systemctl start ludicrous-cleaner'
-		p = subprocess.Popen(_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+	def mount(self, iso_name, mount_point):
+		'''
+		mount `iso_name` to `mount_point`
+		we automatically register an unmount callback
+		'''
+
+		# mount readonly explicitly to get around a weird behavior
+		# in sles12 that prevents re-mounting an already mounted iso
+		proc = self._exec(f'mount --read-only -o loop {iso_name} {mount_point}', shlexsplit=True)
+		if proc.returncode != 0:
+			msg = f'Pallet could not be added - unable to mount {iso_name}.'
+			msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
+			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
+		self.deferred.callback(self.umount, iso_name, mount_point)
+
+
+	def umount(self, iso_name, mount_point):
+		'''
+		un-mount `mount_point`, first checking to see if it is actually mounted
+		'''
+
+		proc = self._exec(f'mount | grep {mount_point}', shell=True)
+		if proc.returncode == 1 and proc.stdout.strip() == '':
+			return
+		proc = self._exec(f'umount {mount_point}', shlexsplit=True)
+		if proc.returncode != 0:
+			msg = f'Pallet could not be unmounted from {mount_point} ({iso_name}).'
+			msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
+			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
+		
 
 	def run(self, params, args):
-		(clean, dir, updatedb, dryrun, username, password) = self.fillParams([
-			('clean', 'n'),
+		clean, stacki_pallet_dir, updatedb, self.username, self.password = self.fillParams([
+			('clean', False),
 			('dir', '/export/stack/pallets'),
-			('updatedb', 'y'),
-			('dryrun', 'n'),
+			('updatedb', True),
 			('username', None),
 			('password', None),
-			])
+		])
 
-		#Validate username and password
-		#need to provide either both or none
-		if username and not password:
-			raise UsageError(self, 'must supply a password with the username')
-		if password and not username:
-			raise UsageError(self, 'must supply a username with the password')
+		# need to provide either both or none
+		if self.username or self.password and not all((self.username, self.password)):
+			raise UsageError(self, 'must supply a password along with the username')
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
-		self.dryrun = self.str2bool(dryrun)
-		if self.dryrun:
-			updatedb = False
-			self.out = sys.stderr
-		else:
-			self.out = sys.stdout
 
-		self.mountPoint = '/mnt/cdrom'
-		tempMountPoint = tempfile.TemporaryDirectory()
-		if not os.path.exists(self.mountPoint):
-			try:
-				os.makedirs(self.mountPoint)
-			except OSError:
-				self.mountPoint = tempMountPoint.name
+		# create a contextmanager that we can append cleanup jobs to
+		# add its closing to run atexit, so we know it will run
+		self.deferred = ExitStack()
+		atexit.register(self.deferred.close)
 
-		# Get a list of all the iso files mentioned in
-		# the command line. Make sure we get the complete 
-		# path for each file.
-			
-		isolist = []
-		network_pallets = []
-		disk_pallets    = []
-		network_isolist = []
+		# special case: no args were specified - check if a pallet is mounted at /mnt/cdrom
+		if not args:
+			mount_point = '/mnt/cdrom'
+			result = self._exec(f'mount | grep {mount_point}', shell=True)
+			if result.returncode != 0:
+				raise CommandError(self, 'no pallets specified and /mnt/cdrom is unmounted')
+			args.append(mount_point)
+
+		bad_args = []
+		for i, arg in enumerate(list(args)):
+			# TODO: fixme?
+			if arg.startswith(('https://', 'http://', 'ftp://')):
+				args[i] = arg
+				continue
+
+			p = pathlib.Path(arg)
+			if not p.exists():
+				bad_args.append(arg)
+			else:
+				args[i] = str(p.resolve())
+
+		if bad_args:
+			msg = 'The following arguments appear to be local paths that do not exist: '
+			raise CommandError(self, msg + ', '.join(bad_args))
+
+		# most plugins will need a temporary directory, so allocate them here so we do cleanup
+		pallet_args = {}
 		for arg in args:
-			if arg.startswith(('http', 'ftp')) and arg.endswith('.iso'):
-				network_isolist.append(arg)
+			tmpdir = tempfile.mkdtemp()
+			self.deferred.callback(shutil.rmtree, tmpdir)
+			pallet_args[arg] = {
+				'canonical_arg': arg,
+				'exploded_path': tmpdir,
+				'matched_pallets': [],
+			}
+
+		results = self.runPlugins(pallet_args)
+
+		prober = probepal.Prober()
+		pallet_infos = prober.find_pallets(*[pallet_args[path]['exploded_path'] for path in pallet_args])
+
+		# pallet_infos returns a dict {path: [pallet1, ...]}
+		# note the list - a path can point to a jumbo pallet
+
+		for path, pals in pallet_infos.items():
+			for arg in pallet_args:
+				if pallet_args[arg]['exploded_path'] == path:
+					pallet_args[arg]['matched_pallets'] = pals
+
+		# TODO what to do if we match something twice.
+		bad_args = [arg for arg, info in pallet_args.items() if not info['matched_pallets']]
+		if bad_args:
+			msg = 'The following arguments do not appear to be pallets: '
+			raise CommandError(self, msg + ', '.join(bad_args))
+
+		# work off of a copy of pallet args, as we modify it as we go
+		for arg, data in pallet_args.copy().items():
+			if len(data['matched_pallets']) == 1:
+				pallet_args[arg]['exploded_path'] = data['matched_pallets'][0].pallet_root
 				continue
-			elif arg.startswith(('http', 'ftp')):
-				network_pallets.append(arg)
-				continue
-			arg = os.path.join(os.getcwd(), arg)
-			if os.path.exists(arg) and arg.endswith('.iso'):
-				isolist.append(arg)
-			elif os.path.isdir(arg):
-				disk_pallets.append(arg)
-			else:
-				msg = "Cannot find %s or %s is not an ISO image"
-				raise CommandError(self, msg % (arg, arg))
 
-		if self.dryrun:
-			self.beginOutput()
-		if not isolist and not network_pallets and not disk_pallets and not network_isolist:
-			#
-			# no files specified look for a cdrom
-			#
-			rc = os.system('mount | grep %s' % self.mountPoint)
-			if rc == 0:
-				self.copy(clean, dir, updatedb, self.mountPoint)
-			else:
-				raise CommandError(self, 'no pallets provided and /mnt/cdrom is unmounted')
+			# delete the arg pointing to a jumbo and replace it with N new args
+			del pallet_args[arg]
+			for pal in data['matched_pallets']:
+				fake_arg_name = '-'.join(info_getter(pal))
+				pallet_args[fake_arg_name] = data.copy()
+				pallet_args[fake_arg_name]['exploded_path'] = pal.pallet_root
+				pallet_args[fake_arg_name]['matched_pallets'] = [pal]
 
-		for iso in network_isolist:
-			#determine the name of the iso file and get the destined path
-			filename = os.path.basename(urlparse(iso).path)
-			local_path = '/'.join([os.getcwd(),filename])
+		# we want to be able to go tempdir to arg
+		paths_to_args = {data['exploded_path']: data['canonical_arg'] for data in pallet_args.values()}
 
-			try:
-				# passing True will display a % progress indicator in stdout
-				local_path = fetch(iso, username, password, True)
-			except FetchError as e:
-				raise CommandError(self, e)
-
-			cwd = os.getcwd()
-			os.system('mount -o loop %s %s > /dev/null 2>&1' % (local_path, self.mountPoint))
-			self.copy(clean, dir, updatedb, iso)
-			os.chdir(cwd)
-			os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
-			print('cleaning up temporary files ...')
-			p = subprocess.run(['rm', filename])
-
-		if isolist:
-			#
-			# before we mount the ISO, make sure there are no active
-			# mounts on the mountpoint
-			#
-			file = open('/proc/mounts')
-
-			for line in file.readlines():
-				l = line.split()
-				if l[1].strip() == self.mountPoint:
-					cmd = 'umount %s' % self.mountPoint
-					cmd += ' > /dev/null 2>&1'
-					subprocess.run([ cmd ], shell=True)
-
-			for iso in isolist:	# have a set of iso files
-				cwd = os.getcwd()
-				os.system('mount -o loop %s %s > /dev/null 2>&1' % (iso, self.mountPoint))
-				self.copy(clean, dir, updatedb, iso)
-				os.chdir(cwd)
-				os.system('umount %s > /dev/null 2>&1' % self.mountPoint)
-			
-		if network_pallets:
-			for pallet in network_pallets:
-				self.runImplementation('network_pallet', (clean, dir, pallet, updatedb))
-		
-		if disk_pallets:
-			for pallet in disk_pallets:
-				self.runImplementation('disk_pallet', (clean, dir, pallet, updatedb))
-
-		self.endOutput(header=['name', 'version', 'release', 'arch', 'os'], trimOwner=False)
+		# we have everything we need, copy the pallet to the fs, add it to the db, and maybe patch it
+		for pallet in flatten(pallet_infos.values()):
+			self.copy(stacki_pallet_dir, pallet, clean)
+			self.write_pallet_xml(stacki_pallet_dir, pallet)
+			if updatedb:
+				self.update_db(pallet, paths_to_args[pallet.pallet_root])
 
 		# Clear the old packages
-		self.clean_ludicrous_packages()
+		self._exec('systemctl start ludicrous-cleaner'.split())
