@@ -61,18 +61,15 @@ def banner(message):
 	print('#######################################')
 
 
-def copy(source, dest):
-	isodir = tempfile.tempdir()
-	banner("Copying %s to local disk" % source)
-	mount(source, isodir)
-	subprocess.call(['mkdir', '-p', dest])
-	subprocess.call(['cp', '-r', isodir, dest])
-	umount(isodir)
-
-
 def mount(source, dest):
 	subprocess.call(['mkdir', '-p', dest])
-	subprocess.call(['mount', '-o', 'loop,ro', source, dest])
+	mnt_cmd = ['mount', '-o', 'loop,ro', source, dest]
+	proc = subprocess.Popen(mnt_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	result = proc.communicate()
+	if proc.returncode != 0:
+		print(' '.join(mnt_cmd) + ' failed:\n' + result[0])
+		proc = subprocess.Popen('mount | grep iso', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		print('mount | grep iso: \n' + proc.communicate()[0])
 
 
 def umount(dest):
@@ -277,6 +274,7 @@ pkgs = [
 	'foundation-python-PyMySQL',
 	'stack-command',
 	'stack-pylib',
+	'stack-mq',
 	'net-tools',
 	'foundation-newt',
 	'stack-wizard',
@@ -290,6 +288,7 @@ if osname == 'redhat':
 # Workaround to add new packages but not break this script for older stacki releases
 new_pkgs = [
 	'stack-templates',
+	'stack-probepal',
 ]
 
 for new_pkg in new_pkgs:

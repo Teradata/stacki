@@ -9,6 +9,7 @@
 -stack-docker
 -stack-examples
 -stack-kickstart
+-stack-probepal
 -stack-pxeboot
 -stack-switch
 -stack-report-system

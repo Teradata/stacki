@@ -25,6 +25,7 @@ stack-docker
 stack-examples
 stack-kickstart
 stack-mq
+stack-probepal
 stack-pxeboot
 stack-pylib
 stack-releasenotes
