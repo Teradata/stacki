@@ -98,6 +98,14 @@ class TestUtil:
 
 	def test_is_valid_hostname(self):
 		assert stack.util.is_valid_hostname("backend-0-0")
+		assert stack.util.is_valid_hostname("a")
+		assert not stack.util.is_valid_hostname("")
+
 		assert not stack.util.is_valid_hostname("-no-leading-minus")
 		assert not stack.util.is_valid_hostname("no-trailing-minus-")
 		assert not stack.util.is_valid_hostname("no.other_chars")
+
+		max_len_name = "63---------------------------------------------------------long"
+		assert stack.util.is_valid_hostname(max_len_name)
+		longer_name = "64----------------------------------------------------------long"
+		assert not stack.util.is_valid_hostname(longer_name)
