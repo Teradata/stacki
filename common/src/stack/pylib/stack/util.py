@@ -177,7 +177,19 @@ def is_valid_hostname(name):
 	"""Check if a given name is a valid hostname.
 
 	For our purposes, a valid hostname is a single hostname label (or "name")
-	as defined by RFCs 952 and 1123.
+	as defined by RFCs 952 and 1123. That is, a name of 1 to 63 characters
+	starting and ending with a letter or digit and having letters, digits,
+	and/or hyphens in between.
 	"""
-	pattern = r"^[a-zA-Z0-9]$|^[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]$"
-	return bool(re.match(pattern, name))
+	return bool(
+		re.match(
+			r"""
+			# <let-or-digit>
+			^[a-z0-9]$
+			# / <let-or-digit> 0*61<let-or-digit-or-hyphen> <let-or-digit>
+			|^[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]$
+			""",
+			name,
+			flags=re.IGNORECASE | re.VERBOSE
+		)
+	)
