@@ -11,7 +11,7 @@
 	],
 	"host": [
 		{
-			"host": "test_host",
+			"host": "test-host",
 			"device": "sdb",
 			"partid": null,
 			"mountpoint": "/host",

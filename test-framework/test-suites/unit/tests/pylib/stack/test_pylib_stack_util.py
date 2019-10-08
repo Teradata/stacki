@@ -105,7 +105,7 @@ class TestUtil:
 		assert not stack.util.is_valid_hostname("no-trailing-minus-")
 		assert not stack.util.is_valid_hostname("no.other_chars")
 
-		max_len_name = "63---------------------------------------------------------long"
+		max_len_name = "a" * 63
 		assert stack.util.is_valid_hostname(max_len_name)
-		longer_name = "64----------------------------------------------------------long"
+		longer_name = "a" * 64
 		assert not stack.util.is_valid_hostname(longer_name)

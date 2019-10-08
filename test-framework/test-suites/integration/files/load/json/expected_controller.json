@@ -11,7 +11,7 @@
 	],
 	"host": [
 		{
-			"host": "test_host",
+			"host": "test-host",
 			"enclosure": 1,
 			"adapter": 1,
 			"slot": 2,

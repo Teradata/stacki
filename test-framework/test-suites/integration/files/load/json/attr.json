@@ -8,7 +8,7 @@
 	],
 	"host": [
 			{
-					"name": "test_host",
+					"name": "test-host",
 					"rack": "0",
 					"rank": "0",
 					"appliance": "test_appliance",
@@ -26,7 +26,7 @@
 									"network": "private",
 									"mac": "52:54:00:ad:a7:c5",
 									"ip": "10.1.1.1",
-									"name": "test_host",
+									"name": "test-host",
 									"module": null,
 									"vlan": null,
 									"options": null,
