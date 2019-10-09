@@ -76,6 +76,7 @@ def dump_mysql(worker_id):
 	# Put drop database commands at the front of the SQL restore file
 	file_obj.write("DROP DATABASE IF EXISTS `shadow`;\n")
 	file_obj.write("DROP DATABASE IF EXISTS `cluster`;\n\n")
+	file_obj.write("DROP DATABASE IF EXISTS `django`;\n\n")
 	file_obj.flush()
 	os.fsync(file_fd)
 
