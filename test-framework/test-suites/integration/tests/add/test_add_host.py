@@ -50,7 +50,7 @@ class TestAddHost:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "host" argument must be unique
-			{host} [box=string] [environment=string] [rack=string] [rank=string]
+			{host} [appliance=string] [box=string] [environment=string] [rack=string] [rank=string]
 		''')
 
 	def test_duplicate(self, host):
