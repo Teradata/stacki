@@ -81,7 +81,7 @@ def dump_mysql(worker_id):
 
 	# Dump the initial Stacki DB into an SQL file, to restore from after each test
 	subprocess.run([
-		"mysqldump", "--opt", "--databases", "cluster", "shadow"
+		"mysqldump", "--opt", "--databases", "cluster", "shadow", "django"
 	], stdout=file_obj, check=True)
 
 	# Close the file
