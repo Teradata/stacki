@@ -18,7 +18,7 @@ class Plugin(stack.commands.Plugin):
 		"""
 		find a pallet where the path is already on the frontend
 
-		Iterate through args, and if arg is a path, just return that
+		Iterate through args, and if arg is a path, just use that
 
 		args is a dictionary
 		{
@@ -27,15 +27,10 @@ class Plugin(stack.commands.Plugin):
 				exploded_path: tempdir
 				},
 		}
-		returns a dictionary with the same format, but only for args that matched.
 		"""
 
-		matches = {}
 		for arg in args:
 			p = pathlib.Path(args[arg]['canonical_arg'])
 			if p.is_dir():
 				# ignore the tempdir, no sense in re-mounting or copying.
 				args[arg]['exploded_path'] = args[arg]['canonical_arg']
-				matches[arg] = args[arg]
-
-		return matches

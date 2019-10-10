@@ -31,10 +31,8 @@ class Plugin(stack.commands.Plugin):
 				exploded_path: tempdir
 				},
 		}
-		returns a dictionary with the same format, but only for args that matched.
 		'''
 
-		matches = {}
 		for arg in args:
 			canon_arg = args[arg]['canonical_arg']
 			tempdir = args[arg]['exploded_path']
@@ -75,6 +73,3 @@ class Plugin(stack.commands.Plugin):
 				raise CommandError(self, f'remote fetch failed, tried:\n{" ".join(wget_cmd)}: {e.stderr}')
 
 			args[arg]['exploded_path'] = tempdir
-			matches[arg] = args[arg]
-
-		return matches

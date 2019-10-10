@@ -25,20 +25,9 @@ class Plugin(stack.commands.Plugin):
 				exploded_path: tempdir
 				},
 		}
-		returns a dictionary with the same format, but only for args that matched.
 		'''
 
-		# strategy:
-		# check if iso
-		# verify iso exists
-		# mount iso to tempdir
-		# return matches
-
-		matches = {}
 		for arg in args:
 			p = pathlib.Path(args[arg]['canonical_arg'])
 			if p.is_file() and p.suffix == '.iso':
 				self.owner.mount(str(p), args[arg]['exploded_path'])
-				matches[arg] = args[arg]
-
-		return matches

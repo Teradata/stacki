@@ -43,7 +43,8 @@ class Command(command):
 	A list of pallets to add to the local machine. If no list is supplied
 	stacki will check if a pallet is mounted on /mnt/cdrom, and if so copy it
 	to the local machine. If the pallet is hosted on the internet, it will
-	be downloaded to a temporary directory before being added.
+	be downloaded to a temporary directory before being added.  All temporary
+	files and mounts will be cleaned up, with the exception of /mnt/cdrom.
 	</arg>
 
 	<param type='string' name='username'>
@@ -57,9 +58,7 @@ class Command(command):
 	<param type='bool' name='clean'>
 	If set, then remove all files from any existing pallets of the same
 	name, version, and architecture before copying the contents of the
-	pallets onto the local disk.  This parameter should not be set
-	when adding multi-CD pallets such as the OS pallet, but should be set
-	when adding single pallet CDs such as the Grid pallet.
+	pallets onto the local disk.
 	</param>
 
 	<param type='string' name='dir'>
@@ -72,15 +71,15 @@ class Command(command):
 	The default is: true.
 	</param>
 	
-	<example cmd='add pallet clean=1 kernel*iso'>
+	<example cmd='add pallet clean=true kernel*iso'>
 	Adds the Kernel pallet to local pallet directory.  Before the pallet is
 	added the old Kernel pallet packages are removed from the pallet
 	directory.
 	</example>
 	
-	<example cmd='add pallet kernel*iso pvfs2*iso ganglia*iso'>
-	Added the Kernel, PVFS, and Ganglia pallets to the local pallet
-	directory.
+	<example cmd='add pallet kernel*iso https://10.0.1.3/pallets/'>
+	Added the Kernel pallet along with any pallets found at the remote server
+	 to the local pallet directory.
 	</example>
 
 	<related>remove pallet</related>
@@ -88,12 +87,13 @@ class Command(command):
 	<related>disable pallet</related>
 	<related>list pallet</related>
 	<related>create pallet</related>
+	<related>create new pallet</related>
 	"""
 
 	def write_pallet_xml(self, stacki_pallet_root, pallet_info):
 		'''
 		Create a roll-*.xml file compatible with the rest of stacki's tooling
-		if we copied an existing roll-*.xml, don't overwrite it here as it may have
+		note: if we copied an existing roll-*.xml, don't overwrite it here as it may have
 		more metadata
 		'''
 		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
@@ -237,9 +237,10 @@ class Command(command):
 				raise CommandError(self, 'no pallets specified and /mnt/cdrom is unmounted')
 			args.append(mount_point)
 
+		# resolve args and check for existence
 		bad_args = []
 		for i, arg in enumerate(list(args)):
-			# TODO: fixme?
+			# TODO: is this a problem?
 			if arg.startswith(('https://', 'http://', 'ftp://')):
 				args[i] = arg
 				continue
@@ -255,6 +256,10 @@ class Command(command):
 			raise CommandError(self, msg + ', '.join(bad_args))
 
 		# most plugins will need a temporary directory, so allocate them here so we do cleanup
+		# 'canonical_arg' is the arg provided by the user, but cleaned to be explicit (relative
+		# paths resolved, etc)
+		# 'exploded_path' is the directory where we will start searching for pallets
+		# 'matched_pallets' is a list of pallet_info objects found at that path.
 		pallet_args = {}
 		for arg in args:
 			tmpdir = tempfile.mkdtemp()
@@ -265,13 +270,15 @@ class Command(command):
 				'matched_pallets': [],
 			}
 
-		results = self.runPlugins(pallet_args)
+		self.runPlugins(pallet_args)
 
 		prober = probepal.Prober()
-		pallet_infos = prober.find_pallets(*[pallet_args[path]['exploded_path'] for path in pallet_args])
+		pallet_infos = prober.find_pallets(
+			*[pallet_args[path]['exploded_path'] for path in pallet_args]
+		)
 
 		# pallet_infos returns a dict {path: [pallet1, ...]}
-		# note the list - a path can point to a jumbo pallet
+		# note the list - an exploded_path can point to a jumbo pallet
 
 		for path, pals in pallet_infos.items():
 			for arg in pallet_args:
@@ -290,7 +297,7 @@ class Command(command):
 				pallet_args[arg]['exploded_path'] = data['matched_pallets'][0].pallet_root
 				continue
 
-			# delete the arg pointing to a jumbo and replace it with N new args
+			# delete the arg pointing to a jumbo and replace it with N new 'dummy' args
 			del pallet_args[arg]
 			for pal in data['matched_pallets']:
 				fake_arg_name = '-'.join(info_getter(pal))
@@ -299,6 +306,7 @@ class Command(command):
 				pallet_args[fake_arg_name]['matched_pallets'] = [pal]
 
 		# we want to be able to go tempdir to arg
+		# this is because we want `canonical_arg` to be what goes in as the `URL` field in the db
 		paths_to_args = {data['exploded_path']: data['canonical_arg'] for data in pallet_args.values()}
 
 		# we have everything we need, copy the pallet to the fs, add it to the db, and maybe patch it

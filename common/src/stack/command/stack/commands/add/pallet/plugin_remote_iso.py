@@ -32,7 +32,6 @@ class Plugin(stack.commands.Plugin):
 				exploded_path: tempdir
 				},
 		}
-		returns a dictionary with the same format, but only for args that matched.
 		'''
 
 		# strategy:
@@ -40,9 +39,7 @@ class Plugin(stack.commands.Plugin):
 		# check if iso
 		# fetch iso and save to temporary location on local filesystem
 		# mount iso to tempdir
-		# return matches
 
-		matches = {}
 		for arg in args:
 			canon_arg = args[arg]['canonical_arg']
 			tempdir = args[arg]['exploded_path']
@@ -64,7 +61,7 @@ class Plugin(stack.commands.Plugin):
 			tmp_mnt_dir = tempfile.mkdtemp()
 
 			fi = pathlib.Path(local_path)
-			if not fi.is_file() or fi.suffix != '.iso':
+			if not fi.is_file():
 				raise CommandError(self, f'Error fetching {fi}: not recognized as an iso file')
 
 			try:
@@ -81,6 +78,3 @@ class Plugin(stack.commands.Plugin):
 				self.owner.deferred.callback(self.owner.umount, local_path, tmp_mnt_dir)
 
 			args[arg]['exploded_path'] = tmp_mnt_dir
-			matches[arg] = args[arg]
-
-		return matches
