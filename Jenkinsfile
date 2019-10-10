@@ -8,6 +8,7 @@ pipeline {
         ARTIFACTORY = credentials('d1a4e414-0526-4973-bea5-9d219d884f03')
         GITHUB_TOKEN = credentials('72702790-6cee-470b-94d0-1c3eb246a71d')
         BLACKDUCK_TOKEN = credentials('cb9c5430-f974-46e3-9d25-baeab4873db9')
+        ESXI_PASS = credentials('8af95130-9b78-4e7a-9d3a-bec7ab54716b')
 
         PIPELINE = env.JOB_NAME.split('/')[0].trim()
         PLATFORM = env.PIPELINE.split('-')[-1].trim()
@@ -354,7 +355,7 @@ pipeline {
 
                     post {
                         failure {
-                            // Notify the Slack #stacki-bot channel
+                            // Notify the Slack #stacki-builds channel
                             slackSend(
                                 channel: '#stacki-builds',
                                 color: 'danger',
@@ -439,7 +440,7 @@ pipeline {
                 }
 
                 failure {
-                    // Notify the Slack #stacki-bot channel
+                    // Notify the Slack #stacki-builds channel
                     slackSend(
                         channel: '#stacki-builds',
                         color: 'danger',
@@ -806,17 +807,6 @@ pipeline {
                             script {
                                 if (env.IS_RELEASE == 'true') {
                                     slackSend(
-                                        channel: '#stacki-builds',
-                                        color: 'good',
-                                        message: """\
-                                            New Stacki ISO uploaded to Artifactory.
-                                            *ISO:* ${env.ISO_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}
-                                        """.stripIndent(),
-                                        tokenCredentialId: 'slack-token-stacki'
-                                    )
-
-                                    slackSend(
                                         channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
@@ -953,7 +943,7 @@ pipeline {
                     }
                 }
 
-                stage('Build VM Images') {
+                stage('Build QCow2 Image') {
                     when {
                         anyOf {
                             environment name: 'PLATFORM', value: 'sles12'
@@ -962,11 +952,11 @@ pipeline {
                     }
 
                     steps {
-                        // Get a copy of kvm-builder
-                        sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-kvm-builder.git'
+                        // Get a copy of stacki-packi
+                        sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-packi.git'
 
                         // Build the KVM image
-                        dir ('stacki-kvm-builder') {
+                        dir ('stacki-packi') {
                             sh './do-build.sh ../$ISO_FILENAME'
                             sh 'mv stacki-*.qcow2 ../'
                         }
@@ -989,9 +979,113 @@ pipeline {
                             """
                         )
 
+                        // Releases of the Redhat version goes to amazon S3 too
+                        script {
+                            if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
+                                withAWS(credentials:'amazon-s3-credentials') {
+                                    s3Upload(
+                                        file: env.QCOW_FILENAME,
+                                        bucket: 'teradata-stacki',
+                                        path: 'release/stacki/5.x/',
+                                        acl: 'PublicRead'
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    post {
+                        success {
+                            // Notify Slack of a new release
+                            script {
+                                if (env.IS_RELEASE == 'true') {
+                                    slackSend(
+                                        channel: '#stacki-announce',
+                                        color: 'good',
+                                        message: """\
+                                            New Stacki QCow2 image uploaded to Artifactory.
+                                            *QCow2:* ${env.QCOW_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                        """.stripIndent(),
+                                        tokenCredentialId: 'slack-token-stacki'
+                                    )
+
+                                    if (env.PLATFORM == 'redhat7') {
+                                        slackSend(
+                                            channel: '#stacki-builds',
+                                            color: 'good',
+                                            message: """\
+                                                New Stacki QCow2 image uploaded to Amazon S3.
+                                                *QCow2:* ${env.QCOW_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
+                                            """.stripIndent(),
+                                            tokenCredentialId: 'slack-token-stacki'
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Update the Stacki Builds website
+                            build job: 'rebuild_stacki-builds_website', wait: false
+                        }
+
+                        failure {
+                            // Notify the Slack #stacki-builds channel
+                            slackSend(
+                                channel: '#stacki-builds',
+                                color: 'danger',
+                                message: """\
+                                    Stacki QCow2 image build has failed.
+                                    *Branch:* ${env.GIT_BRANCH}
+                                    *OS:* ${env.PLATFORM}
+                                    <${env.RUN_DISPLAY_URL}|View the pipeline job>
+                                """.stripIndent(),
+                                tokenCredentialId: 'slack-token-stacki'
+                            )
+                        }
+                    }
+                }
+
+                stage('Build OVA Image') {
+                    agent {
+                        label 'esxi_ova_builder'
+                    }
+
+                    when {
+                        anyOf {
+                            environment name: 'PLATFORM', value: 'sles12'
+                            environment name: 'PLATFORM', value: 'redhat7'
+                        }
+                    }
+
+                    steps {
+                        // Setup Artifactory access
+                        rtServer(
+                            id: "td-artifactory",
+                            url: "${env.ART_URL}",
+                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03"
+                        )
+
+                        // Get the Stacki ISO
+                        rtDownload(
+                            serverId: "td-artifactory",
+                            spec: """
+                                {
+                                    "files": [{
+                                        "pattern": "${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}",
+                                        "flat": "true"
+                                    }]
+                                }
+                            """
+                        )
+
+                        // Get a copy of stacki-packi
+                        sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-packi.git'
+
                         // Build the OVA image
-                        dir ('stacki-kvm-builder') {
-                            sh './qcow2-to-ova.sh ../stacki-*.qcow2'
+                        dir ('stacki-packi') {
+                            sh './do-build.sh --esxi-host=sd-stacki-004.labs.teradata.com --esxi-user=root --format=ova ../$ISO_FILENAME'
+                            sh 'mv stacki-*.ova ../'
                         }
 
                         // Set an environment variable with the OVA filename
@@ -1017,15 +1111,6 @@ pipeline {
                             if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
-                                        file: env.QCOW_FILENAME,
-                                        bucket: 'teradata-stacki',
-                                        path: 'release/stacki/5.x/',
-                                        acl: 'PublicRead'
-                                    )
-                                }
-
-                                withAWS(credentials:'amazon-s3-credentials') {
-                                    s3Upload(
                                         file: env.OVA_FILENAME,
                                         bucket: 'teradata-stacki',
                                         path: 'release/stacki/5.x/',
@@ -1042,25 +1127,10 @@ pipeline {
                             script {
                                 if (env.IS_RELEASE == 'true') {
                                     slackSend(
-                                        channel: '#stacki-builds',
-                                        color: 'good',
-                                        message: """\
-                                            New Stacki VM images uploaded to Artifactory.
-                                            *QCow2:* ${env.QCOW_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
-                                            *OVA:* ${env.OVA_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.OVA_FILENAME}
-                                        """.stripIndent(),
-                                        tokenCredentialId: 'slack-token-stacki'
-                                    )
-
-                                    slackSend(
                                         channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
-                                            New Stacki VM images uploaded to Artifactory.
-                                            *QCow2:* ${env.QCOW_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_QCOW_PATH}/${env.ART_OS}/${env.QCOW_FILENAME}
+                                            New Stacki OVA image uploaded to Artifactory.
                                             *OVA:* ${env.OVA_FILENAME}
                                             *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.OVA_FILENAME}
                                         """.stripIndent(),
@@ -1072,9 +1142,7 @@ pipeline {
                                             channel: '#stacki-builds',
                                             color: 'good',
                                             message: """\
-                                                New Stacki VM images uploaded to Amazon S3.
-                                                *QCow2:* ${env.QCOW_FILENAME}
-                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.QCOW_FILENAME}
+                                                New Stacki OVA image uploaded to Amazon S3.
                                                 *OVA:* ${env.OVA_FILENAME}
                                                 *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.OVA_FILENAME}
                                             """.stripIndent(),
@@ -1094,13 +1162,18 @@ pipeline {
                                 channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
-                                    Stacki VM images build has failed.
+                                    Stacki OVA build has failed.
                                     *Branch:* ${env.GIT_BRANCH}
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
                                 """.stripIndent(),
                                 tokenCredentialId: 'slack-token-stacki'
                             )
+                        }
+
+                        // Clean up after ourselves
+                        always {
+                            cleanWs()
                         }
                     }
                 }
