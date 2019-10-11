@@ -43,10 +43,10 @@ class Command(stack.commands.sync.host.command):
 		out = {}
 		host_output = {}
 
-		
+
 		ha = self.call('list.host.attr', hosts)
 		g = lambda x: (x['attr'], x['value'])
-		
+
 		host_attrs = {}
 		for host in hosts:
 			if host not in host_attrs:
@@ -93,7 +93,7 @@ class Command(stack.commands.sync.host.command):
 				hostname = h['name']
 				os_version = host_attrs[host]['os.version']
 				os_name = host_attrs[host]['os']
-				if os_name == 'rhel':
+				if os_name == 'redhat':
 					cmd = 'systemctl restart iptables'
 				else:
 					if os_version == '11.x':
