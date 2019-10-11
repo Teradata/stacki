@@ -1099,7 +1099,7 @@ pipeline {
                             spec: """
                                 {
                                     "files": [{
-                                        "pattern": "${env.QVA_FILENAME}",
+                                        "pattern": "${env.OVA_FILENAME}",
                                         "target": "${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/"
                                     }]
                                 }
