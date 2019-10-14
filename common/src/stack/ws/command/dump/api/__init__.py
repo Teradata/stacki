@@ -11,6 +11,19 @@ import json
 
 
 class Command(stack.commands.dump.command):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the web service data.
+	Output the web service api users, groups, blacklisted
+	commands, and commands with escalated permissions.
+
+	<example cmd='dump api'>
+	Dump json data for the web service api in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -66,4 +79,3 @@ class Command(stack.commands.dump.command):
 
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    api      = dump), indent=8))
-

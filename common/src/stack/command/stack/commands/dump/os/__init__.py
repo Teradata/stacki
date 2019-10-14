@@ -12,6 +12,20 @@ import json
 
 class Command(stack.commands.dump.command,
 	      stack.commands.OSArgumentProcessor):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the OS level data.
+	For each OS, output the name of the OS, as well as
+	any OS scoped attributes, storage controller,
+	partition, firewall, and route information.
+
+	<example cmd='dump os'>
+	Dump json data for OSes in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -29,4 +43,3 @@ class Command(stack.commands.dump.command,
 
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    os       = dump), indent=8))
-

@@ -11,6 +11,20 @@ import json
 
 
 class Command(stack.commands.dump.command):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the pallet data.
+	For each pallet, output the name of the pallet, as
+	well as its version, release, architecture, OS,
+	source URL, and its tag.
+
+	<example cmd='dump pallet'>
+	Dump json data for pallets in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -45,4 +59,3 @@ class Command(stack.commands.dump.command):
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    software = {'pallet' : dump}),
 					indent=8))
-

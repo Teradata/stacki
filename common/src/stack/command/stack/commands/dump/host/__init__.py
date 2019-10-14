@@ -12,6 +12,22 @@ import json
 
 
 class Command(stack.commands.dump.command):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the host data.
+	For each host, output the name of the host, as well
+	as any host scoped attributes, storage controller,
+	partition, firewall, route information, interfaces,
+	aliases, groups, comments, bootactions, environments,
+	etc.
+
+	<example cmd='dump host'>
+	Dump json data for hosts in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -69,4 +85,3 @@ class Command(stack.commands.dump.command):
 
 		self.addText(json.dumps(OrderedDict(version = stack.version,
 						    host    = dump), indent=8))
-
