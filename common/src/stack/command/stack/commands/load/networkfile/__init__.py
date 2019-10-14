@@ -16,11 +16,11 @@ from stack.exception import CommandError
 class Command(stack.commands.load.command,
 		stack.commands.NetworkArgumentProcessor):
 	"""
-	Take rows from a spreadsheet that describe how a host's disk controller
+	Take rows from a spreadsheet that describe the logical networks that
 	should be configured and then place those values into the database.
 	
 	<param type='string' name='file'>
-	The file that contains the storage disk controller configuration.
+	The file that contains the logical network configuration.
 	</param>
 
 	<param type='string' name='processor' optional='1'>
@@ -29,9 +29,13 @@ class Command(stack.commands.load.command,
 	</param>
 	
 	<example cmd='load networkfile file=mynets.csv'>
-	Read disk controller configuration from controller.csv and use the
+	Read network configuration from mynets.csv and use the
 	default processor to parse the data.
 	</example>
+
+	<related>report networkfile</related>
+	<related>load</related>
+	<related>dump network</related>
 	"""		
 
 	def run(self, params, args):
