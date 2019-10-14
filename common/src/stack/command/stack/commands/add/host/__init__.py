@@ -187,6 +187,8 @@ class Command(command):
 			     [ host, 'type=os', 'sync=false',
 			       'action=%s' % osaction ])
 
+		self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])
+
 		if environment:
 			self.command('set.host.environment',
 				     [ host, "environment=%s" % environment ])
