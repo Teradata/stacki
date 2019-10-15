@@ -26,6 +26,7 @@ import subprocess
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
+from xml.sax import SAXParseException
 from functools import partial
 from operator import itemgetter
 from itertools import groupby, cycle
@@ -2409,7 +2410,12 @@ class Command:
 			handler = DocStringHandler(command, users)
 			parser = make_parser()
 			parser.setContentHandler(handler)
-			parser.feed('<docstring>%s</docstring>' % self.__doc__)
+			try:
+				parser.feed('<docstring>%s</docstring>' % self.__doc__)
+			except SAXParseException as e:
+				cmd = ' '.join(self.__module__.split('.')[2:])
+				msg = f'XML error while parsing docstring for "{cmd}" - {e.getException()}'
+				raise CommandError(self, msg)
 
 			if format == 'docbook':
 				self.addText(handler.getDocbookText())

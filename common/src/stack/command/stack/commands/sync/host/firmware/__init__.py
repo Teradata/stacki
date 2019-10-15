@@ -23,7 +23,7 @@ class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
 	Force the firmware update process to run for hosts that are already in sync.
 	</param>
 
-	<example cmd='sync host firmware switch-18-11>
+	<example cmd='sync host firmware switch-18-11'>
 	If a compatible firmware version is tracked by stacki, the firmware will be synced to switch-18-11.
 	</example>
 
