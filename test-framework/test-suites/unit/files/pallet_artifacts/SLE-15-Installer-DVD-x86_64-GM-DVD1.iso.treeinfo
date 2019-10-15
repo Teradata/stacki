@@ -1,0 +1,22 @@
+[header]
+version = 1.0
+
+[general]
+arch = x86_64
+family = SUSE Linux Enterprise
+name = SUSE Linux Enterprise
+version = 15
+platforms = x86_64,xen
+
+[release]
+name = SUSE Linux Enterprise
+short = sle
+version = 15
+
+[images-x86_64]
+kernel = boot/x86_64/loader/linux
+initrd = boot/x86_64/loader/initrd
+
+[images-xen]
+kernel = boot/x86_64/loader/linux
+initrd = boot/x86_64/loader/initrd

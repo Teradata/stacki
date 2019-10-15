@@ -5,6 +5,7 @@
 # @copyright@
 
 import os
+from stack.topo import Redis
 import stack.mq
 try:
 	import redis
@@ -25,7 +26,7 @@ class ProcessorBase(stack.mq.Subscriber):
 		self.context	= context
 
 		try:
-			self.redis = redis.StrictRedis()
+			self.redis = redis.StrictRedis(host=Redis.server)
 		except NameError:
 			self.redis = None
 

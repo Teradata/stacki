@@ -1,0 +1,7 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+backend-0-0,sda,/boot/efi,512,efi,
+,sda,swap,8192,swap,
+,sda,/export,15360,xfs,
+,sda,/boot,1024,xfs,
+,sda,/,16000,xfs,
+,sda,/var,26000,xfs,

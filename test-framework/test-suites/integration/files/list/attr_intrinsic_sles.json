@@ -1,0 +1,104 @@
+[
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateAddress",
+                "value": "192.168.0.2"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateBroadcast",
+                "value": "192.168.0.255"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateDNSDomain",
+                "value": ""
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateHostname",
+                "value": "frontend-0-0"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateKickstartHost",
+                "value": "192.168.0.2"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateNetmask",
+                "value": "255.255.255.0"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateNetmaskCIDR",
+                "value": "24"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PrivateNetwork",
+                "value": "192.168.0.0"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicAddress",
+                "value": "192.168.100.2"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicBroadcast",
+                "value": "192.168.100.255"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicDNSDomain",
+                "value": "public"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicHostname",
+                "value": "frontend-0-0.public"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicNetmask",
+                "value": "255.255.255.0"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicNetmaskCIDR",
+                "value": "24"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "Kickstart_PublicNetwork",
+                "value": "192.168.100.0"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "release",
+                "value": "sles12"
+        },
+        {
+                "scope": "global",
+                "type": "const",
+                "attr": "version",
+                "value": ""
+        }
+]

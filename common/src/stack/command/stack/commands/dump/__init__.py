@@ -42,6 +42,7 @@ class command(stack.commands.Command):
 			arg = [name]
 			
 		for row in self.call('list.attr', [f'scope={scope}',
+						   'shadow=false',
 						   'resolve=false',
 						   'const=false'] + arg):
 			if row['type'] == 'var':
@@ -142,7 +143,7 @@ class command(stack.commands.Command):
 		if scope == 'global':
 			data = self.call('list.storage.partition')
 		else:
-			data = self.call('list.storage.partition', [name])
+			data = self.call(f'list.{scope}.storage.partition', [name])
 
 		for row in data:
 			dump.append(OrderedDict(
@@ -161,6 +162,14 @@ class command(stack.commands.Command):
 class Command(command):
 	"""
 	Dumps the entire state of the Stacki database as a JSON document.
+
+	This is consumable by 'stack load'
+
+	<example cmd='dump'>
+	dumps the database configuration to STDOUT as JSON
+	</example>
+
+	<related>load</related>
 	"""
 	def run(self, params, args):
 

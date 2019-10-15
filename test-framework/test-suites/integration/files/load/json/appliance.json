@@ -148,7 +148,14 @@
           "appliance": "backend",
           "scope": "appliance",
           "type": "var",
-          "attr": "sync.hosts",
+          "attr": "manage.hostsfile",
+          "value": "true"
+        },
+        {
+          "appliance": "backend",
+          "scope": "appliance",
+          "type": "var",
+          "attr": "sync.hostsfile",
           "value": "true"
         }
       ],

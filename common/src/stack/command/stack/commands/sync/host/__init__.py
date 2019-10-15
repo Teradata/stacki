@@ -22,39 +22,7 @@ timeout	= 30
 
 class command(stack.commands.sync.command,
 	stack.commands.HostArgumentProcessor):
-	def getRunHosts(self, hosts):
-		self.mgmt_networks = {}
-		run_hosts = []
-		self.attrs = self.call('list.host.attr',hosts)
-		f = lambda x: x['attr'] == 'stack.network'
-		network_attrs = list(filter(f, self.attrs))
-
-		self.mgmt_networks = {}
-		for host in hosts:
-			g = lambda x: x['host'] == host
-			s = list(filter(g, network_attrs))
-			if len(s):
-				network = s[0]['value']
-				if network not in self.mgmt_networks:
-					self.mgmt_networks[network] = []
-				self.mgmt_networks[network].append(host)
-
-		a = []
-		b = []
-		for net in self.mgmt_networks:
-			h = self.mgmt_networks[net]
-			a.extend(h)
-			b.extend(self.getHostnames(h, subnet=net))
-
-		for host in hosts:
-			if host in a:
-				idx = a.index(host)
-				run_hosts.append({'host':host, 'name':b[idx]})
-			else:
-				run_hosts.append({'host':host, 'name':host})
-
-		return run_hosts
-
+	pass
 
 class Parallel(threading.Thread):
 	def __init__(self, cmd, out=None, stdin=None):
@@ -93,24 +61,13 @@ class Parallel(threading.Thread):
 
 class Command(command):
 	"""
-	Writes the /etc/hosts file based on the configuration database
+	Writes the /etc/hosts file on the frontend based on the configuration in the database
+
+	<example cmd='sync host'>
+	Re-writes /etc/hosts
+	</example>
 	"""
 
 	def run(self, params, args):
-
 		self.notify('Sync Host')
-
-		output = self.command('report.host')
-		f = open('/etc/hosts', 'w')
-		f.write("%s\n" % output)
-		f.close()
-
-		if os.path.exists('/srv/salt/rocks'):
-			f = open('/srv/salt/rocks/hosts', 'w')
-			f.write("%s\n" % output)
-			f.close()
-
-
-
-
-
+		self.report('report.host')

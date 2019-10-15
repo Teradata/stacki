@@ -23,6 +23,8 @@ class Command(stack.commands.sync.host.command):
 	"""
 	Reconfigure and optionally restart the network for the named hosts.
 
+	Note that this will always trigger a 'stack sync config' on the Frontend.
+
 	<param type='boolean' name='restart'>
 	If "yes", then restart the network after the configuration files are
 	applied on the host.
@@ -69,6 +71,7 @@ class Command(stack.commands.sync.host.command):
 		hosts = self.getHostnames(args, managed_only=1)
 		run_hosts = self.getRunHosts(hosts)
 
+		host_attrs = self.getHostAttrDict(hosts)
 		me = self.db.getHostname('localhost')
 
 		threads = []
@@ -80,24 +83,35 @@ class Command(stack.commands.sync.host.command):
 			if host == me:
 				self.cleanup()
 
-			# Sometimes these return None, in that case, make them an empty string
-			c = str(self.command('report.host.interface',[host]) or '') + \
-				str(self.command('report.host.network',[host]) or '') + \
-				str(self.command('report.host.route',[host]) or '')
+			# Attributes for /etc/hosts management
+			#
+			# sync.hosts : write /etc/hosts during installation
+			# (what it used to mean before we starting syncing in
+			# this command as well).
+			#
+			# manage.hostsfile : write /etc/hosts during
+			# installation.
+			#
+			# sync.hostsfile : write /etc/hosts during
+			# sync.host.network IFF manage.hostsfile is also true.
 
-			s = subprocess.Popen(['/opt/stack/bin/stack','report','script'],
-				stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			o, e = s.communicate(input=c.encode())
 			
+			manage_hostsfile = self.str2bool(host_attrs[host].get('manage.hostsfile', False))
+			sync_hostsfile   = self.str2bool(host_attrs[host].get('sync.hostsfile',   False))
+
 			cmd = '( /opt/stack/bin/stack report host interface %s && ' % host
 			cmd += '/opt/stack/bin/stack report host network %s && ' % host
+			if manage_hostsfile and sync_hostsfile:
+				# we only conditionally sync /etc/hosts
+				cmd += '/opt/stack/bin/stack report host && '
+			cmd += '/opt/stack/bin/stack report host resolv %s && ' % host
 			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
 			if host != me:
 				cmd += 'ssh -T -x %s ' % hostname
 			cmd += 'bash > /dev/null 2>&1'
 
-			p = Parallel(cmd, stdin=o.decode())
+			p = Parallel(cmd)
 			threads.append(p)
 			p.start()
 
@@ -138,15 +152,24 @@ class Command(stack.commands.sync.host.command):
 			for thread in threads:
 				thread.join(timeout)
 
-		#
 		# if IP addresses change, we'll need to sync the config (e.g.,
 		# update /etc/hosts, /etc/dhcpd.conf, etc.).
+
+		# A note on /etc/hosts, since there's some commands that overlap
+		# in management for the FE
 		#
+		# • `sync host` will always overwrite /etc/hosts on the FE
+		# • `sync config` will always call `sync host`
+		# • `sync host network` will respect the `sync.hosts` attr and
+		#    conditionally re-write /etc/hosts on backends.
+		# • `sync host network` always calls `sync config`
+		# • `sync host network localhost` therefore does not respect
+		#    the attribute for the FE
+		# note: 'sync.hosts' implicitly defaults to `False`, meaning
+		#    don't rewrite /etc/hosts on backends
+		#
+		# The net effect is that we always want to rewrite the hostfile
+		# for the FE (FE needs to know how to get ahold of hosts), but
+		# only do the backends if we're explicitly asked to do so.
+
 		self.command('sync.config')
-
-		#
-		# hack for ganglia on the frontend
-		#
-		if me in hosts and os.path.exists('/etc/ganglia/gmond.conf'):
-			os.system('service gmond restart > /dev/null 2>&1')
-

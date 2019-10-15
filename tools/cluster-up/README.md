@@ -23,23 +23,23 @@ the download directory before bringing up the cluster.
 
 There are some optional arguments you can pass to the command:
 
-    --backends=[0-253]          The number backends to create. Default: 0
-    --fqdn=FQDN                 The FQDN of the frontend. Default: cluster-up-frontend.localdomain
-    --name=NAME                 The name to uniquely identify this cluster. Default: cluster-up-RRRRRRRR
-    --download-dir=DIRECTORY    The directory to store installer ISOs. Default: '.'
-    --use-the-src-dir=DIRECTORY The directory will be mounted and symlinked into the frontend.
-    --export-frontend           Export the frontend as a vagrant box with the same name as the STACK_ISO
-
+    --backends=[0-253]            The number backends to create. Default: 0
+    --fqdn=FQDN                   The FQDN of the frontend. Default: cluster-up-frontend.localdomain
+    --name=NAME                   The name to uniquely identify this cluster. Default: cluster-up-RRRRRRRR
+    --download-dir=DIRECTORY      The directory to store installer ISOs. Default: '.'
+    --use-the-src-dir=DIRECTORY   The directory will be mounted and symlinked into the frontend.
+    --export-frontend             Export the frontend as a vagrant box with the same name as the STACK_ISO
+    --forward-ports=SRC:DST[,...] Comma separated list of ports to forward.
 You can also specify the following flags, which will switch cluster-up to create
 the second interface to a bridge interface on the VM host. If you specify a bridged
 interface, then no backends will be automatically created, as they rely on host only
 networking. Instead, you can create your own backends over the bridged interface.
 
-    --bridge=INTERFACE          Bridge interface on the host. Default: Use host only networking
-    --ip=IP_ADDRESS             IP Address for the bridge network. Default: Use DHCP
-    --netmask=NETMASK           The netmask for the bridge network. Default: 255.255.255.0
-    --gateway=GATEWAY_ADDRESS   Gateway address for the bridged interface.
-    --dns=DNS_ADDRESS[,DNS2]    Comma seperated list of DNS servers.
+    --bridge=INTERFACE            Bridge interface on the host. Default: Use host only networking
+    --ip=IP_ADDRESS               IP Address for the bridge network. Default: Use DHCP
+    --netmask=NETMASK             The netmask for the bridge network. Default: 255.255.255.0
+    --gateway=GATEWAY_ADDRESS     Gateway address for the bridged interface.
+    --dns=DNS_ADDRESS[,DNS2]      Comma separated list of DNS servers.
 
 The script will create a generic OS frontend box in Virtualbox or KVM, install
 Stacki on it, then pxe-boot the number of backends requested (None by default) and

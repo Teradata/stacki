@@ -5,25 +5,13 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, ArgError, ParamValue, ParamRequired
+from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
+from stack.util import flatten
 
 
-class Command(stack.commands.remove.command,
-		stack.commands.OSArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
-		stack.commands.ApplianceArgumentProcessor):
+class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.command):
 	"""
 	Remove a storage partition configuration from the database.
-
-	<param type='string' name='scope' optional='0'>
-	Scope of partition definition: a valid os (e.g.,
-	'redhat'), a valid appliance (e.g., 'backend') or a valid host
-	(e.g., 'backend-0-0). Default scope is 'global'.
-	</param>
-
-	<arg type='string' name='name'>
-	Zero or one argument of host, appliance or os name
-	</arg>
 
 	<param type='string' name='device' optional='1'>
 	Device whose partition configuration needs to be removed from
@@ -35,72 +23,68 @@ class Command(stack.commands.remove.command,
 	the database.
 	</param>
 
-	<example cmd='remove storage partition backend-0-0 device=sda'>
-	Remove the disk partition configuration for sda on backend-0-0.
+	<example cmd='remove storage partition device=sda'>
+	Remove the global storage partition configuration for sda.
 	</example>
 
-	<example cmd='remove storage partition backend-0-0 device=sda mountpoint=/var'>
-	Remove the disk partition configuration for partition /var on sda on backend-0-0.
-	</example>
-
-	<example cmd='remove storage partition backend'>
-	Remove the disk array configuration for backend
-	appliance.
+	<example cmd='remove storage partition device=sda mountpoint=/var'>
+	Remove the global storage partition configuration for /var on sda.
 	</example>
 	"""
 
 	def run(self, params, args):
-		(scope, device, mountpoint) = self.fillParams([
-			('scope', 'global'),
+		# Get the scope and make sure the args are valid
+		scope, = self.fillParams([('scope', 'global')])
+		scope_mappings = self.getScopeMappings(args, scope)
+
+		# Now validate the params
+		device, mountpoint = self.fillParams([
 			('device', None),
 			('mountpoint', None)
 		])
 
-		oses = []
-		appliances = []
-		hosts = []
-		name = None
-		accepted_scopes = ['global', 'os', 'appliance', 'host']
+		# Global scope needs to supply either a device or mountpoint
+		if scope == 'global' and not any([device, mountpoint]):
+			raise ParamRequired(self, ['device', 'mountpoint'])
 
-		# Some checking that we got usable input
-		if scope not in accepted_scopes:
-			raise ParamValue(self, '%s' % params, 'one of the following: %s' % accepted_scopes )
-		elif scope == 'global' and len(args) >= 1:
-			raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
-		elif scope == 'global' and (device is None and mountpoint is None):
-			raise ParamRequired(self, 'device OR mountpoint')
-		elif scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '%s name' % scope)
+		scope_ids = []
+		for scope_mapping in scope_mappings:
+			# Check that the partition configuration exists for the scope
+			query = """
+				scope_map.id FROM storage_partition,scope_map
+				WHERE storage_partition.scope_map_id = scope_map.id
+				AND scope_map.scope = %s
+				AND scope_map.appliance_id <=> %s
+				AND scope_map.os_id <=> %s
+				AND scope_map.environment_id <=> %s
+				AND scope_map.node_id <=> %s
+			"""
+			values = list(scope_mapping)
 
-		if scope == "os":
-			oses = self.getOSNames(args)
-		elif scope == "appliance":
-			appliances = self.getApplianceNames(args)
-		elif scope == "host":
-			hosts = self.getHostnames(args)
+			if device and device != '*':
+				query += ' AND device = %s'
+				values.append(device)
 
-		if scope != 'global':
-			name = args[0]
+			if mountpoint and mountpoint != '*':
+				query += ' AND mountpoint = %s'
+				values.append(mountpoint)
 
-		# Look up the id in the appropriate 'scope' table
-		if scope == 'appliance':
-			tableid = self.db.select('id from appliances where name=%s', [name])[0][0]
-		elif scope == 'os':
-			tableid = self.db.select('id from oses where name=%s', [name])[0][0]
-		elif scope == 'host':
-			tableid = self.db.select('id from nodes where name=%s', [name])[0][0]
-		else:
-			tableid = -1
+			rows = self.db.select(query, values)
+			if not rows:
+				if device is None:
+					device = '*'
+				if mountpoint is None:
+					mountpoint = '*'
 
-		query = 'delete from storage_partition where scope = %s and tableid = %s'
-		values = [scope, tableid]
+				raise CommandError(self,
+					f'partition specification for device "{device}" '
+					f'and mount point "{mountpoint}" doesn\'t exist'
+				)
 
-		if device and device != '*':
-			query += ' and device = %s'
-			values.append(device)
+			# Add the matches to the delete list
+			scope_ids.extend(flatten(rows))
 
-		if mountpoint and mountpoint != '*':
-			query += ' and mountpoint = %s'
-			values.append(mountpoint)
-
-		self.db.execute(query, values)
+		# Partition  specifications existed for all the scope mappings, so delete them.
+		# Note: We just delete the scope mapping, the ON DELETE CASCADE takes
+		# care of removing the storage_partition table entries for us.
+		self.db.execute('delete from scope_map where id in %s', (scope_ids,))

@@ -33,10 +33,12 @@ class Command(command):
 	"""
 
 	def run(self, param, args):
+		text = []
 		self.beginOutput()
-		self.addOutput(None, stack.text.DoNotEdit())
-		self.addOutput(None, '#  Site additions go in /etc/hosts.local\n')
-		self.addOutput(None, '127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
+		text.append('<stack:file stack:name="/etc/hosts">')
+		text.append(stack.text.DoNotEdit())
+		text.append('#  Site additions go in /etc/hosts.local\n')
+		text.append('127.0.0.1\tlocalhost.localdomain\tlocalhost\n')
 		zones = {}
 		aliases = {}
 
@@ -45,7 +47,7 @@ class Command(command):
 			zones[row['network']] = row['zone']
 
 		# Populate the host -> interface -> aliases map
-		for row in self.call('list.host.alias'):
+		for row in self.call('list.host.interface.alias'):
 			host = row['host']
 			interface = row['interface']
 			if host not in aliases:
@@ -80,6 +82,7 @@ class Command(command):
 				hosts[host] = []
 			h = {}
 			h['ip'] = row['ip']
+			h['name'] = row['name']
 			h['interface'] = row['interface']
 			h['zone'] = zones[row['network']]
 			h['default'] = row['default']
@@ -89,7 +92,7 @@ class Command(command):
 				for option in options:
 					if option.strip() == 'shortname':
 						h['shortname']= True
-						
+
 			if self.validateHostInterface(host, h, aliases):
 				hosts[host].append(h)
 
@@ -112,17 +115,31 @@ class Command(command):
 				interface = row['interface']
 				shortname = row['shortname']
 				names = []
+
 				# Get the FQDN
 				if zone:
 					names.append('%s.%s' % (host, zone))
+
+					if row['name']:
+						name_fqdn = f"{row['name']}.{zone}"
+						if name_fqdn not in names:
+							names.append(name_fqdn)
+
 				# If shortname for an interface is set to true,
 				# set this interface to have the shortname
 				if shortname_exists and shortname:
 					names.append(host)
+
+					if row['name'] and row['name'] not in names:
+						names.append(row['name'])
+
 				# If shortname is not set for any interface
 				# set the default interface to have the shortname
 				if default and not shortname_exists:
 					names.append(host)
+
+					if row['name'] and row['name'] not in names:
+						names.append(row['name'])
 
 				# Add any interface specific aliases
 				if host in aliases:
@@ -136,21 +153,23 @@ class Command(command):
 						continue
 
 				# Write it all
-				self.addOutput(None, '%s\t%s' % (ip, ' '.join(names)))
+				text.append('%s\t%s' % (ip, ' '.join(names)))
 
 				if ip not in processed:
 					processed[ip] = {}
-				processed[ip]['names'] = ' '.join(names)
+				processed[ip]['names'] = '\t'.join(names)
 
 		# Finally, add the hosts.local file to the list
 		hostlocal = '/etc/hosts.local'
 		if os.path.exists(hostlocal):
 			f = open(hostlocal, 'r')
-			self.addOutput(None, '\n# Imported from /etc/hosts.local\n')
+			text.append('\n# Imported from /etc/hosts.local\n')
 			h = f.read()
-			self.addOutput(None, h)
+			text.append(h)
 			f.close()
 
+		text.append('</stack:file>')
+		self.addOutput(None, '\n'.join(text))
 		self.endOutput(padChar='', trimOwner=True)
 
 
@@ -173,4 +192,3 @@ class Command(command):
 		if hostinfo['default']:
 			return True
 		return False
-                

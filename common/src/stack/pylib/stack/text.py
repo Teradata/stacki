@@ -4,8 +4,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import time
-
 
 def DoNotEdit(prefix='# '):
 	"""Return standard warning to generated files"""

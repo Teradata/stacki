@@ -1,6 +1,7 @@
 YUMLIST = \
 	MegaCLI storcli \
 	ipmitool \
+	stack-checklist \
 	stack-command \
 	stack-mq \
 	stack-pylib \

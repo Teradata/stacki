@@ -12,7 +12,14 @@
 
 
 import stack.commands
-from stack.exception import CommandError, ParamRequired, ArgUnique, ArgRequired
+from stack.exception import (
+	CommandError,
+	ParamRequired,
+	ArgUnique,
+	ArgRequired,
+	ArgValue,
+)
+from stack.util import is_valid_hostname
 
 
 class command(
@@ -34,6 +41,10 @@ class Command(command):
 	basename-rack-rank the default values for the appliance, rack,
 	and rank parameters are taken from the hostname.
 	</arg>
+
+	<param type='string' name='appliance'>
+	The appliance name for this host.
+	</param>
 
 	<param type='string' name='rack'>
 	The number of the rack where the machine is located. The convention
@@ -75,22 +86,25 @@ class Command(command):
 	def run(self, params, args):
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
-		
+
 		if len(args) != 1:
 			raise ArgUnique(self, 'host')
 
 		host = args[0].lower()
 
+		if not is_valid_hostname(host):
+			raise ArgValue(self, 'host', 'a valid hostname label')
+
 		if self.db.count('(ID) from nodes where name=%s', (host,)) > 0:
 			raise CommandError(self, 'host "%s" already exists in the database' % host)
-	
+
 		# If the name is of the form appliancename-rack-rank
 		# then do the right thing and figure out the default
-		# values for appliane, rack, and rank.  If the appliance 
+		# values for appliance, rack, and rank.  If the appliance
 		# name is not found in the database, or the rack/rank numbers
 		# are invalid do not guess any defaults.  The name is
 		# either 100% used or 0% used.
-	
+
 		appliances = self.getApplianceNames()
 
 		appliance = None
@@ -106,7 +120,7 @@ class Command(command):
 			appliance = None
 			rack      = None
 			rank      = None
-				
+
 		# fillParams with the above default values
 		(appliance, rack, rank, box, environment,
 		 osaction, installaction) = self.fillParams([
@@ -138,41 +152,43 @@ class Command(command):
 			osname = row['os']
 
 		# Make sure the installaction and osaction both exist
-		if not self.call('list.bootaction', [ installaction, 
-						      'type=install', 
-						      'os=%s' % osname 
+		if not self.call('list.bootaction', [ installaction,
+						      'type=install',
+						      'os=%s' % osname
 						      ]):
 			raise CommandError(self,
-					   '"%s" install boot action for "%s" is missing' % 
+					   '"%s" install boot action for "%s" is missing' %
 					   (installaction, osname))
 
-		if not self.call('list.bootaction', [ osaction, 
-						      'type=os', 
-						      'os=%s' % osname 
+		if not self.call('list.bootaction', [ osaction,
+						      'type=os',
+						      'os=%s' % osname
 						      ]):
 			raise CommandError(self,
-					   '"%s" os boot action for "%s" is missing' % 
+					   '"%s" os boot action for "%s" is missing' %
 					   (osaction, osname))
 
 		self.db.execute("""
 			insert into nodes
 			(name, appliance, box, rack, rank)
 			values (
-				%s, 
+				%s,
 			 	(select id from appliances where name=%s),
 			 	(select id from boxes      where name=%s),
 				%s, %s
-			) 
+			)
 			""", (host, appliance, box, rack, rank))
 
-		self.command('set.host.bootaction', 
-			     [ host, 'type=install', 'sync=false', 
+		self.command('set.host.bootaction',
+			     [ host, 'type=install', 'sync=false',
 			       'action=%s' % installaction ])
 
-		self.command('set.host.bootaction', 
-			     [ host, 'type=os', 'sync=false', 
+		self.command('set.host.bootaction',
+			     [ host, 'type=os', 'sync=false',
 			       'action=%s' % osaction ])
 
+		self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])
+
 		if environment:
-			self.command('set.host.environment', 
+			self.command('set.host.environment',
 				     [ host, "environment=%s" % environment ])

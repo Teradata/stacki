@@ -1,5 +1,12 @@
 require 'json'
+require 'net/http'
 
+# Are we internal to TD?
+begin
+  INTERNAL = Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+rescue
+  INTERNAL = "false"
+end
 
 if File.file?('.vagrant/cluster-up.json')
   json_data = File.read('.vagrant/cluster-up.json')
@@ -18,7 +25,7 @@ if File.file?('.vagrant/cluster-up.json')
   NETMASK = settings['NETMASK']
   GATEWAY = settings['GATEWAY']
   DNS = settings['DNS']
-  INTERNAL = settings['INTERNAL']
+  FORWARD_PORTS = settings['FORWARD_PORTS']
 
   Vagrant.configure("2") do |config|
     config.vm.define "frontend", autostart: false do |config|
@@ -26,9 +33,9 @@ if File.file?('.vagrant/cluster-up.json')
         config.vm.box = "stacki/sles-12.3"
         config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
       elsif OS == 'redhat7'
-        config.vm.box = "stacki/centos-7.4"
-        if INTERNAL
-          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+        config.vm.box = "stacki/centos-7.6"
+        if INTERNAL == "true"
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
       end
 
@@ -87,20 +94,27 @@ if File.file?('.vagrant/cluster-up.json')
         end
       end
 
+      FORWARD_PORTS.split(",").each do |pair|
+        host, guest = pair.split(":")
+        config.vm.network "forwarded_port", host: host.to_i, guest: guest.to_i
+      end
+
       config.vm.provision "shell", path: "provision-frontend.sh", env: settings
     end
 
     (0..BACKENDS-1).each do |i|
       config.vm.define "backend-0-#{i}", autostart: false do |config|
         config.vm.box = "stacki/pxe-boot"
-        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        if INTERNAL == "true"
+          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        end
         config.vm.boot_timeout = 3600
 
         config.vm.provider "virtualbox" do |vb, config|
           vb.name = NAME + "_backend-0-#{i}"
           vb.gui = false
 
-          vb.memory = "2048"
+          vb.memory = "3072"
           vb.cpus = 1
 
           vb.check_guest_additions = false
@@ -125,7 +139,7 @@ if File.file?('.vagrant/cluster-up.json')
           provider.driver = "kvm"
           provider.connect_via_ssh = false
 
-          provider.memory = "2048"
+          provider.memory = "3072"
           provider.cpus = 1
           provider.nic_model_type = "e1000"
           provider.random :model => "random"
@@ -134,7 +148,7 @@ if File.file?('.vagrant/cluster-up.json')
           provider.boot boot_network
           provider.boot 'hd'
           provider.qemuargs :value => "-boot"
-          provider.qemuargs :value => "reboot-timeout=10"
+          provider.qemuargs :value => "reboot-timeout=10000"
 
           config.vm.network "private_network",
             mac: sprintf("5254000000%02X", i+3),

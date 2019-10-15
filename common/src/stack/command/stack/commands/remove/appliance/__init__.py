@@ -59,4 +59,4 @@ class Command(command):
 		# good to go
 		#
 		for appliance in appliances:
-			self.runPlugins(appliance)
+			self.db.execute('delete from appliances where name=%s', (appliance,))

@@ -9,19 +9,24 @@ class CLI:
 		'cached', 'direct', 'endskcache', 'disdskcache',
 		'cachedbadbbu', 'nocachedbadbbu' ]
 
-	def run(self, args):
+	def run(self, args, check=False):
+		'''
+		check=False was added to allow this subprocess wrapper to halt the install on error.
+		currently, only commands related to creating RAID volumes will ever have check=True
+		other commands may be expected to fail
+		'''
+
 		cmd = [ '/opt/stack/sbin/MegaCli' ]
 		cmd.extend(args)
-		file = open('/tmp/MegaCli.log', 'a+')
-		file.write('cmd: %s\n' % ' '.join(cmd))
-		file.close()
+		with open('/tmp/MegaCli.log', 'a+') as fi:
+			fi.write('cmd: %s\n' % ' '.join(cmd))
 		cmd.extend(['-AppLogFile','/tmp/MegaCli.log'])
 
 		result = []
 
-		p = subprocess.run(cmd, stdout=subprocess.PIPE)
+		p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', check=check)
 
-		for line in p.stdout.decode().splitlines():
+		for line in p.stdout.splitlines():
 			tokens = line.split(':', 1)
 			if len(tokens) != 2:
 				continue
@@ -82,18 +87,17 @@ class CLI:
 
 		return slots
 
-	def doStrippedRaid(self, raidlevel, adapter, enclosure, slots,
-			hotspares, flags):
+	def doStrippedRaid(self, raidlevel, adapter, enclosure, slots, hotspares, flags, check):
 
 		if raidlevel == '10':
 			cmd = [ '-CfgSpanAdd', '-r10' ]
 			pdperarray = 2
 		elif raidlevel == '50':
 			cmd = [ '-CfgSpanAdd', '-r50' ]
-			pdperarray = 5
+			pdperarray = 3
 		elif raidlevel == '60':
 			cmd = [ '-CfgSpanAdd', '-r60' ]
-			pdperarray = 6
+			pdperarray = 4
 		else:
 			return
 
@@ -139,7 +143,7 @@ class CLI:
 
 		cmd.append('-force')
 		cmd.append('-a%d' % adapter)
-		results = self.run(cmd)
+		results = self.run(cmd, check=check)
 
 		#
 		# apply any flags that are not able to be set in
@@ -159,7 +163,7 @@ class CLI:
 			for f in setpropflags:
 				cmd = [ '-LDSetProp', f, '-L%d' % vid, 
 					'-a%d' % adapter ]
-				results = self.run(cmd)
+				results = self.run(cmd, check=check)
 
 		# 
 		# support for dedicated hot spares for 10, 50 and 60
@@ -167,15 +171,14 @@ class CLI:
 		# global hot spares with this.
 		# 
 		self.doGlobalHotSpare(adapter, enclosure, hotspares,
-			' '.join(options))
+			' '.join(options), check)
 
 
-	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares,
-			flags):
+	def doRaid(self, raidlevel, adapter, enclosure, slots, hotspares, flags, check):
 
 		if raidlevel in [ '10', '50', '60' ]:
 			self.doStrippedRaid(raidlevel, adapter, enclosure,
-				slots, hotspares, flags)
+				slots, hotspares, flags, check)
 		else:
 			cmd = [ '-CfgLdAdd', '-r%s' % raidlevel ]
 
@@ -207,7 +210,7 @@ class CLI:
 
 			cmd.append('-force')
 			cmd.append('-a%d' % adapter)
-			results = self.run(cmd)
+			results = self.run(cmd, check=check)
 
 			#
 			# apply any flags that are not able to be set in
@@ -226,10 +229,10 @@ class CLI:
 			for f in setpropflags:
 				cmd = [ '-LDSetProp', f, '-L%d' % vid, 
 					'-a%d' % adapter ]
-				results = self.run(cmd)
+				results = self.run(cmd, check=check)
 
 
-	def doGlobalHotSpare(self, adapter, enclosure, hotspares, flags):
+	def doGlobalHotSpare(self, adapter, enclosure, hotspares, flags, check):
 		for hotspare in hotspares:
 			cmd = [ '-PDHSP', '-Set', '-PhysDrv',
 				'[%s:%d]' % (enclosure, hotspare),
@@ -238,5 +241,11 @@ class CLI:
 			if flags:
 				cmd.append(flags)
 
-			self.run(cmd)
+			self.run(cmd, check=check)
 
+if __name__ == '__main__':
+	s = CLI()
+	a = s.getAdapter()
+	if a is not None:
+		print(s.getEnclosure(a))
+		print(s.getSlots(a))

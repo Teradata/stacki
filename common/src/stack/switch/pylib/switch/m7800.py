@@ -44,7 +44,7 @@ class SwitchMellanoxM7800(Switch):
 
 		self.switchname = switchname
 		self.proc = ExpectMore()
-		self.proc.PROMPTS = (['.config. #', ' >', ' #', 'initial configuration?'])
+		self.proc.PROMPTS = ['.config. #', ' >', ' #', 'initial configuration?']
 
 
 	def connect(self):

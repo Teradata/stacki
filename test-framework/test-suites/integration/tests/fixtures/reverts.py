@@ -68,8 +68,12 @@ def _remove_overlay(target, request):
 				f.write('{}\n\n'.format('\n'.join(sorted(mods))))
 
 				# Check if the fixture is part of the function parameters
+				# or if it was specified via a usefixtures marker.
 				parameters = inspect.signature(request.function).parameters
-				if request.fixturename not in parameters:
+				usefixtures_marker = request.node.get_closest_marker("usefixtures")
+				if request.fixturename not in parameters and (
+					usefixtures_marker is None or request.fixturename not in usefixtures_marker.args
+				):
 					request.node.warn(pytest.PytestWarning(
 						f"'{request.fixturename}' fixture is missing"
 					))

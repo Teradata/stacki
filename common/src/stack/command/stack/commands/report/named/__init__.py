@@ -27,91 +27,16 @@
 	## the hex value of the CRC32 code.
 #####
 
-import os
-
+import zlib
 import ipaddress
+import pathlib
+import jinja2
 
 import stack.commands
 import stack.commands.report
 import stack.text
-import zlib
 
-config_preamble_redhat = """options {
-	directory "/var/named";
-	dump-file "/var/named/data/cache_dump.db";
-	statistics-file "/var/named/data/named_stats.txt";
-	forwarders { %s; };
-	allow-query { private; };
-};
-
-controls {
-	inet 127.0.0.1 allow { localhost; } keys { rndc-key; };
-};
-
-zone "." IN {
-	type hint;
-	file "named.ca";
-};
-
-zone "localhost" IN {
-	type master;
-	file "named.localhost";
-	allow-update { none; };
-};
-
-zone "0.0.127.in-addr.arpa" IN {
-	type master;
-	file "named.local";
-	allow-update { none; };
-};
-"""
-
-config_preamble_sles = """options {
-	directory "/var/lib/named";
-	dump-file "/var/log/named_dump.db";
-	statistics-file "/var/log/named.stats";
-	forwarders { %s; };
-	allow-query { private; };
-};
-
-controls {
-	inet 127.0.0.1 allow { localhost; } keys { rndc-key; };
-};
-
-zone "." IN {
-	type hint;
-	file "root.hint";
-};
-
-zone "localhost" IN {
-	type master;
-	file "localhost.zone";
-	allow-update { none; };
-};
-
-zone "0.0.127.in-addr.arpa" IN {
-	type master;
-	file "127.0.0.zone";
-	allow-update { none; };
-};
-"""
-# zone mapping
-fw_zone_template = """
-# Zone Mapping for %s
-zone "%s" {
-	type master;
-	notify no;
-	file "%s.domain";
-};
-"""
-rev_zone_template = """
-# Reverse Zone mapping for %s
-zone "%s.in-addr.arpa" {
-	type master;
-	notify no;
-	file "reverse.%s.domain";
-};
-"""
+from stack.exception import CommandError
 
 
 class Command(stack.commands.report.command):
@@ -130,21 +55,22 @@ class Command(stack.commands.report.command):
 		for row in self.call('list.network', [ 'dns=true' ]):
 			networks.append(row)
 
+		local_conf = pathlib.Path('/opt/stack/share/templates/named.conf.j2')
+		if local_conf.is_file():
+			template_file = jinja2.Template(local_conf.read_text(), lstrip_blocks=True, trim_blocks=True)
+		else:
+			raise CommandError(self, 'Unable to parse template file: /opt/stack/share/templates/named.conf.j2')
+
 		s = '<stack:file stack:name="/etc/named.conf" stack:perms="0644">\n'
-		s += stack.text.DoNotEdit()
-		s += '# Site additions go in /etc/named.conf.local\n\n'
+		template_vars = {'edit_warning': stack.text.DoNotEdit()}
 
-
-		acl = [ '127.0.0.0/24']
+		acl = ['127.0.0.0/24']
 		for network in networks:
-			ipnetwork = ipaddress.IPv4Network(network['address'] + '/' + network['mask'])
-			cidr = ipnetwork.prefixlen
-			acl.append('%s/%s' % (network['address'], cidr))
-		s += 'acl private {\n\t%s;\n};\n\n' % ';'.join(acl)
-
+			acl.append(str(ipaddress.IPv4Interface(f"{network['address']}/{network['mask']}")))
+		template_vars['acl_list'] = acl
 
 		fwds = self.getAttr('Kickstart_PublicDNSServers')
-		if not fwds:
+		if fwds is None:
 			#
 			# in the case of only one interface on the frontend,
 			# then Kickstart_PublicDNSServers will not be
@@ -152,25 +78,42 @@ class Command(stack.commands.report.command):
 			# the correct DNS servers
 			#
 			fwds = self.getAttr('Kickstart_PrivateDNSServers')
+		if fwds is not None:
+			fwds = fwds.strip()
+	
+		if fwds:
+			template_vars['forwarders'] = ';'.join(fwds.split(','))
 
-			if not fwds:
-				return
-
-		forwarders = ';'.join(fwds.split(','))
-		if self.getHostAttr('localhost','os') == 'redhat':
-			s += config_preamble_redhat % (forwarders)
-		if self.getHostAttr('localhost','os') == 'sles':
-			s += config_preamble_sles % (forwarders)
+		if self.os == 'redhat':
+			template_vars.update({
+				'directory': '/var/named',
+				'dumpfile': '/var/named/data/cache_dump.db',
+				'statfile': '/var/named/data/named_stats.txt',
+				'hintfile': 'named.ca',
+				'localzone': 'named.localhost',
+				'loopzone': 'named.local',
+			})
+		elif self.os == 'sles':
+			template_vars.update({
+				'directory': '/var/lib/named',
+				'dumpfile': '/var/log/named_dump.db',
+				'statfile': '/var/log/named.stats',
+				'hintfile': 'root.hint',
+				'localzone': 'localhost.zone',
+				'loopzone': '127.0.0.zone',
+			})
 
 		# Generate the Forward Lookups
+		fw_zones = []
 		for network in networks:
-			s += fw_zone_template % ("%s network" % network["network"],
-				network['zone'], network['network'])
+			fw_zones.append({'name': network["network"], 'zone': network["zone"]})
+		template_vars['fwzones'] = fw_zones
 
 		# Generate the reverse lookups
 		# For every network, get the base subnet,
 		# and reverse it. This is the format
 		# that named understands
+		rev_zones = []
 		z = {}
 		for network in networks:
 			sn = self.getSubnet(network['address'], network['mask'])
@@ -187,17 +130,16 @@ class Command(stack.commands.report.command):
 				n = '.'.join(list(map(lambda x: x["network"], z[zone]))).encode()
 				name = hex(zlib.crc32(n) & 0xffffffff)[2:]
 				comment_name = "networks - %s" % ','.join(list(map(lambda x: x["network"], z[zone])))
-			s += rev_zone_template % ("%s" % comment_name, zone, name)
+			rev_zones.append({'name': name, 'zone': zone, 'comment_name': comment_name})
+		template_vars['revzones'] = rev_zones
 
 		# Check if there are local modifications to named.conf
-		if os.path.exists('/etc/named.conf.local'):
-			f = open('/etc/named.conf.local', 'r')
-			s += '\n#Imported from /etc/named.conf.local\n'
-			s += f.read()
-			f.close()
-			s += '\n'
+		local_conf = pathlib.Path('/etc/named.conf.local')
+		if local_conf.is_file():
+			template_vars['local_conf'] = local_conf.read_text()
 
-		s += '\ninclude "/etc/rndc.key";\n'
+		s += template_file.render(template_vars)
+
 		s += '</stack:file>\n'
 
 		self.beginOutput()

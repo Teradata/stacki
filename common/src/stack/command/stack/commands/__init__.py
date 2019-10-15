@@ -26,13 +26,15 @@ import subprocess
 from xml.sax import saxutils
 from xml.sax import handler
 from xml.sax import make_parser
-from pymysql import OperationalError, ProgrammingError
+from xml.sax import SAXParseException
 from functools import partial
 from operator import itemgetter
 from itertools import groupby, cycle
 from collections import OrderedDict, namedtuple
 from concurrent.futures import ThreadPoolExecutor
 import threading
+
+import pymysql
 
 import stack.graph
 import stack
@@ -555,6 +557,15 @@ class HostArgumentProcessor:
 			where a.name='frontend' and a.id=n.appliance order by rack, rank %s
 		""" % order)
 
+		# Performance improvement for `list host profile`
+		if (
+			names==["a:frontend"]
+			and managed_only == False
+			and subnet == None
+			and host_filter == None
+		):
+			return flatten(frontends)
+
 		# Now get the backend appliances
 		rows = self.db.select("""
 			n.name, n.rack, n.rank from nodes n, appliances a
@@ -742,6 +753,57 @@ class HostArgumentProcessor:
 
 		return hosts[0]
 
+	def getRunHosts(self, hosts):
+		"""Return a mapping of hosts to their accessible network addresses.
+		The network addresses are either user defined using the "stack.network"
+		attribute, or defaults to the any pxe-enabled network, with the default
+		network being priority.
+		This function needs to be called for any command that connects to backends
+		over SSH to run commands - typically "sync host..." or "run host" commands
+		"""
+
+		# Get a list of all attributes for the hosts, and convert the output
+		# to a usable dictionary of host to attribute:value mapping
+		attrs = {}
+		for row in self.call('list.host.attr', hosts):
+			host = row['host']
+			attr = row['attr']
+			value= row['value']
+			if host not in attrs:
+				attrs[host] = {}
+			attrs[host][attr] = value
+
+		# Create a dictionary of hosts to the names by which they will be accessed.
+		# This defaults to the hostname known to Stacki will be used as the hostname
+		# used to access the node.
+		h = { host: host for host in hosts }
+
+		# Get a list of all the host interfaces for the hosts specified.
+		host_if = self.call('list.host.interface', hosts + ['expanded=True'])
+
+		for host in hosts:
+			# If "stack.network" attribute is specified and points to a valid network
+			# use the hostname of the host on THAT network.
+			if 'stack.network' in attrs[host]:
+				h[host] = self.getHostnames([host], subnet = attrs[host]['stack.network'])[0]
+			# If not get the list of all PXE-Enabled addresses for the host, with the "default"
+			# network being prioritized. If one of the PXE-Enabled networks isn't default, then
+			# just use the first one returned by the database.
+			else:
+				# List of PXE-enabled networks for host where default = True
+				net = [ f['network'] for f in host_if if f['pxe'] == True and f['host'] == host and f['default'] == True ]
+				if not net:
+					# List of PXE-enabled networks for host if no default is found
+					net = [ f['network'] for f in host_if if f['pxe'] == True and f['host'] == host ]
+				if not net:
+					# If no PXE-enabled networks are found, we still have the original hostname of the host
+					continue
+				else:
+					h[host] = self.getHostnames([host], subnet=net[0])[0]
+
+		run_hosts = [ {'host': host, 'name': h[host] } for host in h ]
+		return run_hosts
+
 
 class ScopeArgumentProcessor(
 	ApplianceArgumentProcessor,
@@ -760,6 +822,12 @@ class ScopeArgumentProcessor(
 		# Validate the different scopes and get the keys to the targets
 		if scope == 'global':
 			# Global scope has no friends
+			if args:
+				raise CommandError(
+					cmd = self,
+					msg = "Arguments are not allowed at the global scope.",
+				)
+
 			scope_mappings.append(
 				ScopeMapping(scope, None, None, None, None)
 			)
@@ -792,13 +860,15 @@ class ScopeArgumentProcessor(
 			# Piggy-back to resolve the environment names
 			names = self.getEnvironmentNames(args)
 
-			# Now we have to convert the names to the primary keys
-			for environment_id in flatten(self.db.select(
-				'id from environments where name in %s', (names,)
-			)):
-				scope_mappings.append(
-					ScopeMapping(scope, None, None, environment_id, None)
-				)
+			if names:
+
+				# Now we have to convert the names to the primary keys
+				for environment_id in flatten(self.db.select(
+					'id from environments where name in %s', (names,)
+				)):
+					scope_mappings.append(
+						ScopeMapping(scope, None, None, environment_id, None)
+					)
 
 		elif scope == 'host':
 			# Piggy-back to resolve the host names
@@ -1069,6 +1139,68 @@ class DocStringHandler(handler.ContentHandler,
 		self.text += s
 
 
+def get_mysql_connection(user=None, password=None):
+	"""
+	Creates a connection to MySQL and returns it, or returns None if
+	it can't connect. The caller must call `close` on the connection.
+	"""
+
+	connection = None
+
+	try:
+		if user is None:
+			# Root connects as 'apache', everyone else as the user
+			# running the python command.
+			if os.geteuid() == 0:
+				user = 'apache'
+			else:
+				user = pwd.getpwuid(os.geteuid())[0]
+
+		if password is None:
+			# Try to read the apache user's password
+			password = ''
+			try:
+				with open('/etc/apache.my.cnf') as f:
+					for line in f:
+						if line.startswith('password'):
+							password = line.split('=')[1].strip()
+							break
+			except:
+				# Couldn't read the password, try connecting without one
+				pass
+
+		# Connect to a copy of the database if we are running pytest-xdist
+		if 'PYTEST_XDIST_WORKER' in os.environ:
+			db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
+		else:
+			db_name = 'cluster'
+
+		if os.path.exists('/var/run/mysql/mysql.sock'):
+			connection = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=password,
+				host='localhost',
+				unix_socket='/var/run/mysql/mysql.sock',
+				autocommit=True
+			)
+		else:
+			connection = pymysql.connect(
+				db=db_name,
+				user=user,
+				passwd=password,
+				host='localhost',
+				port=40000,
+				autocommit=True
+			)
+
+	except pymysql.OperationalError:
+		# No database
+		pass
+
+	return connection
+
+
 class DatabaseConnection:
 	"""
 	Wrapper class for all database access.  The methods are based on
@@ -1078,14 +1210,49 @@ class DatabaseConnection:
 	"""
 
 	cache = {}
+	_lookup_hostname_cache = {}
 
-	def __init__(self, db, *, caching=True):
+	def _lookup_hostname(self, hostname):
+		"""
+		Looks up a hostname in a case-insenstive manner to get how it is
+		formarted in the DB, allowing MySQL LIKE patterns, and using the
+		DatabaseConnection cache when possible.
+
+		Returns None when the hostname doesn't exist.
+		"""
+
+		# See if we need to do MySQL LIKE
+		if '%' in hostname or '_' in hostname:
+			rows = self.select('name FROM nodes WHERE name LIKE %s', (hostname,))
+			if rows:
+				return rows[0][0]
+		elif not self.caching:
+			# If we aren't caching, just do a straight lookup
+			rows = self.select('name FROM nodes WHERE name = %s', (hostname,))
+			if rows:
+				return rows[0][0]
+		else:
+			# Build the cache if needed
+			if not DatabaseConnection._lookup_hostname_cache:
+				DatabaseConnection._lookup_hostname_cache = {
+					name.lower(): name
+					for name in flatten(self.select('name FROM nodes'))
+				}
+
+			# Return the hostname if it was in the database
+			if hostname.lower() in DatabaseConnection._lookup_hostname_cache:
+				return DatabaseConnection._lookup_hostname_cache[hostname.lower()]
+
+		# No match
+		return None
+
+	def __init__(self, database, *, caching=True):
 		# self.database : object returned from orginal connect call
 		# self.link	: database cursor used by everyone else
-		if db:
-			self.database = db
-			self.name     = db.db.decode() # name of the database
-			self.link     = db.cursor()
+		if database:
+			self.database = database
+			self.name     = database.db.decode() # name of the database
+			self.link     = database.cursor()
 		else:
 			self.database = None
 			self.name     = None
@@ -1120,6 +1287,7 @@ class DatabaseConnection:
 	def clearCache(self):
 		Debug('clearing cache of %d selects' % len(DatabaseConnection.cache[self.name]))
 		DatabaseConnection.cache[self.name] = {}
+		DatabaseConnection._lookup_hostname_cache = {}
 
 	def count(self, command, args=None ):
 		"""
@@ -1142,7 +1310,7 @@ class DatabaseConnection:
 
 		return rows[0][0]
 
-	def select(self, command, args=None):
+	def select(self, command, args=None, prepend_select=True):
 		if not self.link:
 			return []
 
@@ -1158,11 +1326,14 @@ class DatabaseConnection:
 			Debug('select %s' % k)
 			rows = DatabaseConnection.cache[self.name][k]
 		else:
+			if prepend_select:
+				command = f'select {command}'
+
 			try:
-				self.execute('select %s' % command, args)
+				self.execute(command, args)
 				rows = self.fetchall()
-			except OperationalError:
-				Debug('SQL ERROR: %s' % self.link.mogrify('select %s' % command, args))
+			except pymysql.OperationalError:
+				Debug('SQL ERROR: %s' % self.link.mogrify(command, args))
 				# Permission error return the empty set
 				# Syntax errors throw exceptions
 				rows = []
@@ -1192,7 +1363,7 @@ class DatabaseConnection:
 				t0 = time.time()
 				result = executor(command, args)
 				t1 = time.time()
-			except ProgrammingError:
+			except pymysql.ProgrammingError:
 				# mogrify doesn't understand the executemany args, so we have to do some more work.
 				if many:
 					error = '\n'.join((self.link.mogrify(command, arg) for arg in args))
@@ -1200,14 +1371,16 @@ class DatabaseConnection:
 				else:
 					Debug(f'SQL ERROR: {self.link.mogrify(command, args)}')
 
-				raise ProgrammingError
+				raise pymysql.ProgrammingError
 
-			# mogrify doesn't understand the executemany args, so we have to do some more work.
-			if many:
-				commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
-				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), commands))
-			else:
-				Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
+			# Only spend cycles on mogrify if we are in debug mode
+			if stack.commands._debug:
+				# mogrify doesn't understand the executemany args, so we have to do some more work.
+				if many:
+					commands = '\n'.join((self.link.mogrify(command, arg) for arg in args))
+					Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), commands))
+				else:
+					Debug('SQL EX: %.4d rows in %.3fs <- %s' % (result, (t1 - t0), self.link.mogrify(command, args)))
 
 			return result
 
@@ -1269,20 +1442,14 @@ class DatabaseConnection:
 
 	def getNodeName(self, hostname, subnet=None):
 		if not subnet:
-			rows = self.select('name from nodes where name like %s', (hostname,))
-			if rows:
-				(hostname, ) = rows[0]
+			lookup = self._lookup_hostname(hostname)
+			if lookup:
+				hostname = lookup
+
 			return hostname
 
 		result = None
 
-		###
-		# CLADD (11/5/2018): I'm 99% sure this code below is unreachable
-		# in our current code base. Tracing though the code, I couldn't
-		# find a path to get coverage on this chunk of code, where subnet
-		# would be anything besides None. However, I'm hesitent to delete
-		# the chunk of code until test coverage is higher.
-		###
 		for (netname, zone) in self.select("""
 			net.name, s.zone from nodes n, networks net, subnets s
 			where n.name like %s and s.name like %s
@@ -1293,11 +1460,10 @@ class DatabaseConnection:
 			# dns zone
 			if not netname:
 				netname = hostname
-
-			result = '%s.%s' % (netname, zone)
-		###
-		# End possible dead code chunk
-		###
+			if zone:
+				result = '%s.%s' % (netname, zone)
+			else:
+				result = netname
 
 		return result
 
@@ -1313,10 +1479,7 @@ class DatabaseConnection:
 		# table. This should speed up the installer w/ the restore pallet.
 
 		if hostname and self.link:
-			rows = self.link.execute(
-				'select * from nodes where name like %s', (hostname,)
-			)
-			if rows:
+			if self._lookup_hostname(hostname):
 				return self.getNodeName(hostname, subnet)
 
 		if not hostname:
@@ -1357,11 +1520,7 @@ class DatabaseConnection:
 
 		if not addr:
 			if self.link:
-				self.link.execute(
-					'select name from nodes where name=%s', (hostname,)
-				)
-
-				if self.link.fetchone():
+				if self._lookup_hostname(hostname):
 					return self.getNodeName(hostname, subnet)
 
 				# See if this is a MAC address
@@ -1510,8 +1669,8 @@ class Command:
 
 		self.db = DatabaseConnection(database)
 
-		self.text  = ''
-		self.bytes = b''
+		self.text  = []
+		self.bytes = []
 
 		self._exec = stack.util._exec
 
@@ -1931,8 +2090,8 @@ class Command:
 		Reset the output text buffer.
 		"""
 
-		self.text  = ''
-		self.bytes = b''
+		self.text  = []
+		self.bytes = []
 
 	def addText(self, s):
 		"""
@@ -1941,9 +2100,9 @@ class Command:
 
 		if s:
 			if isinstance(s, str):
-				self.text += s
+				self.text.append(s)
 			else:
-				self.bytes += s
+				self.bytes.append(s)
 
 	def getText(self):
 		"""
@@ -1951,9 +2110,11 @@ class Command:
 		"""
 
 		if self.text:
-			return self.text
+			return ''.join(self.text)
+
 		if self.bytes:
-			return self.bytes
+			return b''.join(self.bytes)
+
 		return None
 
 
@@ -2249,7 +2410,12 @@ class Command:
 			handler = DocStringHandler(command, users)
 			parser = make_parser()
 			parser.setContentHandler(handler)
-			parser.feed('<docstring>%s</docstring>' % self.__doc__)
+			try:
+				parser.feed('<docstring>%s</docstring>' % self.__doc__)
+			except SAXParseException as e:
+				cmd = ' '.join(self.__module__.split('.')[2:])
+				msg = f'XML error while parsing docstring for "{cmd}" - {e.getException()}'
+				raise CommandError(self, msg)
 
 			if format == 'docbook':
 				self.addText(handler.getDocbookText())

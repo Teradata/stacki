@@ -73,12 +73,20 @@ def dump_mysql(worker_id):
 	file_fd, file_path = tempfile.mkstemp(suffix=".sql")
 	file_obj = os.fdopen(file_fd, mode="w")
 
+	# Put drop database commands at the front of the SQL restore file
+	file_obj.write("DROP DATABASE IF EXISTS `shadow`;\n")
+	file_obj.write("DROP DATABASE IF EXISTS `cluster`;\n\n")
+	file_obj.flush()
+	os.fsync(file_fd)
+
 	# Dump the initial Stacki DB into an SQL file, to restore from after each test
 	subprocess.run([
-		"mysqldump", "--opt", "--add-drop-database", "--databases", "cluster", "shadow"
+		"mysqldump", "--opt", "--databases", "cluster", "shadow"
 	], stdout=file_obj, check=True)
 
 	# Close the file
+	file_obj.flush()
+	os.fsync(file_fd)
 	file_obj.close()
 
 	if worker_id != 'master':
@@ -98,6 +106,10 @@ def dump_mysql(worker_id):
 			'mysql', '-e', f'GRANT ALL ON `shadow{worker_id}`.* to apache@localhost'
 		], check=True)
 
+		subprocess.run([
+			'mysql', '-e', f"GRANT ALL ON `cluster{worker_id}`.* to ''@'localhost'"
+		], check=True)
+
 	# Done with the set up, yield our SQL file path
 	yield file_path
 
@@ -106,8 +118,8 @@ def dump_mysql(worker_id):
 
 	if worker_id != 'master':
 		# Drop our process specific dbs
-		subprocess.run(['mysql', '-e', f'DROP DATABASE `cluster{worker_id}`'], check=True)
 		subprocess.run(['mysql', '-e', f'DROP DATABASE `shadow{worker_id}`'], check=True)
+		subprocess.run(['mysql', '-e', f'DROP DATABASE `cluster{worker_id}`'], check=True)
 
 @pytest.fixture
 def process_count(redis, request):

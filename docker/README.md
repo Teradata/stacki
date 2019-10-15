@@ -14,14 +14,25 @@ You must have docker installed and configured on your host. If you are
 using Docker on the Mac go into the advanced/disk settings and
 allocation at least 8GBs RAM, 2 CPUs, and 64GB of Disk.
 
-## Building
+## Grab the Stacki image
+
+You can grab an image from the Stacki Docker repository, or just build
+it yourself.
+
+### From Docker
+
+```
+# docker pull stacki/frontend-centos:latest
+```
+
+### Build Source
 
 ```
 # cd stacki/docker
-# make
+# docker-compose build
 ```
 
-This will create an image called `stacki/frontend-centos:<version>`.
+
 
 ## Running
 
@@ -30,7 +41,7 @@ Start the contianer using a persistent volume for `/root`. If the
 you.
 
 ```
-docker run --mount source=develop,target=/root -P --privileged stacki/frontend-centos:<version>
+# docker-compose up -d
 ```
 
 On first boot the container start the final stages of a *barnacle*

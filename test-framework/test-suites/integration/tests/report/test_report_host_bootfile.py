@@ -12,17 +12,9 @@ class TestReportHostBootfile:
 		result = host.run('stack add host interface backend-1-1 interface=eth1 ip=192.172.0.2 network=public default=True mac=52:54:00:6e:50:91')
 		assert result.rc == 0
 
-		# When Bootaction is set to None (Doesn't produce a Bootfile and is Skipped)
-		result = host.run('stack report host bootfile')
-		assert result.rc == 0
-		result_specific = host.run('stack report host bootfile backend-1-1')
-		assert result_specific.rc == 0
-		assert result.stdout == result_specific.stdout
-		assert result.stdout == ""
-
 		# When Bootaction is set to OS (Produces a Bootfile)
-		result = host.run('stack set host boot backend-1-1 action=os')
-		assert result.rc == 0
+		#
+		# stack add host does this by default (always start with the os boot action)
 		result = host.run('stack report host bootfile')
 		assert result.rc == 0
 		result_specific = host.run('stack report host bootfile backend-1-1')

@@ -4,80 +4,93 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import tempfile
+import json
 import stack.commands
+from stack.exception import CommandError
 
 
-class Plugin(stack.commands.OSArgumentProcessor, stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Plugin):
-
+class Plugin(
+	stack.commands.OSArgumentProcessor,
+	stack.commands.ApplianceArgumentProcessor,
+	stack.commands.Plugin
+):
 	"""
 	Plugin that invokes 'stack add storage partition' and adds
 	the partitions to the database.
 	"""
+
 	def provides(self):
 		return 'default'
 
+	def _add_dump_data(self, scope, target, data, dump_data):
+		"""Add dump data for partition objects nested under the given scope."""
+		# If the scope already has data, be sure to append it appropriately.
+		if scope in dump_data:
+			existing_scope_data = None
+			# See if the data with the target name already exists at the scope
+			for scope_data in dump_data[scope]:
+				if scope_data["name"] == target:
+					existing_scope_data = scope_data
+					break
+
+			# If it does, append the new data to the existing named entry.
+			if existing_scope_data is not None:
+				existing_scope_data["partition"].extend(data)
+			# Otherwise, add a new named entry to the scope.
+			else:
+				dump_data[scope].append(
+					{
+						"name": target,
+						"partition": data,
+					},
+				)
+		# Otherwise, initialize a new list of named data within the scope.
+		else:
+			dump_data[scope] = [
+				{
+					"name": target,
+					"partition": data,
+				},
+			]
+
+		return dump_data
 
 	def run(self, args):
-		hosts = args
-		for host in hosts.keys():
-			#
-			# first remove the entries for this host
-			#
-			if host == 'global':
-				self.owner.call('remove.storage.partition', ['scope=global','device=*'])
+		appliances = self.getApplianceNames()
+		oses = self.getOSNames()
+
+		# Build a dump.json like dictionary object to pass into `stack load`
+		dump_data = {}
+
+		for target, data in args.items():
+			# Global just goes at the top level of the dict as a list of partition dictionaries
+			if target == 'global':
+				if "partition" in dump_data:
+					dump_data["partition"].extend(data)
+				else:
+					dump_data["partition"] = data
+
+				continue
+
+			# Otherwise, figure out which scope the target is in.
+			if target in appliances:
+				scope = "appliance"
+			elif target in oses:
+				scope = "os"
 			else:
-				try:
-					_ = self.getOSNames([host])
-					self.owner.call('remove.os.storage.partition', [host])
-				except:
-					pass
+				scope = "host"
 
-				try:
-					_ = self.getApplianceNames([host])
-					self.owner.call('remove.appliance.storage.partition', [host])
-				except:
-					pass
+			# Appliances, Oses, and Hosts are nested objects, with the partition list inside the appliance.
+			dump_data = self._add_dump_data(
+				scope = scope,
+				target = target,
+				data = data,
+				dump_data = dump_data,
+			)
 
-				try:
-					_ = self.getHostnames([host])
-					self.owner.call('remove.host.storage.partition', [host])
-				except:
-					pass
-
-			# Get list of devices for this host
-			devices = []
-			for d in hosts[host].keys():
-				devices.append(d)
-			devices.sort()
-
-			# Loop through all devices in the list
-			for device in devices:
-				partition_list = hosts[host][device]
-
-				# Add storage partitions for this device
-				for partition in partition_list:
-					cmdargs = []
-					if host != 'global':
-						cmdargs.append(host)
-					cmdargs += [ 'device=%s' % device ]
-
-					mountpt = partition['mountpoint']
-					size = partition['size']
-					parttype = partition['type']
-					options = partition['options']
-					partid = partition['partid']
-
-					if mountpt:
-						cmdargs.append('mountpoint=%s' % mountpt)
-					if parttype:
-						cmdargs.append('type=%s' % parttype)
-
-					cmdargs.append('size=%s' % size)
-					if options:
-						cmdargs.append('options=%s' % options)
-					if partid:
-						cmdargs.append('partid=%s' % partid)
-
-					self.owner.call('add.storage.partition',
-						cmdargs)
+		# Write to a temporary file that stack load can read
+		with tempfile.NamedTemporaryFile(mode = "w") as temp_file:
+			json.dump(dump_data, temp_file)
+			temp_file.flush()
+			self.owner.call(command = "load", args = [temp_file.name, "exec=True"])

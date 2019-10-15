@@ -1,5 +1,5 @@
 #! /opt/stack/bin/python
-# 
+#
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
@@ -13,11 +13,11 @@
 # @rocks@
 
 import os
-import sys
 import subprocess
 import shlex
 import itertools
 from xml.sax import handler
+import re
 
 # An exception for Kickstart builder trinity: kcgi, kgen, kpp
 
@@ -74,7 +74,7 @@ def list_isprefix(l1, l2):
 
 def getNativeArch():
 	"""Returns the canotical arch as reported by the operating system"""
-	
+
 	arch = os.uname()[4]
 	if arch in [ 'i386', 'i486', 'i586', 'i686']:
 		arch = 'i386'
@@ -90,7 +90,7 @@ def mkdir(newdir):
 	if os.path.isdir(newdir):
 		pass
 	elif os.path.isfile(newdir):
-		raise OSError("a file with the same name as the desired dir, '%s', already exists." % 
+		raise OSError("a file with the same name as the desired dir, '%s', already exists." %
 			      newdir)
 	else:
 		head, tail = os.path.split(newdir)
@@ -112,7 +112,7 @@ class ParseXML(handler.ContentHandler,
 		handler.ContentHandler.__init__(self)
 		self.app = app
 		self.text = ''
-		
+
 
 	def startElement(self, name, attrs):
 		"""The Mason Katz school of parsers. Make small functions
@@ -145,5 +145,51 @@ def system(cmd):
 def blank_str_to_None(string):
 	if isinstance(string, str) and string.strip() == '':
 		return None
-	
+
 	return string
+
+def unique_everseen(iterable, key=None):
+	"""List unique elements, preserving order. Remember all elements ever seen.
+
+	unique_everseen('AAAABBBCCDAABBB') --> A B C D
+	unique_everseen('ABBCcAD', str.lower) --> A B C D
+
+	Source: https://docs.python.org/3/library/itertools.html#itertools-recipes
+	"""
+	seen = set()
+	seen_add = seen.add
+	if key is None:
+		for element in itertools.filterfalse(seen.__contains__, iterable):
+			seen_add(element)
+			yield element
+	else:
+		for element in iterable:
+			k = key(element)
+			if k not in seen:
+				seen_add(k)
+				yield element
+
+def lowered(iterable):
+	"""Return a generator that lowercases all strings in the provided iterable."""
+	return (string.lower() for string in iterable)
+
+def is_valid_hostname(name):
+	"""Check if a given name is a valid hostname.
+
+	For our purposes, a valid hostname is a single hostname label (or "name")
+	as defined by RFCs 952 and 1123. That is, a name of 1 to 63 characters
+	starting and ending with a letter or digit and having letters, digits,
+	and/or hyphens in between.
+	"""
+	return bool(
+		re.match(
+			r"""
+			# <let-or-digit>
+			^[a-z0-9]$
+			# / <let-or-digit> 0*61<let-or-digit-or-hyphen> <let-or-digit>
+			|^[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]$
+			""",
+			name,
+			flags=re.IGNORECASE | re.VERBOSE
+		)
+	)

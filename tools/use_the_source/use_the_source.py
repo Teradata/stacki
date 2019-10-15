@@ -5,12 +5,14 @@ from pathlib import Path
 dest_base = Path("/opt/stack/lib/python3.7/site-packages")
 
 grafts_to_site_packages = (
+	("command/stack/argument_processors", "stack/argument_processors"),
 	("command/stack/commands", "stack/commands"),
 	("discovery/command", "stack/commands"),
 	("discovery/pylib", "stack"),
 	("mq/pylib", "stack"),
 	("mq/processors", "stack/mq/processors"),
 	("mq/producers", "stack/mq/producers"),
+	("probepal/pylib", "stack/probepal"),
 	("pylib/stack", "stack"),
 	("report-system/command", "stack/commands"),
 	("switch/command", "stack/commands"),
@@ -33,6 +35,7 @@ bin_file_grafts = (
 	("mq/daemons/publisher.init", "/etc/init.d/smq-publisher"),
 	("mq/daemons/shipper.init", "/etc/init.d/smq-shipper"),
 	("mq/daemons/processor.init", "/etc/init.d/smq-processor"),
+	("probepal/bin/probepal.py", "/opt/stack/sbin/probepal"),
 	("ws-client/bin/wsclient.py", "/opt/stack/bin/wsclient")
 )
 
@@ -56,6 +59,9 @@ if __name__ == '__main__':
 			if dest_filename.exists() or dest_filename.is_symlink():
 				dest_filename.unlink()
 
+			# Create any missing directory structure in the destination.
+			dest_filename.parent.mkdir(parents = True, exist_ok = True)
+
 			# Now symlink over our src version
 			dest_filename.symlink_to(src_filename)
 
@@ -66,6 +72,9 @@ if __name__ == '__main__':
 		# Blow away the old one, if it exists
 		if dest_filename.exists() or dest_filename.is_symlink():
 			dest_filename.unlink()
+
+		# Create any missing directory structure in the destination.
+		dest_filename.parent.mkdir(parents = True, exist_ok = True)
 
 		# Now symlink over our src version
 		dest_filename.symlink_to(src_filename)

@@ -1,0 +1,54 @@
+---
+- name: Set up yum
+  block:
+    - name: Download CentOS-7-x86_64-Everything-1810.iso
+      get_url:
+        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
+        dest: /export/isos/CentOS-7-x86_64-Everything-1810.iso
+        checksum: "sha1:d3a42e49e41b9b3dc71aaeab125215fee3a19516"
+        mode: 0644
+
+    - name: Create /media/cdrom
+      file:
+        path: /media/cdrom
+        state: directory
+
+    # Don't use `mount` because we don't want an entry in /etc/fstab
+    - name: Mount the CentOS-7-x86_64-Everything-1810.iso
+      command: mount -o loop /export/isos/CentOS-7-x86_64-Everything-1810.iso /media/cdrom
+      args:
+        warn: no
+
+    - name: Find the existing repo files
+      find:
+        paths: /etc/yum.repos.d
+        patterns: "*.repo"
+      register: repo_files
+
+    - name: Remove the existing repo files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ repo_files.files }}"
+      no_log: True
+
+    - name: Add the DVD repo to yum
+      yum_repository:
+        name: dvd
+        description: CentOS-7-x86_64-Everything-1810.iso
+        baseurl: file:///media/cdrom/
+        enabled: yes
+        gpgcheck: no
+
+    - name: Set the DVD repo to assume yes
+      ini_file:
+        path: /etc/yum.repos.d/dvd.repo
+        section: dvd
+        option: assumeyes
+        value: 1
+
+    - name: Update yum
+      command: yum update
+      args:
+        warn: no
+  when: ansible_distribution == "CentOS"

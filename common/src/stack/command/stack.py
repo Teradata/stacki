@@ -20,32 +20,13 @@ import getopt
 import traceback
 import signal
 import stack
+from stack.commands import get_mysql_connection
 from stack.exception import CommandError
 
 
 def sigint_handler(signal, frame):
 	print('\nInterrupted')
 	sys.exit(0)
-
-
-def connect_db(username, passwd):
-	# Connect to a copy of the database if we are running pytest-xdist
-	if 'PYTEST_XDIST_WORKER' in os.environ:
-		db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
-	else:
-		db_name = 'cluster'
-
-	if os.path.exists('/var/run/mysql/mysql.sock'):
-		db = pymysql.connect(db=db_name,
-				     user=username, passwd=passwd,
-				     host='localhost', unix_socket='/var/run/mysql/mysql.sock',
-				     autocommit=True)
-	else:
-		db = pymysql.connect(db=db_name,
-				     host='localhost', port=40000,
-				     user=username, passwd=passwd,
-				     autocommit=True)
-	return db
 
 
 def run_command(args, debug=False):
@@ -146,40 +127,7 @@ signal.signal(signal.SIGINT, sigint_handler)
 syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
-# First try to read the cluster password (for apache)
-
-passwd = ''
-try:
-	file = open('/etc/apache.my.cnf', 'r')
-	for line in file.readlines():
-		if line.startswith('password'):
-			passwd = line.split('=')[1].strip()
-			break
-	file.close()
-except:
-	pass
-
-if os.geteuid() == 0:
-	username = 'apache'
-else:
-	username = pwd.getpwuid(os.geteuid())[0]
-
-
-# Connect over UNIX socket if it exists, otherwise go over the network. In the
-# past (and maybe in the future the command line could run remote from the
-# database.
-
-sql = True
-db  = None
-try:
-	import pymysql
-except ImportError:
-	sql = False
-if sql:
-	try:
-		db = connect_db(username, passwd)
-	except pymysql.err.OperationalError:
-		pass
+db  = get_mysql_connection()
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])

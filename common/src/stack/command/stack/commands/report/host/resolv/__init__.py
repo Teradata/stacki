@@ -26,34 +26,26 @@ class Command(stack.commands.report.host.command):
 			zones[row['network']] = row['zone']
 			dns[row['network']] = row['dns']
 
-		search = None
-		# The default search path should always have the
-		# hosts default network. If a host has no default
-		# network, or if the zone on the default network
-		# is empty, leave the search value out.
-		for intf in self.call('list.host.interface', [host, 'expanded=True']):
-			if intf['default'] is True and intf['zone']:
-				search = intf['zone']
-				break
+		# 'resolv.attr' attribute can be used the specify the search
+		# line
+
+		search = self.getHostAttr(host, 'resolv.search')
+
+		if not search:
+			# Otherwise the search line should be the zone of the
+			# host's default interface.
+			for intf in self.call('list.host.interface', 
+					      [host, 'expanded=True']):
+				if intf['default'] is True and intf['zone']:
+					search = intf['zone']
+					break
+
 		if search:
 			report.append(f'search {search}')
 			
-		#
-		# If the default network is 'public' use the
-		# public DNS rather that the server on the boss.
 
-		#
-		# or
-		#
-
-		#
-		# if any network has 'dns' set to true, then the frontend
-		# is serving DNS for that network, so make sure the
-		# frontend is listed as the first DNS server, then list
-		# the public DNS server. The IP address of the DNS server
-		# should be the one on the network that serves out
-		# DNS. Not the primary network of the frontend.
-		#
+		# If any network has 'dns' set to true, list the Frontend as
+		# the first DNS server.
 
 		for row in self.call('list.host.interface', [ host ]):
 			network = row['network']
@@ -65,15 +57,31 @@ class Command(stack.commands.report.host.command):
 				report.append(f'nameserver {frontend}')
 				break
 
-		remotedns = self.getHostAttr(host, 'Kickstart_PublicDNSServers')
+		# For the subsequent nameserver lines:
+	        #
+		# Frontend - Use the public DNS and if that doesn't exist use
+		# the private DNS. This is still legacy public/private
+		# HPC-nonsense, but we do this so that setup works and
+		# AWS/Docker does as well.
+		#
+		# Backends - Uses the private DNS, and ignore the public
+		# DNS. By default the private DNS attr is the Frontend which is
+		# already a forwarding nameserver.
+
+		remotedns = None
+		if self.db.getHostAppliance(host) == 'frontend':
+			remotedns = self.getHostAttr(host, 'Kickstart_PublicDNSServers')
+
 		if not remotedns:
 			remotedns = self.getHostAttr(host, 'Kickstart_PrivateDNSServers')
-		if remotedns:
-			servers = remotedns.split(',')
-			for server in servers:
-				report.append(f'nameserver {server.strip()}')
 
-		return'\n'.join(report)
+		if remotedns:
+			servers = remotedns.strip().split(',')
+			for server in servers:
+				if server:
+					report.append(f'nameserver {server.strip()}')
+
+		return '\n'.join(report)
 
 
 	def reportFile(self, file, contents, *, perms=None, host=None):

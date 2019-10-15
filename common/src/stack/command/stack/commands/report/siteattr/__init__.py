@@ -76,7 +76,7 @@ class Command(stack.commands.report.command):
 			'Kickstart_PrivateNetwork'       : net.network_address,
 			'Kickstart_PrivateRootPassword'  : '*',
 			'Kickstart_PublicNTPHost'        : 'pool.ntp.org',
-			'Kickstart_Timezone'             : 'America/Los_Angeles'
+			'Kickstart_Timezone'             : 'UTC'
 			}
 
 

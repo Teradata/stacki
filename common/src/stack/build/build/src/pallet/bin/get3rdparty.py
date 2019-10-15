@@ -59,7 +59,7 @@ import getopt
 def download_url(source, target, curl_args):
 	# Retry the curl command 3 times, in case of error
 	retry = 3
-	curl_cmd = [ 'curl', '--retry', '2', '-w', '%{http_code}']
+	curl_cmd = [ 'curl', '--max-time', '300', '--retry', '2', '-w', '%{http_code}']
 
 	# Append any extra curl arguments specified
 	if len(curl_args):

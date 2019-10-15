@@ -2,12 +2,6 @@ import pytest
 import json
 
 
-def test_frontend_stack_report_system(host):
-	"Simple sanity test that a frontend is up and running"
-
-	cmd = host.run("stack report system pretty=false")
-	assert cmd.rc == 0
-
 def test_stack_command_displays_usage_strings(host):
 	"""
 	The command line attempts to recursively import the command directory to find code to run
@@ -72,14 +66,6 @@ def test_daily_db_backup_cronjob_script(host):
 	cmd = host.run('stack list api user output-format=json')
 	assert cmd.rc == 0
 	assert '"username": "admin",' in cmd.stdout
-
-@pytest.mark.parametrize("backend", ("backend-0-0", "backend-0-1"))
-def test_frontend_ssh_to_backends(host, backend):
-	"Test that the frontend can SSH to its backends"
-
-	cmd = host.run("ssh {} hostname".format(backend))
-	assert cmd.rc == 0
-	assert cmd.stdout.strip().split('.')[0] == backend
 
 def test_default_appliances_have_sane_attributes(host, test_file):
 	"Test that default appliances are created with expected attrs"

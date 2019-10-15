@@ -90,7 +90,7 @@ class TestSwapHostInterface:
 		# Add two interfaces with all the fixins
 		result = host.run(
 			'stack add host interface backend-0-0 interface=eth1 '
-			'mac=11:11:11:11:11:11 network=private ip=1.1.1.1 '
+			'mac=11:11:11:11:11:11 network=private ip=192.0.2.1 '
 			'module=module_1 name=name_1 vlan=1 default=true '
 			'options=options_1 channel=1'
 		)
@@ -98,7 +98,7 @@ class TestSwapHostInterface:
 
 		result = host.run(
 			'stack add host interface backend-0-0 interface=eth2 '
-			'mac=22:22:22:22:22:22 network=test ip=2.2.2.2 '
+			'mac=22:22:22:22:22:22 network=test ip=192.0.2.2 '
 			'module=module_2 name=name_2 vlan=2 default=false '
 			'options=options_2 channel=2'
 		)
@@ -117,7 +117,7 @@ class TestSwapHostInterface:
 				'default': None,
 				'host': 'backend-0-0',
 				'interface': 'eth1',
-				'ip': '2.2.2.2',
+				'ip': '192.0.2.2',
 				'mac': '11:11:11:11:11:11',
 				'module': 'module_1',
 				'name': 'name_2',
@@ -130,7 +130,7 @@ class TestSwapHostInterface:
 				'default': True,
 				'host': 'backend-0-0',
 				'interface': 'eth2',
-				'ip': '1.1.1.1',
+				'ip': '192.0.2.1',
 				'mac': '22:22:22:22:22:22',
 				'module': 'module_2',
 				'name': 'name_1',

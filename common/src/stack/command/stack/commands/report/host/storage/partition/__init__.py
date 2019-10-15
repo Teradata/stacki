@@ -8,8 +8,7 @@ import stack.commands
 from stack.exception import ArgUnique
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
 	"""
 	Output the storage partition configuration for a specific host
 
@@ -25,52 +24,15 @@ class Command(stack.commands.HostArgumentProcessor,
 	def run(self, params, args):
 		hosts = self.getHostnames(args)
 
-		self.beginOutput()
-
-		if len(hosts) == 0:
-			output = []
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
-		elif len(hosts) > 1:
+		if len(hosts) != 1:
 			raise ArgUnique(self, 'host')
 
-		host = hosts[0]
+		self.beginOutput()
 
-		#
-		# first see if there is a storage partition configuration for
-		# this specific host
-		#
-		output = self.call('list.storage.partition', [ host ])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
+		# Get the partitions, removing 'source' to keep the existing output structure
+		partitions = self.call('list.host.storage.partition', [hosts[0]])
+		for partition in partitions:
+			partition.pop('source', None)
 
-		# 
-		# now check at the appliance level
-		# 
-		appliance = self.getHostAttr(host, 'appliance')
-
-		output = self.call('list.storage.partition', [ appliance ])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
-
-		#
-		# finally check the global level
-		#
-		output = self.call('list.storage.partition', ['globalOnly=y'])
-		if output:
-			self.addOutput('', '%s' % output)
-			self.endOutput(padChar='')
-			return
-
-		#
-		# if we made it here, there is no storage partition
-		# configuration for this host
-		#
-		output = []
-		self.addOutput('', '%s' % output)
+		self.addOutput('', str(partitions))
 		self.endOutput(padChar='')

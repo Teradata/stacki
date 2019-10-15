@@ -37,6 +37,7 @@
 	
 	<edge from="client">
 		<to>base</to>
+		<to>pre-ssh-key</to>
 		<to>time-client</to>
 		<to>networking-client</to>
 		<to>resolv</to>

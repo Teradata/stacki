@@ -12,6 +12,20 @@ import json
 
 class Command(stack.commands.dump.command,
 	      stack.commands.EnvironmentArgumentProcessor):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the environment level data.
+	For each environment, output the name of the environment,
+	as well as any environment scoped attributes, storage controller,
+	partition, firewall, and route information.
+
+	<example cmd='dump environment'>
+	Dump json data for environments in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -22,11 +36,10 @@ class Command(stack.commands.dump.command,
 			dump.append(OrderedDict(
 				name          = name,
 				attr          = self.dump_attr(name),
-#				controller    = self.dump_controller(name),
-#				partition     = self.dump_partition(name),
+				controller    = self.dump_controller(name),
+				partition     = self.dump_partition(name),
 				firewall      = self.dump_firewall(name),
 				route         = self.dump_route(name)))
 
 		self.addText(json.dumps(OrderedDict(version     = stack.version,
 						    environment = dump), indent=8))
-

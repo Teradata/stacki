@@ -36,25 +36,6 @@ then
     # Start discovery
     vagrant ssh frontend -c "sudo -i stack enable discovery box=sles11sp3 installaction='install sles 11.3'"
 
-    # Bring up the backends a bit apart
-    # Note: Vagrant Virtualbox provider doesn't support --parallel, so we do it here
-    vagrant up backend-0-0 &
-    sleep 10
-    vagrant up backend-0-1 &
-    wait
-
-    # NOTE: Enable this once SLES 11 status is reliable
-    # # Wait until the frontend sees that backend-0-0 is online
-    # while [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-0 output-format=json | grep online") ]]
-    # do
-    #     echo "Waiting for backend-0-0..."
-    #     sleep 60
-    # done
-
-    # # And backend-0-1
-    # while [[ -z $(vagrant ssh frontend -c "sudo -i stack list host status backend-0-1 output-format=json | grep online") ]]
-    # do
-    #     echo "Waiting for backend-0-1..."
-    #     sleep 60
-    # done
+    # Bring up the backends (120 minute timeout)
+    ./set-up.d/_common.sh 120
 fi

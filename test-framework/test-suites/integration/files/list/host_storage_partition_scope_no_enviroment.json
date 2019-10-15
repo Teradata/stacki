@@ -1,0 +1,12 @@
+[
+        {
+                "host": "backend-0-0",
+                "device": "sda1",
+                "partid": null,
+                "mountpoint": null,
+                "size": 1024,
+                "fstype": null,
+                "options": "",
+                "source": "H"
+        }
+]

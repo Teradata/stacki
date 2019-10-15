@@ -1,0 +1,12 @@
+[Unit]
+Description=System Installation Checklist
+After=last.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/checklist/checklist.pid
+ExecStartPre=/usr/bin/mkdir -p /var/run/checklist
+ExecStart=/opt/stack/bin/python3 /opt/stack/bin/checklist.py
+
+[Install]
+WantedBy=last.target

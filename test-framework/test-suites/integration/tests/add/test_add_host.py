@@ -8,8 +8,8 @@ class TestAddHost:
 	# Tests for the positive behaviour of stack add host
 	HOST_POSITIVE_TEST_DATA = [
 		('backend-0-0','','add_host_with_standard_naming_convention.json',),
-		('backend_4_3','appliance=backend rack=4 rank=3','add_host_with_appliance_rack_rank.json',),
-		('backend-7-7','appliance=backend rack=5 rank=5','add_host_with_standard_naming_and_appliance_rack_rank.json',)
+		('backend-4-3','appliance=backend rack=4 rank=3','add_host_with_appliance_rack_rank.json',),
+		('backend-7-7','appliance=backend rack=5 rank=5','add_host_with_standard_naming_and_appliance_rack_rank.json',),
 	]
 
 	@pytest.mark.parametrize("host_name, add_params, output_file", HOST_POSITIVE_TEST_DATA)
@@ -36,7 +36,8 @@ class TestAddHost:
 		('backend', 'appliance=backend rack=4','',),
 		('backend', 'appliance=backend rack=4 rank=',''),
 		('backend', 'appliance=backend rack= rank=4',''),
-		('backend', 'appliance=backend rack= rank= ','')
+		('backend', 'appliance=backend rack= rank= ',''),
+		('backend_4_3', 'appliance=backend rack=4 rank=3 ',''),
 	]
 
 	@pytest.mark.parametrize("host_name, add_params, output_file", HOST_NEGATIVE_TEST_DATA)
@@ -49,7 +50,7 @@ class TestAddHost:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "host" argument must be unique
-			{host} [box=string] [environment=string] [rack=string] [rank=string]
+			{host} [appliance=string] [box=string] [environment=string] [rack=string] [rank=string]
 		''')
 
 	def test_duplicate(self, host):
@@ -81,6 +82,12 @@ class TestAddHost:
 		result = host.run('stack add host test appliance=backend rack=0 rank=0 osaction=test')
 		assert result.rc == 255
 		assert result.stderr == f'error - "test" os boot action for "{host_os}" is missing\n'
+
+	def test_invalid_hostname(self, host):
+		result = host.run('stack add host -bad-backend appliance=backend rack=0 rank=0')
+		assert result.rc == 255
+		errmsg = result.stderr.split('\n')[0]
+		assert errmsg == 'error - "host" argument must be a valid hostname label'
 
 	def test_with_environment(self, host, host_os):
 		# Create our environment

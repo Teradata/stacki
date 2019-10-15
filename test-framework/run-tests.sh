@@ -163,6 +163,13 @@ then
     echo -e "\033[34mRunning unit test suite ...\033[0m"
     ./test-suites/unit/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
+    # Bail if set up failed
+    if [[ $? -ne 0 ]]
+    then
+        ./test-suites/unit/tear-down.sh
+        exit 1
+    fi
+
     if [[ $COVERAGE -eq 1 ]]
     then
         ./test-suites/unit/run-tests.sh --coverage
@@ -189,6 +196,13 @@ then
     echo -e "\033[34mRunning integration test suite ...\033[0m"
     ./test-suites/integration/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
+    # Bail if set up failed
+    if [[ $? -ne 0 ]]
+    then
+        ./test-suites/integration/tear-down.sh
+        exit 1
+    fi
+
     if [[ $COVERAGE -eq 1 ]]
     then
         ./test-suites/integration/run-tests.sh --coverage
@@ -213,9 +227,31 @@ if [[ $ALL -eq 1 || $SYSTEM -eq 1 ]]
 then
     echo
     echo -e "\033[34mRunning system test suite ...\033[0m"
-    ./test-suites/system/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
 
-    ./test-suites/system/run-tests.sh
+    if [[ $COVERAGE -eq 1 ]]
+    then
+        ./test-suites/system/set-up.sh --coverage $STACKI_ISO "${EXTRA_ISOS[@]}"
+
+        # Bail if set up failed
+        if [[ $? -ne 0 ]]
+        then
+            ./test-suites/system/tear-down.sh
+            exit 1
+        fi
+
+        ./test-suites/system/run-tests.sh --coverage
+    else
+        ./test-suites/system/set-up.sh $STACKI_ISO "${EXTRA_ISOS[@]}"
+
+        # Bail if set up failed
+        if [[ $? -ne 0 ]]
+        then
+            ./test-suites/system/tear-down.sh
+            exit 1
+        fi
+        
+        ./test-suites/system/run-tests.sh
+    fi
     RETURN_CODE=$?
 
     ./test-suites/system/tear-down.sh

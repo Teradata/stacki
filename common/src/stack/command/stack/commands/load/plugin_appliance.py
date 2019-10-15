@@ -19,7 +19,7 @@ class Plugin(stack.commands.Plugin):
 		for a in section:
 			appliance = a.get('name')
 			params    = {'public': a.get('public')}
-			
+
 			self.owner.stack('add.appliance', appliance, **params)
 
 			self.owner.load_attr(a.get('attr'), appliance)

@@ -13,6 +13,20 @@
 unset PYTHONPATH
 export LD_LIBRARY_PATH=/opt/stack/lib
 
+# util func to pause the install, alert the console user, alert the MQ
+function halt_install {
+	console_err_msg=$1
+	mq_health_msg=$2
+
+	echo $console_err_msg > /tmp/wait
+	echo $console_err_msg
+	while [ -f /tmp/wait ]
+	do
+		sleep 1
+		/opt/stack/bin/smq-publish -chealth $mq_health_msg
+	done
+}
+
 /opt/stack/bin/stacki-profile.py
 
 #
@@ -52,33 +66,58 @@ echo "tracker = ${FRONTEND}:3825" > /tmp/stack.conf
 
 /opt/stack/bin/python3 -E /opt/stack/bin/ludicrous-client.py --environment initrd --trackerfile='/tmp/stack.conf';
 
+# nuke the disks, if appropriate
+/opt/stack/bin/initialize-storage.py
+if [ $? -ne 0 ]
+then
+	halt_install "Unable to initialize internal storage configuration." \
+		'{"state": "nukedisk failed - check console or reinstall with halt_install_on_error=False"}'
+fi
+
 #
 # configure the hardware disk array controller first
 #
 /opt/stack/bin/configure-controllers.py
+if [ $? -ne 0 ]
+then
+	halt_install "Unable to complete storage controller configuration." \
+		'{"state": "controller config failed - check console or reinstall with halt_install_on_error=False"}'
+fi
 
 udevadm settle --timeout=60
 
-#
+# NOTE: we initialize storage twice in RHEL, so do the same thing here, too
+
+# need to call 'initialize-storage.py' again after reconfiguring the
+# hardware disk controller because it may have created new LUNs and the
+# master boot record on a LUN may be corrupted and require initialization.
+
+/opt/stack/bin/initialize-storage.py
+if [ $? -ne 0 ]
+then
+	halt_install "Unable to initialize internal storage configuration after storage controller config." \
+		'{"state": "post-controller config initialization failed - check console or reinstall with halt_install_on_error=False"}'
+fi
+
 # then configure the partitions
-#
 /opt/stack/bin/output-partition.py > /tmp/partition.xml
+if [ $? -eq 1 ]
+then
+	halt_install "Unable to find disks to create partitioning scheme on." \
+		'{"state": "partition config failed - no disks found"}'
+fi
 
 # Configure the bootloader
 /opt/stack/bin/output-bootloader.py > /tmp/bootloader.xml
 
+/opt/stack/bin/BackendTest.py
+
 # give ourselves the ability to hold the installation prior to the start of yast
-#
 grep stack-debug /proc/cmdline 2>&1 > /dev/null
 if [ $? -eq 0 ]
 then
-	touch /tmp/wait
-	echo "Stacki debug wait loop - remove /tmp/wait to continue"
-	while [ -f /tmp/wait ]
-	do
-		sleep 1
-		/opt/stack/bin/smq-publish -chealth '{"state": "install wait"}'
-	done
+	halt_install "Stacki debug wait loop - remove /tmp/wait to continue" \
+		'{"state": "install wait"}'
 fi
 
 if [[ -n $YUMSERVER ]]
@@ -92,4 +131,3 @@ fi
 # execute code that runs just prior to the autoyast gui 
 #
 PYTHONPATH=/tmp /opt/stack/bin/python3 -c "exec(\"from stack_site import *\\ntry: \\n patch() \\nexcept: \\n pass\" )"
-

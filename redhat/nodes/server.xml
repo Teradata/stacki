@@ -26,7 +26,6 @@ text
 
 <stack:eval stack:shell="/opt/stack/bin/python3" stack:mode="xml">
 import os
-import urlparse
 import stack.roll
 
 g = stack.roll.Generator()
@@ -47,6 +46,9 @@ for pallet in g.rolls:
 <stack:package>stack-admin</stack:package>
 <stack:package>gd</stack:package>
 <stack:package>foundation-newt</stack:package>
+
+<stack:package>stack-templates</stack:package>
+<stack:package>stack-probepal</stack:package>
 
 <!-- to build anaconda -->
 <stack:package>device-mapper-devel</stack:package>
@@ -115,8 +117,8 @@ for pallet in g.rolls:
 -->
 /opt/stack/bin/stack set attr attr=user.auth value=unix
 
-<!-- add sync.hosts to default false -->
-/opt/stack/bin/stack set attr attr=sync.hosts value=False
+<!-- add manage.hostsfile to default false -->
+/opt/stack/bin/stack set attr attr=manage.hostsfile value=False
 </stack:script>
 
 <stack:script stack:stage="install-post">
@@ -146,5 +148,5 @@ git init /export/site-pallet/restore
 touch /root/.gitconfig
 </stack:script>
 
-</stack:stack> 
+</stack:stack>
 

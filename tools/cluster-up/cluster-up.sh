@@ -31,6 +31,7 @@ IP=""
 NETMASK="255.255.255.0"
 GATEWAY=""
 DNS=""
+FORWARD_PORTS=""
 
 while [[ "$#" -gt 0 ]]
 do
@@ -79,6 +80,14 @@ do
             DNS="${1#*=}"
             shift 1
             ;;
+        --forward-ports=*)
+            FORWARD_PORTS="${1#*=}"
+            shift 1
+            ;;
+        --*)
+            echo -e "\033[31mError: unrecognized flag \"$1\"\033[0m"
+            exit 1
+            ;;
         *)
             ISO="$1"
             shift 1
@@ -90,17 +99,18 @@ if [[ -z "$ISO" ]]
 then
     echo "Usage: ./cluster-up.sh [options...] STACKI_ISO"
     echo "Options:"
-    echo -e "  --backends=[0-253]\t\tThe number backends to create. Default: 1"
+    echo -e "  --backends=[0-253]\t\tThe number backends to create. Default: 0"
     echo -e "  --fqdn=FQDN\t\t\tThe FQDN of the frontend. Default: cluster-up-frontend.localdomain"
     echo -e "  --name=NAME\t\t\tThe name to uniquely identify this cluster. Default: YYYYMMDD_HHMMSS_RRRR"
     echo -e "  --download-dir=DIRECTORY\tThe directory to store installer ISOs. Default: '.'"
     echo -e "  --use-the-src-dir=DIRECTORY\tThe directory will be mounted and symlinked into the frontend."
     echo -e "  --export-frontend\t\tExport the frontend as a vagrant box."
+    echo -e "  --forward-ports=SRC:DST[,...]\tComma separated list of ports to forward."
     echo -e "  --bridge=INTERFACE\t\tBridge interface on the host. Default: Use host only networking"
     echo -e "  --ip=IP_ADDRESS\t\tIP Address for the bridge network. Default: Use DHCP"
     echo -e "  --netmask=NETMASK\t\tThe netmask for the bridge network. Default: 255.255.255.0"
     echo -e "  --gateway=GATEWAY_ADDRESS\tGateway address for the bridged interface."
-    echo -e "  --dns=DNS_ADDRESS[,DNS2]\tComma seperated list of DNS servers."
+    echo -e "  --dns=DNS_ADDRESS[,DNS2]\tComma separated list of DNS servers."
     exit 1
 fi
 
@@ -195,19 +205,6 @@ fi
 ISO_PATH=`dirname "$ISO"`
 ISO_FILENAME=`basename "$ISO"`
 
-# Figure out if are on the Teradata network or not
-INTERNAL="false"
-if host stacki-builds.labs.teradata.com >/dev/null
-then
-    INTERNAL="true"
-fi
-
-if [[ OS == "sles12" && INTERNAL == "false" ]]
-then
-    echo -e "\033[31mError: Only CentOS Stacki is supported outside of the Teradata network\033[0m"
-    exit 1
-fi
-
 # Write out some settings for the Vagrantfile
 mkdir -p ".vagrant"
 cat > ".vagrant/cluster-up.json" <<-EOF
@@ -226,7 +223,7 @@ cat > ".vagrant/cluster-up.json" <<-EOF
     "NETMASK": "$NETMASK",
     "GATEWAY": "$GATEWAY",
     "DNS": "$DNS",
-    "INTERNAL": $INTERNAL
+    "FORWARD_PORTS": "$FORWARD_PORTS"
 }
 EOF
 
@@ -241,18 +238,31 @@ then
     fi
 elif [[ $OS == "redhat7" ]]
 then
-    if [[ ! -f "$DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso" ]]
+    if [[ ! -f "$DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso" ]]
     then
         echo
-        echo -e "\033[34mDownloading CentOS-7-x86_64-Everything-1708.iso ...\033[0m"
+        echo -e "\033[34mDownloading CentOS-7-x86_64-Everything-1810.iso ...\033[0m"
 
-        if [[ $INTERNAL == "true" ]]
+        # Try to pull it from TD first
+        set +e
+        echo
+        echo -e "\033[37mTrying internal Teradata first ...\033[0m"
+        curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
+        set -e
+
+        if [[ ! -f $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso ]]
         then
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1708.iso
-        else
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1708.iso http://archive.kernel.org/centos-vault/7.5.1804/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso
+            echo
+            echo -e "\033[37mDownloading from the Internet ...\033[0m"
+            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
+fi
+
+# Pull frontend-install.py from the local machine if we are running from a full repo checkout
+if [[ -f ../fab/frontend-install.py ]]
+then
+    cp ../fab/frontend-install.py .
 fi
 
 # Make sure the boxes are up-to-date
@@ -281,10 +291,12 @@ if [[ $OS == "sles12" ]]
 then
     vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet SLES"
+    vagrant ssh frontend -c "sudo -i stack enable pallet SLES box=frontend"
 elif [[ $OS == "redhat7" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1708.iso"
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1810.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet CentOS"
+    vagrant ssh frontend -c "sudo -i stack enable pallet CentOS box=frontend"
 fi
 
 # Copy the vagrant cart into place and enable it
@@ -441,6 +453,6 @@ fi
 run_hooks "post-cluster-up"
 
 # Have vagrant ssh automatically sudo to root
-vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]]; then sudo -i && exit >/dev/null; fi" >> /home/vagrant/.bash_profile'
+vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then sudo -i && exit >/dev/null; fi" >> /home/vagrant/.bash_profile'
 
 exit 0

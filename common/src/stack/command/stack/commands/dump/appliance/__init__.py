@@ -11,6 +11,20 @@ import json
 
 
 class Command(stack.commands.dump.command):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically the appliance level data.
+	For each appliance, output the name of the appliance,
+	as well as any appliance scoped attributes, storage controller,
+	partition, firewall, and route information.
+
+	<example cmd='dump appliance'>
+	Dump json data for appliances in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 

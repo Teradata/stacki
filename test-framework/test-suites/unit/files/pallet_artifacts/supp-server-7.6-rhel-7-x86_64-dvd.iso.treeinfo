@@ -1,0 +1,47 @@
+[base_product]
+name = Red Hat Enterprise Linux
+short = RHEL
+version = 7
+
+[general]
+; WARNING.0 = This section provides compatibility with pre-productmd treeinfos.
+; WARNING.1 = Read productmd documentation for details about new format.
+arch = x86_64
+family = Supplementary
+name = Supplementary 7.6
+packagedir = Packages
+platforms = x86_64
+repository = .
+timestamp = 1538469203
+variant = Server
+variants = Server
+version = 7.6
+
+[header]
+type = productmd.treeinfo
+version = 1.2
+
+[media]
+discnum = 1
+totaldiscs = 1
+
+[release]
+is_layered = true
+name = Supplementary
+short = Supp
+version = 7.6
+
+[tree]
+arch = x86_64
+build_timestamp = 1538469203
+platforms = x86_64
+variants = Server
+
+[variant-Server]
+id = Server
+name = Server
+packages = Packages
+repository = .
+type = variant
+uid = Server
+

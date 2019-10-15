@@ -8,6 +8,7 @@
 #
 
 import sys
+from subprocess import CalledProcessError
 
 sys.path.append('/tmp')
 from stack_site import *
@@ -71,15 +72,13 @@ def getController():
 ## MAIN
 ##
 
-if 'nukecontroller' in attributes:
-	nukecontroller = str2bool(attributes['nukecontroller'])
-else:
-	nukecontroller = False
+# Halt the install with an error message on the console and in the message queue
+# if we are unable to create a RAID.
+# To override, set the attribute 'halt_install_on_error=False'.
 
-if 'secureerase' in attributes:
-	secureerase = str2bool(attributes['secureerase'])
-else:
-	secureerase = False
+halt_on_error  = str2bool(attributes.get('halt_install_on_error', True))
+nukecontroller = str2bool(attributes.get('nukecontroller', False))
+secureerase    = str2bool(attributes.get('secureerase', False))
 
 #
 # if 'secureerase' is true, then that implies that 'nukecontroller' is true
@@ -181,11 +180,15 @@ for arrayid in arrayids:
 		#
 		continue
 
-	if raidlevel == 'hotspare' and arrayid == 'global':
-		ctrl.doGlobalHotSpare(adapter, enclosure, hotspares, options)
-	else:
-		ctrl.doRaid(raidlevel, adapter, enclosure, slots, hotspares,
-			options)
+	try:
+		if raidlevel == 'hotspare' and arrayid == 'global':
+			ctrl.doGlobalHotSpare(adapter, enclosure, hotspares, options, check=halt_on_error)
+		else:
+			ctrl.doRaid(raidlevel, adapter, enclosure, slots, hotspares, options, check=halt_on_error)
+	except CalledProcessError as e:
+		print(' '.join(e.cmd))
+		print(f'output: {e.stdout}')
+		sys.exit(1)
 
 	for slot in slots + hotspares:
 		try:
@@ -221,7 +224,7 @@ for o in csv_controller:
 			try:
 				raidlevel = o['raidlevel']
 			except:
-				raidlevel = 0
+				raidlevel = '0'
 
 		if 'options' in o.keys():
 			try:
@@ -235,14 +238,30 @@ for o in csv_controller:
 			enclosure = ctrl.getEnclosure(adapter)
 
 		if 'arrayid' in o.keys():
-			# JBOD Mode for the remainder
-			if o['arrayid'] == '*':
-				for slot in freeslots[adapter]:
-					ctrl.doRaid(0, adapter, enclosure, [ slot ],
-						hotspares, options)
+			try:
+				if o['arrayid'] == '*':
+					if raidlevel == '1':
+						#
+						# special case for arrayid == '*' and raidlevel 1 -- put the remaining
+						# disks into RAID 1 pairs
+						#
+						while len(freeslots[adapter]) > 1:
+							disks = [ freeslots[adapter][0], freeslots[adapter][1] ]
+							ctrl.doRaid(1, adapter, enclosure, disks, [], options, check=halt_on_error)
 
-			# RAID mode - Single array for remaining disks
-			else:
-				ctrl.doRaid(raidlevel, adapter, enclosure, freeslots[adapter],
-					hotspares, options)
+							freeslots[adapter].remove(disks[0])
+							freeslots[adapter].remove(disks[1])
+					else:
+						# JBOD Mode for the remainder
+						for slot in freeslots[adapter]:
+							ctrl.doRaid(0, adapter, enclosure, [ slot ],
+								[], options, check=halt_on_error)
 
+				# RAID mode - Single array for remaining disks
+				else:
+					ctrl.doRaid(raidlevel, adapter, enclosure, freeslots[adapter],
+						hotspares, options, check=halt_on_error)
+			except CalledProcessError as e:
+				print(' '.join(e.cmd))
+				print(f'output: {e.stdout}')
+				sys.exit(1)

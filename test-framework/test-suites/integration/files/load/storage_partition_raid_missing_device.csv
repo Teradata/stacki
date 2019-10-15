@@ -1,0 +1,3 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,md0,/,0,ext4,--level=RAID1 raid.01 raid.02
+,sda,raid.01,16000,raid,

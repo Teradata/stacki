@@ -43,11 +43,35 @@ then
     echo "nameserver ${DNS//,/ /}" >> /etc/resolv.conf
 fi
 
-# Fetch the barnacle script
-curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/develop/tools/fab/frontend-install.py
-chmod u+x frontend-install.py
+# Fetch the barnacle script, if needed
+if [[ -f /vagrant/frontend-install.py ]]
+then
+    mv /vagrant/frontend-install.py .
+else
+    curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/$(echo $ISO_FILENAME | cut -d '-' -f -2 | cut -d '_' -f 1)/tools/fab/frontend-install.py
+fi
 
 # Barnacle myself, choosing the second interface
+chmod u+x frontend-install.py
 ./frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
+
+# Allow port forwards to talk on eth0
+if [[ -n $FORWARD_PORTS ]]
+then
+    # Add the vagrant network to Stacki
+    /opt/stack/bin/stack add network vagrant zone= $(route -n | grep eth0 | tail -n 1 | awk '{print "address=" $1 " mask=" $3}')
+
+    # Add in the eth0 interface but tell Stacki not to manage it
+    /opt/stack/bin/stack add host interface localhost interface=eth0 network=vagrant options=noreport
+
+    # Open up the ports for each forward
+    for PAIR in ${FORWARD_PORTS//,/ }
+    do
+        /opt/stack/bin/stack add firewall network=vagrant service=${PAIR#*:} protocol=all action=ACCEPT chain=INPUT
+    done
+
+    # Apply the new firewall rules
+    /opt/stack/bin/stack sync host firewall localhost
+fi
 
 exit 0

@@ -13,7 +13,7 @@ class Plugin(stack.commands.Plugin):
 		return 'host'
 
 	def requires(self):
-		return [ 'software', 'network', 'appliance', 'bootaction' ]
+		return [ 'software', 'network', 'appliance', 'bootaction', 'environment' ]
 
 	def run(self, section):
 
@@ -34,12 +34,12 @@ class Plugin(stack.commands.Plugin):
 
 			metadata = h.get('metadata')
 			if metadata:
-				self.owner.stack('set.host.metadata', 
+				self.owner.stack('set.host.metadata',
 						 host, [f'metadata={metadata}'])
 
 			# group
 
-			for i in h.get('interface'):
+			for i in h.get('interface', []):
 				params    = {'interface': i.get('interface'),
 					     'default'  : i.get('default'),
 					     'network'  : i.get('network'),
@@ -50,17 +50,13 @@ class Plugin(stack.commands.Plugin):
 					     'vlan'     : i.get('vlan'),
 					     'options'  : i.get('options'),
 					     'channel'  : i.get('channel')}
-				
+
 				self.owner.stack('add.host.interface', host, **params)
 
-				try:
-					aliases = i['alias']
-				except:
-					aliases = []
-				for a in aliases:
+				for a in i.get('alias', []):
 					params = {'interface': i.get('interface'),
 						  'alias'    : a}
-					self.owner.stack('add.host.alias', host, **params)
+					self.owner.stack('add.host.interface.alias', host, **params)
 
 			self.owner.load_attr(h.get('attr'), host)
 			self.owner.load_controller(h.get('controller'), host)

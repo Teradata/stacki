@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 
-def test_list_host_profile(host, add_host, revert_export_stack_carts):
+def test_list_host_profile(host, add_host_with_net, revert_export_stack_carts):
 	result = host.run('stack list host profile backend-0-0')
 	assert result.rc == 0
 

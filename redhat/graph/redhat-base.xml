@@ -24,7 +24,6 @@
 	<!-- Graph OO Framework -->
 
 	<edge from="base">
-		<to>pre-ssh-key</to>
 		<to>logrotate</to>
 		<to>rpc</to>
 		<to>time-base</to>
@@ -33,6 +32,7 @@
 		<to>storage</to>
 		<to>foundation-python</to>
 		<to>uefi-base</to>
+		<to>nsswitch</to>
 	</edge>
 
 

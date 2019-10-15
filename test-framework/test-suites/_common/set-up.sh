@@ -15,6 +15,7 @@ fi
 
 # Parse the command line
 USE_SRC=0
+COVERAGE=0
 ISO=""
 EXTRA_ISOS=()
 
@@ -23,6 +24,10 @@ do
     case "$1" in
         --use-src)
             USE_SRC=1
+            shift 1
+            ;;
+        --coverage)
+            COVERAGE=1
             shift 1
             ;;
         *)
@@ -44,7 +49,7 @@ do
                 # Copy the EXTRA_ISO to the .cache directory, if needed
                 if [[ "$(cd "$(dirname "$1")"; pwd)" != "$CACHE_DIR" ]]
                 then
-                    $cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
+                    cp "$EXTRA_ISO" "$CACHE_DIR" 2>/dev/null
                 fi
 
                 # Add the filename EXTRA_ISOS array, which will be accessible
@@ -140,18 +145,39 @@ then
     source ../../bin/activate
 fi
 
-# Make sure the boxes are up-to-date (don't fail if we can't)
+# Don't bother catching errors from this point on
 set +e
-vagrant box update
-set -e
 
-# Bring up the frontend
-vagrant up frontend
+# Make sure the boxes are up-to-date
+vagrant box update
+
+# Export the SYSTEM_COVERAGE environment variable if coverage was requested
+if [[ $COVERAGE -eq 1 ]]
+then
+    export SYSTEM_COVERAGE="1"
+fi
+
+# Try three times to bring up the frontend
+for ATTEMPT in 1 2 3
+do
+    if vagrant up frontend
+    then
+        break
+    fi
+
+    vagrant destroy -f
+
+    if [[ $ATTEMPT -eq 3 ]]
+    then
+        echo "Error: failed to setup frontend"
+        exit 1
+    fi
+done
 
 # Run the set-up.d scripts
 for SETUP_FILE in set-up.d/*
 do
-    if [[ -f $SETUP_FILE && -x $SETUP_FILE ]]
+    if [[ -f $SETUP_FILE && -x $SETUP_FILE && $(basename $SETUP_FILE) != _* ]]
     then
         ./$SETUP_FILE $STACKI_ISO "${EXTRA_ISOS[@]}"
     fi

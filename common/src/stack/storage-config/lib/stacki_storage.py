@@ -67,10 +67,10 @@ def getHostDisks(nukedisks):
 	#		'nuke'		: 0
 	#	}]
 	#
-	lsblk = ['lsblk', '-lio', 'NAME,RM,RO,TYPE']
+	lsblk = ['lsblk', '--noheadings', '-lio', 'NAME,RM,RO,TYPE']
 	# sles 11 doesn't support the TYPE column
 	if attributes['os.version'] == "11.x" and attributes['os'] == "sles":
-		lsblk = ['lsblk', '-lio', 'NAME,RM,RO']
+		lsblk = ['lsblk', '--noheadings', '-lio', 'NAME,RM,RO']
 	p = subprocess.run(lsblk,
 			   stdin=subprocess.PIPE,
 			   stdout=subprocess.PIPE,
@@ -289,22 +289,47 @@ def getHostFstab(devices):
 def get_sles11_media_type(dev_name):
 	"""Determines disk and partition for SLES 11.
 	Because SLES 11 doesn't support TYPE field on lsblk commands
+
+	`dev_name` is expected to be just the block device, without leading /dev/
+	return value should only ever be 'loop', 'part', or 'disk'
 	"""
-	p = subprocess.run(["hwinfo", "--block", "--short"],
-		stdin=subprocess.PIPE,
+	p = subprocess.run(f"hwinfo --block --short --only /dev/{dev_name}",
+		shell=True,
+		encoding='utf-8',
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE)
-	for l in p.stdout.decode().split('\n'):
-		# Ignore empty lines or non-path
-		if not l.strip() or "/" not in l.strip():
-			continue
-		arr = l.split()
-		if dev_name == os.path.split(arr[0])[1]:
-			if str(arr[1]).lower() == "disk":
-				return "disk"
-			if str(arr[1]).lower() == "partition":
-				return "part"
-			return arr[1]
+
+	# hwinfo --only against a block device will return either empty string OR something like:
+	# partition:
+	#   /dev/sda1		Partition
+	# OR
+	# disk:
+	#   /dev/sda		Some crazy string
+	# 'Some crazy string' is maybe controller model, or the iscsi target type, or maybe just 'disk'
+	# anyway, just steal line 0 for the type
+	# other possible line 0 values can be 'cdrom', 'unknown', depending on the state of system
+
 	# If we can't find what we are looking for, lie and say its "loop"
-	# I think that is the only other option if it is not a disk or parition.
-	return "loop"
+	blk_type = 'loop'
+	if p.stdout == '':
+		return blk_type
+
+	# we could probably do without a loop here, but I don't fully trust the output of hwinfo
+	for l in p.stdout.splitlines():
+		# there should be just two lines...
+		arr = l.strip().split()
+
+		# line 0
+		if len(arr) == 1 and arr[0] == 'partition:':
+			blk_type = 'part'
+			continue
+
+		# line 0
+		if len(arr) == 1 and arr[0] == 'disk:':
+			blk_type = 'disk'
+			continue
+
+		# line 1
+		if f'/dev/{dev_name}' == arr[0]:
+			return blk_type
+

@@ -1,100 +1,119 @@
-import os
-import subprocess
-
-import pytest
+import json
+from textwrap import dedent
 
 
-STORAGE_SPREADSHEETS = ['multi_teradata_global', 'multi_teradata_backend']
+class TestRemoveStoragePartition:
+	def test_no_args(self, host):
+		result = host.run('stack remove storage partition')
+		assert result.rc == 255
+		assert result.stderr == dedent('''\
+			error - "device" or "mountpoint" parameter is required
+			[device=string] [mountpoint=string]
+		''')
 
-@pytest.mark.parametrize("csvfile", STORAGE_SPREADSHEETS)
-def test_remove_storage_partition(host, add_host, csvfile, test_file):
-	# get filename
-	input_file = test_file(f'load/storage_partition_{csvfile}_input.csv')
+	def test_no_matches_on_device(self, host):
+		result = host.run('stack remove storage partition device=sda')
+		assert result.rc == 255
+		assert result.stderr == 'error - partition specification for device "sda" and mount point "*" doesn\'t exist\n'
 
-	if 'global' in input_file:
-		hostname = ''
-	else:
-		hostname = 'scope=host backend-0-0'
-	# check that it has no partition info by default
-	result = host.run('stack list storage partition %s' % hostname)
-	assert result.rc == 0
-	assert result.stdout == ''
+	def test_no_matches_on_mountpoint(self, host):
+		result = host.run('stack remove storage partition mountpoint=/')
+		assert result.rc == 255
+		assert result.stderr == 'error - partition specification for device "*" and mount point "/" doesn\'t exist\n'
 
-	# load the partition file
-	result = host.run('stack load storage partition file=%s' % input_file)
-	assert result.rc == 0
+	def test_remove_single_partition(self, host):
+		# Add a couple global partitions
+		result = host.run(
+			'stack add storage partition device=sda mountpoint=/ '
+			'size=1024 type=ext4 options=sda_options partid=1'
+		)
+		assert result.rc == 0
 
-	# check that it has partition info
-	result = host.run('stack list storage partition %s' % hostname)
-	assert result.rc == 0
-	assert 'sda' in result.stdout
-	assert 'sdb' in result.stdout
-	assert '/var/opt/teradata' in result.stdout
-	assert result.stderr == ''
+		result = host.run(
+			'stack add storage partition device=sdb mountpoint=/var '
+			'size=2048 type=ext3 options=sdb_options partid=2'
+		)
+		assert result.rc == 0
 
-	# remove the partition info for a single device
-	result = host.run('stack remove storage partition %s device=sdb' % hostname)
-	assert result.rc == 0
-	assert result.stdout == ''
-	assert result.stderr == ''
-	# Check that it is indeed removed
-	result = host.run('stack list storage partition %s' % hostname)
-	assert result.rc == 0
-	assert 'sda' in result.stdout
-	assert 'sdb' not in result.stdout
+		# Make sure they got added
+		result = host.run('stack list storage partition output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'device': 'sda',
+				'fstype': 'ext4',
+				'mountpoint': '/',
+				'options': 'sda_options',
+				'partid': 1,
+				'size': 1024
+			},
+			{
+				'device': 'sdb',
+				'fstype': 'ext3',
+				'mountpoint': '/var',
+				'options': 'sdb_options',
+				'partid': 2,
+				'size': 2048
+			}
+		]
 
-	# remove the partition info for a single mountpoint
-	result = host.run('stack remove storage partition %s mountpoint="/var/opt/teradata"' % hostname)
-	assert result.rc == 0
-	assert result.stdout == ''
-	assert result.stderr == ''
-	# Check that it is indeed removed
-	result = host.run('stack list storage partition %s' % hostname)
-	assert result.rc == 0
-	assert '/var/opt/teradata' not in result.stdout
+		# Now remove just the sdb partition
+		result = host.run('stack remove storage partition mountpoint=/var')
+		assert result.rc == 0
 
-	# remove all the partition info
-	result = host.run('stack remove storage partition %s device="*"' % hostname)
-	assert result.rc == 0
-	assert result.stdout == ''
-	assert result.stderr == ''
+		# Make sure only sdb got removed
+		result = host.run('stack list storage partition output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'device': 'sda',
+			'fstype': 'ext4',
+			'mountpoint': '/',
+			'options': 'sda_options',
+			'partid': 1,
+			'size': 1024
+		}]
 
-	# check that it has no partition info again
-	result = host.run('stack list storage partition %s' % hostname)
-	assert result.rc == 0
-	assert result.stdout == ''
-	assert result.stderr == ''
+	def test_remove_everything(self, host):
+		# Add a couple global partitions
+		result = host.run(
+			'stack add storage partition device=sda mountpoint=/ '
+			'size=1024 type=ext4 options=root_options partid=1'
+		)
+		assert result.rc == 0
 
-def test_negative_remove_storage_partition(host, add_host):
-	"""
-	Trying to hit the below exceptions. The order is important as it is contextual to the attempted input.
+		result = host.run(
+			'stack add storage partition device=sda mountpoint=/var '
+			'size=2048 type=ext3 options=var_options partid=2'
+		)
+		assert result.rc == 0
 
-		if scope not in accepted_scopes:
-			raise ParamValue(self, '%s' % params, 'one of the following: %s' % accepted_scopes )
-		elif scope == 'global' and len(args) >= 1:
-			raise ArgError(self, '%s' % args, 'unexpected, please provide a scope: %s' % accepted_scopes)
-		elif scope == 'global' and (device is None and mountpoint is None):
-			raise ParamRequired(self, 'device OR mountpoint')
-		elif scope != 'global' and len(args) < 1:
-			raise ArgRequired(self, '%s name' % scope)
-	"""
-	accepted_scopes = ['global', 'os', 'appliance', 'host']
+		# Make sure they got added
+		result = host.run('stack list storage partition output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'device': 'sda',
+				'fstype': 'ext4',
+				'mountpoint': '/',
+				'options': 'root_options',
+				'partid': 1,
+				'size': 1024
+			},
+			{
+				'device': 'sda',
+				'fstype': 'ext3',
+				'mountpoint': '/var',
+				'options': 'var_options',
+				'partid': 2,
+				'size': 2048
+			}
+		]
 
-	# Provide extra data on global scope
-	result = host.run('stack remove storage partition scope=global backend-0-0')
-	assert result.rc == 255
-	assert 'argument unexpected' in result.stderr
+		# Now remove everything by specifying the sda device
+		result = host.run('stack remove storage partition device=sda')
+		assert result.rc == 0
 
-	result = host.run('stack remove storage partition scope=garbage backend-0-0')
-	assert result.rc == 255
-	assert "{'scope': 'garbage'}" in result.stderr
-
-	for scope in accepted_scopes:
-		if scope != 'global':
-			result = host.run('stack remove storage partition scope=%s' % scope)
-			assert result.rc == 255
-			assert '"%s name" argument is required' % scope in result.stderr
-		else:
-			result = host.run('stack remove storage partition scope=%s' % scope)
-			assert result.rc == 255
-			assert '"device OR mountpoint" parameter is required' in result.stderr
+		# Make sure it's all gone
+		result = host.run('stack list storage partition')
+		assert result.rc == 0
+		assert result.stdout == ''

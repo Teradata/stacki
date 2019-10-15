@@ -1,0 +1,27 @@
+Info_CertificateCountry:US
+Info_CertificateLocality:Solana Beach
+Info_CertificateOrganization:StackIQ
+Info_CertificateState:California
+Info_ClusterLatlong:N32.87 W117.22
+Info_FQDN:test.example.com
+Kickstart_Keyboard:us
+Kickstart_Lang:en_US
+Kickstart_Langsupport:en_US
+Kickstart_PrivateAddress:192.0.2.2
+Kickstart_PrivateBroadcast:192.0.2.255
+Kickstart_PrivateDNSDomain:example.com
+Kickstart_PrivateDNSServers:1.1.1.1
+Kickstart_PrivateEthernet:
+Kickstart_PrivateGateway:192.0.2.1
+Kickstart_PrivateHostname:test
+Kickstart_PrivateInterface:eth1
+Kickstart_PrivateKickstartHost:192.0.2.2
+Kickstart_PrivateNTPHost:192.0.2.2
+Kickstart_PrivateNetmask:255.255.255.0
+Kickstart_PrivateNetmaskCIDR:24
+Kickstart_PrivateNetwork:192.0.2.0
+Kickstart_PrivateRootPassword:
+Kickstart_PublicNTPHost:pool.ntp.org
+Kickstart_Timezone:America/Denver
+nukedisks:False
+os.version:7.x

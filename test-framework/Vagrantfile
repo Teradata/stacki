@@ -23,10 +23,19 @@ else
 end
 
 # Make sure Ansible can find our roles
-ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/provisioning/roles"
+ENV['TEST_FRAMEWORK_ROOT'] = File.dirname(__FILE__)
+ENV['ANSIBLE_ROLES_PATH'] = ENV['TEST_FRAMEWORK_ROOT'] + "/provisioning/roles"
 
 # Ansible also needs the path to our STACKI ISO in the ENV
 ENV['STACKI_ISO'] = STACKI_ISO
+
+# Try to set the GIT_BRANCH environment variable, if needed
+if ENV['GIT_BRANCH'].nil?
+  branch = `git symbolic-ref --short HEAD 2>/dev/null`.chomp
+  if $?.success?
+    ENV['GIT_BRANCH'] = branch
+  end
+end
 
 Vagrant.configure("2") do |config|
   config.vm.define "frontend", autostart: false do |config|
@@ -34,8 +43,8 @@ Vagrant.configure("2") do |config|
       config.vm.box = "stacki/sles-12.3"
       config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
     elsif STACKI_ISO =~  /-redhat7\./
-      config.vm.box = "stacki/centos-7.4"
-      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.4.json"
+      config.vm.box = "stacki/centos-7.6"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
     end
 
     config.vm.provider "virtualbox" do |provider, config|
@@ -76,7 +85,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.synced_folder '.', '/vagrant', disabled: true
 
-    config.vm.hostname = "frontend-0-0.localdomain"
+    config.vm.hostname = "frontend-0-0"
     config.vm.network "private_network",
       ip: "192.168.0.2",
       virtualbox__intnet: NAME,
@@ -130,7 +139,7 @@ Vagrant.configure("2") do |config|
         provider.driver = "kvm"
         provider.connect_via_ssh = false
 
-        provider.memory = "2048"
+        provider.memory = "4098"
         provider.cpus = 2
         provider.disk_bus = "sata"
         provider.nic_model_type = "e1000"

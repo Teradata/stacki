@@ -10,10 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import stack.commands
-import subprocess
-
 
 class Command(stack.commands.sync.command):
 	"""
@@ -27,5 +24,15 @@ class Command(stack.commands.sync.command):
 	def run(self, params, args):
 
 		self.notify('Sync DNS')
+		# named's files are re-written as a side-effect of runPlugins()
 		self.runPlugins()
-		subprocess.call(['systemctl','restart','named'])
+
+		# only start named if we have networks with dns=True and those nets have zones defined.
+		nets = [net for net in self.call('list.network', ['dns=true']) if net['zone']]
+
+		if nets:
+			self._exec('systemctl enable named'.split())
+			self._exec('systemctl restart named'.split())
+		else:
+			self._exec('systemctl disable named'.split())
+			self._exec('systemctl stop named'.split())

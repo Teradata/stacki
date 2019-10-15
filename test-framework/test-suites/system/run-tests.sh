@@ -18,4 +18,15 @@ fi
 # Run the tests
 vagrant ssh frontend -c "sudo -i pytest -vvv \
 	--junit-xml=/export/reports/system-junit.xml \
+	/opt/stack/lib/python3*/site-packages/stack/commands/report/system/tests/ \
 	/export/test-suites/system/tests/"
+
+if [[ $1 == "--coverage" ]]
+then
+    # Generate the coverage reports
+    vagrant ssh frontend -c "sudo -i coverage combine"
+    vagrant ssh frontend -c "sudo -i coverage html -i -d /export/reports/system"
+
+    # Move the coverage data
+    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/system.coverage"
+fi

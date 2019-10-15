@@ -11,14 +11,13 @@
 # @rocks@
 
 import os
-import subprocess
-#if requests is not available,
-#attempting to barnacle will fail
+# if requests is not available,
+# attempting to barnacle will fail
 try:
 	from urllib.parse import urlparse
 	import requests
 	from requests.auth import HTTPBasicAuth
-except:
+except ImportError:
 	pass
 
 
@@ -55,23 +54,21 @@ def fetch(url, username=None, password=None, verbose=False, file_path=None):
 	content_length = int(r.headers.get('content-length')) / 1000000
 	progress = 0
 	chunk_size = 1000000
-	# determine how many digits long the size of the iso is so we can display a clean progress indicator
-	content_digits = len(str(content_length))
 	with open(local_path, 'wb') as f:
 		for chunk in (item for item in r.iter_content(chunk_size=chunk_size) if item):
 			f.write(chunk)
 			f.flush()
 			progress += 1
-			if verbose == True:
+			if verbose:
 				percent = int(progress/content_length * 100)
 				print(f'{percent}%', end='\r')
 		# watch out for premature connection closures by the download server
 		# if the entire file has not been downloaded, don't pass an incomplete iso
 		if progress < content_length:
-			p = subprocess.run(['rm', filename])
+			os.unlink(filename)
 			raise FetchError(f'unable to download {filename}: the connection may have been prematurely closed by the server.\nFailed at {progress} MB out of {int(content_length)} MB')
 
-	if verbose == True:
+	if verbose:
 		print(f'success. downloaded {int(content_length)} MB.')
 
 	return local_path

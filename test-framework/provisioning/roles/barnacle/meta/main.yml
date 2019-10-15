@@ -1,3 +1,4 @@
 ---
 dependencies:
-- { role: zypper }
+- role: zypper
+- role: yum

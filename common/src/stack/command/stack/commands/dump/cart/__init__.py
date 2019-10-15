@@ -11,6 +11,18 @@ import json
 
 
 class Command(stack.commands.dump.command):
+	"""
+	Dump the contents of the stacki database as json.
+
+	This command dumps specifically cart data.  For each cart,
+	list its name.
+
+	<example cmd='dump cart'>
+	Dump json data for carts in the stacki database
+	</example>
+
+	<related>load</related>
+	"""
 
 	def run(self, params, args):
 
@@ -23,4 +35,3 @@ class Command(stack.commands.dump.command):
 		self.addText(json.dumps(OrderedDict(version  = stack.version,
 						    software = {'cart' : dump}),
 					indent=8))
-

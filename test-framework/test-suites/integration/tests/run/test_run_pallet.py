@@ -29,7 +29,7 @@ class TestRunPallet:
 		# Make sure we get an error that the pallet isn't enabled
 		result = host.run(f'stack run pallet minimal')
 		assert result.rc == 255
-		assert result.stderr == 'error - minimal is not enabled for the frontend\n'
+		assert result.stderr == 'error - minimal is not in box frontend\n'
 
 	def test_one_arg(self, host, revert_export_stack_carts):
 		# Make sure the top of the output matches what we expect

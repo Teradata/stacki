@@ -7,12 +7,13 @@
 -stack-admin
 -stack-config-server
 -stack-docker
--stack-ekv
 -stack-examples
 -stack-kickstart
+-stack-probepal
 -stack-pxeboot
 -stack-switch
 -stack-report-system
+-stack-templates
 -stack-wizard
 -stack-ws
 -stack-ws-client

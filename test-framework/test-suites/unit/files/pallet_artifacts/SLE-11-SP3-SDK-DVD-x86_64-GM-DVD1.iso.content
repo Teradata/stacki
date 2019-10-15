@@ -1,0 +1,32 @@
+CONTENTSTYLE     11
+BASEARCHS        x86_64
+DATADIR          suse
+DESCRDIR         suse/setup/descr
+DISTRIBUTION     SUSE_SDK
+LABEL            SUSE Linux Enterprise Software Development Kit 11 SP3
+LINGUAS          
+NAME             sle-sdk
+REGISTERPRODUCT  true
+RELNOTESURL      
+SP_VERSION       3
+VENDOR           SUSE LINUX Products GmbH, Nuernberg, Germany
+VERSION          11.3
+RELEASE          1.69
+META SHA1 a3867f4f93c2af15b1896f1a30648537bf6ff377  packages.DU.gz
+META SHA1 58025e17da200d64d56b97a1d9b82776c1fb4a0a  packages.FL.gz
+META SHA1 2078cc54ce4715760f3faa9d19bbb9d9ad533a2d  packages.cs.gz
+META SHA1 5f79a096d32e14072e3a35ff791c6bcfcab8296f  packages.de.gz
+META SHA1 30e83056bcfb5c6cce58a20575eb6989102798d3  packages.en.gz
+META SHA1 dd037ffa5be4892d539cb01a1088f5234909d2aa  packages.es.gz
+META SHA1 d76e417f788ff6bd1f364b5b85a2a66f5fef837f  packages.fr.gz
+META SHA1 91f11fbefadf1ad600534addace3cd322359ca53  packages.gz
+META SHA1 c5b9fdcb1beb6b798d92d808baaef60ccfc43fd5  packages.hu.gz
+META SHA1 beefc487f6c7ba8e2ff2b2689b6add8466347664  patterns
+META SHA1 6524b52fab69b54bb3d125212a90491fcf0afb0e  sdk-11-33.8.1.x86_64.pat.gz
+HASH SHA1 0fbc802d79c2d72f4e2160af84b342a80e18c23a  license.tar.gz
+KEY SHA1  66683d241b629f4eca5b724a2f167a68c3cfd005  gpg-pubkey-307e3d54-4be01a65.asc
+KEY SHA1  0dc23ee9df30a4d01ec9eb2b791d45c3c6c182fa  gpg-pubkey-39db7c82-510a966b.asc
+KEY SHA1  47f6492d127ae9f6aac353a2dd23752fc0ed4f8d  gpg-pubkey-3d25d3d9-36e12d04.asc
+KEY SHA1  e55ee8ca5f3ca5b435fcd07c7c3d7f8dfabb4a29  gpg-pubkey-50a3dd1c-50f35137.asc
+KEY SHA1  708e0cbe3f36b8e1053685b317ed77ef93603089  gpg-pubkey-9c800aca-4be01999.asc
+KEY SHA1  9124408c24fae5e6183ba879069a4cf089f45cb0  gpg-pubkey-b37b98a9-4be01a1a.asc

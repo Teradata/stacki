@@ -151,7 +151,7 @@ with open('/tmp/site.json', 'w') as file:
 	"software": {
                 "box": [ 
 			{
-				"name": "frontend",
+				"name": "frontend"
                         },
 			{
 				"name": "default"
@@ -161,7 +161,6 @@ with open('/tmp/site.json', 'w') as file:
         "appliance": [
                 {
                         "name": "frontend",
-			"box": "frontend",
                         "public": false,
                         "attr": [ 
                                 { "name": "node",          "value": "server" },
@@ -213,7 +212,15 @@ with open('/tmp/site.json', 'w') as file:
 				{ "name": "managed",         "value": true },
                                 { "name": "const_overwrite", "value": false }
 			]
-                }
+                },
+                {
+                        "name": "external",
+                        "public": false,
+                        "attr": [ 
+				{ "name": "kickstartable", "value": false },
+				{ "name": "managed",       "value": false }
+			]
+		}
         ]
 }
 </stack:file>

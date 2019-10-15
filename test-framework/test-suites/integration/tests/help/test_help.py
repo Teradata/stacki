@@ -1,5 +1,5 @@
 import pytest
-
+import ast
 
 class TestHelp:
 	def test_no_args(self, host):
@@ -19,20 +19,47 @@ class TestHelp:
 		with open(test_file('help/help_set_bootaction.txt')) as output:
 			assert result.stdout == output.read()
 
-	@pytest.mark.parametrize('format', ['plain', 'raw', 'parsed', 'md'])
-	def test_command_help(self, host, format, test_file):
-		result = host.run(f'stack add pallet help format={format}')
+	def test_command_help_different_formats(self, host):
+		# plain is the normal stacki help output, so ensure those are the same
+		result = host.run(f'stack list help help format=plain')
 		assert result.rc == 255
-		with open(test_file(f'help/add_pallet_{format}.txt')) as output:
-			assert result.stdout == output.read()
+		assert result.stdout != ''
 
-	def test_command_help_no_format(self, host, test_file):
-		result = host.run(f'stack add pallet help')
+		normalresult = host.run(f'stack list help help')
+		assert normalresult.rc == 255
+		assert normalresult.stdout != ''
+
+		assert normalresult.stdout == result.stdout
+		assert result.stdout.startswith('stack list help')
+
+		# raw format is line numbers, starting with the description, but no headings
+		result = host.run(f'stack list help help format=raw')
 		assert result.rc == 255
-		with open(test_file('help/add_pallet_plain.txt')) as output:
-			assert result.stdout == output.read()
+		for li in result.stdout.splitlines():
+			assert li.split(':', maxsplit=1)[0].isdigit()
 
-	def test_command_help_docbook(self, host, test_file):
+		# md format is markdown
+		result = host.run(f'stack list help help format=md')
+		assert result.rc == 255
+		sections = result.stdout.split('### ')
+		assert sections[0].strip() == '## list help'
+		assert sections[1].startswith('Usage')
+		assert sections[2].startswith('Description')
+		assert sections[3].startswith('Parameters')
+		assert sections[4].startswith('Examples')
+		assert '* `stack list help`' in sections[4]
+
+		# parsed returns a python dictionary as a string...
+		result = host.run(f'stack list help help format=parsed')
+		assert result.rc == 255
+
+		# ... so pass it through a safer eval so we can manipulate it
+		parsed = ast.literal_eval(result.stdout)
+		assert set(parsed.keys()) == {'optparam', 'reqarg', 'reqparam', 'example', 'optarg', 'description', 'related'}
+		assert parsed['description'].startswith('The Help Command')
+		assert parsed['example'][0][0] == 'list help'
+
+	def test_command_help_docbook(self, host):
 		result = host.run(f'stack add pallet help format=docbook')
 		assert result.rc == 255
 		assert result.stderr == 'error - "docbook" no longer supported - use "markdown"\n'

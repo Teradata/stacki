@@ -1,13 +1,13 @@
 ---
 - block:
-    - name: Download CentOS-7-x86_64-Everything-1708.iso
+    - name: Download CentOS-7-x86_64-Everything-1810.iso
       get_url:
-        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1708.iso
-        dest: /export/isos/CentOS-7-x86_64-Everything-1708.iso
-        checksum: "sha1:b9d9feace8d3b01527114f15eda5b29c64a7a60c"
+        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
+        dest: /export/isos/CentOS-7-x86_64-Everything-1810.iso
+        checksum: "sha1:d3a42e49e41b9b3dc71aaeab125215fee3a19516"
         mode: 0644
     - name: Add Centos Pallet
-      command: /opt/stack/bin/stack add pallet /export/isos/CentOS-7-x86_64-Everything-1708.iso
+      command: /opt/stack/bin/stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
   when: ansible_distribution == "CentOS"
 
 - block:

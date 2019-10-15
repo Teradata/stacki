@@ -1,0 +1,4 @@
+target,attrName,attrVal
+global,test.global,test_1
+backend,test.appliance,test_2
+backend-0-0,test.host,test_3

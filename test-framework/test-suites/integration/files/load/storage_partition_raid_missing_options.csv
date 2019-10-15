@@ -1,0 +1,4 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,md0,/,0,ext4,
+,sda,raid.01,16000,raid,
+,sdb,raid.02,16000,raid,
