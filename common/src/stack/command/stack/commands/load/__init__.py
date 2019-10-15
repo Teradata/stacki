@@ -377,8 +377,34 @@ class command(stack.commands.Command):
 
 class Command(command):
 	"""
-	Load configuration data from the provided json document. If no arguments
-	are provided then all plugins will be run.
+	Load configuration data from the provided JSON document.
+
+	A series of stack commands will be printed to STDOUT which, if run, would
+	import the data in the JSON document into the stacki database.  Note, all of
+	these commands are database manipulation - commands such as 'sync config',
+	'sync host network', 'sync host boot', etc. must be run manually.
+
+	<example cmd='stack load dump.json | bash'>
+	The data in 'dump.json' will be converted into stack commands and run.
+	</example>
+
+	<param type='string' name='document'>
+	A JSON document to parse.  If omitted, will attempt to use the first argument
+	</param>
+
+	<param type='boolean' name='exec'>
+	If set to True, load commands will be automatically executed and output suppressed.
+	This is much faster than piping through bash.  Defaults to False.
+	</param>
+
+	<param type='boolean' name='force'>
+	If set to True, will disregard any non-syntax validation done on the json data.
+	This is useful to, for example, load incomplete partitioning data, which the admin
+	intends to complete later..
+	Defaults to False.
+	</param>
+
+	<related>dump</related>
 	"""
 
 	def main(self, document):

@@ -61,7 +61,11 @@ class Parallel(threading.Thread):
 
 class Command(command):
 	"""
-	Writes the /etc/hosts file based on the configuration database
+	Writes the /etc/hosts file on the frontend based on the configuration in the database
+
+	<example cmd='sync host'>
+	Re-writes /etc/hosts
+	</example>
 	"""
 
 	def run(self, params, args):

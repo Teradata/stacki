@@ -162,6 +162,14 @@ class command(stack.commands.Command):
 class Command(command):
 	"""
 	Dumps the entire state of the Stacki database as a JSON document.
+
+	This is consumable by 'stack load'
+
+	<example cmd='dump'>
+	dumps the database configuration to STDOUT as JSON
+	</example>
+
+	<related>load</related>
 	"""
 	def run(self, params, args):
 
