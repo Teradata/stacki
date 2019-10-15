@@ -3,7 +3,7 @@
 
 # Stacki 5.4
 
-Go [here](https://github.com/Teradata/stacki/releases/tag/stacki-05.04.00.00) for more details and downloads.
+Go [here](https://github.com/Teradata/stacki/releases/tag/stacki-5.4) for more details and downloads.
 
 New release:
 * [Documentation for Stacki 5.x](https://github.com/Teradata/stacki/wiki)
