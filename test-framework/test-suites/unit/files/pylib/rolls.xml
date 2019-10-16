@@ -1,0 +1,10 @@
+<rolls>
+  <roll
+    arch="x86_64"
+    diskid="stacki - Disk 1"
+    name="stacki"
+    release="sles12"
+    url="http://127.0.0.1/mnt/cdrom/"
+    version="05.02.06.09"
+  />
+</rolls>
