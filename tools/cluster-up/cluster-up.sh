@@ -25,7 +25,7 @@ SRC_DIR=""
 EXPORT_FRONTEND=0
 ISO=""
 PROVIDER="virtualbox"
-FQDN="cluster-up-frontend.localdomain"
+FQDN="frontend-0-0.localdomain"
 BRIDGE=""
 IP=""
 NETMASK="255.255.255.0"
@@ -453,6 +453,6 @@ fi
 run_hooks "post-cluster-up"
 
 # Have vagrant ssh automatically sudo to root
-vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then sudo -i && exit >/dev/null; fi" >> /home/vagrant/.bash_profile'
+vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then exec sudo -i; fi" >> /home/vagrant/.bash_profile'
 
 exit 0
