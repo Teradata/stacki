@@ -10,7 +10,7 @@ import os
 import subprocess
 import traceback
 import stack.password
-import stack.media
+import stack.probepal
 import stack.file
 import ipaddress
 import socket
@@ -70,30 +70,44 @@ class Data:
 	def get(self, attr):
 		return getattr(self.data, attr)
 
+	def mounted(self):
+		"Returns true if the /mnt/cdrom device is mounted"
+
+		with open('/proc/mounts') as f:
+			for line in f:
+				if '/mnt/cdrom' in line:
+					return True
+		return False
+
+
+	def mountCD(self, prefix="/"):
+		"""Try to mount the CD. Returns 256 if mount failed
+		(no disk in drive), 0 on success."""
+
+		if self.mounted():
+			return True
+
+		mountpoint = os.path.join(prefix, 'mnt', 'cdrom')
+
+		# loader creates '/tmp/stack-cdrom' -- the cdrom device
+		rc = os.system('mount -o ro /tmp/stack-cdrom %s > /dev/null 2>&1' % (mountpoint))
+
+		return rc
+
 	def getDVDPallets(self):
 		# packages = [('test', 'ver', 'rel', 'diskId'),
 		#		('test2', 'ver2', 'rel', 'diskId')]
 
-		#check if CD is mounted and get list
+		# TODO, mountCD was copied from the deprecated media.py
+		# it currently forces the mountpoint to /mnt/cdrom
+		self.mountCD()
+
+		pal = stack.probepal.Prober()
+		pallets = pal.find_pallets('/mnt/cdrom')
+
 		packages = []
-		media = stack.media.Media()
-
-		media.mountCD()
-		rollfile = stack.file.RollFile('/dev/null')
-		name, version, release, arch, diskid, foreign = \
-			rollfile.getRollInfo()
-		diskid = media.getId()
-
-		timestamp, name, arch, disknum, version = media.getCDInfo()
-		diskid = media.getId()
-		
-		if name in [ 'RHEL', 'CentOS' ]:
-			release = stack.release
-			packages.append((name, version, release, diskid))
-		else:
-			rolls = media.getRollsFromCD()
-			for name, version, release, arch in rolls:
-				packages.append((name, version, release, diskid))
+		for pal in pallets['/mnt/cdrom']:
+			packages.append((pal.name, pal.version, pal.release, ''))
 
 		return packages
 
@@ -291,31 +305,21 @@ class Data:
 		return (True, "", "")
 
 	def validatePallets(self, dvdlist, netlist):
-		count = len(dvdlist) + len(netlist)
-		if count == 0:
+		if len(dvdlist + netlist) == 0:
 			return (False, "Please select a pallet", "Error")
 		else:
-			self.data.dvdrolls = []
-			self.data.netrolls = []
+			self.data.dvdrolls = dvdlist
+			self.data.netrolls = netlist
 
-			if len(dvdlist) > 0:
-				self.data.dvdrolls = dvdlist
-			if len(netlist) > 0:
-				self.data.netrolls = netlist
 			return (True, "", "")
 
 	def generateSummary(self):
 		#string of pallets
 		text = ""
-		pallets = []
-
-		if self.data.dvdrolls:
-			pallets.extend(self.data.dvdrolls)
-		if self.data.netrolls:
-			pallets.extend(self.data.netrolls)
+		pallets = self.data.dvdrolls + self.data.netrolls
 
 		for p in pallets:
-			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['release'] + ' ' + p['id']
+			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['release']
 
 		#display summary data
 		summaryStr = 'Hostname: ' + self.data.Info_FQDN + '\n' + \
@@ -364,26 +368,24 @@ class Data:
 		#create xml elements and write rolls.xml
 		#write rolls from dvd
 		rolls = Element('rolls')
-		if self.data.dvdrolls:
-			for w in self.data.dvdrolls:
-				roll = SubElement(rolls, 'roll',
-					name=w['name'],
-					version=w['version'],
-					release=w['release'],
-					arch=self.arch,
-					url='http://127.0.0.1/mnt/cdrom/',
-					diskid=w['id'])
+		for w in self.data.dvdrolls:
+			roll = SubElement(rolls, 'roll',
+				name=w['name'],
+				version=w['version'],
+				release=w['release'],
+				arch=self.arch,
+				url='http://127.0.0.1/mnt/cdrom/',
+				diskid=w['id'])
 
 		#write rolls from network
-		if self.data.netrolls:
-			for w in self.data.netrolls:
-				roll = SubElement(rolls, 'roll',
-					name=w['name'],
-					version=w['version'],
-					release=w['release'],
-					arch=self.arch,
-					url=w['url'],
-					diskid='')
+		for w in self.data.netrolls:
+			roll = SubElement(rolls, 'roll',
+				name=w['name'],
+				version=w['version'],
+				release=w['release'],
+				arch=self.arch,
+				url=w['url'],
+				diskid='')
 
 		#write to file
 		tree = ElementTree(rolls)

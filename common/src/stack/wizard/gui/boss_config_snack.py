@@ -203,7 +203,7 @@ def handle_add_pallet(screen, data, pallets):
 		width=60,
 		entryWidth=46
 	)
-	
+
 	if response[0] == "load":
 		url = response[1][0]
 
@@ -225,7 +225,7 @@ def handle_add_pallet(screen, data, pallets):
 						pallet['name'],
 						pallet['version'],
 						pallet['release'],
-						'',
+						'net',
 						url[:-11]
 					))
 		except:
@@ -319,7 +319,7 @@ def process_data(page, btn_value, result):
 				}
 
 				# If it has a disk id then it is a DVD pallet, else it is net
-				if pallet['id'] != '':
+				if pallet['id'] != 'net':
 					dvd_pallets.append(pallet)
 				else:
 					net_pallets.append(pallet)
