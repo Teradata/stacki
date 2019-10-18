@@ -315,7 +315,8 @@ class Command(command):
 			self.write_pallet_xml(stacki_pallet_dir, pallet)
 			if updatedb:
 				self.update_db(pallet, paths_to_args[pallet.pallet_root])
-			self.patch_pallet(pallet)
+			if stacki_pallet_dir == '/export/stack/pallets':
+				self.patch_pallet(pallet)
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())
