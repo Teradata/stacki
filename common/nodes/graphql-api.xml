@@ -1,0 +1,39 @@
+<stack:stack>
+
+<stack:description>
+GraphQL API Endpoint
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>stack-graphql-api</stack:package>
+
+<!-- COMMON -->
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/opt/stack/etc/apache-graphql-api.conf"><![CDATA[
+WSGIPassAuthorization On
+WSGIDaemonProcess stacki-graphql-api processes=2 threads=10 display-name=%{GROUP}
+WSGIScriptAlias /api/graphql /var/www/wsgi/stacki-graphql-api.wsgi  process-group=stacki-graphql-api
+
+# API only over SSL because we need to protect tokens
+<Location "/api/graphql">
+	SSLRequireSSL
+</Location>
+]]></stack:file>
+</stack:script>
+
+<!-- REDHAT -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+ln -s /opt/stack/etc/apache-graphql-api.conf /etc/httpd/conf.d/graphql-api.conf
+</stack:script>
+
+<!-- SLES -->
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+ln -s /opt/stack/etc/apache-graphql-api.conf /etc/apache2/conf.d/graphql-api.conf
+</stack:script>
+
+</stack:stack>

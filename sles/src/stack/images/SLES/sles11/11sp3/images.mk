@@ -4,7 +4,11 @@ YUMLIST = \
 	stack-command \
 	stack-mq \
 	stack-pylib \
-	stack-storage-config 
+	stack-storage-config \
+	stack-graphql-api \
+		foundation-python-ariadne \
+			foundation-python-graphql-core \
+			foundation-python-typing-extensions
 
 getextrapackages:
 	cp RPMS/*rpm cache/

@@ -13,6 +13,7 @@
 -stack-switch
 -stack-report-system
 -stack-templates
+-stack-token-api
 -stack-wizard
 -stack-ws
 -stack-ws-client

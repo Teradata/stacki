@@ -23,7 +23,11 @@ YUMLIST = \
 		foundation-python-urllib3 \
 		foundation-python-chardet \
 		foundation-python-certifi \
-		foundation-python-idna
+		foundation-python-idna \
+	stack-graphql-api \
+		foundation-python-ariadne \
+			foundation-python-graphql-core \
+			foundation-python-typing-extensions
 
 
 getextrapackages:

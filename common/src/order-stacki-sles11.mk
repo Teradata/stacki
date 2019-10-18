@@ -15,4 +15,5 @@ SRCDIRS=stack/build  \
 	stack/storage-config  \
 	stack/uefi-boot-method  \
 	foundation/zeromq \
-	stack/checklist
+	stack/checklist \
+	stack/graphql-api

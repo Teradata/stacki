@@ -1,6 +1,8 @@
 #!/opt/stack/bin/python3
-import sys
+from itertools import chain
 from pathlib import Path
+import sys
+
 
 dest_base = Path("/opt/stack/lib/python3.7/site-packages")
 
@@ -9,6 +11,7 @@ grafts_to_site_packages = (
 	("command/stack/commands", "stack/commands"),
 	("discovery/command", "stack/commands"),
 	("discovery/pylib", "stack"),
+	("graphql-api/pylib", "stack"),
 	("mq/pylib", "stack"),
 	("mq/processors", "stack/mq/processors"),
 	("mq/producers", "stack/mq/producers"),
@@ -17,6 +20,7 @@ grafts_to_site_packages = (
 	("report-system/command", "stack/commands"),
 	("switch/command", "stack/commands"),
 	("switch/pylib", "stack"),
+	("token-api/pylib", "stack"),
 	("ws/command", "stack/commands"),
 	("ws/pylib", "stack"),
 	("ws-client/pylib", "")
@@ -41,18 +45,21 @@ bin_file_grafts = (
 
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
-		print(f'{Path(__file__).name} <path_to_stacki_source_tree>')
+		print(f"{Path(__file__).name} <path_to_stacki_source_tree>")
 		sys.exit(1)
 
 	# get the absolute path, expanding shell stuff
-	src_base = Path(sys.argv[1]).expanduser().resolve() / 'common/src/stack/'
+	src_base = Path(sys.argv[1]).expanduser().resolve() / "common/src/stack/"
 
 	for src, dest in grafts_to_site_packages:
 		src_directory = src_base / src
 		dest_directory = dest_base / dest
 
-		# Find all our Python files
-		for src_filename in src_directory.glob("**/*.py"):
+		# Find all our Python and GraphQL schema files
+		for src_filename in chain(
+			src_directory.glob("**/*.py"),
+			src_directory.glob("**/*.graphql")
+		):
 			dest_filename = dest_directory / src_filename.relative_to(src_directory)
 
 			# First blow away the old one, if it exists
@@ -60,7 +67,7 @@ if __name__ == '__main__':
 				dest_filename.unlink()
 
 			# Create any missing directory structure in the destination.
-			dest_filename.parent.mkdir(parents = True, exist_ok = True)
+			dest_filename.parent.mkdir(parents=True, exist_ok=True)
 
 			# Now symlink over our src version
 			dest_filename.symlink_to(src_filename)
@@ -74,7 +81,7 @@ if __name__ == '__main__':
 			dest_filename.unlink()
 
 		# Create any missing directory structure in the destination.
-		dest_filename.parent.mkdir(parents = True, exist_ok = True)
+		dest_filename.parent.mkdir(parents=True, exist_ok=True)
 
 		# Now symlink over our src version
 		dest_filename.symlink_to(src_filename)

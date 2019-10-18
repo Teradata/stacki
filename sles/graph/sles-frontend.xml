@@ -58,6 +58,8 @@
 		<to>time-server</to>
 		<to>uefi-server</to>
 		<to>restapi</to>
+		<to>token-api</to>
+		<to>graphql-api</to>
 		<to>ludicrous-server</to>
 	</edge>
 

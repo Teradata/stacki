@@ -269,6 +269,10 @@ if osname == 'redhat':
 new_pkgs = [
 	'stack-templates',
 	'stack-probepal',
+	'foundation-python-ariadne',
+	'foundation-python-graphql-core',
+	'foundation-python-typing-extensions',
+	'stack-graphql-api'
 ]
 
 for new_pkg in new_pkgs:

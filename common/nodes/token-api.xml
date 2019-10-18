@@ -1,0 +1,59 @@
+<stack:stack>
+
+<stack:description>
+GraphQL API Endpoint
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>stack-token-api</stack:package>
+
+<!-- COMMON -->
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/opt/stack/etc/apache-token-api.conf"><![CDATA[
+WSGIDaemonProcess stacki-token-api processes=2 threads=10 display-name=%{GROUP}
+WSGIScriptAlias /api/token /var/www/wsgi/stacki-token-api.wsgi  process-group=stacki-token-api
+
+# API only over SSL because we need to protect the credentials
+<Location "/api/token">
+	SSLRequireSSL
+</Location>
+]]></stack:file>
+</stack:script>
+
+<!-- Generate a shared secret -->
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3">
+from pathlib import Path
+import random
+import shutil
+
+# Generate 10 random 16-bit ints as 4 hex chars and smoosh them together
+shared_secret = "".join(
+	"{:04X}".format(random.randint(0, 65535))
+	for x in range(10)
+)
+
+# Write the secret to disk
+path = Path("/opt/stack/etc/jwt.secret")
+path.write_text(shared_secret)
+
+# Make sure only Apache can read it
+path.chmod(0o400)
+shutil.chown(path, "apache", "apache")
+</stack:script>
+
+<!-- REDHAT -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+ln -s /opt/stack/etc/apache-token-api.conf /etc/httpd/conf.d/token-api.conf
+</stack:script>
+
+<!-- SLES -->
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+ln -s /opt/stack/etc/apache-token-api.conf /etc/apache2/conf.d/token-api.conf
+</stack:script>
+
+</stack:stack>

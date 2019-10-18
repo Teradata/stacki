@@ -1,0 +1,17 @@
+type Query
+type Mutation
+
+interface Result {
+	success: Boolean!
+	error: String
+}
+
+type Status implements Result {
+	success: Boolean!
+	error: String
+}
+
+type Lookup {
+	name: String!
+	exists: Boolean!
+}

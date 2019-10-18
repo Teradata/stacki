@@ -9,8 +9,10 @@ authors = ["stacki"]
 [tool.poetry.dependencies]
 # For some reason this tool wants the python version here, so just leave it.
 python = "^3.6"
+ariadne = "*"
 django = "=1.11.20"
 flask = "*"
+flask-jwt-extended = "*"
 gitpython = "*"
 pymysql = "=0.8.1"
 configparser = "*"
@@ -83,8 +85,10 @@ django = { appliances = ["server"] }
 flask = { appliances = ["server"] }
 gitpython = { appliances = ["server"], bootstrap = true }
 pymysql = { appliances = ["server"], bootstrap = true }
+ariadne = { appliances = ["server"], bootstrap = true }
 configparser = { appliances = ["server", "client"] }
 flake8 = { appliances = ["server"], bootstrap = true }
+flask-jwt-extended = { appliances = ["server"] }
 jmespath = { appliances = ["server"] }
 jsoncomment = { appliances = ["server"], bootstrap = true }
 libvirt-python = { appliances = ["server"] }

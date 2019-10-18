@@ -38,11 +38,12 @@ import pymysql
 
 import stack.graph
 import stack
+from stack.bool import str2bool, bool2str
 from stack.cond import EvalCondExpr
 from stack.exception import (
 	CommandError, ParamRequired, ArgNotFound, ArgRequired, ArgUnique, ParamError
 )
-from stack.bool import str2bool, bool2str
+import stack.graphql
 from stack.util import flatten
 import stack.util
 
@@ -1831,6 +1832,48 @@ class Command:
 
 		return o.getText()
 
+	def graphql(self, query, args=None, raise_error=True):
+		# Substitute in the args
+		if args:
+			query = query % tuple(json.dumps(arg) for arg in args)
+
+		# Run the GraphQL query
+		success, result = stack.graphql.execute(self.db.database, {
+			"query": query
+		}, debug=_debug)
+
+		# If something was wrong with the GraphQL syntax, raise an error
+		if not success or result.get("errors"):
+			raise CommandError(
+				self,
+				", ".join(e["message"] for e in result.get("errors", []))
+			)
+
+		# If requested, check for an error status
+		for item in result["data"].values():
+			if isinstance(item, dict) and not item.get("success", True):
+				raise CommandError(self, item.get("error"))
+
+		return result["data"]
+
+	def graphql_query(self, query, args=None, fields=("success", "error"), raise_error=True):
+		return self.graphql(f"""
+			query {{
+				{query} {{
+					{', '.join(fields)}
+				}}
+			}}
+		""", args, raise_error)
+
+	def graphql_mutation(self, query, args=None, fields=("success", "error"), raise_error=True):
+		return self.graphql(f"""
+			mutation {{
+				{query} {{
+					{', '.join(fields)}
+				}}
+			}}
+		""", args, raise_error)
+
 	def loadPlugins(self):
 		dict	= {}
 		graph	= stack.graph.Graph()
@@ -2605,6 +2648,9 @@ class Module:
 	def __init__(self, command):
 		self.owner = command
 		self.db	   = command.db
+
+		self.graphql_query = command.graphql_query
+		self.graphql_mutation = command.graphql_mutation
 
 	def run(self, args):
 		"""

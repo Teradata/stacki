@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>GraphQL Playground - Login</title>
+  </head>
+  <body style="padding-top: 60px; background-color: rgb(9, 20, 28);">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">GraphQL Playground</h5>
+              <p class="card-text text-muted">
+                <b>Note:</b> A set of default credentials were generated on the frontend at install
+                time and are located in /root/stacki-ws.cred
+	      </p>
+
+	      {% if error %}
+	      <p class="alert alert-danger">Error: {{ error }}</p>
+	      {% endif %}
+
+              <form method="post">
+                <div class="form-group row">
+                  <label for="username" class="col-sm-4 col-form-label">Username</label>
+                  <div class="col-sm-8">
+                    <input type="username" class="form-control" id="username" name="username">
+                  </div>
+                </div>
+                <div class="form-group row justify-content-end">
+                  <label for="password" class="col-sm-4 col-form-label">Password</label>
+                  <div class="col-sm-8">
+                    <input type="password" class="form-control" id="password" name="password">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-sm-12">
+                    <button type="submit" class="btn btn-primary float-right">Login</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

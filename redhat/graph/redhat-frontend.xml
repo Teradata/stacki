@@ -66,6 +66,8 @@
 		<to>ludicrous-server</to>
 		<to>repo-server</to>
 		<to>restapi</to>
+		<to>token-api</to>
+		<to>graphql-api</to>
 		<to>uefi-server</to>
 	</edge>
 
