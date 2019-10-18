@@ -113,7 +113,7 @@ class TestBossConfigSnack:
 
 		# Check that the rolls.xml got generated correctly as well
 		assert re.fullmatch(
-			r'<rolls><roll arch="x86_64" diskid="stacki - Disk 1" '
+			r'<rolls><roll arch="x86_64" diskid="" '
 			r'name="stacki" release="[^"]+" url="http://127.0.0.1/mnt/cdrom/" '
 			r'version="[^"]+" /></rolls>',
 			rolls_xml_generated
