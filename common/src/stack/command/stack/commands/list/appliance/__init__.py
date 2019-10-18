@@ -11,6 +11,7 @@
 # @rocks@
 
 import stack.commands
+from stack.exception import ArgNotFound
 
 
 class command(stack.commands.ApplianceArgumentProcessor,
@@ -32,13 +33,19 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
+		# Make sure the appliances are valid
+		if args:
+			self.appliances_exist(args)
+
+		# Get the data
+		result = self.graphql_query(
+			"appliances(names: %s)", (args,),
+			fields=["name", "public"]
+		)
 
 		self.beginOutput()
-		for app in self.getApplianceNames(args):
-			rows = self.db.select(
-				'public from appliances where name=%s',
-				(app,)
-			)
-			self.addOutput(app, rows[0])
 
-		self.endOutput(header=['appliance', 'public'])
+		for appliance in result["appliances"]:
+			self.addOutput(appliance["name"], appliance["public"])
+
+		self.endOutput(header=["appliance", "public"])

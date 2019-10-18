@@ -141,33 +141,40 @@ class EnvironmentArgumentProcessor:
 
 class ApplianceArgumentProcessor:
 	"""
-	An Interface class to add the ability to process appliance arguments.
+	An mix-in class to add the ability to process appliance arguments.
 	"""
+
+	def appliances_exist(self, names=None):
+		"""
+		Checks if appliance names (possibly MySQL LIKE patterns) exist
+		and raise an ArgNotFound if any don't exist.
+		"""
+
+		# Make sure the names are valid
+		results = self.graphql_query(
+			"appliances_exist(names: %s)", (names,), fields=["name", "exists"]
+		)
+
+		invalid = [
+			x["name"] for x in results["appliances_exist"]
+			if x["exists"] == False
+		]
+		if invalid:
+			raise ArgNotFound(self, invalid, "appliance")
 
 	def getApplianceNames(self, args=None):
 		"""
-		Returns a list of appliance names from the database. For each arg
-		in the ARGS list find all the appliance names that match the arg
-		(assume SQL regexp). If an arg does not match anything in the
-		database we raise an exception. If the ARGS list is empty return
-		all appliance names.
+		Returns a list of appliance names from the database. Raises an
+		ArgNotFound if any of the args don't match an appliance name. If
+		the args list is empty return then returns all appliance names.
 		"""
 
-		appliances  = []
-		if not args:
-			args = ['%']		 # find all appliances
+		# Make sure the appliances exist
+		self.appliances_exist(args)
 
-		for arg in args:
-			names = flatten(self.db.select(
-				'name from appliances where name like %s', (arg,)
-			))
-
-			if not names and arg != '%':
-				raise ArgNotFound(self, arg, 'appliance')
-
-			appliances.extend(names)
-
-		return appliances
+		# Get the names
+		results = self.graphql_query("appliances(names: %s)", (args,), fields=["name"])
+		return [a["name"] for a in results["appliances"]]
 
 
 class BoxArgumentProcessor:

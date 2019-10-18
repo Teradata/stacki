@@ -43,7 +43,6 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
-
 		if len(args) != 1:
 			raise ArgUnique(self, 'appliance')
 		appliance = args[0]
@@ -51,33 +50,27 @@ class Command(command):
 		(node, public) = self.fillParams([
 			('node', ''),
 			('public', 'y')
-			])
+		])
 
 		public  = self.bool2str(self.str2bool(public))
 
-		# check for duplicates
-		if self.db.count('(ID) from appliances where name=%s', (appliance,)) > 0:
-			raise CommandError(self, 'appliance "%s" already exists' % appliance)
+		# Add the new appliance
+		self.graphql_mutation("add_appliance(name: %s, public: %s)", (appliance, public))
 
-		# ok, we're good to go
-		self.db.execute('''
-			insert into appliances (name, public) values
-			(%s, %s)
-			''', (appliance, public))
+		# TODO: Move this logic into the GraphQL layer
 
 		# by default, appliances shouldn't be managed or kickstartable...
 		implied_attrs = {'kickstartable': False, 'managed': False}
 
 		# ... but if the user specified node, they probably want those to be True
 		if node:
-			self.command('add.appliance.attr', [ appliance,
-				'attr=node', 'value=%s' % node ])
+			self.command('add.appliance.attr', [
+				appliance,'attr=node', 'value=%s' % node
+			])
 			implied_attrs['kickstartable'] = True
 			implied_attrs['managed'] = True
 
 		for attr, value in implied_attrs.items():
 			self.command('add.appliance.attr', [
-				appliance,
-				'attr=%s' % attr,
-				'value=%s' % value
-				])
+				appliance,'attr=%s' % attr, 'value=%s' % value
+			])

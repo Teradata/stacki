@@ -1,0 +1,53 @@
+type Appliance {
+	id: Int!
+	name: String!
+	public: String!
+}
+
+type ApplianceResult implements Result {
+	success: Boolean!
+	error: String
+	appliance: Appliance
+}
+
+extend type Query {
+	"""
+	Returns a list of appliances.
+
+	`id`: Specific database id of an appliance to return.
+
+	`name`: List of appliance names, which can be MySQL LIKE patterns.
+
+	If `id` and `name` are not provided, or `name` is an empty list, then
+	all appliances are returned.
+	"""
+	appliances(id: Int, names: [String!]): [Appliance!]!
+
+	"""
+	Checks if a list of appliance names each resolve to one or more
+	appliances.
+
+	`names`: List of appliance names, which can be MySQL LIKE patterns.
+	"""
+	appliances_exist(names: [String!]): [Lookup!]!
+}
+
+extend type Mutation {
+	"""
+	Add a new appliance.
+
+	`name`: Name of the appliance.
+
+	`public`: A flag if the appliance is considered public.
+	"""
+	add_appliance(name: String!, public: String): ApplianceResult!
+
+	"""
+	Remove one or more existing appliances.
+
+	`id`: Supply to remove a specific appliance by database id.
+
+	`names`: List of appliance names, which can be MySQL LIKE patterns.
+	"""
+	remove_appliance(id: Int, names: [String!]): Status!
+}

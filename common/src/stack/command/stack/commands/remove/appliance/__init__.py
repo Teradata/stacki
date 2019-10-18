@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ArgRequired, CommandError
+from stack.exception import ArgRequired, ArgNotFound
 
 
 class command(stack.commands.ApplianceArgumentProcessor,
@@ -21,17 +21,14 @@ class command(stack.commands.ApplianceArgumentProcessor,
 
 class Command(command):
 	"""
-	Remove an appliance definition from the system. This can be
-	called with just the appliance or it can be further
-	qualified by supplying the root XML node name and/or the
-	graph XML file name.
+	Remove an appliance definition from the system.
 
-	<arg type='string' name='name'>
-	The name of the appliance.
+	<arg type='string' name='appliance' optional='0' repeat='1'>
+	One or more appliances
 	</arg>
-	
-	<example cmd='remove appliance backend'>
-	Removes the backend appliance from the database.
+
+	<example cmd='remove appliance hadoop'>
+	Removes the hadoop appliance from the database.
 	</example>
 	"""
 
@@ -39,24 +36,8 @@ class Command(command):
 		if len(args) < 1:
 			raise ArgRequired(self, 'appliance')
 
-		appliances = self.getApplianceNames(args)
+		# Make sure the appliances are valid
+		self.appliances_exist(args)
 
-		#
-		# don't remove the default appliance
-		#
-		if 'backend' in appliances:
-			raise CommandError(self, 'cannot remove default appliance')
-
-		#
-		# check if the appliance is associated with any hosts
-		#
-		for appliance in appliances:
-			for row in self.call('list.host'):
-				if row['appliance'] == appliance:
-					raise CommandError(self, 'cannot remove appliance "%s" because host "%s" is assigned to it' % (appliance, row['host']))
-
-		#
-		# good to go
-		#
-		for appliance in appliances:
-			self.db.execute('delete from appliances where name=%s', (appliance,))
+		# Remove the appliances
+		self.graphql_mutation("remove_appliance(names: %s)", (args,))

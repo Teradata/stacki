@@ -72,9 +72,8 @@ CREATE TABLE environments (
 DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
 	id		INT AUTO_INCREMENT PRIMARY KEY,
-	name		VARCHAR(32) NOT NULL,
-	public		ENUM('yes','no') NOT NULL,
-	INDEX (name)
+	name		VARCHAR(32) UNIQUE NOT NULL,
+	public		ENUM('yes','no') NOT NULL
 );
 
 <!-- Boxes -->

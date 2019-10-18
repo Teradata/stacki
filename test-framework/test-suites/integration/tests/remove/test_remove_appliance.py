@@ -8,7 +8,7 @@ class TestRemoveAppliance:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "appliance" argument is required
-			{name}
+			{appliance ...}
 		''')
 
 	def test_invalid(self, host):
@@ -16,7 +16,7 @@ class TestRemoveAppliance:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid appliance
-			{name}
+			{appliance ...}
 		''')
 
 	def test_backend(self, host):
@@ -29,7 +29,7 @@ class TestRemoveAppliance:
 		# Try to remove the "frontend" appliance, which is in use
 		result = host.run('stack remove appliance frontend')
 		assert result.rc == 255
-		assert result.stderr == 'error - cannot remove appliance "frontend" because host "frontend-0-0" is assigned to it\n'
+		assert result.stderr == 'error - cannot remove in-use appliances: frontend\n'
 
 	def test_one_arg(self, host, add_appliance):
 		# Add some appliance scoped data to exercise the plugins
@@ -79,17 +79,9 @@ class TestRemoveAppliance:
 		assert result.rc == 0
 
 		# Make sure test appliance is gone
-		result = host.run('stack list appliance test')
+		result = host.run('stack list appliance test foo')
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
-			error - "test" argument is not a valid appliance
-			[appliance ...]
-		''')
-
-		# Make sure foo appliance is gone
-		result = host.run('stack list appliance foo')
-		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "foo" argument is not a valid appliance
+			error - "test" or "foo" argument is not a valid appliance
 			[appliance ...]
 		''')
