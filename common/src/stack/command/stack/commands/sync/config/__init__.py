@@ -10,7 +10,6 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import stack.file
 import stack.commands
 
 
