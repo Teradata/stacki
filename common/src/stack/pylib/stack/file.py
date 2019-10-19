@@ -18,6 +18,7 @@ import string
 import re
 import shutil
 import stack.util
+import stack.probepal
 import xml.sax
 import subprocess
 try:
@@ -248,111 +249,33 @@ class RollFile(File):
 		try:
 			File.__init__(self, file, timestamp, size)
 		except:
-			pass
-
-		self.name, self.version, self.release, self.arch, \
-			self.diskid, self.foreign = self.getRollInfo()
-
-	def getRollInfoFromXML(self):
-		name = None
-		version = None
-		release = None
-		arch = None
-
-		cdtree = stack.file.Tree('/mnt/cdrom')
-		for dir in cdtree.getDirs():
-			for file in cdtree.getFiles(dir):
-				try:
-					xmlfile = stack.file.RollInfoFile(
-						file.getFullName())
-
-					name = xmlfile.getRollName()
-					version = xmlfile.getRollVersion()
-					release = xmlfile.getRollRelease()
-					arch = xmlfile.getRollArch()
-
-					return name, version, release, arch
-				except:
-					continue
-
-		return None, None, None, None
-
-	def getRollInfo(self):
-		name = None
-		arch = None
-		version = None
-		release = None
-		diskid = None
-		foreign = 0
+			return
 
 		cmd = 'mount -o loop %s /mnt/cdrom > /dev/null 2>&1' % \
 			self.getFullName()
 		retcode = os.system(cmd)
 		if retcode:
-			return name, version, release, arch, diskid, foreign
+			return
 
-		if os.path.exists('/mnt/cdrom/.treeinfo'):
-			foreign = 1
-			file = open('/mnt/cdrom/.treeinfo', 'r')
-			for line in file.readlines():
-				a = line.split('=')
-
-				if len(a) != 2:
-					continue
-
-				key = a[0].strip()
-				value = a[1].strip()
-
-				if key == 'family':
-					if value == 'Red Hat Enterprise Linux':
-						name = 'RHEL'
-					elif value.startswith('CentOS'):
-						name = 'CentOS'
-					elif value.startswith('Oracle'):
-						name = 'OLE'
-					elif value.startswith('Scientific'):
-						name = 'SL'
-				elif key == 'version':
-					version = value
-				elif key == 'arch':
-					arch = value
-				elif key == 'discnum':
-					diskid = value
-			file.close()
-		elif os.path.exists('/mnt/cdrom/.discinfo'):
-			name, version, release, arch = self.getRollInfoFromXML()
-
-			file = open('/mnt/cdrom/.discinfo', 'r')
-			t = file.readline().strip()
-			n = file.readline().strip()
-			a = file.readline().strip()
-			d = file.readline().strip()
-			file.close()
-
-			if not name:
-				name = n.replace(' ', '_')
-			if not arch:
-				arch = a
-
-			#
-			# get the disk id if there are multiple disks, this
-			# will be 1, 2, etc.
-			#
-			diskid = d
-		if not name:
-			name = "BaseOS"
-			foreign = 1
-		if not version:
-			version = stack.version
-		if not release:
-			release = stack.release
-		if not arch:
-			arch = 'x86_64'
-		if not diskid:
-			diskid = '1'
-
+		pal = stack.probepal.Prober()
+		pallets = pal.find_pallets('/mnt/cdrom')
 		os.system('umount /mnt/cdrom > /dev/null 2>&1')
-		return name, version, release, arch, diskid, foreign
+
+		# TODO always expect single pallet?
+		pallet = pallets['/mnt/cdrom']
+		if not pallet:
+			return
+
+		p = pallet[0]
+		self.name = p.name
+		self.version = p.version
+		self.release = p.release
+		self.arch = p.arch
+		self.os = p.distro_family
+		self.diskid = ''
+		# TODO need foreign??
+		# TODO mounting is fucked up
+
 
 	def __cmp__(self, file):
 		if self.getRollArch() != file.getRollArch():
@@ -361,9 +284,6 @@ class RollFile(File):
 			rc = File.__cmp__(self, file)
 		return rc
 
-	def getRollDiskID(self):
-		return self.diskid
-		
 	def getRollName(self):
 		return self.name
 
@@ -373,17 +293,8 @@ class RollFile(File):
 	def getRollRelease(self):
 		return self.release
 
-	def getRollVersionString(self):
-		return self.version
-
-	def getRollReleaseString(self):
-		return self.release
-
 	def getRollArch(self):
 		return self.arch
-
-	def isRollForeign(self):
-		return self.foreign
 
 
 class RollInfoFile(File,
@@ -561,18 +472,6 @@ class Tree:
 			for e in self.tree[key]:
 				func(key, e, root)
 
-	def getSize(self):
-		'Return the size the if Tree in Mbytes'
-
-		len = 0
-		for key in self.tree.keys():
-			for file in self.tree[key]:
-				len = len + file.getSize()
-		return float(len)
-    
-
 	def __dumpIter__(self, path, file, root):
 		print(path, end=' ')
 		file.dump()
-	
-	
