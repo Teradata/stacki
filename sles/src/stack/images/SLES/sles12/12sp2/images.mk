@@ -2,6 +2,7 @@ YUMLIST = \
 	MegaCLI storcli \
 	stack-command \
 	stack-mq \
+	stack-probepal \
 	stack-pylib \
 	stack-storage-config \
 	ludicrous-speed \

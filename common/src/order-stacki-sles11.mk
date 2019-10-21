@@ -2,6 +2,7 @@ SRCDIRS=stack/build  \
 	foundation/python  \
 	stack/config  \
 	stack/command  \
+	stack/probepal  \
 	stack/pylib  \
 	foundation/python-packages  \
 	foundation/MegaCLI  \
