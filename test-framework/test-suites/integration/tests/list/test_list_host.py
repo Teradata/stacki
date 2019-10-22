@@ -20,7 +20,7 @@ class TestListHost:
 			'os': host_os,
 			'osaction': 'default',
 			'rack': '0',
-			'rank': '1'
+			'rank': '0'
 		}]
 
 	def test_lookup_by_FQDN(self, host, add_host_with_interface, add_network, host_os):
@@ -44,7 +44,7 @@ class TestListHost:
 			'os': host_os,
 			'osaction': 'default',
 			'rack': '0',
-			'rank': '1'
+			'rank': '0'
 		}]
 
 	def test_lookup_by_FQDN_with_name(self, host, add_host_with_interface, add_network, host_os):
@@ -72,5 +72,5 @@ class TestListHost:
 			'os': host_os,
 			'osaction': 'default',
 			'rack': '0',
-			'rank': '1'
+			'rank': '0'
 		}]

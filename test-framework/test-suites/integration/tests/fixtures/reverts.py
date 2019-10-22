@@ -5,9 +5,11 @@ import os
 import shutil
 import subprocess
 import time
+from pathlib import Path
 
 import pytest
 
+import stack.firmware
 
 @pytest.fixture
 def revert_database(dump_mysql):
@@ -20,6 +22,8 @@ def revert_database(dump_mysql):
 
 
 def _add_overlay(target):
+	# Support pathlib objects.
+	target = str(target)
 	name = target[1:].replace("/", "_")
 
 	# Make an overlay directories
@@ -45,6 +49,8 @@ def _add_overlay(target):
 	], check=True)
 
 def _remove_overlay(target, request):
+	# Support pathlib objects.
+	target = str(target)
 	name = target[1:].replace("/", "_")
 
 	# Log any file changes, if requested
@@ -189,3 +195,14 @@ def revert_routing_table():
 	for route in old_routes:
 		if route not in new_routes:
 			result = subprocess.run(f"ip route add {route}", shell=True)
+
+@pytest.fixture
+def revert_firmware(request):
+	"""Revert the filesystem where the firmware files get laid down."""
+	# Gotta make the directry first before this overlay stuff works.
+	stack.firmware.BASE_PATH.mkdir(parents = True, exist_ok = True)
+	_add_overlay(stack.firmware.BASE_PATH)
+
+	yield
+
+	_remove_overlay(stack.firmware.BASE_PATH, request)

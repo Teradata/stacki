@@ -5,10 +5,8 @@
 # @copyright@
 
 import re
-from collections import namedtuple
 import stack.commands
 from stack.exception import CommandError
-import stack.firmware
 from stack.util import flatten
 
 class Plugin(stack.commands.Plugin):
@@ -44,37 +42,20 @@ class Plugin(stack.commands.Plugin):
 
 	def run(self, args):
 		# Unpack args.
-		CommonKey, CommonResult, hosts_makes_models, expanded, hashit = args
-		hosts = [host_make_model.host for host_make_model in hosts_makes_models]
+		CommonResult, database_values_dict = args
 		# get all host attrs up front
-		host_attrs = self.owner.getHostAttrDict(host = hosts)
+		host_attrs = self.owner.getHostAttrDict(
+			host = [host_make_model.host for host_make_model in database_values_dict],
+		)
 
+		# Re-map the required information by implementation name so that run_implementations_parallel can
+		# run each implementation in parallel, and each implementation has all the info it needs.
 		mapped_by_imp_name = {}
-		# don't look in the db if here are no hosts.
-		if hosts:
-			for row in self.owner.db.select(
-				"""
-				firmware_imp.name, nodes.Name, firmware_make.name, firmware_model.name
-				FROM firmware_mapping
-					INNER JOIN nodes
-						ON firmware_mapping.node_id = nodes.ID
-					INNER JOIN firmware
-						ON firmware_mapping.firmware_id = firmware.id
-					INNER JOIN firmware_model
-						ON firmware.model_id = firmware_model.id
-					INNER JOIN firmware_make
-						ON firmware_model.make_id = firmware_make.id
-					INNER JOIN firmware_imp
-						ON firmware_model.imp_id = firmware_imp.id
-				WHERE nodes.Name IN %s
-				""",
-				(hosts,)
-			):
-				imp, host, make, model = row
-				if imp in mapped_by_imp_name:
-					mapped_by_imp_name[imp].update({CommonKey(host, make, model): host_attrs[host]})
-				else:
-					mapped_by_imp_name[imp] = {CommonKey(host, make, model): host_attrs[host]}
+		for host_make_model, firmware_info in database_values_dict.items():
+			if firmware_info.firmware_imp in mapped_by_imp_name:
+				mapped_by_imp_name[firmware_info.firmware_imp][host_make_model] = host_attrs[host_make_model.host]
+			else:
+				mapped_by_imp_name[firmware_info.firmware_imp] = {host_make_model: host_attrs[host_make_model.host]}
 
 		# run the implementations in parallel.
 		results_by_imp = self.owner.run_implementations_parallel(
@@ -100,13 +81,15 @@ class Plugin(stack.commands.Plugin):
 			if regex_obj:
 				match = re.search(regex_obj.regex, version, re.IGNORECASE)
 				if not match:
-					results_by_host_make_model[host_make_model] = f"{version} (Doesn't validate using the version_regex named {regex_obj.name} and will be ignored by sync)"
+					results_by_host_make_model[host_make_model] = (
+						f"{version} (Doesn't validate using the version_regex named {regex_obj.name} and will be ignored by sync)"
+					)
 				else:
 					results_by_host_make_model[host_make_model] = match.group()
 
 		# Do a final pass to turn the results into a list as the top level command expects.
 		# Also set None for host + make + model combos that had no results.
-		for host_make_model in hosts_makes_models:
+		for host_make_model in database_values_dict:
 			if host_make_model not in results_by_host_make_model:
 				results_by_host_make_model[host_make_model] = [None]
 			else:
