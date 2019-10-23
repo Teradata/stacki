@@ -34,9 +34,7 @@ stacki release &version; (&release;)
 </stack:file>
 
 <!-- sync.hosts is deprecated, remove it here after tdc-infrastructure switches to managed.hostsfile -->
-<stack:file stack:name="/etc/hosts" stack:cond="managed.hostsfile or sync.hosts" >
-<stack:report stack:name="host" />
-</stack:file>
+<stack:report stack:name="host" stack:cond="manage.hostsfile or sync.hosts" />
 
 </stack:script>
 
