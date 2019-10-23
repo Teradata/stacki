@@ -8,7 +8,7 @@ import stack.commands
 import stack.mq
 import socket
 import json
-from stack.exception import ArgRequired, ParamError
+from stack.exception import ArgRequired, ParamError, CommandError
 
 
 class Command(stack.commands.set.host.command):
@@ -51,9 +51,12 @@ class Command(stack.commands.set.host.command):
 		ipmi = 'ipmitool -I lanplus -H %s -U %s -P %s chassis power %s' \
 			% (ipmi_ip, username, password, cmd)
 
-		p = subprocess.Popen(shlex.split(ipmi), stdout = subprocess.PIPE,
-			stderr = subprocess.STDOUT)
-		out, err = p.communicate()
+		try:
+			p = subprocess.Popen(shlex.split(ipmi),
+				stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+			out, err = p.communicate(timeout=60)
+		except subprocess.TimeoutExpired as e:
+			raise CommandError(self, f'IPMI timed out after {e.timeout} seconds')
 
 		if self.debug:
 			self.beginOutput()
