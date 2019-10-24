@@ -1,4 +1,4 @@
-FROM centos as builder
+FROM centos:7 as builder
 WORKDIR /tmp
 
 RUN yum group install -y "Development Tools" "Infrastructure Server"

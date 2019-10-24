@@ -230,7 +230,9 @@ for master in pkgmasters:
 					if _version is not None and _version != package.version:
 						print(f'\t\tusing {_version}')
 						package.version = _version
-				package.bootstrap = PackageSet[master].bootstrap
+					package.bootstrap = PackageSet[package.name].bootstrap
+				if not package.bootstrap:
+					package.bootstrap = PackageSet[master].bootstrap
 				PackageSet[master].dependencies.append(package)
 				PackageSet[package.name] = package
 				
