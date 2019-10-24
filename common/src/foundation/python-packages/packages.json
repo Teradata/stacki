@@ -19,6 +19,7 @@
 	"GitPython":            { "fe": true, "bootstrap": true, "version": "2.1.11" },
 	"PyMySQL":		{ "fe": true, "bootstrap": true, "version": "0.8.1" }, 
 	"ansible":		{ "fe": true },
+	"asn1crypto":		{ "fe": true },
 	"configparser":		{ "fe": true, "be": true }, 
 	"flake8":		{ "fe": true, "bootstrap": true }, 
 	"jmespath":		{ "fe": true },
