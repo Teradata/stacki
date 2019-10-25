@@ -151,7 +151,7 @@ def render_partition(screen):
 
 def render_pallets(screen, data):
 	# Load the initial pallets from the boot cd (add an empy item for net data)
-	pallets = [x + ('',) for x in data.getDVDPallets()]
+	pallets = data.getDVDPallets()
 	
 	# This will loop until Continue or Back is selected
 	while True:
@@ -307,26 +307,18 @@ def process_data(page, btn_value, result):
 		#pallets
 		elif page == 5:
 			# Create out lists of selected pallets to validate
-			dvd_pallets = []
-			net_pallets = []
+			pallets = []
 			for item in result:
-				pallet =  {
+				pallets.append({
 					'name': item[0],
 					'version': item[1],
 					'release': item[2],
 					'id': item[3],
 					'url': item[4]
-				}
-
-				# If it has a disk id then it is a DVD pallet, else it is net
-				if pallet['id'] != 'net':
-					dvd_pallets.append(pallet)
-				else:
-					net_pallets.append(pallet)
+				})
 			
 			validated, message, title = data.validatePallets(
-				dvd_pallets,
-				net_pallets
+				pallets,
 			)
 		
 		#summary

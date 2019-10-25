@@ -49,8 +49,7 @@ class Attr:
 	nukedisks = False
 	devices = {}
 	partition = "Automated"
-	dvdrolls = None
-	netrolls = None
+	pallets = []
 
 
 class Data:
@@ -104,7 +103,7 @@ class Data:
 
 		packages = []
 		for pal in pallets['/mnt/cdrom']:
-			packages.append((pal.name, pal.version, pal.release, ''))
+			packages.append((pal.name, pal.version, pal.release, '', '/mnt/cdrom'))
 
 		return packages
 
@@ -296,22 +295,20 @@ class Data:
 
 		return (True, "", "")
 
-	def validatePallets(self, dvdlist, netlist):
-		if len(dvdlist + netlist) == 0:
+	def validatePallets(self, pallets):
+		if not pallets:
 			return (False, "Please select a pallet", "Error")
 		else:
-			self.data.dvdrolls = dvdlist
-			self.data.netrolls = netlist
+			self.data.pallets = pallets
 
 			return (True, "", "")
 
 	def generateSummary(self):
 		#string of pallets
 		text = ""
-		pallets = self.data.dvdrolls + self.data.netrolls
 
-		for p in pallets:
-			text += '\n' + p['name'] + ' ' + p['version'] + ' ' + p['release']
+		for p in self.data.pallets:
+			text += f'\n{pal["name"]} {pal["version"]} {pal["release"]}'
 
 		#display summary data
 		summaryStr = 'Hostname: ' + self.data.Info_FQDN + '\n' + \
@@ -339,8 +336,7 @@ class Data:
 			   if not callable(attr) and 
 			   not attr.startswith("__") and 
 			   not attr == 'devices' and 
-			   not attr == 'dvdrolls' and 
-			   not attr == 'netrolls' and
+			   not attr == 'pallets' and
 			   not attr == 'partition']
 		for w in members:
 			v = getattr(self.data, w)
@@ -360,23 +356,13 @@ class Data:
 		#create xml elements and write rolls.xml
 		#write rolls from dvd
 		rolls = Element('rolls')
-		for w in self.data.dvdrolls:
+		for pal in self.data.pallets:
 			roll = SubElement(rolls, 'roll',
-				name=w['name'],
-				version=w['version'],
-				release=w['release'],
+				name=pal['name'],
+				version=pal['version'],
+				release=pal['release'],
 				arch=self.arch,
-				url='http://127.0.0.1/mnt/cdrom/',
-				diskid=w['id'])
-
-		#write rolls from network
-		for w in self.data.netrolls:
-			roll = SubElement(rolls, 'roll',
-				name=w['name'],
-				version=w['version'],
-				release=w['release'],
-				arch=self.arch,
-				url=w['url'],
+				url=pal['url'],
 				diskid='')
 
 		#write to file
