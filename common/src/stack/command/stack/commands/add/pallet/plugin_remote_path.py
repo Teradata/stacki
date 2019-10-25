@@ -63,7 +63,7 @@ class Plugin(stack.commands.Plugin):
 				f'--cut-dirs={cut_dirs}',
 				'--reject=TBL,index.html*',
 				f'--directory-prefix={tempdir}', # directory to save files to
-				canon_arg,
+				norm_loc,
 			]
 
 			try:
