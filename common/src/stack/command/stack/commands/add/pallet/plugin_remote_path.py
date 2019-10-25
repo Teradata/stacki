@@ -56,7 +56,6 @@ class Plugin(stack.commands.Plugin):
 			wget_cmd = [
 				'wget',
 				*creds,
-				'--quiet',
 				'--recursive', # recursive download
 				'--no-host-directories', # Don't create host directory
 				'--no-parent',  # Don't create parent directories
@@ -68,8 +67,8 @@ class Plugin(stack.commands.Plugin):
 			]
 
 			try:
-				result = self.owner._exec(wget_cmd, check=True)
+				result = self.owner._exec(wget_cmd, stderr=subprocess.STDOUT, check=True)
 			except subprocess.CalledProcessError as e:
-				raise CommandError(self, f'remote fetch failed, tried:\n{" ".join(wget_cmd)}: {e.stderr}')
+				raise CommandError(self, f'remote fetch failed, tried:\n{" ".join(wget_cmd)}\n{e.stdout}')
 
 			args[arg]['exploded_path'] = tempdir
