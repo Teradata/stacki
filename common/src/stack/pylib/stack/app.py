@@ -27,12 +27,6 @@ class Application:
 		self.usage_command	= os.path.basename(argv[0])
 		self.usage_name		= 'Application'
 		self.usage_version	= 0
-
-		self.projectName	 = 'stack'
-		self.projectVersionName	 = 'base'
-		self.projectVersionMajor = '0'
-		self.projectVersionMinor = '0'
-		self.projectVersionMicro = '0'
 	
 
 		self.getopt		= stack.util.Struct()
@@ -48,13 +42,6 @@ class Application:
 	
 	def run(self):
 		sys.exit(-1)
-
-	def projectInfo(self):
-		return [ self.projectName,
-			 self.projectVersionName,
-			 int(self.projectVersionMajor),
-			 int(self.projectVersionMinor),
-			 int(self.projectVersionMicro) ]
 
 	def getArgs(self):
 		return self.args
@@ -167,7 +154,7 @@ class Application:
 			if v[len(v) - 1] == '=':
 				list.append(' [--' + v[:-1] + ' ' + h + ']')
 
-		list.append(self.usageTail())
+		list.append('')
 
 		# Print the usage, word wrapped to the correct screen size.
 		print(self.usage_name, '- version', self.usage_version)
@@ -187,10 +174,6 @@ class Application:
 
 	def help(self):
 		self.usage()
-
-
-	def usageTail(self):
-		return ''
 
 
 	def getArch(self):
