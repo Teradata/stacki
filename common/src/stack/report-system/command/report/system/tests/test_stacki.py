@@ -4,11 +4,17 @@ from operator import itemgetter
 
 @pytest.mark.parametrize("command", ["box", "pallet", "cart", "network", "host", "host interface"])
 def test_stack_list(command, host, report_output):
+	'''
+	prepare a report for several key database objects
+	'''
 	result = host.run(f"stack list {command}")
 	assert result.rc == 0
 	report_output(f"list {command}", result.stdout)
 
 def test_stacki_pallets_sane(host):
+	'''
+	Test that the stacki pallet(s) at least are somewhat sane
+	'''
 	palletdir = '/export/stack/pallets/'
 
 	result = host.run(f'probepal {palletdir}')
@@ -29,11 +35,14 @@ def test_stacki_pallets_sane(host):
 	assert stacki_pallets
 
 def test_stacki_central_server(host):
+	'''
+	test that the frontend is correctly configured to act as a central server
+	(serving pallets to other frontends)
+	'''
 	result = host.run("stack list pallet output-format=json")
 	assert result.rc == 0
 	palinfo = [
-		dict((k,v)
-		for k, v in p.items() if k != 'boxes')
+		{k: v for k,v in p.items() if k != 'boxes'}
 		for p in json.loads(result.stdout)
 	]
 
