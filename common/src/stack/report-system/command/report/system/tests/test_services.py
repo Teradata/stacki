@@ -44,19 +44,27 @@ def test_service_enabled_and_running(host, service):
 def test_tftpd_enabled_and_running(host):
 	xinetd = host.service('xinetd')
 	fbtftpd = host.service('fbtftpd')
-	if not xinetd.is_enabled and not fbtftpd.is_enabled:
-		err = print("No tftp server is enabled.")
-		assert err
+	assert xinetd.is_enabled or fbtftpd.is_enabled, "No tftp server is enabled."
+	assert xinetd.is_running or fbtftpd.is_running, "No tftp server is running."
 
-	if not xinetd.is_running and not fbtftpd.is_running:
-		err = print("No tftp server is running.")
-		assert err
+def test_logrotate_service_enabled(host):
+	"""Test that the logrotate service is enabled."""
+	# On RedHat, there's a cronjob in /etc/cron.daily/logrotate.
+	if HOST_OS == "redhat":
+		assert host.file("/etc/cron.daily/logrotate").exists
+	# There seems to be a logrotate service on SLES.
+	else:
+		assert host.service("logrotate").is_enabled
 
-def test_logrotate_enabled_and_configured(host):
-	# note, logrotate doesn't stay running, and only runs on sles?
-	if HOST_OS == 'sles':
-		daemon = host.service('logrotate')
-		assert daemon.is_enabled
+def test_logrotate_configuration_valid(host):
+	"""Runs logrotate in debug mode to confirm the logrotate files have no errors."""
+	result = host.run("logrotate --debug /etc/logrotate.conf")
+	# The command should always return zero even if there are errors,
+	# so we need to check for errors in stdout or stderr.
+	assert result.rc == 0
+	assert "error:" not in result.stdout
+	assert "error:" not in result.stderr
 
-	result = host.run('/usr/sbin/logrotate /etc/logrotate.conf -d')
-	assert result.exit_status == 0, "logrotate configuration is invalid"
+def test_stacki_logrotate_file_exists(host):
+	"""Asserts that the stacki logrotate file exists."""
+	assert host.file("/etc/logrotate.d/stack").exists
