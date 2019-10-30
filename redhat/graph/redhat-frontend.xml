@@ -19,7 +19,7 @@
 
 	<order head="database-data">
 		<tail>install</tail>
-		<tail>insert-rolls</tail>
+		<tail>insert-pallets</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
 		<tail>restapi</tail>
@@ -53,7 +53,7 @@
 		<to>server</to>
 	</edge>
 
-	<edge from="server" to="insert-rolls" cond="platform != 'aws'"/>
+	<edge from="server" to="insert-pallets" cond="platform != 'aws'"/>
 
 	<edge from="server">
 		<to>base</to>

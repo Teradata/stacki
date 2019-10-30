@@ -37,6 +37,7 @@ for name, version, release, arch, url, diskid in generator.rolls:
 	cmd = '/opt/stack/bin/stack'
 	os.system('%s add pallet %s' % (cmd,purl))
 	os.system('%s enable pallet %s' % (cmd,name))
+	os.system('%s enable pallet %s box=frontend' % (cmd,name))
 </stack:script>
 
 </stack:stack> 
