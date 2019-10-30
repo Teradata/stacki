@@ -6,7 +6,6 @@
 	</description>
 
 	<edge from="base">
-		<to>logrotate</to>
 		<to>time-base</to>
 	</edge>
 
