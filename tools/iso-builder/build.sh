@@ -75,7 +75,7 @@ cp build-*/stacki-*.iso /vagrant/
 if [[ $PLATFORM = "redhat7" && -n $OS_PALLET ]]
 then
     cd /export/src
-    stack create pallet stacki/build-*/stacki-*.iso /export/isos/$OS_PALLET name=stackios
+    stack create pallet stacki/build-*/stacki-*.iso /export/isos/$(basename $OS_PALLET) name=stackios
     cp stackios-*.iso /vagrant/
 fi
 
