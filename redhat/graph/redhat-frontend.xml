@@ -40,19 +40,12 @@
 	</order>
 
 	<order head="TAIL">
-		<tail>insert-pallets</tail>
 		<tail>profile-server</tail>
 		<tail>ludicrous-server</tail>
 	</order>
 
 
 	<!-- Graph OO Framework -->
-
-	<edge from="frontend">
-		<to>server</to>
-	</edge>
-
-	<edge from="server" to="insert-pallets" cond="platform != 'aws'"/>
 
 	<edge from="server">
 		<to>base</to>

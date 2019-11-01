@@ -1,0 +1,47 @@
+<stack:stack>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<!-- Make sure to add the frontend box, and enable all added pallets for both the default and frontend box. -->
+<stack:script stack:shell='/opt/stack/bin/python3' stack:stage="install-post" stack:cond="platform != 'aws'">
+import pathlib
+import sys
+import subprocess
+import xml.etree.ElementTree
+import stack.util
+
+# Bail if the roll XML is missing.
+rolls_xml = "/tmp/rolls.xml"
+if not pathlib.Path(rolls_xml).exists():
+	sys.exit(1)
+
+root_element = xml.etree.ElementTree.parse(rolls_xml).getroot()
+
+cmd = "/opt/stack/bin/stack"
+# Add pallet can now recursively add everything under a given URL,
+# so only iterate over unique URLs.
+unique_urls = stack.util.unique_everseen(
+	element.attrib["url"] for element in root_element.iter()
+	if element.attrib.get("url")
+)
+subprocess.run([cmd, "add", "pallet", *unique_urls], check = True)
+
+# Create the frontend box if it doesn't exist.
+# If it already exists, a command error is raised, so don't check the returncode.
+subprocess.run([cmd, "add", "box", "frontend"])
+
+# Enable all pallets for the default and frontend boxes
+subprocess.run([cmd, "enable", "pallet", r"%"], check = True)
+subprocess.run([cmd, "enable", "pallet", r"%", "box=frontend"], check = True)
+</stack:script>
+
+<!-- Make sure the config we set up is synced. -->
+<stack:script stack:stage="install-post">
+/opt/stack/bin/stack sync config
+</stack:script>
+
+</stack:stack>
