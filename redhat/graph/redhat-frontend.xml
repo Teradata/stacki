@@ -18,7 +18,6 @@
 	</edge>
 
 	<order head="database-data">
-		<tail>install</tail>
 		<tail>insert-pallets</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
@@ -42,7 +41,7 @@
 	</order>
 
 	<order head="TAIL">
-		<tail>install</tail>
+		<tail>profile-server</tail>
 		<tail>ludicrous-server</tail>
 	</order>
 
@@ -59,7 +58,7 @@
 		<to>base</to>
 		<to>security-server</to>
 		<to>time-server</to>
-		<to>install</to>
+		<to>profile-server</to>
 		<to>pxe</to>
 		<to>pxeboot</to>
 		<to>networking-server</to>
