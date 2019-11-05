@@ -15,8 +15,6 @@
 	libbdevid-python
 	pykickstart
 	python-pyblock
-	telnet
-	tigervnc
 	</stack:stack> 
 
 	<stack:package>
