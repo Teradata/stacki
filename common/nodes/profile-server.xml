@@ -36,5 +36,6 @@
 	cd install/sbin ;
 	ln -s . public ;
 ) 
+</stack:script>
 
 </stack:stack> 
