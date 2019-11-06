@@ -136,12 +136,12 @@ class Command(command):
 		if result.returncode != 0:
 			raise CommandError(self, f'Unable to copy pallet:\n{result.stderr}')
 
-		cmd = f'find {destdir}/ -type d -exec chmod +x {} ;'
+		cmd = f'find {destdir}/' + ' -type d -exec chmod +x {} ;'
 		result = self._exec(cmd, shlexsplit=True)
 		if result.returncode != 0:
 			raise CommandError(self, f'Error correcting directory permissions:\n{result.stderr}')
 
-		cmd = f'find {destdir}/ -type f -exec chmod +r {} ;'
+		cmd = f'find {destdir}/' + ' -type f -exec chmod +r {} ;'
 		result = self._exec(cmd, shlexsplit=True)
 		if result.returncode != 0:
 			raise CommandError(self, f'Error correcting file permissions:\n{result.stderr}')
