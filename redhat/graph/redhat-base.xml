@@ -24,7 +24,6 @@
 	<!-- Graph OO Framework -->
 
 	<edge from="base">
-		<to>rpc</to>
 		<to>time-base</to>
 		<to>postshell</to>
 		<to>yum-base</to>
