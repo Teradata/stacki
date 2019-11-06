@@ -74,14 +74,7 @@ class Builder:
 			release, OS, arch)
 		os.chdir(palletdir)
 
-		cmd = [ 'createrepo' ]
-		if OS == 'redhat' and self.config.needsComps():
-			self.addComps(basedir)
-			cmd.append('--groupfile')
-			cmd.append(
-				os.path.join(basedir, 'RedHat/base/comps.xml'))
-		cmd.append('.')
-		subprocess.call(cmd)
+		subprocess.call(['createrepo', '.'])
 
 		os.chdir(basedir)
 
@@ -398,51 +391,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 		self.boot.installBootfiles(destination)
 		
 		return
-
-
-	def addComps(self, basedir):
-		#
-		# need to copy foundation-comps from stacki into the pallet
-		# build directory for the OS pallet
-		#
-		destination = os.path.join(basedir, 'disk1')
-		localrolldir = os.path.join(self.config.getRollName(), 
-			self.config.getRollVersion(),
-			self.config.getRollRelease(), 'redhat',
-			self.config.getRollArch())
-		rolldir = os.path.join(destination, localrolldir)
-
-		sversion = None
-		srelease = None
-		sarch = None
-		sos = None
-		output = self.call('list.pallet', [ 'stacki' ])
-		for o in output:
-			if o['version'] == stack.version:
-				sversion = o['version']
-				srelease = o['release']
-				sarch = o['arch']
-				sos = o['os']
-
-		if not sversion:
-			msg = 'could not find stacki pallet matching version "%s" in "stack list pallet"'
-			raise CommandError(self, msg % stack.version)
-
-		foundation_comps = os.path.join('/export', 'stack',
-			'pallets', 'stacki', sversion,
-			srelease, sos, sarch, 'RPMS',
-			'foundation-comps-%s-%s.noarch.rpm' %
-			(sversion, srelease))
-		dst = os.path.join(rolldir, 'RPMS')
-		shutil.copy(foundation_comps, dst)
-				
-		boot = stack.bootable.Bootable(basedir, rolldir)
-
-		pkg = boot.findFile('foundation-comps')
-		if not pkg:
-			raise CommandError(self, 'could not find RPM "foundation-comps"')
-
-		boot.applyRPM(pkg, basedir)
 
 
 	def run(self):
