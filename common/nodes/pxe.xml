@@ -1,6 +1,5 @@
 <stack:stack>
 
-
 <stack:copyright>
 Copyright (c) 2006 - 2019 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
@@ -8,11 +7,22 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
 
-<stack:package>tftp</stack:package>
-<stack:package>syslinux</stack:package>
-<stack:package>xinetd</stack:package>
-<stack:package>stack-pxeboot</stack:package>
-<stack:package>stack-sles-images</stack:package>
+<stack:package stack:cond="os == 'redhat'">
+memtest86+
+tftp-server
+stack-images
+</stack:package>
+
+<stack:package stack:cond="os == 'sles'">
+tftp
+stack-sles-images
+</stack:package>
+
+<stack:package>
+syslinux
+xinetd
+stack-pxeboot
+</stack:package>
 
 
 <stack:script stack:stage="install-post">
@@ -38,8 +48,6 @@ service tftp
 </stack:file>
 
 
-mkdir -p /tftpboot/pxelinux
-
 mkdir -p /tftpboot/pxelinux/pxelinux.cfg
 chown root.apache /tftpboot/pxelinux/pxelinux.cfg
 chmod 775 /tftpboot/pxelinux/pxelinux.cfg
@@ -50,6 +58,11 @@ cp /opt/stack/images/initrd* /tftpboot/pxelinux/
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 
+</stack:script>
+
+
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+cp /boot/memtest86* /tftpboot/pxelinux/memtest
 </stack:script>
 
 
