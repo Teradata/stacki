@@ -1,24 +1,25 @@
 <stack:stack>
 
+  <stack:description>
+  Setup the DHCP server for the cluster
+  </stack:description>
 
-<stack:package>dhcp-server</stack:package>
+<stack:package stack:cond="os == 'redhat'">dhcp</stack:package>
+<stack:package stack:cond="os == 'sles'">dhcp-server</stack:package>
 
 
 <stack:script stack:stage="install-post">
-
 /usr/bin/systemctl enable dhcpd
-
 /opt/stack/bin/stack report dhcpd | /opt/stack/bin/stack report script | sh
+</stack:script>
 
+<stack:script stack:stage="install-post" stack:cond="os == 'sles'">
 rm /etc/dhcpd.conf
 ln -s /etc/dhcp/dhcpd.conf /etc/dhcpd.conf
 
 touch /var/lib/dhcp/db/dhcpd.leases
 chmod 644 /var/lib/dhcp/db/dhcpd.leases
 chown dhcpd.nogroup /var/lib/dhcp/db/dhcpd.leases
-
-/usr/bin/systemctl enable dnsmasq
-
 </stack:script>
 
 </stack:stack> 
