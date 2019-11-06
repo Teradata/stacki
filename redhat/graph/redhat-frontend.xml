@@ -18,7 +18,6 @@
 	</edge>
 
 	<order head="database-data">
-		<tail>insert-pallets</tail>
 		<tail>server</tail>
 		<tail>pxe</tail>
 		<tail>restapi</tail>
@@ -41,6 +40,7 @@
 	</order>
 
 	<order head="TAIL">
+		<tail>insert-pallets</tail>
 		<tail>profile-server</tail>
 		<tail>ludicrous-server</tail>
 	</order>
