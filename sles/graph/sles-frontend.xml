@@ -51,7 +51,6 @@
 		<to>firewall-base</to>
 		<to>firewall-server</to>
 		<to>profile-server</to>
-		<to>kernel-server</to>
 		<to>networking-server</to>
 		<to>pxe</to>
 		<to>ssl-server</to>
