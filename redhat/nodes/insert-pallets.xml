@@ -40,4 +40,8 @@ for name, version, release, arch, url, diskid in generator.rolls:
 	os.system('%s enable pallet %s box=frontend' % (cmd,name))
 </stack:script>
 
+<stack:script stack:stage="install-post">
+/opt/stack/bin/stack sync config
+</stack:script>
+
 </stack:stack> 
