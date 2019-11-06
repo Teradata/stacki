@@ -131,20 +131,21 @@ class Command(command):
 		if not destdir.exists():
 			destdir.mkdir(parents=True, exist_ok=True)
 
-		cmd = f'rsync --archive --exclude "TRANS.TBL" {pallet_dir}/ {destdir}/'
+		# use rsync to perform the copy
+		# archive implies
+		# --recursive, 
+		# --links - copy symlinks as symlinks
+		# --perms - preserve permissions
+		# --times - preserve mtimes
+		# --group - preserve group
+		# --owner - preserve owner
+		# --devices - preserve device files
+		# --specials - preserve special files
+		# we then overwrite the permissions to make apache happy.
+		cmd = f'rsync --archive --chmod=D755 --chmod=F644 --exclude "TRANS.TBL" {pallet_dir}/ {destdir}/'
 		result = self._exec(cmd, shlexsplit=True)
 		if result.returncode != 0:
 			raise CommandError(self, f'Unable to copy pallet:\n{result.stderr}')
-
-		cmd = f'find {destdir}/' + ' -type d -exec chmod +x {} ;'
-		result = self._exec(cmd, shlexsplit=True)
-		if result.returncode != 0:
-			raise CommandError(self, f'Error correcting directory permissions:\n{result.stderr}')
-
-		cmd = f'find {destdir}/' + ' -type f -exec chmod +r {} ;'
-		result = self._exec(cmd, shlexsplit=True)
-		if result.returncode != 0:
-			raise CommandError(self, f'Error correcting file permissions:\n{result.stderr}')
 
 		return destdir
 
