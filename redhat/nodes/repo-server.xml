@@ -11,8 +11,7 @@
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
-/opt/stack/bin/stack report host repo &Kickstart_PrivateHostname; | \
-	/opt/stack/bin/stack report script | sh
+/opt/stack/bin/stack sync host repo &hostname;
 </stack:script>
 
 </stack:stack>
