@@ -105,7 +105,8 @@ class Command(stack.commands.sync.host.command):
 				# we only conditionally sync /etc/hosts
 				cmd += '/opt/stack/bin/stack report host && '
 			cmd += '/opt/stack/bin/stack report host resolv %s && ' % host
-			cmd += '/opt/stack/bin/stack report host route %s ) | ' % host
+			cmd += '/opt/stack/bin/stack report host route %s && ' % host
+			cmd += '/opt/stack/bin/stack report host time %s ) | ' % host
 			cmd += '/opt/stack/bin/stack report script | '
 			if host != me:
 				cmd += 'ssh -T -x %s ' % hostname
