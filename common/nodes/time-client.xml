@@ -1,7 +1,7 @@
 <stack:stack>
 
 <stack:description>
-Time Configuration
+Time Configuration for backends
 </stack:description>
 
 <stack:copyright>
@@ -10,16 +10,14 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
-<stack:rocks>
-Copyright (c) 2000 - 2010 The Regents of the University of California
-All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</stack:rocks>
+<stack:package stack:cond="os == 'sles' and os.version == '12.x'">
+chrony
+</stack:package>
 
-	<stack:package>
-		rdate
-		chrony
-	</stack:package>
+<stack:package stack:cond="os == 'redhat'">
+rdate
+chrony
+</stack:package>
 
 <stack:script stack:stage="install-post">
 <stack:report stack:name="host.time">&hostname;</stack:report>
