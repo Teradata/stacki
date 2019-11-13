@@ -367,7 +367,7 @@ then
     do
         # The libvirt vagrant provider doesn't support boot_timeout, so we ignore
         # errors and check for ssh to come up later on.
-        vagrant up --no-destroy-on-error backend-0-$i 2>/dev/null &
+        vagrant up --no-destroy-on-error backend-0-$i &
         sleep 10
     done
 
