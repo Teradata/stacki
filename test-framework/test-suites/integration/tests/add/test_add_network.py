@@ -72,7 +72,7 @@ class TestAddNetwork:
 				'dns': False,
 				'gateway': '',
 				'mask': '255.255.255.0',
-				'mtu': 1500,
+				'mtu': None,
 				'network': 'test',
 				'pxe': False,
 				'zone': 'test'

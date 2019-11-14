@@ -8,7 +8,7 @@ class TestSetNetworkMTU:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "network" argument is required
-			{network ...} {mtu=string}
+			{network ...} {mtu=integer}
 		''')
 
 	def test_no_parameters(self, host):
@@ -16,7 +16,7 @@ class TestSetNetworkMTU:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "mtu" parameter is required
-			{network ...} {mtu=string}
+			{network ...} {mtu=integer}
 		''')
 
 	def test_invalid_network(self, host):
@@ -24,7 +24,7 @@ class TestSetNetworkMTU:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid network
-			{network ...} {mtu=string}
+			{network ...} {mtu=integer}
 		''')
 
 	def test_single_host(self, host, add_network):

@@ -6,7 +6,6 @@ NETMASK=255.255.255.0
 BOOTPROTO=static
 BONDING_OPTS="mode=1"
 ONBOOT=yes
-MTU=1500
 </stack:file>
 <stack:file stack:name="/etc/sysconfig/network-scripts/ifcfg-eth0">
 # AUTHENTIC STACKI

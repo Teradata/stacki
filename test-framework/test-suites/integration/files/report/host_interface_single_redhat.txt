@@ -6,7 +6,6 @@ IPADDR=192.168.0.2
 NETMASK=255.255.255.0
 BOOTPROTO=static
 ONBOOT=yes
-MTU=1500
 </stack:file>
 <stack:file stack:name="/etc/udev/rules.d/70-persistent-net.rules">
 SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:11:22:33:44:55", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"

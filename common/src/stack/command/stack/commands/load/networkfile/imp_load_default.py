@@ -82,7 +82,7 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 					#
 					# make checking the header easier
 					#
-					required = ['network', 'zone', 'address', 'mask', 'gateway', 'mtu', 'dns', 'pxe']
+					required = ['network', 'zone', 'address', 'mask']
 
 					for i in range(0, len(row)):
 						header[i] = header[i].lower()
@@ -179,9 +179,12 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				else:
 					self.owner.networks[name]['zone'] = zone
 				# add all the rest that we don't care if you screwed up.
-				self.owner.networks[name]['mtu'] = mtu
-				self.owner.networks[name]['dns'] = dns
-				self.owner.networks[name]['pxe'] = pxe
+				if mtu:
+					self.owner.networks[name]['mtu'] = mtu
+				if not dns:
+					self.owner.networks[name]['dns'] = False
+				if not pxe:
+					self.owner.networks[name]['pxe'] = False
 		except UnicodeDecodeError:
 			raise CommandError(self.owner, 'non-ascii character in file')
 
@@ -191,10 +194,4 @@ class Implementation(stack.commands.NetworkArgumentProcessor,
 				% (line - 1)
 			msg += '%s networks. Do you have duplicates?' \
 				% len(self.owner.networks.keys())
-			raise CommandError(self.owner, msg)
-
-		# bail if 'private' is not defined			
-		if 'private' not in self.owner.networks.keys() and \
-			'private' not in self.owner.current_networks.keys():
-			msg = '"private" network not found'
 			raise CommandError(self.owner, msg)
