@@ -81,5 +81,5 @@ class SLES_11_12_Probe(Probe):
 						release = v[3] + v[4]
 					break
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
 		return [p] if p.is_complete() else []
