@@ -32,6 +32,7 @@ PALLET_DATA = [
 	['SLES', '12', 'sp3', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['SLE-SDK', '12', 'sp2', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SLE-12-SP2-SDK-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['SLES', '15', 'sles15', 'x86_64', 'sles', 'ProductMDProbe', {'SLE-15-Installer-DVD-x86_64-GM-DVD1.iso.treeinfo': '.treeinfo'}],
+	['SLES', '15sp1', 'sles15', 'x86_64', 'sles', 'ProductMDProbe', {'SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso.treeinfo': '.treeinfo'}],
 	['SUSE-Enterprise-Storage', '4', 'ses4', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SUSE-Enterprise-Storage-4-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['Ubuntu', '18.04.3', 'ubuntu18.04', 'x86_64', 'ubuntu', 'UbuntuProbe', {'ubuntu-18.04.3-desktop-amd64.iso.disk.info': '.disk/info'}],
 	['Ubuntu-Server', '18.04.3', 'ubuntu18.04', 'x86_64', 'ubuntu', 'UbuntuProbe', {'ubuntu-18.04.3-live-server-amd64.iso.disk.info': '.disk/info'}],
