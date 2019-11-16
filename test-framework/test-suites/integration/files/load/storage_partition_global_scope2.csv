@@ -1,0 +1,5 @@
+NAME,DEVICE,PARTID,MOUNTPOINT,SIZE,TYPE,OPTIONS
+global,sda,1,/,0,ext4,
+,sdb,2,/var,0,ext4,
+,sdc,3,/opt,0,ext4,
+,sdd,4,/export,0,ext4,

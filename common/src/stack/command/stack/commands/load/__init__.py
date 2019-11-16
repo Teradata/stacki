@@ -284,7 +284,11 @@ class command(stack.commands.Command):
 			self.validate_partition(partitions = partitions)
 
 		# Remove all existing entries based on which scope we are operating in.
-		self.stack(f'remove.{scope}.storage.partition' if scope != 'global' else 'remove.storage.partition', device='*')
+		self.stack(
+			f'remove.{scope}.storage.partition' if scope != 'global' else 'remove.storage.partition',
+			target,
+			device='*',
+		)
 
 		cmd = f'add.{scope}.storage.partition' if scope != 'global' else 'add.storage.partition'
 

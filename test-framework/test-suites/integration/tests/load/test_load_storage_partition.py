@@ -162,9 +162,84 @@ class TestLoadStoragePartition:
 			}
 		]
 
+	def test_global_scope_overwrite(self, host, test_file):
+		"""Test that loading another storage partition in the same scope unloads the previous partitioning information."""
+		actual_partition_config = test_file('load/storage_partition_global_scope.csv')
+		secondary_partition_config = test_file('load/storage_partition_global_scope2.csv')
+		# Load the secondary partition config and then load the actual one.
+		result = host.run(f'stack load storage partition file={secondary_partition_config}')
+		assert result.rc == 0
+		result = host.run(f'stack load storage partition file={actual_partition_config}')
+		assert result.rc == 0
+
+		result = host.run('stack list storage partition output-format=json')
+
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				"device": "sda",
+				"partid": 1,
+				"mountpoint": None,
+				"size": 40,
+				"fstype": None,
+				"options": "--asprimary --partition_id=18"
+			},
+			{
+				"device": "sda",
+				"partid": 2,
+				"mountpoint": "/",
+				"size": 30720,
+				"fstype": "ext4",
+				"options": "--asprimary --label=ROOT-BE1"
+			},
+			{
+				"device": "sda",
+				"partid": 3,
+				"mountpoint": None,
+				"size": 30720,
+				"fstype": "ext4",
+				"options": "--asprimary --label=ROOT-BE2"
+			}
+		]
+
 	def test_appliance_scope(self, host, test_file):
 		path = test_file('load/storage_partition_appliance_scope.csv')
 		result = host.run(f'stack load storage partition file={path}')
+		assert result.rc == 0
+
+		result = host.run(
+			'stack list appliance storage partition backend output-format=json'
+		)
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				"appliance": "backend",
+				"device": "sda",
+				"partid": 1,
+				"mountpoint": "/",
+				"size": 0,
+				"fstype": "ext4",
+				"options": ""
+			},
+			{
+				"appliance": "backend",
+				"device": "sdb",
+				"partid": 2,
+				"mountpoint": "/home",
+				"size": 0,
+				"fstype": "ext4",
+				"options": "--label=HOME"
+			}
+		]
+
+	def test_appliance_scope_overwrite(self, host, test_file):
+		"""Test that loading another storage partition in the same scope unloads the previous partitioning information."""
+		actual_partition_config = test_file('load/storage_partition_appliance_scope.csv')
+		secondary_partition_config = test_file('load/storage_partition_appliance_scope2.csv')
+		# Load the secondary partition config and then load the actual one.
+		result = host.run(f'stack load storage partition file={secondary_partition_config}')
+		assert result.rc == 0
+		result = host.run(f'stack load storage partition file={actual_partition_config}')
 		assert result.rc == 0
 
 		result = host.run(
@@ -223,9 +298,70 @@ class TestLoadStoragePartition:
 			}
 		]
 
+	def test_os_scope_overwrite(self, host, test_file):
+		"""Test that loading another storage partition in the same scope unloads the previous partitioning information."""
+		actual_partition_config = test_file('load/storage_partition_os_scope.csv')
+		secondary_partition_config = test_file('load/storage_partition_os_scope2.csv')
+		# Load the secondary partition config and then load the actual one.
+		result = host.run(f'stack load storage partition file={secondary_partition_config}')
+		assert result.rc == 0
+		result = host.run(f'stack load storage partition file={actual_partition_config}')
+		assert result.rc == 0
+
+		result = host.run(
+			'stack list os storage partition sles output-format=json'
+		)
+
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				"os": "sles",
+				"device": "sda",
+				"partid": 1,
+				"mountpoint": "/",
+				"size": 0,
+				"fstype": "ext4",
+				"options": ""
+			},
+			{
+				"os": "sles",
+				"device": "sdb",
+				"partid": 2,
+				"mountpoint": "/home",
+				"size": 0,
+				"fstype": "ext4",
+				"options": "--label=HOME"
+			}
+		]
+
 	def test_host_scope(self, host, add_host, test_file):
 		path = test_file('load/storage_partition_host_scope.csv')
 		result = host.run(f'stack load storage partition file={path}')
+		assert result.rc == 0
+
+		result = host.run(
+			'stack list host storage partition backend-0-0 output-format=json'
+		)
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			"host": "backend-0-0",
+			"device": "sda",
+			"partid": 1,
+			"mountpoint": "/",
+			"size": 0,
+			"fstype": "ext4",
+			"options": "",
+			"source": "H"
+		}]
+
+	def test_host_scope_overwrite(self, host, add_host, test_file):
+		"""Test that loading another storage partition in the same scope unloads the previous partitioning information."""
+		actual_partition_config = test_file('load/storage_partition_host_scope.csv')
+		secondary_partition_config = test_file('load/storage_partition_host_scope2.csv')
+		# Load the secondary partition config and then load the actual one.
+		result = host.run(f'stack load storage partition file={secondary_partition_config}')
+		assert result.rc == 0
+		result = host.run(f'stack load storage partition file={actual_partition_config}')
 		assert result.rc == 0
 
 		result = host.run(

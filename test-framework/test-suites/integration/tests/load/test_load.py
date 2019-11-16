@@ -46,3 +46,34 @@ class TestLoad:
 					listed_result == expected_result
 					for listed_result in listed_results
 				), f"Missing expected {object_name} {expected_result} at scope {scope}.\n\nListed {object_name}s were:\n\n{listed_results}"
+
+	def test_load_multiple_partitions(self, host, stack_load, test_file):
+		"""Ensure that loading partitions twice removes the previously set partitioning at that scope before adding the new partitioning."""
+		# get the file path to use in load.
+		real_partition_file_path = Path(test_file("load/json/partition.json")).resolve(strict = True)
+		secondary_partition_file_path = Path(test_file("load/json/partition2.json")).resolve(strict = True)
+
+		# Load the secondary partitioning first, and then load the real partitioning
+		stack_load(secondary_partition_file_path)
+		result = stack_load(real_partition_file_path)
+
+		# Now ensure the objects were added as expected at each scope, and that the old partitioning information was removed.
+		expected_results_per_scope = json.loads(Path(test_file("load/json/expected_partition.json")).read_text())
+		for scope, expected_results in expected_results_per_scope.items():
+			# Run the list command to get the results for the current scope.
+			result = host.run(f"stack list {scope if scope != 'global' else ''} storage partition output-format=json")
+			assert result.rc == 0
+			# If there is no stdout, ensure that we were expecting no results.
+			if not result.stdout:
+				assert not expected_results, f"No storage partitions listed at scope {scope} when the following were expected:\n\n{expected_results}"
+				continue
+
+			listed_results = json.loads(result.stdout)
+
+			# Since scope collapsing can cause more objects to be listed for a scope than was set at that scope,
+			# we just look for the entry we expect to be in the list an call that a success.
+			for expected_result in expected_results:
+				assert any(
+					listed_result == expected_result
+					for listed_result in listed_results
+				), f"Missing expected storage partition {expected_result} at scope {scope}.\n\nListed storage partitions were:\n\n{listed_results}"
