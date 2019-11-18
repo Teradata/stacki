@@ -208,7 +208,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_pallet_already_mounted(self, host, create_pallet_isos):
+	def test_pallet_already_mounted(self, host, create_pallet_isos, revert_export_stack_pallets):
 		''' shouldn't matter if an iso is mounted elsewhere, we should still be able to add it as a pallet '''
 		with ExitStack() as cleanup: 
 			# Mount our pallet
@@ -241,7 +241,7 @@ class TestAddPallet:
 				}
 			]
 
-	def test_disk_pallet(self, host, test_file):
+	def test_disk_pallet(self, host, test_file, revert_export_stack_pallets):
 		# Add the minimal pallet from the disk
 		result = host.run(f'stack add pallet {test_file("pallets/minimal")}')
 		assert result.rc == 0

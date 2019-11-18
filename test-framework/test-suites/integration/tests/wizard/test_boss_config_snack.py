@@ -1,3 +1,4 @@
+import glob
 import os
 import re
 import subprocess
@@ -12,6 +13,10 @@ class TestBossConfigSnack:
 
 	@pytest.fixture
 	def mount_cdrom(self, exclusive_lock):
+		# StackiOS test pipeline doesn't have a stacki ISO, so we skip the test
+		if not glob.glob("/export/isos/stacki-*.iso"):
+			pytest.skip("No stacki ISO available")
+
 		subprocess.run("mount /export/isos/stacki-*.iso /mnt/cdrom", shell=True, check=True)
 
 		yield

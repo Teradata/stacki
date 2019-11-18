@@ -43,7 +43,7 @@ class TestLoadAttrfile:
 		assert result.rc == 255
 		assert result.stderr == 'error - attribute "test-1" contains an invalid character.\n"test-1" must be a valid ctoken\n'
 
-	def test_global_appliance_host_scope(self, host, add_host, test_file):
+	def test_global_appliance_host_scope(self, host, add_host, test_file, revert_etc):
 		# Load our attr file
 		path = test_file('load/attrfile_global_appliance_host_scope.csv')
 		result = host.run(f'stack load attrfile file={path}')
@@ -58,7 +58,7 @@ class TestLoadAttrfile:
 		with open(test_file('load/attrfile_global_appliance_host_scope.json')) as output:
 			assert json.loads(result.stdout) == json.loads(output.read())
 
-	def test_environment_scope(self, host, add_host, add_environment, add_box, test_file):
+	def test_environment_scope(self, host, add_host, add_environment, add_box, test_file, revert_etc):
 		# Load our attr file
 		path = test_file('load/attrfile_environment_scope.csv')
 		result = host.run(f'stack load attrfile file={path}')
@@ -85,7 +85,7 @@ class TestLoadAttrfile:
 		assert data['box'] == 'test'
 		assert data['environment'] == 'test'
 
-	def test_default_target(self, host, add_host, test_file):
+	def test_default_target(self, host, add_host, test_file, revert_etc):
 		# Load our attr file
 		path = test_file('load/attrfile_default_target.csv')
 		result = host.run(f'stack load attrfile file={path}')
@@ -113,7 +113,7 @@ class TestLoadAttrfile:
 			}
 		]
 
-	def test_create_spreadsheet_dirs(self, host, test_file, rmtree):
+	def test_create_spreadsheet_dirs(self, host, test_file, rmtree, revert_etc):
 		# Remove the existing spreadsheets directory
 		rmtree('/export/stack/spreadsheets')
 

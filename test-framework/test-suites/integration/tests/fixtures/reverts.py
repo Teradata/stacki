@@ -91,7 +91,10 @@ def _remove_overlay(target, request):
 			subprocess.run(["sync"], check=True)
 
 			# Then try to unmount the overlay
-			subprocess.run(["umount", f"overlay_{name}"], check=True)
+			if attempt < 3:
+				subprocess.run(["umount", f"overlay_{name}"], check=True)
+			else:
+				subprocess.run(["umount", "--lazy", f"overlay_{name}"], check=True)
 
 			# It succeeded
 			break
@@ -142,8 +145,7 @@ def revert_discovery(exclusive_lock):
 		result = subprocess.run(
 			["stack", "disable", "discovery"],
 			stdout=subprocess.PIPE,
-			encoding="utf-8",
-			check=True
+			encoding="utf-8"
 		)
 
 		# Make sure we were actually able to shutdown any daemons.

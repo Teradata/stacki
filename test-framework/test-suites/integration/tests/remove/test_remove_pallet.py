@@ -233,7 +233,7 @@ class TestRemovePallet:
 		# But the '1.0' version of the pallet should be gone
 		assert not host.file('/export/stack/pallets/minimal/1.0').exists
 
-	def test_remove_partially_removed_pallet(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_remove_partially_removed_pallet(self, host, create_pallet_isos, revert_export_stack_pallets, revert_etc):
 		# Add our minimal pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
