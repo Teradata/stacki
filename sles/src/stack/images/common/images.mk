@@ -26,7 +26,7 @@ sles-stacki.img: dirs rpminst
 	ln -s /opt/stack/bin/python3 $(CURDIR)/sles-stacki/usr/bin/python
 	# Patch the sles-stacki image
 	-(cd ../../../common/sles-stacki.img-patches && \
-		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/$(IMAGE_RELEASE)/sles-stacki/) )
+		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/sles-stacki/) )
 	-(cd sles-stacki.img-patches && (find . -type f | cpio -pudv ../../../sles-stacki/) )
 	# Create a squash filesystem
 	mksquashfs $(CURDIR)/sles-stacki $@
@@ -41,7 +41,7 @@ stacki-initrd.img:
 	rm -rf stacki-initrd/installkey.gpg~
 	# Add common patches to initrd
 	-(cd ../../../common/initrd-patches && \
-		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_VERSION)/$(IMAGE_RELEASE)/stacki-initrd/) )
+		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/stacki-initrd/) )
 	# Add version specific patches to initrd
 	-(cd initrd-patches && \
 		(find . -type f  | cpio -pudv ../stacki-initrd/) )
@@ -60,8 +60,8 @@ build: sles-stacki.img stacki-initrd.img
 
 install:: keyring
 	mkdir -p $(ROOT)/$(PKGROOT)
-	$(INSTALL) -m0644 linux $(ROOT)/$(PKGROOT)/vmlinuz-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
-	$(INSTALL) -m0644 stacki-initrd.img $(ROOT)/$(PKGROOT)/initrd-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_VERSION)-${IMAGE_RELEASE}-$(ARCH)
+	$(INSTALL) -m0644 linux $(ROOT)/$(PKGROOT)/vmlinuz-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_RELEASE)-${IMAGE_VERSION}-$(ARCH)
+	$(INSTALL) -m0644 stacki-initrd.img $(ROOT)/$(PKGROOT)/initrd-$(shell echo $(SUSE_PRODUCT) | tr A-Z a-z)-$(IMAGE_RELEASE)-${IMAGE_VERSION}-$(ARCH)
 	# Copy over patch files
 	mkdir -p $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs
 	cd SLES-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs)

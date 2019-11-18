@@ -36,6 +36,8 @@ class SLES_11_12_Probe(Probe):
 
 		name, version, release, arch, distro_family = [None] * 5
 
+		service_pack = ''
+		major_version = ''
 		for line in lines:
 			l = line.split(None, 1)
 			if len(l) < 2:
@@ -44,18 +46,17 @@ class SLES_11_12_Probe(Probe):
 			key = l[0].strip()
 			value = l[1].strip()
 
+			distro_family = 'sles'
 			# SLES11 ISO's
 			if key == 'NAME':
 				if value == 'SUSE_SLES':
 					name = 'SLES'
-					distro_family = 'sles'
 				elif value == 'sle-sdk':
 					name = 'SLE-SDK'
-					distro_family = 'sles'
+			elif key == 'SP_VERSION':
+				service_pack = 'sp' + value
 			elif key == 'VERSION':
-				version = value
-			elif key == 'RELEASE':
-				release = value
+				major_version = value.split('.')[0]
 			elif key == 'BASEARCHS':
 				arch = value
 
@@ -71,15 +72,20 @@ class SLES_11_12_Probe(Probe):
 					name = 'SLE-SDK'
 				elif v[3] == 'ses':
 					name = 'SUSE-Enterprise-Storage'
-
+					
 				if name:
-					distro_family = 'sles'
-					version = v[4]
+					major_version = v[4]
+					# SES doesn't have a service pack field...
 					if len(v) > 5:
-						release = v[5]
-					else:
-						release = v[3] + v[4]
+						service_pack = v[5]
 					break
+
+		if name == 'SUSE-Enterprise-Storage':
+			release = f'ses{major_version}'
+		else:
+			release = distro_family + major_version
+
+		version = major_version + service_pack
 
 		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
 		return [p] if p.is_complete() else []
