@@ -15,14 +15,14 @@
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-12-sp3-&arch;",
 			"ramdisk": "initrd-&os;-12-sp3-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp3/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp3/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
 		},
 		{
 			"name":    "console",
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-12-sp3-&arch;",
 			"ramdisk": "initrd-&os;-12-sp3-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp3/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp3/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
 		},
 		{
 			"name":    "rescue",
@@ -36,14 +36,14 @@
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-12-sp2-&arch;",
 			"ramdisk": "initrd-&os;-12-sp2-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp2/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
 		},
 		{
 			"name":    "install sles 12.2 console",
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-12-sp2-&arch;",
 			"ramdisk": "initrd-&os;-12-sp2-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12/sp2/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp2/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
 		},
 		{
 			"name":    "rescue sles 12.2",
@@ -57,14 +57,14 @@
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-11.3-1.138-&arch;",
 			"ramdisk": "initrd-&os;-11.3-1.138-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; insmod=ixgbe insmod=i40e forceinsmod=1"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11sp3/sles11/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; insmod=ixgbe insmod=i40e forceinsmod=1"
 		},
 		{
 			"name":    "install sles 11.3 console",
 			"type":    "install",
 			"kernel":  "vmlinuz-&os;-11.3-1.138-&arch;",
 			"ramdisk": "initrd-&os;-11.3-1.138-&arch;",
-			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11.3/1.138/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS0,115200n8 Server=&Kickstart_PrivateAddress; nomodeset=1 textmode=1 insmod=ixgbe insmod=i40e forceinsmod=1"
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/11sp3/sles11/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 console=ttyS0,115200n8 Server=&Kickstart_PrivateAddress; nomodeset=1 textmode=1 insmod=ixgbe insmod=i40e forceinsmod=1"
 		},
 		{
 			"name":    "rescue sles 11.3",
