@@ -70,15 +70,21 @@ class Plugin(stack.commands.Plugin):
 				# First the pallets
 				pallets = []
 				os_version = None
-				for name, version, rel in self.db.select("""
-					rolls.name, rolls.version, rolls.rel
+				for name, version, rel, pallet_os in self.db.select("""
+					rolls.name, rolls.version, rolls.rel, rolls.os
 					FROM rolls
 					INNER JOIN stacks ON stacks.roll = rolls.id
 					WHERE stacks.box = %s
 				""", (box_id,)):
 					pallets.append(f"{name}-{version}-{rel}")
-					if name in ['SLES', 'CentOS']:
-						os_version = '%s.x' % version.split('.')[0]
+					if name in ['SLES', 'CentOS', 'RHEL', 'Ubuntu', 'Ubuntu-Server', 'Fedora']:
+						# the attr os.version is '{major_version}.x'
+						# release is now '{OS}{major_version}'
+						if pallet_os in rel:
+							os_version = f'{rel.replace(pallet_os, "")}.x'
+						# fedora's OS is 'redhat' ...
+						elif name.lower() in rel:
+							os_version = f'{rel.replace(name.lower(), "")}.x'
 
 				for hostname in box_map[box_id]:
 					output_rows.append([hostname, 'host', 'const', 'pallets', pallets])
