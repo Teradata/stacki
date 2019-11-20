@@ -9,7 +9,6 @@ PATLIST = 32bit Basis-Devel
 
 ifeq ($(RELEASE),sles12)
 PKGLIST += rpm-build libzip2 libvirt-devel
-PATLIST += SDK-C-C++
 endif
 
 ifeq ($(RELEASE),sles11)
