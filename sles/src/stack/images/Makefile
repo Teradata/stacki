@@ -8,7 +8,7 @@ ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-SRCDIRS = SLES/11.3/1.138 SLES/12/sp2 SLES/12/sp3
+SRCDIRS = SLES/sles11/11sp3 SLES/sles12/12sp2 SLES/sles12/12sp3
 
 bootstrap: # nothing to do
 
