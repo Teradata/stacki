@@ -11,6 +11,12 @@ mkdir -p /export/src
 cp -rd /vagrant /export/src/stacki
 cd /export/src/stacki
 
+# Regenerate the versions.json, if requested
+if [[ $UPDATE_VERSIONS_JSON == "true" ]]
+then
+    rm -f common/src/foundation/python-packages/versions.json
+fi
+
 # Figure out our ROLLVERSION
 ROLLVERSION=$(make -f rollversion.mk ROLLVERSION)
 if [[ $IS_RELEASE != "true" ]]
@@ -42,6 +48,12 @@ make ROLLVERSION=$ROLLVERSION bootstrap
 # Build the non-bootable stacki ISO and check that it built correctly
 make ROLLVERSION=$ROLLVERSION
 make ROLLVERSION=$ROLLVERSION manifest-check
+
+# Copy the updated versions.json back out of the VM
+if [[ $UPDATE_VERSIONS_JSON == "true" ]]
+then
+    cp common/src/foundation/python-packages/versions.json  /vagrant/common/src/foundation/python-packages/versions.json
+fi
 
 # If we are redhat7 PLATFORM, we aren't done yet
 if [[ $PLATFORM = "redhat7" ]]
