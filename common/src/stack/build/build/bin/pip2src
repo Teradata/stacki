@@ -8,323 +8,404 @@
 # @copyright@
 
 import os
-import sys
-import json
 import subprocess
 import tempfile
-import getopt
+import pkg_resources
+from typing import List
+import argparse
+from pathlib import Path
+import dataclasses
+import tomlkit
 
-
+@dataclasses.dataclass
 class Package:
+	"""A dataclass container to hold the package metadata we need to process our python dependencies."""
+	# Key is the case insensitive identifier for the package, normally name.casefold() or similar.
+	key: str
+	# Name is the canonical, potentially camel cased name.
+	name: str
+	master: bool
+	bootstrap: bool
+	appliances: List[str]
+	dependencies: List["Package"]
+	version: str
+	package_license: str = dataclasses.field(default = "")
+	url: str = dataclasses.field(default = "")
 
-	def __init__(self, name, *, master=False, version=None):
-		self.name         = name
-		self.master       = master
-		self.bootstrap    = False
-		self.license      = ''
-		self.url          = ''
-		self.appliances   = [ ]
-		self.dependencies = [ ]
-		if version is not None:
-			self.version = version
 
+def populate_metadata(package, distributions):
+	"""Given a package and some parsed distribution information, try to populate the package's license and url fields."""
+	distribution = distributions[package.key]
+	package_info_key = "PKG-INFO"
+	metadata_key = "METADATA"
 
-class Scanner:
+	# Try the various metadata name keys, but just return the package if we can't find it.
+	if distribution.has_metadata(package_info_key):
+		distribution_metadata_lines = distribution.get_metadata_lines(package_info_key)
+	elif distribution.has_metadata(metadata_key):
+		distribution_metadata_lines = distribution.get_metadata_lines(metadata_key)
+	else:
+		return package
 
-	def __init__(self, root):
-		self.root     = root
-		self.metadata = []
-		self.packages = []
-		self.traverse(root)
-
-	def traverse(self, root):
-		for x in os.listdir(root):
-			path = os.path.join(root, x)
-			tokens = x.rsplit('.', 1)
-			if len(tokens) == 2:
-				if tokens[1] == 'dist-info':
-					self.readWheel(path)
-					continue
-				if tokens[1] == 'egg-info':
-					self.readEgg(path)
-					continue
-			if os.path.isdir(path):
-				self.traverse(path)
-
-	def readWheel(self, path):
-		print('\tfound whl %s' % os.path.split(path)[-1])
+	# Found some metadata, lets parse it.
+	for line in distribution_metadata_lines:
 		try:
-			# Try the normal metadata file first
-			with open(os.path.join(path, 'metadata.json'), 'r') as text:
-				meta = json.load(text)
-			print('\t\tmetadata.json')
-		except FileNotFoundError:
-			# If the normal file doesn't exist, try the old version
-			meta = {}
-			with open(os.path.join(path, 'METADATA'), 'r') as text:
-				print('\t\tMETADATA')
-				for line in text:
-					try:
-						key, value = line.split(':', 1)
-					except ValueError:
-						continue
-					key   = key.strip().lower()
-					value = value.strip()
-					if key in [ 'name', 'version' ]:
-						meta[key] = value
-					elif key == 'home-page':
-						meta['url'] = value
-					elif key == 'license':
-						meta['license'] = value.strip()
-					elif key == 'classifier' and value.startswith('License'):
-						_, value = value.split('::', 1)
-						meta['license'] = value.strip()
-
-		try:
-			meta['url'] = meta['extensions']['python.details']['project_urls']['Home']
-		except:
-			pass
-
-		if 'classifiers' in meta:
-			for c in meta['classifiers']:
-				k, v = c.split('::', 1)
-				if k.strip() == 'License':
-					meta['license'] = v.strip()
-
-#		print(f'\t\t{meta}')
-		package = Package(meta['name'])
-		package.version = meta['version']
-		package.license = meta['license']
-		package.url     = meta['url']
-		self.packages.append(package)
-
-
-	def readEgg(self, path):
-		print('\tfound egg %s' % os.path.split(path)[-1])
-		meta = {}
-		with open(os.path.join(path, 'PKG-INFO'), 'r', encoding='utf-8') as text:
-			for line in text:
-				try:
-					key, value = line.split(':', 1)
-				except ValueError:
-					continue
-				key   = key.strip().lower()
-				value = value.strip()
-				if key in [ 'name', 'version' ]:
-					meta[key] = value
-				elif key == 'home-page':
-					meta['url'] = value
-				elif key == 'license':
-					meta['license'] = value.strip()
-				elif key == 'classifier' and value.startswith('License'):
-					_, value = value.split('::', 1)
-					meta['license'] = value.strip()
-
-#		print(f'\t\t{meta}')
-		package = Package(meta['name'])
-		package.version = meta['version']
-		package.license = meta['license']
-		package.url     = meta['url']
-		self.packages.append(package)
-		
-try:
-	opts, args = getopt.getopt(sys.argv[1:], '', ['bootstrap'])
-except getopt.GetoptError as msg:
-	sys.stderr.write("error - %s\n" % msg)
-	sys.exit(1)
-
-bootstrap = False
-for o, a in opts:
-	if o == '--bootstrap':
-		bootstrap = True
-
-
-Prefix = 'foundation-python'
-
-print('\nBuild the PackageSet')
-PackageSet = {}
-with open('packages.json', 'r') as text:
-	code = []
-	for line in text: # json doesn't allow comments (we do)
-		if not line.startswith('//'):
-			code.append(line)
-	manifest = json.loads(''.join(code))
-	for name in manifest:
-		package = Package(name, master=True)
-		package.bootstrap = manifest[name].get('bootstrap')
-		package.version   = manifest[name].get('version')
-		if manifest[name].get('fe'):
-			package.appliances.append('server')
-		if manifest[name].get('be'):
-			package.appliances.append('client')
-		if bootstrap and not package.bootstrap:
+			# Lines we care about are written as <key>:<value>
+			key, value = line.split(":", maxsplit = 1)
+			key = key.casefold().strip()
+			value = value.strip()
+		except ValueError:
 			continue
-		PackageSet[name] = package
-for key in PackageSet:
-	print(f'\t{key} {PackageSet[key].version}')
 
-pkgmasters = sorted(PackageSet.keys()) # before implicits get mixed in
+		# Use the home-page metadata as the URL.
+		if key == "home-page":
+			package.url = value
 
-# If we have versions.json file force the versions with the previously computed
-# values.
+		# Read the license. This key takes less precedence than the `Classifier: License` key.
+		if key == "license":
+			package.package_license = value
 
-if os.path.exists('versions.json'):
-	print(f'Processing versions.json')
-	with open('versions.json', 'r') as text:
-		versions = json.loads(text.read())
-	for name in versions.keys():
-		if name not in PackageSet:
-			print(f'\timplicit {name} {versions[name]}')
-			PackageSet[name] = Package(name, version=versions[name])
-		else:
-			v = PackageSet[name].version
-			if v and v != versions[name]:
-				print(f'\twarning - explicit {name} {v} was {versions[name]}')
-			if not v:
-				print(f'\texplicit {name} {versions[name]}')
-				PackageSet[name].version = versions[name]
+		# Read the license. This key takes more precedence than the `License` key.
+		if key == "classifier" and value.casefold().startswith("license"):
+			package.package_license = value
 
-# Compute dependencies and versions
-#
-# There's no PIP interface for this so for each master package (above) install
-# it into a tmp directory and then go find the metadata.json files to figure
-# out what got installed. Yes this means we build things twice when all
-# packages get refreshed.
+	return package
 
-for master in pkgmasters:
-	with tempfile.TemporaryDirectory() as tmp:
-		version = PackageSet[master].version
-		if version:
-			target = '%s==%s' % (master, version)
-		else:
-			target = master
-		print('Unpacking %s' % target)
+def get_dependencies(parent_package_dict, locked_packages, distributions, bootstrap, appliances):
+	"""Given a parent package dictionary from poetry.lock, return a list of Package dataclasses that represent its dependencies."""
+	dependencies = []
+	# If there are no dependencies, return an empty list
+	if "dependencies" not in parent_package_dict:
+		return dependencies
 
-		os.environ['PKG_CONFIG_PATH'] = ':'.join(['/opt/stack/lib/pkgconfig',
-							  '/usr/lib/pkgconfig',
-							  '/usr/lib64/pkgconfig'])
+	# Otherwise, build out that set of dependencies.
+	for package_dict in locked_packages:
+		package_key = package_dict["name"]
+		# If the package isn't one of the parent dependencies, don't create a Package for it.
+		if package_key not in parent_package_dict["dependencies"]:
+			continue
 
-		p = subprocess.run(['/opt/stack/bin/python3', 
-				    '-mpip', 
-				    'install', 
-				    '--no-warn-script-location',
-				    '-I', 
-				    f'--root={tmp}', 
-				    target],
-				   stdout=subprocess.PIPE)
-		print(p.stdout.decode())
-		print('Scanning  %s' % master)
+		# If the package didn't get installed, I.E. due to markers disabling it for the current environment,
+		# don't add it to our package list.
+		if package_key not in distributions:
+			continue
 
-		for package in Scanner(tmp).packages:
-			print(f'\tscanned {package.name} {package.version}')
-			if package.name == master:
-				if version is not None and version != package.version:
-					print(f'\t\tusing {version}')
-					package.version = version
-				PackageSet[master].version = package.version
-				PackageSet[master].url     = package.url
-				PackageSet[master].license = package.license
-			else:
-				if package.name in PackageSet:
-					_version = PackageSet[package.name].version
-					if _version is not None and _version != package.version:
-						print(f'\t\tusing {_version}')
-						package.version = _version
-					package.bootstrap = PackageSet[package.name].bootstrap
-				if not package.bootstrap:
-					package.bootstrap = PackageSet[master].bootstrap
-				PackageSet[master].dependencies.append(package)
-				PackageSet[package.name] = package
-				
+		dependency = Package(
+			key = package_key,
+			# We must use the canonical, potentially camel cased name because RPMs are case sensitive.
+			# I'm not bitter at all.
+			name = distributions[package_key].project_name,
+			version = package_dict["version"],
+			master = False,
+			# The stacki metadata should have this package name in it since it is a top level package.
+			# If it doesn't, that is an error.
+			bootstrap = bootstrap,
+			appliances = appliances,
+			# Recurse to fill out this dependency's dependencies, passing down the bootstrap and appliances.
+			dependencies = get_dependencies(
+				parent_package_dict = package_dict,
+				locked_packages = locked_packages,
+				distributions = distributions,
+				bootstrap = bootstrap,
+				appliances = appliances,
+			),
+		)
+		# Try to find the metadata and parse the license and url, and then append the package to the list.
+		dependency = populate_metadata(package = dependency, distributions = distributions)
+		dependencies.append(dependency)
 
-# Write out the computed versions and license information
+	return dependencies
 
-version = {}
-license = {}
-for package in PackageSet.values():
-	version[package.name] = package.version
-	license[package.name] = (package.version, package.license, package.url)
-with open('versions.json', 'w') as text:
-	text.write(json.dumps(version, sort_keys=True, indent='\t'))
+def build_package_list(locked_packages, dependencies, stacki_metadata, distributions, bootstrap_only):
+	"""Build a list of packages and all their dependencies.
 
-rows   = []
-widths = [ 0, 0, 0, 0 ]
-for name in sorted(license.keys()):
-	rows.append([name, license[name][0], license[name][1], license[name][2]])
-for row in rows:
-	for i in range(0, 4):
-		if len(row[i]) > widths[i]:
-			widths[i] = len(row[i])
-		
-with open('LICENSE.txt', 'w') as text:
+	This returns a list of Package objets which are the top level packages as defined in pyproject.toml. These packages have
+	a dependencies attribute which is a list of Package objects that are their direct dependencies. Each of those Package objects
+	may have a non-empty dependencies list and so on.
+	"""
+	# Start the package tree with the master packages, which are defined in the top level dependencies from pyproject.toml.
+	top_level_packages = []
+	for package_dict in locked_packages:
+		package_key = package_dict["name"]
+		# Don't create a top level package if this is not in the top level dependencies.
+		if package_key not in dependencies:
+			continue
+
+		bootstrap_value = stacki_metadata[package_key].get("bootstrap", False)
+		# If we're configured to do bootstrap packages only, skip all non-bootstrap packages.
+		if bootstrap_only and not bootstrap_value:
+			continue
+
+		# If the package didn't get installed, I.E. due to markers disabling it for the current environment,
+		# don't add it to our package list.
+		if package_key not in distributions:
+			continue
+
+		appliances_value = stacki_metadata[package_key].get("appliances", [])
+		top_level_package = Package(
+			key = package_key,
+			# We must use the canonical, potentially camel cased name because RPMs are case sensitive.
+			# I'm not bitter at all.
+			name = distributions[package_key].project_name,
+			version = package_dict["version"],
+			master = True,
+			# The stacki metadata should have this package name in it since it is a top level package.
+			# If it doesn't, that is an error.
+			bootstrap = bootstrap_value,
+			appliances = appliances_value,
+			# Get this master packages dependencies, and the sub dependencies of those dependencies, and so on.
+			# This ends up chaining all of the master properties such as bootstrap and appliance names down to
+			# this master package's children, children's children, and so on.
+			dependencies = get_dependencies(
+				parent_package_dict = package_dict,
+				locked_packages = locked_packages,
+				distributions = distributions,
+				bootstrap = bootstrap_value,
+				appliances = appliances_value,
+			),
+		)
+		# Try to find the metadata and parse the license and url, and then append the package to the list.
+		top_level_package = populate_metadata(package = top_level_package, distributions = distributions)
+		top_level_packages.append(top_level_package)
+
+	return top_level_packages
+
+def write_makefiles(package, package_prefix):
+	"""Write the makefiles for this package, all its dependencies, all its dependencies dependencies, and so on."""
+	srcdir = Path("src") / package.name
+	# Don't overwrite existing stuff for this specific package, but do potentially
+	# write dependencies of this package that might be missing.
+	if not srcdir.exists():
+		srcdir.mkdir(parents = True)
+		with srcdir.joinpath("Makefile").open("w") as makefile:
+			makefile.write("PKGROOT  = /opt/stack\n")
+			makefile.write(f"ROLLROOT = {os.environ['ROLLROOT']}/../..\n")
+			makefile.write("\n")
+			makefile.write("include $(STACKBUILD)/etc/CCRules.mk\n")
+			makefile.write("\n")
+			makefile.write("build:\n")
+			makefile.write("\n")
+			makefile.write("install::\n")
+			makefile.write(f"\t$(PY.PATH) -mpip install --no-warn-script-location -I --no-deps --root=$(ROOT) {package.name}==$(VERSION)\n")
+			if package.bootstrap:
+				makefile.write("\n")
+				makefile.write("bootstrap: install-rpm\n")
+
+		with srcdir.joinpath("version.mk").open("w") as ver:
+			ver.write('NAME=%s-%s\n' % (package_prefix, package.name))
+			ver.write('VERSION=%s\n' % package.version)
+
+	# Now write the makefiles for our dependencies, and our dependencies dependencies, and so on.
+	for dependency in package.dependencies:
+		write_makefiles(package = dependency, package_prefix = package_prefix)
+
+def _write_node_packages(package, package_prefix, node_file, indent):
+	"""Recurses through the chain of dependencies to write all packages into the node file."""
+	# Write this package.
+	node_file.write(f"{indent}{package_prefix}-{package.name}\n")
+
+	# Write all of the dependencies of this package.
+	for dependency in package.dependencies:
+		_write_node_packages(
+			package = dependency,
+			package_prefix = package_prefix,
+			node_file = node_file,
+			# Extra indent to delineate master package from its dependencies for humans.
+			indent = "\t\t",
+		)
+
+def _write_manifest(package, package_prefix, manifest_file):
+	"""Recurses through the chain of dependencies to write all packages into the manifest file."""
+	# Write this package.
+	manifest_file.write(f"{package_prefix}-{package.name}\n")
+
+	# Write all of the dependencies of this package.
+	for dependency in package.dependencies:
+		_write_manifest(package = dependency, package_prefix = package_prefix, manifest_file = manifest_file)
+
+def get_licenses(package):
+	"""Get the licenses of the package and all its dependencies."""
+	licenses = {}
+	# Add the license for this package.
+	licenses[package.name] = (package.version, package.package_license, package.url)
+
+	# Get all the licenses of the dependencies.
+	for dependency in package.dependencies:
+		licenses.update(get_licenses(package = dependency))
+
+	return licenses
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(
+		description = (
+			"Resolves required foundation python dependencies for stacki and builds "
+			"requisite node, graph, and make files."
+		),
+	)
+	parser.add_argument(
+		"release",
+		help = "The OS release this is being built on. Required to exclude packages that don't work on SLES 11.",
+	)
+	parser.add_argument(
+		"--bootstrap",
+		action = "store_true",
+		help = "Only resolve bootstrap packages",
+	)
+	args = parser.parse_args()
+
+	lockfile_path = Path("poetry.lock")
+	if not lockfile_path.exists():
+		print("\nUsing poetry to lock dependencies and install them.")
+		print(
+			"\nThe lockfile appears to not exist. This will generate"
+			" a new poetry.lock file which must be committed to source control."
+		)
+	else:
+		print("\nUsing poetry to install locked dependencies.")
+
+	with tempfile.TemporaryDirectory() as temp_dir:
+		# Configure poetry to use the temporary directory for this venv.
+		subprocess.run(
+			["/opt/stack/bin/poetry", "config", "--no-interaction", "settings.virtualenvs.path", temp_dir],
+			check = True,
+		)
+		# Install all the packages in a local venv so we can parse some
+		# extra data from them, like licenses. If the lockfile does not
+		# exist yet, this will lock the dependencies and generate a
+		# lockfile.
+		#
+		# We only have to pass release here because of SLES 11 not supporting libvirt-python.
+		subprocess.run(["/opt/stack/bin/poetry", "install", "--no-interaction", "--extras", args.release], check = True)
+
+		# Read in the pyproject.toml and poetry.lock files.
+		project_toml = tomlkit.parse(Path("pyproject.toml").read_text())
+		project_lockfile = tomlkit.parse(lockfile_path.read_text())
+		# The dependency names are sometimes camel case in some contexts and lowercase in others.
+		# Normalize all the dependency names since pip/poetry doesn't care.
+		dependencies = {
+			key.casefold(): value
+			for key, value in project_toml["tool"]["poetry"]["dependencies"].items()
+			# For some reason this tool wants the python version here, so make sure we don't
+			# treat it as a dependency.
+			if key.casefold() != "python"
+		}
+		# Same for the locked packages.
+		locked_packages = project_lockfile["package"]
+		for package_dict in locked_packages:
+			package_dict["name"] = package_dict["name"].casefold()
+			# The dependencies dictionary is where I've seen the keys, I.E. dependency names,
+			# be camel cased.
+			if "dependencies" in package_dict:
+				package_dict["dependencies"] = {
+					key.casefold(): value
+					for key, value in package_dict["dependencies"].items()
+				}
+		# And be sure to normalize the stacki-metadata stuff too.
+		stacki_metadata = {
+			key.casefold(): value
+			for key, value in project_toml["stacki-metadata"].items()
+		}
+		# Ensure that the packages in stacki-metadata section of pyproject.toml all exist in the tool.poetry.dependencies section.
+		for package in stacki_metadata:
+			if package not in dependencies:
+				raise ValueError(f"The package {package} in stacki-metadata is not present in tool.poetry.dependencies")
+
+		# Ensure the reverse.
+		for package in dependencies:
+			if package not in stacki_metadata:
+				raise ValueError(f"The package {package} in tool.poetry.dependencies is not present in stacki-metadata")
+
+		# Get the path to site-packages.
+		site_packages = list(Path(temp_dir).glob("**/site-packages"))
+		if len(site_packages) != 1:
+			raise ValueError(f"Unable to find the virtualenv's site-packages folder. Found: {site_packages if site_packages else 'nothing'}")
+
+		site_packages = site_packages[0]
+
+		# To get all the distribution information from the venv, and make it a dictionary keyed by
+		# the distributions key attribute, which is used for case insensitive compares.
+		venv_distributions = {
+			distribution.key: distribution
+			for distribution in pkg_resources.find_distributions(site_packages)
+		}
+
+		# Build the combined package list from all the data sources.
+		print('\nBuild the package list')
+		package_list = build_package_list(
+			locked_packages = locked_packages,
+			dependencies = dependencies,
+			stacki_metadata = stacki_metadata,
+			distributions = venv_distributions,
+			bootstrap_only = args.bootstrap,
+		)
+
+	print('\nWrite the licenses')
+	# Write out the computed license information
+	package_license = {}
+	for package in package_list:
+		package_license.update(get_licenses(package = package))
+
+	rows   = []
+	widths = [0, 0, 0, 0]
+	for name in sorted(package_license.keys()):
+		rows.append([name, package_license[name][0], package_license[name][1], package_license[name][2]])
 	for row in rows:
-		text.write(f'{row[0].ljust(widths[0])} {row[1].ljust(widths[1])} {row[2].ljust(widths[2])} {row[3]}\n')
+		for i in range(0, 4):
+			if len(row[i]) > widths[i]:
+				widths[i] = len(row[i])
 
+	with Path("LICENSE.txt").open("w") as text:
+		for row in rows:
+			text.write(f'{row[0].ljust(widths[0])} {row[1].ljust(widths[1])} {row[2].ljust(widths[2])} {row[3]}\n')
 
-# Build the src/ directories
+	print('\nWrite the makefiles')
+	# Build the src/ directories
+	package_prefix = "foundation-python"
+	for package in package_list:
+		write_makefiles(package = package, package_prefix = package_prefix)
 
-for package in PackageSet.values():
-	srcdir = os.path.join('src', package.name)
-	if os.path.exists(srcdir):
-		continue # don't overwrite existing stuff
-	os.makedirs(srcdir)
+	print('\nWrite the node files')
+	# Create node files
+	nodedir = Path("nodes")
+	nodedir.mkdir(exist_ok = True)
+	# This loop creates a node file per top level package that contains package directives for it
+	# and all of its nested dependencies.
+	node_name_template = "{package_prefix}-pip2src-{package_name}"
+	for package in package_list:
+		node_name = node_name_template.format(package_prefix = package_prefix, package_name = package.name)
+		with nodedir.joinpath(f"{node_name}.xml").open("w") as node:
+			node.write("<stack:stack><stack:package>\n")
+			_write_node_packages(
+				package = package,
+				package_prefix = package_prefix,
+				node_file = node,
+				indent = "\t",
+			)
+			node.write("</stack:package></stack:stack>\n")
 
-	with open(os.path.join(srcdir, 'Makefile'), 'w') as makefile:
-		makefile.write("""
-PKGROOT  = /opt/stack
-ROLLROOT = %s/../..
+	print('\nWrite the graph files')
+	# Create graph files
+	graphdir = Path("graph")
+	graphdir.mkdir(exist_ok = True)
+	with graphdir.joinpath(f"{package_prefix}-pip2src.xml").open("w") as graph:
+		graph.write("<graph>\n")
+		# Write an edge for each top level package based on its appliances.
+		for package in package_list:
+			node_name = node_name_template.format(package_prefix = package_prefix, package_name = package.name)
+			for appliance in package.appliances:
+				graph.write(f'\t<edge from="{package_prefix}-{appliance}" to="{node_name}"/>\n')
 
-include $(STACKBUILD)/etc/CCRules.mk
+			if package.appliances:
+				graph.write("\n")
 
-build:
+		graph.write("</graph>\n")
 
-install::
-	$(PY.PATH) -mpip install --no-warn-script-location -I --no-deps --root=$(ROOT) %s==$(VERSION)
-""" % (os.environ['ROLLROOT'], package.name))
-		if package.bootstrap:
-			makefile.write('\nbootstrap: install-rpm\n')
+	print('\nWrite the manifests')
+	# Create manifests
+	manifestdir = Path("manifest.d")
+	manifestdir.mkdir(exist_ok = True)
+	for package in package_list:
+		with manifestdir.joinpath(f"{package_prefix}-{package.name}.manifest").open("w") as manifest:
+			_write_manifest(package = package, package_prefix = package_prefix, manifest_file = manifest)
 
-	with open(os.path.join(srcdir, 'version.mk'), 'w') as ver:
-		ver.write('NAME=%s-%s\n' % (Prefix, package.name))
-		ver.write('VERSION=%s\n' % package.version)
-
-
-# Create graph and node files
-
-xmldir = os.path.join('nodes')
-if not os.path.exists(xmldir):
-	os.makedirs(xmldir)
-for pkgname in pkgmasters:
-	with open(os.path.join(xmldir, '%s-pip2src-%s.xml' % (Prefix, pkgname)), 'w') as node:
-		node.write('<stack:stack><stack:package>\n')
-		node.write('%s-%s\n' % (Prefix, pkgname))
-		for dep in PackageSet[pkgname].dependencies:
-			node.write('\t%s-%s\n' % (Prefix, dep.name))
-		node.write('</stack:package></stack:stack>')
-
-xmldir = os.path.join('graph')
-if not os.path.exists(xmldir):
-	os.makedirs(xmldir)
-with open(os.path.join(xmldir, '%s-pip2src.xml' % Prefix), 'w') as graph:
-	graph.write('<graph>\n')
-	for pkgname in pkgmasters:
-		for appliance in PackageSet[pkgname].appliances:
-			graph.write('\t<edge from="%s-%s" to="%s-pip2src-%s"/>\n' % (Prefix, appliance, Prefix, pkgname))
-		if PackageSet[pkgname].appliances:
-			graph.write('\n')
-	graph.write('</graph>')
-		
-
-# Create manifests
-
-manifestdir = os.path.join('manifest.d')
-if not os.path.exists(manifestdir):
-	os.makedirs(manifestdir)
-for pkgname in pkgmasters:
-	with open(os.path.join(manifestdir, '%s-%s.manifest' % (Prefix, pkgname)), 'w') as manifest:
-		manifest.write('%s-%s\n' % (Prefix, pkgname))
-		for dep in PackageSet[pkgname].dependencies:
-			manifest.write('\t%s-%s\n' % (Prefix, dep.name))
-
-
-print('\n\n')
+	print('\n\n')
