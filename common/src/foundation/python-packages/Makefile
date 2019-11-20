@@ -10,9 +10,9 @@ RPM.STRATEGY    = custom
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-#BOOTSTRAP        = 
-#BOOTSTRAP.redhat = 
-#BOOTSTRAP.sles   = 
+#BOOTSTRAP        =
+#BOOTSTRAP.redhat =
+#BOOTSTRAP.sles   =
 #	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
 
 bootstrap rpm: src
@@ -22,13 +22,21 @@ bootstrap rpm: src
 	cp graph/*.xml $(ROLLROOT)/common/graph/
 
 refresh:
-	-rm -f versions.json
+	poetry update --no-interaction
 
-src: packages.json
+src: pyproject.toml
 ifeq ($(RELEASE),sles11)
 	-ln -s /usr/include/apache2-worker/mpm.h /usr/include/apache2/
 endif
 	$(MAKE) clean
+	# Add required poetry and tomlkit packages so that pip2src runs correctly.
+	/opt/stack/bin/python3 -m ensurepip
+	/opt/stack/bin/python3 -m pip install poetry
+	/opt/stack/bin/python3 -m pip install tomlkit
+# Dat dere support release is still on 3.6, and doesn't have dataclasses built in.
+ifeq (Python 3.6.6,$(shell /opt/stack/bin/python3 --version))
+	/opt/stack/bin/python3 -m pip install dataclasses
+endif
 	ROLLROOT=$(ROLLROOT) ../../stack/build/build/bin/pip2src
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/manifest.d
 	mkdir -p $(ROLLROOT)/build-$(ROLL)-$(STACK)/nodes
@@ -36,5 +44,3 @@ endif
 
 clean::
 	-rm -rf src graph nodes manifest.d .cache
-
-

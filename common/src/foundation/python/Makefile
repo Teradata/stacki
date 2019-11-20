@@ -14,7 +14,7 @@ BOOTSTRAP        = readline-devel xz-devel
 BOOTSTRAP.redhat = openssl-devel bzip2-libs bzip2-devel libffi-devel
 BOOTSTRAP.sles11 = libffi-devel
 BOOTSTRAP.sles12 = libffi48-devel
-BOOTSTRAP.sles   = libopenssl-devel bzip2 libzip2 $(BOOTSTRAP.$(RELEASE))
+BOOTSTRAP.sles   = libopenssl-devel bzip2 libzip2 libbz2-devel $(BOOTSTRAP.$(RELEASE))
 
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))

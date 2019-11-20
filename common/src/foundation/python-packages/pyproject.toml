@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "stacki"
+version = "0.1.0"
+description = "stacki"
+authors = ["stacki"]
+
+# Some packages are pinned, others are floating.
+# Version specifier syntax: https://poetry.eustace.io/docs/versions/
+[tool.poetry.dependencies]
+# For some reason this tool wants the python version here, so just leave it.
+python = "^3.6"
+django = "=1.11.20"
+flask = "*"
+gitpython = "*"
+pymysql = "=0.8.1"
+ansible = "*"
+configparser = "*"
+flake8 = "*"
+jmespath = "*"
+jsoncomment = "*"
+mod-wsgi = "*"
+netifaces = "*"
+paramiko = "*"
+pexpect = "*"
+psutil = "*"
+python-daemon = "*"
+pyzmq = "=17.1.2"
+redis = "*"
+requests = "*"
+testinfra = "=1.16.0"
+yoyo-migrations = "*"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+# This is the extra metadata that pip2src uses to generate node.xml,
+# graph.xml, and makefiles. The names of the packages here must match
+# the names of the packages in the tool.poetry.dependencies block above.
+#
+# The appliance names of `server` and `client` correspond to `frontend`
+# and `backend` respectively. Do not change these because the rest of
+# the graph appears to assume the names are `server` and `client`.
+[stacki-metadata]
+django = { appliances = ["server"] }
+flask = { appliances = ["server"] }
+gitpython = { appliances = ["server"], bootstrap = true }
+pymysql = { appliances = ["server"], bootstrap = true }
+ansible = { appliances = ["server"] }
+configparser = { appliances = ["server", "client"] }
+flake8 = { appliances = ["server"], bootstrap = true }
+jmespath = { appliances = ["server"] }
+jsoncomment = { appliances = ["server"], bootstrap = true }
+mod-wsgi = { appliances = ["server"] }
+netifaces = { appliances = ["server", "client"], bootstrap = true }
+paramiko = { appliances = ["server"] }
+pexpect = { appliances = ["server"] }
+psutil = { appliances = ["server", "client"], bootstrap = true }
+python-daemon = { appliances = ["server", "client"], bootstrap = true }
+pyzmq = { appliances = ["server", "client"], bootstrap = true }
+redis = { appliances = ["server"], bootstrap = true }
+requests = { appliances = ["server"] }
+testinfra = { appliances = ["server"], bootstrap = true }
+yoyo-migrations = { appliances = ["server"] }
