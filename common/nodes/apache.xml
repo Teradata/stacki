@@ -94,6 +94,11 @@ rm -f /etc/httpd/conf.modules.d/00-dav.conf
 rm -f /etc/httpd/conf.modules.d/00-lua.conf
 rm -f /etc/httpd/conf.modules.d/00-proxy.conf
 
+<!-- Then add blank ones so package updates won't add them back -->
+touch /etc/httpd/conf.modules.d/00-dav.conf
+touch /etc/httpd/conf.modules.d/00-lua.conf
+touch /etc/httpd/conf.modules.d/00-proxy.conf
+
 <stack:file stack:name="/etc/httpd/conf.modules.d/00-base.conf">
 LoadModule access_compat_module modules/mod_access_compat.so
 LoadModule actions_module modules/mod_actions.so
