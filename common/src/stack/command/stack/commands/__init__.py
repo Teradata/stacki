@@ -1169,15 +1169,9 @@ def get_mysql_connection(user=None, password=None):
 				# Couldn't read the password, try connecting without one
 				pass
 
-		# Connect to a copy of the database if we are running pytest-xdist
-		if 'PYTEST_XDIST_WORKER' in os.environ:
-			db_name = 'cluster' + os.environ['PYTEST_XDIST_WORKER']
-		else:
-			db_name = 'cluster'
-
 		if os.path.exists('/var/run/mysql/mysql.sock'):
 			connection = pymysql.connect(
-				db=db_name,
+				db='cluster',
 				user=user,
 				passwd=password,
 				host='localhost',
@@ -1186,7 +1180,7 @@ def get_mysql_connection(user=None, password=None):
 			)
 		else:
 			connection = pymysql.connect(
-				db=db_name,
+				db='cluster',
 				user=user,
 				passwd=password,
 				host='localhost',

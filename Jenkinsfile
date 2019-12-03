@@ -405,7 +405,9 @@ pipeline {
 
                 // Make a copy of test-framework for each test suite
                 sh 'cp -al stacki/test-framework unit'
-                sh 'cp -al stacki/test-framework integration'
+                sh 'cp -al stacki/test-framework integration_1'
+                sh 'cp -al stacki/test-framework integration_2'
+                sh 'cp -al stacki/test-framework integration_3'
                 sh 'cp -al stacki/test-framework system'
 
                 script {
@@ -514,7 +516,7 @@ pipeline {
                     }
                 }
 
-                stage('Integration') {
+                stage('Integration - Group 1') {
                     when {
                         anyOf {
                             environment name: 'PLATFORM', value: 'sles12'
@@ -529,16 +531,16 @@ pipeline {
                         sleep 10
 
                         // Run the integration tests
-                        dir('integration') {
-                            // Give the tests up to 90 minutes to finish
-                            timeout(90) {
+                        dir('integration_1') {
+                            // Give the tests up to 60 minutes to finish
+                            timeout(60) {
                                 script {
                                     try {
                                         if (env.COVERAGE_REPORTS == 'true') {
-                                            sh './run-tests.sh --integration --coverage ../$ISO_FILENAME'
+                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=1 ../$ISO_FILENAME'
                                         }
                                         else {
-                                            sh './run-tests.sh --integration ../$ISO_FILENAME'
+                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=1 ../$ISO_FILENAME'
                                         }
                                     }
                                     catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -548,7 +550,7 @@ pipeline {
                                         }
 
                                         // Raise an error
-                                        error 'Integration test-suite timed out'
+                                        error 'Integration Group 1 test-suite timed out'
                                     }
                                 }
                             }
@@ -559,16 +561,129 @@ pipeline {
                         always {
                             script {
                                 // Record the test statuses for Jenkins
-                                if (fileExists('integration/reports/integration-junit.xml')) {
-                                    junit 'integration/reports/integration-junit.xml'
+                                if (fileExists('integration_1/reports/integration-junit.xml')) {
+                                    junit 'integration_1/reports/integration-junit.xml'
                                 }
 
                                 if (env.COVERAGE_REPORTS == 'true') {
-                                    // Move the coverage report to the common folder
-                                    sh 'mv integration/reports/integration coverage/'
-
                                     // Add the coverage data to the `combine` folder
-                                    sh 'mv integration/reports/integration.coverage combine/reports/'
+                                    sh 'mv integration_1/reports/integration.coverage combine/reports/integration-1.coverage'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Integration - Group 2') {
+                    when {
+                        anyOf {
+                            environment name: 'PLATFORM', value: 'sles12'
+                            environment name: 'PLATFORM', value: 'redhat7'
+                        }
+                    }
+
+                    steps {
+                        // Note: There is a race condition getting bridged networks
+                        // when you kick off vagrant at the exact same time. So, cause
+                        // a slight delay.
+                        sleep 20
+
+                        // Run the integration tests
+                        dir('integration_2') {
+                            // Give the tests up to 60 minutes to finish
+                            timeout(60) {
+                                script {
+                                    try {
+                                        if (env.COVERAGE_REPORTS == 'true') {
+                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=2 ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=2 ../$ISO_FILENAME'
+                                        }
+                                    }
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/integration') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Integration Group 2 test-suite timed out'
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    post {
+                        always {
+                            script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('integration_2/reports/integration-junit.xml')) {
+                                    junit 'integration_2/reports/integration-junit.xml'
+                                }
+
+                                if (env.COVERAGE_REPORTS == 'true') {
+                                    // Add the coverage data to the `combine` folder
+                                    sh 'mv integration_2/reports/integration.coverage combine/reports/integration-2.coverage'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Integration - Group 3') {
+                    when {
+                        anyOf {
+                            environment name: 'PLATFORM', value: 'sles12'
+                            environment name: 'PLATFORM', value: 'redhat7'
+                        }
+                    }
+
+                    steps {
+                        // Note: There is a race condition getting bridged networks
+                        // when you kick off vagrant at the exact same time. So, cause
+                        // a slight delay.
+                        sleep 30
+
+                        // Run the integration tests
+                        dir('integration_3') {
+                            // Give the tests up to 60 minutes to finish
+                            timeout(60) {
+                                script {
+                                    try {
+                                        if (env.COVERAGE_REPORTS == 'true') {
+                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=3 ../$ISO_FILENAME'
+                                        }
+                                        else {
+                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=3 ../$ISO_FILENAME'
+                                        }
+                                    }
+                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                        // Make sure we clean up the VM
+                                        dir('test-suites/integration') {
+                                            sh 'vagrant destroy -f || true'
+                                        }
+
+                                        // Raise an error
+                                        error 'Integration Group 3 test-suite timed out'
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    post {
+                        always {
+                            script {
+                                // Record the test statuses for Jenkins
+                                if (fileExists('integration_3/reports/integration-junit.xml')) {
+                                    junit 'integration_3/reports/integration-junit.xml'
+                                }
+
+                                if (env.COVERAGE_REPORTS == 'true') {
+                                    // Add the coverage data to the `combine` folder
+                                    sh 'mv integration_3/reports/integration.coverage combine/reports/integration-3.coverage'
                                 }
                             }
                         }
@@ -577,7 +692,7 @@ pipeline {
 
                 stage('System') {
                     steps {
-                        sleep 20
+                        sleep 40
 
                         // Run the system tests
                         dir('system') {
@@ -667,7 +782,7 @@ pipeline {
                     }
 
                     steps {
-                        sleep 30
+                        sleep 50
 
                         dir('combine/test-suites/unit') {
                             script {
@@ -690,6 +805,10 @@ pipeline {
 
                                     source ../../bin/activate
 
+                                    vagrant ssh frontend -c "sudo -i coverage combine /export/reports/integration-*.coverage"
+                                    vagrant ssh frontend -c "sudo -i coverage html -d /export/reports/integration/"
+                                    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/integration.coverage"
+
                                     vagrant ssh frontend -c "sudo -i coverage combine /export/reports/*.coverage"
                                     vagrant ssh frontend -c "sudo -i coverage html -d /export/reports/all/"
 
@@ -698,7 +817,8 @@ pipeline {
                                 '''
                             }
 
-                            // Move our new `all` coverage report to the common folder
+                            // Move our new `integration` and `all` coverage reports to the common folder
+                            sh 'mv combine/reports/integration coverage/'
                             sh 'mv combine/reports/all coverage/'
 
                             // Publish the coverage reports

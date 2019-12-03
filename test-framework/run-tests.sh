@@ -10,6 +10,8 @@ INTEGRATION=0
 SYSTEM=0
 COVERAGE=0
 
+EXTRA_FLAGS=()
+
 ISO=""
 TEMP_EXTRA_ISOS=()
 EXTRA_ISOS=()
@@ -38,6 +40,10 @@ do
             ;;
         --extra-isos=*)
             TEMP_EXTRA_ISOS=($(echo "${1#*=}" | tr ',' '\n'))
+            shift 1
+            ;;
+        -*)
+            EXTRA_FLAGS+=("$1")
             shift 1
             ;;
         *)
@@ -205,9 +211,9 @@ then
 
     if [[ $COVERAGE -eq 1 ]]
     then
-        ./test-suites/integration/run-tests.sh --coverage
+        ./test-suites/integration/run-tests.sh --coverage ${EXTRA_FLAGS[@]}
     else
-        ./test-suites/integration/run-tests.sh
+        ./test-suites/integration/run-tests.sh ${EXTRA_FLAGS[@]}
     fi
     RETURN_CODE=$?
 
@@ -249,7 +255,7 @@ then
             ./test-suites/system/tear-down.sh
             exit 1
         fi
-        
+
         ./test-suites/system/run-tests.sh
     fi
     RETURN_CODE=$?

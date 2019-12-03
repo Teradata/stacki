@@ -10,14 +10,13 @@ import pytest
 
 
 @pytest.fixture
-def revert_database(dump_mysql, redis):
+def revert_database(dump_mysql):
 	# Don't need to do anything in the set up
 	yield
 
 	# Load a fresh database after each test
-	with redis.lock("pytest_revert_database"):
-		with open(dump_mysql) as sql:
-			subprocess.run("mysql", stdin=sql, check=True)
+	with open(dump_mysql) as sql:
+		subprocess.run("mysql", stdin=sql, check=True)
 
 
 def _add_overlay(target):
@@ -111,7 +110,7 @@ def _remove_overlay(target, request):
 	shutil.rmtree(f"/overlay/{name}")
 
 @pytest.fixture
-def revert_export_stack_pallets(exclusive_lock, request):
+def revert_export_stack_pallets(request):
 	_add_overlay('/export/stack/pallets')
 
 	yield
@@ -119,7 +118,7 @@ def revert_export_stack_pallets(exclusive_lock, request):
 	_remove_overlay('/export/stack/pallets', request)
 
 @pytest.fixture
-def revert_export_stack_carts(exclusive_lock, request):
+def revert_export_stack_carts(request):
 	_add_overlay('/export/stack/carts')
 
 	yield
@@ -127,7 +126,7 @@ def revert_export_stack_carts(exclusive_lock, request):
 	_remove_overlay('/export/stack/carts', request)
 
 @pytest.fixture
-def revert_etc(exclusive_lock, request):
+def revert_etc(request):
 	_add_overlay('/etc')
 
 	yield
@@ -135,7 +134,7 @@ def revert_etc(exclusive_lock, request):
 	_remove_overlay('/etc', request)
 
 @pytest.fixture
-def revert_discovery(exclusive_lock):
+def revert_discovery():
 	# Nothing to do in set up
 	yield
 
@@ -160,7 +159,7 @@ def revert_discovery(exclusive_lock):
 		os.remove("/var/log/stack-discovery.log")
 
 @pytest.fixture
-def revert_routing_table(exclusive_lock):
+def revert_routing_table():
 	# Get a snapshot of the existing routes
 	result = subprocess.run(
 		["ip", "route", "list"],

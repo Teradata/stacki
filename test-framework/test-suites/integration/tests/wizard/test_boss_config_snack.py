@@ -12,7 +12,7 @@ class TestBossConfigSnack:
 	DOWN_KEY = "\033[B"
 
 	@pytest.fixture
-	def mount_cdrom(self, exclusive_lock):
+	def mount_cdrom(self):
 		# StackiOS test pipeline doesn't have a stacki ISO, so we skip the test
 		if not glob.glob("/export/isos/stacki-*.iso"):
 			pytest.skip("No stacki ISO available")
