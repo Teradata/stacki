@@ -10,6 +10,9 @@ if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`
 elif [ -f /etc/SuSE-release ]; then
 	RELEASE=`head -1 /etc/SuSE-release`
+elif [ -f /etc/os-release ]; then
+	# sles15 doesn't have SuSE-release
+	RELEASE=`grep -e '^NAME=' -e '^VERSION_ID=' /etc/os-release | tr -d '"' | awk -v ORS= -F '=' '{ print $2 }'`
 else
 	RELEASE='unknown'
 fi
@@ -24,7 +27,7 @@ case $RELEASE in
 	*SUSE*12*)
 		echo sles12
 		;;
-	*SUSE*15*)
+	*SLES15*)
 		echo sles15
 		;;
 	*)
