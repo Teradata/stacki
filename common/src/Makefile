@@ -11,7 +11,7 @@ endif
 include order-$(ROLL).mk
 
 order-$(ROLL).mk: Makefile ../../version.mk $(shell find . -name version.mk)
-	python stack/build/build/bin/gen-order > $@
+	stack/build/build/bin/gen-order > $@
 
 -include order-$(ROLL)-$(RELEASE).mk
 

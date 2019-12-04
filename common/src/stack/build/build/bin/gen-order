@@ -1,11 +1,14 @@
-#! /usr/bin/python
+#! /usr/bin/env any_python
+#
+# NOTE: THIS FILE MUST WORK IN PYTHON2 and PYTHON3
 #
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
-
+from __future__ import print_function
+import sys
 import os
 import string
 from subprocess import *
@@ -18,8 +21,13 @@ for entry in os.listdir('.'):
 	if os.path.isdir(entry):
 #		print '+', entry
 		os.chdir(entry)
-		stdout, stderr = Popen(['make', 'dump-info'], 
-				       stderr=PIPE, stdout=PIPE).communicate()
+		cmd = ['make', 'dump-info']
+		kwargs = {'stderr': PIPE, 'stdout': PIPE}
+		# python3 wants an encoding, python2's Popen doesn't support one
+		# check the version here.
+		if sys.version_info[0] == 3:
+			kwargs['encoding'] = 'utf-8'
+		stdout, stderr = Popen(cmd, **kwargs).communicate()
 
 		for line in stdout.split('\n'):
 #			print line
@@ -38,7 +46,7 @@ for entry in os.listdir('.'):
 					curr = {}
 			except:
 				continue
-        
+
 			curr[key.lower()] = value
 
 		try:
@@ -48,18 +56,17 @@ for entry in os.listdir('.'):
 
 		os.chdir(cwd)
 
-
 list = []
 for src in dirs.keys():
-        order = dirs[src]['order']
-        if order:
-                order = int(order)
-        else:
-                order = 50
-        list.append((order, dirs[src]['dir']))
+	order = dirs[src]['order']
+	if order:
+		order = int(order)
+	else:
+		order = 50
+	list.append((order, dirs[src]['dir']))
 
 list.sort()
 
-print 'SRCDIRS = ',
+print('SRCDIRS = ', end='')
 for order, src in list:
-        print '\\\n\t%s ' % src,
+	print('\\\n\t%s ' % src, end='')
