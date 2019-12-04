@@ -58,8 +58,10 @@ fi
 # If we are redhat7 PLATFORM, we aren't done yet
 if [[ $PLATFORM = "redhat7" ]]
 then
+    # Install stacki-fab RPMs so we can run frontend-install
+    rpm -ivh "$(find . -wholename "./build-stacki-*/RPMS/x86_64/stacki-fab*.rpm")"
     # Barnacle with the non-bootable ISO
-    python ./tools/fab/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
+    /opt/stack/bin/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
 
     # Restart httpd, it seems to be in a crashed state after barnacle
     systemctl restart httpd

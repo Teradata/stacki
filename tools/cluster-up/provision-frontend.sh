@@ -43,17 +43,23 @@ then
     echo "nameserver ${DNS//,/ /}" >> /etc/resolv.conf
 fi
 
-# Fetch the barnacle script, if needed
-if [[ -f /vagrant/frontend-install.py ]]
+# Install the foundation-python RPM from the stacki iso.
+mkdir -p "/mnt/$ISO_FILENAME"
+mount "/export/stacki-iso/$ISO_FILENAME" "/mnt/$ISO_FILENAME"
+rpm -ivh "$(find "/mnt/$ISO_FILENAME" -name "foundation-python-3*.rpm")"
+
+# Install the stacki-fab RPM. This is either user supplied or we use what is on the stacki ISO.
+if [[ -f "$(find /vagrant -name "stacki-fab*.rpm")" ]]
 then
-    mv /vagrant/frontend-install.py .
+    rpm -ivh "$(find /vagrant -name "stacki-fab*.rpm")"
 else
-    curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/$(echo $ISO_FILENAME | cut -d '-' -f -2 | cut -d '_' -f 1)/tools/fab/frontend-install.py
+    rpm -ivh "$(find "/mnt/$ISO_FILENAME" -name "stacki-fab*.rpm")"
 fi
 
+umount "/mnt/$ISO_FILENAME"
+
 # Barnacle myself, choosing the second interface
-chmod u+x frontend-install.py
-./frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
+/opt/stack/bin/frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
 
 # Allow port forwards to talk on eth0
 if [[ -n $FORWARD_PORTS ]]

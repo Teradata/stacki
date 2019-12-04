@@ -32,6 +32,7 @@ NETMASK="255.255.255.0"
 GATEWAY=""
 DNS=""
 FORWARD_PORTS=""
+FAB_RPM=""
 
 while [[ "$#" -gt 0 ]]
 do
@@ -84,6 +85,10 @@ do
             FORWARD_PORTS="${1#*=}"
             shift 1
             ;;
+        --fab-rpm=*)
+            FAB_RPM="${1#*=}"
+            shift 1
+            ;;
         --*)
             echo -e "\033[31mError: unrecognized flag \"$1\"\033[0m"
             exit 1
@@ -111,6 +116,7 @@ then
     echo -e "  --netmask=NETMASK\t\tThe netmask for the bridge network. Default: 255.255.255.0"
     echo -e "  --gateway=GATEWAY_ADDRESS\tGateway address for the bridged interface."
     echo -e "  --dns=DNS_ADDRESS[,DNS2]\tComma separated list of DNS servers."
+    echo -e "  --fab-rpm=FAB_RPM\tOptional override of the stacki-fab RPM to use."
     exit 1
 fi
 
@@ -259,10 +265,16 @@ then
     fi
 fi
 
-# Pull frontend-install.py from the local machine if we are running from a full repo checkout
-if [[ -f ../fab/frontend-install.py ]]
+# Use the user specified stacki-fab RPM
+if [[ -n "$FAB_RPM" ]]
 then
-    cp ../fab/frontend-install.py .
+    if [[ -f "$FAB_RPM" ]]
+    then
+        cp "$FAB_RPM" .
+    else
+        echo -e "\033[31mError: Specified FAB_RPM path $FAB_RPM not found\033[0m"
+        exit 1
+    fi
 fi
 
 # Make sure the boxes are up-to-date

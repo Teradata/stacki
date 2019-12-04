@@ -19,8 +19,6 @@ BOOTSTRAP.sles   = libopenssl-devel bzip2 libzip2 libbz2-devel sqlite3-devel $(B
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
 	$(MAKE) install-rpm
-	echo $(PKGROOT)/lib > /etc/ld.so.conf.d/stacki-python.conf
-	ldconfig
 	$(PY.PATH) -mensurepip
 
 
@@ -41,6 +39,10 @@ install::
 		cd Python-$(VERSION);					\
 		$(MAKE) install DESTDIR=$(ROOT) ;			\
 	)
+	# Lay down the ldconf file in the right place.
+	# %post and %postun will run ldconfig to apply it.
+	mkdir -p $(ROOT)/etc/ld.so.conf.d
+	cp stacki-python.conf $(ROOT)/etc/ld.so.conf.d/
 
 clean::
 	rm -rf Python-$(VERSION)
