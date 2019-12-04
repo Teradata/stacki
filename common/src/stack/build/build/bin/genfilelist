@@ -1,16 +1,15 @@
-#!/usr/bin/env python
+#! /bin/bash
 
-import os, sys
+# this script was re-written from the original version to support environments which do not have python2
 
-pkg = sys.argv[1]
-buildroot = sys.argv[2]
-for r, d, f in os.walk(buildroot,topdown=True):
-	for n in d:
-		dn = os.path.join(r,n)
-		if os.listdir(dn) == []:
-			fname = dn.replace(buildroot,'', 1)
-			print "\"%s\"" % fname
-	for n in f:
-		fn = os.path.join(r, n)
-		fname = fn.replace(buildroot,'',1)
-		print "\"%s\"" % fname
+# $1 is the package name - not used?
+# $2 is the source directory
+
+# find all empty directories in the source dir
+# find all files (symlinks too) in the source dir
+# print each on a newline, relative to the source directory ($2), and wrapped in quotes
+pushd $2 > /dev/null
+find . -empty -type d -printf '"/%P"\n'
+find . -type f -printf '"/%P"\n'
+find . -type l -printf '"/%P"\n'
+popd > /dev/null

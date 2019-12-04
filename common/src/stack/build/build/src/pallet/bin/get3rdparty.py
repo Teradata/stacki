@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env any_python
+#
+# NOTE: THIS FILE MUST WORK IN PYTHON2 and PYTHON3
 #
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
@@ -6,6 +8,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from __future__ import print_function
 import os
 import sys
 import json
@@ -70,7 +73,8 @@ def download_url(source, target, curl_args):
 	while retry:
 		p = subprocess.Popen(curl_cmd,
 			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
+			stderr=subprocess.PIPE,
+                )
 		rc = p.wait()
 		o, e = p.communicate()
 		if rc:
@@ -78,7 +82,8 @@ def download_url(source, target, curl_args):
 			print(e)
 			time.sleep(1)
 		else:
-			if o.strip() == '200':
+			# note the byte literal makes this line py2/3 compatible
+			if o.strip() == b'200':
 				retry = 0
 				success = True
 			else:

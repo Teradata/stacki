@@ -22,6 +22,18 @@ endif
 	cd sles   && $(ROLLSBUILD)/bin/get3rdparty.py
 
 bootstrap-make:
+	# setup any_python
+	# this lets some of our build scripts be written in a python2 and python3
+	# and scripts can use /usr/bin/env any_python for the shebang
+	# note `then :;` is the bash equivalent of `pass`. skip linking if link exists
+	(									\
+		if [ "$(shell which any_python)" != "" ]; then :;		\
+		elif [ "$(shell which python)" != "" ]; then			\
+			ln -s $(shell which python) /usr/bin/any_python;	\
+		elif [ "$(shell which python3)" != "" ]; then			\
+			ln -s $(shell which python3) /usr/bin/any_python;	\
+		fi;								\
+	)
 	$(MAKE) -C $(OS) -f bootstrap.mk RELEASE=$(RELEASE) bootstrap
 	$(MAKE) -C common/src/stack/build bootstrap
 
