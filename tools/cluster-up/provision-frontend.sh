@@ -51,9 +51,17 @@ else
     curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/$(echo $ISO_FILENAME | cut -d '-' -f -2 | cut -d '_' -f 1)/tools/fab/frontend-install.py
 fi
 
+if [[ -f /vagrant/frontend-install.sh ]]
+then
+    mv /vagrant/frontend-install.sh .
+else
+    curl -sfSLO --retry 3 https://raw.githubusercontent.com/Teradata/stacki/$(echo $ISO_FILENAME | cut -d '-' -f -2 | cut -d '_' -f 1)/tools/fab/frontend-install.sh
+fi
+
 # Barnacle myself, choosing the second interface
 chmod u+x frontend-install.py
-./frontend-install.py --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
+chmod u+x frontend-install.sh
+./frontend-install.sh --use-existing --stacki-iso="/export/stacki-iso/$ISO_FILENAME" <<< "2"
 
 # Allow port forwards to talk on eth0
 if [[ -n $FORWARD_PORTS ]]

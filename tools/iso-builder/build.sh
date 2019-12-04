@@ -59,7 +59,7 @@ fi
 if [[ $PLATFORM = "redhat7" ]]
 then
     # Barnacle with the non-bootable ISO
-    python ./tools/fab/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
+    ./tools/fab/frontend-install.sh --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
 
     # Restart httpd, it seems to be in a crashed state after barnacle
     systemctl restart httpd

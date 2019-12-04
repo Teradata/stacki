@@ -1,15 +1,40 @@
-#!/usr/bin/python
+#! /usr/bin/env any_python
+#
+# NOTE: THIS FILE MUST WORK IN PYTHON2 and PYTHON3
+#
 
 from __future__ import print_function
 import os
 import sys
 import subprocess
 import getopt
-import tempfile
+import logging
 import socket
 import re
 import struct
 import json
+from collections import namedtuple
+
+# PYTHON3 subprocess wants an encoding - python2 doesn't support it at all
+
+PYTHON_3 = sys.version_info[0] == 3
+
+py3_kwargs = {}
+if PYTHON_3:
+	py3_kwargs['encoding'] = 'utf-8'
+
+done_proc = namedtuple('done_proc', ('returncode', 'stdout', 'stderr'))
+def run(*args, **kwargs):
+	''' this function is just a wrapper to handle py2/3 and is not intended to replicate py3's subprocess.run '''
+
+	if PYTHON_3:
+		kw = kwargs.copy()
+		kw.update(py3_kwargs)
+		kwargs = kw
+
+	proc = subprocess.Popen(*args, **kwargs)
+	result = proc.communicate()
+	return done_proc(proc.returncode, *result)
 
 
 SITE_ATTRS_TEMPLATE = """\
@@ -55,12 +80,11 @@ def banner(message):
 def mount(source, dest):
 	subprocess.call(['mkdir', '-p', dest])
 	mnt_cmd = ['mount', '-o', 'loop,ro', source, dest]
-	proc = subprocess.Popen(mnt_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	result = proc.communicate()
-	if proc.returncode != 0:
-		print(' '.join(mnt_cmd) + ' failed:\n' + result[0])
-		proc = subprocess.Popen('mount | grep iso', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		print('mount | grep iso: \n' + proc.communicate()[0])
+	result = run(mnt_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	if result.returncode != 0:
+		print(' '.join(mnt_cmd) + ' failed:\n' + result.stdout)
+		result = run('mount | grep iso', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		print('mount | grep iso: \n' + result.stdout)
 
 
 def umount(dest):
@@ -96,7 +120,6 @@ def find_repos(iso, stacki_only=False):
 		elif 'repodata' in dirs:
 			repodirs.append(path)
 
-#	umount(mountdir)
 	return repodirs
 
 
@@ -173,6 +196,7 @@ def usage():
 	print("\t--extra-iso=iso1,iso2,iso3.. : list of pallets to add")
 	print("\t--use-existing : use the existing system settings and root password")
 
+
 #
 # MAIN
 #
@@ -180,19 +204,29 @@ def usage():
 #
 # log all output to a file too
 #
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
-tee = subprocess.Popen(["tee", "/tmp/frontend-install.log"],
-	stdin=subprocess.PIPE)
-os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
-os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+filehandler = logging.FileHandler('/tmp/frontend-install.log')
+handler = logging.StreamHandler(sys.stdout)
+
+filehandler.setLevel(logging.DEBUG)
+handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(message)s')
+filehandler.setFormatter(formatter)
+handler.setFormatter(formatter)
+
+root.addHandler(filehandler)
+root.addHandler(handler)
 
 #
 # determine if this is CentOS/RedHat or SLES
 #
 if os.path.exists('/etc/redhat-release'):
 	osname = 'redhat'
-elif os.path.exists('/etc/SuSE-release'):
+elif os.path.exists('/etc/SuSE-release') or os.path.exists('/etc/SUSE-brand'):
 	osname = 'sles'
 else:
 	print('Unrecognized operating system\n')
@@ -299,14 +333,14 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		attrs['HOSTNAME'] = fqdn.pop(0)
 		attrs['DOMAIN'] = '.'.join(fqdn)
 
-                # Reject frontend and backend as hostnames
+		# Reject frontend and backend as hostnames
 		if attrs['HOSTNAME'].lower() in ['frontend', 'backend']:
 			print('Cannot have an appliance name as a hostname')
 			sys.exit(1)
 
 		# Figure out which interface to use
 		interfaces = []
-		for line in subprocess.check_output("ip -o -4 address", shell=True).splitlines():
+		for line in subprocess.check_output("ip -o -4 address", shell=True, **py3_kwargs).splitlines():
 			interface = re.match(r'\d+:\s+(\S+)\s+', line).group(1)
 			if interface != 'lo':
 				interfaces.append((interface, line))
@@ -336,7 +370,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 					choice = int(get_input("\nType the interface number: ")) - 1
 					interface = interfaces[choice]
 					break
-				except:
+				except Exception:
 					print("\nError: Bad choice, Try again.")
 			else:
 				print("\nError: Failed after 3 tries.")
@@ -364,7 +398,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		attrs['NETWORK'] = socket.inet_ntoa(struct.pack('!I', network_address))
 
 		# Get the MAC_ADDRESS
-		for line in subprocess.check_output("ip -o link", shell=True).splitlines():
+		for line in subprocess.check_output("ip -o link", shell=True, **py3_kwargs).splitlines():
 			if line.split(':')[1].strip() == interface[0]:
 				attrs['MAC_ADDRESS'] = re.search(r'link/ether\s+([0-9a-f:]{17})\s+', line).group(1)
 				break
@@ -374,7 +408,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 
 		# Get the GATEWAY
 		gateways = []
-		for line in subprocess.check_output("ip route", shell=True).splitlines():
+		for line in subprocess.check_output("ip route", shell=True, **py3_kwargs).splitlines():
 			parts = line.split()
 			if parts[0] == 'default':
 				gateways.append((parts[4], parts[2]))
@@ -404,7 +438,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 					choice = int(get_input("\nType the gateway number: ")) - 1
 					gateway = gateways[choice][1]
 					break
-				except:
+				except Exception:
 					print("\nError: Bad choice, Try again.")
 			else:
 				print("\nError: Failed after 3 tries.")
@@ -418,7 +452,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			if 'nameserver' in line:
 				dns_servers.append(line.split()[1])
 
-		if len(dns_servers):
+		if dns_servers:
 			attrs['DNS_SERVERS'] = ','.join(dns_servers)
 		else:
 			print("Error: DNS server not found.")
@@ -455,7 +489,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			'from stack.wizard import Data;'
 			'import json;'
 			'print(json.dumps(Data().getDVDPallets()[0]))'
-		]))
+		], **py3_kwargs))
 
 		umount('/mnt/cdrom')
 
@@ -523,40 +557,32 @@ stackpath = '/opt/stack/bin/stack'
 subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
 banner("Generate XML")
 # run stack list node xml server attrs="<python dict>"
-f = open("/tmp/stack.xml", "w")
-cmd = [ stackpath, 'list', 'node', 'xml', 'server',
-	'attrs={0}'.format(repr(attributes))]
-print('cmd: %s' % ' '.join(cmd))
-p = subprocess.Popen(cmd, stdout=f, stderr=None)
-rc = p.wait()
-f.close()
+with open("/tmp/stack.xml", "w") as fi:
+	cmd = [ stackpath, 'list', 'node', 'xml', 'server',
+		'attrs={0}'.format(repr(attributes))]
+	print('cmd: %s' % ' '.join(cmd))
+	result = run(cmd, stdout=fi, stderr=None)
 
-if rc:
-	print("Could not generate XML")
-	sys.exit(rc)
+	if result.returncode != 0:
+		print("Could not generate XML")
+		sys.exit(result.returncode)
 
 banner("Process XML")
 # pipe that output to stack run pallet and output run.sh
-infile = open("/tmp/stack.xml", "r")
-outfile = open("/tmp/run.sh", "w")
-cmd = [stackpath, 'list', 'host', 'profile', 'chapter=main', 'profile=bash']
-p = subprocess.Popen(cmd, stdin=infile,
-	stdout=outfile)
-rc = p.wait()
-infile.close()
-outfile.close()
+with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
+	cmd = [stackpath, 'list', 'host', 'profile', 'chapter=main', 'profile=bash']
+	result = run(cmd, stdin=infile, stdout=outfile)
 
-if rc:
-	print("Could not process XML")
-	sys.exit(rc)
+	if result.returncode != 0:
+		print("Could not process XML")
+		sys.exit(result.returncode)
 
 banner("Run Setup Script")
 # run run.sh
-p = subprocess.Popen(['sh', '/tmp/run.sh'])
-rc = p.wait()
-if rc:
+result = run(['sh', '/tmp/run.sh'])
+if result.returncode != 0:
 	print("Setup Script Failed")
-	sys.exit(rc)
+	sys.exit(result.returncode)
 
 banner("Adding Pallets")
 subprocess.call([stackpath, 'add', 'pallet', stacki_iso])
@@ -571,4 +597,3 @@ subprocess.call([stackpath, 'sync', 'config'])
 banner("Done")
 
 print("Reboot to complete process.")
-

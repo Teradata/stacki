@@ -49,8 +49,22 @@
     retries: 6
     delay: 10
 
+  - name: "Report frontend-install.sh URL"
+    debug:
+      msg: "https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('env','GIT_BRANCH')|default('develop', True) }}/tools/fab/frontend-install.sh"
+
+  - name: Download frontend-install.sh
+    get_url:
+      url: "https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('env','GIT_BRANCH')|default('develop', True) }}/tools/fab/frontend-install.sh"
+      dest: /root/
+      mode: 0744
+    register: get_url_result
+    until: get_url_result is succeeded
+    retries: 6
+    delay: 10
+
   - name: Barnacle the frontend
-    shell: /root/frontend-install.py --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"
+    shell: /root/frontend-install.sh --use-existing --stacki-iso=/export/isos/{{ lookup('env','STACKI_ISO')|basename }} <<< "2"
     register: barnacle_output
 
   - name: Barnacle Output

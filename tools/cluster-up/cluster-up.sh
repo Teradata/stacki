@@ -259,10 +259,15 @@ then
     fi
 fi
 
-# Pull frontend-install.py from the local machine if we are running from a full repo checkout
+# Pull frontend-install.py and frontend-install.sh from the local machine if we are running from a full repo checkout
 if [[ -f ../fab/frontend-install.py ]]
 then
     cp ../fab/frontend-install.py .
+fi
+
+if [[ -f ../fab/frontend-install.sh ]]
+then
+    cp ../fab/frontend-install.sh .
 fi
 
 # Make sure the boxes are up-to-date
