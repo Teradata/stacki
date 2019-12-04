@@ -27,6 +27,8 @@ case $OS in
 		echo redhat
 	elif [ -f /etc/SuSE-release ]; then
 		echo sles
+	elif [ -f /etc/SUSE-brand ]; then
+		echo sles
 	else
 		echo linux
 	fi
