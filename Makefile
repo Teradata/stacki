@@ -59,6 +59,7 @@ endif
 preroll::
 	make -C common/src pkg
 	make -C $(OS)/src pkg
+	make -C tools/fab pkg
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
 	cp common/graph/* $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/
