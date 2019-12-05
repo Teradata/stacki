@@ -292,7 +292,9 @@ new_pkgs = [
 ]
 
 for new_pkg in new_pkgs:
-	if subprocess.call(['yum' if osname == 'redhat' else 'zypper', 'info', new_pkg]) == 0:
+	if osname == 'redhat' and subprocess.call(['yum', 'info', new_pkg]) == 0:
+		pkgs.append(new_pkg)
+	elif osname == 'sles' and "not found" not in str(subprocess.check_output(['zypper', 'info', new_pkg])):
 		pkgs.append(new_pkg)
 
 return_code = installrpms(pkgs)
