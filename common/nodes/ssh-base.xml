@@ -17,10 +17,7 @@
 	</stack:rocks>
 
 
-	<stack:package>
-		openssh
-		openssh-askpass
-	</stack:package>
+	<stack:package>openssh</stack:package>
 
 	<stack:package stack:cond="os == 'redhat'">
 		openssh-clients

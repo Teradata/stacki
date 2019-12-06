@@ -17,7 +17,7 @@
 	</stack:rocks>
 
 
-	<stack:package>
+	<stack:package stack:cond="not (os == 'sles' and os.version == '15.x')">
 		ntp
 	</stack:package>
 

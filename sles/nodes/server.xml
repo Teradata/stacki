@@ -18,9 +18,11 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>git-core</stack:package>
 
 <!-- rpms to create pallets -->
-<stack:package>genisoimage</stack:package>
-<stack:package>createrepo</stack:package>
+<stack:package stack:cond="os.version == '12.x'">genisoimage</stack:package>
+<stack:package stack:cond="os.version == '12.x'">createrepo</stack:package>
 
+<stack:package stack:cond="os.version == '15.x'">mkisofs</stack:package>
+<stack:package stack:cond="os.version == '15.x'">createrepo_c</stack:package>
 <!-- packages required for stack create package -->
 <stack:package>rpm-build</stack:package>
 <stack:package>stack-build</stack:package>

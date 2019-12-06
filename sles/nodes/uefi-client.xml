@@ -15,7 +15,7 @@
 		uefi-boot-method
 	</stack:package>
 
-	<stack:package stack:cond="os.version == '12.x'">
+	<stack:package stack:cond="os.version in ['12.x', '15.x']">
 		grub2-x86_64-efi
 		shim
 		mokutil
@@ -56,7 +56,7 @@ if efi_dev:
 ]]>
 </stack:script>
 
-<stack:script stack:cond="os.version == '12.x'" stack:stage="install-post">
+<stack:script stack:cond="os.version in ['12.x', '15.x']" stack:stage="install-post">
 /usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
@@ -64,7 +64,7 @@ if efi_dev:
 MTOOLSRC=/mnt/etc/mtools.conf /mnt/usr/bin/mlabel x:BOOTEFI
 </stack:script>
 
-<stack:script stack:stage="boot-post" cond="os.version == '12.x'">
+<stack:script stack:stage="boot-post" cond="os.version in ['12.x', '15.x']">
 systemctl enable uefi-boot-method
 systemctl start uefi-boot-method
 </stack:script>

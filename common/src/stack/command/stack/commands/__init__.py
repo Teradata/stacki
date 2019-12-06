@@ -868,12 +868,12 @@ class Command:
 
 		if os.path.exists('/etc/centos-release') or os.path.exists('/etc/redhat-release'):
 			self.os = 'redhat'
-		elif os.path.exists('/etc/SuSE-release'):
+		elif os.path.exists('/etc/SuSE-release') or os.path.exists('/etc/SUSE-brand'):
 			self.os = 'sles'
 		else:
 			self.os = os.uname()[0].lower()
 			if self.os == 'linux':
-				self.os = 'redhat'
+				self.os = 'UNKNOWN_LINUX_DISTRO'
 
 		self._args   = None
 		self._params = None

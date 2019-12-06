@@ -196,11 +196,13 @@ fi
 wait_for_mysql_up
 
 <!--
-	set the password for the apache user, root user at localhost
+	set the password for the apache user, root user at localhost.
+	likewise, we create a localhost account that can be leveraged for list commands
 -->
 
 <stack:file stack:name="/root/users.sql" stack:perms="0400"
             stack:owner="root:root" stack:vars="expanded">
+CREATE USER ""@"localhost";
 CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
 CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
 CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";
