@@ -16,7 +16,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:script stack:stage="install-post">
 mkdir -p /tftpboot/pxelinux/uefi/
-cp /usr/lib/grub2/x86_64-efi/grub.efi /tftpboot/pxelinux/uefi/
+cp /usr/lib64/efi/grub.efi /tftpboot/pxelinux/uefi/
 cp /usr/lib64/efi/shim.efi /tftpboot/pxelinux/uefi/
 cp /usr/lib64/efi/MokManager.efi /tftpboot/pxelinux/uefi/
 

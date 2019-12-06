@@ -17,8 +17,8 @@
 	All rights reserved. Stacki(r) v5.x stacki.com
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
-	
-	<services-manager stack:cond="os.version == '12.x'">
+	<services-manager stack:cond="os.version in ['12.x', '15.x']">
+	<!-- AKA: not sles11 -->
 		<default_target>&systemd.default.target;</default_target>
 		<services>
 			<enable config:type="list">

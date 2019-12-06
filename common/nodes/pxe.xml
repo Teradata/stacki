@@ -18,12 +18,14 @@ tftp
 stack-&os;-&release;-images
 </stack:package>
 
-<stack:package>
-syslinux
+<stack:package stack:cond="not (os == 'sles' and os.version == '15.x')">
 xinetd
-stack-pxeboot
 </stack:package>
 
+<stack:package>
+syslinux
+stack-pxeboot
+</stack:package>
 
 <stack:script stack:stage="install-post">
 
