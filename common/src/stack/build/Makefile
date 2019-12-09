@@ -14,7 +14,7 @@ PKGROOT		= /opt/stack/share/build
 STACKBUILD	= build
 ROLLROOT	= ../../../..
 DEPENDS.DIRS	= build
-DEPENDS.FILES	= stack-build.sh stack-build.csh
+DEPENDS.FILES	= stack-build.sh
 DEPENDS.RPMS	=
 
 include $(STACKBUILD)/etc/CCRules.mk
@@ -28,7 +28,6 @@ install::
 	mkdir -p $(ROOT)/etc/profile.d/
 	mkdir -p $(ROOT)/opt/stack/share/licenses/
 	$(INSTALL) -m0555 stack-build.sh  $(ROOT)/etc/profile.d
-	$(INSTALL) -m0555 stack-build.csh $(ROOT)/etc/profile.d
 	(								\
 		cd LICENSE;						\
 		find . -type f | cpio -pudv $(ROOT)/opt/stack/share/licenses/; \

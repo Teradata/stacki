@@ -23,7 +23,6 @@ install::
 	mkdir -p $(ROOT)/etc/init.d/
 	mkdir -p $(ROOT)/export/stack/pallets
 	mkdir -p $(ROOT)/$(PY.STACK)/stack/mq/producers
-	$(INSTALL) -m755 profile.d/ssh-key.csh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 profile.d/ssh-key.sh $(ROOT)/etc/profile.d/
 	$(INSTALL) -m755 init.d/stack-num-cpus $(ROOT)/etc/init.d/
 	$(INSTALL) -m755 cgi/index.cgi $(ROOT)/export/stack/pallets/index.cgi
