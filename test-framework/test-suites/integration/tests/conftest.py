@@ -10,7 +10,6 @@ import tempfile
 import time
 
 import pytest
-from redis import StrictRedis
 
 
 # Everything in "fixures" gets loaded
@@ -23,11 +22,6 @@ def pytest_addoption(parser):
 	parser.addoption(
 		"--audit", action="store_true", help="audit filesystem changes"
 	)
-
-class FakeWorkerID(object):
-	@pytest.fixture(scope="session")
-	def worker_id(self):
-		return 'master'
 
 def pytest_configure(config):
 	# Are we auditing filesystem changes?
@@ -50,25 +44,17 @@ def pytest_configure(config):
 	if os.path.exists("/export/reports/debug.log"):
 		os.remove("/export/reports/debug.log")
 
-	# If we don't have xdist, we need to fake the worker_id fixture
-	if not config.pluginmanager.hasplugin('xdist'):
-		config.pluginmanager.register(FakeWorkerID())
-
-@pytest.fixture(scope="session")
-def redis():
-	yield StrictRedis(host='localhost')
 
 @pytest.fixture
-def debug_log(redis, request, worker_id):
+def debug_log(request):
 	def _inner(message):
-		with redis.lock("pytest_debug_log"):
-			with open("/export/reports/debug.log", "a") as f:
-				f.write(f"[{worker_id}] {request.node.nodeid} {message}\n")
+		with open("/export/reports/debug.log", "a") as f:
+			f.write(f"{request.node.nodeid} {message}\n")
 
 	return _inner
 
 @pytest.fixture(scope="session")
-def dump_mysql(worker_id):
+def dump_mysql():
 	# Create a temp file and open it for the subprocess command
 	file_fd, file_path = tempfile.mkstemp(suffix=".sql")
 	file_obj = os.fdopen(file_fd, mode="w")
@@ -81,59 +67,11 @@ def dump_mysql(worker_id):
 	# Close the file
 	file_obj.close()
 
-	if worker_id != 'master':
-		# Now replace the database names with our process specific ones
-		subprocess.run(['sed', '-i', f's|`cluster`|`cluster{worker_id}`|g', file_path], check=True)
-		subprocess.run(['sed', '-i', f's|`shadow`|`shadow{worker_id}`|g', file_path], check=True)
-
-		# Load up the new process specific dbs
-		with open(file_path) as sql:
-			subprocess.run("mysql", stdin=sql, check=True)
-
-		subprocess.run([
-			'mysql', '-e', f'GRANT ALL ON `cluster{worker_id}`.* to apache@localhost'
-		], check=True)
-
-		subprocess.run([
-			'mysql', '-e', f'GRANT ALL ON `shadow{worker_id}`.* to apache@localhost'
-		], check=True)
-
 	# Done with the set up, yield our SQL file path
 	yield file_path
 
 	# Remove the SQL file
 	os.remove(file_path)
-
-	if worker_id != 'master':
-		# Drop our process specific dbs
-		subprocess.run(['mysql', '-e', f'DROP DATABASE `cluster{worker_id}`'], check=True)
-		subprocess.run(['mysql', '-e', f'DROP DATABASE `shadow{worker_id}`'], check=True)
-
-@pytest.fixture
-def process_count(redis, request):
-	# Pause this worker process if the exclusive lock is taken
-	with redis.lock("pytest_exclusive_lock"):
-		pass
-
-	# We only increment the count if we aren't an exclusive process
-	if "exclusive_lock" not in request.fixturenames:
-		redis.incr("pytest_process_count")
-
-	yield
-
-	redis.decr("pytest_process_count")
-
-@pytest.fixture
-def exclusive_lock(redis):
-	with redis.lock("pytest_exclusive_lock"):
-		# Safe to increment the process count, now that we have the lock
-		redis.incr("pytest_process_count")
-
-		# Wait for all the other worker processes to run
-		while(int(redis.get("pytest_process_count")) != 1):
-			time.sleep(0.2)
-
-		yield
 
 @pytest.fixture
 def set_host_interface(add_host_with_interface):
@@ -198,7 +136,7 @@ def invalid_host():
 	return 'invalid-{:04x}'.format(random.randint(0, 65535))
 
 @pytest.fixture
-def fake_os_sles(exclusive_lock, host):
+def fake_os_sles(host):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as SLES
 	"""
@@ -220,7 +158,7 @@ def fake_os_sles(exclusive_lock, host):
 			pytest.fail('unable to fake SLES OS')
 
 @pytest.fixture
-def fake_os_redhat(exclusive_lock, host):
+def fake_os_redhat(host):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
 	"""
@@ -242,7 +180,7 @@ def fake_os_redhat(exclusive_lock, host):
 			pytest.fail('unable to fake Redhat OS')
 
 @pytest.fixture
-def rmtree(exclusive_lock, tmpdir):
+def rmtree(tmpdir):
 	"""
 	This fixture lets you call rmtree(path) in a test, which simulates
 	deleting a directory and all it's files. It really moves it to
@@ -315,7 +253,7 @@ def create_blank_iso(tmpdir_factory):
 	temp_dir.remove(1, True)
 
 @pytest.fixture
-def inject_code(exclusive_lock, host):
+def inject_code(host):
 	"""
 	This returns a context manager used to inject code into the python
 	runtime environment. This is currently used to inject Mock code for

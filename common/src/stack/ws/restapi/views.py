@@ -188,11 +188,6 @@ class StackWS(View):
 							"/opt/stack/bin/stack",
 						]
 
-						# If we are running pytest-xdist, we need to pass the
-						# environment variable into the sudo call
-						if 'PYTEST_XDIST_WORKER' in os.environ:
-							c.insert(1, 'PYTEST_XDIST_WORKER='+os.environ['PYTEST_XDIST_WORKER'])
-
 						c.extend(cmd_module.split('.'))
 						c.extend(cmd_arg_list)
 						log.info(f'{c}')
