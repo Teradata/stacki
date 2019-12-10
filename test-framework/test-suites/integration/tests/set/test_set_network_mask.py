@@ -40,7 +40,7 @@ class TestSetNetworkMask:
 			'address': '192.168.0.0',
 			'mask': '255.0.0.0',
 			'gateway': '',
-			'mtu': 1500,
+			'mtu': None,
 			'zone': 'test',
 			'dns': False,
 			'pxe': False
@@ -63,7 +63,7 @@ class TestSetNetworkMask:
 				'address': '192.168.0.0',
 				'mask': '255.0.0.0',
 				'gateway': '',
-				'mtu': 1500,
+				'mtu': None,
 				'zone': 'test',
 				'dns': False,
 				'pxe': False
@@ -73,7 +73,7 @@ class TestSetNetworkMask:
 				'address': '192.168.1.0',
 				'mask': '255.0.0.0',
 				'gateway': '',
-				'mtu': 1500,
+				'mtu': None,
 				'zone': 'foo',
 				'dns': False,
 				'pxe': False

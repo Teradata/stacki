@@ -96,7 +96,8 @@ Vagrant.configure("2") do |config|
       "PLATFORM" => ENV["PLATFORM"],
       "IS_RELEASE" => ENV["IS_RELEASE"],
       "OS_PALLET" => ENV["OS_PALLET"],
-      "PYPI_CACHE" => ENV["PYPI_CACHE"]
+      "PYPI_CACHE" => ENV["PYPI_CACHE"],
+      "UPDATE_VERSIONS_JSON" => ENV["UPDATE_VERSIONS_JSON"]
     }
 
   end

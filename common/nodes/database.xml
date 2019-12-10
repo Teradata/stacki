@@ -150,7 +150,7 @@ chmod a+rx     /var/run/mysql
 -->
 if [[ ! -z $(which mysql_install_db) ]]
 then
-	mysql_install_db --user=mysql
+	mysql_install_db --user=mysql --basedir=/usr
 	mysqld_safe --skip-grant-tables &amp;
 	MYSQLD_BG_PID=$!
 

@@ -13,7 +13,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 if [[ $1 == "--coverage" ]]
 then
     # Figure out which .coveragerc to pass
-    STACKI_ISO=$(cat .cache/state.json | python -c 'import sys, json; print json.load(sys.stdin)["STACKI_ISO"]')
+    STACKI_ISO=$(cat .cache/state.json | python3 -c 'import sys, json; print(json.load(sys.stdin)["STACKI_ISO"])')
     if [[ $(basename $STACKI_ISO) =~ sles12\.x86_64\.disk1\.iso ]]
     then
         COVERAGERC="sles.coveragerc"

@@ -12,9 +12,8 @@
 
 from collections import defaultdict
 import importlib
-import os
+import pathlib
 
-import stack.file
 import stack.commands
 
 
@@ -55,21 +54,22 @@ class Command(stack.commands.PalletArgumentProcessor,
 	"""
 
 	def run(self, params, args):
-		# Get a listing of all the subdirectories in the
-		# stack.commands package
-		tree = stack.file.Tree(stack.commands.__path__[0])
-
+		# Get a listing of all the subdirectories in the stack.commands package
 		# Filter it to remove any blanks and __pycache__
+		command_lib_dir = pathlib.Path(stack.commands.__path__[0])
 		directories = [
-			path for path in tree.getDirs()
-			if path and '__pycache__' not in path and '.' not in path
+			str(path.relative_to(command_lib_dir)) for path in command_lib_dir.rglob('**')
+			if '__pycache__' not in path.parts and path.is_dir()
 		]
 
 		# Create a mapping of pallet names to Commands
 		mapping = defaultdict(list)
 		for directory in sorted(directories):
+			if '/.' in directory or directory == '.':
+				continue
+
 			# Load our module
-			modpath = 'stack.commands.%s' % '.'.join(directory.split(os.sep))
+			modpath = f'stack.commands.{directory.replace("/", ".")}'
 
 			try:
 				module = importlib.import_module(modpath)
@@ -86,7 +86,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 			except AttributeError:
 				continue
 
-			mapping[pallet_name].append(directory.replace(os.sep, ' '))
+			mapping[pallet_name].append(directory.replace('/', ' '))
 
 		# Output a list of commands for the pallets requested
 		self.beginOutput()

@@ -5,12 +5,12 @@
 # @copyright@
 
 import os
+import pathlib
 import grp
 import json
 import stat
 import tarfile
 import shutil
-import stack.file
 import stack.commands
 from stack.bool import str2bool
 from pathlib import Path
@@ -18,8 +18,7 @@ from stack.exception import ArgRequired, ArgUnique, CommandError, UsageError
 import subprocess
 from stack.download import fetch, FetchError
 
-#if requests is not available,
-#attempting to barnacle will fail
+# if requests is not available, attempting to barnacle will fail
 try:
         import requests
 except ImportError:
@@ -203,19 +202,14 @@ class Command(stack.commands.CartArgumentProcessor,
 				insert into carts (Name, url) values (%s, %s)
 				""", (cart, cart_url))
 
-		# If the directory does not exist create it along with
-		# a skeleton template.
+		# If the directory does not exist create it along with # a skeleton template.
 
-		tree = stack.file.Tree('/export/stack/carts')
-		if cart not in tree.getDirs():
-			for dir in [ 'RPMS', 'nodes', 'graph' ]:
-				os.makedirs(os.path.join(tree.getRoot(), cart, dir))
+		tree = pathlib.Path(f'/export/stack/carts/{cart}')
+		if not tree.is_dir():
+			for subdir in ['RPMS', 'nodes', 'graph']:
+				tree.joinpath(subdir).mkdir(mode=775, parents=True, exist_ok=True)
 
-			cartpath = os.path.join(tree.getRoot(), cart)
-			args = [ cart, cartpath ]
-			self.create_files(cart, cartpath)
-
-
+			self.create_files(cart, str(tree))
 
 	def add_cart_file(self,cartfile, cart_url=None):
 		cartsdir = '/export/stack/carts/'

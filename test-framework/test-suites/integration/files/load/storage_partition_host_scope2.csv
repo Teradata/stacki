@@ -1,0 +1,5 @@
+NAME,DEVICE,MOUNTPOINT,SIZE,TYPE
+backend-0-0,sda,/,0,ext4
+,sdb,/var,0,ext4,
+,sdc,/opt,0,ext4,
+,sdd,/export,0,ext4,

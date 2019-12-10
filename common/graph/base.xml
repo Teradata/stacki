@@ -12,6 +12,7 @@
 
 	<edge from="base">
 		<to>&os;-base</to>
+		<to>logrotate</to>
 		<to>foundation-python</to>
 		<to>mq-base</to>
 		<to>selinux-base</to>

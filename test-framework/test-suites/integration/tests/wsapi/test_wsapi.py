@@ -2,7 +2,7 @@ import json
 
 
 class TestWSAPI_sudo:
-	def test_api_sudo_commands(self, exclusive_lock, host, revert_etc):
+	def test_api_sudo_commands(self, host, revert_etc):
 		# Add list host to sudo commands
 		op = host.run('stack add api sudo command command="list host"')
 		assert op.rc == 0
@@ -57,7 +57,7 @@ class TestWSAPI_sudo:
 
 
 class TestWSAPI_Blacklist:
-	def test_api_blacklist_commands(self, exclusive_lock, host):
+	def test_api_blacklist_commands(self, host):
 		# Add list host to blacklist commands
 		op = host.run('stack add api blacklist command command="list host"')
 		assert op.rc == 0

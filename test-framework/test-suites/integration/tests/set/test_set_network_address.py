@@ -48,7 +48,7 @@ class TestSetNetworkAddress:
 			'address': '10.10.10.0',
 			'mask': '255.255.255.0',
 			'gateway': '',
-			'mtu': 1500,
+			'mtu': None,
 			'zone': 'test',
 			'dns': False,
 			'pxe': False

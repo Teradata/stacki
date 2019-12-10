@@ -65,10 +65,16 @@ async def monitor_install(backend):
 
 async def main(timeout):
 	# Create our monitoring tasks...
+	# backend-0-0 will end up with the .1, the frontend will have the .2,
+	# backend-0-1 will end up with the .3, and backend-0-2 will have the .4
+	backend_ips = {
+		"backend-0-0": "192.168.0.1",
+		"backend-0-1": "192.168.0.3",
+		"backend-0-2": "192.168.0.4",
+	}
 	tasks = asyncio.gather(
-		monitor_install("192.168.0.1"),
-		monitor_install("192.168.0.3"),
-		return_exceptions=True
+		*(monitor_install(ip) for ip in backend_ips.values()),
+		return_exceptions=True,
 	)
 
 	# ...and run them with a timeout
@@ -85,14 +91,11 @@ async def main(timeout):
 		# vagrant output for the backends
 		await asyncio.sleep(10)
 
-		print()
-		print("*** Last status for backend-0-0 ***")
-		print(STATUSES["192.168.0.1"])
-		print()
-
-		print("*** Last status for backend-0-1 ***")
-		print(STATUSES["192.168.0.3"])
-		print()
+		for backend, ip in backend_ips.items():
+			print()
+			print(f"*** Last status for {backend} ***")
+			print(STATUSES[ip])
+			print()
 
 	# Return if our tasks finished successfully or not
 	return not any(isinstance(result, Exception) for result in results)

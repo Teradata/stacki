@@ -14,7 +14,6 @@
 
 	<order head="database-data">
 		<tail>dhcp-server</tail>
-		<tail>install</tail>
 		<tail>networking-server</tail>
 		<tail>pxe</tail>
 		<tail>server</tail>
@@ -35,7 +34,7 @@
 	</order>
 
 	<order head="TAIL">
-		<tail>install</tail>
+		<tail>profile-server</tail>
 	</order>
 
 
@@ -51,8 +50,7 @@
 		<to>dhcp-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
-		<to>install</to>
-		<to>kernel-server</to>
+		<to>profile-server</to>
 		<to>networking-server</to>
 		<to>pxe</to>
 		<to>ssl-server</to>

@@ -208,7 +208,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_pallet_already_mounted(self, host, create_pallet_isos):
+	def test_pallet_already_mounted(self, host, create_pallet_isos, revert_export_stack_pallets):
 		''' shouldn't matter if an iso is mounted elsewhere, we should still be able to add it as a pallet '''
 		with ExitStack() as cleanup: 
 			# Mount our pallet
@@ -241,7 +241,7 @@ class TestAddPallet:
 				}
 			]
 
-	def test_disk_pallet(self, host, test_file):
+	def test_disk_pallet(self, host, test_file, revert_export_stack_pallets):
 		# Add the minimal pallet from the disk
 		result = host.run(f'stack add pallet {test_file("pallets/minimal")}')
 		assert result.rc == 0
@@ -282,6 +282,26 @@ class TestAddPallet:
 	def test_network_directory(self, host, run_file_server, revert_export_stack_pallets):
 		# Add the minimal pallet directory from the network
 		result = host.run('stack add pallet http://127.0.0.1:8000/pallets/minimal/1.0/sles12/sles/x86_64')
+		assert result.rc == 0
+
+		# Check it made it in as expected
+		result = host.run('stack list pallet minimal output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'name': 'minimal',
+				'version': '1.0',
+				'release': 'sles12',
+				'arch': 'x86_64',
+				'os': 'sles',
+				'boxes': ''
+			}
+		]
+
+	def test_network_directory_with_extra_slash(self, host, run_file_server, revert_export_stack_pallets):
+		''' add pallet should clean up the extra slash - this was a bug we found in stackios :( '''
+		# Add the minimal pallet directory from the network
+		result = host.run('stack add pallet http://127.0.0.1:8000/pallets//minimal/1.0/sles12/sles/x86_64')
 		assert result.rc == 0
 
 		# Check it made it in as expected

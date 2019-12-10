@@ -53,7 +53,7 @@ os.chdir(cwd)
 #
 # now generate the kickstart file with the command line
 #
-cmd = '/opt/stack/bin/stack list node xml frontend '
+cmd = '/opt/stack/bin/stack list node xml server '
 cmd += 'attrs="/tmp/site.attrs" > /tmp/ks.xml 2> /tmp/ks.xml.debug'
 os.system(cmd)
 

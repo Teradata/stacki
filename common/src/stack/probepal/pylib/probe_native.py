@@ -60,7 +60,7 @@ class NativePalletProbe(Probe):
 				# any errors, just fail and move to the next probe
 				return []
 
-			p = PalletInfo(name, version, release, arch, distro_family, real_root)
+			p = PalletInfo(name, version, release, arch, distro_family, real_root, self.__class__.__name__)
 			if not p.is_complete():
 				return []
 			pal_infos.append(p)

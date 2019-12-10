@@ -292,7 +292,9 @@ new_pkgs = [
 ]
 
 for new_pkg in new_pkgs:
-	if subprocess.call(['yum' if osname == 'redhat' else 'zypper', 'info', new_pkg]) == 0:
+	if osname == 'redhat' and subprocess.call(['yum', 'info', new_pkg]) == 0:
+		pkgs.append(new_pkg)
+	elif osname == 'sles' and "not found" not in str(subprocess.check_output(['zypper', 'info', new_pkg])):
 		pkgs.append(new_pkg)
 
 return_code = installrpms(pkgs)
@@ -499,18 +501,16 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		umount('/mnt/cdrom')
 
 	# add missing attrs to site.attrs
-	f = open("/tmp/site.attrs", "a")
-	str = "Kickstart_Multicast:" + generate_multicast() + "\n"
-	str += "Server_Partitioning:force-default-root-disk-only\n"
-	f.write(str)
-	f.close()
+	with open("/tmp/site.attrs", "a") as attrs_file:
+		attrs_file.write("Kickstart_Multicast:{}\n".format(generate_multicast()))
+		attrs_file.write("Server_Partitioning:force-default-root-disk-only\n")
 
 # convert site.attrs to python dict
 f = [line.strip() for line in open("/tmp/site.attrs", "r")]
-attributes = {}
+attributes = {"barnacle": "True"}
 for line in f:
-        split = line.split(":", 1)
-        attributes[split[0]] = split[1]
+	split = line.split(":", 1)
+	attributes[split[0]] = split[1]
 
 # Reject frontend and backend as hostnames
 hostname = attributes['Kickstart_PrivateHostname'].lower()

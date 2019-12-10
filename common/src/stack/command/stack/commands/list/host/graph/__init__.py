@@ -18,7 +18,6 @@ import json
 import stack.util
 import stack.profile
 import stack.graph
-import stack.file
 import stack.commands
 
 from xml.sax import make_parser

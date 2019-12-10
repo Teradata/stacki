@@ -10,7 +10,7 @@ import pytest
 
 
 @pytest.fixture
-def run_django_server(exclusive_lock):
+def run_django_server():
 	# Run a Django server in a process
 	def runner():
 		try:
@@ -34,7 +34,7 @@ def run_django_server(exclusive_lock):
 	process.join()
 
 @pytest.fixture
-def run_file_server(exclusive_lock, test_file):
+def run_file_server(test_file):
 	# Run an HTTP server in a process
 	def runner():
 		try:
@@ -65,7 +65,7 @@ def run_file_server(exclusive_lock, test_file):
 	process.join()
 
 @pytest.fixture
-def run_pallet_isos_server(exclusive_lock, create_pallet_isos):
+def run_pallet_isos_server(create_pallet_isos):
 	# Run an HTTP server in a process
 	def runner():
 		try:

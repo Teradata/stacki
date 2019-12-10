@@ -38,6 +38,11 @@ class Implementation(stack.commands.Implementation):
 			startmode = None
 			bootproto = 'static'
 
+			mtu	  = None
+			if netname:
+				subnetInfo = self.owner.call('list.network', [netname])
+				mtu = subnetInfo[0]['mtu']
+
 			if ip and not netname:
 				Warn(f'WARNING: skipping interface "{interface}" on host "{o["host"]}" - '
 				      'interface has an IP but no network')
@@ -214,6 +219,9 @@ class Implementation(stack.commands.Implementation):
 							self.owner.addOutput(host, 'BRIDGE_STP=off')
 							self.owner.addOutput(host, 'BRIDGE_PORTS=%s' % p['interface'])
 							break
+					mtu = None
+				if mtu:
+					self.owner.addOutput(host, "MTU=%s" % mtu)
 
 			self.owner.addOutput(host, '\n')
 			self.owner.addOutput(host, '</stack:file>')

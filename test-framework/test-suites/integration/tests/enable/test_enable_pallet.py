@@ -24,7 +24,7 @@ class TestEnablePallet:
 		assert result.rc == 255
 		assert result.stderr == 'error - unknown box "test"\n'
 
-	def test_incompatable_os(self, host, create_pallet_isos):
+	def test_incompatable_os(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add the pallet that is ubuntu
 		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-os-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0

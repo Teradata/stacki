@@ -69,15 +69,9 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.set.command)
 		if value and is_glob:
 			raise CommandError(self, f'invalid attr name "{attr}"')
 
-		# Connect to a copy of the database if we are running pytest-xdist
-		if 'PYTEST_XDIST_WORKER' in os.environ:
-			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
-		else:
-			db_name = 'shadow'  # pragma: no cover
-
 		# Get a list of all matching attrs in the scope, for both normal and shadow
 		scope_map_ids = []
-		for table in ('attributes', f'{db_name}.attributes'):
+		for table in ('attributes', 'shadow.attributes'):
 			query = """
 				attributes.name, scope_map.id
 				FROM %s, scope_map
@@ -138,9 +132,9 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.set.command)
 			# Then add the attr entry
 			if shadow:
 				self.db.execute("""
-					INSERT INTO %s.attributes(scope_map_id, name, value)
-					VALUES (LAST_INSERT_ID(), %%s, %%s)
-				""" % db_name, (attr, value))
+					INSERT INTO shadow.attributes(scope_map_id, name, value)
+					VALUES (LAST_INSERT_ID(), %s, %s)
+				""", (attr, value))
 
 			else:
 				self.db.execute("""

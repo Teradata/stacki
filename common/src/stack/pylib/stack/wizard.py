@@ -355,6 +355,10 @@ class Data:
 		#
 		f.write('os.version:7.x\n')
 
+		# if hostname isn't explicitly set, list node xml will call 
+		# `self.db.getHostname()` which returns localhost
+		f.write('hostname:{}\n'.format(self.data.Kickstart_PrivateHostname))
+
 		f.close()
 
 		#create xml elements and write rolls.xml

@@ -22,9 +22,16 @@
 		<tail>routes-server</tail>
 	</order>
 
+	<!-- frontend-server runs some post install scripts that should
+		 execute near the end of the post install stage.
+	-->
+	<order head="TAIL">
+		<tail>frontend-server</tail>
+	</order>
 
 	<edge from="server">
 		<to>apache</to>
+		<to>frontend-server</to>
 		<to>database</to>
 		<to>database-schema</to>
 		<to>database-data-init</to>
@@ -36,6 +43,7 @@
 		<to>mq-server</to>
 		<to>routes-server</to>
 		<to>checklist</to>
+		<to>server-packages</to>
 	</edge>
 
 	<edge from="server" cond="platform == 'aws'">

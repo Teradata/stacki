@@ -1,23 +1,19 @@
 <stack:stack>
 
-
-<stack:description>
-Frontend Appliance Node.
-</stack:description>
-
 <stack:copyright>
 Copyright (c) 2006 - 2019 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
+<!-- Common packages to install between OS's -->
 
+<stack:package>libvirt</stack:package>
 
+<!-- We need stack command line on the frontend, and that relies on stack pylib. -->
 <stack:package>
 	stack-command
 	stack-pylib
 </stack:package>
 
-
-</stack:stack> 
-
+</stack:stack>

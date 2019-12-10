@@ -1,5 +1,6 @@
 import pathlib
 import configparser
+import re
 
 from stack.probepal.common import PalletInfo, Probe
 
@@ -58,8 +59,10 @@ class ProductMDProbe(Probe):
 		treeinfo.read(path)
 		try:
 			if 'release' in treeinfo:
-				version = treeinfo['release']['version']
-				maj_version = version.split('.')[0]
+				version = treeinfo['release']['version'].lower()
+				full_version = version.replace(' ', '')
+				maj_version = re.split('\.| ', version)[0]
+				version = full_version
 
 				name = treeinfo['release']['name']
 				shortname = treeinfo['release']['short']
@@ -90,5 +93,5 @@ class ProductMDProbe(Probe):
 		except KeyError:
 			return []
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
 		return [p] if p.is_complete() else []

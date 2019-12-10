@@ -17,7 +17,6 @@ All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
 https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 </stack:rocks>
 
-
 <!-- packages that are needed to correctly rebuild the kernel roll -->
 <stack:package>pcre</stack:package>
 <stack:package>pcre-devel</stack:package>
@@ -25,7 +24,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <stack:package>keyutils-libs-devel</stack:package>
 <stack:package>iscsi-initiator-utils</stack:package>
 <stack:package>iscsi-initiator-utils-devel</stack:package>
-<stack:package>fcgi</stack:package>
 <stack:package>ludicrous-speed</stack:package>
 <stack:package>libblkid-devel</stack:package>
 <stack:package>isomd5sum-devel</stack:package>
@@ -34,15 +32,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <stack:package>NetworkManager-devel</stack:package>
 <stack:package>NetworkManager-glib-devel</stack:package>
 <stack:package>yum-utils</stack:package>
-
-
-<stack:script stack:stage="install-post">
-
-systemctl enable ludicrous-server
-systemctl start ludicrous-server
-
-</stack:script>
-
 
 </stack:stack>
 

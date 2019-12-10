@@ -40,7 +40,7 @@ class TestSetNetworkZone:
 			'address': '192.168.0.0',
 			'mask': '255.255.255.0',
 			'gateway': '',
-			'mtu': 1500,
+			'mtu': None,
 			'zone': 'test.com',
 			'dns': False,
 			'pxe': False

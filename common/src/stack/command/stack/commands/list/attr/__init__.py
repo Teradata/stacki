@@ -110,12 +110,6 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 
 		is_glob = attr is not None and re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', attr) is None
 
-		# Connect to a copy of the database if we are running pytest-xdist
-		if 'PYTEST_XDIST_WORKER' in os.environ:
-			db_name = 'shadow' + os.environ['PYTEST_XDIST_WORKER']
-		else:
-			db_name = 'shadow'  # pragma: no cover
-
 		output = defaultdict(dict)
 		if var:
 			if resolve and scope == 'host':
@@ -166,7 +160,7 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 				# Now get the shadow attributes, if requested
 				if shadow:
 					query, values = self._construct_host_query(
-						node_ids, f'{db_name}.attributes', 'shadow', attr, is_glob
+						node_ids, 'shadow.attributes', 'shadow', attr, is_glob
 					)
 
 					# Merge in the shadow attributes for the host's scopes
@@ -190,9 +184,9 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 								output[host][row[2]] = row
 
 					# Merge in any shadow global attrs for each host
-					query = f"""
+					query = """
 						'global', 'shadow', attributes.name, attributes.value
-						FROM {db_name}.attributes, scope_map
+						FROM shadow.attributes, scope_map
 						WHERE attributes.scope_map_id = scope_map.id
 						AND scope_map.scope = 'global'
 					"""
@@ -216,7 +210,7 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 			else:
 				query_data = [('attributes', 'var')]
 				if shadow:
-					query_data.append((f'{db_name}.attributes', 'shadow'))
+					query_data.append(('shadow.attributes', 'shadow'))
 
 				for table, attr_type in query_data:
 					if scope == 'global':

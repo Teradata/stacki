@@ -17,7 +17,7 @@ class TestReportNetworkfile:
 		assert result.rc == 0
 		assert result.stdout == textwrap.dedent(f"""\
 			NETWORK,ADDRESS,MASK,GATEWAY,MTU,ZONE,DNS,PXE\r
-			private,{network[0]['address']},255.255.255.0,{network[0]['gateway']},1500,,False,True
+			private,{network[0]['address']},255.255.255.0,{network[0]['gateway']},,,False,True
 			"""
 		)
 

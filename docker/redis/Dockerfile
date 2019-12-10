@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:7
 WORKDIR /tmp
 
 EXPOSE 6379

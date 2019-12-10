@@ -14,7 +14,7 @@ class UbuntuProbe(Probe):
 
 	arch_map = {'amd64': 'x86_64'}
 
-	def __init__(self, weight=10, desc='.disk/info files - ubuntu'):
+	def __init__(self, weight=30, desc='.disk/info files - ubuntu'):
 		super().__init__(weight=weight, desc=desc)
 
 	def probe(self, pallet_root):
@@ -39,5 +39,5 @@ class UbuntuProbe(Probe):
 			'ubuntu'
 		)
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
 		return [p] if p.is_complete() else []

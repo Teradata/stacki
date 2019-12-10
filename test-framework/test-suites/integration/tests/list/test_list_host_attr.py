@@ -246,17 +246,10 @@ class TestListHostAttr:
 		result = host.run("stack set access command='list *' group=vagrant")
 		assert result.rc == 0
 
-		# Now make sure a normal user can't see it. Gotta preserve the
-		# PYTEST_XDIST_WORKER environment variable so we point at the
-		# correct database copy.
-		injected_env = ""
-		if 'PYTEST_XDIST_WORKER' in os.environ:
-			injected_env = "PYTEST_XDIST_WORKER=" + os.environ['PYTEST_XDIST_WORKER']
-
+		# Now make sure a normal user can't see it.
 		with host.sudo("vagrant"):
 			result = host.run(
-				f'{injected_env} /opt/stack/bin/stack '
-				'list host attr backend-0-0 attr=test shadow=True output-format=json'
+				'/opt/stack/bin/stack list host attr backend-0-0 attr=test shadow=True output-format=json'
 			)
 
 		assert result.rc == 0

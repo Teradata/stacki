@@ -1,0 +1,95 @@
+{
+	"version": "05.03.00.00",
+	"partition": [
+		{
+			"device": "vda",
+			"partid": 1,
+			"mountpoint": "/foo",
+			"size": 200,
+			"fstype": null,
+			"options": "--asprimary --partition_id=18"
+		}
+	],
+	"host": [
+		{
+			"name": "test-host",
+			"rack": "0",
+			"rank": "0",
+			"appliance": "test_appliance",
+			"box": "default",
+			"environment": null,
+			"osaction": "default",
+			"installaction": "default",
+			"comment": null,
+			"metadata": null,
+			"group": [],
+			"interface": [
+				{
+					"interface": "eth0",
+					"default": null,
+					"network": "private",
+					"mac": "52:54:00:ad:a7:c5",
+					"ip": "10.1.1.1",
+					"name": "test-host",
+					"module": null,
+					"vlan": null,
+					"options": null,
+					"channel": null,
+					"alias": []
+				}
+			],
+			"partition": [
+				{
+					"device": "vdb",
+					"mountpoint": "/bar",
+					"size": 0,
+					"fstype": "ext4",
+					"options": "--asprimary --label=HOST"
+				}
+			]
+		}
+	],
+	"environment": [
+		{
+			"name": "test_environment",
+			"partition": [
+				{
+					"device": "vdc",
+					"mountpoint": "/baz",
+					"size": 34567,
+					"fstype": "ext4",
+					"options": ""
+				}
+			]
+		}
+	],
+	"os": [
+		{
+			"name": "redhat",
+			"partition": [
+				{
+					"device": "vdd",
+					"mountpoint": "/bag",
+					"size": 23456,
+					"fstype": "ext4",
+					"options": ""
+				}
+			]
+		}
+	],
+	"appliance": [
+		{
+			"name": "test_appliance",
+			"public": true,
+			"partition": [
+				{
+					"device": "vde",
+					"mountpoint": "/bam",
+					"size": 12345,
+					"fstype": "ext4",
+					"options": ""
+				}
+			]
+		}
+	]
+}
