@@ -15,6 +15,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:package>stack-command</stack:package>
 
+<!-- Make sure pip is installed. This also installs setuptools. -->
+<stack:script stack:stage="install-post">
+/opt/stack/bin/python3 -m ensurepip
+</stack:script>
 
-</stack:stack> 
+</stack:stack>
 
