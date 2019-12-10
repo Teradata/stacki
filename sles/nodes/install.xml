@@ -24,9 +24,14 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	ln -s /export/stack install;
 	cd install/sbin ;
 	ln -s . public ;
-) 
+)
 
 </stack:script>
 
-</stack:stack> 
+<!-- Make sure pip is installed. This also installs setuptools. -->
+<stack:script stack:stage="install-post">
+/opt/stack/bin/python3 -m ensurepip
+</stack:script>
+
+</stack:stack>
 
