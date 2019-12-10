@@ -44,8 +44,9 @@ def test_service_enabled_and_running(host, service):
 def test_tftpd_enabled_and_running(host):
 	xinetd = host.service('xinetd')
 	fbtftpd = host.service('fbtftpd')
-	assert xinetd.is_enabled or fbtftpd.is_enabled, "No tftp server is enabled."
-	assert xinetd.is_running or fbtftpd.is_running, "No tftp server is running."
+	tftpsocket = host.service('tftp.socket')
+	assert tftpsocket.is_enabled or xinetd.is_enabled or fbtftpd.is_enabled, "No tftp server is enabled."
+	assert tftpsocket.is_running or xinetd.is_running or fbtftpd.is_running, "No tftp server is running."
 
 def test_logrotate_service_enabled(host):
 	"""Test that the logrotate service is enabled."""

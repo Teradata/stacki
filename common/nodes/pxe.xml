@@ -27,24 +27,19 @@ stack-pxeboot
 
 <stack:script stack:stage="install-post">
 
-/usr/bin/systemctl enable xinetd
+<!-- pxe needs a tftp server - unit files in /etc override system defaults -->
+<stack:file stack:name="/etc/systemd/system/tftp.service">
+[Unit]
+Description=Tftp Server
+Requires=tftp.socket
+Documentation=man:in.tftpd
 
-<!-- pxe needs a tftp server -->
-<stack:file stack:name="/etc/xinetd.d/tftp">
-service tftp
-{
-        socket_type             = dgram
-        protocol                = udp
-        wait                    = yes
-        user                    = root
-        server                  = /usr/sbin/in.tftpd
-        server_args             = --verbose --secure /tftpboot/pxelinux
-        instances               = 1
-	per_source		= 11
-	cps			= 1000 2
-	flags			= IPv4
-        disable                 = no
-}
+[Service]
+ExecStart=/usr/sbin/in.tftpd --user root --verbose --secure /tftpboot/pxelinux
+StandardInput=socket
+
+[Install]
+Also=tftp.socket
 </stack:file>
 
 
@@ -57,6 +52,9 @@ cp /opt/stack/images/initrd* /tftpboot/pxelinux/
 
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
+
+systemctl enable tftp.socket
+systemctl start tftp.socket
 
 </stack:script>
 
