@@ -323,7 +323,7 @@ class Command(stack.commands.list.command,
 
 		self.addText('<stack:profile stack:os="%s"' % attrs['os'])
 		self.addText(' %s' % handler.nsAttrs())
-		self.addText(' stack:attrs="%s">\n' % saxutils.escape('%s' % attrs))
+		self.addText(' stack:attrs=%s>\n' % saxutils.quoteattr('%s' % attrs))
 
 		self.runPlugins(attrs)
 
