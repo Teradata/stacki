@@ -31,8 +31,8 @@ endif
 	$(MAKE) clean
 	# Add required poetry and tomlkit packages so that pip2src runs correctly.
 	/opt/stack/bin/python3 -m ensurepip
-	/opt/stack/bin/python3 -m pip install poetry
-	/opt/stack/bin/python3 -m pip install tomlkit
+	/opt/stack/bin/python3 -m pip install poetry==0.12.17
+	/opt/stack/bin/python3 -m pip install tomlkit==0.5.8
 # Dat dere support release is still on 3.6, and doesn't have dataclasses built in.
 ifeq (Python 3.6.6,$(shell /opt/stack/bin/python3 --version))
 	/opt/stack/bin/python3 -m pip install dataclasses
