@@ -1,0 +1,10 @@
+{
+	"host": "test-host",
+	"enclosure": 1,
+	"adapter": 1,
+	"slot": 2,
+	"raidlevel": "1",
+	"arrayid": 2,
+	"options": "host",
+	"source": "H"
+}

@@ -196,17 +196,35 @@ def add_host_with_net(host):
 	host.run("stack add host backend-0-0 appliance=backend rack=0 rank=0")
 	host.run("stack add host interface backend-0-0 interface=eth0 network=test ip=192.168.0.3")
 
-@pytest.fixture(params = (True, False))
+@pytest.fixture(
+	params = (
+		("", "exec=True"),
+		("", "| bash -x"),
+		("document=", "exec=True"),
+		("document=", "| bash -x"),
+	),
+	ids = ("stack_load_exec", "stack_load_bash", "stack_load_document_exec", "stack_load_document_bash"),
+)
 def stack_load(request, host):
-	if request.param:
-		def _load_using_exec(dump_file, **kwargs):
-			kwargs_string = " ".join(f"{key}={value}" for key, value in kwargs.items())
-			return host.run(f"stack load {dump_file} exec=True {kwargs_string}")
+	"""This fixture is used to run `stack load` on the host during integration tests.
 
-		return _load_using_exec
+	There are 4 essentially equivalent ways of loading and running a dump.json. Using
+	this test fixture ensures that all 4 are tested. I.E:
 
-	def _load_using_bash(dump_file, **kwargs):
-		kwargs_string = " ".join(f"{key}={value}" for key, value in kwargs.items() if key != "exec")
-		return host.run(f"stack load {dump_file} {kwargs_string} | bash -x")
+	stack load dump_file exec=True
+	stack load document=dump_file exec=True
+	stack load dump_file | bash -x
+	stack load document=dump_file | bash -x
+	"""
+	param_string, exec_string = request.param
+	def _load(dump_file, **kwargs):
+		if "exec" in kwargs:
+			raise ValueError("Cannot pass exec param to this fixture. It handles it for you.")
 
-	return _load_using_bash
+		if "document" in kwargs:
+			raise ValueError("Cannot pass document param to this fixture. It handles it for you.")
+
+		kwargs_string = " ".join(f"{key}={value}" for key, value in kwargs.items())
+		return host.run(f"stack load {param_string}{dump_file} {exec_string} {kwargs_string}")
+
+	return _load

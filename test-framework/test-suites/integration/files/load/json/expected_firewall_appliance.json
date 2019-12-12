@@ -1,0 +1,15 @@
+{
+	"appliance": "test_appliance",
+	"name": "ACCEPT-APPLIANCE",
+	"table": "filter",
+	"service": "appliance",
+	"protocol": "all",
+	"chain": "INPUT",
+	"network": null,
+	"output-network": null,
+	"action": "ACCEPT",
+	"flags": null,
+	"comment": "Appliance test firewall rule",
+	"source": "A",
+	"type": "var"
+}

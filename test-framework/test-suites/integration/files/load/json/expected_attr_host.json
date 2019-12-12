@@ -1,0 +1,7 @@
+{
+	"host": "test-host",
+	"scope": "host",
+	"type": "var",
+	"attr": "host_attr",
+	"value": "host_attr"
+}

@@ -1,0 +1,7 @@
+{
+	"appliance": "test_appliance",
+	"scope": "appliance",
+	"type": "var",
+	"attr": "appliance_attr",
+	"value": "appliance_attr"
+}

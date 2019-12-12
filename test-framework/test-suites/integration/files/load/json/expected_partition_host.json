@@ -1,0 +1,10 @@
+{
+	"host": "test-host",
+	"device": "sdb",
+	"partid": null,
+	"mountpoint": "/host",
+	"size": 0,
+	"fstype": "ext4",
+	"options": "--asprimary --label=HOST",
+	"source": "H"
+}

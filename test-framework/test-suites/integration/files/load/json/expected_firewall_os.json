@@ -1,0 +1,15 @@
+{
+	"os": "redhat",
+	"name": "ACCEPT-OS",
+	"table": "filter",
+	"service": "os",
+	"protocol": "all",
+	"chain": "INPUT",
+	"action": "ACCEPT",
+	"network": null,
+	"output-network": null,
+	"flags": null,
+	"comment": "OS test firewall rule",
+	"source": "O",
+	"type": "var"
+}

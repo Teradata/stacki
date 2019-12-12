@@ -1,0 +1,9 @@
+{
+	"environment": "test_environment",
+	"enclosure": 2,
+	"adapter": 2,
+	"slot": 3,
+	"raidlevel": "5",
+	"arrayid": 3,
+	"options": "environment"
+}

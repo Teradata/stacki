@@ -1,0 +1,7 @@
+{
+	"os": "redhat",
+	"scope": "os",
+	"type": "var",
+	"attr": "os_attr",
+	"value": "os_attr"
+}

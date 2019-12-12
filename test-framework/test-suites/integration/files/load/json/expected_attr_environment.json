@@ -1,0 +1,7 @@
+{
+	"environment": "test_environment",
+	"scope": "environment",
+	"type": "var",
+	"attr": "environment_attr",
+	"value": "environment_attr"
+}

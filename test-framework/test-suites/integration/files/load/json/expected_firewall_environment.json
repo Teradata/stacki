@@ -1,0 +1,15 @@
+{
+	"environment": "test_environment",
+	"name": "ACCEPT-ENVIRONMENT",
+	"table": "filter",
+	"service": "environment",
+	"protocol": "UDP",
+	"chain": "INPUT",
+	"action": "ACCEPT",
+	"network": null,
+	"output-network": null,
+	"flags": null,
+	"comment": "Environment test firewall rule",
+	"source": "E",
+	"type": "var"
+}

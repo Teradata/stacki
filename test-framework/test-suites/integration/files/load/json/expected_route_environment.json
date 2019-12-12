@@ -1,0 +1,8 @@
+{
+	"environment": "test_environment",
+	"network": "250.254.2.0",
+	"netmask": "255.255.255.0",
+	"gateway": null,
+	"subnet": "private",
+	"interface": "eth0"
+}

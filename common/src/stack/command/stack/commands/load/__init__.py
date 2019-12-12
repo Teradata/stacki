@@ -372,7 +372,10 @@ class command(stack.commands.Command):
 				raise ArgRequired(self, 'filename')
 			if len(args) > 1:
 				raise ArgUnique(self, 'filename')
-			document = self.load_file(args[0])
+
+			document = args[0]
+
+		document = self.load_file(document)
 
 		self.main(document)
 

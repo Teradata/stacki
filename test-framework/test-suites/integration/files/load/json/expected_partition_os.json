@@ -1,0 +1,9 @@
+{
+	"os": "redhat",
+	"device": "sdd",
+	"partid": null,
+	"mountpoint": "/os",
+	"size": 23456,
+	"fstype": "ext4",
+	"options": ""
+}

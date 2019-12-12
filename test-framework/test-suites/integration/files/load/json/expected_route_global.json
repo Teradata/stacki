@@ -1,0 +1,7 @@
+{
+	"network": "250.254.0.0",
+	"netmask": "255.255.255.0",
+	"gateway": null,
+	"subnet": "private",
+	"interface": null
+}

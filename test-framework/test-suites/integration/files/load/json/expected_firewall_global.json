@@ -1,0 +1,14 @@
+{
+	"name": "REJECT-GLOBAL",
+	"table": "filter",
+	"service": "global",
+	"protocol": "all",
+	"chain": "INPUT",
+	"action": "REJECT",
+	"network": null,
+	"output-network": null,
+	"flags": null,
+	"comment": "Global test firewall rule",
+	"source": "G",
+	"type": "var"
+}

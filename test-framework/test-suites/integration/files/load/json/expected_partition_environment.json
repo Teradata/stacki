@@ -1,0 +1,9 @@
+{
+	"environment": "test_environment",
+	"device": "sdc",
+	"partid": null,
+	"mountpoint": "/environment",
+	"size": 34567,
+	"fstype": "ext4",
+	"options": ""
+}

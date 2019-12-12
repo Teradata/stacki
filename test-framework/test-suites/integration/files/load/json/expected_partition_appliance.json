@@ -1,0 +1,9 @@
+{
+	"appliance": "test_appliance",
+	"device": "sde",
+	"partid": null,
+	"mountpoint": "/appliance",
+	"size": 12345,
+	"fstype": "ext4",
+	"options": ""
+}

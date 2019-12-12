@@ -1,0 +1,8 @@
+{
+	"device": "sda",
+	"partid": 1,
+	"mountpoint": "/global",
+	"size": 200,
+	"fstype": null,
+	"options": "--asprimary --partition_id=18"
+}

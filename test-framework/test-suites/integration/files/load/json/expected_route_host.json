@@ -1,0 +1,9 @@
+{
+	"host": "test-host",
+	"network": "250.254.1.0",
+	"netmask": "255.255.255.0",
+	"gateway": "250.254.1.1",
+	"subnet": null,
+	"interface": null,
+	"source": "H"
+}

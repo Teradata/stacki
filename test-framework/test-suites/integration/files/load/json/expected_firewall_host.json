@@ -1,0 +1,15 @@
+{
+	"host": "test-host",
+	"name": "ACCEPT-HOST",
+	"table": "filter",
+	"service": "host",
+	"protocol": "TCP",
+	"chain": "INPUT",
+	"action": "ACCEPT",
+	"network": "private",
+	"output-network": null,
+	"flags": null,
+	"comment": "Host test firewall rule",
+	"source": "H",
+	"type": "var"
+}

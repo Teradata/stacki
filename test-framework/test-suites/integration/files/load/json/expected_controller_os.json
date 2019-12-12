@@ -1,0 +1,9 @@
+{
+	"os": "redhat",
+	"enclosure": 3,
+	"adapter": 3,
+	"slot": 4,
+	"raidlevel": "6",
+	"arrayid": 4,
+	"options": "os"
+}
