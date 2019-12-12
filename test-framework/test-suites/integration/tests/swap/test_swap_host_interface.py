@@ -51,7 +51,7 @@ class TestSwapHostInterface:
 		assert result.rc == 0
 
 		# Swap them
-		result = host.run('stack swap host interface backend-0-0 interfaces=eth0,eth1')
+		result = host.run('stack swap host interface backend-0-0 interfaces=eth0,eth1 sync-config=no')
 		assert result.rc == 0
 
 		# Make sure they got swapped
@@ -105,7 +105,7 @@ class TestSwapHostInterface:
 		assert result.rc == 0
 
 		# Swap them
-		result = host.run('stack swap host interface backend-0-0 interfaces=eth1,eth2')
+		result = host.run('stack swap host interface backend-0-0 interfaces=eth1,eth2 sync-config=no')
 		assert result.rc == 0
 
 		# Make sure they got swapped
