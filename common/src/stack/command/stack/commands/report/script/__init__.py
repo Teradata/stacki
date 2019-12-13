@@ -11,6 +11,7 @@
 # @copyright@
 
 
+import ast
 import sys
 import subprocess
 import stack.commands
@@ -48,7 +49,7 @@ class Command(stack.commands.report.command):
 		xml = ''
 
 		if attrs:
-			attrs = eval(attrs)
+			attrs = ast.literal_eval(attrs)
 			xml += '<!DOCTYPE stacki-profile [\n'
 			for (k, v) in attrs.items():
 				xml += '\t<!ENTITY %s "%s">\n' % (k, v)

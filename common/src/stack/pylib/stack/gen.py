@@ -12,6 +12,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+
+import ast
 import collections
 import os
 from xml.sax import handler
@@ -244,7 +246,7 @@ class SetupTraversor(Traversor):
 		if node.attributes:
 			attrs = node.attributes.getNamedItem('stack:attrs')
 			if attrs:
-				dict = eval(attrs.value)
+				dict = ast.literal_eval(attrs.value)
 				for (k, v) in dict.items():
 					self.gen.attrs[k] = v
 		else:
