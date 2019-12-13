@@ -494,6 +494,35 @@ grant select,update,insert,delete,lock tables on shadow.*  to apache@localhost;
 grant select,update,insert,delete,lock tables on shadow.*  to apache@"&hostname;";
 </stack:file>
 
+<stack:file stack:name="/tmp/tables.sql">
+use cluster;
+
+CREATE TABLE IF NOT EXISTS virtual_machines (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	hypervisor_id INT DEFAULT NULL,
+	node_id INT NOT NULL,
+	memory_size INT NOT NULL,
+	cpu_cores INT NOT NULL,
+	vm_delete BOOLEAN DEFAULT 0,
+	FOREIGN KEY (hypervisor_id) REFERENCES nodes(id) ON DELETE SET NULL,
+	FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS virtual_machine_disks (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	virtual_machine_id INT DEFAULT NULL,
+	disk_name VARCHAR(128) NOT NULL,
+	disk_type VARCHAR(128) NOT NULL,
+	disk_size INT DEFAULT NULL,
+	disk_location VARCHAR(128) NOT NULL,
+	disk_delete BOOLEAN DEFAULT 0,
+	image_file_name VARCHAR(128) DEFAULT NULL,
+	image_archive_name VARCHAR(128) DEFAULT NULL,
+	mount_disk VARCHAR(128) DEFAULT NULL,
+	FOREIGN KEY (virtual_machine_id) REFERENCES virtual_machines(id) ON DELETE CASCADE
+);
+</stack:file>
+
 /usr/bin/mysql --defaults-extra-file=/etc/root.my.cnf --user=root &lt; /var/db/grants.sql
 
 
