@@ -5,7 +5,8 @@
 # @copyright@
 
 import stack.commands
-import tarfile
+import json
+from stack.util import _exec
 from pathlib import Path
 from stack.exception import CommandError, ArgRequired, ParamError
 
@@ -25,9 +26,8 @@ class Command(stack.commands.add.vm.Command):
 
 	<param type='string' name='disks' optional='1'>
 	A list of disks or single disk for a virtual machine. Can be an integer to
-	create a new disk image for the virtual machine, a path to a compressed (tar or gzip)
-	or uncompressed qcow2 or raw image, or a path to a disk device (such as /dev/sdb) to
-	mount to a virtual machine.
+	create a new disk image for the virtual machine, a path to a uncompressed qcow2 or raw image,
+	or a path to a disk device (such as /dev/sdb) to mount to a virtual machine .
 	</param>
 
 	<example cmd='add vm storage virtual-backend-0-1 storage_pool=/export/pool/stacki disks=200'>
@@ -41,6 +41,23 @@ class Command(stack.commands.add.vm.Command):
 	</example>
 
 	"""
+	def valid_image(self, file_path, img_types):
+		"""
+		Use qemu-img to check the VM image
+		we are given is valid.
+		"""
+
+		# Get the image info as json
+		output = _exec(f'qemu-img info --output=json {file_path}', shlexsplit=True)
+		img_info = json.loads(output.stdout)
+		valid_img = False
+		image_ext = file_path.suffix.replace('.', '')
+
+		# Check qemu-img info and file extension
+		# as it classifies any file as raw
+		if img_info['format'] in img_types and image_ext in img_types:
+			valid_img = True
+		return valid_img
 
 	def run(self, params, args):
 		vm_host = self.getSingleHost(args)
@@ -52,41 +69,31 @@ class Command(stack.commands.add.vm.Command):
 		vol_name = f'{vm_host[0]}_disk'
 		dev_id = 0
 		vol_id = 0
+		disk_name = f'sd{chr(ord("a") + dev_id)}'
 		disk_loc, disks = self.fillParams([
 			('storage_pool', ''),
 			('disks', '', True)
 		])
-		vm_disks = self.call('list.vm.storage', vm_host)
-		disk_names = [ disk['Name'] for disk in vm_disks ]
-		disk_names.sort()
-
 		if disk_loc:
-			disk_loc = f'{disk_loc}/{vm_host[0]}'
+			disk_loc = Path(f'{disk_loc}/{vm_host[0]}')
 
 		# Get the name of all disks for the VM
-		image_formats = ['.qcow2', '.raw']
+		image_formats = ['qcow2', 'raw']
 
 		for disk in disks.split(','):
-			image_archive = None
+			image = ''
 			disk_size = None
 			mount_disk = None
-			curr_images = [ disk['Image Name'] for disk in vm_disks if disk['Image Name'] and disk['Type'] == 'disk']
 
-			# The calculated names of newly created disks
-			vol_names = []
+			# Get the current disks
+			vm_disks = self.call('list.vm.storage', vm_host)
 
-			# All the disks to be added into the database
-			images = []
+			# Used for calculating the device name
+			disk_names = [ disk['Name'] for disk in vm_disks ]
 
+			# Used for disks created on the hypervisor
+			vol_names = [ disk['Image Name'] for disk in vm_disks if disk['Image Name'] and disk['Type'] == 'disk']
 			disk_path = Path(disk)
-
-			disk_name = f'sd{chr(ord("a") + dev_id)}'
-
-			# Only want storage of type disk (i.e. created volumes) that match the default
-			# naming scheme in order to determine the next disk name, ignoring custom names
-			for name in curr_images:
-				if vol_name in name:
-					vol_names.append(name)
 
 			# If the disk is a number it's a disk to be created
 			# during vm definition
@@ -96,57 +103,13 @@ class Command(stack.commands.add.vm.Command):
 				disk_type = 'disk'
 				disk_size = disk
 				if vol_names:
-					try:
-						# Get the disk number in the volume name
-						vol_file = vol_names[-1].replace(Path(vol_names[-1]).suffix, '')
-						vol_id = int(vol_file.split(vol_name)[1]) + 1
 
-					# Just increment the disk name number if we can't get the last created one
-					except (IndexError, ValueError):
-						vol_id += 1
+					# Get the next disk name but only consider other disk type images
+					vol_file = vol_names[-1].replace(Path(vol_names[-1]).suffix, '')
+					vol_id = int(vol_file.split(vol_name)[1]) + 1
 				else:
 					vol_id += 1
-				disk_image = f'{vol_name}{vol_id}.qcow2'
-				images.append(disk_image)
-
-			# A path existing on the frontend is a compressed/uncompressed disk file
-			# First check if it's a valid tar file
-			elif disk_path.exists() and not disk_path.is_dir() and tarfile.is_tarfile(disk_path):
-				if not disk_loc:
-					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
-				disk_type = 'image'
-				image_archive = disk
-				tar_disks = tarfile.open(disk_path)
-				tar_images = tar_disks.getnames()
-				tar_disks.close()
-
-				# Assume the top level files of the
-				# tar archive are all vm images
-				for vm_image in tar_images:
-					if Path(vm_image).suffix in image_formats:
-						images.append(vm_image)
-			elif disk_path.exists():
-				disk_type = 'image'
-				if not disk_loc:
-					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
-
-				# First test for a gzip archive and replace the suffix for
-				# the uncompressed disk image name
-				if '.gz' in disk_path.suffix:
-
-					# Remove the archive extension
-					image_name = disk_path.name.replace(disk_path.suffix, '')
-					image_archive = str(disk_path)
-					images.append(image_name)
-
-				else:
-
-					# Otherwise assume the disk is an uncompressed
-					# image
-					if disk_path.suffix in image_formats:
-						images.append(disk)
-					else:
-						raise ParamError(self, 'Virtual Machine disk {disk} not a qcow2 or raw image')
+				image = f'{vol_name}{vol_id}.qcow2'
 
 			elif '/dev/' in disk:
 
@@ -154,31 +117,38 @@ class Command(stack.commands.add.vm.Command):
 				# a storage directory as it is just a mounted disk to a VM
 				disk_type = 'mountpoint'
 				mount_disk = disk
-				images.append('')
 
-			# For an archive containing multiple disk images
-			# Create a new entry in the table for each one
+			else:
+				if not disk_loc:
+					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
+
+				# Otherwise assume the disk is an premade image
+				disk_type = 'image'
+				image = str(disk_path)
+				if not self.valid_image(disk_path, image_formats):
+					raise ParamError(self, 'disks', f'Virtual Machine disk {disk} not a qcow2 or raw image')
+
+			# Calculate the next device name (sdb, sdc, sdd...etc)
+			if disk_names:
+				disk_name = f'sd{chr(ord(disk_names[-1][-1]) + 1)}'
+
 			# Insert disks into the database
-			for image in images:
+			self.db.execute("""
+			INSERT INTO virtual_machine_disks
+				(
+					virtual_machine_id,
+					disk_name,
+					disk_location,
+					disk_type,
+					disk_size,
+					image_file_name,
+					mount_disk
+				)
+				VALUES (
+					(select virtual_machines.id from virtual_machines inner join nodes on node_id=nodes.id where name=%s),
+					%s, %s, %s, %s, %s, %s
+				)
+			""", (vm_host, disk_name, str(disk_loc), disk_type, disk_size, image, mount_disk))
 
-				# Calculate the next device name (sda, sdb, sdc...etc)
-				if disk_names:
-					disk_name = f'sd{chr(ord(disk_names[-1][-1]) + 1 + dev_id)}'
-				self.db.execute("""
-					INSERT INTO virtual_machine_disks
-					(
-						virtual_machine_id,
-						disk_name,
-						disk_location,
-						disk_type,
-						disk_size,
-						image_file_name,
-						image_archive_name,
-						mount_disk
-					)
-					VALUES (
-						(select virtual_machines.id from virtual_machines inner join nodes on node_id=nodes.id where name=%s),
-						%s, %s, %s, %s, %s, %s, %s
-					)
-				""", (vm_host, disk_name, disk_loc, disk_type, disk_size, image, image_archive, mount_disk))
-				dev_id += 1
+			# Increment the disk counter
+			dev_id += 1

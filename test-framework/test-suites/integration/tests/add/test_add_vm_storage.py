@@ -1,6 +1,5 @@
 import pytest
 import json
-import tarfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -19,10 +18,10 @@ class TestAddVMStorage:
 
 		image_dir = TemporaryDirectory()
 		images = create_image_files(image_dir)
-		image_name = images["image4.raw"]
+		image_name = images["image2.qcow2"]
 
 		# Adds an uncompressed qcow2 image to the host
-		add_storage = f'stack add vm storage vm-backend-0-3 storage_pool={self.STOR_POOL} disks={images["image4.raw"]}'
+		add_storage = f'stack add vm storage vm-backend-0-3 storage_pool={self.STOR_POOL} disks={image_name}'
 		storage_result = host.run(add_storage)
 		assert storage_result.rc == 0
 
@@ -37,7 +36,6 @@ class TestAddVMStorage:
 				'Location': '/export/pools/stacki/vm-backend-0-3',
 				'Size': 100,
 				'Image Name': 'vm-backend-0-3_disk1.qcow2',
-				'Image Archive': None,
 				'Mountpoint': None,
 				'Pending Deletion': False
 			},
@@ -48,7 +46,6 @@ class TestAddVMStorage:
 				'Location': '/export/pools/stacki/vm-backend-0-3',
 				'Size': None,
 				'Image Name': str(image_name),
-				'Image Archive': None,
 				'Mountpoint': None,
 				'Pending Deletion': False
 				}
@@ -65,17 +62,7 @@ class TestAddVMStorage:
 		expect_file = Path(test_file(f'add/add_vm_storage_complex.json'))
 		expect_output = json.loads(expect_file.read_text())
 		images = create_image_files(image_dir)
-		disks = []
-
-		for image, loc in images.items():
-
-			# If an archive contains
-			# mutliple images, we only need
-			# to add the archive once
-			# when running add vm storage
-			if str(loc) in disks:
-				continue
-			disks.append(str(loc))
+		disks = [str(loc) for loc in images.values()]
 
 		# Populate the output with the
 		# tmpdir locations of each image
@@ -85,11 +72,7 @@ class TestAddVMStorage:
 				continue
 			disk_name = disk['Image Name']
 			if disk_name in images:
-				image = images[disk_name]
-				if tarfile.is_tarfile(image) or '.gz' in image.suffixes:
-					disk['Image Archive'] = str(images[disk_name])
-				else:
-					disk['Image Name'] = str(images[disk_name])
+				disk['Image Name'] = str(images[disk_name])
 
 		add_storage = f'stack add vm storage vm-backend-0-3 storage_pool={self.STOR_POOL} disks=200,{",".join(disks)},/dev/sdb'
 		storage_result = host.run(add_storage)
@@ -99,6 +82,7 @@ class TestAddVMStorage:
 		assert list_result.rc == 0
 
 		actual_output = json.loads(list_result.stdout)
+		print(actual_output)
 		assert expect_output == actual_output
 
 	def test_add_vm_storage_bad(self, add_hypervisor, add_vm, host, create_image_files, create_invalid_image):
@@ -113,10 +97,10 @@ class TestAddVMStorage:
 		add_stor_disk = host.run(f'stack add vm storage vm-backend-0-3 disks=200')
 		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
-		add_stor_tar = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image.qcow2"]}')
+		add_stor_tar = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image1.raw"]}')
 		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
-		add_stor_image = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image5.qcow2"]}')
+		add_stor_image = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image2.qcow2"]}')
 		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
 		add_stor_invalid = host.run(f'stack add vm storage vm-backend-0-3 disks={invalid_image}')

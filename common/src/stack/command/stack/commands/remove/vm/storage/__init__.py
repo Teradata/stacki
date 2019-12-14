@@ -29,8 +29,7 @@ class Command(stack.commands.remove.vm.Command):
 	def run(self, params, args):
 
 		# We only want a single host argument
-		host = self.getSingleHost(args)
-		host = self.valid_vm_args([host])
+		host = self.valid_vm_args([self.getSingleHost(args)])
 
 		# Get the disk names for the host
 		host_disks = [disk['Name'] for disk in self.call('list.vm.storage', host)]
@@ -45,7 +44,7 @@ class Command(stack.commands.remove.vm.Command):
 
 		self.db.execute(
 			"""
-			UPDATE virtual_machine_disks SET disk_delete = 1
+			UPDATE virtual_machine_disks SET disk_delete = True
 			WHERE virtual_machine_disks.virtual_machine_id = %s
 			AND virtual_machine_disks.disk_name = %s
 			""",

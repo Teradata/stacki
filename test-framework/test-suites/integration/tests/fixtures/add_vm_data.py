@@ -99,20 +99,22 @@ def add_vm_multiple():
 
 @pytest.fixture
 def add_hypervisor():
-	def _inner(hostname, rack, rank, appliance, ip):
+	def _inner(hostname, rack, rank, hypervisor, ip):
 
 		# Add the correct appliance
 		# and ignore if the appliance
 		# was already created
-		app_cmd = f'stack add appliance {appliance}'
-		result = _exec(app_cmd, shlexsplit = True)
+		app_cmd = f'stack add appliance hypervisor'
+		result = _exec(app_cmd, shlexsplit=True)
 		if result.returncode != 0 and 'appliance "hypervisor" already exists' not in result.stderr:
 			pytest.fail(f'Unable to add hypervisor appliance {result.stdout} {result.stderr}')
+		app_cmd2 = f'stack add appliance attr hypervisor attr=hypervisor value=True'
+		result = _exec(app_cmd2, shlexsplit=True)
 
-		host_cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance={appliance}'
+		host_cmd = f'stack add host {hostname} rack={rack} rank={rank} appliance=hypervisor'
 
 		# Add the host
-		result = _exec(host_cmd, shlexsplit = True)
+		result = _exec(host_cmd, shlexsplit=True)
 		if result.returncode != 0:
 			pytest.fail(f'Unable to add hypervisor {hostname} {result.stdout} {result.stderr}')
 
@@ -133,7 +135,7 @@ def add_hypervisor():
 @pytest.fixture
 def create_image_files():
 
-	# Given a temp folder create dummy files
+	# Given a temp folder create blank disk images
 	# to replicate vm images being adding them to Stacki
 	# Returns a list of Path objects to the image files
 	def _inner(folder):
@@ -144,26 +146,12 @@ def create_image_files():
 			os.chdir(folder.name)
 			cleanup.callback(os.chdir, cur_dir)
 
-			# Create a tar archive with two images
-			tar_name = Path(f'{folder.name}/images.tar.gz')
-			_exec(f'touch image.qcow2', shlexsplit=True)
-			_exec(f'touch image2.raw', shlexsplit=True)
-			_exec(f'tar -zcvf images.tar.gz image.qcow2 image2.raw', shlexsplit=True)
-			disks['image.qcow2'] = tar_name
-			disks['image2.raw'] = tar_name
+			# Create qcow2 and raw image files
+			_exec(f'qemu-img create -f raw image1.raw 100M', shlexsplit=True)
+			disks['image1.raw'] = Path(f'{folder.name}/image1.raw')
 
-			# Create a gzip file
-			gzip_name = Path(f'{folder.name}/image3.qcow2.gz')
-			_exec(f'touch image3.qcow2', shlexsplit=True)
-			_exec(f'gzip image3.qcow2', shlexsplit=True)
-			disks['image3.qcow2'] = gzip_name
-
-			# Create standard image files
-			_exec(f'touch image4.raw', shlexsplit=True)
-			disks['image4.raw'] = Path(f'{folder.name}/image4.raw')
-
-			_exec(f'touch image5.qcow2', shlexsplit=True)
-			disks[f'image5.qcow2'] = Path(f'{folder.name}/image5.qcow2')
+			_exec(f'qemu-img create -f qcow2 image2.qcow2 100M', shlexsplit=True)
+			disks[f'image2.qcow2'] = Path(f'{folder.name}/image2.qcow2')
 
 			return disks
 	return _inner
@@ -179,8 +167,8 @@ def create_invalid_image():
 		with ExitStack() as cleanup:
 			os.chdir(folder.name)
 			cleanup.callback(os.chdir, cur_dir)
-			_exec(f'touch image6.txt', shlexsplit=True)
-			return Path(f'{folder.name}/image6.txt')
+			_exec(f'touch image3.txt', shlexsplit=True)
+			return Path(f'{folder.name}/image3.txt')
 	return _inner
 
 @pytest.fixture
@@ -189,22 +177,13 @@ def add_vm_storage():
 	# Add a	all types of VM storage
 	# to a given host
 	def _inner(images, host):
-		disks = []
-
-		# Remove duplicate disks from the
-		# images as an archive can
-		# contain multiple images, which
-		# only needs to be added once
-		for disk, location in images.items():
-			loc = str(location)
-			if loc not in disks:
-				disks.append(loc)
+		disks = [str(path) for disk, path in images.items()]
 
 		# Add the new disks
 		cmd =(
 			f'stack add vm storage {host} '
 			f'storage_pool=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
 		)
-		add_stor = _exec(cmd, shlexsplit = True)
+		add_stor = _exec(cmd, shlexsplit=True)
 		assert add_stor.returncode == 0
 	return _inner

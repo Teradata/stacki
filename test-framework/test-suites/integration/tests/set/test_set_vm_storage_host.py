@@ -54,20 +54,18 @@ class TestSetVmStorageHost:
 				'Location': '/export/pools/stacki/vm-backend-0-3',
 				'Size': 100,
 				'Image Name': 'vm-backend-0-3_disk1.qcow2',
-				'Image Archive': None,
 				'Mountpoint': None,
 				'Pending Deletion': False
 			},
 			{
-				"Virtual Machine": "vm-backend-0-3",
-				"Name": "sdb",
-				"Type": "disk",
-				"Location": "/export/pools/stacki/vm-backend-0-4",
-				"Size": 100,
-				"Image Name": "vm-backend-0-4_disk2.qcow2",
-				"Image Archive": None,
-				"Mountpoint": None,
-				"Pending Deletion": False
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sdb',
+				'Type': 'disk',
+				'Location': '/export/pools/stacki/vm-backend-0-4',
+				'Size': 100,
+				'Image Name': 'vm-backend-0-4_disk2.qcow2',
+				'Mountpoint': None,
+				'Pending Deletion': False
 			}
 		]
 
@@ -81,10 +79,10 @@ class TestSetVmStorageHost:
 		add_vm_storage(disks, 'vm-backend-0-4')
 		result = host.run('stack list vm storage vm-backend-0-4 output-format=json')
 
-		result = host.run('stack set vm storage host vm-backend-0-4 disk=sde newhost=vm-backend-0-3')
+		result = host.run('stack set vm storage host vm-backend-0-4 disk=sdd newhost=vm-backend-0-3')
 		assert result.rc == 0
 
-		result = host.run('stack set vm storage host vm-backend-0-4 disk=sdh newhost=vm-backend-0-3')
+		result = host.run('stack set vm storage host vm-backend-0-4 disk=sde newhost=vm-backend-0-3')
 		assert result.rc == 0
 
 		result = host.run('stack list vm storage vm-backend-0-3 output-format=json')
@@ -98,30 +96,27 @@ class TestSetVmStorageHost:
 				'Location': '/export/pools/stacki/vm-backend-0-3',
 				'Size': 100,
 				'Image Name': 'vm-backend-0-3_disk1.qcow2',
-				'Image Archive': None,
 				'Mountpoint': None,
 				'Pending Deletion': False
 			},
 			{
-				"Virtual Machine": "vm-backend-0-3",
-				"Name": "sde",
-				"Type": "image",
-				"Location": '/export/pools/stacki/vm-backend-0-4',
-				"Size": None,
-				"Image Name": "image3.qcow2",
-				"Image Archive": str(disks['image3.qcow2']),
-				"Mountpoint": None,
-				"Pending Deletion": False
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sdd',
+				'Type': 'image',
+				'Location': '/export/pools/stacki/vm-backend-0-4',
+				'Size': None,
+				'Image Name': f'{disks["image2.qcow2"]}',
+				'Mountpoint': None,
+				'Pending Deletion': False
 			},
 			{
-				"Virtual Machine": "vm-backend-0-3",
-				"Name": "sdh",
-				"Type": "mountpoint",
-				"Location": "/export/pools/stacki/vm-backend-0-4",
-				"Size": None,
-				"Image Name": '',
-				"Image Archive": None,
-				"Mountpoint": '/dev/sdb',
-				"Pending Deletion": False
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sde',
+				'Type': 'mountpoint',
+				'Location': '/export/pools/stacki/vm-backend-0-4',
+				'Size': None,
+				'Image Name': '',
+				'Mountpoint': '/dev/sdb',
+				'Pending Deletion': False
 			}
 		]

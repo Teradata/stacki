@@ -1,0 +1,33 @@
+<stack:stack>
+
+	<stack:description>
+	Add required packages for
+	hosting virtual machines
+	</stack:description>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+	<stack:package>
+		virt-viewer
+		ansible
+		virt-manager
+		qemu-kvm
+		libvirt
+		dosfstools
+	</stack:package>
+
+	<stack:package stack:cond="os == 'sles' and os.version == '12.x'">
+		guestfs-tools
+		libfreetype6
+	</stack:package>
+
+	<stack:package stack:cond="os == 'redhat'">
+		libguestfs-tools
+		freetype
+	</stack:package>
+
+</stack:stack>
