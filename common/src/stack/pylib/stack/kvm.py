@@ -36,10 +36,10 @@ class VM:
 		libvirt.registerErrorHandler(f=libvirt_callback, ctx=None)
 		self.hostname = host
 		self.privkey = privkey
-		self.sshCopyID()
+		self.ssh_copy_id()
 		self.kvm = self.connect()
 
-	def doRemoteCommand(self, user, commands):
+	def do_remote_command(self, user, commands):
 		""""
 		Try to execute a command on a remote host via ssh.
 		If there is an ssh  key use that, otherwise prompt for a
@@ -52,7 +52,7 @@ class VM:
 			if self.privkey:
 				s.login(self.hostname, user, ssh_key = self.privkey)
 			else:
-				password = getpass.getpass('root password for "%s": ' % self.hostname)
+				password = getpass.getpass(f'root password for {self.hostname}: ')
 				s.login(self.hostname, user, password)
 
 			for cmd in commands:
@@ -66,7 +66,7 @@ class VM:
 
 		return True
 
-	def sshCopyID(self):
+	def ssh_copy_id(self):
 		"""
 		Initialize the ssh connection between a frontend and a KVM system
 
@@ -74,20 +74,20 @@ class VM:
 		not be found
 		"""
 
-		pubkey = '%s.pub' % self.privkey
+		pubkey = f'{self.privkey}.pub'
 		if not os.path.exists(pubkey):
 			raise VmExcpetion(f'Failed to find public key to contact hypervisor at {pubkey}')
 
 		try:
-			f = open(pubkey)
-			stacki_public_key = f.read()
-			f.close
+			with open(pubkey) as f:
+				stacki_public_key = f.read()
+				f.close
 		except IOError:
 			raise VmExcpetion(f'Failed to read public key to contact hypervisor at {pubkey}')
 
-		if not self.doRemoteCommand('root', []):
-			commands = [ 'echo "%s" >> /root/.ssh/authorized_keys' % stacki_public_key ]
-			self.doRemoteCommand('root', commands)
+		if not self.do_remote_command('root', []):
+			commands = [ f'echo "{stacki_public_key}" >> /root/.ssh/authorized_keys' ]
+			self.do_remote_command('root', commands)
 
 	def connect(self):
 		"""
@@ -228,12 +228,12 @@ class VM:
 	</pool>"""
 
 		# Need to ensure the directory exists on the kvm host
-		self.doRemoteCommand('root', [ f'mkdir -p {pooldir}' ])
+		self.do_remote_command('root', [ f'mkdir -p {pooldir}' ])
 		try:
 			pools = self.kvm.listAllStoragePools(0)
 			pool_exists = self.kvm.storagePoolLookupByName(poolname)
 			if pool_exists:
-				return ''
+				return
 			pool = self.kvm.storagePoolDefineXML(poolxml, 0)
 			pool.create()
 			pool.setAutostart(1)
@@ -334,7 +334,7 @@ class VM:
 					raise VmException(f'Failed to unpack vm image {image} on {self.hostname}:\n{untar.stderr}')
 
 			# Otherwise use gunzip if its compressed using gzip
-			elif 'gz' in image.name:
+			elif image.name.endswith('gz'):
 				unzip = _exec(f'ssh {self.hostname} "gunzip {copy_image}"', shlexsplit=True)
 				if unzip.returncode != 0:
 					raise VmException(f'Failed to unpack vm image {image} on {self.hostname}:\n{unzip.stderr}')
