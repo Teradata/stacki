@@ -1,0 +1,90 @@
+[
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sda",
+                "Type": "disk",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": 100,
+                "Image Name": "vm-backend-0-3_disk1.qcow2",
+                "Image Archive": null,
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdb",
+                "Type": "disk",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": 200,
+                "Image Name": "vm-backend-0-3_disk2.qcow2",
+                "Image Archive": null,
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdc",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image.qcow2",
+                "Image Archive": "",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdd",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image2.raw",
+                "Image Archive": "",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sde",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image3.qcow2",
+                "Image Archive": "",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdf",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image4.raw",
+                "Image Archive": null,
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdg",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image5.qcow2",
+                "Image Archive": null,
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdh",
+                "Type": "mountpoint",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "",
+                "Image Archive": null,
+                "Mountpoint": "/dev/sdb",
+                "Pending Deletion": false
+        }
+]

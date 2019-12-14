@@ -121,3 +121,24 @@ class TestRemoveHost:
 				'rank': '2'
 			}
 		]
+
+	def test_hypervisor_with_vm(self, host, add_hypervisor, add_vm_multiple):
+		"""
+		Test that remove host doesn't allow removing
+		a hypervisor host with virtual machines defined
+		on it
+		"""
+
+		# hypervisor-0-1 currently has two VM's
+		# defined on it
+		result = host.run('stack remove host hypervisor-0-1')
+		assert result.rc != 0
+
+	def test_hypervisor_no_vm(self, host, add_hypervisor, add_vm):
+		"""
+		Test that we can remove a hypervisor host
+		with no virtual machines defined on it
+		"""
+
+		result = host.run('stack remove host hypervisor-0-2')
+		assert result.rc == 0
