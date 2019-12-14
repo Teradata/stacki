@@ -1,5 +1,6 @@
 from stack.exception import CommandError
 from collections import defaultdict
+from stack.bool import str2bool
 
 class VmArgumentProcessor():
 	"""
@@ -10,16 +11,16 @@ class VmArgumentProcessor():
 	def vm_by_name(self, vm_name):
 		"""
 		Return a virtual machine's info
-		by its hostname. All required info must be
-		present for a return value to be present
-		(hypervisor id, host id, memory, and cpu )
+		by its hostname.
 		"""
 
 		result = self.db.select(
 			"""
 			* FROM virtual_machines vm
-			INNER JOIN nodes ON vm.node_id = nodes.id
-			WHERE nodes.name = %s AND COALESCE(vm.id, vm.hypervisor_id, vm.node_id, vm.memory_size, vm.cpu_cores)
+			INNER JOIN nodes
+			ON vm.node_id = nodes.id
+			WHERE nodes.name = %s
+			AND vm.hypervisor_id
 			IS NOT NULL
 			""", (vm_name)
 		)
@@ -33,10 +34,12 @@ class VmArgumentProcessor():
 
 		result = self.db.select(
 			"""
-			virtual_machines.id FROM virtual_machines
-			INNER JOIN nodes ON virtual_machines.node_id = nodes.id
+			virtual_machines.id
+			FROM virtual_machines
+			INNER JOIN nodes
+			ON virtual_machines.node_id = nodes.id
 			WHERE nodes.name = %s
-			""", (vm_name)
+			""", (vm_name, )
 		)
 		if result:
 			return result[0][0]
@@ -49,10 +52,7 @@ class VmArgumentProcessor():
 		# If vm_by_name returns a non empty value for the given input,
 		# it is a valid input as all required values are present in the
 		# database table
-		if not self.vm_by_name(vm_name):
-			return False
-		else:
-			return True
+		return self.vm_by_name(vm_name)
 
 	def valid_vm_args(self, args):
 		"""
@@ -65,10 +65,7 @@ class VmArgumentProcessor():
 
 		# Use valid_vm to determine if the vm is
 		# defined
-		vm_hosts = self.getHostnames(args,
-			host_filter = lambda self, host: self.valid_vm(host)
-		)
-		vm_hosts = list(vm_hosts)
+		vm_hosts = [host for host in hosts if self.valid_vm(host)]
 
 		# Need to check if args is empty or not
 		# as getHostnames will return all hosts if args
@@ -86,9 +83,11 @@ class VmArgumentProcessor():
 		vm_id = self.vm_id_by_name(vm_name)
 		result = self.db.select(
 			"""
-			nodes.name FROM nodes INNER JOIN virtual_machines
-			ON nodes.id = virtual_machines.hypervisor_id AND
-			virtual_machines.id = %s
+			nodes.name
+			FROM nodes
+			INNER JOIN virtual_machines
+			ON nodes.id = virtual_machines.hypervisor_id
+			AND virtual_machines.id = %s
 			""", (vm_id, )
 		)
 		if result:
@@ -100,24 +99,10 @@ class VmArgumentProcessor():
 		via it's appliance.
 		"""
 
-		appliance = self.getHostAttr(hypervisor, 'appliance')
-		if appliance == 'vms' or appliance == 'hypervisor':
-			return True
-		else:
+		if not hypervisor:
 			return False
-
-	def hypervisor_id_by_name(self, hypervisor):
-		"""
-		Get the hypervisor id in the nodes table via
-		its hostname
-		"""
-
-		return self.db.select(
-			"""
-			nodes.id FROM nodes WHERE nodes.name = %s
-			""", (hypervisor, )
-		)
-
+		attr = self.getHostAttr(hypervisor, 'hypervisor')
+		return str2bool(attr)
 	def vm_info(self, hosts):
 		"""
 		Get virtual specific attributes
@@ -127,12 +112,14 @@ class VmArgumentProcessor():
 
 		vm_info = defaultdict(list)
 
-		# Copy the hosts arg to append extra
-		# parameters
+		# Copy the hosts arg to append extra parameters
 		for row in self.db.select(
 			"""
-			nodes.name, (SELECT name FROM nodes WHERE nodes.id = vm.hypervisor_id)
-			AS hypervisor, vm.memory_size, vm.cpu_cores, vm.vm_delete FROM nodes INNER JOIN virtual_machines vm
+			nodes.name,
+			(SELECT name FROM nodes WHERE nodes.id = vm.hypervisor_id)
+			AS hypervisor, vm.memory_size, vm.cpu_cores, vm.vm_delete
+			FROM nodes
+			INNER JOIN virtual_machines vm
 			ON nodes.id = vm.node_id
 			"""):
 			if row[0] in hosts:
@@ -152,9 +139,12 @@ class VmArgumentProcessor():
 		disks = defaultdict(dict)
 		for row in self.db.select(
 			"""
-			nodes.name, vmd.id, disk_name, disk_type, disk_location, disk_size, image_file_name, image_archive_name,
-			mount_disk, vmd.disk_delete FROM virtual_machine_disks vmd INNER JOIN virtual_machines vm
-			ON vmd.virtual_machine_id = vm.id INNER JOIN nodes ON vm.node_id = nodes.id
+			nodes.name, vmd.id, disk_name, disk_type, disk_location, disk_size, image_file_name, mount_disk, vmd.disk_delete
+			FROM virtual_machine_disks vmd
+			INNER JOIN virtual_machines vm
+			ON vmd.virtual_machine_id = vm.id
+			INNER JOIN nodes
+			ON vm.node_id = nodes.id
 			"""):
 				if row[0] in hosts:
 					disks[row[0]][row[1]] = list(row[2:-1])
@@ -174,10 +164,11 @@ class VmArgumentProcessor():
 		vm_id = self.vm_id_by_name(host)
 		return self.db.execute(
 			"""
-			DELETE FROM virtual_machine_disks WHERE
-			virtual_machine_disks.virtual_machine_id = %s AND
-			virtual_machine_disks.disk_delete = 1 AND
-			virtual_machine_disks.disk_name = %s
+			DELETE FROM virtual_machine_disks
+			WHERE virtual_machine_disks.virtual_machine_id = %s
+			AND virtual_machine_disks.disk_delete
+			IS TRUE
+			AND virtual_machine_disks.disk_name = %s
 			""", (vm_id, disk_name)
 		)
 
@@ -192,8 +183,9 @@ class VmArgumentProcessor():
 		vm_id = self.vm_id_by_name(host)
 		return self.db.execute(
 			"""
-			DELETE FROM virtual_machines WHERE
-			virtual_machines.id = %s AND
-			virtual_machines.vm_delete = 1
+			DELETE FROM virtual_machines
+			WHERE virtual_machines.id = %s
+			AND virtual_machines.vm_delete
+			IS TRUE
 			""", (vm_id, )
 		)

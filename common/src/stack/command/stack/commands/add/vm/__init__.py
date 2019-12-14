@@ -67,8 +67,7 @@ class Command(command, VmArgumentProcessor):
 
 		# Check if the virtual machine is already defined
 		# Raise a CommandError if it is
-		for host in self.call('list.vm'):
-			if vm_host == host['virtual machine']:
+		if self.vm_by_name(vm_host):
 				raise CommandError(self, f'Virtual Machine {vm_host} already defined')
 
 		# Add into database

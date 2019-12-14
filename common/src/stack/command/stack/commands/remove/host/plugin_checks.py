@@ -5,9 +5,10 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import CommandError
+from stack.exception import CommandError, ParamError
+from stack.argument_processors.vm import VmArgumentProcessor
 
-class Plugin(stack.commands.Plugin):
+class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 	"""
 	Prevent the removal of a virtual machine
 	hypervisor host with virtual machines
@@ -29,9 +30,12 @@ class Plugin(stack.commands.Plugin):
 		# there are not any assigned VM's to it
 		# at removal time
 		for host in hosts:
-			host_appliance = self.owner.getHostAttr(host, 'appliance')
-			if host_appliance != 'hypervisor':
-				return
-			vm_hosts = self.owner.call('list.vm', [f'hypervisor={host}'])
-			if vm_hosts:
-				raise CommandError(self.owner, f'Cannot remove host {host} with virtual machines assigned')
+			try:
+				vm_hosts = self.owner.call('list.vm', [f'hypervisor={host}'])
+				if vm_hosts:
+					raise CommandError(self.owner, f'Cannot remove host {host} with virtual machines assigned')
+
+			# If the given host isn't a valid hypervisor, list vm
+			# will raise a param error
+			except ParamError:
+				continue

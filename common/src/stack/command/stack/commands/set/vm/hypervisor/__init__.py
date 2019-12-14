@@ -31,17 +31,21 @@ class Command(stack.commands.set.vm.command):
 		(hypervisor, ) = self.fillParams([
 			('hypervisor', '', True)
 		])
-
 		if not self.is_hypervisor(hypervisor):
 			raise ParamError(self, 'hypervisor', f'host {hypervisor} is not a valid hypervisor')
 
+
 		for vm in hosts:
 			vm_id = self.vm_id_by_name(vm)
-			hypervisor_id = self.hypervisor_id_by_name(hypervisor)
-			self.db.execute(
-				"""
-				UPDATE virtual_machines SET hypervisor_id=%s
-				WHERE virtual_machines.id=%s
-				""",
-				(hypervisor_id, vm_id)
-			)
+
+			if hypervisor:
+				self.db.execute(
+					"""
+					UPDATE virtual_machines
+					INNER JOIN nodes
+					ON nodes.name = %s
+					AND virtual_machines.id = %s
+					SET virtual_machines.hypervisor_id = nodes.id
+					""",
+					(hypervisor, vm_id)
+				)

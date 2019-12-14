@@ -29,12 +29,11 @@ class TestRemoveVmStorage:
 			'Location': '/export/pools/stacki/vm-backend-0-3',
 			'Size': 100,
 			'Image Name': 'vm-backend-0-3_disk1.qcow2',
-			'Image Archive': None,
 			'Mountpoint': None,
 			'Pending Deletion': True
 		}]
 
-	@pytest.mark.parametrize('disk', ['sdc', 'sde', 'sdg'])
+	@pytest.mark.parametrize('disk', ['sdb', 'sdc', 'sdd'])
 	def test_multiple_disks(self, add_hypervisor, add_vm, create_image_files, add_vm_storage, disk, host):
 		"""
 		Remove different disks from a host

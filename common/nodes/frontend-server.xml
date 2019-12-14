@@ -49,4 +49,10 @@ subprocess.run([cmd, "enable", "pallet", r"%", "box=frontend"], check = True)
 /opt/stack/bin/python3 -m ensurepip
 </stack:script>
 
+<!-- Add the hypervisor appliance to the frontend -->
+<stack:script stack:stage="install-post">
+/opt/stack/bin/stack add appliance hypervisor node=hypervisor
+/opt/stack/bin/stack add appliance attr hypervisor attr=hypervisor value=True
+</stack:script>
+
 </stack:stack>

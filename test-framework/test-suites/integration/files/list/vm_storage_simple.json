@@ -6,7 +6,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-3",
                 "Size": 100,
                 "Image Name": "vm-backend-0-3_disk1.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -17,7 +16,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-4",
                 "Size": 200,
                 "Image Name": "vm-backend-0-4_disk1.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -28,7 +26,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-4",
                 "Size": 100,
                 "Image Name": "vm-backend-0-4_disk2.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -39,7 +36,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-5",
                 "Size": 200,
                 "Image Name": "vm-backend-0-5_disk1.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -50,7 +46,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-5",
                 "Size": 100,
                 "Image Name": "vm-backend-0-5_disk2.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -61,7 +56,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-6",
                 "Size": 200,
                 "Image Name": "vm-backend-0-6_disk1.qcow2",
-                "Image Archive": null,
                 "Mountpoint": null,
                 "Pending Deletion": false
         },
@@ -72,7 +66,6 @@
                 "Location": "/export/pools/stacki/vm-backend-0-6",
                 "Size": null,
                 "Image Name": "",
-                "Image Archive": null,
                 "Mountpoint": "/dev/sdc",
                 "Pending Deletion": false
         }

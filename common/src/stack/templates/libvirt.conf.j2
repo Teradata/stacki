@@ -1,8 +1,8 @@
 <domain type="kvm">
-	<name>vm-backend-0-3</name>
-	<uuid>00000000-0000-0000-0000-0000000000</uuid>
-	<memory>2097152</memory>
-	<vcpu>1</vcpu>
+	<name>{{ name }}</name>
+	<uuid>{{ uuid }}</uuid>
+	<memory>{{ memory }}</memory>
+	<vcpu>{{ cpucount }}</vcpu>
 	<os>
 		<type arch="x86_64">hvm</type>
 	</os>
@@ -25,18 +25,24 @@
 	</pm>
 	<devices>
 		<emulator>/usr/bin/qemu-kvm</emulator>
+		{% for interface in interfaces %}
 		<interface type="bridge">
-			<mac address="52:54:00:4a:7d:91"/>
-			<source bridge="eth0"/>
+			<mac address="{{ interface.mac }}"/>
+			<source bridge="{{ interface.name }}"/>
 			<model type="virtio"/>
-			<boot order="1"/>
+			{% if interface.bootorder %}
+			<boot order="{{ interface.bootorder }}"/>
+			{% endif %}
 		</interface>
-		<disk device="disk" type="file">
-			<driver cache="none" type="qcow2" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/vm-backend-0-3/vm-backend-0-3_disk1.qcow2"/>
-			<target dev="sda" bus="sata"/>
-			<boot order="2"/>
+		{% endfor %}
+		{% for disk in disks %}
+		<disk device="disk" type="{{ disk.dev }}">
+			<driver cache="none" type="{{ disk.type }}" name="qemu" io="native"/>
+			<source {{ disk.src_type }}="{{ disk.path }}"/>
+			<target dev="{{ disk.name }}" bus="{{ disk.bus }}"/>
+			<boot order="{{ disk.bootorder }}"/>
 		</disk>
+		{% endfor %}
 		<serial type="pty">
 			<target port="0"/>
 		</serial>

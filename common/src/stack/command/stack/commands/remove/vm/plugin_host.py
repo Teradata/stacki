@@ -24,7 +24,7 @@ class Plugin(stack.commands.Plugin):
 		for host, host_id in hosts.items():
 			self.owner.db.execute(
 				"""
-				UPDATE virtual_machines SET vm_delete = 1
+				UPDATE virtual_machines SET vm_delete = True
 				WHERE virtual_machines.id = %s
 				""", (host_id, )
 			)

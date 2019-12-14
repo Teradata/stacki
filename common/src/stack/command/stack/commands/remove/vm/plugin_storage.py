@@ -5,7 +5,6 @@
 # @copyright@
 #
 import stack.commands
-from stack import api
 
 class Plugin(stack.commands.Plugin):
 	"""
@@ -21,4 +20,4 @@ class Plugin(stack.commands.Plugin):
 			for host, host_id in hosts.items():
 				for disk in disks:
 					if disk['Virtual Machine'] == host:
-						api.Call('remove.vm.storage', args = [host, f'disk={disk["Name"]}'])
+						self.owner.call('remove.vm.storage', [host, f'disk={disk["Name"]}'])

@@ -49,7 +49,6 @@ class Command(stack.commands.list.vm.Command):
 					'Location',
 					'Size',
 					'Image Name',
-					'Image Archive',
 					'Mountpoint',
 					'Pending Deletion'
 		]
