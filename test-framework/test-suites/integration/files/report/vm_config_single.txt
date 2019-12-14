@@ -1,0 +1,56 @@
+<domain type="kvm">
+<name>vm-backend-0-3</name>
+<uuid>00000000-0000-0000-0000-0000000000</uuid>
+<memory>2097152</memory>
+<vcpu>1</vcpu>
+<os>
+<type arch="x86_64">hvm</type>
+</os>
+<features>
+<acpi/>
+<apic/>
+<vmport state="off"/>
+</features>
+<clock offset="utc">
+<timer name="rtc" tickpolicy="catchup"/>
+<timer name="pit" tickpolicy="delay"/>
+<timer name="hpet" present="no"/>
+</clock>
+<on_poweroff>destroy</on_poweroff>
+<on_reboot>restart</on_reboot>
+<on_crash>restart</on_crash>
+<pm>
+<suspend-to-mem enabled="no"/>
+<suspend-to-disk enabled="no"/>
+</pm>
+<devices>
+<emulator>/usr/bin/qemu-kvm</emulator>
+<interface type="bridge">
+<mac address="52:54:00:4a:7d:91"/>
+<source bridge="eth0"/>
+<model type="virtio"/>
+<boot order="1"/>
+</interface>
+<disk device="disk" type="file">
+<driver cache="none" type="qcow2" name="qemu" io="native"/>
+<source file="/export/pools/stacki/vm-backend-0-3_disk1.qcow2"/>
+<target dev="sda" bus="sata"/>
+<boot order="2"/>
+</disk>
+<serial type="pty">
+<target port="0"/>
+</serial>
+<serial type="pty">
+<target port="1"/>
+</serial>
+<input bus="ps2" type="mouse"/>
+<graphics autoport="yes" keymap="en-us" type="vnc" port="-1"/>
+<video>
+<model heads="1" vram="9216" type="cirrus"/>
+</video>
+<rng model="virtio">
+<backend model="random">/dev/random</backend>
+<address type="pci" domain="0x0000" bus="0x00" slot="0x0c" function="0x0"/>
+</rng>
+</devices>
+</domain>
