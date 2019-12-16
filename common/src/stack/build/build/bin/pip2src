@@ -97,8 +97,6 @@ def get_dependencies(parent_package_dict, locked_packages, distributions, bootst
 			name = distributions[package_key].project_name,
 			version = package_dict["version"],
 			master = False,
-			# The stacki metadata should have this package name in it since it is a top level package.
-			# If it doesn't, that is an error.
 			bootstrap = bootstrap,
 			appliances = appliances,
 			# Recurse to fill out this dependency's dependencies, passing down the bootstrap and appliances.
@@ -149,8 +147,6 @@ def build_package_list(locked_packages, dependencies, stacki_metadata, distribut
 			name = distributions[package_key].project_name,
 			version = package_dict["version"],
 			master = True,
-			# The stacki metadata should have this package name in it since it is a top level package.
-			# If it doesn't, that is an error.
 			bootstrap = bootstrap_value,
 			appliances = appliances_value,
 			# Get this master packages dependencies, and the sub dependencies of those dependencies, and so on.
@@ -266,7 +262,7 @@ if __name__ == "__main__":
 	with tempfile.TemporaryDirectory() as temp_dir:
 		# Configure poetry to use the temporary directory for this venv.
 		subprocess.run(
-			["/opt/stack/bin/poetry", "config", "--no-interaction", "settings.virtualenvs.path", temp_dir],
+			["/opt/stack/bin/poetry", "config", "--no-interaction", "virtualenvs.path", temp_dir],
 			check = True,
 		)
 		# Install all the packages in a local venv so we can parse some

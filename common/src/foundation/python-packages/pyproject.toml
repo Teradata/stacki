@@ -13,7 +13,6 @@ django = "=1.11.20"
 flask = "*"
 gitpython = "*"
 pymysql = "=0.8.1"
-ansible = "*"
 configparser = "*"
 flake8 = "*"
 jmespath = "*"
@@ -33,6 +32,26 @@ redis = "*"
 requests = "*"
 testinfra = "=1.16.0"
 yoyo-migrations = "*"
+# There's an issue with the way ansible packages their python package such that
+# poetry cannot resolve its dependencies. Therefore we have to pin the versions
+# of ansible and its dependencies here so that we get the dependencies and can
+# properly use ansible.
+#
+# See: https://github.com/python-poetry/poetry/issues/581
+#
+# The update process for this is to create a virtualenv and install the latest
+# version of ansible using pip. I.E. `pip install ansible`. Then, take the output
+# of `pip freeze` and pin the versions of packages that are output here. Finally,
+# the extra packages must be added to the [stacki-metadata] section below, and have
+# their metadata set to be the same as what ansible is set to.
+ansible = "=2.9.2"
+cffi = "=1.13.2"
+cryptography = "=2.8"
+jinja2 = "=2.10.3"
+markupsafe = "=1.1.1"
+pycparser = "=2.19"
+pyyaml = "=5.2"
+six = "=1.13.0"
 
 [tool.poetry.dev-dependencies]
 
@@ -64,7 +83,6 @@ django = { appliances = ["server"] }
 flask = { appliances = ["server"] }
 gitpython = { appliances = ["server"], bootstrap = true }
 pymysql = { appliances = ["server"], bootstrap = true }
-ansible = { appliances = ["server"] }
 configparser = { appliances = ["server", "client"] }
 flake8 = { appliances = ["server"], bootstrap = true }
 jmespath = { appliances = ["server"] }
@@ -81,3 +99,14 @@ redis = { appliances = ["server"], bootstrap = true }
 requests = { appliances = ["server"] }
 testinfra = { appliances = ["server"], bootstrap = true }
 yoyo-migrations = { appliances = ["server"] }
+# The metadata for ansible and all its dependencies is below. See the
+# [tool.poetry.dependencies] section above for why we have to do this
+# for ansible's dependencies.
+ansible = { appliances = ["server"] }
+cffi = { appliances = ["server"] }
+cryptography = { appliances = ["server"] }
+jinja2 = { appliances = ["server"] }
+markupsafe = { appliances = ["server"] }
+pycparser = { appliances = ["server"] }
+pyyaml = { appliances = ["server"] }
+six = { appliances = ["server"] }
