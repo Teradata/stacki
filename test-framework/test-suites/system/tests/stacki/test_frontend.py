@@ -103,3 +103,9 @@ def test_ansible(host, test_file):
 	# The system test suite currently stands up 3 backends, so expect 3
 	# echo outputs in the stdout.
 	assert cmd.stdout.count('"stdout": "hello ansible"') == 3
+
+def test_foundation_python(host):
+	results = host.run("/opt/stack/bin/python3 -c 'import _sqlite3'")
+	assert results.rc == 0
+	assert results.stdout.strip() == ''
+	assert results.stderr.strip() == ''
