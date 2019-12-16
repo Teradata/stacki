@@ -86,3 +86,20 @@ def test_packages_have_hashes(host):
 	assert results.stdout.strip() != ''
 	for pkgline in results.stdout.splitlines():
 		assert pkgline.split()[-1] != '(none)'
+
+def test_report_system(host):
+	"""Make sure report system doesn't report any errors."""
+	cmd = host.run("stack report system")
+	assert cmd.rc == 0
+
+def test_ansible(host, test_file):
+	"""Test that ansible can run on the frontend and talk to the backends."""
+	# Lay down the ansible inventory file on the frontend.
+	cmd = host.run("stack report ansible | stack report script | bash")
+	assert cmd.rc == 0
+	# Run an ansible playbook that sshes into each node.
+	cmd = host.run(f"ansible-playbook --verbose {test_file('test_ansible.yml')}")
+	assert cmd.rc == 0
+	# The system test suite currently stands up 3 backends, so expect 3
+	# echo outputs in the stdout.
+	assert cmd.stdout.count('"stdout": "hello ansible"') == 3
