@@ -3,7 +3,7 @@
   command: /opt/stack/bin/python3 -m ensurepip
 
 - name: Install coverage package
-  command: /opt/stack/bin/pip3 install coverage
+  command: /opt/stack/bin/pip3 install coverage==4.5.4
 
 - name: Hook the python interpreter
   copy:
