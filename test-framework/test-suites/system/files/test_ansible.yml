@@ -1,0 +1,4 @@
+- hosts: backend
+  tasks:
+    - name: echo a test string for all backends
+      command: echo "hello ansible"
