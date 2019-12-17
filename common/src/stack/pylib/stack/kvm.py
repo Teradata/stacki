@@ -4,13 +4,10 @@
 # @copyright@
 #
 
-from pexpect import pxssh
-import os
 import libvirt
 import tarfile
 from libvirt import libvirtError
 from stack.util import _exec
-import getpass
 from pathlib import Path
 
 # Libvirt has a weird quirk where it prints
@@ -18,7 +15,7 @@ from pathlib import Path
 # exceptions, code taken from:
 # stackoverflow.com/questions/45541725/avoiding-console-prints-by-libvirt-qemu-python-apis
 def libvirt_callback(userdata, err):
-    pass
+	pass
 
 class VmException(Exception):
 	pass
@@ -32,62 +29,10 @@ class VM:
 	storage pools or images.
 	"""
 
-	def __init__(self, host, privkey):
+	def __init__(self, host):
 		libvirt.registerErrorHandler(f=libvirt_callback, ctx=None)
 		self.hostname = host
-		self.privkey = privkey
-		self.ssh_copy_id()
 		self.kvm = self.connect()
-
-	def do_remote_command(self, user, commands):
-		""""
-		Try to execute a command on a remote host via ssh.
-		If there is an ssh  key use that, otherwise prompt for a
-		password and send a command.
-		"""
-
-		try:
-			s = pxssh.pxssh()
-
-			if self.privkey:
-				s.login(self.hostname, user, ssh_key = self.privkey)
-			else:
-				password = getpass.getpass(f'root password for {self.hostname}: ')
-				s.login(self.hostname, user, password)
-
-			for cmd in commands:
-				s.sendline(cmd)
-				s.prompt()
-
-			s.logout()
-
-		except pxssh.ExceptionPxssh as e:
-			return False
-
-		return True
-
-	def ssh_copy_id(self):
-		"""
-		Initialize the ssh connection between a frontend and a KVM system
-
-		Raises a VmException if the public key on the frontend could
-		not be found
-		"""
-
-		pubkey = f'{self.privkey}.pub'
-		if not os.path.exists(pubkey):
-			raise VmExcpetion(f'Failed to find public key to contact hypervisor at {pubkey}')
-
-		try:
-			with open(pubkey) as f:
-				stacki_public_key = f.read()
-				f.close
-		except IOError:
-			raise VmExcpetion(f'Failed to read public key to contact hypervisor at {pubkey}')
-
-		if not self.do_remote_command('root', []):
-			commands = [ f'echo "{stacki_public_key}" >> /root/.ssh/authorized_keys' ]
-			self.do_remote_command('root', commands)
 
 	def connect(self):
 		"""
@@ -98,6 +43,9 @@ class VM:
 		the hypervisor failed
 		"""
 
+		# We assume the frontend
+		# has ssh access to the
+		# hypervisor
 		try:
 			hypervisor = libvirt.open(f'qemu+ssh://root@{self.hostname}/system')
 		except libvirtError:
@@ -132,18 +80,16 @@ class VM:
 		vm_guests = {}
 
 		try:
-			off_domains = self.kvm.listDefinedDomains()
-			on_domains = self.kvm.listDomainsID()
+			domains = self.kvm.listAllDomains()
 
-		except libvirtError as msg:
-			raise VmException(f'Failed to get list of VM domains on {self.hostname}:\n{msg}')
+			except libvirtError as msg:
+				raise VmException(f'Failed to get list of VM domains on {self.hostname}:\n{msg}')
 
-		for domain in off_domains:
-			vm_guests[domain] = 'off'
-
-		for domid in on_domains:
-			dom = self.kvm.lookupByID(domid)
-			vm_guests[dom.name()] = 'on'
+		for dom in domains:
+			status = 'off'
+			if dom.isActive() == True:
+				status = 'on'
+			vm_guests[dom.name()] = status
 
 		return vm_guests
 
@@ -327,7 +273,8 @@ class VM:
 			transfer_image = _exec(f'scp {image} {self.hostname}:{dest}', shlexsplit=True)
 			if transfer_image.returncode != 0:
 				raise VmException(f'Failed to transfer image {image} to {self.hostname} at {image}:\n{transfer_image.stderr}')
-                        # Use tar to uncompress the image if its in a tarfile
+
+			# Use tar to uncompress the image if its in a tarfile
 			if tarfile.is_tarfile(image_path):
 				untar = _exec(f'ssh {self.hostname} "tar -xvf {copy_image} -C {dest} && rm {copy_image}"', shlexsplit=True)
 				if untar.returncode != 0:
