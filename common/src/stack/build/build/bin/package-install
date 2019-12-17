@@ -11,7 +11,7 @@ zypper() {
 		if [ $meta == 1 ]; then
 			/usr/bin/zypper in -y -t pattern "$p"
 		else
-			/usr/bin/zypper in -y "$p"
+			/usr/bin/zypper in -y -- "$p"
 		fi
 	done
 }
