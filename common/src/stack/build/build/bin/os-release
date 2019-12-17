@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
@@ -6,13 +6,16 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+source /etc/os-release
+
 if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`
 elif [ -f /etc/SuSE-release ]; then
 	RELEASE=`head -1 /etc/SuSE-release`
-elif [ -f /etc/os-release ]; then
-	# sles15 doesn't have SuSE-release
-	RELEASE=`grep -e '^NAME=' -e '^VERSION_ID=' /etc/os-release | tr -d '"' | awk -v ORS= -F '=' '{ print $2 }'`
+elif [[ "$NAME" == "SLES" && "$VERSION" == "15-SP1" ]]; then
+	RELEASE="SLES15"
+elif [[ "$NAME" == "openSUSE Leap" && "$VERSION" == "15.1" ]]; then
+	RELEASE="SLES15"
 else
 	RELEASE='unknown'
 fi
