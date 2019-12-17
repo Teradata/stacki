@@ -27,6 +27,7 @@ PALLET_DATA = [
 	['RHEL', '8.0.0', 'redhat8', 'x86_64', 'redhat', 'ProductMDProbe', {'rhel-8.0-x86_64-dvd.iso.treeinfo': '.treeinfo'}],
 	['RHEL-Supp', '8.0.0', 'redhat8', 'x86_64', 'redhat', 'ProductMDProbe', {'supp-supplementary-8.0-rhel-8-x86_64-dvd.iso.treeinfo': '.treeinfo'}],
 	['Fedora', '30', 'fedora30', 'x86_64', 'redhat', 'ProductMDProbe', {'Fedora-Server-dvd-x86_64-30-1.2.iso.treeinfo': '.treeinfo'}],
+	['openSUSE', '15.1', 'sles15', 'x86_64', 'sles', 'TreeinfoProbe', {'openSUSE-Leap-15.1-DVD-x86_64.iso.treeinfo': '.treeinfo'}],
 	['SLES', '11sp3', 'sles11', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SLES-11-SP3-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['SLE-SDK', '11sp3', 'sles11', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['SLES', '12sp3', 'sles12', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
