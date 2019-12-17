@@ -474,21 +474,21 @@ CREATE TABLE virtual_machines (
 	memory_size INT NOT NULL,
 	cpu_cores INT NOT NULL,
 	vm_delete BOOLEAN DEFAULT 0,
-	FOREIGN KEY (hypervisor_id) REFERENCES nodes(id) ON DELETE SET NULL,
+	FOREIGN KEY (hypervisor_id) REFERENCES nodes(id),
 	FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE virtual_machine_disks (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	virtual_machine_id INT DEFAULT NULL,
-	disk_name VARCHAR(128) NOT NULL,
+	disk_name VARCHAR(255) NOT NULL,
 	disk_type VARCHAR(128) NOT NULL,
 	disk_size INT DEFAULT NULL,
-	disk_location VARCHAR(128) NOT NULL,
+	disk_location VARCHAR(255) NOT NULL,
 	disk_delete BOOLEAN DEFAULT 0,
-	image_file_name VARCHAR(128) DEFAULT NULL,
-	image_archive_name VARCHAR(128) DEFAULT NULL,
-	mount_disk VARCHAR(128) DEFAULT NULL,
+	image_file_name VARCHAR(255) DEFAULT NULL,
+	image_archive_name VARCHAR(255) DEFAULT NULL,
+	mount_disk VARCHAR(255) DEFAULT NULL,
 	FOREIGN KEY (virtual_machine_id) REFERENCES virtual_machines(id) ON DELETE CASCADE
 );
 
