@@ -12,7 +12,7 @@
 			"storcli-007.0409.0000.0000-1.noarch.rpm",
 			"stream.tar.gz",
 			"redis-4.0.11.tar.gz",
-			"zeromq-4.3.1.tar.gz"
+			"zeromq-4.3.2.tar.gz"
 		]
 	}
 ]
