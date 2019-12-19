@@ -77,7 +77,7 @@ class Plugin(stack.commands.Plugin):
 					WHERE stacks.box = %s
 				""", (box_id,)):
 					pallets.append(f"{name}-{version}-{rel}")
-					if name in ['SLES', 'CentOS', 'RHEL', 'Ubuntu', 'Ubuntu-Server', 'Fedora']:
+					if name in ['SLES', 'CentOS', 'RHEL', 'Ubuntu', 'Ubuntu-Server', 'Fedora', 'openSUSE']:
 						# the attr os.version is '{major_version}.x'
 						# release is now '{OS}{major_version}'
 						if pallet_os in rel:
