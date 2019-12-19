@@ -12,4 +12,4 @@ This repository includes the following code from other projects.
 * sc-im-0.4.0-20161021.tgz [https://teradata-stacki.s3.amazonaws.com/3rdparty/sc-im-0.4.0-20161021.tgz]
 * storcli-007.0409.0000.0000-1.noarch.rpm [https://teradata-stacki.s3.amazonaws.com/3rdparty/storcli-007.0409.0000.0000-1.noarch.rpm]
 * stream.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/stream.tar.gz]
-* zeromq-4.3.1.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/zeromq-4.3.1.tar.gz]
+* zeromq-4.3.2.tar.gz [https://teradata-stacki.s3.amazonaws.com/3rdparty/zeromq-4.3.2.tar.gz]
