@@ -108,6 +108,9 @@ def test_ansible(host, test_file):
 	# Run an ansible playbook that sshes into each node.
 	cmd = host.run(f"ansible-playbook --verbose {test_file('test_ansible.yml')}")
 	assert cmd.rc == 0
-	# The system test suite currently stands up 3 backends, so expect 3
-	# echo outputs in the stdout.
-	assert cmd.stdout.count('"stdout": "hello ansible"') == 3
+	# test_ansible.yml currently runs against backends
+	# so expect that many responses
+	results = host.run('stack list host a:backend output-format=json')
+	assert cmd.rc == 0
+	node_count = len(json.loads(results.stdout))
+	assert cmd.stdout.count('"stdout": "hello ansible"') == node_count
