@@ -256,7 +256,7 @@ class Hypervisor:
 		except libvirtError:
 			pass
 		try:
-			volume_vars = {'name': volname, 'size': size, 'dir' pooldir }
+			volume_vars = {'volname': volname, 'size': size, 'dir': pooldir }
 
 			# Render the volume template
 			# According to the libvirt docs, zero
