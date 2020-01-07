@@ -11,10 +11,10 @@ mkdir -p /export/src
 cp -rd /vagrant /export/src/stacki
 cd /export/src/stacki
 
-# Regenerate the versions.json, if requested
-if [[ $UPDATE_VERSIONS_JSON == "true" ]]
+# Regenerate the poetry.lock, if requested
+if [[ $UPDATE_LOCKFILE == "true" ]]
 then
-    rm -f common/src/foundation/python-packages/versions.json
+    rm -f common/src/foundation/python-packages/poetry.lock
 fi
 
 # Figure out our ROLLVERSION
@@ -49,10 +49,10 @@ make ROLLVERSION=$ROLLVERSION bootstrap
 make ROLLVERSION=$ROLLVERSION
 make ROLLVERSION=$ROLLVERSION manifest-check
 
-# Copy the updated versions.json back out of the VM
-if [[ $UPDATE_VERSIONS_JSON == "true" ]]
+# Copy the updated poetry.lock back out of the VM
+if [[ $UPDATE_LOCKFILE == "true" ]]
 then
-    cp common/src/foundation/python-packages/versions.json  /vagrant/common/src/foundation/python-packages/versions.json
+    cp common/src/foundation/python-packages/poetry.lock  /vagrant/common/src/foundation/python-packages/poetry.lock
 fi
 
 # If we are redhat7 PLATFORM, we aren't done yet
