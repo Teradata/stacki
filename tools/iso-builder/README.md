@@ -23,7 +23,7 @@ Optional environment variables:
 
 * **PYPI_CACHE** - Set to "true" to have the build script use our internal Stacki Builds PyPI cache, which is needed to build the "sles11" platform.
 
-* **UPDATE_VERSIONS_JSON** - Set to "true" to regenerate the versions.json file for the Python modules
+* **UPDATE_LOCKFILE** - Set to "true" to regenerate the poetry.lock file for the Python modules
 
 ## Usage
 
