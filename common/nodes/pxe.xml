@@ -15,7 +15,7 @@ stack-images
 
 <stack:package stack:cond="os == 'sles'">
 tftp
-stack-sles-images
+stack-&os;-&release;-images
 </stack:package>
 
 <stack:package>
@@ -64,4 +64,4 @@ cp /boot/memtest86* /tftpboot/pxelinux/memtest
 </stack:script>
 
 
-</stack:stack> 
+</stack:stack>

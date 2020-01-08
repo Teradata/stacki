@@ -1,4 +1,3 @@
--stack-sles-images
 -stack-aws-client
 -stack-aws-server
 -stack-barnacle

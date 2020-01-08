@@ -8,7 +8,24 @@ ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-SRCDIRS = SLES/sles11/11sp3 SLES/sles12/12sp2 SLES/sles12/12sp3
+# Make sure we're building the SLES os.
+ifeq ($(OS), sles)
+# Only build and pack up the images for the SLES release we are building.
+# Add more cases to this as more SLES versions are supported, I.E.
+# `else ifeq($(RELEASE), sles15)`. SLES 11 is a special case where it
+# gets no bits because we package them up in SLES 12 due to being unable
+# to build the image on SLES 11.
+ifeq ($(RELEASE), sles12)
+SRCDIRS = SLES/sles12/12sp2 SLES/sles12/12sp3 SLES/sles11/11sp3
+else
+SRCDIRS =
+endif
+endif
+
+# Debug output of the OS, RELEASE, and SRCDIRS variables.
+$(info OS is $(OS))
+$(info RELEASE is $(RELEASE))
+$(info SRCDIRS is $(SRCDIRS))
 
 bootstrap: # nothing to do
 
