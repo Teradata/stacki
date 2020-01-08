@@ -6,6 +6,7 @@
 
 OS=$(shell common/src/stack/build/build/bin/os)
 RELEASE=$(shell common/src/stack/build/build/bin/os-release)
+DISTRO=$(shell common/src/stack/build/build/bin/distribution)
 
 ROLLROOT = .
 

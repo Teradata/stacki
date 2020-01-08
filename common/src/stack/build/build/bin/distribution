@@ -1,67 +1,30 @@
-#! /bin/sh
-# 
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
-#
-# $Log$
-# Revision 1.2  2010/09/07 23:53:04  bruno
-# star power for gb
-#
-# Revision 1.1  2010/06/22 21:07:44  mjk
-# build env moving into base roll
-#
-# Revision 1.9  2009/05/01 19:06:45  mjk
-# chimi con queso
-#
-# Revision 1.8  2008/10/18 00:55:43  mjk
-# copyright 5.1
-#
-# Revision 1.7  2008/03/06 23:41:28  mjk
-# copyright storm on
-#
-# Revision 1.6  2007/06/23 04:03:16  mjk
-# mars hill copyright
-#
-# Revision 1.5  2006/09/11 22:46:51  mjk
-# monkey face copyright
-#
-# Revision 1.4  2006/08/17 16:52:55  bruno
-# add Scientific Linux to the list of centos compatible distros
-#
-# Revision 1.3  2006/08/15 21:15:50  bruno
-# you mean the world really isn't only centos?
-#
-# Revision 1.2  2006/08/10 00:09:12  mjk
-# 4.2 copyright
-#
-# Revision 1.1  2006/06/05 19:39:36  mjk
-# *** empty log message ***
-#
-  
+#! /bin/bash
 
-DIST='unknown'
+# the purpose of this script is to parse the contents of the now standard /etc/os-release file
+# and turn it into something that gives us a handle over the actual distro we're running on
+# currently the parsing is intended to match what the installer pallet would be named
 
-if [ -f /etc/redhat-release ]; then
-	DIST=`cat /etc/redhat-release | awk '{ print $1; }'`
+if [ -f /etc/os-release ]; then
+	source /etc/os-release
+elif [ -f /etc/SuSE-release ]; then
+	# we still build on sles11, but it's old enough that it lacks the os-release file
+	NAME=SLES
 fi
 
-##
-## insert SuSe detection here
-##
-if [ -f /etc/SuSE-release ]; then
-	DIST=`head -1 /etc/SuSE-release | awk '{print $1;}'`
-
-case $DIST in
-    CentOS|Red|Scientific)
-	echo centos
-        ;;
-    SUSE)
-	echo sles
-	;;
-    *)
-        echo unknown
-        ;;
-esac
+if [ "$NAME" == "" ]; then
+	echo unknown_distro
+elif [ "$NAME" == "CentOS Linux" ]; then
+	echo CentOS
+elif [ "$NAME" == "SLES" ]; then
+	echo SLES
+elif [ "$NAME" == "Red Hat Enterprise Linux Server" ]; then
+	echo RHEL
+elif [ "$NAME" == "Red Hat Enterprise Linux" ]; then
+	echo RHEL
+elif [ "$NAME" == "openSUSE Leap" ]; then
+	echo openSUSE
+elif [ "$NAME" == "Ubuntu" ]; then
+	echo Ubuntu
+else
+	echo $NAME
+fi
