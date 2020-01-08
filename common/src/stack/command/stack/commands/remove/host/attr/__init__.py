@@ -20,16 +20,16 @@ class Command(stack.commands.remove.host.command):
 	<arg type='string' name='host' optional='1' repeat='1'>
 	One or more hosts
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
 	</param>
-	
+
 	<example cmd='remove host attr backend-0-0 attr=cpus'>
 	Removes the attribute cpus for host backend-0-0.
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=host', 'value=' ])
+		self.command('remove.attr', self._argv + ['scope=host'])
 		return self.rc

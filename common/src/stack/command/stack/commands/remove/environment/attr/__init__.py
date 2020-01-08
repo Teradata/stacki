@@ -14,16 +14,16 @@ class Command(stack.commands.remove.environment.command):
 	<arg type='string' name='environment' repeat='1' optional='1'>
 	One or more Environment specifications (e.g., 'test').
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
 	</param>
-	
+
 	<example cmd='remove environment attr test attr=sge'>
 	Removes the attribute sge for text environment machines.
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=environment', 'value=' ])
+		self.command('remove.attr', self._argv + ['scope=environment'])
 		return self.rc

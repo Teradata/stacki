@@ -20,17 +20,16 @@ class Command(stack.commands.remove.os.command):
 	<arg type='string' name='os' optional='1' repeat='1'>
 	One or more OS specifications (e.g., 'linux').
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
 	</param>
-	
+
 	<example cmd='remove os attr linux attr=sge'>
 	Removes the attribute sge for linux OS machines.
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=os', 'value=' ])
+		self.command('remove.attr', self._argv + ['scope=os'])
 		return self.rc
-

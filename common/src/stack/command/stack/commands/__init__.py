@@ -897,6 +897,39 @@ class ScopeArgumentProcessor(
 
 		return scope_mappings
 
+	def targets_exist(self, scope, names=None):
+		"""
+		Checks if target names (possibly MySQL LIKE patterns) exist
+		and raise an ArgNotFound if any don't exist.
+		"""
+
+		if scope == 'global':
+			# Global scope has no friends
+			if names:
+				raise CommandError(
+					cmd = self,
+					msg = "Arguments are not allowed at the global scope.",
+				)
+
+		elif scope == 'appliance':
+			self.appliances_exist(names)
+
+		elif scope == 'os':
+			# Piggy-back to resolve the os names
+			names = self.getOSNames(names)
+
+		elif scope == 'environment':
+			# Piggy-back to resolve the environment names
+			names = self.getEnvironmentNames(names)
+
+		elif scope == 'host':
+			# Piggy-back to resolve the host names
+			names = self.getHostnames(names)
+			if not names:
+				raise ArgRequired(self, 'host')
+		else:
+			raise ParamError(self, 'scope', 'is not valid')
+
 
 class DocStringHandler(handler.ContentHandler,
 	handler.DTDHandler,

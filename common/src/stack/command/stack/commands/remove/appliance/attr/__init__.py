@@ -20,16 +20,16 @@ class Command(stack.commands.remove.appliance.command):
 	<arg type='string' name='appliance' optional='1' repeat='1'>
 	One or more appliances
 	</arg>
-	
+
 	<param type='string' name='attr' optional='0'>
 	The attribute name that should be removed.
 	</param>
-	
+
 	<example cmd='remove appliance attr backend attr=sge'>
 	Removes the attribute sge for backend appliances
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=appliance', 'value=' ])
+		self.command('remove.attr', self._argv + ['scope=appliance'])
 		return self.rc

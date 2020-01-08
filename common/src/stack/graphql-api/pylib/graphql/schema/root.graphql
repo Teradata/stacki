@@ -15,3 +15,11 @@ type Lookup {
 	name: String!
 	exists: Boolean!
 }
+
+enum Scope {
+	global
+	appliance
+	os
+	environment
+	host
+}

@@ -1,0 +1,38 @@
+enum AttributeType {
+	var
+	const
+	shadow
+}
+
+type Attribute {
+	id: Int
+	target: String!
+	scope: Scope!
+	type: AttributeType!
+	name: String!
+	value: String
+}
+
+type AttributeResult implements Result {
+	success: Boolean!
+	error: String
+	attributes: [Attribute!]!
+}
+
+extend type Query {
+	attributes(
+		id: Int, name: String, resolve: Boolean, var: Boolean,
+		const: Boolean, shadow: Boolean, scope: Scope, targets: [String!]
+	): [Attribute!]!
+
+	attributes_exist(names: [String!], scope: Scope, targets: [String!]): [Lookup!]!
+}
+
+extend type Mutation {
+	add_attribute(
+		name: String!, value: String!, shadow: Boolean,
+		force: Boolean, scope: Scope, targets: [String!]
+	): AttributeResult!
+
+	remove_attribute(id: Int, name: String, scope: Scope, targets: [String!]): Status!
+}
