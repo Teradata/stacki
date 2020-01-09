@@ -1,4 +1,8 @@
-- hosts: backend
+# Need to use one host here because we can't rely on the backend
+# appliance being set properly. This due to other pallets potentially
+# overlaying their tests and changing how the system test suite
+# is set up. If they don't have a backend-0-0 though, that's their bug.
+- hosts: backend-0-0
   tasks:
     - name: echo a test string for all backends
       command: echo "hello ansible"
