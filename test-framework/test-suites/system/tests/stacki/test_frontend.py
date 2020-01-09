@@ -101,16 +101,12 @@ def test_report_system(host):
 	assert cmd.rc == 0
 
 def test_ansible(host, test_file):
-	"""Test that ansible can run on the frontend and talk to the backends."""
+	"""Test that ansible can run on the frontend and talk to a backend."""
 	# Lay down the ansible inventory file on the frontend.
 	cmd = host.run("stack report ansible | stack report script | bash")
 	assert cmd.rc == 0
-	# Run an ansible playbook that sshes into each node.
+	# Run an ansible playbook that sshes into one node.
 	cmd = host.run(f"ansible-playbook --verbose {test_file('test_ansible.yml')}")
 	assert cmd.rc == 0
-	# test_ansible.yml currently runs against backends
-	# so expect that many responses
-	results = host.run('stack list host a:backend output-format=json')
-	assert cmd.rc == 0
-	node_count = len(json.loads(results.stdout))
-	assert cmd.stdout.count('"stdout": "hello ansible"') == node_count
+	# Make sure it worked
+	assert '"stdout": "hello ansible"' in cmd.stdout
