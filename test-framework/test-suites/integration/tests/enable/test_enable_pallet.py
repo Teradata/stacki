@@ -36,7 +36,7 @@ class TestEnablePallet:
 	
 	def test_wrong_version(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our test pallet
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-test_foo-prod.x86_64.disk1.iso')
 		assert result.rc == 0 
 
 		# Try to enable it with the version parameter being wrong
