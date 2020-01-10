@@ -46,7 +46,7 @@ class StackWS(View):
 	def _check_login_(func):
 		def runner(inst, *args, **kwargs):
 			request = args[0]
-			if request.user.is_authenticated():
+			if request.user.is_authenticated:
 				return func(inst, *args, **kwargs)
 			else:
 				j = json.dumps({'logged_in': False})
@@ -346,7 +346,7 @@ def log_out(request):
 
 # Function to check log in user
 def check_user(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		s = {'user': request.user.username}
 	else:
 		s = {'user': 'None'}
