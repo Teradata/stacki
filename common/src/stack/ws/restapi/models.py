@@ -14,16 +14,16 @@ class GroupAccess(models.Model):
 	Model that stores command permissions
 	for a group.
 	"""
-	group = models.ForeignKey(Group)
-	command = models.CharField(max_length=1024)	
-	
+	group = models.ForeignKey(Group, on_delete = models.CASCADE)
+	command = models.CharField(max_length=1024)
+
 class UserAccess(models.Model):
 	"""
 	Model that stores command permissions
 	for a user.
 	"""
-	user = models.ForeignKey(User)
-	command = models.CharField(max_length=1024)	
+	user = models.ForeignKey(User, on_delete = models.CASCADE)
+	command = models.CharField(max_length=1024)
 
 class BlackList(models.Model):
 	"""

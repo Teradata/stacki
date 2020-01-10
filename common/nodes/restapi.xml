@@ -15,14 +15,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <!-- COMMON -->
 <stack:script stack:stage="install-post">
-<!--
-	Create Symlink to point to pymysqldb. This
-	is required for django to work correctly, since
-	django requires MySQLdb which we cannot distribute
--->
-ln -s /opt/stack/lib/python3.7/site-packages/pymysql \
-	/opt/stack/lib/python3.7/site-packages/MySQLdb
-
 /opt/stack/share/stack/bin/ws_setup.sh
 
 <!-- enable commands because they require 'sudo' -->

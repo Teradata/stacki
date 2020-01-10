@@ -19,6 +19,19 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import pymysql
+
+# Install pymysql as mysqldb. This is required for django to
+# work correctly, since django requires MySQLdb which we cannot
+# distribute.
+#
+# We also change pymysql version because Django checks that
+# the version of mysqldb is at least what they expect. This
+# apparently resolves as the version of pymysql in this case,
+# which is not in sync with mysqldb.
+# https://github.com/PyMySQL/PyMySQL/issues/790#issuecomment-562820913
+pymysql.version_info = (9, 9, 9, 'final', 0)
+pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

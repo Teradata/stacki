@@ -38,7 +38,7 @@ class Command(stack.commands.Command,
 	<param name="admin" type="bool">
 	Admin type user account. Default is "False"
 	</param>
-	
+
 	<example cmd="add user greg admin=True">
 	Adds a user called 'greg' with admin privileges
 	to the API
@@ -92,8 +92,7 @@ class Command(stack.commands.Command,
 		u.set_password(passwd)
 		u.is_superuser = admin
 		u.save()
-		u.groups = groups
-		u.save()
+		u.groups.set(groups)
 
 		hostname = self.getHostnames(['localhost'])[0]
 		domainname = self.getHostAttr('localhost','domainname')

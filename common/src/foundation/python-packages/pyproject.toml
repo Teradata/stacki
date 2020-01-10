@@ -9,10 +9,10 @@ authors = ["stacki"]
 [tool.poetry.dependencies]
 # For some reason this tool wants the python version here, so just leave it.
 python = "^3.6"
-django = "=1.11.20"
+django = "*"
 flask = "*"
 gitpython = "*"
-pymysql = "=0.8.1"
+pymysql = "*"
 configparser = "*"
 flake8 = "*"
 jmespath = "*"
