@@ -70,11 +70,11 @@ class TestListPallet:
 
 	def test_with_version(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our pallet with a unique version
-		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-2.0-prod.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-version-test_foo-prod.x86_64.disk1.iso')
 		assert result.rc == 0
 
 		# Make sure our list command filters by arch
-		result = host.run('stack list pallet version=2.0 output-format=json')
+		result = host.run('stack list pallet version=test_foo output-format=json')
 		assert result.rc == 0
 		assert json.loads(result.stdout) == [
 			{
@@ -83,7 +83,7 @@ class TestListPallet:
 				'name': 'test-different-version',
 				'os': 'sles',
 				'release': 'prod',
-				'version': '2.0'
+				'version': 'test_foo'
 			}
 		]
 
