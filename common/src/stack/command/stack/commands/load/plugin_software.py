@@ -51,8 +51,30 @@ class Plugin(stack.commands.Plugin):
 
 				self.owner.stack('enable.cart', cart, **params)
 
+			for r in b.get('repo', []):
+				repo   = r.get('name')
+				params = {'box': box}
 
+				self.owner.stack('enable.repo', repo, **params)
+
+
+	def load_repo(self, repos):
+		for r in repos:
+			repo = r.get('name')
+			params = {
+				'alias'         : r.get('alias'),
+				'url'           : r.get('url'),
+				'autorefresh'   : r.get('autorefresh'),
+				'assumeyes'     : r.get('assumeyes'),
+				'type'          : r.get('type'),
+				'is_mirrorlist' : r.get('is_mirrorlist'),
+				'gpgcheck'      : r.get('gpgcheck'),
+				'gpgkey'        : r.get('gpgkey'),
+				'os'            : r.get('os'),
+			}
+			self.owner.stack('add.repo', repo, **params)
 
 	def run(self, section):
+		self.load_repo(section.get('repo', []))
 		self.load_box(section.get('box', []))
 		self.load_pallet(section.get('pallet', []))

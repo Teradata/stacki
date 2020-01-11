@@ -173,6 +173,25 @@ def add_group(host):
 
 
 @pytest.fixture
+def add_repo(host):
+	"""Adds a repo to the stacki db."""
+	def _inner(name, url, **kwargs):
+		params = ' '.join(f'{k}={v}' for k, v in kwargs.items())
+		result = host.run(
+			f'stack add repo {name} url={url} {params}'
+		)
+		if result.rc != 0:
+			pytest.fail(f'unable to add dummy repo "{name}"')
+
+	# First use of the fixture adds network "test"
+	_inner('test', 'test_url')
+
+	# Then return the inner function, so we can call it inside the test
+	# to get more repos added
+
+	return _inner
+
+@pytest.fixture
 def add_network(host):
 	"""Adds a network to the stacki db. For historical reasons the first test network this creates is pxe=False."""
 	def _inner(name, address, pxe = False):

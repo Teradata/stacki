@@ -24,7 +24,8 @@ class TestAddBox:
 				"name": "test",
 				"os": host_os,
 				"pallets": "",
-				"carts": ""
+				"carts": "",
+				"repos": "",
 			}
 		]
 
@@ -41,7 +42,8 @@ class TestAddBox:
 				"name": "test",
 				"os": "ubuntu",
 				"pallets": "",
-				"carts": ""
+				"carts": "",
+				"repos": "",
 			}
 		]
 	

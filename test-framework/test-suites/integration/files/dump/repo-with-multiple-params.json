@@ -1,0 +1,19 @@
+{
+        "version": "no-version",
+        "software": {
+                "repo": [
+                        {
+                                "name": "test1",
+                                "alias": "test1",
+                                "url": "test1.url",
+                                "autorefresh": true,
+                                "assumeyes": true,
+                                "type": "rpm-md",
+                                "is_mirrorlist": false,
+                                "gpgcheck": true,
+                                "gpgkey": "somekey.asc",
+                                "os": "sles"
+                        }
+                ]
+        }
+}

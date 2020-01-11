@@ -105,7 +105,7 @@ yoyo-migrations = { appliances = ["server"] }
 ansible = { appliances = ["server"] }
 cffi = { appliances = ["server"] }
 cryptography = { appliances = ["server"] }
-jinja2 = { appliances = ["server"] }
+jinja2 = { appliances = ["server"], bootstrap = true }
 markupsafe = { appliances = ["server"] }
 pycparser = { appliances = ["server"] }
 pyyaml = { appliances = ["server"] }
