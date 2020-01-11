@@ -10,10 +10,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-from stack.argument_processors.box import BoxArgProcessor
-import stack.commands
+from collections import defaultdict
 
-class command(stack.commands.list.command, BoxArgProcessor):
+import stack.commands
+from stack.argument_processors.box import BoxArgProcessor
+from stack.argument_processors.repo import RepoArgProcessor
+
+class command(BoxArgProcessor, RepoArgProcessor, stack.commands.list.command):
 	pass
 
 
@@ -33,6 +36,7 @@ class Command(command):
 	def run(self, params, args):
 		pallets = {}
 		carts	= {}
+		repos	= defaultdict(list)
 
 		for box in self.get_box_names(args):
 			for pallet in self.get_box_pallets(box):
@@ -51,6 +55,11 @@ class Command(command):
 						carts[box] = []
 					carts[box].append(row['name'])
 
+		for box in self.get_box_names(args):
+			for repo_data in self.get_repos_by_box(box).values():
+				for repo in repo_data.values():
+					repos[box].append(repo['alias'])
+
 		self.beginOutput()
 
 		for box in self.get_box_names(args):
@@ -67,10 +76,10 @@ class Command(command):
 				pallets[box] = []
 
 			self.addOutput(box, (
-				os, ' '.join(pallets[box]), ' '.join(carts[box])
+				os, ' '.join(pallets[box]), ' '.join(carts[box]), ' '.join(repos[box]),
 			))
 
 		self.endOutput(
-			header=['name', 'os', 'pallets', 'carts'],
+			header=['name', 'os', 'pallets', 'carts', 'repos'],
 			trimOwner=False
 		)

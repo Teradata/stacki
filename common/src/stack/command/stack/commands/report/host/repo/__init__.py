@@ -1,22 +1,14 @@
-#
-# @copyright@
-# Copyright (c) 2006 - 2019 Teradata
-# All rights reserved. Stacki(r) v5.x stacki.com
-# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-# @copyright@
-#
-# @rocks@
-# Copyright (c) 2000 - 2010 The Regents of the University of California
-# All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-# https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-# @rocks@
-#
-
 from stack.argument_processors.box import BoxArgProcessor
 from stack.argument_processors.host import HostArgProcessor
-import stack.commands
+from stack.argument_processors.repo import RepoArgProcessor
 
-class Command(BoxArgProcessor, HostArgProcessor, stack.commands.report.command):
+import stack.commands
+from stack.repo import build_repo_files, yum_repo_template
+
+class Command(BoxArgProcessor,
+	HostArgProcessor,
+	RepoArgProcessor,
+	stack.commands.report.command):
 	"""
 	Create a report that describes the repository configuration file
 	that should be put on hosts.
@@ -31,16 +23,28 @@ class Command(BoxArgProcessor, HostArgProcessor, stack.commands.report.command):
 	"""
 
 	def run(self, params, args):
-
 		self.beginOutput()
 
 		hosts = self.getHostnames(args)
-		for host in hosts:
-			osname = self.db.getHostOS(host)
-			server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
+		self.host_attrs = self.getHostAttrDict(hosts)
 
-			self.runImplementation(osname, (host, server))
+		# get the boxes that are actually in use by the hosts we're running against
+		box_repos = {
+			attrs['box']: self.get_repos_by_box(attrs['box'])
+			for attrs in self.host_attrs.values()
+		}
+
+		# only generate repo file contents once for each box.
+		self.box_repo_data = {}
+		for box, repo_data in box_repos.items():
+			# replace the variables in the yum repo with data from the repo tables
+			repo_lines = build_repo_files(repo_data, yum_repo_template)
+			self.box_repo_data[box] = '\n\n'.join(repo_lines)
+
+		# now for each host, build its customized repo file
+		for host in hosts:
+			# TODO: ubuntu
+			imp = 'rpm'
+			self.runImplementation(imp, (host,))
 
 		self.endOutput(padChar='', trimOwner=True)
-
-

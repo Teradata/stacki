@@ -22,11 +22,17 @@ class Plugin(stack.commands.Plugin):
 				    object_pairs_hook=OrderedDict)
 		pallet = json.loads(self.owner.command('dump.pallet'),
 				    object_pairs_hook=OrderedDict)
+		repo   = json.loads(self.owner.command('dump.repo'),
+				    object_pairs_hook=OrderedDict)
 
 		return json.dumps(OrderedDict(
 			version  = stack.version,
 			software = OrderedDict(
 				box    = box['software']['box'],
 				cart   = cart['software']['cart'],
-				pallet = pallet['software']['pallet'])), indent=8)
+				pallet = pallet['software']['pallet'],
+				repo   = repo['software']['repo'],
+				)),
+			indent=8
+			)
 

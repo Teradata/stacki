@@ -104,4 +104,10 @@ then
     /opt/stack/bin/stack sync host firewall localhost
 fi
 
+if [[ $OS == "redhat7" ]]
+then
+    # cleanup - this repo is now availabe as a pallet in the frontend
+    rm -f /etc/yum.repos.d/dvd.repo
+fi
+
 exit 0

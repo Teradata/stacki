@@ -220,6 +220,26 @@ CREATE TABLE rolls (
 	INDEX (Name)
 );
 
+<!-- Repos -->
+DROP TABLE IF EXISTS repos;
+CREATE TABLE repos (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(128) NOT NULL UNIQUE,
+	alias		VARCHAR(128) NOT NULL UNIQUE,
+	url		TEXT NOT NULL,
+	autorefresh	BOOLEAN DEFAULT FALSE,
+	assumeyes	BOOLEAN DEFAULT FALSE,
+	type		VARCHAR(32) NOT NULL DEFAULT 'rpm-md',
+	is_mirrorlist	BOOLEAN DEFAULT FALSE,
+	gpgcheck	BOOLEAN DEFAULT FALSE,
+	gpgkey		TEXT DEFAULT '',
+	os		VARCHAR(32) NOT NULL DEFAULT '&os;',
+	pallet_id	INT,
+	INDEX (Name),
+	INDEX (Alias),
+	FOREIGN KEY (pallet_id) REFERENCES rolls(id) ON DELETE CASCADE
+);
+
 <!-- Stacks -->
 DROP TABLE IF EXISTS stacks;
 CREATE TABLE stacks (
@@ -235,6 +255,14 @@ CREATE TABLE cart_stacks (
 	cart		INT NOT NULL,
 	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
 	FOREIGN KEY (cart) REFERENCES carts(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS repo_stacks;
+CREATE TABLE repo_stacks (
+	box		INT NOT NULL,
+	repo		INT NOT NULL,
+	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
+	FOREIGN KEY (repo) REFERENCES repos(id) ON DELETE CASCADE
 );
 
 <!-- Groups -->

@@ -15,6 +15,7 @@ ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
 DEPENDS.FILES	= stack.py
 PY.TEST.FLAGS   = -s
+RPM.REQUIRES	= foundation-python-Jinja2
 
 include $(STACKBUILD)/etc/CCRules.mk
 

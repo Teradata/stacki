@@ -43,7 +43,8 @@ class TestRemoveBox:
 				'name': 'test',
 				'os': host_os,
 				'pallets': '',
-				'carts': ''
+				'carts': '',
+				'repos': '',
 			}
 		]
 
@@ -71,13 +72,15 @@ class TestRemoveBox:
 				'name': 'test',
 				'os': host_os,
 				'pallets': '',
-				'carts': ''
+				'carts': '',
+				'repos': '',
 			},
 			{
 				'name': 'foo',
 				'os': host_os,
 				'pallets': '',
-				'carts': ''
+				'carts': '',
+				'repos': '',
 			}
 		]
 

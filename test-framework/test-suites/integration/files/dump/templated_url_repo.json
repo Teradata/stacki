@@ -1,0 +1,19 @@
+{
+        "version": "no-version",
+        "software": {
+                "repo": [
+                        {
+                                "name": "test_with_templating",
+                                "alias": "test_with_templating",
+                                "url": "http://{ Kickstart_PrivateAddress }}/install/pallets/fake/",
+                                "autorefresh": false,
+                                "assumeyes": false,
+                                "type": "rpm-md",
+                                "is_mirrorlist": false,
+                                "gpgcheck": false,
+                                "gpgkey": null,
+                                "os": "sles"
+                        }
+                ]
+        }
+}

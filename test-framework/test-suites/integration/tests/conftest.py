@@ -145,6 +145,14 @@ def host_os():
 
 	return 'redhat'
 
+@pytest.fixture(scope="session")
+def host_repo_file():
+	if os.path.exists('/etc/SuSE-release'):
+		return '/etc/zypp/repos.d/stacki.repo'
+	# TODO: ubuntu
+
+	return '/etc/yum.repos.d/stacki.repo'
+
 @pytest.fixture
 def invalid_host():
 	return 'invalid-{:04x}'.format(random.randint(0, 65535))
