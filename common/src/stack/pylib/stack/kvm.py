@@ -1,4 +1,4 @@
-# @copyright@ # Copyright (c) 2006 - 2018 Teradata
+# @copyright@ # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -189,8 +189,8 @@ class Hypervisor:
 		Define a new kvm storage pool
 		with the given pool directory and name
 
-		Returns empty string if the pool exists
-		and the pool name if the pool was created
+		Returns the pool name if the pool was created
+		Skips pools already created with the same name
 
 		If the pool was created, the pool is set to
 		autostart, meaning the pool is not destroyed
@@ -202,13 +202,21 @@ class Hypervisor:
 
 		# Need to ensure the directory exists on the kvm host
 		_exec(f'ssh {self.hypervisor} "mkdir -p {pooldir}"', shlexsplit = True)
+		pool_exists = None
 		try:
 			pool_template = jinja2.Template(self.kvm_pool)
-			temp_vars = {'name': poolname, 'dir': pooldir}
+			pool_vars = {'name': poolname, 'dir': pooldir}
 			pool_exists = self.kvm.storagePoolLookupByName(poolname)
 			if pool_exists:
 				return
 
+		# Libvirt will raise an error if a pool doesn't exist
+		# with the given name, so continue with making a new pool
+		# if this is the case
+		except libvirtError:
+			pass
+
+		try:
 			# Render the template to create the pool
 			# According to the libvirt docs, zero
 			# always needs to be passed in
@@ -280,59 +288,6 @@ class Hypervisor:
 			vol.delete()
 		except libvirtError as msg:
 			raise VmException(f'Failed to delete volume {volname} on hypervisor {self.hypervisor}:\n{msg}')
-
-	def copy_image(self, image_path, dest_path, image_name = ''):
-		if not Path(image_path).is_file():
-			raise VmException(f'Disk image {image_path} not found to transfer')
-
-		image = Path(image_path)
-		dest = Path(dest_path)
-		curr_image = Path(f'{dest}/{image_name}')
-		copy_image = f'{dest}/{image.name}'
-
-		# Create the path on the host
-		create_dest = _exec(f'ssh {self.hypervisor} "mkdir -p {dest}"', shlexsplit=True)
-		if create_dest.returncode != 0:
-			raise VmException(f'Could not create image folder {dest} on {self.hypervisor}:\n{create_dest.stderr}')
-
-		# Check if the image already exists at the given location
-		if image_name:
-			image_present = _exec(f'ssh {self.hypervisor} "ls {curr_image}"', shlexsplit=True)
-			if image_present.returncode == 0:
-				return
-
-		# Transfer the image
-		transfer_image = _exec(f'scp {image} {self.hypervisor}:{dest}', shlexsplit=True)
-		if transfer_image.returncode != 0:
-			raise VmException(f'Failed to transfer image {image} to {self.hypervisor} at {image}:\n{transfer_image.stderr}')
-
-		# Use tar to uncompress the image if its in a tarfile
-		if tarfile.is_tarfile(image_path):
-			untar = _exec(f'ssh {self.hypervisor} "tar -xvf {copy_image} -C {dest} && rm {copy_image}"', shlexsplit=True)
-			if untar.returncode != 0:
-				raise VmException(f'Failed to unpack vm image {image} on {self.hypervisor}:\n{untar.stderr}')
-
-		# Otherwise use gunzip if its compressed using gzip
-		elif image.name.endswith('.gz'):
-			unzip = _exec(f'ssh {self.hypervisor} "gunzip {copy_image}"', shlexsplit=True)
-			if unzip.returncode != 0:
-				raise VmException(f'Failed to unpack vm image {image} on {self.hypervisor}:\n{unzip.stderr}')
-
-	def remove_image(self, image_path):
-		"""
-		Remove an image at the given path
-
-		Raises a VmException if the image failed
-		to be removed
-		"""
-
-		image = Path(image_path)
-		image_present = _exec(f'ssh {self.hypervisor} "ls {image}"', shlexsplit=True)
-		if image_present.returncode != 0:
-			raise VmException(f'Could not find image file {image.name} on {self.hypervisor}')
-		rm_image = _exec(f'ssh {self.hypervisor} "rm {image}"', shlexsplit=True)
-		if rm_image.returncode != 0:
-			raise VmException(f'Failed to remove image {image.name}:{rm_image.stderr}')
 
 	def autostart(self, vm, is_autostart = False):
 		"""
