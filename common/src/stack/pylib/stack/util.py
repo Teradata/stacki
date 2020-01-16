@@ -16,7 +16,9 @@ import os
 import subprocess
 import shlex
 import itertools
+import tarfile
 from xml.sax import handler
+from pathlib import Path
 import re
 
 # An exception for Kickstart builder trinity: kcgi, kgen, kpp
@@ -193,3 +195,77 @@ def is_valid_hostname(name):
 			flags=re.IGNORECASE | re.VERBOSE
 		)
 	)
+
+def copy_remote_file(file_path, dest_path, dest_host, uncompress = True, uncompress_file_name = ''):
+		"""
+		Transfer over a file to a given host and optionally uncompress it.
+
+		If uncompressed_file_name is set, it will not overwrite the file on disk
+		if it exists at the destination path. Handles compressed gzip2 or tar archives.
+		By setting the uncompress_file_name argument, if a file exists at the destination
+		path, it will not be overwritten.
+
+		Raises IOError or OSError when an action could not be completed.
+		"""
+
+		if not Path(file_path).is_file():
+			raise OSError(f'File {file_path} not found to transfer')
+
+		transfer_file = Path(file_path)
+		dest = Path(dest_path)
+
+		# Path for of the files final path name
+		# used to check if a file with the same name
+		# is present
+		final_file_path = Path(f'{dest}/{uncompress_file_name}')
+
+		# Path to transferred file location
+		copy_file_path = Path(f'{dest}/{transfer_file.name}')
+
+		# Create the path on the host
+		create_dest = _exec(f'ssh {dest_host} "mkdir -p {dest}"', shlexsplit=True)
+		if create_dest.returncode != 0:
+			raise OSError(f'Could not create file folder {dest} on {dest_host}:\n{create_dest.stderr}')
+
+		# Check if the file already exists at the given location
+		if uncompress_file_name:
+			file_present = _exec(f'ssh {dest_host} "ls {final_file_path}"', shlexsplit=True)
+			if file_present.returncode == 0:
+				return
+
+		# Transfer the file
+		copy_file = _exec(f'scp {transfer_file} {dest_host}:{dest}', shlexsplit=True)
+		if copy_file.returncode != 0:
+			raise OSError(f'Failed to transfer file {transfer_file} to {dest_host} at {copy_file_path}:\n{copy_file.stderr}')
+
+		# Use tar to uncompress the file if it's in a tarfile
+		if tarfile.is_tarfile(copy_file_path) and uncompress:
+			untar = _exec(f'ssh {dest_host} "tar -xvf {copy_file_path} -C {dest} && rm {copy_file_path}"', shlexsplit=True)
+			if untar.returncode != 0:
+				raise OSError(f'Failed to unpack file archive {transfer_file.name} on {dest_host}:\n{untar.stderr}')
+
+		# Otherwise use gunzip if its compressed using gzip
+		elif copy_file_path.name.endswith('.gz') and uncompress:
+			unzip = _exec(f'ssh {dest_host} "gunzip {copy_file_path}"', shlexsplit=True)
+			if unzip.returncode != 0:
+				raise OSError(f'Failed to unpack file {transfer_file} on {dest_host}:\n{unzip.stderr}')
+
+def remove_remote_file(remove_file, host):
+		"""
+		Remove a file on the specified host
+		at the given path
+
+		Raise a FileNotFoundError if the remote file isn't
+		present
+
+		Raise an OSError if the remote file couldn't
+		be removed
+		"""
+
+		file_path = Path(remove_file)
+		file_present = _exec(f'ssh {host} "ls {file_path}"', shlexsplit=True)
+		if file_present.returncode != 0:
+			raise OSError(f'Could not find file {file_path.name} on {host}')
+		rm_file_out = _exec(f'ssh {host} "rm {file_path}"', shlexsplit=True)
+		if rm_file_out.returncode != 0:
+			raise OSError(f'Failed to remove file {file_path.name}:{rm_file_out.stderr}')
