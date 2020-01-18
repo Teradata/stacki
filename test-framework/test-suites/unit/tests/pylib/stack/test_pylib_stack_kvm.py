@@ -89,6 +89,13 @@ class TestPylibKvm:
 			mock_hypervisor.close()
 			mock_libvirt.close.assert_called_once()
 
+	def test_kvm_close_no_conn(self):
+		mock_hypervisor = self.TestPylibKvmUnderTest()
+		mock_hypervisor.kvm = None
+		expect_exception = 'Cannot find hypervisor connection to hypervisor-foo'
+		with pytest.raises(VmException, match=expect_exception):
+			mock_hypervisor.close()
+
 	# Test three cases:
 	# 1. No guests found
 	# 2. Guests with different status (on/off)
@@ -166,6 +173,25 @@ class TestPylibKvm:
 		mock_hypervisor.kvm.defineXML.side_effect = libvirtError(exception)
 		mock_hypervisor.add_domain('foo')
 		mock_hypervisor.kvm.defineXML.assert_called_once_with('foo')
+
+	@patch('libvirt.virDomain', autospec=True)
+	def test_kvm_remove_domain(self, mock_virDomain):
+		mock_hypervisor = self.TestPylibKvmUnderTest()
+		mock_hypervisor.kvm.lookupByName.return_value = mock_virDomain
+
+		mock_hypervisor.remove_domain('foo')
+		mock_virDomain.undefine.assert_called_once()
+
+	@patch('libvirt.virDomain', autospec=True)
+	def test_kvm_remove_domain_exception(self, mock_virDomain):
+		mock_hypervisor = self.TestPylibKvmUnderTest()
+		mock_hypervisor.kvm.lookupByName.return_value = mock_virDomain
+		mock_virDomain.undefine = self.mock_libvirt_exception
+		expect_exception = 'Failed to undefine VM foo on hypervisor hypervisor-foo:\nSomething went wrong!'
+
+		with pytest.raises(VmException, match=expect_exception):
+			mock_hypervisor.remove_domain('foo')
+			mock_virDomain.undefine.assert_called_once()
 
 	@patch('libvirt.virDomain', autospec=True)
 	def test_kvm_start_domain(self, mock_virDomain):
