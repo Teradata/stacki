@@ -60,6 +60,7 @@ def dump_mysql():
 	file_obj = os.fdopen(file_fd, mode="w")
 
 	# Put drop database commands at the front of the SQL restore file
+	file_obj.write("DROP DATABASE IF EXISTS `django`;\n")
 	file_obj.write("DROP DATABASE IF EXISTS `shadow`;\n")
 	file_obj.write("DROP DATABASE IF EXISTS `cluster`;\n\n")
 	file_obj.flush()
@@ -67,7 +68,7 @@ def dump_mysql():
 
 	# Dump the initial Stacki DB into an SQL file, to restore from after each test
 	subprocess.run([
-		"mysqldump", "--opt", "--databases", "cluster", "shadow"
+		"mysqldump", "--opt", "--databases", "cluster", "shadow", "django"
 	], stdout=file_obj, check=True)
 
 	# Close the file
