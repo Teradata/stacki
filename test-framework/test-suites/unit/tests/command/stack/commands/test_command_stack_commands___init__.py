@@ -1,6 +1,6 @@
-from stack.commands import Command, Implementation, ScopeArgumentProcessor
+from stack.commands import Command, Implementation, ScopeArgumentProcessor, DatabaseConnection
 from stack.exception import CommandError
-from unittest.mock import patch, create_autospec, ANY
+from unittest.mock import patch, create_autospec, ANY, MagicMock
 from concurrent.futures import Future
 from collections import namedtuple
 import time
@@ -9,9 +9,16 @@ import pytest
 class CommandUnderTest(Command):
 	"""A subclass of Command that replaces __init__ to remove the database dependency."""
 
-	def __init__(self):
+	def __init__(self, *args, **kwargs):
 		# needed for implementation running and loading functions
 		self.impl_list = {}
+		# needed for anything that messes with the DB
+		self.db = create_autospec(
+			spec = DatabaseConnection,
+			instance = True,
+		)
+		self.db.database = MagicMock()
+		self.level = 0
 
 class TestCommand:
 
@@ -262,6 +269,79 @@ class TestCommand:
 			)
 			for key in test_implementation_mapping
 		}
+
+	# To get this to work we're essentially overriding the global __import__ and eval functions
+	# in the stack.commands module with mock objects. Mocking the builtins directly doesn't seem
+	# to work for eval.
+	@patch(target = "stack.commands.__import__", create = True)
+	@patch(target = "stack.commands.eval", create = True)
+	def test_command_command_error_exception_handling(self, mock_eval, mock__import__):
+		"""Test that the CommandError raised contains the command run and the lower tier exception information."""
+		# Set the mock's side effect for when runWrapper is called to raise a CommandError.
+		mock_eval.return_value.Command.return_value.runWrapper.side_effect = CommandError(
+			cmd = create_autospec(spec = Command, instance = True),
+			msg = "test error",
+		)
+
+		test_command = CommandUnderTest()
+
+		with pytest.raises(CommandError) as exception_info:
+			test_command.command(command = "foo.bar.baz", args = ["a", "b=c"])
+
+		# make sure the command is listed as well as its arguments
+		assert "foo bar baz a b=c" in exception_info.value.message()
+		# make sure the CommandError's message is passed along as well
+		assert "test error" in exception_info.value.message()
+
+	# To get this to work we're essentially overriding the global __import__ and eval functions
+	# in the stack.commands module with mock objects. Mocking the builtins directly doesn't seem
+	# to work for eval.
+	@patch(target = "stack.commands.__import__", create = True)
+	@patch(target = "stack.commands.eval", create = True)
+	def test_command_command_error_exception_handling_verbose_off(self, mock_eval, mock__import__):
+		"""Test that the CommandError raised does not contain the command run when verbose errors are turned off."""
+		# Set the mock's side effect for when runWrapper is called to raise a CommandError.
+		mock_eval.return_value.Command.return_value.runWrapper.side_effect = CommandError(
+			cmd = create_autospec(spec = Command, instance = True),
+			msg = "test error",
+		)
+
+		test_command = CommandUnderTest()
+
+		with pytest.raises(CommandError) as exception_info:
+			test_command.command(command = "foo.bar.baz", args = ["a", "b=c"], verbose_errors = False)
+
+		# make sure the command is not listed
+		assert "foo bar baz a b=c" not in exception_info.value.message()
+		# make sure the CommandError's message is passed along as well
+		assert "test error" in exception_info.value.message()
+
+	@pytest.mark.parametrize("verbose_errors", (True, False))
+	# To get this to work we're essentially overriding the global __import__ and eval functions
+	# in the stack.commands module with mock objects. Mocking the builtins directly doesn't seem
+	# to work for eval.
+	@patch(target = "stack.commands.__import__", create = True)
+	@patch(target = "stack.commands.eval", create = True)
+	def test_command_exception_handling(self, mock_eval, mock__import__, verbose_errors):
+		"""Test that non-CommandErrors cause a RuntimeError to be raised that contains the command run.
+
+		This should happen regardless of whether verbose_errors were turned off or not.
+		"""
+		# The getattr is used to return the Command class in the eval'd module and
+		# construct the Command instance. Return a mock instead
+		mock_eval.return_value.Command = MagicMock()
+		# Set the mock's side effect for when runWrapper is called to raise a CommandError.
+		mock_eval.return_value.Command.return_value.runWrapper.side_effect = ValueError(
+			"test error",
+		)
+
+		test_command = CommandUnderTest()
+
+		with pytest.raises(RuntimeError) as exception_info:
+			test_command.command(command = "foo.bar.baz", args = ["a", "b=c"], verbose_errors = verbose_errors)
+
+		# make sure the command is listed as well as its arguments
+		assert "foo bar baz a b=c" in str(exception_info.value)
 
 class TestScopeArgumentProcessor:
 	"""Test case for the ScopeArgumentProcessor"""

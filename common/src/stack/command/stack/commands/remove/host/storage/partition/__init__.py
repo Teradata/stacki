@@ -35,5 +35,5 @@ class Command(stack.commands.remove.host.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		self.command('remove.storage.partition', self._argv + ['scope=host'])
+		self.command('remove.storage.partition', self._argv + ['scope=host'], verbose_errors = False)
 		return self.rc

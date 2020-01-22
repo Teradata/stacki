@@ -50,5 +50,5 @@ class Command(stack.commands.add.host.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		self.command('add.storage.partition', self._argv + ['scope=host'])
+		self.command('add.storage.partition', self._argv + ['scope=host'], verbose_errors = False)
 		return self.rc

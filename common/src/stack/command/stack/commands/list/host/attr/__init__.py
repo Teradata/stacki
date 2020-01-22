@@ -20,7 +20,7 @@ class Command(stack.commands.list.host.command):
 	<arg optional='1' type='string' name='host'>
 	Host name of machine
 	</arg>
-	
+
 	<param type='string' name='attr'>
 	A shell syntax glob pattern to specify to attributes to
 	be listed.
@@ -46,6 +46,6 @@ class Command(stack.commands.list.host.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.attr', self._argv + [ 'scope=host' ]))
+		self.addText(self.command('list.attr', self._argv + [ 'scope=host' ], verbose_errors = False))
 		return self.rc
 

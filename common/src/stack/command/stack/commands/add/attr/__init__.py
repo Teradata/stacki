@@ -18,7 +18,7 @@ class Command(stack.commands.add.command):
 	<param type='string' name='value' optional='0'>
 	Value of the attribute
 	</param>
-	
+
 	<param type='boolean' name='shadow'>
 	If set to true, then set the 'shadow' value (only readable by root
 	and apache).
@@ -33,5 +33,5 @@ class Command(stack.commands.add.command):
 	"""
 
 	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'force=no' ])
+		self.command('set.attr', self._argv + [ 'force=no' ], verbose_errors = False)
 		return self.rc

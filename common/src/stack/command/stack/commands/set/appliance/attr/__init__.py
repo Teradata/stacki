@@ -38,5 +38,5 @@ class Command(stack.commands.set.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		self.command('set.attr', self._argv + ['scope=appliance'])
+		self.command('set.attr', self._argv + ['scope=appliance'], verbose_errors = False)
 		return self.rc

@@ -44,5 +44,5 @@ class Command(stack.commands.add.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		self.command('set.appliance.attr', self._argv + [ 'force=no' ])
+		self.command('set.appliance.attr', self._argv + [ 'force=no' ], verbose_errors = False)
 		return self.rc

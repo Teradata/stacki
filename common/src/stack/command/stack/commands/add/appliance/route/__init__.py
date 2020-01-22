@@ -46,5 +46,5 @@ class Command(stack.commands.add.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		self.command('add.route', self._argv + ['scope=appliance'])
+		self.command('add.route', self._argv + ['scope=appliance'], verbose_errors = False)
 		return self.rc

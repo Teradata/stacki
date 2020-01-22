@@ -28,5 +28,5 @@ class Command(stack.commands.list.host.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.route', self._argv + ['scope=host']))
+		self.addText(self.command('list.route', self._argv + ['scope=host'], verbose_errors = False))
 		return self.rc
