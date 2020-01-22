@@ -36,5 +36,5 @@ class Command(stack.commands.remove.environment.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
 
-		self.command('remove.storage.controller', self._argv + ['scope=environment'])
+		self.command('remove.storage.controller', self._argv + ['scope=environment'], verbose_errors = False)
 		return self.rc

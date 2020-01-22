@@ -36,5 +36,5 @@ class Command(stack.commands.remove.os.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		self.command('remove.storage.controller', self._argv + ['scope=os'])
+		self.command('remove.storage.controller', self._argv + ['scope=os'], verbose_errors = False)
 		return self.rc

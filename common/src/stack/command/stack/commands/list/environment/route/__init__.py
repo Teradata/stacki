@@ -19,5 +19,5 @@ class Command(stack.commands.list.environment.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.route', self._argv + ['scope=environment']))
+		self.addText(self.command('list.route', self._argv + ['scope=environment'], verbose_errors = False))
 		return self.rc

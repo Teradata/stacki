@@ -38,5 +38,5 @@ class Command(stack.commands.set.host.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'host')
 
-		self.command('set.attr', self._argv + ['scope=host'])
+		self.command('set.attr', self._argv + ['scope=host'], verbose_errors = False)
 		return self.rc

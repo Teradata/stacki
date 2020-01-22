@@ -34,5 +34,5 @@ class Command(stack.commands.add.os.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		self.command('set.os.attr', self._argv + ['force=no'])
+		self.command('set.os.attr', self._argv + ['force=no'], verbose_errors = False)
 		return self.rc

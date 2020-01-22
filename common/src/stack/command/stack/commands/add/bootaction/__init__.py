@@ -15,12 +15,12 @@ class Command(stack.commands.add.command):
 	Label name for the bootaction. You can see the bootaction label names by
 	executing: 'stack list bootaction [host(s)]'.
 	</arg>
-	
+
 	<param type='string' name='os'>
 	Operating System for the bootaction.
 	The default os is Redhat.
 	</param>
-	
+
 	<param type='string' name='type'>
 	Type of bootaction. Either 'os' or 'install'.
 	</param>
@@ -48,5 +48,5 @@ class Command(stack.commands.add.command):
 	"""
 
 	def run(self, params, args):
-		self.command('set.bootaction', self._argv + [ 'force=no' ])
+		self.command('set.bootaction', self._argv + [ 'force=no' ], verbose_errors = False)
 		return self.rc

@@ -14,13 +14,13 @@ class Command(stack.commands.list.appliance.command):
 	<arg optional='1' type='string' name='appliance'>
 	Name of appliance
 	</arg>
-	
+
 	<example cmd='list appliance attr backend'>
 	List the attributes for backend appliances
 	</example>
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.attr', self._argv + [ 'scope=appliance' ]))
+		self.addText(self.command('list.attr', self._argv + [ 'scope=appliance' ], verbose_errors = False))
 		return self.rc
 

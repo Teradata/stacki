@@ -97,5 +97,5 @@ class Command(stack.commands.add.os.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'os')
 
-		self.command('add.firewall', self._argv + ['scope=os'])
+		self.command('add.firewall', self._argv + ['scope=os'], verbose_errors = False)
 		return self.rc

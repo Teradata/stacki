@@ -18,5 +18,5 @@ class Command(stack.commands.list.os.command):
 	"""
 
 	def run(self, params, args):
-		self.addText(self.command('list.storage.controller', self._argv + ['scope=os']))
+		self.addText(self.command('list.storage.controller', self._argv + ['scope=os'], verbose_errors = False))
 		return self.rc

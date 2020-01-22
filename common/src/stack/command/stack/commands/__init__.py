@@ -1785,7 +1785,7 @@ class Command:
 
 		return list
 
-	def call(self, command, args=[]):
+	def call(self, command, args=[], verbose_errors = True):
 		"""
 		Similar to the command method but uses the output-format=binary
 		to run a command and return a list of dictionary rows.
@@ -1793,7 +1793,7 @@ class Command:
 		# Do a copy of the args list
 		a = args[:]
 		a.append('output-format=binary')
-		s = self.command(command, a)
+		s = self.command(command, a, verbose_errors)
 		if s:
 			return marshal.loads(s)
 
@@ -1802,7 +1802,7 @@ class Command:
 	def notify(self, message):
 		print(f'{_logPrefix}{message}', file = sys.stderr, flush = True)
 
-	def command(self, command, args=[]):
+	def command(self, command, args=[], verbose_errors = True):
 		"""
 		Import and run a Stack command. Returns and output string.
 		"""
@@ -1823,11 +1823,26 @@ class Command:
 
 		try:
 			self.rc = o.runWrapper(name, args, self.level + 1)
-		except CommandError as e:
-			# We need to catch any CommandError, point it to the calling cmd,
-			# and then re-raise it so it will have the correct usage message
-			e.cmd = self
-			raise e
+		except CommandError as exception:
+			# Add sub-command call information to the exception
+			# if VerboseErrors are turned on.
+			if verbose_errors:
+				exception.msg = (
+					f"Failed to run sub-command '{name} {' '.join(args)}'"
+					f" with error:\n\t{exception.message()}"
+				)
+
+			# Change the returned CommandError's cmd attribute to
+			# be this command.
+			exception.cmd = self
+			raise exception
+
+		except Exception as exception:
+			# This doesn't respect verbose_errors because this is probably a bug
+			# and we'll want all the juicy info.
+			raise RuntimeError(
+				f"Failed to run {name} {' '.join(args)}"
+			) from exception
 
 		return o.getText()
 

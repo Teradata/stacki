@@ -38,5 +38,5 @@ class Command(stack.commands.add.environment.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'environment')
 
-		self.command('set.environment.attr', self._argv + ['force=no'])
+		self.command('set.environment.attr', self._argv + ['force=no'], verbose_errors = False)
 		return self.rc

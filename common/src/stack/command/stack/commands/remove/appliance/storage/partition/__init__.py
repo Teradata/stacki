@@ -35,5 +35,5 @@ class Command(stack.commands.remove.appliance.command):
 		if len(args) == 0:
 			raise ArgRequired(self, 'appliance')
 
-		self.command('remove.storage.partition', self._argv + ['scope=appliance'])
+		self.command('remove.storage.partition', self._argv + ['scope=appliance'], verbose_errors = False)
 		return self.rc
