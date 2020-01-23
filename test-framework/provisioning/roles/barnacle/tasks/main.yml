@@ -29,6 +29,12 @@
         192.168.0.2     frontend-0-0  frontend-0-0
       mode: 0644
 
+  - name: Setup /etc/resolv.conf to known good state
+    copy:
+      src: /etc/resolv.conf
+      dest: /etc/resolv.conf
+      mode: 0644
+
   - name: "Report frontend-install.py URL"
     debug:
       msg: "https://raw.githubusercontent.com/Teradata/stacki/{{ lookup('env','GIT_BRANCH')|default('develop', True) }}/tools/fab/frontend-install.py"
