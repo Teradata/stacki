@@ -357,3 +357,46 @@ class TestAddPallet:
 				'boxes': ''
 			},
 		]
+
+	def test_add_pallet_updates_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets):
+		# Add our minimal pallet
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
+		assert result.rc == 0
+
+		result = host.run('stack list pallet minimal expanded=true output-format=json')
+		assert result.rc == 0
+
+		# Make sure we have the expected local path
+		result_json = json.loads(result.stdout)
+		assert result_json[0]['url'].startswith("/tmp/")
+		del result_json[0]['url']
+
+		assert  result_json == [
+			{
+				'name': 'minimal',
+				'version': '1.0',
+				'release': 'sles12',
+				'arch': 'x86_64',
+				'os': 'sles',
+				'boxes': ''
+			}
+		]
+
+		# Now add it from with a URL, and see that the url field is updated
+		result = host.run('stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso')
+		assert result.rc == 0
+
+		# Check it made it in as expected, and the url is updated
+		result = host.run('stack list pallet minimal expanded=true output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'name': 'minimal',
+				'version': '1.0',
+				'release': 'sles12',
+				'arch': 'x86_64',
+				'os': 'sles',
+				'boxes': '',
+				'url': 'http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso'
+			}
+		]

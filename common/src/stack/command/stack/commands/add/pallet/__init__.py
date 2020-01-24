@@ -155,16 +155,21 @@ class Command(command):
 		Insert the pallet information into the database if not already present.
 		"""
 
-		if self.db.count(
-			'(ID) from rolls where name=%s and version=%s and rel=%s and os=%s and arch=%s',
+		rows = self.db.select(
+			'id FROM rolls WHERE name=%s AND version=%s AND rel=%s AND os=%s AND arch=%s',
 			info_getter(pallet_info)
-		) == 0:
+		)
+
+		if len(rows) == 0:
+			# New pallet
 			self.db.execute("""
 				insert into rolls(name, version, rel, os, arch, URL)
 				values (%s, %s, %s, %s, %s, %s)
 				""", (*info_getter(pallet_info), URL)
 			)
-
+		else:
+			# Re-added the pallet. Update the URL.
+			self.db.execute('UPDATE rolls SET url=%s WHERE id=%s', (URL, rows[0][0]))
 
 	def mount(self, iso_name, mount_point):
 		'''
