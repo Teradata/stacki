@@ -31,7 +31,7 @@ def run_django_server():
 
 	# Tell the server it is time to clean up
 	os.kill(process.pid, signal.SIGINT)
-	process.join()
+	process.join(timeout=180)
 
 @pytest.fixture
 def run_file_server(test_file):
@@ -62,7 +62,7 @@ def run_file_server(test_file):
 
 	# Tell the server it is time to clean up
 	os.kill(process.pid, signal.SIGINT)
-	process.join()
+	process.join(timeout=180)
 
 @pytest.fixture
 def run_pallet_isos_server(create_pallet_isos):
@@ -93,4 +93,4 @@ def run_pallet_isos_server(create_pallet_isos):
 
 	# Tell the server it is time to clean up
 	os.kill(process.pid, signal.SIGINT)
-	process.join()
+	process.join(timeout=180)
