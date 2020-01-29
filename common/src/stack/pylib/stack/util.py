@@ -205,7 +205,7 @@ def copy_remote_file(file_path, dest_path, dest_host, uncompress = True, uncompr
 		By setting the uncompress_file_name argument, if a file exists at the destination
 		path, it will not be overwritten.
 
-		Raises IOError or OSError when an action could not be completed.
+		Raises an OSError when an action could not be completed.
 		"""
 
 		if not Path(file_path).is_file():
@@ -238,17 +238,19 @@ def copy_remote_file(file_path, dest_path, dest_host, uncompress = True, uncompr
 		if copy_file.returncode != 0:
 			raise OSError(f'Failed to transfer file {transfer_file} to {dest_host} at {copy_file_path}:\n{copy_file.stderr}')
 
-		# Use tar to uncompress the file if it's in a tarfile
-		if tarfile.is_tarfile(copy_file_path) and uncompress:
-			untar = _exec(f'ssh {dest_host} "tar -xvf {copy_file_path} -C {dest} && rm {copy_file_path}"', shlexsplit=True)
-			if untar.returncode != 0:
-				raise OSError(f'Failed to unpack file archive {transfer_file.name} on {dest_host}:\n{untar.stderr}')
-
-		# Otherwise use gunzip if its compressed using gzip
-		elif copy_file_path.name.endswith('.gz') and uncompress:
-			unzip = _exec(f'ssh {dest_host} "gunzip {copy_file_path}"', shlexsplit=True)
-			if unzip.returncode != 0:
-				raise OSError(f'Failed to unpack file {transfer_file} on {dest_host}:\n{unzip.stderr}')
+		try:
+			# Use tar to uncompress the file if it's in a tarfile
+			if tarfile.is_tarfile(transfer_file) and uncompress:
+				untar = _exec(f'ssh {dest_host} "tar -xvf {copy_file_path} -C {dest} && rm {copy_file_path}"', shlexsplit=True)
+				if untar.returncode != 0:
+					raise OSError(f'Failed to unpack file archive {transfer_file.name} on {dest_host}:\n{untar.stderr}')
+			# Otherwise use gunzip if its compressed using gzip
+			elif copy_file_path.name.endswith('.gz') and uncompress:
+				unzip = _exec(f'ssh {dest_host} "gunzip {copy_file_path}"', shlexsplit=True)
+				if unzip.returncode != 0:
+					raise OSError(f'Failed to unpack file {transfer_file} on {dest_host}:\n{unzip.stderr}')
+		except FileNotFoundError:
+			pass
 
 def remove_remote_file(remove_file, host):
 		"""
