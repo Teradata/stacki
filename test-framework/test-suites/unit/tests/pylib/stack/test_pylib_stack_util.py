@@ -205,7 +205,7 @@ class TestUtil:
 		# will tarfile.is_tarfile be called, so only
 		# assert it has been called then
 		if len(exec_args) >= 3:
-			mock_is_tarfile.assert_called_once_with(Path(f'bar/{file_name}'))
+			mock_is_tarfile.assert_called_once_with(Path(f'{file_name}'))
 
 		mock_is_file.assert_called_once_with(Path(file_name))
 
