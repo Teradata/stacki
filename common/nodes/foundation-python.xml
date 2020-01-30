@@ -11,6 +11,10 @@
 
 
 <stack:script stack:stage="install-post">
+ln -s /opt/stack/bin/python3 /opt/stack/bin/spython3
+</stack:script>
+
+<stack:script stack:stage="install-post">
 
 <stack:file stack:name="/etc/ld.so.conf.d/foundation.conf">
 /lib

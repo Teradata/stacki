@@ -108,3 +108,14 @@ def test_foundation_python(host):
 	assert results.rc == 0
 	assert results.stdout.strip() == ''
 	assert results.stderr.strip() == ''
+
+	# ensure the symlinks for foundation python all point to the same thing
+	spython_results = host.run("readlink -f /opt/stack/bin/spython3")
+	assert results.rc == 0
+	assert results.stderr.strip() == ''
+	python_results = host.run("readlink -f /opt/stack/bin/python3")
+	assert results.rc == 0
+	assert results.stderr.strip() == ''
+
+	assert python_results.stdout.strip() == spython_results.stdout.strip()
+	assert python_results.stdout.startswith("/opt/stack/bin/python3")
