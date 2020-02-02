@@ -12,7 +12,7 @@ from collections import namedtuple
 from pytest import main
 from glob import glob
 import os
-
+import pathlib
 
 class Command(stack.commands.Command,
 	stack.commands.HostArgumentProcessor):
@@ -57,7 +57,7 @@ class Command(stack.commands.Command,
 		pretty = self.str2bool(pretty)
 
 		current_dir = os.getcwd()
-		os.chdir('/opt/stack/lib/python3.7/site-packages/stack/commands/report/system')
+		os.chdir(pathlib.Path(__file__).parent)
 		tests = glob('tests/*')
 
 		# make it real ugly.

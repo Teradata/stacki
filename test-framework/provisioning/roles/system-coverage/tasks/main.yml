@@ -5,8 +5,12 @@
 - name: Install coverage package
   command: /opt/stack/bin/pip3 install coverage==4.5.4
 
+- name: Get the python site-packages path
+  command: /opt/stack/bin/python3 -c "import site; print(site.getsitepackages()[0])"
+  register: site_packages
+
 - name: Hook the python interpreter
   copy:
     src: files/sitecustomize.py
-    dest: /opt/stack/lib/python3.7/site-packages/
+    dest: "{{ site_packages.stdout }}"
     mode: 0644

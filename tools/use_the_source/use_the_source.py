@@ -1,8 +1,10 @@
 #!/opt/stack/bin/python3
 import sys
 from pathlib import Path
+import site
 
-dest_base = Path("/opt/stack/lib/python3.7/site-packages")
+site_pkgs = [p for p in site.getsitepackages() if p.startswith('/opt/stack/lib/python')][0]
+dest_base = Path(site_pkgs)
 
 grafts_to_site_packages = (
 	("command/stack/argument_processors", "stack/argument_processors"),
