@@ -3,7 +3,7 @@
 		"urlbase": "https://teradata-stacki.s3.amazonaws.com/3rdparty",
 		"files": [
 		        "MegaCli-8.07.07-1.noarch.rpm", 
-			"Python-3.7.2.tgz",
+			"Python-3.8.1.tgz",
 		        "newt-0.52.20.tar.gz", 
 			"fbtftp.tar.gz",
 			"fio-2.1.2.tar.gz",
