@@ -20,12 +20,6 @@
 ifndef __PYTHON_MK
 __PYTHON_MK = yes
 
-#PY.VERSION	= 2.6
-#PY.PATH		= /opt/stack/bin/python
-#PY.LIB		= python$(PY.VERSION)
-#PY.STACK	= /opt/stack/lib/$(PY.LIB)/site-packages/
-#PY.TEST		= /opt/stack/bin/py.test-$(PY.VERSION)
-
 PY.VERSION	= 3.7
 PY.PATH		= /opt/stack/bin/python3
 PY.LIB		= python$(PY.VERSION)

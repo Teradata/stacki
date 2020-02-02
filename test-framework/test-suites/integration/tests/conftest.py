@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import site
 
 import pytest
 
@@ -271,8 +272,9 @@ def inject_code(host):
 
 	@contextmanager
 	def _inner(code_file):
+		site_pkgs_path = [p for p in site.getsitepackages() if p.startswith('/opt/stack/lib/python')][0]
 		result = host.run(
-			f'cp "{code_file}" /opt/stack/lib/python3.7/site-packages/sitecustomize.py'
+			f'cp "{code_file}" {site_pkgs_path}/sitecustomize.py'
 		)
 
 		if result.rc != 0:
@@ -281,7 +283,7 @@ def inject_code(host):
 		try:
 			yield
 		finally:
-			os.remove('/opt/stack/lib/python3.7/site-packages/sitecustomize.py')
+			os.remove(f'{site_pkgs_path}/sitecustomize.py')
 
 	return _inner
 

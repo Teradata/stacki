@@ -1,7 +1,7 @@
 from collections import defaultdict
 import json
 from textwrap import dedent
-
+import site
 
 class TestListPalletCommand:
 	def test_invalid_pallet(self, host):
@@ -79,9 +79,10 @@ class TestListPalletCommand:
 
 	def test_missing_rollname(self, host):
 		# Comment out the 'RollName' from the `list pallet command`
+		site_pkgs = [p for p in site.getsitepackages() if p.startswith('/opt/stack/lib/python')][0]
 		result = host.run(
 			"sed -i 's/^RollName/#RollName/' "
-			"/opt/stack/lib/python3.7/site-packages/"
+			f"{site_pkgs}/"
 			"stack/commands/list/pallet/command/__init__.py"
 		)
 		assert result.rc == 0
