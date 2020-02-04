@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 
 import pexpect
 import pytest
@@ -107,14 +108,17 @@ class TestBossConfigSnack:
 
 		assert site_attrs_generated == site_attrs_expected
 
-		# Read the rolls.xml created
-		with open("/tmp/rolls.xml") as f:
-			rolls_xml_generated = f.read()
-
-		# Check that the rolls.xml got generated correctly as well
-		assert re.fullmatch(
-			r'<rolls><roll arch="x86_64" diskid="" '
-			r'name="stacki" release="[^"]+" url="http://127.0.0.1/mnt/cdrom/" '
-			r'version="[^"]+" /></rolls>',
-			rolls_xml_generated
-		) is not None
+		# Read the rolls.xml created correctly
+		tree = ET.parse("/tmp/rolls.xml")
+		root = tree.getroot()
+		assert len(root) == 1
+		roll = root[0]
+		assert roll.text == None
+		assert set(roll.attrib.keys()) == {'arch', 'release', 'diskid', 'name', 'url', 'version'}
+		assert roll.attrib['arch'] == "x86_64"
+		assert roll.attrib['diskid'] == ""
+		assert roll.attrib['name'] == "stacki"
+		assert roll.attrib['url'] == "http://127.0.0.1/mnt/cdrom/"
+		# punt on actually checking release and version
+		assert roll.attrib['release'] != ""
+		assert roll.attrib['version'] != ""
