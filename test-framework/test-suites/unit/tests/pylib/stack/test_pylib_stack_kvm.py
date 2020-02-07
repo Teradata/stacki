@@ -5,7 +5,7 @@ import tarfile
 from pathlib import Path
 from libvirt import libvirtError, virConnect, virDomain, virStoragePool, virStorageVol
 from stack.kvm import Hypervisor, VmException
-from unittest.mock import create_autospec, patch, call
+from unittest.mock import create_autospec, patch, call, Mock
 from subprocess import CompletedProcess
 
 class TestPylibKvm:
@@ -24,7 +24,7 @@ class TestPylibKvm:
 
 		def __init__(self, host = 'hypervisor-foo'):
 			self.hypervisor = host
-			self.kvm = create_autospec(spec = virConnect, instance = True)
+			self.kvm = create_autospec(spec=virConnect, instance=True)
 			self.kvm_pool = """
 				<pool type="dir">
 				<name>{{ name }}</name>
@@ -45,10 +45,10 @@ class TestPylibKvm:
 				</volume>
 			"""
 
-	@patch(target = 'stack.kvm.Hypervisor.connect', autospec = True)
+	@patch(target = 'stack.kvm.Hypervisor.connect', autospec=True)
 	def test_kvm_init(self, mock_kvm_connect):
 		mock_kvm_connect.return_value = 'bar'
-		test_hypervisor = Hypervisor(host = 'hypervisor-foo')
+		test_hypervisor = Hypervisor(host='hypervisor-foo')
 		mock_kvm_connect.assert_called_once()
 		assert hasattr(test_hypervisor, 'hypervisor')
 
@@ -112,34 +112,35 @@ class TestPylibKvm:
 	)
 	]
 	@pytest.mark.parametrize('status, guests', GUEST_INPUT)
-	@patch('libvirt.virDomain', autospec=True)
-	def test_kvm_guests(self, mock_virDomain, status, guests):
+	def test_kvm_guests(self, status, guests):
 		mock_hypervisor = self.TestPylibKvmUnderTest()
+		domain_status = []
+		mock_virDomain = create_autospec(virDomain, instance=True)
 
 		# Patch the virDomain object that listAllDomains
 		# will return a list of when called
 		# These are the only two functions of virDomain we
 		# care about
-		mock_virDomain.isActive.side_effect = status.values()
-		mock_virDomain.name.side_effect = status.keys()
+		for host, is_active in status.items():
+			domain = Mock(return_value = mock_virDomain)
+			domain.name.return_value = host
+			domain.isActive.return_value = is_active
+			domain_status.append(domain)
 
 		# Make the return value of listAllDomains the same
 		# length as the amount of vm's on our simulated hypervisor object
-		mock_hypervisor.kvm.listAllDomains.return_value = [mock_virDomain] * len(status)
+		mock_hypervisor.kvm.listAllDomains.return_value = domain_status
 		actual_guests = mock_hypervisor.guests()
 		mock_hypervisor.kvm.listAllDomains.assert_called_once()
 
-		# Check several conditions are met:
-		# 1. Output of the function matches
-		#	 what we expected
-		# 2. The isActive function is called the
-		#	 same amount of times as the number of guests
-		# 3. Ditto for the domain name function
-		assert all([
-			actual_guests == guests,
-			mock_virDomain.isActive.call_count == len(guests),
-			mock_virDomain.name.call_count == len(guests)
-		])
+		# Check for each domain object
+		# that two functions we expected
+		# were called
+		for mock_domain in domain_status:
+			mock_domain.isActive.assert_called_once()
+			mock_domain.name.assert_called_once()
+
+		assert actual_guests == guests
 
 	def test_kvm_guests_exception(self):
 		mock_hypervisor = self.TestPylibKvmUnderTest()
@@ -318,6 +319,11 @@ class TestPylibKvm:
 			mock_storage_pool.createXML.assert_called_once_with(vol_xml, 0)
 
 	def test_kvm_add_volume_no_pool(self):
+		"""
+		Test adding a storage volume to a
+		storage pool that doesn't exist
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_hypervisor.kvm.storagePoolLookupByName.side_effect = self.mock_libvirt_exception
 
@@ -370,13 +376,9 @@ class TestPylibKvm:
 
 	@patch('libvirt.virStoragePool', autospec=True)
 	def test_kvm_remove_vol_exception(self, mock_storage_pool):
-		"""
-		Simulate finding the correct pool, but no volume
-		existing in that pool with the given name
-		when trying to remove it
-		"""
-
 		mock_hypervisor = self.TestPylibKvmUnderTest()
+
+		# Raise an exception when finding a volume by name
 		mock_storage_pool.storageVolLookupByName.side_effect = self.mock_libvirt_exception
 		mock_hypervisor.kvm.storagePoolLookupByName.return_value = mock_storage_pool
 		expect_exception = 'Failed to delete volume bar on hypervisor hypervisor-foo:\nSomething went wrong!'
@@ -405,7 +407,12 @@ class TestPylibKvm:
 			mock_virDomain.setAutostart.assert_called_once_with(0)
 
 	@patch('libvirt.virDomain', autospec=True)
-	def test_kvm_remove_autostart_exception(self, mock_virDomain):
+	def test_kvm__autostart_exception(self, mock_virDomain):
+		"""
+		Test that autostart raises a VmException
+		when we expect it to
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_virDomain.setAutostart.side_effect = self.mock_libvirt_exception
 		mock_hypervisor.kvm.lookupByName.return_value = mock_virDomain
@@ -479,24 +486,37 @@ class TestPylibKvm:
 
 		)
 	]
-	@patch('libvirt.virStoragePool', autospec=True)
 	@pytest.mark.parametrize('filter_pool, p_names, p_info, is_active, expect_output', POOL_INFO)
 	def test_kvm_pool_info(
 		self,
-		mock_virStoragePool,
 		filter_pool,
 		p_names,
 		p_info,
 		is_active,
 		expect_output
 	):
+		pool_list = []
 		mock_hypervisor = self.TestPylibKvmUnderTest()
-		if filter_pool:
-			mock_virStoragePool.name.return_value = filter_pool
-		else:
-			mock_virStoragePool.name.side_effect = p_names
-		mock_virStoragePool.isActive.return_value = is_active
-		mock_virStoragePool.info.return_value = p_info
-		mock_hypervisor.kvm.listAllStoragePools.return_value = [mock_virStoragePool] * len(p_names)
+
+		# Create a list of mock virStoragePool
+		# objects to emulate the real return value
+		# of listAllStoragePools
+		mock_virStoragePool = create_autospec(virStoragePool, instance=True)
+		for p_name in p_names:
+			mock_pool = Mock(return_value=mock_virStoragePool)
+			mock_pool.name.return_value = p_name
+			mock_pool.info.return_value = p_info
+			mock_pool.isActive.return_value = is_active
+			pool_list.append(mock_pool)
+		mock_hypervisor.kvm.listAllStoragePools.return_value = pool_list
 		output = mock_hypervisor.pool_info(filter_pool=filter_pool)
 		assert output == expect_output
+
+	def test_kvm_pool_info_except(self):
+		mock_hypervisor = self.TestPylibKvmUnderTest()
+		mock_hypervisor.kvm.listAllStoragePools.side_effect = self.mock_libvirt_exception
+		except_msg = 'Failed to get pool info on hypervisor-foo:\nSomething went wrong!'
+
+		with pytest.raises(VmException, match=except_msg):
+			mock_hypervisor.pool_info()
+			mock_hypervisor.kvm.listAllStoragePools.assert_called_once_with(0)
