@@ -21,9 +21,6 @@ rpminst: localrepo getpackages getextrapackages
 
 sles-stacki.img: dirs rpminst
 	@echo "Building sles-stacki.img"
-	# SymLink /usr/bin/python to foundation-python
-	mkdir -p $(CURDIR)/sles-stacki/usr/bin
-	ln -s /opt/stack/bin/python3 $(CURDIR)/sles-stacki/usr/bin/python
 	# Patch the sles-stacki image
 	-(cd ../../../common/sles-stacki.img-patches && \
 		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/sles-stacki/) )
@@ -35,7 +32,7 @@ sles-stacki.img: dirs rpminst
 stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
-	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm ) 
+	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf stacki-initrd/installkey.gpg~
