@@ -10,6 +10,7 @@ import tarfile
 from libvirt import libvirtError
 from stack.util import _exec
 from pathlib import Path
+from collections import defaultdict
 
 # Libvirt has a weird quirk where it prints
 # error messages even if they are handled via
@@ -306,3 +307,37 @@ class Hypervisor:
 				dom.setAutostart(0)
 		except libvirtError as msg:
 			raise VmException(f'Could not autostart {vm} on {self.hypervisor}:\n{str(msg)}')
+
+	def pool_info(self, filter_pool=''):
+		"""
+		Return the storage pool information
+		of the hypervisor.
+
+		Optionally takes a filter_pool param for
+		returning info on a specific pool, otherwise
+		returns all pool info on the hypervisor
+
+		Returns an empty dict if filter_pool is set
+		to a pool that isn't found or a dict of pool
+		information if it is
+
+		Raises a VmException if the the pool info
+		couldn't be retrived
+		"""
+
+		pool_val = defaultdict(dict)
+		try:
+			if filter_pool:
+				pools = [pool for pool in self.kvm.listAllStoragePools(0) if pool.name() == filter_pool]
+			else:
+				pools = self.kvm.listAllStoragePools(0)
+			for pool in pools:
+				p_name = pool.name()
+				info = pool.info()
+				pool_val[p_name]['capacity'] = str(info[1])
+				pool_val[p_name]['allocated'] = str(info[2])
+				pool_val[p_name]['available'] = str(info[3])
+				pool_val[p_name]['is_active'] = bool(pool.isActive())
+			return pool_val
+		except libvirtError as msg:
+			raise VmException(f'Failed to get pool info on {self.hypervisor}:\n{str(msg)}')

@@ -415,3 +415,88 @@ class TestPylibKvm:
 			mock_hypervisor.autostart('foo', True)
 			mock_hypervisor.kvm.lookupByName.assert_called_once_with('foo')
 			mock_virDomain.setAutostart.assert_called_once_with(1)
+
+	POOL_INFO = [
+		(
+			'',
+			['foo'],
+			[2, 1000, 1000, 0],
+			True,
+			{
+				'foo':
+				{
+					'allocated': '1000',
+					'capacity': '1000',
+					'available': '0',
+					'is_active': True
+				}
+			}
+		),
+		(
+			'',
+			['foo', 'bar', 'baz'],
+			[2, 1000, 1000, 0],
+			True,
+			{
+				'foo':
+				{
+					'allocated': '1000',
+					'capacity': '1000',
+					'available': '0',
+					'is_active': True
+				},
+				'bar':
+				{
+					'allocated': '1000',
+					'capacity': '1000',
+					'available': '0',
+					'is_active': True
+				},
+				'baz':
+				{
+					'allocated': '1000',
+					'available': '0',
+					'capacity': '1000',
+					'is_active': True
+				}
+			}
+
+		),
+		(
+			'foo',
+			['foo', 'bar', 'baz'],
+			[2, 1000, 1000, 0],
+			True,
+			{
+				'foo':
+				{
+					'allocated': '1000',
+					'available': '0',
+					'capacity': '1000',
+					'is_active': True
+				}
+			}
+
+		)
+	]
+	@patch('libvirt.virStoragePool', autospec=True)
+	@pytest.mark.parametrize('filter_pool, p_names, p_info, is_active, expect_output', POOL_INFO)
+	def test_kvm_pool_info(
+		self,
+		mock_virStoragePool,
+		filter_pool,
+		p_names,
+		p_info,
+		is_active,
+		expect_output
+	):
+		mock_hypervisor = self.TestPylibKvmUnderTest()
+		if filter_pool:
+			mock_virStoragePool.name.return_value = filter_pool
+		else:
+			mock_virStoragePool.name.side_effect = p_names
+		mock_virStoragePool.isActive.return_value = is_active
+		mock_virStoragePool.info.return_value = p_info
+		mock_hypervisor.kvm.listAllStoragePools.return_value = [mock_virStoragePool] * len(p_names)
+		output = mock_hypervisor.pool_info(filter_pool=filter_pool)
+		assert output == expect_output
