@@ -7,6 +7,7 @@
 import libvirt
 import jinja2
 import tarfile
+import math
 from libvirt import libvirtError
 from stack.util import _exec
 from pathlib import Path
@@ -334,9 +335,12 @@ class Hypervisor:
 			for pool in pools:
 				p_name = pool.name()
 				info = pool.info()
-				pool_val[p_name]['capacity'] = str(info[1])
-				pool_val[p_name]['allocated'] = str(info[2])
-				pool_val[p_name]['available'] = str(info[3])
+
+				# Libvirt returns storage pool sizes in KB
+				# convert to GB
+				pool_val[p_name]['capacity'] = f'{round(info[1] / math.pow(2, 30), 2)} GB'
+				pool_val[p_name]['allocated'] = f'{round(info[2] / math.pow(2, 30), 2)} GB'
+				pool_val[p_name]['available'] = f'{round(info[3] / math.pow(2, 30), 2)} GB'
 				pool_val[p_name]['is_active'] = bool(pool.isActive())
 			return pool_val
 		except libvirtError as msg:

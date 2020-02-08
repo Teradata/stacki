@@ -427,14 +427,14 @@ class TestPylibKvm:
 		(
 			'',
 			['foo'],
-			[2, 1000, 1000, 0],
+			[2, 21474836480, 21474836480, 0],
 			True,
 			{
 				'foo':
 				{
-					'allocated': '1000',
-					'capacity': '1000',
-					'available': '0',
+					'allocated': '20.0 GB',
+					'available': '0.0 GB',
+					'capacity': '20.0 GB',
 					'is_active': True
 				}
 			}
@@ -442,28 +442,28 @@ class TestPylibKvm:
 		(
 			'',
 			['foo', 'bar', 'baz'],
-			[2, 1000, 1000, 0],
+			[2, 21474836480, 21474836480, 0],
 			True,
 			{
 				'foo':
 				{
-					'allocated': '1000',
-					'capacity': '1000',
-					'available': '0',
+					'allocated': '20.0 GB',
+					'available': '0.0 GB',
+					'capacity': '20.0 GB',
 					'is_active': True
 				},
 				'bar':
 				{
-					'allocated': '1000',
-					'capacity': '1000',
-					'available': '0',
+					'allocated': '20.0 GB',
+					'available': '0.0 GB',
+					'capacity': '20.0 GB',
 					'is_active': True
 				},
 				'baz':
 				{
-					'allocated': '1000',
-					'available': '0',
-					'capacity': '1000',
+					'allocated': '20.0 GB',
+					'available': '0.0 GB',
+					'capacity': '20.0 GB',
 					'is_active': True
 				}
 			}
@@ -472,14 +472,14 @@ class TestPylibKvm:
 		(
 			'foo',
 			['foo', 'bar', 'baz'],
-			[2, 1000, 1000, 0],
+			[2, 21474836480, 21474836480, 0],
 			True,
 			{
 				'foo':
 				{
-					'allocated': '1000',
-					'available': '0',
-					'capacity': '1000',
+					'allocated': '20.0 GB',
+					'available': '0.0 GB',
+					'capacity': '20.0 GB',
 					'is_active': True
 				}
 			}
