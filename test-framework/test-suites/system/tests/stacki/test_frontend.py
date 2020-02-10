@@ -1,4 +1,4 @@
-import pytest
+from collections import defaultdict
 import json
 
 
@@ -119,3 +119,19 @@ def test_foundation_python(host):
 
 	assert python_results.stdout.strip() == spython_results.stdout.strip()
 	assert python_results.stdout.startswith("/opt/stack/bin/python3")
+
+def test_mac_discovery(host):
+	"""
+	Test that each backend has two interfaces, one of which would be discovered
+	"""
+
+	cmd = host.run("stack list host interface a:backend output-format=json")
+	assert cmd.rc == 0
+
+	counts = defaultdict(int)
+	for row in json.loads(cmd.stdout):
+		if row["mac"] and row["interface"]:
+			counts[row["host"]] += 1
+
+	for host in counts:
+		assert counts[host] == 2

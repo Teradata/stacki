@@ -132,34 +132,12 @@ if [ $? -eq 0 ]; then
 		warn "failed to fetch kickstart from $kickstart"
 	fi
 else
-	numcpus=`grep -c processor /proc/cpuinfo`
-	arch=`uname -p`
+	/opt/stack/bin/stacki-profile.py
 
-	#
-	# keep trying to get a kickstart file
-	#
-	fini=0
-	while [ $fini -eq 0 ]
-	do
-		info "STACKI: kickstart: $kickstart?os=redhat&arch=$arch&np=$numcpus"
-		echo "STACKI: kickstart: $kickstart?os=redhat&arch=$arch&np=$numcpus" > /run/install/k.debug
-		echo "STACKI: kickstart: $kickstart?os=redhat&arch=$arch&np=$numcpus" > /tmp/k.debug
-		/bin/curl -w "%{http_code}\\n" -o /tmp/ks.xml --insecure \
-			--local-port 1-100 --retry 3 \
-			"$kickstart?os=redhat&arch=$arch&np=$numcpus" > /tmp/httpcode
-		httpcode=`cat /tmp/httpcode`
-		if [ "$httpcode" -eq "200" ]
-		then
-			mkdir -p /tmp/stack_site
-			cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=main   2>  /tmp/kgen.debug > /tmp/ks.cfg
-			cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=stacki 2>> /tmp/profile_stack_site.debug > /tmp/stack_site/__init__.py
-			parse_kickstart /tmp/ks.cfg
-			run_kickstart
-			fini=1
-		else
-			warn "failed to fetch kickstart from $kickstart"
-			sleep 2
-		fi
-	done
+	mkdir -p /tmp/stack_site
+	cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=main   2>  /tmp/kgen.debug > /tmp/ks.cfg
+	cat /tmp/ks.xml | /opt/stack/bin/stack list host profile chapter=stacki 2>> /tmp/profile_stack_site.debug > /tmp/stack_site/__init__.py
+
+	parse_kickstart /tmp/ks.cfg
+	run_kickstart
 fi
-

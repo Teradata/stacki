@@ -15,35 +15,35 @@
                         "type":    "install",
                         "kernel":  "vmlinuz-&version;-&release;-&arch;",
                         "ramdisk": "initrd.img-&version;-&release;-&arch;",
-                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000"
+                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl ramdisk_size=300000"
                 },
                 {
                         "name":    "console",
                         "type":    "install",
                         "kernel":  "vmlinuz-&version;-&release;-&arch;",
                         "ramdisk": "initrd.img-&version;-&release;-&arch;",
-                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac ramdisk_size=300000 console=tty0 console=ttyS0,115200n8"
+                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl ramdisk_size=300000 console=tty0 console=ttyS0,115200n8"
                 },
                 {
                         "name":    "no-parallel-format",
                         "type":    "install",
                         "kernel":  "vmlinuz-&version;-&release;-&arch;",
                         "ramdisk": "initrd.img-&version;-&release;-&arch;",
-                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac no-parallel-format ramdisk_size=300000"
+                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl no-parallel-format ramdisk_size=300000"
                 },
                 {
                         "name":    "headless",
                         "type":    "install",
                         "kernel":  "vmlinuz-&version;-&release;-&arch;",
                         "ramdisk": "initrd.img-&version;-&release;-&arch;",
-                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac inst.vnc ramdisk_size=300000"
+                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.vnc ramdisk_size=300000"
                 },
                 {
                         "name":    "rescue",
                         "type":    "install",
                         "kernel":  "vmlinuz-&version;-&release;-&arch;",
                         "ramdisk": "initrd.img-&version;-&release;-&arch;",
-                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl inst.ks.sendmac rescue ramdisk_size=300000"
+                        "args":    "ip=bootif:dhcp inst.ks=https://&Kickstart_PrivateAddress;/install/sbin/profile.cgi inst.geoloc=0 inst.noverifyssl rescue ramdisk_size=300000"
                 }
 	]
 }

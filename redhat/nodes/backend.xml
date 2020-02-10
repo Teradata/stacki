@@ -48,10 +48,7 @@ include ld.so.conf.d/*.conf
 
 </stack:script>
 
-<!-- stacki-profile adds the extra interfaces -->
 <stack:script stack:stage="install-post" stack:chroot="false">
-/opt/stack/bin/stacki-profile.py
-
 /opt/stack/bin/stacki-status.py install complete rebooting
 </stack:script>
 

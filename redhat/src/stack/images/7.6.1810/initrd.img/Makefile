@@ -16,6 +16,7 @@ build:
 	../../build-initrd.py --rpms=$(REDHAT.RPMS) --pkgs="$(OVERLAY.PKGS)" \
 		--update-pkgs="$(OVERLAY.UPDATE.PKGS)" --build-directory=build
 	cp -r dracut build/usr/lib/
+	cp -r opt build/updates/
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)

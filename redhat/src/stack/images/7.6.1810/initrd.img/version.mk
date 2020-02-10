@@ -1,7 +1,8 @@
 ORDER			= 99
 PKGROOT			= /opt/stack/images
 OVERLAY.PKGS = \
-	glibc-common
+	glibc-common \
+	ipmitool
 OVERLAY.UPDATE.PKGS	= \
 	MegaCLI storcli \
 	foundation-python \
