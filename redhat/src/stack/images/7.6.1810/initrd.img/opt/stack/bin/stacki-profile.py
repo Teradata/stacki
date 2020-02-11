@@ -7,11 +7,13 @@
 # @copyright@
 #
 
+import os
 import random
 import re
 import subprocess
-import time
 import sys
+import time
+
 
 
 # Start to build the curl command
@@ -94,7 +96,14 @@ while True:
 	try:
 		http_code = int(result.stdout.splitlines()[0])
 
-		if http_code == 200:
+		if http_code == 204:
+			# We aren't doing the install so power down
+			os.system("poweroff --force")
+
+			# Give it a minute to power down
+			time.sleep(60)
+
+		elif http_code == 200:
 			# It worked!
 			break
 

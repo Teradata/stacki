@@ -39,6 +39,8 @@ function halt_install {
 #		configure the system.
 #
 
+mkdir -p /tmp/profile/
+
 cat /tmp/stacki-profile.xml \
 	| /opt/stack/bin/stack list host profile chapter=main \
 	> /tmp/profile/autoinst.xml
