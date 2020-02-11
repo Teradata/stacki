@@ -151,33 +151,20 @@ class Discovery:
 		if network is not None:
 			# Add our new node
 			result = subprocess.run([
-				"/opt/stack/bin/stack",
-				"add",
-				"host",
-				self.hostname,
-				f"appliance={self._appliance_name}",
-				f"rack={self._rack}",
-				f"rank={self._rank}",
-				f"box={self._box}"
+				"/opt/stack/bin/stack", "add", "host", self.hostname,
+				f"rack={self._rack}", f"rank={self._rank}",
+				f"appliance={self._appliance_name}", f"box={self._box}"
 			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
 			if result.returncode != 0:
 				self._logger.error("failed to add host %s:\n%s", self.hostname, result.stderr)
 				return
 
-			# Add the node's interface
+			# Add the node's interface (guess eth0 but will be updated pre-install)
 			result = subprocess.run([
-				"/opt/stack/bin/stack",
-				"add",
-				"host",
-				"interface",
-				self.hostname,
-				"interface=NULL",
-				"default=true",
-				f"mac={mac_address}",
-				f"name={self.hostname}",
-				f"ip={ip_address}",
-				f"network={network}"
+				"/opt/stack/bin/stack", "add", "host", "interface", self.hostname,
+				"interface=eth0", "default=true", f"mac={mac_address}",
+				f"name={self.hostname}", f"ip={ip_address}", f"network={network}"
 			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
 			if result.returncode != 0:
@@ -186,54 +173,36 @@ class Discovery:
 
 			# Set the new node's install action
 			result = subprocess.run([
-				"/opt/stack/bin/stack",
-				"set",
-				"host",
-				"bootaction",
-				self.hostname,
-				"type=install",
-				"sync=false",
-				f"action={self._install_action}"
+				"/opt/stack/bin/stack", "set", "host", "bootaction", self.hostname,
+				"type=install", "sync=false", f"action={self._install_action}"
 			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
 			if result.returncode != 0:
 				self._logger.error("failed to set install action for host %s:\n%s", self.hostname, result.stderr)
 				return
 
-			if self._install:
-				# Set the new node to install on boot
-				result = subprocess.run([
-					"/opt/stack/bin/stack",
-					"set",
-					"host",
-					"boot",
-					self.hostname,
-					"action=install"
-				], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+			# Set an attribute to let profile.cgi know if we are installing
+			result = subprocess.run([
+				"/opt/stack/bin/stack", "set", "host", "attr", self.hostname,
+				"attr=discovery.install", f"value={self._install}"
+			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
-				if result.returncode != 0:
-					self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
-					return
-			else:
-				# Set the new node to OS on boot
-				result = subprocess.run([
-					"/opt/stack/bin/stack",
-					"set",
-					"host",
-					"boot",
-					self.hostname,
-					"action=os"
-				], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+			if result.returncode != 0:
+				self._logger.error("failed to set 'discovery.install' attribute for host %s:\n%s", self.hostname, result.stderr)
+				return
 
-				if result.returncode != 0:
-					self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
-					return
+			# Set the new node to install on boot
+			result = subprocess.run([
+				"/opt/stack/bin/stack", "set", "host", "boot", self.hostname, "action=install"
+			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+
+			if result.returncode != 0:
+				self._logger.error("failed to set boot action for host %s:\n%s", self.hostname, result.stderr)
+				return
 
 			# Sync the global config
 			result = subprocess.run([
-				"/opt/stack/bin/stack",
-				"sync",
-				"config"
+				"/opt/stack/bin/stack", "sync", "config"
 			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
 			if result.returncode != 0:
@@ -242,11 +211,7 @@ class Discovery:
 
 			# Sync the host config
 			result = subprocess.run([
-				"/opt/stack/bin/stack",
-				"sync",
-				"host",
-				"config",
-				self.hostname
+				"/opt/stack/bin/stack", "sync", "host", "config", self.hostname
 			], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
 
 			if result.returncode != 0:

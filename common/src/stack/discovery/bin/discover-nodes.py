@@ -27,7 +27,7 @@ class TUI(Subscriber):
 
 	def error(self, message):
 		form = snack.GridForm(self._screen, "Error", 1, 3)
-		
+
 		form.add(snack.TextboxReflowed(40, message), 0, 0)
 		form.add(snack.Textbox(0, 2, ""), 0, 1)
 		form.add(snack.Button("Quit"), 0, 2)
@@ -50,11 +50,11 @@ class TUI(Subscriber):
 
 		# Launch the form and wait for the quit button to be pressed
 		form.runOnce()
-	
+
 	def finish(self):
 		self.unsubscribe("discovery")
 		self._screen.finish()
-	
+
 	def callback(self, message):
 		payload = message.getPayload()
 
@@ -71,12 +71,12 @@ class TUI(Subscriber):
 			# In case we see a kickstart of a node already in the db
 			if ip_address not in self._callback_data:
 				self._callback_data[ip_address] = ["Unknown", "Unknown", ""]
-			
-			if status_code == 200:
+
+			if status_code in {200, 204}:
 				self._callback_data[ip_address][2] = "Success"
 			else:
 				self._callback_data[ip_address][2] = f"Error: {status_code}"
-		
+
 		self._textbox.setText('\n'.join([
 			"{0}   {1:20}   {2}".format(*data) for data in self._callback_data.values()
 		]))
@@ -158,7 +158,7 @@ else:
 	error_message = result.stderr.strip()
 	if error_message.startswith("error - "):
 		error_message = error_message[8:]
-	
+
 	tui.error(error_message)
 
 # We are done

@@ -260,11 +260,26 @@ if profile_update_macs:
 		stack.api.Call('config host interface',
 			[ client.addr ] + params)
 
-#
-# Generate the system profile
-#
-client.main()
-		
+# See if we are actually installing
+do_install = True
+output = stack.api.Call('list host attr', [client.addr, 'attr=discovery.install'])
+if output and not stack.bool.str2bool(output[0]['value']):
+	do_install = False
+
+if do_install:
+	# Generate the system profile
+	client.main()
+else:
+	# Signal to the node to shutdown
+	print("Status: 204 No Content")
+	print()
+
+	# Set the boot action back to os
+	stack.api.Call("set host boot", [client.addr, "action=os"])
+
+	# Remove the discovery.install attribute
+	stack.api.Call("remove host attr", [client.addr, "attr=discovery.install"])
+
 #
 # Release resource semaphore.
 #
