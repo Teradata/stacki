@@ -18,14 +18,7 @@
 	{
 		"urlbase": "https://dl.google.com/go",
 		"files": [
-			"go1.13.5.linux-amd64.tar.gz"
-		]
-	},
-	{
-		"urlbase": "https://dl.google.com/go",
-		"files": [
-			"go1.13.5.linux-amd64.tar.gz"
+			"go1.14.2.linux-amd64.tar.gz"
 		]
 	}
-
 ]
