@@ -33,5 +33,29 @@ COMPANY   = StackIQ
 COPYRIGHT = (c) $(YEAR) $(COMPANY)
 VENDOR    = $(COMPANY)
 
+##
+## Setup any_python.
+## This lets some of our build scripts be written in a python2 and python3
+## and scripts can use /usr/bin/env any_python for the shebang.
+##
+## This should run at parse time when make is run before any targets are run.
+## This is put in this location so that building pallets will also set this up.
+##
+ANY_PYTHON = /usr/bin/any_python
+$(info CCCommon.mk is setting up any_python)
+# If any_python is not already set up.
+ifeq ($(shell which any_python),)
+# Try to set it to python2 before setting it to python3.
+ifneq ($(shell which python),)
+$(info symlinking $(shell which python) to $(ANY_PYTHON))
+$(shell ln -s "$(shell which python)" $(ANY_PYTHON))
+else ifneq ($(shell which python3),)
+$(info symlinking $(shell which python3) to $(ANY_PYTHON))
+$(shell ln -s "$(shell which python3)" $(ANY_PYTHON))
+endif
+# Else any_python is already set up.
+else
+$(info any_python already set up)
+endif
 
 endif # __CCCOMMON_MK
