@@ -28,7 +28,7 @@ tar -xf stacki.tar -C /export/stack/pallets
 pushd /export/stack/pallets
 cd stacki/*/*/*/*/RPMS/
 for pkg in foundation-python stack-command stack-pylib; do
-	rpm -Uhv $pkg-*.rpm
+	yum install -y $pkg-*.rpm
 done
 
 popd
