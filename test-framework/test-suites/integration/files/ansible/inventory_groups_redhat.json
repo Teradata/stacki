@@ -1,0 +1,51 @@
+{
+    "a_backend": {
+        "hosts": [
+            "backend-0-0"
+        ]
+    },
+    "a_frontend": {
+        "hosts": [
+            "frontend-0-0"
+        ]
+    },
+    "all": {
+        "children": [
+            "a_backend",
+            "a_frontend",
+            "b_default",
+            "b_frontend",
+            "g_test",
+            "o_redhat",
+            "r_0",
+            "ungrouped"
+        ]
+    },
+    "b_default": {
+        "hosts": [
+            "backend-0-0"
+        ]
+    },
+    "b_frontend": {
+        "hosts": [
+            "frontend-0-0"
+        ]
+    },
+    "g_test": {
+        "hosts": [
+            "backend-0-0"
+        ]
+    },
+    "o_redhat": {
+        "hosts": [
+            "backend-0-0",
+            "frontend-0-0"
+        ]
+    },
+    "r_0": {
+        "hosts": [
+            "backend-0-0",
+            "frontend-0-0"
+        ]
+    }
+}

@@ -44,6 +44,7 @@
 		<to>routes-server</to>
 		<to>checklist</to>
 		<to>server-packages</to>
+		<to>ansible</to>
 	</edge>
 
 	<edge from="server" cond="platform == 'aws'">

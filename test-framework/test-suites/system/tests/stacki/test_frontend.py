@@ -94,12 +94,11 @@ def test_report_system(host):
 
 def test_ansible(host, test_file):
 	"""Test that ansible can run on the frontend and talk to a backend."""
-	# Lay down the ansible inventory file on the frontend.
-	cmd = host.run("stack report ansible | stack report script | bash")
-	assert cmd.rc == 0
+
 	# Run an ansible playbook that sshes into one node.
 	cmd = host.run(f"ansible-playbook --verbose {test_file('test_ansible.yml')}")
 	assert cmd.rc == 0
+
 	# Make sure it worked
 	assert '"stdout": "hello ansible"' in cmd.stdout
 

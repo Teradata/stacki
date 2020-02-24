@@ -43,6 +43,9 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <!-- node discovery feature -->
 <stack:package>stack-discovery</stack:package>
 
+<!-- Ansible integration -->
+<stack:package>stack-ansible</stack:package>
+
 <!-- /mnt/cdrom needed to create pallets -->
 <stack:script stack:stage="install-post">
     if [ ! -d /mnt/cdrom ]; then

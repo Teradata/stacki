@@ -25,6 +25,8 @@ grafts_to_site_packages = (
 )
 
 bin_file_grafts = (
+	("ansible/etc/ansible.cfg", "/etc/ansible/ansible.cfg"),
+	("ansible/plugins/inventory/stacki.py", "/opt/stack/ansible/plugins/inventory/stacki.py"),
 	("command/stack.py", "/opt/stack/bin/stack"),
 	("discovery/bin/discover-nodes.py", "/opt/stack/sbin/discover-nodes"),
 	("mq/clients/publish.py", "/opt/stack/bin/smq-publish"),

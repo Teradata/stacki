@@ -19,3 +19,4 @@
 -stack-discovery
 -stack-releasenotes
 -foundation-python-libvirt-python
+-stack-ansible
