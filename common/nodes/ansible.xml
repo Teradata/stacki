@@ -1,0 +1,19 @@
+<stack:stack>
+<stack:description>
+Ansible Stacki integration
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>stack-ansible</stack:package>
+
+<stack:script stack:stage="install-post">
+mkdir -p /etc/ansible
+ln -s /opt/stack/etc/ansible.cfg /etc/ansible/ansible.cfg
+</stack:script>
+
+</stack:stack>

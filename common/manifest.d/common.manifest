@@ -38,3 +38,4 @@ stack-ws-client
 storcli
 uefi-boot-method
 stacki-fab
+stack-ansible
