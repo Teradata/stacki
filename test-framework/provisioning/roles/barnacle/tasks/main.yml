@@ -35,6 +35,16 @@
       dest: /etc/resolv.conf
       mode: 0644
 
+  - name: Prevent dhclient-script from overwriting resolv.conf
+    copy:
+      dest: /etc/dhcp/dhclient-enter-hooks
+      content: |
+        make_resolv_conf() {
+          exit 0
+        }
+      mode: 0744
+    when: ansible_distribution == "CentOS"
+
   - name: Create directory to mount stacki ISO
     file:
       path: /mnt/stacki
@@ -60,16 +70,14 @@
     register: stacki_fab_rpm
 
   - name: Install foundation-python
-    command: "rpm -ivh {{ item.path }}"
+    command: "rpm -ivh {{ foundation_python_rpm.files[0].path }}"
     args:
       warn: no
-    loop: "{{ foundation_python_rpm.files }}"
 
   - name: Install stacki-fab
-    command: "rpm -ivh {{ item.path }}"
+    command: "rpm -ivh {{ stacki_fab_rpm.files[0].path }}"
     args:
       warn: no
-    loop: "{{ stacki_fab_rpm.files }}"
 
   - name: Unmount stacki ISO
     command: umount /mnt/stacki

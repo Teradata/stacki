@@ -45,7 +45,7 @@
         path: /etc/yum.repos.d/dvd.repo
         section: dvd
         option: assumeyes
-        value: 1
+        value: "1"
 
     - name: Update yum
       command: yum update
