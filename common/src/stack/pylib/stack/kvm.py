@@ -238,6 +238,9 @@ class Hypervisor:
 
 		try:
 			pool = self.kvm.storagePoolLookupByName(poolname)
+
+			# Set the pool to be inactive, then undefine it
+			pool.destroy()
 			pool.undefine()
 		except libvirtError as msg:
 			raise VmException(f'Failed to delete pool {poolname} on hypervisor {self.hypervisor}:\n{msg}')
