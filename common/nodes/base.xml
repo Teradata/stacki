@@ -16,6 +16,7 @@ Base class for all nodes.
 	OpenIPMI
 	wget
 	bridge-utils
+	rsyslog
 </stack:package>
 
 
