@@ -509,6 +509,19 @@ for line in f:
 	split = line.split(":", 1)
 	attributes[split[0]] = split[1]
 
+# Set the os.version if possible since graph conditionals need this attribute.
+with open('/etc/os-release') as os_release_file:
+	for line in os_release_file.readlines():
+		pair = line.strip().split('=')
+		if len(pair) != 2:
+			continue
+
+		key, value = pair
+		if key == 'VERSION_ID':
+			value = value.strip().replace('"', '')
+			attributes['os.version'] = value.split('.')[0] + '.x'
+			break
+
 # Reject frontend and backend as hostnames
 hostname = attributes['Kickstart_PrivateHostname'].lower()
 if hostname in ['frontend', 'backend']:
