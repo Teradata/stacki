@@ -10,7 +10,7 @@ class TestDisablePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "pallet" argument is required
-			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 	def test_invalid_pallet(self, host):
@@ -18,7 +18,7 @@ class TestDisablePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid pallet with parameters arch=x86_64
-			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [box=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 	def test_invalid_box(self, host):

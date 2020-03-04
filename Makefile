@@ -50,9 +50,19 @@ preroll::
 	make -C tools/fab pkg
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
+	mkdir -p build-$(ROLL)-$(STACK)/pallet_hooks/common
+	mkdir -p build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)
 	cp common/graph/* $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/
 	cp common/nodes/* $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/
+# mkisofs fails because the directory structure is too deep in the build env
+# for the version on sles11. We just simply skip this step for sles11 as the
+# sles12 pallet holds all the hooks and initrds for sles11 anyways.
+ifneq ($(RELEASE),sles11)
+	-cp -r common/pallet_hooks/ build-$(ROLL)-$(STACK)/pallet_hooks/common/
+	-cp -r $(OS)/pallet_hooks/  build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)/
+endif
 
 clean::
 	rm -rf build-$(ROLL)-$(STACK)/graph/
 	rm -rf build-$(ROLL)-$(STACK)/nodes/
+	rm -rf build-$(ROLL)-$(STACK)/pallet_hooks/

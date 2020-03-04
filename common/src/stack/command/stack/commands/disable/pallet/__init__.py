@@ -53,6 +53,10 @@ class Command(PalletArgumentProcessor,
 	box is specified the pallet is disabled for the default box.
 	</param>
 
+	<param type='bool' name='run_hooks'>
+	Controls whether pallets hooks are run. This defaults to True.
+	</param>
+
 	<example cmd='disable pallet kernel'>
 	Disable the kernel pallet.
 	</example>
@@ -72,9 +76,10 @@ class Command(PalletArgumentProcessor,
 		if len(args) < 1:
 			raise ArgRequired(self, 'pallet')
 
-		(arch, box) = self.fillParams([
+		arch, box, run_hooks = self.fillParams([
 			('arch', self.arch),
-			('box', 'default')
+			('box', 'default'),
+			('run_hooks', True),
 		])
 
 		# We need to write the default arch back to the params list
@@ -89,6 +94,10 @@ class Command(PalletArgumentProcessor,
 		box_id = rows[0][0]
 
 		for pallet in self.get_pallets(args, params):
+			# Run any hooks before we remove repos.
+			if run_hooks:
+				self.run_pallet_hooks(operation="disable", pallet_info=pallet)
+
 			self.db.execute(
 				'delete from stacks where box=%s and roll=%s',
 				(box_id, pallet.id)

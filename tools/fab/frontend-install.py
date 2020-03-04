@@ -295,6 +295,9 @@ if osname == 'redhat':
 new_pkgs = [
 	'stack-templates',
 	'stack-probepal',
+	'foundation-python-jsoncomment',
+	'foundation-python-json-spec',
+	'foundation-python-six',
 ]
 
 for new_pkg in new_pkgs:

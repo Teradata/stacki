@@ -30,7 +30,11 @@ def pytest_configure(config):
 		filesystem_revert_fixtures = [
 			"revert_etc",
 			"revert_export_stack_carts",
-			"revert_export_stack_pallets"
+			"revert_export_stack_pallets",
+			"revert_firmware",
+			"revert_pallet_patches",
+			"revert_pallet_hooks",
+			"revert_opt_stack_images",
 		]
 
 		for fixture in filesystem_revert_fixtures:

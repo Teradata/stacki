@@ -21,7 +21,7 @@ class TestAddPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - must supply a password along with the username
-			[pallet ...] [clean=bool] [dir=string] [password=string] [updatedb=string] [username=string]
+			[pallet ...] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
 		''')
 
 	def test_password_no_username(self, host, create_pallet_isos):
@@ -29,7 +29,7 @@ class TestAddPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - must supply a password along with the username
-			[pallet ...] [clean=bool] [dir=string] [password=string] [updatedb=string] [username=string]
+			[pallet ...] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
 		''')
 
 	def test_minimal(self, host, create_pallet_isos, revert_export_stack_pallets):
@@ -111,7 +111,7 @@ class TestAddPallet:
 			assert result.rc == 0
 			#Unmount the iso no matter what happens after test exits
 			cleanup.callback(host.run, 'umount /mnt/cdrom')
-		
+
 			result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 			assert result.rc == 0
 
@@ -157,7 +157,7 @@ class TestAddPallet:
 			]
 
 	def test_mounted_cdrom(self, host, create_pallet_isos, revert_export_stack_pallets):
-		with ExitStack() as cleanup: 
+		with ExitStack() as cleanup:
 			# Mount our pallet
 			result = host.run(f'mount | grep /mnt/cdrom')
 			print(result)
@@ -210,7 +210,7 @@ class TestAddPallet:
 
 	def test_pallet_already_mounted(self, host, create_pallet_isos, revert_export_stack_pallets):
 		''' shouldn't matter if an iso is mounted elsewhere, we should still be able to add it as a pallet '''
-		with ExitStack() as cleanup: 
+		with ExitStack() as cleanup:
 			# Mount our pallet
 			result = host.run(f'mount | grep /mnt/cdrom')
 			print(result)
@@ -219,7 +219,7 @@ class TestAddPallet:
 
 			cleanup.callback(host.run, 'umount /mnt/cdrom')
 
-			# Unmount ISO  
+			# Unmount ISO
 			result = host.run(f'umount /mnt/cdrom')
 			assert result.rc == 0
 

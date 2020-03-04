@@ -44,7 +44,6 @@ from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
 
-
 _logPrefix = ''
 _debug     = False
 

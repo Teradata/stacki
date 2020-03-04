@@ -91,3 +91,9 @@
   - name: Barnacle Output
     echo:
       output: "{{ barnacle_output.stdout }}"
+
+  - name: Remove the dvd repo from Yum
+    yum_repository:
+      name: dvd
+      state: absent
+    when: ansible_distribution == "CentOS"

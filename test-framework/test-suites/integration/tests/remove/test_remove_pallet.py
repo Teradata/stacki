@@ -9,7 +9,7 @@ class TestRemovePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "pallet" argument is required
-			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 	def test_invalid(self, host):
@@ -17,7 +17,7 @@ class TestRemovePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid pallet
-			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 	def test_no_parameters(self, host, create_pallet_isos, revert_etc):
@@ -121,7 +121,7 @@ class TestRemovePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "minimal" argument is not a valid pallet with parameters arch=x86
-			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 		# The pallet should still be in the DB
@@ -168,7 +168,7 @@ class TestRemovePallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "minimal" argument is not a valid pallet with parameters os=redhat
-			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
+			{pallet ...} [arch=string] [os=string] [release=string] [run_hooks=bool] [version=string]
 		''')
 
 		# The pallet should still be in the DB

@@ -1,0 +1,54 @@
+# This maps the script path, relative to the pallet_hooks directory, to the pallet information
+# that this script should be run for. This also specifies which operations should trigger the
+# script being run.
+#
+# The full pallet information must be provided, I.E. name, version, rel, os, and arch.
+# However, these can be valid python regular expressions to allow wildcard matching.
+{
+	# The SLES scripts match against the exact pallet info when they are enabled, I.E.
+	# `stack enable pallet SLES`.
+	"SLES-11sp3-sles11-sles-x86_64/010-add-stacki-squashfs.sh": {
+		"name": "SLES",
+		"version": "11sp3",
+		"rel": "sles11",
+		"os": "sles",
+		"arch": "x86_64",
+		"operations": ["enable"],
+	},
+	"SLES-12sp2-sles12-sles-x86_64/010-add-stacki-squashfs.sh": {
+		"name": "SLES",
+		"version": "12sp2",
+		"rel": "sles12",
+		"os": "sles",
+		"arch": "x86_64",
+		"operations": ["enable"],
+	},
+	"SLES-12sp3-sles12-sles-x86_64/010-add-stacki-squashfs.sh": {
+		"name": "SLES",
+		"version": "12sp3",
+		"rel": "sles12",
+		"os": "sles",
+		"arch": "x86_64",
+		"operations": ["enable"],
+	},
+	# This one will run against any pallet named stacki which has a sles12 release
+	# when they are enabled, I.E. `stack enable pallet stacki release=sles12`.
+	"stacki-sles12/010-add-stacki-images.sh": {
+		"name": "stacki",
+		"version": ".*",
+		"rel": "sles12",
+		"os": ".*",
+		"arch": ".*",
+		"operations": ["enable"],
+	},
+	# This one will run against any pallet named stacki which has a sles11 release
+	# when they are enabled, I.E. `stack enable pallet stacki release=sles11`.
+	"stacki-sles11/010-add-stacki-images.sh": {
+		"name": "stacki",
+		"version": ".*",
+		"rel": "sles11",
+		"os": ".*",
+		"arch": ".*",
+		"operations": ["enable"],
+	},
+}
