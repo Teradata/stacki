@@ -15,23 +15,34 @@ import shutil
 from contextlib import ExitStack
 import atexit
 import tempfile
-from operator import attrgetter
 from textwrap import dedent
 import subprocess
+from operator import attrgetter
 
 import stack.commands
+from stack.argument_processors.pallet import (
+	PalletArgumentProcessor,
+	PALLET_HOOK_DIRNAME,
+)
 from stack import probepal
 from stack.util import flatten
 from stack.exception import CommandError, UsageError
 
-info_getter = attrgetter('name', 'version', 'release', 'distro_family', 'arch')
-
+# Set up our info_getter because we expect a certain order of attribute values,
+# I.E. some code is doing tuple unpacking.
+probepal_info_getter = attrgetter(
+	"name",
+	"version",
+	"release",
+	"distro_family",
+	"arch",
+)
 
 class command(stack.commands.add.command):
 	pass
 
 
-class Command(command):
+class Command(PalletArgumentProcessor, command):
 	"""
 	Add pallets to this machine's pallet directory. This command copies all
 	files in ISOs or paths recognized by stacki to be pallets to the local
@@ -71,6 +82,10 @@ class Command(command):
 	The default is: true.
 	</param>
 
+	<param type='bool' name='run_hooks'>
+	Controls whether pallets hooks are run. This defaults to True.
+	</param>
+
 	<example cmd='add pallet clean=true kernel*iso'>
 	Adds the Kernel pallet to local pallet directory.  Before the pallet is
 	added the old Kernel pallet packages are removed from the pallet
@@ -96,8 +111,8 @@ class Command(command):
 		note: if we copied an existing roll-*.xml, don't overwrite it here as it may have
 		more metadata
 		'''
-		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
-		name, version, release, distro_family, arch = info_getter(pallet_info)
+		destdir = pathlib.Path(stacki_pallet_root).joinpath(*probepal_info_getter(pallet_info))
+		name, version, release, distro_family, arch = probepal_info_getter(pallet_info)
 
 		if destdir.joinpath(f'roll-{name}.xml').exists():
 			return
@@ -120,16 +135,15 @@ class Command(command):
 		`stacki_pallet_root`/name/version/release/os/arch/
 		'''
 		pallet_dir = pallet_info.pallet_root
-		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
+		destdir = pathlib.Path(stacki_pallet_root).joinpath(*probepal_info_getter(pallet_info))
 
 		if destdir.exists() and clean:
-			print(f'Cleaning {"-".join(info_getter(pallet_info))} from pallets directory')
+			print(f'Cleaning {"-".join(probepal_info_getter(pallet_info))} from pallets directory')
 			shutil.rmtree(destdir)
 
-		print(f'Copying {"-".join(info_getter(pallet_info))} ...')
+		print(f'Copying {"-".join(probepal_info_getter(pallet_info))} ...')
 
-		if not destdir.exists():
-			destdir.mkdir(parents=True, exist_ok=True)
+		destdir.mkdir(parents=True, exist_ok=True)
 
 		# use rsync to perform the copy
 		# archive implies
@@ -147,6 +161,19 @@ class Command(command):
 		if result.returncode != 0:
 			raise CommandError(self, f'Unable to copy pallet:\n{result.stderr}')
 
+		# Copy any pallet hooks into the correct location
+		script_dir = pathlib.Path(pallet_dir) / PALLET_HOOK_DIRNAME
+		if script_dir.is_dir():
+			# Create the pallet hook directory if it doesn't already exist.
+			dest_hook_dir = self.get_pallet_hook_directory(pallet_info=pallet_info)
+			dest_hook_dir.mkdir(parents=True, exist_ok=True)
+			# Copy the hooks to the appropriate destination.
+			# We don't need to change the permissions with --chmod for this copy.
+			cmd = f'rsync --archive --exclude "TRANS.TBL" {script_dir}/ {dest_hook_dir}/'
+			result = self._exec(cmd, shlexsplit=True)
+			if result.returncode != 0:
+				raise CommandError(self, f'Unable to copy pallet hooks:\n{result.stderr}')
+
 		return destdir
 
 
@@ -157,7 +184,7 @@ class Command(command):
 
 		rows = self.db.select(
 			'id FROM rolls WHERE name=%s AND version=%s AND rel=%s AND os=%s AND arch=%s',
-			info_getter(pallet_info)
+			probepal_info_getter(pallet_info)
 		)
 
 		if len(rows) == 0:
@@ -165,7 +192,7 @@ class Command(command):
 			self.db.execute("""
 				insert into rolls(name, version, rel, os, arch, URL)
 				values (%s, %s, %s, %s, %s, %s)
-				""", (*info_getter(pallet_info), URL)
+				""", (*probepal_info_getter(pallet_info), URL)
 			)
 		else:
 			# Re-added the pallet. Update the URL.
@@ -207,7 +234,7 @@ class Command(command):
 		Run any available pallet patches
 		'''
 
-		pallet_patch_dir = '-'.join(info_getter(pallet_info))
+		pallet_patch_dir = '-'.join(probepal_info_getter(pallet_info))
 		patch_dir = pathlib.Path(f'/opt/stack/pallet-patches/{pallet_patch_dir}')
 		print(f'checking for patches in {patch_dir}')
 		if not patch_dir.is_dir():
@@ -225,10 +252,11 @@ class Command(command):
 
 
 	def run(self, params, args):
-		clean, stacki_pallet_dir, updatedb, self.username, self.password = self.fillParams([
+		clean, stacki_pallet_dir, updatedb, run_hooks, self.username, self.password = self.fillParams([
 			('clean', False),
 			('dir', '/export/stack/pallets'),
 			('updatedb', True),
+			('run_hooks', True),
 			('username', None),
 			('password', None),
 		])
@@ -239,6 +267,7 @@ class Command(command):
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
+		run_hooks = self.str2bool(run_hooks)
 
 		# create a contextmanager that we can append cleanup jobs to
 		# add its closing to run atexit, so we know it will run
@@ -316,7 +345,7 @@ class Command(command):
 			# delete the arg pointing to a jumbo and replace it with N new 'dummy' args
 			del pallet_args[arg]
 			for pal in data['matched_pallets']:
-				fake_arg_name = '-'.join(info_getter(pal))
+				fake_arg_name = '-'.join(probepal_info_getter(pal))
 				pallet_args[fake_arg_name] = data.copy()
 				pallet_args[fake_arg_name]['exploded_path'] = pal.pallet_root
 				pallet_args[fake_arg_name]['matched_pallets'] = [pal]
@@ -331,8 +360,10 @@ class Command(command):
 			self.write_pallet_xml(stacki_pallet_dir, pallet)
 			if updatedb:
 				self.update_db(pallet, paths_to_args[pallet.pallet_root])
-			if stacki_pallet_dir == '/export/stack/pallets':
-				self.patch_pallet(pallet)
+
+			# Run pallet hooks for the add operation.
+			if run_hooks:
+				self.run_pallet_hooks(operation="add", pallet_info=pallet)
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())

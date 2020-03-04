@@ -47,9 +47,6 @@ mkdir -p /tftpboot/pxelinux/pxelinux.cfg
 chown root.apache /tftpboot/pxelinux/pxelinux.cfg
 chmod 775 /tftpboot/pxelinux/pxelinux.cfg
 
-cp /opt/stack/images/vmlinuz* /tftpboot/pxelinux/
-cp /opt/stack/images/initrd* /tftpboot/pxelinux/
-
 <!-- copy all the syslinux programs to the pxelinux directory -->
 cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 

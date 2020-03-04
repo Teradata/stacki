@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 import stack.firmware
+from stack.argument_processors.pallet import PALLET_HOOK_ROOT
 
 @pytest.fixture
 def revert_database(dump_mysql):
@@ -206,3 +207,41 @@ def revert_firmware(request):
 	yield
 
 	_remove_overlay(stack.firmware.BASE_PATH, request)
+
+@pytest.fixture
+def revert_pallet_patches(request):
+	"""Revert the filesystem where pallet patches are laid down."""
+	patch_dir = Path("/opt/stack/pallet-patches")
+	# Some OSes (I.E. RedHat) might not have this, so gotta make it
+	# otherwise the fixture blows up.
+	patch_dir.mkdir(parents=True, exist_ok=True)
+	_add_overlay(patch_dir)
+
+	yield
+
+	_remove_overlay(patch_dir, request)
+
+@pytest.fixture
+def revert_pallet_hooks(request):
+	"""Revert the filesystem where pallet hooks are laid down."""
+	# Gotta make sure the directory exists
+	# otherwise the fixture blows up.
+	PALLET_HOOK_ROOT.mkdir(parents=True, exist_ok=True)
+	_add_overlay(PALLET_HOOK_ROOT)
+
+	yield
+
+	_remove_overlay(PALLET_HOOK_ROOT, request)
+
+@pytest.fixture
+def revert_opt_stack_images(request):
+	"""Revert the filesystem where initrds and vmlinuz get installed by the stacki-images RPMs."""
+	image_dir = Path("/opt/stack/images")
+	# Gotta make sure the directory exists
+	# otherwise the fixture blows up.
+	image_dir.mkdir(parents=True, exist_ok=True)
+	_add_overlay(image_dir)
+
+	yield
+
+	_remove_overlay(image_dir, request)

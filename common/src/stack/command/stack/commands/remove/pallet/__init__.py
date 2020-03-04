@@ -55,6 +55,10 @@ class Command(command):
 	supplied, then all OSes will be removed.
 	</param>
 
+	<param type='bool' name='run_hooks'>
+	Controls whether pallets hooks are run. This defaults to True.
+	</param>
+
 	<example cmd='remove pallet kernel'>
 	Remove all versions and architectures of the kernel pallet.
 	</example>
@@ -74,10 +78,18 @@ class Command(command):
 		if len(args) < 1:
 			raise ArgRequired(self, 'pallet')
 
+		run_hooks, = self.fillParams([
+			('run_hooks', True),
+		])
+
 		self.beginOutput()
 
 		regenerate = False
 		for pallet in self.get_pallets(args, params):
+			# Run any hooks before we regenerate the repo file and remove the pallet.
+			if run_hooks:
+				self.run_pallet_hooks(operation="remove", pallet_info=pallet)
+
 			self.clean_pallet(pallet)
 			regenerate = True
 
