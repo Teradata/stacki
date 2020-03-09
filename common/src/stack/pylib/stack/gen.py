@@ -16,8 +16,10 @@
 import ast
 import collections
 import os
+import re
 from xml.sax import handler
 import xml.dom.minidom
+
 from stack.bool import str2bool
 import stack.cond
 
@@ -484,7 +486,7 @@ class ExpandingTraversor(Traversor):
 				s += fileText
 				if fileText[-1] != '\n':
 					s += '\n'
-				s += 'EOF\n'
+				s += 'EOF\n\n'
 
 			if fileOwner:
 				s += 'chown %s %s\n' % (fileOwner, fileName)
@@ -844,8 +846,6 @@ class Generator:
 		for child in children:
 			self._traverse(traversor, child)
 
-
-
 	def generate(self, section):
 		"""Dump the requested section of the kickstart file.  If none 
 		exists do nothing."""
@@ -872,3 +872,129 @@ class Generator:
 		profile  = [ '#! /bin/bash' ]
 		profile.extend(self.shellSection.generate())
 		return profile
+
+	def generate_ansible(self):
+		playbook = []
+		playbook.extend(self.shellSection.generate())
+		return playbook
+
+
+class AnsibleProfileTraversor(MainTraversor):
+	def pre(self):
+		self.tasks = {
+			'install-post': [],
+			'boot-pre': [],
+			'boot-post': []
+		}
+
+	def traverse_stack_script(self, node):
+		stage  = self.getAttr(node, 'stack:stage',  default='install-post')
+		chroot = self.getAttr(node, 'stack:chroot', default='true')
+
+		# Ignore the stages that run pre-install
+		if stage in [ 'install-pre', 'install-pre-package' ] or not chroot == 'true':
+			return False
+
+		def tabs_to_spaces(match):
+			"""Replace each match char (a tab) with 4 spaces"""
+			return match.group(1) + ' ' * 4 * len(match.group(2))
+
+		node_id = self.getAttr(node, 'stack:id')
+		shell  = self.getAttr(node, 'stack:shell', default='/bin/bash')
+		node_file = os.path.basename(self.getAttr(node, 'stack:file'))
+		script = self.collect(node).strip()
+
+		# Make a nice name for our Ansible task
+		name = f"{stage}: Create script {node_id}"
+		if node_file:
+			name += f" from {node_file}"
+
+		# Format the script to be valid yaml by replacing tabs with spaces
+		formatted_script = []
+		last_line_blank = True
+		for line in script.splitlines():
+			# Collapse down multiple blank lines
+			if not line and last_line_blank:
+				continue
+
+			# Replace beginning tabs with spaces
+			line = re.sub(r'^( *)(\t+)', tabs_to_spaces, line)
+
+			# Strip any trailing whitespace
+			line = line.rstrip()
+
+			# Indent it for the Ansible output
+			formatted_script.append(' '*8 + line)
+
+			# Record if we were blank, so we can collapse
+			last_line_blank = not line
+
+		# Construct our Ansible task to copy over the script
+		task = [f'  - name: "{name}"']
+		task.append("    copy:")
+		task.append("      content: |")
+		task.extend(formatted_script)
+		task.append(f"      dest: /tmp/stacki_{stage}-{node_id}")
+		task.append(f"      mode: 0600")
+		self.tasks[stage].append('\n'.join(task))
+
+		# Now add a task to run it
+		name = f"{stage}: Run script {node_id}"
+		if node_file:
+			name += f" from {node_file}"
+
+		self.tasks[stage].append('\n'.join([
+			f'  - name: "{name}"',
+			f"    shell: {shell} /tmp/stacki_{stage}-{node_id}",
+			"    ignore_errors: True"
+		]))
+
+		return True
+
+	def post(self):
+		# Ansible playbook header stuff
+		self.gen.shellSection.append('\n'.join([
+			'---',
+			f'- hosts: {self.gen.attrs["hostname"]}',
+			'  tasks:'
+		]))
+
+		# Install package task
+		packages = self.gen.packageSet.getPackages()
+
+		enabled = []
+		for package_list in packages['enabled'].values():
+			enabled.extend(package_list)
+
+		if enabled:
+			task = [
+				'  - name: "Packages: Install"',
+				'    package:',
+				'      name:'
+			]
+			for package in enabled:
+				task.append(f'        - {package}')
+			task.append('      state: present')
+
+			self.gen.shellSection.append('\n'.join(task)+'\n')
+
+		# Remove package task
+		disabled = []
+		for package_list in packages['disabled'].values():
+			disabled.extend(package_list)
+
+		if disabled:
+			task = [
+				'  - name: "Packages - Remove"',
+				'    package:',
+				'      name:'
+			]
+			for package in disabled:
+				task.append(f'        - {package}')
+			task.append('      state: absent')
+
+			self.gen.shellSection.append('\n'.join(task)+'\n')
+
+		# Add the install stage tasks
+		for stage in ('install-post', 'boot-pre', 'boot-post'):
+			self.gen.shellSection.append('\n\n'.join(self.tasks[stage])+'\n')

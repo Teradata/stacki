@@ -19,4 +19,8 @@ install::
 	mkdir -p $(ROOT)/opt/stack/ansible/plugins/inventory
 	$(INSTALL) -m0644 plugins/inventory/stacki.py $(ROOT)/opt/stack/ansible/plugins/inventory/
 
+	# Install the callback plugin
+	mkdir -p $(ROOT)/opt/stack/ansible/plugins/callback
+	$(INSTALL) -m0644 plugins/callback/failure_report.py $(ROOT)/opt/stack/ansible/plugins/callback/
+
 clean::

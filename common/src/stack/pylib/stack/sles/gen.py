@@ -379,6 +379,8 @@ class Generator(stack.gen.Generator):
 					 MainTraversor(self) ])
 		elif profileType == 'bash':
 			workers.extend([ BashProfileTraversor(self) ])
+		elif profileType == 'ansible':
+			workers.extend([ stack.gen.AnsibleProfileTraversor(self) ])
 
 		return workers
 
