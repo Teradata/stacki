@@ -11,64 +11,62 @@
 # @rocks@
 
 import sys
-from xml.sax import make_parser
+from xml.etree import ElementTree
+
 import stack.commands
 import stack.gen
 from stack.exception import CommandError, ArgUnique
 
 
 class implementation(stack.commands.Implementation):
-
 	def generator(self):
-		pass
+		raise NotImplementedError
 
-	def chapter(self, generator, profile):
-		profileType = generator.getProfileType()
+	def get_chapter(self, generator, chapter):
+		output = []
 
-		profile.append('<chapter name="main">')
-		for line in generator.generate(profileType):
-			profile.append(line)
-		profile.append('</chapter>')
+		output.append(f'<chapter name="{chapter}">')
+		output.extend(generator.generate(chapter))
+		output.append('</chapter>')
 
-	def run(self, x):
+		return output
 
-		(xmlinput, profileType, chapter) = x
+	def run(self, args):
+		xml_input, profile_type, chapter = args
 
-		profile     = []
-		generator   = self.generator()
+		generator = self.generator()
+		generator.setProfileType(profile_type)
+		generator.parse(xml_input)
 
-		generator.setProfileType(profileType)
-		generator.parse(xmlinput)
-
-		profile.append('<profile type="%s">' % generator.getProfileType())
-
-		profile.append('<chapter name="stacki">')
-		for line in generator.generate('stacki'):
-			profile.append('%s' % line)
-		profile.append('</chapter>')
-
-		profile.append('<chapter name="debug">')
-		for line in generator.generate('debug'):
-			profile.append(line)
-		profile.append('</chapter>')
-
-		self.chapter(generator, profile)
-
-		profile.append('</profile>')
+		profile = []
 
 		if chapter:
-			parser  = make_parser()
-			handler = stack.gen.ProfileHandler()
+			# If we only need a specific chapter, just fetch it
+			chapter_xml = '\n'.join(self.get_chapter(generator, chapter))
 
-			parser.setContentHandler(handler)
-			for line in profile:
-				parser.feed('%s\n' % line)
+			# Then pull out the section contents
+			root = ElementTree.fromstring(chapter_xml)
+			for element in root.iter():
+				content = element.text.strip()
+				if content:
+					profile.append(content)
+		else:
+			# We need to fetch it all
+			profile.append(f'<profile type="{profile_type}">')
 
-			profile = handler.getChapter(chapter)
+			# Stacki chapter
+			profile.extend(self.get_chapter(generator, 'stacki'))
+
+			# Debug chapter
+			profile.extend(self.get_chapter(generator, 'debug'))
+
+			# Main chapter
+			profile.extend(self.get_chapter(generator, 'main'))
+
+			profile.append('</profile>')
 
 		for line in profile:
 			self.owner.addOutput('', line)
-
 
 
 class Command(stack.commands.list.host.command):
@@ -104,17 +102,16 @@ class Command(stack.commands.list.host.command):
 	MustBeRoot = 1
 
 	def run(self, params, args):
-
 		(profile, hashit, chapter) = self.fillParams([
 			('profile', 'native'),
 			('hash', 'n'),
-			('chapter', None) ])
+			('chapter', None)
+		])
 
-		xmlinput  = ''
-		osname    = None
+		xmlinput = ''
+		osname = None
 
 		# If the command is not on a TTY, then try to read XML input.
-
 		if not sys.stdin.isatty():
 			for line in sys.stdin.readlines():
 				if line.find('<stack:profile stack:os="') == 0:
@@ -127,7 +124,6 @@ class Command(stack.commands.list.host.command):
 
 		# If there's no XML input, either we have TTY, or we're running
 		# in an environment where TTY cannot be created (ie. apache)
-
 		if not xmlinput:
 			hosts = self.getHostnames(args)
 			if len(hosts) != 1:
@@ -140,7 +136,6 @@ class Command(stack.commands.list.host.command):
 			self.runImplementation(osname, (xmlinput, profile, chapter))
 
 		# If we DO have XML input, simply parse it.
-
 		else:
 			self.runImplementation(osname, (xmlinput, profile, chapter))
 
@@ -164,4 +159,3 @@ class Command(stack.commands.list.host.command):
 				m.update(l.encode())
 
 			sys.stderr.write('%s  profile\n' % m.hexdigest())
-

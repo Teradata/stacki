@@ -865,48 +865,10 @@ class Generator:
 	def generate_debug(self):
 		return self.debugSection.generate()
 
+	def generate_main(self):
+		return self.generate(self.profileType)
+
 	def generate_bash(self):
 		profile  = [ '#! /bin/bash' ]
 		profile.extend(self.shellSection.generate())
 		return profile
-
-
-class ProfileHandler(handler.ContentHandler,
-		     handler.DTDHandler,
-		     handler.EntityResolver,
-		     handler.ErrorHandler):
-
-	def __init__(self):
-		handler.ContentHandler.__init__(self)
-		self.recording = False
-		self.text      = ''
-		self.chapters  = {}
-		self.chapter   = None
-
-	def startElement(self, name, attrs):
-		if name == 'chapter':
-			self.chapter   = self.chapters[attrs.get('name')] = []
-			self.recording = True
-
-	def endElement(self, name):
-		if self.recording:
-			self.chapter.append(self.text)
-			self.text = ''
-
-		if name == 'chapter':
-			self.recording = False
-
-	def characters(self, s):
-		if self.recording:
-			self.text += s
-
-	def getChapter(self, chapter):
-		doc = []
-		if chapter in self.chapters:
-			for text in self.chapters[chapter]:
-				doc.append(text.lstrip())
-		return doc
-
-
-
-

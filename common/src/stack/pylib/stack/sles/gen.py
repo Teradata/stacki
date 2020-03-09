@@ -396,10 +396,3 @@ class Generator(stack.gen.Generator):
 		profile.extend(self.scriptsSection.generate())
 		profile.extend(self.footerSection.generate())
 		return profile
-
-	def generate_bash(self):
-		profile	 = [ '#! /bin/bash' ]
-		profile.extend(self.shellSection.generate())
-		return profile
-
-

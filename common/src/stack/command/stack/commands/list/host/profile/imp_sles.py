@@ -12,9 +12,5 @@ import stack.sles.gen
 
 
 class Implementation(stack.commands.list.host.profile.implementation):
-	
 	def generator(self):
 		return stack.sles.gen.Generator()
-
-
-
