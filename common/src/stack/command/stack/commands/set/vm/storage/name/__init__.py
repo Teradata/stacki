@@ -47,29 +47,20 @@ class Command(stack.commands.set.vm.command):
 
 			# A mountpoint won't be in the image list, so don't raise
 			# an error if it's not there
-			if backing not in disk_images and '/dev' not in backing:
+			if backing not in disk_images and not backing.startswith('/dev/'):
 				raise ParamError(self, 'backing', f'{backing} not found for {vm}, is the backing a defined disk for that host?')
 
 			# No disks with the same device name
 			if disk_name in disk_names:
 				raise CommandError(self, f'Disk with name {disk_name} already exists for {vm}')
 
-			# Handle mountpoints
-			if '/dev' in backing:
-				self.db.execute(
-					"""
-					UPDATE virtual_machine_disks SET disk_name=%s
-					WHERE virtual_machine_disks.mount_disk = %s
-					AND virtual_machine_disks.virtual_machine_id = %s
-					""",
-					(disk_name, backing, vm_id)
-				)
-			else:
-				self.db.execute(
-					"""
-					UPDATE virtual_machine_disks SET disk_name=%s
-					WHERE virtual_machine_disks.image_file_name = %s
-					AND virtual_machine_disks.virtual_machine_id = %s
-					""",
-					(disk_name, backing, vm_id)
-				)
+			self.db.execute(
+				"""
+				UPDATE virtual_machine_disks
+				SET disk_name=%s
+				WHERE virtual_machine_disks.image_file_name = %s
+				OR virtual_machine_disks.mount_disk = %s
+				AND virtual_machine_disks.virtual_machine_id = %s
+				""",
+				(disk_name, backing, backing, vm_id)
+			)

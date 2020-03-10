@@ -6,7 +6,6 @@
 #
 import stack.commands
 
-
 class Plugin(stack.commands.Plugin):
 	"""
 	Plugin to mark a specified virtual machine

@@ -21,8 +21,7 @@ class Command(stack.commands.set.vm.command):
 	</param>
 
 	<param type='string' name='newhost' optional='0'>
-	The hostname of the virtual machine host to assign
-	the disk to.
+	The hostname of the virtual machine host to assign the disk to.
 	</param>
 
 	<example cmd='set vm storage host virtual-backend-0-2 disk=sda newhost=virtual-backend-0-1'>
@@ -48,7 +47,7 @@ class Command(stack.commands.set.vm.command):
 
 		vm_id = self.vm_id_by_name(vm)
 		new_vm_id = self.vm_id_by_name(new_vm)
-		vm_disks = self.call(f'list.vm.storage', [vm, new_vm])
+		vm_disks = self.call('list.vm.storage', [vm, new_vm])
 
 		disk_names = [ disk['Name'] for disk in vm_disks if disk['Virtual Machine'] == vm ]
 		new_vm_disks = [ disk['Name'] for disk in vm_disks if disk['Virtual Machine'] == new_vm ]
@@ -65,7 +64,8 @@ class Command(stack.commands.set.vm.command):
 
 		self.db.execute(
 			"""
-			UPDATE virtual_machine_disks SET virtual_machine_id=%s
+			UPDATE virtual_machine_disks
+			SET virtual_machine_id=%s
 			WHERE virtual_machine_disks.disk_name = %s
 			AND virtual_machine_disks.virtual_machine_id = %s
 			""",

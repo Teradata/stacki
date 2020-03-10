@@ -26,10 +26,8 @@ class Command(command, VmArgumentProcessor):
 	</param>
 
 	<param type='bool' name='force'>
-	By default, sync vm will not sync for
-	virtual machines currently turned on. Force
-	will non-elegantly turn off the VM and proceed
-	with syncing it.
+	By default, sync vm will not sync virtual machines currently turned on.
+	Force will hard power off the VM and proceed with syncing it.
 	</param>
 
 	<param type='string' name='hypervisor'>
@@ -37,9 +35,9 @@ class Command(command, VmArgumentProcessor):
 	</param>
 
 	<param type='bool' name='autostart'>
-	By default, sync vm turns on all virtual-machines
-	after finishing syncing their config. If autostart
-	is set to false, the virtual machine will remain off.
+	By default, sync vm will not turn on a VM,
+	when autostart is set, all VM's affected by the sync command
+	will be turned on
 	</param>
 
 	<param type='bool' name='sync_ssh'>
@@ -48,17 +46,14 @@ class Command(command, VmArgumentProcessor):
 	</param>
 
 	<example cmd='sync vm virtual-machine-0-1'>
-	Define a virtual machine virtual-machine-0-1 on
-	it's assigned hypervisor and handle any storage
-	needed for it.
+	Define a virtual machine virtual-machine-0-1 on it's assigned hypervisor
 	</example>
 
-	<example cmd='sync vm virtual-machine-0-1 sync_ssh=n autostart=n'>
+	<example cmd='sync vm virtual-machine-0-1 sync_ssh=n autostart=y'>
 	Sync a virtual machine but don't pack in the frontend's ssh key
 	(assuming it has a premade qcow2 or raw image as its storage)
-	and don't start it after syncing.
+	and start if after syncing
 	</example>
-
 	"""
 
 	def run(self, params, args):
@@ -67,7 +62,7 @@ class Command(command, VmArgumentProcessor):
 			('hypervisor', ''),
 			('force', False),
 			('autostart', False),
-			('sync_ssh', True)
+			('sync_ssh', True),
 		])
 
 		force = self.str2bool(force)
@@ -93,11 +88,10 @@ class Command(command, VmArgumentProcessor):
 				self.notify(f'VM host {vm_name} is on, skipping')
 
 		# Gather each host's disk information
-		for disk in self.call('list.vm.storage', [*vm_hosts]):
+		for disk in self.call('list.vm.storage', list(vm_hosts)):
 			vm_disks.setdefault(disk['Virtual Machine'], []).append(disk)
 
-		# If there is no VM's to sync
-		# we are done
+		# If there is no VM's to sync we are done
 		if not vm_hosts:
 			return
 		self.notify('Sync Virtual Machines')

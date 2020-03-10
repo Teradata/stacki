@@ -77,7 +77,7 @@ class TestSyncVmStorage:
 		disk,
 		sync_ssh
 	):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.add_pool.return_value = True
 		mock_pack_ssh.return_value = []
 		mock_copy_file.return_value = None
@@ -134,7 +134,7 @@ class TestSyncVmStorage:
 		when a VmException is raised
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.add_pool.side_effect = self.mock_vm_exception
 		disk = {
 				'Name': 'disk1',
@@ -245,7 +245,7 @@ class TestSyncVmStorage:
 		hypervisor_name,
 		disk
 	):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		mock_remove_remote_file.return_value = None
 		output = mock_sync_storage_plugin.remove_disk(hypervisor_name, disk, True)
 
@@ -271,7 +271,7 @@ class TestSyncVmStorage:
 		when a VmException is raised
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.remove_volume.side_effect = self.mock_vm_exception
 		disk = {
 				'Name': 'disk1',
@@ -634,7 +634,7 @@ class TestSyncVmStorage:
 				'ssh bar "ls foo"': True,
 				'ssh bar "rm foo"': False
 			},
-			'Failed to remove file foo:Something went wrong!'
+			'Failed to remove file foo:Error!'
 		)
 	]
 	@patch('stack.commands.sync.vm.plugin_storage._exec', autospec=True)
@@ -648,37 +648,17 @@ class TestSyncVmStorage:
 		exec_args,
 		except_msg
 	):
+		mock_completed_process.stderr = 'Error!'
 
 		# Call a helper function to assign the desired
 		# return code values for each arg to _exec
 		mock_exec.side_effect = lambda *args, **kwargs: self.exec_return(mock_completed_process, exec_args, *args, **kwargs)
-		mock_sync_storage_plugin.remove_remote_file('foo', 'bar')
+		output = mock_sync_storage_plugin.remove_remote_file('foo', 'bar')
 
 		# The calls should match what we expect
 		expected_calls = [call(c, shlexsplit=True) for c in exec_args.keys()]
 		assert expected_calls == mock_exec.call_args_list
-
-	@patch('subprocess.CompletedProcess', autospec=True)
-	@patch('stack.commands.sync.vm.plugin_storage._exec', autospec=True)
-	def test_remove_empty_dir(self, mock_exec, mock_completed_process):
-
-		# Always have 0 be the return code value
-		# to simulate all commands executing successfully
-		mock_completed_process.returncode = 0
-		mock_exec.return_value = mock_completed_process
-
-		output = mock_sync_storage_plugin.pack_ssh_key('foo', 'bar')
-
-		# Make sure all commands executed
-		# on the hypervisor are the correct
-		# values
-		expect_calls = [
-			call(f'ssh foo "ls bar"', shlexsplit=True),
-			call(f'ssh foo "rm -r bar"',
-				shlexsplit=True
-			)
-		]
-		assert output is None and mock_exec.call_args_list == expect_calls
+		assert output == except_msg
 
 	@patch('subprocess.CompletedProcess', autospec=True)
 	@patch('stack.commands.sync.vm.plugin_storage._exec', autospec=True)
@@ -780,7 +760,11 @@ class TestSyncVmStorage:
 		mock_hypervisor,
 		mock_sync_storage_plugin
 	):
-		mock_conn = mock_hypervisor.return_value
+		"""
+		Test storage pools are removed correctly
+		"""
+
+		mock_conn = mock_hypervisor.return_value.__enter__.return_value
 		errors = mock_sync_storage_plugin.remove_pool('pool', 'foo', False)
 		mock_conn.remove_pool.assert_called_once_with('pool')
 		assert errors == []
@@ -791,7 +775,12 @@ class TestSyncVmStorage:
 		mock_hypervisor,
 		mock_sync_storage_plugin
 	):
-		mock_conn = mock_hypervisor.return_value
+		"""
+		Test remove_pool outputs errors
+		when VmExceptions are raised
+		"""
+
+		mock_conn = mock_hypervisor.return_value.__enter__.return_value
 		mock_conn.remove_pool.side_effect = self.mock_vm_exception
 		errors = mock_sync_storage_plugin.remove_pool('pool', 'foo', False)
 		mock_conn.remove_pool.assert_called_once_with('pool')
@@ -803,6 +792,11 @@ class TestSyncVmStorage:
 		mock_remove_empty_dir,
 		mock_sync_storage_plugin
 	):
+		"""
+		Test remove_storage_dir removes Vm storage directories
+		when they are empty and outputs errors
+		"""
+
 		mock_remove_empty_dir.return_value = 'Error!'
 		disks = [
 			{

@@ -12,7 +12,7 @@ class Command(stack.commands.remove.vm.Command):
 	Mark a virtual machine's disk for deletion.
 
 	<arg type='string' name='host' optional='1'>
-	A single hostname with to remove a disk from.
+	A single hostname  to remove a disk from.
 	</arg>
 
 	<param type='string' name='disk' optional='1'>
@@ -22,7 +22,7 @@ class Command(stack.commands.remove.vm.Command):
 	<example cmd='remove vm storage virtual-backend-0-1 disk=sda'>
 	Mark disk sda for deletion from virtual-backend-0-1. Upon running
 	sync vm, the disk will be deleted on the hypervisor and removed from
-	the frontend.
+	the VM config.
 	</example>
 	"""
 
@@ -44,7 +44,8 @@ class Command(stack.commands.remove.vm.Command):
 
 		self.db.execute(
 			"""
-			UPDATE virtual_machine_disks SET disk_delete = True
+			UPDATE virtual_machine_disks
+			SET disk_delete = True
 			WHERE virtual_machine_disks.virtual_machine_id = %s
 			AND virtual_machine_disks.disk_name = %s
 			""",

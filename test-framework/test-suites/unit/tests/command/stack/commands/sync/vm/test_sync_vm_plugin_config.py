@@ -116,7 +116,7 @@ class TestSyncVmConfig:
 		# Use the real str2bool when the
 		# mock plugin calls it
 		mock_sync_config_plugin.owner.str2bool.side_effect = str2bool
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Call the plugin
 		actual_output = mock_sync_config_plugin.run((vm_hosts, vm_disks, False, True, False, True))
@@ -234,7 +234,7 @@ class TestSyncVmConfig:
 		# Use the real str2bool when the
 		# mock plugin calls it
 		mock_sync_config_plugin.owner.str2bool.side_effect = str2bool
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Call the plugin
 		actual_output = mock_sync_config_plugin.run((vm_hosts, vm_disks, False, True, False, True))
@@ -271,7 +271,7 @@ class TestSyncVmConfig:
 		as we expect it to
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.autostart.side_effect = self.mock_vm_exception
 		mock_sync_config_plugin.owner.str2bool.side_effect = str2bool
 		vm_disks = {}
@@ -304,7 +304,7 @@ class TestSyncVmConfig:
 		and marked for deletion
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		mock_sync_config_plugin.owner.str2bool.side_effect = str2bool
 
 		# Simulate finding the disk image file

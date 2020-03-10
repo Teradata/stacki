@@ -39,7 +39,8 @@ class Command(stack.commands.set.vm.command):
 			vm_id = self.vm_id_by_name(vm)
 			self.db.execute(
 				"""
-				UPDATE virtual_machines SET memory_size=%s
+				UPDATE virtual_machines
+				SET memory_size=%s
 				WHERE virtual_machines.id=%s
 				""",
 				(memory, vm_id)

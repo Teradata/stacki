@@ -10,6 +10,7 @@ import random
 import uuid
 import jinja2
 from pathlib import Path
+from stack.kvm import Hypervisor
 from stack.exception import CommandError, ParamError
 from stack.argument_processors.vm import VmArgumentProcessor
 from stack.util import _exec
@@ -24,24 +25,40 @@ class Command(command, VmArgumentProcessor):
 	information stored in Stacki for a given host
 
 	<arg type='string' name='host' repeat='1' optional='1'>
-	The host/mutliple hosts to output a config of
+	The host or hosts to generate config files for
 	</arg>
+
+	<param type='string' name='hypervisor'>
+	Output libvirt configs for virtual machines on a specified hypervisor
+	</param>
 
 	<param type='bool' name='bare'>
 	Output the config file in non-SUX format for feeding
 	directly to the hypervisor.
 	</param>
+
+	<example cmd='report vm virtual-backend-0-1'>
+	Output the libvirt config of virtual-backend-0-1
+    </example>
+
+	<example cmd='report vm virtual-backend-0-1 bare=y'>
+	Output the libvirt config of virtual-backend-0-1 without SUX
+    </example>
+
+	<example cmd='report vm hypervisor=hypervisor-0-1'>
+	Get the libvirt config for all hosts on hypervisor-0-1
+    </example>
 	"""
 
 	def run(self, param, args):
 		self.beginOutput()
 		vm_hosts = self.valid_vm_args(args)
-		conf_loc = '/etc/libvirt/qemu/'
+		conf_loc = Hypervisor.conf_loc
 		out = []
 
 		bare_output, hypervisor = self.fillParams([
 			('bare', False),
-			('hypervisor', '')
+			('hypervisor', ''),
 		])
 
 		template_conf = Path('/opt/stack/share/templates/libvirt.conf.j2')
@@ -62,7 +79,7 @@ class Command(command, VmArgumentProcessor):
 		# Check if the hypervisor is valid
 		# if the param is set
 		if hypervisor and not self.is_hypervisor(hypervisor):
-			raise ParamError(self, 'hypervisor', '{hypervisor} is not a valid hypervisor')
+			raise ParamError(self, 'hypervisor', f'{hypervisor} is not a valid hypervisor')
 
 		for vm in vm_hosts:
 			self.bootorder = 1
@@ -74,11 +91,6 @@ class Command(command, VmArgumentProcessor):
 			# specified hypervisor host
 			if hypervisor and curr_hypervisor != hypervisor:
 				continue
-
-			conf_loc_attr = self.getHostAttr(curr_hypervisor, 'vm.config.location')
-
-			if conf_loc_attr:
-				loc = conf_loc_attr
 
 			# Handle if no disks are defined for a
 			# virtual machine
@@ -95,6 +107,7 @@ class Command(command, VmArgumentProcessor):
 			template_vars['memory'] = int(vm_values['memory']) * 1024
 			template_vars['cpucount'] = vm_values['cpu']
 			template_vars['uuid'] = uuid.uuid4()
+			template_vars['os'] = self.getHostAttr(curr_hypervisor, 'os')
 
 			# Get template info that varies between VM's
 			template_vars['interfaces'] = self.gen_interfaces(vm)
@@ -121,10 +134,13 @@ class Command(command, VmArgumentProcessor):
 		virtual machine interfaces
 		"""
 
-		r = random.SystemRandom()
-		m = "%06x" % r.getrandbits(24)
+		# Convert 24 random bits to hex
+		# and truncate the 0x
+		mac = hex(random.getrandbits(24))[2:]
 
-		return "52:54:00:%s:%s:%s" % (m[0:2], m[2:4], m[4:6])
+		# Assign every 2 hex digits to the new mac address
+		# The first 6 digits are the VirtIO mac manufacturer address
+		return f'52:54:00:{mac[0:2]}:{mac[2:4]}:{mac[4:6]}'
 
 	def getInterfaceByNetwork(self, host, network):
 		"""
@@ -210,21 +226,30 @@ class Command(command, VmArgumentProcessor):
 
 		for interface in self.call('list.host.interface', [host]):
 			interface_name = interface['interface']
+
 			network = interface['network']
 			out = {}
+
+			# Skip any vlan tagged or virtual interfaces
+			# interfaces containing . are considered vlan tagged
+			# interfaces containing : are considered virtual interfaces
+			if '.' in interface_name or ':' in interface_name:
+				continue
 
 			# Check if the hypervisor has a interface on the same network
 			# as the virtual machine
 			host_interface = self.getInterfaceByNetwork(vm_host, network)
 
-			# Skip ipmi and interfaces that the underlying hypervisor
+			# Skip interfaces that the underlying hypervisor
 			# has no interface for on that network
-			if interface_name == 'ipmi' or not host_interface:
-				continue
+			if not host_interface:
+				raise CommandError(self, f'On VM {host} could not find interface for network {network} on hypervisor {vm_host}')
+
 			if network:
 
 				# If the network isn't set for pxe, don't use it for the bootorder
 				network_pxe = self.str2bool(self.call('list.network', args = [network])[0].get('pxe'))
+
 			out['mac'] = interface['mac']
 			out['name'] = host_interface
 
@@ -233,7 +258,7 @@ class Command(command, VmArgumentProcessor):
 				self.bootorder+=1
 
 			# If no mac address is assigned to a VM's
-			# interface, generate one
+			# interface, generate one and assign it
 			if not out.get('mac'):
 				mac_addr = self.getMAC()
 				out['mac'] = mac_addr

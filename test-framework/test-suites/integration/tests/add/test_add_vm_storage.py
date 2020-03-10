@@ -105,3 +105,6 @@ class TestAddVMStorage:
 
 		add_stor_invalid = host.run(f'stack add vm storage vm-backend-0-3 disks={invalid_image}')
 		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
+
+		add_stor_nonexistant_disk = host.run(f'stack add vm storage vm-backend-0-3 disks=fake_disk')
+		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr

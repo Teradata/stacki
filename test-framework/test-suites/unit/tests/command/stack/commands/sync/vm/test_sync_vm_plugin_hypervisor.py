@@ -107,7 +107,7 @@ class TestSyncVmHypervisor:
 		Test adding a vm to a hypervisor
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Mock output of report vm
 		mock_vm_config = [{'col-1': 'config_file'}]
@@ -131,7 +131,7 @@ class TestSyncVmHypervisor:
 		is raised
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Raise a VmException when add_domain is called
 		hypervisor.add_domain.side_effect = self.mock_vm_exception
@@ -156,7 +156,7 @@ class TestSyncVmHypervisor:
 		Test adding a vm to a hypervisor
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		output = mock_sync_hypervisor_plugin.remove_vm('foo', True, 'hypervisor-foo')
 
 		# Check remove_domain was called with our mock
@@ -176,7 +176,7 @@ class TestSyncVmHypervisor:
 		is raised
 		"""
 
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Raise a VmException when add_domain is called
 		hypervisor.remove_domain.side_effect = self.mock_vm_exception
