@@ -19,9 +19,10 @@ import pathlib
 import shutil
 
 import stack.commands
+from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired
 
-class command(stack.commands.PalletArgumentProcessor,
+class command(PalletArgumentProcessor,
 	      stack.commands.remove.command):
 	pass
 
@@ -76,7 +77,7 @@ class Command(command):
 		self.beginOutput()
 
 		regenerate = False
-		for pallet in self.getPallets(args, params):
+		for pallet in self.get_pallets(args, params):
 			self.clean_pallet(pallet)
 			regenerate = True
 

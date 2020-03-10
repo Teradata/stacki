@@ -14,12 +14,13 @@ import sys
 import subprocess
 
 import stack.commands
+from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired, CommandError
 
 
 class Command(
 	stack.commands.run.command,
-	stack.commands.PalletArgumentProcessor,
+	PalletArgumentProcessor,
 	stack.commands.BoxArgumentProcessor
 ):
 	"""
@@ -69,7 +70,7 @@ class Command(
 			# List of all pallets enabled for the frontend
 			fe_pallets = self.getBoxPallets(box)
 			# List of all pallets specified on the command line
-			arg_pallets = self.getPallets(args, params)
+			arg_pallets = self.get_pallets(args, params)
 			# Find the intersection of the 2 list of pallets
 			pallets = [ pallet.name for pallet in arg_pallets if pallet in fe_pallets ]
 			# If there aren't any, raise a command error and exit out.

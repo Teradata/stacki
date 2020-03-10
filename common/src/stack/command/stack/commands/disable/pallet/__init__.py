@@ -13,10 +13,11 @@
 
 import os
 import stack.commands
+from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.PalletArgumentProcessor,
+class Command(PalletArgumentProcessor,
 	stack.commands.disable.command):
 	"""
 	Disable an available pallet. The pallet must already be copied on the
@@ -87,7 +88,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
 
-		for pallet in self.getPallets(args, params):
+		for pallet in self.get_pallets(args, params):
 			self.db.execute(
 				'delete from stacks where box=%s and roll=%s',
 				(box_id, pallet.id)
