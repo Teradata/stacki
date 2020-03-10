@@ -15,9 +15,10 @@ import importlib
 import pathlib
 
 import stack.commands
+from stack.argument_processors.pallet import PalletArgumentProcessor
 
 
-class Command(stack.commands.PalletArgumentProcessor,
+class Command(PalletArgumentProcessor,
 	stack.commands.list.command):
 	"""
 	List the commands provided by a pallet.
@@ -47,7 +48,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 	The OS of the pallet to be listed. If no OS is supplied, then all OS
 	versions of a pallet will be listed.
 	</param>
-	
+
 	<example cmd='list pallet command stacki'>
 	Returns the the list of commands installed by the stacki pallet.
 	</example>
@@ -91,7 +92,7 @@ class Command(stack.commands.PalletArgumentProcessor,
 		# Output a list of commands for the pallets requested
 		self.beginOutput()
 
-		for pallet in self.getPallets(args, params):
+		for pallet in self.get_pallets(args, params):
 			if pallet.name in mapping:
 				for command in mapping[pallet.name]:
 					self.addOutput(pallet.name, command)

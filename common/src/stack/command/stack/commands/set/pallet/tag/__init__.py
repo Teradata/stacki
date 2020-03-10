@@ -59,8 +59,8 @@ class Command(stack.commands.set.pallet.command):
 		if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', tag):
 			raise CommandError(self, f'invalid tag name "{tag}"')
 
-		
-		pallets = self.getPallets(args, params)
+
+		pallets = self.get_pallets(args, params)
 
 		# If the tag is already defined and force=False
 		# complain
@@ -78,16 +78,16 @@ class Command(stack.commands.set.pallet.command):
 					f'os={p.os}',
 					f'tag={tag}'
 					]):
-					raise CommandError(self, 
+					raise CommandError(self,
 							   f'tag "{tag}" exists for {name}')
-	
+
 
 		for p in pallets:
 			# To avoid 'update' vs 'insert' nonsense just remove
 			# the tag first (not an error if it doesn't exist)
 			self.db.execute("""
 				delete from tags where
-				scope   = 'pallet' and 
+				scope   = 'pallet' and
 				scopeid = %s and
 				tag     = %s
 				""", (p.id, tag))

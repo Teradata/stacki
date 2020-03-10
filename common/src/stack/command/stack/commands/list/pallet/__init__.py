@@ -12,10 +12,11 @@
 
 
 import stack.commands
+from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.util import flatten
 
 class command(stack.commands.list.command,
-	      stack.commands.PalletArgumentProcessor):
+	      PalletArgumentProcessor):
 	pass
 
 class Command(command):
@@ -77,13 +78,13 @@ class Command(command):
 		expanded, = self.fillParams([ ('expanded', 'false') ])
 		expanded = self.str2bool(expanded)
 
-		for pallet in self.getPallets(args, params):
+		for pallet in self.get_pallets(args, params):
 
 			boxes = ' '.join(flatten(self.db.select("""
 					boxes.name from stacks, boxes
 					where stacks.roll=%s and stacks.box=boxes.id
 					""", (pallet.id,))))
-			
+
 			# Constuct our data to output
 			output = [
 				pallet.version, pallet.rel, pallet.arch, pallet.os, boxes
