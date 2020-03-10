@@ -29,7 +29,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			return {'keys': [], 'values': {} }
 
 		for host in hosts:
-			conn = None
+
 			# Get the hypervisor hostname
 			host_hypervisor = self.get_hypervisor_by_name(host)
 
@@ -44,22 +44,19 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 					vm_status[host].append('undefined')
 			else:
 				try:
-					conn = stack.kvm.Hypervisor(host_hypervisor)
+					with stack.kvm.Hypervisor(host_hypervisor) as conn:
 
-					# A dict of the current status
-					# of all VM's on the hypervisor
-					guest_status = conn.guests()
-					hypervisors[host_hypervisor] = guest_status
-					if host in guest_status:
-						vm_status[host].append(guest_status[host])
-					else:
-						vm_status[host].append('undefined')
-					conn.close()
+						# A dict of the current status
+						# of all VM's on the hypervisor
+						guest_status = conn.guests()
+						hypervisors[host_hypervisor] = guest_status
+						if host in guest_status:
+							vm_status[host].append(guest_status[host])
+						else:
+							vm_status[host].append('undefined')
 
 				# If an exception was raised, set the status
 				# to connection failed
 				except VmException as error:
-					if conn:
-						conn.close()
 					vm_status[host].append('Connection failed to hypervisor')
 		return { 'keys' : keys, 'values': vm_status }

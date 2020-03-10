@@ -25,8 +25,7 @@ class Command(stack.commands.list.vm.Command):
 	</example>
 
 	<example cmd='list vm storage hypervisor=hypervisor-0-1'>
-	List all disks belonging to virtual machines hosted on
-	hypervisor-0-1
+	List all disks belonging to virtual machines hosted on hypervisor-0-1
 	</example>
 	"""
 

@@ -26,8 +26,11 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 	def pack_ssh_key(self, host, hypervisor, disk):
 		"""
-		Returns a list with an error messages encountered
-		when packing the frontend's ssh key into a VM image
+		Packs the frontend's ssh key into the authorized keys
+		of a given disk image, assumes there is a /root/.ssh folder
+		on the target disk
+
+		Returns a list containing any errors encountered
 		"""
 
 		key_dir = Path(f'/tmp/{host}_keys')
@@ -124,12 +127,12 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			return f'Could not find file {file_path.name} on {host}'
 		rm_file_out = _exec(f'ssh {host} "rm {file_path}"', shlexsplit=True)
 		if rm_file_out.returncode != 0:
-			return 'Failed to remove file {file_path.name}:{rm_file_out.stderr}'
+			return f'Failed to remove file {file_path.name}:{rm_file_out.stderr}'
 
 	def remove_empty_dir(self, host, dir_loc):
 		"""
-		Remove a directory at a given host if it contains no
-		non-hidden files
+		Remove a directory at a given host if it contains no files
+		(assuming they aren't hidden)
 
 		Return a string if an error occurred
 		"""
@@ -158,16 +161,16 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			pool = image_loc.name
 			try:
-				conn = Hypervisor(hypervisor)
-				add_pool = conn.add_pool(image_loc.name, image_loc)
-				if not add_pool and debug:
-					self.owner.notify(f'Pool {pool} already created, skipping')
-				vol_name = disk['Image Name']
-				if debug:
-					self.owner.notify(f'Create storage volume {vol_name} with size {disk["Size"]}')
+				with Hypervisor(hypervisor) as conn:
+					add_pool = conn.add_pool(image_loc.name, image_loc)
+					if not add_pool and debug:
+						self.owner.notify(f'Pool {pool} already created, skipping')
+					vol_name = disk['Image Name']
+					if debug:
+						self.owner.notify(f'Create storage volume {vol_name} with size {disk["Size"]}')
 
-				# add the disk to the hypervisor
-				conn.add_volume(vol_name, image_loc, pool, disk['Size'])
+					# Add the disk to the hypervisor
+					conn.add_volume(vol_name, image_loc, pool, disk['Size'])
 			except VmException as error:
 				add_errors.append(str(error))
 
@@ -209,14 +212,14 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			vol_name = disk['Image Name']
 			try:
-				conn = Hypervisor(hypervisor)
-				if debug:
-					self.owner.notify(f'Removing disk {vol_name}')
+				with Hypervisor(hypervisor) as conn:
+					if debug:
+						self.owner.notify(f'Removing disk {vol_name}')
 
-				# Remove a volume from it's pool
-				# which is determined by the last
-				# part of the path of the disk location
-				conn.remove_volume(image_loc.name, vol_name)
+					# Remove a volume from its pool
+					# which is determined by the last
+					# part of the path of the disk location
+					conn.remove_volume(image_loc.name, vol_name)
 			except VmException as error:
 				remove_errors.append(str(error))
 
@@ -237,10 +240,10 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 		remove_errors = []
 		try:
-			conn = Hypervisor(hypervisor)
-			if debug:
-				self.owner.notify(f'Removing storage pool {pool_name}')
-			conn.remove_pool(pool_name)
+			with Hypervisor(hypervisor) as conn:
+				if debug:
+					self.owner.notify(f'Removing storage pool {pool_name}')
+				conn.remove_pool(pool_name)
 		except VmException as msg:
 			remove_errors.append(str(msg))
 		return remove_errors

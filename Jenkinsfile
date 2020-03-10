@@ -532,8 +532,8 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration_1') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(60) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
                                     try {
                                         if (env.COVERAGE_REPORTS == 'true') {
@@ -590,8 +590,8 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration_2') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(60) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
                                     try {
                                         if (env.COVERAGE_REPORTS == 'true') {
@@ -648,8 +648,8 @@ pipeline {
 
                         // Run the integration tests
                         dir('integration_3') {
-                            // Give the tests up to 60 minutes to finish
-                            timeout(60) {
+                            // Give the tests up to 90 minutes to finish
+                            timeout(90) {
                                 script {
                                     try {
                                         if (env.COVERAGE_REPORTS == 'true') {

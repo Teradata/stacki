@@ -95,7 +95,7 @@ class TestListVmStatus:
 
 		# Mock outside function call
 		# return values
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.guests.side_effect = guest_status
 		mock_get_hypervisor.side_effect = hypervisors
 
@@ -122,7 +122,8 @@ class TestListVmStatus:
 
 		# Raise a VmException when instantiating
 		# a hypervisor object
-		mock_hypervisor.side_effect = self.mock_vm_exception
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
+		hypervisor.guests.side_effect = self.mock_vm_exception
 
 		# Call the plugin
 		output = mock_vm_status_plugin.run((['bar'], True))
@@ -142,7 +143,7 @@ class TestListVmStatus:
 		"""
 
 		mock_get_hypervisor.return_value = 'foo'
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Raise a VmException when the
 		# guests method is called
@@ -157,6 +158,5 @@ class TestListVmStatus:
 		mock_get_hypervisor.assert_called_once_with(ANY, 'bar')
 		mock_hypervisor.assert_called_once_with('foo')
 		hypervisor.guests.assert_called_once()
-		hypervisor.close.assert_called_once()
 		expect_output = {'keys' : ['status'], 'values': {'bar': ['Connection failed to hypervisor'] }}
 		assert output == expect_output

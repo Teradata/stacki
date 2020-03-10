@@ -45,15 +45,45 @@ class TestPylibKvm:
 				</volume>
 			"""
 
-	@patch(target = 'stack.kvm.Hypervisor.connect', autospec=True)
-	def test_kvm_init(self, mock_kvm_connect):
-		mock_kvm_connect.return_value = 'bar'
+	def test_kvm_init(self):
+		"""
+		Test the init sets the values
+		we expect
+		"""
+
 		test_hypervisor = Hypervisor(host='hypervisor-foo')
+		assert test_hypervisor.hypervisor == 'hypervisor-foo'
+		assert test_hypervisor.kvm is None
+
+	@patch('stack.kvm.Hypervisor.connect', autospec=True)
+	@patch('stack.kvm.Hypervisor.close', autospec=True)
+	def test_kvm_context_manager(
+		self,
+		mock_kvm_close,
+		mock_kvm_connect,
+	):
+		"""
+		Test when calling the Hypervisor class as a context manager
+		the connect and close functions are called on context manager
+		enter and exit
+		"""
+
+		with Hypervisor('hypervisor-foo') as conn:
+			pass
 		mock_kvm_connect.assert_called_once()
-		assert hasattr(test_hypervisor, 'hypervisor')
+		mock_kvm_close.assert_called_once()
+
+		# Make sure we are returning the
+		# Hypervisor object upon contextmanager enter
+		assert conn is not None
 
 	@patch('libvirt.open', autospec=True)
 	def test_kvm_connect(self, mock_libvirt_open):
+		"""
+		Test the connect method successfully returns
+		a libvirt connection object
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_libvirt_open.return_value = 'bar'
 
@@ -65,6 +95,11 @@ class TestPylibKvm:
 
 	@patch('libvirt.open', autospec=True)
 	def test_kvm_connect_exception(self, mock_libvirt_open):
+		"""
+		Test the connect method throws a VmException when
+		a libvirt connection object could not be made
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_libvirt_open.side_effect = self.mock_libvirt_exception
 		expect_exception = 'Failed to connect to hypervisor hypervisor-foo:\nSomething went wrong!'
@@ -77,11 +112,21 @@ class TestPylibKvm:
 			mock_libvirt_open.assert_called_once()
 
 	def test_kvm_close(self):
+		"""
+		Test the close method calls the libvirt
+		close connection method
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_hypervisor.close()
 		mock_hypervisor.kvm.close.assert_called_once()
 
 	def test_kvm_close_exception(self):
+		"""
+		Test the close method throws a VmExpection
+		when a connection could not be close
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_hypervisor.kvm.close.side_effect = self.mock_libvirt_exception
 		expect_exception = 'Failed to close hypervisor connection to hypervisor-foo:\nSomething went wrong!'

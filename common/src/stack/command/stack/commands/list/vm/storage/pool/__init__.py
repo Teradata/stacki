@@ -7,7 +7,7 @@
 
 import stack.commands
 from stack.kvm import Hypervisor, VmException
-from stack.exception import ArgError
+from stack.exception import ArgError, CommandError
 
 class Command(stack.commands.list.vm.storage.Command):
 	"""
@@ -31,8 +31,7 @@ class Command(stack.commands.list.vm.storage.Command):
 	</example>
 
 	<example cmd='list vm storage pool hypervisor-0-0 pool=stacki'>
-	Only list storage pool information for pool stacki on
-	hypervisor-0-0
+	Only list storage pool information for pool stacki on hypervisor-0-0
 	</example>
 	"""
 
@@ -56,15 +55,18 @@ class Command(stack.commands.list.vm.storage.Command):
 			'Pool Active'
 		]
 		for arg in args:
-			conn = Hypervisor(arg)
-			pool_info = conn.pool_info(filter_pool=pool)
-			for pool, values in pool_info.items():
-				pool_values = [
-						pool,
-						values['allocated'],
-						values['available'],
-						values['capacity'],
-						values['is_active']
-					]
-				self.addOutput(owner = arg, vals = pool_values)
+			try:
+				with Hypervisor(arg) as conn:
+					pool_info = conn.pool_info(filter_pool=pool)
+					for pool, values in pool_info.items():
+						pool_values = [
+							pool,
+							values['allocated'],
+							values['available'],
+							values['capacity'],
+							values['is_active']
+						]
+						self.addOutput(owner = arg, vals = pool_values)
+			except VmException as msg:
+				raise CommandError(self, str(msg))
 		self.endOutput(header=header, trimOwner=False)

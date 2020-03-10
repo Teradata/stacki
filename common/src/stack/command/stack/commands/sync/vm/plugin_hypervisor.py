@@ -27,12 +27,12 @@ class Plugin(stack.commands.Plugin):
 		if debug:
 			self.owner.notify(f'Generating vm config file for {host}')
 
-			# Get the libvirt config
-			# the bare parameter gets removes the SUX tags
+		# Get the libvirt config
+		# the bare parameter gets removes the SUX tags
 		vm_config = self.owner.call('report.vm', [host, 'bare=y'])
 		try:
-			conn = Hypervisor(hypervisor)
-			conn.add_domain(vm_config[0]['col-1'])
+			with Hypervisor(hypervisor) as conn:
+					conn.add_domain(vm_config[0]['col-1'])
 		except VmException as error:
 			add_errors.append(str(error))
 		return add_errors
@@ -45,8 +45,8 @@ class Plugin(stack.commands.Plugin):
 
 		remove_errors = []
 		try:
-			conn = Hypervisor(hypervisor)
-			conn.remove_domain(host)
+			with Hypervisor(hypervisor) as conn:
+					conn.remove_domain(host)
 		except VmException as error:
 			remove_errors.append(str(error))
 		return remove_errors

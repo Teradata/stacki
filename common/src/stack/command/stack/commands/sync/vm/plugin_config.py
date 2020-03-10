@@ -62,14 +62,14 @@ class Plugin(stack.commands.Plugin):
 			status = host['status']
 			if status == 'off':
 				try:
-					conn = Hypervisor(hypervisor_host)
-					if autostart:
-						self.owner.notify(f'Starting {hostname} on {hypervisor_host}')
-						conn.start_domain(hostname)
+					with Hypervisor(hypervisor_host) as conn:
+						if autostart:
+							self.owner.notify(f'Starting {hostname} on {hypervisor_host}')
+							conn.start_domain(hostname)
 
-					# Always set the vm to start on boot
-					# of hypervisor
-					conn.autostart(hostname, True)
+						# Always set the vm to start on boot
+						# of hypervisor
+						conn.autostart(hostname, True)
 				except VmException as error:
 					config_errors.append(f'Could not start VM {hostname}:\n{str(error)}')
 
@@ -79,5 +79,4 @@ class Plugin(stack.commands.Plugin):
 			if (force or (status in ['undefined', 'off'])) and delete_vm:
 				self.owner.delete_pending_vm(hostname)
 				self.owner.notify(f'Removing VM {hostname}')
-
 		return config_errors

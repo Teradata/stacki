@@ -39,9 +39,8 @@ class Command(command, VmArgumentProcessor):
 
 	<param type='string' name='disks'>
 	A list of disks or single disk for a virtual machine. Can be an integer to
-	create a new disk image for the virtual machine, a path to a compressed (tar or gzip),
-	uncompressed qcow2 or raw image, or a path to a disk device (such as /dev/sdb) to
-	mount to a virtual machine.
+	create a new disk image for the virtual machine, a full path to a qcow2 or raw image,
+	or a path to a disk device on the hypervisor (such as /dev/sdb) to mount to a virtual machine.
 	</param>
 
 	"""
@@ -60,15 +59,17 @@ class Command(command, VmArgumentProcessor):
 		if not self.is_hypervisor(hypervisor):
 			raise ParamError(self, param = 'hypervisor', msg = f'has a non valid hypervisor appliance or host')
 
-		# Cpu and Memory input must be valid numbers and be one or greater
-		# No guarantees your vm will boot with 1 MB of memory though
-		if not cpu.isdigit() or int(cpu) < 1 or not memory.isdigit() or int(memory) < 1:
-			raise ParamError(self, 'cpu or memory', 'must be a number greater than 0')
+		# CPU and Memory input must be valid numbers and be at least equal to one
+		if not memory.isdigit() or int(memory) < 1:
+			raise ParamError(self, 'memory', 'must be a number greater than 0')
+
+		if not cpu.isdigit() or int(cpu) < 1:
+			raise ParamError(self, 'cpu', 'must be a number greater than 0')
 
 		# Check if the virtual machine is already defined
 		# Raise a CommandError if it is
 		if self.vm_by_name(vm_host):
-				raise CommandError(self, f'Virtual Machine {vm_host} already defined')
+			raise CommandError(self, f'Virtual Machine {vm_host} already defined')
 
 		# Add into database
 		self.db.execute("""

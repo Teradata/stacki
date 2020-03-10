@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import ANY, call, create_autospec, patch
-from stack.commands.list.vm.storage.pool import Command, Hypervisor, VmException, ArgError
+from stack.commands.list.vm.storage.pool import Command, Hypervisor, VmException, ArgError, CommandError
 
 class TestListVmStoragePool:
 	def mock_vm_exception(self, *args, **kwargs):
@@ -100,11 +100,11 @@ class TestListVmStoragePool:
 		command,
 		pool_info
 	):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 
 		# Each time pool_info is called, return
 		# the next pool values
-		hypervisor.pool_info.side_effect =  pool_info.values()
+		hypervisor.pool_info.side_effect = pool_info.values()
 
 		# Assume every host is a valid hypervisor for
 		# this test
@@ -149,9 +149,25 @@ class TestListVmStoragePool:
 		# Force fillParams to be the pool
 		# parameter value
 		command.fillParams = lambda p: ('foo', )
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		command.run(('foo', ), ['hypervisor-foo'])
 
 		# Only the pool given as a param should be called
 		mock_hypervisor.assert_called_once_with('hypervisor-foo')
 		hypervisor.pool_info.assert_called_once_with(filter_pool='foo')
+
+	@patch('stack.commands.list.vm.storage.pool.Hypervisor', create_autospec=True)
+	def test_list_vm__storage_pool_exception(
+		self,
+		mock_hypervisor,
+		command
+	):
+		command.is_hypervisor = lambda h: True
+		except_msg = 'Oh no something went wrong!'
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
+		hypervisor.pool_info.side_effect = self.mock_vm_exception
+
+		with pytest.raises(CommandError, match=except_msg):
+			command.run((), ['hypervisor-foo'])
+			mock_hypervisor.assert_called_once_with('hypervisor-foo')
+			hypervisor.pool_info.called_once()

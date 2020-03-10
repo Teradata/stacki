@@ -10,7 +10,7 @@ from stack.exception import ParamError
 
 class Command(stack.commands.set.vm.command):
 	"""
-	Set the number of cpu cores allocated to a virtual machine.
+	Set the number of CPU cores allocated to a virtual machine.
 
 	<arg type='string' name='host' repeat='1'>
 	One or more virtual machine host names.
@@ -22,8 +22,7 @@ class Command(stack.commands.set.vm.command):
 	</param>
 
 	<example cmd='set vm cpu virtual-backend-0-2 cpu=4'>
-	Set the cpu core's allocated to virtual-backend-0-2
-	to 4 cores.
+	Set the cpu core's allocated to virtual-backend-0-2 to 4 cores.
 	</example>
 	"""
 
@@ -41,7 +40,8 @@ class Command(stack.commands.set.vm.command):
 			vm_id = self.vm_id_by_name(vm)
 			self.db.execute(
 				"""
-				UPDATE virtual_machines SET cpu_cores=%s
+				UPDATE virtual_machines
+				SET cpu_cores=%s
 				WHERE virtual_machines.id=%s
 				""",
 				(cpu_cores, vm_id)

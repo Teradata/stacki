@@ -13,7 +13,6 @@
 
 	<stack:package>
 		virt-viewer
-		ansible
 		virt-manager
 		qemu-kvm
 		libvirt

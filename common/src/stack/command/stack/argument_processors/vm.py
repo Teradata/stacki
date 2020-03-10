@@ -20,8 +20,7 @@ class VmArgumentProcessor():
 			INNER JOIN nodes
 			ON vm.node_id = nodes.id
 			WHERE nodes.name = %s
-			AND vm.hypervisor_id
-			IS NOT NULL
+			AND vm.hypervisor_id IS NOT NULL
 			""", (vm_name)
 		)
 		return result
@@ -50,7 +49,7 @@ class VmArgumentProcessor():
 		"""
 
 		# If vm_by_name returns a non empty value for the given input,
-		# it is a valid input as all required values are present in the
+		# it is a valid VM as all required values are present in the
 		# database table
 		return self.vm_by_name(vm_name)
 
@@ -96,23 +95,22 @@ class VmArgumentProcessor():
 	def is_hypervisor(self, hypervisor):
 		"""
 		Determine if the input host is a valid hypervisor
-		via it's appliance.
+		via it's appliance attr.
 		"""
 
 		if not hypervisor:
 			return False
 		attr = self.getHostAttr(hypervisor, 'hypervisor')
 		return str2bool(attr)
+
 	def vm_info(self, hosts):
 		"""
-		Get virtual specific attributes
+		Get virtual machine specific attributes
 		from the database and return it
 		with the hostnames as keys
 		"""
 
 		vm_info = defaultdict(list)
-
-		# Copy the hosts arg to append extra parameters
 		for row in self.db.select(
 			"""
 			nodes.name,
@@ -166,8 +164,7 @@ class VmArgumentProcessor():
 			"""
 			DELETE FROM virtual_machine_disks
 			WHERE virtual_machine_disks.virtual_machine_id = %s
-			AND virtual_machine_disks.disk_delete
-			IS TRUE
+			AND virtual_machine_disks.disk_delete IS TRUE
 			AND virtual_machine_disks.disk_name = %s
 			""", (vm_id, disk_name)
 		)
@@ -185,7 +182,6 @@ class VmArgumentProcessor():
 			"""
 			DELETE FROM virtual_machines
 			WHERE virtual_machines.id = %s
-			AND virtual_machines.vm_delete
-			IS TRUE
+			AND virtual_machines.vm_delete IS TRUE
 			""", (vm_id, )
 		)

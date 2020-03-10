@@ -40,7 +40,7 @@ class TestKVMImp:
 
 	@patch('stack.kvm.Hypervisor', autospec = True)
 	def test_kvm_imp_on(self, mock_hypervisor, kvm_imp):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.start_domain.return_value = None
 
 		output = kvm_imp.run(args = ['foo', 'on', self.mock_tuple])
@@ -51,7 +51,7 @@ class TestKVMImp:
 
 	@patch('stack.kvm.Hypervisor', autospec = True)
 	def test_kvm_imp_off(self, mock_hypervisor, kvm_imp):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.stop_domain.return_value = None
 
 		output = kvm_imp.run(args = ['foo', 'off', self.mock_tuple])
@@ -62,7 +62,7 @@ class TestKVMImp:
 
 	@patch('stack.kvm.Hypervisor', autospec = True)
 	def test_kvm_imp_reset(self, mock_hypervisor, kvm_imp):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.start_domain.return_value = None
 		hypervisor.stop_domain.return_value = None
 
@@ -93,7 +93,7 @@ class TestKVMImp:
 
 	@patch('stack.kvm.Hypervisor', autospec = True)
 	def test_kvm_imp_vm_exception(self, mock_hypervisor, kvm_imp):
-		hypervisor = mock_hypervisor.return_value
+		hypervisor = mock_hypervisor.return_value.__enter__.return_value
 		hypervisor.start_domain.side_effect = self.mock_vm_exception
 		output = kvm_imp.run(args = ['foo', 'on', self.mock_tuple])
 

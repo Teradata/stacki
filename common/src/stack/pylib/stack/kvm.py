@@ -27,15 +27,21 @@ class Hypervisor:
 
 	"""
 	Class to interface to a kvm hypervisor via
-	the libvirt bindings. Can create and remove vm's,
+	the libvirt api bindings. Can create and remove vm's,
 	get the current state of guests, and manage
-	storage pools or images.
+	storage pools/volumes or pre-made images.
 	"""
+
+	# The file path for where to place
+	# VM config files on the hypervisor
+	conf_loc = '/etc/libvirt/qemu/'
 
 	def __init__(self, host):
 		libvirt.registerErrorHandler(f=libvirt_callback, ctx=None)
 		self.hypervisor = host
-		self.kvm = self.connect()
+		self.kvm = None
+
+		# Template for defining storage pools in libvirt
 		self.kvm_pool = """
 			<pool type="dir">
 			<name>{{ name }}</name>
@@ -44,6 +50,8 @@ class Hypervisor:
 			</target>
 			</pool>
 		"""
+
+		# Template for defining storage volumes in libvirt
 		self.kvm_volume = """
 		<volume>
 		<name>{{ volname }}</name>
@@ -56,6 +64,16 @@ class Hypervisor:
 		</volume>
 		"""
 
+	# Connect automatically and close the connection when
+	# calling the hypervisor class as a context manager
+	def __enter__(self, *args):
+		self.kvm = self.connect()
+		return self
+
+	def __exit__(self, *args):
+		self.close()
+		return self
+
 	def connect(self):
 		"""
 		Establish a connection to the hypervisor
@@ -67,7 +85,7 @@ class Hypervisor:
 
 		# We assume the frontend
 		# has ssh access to the
-		# hypervisor
+		# hypervisor as root
 		try:
 			hypervisor = libvirt.open(f'qemu+ssh://root@{self.hypervisor}/system')
 		except libvirtError as msg:
@@ -103,7 +121,6 @@ class Hypervisor:
 
 		try:
 			domains = self.kvm.listAllDomains()
-
 		except libvirtError as msg:
 			raise VmException(f'Failed to get list of VM domains on {self.hypervisor}:\n{msg}')
 
@@ -162,9 +179,11 @@ class Hypervisor:
 		failed to be started
 		"""
 		try:
+
+			# Get the domain object
 			dom = self.kvm.lookupByName(guest_name)
 
-			# Start running a defined
+			# create() starts running a defined
 			# domain on a hypervisor
 			dom.create()
 		except libvirtError as msg:
@@ -181,7 +200,7 @@ class Hypervisor:
 		try:
 			dom = self.kvm.lookupByName(guest_name)
 
-			# This sounds scary but just stops the vm
+			# destroy() sounds scary but just stops the vm
 			dom.destroy()
 		except libvirtError as msg:
 			raise VmException(f'Failed to stop VM {guest_name} on hypervisor {self.hypervisor}:\n{msg}')
@@ -219,6 +238,7 @@ class Hypervisor:
 			pass
 
 		try:
+
 			# Render the template to create the pool
 			# According to the libvirt docs, zero
 			# always needs to be passed in
@@ -326,7 +346,7 @@ class Hypervisor:
 		information if it is
 
 		Raises a VmException if the the pool info
-		couldn't be retrived
+		couldn't be found
 		"""
 
 		pool_val = defaultdict(dict)

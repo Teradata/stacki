@@ -7,7 +7,6 @@
 
 import stack.commands
 from stack.exception import ParamError
-
 class Command(stack.commands.set.vm.command):
 	"""
 	Set the hypervisor hostname to host a virtual machine.
@@ -33,7 +32,6 @@ class Command(stack.commands.set.vm.command):
 		])
 		if not self.is_hypervisor(hypervisor):
 			raise ParamError(self, 'hypervisor', f'host {hypervisor} is not a valid hypervisor')
-
 
 		for vm in hosts:
 			vm_id = self.vm_id_by_name(vm)
