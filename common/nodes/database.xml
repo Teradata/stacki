@@ -55,7 +55,7 @@ password	= $root_pw
 </stack:file>
 
 <!-- symlink to root's home dir -->
-ln -s /etc/root.my.cnf /root/.my.cnf
+ln -s --force /etc/root.my.cnf /root/.my.cnf
 
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`

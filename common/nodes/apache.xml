@@ -80,10 +80,10 @@ chown apache:root /var/tmp/profile.semaphore
 
 <!-- REDHAT -->
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
-ln -s /opt/stack/etc/apache-stack.conf /etc/httpd/conf.d/stack.conf
+ln -s --force /opt/stack/etc/apache-stack.conf /etc/httpd/conf.d/stack.conf
 
 <!-- Set up mod_wsgi -->
-ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/httpd/modules/mod_wsgi.so
+ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/httpd/modules/mod_wsgi.so
 
 <stack:file stack:name="/etc/httpd/conf.modules.d/02-wsgi.conf">
 LoadModule wsgi_module modules/mod_wsgi.so
@@ -184,11 +184,11 @@ CustomLog ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
 ]]>
 </stack:file>
 
-ln -s /opt/stack/etc/apache-ssl.conf /etc/apache2/conf.d/ssl.conf
-ln -s /opt/stack/etc/apache-stack.conf /etc/apache2/conf.d/stack.conf
+ln -s --force /opt/stack/etc/apache-ssl.conf /etc/apache2/conf.d/ssl.conf
+ln -s --force /opt/stack/etc/apache-stack.conf /etc/apache2/conf.d/stack.conf
 
 <!-- Set up mod_wsgi -->
-ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/apache2/mod_wsgi.so
+ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib64/apache2/mod_wsgi.so
 /usr/sbin/a2enmod wsgi
 
 <!-- Twiddle some modules -->

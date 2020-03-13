@@ -11,7 +11,7 @@
 
 
 <stack:script stack:stage="install-post">
-ln -s /opt/stack/bin/python3 /opt/stack/bin/spython3
+ln -s --force /opt/stack/bin/python3 /opt/stack/bin/spython3
 </stack:script>
 
 <stack:script stack:stage="install-post">

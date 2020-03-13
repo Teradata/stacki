@@ -480,6 +480,33 @@ class ExpandingTraversor(Traversor):
 				else:
 					eof = "'EOF'"
 
+				# Make file appending idempotent. Limiting it to just the
+				# Ansible profile output because it is black magic.
+				if fileMode == 'append' and self.gen.profileType == 'ansible':
+					# To make appending text to a file idempotent, we need to check
+					# if the text already exists in the target file, and only append
+					# if it isn't already there.
+					#
+					# Grep can only match with single lines, so we have to delete the
+					# pesky newlines from both the source text to insert and the
+					# target file we are appending.
+					#
+					# After modifying the text on the fly using "tr", grep can search
+					# for our text, and if it returns non-zero then we know the text
+					# isn't in the target yet, so we append it by running the if block.
+
+					s += f"grep --quiet --fixed-strings --file=<(tr -d '\\n' << {eof}"
+
+					if fileText[0] != '\n':
+						s += '\n'
+					s += fileText
+					if fileText[-1] != '\n':
+						s += '\n'
+
+					s += 'EOF\n'
+					s += f") <(cat {fileName} | tr -d '\\n')\n"
+					s += "if [[ $? -ne 0 ]]; then\n"
+
 				s += "cat %s %s << %s" % (gt, fileName, eof)
 				if fileText[0] != '\n':
 					s += '\n'
@@ -487,6 +514,10 @@ class ExpandingTraversor(Traversor):
 				if fileText[-1] != '\n':
 					s += '\n'
 				s += 'EOF\n\n'
+
+				# End the black magic
+				if fileMode == 'append' and self.gen.profileType == 'ansible':
+					s += "fi\n"
 
 			if fileOwner:
 				s += 'chown %s %s\n' % (fileOwner, fileName)

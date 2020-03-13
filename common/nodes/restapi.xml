@@ -29,12 +29,12 @@ WSGIScriptAlias /stack /var/www/wsgi/stacki-ws.wsgi process-group=stacki-ws
 
 <!-- REDHAT -->
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
-ln -s /opt/stack/etc/apache-ws.conf /etc/httpd/conf.d/ws.conf
+ln -s --force /opt/stack/etc/apache-ws.conf /etc/httpd/conf.d/ws.conf
 </stack:script>
 
 <!-- SLES -->
 <stack:script stack:stage="install-post" stack:cond="os == 'sles'">
-ln -s /opt/stack/etc/apache-ws.conf /etc/apache2/conf.d/ws.conf
+ln -s --force /opt/stack/etc/apache-ws.conf /etc/apache2/conf.d/ws.conf
 </stack:script>
 
 </stack:stack>

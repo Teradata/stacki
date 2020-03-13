@@ -10,7 +10,7 @@
 
 <stack:script stack:stage="boot-post">
 
-ln -s /opt/stack/images /export/stack/images
+ln -s --force /opt/stack/images /export/stack/images
 
 systemctl enable stack-aws-server-init
 

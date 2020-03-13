@@ -32,9 +32,9 @@
 <!-- set up the install directory so it can be served by the web -->
 (
 	cd /var/www/html ;
-	ln -s /export/stack install;
+	ln -s --force /export/stack install;
 	cd install/sbin ;
-	ln -s . public ;
+	ln -s --force . public ;
 ) 
 </stack:script>
 

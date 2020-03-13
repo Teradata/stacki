@@ -22,12 +22,12 @@ WSGIScriptAlias /ludicrous /var/www/wsgi/stacki-ludicrous.wsgi  process-group=st
 
 <!-- REDHAT -->
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
-ln -s /opt/stack/etc/apache-ludicrous.conf /etc/httpd/conf.d/ludicrous.conf
+ln -s --force /opt/stack/etc/apache-ludicrous.conf /etc/httpd/conf.d/ludicrous.conf
 </stack:script>
 
 <!-- SLES -->
 <stack:script stack:stage="install-post" stack:cond="os == 'sles'">
-ln -s /opt/stack/etc/apache-ludicrous.conf /etc/apache2/conf.d/ludicrous.conf
+ln -s --force /opt/stack/etc/apache-ludicrous.conf /etc/apache2/conf.d/ludicrous.conf
 </stack:script>
 
 </stack:stack>

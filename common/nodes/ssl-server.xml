@@ -38,12 +38,12 @@ chmod ao+rx /export/stack/pallets
 
 <!-- REDHAT -->
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
-ln -s /opt/stack/etc/apache-https.conf /etc/httpd/conf.d/https.conf
+ln -s --force /opt/stack/etc/apache-https.conf /etc/httpd/conf.d/https.conf
 </stack:script>
 
 <!-- SLES -->
 <stack:script stack:stage="install-post" stack:cond="os == 'sles'">
-ln -s /opt/stack/etc/apache-https.conf /etc/apache2/conf.d/https.conf
+ln -s --force /opt/stack/etc/apache-https.conf /etc/apache2/conf.d/https.conf
 </stack:script>
 
 </stack:stack>

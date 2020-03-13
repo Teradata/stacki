@@ -13,7 +13,7 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <stack:script stack:stage="install-post">
 mkdir -p /etc/ansible
-ln -s /opt/stack/etc/ansible.cfg /etc/ansible/ansible.cfg
+ln -s --force /opt/stack/etc/ansible.cfg /etc/ansible/ansible.cfg
 </stack:script>
 
 </stack:stack>
