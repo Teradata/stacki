@@ -33,6 +33,7 @@ GATEWAY=""
 DNS=""
 FORWARD_PORTS=""
 FAB_RPM=""
+NO_PXE=0
 
 while [[ "$#" -gt 0 ]]
 do
@@ -89,6 +90,10 @@ do
             FAB_RPM="${1#*=}"
             shift 1
             ;;
+        --no-pxe)
+            NO_PXE=1
+            shift 1
+            ;;
         --*)
             echo -e "\033[31mError: unrecognized flag \"$1\"\033[0m"
             exit 1
@@ -111,6 +116,7 @@ then
     echo -e "  --use-the-src-dir=DIRECTORY\tThe directory will be mounted and symlinked into the frontend."
     echo -e "  --export-frontend\t\tExport the frontend as a vagrant box."
     echo -e "  --forward-ports=SRC:DST[,...]\tComma separated list of ports to forward."
+    echo -e "  --no-pxe\t\tCreated backends using the minimal OS box."
     echo -e "  --bridge=INTERFACE\t\tBridge interface on the host. Default: Use host only networking"
     echo -e "  --ip=IP_ADDRESS\t\tIP Address for the bridge network. Default: Use DHCP"
     echo -e "  --netmask=NETMASK\t\tThe netmask for the bridge network. Default: 255.255.255.0"
@@ -229,7 +235,8 @@ cat > ".vagrant/cluster-up.json" <<-EOF
     "NETMASK": "$NETMASK",
     "GATEWAY": "$GATEWAY",
     "DNS": "$DNS",
-    "FORWARD_PORTS": "$FORWARD_PORTS"
+    "FORWARD_PORTS": "$FORWARD_PORTS",
+    "NO_PXE": "$NO_PXE"
 }
 EOF
 
@@ -367,8 +374,11 @@ then
     echo
     echo -e "\033[34mBringing up the $BACKENDS backend(s) ...\033[0m"
 
-    # Start up node discovery
-    vagrant ssh frontend -c "sudo -i stack enable discovery"
+    if [[ $NO_PXE -eq 0 ]]
+    then
+        # Start up node discovery
+        vagrant ssh frontend -c "sudo -i stack enable discovery"
+    fi
 
     # Run the pre-backends hooks
     run_hooks "pre-backends"
@@ -422,8 +432,11 @@ then
     # Run the post-backends hooks
     run_hooks "post-backends"
 
-    # Shut down node discovery
-    vagrant ssh frontend -c "sudo -i stack disable discovery"
+    if [[ $NO_PXE -eq 0 ]]
+    then
+        # Shut down node discovery
+        vagrant ssh frontend -c "sudo -i stack disable discovery"
+    fi
 fi
 
 # Write out the access instructions

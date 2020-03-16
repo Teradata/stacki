@@ -26,6 +26,7 @@ if File.file?('.vagrant/cluster-up.json')
   GATEWAY = settings['GATEWAY']
   DNS = settings['DNS']
   FORWARD_PORTS = settings['FORWARD_PORTS']
+  NO_PXE = settings['NO_PXE']
 
   Vagrant.configure("2") do |config|
     config.vm.define "frontend", autostart: false do |config|
@@ -104,9 +105,21 @@ if File.file?('.vagrant/cluster-up.json')
 
     (0..BACKENDS-1).each do |i|
       config.vm.define "backend-0-#{i}", autostart: false do |config|
-        config.vm.box = "stacki/pxe-boot"
-        if INTERNAL == "true"
-          config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+        if NO_PXE == "1"
+          if OS == "sles12"
+            config.vm.box = "stacki/sles-12.3"
+            config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+          elsif OS == "redhat7"
+            config.vm.box = "stacki/centos-7.6"
+            if INTERNAL == "true"
+              config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
+            end
+          end
+        else
+          config.vm.box = "stacki/pxe-boot"
+          if INTERNAL == "true"
+            config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
+          end
         end
         config.vm.boot_timeout = 3600
 
@@ -126,12 +139,6 @@ if File.file?('.vagrant/cluster-up.json')
           vb.customize ['modifyvm', :id, '--cableconnected2', 'on']
           vb.customize ['modifyvm', :id, '--nicbootprio2', '1']
           vb.customize ['modifyvm', :id, "--nictype2", '82540EM']
-
-          config.vm.network "private_network",
-            mac: sprintf("5254000000%02X", i+3),
-            type: "dhcp",
-            virtualbox__intnet: NAME,
-            auto_config: false
         end
 
         config.vm.provider "libvirt" do |provider, config|
@@ -149,9 +156,22 @@ if File.file?('.vagrant/cluster-up.json')
           provider.boot 'hd'
           provider.qemuargs :value => "-boot"
           provider.qemuargs :value => "reboot-timeout=10000"
+        end
 
+        if NO_PXE == "1"
+          config.vm.network "private_network",
+          mac: sprintf("5254000000%02X", i+3),
+          ip: "192.168.0.#{i+3}",
+          virtualbox__intnet: NAME,
+          libvirt__network_name: NAME,
+          libvirt__dhcp_enabled: false,
+          libvirt__forward_mode: "veryisolated",
+          libvirt__adapter: 1
+        else
           config.vm.network "private_network",
             mac: sprintf("5254000000%02X", i+3),
+            type: "dhcp",
+            virtualbox__intnet: NAME,
             libvirt__network_name: NAME,
             libvirt__dhcp_enabled: false,
             libvirt__forward_mode: "veryisolated",
