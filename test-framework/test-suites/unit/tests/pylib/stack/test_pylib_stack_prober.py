@@ -37,6 +37,8 @@ PALLET_DATA = [
 	['Packages-1', '15', 'sles15', 'x86_64', 'sles', 'Sles15MediaProbe', {'SLE-15-Packages-x86_64-GM-DVD1.iso.media': 'media.1/media'}],
 	['Packages-1', '15sp1', 'sles15', 'x86_64', 'sles', 'Sles15MediaProbe', {'SLE-15-SP1-Packages-x86_64-GM-DVD1.iso.media': 'media.1/media'}],
 	['Packages-2', '15sp1', 'sles15', 'x86_64', 'sles', 'Sles15MediaProbe', {'SLE-15-SP1-Packages-x86_64-GM-DVD2.iso.media': 'media.1/media'}],
+	['SLES', '15sp2', 'sles15', 'x86_64', 'sles', 'ProductMDProbe', {'SLE-15-SP2-Full-x86_64-PublicBeta-Media1.iso.treeinfo': '.treeinfo'}],
+	['Full-SOURCE', '15sp2', 'sles15', 'x86_64', 'sles', 'Sles15MediaProbe', {'SLE-15-SP2-Full-x86_64-PublicBeta-Media2.iso.media': 'media.1/media'}],
 	['SUSE-Enterprise-Storage', '4', 'ses4', 'x86_64', 'sles', 'SLES_11_12_Probe', {'SUSE-Enterprise-Storage-4-DVD-x86_64-GM-DVD1.iso.content': 'content'}],
 	['Ubuntu', '18.04.3', 'ubuntu18.04', 'x86_64', 'ubuntu', 'UbuntuProbe', {'ubuntu-18.04.3-desktop-amd64.iso.disk.info': '.disk/info'}],
 	['Ubuntu-Server', '18.04.3', 'ubuntu18.04', 'x86_64', 'ubuntu', 'UbuntuProbe', {'ubuntu-18.04.3-live-server-amd64.iso.disk.info': '.disk/info'}],
