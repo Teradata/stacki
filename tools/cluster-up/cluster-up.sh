@@ -278,9 +278,14 @@ then
 fi
 
 # Make sure the boxes are up-to-date
+set +e
 echo
 echo -e "\033[34mChecking the vagrant boxes for updates ...\033[0m"
-vagrant box update
+if timeout 5 vagrant box outdated 2>&1 >/dev/null
+then
+    vagrant box update
+fi
+set -e
 
 # Run the pre-frontend hooks
 run_hooks "pre-frontend"

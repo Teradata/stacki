@@ -1,9 +1,12 @@
 require 'json'
 require 'net/http'
+require 'timeout'
 
 # Are we internal to TD?
 begin
-  INTERNAL = Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+  INTERNAL = Timeout::timeout(5) {
+    Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+  }
 rescue
   INTERNAL = "false"
 end
@@ -38,6 +41,8 @@ if File.file?('.vagrant/cluster-up.json')
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
       end
+
+      config.vm.box_check_update = false
 
       config.vm.provider "virtualbox" do |provider, config|
         provider.name = NAME + "_frontend"
@@ -108,6 +113,8 @@ if File.file?('.vagrant/cluster-up.json')
         if INTERNAL == "true"
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/pxe-boot.json"
         end
+
+        config.vm.box_check_update = false
         config.vm.boot_timeout = 3600
 
         config.vm.provider "virtualbox" do |vb, config|
