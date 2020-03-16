@@ -30,6 +30,8 @@ There are some optional arguments you can pass to the command:
     --use-the-src-dir=DIRECTORY   The directory will be mounted and symlinked into the frontend.
     --export-frontend             Export the frontend as a vagrant box with the same name as the STACK_ISO
     --forward-ports=SRC:DST[,...] Comma separated list of ports to forward.
+    --no-pxe                      Created backends using the minimal OS box.
+
 You can also specify the following flags, which will switch cluster-up to create
 the second interface to a bridge interface on the VM host. If you specify a bridged
 interface, then no backends will be automatically created, as they rely on host only
