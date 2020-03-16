@@ -52,7 +52,7 @@ class Plugin(stack.commands.Plugin):
 			try:
 				remote_filename = pathlib.Path(urllib.parse.urlparse(canon_arg).path).name
 				# passing True will display a % progress indicator in stdout
-				local_path = fetch(canon_arg, self.owner.username, self.owner.password, True, f'{tempdir}/{remote_filename}')
+				local_path = fetch(canon_arg, self.owner.username, self.owner.password, False, f'{tempdir}/{remote_filename}')
 			except FetchError as e:
 				raise CommandError(self, e)
 

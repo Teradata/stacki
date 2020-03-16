@@ -138,10 +138,10 @@ class Command(PalletArgumentProcessor, command):
 		destdir = pathlib.Path(stacki_pallet_root).joinpath(*probepal_info_getter(pallet_info))
 
 		if destdir.exists() and clean:
-			print(f'Cleaning {"-".join(probepal_info_getter(pallet_info))} from pallets directory')
+			self.notify(f'Cleaning {"-".join(probepal_info_getter(pallet_info))} from pallets directory')
 			shutil.rmtree(destdir)
 
-		print(f'Copying {"-".join(probepal_info_getter(pallet_info))} ...')
+		self.notify(f'Copying {"-".join(probepal_info_getter(pallet_info))} ...')
 
 		destdir.mkdir(parents=True, exist_ok=True)
 
@@ -333,6 +333,7 @@ class Command(PalletArgumentProcessor, command):
 		paths_to_args = {data['exploded_path']: data['canonical_arg'] for data in pallet_args.values()}
 
 		# we have everything we need, copy the pallet to the fs, add it to the db, and maybe patch it
+		self.beginOutput()
 		for pallet in flatten(pallet_infos.values()):
 			self.copy(stacki_pallet_dir, pallet, clean)
 			self.write_pallet_xml(stacki_pallet_dir, pallet)
@@ -342,6 +343,8 @@ class Command(PalletArgumentProcessor, command):
 			# Run pallet hooks for the add operation.
 			if run_hooks:
 				self.run_pallet_hooks(operation="add", pallet_info=pallet)
+			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family))
+		self.endOutput(header=['pallet', 'version', 'release', 'arch', 'os'])
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())
