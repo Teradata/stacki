@@ -30,11 +30,12 @@ class Sles15MediaProbe(Probe):
 			^SUSE\ -\                # preamble
 			(?P<os>\w+)-             # match the OS: SLE
 			(?P<rel>\w+)-            # match the release: 15
-			((?P<servicepack>\w+)-)? # optionally, match the version: SP1
-			(?P<disctype>\w+)-       # match the disctype: Packages
+			((?P<servicepack>\w+)-)? # optionally, match the version: SP1, SP2
+			(?P<disctype>\w+)-       # match the disctype: Packages, Full
 			(?P<arch>\w+)-           # match the arch
 			.+-                      # the build number of the iso
-			\w+(?P<dvd_num>\d+)      # match just the disk number
+			(\w+(?P<dvd_num>\d+)|    # match just the disk number or.. 
+			(?P<source>\w+))         # if there is no disk number, match source
 			''',
 			re.VERBOSE
 		)
@@ -43,9 +44,9 @@ class Sles15MediaProbe(Probe):
 		if not match:
 			return []
 
-		getter = itemgetter('os', 'rel', 'servicepack', 'disctype', 'arch', 'dvd_num')
+		getter = itemgetter('os', 'rel', 'servicepack', 'disctype', 'arch', 'dvd_num', 'source')
 
-		os, rel, servicepack, disctype, arch, dvd_num = getter(match.groupdict())
+		os, rel, servicepack, disctype, arch, dvd_num, source = getter(match.groupdict())
 
 		distro_family = None
 		if os == 'SLE':
@@ -55,6 +56,9 @@ class Sles15MediaProbe(Probe):
 			servicepack = servicepack.lower()
 		else:
 			servicepack = ''
+
+		if not dvd_num:
+			dvd_num = source
 
 		version = f'{rel}{servicepack}'
 		release = f'{distro_family}{rel}'
