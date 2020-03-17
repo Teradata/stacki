@@ -5,10 +5,10 @@
 # @copyright@
 
 import stack.commands
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class Command(stack.commands.set.host.command,
-	      stack.commands.BoxArgumentProcessor):
+	      BoxArgumentProcessor):
 	"""
 	Sets the box for a list of hosts.
 
@@ -33,7 +33,7 @@ class Command(stack.commands.set.host.command,
 		])
 
 		# Check to make sure this is a valid box name
-		self.getBoxNames([ box ])
+		self.get_box_names([ box ])
 
 		for host in hosts:
 			self.db.execute("""

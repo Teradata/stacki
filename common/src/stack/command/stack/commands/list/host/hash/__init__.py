@@ -9,9 +9,10 @@
 import os
 import hashlib
 import stack.commands
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class Command(stack.commands.list.host.command,
-	stack.commands.BoxArgumentProcessor):
+	BoxArgumentProcessor):
 	"""
 	Calculate and list the MD5 hashes of a host's:
 
@@ -63,7 +64,7 @@ class Command(stack.commands.list.host.command,
 			# calculate MD5s for the pallets associated with the host
 			#
 			box = self.getHostAttr(host, 'box')
-			for pallet in self.getBoxPallets(box):
+			for pallet in self.get_box_pallets(box):
 				path = '/export/stack/pallets/%s/%s/%s/%s/%s' % \
 					(pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch)
 

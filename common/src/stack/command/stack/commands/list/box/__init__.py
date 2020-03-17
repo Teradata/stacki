@@ -11,10 +11,10 @@
 # @rocks@
 
 import stack.commands
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class command(stack.commands.list.command,
-	      stack.commands.BoxArgumentProcessor):
+	      BoxArgumentProcessor):
 	pass
 
 
@@ -35,8 +35,8 @@ class Command(command):
 		pallets = {}
 		carts	= {}
 
-		for box in self.getBoxNames(args):
-			for pallet in self.getBoxPallets(box):
+		for box in self.get_box_names(args):
+			for pallet in self.get_box_pallets(box):
 				fullname = '%s-%s' % (pallet.name, pallet.version)
 				if pallet.rel:
 					fullname += '-%s' % pallet.rel
@@ -54,7 +54,7 @@ class Command(command):
 
 		self.beginOutput()
 
-		for box in self.getBoxNames(args):
+		for box in self.get_box_names(args):
 			id, os = self.db.select("""
 				b.id, o.name from boxes b, oses o
 				where b.name=%s	and b.os=o.id

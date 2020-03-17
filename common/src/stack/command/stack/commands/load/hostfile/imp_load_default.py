@@ -14,13 +14,13 @@ import stack.csv
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class Implementation(stack.commands.ApplianceArgumentProcessor,
 	stack.commands.HostArgumentProcessor,
 	stack.commands.NetworkArgumentProcessor,
-	stack.commands.BoxArgumentProcessor,
-	stack.commands.Implementation):	
+	BoxArgumentProcessor,
+	stack.commands.Implementation):
 
 	"""
 	Load attributes into the database based on comma-separated formatted
@@ -65,7 +65,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 		self.appliances = self.getApplianceNames()
 		# need all the info from networks(/subnets)
 		self.networks = dict((k, next(v)) for k, v in groupby(self.owner.call('list.network'), itemgetter('network')))
-		self.boxes = self.getBoxNames()
+		self.boxes = self.get_box_names()
 		self.actions = [entry['bootaction'] for entry in self.owner.call('list.bootaction')]
 
 		try:
@@ -88,7 +88,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 							required.remove(header[i])
 
 					if len(required) > 0:
-						msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)	
+						msg = 'the following required fields are not present in the input file: "%s"' % ', '.join(required)
 						raise CommandError(self.owner, msg)
 
 					continue
@@ -173,7 +173,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 						osaction = field
 					elif header[i] == 'groups':
 						groups = field
-							
+
 				if not name:
 					msg = 'empty host name found in "name" column'
 					raise CommandError(self.owner, msg)
@@ -220,7 +220,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 					raise CommandError(self.owner, msg)
 
 				self.owner.interfaces[name][interface] = {}
-				
+
 				if default:
 					self.owner.interfaces[name][interface]['default'] = default
 				if ip:
@@ -313,7 +313,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 			# 'default' checking
 			#
 			ifaces = self.owner.interfaces[name].keys()
-			
+
 			#
 			# if there is only one interface, make it the default
 			#
@@ -341,7 +341,7 @@ class Implementation(stack.commands.ApplianceArgumentProcessor,
 				if multiple_defaults:
 					msg = 'host "%s" has more than one interface designated as the "default" interface.\nedit your spreadsheet so that only one interface is the "default".' % name
 					raise CommandError(self.owner, msg)
-					
+
 			#
 			# interface specific checks
 			#

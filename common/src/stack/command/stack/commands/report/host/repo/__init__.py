@@ -13,10 +13,10 @@
 #
 
 import stack.commands
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.BoxArgumentProcessor, stack.commands.report.command):
+	BoxArgumentProcessor, stack.commands.report.command):
 	"""
 	Create a report that describes the repository configuration file
 	that should be put on hosts.
@@ -24,7 +24,7 @@ class Command(stack.commands.HostArgumentProcessor,
 	<arg optional='0' type='string' name='host'>
 	Host name of machine
 	</arg>
-	
+
 	<example cmd='report host repo backend-0-0'>
 	Create a report of the repository configuration file for backend-0-0.
 	</example>
@@ -38,7 +38,7 @@ class Command(stack.commands.HostArgumentProcessor,
 		for host in hosts:
 			osname = self.db.getHostOS(host)
 			server = self.getHostAttr(host, 'Kickstart_PrivateAddress')
-			
+
 			self.runImplementation(osname, (host, server))
 
 		self.endOutput(padChar='', trimOwner=True)
