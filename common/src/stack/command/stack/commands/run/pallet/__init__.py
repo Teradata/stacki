@@ -16,12 +16,12 @@ import subprocess
 import stack.commands
 from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired, CommandError
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class Command(
 	stack.commands.run.command,
 	PalletArgumentProcessor,
-	stack.commands.BoxArgumentProcessor
+	BoxArgumentProcessor
 ):
 	"""
 	Installs a pallet on the fly
@@ -68,7 +68,7 @@ class Command(
 			# Make sure the pallets exist and are enabled for the frontend box
 			box = self.call("list.host",["localhost"])[0]["box"]
 			# List of all pallets enabled for the frontend
-			fe_pallets = self.getBoxPallets(box)
+			fe_pallets = self.get_box_pallets(box)
 			# List of all pallets specified on the command line
 			arg_pallets = self.get_pallets(args, params)
 			# Find the intersection of the 2 list of pallets

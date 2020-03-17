@@ -20,10 +20,10 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 from xml.sax import make_parser
 from xml.sax import saxutils
+from stack.argument_processors.box import BoxArgumentProcessor
 
-
-class Command(stack.commands.list.command, 
-	      stack.commands.BoxArgumentProcessor):
+class Command(stack.commands.list.command,
+	      BoxArgumentProcessor):
 	"""
 	Lists the XML configuration information for a host. The graph
 	traversal for the XML output is rooted at the XML node file
@@ -72,7 +72,7 @@ class Command(stack.commands.list.command,
 				('gen', 'kgen'),
 				('basedir', None),
 				])
-			
+
 		if pallets:
 			pallets = pallets.split(',')
 
@@ -111,7 +111,7 @@ class Command(stack.commands.list.command,
 			try:
 				a = saxutils.escape(attrs[key],
 						    {'"': '&#x22;',
-						     '%': '&#x25;', 
+						     '%': '&#x25;',
 						     '^': '&#x5E;'})
 			except:
 				a = attrs[key]
@@ -123,13 +123,13 @@ class Command(stack.commands.list.command,
 
 		if 'arch' not in attrs:
 			attrs['arch'] = self.arch
-			
+
 		if 'hostname' not in attrs:
 			attrs['hostname'] = self.db.getHostname()
 
 		if 'graph' not in attrs:
 			attrs['graph'] = 'default'
-			
+
 		if 'box' not in attrs:
 			attrs['box'] = 'default'
 
@@ -148,20 +148,20 @@ class Command(stack.commands.list.command,
 		attrs['version'] = stack.version
 		attrs['release'] = stack.release
 		attrs['root']	 = root
-		
+
 		# Parse the XML graph files in the chosen directory
 
-		#	
+		#
 		# get the pallets that are in the box associated with the host
-		#	
+		#
 		items = []
 		try:
-			for pallet in self.getBoxPallets(attrs['box']):
+			for pallet in self.get_box_pallets(attrs['box']):
 				items.append(os.path.join('/export', 'stack', 'pallets',
 					pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch))
 		except:
 			#
-			# there is no output from 'getBoxPallets()'.
+			# there is no output from 'get_box_pallets()'.
 			# let's assume that the database is down
 			# (e.g., we are installing and configuring
 			# the frontend's database) and we'll get
@@ -194,7 +194,7 @@ class Command(stack.commands.list.command,
 			if attrs['box'] in o['boxes'].split():
 				items.append(os.path.join('/export', 'stack',
 					'carts', o['name']))
-	
+
 				#
 				# if a cart has changed since the last time we
 				# built a kickstart file, we will need to
@@ -254,13 +254,13 @@ class Command(stack.commands.list.command,
 		#
 		# Now test for arbitrary conditionals (cond tag),
 		# old arch,os test are part of this now are still supported
-		
+
 		nodesHash = {}
 		for node, cond in nodes:
 			nodesHash[node.name] = node
 			if not stack.cond.EvalCondExpr(cond, attrs):
 				nodesHash[node.name] = None
-			
+
 		# Initialize the hash table for the dependency
 		# nodes, and filter out everyone not for our
 		# generator type (e.g. 'kgen').
@@ -340,13 +340,13 @@ class Command(stack.commands.list.command,
 
 			if pallets and pallet not in pallets:
 				continue
-				
+
 			try:
 				self.addText('%s\n' % node.getXML())
 			except Exception as msg:
 				raise stack.util.KickstartNodeError("in %s node: %s" % (node, msg))
 
 		self.addText('</stack:profile>\n')
-		
-		
+
+
 

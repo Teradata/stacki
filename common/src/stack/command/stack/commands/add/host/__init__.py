@@ -20,12 +20,12 @@ from stack.exception import (
 	ArgValue,
 )
 from stack.util import is_valid_hostname
-
+from stack.argument_processors.box import BoxArgumentProcessor
 
 class command(
 	stack.commands.HostArgumentProcessor,
 	stack.commands.ApplianceArgumentProcessor,
-	stack.commands.BoxArgumentProcessor,
+	BoxArgumentProcessor,
 	stack.commands.EnvironmentArgumentProcessor,
 	stack.commands.add.command
 ):
@@ -144,7 +144,7 @@ class Command(command):
 		if appliance not in appliances:
 			raise CommandError(self, 'appliance "%s" is not in the database' % appliance)
 
-		if box not in self.getBoxNames():
+		if box not in self.get_box_names():
 			raise CommandError(self, 'box "%s" is not in the database' % box)
 
 		osname = None

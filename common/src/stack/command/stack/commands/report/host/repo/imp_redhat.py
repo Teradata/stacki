@@ -19,7 +19,7 @@ class Implementation(stack.commands.Implementation):
 
 		repo.append('<stack:file stack:name="%s">' % filename)
 
-		for pallet in self.owner.getBoxPallets(box):
+		for pallet in self.owner.get_box_pallets(box):
 			repo.append('[%s-%s-%s]' % (pallet.name, pallet.version, pallet.rel))
 			repo.append('name=%s %s %s' % (pallet.name, pallet.version, pallet.rel))
 			repo.append('baseurl=http://%s/install/pallets/%s/%s/%s/%s/%s' % \

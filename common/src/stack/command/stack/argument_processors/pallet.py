@@ -1,5 +1,16 @@
-from collections import namedtuple
+from dataclasses import dataclass
 from stack.exception import ArgNotFound
+
+@dataclass(eq=True, order=True, frozen=True)
+class Pallet:
+	"""A dataclass representation of the Roll schema in the database."""
+	id: int
+	name: str
+	version: str
+	rel: str
+	arch: str
+	os: str
+	url: str
 
 class PalletArgumentProcessor:
 
@@ -23,10 +34,6 @@ class PalletArgumentProcessor:
 		# Find all pallet names if we weren't given one
 		if not args:
 			args = ['%']
-
-		Pallet = namedtuple('Pallet', [
-			'id', 'name', 'version', 'rel', 'arch', 'os', 'url'
-		])
 
 		pallets = []
 		for arg in args:

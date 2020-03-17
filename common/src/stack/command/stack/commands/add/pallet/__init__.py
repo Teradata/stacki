@@ -54,7 +54,7 @@ class Command(command):
 	<param type='string' name='password'>
 	A password that will be used for authenticating to any remote pallet locations
 	</param>
-		
+
 	<param type='bool' name='clean'>
 	If set, then remove all files from any existing pallets of the same
 	name, version, and architecture before copying the contents of the
@@ -70,13 +70,13 @@ class Command(command):
 	Add the pallet info to the cluster database.
 	The default is: true.
 	</param>
-	
+
 	<example cmd='add pallet clean=true kernel*iso'>
 	Adds the Kernel pallet to local pallet directory.  Before the pallet is
 	added the old Kernel pallet packages are removed from the pallet
 	directory.
 	</example>
-	
+
 	<example cmd='add pallet kernel*iso https://10.0.1.3/pallets/'>
 	Added the Kernel pallet along with any pallets found at the remote server
 	 to the local pallet directory.
@@ -133,7 +133,7 @@ class Command(command):
 
 		# use rsync to perform the copy
 		# archive implies
-		# --recursive, 
+		# --recursive,
 		# --links - copy symlinks as symlinks
 		# --perms - preserve permissions
 		# --times - preserve mtimes
@@ -200,7 +200,7 @@ class Command(command):
 			msg = f'Pallet could not be unmounted from {mount_point} ({iso_name}).'
 			msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
 			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
-		
+
 
 	def patch_pallet(self, pallet_info):
 		'''

@@ -12,9 +12,9 @@
 
 import stack.commands
 from stack.exception import ArgRequired, CommandError
+from stack.argument_processors.box import BoxArgumentProcessor
 
-
-class Command(stack.commands.BoxArgumentProcessor,
+class Command(BoxArgumentProcessor,
 	stack.commands.remove.command):
 	"""
 	Remove a box specification from the database.
@@ -22,7 +22,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 	<arg type='string' name='box'>
 	A list of boxes to remove.  Boxes must not have any hosts assigned.
 	</arg>
-	
+
 	<example cmd='remove box test'>
 	Removes the box named "test" from the database.
 	</example>
@@ -32,7 +32,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 		if len(args) < 1:
 			raise ArgRequired(self, 'box')
 
-		boxes = self.getBoxNames(args)
+		boxes = self.get_box_names(args)
 
 		# Prevent user from removing the default box.
 		if 'default' in boxes:

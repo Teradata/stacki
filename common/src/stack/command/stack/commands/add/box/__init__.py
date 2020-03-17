@@ -13,9 +13,9 @@
 import stack
 import stack.commands
 from stack.exception import ArgUnique, CommandError, ArgNotFound
+from stack.argument_processors.box import BoxArgumentProcessor
 
-
-class Command(stack.commands.BoxArgumentProcessor,
+class Command(BoxArgumentProcessor,
 	stack.commands.OSArgumentProcessor,
 	stack.commands.add.command):
 	"""
@@ -24,7 +24,7 @@ class Command(stack.commands.BoxArgumentProcessor,
 	<arg type='string' name='box'>
 	Name of the new box.
 	</arg>
-	
+
 	<param type='string' name='os'>
 	OS associated with the box. Default is the native os (e.g., 'redhat', 'sles').
 	</param>
@@ -39,8 +39,8 @@ class Command(stack.commands.BoxArgumentProcessor,
 			raise ArgUnique(self, 'box')
 
 		box = args[0]
-		
-		if box in self.getBoxNames():
+
+		if box in self.get_box_names():
 			raise CommandError(self, 'box "%s" exists' % box)
 
 		OS, = self.fillParams([ ('os', self.os) ])

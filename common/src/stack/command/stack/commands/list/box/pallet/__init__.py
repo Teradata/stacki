@@ -29,7 +29,7 @@ class Command(stack.commands.list.box.command):
 	def run(self, params, args):
 		self.beginOutput()
 
-		boxes = self.getBoxNames(args)
+		boxes = self.get_box_names(args)
 
 		for box in boxes:
 			rows = self.db.select("""
