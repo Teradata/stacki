@@ -284,14 +284,14 @@ def page_not_found(e):
 def main(environment, trackerfile, nosavefile, port):
 
 	# Setup the logger
-	logHandler = FileHandler('/var/log/ludicrous-client-debug.log')
-	formatter = logging.Formatter("%(asctime)s: %(message)s", "%Y-%m-%d %H:%M:%S")
-	logHandler.setFormatter(formatter)
-	logHandler.setLevel(logging.DEBUG)
+	logging.basicConfig(
+		filename="/var/log/ludicrous-client-debug.log",
+		format="%(asctime)s: %(message)s",
+		datefmt="%Y-%m-%d %H:%M:%S",
+		level=logging.DEBUG
+	)
 	app.logger.setLevel(logging.DEBUG)
-	log = logging.getLogger('werkzeug')
-	log.setLevel(logging.DEBUG)
-	app.logger.addHandler(logHandler)
+	logging.getLogger('werkzeug').setLevel(logging.DEBUG)
 
 	client_settings['ENVIRONMENT']	= environment
 	client_settings['SAVE_FILES']	= False if nosavefile else True
