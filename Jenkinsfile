@@ -79,7 +79,7 @@ pipeline {
         stage('Check Branch') {
             // Only need these checks on one platform for feature and bugfix branches
             when {
-                environment name: 'PLATFORM', value: 'sles12'
+                environment name: 'PLATFORM', value: 'sles15'
                 anyOf {
                     branch 'feature/*'
                     branch 'bugfix/*'
@@ -173,6 +173,11 @@ pipeline {
                             sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1810.iso .'
                             // sh 'cp /export/www/stacki-isos/redhat7/os/os-7.6_20191101-redhat7.x86_64.disk1.iso .'
                             // env.OS_PALLET = 'os-7.6_20191101-redhat7.x86_64.disk1.iso'
+                            break
+
+                        case 'sles15':
+                            sh 'cp /export/www/installer-isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso .'
+                            sh 'cp /export/www/installer-isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso .'
                             break
 
                         case 'sles12':
@@ -291,6 +296,7 @@ pipeline {
                             env.ART_OS = [
                                 'sles11': 'sles-11.3',
                                 'sles12': 'sles-12.3',
+                                'sles15': 'sles-15.1',
                                 'redhat7': 'redhat-7.4'
                             ][env.PLATFORM]
                         }
@@ -391,6 +397,11 @@ pipeline {
                                 sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1810.iso .'
                                 break
 
+                            case 'sles15':
+                                sh 'cp /export/www/installer-isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso .'
+                                sh 'cp /export/www/installer-isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso .'
+                                break
+
                             case 'sles12':
                                 sh 'cp /export/www/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso .'
                                 sh 'cp /export/www/installer-isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso .'
@@ -465,9 +476,8 @@ pipeline {
             parallel {
                 stage('Unit') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
@@ -521,9 +531,8 @@ pipeline {
 
                 stage('Integration - Group 1') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
@@ -574,9 +583,8 @@ pipeline {
 
                 stage('Integration - Group 2') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
@@ -627,9 +635,8 @@ pipeline {
 
                 stage('Integration - Group 3') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
