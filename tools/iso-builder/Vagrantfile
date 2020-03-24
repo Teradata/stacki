@@ -1,9 +1,12 @@
 require "json"
 require "net/http"
+require 'timeout'
 
 # Are we internal to TD?
 begin
-  INTERNAL = Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+  INTERNAL = Timeout::timeout(5) {
+    Net::HTTP.get_response("stacki-builds.labs.teradata.com", "/vagrant-boxes/").code == "200" ? "true" : "false"
+  }
 rescue
   INTERNAL = "false"
 end
@@ -14,8 +17,8 @@ if ARGV[0] == "up"
     abort("Error: PLATFORM environment variable must be set")
   end
 
-  if not ["redhat7", "sles12", "sles11"].include?(ENV["PLATFORM"])
-    abort("Error: PLATFORM must be one of 'redhat7', 'sles12', or 'sles11'")
+  if not ["redhat7", "sles15", "sles12", "sles11"].include?(ENV["PLATFORM"])
+    abort("Error: PLATFORM must be one of 'redhat7', 'sles15', 'sles12', or 'sles11'")
   end
 
   if not ENV.has_key?("ISOS")
@@ -53,6 +56,9 @@ Vagrant.configure("2") do |config|
         if INTERNAL == "true"
           config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/centos-7.6.json"
         end
+      when "sles15"
+        config.vm.box = "stacki/sles-15.1"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-15.1.json"
       when "sles12"
         config.vm.box = "stacki/sles-12.3"
         config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"

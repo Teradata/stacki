@@ -36,7 +36,6 @@ then
 
     zypper addrepo iso:/?iso=/export/isos/SLES-11-SP3-DVD-x86_64-GM-DVD1.iso os
     zypper addrepo iso:/?iso=/export/isos/SLE-11-SP3-SDK-DVD-x86_64-GM-DVD1.iso sdk
-    zypper update
 
     zypper install -y git-core
 
@@ -67,7 +66,38 @@ then
     zypper addrepo iso:/?iso=/export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
     zypper addrepo iso:/?iso=/export/isos/SLE-12-SP3-SDK-DVD-x86_64-GM-DVD1.iso sdk
 
-    zypper update
+    zypper install -y git-core
+
+elif [[ $PLATFORM = "sles15" ]]
+then
+    if [[ ! -f SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso ]]
+    then
+        curl -sfSLO --retry 3 $INSTALLER_ISOS/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+    fi
+
+    if [[ $(md5sum SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso | cut -c 1-32) != "f61a98405b233c62f5b8d48ac6c611d4" ]]
+    then
+        echo "Error: SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso is corrupt"
+        exit 1
+    fi
+
+    if [[ ! -f SLE-15-SP1-Packages-x86_64-GM-DVD1.iso ]]
+    then
+        curl -sfSLO --retry 3 $INSTALLER_ISOS/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+    fi
+
+    if [[ $(md5sum SLE-15-SP1-Packages-x86_64-GM-DVD1.iso | cut -c 1-32) != "1caa5d8348ac16f793d716a4b78cd948" ]]
+    then
+        echo "Error: SLE-15-SP1-Packages-x86_64-GM-DVD1.iso is corrupt"
+        exit 1
+    fi
+
+    # Virtualbox is flaky with using large ISOs in a shared folder, so copy them into the VM
+    cp SLE-15-*.iso /export/
+
+    zypper addrepo iso:/?iso=/export/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso os
+    zypper addrepo iso:/?iso=/export/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso packages
+
     zypper install -y git-core
 
 else

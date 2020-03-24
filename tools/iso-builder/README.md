@@ -11,7 +11,7 @@ Outside of the Teradata network, only the "redhat7" platform (CentOS based) can 
 
 Set the following REQUIRED environment variable:
 
-* **PLATFORM** - The platform to build for. One of: "redhat7", "sles12", or "sles11".
+* **PLATFORM** - The platform to build for. One of: "redhat7", "sles15", "sles12", or "sles11".
 
 Optional environment variables:
 
