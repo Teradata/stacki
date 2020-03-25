@@ -9,7 +9,53 @@
 <stack:script stack:stage="install-post">
 <stack:file stack:name="/tmp/dump-bootaction.json">
 {
-        "bootaction": [
+	"bootaction": [
+</stack:file>
+<stack:file stack:name="/tmp/dump-bootaction.json" stack:mode="append" stack:cond="os.version == '15.x'">
+		{
+			"name":    "default",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles15-15sp1-&arch;",
+			"ramdisk": "initrd-&os;-sles15-15sp1-&arch;",
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/15sp1/sles15/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+		},
+		{
+			"name":    "console",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles15-15sp1-&arch;",
+			"ramdisk": "initrd-&os;-sles15-15sp1-&arch;",
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/15sp1/sles15/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
+		},
+		{
+			"name":    "rescue",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles15-15sp1-&arch;",
+			"ramdisk": "initrd-&os;-sles15-15sp1-&arch;",
+			"args":    "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+		},
+		{
+			"name":    "install sles 12.3",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles12-12sp3-&arch;",
+			"ramdisk": "initrd-&os;-sles12-12sp3-&arch;",
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp3/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress;"
+		},
+		{
+			"name":    "install sles 12.3 console",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles12-12sp3-&arch;",
+			"ramdisk": "initrd-&os;-sles12-12sp3-&arch;",
+			"args":    "install=http://&Kickstart_PrivateAddress;/install/pallets/SLES/12sp3/sles12/&os;/&arch; autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server=&Kickstart_PrivateAddress; console=ttyS0,115200n8 nomodeset=1 textmode=1"
+		},
+		{
+			"name":    "rescue sles 12.3",
+			"type":    "install",
+			"kernel":  "vmlinuz-&os;-sles12-12sp3-&arch;",
+			"ramdisk": "initrd-&os;-sles12-12sp3-&arch;",
+			"args":    "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
+		},
+</stack:file>
+<stack:file stack:name="/tmp/dump-bootaction.json" stack:mode="append" stack:cond="os.version == '12.x'">
 		{
 			"name":    "default",
 			"type":    "install",
@@ -31,6 +77,8 @@
 			"ramdisk": "initrd-&os;-sles12-12sp3-&arch;",
 			"args":    "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
 		},
+</stack:file>
+<stack:file stack:name="/tmp/dump-bootaction.json" stack:mode="append">
 		{
 			"name":    "install sles 12.2",
 			"type":    "install",
@@ -73,7 +121,7 @@
 			"ramdisk": "initrd-&os;-sles11-11sp3-&arch;",
 			"args":    "splash=silent rescue=1 showopts brokenmodules=mptfc,qla2xxx,mpt2sas,mpt3sas,mlx4_core,mlx4_ib,mlx4_en,mlx5_core,mlx5_ib"
 		}
-	]		
+	]
 }
 </stack:file>
 </stack:script>
