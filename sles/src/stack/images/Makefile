@@ -17,6 +17,8 @@ ifeq ($(OS), sles)
 # to build the image on SLES 11.
 ifeq ($(RELEASE), sles12)
 SRCDIRS = SLES/sles12/12sp2 SLES/sles12/12sp3 SLES/sles11/11sp3
+else ifeq ($(RELEASE), sles15)
+SRCDIRS = SLES/sles15/15sp1
 else
 SRCDIRS =
 endif

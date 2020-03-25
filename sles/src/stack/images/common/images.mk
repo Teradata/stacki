@@ -11,6 +11,14 @@ PALLET_PATCH_DIR = /opt/stack/pallet-patches/$(SUSE_PRODUCT)-$(IMAGE_VERSION)-$(
 
 -include ../../../common/images-$(OS).mk
 
+# In sles < 15 the checksum file is called `content`, but in sles >= 15 (at this time)
+# the file is called `CHECKSUMS`.
+ifeq ($(RELEASE),sles15)
+CHECKSUMS_FILE = CHECKSUMS
+else
+CHECKSUMS_FILE = content
+endif
+
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
@@ -33,6 +41,13 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
+ifeq ($(RELEASE),sles15)
+	# Under SLES 15's newer version of gpg we need to wire up the agent sockets to a different location
+	printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent\n' > ~/.gnupg/S.gpg-agent
+	printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.browser\n' > ~/.gnupg/S.gpg-agent.browser
+	printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.extra\n' > ~/.gnupg/S.gpg-agent.extra
+	printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.ssh\n' > ~/.gnupg/S.gpg-agent.ssh
+endif
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf stacki-initrd/installkey.gpg~
@@ -63,12 +78,12 @@ install:: keyring
 	mkdir -p $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs
 	cd SLES-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs)
 	$(INSTALL) -m0644 sles-stacki.img $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/boot/x86_64/sles-stacki.img
-	# Add the SHA1 of the stacki image to content file
-	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
+	# Add the HASH of the stacki image to the CHECKSUMS_FILE
+	echo "$(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 	# Sign the content file
 	gpg --armor \
-		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content.asc \
-		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
+		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE).asc \
+		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 
 clean::
 	rm -rf $(CURDIR)/localrepo

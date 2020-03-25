@@ -6,7 +6,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-source /etc/os-release
+
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+fi
 
 if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`

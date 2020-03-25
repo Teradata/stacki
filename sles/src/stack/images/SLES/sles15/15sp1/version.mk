@@ -1,0 +1,6 @@
+ORDER		= 99
+PKGROOT		= /opt/stack/images
+IMAGE_VERSION	= 15sp1
+IMAGE_RELEASE	= sles15
+SUSE_PRODUCT	= SLES
+DISTRO_FAMILY	= sles
