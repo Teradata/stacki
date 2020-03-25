@@ -45,6 +45,8 @@ from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
 
+# dynamically get arg processors in the 'stack.' namespace
+from stack.argument_processors import *
 
 _logPrefix = ''
 _debug     = False
