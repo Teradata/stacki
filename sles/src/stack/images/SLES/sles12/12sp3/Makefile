@@ -14,7 +14,7 @@ include images.mk
 include ../../../common/images.mk
 
 install:: 
-SHA = $(shell sha256sum sles-stacki.img | awk '{print "SHA256 "$$1;}')
+SHA = $(shell sha256sum sles-stacki.img | awk '{print "HASH SHA256 "$$1;}')
 
 clean::
 	rm -rf cache
