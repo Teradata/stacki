@@ -5,12 +5,12 @@
 # @copyright@
 
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	Output the PXE file for a host
 	<arg name="host" type="string" repeat="1">

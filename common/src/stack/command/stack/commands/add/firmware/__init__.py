@@ -10,13 +10,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.firmware import FirmwareArgProcessor
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
-class command(stack.commands.add.command, FirmwareArgumentProcessor):
+class command(stack.commands.add.command, FirmwareArgProcessor):
 	pass
 
-class Command(command, stack.commands.HostArgumentProcessor):
+class Command(command, HostArgProcessor):
 	"""
 	Adds a firmware image to stacki.
 

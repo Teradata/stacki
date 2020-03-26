@@ -4,11 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.list.command):
+class Command(CartArgProcessor, stack.commands.list.command):
 	"""
 	List the status of available carts.
 	

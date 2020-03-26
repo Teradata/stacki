@@ -15,7 +15,7 @@ from collections import OrderedDict
 from stack.exception import ArgNotFound
 from stack.util import flatten
 
-class EnvironmentArgumentProcessor:
+class EnvironmentArgProcessor:
 	"""
 	An Interface class to add the ability to process environment arguments.
 	"""

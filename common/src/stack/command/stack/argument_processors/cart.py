@@ -13,7 +13,7 @@
 from stack.exception import ArgNotFound
 from stack.util import flatten
 
-class CartArgumentProcessor:
+class CartArgProcessor:
 	"""
 	An Interface class to add the ability to process cart arguments.
 	"""

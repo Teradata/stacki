@@ -9,11 +9,11 @@ from pathlib import Path
 from collections import namedtuple
 from dataclasses import make_dataclass
 import itertools
+from stack.argument_processors.firmware import FirmwareArgProcessor
 import stack.commands
 import stack.firmware
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
-class Command(stack.commands.sync.host.command, FirmwareArgumentProcessor):
+class Command(stack.commands.sync.host.command, FirmwareArgProcessor):
 	"""
 	Syncs firmware to hosts that are compatible with the firmware
 

@@ -4,11 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.box import BoxArgProcessor
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
 
-class Command(stack.commands.set.host.command,
-	      BoxArgumentProcessor):
+class Command(BoxArgProcessor, stack.commands.set.host.command):
 	"""
 	Sets the box for a list of hosts.
 

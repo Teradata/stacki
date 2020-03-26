@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import ArgUnique
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Output the storage controller configuration for a specific host
 

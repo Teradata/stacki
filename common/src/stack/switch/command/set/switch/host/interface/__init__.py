@@ -5,14 +5,13 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.exception import (
 	ParamRequired, ParamUnique, ParamType, CommandError, ArgUnique, ArgRequired, ArgError
 )
 
-
-class Command(stack.commands.SwitchArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
-		stack.commands.set.switch.host.command):
+class Command(HostArgProcessor, SwitchArgProcessor, stack.commands.set.switch.host.command):
 	"""
 	In the switch to host relation that Stacki keeps in its database, this command
 	changes the name of a host's interface that is associated with a specific port

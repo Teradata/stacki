@@ -6,16 +6,14 @@
 
 import re
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
+from stack.argument_processors.os import OSArgProcessor
 import stack.csv
 import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(
-	stack.commands.OSArgumentProcessor,
-	stack.commands.ApplianceArgumentProcessor,
-	stack.commands.Implementation
-):
+class Implementation(ApplianceArgProcessor, OSArgProcessor, stack.commands.Implementation):
 	"""
 	Put storage partition configuration into the database based on
 	a comma-separated formatted file.

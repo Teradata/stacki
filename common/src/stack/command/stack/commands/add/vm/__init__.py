@@ -5,16 +5,17 @@
 # @copyright@
 
 import stack.commands
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.exception import CommandError, ArgRequired, ParamError
 
 class command(
-	stack.commands.HostArgumentProcessor,
+	HostArgProcessor,
 	stack.commands.add.command
 ):
 	pass
 
-class Command(command, VmArgumentProcessor):
+class Command(command, VmArgProcessor):
 	"""
 	Add a new virtual machine host to the cluster.
 

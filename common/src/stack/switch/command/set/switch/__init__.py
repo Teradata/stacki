@@ -5,10 +5,10 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor, 
-	      stack.commands.set.command):
+class command(SwitchArgProcessor, stack.commands.set.command):
 
 	def fillSetSwitchParams(self, args, paramName):
 		

@@ -7,12 +7,13 @@
 #
 
 import os
+
+from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
 from stack.exception import ArgRequired
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.remove.command):
+class Command(CartArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a cart from both the database and filesystem.	
 

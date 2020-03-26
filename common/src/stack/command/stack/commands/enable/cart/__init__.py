@@ -5,12 +5,12 @@
 # @copyright@
 
 import os
+
+from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
-
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.enable.command):
+class Command(CartArgProcessor, stack.commands.enable.command):
 	"""
 	Enable an available cart. The cart must already be initialized on the
 	system using the command "stack add cart".

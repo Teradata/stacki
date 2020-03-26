@@ -4,10 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import ArgRequired
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.create.command):
+class command(HostArgProcessor, stack.commands.create.command):
 	pass
 
 class Command(command):

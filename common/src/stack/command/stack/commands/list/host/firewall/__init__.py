@@ -11,10 +11,9 @@
 # @rocks@
 
 import stack.commands
+from stack.argument_processors.network import NetworkArgProcessor
 
-
-class Command(stack.commands.NetworkArgumentProcessor,
-	stack.commands.list.host.command):
+class Command(NetworkArgProcessor, stack.commands.list.host.command):
 	"""
 	List the current firewall rules for the named hosts.
 

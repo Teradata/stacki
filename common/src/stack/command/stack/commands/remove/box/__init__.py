@@ -10,12 +10,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.box import BoxArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
-from stack.argument_processors.box import BoxArgumentProcessor
 
-class Command(BoxArgumentProcessor,
-	stack.commands.remove.command):
+class Command(BoxArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a box specification from the database.
 

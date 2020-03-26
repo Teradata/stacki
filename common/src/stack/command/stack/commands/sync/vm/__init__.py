@@ -1,15 +1,16 @@
 import stack.kvm
 from pathlib import Path
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.kvm import VmException
 from stack.exception import CommandError, ParamError
 from stack.util import _exec
 
-class command(stack.commands.HostArgumentProcessor,
+class command(HostArgProcessor,
 	stack.commands.sync.command):
 	pass
 
-class Command(command, VmArgumentProcessor):
+class Command(command, VmArgProcessor):
 	"""
 	Sync virtual machines to their hypervisor host.
 	Until this command is run, no virtual machines

@@ -11,25 +11,26 @@
 # @rocks@
 
 
-import os
-import sys
-import string
-import time
-import tempfile
-import shutil
-import subprocess
-import shlex
 import glob
 import json
+import os
+import shlex
+import shutil
+import string
+import subprocess
+import sys
+import tempfile
+import time
+
 import stack
+from stack.argument_processors.host import HostArgProcessor
+import stack.bootable
 import stack.commands
 import stack.dist
 import stack.file
 import stack.roll
 import stack.util
-import stack.bootable
 from stack.exception import CommandError, ArgRequired
-
 
 
 class Builder:
@@ -735,8 +736,7 @@ class GitRollBuilder(Builder):
 			print('pallet created at:\n\t%s' % iso_glob[0])
 
 
-class Command(stack.commands.create.command,
-		stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.create.command):
 
 	"""
 	Create a pallet.  You may specify either a single XML file or git URL

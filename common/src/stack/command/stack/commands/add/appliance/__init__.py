@@ -11,12 +11,12 @@
 # @rocks@
 
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
 import stack.commands
 from stack.exception import ArgUnique, CommandError
 
 
-class command(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.add.command):
+class command(ApplianceArgProcessor, stack.commands.add.command):
 	pass
 
 

@@ -10,11 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 
-
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.list.command):
+class command(HostArgProcessor, stack.commands.list.command):
 	pass
 	
 

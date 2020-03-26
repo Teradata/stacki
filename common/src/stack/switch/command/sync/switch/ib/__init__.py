@@ -4,10 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
-import stack.util
 import subprocess
+
+import stack.commands
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.exception import CommandError
+import stack.util
 
 def enforce_subnet_manager(command_handle, switches):
 	ibswitches = [sw for sw in command_handle.call('list.switch', switches + ['expanded=True'])
@@ -18,8 +20,7 @@ def enforce_subnet_manager(command_handle, switches):
 		msg = 'The following switches are either non-infiniband or are not subnet managers: '
 		raise CommandError(command_handle, msg + f'{", ".join(bad_switches)}')
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.sync.command):
+class command(SwitchArgProcessor, stack.commands.sync.command):
 		pass
 
 class Command(command):

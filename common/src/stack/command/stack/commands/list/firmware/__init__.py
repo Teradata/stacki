@@ -10,10 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.firmware import FirmwareArgProcessor
 import stack.commands
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
-class command(stack.commands.list.command, FirmwareArgumentProcessor):
+class command(stack.commands.list.command, FirmwareArgProcessor):
 	pass
 
 class Command(command):

@@ -57,7 +57,7 @@ class Pallet:
 			url="",
 		)
 
-class PalletArgumentProcessor:
+class PalletArgProcessor:
 
 	def get_pallets(self, args, params):
 		"""

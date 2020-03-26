@@ -4,14 +4,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack
-import stack.commands
 from collections import OrderedDict
 import json
 
+import stack
+import stack.commands
+from stack.argument_processors.os import OSArgProcessor
 
-class Command(stack.commands.dump.command,
-	      stack.commands.OSArgumentProcessor):
+class Command(OSArgProcessor, stack.commands.dump.command):
 	"""
 	Dump the contents of the stacki database as json.
 

@@ -5,7 +5,7 @@
 # @rocks@
 
 import stack.commands
+from stack.argument_processors.appliance import ApplianceArgProcessor
 
-
-class command(stack.commands.ApplianceArgumentProcessor, stack.commands.set.command):
+class command(ApplianceArgProcessor, stack.commands.set.command):
 	pass

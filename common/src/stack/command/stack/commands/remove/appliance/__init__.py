@@ -11,13 +11,11 @@
 # @rocks@
 
 import stack.commands
+from stack.argument_processors.appliance import ApplianceArgProcessor
 from stack.exception import ArgRequired, CommandError
 
-
-class command(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.remove.command):
+class command(ApplianceArgProcessor, stack.commands.remove.command):
 	pass
-
 
 class Command(command):
 	"""

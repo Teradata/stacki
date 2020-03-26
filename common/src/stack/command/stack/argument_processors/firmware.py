@@ -2,7 +2,7 @@ from pathlib import Path
 from collections import namedtuple, OrderedDict
 from stack.exception import CommandError
 
-class FirmwareArgumentProcessor:
+class FirmwareArgProcessor:
 	"""A mixin to process firmware command arguments."""
 
 	def get_make_id(self, make):

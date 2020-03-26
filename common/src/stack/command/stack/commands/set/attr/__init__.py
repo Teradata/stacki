@@ -10,10 +10,11 @@ import os
 import re
 
 import stack.commands
+from stack.argument_processors.scope import ScopeArgProcessor
 from stack.exception import CommandError, ArgRequired
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.set.command):
+class Command(ScopeArgProcessor, stack.commands.set.command):
 	"""
 	Sets a global attribute for all nodes
 

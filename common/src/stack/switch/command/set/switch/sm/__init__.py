@@ -4,15 +4,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
 from stack.bool import str2bool
+import stack.commands
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.exception import ArgUnique, CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
 
 
-class Command(stack.commands.SwitchArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
-		stack.commands.set.command):
+class Command(HostArgProcessor, SwitchArgProcessor, stack.commands.set.command):
 	"""
 	Enable the subnet manager for the given switch.
 

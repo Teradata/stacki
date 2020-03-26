@@ -22,12 +22,12 @@
 #
 #
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 import stack.commands.set.bootaction
 from stack.exception import CommandError
 
-
-class Command(stack.commands.HostArgumentProcessor,
+class Command(HostArgProcessor,
 	stack.commands.set.bootaction.command,
 	stack.commands.remove.command):
 

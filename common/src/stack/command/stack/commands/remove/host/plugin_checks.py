@@ -6,9 +6,9 @@
 
 import stack.commands
 from stack.exception import CommandError, ParamError
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 
-class Plugin(stack.commands.Plugin, VmArgumentProcessor):
+class Plugin(stack.commands.Plugin, VmArgProcessor):
 	"""
 	Prevent the removal of a virtual machine
 	hypervisor host with virtual machines

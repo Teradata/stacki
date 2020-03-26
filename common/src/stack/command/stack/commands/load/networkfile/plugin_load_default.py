@@ -7,9 +7,9 @@
 # @rocks@
 
 import stack.commands
+from stack.argument_processors.network import NetworkArgProcessor
 
-
-class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
+class Plugin(NetworkArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

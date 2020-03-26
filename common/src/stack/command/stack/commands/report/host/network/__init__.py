@@ -10,11 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 
-
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Outputs the network configuration file for a host (on RHEL-based
 	machines, this is the contents of the file /etc/sysconfig/network).

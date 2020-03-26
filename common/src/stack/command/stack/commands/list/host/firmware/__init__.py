@@ -10,16 +10,18 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import stack.commands
 import os
 import re
 from collections import namedtuple
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
+
+from stack.argument_processors.firmware import FirmwareArgProcessor
+from stack.argument_processors.host import HostArgProcessor
+import stack.commands
 
 class command(
-	stack.commands.HostArgumentProcessor,
+	FirmwareArgProcessor,
+	HostArgProcessor,
 	stack.commands.list.command,
-	FirmwareArgumentProcessor,
 ):
 	pass
 

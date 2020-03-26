@@ -11,6 +11,11 @@
 # @rocks@
 
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
+from stack.argument_processors.box import BoxArgProcessor
+from stack.argument_processors.environment import EnvironmentArgProcessor
+from stack.argument_processors.host import HostArgProcessor
+
 import stack.commands
 from stack.exception import (
 	CommandError,
@@ -19,14 +24,14 @@ from stack.exception import (
 	ArgRequired,
 	ArgValue,
 )
+
 from stack.util import is_valid_hostname
-from stack.argument_processors.box import BoxArgumentProcessor
 
 class command(
-	stack.commands.HostArgumentProcessor,
-	stack.commands.ApplianceArgumentProcessor,
-	BoxArgumentProcessor,
-	stack.commands.EnvironmentArgumentProcessor,
+	ApplianceArgProcessor,
+	BoxArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor,
 	stack.commands.add.command
 ):
 	pass

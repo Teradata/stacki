@@ -15,7 +15,7 @@ from collections import OrderedDict
 from stack.exception import ArgNotFound
 from stack.util import flatten
 
-class OSArgumentProcessor:
+class OSArgProcessor:
 	"""
 	An Interface class to add the ability to process os arguments.
 	"""

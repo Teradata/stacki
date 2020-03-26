@@ -8,12 +8,12 @@ import stack.commands
 import shlex
 from stack.kvm import Hypervisor
 from stack.kvm import VmException
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.util import _exec
 from pathlib import Path
 from contextlib import ExitStack
 
-class Plugin(stack.commands.Plugin, VmArgumentProcessor):
+class Plugin(stack.commands.Plugin, VmArgProcessor):
 
 	def provides(self):
 		return 'storage'

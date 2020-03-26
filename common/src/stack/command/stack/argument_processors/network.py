@@ -13,7 +13,7 @@
 from stack.exception import ArgNotFound
 from stack.util import flatten
 
-class NetworkArgumentProcessor:
+class NetworkArgProcessor:
 	"""
 	An Interface class to add the ability to process network (subnet) argument.
 	"""

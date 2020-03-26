@@ -8,12 +8,13 @@ import re
 import os
 import os.path
 import shutil
+
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command,
-	       stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.load.command):
 	"""
 	Load attributes into the database. The attribute csv file needs to have a mandatory 'target'
 	column with hostnames. There are 2 ways of specifying attribute name, value:

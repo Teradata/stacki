@@ -6,11 +6,11 @@
 
 import stack.commands
 import stack.kvm
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.kvm import VmException
 from collections import namedtuple
 
-class Implementation(stack.commands.Implementation, VmArgumentProcessor):
+class Implementation(stack.commands.Implementation, VmArgProcessor):
 	"""
 	Implementation class for set host power.
 	Communicates with kvm based hypervisors

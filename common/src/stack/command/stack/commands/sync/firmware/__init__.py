@@ -4,10 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.firmware import FirmwareArgProcessor
 import stack.commands
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
-class command(stack.commands.sync.command, FirmwareArgumentProcessor):
+class command(stack.commands.sync.command, FirmwareArgProcessor):
 	pass
 
 

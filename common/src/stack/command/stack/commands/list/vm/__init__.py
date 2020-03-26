@@ -6,14 +6,15 @@
 #
 
 import stack.commands
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.exception import CommandError, ParamError
 
-class command(stack.commands.HostArgumentProcessor,
+class command(HostArgProcessor,
         stack.commands.list.command):
         pass
 
-class Command(command, VmArgumentProcessor):
+class Command(command, VmArgProcessor):
 	"""
 	List virtual machines defined on the frontend
 

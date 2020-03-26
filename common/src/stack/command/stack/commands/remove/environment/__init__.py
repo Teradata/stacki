@@ -4,12 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.environment import EnvironmentArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
-
-class command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.remove.command):
+class command(EnvironmentArgProcessor, stack.commands.remove.command):
 	pass
 
 

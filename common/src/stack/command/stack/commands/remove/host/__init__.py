@@ -10,14 +10,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
-
-class command(stack.commands.HostArgumentProcessor,
-		stack.commands.remove.command):
+class command(HostArgProcessor, stack.commands.remove.command):
 	pass
-
 
 class Command(command):
 	"""

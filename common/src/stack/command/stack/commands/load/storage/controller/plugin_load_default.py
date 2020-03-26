@@ -6,11 +6,12 @@
 #
 # @rocks@
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
 import stack.commands
 from stack.exception import CommandError
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
+class Plugin(ApplianceArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

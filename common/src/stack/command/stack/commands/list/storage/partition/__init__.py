@@ -5,10 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.scope import ScopeArgProcessor
 from stack.exception import ArgError, ParamValue
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(ScopeArgProcessor, stack.commands.list.command):
 	"""
 	List the global storage partition configuration.
 

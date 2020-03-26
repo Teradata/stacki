@@ -10,14 +10,15 @@
 # check if name exists and is correct
 # if not private, check for default (later)
 
+from ipaddress import IPv4Address, IPv4Network, IPv6Network, IPv6Address
+
 import stack.csv
 import stack.commands
-from ipaddress import IPv4Address, IPv4Network, IPv6Network, IPv6Address 
+from stack.argument_processors.network import NetworkArgProcessor
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.NetworkArgumentProcessor,
-	stack.commands.Implementation):	
+class Implementation(NetworkArgProcessor, stack.commands.Implementation):
 
 	"""
 	Put network configuration into the database based on

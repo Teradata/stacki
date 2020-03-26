@@ -2,7 +2,7 @@ import pytest
 from stack.kvm import Hypervisor, VmException
 from unittest.mock import create_autospec, patch, call, ANY
 from stack.commands import DatabaseConnection
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.commands.list.vm.plugin_status import Plugin
 from stack.commands.list.vm import Command
 

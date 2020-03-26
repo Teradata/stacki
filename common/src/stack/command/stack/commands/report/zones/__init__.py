@@ -23,6 +23,7 @@ import os
 import time
 import zlib
 
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 import stack.commands.report
 from stack.util import flatten
@@ -42,8 +43,7 @@ preamble_template = """$TTL 3D
 """
 
 
-class Command(stack.commands.report.command,
-	stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Prints out all the named zone.conf and reverse-zone.conf files in XML.
 	To actually create these files, run the output of the command through

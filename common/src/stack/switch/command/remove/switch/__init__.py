@@ -5,10 +5,10 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.exception import CommandError, ArgRequired
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.remove.command):
+class command(SwitchArgProcessor, stack.commands.remove.command):
 	pass
 
 class Command(command):

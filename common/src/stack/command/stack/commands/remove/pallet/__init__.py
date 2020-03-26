@@ -19,11 +19,10 @@ import pathlib
 import shutil
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.argument_processors.pallet import PalletArgProcessor
 from stack.exception import ArgRequired
 
-class command(PalletArgumentProcessor,
-	      stack.commands.remove.command):
+class command(PalletArgProcessor, stack.commands.remove.command):
 	pass
 
 class Command(command):

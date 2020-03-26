@@ -4,12 +4,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
 import stack.csv
 import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.Implementation):
+class Implementation(ApplianceArgProcessor, stack.commands.Implementation):
 	"""
 	Put storage controller configuration into the database based on
 	a comma-separated formatted file.

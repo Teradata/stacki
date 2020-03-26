@@ -3,7 +3,7 @@ from collections import namedtuple
 from stack.kvm import Hypervisor, VmException
 from unittest.mock import create_autospec, patch
 from stack.commands import DatabaseConnection
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from stack.commands.set.host.power.imp_kvm import Implementation
 from stack.commands.set.host.power import Command
 

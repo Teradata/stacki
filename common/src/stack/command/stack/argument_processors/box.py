@@ -2,7 +2,7 @@ from stack.util import flatten
 from stack.exception import ArgNotFound
 from stack.argument_processors.pallet import Pallet
 
-class BoxArgumentProcessor:
+class BoxArgProcessor:
 	"""
 	An Interface class to add the ability to process box arguments.
 	"""

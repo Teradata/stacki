@@ -5,10 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.scope import ScopeArgProcessor
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
+class Command(ScopeArgProcessor, stack.commands.add.command):
 	"""
 	Add a global storage partition configuration for the all hosts in the cluster.
 

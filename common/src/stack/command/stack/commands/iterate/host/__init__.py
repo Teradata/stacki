@@ -11,11 +11,11 @@
 # @rocks@
 
 import os
+
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 
-
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.iterate.command):
+class command(HostArgProcessor, stack.commands.iterate.command):
 	pass
 
 	

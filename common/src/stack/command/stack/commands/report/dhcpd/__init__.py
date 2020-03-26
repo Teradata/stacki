@@ -14,6 +14,7 @@ import ipaddress
 
 import stack.commands
 from stack.commands import Warn
+from stack.argument_processors.host import HostArgProcessor
 import stack.text
 
 header = """
@@ -36,8 +37,7 @@ filename = """	if option client-arch = 00:07 {
 	}"""
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.
 

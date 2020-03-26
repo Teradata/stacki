@@ -5,14 +5,12 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.switch import SwitchArgProcessor
 from stack.commands.sync.switch.ib import enforce_subnet_manager
 from stack.exception import ArgRequired, ParamValue, CommandError
 
 
-class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
-):
+class Command(SwitchArgProcessor, stack.commands.Command):
 	"""
 	Lists the infiniband partitions in the Stacki database for one or more
 	switches.

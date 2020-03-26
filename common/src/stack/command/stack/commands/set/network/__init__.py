@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.network import NetworkArgProcessor
 from stack.exception import ArgRequired, CommandError
 
 
-class command(stack.commands.set.command,
-	      stack.commands.NetworkArgumentProcessor):
+class command(NetworkArgProcessor, stack.commands.set.command):
 
 	def fillSetNetworkParams(self, args, paramName):
 		if len(args) == 0:

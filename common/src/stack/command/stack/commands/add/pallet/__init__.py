@@ -21,7 +21,7 @@ from operator import attrgetter
 
 import stack.commands
 from stack.argument_processors.pallet import (
-	PalletArgumentProcessor,
+	PalletArgProcessor,
 	PALLET_HOOK_DIRNAME,
 )
 from stack import probepal
@@ -42,7 +42,7 @@ class command(stack.commands.add.command):
 	pass
 
 
-class Command(PalletArgumentProcessor, command):
+class Command(PalletArgProcessor, command):
 	"""
 	Add pallets to this machine's pallet directory. This command copies all
 	files in ISOs or paths recognized by stacki to be pallets to the local

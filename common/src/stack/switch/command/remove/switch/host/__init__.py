@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.switch import SwitchArgProcessor
 import stack.commands
 from stack.exception import CommandError, ArgRequired
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.HostArgumentProcessor,
-	      stack.commands.remove.command):
+class command(HostArgProcessor, SwitchArgProcessor, stack.commands.remove.command):
 	pass
 
 class Command(command):

@@ -5,12 +5,13 @@
 # @copyright@
 
 import os
+
+from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.disable.command):
+class Command(CartArgProcessor, stack.commands.disable.command):
 	"""
 	Disables a cart. The cart must already be copied on the
 	system using the command "stack add cart".

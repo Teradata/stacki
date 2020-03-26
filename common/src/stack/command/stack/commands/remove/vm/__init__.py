@@ -6,13 +6,13 @@
 #
 import stack.commands
 from stack.exception import ArgRequired, CommandError
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.vm import VmArgProcessor
 
-class command(stack.commands.HostArgumentProcessor,
-		stack.commands.remove.command):
+class command(HostArgProcessor, stack.commands.remove.command):
 	pass
 
-class Command(command, VmArgumentProcessor):
+class Command(command, VmArgProcessor):
 	"""
 	Mark a vm for removal from the database and hypervisor.
 	Upon running the sync vm command, nodes set to pending deletion will

@@ -11,13 +11,11 @@
 # @rocks@
 
 import stack.commands
+from stack.argument_processors.switch import SwitchArgProcessor
 
-
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
+class command(SwitchArgProcessor, stack.commands.list.command):
 	pass
 	
-
 class Command(command):
 	"""
 	List Interface, Port, Interface, Vlan, and Network of any hosts-to-switch

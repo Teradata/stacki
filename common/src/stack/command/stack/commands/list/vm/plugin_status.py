@@ -7,10 +7,10 @@
 import stack.commands
 import stack.kvm
 from stack.kvm import VmException
-from stack.argument_processors.vm import VmArgumentProcessor
+from stack.argument_processors.vm import VmArgProcessor
 from collections import defaultdict
 
-class Plugin(stack.commands.Plugin, VmArgumentProcessor):
+class Plugin(stack.commands.Plugin, VmArgProcessor):
 
 	def provides(self):
 		return 'status'

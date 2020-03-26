@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.argument_processors.scope import ScopeArgProcessor
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
 from stack.util import flatten
 
-
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.command):
+class Command(ScopeArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a storage partition configuration from the database.
 

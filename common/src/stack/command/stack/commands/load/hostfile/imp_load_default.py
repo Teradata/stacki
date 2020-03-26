@@ -10,16 +10,20 @@ from operator import itemgetter
 from itertools import groupby
 import ipaddress
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
+from stack.argument_processors.box import BoxArgProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.network import NetworkArgProcessor
 import stack.csv
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
-from stack.argument_processors.box import BoxArgumentProcessor
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
-	BoxArgumentProcessor,
+class Implementation(
+	ApplianceArgProcessor,
+	BoxArgProcessor,
+	HostArgProcessor,
+	NetworkArgProcessor,
 	stack.commands.Implementation):
 
 	"""

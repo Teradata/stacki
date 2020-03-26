@@ -10,11 +10,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+from stack.argument_processors.box import BoxArgProcessor
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
 
-class command(stack.commands.list.command,
-	      BoxArgumentProcessor):
+class command(stack.commands.list.command, BoxArgProcessor):
 	pass
 
 

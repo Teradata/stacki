@@ -2,7 +2,7 @@ from stack.exception import CommandError
 from collections import defaultdict
 from stack.bool import str2bool
 
-class VmArgumentProcessor():
+class VmArgProcessor():
 	"""
 	Mixin class to collect various functions for getting
 	virtual machine values

@@ -4,9 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.environment import EnvironmentArgProcessor
 import stack.commands
 
-
-class command(stack.commands.EnvironmentArgumentProcessor, stack.commands.set.command):
+class command(EnvironmentArgProcessor, stack.commands.set.command):
 	pass
 

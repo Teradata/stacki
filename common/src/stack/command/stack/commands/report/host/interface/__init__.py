@@ -11,12 +11,12 @@
 # @rocks@
 
 import re
+
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.switch import SwitchArgProcessor
 import stack.commands
 
-
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.SwitchArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, SwitchArgProcessor, stack.commands.report.command):
 	"""
 	Output the network configuration file for a host's interface.
 

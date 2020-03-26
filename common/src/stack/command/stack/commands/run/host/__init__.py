@@ -10,14 +10,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
 import os
+import socket
+import subprocess
+import threading
+import time
+
+from stack.argument_processors.host import HostArgProcessor
 import stack.commands
 from stack.exception import ParamType, ParamValue
-import threading
-import socket
-import time
-import subprocess
 
 class Parallel(threading.Thread):
 	def __init__(self, cmd, host, output, timeout):
@@ -105,8 +106,7 @@ class Parallel(threading.Thread):
 
 		return
 
-class command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+class command(HostArgProcessor, stack.commands.Command):
 	pass
 
 

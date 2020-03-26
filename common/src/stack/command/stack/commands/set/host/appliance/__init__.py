@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
 import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.set.host.command,
-	      stack.commands.ApplianceArgumentProcessor):
+class Command(ApplianceArgProcessor, stack.commands.set.host.command):
 	"""
 	Set the Appliance for a list of hosts.
 

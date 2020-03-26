@@ -5,13 +5,13 @@
 # @copyright@
 
 
+from stack.argument_processors.appliance import ApplianceArgProcessor
+from stack.argument_processors.host import HostArgProcessor
 import stack.csv
 import stack.commands
 from stack.exception import CommandError
 
-
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
+class Implementation(ApplianceArgProcessor, HostArgProcessor, stack.commands.Implementation):
 
 	"""
 	Unload (remove) hosts from the database based on comma-separated
