@@ -6,12 +6,13 @@
 
 import os
 import tarfile
+
 import stack.commands
+from stack.commands import CartArgProcessor
 from stack.exception import *
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.pack.command):
+class Command(CartArgProcessor, stack.commands.pack.command):
 	"""
 	Pack a cart into a compressed file.
 	Default is tgz.

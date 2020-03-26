@@ -5,12 +5,11 @@
 # @copyright@
 
 import stack.commands
-import stack.util
+from stack.commands import HostArgProcessor, SwitchArgProcessor
 from stack.exception import CommandError
+import stack.util
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.list.command,
-	      stack.commands.HostArgumentProcessor):
+class command(HostArgProcessor, SwitchArgProcessor, stack.commands.list.command):
 	pass
 
 class Command(command):

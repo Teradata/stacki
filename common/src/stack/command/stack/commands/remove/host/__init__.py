@@ -11,13 +11,11 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 from stack.exception import ArgRequired, CommandError
 
-
-class command(stack.commands.HostArgumentProcessor,
-		stack.commands.remove.command):
+class command(HostArgProcessor, stack.commands.remove.command):
 	pass
-
 
 class Command(command):
 	"""

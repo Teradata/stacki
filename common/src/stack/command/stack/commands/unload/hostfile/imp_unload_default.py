@@ -7,11 +7,10 @@
 
 import stack.csv
 import stack.commands
+from stack.commands import ApplianceArgProcessor, HostArgProcessor
 from stack.exception import CommandError
 
-
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
+class Implementation(ApplianceArgProcessor, HostArgProcessor, stack.commands.Implementation):
 
 	"""
 	Unload (remove) hosts from the database based on comma-separated

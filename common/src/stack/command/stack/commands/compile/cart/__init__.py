@@ -6,15 +6,16 @@
 
 import os
 import grp
-import stat
 import shutil
+import stat
 import subprocess
+
 import stack.commands
+from stack.commands import CartArgProcessor
 import stack.lock
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.compile.command):
+class Command(CartArgProcessor, stack.commands.compile.command):
 	"""
 	Compile a repo inside the cart so it can be used by backend nodes
 	for installation.

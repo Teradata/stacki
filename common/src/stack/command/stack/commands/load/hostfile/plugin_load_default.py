@@ -7,12 +7,14 @@
 # @rocks@
 
 import sys
-import stack.commands
-from stack.exception import CommandError
+
 from stack.bool import str2bool
+import stack.commands
+from stack.commands import HostArgProcessor
+from stack.exception import CommandError
 
 
-class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
+class Plugin(HostArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

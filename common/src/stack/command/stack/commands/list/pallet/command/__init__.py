@@ -15,11 +15,10 @@ import importlib
 import pathlib
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.commands import PalletArgProcessor
 
 
-class Command(PalletArgumentProcessor,
-	stack.commands.list.command):
+class Command(PalletArgProcessor, stack.commands.list.command):
 	"""
 	List the commands provided by a pallet.
 

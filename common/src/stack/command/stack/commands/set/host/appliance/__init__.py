@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import ApplianceArgProcessor
 from stack.exception import CommandError
 
 
-class Command(stack.commands.set.host.command,
-	      stack.commands.ApplianceArgumentProcessor):
+class Command(ApplianceArgProcessor, stack.commands.set.host.command):
 	"""
 	Set the Appliance for a list of hosts.
 

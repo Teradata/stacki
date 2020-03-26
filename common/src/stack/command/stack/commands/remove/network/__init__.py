@@ -11,11 +11,10 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import NetworkArgProcessor
 from stack.exception import ArgRequired, CommandError
 
-
-class Command(stack.commands.NetworkArgumentProcessor,
-	stack.commands.remove.command):
+class Command(NetworkArgProcessor, stack.commands.remove.command):
 	"""
 	Remove network definition from the system. If there are still nodes
 	defined in the database that are assigned to the network name you

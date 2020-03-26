@@ -10,15 +10,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import stack.commands
-from stack.commands import Warn
-import stack.text
 import os.path
 import shlex
 
+import stack.commands
+from stack.commands import HostArgProcessor, Warn
+import stack.text
 
-class command(stack.commands.HostArgumentProcessor,
-	      stack.commands.report.command):
+
+class command(HostArgProcessor, stack.commands.report.command):
 	pass
 
 

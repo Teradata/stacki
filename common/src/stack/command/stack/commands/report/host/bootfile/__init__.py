@@ -6,11 +6,11 @@
 
 
 import stack.commands
+from stack.commands import HostArgProcessor
 from stack.exception import CommandError
 
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	Output the PXE file for a host
 	<arg name="host" type="string" repeat="1">

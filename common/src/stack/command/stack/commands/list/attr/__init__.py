@@ -17,12 +17,13 @@ import os
 import re
 
 import stack.commands
+from stack.commands import ScopeArgProcessor
 from stack.bool import str2bool
 from stack.exception import CommandError
 from stack.util import flatten
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(ScopeArgProcessor, stack.commands.list.command):
 	"""
 	Lists the set of global attributes.
 

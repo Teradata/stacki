@@ -6,10 +6,11 @@
 
 import stack.csv
 import stack.commands
+from stack.commands import ApplianceArgProcessor
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.Implementation):
+class Implementation(ApplianceArgProcessor, stack.commands.Implementation):
 	"""
 	Put storage controller configuration into the database based on
 	a comma-separated formatted file.

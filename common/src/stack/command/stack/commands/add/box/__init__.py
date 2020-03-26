@@ -13,11 +13,9 @@
 import stack
 import stack.commands
 from stack.exception import ArgUnique, CommandError, ArgNotFound
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.commands import BoxArgProcessor, OSArgProcessor
 
-class Command(BoxArgumentProcessor,
-	stack.commands.OSArgumentProcessor,
-	stack.commands.add.command):
+class Command(BoxArgProcessor, OSArgProcessor, stack.commands.add.command):
 	"""
 	Add a box specification to the database.
 

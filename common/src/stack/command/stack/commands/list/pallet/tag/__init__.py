@@ -6,10 +6,9 @@
 
 import fnmatch
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.commands import PalletArgProcessor
 
-class Command(stack.commands.list.command,
-	      PalletArgumentProcessor):
+class Command(stack.commands.list.command, PalletArgProcessor):
 	"""
 	Lists the set of tags for hosts.
 

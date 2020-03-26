@@ -5,8 +5,7 @@
 # @copyright@
 
 import stack.commands.enable
+from stack.commands import HostArgProcessor
 
-
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.enable.command):
+class command(HostArgProcessor, stack.commands.enable.command):
 	pass

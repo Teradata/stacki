@@ -4,18 +4,19 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import os
-import pathlib
 import grp
 import json
-import stat
-import tarfile
-import shutil
-import stack.commands
-from stack.bool import str2bool
+import os
 from pathlib import Path
-from stack.exception import ArgRequired, ArgUnique, CommandError, UsageError
+import shutil
+import stat
 import subprocess
+import tarfile
+
+from stack.bool import str2bool
+import stack.commands
+from stack.commands import CartArgProcessor
+from stack.exception import ArgRequired, ArgUnique, CommandError, UsageError
 from stack.download import fetch, FetchError
 
 # if requests is not available, attempting to barnacle will fail
@@ -24,8 +25,7 @@ try:
 except ImportError:
         pass
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.add.command):
+class Command(CartArgProcessor, stack.commands.add.command):
 	"""
 	Add a cart. Files to download are concatenated
 	from "url," "urlfile," and "authfile" options
@@ -204,7 +204,7 @@ class Command(stack.commands.CartArgumentProcessor,
 
 		# If the directory does not exist create it along with # a skeleton template.
 
-		tree = pathlib.Path(f'/export/stack/carts/{cart}')
+		tree = Path(f'/export/stack/carts/{cart}')
 		if not tree.is_dir():
 			for subdir in ['RPMS', 'nodes', 'graph']:
 				tree.joinpath(subdir).mkdir(mode=775, parents=True, exist_ok=True)

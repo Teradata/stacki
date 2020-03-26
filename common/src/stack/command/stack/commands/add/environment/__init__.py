@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import EnvironmentArgProcessor
 from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
-class command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.add.command):
+class command(EnvironmentArgProcessor, stack.commands.add.command):
 	pass
 
 

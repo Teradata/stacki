@@ -8,8 +8,7 @@ import stack.commands
 import stack.util
 
 
-class Command(stack.commands.sync.host.command,
-	stack.commands.HostArgumentProcessor):
+class Command(stack.commands.sync.host.command):
 	"""
 	!!! Rocks+ Internal Only !!!
 	Generate host specific configuration files

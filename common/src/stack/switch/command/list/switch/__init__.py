@@ -4,12 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
-import stack.util
 from stack.bool import str2bool
+import stack.commands
+from stack.commands import SwitchArgProcessor
+import stack.util
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
+class command(SwitchArgProcessor, stack.commands.list.command):
 	pass
 
 class Command(command):

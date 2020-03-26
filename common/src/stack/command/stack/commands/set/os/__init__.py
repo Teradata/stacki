@@ -23,7 +23,7 @@
 #
 
 import stack.commands
+from stack.commands import OSArgProcessor
 
-
-class command(stack.commands.OSArgumentProcessor, stack.commands.set.command):
+class command(OSArgProcessor, stack.commands.set.command):
 	pass

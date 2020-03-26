@@ -11,10 +11,10 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import NetworkArgProcessor
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
-	stack.commands.list.command):
+class Command(NetworkArgProcessor, stack.commands.list.command):
 	"""
 	List the defined networks for this system.
 

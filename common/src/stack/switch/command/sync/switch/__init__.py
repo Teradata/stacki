@@ -4,13 +4,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
-import stack.util
 import subprocess
-from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.sync.command):
+import stack.commands
+from stack.commands import SwitchArgProcessor
+from stack.exception import CommandError
+import stack.util
+
+class command(SwitchArgProcessor, stack.commands.sync.command):
 		pass
 
 class Command(command):

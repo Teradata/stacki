@@ -8,11 +8,11 @@
 import csv
 import re
 from io import StringIO
+
 import stack.commands
+from stack.commands import HostArgProcessor
 
-
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	This command outputs all the attributes
 	of a system in a CSV format.

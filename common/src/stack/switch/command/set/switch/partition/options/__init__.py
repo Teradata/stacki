@@ -5,14 +5,12 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import SwitchArgProcessor
 from stack.commands.sync.switch.ib import enforce_subnet_manager
 from stack.exception import ArgRequired, ParamValue, CommandError
 
 
-class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
-):
+class Command(SwitchArgProcessor, stack.commands.Command):
 	"""
 	Sets the infiniband partition flags in the Stacki database.
 	Note that a sync is still required to enact this change on the switch.

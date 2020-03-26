@@ -6,10 +6,12 @@
 # @copyright@
 #
 
-import stack.commands
-import stack.text
 import ipaddress
+
+import stack.commands
+from stack.commands import HostArgProcessor, NetworkArgProcessor
 from stack.exception import *
+import stack.text
 
 ## DESIGN CONSIDERATIONS
 # The timekeeping system set up by default in Stacki has the
@@ -30,9 +32,7 @@ from stack.exception import *
 # 6. If Stacki shouldn't be managing time at all, then the time.protocol attribute can
 #    be unset, and the admin can manage the time by themselves
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, NetworkArgProcessor, stack.commands.report.command):
 	"""
 	Create a time configuration report (NTP or chrony).
 	At a minimum at least one server in the cluster has to be designated as a "parent"

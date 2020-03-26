@@ -7,11 +7,13 @@
 import os
 import os.path
 import shutil
+
 import stack.commands
+from stack.commands import HostArgProcessor
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command, stack.commands.HostArgumentProcessor):
+class Command(stack.commands.load.command, HostArgProcessor):
 	"""
 	Take rows from a spreadsheet that describe how a host's disk controller
 	should be configured and then place those values into the database.

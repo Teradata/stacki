@@ -12,10 +12,9 @@
 
 
 import stack.commands
+from stack.commands import HostArgProcessor
 
-
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Create a report that contains the static routes for a host.
  

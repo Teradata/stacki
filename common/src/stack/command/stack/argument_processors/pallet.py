@@ -12,7 +12,7 @@ class Pallet:
 	os: str
 	url: str
 
-class PalletArgumentProcessor:
+class PalletArgProcessor:
 
 	def get_pallets(self, args, params):
 		"""

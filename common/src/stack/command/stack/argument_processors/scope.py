@@ -15,18 +15,17 @@ from collections import namedtuple
 from stack.exception import CommandError, ArgRequired, ParamError
 from stack.util import flatten
 
-from . import (
-	ApplianceArgumentProcessor
-	OSArgumentProcessor
-	EnvironmentArgumentProcessor
-	HostArgumentProcessor
-)
+# these need to be non-relative imports to prevent circular importing errors
+from stack.argument_processors.appliance import ApplianceArgProcessor
+from stack.argument_processors.environment import EnvironmentArgProcessor
+from stack.argument_processors.host import HostArgProcessor
+from stack.argument_processors.os import OSArgProcessor
 
-class ScopeArgumentProcessor(
-	ApplianceArgumentProcessor,
-	OSArgumentProcessor,
-	EnvironmentArgumentProcessor,
-	HostArgumentProcessor
+class ScopeArgProcessor(
+	ApplianceArgProcessor,
+	OSArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor
 ):
 	def getScopeMappings(self, args=None, scope=None):
 		# We will return a list of these

@@ -5,9 +5,10 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 from stack.exception import ArgRequired
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.create.command):
+class command(HostArgProcessor, stack.commands.create.command):
 	pass
 
 class Command(command):

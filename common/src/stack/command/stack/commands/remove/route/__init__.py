@@ -11,10 +11,10 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import ScopeArgProcessor
 from stack.exception import CommandError
 
-
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.command):
+class Command(ScopeArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a global static route.
 

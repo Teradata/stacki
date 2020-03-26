@@ -9,12 +9,13 @@
 import os
 import os.path
 import shutil
+
 import stack.commands
+from stack.commands import NetworkArgProcessor
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command,
-		stack.commands.NetworkArgumentProcessor):
+class Command(NetworkArgProcessor, stack.commands.load.command):
 	"""
 	Take rows from a spreadsheet that describe the logical networks that
 	should be configured and then place those values into the database.

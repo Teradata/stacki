@@ -8,16 +8,15 @@
 
 import os
 import sys
-import stack.django_env
-
-import stack.commands
-
-from stack.exception import *
 
 from django.contrib.auth.models import User, Group
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+import stack.django_env
+import stack.commands
+from stack.commands import HostArgProcessor
+from stack.exception import *
+
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	Set or unset admin privileges of a user.
 	<arg name="Username" type="string">

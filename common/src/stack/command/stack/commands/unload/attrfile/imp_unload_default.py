@@ -6,11 +6,11 @@
 
 import stack.csv
 import stack.commands
+from stack.commands import ApplianceArgProcessor, HostArgProcessor
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
+class Implementation(ApplianceArgProcessor, HostArgProcessor, stack.commands.Implementation):
 
 	"""
 	Create a dictionary of attributes based on comma-separated formatted

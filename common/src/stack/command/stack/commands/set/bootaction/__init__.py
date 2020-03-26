@@ -4,11 +4,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 import stack.commands
+from stack.commands import OSArgProcessor
+from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 
 
-class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
+class command(OSArgProcessor, stack.commands.set.command):
 	def getBootActionTypeOS(self, params, args):
 		if not len(args):
 			raise ArgRequired(self, 'action')

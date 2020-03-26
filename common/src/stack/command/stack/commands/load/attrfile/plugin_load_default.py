@@ -7,11 +7,9 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import ApplianceArgProcessor, HostArgProcessor
 
-
-class Plugin(stack.commands.ApplianceArgumentProcessor, 
-	     stack.commands.HostArgumentProcessor,
-	     stack.commands.Plugin):
+class Plugin(ApplianceArgProcessor, HostArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

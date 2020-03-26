@@ -18,7 +18,7 @@ from stack.bool import str2bool
 from stack.cond import EvalCondExpr
 from stack.util import flatten
 
-class HostArgumentProcessor:
+class HostArgProcessor:
 	"""
 	An Interface class to add the ability to process host arguments.
 	"""

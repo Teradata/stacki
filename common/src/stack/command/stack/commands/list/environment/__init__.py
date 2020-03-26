@@ -5,10 +5,9 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import EnvironmentArgProcessor
 
-
-class command(stack.commands.EnvironmentArgumentProcessor,
-	stack.commands.list.command):
+class command(EnvironmentArgProcessor, stack.commands.list.command):
 	pass
 
 

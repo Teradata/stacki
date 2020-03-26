@@ -5,11 +5,10 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import EnvironmentArgProcessor
 from stack.exception import ArgRequired, CommandError
 
-
-class command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.remove.command):
+class command(EnvironmentArgProcessor, stack.commands.remove.command):
 	pass
 
 

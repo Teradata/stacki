@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 
-
-class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
+class command(HostArgProcessor, stack.commands.set.command):
 	pass

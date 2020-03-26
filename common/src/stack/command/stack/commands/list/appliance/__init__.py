@@ -11,10 +11,9 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import ApplianceArgProcessor
 
-
-class command(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.list.command):
+class command(ApplianceArgProcessor, stack.commands.list.command):
 	pass
 
 

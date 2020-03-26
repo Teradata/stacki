@@ -11,10 +11,9 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 
-
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.list.command):
+class command(HostArgProcessor, stack.commands.list.command):
 	pass
 	
 

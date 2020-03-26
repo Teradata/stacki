@@ -13,9 +13,9 @@
 from operator import itemgetter
 
 import stack.commands
+from stack.commands import ScopeArgProcessor
 
-
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(ScopeArgProcessor, stack.commands.list.command):
 	"""
 	List the global routes.
 

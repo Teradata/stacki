@@ -7,10 +7,11 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import ApplianceArgProcessor
 from stack.exception import CommandError
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
+class Plugin(ApplianceArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

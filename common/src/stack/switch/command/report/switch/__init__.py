@@ -6,9 +6,11 @@
 # 
 
 import re
-import stack.commands
 
-class command(stack.commands.HostArgumentProcessor,
+import stack.commands
+from stack.commands import HostArgProcessor
+
+class command(HostArgProcessor,
 	stack.commands.report.command,
 	stack.commands.DatabaseConnection):
 	pass

@@ -5,10 +5,9 @@
 # @copyright@
 
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.commands import BoxArgProcessor
 
-class Command(stack.commands.set.host.command,
-	      BoxArgumentProcessor):
+class Command(BoxArgProcessor, stack.commands.set.host.command):
 	"""
 	Sets the box for a list of hosts.
 

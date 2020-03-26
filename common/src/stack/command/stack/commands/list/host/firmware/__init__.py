@@ -14,12 +14,12 @@ import stack.commands
 import os
 import re
 from collections import namedtuple
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
+from stack.commands import FirmwareArgProcessor, HostArgProcessor
 
 class command(
-	stack.commands.HostArgumentProcessor,
+	FirmwareArgProcessor,
+	HostArgProcessor,
 	stack.commands.list.command,
-	FirmwareArgumentProcessor,
 ):
 	pass
 

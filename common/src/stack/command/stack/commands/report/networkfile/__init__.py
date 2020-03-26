@@ -4,12 +4,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
 import csv
 from io import StringIO
 
+import stack.commands
+from stack.commands import HostArgProcessor
 
-class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	Outputs a network file in CSV format.
 	<dummy />

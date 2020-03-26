@@ -6,15 +6,13 @@
 
 import tempfile
 import json
+
 import stack.commands
+from stack.commands import ApplianceArgProcessor, OSArgProcessor
 from stack.exception import CommandError
 
 
-class Plugin(
-	stack.commands.OSArgumentProcessor,
-	stack.commands.ApplianceArgumentProcessor,
-	stack.commands.Plugin
-):
+class Plugin(ApplianceArgProcessor, OSArgProcessor, stack.commands.Plugin):
 	"""
 	Plugin that invokes 'stack add storage partition' and adds
 	the partitions to the database.

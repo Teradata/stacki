@@ -1,4 +1,4 @@
-from stack.commands import Command, Implementation, ScopeArgumentProcessor, DatabaseConnection
+from stack.commands import Command, Implementation, ScopeArgProcessor, DatabaseConnection
 from stack.exception import CommandError
 from unittest.mock import patch, create_autospec, ANY, MagicMock
 from concurrent.futures import Future
@@ -343,13 +343,13 @@ class TestCommand:
 		# make sure the command is listed as well as its arguments
 		assert "foo bar baz a b=c" in str(exception_info.value)
 
-class TestScopeArgumentProcessor:
-	"""Test case for the ScopeArgumentProcessor"""
+class TestScopeArgProcessor:
+	"""Test case for the ScopeArgProcessor"""
 
 	def test_getScopeMappings_global_scope(self):
 		"""Test that getting the scope mappings works as expected for the global scope."""
 		test_scope = "global"
-		result = ScopeArgumentProcessor().getScopeMappings(scope = test_scope)
+		result = ScopeArgProcessor().getScopeMappings(scope = test_scope)
 		assert [(test_scope, None, None, None, None)] == result
 
 	def test_getScopeMappings_global_scope_with_args(self):
@@ -358,4 +358,4 @@ class TestScopeArgumentProcessor:
 		test_args = ["foo", "bar"]
 
 		with pytest.raises(CommandError):
-			ScopeArgumentProcessor().getScopeMappings(args = test_args, scope = test_scope)
+			ScopeArgProcessor().getScopeMappings(args = test_args, scope = test_scope)

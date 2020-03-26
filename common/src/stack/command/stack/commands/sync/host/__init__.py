@@ -10,18 +10,19 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import stack.commands
-import threading
-import subprocess
-import time
 import os
+import subprocess
+import threading
+import time
+
+import stack.commands
+from stack.commands import HostArgProcessor
 
 max_threading = 512
 timeout	= 30
 
 
-class command(stack.commands.sync.command,
-	stack.commands.HostArgumentProcessor):
+class command(HostArgProcessor, stack.commands.sync.command):
 	pass
 
 class Parallel(threading.Thread):

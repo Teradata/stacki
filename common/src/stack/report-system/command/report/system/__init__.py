@@ -5,17 +5,18 @@
 # @copyright@
 #
 
-import stack.commands
-from stack.exception import CommandError
-import shutil
 from collections import namedtuple
-from pytest import main
 from glob import glob
 import os
 import pathlib
+from pytest import main
+import shutil
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+import stack.commands
+from stack.commands import HostArgProcessor
+from stack.exception import CommandError
+
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	<arg type='string' name='options' repeat='1'>
 	Zero or more options to pass to pytest.

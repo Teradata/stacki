@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import EnvironmentArgProcessor
 from stack.exception import CommandError
 
 
-class Command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.set.host.command):
+class Command(EnvironmentArgProcessor, stack.commands.set.host.command):
 	"""
 	Specifies an Environment for the gives hosts.  Environments are
 	used to add another level to attribute resolution.  This is commonly

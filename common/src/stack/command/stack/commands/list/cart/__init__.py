@@ -5,10 +5,10 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import CartArgProcessor
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.list.command):
+class Command(CartArgProcessor, stack.commands.list.command):
 	"""
 	List the status of available carts.
 	

@@ -8,14 +8,11 @@ import re
 
 import stack.csv
 import stack.commands
+from stack.commands import ApplianceArgProcessor, OSArgProcessor
 from stack.exception import CommandError
 
 
-class Implementation(
-	stack.commands.OSArgumentProcessor,
-	stack.commands.ApplianceArgumentProcessor,
-	stack.commands.Implementation
-):
+class Implementation(ApplianceArgProcessor, OSArgProcessor, stack.commands.Implementation):
 	"""
 	Put storage partition configuration into the database based on
 	a comma-separated formatted file.

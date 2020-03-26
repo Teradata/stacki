@@ -14,7 +14,7 @@ from stack.cond import EvalCondExpr
 from stack.exception import CommandError, ArgNotFound
 from stack.util import flatten
 
-class SwitchArgumentProcessor:
+class SwitchArgProcessor:
 	"""
 	An interface class to add the ability to process switch arguments.
 	"""

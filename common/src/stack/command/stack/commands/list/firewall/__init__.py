@@ -11,9 +11,9 @@
 # @rocks@
 
 import stack.commands
+from stack.commands import ScopeArgProcessor
 
-
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(ScopeArgProcessor, stack.commands.list.command):
 	"""
 	Lists the set of global firewalls.
 
