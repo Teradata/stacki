@@ -201,15 +201,18 @@ then
     ISO=$DOWNLOAD_ISO
 fi
 
-# Figure out if we are SLES or CentOS
-if [[ $ISO =~  "-sles12." ]]
+# Figure out the OS
+if [[ $ISO =~  "-sles15." ]]
+then
+    OS="sles15"
+elif [[ $ISO =~  "-sles12." ]]
 then
     OS="sles12"
 elif [[ $ISO =~ "-redhat7." ]]
 then
     OS="redhat7"
 else
-    echo -e "\033[31mError: Need a sles12 OR redhat7 Stacki ISO\033[0m"
+    echo -e "\033[31mError: Need a sles12, sles15, or redhat7 Stacki ISO\033[0m"
     exit 1
 fi
 
@@ -241,13 +244,46 @@ cat > ".vagrant/cluster-up.json" <<-EOF
 EOF
 
 # Download the installer ISO if it doesn't exist
-if [[ $OS == "sles12" ]]
+if [[ $OS == "sles15" ]]
+then
+    if [[ ! -f "$DOWNLOAD_DIR/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso ...\033[0m"
+        curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+    fi
+
+    if [[ $(md5sum "$DOWNLOAD_DIR/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso" | cut -c 1-32) != "f61a98405b233c62f5b8d48ac6c611d4" ]]
+    then
+        echo "Error: SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso is corrupt"
+        exit 1
+    fi
+
+    if [[ ! -f "$DOWNLOAD_DIR/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading SLE-15-SP1-Packages-x86_64-GM-DVD1.iso ...\033[0m"
+        curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+    fi
+
+    if [[ $(md5sum "$DOWNLOAD_DIR/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso" | cut -c 1-32) != "1caa5d8348ac16f793d716a4b78cd948" ]]
+    then
+        echo "Error: SLE-15-SP1-Packages-x86_64-GM-DVD1.iso is corrupt"
+        exit 1
+    fi
+elif [[ $OS == "sles12" ]]
 then
     if [[ ! -f "$DOWNLOAD_DIR/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso" ]]
     then
         echo
         echo -e "\033[34mDownloading SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso ...\033[0m"
         curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+    fi
+
+    if [[ $(md5sum "$DOWNLOAD_DIR/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso" | cut -c 1-32) != "633537da81d270a9548272dfe1fdd20d" ]]
+    then
+        echo "Error: SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso is corrupt"
+        exit 1
     fi
 elif [[ $OS == "redhat7" ]]
 then
@@ -269,6 +305,12 @@ then
             echo -e "\033[37mDownloading from the Internet ...\033[0m"
             curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
+    fi
+
+    if [[ $(md5sum "$DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso" | cut -c 1-32) != "41e58360e224b49e96e44b94e1563c1f" ]]
+    then
+        echo "Error: CentOS-7-x86_64-Everything-1810.iso is corrupt"
+        exit 1
     fi
 fi
 
@@ -310,25 +352,34 @@ run_hooks "post-frontend"
 
 # Add the OS pallet
 echo
-echo -e "\033[34mAdding the OS pallet to the frontend ...\033[0m"
-if [[ $OS == "sles12" ]]
+echo -e "\033[34mAdding the OS pallets to the frontend ...\033[0m"
+if [[ $OS == "sles15" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
-    vagrant ssh frontend -c "sudo -i stack enable pallet SLES"
-    vagrant ssh frontend -c "sudo -i stack enable pallet SLES box=frontend"
+    vagrant ssh frontend --no-tty -c "sudo -i stack add pallet /export/isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet SLES"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet SLES box=frontend"
+
+    vagrant ssh frontend --no-tty -c "sudo -i stack add pallet /export/isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet Packages-1"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet Packages-1 box=frontend"
+elif [[ $OS == "sles12" ]]
+then
+    vagrant ssh frontend --no-tty -c "sudo -i stack add pallet /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet SLES"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet SLES box=frontend"
 elif [[ $OS == "redhat7" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1810.iso"
-    vagrant ssh frontend -c "sudo -i stack enable pallet CentOS"
-    vagrant ssh frontend -c "sudo -i stack enable pallet CentOS box=frontend"
+    vagrant ssh frontend --no-tty -c "sudo -i stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet CentOS"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable pallet CentOS box=frontend"
 fi
 
 # Copy the vagrant cart into place and enable it
 echo
 echo -e "\033[34mAdding the vagrant cart to the frontend ...\033[0m"
-vagrant ssh frontend -c "sudo -i cp -r /vagrant/cart /export/stack/carts/vagrant"
-vagrant ssh frontend -c "sudo -i stack add cart vagrant"
-vagrant ssh frontend -c "sudo -i stack enable cart vagrant"
+vagrant ssh frontend --no-tty -c "sudo -i cp -r /vagrant/cart /export/stack/carts/vagrant"
+vagrant ssh frontend --no-tty -c "sudo -i stack add cart vagrant"
+vagrant ssh frontend --no-tty -c "sudo -i stack enable cart vagrant"
 
 # Export the frontend box, if requested
 if [[ $EXPORT_FRONTEND -eq 1 ]]
@@ -339,7 +390,7 @@ then
     # Package up the frontend
     BOX_NAME=$ISO_PATH/${ISO_FILENAME/.iso/.box}
     BOX_JSON=$ISO_PATH/${ISO_FILENAME/.iso/.json}
-    BOX_VERSION=$(vagrant ssh frontend -c "sudo -i stack report version" | tr -d '\r' | tr '_' '-')
+    BOX_VERSION=$(vagrant ssh frontend --no-tty -c "sudo -i stack report version" | tr -d '\r' | tr '_' '-')
 
     set +e
     SHASUM_EXE=$(which sha1sum)
@@ -382,7 +433,7 @@ then
     if [[ $NO_PXE -eq 0 ]]
     then
         # Start up node discovery
-        vagrant ssh frontend -c "sudo -i stack enable discovery"
+        vagrant ssh frontend --no-tty -c "sudo -i stack enable discovery"
     fi
 
     # Run the pre-backends hooks
@@ -416,7 +467,7 @@ then
         do
             if [[ BACKEND_UP[$i] -eq 0 ]]
             then
-                vagrant ssh backend-0-$i -c "echo backend-0-$i is up" 2>/dev/null
+                vagrant ssh backend-0-$i --no-tty -c "echo backend-0-$i is up" 2>/dev/null
                 if [[ $? -eq 0 ]]
                 then
                     BACKEND_UP[$i]=1
@@ -440,7 +491,7 @@ then
     if [[ $NO_PXE -eq 0 ]]
     then
         # Shut down node discovery
-        vagrant ssh frontend -c "sudo -i stack disable discovery"
+        vagrant ssh frontend --no-tty -c "sudo -i stack disable discovery"
     fi
 fi
 
@@ -476,13 +527,13 @@ echo
 # if we mapped the stacki source, symlink it in to place
 if [[ -d "$SRC_DIR" ]]
 then
-    vagrant ssh frontend -c "sudo -i python3 /export/src/tools/use_the_source/use_the_source.py /export/src/"
+    vagrant ssh frontend --no-tty -c "sudo -i python3 /export/src/tools/use_the_source/use_the_source.py /export/src/"
 fi
 
 # Run the post-cluster-up hooks
 run_hooks "post-cluster-up"
 
 # Have vagrant ssh automatically sudo to root
-vagrant ssh frontend -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then exec sudo -i; fi" >> /home/vagrant/.bash_profile'
+vagrant ssh frontend --no-tty -c 'echo "if [[ -n \$SSH_TTY ]] && [[ \$- =~ i ]]; then exec sudo -i; fi" >> /home/vagrant/.bash_profile'
 
 exit 0

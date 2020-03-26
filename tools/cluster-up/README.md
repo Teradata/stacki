@@ -17,7 +17,7 @@ Open up a terminal on your computer, change to the project directory, then run:
     ./cluster-up.sh [options...] STACKI_ISO
 
 where STACKI_ISO is the path to the Stacki ISO you want to base the cluster on.
-It can be either a SLES 12 or Centos 7 based ISO, and the path can be relative
+It can be either a SLES 12, SLES 15, or Centos 7 based ISO, and the path can be relative
 or absolute. The ISO argument can also be a URL, which will be downloaded into
 the download directory before bringing up the cluster.
 

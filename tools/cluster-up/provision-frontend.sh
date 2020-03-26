@@ -6,11 +6,35 @@ set -e
 # Output the commands as they are run
 set -x
 
-# Add the installer ISO for SLES
-if [[ $OS == "sles12" ]]
+# Add the installer ISOs
+mkdir /export/isos
+
+if [[ $OS == "sles15" ]]
 then
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
-    zypper update
+    cp /export/installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso /export/isos/
+    zypper addrepo iso:/?iso=/export/isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso os
+
+    cp /export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso /export/isos/
+    zypper addrepo iso:/?iso=/export/isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso packages
+elif [[ $OS == "sles12" ]]
+then
+    cp /export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso /export/isos/
+    zypper addrepo iso:/?iso=/export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
+elif [[ $OS == "redhat7" ]]
+then
+    mkdir -p /media/cdrom
+    cp /export/installer-iso/CentOS-7-x86_64-Everything-1810.iso /export/isos/
+    mount -o loop /export/isos/CentOS-7-x86_64-Everything-1810.iso /media/cdrom
+
+    rm /etc/yum.repos.d/*.repo
+    cat > "/etc/yum.repos.d/dvd.repo" <<EOF
+[dvd]
+name=CentOS-7-x86_64-Everything-1810.iso
+baseurl=file:///media/cdrom/
+gpgcheck=0
+enabled=1
+assumeyes=1
+EOF
 fi
 
 # Vagrant monkeys with the hosts file, set it back to something known
