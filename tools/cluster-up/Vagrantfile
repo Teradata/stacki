@@ -33,7 +33,10 @@ if File.file?('.vagrant/cluster-up.json')
 
   Vagrant.configure("2") do |config|
     config.vm.define "frontend", autostart: false do |config|
-      if OS == 'sles12'
+      if OS == 'sles15'
+        config.vm.box = "stacki/sles-15.1"
+        config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-15.1.json"
+      elsif OS == 'sles12'
         config.vm.box = "stacki/sles-12.3"
         config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
       elsif OS == 'redhat7'
@@ -111,7 +114,10 @@ if File.file?('.vagrant/cluster-up.json')
     (0..BACKENDS-1).each do |i|
       config.vm.define "backend-0-#{i}", autostart: false do |config|
         if NO_PXE == "1"
-          if OS == "sles12"
+          if OS == "sles15"
+            config.vm.box = "stacki/sles-15.1"
+            config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-15.1.json"
+          elsif OS == "sles12"
             config.vm.box = "stacki/sles-12.3"
             config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
           elsif OS == "redhat7"
