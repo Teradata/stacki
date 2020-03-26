@@ -5,5 +5,5 @@
 # @copyright@
 
 bootstrap:
-	../common/src/stack/build/build/bin/package-install -m "Development Tools" "Infrastructure Server"
-	../common/src/stack/build/build/bin/package-install createrepo genisoimage git emacs vim httpd-devel libvirt-devel
+	../common/src/stack/build/build/bin/package-install -m "Development Tools" "RPM Development Tools"
+	../common/src/stack/build/build/bin/package-install createrepo genisoimage git emacs vim httpd-devel libvirt-devel rpm-devel

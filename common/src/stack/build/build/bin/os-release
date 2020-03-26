@@ -18,6 +18,9 @@ case $RELEASE in
 	*release?7.*)
 		echo redhat7
 		;;
+	*release?8.*)
+		echo redhat8
+		;;
 	*SUSE*11*)
 		echo sles11
 		;;

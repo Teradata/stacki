@@ -255,14 +255,13 @@ $(RPM.TARGET): $(DEPENDENCIES)
 	@echo "%_var		$(REDHAT.VAR)"	>> $(HOME)/.rpmmacros
 	@echo "%debug_package	%{nil}"		>> $(HOME)/.rpmmacros
 	@echo -e "%__os_install_post    \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-compress \\" >> $(HOME)/.rpmmacros
+	@echo -e "/usr/lib/rpm/brp-compress \\" >> $(HOME)/.rpmmacros
 	@echo -e "%{!?__debug_package: \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \\" >> $(HOME)/.rpmmacros
+	@echo -e "/usr/lib/rpm/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros
+	@echo -e "/usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \\" >> $(HOME)/.rpmmacros
 	@echo -e "} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-python-hardlink \\" >> $(HOME)/.rpmmacros
-	@echo -e "%{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \\" >> $(HOME)/.rpmmacros
+	@echo -e "/usr/lib/rpm/brp-strip-static-archive %{__strip} \\" >> $(HOME)/.rpmmacros
+	@echo -e "/usr/lib/rpm/brp-python-hardlink \\" >> $(HOME)/.rpmmacros
 	@echo -e "%{nil}" >> $(HOME)/.rpmmacros
 	@echo -e "$(RPM.MACROS.EXTRAS)"		>> $(HOME)/.rpmmacros
 	@echo 
