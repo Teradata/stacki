@@ -58,4 +58,3 @@ text-unidecode  1.3        License :: OSI Approved :: GNU General Public License
 urllib3         1.25.8     License :: OSI Approved :: MIT License                                             https://urllib3.readthedocs.io/
 wcwidth         0.1.9      License :: OSI Approved :: MIT License                                             https://github.com/jquast/wcwidth
 yoyo-migrations 7.0.2      License :: OSI Approved :: Apache Software License                                 https://ollycope.com/software/yoyo/latest/
-
