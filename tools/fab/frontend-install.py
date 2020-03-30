@@ -489,7 +489,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		banner("Launch Boss-Config")
 		mount(stacki_iso, '/mnt/cdrom')
 
-		run_and_warn([
+		subprocess.call([
 			'/opt/stack/bin/python3',
 			'/opt/stack/bin/boss_config_snack.py',
 			'--no-partition',
