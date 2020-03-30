@@ -15,6 +15,9 @@ else
 fi
 
 case $RELEASE in
+	*release?8.*)
+		echo redhat8
+		;;
 	*release?7.*)
 		echo redhat7
 		;;

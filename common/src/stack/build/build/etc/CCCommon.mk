@@ -29,7 +29,7 @@ RELEASE	?= $(STACK)
 ## Brand all of our packages
 ##
 
-COMPANY   = StackIQ
+COMPANY   = Stacki
 COPYRIGHT = (c) $(YEAR) $(COMPANY)
 VENDOR    = $(COMPANY)
 
@@ -42,7 +42,7 @@ VENDOR    = $(COMPANY)
 ## This is put in this location so that building pallets will also set this up.
 ##
 ANY_PYTHON = /usr/bin/any_python
-$(info CCCommon.mk is setting up any_python)
+#$(info CCCommon.mk is setting up any_python)
 # If any_python is not already set up.
 ifeq ($(shell which any_python),)
 # Try to set it to python2 before setting it to python3.
@@ -55,7 +55,7 @@ $(shell ln -s "$(shell which python3)" $(ANY_PYTHON))
 endif
 # Else any_python is already set up.
 else
-$(info any_python already set up)
+#$(info any_python already set up)
 endif
 
 endif # __CCCOMMON_MK

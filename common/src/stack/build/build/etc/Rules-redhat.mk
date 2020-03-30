@@ -42,8 +42,8 @@ RPM.FILESLIST = /tmp/$(NAME)-fileslist
 ifdef __ROLLS_MK
 RPM.PACKAGE = kickstart
 RPM.ARCH = noarch
-RPM.SUMMARY = StackIQ $(ROLL) Roll
-RPM.DESCRIPTION = XML files for the StackIQ $(ROLL) Roll
+RPM.SUMMARY = Stacki $(ROLL) Pallet
+RPM.DESCRIPTION = XML files for the Stacki $(ROLL) Pallet
 RPM.PREFIX = $(PROFILE_DIR)
 endif
 
@@ -255,14 +255,38 @@ $(RPM.TARGET): $(DEPENDENCIES)
 	@echo "%_var		$(REDHAT.VAR)"	>> $(HOME)/.rpmmacros
 	@echo "%debug_package	%{nil}"		>> $(HOME)/.rpmmacros
 	@echo -e "%__os_install_post    \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-compress \\" >> $(HOME)/.rpmmacros
+	@if [ -e /usr/lib/rpm/brp-compress ]; then					\
+		echo -e "/usr/lib/rpm/brp-compress \\" >> $(HOME)/.rpmmacros;		\
+	else										\
+		echo -e "/usr/lib/rpm/redhat/brp-compress \\" >> $(HOME)/.rpmmacros;	\
+	fi
 	@echo -e "%{!?__debug_package: \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \\" >> $(HOME)/.rpmmacros
+	@if [ -e /usr/lib/rpm/brp-strip ]; then							\
+		echo -e "/usr/lib/rpm/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros;		\
+	else											\
+		echo -e "/usr/lib/rpm/redhat/brp-strip %{__strip} \\" >> $(HOME)/.rpmmacros;	\
+	fi
+	@if [ -e /usr/lib/rpm/brp-strip-comment-note ]; then								\
+		echo -e "/usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump} \\" >> $(HOME)/.rpmmacros;	\
+	else														\
+		echo -e "/usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \\" >> $(HOME)/.rpmmacros;	\
+	fi
 	@echo -e "} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \\" >> $(HOME)/.rpmmacros
-	@echo -e "/usr/lib/rpm/redhat/brp-python-hardlink \\" >> $(HOME)/.rpmmacros
-	@echo -e "%{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \\" >> $(HOME)/.rpmmacros
+	@if [ -e /usr/lib/rpm/brp-strip-static-archive ]; then							\
+		echo -e "/usr/lib/rpm/brp-strip-static-archive %{__strip} \\" >> $(HOME)/.rpmmacros;		\
+	else													\
+		echo -e "/usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \\" >> $(HOME)/.rpmmacros;	\
+	fi
+	@if [ -e /usr/lib/rpm/brp-python-hardlink ]; then					\
+		echo -e "/usr/lib/rpm/brp-python-hardlink \\" >> $(HOME)/.rpmmacros;		\
+	else											\
+		echo -e "/usr/lib/rpm/redhat/brp-python-hardlink \\" >> $(HOME)/.rpmmacros;	\
+	fi
+	@if [ -e /usr/lib/rpm/brp-java-repack-jars ]; then							\
+		echo -e "%{!?__jar_repack:/usr/lib/rpm/brp-java-repack-jars} \\" >> $(HOME)/.rpmmacros;		\
+	elif [ -e /usr/lib/rpm/redhat/brp-java-repack-jars ]; then						\
+		echo -e "%{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \\" >> $(HOME)/.rpmmacros;	\
+	fi
 	@echo -e "%{nil}" >> $(HOME)/.rpmmacros
 	@echo -e "$(RPM.MACROS.EXTRAS)"		>> $(HOME)/.rpmmacros
 	@echo 

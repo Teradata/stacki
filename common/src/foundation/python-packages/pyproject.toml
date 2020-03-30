@@ -66,6 +66,7 @@ sles11 = []
 sles12 = ["libvirt-python"]
 sles15 = ["libvirt-python"]
 redhat7 = ["libvirt-python"]
+redhat8 = ["libvirt-python"]
 
 [build-system]
 requires = ["poetry>=0.12"]

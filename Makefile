@@ -13,7 +13,8 @@ ROLLROOT = .
 -include $(ROLLSBUILD)/etc/CCRolls.mk
 
 ifeq ($(OS),redhat)
-BOOTABLE=1
+#BOOTABLE=1
+BOOTABLE=0
 endif
 
 .PHONY: 3rdparty

@@ -719,6 +719,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [extras]
 redhat7 = ["libvirt-python"]
+redhat8 = ["libvirt-python"]
 sles11 = []
 sles12 = ["libvirt-python"]
 sles15 = ["libvirt-python"]

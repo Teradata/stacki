@@ -38,8 +38,8 @@ logger.addHandler(handler)
 
 SITE_ATTRS_TEMPLATE = """\
 Info_CertificateCountry:US
-Info_CertificateLocality:Solana Beach
-Info_CertificateOrganization:StackIQ
+Info_CertificateLocality:San Diego
+Info_CertificateOrganization:Stacki
 Info_CertificateState:California
 Info_ClusterLatlong:N32.87 W117.22
 Info_FQDN:{FQDN}
