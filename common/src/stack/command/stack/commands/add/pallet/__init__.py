@@ -229,28 +229,6 @@ class Command(PalletArgumentProcessor, command):
 			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
 
 
-	def patch_pallet(self, pallet_info):
-		'''
-		Run any available pallet patches
-		'''
-
-		pallet_patch_dir = '-'.join(probepal_info_getter(pallet_info))
-		patch_dir = pathlib.Path(f'/opt/stack/pallet-patches/{pallet_patch_dir}')
-		print(f'checking for patches in {patch_dir}')
-		if not patch_dir.is_dir():
-			return
-
-		patches = sorted(list(patch_dir.glob('*.sh')) + list(patch_dir.glob('*.py')), key=lambda p: p.name)
-		for patch in patches:
-			print(f'applying patch: {patch}')
-			try:
-				self._exec(str(patch), cwd=patch_dir, check=True)
-			except PermissionError as e:
-				raise CommandError(self, f'Unable to apply patch: {str(patch)}\n{e}')
-			except subprocess.CalledProcessError as e:
-				print(e)
-
-
 	def run(self, params, args):
 		clean, stacki_pallet_dir, updatedb, run_hooks, self.username, self.password = self.fillParams([
 			('clean', False),
