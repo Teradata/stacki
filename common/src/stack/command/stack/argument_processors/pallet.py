@@ -152,7 +152,11 @@ class PalletArgumentProcessor:
 			try:
 				self._exec(str(hook), cwd=hook.parent, check=True)
 			except (PermissionError, subprocess.CalledProcessError) as exception:
-				self.notify(f'Unable to run hook {hook}:\n\n{exception}\n\nstdout:\n{exception.stdout}\n\nstderr:\n{exception.stderr}')
+				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
+				# CalledProcessError has additional info...
+				if hasattr(exception, 'stdout'):
+					msg += f'\nstdout:\n{exception.stdout}\n\nstderr:\n{exception.stderr}'
+				self.notify(msg)
 
 	def get_pallet_hook_directory(self, pallet_info):
 		"""Calculate the hook directory for a given pallet."""
