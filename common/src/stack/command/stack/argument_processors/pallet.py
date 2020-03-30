@@ -150,7 +150,7 @@ class PalletArgumentProcessor:
 		for hook in hooks:
 			self.notify(f'running hook: {hook}')
 			try:
-				self._exec(str(hook), cwd=hook.parent, check=True)
+				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True)
 			except (PermissionError, subprocess.CalledProcessError) as exception:
 				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
 				# CalledProcessError has additional info...
