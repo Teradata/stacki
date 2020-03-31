@@ -576,7 +576,7 @@ with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
 
 banner("Run Setup Script")
 # run run.sh
-result = run(['sh', '/tmp/run.sh'])
+result = subprocess.call(['sh', '-x', '/tmp/run.sh'])
 if result.returncode != 0:
 	logger.error("Setup Script Failed")
 	sys.exit(result.returncode)
