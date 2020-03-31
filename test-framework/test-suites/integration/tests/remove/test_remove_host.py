@@ -134,7 +134,7 @@ class TestRemoveHost:
 		result = host.run('stack remove host hypervisor-0-1')
 		assert result.rc != 0
 
-	def test_hypervisor_no_vm(self, host, add_hypervisor, add_vm):
+	def test_hypervisor_no_vm(self, host, add_hypervisor, add_vm, revert_etc):
 		"""
 		Test that we can remove a hypervisor host
 		with no virtual machines defined on it
