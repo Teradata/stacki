@@ -76,7 +76,7 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.comma
 			for scope_mapping in scope_mappings:
 				if scope_mapping.node_id == node_id:
 					# Remove the route
-					self._exec(f'route del -host {address}', shlexsplit=True)
+					self._exec(f'ip route del {address}', shlexsplit=True)
 
 					# Sync the routes file
 					self._exec("""

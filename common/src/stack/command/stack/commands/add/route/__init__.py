@@ -109,14 +109,14 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 			for scope_mapping in scope_mappings:
 				if scope_mapping.node_id == node_id:
 					# Add the new route
-					cmd = ['route', 'add', '-host', address]
+					cmd = ['ip', 'route', 'add', address]
 
 					if interface:
 						cmd.append('dev')
 						cmd.append(interface)
 
 					if gateway:
-						cmd.append('gw')
+						cmd.append('via')
 						cmd.append(gateway)
 
 					self._exec(cmd)
