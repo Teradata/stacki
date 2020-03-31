@@ -4,8 +4,8 @@
   Setup the DHCP server for the cluster
   </stack:description>
 
-<stack:package stack:cond="os == 'redhat'">dhcp</stack:package>
-<stack:package stack:cond="os == 'sles'">dhcp-server</stack:package>
+<stack:package stack:cond="os == 'redhat' and os.version != '8.x'">dhcp</stack:package>
+<stack:package stack:cond="os == 'sles' or (os == 'redhat' and os.version == '8.x')">dhcp-server</stack:package>
 
 
 <stack:script stack:stage="install-post">

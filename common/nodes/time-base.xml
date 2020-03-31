@@ -17,7 +17,7 @@
 	</stack:rocks>
 
 
-	<stack:package>
+	<stack:package stack:cond="not (os == 'redhat' and os.version == '8.x')">
 		ntp
 	</stack:package>
 

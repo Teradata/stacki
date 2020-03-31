@@ -22,8 +22,22 @@ yum_template = """yum install -y %s
 class BashProfileTraversor(stack.gen.MainTraversor):
 
 	def shellPackages(self, enabled, disabled):
+
+		cmd = ''
+		
+		# crazy hack to make bootstrapping to new versions of the OS
+		# easier. Peel out the stack-images RPM and don't require it,
+		# this is the code that make the ISO bootable and to just get a
+		# frontend up for development you don't need it. This wasn't
+		# needed for CentOS7 but CentOS8 changes yum and one bad
+		# package on the install line means nothing gets installed.
 		if enabled:
-			return yum_template % ' '.join(enabled)
+			images = 'stack-images'
+			if images in enabled:
+				cmd += f'yum install -y {images}\n'
+				enabled.remove(images)
+			
+			return cmd + yum_template % ' '.join(enabled)
 		
 		return None
 		

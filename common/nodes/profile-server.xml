@@ -11,14 +11,17 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</stack:copyright>
 
-	<stack:package stack:cond="os == 'redhat'">
-	libbdevid-python
-	pykickstart
-	python-pyblock
+	<stack:package stack:cond="os == 'redhat' and os.version != '8.x'">
+		libbdevid-python
+		python-pyblock
 	</stack:package> 
 
+	<stack:package stack:cond="os == 'redhat'">
+		pykickstart
+	</stack:package> 
+	
 	<stack:package>
-	stack-kickstart
+		stack-kickstart
 	</stack:package>
 
 

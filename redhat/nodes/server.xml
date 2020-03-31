@@ -51,17 +51,20 @@ for pallet in g.rolls:
 <stack:package>stack-probepal</stack:package>
 
 <!-- to build anaconda -->
-<stack:package>device-mapper-devel</stack:package>
-<stack:package>isomd5sum-devel</stack:package>
-<stack:package>libarchive-devel</stack:package>
+
+	<stack:package cond="os.version != '8.x'">
+		device-mapper-devel
+		isomd5sum-devel
+		libarchive-devel
+		NetworkManager-devel
+		NetworkManager-glib-devel
+		iscsi-initiator-utils-devel
+	</stack:package>
+
 <stack:package>libblkid-devel</stack:package>
 <stack:package>newt-devel</stack:package>
 <stack:package>slang-devel</stack:package>
-<stack:package>xmlto</stack:package>
-<stack:package>NetworkManager-devel</stack:package>
-<stack:package>NetworkManager-glib-devel</stack:package>
 <stack:package>dbus-devel</stack:package>
-<stack:package>iscsi-initiator-utils-devel</stack:package>
 <stack:package>libcurl-devel</stack:package>
 <stack:package>stack-config-server</stack:package>
 <stack:package>git</stack:package>

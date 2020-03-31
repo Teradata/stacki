@@ -15,8 +15,11 @@ Base class for all nodes.
 	ipmitool
 	OpenIPMI
 	wget
-	bridge-utils
 	rsyslog
+</stack:package>
+
+<stack:package stack:cond="not (os == 'redhat' and os.version == '8.x')">
+	bridge-utils
 </stack:package>
 
 
