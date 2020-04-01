@@ -74,3 +74,24 @@ class TestListHost:
 			'rack': '0',
 			'rank': '0'
 		}]
+
+	def test_lookup_non_kickstartable(self, host, add_host, host_os):
+		# Set the host to non-kickstartable
+		result = host.run('stack set host attr backend-0-0 attr=kickstartable value=false')
+		assert result.rc == 0
+
+		# List the host
+		result = host.run('stack list host backend-0-0 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'appliance': 'backend',
+			'box': 'default',
+			'comment': None,
+			'environment': None,
+			'host': 'backend-0-0',
+			'installaction': None,
+			'os': host_os,
+			'osaction': None,
+			'rack': '0',
+			'rank': '0'
+		}]
