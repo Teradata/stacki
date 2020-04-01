@@ -1790,7 +1790,7 @@ class Command:
 		"""
 
 		if type(host) == type([]):
-			params = host
+			params = host.copy()
 		else:
 			params = [host]
 

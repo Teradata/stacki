@@ -49,6 +49,15 @@ class Plugin(stack.commands.Plugin):
 			if row[0] in host_info:
 				host_info[row[0]].extend(row[1:])
 
+		kickable_hosts = self.owner.getHostAttrDict(hosts, 'kickstartable')
+
+		for host in hosts:
+			if not self.owner.str2bool(kickable_hosts[host]['kickstartable']):
+				# Installaction
+				host_info[host][-1] = None
+				# osaction
+				host_info[host][-2] = None
+
 		keys.extend(['rack', 'rank',
 			     'appliance',
 			     'os', 'box',
