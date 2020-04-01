@@ -176,6 +176,11 @@ def write_makefiles(package, package_prefix):
 		with srcdir.joinpath("Makefile").open("w") as makefile:
 			makefile.write("PKGROOT  = /opt/stack\n")
 			makefile.write(f"ROLLROOT = {os.environ['ROLLROOT']}/../..\n")
+			dep_list = []
+			for dependency in package.dependencies:
+				dep_list.append(f"{package_prefix}-{dependency.name} = {dependency.version}")
+			if dep_list:
+				makefile.write(f"RPM.REQUIRES = {', '.join(dep_list)}\n")
 			makefile.write("\n")
 			makefile.write("include $(STACKBUILD)/etc/CCRules.mk\n")
 			makefile.write("\n")
