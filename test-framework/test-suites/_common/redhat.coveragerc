@@ -11,5 +11,8 @@ omit =
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/repo/imp_sles.py
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/resolv/imp_sles.py
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/route/imp_sles.py
+	/opt/stack/lib/python3*/site-packages/stack/commands/report/system/conftest.py
+	/opt/stack/lib/python3*/site-packages/stack/commands/report/system/fixtures/__init__.py
+	/opt/stack/lib/python3*/site-packages/stack/commands/report/system/tests/stack_test_util.py
 	/opt/stack/lib/python3*/site-packages/stack/sles/__init__.py
 	/opt/stack/lib/python3*/site-packages/stack/sles/gen.py
