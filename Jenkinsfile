@@ -525,11 +525,6 @@ pipeline {
                     }
 
                     steps {
-                        // Note: There is a race condition getting bridged networks
-                        // when you kick off vagrant at the exact same time. So, cause
-                        // a slight delay.
-                        sleep 10
-
                         // Run the integration tests
                         dir('integration_1') {
                             // Give the tests up to 90 minutes to finish
@@ -583,11 +578,6 @@ pipeline {
                     }
 
                     steps {
-                        // Note: There is a race condition getting bridged networks
-                        // when you kick off vagrant at the exact same time. So, cause
-                        // a slight delay.
-                        sleep 20
-
                         // Run the integration tests
                         dir('integration_2') {
                             // Give the tests up to 90 minutes to finish
@@ -641,11 +631,6 @@ pipeline {
                     }
 
                     steps {
-                        // Note: There is a race condition getting bridged networks
-                        // when you kick off vagrant at the exact same time. So, cause
-                        // a slight delay.
-                        sleep 30
-
                         // Run the integration tests
                         dir('integration_3') {
                             // Give the tests up to 90 minutes to finish
@@ -692,8 +677,6 @@ pipeline {
 
                 stage('System') {
                     steps {
-                        sleep 40
-
                         // Run the system tests
                         dir('system') {
                             // Give the tests up to 90 minutes to finish
@@ -782,8 +765,6 @@ pipeline {
                     }
 
                     steps {
-                        sleep 50
-
                         dir('combine/test-suites/unit') {
                             script {
                                 // Create a VM to combine the coverage data

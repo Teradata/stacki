@@ -31,10 +31,10 @@ then
     cd - >/dev/null
 
     # Create the sles11sp3 box on the frontend
-    vagrant ssh frontend -c "sudo -i /export/test-suites/system/files/create-sles11sp3-box.sh $2"
+    vagrant ssh frontend --no-tty -c "sudo -i /export/test-suites/system/files/create-sles11sp3-box.sh $2"
 
     # Start discovery
-    vagrant ssh frontend -c "sudo -i stack enable discovery box=sles11sp3 installaction='install sles 11.3'"
+    vagrant ssh frontend --no-tty -c "sudo -i stack enable discovery box=sles11sp3 installaction='install sles 11.3'"
 
     # Bring up the backends (120 minute timeout)
     ./set-up.d/_common.sh 120
