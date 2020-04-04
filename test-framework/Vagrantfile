@@ -1,4 +1,5 @@
 require 'json'
+require 'thread'
 
 # We need the vagrant-reload plugin
 unless Vagrant.has_plugin?("vagrant-reload")
@@ -38,6 +39,26 @@ if ENV['GIT_BRANCH'].nil?
 end
 
 Vagrant.configure("2") do |config|
+  # Note: This requires Vagrant 2.2.0 or newer
+  config.trigger.before :up do |trigger|
+    trigger.info = "Acquiring Lock..."
+    trigger.ruby do |env, machine|
+      # The vagrant-libvirt plugin has a race condition getting
+      # virtual bridges and IPs. So, we make sure concurrent processes
+      # are spread out with a lock.
+      lock = File.open(File.join(env.home_path, "test-framework.lock"), "w+")
+      lock.flock(File::LOCK_EX)
+      machine.ui.info("Lock acquired")
+
+      Thread.new {
+        # Give vagrant 60 seconds to get an IP
+        sleep 60
+        lock.flock(File::LOCK_UN)
+        lock.close()
+      }
+    end
+  end
+
   config.vm.define "frontend", autostart: false do |config|
     if STACKI_ISO =~  /-sles12\./
       config.vm.box = "stacki/sles-12.3"

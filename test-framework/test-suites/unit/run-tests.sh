@@ -23,7 +23,7 @@ then
 
     # Capture the test status but continue after failure
     set +e
-    vagrant ssh frontend -c "sudo -i pytest -vvv \
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/pytest -vvv \
         --junitxml=/export/reports/unit-junit.xml \
         --cov-config=/export/test-suites/_common/$COVERAGERC \
         --cov=wsclient \
@@ -33,11 +33,11 @@ then
     STATUS=$?
 
     # Move the coverage data
-    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/unit.coverage"
+    vagrant ssh frontend --no-tty -c "sudo -i mv /root/.coverage /export/reports/unit.coverage"
 
     exit $STATUS
 else
-    vagrant ssh frontend -c "sudo -i pytest -vvv \
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/pytest -vvv \
         --junitxml=/export/reports/unit-junit.xml \
         /export/test-suites/unit/tests/"
 fi

@@ -46,7 +46,7 @@ then
 
     # Capture the test status but continue after failure
     set +e
-    vagrant ssh frontend -c "sudo -i pytest -vvv \
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/pytest -vvv \
         --timeout=300 --timeout_method=signal \
         --junit-xml=/export/reports/integration-junit.xml \
         --cov-config=/export/test-suites/_common/$COVERAGERC \
@@ -58,17 +58,17 @@ then
     STATUS=$?
 
     # Move the coverage data
-    vagrant ssh frontend -c "sudo -i mv /root/.coverage /export/reports/integration.coverage"
+    vagrant ssh frontend --no-tty -c "sudo -i mv /root/.coverage /export/reports/integration.coverage"
 
     exit $STATUS
 elif [[ $AUDIT -eq 1 ]]
 then
-    vagrant ssh frontend -c "sudo -i pytest -vvv \
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/pytest -vvv \
         --audit \
         ${EXTRA_FLAGS[*]} \
         /export/test-suites/integration/tests/"
 else
-    vagrant ssh frontend -c "sudo -i pytest -vvv \
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/pytest -vvv \
         --timeout=300 --timeout_method=signal \
         --junit-xml=/export/reports/integration-junit.xml \
         ${EXTRA_FLAGS[*]} \
