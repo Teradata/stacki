@@ -81,7 +81,7 @@
                 "scope": "global",
                 "type": "const",
                 "attr": "release",
-                "value": "redhat7"
+                "value": ""
         },
         {
                 "scope": "global",

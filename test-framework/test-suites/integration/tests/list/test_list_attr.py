@@ -45,7 +45,7 @@ class TestListAttr:
 					return False
 		return True
 
-	def test_intrinsic(self, host, add_network, host_os, test_file):
+	def test_intrinsic(self, host, add_network, test_file):
 		# Add a public network
 		add_network("public", "192.168.100.0")
 
@@ -59,15 +59,17 @@ class TestListAttr:
 		result = host.run('stack list attr var=False output-format=json')
 		assert result.rc == 0
 
-		# Assert there is version, then blank it out
+		# Assert there is version and release, then blank it out
 		attrs = json.loads(result.stdout)
 		for attr in attrs:
 			if attr['attr'] == 'version':
 				assert attr['value'] and attr['value'].strip()
 				attr['value'] = ''
-				break
+			if attr['attr'] == 'release':
+				assert attr['value'] in {'redhat7', 'sles12', 'sles15'}
+				attr['value'] = ''
 
-		with open(test_file(f'list/attr_intrinsic_{host_os}.json')) as output:
+		with open(test_file(f'list/attr_intrinsic.json')) as output:
 			assert attrs == json.loads(output.read())
 
 	def test_normal_user_no_shadow(self, host):
