@@ -58,6 +58,7 @@ class Command(stack.commands.set.host.command):
 			('sync', True)
 		])
 
+		sync_dhcp = False
 		sync = self.str2bool(sync)
 		if action not in ['os', 'install']:
 			raise ParamValue(self, 'action', 'one of: os, install')
@@ -68,6 +69,9 @@ class Command(stack.commands.set.host.command):
 		)}
 
 		for host in hosts:
+			if host['os'] == 'raspbian':
+				sync_dhcp = True
+
 			if host in hosts_with_boot:
 				self.db.execute(
 					'update boot set action=%s where node=%s',
@@ -98,3 +102,5 @@ class Command(stack.commands.set.host.command):
 
 		if sync:
 			self.command('sync.host.boot', hosts)
+			if sync_dhcp: # for the pi
+				self.command('sync.dhcpd')

@@ -21,6 +21,8 @@ class Plugin(stack.commands.Plugin):
 		for host in ha:
 			if 'interfaces' not in ha[host]:
 				continue
+			if ha[host]['os'] in [ 'raspbian', None ]:
+				continue
 			for interface in ha[host]['interfaces']:
 				filename = os.path.join(os.path.sep, 
 							'tftpboot', 

@@ -63,6 +63,9 @@ class Command(stack.commands.Command,
 				hosts_with_no_action.append(row['host'])
 			h['os']        = row['os']
 			h['appliance'] = row['appliance']
+			h['box']       = row['box']
+			h['image']     = row['image']
+			h['nfsroot']   = row['nfsroot']
 
 		# Removing all the hosts which do not have any bootaction
 		for blacklist_host in hosts_with_no_action:
@@ -103,12 +106,14 @@ class Command(stack.commands.Command,
 			if h['appliance'] == 'frontend':
 				continue
 			ip  = row['ip']
+			mac = row['mac']
 			pxe = row['pxe']
 			interface = row['interface']
 			if ip and pxe:
 				h['interfaces'].append({
 					'interface': interface,
 					'ip'	   : ip,
+					'mac'      : mac,
 					'mask'	   : row['mask'],
 					'gateway'  : row['gateway']
 				})

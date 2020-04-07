@@ -33,22 +33,43 @@ class Plugin(stack.commands.Plugin):
 		box_map = defaultdict(list)
 		hostname_map = {}
 
+		appliances = {}
+		for row in self.owner.call('list.appliance'):
+			appliances[row['appliance']] = row
+
 		# Get the data for the hosts
 		if node_ids:
-			for node_id, hostname, appliance, box_id, box, os, environment, rack, rank, metadata in self.db.select("""
-				nodes.id, nodes.name, appliances.name, boxes.id, boxes.name, oses.name,
+			for (node_id, hostname, 
+			     appliance_id, appliance, 
+			     box_id, box, box_os, 
+			     image_id, image, 
+			     environment, rack, rank, metadata) in self.db.select("""
+				nodes.id, nodes.name, 
+				appliances.id, appliances.name, 
+				boxes.id, boxes.name, oses.name,
+				images.id, images.name, 
 				environments.name, nodes.rack, nodes.rank, nodes.metadata
 				FROM nodes
 				INNER JOIN appliances ON appliances.id = nodes.appliance
-				INNER JOIN boxes ON boxes.id = nodes.box
-				INNER JOIN oses ON oses.id = boxes.os
+				LEFT JOIN boxes ON boxes.id = nodes.box
+				LEFT JOIN oses ON oses.id = boxes.os
+				LEFT JOIN images ON images.id = nodes.image
 				LEFT JOIN environments ON environments.id = nodes.environment
 				WHERE nodes.id IN %s
-			""", (node_ids,)):
+				""", (node_ids,)):
 				output_rows.append([hostname, 'host', 'const', 'hostname', hostname])
 				output_rows.append([hostname, 'host', 'const', 'appliance', appliance])
 				output_rows.append([hostname, 'host', 'const', 'box', box])
-				output_rows.append([hostname, 'host', 'const', 'os', os])
+				output_rows.append([hostname, 'host', 'const', 'image', image])
+				if box_os:
+					# WARNING: This is different from `list
+					# host`, here the OS is only calculated
+					# from the box, so image or nfsroot
+					# hosts won't get this attribute
+					# set. That's bad but attributes are
+					# mainly for SUX which these hosts
+					# don't have.
+					output_rows.append([hostname, 'host', 'const', 'os', box_os])
 
 				if environment:
 					output_rows.append([hostname, 'host', 'const', 'environment', environment])
@@ -58,6 +79,11 @@ class Plugin(stack.commands.Plugin):
 
 				if metadata:
 					output_rows.append([hostname, 'host', 'const', 'metadata', metadata])
+
+				sux = appliances[appliance]['sux']
+				output_rows.append([hostname, 'host', 'const', 'node', sux]) # deprecate this
+				output_rows.append([hostname, 'host', 'const', 'sux',  sux])  # use this instead
+				output_rows.append([hostname, 'host', 'const', 'managed', appliances[appliance]['managed']])
 
 				# Add the host to the box map
 				box_map[box_id].append(hostname)
