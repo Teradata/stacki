@@ -30,4 +30,5 @@ class Plugin(stack.commands.Plugin):
 		for arg in args:
 			p = pathlib.Path(args[arg]['canonical_arg'])
 			if p.is_file() and p.suffix == '.iso':
+				self.owner.perform_checksum(str(p), args[arg]['canonical_arg'])
 				self.owner.mount(str(p), args[arg]['exploded_path'])

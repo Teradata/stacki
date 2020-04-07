@@ -65,6 +65,7 @@ class Plugin(stack.commands.Plugin):
 				raise CommandError(self, f'Error fetching {fi}: not recognized as an iso file')
 
 			try:
+				self.owner.perform_checksum(canon_arg, local_path)
 				self.owner.mount(local_path, tmp_mnt_dir)
 			except CommandError:
 				# mount can fail and that's fine, but we want to clean up if it does

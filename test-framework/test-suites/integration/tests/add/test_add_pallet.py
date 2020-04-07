@@ -21,7 +21,7 @@ class TestAddPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - must supply a password along with the username
-			[pallet ...] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
+			[pallet ...] [checksum=string] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
 		''')
 
 	def test_password_no_username(self, host, create_pallet_isos):
@@ -29,7 +29,7 @@ class TestAddPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - must supply a password along with the username
-			[pallet ...] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
+			[pallet ...] [checksum=string] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
 		''')
 
 	def test_minimal(self, host, create_pallet_isos, revert_export_stack_pallets):
@@ -435,3 +435,66 @@ class TestAddPallet:
 				'os': 'sles'
 			}
 		]
+
+	def test_pallet_invalid_sha1sum(self, host, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		result = host.run(f'stack add pallet {minimal} checksum="sha1:d25fd4ada1e1d5c2296831841d6e157644268530"')
+		assert result.rc != 0
+		assert "FAILED" in result.stderr
+
+		# ensure pallet is not added
+		result = host.run('stack list pallet minimal output-format=json')
+		assert result.rc != 0
+
+	def test_pallet_invalid_checksum(self, host, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		result = host.run(f'stack add pallet {minimal} checksum="fsum:d25fd4ada1e1d5c2296831841d6e157644268530"')
+		assert result.rc != 0
+		assert "Invalid checksum type(s) given" in result.stderr
+		assert "fsum" in result.stderr
+
+	def test_pallet_invalid_checksum_format(self, host, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		result = host.run(f'stack add pallet {minimal} checksum="sha1=d25fd4ada1e1d5c2296831841d6e157644268530"')
+		assert result.rc != 0
+		assert "You must supply a checksum in the format of <type>:<value>" in result.stderr
+
+	def test_pallet_invalid_checksums_when_multiple(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		minimal_url = "http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso"
+		result = host.run(
+			f'stack add pallet {minimal} {minimal_url} checksum="sha1:d25fd4ada1e1d5c2296831841d6e157644268530"')
+		assert result.rc != 0
+		assert "Checksum is required for each pallet." in result.stderr
+
+	def test_pallet_valid_checksum(self, host, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		result = host.run(f'sha1sum {minimal}')
+		assert result.rc == 0
+		sha1sum = result.stdout.split(' ')[0]
+		result = host.run(f'stack add pallet {minimal} checksum="sha1:{sha1sum}"')
+		assert result.rc == 0
+
+		# ensure pallet is not added
+		result = host.run('stack list pallet minimal output-format=json')
+		assert result.rc == 0
+
+	def test_pallet_valid_checksum_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets):
+		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
+		result = host.run(f'sha1sum {minimal}')
+		assert result.rc == 0
+		sha1sum = result.stdout.split(' ')[0]
+
+		# ensure we're checking remote pallets
+		result = host.run(
+			f'stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso  checksum="sha1:{sha1sum}"'
+		)
+		assert result.rc == 0
+
+	def test_pallet_invalid_folder(self, host, test_file):
+		print(f'stack add pallet {test_file("pallets/jumbo/")}')
+		result = host.run(
+			f'stack add pallet {test_file("pallets/jumbo/")} checksum="sha1:d25fd4ada1e1d5c2296831841d6e157644268530"'
+		)
+		assert result.rc != 0
+		assert "One or more paths was specified with a checksum that is a directory" in result.stderr
