@@ -16,7 +16,7 @@ from contextlib import ExitStack
 import atexit
 import tempfile
 from textwrap import dedent
-import subprocess
+import os
 from operator import attrgetter
 
 import stack.commands
@@ -37,6 +37,7 @@ probepal_info_getter = attrgetter(
 	"distro_family",
 	"arch",
 )
+
 
 class command(stack.commands.add.command):
 	pass
@@ -86,6 +87,18 @@ class Command(PalletArgProcessor, command):
 	Controls whether pallets hooks are run. This defaults to True.
 	</param>
 
+	<param type='string' name='checksum'>
+	Check the pallet against the given checksum.
+
+	If you want to avoid collisions, be sure to use sha256 and/or sha512 (at least until a point when collisions
+	are detected with these algorithms)
+
+	Supported checksums at the moment are: md5, sha1, sha256, sha512.
+	e.g. checksum="sha256:$SHA256"
+
+	For multiple pallets given, separate the checksum by commas.
+	</param>
+
 	<example cmd='add pallet clean=true kernel*iso'>
 	Adds the Kernel pallet to local pallet directory.  Before the pallet is
 	added the old Kernel pallet packages are removed from the pallet
@@ -95,6 +108,15 @@ class Command(PalletArgProcessor, command):
 	<example cmd='add pallet kernel*iso https://10.0.1.3/pallets/'>
 	Added the Kernel pallet along with any pallets found at the remote server
 	 to the local pallet directory.
+	</example>
+
+	<example cmd='add pallet my-os.iso checksum="sha256:$SHA256"'>
+	Check the SHA256 checksum of my-os.iso against the value of $SHA256.
+	</example>
+
+	<example cmd='add pallet os-1.iso os-2.iso checksum="sha256:$SHA256_ISO_1,sha256:$SHA256_ISO_2"'>
+	Check multiple pallets. First check os-1.iso checksum against the value of $SHA256_ISO_1 followed by the os-2.iso
+	checksum against the value of $SHA256_ISO_2.
 	</example>
 
 	<related>remove pallet</related>
@@ -198,6 +220,22 @@ class Command(PalletArgProcessor, command):
 			# Re-added the pallet. Update the URL.
 			self.db.execute('UPDATE rolls SET url=%s WHERE id=%s', (URL, rows[0][0]))
 
+	def perform_checksum(self, pallet_arg, iso_name):
+		if pallet_arg in self.checksum:
+			checksum_type, checksum_value = self.checksum[pallet_arg]
+			self.notify(f'Checking {iso_name} matches {checksum_type}={checksum_value}...')
+			proc = self._exec(
+				cmd = f'{checksum_type}sum -c',
+				shlexsplit=True,
+				input=f'{checksum_value} {iso_name}\n'
+			)
+			if proc.returncode != 0:
+				raise CommandError(
+					self,
+					f'Checksum for {iso_name} does not match given checksum ({checksum_type}:{checksum_value}).\n'
+					f'{proc.stdout}\n{proc.stderr}'
+				)
+
 	def mount(self, iso_name, mount_point):
 		'''
 		mount `iso_name` to `mount_point`
@@ -206,6 +244,7 @@ class Command(PalletArgProcessor, command):
 
 		# mount readonly explicitly to get around a weird behavior
 		# in sles12 that prevents re-mounting an already mounted iso
+
 		proc = self._exec(f'mount --read-only -o loop {iso_name} {mount_point}', shlexsplit=True)
 		if proc.returncode != 0:
 			msg = f'Pallet could not be added - unable to mount {iso_name}.'
@@ -230,22 +269,63 @@ class Command(PalletArgProcessor, command):
 
 
 	def run(self, params, args):
-		clean, stacki_pallet_dir, updatedb, run_hooks, self.username, self.password = self.fillParams([
+		clean, stacki_pallet_dir, updatedb, run_hooks, checksum, self.username, self.password = self.fillParams([
 			('clean', False),
 			('dir', '/export/stack/pallets'),
 			('updatedb', True),
 			('run_hooks', True),
+			('checksum', None),
 			('username', None),
 			('password', None),
 		])
 
 		# need to provide either both or none
-		if self.username or self.password and not all((self.username, self.password)):
+		if (self.username or self.password) and not all((self.username, self.password)):
 			raise UsageError(self, 'must supply a password along with the username')
 
 		clean = self.str2bool(clean)
 		updatedb = self.str2bool(updatedb)
 		run_hooks = self.str2bool(run_hooks)
+
+		self.checksum = {}
+		if checksum:
+			valid_checksums = ['md5', 'sha1', 'sha256', 'sha512']
+			bad_paths = []
+			for pallets in args:
+				if os.path.isdir(pallets):
+					bad_paths.append(pallets)
+
+			if bad_paths:
+				raise UsageError(
+					self,
+					f"One or more paths was specified with a checksum that is a directory. Invalid paths are: "
+					f"{', '.join(bad_paths)}"
+				)
+
+			if len(checksum.split(',')) != len(args):
+				raise UsageError(self, "Checksum is required for each pallet.")
+
+			invalid_checksums = []
+			for i, pallet in enumerate(args):
+				try:
+					checksum_type, checksum_value = checksum.split(',')[i].split(':')
+				except ValueError:
+					raise UsageError(self, 'You must supply a checksum in the format of <type>:<value>')
+				if checksum_type not in valid_checksums:
+					invalid_checksums.append(checksum_type)
+				else:
+					if pallet.startswith(('https://', 'http://', 'ftp://')):
+						path = pallet
+					else:
+						path = str(pathlib.Path(pallet).resolve())
+					self.checksum[path] = (checksum_type, checksum_value)
+
+			if len(invalid_checksums) > 0:
+				raise UsageError(
+					self,
+					f"Invalid checksum type(s) given: {', '.join(invalid_checksums)}. "
+					f"Valid checksums are: [{', '.join(valid_checksums)}."
+				)
 
 		# create a contextmanager that we can append cleanup jobs to
 		# add its closing to run atexit, so we know it will run
