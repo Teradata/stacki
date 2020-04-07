@@ -140,7 +140,13 @@ def set_host_interface(add_host_with_interface):
 
 @pytest.fixture(scope="session")
 def host_os():
+	# SLES 12
 	if os.path.exists('/etc/SuSE-release'):
+		return 'sles'
+
+	# SLES 15
+	os_release = Path('/etc/os-release')
+	if os_release.exists() and 'NAME="SLES"' in os_release.read_text():
 		return 'sles'
 
 	return 'redhat'
@@ -158,48 +164,38 @@ def invalid_host():
 	return 'invalid-{:04x}'.format(random.randint(0, 65535))
 
 @pytest.fixture
-def fake_os_sles(host):
+def fake_os_sles(host, host_os, revert_etc):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as SLES
 	"""
 
-	already_sles = host.file('/etc/SuSE-release').exists
+	if host_os != "sles":
+		centos_release = Path("/etc/centos-release")
+		if centos_release.exists():
+			centos_release.unlink()
 
-	# Move the release file if needed
-	if not already_sles:
-		result = host.run('mv /etc/centos-release /etc/SuSE-release')
-		if result.rc != 0:
-			pytest.fail('unable to fake SLES OS')
+		Path("/etc/SuSE-release").touch()
 
 	yield
 
-	# Put things back the way they were
-	if not already_sles:
-		result = host.run('mv /etc/SuSE-release /etc/centos-release')
-		if result.rc != 0:
-			pytest.fail('unable to fake SLES OS')
-
 @pytest.fixture
-def fake_os_redhat(host):
+def fake_os_redhat(host, host_os, revert_etc):
 	"""
 	Trick Stacki into always seeing the OS (self.os) as Redhat (CentOS)
 	"""
 
-	already_redhat = host.file('/etc/centos-release').exists
+	if host_os != "redhat":
+		suse_release = Path("/etc/SuSE-release")
+		if suse_release.exists():
+			suse_release.unlink()
 
-	# Move the release file if needed
-	if not already_redhat:
-		result = host.run('mv /etc/SuSE-release /etc/centos-release')
-		if result.rc != 0:
-			pytest.fail('unable to fake Redhat OS')
+		os_release = Path('/etc/os-release')
+		if os_release.exists():
+			os_release.unlink()
+
+		Path("/etc/centos-release").touch()
 
 	yield
-
-	# Put things back the way they were
-	if not already_redhat:
-		result = host.run('mv /etc/centos-release /etc/SuSE-release')
-		if result.rc != 0:
-			pytest.fail('unable to fake Redhat OS')
 
 @pytest.fixture
 def rmtree(tmpdir):
@@ -267,7 +263,12 @@ def create_blank_iso(tmpdir_factory):
 	# Change to the temp directory
 	with temp_dir.as_cwd():
 		# Create our blank ISO
-		subprocess.run(['genisoimage', '-o', 'blank.iso', '.'], check=True)
+		if shutil.which("genisoimage"):
+			subprocess.run(['genisoimage', '-o', 'blank.iso', '.'], check=True)
+		elif shutil.which("mkisofs"):
+			subprocess.run(['mkisofs', '-o', 'blank.iso', '.'], check=True)
+		else:
+			pytest.fail('unable to create blank.iso')
 
 	yield str(temp_dir)
 

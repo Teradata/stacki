@@ -33,8 +33,8 @@ class TestSetAccess:
 		assert result.stderr == 'error - cannot find group test\n'
 
 	def test_group_name(self, host):
-		# Give all access to group 'adm'
-		result = host.run('stack set access command="*" group=adm')
+		# Give all access to group 'vagrant'
+		result = host.run('stack set access command="*" group=vagrant')
 		assert result.rc == 0
 
 		# Confirm it got added
@@ -59,15 +59,15 @@ class TestSetAccess:
 			},
 			{
 				'command': '*',
-				'group': 'adm'
+				'group': 'vagrant'
 			}
 		]
 
 	def test_group_id(self, host):
-		# Get the adm group id
-		gid = host.group('adm').gid
+		# Get the vagrant group id
+		gid = host.group('vagrant').gid
 
-		# Give all access to group 'adm'
+		# Give all access to group 'vagrant'
 		result = host.run(f'stack set access command="*" group={gid}')
 		assert result.rc == 0
 
@@ -93,6 +93,6 @@ class TestSetAccess:
 			},
 			{
 				'command': '*',
-				'group': 'adm'
+				'group': 'vagrant'
 			}
 		]
