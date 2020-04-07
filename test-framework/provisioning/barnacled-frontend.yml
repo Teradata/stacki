@@ -1,6 +1,11 @@
 ---
 - hosts: frontend
   tasks:
+    - name: Create /export/isos
+      file:
+        path: /export/isos
+        state: directory
+
     - name: Barnacle the frontend
       import_role:
         name: barnacle

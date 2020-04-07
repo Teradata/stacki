@@ -143,7 +143,6 @@ class TestEnablePallet:
 	def test_stacki_enable_hooks_sles12(
 		self,
 		host,
-		host_os,
 		revert_etc,
 		revert_export_stack_pallets,
 		revert_pallet_patches,
@@ -151,8 +150,10 @@ class TestEnablePallet:
 		revert_opt_stack_images,
 	):
 		"""Test the stacki hooks for sles12 work as expected."""
-		if host_os != "sles":
-			pytest.skip("This only tests hooks for SLES")
+
+		result = host.run("stack list pallet stacki output-format=json")
+		if json.loads(result.stdout)[0]["release"] != "sles12":
+			pytest.skip("This only tests hooks for SLES 12")
 
 		# remove the stacki-sles-sles12-images RPM
 		result = host.run("zypper --non-interactive remove stack-sles-sles12-images")

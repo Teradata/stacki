@@ -14,7 +14,7 @@ if [[ $1 == "--coverage" ]]
 then
     # Figure out which .coveragerc to pass
     STACKI_ISO=$(cat .cache/state.json | python3 -c 'import sys, json; print(json.load(sys.stdin)["STACKI_ISO"])')
-    if [[ $(basename $STACKI_ISO) =~ sles12\.x86_64\.disk1\.iso ]]
+    if [[ $(basename $STACKI_ISO) =~ sles1.\.x86_64\.disk1\.iso ]]
     then
         COVERAGERC="sles.coveragerc"
     else

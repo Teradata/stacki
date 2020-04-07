@@ -4,9 +4,12 @@
     - name: Download CentOS-7-x86_64-Everything-1810.iso
       get_url:
         url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
-        dest: /export/isos/CentOS-7-x86_64-Everything-1810.iso
-        checksum: "sha1:d3a42e49e41b9b3dc71aaeab125215fee3a19516"
+        dest: /export/cache/CentOS-7-x86_64-Everything-1810.iso
+        checksum: "md5:41e58360e224b49e96e44b94e1563c1f"
         mode: 0644
+
+    - name: Copy CentOS-7-x86_64-Everything-1810.iso into the VM
+      command: cp /export/cache/CentOS-7-x86_64-Everything-1810.iso /export/isos/
 
     - name: Create /media/cdrom
       file:

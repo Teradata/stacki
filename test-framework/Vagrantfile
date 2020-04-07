@@ -60,7 +60,10 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "frontend", autostart: false do |config|
-    if STACKI_ISO =~  /-sles12\./
+    if STACKI_ISO =~  /-sles15\./
+      config.vm.box = "stacki/sles-15.1"
+      config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-15.1.json"
+    elsif STACKI_ISO =~  /-sles12\./
       config.vm.box = "stacki/sles-12.3"
       config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
     elsif STACKI_ISO =~  /-redhat7\./
@@ -76,7 +79,7 @@ Vagrant.configure("2") do |config|
       provider.memory = "4098"
       provider.cpus = 4
 
-      config.vm.synced_folder ".cache", "/export/isos", type: "virtualbox"
+      config.vm.synced_folder ".cache", "/export/cache", type: "virtualbox"
       config.vm.synced_folder "reports", "/export/reports", type: "virtualbox"
       config.vm.synced_folder "test-suites", "/export/test-suites", type: "virtualbox"
 
@@ -95,7 +98,7 @@ Vagrant.configure("2") do |config|
       provider.nic_model_type = "e1000"
       provider.random :model => "random"
 
-      config.vm.synced_folder ".cache", "/export/isos", nfs: true, nfs_version: 4, nfs_udp: false
+      config.vm.synced_folder ".cache", "/export/cache", nfs: true, nfs_version: 4, nfs_udp: false
       config.vm.synced_folder "reports", "/export/reports", nfs: true, nfs_version: 4, nfs_udp: false
       config.vm.synced_folder "test-suites", "/export/test-suites", nfs: true, nfs_version: 4, nfs_udp: false
 

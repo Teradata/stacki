@@ -1,12 +1,15 @@
 ---
-- name: Set up zypper
+- name: Set up zypper for SLES 12
   block:
     - name: Download SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
       get_url:
         url: http://stacki-builds.labs.teradata.com/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-        dest: /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-        checksum: "sha1:d5e880817ab39124d2be0a8f5e81498143067c10"
+        dest: /export/cache/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+        checksum: "md5:633537da81d270a9548272dfe1fdd20d"
         mode: 0644
+
+    - name: Copy SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso into the VM
+      command: cp /export/cache/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso /export/isos/
 
     - name: Add SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso to zypper
       zypper_repository:
@@ -14,4 +17,41 @@
         repo: iso:/?iso=/export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
         state: present
         runrefresh: true
-  when: ansible_distribution == "SLES"
+  when: ansible_distribution == "SLES" and ansible_distribution_version == "12.3"
+
+- name: Set up zypper for SLES 15
+  block:
+    - name: Download SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+      get_url:
+        url: http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+        dest: /export/cache/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+        checksum: "md5:f61a98405b233c62f5b8d48ac6c611d4"
+        mode: 0644
+
+    - name: Copy SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso into the VM
+      command: cp /export/cache/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso /export/isos/
+
+    - name: Add SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso to zypper
+      zypper_repository:
+        name: os
+        repo: iso:/?iso=/export/isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+        state: present
+        runrefresh: true
+
+    - name: Download SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+      get_url:
+        url: http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.isoo
+        dest: /export/cache/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+        checksum: "md5:1caa5d8348ac16f793d716a4b78cd948"
+        mode: 0644
+
+    - name: Copy SLE-15-SP1-Packages-x86_64-GM-DVD1.iso into the VM
+      command: cp /export/cache/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso /export/isos/
+
+    - name: Add SLE-15-SP1-Packages-x86_64-GM-DVD1.iso to zypper
+      zypper_repository:
+        name: packages
+        repo: iso:/?iso=/export/isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+        state: present
+        runrefresh: true
+  when: ansible_distribution == "SLES" and ansible_distribution_version == "15.1"

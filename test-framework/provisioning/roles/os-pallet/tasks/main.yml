@@ -1,25 +1,30 @@
 ---
-- block:
-    - name: Download CentOS-7-x86_64-Everything-1810.iso
-      get_url:
-        url: http://stacki-builds.labs.teradata.com/installer-isos/CentOS-7-x86_64-Everything-1810.iso
-        dest: /export/isos/CentOS-7-x86_64-Everything-1810.iso
-        checksum: "sha1:d3a42e49e41b9b3dc71aaeab125215fee3a19516"
-        mode: 0644
-    - name: Add Centos Pallet
-      command: /opt/stack/bin/stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
+- name: Add Centos pallet
+  command: /opt/stack/bin/stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
   when: ansible_distribution == "CentOS"
 
-- block:
-    - name: Download SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-      get_url:
-        url: http://stacki-builds.labs.teradata.com/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-        dest: /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-        checksum: "sha1:d5e880817ab39124d2be0a8f5e81498143067c10"
-        mode: 0644
-    - name: Add SLES Pallet
-      command: /opt/stack/bin/stack add pallet /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
-  when: ansible_distribution == "SLES"
+- name: Add SLES 12 pallet
+  command: /opt/stack/bin/stack add pallet /export/isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+  when: ansible_distribution == "SLES" and ansible_distribution_version == "12.3"
 
-- name: Enable {{ ansible_distribution }} Pallet
+- name: Add SLES 15 pallet
+  command: /opt/stack/bin/stack add pallet /export/isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+  when: ansible_distribution == "SLES" and ansible_distribution_version == "15.1"
+
+- name: Enable {{ ansible_distribution }} pallet for default box
   command: /opt/stack/bin/stack enable pallet {{ ansible_distribution }}
+
+- name: Enable {{ ansible_distribution }} pallet for frontend box
+  command: /opt/stack/bin/stack enable pallet {{ ansible_distribution }} box=frontend
+
+- name: Set up SLES 15 packages pallet
+  block:
+  - name: Add SLES 15 packages pallet
+    command: /opt/stack/bin/stack add pallet /export/isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
+
+  - name: Enable SLES 15 packages pallet for default box
+    command: /opt/stack/bin/stack enable pallet Packages-1
+
+  - name: Enable SLES 15 packages pallet for frontend box
+    command: /opt/stack/bin/stack enable pallet Packages-1 box=frontend
+  when: ansible_distribution == "SLES" and ansible_distribution_version == "15.1"
