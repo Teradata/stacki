@@ -281,7 +281,8 @@ pipeline {
                         rtServer(
                             id: "td-artifactory",
                             url: "${env.ART_URL}",
-                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03"
+                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03",
+                            timeout: 3600
                         )
 
                         // Figure out our Artifactory OS
@@ -1181,7 +1182,8 @@ pipeline {
                         rtServer(
                             id: "td-artifactory",
                             url: "${env.ART_URL}",
-                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03"
+                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03",
+                            timeout: 3600
                         )
 
                         // Get the Stacki ISO
