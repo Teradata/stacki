@@ -3,10 +3,10 @@ Description=Stacki Message Queue Shipper
 After=last.target
 
 [Service]
-Type=idle
-PIDFile=/var/run/smq-shipper/smq-shipper.pid
-ExecStartPre=/usr/bin/mkdir -p /var/run/smq-shipper
+Type=simple
 ExecStart=/opt/stack/sbin/smq-shipper
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=last.target

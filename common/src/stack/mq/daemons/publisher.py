@@ -6,6 +6,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import argparse
 import os
 import sys
 import daemon
@@ -78,7 +79,11 @@ def Handler(signal, frame):
 	sys.exit(0)
 
 
-if 'STACKDEBUG' not in os.environ:
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--daemonize", help="daemonize the process", action="store_true")
+args = parser.parse_args()
+
+if args.daemonize and 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
 						('smq-publisher', 'smq-publisher'))
 	daemon.DaemonContext(pidfile=lock).open()
