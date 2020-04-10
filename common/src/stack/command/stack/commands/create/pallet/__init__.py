@@ -15,13 +15,14 @@ import glob
 import json
 import os
 import shlex
+import sys
+import time
+import tempfile
 import shutil
 import string
 import subprocess
-import sys
-import tempfile
-import time
-
+import glob
+import json
 import stack
 from stack.argument_processors.host import HostArgProcessor
 import stack.bootable
@@ -44,8 +45,8 @@ class Builder:
 
 	def makeBootable(self, name, version, release, arch):
 		pass
-
-	def mkisofs(self, isoName, rollName, diskName, rollDir):
+				
+	def mkisofs(self, isoName, rollName, diskName, rollDir, *, command='mkisofs'):
 		print('Building ISO image for %s' % diskName)
 
 		if self.config.isBootable():
@@ -55,8 +56,8 @@ class Builder:
 
 		volname = "stacki"
 		cwd = os.getcwd()
-		cmd = 'mkisofs -quiet -V "%s" %s -r -T -f -o %s .' % \
-			(volname, extraflags, os.path.join(cwd, isoName))
+		cmd = '%s -quiet -V "%s" %s -r -T -f -o %s .' % \
+			(command, volname, extraflags, os.path.join(cwd, isoName))
 
 #		print('mkisofs: cmd %s' % cmd)
 		stack.util._exec(cmd, shlexsplit=True, cwd=rollDir)
@@ -71,11 +72,13 @@ class Builder:
 	def writerepo(self, name, version, release, OS, arch):
 		print('Writing repo data')
 		basedir = os.getcwd()
-		palletdir = os.path.join(basedir, 'disk1', name, version,
-			release, OS, arch)
-		os.chdir(palletdir)
 
-		subprocess.call(['createrepo', '.'])
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			os.chdir(os.path.join(basedir, 'disk1', name, version, release, OS, arch))
+			subprocess.call(['createrepo', '.'])
+		else: # debian
+			os.chdir(os.path.join(basedir, 'disk1', name, version, release, OS, arch, 'packages'))
+			os.system('dpkg-scanpackages . /dev/null | gzip -c > Packages.gz')
 
 		os.chdir(basedir)
 
@@ -133,7 +136,7 @@ class Builder:
 			shutil.rmtree(tmp)
 
 
-	def stampDisk(self, dir, name, arch, id=1):
+	def stampDisk(self, dir, name, arch):
 		file = os.path.join(dir, '.discinfo')
 		if os.path.isfile(file):
 			os.unlink(file)
@@ -141,7 +144,7 @@ class Builder:
 		fout.write('%f\n' % time.time())
 		fout.write('%s\n' % name)
 		fout.write('%s\n' % arch)
-		fout.write('%d\n' % id)
+		fout.write('1\n')
 		fout.close()
 
 
@@ -156,9 +159,9 @@ class RollBuilder(Builder, stack.dist.Arch):
 		self.command = command
 		self.call = call
 
-	def mkisofs(self, isoName, rollName, diskName):
-		Builder.mkisofs(self, isoName, rollName, diskName, diskName)
-
+	def mkisofs(self, isoName, rollName, diskName, *, command='mkisofs'):
+		Builder.mkisofs(self, isoName, rollName, diskName, diskName, command=command)
+		
 	def getRPMS(self, path):
 		"""Return a list of all the RPMs in the given path, if multiple
 		versions of a package are found only the most recent one will
@@ -195,70 +198,10 @@ class RollBuilder(Builder, stack.dist.Arch):
 		return list
 
 
-	def spanDisks(self, files, disks=[]):
-		"""Given the pallet RPMS and backend the size
-		of all the files and return a list of files for each disk of
-		the pallet.  The intention is for almost all pallets to be one
-		CD but for our OS pallet this is not the case."""
+	def configure_yum(self, packages):
+		# create a yum.conf file that contains only repos from
+		# the default-all box
 
-		# Set the pallet size to 0 to bypass the disk spanning
-		# logic.  The updates pallet does this.
-
-		avail = self.config.getISOMaxSize()
-		if avail <= 0:
-			infinite = 1
-		else:
-			infinite = 0
-		consumed = []
-		remaining = []
-
-		# Fill the CDs
-
-		for file in files:
-			if file and infinite:
-				consumed.append(file)
-			elif file and (avail - file.getSize()) > 0:
-				consumed.append(file)
-				avail -= file.getSize()
-			else:
-				remaining.append(file)
-
-		id	= len(disks) + 1
-		name	= 'disk%d' % id
-		size	= self.config.getISOMaxSize() - avail
-		disks.append((name, id, size, consumed))
-		if len(remaining):
-			self.spanDisks(remaining, disks)
-		return disks
-
-
-	def getExternalRPMS(self):
-		import stack.roll
-		import stack.redhat.gen
-
-		attrs = {}
-		for row in self.call('list.host.attr', [ 'localhost' ]):
-			attrs[row['attr']] = row['value']
-		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
-
-		#
-		# make sure the XML string is ASCII and not unicode,
-		# otherwise, the parser will fail
-		#
-		xmlinput = xml.encode('ascii', 'ignore')
-
-		generator = stack.redhat.gen.Generator()
-		generator.setProfileType('native')
-		generator.setArch(self.arch)
-		generator.setOS('redhat')
-		generator.parse(xmlinput)
-
-		# call the getPackages, for just enabled packages and flatten it
-		rpms = [pkg for node_pkgs in generator.packageSet.getPackages()['enabled'].values() for pkg in node_pkgs]
-
-		# create a yum.conf file that contains only repos from the
-		# default-all box
-		#
 		cwd = os.getcwd()
 		yumconf = os.path.join(cwd, 'yum.conf')
 
@@ -289,8 +232,8 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.close()
 
 		# Use system python (2.x)
-		cmd = ['/usr/bin/python', '/opt/stack/sbin/yumresolver', yumconf]
-		cmd.extend(rpms)
+		cmd = ['/usr/bin/python', '/opt/stack/sbin/yumresolver', yumconf ]
+		cmd.extend(packages)
 		proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		stdout, stdrr = proc.communicate()
 
@@ -331,22 +274,59 @@ class RollBuilder(Builder, stack.dist.Arch):
 				file.write('baseurl=file:///export/stack/pallets/%s/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['release'], o['arch']))
 
 		file.close()
-		destdir = os.path.join(cwd, 'RPMS')
 
-		cmd = [ 'yumdownloader', '--destdir=%s' % destdir, '-y', '-c', yumconf ]
+		cmd = [ 'yumdownloader', '--destdir=%s' % os.path.join(cwd, 'RPMS'), '-y', '-c', yumconf ]
 		cmd.extend(selected)
 		subprocess.call(cmd, stdin=None)
+
+	def configure_dpkg(self, packages):
+		os.system('dpkg-scanpackages packages /dev/null | gzip -c > packages/Packages.gz')
+	    
+	def getExternalRPMS(self):
+		import stack.roll
+		import stack.redhat.gen
+
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'localhost' ]):
+			attrs[row['attr']] = row['value']
+		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
+
+		#
+		# make sure the XML string is ASCII and not unicode, 
+		# otherwise, the parser will fail
+		#
+		xmlinput = xml.encode('ascii', 'ignore')
+
+		generator = stack.redhat.gen.Generator()
+		generator.setProfileType('native')
+		generator.setArch(self.arch)
+		generator.setOS('redhat')
+		generator.parse(xmlinput)
+
+		# call the getPackages, for just enabled packages and flatten it
+		packages = [pkg for node_pkgs in generator.packageSet.getPackages()['enabled'].values() for pkg in node_pkgs]
+
+
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			print('YUM')
+			self.configure_yum(packages)
+			pkgdir = os.path.join(os.getcwd(), 'RPMS')
+		else: # debian
+			print('DEB')
+			self.configure_dpkg(packages)
+			pkgdir = os.path.join(os.getcwd(), 'packages')
+
 
 		stacki = []
 		nonstacki = []
 
-		tree = stack.file.Tree(destdir)
+		tree = stack.file.Tree(pkgdir)
 
-		for rpm in tree.getFiles():
-			if rpm.getBaseName() in selected:
-				stacki.append(rpm)
+		for pkg in tree.getFiles():
+			if pkg.getBaseName() in selected:
+				stacki.append(pkg)
 			else:
-				nonstacki.append(rpm)
+				nonstacki.append(pkg)
 
 		return (stacki, nonstacki)
 
@@ -403,13 +383,17 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 	def run(self):
 
+		pkgsdir = 'packages'
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			pkgsdir = 'RPMS'
+				
 		# Make a list of all the files that we need to copy onto the
 		# pallets cds.	Don't worry about what the file types are right
 		# now, we can figure that out later.
 
 		list = []
 		if self.config.hasRPMS():
-			list.extend(self.getRPMS('RPMS'))
+			list.extend(self.getRPMS(pkgsdir))
 
 		# Make a list of both required and optional packages.  The copy
 		# code is here since python is by-reference for everything.
@@ -419,6 +403,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 		required = []
 		if self.config.hasRolls():
+			print('hasRolls')
 			(required, optional) = self.getExternalRPMS()
 			for file in list:
 				required.append(file)
@@ -429,96 +414,85 @@ class RollBuilder(Builder, stack.dist.Arch):
 			list.extend(optional)
 
 
-		optional = 0
-		for (name, id, size, files) in self.spanDisks(list):
-			print('Creating %s (%.2fMB)...' % (name, size), end=' ')
-			if optional:
-				print(' This disk is optional (extra rpms)')
-			else:
-				print()
+		print('Creating ...', end=' ')
+		print() 
+				
+		root = os.path.join('disk1',
+				    self.config.getRollName(),
+				    self.config.getRollVersion(),
+				    self.config.getRollRelease(),
+				    self.config.getRollOS(),
+				    self.config.getRollArch())
 
-			root = os.path.join(name,
-					    self.config.getRollName(),
-					    self.config.getRollVersion(),
-					    self.config.getRollRelease(),
-					    self.config.getRollOS(),
-					    self.config.getRollArch())
+		os.makedirs(os.path.join(root, pkgsdir))
+			    
+			
+		# Symlink in all the RPMS
+			
+		for file in list:
+			try:
+				#
+				# not RPM files will throw an exception
+				# in getPackageArch()
+				#
+				arch = file.getPackageArch()
+			except:
+				continue
 
-			rpmsdir = 'RPMS'
+			if arch != 'src':
+				file.symlink(os.path.join(root, pkgsdir, file.getName()))
+			if file in required:
+				del required[required.index(file)]
+					
 
-			os.makedirs(root)
-			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-				os.makedirs(os.path.join(root, rpmsdir))
+		# Copy the pallet XML file onto all the disks
+		shutil.copy(self.config.getFullName(), root)
+			
+		# Create the .discinfo file
+			
+		self.stampDisk('disk1', self.config.getRollName(), self.config.getRollArch())
+				
+		# write repodata 
+		self.writerepo(self.config.getRollName(),
+			       self.config.getRollVersion(),
+			       self.config.getRollRelease(),
+			       self.config.getRollOS(),
+			       self.config.getRollArch())
 
-			# Symlink in all the RPMS
-
-			for file in files:
-				try:
-					#
-					# not RPM files will throw an exception
-					# in getPackageArch()
-					#
-					arch = file.getPackageArch()
-				except:
-					continue
-
-				if arch != 'src':
-					file.symlink(
-						os.path.join(root, rpmsdir,
-							     file.getName()))
-				if file in required:
-					del required[required.index(file)]
-
-			if len(required) == 0:
-				optional = 1
-
-			# Copy the pallet XML file onto all the disks
-			shutil.copy(self.config.getFullName(), root)
-
-			# Create the .discinfo file
-
-			self.stampDisk(name, self.config.getRollName(),
-				       self.config.getRollArch(), id)
-
-			# write repodata
-			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-				self.writerepo(self.config.getRollName(),
-					       self.config.getRollVersion(),
-					       self.config.getRollRelease(),
-					       self.config.getRollOS(),
-					       self.config.getRollArch())
-
-			# copy the graph and node XMLs files into the pallet
-			self.copyXMLs(self.config.getRollOS(),
-				      self.config.getRollName(),
-				      self.config.getRollVersion(),
-				      self.config.getRollRelease(),
-				      self.config.getRollArch())
-
-			# make the ISO.	 This code will change and move into
-			# the base class, and supported bootable pallets.  Get
-			# this working here and then test on the bootable
-			# kernel pallet.
-
-			isoname = '%s-%s-%s.%s.%s.iso' % (
-				self.config.getRollName(),
-				self.config.getRollVersion(),
-				self.config.getRollRelease(),
-				self.config.getRollArch(),
-				name)
-
-			if id == 1 and self.config.isBootable() == 1:
-				try:
-					self.makeBootable(self.config.getRollName(),
-							  self.config.getRollVersion(),
-							  self.config.getRollRelease(),
-							  self.config.getRollArch())
-				except ValueError as msg:
-					print('ERROR -', msg)
-					print('Pallet is not bootable')
-					self.config.setBootable(False)
-
-			self.mkisofs(isoname, self.config.getRollName(), name)
+		# copy the graph and node XMLs files into the pallet
+		self.copyXMLs(self.config.getRollOS(),
+			      self.config.getRollName(),
+			      self.config.getRollVersion(),
+			      self.config.getRollRelease(),
+			      self.config.getRollArch())
+			
+		# make the ISO.	 This code will change and move into
+		# the base class, and supported bootable pallets.  Get
+		# this working here and then test on the bootable
+		# kernel pallet.
+			
+		isoname = '%s-%s-%s.%s.%s.iso' % (
+			self.config.getRollName(),
+			self.config.getRollVersion(),
+			self.config.getRollRelease(),
+			self.config.getRollArch(),
+			'disk1')
+				
+		if self.config.isBootable():
+			try:
+				self.makeBootable(self.config.getRollName(),
+						  self.config.getRollVersion(),
+						  self.config.getRollRelease(),
+						  self.config.getRollArch())
+			except ValueError as msg:
+				print('ERROR -', msg)
+				print('Pallet is not bootable')
+				self.config.setBootable(False)
+				
+		command = 'genisoimage'
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			command = 'mkisofs'
+		self.mkisofs(isoname, self.config.getRollName(), 'disk1', command=command)
 
 
 class MetaRollBuilder(Builder):

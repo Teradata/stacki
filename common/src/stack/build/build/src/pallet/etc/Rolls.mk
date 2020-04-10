@@ -68,7 +68,7 @@ endif
 preroll::
 roll: rpm-mkdirs preroll $(TARGET_PKG)s roll-$(ROLL).xml 
 	(								\
-		cd $(REDHAT.ROOT);					\
+		cd $(PALLET.ROOT);					\
 		rm -rf disk*;						\
 		env GNUPGHOME=$(STACKBUILD.ABSOLUTE)/../.gnupg		\
 			Kickstart_Lang=$(KICKSTART_LANG)		\
@@ -82,11 +82,12 @@ reroll: roll
 pretar:: roll-$(ROLL).xml 
 
 .PHONY: $(TARGET_PKG)s
+pkgs: $(TARGET_PKG)s
 $(TARGET_PKG)s: 
 	@echo 
 	@echo ::: building src packages :::
 	@echo
-	@if [ -d src ]; then (cd src; $(MAKE) BG="$(MAKEBG)" $(TARGET_PKG)); fi
+	@if [ -d src ]; then (cd src; $(MAKE) BG="$(MAKEBG)" pkg); fi
 
 clean::
 	rm -rf comps 
@@ -112,7 +113,7 @@ roll-$(ROLL).xml:
 		"arch=\"$(ARCH)\" os=\"$(ROLLS.OS)\"/>" >> $@
 	@echo "<iso maxsize=\"$(ISOSIZE)\" addcomps=\"$(ADDCOMPS)\" bootable=\"$(BOOTABLE)\""\
 		"mkisofs=\"$(MKISOFSFLAGS)\"/>" >> $@
-	@echo "<$(TARGET_PKG) rolls=\"$(WITHROLLS)\""\
+	@echo "<rpm rolls=\"$(WITHROLLS)\""\
 		"bin=\"$(INCLUDE_RPMS)\" src=\"0\"/>" >> $@
 	@echo "<author name=\"$(USER)\""\
 		"host=\"$(shell /bin/hostname)\"/>" >> $@

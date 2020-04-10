@@ -8,7 +8,8 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 
 <!-- Common packages to install between OS's -->
 
-<stack:package>libvirt</stack:package>
+<stack:package stack:cond="os in [ 'redhat', 'sles']">libvirt</stack:package>
+<stack:package stack:cond="os == 'debian'">libvirt-dev</stack:package>
 
 <!-- We need stack command line on the frontend, and that relies on stack pylib. -->
 <stack:package>

@@ -25,6 +25,7 @@ CVS	= /usr/bin/cvs
 #MYSQL_LDFLAGS = -all-static
 TARGET_PKG = rpm
 TAR = tar
+AWK = gawk
 INIT_SCRIPTS_DIR = /etc/rc.d/init.d
 PROFILE_DIR = /export/profile
 MPIROOT	= /opt/openmpi
@@ -77,8 +78,8 @@ endif
 # Build Package 
 # --------------------------------------------------------------------- #
 
-BUILD.PREFIX ?= build
-REDHAT.ROOT  ?= $(CURDIR)/$(ROLLROOT)/$(BUILD.PREFIX)-$(ROLL)-$(STACK)
+PALLET.ROOT   = $(CURDIR)/$(ROLLROOT)/build-$(ROLL)-$(STACK)
+REDHAT.ROOT  ?= $(PALLET.ROOT)
 REDHAT.VAR   ?= /var
 
 dump-info::
@@ -341,6 +342,7 @@ nuke:: clean
 
 # pkg is an alias for rpm
 pkg: rpm
+install-pkg: install-rpm
 
 clean::
 	@rm -f $(REDHAT.SOURCES)/$(TARBALL)

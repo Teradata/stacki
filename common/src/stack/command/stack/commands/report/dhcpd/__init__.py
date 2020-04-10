@@ -10,6 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import os
 import ipaddress
 
 import stack.commands
@@ -31,9 +32,9 @@ option client-arch code 93 = unsigned integer 16;
 """
 
 filename = """	if option client-arch = 00:07 {
-		filename "uefi/shim.efi";
+		filename "pxelinux/uefi/shim.efi";
 	} else {
-		filename "pxelinux.0";
+		filename "pxelinux/pxelinux.0";
 	}"""
 
 
@@ -136,7 +137,9 @@ class Command(HostArgProcessor, stack.commands.report.command):
 
 		data = {}
 		for host in self.call('list.host'):
-			data[host['host']] = []
+			data[host['host']] = { 'appliance': host['appliance'], 'boot': None, 'interfaces': [] }
+		for boot in self.call('list.host.boot'):
+			data[boot['host']]['boot'] = boot['action']
 
 		host_devices = {}
 		interfaces = self.call('list.host.interface')
@@ -168,10 +171,12 @@ class Command(HostArgProcessor, stack.commands.report.command):
 				host_devices[host] = [device]
 
 			if host and mac:
-				data[host].append((mac, ip, device))
+				data[host]['interfaces'].append((mac, ip, device))
 
 		for name in data.keys():
-			kickstartable = self.str2bool(self.getHostAttr(name, 'kickstartable'))
+			appliance = data[name]['appliance']
+			boot = data[name]['boot']
+			sux = self.str2bool(self.getHostAttr(name, 'node'))
 			aws = self.str2bool(self.getHostAttr(name, 'aws'))
 			mac = None
 			ip  = None
@@ -181,7 +186,7 @@ class Command(HostArgProcessor, stack.commands.report.command):
 			# look for a physical private interface that has an
 			# IP address assigned to it.
 			#
-			for (mac, ip, dev) in data[name]:
+			for (mac, ip, dev) in data[name]['interfaces']:
 				if not ip:
 					try:
 						ip = self.resolve_ip(name, dev)
@@ -199,6 +204,10 @@ class Command(HostArgProcessor, stack.commands.report.command):
 					if r:
 						(netname, ) = r[0]
 				if ip and mac and dev and netname and not aws:
+					server = servers.get(netname)
+					if not server:
+						server = servers.get('default')
+
 					self.addOutput('', '\nhost %s.%s.%s {' %
 						(name, netname, dev))
 					self.addOutput('', '\toption host-name\t"%s";' % name)
@@ -206,13 +215,18 @@ class Command(HostArgProcessor, stack.commands.report.command):
 					self.addOutput('', '\thardware ethernet\t%s;' % mac)
 					self.addOutput('', '\tfixed-address\t\t%s;' % ip)
 
-					if kickstartable:
+					if appliance == 'raspberry':
+						# If tftp is already setup include that information
+						# Otherwise just do normal pxe
+						pimac = '-'.join(map(lambda x: x.lower(), mac.split(':')))
+						if os.path.exists(os.path.join('/tftpboot', pimac)):
+							self.addOutput('', '\toption vendor-class-identifier\t\t"PXEClient";')
+							self.addOutput('', '\toption vendor-encapsulated-options\t"Raspberry Pi Boot";')
+							self.addOutput('', f'\toption tftp-server-name\t\t\t"{server}";')
+
+					elif sux: # has a nodefile so must be kickstartable
 
 						self.addOutput('', filename)
-						server = servers.get(netname)
-						if not server:
-							server = servers.get('default')
-
 						self.addOutput('','\tserver-name\t\t"%s";'
 							% server)
 						self.addOutput('','\tnext-server\t\t%s;'

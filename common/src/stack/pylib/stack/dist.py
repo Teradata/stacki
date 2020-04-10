@@ -54,6 +54,8 @@ class Arch:
 			self.cpus = [ arch ]
 			self.cpus.extend([ 'ia32e' ])
 			self.cpus.extend(self.i86cpus)
+		elif arch in [ 'armv7hl' ]:
+			self.cpus = [ arch, 'armhf' ]
 		else:
 			self.cpus = [ arch ]
 

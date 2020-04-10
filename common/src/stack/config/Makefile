@@ -15,7 +15,7 @@ DEPENDS.DIRS	= etc init.d opt
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap: install-rpm
+bootstrap: install-pkg
 
 build:
 

@@ -1,0 +1,18 @@
+<stack:stack>
+
+	<stack:description>
+	The 'server node' in the graph.
+
+	This file is used as a connection point for other XML
+	configuration nodes.
+	</stack:description>
+
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
+
+
+</stack:stack>
+

@@ -10,7 +10,7 @@ DEPENDS.DIRS	= daemons producers processors clients
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-bootstrap: install-rpm
+bootstrap: install-pkg
 
 build:
 

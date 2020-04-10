@@ -24,7 +24,9 @@ elif [ "$NAME" == "Red Hat Enterprise Linux" ]; then
 elif [ "$NAME" == "openSUSE Leap" ]; then
 	echo openSUSE
 elif [ "$NAME" == "Ubuntu" ]; then
-	echo Ubuntu
+	echo Debian
+elif [ "$NAME" == "Raspbian GNU/Linux" ]; then
+    	echo Debian
 else
 	echo $NAME
 fi

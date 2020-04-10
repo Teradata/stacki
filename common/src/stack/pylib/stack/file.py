@@ -158,7 +158,39 @@ class File:
 		print('%s(%s)' % (self.filename, self.pathname))
 
 
+class DebFile(File):
 
+	def __init__(self, file, timestamp=None, size=None, ext=1):
+		File.__init__(self, file, timestamp, size)
+
+		self.info = {}
+
+		p = subprocess.Popen(['dpkg', '-f', file],
+				     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		rc = p.wait()
+		o, e = p.communicate()
+		if rc == 0:
+			for line in o.decode().split('\n'):
+				if line:
+					key, value = line.split(':', 1)
+					self.info[key.lower()] = value.strip()
+		else:
+			print("Skipping %s - %s" % (file, e.decode()))
+
+	def getPackageName(self):
+		return self.info['package']
+	    
+	def getPackageVersion(self):
+		return self.info['version']
+
+	def getPackageArch(self):
+		return self.info['architecture']
+		
+	def getUniqueName(self):
+		return f'{self.info["package"]}-{self.info["architecture"]}'
+
+
+    
 class RPMBaseFile(File):
 
 	def __init__(self, file, timestamp=None, size=None, ext=1):
@@ -543,6 +575,8 @@ class Tree:
 			else:
 				if re.match('.*\.rpm$', f) is not None:
 					v.append(RPMFile(filepath))
+				if re.match('.*\.deb$', f) is not None:
+					v.append(DebFile(filepath))
 				elif re.match('roll-.*\.iso$', f) is not None:
 					v.append(RollFile(filepath))
 				else:

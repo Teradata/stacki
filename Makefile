@@ -36,24 +36,26 @@ ifeq ($(STACKBUILD),)
 	@echo
 	@echo
 	@/bin/false # stop the caller from continuing
-else
+endif
 	$(MAKE) 3rdparty
 	$(MAKE) -C common/src $@
-endif
 	$(MAKE) -C $(OS) -f bootstrap.mk $@
-	$(MAKE) -C $(OS)/src $@
+	if [ -e $(OS)/src ]; then $(MAKE) -C $(OS)/src $@; fi
 
 
 preroll::
 	make -C common/src pkg
-	make -C $(OS)/src pkg
+	if [ -e $(OS)/src ]; then make -C $(OS)/src pkg; fi
 	make -C tools/fab pkg
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
+
 	mkdir -p build-$(ROLL)-$(STACK)/pallet_hooks/common
 	mkdir -p build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)
-	cp common/graph/* $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/
-	cp common/nodes/* $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/
+	cp common/graph/* build-$(ROLL)-$(STACK)/graph/
+	cp common/nodes/* build-$(ROLL)-$(STACK)/nodes/
+	if [ -e $(OS)/graph ]; then cp $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/; fi
+	if [ -e $(OS)/nodes ]; then cp $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/; fi
 # mkisofs fails because the directory structure is too deep in the build env
 # for the version on sles11. We just simply skip this step for sles11 as the
 # sles12 pallet holds all the hooks and initrds for sles11 anyways.
@@ -61,6 +63,9 @@ ifneq ($(RELEASE),sles11)
 	-cp -r common/pallet_hooks/ build-$(ROLL)-$(STACK)/pallet_hooks/common/
 	-cp -r $(OS)/pallet_hooks/  build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)/
 endif
+
+
+
 
 clean::
 	rm -rf build-$(ROLL)-$(STACK)/graph/

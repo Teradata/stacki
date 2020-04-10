@@ -32,14 +32,6 @@ class Command(command):
 	The name of the root XML node (e.g., 'backend', 'nas'). If
 	not supplied, the node name is set to the appliance name.
 	</param>
-
-	<param type='bool' name='public'>
-	True means this appliance will be displayed by 'insert-ethers' in
-	the Appliance menu. The default is 'yes'.
-	</param>
-
-	<example cmd='add appliance nas node=nas public=yes'>
-	</example>
 	"""
 
 	def run(self, params, args):
@@ -49,30 +41,26 @@ class Command(command):
 		appliance = args[0]
 
 		(node, public) = self.fillParams([
-			('node', ''),
-			('public', 'y')
+			('node', None),
 			])
 
-		public  = self.bool2str(self.str2bool(public))
+		public = self.bool2str(self.str2bool(public))
 
-		# check for duplicates
 		if self.db.count('(ID) from appliances where name=%s', (appliance,)) > 0:
 			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
-		# ok, we're good to go
-		self.db.execute('''
-			insert into appliances (name, public) values
-			(%s, %s)
-			''', (appliance, public))
+		self.db.execute("""
+			insert into appliances (name, node)
+			values (%s, %s)
+			""", (appliance, node))
 
 		# by default, appliances shouldn't be managed or kickstartable...
-		implied_attrs = {'kickstartable': False, 'managed': False}
+		implied_attrs = {'managed': False}
 
 		# ... but if the user specified node, they probably want those to be True
 		if node:
 			self.command('add.appliance.attr', [ appliance,
 				'attr=node', 'value=%s' % node ])
-			implied_attrs['kickstartable'] = True
 			implied_attrs['managed'] = True
 
 		for attr, value in implied_attrs.items():

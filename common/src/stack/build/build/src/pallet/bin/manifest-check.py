@@ -19,7 +19,7 @@ import os
 import sys
 from pathlib import Path
 import stack.util
-from stack.file import RPMFile
+from stack.file import RPMFile, DebFile
 
 if len(sys.argv) < 3:
 	print('error - use make manifest-check')
@@ -38,11 +38,20 @@ try:
 except:
 	release = None
 
-# Gather all .rpm files under the RPMS folder in the buildpath.
-# If the path doesn't exist, or no .rpm files exist, glob will return an empty list.
-builtfiles = [
-	RPMFile(str(pkg)) for pkg in Path(buildpath).joinpath("RPMS").resolve().glob("**/*.rpm")
-]
+# Don't know yet what OS we are on, so assume CentOS/SLES and fallback to Debian
+#
+# Find all the RPMs
+# If None Find all the Debs
+#
+# Also on Debian package names always get reported in lowercase, so switch mode
+# to do that.
+
+pkg_lower = False
+builtfiles = [ RPMFile(str(pkg)) for pkg in Path(buildpath).joinpath("RPMS").resolve().glob("**/*.rpm") ]
+if not builtfiles:
+	pkg_lower = True
+	builtfiles = [ DebFile(str(pkg)) for pkg in Path(buildpath).joinpath("packages").resolve().glob("**/*.deb") ]
+
 
 manifests = [ ]
 search    = [ 'common', '.', buildpath ]
@@ -71,6 +80,8 @@ for filename in manifests:
 	file = open(filename, 'r')
 	for line in file.readlines():
 		l = line.strip()
+		if pkg_lower is True:
+			l = l.lower()
 		if len(l) == 0 or (len(l) > 0 and l[0] == '#'):
 			continue
 		if l[0] == '-': # use '-package' to turn off the check
@@ -93,9 +104,9 @@ if not found:
 built = []
 notmanifest = []
 
-for rpm in builtfiles:
+for file in builtfiles:
 	try:
-		pkg = rpm.getPackageName()
+		pkg = file.getPackageName()
 		if pkg in manifest:
 			if pkg not in built:
 				#

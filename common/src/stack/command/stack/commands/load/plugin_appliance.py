@@ -18,7 +18,8 @@ class Plugin(stack.commands.Plugin):
 
 		for a in section:
 			appliance = a.get('name')
-			params    = {'public': a.get('public')}
+			params    = {'sux'    : a.get('sux'),
+				     'managed': a.get('managed')}
 
 			self.owner.stack('add.appliance', appliance, **params)
 

@@ -80,6 +80,68 @@ def Debug(message, level=syslog.LOG_DEBUG):
 		sys.__stderr__.write('%s\n' % m)
 
 
+class ImageArgumentProcessor:
+	"""
+	An Interface class to add the ability to process image arguments.
+	"""
+
+	def getImageNames(self, args=None):
+		"""
+		Returns a list of image names from the database. For each arg
+		in the ARGS list find all the image names that match the arg
+		(assume SQL regexp). If an arg does not match anything in the
+		database we raise an exception. If the ARGS list is empty return
+		all image names.
+		"""
+
+		images  = []
+		if not args:
+			args = ['%']		 # find all images
+
+		for arg in args:
+			names = flatten(self.db.select(
+				'name from images where name like %s', (arg,)
+			))
+
+			if not names and arg != '%':
+				raise ArgNotFound(self, arg, 'image')
+
+			images.extend(names)
+
+		return images
+
+
+class NFSRootArgumentProcessor:
+	"""
+	An Interface class to add the ability to process nfsroot arguments.
+	"""
+
+	def getNFSRootNames(self, args=None):
+		"""
+		Returns a list of nfsroot names from the database. For each arg
+		in the ARGS list find all the nfsroot names that match the arg
+		(assume SQL regexp). If an arg does not match anything in the
+		database we raise an exception. If the ARGS list is empty return
+		all nfsroot names.
+		"""
+
+		nfsroots  = []
+		if not args:
+			args = ['%']		 # find all nfsroots
+
+		for arg in args:
+			names = flatten(self.db.select(
+				'name from nfsroots where name like %s', (arg,)
+			))
+
+			if not names and arg != '%':
+				raise ArgNotFound(self, arg, 'nfsroot')
+
+			nfsroots.extend(names)
+
+		return nfsroots
+
+
 class DocStringHandler(handler.ContentHandler,
 	handler.DTDHandler,
 	handler.EntityResolver,
@@ -870,6 +932,8 @@ class Command:
 			self.os = 'redhat'
 		elif os.path.exists('/etc/SuSE-release'):
 			self.os = 'sles'
+		elif os.path.exists('/etc/debian_version'):
+			self.os = 'debian'
 		else:
 			self.os = os.uname()[0].lower()
 			if self.os == 'linux':

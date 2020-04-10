@@ -14,6 +14,12 @@ else
 	RELEASE='unknown'
 fi
 
+if [ -f /etc/os-release ]; then
+	. /etc/os-release
+	RELEASE=debian${VERSION_ID}
+fi
+
+
 case $RELEASE in
 	*release?7.*)
 		echo redhat7
@@ -26,6 +32,9 @@ case $RELEASE in
 		;;
 	*SUSE*15*)
 		echo sles15
+		;;
+	debian*)
+	    	echo $RELEASE
 		;;
 	*)
 		echo unknown

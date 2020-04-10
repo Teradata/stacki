@@ -85,7 +85,7 @@ def run_and_warn(cmd, **kwargs):
 		if not isinstance(logged_cmd, str):
 			logged_cmd = ' '.join(logged_cmd)
 
-		logger.warning('%s failed:\n%s', logged_cmd, result.stdout)
+		logger.warning('%s failed:\n\t%s', logged_cmd, result.stdout.decode())
 
 	return result
 
@@ -111,12 +111,13 @@ def umount(dest):
 		result = run(mount_debug_cmd, shell=True)
 		logger.warning('%s: \n%s', mount_debug_cmd, result.stdout)
 
-def installrpms(pkgs):
+def install_pkgs(pkgs):
 	if osname == 'redhat':
-		cmd = [ 'yum', '-y', 'install' ]
+		cmd = [ 'yum', '-y', 'install', *pkgs ]
 	elif osname == 'sles':
-		cmd = [ 'zypper', 'install', '-y', '-f' ]
-	cmd += pkgs
+		cmd = [ 'zypper', 'install', '-y', '-f', *pkgs ]
+	else: # debian is lowercase in the apt db
+		cmd = [ 'apt', 'install', '-y', *[ pkg.lower() for pkg in pkgs ] ]
 	return run(cmd)
 
 
@@ -135,10 +136,14 @@ def find_repos(iso, stacki_only=False):
 		search_dir = os.path.join(mountdir, 'stacki')
 
 	for (path, dirs, files) in os.walk(search_dir):
-		if 'suse' in dirs:
-			repodirs.append(os.path.join(path, 'suse'))
-		elif 'repodata' in dirs:
-			repodirs.append(path)
+		if osname == 'debian':
+			if 'packages' in dirs:
+				repodirs.append(os.path.join(path, 'packages'))
+		else:
+			if 'suse' in dirs:
+				repodirs.append(os.path.join(path, 'suse'))
+			elif 'repodata' in dirs:
+				repodirs.append(path)
 
 	return repodirs
 
@@ -147,6 +152,18 @@ def repoconfig(stacki_iso, extra_isos):
 	# we only want to pull stacki from 'stacki_iso'
 	# but we'll look for all pallets in 'extra_isos'
 
+	count = 0
+	repos = find_repos(stacki_iso, stacki_only=True)
+	for iso in extra_isos:
+		repos.extend(find_repos(iso))
+
+	if osname == 'debian':
+		with open('/etc/apt/sources.list.d/stacki.list', 'w') as repofile:
+			for repo in repos:
+				repofile.write(f'deb [trusted=yes] file:{repo} ./\n')
+		run_and_warn(['apt-get', 'update'])
+		return # rest is all yummy stuff / bail out
+		    
 	if extra_isos:
 		#
 		# we are going to use the ISO(s) described in the 'extra_isos'
@@ -165,11 +182,6 @@ def repoconfig(stacki_iso, extra_isos):
 			if os.path.isfile('%s/%s' % (repodir, f)):
 				mv_cmd = ['mv', f'{repodir}/{f}', f'{repodir}/save/']
 				run_and_warn(mv_cmd)
-
-	count = 0
-	repos = find_repos(stacki_iso, stacki_only=True)
-	for iso in extra_isos:
-		repos.extend(find_repos(iso))
 
 	if osname == 'redhat':
 		with open('/etc/yum.repos.d/stacki.repo', 'w') as repofile:
@@ -220,6 +232,8 @@ if os.path.exists('/etc/redhat-release'):
 	osname = 'redhat'
 elif os.path.exists('/etc/SuSE-release') or os.path.exists('/etc/SUSE-brand'):
 	osname = 'sles'
+elif os.path.exists('/etc/debian_version'):
+	osname = 'debian'
 else:
 	logger.error('Unrecognized operating system\n')
 	usage()
@@ -260,10 +274,11 @@ for iso in extra_isos:
 		logger.error("Error: File '%s' does not exist.", iso)
 		sys.exit(1)
 
-banner("Bootstrap Stack Command Line")
+if osname in [ 'redhat', 'sles' ]:
+	banner("Bootstrap Stack Command Line")
 
-# turn off NetworkManager so it doesn't overwrite our networking info
-run_and_warn(['service', 'NetworkManager', 'stop'])
+	# turn off NetworkManager so it doesn't overwrite our networking info
+	run_and_warn(['service', 'NetworkManager', 'stop'])
 
 stacki_iso = os.path.abspath(stacki_iso)
 
@@ -305,11 +320,13 @@ for new_pkg in new_pkgs:
 		pkgs.append(new_pkg)
 	elif osname == 'sles' and "not found" not in str(run(['zypper', 'info', new_pkg]).stdout):
 		pkgs.append(new_pkg)
+	else: # there is no old version for ubuntu just add the pkg
+		pkgs.append(new_pkg)
 
-result = installrpms(pkgs)
+result = install_pkgs(pkgs)
 
 if result.returncode != 0:
-	logger.error("Error: stacki package installation failed\n%s", result.stdout)
+	logger.error("Error: stacki package installation failed\n%s", result.stdout.decode())
 	sys.exit(result.returncode)
 
 # Note: we need to refresh the library cache so the wizard
@@ -583,9 +600,12 @@ with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
 		logger.error("Could not process XML")
 		sys.exit(result.returncode)
 
+if osname == 'debian': # remove once we can get to this part
+	sys.exit(0)
+	
 banner("Run Setup Script")
 # run run.sh
-result = run(['sh', '/tmp/run.sh'])
+result = subprocess.run(['sh', '-x', '/tmp/run.sh'])
 if result.returncode != 0:
 	logger.error("Setup Script Failed")
 	sys.exit(result.returncode)

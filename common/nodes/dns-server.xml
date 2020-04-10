@@ -13,9 +13,14 @@
 	</stack:copyright>
 
 
-	<stack:package>
+	<stack:package stack:cond="os in ['redhat', 'sles']">
 		bind
 		bind-utils
+	</stack:package>
+
+	<stack:package stack:cond="os == 'debian'">
+		bind9
+		bind9utils
 	</stack:package>
 
 

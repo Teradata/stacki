@@ -34,7 +34,7 @@ Requires=tftp.socket
 Documentation=man:in.tftpd
 
 [Service]
-ExecStart=/usr/sbin/in.tftpd --user root --verbose --secure /tftpboot/pxelinux
+ExecStart=/usr/sbin/in.tftpd --user root --verbose --secure /tftpboot
 StandardInput=socket
 
 [Install]

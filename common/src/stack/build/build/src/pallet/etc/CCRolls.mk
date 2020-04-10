@@ -25,6 +25,10 @@ nuke.all:: nuke
 
 .PHONY: manifest-check
 manifest-check:
+ifeq ($(OS),debian)
+	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) $(PALLET.ROOT) $(OS) $(RELEASE)
+else
 	$(ROLLSBUILD)/bin/manifest-check.py $(ROLL) $(REDHAT.ROOT) $(OS) $(RELEASE)
+endif
 
 endif # __CCROLLS_MK

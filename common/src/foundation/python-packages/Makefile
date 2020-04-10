@@ -6,16 +6,17 @@
 
 ROLLROOT	= ../../../..
 ORDER           = 20
-RPM.STRATEGY    = custom
+PKG.STRATEGY    = custom
 
 include $(STACKBUILD)/etc/CCRules.mk
 
-#BOOTSTRAP        =
-#BOOTSTRAP.redhat =
-#BOOTSTRAP.sles   =
-#	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
+BOOTSTRAP        =
+BOOTSTRAP.redhat =
+BOOTSTRAP.sles   =
+BOOTSTRAP.debian = apache2-dev
 
-bootstrap rpm: src
+bootstrap pkg: src
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
 	-for x in src/*; do $(MAKE) -C $$x $@; done
 	cp manifest.d/*.manifest $(ROLLROOT)/common/manifest.d/
 	cp nodes/*.xml $(ROLLROOT)/common/nodes/

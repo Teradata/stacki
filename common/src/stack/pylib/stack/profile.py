@@ -498,7 +498,7 @@ class NodeHandler(handler.ContentHandler,
 		return ''
 
 	def nsAttrs(self):
-		if self.os == 'redhat':
+		if self.os in [ 'redhat', 'debian' ]:
 			attrs = [
 				'xmlns="http://www.stacki.com"',
 			]

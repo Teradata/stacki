@@ -11,23 +11,18 @@ include $(STACKBUILD)/etc/CCRules.mk
 build:
 
 install::
-	# Install pylib
 	mkdir -p $(ROOT)/$(PY.STACK)/stack/
-
 	(								\
 		cd pylib;						\
 		find . -name "*.py" |					\
 			cpio -pduv $(ROOT)/$(PY.STACK)/stack;		\
 	)
-
-	# Install command
 	(					\
 		cd command;			\
 		find . -type f -name \*.py |	\
 		cpio -pudv $(ROOT)/$(PY.STACK)/stack/commands;	\
 	)
-	
-	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | gawk	\
+	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | $(AWK)	\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
 
 clean::
