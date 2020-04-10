@@ -12,6 +12,7 @@ Base class for SLES nodes.
 </stack:description>
 
 <stack:package>
+	ethtool
 	net-tools
 	man
 	man-pages
