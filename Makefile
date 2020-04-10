@@ -36,10 +36,9 @@ ifeq ($(STACKBUILD),)
 	@echo
 	@echo
 	@/bin/false # stop the caller from continuing
-else
+endif
 	$(MAKE) 3rdparty
 	$(MAKE) -C common/src $@
-endif
 	$(MAKE) -C $(OS) -f bootstrap.mk $@
 	$(MAKE) -C $(OS)/src $@
 

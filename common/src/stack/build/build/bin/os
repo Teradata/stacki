@@ -27,6 +27,8 @@ case $OS in
 		echo redhat
 	elif [ -f /etc/SuSE-release ]; then
 		echo sles
+	elif [ -f /etc/debian_version ]; then
+		echo debian
 	else
 		echo linux
 	fi

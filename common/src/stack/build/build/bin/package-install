@@ -26,6 +26,12 @@ yum() {
 	done
 }
 
+apt() {
+	for p in "$@"; do
+		/usr/bin/apt-get -y install "$p"
+	done
+}
+
 meta=0
 while getopts "m" opt; do
 	case $opt in
@@ -47,6 +53,9 @@ sles)
 	;;
 redhat)
 	yum "$@"
+	;;
+debian)
+	apt "$@"
 	;;
 esac
 
