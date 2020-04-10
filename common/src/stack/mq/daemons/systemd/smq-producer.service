@@ -3,10 +3,10 @@ Description=Stacki Message Queue Producer
 After=last.target
 
 [Service]
-Type=idle
-PIDFile=/var/run/smq-producer/smq-producer.pid
-ExecStartPre=/usr/bin/mkdir -p /var/run/smq-producer
+Type=simple
 ExecStart=/opt/stack/sbin/smq-producer
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=last.target

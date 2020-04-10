@@ -46,7 +46,7 @@ start() {
         mkdir -p `dirname $pidfile`
     fi
 
-    $prog
+    $prog --daemonize
     RETVAL=$?
     echo
 

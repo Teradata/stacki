@@ -6,6 +6,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import argparse
 import socket
 import sched
 import time
@@ -28,7 +29,11 @@ for file in os.listdir(stack.mq.producers.__path__[0]):
 	if module not in modules:
 		modules.append(module)
 
-if 'STACKDEBUG' not in os.environ:
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--daemonize", help="daemonize the process", action="store_true")
+args = parser.parse_args()
+
+if args.daemonize and 'STACKDEBUG' not in os.environ:
 	lock = lockfile.pidlockfile.PIDLockFile('/var/run/%s/%s.pid' % 
 						('smq-producer', 'smq-producer'))
 	daemon.DaemonContext(pidfile=lock).open()
