@@ -43,7 +43,7 @@ stacki release &version; (&release;)
 	systemd services have started
 -->
 
-<stack:script stack:stage="install-post" stack:cond="release == 'sles12' or release == 'redhat7'">
+<stack:script stack:stage="install-post" stack:cond="not (os == 'sles' and os.version == '11.x')">
 systemctl enable last.target
 </stack:script>
 

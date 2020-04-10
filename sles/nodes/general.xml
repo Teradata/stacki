@@ -6,6 +6,8 @@
 			<accept_file_without_checksum config:type="boolean">true</accept_file_without_checksum>
 			<accept_verification_failed config:type="boolean">true</accept_verification_failed>
 			<accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+			<accept_non_trusted_gpg_key config:type="boolean">true</accept_non_trusted_gpg_key>
+			<import_gpg_key config:type="boolean">true</import_gpg_key>
 		</signature-handling>
 		<mode>
 			<!-- skip the "Confirm Installation" screen -->
@@ -13,5 +15,9 @@
 			<final_reboot config:type="boolean">&install.final_reboot;</final_reboot>
 		</mode>
 	</general>
-
+	<software stack:cond="os.version == '15.x'">
+		<products config:type="list">
+			<product>SLES</product>
+		</products>
+	</software>
 </stack:stack>
