@@ -185,7 +185,7 @@ def write_makefiles(package, package_prefix):
 			makefile.write(f"\t$(PY.PATH) -mpip install --no-warn-script-location -I --no-deps --root=$(ROOT) {package.name}==$(VERSION)\n")
 			if package.bootstrap:
 				makefile.write("\n")
-				makefile.write("bootstrap: install-rpm\n")
+				makefile.write("bootstrap: install-pkg\n")
 
 		with srcdir.joinpath("version.mk").open("w") as ver:
 			ver.write('NAME=%s-%s\n' % (package_prefix, package.name))

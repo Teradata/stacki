@@ -14,7 +14,7 @@ BOOTSTRAP = slang-devel popt-devel
 
 bootstrap:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP)
-	$(MAKE) install-rpm
+	$(MAKE) install-pkg
 
 build:
 	tar -xzf newt-$(VERSION).tar.gz

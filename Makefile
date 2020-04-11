@@ -40,7 +40,7 @@ endif
 	$(MAKE) 3rdparty
 	$(MAKE) -C common/src $@
 	$(MAKE) -C $(OS) -f bootstrap.mk $@
-	$(MAKE) -C $(OS)/src $@
+	if [ -e $(OS)/src ]; then $(MAKE) -C $(OS)/src $@; fi
 
 
 preroll::

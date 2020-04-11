@@ -99,7 +99,7 @@ ifeq ($(PKG.STRATEGY),source)
 	@echo
 	@echo ::: building rpm from source :::
 	@echo
-	$(MAKE) ROOT=$(CURDIR)/.buildenv-$(ROLL)/build install
+	$(MAKE) ROOT=$(CURDIR)/.buildenv-$(ROLL)/build build install
 	fpm --input-type dir --output-type deb --name $(NAME) --version $(VERSION)-$(RELEASE)	\
 		--chdir .buildenv-$(ROLL)/build 						\
 		--package $(PALLET.PKGS)/$(NAME)_VERSION_ARCH.deb 				\

@@ -12,7 +12,7 @@ DEPENDS.FILES=$(ARCHIVENAME)-$(VERSION).tar.gz
 include $(STACKBUILD)/etc/CCRules.mk
 
 
-bootstrap: install-rpm
+bootstrap: install-pkg
 
 build:
 	tar xzf $(ARCHIVENAME)-$(VERSION).tar.gz
