@@ -12,15 +12,12 @@ build:
 
 install::
 	mkdir -p $(ROOT)/$(PY.STACK)/stack/
-
-	# Install command
 	(					\
 		cd command;			\
 		find . -type f -name \*.py |	\
 		cpio -pudv $(ROOT)/$(PY.STACK)/stack/commands;	\
 	)
-	
-	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | gawk	\
+	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | $(AWK)	\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
 
 clean::

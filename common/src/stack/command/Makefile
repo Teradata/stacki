@@ -35,7 +35,7 @@ install::
 			cpio -pduv $(ROOT)/$(PY.STACK)/stack;		\
 		rm $(ROOT)/$(PY.STACK)/stack/__init__.py;		\
 	)
-	find $(ROOT)/$(PY.STACK)/stack/ -name "*.py" | gawk		\
+	find $(ROOT)/$(PY.STACK)/stack/ -name "*.py" | $(AWK)		\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
 	find $(ROOT) -type d -exec chmod a+rx {} \;
 

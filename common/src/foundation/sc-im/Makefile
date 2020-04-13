@@ -11,7 +11,12 @@ DEPENDS.FILES	= $(ARCHIVENAME)-$(VERSION)-$(RELEASE).tgz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
+BOOTSTRAP.redhat =
+BOOTSTRAP.sles   =
+BOOTSTRAP.debian = libncurses-dev bison
+
 bootstrap:
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP.$(OS))
 ifeq ($(OS),sles)
 	echo "Name: ncursesw" > /usr/lib64/pkgconfig/ncursesw.pc
 	echo "Description: Old school GUI" >> /usr/lib64/pkgconfig/ncursesw.pc
@@ -28,7 +33,7 @@ refresh:
 build:
 	mkdir $(ARCHIVENAME)
 	(cd $(ARCHIVENAME) ; tar zvfx ../$(ARCHIVENAME)-$(VERSION)-$(RELEASE).tgz)
-	(cd $(ARCHIVENAME)/src ; $(MAKE) prefix=$(PKGROOT))
+	(cd $(ARCHIVENAME)/src ; $(MAKE) YACC="bison -y" prefix=$(PKGROOT))
 
 install::
 	echo

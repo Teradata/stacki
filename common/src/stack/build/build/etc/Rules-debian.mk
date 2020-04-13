@@ -10,6 +10,7 @@ USERID     = $(shell id -u)
 INSTALL    = install
 TARGET_PKG = deb
 TAR        = tar
+AWK	   = awk
 
 ifndef ROLL.MEMBERSHIP
 ROLL.MEMBERSHIP = $(ROLL)
@@ -67,11 +68,17 @@ ifneq ($(filter $(ROLL), $(ROLL.MEMBERSHIP)),$(ROLL))
 pkg:
 	@echo $(NAME) is not a member of $(ROLL)
 else
+ifneq ($(PKG.STRATEGY),custom)
 pkg: $(PKG.TARGET)
 endif
+endif
 
+rpm-mkdirs:
+
+ifneq ($(PKG.STRATEGY),custom)
 install-pkg: $(PKG.TARGET)
 	dpkg -i $<
+endif
 
 
 $(PKG.TARGET): $(DEPENDENCIES)

@@ -32,7 +32,7 @@ install::
 		find . -type f -name \*.py |	\
 		cpio -pudv $(ROOT)/$(PY.STACK)/stack/commands;	\
 	)
-	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | gawk	\
+	find $(ROOT)/$(PY.STACK)/stack/commands -name "*.py" | $(AWK)	\
 		'{ print "\nRollName = \"$(ROLL)\"" >> $$1; }'  
 
 	# Install syslog file

@@ -45,12 +45,14 @@ endif
 
 preroll::
 	make -C common/src pkg
-	make -C $(OS)/src pkg
+	if [ -e $(OS)/src ]; then make -C $(OS)/src pkg; fi
 	make -C tools/fab pkg
 	mkdir -p build-$(ROLL)-$(STACK)/graph
 	mkdir -p build-$(ROLL)-$(STACK)/nodes
-	cp common/graph/* $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/
-	cp common/nodes/* $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/
+	cp common/graph/* build-$(ROLL)-$(STACK)/graph/
+	cp common/nodes/* build-$(ROLL)-$(STACK)/nodes/
+	if [ -e $(OS)/graph ]; then cp $(OS)/graph/* build-$(ROLL)-$(STACK)/graph/; fi
+	if [ -e $(OS)/nodes ]; then cp $(OS)/nodes/* build-$(ROLL)-$(STACK)/nodes/; fi
 
 clean::
 	rm -rf build-$(ROLL)-$(STACK)/graph/

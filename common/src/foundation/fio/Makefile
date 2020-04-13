@@ -12,6 +12,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	gunzip -c fio-$(VERSION).tar.gz | $(TAR) -xf -
+	(cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../)
 	(				\
 		cd fio-$(VERSION);	\
 		./configure;		\

@@ -158,7 +158,35 @@ class File:
 		print('%s(%s)' % (self.filename, self.pathname))
 
 
+class DebFile(File):
 
+	def __init__(self, file, timestamp=None, size=None, ext=1):
+		File.__init__(self, file, timestamp, size)
+
+		self.info = {}
+
+		p = subprocess.Popen(['dpkg', '-f', file],
+				     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		rc = p.wait()
+		o, e = p.communicate()
+		if rc == 0:
+			for line in o.decode().split('\n'):
+				if line:
+					key, value = line.split(':', 1)
+					self.info[key.lower()] = value.strip()
+		else:
+			print("Skipping %s - %s" % (file, e.decode()))
+
+	def getPackageName(self):
+		return self.info['package']
+	    
+	def getPackageVersion(self):
+		return self.info['version']
+
+	def getPackageArch(self):
+		return self.info['architecture']
+		
+    
 class RPMBaseFile(File):
 
 	def __init__(self, file, timestamp=None, size=None, ext=1):

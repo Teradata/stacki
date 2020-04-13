@@ -25,6 +25,7 @@ CVS	= /usr/bin/cvs
 #MYSQL_LDFLAGS = -all-static
 TARGET_PKG = rpm
 TAR = tar
+AWK = gawk
 INIT_SCRIPTS_DIR = /etc/rc.d/init.d
 PROFILE_DIR = /export/profile
 MPIROOT	= /opt/openmpi

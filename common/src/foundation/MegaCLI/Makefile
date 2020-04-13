@@ -10,11 +10,20 @@ RPMFILE		= MegaCli-$(VERSION)-1.noarch.rpm
 DEPENDS.FILES	= $(RPMFILE)
 
 include $(STACKBUILD)/etc/CCRules.mk
+ifeq ($(OS),debian)
+build:
+	fpm --input-type rpm --output-type tar --name $(NAME) $(RPMFILE) 
+	mkdir $(CURDIR)/tmp/
+	(cd $(CURDIR)/tmp; tar -xf ../$(NAME).tar)
 
+clean::
+	rm -f $(NAME).tar
+else
 build:
 	mkdir $(CURDIR)/tmp/
 	rpm -i --force --noscripts --badreloc \
 		--relocate /=$(CURDIR)/tmp/ $(RPMFILE)
+endif
 
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)/sbin

@@ -13,6 +13,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 
 build:
 	$(TAR) -xzf $(ARCHIVENAME)-$(VERSION).tar.gz
+	(cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../)
 	(					\
 		cd $(ARCHIVENAME)-$(VERSION);	\
 		make PREFIX=$(PKGROOT);		\

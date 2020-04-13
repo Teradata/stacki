@@ -6,7 +6,7 @@
 
 ROLLROOT	= ../../../..
 ORDER           = 20
-RPM.STRATEGY    = custom
+PKG.STRATEGY    = custom
 
 include $(STACKBUILD)/etc/CCRules.mk
 

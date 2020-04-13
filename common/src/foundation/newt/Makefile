@@ -11,9 +11,12 @@ DEPENDS.FILES	= newt-$(VERSION).tar.gz
 include $(STACKBUILD)/etc/CCRules.mk
 
 BOOTSTRAP = slang-devel popt-devel
+BOOTSTRAP.redhat = $(BOOTSTRAP)
+BOOTSTRAP.sles   = $(BOOTSTRAP)
+BOOTSTRAP.debian = libncurses-dev libslang2-dev libpopt-dev
 
 bootstrap:
-	$(STACKBUILD)/bin/package-install $(BOOTSTRAP)
+	$(STACKBUILD)/bin/package-install $(BOOTSTRAP.$(OS))
 	$(MAKE) install-pkg
 
 build:
