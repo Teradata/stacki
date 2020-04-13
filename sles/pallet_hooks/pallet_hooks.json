@@ -30,8 +30,26 @@
 		"os": "sles",
 		"arch": "x86_64",
 		"operations": ["enable"],
+    },
+    "SLES-15sp1-sles15-sles-x86_64/010-add-stacki-squashfs.sh": {
+		"name": "SLES",
+		"version": "15sp1",
+		"rel": "sles15",
+		"os": "sles",
+		"arch": "x86_64",
+		"operations": ["enable"],
 	},
-	# This one will run against any pallet named stacki which has a sles12 release
+	# This one will run against any pallet named stacki which has a sles15 release
+	# when they are enabled, I.E. `stack enable pallet stacki release=sles15`.
+	"stacki-sles15/010-add-stacki-images.sh": {
+		"name": "stacki",
+		"version": ".*",
+		"rel": "sles15",
+		"os": ".*",
+		"arch": ".*",
+		"operations": ["enable"],
+    },
+    # This one will run against any pallet named stacki which has a sles12 release
 	# when they are enabled, I.E. `stack enable pallet stacki release=sles12`.
 	"stacki-sles12/010-add-stacki-images.sh": {
 		"name": "stacki",
@@ -50,5 +68,13 @@
 		"os": ".*",
 		"arch": ".*",
 		"operations": ["enable"],
-	},
+    },
+    "Packages-1-15sp1-sles15-x86_64-sles/010-relocate-rpms.sh": {
+        "name": "Packages-1",
+		"version": "15sp1",
+		"rel": "sles15",
+		"os": "sles",
+		"arch": "x86_64",
+		"operations": ["add"],
+	}
 }
