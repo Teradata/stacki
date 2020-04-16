@@ -183,7 +183,6 @@ if File.file?('.vagrant/cluster-up.json')
         else
           config.vm.network "private_network",
             mac: sprintf("5254000000%02X", i+3),
-            type: "dhcp",
             virtualbox__intnet: NAME,
             libvirt__network_name: NAME,
             libvirt__dhcp_enabled: false,
