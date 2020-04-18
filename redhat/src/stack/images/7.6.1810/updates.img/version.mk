@@ -7,6 +7,8 @@ OVERLAY.PKGS	= \
 	stack-wizard \
 	storcli \
 	yum \
+	foundation-python-jsoncomment \
+		foundation-python-json-spec \
 	foundation-newt \
 	foundation-python-Flask \
 		foundation-python-itsdangerous \
