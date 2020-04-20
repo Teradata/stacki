@@ -190,8 +190,8 @@ class Command(PalletArgProcessor, command):
 			dest_hook_dir = self.get_pallet_hook_directory(pallet_info=pallet_info)
 			dest_hook_dir.mkdir(parents=True, exist_ok=True)
 			# Copy the hooks to the appropriate destination.
-			# We don't need to change the permissions with --chmod for this copy.
-			cmd = f'rsync --archive --exclude "TRANS.TBL" {script_dir}/ {dest_hook_dir}/'
+			# ensure with chmod that hooks are executable by at least root
+			cmd = f'rsync --archive --chmod=F744 --exclude "TRANS.TBL" {script_dir}/ {dest_hook_dir}/'
 			result = self._exec(cmd, shlexsplit=True)
 			if result.returncode != 0:
 				raise CommandError(self, f'Unable to copy pallet hooks:\n{result.stderr}')
