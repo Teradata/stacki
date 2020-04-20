@@ -312,6 +312,10 @@ if result.returncode != 0:
 	logger.error("Error: stacki package installation failed\n%s", result.stdout)
 	sys.exit(result.returncode)
 
+# Note: we need to refresh the library cache so the wizard
+# code can find the Newt library and its dependencies
+run_and_warn(['ldconfig'])
+
 if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'):
 	if use_existing:
 		# Construct site.attrs and rolls.xml from the exising system
@@ -492,7 +496,9 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		banner("Launch Boss-Config")
 		mount(stacki_iso, '/mnt/cdrom')
 
-		run_and_warn([
+		# Note: Don't capture the STDOUT here, because the wizard
+		# needs it to draw to the screen
+		subprocess.run([
 			'/opt/stack/bin/python3',
 			'/opt/stack/bin/boss_config_snack.py',
 			'--no-partition',
