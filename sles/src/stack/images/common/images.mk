@@ -15,7 +15,7 @@ dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
 rpminst: localrepo getpackages getextrapackages
-	rpm --dbpath $(TEMPDIR) -ivh --nodeps --force --badreloc \
+	rpm --dbpath $(TEMPDIR) -iv --nodeps --force --badreloc \
 		--relocate=/=$(CURDIR)/sles-stacki $(RPMLOC)
 	rm -rf $(TEMPDIR)
 
