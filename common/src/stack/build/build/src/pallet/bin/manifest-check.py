@@ -50,7 +50,7 @@ pkg_lower = False
 builtfiles = [ RPMFile(str(pkg)) for pkg in Path(buildpath).joinpath("RPMS").resolve().glob("**/*.rpm") ]
 if not builtfiles:
 	pkg_lower = True
-	builtfiles = [ DebFile(str(pkg)) for pkg in Path(buildpath).joinpath("PKGS").resolve().glob("**/*.deb") ]
+	builtfiles = [ DebFile(str(pkg)) for pkg in Path(buildpath).joinpath("packages").resolve().glob("**/*.deb") ]
 
 
 manifests = [ ]

@@ -13,12 +13,10 @@
 
 import os
 import sys
-import string
 import time
 import tempfile
 import shutil
 import subprocess
-import shlex
 import glob
 import json
 import stack
@@ -125,7 +123,7 @@ class Builder:
 			shutil.rmtree(tmp)
 
 
-	def stampDisk(self, dir, name, arch, id=1):
+	def stampDisk(self, dir, name, arch):
 		file = os.path.join(dir, '.discinfo')
 		if os.path.isfile(file):
 			os.unlink(file)
@@ -133,7 +131,7 @@ class Builder:
 		fout.write('%f\n' % time.time())
 		fout.write('%s\n' % name)
 		fout.write('%s\n' % arch)
-		fout.write('%d\n' % id)
+		fout.write('1\n')
 		fout.close()
 			
 
@@ -186,43 +184,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 			list.append(dict[e])
 		return list
 
-
-	def spanDisks(self, files, disks=[]):
-		"""Given the pallet RPMS and backend the size
-		of all the files and return a list of files for each disk of 
-		the pallet.  The intention is for almost all pallets to be one
-		CD but for our OS pallet this is not the case."""
-		
-		# Set the pallet size to 0 to bypass the disk spanning
-		# logic.  The updates pallet does this.
-		
-		avail = self.config.getISOMaxSize()
-		if avail <= 0:
-			infinite = 1
-		else:
-			infinite = 0
-		consumed = []
-		remaining = []
-		
-		# Fill the CDs
-		
-		for file in files:
-			if file and infinite:
-				consumed.append(file)
-			elif file and (avail - file.getSize()) > 0:
-				consumed.append(file)
-				avail -= file.getSize()
-			else:
-				remaining.append(file)
-		
-		id	= len(disks) + 1
-		name	= 'disk%d' % id
-		size	= self.config.getISOMaxSize() - avail
-		disks.append((name, id, size, consumed))
-		if len(remaining):
-			self.spanDisks(remaining, disks)
-		return disks
-		
 
 	def getExternalRPMS(self):
 		import stack.roll
@@ -421,96 +382,88 @@ class RollBuilder(Builder, stack.dist.Arch):
 			list.extend(optional)
 
 
-		optional = 0
-		for (name, id, size, files) in self.spanDisks(list):
-			print('Creating %s (%.2fMB)...' % (name, size), end=' ')
-			if optional:
-				print(' This disk is optional (extra rpms)')
-			else:
-				print() 
+		print('Creating ...', end=' ')
+		print() 
 				
-			root = os.path.join(name,
-					    self.config.getRollName(),
-					    self.config.getRollVersion(),
-					    self.config.getRollRelease(),
-					    self.config.getRollOS(),
-					    self.config.getRollArch())
+		root = os.path.join('disk1',
+				    self.config.getRollName(),
+				    self.config.getRollVersion(),
+				    self.config.getRollRelease(),
+				    self.config.getRollOS(),
+				    self.config.getRollArch())
 
-			rpmsdir = 'RPMS'
+		pkgsdir = 'packages'
 
-			os.makedirs(root)
-			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-				os.makedirs(os.path.join(root, rpmsdir))
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			pkgsdir = 'RPMS'
+				
+		os.makedirs(os.path.join(root, pkgsdir))
+			    
 			
-			# Symlink in all the RPMS
+		# Symlink in all the RPMS
 			
-			for file in files:
-				try:
-					#
-					# not RPM files will throw an exception
-					# in getPackageArch()
-					#
-					arch = file.getPackageArch()
-				except:
-					continue
+		for file in files:
+			try:
+				#
+				# not RPM files will throw an exception
+				# in getPackageArch()
+				#
+				arch = file.getPackageArch()
+			except:
+				continue
 
-				if arch != 'src':
-					file.symlink(
-						os.path.join(root, rpmsdir,
-							     file.getName()))
-				if file in required:
-					del required[required.index(file)]
+			if arch != 'src':
+				file.symlink(os.path.join(root, pkgsdir, file.getName()))
+			if file in required:
+				del required[required.index(file)]
 					
-			if len(required) == 0:
-				optional = 1
-				
-			# Copy the pallet XML file onto all the disks
-			shutil.copy(self.config.getFullName(), root)
-			
-			# Create the .discinfo file
-			
-			self.stampDisk(name, self.config.getRollName(), 
-				       self.config.getRollArch(), id)
-				
-			# write repodata 
-			if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-				self.writerepo(self.config.getRollName(),
-					       self.config.getRollVersion(),
-					       self.config.getRollRelease(),
-					       self.config.getRollOS(),
-					       self.config.getRollArch())
 
-			# copy the graph and node XMLs files into the pallet
-			self.copyXMLs(self.config.getRollOS(),
-				      self.config.getRollName(),
-				      self.config.getRollVersion(),
-				      self.config.getRollRelease(),
-				      self.config.getRollArch())
+		# Copy the pallet XML file onto all the disks
+		shutil.copy(self.config.getFullName(), root)
 			
-			# make the ISO.	 This code will change and move into
-			# the base class, and supported bootable pallets.  Get
-			# this working here and then test on the bootable
-			# kernel pallet.
+		# Create the .discinfo file
 			
-			isoname = '%s-%s-%s.%s.%s.iso' % (
-				self.config.getRollName(),
-				self.config.getRollVersion(),
-				self.config.getRollRelease(),
-				self.config.getRollArch(),
-				name)
+		self.stampDisk('disk1', self.config.getRollName(), self.config.getRollArch())
 				
-			if id == 1 and self.config.isBootable() == 1:
-				try:
-					self.makeBootable(self.config.getRollName(),
-							  self.config.getRollVersion(),
-							  self.config.getRollRelease(),
-							  self.config.getRollArch())
-				except ValueError as msg:
-					print('ERROR -', msg)
-					print('Pallet is not bootable')
-					self.config.setBootable(False)
+		# write repodata 
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			self.writerepo(self.config.getRollName(),
+				       self.config.getRollVersion(),
+				       self.config.getRollRelease(),
+				       self.config.getRollOS(),
+				       self.config.getRollArch())
 
-			self.mkisofs(isoname, self.config.getRollName(), name)
+		# copy the graph and node XMLs files into the pallet
+		self.copyXMLs(self.config.getRollOS(),
+			      self.config.getRollName(),
+			      self.config.getRollVersion(),
+			      self.config.getRollRelease(),
+			      self.config.getRollArch())
+			
+		# make the ISO.	 This code will change and move into
+		# the base class, and supported bootable pallets.  Get
+		# this working here and then test on the bootable
+		# kernel pallet.
+			
+		isoname = '%s-%s-%s.%s.%s.iso' % (
+			self.config.getRollName(),
+			self.config.getRollVersion(),
+			self.config.getRollRelease(),
+			self.config.getRollArch(),
+			'disk1')
+				
+		if self.config.isBootable():
+			try:
+				self.makeBootable(self.config.getRollName(),
+						  self.config.getRollVersion(),
+						  self.config.getRollRelease(),
+						  self.config.getRollArch())
+			except ValueError as msg:
+				print('ERROR -', msg)
+				print('Pallet is not bootable')
+				self.config.setBootable(False)
+				
+		self.mkisofs(isoname, self.config.getRollName(), 'disk1')
 
 		
 class MetaRollBuilder(Builder):

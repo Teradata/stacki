@@ -78,8 +78,8 @@ endif
 # Build Package 
 # --------------------------------------------------------------------- #
 
-BUILD.PREFIX ?= build
-REDHAT.ROOT  ?= $(CURDIR)/$(ROLLROOT)/$(BUILD.PREFIX)-$(ROLL)-$(STACK)
+PALLET.ROOT   = $(CURDIR)/$(ROLLROOT)/build-$(ROLL)-$(STACK)
+REDHAT.ROOT  ?= $(PALLET.ROOT)
 REDHAT.VAR   ?= /var
 
 dump-info::

@@ -18,7 +18,7 @@ endif
 
 
 PALLET.ROOT = $(CURDIR)/$(ROLLROOT)/build-$(ROLL)-$(STACK)
-PALLET.PKGS = $(PALLET.ROOT)/PKGS
+PALLET.PKGS = $(PALLET.ROOT)/packages
 ifeq ($(ARCH),armv7hl)
 PKG.ARCH    = armhf
 else
