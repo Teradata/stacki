@@ -1,9 +1,10 @@
-import pathlib
+from dataclasses import dataclass, asdict
 from operator import attrgetter
+import jsoncomment
+import pathlib
 import re
 import subprocess
-from dataclasses import dataclass, asdict
-import jsoncomment
+from stack.commands import Log
 from stack.exception import ArgNotFound
 
 # Pallet info from Probepal and the database columns do not have the same names.
@@ -117,6 +118,7 @@ class PalletArgProcessor:
 		json_comment = jsoncomment.JsonComment()
 		for hook_file in hook_metadata_files:
 			hook_metadata = json_comment.loads(hook_file.read_text())
+			Log(f'{operation} pallet hook file found: {str(hook_file)}.')
 
 			# Check if any scripts called out in the file should be run.
 			# This should only happen if all conditions are satisfied and we
@@ -149,10 +151,15 @@ class PalletArgProcessor:
 		# Execute the hooks in name sorted order.
 		for hook in hooks:
 			self.notify(f'running hook: {hook}')
+			Log(f'Running {operation} pallet hook for pallet {"-".join(pallet_info_getter(pallet_info))}: {hook} ')
 			try:
 				# subprocess's env mapping must be strings to strings!
 				environ = dict((str(k), str(v)) for k, v in asdict(pallet_info).items())
 				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True, env=environ)
+				Log(f'Result of running {hook} (rc=={result.returncode}):')
+				Log(f'env:\n{env}')
+				Log(f'Stdout:\n{result.stdout}')
+				Log(f'Stderr:\n{result.stderr}')
 			except (PermissionError, subprocess.CalledProcessError) as exception:
 				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
 				# CalledProcessError has additional info...
