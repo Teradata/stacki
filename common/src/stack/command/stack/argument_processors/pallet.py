@@ -2,6 +2,7 @@ import pathlib
 from operator import attrgetter
 import re
 import subprocess
+from stack.commands import Log
 from dataclasses import dataclass
 import jsoncomment
 from stack.exception import ArgNotFound
@@ -117,6 +118,7 @@ class PalletArgProcessor:
 		json_comment = jsoncomment.JsonComment()
 		for hook_file in hook_metadata_files:
 			hook_metadata = json_comment.loads(hook_file.read_text())
+			Log(f'{operation} pallet hook file found: {str(hook_file)}.')
 
 			# Check if any scripts called out in the file should be run.
 			# This should only happen if all conditions are satisfied and we
@@ -149,8 +151,12 @@ class PalletArgProcessor:
 		# Execute the hooks in name sorted order.
 		for hook in hooks:
 			self.notify(f'running hook: {hook}')
+			Log(f'Running {operation} pallet hook for pallet {"-".join(pallet_info_getter(pallet_info))}: {hook} ')
 			try:
-				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True)
+				result = self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True)
+				Log(f'Result of running {hook} (rc=={result.returncode}):')
+				Log(f'Stdout:\n{result.stdout}')
+				Log(f'Stderr:\n{result.stderr}')
 			except (PermissionError, subprocess.CalledProcessError) as exception:
 				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
 				# CalledProcessError has additional info...
