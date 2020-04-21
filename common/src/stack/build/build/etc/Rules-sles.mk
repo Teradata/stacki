@@ -219,7 +219,7 @@ ifndef __ROLLS_MK
 	@echo                   			>> $@
 	@echo ".PHONY: install-rpm"			>> $@
 	@echo "install-rpm: $(RPM.TARGET)"		>> $@
-	@echo -e "\trpm -Uhv --force --nodeps $$<"	>> $@
+	@echo -e "\trpm -Uv --force --nodeps $$<"	>> $@
 
 include .buildenv-$(ROLL)/install-rpm.mk
 

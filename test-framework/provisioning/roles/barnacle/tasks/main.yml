@@ -70,12 +70,12 @@
     register: stacki_fab_rpm
 
   - name: Install foundation-python
-    command: "rpm -ivh {{ foundation_python_rpm.files[0].path }}"
+    command: "rpm -iv {{ foundation_python_rpm.files[0].path }}"
     args:
       warn: no
 
   - name: Install stacki-fab
-    command: "rpm -ivh {{ stacki_fab_rpm.files[0].path }}"
+    command: "rpm -iv {{ stacki_fab_rpm.files[0].path }}"
     args:
       warn: no
 

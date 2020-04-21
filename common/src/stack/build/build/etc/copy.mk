@@ -14,6 +14,6 @@ rpm::
 install-rpm:: rpm
 	for rpmfile in *.rpm; do				\
 		arch=`rpm -qp --queryformat "%{ARCH}" $$rpmfile 2> /dev/null`;\
-		rpm -Uhv --force --nodeps $(REDHAT.RPMS)/$$arch/$$rpmfile; \
+		rpm -Uv --force --nodeps $(REDHAT.RPMS)/$$arch/$$rpmfile; \
 	done
 

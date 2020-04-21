@@ -70,14 +70,14 @@ fi
 # Install the foundation-python RPM from the stacki iso.
 mkdir -p "/mnt/$ISO_FILENAME"
 mount "/export/stacki-iso/$ISO_FILENAME" "/mnt/$ISO_FILENAME"
-rpm -ivh "$(find "/mnt/$ISO_FILENAME" -name "foundation-python-3*.rpm")"
+rpm -iv "$(find "/mnt/$ISO_FILENAME" -name "foundation-python-3*.rpm")"
 
 # Install the stacki-fab RPM. This is either user supplied or we use what is on the stacki ISO.
 if [[ -f "$(find /vagrant -name "stacki-fab*.rpm")" ]]
 then
-    rpm -ivh "$(find /vagrant -name "stacki-fab*.rpm")"
+    rpm -iv "$(find /vagrant -name "stacki-fab*.rpm")"
 else
-    rpm -ivh "$(find "/mnt/$ISO_FILENAME" -name "stacki-fab*.rpm")"
+    rpm -iv "$(find "/mnt/$ISO_FILENAME" -name "stacki-fab*.rpm")"
 fi
 
 umount "/mnt/$ISO_FILENAME"
