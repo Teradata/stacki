@@ -2,8 +2,16 @@
 
 set -e
 
-# Install the stack SLES images.
-zypper --non-interactive install stack-sles-sles12-images
+# Install the stack SLES images.  Use find + rpm because networking might be in a bad state.
+PALLET_DIR=/export/stack/pallets/${name}/${version}/${rel}/${os}/${arch}/
+images=$(find $PALLET_DIR -name stack-${os}-${rel}-images*rpm)
+if (( $(echo $images | wc --lines) > 1 )); then
+  echo found more than one stack-images package in ${PALLET_DIR}:
+  echo $images
+  exit 1
+else
+  rpm -Uv $images
+fi
 
 # Copy the vmlinuz and initrd
 cp /opt/stack/images/initrd-sles-sles11-11sp3-x86_64 /tftpboot/pxelinux/

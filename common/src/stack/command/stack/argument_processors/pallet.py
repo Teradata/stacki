@@ -2,7 +2,7 @@ import pathlib
 from operator import attrgetter
 import re
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import jsoncomment
 from stack.exception import ArgNotFound
 
@@ -150,7 +150,9 @@ class PalletArgProcessor:
 		for hook in hooks:
 			self.notify(f'running hook: {hook}')
 			try:
-				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True)
+				# subprocess's env mapping must be strings to strings!
+				environ = dict((str(k), str(v)) for k, v in asdict(pallet_info).items())
+				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True, env=environ)
 			except (PermissionError, subprocess.CalledProcessError) as exception:
 				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
 				# CalledProcessError has additional info...
