@@ -202,16 +202,23 @@ pipeline {
                     }
                 }
 
-                // Move the ISO into the root of the workspace
-                sh 'mv stacki/stacki-*.iso .'
+                // Move the ISO into the root of the workspace, renaming it for TSS if needed
+                script {
+                    sh 'mv stacki/stacki-*.iso ./'
 
-                // Note: For now, we no longer build StackiOS
-                // If we are Redhat, we will have a StackiOS ISO as well
-                // script {
-                //     if (env.PLATFORM == 'redhat7') {
-                //         sh 'mv stacki/stackios-*.iso .'
-                //     }
-                // }
+                    switch(env.PLATFORM) {
+                        case 'sles12':
+                            sh 'mv $(ls ./stacki-*.iso) $(ls ./stacki-*.iso | sed -e "s|stacki-|stacki-12.3-|")'
+                            break
+                        case 'sles11':
+                            sh 'mv $(ls ./stacki-*.iso) $(ls ./stacki-*.iso | sed -e "s|stacki-|stacki-11.3-|")'
+                            break
+                        case 'redhat7':
+                            // Note: For now, we no longer build StackiOS
+                            // sh 'mv stacki/stackios-*.iso ./'
+                            break
+                    }
+                }
 
                 // Set an environment variable with the ISO filename
                 script {
@@ -432,7 +439,10 @@ pipeline {
                     // Note: Give it 20 minutes to show up (will usually take 10)
                     if (env.PLATFORM == 'sles11') {
                         retry(20) {
-                            sh 'curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}" || (STATUS=$? && sleep 60 && exit $STATUS)'
+                            sh '''
+                                SLES12_ISO_FILENAME=$(echo $ISO_FILENAME | sed -e 's|stacki-11.3|stacki-12.3|' -e 's|sles11.x86_64|sles12.x86_64|')
+                                curl -H "X-JFrog-Art-Api:${ARTIFACTORY_PSW}" -sfSLO --retry 3 "https://sdartifact.td.teradata.com/artifactory/pkgs-external-snapshot-sd/$ART_ISO_PATH/sles-12.3/$GIT_BRANCH/$SLES12_ISO_FILENAME" || (STATUS=$? && sleep 60 && exit $STATUS)
+                            '''
                         }
                     }
                 }
@@ -687,7 +697,7 @@ pipeline {
                                 script {
                                     try {
                                         if (env.PLATFORM == 'sles11') {
-                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ../${ISO_FILENAME/%sles11.x86_64.disk1.iso/sles12.x86_64.disk1.iso}'
+                                            sh './run-tests.sh --system --extra-isos=../$ISO_FILENAME ../stacki-*-sles12.x86_64.disk1.iso'
                                         }
                                         else {
                                             if (env.COVERAGE_REPORTS == 'true') {
