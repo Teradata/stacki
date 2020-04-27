@@ -743,22 +743,23 @@ pipeline {
                     }
                 }
 
-                stage('StackiOS') {
-                    when {
-                        environment name: 'PLATFORM', value: 'redhat7'
-                        anyOf {
-                            branch 'develop'
-                            environment name: 'IS_RELEASE', value: 'true'
-                        }
-                    }
-
-                    steps {
-                        build job: 'test_stackios', parameters: [
-                            string(name: 'STACKIOS_ISO', value: "http://stacki-builds.labs.teradata.com/stacki-isos/redhat7/stackios/${env.NORMALIZED_BRANCH}/${env.STACKIOS_FILENAME}"),
-                            string(name: 'STACKI_BRANCH', value: "${env.BRANCH_NAME}")
-                        ], wait: false
-                    }
-                }
+                // Note: No more StackiOS until further notice
+                // stage('StackiOS') {
+                //     when {
+                //         environment name: 'PLATFORM', value: 'redhat7'
+                //         anyOf {
+                //             branch 'develop'
+                //             environment name: 'IS_RELEASE', value: 'true'
+                //         }
+                //     }
+                //
+                //     steps {
+                //         build job: 'test_stackios', parameters: [
+                //             string(name: 'STACKIOS_ISO', value: "http://stacki-builds.labs.teradata.com/stacki-isos/redhat7/stackios/${env.NORMALIZED_BRANCH}/${env.STACKIOS_FILENAME}"),
+                //             string(name: 'STACKI_BRANCH', value: "${env.BRANCH_NAME}")
+                //         ], wait: false
+                //     }
+                // }
 
                 stage('Combine') {
                     when {
