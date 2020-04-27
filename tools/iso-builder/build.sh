@@ -55,33 +55,32 @@ then
     cp common/src/foundation/python-packages/poetry.lock  /vagrant/common/src/foundation/python-packages/poetry.lock
 fi
 
-# Note: For now, we no longer build StackiOS
 # If we are redhat7 PLATFORM, we aren't done yet
-# if [[ $PLATFORM = "redhat7" ]]
-# then
-#     # Install stacki-fab RPMs so we can run frontend-install
-#     rpm -iv "$(find . -wholename "./build-stacki-*/RPMS/x86_64/stacki-fab*.rpm")"
-#     # Barnacle with the non-bootable ISO
-#     /opt/stack/bin/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
+if [[ $PLATFORM = "redhat7" ]]
+then
+    # Install stacki-fab RPMs so we can run frontend-install
+    rpm -ivh "$(find . -wholename "./build-stacki-*/RPMS/x86_64/stacki-fab*.rpm")"
+    # Barnacle with the non-bootable ISO
+    /opt/stack/bin/frontend-install.py --use-existing --stacki-iso=$(ls -1 ./build-*/stacki-*.iso)
 
-#     # Restart httpd, it seems to be in a crashed state after barnacle
-#     systemctl restart httpd
+    # Restart httpd, it seems to be in a crashed state after barnacle
+    systemctl restart httpd
 
-#     # Add the CentOS pallet
-#     source /etc/profile.d/stack-binaries.sh
-#     stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
-#     stack enable pallet CentOS box=frontend
+    # Add the CentOS pallet
+    source /etc/profile.d/stack-binaries.sh
+    stack add pallet /export/isos/CentOS-7-x86_64-Everything-1810.iso
+    stack enable pallet CentOS box=frontend
 
-#     # Clean the build environment
-#     cd /export/src/stacki/redhat/src/
-#     make ROLLVERSION=$ROLLVERSION nuke
-#     cd ../../
-#     make ROLLVERSION=$ROLLVERSION nuke
+    # Clean the build environment
+    cd /export/src/stacki/redhat/src/
+    make ROLLVERSION=$ROLLVERSION nuke
+    cd ../../
+    make ROLLVERSION=$ROLLVERSION nuke
 
-#     # Rebuild the stacki ISO as bootable
-#     make ROLLVERSION=$ROLLVERSION
-#     make ROLLVERSION=$ROLLVERSION manifest-check
-# fi
+    # Rebuild the stacki ISO as bootable
+    make ROLLVERSION=$ROLLVERSION
+    make ROLLVERSION=$ROLLVERSION manifest-check
+fi
 
 # Copy the ISO out of the VM
 cp build-*/stacki-*.iso /vagrant/
