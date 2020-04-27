@@ -171,8 +171,8 @@ pipeline {
                     switch(env.PLATFORM) {
                         case 'redhat7':
                             sh 'cp /export/www/installer-isos/CentOS-7-x86_64-Everything-1810.iso .'
-                            sh 'cp /export/www/stacki-isos/redhat7/os/os-7.6_20191101-redhat7.x86_64.disk1.iso .'
-                            env.OS_PALLET = 'os-7.6_20191101-redhat7.x86_64.disk1.iso'
+                            // sh 'cp /export/www/stacki-isos/redhat7/os/os-7.6_20191101-redhat7.x86_64.disk1.iso .'
+                            // env.OS_PALLET = 'os-7.6_20191101-redhat7.x86_64.disk1.iso'
                             break
 
                         case 'sles12':
@@ -205,12 +205,13 @@ pipeline {
                 // Move the ISO into the root of the workspace
                 sh 'mv stacki/stacki-*.iso .'
 
+                // Note: For now, we no longer build StackiOS
                 // If we are Redhat, we will have a StackiOS ISO as well
-                script {
-                    if (env.PLATFORM == 'redhat7') {
-                        sh 'mv stacki/stackios-*.iso .'
-                    }
-                }
+                // script {
+                //     if (env.PLATFORM == 'redhat7') {
+                //         sh 'mv stacki/stackios-*.iso .'
+                //     }
+                // }
 
                 // Set an environment variable with the ISO filename
                 script {
@@ -221,12 +222,12 @@ pipeline {
                 fingerprint "${env.ISO_FILENAME}"
 
                 // If we are Redhat, fingerprint the StackiOS ISO as well
-                script {
-                    if (env.PLATFORM == 'redhat7') {
-                        env.STACKIOS_FILENAME = findFiles(glob: 'stackios-*.iso')[0].name
-                        fingerprint "${env.STACKIOS_FILENAME}"
-                    }
-                }
+                // script {
+                //     if (env.PLATFORM == 'redhat7') {
+                //         env.STACKIOS_FILENAME = findFiles(glob: 'stackios-*.iso')[0].name
+                //         fingerprint "${env.STACKIOS_FILENAME}"
+                //     }
+                // }
             }
 
             post {
@@ -338,20 +339,21 @@ pipeline {
                         sh 'cp $ISO_FILENAME /export/www/stacki-isos/$PLATFORM/stacki/$NORMALIZED_BRANCH/'
                         sh 'cp $ISO_FILENAME.md5 /export/www/stacki-isos/$PLATFORM/stacki/$NORMALIZED_BRANCH/'
 
+                        // Note: For now, we no longer build StackiOS
                         // If we are Redhat, we should have a StackiOS ISO as well
-                        script {
-                            if (env.PLATFORM == 'redhat7') {
-                                // Create our MD5 of the ISO
-                                sh 'md5sum $STACKIOS_FILENAME > $STACKIOS_FILENAME.md5'
+                        // script {
+                        //     if (env.PLATFORM == 'redhat7') {
+                        //         // Create our MD5 of the ISO
+                        //         sh 'md5sum $STACKIOS_FILENAME > $STACKIOS_FILENAME.md5'
 
-                                // Make sure our web directory exists
-                                sh 'mkdir -p /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH'
+                        //         // Make sure our web directory exists
+                        //         sh 'mkdir -p /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH'
 
-                                // Copy the files over
-                                sh 'cp $STACKIOS_FILENAME /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH/'
-                                sh 'cp $STACKIOS_FILENAME.md5 /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH/'
-                            }
-                        }
+                        //         // Copy the files over
+                        //         sh 'cp $STACKIOS_FILENAME /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH/'
+                        //         sh 'cp $STACKIOS_FILENAME.md5 /export/www/stacki-isos/redhat7/stackios/$NORMALIZED_BRANCH/'
+                        //     }
+                        // }
                     }
 
                     post {
@@ -975,14 +977,15 @@ pipeline {
                                 path: 'release/stacki/5.x/',
                                 acl: 'PublicRead'
                             )
-
+                            
+                            // Note: For now, we no longer build StackiOS
                             // And the StackiOS ISO
-                            s3Upload(
-                                file: env.STACKIOS_FILENAME,
-                                bucket: 'teradata-stacki',
-                                path: 'release/stacki/5.x/',
-                                acl: 'PublicRead'
-                            )
+                            // s3Upload(
+                            //     file: env.STACKIOS_FILENAME,
+                            //     bucket: 'teradata-stacki',
+                            //     path: 'release/stacki/5.x/',
+                            //     acl: 'PublicRead'
+                            // )
                         }
                     }
 
@@ -992,9 +995,8 @@ pipeline {
                                 channel: '#stacki-builds',
                                 color: 'good',
                                 message: """\
-                                    New Stacki ISOs uploaded to Amazon S3.
+                                    New Stacki ISO uploaded to Amazon S3.
                                     *Stacki:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.ISO_FILENAME}
-                                    *StackiOS:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.STACKIOS_FILENAME}
                                 """.stripIndent(),
                                 tokenCredentialId: 'slack-token-stacki'
                             )
@@ -1005,7 +1007,7 @@ pipeline {
                                 channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
-                                    Stacki ISOs failed to upload to Amazon s3.
+                                    Stacki ISO failed to upload to Amazon s3.
                                     *Branch:* ${env.GIT_BRANCH}
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
