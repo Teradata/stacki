@@ -155,9 +155,9 @@ class PalletArgProcessor:
 			try:
 				# subprocess's env mapping must be strings to strings!
 				environ = dict((str(k), str(v)) for k, v in asdict(pallet_info).items())
-				self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True, env=environ)
+				result = self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True, env=environ)
 				Log(f'Result of running {hook} (rc=={result.returncode}):')
-				Log(f'env:\n{env}')
+				Log(f'Env:\n{environ}')
 				Log(f'Stdout:\n{result.stdout}')
 				Log(f'Stderr:\n{result.stderr}')
 			except (PermissionError, subprocess.CalledProcessError) as exception:
