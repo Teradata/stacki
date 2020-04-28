@@ -10,7 +10,8 @@ if (( $(echo $images | wc --lines) > 1 )); then
   echo $images
   exit 1
 else
-  rpm -Uv $images
+  echo installing $images
+  rpm --force -Uv $images
 fi
 
 # Copy the vmlinuz and initrd
