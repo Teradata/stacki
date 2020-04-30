@@ -26,9 +26,9 @@ def sortDiskId(entry):
 	try:
 		key = entry['diskid']
 		if not key:
-			key = sys.maxint
+			key = sys.maxsize
 	except:
-		key = sys.maxint
+		key = sys.maxsize
 
 	return key
 
