@@ -42,7 +42,7 @@ class Builder:
 	def makeBootable(self, name, version, release, arch):
 		pass
 				
-	def mkisofs(self, isoName, rollName, diskName, rollDir):
+	def mkisofs(self, isoName, rollName, diskName, rollDir, *, command='mkisofs'):
 		print('Building ISO image for %s' % diskName)
 
 		if self.config.isBootable():
@@ -52,8 +52,8 @@ class Builder:
 
 		volname = "stacki"
 		cwd = os.getcwd()
-		cmd = 'mkisofs -quiet -V "%s" %s -r -T -f -o %s .' % \
-			(volname, extraflags, os.path.join(cwd, isoName))
+		cmd = '%s -quiet -V "%s" %s -r -T -f -o %s .' % \
+			(command, volname, extraflags, os.path.join(cwd, isoName))
 
 #		print('mkisofs: cmd %s' % cmd)
 		stack.util._exec(cmd, shlexsplit=True, cwd=rollDir)
@@ -146,8 +146,8 @@ class RollBuilder(Builder, stack.dist.Arch):
 		self.command = command
 		self.call = call
 
-	def mkisofs(self, isoName, rollName, diskName):
-		Builder.mkisofs(self, isoName, rollName, diskName, diskName)
+	def mkisofs(self, isoName, rollName, diskName, *, command='mkisofs'):
+		Builder.mkisofs(self, isoName, rollName, diskName, diskName, command=command)
 		
 	def getRPMS(self, path):
 		"""Return a list of all the RPMs in the given path, if multiple
@@ -402,7 +402,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 			
 		# Symlink in all the RPMS
 			
-		for file in files:
+		for file in list:
 			try:
 				#
 				# not RPM files will throw an exception
@@ -463,7 +463,10 @@ class RollBuilder(Builder, stack.dist.Arch):
 				print('Pallet is not bootable')
 				self.config.setBootable(False)
 				
-		self.mkisofs(isoname, self.config.getRollName(), 'disk1')
+		command = 'genisoimage'
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			command = 'mkisofs'
+		self.mkisofs(isoname, self.config.getRollName(), 'disk1', command=command)
 
 		
 class MetaRollBuilder(Builder):
