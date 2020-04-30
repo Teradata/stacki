@@ -6,17 +6,18 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
+DEPENDS.FILES   = fbtftp-$(VERSION).tar.gz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 refresh:
 	rm -fr fbtftp
 	git clone https://github.com/facebook/fbtftp.git
-	tar -czf fbtftp.tar.gz ./fbtftp
+	tar -czf fbtftp-$(shell date --rfc-3339=date).tar.gz ./fbtftp
 	
 build:
 	(					\
-		tar -xzf fbtftp.tar.gz;		\
+		tar -xzf fbtftp-$(VERSION).tar.gz;		\
 		cd fbtftp;			\
 		$(PY.PATH) setup.py build;	\
 	)
