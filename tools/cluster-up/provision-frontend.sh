@@ -48,8 +48,8 @@ if [[ -n $GATEWAY ]]
 then
     if [[ $OS =~ "sles" ]]
     then
-        route del default
-        route add default gw $GATEWAY
+        ip route del default
+        ip route add default via $GATEWAY
         sed -i "/DHCLIENT_SET_DEFAULT_ROUTE/d" /etc/sysconfig/network/ifcfg-eth0
     else
         echo "GATEWAY=$GATEWAY" > /etc/sysconfig/network
