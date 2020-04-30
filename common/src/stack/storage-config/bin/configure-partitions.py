@@ -132,7 +132,7 @@ def sortPartId(entry):
 		if not key:
 			key = sys.maxsize
 	except:
-		key = sys.maxint
+		key = sys.maxsize
 
 	return key
 
