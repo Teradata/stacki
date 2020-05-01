@@ -20,7 +20,6 @@ stack-&os;-&release;-images
 
 <stack:package>
 syslinux
-xinetd
 stack-pxeboot
 </stack:package>
 
