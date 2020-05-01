@@ -66,16 +66,9 @@ chmod 600 /tmp/authorized_keys
 
 </stack:script>
 
-<stack:script stack:cond="release == 'redhat7'" stack:stage="install-pre">
-
-<stack:file stack:name="/etc/ssh/ssh_host_ecdsa_key" stack:perms="0400" stack:rcs="off">
-<stack:eval>
-/opt/stack/sbin/read-ssh-private-key ECDSA
-</stack:eval>
-</stack:file>
-
-/sbin/sshd -f /etc/ssh/sshd_config.anaconda \
-	-h /etc/ssh/ssh_host_ecdsa_key -p 2200
+<stack:script stack:stage="install-pre">
+ssh-keygen -N "" -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key
+/sbin/sshd -f /etc/ssh/sshd_config.anaconda -h /etc/ssh/ssh_host_ecdsa_key -p 2200
 </stack:script>
 
 </stack:stack>

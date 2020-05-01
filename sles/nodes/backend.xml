@@ -17,7 +17,6 @@
 
 <stack:stacki>
 authorized_key="""<stack:eval>cat /root/.ssh/id_rsa.pub</stack:eval>"""
-host_key="""<stack:eval>/opt/stack/sbin/read-ssh-private-key ECDSA</stack:eval>"""
 </stack:stacki>
 
 <stack:script stack:stage="install-post" stack:chroot="false">

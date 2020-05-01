@@ -13,29 +13,18 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
-DEPENDS.FILES	= $(wildcard *.py)
-DEPENDS.DIRS	= utils
+DEPENDS.FILES	= $(wildcard *.py) setDbPartitions.cgi
 
 
 include $(STACKBUILD)/etc/CCRules.mk
 
 
-build:	$(SCRIPTS) $(RCFILES)
-	$(MAKE) -C utils
+build::
 
 install::
-	mkdir -p $(ROOT)/$(PKGROOT)/sbin
-	$(INSTALL) -m 4555 utils/read-ssh-private-key $(ROOT)/$(PKGROOT)/sbin/
-	$(INSTALL) -m 4555 utils/read-411-shared-key $(ROOT)/$(PKGROOT)/sbin/
-
 	mkdir -p $(ROOT)/export/stack/sbin/profile
 	$(INSTALL) -m 0755 profile.py  $(ROOT)/export/stack/sbin/profile.cgi
 	$(INSTALL) -m 0755 __init__.py $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 redhat.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 sles.py  $(ROOT)/export/stack/sbin/profile/
-	$(INSTALL) -m 0755 utils/*.cgi $(ROOT)/export/stack/sbin/
-
-
-clean::
-	$(MAKE) -C utils clean
-
+	$(INSTALL) -m 0755 setDbPartitions.cgi $(ROOT)/export/stack/sbin/
