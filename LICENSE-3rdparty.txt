@@ -2,13 +2,10 @@ PACKAGE        VERSION            URL				                                       
 MegaCli        8.07.07-1 	  https://docs.broadcom.com/docs/12352792 				 https://raw.githubusercontent.com/Teradata/stacki/master/common/src/foundation/MegaCLI/LICENSE.txt
 Python         3.6.6     	  https://www.python.org                  				 PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
 fbtftp         n/a       	  https://github.com/facebook/fbtftp      				 BSD
-fio            2.1.2     	  https://github.com/axboe/fio            				 GPL2
 newt           0.52.20   	  https://pagure.io/newt                  				 GPL2
 rcs            5.7       	  https://www.gnu.org/software/rcs        				 GPL2
 redis          4.0.11    	  https://redis.io                        				 BSD-ish https://raw.githubusercontent.com/antirez/redis/unstable/COPYING
-sc-im          0.4.0     	  https://github.com/andmarti1424/sc-im   				 BSD
 storcli        007.0409.0000.0000 https://docs.broadcom.com/docs/007.0409.0000.0000_Unified_StorCLI.txt	 https://www.broadcom.com/support/download-search/?pg=&pf=&pn=&pa=&po=&dk=storcli
-stream         n/a       	  https://github.com/jeffhammond/STREAM   				 https://raw.githubusercontent.com/jeffhammond/STREAM/master/LICENSE.txt
 zeromq         4.2.2              http://zeromq.org/                      				 LGPL3
 
 Django         1.11.6    https://www.djangoproject.com/                     OSI Approved :: BSD License

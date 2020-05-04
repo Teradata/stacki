@@ -77,9 +77,6 @@ for pallet in g.rolls:
 <stack:package>stack-build</stack:package>
 <stack:package>redhat-rpm-config</stack:package>
 
-<!-- text-based spreadsheet editor -->
-<stack:package>foundation-sc-im</stack:package>
-
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 

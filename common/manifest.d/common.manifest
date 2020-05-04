@@ -1,12 +1,8 @@
 foundation-fbtftpd
-foundation-fio
-foundation-iperf
 foundation-newt
 foundation-python
 foundation-rcs
 foundation-redis
-foundation-sc-im
-foundation-stream
 foundation-zeromq
 ludicrous-speed
 MegaCLI

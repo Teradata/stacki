@@ -2,7 +2,6 @@
 -foundation-fbtftpd
 -foundation-newt
 -foundation-redis
--foundation-sc-im
 -stack-admin
 -stack-config-server
 -stack-docker

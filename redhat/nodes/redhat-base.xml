@@ -44,9 +44,7 @@ else:
 
 <stack:package>grub2</stack:package>
 <stack:package>grub2-tools</stack:package>
-<!-- Network test from stacki-pro -->
-<stack:package>iperf3</stack:package>
-<stack:package>foundation-iperf</stack:package>
+
 <!-- Don't install the wireless or tv rpms -->
 <stack:package stack:enable="false">iwl*</stack:package>
 <stack:package stack:enable="false">ivtv*</stack:package>

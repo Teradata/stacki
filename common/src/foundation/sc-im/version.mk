@@ -1,4 +1,0 @@
-NAME	= foundation-sc-im
-ARCHIVENAME	= sc-im
-VERSION	= 0.4.0
-RELEASE	= 20161021

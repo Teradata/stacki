@@ -25,9 +25,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 <stack:package>rpm-build</stack:package>
 <stack:package>stack-build</stack:package>
 
-<!-- text-based spreadsheet editor -->
-<stack:package>foundation-sc-im</stack:package>
-
 <!-- example spreadsheets -->
 <stack:package>stack-examples</stack:package>
 
