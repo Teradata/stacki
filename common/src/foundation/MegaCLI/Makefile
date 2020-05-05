@@ -25,6 +25,10 @@ install::
 	$(INSTALL) -m0444 \
 		$(CURDIR)/tmp/opt/MegaRAID/MegaCli/libstorelibir-2.so.13.05-0 \
 		$(ROOT)/$(PKGROOT)/lib/libstorelibir-2.so.13.05-0
+	(								\
+		cd $(ROOT)/$(PKGROOT)/lib/;				\
+		ln -s libstorelibir-2.so.13.05-0 libstorelibir-2.so.13	\
+	)
 
 clean::
 	rm -rf tmp
