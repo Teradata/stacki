@@ -1,5 +1,6 @@
 YUMLIST = \
 	MegaCLI storcli \
+	libncurses5 \
 	ipmitool \
 	stack-checklist \
 	stack-command \
@@ -28,9 +29,11 @@ YUMLIST = \
 # Under SLES 15, zypper download blows away the previous contents
 # of the cache directory, so we need to download into a temp
 # directory and then move the contents.
+#
+# Also, SLES 15 MegaCLI needs libncurses5
 getextrapackages:
 	rm -rf temp_cache
 	mkdir -p temp_cache
-	zypper --pkg-cache-dir temp_cache download ipmitool
+	zypper --pkg-cache-dir temp_cache download ipmitool libncurses5
 	mv temp_cache/* cache/
 	rm -rf temp_cache
