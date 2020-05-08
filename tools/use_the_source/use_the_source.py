@@ -43,6 +43,10 @@ bin_file_grafts = (
 	("ws-client/bin/wsclient.py", "/opt/stack/bin/wsclient")
 )
 
+template_file_grafts = (
+	("templates", "/opt/stack/share/templates"),
+)
+
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
 		print(f'{Path(__file__).name} <path_to_stacki_source_tree>')
@@ -82,3 +86,21 @@ if __name__ == '__main__':
 
 		# Now symlink over our src version
 		dest_filename.symlink_to(src_filename)
+
+	for src, dest in template_file_grafts:
+		src_directory = src_base / src
+		dest_directory = dest_base / dest
+
+		# Find all our template files
+		for src_filename in src_directory.glob("**/*.j2"):
+			dest_filename = dest_directory / src_filename.relative_to(src_directory)
+
+			# First blow away the old one, if it exists
+			if dest_filename.exists() or dest_filename.is_symlink():
+				dest_filename.unlink()
+
+			# Create any missing directory structure in the destination.
+			dest_filename.parent.mkdir(parents = True, exist_ok = True)
+
+			# Now symlink over our src version
+			dest_filename.symlink_to(src_filename)
