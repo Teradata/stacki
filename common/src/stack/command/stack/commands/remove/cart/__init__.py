@@ -36,7 +36,7 @@ class Command(CartArgProcessor, stack.commands.remove.command):
 			raise ArgRequired(self, 'cart')
 
 		cartpath = '/export/stack/carts'
-		for cart in self.getCartNames(args):
+		for cart in self.get_cart_names(args):
 			os.system('/bin/rm -rf %s' % os.path.join(cartpath, cart))
 
 			self.db.execute('delete from carts where name=%s', (cart,))

@@ -18,7 +18,7 @@ class CartArgProcessor:
 	An Interface class to add the ability to process cart arguments.
 	"""
 
-	def getCartNames(self, args):
+	def get_cart_names(self, args):
 		carts = []
 		if not args:
 			args = ['%']		 # find all cart names

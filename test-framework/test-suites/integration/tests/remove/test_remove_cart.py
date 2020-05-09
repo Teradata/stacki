@@ -40,10 +40,7 @@ class TestRemoveCart:
 		# And confirm it is gone
 		result = host.run('stack list cart test')
 		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "test" argument is not a valid cart
-			[cart ...] {expanded=string}
-		''')
+		assert result.stderr.startswith('error - "test" argument is not a valid cart')
 
 		# Files should be gone too
 		assert not host.file('/export/stack/carts/test').exists
@@ -73,17 +70,11 @@ class TestRemoveCart:
 		# And confirm they are gone
 		result = host.run('stack list cart test')
 		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "test" argument is not a valid cart
-			[cart ...] {expanded=string}
-		''')
+		assert result.stderr.startswith('error - "test" argument is not a valid cart')
 
 		result = host.run('stack list cart foo')
 		assert result.rc == 255
-		assert result.stderr == dedent('''\
-			error - "foo" argument is not a valid cart
-			[cart ...] {expanded=string}
-		''')
+		assert result.stderr.startswith('error - "foo" argument is not a valid cart')
 
 		# Files should be gone too
 		assert not host.file('/export/stack/carts/test').exists

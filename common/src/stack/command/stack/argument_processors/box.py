@@ -50,3 +50,21 @@ class BoxArgProcessor:
 		pallets.extend([Pallet(*row) for row in rows])
 
 		return pallets
+
+	def get_box_carts(self, box='default'):
+		"""
+		Returns a list of carts for a box
+		"""
+
+		# Make sure 'box' exists
+		self.get_box_names([box])
+
+		rows = self.db.select("""
+			carts.name, boxes.name AS box
+			FROM carts, cart_stacks AS cs, boxes
+			WHERE carts.id = cs.cart
+			AND cs.box = boxes.id
+			AND boxes.name=%s
+		""", (box,))
+
+		return list(rows)

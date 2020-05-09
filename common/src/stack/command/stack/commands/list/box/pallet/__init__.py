@@ -32,15 +32,8 @@ class Command(stack.commands.list.box.command):
 		boxes = self.get_box_names(args)
 
 		for box in boxes:
-			rows = self.db.select("""
-				r.name, r.arch, r.version, r.rel, r.os
-				from stacks s, rolls r, boxes b
-				where s.roll=r.id and s.box=b.id and b.name=%s
-				""", (box,)
-			)
-
-			for (roll, arch, version, release, osname) in rows:
-				self.addOutput(box, (roll, arch, version, release, osname))
+			for pal in self.get_box_pallets(box):
+				self.addOutput(box, (pal.name, pal.arch, pal.version, pal.rel, pal.os))
 
 		self.endOutput(
 			header=['box', 'pallet', 'arch', 'version', 'release', 'os'],

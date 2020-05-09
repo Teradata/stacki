@@ -48,7 +48,7 @@ class Command(CartArgProcessor, stack.commands.enable.command):
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
 
-		for cart in self.getCartNames(args):
+		for cart in self.get_cart_names(args):
 			# If this cart isn't already in the box, add it
 			if self.db.count("""
 				(*) from cart_stacks s, carts c

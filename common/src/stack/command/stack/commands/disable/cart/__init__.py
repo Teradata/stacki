@@ -49,7 +49,7 @@ class Command(CartArgProcessor, stack.commands.disable.command):
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
 
-		for cart in self.getCartNames(args):
+		for cart in self.get_cart_names(args):
 			self.db.execute("""
 				delete from cart_stacks where
 				box=%s and cart=(select id from carts where name=%s)
