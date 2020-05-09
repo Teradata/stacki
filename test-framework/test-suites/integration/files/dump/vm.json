@@ -1,0 +1,92 @@
+{
+        "vm": [
+                {
+                        "name": "vm-backend-0-3",
+                        "hypervisor": "hypervisor-0-1",
+                        "memory": 2048,
+                        "cpu": 1,
+                        "disks": [
+                                {
+                                        "disk_name": "sda",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 100,
+                                        "image_name": "vm-backend-0-3_disk1.qcow2",
+                                        "mountpoint": null
+                                }
+                        ]
+                },
+                {
+                        "name": "vm-backend-0-4",
+                        "hypervisor": "hypervisor-0-1",
+                        "memory": 2048,
+                        "cpu": 2,
+                        "disks": [
+                                {
+                                        "disk_name": "sda",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 200,
+                                        "image_name": "vm-backend-0-4_disk1.qcow2",
+                                        "mountpoint": null
+                                },
+                                {
+                                        "disk_name": "sdb",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 100,
+                                        "image_name": "vm-backend-0-4_disk2.qcow2",
+                                        "mountpoint": null
+                                }
+                        ]
+                },
+                {
+                        "name": "vm-backend-0-5",
+                        "hypervisor": "hypervisor-0-2",
+                        "memory": 3072,
+                        "cpu": 3,
+                        "disks": [
+                                {
+                                        "disk_name": "sda",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 200,
+                                        "image_name": "vm-backend-0-5_disk1.qcow2",
+                                        "mountpoint": null
+                                },
+                                {
+                                        "disk_name": "sdb",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 100,
+                                        "image_name": "vm-backend-0-5_disk2.qcow2",
+                                        "mountpoint": null
+                                }
+                        ]
+                },
+                {
+                        "name": "vm-backend-0-6",
+                        "hypervisor": "hypervisor-0-2",
+                        "memory": 4096,
+                        "cpu": 4,
+                        "disks": [
+                                {
+                                        "disk_name": "sda",
+                                        "disk_type": "disk",
+                                        "location": "/export/pools/stacki",
+                                        "size": 200,
+                                        "image_name": "vm-backend-0-6_disk1.qcow2",
+                                        "mountpoint": null
+                                },
+                                {
+                                        "disk_name": "sdb",
+                                        "disk_type": "mountpoint",
+                                        "location": "/export/pools/stacki",
+                                        "size": null,
+                                        "image_name": "",
+                                        "mountpoint": "/dev/sdc"
+                                }
+                        ]
+                }
+        ]
+}
