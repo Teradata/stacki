@@ -1,0 +1,16 @@
+{
+	"name": "vm-backend-0-3",
+	"hypervisor": "hypervisor-0-1",
+	"memory": 3072,
+	"cpu": 1,
+	"disks": [
+		{
+		"disk_name": "sda",
+		"disk_type": "disk",
+		"location": "/export/pools/stacki",
+		"size": null,
+		"image_name": "/export/images/fake_disk.qcow2",
+		"mountpoint": null
+		}
+	]
+}
