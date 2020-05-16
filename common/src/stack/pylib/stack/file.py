@@ -186,6 +186,10 @@ class DebFile(File):
 	def getPackageArch(self):
 		return self.info['architecture']
 		
+	def getUniqueName(self):
+		return f'{self.info["package"]}-{self.info["architecture"]}'
+
+
     
 class RPMBaseFile(File):
 
@@ -571,6 +575,8 @@ class Tree:
 			else:
 				if re.match('.*\.rpm$', f) is not None:
 					v.append(RPMFile(filepath))
+				if re.match('.*\.deb$', f) is not None:
+					v.append(DebFile(filepath))
 				elif re.match('roll-.*\.iso$', f) is not None:
 					v.append(RollFile(filepath))
 				else:

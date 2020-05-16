@@ -68,11 +68,13 @@ class Builder:
 	def writerepo(self, name, version, release, OS, arch):
 		print('Writing repo data')
 		basedir = os.getcwd()
-		palletdir = os.path.join(basedir, 'disk1', name, version,
-			release, OS, arch)
-		os.chdir(palletdir)
 
-		subprocess.call(['createrepo', '.'])
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			os.chdir(os.path.join(basedir, 'disk1', name, version, release, OS, arch))
+			subprocess.call(['createrepo', '.'])
+		else: # debian
+			os.chdir(os.path.join(basedir, 'disk1', name, version, release, OS, arch, 'packages'))
+			os.system('dpkg-scanpackages . /dev/null | gzip -c > Packages.gz')
 
 		os.chdir(basedir)
 
@@ -153,7 +155,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		"""Return a list of all the RPMs in the given path, if multiple
 		versions of a package are found only the most recent one will
 		be included"""
-		
+
 		dict = {}
 		tree = stack.file.Tree(os.path.join(os.getcwd(), path))
 		for dir in tree.getDirs():
@@ -164,7 +166,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 					continue # skip all non-rpm files
 					
 				# Skip RPMS for other architecures
-				
 				if file.getPackageArch() not in self.getCPUs():
 					continue
 					
@@ -185,33 +186,10 @@ class RollBuilder(Builder, stack.dist.Arch):
 		return list
 
 
-	def getExternalRPMS(self):
-		import stack.roll
-		import stack.redhat.gen
+	def configure_yum(self, packages):
+		# create a yum.conf file that contains only repos from
+		# the default-all box
 
-		attrs = {}
-		for row in self.call('list.host.attr', [ 'localhost' ]):
-			attrs[row['attr']] = row['value']
-		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
-
-		#
-		# make sure the XML string is ASCII and not unicode, 
-		# otherwise, the parser will fail
-		#
-		xmlinput = xml.encode('ascii', 'ignore')
-
-		generator = stack.redhat.gen.Generator()
-		generator.setProfileType('native')
-		generator.setArch(self.arch)
-		generator.setOS('redhat')
-		generator.parse(xmlinput)
-
-		# call the getPackages, for just enabled packages and flatten it
-		rpms = [pkg for node_pkgs in generator.packageSet.getPackages()['enabled'].values() for pkg in node_pkgs]
-
-		# create a yum.conf file that contains only repos from the
-		# default-all box
-		#
 		cwd = os.getcwd()
 		yumconf = os.path.join(cwd, 'yum.conf')
 
@@ -242,8 +220,8 @@ class RollBuilder(Builder, stack.dist.Arch):
 		file.close()
 
 		# Use system python (2.x)
-		cmd = ['/usr/bin/python', '/opt/stack/sbin/yumresolver', yumconf]
-		cmd.extend(rpms)
+		cmd = ['/usr/bin/python', '/opt/stack/sbin/yumresolver', yumconf ]
+		cmd.extend(packages)
 		proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		stdout, stdrr = proc.communicate()
 
@@ -284,22 +262,60 @@ class RollBuilder(Builder, stack.dist.Arch):
 				file.write('baseurl=file:///export/stack/pallets/%s/%s/%s/redhat/%s\n' % (o['name'], o['version'], o['release'], o['arch']))
 
 		file.close()
-		destdir = os.path.join(cwd, 'RPMS')
 
-		cmd = [ 'yumdownloader', '--destdir=%s' % destdir, '-y', '-c', yumconf ]
+		cmd = [ 'yumdownloader', '--destdir=%s' % os.path.join(cwd, 'RPMS'), '-y', '-c', yumconf ]
 		cmd.extend(selected)
 		subprocess.call(cmd, stdin=None)
+
 		
+	def configure_dpkg(self, packages):
+		os.system('dpkg-scanpackages packages /dev/null | gzip -c > packages/Packages.gz')
+	    
+	def getExternalRPMS(self):
+		import stack.roll
+		import stack.redhat.gen
+
+		attrs = {}
+		for row in self.call('list.host.attr', [ 'localhost' ]):
+			attrs[row['attr']] = row['value']
+		xml = self.command('list.node.xml', [ 'everything', 'eval=n', 'attrs=%s' % attrs ] )
+
+		#
+		# make sure the XML string is ASCII and not unicode, 
+		# otherwise, the parser will fail
+		#
+		xmlinput = xml.encode('ascii', 'ignore')
+
+		generator = stack.redhat.gen.Generator()
+		generator.setProfileType('native')
+		generator.setArch(self.arch)
+		generator.setOS('redhat')
+		generator.parse(xmlinput)
+
+		# call the getPackages, for just enabled packages and flatten it
+		packages = [pkg for node_pkgs in generator.packageSet.getPackages()['enabled'].values() for pkg in node_pkgs]
+
+
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			print('YUM')
+			self.configure_yum(packages)
+			pkgdir = os.path.join(os.getcwd(), 'RPMS')
+		else: # debian
+			print('DEB')
+			self.configure_dpkg(packages)
+			pkgdir = os.path.join(os.getcwd(), 'packages')
+
+
 		stacki = []
 		nonstacki = []
 
-		tree = stack.file.Tree(destdir)
+		tree = stack.file.Tree(pkgdir)
 
-		for rpm in tree.getFiles():
-			if rpm.getBaseName() in selected:
-				stacki.append(rpm)
+		for pkg in tree.getFiles():
+			if pkg.getBaseName() in selected:
+				stacki.append(pkg)
 			else:
-				nonstacki.append(rpm)
+				nonstacki.append(pkg)
 
 		return (stacki, nonstacki)
 
@@ -356,13 +372,17 @@ class RollBuilder(Builder, stack.dist.Arch):
 
 	def run(self):
 
+		pkgsdir = 'packages'
+		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
+			pkgsdir = 'RPMS'
+				
 		# Make a list of all the files that we need to copy onto the
 		# pallets cds.	Don't worry about what the file types are right
 		# now, we can figure that out later.
 
 		list = []
 		if self.config.hasRPMS():
-			list.extend(self.getRPMS('RPMS'))
+			list.extend(self.getRPMS(pkgsdir))
 
 		# Make a list of both required and optional packages.  The copy
 		# code is here since python is by-reference for everything.
@@ -372,6 +392,7 @@ class RollBuilder(Builder, stack.dist.Arch):
 		
 		required = []
 		if self.config.hasRolls():
+			print('hasRolls')
 			(required, optional) = self.getExternalRPMS()
 			for file in list:
 				required.append(file)
@@ -392,11 +413,6 @@ class RollBuilder(Builder, stack.dist.Arch):
 				    self.config.getRollOS(),
 				    self.config.getRollArch())
 
-		pkgsdir = 'packages'
-
-		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-			pkgsdir = 'RPMS'
-				
 		os.makedirs(os.path.join(root, pkgsdir))
 			    
 			
@@ -426,12 +442,11 @@ class RollBuilder(Builder, stack.dist.Arch):
 		self.stampDisk('disk1', self.config.getRollName(), self.config.getRollArch())
 				
 		# write repodata 
-		if self.config.getRollOS() in [ 'redhat', 'sles' ]:
-			self.writerepo(self.config.getRollName(),
-				       self.config.getRollVersion(),
-				       self.config.getRollRelease(),
-				       self.config.getRollOS(),
-				       self.config.getRollArch())
+		self.writerepo(self.config.getRollName(),
+			       self.config.getRollVersion(),
+			       self.config.getRollRelease(),
+			       self.config.getRollOS(),
+			       self.config.getRollArch())
 
 		# copy the graph and node XMLs files into the pallet
 		self.copyXMLs(self.config.getRollOS(),
