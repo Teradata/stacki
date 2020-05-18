@@ -316,6 +316,8 @@ for new_pkg in new_pkgs:
 		pkgs.append(new_pkg)
 	elif osname == 'sles' and "not found" not in str(run(['zypper', 'info', new_pkg]).stdout):
 		pkgs.append(new_pkg)
+	else: # there is no old version for ubuntu just add the pkg
+		pkgs.append(new_pkg)
 
 result = install_pkgs(pkgs)
 
@@ -588,6 +590,9 @@ with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
 		logger.error("Could not process XML")
 		sys.exit(result.returncode)
 
+if osname == 'ubuntu': # remove once we can get to this part
+	sys.exit(0)
+	
 banner("Run Setup Script")
 # run run.sh
 result = run(['sh', '/tmp/run.sh'])
