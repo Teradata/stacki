@@ -36,7 +36,8 @@ class Command(stack.commands.dump.command):
 
 			dump.append(OrderedDict(
 				name       = name,
-				public     = self.str2bool(row['public']),
+				sux        = row['sux'],
+				managed    = self.str2bool(row['managed']),
 				attr       = self.dump_attr(name),
 				controller = self.dump_controller(name),
 				partition  = self.dump_partition(name),

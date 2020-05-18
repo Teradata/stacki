@@ -16,6 +16,30 @@
 <stack:script stack:stage="install-post">
 
 <stack:file stack:name="/tmp/cluster.sql">
+<!-- NFSRoots -->
+DROP TABLE IF EXISTS nfsroots;
+CREATE TABLE nfsroots (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(64) NOT NULL,
+	os		INT NOT NULL,
+	tftp		VARCHAR(128) NOT NULL,
+	nfs		VARCHAR(128) NOT NULL,
+	INDEX (name),
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
+);
+
+<!-- Images -->
+DROP TABLE IF EXISTS images;
+CREATE TABLE images (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(64) NOT NULL,
+	os		INT NOT NULL,
+	filename	VARCHAR(128) NOT NULL,
+	comment		VARCHAR(128) DEFAULT NULL,
+	INDEX (name),
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
+);
+
 <!-- Access -->
 DROP TABLE IF EXISTS access;
 CREATE TABLE access (
@@ -59,6 +83,7 @@ INSERT INTO oses(name) VALUES ("ubuntu");
 INSERT INTO oses(name) VALUES ("sles");
 INSERT INTO oses(name) VALUES ("vmware");
 INSERT INTO oses(name) VALUES ("xenserver");
+INSERT INTO oses(name) VALUES ("raspbian");
 
 <!-- Environments -->
 DROP TABLE IF EXISTS environments;
@@ -73,7 +98,8 @@ DROP TABLE IF EXISTS appliances;
 CREATE TABLE appliances (
 	id		INT AUTO_INCREMENT PRIMARY KEY,
 	name		VARCHAR(32) NOT NULL,
-	public		ENUM('yes','no') NOT NULL,
+	sux		VARCHAR(64) DEFAULT NULL,
+	managed		BOOLEAN	DEFAULT FALSE,
 	INDEX (name)
 );
 
@@ -131,7 +157,9 @@ CREATE TABLE nodes (
 	id		INT AUTO_INCREMENT PRIMARY KEY,
 	name		VARCHAR(128) NOT NULL,
 	appliance	INT NOT NULL,
-	box		INT NOT NULL,
+	box		INT DEFAULT NULL,
+	image		INT DEFAULT NULL,
+	nfsroot		INT DEFAULT NULL,
 	environment	INT DEFAULT NULL,
 	rack		VARCHAR(64) NOT NULL,
 	rank		VARCHAR(64) NOT NULL,
@@ -141,7 +169,7 @@ CREATE TABLE nodes (
 	metadata	TEXT DEFAULT NULL,
 	INDEX (name),
 	FOREIGN KEY (appliance) REFERENCES appliances(id) ON DELETE CASCADE,
-	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE CASCADE,
+	FOREIGN KEY (box) REFERENCES boxes(id) ON DELETE SET NULL,
 	FOREIGN KEY (environment) REFERENCES environments(id) ON DELETE SET NULL,
 	FOREIGN KEY (osaction) REFERENCES bootactions(id) ON DELETE SET NULL,
 	FOREIGN KEY (installaction) REFERENCES bootactions(id) ON DELETE SET NULL

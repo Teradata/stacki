@@ -32,13 +32,15 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
+		
+		info = {} # greedy select for caching
+		for name, sux, managed in self.db.select("""
+			name, sux, if(managed, 'True', 'False') 
+			from appliances"""):
+			info[name] = (sux, managed)
 
 		self.beginOutput()
 		for app in self.getApplianceNames(args):
-			rows = self.db.select(
-				'public from appliances where name=%s',
-				(app,)
-			)
-			self.addOutput(app, rows[0])
+			self.addOutput(app, info[app])
 
-		self.endOutput(header=['appliance', 'public'])
+		self.endOutput(header=['appliance', 'sux', 'managed'])

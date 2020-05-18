@@ -505,7 +505,7 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 		banner("Launch Boss-Config")
 		mount(stacki_iso, '/mnt/cdrom')
 
-		run_and_warn([
+		subprocess.run([
 			'/opt/stack/bin/python3',
 			'/opt/stack/bin/boss_config_snack.py',
 			'--no-partition',
@@ -595,7 +595,7 @@ if osname == 'ubuntu': # remove once we can get to this part
 	
 banner("Run Setup Script")
 # run run.sh
-result = run(['sh', '/tmp/run.sh'])
+result = subprocess.run(['sh', '-x', '/tmp/run.sh'])
 if result.returncode != 0:
 	logger.error("Setup Script Failed")
 	sys.exit(result.returncode)

@@ -32,8 +32,8 @@ class Command(stack.commands.set.host.command,
 			('box', None, True)
 		])
 
-		# Check to make sure this is a valid box name
-		self.get_box_names([ box ])
+		if box: # check to make sure this is a valid box name
+			self.get_box_names([ box ])
 
 		for host in hosts:
 			self.db.execute("""
