@@ -183,7 +183,6 @@ class HostArgProcessor:
 				hostAttrs[h][a] = v
 
 		# Finally iterate over all the host/groups
-		list	 = []
 		explicit = {}
 		for name in names:
 			# Ad-hoc group
@@ -228,7 +227,7 @@ class HostArgProcessor:
 		# unmanaged hosts unless they explicitly appear in
 		# the names list.  This effectively enforces the
 		# filtering only on groups.
-		list = []
+		final_list = []
 		for host in hostList:
 			if not hostDict[host]:
 				continue
@@ -238,7 +237,7 @@ class HostArgProcessor:
 				if not managed and not explicit.get(host):
 					continue
 
-			list.append(hostDict[host])
+			final_list.append(hostDict[host])
 
 		# finally, apply the host_filter function, if it was passed
 		# explicitly check host_filter, because filter(None, iterable) has a semantic meaning
@@ -246,9 +245,9 @@ class HostArgProcessor:
 			# filter(func, iterable) requires that func take a single argument
 			# so we use functools.partial to get a function with one argument 'locked'
 			part_func = partial(host_filter, self)
-			list = filter(part_func, list)
+			final_list = list(filter(part_func, final_list))
 
-		return list
+		return final_list
 
 	def getHosts(self, args):
 		"""
