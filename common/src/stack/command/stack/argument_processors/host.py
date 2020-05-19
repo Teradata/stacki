@@ -23,33 +23,6 @@ class HostArgProcessor:
 	An Interface class to add the ability to process host arguments.
 	"""
 
-	def sortHosts(self, hosts):
-		def racksort(a):
-			try:
-				retval = int(a['rack'])
-			except:
-				retval = a['rack']
-			return retval
-
-		def ranksort(a):
-			try:
-				retval = int(a['rank'])
-			except:
-				retval = a['rank']
-			return retval
-
-		rank = sorted((h for h in hosts if h['rank'].isnumeric()), key=ranksort)
-		rank += sorted((h for h in hosts if not h['rank'].isnumeric()), key=ranksort)
-
-		rack = sorted((h for h in rank if h['rack'].isnumeric()), key=racksort)
-		rack += sorted((h for h in rank if not h['rack'].isnumeric()), key=racksort)
-
-		hosts = []
-		for r in rack:
-			hosts.append((r['host'],))
-
-		return hosts
-
 	def getHostnames(self, names=[], managed_only=False, subnet=None, host_filter=None, order='asc'):
 		"""
 		Expands the given list of names to valid cluster hostnames.	A name can be:
@@ -111,14 +84,35 @@ class HostArgProcessor:
 		if frontends:
 			hosts.extend(frontends)
 
-		sortem = []
+		# get the host/rack/rank for sorting
+		backends = []
 		for host, rack, rank in rows:
-			sortem.append({ 'host' : host, 'rack' : rack, 'rank' : rank })
+			backends.append({'host': host, 'rack': rack, 'rank': rank})
 
-		backends = self.sortHosts(sortem)
+		# sort non-frontend hosts by rack then rank (first numeric values, then strings) so:
+		# HOST                RACK   RANK
+		# frontend-0-0        0      0   
+		# backend-0-0         0      12  
+		# backend-0-soup      0      soup
+		# backend-3-5         3      5   
+		# backend-potato-0    potato 0   
+		# backend-potato-soup potato soup
+
+		backends.sort(
+			# python already knows how to sort tuples,
+			# so turn each item into a tuple ordered the way we want
+			# (intable-ness of rack, rack, intable-ness of rank, rank)
+			key=lambda h: (
+				not h['rack'].isnumeric(),
+				h['rack'],
+				not h['rank'].isnumeric(),
+				h['rank']
+			)
+		)
 
 		if backends:
-			hosts.extend(backends)
+			# add backends into the list, as a single-item tuples...
+			hosts.extend([(host['host'], ) for host in backends])
 
 		for host, in hosts:
 			# If we have a list of hostnames (or groups) then
