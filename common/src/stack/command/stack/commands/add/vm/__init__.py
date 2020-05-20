@@ -44,6 +44,21 @@ class Command(command, VmArgProcessor):
 	or a path to a disk device on the hypervisor (such as /dev/sdb) to mount to a virtual machine.
 	</param>
 
+	<example cmd='add vm virtual-backend-0-1 hypervisor=hypervisor-0-1 storage_pool=/export/pool/stacki'>
+	Add a new virtual machine to hypervisor-0-1 with the default values of 1 cpu core, 3072MB of memory, and
+	a 100GB of qcow2 based storage.
+	</example>
+
+	<example cmd='add vm virtual-backend-0-1 hypervisor=hypervisor-0-1 cpu=4 memory=4096 storage_pool=/export/pool/stacki disks=200'>
+	Add a new virtual machine for existing host virtual-backend-0-1 to hypervisor hypervisor-0-1.
+	The virtual machine will be configured with 4 cpu cores, 4096MB of memory and 200GB qcow2 storage disk
+	which will be located at /export/pool/stacki on the hypervisor.
+	</example>
+
+	<example cmd='add vm virtual-backend-0-1 hypervisor=hypervisor-0-1 cpu=4 memory=4096 storage_pool=/export/pool/stacki disks=200,disk.qcow2'>
+	Similar to the previous example, except multiple disks are added upon creating the virtual machine.
+	</example>
+
 	"""
 
 	def run(self, params, args):
