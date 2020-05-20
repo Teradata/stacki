@@ -117,7 +117,7 @@ def install_pkgs(pkgs):
 	elif osname == 'sles':
 		cmd = [ 'zypper', 'install', '-y', '-f', *pkgs ]
 	else: # debian is lowercase in the apt db
-		cmd = [ 'apt', 'install', *[ pkg.lower() for pkg in pkgs ] ]
+		cmd = [ 'apt', 'install', '-y', *[ pkg.lower() for pkg in pkgs ] ]
 	return run(cmd)
 
 
@@ -161,6 +161,7 @@ def repoconfig(stacki_iso, extra_isos):
 		with open('/etc/apt/sources.list.d/stacki.list', 'w') as repofile:
 			for repo in repos:
 				repofile.write(f'deb [trusted=yes] file:{repo} ./\n')
+		run_and_warn(['apt-get', 'update'])
 		return # rest is all yummy stuff / bail out
 		    
 	if extra_isos:
@@ -322,7 +323,7 @@ for new_pkg in new_pkgs:
 result = install_pkgs(pkgs)
 
 if result.returncode != 0:
-	logger.error("Error: stacki package installation failed\n%s", result.stdout)
+	logger.error("Error: stacki package installation failed\n%s", result.stdout.decode())
 	sys.exit(result.returncode)
 
 if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'):
@@ -590,7 +591,7 @@ with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
 		logger.error("Could not process XML")
 		sys.exit(result.returncode)
 
-if osname == 'ubuntu': # remove once we can get to this part
+if osname == 'debian': # remove once we can get to this part
 	sys.exit(0)
 	
 banner("Run Setup Script")

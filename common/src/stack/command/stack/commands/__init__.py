@@ -1641,6 +1641,8 @@ class Command:
 			self.os = 'redhat'
 		elif os.path.exists('/etc/SuSE-release'):
 			self.os = 'sles'
+		elif os.path.exists('/etc/debian_version'):
+			self.os = 'debian'
 		else:
 			self.os = os.uname()[0].lower()
 			if self.os == 'linux':

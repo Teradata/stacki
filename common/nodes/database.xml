@@ -12,8 +12,19 @@
         https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
         </stack:rocks>
 
-	<stack:package>mariadb</stack:package>
-	<stack:package stack:cond="os == 'redhat'">mariadb-server</stack:package>
+	<stack:package stack:cond="os == 'redhat'">
+		mariadb-server
+		mariadb
+	</stack:package>
+
+	<stack:package stack:cond="os == 'sles'">
+		mariadb
+	</stack:package>
+
+	<stack:package stack:cond="os == 'debian'">
+		mariadb-server
+		mariadb-client
+	</stack:package>
 
 
 <stack:script stack:stage="install-post">
