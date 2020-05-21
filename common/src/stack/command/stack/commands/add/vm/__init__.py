@@ -83,5 +83,6 @@ class Command(command, VmArgProcessor):
 			)
 		""", (hypervisor, vm_host, int(memory), int(cpu)))
 
-		# Call add vm storage for any disks given
-		self.call('add.vm.storage', [vm_host, f'disks={disks}', f'storage_pool={disk_loc}'])
+		# If storage_pool is set, call add vm storage for any disks given
+		if disk_loc:
+			self.call('add.vm.storage', [vm_host, f'disks={disks}', f'storage_pool={disk_loc}'])

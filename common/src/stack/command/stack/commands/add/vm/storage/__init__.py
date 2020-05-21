@@ -29,6 +29,11 @@ class Command(stack.commands.add.vm.Command):
 	or a path to a disk device (such as /dev/sdb) to mount to a virtual machine .
 	</param>
 
+	<param type='string' name='name' optional='0'>
+	Assign a name to a new disk (such as sda,sdb...etc), if this parameter is set
+	only one disk can be added.
+	</param>
+
 	<example cmd='add vm storage virtual-backend-0-1 storage_pool=/export/pool/stacki disks=200'>
 	Add a new disk to virtual-backend-0-1 at the location of /export/pool/stacki/virtual-backend-0-1
 	Disks are always sorted into folders by virtual machine host name
@@ -72,14 +77,16 @@ class Command(stack.commands.add.vm.Command):
 		vol_name = f'{vm_host[0]}_disk'
 		vol_id = 0
 		disk_name = 'sda'
-		disk_loc, disks = self.fillParams([
+		disk_loc, disks, set_name = self.fillParams([
 			('storage_pool', ''),
-			('disks', '', True)
+			('disks', '', True),
+			('name', '')
 		])
 		if disk_loc:
 			disk_loc = Path(f'{disk_loc}/{vm_host[0]}')
 
-		for disk in disks.split(','):
+		disk_list = disks.split(',')
+		for disk in disk_list:
 			image = ''
 			disk_size = None
 			mount_disk = None
@@ -130,6 +137,14 @@ class Command(stack.commands.add.vm.Command):
 			# Calculate the next device name (sdb, sdc, sdd...etc)
 			if disk_names:
 				disk_name = f'sd{chr(ord(disk_names[-1][-1]) + 1)}'
+
+			# Use the name parameter if it meets the right criteria
+			if set_name:
+				if len(disk_list) != 1:
+					raise ParamError(self, 'disks', 'Only one disk can be added with name parameter set')
+				if set_name in disk_names:
+					raise ParamError(self, 'name', f'disk {set_name} already defined for {vm_host[0]}')
+				disk_name = set_name
 
 			# Insert disks into the database
 			self.db.execute("""
