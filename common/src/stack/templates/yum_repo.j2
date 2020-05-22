@@ -1,21 +1,21 @@
 [{{ alias }}]
 name={{ name }}
-{% if is_mirrorlist != 0 %}
+{% if is_mirrorlist and is_mirrorlist != 0 %}
 mirrorlist={{ url }}
 {% else %}
 baseurl={{ url }}
 {% endif %}
-{% if is_enabled != 1 %}
+{% if is_enabled and is_enabled != 1 %}
 enabled={{ is_enabled }}
 {% endif %}
-{% if type is not none %}
+{% if type and type is not none %}
 type={{ type }}
 {% endif %}
 
-{% if autorefresh != 0 %}
+{% if autorefresh and autorefresh != 0 %}
 autorefresh={{ autorefresh }}
 {% endif %}
-{% if assumeyes != 0 %}
+{% if assumeyes and assumeyes != 0 %}
 assumeyes={{ assumeyes }}
 {% endif %}
 {% if gpgkey %}
