@@ -75,10 +75,11 @@ class Command(stack.commands.enable.command):
 		else:
 			discovery = Discovery()
 
+		if self.db.database.open:
+			self.db.database.close()
 		try:
 			# Call start
 			discovery.start(
-				self,
 				appliance_name=appliance,
 				base_name=base_name,
 				rack=rack,

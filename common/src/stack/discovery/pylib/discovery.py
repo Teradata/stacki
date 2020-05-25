@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 
+import stack.api
 from stack.exception import CommandError
 import stack.mq
 
@@ -77,8 +78,7 @@ class Discovery:
 
 		if ipv4_network is not None:
 			# Figure out the gateway for the interface and check that pxe is true
-			self._command.db.clearCache()
-			for row in self._command.call("list.network"):
+			for row in stack.api.Call("list.network"):
 				if (
 					row['address'] == str(ipv4_network.network_address) and
 					row['mask'] == str(ipv4_network.netmask)
@@ -116,8 +116,7 @@ class Discovery:
 			self._logger.debug("trying IP address: %s", ip_address)
 
 			# Make sure this IP isn't already taken
-			self._command.db.clearCache()
-			for row in self._command.call("list.host.interface"):
+			for row in stack.api.Call("list.host.interface"):
 				if (
 					row['ip'] == str(ip_address) and
 					not row['interface'].startswith("vlan")
@@ -137,8 +136,7 @@ class Discovery:
 		network = None
 		ipv4_network = self._get_ipv4_network_for_interface(interface)
 		if ipv4_network is not None:
-			self._command.db.clearCache()
-			for row in self._command.call("list.network"):
+			for row in stack.api.Call("list.network"):
 				if (
 					row['address'] == str(ipv4_network.network_address) and
 					row['mask'] == str(ipv4_network.netmask)
@@ -246,8 +244,7 @@ class Discovery:
 			self._logger.info("detected a dhcp request: %s %s", mac_address, interface)
 
 			# Is this a new MAC address?
-			self._command.db.clearCache()
-			for row in self._command.call("list.host.interface"):
+			for row in stack.api.Call("list.host.interface"):
 				if row['mac'] == mac_address:
 					self._logger.debug("node is already known: %s %s", mac_address, interface)
 					break
@@ -357,148 +354,143 @@ class Discovery:
 
 		return False
 
-	def start(self, command, appliance_name=None, base_name=None,
+	def start(self, appliance_name=None, base_name=None,
 		rack=None, rank=None, box=None, install_action=None, install=None):
 		"""
 		Start the node discovery daemon.
 		"""
 
 		# Only start if there isn't already a daemon running
-		if not self.is_running():
-			# Make sure our appliance name is valid
-			if appliance_name:
-				try:
-					command.call("list.appliance", [appliance_name])
-					self._appliance_name = appliance_name
-				except CommandError:
-					raise ValueError(f"Unknown appliance with name {appliance_name}")
-			else:
-				self._appliance_name = "backend"
+		if self.is_running():
+			return
 
-			# Set up the base name
-			if base_name:
-				self._base_name = base_name
-			else:
-				self._base_name = self._appliance_name
-
-			# Set up the rack
-			if rack is None:
-				self._rack = int(command.getAttr("discovery.base.rack"))
-			else:
-				self._rack = int(rack)
-
-			# Set up the rank
-			if rank is None:
-				# Start with with default
-				self._rank = int(command.getAttr("discovery.base.rank"))
-
-				# Try to pull the next rank based on the DB
-				for host in command.call("list.host"):
-					if (
-						host['appliance'] == self._appliance_name and
-						int(host['rack']) == self._rack and
-						int(host['rank']) >= self._rank
-					):
-						self._rank = int(host['rank']) + 1
-			else:
-				self._rank = int(rank)
-
-			# Set up box and make sure it is valid
-			if box is None:
-				self._box = "default"
-			else:
-				try:
-					command.call("list.box", [box])
-					self._box = box
-				except CommandError:
-					raise ValueError(f"Unknown box with name {box}")
-
-			# Set up install_action and make sure is is valid
-			if install_action is None:
-				self._install_action = "default"
-			else:
-				for action in command.call("list.bootaction"):
-					if action['type'] == "install" and action['bootaction'] == install_action:
-						self._install_action = install_action
-						break
-				else:
-					raise ValueError(f"Unknown install action with name {install_action}")
-
-			# Set up if we are installing the OS on boot
-			if install is None:
-				self._install = True
-			else:
-				self._install = bool(install)
-
-			# Find our apache log
-			if os.path.isfile("/var/log/httpd/ssl_access_log"):
-				kickstart_log = "/var/log/httpd/ssl_access_log"
-			elif os.path.isfile("/var/log/apache2/ssl_access_log"):
-				kickstart_log = "/var/log/apache2/ssl_access_log"
-			else:
-				raise ValueError("Apache log does not exist")
-
-			# Fork once to get us into the background
-			if os.fork() != 0:
-				return
-
-			# Close stdin, stdout, stderr of our daemon
-			os.close(0)
-			os.close(1)
-			os.close(2)
-
-			# Seperate ourselves from the parent process
-			os.setsid()
-
-			# Fork again so we aren't a session leader
-			if os.fork() != 0:
-				# Directly end this parent process, so it doesn't create another
-				# path back up to the caller
-				sys.exit(0)
-
-			# Reconnect to the db via the command connection passed in, so when
-			# the parent process closes theirs, we still have an open socket
-			self._command = command
-			self._command.db.database.connect()
-			self._command.db.link = self._command.db.database.cursor()
-
-			# Open the message queue socket
-			self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-			# Now write out the daemon pid
-			with open(self._PIDFILE, 'w') as f:
-				f.write("{}".format(os.getpid()))
-
-			self._logger.info("discovery daemon started")
-
-			# Get our coroutine event loop
-			loop = asyncio.get_event_loop()
-
-			# Setup signal handlers to cleanly stop
-			loop.add_signal_handler(signal.SIGINT, self._signal_handler)
-			loop.add_signal_handler(signal.SIGTERM, self._signal_handler)
-
-			# Start our event loop
-			status_code = 0
-			self._done = False
+		# Make sure our appliance name is valid
+		if appliance_name:
 			try:
-				loop.run_until_complete(asyncio.gather(
-					self._monitor_log("/var/log/messages", self._process_dhcp_line),
-					self._monitor_log(kickstart_log, self._process_kickstart_line)
-				))
-			except:
-				self._logger.exception("event loop threw an exception")
-				status_code = 1
-			finally:
-				# All done, clean up
-				loop.close()
-				self._command.db.database.close()
-				self._socket.close()
-				self._cleanup()
+				stack.api.Call("list.appliance", [appliance_name])
+				self._appliance_name = appliance_name
+			except CommandError:
+				raise ValueError(f"Unknown appliance with name {appliance_name}")
+		else:
+			self._appliance_name = "backend"
 
-			self._logger.info("discovery daemon stopped")
+		# Set up the base name
+		if base_name:
+			self._base_name = base_name
+		else:
+			self._base_name = self._appliance_name
 
-			sys.exit(status_code)
+		# Set up the rack
+		if rack is None:
+			self._rack = int(stack.api.Call("list.host.attr", ["localhost", "attr=discovery.base.rack"])[0]['value'])
+		else:
+			self._rack = int(rack)
+
+		# Set up the rank
+		if rank is None:
+			# Start with with default
+			self._rank = int(stack.api.Call("list.host.attr", ["localhost", "attr=discovery.base.rank"])[0]['value'])
+
+			# Try to pull the next rank based on the DB
+			for host in stack.api.Call("list.host"):
+				if (
+					host['appliance'] == self._appliance_name and
+					int(host['rack']) == self._rack and
+					int(host['rank']) >= self._rank
+				):
+					self._rank = int(host['rank']) + 1
+		else:
+			self._rank = int(rank)
+
+		# Set up box and make sure it is valid
+		if box is None:
+			self._box = "default"
+		else:
+			try:
+				stack.api.Call("list.box", [box])
+				self._box = box
+			except CommandError:
+				raise ValueError(f"Unknown box with name {box}")
+
+		# Set up install_action and make sure is is valid
+		if install_action is None:
+			self._install_action = "default"
+		else:
+			for action in stack.api.Call("list.bootaction"):
+				if action['type'] == "install" and action['bootaction'] == install_action:
+					self._install_action = install_action
+					break
+			else:
+				raise ValueError(f"Unknown install action with name {install_action}")
+
+		# Set up if we are installing the OS on boot
+		if install is None:
+			self._install = True
+		else:
+			self._install = bool(install)
+
+		# Find our apache log
+		if os.path.isfile("/var/log/httpd/ssl_access_log"):
+			kickstart_log = "/var/log/httpd/ssl_access_log"
+		elif os.path.isfile("/var/log/apache2/ssl_access_log"):
+			kickstart_log = "/var/log/apache2/ssl_access_log"
+		else:
+			raise ValueError("Apache log does not exist")
+
+		# Fork once to get us into the background
+		if os.fork() != 0:
+			return
+
+		# Close stdin, stdout, stderr of our daemon
+		os.close(0)
+		os.close(1)
+		os.close(2)
+
+		# Seperate ourselves from the parent process
+		os.setsid()
+
+		# Fork again so we aren't a session leader
+		if os.fork() != 0:
+			# Directly end this parent process, so it doesn't create another
+			# path back up to the caller
+			sys.exit(0)
+
+		# Open the message queue socket
+		self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+		# Now write out the daemon pid
+		with open(self._PIDFILE, 'w') as f:
+			f.write("{}".format(os.getpid()))
+
+		self._logger.info("discovery daemon started")
+
+		# Get our coroutine event loop
+		loop = asyncio.get_event_loop()
+
+		# Setup signal handlers to cleanly stop
+		loop.add_signal_handler(signal.SIGINT, self._signal_handler)
+		loop.add_signal_handler(signal.SIGTERM, self._signal_handler)
+
+		# Start our event loop
+		status_code = 0
+		self._done = False
+		try:
+			loop.run_until_complete(asyncio.gather(
+				self._monitor_log("/var/log/messages", self._process_dhcp_line),
+				self._monitor_log(kickstart_log, self._process_kickstart_line)
+			))
+		except:
+			self._logger.exception("event loop threw an exception")
+			status_code = 1
+		finally:
+			# All done, clean up
+			loop.close()
+			self._socket.close()
+			self._cleanup()
+
+		self._logger.info("discovery daemon stopped")
+
+		sys.exit(status_code)
 
 	def stop(self):
 		"Stop the node discovery daemon."
