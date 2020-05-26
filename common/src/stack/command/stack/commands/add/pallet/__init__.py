@@ -12,8 +12,6 @@
 
 import pathlib
 import shutil
-from contextlib import ExitStack
-import atexit
 import tempfile
 from textwrap import dedent
 import os
@@ -326,11 +324,6 @@ class Command(PalletArgProcessor, command):
 					f"Invalid checksum type(s) given: {', '.join(invalid_checksums)}. "
 					f"Valid checksums are: [{', '.join(valid_checksums)}."
 				)
-
-		# create a contextmanager that we can append cleanup jobs to
-		# add its closing to run atexit, so we know it will run
-		self.deferred = ExitStack()
-		atexit.register(self.deferred.close)
 
 		# special case: no args were specified - check if a pallet is mounted at /mnt/cdrom
 		if not args:
