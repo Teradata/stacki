@@ -10,7 +10,7 @@ import sys
 import stack.commands
 from stack.commands.sync.host import Parallel
 from stack.commands.sync.host import timeout
-
+from stack.repo import rewrite_repofile
 
 class Command(stack.commands.sync.host.command):
 	"""
@@ -40,29 +40,24 @@ class Command(stack.commands.sync.host.command):
 
 		self.notify('Sync Host Repo')
 
-
 		hosts = self.getHostnames(args, managed_only=1)
-		run_hosts = self.getRunHosts(hosts)
 		me    = self.db.getHostname('localhost')
 
-		# Only shutdown stdout/stderr if we not local
-		for host in hosts:
-			if host != me:
-				sys.stdout = open('/dev/null')
-				sys.stderr = open('/dev/null')
-				break
+		# if we're only syncing localhost, just do that and don't mess with the other stuff
+		if hosts == [me]:
+			rewrite_repofile()
+			return
 
 		threads = []
 
-		for h in run_hosts:
-			host = h['host']
-			hostname = h['name']
+		for host_data in self.getRunHosts(hosts):
+			stacki_hostname, run_hostname = host_data['host'], host_data['name']
 
-			cmd = '/opt/stack/bin/stack report host repo %s | ' % host
+			cmd = f'/opt/stack/bin/stack report host repo {stacki_hostname} | '
 			cmd += '/opt/stack/bin/stack report script | '
 
-			if me != host:
-				cmd += 'ssh -T -x %s ' % hostname
+			if me != stacki_hostname:
+				cmd += f'ssh -T -x {run_hostname} '
 			cmd += 'bash > /dev/null 2>&1 '
 
 			try:
@@ -72,8 +67,6 @@ class Command(stack.commands.sync.host.command):
 			except:
 				pass
 
-		#
 		# collect the threads
-		#
 		for thread in threads:
 			thread.join(timeout)

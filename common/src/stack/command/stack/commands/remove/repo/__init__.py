@@ -1,6 +1,8 @@
 from stack.argument_processors.repo import RepoArgProcessor
 import stack.commands
+import stack.deferable
 from stack.exception import CommandError
+
 
 class Command(RepoArgProcessor, stack.commands.remove.command):
 	"""
@@ -15,6 +17,7 @@ class Command(RepoArgProcessor, stack.commands.remove.command):
 	</example>
 	"""
 
+	@stack.deferable.rewrite_frontend_repo_file
 	def run(self, params, args):
 		if not args:
 			raise CommandError(self, 'either a repo name or alias must be specified.')
@@ -22,9 +25,3 @@ class Command(RepoArgProcessor, stack.commands.remove.command):
 		for repo in self.get_repos(args):
 			self.delete_repo(repo.alias)
 
-		# TODO only run if frontend box has changed
-		self._exec("""
-				/opt/stack/bin/stack report host repo localhost |
-				/opt/stack/bin/stack report script |
-				/bin/sh
-			""", shell=True)

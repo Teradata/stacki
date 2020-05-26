@@ -4,10 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import os
-
 from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
+import stack.deferable
 from stack.exception import ArgRequired, CommandError
 
 class Command(CartArgProcessor, stack.commands.enable.command):
@@ -34,6 +33,7 @@ class Command(CartArgProcessor, stack.commands.enable.command):
 	<related>list cart</related>
 	"""
 
+	@stack.deferable.rewrite_frontend_repo_file
 	def run(self, params, args):
 		if len(args) < 1:
 			raise ArgRequired(self, 'cart')
@@ -60,10 +60,3 @@ class Command(CartArgProcessor, stack.commands.enable.command):
 					values ((select id from carts where name=%s), %s)
 					""", (cart, box_id)
 				)
-
-		# Regenerate stacki.repo
-		os.system("""
-			/opt/stack/bin/stack report host repo localhost |
-			/opt/stack/bin/stack report script |
-			/bin/sh
-			""")
