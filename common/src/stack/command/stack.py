@@ -24,98 +24,113 @@ from stack.commands import get_mysql_connection
 from stack.exception import CommandError
 
 
+from contextlib import ExitStack
+import atexit
+
 def sigint_handler(signal, frame):
 	print('\nInterrupted')
 	sys.exit(0)
 
+def db_closer(db_handle):
+	if db_handle and db_handle.open:
+		db_handle.close()
 
-def run_command(args, debug=False):
-	# Check if the stack command has been quoted.
+class StackRunner:
+	def __init__(self):
+		# when the process exits (regardless of how) close the db
+		self.deferred = ExitStack()
+		atexit.register(self.deferred.close)
 
-	module = None
-	if not args:
-		return
+		self.db  = get_mysql_connection()
+		self.deferred.callback(db_closer, self.db)
 
-	cmd = args[0].split()
-	if len(cmd) > 1:
-		s = 'stack.commands.%s' % '.'.join(cmd)
-		try:
-			__import__(s)
-			module = eval(s)
-			i = 1
-		except:
-			module = None
+	def run_command(self, args, debug=False):
+		# Check if the stack command has been quoted.
 
-	# Treat the entire command line as if it were a python
-	# command module and keep popping arguments off the end
-	# until we get a match.	 If no match is found issue an
-	# error
-	if not module:
-		for i in range(len(args), 0, -1):
-			s = 'stack.commands.%s' % '.'.join(args[:i])
+		module = None
+		if not args:
+			return
+
+		cmd = args[0].split()
+		if len(cmd) > 1:
+			s = 'stack.commands.%s' % '.'.join(cmd)
 			try:
 				__import__(s)
 				module = eval(s)
-				if module:
-					break
-			except ImportError:
-				continue
+				i = 1
+			except:
+				module = None
 
-	if not module:
-		sys.stderr.write('Error - Invalid stack command "%s"\n' % args[0])
-		return -1
+		# Treat the entire command line as if it were a python
+		# command module and keep popping arguments off the end
+		# until we get a match.	 If no match is found issue an
+		# error
+		if not module:
+			for i in range(len(args), 0, -1):
+				s = 'stack.commands.%s' % '.'.join(args[:i])
+				try:
+					__import__(s)
+					module = eval(s)
+					if module:
+						break
+				except ImportError:
+					continue
 
-	name = ' '.join(s.split('.')[2:])
+		if not module:
+			sys.stderr.write('Error - Invalid stack command "%s"\n' % args[0])
+			return -1
 
-	# If we can load the command object then fall through and invoke the run()
-	# method.  Otherwise the user did not give a complete command line and
-	# we call the help command based on the partial command given.
+		name = ' '.join(s.split('.')[2:])
 
-	if not hasattr(module, 'Command'):
-		import stack.commands.list.help
-		help = stack.commands.list.help.Command(db)
-		fullmodpath = s.split('.')
-		submodpath = '/'.join(fullmodpath[2:])
+		# If we can load the command object then fall through and invoke the run()
+		# method.  Otherwise the user did not give a complete command line and
+		# we call the help command based on the partial command given.
+
+		if not hasattr(module, 'Command'):
+			import stack.commands.list.help
+			help = stack.commands.list.help.Command(self.db)
+			fullmodpath = s.split('.')
+			submodpath = '/'.join(fullmodpath[2:])
+			try:
+				help.run({'subdir': submodpath}, [])
+			except CommandError as e:
+				sys.stderr.write('%s\n' % e)
+				return -1
+			print(help.getText())
+			return -1
+
 		try:
-			help.run({'subdir': submodpath}, [])
+			command = getattr(module, 'Command')(self.db, debug=debug)
+			rc = command.runWrapper(name, args[i:])
 		except CommandError as e:
 			sys.stderr.write('%s\n' % e)
+			syslog.syslog(syslog.LOG_ERR, '%s' % e)
 			return -1
-		print(help.getText())
+		except Exception as e:
+			# Sanitize Exceptions, and log them.
+			exc, msg, tb = sys.exc_info()
+			for line in traceback.format_tb(tb):
+				syslog.syslog(syslog.LOG_DEBUG, '%s' % line)
+				sys.stderr.write(line)
+			error = '%s: %s -- %s' % (module.__name__, exc.__name__, msg)
+			sys.stderr.write('%s\n' % error)
+			syslog.syslog(syslog.LOG_ERR, error)
+			return -1
+
+		text = command.getText()
+
+		# set the SIGPIPE to the system default (instead of python default)
+		# before trying to print; prevents a stacktrace when exiting a pipe'd stack command
+		signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
+		if text and len(text) > 0:
+			print(text, end='')
+			if text[len(text) - 1] != '\n':
+				print()
+		syslog.closelog()
+		if rc is True:
+			return 0
 		return -1
-
-	try:
-		command = getattr(module, 'Command')(db, debug=debug)
-		rc = command.runWrapper(name, args[i:])
-	except CommandError as e:
-		sys.stderr.write('%s\n' % e)
-		syslog.syslog(syslog.LOG_ERR, '%s' % e)
-		return -1
-	except Exception as e:
-		# Sanitize Exceptions, and log them.
-		exc, msg, tb = sys.exc_info()
-		for line in traceback.format_tb(tb):
-			syslog.syslog(syslog.LOG_DEBUG, '%s' % line)
-			sys.stderr.write(line)
-		error = '%s: %s -- %s' % (module.__name__, exc.__name__, msg)
-		sys.stderr.write('%s\n' % error)
-		syslog.syslog(syslog.LOG_ERR, error)
-		return -1
-
-	text = command.getText()
-
-	# set the SIGPIPE to the system default (instead of python default)
-	# before trying to print; prevents a stacktrace when exiting a pipe'd stack command
-	signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-
-	if text and len(text) > 0:
-		print(text, end='')
-		if text[len(text) - 1] != '\n':
-			print()
-	syslog.closelog()
-	if rc is True:
-		return 0
-	return -1
 
 
 
@@ -123,18 +138,17 @@ def run_command(args, debug=False):
 signal.signal(signal.SIGINT, sigint_handler)
 
 # Open syslog
-
 syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
-db  = get_mysql_connection()
+runner = StackRunner()
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
-	if db is not None:
-		db.close()
+	if runner.db is not None and runner.db.open:
+		runner.db.close()
 	sys.exit(1)
 
 debug = False
@@ -143,17 +157,17 @@ for o, a in opts:
 	if o == '--debug':
 		debug = True
 	elif o == '--help':
-		rc = run_command(['help'])
+		rc = runner.run_command(['help'])
 	elif o == '--version':
-		rc = run_command(['report.version'])
+		rc = runner.run_command(['report.version'])
 
 if rc is None:
 	if len(args) == 0:
-		rc = run_command(['help'])
+		rc = runner.run_command(['help'])
 	else:
-		rc = run_command(args, debug)
+		rc = runner.run_command(args, debug)
 
-if db is not None:
-	db.close()
+if runner.db is not None and runner.db.open:
+	runner.db.close()
 
 sys.exit(rc)
