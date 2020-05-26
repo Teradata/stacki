@@ -12,8 +12,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import atexit
 import os
 import pwd
+import pymysql
 import sys
 import syslog
 import getopt
@@ -27,6 +29,13 @@ from stack.exception import CommandError
 def sigint_handler(signal, frame):
 	print('\nInterrupted')
 	sys.exit(0)
+
+def db_closer(db_handle):
+	try:
+		db_handle.close()
+	except pymysql.err.Error:
+		# yolo - (handle already closed, perhaps in a forked process)
+		pass
 
 
 def run_command(args, debug=False):
@@ -73,7 +82,7 @@ def run_command(args, debug=False):
 
 	if not hasattr(module, 'Command'):
 		import stack.commands.list.help
-		help = stack.commands.list.help.Command(db)
+		help = stack.commands.list.help.Command(db_handle)
 		fullmodpath = s.split('.')
 		submodpath = '/'.join(fullmodpath[2:])
 		try:
@@ -85,7 +94,7 @@ def run_command(args, debug=False):
 		return -1
 
 	try:
-		command = getattr(module, 'Command')(db, debug=debug)
+		command = getattr(module, 'Command')(db_handle, debug=debug)
 		rc = command.runWrapper(name, args[i:])
 	except CommandError as e:
 		sys.stderr.write('%s\n' % e)
@@ -127,14 +136,14 @@ signal.signal(signal.SIGINT, sigint_handler)
 syslog.openlog('SCL', syslog.LOG_PID, syslog.LOG_LOCAL0)
 
 
-db  = get_mysql_connection()
+db_handle = get_mysql_connection()
+
+atexit.register(db_closer, db_handle)
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
-	if db is not None:
-		db.close()
 	sys.exit(1)
 
 debug = False
@@ -152,8 +161,5 @@ if rc is None:
 		rc = run_command(['help'])
 	else:
 		rc = run_command(args, debug)
-
-if db is not None:
-	db.close()
 
 sys.exit(rc)
