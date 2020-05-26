@@ -10,29 +10,32 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import os
-import time
-import socket
-import string
-import re
+import atexit
 import fnmatch
-import syslog
-import pwd
-import sys
+import hashlib
 import json
 import marshal
-import hashlib
+import os
+import pwd
+import pymysql
+import re
+import socket
+import string
 import subprocess
-from xml.sax import handler
-from xml.sax import make_parser
-from xml.sax import SAXParseException
-from operator import itemgetter
-from itertools import groupby, cycle
+import sys
+import syslog
+import threading
+import time
+from functools import wraps
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-import threading
+from contextlib import ExitStack
+from itertools import groupby, cycle
+from operator import itemgetter
+from xml.sax import SAXParseException
+from xml.sax import handler
+from xml.sax import make_parser
 
-import pymysql
 import stack.graph
 import stack
 from stack.exception import CommandError, ParamRequired
@@ -850,6 +853,14 @@ class Command:
 
 		if debug is not None:
 			stack.commands._debug = debug
+
+		# create a contextmanager to which commands can append cleanup jobs
+		# add its closing to run atexit, so we know it will run
+		# There is another ExitStack in stack.py which closes the database!
+		# that means anything in self.deferred can make db calls since the
+		# db is not yet closed
+		self.deferred = ExitStack()
+		atexit.register(self.deferred.close)
 
 		self.db = DatabaseConnection(database)
 
