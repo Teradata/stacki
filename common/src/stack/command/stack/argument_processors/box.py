@@ -7,6 +7,9 @@ class BoxArgProcessor:
 	An Interface class to add the ability to process box arguments.
 	"""
 
+	def get_box_name_by_id(self, box_id):
+		return self.db.select('name from boxes where id=%s', box_id)[0][0]
+
 	def get_box_names(self, args=None):
 		"""
 		Returns a list of box names from the database. For each arg in

@@ -4,10 +4,9 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import os
-
 from stack.argument_processors.cart import CartArgProcessor
 import stack.commands
+import stack.deferable
 from stack.exception import ArgRequired, CommandError
 
 
@@ -35,6 +34,7 @@ class Command(CartArgProcessor, stack.commands.disable.command):
 	<related>list cart</related>
 	"""
 
+	@stack.deferable.rewrite_frontend_repo_file
 	def run(self, params, args):
 		if len(args) < 1:
 			raise ArgRequired(self, 'cart')
@@ -42,12 +42,13 @@ class Command(CartArgProcessor, stack.commands.disable.command):
 		box, = self.fillParams([ ('box', 'default') ])
 
 		# Make sure our box exists
-		rows = self.db.select('ID from boxes where name=%s', (box,))
+		rows = self.db.select('ID, name from boxes where name=%s', (box,))
 		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
 
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
+		box = rows[0][1]
 
 		for cart in self.get_cart_names(args):
 			self.db.execute("""
@@ -55,10 +56,3 @@ class Command(CartArgProcessor, stack.commands.disable.command):
 				box=%s and cart=(select id from carts where name=%s)
 				""", (box_id, cart)
 			)
-
-		# Regenerate stacki.repo
-		os.system("""
-			/opt/stack/bin/stack report host repo localhost |
-			/opt/stack/bin/stack report script |
-			/bin/sh
-			""")

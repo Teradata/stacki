@@ -1,5 +1,6 @@
 import jinja2
 import pathlib
+from stack.util import _exec
 
 yum_repo_template = '/opt/stack/share/templates/yum_repo.j2'
 
@@ -12,3 +13,11 @@ def build_repo_files(box_data, repo_template):
 			lines = [s for s in templ.render(**repo).splitlines() if s]
 			repo_stanzas.append('\n'.join(lines))
 	return repo_stanzas
+
+def rewrite_repofile():
+	''' re-write the stacki.repo file '''
+	_exec("""
+		/opt/stack/bin/stack report host repo localhost |
+		/opt/stack/bin/stack report script |
+		/bin/sh
+		""", shell=True, check=True)

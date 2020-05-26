@@ -4,9 +4,10 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-from stack.argument_processors.repo import RepoArgProcessor
 from stack.argument_processors.box import BoxArgProcessor
+from stack.argument_processors.repo import RepoArgProcessor
 import stack.commands
+import stack.deferable
 from stack.exception import CommandError
 
 
@@ -33,6 +34,7 @@ class Command(BoxArgProcessor, RepoArgProcessor, stack.commands.disable.command)
 	<related>list repo</related>
 	"""
 
+	@stack.deferable.rewrite_frontend_repo_file
 	def run(self, params, args):
 		if not len(args):
 			raise CommandError(self, 'One or more repos must be specified')
@@ -45,11 +47,3 @@ class Command(BoxArgProcessor, RepoArgProcessor, stack.commands.disable.command)
 
 		for repo in self.get_repos(args):
 			self.disable_repo(repo.alias, box)
-
-		# TODO, only run if frontend box has changed
-		# Regenerate stacki.repo
-		self._exec("""
-			/opt/stack/bin/stack report host repo localhost |
-			/opt/stack/bin/stack report script |
-			/bin/sh
-			""", shell=True)

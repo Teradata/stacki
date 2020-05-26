@@ -11,9 +11,9 @@
 # @rocks@
 
 
-import os
 import stack.commands
 from stack.argument_processors.pallet import PalletArgProcessor
+import stack.deferable
 from stack.exception import ArgRequired, CommandError
 
 
@@ -71,6 +71,7 @@ class Command(PalletArgProcessor, stack.commands.disable.command):
 	<related>create pallet</related>
 	"""
 
+	@stack.deferable.rewrite_frontend_repo_file
 	def run(self, params, args):
 		if len(args) < 1:
 			raise ArgRequired(self, 'pallet')
@@ -85,12 +86,13 @@ class Command(PalletArgProcessor, stack.commands.disable.command):
 		params['arch'] = arch
 
 		# Make sure our box exists
-		rows = self.db.select('ID from boxes where name=%s', (box,))
+		rows = self.db.select('ID, name from boxes where name=%s', (box,))
 		if len(rows) == 0:
 			raise CommandError(self, 'unknown box "%s"' % box)
 
 		# Remember the box ID to simply queries down below
 		box_id = rows[0][0]
+		box = rows[0][1]
 
 		for pallet in self.get_pallets(args, params):
 			# Run any hooks before we remove repos.
@@ -101,10 +103,3 @@ class Command(PalletArgProcessor, stack.commands.disable.command):
 				'delete from stacks where box=%s and roll=%s',
 				(box_id, pallet.id)
 			)
-
-		# Regenerate stacki.repo
-		self._exec("""
-			/opt/stack/bin/stack report host repo localhost |
-			/opt/stack/bin/stack report script |
-			/bin/sh
-			""", shell=True)
