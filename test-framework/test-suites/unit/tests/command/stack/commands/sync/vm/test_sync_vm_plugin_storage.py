@@ -439,7 +439,7 @@ class TestSyncVmStorage:
 		# to simulate all commands executing successfully
 		mock_completed_process.returncode = 0
 		mock_exec.return_value = mock_completed_process
-		key_dir = '/tmp/foo_keys'
+		key_dir = Path('/tmp/foo_keys/.ssh')
 
 		disk = {
 			'Name': 'disk1',
@@ -457,17 +457,17 @@ class TestSyncVmStorage:
 		# values
 		expect_calls = [
 			call(f'ssh hypervisor-foo "mkdir -p {key_dir}"', shlexsplit=True),
-			call(f'scp /root/.ssh/id_rsa.pub hypervisor-foo:{key_dir}/frontend_key', shlexsplit=True),
+			call(f'scp /root/.ssh/id_rsa.pub hypervisor-foo:{key_dir.parent}/frontend_key', shlexsplit=True),
 			call(f'ssh hypervisor-foo "virt-copy-out -a loc/disk_name /root/.ssh/authorized_keys {key_dir}"',
 				shlexsplit=True
 			),
-			call(f'ssh hypervisor-foo "cat {key_dir}/frontend_key >> {key_dir}/authorized_keys"',
+			call(f'ssh hypervisor-foo "cat {key_dir.parent}/frontend_key >> {key_dir}/authorized_keys"',
 				shlexsplit=True
 			),
-			call(f'ssh hypervisor-foo "virt-copy-in -a loc/disk_name {key_dir}/authorized_keys /root/.ssh/"',
+			call(f'ssh hypervisor-foo "virt-copy-in -a loc/disk_name {key_dir} /root"',
 				shlexsplit=True
 			),
-			call(shlex.split(f'ssh hypervisor-foo "rm -r {key_dir}"'))
+			call(shlex.split(f'ssh hypervisor-foo "rm -r {key_dir.parent}"'))
 		]
 		assert output is None and mock_exec.call_args_list == expect_calls
 

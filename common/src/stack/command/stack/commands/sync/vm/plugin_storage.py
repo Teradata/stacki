@@ -33,7 +33,7 @@ class Plugin(stack.commands.Plugin, VmArgProcessor):
 		Returns a list containing any errors encountered
 		"""
 
-		key_dir = Path(f'/tmp/{host}_keys')
+		key_dir = Path(f'/tmp/{host}_keys/.ssh')
 
 		with ExitStack() as cleanup:
 
@@ -46,12 +46,12 @@ class Plugin(stack.commands.Plugin, VmArgProcessor):
 
 			# Ensure the temp key directory is
 			# removed on the remote host
-			remove_key_dir = shlex.split(f'ssh {hypervisor} "rm -r {key_dir}"')
+			remove_key_dir = shlex.split(f'ssh {hypervisor} "rm -r {key_dir.parent}"')
 			cleanup.callback(_exec, remove_key_dir)
 
 			if create_key_dir.returncode != 0:
 				return create_key_dir.stderr
-			copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:{key_dir}/frontend_key', shlexsplit=True)
+			copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:{key_dir.parent}/frontend_key', shlexsplit=True)
 			if copy_key.returncode != 0:
 				return copy_key.stderr
 
@@ -65,7 +65,7 @@ class Plugin(stack.commands.Plugin, VmArgProcessor):
 			# Add the frontend's public key
 			# to the authorized_keys file
 			add_key = _exec(
-				f'ssh {hypervisor} "cat {key_dir}/frontend_key >> {key_dir}/authorized_keys"',
+				f'ssh {hypervisor} "cat {key_dir.parent}/frontend_key >> {key_dir}/authorized_keys"',
 				shlexsplit=True
 			)
 			if add_key.returncode != 0:
@@ -74,7 +74,7 @@ class Plugin(stack.commands.Plugin, VmArgProcessor):
 			# Put the key back into
 			# the vm's disk image
 			pack_image = _exec(
-				f'ssh {hypervisor} "virt-copy-in -a {disk_loc} {key_dir}/authorized_keys /root/.ssh/"',
+				f'ssh {hypervisor} "virt-copy-in -a {disk_loc} {key_dir} /root"',
 				shlexsplit=True
 			)
 			if pack_image.returncode != 0:
