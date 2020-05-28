@@ -32,4 +32,4 @@ class Command(stack.commands.Command):
 			self.addOutput(None, "Defaults!STACK_CMDS !requiretty")
 			self.addOutput(None, "apache ALL = (root) NOPASSWD:STACK_CMDS")
 			self.addOutput(None, "</stack:file>")
-			self.endOutput()
+			self.endOutput(trimOwner=True)
