@@ -10,8 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
-import subprocess
+from stack.util import _exec
 import stack.commands
 
 
@@ -22,21 +21,4 @@ class command(stack.commands.Command):
 		and processes the XML to create system files.
 		"""
 
-		p = subprocess.Popen(['/opt/stack/bin/stack', 'report', 'script'],
-				     stdin=subprocess.PIPE,
-				     stdout=subprocess.PIPE,
-				     stderr=subprocess.PIPE)
-
-		for row in self.call(cmd, args):
-			line = '%s\n' % row['col-1']
-			p.stdin.write(line.encode())
-		o, e = p.communicate('')
-
-		psh = subprocess.Popen(['/bin/sh'],
-				       stdin=subprocess.PIPE,
-				       stdout=subprocess.PIPE,
-				       stderr=subprocess.PIPE)
-		out, err = psh.communicate(o)
-
-
-
+		_exec('/opt/stack/bin/stack report script | /bin/bash', shell=True, input=self.command(cmd, args))
