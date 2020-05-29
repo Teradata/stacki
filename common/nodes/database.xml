@@ -57,8 +57,7 @@
 
 <!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/etc/root.my.cnf" stack:perms="0400"
-	    stack:owner="root:root" stack:vars="expanded">
+<stack:file stack:name="/etc/root.my.cnf" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
 [client]
 user		= root
 socket		= /var/run/mysql/mysql.sock
@@ -70,8 +69,9 @@ ln -s --force /etc/root.my.cnf /root/.my.cnf
 
 <!-- Generate random password for apache access to database -->
 apache_pw=`/opt/stack/sbin/gen_random_pw`
-<stack:file stack:name="/etc/apache.my.cnf"
-	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
+
+
+<stack:file stack:name="/etc/apache.my.cnf" stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
 socket		= /var/run/mysql/mysql.sock
@@ -79,8 +79,7 @@ password	= $apache_pw
 </stack:file>
 
 <!-- this is the config file mysql tools look at by default -->
-<stack:file stack:name="/etc/my.cnf"
-	    stack:owner="root:mysql" stack:perms="0640">
+<stack:file stack:name="/etc/my.cnf" stack:owner="root:mysql" stack:perms="0640">
 [mysqld]
 user		= mysql
 socket		= /var/run/mysql/mysql.sock
@@ -114,7 +113,7 @@ systemctl daemon-reload
 <!--
 	sql file to nuke default anonymous user inside mysql,
 	set our password on root, nuke some unused tables,
-	set the password for the apache user
+	set the password for the root user
 -->
 
 <stack:file stack:name="/root/initial.sql" stack:perms="0400"
@@ -210,8 +209,7 @@ wait_for_mysql_up
 	set the password for the apache user, root user at localhost
 -->
 
-<stack:file stack:name="/root/users.sql" stack:perms="0400"
-            stack:owner="root:root" stack:vars="expanded">
+<stack:file stack:name="/root/users.sql" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
 CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
 CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
 CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";

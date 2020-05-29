@@ -54,7 +54,6 @@ systemctl start tftp.socket
 
 </stack:script>
 
-
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
 cp /boot/memtest86* /tftpboot/pxelinux/memtest
 </stack:script>

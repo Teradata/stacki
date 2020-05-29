@@ -66,7 +66,7 @@ with open('/tmp/site.json', 'w') as file:
                 {
                         "command": "list*",
                         "group": "wheel"
-                },
+                }
         ],
         "attr": [
                 {
@@ -150,12 +150,12 @@ with open('/tmp/site.json', 'w') as file:
 			"os":     "raspbian",
 			"name":   "default",
 			"kernel": ""
-		}
+		},
 		{
 			"os":     "raspbian",
 			"name":   "nfsroot",
 			"kernel": "nfsroot=&Kickstart_PrivateAddress;",
-			"args:"   "console=serial0,115200 console=tty1 root=/dev/nfs ip=dhcp rw elevator=deadline fsck.repair=yes rootwait"
+			"args":   "console=serial0,115200 console=tty1 root=/dev/nfs ip=dhcp rw elevator=deadline fsck.repair=yes rootwait"
 		}
         ],
 	"software": {

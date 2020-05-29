@@ -115,12 +115,13 @@ class Command(command):
 		if existing and not force:
 			raise CommandError(self, 'action "%s" exists' % b_action)
 
+		
 		if not self.bootNameExists(b_action, b_type):
 			self.db.execute(
 				'insert into bootnames(name, type) values (%s, %s)',
 				(b_action, b_type)
 			)
-
+		
 		if not existing:
 			if b_os:
 				self.db.execute("""

@@ -16,30 +16,6 @@
 <stack:script stack:stage="install-post">
 
 <stack:file stack:name="/tmp/cluster.sql">
-<!-- NFSRoots -->
-DROP TABLE IF EXISTS nfsroots;
-CREATE TABLE nfsroots (
-	id		INT AUTO_INCREMENT PRIMARY KEY,
-	name		VARCHAR(64) NOT NULL,
-	os		INT NOT NULL,
-	tftp		VARCHAR(128) NOT NULL,
-	nfs		VARCHAR(128) NOT NULL,
-	INDEX (name),
-	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
-);
-
-<!-- Images -->
-DROP TABLE IF EXISTS images;
-CREATE TABLE images (
-	id		INT AUTO_INCREMENT PRIMARY KEY,
-	name		VARCHAR(64) NOT NULL,
-	os		INT NOT NULL,
-	filename	VARCHAR(128) NOT NULL,
-	comment		VARCHAR(128) DEFAULT NULL,
-	INDEX (name),
-	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
-);
-
 <!-- Access -->
 DROP TABLE IF EXISTS access;
 CREATE TABLE access (
@@ -101,6 +77,30 @@ CREATE TABLE appliances (
 	sux		VARCHAR(64) DEFAULT NULL,
 	managed		BOOLEAN	DEFAULT FALSE,
 	INDEX (name)
+);
+
+<!-- NFSRoots -->
+DROP TABLE IF EXISTS nfsroots;
+CREATE TABLE nfsroots (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(64) NOT NULL,
+	os		INT NOT NULL,
+	tftp		VARCHAR(128) NOT NULL,
+	nfs		VARCHAR(128) NOT NULL,
+	INDEX (name),
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
+);
+
+<!-- Images -->
+DROP TABLE IF EXISTS images;
+CREATE TABLE images (
+	id		INT AUTO_INCREMENT PRIMARY KEY,
+	name		VARCHAR(64) NOT NULL,
+	os		INT NOT NULL,
+	filename	VARCHAR(128) NOT NULL,
+	comment		VARCHAR(128) DEFAULT NULL,
+	INDEX (name),
+	FOREIGN KEY (os) REFERENCES oses(id) ON DELETE CASCADE
 );
 
 <!-- Boxes -->

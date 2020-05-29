@@ -401,8 +401,8 @@ def get_mysql_connection(user=None, password=None):
 
 	try:
 		if user is None:
-			# Root connects as 'apache', everyone else as the user
-			# running the python command.
+			# Root connects as the apache user, everyone else as
+			# the user running the python command.
 			if os.geteuid() == 0:
 				user = 'apache'
 			else:
@@ -552,7 +552,7 @@ class DatabaseConnection:
 
 		# We should always get a single row back
 		if len(rows) != 1:
-			return None
+			return 0
 
 		return rows[0][0]
 
@@ -594,7 +594,6 @@ class DatabaseConnection:
 		If many is True, this will use executemany instead of execute to perform the command.
 		"""
 		command = command.strip()
-
 		if not command.lower().startswith('select'):
 			self.clearCache()
 
