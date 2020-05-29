@@ -147,8 +147,6 @@ try:
 	opts, args = getopt.getopt(sys.argv[1:], '', ['debug', 'help', 'version'])
 except getopt.GetoptError as msg:
 	sys.stderr.write("error - %s\n" % msg)
-	if runner.db is not None and runner.db.open:
-		runner.db.close()
 	sys.exit(1)
 
 debug = False
@@ -166,8 +164,5 @@ if rc is None:
 		rc = runner.run_command(['help'])
 	else:
 		rc = runner.run_command(args, debug)
-
-if runner.db is not None and runner.db.open:
-	runner.db.close()
 
 sys.exit(rc)
