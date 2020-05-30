@@ -96,15 +96,6 @@ class Plugin(stack.commands.Plugin):
 		# weird and we aren't sure how best to display it without
 		# freaking people out.
 
-		kickable_hosts = self.owner.getHostAttrDict(hosts, 'kickstartable')
-
-		for host in hosts:
-			if not self.owner.str2bool(kickable_hosts[host]['kickstartable']):
-				# Installaction
-				host_info[host][-1] = None
-				# osaction
-				host_info[host][-2] = None
-
 		keys = []
 		if expanded:
 			# This is used by the MessageQ as a permanent handle on

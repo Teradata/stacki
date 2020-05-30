@@ -147,13 +147,8 @@ with open('/tmp/site.json', 'w') as file:
                         "kernel": "kernel memtest"
                 },
 		{
-			"os":     "raspbian",
-			"name":   "default",
-			"kernel": ""
-		},
-		{
-			"os":     "raspbian",
 			"name":   "nfsroot",
+			"type":   "os",
 			"kernel": "nfsroot=&Kickstart_PrivateAddress;",
 			"args":   "console=serial0,115200 console=tty1 root=/dev/nfs ip=dhcp rw elevator=deadline fsck.repair=yes rootwait"
 		}
@@ -170,75 +165,38 @@ with open('/tmp/site.json', 'w') as file:
 	},
         "appliance": [
                 {
-                        "name": "frontend",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "server" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": false }
-			]
+                        "name":    "frontend",
+                        "sux":     "server",
+			"managed": false
                 },
                 {
                         "name": "builder",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "builder" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
+			"sux":  "builder"
                 },
                 {
                         "name": "barnacle",
-                        "public": false,
-                        "attr": [ 
-                                { "name": "node",          "value": "barnacle" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
+			"sux":  "barnacle"
                 },
                 {
-                        "name": "switch",
-                        "public": false,
-                        "attr": [ 
-				{ "name": "kickstartable", "value": false },
-				{ "name": "managed",       "value": false }
-			]
+                        "name": "switch"
 		},
                 {
                         "name": "backend",
-                        "public": true,
-                        "attr": [ 
-                                { "name": "node",          "value": "backend" },
-				{ "name": "kickstartable", "value": true },
-				{ "name": "managed",       "value": true }
-			]
+			"sux":  "backend"
                 },
                 {
                         "name": "raspberry",
-                        "public": true,
-                        "attr": [ 
-                                { "name": "node",          "value": "backend" },
-				{ "name": "kickstartable", "value": false },
-				{ "name": "managed",       "value": true }
-			]
+			"sux":  "backend"
                 },
                 {
                         "name": "replicant",
-                        "public": true,
+			"sux" : "replicant",
                         "attr": [ 
-                                { "name": "node",            "value": "replicant" },
-				{ "name": "kickstartable",   "value": true },
-				{ "name": "managed",         "value": true },
                                 { "name": "const_overwrite", "value": false }
 			]
                 },
                 {
-                        "name": "external",
-                        "public": false,
-                        "attr": [ 
-				{ "name": "kickstartable", "value": false },
-				{ "name": "managed",       "value": false }
-			]
+                        "name": "external"
 		}
         ]
 }

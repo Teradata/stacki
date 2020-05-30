@@ -29,5 +29,10 @@ t the
 
 		self.report('report.dhcpd')
 
-		subprocess.call(['/sbin/service', 'dhcpd', 'restart'],
-				stdout=open('/dev/null'), stderr=open('/dev/null'))
+		if self.os == 'debian':
+			subprocess.call(['/bin/systemctl', 'restart', 'isc-dhcp-server'],
+					stdout=open('/dev/null'), stderr=open('/dev/null'))
+		else:
+			subprocess.call(['/sbin/service', 'dhcpd', 'restart'],
+					stdout=open('/dev/null'), stderr=open('/dev/null'))
+

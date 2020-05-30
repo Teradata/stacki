@@ -40,32 +40,24 @@ class Command(command):
 			raise ArgUnique(self, 'appliance')
 		appliance = args[0]
 
-		(node, public) = self.fillParams([
-			('node', None),
-			])
-
-		public = self.bool2str(self.str2bool(public))
+		(sux, managed) = self.fillParams([('sux', None),
+						  ('managed', None)])
+     
 
 		if self.db.count('(ID) from appliances where name=%s', (appliance,)) > 0:
 			raise CommandError(self, 'appliance "%s" already exists' % appliance)
 
+
+		# Default to only setting managed=True when the appliance has a
+		# SUX node file to build a profile from, but still allow the
+		# user to override this on the command line.
+		if managed is None:
+			managed = False
+			if sux:
+				managed = True
+			
 		self.db.execute("""
-			insert into appliances (name, node)
-			values (%s, %s)
-			""", (appliance, node))
+			insert into appliances (name, sux, managed)
+			values (%s, %s, %s)
+			""", (appliance, sux, self.str2bool(managed)))
 
-		# by default, appliances shouldn't be managed or kickstartable...
-		implied_attrs = {'managed': False}
-
-		# ... but if the user specified node, they probably want those to be True
-		if node:
-			self.command('add.appliance.attr', [ appliance,
-				'attr=node', 'value=%s' % node ])
-			implied_attrs['managed'] = True
-
-		for attr, value in implied_attrs.items():
-			self.command('add.appliance.attr', [
-				appliance,
-				'attr=%s' % attr,
-				'value=%s' % value
-				])

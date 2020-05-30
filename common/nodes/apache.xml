@@ -128,21 +128,15 @@ LoadModule unixd_module modules/mod_unixd.so
 /bin/systemctl enable httpd
 </stack:script>
 
-<!-- Make every other linux behave like RedHat
-     SLES   wwwrun:www -> apache:apache
-     Debian www-data:www-data -> apache:apache
--->
+<!-- SLES -->
 <stack:script stack:stage="install-post" stack:cond="os == 'sles'">
+<!-- Make the user and group match Redhat -->
 usermod --login apache wwwrun
 groupmod --new-name apache www
+
 <stack:file stack:name="/etc/apache2/uid.conf">
 User apache
 Group apache
-</stack:file>
-
-<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
-usermod --login apache www-data
-groupmod --new-name apache www-data
 </stack:file>
 
 <!-- Create the www root -->
@@ -204,5 +198,13 @@ ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.
 <!-- Enable Apache at boot -->
 /usr/bin/systemctl enable apache2
 </stack:script>
+
+
+<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
+<!-- Make the user and group match Redhat -->
+usermod --login apache www-data
+groupmod --new-name apache www-data
+</stack:script>
+
 
 </stack:stack>

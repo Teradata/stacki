@@ -134,8 +134,8 @@ class Command(command):
 			 ('rank',          rank),
 			 ('box',           'default'),
 			 ('environment',   ''),
-			 ('osaction',      'default'),
-			 ('installaction', 'default')
+			 ('osaction',      ''),
+			 ('installaction', '')
 		])
 
 		if not appliance:
@@ -156,22 +156,33 @@ class Command(command):
 		for row in self.call('list.box', [ box ]):
 			osname = row['os']
 
-		# Make sure the installaction and osaction both exist
-		if not self.call('list.bootaction', [ installaction,
-						      'type=install',
-						      'os=%s' % osname
-						      ]):
-			raise CommandError(self,
-					   '"%s" install boot action for "%s" is missing' %
-					   (installaction, osname))
+		for row in self.call('list.appliance', [ appliance ]):
+			managed = self.str2bool(row['managed'])
 
-		if not self.call('list.bootaction', [ osaction,
-						      'type=os',
-						      'os=%s' % osname
-						      ]):
-			raise CommandError(self,
-					   '"%s" os boot action for "%s" is missing' %
-					   (osaction, osname))
+		# If the appliance type is not managed don't allow the user to
+		# assign any boot actions
+			
+		if managed:
+			if not osaction:
+				osaction = 'default'
+			if not installaction:
+				installaction = 'default'
+		else:
+			if osaction:
+				raise CommandError(self, 'cannot assign osaction to unmanaged host')
+			if installaction:
+				raise CommandError(self, 'cannot assign installaction to unmanaged host')
+
+
+		if osaction:
+			if not self.call('list.bootaction', [ osaction, 'type=os', 'os=%s' % osname ]):
+				raise CommandError(self, '"%s" os boot action for "%s" is missing' %
+						   (osaction, osname))
+
+		if installaction:
+			if not self.call('list.bootaction', [ installaction, 'type=install', 'os=%s' % osname ]):
+				raise CommandError(self, '"%s" install boot action for "%s" is missing' %
+						   (installaction, osname))
 
 		self.db.execute("""
 			insert into nodes
@@ -184,15 +195,16 @@ class Command(command):
 			)
 			""", (host, appliance, box, rack, rank))
 
-		self.command('set.host.bootaction',
-			     [ host, 'type=install', 'sync=false',
-			       'action=%s' % installaction ])
+		if osaction:
+			self.command('set.host.bootaction',
+				     [ host, 'type=os', 'sync=false',
+				       'action=%s' % osaction ])
+			self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])
 
-		self.command('set.host.bootaction',
-			     [ host, 'type=os', 'sync=false',
-			       'action=%s' % osaction ])
-
-		self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])
+		if installaction:
+			self.command('set.host.bootaction',
+				     [ host, 'type=install', 'sync=false',
+				       'action=%s' % installaction ])
 
 		if environment:
 			self.command('set.host.environment',

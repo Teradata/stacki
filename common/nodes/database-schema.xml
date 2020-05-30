@@ -55,10 +55,11 @@ CREATE TABLE oses (
 );
 
 INSERT INTO oses(name) VALUES ("redhat");
-INSERT INTO oses(name) VALUES ("ubuntu");
+INSERT INTO oses(name) VALUES ("debian");
 INSERT INTO oses(name) VALUES ("sles");
 INSERT INTO oses(name) VALUES ("vmware");
 INSERT INTO oses(name) VALUES ("xenserver");
+INSERT INTO oses(name) VALUES ("ubuntu");
 INSERT INTO oses(name) VALUES ("raspbian");
 
 <!-- Environments -->
@@ -539,8 +540,14 @@ CREATE TABLE attributes (
 /usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root cluster &lt; /tmp/cluster.sql
 /usr/bin/mysql      --defaults-extra-file=/etc/root.my.cnf --user=root shadow &lt; /tmp/shadow.sql
 
-<stack:file stack:name="/var/db/grants.sql" stack:perms="0400">
+<stack:file stack:name="/var/db/grants.sql" stack:cond="os in [ 'redhat', 'sles']">
 grant select on cluster.* to ''@'localhost';
+</stack:file>
+<stack:file stack:name="/var/db/grants.sql" stack:cond="os == 'debian'">
+<!-- TODO: how to grant RO access for all users for newer mariadb -->
+</stack:file>
+
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400" stack:mode="append">
 grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
 grant select,update,insert,delete,lock tables on shadow.*  to apache@localhost;
