@@ -6,7 +6,7 @@
 
 <stack:package stack:cond="os == 'redhat'">dhcp</stack:package>
 <stack:package stack:cond="os == 'sles'">dhcp-server</stack:package>
-
+<stack:package stack:cond="os == 'debian'">isc-dhcp-server</stack:package>
 
 <stack:script stack:stage="install-post">
 /usr/bin/systemctl enable dhcpd
