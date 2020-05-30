@@ -50,3 +50,25 @@ class TestAnsibleDynamicInventory:
 		# Check that our added attributes exist
 		assert inventory["_meta"]["hostvars"]["frontend-0-0"]["stacki_foo"] == "frontend"
 		assert inventory["_meta"]["hostvars"]["backend-0-0"]["stacki_bar"] == "backend"
+
+	def test_vm_attributes(self, add_hypervisor, add_vm, host):
+		"""
+		Test the plugin creates vars for VM host information
+		"""
+
+		result = host.run("ansible-inventory --list")
+		assert result.rc == 0
+		inventory = json.loads(result.stdout)
+
+		# Check basic VM related data is added
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_cpu"] == 1
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_memory"] == 2048
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_hypervisor"] == "hypervisor-0-1"
+
+		# Check for VM storage info
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_name"] == "sda"
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_size"] == 100
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_image"] == "vm-backend-0-3_disk1.qcow2"
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_location"] == "/export/pools/stacki/vm-backend-0-3"
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_mountpoint"] == None
+		assert inventory["_meta"]["hostvars"]["vm-backend-0-3"]["stacki_vm_disk_sda_type"] == "disk"

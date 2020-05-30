@@ -129,3 +129,23 @@ class InventoryModule(BaseInventoryPlugin):
 				pass
 
 			self.inventory.set_variable(row["host"], "stacki_%s" % row["attr"], value)
+
+		# Add VM values for virtual machine hosts
+		for row in stack.api.Call("list vm"):
+			name = row["virtual machine"]
+
+			self.inventory.set_variable(name, "stacki_vm_cpu", row["cpu"])
+			self.inventory.set_variable(name, "stacki_vm_memory", row["memory"])
+			self.inventory.set_variable(name, "stacki_vm_hypervisor", row["hypervisor"])
+
+		# Add VM storage info
+		for row in stack.api.Call("list vm storage"):
+			host = row["Virtual Machine"]
+			name = row["Name"]
+
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_name", row["Name"])
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_type", row["Type"])
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_location", row["Location"])
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_size", row["Size"])
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_image", row["Image Name"])
+			self.inventory.set_variable(host, f"stacki_vm_disk_{name}_mountpoint", row["Mountpoint"])
