@@ -15,6 +15,7 @@
 import atexit
 import os
 import pwd
+import pymysql
 import sys
 import syslog
 import getopt
@@ -30,8 +31,11 @@ def sigint_handler(signal, frame):
 	sys.exit(0)
 
 def db_closer(db_handle):
-	if db_handle and db_handle.open:
+	try:
 		db_handle.close()
+	except pymysql.err.Error:
+		# yolo - (handle already closed, perhaps in a forked process)
+		pass
 
 
 def run_command(args, debug=False):
