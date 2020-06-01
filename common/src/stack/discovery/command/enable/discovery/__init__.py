@@ -10,7 +10,7 @@ import stack.commands
 from stack.discovery import Discovery
 from stack.exception import CommandError
 import time
-
+import pymysql
 
 class Command(stack.commands.enable.command):
 	"""
@@ -75,8 +75,12 @@ class Command(stack.commands.enable.command):
 		else:
 			discovery = Discovery()
 
-		if self.db.database.open:
+		try:
 			self.db.database.close()
+		except pymysql.err.Error:
+			# closed in the forked process
+			pass
+
 		try:
 			# Call start
 			discovery.start(
