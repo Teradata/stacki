@@ -127,12 +127,13 @@ class Command(command):
 			rank      = None
 
 		# fillParams with the above default values
-		(appliance, rack, rank, box, environment,
-		 osaction, installaction) = self.fillParams([
+		(appliance, rack, rank, box, image, nfsroot, environment, osaction, installaction) = self.fillParams([
 			 ('appliance',     appliance),
 			 ('rack',          rack),
 			 ('rank',          rank),
 			 ('box',           'default'),
+			 ('image',         ''),
+			 ('nfsroot',       ''),
 			 ('environment',   ''),
 			 ('osaction',      ''),
 			 ('installaction', '')
@@ -156,6 +157,22 @@ class Command(command):
 		for row in self.call('list.box', [ box ]):
 			osname = row['os']
 
+		if nfsroot:
+			found = False
+			for row in self.call('list.nfsroot', [ nfsroot ]):
+				found = True
+				osname = row['os']
+			if not found:
+				raise CommandError(self, f'nfsroot "{nfsroot}" not found')
+			    
+		if image:
+			found = False
+			for row in self.call('list.image', [ image ]):
+				found = True
+				osname = row['os']
+			if not found:
+				raise CommandError(self, f'image "{image}" not found')
+
 		for row in self.call('list.appliance', [ appliance ]):
 			managed = self.str2bool(row['managed'])
 
@@ -165,7 +182,7 @@ class Command(command):
 		if managed:
 			if not osaction:
 				osaction = 'default'
-			if not installaction:
+			if not installaction and not (nfsroot or image):
 				installaction = 'default'
 		else:
 			if osaction:
@@ -199,7 +216,6 @@ class Command(command):
 			self.command('set.host.bootaction',
 				     [ host, 'type=os', 'sync=false',
 				       'action=%s' % osaction ])
-			self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])
 
 		if installaction:
 			self.command('set.host.bootaction',
@@ -209,3 +225,12 @@ class Command(command):
 		if environment:
 			self.command('set.host.environment',
 				     [ host, "environment=%s" % environment ])
+
+		if nfsroot:
+			self.command('set.host.nfsroot', [host, f'nfsroot={nfsroot}'])
+
+		if image:
+			self.command('set.host.image', [host, f'image={image}'])
+
+		if osaction: # do this last
+			self.command('set.host.boot', [ host, 'action=os', 'sync=false' ])

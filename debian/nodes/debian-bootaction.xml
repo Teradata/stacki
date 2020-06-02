@@ -7,5 +7,22 @@
 	</stack:copyright>
 
 
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/tmp/dump-bootaction.json">
+{
+        "bootaction": [
+                {
+                        "name":    "default",
+			"os":      "debian",
+                        "type":    "os",
+                        "kernel":  "",
+                        "ramdisk": "",
+                        "args":    ""
+                }
+	]
+}
+</stack:file>
+</stack:script>
+
 </stack:stack>
 

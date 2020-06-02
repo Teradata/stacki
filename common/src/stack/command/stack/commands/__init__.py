@@ -35,7 +35,7 @@ import threading
 import pymysql
 import stack.graph
 import stack
-from stack.exception import CommandError, ParamRequired
+from stack.exception import CommandError, ParamRequired, ArgNotFound
 from stack.bool import str2bool, bool2str
 from stack.util import flatten
 import stack.util
@@ -651,12 +651,57 @@ class DatabaseConnection:
 		Return the OS name for the given host.
 		"""
 
-		for (name, osname) in self.select("""
-			n.name, o.name from boxes b, nodes n, oses o
-			where n.box=b.id and b.os=o.id
-		"""):
+		nfsroot_os = {}
+		image_os   = {}
+		box_os     = {}
+
+		# The nodes table does not store the OS for a host, rather this
+		# is determined by what the OS of the underlying bits are. The
+		# underlying bits could be an nfsroot directory, an image, or a
+		# box. So gather all that info here first. When computing the
+		# OS to display the priority from highest to lowest is:
+		#
+		# nfsroot / image / box.
+
+		for name, _os in self.select(
+			"""
+			r.name, o.name from
+			nfsroots r, oses o where
+			r.os=o.id
+			"""):
+			nfsroot_os[name] = _os
+
+		for name, _os in self.select(
+			"""
+			i.name, o.name from
+			images i, oses o where
+			i.os=o.id
+			"""):
+			image_os[name] = _os
+
+		for name, _os in self.select(
+			"""
+			b.name, o.name from
+			boxes b, oses o where
+			b.os=o.id
+			"""):
+			box_os[name] = _os
+
+
+		for (name, nfsroot, image, box) in self.select("""
+			n.name, r.name, i.name, b.name from
+			nodes n 
+			left join nfsroots r on n.nfsroot = r.id
+			left join images i   on n.image   = i.id
+			left join boxes b    on n.box     = b.id 
+			"""):
 			if name == host:
-				return osname
+				if nfsroot:
+					return nfsroot_os[nfsroot]
+				if image:
+					return image_os[image]
+				if box:
+					return box_os[box]
 		return None
 
 	def getHostAppliance(self, host):

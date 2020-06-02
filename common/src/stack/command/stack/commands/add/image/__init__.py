@@ -5,10 +5,11 @@ import os
 import shutil
 import subprocess
 import stack.commands
+from stack.argument_processors.os import OSArgProcessor
 from stack.exception import CommandError, UsageError, ArgUnique
 
 class command(stack.commands.ImageArgumentProcessor,
-	stack.commands.OSArgumentProcessor,
+	OSArgProcessor,
 	stack.commands.add.command):
 	pass
 

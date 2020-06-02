@@ -17,42 +17,6 @@ class Plugin(stack.commands.Plugin):
 
 		info = dict.fromkeys(hosts)
 
-		nfsroot_os = {}
-		image_os   = {}
-		box_os     = {}
-
-		# The nodes table does not store the OS for a host, rather this
-		# is determined by what the OS of the underlying bits are. The
-		# underlying bits could be an nfsroot directory, an image, or a
-		# box. So gather all that info here first. When computing the
-		# OS to display the priority from highest to lowest is:
-		#
-		# nfsroot / image / box.
-
-		for name, _os in self.db.select(
-			"""
-			r.name, o.name from
-			nfsroots r, oses o where
-			r.os=o.id
-			"""):
-			nfsroot_os[name] = _os
-
-		for name, _os in self.db.select(
-			"""
-			i.name, o.name from
-			images i, oses o where
-			i.os=o.id
-			"""):
-			image_os[name] = _os
-
-		for name, _os in self.db.select(
-			"""
-			b.name, o.name from
-			boxes b, oses o where
-			b.os=o.id
-			"""):
-			box_os[name] = _os
-
 		for id, name, rack, rank, appliance, box, image, nfsroot, environment, bno, bni in self.db.select(
 			"""
 			n.id, n.name, n.rack, n.rank, 
@@ -80,15 +44,9 @@ class Plugin(stack.commands.Plugin):
 					      'nfsroot': nfsroot,
 					      'environment': environment,
 					      'bno': bno,
-					      'bni': bni,
-					      'os': None}
-				if box:
-					info[name]['os'] = box_os[box]
-				if image:
-					info[name]['os'] = image_os[image]
-				if nfsroot:
-					info[name]['os'] = nfsroot_os[nfsroot]
+					      'bni': bni}
 
+				info[name]['os'] = self.db.getHostOS(name)
 
 		# This is (and the above dict) is more work than it needs to
 		# be, but we want to give flexibility at ordering the columns

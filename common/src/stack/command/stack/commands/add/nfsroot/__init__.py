@@ -7,11 +7,12 @@ import subprocess
 import tempfile
 import time
 import stack.commands
+from stack.argument_processors.os import OSArgProcessor
 from stack.exception import CommandError, UsageError, ArgUnique
 
 class command(stack.commands.ImageArgumentProcessor,
 	      stack.commands.NFSRootArgumentProcessor,
-	      stack.commands.OSArgumentProcessor,
+	      OSArgProcessor,
 	      stack.commands.add.command):
 	pass
 
@@ -34,6 +35,7 @@ class Command(command):
 	"""
 
 	def run(self, params, args):
+		roots_path = '/export/stack/roots'
 
 		image, = self.fillParams([('image', None, True)])
 
@@ -59,12 +61,17 @@ class Command(command):
 
 		# I told you this way beta, Pis only for now.
 
-		if image_os != 'raspbian':
+		if image_os != 'debian':
 			raise CommandError(self, 'only supports raspbian for nfsroot')
 
-		nfsroot_path  = os.path.join('/export/stack/roots', nfsroot)
-		tftp_path     = os.path.join('/tftpboot', tftp)
 
+		for path in [ roots_path, '/tftpboot' ]:
+			if not os.path.exists(path):
+				os.mkdir(path)
+
+		nfsroot_path  = os.path.join(roots_path, nfsroot)
+		tftp_path     = os.path.join('/tftpboot', tftp)
+		
 		if os.path.exists(nfsroot_path):
 			raise CommandError(self, f'directory {nfsroot_path} already exists')
 		if os.path.exists(tftp_path):

@@ -63,13 +63,13 @@ class Command(stack.commands.set.host.command):
 		if action not in ['os', 'install']:
 			raise ParamValue(self, 'action', 'one of: os, install')
 
-		# Get the mapping of hosts with boot actions and thier PK
+		# Get the mapping of hosts with boot actions and their PK
 		hosts_with_boot = {row[0]: row[1] for row in self.db.select(
 			'nodes.name, nodes.id from nodes, boot where nodes.id=boot.node'
 		)}
 
 		for host in hosts:
-			if host['os'] == 'raspbian':
+			if self.db.getHostOS(host) == 'debian':
 				sync_dhcp = True
 
 			if host in hosts_with_boot:
