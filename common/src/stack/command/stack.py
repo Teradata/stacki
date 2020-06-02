@@ -36,7 +36,6 @@ def db_closer(db_handle):
 	except Exception as e:
 		print(e)
 		print(e.args)
-		print(e.with_traceback())
 		# yolo - (handle already closed, perhaps in a forked process)
 		pass
 
