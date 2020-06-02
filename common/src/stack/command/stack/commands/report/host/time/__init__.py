@@ -149,8 +149,8 @@ class Command(HostArgProcessor, NetworkArgProcessor, stack.commands.report.comma
 		if not timeservers:
 			timeservers = []
 
-		for peer in self.getNTPPeers(host):
-			timeservers.append(peer)
+		#for peer in self.getNTPPeers(host):
+		#	timeservers.append(peer)
 		return timeservers
 
 	def set_timezone(self, host):

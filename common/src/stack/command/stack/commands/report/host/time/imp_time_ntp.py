@@ -50,13 +50,16 @@ class Implementation(stack.commands.Implementation):
 		self.owner.addOutput(host, "\n# Accept broadcast NTP information")
 		self.owner.addOutput(host, 'broadcastclient')
 
-		self.owner.addOutput(host, "\n# Pull time from the following servers")
-		for server in self.owner.timeservers:
-			self.owner.addOutput(host, f"server {server}")
+		if len(self.owner.timeservers):
+			self.owner.addOutput(host, "\n# Pull time from the following servers")
+			preferred_server = self.owner.timeservers.pop(0)
+			self.owner.addOutput(host, f"server {preferred_server} iburst prefer")
+			for server in self.owner.timeservers:
+				self.owner.addOutput(host, f"server {server}")
 
-		self.owner.addOutput(host, "\n# Allow time from the following servers to modify config")
-		for server in self.owner.timeservers:
-			self.owner.addOutput(host, f"restrict {server}")
+			self.owner.addOutput(host, "\n# Allow time from the following servers to modify config")
+			for server in self.owner.timeservers:
+				self.owner.addOutput(host, f"restrict {server}")
 
 		for network in self.owner.getNTPNetworks(host):
 			self.owner.addOutput(host, f"\n# Allow servers from the {network.network_address}/{network.prefixlen} network to modify config")
@@ -92,8 +95,11 @@ class Implementation(stack.commands.Implementation):
 
 	def server(self, host):
 		self.owner.addOutput(host, '<stack:file stack:name="/etc/ntp.conf">')
-		for server in self.owner.timeservers:
-			self.owner.addOutput(host, f"server {server} iburst")
+		if len(self.owner.timeservers):
+			preferred_server = self.owner.timeservers.pop(0)
+			self.owner.addOutput(host, f"server {preferred_server} iburst prefer")
+			for server in self.owner.timeservers:
+				self.owner.addOutput(host, f"server {server} iburst")
 		self.owner.addOutput(host, 'server 127.127.1.1 iburst')
 		self.owner.addOutput(host, 'fudge 127.127.1.1 stratum 10')
 		self.owner.addOutput(host, 'driftfile /var/lib/ntp/drift')
