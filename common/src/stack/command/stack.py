@@ -33,7 +33,7 @@ def sigint_handler(signal, frame):
 def db_closer(db_handle):
 	try:
 		db_handle.close()
-	except Exception as e
+	except Exception as e:
 		print(e)
 		print(e.args)
 		print(err.with_traceback())
