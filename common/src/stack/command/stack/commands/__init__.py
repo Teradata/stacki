@@ -23,6 +23,7 @@ import json
 import marshal
 import hashlib
 import subprocess
+import netifaces
 from xml.sax import handler
 from xml.sax import make_parser
 from xml.sax import SAXParseException
@@ -467,16 +468,18 @@ class DatabaseConnection:
 		Returns None when the hostname doesn't exist.
 		"""
 
+		match = None
+		
 		# See if we need to do MySQL LIKE
 		if '%' in hostname or '_' in hostname:
 			rows = self.select('name FROM nodes WHERE name LIKE %s', (hostname,))
 			if rows:
-				return rows[0][0]
+				match = rows[0][0]
 		elif not self.caching:
 			# If we aren't caching, just do a straight lookup
 			rows = self.select('name FROM nodes WHERE name = %s', (hostname,))
 			if rows:
-				return rows[0][0]
+				match = rows[0][0]
 		else:
 			# Build the cache if needed
 			if not DatabaseConnection._lookup_hostname_cache:
@@ -487,10 +490,10 @@ class DatabaseConnection:
 
 			# Return the hostname if it was in the database
 			if hostname.lower() in DatabaseConnection._lookup_hostname_cache:
-				return DatabaseConnection._lookup_hostname_cache[hostname.lower()]
+				match = DatabaseConnection._lookup_hostname_cache[hostname.lower()]
 
-		# No match
-		return None
+#		print(f'{match} <= _lookup_hostname({hostname})')
+		return match
 
 	def __init__(self, database, *, caching=True):
 		# self.database : object returned from orginal connect call
@@ -768,6 +771,7 @@ class DatabaseConnection:
 		# lookup the IP address and map that to the name in the nodes
 		# table. This should speed up the installer w/ the restore pallet.
 
+#		print(f'getHostname({hostname}, {subnet})')
 		if hostname and self.link:
 			if self._lookup_hostname(hostname):
 				return self.getNodeName(hostname, subnet)
@@ -801,7 +805,6 @@ class DatabaseConnection:
 				(name, aliases, addrs) = socket.gethostbyaddr(addr)
 				if hostname != name and hostname not in aliases:
 					raise NameError
-
 		except:
 			if hostname == 'localhost':
 				addr = '127.0.0.1'
@@ -904,12 +907,15 @@ class DatabaseConnection:
 				return 'localhost'
 
 		if self.link:
+
 			# Look up the IP address in the networks table to find the
 			# hostname (nodes table) of the node.
 			#
-			# If the IP address is not found also see if the hostname is
-			# in the networks table. This last check handles the case
-			# where DNS is correct but the IP address used is different.
+			# If the IP address is not found also see if the
+			# hostname is in the networks table using the zone for
+			# that interface. This last check handles the case
+			# where DNS is correct but the IP address used is
+			# different.
 
 			rows = self.link.execute("""
 				select nodes.name from networks,nodes
@@ -917,13 +923,25 @@ class DatabaseConnection:
 			""", (addr,))
 
 			if not rows:
-				rows = self.link.execute("""
-					select nodes.name from networks,nodes
-					where nodes.id=networks.node and networks.name=%s
-				""", (hostname,))
+				tokens = hostname.split('.')
+				host   = tokens[0]
+				domain = '.'.join(tokens[1:])
+				
+				self.link.execute("""
+					select nodes.name, networks.name, subnets.zone from 
+					nodes, networks, subnets where
+					nodes.id=networks.node and
+					networks.subnet=subnets.id and
+					(nodes.name=%s or networks.name=%s)
+				""", (host, host))
 
-				if not rows:
-					raise CommandError(self, f'host "{hostname}" is not in cluster')
+				for (host, interface, domain) in self.link.fetchall():
+					if hostname in [f'{host}.{domain}', f'{interface}.{domain}']:
+						return host
+
+				# Really not in the database, time to give up
+
+				raise CommandError(self, f'host "{hostname}" is not in cluster')
 
 			hostname, = self.link.fetchone()
 
