@@ -284,3 +284,41 @@ class TestListHostAttr:
 			'type': 'const',
 			'value': '0'
 		}]
+
+	def test_regression_shadow_glob_interaction(self, host, add_host):
+		# Create another backend
+		add_host('backend-0-1', '0', '1', 'backend')
+
+		# Add a shadow appliance attr
+		result = host.run(
+			'stack add appliance attr backend attr=test value=test shadow=true'
+		)
+		assert result.rc == 0
+
+		# Now add a non-shadow attr at the host level
+		result = host.run(
+			'stack add host attr backend-0-0 attr=test value=foo'
+		)
+		assert result.rc == 0
+
+		# List a non-related glob pattern and make sure it doesn't traceback
+		result = host.run(
+			'stack list host attr a:backend attr=time.* output-format=json'
+		)
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'attr': 'time.protocol',
+				'host': 'backend-0-0',
+				'scope': 'global',
+				'type': 'var',
+				'value': 'chrony'
+			},
+			{
+				'attr': 'time.protocol',
+				'host': 'backend-0-1',
+				'scope': 'global',
+				'type': 'var',
+				'value': 'chrony'
+			}
+		]

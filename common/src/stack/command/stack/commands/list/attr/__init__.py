@@ -135,7 +135,7 @@ class Command(ScopeArgProcessor, stack.commands.list.command):
 					if row[2] not in seen[host]:
 						if attr is None or self._fnmatchcase(row[2], attr):
 							output[host][row[2]] = row
-						seen[host].add(row[2])
+							seen[host].add(row[2])
 
 				# Merge in any normal global attrs for each host
 				query = """
@@ -156,7 +156,7 @@ class Command(ScopeArgProcessor, stack.commands.list.command):
 						if row[2] not in seen[host]:
 							if attr is None or self._fnmatchcase(row[2], attr):
 								output[host][row[2]] = row
-							seen[host].add(row[2])
+								seen[host].add(row[2])
 
 				# Now get the shadow attributes, if requested
 				if shadow:
@@ -178,7 +178,7 @@ class Command(ScopeArgProcessor, stack.commands.list.command):
 							# If we haven't seen it
 							if attr is None or self._fnmatchcase(row[2], attr):
 								output[host][row[2]] = row
-							seen[host].add(row[2])
+								seen[host].add(row[2])
 						else:
 							# Maybe the shadow attr is higher scope
 							if weights[row[0]] >= weights[output[host][row[2]][0]]:
@@ -203,7 +203,7 @@ class Command(ScopeArgProcessor, stack.commands.list.command):
 							if row[2] not in seen[host]:
 								if attr is None or self._fnmatchcase(row[2], attr):
 									output[host][row[2]] = row
-								seen[host].add(row[2])
+									seen[host].add(row[2])
 							else:
 								if output[host][row[2]][0] == 'global':
 									output[host][row[2]] = row
