@@ -15,14 +15,14 @@ class Plugin(stack.commands.Plugin):
 	"""
 
 	def provides(self):
-		return 'pxe'
+		return 'nfsroot'
 
 	def run(self, ha):
 
 		for host in ha:
 			if 'interfaces' not in ha[host]:
 				continue
-			if ha[host]['os'] != 'raspbian':
+			if ha[host]['appliance'] != 'raspberry':
 				continue
 
 			nfsroot = {}

@@ -1,0 +1,10 @@
+<stack:stack>
+
+	<stack:copyright>
+	</stack:copyright>
+
+	<stack:package stack:cond="os == 'debian'">
+		nfs-kernel-server
+	</stack:package>
+
+</stack:stack>

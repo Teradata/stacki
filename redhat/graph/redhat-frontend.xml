@@ -19,7 +19,6 @@
 
 	<order head="database-data">
 		<tail>server</tail>
-		<tail>pxe</tail>
 		<tail>restapi</tail>
 		<tail>networking-server</tail>
 		<tail>dhcp-server</tail>
@@ -49,24 +48,25 @@
 
 	<edge from="server">
 		<to>base</to>
-		<to>security-server</to>
-		<to>time-server</to>
-		<to>profile-server</to>
-		<to>pxe</to>
-		<to>pxeboot</to>
-		<to>networking-server</to>
-		<to>dhcp-server</to>
-		<to>firewall-server</to>
-		<to>firewall-base</to>
-		<to>kernel-server</to>
 		<to>ca</to>
+		<to>dhcp-server</to>
+		<to>firewall-base</to>
+		<to>firewall-server</to>
+		<to>pxe</to>
+		<to>ludicrous-server</to>
+		<to>time-server</to>
+		<to>restapi</to>
+		<to>profile-server</to>
+		<to>networking-server</to>
+		<to>uefi-server</to>
+
+		<to>security-server</to>
+		<to>pxeboot</to>
+		<to>kernel-server</to>
 		<to>foundation-server</to>
 		<to>ssh-server</to>
 		<to>storage-server</to>
-		<to>ludicrous-server</to>
 		<to>repo-server</to>
-		<to>restapi</to>
-		<to>uefi-server</to>
 	</edge>
 
 

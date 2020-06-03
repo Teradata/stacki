@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="no"?>
+<graph>
+
+	<order head="database-data">
+		<tail>server</tail>
+	</order>
+
+	<edge from="server">
+		<to>base</to>
+		<to>pxe</to>
+	</edge>
+
+
+</graph>

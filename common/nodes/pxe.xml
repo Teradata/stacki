@@ -1,32 +1,55 @@
 <stack:stack>
 
-<stack:copyright>
-Copyright (c) 2006 - 2019 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
 
-<stack:package stack:cond="os == 'redhat'">
-memtest86+
-tftp-server
-stack-images
-</stack:package>
+	<stack:package stack:cond="os == 'redhat'">
+		memtest86+
+		tftp-server
+		stack-images
+	</stack:package>
 
-<stack:package stack:cond="os == 'sles'">
-tftp
-stack-&os;-&release;-images
-</stack:package>
+	<stack:package stack:cond="os == 'sles'">
+		tftp
+		stack-&os;-&release;-images
+	</stack:package>
 
-<stack:package>
-syslinux
-stack-pxeboot
-</stack:package>
+	<stack:package stack:cond="os == 'debian'">
+		tftpd-hpa
+		pxelinux
+	</stack:package>
 
+	<stack:package>
+		syslinux
+		stack-pxeboot
+	</stack:package>
 
 <stack:script stack:stage="install-post">
+mkdir -p /tftpboot/pxelinux/pxelinux.cfg
+chown root.apache /tftpboot/pxelinux/pxelinux.cfg
+chmod 775 /tftpboot/pxelinux/pxelinux.cfg
+</stack:script>		
+	
+<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
+cp -R /usr/lib/syslinux/modules/bios/* /tftpboot/pxelinux/
+<stack:file stack:name="/etc/default/tftpd-hpa">
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/tftpboot"
+TFTP_ADDRESS="0.0.0.0:69"
+TFTP_OPTIONS="--secure"
+</stack:file>
 
-<!-- pxe needs a tftp server - unit files in /etc override system defaults -->
+systemctl enable tftpd-hpa
+systemctl start tftpd-hpa
+</stack:script>		
+
+
+<stack:script stack:stage="install-post" stack:cond="os in ['redhat', 'sles']">
+cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
 <stack:file stack:name="/etc/systemd/system/tftp.service">
 [Unit]
 Description=Tftp Server
@@ -41,17 +64,8 @@ StandardInput=socket
 Also=tftp.socket
 </stack:file>
 
-
-mkdir -p /tftpboot/pxelinux/pxelinux.cfg
-chown root.apache /tftpboot/pxelinux/pxelinux.cfg
-chmod 775 /tftpboot/pxelinux/pxelinux.cfg
-
-<!-- copy all the syslinux programs to the pxelinux directory -->
-cp -R /usr/share/syslinux/* /tftpboot/pxelinux/
-
 systemctl enable tftp.socket
 systemctl start tftp.socket
-
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:cond="os == 'redhat'">

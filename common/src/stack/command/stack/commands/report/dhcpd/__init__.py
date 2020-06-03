@@ -252,7 +252,12 @@ class Command(HostArgProcessor, stack.commands.report.command):
 		return ip
 
 	def writeDhcpSysconfig(self):
-		self.addOutput('', '<stack:file stack:name="/etc/sysconfig/dhcpd">')
+		if self.os in [ 'redhat', 'sles' ]:
+			default = '/etc/sysconfig/dhcpd'
+		else: # debian
+			default = '/etc/default/isc-dhcp-server'
+
+		self.addOutput('', f'<stack:file stack:name="{default}">')
 		self.addOutput('', stack.text.DoNotEdit())
 
 		devices = set()
@@ -272,10 +277,14 @@ class Command(HostArgProcessor, stack.commands.report.command):
 
 		devices = ' '.join(sorted(devices))
 
+		# can't even agree on crap like this
+		
 		if self.os == 'redhat':
 			self.addOutput('', f'DHCPDARGS="{devices}"')
-		if self.os == 'sles':
+		elif self.os == 'sles':
 			self.addOutput('', f'DHCPD_INTERFACE="{devices}"')
+		elif self.os == 'debian':
+			self.addOutput('', f'INTERFACESv4="{devices}"')
 
 		self.addOutput('', '</stack:file>')
 
