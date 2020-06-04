@@ -42,21 +42,3 @@ class NetworkArgProcessor:
 			networks.extend(names)
 
 		return networks
-
-	def getNetworkName(self, netid):
-		"""
-		Returns a network (subnet) name from the database that
-		is associated with the id 'netid'.
-		"""
-
-		if not netid:
-			return ''
-
-		rows = self.db.select('name from subnets where id=%s', (netid,))
-
-		if rows:
-			netname = rows[0][0]
-		else:
-			netname = ''
-
-		return netname
