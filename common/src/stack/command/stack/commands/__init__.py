@@ -36,7 +36,7 @@ import pymysql
 import stack.graph
 import stack
 from stack.exception import CommandError, ParamRequired
-from stack.bool import str2bool, bool2str
+import stack.bool
 from stack.util import flatten
 import stack.util
 
@@ -457,7 +457,7 @@ class DatabaseConnection:
 			DatabaseConnection.cache[self.name] = {}
 
 		if os.environ.get('STACKCACHE'):
-			self.caching = str2bool(os.environ.get('STACKCACHE'))
+			self.caching = stack.bool.str2bool(os.environ.get('STACKCACHE'))
 		else:
 			self.caching = caching
 
@@ -857,6 +857,8 @@ class Command:
 		self.bytes = []
 
 		self._exec = stack.util._exec
+		self.str2bool = stack.bool.str2bool
+		self.bool2str = stack.bool.bool2str
 
 		self.output = []
 
@@ -1260,29 +1262,6 @@ class Command:
 		except:
 			pass
 		return 0
-
-	def str2bool(self, s):
-		return str2bool(s)
-
-	def bool2str(self, b):
-		return bool2str(b)
-
-	def strWordWrap(self, line, indent=''):
-		if 'COLUMNS' in os.environ:
-			cols = os.environ['COLUMNS']
-		else:
-			cols = 80
-
-		l = 0
-		s = ''
-		for word in line.split(' '):
-			if l + len(word) < cols:
-				s += '%s ' % word
-				l += len(word) + 1 # space
-			else:
-				s += '\n%s%s ' % (indent, word)
-				l += len(indent) + len(word) + 1 # space
-		return s
 
 	def clearText(self):
 		"""
