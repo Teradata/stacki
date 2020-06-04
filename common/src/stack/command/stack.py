@@ -13,8 +13,6 @@
 # @rocks@
 
 import atexit
-import os
-import pwd
 import pymysql
 import sys
 import syslog
