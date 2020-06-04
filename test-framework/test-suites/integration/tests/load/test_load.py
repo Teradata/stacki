@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from textwrap import dedent
 import pytest
 
 SCOPES = ("global", "host", "environment", "os", "appliance")
@@ -153,3 +154,14 @@ class TestLoad:
 			listed_result == expected_result
 			for listed_result in listed_results
 		), f"Missing expected storage partition {expected_result} at {scope} scope.\n\nListed storage partitions were:\n\n{listed_results}"
+
+	def test_load_cart(self, host, test_file):
+		""" ensure load outputs the correct shell commands for carts """
+		json_path = Path(test_file("load/json/cart.json"))
+
+		result = host.run(f'stack load {json_path}')
+		assert result.rc == 0
+		assert result.stdout == dedent('''\
+			/opt/stack/bin/stack "add box" test os=sles
+			/opt/stack/bin/stack "enable cart" test box=test
+		''')

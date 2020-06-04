@@ -1,0 +1,19 @@
+{
+        "version": "no-version",
+        "software": {
+                "box": [
+                        {
+                                "name": "test",
+                                "os": "sles",
+                                "cart": [
+                                        "test"
+                                ]
+                        }
+                ],
+                "cart": [
+                        {
+                                "name": "test"
+                        }
+                ]
+        }
+}

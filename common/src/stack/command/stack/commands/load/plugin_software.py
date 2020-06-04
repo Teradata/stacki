@@ -45,8 +45,7 @@ class Plugin(stack.commands.Plugin):
 
 				self.owner.stack('enable.pallet', pallet, **params)
 
-			for c in b.get('cart', []):
-				cart   = c.get('name')
+			for cart in b.get('cart', []):
 				params = {'box': box}
 
 				self.owner.stack('enable.cart', cart, **params)
