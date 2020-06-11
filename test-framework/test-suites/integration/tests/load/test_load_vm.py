@@ -16,7 +16,8 @@ class TestLoadVM:
 		add_hypervisor,
 		add_vm_multiple,
 		host,
-		stack_load
+		stack_load,
+		revert_etc
 	):
 		"""
 		Test stack load with a focus on virtual machine information.
@@ -77,7 +78,8 @@ class TestLoadVM:
 		create_image_files,
 		add_vm_storage,
 		stack_load,
-		host
+		host,
+		revert_etc
 	):
 		"""
 		Test loading a VM with all types of storage mediums

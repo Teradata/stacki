@@ -32,7 +32,7 @@ class TestAddPallet:
 			[pallet ...] [checksum=string] [clean=bool] [dir=string] [password=string] [run_hooks=bool] [updatedb=string] [username=string]
 		''')
 
-	def test_minimal(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_minimal(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add our minimal pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
 		assert result.rc == 0
@@ -61,7 +61,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_multiple_isos(self, host, host_os, create_pallet_isos, revert_export_stack_pallets):
+	def test_multiple_isos(self, host, host_os, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add our minimal pallet
 		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
 		other_iso = f'{create_pallet_isos}/test-different-arch-1.0-prod.arm.disk1.iso'
@@ -91,7 +91,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_no_mountpoint(self, host, rmtree, create_pallet_isos, revert_export_stack_pallets):
+	def test_no_mountpoint(self, host, rmtree, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Remove our mountpoint
 		rmtree('/mnt/cdrom')
 
@@ -113,7 +113,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_mountpoint_in_use(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_mountpoint_in_use(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		''' current code should not care about double mounted iso's, or anything mounted in /mnt/cdrom '''
 		# Mount an ISO to simulate something left mounted
 		with ExitStack() as cleanup:
@@ -139,7 +139,7 @@ class TestAddPallet:
 				}
 			]
 
-	def test_mountpoint_in_use_mnt(self, host, create_blank_iso, create_pallet_isos, revert_export_stack_pallets):
+	def test_mountpoint_in_use_mnt(self, host, create_blank_iso, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		with ExitStack() as cleanup:
 			# Mount an ISO to simulate another iso left mounted in /mnt
 			result = host.run(f'mount {create_blank_iso}/blank.iso /mnt')
@@ -166,7 +166,7 @@ class TestAddPallet:
 				}
 			]
 
-	def test_mounted_cdrom(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_mounted_cdrom(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		with ExitStack() as cleanup:
 			# Mount our pallet
 			result = host.run(f'mount | grep /mnt/cdrom')
@@ -194,7 +194,7 @@ class TestAddPallet:
 				}
 			]
 
-	def test_duplicate(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_duplicate(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add our minimal pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -218,7 +218,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_pallet_already_mounted(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_pallet_already_mounted(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		''' shouldn't matter if an iso is mounted elsewhere, we should still be able to add it as a pallet '''
 		with ExitStack() as cleanup:
 			# Mount our pallet
@@ -270,7 +270,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_network_iso(self, host, run_pallet_isos_server, revert_export_stack_pallets):
+	def test_network_iso(self, host, run_pallet_isos_server, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add the minimal pallet ISO from the network
 		result = host.run('stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
 		assert result.rc == 0
@@ -378,7 +378,7 @@ class TestAddPallet:
 			},
 		]
 
-	def test_add_pallet_updates_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets):
+	def test_add_pallet_updates_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add our minimal pallet
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -421,7 +421,7 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_output_wsclient(self, host, run_pallet_isos_server, revert_export_stack_pallets):
+	def test_add_pallet_output_wsclient(self, host, run_pallet_isos_server, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add the minimal pallet ISO from the network
 		result = host.run('wsclient add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
@@ -467,7 +467,7 @@ class TestAddPallet:
 		assert result.rc != 0
 		assert "Checksum is required for each pallet." in result.stderr
 
-	def test_pallet_valid_checksum(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_pallet_valid_checksum(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
 		result = host.run(f'sha1sum {minimal}')
 		assert result.rc == 0
@@ -479,7 +479,7 @@ class TestAddPallet:
 		result = host.run('stack list pallet minimal output-format=json')
 		assert result.rc == 0
 
-	def test_pallet_valid_checksum_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets):
+	def test_pallet_valid_checksum_url(self, host, run_pallet_isos_server, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		minimal = f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
 		result = host.run(f'sha1sum {minimal}')
 		assert result.rc == 0

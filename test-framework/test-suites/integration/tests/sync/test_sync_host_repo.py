@@ -24,8 +24,8 @@ class TestSyncHostRepo:
 		# verify it changed
 		assert repo_fi_handle.read_text() == og_repo_text
 
-	
-	def test_repo_file_synced(self, host, host_os, host_repo_file, revert_etc, add_box, add_cart, add_repo, create_pallet_isos, revert_export_stack_pallets):
+
+	def test_repo_file_synced(self, host, host_os, host_repo_file, revert_etc, add_box, add_cart, add_repo, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks, revert_export_stack_carts):
 		''' verify that the frontend's repo file is re-written for certain commands '''
 
 		# get the original

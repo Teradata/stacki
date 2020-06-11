@@ -11,7 +11,7 @@ class TestListBoxRepo:
 			[box ...]
 		''')
 
-	def test_no_args(self, host, add_repo):
+	def test_no_args(self, host, add_repo, revert_etc):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -29,7 +29,7 @@ class TestListBoxRepo:
 		assert len(boxes) == 1
 		assert 'test' in boxes
 
-	def test_one_arg(self, host, add_repo):
+	def test_one_arg(self, host, add_repo, revert_etc):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
@@ -46,7 +46,7 @@ class TestListBoxRepo:
 		boxes = [item['box'] for item in json.loads(result.stdout)]
 		assert boxes == ['test']
 
-	def test_multiple_args(self, host, host_os, add_repo):
+	def test_multiple_args(self, host, host_os, add_repo, revert_etc):
 		# Add a second box to be included
 		result = host.run('stack add box test')
 		assert result.rc == 0

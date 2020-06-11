@@ -20,7 +20,7 @@ class TestDumpSoftware:
 	Test that dumping the software data works properly
 	"""
 
-	def test_pallet(self, host, revert_export_stack_pallets, test_file):
+	def test_pallet(self, host, revert_export_stack_pallets, test_file, revert_pallet_hooks):
 		"test that dump software provides accurate pallet information"
 
 		# do an initial rm of the files that are about to be created just in case the test has been run recently
@@ -89,7 +89,7 @@ class TestDumpSoftware:
 		assert check == True
 
 	@pytest.mark.parametrize("repo_args", ADD_REPO_ARGUMENTS)
-	def test_load_dumped_repo(self, host, repo_args, stack_load, test_file, fake_os_sles):
+	def test_load_dumped_repo(self, host, repo_args, stack_load, test_file, fake_os_sles, revert_etc):
 		expected_dumpfile = Path(test_file(repo_args[2])).resolve()
 
 		repo_name = repo_args[0]
@@ -125,7 +125,7 @@ class TestDumpSoftware:
 		assert results.rc == 0
 		assert list_results == results.stdout
 
-	def test_load_multiple_dumped_repos(self, host, stack_load, test_file, fake_os_sles):
+	def test_load_multiple_dumped_repos(self, host, stack_load, test_file, fake_os_sles, revert_etc):
 		expected_dumpfile = Path(test_file('dump/multiple-repo.json')).resolve()
 
 		repo_name1 = ADD_REPO_ARGUMENTS[0][0]

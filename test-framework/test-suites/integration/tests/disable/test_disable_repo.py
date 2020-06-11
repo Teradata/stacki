@@ -1,7 +1,7 @@
 import json
 
 class TestDisableRepo:
-	def test_disable_repo(self, host, add_repo):
+	def test_disable_repo(self, host, add_repo, revert_etc):
 		''' we should be able to enable and disable repos from a box '''
 		result = host.run('stack add box test')
 		assert result.rc == 0

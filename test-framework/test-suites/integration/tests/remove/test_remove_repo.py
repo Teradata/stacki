@@ -11,7 +11,7 @@ class TestRemoveRepo:
 		assert result.rc == 255
 		assert result.stderr.startswith('error - ')
 
-	def test_args(self, host, add_repo):
+	def test_args(self, host, add_repo, revert_etc):
 		''' ensure removing one repo only touches that repo '''
 		add_repo('test2', 'testurl2')
 

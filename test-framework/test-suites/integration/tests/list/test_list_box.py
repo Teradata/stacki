@@ -11,7 +11,7 @@ class TestListBox:
 			[box ...]
 		''')
 
-	def test_no_args(self, host, host_os):
+	def test_no_args(self, host, host_os, revert_opt_stack_images, revert_pallet_patches, revert_export_stack_pallets):
 		# Add a second box
 		result = host.run('stack add box test')
 		assert result.rc == 0
