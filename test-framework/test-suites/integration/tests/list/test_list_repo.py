@@ -33,7 +33,7 @@ class TestListRepo:
 		assert len(new_repo_data) == 2
 		assert {'test', 'test2'} == {repo['name'] for repo in new_repo_data}
 
-	def test_removed_not_listed(self, host, add_repo):
+	def test_removed_not_listed(self, host, add_repo, revert_etc):
 		# Run list repo with just the test box
 		result = host.run('stack list repo test output-format=json')
 		assert result.rc == 0
@@ -71,7 +71,7 @@ class TestListRepo:
 			}
 		]
 
-	def test_add_repo_with_pallet(self, host, host_os, add_repo, create_pallet_isos, revert_export_stack_pallets):
+	def test_add_repo_with_pallet(self, host, host_os, add_repo, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks, revert_etc):
 		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
 		#result = host.run(f'stack add pallet /root/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0

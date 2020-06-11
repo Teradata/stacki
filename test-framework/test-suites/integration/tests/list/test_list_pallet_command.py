@@ -50,7 +50,7 @@ class TestListPalletCommand:
 		# That stacki pallet should have a ton of commands
 		assert len(commands['stacki']) > 200
 
-	def test_multiple_args(self, host, create_pallet_isos, revert_export_stack_pallets):
+	def test_multiple_args(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add two of the test pallets
 		result = host.run(f'stack add pallet {create_pallet_isos}/test_1-sles-1.0-prod.x86_64.disk1.iso')
 		assert result.rc == 0

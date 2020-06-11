@@ -19,7 +19,7 @@ class TestRunPallet:
 			{pallet ...} [arch=string] [os=string] [release=string] [version=string]
 		''')
 
-	def test_not_enabled(self, host, host_os, create_pallet_isos, revert_export_stack_pallets):
+	def test_not_enabled(self, host, host_os, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
 		# Add our test pallet
 		result = host.run(
 			f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso'
@@ -45,7 +45,7 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_multiple_args(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets, revert_export_stack_carts):
+	def test_multiple_args(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets, revert_export_stack_carts, revert_pallet_hooks):
 		# Add our test pallet
 		result = host.run(
 			f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'
@@ -69,7 +69,7 @@ class TestRunPallet:
 		assert result.rc == 0
 		assert result.stdout == ''
 
-	def test_database_false(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets, revert_export_stack_carts):
+	def test_database_false(self, host, host_os, create_pallet_isos, revert_etc, revert_export_stack_pallets, revert_export_stack_carts, revert_pallet_hooks):
 		# Add our test pallet
 		result = host.run(
 			f'stack add pallet {create_pallet_isos}/test_1-{host_os}-1.0-prod.x86_64.disk1.iso'

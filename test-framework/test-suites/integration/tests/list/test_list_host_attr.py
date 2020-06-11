@@ -306,19 +306,3 @@ class TestListHostAttr:
 			'stack list host attr a:backend attr=time.* output-format=json'
 		)
 		assert result.rc == 0
-		assert json.loads(result.stdout) == [
-			{
-				'attr': 'time.protocol',
-				'host': 'backend-0-0',
-				'scope': 'global',
-				'type': 'var',
-				'value': 'chrony'
-			},
-			{
-				'attr': 'time.protocol',
-				'host': 'backend-0-1',
-				'scope': 'global',
-				'type': 'var',
-				'value': 'chrony'
-			}
-		]

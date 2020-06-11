@@ -23,7 +23,7 @@ class TestReportHostRepo:
 		assert result.stdout.splitlines()[0] == first_line
 		assert result.stdout.splitlines()[-1] == last_line
 
-	def test_with_repo(self, host, host_os, host_repo_file, add_host, add_repo, add_box):
+	def test_with_repo(self, host, host_os, host_repo_file, add_host, add_repo, add_box, revert_etc):
 		result = host.run('stack enable repo test box=test')
 		assert result.rc == 0
 		result = host.run('stack set host box backend-0-0 box=test')
@@ -90,7 +90,7 @@ class TestReportHostRepo:
 		assert result.rc == 0
 		assert result.stdout == output_single_repo.replace('gpgcheck=0', 'gpgcheck=1')
 
-	def test_repo_templating(self, host, host_os, host_repo_file, add_host, add_repo, add_box):
+	def test_repo_templating(self, host, host_os, host_repo_file, add_host, add_repo, add_box, revert_etc):
 		''' test that the repo templating feature works correctly '''
 		result = host.run('stack set repo test url="http://{{ Kickstart_PrivateAddress }}/test"')
 		assert result.rc == 0
