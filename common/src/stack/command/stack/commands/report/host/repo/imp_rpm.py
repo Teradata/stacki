@@ -27,11 +27,11 @@ class Implementation(stack.commands.Implementation):
 		repo_data = {}
 		# convert the raw pallet and cart data into repo dictionaries
 		for pallet in self.owner.box_data[box]['pallets']:
-			repo_data[pallet.name] = {
+			repo_data[pallet.id] = {
 				'alias': f'{pallet.name}-{pallet.version}-{pallet.rel}',
 				'name': f'{pallet.name} {pallet.version} {pallet.rel}',
 				'url': f'{stacki_http_url_base}/pallets/{pallet.name}/{pallet.version}/{pallet.rel}/{pallet.os}/{pallet.arch}',
-				'gpgcheck': False,
+				'gpgcheck': '0',
 			}
 
 		for cart, _ in self.owner.box_data[box]['carts']:
@@ -40,7 +40,7 @@ class Implementation(stack.commands.Implementation):
 				'alias': f'{cart}-cart',
 				'name': f'{cart} cart',
 				'url': f'{stacki_http_url_base}/carts/{cart}',
-				'gpgcheck': False,
+				'gpgcheck': '0',
 			}
 
 		# repo objects are already in the right format so merge that dict here.

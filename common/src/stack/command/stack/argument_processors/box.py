@@ -45,6 +45,7 @@ class BoxArgProcessor:
 			r.id, r.name, r.version, r.rel, r.arch, o.name, r.url
 			from rolls r, boxes b, stacks s, oses o
 			where b.name=%s and b.id=s.box and s.roll=r.id and b.os=o.id
+			ORDER BY r.id
 		""", (box,))
 
 		pallets.extend([Pallet(*row) for row in rows])
@@ -65,6 +66,7 @@ class BoxArgProcessor:
 			WHERE carts.id = cs.cart
 			AND cs.box = boxes.id
 			AND boxes.name=%s
+			ORDER BY carts.id
 		""", (box,))
 
 		return list(rows)

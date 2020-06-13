@@ -150,3 +150,30 @@ class TestReportHostRepo:
 			{last_line}
 			'''
 		)
+
+	def test_repo_same_pallet_name(self, host, create_pallet_isos, revert_export_stack_pallets):
+		''' ensure the corner case of two pallets having the same name can both end up in the repo '''
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-test.x86_64.disk1.iso')
+		assert result.rc == 0
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-dev.x86_64.disk1.iso')
+		assert result.rc == 0
+
+		# add both test pallets
+		result = host.run('stack add box test os=sles')
+		assert result.rc == 0
+		result = host.run(f'stack enable pallet test-different-release box=test')
+		assert result.rc == 0
+
+		# set the frontend's box to test and validate the repo file.
+		result = host.run('stack set host box localhost box=test')
+		assert result.rc == 0
+
+		result = host.run('stack report host repo localhost')
+		assert result.rc == 0
+
+		repos = [r.strip() for r in result.stdout.splitlines() if r.startswith('[test-different-release')]
+		assert len(repos) == 2
+
+		# assert that they are different entries, however
+		# also tests that the order they appear is the order they were add pallet'ed in
+		assert repos == ['[test-different-release-1.0-test]', '[test-different-release-1.0-dev]']
