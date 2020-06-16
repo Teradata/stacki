@@ -153,10 +153,17 @@ def host_os():
 
 @pytest.fixture(scope="session")
 def host_repo_file():
-	if os.path.exists('/etc/SuSE-release'):
-		return '/etc/zypp/repos.d/stacki.repo'
-	# TODO: ubuntu
+	sles_path = '/etc/zypp/repos.d/stacki.repo'
 
+	if Path('/etc/SuSE-release').exists():
+		return sles_path
+
+	# SLES 15
+	os_release = Path('/etc/os-release')
+	if os_release.exists() and 'NAME="SLES"' in os_release.read_text():
+		return sles_path
+
+	# TODO: ubuntu
 	return '/etc/yum.repos.d/stacki.repo'
 
 @pytest.fixture
