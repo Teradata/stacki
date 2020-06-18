@@ -30,6 +30,8 @@ REPO_NON_REQUIRED_ARGS = [
 	{'type': 'yast'},
 ]
 
+DEFAULT_GPGKEY_VALUE = None
+
 class TestRepoArgumentProcessor:
 	@pytest.fixture
 	def argument_processor(self):
@@ -60,7 +62,7 @@ class TestRepoArgumentProcessor:
 
 		# verify db call sequence
 		argument_processor.db.select.assert_called_once_with(ANY, (basic_repo_data[0], basic_repo_data[1]))
-		argument_processor.db.execute.assert_called_once_with(ANY, basic_repo_data)
+		argument_processor.db.execute.assert_called_once_with(ANY, basic_repo_data + (DEFAULT_GPGKEY_VALUE, ))
 
 	@pytest.mark.parametrize("kwargs", REPO_NON_REQUIRED_ARGS)
 	def test_insert_repo_optional_args(self, argument_processor, kwargs):
@@ -78,7 +80,7 @@ class TestRepoArgumentProcessor:
 
 		# verify db call sequence only has expected key/vals
 		argument_processor.db.select.assert_called_once_with(ANY, (basic_repo_data[0], basic_repo_data[1]))
-		argument_processor.db.execute.assert_called_with(ANY, basic_repo_data + tuple(expected_vals))
+		argument_processor.db.execute.assert_called_with(ANY, basic_repo_data + tuple(expected_vals) + (DEFAULT_GPGKEY_VALUE, ))
 
 	def test_insert_repo_already_exists(self, argument_processor):
 		# setup the id check in the db to be empty
@@ -88,7 +90,7 @@ class TestRepoArgumentProcessor:
 		argument_processor.insert_repo(*basic_repo_data)
 
 		argument_processor.db.select.assert_called_once_with(ANY, (basic_repo_data[0], basic_repo_data[1]))
-		argument_processor.db.execute.assert_called_once_with(ANY, basic_repo_data)
+		argument_processor.db.execute.assert_called_once_with(ANY, basic_repo_data + (DEFAULT_GPGKEY_VALUE, ))
 
 		# now re-attempt insert which should fail
 		# reset test fixture

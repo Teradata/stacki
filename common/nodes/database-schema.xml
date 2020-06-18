@@ -232,7 +232,7 @@ CREATE TABLE repos (
 	type		VARCHAR(32) NOT NULL DEFAULT 'rpm-md',
 	is_mirrorlist	BOOLEAN DEFAULT FALSE,
 	gpgcheck	BOOLEAN DEFAULT FALSE,
-	gpgkey		TEXT DEFAULT '',
+	gpgkey		TEXT DEFAULT NULL,
 	os		VARCHAR(32) NOT NULL DEFAULT '&os;',
 	pallet_id	INT,
 	INDEX (Name),

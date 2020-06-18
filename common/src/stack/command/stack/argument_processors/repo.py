@@ -36,6 +36,11 @@ class RepoArgProcessor:
 			if key in kwargs:
 				data[key] = kwargs[key]
 
+		# WORKAROUND FOR MARIADB <10.2.1 BUG (so, currently supported OSes that aren't sles15)
+		# see STACKI-1679 and https://mariadb.com/kb/en/mariadb-1021-release-notes/
+		if 'gpgkey' not in data:
+			data['gpgkey'] = None
+
 		cols = ', '.join(['name', 'alias', 'url'] + list(data))
 		vals = ', '.join(['%s'] * (3 + len(data.values())))
 
