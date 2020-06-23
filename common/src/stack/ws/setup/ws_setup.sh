@@ -35,6 +35,8 @@ STACK_CMDS=( "sync *"	\
 	"unload *"	\
 	"remove host"	\
 	"add pallet" 	\
+	"enable pallet" 	\
+	"disable pallet" 	\
 	"remove pallet"	\
 	"list host switch" \
 	)
