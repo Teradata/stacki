@@ -1084,9 +1084,8 @@ pipeline {
 
                 stage('Build QCow2 Image') {
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
@@ -1191,9 +1190,8 @@ pipeline {
                     }
 
                     when {
-                        anyOf {
-                            environment name: 'PLATFORM', value: 'sles12'
-                            environment name: 'PLATFORM', value: 'redhat7'
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
                         }
                     }
 
