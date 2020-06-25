@@ -527,7 +527,7 @@ echo
 # if we mapped the stacki source, symlink it in to place
 if [[ -d "$SRC_DIR" ]]
 then
-    vagrant ssh frontend --no-tty -c "sudo -i python3 /export/src/tools/use_the_source/use_the_source.py /export/src/"
+    vagrant ssh frontend --no-tty -c "sudo -i /opt/stack/bin/python3 /export/src/tools/use_the_source/use_the_source.py /export/src/"
 fi
 
 # Run the post-cluster-up hooks
