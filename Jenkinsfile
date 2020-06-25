@@ -436,7 +436,7 @@ pipeline {
 
                 script {
                     // releases, develop branch, and branches ending in _cov get coverage reports
-                    if (env.PLATFORM ==~ 'sles12|redhat7' && (env.IS_RELEASE == 'true' || env.GIT_BRANCH ==~ /develop|.*_cov/ || currentBuild.description ==~ /(?si).*\bcoverage\b.*/)) {
+                    if (env.PLATFORM != 'sles11' && (env.IS_RELEASE == 'true' || env.GIT_BRANCH ==~ /develop|.*_cov/ || currentBuild.description ==~ /(?si).*\bcoverage\b.*/)) {
                         env.COVERAGE_REPORTS = 'true'
 
                         // A VM to combine all the coverage into a combined report
