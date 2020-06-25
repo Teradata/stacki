@@ -212,6 +212,9 @@ pipeline {
                     sh 'mv stacki/stacki-*.iso ./'
 
                     switch(env.PLATFORM) {
+                        case 'sles15':
+                            sh 'mv $(ls ./stacki-*.iso) $(ls ./stacki-*.iso | sed -e "s|stacki-|stacki-15.1-|")'
+                            break
                         case 'sles12':
                             sh 'mv $(ls ./stacki-*.iso) $(ls ./stacki-*.iso | sed -e "s|stacki-|stacki-12.3-|")'
                             break
