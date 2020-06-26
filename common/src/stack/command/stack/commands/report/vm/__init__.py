@@ -222,6 +222,7 @@ class Command(command, VmArgProcessor):
 		"""
 
 		vm_host = self.get_hypervisor_by_name(host)
+		kickstartable = self.str2bool(self.getHostAttr(host, 'kickstartable'))
 		interfaces = []
 
 		for interface in self.call('list.host.interface', [host]):
@@ -253,7 +254,9 @@ class Command(command, VmArgProcessor):
 			out['mac'] = interface['mac']
 			out['name'] = host_interface
 
-			if network_pxe:
+			# Only set the bootorder for the interface  if the network
+			# is set to pxe and that the kickstartable attr is true for the host
+			if network_pxe and kickstartable:
 				out['bootorder'] = self.bootorder
 				self.bootorder+=1
 
