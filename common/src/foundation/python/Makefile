@@ -6,7 +6,7 @@
 
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
-DEPENDS.FILES	= Python-$(VERSION).tgz
+DEPENDS.FILES	= Python-$(VERSION).tar.xz
 
 include $(STACKBUILD)/etc/CCRules.mk
 
@@ -24,7 +24,7 @@ bootstrap:
 
 
 build:
-	tar -xzf Python-$(VERSION).tgz
+	tar -xf $(DEPENDS.FILES)
 	( 								\
 		cd Python-$(VERSION);					\
 		./configure --prefix=$(PKGROOT)				\
