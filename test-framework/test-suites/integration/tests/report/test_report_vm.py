@@ -212,3 +212,32 @@ class TestReportVM:
 		)
 
 		assert sub_uuid == expect_output
+
+	def test_report_vm_no_kickstartable(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		host,
+		host_os,
+		test_file
+	):
+		expect_output = Path(test_file(f'report/vm_config_no_kickstart_{host_os}.txt')).read_text()
+
+		conf = host.run('stack report vm vm-backend-0-3')
+		no_kickstart = host.run('stack set host attr vm-backend-0-3 attr=kickstartable value=False')
+		assert no_kickstart.rc == 0
+
+		conf = host.run('stack report vm vm-backend-0-3 bare=y')
+		assert conf.rc == 0
+
+		# Remove the generated UUID
+		# as it is different each
+		# test run
+		sub_uuid = re.sub(
+			r'<uuid>.*</uuid>',
+			'<uuid>00000000-0000-0000-0000-0000000000</uuid>',
+			conf.stdout
+		)
+
+		assert sub_uuid == expect_output
+
