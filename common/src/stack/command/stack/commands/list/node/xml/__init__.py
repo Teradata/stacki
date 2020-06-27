@@ -23,6 +23,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 import stack.profile
 import stack.roll
+import stack.settings
 
 class Command(stack.commands.list.command, BoxArgProcessor):
 	"""
@@ -64,7 +65,7 @@ class Command(stack.commands.list.command, BoxArgProcessor):
 	"""
 
 	def run(self, params, args):
-		(attributes, pallets, evalp, missing, generator, basedir) = \
+		(attributes_input, pallets, evalp, missing, generator, basedir) = \
 			self.fillParams([
 				('attrs', ),
 				('pallet', ),
@@ -76,25 +77,29 @@ class Command(stack.commands.list.command, BoxArgProcessor):
 
 		if pallets:
 			pallets = pallets.split(',')
+		# seed the attributes with the contents of /etc/stacki.yml
+		# but let the graph treat them as attributes
+		# yaml supports multiple data types - just convert to strings
 
-		if attributes:
+		attrs = {k: str(v) for k, v in stack.settings.get_settings().items()}
+
+		if attributes_input:
 			try:
-				attrs = ast.literal_eval(attributes)
+				attrs.update(ast.literal_eval(attributes_input))
 			except:
-				attrs = {}
-				if os.path.exists(attributes):
-					file = open(attributes, 'r')
+				attrfile_data = {}
+				if os.path.exists(attributes_input):
+					file = open(attributes_input, 'r')
 					for line in file.readlines():
 						l = line.split(':', 1)
 						if len(l) == 2:
 							#
 							# key/value pairs
 							#
-							attrs[l[0].strip()] = \
+							attrfile_data[l[0].strip()] = \
 								l[1].strip()
 					file.close()
-		else:
-			attrs = {}
+				attrs.update(attrfile_data)
 
 		#
 		# if there is an empty key in the attrs dictionary, remove

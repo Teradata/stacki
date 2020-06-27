@@ -6,6 +6,13 @@ All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
 
+<!-- create the stack.yml -->
+<stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
+import stack.settings
+
+stack.settings.write_default_settings_file(overwrite=True)
+</stack:script>
+
 <!-- Make sure to add the frontend box, and enable all added pallets for both the default and frontend box. -->
 <stack:script stack:shell='/opt/stack/bin/python3' stack:stage="install-post" stack:cond="platform != 'aws' and not barnacle">
 import pathlib
