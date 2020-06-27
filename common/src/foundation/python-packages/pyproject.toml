@@ -108,5 +108,5 @@ cryptography = { appliances = ["server"] }
 jinja2 = { appliances = ["server"], bootstrap = true }
 markupsafe = { appliances = ["server"] }
 pycparser = { appliances = ["server"] }
-pyyaml = { appliances = ["server"] }
+pyyaml = { appliances = ["server"], bootstrap = true }
 six = { appliances = ["server"] }

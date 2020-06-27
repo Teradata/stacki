@@ -1,15 +1,17 @@
 #! /opt/stack/bin/python3
 
 from __future__ import print_function
-import os
-import sys
-import subprocess
 import getopt
-import logging
-import socket
-import re
-import struct
 import json
+import logging
+import os
+import re
+import socket
+import struct
+import subprocess
+import sys
+
+from pathlib import Path
 
 # Bail if being run in python2.
 if sys.version_info[0] < 3:
@@ -37,11 +39,6 @@ logger.addHandler(filehandler)
 logger.addHandler(handler)
 
 SITE_ATTRS_TEMPLATE = """\
-Info_CertificateCountry:US
-Info_CertificateLocality:Solana Beach
-Info_CertificateOrganization:StackIQ
-Info_CertificateState:California
-Info_ClusterLatlong:N32.87 W117.22
 Info_FQDN:{FQDN}
 Kickstart_Keyboard:us
 Kickstart_Lang:en_US
@@ -315,6 +312,9 @@ if result.returncode != 0:
 # Note: we need to refresh the library cache so the wizard
 # code can find the Newt library and its dependencies
 run_and_warn(['ldconfig'])
+
+if not Path('/opt/stack/etc/stacki.yml').exists():
+	run_and_warn("/opt/stack/bin/python3 -c 'import stack.settings; stack.settings.write_default_settings_file()'", shell=True)
 
 if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'):
 	if use_existing:

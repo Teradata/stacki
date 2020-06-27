@@ -16,6 +16,7 @@ PYAPI		= $(wildcard api/*.py)
 PKGROOT		= /opt/stack
 ROLLROOT	= ../../../..
 DEPENDS.DIRS	= stack
+RPM.REQUIRES    = foundation-python-PyYAML
 
 include $(STACKBUILD)/etc/CCRules.mk
 

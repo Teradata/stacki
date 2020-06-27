@@ -24,6 +24,7 @@ import stack.api
 import stack.bool
 import stack.mq
 import stack.commands
+import stack.settings
 
 
 class Client:
@@ -161,21 +162,15 @@ syslog.openlog('profile', syslog.LOG_PID, syslog.LOG_LOCAL0)
 syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (client.addr, client.port))
 client.pre()
 
-# Use a semaphore to restrict the number of concurrent profile
-# generators.  The first time through we set the semaphore to the
-# number of CPUs (not a great guess, but reasonable).
+# Use a semaphore to restrict the number of concurrent profile generators.
 
 empty = False
 mutex.acquire()
 count = semaphore.read()
 if count is None:
 	syslog.syslog(syslog.LOG_DEBUG, 'semaphore not found')
-	try:
-		cmd = "grep 'processor' /proc/cpuinfo | wc -l"
-		out = os.popen(cmd).readline()
-		count = int(out)
-	except:
-		count = 8
+	count = stack.settings.get_settings()['max_concurrent_profile_requests']
+
 if count == 0:
 	syslog.syslog(syslog.LOG_DEBUG, 'semaphore found but zero')
 	# Out of resources force the client to retry,
