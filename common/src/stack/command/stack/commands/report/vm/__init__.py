@@ -9,6 +9,7 @@ import stack.commands
 import random
 import uuid
 import jinja2
+from jinja2 import Environment, meta
 from pathlib import Path
 from stack.kvm import Hypervisor
 from stack.exception import CommandError, ParamError
@@ -54,18 +55,14 @@ class Command(command, VmArgProcessor):
 		self.beginOutput()
 		vm_hosts = self.valid_vm_args(args)
 		conf_loc = Hypervisor.conf_loc
+		default_template = '/opt/stack/share/templates/libvirt.conf.j2'
+		req_vars = {'memory', 'cpucount', 'uuid', 'os', 'name'}
 		out = []
 
 		bare_output, hypervisor = self.fillParams([
 			('bare', False),
 			('hypervisor', ''),
 		])
-
-		template_conf = Path('/opt/stack/share/templates/libvirt.conf.j2')
-		if template_conf.is_file():
-			libvirt_template = jinja2.Template(template_conf.read_text(), lstrip_blocks=True, trim_blocks=True)
-		else:
-			raise CommandError(self, f'Unable to parse template file: {template_conf}')
 
 		# Strip the SUX tags if set to true
 		bare_output = self.str2bool(bare_output)
@@ -85,6 +82,22 @@ class Command(command, VmArgProcessor):
 			self.bootorder = 1
 			curr_hypervisor = self.get_hypervisor_by_name(vm)
 			loc = conf_loc
+			template_loc = self.getHostAttr(vm, 'vm_config_location')
+
+			# Use the default template in /opt/stack/share/templates
+			# if the template attribute isn't set
+			if not template_loc:
+				template_loc = default_template
+
+			template_conf = Path(template_loc)
+			env = Environment()
+			ast = env.parse(template_conf.read_text())
+			var_list = meta.find_undeclared_variables(ast)
+
+			if template_conf.is_file() and req_vars.issubset(var_list):
+				libvirt_template = jinja2.Template(template_conf.read_text(), lstrip_blocks=True, trim_blocks=True)
+			else:
+				raise CommandError(self, f'Unable to parse or missing variables for template file: {template_conf}')
 
 			# If the hypervisor param is set
 			# ignore any VM not belonging to the

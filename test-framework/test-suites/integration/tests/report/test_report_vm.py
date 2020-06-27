@@ -241,3 +241,47 @@ class TestReportVM:
 
 		assert sub_uuid == expect_output
 
+	def test_report_vm_custom_template(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		host,
+		host_os,
+		test_file
+	):
+		expect_output = Path(test_file(f'report/vm_config_simple_{host_os}.txt')).read_text()
+		custom_config = Path(test_file(f'report/vm_config_custom_template.j2'))
+
+		set_template_attr = host.run(f'stack set host attr vm-backend-0-3 attr=vm_config_location value={custom_config}')
+		assert set_template_attr.rc == 0
+
+		conf = host.run('stack report vm vm-backend-0-3 bare=y')
+		assert conf.rc == 0
+
+		# Remove the generated UUID
+		# as it is different each
+		# test run
+		sub_uuid = re.sub(
+			r'<uuid>.*</uuid>',
+			'<uuid>00000000-0000-0000-0000-0000000000</uuid>',
+			conf.stdout
+		)
+
+		assert sub_uuid == expect_output
+
+	def test_report_vm_bad_template(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		host,
+		host_os,
+		test_file
+	):
+		custom_config = Path(test_file(f'report/vm_config_bad_template.j2'))
+
+		set_template_attr = host.run(f'stack set host attr vm-backend-0-3 attr=vm_config_location value={custom_config}')
+		assert set_template_attr.rc == 0
+
+		conf = host.run('stack report vm vm-backend-0-3 bare=y')
+		assert conf.rc != 0
+

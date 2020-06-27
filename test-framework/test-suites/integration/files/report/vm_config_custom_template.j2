@@ -1,0 +1,51 @@
+<domain type="kvm">
+	<name>{{ name }}</name>
+	<uuid>{{ uuid }}</uuid>
+	<memory>{{ memory }}</memory>
+	<vcpu>{{ cpucount }}</vcpu>
+	<os>
+		<type arch="x86_64">hvm</type>
+	</os>
+	<features>
+		<acpi/>
+		<apic/>
+		{% if os == 'sles' %}
+		<vmport state="off"/>
+		{% endif %}
+	</features>
+	<clock offset="utc">
+		<timer name="rtc" tickpolicy="catchup"/>
+		<timer name="pit" tickpolicy="delay"/>
+		<timer name="hpet" present="no"/>
+	</clock>
+	<on_poweroff>destroy</on_poweroff>
+	<on_reboot>restart</on_reboot>
+	<on_crash>restart</on_crash>
+	<pm>
+		<suspend-to-mem enabled="no"/>
+		<suspend-to-disk enabled="no"/>
+	</pm>
+	<devices>
+		{% if os == 'redhat' %}
+		<emulator>/usr/libexec/qemu-kvm</emulator>
+		{% endif %}
+		{% if os == 'sles' %}
+		<emulator>/usr/bin/qemu-kvm</emulator>
+		{% endif %}
+		<serial type="pty">
+			<target port="0"/>
+		</serial>
+		<serial type="pty">
+			<target port="1"/>
+		</serial>
+		<input bus="ps2" type="mouse"/>
+		<graphics autoport="yes" keymap="en-us" type="vnc" port="-1"/>
+		<video>
+			<model heads="1" vram="9216" type="cirrus"/>
+		</video>
+		<rng model="virtio">
+			<backend model="random">/dev/random</backend>
+			<address type="pci" domain="0x0000" bus="0x00" slot="0x0c" function="0x0"/>
+		</rng>
+	</devices>
+</domain>
