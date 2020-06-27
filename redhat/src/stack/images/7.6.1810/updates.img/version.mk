@@ -13,7 +13,7 @@ OVERLAY.PKGS	= \
 	foundation-python-Flask \
 		foundation-python-itsdangerous \
 		foundation-python-Werkzeug \
-		foundation-python-Click \
+		foundation-python-click \
 		foundation-python-MarkupSafe \
 		foundation-python-Jinja2 \
 	foundation-python-PyMySQL \

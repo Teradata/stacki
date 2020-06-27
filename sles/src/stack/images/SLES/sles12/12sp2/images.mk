@@ -11,7 +11,7 @@ YUMLIST = \
 		foundation-python-Werkzeug \
 		foundation-python-MarkupSafe \
 		foundation-python-Jinja2 \
-		foundation-python-Click \
+		foundation-python-click \
 	foundation-python-PyMySQL \
 	foundation-python-configparser \
 	foundation-python-jsoncomment \
