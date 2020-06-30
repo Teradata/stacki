@@ -10,7 +10,7 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-
+import importlib
 import ast
 import os
 import subprocess
@@ -22,6 +22,7 @@ from stack.argument_processors.box import BoxArgProcessor
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 import stack.profile
+import stack.roll
 
 class Command(stack.commands.list.command, BoxArgProcessor):
 	"""
@@ -140,10 +141,8 @@ class Command(stack.commands.list.command, BoxArgProcessor):
 		doEval = self.str2bool(evalp)
 		allowMissing = self.str2bool(missing)
 
-		# yes, this was already imported above.  Take it out and it crashes looking up .version.
-		# First added in commit 38623be.  No one knows why it's needed.
-		import stack
-
+		# get the version/release populated during frontend install
+		importlib.reload(stack)
 		# Add more values to the attributes
 		attrs['version'] = stack.version
 		attrs['release'] = stack.release
@@ -168,8 +167,6 @@ class Command(stack.commands.list.command, BoxArgProcessor):
 			# pallet info from '/tmp/rolls.xml' or
 			# '/tmp/pallets.xml'
 			#
-
-			import stack.roll
 
 			g = stack.roll.Generator()
 
