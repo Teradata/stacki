@@ -44,6 +44,7 @@ apache2
 # out the following lines and restart the webserver.
 KeepAlive On
 KeepAliveTimeout 5
+TimeOut 300
 
 UseCanonicalName Off
 ServerName ]]>&Info_FQDN;<![CDATA[
