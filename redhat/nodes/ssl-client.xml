@@ -23,10 +23,10 @@ cd /etc/security/ca; \
 /usr/bin/openssl req -new -nodes -config ca.cfg \
 	-keyout $cert/key \
 	-subj "\
-/C=&Info_CertificateCountry;/\
-ST=&Info_CertificateState;/\
-L=&Info_CertificateLocality;/\
-O=&Info_CertificateOrganization;/\
+/C=&settings.ssl.country;/\
+ST=&settings.ssl.state;/\
+L=&settings.ssl.locality;/\
+O=&settings.ssl.organization;/\
 OU=&Kickstart_PrivateHostname;/\
 CN=&hostname;.&Kickstart_PrivateDNSDomain;" \
 	&gt; $cert/csr 2&gt;/dev/null
