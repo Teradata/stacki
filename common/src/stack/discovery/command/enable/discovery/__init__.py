@@ -25,7 +25,7 @@ class Command(stack.commands.enable.command):
 	</param>
 
 	<param type='string' name='rack' optional='1'>
-	The rack number to use for discovered nodes. Defaults to the 'discovery.base.rack' attribute.
+	The rack number to use for discovered nodes. Defaults to the 'discovery.base.rack' setting.
 	</param>
 
 	<param type='string' name='rank' optional='1'>

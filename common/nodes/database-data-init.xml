@@ -78,14 +78,6 @@ with open('/tmp/site.json', 'w') as file:
                         "value": true
                 },
                 {
-                        "name": "discovery.base.rack",
-                        "value": "0"
-                },
-                {
-                        "name": "discovery.base.rank",
-                        "value": 0
-                },
-                {
                         "name": "os",
                         "value": "&os;"
                 },

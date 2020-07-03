@@ -20,6 +20,7 @@ import sys
 import stack.api
 from stack.exception import CommandError
 import stack.mq
+import stack.settings
 
 
 class Discovery:
@@ -364,6 +365,8 @@ class Discovery:
 		if self.is_running():
 			return
 
+		stacki_settings = stack.settings.get_settings()
+
 		# Make sure our appliance name is valid
 		if appliance_name:
 			try:
@@ -382,14 +385,14 @@ class Discovery:
 
 		# Set up the rack
 		if rack is None:
-			self._rack = int(stack.api.Call("list.host.attr", ["localhost", "attr=discovery.base.rack"])[0]['value'])
+			self._rack = int(stacki_settings['discovery.base.rack'])
 		else:
 			self._rack = int(rack)
 
 		# Set up the rank
 		if rank is None:
 			# Start with with default
-			self._rank = int(stack.api.Call("list.host.attr", ["localhost", "attr=discovery.base.rank"])[0]['value'])
+			self._rank = int(stacki_settings['discovery.base.rank'])
 
 			# Try to pull the next rank based on the DB
 			for host in stack.api.Call("list.host"):
