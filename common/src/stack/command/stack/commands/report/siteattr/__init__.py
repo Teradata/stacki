@@ -52,11 +52,6 @@ class Command(stack.commands.report.command):
 					nameserver = line[10:].strip()
 
 		attrs = { 
-#			'Info_CertificateCountry'        : 'US',
-#			'Info_CertificateLocality'       : 'San Diego',
-#			'Info_CertificateOrganization'   : 'Stacki',
-#			'Info_CertificateState'          : 'California',
-#			'Info_ClusterLatlong'            : 'N32.87 W117.22',
 			'Info_FQDN'                      : fqdn,
 			'Kickstart_Keyboard'             : 'us',
 			'Kickstart_Lang'                 : 'en_US',

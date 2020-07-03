@@ -81,7 +81,7 @@ class Command(stack.commands.list.command, BoxArgProcessor):
 		# but let the graph treat them as attributes
 		# yaml supports multiple data types - just convert to strings
 
-		attrs = {k: str(v) for k, v in stack.settings.get_settings().items()}
+		attrs = {f'settings.{k}': str(v) for k, v in stack.settings.get_settings().items()}
 
 		if attributes_input:
 			try:

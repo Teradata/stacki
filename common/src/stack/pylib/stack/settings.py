@@ -27,10 +27,10 @@ max_concurrent_profile_requests: {2 * os.cpu_count()}
 
 # these are used to generate the CA for frontend's ssl cert
 # These are used at frontend installation time.
-Info_CertificateCountry: 'US'
-Info_CertificateLocality: 'Solana Beach'
-Info_CertificateOrganization: 'StackIQ'
-Info_CertificateState: 'California'
+ssl.organization: 'StackIQ'
+ssl.locality: 'Solana Beach'
+ssl.state: 'California'
+ssl.country: 'US'
 
 # these settings control the starting points for discover-nodes (nee insert ethers)
 discovery.base.rack: '0'

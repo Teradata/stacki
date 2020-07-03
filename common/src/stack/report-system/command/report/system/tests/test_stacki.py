@@ -2,6 +2,8 @@ import pytest
 import json
 from operator import itemgetter
 
+import stack.settings
+
 @pytest.mark.parametrize("command", ["box", "pallet", "cart", "network", "host", "host interface"])
 def test_stack_list(command, host, report_output):
 	'''
@@ -54,3 +56,38 @@ def test_stacki_central_server(host):
 	palgetter = itemgetter('name', 'version', 'release', 'arch', 'os')
 
 	assert sorted(palinfo, key=palgetter) == sorted(central_pallets, key=palgetter)
+
+def test_stacki_ca_correct(host):
+	'''
+	test that the ssl certificate authority was created correctly
+	'''
+
+	version_chk_result = host.run('openssl version')
+	assert version_chk_result.rc == 0
+	old_openssl = version_chk_result.stdout.startswith('OpenSSL 1.0')
+
+	result = host.run('openssl x509 -noout -issuer -in /etc/security/ca/ca.crt')
+	assert result.rc == 0
+
+	# on sles15 (openssl 1.1.0i) output looks like:
+	# issuer=O = StackIQ, OU = frontend-0-0-CA, L = Solana Beach, ST = California, C = US, CN = frontend-0-0
+	#
+	# on rhel7 (openssl 1.0.2k-16) / sles12sp3 (openssl 1.0.2j-59.1)
+	# issuer= /O=StackIQ/OU=sd-stacki-147-CA/L=Solana Beach/ST=California/C=US/CN=sd-stacki-147.labs.teradata.com
+	#
+	# honestly, it's $CURRENT_YEAR, how hard is it to produce a more parser friendly output
+	if old_openssl:
+		# split across '/', then '=', ignore 'issuer= '
+		ca_dict = dict(item.strip().split('=') for item in result.stdout.split('/')[1:])
+	else:
+		# split across commas, then ' = '
+		ca_dict = dict(item.strip().split(' = ') for item in result.stdout.split(','))
+		ca_dict['O'] = ca_dict['issuer=O']
+
+	stacki_set = {k: v for k, v in stack.settings.get_settings().items() if k.startswith('ssl.')}
+
+	# note, we're ignoring CN and OU, as these will vary
+	assert ca_dict['L'] == stacki_set['ssl.locality']
+	assert ca_dict['C'] == stacki_set['ssl.country']
+	assert ca_dict['ST'] == stacki_set['ssl.state']
+	assert ca_dict['O'] == stacki_set['ssl.organization']

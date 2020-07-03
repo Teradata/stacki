@@ -42,10 +42,10 @@ commonName		= Common Name (hostname, IP, or your name)
 
 commonName_default		= &Info_FQDN;
 organizationalUnitName_default	= &Kickstart_PrivateHostname;-CA
-0.organizationName_default	= &Info_CertificateOrganization;
-localityName_default		= &Info_CertificateLocality;
-stateOrProvinceName_default	= &Info_CertificateState;
-countryName_default		= &Info_CertificateCountry;
+0.organizationName_default	= &settings.ssl.organization;
+localityName_default		= &settings.ssl.locality;
+stateOrProvinceName_default	= &settings.ssl.state;
+countryName_default		= &settings.ssl.country;
 </stack:file>
 
 </stack:script>
