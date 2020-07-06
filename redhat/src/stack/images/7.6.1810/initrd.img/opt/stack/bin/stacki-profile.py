@@ -80,12 +80,8 @@ for line in result.stdout.splitlines():
 
 		break
 
-# Get the number of CPUs
-with open('/proc/cpuinfo') as f:
-	cpus = len(re.findall(r'^processor\s+:\s+\d+', f.read(), re.MULTILINE))
-
 # Append the URL to request
-command.append(f'{boot_args["inst.ks"]}?os=redhat&arch=x86_64&np={cpus}')
+command.append(f'{boot_args["inst.ks"]}?os=redhat&arch=x86_64&np={os.cpu_count()}')
 
 # Retry until we get an installation file
 while True:

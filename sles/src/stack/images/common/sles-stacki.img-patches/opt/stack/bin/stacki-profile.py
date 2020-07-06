@@ -72,10 +72,6 @@ for line in result.stdout.splitlines():
 
 		break
 
-# Get the number of CPUs
-with open('/proc/cpuinfo') as f:
-	cpus = len(re.findall(r'^processor\s+:\s+\d+', f.read(), re.MULTILINE))
-
 # Find the frontend server
 server = os.environ.get('Server', None)
 if not server:
@@ -107,7 +103,7 @@ if not server:
 
 command.append(
 	f'https://{server}/install/sbin/profile.cgi'
-	f'?os=sles&arch=x86_64&np={cpus}'
+	f'?os=sles&arch=x86_64&np={os.cpu_count()}'
 )
 
 # Retry until we get an installation file
