@@ -18,6 +18,7 @@ pipeline {
         ART_ISO_PATH = "software-manufacturing/pallets/stacki"
         ART_QCOW_PATH = "software-manufacturing/kvm-images/stacki"
         ART_OVA_PATH = "software-manufacturing/ova-images/stacki"
+        ART_VBOX_PATH = "software-manufacturing/vbox-images/stacki"
     }
 
     options {
@@ -1187,7 +1188,7 @@ pipeline {
                     }
                 }
 
-                stage('Build OVA Image') {
+                stage('Build VMWare Image') {
                     agent {
                         label 'esxi_ova_builder'
                     }
@@ -1223,24 +1224,24 @@ pipeline {
                         // Get a copy of stacki-packi
                         sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-packi.git'
 
-                        // Build the OVA image
+                        // Build the VMWare image
                         dir ('stacki-packi') {
-                            sh './do-build.sh --esxi-host=sd-stacki-004.labs.teradata.com --esxi-user=root --format=ova ../$ISO_FILENAME'
-                            sh 'mv stacki-*.ova ../'
+                            sh './do-build.sh --esxi-host=sd-stacki-004.labs.teradata.com --esxi-user=root --format=vmware ../$ISO_FILENAME'
+                            sh 'mv stacki-*-vmware.ova ../'
                         }
 
                         // Set an environment variable with the OVA filename
                         script {
-                            env.OVA_FILENAME = findFiles(glob: 'stacki-*.ova')[0].name
+                            env.VMWARE_FILENAME = findFiles(glob: 'stacki-*-vmware.ova')[0].name
                         }
 
-                        // Upload the Stacki OVA to artifactory
+                        // Upload the Stacki VMWare image to artifactory
                         rtUpload(
                             serverId: "td-artifactory",
                             spec: """
                                 {
                                     "files": [{
-                                        "pattern": "${env.OVA_FILENAME}",
+                                        "pattern": "${env.VMWARE_FILENAME}",
                                         "target": "${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/"
                                     }]
                                 }
@@ -1252,7 +1253,7 @@ pipeline {
                             if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
                                 withAWS(credentials:'amazon-s3-credentials') {
                                     s3Upload(
-                                        file: env.OVA_FILENAME,
+                                        file: env.VMWARE_FILENAME,
                                         bucket: 'teradata-stacki',
                                         path: 'release/stacki/5.x/',
                                         acl: 'PublicRead'
@@ -1271,9 +1272,9 @@ pipeline {
                                         channel: '#stacki-announce',
                                         color: 'good',
                                         message: """\
-                                            New Stacki OVA image uploaded to Artifactory.
-                                            *OVA:* ${env.OVA_FILENAME}
-                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.OVA_FILENAME}
+                                            New Stacki VMWare image uploaded to Artifactory.
+                                            *OVA:* ${env.VMWARE_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_OVA_PATH}/${env.ART_OS}/${env.VMWARE_FILENAME}
                                         """.stripIndent(),
                                         tokenCredentialId: 'slack-token-stacki'
                                     )
@@ -1283,9 +1284,9 @@ pipeline {
                                             channel: '#stacki-builds',
                                             color: 'good',
                                             message: """\
-                                                New Stacki OVA image uploaded to Amazon S3.
-                                                *OVA:* ${env.OVA_FILENAME}
-                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.OVA_FILENAME}
+                                                New Stacki VMWare image uploaded to Amazon S3.
+                                                *OVA:* ${env.VMWARE_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.VMWARE_FILENAME}
                                             """.stripIndent(),
                                             tokenCredentialId: 'slack-token-stacki'
                                         )
@@ -1303,7 +1304,139 @@ pipeline {
                                 channel: '#stacki-builds',
                                 color: 'danger',
                                 message: """\
-                                    Stacki OVA build has failed.
+                                    Stacki VMWare image build has failed.
+                                    *Branch:* ${env.GIT_BRANCH}
+                                    *OS:* ${env.PLATFORM}
+                                    <${env.RUN_DISPLAY_URL}|View the pipeline job>
+                                """.stripIndent(),
+                                tokenCredentialId: 'slack-token-stacki'
+                            )
+                        }
+
+                        // Clean up after ourselves
+                        always {
+                            cleanWs()
+                        }
+                    }
+                }
+
+                stage('Build Virtualbox Image') {
+                    agent {
+                        label 'sd-stacki-021'
+                    }
+
+                    when {
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
+                        }
+                    }
+
+                    steps {
+                        // Setup Artifactory access
+                        rtServer(
+                            id: "td-artifactory",
+                            url: "${env.ART_URL}",
+                            credentialsId: "d1a4e414-0526-4973-bea5-9d219d884f03",
+                            timeout: 3600
+                        )
+
+                        // Get the Stacki ISO
+                        rtDownload(
+                            serverId: "td-artifactory",
+                            spec: """
+                                {
+                                    "files": [{
+                                        "pattern": "${env.ART_REPO}/${env.ART_ISO_PATH}/${env.ART_OS}/${env.ISO_FILENAME}",
+                                        "flat": "true"
+                                    }]
+                                }
+                            """
+                        )
+
+                        // Get a copy of stacki-packi
+                        sh 'git clone https://${TD_GITHUB}@github.td.teradata.com/software-manufacturing/stacki-packi.git'
+
+                        // Build the Virtualbox image
+                        dir ('stacki-packi') {
+                            sh './do-build.sh --format=vbox ../$ISO_FILENAME'
+                            sh 'mv stacki-*-vbox.ova ../'
+                        }
+
+                        // Set an environment variable with the Virtualbox filename
+                        script {
+                            env.VBOX_FILENAME = findFiles(glob: 'stacki-*-vbox.ova')[0].name
+                        }
+
+                        // Upload the Stacki OVA to artifactory
+                        rtUpload(
+                            serverId: "td-artifactory",
+                            spec: """
+                                {
+                                    "files": [{
+                                        "pattern": "${env.VBOX_FILENAME}",
+                                        "target": "${env.ART_REPO}/${env.ART_VBOX_PATH}/${env.ART_OS}/"
+                                    }]
+                                }
+                            """
+                        )
+
+                        // Releases of the Redhat version goes to amazon S3 too
+                        script {
+                            if (env.IS_RELEASE == 'true' && env.PLATFORM == 'redhat7') {
+                                withAWS(credentials:'amazon-s3-credentials') {
+                                    s3Upload(
+                                        file: env.VMWARE_FILENAME,
+                                        bucket: 'teradata-stacki',
+                                        path: 'release/stacki/5.x/',
+                                        acl: 'PublicRead'
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    post {
+                        success {
+                            // Notify Slack of a new release
+                            script {
+                                if (env.IS_RELEASE == 'true') {
+                                    slackSend(
+                                        channel: '#stacki-announce',
+                                        color: 'good',
+                                        message: """\
+                                            New Stacki Virtualbox image uploaded to Artifactory.
+                                            *OVA:* ${env.VBOX_FILENAME}
+                                            *URL:* ${env.ART_URL}/${env.ART_REPO}/${env.ART_VBOX_PATH}/${env.ART_OS}/${env.VBOX_FILENAME}
+                                        """.stripIndent(),
+                                        tokenCredentialId: 'slack-token-stacki'
+                                    )
+
+                                    if (env.PLATFORM == 'redhat7') {
+                                        slackSend(
+                                            channel: '#stacki-builds',
+                                            color: 'good',
+                                            message: """\
+                                                New Stacki Virtualbox image uploaded to Amazon S3.
+                                                *OVA:* ${env.VBOX_FILENAME}
+                                                *URL:* http://teradata-stacki.s3.amazonaws.com/release/stacki/5.x/${env.VBOX_FILENAME}
+                                            """.stripIndent(),
+                                            tokenCredentialId: 'slack-token-stacki'
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Update the Stacki Builds website
+                            build job: 'rebuild_stacki-builds_website', wait: false
+                        }
+
+                        failure {
+                            // Notify the Slack #stacki-bot channel
+                            slackSend(
+                                channel: '#stacki-builds',
+                                color: 'danger',
+                                message: """\
+                                    Stacki Virtualbox image build has failed.
                                     *Branch:* ${env.GIT_BRANCH}
                                     *OS:* ${env.PLATFORM}
                                     <${env.RUN_DISPLAY_URL}|View the pipeline job>
