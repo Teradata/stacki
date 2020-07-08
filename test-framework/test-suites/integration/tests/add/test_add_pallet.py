@@ -341,7 +341,8 @@ class TestAddPallet:
 	def test_failed_download(self, host, run_file_server):
 		result = host.run('stack add pallet http://127.0.0.1:8000/test.iso')
 		assert result.rc == 255
-		assert result.stderr == 'error - unable to download test.iso: http error 404\n'
+		assert result.stderr.startswith('error - ')
+		assert result.stderr.endswith('404 - Not Found\n')
 
 	def test_invalid_iso(self, host, create_blank_iso):
 		result = host.run(f'stack add pallet {create_blank_iso}/blank.iso')

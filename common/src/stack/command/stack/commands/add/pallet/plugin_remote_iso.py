@@ -12,7 +12,8 @@ import urllib.parse
 
 import stack.commands
 from stack.exception import CommandError
-from stack.download import fetch, FetchError
+from stack.download import fetch_artifact, FetchError
+
 
 class Plugin(stack.commands.Plugin):
 	def provides(self):
@@ -51,8 +52,8 @@ class Plugin(stack.commands.Plugin):
 
 			try:
 				remote_filename = pathlib.Path(urllib.parse.urlparse(canon_arg).path).name
-				# passing True will display a % progress indicator in stdout
-				local_path = fetch(canon_arg, self.owner.username, self.owner.password, False, f'{tempdir}/{remote_filename}')
+				fetch_artifact(canon_arg, tempdir, self.owner.username, self.owner.password)
+				local_path = f'{tempdir}/{remote_filename}'
 			except FetchError as e:
 				raise CommandError(self, e)
 

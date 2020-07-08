@@ -13,7 +13,6 @@ import subprocess
 
 import stack.commands
 from stack.exception import CommandError
-from stack.download import fetch, FetchError
 
 class Plugin(stack.commands.Plugin):
 	def provides(self):
