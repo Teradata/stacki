@@ -20,6 +20,7 @@ try:
 except ImportError:
 	pass
 
+from stack.util import _exec
 
 class FetchError(Exception):
 
@@ -72,3 +73,44 @@ def fetch(url, username=None, password=None, verbose=False, file_path=None):
 		print(f'success. downloaded {int(content_length)} MB.')
 
 	return local_path
+
+def fetch_artifact(url, dest_dir, username=None, password=None):
+	'''
+	fetch the artifact at `url` and write it to `dest_dir`. `dest_dir` must exist.
+	if username and password are both defined, they will be used.
+	if the server returns 401, 403, 404, or 500, or if curl exists non-zero (for eg connection errors), FetchError will be raised.
+	'''
+
+	curl_cmd = [
+		'curl',
+		'--write-out', '%{http_code}',   # send http status to stdout
+		'--silent',                      # don't show download progress
+		'--show-error',                  # kept for debugging purposes
+		'--location',                    # follow redirects
+		'--remote-name',                 # use the remote filename for the local filename
+		'--retry', '3',
+		'--config', '-',                 # get remaining config from STDIN (credentials)
+		'--url',
+		url,
+	]
+
+	creds = ''
+	if username and password:
+		creds = f'--user {username}:{password}'
+
+	proc = _exec(curl_cmd, input=creds, cwd=dest_dir)
+
+	http_codes = {
+		'401': 'Unauthorized',
+		'403': 'Forbidden',
+		'404': 'Not Found',
+		'500': 'Internal Server Error',
+	}
+
+	basic_error_msg = f"tried to run '{' '.join(proc.args)}'."
+
+	if proc.returncode != 0:
+		raise FetchError(f"{basic_error_msg}\n{proc.stderr}")
+
+	if proc.stdout in http_codes:
+		raise FetchError(f"{basic_error_msg}\nServer returned HTTP code {proc.stdout} - {http_codes[proc.stdout]}")
