@@ -19,10 +19,15 @@ endif
 
 PALLET.ROOT = $(CURDIR)/$(ROLLROOT)/build-$(ROLL)-$(STACK)
 PALLET.PKGS = $(PALLET.ROOT)/packages
+
 ifeq ($(ARCH),armv7hl)
-PKG.ARCH    = armhf
+PKG.ARCH = armhf
+else
+ifeq ($(ARCH),x86_64)
+PKG.ARCH    = amd64
 else
 PKG.ARCH    = $(ARCH)
+endif
 endif
 PKG.NAME    = $(NAME)_$(VERSION)-$(RELEASE)_$(PKG.ARCH).deb
 PKG.TARGET  = $(PALLET.PKGS)/$(PKG.NAME)
