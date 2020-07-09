@@ -61,7 +61,7 @@ preroll::
 # sles12 pallet holds all the hooks and initrds for sles11 anyways.
 ifneq ($(RELEASE),sles11)
 	-cp -r common/pallet_hooks/ build-$(ROLL)-$(STACK)/pallet_hooks/common/
-	-cp -r $(OS)/pallet_hooks/  build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)/
+	if [ -e $(OS)/pallet_hook ]; then cp -r $(OS)/pallet_hooks/ build-$(ROLL)-$(STACK)/pallet_hooks/$(OS)/; fi
 endif
 
 

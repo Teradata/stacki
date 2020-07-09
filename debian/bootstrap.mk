@@ -5,6 +5,6 @@
 # @copyright@
 
 bootstrap:
-	../common/src/stack/build/build/bin/package-install make openssh-server git emacs vim dpkg-dev ruby ruby-dev rubygems build-essential genisoimage
+	../common/src/stack/build/build/bin/package-install make openssh-server git emacs vim dpkg-dev ruby ruby-dev rubygems build-essential genisoimage curl
 	@if [ ! -e /usr/local/bin/fpm ]; then gem install --no-document fpm; fi
 

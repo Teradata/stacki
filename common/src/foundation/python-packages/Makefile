@@ -15,8 +15,9 @@ BOOTSTRAP.redhat =
 BOOTSTRAP.sles   =
 BOOTSTRAP.debian = apache2-dev
 
-bootstrap pkg: src
+bootstrap pkg:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
+	$(MAKE) src
 	-for x in src/*; do $(MAKE) -C $$x $@; done
 	cp manifest.d/*.manifest $(ROLLROOT)/common/manifest.d/
 	cp nodes/*.xml $(ROLLROOT)/common/nodes/
