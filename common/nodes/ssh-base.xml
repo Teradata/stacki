@@ -16,15 +16,22 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 	</stack:rocks>
 
+	<stack:package stack:cond="os == 'debian'">
+		openssh-clients
+		openssh-server
+		askpass
+	</stack>
 
-	<stack:package>
+	<stack:package stack:cond="os == 'sles'">
 		openssh
 		openssh-askpass
 	</stack:package>
 
 	<stack:package stack:cond="os == 'redhat'">
+		openssh
 		openssh-clients
 		openssh-server
+		openssh-askpass
 		xorg-x11-xauth
 	</stack:package>
 
