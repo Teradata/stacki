@@ -17,10 +17,10 @@
 	</stack:rocks>
 
 	<stack:package stack:cond="os == 'debian'">
-		openssh-clients
+		openssh-client
 		openssh-server
-		askpass
-	</stack>
+		ssh-askpass
+	</stack:package>
 
 	<stack:package stack:cond="os == 'sles'">
 		openssh
