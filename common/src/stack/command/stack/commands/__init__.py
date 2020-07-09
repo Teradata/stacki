@@ -409,8 +409,8 @@ def get_mysql_connection(user=None, password=None):
 			user = pwd.getpwuid(os.geteuid())[0]
 
 
-	my_cnf_socket = None
-	my_cnf_password = None
+	my_cnf_socket = ''
+	my_cnf_password = ''
 	try:
 		with open('/etc/apache.my.cnf') as f:
 			for line in f:
