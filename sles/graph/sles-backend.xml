@@ -22,7 +22,6 @@
 		<to>add-on</to>
 		<to>users</to>
 		<to>uefi-client</to>
-		<to>time-client</to>
 	</edge>
 
 	<edge from="client" to="firewall-client" cond="firewall"/>

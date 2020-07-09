@@ -18,27 +18,14 @@
 	</edge>
 
 	<order head="database-data">
-		<tail>server</tail>
 		<tail>restapi</tail>
-		<tail>networking-server</tail>
-		<tail>time-server</tail>
 	</order>
 
 	<order head="firewall-server">
 		<tail>firewall-base</tail>
 	</order>
 
-	<order tail="firewall-server">
-		<head>networking-server</head>
-		<head>database-data</head>
-	</order>
-
-	<order head="time-server">
-		<tail>time-base</tail>
-	</order>
-
 	<order head="TAIL">
-		<tail>profile-server</tail>
 		<tail>ludicrous-server</tail>
 	</order>
 
@@ -46,25 +33,19 @@
 	<!-- Graph OO Framework -->
 
 	<edge from="server">
-		<to>base</to>
 		<to>ca</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
-		<to>pxe</to>
-		<to>ludicrous-server</to>
-		<to>time-server</to>
-		<to>restapi</to>
-		<to>profile-server</to>
-		<to>networking-server</to>
-		<to>uefi-server</to>
-
-		<to>security-server</to>
-		<to>pxeboot</to>
-		<to>kernel-server</to>
 		<to>foundation-server</to>
+		<to>kernel-server</to>
+		<to>ludicrous-server</to>
+		<to>pxeboot</to>
+		<to>repo-server</to>
+		<to>restapi</to>
+		<to>security-server</to>
 		<to>ssh-server</to>
 		<to>storage-server</to>
-		<to>repo-server</to>
+		<to>uefi-server</to>
 	</edge>
 
 

@@ -24,7 +24,6 @@
 	<!-- Graph OO Framework -->
 
 	<edge from="base">
-		<to>time-base</to>
 		<to>postshell</to>
 		<to>yum-base</to>
 		<to>storage</to>

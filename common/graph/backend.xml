@@ -11,6 +11,11 @@
 	</copyright>
 
 	<order tail="barnacle" head="backend"/>
+
+	<order head="time-client">
+		<tail>time-base</tail>
+	</order>
+
 	<edge  from="barnacle">
 		<to>foundation-python-server</to>
 		<to>backend</to>
@@ -27,7 +32,9 @@
 	<edge from="hypervisor">
 		<to>backend</to>
 	</edge>
+	
 	<edge from="client">
+		<to>time-client</to>
 		<to>peerdone</to>
 	</edge>
 

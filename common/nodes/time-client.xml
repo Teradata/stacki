@@ -1,24 +1,30 @@
 <stack:stack>
 
-<stack:description>
-Time Configuration for backends
-</stack:description>
+	<stack:description>
+	Time Configuration for backends
+	</stack:description>
 
-<stack:copyright>
-Copyright (c) 2006 - 2019 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:package stack:cond="os == 'sles' and os.version == '12.x'">
-chrony
-</stack:package>
 
-<stack:package stack:cond="os == 'redhat'">
-rdate
-chrony
-</stack:package>
+	<stack:package stack:cond="os == 'sles' and os.version == '12.x'">
+		chrony
+	</stack:package>
 
+	<stack:package stack:cond="os == 'redhat'">
+		rdate
+		chrony
+	</stack:package>
+
+	<stack:package stack:cond="os == 'debian'">
+		chrony
+	</stack:package>
+
+	
 <stack:script stack:stage="install-post">
 <stack:report stack:name="host.time">&hostname;</stack:report>
 </stack:script>

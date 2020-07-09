@@ -20,10 +20,6 @@
 		<head>networking-client</head>
 	</order>
 
-	<order head="time-client">
-		<tail>time-base</tail>
-	</order>
-
 	<order head="TAIL">
 		<tail>backend</tail>
 	</order>
@@ -38,7 +34,6 @@
 	<edge from="client">
 		<to>base</to>
 		<to>pre-ssh-key</to>
-		<to>time-client</to>
 		<to>networking-client</to>
 		<to>resolv</to>
 		<to>routes-client</to>

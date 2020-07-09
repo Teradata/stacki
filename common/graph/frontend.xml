@@ -10,17 +10,24 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
+	<order head="&os;-bootaction"    tail="database-data"/>
 	<order head="apache"             tail="database"/>
 	<order head="database"           tail="database-schema"/>
+	<order head="database-data-init" tail="&os;-bootaction"/>
 	<order head="database-schema"    tail="database-data-init"/>
 	<order head="node"               tail="database-data-init"/>
-	<order head="database-data-init" tail="&os;-bootaction"/>
-	<order head="&os;-bootaction"    tail="database-data"/>
 
 	<order head="database-data">
 		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
+		<tail>firewall-server</tail>
 		<tail>routes-server</tail>
+		<tail>server</tail>
+		<tail>time-server</tail>
+	</order>
+
+	<order head="time-server">
+		<tail>time-base</tail>
 	</order>
 
 	<!-- frontend-server runs some post install scripts that should
@@ -28,25 +35,31 @@
 	-->
 	<order head="TAIL">
 		<tail>frontend-server</tail>
+		<tail>profile-server</tail>
 	</order>
 
 	<edge from="server">
-		<to>dhcp-server</to>
-		<to>apache</to>
-		<to>frontend-server</to>
-		<to>database</to>
-		<to>database-schema</to>
-		<to>database-data-init</to>
 		<to>&os;-bootaction</to>
+		<to>ansible</to>
+		<to>apache</to>
+		<to>base</to>
+		<to>checklist</to>
+		<to>database-data-init</to>
 		<to>database-data</to>
 		<to>database-migration</to>
-		<to>foundation-python-server</to>
+		<to>database-schema</to>
+		<to>database</to>
+		<to>dhcp-server</to>
 		<to>dns-server</to>
+		<to>foundation-python-server</to>
+		<to>frontend-server</to>
 		<to>mq-server</to>
+		<to>networking-server</to>
+		<to>profile-server</to>
+		<to>pxe</to>
 		<to>routes-server</to>
-		<to>checklist</to>
 		<to>server-packages</to>
-		<to>ansible</to>
+		<to>time-server</to>
 	</edge>
 
 	<edge from="server" cond="platform == 'aws'">

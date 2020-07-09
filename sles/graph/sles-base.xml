@@ -5,8 +5,4 @@
 	Common graph for Stacki SLES frontend and backends
 	</description>
 
-	<edge from="base">
-		<to>time-base</to>
-	</edge>
-
 </graph>

@@ -12,23 +12,8 @@
 		<tail>ssl-server</tail>
 	</order>
 
-	<order head="database-data">
-		<tail>networking-server</tail>
-		<tail>server</tail>
-		<tail>time-server</tail>
-	</order>
-
 	<order head="firewall-server">
 		<tail>firewall-base</tail>
-	</order>
-
-	<order tail="firewall-server">
-		<head>database-data</head>
-		<head>networking-server</head>
-	</order>
-
-	<order head="time-server">
-		<tail>time-base</tail>
 	</order>
 
 	<order head="TAIL">
@@ -38,25 +23,15 @@
 
 	<!-- Edge definitions --> 
 
-	<edge from="frontend">
-		<to>server</to>
-	</edge>
-
 	<edge from="server">
-		<to>base</to>
 		<to>ca</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
-		<to>pxe</to>
 		<to>ludicrous-server</to>
-		<to>time-server</to>
 		<to>restapi</to>
-		<to>profile-server</to>
-		<to>networking-server</to>
-		<to>uefi-server</to>
-
 		<to>ssl-server</to>
 		<to>storage-controller-server</to>
+		<to>uefi-server</to>
 	</edge>
 
 	<order head="database-data">
