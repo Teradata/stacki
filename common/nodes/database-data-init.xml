@@ -62,10 +62,6 @@ with open('/tmp/site.json', 'w') as file:
                 {
                         "command": "*",
                         "group": "apache"
-                },
-                {
-                        "command": "list*",
-                        "group": "wheel"
                 }
         ],
         "attr": [

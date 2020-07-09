@@ -28,9 +28,23 @@
 
 
 <stack:script stack:stage="install-post">
+<!--
+	set the hostname to the private name. this helps the stacki command
+	line find the host 'localhost' correctly
+-->
+/bin/hostname &hostname;
 
+<stack:file stack:name="/etc/hostname" stack:cond="os in [ 'sles', 'debian' ]">
+&Info_FQDN;
+</stack:file>
 
 <!--
+    	On Debian the mariadb package starts the server so we don't
+    	need to bootstrap it, so just deal with the paths being
+    	different from other OSes.
+
+	But for Redhat and SLES ...
+
 	The goal of this file is to get the distribution's stock
 	MariaDB installation to a known common state with as little
 	customization and reliance on a distro's packaged helper scripts
@@ -45,57 +59,67 @@
 -->
 
 
-<!--
-	set the hostname to the private name. this helps the stacki command
-	line find the host 'localhost' correctly
--->
-/bin/hostname &hostname;
+if [ "&os;" == "debian" ]; then
+	mysql_sock=/var/run/mysqld/mysqld.sock
+else
+	mysql_sock=/var/run/mysql/mysqld.sock
+fi
 
-<stack:file stack:name="/etc/hostname" stack:cond="os == 'sles'">
-&Info_FQDN;
-</stack:file>
-
-<!-- Generate random password for root access to the database -->
 root_pw=`/opt/stack/sbin/gen_random_pw`
+apache_pw=`/opt/stack/sbin/gen_random_pw`
+
 <stack:file stack:name="/etc/root.my.cnf" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
 [client]
 user		= root
-socket		= /var/run/mysql/mysql.sock
+socket		= $mysql_sock
 password	= $root_pw
 </stack:file>
-
-<!-- symlink to root's home dir -->
 ln -s --force /etc/root.my.cnf /root/.my.cnf
-
-<!-- Generate random password for apache access to database -->
-apache_pw=`/opt/stack/sbin/gen_random_pw`
 
 
 <stack:file stack:name="/etc/apache.my.cnf" stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
-socket		= /var/run/mysql/mysql.sock
+socket		= $mysql_sock
 password	= $apache_pw
 </stack:file>
 
-<!-- this is the config file mysql tools look at by default -->
-<stack:file stack:name="/etc/my.cnf" stack:owner="root:mysql" stack:perms="0640">
+<stack:file stack:name="/etc/my.cnf" stack:owner="root:mysql" stack:perms="0640" stack:cond="os != 'debian'">
 [mysqld]
 user		= mysql
-socket		= /var/run/mysql/mysql.sock
+socket		= $mysql_sock
 max_allowed_packet = 1024M
 
 [client]
-socket		= /var/run/mysql/mysql.sock
+socket		= $mysql_sock
 </stack:file>
 
 <!--
-	centos needs a new service file to set command line args as well as /var/run/mysql
+	sql file to nuke default anonymous user inside mysql,
+	set our password on root, nuke some unused tables,
+	set the password for the root user
 -->
+<stack:file stack:name="/root/initial.sql" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
+UPDATE mysql.user SET Password=PASSWORD('$root_pw') WHERE User='root';
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+</stack:file>
 
-<stack:file stack:name="/etc/systemd/system/mariadb.service"
-            stack:owner="root:root" stack:perms="0644"
-            stack:cond="os == 'redhat'">
+<stack:file stack:name="/root/users.sql" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
+CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
+CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
+CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";
+CREATE USER "root"@"&hostname;" IDENTIFIED BY "$root_pw";
+</stack:file>
+</stack:script>
+
+
+<!-- centos needs a new service file to set command line args as well as /var/run/mysql -->
+<stack:script stack:stage="install-post" stack:cond="os == 'redhat'">
+<stack:file stack:name="/etc/systemd/system/mariadb.service" stack:owner="root:root" stack:perms="0644">
 .include /usr/lib/systemd/system/mariadb.service
 
 # note: 'defaults-file' must be the first arg here.
@@ -106,27 +130,19 @@ Environment="MYSQLD_OPTS=--defaults-file=/etc/my.cnf --user=mysql --basedir=/usr
 ExecStart=
 ExecStart=/usr/bin/mysqld_safe $MYSQLD_OPTS
 </stack:file>
-
-<!-- we added a systemd file, so reload -->
-systemctl daemon-reload
-
-<!--
-	sql file to nuke default anonymous user inside mysql,
-	set our password on root, nuke some unused tables,
-	set the password for the root user
--->
-
-<stack:file stack:name="/root/initial.sql" stack:perms="0400"
-            stack:owner="root:root" stack:vars="expanded">
-UPDATE mysql.user SET Password=PASSWORD('$root_pw') WHERE User='root';
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-FLUSH PRIVILEGES;
-</stack:file>
+systemctl daemon-reload <!-- we added a systemd file, so reload -->
+</stack:script>
 
 
+<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
+mysql -sfu root &lt; /root/initial.sql
+mysql --defaults-file=/etc/root.my.cnf -sf &lt; /root/users.sql
+rm -f /root/initial.sql
+rm -f /root/users.sql
+</stack:script>
+
+
+<stack:script stack:stage="install-post" stack:cond="os != 'debian'">
 wait_for_mysql_up()
 {
 	# wait 5 sec each loop by default
@@ -209,15 +225,7 @@ wait_for_mysql_up
 	set the password for the apache user, root user at localhost
 -->
 
-<stack:file stack:name="/root/users.sql" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
-CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
-CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
-CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";
-CREATE USER "root"@"&hostname;" IDENTIFIED BY "$root_pw";
-</stack:file>
-
 mysql --defaults-file=/etc/root.my.cnf -sf &lt; /root/users.sql
 rm -f /root/users.sql
-
 </stack:script>
 </stack:stack>

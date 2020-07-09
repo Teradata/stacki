@@ -34,7 +34,6 @@ class OSArgProcessor:
 			names = flatten(self.db.select(
 				'name from oses where name like %s order by name', (arg,)
 			))
-
 			if not names and arg != '%':
 				raise ArgNotFound(self, arg, 'OS')
 

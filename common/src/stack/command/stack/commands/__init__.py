@@ -400,49 +400,44 @@ def get_mysql_connection(user=None, password=None):
 
 	connection = None
 
-	try:
-		if user is None:
-			# Root connects as the apache user, everyone else as
-			# the user running the python command.
-			if os.geteuid() == 0:
-				user = 'apache'
-			else:
-				user = pwd.getpwuid(os.geteuid())[0]
-
-		if password is None:
-			# Try to read the apache user's password
-			password = ''
-			try:
-				with open('/etc/apache.my.cnf') as f:
-					for line in f:
-						if line.startswith('password'):
-							password = line.split('=')[1].strip()
-							break
-			except:
-				# Couldn't read the password, try connecting without one
-				pass
-
-		if os.path.exists('/var/run/mysql/mysql.sock'):
-			connection = pymysql.connect(
-				db='cluster',
-				user=user,
-				passwd=password,
-				host='localhost',
-				unix_socket='/var/run/mysql/mysql.sock',
-				autocommit=True
-			)
+	if user is None:
+		# Root connects as the apache user, everyone else as
+		# the user running the python command.
+		if os.geteuid() == 0:
+			user = 'apache'
 		else:
-			connection = pymysql.connect(
-				db='cluster',
-				user=user,
-				passwd=password,
-				host='localhost',
-				port=40000,
-				autocommit=True
-			)
+			user = pwd.getpwuid(os.geteuid())[0]
 
+
+	my_cnf_socket = None
+	my_cnf_password = None
+	try:
+		with open('/etc/apache.my.cnf') as f:
+			for line in f:
+				tokens = line.split('=', 1)
+				if len(tokens) == 2:
+					key, value = [ s.strip() for s in tokens ]
+					if key == 'socket':
+						my_cnf_socket = value
+					elif key == 'password':
+						my_cnf_password = value
+	except FileNotFoundError:
+		pass
+	
+	if password is None:
+		password = my_cnf_password
+
+
+	try:
+		if os.path.exists(my_cnf_socket):
+			connection = pymysql.connect(db='cluster', user=user, passwd=password, host='localhost', 
+						     unix_socket=my_cnf_socket,
+						     autocommit=True)
+		else:
+			connection = pymysql.connect(db='cluster', user=user, passwd=password, host='localhost',
+						     port=40000,
+						     autocommit=True)
 	except pymysql.OperationalError:
-		# No database
 		pass
 
 	return connection
