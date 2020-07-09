@@ -1,0 +1,10 @@
+[
+	{
+		"urlbase": "http://ftp.debian.org/debian/dists/stable/main/",
+		"files": [
+			[ "installer-armhf/current/images/netboot/netboot.tar.gz", "netboot-armhf.tar.gz" ],
+			[ "installer-arm64/current/images/netboot/netboot.tar.gz", "netboot-arm64.tar.gz" ],
+			[ "installer-amd64/current/images/netboot/netboot.tar.gz", "netboot-amd64.tar.gz" ]
+		]
+	}
+]

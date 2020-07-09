@@ -23,18 +23,25 @@ import getopt
 # and authorization information to access <urlbase>/file
 #
 # urlbase: typically a web address pointing to a directory
+#
 # example: https://teradata-stacki.s3.amazonaws.com/3rdparty
 #
-# files: the files present at the location
+# files: the files present at the location, each element of files is either a
+# file name or a tuple containing the source file name as the first element and
+# the destination file name as the second.
+#
 # example: foundation-python-3.6.1-sles11.x86_64.rpm
 #
-# authfile: optional - Only required when accessing URLS that require authentication
-# manifest: optional - Create a manifest directory and an entry for each package in files if they are RPM's
+# authfile: optional - Only required when accessing URLS that require
+# authentication
+#
+# manifest: optional - Create a manifest directory and an entry for each
+# package in files if they are RPM's
 #
 # [
 #	{
 #		"urlbase": "<baseurl1>",
-#		"files": [ "file1", "file2", ... ],
+#		"files": [ "file1", [ "file2-src", "file2-dst" ], ... ],
 #		"authfile": "<authfile1>.json",
 #		"manifest": true
 #	},
@@ -203,9 +210,14 @@ for section in pkglist:
 		do_manifest = True
 
 	for blob in section['files']:
-		blobs[blob] = {
-			'source' : os.path.join(section['urlbase'], blob),
-			'target' : os.path.join(cachedir, os.path.split(blob)[-1])
+		key = source = target = blob
+		
+		if type(blob) == type([]):
+			key = source = blob[0]
+			target = blob[1]
+		blobs[key] = {
+			'source' : os.path.join(section['urlbase'], source),
+			'target' : os.path.join(cachedir, os.path.split(target)[-1])
 		}
 
 	for blob in blobs:
