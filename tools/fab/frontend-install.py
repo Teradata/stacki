@@ -600,6 +600,8 @@ with open("/tmp/stack.xml", "r") as infile, open("/tmp/run.sh", "w") as outfile:
 		logger.error("Could not process XML")
 		sys.exit(result.returncode)
 
+sys.exit(0) # don't complete -- still testing this shit
+
 banner("Run Setup Script")
 # run run.sh
 result = subprocess.run(['bash', '-x', '/tmp/run.sh'])
