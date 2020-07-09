@@ -16,10 +16,6 @@
 		<tail>firewall-base</tail>
 	</order>
 
-	<order head="TAIL">
-		<tail>profile-server</tail>
-	</order>
-
 
 	<!-- Edge definitions --> 
 

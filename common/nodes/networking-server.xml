@@ -1,0 +1,21 @@
+<stack:stack>
+
+	<stack:copyright>
+	</stack:copyright>
+
+
+<stack:script stack:stage="install-post">
+
+/opt/stack/bin/stack report host network &Kickstart_PrivateHostname; | /opt/stack/bin/stack report script > /tmp/do-network.sh
+chmod a+x /tmp/do-network.sh
+/tmp/do-network.sh
+
+/opt/stack/bin/stack report host interface &Kickstart_PrivateHostname; | /opt/stack/bin/stack report script > /tmp/do-interface.sh
+chmod a+x /tmp/do-interface.sh
+/tmp/do-interface.sh
+
+</stack:script>
+
+
+</stack:stack> 
+
