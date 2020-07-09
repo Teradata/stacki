@@ -83,7 +83,7 @@ class Implementation(stack.commands.Implementation):
 				if self.owner.interface == device:
 					self.writeConfig(host, mac, ip, device, netmask, vlanid, mtu, optionlist, channel, default)
 			else:
-				self.owner.addOutput(host, f'<stack:file stack:name="/etc/network/interfaces.d/{device}">')
+				self.owner.addOutput(host, f'<stack:file stack:name="/etc/network/interfaces.d/ifcfg-{device}">')
 				self.owner.addOutput(host, '# AUTHENTIC STACKI')
 				self.writeConfig(host, mac, ip, device, netmask, vlanid, mtu, optionlist, channel, default)
 				self.owner.addOutput(host, '</stack:file>')

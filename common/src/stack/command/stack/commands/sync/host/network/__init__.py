@@ -52,9 +52,10 @@ class Command(stack.commands.sync.host.command):
 		#
 		if self.os == 'sles':
 			ifcfg_dir = '/etc/sysconfig/network'
-		else:
-			#TODO Ubuntu?
+		elif self.os == 'redhat':
 			ifcfg_dir = '/etc/sysconfig/network-scripts'
+		else: # debian
+			ifcfg_dir = '/etc/network/interfaces.d'
 
 		for fname in os.listdir(ifcfg_dir):
 			if fname != 'ifcfg-lo' and fname.startswith('ifcfg-'):
