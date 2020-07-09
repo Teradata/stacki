@@ -18,6 +18,7 @@
 	<order head="&os;-bootaction"    tail="database-data"/>
 
 	<order head="database-data">
+		<tail>dhcp-server</tail>
 		<tail>dns-server</tail>
 		<tail>routes-server</tail>
 	</order>
@@ -30,6 +31,7 @@
 	</order>
 
 	<edge from="server">
+		<to>dhcp-server</to>
 		<to>apache</to>
 		<to>frontend-server</to>
 		<to>database</to>

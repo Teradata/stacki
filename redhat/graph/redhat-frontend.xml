@@ -21,7 +21,6 @@
 		<tail>server</tail>
 		<tail>restapi</tail>
 		<tail>networking-server</tail>
-		<tail>dhcp-server</tail>
 		<tail>time-server</tail>
 	</order>
 
@@ -49,7 +48,6 @@
 	<edge from="server">
 		<to>base</to>
 		<to>ca</to>
-		<to>dhcp-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
 		<to>pxe</to>

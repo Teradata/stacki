@@ -13,7 +13,6 @@
 	</order>
 
 	<order head="database-data">
-		<tail>dhcp-server</tail>
 		<tail>networking-server</tail>
 		<tail>server</tail>
 		<tail>time-server</tail>
@@ -46,7 +45,6 @@
 	<edge from="server">
 		<to>base</to>
 		<to>ca</to>
-		<to>dhcp-server</to>
 		<to>firewall-base</to>
 		<to>firewall-server</to>
 		<to>pxe</to>

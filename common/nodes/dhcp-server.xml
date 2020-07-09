@@ -8,8 +8,14 @@
 <stack:package stack:cond="os == 'sles'">dhcp-server</stack:package>
 <stack:package stack:cond="os == 'debian'">isc-dhcp-server</stack:package>
 
-<stack:script stack:stage="install-post">
+<stack:script stack:stage="install-post" stack:cond="os in [ 'redhat', 'sles' ]">
 /usr/bin/systemctl enable dhcpd
+</stack:script>
+
+<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
+/usr/bin/systemctl enable dhcpd
+<stack:package stack:cond="os == 'debian'">isc-dhcp-server</stack:package>
+
 /opt/stack/bin/stack report dhcpd | /opt/stack/bin/stack report script | sh
 </stack:script>
 
