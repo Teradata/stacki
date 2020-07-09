@@ -17,7 +17,8 @@
 	</stack:rocks>
 
 
-	<stack:package>
+	<!-- TODO: this doesn't look right pick one chrony or ntp -->
+	<stack:package stack:cond="os != 'debian'">
 		ntp
 	</stack:package>
 
