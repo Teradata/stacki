@@ -69,13 +69,6 @@ DocumentRoot "/var/www/html"
 </Directory>
 ]]>
 </stack:file>
-
-<!-- Create Apache Profile.cgi mutex and semaphore -->
-mkdir -p /var/tmp
-touch /var/tmp/profile.mutex
-chown apache:root /var/tmp/profile.mutex
-cat /proc/cpuinfo  | awk -F: '/^processor/{print $2;}' | wc -l > /var/tmp/profile.semaphore
-chown apache:root /var/tmp/profile.semaphore
 </stack:script>
 
 <!-- REDHAT -->
