@@ -1,31 +1,37 @@
 <stack:stack>
-<stack:description>
-Apache HTTP Server
-</stack:description>
 
-<stack:copyright>
-Copyright (c) 2006 - 2019 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:description>
+	Apache HTTP Server
+	</stack:description>
 
-<stack:rocks>
-Copyright (c) 2000 - 2010 The Regents of the University of California
-All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
-https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
-</stack:rocks>
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:package stack:cond="os == 'redhat'">
-httpd
-httpd-devel
-mod_ssl
-</stack:package>
+	<stack:rocks>
+	Copyright (c) 2000 - 2010 The Regents of the University of California
+	All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
+	https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
+	</stack:rocks>
 
-<stack:package stack:cond="os == 'sles'">
-apache2
-</stack:package>
+	
+	<stack:package stack:cond="os == 'redhat'">
+		httpd
+		httpd-devel
+		mod_ssl
+	</stack:package>
 
-<stack:package>curl</stack:package>
+	<stack:package stack:cond="os == 'sles'">
+		apache2
+	</stack:package>
+
+	<stack:package stack:cond="os == 'debian'">
+		apache2
+	</stack:package>
+
+	<stack:package>curl</stack:package>
 
 <!-- COMMON -->
 <stack:script stack:stage="install-post">
@@ -128,7 +134,17 @@ LoadModule unixd_module modules/mod_unixd.so
 /bin/systemctl enable httpd
 </stack:script>
 
-<!-- SLES -->
+
+<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
+<!-- Make the user and group match Redhat -->
+groupmod --new-name apache www-data
+usermod --login apache www-data
+usermod --gid apache apache
+
+sed -i 's/www-data/apache/' /etc/apache2/envvars
+</stack:script>
+
+
 <stack:script stack:stage="install-post" stack:cond="os == 'sles'">
 <!-- Make the user and group match Redhat -->
 usermod --login apache wwwrun
@@ -197,13 +213,6 @@ ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.
 
 <!-- Enable Apache at boot -->
 /usr/bin/systemctl enable apache2
-</stack:script>
-
-
-<stack:script stack:stage="install-post" stack:cond="os == 'debian'">
-<!-- Make the user and group match Redhat -->
-usermod --login apache www-data
-groupmod --new-name apache www-data
 </stack:script>
 
 
