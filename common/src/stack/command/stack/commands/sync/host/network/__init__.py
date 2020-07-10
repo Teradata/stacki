@@ -137,10 +137,16 @@ class Command(stack.commands.sync.host.command):
 			for h in run_hosts:
 				host = h['host']
 				hostname = h['name']
-				cmd = '/sbin/service network restart '
-				cmd += '> /dev/null 2>&1 ; '
-				cmd += '/sbin/service ipmi restart > '
-				cmd += '/dev/null 2>&1'
+				host_os = host_attrs[host]['os']
+
+				if host_os == 'debian':
+					cmd = 'systemctl restart networking'
+				else:
+					cmd = '/sbin/service network restart '
+					cmd += '> /dev/null 2>&1 ; '
+					cmd += '/sbin/service ipmi restart > '
+					cmd += '/dev/null 2>&1'
+					
 				if host != me:
 					cmd = 'ssh %s "%s"' % (hostname, cmd)
 
@@ -159,7 +165,7 @@ class Command(stack.commands.sync.host.command):
 
 		# A note on /etc/hosts, since there's some commands that overlap
 		# in management for the FE
-		#
+		# 
 		# • `sync host` will always overwrite /etc/hosts on the FE
 		# • `sync config` will always call `sync host`
 		# • `sync host network` will respect the `sync.hosts` attr and

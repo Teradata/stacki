@@ -36,6 +36,8 @@ chmod 775 /tftpboot/pxelinux/pxelinux.cfg
 	
 <stack:script stack:stage="install-post" stack:cond="os == 'debian'">
 cp -R /usr/lib/syslinux/modules/bios/* /tftpboot/pxelinux/
+cp -R /opt/stack/images/debian         /tftpboot/
+	
 <stack:file stack:name="/etc/default/tftpd-hpa">
 TFTP_USERNAME="tftp"
 TFTP_DIRECTORY="/tftpboot"
