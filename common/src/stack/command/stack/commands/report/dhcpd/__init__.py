@@ -31,13 +31,6 @@ option PXE.mtftp-delay code 5 = unsigned integer 8;
 option client-arch code 93 = unsigned integer 16;
 """
 
-filename = """	if option client-arch = 00:07 {
-		filename "pxelinux/uefi/shim.efi";
-	} else {
-		filename "pxelinux/pxelinux.0";
-	}"""
-
-
 class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.
@@ -93,7 +86,8 @@ class Command(HostArgProcessor, stack.commands.report.command):
 				self.addOutput('', '\tmax-lease-time\t\t\t1200;')
 
 				ipnetwork = ipaddress.IPv4Network(network + '/' + netmask)
-				self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
+				if gateway:
+					self.addOutput('', '\toption routers\t\t\t%s;' % gateway)
 				self.addOutput('', '\toption subnet-mask\t\t%s;' % netmask)
 				self.addOutput('', '\toption broadcast-address\t%s;' %
 					ipnetwork.broadcast_address)
@@ -176,8 +170,9 @@ class Command(HostArgProcessor, stack.commands.report.command):
 		for name in data.keys():
 			appliance = data[name]['appliance']
 			boot = data[name]['boot']
-			sux = self.str2bool(self.getHostAttr(name, 'node'))
 			aws = self.str2bool(self.getHostAttr(name, 'aws'))
+			sux = self.getHostAttr(name, 'node')
+			hos = self.getHostAttr(name, 'os')
 			mac = None
 			ip  = None
 			dev = None
@@ -225,8 +220,18 @@ class Command(HostArgProcessor, stack.commands.report.command):
 							self.addOutput('', f'\toption tftp-server-name\t\t\t"{server}";')
 
 					elif sux: # has a nodefile so must be kickstartable
+						if hos == 'debian':
+							# /tftpboot/debian -- keep it seperate for now (not sure what this means for UEFI)
+							basedir = 'debian'
+						else:
+							basedir = 'pxelinux'
+							
+						self.addOutput('', '\tif option client-arch = 00:07 {')
+						self.addOutput('', '\t\tfilename "pxelinux/uefi/shim.efi";')
+						self.addOutput('', '\t} else {')
+						self.addOutput('', f'\t\tfilename "{basedir}/pxelinux.0";')
+						self.addOutput('', '\t}')
 
-						self.addOutput('', filename)
 						self.addOutput('','\tserver-name\t\t"%s";'
 							% server)
 						self.addOutput('','\tnext-server\t\t%s;'
