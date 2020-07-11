@@ -32,6 +32,7 @@ install::
 	$(INSTALL) -m 0755 profile.py  $(ROOT)/export/stack/sbin/profile.cgi
 	$(INSTALL) -m 0755 __init__.py $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 redhat.py  $(ROOT)/export/stack/sbin/profile/
+	$(INSTALL) -m 0755 debian.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 sles.py  $(ROOT)/export/stack/sbin/profile/
 	$(INSTALL) -m 0755 utils/*.cgi $(ROOT)/export/stack/sbin/
 

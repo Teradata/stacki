@@ -22,7 +22,18 @@ class BashProfileTraversor(stack.gen.MainTraversor):
 		
 		return None
 		
-		
+
+class MainTraversor(stack.gen.MainTraversor):
+
+	def traverse_stack_native(self, node):
+		lang = self.getAttr(node, 'stack:lang')
+
+		if lang == 'preseed':
+			self.gen.nativeSection.append(self.collect(node),
+						      self.getAttr(node, 'stack:file'))
+		return False
+
+	
 class Generator(stack.gen.Generator):
 
 	def __init__(self):
@@ -35,16 +46,15 @@ class Generator(stack.gen.Generator):
 		#
 		# We used to do i386 (not anymore)
 
-#		self.setOS('redhat')
-#		self.setArch('x86_64')
+		self.setOS('debian')
+		self.setArch('x86_64')
 
 	def traversors(self):
 		profileType = self.getProfileType()
 		workers     = [ ]
 
 		if profileType == 'native':
-			print('error - native profile not implemented')
-			sys.exit(-1)
+			workers.extend([ MainTraversor(self) ])
 		elif profileType == 'bash':
 			workers.extend([ BashProfileTraversor(self) ])
 		elif profileType == 'ansible':
@@ -53,5 +63,8 @@ class Generator(stack.gen.Generator):
 		return workers
 
 
+	def generate_native(self):
+		doc = self.nativeSection.generate() # <stack:native>
+		return doc
 
 
