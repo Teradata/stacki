@@ -12,6 +12,14 @@
 {
         "bootaction": [
                 {
+	                "name":    "default",
+			"os":      "debian",
+                        "type":    "install",
+                        "kernel":  "debian-installer/amd64/linux",
+                        "ramdisk": "debian-installer/amd64/initrd.gz",
+                        "args":    "auto=true hostname=unassigned domain=unassigned netcfg/get_nameservers=&Kickstart_PrivateAddress; url=http://&Kickstart_PrivateAddress;/install/sbin/profile.cgi?arch=x86_64&amp;np=1&amp;os=debian"
+                },
+                {
                         "name":    "default",
 			"os":      "debian",
                         "type":    "os",

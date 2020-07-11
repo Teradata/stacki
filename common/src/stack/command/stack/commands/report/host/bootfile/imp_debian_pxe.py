@@ -1,7 +1,4 @@
 # @copyright@
-# Copyright (c) 2006 - 2019 Teradata
-# All rights reserved. Stacki(r) v5.x stacki.com
-# https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
 import os
@@ -26,10 +23,17 @@ class Implementation(PXEImplementation):
 		mac       = i['mac']
 		mask      = i['mask']
 		gateway   = i['gateway']
+
+		arch = 'amd64' # TODO - support multiple archs
 		
+		dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
+		nextserver = attrs.get('Kickstart_PrivateKickstartHost')
+
 		self.owner.addOutput(host, self.get_sux_header(os.path.join(os.path.sep,
 									    'tftpboot',
-									    'pxelinux',
+									    'debian',
+									    'debian-installer',
+									    arch,
 									    'pxelinux.cfg',
 									    self.get_tftpboot_filename(mac))))
 		self.owner.addOutput(host, 'default stack')
@@ -37,19 +41,18 @@ class Implementation(PXEImplementation):
 		self.owner.addOutput(host, 'label stack')
 
 		if kernel:
-			if kernel[0:7] == 'vmlinuz':
-				self.owner.addOutput(host, '\tkernel %s' % (kernel))
+			if kernel.endswith('linux'):
+				self.owner.addOutput(host, f'\tkernel {kernel}')
 			else:
-				self.owner.addOutput(host, '\t%s' % (kernel))
+				self.owner.addOutput(host, f'\t{kernel}')
+
+		if args is None:
+			args = ''
+			
 		if ramdisk and len(ramdisk) > 0:
-			if len(args) > 0:
-				args += ' initrd=%s' % ramdisk
-			else:
-				args = 'initrd=%s' % ramdisk
+			args += f' initrd={ramdisk}'
 
 		if args and len(args) > 0:
-			self.owner.addOutput(host, '\tappend %s' % args)
-		if boottype == "install":
-			self.owner.addOutput(host, '\tipappend 2')
+			self.owner.addOutput(host, f'\tappend {args}')
 
 		self.owner.addOutput(host, self.get_sux_trailer())

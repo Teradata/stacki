@@ -4,10 +4,11 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import os
 import stack.commands
+from .imp_base import PXEImplementation
 
-
-class Implementation(stack.commands.Implementation):
+class Implementation(PXEImplementation):
 
 	def run(self, args):
 		h = args[0]
@@ -22,6 +23,7 @@ class Implementation(stack.commands.Implementation):
 
 		interface = i['interface']
 		ip        = i['ip']
+		mac       = i['mac']
 		mask      = i['mask']
 		gateway   = i['gateway']
 
@@ -36,7 +38,12 @@ class Implementation(stack.commands.Implementation):
 		if args and args.find('ksdevice=') != -1:
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
 				(ip, gateway, mask, dnsserver, nextserver)
-
+			
+		self.owner.addOutput(host, self.get_sux_header(os.path.join(os.path.sep,
+									    'tftpboot',
+									    'pxelinux',
+									    'pxelinux.cfg',
+									    self.get_tftpboot_filename(mac))))
 		self.owner.addOutput(host, 'default stack')
 		self.owner.addOutput(host, 'prompt 0')
 		self.owner.addOutput(host, 'label stack')
@@ -57,3 +64,5 @@ class Implementation(stack.commands.Implementation):
 
 		if boottype == "install":
 			self.owner.addOutput(host, '\tipappend 2')
+			
+		self.owner.addOutput(host, self.get_sux_trailer())

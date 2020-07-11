@@ -142,14 +142,23 @@ usermod --login apache www-data
 usermod --gid apache apache
 sed -i 's/www-data/apache/' /etc/apache2/envvars
 
-ln -s --force /opt/stack/etc/apache-stack.conf /etc/apache2/conf-enabled/stack.conf
+ln -s /opt/stack/etc/apache-stack.conf /etc/apache2/sites-enable/stack.conf
 
 <!-- Set up mod_wsgi -->
-ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib/apache2/modules/mod_wsgi.so
-
-<stack:file stack:name="/etc/apache2/mods-enabled/wsgi.load">
+ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib/apache2/modules/mod_wsgi.so
+<stack:file stack:name="/etc/apache2/mods-available/wsgi.load">
 LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so
 </stack:file>
+
+cd /etc/apache2/sites-enabled
+ln -s ../sites-available/default-ssl.conf .
+
+cd /etc/apache2/mods-enabled
+ln -s ../mods-available/wsgi.load .
+ln -s ../mods-available/cgi.load .
+ln -s ../mods-available/ssl.load .
+ln -s ../mods-available/ssl.conf .
+ln -s ../mods-available/socache_shmcb.load .
 
 </stack:script>
 
