@@ -10,6 +10,10 @@
 	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 	</copyright>
 
+	<order head="TAIL">
+		<tail>backend</tail>
+	</order>
+
 	<order tail="barnacle" head="backend"/>
 
 	<order head="time-client">

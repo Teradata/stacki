@@ -1,0 +1,18 @@
+<stack:stack>
+
+
+	<stack:description>
+	Backend Appliance
+	</stack:description>
+
+	<stack:copyright>
+	</stack:copyright>
+
+<stack:native stack:lang="preseed">
+
+	this is debian
+	
+</stack:native>
+
+</stack:stack> 
+

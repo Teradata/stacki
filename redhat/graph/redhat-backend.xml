@@ -20,9 +20,6 @@
 		<head>networking-client</head>
 	</order>
 
-	<order head="TAIL">
-		<tail>backend</tail>
-	</order>
 
 
 	<!-- Graph OO Framework -->

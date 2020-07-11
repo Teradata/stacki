@@ -31,8 +31,4 @@
 		<head>general</head>
 	</order>
 
-	<order head="TAIL">
-		<tail>backend</tail>
-	</order>
-
 </graph>
