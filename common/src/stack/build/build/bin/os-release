@@ -10,13 +10,16 @@ if [ -f /etc/redhat-release ]; then
 	RELEASE=`cat /etc/redhat-release`
 elif [ -f /etc/SuSE-release ]; then
 	RELEASE=`head -1 /etc/SuSE-release`
+elif [ -f /etc/os-release ]; then
+	. /etc/os-release
+	RELEASE=${VERSION_CODENAME}
+	RELEASE=debian${VERSION_ID}
+
+	# TODO - remove above line to set the release on ubunto to the
+	# codename, this means rebuilding everything so just do this
+	# when you are ready.
 else
 	RELEASE='unknown'
-fi
-
-if [ -f /etc/os-release ]; then
-	. /etc/os-release
-	RELEASE=debian${VERSION_ID}
 fi
 
 

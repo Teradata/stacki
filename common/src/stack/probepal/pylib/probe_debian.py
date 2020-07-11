@@ -33,7 +33,7 @@ class DebianProbe(Probe):
 		name, version, release, arch, distro_family = (
 			fields[0],
 			fields[2],
-			fields[3].strip('"'), # code name as release
+			fields[3].strip('"').lower(), # code name as release
 			self.arch_map.get(fields[-4]),
 			'debian'
 		)
