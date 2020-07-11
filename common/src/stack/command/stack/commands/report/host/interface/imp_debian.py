@@ -81,11 +81,11 @@ class Implementation(stack.commands.Implementation):
 
 			if self.owner.interface:
 				if self.owner.interface == device:
-					self.writeConfig(host, mac, ip, device, netmask, vlanid, mtu, optionlist, channel, default)
+					self.writeConfig(host, mac, ip, device, netmask, gateway, vlanid, mtu, optionlist, channel, default)
 			else:
 				self.owner.addOutput(host, f'<stack:file stack:name="/etc/network/interfaces.d/ifcfg-{device}">')
 				self.owner.addOutput(host, '# AUTHENTIC STACKI')
-				self.writeConfig(host, mac, ip, device, netmask, vlanid, mtu, optionlist, channel, default)
+				self.writeConfig(host, mac, ip, device, netmask, gateway, vlanid, mtu, optionlist, channel, default)
 				self.owner.addOutput(host, '</stack:file>')
 
 				ib_re = re.compile('^ib[0-9]+$')
@@ -105,7 +105,7 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host, '</stack:file>')
 
 			
-	def writeConfig(self, host, mac, ip, device, netmask, vlanid, mtu, options, channel, default):
+	def writeConfig(self, host, mac, ip, device, netmask, gateway, vlanid, mtu, options, channel, default):
 
 
 		if 'dhcp' in options:
@@ -117,6 +117,10 @@ class Implementation(stack.commands.Implementation):
 			self.owner.addOutput(host, f'iface {device} inet static')
 			self.owner.addOutput(host, f'  address {ip}')
 			self.owner.addOutput(host, f'  netmask {netmask}')
+			if gateway:
+				self.owner.addOutput(host, f'  gateway {gateway}')
 
 		# TODO - advanced stuff like ib, vlan, virtual, bonding,
 		# bridges, all the freaky stuff
+		#
+		# man interfaces <== most stuff documented here

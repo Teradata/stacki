@@ -140,8 +140,17 @@ LoadModule unixd_module modules/mod_unixd.so
 groupmod --new-name apache www-data
 usermod --login apache www-data
 usermod --gid apache apache
-
 sed -i 's/www-data/apache/' /etc/apache2/envvars
+
+ln -s --force /opt/stack/etc/apache-stack.conf /etc/apache2/conf-enabled/stack.conf
+
+<!-- Set up mod_wsgi -->
+ln -s --force /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib/apache2/modules/mod_wsgi.so
+
+<stack:file stack:name="/etc/apache2/mods-enabled/wsgi.load">
+LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so
+</stack:file>
+
 </stack:script>
 
 
