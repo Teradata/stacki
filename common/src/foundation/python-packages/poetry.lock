@@ -718,7 +718,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [extras]
-debian10 = ["libvirt-python"]
+buster = ["libvirt-python"]
 redhat7 = ["libvirt-python"]
 sles11 = []
 sles12 = ["libvirt-python"]

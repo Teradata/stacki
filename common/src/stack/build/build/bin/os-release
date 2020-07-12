@@ -13,11 +13,6 @@ elif [ -f /etc/SuSE-release ]; then
 elif [ -f /etc/os-release ]; then
 	. /etc/os-release
 	RELEASE=${VERSION_CODENAME}
-	RELEASE=debian${VERSION_ID}
-
-	# TODO - remove above line to set the release on ubunto to the
-	# codename, this means rebuilding everything so just do this
-	# when you are ready.
 else
 	RELEASE='unknown'
 fi
