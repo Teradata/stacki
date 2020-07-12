@@ -10,8 +10,19 @@
 
 <stack:native stack:lang="preseed">
 
-	this is debian
-	
+d-i debian-installer/locale string &Kickstart_Lang;
+d-i keyboard-configuration/xkb-keymap skip-config
+d-i passwd/root-password-crypted password &Kickstart_PrivateRootPassword;
+d-i time/zone string &Kickstart_Timezone;
+d-i passwd/make-user boolean false
+
+d-i mirror/country string manual
+d-i mirror/http/hostname string &Kickstart_PrivateAddress;
+d-i mirror/http/proxy string
+d-i mirror/http/directory string /install/pallets/Debian/10.4.0/buster/debian/x86_64
+d-i mirror/codename string buster
+d-i debian-installer/allow_unauthenticated boolean true
+
 </stack:native>
 
 </stack:stack> 
