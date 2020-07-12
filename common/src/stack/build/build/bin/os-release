@@ -31,7 +31,7 @@ case $RELEASE in
 	*SUSE*15*)
 		echo sles15
 		;;
-	debian*)
+	buster)
 	    	echo $RELEASE
 		;;
 	*)
