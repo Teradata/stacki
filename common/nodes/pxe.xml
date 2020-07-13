@@ -21,6 +21,7 @@
 	<stack:package stack:cond="os == 'debian'">
 		tftpd-hpa
 		pxelinux
+		stack-images
 	</stack:package>
 
 	<stack:package>

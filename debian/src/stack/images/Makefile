@@ -1,7 +1,7 @@
 # @copyright@
 # @copyright@
 
-PKGROOT		= /opt/stack/images/debian
+PKGROOT		= /tftpboot/debian
 ROLLROOT	= ../../../..
 
 include $(STACKBUILD)/etc/CCRules.mk
