@@ -13,7 +13,7 @@ include $(STACKBUILD)/etc/CCRules.mk
 BOOTSTRAP        =
 BOOTSTRAP.redhat =
 BOOTSTRAP.sles   =
-BOOTSTRAP.debian = apache2-dev
+BOOTSTRAP.debian = apache2-dev libvirt-dev
 
 bootstrap pkg:
 	$(STACKBUILD)/bin/package-install $(BOOTSTRAP) $(BOOTSTRAP.$(OS))
