@@ -137,12 +137,12 @@ LoadModule unixd_module modules/mod_unixd.so
 
 <stack:script stack:stage="install-post" stack:cond="os == 'debian'">
 <!-- Make the user and group match Redhat -->
-groupmod --new-name apache www-data
-usermod --login apache www-data
-usermod --gid apache apache
+  
+sed -i 's/www-data/apache/' /etc/passwd
+sed -i 's/www-data/apache/' /etc/shadow
 sed -i 's/www-data/apache/' /etc/apache2/envvars
 
-ln -s /opt/stack/etc/apache-stack.conf /etc/apache2/sites-enable/stack.conf
+ln -s /opt/stack/etc/apache-stack.conf /etc/apache2/sites-enabled/stack.conf
 
 <!-- Set up mod_wsgi -->
 ln -s /opt/stack/lib/python3.*/site-packages/mod_wsgi/server/mod_wsgi-*.so /usr/lib/apache2/modules/mod_wsgi.so
