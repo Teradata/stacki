@@ -12,7 +12,6 @@
 # @rocks@
 #
 
-import os
 from stack.argument_processors.box import BoxArgProcessor
 from stack.argument_processors.host import HostArgProcessor
 import stack.commands
