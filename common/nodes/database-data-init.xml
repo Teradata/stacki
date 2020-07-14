@@ -56,14 +56,30 @@ with open('/tmp/site.json', 'w') as file:
 
 <stack:script stack:stage="install-post">
 
-<stack:file stack:name="/tmp/dump-core.json">
+    
+<stack:file stack:name="/tmp/dump-access.json" stack:cond="os == 'debian'">
+{
+        "access": [
+                {
+                        "command": "*",
+                        "group": "www-data"
+                }
+	]
+}
+</stack:file>
+<stack:file stack:name="/tmp/dump-access.json" stack:cond="os != 'debian'">
 {
         "access": [
                 {
                         "command": "*",
                         "group": "apache"
                 }
-        ],
+	]
+}
+</stack:file>
+  
+<stack:file stack:name="/tmp/dump-core.json">
+{
         "attr": [
                 {
                         "name": "sync.ssh.authkey",
@@ -199,6 +215,7 @@ with open('/tmp/site.json', 'w') as file:
 </stack:file>
 
 /opt/stack/bin/stack load /tmp/site.json | sh
+/opt/stack/bin/stack load /tmp/dump-access.json | sh
 /opt/stack/bin/stack load /tmp/dump-core.json | sh
 
 </stack:script>

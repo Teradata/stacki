@@ -432,7 +432,6 @@ def get_mysql_connection(user=None, password=None):
 	if user is None:
 		user = my_cnf_user
 
-
 	try:
 		if os.path.exists(my_cnf_socket):
 			connection = pymysql.connect(db='cluster', user=user, passwd=password, host='localhost', 
