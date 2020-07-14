@@ -401,16 +401,16 @@ def get_mysql_connection(user=None, password=None):
 	connection = None
 
 	if user is None:
-		# Root connects as the apache user, everyone else as
-		# the user running the python command.
-		if os.geteuid() == 0:
-			user = 'apache'
-		else:
+		# Root connects as the apache (see apache.my.cnf)
+		# user, everyone else as the user running the python
+		# command.
+		if os.geteuid() != 0:
 			user = pwd.getpwuid(os.geteuid())[0]
 
 
 	my_cnf_socket = ''
 	my_cnf_password = ''
+	my_cnf_user = ''
 	try:
 		with open('/etc/apache.my.cnf') as f:
 			for line in f:
@@ -421,11 +421,16 @@ def get_mysql_connection(user=None, password=None):
 						my_cnf_socket = value
 					elif key == 'password':
 						my_cnf_password = value
+					elif key == 'user':
+						my_cnf_user = value
 	except FileNotFoundError:
 		pass
 	
 	if password is None:
 		password = my_cnf_password
+
+	if user is None:
+		user = my_cnf_user
 
 
 	try:

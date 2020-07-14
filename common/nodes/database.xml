@@ -61,8 +61,10 @@
 
 if [ "&os;" == "debian" ]; then
 	mysql_sock=/var/run/mysqld/mysqld.sock
+	apache_user=www-data
 else
 	mysql_sock=/var/run/mysql/mysqld.sock
+	apache_user=apache
 fi
 
 root_pw=`/opt/stack/sbin/gen_random_pw`
@@ -77,12 +79,15 @@ password	= $root_pw
 ln -s --force /etc/root.my.cnf /root/.my.cnf
 
 
-<stack:file stack:name="/etc/apache.my.cnf" stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
+<stack:file stack:name="/etc/apache.my.cnf" stack:perms="0640" stack:vars="expanded">
 [client]
-user		= apache
+user		= $apache_user
 socket		= $mysql_sock
 password	= $apache_pw
 </stack:file>
+
+<stack:file stack:name="/etc/apache.my.cnf" stack:owner="root:www-data" stack:cond="os == 'debian'"/>
+<stack:file stack:name="/etc/apache.my.cnf" stack:owner="root:apache"   stack:cond="os != 'debian'"/>
 
 <stack:file stack:name="/etc/my.cnf" stack:owner="root:mysql" stack:perms="0640" stack:cond="os != 'debian'">
 [mysqld]
@@ -109,9 +114,9 @@ FLUSH PRIVILEGES;
 </stack:file>
 
 <stack:file stack:name="/root/users.sql" stack:perms="0400" stack:owner="root:root" stack:vars="expanded">
-CREATE USER "apache"@"localhost" IDENTIFIED BY "$apache_pw";
-CREATE USER "apache"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
-CREATE USER "apache"@"&hostname;" IDENTIFIED BY "$apache_pw";
+CREATE USER "$apache_user"@"localhost" IDENTIFIED BY "$apache_pw";
+CREATE USER "$apache_user"@"127.0.0.1" IDENTIFIED BY "$apache_pw";
+CREATE USER "$apache_user"@"&hostname;" IDENTIFIED BY "$apache_pw";
 CREATE USER "root"@"&hostname;" IDENTIFIED BY "$root_pw";
 </stack:file>
 </stack:script>
