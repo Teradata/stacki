@@ -547,7 +547,13 @@ grant select on cluster.* to ''@'localhost';
 <!-- TODO: how to grant RO access for all users for newer mariadb -->
 </stack:file>
 
-<stack:file stack:name="/var/db/grants.sql" stack:perms="0400" stack:mode="append">
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400" stack:mode="append" stack:cond="os == 'debian'">
+grant select,update,insert,delete,lock tables on cluster.* to www-data@localhost;
+grant select,update,insert,delete,lock tables on cluster.* to www-data@"&hostname;";
+grant select,update,insert,delete,lock tables on shadow.*  to www-data@localhost;
+grant select,update,insert,delete,lock tables on shadow.*  to www-data@"&hostname;";
+</stack:file>
+<stack:file stack:name="/var/db/grants.sql" stack:perms="0400" stack:mode="append" stack:cond="os != 'debian'">
 grant select,update,insert,delete,lock tables on cluster.* to apache@localhost;
 grant select,update,insert,delete,lock tables on cluster.* to apache@"&hostname;";
 grant select,update,insert,delete,lock tables on shadow.*  to apache@localhost;
