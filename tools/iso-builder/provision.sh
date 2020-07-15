@@ -107,7 +107,7 @@ else
         then
             curl -sfSLO --retry 3 $INSTALLER_ISOS/CentOS-7-x86_64-Everything-1810.iso
         else
-            curl -sfSLO --retry 3  http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
+            curl -sfSLO --retry 3 https://archive.kernel.org/centos-vault/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
 
