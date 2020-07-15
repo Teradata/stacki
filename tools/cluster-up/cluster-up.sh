@@ -303,7 +303,7 @@ then
         then
             echo
             echo -e "\033[37mDownloading from the Internet ...\033[0m"
-            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso http://mirrors.edge.kernel.org/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
+            curl -f --progress-bar --retry 3 -o $DOWNLOAD_DIR/CentOS-7-x86_64-Everything-1810.iso https://archive.kernel.org/centos-vault/7.6.1810/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
         fi
     fi
 
