@@ -433,8 +433,8 @@ class Discovery:
 			# Find our apache log
 			if os.path.isfile("/var/log/httpd/ssl_access_log"):
 				kickstart_log = "/var/log/httpd/ssl_access_log"
-			elif os.path.isfile("/var/log/apache2/ssl_access_log"):
-				kickstart_log = "/var/log/apache2/ssl_access_log"
+			elif os.path.isfile("/var/log/apache2/access.log"):
+				kickstart_log = "/var/log/apache2/access.log"
 			else:
 				raise ValueError("Apache log does not exist")
 
