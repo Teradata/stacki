@@ -306,3 +306,32 @@ class TestListHostAttr:
 			'stack list host attr a:backend attr=time.* output-format=json'
 		)
 		assert result.rc == 0
+
+	def test_const_determined_correctly(self, host):
+		result = host.run('stack list host attr localhost attr=os* output-format=json')
+		assert result.rc == 0
+		attrs = json.loads(result.stdout)
+
+		stacki_os_attributes = {}
+
+		for this_attr in attrs:
+			if this_attr['attr'] == 'os':
+				stacki_os_attributes['os'] = this_attr['value']
+			elif this_attr['attr'] == 'os.version':
+				stacki_os_attributes['os.version'] = this_attr['value']
+			elif this_attr['attr'] == 'os.minor_version':
+				stacki_os_attributes['os.minor_version'] = this_attr['value']
+
+		expected_keys = ('os', 'os.version', 'os.minor_version')
+		assert set(expected_keys) == set(stacki_os_attributes.keys())
+
+		expected_values = itemgetter(*expected_keys)(stacki_os_attributes)
+
+		distro, rel = host.system_info.distribution, host.system_info.release
+		if (distro, rel) == ('sles', '12.3'):
+			assert ('sles', '12.x', 'sp3') == expected_values
+		if (distro, rel) == ('sles', '15.1'):
+			assert ('sles', '15.x', 'sp1') == expected_values
+		elif (distro, rel) == ('centos', '7'):
+			assert ('redhat', '7.x', '6') == expected_values
+		# TODO Ubuntu

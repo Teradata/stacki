@@ -70,6 +70,7 @@ class Plugin(stack.commands.Plugin):
 				# First the pallets
 				pallets = []
 				os_version = None
+				minor_version = None
 				for name, version, rel, pallet_os in self.db.select("""
 					rolls.name, rolls.version, rolls.rel, rolls.os
 					FROM rolls
@@ -81,7 +82,11 @@ class Plugin(stack.commands.Plugin):
 						# the attr os.version is '{major_version}.x'
 						# release is now '{OS}{major_version}'
 						if pallet_os in rel:
-							os_version = f'{rel.replace(pallet_os, "")}.x'
+							major_version = rel.replace(pallet_os, "")
+							os_version = f'{major_version}.x'
+							# take the version field and carve away the major version, stripping remaining leading dots.
+							# note, this may stay '' in some cases (Fedora, inital releases of ubuntu, sles15, ...)
+							minor_version = f'{version.replace(major_version, "")}'.lstrip('.')
 						# fedora's OS is 'redhat' ...
 						elif name.lower() in rel:
 							os_version = f'{rel.replace(name.lower(), "")}.x'
@@ -89,6 +94,7 @@ class Plugin(stack.commands.Plugin):
 				for hostname in box_map[box_id]:
 					output_rows.append([hostname, 'host', 'const', 'pallets', pallets])
 					output_rows.append([hostname, 'host', 'const', 'os.version', os_version])
+					output_rows.append([hostname, 'host', 'const', 'os.minor_version', minor_version])
 
 				# Then the carts
 				carts = flatten(self.db.select("""
