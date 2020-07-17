@@ -4,6 +4,8 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+from operator import itemgetter
+from itertools import groupby
 
 from stack.argument_processors.host import HostArgProcessor
 import stack.commands
@@ -26,7 +28,7 @@ class Command(HostArgProcessor, stack.commands.Command):
 
 		hosts = self.getHostnames(args, managed_only=True)
 
-		(action,) = self.fillParams([
+		action, = self.fillParams([
 			('action', None)
 		])
 
@@ -34,51 +36,67 @@ class Command(HostArgProcessor, stack.commands.Command):
 		if len(hosts) == 0:
 			return
 
-		ha = {}
-		for host in hosts:
-			ha[host] = {
-				'host'       : host,
-				'action'     : None,
-				'type'       : action,
-				'attrs'      : {}
-			}
-
-
-		for row in self.call('list.host.attr', hosts):
-			ha[row['host']]['attrs'][row['attr']] = row['value']
-
+		# only populated if action != None
+		list_host_boot_actions = {k: None for k in hosts}
 		if not action: # param can override the db
 			for row in self.call('list.host.boot', hosts):
-				ha[row['host']]['type'] = row['action']
+				list_host_boot_actions[row['host']] = row['action']
 
-		hosts_with_no_action = []
-		for row in self.call('list.host', hosts):
-			h = ha[row['host']]
-			if h['type'] == 'install':
-				h['action'] = row['installaction']
-			elif h['type'] == 'os':
-				h['action'] = row['osaction']
-			# If there is no bootaction set for this host it is added to the list of hosts to be skipped
-			if h['action'] == None:
-				hosts_with_no_action.append(row['host'])
-			h['os']        = row['os']
-			h['appliance'] = row['appliance']
+		host_attributes = self.getHostAttrDict(hosts)
 
-		# Removing all the hosts which do not have any bootaction
-		for blacklist_host in hosts_with_no_action:
-			ha.pop(blacklist_host)
-			hosts.remove(blacklist_host)
+		# works just like getHostAttrDict()
+		# get all hosts in a dictionary with their interaces.
+		cond = lambda iface: all(itemgetter('ip', 'pxe')(iface))
+		host_interfaces = {
+			k: {i['interface']: i for i in v if cond(i)}
+			for k, v in groupby(
+				self.call('list.host.interface', hosts + ['expanded=true']),
+				itemgetter('host'))
+		}
+
+		host_data = {}
+		for host_row in self.call('list.host', hosts):
+			# don't build bootfiles for the frontend
+			if host_row['appliance'] == 'frontend':
+				continue
+
+			hostname = host_row['host']
+
+			# don't build bootfiles for hosts with no interfaces
+			if hostname not in host_interfaces:
+				continue
+
+			this_host = {
+				'host'       : hostname,
+				'type'       : action or list_host_boot_actions[hostname],
+				'attrs'      : host_attributes[hostname],
+				'os'         : host_row['os'],
+				'appliance'  : host_row['appliance'],
+			}
+
+			if this_host['type'] == 'install':
+				this_host['action'] = host_row['installaction']
+			elif this_host['type'] == 'os':
+				this_host['action'] = host_row['osaction']
+
+			# if this host has no boot action currently set - don't try to write a bootfile for it
+			if this_host['action'] == None:
+				continue
+
+			this_host['interfaces'] = host_interfaces[hostname].values()
+
+			host_data[hostname] = this_host
 
 		# This condition is checked again because the previous block updates the list of hosts
-		if len(hosts) == 0:
+		if len(host_data) == 0:
 			return
 
 		ba = {}
 		for row in self.call('list.bootaction'):
 			ba[(row['bootaction'], row['type'], row['os'])] = row
 
-		for host in hosts:
-			h   = ha[host]
+		for host in host_data:
+			h   = host_data[host]
 			key = (h['action'], h['type'], None)
 			if key in ba:
 				b = ba[key]
@@ -92,29 +110,7 @@ class Command(HostArgProcessor, stack.commands.Command):
 				h['ramdisk'] = b['ramdisk']
 				h['args']    = b['args']
 
-		argv = []
-		for host in hosts:
-			argv.append(host)
-		argv.append('expanded=true')
-		for row in self.call('list.host.interface', argv):
-			h   = ha[row['host']]
-			if 'interfaces' not in h:
-				h['interfaces'] = []
-			if h['appliance'] == 'frontend':
-				continue
-			ip  = row['ip']
-			pxe = row['pxe']
-			interface = row['interface']
-			if ip and pxe:
-				h['interfaces'].append({
-					'interface': interface,
-					'ip'	   : ip,
-					'mask'	   : row['mask'],
-					'gateway'  : row['gateway']
-				})
-
-
 		self.beginOutput()
-		self.runPlugins(ha)
+		self.runPlugins(host_data)
 		self.endOutput(padChar='', trimOwner=True)
 
