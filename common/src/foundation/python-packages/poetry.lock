@@ -677,7 +677,7 @@ description = "Database migrations with SQL"
 name = "yoyo-migrations"
 optional = false
 python-versions = "*"
-version = "7.1.2"
+version = "7.2.0"
 
 [package.dependencies]
 sqlparse = "*"
@@ -1121,8 +1121,8 @@ werkzeug = [
     {file = "Werkzeug-1.0.1.tar.gz", hash = "sha256:6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c"},
 ]
 yoyo-migrations = [
-    {file = "yoyo-migrations-7.1.2.tar.gz", hash = "sha256:cfd92cd1b26c3a026f6813b28c03f80a9532a035acc4fd8dc2f7c4dd8dbd3316"},
-    {file = "yoyo_migrations-7.1.2-py3-none-any.whl", hash = "sha256:d941d0ff55a0af33dd1a7287c14d8755f580cafd87da3e42b36c815af41cefdb"},
+    {file = "yoyo-migrations-7.2.0.tar.gz", hash = "sha256:a54f6176ff6da3330be537c962235aaa9e5f7f2aae563b1c531b1cb616d80359"},
+    {file = "yoyo_migrations-7.2.0-py3-none-any.whl", hash = "sha256:d6e0e32054d81b27278f465e719e39c658e14decd62fd71d34f50e0772f80755"},
 ]
 zipp = [
     {file = "zipp-3.1.0-py3-none-any.whl", hash = "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b"},
