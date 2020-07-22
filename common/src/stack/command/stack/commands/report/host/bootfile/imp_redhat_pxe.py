@@ -26,16 +26,13 @@ class Implementation(stack.commands.Implementation):
 		gateway   = i['gateway']
 
 
-		dnsserver  = attrs.get('Kickstart_PrivateDNSServers')
-		nextserver = attrs.get('Kickstart_PrivateKickstartHost')
-
+		# redhat only:
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.
-
-		if args and args.find('ksdevice=') != -1:
+		if h['os'] == 'redhat' and args and args.find('ksdevice=') != -1:
 			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
-				(ip, gateway, mask, dnsserver, nextserver)
+				(ip, gateway, mask, attrs.get('Kickstart_PrivateDNSServers'), attrs.get('Kickstart_PrivateKickstartHost'))
 
 		self.owner.addOutput(host, 'default stack')
 		self.owner.addOutput(host, 'prompt 0')
