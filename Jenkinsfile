@@ -5,10 +5,12 @@ pipeline {
 
     environment {
         TD_GITHUB = credentials('cbaa2c3c-151e-4ba2-92ed-8f088762467b')
+        GITHUB = credentials('88f234ac-6b93-4c41-92d2-1329c97e2254')
         ARTIFACTORY = credentials('d1a4e414-0526-4973-bea5-9d219d884f03')
         GITHUB_TOKEN = credentials('72702790-6cee-470b-94d0-1c3eb246a71d')
         BLACKDUCK_TOKEN = credentials('cb9c5430-f974-46e3-9d25-baeab4873db9')
         ESXI_PASS = credentials('8af95130-9b78-4e7a-9d3a-bec7ab54716b')
+        JENKINS = credentials('8b24c6e2-8589-4feb-afc2-3d0175854b11')
 
         PIPELINE = env.JOB_NAME.split('/')[0].trim()
         PLATFORM = env.PIPELINE.split('-')[-1].trim()
@@ -551,46 +553,12 @@ pipeline {
                     }
 
                     steps {
-                        // Run the integration tests
-                        dir('integration_1') {
-                            // Give the tests up to 90 minutes to finish
-                            timeout(90) {
-                                script {
-                                    try {
-                                        if (env.COVERAGE_REPORTS == 'true') {
-                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=1 ../$ISO_FILENAME'
-                                        }
-                                        else {
-                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=1 ../$ISO_FILENAME'
-                                        }
-                                    }
-                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                                        // Make sure we clean up the VM
-                                        dir('test-suites/integration') {
-                                            sh 'vagrant destroy -f || true'
-                                        }
-
-                                        // Raise an error
-                                        error 'Integration Group 1 test-suite timed out'
-                                    }
-                                }
-                            }
-                        }
+                        run_integration_test_steps('1', '3')
                     }
 
                     post {
                         always {
-                            script {
-                                // Record the test statuses for Jenkins
-                                if (fileExists('integration_1/reports/integration-junit.xml')) {
-                                    junit 'integration_1/reports/integration-junit.xml'
-                                }
-
-                                if (env.COVERAGE_REPORTS == 'true') {
-                                    // Add the coverage data to the `combine` folder
-                                    sh 'mv integration_1/reports/integration.coverage combine/reports/integration-1.coverage'
-                                }
-                            }
+                            run_integration_test_post('1')
                         }
                     }
                 }
@@ -603,46 +571,12 @@ pipeline {
                     }
 
                     steps {
-                        // Run the integration tests
-                        dir('integration_2') {
-                            // Give the tests up to 90 minutes to finish
-                            timeout(90) {
-                                script {
-                                    try {
-                                        if (env.COVERAGE_REPORTS == 'true') {
-                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=2 ../$ISO_FILENAME'
-                                        }
-                                        else {
-                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=2 ../$ISO_FILENAME'
-                                        }
-                                    }
-                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                                        // Make sure we clean up the VM
-                                        dir('test-suites/integration') {
-                                            sh 'vagrant destroy -f || true'
-                                        }
-
-                                        // Raise an error
-                                        error 'Integration Group 2 test-suite timed out'
-                                    }
-                                }
-                            }
-                        }
+                        run_integration_test_steps('2', '3')
                     }
 
                     post {
                         always {
-                            script {
-                                // Record the test statuses for Jenkins
-                                if (fileExists('integration_2/reports/integration-junit.xml')) {
-                                    junit 'integration_2/reports/integration-junit.xml'
-                                }
-
-                                if (env.COVERAGE_REPORTS == 'true') {
-                                    // Add the coverage data to the `combine` folder
-                                    sh 'mv integration_2/reports/integration.coverage combine/reports/integration-2.coverage'
-                                }
-                            }
+                            run_integration_test_post('2')
                         }
                     }
                 }
@@ -655,46 +589,12 @@ pipeline {
                     }
 
                     steps {
-                        // Run the integration tests
-                        dir('integration_3') {
-                            // Give the tests up to 90 minutes to finish
-                            timeout(90) {
-                                script {
-                                    try {
-                                        if (env.COVERAGE_REPORTS == 'true') {
-                                            sh './run-tests.sh --integration --coverage --test-group-count=3 --test-group=3 ../$ISO_FILENAME'
-                                        }
-                                        else {
-                                            sh './run-tests.sh --integration --test-group-count=3 --test-group=3 ../$ISO_FILENAME'
-                                        }
-                                    }
-                                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                                        // Make sure we clean up the VM
-                                        dir('test-suites/integration') {
-                                            sh 'vagrant destroy -f || true'
-                                        }
-
-                                        // Raise an error
-                                        error 'Integration Group 3 test-suite timed out'
-                                    }
-                                }
-                            }
-                        }
+                        run_integration_test_steps('3', '3')
                     }
 
                     post {
                         always {
-                            script {
-                                // Record the test statuses for Jenkins
-                                if (fileExists('integration_3/reports/integration-junit.xml')) {
-                                    junit 'integration_3/reports/integration-junit.xml'
-                                }
-
-                                if (env.COVERAGE_REPORTS == 'true') {
-                                    // Add the coverage data to the `combine` folder
-                                    sh 'mv integration_3/reports/integration.coverage combine/reports/integration-3.coverage'
-                                }
-                            }
+                            run_integration_test_post('3')
                         }
                     }
                 }
@@ -1453,6 +1353,64 @@ pipeline {
                 }
             }
         }
+
+        stage('Merge') {
+            when {
+                branch 'feature/updates-*'
+                environment name: 'PLATFORM', value: 'redhat7'
+            }
+
+            steps {
+                // Poll the status of the other platforms' builds
+                retry(20) {
+                    sh '''
+                        curl -s --user $JENKINS ${JOB_URL/redhat7/sles15}/lastBuild/api/json?tree=result | grep -q SUCCESS || (STATUS=$? && sleep 60 && exit $STATUS)
+                        curl -s --user $JENKINS ${JOB_URL/redhat7/sles12}/lastBuild/api/json?tree=result | grep -q SUCCESS || (STATUS=$? && sleep 60 && exit $STATUS)
+                        curl -s --user $JENKINS ${JOB_URL/redhat7/sles11}/lastBuild/api/json?tree=result | grep -q SUCCESS || (STATUS=$? && sleep 60 && exit $STATUS)
+                    '''
+                }
+
+                dir('stacki') {
+                    // Note: Will fail the stage if we can't fast-forward the
+                    // commit, which will let us deal with merge issues manually
+
+                    // Merge in the update branch via fast-forward
+                    sh 'git checkout develop'
+                    sh 'git merge --ff-only $GIT_BRANCH'
+                    sh 'git push https://${GITHUB}@github.com/Teradata/stacki.git'
+
+                    // Delete the old branch
+                    sh 'git push https://${GITHUB}@github.com/Teradata/stacki.git --delete $GIT_BRANCH'
+                }
+            }
+
+            post {
+                failure {
+                    slackSend(
+                        channel: '#stacki-bot',
+                        color: 'danger',
+                        message: """\
+                            Stacki merge has failed.
+                            *Branch:* ${env.GIT_BRANCH}
+                            <${env.RUN_DISPLAY_URL}|View the pipeline job>
+                        """.stripIndent(),
+                        tokenCredentialId: 'slack-token-stacki'
+                    )
+                }
+
+                success {
+                    slackSend(
+                        channel: '#stacki-builds',
+                        color: 'good',
+                        message: """\
+                            Stacki merge has succeeded.
+                            *Branch:* ${env.GIT_BRANCH}
+                        """.stripIndent(),
+                        tokenCredentialId: 'slack-token-stacki'
+                    )
+                }
+            }
+        }
     }
 
     post {
@@ -1460,5 +1418,45 @@ pipeline {
         always {
             cleanWs()
         }
+    }
+}
+
+def run_integration_test_steps(String group, String count) {
+    // Run the integration tests
+    dir("integration_$group") {
+        // Give the tests up to 90 minutes to finish
+        timeout(90) {
+            script {
+                try {
+                    if (env.COVERAGE_REPORTS == 'true') {
+                        sh "./run-tests.sh --integration --coverage --test-group-count=$count --test-group=$group ../\$ISO_FILENAME"
+                    }
+                    else {
+                        sh "./run-tests.sh --integration --test-group-count=$count --test-group=$group ../\$ISO_FILENAME"
+                    }
+                }
+                catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                    // Make sure we clean up the VM
+                    dir('test-suites/integration') {
+                        sh 'vagrant destroy -f || true'
+                    }
+
+                    // Raise an error
+                    error "Integration Group $group test-suite timed out"
+                }
+            }
+        }
+    }
+}
+
+def run_integration_test_post(String group) {
+    // Record the test statuses for Jenkins
+    if (fileExists("integration_$group/reports/integration-junit.xml")) {
+        junit "integration_$group/reports/integration-junit.xml"
+    }
+
+    if (env.COVERAGE_REPORTS == 'true') {
+        // Add the coverage data to the `combine` folder
+        sh "mv integration_$group/reports/integration.coverage combine/reports/integration-$group.coverage"
     }
 }
