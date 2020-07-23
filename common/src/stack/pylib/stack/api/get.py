@@ -39,23 +39,15 @@ def GetHostAttr(host, attribute):
 	"""
 	Returns the value of the specified ATTRIBUTE for the given
 	HOST.  If no attribute is define it returns None.
-
-	If a profile.cfg file is found read the attribute from there
-	rather than from the database.
 	"""
 
 	value = None
 
-	cfg = configparser.RawConfigParser()
-	cfg.read(os.path.join(os.sep, 'opt', 'stack', 'etc', 'profile.cfg'))
-	try:
-		value = cfg.get('attr', attribute)
-	except:
-		result = stack.api.Call('list host attr', 
-					[host, 'attr=%s' % attribute])
-		if result:
-			assert len(result) == 1
-			value = result[0]['value']
+	result = stack.api.Call('list host attr', 
+				[host, 'attr=%s' % attribute])
+	if result:
+		assert len(result) == 1
+		value = result[0]['value']
 		
 	return value
 
