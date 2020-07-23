@@ -5,7 +5,6 @@ disable_warnings =
 
 omit =
 	/opt/stack/lib/python3*/site-packages/stack/commands/list/host/profile/imp_sles.py
-	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/bootfile/imp_sles_uefi.py
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/interface/imp_sles.py
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/repo/imp_sles.py
 	/opt/stack/lib/python3*/site-packages/stack/commands/report/host/resolv/imp_sles.py
