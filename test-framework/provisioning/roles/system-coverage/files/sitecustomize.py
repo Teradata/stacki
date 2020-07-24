@@ -8,14 +8,14 @@ def get_distro():
 	''' get the distro on any newer systemd based distro (sles12+, centos/rhel 7+) '''
 	os_release = Path('/etc/os-release')
 	if not os_release.exists():
-		raise NotImplemented
+		raise NotImplementedError
 
 	for line in os_release.read_text().splitlines():
 		if line.startswith('ID='):
 			distro_id = line.split('=')[-1].strip('"')
 			break
 	else: # nobreak
-		raise NotImplemented
+		raise NotImplementedError
 
 	if distro_id in ['rhel', 'centos']:
 		return 'redhat'
