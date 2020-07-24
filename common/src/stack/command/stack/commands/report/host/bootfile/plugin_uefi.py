@@ -28,6 +28,6 @@ class Plugin(stack.commands.Plugin):
 				self.owner.addOutput(host, """
 <stack:file stack:name="%s" stack:owner="root:apache" stack:perms="0664" 
             stack:rcs="off"><![CDATA[""" % filename)
-				self.owner.runImplementation("%s_uefi" % ha[host]['os'], 
+				self.owner.runImplementation("redhat_uefi", 
 							     (ha[host], interface))
 				self.owner.addOutput(host, ']]>\n</stack:file>')

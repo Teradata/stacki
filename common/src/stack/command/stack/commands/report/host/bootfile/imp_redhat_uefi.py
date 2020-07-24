@@ -27,6 +27,10 @@ os_template = {
 chainloader ($root)/efi/SuSE/elilo.efi
 boot
 """,
+	'sles15.x': """search.fs_label BOOTEFI root
+configfile ($root)/efi/sles/grub.cfg
+boot
+""",
 	'sles12.x': """search.fs_label BOOTEFI root
 configfile ($root)/efi/sles/grub.cfg
 boot
@@ -58,8 +62,8 @@ class Implementation(stack.commands.Implementation):
 		# get distro and version
 		distro_version = f"{attrs.get('os')}{attrs.get('os.version')}"
 
-		root_uuid = None
 		if boottype == 'os' and attrs.get('os') == 'redhat':
+			root_uuid = None
 			for part in self.owner.call('list.host.partition', [host]):
 				if part['mountpoint'] == '/boot/efi':
 					root_uuid = part['uuid']
@@ -69,7 +73,7 @@ class Implementation(stack.commands.Implementation):
 		# Get the bootaction for the host (install or os) and
 		# lookup the actual kernel, ramdisk, and args for the
 		# specific action.
-		elif boottype == 'os':
+		elif boottype == 'os' and attrs.get('os') == 'sles':
 			self.owner.addOutput(host, os_template[distro_version])
 		else:
 			args = "%s BOOTIF=00:$net_default_mac" % args
