@@ -109,7 +109,8 @@ class Command(HostArgProcessor, stack.commands.Command):
 				h['kernel']  = b['kernel']
 				h['ramdisk'] = b['ramdisk']
 				h['args']    = b['args']
-
+#		from pprint import pprint
+#		pprint(ba)
 		self.beginOutput()
 		self.runPlugins(host_data)
 		self.endOutput(padChar='', trimOwner=True)

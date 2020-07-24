@@ -4,8 +4,26 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import jinja2
+
 import stack.commands
 
+jtemp = """\
+default stack
+prompt 0
+label stack
+{% if kernel.startswith('vmlinuz') %}
+	kernel {{ kernel }}
+{% else %}
+	{{ kernel }}
+{% endif %}
+{% if args %}
+	append {{ args }}
+{% endif %}
+{% if boottype == 'install' %}
+ipappend 2
+{% endif %}
+"""
 
 class Implementation(stack.commands.Implementation):
 
@@ -25,32 +43,26 @@ class Implementation(stack.commands.Implementation):
 		mask      = i['mask']
 		gateway   = i['gateway']
 
-
+		more_args = []
 		# redhat only:
 		# If the ksdevice= is set fill in the network
 		# information as well.  This will avoid the DHCP
 		# request inside anaconda.
 		if h['os'] == 'redhat' and args and args.find('ksdevice=') != -1:
-			args += ' ip=%s gateway=%s netmask=%s dns=%s nextserver=%s' % \
-				(ip, gateway, mask, attrs.get('Kickstart_PrivateDNSServers'), attrs.get('Kickstart_PrivateKickstartHost'))
+			more_args.append(f'ip={ip}')
+			more_args.append(f'gateway={gateway}')
+			more_args.append(f'netmask={mask}')
+			more_args.append(f'dns={attrs.get("Kickstart_PrivateDNSServers")}')
+			more_args.append(f'nextserver={attrs.get("Kickstart_PrivateKickstartHost")}')
 
-		self.owner.addOutput(host, 'default stack')
-		self.owner.addOutput(host, 'prompt 0')
-		self.owner.addOutput(host, 'label stack')
+		if ramdisk:
+			more_args.append(f'initrd={ramdisk}')
 
-		if kernel:
-			if kernel[0:7] == 'vmlinuz':
-				self.owner.addOutput(host, '\tkernel %s' % (kernel))
-			else:
-				self.owner.addOutput(host, '\t%s' % (kernel))
-		if ramdisk and len(ramdisk) > 0:
-			if len(args) > 0:
-				args += ' initrd=%s' % ramdisk
-			else:
-				args = 'initrd=%s' % ramdisk
+		templ_vars = {
+			'kernel': kernel,
+			'args': ' '.join([args] + more_args),
+			'boottype': boottype,
+		}
 
-		if args and len(args) > 0:
-			self.owner.addOutput(host, '\tappend %s' % args)
-
-		if boottype == "install":
-			self.owner.addOutput(host, '\tipappend 2')
+		templ = jinja2.Template(jtemp, lstrip_blocks=True, trim_blocks=True)
+		self.owner.addOutput(host, templ.render(**templ_vars).rstrip())
