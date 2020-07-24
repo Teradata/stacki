@@ -3,6 +3,7 @@ import glob
 import json
 import os
 from pathlib import Path
+import re
 import random
 import shutil
 import subprocess
@@ -322,5 +323,25 @@ def clean_dir(tmpdir_factory):
 def test_file():
 	def _inner(path):
 		return os.path.join("/export/test-suites/integration/files", path)
+
+	return _inner
+
+@pytest.fixture
+def run_ansible_module(host):
+	def _inner(module, **kwargs):
+		command = f"ansible localhost -o -m {module}"
+		if kwargs:
+			command += ' -a "'
+			command += " ".join(f"{k}={v}" for k,v in kwargs.items())
+			command += '"'
+
+		result = host.run(command)
+
+		match = re.match(r"localhost \| (.*?) => (.*)$", result.stdout, flags=re.DOTALL)
+		if match:
+		 	result.status = match.group(1)
+		 	result.data = json.loads(match.group(2))
+
+		return result
 
 	return _inner
