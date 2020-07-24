@@ -1027,12 +1027,12 @@ class Command:
 			exception.cmd = self
 			raise exception
 
-		except Exception as exception:
+#		except Exception as exception:
 			# This doesn't respect verbose_errors because this is probably a bug
 			# and we'll want all the juicy info.
-			raise RuntimeError(
-				f"Failed to run {name} {' '.join(args)}"
-			) from exception
+#			raise RuntimeError(
+#				f"Failed to run {name} {' '.join(args)}"
+#			) from exception
 
 		return o.getText()
 
