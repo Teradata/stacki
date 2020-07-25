@@ -37,6 +37,9 @@ class Pallet:
 	os: str
 	url: str
 
+	def get_pallet_path(self):
+		return f'{self.name}/{self.version}/{self.rel}/{{self.os}/self.arch}/'
+
 	@classmethod
 	def create_from_probepal_pallet_info(cls, pallet_info):
 		"""Create a Pallet from a PalletInfo instance."""
