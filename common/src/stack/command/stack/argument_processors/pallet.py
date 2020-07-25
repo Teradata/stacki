@@ -38,7 +38,8 @@ class Pallet:
 	url: str
 
 	def get_pallet_path(self):
-		return f'{self.name}/{self.version}/{self.rel}/{{self.os}/self.arch}/'
+		""" get the path to this pallet on disk, relative to the webroot """
+		return f'{self.name}/{self.version}/{self.rel}/{self.os}/{self.arch}/'
 
 	@classmethod
 	def create_from_probepal_pallet_info(cls, pallet_info):
