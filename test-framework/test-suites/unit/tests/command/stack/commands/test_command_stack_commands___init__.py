@@ -317,32 +317,6 @@ class TestCommand:
 		# make sure the CommandError's message is passed along as well
 		assert "test error" in exception_info.value.message()
 
-	@pytest.mark.parametrize("verbose_errors", (True, False))
-	# To get this to work we're essentially overriding the global __import__ and eval functions
-	# in the stack.commands module with mock objects. Mocking the builtins directly doesn't seem
-	# to work for eval.
-	@patch(target = "stack.commands.__import__", create = True)
-	@patch(target = "stack.commands.eval", create = True)
-	def test_command_exception_handling(self, mock_eval, mock__import__, verbose_errors):
-		"""Test that non-CommandErrors cause a RuntimeError to be raised that contains the command run.
-
-		This should happen regardless of whether verbose_errors were turned off or not.
-		"""
-		# The getattr is used to return the Command class in the eval'd module and
-		# construct the Command instance. Return a mock instead
-		mock_eval.return_value.Command = MagicMock()
-		# Set the mock's side effect for when runWrapper is called to raise a CommandError.
-		mock_eval.return_value.Command.return_value.runWrapper.side_effect = ValueError(
-			"test error",
-		)
-
-		test_command = CommandUnderTest()
-
-		with pytest.raises(RuntimeError) as exception_info:
-			test_command.command(command = "foo.bar.baz", args = ["a", "b=c"], verbose_errors = verbose_errors)
-
-		# make sure the command is listed as well as its arguments
-		assert "foo bar baz a b=c" in str(exception_info.value)
 
 class TestScopeArgProcessor:
 	"""Test case for the ScopeArgProcessor"""
