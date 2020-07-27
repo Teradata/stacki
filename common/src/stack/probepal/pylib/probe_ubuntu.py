@@ -39,5 +39,5 @@ class UbuntuProbe(Probe):
 			'ubuntu'
 		)
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__, is_install_media=True)
 		return [p] if p.is_complete() else []

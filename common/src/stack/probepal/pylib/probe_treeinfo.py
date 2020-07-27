@@ -42,6 +42,7 @@ class TreeinfoProbe(Probe):
 		lines = path.read_text().splitlines()
 
 		name, major_version, full_version, release, arch, distro_family = [None] * 6
+		is_install_media = False
 
 		for line in lines:
 			kv = line.split('=')
@@ -54,12 +55,14 @@ class TreeinfoProbe(Probe):
 				if value.startswith('CentOS'):
 					name = 'CentOS'
 					distro_family = 'redhat'
+					is_install_media = True
 				elif value.startswith('Oracle'):
 					name = 'OLE'
 					distro_family = 'redhat'
 				elif value.startswith('openSUSE'):
 					name = 'openSUSE'
 					distro_family = 'sles'
+					is_install_media = True
 
 			elif key == 'version':
 				full_version = value
@@ -90,5 +93,5 @@ class TreeinfoProbe(Probe):
 			except ValueError:
 				version = major_version
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__, is_install_media)
 		return [p] if p.is_complete() else []

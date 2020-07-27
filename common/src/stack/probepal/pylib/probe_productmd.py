@@ -54,6 +54,7 @@ class ProductMDProbe(Probe):
 			return []
 
 		name, version, release, arch, distro_family = [None] * 5
+		is_install_media = False
 
 		treeinfo = configparser.ConfigParser()
 		treeinfo.read(path)
@@ -90,8 +91,11 @@ class ProductMDProbe(Probe):
 
 			if 'general' in treeinfo:
 				arch = treeinfo['general']['arch']
+
+			if name and name in ['SLES', 'RHEL']:
+				is_install_media = True
 		except KeyError:
 			return []
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__, is_install_media)
 		return [p] if p.is_complete() else []

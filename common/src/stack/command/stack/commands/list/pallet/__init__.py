@@ -48,6 +48,12 @@ class Command(command):
 	versions of a pallet will be listed.
 	</param>
 
+	<param type='bool' name='install_media'>
+	Whether or not a pallet is installation media, as recognized by stacki.
+	If True, only install media pallets will be listed. If not specified,
+	all matching pallets will be listed.
+	</param>
+
 	<param type='bool' name='expanded' optional='0'>
 	Displays an additional column containing the url of the pallet.
 	</param>
@@ -86,7 +92,7 @@ class Command(command):
 
 			# Constuct our data to output
 			output = [
-				pallet.version, pallet.rel, pallet.arch, pallet.os, boxes
+				pallet.version, pallet.rel, pallet.arch, pallet.os, pallet.is_install_media, boxes
 			]
 
 			if expanded:
@@ -94,7 +100,7 @@ class Command(command):
 
 			self.addOutput(pallet.name, output)
 
-		header = ['name', 'version', 'release', 'arch', 'os', 'boxes']
+		header = ['name', 'version', 'release', 'arch', 'os', 'is_install_media', 'boxes']
 		if expanded:
 			header.append('url')
 

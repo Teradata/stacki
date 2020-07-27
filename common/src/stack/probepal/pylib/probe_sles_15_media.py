@@ -65,5 +65,5 @@ class Sles15MediaProbe(Probe):
 
 		name = f'{disctype}-{dvd_num}'
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__, is_install_media=False)
 		return [p] if p.is_complete() else []

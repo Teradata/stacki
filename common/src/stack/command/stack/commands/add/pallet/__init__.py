@@ -212,9 +212,9 @@ class Command(PalletArgProcessor, command):
 		if len(rows) == 0:
 			# New pallet
 			self.db.execute("""
-				insert into rolls(name, version, rel, os, arch, URL)
-				values (%s, %s, %s, %s, %s, %s)
-				""", (*probepal_info_getter(pallet_info), URL)
+				insert into rolls(name, version, rel, os, arch, install_media, URL)
+				values (%s, %s, %s, %s, %s, %s, %s)
+				""", (*probepal_info_getter(pallet_info), pallet_info.is_install_media, URL)
 			)
 		else:
 			# Re-added the pallet. Update the URL.
@@ -423,8 +423,8 @@ class Command(PalletArgProcessor, command):
 			# Run pallet hooks for the add operation.
 			if run_hooks:
 				self.run_pallet_hooks(operation="add", pallet_info=pallet)
-			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family))
-		self.endOutput(header=['pallet', 'version', 'release', 'arch', 'os'])
+			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family, pallet.is_install_media))
+		self.endOutput(header=['pallet', 'version', 'release', 'arch', 'os', 'is_install_media'])
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())

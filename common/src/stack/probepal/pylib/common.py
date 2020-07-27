@@ -15,7 +15,7 @@ class PalletInfo:
 	distro_family: str
 	pallet_root: str
 	probe_name: str
-	is_install_pallet: bool
+	is_install_media: bool=False
 
 	def is_complete(self):
 		return all((self.name, self.version, self.release, self.arch, self.distro_family))

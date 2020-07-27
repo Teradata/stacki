@@ -35,6 +35,7 @@ class SLES_11_12_Probe(Probe):
 		lines = path.read_text().splitlines()
 
 		name, version, release, arch, distro_family = [None] * 5
+		is_install_media = False
 
 		service_pack = ''
 		major_version = ''
@@ -51,6 +52,7 @@ class SLES_11_12_Probe(Probe):
 			if key == 'NAME':
 				if value == 'SUSE_SLES':
 					name = 'SLES'
+					is_install_media = True
 				elif value == 'sle-sdk':
 					name = 'SLE-SDK'
 			elif key == 'SP_VERSION':
@@ -68,6 +70,7 @@ class SLES_11_12_Probe(Probe):
 
 				if v[3] == 'sles':
 					name = 'SLES'
+					is_install_media = True
 				elif v[3] == 'sle-sdk':
 					name = 'SLE-SDK'
 				elif v[3] == 'ses':
@@ -87,5 +90,5 @@ class SLES_11_12_Probe(Probe):
 
 		version = major_version + service_pack
 
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
+		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__, is_install_media)
 		return [p] if p.is_complete() else []

@@ -16,6 +16,7 @@ PALLET_ATTR_MAPPINGS = {
 	'rel': 'release',
 	'arch': 'arch',
 	'os': 'distro_family',
+	'is_install_media': 'is_install_media',
 }
 # Since we normalize to a Pallet dataclass, this pallet_info_getter uses those
 # attribute names (the keys) from the mappings.
@@ -36,6 +37,7 @@ class Pallet:
 	arch: str
 	os: str
 	url: str
+	is_install_media: bool=False
 
 	def get_pallet_path(self):
 		""" get the path to this pallet on disk, relative to the webroot """
@@ -81,17 +83,23 @@ class PalletArgProcessor:
 		arch = params.get('arch', '%')
 		os = params.get('os', '%')
 
+		# sometimes we'll want just the install media
+		install_media_clause = ''
+		if 'is_install_media' in params:
+			install_media_clause = 'AND install_media is True'
+
 		# Find all pallet names if we weren't given one
 		if not args:
 			args = ['%']
 
 		pallets = []
 		for arg in args:
-			rows = self.db.select("""
-				id, name, version, rel, arch, os, url from rolls
+			rows = self.db.select(f"""
+				id, name, version, rel, arch, os, install_media, url from rolls
 				where name like binary %s and version like binary %s
 				and rel like binary %s and arch like binary %s
 				and os like binary %s
+				{install_media_clause}
 			""", (arg, version, rel, arch, os))
 
 			if not rows and arg != '%':
