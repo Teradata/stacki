@@ -16,7 +16,6 @@ PALLET_ATTR_MAPPINGS = {
 	'rel': 'release',
 	'arch': 'arch',
 	'os': 'distro_family',
-	'is_install_media': 'is_install_media',
 }
 # Since we normalize to a Pallet dataclass, this pallet_info_getter uses those
 # attribute names (the keys) from the mappings.
