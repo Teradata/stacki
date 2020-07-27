@@ -35,7 +35,7 @@ class Plugin(stack.commands.Plugin):
 			metadata = h.get('metadata')
 			if metadata:
 				self.owner.stack('set.host.metadata',
-						 host, [f'metadata={metadata}'])
+						 host, f'metadata={metadata}')
 
 			# group
 
