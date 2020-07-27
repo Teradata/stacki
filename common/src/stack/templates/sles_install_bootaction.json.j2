@@ -1,0 +1,11 @@
+{
+    "bootaction": [
+        {
+            "name": "default template",
+            "type": "install",
+            "kernel": "vmlinuz-{{ os }}-{{ version }}-{{ release }}-{{ arch }}",
+            "ramdisk": "initrd-{{ os }}-{{ version }}-{{ release }}-{{ arch }}",
+            "args": "install=http://{{ Kickstart_PrivateAddress }}/install/pallets/{{ pallet_path }} autoyast=file:///tmp/profile/autoinst.xml ramdisk_size=300000 biosdevname=0 Server={{ Kickstart_PrivateAddress }}"
+        }
+    ]
+}
