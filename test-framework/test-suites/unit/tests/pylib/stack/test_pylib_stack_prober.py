@@ -66,21 +66,21 @@ class TestProbepal:
 		paldirs = []
 		palinfos = []
 
-		*pallet_data, expected_probe, filemap = PALLET_DATA[0]
+		*pallet_data, expected_probe, is_install_media, filemap = PALLET_DATA[0]
 		paldir = tempfile.TemporaryDirectory()
 		for input_file, dest in filemap.items():
 			pathlib.Path(f'{paldir.name}/{dest}').parent.mkdir(parents=True, exist_ok=True)
 			shutil.copyfile(test_file(f'pallet_artifacts/{input_file}'), f'{paldir.name}/{dest}')
 		paldirs.append(paldir.name)
-		palinfos.append([pal.PalletInfo(*pallet_data, paldir.name, expected_probe)])
+		palinfos.append([pal.PalletInfo(*pallet_data, paldir.name, expected_probe, is_install_media)])
 
-		*pallet_data, expected_probe, filemap = PALLET_DATA[1]
+		*pallet_data, expected_probe, is_install_media, filemap = PALLET_DATA[1]
 		paldir2 = tempfile.TemporaryDirectory()
 		for input_file, dest in filemap.items():
 			pathlib.Path(f'{paldir2.name}/{dest}').parent.mkdir(parents=True, exist_ok=True)
 			shutil.copyfile(test_file(f'pallet_artifacts/{input_file}'), f'{paldir2.name}/{dest}')
 		paldirs.append(paldir2.name)
-		palinfos.append([pal.PalletInfo(*pallet_data, paldir2.name, expected_probe)])
+		palinfos.append([pal.PalletInfo(*pallet_data, paldir2.name, expected_probe, is_install_media)])
 
 		prober = pal.Prober()
 		pal_map = prober.find_pallets(*paldirs)
