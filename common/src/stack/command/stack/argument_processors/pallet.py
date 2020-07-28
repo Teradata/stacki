@@ -94,7 +94,7 @@ class PalletArgProcessor:
 		pallets = []
 		for arg in args:
 			rows = self.db.select(f"""
-				id, name, version, rel, arch, os, install_media, url from rolls
+				id, name, version, rel, arch, os, url, install_media from rolls
 				where name like binary %s and version like binary %s
 				and rel like binary %s and arch like binary %s
 				and os like binary %s

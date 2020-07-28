@@ -83,6 +83,10 @@ class Command(command):
 		expanded, = self.fillParams([ ('expanded', 'false') ])
 		expanded = self.str2bool(expanded)
 
+		# if user requested install media, provide expanded output
+		if self.str2bool(params.get(install_media, 'false')):
+			expanded=True
+
 		for pallet in self.get_pallets(args, params):
 
 			boxes = ' '.join(flatten(self.db.select("""
@@ -92,16 +96,16 @@ class Command(command):
 
 			# Constuct our data to output
 			output = [
-				pallet.version, pallet.rel, pallet.arch, pallet.os, pallet.is_install_media, boxes
+				pallet.version, pallet.rel, pallet.arch, pallet.os, boxes
 			]
 
 			if expanded:
-				output.append(pallet.url)
+				output.append(pallet.is_install_media, pallet.url)
 
 			self.addOutput(pallet.name, output)
 
-		header = ['name', 'version', 'release', 'arch', 'os', 'is_install_media', 'boxes']
+		header = ['name', 'version', 'release', 'arch', 'os', 'boxes']
 		if expanded:
-			header.append('url')
+			header.append('is_install_media', 'url')
 
 		self.endOutput(header, trimOwner=False)

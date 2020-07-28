@@ -90,17 +90,17 @@ class TestProbepal:
 		''' test that find_pallets can identify jumbo pallets '''
 		paldir = tempfile.TemporaryDirectory()
 
-		*pallet_data, expected_probe, filemap = PALLET_DATA[0]
+		*pallet_data, expected_probe, is_install_media, filemap = PALLET_DATA[0]
 		for input_file, dest in filemap.items():
 			pathlib.Path(f'{paldir.name}/pallet1/{dest}').parent.mkdir(parents=True, exist_ok=True)
 			shutil.copyfile(test_file(f'pallet_artifacts/{input_file}'), f'{paldir.name}/pallet1/{dest}')
-		p1 = pal.PalletInfo(*pallet_data, f'{paldir.name}/pallet1', expected_probe)
+		p1 = pal.PalletInfo(*pallet_data, f'{paldir.name}/pallet1', expected_probe, is_install_media)
 
-		*pallet_data, expected_probe, filemap = PALLET_DATA[1]
+		*pallet_data, expected_probe, is_install_media, filemap = PALLET_DATA[1]
 		for input_file, dest in filemap.items():
 			pathlib.Path(f'{paldir.name}/pallet2/{dest}').parent.mkdir(parents=True, exist_ok=True)
 			shutil.copyfile(test_file(f'pallet_artifacts/{input_file}'), f'{paldir.name}/pallet2/{dest}')
-		p2 = pal.PalletInfo(*pallet_data, f'{paldir.name}/pallet2', expected_probe)
+		p2 = pal.PalletInfo(*pallet_data, f'{paldir.name}/pallet2', expected_probe, is_install_media)
 
 		prober = pal.Prober()
 		pal_map = prober.find_pallets(paldir.name)

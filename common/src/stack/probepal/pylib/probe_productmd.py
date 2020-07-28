@@ -92,7 +92,7 @@ class ProductMDProbe(Probe):
 			if 'general' in treeinfo:
 				arch = treeinfo['general']['arch']
 
-			if name and name in ['SLES', 'RHEL']:
+			if name and name in ['SLES', 'RHEL', 'Fedora']:
 				is_install_media = True
 		except KeyError:
 			return []
