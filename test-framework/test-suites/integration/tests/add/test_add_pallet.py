@@ -43,7 +43,8 @@ class TestAddPallet:
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
-				'os': 'sles'
+				'os': 'sles',
+				'is_install_media': False,
 			}
 		]
 
@@ -281,7 +282,8 @@ class TestAddPallet:
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
-				'os': 'sles'
+				'os': 'sles',
+				'is_install_media': False,
 			}
 		]
 
@@ -418,6 +420,7 @@ class TestAddPallet:
 				'arch': 'x86_64',
 				'os': 'sles',
 				'boxes': '',
+				'is_install_media': False,
 				'url': 'http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso'
 			}
 		]
@@ -433,7 +436,8 @@ class TestAddPallet:
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
-				'os': 'sles'
+				'os': 'sles',
+				'is_install_media': False,
 			}
 		]
 

@@ -423,8 +423,8 @@ class Command(PalletArgProcessor, command):
 			# Run pallet hooks for the add operation.
 			if run_hooks:
 				self.run_pallet_hooks(operation="add", pallet_info=pallet)
-			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family, pallet.is_install_media))
-		self.endOutput(header=['pallet', 'version', 'release', 'arch', 'os', 'is_install_media'])
+			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family, pallet.is_install_media, pallet.pallet_root))
+		self.endOutput(header=['name', 'version', 'release', 'arch', 'os', 'is_install_media', 'url'])
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())

@@ -28,27 +28,27 @@ class Command(command):
 	listed.
 	</arg>
 
-	<param type='string' name='version'>
+	<param type='string' name='version' optional='0'>
 	The version number of the pallets to list. If no version number is
 	supplied, then all versions of a pallet will be listed.
 	</param>
 
-	<param type='string' name='release'>
+	<param type='string' name='release' optional='0'>
 	The release number of the pallet to be listed. If no release number is
 	supplied, then all releases of a pallet will be listed.
 	</param>
 
-	<param type='string' name='arch'>
+	<param type='string' name='arch' optional='0'>
 	The architecture of the pallet to be listed. If no architecture is
 	supplied, then all architectures of a pallet will be listed.
 	</param>
 
-	<param type='string' name='os'>
+	<param type='string' name='os' optional='0'>
 	The OS of the pallet to be listed. If no OS is supplied, then all OS
 	versions of a pallet will be listed.
 	</param>
 
-	<param type='bool' name='install_media'>
+	<param type='bool' name='install_media' optional='0'>
 	Whether or not a pallet is installation media, as recognized by stacki.
 	If True, only install media pallets will be listed. If not specified,
 	all matching pallets will be listed.
@@ -85,7 +85,7 @@ class Command(command):
 
 		# if user requested install media, provide expanded output
 		if self.str2bool(params.get('install_media', 'false')):
-			expanded=True
+			expanded = True
 
 		for pallet in self.get_pallets(args, params):
 
@@ -100,12 +100,12 @@ class Command(command):
 			]
 
 			if expanded:
-				output.append(pallet.is_install_media, pallet.url)
+				output.extend([pallet.is_install_media, pallet.url])
 
 			self.addOutput(pallet.name, output)
 
 		header = ['name', 'version', 'release', 'arch', 'os', 'boxes']
 		if expanded:
-			header.append('is_install_media', 'url')
+			header.extend(['is_install_media', 'url'])
 
 		self.endOutput(header, trimOwner=False)

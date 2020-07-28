@@ -8,7 +8,7 @@ class TestListPallet:
 		assert result.rc == 255
 		assert result.stderr == dedent('''\
 			error - "test" argument is not a valid pallet
-			[pallet ...] {expanded=bool} [arch=string] [os=string] [release=string] [version=string]
+			[pallet ...] {arch=string} {expanded=bool} {install_media=bool} {os=string} {release=string} {version=string}
 		''')
 
 	def test_with_arch(self, host, create_pallet_isos, revert_export_stack_pallets, revert_pallet_hooks):
@@ -102,6 +102,7 @@ class TestListPallet:
 				'name': 'minimal',
 				'os': 'sles',
 				'release': 'sles12',
+				'is_install_media': False,
 				'url': f'{create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso',
 				'version': '1.0'
 			}
