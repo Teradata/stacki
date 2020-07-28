@@ -43,7 +43,7 @@ class TestRemovePallet:
 		# Should be gone from the DB
 		result = host.run('stack list pallet minimal')
 		assert result.rc == 255
-		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet'
+		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet')
 
 		# Directory should be gone as well
 		assert not host.file('/export/stack/pallets/minimal/').exists
@@ -77,7 +77,7 @@ class TestRemovePallet:
 		# Should be gone from the DB
 		result = host.run('stack list pallet minimal')
 		assert result.rc == 255
-		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet'
+		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet')
 
 		# Directory should be gone as well
 		assert not host.file('/export/stack/pallets/minimal/').exists
@@ -151,7 +151,7 @@ class TestRemovePallet:
 		# Now run a remove command but pass an OS that won't match
 		result = host.run('stack remove pallet minimal os=redhat')
 		assert result.rc == 255
-		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet with parameters os=redhat'
+		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet with parameters os=redhat')
 
 		# The pallet should still be in the DB
 		result = host.run('stack list pallet minimal output-format=json')
@@ -204,7 +204,7 @@ class TestRemovePallet:
 		# Should be gone from the DB
 		result = host.run('stack list pallet minimal')
 		assert result.rc == 255
-		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet'
+		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet')
 
 		# The top level directory should still be there
 		assert host.file('/export/stack/pallets/minimal/').exists
