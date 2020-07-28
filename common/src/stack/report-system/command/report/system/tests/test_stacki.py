@@ -44,7 +44,7 @@ def test_stacki_central_server(host):
 	result = host.run("stack list pallet output-format=json")
 	assert result.rc == 0
 	palinfo = [
-		{k: v for k,v in p.items() if k != 'boxes'}
+		{k: v for k,v in p.items() if k not in ['boxes', 'is_install_media']}
 		for p in json.loads(result.stdout)
 	]
 
