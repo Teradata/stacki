@@ -84,7 +84,7 @@ class Command(command):
 		expanded = self.str2bool(expanded)
 
 		# if user requested install media, provide expanded output
-		if self.str2bool(params.get(install_media, 'false')):
+		if self.str2bool(params.get('install_media', 'false')):
 			expanded=True
 
 		for pallet in self.get_pallets(args, params):
