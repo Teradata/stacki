@@ -401,7 +401,8 @@ class TestAddPallet:
 				'release': 'sles12',
 				'arch': 'x86_64',
 				'os': 'sles',
-				'boxes': ''
+				'is_install_media': False,
+				'boxes': '',
 			}
 		]
 
