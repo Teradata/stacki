@@ -39,7 +39,7 @@ class TestAddPallet:
 
 		assert json.loads(result.stdout) == [
 			{
-				'pallet': 'minimal',
+				'name': 'minimal',
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
@@ -278,7 +278,7 @@ class TestAddPallet:
 
 		assert json.loads(result.stdout) == [
 			{
-				'pallet': 'minimal',
+				'name': 'minimal',
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
@@ -432,7 +432,7 @@ class TestAddPallet:
 
 		assert json.loads(result.stdout) == [
 			{
-				'pallet': 'minimal',
+				'name': 'minimal',
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
