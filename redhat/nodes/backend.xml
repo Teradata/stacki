@@ -37,7 +37,7 @@ for o in stack.api.Call('list cart'):
 </stack:eval>
 </stack:native>
 
-<!-- give me some status --> 
+<!-- give me some status -->
 
 <stack:script stack:stage="install-pre">
 /opt/stack/bin/stacki-status.py Running preinstall
@@ -52,9 +52,16 @@ include ld.so.conf.d/*.conf
 /opt/stack/bin/stacki-status.py install complete rebooting
 </stack:script>
 
+<!-- create the stack.yml -->
+<stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
+import stack.settings
+
+stack.settings.write_default_settings_file(overwrite=True)
+</stack:script>
+
 <stack:script stack:cond="release == 'redhat7'" stack:stage="install-post">
 cp /run/install/tmp/stack.conf /tmp/stack.conf
 </stack:script>
 
-</stack:stack> 
+</stack:stack>
 
