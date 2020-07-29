@@ -35,6 +35,11 @@ ssl.country: 'US'
 # these settings control the starting points for discover-nodes (nee insert ethers)
 discovery.base.rack: '0'
 discovery.base.rank: '0'
+
+# smq ports
+smq.pub.port: '5000'
+smq.sub.port: '5001'
+smq.control.port: '5002'
 '''
 
 def get_settings():
