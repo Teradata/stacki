@@ -165,3 +165,13 @@ class TestLoad:
 			/opt/stack/bin/stack "add box" test os=sles
 			/opt/stack/bin/stack "enable cart" test box=test
 		''')
+
+
+	def test_load_json_with_jinja(self, host, test_file):
+		""" test that the json parser doesn't swallow jinja templates """
+		json_path = Path(test_file("load/json/network_with_jinja.json"))
+
+		result = host.run(f'stack load {json_path}')
+		assert result.rc == 0
+		assert result.stdout.lstrip().startswith('''/opt/stack/bin/stack "add network" bogus''')
+		assert "zone='{{ fake }}'" in result.stdout

@@ -1,0 +1,14 @@
+{
+  "network": [
+    {
+      "name": "bogus",
+      "address": "10.35.100.0",
+      "gateway": null,
+      "netmask": "255.255.255.0",
+      "dns": false,
+      "pxe": false,
+      "mtu": 65492,
+      "zone": "{{ fake }}"
+    }
+  ]
+}
