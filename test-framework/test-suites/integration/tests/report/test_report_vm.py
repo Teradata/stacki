@@ -221,6 +221,11 @@ class TestReportVM:
 		host_os,
 		test_file
 	):
+		"""
+		Test for a virtual machine with its kickstartable attribute
+		set to false, the bootorder excludes the network interfaces
+		"""
+
 		expect_output = Path(test_file(f'report/vm_config_no_kickstart_{host_os}.txt')).read_text()
 
 		conf = host.run('stack report vm vm-backend-0-3')
@@ -249,6 +254,10 @@ class TestReportVM:
 		host_os,
 		test_file
 	):
+		"""
+		Test report vm uses the custom jinja2 template set as an attribute
+		"""
+
 		expect_output = Path(test_file(f'report/vm_config_simple_{host_os}.txt')).read_text()
 		custom_config = Path(test_file(f'report/vm_config_custom_template.j2'))
 
@@ -277,6 +286,11 @@ class TestReportVM:
 		host_os,
 		test_file
 	):
+		"""
+		Test report vm raises an error for a template
+		missing required jinja2 variables
+		"""
+
 		custom_config = Path(test_file(f'report/vm_config_bad_template.j2'))
 
 		set_template_attr = host.run(f'stack set host attr vm-backend-0-3 attr=vm_config_location value={custom_config}')
@@ -284,4 +298,26 @@ class TestReportVM:
 
 		conf = host.run('stack report vm vm-backend-0-3 bare=y')
 		assert conf.rc != 0
+
+		assert "Missing required template variables" in conf.stderr
+
+	def test_report_vm_no_template(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		host,
+		host_os,
+		test_file
+	):
+		"""
+		Test an error is raised when the custom template file cannot be found
+		"""
+
+		set_template_attr = host.run(f'stack set host attr vm-backend-0-3 attr=vm_config_location value=/export/fake_template.j2')
+		assert set_template_attr.rc == 0
+
+		conf = host.run('stack report vm vm-backend-0-3 bare=y')
+		assert conf.rc != 0
+
+		assert "Unable to find template file" in conf.stderr
 

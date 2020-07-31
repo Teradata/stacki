@@ -91,13 +91,19 @@ class Command(command, VmArgProcessor):
 
 			template_conf = Path(template_loc)
 			env = Environment()
-			ast = env.parse(template_conf.read_text())
-			var_list = meta.find_undeclared_variables(ast)
 
-			if template_conf.is_file() and req_vars.issubset(var_list):
+			# Check if the template exists
+			# and has the required variables
+			if template_conf.is_file():
+				ast = env.parse(template_conf.read_text())
+				var_list = meta.find_undeclared_variables(ast)
+			else:
+				raise CommandError(self, f'Unable to find template file: {template_conf}')
+
+			if req_vars.issubset(var_list):
 				libvirt_template = jinja2.Template(template_conf.read_text(), lstrip_blocks=True, trim_blocks=True)
 			else:
-				raise CommandError(self, f'Unable to parse or missing variables for template file: {template_conf}')
+				raise CommandError(self, f'Missing required template variables for libvirt config file: {template_conf}')
 
 			# If the hypervisor param is set
 			# ignore any VM not belonging to the
