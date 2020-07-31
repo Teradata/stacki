@@ -274,7 +274,6 @@ repoconfig(stacki_iso, extra_isos)
 
 pkgs = [
 	'foundation-python',
-	'foundation-python-PyMySQL',
 	'stack-command',
 	'stack-pylib',
 	'stack-mq',
@@ -290,11 +289,7 @@ if osname == 'redhat':
 
 # Workaround to add new packages but not break this script for older stacki releases
 new_pkgs = [
-	'stack-templates',
 	'stack-probepal',
-	'foundation-python-jsoncomment',
-	'foundation-python-json-spec',
-	'foundation-python-six',
 ]
 
 for new_pkg in new_pkgs:
