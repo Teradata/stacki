@@ -24,9 +24,9 @@ class command(stack.commands.Command):
 	MustBeRoot = 0
 
 	def _load(self, text):
-		parser = JsonComment(json) # standard JSON is stupid
+		parser = JsonComment() # standard JSON is stupid
 		try:
-			data = parser.loads(text)
+			data = parser.loads(text, template=False)
 		except ValueError as e:
 			# parse the error message and split the input at the
 			# syntax error
@@ -106,6 +106,7 @@ class command(stack.commands.Command):
 			data = fin.read()
 		except IOError:
 			raise CommandError(self, f'cannot read {filename}')
+
 		document = self._load(data)
 		if scope == 'global':
 			return document
