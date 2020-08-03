@@ -29,6 +29,6 @@ install::
 
 	# Install the modules
 	mkdir -p $(ROOT)/opt/stack/ansible/plugins/modules
-	$(INSTALL) -m0644 plugins/modules/stacki_box_info.py $(ROOT)/opt/stack/ansible/plugins/modules/
+	$(INSTALL) -m0644 plugins/modules/stacki_*_info.py $(ROOT)/opt/stack/ansible/plugins/modules/
 
 clean::
