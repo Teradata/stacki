@@ -136,7 +136,7 @@ description = "A high-level Python Web framework that encourages rapid developme
 name = "django"
 optional = false
 python-versions = ">=3.6"
-version = "3.0.8"
+version = "3.0.9"
 
 [package.dependencies]
 asgiref = ">=3.2,<4.0"
@@ -310,7 +310,7 @@ description = "The libvirt virtualization API python binding"
 name = "libvirt-python"
 optional = true
 python-versions = "*"
-version = "6.4.0"
+version = "6.6.0"
 
 [[package]]
 category = "main"
@@ -836,8 +836,8 @@ cryptography = [
     {file = "cryptography-2.8.tar.gz", hash = "sha256:3cda1f0ed8747339bbdf71b9f38ca74c7b592f24f65cdb3ab3765e4b02871651"},
 ]
 django = [
-    {file = "Django-3.0.8-py3-none-any.whl", hash = "sha256:5457fc953ec560c5521b41fad9e6734a4668b7ba205832191bbdff40ec61073c"},
-    {file = "Django-3.0.8.tar.gz", hash = "sha256:31a5fbbea5fc71c99e288ec0b2f00302a0a92c44b13ede80b73a6a4d6d205582"},
+    {file = "Django-3.0.9-py3-none-any.whl", hash = "sha256:96fbe04e8ba0df289171e7f6970e0ff8b472bf4f909ed9e0e5beccbac7e1dbbe"},
+    {file = "Django-3.0.9.tar.gz", hash = "sha256:c22b4cd8e388f8219dc121f091e53a8701f9f5bca9aa132b5254263cab516215"},
 ]
 docutils = [
     {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
@@ -892,7 +892,7 @@ jsoncomment = [
     {file = "jsoncomment-0.4.2.tar.gz", hash = "sha256:8fa065a85327306211ec567bb9ad8ca252c59332f6c6cf09c3228a0abf1191da"},
 ]
 libvirt-python = [
-    {file = "libvirt-python-6.4.0.tar.gz", hash = "sha256:b13e6dddea8876a7a6c43482d275a84f082d72427302ecb76683c1279b865cec"},
+    {file = "libvirt-python-6.6.0.tar.gz", hash = "sha256:68763f7b7b955032665aa4e0ea0668fc45067574bf2bf6b9f091ffdfd71aea25"},
 ]
 lockfile = [
     {file = "lockfile-0.12.2-py2.py3-none-any.whl", hash = "sha256:6c3cb24f344923d30b2785d5ad75182c8ea7ac1b6171b08657258ec7429d50fa"},
