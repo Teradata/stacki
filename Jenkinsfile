@@ -1457,6 +1457,6 @@ def run_integration_test_post(String group) {
 
     if (env.COVERAGE_REPORTS == 'true') {
         // Add the coverage data to the `combine` folder
-        sh "mv integration_$group/reports/integration.coverage combine/reports/integration-$group.coverage"
+        sh "mv integration_$group/reports/integration.coverage combine/reports/integration-${group}.coverage"
     }
 }
