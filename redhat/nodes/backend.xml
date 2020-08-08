@@ -50,9 +50,12 @@ include ld.so.conf.d/*.conf
 
 <stack:script stack:stage="install-post" stack:chroot="false">
 /opt/stack/bin/stacki-status.py install complete rebooting
+<stack:file stack:name="/opt/stack/etc/stacki.yml">
+<stack:eval>cat /opt/stack/etc/stacki.yml;</stack:eval>
+</stack:file>
 </stack:script>
 
-<!-- create the stack.yml -->
+<!-- create the stacki.yml -->
 <stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
 import stack.settings
 
