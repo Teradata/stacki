@@ -1097,6 +1097,9 @@ pipeline {
                         not {
                             environment name: 'PLATFORM', value: 'sles11'
                         }
+                        not {
+                            environment name: 'PLATFORM', value: 'sles15'
+                        }
                     }
 
                     steps {
