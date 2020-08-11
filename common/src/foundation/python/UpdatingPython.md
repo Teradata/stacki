@@ -31,13 +31,17 @@ You must rebuild foundation-python and foundation-python-packages for sles11 (th
 
 ### Setup a sles 11 build environment.
 
-Build a sles11 backend (maybe you should use stacki for this!), based off of develop (so, not with the python version change yet).  Include the SLES11 SDK.
+Build a sles11 backend (maybe you should use stacki for this!), based off of develop (so, not with the python version change yet).  Include the SLES11 SDK and OS-Updates.  Install the openssl that ships with OS-Updates. `zypper install -y curl-openssl1`
 
 ## build the new foundation python
 
-Sles11 has issues with old TLS.  We have a caching proxy setup for pip to get around this. Create an /etc/pip.conf to point to our cache:
+Copy in the stacki source code with the new python branch and cd to it.
 
-/etc/pip.conf:
+Sles11 has issues with old TLS.  We have a caching proxy setup for pip to get around this. Copy the pip.conf with our mirror to use it in the sles11 build host:
+
+`cp sles/src/stack/images/SLES/sles11/11sp3/pip.conf /etc/pip.conf`
+
+> in case this file disappears or moves, here's it's contents:
 
 ```
 [global]
@@ -46,9 +50,11 @@ trusted-host = stacki-builds.labs.teradata.com
 disable-pip-version-check = true
 ```
 
-Copy in the stacki source code with the new python branch, `run make bootstrap; source /etc/profile.d/stack-build.sh; make bootstrap` again.
+Then bootstrap the build host.
 
-Then build python
+`make bootstrap; source /etc/profile.d/stack-build.sh && make bootstrap`
+
+Then build python:
 
 ```
 cd common/src/foundation/python
@@ -56,20 +62,24 @@ make
 make install-rpm
 ```
 
-Transfer the newly built rpm to S3
+Transfer the newly built rpm to S3:
+
+`s3cmd put foundation-python-3*rpm s3://teradata-stacki/3rdparty/`
 
 ## Build the initrd python packages for the new foundation python
 
 On the same system sles11 system, using the new foundation-python, we'll use pip to fetch and prepare our python packages and their dependencies.
 
-> note, the system will have the older version of spython installed - make sure to specify full path to new one
+> note, the system may have the older version of spython installed - make sure to specify full path to new one
 
 ```
-PKGS=Jinja2 Flask MarkupSafe PyMySQL Werkzeug PyYAML certifi chardet Click idna itsdangerous requests setuptools six urllib3
 
 mkdir -p /tmp/initrd/opt/stack/
 
+PKGS="Jinja2 Flask MarkupSafe PyMySQL Werkzeug PyYAML certifi chardet Click idna itsdangerous requests setuptools six urllib3 jsoncomment"
 /opt/stack/bin/pip3.8 install --ignore-installed --install-option="--prefix=/tmp/initrd/opt/stack" $PKGS
+
+echo $? # to see if it failed
 
 cd /tmp/initrd
 tar -cvzf foundation-python-packages.tar.gz opt/
@@ -85,7 +95,9 @@ stack create package dir=${PWD}/opt/ prefix=/ name=foundation-python-packages re
 
 You can run `rpm -qilp foundation-python-packages-*-sles11.x86_64.rpm` to test the new package and check that the paths look correct
 
-Transfer the package to s3
+Transfer the package to s3:
+
+`s3cmd put foundation-python-packages-*rpm s3://teradata-stacki/3rdparty/`
 
 Update sles/3rdparty.json for the new filenames
 
@@ -93,8 +105,8 @@ Update sles/3rdparty.json for the new filenames
 
 ```
 cd sles/src/stack/images/SLES/sles11/11sp3/RPMS/
-ln -s ../../../../../../../3rdparty/foundation-python-3.8.1-sles11.x86_64.rpm
-ln -s ../../../../../../../3rdparty/foundation-python-packages-7.0-sles11.x86_64.rpm
 rm foundation-python-packages-*-sles11.x86_64.rpm
 rm foundation-python-*-sles11.x86_64.rpm
+ln -s ../../../../../../../3rdparty/foundation-python-3.8.1-sles11.x86_64.rpm
+ln -s ../../../../../../../3rdparty/foundation-python-packages-7.0-sles11.x86_64.rpm
 ```
