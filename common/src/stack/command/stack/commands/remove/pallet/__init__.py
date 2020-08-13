@@ -140,5 +140,11 @@ class Command(command):
 			# Move up a level in the tree
 			tree.pop()
 
+		# remove the pallet hooks for this pallet
+		# not all pallets (notably retail distro media) will have hooks
+		pallet_hook_dir = pathlib.Path(self.get_pallet_hook_directory(pallet_info=pallet))
+		if pallet_hook_dir.exists():
+			shutil.rmtree(self.get_pallet_hook_directory(pallet_info=pallet))
+
 		# Remove the pallet from the database
 		self.db.execute('delete from rolls where id=%s', (pallet.id,))
