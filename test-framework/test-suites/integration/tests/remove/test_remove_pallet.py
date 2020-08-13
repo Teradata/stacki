@@ -1,6 +1,8 @@
 import json
 import shutil
 from textwrap import dedent
+from operator import itemgetter
+from pathlib import Path
 
 
 class TestRemovePallet:
@@ -275,3 +277,49 @@ class TestRemovePallet:
 		assert result.rc == 255
 		assert result.stderr.startswith('error - "minimal" argument is not a valid pallet ')
 		assert not host.file('/export/stack/pallets/minimal/').exists
+
+	def test_pallet_hooks_removed(self, host, create_pallet_isos, revert_etc, revert_export_stack_pallets, revert_pallet_hooks):
+		hook_dir = Path('/opt/stack/pallet_hooks/')
+		pal_itemgetter = itemgetter('name', 'version', 'release', 'arch', 'os')
+
+		# we'll pull in two pallets with the same name to make sure we don't overly remove...
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-dev.x86_64.disk1.iso')
+		assert result.rc == 0
+
+		# Make sure it made it to the DB
+		result = host.run('stack list pallet test-different-release output-format=json')
+		assert result.rc == 0
+
+		first_pallet_json = json.loads(result.stdout)
+		assert len(first_pallet_json) == 1
+		first_pallet_json = first_pallet_json[0]
+		pal_hook_dir = hook_dir.joinpath('-'.join(pal_itemgetter(first_pallet_json)))
+
+		# Sanity check that the pallet files got added to the filesystem
+		assert pal_hook_dir.exists()
+
+		# now add another pallet with the same name but different release
+		result = host.run(f'stack add pallet {create_pallet_isos}/test-different-release-1.0-test.x86_64.disk1.iso')
+		# Make sure it made it to the DB
+		result = host.run('stack list pallet test-different-release output-format=json')
+		assert result.rc == 0
+		result_json = json.loads(result.stdout)
+		assert len(result_json) == 2
+
+		second_pallet_json = None
+		for p in result_json:
+			if p['release'] == 'test':
+				second_pallet_json = p
+
+		assert second_pallet_json
+
+		second_pal_hook_dir = hook_dir.joinpath('-'.join(pal_itemgetter(second_pallet_json)))
+		# Sanity check that the pallet files are both on the filesystem
+		assert pal_hook_dir.exists()
+		assert second_pal_hook_dir.exists()
+
+		# now remove one of them, ensure it's pallet hooks dir goes away, but the other stays.
+		result = host.run('stack remove pallet test-different-release release=test')
+
+		assert pal_hook_dir.exists()
+		assert not second_pal_hook_dir.exists()
