@@ -23,4 +23,14 @@ install::
 	mkdir -p $(ROOT)/opt/stack/ansible/plugins/callback
 	$(INSTALL) -m0644 plugins/callback/failure_report.py $(ROOT)/opt/stack/ansible/plugins/callback/
 
+	# Install the module_utils plugin
+	mkdir -p $(ROOT)/opt/stack/ansible/plugins/module_utils
+	$(INSTALL) -m0644 plugins/module_utils/stacki.py $(ROOT)/opt/stack/ansible/plugins/module_utils/
+
+	# Install the modules
+	mkdir -p $(ROOT)/opt/stack/ansible/plugins/modules
+ifneq ($(wildcard plugins/modules/*.py),)
+	$(INSTALL) -m0644 plugins/modules/*.py $(ROOT)/opt/stack/ansible/plugins/modules/
+endif
+
 clean::
