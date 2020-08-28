@@ -6,11 +6,14 @@
 #
 
 import stack.commands
+
 import random
 import uuid
 import jinja2
 from jinja2 import Environment, meta
 from pathlib import Path
+import secrets
+
 from stack.kvm import Hypervisor
 from stack.exception import CommandError, ParamError
 from stack.argument_processors.host import HostArgProcessor
@@ -149,13 +152,11 @@ class Command(command, VmArgProcessor):
 
 	def getMAC(self):
 		"""
-		Generate a random mac address for
-		virtual machine interfaces
+		Generate a random mac address for virtual machine interfaces
 		"""
 
-		# Convert 24 random bits to hex
-		# and truncate the 0x
-		mac = hex(random.getrandbits(24))[2:]
+		# Generate 6 random hex chars
+		mac = secrets.token_hex(3)
 
 		# Assign every 2 hex digits to the new mac address
 		# The first 6 digits are the VirtIO mac manufacturer address
