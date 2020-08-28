@@ -106,12 +106,14 @@ class TestListHost:
 			("stacki-2-12"     , "2"         , "12"         , "backend"),
 			("stacki-2-10"     , "2"         , "10"         , "backend"),
 			("backend-1-0"     , "1"         , "station-11" , "backend"),
+			("stacki-2-2"      , "2"         , "2"         , "backend"),
 			("ethernet-2-43"   , "2"         , "43"         , "switch"),
 			("backend-0-1"     , "sector-42" , "2"          , "backend"),
 			("backend-0-3"     , "sector-42" , "4"          , "backend"),
 			("backend-0-4"     , "sector-42" , "station-8"  , "backend"),
 			("infiniband-2-20" , "2"         , "20"         , "switch"),
 			("backend-0-2"     , "sector-42" , "3"          , "backend"),
+			("stacki-2-4"      , "2"         , "4"         , "backend"),
 		]
 
 		# backend-0-0 and frontend-0-0 already added at test initialization...
@@ -123,6 +125,8 @@ class TestListHost:
 			backend-0-0
 			backend-1-0
 			ethernet-2-1
+			stacki-2-2
+			stacki-2-4
 			stacki-2-10
 			stacki-2-11
 			stacki-2-12
