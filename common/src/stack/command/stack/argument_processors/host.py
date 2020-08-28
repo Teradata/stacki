@@ -104,9 +104,9 @@ class HostArgProcessor:
 			# (intable-ness of rack, rack, intable-ness of rank, rank)
 			key=lambda h: (
 				not h['rack'].isnumeric(),
-				h['rack'],
+				int(h['rack']) if h['rack'].isnumeric() else h['rack'],
 				not h['rank'].isnumeric(),
-				h['rank']
+				int(h['rank']) if h['rank'].isnumeric() else h['rank']
 			)
 		)
 
