@@ -6,6 +6,7 @@ import re
 import subprocess
 from stack.commands import Log
 from stack.exception import ArgNotFound
+import logging
 
 # Pallet info from Probepal and the database columns do not have the same names.
 # They do have a mapping that ends up being the same values as one another. So
@@ -138,11 +139,22 @@ class PalletArgProcessor:
 				except FileNotFoundError as exception:
 					self.notify(f"{script_file} specified in {hook_file} not found:\n\n{exception}")
 
+	def log_routine(self, msg, log_methods):
+		[ _logger(msg) for _logger in log_methods ]
+
 	def run_pallet_hooks(self, operation, pallet_info):
+		# Setup the logger
+		logging.basicConfig(
+			filename="/var/log/run-pallet.log",
+			format="%(asctime)s: %(message)s",
+			datefmt="%Y-%m-%d %H:%M:%S",
+			level=logging.DEBUG
+		)
+		logger = logging.getLogger(__name__)
+
 		"""Run the hooks for the pallet operation in progress."""
 		pallet_info = self._normalize_pallet_info(pallet_info)
-		self.notify(f'checking for hooks in {PALLET_HOOK_ROOT} for {"-".join(pallet_info_getter(pallet_info))}')
-
+		self.log_routine(f'checking for hooks in {PALLET_HOOK_ROOT} for {"-".join(pallet_info_getter(pallet_info))}', [self.notify, logger.info])
 		# Find all executable files within the script directory and sort them by name.
 		hooks = sorted(
 			self._get_pallet_hooks(operation=operation, pallet_info=pallet_info),
@@ -150,22 +162,22 @@ class PalletArgProcessor:
 		)
 		# Execute the hooks in name sorted order.
 		for hook in hooks:
-			self.notify(f'running hook: {hook}')
-			Log(f'Running {operation} pallet hook for pallet {"-".join(pallet_info_getter(pallet_info))}: {hook} ')
+			self.log_routine(f'running hook: {hook}', [self.notify])
+			self.log_routine(f'Running {operation} pallet hook for pallet {"-".join(pallet_info_getter(pallet_info))}: {hook} ', [Log, logger.info])
 			try:
 				# subprocess's env mapping must be strings to strings!
 				environ = dict((str(k), str(v)) for k, v in asdict(pallet_info).items())
 				result = self._exec(['/usr/bin/env', str(hook)], cwd=hook.parent, check=True, env=environ)
-				Log(f'Result of running {hook} (rc=={result.returncode}):')
-				Log(f'Env:\n{environ}')
-				Log(f'Stdout:\n{result.stdout}')
-				Log(f'Stderr:\n{result.stderr}')
+				self.log_routine(f'Result of running {hook} (rc=={result.returncode}):', [Log, logger.info])
+				self.log_routine(f'Env:\n{environ}', [Log, logger.info])
+				self.log_routine(f'Stdout:\n{result.stdout}', [Log, logger.info])
+				self.log_routine(f'Stderr:\n{result.stderr}', [Log, logger.info])
 			except (PermissionError, subprocess.CalledProcessError) as exception:
 				msg = f'Unable to run hook {hook}:\n\n{exception}\n'
 				# CalledProcessError has additional info...
 				if hasattr(exception, 'stdout'):
 					msg += f'\nstdout:\n{exception.stdout}\n\nstderr:\n{exception.stderr}'
-				self.notify(msg)
+				self.log_routine(msg, [self.notify, logger.warning])
 
 	def get_pallet_hook_directory(self, pallet_info):
 		"""Calculate the hook directory for a given pallet."""
