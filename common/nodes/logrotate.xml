@@ -5,7 +5,7 @@ Append rules to logrotate to prune files in /var/log
 </stack:description>
 
 <stack:copyright>
-Copyright (c) 2006 - 2019 Teradata
+Copyright (c) 2006 - 2020 Teradata
 All rights reserved. Stacki(r) v5.x stacki.com
 https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 </stack:copyright>
@@ -33,6 +33,10 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 		/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` \
 			2&gt; /dev/null || true
 	endscript
+}
+/var/log/pallet-hooks.log {
+	size=1M
+	missingok
 }
 </stack:file>
 </stack:script>
