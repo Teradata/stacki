@@ -58,7 +58,7 @@ def render_network(screen, data):
 		returnExit=0)
 	e3 = Entry(21, text=data.get('Kickstart_PrivateGateway'), scroll=0, \
 		returnExit=0)
-	e4 = Entry(21, text=data.get('Kickstart_PrivateDNSServers'), scroll=0, \
+	e4 = Entry(21, text=data.get('Kickstart_PrivateDNSServers'), scroll=1, \
 		returnExit=0)
 
 	#add elements to form
