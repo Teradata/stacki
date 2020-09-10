@@ -500,6 +500,9 @@ if not os.path.exists('/tmp/site.attrs') and not os.path.exists('/tmp/rolls.xml'
 			'--no-net-reconfig',
 		])
 
+		# Reset the terminal, which the wizard messes up if running over virsh console
+		os.system("reset")
+
 		umount('/mnt/cdrom')
 
 	# add missing attrs to site.attrs
