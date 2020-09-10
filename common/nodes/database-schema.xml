@@ -26,18 +26,6 @@ CREATE TABLE access (
 <!-- enable root to run all commands -->
 INSERT INTO access(command, groupid) VALUES ("*", 0);
 
-<!-- Tags -->
-DROP TABLE IF EXISTS tags;
-CREATE TABLE tags (
-	scope		ENUM('box', 'cart', 'network', 'pallet') NOT NULL,
-	tag		VARCHAR(128) NOT NULL,
-	value		TEXT,
-	scopeid		INT NOT NULL,
-	INDEX (scope),
-	INDEX (tag),
-	INDEX (scopeid)
-);
-
 <!-- Attributes -->
 DROP TABLE IF EXISTS attributes_doc;
 CREATE TABLE attributes_doc (
@@ -218,6 +206,18 @@ CREATE TABLE rolls (
 	os		VARCHAR(32) NOT NULL DEFAULT '&os;',
 	url		TEXT DEFAULT '',
 	INDEX (Name)
+);
+
+<!-- Tags -->
+DROP TABLE IF EXISTS tags;
+CREATE TABLE tags (
+	scope		ENUM('box', 'cart', 'network', 'pallet') NOT NULL,
+	tag		VARCHAR(128) NOT NULL,
+	value		TEXT,
+	scopeid		INT NOT NULL,
+	INDEX (scope),
+	INDEX (tag),
+	FOREIGN KEY (scopeid) REFERENCES rolls(id) ON DELETE CASCADE
 );
 
 <!-- Repos -->
