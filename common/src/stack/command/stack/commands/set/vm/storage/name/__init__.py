@@ -58,9 +58,11 @@ class Command(stack.commands.set.vm.command):
 				"""
 				UPDATE virtual_machine_disks
 				SET disk_name=%s
-				WHERE virtual_machine_disks.image_file_name = %s
-				OR virtual_machine_disks.mount_disk = %s
-				AND virtual_machine_disks.virtual_machine_id = %s
+				WHERE (
+					virtual_machine_disks.image_file_name = %s
+					OR virtual_machine_disks.mount_disk = %s
+				) AND virtual_machine_disks.virtual_machine_id = %s
 				""",
 				(disk_name, backing, backing, vm_id)
 			)
+

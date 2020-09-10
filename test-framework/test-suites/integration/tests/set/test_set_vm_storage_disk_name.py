@@ -157,3 +157,49 @@ class TestSetVmStorageName:
 				'Pending Deletion': False
 			}
 		]
+
+	def test_disk_same_image(self, add_hypervisor, add_vm_multiple, create_image_files, host):
+		"""
+		Test when a disk image is used for multiple hosts, only the
+		given host's disk name is changed
+		"""
+
+		temp_dir = TemporaryDirectory()
+		disks = create_image_files(temp_dir)
+
+		# Add image1.raw to vmbackend-0-3 and vm-backend-0-4
+		add_storage = host.run(f'stack add vm storage vm-backend-0-3 disks={disks["image1.raw"]} storage_pool=/export/pools/stacki')
+		assert add_storage.rc == 0
+
+		add_storage = host.run(f'stack add vm storage vm-backend-0-4 disks={disks["image1.raw"]} storage_pool=/export/pools/stacki')
+		assert add_storage.rc == 0
+
+		# Set only vm-backend-0-4's disk name to vdc
+		result = host.run(f'stack set vm storage name vm-backend-0-4 backing={disks["image1.raw"]} name=vdc')
+		assert result.rc == 0
+
+		# Check vm-backend-0-3 doesn't have the disk name change
+		result = host.run('stack list vm storage vm-backend-0-3 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sda',
+				'Type': 'disk',
+				'Location': '/export/pools/stacki/vm-backend-0-3',
+				'Size': 100,
+				'Image Name': 'vm-backend-0-3_disk1.qcow2',
+				'Mountpoint': None,
+				'Pending Deletion': False
+			},
+			{
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sdb',
+				'Type': 'image',
+				'Location': '/export/pools/stacki/vm-backend-0-3',
+				'Size': None,
+				'Image Name': f'{disks["image1.raw"]}',
+				'Mountpoint': None,
+				'Pending Deletion': False
+			}
+		]
