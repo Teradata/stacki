@@ -168,7 +168,7 @@ class Command(command, VmArgProcessor):
 		"""
 
 		for interface in self.call('list.host.interface', [host]):
-			if interface['network'] == network and network != None:
+			if interface['network'] == network:
 				return interface['interface']
 
 	def gen_disks(self, host, disks):
