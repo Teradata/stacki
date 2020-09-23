@@ -1129,7 +1129,9 @@ pipeline {
 
                         // Build the VMWare image
                         dir ('stacki-packi') {
-                            sh './do-build.sh --esxi-host=sd-stacki-004.labs.teradata.com --esxi-user=root --format=vmware ../$ISO_FILENAME'
+                            retry(3) {
+                                sh './do-build.sh --esxi-host=sd-stacki-004.labs.teradata.com --esxi-user=root --format=vmware ../$ISO_FILENAME'
+                            }
                             sh 'mv stacki-*-vmware.ova ../'
                         }
 
@@ -1232,6 +1234,9 @@ pipeline {
                         not {
                             environment name: 'PLATFORM', value: 'sles11'
                         }
+                        not {
+                            environment name: 'PLATFORM', value: 'sles15'
+                        }
                     }
 
                     steps {
@@ -1261,7 +1266,9 @@ pipeline {
 
                         // Build the Virtualbox image
                         dir ('stacki-packi') {
-                            sh './do-build.sh --format=vbox ../$ISO_FILENAME'
+                            retry(3) {
+                                sh './do-build.sh --format=vbox ../$ISO_FILENAME'
+                            }
                             sh 'mv stacki-*-vbox.ova ../'
                         }
 
