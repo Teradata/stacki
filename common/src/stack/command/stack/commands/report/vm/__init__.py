@@ -247,8 +247,10 @@ class Command(command, VmArgProcessor):
 
 		for interface in self.call('list.host.interface', [host]):
 			interface_name = interface['interface']
-
+			host_interface = None
+			network_pxe = False
 			network = interface['network']
+			channel = interface['channel']
 			out = {}
 
 			# Skip any vlan tagged or virtual interfaces
@@ -257,19 +259,27 @@ class Command(command, VmArgProcessor):
 			if '.' in interface_name or ':' in interface_name:
 				continue
 
-			# Check if the hypervisor has a interface on the same network
-			# as the virtual machine
-			host_interface = self.getInterfaceByNetwork(vm_host, network)
-
-			# Skip interfaces that the underlying hypervisor
-			# has no interface for on that network
-			if not host_interface:
-				raise CommandError(self, f'On VM {host} could not find interface for network {network} on hypervisor {vm_host}')
-
 			if network:
+
+				# Check if the hypervisor has a interface on the same network
+				# as the virtual machine
+				host_interface = self.getInterfaceByNetwork(vm_host, network)
 
 				# If the network isn't set for pxe, don't use it for the bootorder
 				network_pxe = self.str2bool(self.call('list.network', args = [network])[0].get('pxe'))
+
+			# If no network is set for the source interface
+			# use the channel setting for a default one
+			# if it is a valid interface on the hypervisor
+			elif channel:
+				for interface in self.call('list.host.interface', [vm_host]):
+					if interface['interface'] == channel:
+						host_interface = channel
+
+			# Otherwise raise an error as libvirt requires
+			# a source interface when defining the VM's interfaces
+			if not host_interface:
+				raise CommandError(self, f'On VM {host} could not find interface for network {network} on hypervisor {vm_host}')
 
 			out['mac'] = interface['mac']
 			out['name'] = host_interface

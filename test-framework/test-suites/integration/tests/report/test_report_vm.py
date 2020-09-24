@@ -91,6 +91,44 @@ class TestReportVM:
 		run_report = host.run('stack report vm vm-backend-0-3')
 		assert run_report.rc != 0 and error_msg in run_report.stderr
 
+	def test_report_vm_no_network(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		host,
+		host_os,
+		test_file
+	):
+		"""
+		Test report vm raises a command error
+		when a virtual machine has an interface
+		on a network the hypervisor lacks
+		"""
+
+		# Add a new network then assign it to a virtual machine
+		add_network = host.run('stack add host interface hypervisor-0-1 mac=52:54:00:4a:7d:92 interface=eth1 network=private ip=192.168.0.8')
+		assert add_network.rc == 0
+		set_network = host.run('stack set host interface network vm-backend-0-3 interface=eth0 network= ')
+		assert set_network.rc == 0
+		set_channel = host.run('stack set host interface channel vm-backend-0-3 interface=eth0 channel=eth1')
+		assert set_channel.rc == 0
+
+		expect_output = Path(test_file(f'report/vm_config_no_network_{host_os}.txt')).read_text()
+		config_result = host.run('stack report vm vm-backend-0-3 bare=y')
+		assert config_result.rc == 0
+
+		# The uuid of the config will change every time,
+		# zero it out so the configs will always match
+		# to what we expect
+		sub_uuid = re.sub(
+			r'<uuid>.*</uuid>',
+			'<uuid>00000000-0000-0000-0000-0000000000</uuid>',
+			config_result.stdout
+		)
+
+		# Now they can be compared
+		assert sub_uuid == expect_output
+
 	def test_report_vm_virt_interface(self, add_hypervisor, add_vm_multiple, host, host_os, test_file):
 		"""
 		Test virtual interfaces for a VM are skipped
