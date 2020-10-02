@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Remove a host
+      stacki_host:
+        name: test-backend
+        state: absent
