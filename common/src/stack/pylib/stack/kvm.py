@@ -66,13 +66,12 @@ class Hypervisor:
 
 	# Connect automatically and close the connection when
 	# calling the hypervisor class as a context manager
-	def __enter__(self, *args):
+	def __enter__(self):
 		self.kvm = self.connect()
 		return self
 
-	def __exit__(self, *args):
+	def __exit__(self, exc_type, exc_value, traceback):
 		self.close()
-		return self
 
 	def connect(self):
 		"""
