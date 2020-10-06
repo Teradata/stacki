@@ -17,6 +17,13 @@ class TestPylibKvm:
 
 		raise libvirtError('Something went wrong!')
 
+	def mock_kvm_exception(self, *args, **kwargs):
+		"""
+		Mock raising a VmException
+		"""
+
+		raise VmException('Something went wrong!')
+
 	class TestPylibKvmUnderTest(Hypervisor):
 		"""
 		Inherited class to mock the init function
@@ -77,6 +84,42 @@ class TestPylibKvm:
 		# Hypervisor object upon contextmanager enter
 		assert conn is not None
 
+	@patch('stack.kvm.Hypervisor.connect', autospec=True)
+	@patch('stack.kvm.Hypervisor.close', autospec=True)
+	def test_kvm_context_manager_exception_open(
+		self,
+		mock_kvm_close,
+		mock_kvm_connect,
+	):
+		"""
+		Test when entering the context manager that if the an exception
+		is raised it will be output
+		"""
+
+		expect_exception = 'Something went wrong!'
+		mock_kvm_connect.side_effect = self.mock_kvm_exception
+		with pytest.raises(VmException, match=expect_exception), Hypervisor('hypervisor-foo') as conn:
+			mock_kvm_connect.assert_called_once()
+			mock_kvm_close.assert_called_once()
+
+	@patch('stack.kvm.Hypervisor.connect', autospec=True)
+	@patch('stack.kvm.Hypervisor.close', autospec=True)
+	def test_kvm_context_manager_exception_close(
+		self,
+		mock_kvm_close,
+		mock_kvm_connect,
+	):
+		"""
+		Test when entering the context manager that if the an exception
+		is raised it will be output
+		"""
+
+		expect_exception = 'Something went wrong!'
+		mock_kvm_close.side_effect = self.mock_kvm_exception
+		with pytest.raises(VmException, match=expect_exception), Hypervisor('hypervisor-foo') as conn:
+			mock_kvm_connect.assert_called_once()
+			mock_kvm_close.assert_called_once()
+
 	@patch('libvirt.open', autospec=True)
 	def test_kvm_connect(self, mock_libvirt_open):
 		"""
@@ -135,6 +178,11 @@ class TestPylibKvm:
 			mock_libvirt.close.assert_called_once()
 
 	def test_kvm_close_no_conn(self):
+		"""
+		Test the close method catches the case
+		when a hypervisor connection is no longer available
+		"""
+
 		mock_hypervisor = self.TestPylibKvmUnderTest()
 		mock_hypervisor.kvm = None
 		expect_exception = 'Cannot find hypervisor connection to hypervisor-foo'
