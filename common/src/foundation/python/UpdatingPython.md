@@ -10,8 +10,8 @@ Note that this is a broken symlink which is automatically corrected during build
 
 ```
 cd common/src/foundation/python/
-rm Python-*tgz
-ln -s ../../../3rdparty/Python-$FULL_VERSION.tgz
+git rm Python-*xz
+ln -s ../../../3rdparty/Python-$FULL_VERSION.xz
 ```
 
 ### Scan the codebase for existing references to python versions.

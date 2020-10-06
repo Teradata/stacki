@@ -20,7 +20,7 @@
 ifndef __PYTHON_MK
 __PYTHON_MK = yes
 
-PY.VERSION	= 3.8
+PY.VERSION	= 3.9
 PY.PATH		= /opt/stack/bin/python3
 PY.LIB		= python$(PY.VERSION)
 PY.STACK	= /opt/stack/lib/$(PY.LIB)/site-packages/
