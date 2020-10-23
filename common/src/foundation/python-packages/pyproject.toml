@@ -31,6 +31,7 @@ pyzmq = "*"
 redis = "*"
 requests = "*"
 testinfra = "=1.16.0"
+wheel = "*"
 yoyo-migrations = "*"
 # There's an issue with the way ansible packages their python package such that
 # poetry cannot resolve its dependencies. Therefore we have to pin the versions
@@ -98,6 +99,7 @@ pyzmq = { appliances = ["server", "client"], bootstrap = true }
 redis = { appliances = ["server"], bootstrap = true }
 requests = { appliances = ["server"] }
 testinfra = { appliances = ["server"], bootstrap = true }
+wheel = { appliances = ["server"], bootstrap = true }
 yoyo-migrations = { appliances = ["server"] }
 # The metadata for ansible and all its dependencies is below. See the
 # [tool.poetry.dependencies] section above for why we have to do this
