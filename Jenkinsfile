@@ -435,6 +435,7 @@ pipeline {
                 sh 'cp -al stacki/test-framework integration_1'
                 sh 'cp -al stacki/test-framework integration_2'
                 sh 'cp -al stacki/test-framework integration_3'
+                sh 'cp -al stacki/test-framework integration_4'
                 sh 'cp -al stacki/test-framework system'
 
                 script {
@@ -553,7 +554,7 @@ pipeline {
                     }
 
                     steps {
-                        run_integration_test_steps('1', '3')
+                        run_integration_test_steps('1', '4')
                     }
 
                     post {
@@ -571,7 +572,7 @@ pipeline {
                     }
 
                     steps {
-                        run_integration_test_steps('2', '3')
+                        run_integration_test_steps('2', '4')
                     }
 
                     post {
@@ -589,12 +590,30 @@ pipeline {
                     }
 
                     steps {
-                        run_integration_test_steps('3', '3')
+                        run_integration_test_steps('3', '4')
                     }
 
                     post {
                         always {
                             run_integration_test_post('3')
+                        }
+                    }
+                }
+
+                stage('Integration - Group 4') {
+                    when {
+                        not {
+                            environment name: 'PLATFORM', value: 'sles11'
+                        }
+                    }
+
+                    steps {
+                        run_integration_test_steps('4', '4')
+                    }
+
+                    post {
+                        always {
+                            run_integration_test_post('4')
                         }
                     }
                 }
