@@ -329,7 +329,7 @@ def test_file():
 @pytest.fixture
 def run_ansible_module(host):
 	def _inner(module, **kwargs):
-		command = f"ansible localhost -o -m {module}"
+		command = f"ansible --inventory=localhost localhost -o -m {module}"
 		if kwargs:
 			command += ' -a "'
 			command += " ".join(f"{k}={v}" for k,v in kwargs.items())
