@@ -841,6 +841,11 @@ class Command:
 
 	MustBeRoot = 1
 
+	# helper functions for the Command class
+	_exec = stack.util._exec
+	str2bool = stack.bool.str2bool
+	bool2str = stack.bool.bool2str
+
 	def __init__(self, database, *, debug=None):
 		"""
 		Creates a DatabaseConnection for the StackCommand to use.
@@ -855,10 +860,6 @@ class Command:
 
 		self.text  = []
 		self.bytes = []
-
-		self._exec = stack.util._exec
-		self.str2bool = stack.bool.str2bool
-		self.bool2str = stack.bool.bool2str
 
 		self.output = []
 
