@@ -27,6 +27,7 @@ paramiko = "*"
 pexpect = "*"
 psutil = "*"
 python-daemon = "*"
+# pin pyzmq to 19.0.1 for now - there's an upstream? packaging bug in 19.0.2 on rhel7
 pyzmq = "=19.0.1"
 redis = "*"
 requests = "*"
