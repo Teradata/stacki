@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-import stack.firmware
 from stack.argument_processors.pallet import PALLET_HOOK_ROOT
 
 @pytest.fixture
@@ -196,17 +195,6 @@ def revert_routing_table():
 	for route in old_routes:
 		if route not in new_routes:
 			result = subprocess.run(f"ip route add {route}", shell=True)
-
-@pytest.fixture
-def revert_firmware(request):
-	"""Revert the filesystem where the firmware files get laid down."""
-	# Gotta make the directry first before this overlay stuff works.
-	stack.firmware.BASE_PATH.mkdir(parents = True, exist_ok = True)
-	_add_overlay(stack.firmware.BASE_PATH)
-
-	yield
-
-	_remove_overlay(stack.firmware.BASE_PATH, request)
 
 @pytest.fixture
 def revert_pallet_patches(request):
