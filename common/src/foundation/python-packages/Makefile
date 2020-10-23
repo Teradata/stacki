@@ -33,6 +33,7 @@ endif
 	/opt/stack/bin/python3 -m ensurepip
 	/opt/stack/bin/python3 -m pip install poetry==1.0.0
 	/opt/stack/bin/python3 -m pip install tomlkit==0.5.8
+	/opt/stack/bin/python3 -m pip install wheel
 # Dat dere support release is still on 3.6, and doesn't have dataclasses built in.
 ifeq (Python 3.6.6,$(shell /opt/stack/bin/python3 --version))
 	/opt/stack/bin/python3 -m pip install dataclasses
