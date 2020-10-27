@@ -1,9 +1,9 @@
 ![alt tag](logo.png)
 
 
-# Stacki 5.4.1
+# Stacki 5.6.5
 
-Go [here](https://github.com/Teradata/stacki/releases/tag/stacki-5.4.1) for more details and downloads.
+Go [here](https://github.com/Teradata/stacki/releases/tag/stacki-5.6.5) for more details and downloads.
 
 New release:
 * [Documentation for Stacki 5.x](https://github.com/Teradata/stacki/wiki)
