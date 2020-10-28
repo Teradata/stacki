@@ -61,6 +61,7 @@ class Command(command, VmArgProcessor):
 		# status from the hypervisor
 		expanded = self.str2bool(expanded)
 
+		# If the hypervisor parameter is used, check if its a valid hypervisor host
 		if hypervisor and not self.is_hypervisor(hypervisor):
 			raise ParamError(self, param = 'hypervisor', msg = f'{hypervisor} is not a valid hypervisor')
 		header = ['virtual machine']
