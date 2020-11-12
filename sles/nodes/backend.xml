@@ -1,5 +1,5 @@
 <stack:stack>
-	
+
 	<stack:description>
 	Handle for Backend Appliance
 	</stack:description>
@@ -56,6 +56,11 @@ rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.repo">&hostname;</stack:report>
 </stack:script>
 
+<stack:script stack:stage="install-post">
+<stack:file stack:name="/opt/stack/etc/stacki.yml">
+<stack:eval>cat /opt/stack/etc/stacki.yml;</stack:eval>
+</stack:file>
+</stack:script>
 
 <stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
 <stack:report stack:name="host.interface">&hostname;</stack:report>
@@ -69,6 +74,9 @@ rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.interface">&hostname;</stack:report>
 <stack:report stack:name="host.route">&hostname;</stack:report>
 <stack:report stack:name="host.resolv">&hostname;</stack:report>
+<stack:file stack:name="/opt/stack/etc/stacki.yml">
+<stack:eval>cat /opt/stack/etc/stacki.yml;</stack:eval>
+</stack:file>
 
 #
 # the above command (report host resolv) writes /etc/resolv.conf. make sure
@@ -102,5 +110,5 @@ rm -rf /tmp/ipmisetup
 </stack:script>
 
 
-</stack:stack> 
+</stack:stack>
 

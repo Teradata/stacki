@@ -10,6 +10,8 @@ import json
 import socket
 import sys
 import os
+import yaml
+from pathlib import Path
 
 # We need the "ports" class when we are inside the installer, but don't need to
 # setup and zmq based services. The alternative is to add zmq and dependencies
@@ -23,18 +25,49 @@ except ImportError:
 
 
 
-class ports:
+class PortsMeta(type):
 	"""
 	Socket port numbers used by the Stack Message Queue daemons.
 
-	:var publish: UDP socket service for publishing a message
-	:var subscribe: zmq.SUB socket for subscribing to a channel
-	:var control: TCP socket service for enabling/disabling channel propagation
+	:publish: UDP socket service for publishing a message
+	:subscribe: zmq.SUB socket for subscribing to a channel
+	:control: TCP socket service for enabling/disabling channel propagation
 	"""
-	publish	  = 5000
-	subscribe = 5001
-	control	  = 5002
 
+	# Stacki settings file location
+	# and default ports
+	SETTINGS = Path('/opt/stack/etc/stacki.yml')
+	pub_port = 5000
+	sub_port = 5001
+	con_port = 5002
+
+	def load_settings(cls):
+		config = {}
+		if cls.SETTINGS.is_file():
+			with cls.SETTINGS.open() as f:
+				config = yaml.safe_load(f)
+		return config
+
+	@property
+	def publish(cls):
+		config = cls.load_settings()
+		port = int(config.get('smq.pub.port', cls.pub_port))
+		return port
+
+	@property
+	def subscribe(cls):
+		config = cls.load_settings()
+		port = int(config.get('smq.sub.port', cls.sub_port))
+		return port
+
+	@property
+	def control(cls):
+		config = cls.load_settings()
+		port = int(config.get('smq.control.port', cls.con_port))
+		return port
+
+class ports(metaclass=PortsMeta):
+	pass
 
 class Message():
 	"""
@@ -42,7 +75,7 @@ class Message():
 
 	A Message is composed of header fields and the *message* text body.  For many
 	applications only body is manipulated and other fields are controlled by
-	lower software levels.  
+	lower software levels.
 
 	For simple Messages the *message* body can be a string.  For more complex Messages
 	the body should be a json encoded python dictionary.
@@ -87,7 +120,7 @@ class Message():
 
 		# JSON does not override parameters, this allows loading an
 		# existing Message and overwriting some of the fields
-		
+
 		self.channel = channel if channel else msg.get('channel')
 		self.id      = id      if id      else msg.get('id')
 		self.payload = payload if payload else msg.get('payload')
@@ -160,7 +193,7 @@ class Message():
 	def setPayload(self, payload):
 		"""
 		Sets the payload text
-		
+
 		:param payload: text
 		:type payload: string
 		"""
@@ -169,7 +202,7 @@ class Message():
 
 	def getHops(self):
 		"""
-		:returns: number of software hops 
+		:returns: number of software hops
 		"""
 		return self.hops
 
@@ -189,7 +222,7 @@ class Message():
 		"""
 		Set the source host address.  This address can be a hostname
 		or an IP Address.
-		
+
 		:param addr: source address
 		:type addr: string
 		"""
@@ -234,9 +267,9 @@ class Message():
 	def addHop(self):
 		"""
 		Increments the hop count for the :class:`Message`.  A hop is
-		defined as a software hop not a physical network hop.  
+		defined as a software hop not a physical network hop.
 		Every time an application receives and retransmits a message the
-		hop should be incremented.  
+		hop should be incremented.
 		This value is used to debugging.
 		"""
 		self.hops += 1
@@ -289,12 +322,12 @@ class Subscriber(threading.Thread):
 		:type channel: string
 		"""
 		self.sub.setsockopt_string(zmq.UNSUBSCRIBE, channel)
-		
+
 	def run(self):
 		while True:
 			try:
 				channel, payload = self.sub.recv_multipart()
-				msg = Message(message=payload.decode(), 
+				msg = Message(message=payload.decode(),
 					      channel=channel.decode())
 			except:
 				continue
@@ -341,10 +374,10 @@ class Receiver(threading.Thread):
 			#
 			# Note the callback() always pushes data as
 			# stack.mq.Message objects.  This is the only
-			# part of the code where we handle receiving 
+			# part of the code where we handle receiving
 			# unstructured data.
 			#
-			# Design point here was to keep the clients 
+			# Design point here was to keep the clients
 			# simple so we don't need an API to write to
 			# the message queue.
 
