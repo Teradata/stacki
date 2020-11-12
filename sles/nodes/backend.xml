@@ -56,6 +56,13 @@ rm -f /etc/zypp/repos.d/*
 <stack:report stack:name="host.repo">&hostname;</stack:report>
 </stack:script>
 
+<!-- create the stack.yml -->
+<stack:script stack:shell="/opt/stack/bin/python3" stack:stage="install-post">
+import stack.settings
+
+stack.settings.write_default_settings_file(overwrite=True)
+</stack:script>
+
 
 <stack:script stack:stage="install-post" stack:cond="release == 'sles12'">
 <stack:report stack:name="host.interface">&hostname;</stack:report>
