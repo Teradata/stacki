@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Update a host interface device
+      stacki_host:
+        name: test-backend
+        interfaces:
+          - interface: eth1
+            mac: "00:11:22:33:44:55"
+            state: update_interface

@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Modify a host
+      stacki_host:
+        name: test-backend
+        appliance: backend
+        box: default
+        comment: "test host"
+        groups:
+          - name: foo
+            state: absent
+          - name: bar
+        installaction: console
+        interfaces:
+          - interface: eth1
+            state: absent
+          - interface: eth2
+            ip: "10.10.2.1"
+            mac: "00:11:22:33:44:55"
+        rack: "10"
+        rank: "4"

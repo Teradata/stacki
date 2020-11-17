@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Add a host
+      stacki_host:
+        name: test-backend
+        appliance: backend
+        box: default
+        comment: "test host"
+        groups:
+          - name: test
+        installaction: console
+        interfaces:
+          - default: true
+            interface: eth0
+            ip: "10.10.10.10"
+            mac: "00:11:22:33:44:55"
+        rack: "10"
+        rank: "4"
