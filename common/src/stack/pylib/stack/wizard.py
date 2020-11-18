@@ -1,7 +1,7 @@
 #! /opt/stack/bin/python
 #
 # @copyright@
-# Copyright (c) 2006 - 2019 Teradata
+# Copyright (c) 2006 - 2020 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
@@ -15,7 +15,6 @@ import stack.file
 import ipaddress
 import socket
 from xml.etree.ElementTree import Element, SubElement, ElementTree
-
 
 class Attr:
 	Info_FQDN = ""
@@ -131,10 +130,11 @@ class Data:
 		if os.path.exists(ifDhcpFile):
 			os.remove(ifDhcpFile)
 		# Force network reconfiguration
-		cmd = ['/sbin/ifconfig', interface, addr, 'netmask', netmask]
+		ip_mask = ipaddress.ip_interface(join(addr,'/',netmask))
+		cmd = ['/sbin/ip', 'addr', 'add', ip_mask.with_prefixlen, 'dev', interface]
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 		# Bring up network
-		cmd = ['/sbin/ifconfig', interface, 'up']
+		cmd = ['/sbin/ip', 'link', 'set', interface, 'up']
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 	def setHostname(self, hostname):
