@@ -6,7 +6,9 @@ OVERLAY.UPDATE.PKGS	= \
 	MegaCLI storcli \
 	foundation-python \
 	ludicrous-speed \
+	stack-checklist \
 	stack-command \
+	stack-mq \
 	stack-pylib \
 	foundation-newt \
 	foundation-python-Flask \

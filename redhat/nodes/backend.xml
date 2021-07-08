@@ -46,6 +46,8 @@ for o in stack.api.Call('list cart'):
 include ld.so.conf.d/*.conf
 </stack:file>
 
+<!-- Run BackendTest.py in a non-blocking way -->
+/opt/stack/bin/BackendTest.py &gt; /var/log/BackendTest.log 2&gt;&amp;1 &lt;/dev/null &amp;
 </stack:script>
 
 <stack:script stack:stage="install-post" stack:chroot="false">
@@ -57,4 +59,3 @@ cp /run/install/tmp/stack.conf /tmp/stack.conf
 </stack:script>
 
 </stack:stack> 
-
